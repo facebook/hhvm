@@ -295,10 +295,31 @@ let php7_ltr_assign () =
 
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
+  let check_int_overflow =
+    Hhbc_options.check_int_overflow !Hhbc_options.compiler_options
+  in
   match op with
-  | Ast_defs.Plus -> instr (IOp Add)
-  | Ast_defs.Minus -> instr (IOp Sub)
-  | Ast_defs.Star -> instr (IOp Mul)
+  | Ast_defs.Plus ->
+    instr
+      (IOp
+         ( if check_int_overflow then
+           AddO
+         else
+           Add ))
+  | Ast_defs.Minus ->
+    instr
+      (IOp
+         ( if check_int_overflow then
+           SubO
+         else
+           Sub ))
+  | Ast_defs.Star ->
+    instr
+      (IOp
+         ( if check_int_overflow then
+           MulO
+         else
+           Mul ))
   | Ast_defs.Slash -> instr (IOp Div)
   | Ast_defs.Eqeq -> instr (IOp Eq)
   | Ast_defs.Eqeqeq -> instr (IOp Same)
@@ -326,10 +347,28 @@ let from_binop op =
     failwith "short-circuiting operator cannot be generated as a simple binop"
 
 let binop_to_eqop op =
+  let check_int_overflow =
+    Hhbc_options.check_int_overflow !Hhbc_options.compiler_options
+  in
   match op with
-  | Ast_defs.Plus -> Some PlusEqual
-  | Ast_defs.Minus -> Some MinusEqual
-  | Ast_defs.Star -> Some MulEqual
+  | Ast_defs.Plus ->
+    Some
+      ( if check_int_overflow then
+        PlusEqualO
+      else
+        PlusEqual )
+  | Ast_defs.Minus ->
+    Some
+      ( if check_int_overflow then
+        MinusEqualO
+      else
+        MinusEqual )
+  | Ast_defs.Star ->
+    Some
+      ( if check_int_overflow then
+        MulEqualO
+      else
+        MulEqual )
   | Ast_defs.Slash -> Some DivEqual
   | Ast_defs.Starstar -> Some PowEqual
   | Ast_defs.Amp -> Some AndEqual
@@ -342,11 +381,30 @@ let binop_to_eqop op =
   | _ -> None
 
 let unop_to_incdec_op op =
+  let check_int_overflow =
+    Hhbc_options.check_int_overflow !Hhbc_options.compiler_options
+  in
   match op with
-  | Ast_defs.Uincr -> PreInc
-  | Ast_defs.Udecr -> PreDec
-  | Ast_defs.Upincr -> PostInc
-  | Ast_defs.Updecr -> PostDec
+  | Ast_defs.Uincr ->
+    if check_int_overflow then
+      PreIncO
+    else
+      PreInc
+  | Ast_defs.Udecr ->
+    if check_int_overflow then
+      PreDecO
+    else
+      PreDec
+  | Ast_defs.Upincr ->
+    if check_int_overflow then
+      PostIncO
+    else
+      PostInc
+  | Ast_defs.Updecr ->
+    if check_int_overflow then
+      PostDecO
+    else
+      PostDec
   | _ -> failwith "invalid incdec op"
 
 let istype_op lower_fq_id =
@@ -4601,11 +4659,26 @@ and emit_lval_op_nonlist_steps
     Emit_fatal.raise_fatal_parse pos "Can't use return value in write context"
 
 and from_unop op =
+  let check_int_overflow =
+    Hhbc_options.check_int_overflow !Hhbc_options.compiler_options
+  in
   match op with
   | Ast_defs.Utild -> instr (IOp BitNot)
   | Ast_defs.Unot -> instr (IOp Not)
-  | Ast_defs.Uplus -> instr (IOp Add)
-  | Ast_defs.Uminus -> instr (IOp Sub)
+  | Ast_defs.Uplus ->
+    instr
+      (IOp
+         ( if check_int_overflow then
+           AddO
+         else
+           Add ))
+  | Ast_defs.Uminus ->
+    instr
+      (IOp
+         ( if check_int_overflow then
+           SubO
+         else
+           Sub ))
   | Ast_defs.Uincr
   | Ast_defs.Udecr
   | Ast_defs.Upincr

@@ -552,6 +552,7 @@ struct RuntimeOption {
   static bool TimeoutsUseWallTime;
   static bool CheckFlushOnUserClose;
   static bool EvalAuthoritativeMode;
+  static int CheckIntOverflow;
   static HackStrictOption StrictArrayFillKeys;
   static bool LookForTypechecker;
   static bool AutoTypecheck;

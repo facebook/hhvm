@@ -58,6 +58,7 @@ type t = {
   option_disable_unset_class_const: bool;
   option_disallow_func_ptrs_in_constants: bool;
   option_enforce_generics_ub: bool;
+  option_check_int_overflow: bool;
 }
 
 let default =
@@ -111,6 +112,7 @@ let default =
     option_disable_unset_class_const = false;
     option_disallow_func_ptrs_in_constants = false;
     option_enforce_generics_ub = false;
+    option_check_int_overflow = false;
   }
 
 let constant_folding o = o.option_constant_folding
@@ -213,6 +215,8 @@ let disallow_func_ptrs_in_constants o =
 
 let enforce_generics_ub o = o.option_enforce_generics_ub
 
+let check_int_overflow o = o.option_check_int_overflow
+
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o))
@@ -288,6 +292,7 @@ let to_string o =
       Printf.sprintf "disallow_func_ptrs_in_constants: %B"
       @@ disallow_func_ptrs_in_constants o;
       Printf.sprintf "enforce_generics_ub: %B" @@ enforce_generics_ub o;
+      Printf.sprintf "check_int_overflow: %B" @@ check_int_overflow o;
     ]
 
 let as_bool s =
@@ -394,6 +399,8 @@ let set_option options name value =
     { options with option_disallow_func_ptrs_in_constants = as_bool value }
   | "eval.enforcegenericsub" ->
     { options with option_enforce_generics_ub = as_bool value }
+  | "hhvm.hack.lang.check_int_overflow" ->
+    { options with option_check_int_overflow = int_of_string value > 0 }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -598,6 +605,8 @@ let value_setters =
     { opts with option_disallow_func_ptrs_in_constants = v = 1 } );
     ( set_value "hhvm.enforce_generics_ub" get_value_from_config_int
     @@ (fun opts v -> { opts with option_enforce_generics_ub = v = 1 }) );
+    ( set_value "hhvm.hack.lang.check_int_overflow" get_value_from_config_int
+    @@ (fun opts v -> { opts with option_check_int_overflow = v > 0 }) );
   ]
 
 let extract_config_options_from_json ~init config_json =

@@ -2645,7 +2645,7 @@ module Make (GetLocals : GetLocals) = struct
       let l = List.map l (fun (e1, e2) -> (expr env e1, expr env e2)) in
       if (fst env).in_mode = FileInfo.Mstrict then
         Errors.dynamic_new_in_strict_mode p;
-      N.Record (make_record_id env (p, SN.Classes.cUnknown), is_array, l)
+      N.Record ((p, N.CI (p, SN.Classes.cUnknown)), is_array, l)
     | Aast.Efun (f, idl) ->
       let idl =
         List.fold_right idl ~init:[] ~f:(fun ((p, x) as id) acc ->
@@ -2842,17 +2842,6 @@ module Make (GetLocals : GetLocals) = struct
              cid
              ~allow_typedef:false
              ~allow_generics:true) )
-
-  and make_record_id env ((p, _) as rdid) =
-    ( p,
-      N.CI
-        (Env.type_name
-           ~elaborate_kind:NS.ElaborateRecord
-           ~elaborate_namespace:true
-           env
-           rdid
-           ~allow_typedef:false
-           ~allow_generics:true) )
 
   and casel env l = List.map l (case env)
 

@@ -2312,7 +2312,7 @@ module Make (GetLocals : GetLocals) = struct
       begin
         match c with
         | Aast.CIexpr (_, Aast.Id x1) ->
-          N.PU_identifier (make_class_id env x1, s1, s2)
+          N.PU_identifier (make_class_id_without_elaboration env x1, s1, s2)
         | _ ->
           failwith "TODO(T35357243): Error during parsing of PU_identifier"
       end

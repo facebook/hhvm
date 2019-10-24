@@ -288,7 +288,9 @@ let namespace_elaborater =
           expr
         else
           Id (NS.elaborate_id env.namespace NS.ElaborateConst sid)
-      | PU_identifier ((_, CIexpr (_, Id _)), _, _) -> expr
+      | PU_identifier ((p1, CIexpr (p2, Id x1)), s1, s2) ->
+        let x1 = elaborate_type_name env x1 in
+        PU_identifier ((p1, CIexpr (p2, Id x1)), s1, s2)
       | New ((p1, CIexpr (p2, Id x)), tal, el, uel, ex) ->
         New
           ( (p1, CIexpr (p2, Id x)),

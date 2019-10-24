@@ -461,16 +461,6 @@ static encodePtr find_encoder_by_type_name(sdl *sdl, const char *type) {
   return encodePtr();
 }
 
-static Variant soap_find_xml_ref(xmlNodePtr node) {
-  USE_SOAP_GLOBAL;
-  auto& ref_map = SOAP_GLOBAL(ref_map);
-  auto const it = ref_map.find(node);
-  if (it != ref_map.end()) {
-    return Variant(it->second.get());
-  }
-  return uninit_null();
-}
-
 static bool soap_check_zval_ref(const Variant& data, xmlNodePtr node) {
   USE_SOAP_GLOBAL;
   HeapObject* hash = nullptr;
@@ -539,23 +529,20 @@ static bool soap_check_xml_ref(Variant& data, xmlNodePtr node) {
   auto const it = ref_map.find(node);
   if (it != ref_map.end()) {
     auto const& data2 = it->second;
-    tv_lval inner2 = data2->cell();
-    if (!(data.isObject() && isObjectType(inner2.type()) &&
-          data.getObjectData() == inner2.val().pobj) &&
-        !(data.isReferenced() && data2->isReferenced() &&
-          data.getRefData() == data2->var())) {
-      tvBind(make_tv<KindOfRef>(data2.get()), *data.asTypedValue());
+    if (!data.isObject() ||
+        !data2.isObject() ||
+        data.getObjectData() != data2.getObjectData()) {
+      data = data2;
       return true;
     }
-  } else {
-    req::ptr<RefData> v{
-      isRefType(data.getType()) ? data.asTypedValue()->m_data.pref
-                                : RefData::Make(*data.asTypedValue())};
-
-    tvBind(make_tv<KindOfRef>(v.get()), *data.asTypedValue());
-    ref_map.emplace(node, std::move(v));
   }
   return false;
+}
+
+static void soap_add_xml_ref(Variant& data, xmlNodePtr node) {
+  USE_SOAP_GLOBAL;
+  auto& ref_map = SOAP_GLOBAL(ref_map);
+  ref_map.emplace(node, data);
 }
 
 static xmlNodePtr master_to_xml_int(encodePtr encode, const Variant& data, int style,
@@ -1451,6 +1438,7 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
           return ret;
         }
         ret = create_object(ce, Array());
+        soap_add_xml_ref(ret, data);
       }
     } else if (sdlType->kind == XSD_TYPEKIND_EXTENSION &&
                sdlType->encode &&
@@ -1462,7 +1450,7 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
           details.sdl_type->kind != XSD_TYPEKIND_UNION) {
 
         CHECK_XML_NULL(data)
-        if (!(ret = soap_find_xml_ref(data)).isNull()) {
+        if (soap_check_xml_ref(ret, data)) {
           return ret;
         }
 
@@ -1478,9 +1466,9 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
         } else {
           ret = master_to_zval_int(sdlType->encode, data);
         }
-        if (soap_check_xml_ref(ret, data)) {
-          return ret;
-        }
+
+        soap_add_xml_ref(ret, data);
+
         auto any_prop = get_rval_property(ret, "any");
         redo_any = any_prop && any_prop.type() != KindOfUninit;
       } else {
@@ -1488,6 +1476,7 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
           return ret;
         }
         ret = create_object(ce, Array());
+        soap_add_xml_ref(ret, data);
         ret.toObject()->setProp(
           nullptr,
           s__.get(),
@@ -1500,10 +1489,12 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
         return ret;
       }
       ret = create_object(ce, Array());
+      soap_add_xml_ref(ret, data);
     }
     if (sdlType->model) {
       if (redo_any) {
         ret.toObject()->unsetProp(nullptr, s_any.get());
+        soap_add_xml_ref(ret, data);
       }
       model_to_zval_object(ret, sdlType->model, data, sdl);
       if (redo_any) {
@@ -1549,7 +1540,9 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
     }
 
     ret = create_object(ce, Array());
+    soap_add_xml_ref(ret, data);
     xmlNodePtr trav = data->children;
+
     while (trav != nullptr) {
       if (trav->type == XML_ELEMENT_NODE) {
         Variant tmpVal = master_to_zval(encodePtr(), trav);

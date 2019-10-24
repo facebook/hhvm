@@ -31,7 +31,7 @@ let dict_or_darray kv =
 let get_kind_num ~tparams p =
   let p =
     if List.mem ~equal:( = ) tparams p then
-      "typevar"
+      "$$internal$$typevar"
     else
       String.lowercase p
   in
@@ -49,9 +49,9 @@ let get_kind_num ~tparams p =
   | "hh\\arraykey" -> 7
   | "hh\\mixed" -> 9
   | "tuple" -> 10
-  | "fun" -> 11
+  | "$$internal$$fun" -> 11
   | "array" -> 12
-  | "typevar"
+  | "$$internal$$typevar"
   | "_" ->
     13 (* corresponds to user OF_GENERIC *)
   | "shape" -> 14
@@ -71,9 +71,9 @@ let get_kind_num ~tparams p =
   | "hh\\null" -> 28
   | "hh\\nothing" -> 29
   | "hh\\dynamic" -> 30
-  | "typeaccess" -> 102
+  | "$$internal$$typeaccess" -> 102
   | _ when String.length p > 4 && String.sub p 0 4 = "xhp_" -> 103
-  | "reifiedtype" -> 104
+  | "$$internal$$reifiedtype" -> 104
   | "unresolved"
   | _ ->
     101
@@ -214,7 +214,7 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
       | Some i -> Int64.of_int i
       | None -> failwith "impossible"
     in
-    get_kind ~tparams "reifiedtype" @ [(TV.String "id", TV.Int id)]
+    get_kind ~tparams "$$internal$$reifiedtype" @ [(TV.String "id", TV.Int id)]
   | Aast.Happly (s, l) ->
     let (classname, s_res) = resolve_classname ~tparams ~namespace s in
     let kind = get_kind ~tparams s_res in
@@ -235,7 +235,7 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
       ]
   (* Matches the structure in ast_to_nast.ml on_hint for Haccess *)
   | Aast.Haccess ((_, Aast.Happly ((_, root_id), [])), ids) ->
-    get_kind ~tparams "typeaccess"
+    get_kind ~tparams "$$internal$$typeaccess"
     @ [
         (TV.String "root_name", TV.String (root_to_string ~namespace root_id));
         (TV.String "access_list", type_constant_access_list ids);
@@ -257,7 +257,7 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
           hf_is_mutable_return = _;
         } ->
     (* TODO(mqian): Implement for inout parameters *)
-    let kind = get_kind ~tparams "fun" in
+    let kind = get_kind ~tparams "$$internal$$fun" in
     let single_hint name h =
       [(TV.String name, hint_to_type_constant ~tparams ~namespace ~targ_map h)]
     in

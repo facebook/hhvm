@@ -22,15 +22,33 @@ impl Label {
         }
     }
 
-    pub fn map<T, F: FnOnce(Id) -> Id>(&self, f: F) -> Result<Label, Error> {
+    pub fn map<F: FnOnce(Id) -> Id>(&self, f: F) -> Result<Label, Error> {
         match self {
             Label::Regular(id) => Ok(Label::Regular(f(*id))),
             Label::DefaultArg(id) => Ok(Label::DefaultArg(f(*id))),
             Label::Named(_) => Err(Error::Map),
         }
     }
+
+    pub fn option_map<F: FnOnce(Id) -> Option<Id>>(&self, f: F) -> Result<Option<Label>, Error> {
+        match self {
+            Label::Regular(id) => {
+                if let Some(l) = f(*id) {
+                    return Ok(Some(Label::Regular(l)));
+                }
+            }
+            Label::DefaultArg(id) => {
+                if let Some(l) = f(*id) {
+                    return Ok(Some(Label::DefaultArg(l)));
+                }
+            }
+            Label::Named(_) => return Err(Error::OptionMap),
+        }
+        Ok(None)
+    }
 }
 
+#[derive(Debug)]
 pub enum Error {
     Id,
     OptionMap,

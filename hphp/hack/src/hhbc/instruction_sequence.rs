@@ -1016,10 +1016,11 @@ impl Instr {
     }
 }
 
-mod instr_seq {
+pub mod instr_seq {
     use crate::Instr;
     use hhbc_ast_rust::Instruct;
-    fn flat_map<F>(instrseq: &Instr, f: &mut F) -> Instr
+
+    pub fn flat_map<F>(instrseq: &Instr, f: &mut F) -> Instr
     where
         F: FnMut(&Instruct) -> Vec<Instruct>,
     {
@@ -1044,7 +1045,7 @@ mod instr_seq {
         }
     }
 
-    fn flat_map_seq<F>(instrseq: &Instr, f: &mut F) -> Instr
+    pub fn flat_map_seq<F>(instrseq: &Instr, f: &mut F) -> Instr
     where
         F: FnMut(&Instruct) -> Instr,
     {
@@ -1063,7 +1064,7 @@ mod instr_seq {
         }
     }
 
-    fn fold_left<F, A>(instrseq: &Instr, f: &mut F, init: A) -> A
+    pub fn fold_left<F, A>(instrseq: &Instr, f: &mut F, init: A) -> A
     where
         F: FnMut(A, &Instruct) -> A,
     {
@@ -1077,7 +1078,7 @@ mod instr_seq {
         }
     }
 
-    fn filter_map<F>(instrseq: &Instr, f: &mut F) -> Instr
+    pub fn filter_map<F>(instrseq: &Instr, f: &mut F) -> Instr
     where
         F: FnMut(&Instruct) -> Option<Instruct>,
     {
@@ -1099,10 +1100,10 @@ mod instr_seq {
         }
     }
 
-    fn map<F>(instrseq: &Instr, f: &mut F) -> Instr
+    pub fn map<F>(instrseq: &Instr, f: &mut F) -> Instr
     where
-        F: FnMut(&Instruct) -> Instruct,
+        F: FnMut(Instruct) -> Instruct,
     {
-        filter_map(instrseq, &mut |x| Some(f(x)))
+        filter_map(instrseq, &mut |x| Some(f(x.clone())))
     }
 }

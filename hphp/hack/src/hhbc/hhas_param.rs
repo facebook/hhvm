@@ -21,8 +21,11 @@ pub struct HhasParam {
 }
 
 impl HhasParam {
-    pub fn replace_default_value(&mut self, new_default_value: Option<(Label, TastExpr)>) {
-        self.default_value = new_default_value;
+    pub fn replace_default_value_label(&mut self, new_label: Label) {
+        let old_default_value = std::mem::replace(&mut self.default_value, None);
+        if let Some((_, e)) = old_default_value {
+            self.default_value = Some((new_label, e));
+        }
     }
 
     pub fn without_type(&mut self) {

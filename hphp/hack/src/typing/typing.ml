@@ -1950,87 +1950,41 @@ and expr_
            (List.map (List.zip_exn key_exprs value_exprs) (fun (tek, tev) ->
                 T.AFkvalue (tek, tev))))
         (Reason.Rwitness p, Tarraykind (AKdarray (key_ty, value_ty)))
-  | Darray (th, l) ->
-    (* Use expected type to determine expected key and value types *)
-    let (env, kexpected, vexpected, th) =
-      match th with
-      | Some ((_, tk), (_, tv)) ->
-        let (env, tk, tk_expected) = localize_targ env tk in
-        let (env, tv, tv_expected) = localize_targ env tv in
-        (env, Some tk_expected, Some tv_expected, Some (tk, tv))
+  | Varray (th, el)
+  | ValCollection (_, th, el) ->
+    let (get_expected_kind, name, subtype_val, make_expr, make_ty) =
+      match e with
+      | ValCollection (kind, _, _) ->
+        let class_name = Nast.vc_kind_to_name kind in
+        let subtype_val =
+          match kind with
+          | Set
+          | ImmSet
+          | Keyset ->
+            arraykey_value p class_name
+          | Vector
+          | ImmVector
+          | Vec
+          | Pair_ ->
+            array_value
+        in
+        ( get_vc_inst kind,
+          class_name,
+          subtype_val,
+          (fun th elements -> T.ValCollection (kind, th, elements)),
+          fun value_ty ->
+            MakeType.class_type (Reason.Rwitness p) class_name [value_ty] )
+      | Varray _ ->
+        ( get_varray_inst,
+          "varray",
+          array_value,
+          (fun th elements -> T.Varray (th, elements)),
+          (fun value_ty -> (Reason.Rwitness p, Tarraykind (AKvarray value_ty)))
+        )
       | _ ->
-        (* no explicit typehint, fallback to supplied expect *)
-        begin
-          match expand_expected env expected with
-          | (env, Some (pos, reason, ety)) ->
-            begin
-              match get_darray_inst p ety with
-              | Some (kty, vty) ->
-                let k_expected = ExpectedTy.make pos reason kty in
-                let v_expected = ExpectedTy.make pos reason vty in
-                (env, Some k_expected, Some v_expected, None)
-              | None -> (env, None, None, None)
-            end
-          | _ -> (env, None, None, None)
-        end
+        (* The parent match makes this case impossible *)
+        failwith "impossible match case"
     in
-    let (keys, values) = List.unzip l in
-    let (env, value_exprs, value_ty) =
-      compute_exprs_and_supertype
-        ~expected:vexpected
-        (Reason.Rtype_variable_generics (p, "Tv", "darray"))
-        env
-        values
-        array_value
-    in
-    let (env, key_exprs, key_ty) =
-      compute_exprs_and_supertype
-        ~expected:kexpected
-        (Reason.Rtype_variable_generics (p, "Tk", "darray"))
-        env
-        keys
-        (arraykey_value p "darray")
-    in
-    let field_exprs = List.zip_exn key_exprs value_exprs in
-    make_result
-      env
-      p
-      (T.Darray (th, field_exprs))
-      (Reason.Rwitness p, Tarraykind (AKdarray (key_ty, value_ty)))
-  | Varray (th, values) ->
-    (* Use expected type to determine expected element type *)
-    let (env, elem_expected, th) =
-      match th with
-      | Some (_, tv) ->
-        let (env, tv, tv_expected) = localize_targ env tv in
-        (env, Some tv_expected, Some tv)
-      | _ ->
-        (* no explicit typehint, fallback to supplied expect *)
-        begin
-          match expand_expected env expected with
-          | (env, Some (pos, ur, ety)) ->
-            begin
-              match get_varray_inst ety with
-              | Some vty -> (env, Some (ExpectedTy.make pos ur vty), None)
-              | _ -> (env, None, None)
-            end
-          | _ -> (env, None, None)
-        end
-    in
-    let (env, value_exprs, value_ty) =
-      compute_exprs_and_supertype
-        ~expected:elem_expected
-        (Reason.Rtype_variable_generics (p, "T", "varray"))
-        env
-        values
-        array_value
-    in
-    make_result
-      env
-      p
-      (T.Varray (th, value_exprs))
-      (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
-  | ValCollection (kind, th, el) ->
     (* Use expected type to determine expected element type *)
     let (env, elem_expected, th) =
       match th with
@@ -2042,38 +1996,43 @@ and expr_
           match expand_expected env expected with
           | (env, Some (pos, ur, ety)) ->
             begin
-              match get_vc_inst kind ety with
+              match get_expected_kind ety with
               | Some vty -> (env, Some (ExpectedTy.make pos ur vty), None)
               | None -> (env, None, None)
             end
           | _ -> (env, None, None)
         end
     in
-    let class_name = Nast.vc_kind_to_name kind in
-    let subtype_val =
-      match kind with
-      | Set
-      | ImmSet
-      | Keyset ->
-        arraykey_value p class_name
-      | Vector
-      | ImmVector
-      | Vec
-      | Pair_ ->
-        array_value
-    in
     let (env, tel, elem_ty) =
       compute_exprs_and_supertype
         ~expected:elem_expected
         ~reason:Reason.URvector
-        (Reason.Rtype_variable_generics (p, "T", strip_ns class_name))
+        (Reason.Rtype_variable_generics (p, "T", strip_ns name))
         env
         el
         subtype_val
     in
-    let ty = MakeType.class_type (Reason.Rwitness p) class_name [elem_ty] in
-    make_result env p (T.ValCollection (kind, th, tel)) ty
-  | KeyValCollection (kind, th, l) ->
+    make_result env p (make_expr th tel) (make_ty elem_ty)
+  | Darray (th, l)
+  | KeyValCollection (_, th, l) ->
+    let (get_expected_kind, name, make_expr, make_ty) =
+      match e with
+      | KeyValCollection (kind, _, _) ->
+        let class_name = Nast.kvc_kind_to_name kind in
+        ( get_kvc_inst p kind,
+          class_name,
+          (fun th pairs -> T.KeyValCollection (kind, th, pairs)),
+          (fun k v -> MakeType.class_type (Reason.Rwitness p) class_name [k; v])
+        )
+      | Darray _ ->
+        ( get_darray_inst p,
+          "darray",
+          (fun th pairs -> T.Darray (th, pairs)),
+          (fun k v -> (Reason.Rwitness p, Tarraykind (AKdarray (k, v)))) )
+      | _ ->
+        (* The parent match makes this case impossible *)
+        failwith "impossible match case"
+    in
     (* Use expected type to determine expected key and value types *)
     let (env, kexpected, vexpected, th) =
       match th with
@@ -2087,7 +2046,7 @@ and expr_
           match expand_expected env expected with
           | (env, Some (pos, reason, ety)) ->
             begin
-              match get_kvc_inst p kind ety with
+              match get_expected_kind ety with
               | Some (kty, vty) ->
                 let k_expected = ExpectedTy.make pos reason kty in
                 let v_expected = ExpectedTy.make pos reason vty in
@@ -2098,27 +2057,26 @@ and expr_
         end
     in
     let (kl, vl) = List.unzip l in
-    let class_name = Nast.kvc_kind_to_name kind in
     let (env, tkl, k) =
       compute_exprs_and_supertype
         ~expected:kexpected
         ~reason:Reason.URkey
-        (Reason.Rtype_variable_generics (p, "Tk", strip_ns class_name))
+        (Reason.Rtype_variable_generics (p, "Tk", strip_ns name))
         env
         kl
-        (arraykey_value p class_name)
+        (arraykey_value p name)
     in
     let (env, tvl, v) =
       compute_exprs_and_supertype
         ~expected:vexpected
         ~reason:Reason.URvalue
-        (Reason.Rtype_variable_generics (p, "Tv", strip_ns class_name))
+        (Reason.Rtype_variable_generics (p, "Tv", strip_ns name))
         env
         vl
         array_value
     in
-    let ty = MakeType.class_type (Reason.Rwitness p) class_name [k; v] in
-    make_result env p (T.KeyValCollection (kind, th, List.zip_exn tkl tvl)) ty
+    let pairs = List.zip_exn tkl tvl in
+    make_result env p (make_expr th pairs) (make_ty k v)
   | Clone e ->
     let (env, te, ty) = expr env e in
     (* Clone only works on objects; anything else fatals at runtime *)

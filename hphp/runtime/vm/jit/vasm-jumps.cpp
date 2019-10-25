@@ -55,16 +55,21 @@ WidthAnalysis::WidthAnalysis(Vunit& unit)
 {
   // Initialize physical registers and constants with their appropriate widths.
 
+  VregSet ignore;
   for (size_t i = 0; i < m_def_widths.size(); ++i) {
     Vreg r{i};
-    if (r.isGP()) m_def_widths[i] &= Width::QuadN;
-    if (r.isSIMD()) m_def_widths[i] &= Width::Octa;
-    if (r.isSF()) m_def_widths[i] &= Width::Flags;
+    if (r.isPhys()) {
+      if (r.isGP()) m_def_widths[i] &= Width::QuadN;
+      if (r.isSIMD()) m_def_widths[i] &= Width::Octa;
+      if (r.isSF()) m_def_widths[i] &= Width::Flags;
+      ignore.add(r);
+    }
   }
 
   for (auto const& pair : unit.constToReg) {
     auto const& cns = pair.first;
     auto const r = pair.second;
+    ignore.add(r);
 
     m_def_widths[r] = [&] {
       switch (cns.kind) {
@@ -114,9 +119,11 @@ WidthAnalysis::WidthAnalysis(Vunit& unit)
         }
       } else {
         visitUses(m_unit, inst, [&] (Vreg r, Width w) {
+          if (ignore[r]) return;
           m_use_widths[r] &= w;
         });
         visitDefs(m_unit, inst, [&] (Vreg r, Width w) {
+          if (ignore[r]) return;
           m_def_widths[r] &= w;
         });
       }
@@ -130,13 +137,17 @@ WidthAnalysis::WidthAnalysis(Vunit& unit)
   do {
     changed = false;
     for (auto const& p : copies) {
-      auto orig = m_def_widths[p.d];
-      m_def_widths[p.d] &= m_def_widths[p.s];
-      if (m_def_widths[p.d] != orig) changed = true;
+      if (!ignore[p.d]) {
+        auto const orig = m_def_widths[p.d];
+        m_def_widths[p.d] &= m_def_widths[p.s];
+        if (m_def_widths[p.d] != orig) changed = true;
+      }
 
-      orig = m_use_widths[p.s];
-      m_use_widths[p.s] &= m_use_widths[p.d];
-      if (m_use_widths[p.s] != orig) changed = true;
+      if (!ignore[p.s]) {
+        auto const orig = m_use_widths[p.s];
+        m_use_widths[p.s] &= m_use_widths[p.d];
+        if (m_use_widths[p.s] != orig) changed = true;
+      }
     }
   } while (changed);
 }
@@ -191,8 +202,7 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
 
   auto const& next_uses = unit.tuples[next_phi.uses];
   auto const& taken_uses = unit.tuples[taken_phi.uses];
-  DEBUG_ONLY auto const& join_defs =
-    unit.tuples[join_block.code[0].phidef_.defs];
+  auto const& join_defs = unit.tuples[join_block.code[0].phidef_.defs];
 
   assertx(next_uses.size() == taken_uses.size());
   assertx(next_uses.size() == join_defs.size());
@@ -213,9 +223,11 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
   for (size_t i = 0; i < next_uses.size(); ++i) {
     auto const r1 = next_uses[i];
     auto const r2 = taken_uses[i];
+    auto const r3 = join_defs[i];
     auto const d = unit.makeReg();
     switch (analysis.getAppropriate(r1) &
-            analysis.getAppropriate(r2)) {
+            analysis.getAppropriate(r2) &
+            analysis.getAppropriate(r3)) {
       case Width::Byte:
         moves.emplace_back(cmovb{cc, sf, r1, r2, d}, irctx);
         break;

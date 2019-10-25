@@ -62,19 +62,6 @@ struct ProfDataDeserializer;
  * the various locations things can point after a fully generic member
  * operation (see Memb below).
  *
- * The reason we have the category "Ref|Foo" for each of these Foos is that it
- * is very common to need to do a generic unbox on some value if you have no
- * type information.  For example:
- *
- *     t1 = LdPropAddr ...
- *     t2 = UnboxPtr t1
- *
- * At this point, t2 is a pointer into either an object property or a inner
- * RefData, which will be a PtrToRPropCell, which means it still can't alias,
- * for example, a PtrToStkCell or a PtrToGblCell (although it could generally
- * alias a PtrToRGblCell because both could be inside the same RefData.). Note
- * that PtrToRFooCell is just shorthand for PtrTo{Ref|Foo}Cell.
- *
  * Memb is a number of different locations that result from the more generic
  * types of member operations: Prop, Elem, MIS, MMisc, and Other. MMisc
  * contains something living in a collection instance or object's dynamic
@@ -86,70 +73,43 @@ struct ProfDataDeserializer;
  *
  * ClsCns is a pointer to class constant values in RDS.
  *
- * Ptr is a supertype of all Ptr types, Foo is a subtype of RFoo, and Ref is a
- * subtype of RFoo. NotPtr is unrelated to all other types. The hierarchy looks
- * something like this:
+ * The hierarchy looks something like this:
  *
  *                            Ptr                            NotPtr
  *                             |
  *         +-------------------+----+--------+-------+
  *         |                        |        |       |
- *       RMemb                      |     ClsInit  ClsCns
+ *        Memb                      |     ClsInit  ClsCns
  *         |                        |
- *  +------+---------+              |
- *  |      |         |              |
- *  |      |         |              |
- *  |      |         |              |
- *  |      |    +----+-----+        +--------+----- ... etc
- *  |      |    |    |     |        |        |
- *  |    Memb  RMIS RProp RElem   RFrame    RStk
- *  |      |   /  | /   | /|        |  \      | \
- *  |   +--+-+/---|/+   |/ |        |  Frame  |  Stk
- *  |   |    /    / |   /  |        |         |
- *  |   |   /|   /| |  /|  |        |         |
- *  |   |  / |  / | | / |  |        |         |
- *  |   MIS  Prop | Elem|  |        |         |
- *  |             |     |  |        |         |
- *  +-------------+--+--+--+--------+---------+
- *                   |
- *                  Ref
+ *         |                        +--------+----- ... etc
+ *         |                        |        |
+ *         |                      Frame     Stk
+ *      +--+-+------+
+ *      |    |      |
+ *     MIS  Prop   Elem
  *
  * Note: if you add a new pointer type, you very likely need to update
  * pointee() in memory-effects.cpp for it to remain correct.
  *
  */
 
-#define PTR_R(f, name, bits, ...)                    \
-  f(name, bits, __VA_ARGS__)                         \
-  f(R##name, (bits) | Ref, __VA_ARGS__)
+#define PTR_PRIMITIVE(f,...)                             \
+  f(ClsInit,  1U << 0, __VA_ARGS__)                      \
+  f(ClsCns,   1U << 1, __VA_ARGS__)                      \
+  f(Frame, 1U << 2, __VA_ARGS__)                         \
+  f(Stk,   1U << 3, __VA_ARGS__)                         \
+  f(Gbl,   1U << 4, __VA_ARGS__)                         \
+  f(Prop,  1U << 5, __VA_ARGS__)                         \
+  f(Elem,  1U << 6, __VA_ARGS__)                         \
+  f(SProp, 1U << 7, __VA_ARGS__)                         \
+  f(MIS,   1U << 8, __VA_ARGS__)                         \
+  f(MMisc, 1U << 9, __VA_ARGS__)                         \
+  f(Other, 1U << 10, __VA_ARGS__)                        \
+  /* NotPtr,  1U << 11, declared below */
 
-#define PTR_NO_R(f, name, bits, ...)            \
-  f(name, bits, __VA_ARGS__)
-
-/*
- * Types that can never be refs directly call f; types that can call r with f
- * as an argument. Callers of PTR_TYPES may control whether the Ref cases are
- * actually expanded by passing PTR_R or PTR_NO_R for the r argument. Any
- * arguments passed beyond f and r will be forwarded to f.
- */
-#define PTR_PRIMITIVE(f, r, ...)                         \
-  f(Ref,      1U << 0, __VA_ARGS__)                      \
-  f(ClsInit,  1U << 1, __VA_ARGS__)                      \
-  f(ClsCns,   1U << 2, __VA_ARGS__)                      \
-  r(f, Frame, 1U << 3, __VA_ARGS__)                      \
-  r(f, Stk,   1U << 4, __VA_ARGS__)                      \
-  r(f, Gbl,   1U << 5, __VA_ARGS__)                      \
-  r(f, Prop,  1U << 6, __VA_ARGS__)                      \
-  r(f, Elem,  1U << 7, __VA_ARGS__)                      \
-  r(f, SProp, 1U << 8, __VA_ARGS__)                      \
-  r(f, MIS,   1U << 9, __VA_ARGS__)                      \
-  r(f, MMisc, 1U << 10, __VA_ARGS__)                     \
-  r(f, Other, 1U << 11, __VA_ARGS__)                    \
-  /* NotPtr,  1U << 12, declared below */
-
-#define PTR_TYPES(f, r, ...)                             \
-  PTR_PRIMITIVE(f, r, __VA_ARGS__)                       \
-  r(f, Memb, Prop | Elem | MIS | MMisc | Other, __VA_ARGS__)
+#define PTR_TYPES(f, ...)                                \
+  PTR_PRIMITIVE(f, __VA_ARGS__)                          \
+  f(Memb, Prop | Elem | MIS | MMisc | Other, __VA_ARGS__)
 
 enum class Ptr : uint16_t {
   /*
@@ -160,16 +120,15 @@ enum class Ptr : uint16_t {
   Bottom = 0,
   Top    = 0x1fffU, // Keep this in sync with the number of bits used in
                     // PTR_PRIMITIVE, to keep pretty-printing cleaner.
-  NotPtr = 1U << 12,
+  NotPtr = 1U << 11,
   Ptr    = Top & ~NotPtr,
 
 #define PTRT(name, bits, ...) name = (bits),
-  PTR_TYPES(PTRT, PTR_R)
+  PTR_TYPES(PTRT)
 #undef PTRT
 };
 
 using ptr_t = std::underlying_type<Ptr>::type;
-constexpr auto kPtrRefBit = static_cast<ptr_t>(Ptr::Ref);
 
 constexpr Ptr operator~(Ptr p) {
   return static_cast<Ptr>(~static_cast<ptr_t>(p));
@@ -291,11 +250,11 @@ constexpr bool operator>(Mem a, Mem b) {
 #define IRT_PTRS_LVALS(name, bits)                            \
   IRT(name,               (bits))                             \
   IRTP(PtrTo##name,       Ptr, k##name)                       \
-  PTR_TYPES(IRTP_FROM_PTR, PTR_R, name)                       \
+  PTR_TYPES(IRTP_FROM_PTR, name)                              \
   IRTL(LvalTo##name,      Ptr, k##name)                       \
-  PTR_TYPES(IRTL_FROM_PTR, PTR_R, name)                       \
+  PTR_TYPES(IRTL_FROM_PTR, name)                              \
   IRTM(MemTo##name,       Ptr, k##name)                       \
-  PTR_TYPES(IRTM_FROM_PTR, PTR_R, name)                       \
+  PTR_TYPES(IRTM_FROM_PTR, name)                              \
 /**/
 
 #define IRT_PHP(c)                                                      \

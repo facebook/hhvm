@@ -1120,7 +1120,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // hooked up yet.
   case StElem:
     return PureStore {
-      inst.src(0)->type() <= TPtrToRMembCell
+      inst.src(0)->type() <= TPtrToMembCell
         ? AHeapAny
         : AUnknown,
       inst.src(2),
@@ -1128,7 +1128,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
   case LdElem:
     return PureLoad {
-      inst.src(0)->type() <= TPtrToRMembCell
+      inst.src(0)->type() <= TPtrToMembCell
         ? AHeapAny
         : AUnknown
     };

@@ -195,14 +195,14 @@ static std::string show(Ptr ptr) {
     case Ptr::Ptr:    return "";
 
 #define PTRT(name, ...) case Ptr::name: return #name;
-    PTR_TYPES(PTRT, PTR_R)
+    PTR_TYPES(PTRT)
 #undef PTRT
   }
 
   std::vector<const char*> parts;
 #define PTRT(name, ...) \
   if (Ptr::name <= ptr) parts.emplace_back(#name);
-  PTR_PRIMITIVE(PTRT, PTR_NO_R)
+  PTR_PRIMITIVE(PTRT)
 #undef PTRT
   return folly::sformat("{{{}}}", folly::join('|', parts));
 }

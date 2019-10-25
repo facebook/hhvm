@@ -1720,33 +1720,6 @@ void observe_all(Env& env, RCState& state, PreAdder add_node) {
   }
 }
 
-/*
- * When we call builtin functions, we need to make sure that we don't change
- * the return value of VRefParam::isReferenced on any possibly-KindOfRef
- * arguments.  We accomplish this with req nodes at level 2 for all asets that
- * could be boxed before we see builtin calls (we could do it only to the ones
- * that could be args, but we don't bother).
- *
- * The reason we have this unusual case only when dealing with builtin calls is
- * that in that situation, we're actually tracking references and memory
- * locations associated with the call.  This means it doesn't fall into the
- * usual category of not changing whether an "unknown pointer" could be the
- * last reference (as described in the "More about memory" section at the top
- * of this file)---we need to avoid changing whether a known pointer (the one
- * in memory for the CallBuiltin arg) is the last reference.  Basically,
- * CallBuiltin observes the reference count (at level 2) for their
- * possibly-boxed args, even though they can't decref the pointer through the
- * memory locations for those args.
- */
-void observe_for_is_referenced(Env& env, RCState& state, PreAdder add_node) {
-  FTRACE(3, "    observe_for_is_referenced\n");
-  for (auto asetID = uint32_t{0}; asetID < state.asets.size(); ++asetID) {
-    if (env.asets[asetID].widestType.maybe(TBoxedCell)) {
-      add_node(asetID, NReq{2});
-    }
-  }
-}
-
 void may_decref(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
   auto& aset = state.asets[asetID];
 
@@ -2054,7 +2027,6 @@ void analyze_mem_effects(Env& env,
       if (inst.is(CallBuiltin)) {
         observe_unbalanced_decrefs(env, state, add_node);
         kill_unsupported_refs(state, add_node);
-        observe_for_is_referenced(env, state, add_node);
       }
 
       // Locations that are killed don't need to be tracked as memory support

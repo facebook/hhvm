@@ -168,11 +168,8 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       return srcNo == 1;
 
     case ArraySet:
-    case ArraySetRef:
     case VecSet:
-    case VecSetRef:
     case DictSet:
-    case DictSetRef:
     case AddNewElem:
     case AddNewElemKeyset:
     case AddNewElemVec:
@@ -258,20 +255,6 @@ Type thisTypeFromFunc(const Func* func) {
 // outputType().
 
 namespace {
-
-Type unboxPtr(Type t) {
-  assertx(t <= TPtrToGen || t <= TLvalToGen);
-  auto const mcell = t & TMemToCell;
-  auto const mref = t & TMemToBoxedInitCell;
-  return mref.deref().inner().mem(t.memKind(), Ptr::Ref) | mcell;
-}
-
-Type boxPtr(Type t) {
-  assertx(t <= TPtrToGen || t <= TLvalToGen);
-  auto const rawBoxed = t.deref().unbox().box();
-  auto const noNull = rawBoxed - TBoxedUninit;
-  return noNull.mem(t.memKind(), t.ptrKind() - Ptr::Ref);
-}
 
 Type allocObjReturn(const IRInstruction* inst) {
   switch (inst->op()) {
@@ -415,7 +398,7 @@ Type keysetElemReturn(const IRInstruction* inst) {
 
 Type setElemReturn(const IRInstruction* inst) {
   assertx(inst->op() == SetElem);
-  auto baseType = inst->src(minstrBaseIdx(inst->op()))->type().strip();
+  auto baseType = inst->src(minstrBaseIdx(inst->op()))->type().derefIfPtr();
 
   // If the base is a Str, the result will always be a StaticStr (or
   // an exception). If the base might be a str, the result wil be
@@ -496,7 +479,7 @@ Type memoKeyReturn(const IRInstruction* inst) {
 
 Type ptrToLvalReturn(const IRInstruction* inst) {
   auto const ptr = inst->src(0)->type();
-  assertx(ptr <= TPtrToGen);
+  assertx(ptr <= TPtrToCell);
   return ptr.deref().mem(Mem::Lval, ptr.ptrKind());
 }
 
@@ -515,7 +498,7 @@ Type ptrToLvalReturn(const IRInstruction* inst) {
 Type ptrIterReturn(const IRInstruction* inst) {
   if (inst->is(AdvanceMixedPtrIter, AdvancePackedPtrIter)) {
     auto const ptr = inst->src(0)->type();
-    assertx(ptr <= TPtrToElemGen);
+    assertx(ptr <= TPtrToElemCell);
     return ptr;
   }
   assertx(inst->is(GetMixedPtrIter, GetPackedPtrIter));
@@ -525,14 +508,14 @@ Type ptrIterReturn(const IRInstruction* inst) {
     if (arr <= TArr)  return arrElemType(arr, TInt | TStr, inst->ctx()).first;
     if (arr <= TVec)  return vecElemType(arr, TInt, inst->ctx()).first;
     if (arr <= TDict) return dictElemType(arr, TInt | TStr).first;
-    return TGen;
+    return TCell;
   }();
   return value.ptr(Ptr::Elem);
 }
 
 Type ptrIterValReturn(const IRInstruction* inst) {
   auto const ptr = inst->src(0)->type();
-  assertx(ptr <= TPtrToElemGen);
+  assertx(ptr <= TPtrToElemCell);
   return ptr.deref();
 }
 
@@ -566,8 +549,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
   }                                                                \
   return TCls;                                                     \
 }
-#define DUnboxPtr       return unboxPtr(inst->src(0)->type());
-#define DBoxPtr         return boxPtr(inst->src(0)->type());
 #define DAllocObj       return allocObjReturn(inst);
 #define DArrElem        return arrElemReturn(inst);
 #define DVecElem        return vecElemReturn(inst);
@@ -628,8 +609,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DParamMayRelax
 #undef DParam
 #undef DLdObjCls
-#undef DUnboxPtr
-#undef DBoxPtr
 #undef DAllocObj
 #undef DArrElem
 #undef DVecElem

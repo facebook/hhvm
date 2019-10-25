@@ -74,7 +74,7 @@ inline CallDest callDest(IRLS& env, const IRInstruction* inst) {
 
   auto const loc = dstLoc(env, inst, 0);
   assertx(loc.numAllocated() == 1 ||
-          (inst->dst()->isA(TLvalToGen) && loc.numAllocated() == 2));
+          (inst->dst()->isA(TLvalToCell) && loc.numAllocated() == 2));
 
   auto const dst = inst->dst();
   auto const kind = dst->isA(TBool) ? DestType::Byte :
@@ -92,12 +92,12 @@ inline CallDest callDestTV(IRLS& env, const IRInstruction* inst) {
 
   if (loc.isFullSIMD()) {
     assertx(loc.numAllocated() == 1);
-    return { DestType::SIMD, TGen, loc.reg(0) };
+    return { DestType::SIMD, TCell, loc.reg(0) };
   }
 
   // loc.reg(1) may be InvalidReg, if the type is statically known. This is
   // expected and handled by users of CallDest.
-  return { DestType::TV, TGen, loc.reg(0), loc.reg(1) };
+  return { DestType::TV, TCell, loc.reg(0), loc.reg(1) };
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -184,7 +184,7 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
   );
 
   // Nothing to check.
-  if (type == TGen) return;
+  if (type == TCell) return;
 
   // Profile the type being guarded. We skip TUncounted here because that's
   // handled in emitIsTVTypeRefCounted, which has a number of other callers.
@@ -231,7 +231,6 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
     if (type == TCell)          return cmp(KindOfRef, CC_NE);
 
     always_assert(type.isKnownDataType());
-    always_assert(!(type < TBoxedInitCell));
 
     auto const dt = type.toDataType();
     return cmp(dt, CC_E);

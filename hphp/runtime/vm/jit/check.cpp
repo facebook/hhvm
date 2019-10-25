@@ -504,8 +504,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
                          IdxSeq<__VA_ARGS__>{}                                 \
                        );
 #define DLdObjCls
-#define DUnboxPtr
-#define DBoxPtr
 #define DAllocObj
 #define DArrElem
 #define DVecElem
@@ -568,8 +566,6 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #undef DParamMayRelax
 #undef DParam
 #undef DLdObjCls
-#undef DUnboxPtr
-#undef DBoxPtr
 #undef DAllocObj
 #undef DArrElem
 #undef DVecElem

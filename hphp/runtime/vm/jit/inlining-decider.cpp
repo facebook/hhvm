@@ -612,7 +612,7 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
 
   for (uint32_t i = 0; i < argTypes.size(); ++i) {
     auto type = argTypes[i];
-    assertx(type <= TGen);
+    assertx(type <= TCell);
     ctx.liveTypes.push_back({Location::Local{i}, type});
   }
 
@@ -783,16 +783,11 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     // DataTypeGeneric is used because we're just passing the locals into the
     // callee.  It's up to the callee to constrain further if needed.
     auto type = irgen::publicTopType(irgs, BCSPRelOffset{firstArgPos - i});
-    assertx(type <= TGen);
+    assertx(type <= TCell);
 
     // If we don't have sufficient type information to inline the region return
     // early
     if (type == TBottom) return nullptr;
-    if (!(type <= TCell) && !(type <= TBoxedCell)) {
-      traceRefusal(sk, callee, folly::sformat("maybe boxed arg num: {}", i + 1),
-                   annotationsPtr);
-      return nullptr;
-    }
     FTRACE(2, "arg {}: {}\n", i + 1, type);
     argTypes.push_back(type);
   }

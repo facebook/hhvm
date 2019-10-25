@@ -249,7 +249,7 @@ void initObjProps(IRGS& env, const Class* cls, SSATmp* obj) {
         env,
         LdPropAddr,
         ByteOffsetData { (ptrdiff_t)(cls->declPropOffset(slot)) },
-        TLvalToPropGen,
+        TLvalToPropCell,
         obj
       );
       gen(env, StMem, addr, val);
@@ -425,9 +425,8 @@ void emitNewKeysetArray(IRGS& env, uint32_t numArgs) {
 }
 
 void emitNewLikeArrayL(IRGS& env, int32_t id, uint32_t capacity) {
-  auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
+  auto const ld = ldLoc(env, id, ldPMExit, DataTypeSpecific);
 
   SSATmp* arr;
   if (ld->isA(TArr)) {

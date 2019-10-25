@@ -85,12 +85,12 @@ void ifNonPersistent(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
 template<class Then>
 void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
   if (!ty.maybe(TCounted)) return;
-  if (ty <= TGen && ty.isKnownDataType()) {
+  if (ty <= TCell && ty.isKnownDataType()) {
     if (isRefcountedType(ty.toDataType())) then(v);
     return;
   }
   auto const sf = v.makeReg();
-  assertx(ty <= TGen);
+  assertx(ty <= TCell);
   auto const cond = emitIsTVTypeRefCounted(v, sf, loc.reg(1));
   unlikelyIfThen(v, vtaken, cond, sf, then);
 }
@@ -163,7 +163,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
     if (data.total > 0) {
       if (data.percent(data.refcounted) <
           RuntimeOption::EvalJitPGOUnlikelyIncRefCountedPercent
-          && !(ty <= TGen && ty.isKnownDataType())) {
+          && !(ty <= TCell && ty.isKnownDataType())) {
         unlikelyCounted = true;
         FTRACE(3, "irlower-inc-dec: Emitting cold counted check for {}, {}\n",
                data, *inst);
@@ -734,7 +734,7 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
     if (data.total > 0) {
       if (data.percent(data.refcounted) <
           RuntimeOption::EvalJitPGOUnlikelyDecRefCountedPercent
-          && !(ty <= TGen && ty.isKnownDataType())) {
+          && !(ty <= TCell && ty.isKnownDataType())) {
         unlikelyCounted = true;
         FTRACE(3, "irlower-inc-dec: Emitting cold counted check for {}, {}\n",
                data, *inst);

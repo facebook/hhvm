@@ -33,8 +33,8 @@ TEST(PredictionOpts, basic) {
   Block* taken = unit.defBlock();
   Block* end = unit.defBlock();
 
-  auto ptr = unit.gen(Conjure, bcctx, TPtrToGen);
-  auto ldm = unit.gen(LdMem, bcctx, TGen, ptr->dst());
+  auto ptr = unit.gen(Conjure, bcctx, TPtrToCell);
+  auto ldm = unit.gen(LdMem, bcctx, TCell, ptr->dst());
   auto inc = unit.gen(IncRef, bcctx, ldm->dst());
   auto ckt = unit.gen(CheckType, bcctx, TInt, taken, ldm->dst());
   ckt->setNext(end);
@@ -58,7 +58,7 @@ TEST(PredictionOpts, basic) {
     auto takenIt = taken->begin();
     auto& ldmem = *takenIt;
     auto& incref = *(++takenIt);
-    EXPECT_MATCH(ldmem, LdMem, TGen, ptr->dst());
+    EXPECT_MATCH(ldmem, LdMem, TCell, ptr->dst());
     EXPECT_MATCH(incref, IncRef, ldmem.dst());
   }
 

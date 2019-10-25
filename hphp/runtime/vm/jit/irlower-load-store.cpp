@@ -222,22 +222,6 @@ void cgDbgTrashMem(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgLdRef(IRLS& env, const IRInstruction* inst) {
-  auto const ptr = srcLoc(env, inst, 0).reg();
-  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0),
-         ptr[RefData::cellOffset()]);
-}
-
-void cgStRef(IRLS& env, const IRInstruction* inst) {
-  auto const ptr = srcLoc(env, inst, 0).reg();
-  auto const valLoc = srcLoc(env, inst, 1);
-  always_assert(!srcLoc(env, inst, 1).isFullSIMD());
-
-  storeTV(vmain(env), ptr[RefData::cellOffset()], valLoc, inst->src(1));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void cgLdElem(IRLS& env, const IRInstruction* inst) {
   auto const rbase = srcLoc(env, inst, 0).reg();
   auto const ridx = srcLoc(env, inst, 1).reg();

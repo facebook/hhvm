@@ -55,8 +55,6 @@ struct SSATmp;
  *     DParam(t)    single dst has type of the instruction's type parameter,
  *                    which must be a subtype of t
  *     DParamMayRelax(t) like DParam, except type may relax
- *     DUnboxPtr    Unboxed PtrTo*T; adds possibility of pointing into a ref
- *     DBoxPtr      Boxed PtrTo*T
  *     DAllocObj    single dst has a type of a newly allocated object; may be a
  *                    specialized object type if the class is known
  *     DArrPacked   single dst has a packed array type

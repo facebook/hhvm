@@ -49,8 +49,6 @@ TRACE_SET_MOD(hhir);
 #define DParamMayRelax(t) HasDest
 #define DParam(t)      HasDest
 #define DLdObjCls      HasDest
-#define DUnboxPtr      HasDest
-#define DBoxPtr        HasDest
 #define DAllocObj      HasDest
 #define DArrElem       HasDest
 #define DVecElem       HasDest
@@ -129,8 +127,6 @@ OpInfo g_opInfo[] = {
 #undef DParamMayRelax
 #undef DParam
 #undef DLdObjCls
-#undef DUnboxPtr
-#undef DBoxPtr
 #undef DArrElem
 #undef DVecElem
 #undef DDictElem
@@ -316,7 +312,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ArrayAdd:
   case ArrayGet:
   case ArraySet:
-  case ArraySetRef:
   case BaseG:
   case Call:
   case CallBuiltin:
@@ -378,7 +373,6 @@ bool opcodeMayRaise(Opcode opc) {
   case DictAddElemStrKey:
   case DictGet:
   case DictSet:
-  case DictSetRef:
   case ElemArrayD:
   case ElemArrayU:
   case ElemArrayX:
@@ -519,7 +513,6 @@ bool opcodeMayRaise(Opcode opc) {
   case UnsetElem:
   case UnsetProp:
   case VecSet:
-  case VecSetRef:
   case VectorSet:
   case VerifyParamCallable:
   case VerifyParamCls:
@@ -570,8 +563,6 @@ bool opcodeMayRaise(Opcode opc) {
   case AsyncSwitchFast:
   case BeginCatch:
   case BeginInlining:
-  case Box:
-  case BoxPtr:
   case Ceil:
   case CheckArrayCOW:
   case CheckCold:
@@ -590,7 +581,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckPackedArrayDataBounds:
   case CheckRange:
   case CheckRDSInitialized:
-  case CheckRefInner:
   case CheckInOuts:
   case CheckSmashableClass:
   case CheckStk:
@@ -742,9 +732,6 @@ bool opcodeMayRaise(Opcode opc) {
   case GtStr:
   case GtStrInt:
   case HasToString:
-  case HintLocInner:
-  case HintMBaseInner:
-  case HintStkInner:
   case IncProfCounter:
   case IncRef:
   case IncStat:
@@ -855,7 +842,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdPairBase:
   case LdPropAddr:
   case LdRDSAddr:
-  case LdRef:
   case LdRetVal:
   case LdSSwitchDestFast:
   case LdSmashable:
@@ -992,7 +978,6 @@ bool opcodeMayRaise(Opcode opc) {
   case StMem:
   case StMIPropState:
   case StOutValue:
-  case StRef:
   case StrictlyIntegerConv:
   case StringIsset:
   case StStk:
@@ -1000,7 +985,6 @@ bool opcodeMayRaise(Opcode opc) {
   case SubInt:
   case SubIntO:
   case SyncReturnBC:
-  case UnboxPtr:
   case Unreachable:
   case UnwindCheckSideExit:
   case VecFirst:

@@ -252,7 +252,6 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
 
     {ArrayAdd,           arrayAdd, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
-    {Box,                boxValue, DSSA, SNone, {{TV, 0}}},
     {Clone,              &ObjectData::clone, DSSA, SSync, {{SSA, 0}}},
     {NewPair,            collections::allocPair, DSSA, SNone,
                            {{TV, 0}, {TV, 1}}},

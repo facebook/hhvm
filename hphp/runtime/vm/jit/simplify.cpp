@@ -288,8 +288,7 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckMixedArrayKeys,
                    CheckMixedArrayOffset,
                    CheckDictOffset,
-                   CheckKeysetOffset,
-                   CheckRefInner));
+                   CheckKeysetOffset));
   if (inst->next() != nullptr && inst->next() == inst->taken()) {
     return gen(env, Jmp, inst->next());
   }
@@ -2535,23 +2534,9 @@ SSATmp* simplifyCeil(State& env, const IRInstruction* inst) {
   return roundImpl(env, inst, ceil);
 }
 
-SSATmp* simplifyUnboxPtr(State& /*env*/, const IRInstruction* inst) {
-  if (inst->src(0)->isA(TMemToCell)) {
-    return inst->src(0);
-  }
-  return nullptr;
-}
-
-SSATmp* simplifyBoxPtr(State& /*env*/, const IRInstruction* inst) {
-  if (inst->src(0)->isA(TMemToBoxedCell)) {
-    return inst->src(0);
-  }
-  return nullptr;
-}
-
 SSATmp* simplifyCheckInit(State& env, const IRInstruction* inst) {
   auto const srcType = inst->src(0)->type();
-  assertx(!srcType.maybe(TMemToGen));
+  assertx(!srcType.maybe(TMemToCell));
   assertx(inst->taken());
   if (!srcType.maybe(TUninit)) return gen(env, Nop);
   return mergeBranchDests(env, inst);
@@ -2709,14 +2694,6 @@ SSATmp* simplifyCheckInOuts(State& env, const IRInstruction* inst) {
   }
 
   return gen(env, Nop);
-}
-
-SSATmp* simplifyCheckRefInner(State& env, const IRInstruction* inst) {
-  // Ref inner cells are at worst InitCell, so don't bother checking for that.
-  if (TInitCell <= inst->typeParam()) {
-    return gen(env, Nop);
-  }
-  return mergeBranchDests(env, inst);
 }
 
 SSATmp* simplifyDefLabel(State& env, const IRInstruction* inst) {
@@ -3785,7 +3762,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(Lshr)
   X(AbsDbl)
   X(AssertNonNull)
-  X(BoxPtr)
   X(CallBuiltin)
   X(Ceil)
   X(CheckInit)
@@ -3795,7 +3771,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckLoc)
   X(CheckMBase)
   X(CheckInOuts)
-  X(CheckRefInner)
   X(CheckStk)
   X(CheckType)
   X(CheckTypeMem)
@@ -3907,7 +3882,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdObjClass)
   X(LdObjInvoke)
   X(Mov)
-  X(UnboxPtr)
   X(JmpZero)
   X(JmpNZero)
   X(Select)

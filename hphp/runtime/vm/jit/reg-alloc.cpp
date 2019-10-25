@@ -59,7 +59,7 @@ bool loadsCell(const IRInstruction& inst) {
 
   switch (inst.op()) {
   case LdMem:
-    return arch_allows && (!wide_tv_val || inst.src(0)->isA(TPtrToGen));
+    return arch_allows && (!wide_tv_val || inst.src(0)->isA(TPtrToCell));
 
   case LdVecElem:
   case LdPackedElem:
@@ -70,7 +70,6 @@ bool loadsCell(const IRInstruction& inst) {
   case LdLoc:
   case LdContField:
   case LdElem:
-  case LdRef:
   case InitClsCns:
   case CGetProp:
   case ArrayGet:

@@ -111,7 +111,6 @@ struct ParamPrep {
     SSATmp* value{nullptr};
     bool passByAddr{false};
     bool needsConversion{false};
-    bool isOutputArg{false};
     bool isInOut{false};
   };
 
@@ -1022,9 +1021,8 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
   );
 
   auto const finish = [&](SSATmp* val){
-    auto const cell = is_dict ? val : unbox(env, val, nullptr);
-    gen(env, IncRef, cell);
-    return cell;
+    gen(env, IncRef, val);
+    return val;
   };
   return finish(profiledType(env, elm, [&] {
     auto const cell = finish(elm);
@@ -1238,13 +1236,8 @@ prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* ctx,
     auto& pi = callee->params()[offset];
 
     cur.value = loadParam(offset, ty);
-    cur.isOutputArg = pi.nativeArg && ty == TBoxedCell;
     // If ty > TBottom, it had some kind of type hint.
-    // A by-reference parameter thats defaulted will get a plain
-    // value (typically null), rather than a BoxedCell; so we still
-    // need to apply a conversion there.
-    cur.needsConversion = cur.isOutputArg ||
-      (offset < numNonDefault && ty > TBottom);
+    cur.needsConversion = (offset < numNonDefault && ty > TBottom);
     cur.isInOut = callee->isInOut(offset);
     // We do actually mean exact type equality here.  We're only capable of
     // passing the following primitives through registers; everything else goes
@@ -1564,7 +1557,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
 
     seenBottom |= (param.value->type() == TBottom);
 
-    if (param.value->type() <= TPtrToGen) {
+    if (param.value->type() <= TPtrToCell) {
       ret[argIdx++] = realize_param(
         env, param, callee, targetTy,
         [&] (const Type& ty, Block* fail) -> SSATmp* {
@@ -1572,14 +1565,10 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
           if (needDVCheck(paramIdx, ty)) {
             dvCheck(paramIdx, gen(env, LdMem, ty, param.value));
           }
-          return param.isOutputArg ?
-            gen(env, LdMem, TBoxedCell, param.value) : nullptr;
+          return nullptr;
         },
         [&] (const Type& ty) -> SSATmp* {
           hint(env, Block::Hint::Unlikely);
-          if (param.isOutputArg) {
-            return cns(env, TNullptr);
-          }
           auto val = gen(env, LdMem, TCell, param.value);
           assertx(ty.isKnownDataType());
           maybeCoerceValue(
@@ -1601,7 +1590,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
           return nullptr;
         },
         [&] {
-          if (!param.passByAddr && !param.isOutputArg) {
+          if (!param.passByAddr) {
             assertx(targetTy == TBool ||
                     targetTy == TInt ||
                     targetTy == TDbl ||
@@ -1628,7 +1617,6 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
         },
         [&] (const Type& ty) -> SSATmp* {
           hint(env, Block::Hint::Unlikely);
-          if (param.isOutputArg) return cns(env, TNullptr);
           assert(ty.isKnownDataType());
           return maybeCoerceValue(
             env,
@@ -1668,9 +1656,6 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
            * with the new value).
            */
           auto v = param.value;
-          if (param.isOutputArg) {
-            param.value = oldVal;
-          }
           return v;
         });
       continue;
@@ -2124,7 +2109,7 @@ Type builtinReturnType(const Func* builtin) {
   // type.
   assertx(builtin->isCPPBuiltin());
 
-  // NB: It is *not* safe to be pessimistic here and return TGen (or any other
+  // NB: It is *not* safe to be pessimistic here and return TCell (or any other
   // approximation). The builtin's return type inferred here is used to control
   // code-gen when lowering the builtin call to vasm and must be no more general
   // than the HNI declaration (if present).
@@ -2199,8 +2184,7 @@ void implArrayIdx(IRGS& env) {
   );
 
   auto finish = [&](SSATmp* tmp) {
-    auto const value = unbox(env, tmp, nullptr);
-    pushIncRef(env, value);
+    pushIncRef(env, tmp);
     decRef(env, base);
     decRef(env, key);
     decRef(env, def);
@@ -2522,10 +2506,9 @@ void emitGetMemoKeyL(IRGS& env, int32_t locId) {
   DEBUG_ONLY auto const func = curFunc(env);
   assertx(func->isMemoizeWrapper());
 
-  auto const value = ldLocInnerWarn(
+  auto const value = ldLocWarn(
     env,
     locId,
-    makeExit(env),
     nullptr,
     DataTypeSpecific
   );

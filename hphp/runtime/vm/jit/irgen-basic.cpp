@@ -122,12 +122,10 @@ void emitClassGetTS(IRGS& env) {
 }
 
 void emitCGetL(IRGS& env, int32_t id) {
-  auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const loc = ldLocInnerWarn(
+  auto const loc = ldLocWarn(
     env,
     id,
-    ldrefExit,
     ldPMExit,
     DataTypeBoxAndCountnessInit
   );
@@ -135,15 +133,13 @@ void emitCGetL(IRGS& env, int32_t id) {
 }
 
 void emitCGetQuietL(IRGS& env, int32_t id) {
-  auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   pushIncRef(
     env,
     [&] {
-      auto const loc = ldLocInner(
+      auto const loc = ldLoc(
         env,
         id,
-        ldrefExit,
         ldPMExit,
         DataTypeBoxAndCountnessInit
       );
@@ -173,9 +169,8 @@ void emitCGetQuietL(IRGS& env, int32_t id) {
 }
 
 void emitCUGetL(IRGS& env, int32_t id) {
-  auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  pushIncRef(env, ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeGeneric));
+  pushIncRef(env, ldLoc(env, id, ldPMExit, DataTypeGeneric));
 }
 
 void emitPushL(IRGS& env, int32_t id) {
@@ -186,13 +181,11 @@ void emitPushL(IRGS& env, int32_t id) {
 }
 
 void emitCGetL2(IRGS& env, int32_t id) {
-  auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const oldTop = pop(env, DataTypeGeneric);
-  auto const val = ldLocInnerWarn(
+  auto const val = ldLocWarn(
     env,
     id,
-    ldrefExit,
     ldPMExit,
     DataTypeBoxAndCountnessInit
   );
@@ -207,14 +200,13 @@ void emitUnsetL(IRGS& env, int32_t id) {
 }
 
 void emitSetL(IRGS& env, int32_t id) {
-  auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
 
   // since we're just storing the value in a local, this function doesn't care
   // about the type of the value. stLoc needs to IncRef the value so it may
   // constrain it further.
   auto const src = popC(env, DataTypeGeneric);
-  pushStLoc(env, id, ldrefExit, ldPMExit, src);
+  pushStLoc(env, id, ldPMExit, src);
 }
 
 void emitInitThisLoc(IRGS& env, int32_t id) {
@@ -584,10 +576,9 @@ void emitPopU2(IRGS& env) {
 }
 
 void emitPopL(IRGS& env, int32_t id) {
-  auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const src = popC(env, DataTypeGeneric);
-  stLocMove(env, id, ldrefExit, ldPMExit, src);
+  stLocMove(env, id, ldPMExit, src);
 }
 
 void emitPopFrame(IRGS& env, uint32_t nout) {

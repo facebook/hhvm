@@ -118,7 +118,7 @@ std::pair<Type, bool> arrElemType(Type arr, Type idx, const Class* ctx) {
     }
   }
 
-  auto type = (arr <= TPersistentArr) ? TUncountedInit : TInitGen;
+  auto type = (arr <= TPersistentArr) ? TUncountedInit : TInitCell;
 
   auto const arrTy = arr.arrSpec().type();
   if (!arrTy) return {type, false};
@@ -334,7 +334,7 @@ std::pair<Type, bool> vecFirstLastType(Type arr,
   auto type = [&] {
     if (arr <= TUncounted) return TUncountedInit;
     if (arr <= TVec) return TInitCell;
-    return TInitGen;
+    return TInitCell;
   }();
 
   auto const arrTy = arr.arrSpec().type();
@@ -377,7 +377,7 @@ std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey) {
   auto const type = [&] {
     if (arr <= TUncounted) return TUncountedInit;
     if (arr <= TDict) return TInitCell;
-    return TInitGen;
+    return TInitCell;
   }();
   return {type, false};
 }

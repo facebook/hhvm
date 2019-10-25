@@ -48,12 +48,12 @@ int typeNeededWords(Type t) {
   if (t.maybe(TNullptr)) {
     return typeNeededWords(t - TNullptr);
   }
-  if (t <= TPtrToGen) {
+  if (t <= TPtrToCell) {
     // PtrTo* may be statically unknown but always need just one
     // register.
     return 1;
   }
-  if (t <= TLvalToGen) {
+  if (t <= TLvalToCell) {
     // If tv_val<> is ever anything other than 1 or more normal pointers, this
     // will need to change.
     static_assert(sizeof(tv_lval) % 8 == 0, "");
@@ -61,11 +61,11 @@ int typeNeededWords(Type t) {
   }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.
-    assertx(IMPLIES(t <= TGen, t.isKnownDataType()));
+    assertx(IMPLIES(t <= TCell, t.isKnownDataType()));
     return 1;
   }
 
-  assertx(t <= TGen);
+  assertx(t <= TCell);
 
   // XXX(t4592459): This will return 2 for TNull, even though it only
   // needs 1 register (one for the type, none for the value). This is to work

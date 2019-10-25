@@ -77,7 +77,7 @@ Vreg zeroExtendIfBool(Vout& v, Type type, Vreg reg);
 
 /*
  * Return a pointer to the type or value field of the pointee of `ptr', whether
- * it is a TPtrToGen or a TLvalToGen.
+ * it is a TPtrToCell or a TLvalToCell.
  */
 Vptr memTVTypePtr(SSATmp* ptr, Vloc loc);
 Vptr memTVValPtr(SSATmp* ptr, Vloc loc);

@@ -280,7 +280,7 @@ void beginInlining(IRGS& env,
   jit::vector<SSATmp*> params{numArgs + 1};
 
   for (unsigned i = 0; i < numArgs; ++i) {
-    params[numArgs - i - 1] = popF(env);
+    params[numArgs - i - 1] = popC(env);
   }
 
   // NB: Now that we've popped the callee's arguments off the stack

@@ -50,11 +50,9 @@ AliasClass pointee(
   jit::flat_set<const IRInstruction*>* visited_labels
 ) {
   auto const type = ptr->type();
-  always_assert(type <= TMemToGen);
-  auto const maybeRef = type.maybe(TMemToRefGen);
-  auto const typeNR = type - TMemToRefGen;
+  always_assert(type <= TMemToCell);
   auto const canonPtr = canonical(ptr);
-  if (!canonPtr->isA(TMemToGen)) {
+  if (!canonPtr->isA(TMemToCell)) {
     // This can happen when ptr is TBottom from a passthrough instruction with
     // a src that isn't TBottom. The most common cause of this is something
     // like "t5:Bottom = CheckType<Str> t2:Int". It means ptr isn't really a
@@ -65,10 +63,6 @@ AliasClass pointee(
   }
 
   auto const sinst = canonPtr->inst();
-
-  if (sinst->is(UnboxPtr)) {
-    return ARefAny | pointee(sinst->src(0), visited_labels);
-  }
 
   if (sinst->is(LdRDSAddr, LdInitRDSAddr)) {
     return ARds { sinst->extra<RDSHandleData>()->handle };
@@ -102,9 +96,9 @@ AliasClass pointee(
   }
 
   auto specific = [&] () -> folly::Optional<AliasClass> {
-    if (typeNR <= TBottom) return AEmpty;
+    if (type <= TBottom) return AEmpty;
 
-    if (typeNR <= TMemToFrameGen) {
+    if (type <= TMemToFrameCell) {
       if (sinst->is(LdLocAddr)) {
         return AliasClass {
           AFrame { sinst->src(0), sinst->extra<LdLocAddr>()->locId }
@@ -113,7 +107,7 @@ AliasClass pointee(
       return AFrameAny;
     }
 
-    if (typeNR <= TMemToStkGen) {
+    if (type <= TMemToStkCell) {
       if (sinst->is(LdStkAddr)) {
         return AliasClass {
           AStack { sinst->src(0), sinst->extra<LdStkAddr>()->offset, 1 }
@@ -122,7 +116,7 @@ AliasClass pointee(
       return AStackAny;
     }
 
-    if (typeNR <= TMemToPropGen) {
+    if (type <= TMemToPropCell) {
       if (sinst->is(LdPropAddr, LdInitPropAddr)) {
         return AliasClass {
           AProp {
@@ -134,7 +128,7 @@ AliasClass pointee(
       return APropAny;
     }
 
-    if (typeNR <= TMemToMISGen) {
+    if (type <= TMemToMISCell) {
       if (sinst->is(LdMIStateAddr)) {
         return mis_from_offset(sinst->src(0)->intVal());
       }
@@ -163,18 +157,18 @@ AliasClass pointee(
       return AElemAny;
     };
 
-    if (typeNR <= TMemToElemGen) {
+    if (type <= TMemToElemCell) {
       if (sinst->is(LdPackedArrayDataElemAddr)) return elem();
       return AElemAny;
     }
 
     // The result of ElemArray{,W,U} is either the address of an array element,
     // or &immutable_null_base.
-    if (typeNR <= TMemToMembGen) {
+    if (type <= TMemToMembCell) {
       if (sinst->is(ElemArrayX, ElemDictX, ElemKeysetX)) return elem();
 
-      // Takes a PtrToGen as its first operand, so we can't easily grab an array
-      // base.
+      // Takes a PtrToCell as its first operand, so we can't easily grab an
+      // array base.
       if (sinst->is(ElemArrayU, ElemVecU, ElemDictU, ElemKeysetU)) {
         return AElemAny;
       }
@@ -185,13 +179,13 @@ AliasClass pointee(
       if (sinst->is(PropX, PropDX, PropQ)) {
         auto const src = [&]{
           if (sinst->is(PropDX)) {
-            assertx(sinst->src(sinst->numSrcs() - 2)->isA(TMemToMISGen));
+            assertx(sinst->src(sinst->numSrcs() - 2)->isA(TMemToMISCell));
             assertx(
               sinst->src(sinst->numSrcs() - 1)->isA(TMIPropSPtr | TNullptr)
             );
             return sinst->src(sinst->numSrcs() - 2);
           } else {
-            assertx(sinst->srcs().back()->isA(TPtrToMISGen));
+            assertx(sinst->srcs().back()->isA(TPtrToMISCell));
             return sinst->srcs().back();
           }
         }();
@@ -204,13 +198,13 @@ AliasClass pointee(
       if (sinst->is(ElemX, ElemDX, ElemUX)) {
         auto const src = [&]{
           if (sinst->is(ElemDX)) {
-            assertx(sinst->src(sinst->numSrcs() - 2)->isA(TMemToMISGen));
+            assertx(sinst->src(sinst->numSrcs() - 2)->isA(TMemToMISCell));
             assertx(
               sinst->src(sinst->numSrcs() - 1)->isA(TMIPropSPtr | TNullptr)
             );
             return sinst->src(sinst->numSrcs() - 2);
           } else {
-            assertx(sinst->srcs().back()->isA(TPtrToMISGen));
+            assertx(sinst->srcs().back()->isA(TPtrToMISCell));
             return sinst->srcs().back();
           }
         }();
@@ -223,21 +217,21 @@ AliasClass pointee(
     return folly::none;
   }();
 
-  auto ret = maybeRef ? ARefAny : AEmpty;
-  if (specific) return *specific | ret;
+  if (specific) return *specific;
 
   /*
    * None of the above worked, so try to make the smallest union we can based
    * on the pointer type.
    */
-  if (typeNR.maybe(TMemToStkGen))     ret = ret | AStackAny;
-  if (typeNR.maybe(TMemToFrameGen))   ret = ret | AFrameAny;
-  if (typeNR.maybe(TMemToPropGen))    ret = ret | APropAny;
-  if (typeNR.maybe(TMemToElemGen))    ret = ret | AElemAny;
-  if (typeNR.maybe(TMemToMISGen))     ret = ret | AMIStateTV;
-  if (typeNR.maybe(TMemToClsInitGen)) ret = ret | AHeapAny;
-  if (typeNR.maybe(TMemToClsCnsGen))  ret = ret | AHeapAny;
-  if (typeNR.maybe(TMemToSPropGen))   ret = ret | ARdsAny;
+  auto ret = AEmpty;
+  if (type.maybe(TMemToStkCell))     ret = ret | AStackAny;
+  if (type.maybe(TMemToFrameCell))   ret = ret | AFrameAny;
+  if (type.maybe(TMemToPropCell))    ret = ret | APropAny;
+  if (type.maybe(TMemToElemCell))    ret = ret | AElemAny;
+  if (type.maybe(TMemToMISCell))     ret = ret | AMIStateTV;
+  if (type.maybe(TMemToClsInitCell)) ret = ret | AHeapAny;
+  if (type.maybe(TMemToClsCnsCell))  ret = ret | AHeapAny;
+  if (type.maybe(TMemToSPropCell))   ret = ret | ARdsAny;
   return ret;
 }
 
@@ -246,14 +240,14 @@ AliasClass pointee(
 AliasClass all_pointees(folly::Range<SSATmp**> srcs) {
   auto ret = AliasClass{AEmpty};
   for (auto const& src : srcs) {
-    if (src->isA(TMemToGen)) {
+    if (src->isA(TMemToCell)) {
       ret = ret | pointee(src);
     }
   }
   return ret;
 }
 
-// Return an AliasClass containing all locations pointed to by any MemToGen
+// Return an AliasClass containing all locations pointed to by any MemToCell
 // sources to an instruction.
 AliasClass all_pointees(const IRInstruction& inst) {
   return all_pointees(inst.srcs());
@@ -526,7 +520,7 @@ MemEffects minstr_with_tvref(const IRInstruction& inst) {
 
   auto const srcs = inst.srcs();
   if (inst.is(ElemDX, PropDX)) {
-    assertx(inst.src(inst.numSrcs() - 2)->isA(TMemToMISGen));
+    assertx(inst.src(inst.numSrcs() - 2)->isA(TMemToMISCell));
     assertx(inst.src(inst.numSrcs() - 1)->isA(TMIPropSPtr | TNullptr));
     loads |= all_pointees(srcs.subpiece(0, srcs.size() - 2));
 
@@ -541,7 +535,7 @@ MemEffects minstr_with_tvref(const IRInstruction& inst) {
       stores |= AMIStatePropS;
     }
   } else {
-    assertx(srcs.back()->isA(TMemToMISGen));
+    assertx(srcs.back()->isA(TMemToMISCell));
     loads |= all_pointees(srcs.subpiece(0, srcs.size() - 1));
     kills = AMIStatePropS;
   }
@@ -912,7 +906,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const stk = [&] () -> AliasClass {
         AliasClass ret = AEmpty;
         for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
-          if (inst.src(i)->type() <= TPtrToGen) {
+          if (inst.src(i)->type() <= TPtrToCell) {
             auto const cls = pointee(inst.src(i));
             if (cls.maybe(AStackAny)) {
               ret = ret | cls;
@@ -1151,14 +1145,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case FinishMemberOp:
     return may_load_store_kill(AEmpty, AEmpty, AMIStateAny);
 
-  case BoxPtr:
-    {
-      auto const mem = pointee(inst.src(0));
-      return may_load_store(mem, mem);
-    }
-  case UnboxPtr:
-    return may_load_store(pointee(inst.src(0)), AEmpty);
-
   case IsNTypeMem:
   case IsTypeMem:
   case CheckTypeMem:
@@ -1194,13 +1180,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   //////////////////////////////////////////////////////////////////////
   // Object/Ref loads/stores
-
-  case CheckRefInner:
-    return may_load_store(ARef { inst.src(0) }, AEmpty);
-  case LdRef:
-    return PureLoad { ARef { inst.src(0) } };
-  case StRef:
-    return PureStore { ARef { inst.src(0) }, inst.src(1), inst.src(0) };
 
   case InitObjProps:
     return may_load_store(AEmpty, APropAny);
@@ -1448,7 +1427,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AElemAny, AEmpty);
 
   case ArrayIdx:
-    return may_load_store(AElemAny | ARefAny, AEmpty);
+    return may_load_store(AElemAny, AEmpty);
 
   case SameArr:
   case NSameArr:
@@ -1615,7 +1594,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvFuncToArr:
   case ConvIntToArr:
   case ConvIntToStr:
-  case Box:  // conditional allocation
     return IrrelevantEffects {};
 
   case AllocObj:
@@ -1712,9 +1690,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GteInt:
   case GtBool:
   case GtInt:
-  case HintLocInner:
-  case HintStkInner:
-  case HintMBaseInner:
   case Jmp:
   case JmpNZero:
   case JmpZero:
@@ -1993,9 +1968,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       auto const src = inst.src(0);
       // It could decref the inner ref.
-      auto affected = src->isA(TBoxedCell) ? ARef { src } :
-                      src->type().maybe(TBoxedCell) ? ARefAny : AEmpty;
-      if (src->type().maybe(TKeyset | TBoxedKeyset)) {
+      auto affected = AEmpty;
+      if (src->type().maybe(TKeyset)) {
         // TKeyset can't re-enter, but it will decref any contained
         // strings. Without this, an incref of a string contained in
         // a Keyset could be sunk past the decref of the Keyset.
@@ -2004,9 +1978,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       // Need to add affected to the `store' set. See comments about
       // `GeneralEffects' in memory-effects.h.
       auto const effect = may_load_store(affected, affected);
-      if (src->type().maybe(TArr | TVec | TDict | TObj | TRes |
-                            TBoxedArr | TBoxedVec | TBoxedDict |
-                            TBoxedObj | TBoxedRes)) {
+      if (src->type().maybe(TArr | TVec | TDict | TObj | TRes)) {
         // Could re-enter to run a destructor. Keysets are exempt because they
         // can only contain strings or integers.
         return may_reenter(inst, effect);
@@ -2097,13 +2069,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DictAddElemStrKey:  // decrefs value
   case ArrayGet:       // kVPackedKind warnings
   case ArraySet:       // kVPackedKind warnings
-  case ArraySetRef:    // kVPackedKind warnings
   case DictGet:
   case KeysetGet:
   case VecSet:
-  case VecSetRef:
   case DictSet:
-  case DictSetRef:
   case ElemArrayX:
   case ElemDictX:
   case ElemKeysetX:

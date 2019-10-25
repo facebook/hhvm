@@ -165,7 +165,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
  */
 template<class Finish>
 SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
-  if (tmp->type() <= TGen && tmp->type().isKnownDataType()) {
+  if (tmp->type() <= TCell && tmp->type().isKnownDataType()) {
     return tmp;
   }
 
@@ -188,7 +188,7 @@ SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
 
   Type typeToCheck = relaxToGuardable(reducedType);
 
-  if (typeToCheck == TGen) return tmp;
+  if (typeToCheck == TCell) return tmp;
 
   SSATmp* ptmp{nullptr};
 

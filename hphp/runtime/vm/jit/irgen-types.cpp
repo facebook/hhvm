@@ -170,8 +170,6 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
  * The lambda parameters are as follows:
  *
  * - GetVal:    Return the SSATmp of the value to test
- * - PredInner: When the value is a BoxedInitCell, return the predicted inner
- *              type of the value.
  * - FuncToStr: Emit code to deal with any func to string conversions.
  * - ClsMethToVec: Emit code to deal with any ClsMeth to array conversions
  * - Fail:      Emit code to deal with the type check failing.
@@ -188,7 +186,6 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
  * runtime class of the object the property belongs to.
  */
 template <typename GetVal,
-          typename PredInner,
           typename FuncToStr,
           typename ClassToStr,
           typename ClsMethToVec,
@@ -203,7 +200,6 @@ void verifyTypeImpl(IRGS& env,
                     bool onlyCheckNullability,
                     SSATmp* propCls,
                     GetVal getVal,
-                    PredInner predInner,
                     FuncToStr funcToStr,
                     ClassToStr classToStr,
                     ClsMethToVec clsMethToVec,
@@ -219,15 +215,9 @@ void verifyTypeImpl(IRGS& env,
   }
 
   auto val = getVal();
-  assertx(val->type() <= TCell || val->type() <= TBoxedCell);
+  assertx(val->type() <= TCell);
 
-  auto const valType = [&]() -> Type {
-    if (val->type() <= TCell) return val->type();
-    auto const pred = predInner(val);
-    gen(env, CheckRefInner, pred, makeExit(env), val);
-    val = gen(env, LdRef, pred, val);
-    return pred;
-  }();
+  auto const valType = val->type();
 
   if (!valType.isKnownDataType()) return giveup();
 
@@ -1286,9 +1276,6 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
     [&] { // Get value to test
       return topC(env, BCSPRelOffset { ind });
     },
-    [] (SSATmp*) -> Type { // Get boxed inner value
-      PUNT(VerifyReturnTypeBoxed);
-    },
     [&] (SSATmp* val) { // func to string conversions
       auto const str = gen(env, LdFuncName, val);
       auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
@@ -1383,9 +1370,6 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
     [&] { // Get value to test
       auto const ldPMExit = makePseudoMainExit(env);
       return ldLoc(env, id, ldPMExit, DataTypeSpecific);
-    },
-    [&] (SSATmp* val) { // Get boxed inner type
-      return env.irb->predictedLocalInnerType(id);
     },
     [&] (SSATmp* val) { // func to string conversions
       auto const str = gen(env, LdFuncName, val);
@@ -1484,10 +1468,6 @@ void verifyPropType(IRGS& env,
     [&] { // Get value to check
       env.irb->constrainValue(val, DataTypeSpecific);
       return val;
-    },
-    [&] (SSATmp*) -> Type { // Get boxed inner type
-      // We've already asserted that the value is a Cell.
-      always_assert(false);
     },
     [&] (SSATmp*) { return false; }, // No func to string automatic conversions
     [&] (SSATmp*) { return false; }, // No class to string automatic conversions
@@ -1631,9 +1611,8 @@ void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {
 }
 
 void emitIssetL(IRGS& env, int32_t id) {
-  auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
+  auto const ld = ldLoc(env, id, ldPMExit, DataTypeSpecific);
   if (ld->isA(TClsMeth)) {
     PUNT(IssetL_is_ClsMeth);
   }
@@ -1641,9 +1620,8 @@ void emitIssetL(IRGS& env, int32_t id) {
 }
 
 void emitEmptyL(IRGS& env, int32_t id) {
-  auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const ld = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
+  auto const ld = ldLoc(env, id, ldPMExit, DataTypeSpecific);
   if (ld->isA(TClsMeth)) {
     PUNT(EmptyL_is_ClsMeth);
   }
@@ -1689,10 +1667,8 @@ void emitIsTypeC(IRGS& env, IsTypeOp subop) {
 }
 
 void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
-  auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const val =
-    ldLocInnerWarn(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
+  auto const val = ldLocWarn(env, id, ldPMExit, DataTypeSpecific);
 
   if (subop == IsTypeOp::VArray || subop == IsTypeOp::DArray) {
     push(env, isDVArrayImpl(env, val, subop));

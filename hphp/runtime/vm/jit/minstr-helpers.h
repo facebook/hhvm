@@ -695,7 +695,7 @@ CGETELEM_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template<KeyType keyType, bool setRef>
+template<KeyType keyType>
 auto arraySetImpl(ArrayData* a, key_type<keyType> key,
                   Cell value, TypedValue* ref) {
   static_assert(keyType != KeyType::Any,
@@ -703,7 +703,7 @@ auto arraySetImpl(ArrayData* a, key_type<keyType> key,
   assertx(cellIsPlausible(value));
   assertx(a->isPHPArray());
   auto const ret = a->set(key, value);
-  return arrayRefShuffle<setRef, KindOfArray>(a, ret, ref);
+  return arrayRefShuffle<false, KindOfArray>(a, ret, ref);
 }
 
 #define ARRAYSET_HELPER_TABLE(m)  \
@@ -713,32 +713,19 @@ auto arraySetImpl(ArrayData* a, key_type<keyType> key,
 
 #define X(nm, keyType)                                                  \
 inline ArrayData* nm(ArrayData* a, key_type<keyType> key, Cell value) { \
-  return arraySetImpl<keyType, false>(a, key, value, nullptr);          \
+  return arraySetImpl<keyType>(a, key, value, nullptr);          \
 }
 ARRAYSET_HELPER_TABLE(X)
 #undef X
 
-#define ARRAYSET_REF_HELPER_TABLE(m)  \
-  /* name         keyType */          \
-  m(arraySetSR,   KeyType::Str)       \
-  m(arraySetIR,   KeyType::Int)       \
-
-#define X(nm, keyType)                                      \
-inline void nm(ArrayData* a, key_type<keyType> key,         \
-               Cell value, RefData* ref) {                  \
-  arraySetImpl<keyType, true>(a, key, value, ref->cell());  \
-}
-ARRAYSET_REF_HELPER_TABLE(X)
-#undef X
-
 //////////////////////////////////////////////////////////////////////
 
-template<bool setRef, bool copyProv>
+template<bool copyProv>
 auto vecSetImpl(ArrayData* a, int64_t key, Cell value, TypedValue* ref) {
   assertx(cellIsPlausible(value));
   assertx(a->isVecArray());
   ArrayData* ret = PackedArray::SetIntVec(a, key, value);
-  return arrayRefShuffle<setRef, KindOfVec>(a, ret, ref);
+  return arrayRefShuffle<false, KindOfVec>(a, ret, ref);
 }
 
 #define VECSET_HELPER_TABLE(m) \
@@ -748,21 +735,9 @@ auto vecSetImpl(ArrayData* a, int64_t key, Cell value, TypedValue* ref) {
 
 #define X(nm, copyProv)                                     \
 inline ArrayData* nm(ArrayData* a, int64_t key, Cell val) { \
-  return vecSetImpl<false, copyProv>(a, key, val, nullptr); \
+  return vecSetImpl<copyProv>(a, key, val, nullptr); \
 }
 VECSET_HELPER_TABLE(X)
-#undef X
-
-#define VECSET_REF_HELPER_TABLE(m) \
-  /* name      copyProv*/       \
-  m(vecSetIRN, false) \
-  m(vecSetIRP, true)
-
-#define X(nm, copyProv)                                             \
-inline void nm(ArrayData* a, int64_t key, Cell val, RefData* ref) { \
-  vecSetImpl<true, copyProv>(a, key, val, ref->cell());             \
-}
-VECSET_REF_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
@@ -774,13 +749,13 @@ inline ArrayData* dictSetImplPre(ArrayData* a, StringData* s, Cell val) {
   return MixedArray::SetStrDict(a, s, val);
 }
 
-template<KeyType keyType, bool setRef, bool copyProv>
+template<KeyType keyType, bool copyProv>
 auto
 dictSetImpl(ArrayData* a, key_type<keyType> key, Cell value, TypedValue* ref) {
   assertx(cellIsPlausible(value));
   assertx(a->isDict());
   auto ret = dictSetImplPre(a, key, value);
-  return arrayRefShuffle<setRef, KindOfDict>(a, ret, ref);
+  return arrayRefShuffle<false, KindOfDict>(a, ret, ref);
 }
 
 #define DICTSET_HELPER_TABLE(m) \
@@ -792,24 +767,9 @@ dictSetImpl(ArrayData* a, key_type<keyType> key, Cell value, TypedValue* ref) {
 
 #define X(nm, keyType, copyProv)                                      \
 inline ArrayData* nm(ArrayData* a, key_type<keyType> key, Cell val) { \
-  return dictSetImpl<keyType, false, copyProv>(a, key, val, nullptr); \
+  return dictSetImpl<keyType, copyProv>(a, key, val, nullptr); \
 }
 DICTSET_HELPER_TABLE(X)
-#undef X
-
-#define DICTSET_REF_HELPER_TABLE(m) \
-  /* name       keyType       copyProv */ \
-  m(dictSetIRN,  KeyType::Int, false)     \
-  m(dictSetSRN,  KeyType::Str, false)     \
-  m(dictSetIRP,  KeyType::Int, true)      \
-  m(dictSetSRP,  KeyType::Str, true)
-
-#define X(nm, keyType, copyProv)                                        \
-inline                                                                  \
-void nm(ArrayData* a, key_type<keyType> key, Cell val, RefData* ref) {  \
-  dictSetImpl<keyType, true, copyProv>(a, key, val, ref->cell());       \
-}
-DICTSET_REF_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////

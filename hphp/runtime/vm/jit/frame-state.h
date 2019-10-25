@@ -55,7 +55,7 @@ struct LocationState {
                 false,
                 "invalid LTag for LocationState");
 
-  static constexpr Type default_type() { return TGen; }
+  static constexpr Type default_type() { return TCell; }
 
   template<LTag other>
   LocationState<tag>& operator=(const LocationState<other>& o) {
@@ -120,7 +120,7 @@ using MBaseState = LocationState<LTag::MBase>;
 struct MBRState {
   SSATmp* ptr{nullptr};
   AliasClass pointee{AEmpty}; // defaults to "invalid", not "Top"
-  Type ptrType{TLvalToGen};
+  Type ptrType{TLvalToCell};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -414,7 +414,6 @@ private:
   void setType(Location l, Type type);
   void widenType(Location l, Type type);
   void refineType(Location l, Type type, TypeSource typeSrc);
-  void setBoxedPrediction(Location l, Type type);
   void refinePredictedTmpType(SSATmp*, Type);
 
   template<LTag tag>
@@ -432,9 +431,7 @@ private:
    * Local state update helpers.
    */
   void setLocalPredictedType(uint32_t id, Type type);
-  void updateLocalRefPredictions(SSATmp*, SSATmp*);
   void killLocalsForCall(bool);
-  void dropLocalRefsInnerTypes();
   void clearLocals();
 
 private:

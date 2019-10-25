@@ -228,7 +228,7 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
   for (auto const& pred : typePredictions) {
     auto type = pred.type;
     auto loc  = pred.location;
-    assertx(type <= TGen);
+    assertx(type <= TCell);
     irgen::predictType(irgs, loc, type);
   }
 
@@ -236,7 +236,7 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
   for (auto const& preCond : typePreConditions) {
     auto type = preCond.type;
     auto loc  = preCond.location;
-    assertx(type <= TGen);
+    assertx(type <= TCell);
     irgen::checkType(irgs, loc, type, bcOff, checkOuterTypeOnly);
   }
 

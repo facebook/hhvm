@@ -57,7 +57,7 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
   auto const ctx = curClass(env);
   auto const& prop = cls->staticProperties()[slot];
 
-  auto knownType = TGen;
+  auto knownType = TCell;
   if (RuntimeOption::EvalCheckPropTypeHints >= 3) {
     knownType = typeFromPropTC(prop.typeConstraint, cls, ctx, true);
     if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
@@ -172,8 +172,7 @@ void emitCGetS(IRGS& env) {
 
   auto const propAddr  =
     ldClsPropAddr(env, ssaCls, ssaPropName, true, false, false).propPtr;
-  auto const unboxed   = gen(env, UnboxPtr, propAddr);
-  auto const ldMem     = gen(env, LdMem, unboxed->type().deref(), unboxed);
+  auto const ldMem     = gen(env, LdMem, propAddr->type().deref(), propAddr);
 
   discard(env);
   destroyName(env, ssaPropName);
@@ -205,11 +204,9 @@ void emitSetS(IRGS& env) {
     gen(env, VerifyProp, ssaCls, slot, value, cns(env, true));
   }
 
-  auto const ptr = gen(env, UnboxPtr, lookup.propPtr);
-
   discard(env);
   destroyName(env, ssaPropName);
-  bindMem(env, ptr, value);
+  bindMem(env, lookup.propPtr, value);
 }
 
 void emitIssetS(IRGS& env) {
@@ -227,7 +224,7 @@ void emitIssetS(IRGS& env) {
       return gen(env, CheckNonNull, taken, propAddr);
     },
     [&] (SSATmp* ptr) { // Next: property or global exists
-      return gen(env, IsNTypeMem, TNull, gen(env, UnboxPtr, ptr));
+      return gen(env, IsNTypeMem, TNull, ptr);
     },
     [&] { // Taken: LdClsPropAddr* returned Nullptr because it isn't defined
       return cns(env, false);
@@ -254,8 +251,7 @@ void emitEmptyS(IRGS& env) {
       return gen(env, CheckNonNull, taken, propAddr);
     },
     [&] (SSATmp* ptr) {
-      auto const unbox = gen(env, UnboxPtr, ptr);
-      auto const val   = gen(env, LdMem, unbox->type().deref(), unbox);
+      auto const val = gen(env, LdMem, ptr->type().deref(), ptr);
       return gen(env, XorBool, gen(env, ConvCellToBool, val), cns(env, true));
     },
     [&] { // Taken: LdClsPropAddr* returned Nullptr because it isn't defined
@@ -276,8 +272,8 @@ void emitIncDecS(IRGS& env, IncDecOp subop) {
 
   auto const lookup  =
     ldClsPropAddr(env, ssaCls, ssaPropName, true, false, true);
-  auto const unboxed = gen(env, UnboxPtr, lookup.propPtr);
-  auto const oldVal  = gen(env, LdMem, unboxed->type().deref(), unboxed);
+  auto const oldVal =
+    gen(env, LdMem, lookup.propPtr->type().deref(), lookup.propPtr);
 
   auto const result = incDec(env, subop, oldVal);
   if (!result) PUNT(IncDecS);
@@ -305,7 +301,7 @@ void emitIncDecS(IRGS& env, IncDecOp subop) {
   // Update marker to ensure newly-pushed value isn't clobbered by DecRef.
   updateMarker(env);
 
-  gen(env, StMem, unboxed, result);
+  gen(env, StMem, lookup.propPtr, result);
   gen(env, IncRef, result);
   decRef(env, oldVal);
 }
@@ -320,7 +316,7 @@ void emitCGetG(IRGS& env) {
     env,
     [&] (Block* taken) { return gen(env, LdGblAddr, taken, name); },
     [&] (SSATmp* ptr) {
-      auto tmp = gen(env, LdMem, TCell, gen(env, UnboxPtr, ptr));
+      auto tmp = gen(env, LdMem, TCell, ptr);
       gen(env, IncRef, tmp);
       return tmp;
     },
@@ -337,9 +333,9 @@ void emitSetG(IRGS& env) {
   auto const name = topC(env, BCSPRelOffset{1});
   if (!name->isA(TStr)) PUNT(SetG-NameNotStr);
   auto const value   = popC(env, DataTypeCountness);
-  auto const unboxed = gen(env, UnboxPtr, gen(env, LdGblAddrDef, name));
+  auto const ptr = gen(env, LdGblAddrDef, name);
   destroyName(env, name);
-  bindMem(env, unboxed, value);
+  bindMem(env, ptr, value);
 }
 
 void emitIssetG(IRGS& env) {
@@ -352,7 +348,7 @@ void emitIssetG(IRGS& env) {
       return gen(env, LdGblAddr, taken, name);
     },
     [&] (SSATmp* ptr) { // Next: global exists
-      return gen(env, IsNTypeMem, TNull, gen(env, UnboxPtr, ptr));
+      return gen(env, IsNTypeMem, TNull, ptr);
     },
     [&] { // Taken: global doesn't exist
       return cns(env, false);
@@ -372,8 +368,7 @@ void emitEmptyG(IRGS& env) {
       return gen(env, LdGblAddr, taken, name);
     },
     [&] (SSATmp* ptr) { // Next: global exists
-      auto const unboxed = gen(env, UnboxPtr, ptr);
-      auto const val     = gen(env, LdMem, TCell, unboxed);
+      auto const val = gen(env, LdMem, TCell, ptr);
       return gen(env, XorBool, gen(env, ConvCellToBool, val), cns(env, true));
     },
     [&] { // Taken: global doesn't exist

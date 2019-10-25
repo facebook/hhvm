@@ -282,7 +282,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     // req::ptr types (String, Array, Object) need adjusting to point to
     // &ptr->m_data.
     if (TVOFF(m_data) && !pi.nativeArg && isReqPtrRef(pi.builtinType)) {
-      assertx(inst->src(srcNum)->type() <= TPtrToGen);
+      assertx(inst->src(srcNum)->type() <= TPtrToCell);
       args.addr(srcLoc(env, inst, srcNum).reg(), TVOFF(m_data));
     } else if (pi.nativeArg && !pi.builtinType) {
       // This condition indicates a MixedTV (i.e., TypedValue-by-value) arg.
@@ -366,7 +366,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     return end(v);
   }
 
-  if (returnType <= TCell || returnType <= TBoxedCell) {
+  if (returnType <= TCell) {
     // The return type is Variant; fold KindOfUninit to KindOfNull.
     assertx(isBuiltinByRef(funcReturnType) && !isReqPtrRef(funcReturnType));
     static_assert(KindOfUninit == static_cast<DataType>(0),

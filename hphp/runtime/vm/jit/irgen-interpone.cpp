@@ -68,17 +68,17 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
   switch (op) {
   case SetOpOp::PlusEqual:
   case SetOpOp::MinusEqual:
-  case SetOpOp::MulEqual:    return arithOpResult(locType.unbox(), valType);
+  case SetOpOp::MulEqual:    return arithOpResult(locType, valType);
   case SetOpOp::PlusEqualO:
   case SetOpOp::MinusEqualO:
-  case SetOpOp::MulEqualO:   return arithOpOverResult(locType.unbox(), valType);
+  case SetOpOp::MulEqualO:   return arithOpOverResult(locType, valType);
   case SetOpOp::ConcatEqual: return TStr;
   case SetOpOp::PowEqual:
   case SetOpOp::DivEqual:
   case SetOpOp::ModEqual:    return TUncountedInit;
   case SetOpOp::AndEqual:
   case SetOpOp::OrEqual:
-  case SetOpOp::XorEqual:    return bitOpResult(locType.unbox(), valType);
+  case SetOpOp::XorEqual:    return bitOpResult(locType, valType);
   case SetOpOp::SlEqual:
   case SetOpOp::SrEqual:     return TInt;
   }
@@ -141,7 +141,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutArithO:
       return arithOpOverResult(topType(env, BCSPRelOffset{0}),
                                topType(env, BCSPRelOffset{1}));
-    case OutUnknown:     return TGen;
+    case OutUnknown:     return TCell;
 
     case OutBitOp:
       return bitOpResult(topType(env, BCSPRelOffset{0}),
@@ -151,27 +151,20 @@ folly::Optional<Type> interpOutputType(IRGS& env,
                           topType(env, BCSPRelOffset{0}),
                           SetOpOp(getImm(sk.pc(), 1).u_OA));
     case OutIncDec: {
-      auto ty = localType().unbox();
+      auto ty = localType();
       return ty <= TDbl ? ty : TCell;
     }
     case OutNone:       return folly::none;
 
     case OutCInput: {
-      auto ttype = topType(env, BCSPRelOffset{0});
-      if (ttype <= TCell) return ttype;
-      // All instructions that are OutCInput or OutCInputL cannot push uninit or
-      // a ref, so only specific inner types need to be checked.
-      if (ttype.unbox() < TInitCell) {
-        checkTypeType = ttype.unbox();
-      }
-      return TCell;
+      return topType(env, BCSPRelOffset{0});
     }
 
     case OutCInputL: {
       auto ltype = localType();
       if (ltype <= TCell) return ltype;
-      if (ltype.unbox() < TInitCell) {
-        checkTypeType = ltype.unbox();
+      if (ltype < TInitCell) {
+        checkTypeType = ltype;
       }
       return TCell;
     }
@@ -204,11 +197,6 @@ interpOutputLocals(IRGS& env,
     assertx(id < kMaxHhbcImms);
     setLocType(getImm(sk.pc(), id).u_LA, t);
   };
-  auto handleBoxiness = [&] (Type testTy, Type useTy) {
-    return testTy <= TBoxedCell ? TBoxedInitCell :
-           testTy.maybe(TBoxedCell) ? TGen :
-           useTy;
-  };
 
   auto const mDefine = static_cast<unsigned char>(MOpMode::Define);
 
@@ -216,11 +204,9 @@ interpOutputLocals(IRGS& env,
     case OpSetOpL:
     case OpIncDecL: {
       assertx(pushedType.hasValue());
-      auto locType = env.irb->local(localInputId(sk), DataTypeSpecific).type;
-      assertx(locType < TGen || curFunc(env)->isPseudoMain());
 
       auto stackType = pushedType.value();
-      setImmLocType(0, handleBoxiness(locType, stackType));
+      setImmLocType(0, stackType);
       break;
     }
 
@@ -230,10 +216,9 @@ interpOutputLocals(IRGS& env,
 
     case OpSetL:
     case OpPopL: {
-      auto locType = env.irb->local(localInputId(sk), DataTypeSpecific).type;
       auto stackType = topType(env, BCSPRelOffset{0});
       // [Set,Pop]L preserves reffiness of a local.
-      setImmLocType(0, handleBoxiness(locType, stackType));
+      setImmLocType(0, stackType);
       break;
     }
 
@@ -265,7 +250,7 @@ interpOutputLocals(IRGS& env,
       /* fallthrough */
     case OpIterInit:
     case OpIterNext:
-      setImmLocType(2, TGen);
+      setImmLocType(2, TCell);
       break;
 
     case OpLIterInitK:
@@ -274,13 +259,12 @@ interpOutputLocals(IRGS& env,
       /* fallthrough */
     case OpLIterInit:
     case OpLIterNext:
-      setImmLocType(3, TGen);
+      setImmLocType(3, TCell);
       break;
 
     case OpVerifyParamTypeTS:
     case OpVerifyParamType: {
-      auto locType = env.irb->local(localInputId(sk), DataTypeSpecific).type;
-      setImmLocType(0, handleBoxiness(locType, TCell));
+      setImmLocType(0, TCell);
       break;
     }
 

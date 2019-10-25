@@ -263,7 +263,6 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   ret |= may_alias_part(*this, acls, acls.prop(), APropAny, all_props);
   ret |= may_alias_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
   ret |= may_alias_part(*this, acls, acls.elemS(), AElemSAny, all_elemSs);
-  ret |= may_alias_part(*this, acls, acls.ref(), ARefAny, all_ref);
   ret |= may_alias_part(*this, acls, acls.iterBase(),
                         AIterBaseAny, all_iterBase);
   ret |= may_alias_part(*this, acls, acls.iterType(),
@@ -318,7 +317,6 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
   ret |= expand_part(*this, acls, acls.prop(), APropAny, all_props);
   ret |= expand_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
   ret |= expand_part(*this, acls, acls.elemS(), AElemSAny, all_elemSs);
-  ret |= expand_part(*this, acls, acls.ref(), ARefAny, all_ref);
   ret |= expand_part(*this, acls, acls.iterBase(), AIterBaseAny, all_iterBase);
   ret |= expand_part(*this, acls, acls.iterType(), AIterTypeAny, all_iterType);
   ret |= expand_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
@@ -370,13 +368,6 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
     if (acls.is_rds()) {
       add_class(ret, acls);
-      return;
-    }
-
-    if (acls.is_ref()) {
-      if (auto const index = add_class(ret, acls)) {
-        ret.all_ref.set(*index);
-      }
       return;
     }
 
@@ -512,12 +503,6 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (acls.is_ref()) {
-      meta.conflicts = ret.all_ref;
-      meta.conflicts.reset(meta.index);
-      return;
-    }
-
     if (acls.is_rds()) {
       ret.all_rds.set(meta.index);
       return;
@@ -622,7 +607,6 @@ std::string show(const AliasAnalysis& ainfo) {
       "all props",          show(ainfo.all_props),
       "all elemIs",         show(ainfo.all_elemIs),
       "all elemSs",         show(ainfo.all_elemSs),
-      "all refs",           show(ainfo.all_ref),
       "all iterBase",       show(ainfo.all_iterBase),
       "all iterType",       show(ainfo.all_iterType),
       "all iterPos",        show(ainfo.all_iterPos),

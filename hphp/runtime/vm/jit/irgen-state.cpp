@@ -96,7 +96,7 @@ std::string show(const IRGS& irgs) {
     auto const stkVal = irgs.irb->stack(spRel, DataTypeGeneric).value;
 
     std::string elemStr;
-    if (stkTy == TGen) {
+    if (stkTy == TCell) {
       elemStr = "unknown";
     } else if (stkVal) {
       elemStr = stkVal->inst()->toString();
@@ -127,13 +127,6 @@ std::string show(const IRGS& irgs) {
                           : localTy.toString();
     auto const predicted = irgs.irb->fs().local(i).predictedType;
     if (predicted < localTy) str += folly::sformat(" (predict: {})", predicted);
-
-    if (localTy <= TBoxedCell) {
-      auto const pred = irgs.irb->predictedLocalInnerType(i);
-      if (pred != TBottom) {
-        str += folly::sformat(" (predict inner: {})", pred.toString());
-      }
-    }
 
     out << folly::format("| {:<100} |\n",
                          folly::format("{:>2}: {}", i, str));

@@ -435,12 +435,11 @@ Flags handle_general_effects(Local& env,
   case CheckLoc:
   case CheckStk:
   case CheckMBase:
-  case CheckRefInner:
     if (auto flags = handleCheck(inst.typeParam())) return *flags;
     break;
 
   case CheckInitMem:
-    if (auto flags = handleCheck(TInitGen)) return *flags;
+    if (auto flags = handleCheck(TInitCell)) return *flags;
     break;
 
   case CheckIter: {
@@ -481,16 +480,6 @@ Flags handle_general_effects(Local& env,
     env.state.initRDS.insert(handle);
     break;
   }
-
-  case UnboxPtr:
-    if (auto const meta = env.global.ainfo.find(canonicalize(m.loads))) {
-      if (!env.state.avail[meta->index]) break;
-      auto const tloc = &env.state.tracked[meta->index];
-      if (!tloc->knownType.maybe(TBoxedCell)) {
-        return FReducible{inst.src(0), inst.dst()->type(), meta->index};
-      }
-    }
-    break;
 
   case CheckPackedArrayDataBounds: {
     if (!(inst.src(0)->type() <= (TVec|Type::Array(ArrayData::kPackedKind)))) {
@@ -841,7 +830,6 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
   case CheckLoc:
   case CheckStk:
   case CheckMBase:
-  case CheckRefInner:
     reduce_to(CheckType, inst.typeParam());
     break;
 
@@ -852,10 +840,6 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
   case AssertLoc:
   case AssertStk:
     reduce_to(AssertType, flags.knownType);
-    break;
-
-  case UnboxPtr:
-    env.unit.replace(&inst, AssertType, flags.knownType, resolved);
     break;
 
   default: always_assert(false);
@@ -901,7 +885,7 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
              redundantFlags.knownType.toString(),
              resolved->toString());
 
-      if (resolved->type().subtypeOfAny(TGen, TCls)) {
+      if (resolved->type() <= TCell) {
         env.unit.replace(&inst, AssertType, redundantFlags.knownType, resolved);
       } else {
         env.unit.replace(&inst, Mov, resolved);

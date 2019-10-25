@@ -119,13 +119,13 @@ LocationTypeWeights findLocationTypes(const BlockDataVec& blockData) {
  * We consider relaxation profitable if there's not a single dominating type
  * that accounts for RuntimeOption::EvalJitPGORelaxPercent or more of the time
  * during profiling.  Besides that, if `guardCategory' is DataTypeCountness, we
- * also consider relaxing all the way to Gen, in which case `guardCategory' is
+ * also consider relaxing all the way to Cell, in which case `guardCategory' is
  * updated to DataTypeGeneric.
  */
 bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
                        Type                               guardType,
                        DataTypeCategory&                  guardCategory) {
-  assertx(guardType <= TGen);
+  assertx(guardType <= TCell);
   auto relaxedType = relaxType(guardType, guardCategory);
 
   int64_t totalWgt   = 0; // sum of all the block weights
@@ -134,7 +134,7 @@ bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
   for (auto& typeWgt : typeWeights) {
     auto type = typeWgt.first;
     auto weight = typeWgt.second;
-    assertx(type <= TGen);
+    assertx(type <= TCell);
     const bool fitsConstraint = guardCategory == DataTypeSpecialized
       ? type.isSpecialized()
       : typeFitsConstraint(type, guardCategory);
@@ -144,13 +144,13 @@ bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
     if (relaxType(type, guardCategory) == relaxedType) relaxWgt += weight;
   }
 
-  // Consider relaxing Countness to Gen, which we do if the sum of the weights
+  // Consider relaxing Countness to Cell, which we do if the sum of the weights
   // of all the blocks that would pass the relaxed guard would be less than a
   // certain threshold.  We use different thresholds for counted versus
-  // uncounted types, because incref/decref are much more expensive for Gen than
-  // for uncounted (where it's a no-op).  For counted types, the difference
+  // uncounted types, because incref/decref are much more expensive for Cell
+  // than for uncounted (where it's a no-op).  For counted types, the difference
   // between generic and specialized incref/decrefs is much smaller, so we're
-  // willing to relax to Gen more often for counted types.
+  // willing to relax to Cell more often for counted types.
   bool profitable = false;
   auto newCategory = guardCategory;
   if (guardCategory == DataTypeCountness) {
@@ -163,7 +163,7 @@ bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
     }
   }
 
-  // If we didn't relax to Gen, consider relaxing to the input guardCategory.
+  // If we didn't relax to Cell, consider relaxing to the input guardCategory.
   if (!profitable) {
     if (noRelaxWgt * 100 < relaxWgt * RuntimeOption::EvalJitPGORelaxPercent) {
       profitable = true;
@@ -202,7 +202,7 @@ void relaxGuards(BlockDataVec& blockData) {
       }
 
       auto oldType = guard.type;
-      always_assert_flog(oldType <= TGen, "oldType = {}", oldType);
+      always_assert_flog(oldType <= TCell, "oldType = {}", oldType);
       guard.type = relaxType(guard.type, guard.category);
       if (oldType != guard.type) {
         bd.relaxed = true;
@@ -411,7 +411,7 @@ void updateRegion(RegionDesc&         region,
     // Actually update the type guards.
     newBlock->clearPreConditions();
     for (auto& guard : bd.guards) {
-      if (guard.type < TGen) {
+      if (guard.type < TCell) {
         newBlock->addPreCondition(guard);
       }
     }
@@ -566,14 +566,14 @@ void optimizeGuards(RegionDesc& region, bool simple) {
     auto& oldPreConds = block->typePreConditions();
 
     for (auto& preCond : oldPreConds) {
-      assertx(preCond.type <= TGen);
+      assertx(preCond.type <= TCell);
       auto category = preCond.category;
       if (simple && category > DataTypeGeneric && category < DataTypeSpecific) {
         category = DataTypeSpecific;
       }
       auto newType = relaxType(preCond.type, category);
 
-      if (newType != TGen) {
+      if (newType != TCell) {
         newPreConds.push_back({preCond.location, newType, preCond.category});
       }
 

@@ -63,13 +63,7 @@ constexpr Type::bits_t Type::kTop;
 #undef IRTM
 #undef IRTX
 
-constexpr Type::bits_t Type::kAnyArr;
-constexpr Type::bits_t Type::kAnyVec;
-constexpr Type::bits_t Type::kAnyDict;
-constexpr Type::bits_t Type::kAnyKeyset;
-constexpr Type::bits_t Type::kAnyArrLike;
 constexpr Type::bits_t Type::kArrSpecBits;
-constexpr Type::bits_t Type::kAnyObj;
 constexpr Type::bits_t Type::kClsSpecBits;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -170,13 +164,13 @@ std::string Type::constValString() const {
   if (*this <= TRDSHandle) {
     return folly::format("rds::Handle({:#x})", m_rdsHandleVal).str();
   }
-  if (*this <= TPtrToGen) {
+  if (*this <= TPtrToCell) {
     return folly::sformat("TV: {}", m_ptrVal);
   }
-  if (*this <= TLvalToGen) {
+  if (*this <= TLvalToCell) {
     return folly::sformat("Lval: {}", m_ptrVal);
   }
-  if (*this <= TMemToGen) {
+  if (*this <= TMemToCell) {
     return folly::sformat("Mem: {}", m_ptrVal);
   }
 
@@ -239,10 +233,6 @@ std::string Type::toString() const {
     );
   }
 
-  if (*this <= TBoxedCell) {
-    return folly::to<std::string>("Boxed", inner().toString());
-  }
-
   if (m_hasConstVal) {
     if (*this <= TCls) {
       return folly::sformat("Cls={}", m_clsVal->name()->data());
@@ -256,24 +246,24 @@ std::string Type::toString() const {
 
   auto t = *this;
 
-  if (t.maybe(TPtrToGen)) {
+  if (t.maybe(TPtrToCell)) {
     assertx(!t.m_hasConstVal);
     auto ret = "PtrTo" +
       show(t.ptrKind() & Ptr::Ptr) +
-      (t & TPtrToGen).deref().toString();
+      (t & TPtrToCell).deref().toString();
 
-    t -= TPtrToGen;
+    t -= TPtrToCell;
     if (t != TBottom) ret += "|" + t.toString();
     return ret;
   }
 
-  if (t.maybe(TLvalToGen)) {
+  if (t.maybe(TLvalToCell)) {
     assertx(!t.m_hasConstVal);
     auto ret = "LvalTo" +
       show(t.ptrKind() & Ptr::Ptr) +
-      (t & TLvalToGen).deref().toString();
+      (t & TLvalToCell).deref().toString();
 
-    t -= TLvalToGen;
+    t -= TLvalToCell;
     if (t != TBottom) ret += "|" + t.toString();
     return ret;
   }
@@ -290,7 +280,7 @@ std::string Type::toString() const {
       auto const partStr = folly::to<std::string>(base.toString(), exact, name);
 
       parts.push_back(partStr);
-      t -= TAnyObj;
+      t -= TObj;
     } else if (auto arrSpec = t.arrSpec()) {
       auto str = Type{
         m_bits & kArrSpecBits,
@@ -306,7 +296,7 @@ std::string Type::toString() const {
         str += folly::to<std::string>(':', show(*ty));
       }
       parts.push_back(str);
-      t -= TAnyArr;
+      t -= TArr;
     } else {
       not_reached();
     }
@@ -386,7 +376,6 @@ void Type::serialize(ProfDataSerializer& ser) const {
 
   Type t = *this;
   if (t.maybe(TNullptr)) t = t - TNullptr;
-  if (t <= TBoxedCell) t = inner();
 
   auto const key = m_hasConstVal ? TypeKey::Const :
     t.clsSpec() ? (t.clsSpec().exact() ? TypeKey::ClsExact : TypeKey::ClsSub) :
@@ -492,9 +481,9 @@ bool Type::checkValid() const {
                 m_bits.hexStr(), m_ptrVal, m_hasConstVal, m_extra);
   }
 
-  // m_ptr and m_mem should be Bottom iff we have no kGen bits.
-  assertx(((m_bits & kGen) == kBottom) == (m_ptr == Ptr::Bottom));
-  assertx(((m_bits & kGen) == kBottom) == (m_mem == Mem::Bottom));
+  // m_ptr and m_mem should be Bottom iff we have no kCell bits.
+  assertx(((m_bits & kCell) == kBottom) == (m_ptr == Ptr::Bottom));
+  assertx(((m_bits & kCell) == kBottom) == (m_mem == Mem::Bottom));
 
   // Ptr::NotPtr and Mem::NotMem should imply one another.
   assertx((m_ptr == Ptr::NotPtr) == (m_mem == Mem::NotMem));
@@ -502,10 +491,7 @@ bool Type::checkValid() const {
   return true;
 }
 
-Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
-  assertx(!isRefType(inner));
-  assertx(inner == KindOfUninit || isRefType(outer));
-
+Type::bits_t Type::bitsFromDataType(DataType outer) {
   switch (outer) {
     case KindOfUninit           : return kUninit;
     case KindOfNull             : return kInitNull;
@@ -529,14 +515,13 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfClsMeth          : return kClsMeth;
     case KindOfRecord           : return kRecord;
     case KindOfRef:
-      assertx(inner != KindOfUninit);
-      return bitsFromDataType(inner, KindOfUninit) << kBoxShift;
+      always_assert(false);
   }
   not_reached();
 }
 
 DataType Type::toDataType() const {
-  assertx(!maybe(TMemToGen) || m_bits == kBottom);
+  assertx(!maybe(TMemToCell) || m_bits == kBottom);
   assertx(isKnownDataType());
 
   // Order is important here: types must progress from more specific
@@ -562,7 +547,6 @@ DataType Type::toDataType() const {
   if (*this <= TCls)         return KindOfClass;
   if (*this <= TClsMeth)     return KindOfClsMeth;
   if (*this <= TRecord)      return KindOfRecord;
-  if (*this <= TBoxedCell)   return KindOfRef;
   always_assert_flog(false,
                      "Bad Type {} in Type::toDataType()", *this);
 }
@@ -717,8 +701,8 @@ Type Type::operator&(Type rhs) const {
   // each set of such "interfering" components, if any component goes to
   // Bottom, we have to Bottom out the other components in the set as well.
 
-  // Gen bits depend on both Ptr and Mem.
-  if (ptr == Ptr::Bottom || mem == Mem::Bottom) bits &= ~kGen;
+  // Cell bits depend on both Ptr and Mem.
+  if (ptr == Ptr::Bottom || mem == Mem::Bottom) bits &= ~kCell;
 
   // Arr/Cls bits and specs.
   if (arrSpec == ArraySpec::Bottom) bits &= ~kArrSpecBits;
@@ -726,9 +710,9 @@ Type Type::operator&(Type rhs) const {
   if (!supports(bits, SpecKind::Array)) arrSpec = ArraySpec::Bottom;
   if (!supports(bits, SpecKind::Class)) clsSpec = ClassSpec::Bottom;
 
-  // Ptr and Mem also depend on Gen bits. This must come after all possible
+  // Ptr and Mem also depend on Cell bits. This must come after all possible
   // fixups of bits.
-  if ((bits & kGen) == kBottom) {
+  if ((bits & kCell) == kBottom) {
     ptr = Ptr::Bottom;
     mem = Mem::Bottom;
   } else {
@@ -785,7 +769,7 @@ Type Type::operator-(Type rhs) const {
   auto arrSpec = lhs.arrSpec() - rhs.arrSpec();
   auto clsSpec = lhs.clsSpec() - rhs.clsSpec();
 
-  auto const have_gen_bits = (bits & kGen) != kBottom;
+  auto const have_gen_bits = (bits & kCell) != kBottom;
 
   auto const have_ptr     = (ptr & Ptr::Ptr) != Ptr::Bottom;
   auto const have_not_ptr = (ptr & Ptr::NotPtr) != Ptr::Bottom;
@@ -801,19 +785,19 @@ Type Type::operator-(Type rhs) const {
   auto const have_cls_spec = clsSpec != ClassSpec::Bottom;
 
   // ptr and mem can only interact with clsSpec if lhs.m_bits has at least one
-  // kGen member of kClsSpecBits.
-  auto const have_ptr_cls = supports(lhs.m_bits & kGen, SpecKind::Class);
+  // kCell member of kClsSpecBits.
+  auto const have_ptr_cls = supports(lhs.m_bits & kCell, SpecKind::Class);
 
   // bits, ptr, and mem
   if (have_any_ptr) {
-    bits |= lhs.m_bits & kGen;
+    bits |= lhs.m_bits & kCell;
     // The Not{Ptr,Mem} and {Ptr,Mem} components of Ptr and Mem don't interfere
     // with one another, so keep them separate.
     if (have_ptr)     mem |= (lhs.memKind() & Mem::Mem);
     if (have_not_ptr) mem |= (lhs.memKind() & Mem::NotMem);
   }
   if (have_any_mem) {
-    bits |= lhs.m_bits & kGen;
+    bits |= lhs.m_bits & kCell;
     if (have_mem)     ptr |= (lhs.ptrKind() & Ptr::Ptr);
     if (have_not_mem) ptr |= (lhs.ptrKind() & Ptr::NotPtr);
   }
@@ -860,22 +844,13 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
   if (tvIsArray(tv)) return Type::Array(val(tv).parr->kind());
 
   auto outer = type(tv);
-  auto inner = KindOfUninit;
 
   if (outer == KindOfPersistentString) outer = KindOfString;
   else if (outer == KindOfPersistentVec) outer = KindOfVec;
   else if (outer == KindOfPersistentDict) outer = KindOfDict;
   else if (outer == KindOfPersistentKeyset) outer = KindOfKeyset;
 
-  if (isRefType(outer)) {
-    inner = val(tv).pref->cell()->m_type;
-    if (inner == KindOfPersistentString) inner = KindOfString;
-    else if (inner == KindOfPersistentArray) inner = KindOfArray;
-    else if (inner == KindOfPersistentVec) inner = KindOfVec;
-    else if (inner == KindOfPersistentDict) inner = KindOfDict;
-    else if (inner == KindOfPersistentKeyset) inner = KindOfKeyset;
-  }
-  return Type(outer, inner);
+  return Type(outer);
 }
 
 Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
@@ -1020,7 +995,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
                     bool isSProp) {
   assertx(tc.validForProp());
 
-  if (!tc.isCheckable() || tc.isSoft()) return TGen;
+  if (!tc.isCheckable() || tc.isSoft()) return TCell;
 
   using A = AnnotType;
   auto const atToType = [&](AnnotType at) {
@@ -1037,7 +1012,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       // So if we're here and we have AnnotType::Object, we don't know what the
       // type-hint is, so be conservative.
       case A::Object:
-      case A::Mixed:      return TGen;
+      case A::Mixed:      return TCell;
       case A::Resource:   return TRes;
       case A::Dict:       return TDict;
       case A::Vec:        return TVec;
@@ -1096,25 +1071,13 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
     }
 
     // It could be an alias to mixed so we might have refs
-    return TGen;
+    return TCell;
   }();
   if (tc.isNullable()) base |= TInitNull;
   return base;
 }
 
 //////////////////////////////////////////////////////////////////////
-
-Type ldRefReturn(Type typeParam) {
-  // Guarding on specialized types and uncommon unions like {Int|Bool} is
-  // expensive enough that we only want to do it in situations where we've
-  // manually confirmed the benefit.
-  typeParam = relaxToGuardable(typeParam);
-  always_assert(typeParam <= TCell);
-
-  // Refs can never contain Uninit, so this lets us return UncountedInit rather
-  // than Uncounted, and InitCell rather than Cell.
-  return typeParam - TUninit;
-}
 
 Type negativeCheckType(Type srcType, Type typeParam) {
   if (srcType <= typeParam)      return TBottom;
@@ -1133,44 +1096,14 @@ Type negativeCheckType(Type srcType, Type typeParam) {
   return tmp;
 }
 
-Type boxType(Type t) {
-  // If t contains Uninit, replace it with InitNull.
-  t = t.maybe(TUninit) ? (t - TUninit) | TInitNull : t;
-  // We don't try to track when a BoxedStaticStr might be converted to
-  // a BoxedStr, and we never guard on staticness for strings, so
-  // boxing a string needs to forget this detail.  Same thing for
-  // arrays.
-  if (t <= TStr) {
-    t = TStr;
-  } else if (t <= TArr) {
-    t = TArr;
-  } else if (t <= TVec) {
-    t = TVec;
-  } else if (t <= TDict) {
-    t = TDict;
-  } else if (t <= TKeyset) {
-    t = TKeyset;
-  } else if (t <= TArrLike) {
-    t = TArrLike;
-  }
-  // When boxing an Object, if the inner class does not have AttrNoOverride,
-  // drop the class specialization.
-  if (t < TObj && t.clsSpec() &&
-      !(t.clsSpec().cls()->attrs() & AttrNoOverride)) {
-    t = t.unspecialize();
-  }
-  // Everything else is just a pure type-system boxing operation.
-  return t.box();
-}
-
 //////////////////////////////////////////////////////////////////////
 
-static Type relaxCell(Type t, DataTypeCategory cat) {
+Type relaxType(Type t, DataTypeCategory cat) {
   assertx(t <= TCell);
 
   switch (cat) {
     case DataTypeGeneric:
-      return TGen;
+      return TCell;
 
     case DataTypeCountness:
     case DataTypeBoxAndCountness:
@@ -1192,16 +1125,8 @@ static Type relaxCell(Type t, DataTypeCategory cat) {
   not_reached();
 }
 
-Type relaxType(Type t, DataTypeCategory cat) {
-  always_assert_flog(t <= TGen, "t = {}", t);
-  if (cat == DataTypeGeneric) return TGen;
-  auto const relaxed =
-    (t & TCell) <= TBottom ? TBottom : relaxCell(t & TCell, cat);
-  return t <= TCell ? relaxed : relaxed | TBoxedInitCell;
-}
-
 Type relaxToGuardable(Type ty) {
-  assertx(ty <= TGen);
+  assertx(ty <= TCell);
   ty = ty.unspecialize();
 
   // ty is unspecialized and we don't support guarding on CountedArr or
@@ -1216,12 +1141,10 @@ Type relaxToGuardable(Type ty) {
   // We can guard on StaticStr but not CountedStr.
   if (ty <= TCountedStr)     return TStr;
 
-  if (ty <= TBoxedCell)      return TBoxedCell;
   if (ty.isKnownDataType())  return ty;
   if (ty <= TUncountedInit)  return TUncountedInit;
   if (ty <= TUncounted)      return TUncounted;
   if (ty <= TCell)           return TCell;
-  if (ty <= TGen)            return TGen;
   not_reached();
 }
 

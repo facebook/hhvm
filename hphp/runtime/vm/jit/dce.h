@@ -46,7 +46,6 @@ void fullDCE(IRUnit&);
  * eliding DefInlineFP
  *
  * Precondition: inst is LdLoc, StLoc, LdLocAddr, CheckLoc, AssertLoc, or
- *                       HintLocInner
  * Precondition: inst->src(0)->inst() is DefInlineFP
  */
 void convertToStackInst(IRUnit& unit, IRInstruction& inst);

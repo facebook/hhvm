@@ -130,8 +130,7 @@ to use the parent frame pointer (generally with some additional fixup in any
 associated catch traces) are also accepted.
 
 All pure memory access and pointer logic can be transformed, in
-particular: LdLoc, StLoc, LdLocAddr, CheckLoc, HintLocInner, and
-AssertLoc.
+particular: LdLoc, StLoc, LdLocAddr, CheckLoc, and AssertLoc.
 
 Currently only EagerSyncVMRegs, CallBuiltin, and Call can be adjusted
 to use the parent frame.
@@ -599,7 +598,7 @@ bool canConvertToStack(IRInstruction& inst) {
     auto const id = inst.marker().func()->lookupVarId(s_86metadata.get());
     return inst.extra<StLoc>()->locId != id;
   }
-  return inst.is(LdLoc, CheckLoc, AssertLoc, HintLocInner, LdLocAddr);
+  return inst.is(LdLoc, CheckLoc, AssertLoc, LdLocAddr);
 }
 
 /*

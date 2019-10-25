@@ -165,7 +165,6 @@ bool canDCE(IRInstruction* inst) {
   case IsWaitHandle:
   case IsCol:
   case IsDVArray:
-  case UnboxPtr:
   case LdStk:
   case LdLoc:
   case LdStkAddr:
@@ -177,7 +176,6 @@ bool canDCE(IRInstruction* inst) {
   case LdIterBase:
   case LdIterPos:
   case LdIterEnd:
-  case LdRef:
   case LdFrameThis:
   case LdFrameCls:
   case LdSmashable:
@@ -292,7 +290,6 @@ bool canDCE(IRInstruction* inst) {
   case GetMemoKeyScalar:
   case LookupSPropSlot:
   case ConstructClosure:
-  case Box:
   case AllocPackedArray:
   case AllocStructArray:
   case AllocStructDArray:
@@ -391,9 +388,6 @@ bool canDCE(IRInstruction* inst) {
   case CheckDArray:
   case CheckMixedArrayKeys:
   case CheckSmashableClass:
-  case HintLocInner:
-  case HintStkInner:
-  case HintMBaseInner:
   case CheckLoc:
   case CheckStk:
   case CheckMBase:
@@ -456,7 +450,6 @@ bool canDCE(IRInstruction* inst) {
   case LdLocPseudoMain:
   case LdVectorBase:
   case LdPairBase:
-  case CheckRefInner:
   case DefCls:
   case LdClsCtor:
   case LdCls:
@@ -535,7 +528,6 @@ bool canDCE(IRInstruction* inst) {
   case StLoc:
   case StLocPseudoMain:
   case StLocRange:
-  case StRef:
   case EagerSyncVMRegs:
   case ReqBindJmp:
   case ReqRetranslate:
@@ -680,11 +672,8 @@ bool canDCE(IRInstruction* inst) {
   case MapGet:
   case CGetElem:
   case ArraySet:
-  case ArraySetRef:
   case VecSet:
-  case VecSetRef:
   case DictSet:
-  case DictSetRef:
   case MapSet:
   case VectorSet:
   case SetElem:
@@ -758,7 +747,6 @@ bool canDCE(IRInstruction* inst) {
   case MemoSetLSBCache:
   case MemoSetInstanceValue:
   case MemoSetInstanceCache:
-  case BoxPtr:
   case ThrowAsTypeStructException:
   case RecordReifiedGenericsAndGetTSList:
   case ResolveTypeStruct:
@@ -953,7 +941,6 @@ bool findWeakActRecUses(const BlockList& blocks,
     case CheckLoc:
     case AssertLoc:
     case LdLocAddr:
-    case HintLocInner:
       incWeak(inst, inst->src(0));
       break;
 
@@ -1071,7 +1058,6 @@ void performActRecFixups(const BlockList& blocks,
       case LdLocAddr:
       case AssertLoc:
       case CheckLoc:
-      case HintLocInner:
         if (state[inst.src(0)->inst()].isDead()) {
           convertToStackInst(unit, inst);
           needsReflow = true;
@@ -1433,7 +1419,7 @@ IRInstruction* resolveFpDefLabel(const SSATmp* fp) {
 }
 
 void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
-  assertx(inst.is(CheckLoc, AssertLoc, LdLoc, StLoc, LdLocAddr, HintLocInner,
+  assertx(inst.is(CheckLoc, AssertLoc, LdLoc, StLoc, LdLocAddr,
                   MemoGetStaticCache, MemoSetStaticCache,
                   MemoGetLSBCache, MemoSetLSBCache,
                   MemoGetInstanceCache, MemoSetInstanceCache));
@@ -1491,15 +1477,6 @@ void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
       inst.setNext(next);
       return;
     }
-    case HintLocInner:
-      unit.replace(
-        &inst,
-        HintStkInner,
-        IRSPRelOffsetData { locToStkOff(*inst.extra<LocalId>(), inst.src(0)) },
-        inst.typeParam(),
-        mainSP
-      );
-      return;
     case MemoGetStaticCache:
     case MemoSetStaticCache:
     case MemoGetLSBCache:

@@ -56,7 +56,7 @@ struct ProfDataDeserializer;
  * We have a pointer kind for each of the major segregated locations in which
  * php values can live (eval stack, frame slots, properties, etc...). For most
  * of the primitive kinds, we have a predefined union of the kind and "inside a
- * Ref", so PtrToRStkGen is exactly the same as PtrTo{Ref|Stk}Gen.  These
+ * Ref", so PtrToRStkCell is exactly the same as PtrTo{Ref|Stk}Cell.  These
  * classify PtrTo* types into some categories that cannot possibly alias,
  * without any smarter analysis needed to prove it.  There is also a union for
  * the various locations things can point after a fully generic member
@@ -71,9 +71,9 @@ struct ProfDataDeserializer;
  *
  * At this point, t2 is a pointer into either an object property or a inner
  * RefData, which will be a PtrToRPropCell, which means it still can't alias,
- * for example, a PtrToStkGen or a PtrToGblGen (although it could generally
- * alias a PtrToRGblGen because both could be inside the same RefData.). Note
- * that PtrToRFooGen is just shorthand for PtrTo{Ref|Foo}Gen.
+ * for example, a PtrToStkCell or a PtrToGblCell (although it could generally
+ * alias a PtrToRGblCell because both could be inside the same RefData.). Note
+ * that PtrToRFooCell is just shorthand for PtrTo{Ref|Foo}Cell.
  *
  * Memb is a number of different locations that result from the more generic
  * types of member operations: Prop, Elem, MIS, MMisc, and Other. MMisc
@@ -153,9 +153,9 @@ struct ProfDataDeserializer;
 
 enum class Ptr : uint16_t {
   /*
-   * The Ptr kinds here are kept out of PTR_TYPES to avoid generating names
-   * like TPtrToNotPtrGen or TPtrToPtrGen. Note that those types do exist, just
-   * with less ridiculous names: TGen and TPtrToGen, respectively.
+   * The Ptr kinds here are kept out of PTR_TYPES to avoid generating names like
+   * TPtrToNotPtrCell or TPtrToPtrCell. Note that those types do exist, just
+   * with less ridiculous names: TCell and TPtrToCell, respectively.
    */
   Bottom = 0,
   Top    = 0x1fffU, // Keep this in sync with the number of bits used in
@@ -216,11 +216,11 @@ enum class Mem : uint8_t {
   /* Bottom: No other components of the type are compatible with Mem: TCls,
    *         TRDSHandle, etc... */
   Bottom = 0,
-  /* NotMem: Normal values like TInt or TGen. */
+  /* NotMem: Normal values like TInt or TCell. */
   NotMem = 1U << 0,
-  /* Ptr: TypedValue*: TPtrToInt, TPtrToGen, etc... */
+  /* Ptr: TypedValue*: TPtrToInt, TPtrToCell, etc... */
   Ptr    = 1U << 1,
-  /* Lval: tv_lval: TLvalToInt, TLvalToGen, etc... */
+  /* Lval: tv_lval: TLvalToInt, TLvalToCell, etc... */
   Lval   = 1U << 2,
   /* Mem: Either Ptr or Lval. No concrete values can have this type because
    * there is no way to distinguish between TPtrToFoo and TLvalToFoo at
@@ -288,21 +288,15 @@ constexpr bool operator>(Mem a, Mem b) {
 #define IRTM_FROM_PTR(ptr, ptr_bits, name)                    \
   IRTM(MemTo##ptr##name, ptr, k##name)
 
-#define IRT_BOXES_PTRS_LVALS(name, bits)                      \
+#define IRT_PTRS_LVALS(name, bits)                            \
   IRT(name,               (bits))                             \
-  IRT(Boxed##name,        (bits) << kBoxShift)                \
   IRTP(PtrTo##name,       Ptr, k##name)                       \
-  IRTP(PtrToBoxed##name,  Ptr, kBoxed##name)                  \
   PTR_TYPES(IRTP_FROM_PTR, PTR_R, name)                       \
-  PTR_TYPES(IRTP_FROM_PTR, PTR_NO_R, Boxed##name)             \
   IRTL(LvalTo##name,      Ptr, k##name)                       \
-  IRTL(LvalToBoxed##name, Ptr, kBoxed##name)                  \
   PTR_TYPES(IRTL_FROM_PTR, PTR_R, name)                       \
-  PTR_TYPES(IRTL_FROM_PTR, PTR_NO_R, Boxed##name)             \
   IRTM(MemTo##name,       Ptr, k##name)                       \
-  IRTM(MemToBoxed##name,  Ptr, kBoxed##name)                  \
   PTR_TYPES(IRTM_FROM_PTR, PTR_R, name)                       \
-  PTR_TYPES(IRTM_FROM_PTR, PTR_NO_R, Boxed##name)
+/**/
 
 #define IRT_PHP(c)                                                      \
   c(Uninit,          bits_t::bit<0>())                                  \
@@ -332,7 +326,7 @@ constexpr bool operator>(Mem a, Mem b) {
   c(ClsMeth,         bits_t::bit<24>())                                 \
   c(Record,          bits_t::bit<25>())                                 \
   c(RecDesc,         bits_t::bit<26>())                                 \
-// Boxed*:           27-55
+/**/
 
 /*
  * This list should be in non-decreasing order of specificity.
@@ -391,59 +385,38 @@ constexpr bool operator>(Mem a, Mem b) {
   /* bits above this are unused */
 
 /*
- * Gen, Counted, Init, PtrToGen, etc... are here instead of IRT_PHP_UNIONS
- * because boxing them (e.g., BoxedGen, PtrToBoxedGen) would yield nonsense
- * types.
+ * Cell, Counted, Init, PtrToCell, etc...
  */
 #ifdef USE_LOWPTR
 #define COUNTED_INIT_UNION \
-  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell|kRecord
+  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kRecord
 #else
 #define COUNTED_INIT_UNION \
-  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell|kRecord|kClsMeth
+  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kRecord|kClsMeth
 #endif
 
 #define IRT_SPECIAL                                           \
   /* Bottom and Top use IRTX to specify a custom Ptr kind */  \
-  IRTX(Bottom,       Bottom, kBottom)                         \
-  IRTX(Top,          Top,    kTop)                            \
-  IRTX(AnyObj,       Top,    kAnyObj)                         \
-  IRTX(AnyArr,       Top,    kAnyArr)                         \
-  IRTX(AnyVec,       Top,    kAnyVec)                         \
-  IRTX(AnyDict,      Top,    kAnyDict)                        \
-  IRTX(AnyKeyset,    Top,    kAnyKeyset)                      \
-  IRTX(AnyArrLike,   Top,    kAnyArrLike)                     \
-  IRT(Counted,               COUNTED_INIT_UNION)              \
-  IRTP(PtrToCounted,  Ptr,    kCounted)                       \
-  IRTL(LvalToCounted, Ptr,    kCounted)                       \
-  IRTM(MemToCounted,  Ptr,    kCounted)                       \
-  IRT(Gen,                    kCell|kBoxedCell)               \
-  IRT(InitGen,                kGen & ~kUninit)                \
-  IRTP(PtrToGen,      Ptr,    kGen)                           \
-  IRTP(PtrToInitGen,  Ptr,    kInitGen)                       \
-  IRTL(LvalToGen,     Ptr,    kGen)                           \
-  IRTL(LvalToInitGen, Ptr,    kInitGen)                       \
-  IRTM(MemToGen,      Ptr,    kGen)                           \
-  IRTM(MemToInitGen,  Ptr,    kInitGen)                       \
-  PTR_TYPES(IRTP_FROM_PTR, PTR_R, Gen)                        \
-  PTR_TYPES(IRTP_FROM_PTR, PTR_R, InitGen)                    \
-  PTR_TYPES(IRTL_FROM_PTR, PTR_R, Gen)                        \
-  PTR_TYPES(IRTL_FROM_PTR, PTR_R, InitGen)                    \
-  PTR_TYPES(IRTM_FROM_PTR, PTR_R, Gen)                        \
-  PTR_TYPES(IRTM_FROM_PTR, PTR_R, InitGen)
+  IRTX(Bottom,         Bottom, kBottom)                       \
+  IRTX(Top,            Top,    kTop)                          \
+  IRT(Counted,                 COUNTED_INIT_UNION)            \
+  IRTP(PtrToCounted,   Ptr,    kCounted)                      \
+  IRTL(LvalToCounted,  Ptr,    kCounted)                      \
+  IRTM(MemToCounted,   Ptr,    kCounted)                      \
+/**/
 
 /*
  * All types that represent a non-union type.
  */
-#define IRT_PRIMITIVE IRT_PHP(IRT_BOXES_PTRS_LVALS) IRT_RUNTIME
+#define IRT_PRIMITIVE IRT_PHP(IRT_PTRS_LVALS) IRT_RUNTIME
 
 /*
  * All types.
  */
-#define IR_TYPES                        \
-  IRT_PHP(IRT_BOXES_PTRS_LVALS)         \
-  IRT_PHP_UNIONS(IRT_BOXES_PTRS_LVALS)  \
-  IRT_RUNTIME                           \
+#define IR_TYPES                  \
+  IRT_PHP(IRT_PTRS_LVALS)         \
+  IRT_PHP_UNIONS(IRT_PTRS_LVALS)  \
+  IRT_RUNTIME                     \
   IRT_SPECIAL
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -466,8 +439,7 @@ constexpr bool operator>(Mem a, Mem b) {
  */
 struct Type {
 private:
-  static constexpr size_t kBoxShift = 27;
-  static constexpr size_t kRuntime = kBoxShift * 2;
+  static constexpr size_t kRuntime = 27;
   static constexpr size_t numRuntime = 11;
   using bits_t = BitSet<kRuntime + numRuntime>;
 
@@ -487,16 +459,8 @@ public:
 #undef IRTM
 #undef IRTX
 
-  static constexpr bits_t kAnyArr       = kArr | kBoxedArr;
-  static constexpr bits_t kAnyVec       = kVec | kBoxedVec;
-  static constexpr bits_t kAnyDict      = kDict | kBoxedDict;
-  static constexpr bits_t kAnyKeyset    = kKeyset | kBoxedKeyset;
-  static constexpr bits_t kAnyArrLike   = kAnyArr | kAnyVec | kAnyDict |
-                                          kAnyKeyset;
-  static constexpr bits_t kArrSpecBits  = kAnyArrLike;
-  static constexpr bits_t kAnyObj       = kObj | kBoxedObj;
-  static constexpr bits_t kAnyRecord    = kRecord | kBoxedRecord;
-  static constexpr bits_t kClsSpecBits  = kAnyObj | kCls;
+  static constexpr bits_t kArrSpecBits  = kArrLike;
+  static constexpr bits_t kClsSpecBits  = kObj | kCls;
 
   /////////////////////////////////////////////////////////////////////////////
   // Basic methods.
@@ -539,13 +503,13 @@ public:
   /*
    * Construct from a DataType.
    */
-  explicit Type(DataType outer, DataType inner = KindOfUninit);
+  explicit Type(DataType outer);
 
   /*
    * Return true iff there exists a DataType in the range [KindOfUninit,
    * KindOfRef] that represents a non-strict supertype of this type.
    *
-   * @requires: *this <= Gen
+   * @requires: *this <= Cell
    */
   bool isKnownDataType() const;
 
@@ -807,7 +771,7 @@ public:
    * Whether this type can meaningfully specialize along `kind'.
    *
    * For example, a Type only supports SpecKind::Class if its bits intersect
-   * nontrivially with kAnyObj.
+   * nontrivially with kObj.
    */
   bool supports(SpecKind kind) const;
 
@@ -838,50 +802,19 @@ public:
   // Inner types.                                                       [const]
 
   /*
-   * Box or unbox a Type.
-   *
-   * The box() and inner() methods are inverses---they (respectively) take the
-   * the {Cell, BoxedCell} bits of the Type and coerce them into the
-   * {BoxedCell, Cell} sides of the lattice, replacing whatever was there
-   * before; e.g.,
-   *
-   *    box(Int|BoxedDbl)   -> BoxedInt
-   *    inner(BoxedInt|Dbl) -> Int
-   *
-   * Meanwhile, unbox() is like inner(), but rather than replacing the Cell
-   * component of the Type, it unions it with the shifted BoxedCell bits, e.g.,
-   *
-   *    unbox(BoxedInt|Dbl) -> Int|Dbl
-   *
-   * @requires:
-   *    box:    *this <= Cell
-   *            !maybe(Uninit) || *this == Cell
-   *    inner:  *this <= BoxedCell
-   *    unbox:  *this <= Gen
-   */
-  Type box() const;
-  Type inner() const;
-  Type unbox() const;
-
-  /*
    * Get a pointer to, or dereference, a Type.
    *
    * @requires:
-   *    ptr, lval:  *this <= Gen && kind <= Ptr::Ptr
-   *    mem:        *this <= Gen && kind <= Ptr::Ptr && mem <= Mem::Mem
-   *    deref:      *this <= MemToGen
-   *    derefIfPtr: *this <= (Gen | MemToGen)
+   *    ptr, lval:  *this <= Cell && kind <= Ptr::Ptr
+   *    mem:        *this <= Cell && kind <= Ptr::Ptr && mem <= Mem::Mem
+   *    deref:      *this <= MemToCell
+   *    derefIfPtr: *this <= (Cell | MemToCell)
    */
   Type ptr(Ptr kind) const;
   Type lval(Ptr kind) const;
   Type mem(Mem mem, Ptr kind) const;
   Type deref() const;
   Type derefIfPtr() const;
-
-  /*
-   * Return a Type stripped of boxing and pointerness.
-   */
-  Type strip() const;
 
   /*
    * Return the pointer or memory category of a Type.
@@ -901,9 +834,9 @@ private:
   Type(Type t, ClassSpec classSpec);
 
   /*
-   * Bit-pack an `outer' and an `inner' DataType for a Type.
+   * Bit-pack a DataType
    */
-  static bits_t bitsFromDataType(DataType outer, DataType inner);
+  static bits_t bitsFromDataType(DataType outer);
 
   /*
    * Check invariants and return false if the type is malformed.
@@ -981,19 +914,6 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
                     bool isSProp);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Return the boxed version of the input type, taking into account PHP
- * semantics and subtle implementation details.
- */
-Type boxType(Type);
-
-/*
- * Return the dest type for a LdRef with the given typeParam.
- *
- * @requires: typeParam <= TCell
- */
-Type ldRefReturn(Type typeParam);
 
 /*
  * Returns the type that a value may have if it had type `srcType' and failed a

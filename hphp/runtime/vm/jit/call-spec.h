@@ -56,13 +56,12 @@ namespace detail {
   T(Func*, TFunc)                \
   T(ClsMethDataRef, TClsMeth)    \
   T(NamedEntity*, TNamedEntity)  \
-  T(RefData*, TBoxedInitCell)    \
   T(ResourceHdr*, TRes)          \
   T(StringData*, TStr)           \
   T(TCA, TTCA)                   \
-  T(TypedValue&, TPtrToGen)      \
-  T(TypedValue*, TPtrToGen)      \
-  T(TypedValue, TGen)            \
+  T(TypedValue&, TPtrToCell)     \
+  T(TypedValue*, TPtrToCell)     \
+  T(TypedValue, TCell)           \
   T(bool, TBool)                 \
   T(double, TDbl)                \
   T(int32_t, TInt)               \
@@ -70,8 +69,8 @@ namespace detail {
   T(unsigned long, TInt)         \
   T(unsigned long long, TInt)    \
   T(unsigned int, U(Int, RDSHandle)) \
-  T(tv_lval, TLvalToGen)         \
-  T(tv_rval, TLvalToGen)         \
+  T(tv_lval, TLvalToCell)        \
+  T(tv_rval, TLvalToCell)        \
   T(MInstrPropState*, U(MIPropSPtr, Nullptr))
 
 /*

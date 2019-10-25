@@ -220,7 +220,7 @@ MemEffects canonicalize(MemEffects);
 
 /*
  * Return an alias class representing the pointee of the given value, which
- * must be <= TMemToGen.
+ * must be <= TMemToCell.
  */
 AliasClass pointee(const SSATmp*);
 

@@ -113,30 +113,17 @@ bool MInstrEffects::supported(const IRInstruction* inst) {
 MInstrEffects::MInstrEffects(const Opcode rawOp, const Type origBase) {
   // Note: MInstrEffects wants to manipulate pointer types in some situations
   // for historical reasons.  We'll eventually change that.
-  bool const is_ptr = origBase <= TLvalToGen;
+  bool const is_ptr = origBase <= TLvalToCell;
   auto const basePtr = is_ptr ? origBase.ptrKind() : Ptr::Bottom;
   baseType = origBase.derefIfPtr();
 
   baseTypeChanged = baseValChanged = false;
 
-  // Process the inner and outer types separately and then recombine them,
-  // since the minstr operations all operate on the inner cell of boxed bases.
-  // We treat the new inner type as a prediction because it will be verified
-  // the next time we load from the box.
-  auto inner = (baseType & TBoxedCell).inner();
-  auto outer = baseType & TCell;
-  getBaseType(rawOp, false, outer, baseValChanged);
-  getBaseType(rawOp, true, inner, baseValChanged);
+  getBaseType(rawOp, false, baseType, baseValChanged);
 
-  baseType = inner.box() | outer;
   baseType = is_ptr ? baseType.lval(basePtr) : baseType;
-
   baseTypeChanged = baseType != origBase;
-
-  /* Boxed bases may have their inner value changed but the value of the box
-   * will never change. */
-  baseValChanged = !(origBase <= TBoxedCell) &&
-                   (baseValChanged || baseTypeChanged);
+  baseValChanged = baseValChanged || baseTypeChanged;
 }
 
 //////////////////////////////////////////////////////////////////////

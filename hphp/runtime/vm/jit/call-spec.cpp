@@ -38,9 +38,9 @@ std::string show_types(const std::vector<Type>& ts) {
 template<typename F>
 void verify_return_type(Type ret, const CallDest& dest, F fail) {
   if (dest.type == DestType::TV) {
-    // We really want equality here: TGen corresponds to a full TypedValue
+    // We really want equality here: TCell corresponds to a full TypedValue
     // being returned.
-    if (ret == TGen) return;
+    if (ret == TCell) return;
   } else {
     if (ret <= dest.valueType) return;
 
@@ -51,10 +51,9 @@ void verify_return_type(Type ret, const CallDest& dest, F fail) {
 
     // Some JIT types are much more specific than what we can express in C++,
     // so treat certain classes of types as equivalent.
-    static std::array<Type, 6> constexpr special_types = {
-      TPtrToGen,
-      TLvalToGen,
-      TBoxedInitCell,
+    static std::array<Type, 5> constexpr special_types = {
+      TPtrToCell,
+      TLvalToCell,
       TObj,
       TStr,
       TArrLike,
@@ -99,10 +98,10 @@ bool CallSpec::verifySignature(const CallDest& dest,
   for (; parami < type->params.size() && argi < args.size();
        ++parami, ++argi) {
     auto const param = type->params[parami];
-    // TGen (for a TypedValue parameter) and wide TLvalToGen are special: one
+    // TCell (for a TypedValue parameter) and wide TLvalToCell are special: one
     // SSATmp represents two argument registers, and the latter is passed as a
     // dummy TBottom argument. Make sure both are present.
-    if (param == TGen || (wide_tv_val && param == TLvalToGen)) {
+    if (param == TCell || (wide_tv_val && param == TLvalToCell)) {
       if (!(args[argi] <= param)) {
         fail("Incompatible type {} for first half of {} parameter {}",
              args[argi], param, parami);

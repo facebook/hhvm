@@ -137,12 +137,6 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
         m_constraints.prevTypes[inst] = m_state.typeOf(*l);
       }
     }
-
-    // And a LdRef or CheckRefInner automatically constrains the value to be a
-    // boxed cell, specifically.
-    if (inst->is(LdRef, CheckRefInner)) {
-      constrainValue(inst->src(0), DataTypeSpecific);
-    }
   }
 
   auto where = m_curBlock->end();
@@ -229,22 +223,6 @@ SSATmp* IRBuilder::preOptimizeCheckMBase(IRInstruction* inst) {
   return preOptimizeCheckLocation(inst, Location::MBase{});
 }
 
-SSATmp* IRBuilder::preOptimizeHintInner(IRInstruction* inst, Location l) {
-  if (!(typeOf(l, DataTypeGeneric) <= TBoxedCell) ||
-      predictedInnerType(l).box() <= inst->typeParam()) {
-    inst->convertToNop();
-  }
-  return nullptr;
-}
-
-SSATmp* IRBuilder::preOptimizeHintLocInner(IRInstruction* inst) {
-  return preOptimizeHintInner(inst, loc(inst->extra<HintLocInner>()->locId));
-}
-
-SSATmp* IRBuilder::preOptimizeHintMBaseInner(IRInstruction* inst) {
-  return preOptimizeHintInner(inst, Location::MBase{});
-}
-
 SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
                                            const Type oldType,
                                            SSATmp* oldVal,
@@ -258,7 +236,7 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
 
   // Eliminate this AssertTypeOp if:
   // 1) oldType is at least as good as newType and:
-  //      a) typeParam == Gen
+  //      a) typeParam == Cell
   //      b) oldVal is from a DefConst
   //      c) oldType.hasConstVal()
   //    The AssertType will never be useful for guard constraining in these
@@ -266,7 +244,7 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
   // 2) The source instruction is known to be another assert that's at least
   //    as good as this one.
   if ((oldType <= newType &&
-       (inst->typeParam() == TGen ||
+       (inst->typeParam() == TCell ||
         (oldVal && oldVal->inst()->is(DefConst)) ||
         oldType.hasConstVal())) ||
       (srcInst &&
@@ -417,8 +395,6 @@ SSATmp* IRBuilder::preOptimizeLdFrameCls(IRInstruction* inst) {
 SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst);
   switch (inst->op()) {
-  X(HintLocInner)
-  X(HintMBaseInner)
   X(AssertType)
   X(AssertLoc)
   X(AssertStk)
@@ -793,26 +769,6 @@ SSATmp* IRBuilder::valueOf(Location l, GuardConstraint gc) {
 Type IRBuilder::typeOf(Location l, GuardConstraint gc) {
   constrainLocation(l, gc, "");
   return m_state.typeOf(l);
-}
-
-Type IRBuilder::predictedInnerType(Location l) const {
-  auto const ty = m_state.predictedTypeOf(l);
-  assertx(ty <= TBoxedCell);
-  return ldRefReturn(ty.unbox());
-}
-
-Type IRBuilder::predictedLocalInnerType(uint32_t id) const {
-  return predictedInnerType(loc(id));
-}
-
-Type IRBuilder::predictedStackInnerType(IRSPRelOffset offset) const {
-  return predictedInnerType(stk(offset));
-}
-
-Type IRBuilder::predictedMBaseInnerType() const {
-  auto const ty = m_state.mbase().predictedType;
-  assertx(ty <= TBoxedCell);
-  return ldRefReturn(ty.unbox());
 }
 
 /*

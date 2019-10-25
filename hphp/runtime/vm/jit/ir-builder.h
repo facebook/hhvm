@@ -120,16 +120,6 @@ struct IRBuilder {
   SSATmp* valueOf(Location l, GuardConstraint gc);
   Type     typeOf(Location l, GuardConstraint gc);
 
-  /*
-   * Helper for unboxing predicted types.
-   *
-   * @returns: ldRefReturn(fs().predictedTypeOf(location).unbox())
-   */
-  Type predictedInnerType(Location l) const;
-  Type predictedLocalInnerType(uint32_t id) const;
-  Type predictedStackInnerType(IRSPRelOffset) const;
-  Type predictedMBaseInnerType() const;
-
   /////////////////////////////////////////////////////////////////////////////
   /*
    * Guard relaxation.
@@ -307,9 +297,6 @@ private:
   SSATmp* preOptimizeCheckLoc(IRInstruction*);
   SSATmp* preOptimizeCheckStk(IRInstruction*);
   SSATmp* preOptimizeCheckMBase(IRInstruction*);
-  SSATmp* preOptimizeHintInner(IRInstruction*, Location);
-  SSATmp* preOptimizeHintLocInner(IRInstruction*);
-  SSATmp* preOptimizeHintMBaseInner(IRInstruction*);
   SSATmp* preOptimizeAssertTypeOp(IRInstruction* inst,
                                   Type oldType,
                                   SSATmp* oldVal,

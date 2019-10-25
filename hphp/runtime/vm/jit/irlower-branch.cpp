@@ -153,7 +153,7 @@ void cgSelect(IRLS& env, const IRInstruction* inst) {
   }
 
   // First copy the type if the destination needs one. This should only apply to
-  // types <= TGen.
+  // types <= TCell.
   if (dloc.hasReg(1)) {
     assertx(trueTy.isKnownDataType() || tloc.hasReg(1));
     assertx(falseTy.isKnownDataType() || floc.hasReg(1));

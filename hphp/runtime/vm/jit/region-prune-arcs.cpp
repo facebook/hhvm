@@ -38,7 +38,7 @@ namespace {
 struct State {
   bool initialized{false};
   std::vector<Type> locals;
-  Type mbase{TGen};
+  Type mbase{TCell};
 };
 
 struct BlockInfo {
@@ -55,10 +55,10 @@ std::string DEBUG_ONLY show(const State& state) {
 
   for (auto locID = uint32_t{0}; locID < state.locals.size(); ++locID) {
     auto const ty = state.locals[locID];
-    if (ty < TGen) folly::format(&ret, "  L{}: {}\n", locID, ty.toString());
+    if (ty < TCell) folly::format(&ret, "  L{}: {}\n", locID, ty.toString());
   }
   auto const ty = state.mbase;
-  if (ty < TGen) folly::format(&ret, "  M{{}}: {}\n", ty.toString());
+  if (ty < TCell) folly::format(&ret, "  M{{}}: {}\n", ty.toString());
   return ret;
 }
 
@@ -68,7 +68,7 @@ State entry_state(const RegionDesc& region, std::vector<Type>* input) {
 
   if (input) ret.locals = *input;
   auto const func = region.start().func();
-  ret.locals.resize(func->numLocals(), TGen);
+  ret.locals.resize(func->numLocals(), TCell);
 
   return ret;
 }

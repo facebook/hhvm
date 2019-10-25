@@ -72,7 +72,6 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BMITvRef2:       break;
   case A::BMIBase:         break;
   case A::BMIPropS:        break;
-  case A::BRef:            break;
   case A::BRds:            break;
   }
 
@@ -105,7 +104,6 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BMITvRef2:       ret += "MiT2"; break;
     case A::BMIBase:         ret += "MiB"; break;
     case A::BMIPropS:        ret += "MiP"; break;
-    case A::BRef:            ret += "Ref"; break;
     case A::BRds:            ret += "Rds"; break;
     }
   }
@@ -222,8 +220,6 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
     return folly::hash::hash_combine(hash,
                                      acls.m_stack.offset.offset,
                                      acls.m_stack.size);
-  case STag::Ref:
-    return folly::hash::hash_combine(hash, acls.m_ref.boxed);
 
   case STag::Rds:
     return folly::hash::hash_combine(hash, acls.m_rds.handle);
@@ -256,7 +252,6 @@ X(Prop, prop)
 X(ElemI, elemI)
 X(ElemS, elemS)
 X(Stack, stack)
-X(Ref, ref)
 X(Rds, rds)
 
 #undef X
@@ -272,7 +267,6 @@ X(Prop, prop)
 X(ElemI, elemI)
 X(ElemS, elemS)
 X(Stack, stack)
-X(Ref, ref)
 X(Rds, rds)
 
 #undef X
@@ -320,7 +314,6 @@ AliasClass::rep AliasClass::stagBits(STag tag) {
   case STag::ElemI:          return BElemI;
   case STag::ElemS:          return BElemS;
   case STag::Stack:          return BStack;
-  case STag::Ref:            return BRef;
   case STag::Rds:            return BRds;
   }
   always_assert(0);
@@ -345,9 +338,6 @@ bool AliasClass::checkInvariants() const {
     break;
   case STag::ElemS:
     assertx(m_elemS.key->isStatic());
-    break;
-  case STag::Ref:
-    assertx(m_ref.boxed->isA(TBoxedCell));
     break;
   case STag::Rds:
     assertx(rds::isValidHandle(m_rds.handle));
@@ -378,7 +368,6 @@ bool AliasClass::equivData(AliasClass o) const {
                               m_elemS.key == o.m_elemS.key;
   case STag::Stack:    return m_stack.offset == o.m_stack.offset &&
                               m_stack.size == o.m_stack.size;
-  case STag::Ref:      return m_ref.boxed == o.m_ref.boxed;
   case STag::Rds:      return m_rds.handle == o.m_rds.handle;
   }
   not_reached();
@@ -402,7 +391,6 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
-  case STag::Ref:
   case STag::Rds:
   case STag::IterAll:
     assertx(!a.equivData(b));
@@ -547,7 +535,6 @@ AliasClass AliasClass::operator|(AliasClass o) const {
   case STag::ElemI:    new (&ret.m_elemI) AElemI(best->m_elemI); break;
   case STag::ElemS:    new (&ret.m_elemS) AElemS(best->m_elemS); break;
   case STag::Stack:    new (&ret.m_stack) AStack(best->m_stack); break;
-  case STag::Ref:      new (&ret.m_ref) ARef(best->m_ref); break;
   case STag::Rds:      new (&ret.m_rds) ARds(best->m_rds); break;
   }
   ret.m_stag = stag;
@@ -566,7 +553,6 @@ bool AliasClass::subclassData(AliasClass o) const {
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
-  case STag::Ref:
   case STag::Rds:
     return equivData(o);
   case STag::Frame:
@@ -585,7 +571,6 @@ folly::Optional<AliasClass::UIterAll> AliasClass::asUIter() const {
   case STag::Prop:
   case STag::ElemI:
   case STag::ElemS:
-  case STag::Ref:
   case STag::Rds:
   case STag::Stack:
     return folly::none;
@@ -729,12 +714,6 @@ bool AliasClass::maybeData(AliasClass o) const {
       return lowest_upper.offset > highest_lower;
     }
 
-  /*
-   * Two boxed cells can generally refer to the same RefData.
-   */
-  case STag::Ref:
-    return true;
-
   case STag::Rds:
     return m_rds.handle == o.m_rds.handle;
   }
@@ -822,7 +801,6 @@ AliasClass canonicalize(AliasClass a) {
   case T::IterEnd:        return a;
   case T::IterAll:        return a;
   case T::Stack:          return a;
-  case T::Ref:            return a;
   case T::Rds:            return a;
   case T::Prop:     a.m_prop.obj = canonical(a.m_prop.obj);   return a;
   case T::ElemI:    a.m_elemI.arr = canonical(a.m_elemI.arr); return a;
@@ -885,9 +863,6 @@ std::string show(AliasClass acls) {
         ? "<"
         : folly::sformat(";{}", acls.m_stack.size)
     );
-    break;
-  case A::STag::Ref:
-    folly::format(&ret, "Ref {}", acls.m_ref.boxed->id());
     break;
   case A::STag::Rds:
     folly::format(&ret, "Rds {}", acls.m_rds.handle);

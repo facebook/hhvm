@@ -65,11 +65,11 @@ struct SSATmp;
  *      |         |                   |                         |    |
  *      |         |                HeapAny*                     |   ...
  *      |         |                   |                         |
- *      |         |            +------+------+---------+        |
- *      |         |            |             |         |        |
- *   FrameAny  StackAny     ElemAny       PropAny   RefAny  MIStateAny
- *      |         |          /    \          |         |        |
- *     ...       ...   ElemIAny  ElemSAny   ...       ...       |
+ *      |         |            +------+------+                  |
+ *      |         |            |             |                  |
+ *   FrameAny  StackAny     ElemAny       PropAny           MIStateAny
+ *      |         |          /    \          |                  |
+ *     ...       ...   ElemIAny  ElemSAny   ...                 |
  *                        |         |                           |
  *                       ...       ...    +---------+--------+--+------+
  *                                        |         |        |         |
@@ -81,7 +81,7 @@ struct SSATmp;
  *                                               MIBase**  MIPropS**
  *
  *
- *   (*) AHeapAny contains some things other than ElemAny, PropAny and RefAny
+ *   (*) AHeapAny contains some things other than ElemAny, and PropAny
  *       that don't have explicit nodes in the lattice yet.  (Like the
  *       lvalBlackhole, etc.)  It's hard for this to matter to client code for
  *       now because we don't expose an intersection or difference operation.
@@ -193,11 +193,6 @@ struct AStack {
 };
 
 /*
- * A RefData referenced by a BoxedCell.
- */
-struct ARef { SSATmp* boxed; };
-
-/*
  * A TypedValue stored in rds.
  *
  * Assumes this handle uniquely identifies a TypedValue in rds - it's
@@ -223,8 +218,7 @@ struct AliasClass {
     BElemI          = 1U << 6,
     BElemS          = 1U << 7,
     BStack          = 1U << 8,
-    BRef            = 1U << 9,
-    BRds            = 1U << 10,
+    BRds            = 1U << 9,
 
     // Have no specialization, put them last.
     BMITempBase = 1U << 11,
@@ -234,7 +228,7 @@ struct AliasClass {
     BMIPropS    = 1U << 15,
 
     BElem      = BElemI | BElemS,
-    BHeap      = BElem | BProp | BRef,
+    BHeap      = BElem | BProp,
     BMIStateTV = BMITempBase | BMITvRef | BMITvRef2,
     BMIState   = BMIStateTV | BMIBase | BMIPropS,
 
@@ -269,7 +263,6 @@ struct AliasClass {
   /* implicit */ AliasClass(AElemI);
   /* implicit */ AliasClass(AElemS);
   /* implicit */ AliasClass(AStack);
-  /* implicit */ AliasClass(ARef);
   /* implicit */ AliasClass(ARds);
 
   /*
@@ -331,7 +324,6 @@ struct AliasClass {
   folly::Optional<AElemI>          elemI() const;
   folly::Optional<AElemS>          elemS() const;
   folly::Optional<AStack>          stack() const;
-  folly::Optional<ARef>            ref() const;
   folly::Optional<ARds>            rds() const;
 
   /*
@@ -351,7 +343,6 @@ struct AliasClass {
   folly::Optional<AElemI>          is_elemI() const;
   folly::Optional<AElemS>          is_elemS() const;
   folly::Optional<AStack>          is_stack() const;
-  folly::Optional<ARef>            is_ref() const;
   folly::Optional<ARds>            is_rds() const;
 
   /*
@@ -373,7 +364,6 @@ private:
     ElemI,
     ElemS,
     Stack,
-    Ref,
     Rds,
 
     IterAll,  // The union of all fields for a given iterator.
@@ -407,7 +397,6 @@ private:
     AElemI          m_elemI;
     AElemS          m_elemS;
     AStack          m_stack;
-    ARef            m_ref;
     ARds            m_rds;
 
     UIterAll        m_iterAll;
@@ -426,7 +415,6 @@ auto const AIterEndAny        = AliasClass{AliasClass::BIterEnd};
 auto const AIterAny           = AliasClass{AliasClass::BIter};
 auto const APropAny           = AliasClass{AliasClass::BProp};
 auto const AHeapAny           = AliasClass{AliasClass::BHeap};
-auto const ARefAny            = AliasClass{AliasClass::BRef};
 auto const AStackAny          = AliasClass{AliasClass::BStack};
 auto const ARdsAny            = AliasClass{AliasClass::BRds};
 auto const AElemIAny          = AliasClass{AliasClass::BElemI};

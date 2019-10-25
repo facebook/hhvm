@@ -1511,8 +1511,7 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
     return;
   }
 
-  auto const ldrefExit = makeExit(env);
-  auto loc = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeGeneric);
+  auto loc = ldLoc(env, id, ldPMExit, DataTypeGeneric);
 
   if (*subOpc == Op::Concat) {
     /*
@@ -1522,17 +1521,7 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
     auto const val    = popC(env);
     env.irb->constrainValue(loc, DataTypeSpecific);
     implConcat(env, val, loc, [&] (SSATmp* result) {
-      /*
-       * Null exit block for 'ldrefExit' because we won't actually need to
-       * reload the inner cell since we are doing a stLocNRC.  (Note that the
-       * inner cell may have changed type if we re-entered during Concat.)
-       *
-       * We can't put a non-null block here either, because it may need to
-       * side-exit and we've already made observable progress executing this
-       * instruction.  If we ever change ConcatStrFoo not to decref its sources
-       * we'll need to address this (or punt on a boxed source).
-       */
-      pushIncRef(env, stLocNRC(env, id, nullptr, ldPMExit, result));
+      pushIncRef(env, stLocNRC(env, id, ldPMExit, result));
     });
     return;
   }
@@ -1556,16 +1545,14 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
   auto const result = opc == AddIntO || opc == SubIntO || opc == MulIntO
     ? gen(env, opc, exitSlow, loc, val)
     : gen(env, opc, loc, val);
-  pushStLoc(env, id, ldrefExit, ldPMExit, result);
+  pushStLoc(env, id, ldPMExit, result);
 }
 
 void emitIncDecL(IRGS& env, int32_t id, IncDecOp subop) {
-  auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
-  auto const src = ldLocInnerWarn(
+  auto const src = ldLocWarn(
     env,
     id,
-    ldrefExit,
     ldPMExit,
     DataTypeSpecific
   );
@@ -1574,7 +1561,7 @@ void emitIncDecL(IRGS& env, int32_t id, IncDecOp subop) {
     pushIncRef(env, isPre(subop) ? result : src);
     // Update marker to ensure newly-pushed value isn't clobbered by DecRef.
     updateMarker(env);
-    stLoc(env, id, ldrefExit, ldPMExit, result);
+    stLoc(env, id, ldPMExit, result);
     return;
   }
 

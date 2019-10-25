@@ -50,8 +50,8 @@ constexpr inline Type::Type(bits_t bits, Ptr ptr, Mem mem)
   constexpr Type T##name{Type::bits, Ptr::ptr, Mem::Mem};
 #define IRTX(name, x, bits) \
   constexpr Type T##name{Type::bits, Ptr::x, Mem::x};
-IRT_PHP(IRT_BOXES_PTRS_LVALS)
-IRT_PHP_UNIONS(IRT_BOXES_PTRS_LVALS)
+IRT_PHP(IRT_PTRS_LVALS)
+IRT_PHP_UNIONS(IRT_PTRS_LVALS)
 IRT_SPECIAL
 #undef IRT
 #undef IRTP
@@ -150,8 +150,8 @@ inline Type::Type()
   , m_extra(0)
 {}
 
-inline Type::Type(DataType outer, DataType inner)
-  : m_bits(bitsFromDataType(outer, inner))
+inline Type::Type(DataType outer)
+  : m_bits(bitsFromDataType(outer))
   , m_ptr(Ptr::NotPtr)
   , m_mem(Mem::NotMem)
   , m_hasConstVal(false)
@@ -229,15 +229,14 @@ inline bool Type::isUnion() const {
 }
 
 inline bool Type::isKnownDataType() const {
-  assertx(*this <= TGen);
+  assertx(*this <= TCell);
 
   // Some unions correspond to single KindOfs.
-  return subtypeOfAny(TStr, TArr, TVec, TDict,
-                      TKeyset, TBoxedCell) || !isUnion();
+  return subtypeOfAny(TStr, TArr, TVec, TDict, TKeyset) || !isUnion();
 }
 
 inline bool Type::needsReg() const {
-  return *this <= TGen && !isKnownDataType();
+  return *this <= TCell && !isKnownDataType();
 }
 
 inline bool Type::isSimpleType() const {
@@ -339,7 +338,7 @@ inline Type Type::dropConstVal() const {
 
   // A constant pointer iterator type will still have a target that's a union
   // of possible values for the array it points into.
-  assertx(*this <= TPtrToElemGen || !isUnion());
+  assertx(*this <= TPtrToElemCell || !isUnion());
 
   if (*this <= TStaticArr)    return Type::StaticArray(arrVal()->kind());
   if (*this <= TStaticVec)    return TStaticVec;
@@ -394,7 +393,7 @@ IMPLEMENT_CNS_VAL(TRecDesc,    rec,  const RecordDesc*)
 IMPLEMENT_CNS_VAL(TClsMeth,    clsmeth,  ClsMethDataRef)
 IMPLEMENT_CNS_VAL(TTCA,        tca,  jit::TCA)
 IMPLEMENT_CNS_VAL(TRDSHandle,  rdsHandle,  rds::Handle)
-IMPLEMENT_CNS_VAL(TMemToGen,   ptr, const TypedValue*)
+IMPLEMENT_CNS_VAL(TMemToCell,  ptr, const TypedValue*)
 
 #undef IMPLEMENT_CNS_VAL
 
@@ -542,23 +541,6 @@ inline TypeSpec Type::spec() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Inner types.
 
-inline Type Type::box() const {
-  assertx(*this <= TCell);
-  // Boxing Uninit returns InitNull but that logic doesn't belong here.
-  assertx(!maybe(TUninit) || *this == TCell);
-  return Type(m_bits << kBoxShift, ptrKind(), memKind()).specialize(spec());
-}
-
-inline Type Type::inner() const {
-  assertx(*this <= TBoxedCell);
-  return Type(m_bits >> kBoxShift, ptrKind(), memKind(), false, m_extra);
-}
-
-inline Type Type::unbox() const {
-  assertx(*this <= TGen);
-  return (*this & TCell) | (*this & TBoxedCell).inner();
-}
-
 inline Type Type::ptr(Ptr kind) const {
   return mem(Mem::Ptr, kind);
 }
@@ -568,7 +550,7 @@ inline Type Type::lval(Ptr kind) const {
 }
 
 inline Type Type::mem(Mem mem, Ptr ptr) const {
-  assertx(*this <= TGen);
+  assertx(*this <= TCell);
   assertx(ptr <= Ptr::Ptr);
   assertx(mem <= Mem::Mem);
   // Enforce a canonical representation for Bottom.
@@ -577,19 +559,15 @@ inline Type Type::mem(Mem mem, Ptr ptr) const {
 }
 
 inline Type Type::deref() const {
-  assertx(*this <= TMemToGen);
+  assertx(*this <= TMemToCell);
   if (m_bits == kBottom) return TBottom;
   auto const extra = isSpecialized() ? m_extra : 0;
   return Type(m_bits, Ptr::NotPtr, Mem::NotMem, false, extra);
 }
 
 inline Type Type::derefIfPtr() const {
-  assertx(*this <= (TGen | TMemToGen));
-  return *this <= TMemToGen ? deref() : *this;
-}
-
-inline Type Type::strip() const {
-  return derefIfPtr().unbox();
+  assertx(*this <= (TCell | TMemToCell));
+  return *this <= TMemToCell ? deref() : *this;
 }
 
 inline Ptr Type::ptrKind() const {

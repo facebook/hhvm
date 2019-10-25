@@ -492,7 +492,7 @@ void optimizeProfiledGuards(RegionDesc& region, const ProfData& profData);
 
 /*
  * Optimize the guards of `region', optionally in `simple' mode (where
- * guards are only relaxed if they can be relaxed all the way to TGen).
+ * guards are only relaxed if they can be relaxed all the way to TCell).
  */
 void optimizeGuards(RegionDesc& region, bool simple);
 

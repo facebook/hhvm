@@ -1155,8 +1155,7 @@ std::string show(RegionContext::LiveType ta) {
 
 std::string show(const RegionContext& ctx) {
   std::string ret;
-  folly::toAppend(ctx.func->fullName()->data(), "@", ctx.bcOffset,
-                  resumeModeShortName(ctx.resumeMode), "\n", &ret);
+  folly::toAppend(show(ctx.sk), "\n", &ret);
   for (auto& t : ctx.liveTypes) folly::toAppend(" ", show(t), "\n", &ret);
 
   return ret;

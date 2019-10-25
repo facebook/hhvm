@@ -52,16 +52,17 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 RegionContext getContext(SrcKey sk) {
-  RegionContext ctx { sk.func(), sk.offset(), liveSpOff(), sk.resumeMode() };
+  RegionContext ctx { sk, liveSpOff() };
 
+  auto const func = sk.func();
   auto const fp = vmfp();
   auto const sp = vmsp();
 
-  always_assert(ctx.func == fp->m_func);
+  always_assert(func == fp->m_func);
 
-  auto const ctxClass = ctx.func->cls();
+  auto const ctxClass = func->cls();
   // Track local types.
-  for (uint32_t i = 0; i < fp->m_func->numLocals(); ++i) {
+  for (uint32_t i = 0; i < func->numLocals(); ++i) {
     ctx.liveTypes.push_back(
       { Location::Local{i}, typeFromTV(frame_local(fp, i), ctxClass) }
     );
@@ -83,7 +84,7 @@ RegionContext getContext(SrcKey sk) {
 
   // Get the bytecode for `ctx', skipping Asserts.
   auto const op = [&] {
-    auto pc = ctx.func->unit()->at(ctx.bcOffset);
+    auto pc = func->unit()->at(sk.offset());
     while (isTypeAssert(peek_op(pc))) {
       pc += instrLen(pc);
     }

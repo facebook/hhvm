@@ -604,10 +604,10 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
                                    std::vector<Type>& argTypes,
                                    int32_t maxBCInstrs) {
   // Set up the RegionContext for the tracelet selector.
+  auto const entryOff = callee->getEntryForNumArgs(argTypes.size());
   RegionContext ctx{
-    callee, callee->getEntryForNumArgs(argTypes.size()),
+    SrcKey { callee, entryOff, ResumeMode::None },
     FPInvOffset{safe_cast<int32_t>(callee->numSlotsInFrame())},
-    ResumeMode::None
   };
 
   for (uint32_t i = 0; i < argTypes.size(); ++i) {

@@ -376,13 +376,11 @@ private:
 struct RegionContext {
   struct LiveType;
 
-  RegionContext(const Func* f, Offset bcOff, FPInvOffset spOff, ResumeMode rm)
-    : func(f), bcOffset(bcOff), spOffset(spOff), resumeMode(rm) {}
+  RegionContext(SrcKey sk, FPInvOffset spOff)
+    : sk(sk), spOffset(spOff) {}
 
-  const Func* func;
-  Offset bcOffset;
+  SrcKey sk;
   FPInvOffset spOffset;
-  ResumeMode resumeMode;
   jit::vector<LiveType> liveTypes;
 };
 

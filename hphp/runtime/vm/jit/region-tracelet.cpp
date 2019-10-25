@@ -63,7 +63,7 @@ struct Env {
     : ctx(ctx)
     , interp(interp)
     , breakAt(breakAt)
-    , sk{ctx.func, ctx.bcOffset, ctx.resumeMode}
+    , sk{ctx.sk}
     , startSk(sk)
     , region(std::make_shared<RegionDesc>())
     , curBlock(region->addBlock(sk, 0, ctx.spOffset))
@@ -493,7 +493,7 @@ RegionDescPtr form_region(Env& env) {
   for (auto const& lt : env.ctx.liveTypes) {
     auto t = lt.type;
     assertx(t <= TGen);
-    irgen::checkType(env.irgs, lt.location, t, env.ctx.bcOffset,
+    irgen::checkType(env.irgs, lt.location, t, env.ctx.sk.offset(),
                      true /* outerOnly */);
   }
   env.irgs.irb->resetGuardFailBlock();

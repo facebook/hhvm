@@ -63,17 +63,18 @@ RegionDescPtr selectMethod(const RegionContext& context) {
   using namespace HPHP::Verifier;
   using HPHP::Verifier::Block;
 
-  if (!isFuncEntry(context.func, context.bcOffset)) return nullptr;
-  if (context.func->isPseudoMain()) return nullptr;
+  auto const func = context.sk.func();
+  if (!isFuncEntry(func, context.sk.offset())) return nullptr;
+  if (func->isPseudoMain()) return nullptr;
   FTRACE(1, "function entry for {}: using selectMethod\n",
-         context.func->fullName()->data());
+         func->fullName()->data());
 
   auto ret = std::make_shared<RegionDesc>();
 
   Arena arena;
-  GraphBuilder gb(arena, context.func);
+  GraphBuilder gb(arena, func);
   auto const graph = gb.build();
-  auto const unit = context.func->unit();
+  auto const unit = func->unit();
 
   jit::hash_map<Block*,RegionDesc::BlockId> blockMap;
 
@@ -89,7 +90,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
     for (Block* b = graph->first_linear; b != nullptr; b = b->next_rpo) {
       auto const start  = unit->offsetOf(b->start);
       auto const length = numInstrs(b->start, b->end);
-      SrcKey sk{context.func, start, context.resumeMode};
+      SrcKey sk{context.sk, start};
       auto const rblock = ret->addBlock(sk, length, spOffset);
       blockMap[b] = rblock->id();
       // flag SP offset as unknown for all but the first block
@@ -134,9 +135,9 @@ RegionDescPtr selectMethod(const RegionContext& context) {
           succ->initialSpOffset() == sp,
           "Stack depth mismatch in region method on {}\n"
           "  srcblkoff={}, dstblkoff={}, src={}, target={}",
-          context.func->fullName()->data(),
-          context.func->unit()->offsetOf(b->start),
-          context.func->unit()->offsetOf(b->succs[idx]->start),
+          func->fullName()->data(),
+          func->unit()->offsetOf(b->start),
+          func->unit()->offsetOf(b->succs[idx]->start),
           sp.offset,
           succ->initialSpOffset().offset
         );
@@ -145,7 +146,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
       succ->setInitialSpOffset(sp);
       FTRACE(2,
         "spOff for {} -> {}\n",
-        context.func->unit()->offsetOf(b->succs[idx]->start),
+        func->unit()->offsetOf(b->succs[idx]->start),
         sp.offset
       );
     }
@@ -156,7 +157,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
   for (auto& lt : context.liveTypes) {
     switch (lt.location.tag()) {
       case LTag::Local:
-        if (lt.location.localId() < context.func->numParams()) {
+        if (lt.location.localId() < func->numParams()) {
           // Only predict objectness, not the specific class type.
           auto const type = lt.type < TObj ? TObj : lt.type;
           ret->entry()->addPreCondition({lt.location, type, DataTypeSpecific});

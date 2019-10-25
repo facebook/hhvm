@@ -35,21 +35,17 @@ let extract_as_json_string
   ignore @@ disable_nontoplevel_declarations;
   ignore @@ disable_legacy_soft_typehints;
   ignore @@ disable_legacy_attribute_syntax;
-  let unnormalized =
-    Rust_facts_ffi.extract_as_json_ffi
-      ( (bool2int php5_compat_mode lsl 0)
-      lor (bool2int hhvm_compat_mode lsl 1)
-      lor (bool2int allow_new_attribute_syntax lsl 2) )
-      filename
-      text
-      !mangle_xhp_mode
-  in
-  if unnormalized = "" then
-    None
-  else
-    (* make it compact (same line breaks and whitespace) via Hh_json *)
-    (* to avoid differences in output (because many tests rely on it!) *)
-    Some (unnormalized |> Hh_json.json_of_string |> Hh_json.json_to_multiline)
+  Rust_facts_ffi.extract_as_json_ffi
+    ( (bool2int php5_compat_mode lsl 0)
+    lor (bool2int hhvm_compat_mode lsl 1)
+    lor (bool2int allow_new_attribute_syntax lsl 2) )
+    filename
+    text
+    !mangle_xhp_mode
+  |> Option.map ~f:(fun unnormalized ->
+         (* make it compact (same line breaks and whitespace) via Hh_json *)
+         (* to avoid differences in output (because many tests rely on it!) *)
+         unnormalized |> Hh_json.json_of_string |> Hh_json.json_to_multiline)
 
 let from_text
     ~(php5_compat_mode : bool)

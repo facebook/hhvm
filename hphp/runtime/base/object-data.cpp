@@ -1694,7 +1694,6 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
         SCOPE_EXIT { tvDecRefGen(r.val); };
         // don't unbox until after setopBody; see longer comment below
         setopBody(tvToCell(&r.val), op, val);
-        tvUnboxIfNeeded(r.val);
         if (m_cls->rtAttribute(Class::UseSet)) {
           cellDup(tvAssertCell(r.val), tvRef);
           if (invokeSet(key, tvAssertCell(tvRef))) {
@@ -1757,11 +1756,7 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
     if (!r) tvWriteNull(r.val);
     SCOPE_EXIT { tvDecRefGen(r.val); };
 
-    // Note: the tvUnboxIfNeeded comes *after* the setop on purpose
-    // here, even though it comes before the IncDecOp in the analogous
-    // situation in incDecProp.  This is to match zend 5.5 behavior.
     setopBody(tvToCell(&r.val), op, val);
-    tvUnboxIfNeeded(r.val);
 
     if (prop) raise_error("Cannot access protected property");
     prop = makeDynProp(key);
@@ -1806,7 +1801,6 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     if (type(prop) == KindOfUninit && m_cls->rtAttribute(Class::UseGet)) {
       if (auto r = invokeGet(key)) {
         SCOPE_EXIT { tvDecRefGen(r.val); };
-        tvUnboxIfNeeded(r.val);
         auto const dest = IncDecBody(op, tvAssertCell(&r.val));
         if (m_cls->rtAttribute(Class::UseSet)) {
           invokeSet(key, tvAssertCell(r.val));
@@ -1868,7 +1862,6 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
     if (auto r = invokeNativeGetProp(key)) {
       SCOPE_EXIT { tvDecRefGen(r.val); };
-      tvUnboxIfNeeded(r.val);
       auto const dest = IncDecBody(op, tvAssertCell(&r.val));
       if (invokeNativeSetProp(key, tvAssertCell(r.val))) {
         return dest;
@@ -1883,7 +1876,6 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     auto r = invokeGet(key);
     if (!r) tvWriteNull(r.val);
     SCOPE_EXIT { tvDecRefGen(r.val); };
-    tvUnboxIfNeeded(r.val);
     auto const dest = IncDecBody(op, tvAssertCell(&r.val));
     if (prop) raise_error("Cannot access protected property");
     prop = makeDynProp(key);
@@ -1899,7 +1891,6 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   if (useGet && useSet) {
     if (auto r = invokeGet(key)) {
       SCOPE_EXIT { tvDecRefGen(r.val); };
-      tvUnboxIfNeeded(r.val);
       auto const dest = IncDecBody(op, tvAssertCell(&r.val));
       invokeSet(key, tvAssertCell(r.val));
       return dest;

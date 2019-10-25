@@ -27,60 +27,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Boxing and unboxing.
- *
- * All of these functions assume that `tv' is live (i.e., contains a valid,
- * refcount-supported value).
- */
-
-/*
- * Box `tv' in place.
- */
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvBox(T&& tv) {
-  assertx(cellIsPlausible(as_tv(tv)));
-  val(tv).pref = RefData::Make(as_tv(tv));
-  type(tv) = KindOfRef;
-}
-
-/*
- * Box `tv' in place, if it's not already boxed.
- */
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvBoxIfNeeded(T&& tv) {
-  if (!isRefType(type(tv))) tvBox(tv);
-}
-
-/*
- * Unbox `tv' in place.
- *
- * @requires: isRefType(tv->m_type)
- */
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvUnbox(T&& tv) {
-  assertx(refIsPlausible(as_tv(tv)));
-
-  auto const r = val(tv).pref;
-  auto const inner = r->cell();
-  assertx(cellIsPlausible(*inner));
-
-  val(tv).num = inner->m_data.num;
-  type(tv) = inner->m_type;
-  tvIncRefGen(as_tv(tv));
-  decRefRef(r);
-
-  assertx(tvIsPlausible(as_tv(tv)));
-}
-
-/*
- * Unbox `tv' in place, if it's a ref.
- */
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvUnboxIfNeeded(T&& tv) {
-  if (isRefType(type(tv))) tvUnbox(tv);
-}
-
-/*
  * Return a reference to an unboxed `tv'.
  */
 ALWAYS_INLINE Cell& tvToCell(TypedValue& tv) {

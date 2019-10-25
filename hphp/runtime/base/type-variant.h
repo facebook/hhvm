@@ -1257,12 +1257,6 @@ struct Variant : private TypedValue {
     return *this;
   }
 
-  /*
-   * Access this Variant as a Ref, converting it to a Ref it isn't
-   * one.
-   */
-  Ref* asRef() { tvBoxIfNeeded(*asTypedValue()); return this; }
-
   TypedValue detach() noexcept {
     auto tv = *asTypedValue();
     m_type = KindOfNull;
@@ -1278,9 +1272,6 @@ struct Variant : private TypedValue {
 
   ResourceData* detachResourceData() {
     assertx(is(KindOfResource));
-    if (UNLIKELY(isRefType(m_type))) {
-      tvUnbox(*asTypedValue());
-    }
     assertx(m_type == KindOfResource);
     m_type = KindOfNull;
     return m_data.pres->data();
@@ -1288,9 +1279,6 @@ struct Variant : private TypedValue {
 
   ObjectData* detachObjectData() {
     assertx(is(KindOfObject));
-    if (UNLIKELY(isRefType(m_type))) {
-      tvUnbox(*asTypedValue());
-    }
     assertx(m_type == KindOfObject);
     m_type = KindOfNull;
     return m_data.pobj;

@@ -630,9 +630,6 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
                           ctx.invName, ctx.dynamic, checkRef,
                           allowDynCallNoPointer)
   );
-  if (UNLIKELY(isRefType(ret.getRawType()))) {
-    tvUnbox(*ret.asTypedValue());
-  }
   return ret;
 }
 
@@ -646,9 +643,6 @@ invoke(const String& function, const Variant& params,
                             false, allowDynCallNoPointer)
 
     );
-    if (UNLIKELY(isRefType(ret.getRawType()))) {
-      tvUnbox(*ret.asTypedValue());
-    }
     return ret;
   }
   throw ExtendedException("(1) call the function without enough arguments OR "
@@ -674,9 +668,6 @@ Variant invoke_static_method(const String& s, const String& method,
   auto ret = Variant::attach(
     g_context->invokeFunc(f, params, nullptr, class_)
   );
-  if (UNLIKELY(isRefType(ret.getRawType()))) {
-    tvUnbox(*ret.asTypedValue());
-  }
   return ret;
 }
 

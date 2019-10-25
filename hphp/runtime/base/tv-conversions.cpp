@@ -55,7 +55,6 @@ namespace HPHP {
 template<typename T>
 enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
   bool b;
 
   do {
@@ -147,7 +146,6 @@ bool tvCastToBoolean(TypedValue tv) {
 template<typename T>
 enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
   double d;
 
   do {
@@ -231,8 +229,6 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
 template<typename T>
 enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
   assertx(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
-
   assertx(cellIsPlausible(*tv));
   int64_t i;
 
@@ -391,7 +387,6 @@ const StaticString
 template<typename T>
 enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
   cellCastToStringInPlace(tv);
 }
 
@@ -663,7 +658,6 @@ assign(LHS lhs, T&& rhs) {
 template<typename T, IntishCast IC /* = IntishCast::None */>
 enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
   ArrayData* a;
 
   do {
@@ -829,7 +823,6 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
 template<typename T>
 enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
   ArrayData* a;
 
   do {
@@ -941,7 +934,6 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
 template<typename T>
 enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
   ArrayData* a;
 
   do {
@@ -1053,7 +1045,6 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
 template<typename T>
 enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
   ArrayData* a;
 
   do {
@@ -1168,7 +1159,6 @@ template<typename T>
 enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
   ArrayData* a;
 
   do {
@@ -1292,7 +1282,6 @@ template<typename T>
 enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
   ArrayData* a;
 
   do {
@@ -1478,7 +1467,6 @@ Object tvCastToObject(TypedValue tv) {
 template<typename T>
 enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
-  tvUnboxIfNeeded(tv);
 
   do {
     switch (type(tv)) {

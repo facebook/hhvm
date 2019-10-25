@@ -1,6 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-var_dump(preg_match('/\PN+/', '123abc', $m));
+$m = null;
+var_dump(preg_match_with_matches('/\PN+/', '123abc', inout $m));
 var_dump($m);
 
 var_dump(preg_match('/\P{N}+/A', '123abc'));

@@ -382,12 +382,13 @@ dependencies = [
 name = "hack_parser_errors_ffi"
 version = "3.49.0"
 dependencies = [
+ "hack_ocamlrep 3.49.0",
+ "hack_ocamlrep_ocamlpool 3.72.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
  "hack_parser_errors 3.49.0",
  "hack_parser_ffi 3.49.0",
- "hack_utils_ocamlpool 3.49.0",
  "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "syntax_tree 3.49.0",
 ]

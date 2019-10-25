@@ -10,34 +10,34 @@
 
 use parser_rust as parser;
 
-use ocamlpool_rust::{caml_raise, ocamlvalue::Ocamlvalue, utils::*};
-use oxidized::{parser_options::ParserOptions, relative_path::RelativePath};
-use parser::{positioned_syntax::PositionedSyntax, source_text::SourceText};
+use ocamlrep::{ptr::UnsafeOcamlPtr, OcamlRep};
+use ocamlrep_ocamlpool::ocaml_ffi;
+use oxidized::parser_options::ParserOptions;
+use parser::{
+    positioned_syntax::PositionedSyntax, source_text::SourceText, syntax_error::SyntaxError,
+};
 use syntax_tree::SyntaxTree;
-
-extern "C" {
-    fn ocamlpool_enter();
-    fn ocamlpool_leave();
-}
 
 // "only_for_parser_errors" because it sets only a subset of options relevant to parser errors,
 // leaving the rest default
 unsafe fn parser_options_from_ocaml_only_for_parser_errors(
-    ocaml_parser_options: &ocaml::Value,
+    ocaml_opts: UnsafeOcamlPtr,
 ) -> (ParserOptions, (bool, bool, bool)) {
-    let hhvm_compat_mode = bool_field(ocaml_parser_options, 0);
-    let hhi_mode = bool_field(ocaml_parser_options, 1);
-    let codegen = bool_field(ocaml_parser_options, 2);
+    let ocaml_opts = ocaml_opts.as_usize() as *const usize;
+
+    let hhvm_compat_mode = bool::from_ocaml(*ocaml_opts.add(0)).unwrap();
+    let hhi_mode = bool::from_ocaml(*ocaml_opts.add(1)).unwrap();
+    let codegen = bool::from_ocaml(*ocaml_opts.add(2)).unwrap();
 
     let mut parser_options = ParserOptions::default();
 
-    let po_disable_lval_as_an_expression = bool_field(ocaml_parser_options, 3);
-    let po_disable_legacy_soft_typehints = bool_field(ocaml_parser_options, 4);
-    let tco_const_static_props = bool_field(ocaml_parser_options, 5);
-    let po_disable_legacy_attribute_syntax = bool_field(ocaml_parser_options, 6);
-    let po_const_default_func_args = bool_field(ocaml_parser_options, 7);
-    let po_abstract_static_props = bool_field(ocaml_parser_options, 8);
-    let po_disallow_func_ptrs_in_constants = bool_field(ocaml_parser_options, 9);
+    let po_disable_lval_as_an_expression = bool::from_ocaml(*ocaml_opts.add(3)).unwrap();
+    let po_disable_legacy_soft_typehints = bool::from_ocaml(*ocaml_opts.add(4)).unwrap();
+    let tco_const_static_props = bool::from_ocaml(*ocaml_opts.add(5)).unwrap();
+    let po_disable_legacy_attribute_syntax = bool::from_ocaml(*ocaml_opts.add(6)).unwrap();
+    let po_const_default_func_args = bool::from_ocaml(*ocaml_opts.add(7)).unwrap();
+    let po_abstract_static_props = bool::from_ocaml(*ocaml_opts.add(8)).unwrap();
+    let po_disallow_func_ptrs_in_constants = bool::from_ocaml(*ocaml_opts.add(9)).unwrap();
 
     parser_options.po_disable_lval_as_an_expression = po_disable_lval_as_an_expression;
     parser_options.po_disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
@@ -73,28 +73,32 @@ where
     }
 }
 
-caml_raise!(drop_tree_positioned, |ocaml_tree|, <res>, {
-    let tree_pointer = ocaml_tree.usize_val() as *mut SyntaxTree<PositionedSyntax, ()>;
-    let mut tree = Box::from_raw(tree_pointer);
-    drop_tree(tree);
-    res = ocaml::Value::unit();
-} -> res);
+ocaml_ffi! {
+    fn drop_tree_positioned(ocaml_tree: usize) {
+        let tree_pointer = ocaml_tree as *mut SyntaxTree<PositionedSyntax, ()>;
+        let tree = unsafe { Box::from_raw(tree_pointer) };
+        drop_tree(tree);
+    }
 
-caml_raise!(rust_parser_errors_positioned, |ocaml_source_text, ocaml_tree, ocaml_parser_options|, <res>, {
-    let (parser_options, (hhvm_compat_mode, hhi_mode, codegen)) =
-        parser_options_from_ocaml_only_for_parser_errors(&ocaml_parser_options);
-    let ocaml_source_text_value = ocaml_source_text.0;
+    fn rust_parser_errors_positioned(
+        source_text: SourceText,
+        ocaml_tree: usize,
+        ocaml_parser_options: UnsafeOcamlPtr,
+    ) -> Vec<SyntaxError> {
+        let (parser_options, (hhvm_compat_mode, hhi_mode, codegen)) =
+            unsafe { parser_options_from_ocaml_only_for_parser_errors(ocaml_parser_options) };
+        let tree = unsafe {
+            <SyntaxTree<PositionedSyntax, ()>>::ffi_pointer_into_boxed(ocaml_tree, &source_text)
+        };
 
-    let relative_path_raw = block_field(&ocaml_source_text, 0);
-    let relative_path = RelativePath::from_ocamlvalue(&relative_path_raw);
-    let content = str_field(&ocaml_source_text, 2);
-    let source_text = SourceText::make_with_raw(&relative_path, &content.data(), ocaml_source_text_value);
-    let tree = <SyntaxTree<PositionedSyntax, ()>>::ffi_pointer_into_boxed(ocaml_tree.usize_val(), &source_text);
-
-    let errors = rust_parser_errors::ParserErrors::parse_errors(&tree, parser_options, hhvm_compat_mode, hhi_mode, codegen);
-    drop_tree(tree);
-    ocamlpool_enter();
-    let ocaml_errors = errors.ocamlvalue();
-    ocamlpool_leave();
-    res = ocaml::Value::new(ocaml_errors);
-} -> res);
+        let errors = rust_parser_errors::ParserErrors::parse_errors(
+            &tree,
+            parser_options,
+            hhvm_compat_mode,
+            hhi_mode,
+            codegen,
+        );
+        drop_tree(tree);
+        errors
+    }
+}

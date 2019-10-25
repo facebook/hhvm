@@ -643,10 +643,10 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     out << std::endl;
   }
 
-  if (repoReturnType().tag() != RepoAuthType::Tag::Gen) {
+  if (repoReturnType().tag() != RepoAuthType::Tag::Cell) {
     out << "repoReturnType: " << show(repoReturnType()) << '\n';
   }
-  if (repoAwaitedReturnType().tag() != RepoAuthType::Tag::Gen) {
+  if (repoAwaitedReturnType().tag() != RepoAuthType::Tag::Cell) {
     out << "repoAwaitedReturnType: " << show(repoAwaitedReturnType()) << '\n';
   }
   out << "maxStackCells: " << maxStackCells() << '\n'

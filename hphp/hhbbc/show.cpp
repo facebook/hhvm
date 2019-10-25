@@ -457,7 +457,6 @@ std::string show(const Type& t) {
     return ret;
   case DataTag::Obj:
   case DataTag::Cls:
-  case DataTag::RefInner:
   case DataTag::ArrLikePacked:
   case DataTag::ArrLikePackedN:
   case DataTag::ArrLikeMap:
@@ -510,9 +509,6 @@ std::string show(const Type& t) {
     if (t.m_data.dcls.isCtx) {
       folly::toAppend(" this", &ret);
     }
-    break;
-  case DataTag::RefInner:
-    folly::toAppend("(", show(*t.m_data.inner), ")", &ret);
     break;
   case DataTag::None:
     break;

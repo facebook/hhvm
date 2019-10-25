@@ -280,7 +280,6 @@ auto const primitives = folly::lazy([] {
     TObj,
     TRes,
     TCls,
-    TRef,
     TClsMeth
   };
 });
@@ -335,8 +334,6 @@ auto const non_opt_unions = folly::lazy([] {
   return std::vector<Type> {
     TInitCell,
     TCell,
-    TInitGen,
-    TGen,
     TNull,
     TBool,
     TNum,
@@ -567,7 +564,6 @@ TEST(Type, Prim) {
     { TInitPrim, sval(s_test.get()) },
     { TPrim, sval(s_test.get()) },
     { TInitPrim, TUninit },
-    { TPrim, TRef },
     { TPrim, TObj },
   };
 
@@ -894,36 +890,12 @@ TEST(Type, OptCouldBe) {
   }
 }
 
-TEST(Type, Ref) {
-  EXPECT_TRUE(TRef == TRef);
-  EXPECT_TRUE(TRef != ref_to(TInt));
-  EXPECT_TRUE(ref_to(TInt) == ref_to(TInt));
-  EXPECT_TRUE(ref_to(TInt) != ref_to(TOptInt));
-
-  EXPECT_TRUE(TRef.couldBe(ref_to(TInt)));
-  EXPECT_TRUE(ref_to(TInt).couldBe(BRef));
-  EXPECT_TRUE(!ref_to(TInt).couldBe(ref_to(TObj)));
-  EXPECT_TRUE(ref_to(TOptInt).couldBe(ref_to(TInt)));
-
-  EXPECT_TRUE(!TRef.subtypeOf(ref_to(TInt)));
-  EXPECT_TRUE(ref_to(TInt).subtypeOf(BRef));
-  EXPECT_TRUE(ref_to(TInt).subtypeOf(ref_to(TOptInt)));
-  EXPECT_TRUE(!ref_to(TOptInt).subtypeOf(ref_to(TInt)));
-  EXPECT_TRUE(!ref_to(TObj).subtypeOf(ref_to(TInt)));
-  EXPECT_TRUE(!ref_to(TInt).subtypeOf(ref_to(TObj)));
-
-  EXPECT_TRUE(union_of(TRef, ref_to(TInt)) == TRef);
-  EXPECT_TRUE(union_of(ref_to(TInt), ref_to(TObj)) == ref_to(TInitCell));
-  EXPECT_TRUE(union_of(ref_to(TInitNull), ref_to(TObj)) == ref_to(TOptObj));
-}
-
 TEST(Type, SpecificExamples) {
   // Random examples to stress option types, values, etc:
 
   EXPECT_TRUE(!TInt.subtypeOf(ival(1)));
 
   EXPECT_TRUE(TInitCell.couldBe(ival(1)));
-  EXPECT_TRUE(TInitCell.subtypeOf(BGen));
   EXPECT_TRUE(ival(2).subtypeOf(BInt));
   EXPECT_TRUE(!ival(2).subtypeOf(BBool));
   EXPECT_TRUE(ival(3).subtypeOrNull(BInt));
@@ -946,8 +918,6 @@ TEST(Type, SpecificExamples) {
   EXPECT_TRUE(TNull.couldBe(opt(ival(3))));
   EXPECT_TRUE(TInitNull.subtypeOf(opt(ival(3))));
   EXPECT_TRUE(!TNull.subtypeOf(opt(ival(3))));
-
-  EXPECT_EQ(TGen, union_of(TRef, TUninit));
 }
 
 TEST(Type, IndexBased) {
@@ -1604,16 +1574,16 @@ TEST(Type, FromHNIConstraint) {
   EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\int")), TInt);
   EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\float")), TDbl);
   EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\float")), TOptDbl);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\mixed")), TInitGen);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\mixed")), TInitCell);
   EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\arraykey")), TArrKey);
   EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\arraykey")), TOptArrKey);
 
   // These are conservative, but we're testing them that way.  If we
   // make the function better later we'll remove the tests.
-  EXPECT_EQ(from_hni_constraint(makeStaticString("stdClass")), TGen);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("?stdClass")), TGen);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("fooooo")), TGen);
-  EXPECT_EQ(from_hni_constraint(makeStaticString("")), TGen);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("stdClass")), TCell);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?stdClass")), TCell);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("fooooo")), TCell);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("")), TCell);
 }
 
 TEST(Type, ArrPacked1) {
@@ -1798,7 +1768,7 @@ TEST(Type, ArrPackedN) {
   EXPECT_TRUE(s2.subtypeOf(opt(arr_packedn(TInt))));
 
   EXPECT_TRUE(s2.couldBe(arr_packedn(TInt)));
-  EXPECT_TRUE(s2.couldBe(arr_packedn(TInitGen)));
+  EXPECT_TRUE(s2.couldBe(arr_packedn(TInitCell)));
 
   auto const sn1 = sarr_packedn(TInt);
   auto const sn2 = sarr_packedn(TInitNull);
@@ -2204,7 +2174,7 @@ TEST(Type, LoosenStaticness) {
   for (auto const& t : all()) {
     EXPECT_EQ(loosen_staticness(wait_handle(index, t)),
               wait_handle(index, loosen_staticness(t)));
-    if (t.subtypeOf(TInitGen)) {
+    if (t.subtypeOf(TInitCell)) {
       EXPECT_EQ(loosen_staticness(arr_packedn(t)),
                 arr_packedn(loosen_staticness(t)));
       EXPECT_EQ(loosen_staticness(sarr_packedn(t)),
@@ -2348,7 +2318,6 @@ TEST(Type, LoosenValues) {
     { sval(s_test.get()), TSStr },
     { sval_nonstatic(s_test.get()), TStr },
     { aval(test_array_packed_value()), TSPArrN },
-    { ref_to(TInt), TRef },
     { arr_packedn(TInt), TPArrN },
     { arr_packed({TInt, TBool}), TPArrN },
     { arr_packed_varray({TInt, TBool}), TVArrN },
@@ -2357,7 +2326,6 @@ TEST(Type, LoosenValues) {
   };
   for (auto const& p : tests) {
     EXPECT_EQ(loosen_values(p.first), p.second);
-    if (p.first.subtypeOf(BRef)) continue;
     EXPECT_EQ(loosen_values(opt(p.first)), opt(p.second));
   }
 

@@ -120,7 +120,6 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::OptUncStrLike:
   case T::Null:
   case T::Cell:
-  case T::Ref:
   case T::InitUnc:
   case T::Unc:
   case T::ArrKey:
@@ -128,8 +127,6 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::StrLike:
   case T::UncStrLike:
   case T::InitCell:
-  case T::InitGen:
-  case T::Gen:
   case T::Uninit:
   case T::InitNull:
   case T::Bool:
@@ -468,15 +465,6 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     // fallthrough
   case T::Cell:
     return !isRefType(tv.m_type);
-
-  case T::Ref:
-    return isRefType(tv.m_type);
-
-  case T::InitGen:
-    if (tv.m_type == KindOfUninit) return false;
-    // fallthrough
-  case T::Gen:
-    return true;
   }
   not_reached();
 }
@@ -502,7 +490,6 @@ std::string show(RepoAuthType rat) {
   case T::OptStrLike:    return "?StrLike";
   case T::Null:          return "Null";
   case T::Cell:          return "Cell";
-  case T::Ref:           return "Ref";
   case T::InitUnc:       return "InitUnc";
   case T::Unc:           return "Unc";
   case T::UncArrKey:     return "UncArrKey";
@@ -510,8 +497,6 @@ std::string show(RepoAuthType rat) {
   case T::UncStrLike:    return "UncStrLike";
   case T::StrLike:       return "StrLike";
   case T::InitCell:      return "InitCell";
-  case T::InitGen:       return "InitGen";
-  case T::Gen:           return "Gen";
   case T::Uninit:        return "Uninit";
   case T::InitNull:      return "InitNull";
   case T::Bool:          return "Bool";

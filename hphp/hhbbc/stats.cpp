@@ -60,9 +60,6 @@ TRACE_SET_MOD(hhbbc_stats);
 //////////////////////////////////////////////////////////////////////
 
 #define STAT_TYPES                              \
-  X(Gen)                                        \
-  X(InitGen)                                    \
-  X(Ref)                                        \
   X(Cell)                                       \
   X(InitCell)                                   \
   X(Unc)                                        \

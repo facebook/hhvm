@@ -83,9 +83,6 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::Unc:
   case T::InitCell:
   case T::Cell:
-  case T::Ref:
-  case T::InitGen:
-  case T::Gen:
     assertx(!highBitSet);
     return tagSize;
   case T::SArr:

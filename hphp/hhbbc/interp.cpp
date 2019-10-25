@@ -2343,7 +2343,7 @@ void in(ISS& env, const bc::CGetL& op) {
         op.loc1 == last->PopL.loc1) {
       reprocess(env);
       rewind(env, 1);
-      if (!locCouldBeRef(env, op.loc1)) setLocRaw(env, op.loc1, TCell);
+      setLocRaw(env, op.loc1, TCell);
       return reduce(env, bc::SetL { op.loc1 });
     }
   }
@@ -3507,16 +3507,15 @@ folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
   auto equivLoc = topStkEquiv(env);
   // If the local could be a Ref, don't record equality because the stack
   // element and the local won't actually have the same type.
-  if (!locCouldBeRef(env, op.loc1)) {
-    if (equivLoc == StackThisId && env.state.thisLoc != NoLocalId) {
-      if (env.state.thisLoc == op.loc1 ||
-                 locsAreEquiv(env, env.state.thisLoc, op.loc1)) {
-        return folly::none;
-      } else {
-        equivLoc = env.state.thisLoc;
-      }
+  if (equivLoc == StackThisId && env.state.thisLoc != NoLocalId) {
+    if (env.state.thisLoc == op.loc1 ||
+               locsAreEquiv(env, env.state.thisLoc, op.loc1)) {
+      return folly::none;
+    } else {
+      equivLoc = env.state.thisLoc;
     }
-    assertx(!is_volatile_local(env.ctx.func, op.loc1));
+  }
+  if (!is_volatile_local(env.ctx.func, op.loc1)) {
     if (equivLoc <= MaxLocalId) {
       if (equivLoc == op.loc1 ||
           locsAreEquiv(env, equivLoc, op.loc1)) {
@@ -4683,7 +4682,7 @@ void iterInitKImpl(ISS& env, IterId iter, LocalId valueLoc, LocalId keyLoc,
     // equivalency.
     setLoc(env, valueLoc, std::move(ity.value));
     setLoc(env, keyLoc, std::move(ity.key));
-    if (!locCouldBeRef(env, keyLoc)) setIterKey(env, iter, keyLoc);
+    setIterKey(env, iter, keyLoc);
   };
 
   assert(iterIsDead(env, iter));
@@ -4798,7 +4797,7 @@ void iterNextKImpl(ISS& env, IterId iter, LocalId valueLoc,
         case IterTypes::Count::Any:
           setLoc(env, valueLoc, ti.types.value);
           setLoc(env, keyLoc, ti.types.key);
-          if (!locCouldBeRef(env, keyLoc)) setIterKey(env, iter, keyLoc);
+          setIterKey(env, iter, keyLoc);
           return false;
         case IterTypes::Count::Empty:
           always_assert(false);
@@ -5113,7 +5112,7 @@ bool couldBeMocked(const Type& t) {
 void in(ISS& env, const bc::VerifyParamType& op) {
   IgnoreUsedParams _{env};
 
-  if (env.ctx.func->isMemoizeImpl && !locCouldBeRef(env, op.loc1)) {
+  if (env.ctx.func->isMemoizeImpl) {
     // a MemoizeImpl's params have already been checked by the wrapper
     return reduce(env);
   }

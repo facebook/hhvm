@@ -186,13 +186,6 @@ uint32_t numPush(const Bytecode& bc) {
   return bc.numPush();
 }
 
-// Returns whether a set on something containing type t could have
-// side-effects (running destuctors, or modifying arbitrary things via
-// a Ref).
-bool setCouldHaveSideEffects(const Type& t) {
-  return t.couldBe(BRef);
-}
-
 // Some reads could raise warnings and run arbitrary code.
 bool readCouldHaveSideEffects(const Type& t) {
   return t.couldBe(BUninit);
@@ -600,40 +593,9 @@ Type locRaw(Env& env, LocalId loc) {
   return env.stateBefore.locals[loc];
 }
 
-bool setLocCouldHaveSideEffects(Env& env, LocalId loc, bool forExit = false) {
-  // A "this" local is protected by the $this in the ActRec.
-  if (loc == env.stateBefore.thisLoc) return false;
-
-  // Normally, if there's an equivLocal this isn't the last reference,
-  // so overwriting it won't run any destructors. But if we're
-  // destroying all the locals (eg RetC) they can't all protect each
-  // other; in that case we require a lower equivLoc to ensure that
-  // one local from each equivalence set will still be marked as
-  // having effects (choosing lower numbers also means we mark the
-  // params as live, which makes it more likely that we can eliminate
-  // a local).
-  static_assert(NoLocalId == std::numeric_limits<LocalId>::max(),
-                "NoLocalId must be greater than all valid local ids");
-  if (env.stateBefore.equivLocals.size() > loc) {
-    auto l = env.stateBefore.equivLocals[loc];
-    if (l != NoLocalId) {
-      if (!forExit) return false;
-      do {
-        if (l < loc) return false;
-        l = env.stateBefore.equivLocals[l];
-      } while (l != loc);
-    }
-  }
-
-  return setCouldHaveSideEffects(locRaw(env, loc));
-}
-
-void readDtorLocs(Env& env) {
-  for (auto i = LocalId{0}; i < env.stateBefore.locals.size(); ++i) {
-    if (setLocCouldHaveSideEffects(env, i, true)) {
-      addLocGen(env, i);
-    }
-  }
+bool isLocVolatile(Env& env, uint32_t id) {
+  if (id >= kMaxTrackedLocals) return true;
+  return is_volatile_local(env.dceState.ainfo.ctx.func, id);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1083,9 +1045,8 @@ void cgetImpl(Env& env, LocalId loc, bool quiet) {
         return PushFlags::MarkUnused;
       }
       if (!isLocLive(env, loc) &&
-          !setCouldHaveSideEffects(locRaw(env, loc)) &&
           !readCouldHaveSideEffects(locRaw(env, loc)) &&
-          !is_volatile_local(env.dceState.ainfo.ctx.func, loc)) {
+          !isLocVolatile(env, loc)) {
         // note: PushL does not deal with Uninit, so we need the
         // readCouldHaveSideEffects here, regardless of quiet.
         env.dceState.replaceMap.insert({ env.id, { bc::PushL { loc } } });
@@ -1144,11 +1105,11 @@ void dce(Env& env, const bc::BareThis& op) {
     });
 }
 
-void dce(Env& env, const bc::RetC&)  { pop(env); readDtorLocs(env); }
-void dce(Env& env, const bc::RetCSuspended&) { pop(env); readDtorLocs(env); }
-void dce(Env& env, const bc::Throw&) { pop(env); readDtorLocs(env); }
-void dce(Env& env, const bc::Fatal&) { pop(env); readDtorLocs(env); }
-void dce(Env& env, const bc::Exit&)  { stack_ops(env); readDtorLocs(env); }
+void dce(Env& env, const bc::RetC&)  { pop(env); }
+void dce(Env& env, const bc::RetCSuspended&) { pop(env); }
+void dce(Env& env, const bc::Throw&) { pop(env); }
+void dce(Env& env, const bc::Fatal&) { pop(env); }
+void dce(Env& env, const bc::Exit&)  { stack_ops(env); }
 
 void dce(Env& env, const bc::IsTypeC& op) {
   stack_ops(env, [&] (UseInfo& ui) {
@@ -1344,15 +1305,13 @@ void dce(Env& env, const bc::NewPair& op)         { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::ColFromArray& op)    { dceNewArrayLike(env, op); }
 
 void dce(Env& env, const bc::PopL& op) {
-  auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
-  if (!isLocLive(env, op.loc1) && !effects) {
-    assert(!locRaw(env, op.loc1).couldBe(BRef));
+  if (!isLocLive(env, op.loc1) && !isLocVolatile(env, op.loc1)) {
     discard(env);
     env.dceState.actionMap[env.id] = DceAction::PopInputs;
     return;
   }
   pop(env);
-  if (effects || locRaw(env, op.loc1).couldBe(BRef)) {
+  if (isLocVolatile(env, op.loc1)) {
     addLocGen(env, op.loc1);
   } else {
     addLocKill(env, op.loc1);
@@ -1366,9 +1325,7 @@ void dce(Env& env, const bc::InitThisLoc& op) {
 }
 
 void dce(Env& env, const bc::SetL& op) {
-  auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
-  if (!isLocLive(env, op.loc1) && !effects) {
-    assert(!locRaw(env, op.loc1).couldBe(BRef));
+  if (!isLocLive(env, op.loc1) && !isLocVolatile(env, op.loc1)) {
     return markDead(env);
   }
   stack_ops(env, [&] (UseInfo& ui) {
@@ -1380,7 +1337,7 @@ void dce(Env& env, const bc::SetL& op) {
     ui.actions[env.id] = DceAction::Replace;
     return PushFlags::MarkDead;
   });
-  if (effects || locRaw(env, op.loc1).couldBe(BRef)) {
+  if (isLocVolatile(env, op.loc1)) {
     addLocGen(env, op.loc1);
   } else {
     addLocKill(env, op.loc1);
@@ -1388,13 +1345,10 @@ void dce(Env& env, const bc::SetL& op) {
 }
 
 void dce(Env& env, const bc::UnsetL& op) {
-  auto const oldTy   = locRaw(env, op.loc1);
+  auto const oldTy = locRaw(env, op.loc1);
   if (oldTy.subtypeOf(BUninit)) return markDead(env);
 
-  // Unsetting a local bound to a static never has side effects
-  // because the static itself has a reference to the value.
-  auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
-
+  auto const effects = isLocVolatile(env, op.loc1);
   if (!isLocLive(env, op.loc1) && !effects) return markDead(env);
   if (effects) {
     addLocGen(env, op.loc1);
@@ -1411,8 +1365,8 @@ void dce(Env& env, const bc::UnsetL& op) {
  */
 void dce(Env& env, const bc::IncDecL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
-  auto const effects = setLocCouldHaveSideEffects(env, op.loc1) ||
-                         readCouldHaveSideEffects(oldTy);
+  auto const effects = readCouldHaveSideEffects(oldTy) ||
+                       isLocVolatile(env, op.loc1);
   stack_ops(env, [&] (const UseInfo& ui) {
       scheduleGenLoc(env, op.loc1);
       if (!isLocLive(env, op.loc1) && !effects && allUnused(ui)) {
@@ -1458,13 +1412,13 @@ bool setOpLSideEffects(const bc::SetOpL& op, const Type& lhs, const Type& rhs) {
  * kill it.
  */
 void dce(Env& env, const bc::SetOpL& op) {
-  auto const oldTy   = locRaw(env, op.loc1);
+  auto const oldTy = locRaw(env, op.loc1);
 
   stack_ops(env, [&] (UseInfo& ui) {
       scheduleGenLoc(env, op.loc1);
       if (!isLocLive(env, op.loc1) && allUnused(ui)) {
-        if (!setLocCouldHaveSideEffects(env, op.loc1) &&
-            !readCouldHaveSideEffects(oldTy) &&
+        if (!readCouldHaveSideEffects(oldTy) &&
+            !isLocVolatile(env, op.loc1) &&
             !setOpLSideEffects(op, oldTy, topC(env))) {
           return PushFlags::MarkUnused;
         }

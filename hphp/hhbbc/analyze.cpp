@@ -87,7 +87,7 @@ State pseudomain_entry_state(const php::Func* func) {
   ret.iters.resize(func->numIters);
   for (auto i = 0; i < ret.locals.size(); ++i) {
     // Named pseudomain locals are bound to $GLOBALS.
-    ret.locals[i] = func->locals[i].name ? TGen : TUninit;
+    ret.locals[i] = func->locals[i].name ? TCell : TUninit;
   }
   return ret;
 }
@@ -191,7 +191,7 @@ State entry_state(const Index& index, Context const ctx,
   // parameters.
   for (auto locId = uint32_t{0}; locId < ctx.func->locals.size(); ++locId) {
     if (is_volatile_local(ctx.func, locId)) {
-      ret.locals[locId] = TGen;
+      ret.locals[locId] = TCell;
     }
   }
 
@@ -459,7 +459,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * In this case, we leave the return type as TBottom, to indicate
    * the same to callers.
    */
-  assert(ai.inferredReturn.subtypeOf(BGen));
+  assert(ai.inferredReturn.subtypeOf(BCell));
 
   // For debugging, print the final input states for each block.
   FTRACE(2, "{}", [&] {
@@ -546,7 +546,7 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
      */
     auto const hniTy =
       clsAnalysis.anyInterceptable
-        ? TGen
+        ? TCell
         : from_hni_constraint(prop.userType);
     if (it->second.ty.subtypeOf(hniTy)) {
       it->second.ty = hniTy;

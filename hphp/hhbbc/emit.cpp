@@ -1064,7 +1064,6 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptStrLike:
   case T::Null:
   case T::Cell:
-  case T::Ref:
   case T::InitUnc:
   case T::Unc:
   case T::UncArrKey:
@@ -1072,8 +1071,6 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::UncStrLike:
   case T::StrLike:
   case T::InitCell:
-  case T::InitGen:
-  case T::Gen:
   case T::Uninit:
   case T::InitNull:
   case T::Bool:
@@ -1356,7 +1353,7 @@ void emit_class(EmitUnitState& state,
   auto const privateStatics = state.index.lookup_private_statics(&cls, true);
   for (auto& prop : cls.properties) {
     auto const makeRat = [&] (const Type& ty) -> RepoAuthType {
-      if (!ty.subtypeOf(BGen)) return RepoAuthType{};
+      if (!ty.subtypeOf(BCell)) return RepoAuthType{};
       if (ty.subtypeOf(BBottom)) {
         // A property can be TBottom if no sets (nor its initial value) is
         // compatible with its type-constraint, or if its LateInit and there's

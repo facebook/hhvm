@@ -83,10 +83,10 @@ folly::Optional<Bytecode> makeAssert(ArrayTypeTable::Builder& arrTable,
   auto const rat = make_repo_type(arrTable, t);
   using T = RepoAuthType::Tag;
   if (options.FilterAssertions) {
-    // Gen and InitGen don't add any useful information, so leave them
+    // Cell and InitCell don't add any useful information, so leave them
     // out entirely.
-    if (rat == RepoAuthType{T::Gen})     return folly::none;
-    if (rat == RepoAuthType{T::InitGen}) return folly::none;
+    if (rat == RepoAuthType{T::Cell})     return folly::none;
+    if (rat == RepoAuthType{T::InitCell}) return folly::none;
   }
   return Bytecode { TyBC { arg, rat } };
 }
@@ -178,13 +178,6 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
  * subtypes and adding this to the opcode table.
  */
 bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
-  // Generally consider CGetL obvious because if we knew the type of the local,
-  // we'll assert that right before the CGetL.
-  auto cgetlObvious = [&] (LocalId l, int idx) {
-    return !interp.state.locals[l].couldBe(BRef) ||
-      !interp.state.stack[interp.state.stack.size() - idx - 1].
-         type.strictSubtypeOf(TInitCell);
-  };
   switch (op.op) {
   case Op::Null:
   case Op::NullUninit:
@@ -270,15 +263,11 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
     return true;
 
   case Op::CGetL:
-    return cgetlObvious(op.CGetL.loc1, 0);
   case Op::CGetQuietL:
-    return cgetlObvious(op.CGetQuietL.loc1, 0);
   case Op::CUGetL:
-    return cgetlObvious(op.CUGetL.loc1, 0);
   case Op::CGetL2:
-    return cgetlObvious(op.CGetL2.loc1, 1);
   case Op::PushL:
-    return cgetlObvious(op.PushL.loc1, 0);
+    return true;
 
   // The output of SetL is obvious if you know what its input is
   // (which we'll assert if we know).

@@ -290,7 +290,7 @@ PropState make_unknown_propstate(const php::Class* cls,
   auto ret = PropState{};
   for (auto& prop : cls->properties) {
     if (filter(prop)) {
-      ret[prop.name].ty = TGen;
+      ret[prop.name].ty = TCell;
     }
   }
   return ret;
@@ -3599,7 +3599,7 @@ PublicSPropEntry lookup_public_static_impl(
   const ClassInfo* cinfo,
   SString prop
 ) {
-  auto const noInfo = PublicSPropEntry{TInitGen, TInitGen, nullptr, 0, true};
+  auto const noInfo = PublicSPropEntry{TInitCell, TInitCell, nullptr, 0, true};
 
   if (data.allPublicSPropsUnknown) return noInfo;
 
@@ -3661,7 +3661,7 @@ PublicSPropEntry lookup_public_static_impl(
   auto const classes = find_range(data.classInfo, cls->name);
   if (begin(classes) == end(classes) ||
       std::next(begin(classes)) != end(classes)) {
-    return PublicSPropEntry{TInitGen, TInitGen, nullptr, 0, true};
+    return PublicSPropEntry{TInitCell, TInitCell, nullptr, 0, true};
   }
   return lookup_public_static_impl(data, begin(classes)->second, name);
 }
@@ -3686,14 +3686,14 @@ Type lookup_public_prop_impl(
     }
   );
 
-  if (!prop) return TGen;
+  if (!prop) return TCell;
   // Make sure its non-static and public. Otherwise its another function's
   // problem.
-  if (prop->attrs & (AttrStatic | AttrPrivate)) return TGen;
+  if (prop->attrs & (AttrStatic | AttrPrivate)) return TCell;
 
   // Get a type corresponding to its declared type-hint (if any).
   auto ty = adjust_type_for_prop(
-    *data.m_index, *knownCls, &prop->typeConstraint, TGen
+    *data.m_index, *knownCls, &prop->typeConstraint, TCell
   );
   // We might have to include the initial value which might be outside of the
   // type-hint.
@@ -4902,7 +4902,7 @@ bool Index::prop_tc_maybe_unenforced(const php::Class& propCls,
     tc.type(),
     tc.isNullable(),
     tc.typeName(),
-    TGen
+    TCell
   );
   return res.maybeMixed;
 }
@@ -5486,16 +5486,16 @@ Index::lookup_private_statics(const php::Class* cls,
 Type Index::lookup_public_static(Context ctx,
                                  const Type& cls,
                                  const Type& name) const {
-  if (!is_specialized_cls(cls)) return TInitGen;
+  if (!is_specialized_cls(cls)) return TInitCell;
 
   auto const vname = tv(name);
-  if (!vname || vname->m_type != KindOfPersistentString) return TInitGen;
+  if (!vname || vname->m_type != KindOfPersistentString) return TInitCell;
   auto const sname = vname->m_data.pstr;
 
   if (ctx.unit) add_dependency(*m_data, sname, ctx, Dep::PublicSPropName);
 
   auto const dcls = dcls_of(cls);
-  if (dcls.cls.val.left()) return TInitGen;
+  if (dcls.cls.val.left()) return TInitCell;
   auto const cinfo = dcls.cls.val.right();
 
   switch (dcls.type) {
@@ -5570,14 +5570,14 @@ bool Index::lookup_public_static_maybe_late_init(const Type& cls,
 }
 
 Type Index::lookup_public_prop(const Type& cls, const Type& name) const {
-  if (!is_specialized_cls(cls)) return TGen;
+  if (!is_specialized_cls(cls)) return TCell;
 
   auto const vname = tv(name);
-  if (!vname || vname->m_type != KindOfPersistentString) return TGen;
+  if (!vname || vname->m_type != KindOfPersistentString) return TCell;
   auto const sname = vname->m_data.pstr;
 
   auto const dcls = dcls_of(cls);
-  if (dcls.cls.val.left()) return TGen;
+  if (dcls.cls.val.left()) return TCell;
   auto const cinfo = dcls.cls.val.right();
 
   switch (dcls.type) {
@@ -5606,7 +5606,7 @@ Type Index::lookup_public_prop(const php::Class* cls, SString name) const {
   auto const classes = find_range(m_data->classInfo, cls->name);
   if (begin(classes) == end(classes) ||
       std::next(begin(classes)) != end(classes)) {
-    return TGen;
+    return TCell;
   }
   return lookup_public_prop_impl(*m_data, begin(classes)->second, name);
 }
@@ -5686,7 +5686,7 @@ void Index::init_public_static_prop_types() {
               *this,
               *cinfo->cls,
               &prop.typeConstraint,
-              TInitGen
+              TInitCell
             ),
             initial
           ),
@@ -6093,7 +6093,7 @@ void Index::refine_public_statics(DependencyContextSet& deps) {
     auto it = m_data->unknownClassSProps.find(kv.first);
     if (it == end(m_data->unknownClassSProps)) {
       // If this is the first refinement, our previous state was effectively
-      // TGen for everything, so inserting a type into the map can only
+      // TCell for everything, so inserting a type into the map can only
       // refine. However, if this isn't the first refinement, a name not present
       // in the map means that its TBottom, so we shouldn't be inserting
       // anything.

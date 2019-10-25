@@ -1013,9 +1013,7 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("Cell",     T::Cell);
   X("Dbl",      T::Dbl);
   X("?Dbl",     T::OptDbl);
-  X("Gen",      T::Gen);
   X("InitCell", T::InitCell);
-  X("InitGen",  T::InitGen);
   X("InitNull", T::InitNull);
   X("InitUnc",  T::InitUnc);
   X("Int",      T::Int);
@@ -1031,7 +1029,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("?ClsMeth", T::OptClsMeth);
   X("Record",   T::Record);
   X("?Record",  T::OptRecord);
-  X("Ref",      T::Ref);
   X("?Res",     T::OptRes);
   X("Res",      T::Res);
   X("?SArr",    T::OptSArr);
@@ -1128,9 +1125,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::StrLike:
   case T::InitCell:
   case T::Cell:
-  case T::Ref:
-  case T::InitGen:
-  case T::Gen:
   case T::ExactObj:
   case T::SubObj:
   case T::OptExactObj:

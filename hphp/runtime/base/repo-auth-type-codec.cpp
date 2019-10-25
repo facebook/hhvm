@@ -78,9 +78,6 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::Unc:
   case T::InitCell:
   case T::Cell:
-  case T::Ref:
-  case T::InitGen:
-  case T::Gen:
     assertx(!highBitSet);
     return RepoAuthType{tag};
 
@@ -204,9 +201,6 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::Unc:
   case T::InitCell:
   case T::Cell:
-  case T::Ref:
-  case T::InitGen:
-  case T::Gen:
     break;
 
   case T::SArr:

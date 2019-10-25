@@ -94,9 +94,6 @@ struct RepoAuthType {
     TAG(OptStrLike)                               \
     TAG(InitCell)                                 \
     TAG(Cell)                                     \
-    TAG(Ref)                                      \
-    TAG(InitGen)                                  \
-    TAG(Gen)                                      \
     /* Types where array() may be non-null. */    \
     TAG(SArr)                                     \
     TAG(OptSArr)                                  \
@@ -138,7 +135,7 @@ struct RepoAuthType {
 #undef TAG
   };
 
-  explicit RepoAuthType(Tag tag = Tag::Gen, const StringData* sd = nullptr) {
+  explicit RepoAuthType(Tag tag = Tag::Cell, const StringData* sd = nullptr) {
     m_data.set(static_cast<uint16_t>(tag), sd);
     switch (tag) {
     case Tag::OptSubObj: case Tag::OptExactObj:

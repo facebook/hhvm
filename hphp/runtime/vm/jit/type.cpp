@@ -913,7 +913,6 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::Record:         return TRecord;
 
     case T::Cell:           return TCell;
-    case T::Ref:            return TBoxedInitCell;
     case T::UncArrKey:      return TInt | TPersistentStr;
     case T::ArrKey:         return TInt | TStr;
     case T::UncStrLike:     return TFunc | TPersistentStr;
@@ -921,8 +920,6 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::InitUnc:        return TUncountedInit;
     case T::Unc:            return TUncounted;
     case T::InitCell:       return TInitCell;
-    case T::InitGen:        return TInitGen;
-    case T::Gen:            return TGen;
 
 #define X(A, B) \
       [&]{                                                              \

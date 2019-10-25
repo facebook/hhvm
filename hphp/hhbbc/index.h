@@ -678,13 +678,13 @@ struct Index {
                                    CompactVector<Type> args) const;
   /*
    * Return the best known return type for a resolved function, in a
-   * context insensitive way.  Returns TInitGen at worst.
+   * context insensitive way.  Returns TInitCell at worst.
    */
   Type lookup_return_type(Context, res::Func) const;
 
   /*
    * Return the best known return type for a resolved function, given
-   * the supplied calling context.  Returns TInitGen at worst.
+   * the supplied calling context.  Returns TInitCell at worst.
    *
    * During analyze phases, this function may re-enter analyze in
    * order to interpret the callee with these argument types.
@@ -775,7 +775,7 @@ struct Index {
    * Lookup the best known type for a public static property, with a given
    * class and name.
    *
-   * This function will always return TInitGen before refine_public_statics has
+   * This function will always return TInitCell before refine_public_statics has
    * been called, or if the AnalyzePublicStatics option is off.
    */
   Type lookup_public_static(Context ctx, const Type& cls,

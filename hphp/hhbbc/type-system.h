@@ -46,11 +46,11 @@ struct Type;
  *
  *                      Top
  *                       |
- *                 +-----+              InitGen :=  Gen - Uninit
+ *                 +-----+
  *                 |     |             InitCell := Cell - Uninit
- *                Cls   Gen---+              ?X := X + InitNull
- *                 |     |    |
- *              Cls<=c  Cell  Ref
+ *                Cls    |                   ?X := X + InitNull
+ *                 |     |
+ *              Cls<=c  Cell
  *                 |     |
  *              Cls=c    +-------------+--------+-------+-------+-----+
  *                       |             |        |       |       |     |
@@ -226,22 +226,21 @@ enum trep : uint64_t {
   BObj      = 1ULL << 22,
   BRes      = 1ULL << 23,
   BCls      = 1ULL << 24,
-  BRef      = 1ULL << 25,
 
-  BSVecE    = 1ULL << 26, // static empty vec
-  BCVecE    = 1ULL << 27, // counted empty vec
-  BSVecN    = 1ULL << 28, // static non-empty vec
-  BCVecN    = 1ULL << 29, // counted non-empty vec
-  BSDictE   = 1ULL << 30, // static empty dict
-  BCDictE   = 1ULL << 31, // counted empty dict
-  BSDictN   = 1ULL << 32, // static non-empty dict
-  BCDictN   = 1ULL << 33, // counted non-empty dict
-  BSKeysetE = 1ULL << 34, // static empty keyset
-  BCKeysetE = 1ULL << 35, // counted empty keyset
-  BSKeysetN = 1ULL << 36, // static non-empty keyset
-  BCKeysetN = 1ULL << 37, // counted non-empty keyset
+  BSVecE    = 1ULL << 25, // static empty vec
+  BCVecE    = 1ULL << 26, // counted empty vec
+  BSVecN    = 1ULL << 27, // static non-empty vec
+  BCVecN    = 1ULL << 28, // counted non-empty vec
+  BSDictE   = 1ULL << 29, // static empty dict
+  BCDictE   = 1ULL << 30, // counted empty dict
+  BSDictN   = 1ULL << 31, // static non-empty dict
+  BCDictN   = 1ULL << 32, // counted non-empty dict
+  BSKeysetE = 1ULL << 33, // static empty keyset
+  BCKeysetE = 1ULL << 34, // counted empty keyset
+  BSKeysetN = 1ULL << 35, // static non-empty keyset
+  BCKeysetN = 1ULL << 36, // counted non-empty keyset
 
-  BRecord  = 1ULL << 38,
+  BRecord  = 1ULL << 37,
 
   BSPArr    = BSPArrE | BSPArrN,
   BCPArr    = BCPArrE | BCPArrN,
@@ -394,8 +393,6 @@ enum trep : uint64_t {
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes |
               BVec | BDict | BKeyset | BFunc | BCls | BClsMeth | BRecord,
   BCell     = BUninit | BInitCell,
-  BInitGen  = BInitCell | BRef,
-  BGen      = BUninit | BInitGen,
 
   BTop      = static_cast<uint64_t>(-1),
 };
@@ -436,7 +433,6 @@ constexpr auto BSArrLike = BSArr | BSVec | BSDict | BSKeyset;
   DT(ArrLikeVal, SArray, aval)                                  \
   DT(Obj, DObj, dobj)                                           \
   DT(Cls, DCls, dcls)                                           \
-  DT(RefInner, copy_ptr<Type>, inner)                           \
   DT(ArrLikePacked, copy_ptr<DArrLikePacked>, packed)           \
   DT(ArrLikePackedN, copy_ptr<DArrLikePackedN>, packedn)        \
   DT(ArrLikeMap, copy_ptr<DArrLikeMap>, map)                    \
@@ -646,7 +642,6 @@ private:
   friend bool is_specialized_array_like(const Type& t);
   friend bool is_specialized_obj(const Type&);
   friend bool is_specialized_cls(const Type&);
-  friend bool is_ref_with_inner(const Type&);
   friend bool is_specialized_string(const Type&);
   friend Type wait_handle_inner(const Type&);
   friend Type sval(SString);
@@ -658,7 +653,6 @@ private:
   friend Type objExact(res::Class);
   friend Type subCls(res::Class);
   friend Type clsExact(res::Class);
-  friend Type ref_to(Type);
   friend Type rname(SString);
   friend Type packed_impl(trep, std::vector<Type>, ProvTag);
   friend Type packedn_impl(trep, Type);
@@ -853,7 +847,6 @@ X(SArrN)                                        \
 X(Obj)                                          \
 X(Res)                                          \
 X(Cls)                                          \
-X(Ref)                                          \
 X(Func)                                         \
 X(ClsMeth)                                      \
 X(Record)                                       \
@@ -971,8 +964,6 @@ X(OptUncStrLike)                              \
 X(OptStrLike)                                 \
 X(InitCell)                                     \
 X(Cell)                                         \
-X(InitGen)                                      \
-X(Gen)                                          \
 X(Top)
 
 #define X(y) extern const Type T##y;
@@ -1471,9 +1462,9 @@ bool could_have_magic_bool_conversion(const Type&);
 
 /*
  * Returns the smallest type that `a' is a subtype of, from the
- * following set: TGen, TInitCell, TRef, TUninit, TCls.
+ * following set: TInitCell, TUninit.
  *
- * Pre: `a' is a subtype of TGen, or TCls.
+ * Pre: `a' is a subtype of TCell.
  */
 Type stack_flav(Type a);
 

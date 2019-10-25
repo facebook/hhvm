@@ -273,7 +273,7 @@ Type popT(ISS& env) {
   assert(!env.state.stack.empty());
   auto const ret = env.state.stack.back().type;
   FTRACE(2, "    pop:  {}\n", show(ret));
-  assert(ret.subtypeOf(BGen));
+  assert(ret.subtypeOf(BCell));
   env.state.stack.pop_elem();
   return ret;
 }
@@ -324,11 +324,8 @@ void push(ISS& env, Type t) {
 
 void push(ISS& env, Type t, LocalId l) {
   if (l == NoLocalId) return push(env, t);
-  if (l <= MaxLocalId) {
-    if (peekLocRaw(env, l).couldBe(BRef)) {
-      return push(env, t);
-    }
-    assertx(!is_volatile_local(env.ctx.func, l)); // volatiles are TGen
+  if (l <= MaxLocalId && is_volatile_local(env.ctx.func, l)) {
+    return push(env, t);
   }
   FTRACE(2, "    push: {} (={})\n", show(t), local_string(*env.ctx.func, l));
   env.state.stack.push_elem(std::move(t), l,
@@ -699,7 +696,7 @@ void setIterKey(ISS& env, IterId id, LocalId key) {
 Type peekLocRaw(ISS& env, LocalId l) {
   auto ret = env.state.locals[l];
   if (is_volatile_local(env.ctx.func, l)) {
-    always_assert_flog(ret == TGen, "volatile local was not TGen");
+    always_assert_flog(ret == TCell, "volatile local was not TCell");
   }
   return ret;
 }
@@ -717,7 +714,7 @@ void setLocRaw(ISS& env, LocalId l, Type t) {
   killThisLoc(env, l);
   if (is_volatile_local(env.ctx.func, l)) {
     auto current = env.state.locals[l];
-    always_assert_flog(current == TGen, "volatile local was not TGen");
+    always_assert_flog(current == TCell, "volatile local was not TCell");
     return;
   }
   env.state.locals[l] = std::move(t);
@@ -746,10 +743,6 @@ bool locCouldBeUninit(ISS& env, LocalId l) {
   return locRaw(env, l).couldBe(BUninit);
 }
 
-bool locCouldBeRef(ISS& env, LocalId l) {
-  return locRaw(env, l).couldBe(BRef);
-}
-
 /*
  * Update the known type of a local, based on assertions
  * (VerifyParamType; or IsType/JmpCC), rather than an actual
@@ -757,7 +750,9 @@ bool locCouldBeRef(ISS& env, LocalId l) {
  */
 void refineLocHelper(ISS& env, LocalId l, Type t) {
   auto v = peekLocRaw(env, l);
-  if (v.subtypeOf(BCell)) env.state.locals[l] = std::move(t);
+  if (!is_volatile_local(env.ctx.func, l) && v.subtypeOf(BCell)) {
+    env.state.locals[l] = std::move(t);
+  }
 }
 
 template<typename F>
@@ -866,7 +861,7 @@ void loseNonRefLocalTypes(ISS& env) {
 void killLocals(ISS& env) {
   FTRACE(2, "    killLocals\n");
   readUnknownLocals(env);
-  for (auto& l : env.state.locals) l = TGen;
+  for (auto& l : env.state.locals) l = TCell;
   killAllLocEquiv(env);
   killAllStkEquiv(env);
   killAllIterEquivs(env);
@@ -935,7 +930,7 @@ void killThisProps(ISS& env) {
   FTRACE(2, "    killThisProps\n");
   for (auto& kv : env.collect.props.privateProperties()) {
     kv.second.ty |=
-      adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TGen);
+      adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TCell);
   }
 }
 
@@ -981,7 +976,7 @@ void mergeThisProp(ISS& env, SString name, Type type) {
  * predicate that returns TBottom when some condition doesn't hold.
  *
  * The types given to the map function are the raw tracked types
- * (i.e. could be TRef or TUninit).
+ * (i.e. could be TUninit).
  */
 template<class MapFn>
 void mergeEachThisPropRaw(ISS& env, MapFn fn) {
@@ -1035,14 +1030,14 @@ void killSelfProps(ISS& env) {
   FTRACE(2, "    killSelfProps\n");
   for (auto& kv : env.collect.props.privateStatics()) {
     kv.second.ty |=
-      adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TGen);
+      adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TCell);
   }
 }
 
 void killSelfProp(ISS& env, SString name) {
   FTRACE(2, "    killSelfProp {}\n", name->data());
   if (auto elem = selfPropRaw(env, name)) {
-    elem->ty |= adjust_type_for_prop(env.index, *env.ctx.cls, elem->tc, TGen);
+    elem->ty |= adjust_type_for_prop(env.index, *env.ctx.cls, elem->tc, TCell);
   }
 }
 

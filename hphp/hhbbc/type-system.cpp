@@ -76,7 +76,7 @@ bool mayHaveData(trep bits) {
   case BArrN:    case BSArrN:    case BCArrN:
   case BOptArr:  case BOptSArr:  case BOptCArr:
   case BOptArrN: case BOptSArrN: case BOptCArrN:
-  case BRef:     case BFunc:
+  case BFunc:
   case BVec:      case BSVec:      case BCVec:
   case BVecN:     case BSVecN:     case BCVecN:
   case BOptVec:   case BOptSVec:   case BOptCVec:
@@ -178,8 +178,6 @@ bool mayHaveData(trep bits) {
   case BOptClsMeth:
   case BInitCell:
   case BCell:
-  case BInitGen:
-  case BGen:
   case BTop:
     break;
   }
@@ -264,9 +262,6 @@ bool canBeOptional(trep bits) {
   case BKeyset:
     return true;
 
-  case BRef:
-    return false;
-
   case BOptTrue:
   case BOptFalse:
   case BOptBool:
@@ -334,9 +329,7 @@ bool canBeOptional(trep bits) {
   case BInitUnc:
   case BUnc:
   case BInitCell:
-  case BInitGen:
   case BCell:
-  case BGen:
   case BTop:
     return false;
 
@@ -1625,7 +1618,6 @@ Type Type::unctxHelper(Type t, bool& changed) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Str:
-  case DataTag::RefInner:
   case DataTag::ArrLikeVal:
     break;
   }
@@ -1764,7 +1756,6 @@ Ret Type::dd2nd(const Type& o, DDHelperFn<Ret,T,Function> f) const {
   case DataTag::Int:            return f();
   case DataTag::Dbl:            return f();
   case DataTag::Cls:            return f();
-  case DataTag::RefInner:       return f();
   case DataTag::Str:            return f(o.m_data.sval);
   case DataTag::ArrLikeVal:     return f(o.m_data.aval);
   case DataTag::ArrLikePacked:  return f(*o.m_data.packed);
@@ -1790,7 +1781,6 @@ Type::dualDispatchDataFn(const Type& o, Function f) const {
   case DataTag::Int:            return f();
   case DataTag::Dbl:            return f();
   case DataTag::Cls:            return f();
-  case DataTag::RefInner:       return f();
   case DataTag::Str:            return dd2nd(o, ddbind<R>(f, m_data.sval));
   case DataTag::ArrLikeVal:     return dd2nd(o, ddbind<R>(f, m_data.aval));
   case DataTag::ArrLikePacked:  return dd2nd(o, ddbind<R>(f, *m_data.packed));
@@ -1847,8 +1837,6 @@ bool Type::equivData(const Type& o) const {
     return m_data.dcls.type == o.m_data.dcls.type &&
            m_data.dcls.cls.same(o.m_data.dcls.cls) &&
            contextSensitiveCheck(m_data.dcls, o.m_data.dcls);
-  case DataTag::RefInner:
-    return m_data.inner->equivImpl<contextSensitive>(*o.m_data.inner);
   case DataTag::ArrLikePacked:
     if (m_data.packed->elems.size() != o.m_data.packed->elems.size()) {
       return false;
@@ -1937,8 +1925,6 @@ bool Type::subtypeData(const Type& o) const {
   case DataTag::None:
     // Context sensitivity should not matter here.
     return equivData<contextSensitive>(o);
-  case DataTag::RefInner:
-    return m_data.inner->subtypeOfImpl<contextSensitive>(*o.m_data.inner);
   case DataTag::ArrLikePacked:
     return subtypePacked<contextSensitive>(*m_data.packed, *o.m_data.packed);
   case DataTag::ArrLikePackedN:
@@ -1993,8 +1979,6 @@ bool Type::couldBeData(const Type& o) const {
       return m_data.dcls.cls.couldBe(o.m_data.dcls.cls);
     }
     return false;
-  case DataTag::RefInner:
-    return m_data.inner->couldBe(*o.m_data.inner);
   case DataTag::ArrLikeVal:
     return couldBeArrLike(m_data.aval, o.m_data.aval);
   case DataTag::Str:
@@ -2050,8 +2034,6 @@ size_t Type::hash() const {
           return (uintptr_t)m_data.dobj.cls.name();
         case DataTag::Cls:
           return (uintptr_t)m_data.dcls.cls.name();
-        case DataTag::RefInner:
-          return 0;
         case DataTag::Str:
           return (uintptr_t)m_data.sval;
         case DataTag::Int:
@@ -2089,7 +2071,6 @@ Type project_data(Type t, trep bits) {
   case DataTag::Obj:         return restrict_to(BObj);
   case DataTag::Cls:         return restrict_to(BCls);
   case DataTag::Str:         return restrict_to(BStr);
-  case DataTag::RefInner:    return restrict_to(BRef);
   case DataTag::ArrLikePacked:
     return restrict_to(BVecN | BDictN | BKeysetN | BArrN);
   case DataTag::ArrLikeMap:
@@ -2214,8 +2195,7 @@ bool Type::checkInvariants() const {
 
   DEBUG_ONLY auto const keyBits =
     subtypeOrNull(BSArrLike) ? BUncArrKey : BArrKey;
-  DEBUG_ONLY auto const valBits = isPHPArray ?
-    BInitGen : isKeyset ? BArrKey : BInitCell;
+  DEBUG_ONLY auto const valBits = isKeyset ? BArrKey : BInitCell;
 
   /*
    * TODO(#3696042): for static arrays, we could enforce that all
@@ -2229,9 +2209,6 @@ bool Type::checkInvariants() const {
   case DataTag::Str:    assert(m_data.sval->isStatic()); break;
   case DataTag::Dbl:    break;
   case DataTag::Int:    break;
-  case DataTag::RefInner:
-    assert(!m_data.inner->couldBe(BRef));
-    break;
   case DataTag::Cls:    break;
   case DataTag::Obj:    break;
   case DataTag::ArrLikeVal:
@@ -2333,7 +2310,6 @@ ProvTag Type::getProvTag() const {
   case DataTag::Dbl:
   case DataTag::Obj:
   case DataTag::Cls:
-  case DataTag::RefInner:
   case DataTag::ArrLikePackedN:
   case DataTag::ArrLikeMapN:
     return folly::none;
@@ -2589,18 +2565,6 @@ Type clsExact(res::Class val) {
   return r;
 }
 
-Type ref_to(Type t) {
-  assert(t.subtypeOf(BInitCell));
-  auto r = Type{BRef};
-  construct_inner(r.m_data.inner, std::move(t));
-  r.m_dataTag = DataTag::RefInner;
-  return r;
-}
-
-bool is_ref_with_inner(const Type& t) {
-  return t.m_dataTag == DataTag::RefInner;
-}
-
 bool is_specialized_array_like(const Type& t) {
   switch (t.m_dataTag) {
   case DataTag::None:
@@ -2609,7 +2573,6 @@ bool is_specialized_array_like(const Type& t) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
-  case DataTag::RefInner:
     return false;
   case DataTag::ArrLikeVal:
   case DataTag::ArrLikePacked:
@@ -2828,7 +2791,7 @@ Type unnullish(Type t) {
 }
 
 Type return_with_context(Type t, Type context) {
-  assertx(t.subtypeOf(BInitGen));
+  assertx(t.subtypeOf(BInitCell));
   // We don't assert the context is a TCls or TObj because sometimes we set it
   // to TTop when handling dynamic calls.
   if (((is_specialized_obj(t) && t.m_data.dobj.isCtx) ||
@@ -2926,7 +2889,6 @@ folly::Optional<int64_t> arr_size(const Type& t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Str:
-    case DataTag::RefInner:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
@@ -2983,7 +2945,6 @@ Type::ArrayCat categorize_array(const Type& t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Str:
-    case DataTag::RefInner:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
@@ -3022,7 +2983,6 @@ CompactVector<LSString> get_string_keys(const Type& t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Str:
-    case DataTag::RefInner:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
@@ -3200,7 +3160,6 @@ R tvImpl(const Type& t) {
                                                folly::none);
       }
       break;
-    case DataTag::RefInner:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
@@ -3246,7 +3205,6 @@ Type scalarize(Type t) {
     case DataTag::ArrLikeMap:
     case DataTag::ArrLikePacked:
       return from_cell(*tv(t));
-    case DataTag::RefInner:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
@@ -3265,7 +3223,6 @@ folly::Optional<size_t> array_size(const Type& t) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Str:
-    case DataTag::RefInner:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
@@ -3289,7 +3246,6 @@ array_get_by_index(const Type& t, ssize_t index) {
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Str:
-    case DataTag::RefInner:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:
     case DataTag::Obj:
@@ -3575,7 +3531,7 @@ Type from_DataType(DataType dt) {
   case KindOfRecord:   return TRecord;
   case KindOfPersistentArray:
   case KindOfArray:    return TArr;
-  case KindOfRef:      return TRef;
+  case KindOfRef:      return TBottom;
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
   case KindOfFunc:     return TFunc;
@@ -3586,7 +3542,7 @@ Type from_DataType(DataType dt) {
 }
 
 Type from_hni_constraint(SString s) {
-  if (!s) return TGen;
+  if (!s) return TCell;
 
   auto p   = s->data();
   auto ret = TBottom;
@@ -3627,12 +3583,12 @@ Type from_hni_constraint(SString s) {
                     union_of(TArr, union_of(TVec, union_of(TDict, TKeyset))));
   }
   if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
-  if (!strcasecmp(p, "HH\\mixed"))    return TInitGen;
-  if (!strcasecmp(p, "HH\\nonnull"))  return TInitGen;
+  if (!strcasecmp(p, "HH\\mixed"))    return TInitCell;
+  if (!strcasecmp(p, "HH\\nonnull"))  return TInitCell;
 
   // It might be an object, or we might want to support type aliases in HNI at
   // some point.  For now just be conservative.
-  return TGen;
+  return TCell;
 }
 
 Type intersection_of(Type a, Type b) {
@@ -3722,13 +3678,6 @@ Type intersection_of(Type a, Type b) {
         case DataTag::Dbl:
           // Neither is a subtype of the other, so the intersection is empty
           return TBottom;
-        case DataTag::RefInner:
-        {
-          auto inner = intersection_of(*a.m_data.inner, *b.m_data.inner);
-          if (inner == TBottom) return TBottom;
-          *a.m_data.inner.mutate() = inner;
-          return fix(a);
-        }
         case DataTag::ArrLikePacked:
         case DataTag::ArrLikePackedN:
         case DataTag::ArrLikeMap:
@@ -3742,7 +3691,7 @@ Type intersection_of(Type a, Type b) {
 
   if (t != TBottom) return t;
   auto const bits =
-    isect & ~(BInt|BDbl|BSStr|BArrN|BVecN|BDictN|BKeysetN|BObj|BRef);
+    isect & ~(BInt|BDbl|BSStr|BArrN|BVecN|BDictN|BKeysetN|BObj);
   return Type { bits };
 }
 
@@ -3867,10 +3816,6 @@ Type union_of(Type a, Type b) {
     if (t != TBottom) return t;
   }
 
-  if (is_ref_with_inner(a) && is_ref_with_inner(b)) {
-    return ref_to(union_of(*a.m_data.inner, *b.m_data.inner));
-  }
-
   /*
    * Merging option types tries to preserve subtype information where it's
    * possible.  E.g. if you union InitNull and Obj<=Foo, we want OptObj<=Foo to
@@ -3962,8 +3907,6 @@ Type union_of(Type a, Type b) {
   X(Unc)
   X(InitCell)
   X(Cell)
-  X(InitGen)
-  X(Gen)
 
 #undef Y
 #undef X
@@ -3982,10 +3925,8 @@ Type promote_emptyish(Type a, Type b) {
       t = BInitPrim;
     } else if (trep(t & BInitUnc) == t) {
       t = BInitUnc;
-    } else if (trep(t & BInitCell) == t) {
-      t = BInitCell;
     } else {
-      t = BInitGen;
+      t = BInitCell;
     }
     return union_of(Type { t }, b);
   }
@@ -4052,9 +3993,6 @@ void widen_type_impl(Type& t, uint32_t depth) {
       }
       return;
 
-    case DataTag::RefInner:
-      return widen_type_impl(*t.m_data.inner.mutate(), depth + 1);
-
     case DataTag::ArrLikePacked: {
       if (checkDepth()) return;
       auto& packed = *t.m_data.packed.mutate();
@@ -4108,8 +4046,6 @@ Type widening_union(const Type& a, const Type& b) {
 Type stack_flav(Type a) {
   if (a.subtypeOf(BUninit))   return TUninit;
   if (a.subtypeOf(BInitCell)) return TInitCell;
-  if (a.subtypeOf(BRef))      return TRef;
-  if (a.subtypeOf(BGen))      return TGen;
   always_assert(0 && "stack_flav passed invalid type");
 }
 
@@ -4152,12 +4088,6 @@ Type loosen_staticness(Type t) {
         *whType = loosen_staticness(std::move(*whType));
       }
       break;
-
-    case DataTag::RefInner: {
-      auto inner = t.m_data.inner.mutate();
-      *inner = loosen_staticness(std::move(*inner));
-      break;
-    }
 
     case DataTag::ArrLikePacked: {
       auto& packed = *t.m_data.packed.mutate();
@@ -4239,12 +4169,6 @@ Type loosen_provenance(Type t) {
       }
       break;
 
-    case DataTag::RefInner: {
-      auto inner = t.m_data.inner.mutate();
-      *inner = loosen_provenance(std::move(*inner));
-      break;
-    }
-
     case DataTag::ArrLikePacked: {
       auto& packed = *t.m_data.packed.mutate();
       packed.provenance = folly::none;
@@ -4294,7 +4218,6 @@ Type loosen_values(Type a) {
     case DataTag::Str:
     case DataTag::Int:
     case DataTag::Dbl:
-    case DataTag::RefInner:
     case DataTag::ArrLikeVal:
     case DataTag::ArrLikePacked:
     case DataTag::ArrLikePackedN:
@@ -4361,13 +4284,13 @@ Type add_nonemptiness(Type t) {
 }
 
 Type remove_uninit(Type t) {
-  assert(t.subtypeOf(BGen));
+  assert(t.subtypeOf(BCell));
   if (!t.couldBe(BUninit))  return t;
   if (isPredefined(t.m_bits & ~BUninit)) {
     t.m_bits &= ~BUninit;
     return t;
   }
-  return t.subtypeOf(BCell) ? TInitCell : TInitGen;
+  return TInitCell;
 }
 
 Type to_cell(Type t) {
@@ -4899,7 +4822,6 @@ std::pair<Type, ThrowMode> array_like_elem(const Type& arr,
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
-    case DataTag::RefInner:
       not_reached();
 
     case DataTag::None: {
@@ -4983,7 +4905,6 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
                                          ProvTag loc) {
   const bool maybeEmpty = arr.couldBe(BArrLikeE);
   const bool isVector   = arr.couldBe(BVec);
-  const bool isPhpArray = arr.couldBe(BArr);
   DEBUG_ONLY const bool isVArray   = arr.subtypeOrNull(BVArr);
   const bool validKey   = key.type.subtypeOf(isVector ? BInt : BArrKey);
 
@@ -4998,10 +4919,9 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     }
   }();
 
-  auto const fixRef  = !isPhpArray && valIn.couldBe(BRef);
-  auto const throwMode = !fixRef && validKey && !key.mayThrow ?
+  auto const throwMode = validKey && !key.mayThrow ?
     ThrowMode::None : ThrowMode::BadOperation;
-  auto const& val    = fixRef ? TInitCell : valIn;
+  auto const& val    = valIn;
   // We don't want to store types more general than TArrKey into specialized
   // array type keys. If the key was strange (array or object), it will be more
   // general than TArrKey (this is needed so we can set validKey above), so
@@ -5050,7 +4970,6 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
-  case DataTag::RefInner:
     not_reached();
 
   case DataTag::None:
@@ -5130,12 +5049,6 @@ std::pair<Type, ThrowMode> array_set(Type arr,
                                      ProvTag src) {
   assert(arr.subtypeOf(BArr));
 
-  // Unless you know an array can't cow, you don't know if the TRef
-  // will stay a TRef or turn back into a TInitCell.  Generally you
-  // want a TInitGen.
-  always_assert((val == TBottom || !val.subtypeOf(BRef)) &&
-                "You probably don't want to put Ref types into arrays ...");
-
   auto const key = disect_array_key(undisectedKey);
   assert(key.type != TBottom);
   return array_like_set(std::move(arr), key, val, src);
@@ -5182,7 +5095,6 @@ std::pair<Type,Type> array_like_newelem(Type arr,
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
-  case DataTag::RefInner:
     not_reached();
 
   case DataTag::None:
@@ -5260,12 +5172,6 @@ std::pair<Type,Type> array_like_newelem(Type arr,
 
 std::pair<Type,Type> array_newelem(Type arr, const Type& val, ProvTag src) {
   assert(arr.subtypeOf(BArr));
-
-  // Unless you know an array can't cow, you don't know if the TRef
-  // will stay a TRef or turn back into a TInitCell.  Generally you
-  // want a TInitGen.
-  always_assert((val == TBottom || !val.subtypeOf(BRef)) &&
-         "You probably don't want to put Ref types into arrays ...");
 
   return array_like_newelem(std::move(arr), val, src);
 }
@@ -5346,7 +5252,6 @@ IterTypes iter_types(const Type& iterable) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
-  case DataTag::RefInner:
     always_assert(0);
   case DataTag::ArrLikeVal: {
     auto kv = val_key_values(iterable.m_data.aval);
@@ -5403,13 +5308,6 @@ bool could_contain_objects(const Type& t) {
   auto const couldBeArrWithDestructors =
     t.m_bits & (BCArrN | BCVecN | BCDictN);
 
-  if (t.couldBe(BRef)) {
-    if (!couldBeArrWithDestructors && is_ref_with_inner(t)) {
-      return could_contain_objects(*t.m_data.inner);
-    }
-    return true;
-  }
-
   if (!couldBeArrWithDestructors) return false;
 
   switch (t.m_dataTag) {
@@ -5419,7 +5317,6 @@ bool could_contain_objects(const Type& t) {
   case DataTag::Int:
   case DataTag::Dbl:
   case DataTag::Cls:
-  case DataTag::RefInner:
     return true;
   case DataTag::ArrLikeVal: return false;
   case DataTag::ArrLikePacked:
@@ -5506,7 +5403,6 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
       case DataTag::Int:
       case DataTag::Dbl:
       case DataTag::Cls:
-      case DataTag::RefInner:
         not_reached();
 
       case DataTag::ArrLikeVal:
@@ -5554,7 +5450,6 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
         case DataTag::Int:
         case DataTag::Dbl:
         case DataTag::Cls:
-        case DataTag::RefInner:
           not_reached();
 
         case DataTag::ArrLikeVal:
@@ -5766,7 +5661,6 @@ RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder& arrTable,
     case DataTag::Int:
     case DataTag::Dbl:
     case DataTag::Cls:
-    case DataTag::RefInner:
     case DataTag::ArrLikeVal:
     case DataTag::ArrLikeMap:
     case DataTag::ArrLikeMapN:
@@ -5913,9 +5807,6 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(Unc)
   X(InitCell)
   X(Cell)
-  X(Ref)
-  X(InitGen)
-  X(Gen)
 #undef X
   not_reached();
 }

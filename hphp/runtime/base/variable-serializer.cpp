@@ -2133,7 +2133,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         auto const cname = obj->getProp(
           nullptr,
           s_PHP_Incomplete_Class_Name.get()
-        ).unboxed();
+        );
         if (cname && isStringType(cname.type())) {
           pushObjectInfo(StrNR(cname.val().pstr), 'O');
           properties.remove(s_PHP_Incomplete_Class_Name, true);

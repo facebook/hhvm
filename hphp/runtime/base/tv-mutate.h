@@ -27,15 +27,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Return a reference to an unboxed `tv'.
- */
-template<bool is_const, typename tag_t>
-INLINE_FLATTEN
-tv_val<is_const, tag_t> tv_val<is_const, tag_t>::unboxed() const {
-  return LIKELY(!isRefType(type())) ? *this : tv_val { val().pref->cell() };
-}
-
-/*
  * Return an unboxed and initialized `tv'.
  *
  * This function:

@@ -1559,7 +1559,7 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
   auto const lookup = getPropImpl<false, true, true>(ctx, key);
   if (lookup.val && lookup.accessible) {
     if (lookup.val.type() != KindOfUninit) {
-      return lookup.val.unboxed().type() != KindOfNull;
+      return lookup.val.type() != KindOfNull;
     }
     if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
       return false;
@@ -1584,7 +1584,7 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
   auto const lookup = getPropImpl<false, true, true>(ctx, key);
   if (lookup.val && lookup.accessible) {
     if (lookup.val.type() != KindOfUninit) {
-      return !cellToBool(lookup.val.unboxed().tv());
+      return !cellToBool(lookup.val.tv());
     }
     if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
       return true;

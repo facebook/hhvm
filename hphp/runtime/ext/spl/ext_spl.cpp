@@ -339,7 +339,7 @@ static req::ptr<T> getDir(const Object& dir_iter) {
   assertx(s_DirectoryIterator_class);
   auto const dir = dir_iter->getProp(
     s_DirectoryIterator_class, s_dir.get()
-  ).unboxed();
+  );
   assertx(dir.is_set());
   assertx(dir.type() == KindOfResource);
   return req::ptr<T>(static_cast<T*>(dir.val().pres->data()));

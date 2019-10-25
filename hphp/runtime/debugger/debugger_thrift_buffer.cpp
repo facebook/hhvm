@@ -86,11 +86,10 @@ static inline int unserializeImpl(const String& sdata, Variant& data) {
 
     auto const info = o->getProp(SystemLib::s_ExceptionClass, s_message.get());
     if (info) {
-      auto const inner = info.unboxed();
-      if (isStringType(inner.type())) {
+      if (isStringType(info.type())) {
         data = folly::sformat(
           "unserialize() threw '{}' with message '{}'",
-          o->getVMClass()->name(), inner.val().pstr
+          o->getVMClass()->name(), info.val().pstr
         );
         return DebuggerWireHelpers::ErrorMsg;
       }

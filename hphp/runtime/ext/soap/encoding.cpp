@@ -1259,7 +1259,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
         if (name) {
           String name_str(name);
           if (any.toArrRef().exists(name_str)) {
-            auto const el = any.toArrRef().lval(name_str).unboxed();
+            auto const el = any.toArrRef().lval(name_str);
             if (!isArrayLikeType(el.type())) {
               /* Convert into array */
               Array arr = Array::Create();

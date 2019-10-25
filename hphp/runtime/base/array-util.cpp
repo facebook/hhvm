@@ -249,7 +249,7 @@ Variant ArrayUtil::Range(int64_t low, int64_t high, int64_t step /* = 1 */) {
 Variant ArrayUtil::CountValues(const Array& input) {
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    auto const inner = iter.secondRval().unboxed();
+    auto const inner = iter.secondRval();
     if (isIntType(inner.type()) || isStringType(inner.type()) ||
       isFuncType(inner.type()) || isClassType(inner.type())) {
       auto const inner_key =

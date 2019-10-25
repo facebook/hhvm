@@ -85,10 +85,10 @@ bool StackTraceCommand::executeImpl(
       break;
     }
 
-    auto const parentFrame = backtrace.rval(depth + 1).unboxed();
+    auto const parentFrame = backtrace.rval(depth + 1);
     auto const funcName =
       tvCastToString(parentFrame.val().parr->get(s_function).tv()).data();
-    auto const frame = backtrace.rval(depth).unboxed();
+    auto const frame = backtrace.rval(depth);
     const auto file = frame.val().parr->get(s_file);
     const auto line = frame.val().parr->get(s_line);
 

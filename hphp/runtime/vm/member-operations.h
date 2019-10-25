@@ -534,7 +534,6 @@ template<MOpMode mode, KeyType keyType>
 NEVER_INLINE tv_rval ElemSlow(TypedValue& tvRef,
                               tv_rval base,
                               key_type<keyType> key) {
-  base = base.unboxed();
   assertx(cellIsPlausible(*base));
 
   switch (base.type()) {
@@ -593,12 +592,6 @@ inline tv_rval Elem(TypedValue& tvRef,
                     key_type<keyType> key) {
   assertx(mode != MOpMode::Define && mode != MOpMode::Unset);
   assertx(tvIsPlausible(base.tv()));
-
-  if (mode == MOpMode::InOut) {
-    if (UNLIKELY(tvIsRef(base) && !base.val().pref->isReferenced())) {
-      base = base.unboxed();
-    }
-  }
 
   if (LIKELY(tvIsArray(base))) {
     return ElemArray<mode, keyType>(base.val().parr, key);
@@ -956,8 +949,6 @@ template<MOpMode mode, KeyType keyType = KeyType::Any, bool copyProv>
 tv_lval ElemD(TypedValue& tvRef, tv_lval base,
               key_type<keyType> key, const MInstrPropState* pState) {
   assertx(mode == MOpMode::Define);
-
-  base = base.unboxed();
   assertx(cellIsPlausible(base.tv()));
 
   switch (base.type()) {
@@ -1331,7 +1322,6 @@ inline tv_lval NewElemObject(TypedValue& tvRef, tv_lval base) {
 inline tv_lval NewElem(TypedValue& tvRef,
                        tv_lval base,
                        const MInstrPropState* pState) {
-  base = base.unboxed();
   assertx(cellIsPlausible(base.tv()));
 
   switch (base.type()) {
@@ -3093,7 +3083,6 @@ tv_lval propPreStdclass(TypedValue& tvRef,
 
 template<MOpMode mode>
 tv_lval propPre(TypedValue& tvRef, tv_lval base, MInstrPropState* pState) {
-  base = base.unboxed();
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
@@ -3144,7 +3133,6 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
                             Class* ctx,
                             tv_rval base,
                             StringData* key) {
-  base = base.unboxed();
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:

@@ -160,7 +160,7 @@ APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
     Variant key(it.first());
     assertx(key.isString());
     auto const rval = it.secondRval();
-    if (!isNullType(rval.unboxed().type())) {
+    if (!isNullType(rval.type())) {
       auto val = APCHandle::Create(const_variant_ref{rval}, false,
                                    APCHandleLevel::Inner, true);
       prop->val = val.handle;

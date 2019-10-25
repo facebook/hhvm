@@ -697,7 +697,7 @@ bool MimePart::processHeader() {
       m_headers.set(header_arrkey, make_tv<KindOfString>(newstr.get()));
     } else {
       if (m_headers.exists(header_arrkey)) {
-        auto const zheaderval = m_headers.lval(header_arrkey).unboxed();
+        auto const zheaderval = m_headers.lval(header_arrkey);
         if (isArrayLikeType(zheaderval.type())) {
           asArrRef(zheaderval).append(String(header_val, CopyString));
         } else {

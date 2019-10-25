@@ -159,13 +159,6 @@ public:
   INLINE_FLATTEN TypedValue tv() const;
   INLINE_FLATTEN TypedValue operator*() const;
 
-
-  /*
-   * Return `this' if the referenced value is already unboxed, else a tv_val to
-   * the inner value.
-   */
-  INLINE_FLATTEN tv_val unboxed() const;
-
   template<typename Tag = tag_t>
   INLINE_FLATTEN with_tag_t<Tag> tag() const;
 

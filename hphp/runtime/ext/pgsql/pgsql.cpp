@@ -38,7 +38,7 @@
   name##_decrefs.reserve(params.size());              \
                                                       \
   for (ArrayIter iter(params); iter; ++iter) {        \
-    auto const param = iter.secondRval().unboxed();   \
+    auto const param = iter.secondRval();             \
     if (isNullType(param.type())) {                   \
       name.push_back(nullptr);                        \
     } else {                                          \

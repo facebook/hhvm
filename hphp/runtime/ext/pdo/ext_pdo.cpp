@@ -1910,7 +1910,7 @@ static bool do_fetch(sp_PDOStatement stmt,
       /* already have an item with this name? */
       forceToDArray(ret);
       if (ret.toArrRef().exists(name_key)) {
-        auto const curr_val = ret.toArrRef().lval(name_key).unboxed();
+        auto const curr_val = ret.toArrRef().lval(name_key);
         if (!isArrayLikeType(curr_val.type())) {
           Array arr = Array::CreateVArray();
           arr.append(curr_val.tv());

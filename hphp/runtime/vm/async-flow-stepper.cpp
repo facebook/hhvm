@@ -45,7 +45,7 @@ bool AsyncFlowStepper::isActRecOnAsyncStack(const ActRec* target) {
   ArrayIter iter(depStack);
   ++iter; // Skip the top frame.
   for (; iter; ++iter) {
-    auto const rval = iter.secondRval().unboxed();
+    auto const rval = iter.secondRval();
     if (isNullType(rval.type())) {
       return false;
     }

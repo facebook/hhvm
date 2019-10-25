@@ -197,7 +197,7 @@ TypedValue HHVM_FUNCTION(array_combine,
   Array ret = Array::attach(MixedArray::MakeReserveMixed(keys_size));
   for (ArrayIter iter1(cell_keys), iter2(cell_values);
        iter1; ++iter1, ++iter2) {
-    auto const key = iter1.secondRvalPlus().unboxed();
+    auto const key = iter1.secondRvalPlus();
     if (key.type() == KindOfInt64 || isStringType(key.type())) {
       ret.set(ret.convertKey<IntishCast::Cast>(key.tv()),
                      iter2.secondValPlus());
@@ -301,7 +301,7 @@ TypedValue HHVM_FUNCTION(array_flip,
 
   ArrayInit ret(getClsMethCompactContainerSize(transCell), ArrayInit::Mixed{});
   for (ArrayIter iter(transCell); iter; ++iter) {
-    auto const inner = iter.secondRvalPlus().unboxed();
+    auto const inner = iter.secondRvalPlus();
     if (inner.type() == KindOfInt64 || isStringType(inner.type()) ||
       isFuncType(inner.type())|| isClassType(inner.type())) {
       ret.setUnknownKey<IntishCast::Cast>(VarNR(inner.tv()),
@@ -644,10 +644,10 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
   for (ArrayIter iter(arr2); iter; ++iter) {
     const auto key =
       Variant::wrap(arr1.convertKey<IntishCast::Cast>(iter.first()));
-    auto const rval = iter.secondRval().unboxed();
+    auto const rval = iter.secondRval();
     if (arr1.exists(key, true) && isArrayLikeType(rval.type())) {
       auto const lval = arr1.lval(key, AccessFlags::Key);
-      if (isArrayLikeType(lval.unboxed().type())) {
+      if (isArrayLikeType(lval.type())) {
         Array subarr1 = tvCastToArrayLike<IntishCast::Cast>(
           lval.tv()
         ).toPHPArrayIntishCast();
@@ -765,7 +765,7 @@ TypedValue HHVM_FUNCTION(array_product,
   int64_t i = 1;
   ArrayIter iter(input);
   for (; iter; ++iter) {
-    auto const rval = iter.secondRvalPlus().unboxed();
+    auto const rval = iter.secondRvalPlus();
 
     switch (rval.type()) {
       case KindOfUninit:
@@ -814,7 +814,7 @@ TypedValue HHVM_FUNCTION(array_product,
 DOUBLE:
   double d = i;
   for (; iter; ++iter) {
-    auto const rval = iter.secondRvalPlus().unboxed();
+    auto const rval = iter.secondRvalPlus();
     switch (rval.type()) {
       DT_UNCOUNTED_CASE:
       case KindOfString:
@@ -1042,7 +1042,7 @@ TypedValue HHVM_FUNCTION(array_sum,
   int64_t i = 0;
   ArrayIter iter(input);
   for (; iter; ++iter) {
-    auto const rval = iter.secondRvalPlus().unboxed();
+    auto const rval = iter.secondRvalPlus();
 
     switch (rval.type()) {
       case KindOfUninit:
@@ -1091,7 +1091,7 @@ TypedValue HHVM_FUNCTION(array_sum,
 DOUBLE:
   double d = i;
   for (; iter; ++iter) {
-    auto const rval = iter.secondRvalPlus().unboxed();
+    auto const rval = iter.secondRvalPlus();
     switch (rval.type()) {
       DT_UNCOUNTED_CASE:
       case KindOfString:
@@ -2290,7 +2290,7 @@ static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
     // For each key in the map, we copy the key to the set if the
     // corresponding value is equal to pos exactly (which means it
     // was present in all of the containers).
-    auto const rval = iter.secondRvalPlus().unboxed();
+    auto const rval = iter.secondRvalPlus();
     assertx(rval.type() == KindOfInt64);
     if (rval.val().num == count) {
       st->add(*iter.first().toCell());
@@ -2328,7 +2328,7 @@ static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
     // For each key in the map, we copy the key to the set if the
     // corresponding value is equal to pos exactly (which means it
     // was present in all of the containers).
-    auto const rval = iter.secondRvalPlus().unboxed();
+    auto const rval = iter.secondRvalPlus();
     assertx(rval.type() == KindOfInt64);
     if (rval.val().num == count) {
       st->add(*iter.first().toCell());

@@ -549,12 +549,10 @@ IniSettingMap& IniSettingMap::operator=(const IniSettingMap& i) {
 
 namespace {
 void mergeSettings(tv_lval curval, TypedValue v) {
-  auto const cur_inner = curval.unboxed();
-
   if (isArrayLikeType(v.m_type) &&
-      isArrayLikeType(cur_inner.type())) {
+      isArrayLikeType(curval.type())) {
     for (auto i = ArrayIter(v.m_data.parr); !i.end(); i.next()) {
-      auto& cur_inner_ref = asArrRef(cur_inner);
+      auto& cur_inner_ref = asArrRef(curval);
       if (!cur_inner_ref.exists(i.first())) {
         cur_inner_ref.set(i.first(), empty_array());
       }

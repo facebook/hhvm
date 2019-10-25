@@ -47,7 +47,7 @@ bool SpecHolder::typeSatisfiesConstraint(const TypeConstraint& tc,
     case T_VOID:
       return tc.alwaysPasses(KindOfNull);
     case T_STRUCT: {
-      auto const className = spec.rval(s_class).unboxed();
+      auto const className = spec.rval(s_class);
       if (isNullType(className.type())) return false;
       auto const classNameString = tvCastToString(className.tv());
       // Binary deserializing can assign a null to an object, while compact

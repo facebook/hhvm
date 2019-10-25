@@ -1687,11 +1687,10 @@ inline Array& forceToArray(Variant& var) {
 }
 
 inline Array& forceToArray(tv_lval lval) {
-  auto const inner = lval.unboxed();
-  if (!isArrayLikeType(inner.type())) {
-    tvMove(make_tv<KindOfArray>(ArrayData::Create()), inner);
+  if (!isArrayLikeType(lval.type())) {
+    tvMove(make_tv<KindOfArray>(ArrayData::Create()), lval);
   }
-  return asArrRef(inner);
+  return asArrRef(lval);
 }
 
 inline Array& forceToDict(Variant& var) {
@@ -1700,11 +1699,10 @@ inline Array& forceToDict(Variant& var) {
 }
 
 inline Array& forceToDict(tv_lval lval) {
-  auto const inner = lval.unboxed();
-  if (!isDictType(inner.type())) {
-    tvSet(make_tv<KindOfDict>(ArrayData::CreateDict()), inner);
+  if (!isDictType(lval.type())) {
+    tvSet(make_tv<KindOfDict>(ArrayData::CreateDict()), lval);
   }
-  return asArrRef(inner);
+  return asArrRef(lval);
 }
 
 inline Array& forceToDArray(Variant& var) {
@@ -1717,11 +1715,10 @@ inline Array& forceToDArray(Variant& var) {
 
 inline Array& forceToDArray(tv_lval lval) {
   if (RuntimeOption::EvalHackArrDVArrs) return forceToDict(lval);
-  auto const inner = lval.unboxed();
-  if (!(isArrayType(inner.type()) && inner.val().parr->isDArray())) {
-    tvMove(make_array_like_tv(ArrayData::CreateDArray()), inner);
+  if (!(isArrayType(lval.type()) && lval.val().parr->isDArray())) {
+    tvMove(make_array_like_tv(ArrayData::CreateDArray()), lval);
   }
-  return asArrRef(inner);
+  return asArrRef(lval);
 }
 
 //////////////////////////////////////////////////////////////////////

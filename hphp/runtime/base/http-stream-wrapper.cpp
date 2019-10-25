@@ -84,7 +84,7 @@ req::ptr<File> HttpStreamWrapper::open(const String& filename,
       for (ArrayIter it(lines); it; ++it) {
         Array parts = StringUtil::Explode(
           it.second().toString(), ":", 2).toArray();
-        headers.set(parts.rval(0).unboxed().tv(), parts.rval(1).tv());
+        headers.set(parts.rval(0).tv(), parts.rval(1).tv());
       }
     }
     if (opts.exists(s_user_agent) && !headers.exists(s_User_Agent)) {

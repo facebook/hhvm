@@ -1621,7 +1621,7 @@ static Variant reflection_extension_name_get(const Object& this_) {
   auto const name = this_->getProp(
     Reflection::s_ReflectionExtensionClass,
     s___name.get()
-  ).unboxed();
+  );
   return tvCastToString(name.tv());
 }
 

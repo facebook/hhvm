@@ -611,7 +611,7 @@ static Array HHVM_FUNCTION(getopt, const String& options,
       /* numeric string */
       int optname_int = atoi(optname);
       if (ret.exists(optname_int)) {
-        auto const lval = ret.lval(optname_int).unboxed();
+        auto const lval = ret.lval(optname_int);
         if (!isArrayLikeType(lval.type())) {
           ret.set(optname_int, make_packed_array(Variant::wrap(lval.tv()), val));
         } else {
@@ -624,7 +624,7 @@ static Array HHVM_FUNCTION(getopt, const String& options,
       /* other strings */
       String key(optname, strlen(optname), CopyString);
       if (ret.exists(key)) {
-        auto const lval = ret.lval(key).unboxed();
+        auto const lval = ret.lval(key);
         if (!isArrayLikeType(lval.type())) {
           ret.set(key, make_packed_array(Variant::wrap(lval.tv()), val));
         } else {

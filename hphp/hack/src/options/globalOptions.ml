@@ -79,7 +79,6 @@ type t = {
   log_levels: int SMap.t;
   po_disable_lval_as_an_expression: bool;
   tco_typecheck_xhp_cvars: bool;
-  tco_ignore_collection_expr_type_arguments: bool;
   tco_shallow_class_decl: bool;
   po_rust_parser_errors: bool;
   po_rust_lowerer: bool;
@@ -233,7 +232,6 @@ let default =
     log_levels = SMap.empty;
     po_disable_lval_as_an_expression = false;
     tco_typecheck_xhp_cvars = false;
-    tco_ignore_collection_expr_type_arguments = false;
     tco_shallow_class_decl = false;
     po_rust_parser_errors = false;
     po_rust_lowerer = false;
@@ -315,8 +313,6 @@ let make
     ?(po_disable_lval_as_an_expression =
       default.po_disable_lval_as_an_expression)
     ?(tco_typecheck_xhp_cvars = default.tco_typecheck_xhp_cvars)
-    ?(tco_ignore_collection_expr_type_arguments =
-      default.tco_ignore_collection_expr_type_arguments)
     ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
     ?(po_rust_parser_errors = default.po_rust_parser_errors)
     ?(po_rust_lowerer = default.po_rust_lowerer)
@@ -402,7 +398,6 @@ let make
     log_levels;
     po_disable_lval_as_an_expression;
     tco_typecheck_xhp_cvars;
-    tco_ignore_collection_expr_type_arguments;
     tco_shallow_class_decl;
     po_rust_parser_errors;
     po_rust_lowerer;
@@ -551,9 +546,6 @@ let tco_disable_partially_abstract_typeconsts t =
   t.tco_disable_partially_abstract_typeconsts
 
 let error_codes_treated_strictly t = t.error_codes_treated_strictly
-
-let tco_ignore_collection_expr_type_arguments t =
-  t.tco_ignore_collection_expr_type_arguments
 
 let tco_check_xhp_attribute t = t.tco_check_xhp_attribute
 

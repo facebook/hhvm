@@ -156,7 +156,6 @@ type t = {
   (* Flag to typecheck xhp code *)
   tco_typecheck_xhp_cvars: bool;
   (* Flag to ignore the string in vec<string>[...] *)
-  tco_ignore_collection_expr_type_arguments: bool;
   (* Look up class members lazily from shallow declarations instead of eagerly
      computing folded declarations representing the entire class type. *)
   tco_shallow_class_decl: bool;
@@ -276,7 +275,6 @@ val make :
   ?log_levels:int SMap.t ->
   ?po_disable_lval_as_an_expression:bool ->
   ?tco_typecheck_xhp_cvars:bool ->
-  ?tco_ignore_collection_expr_type_arguments:bool ->
   ?tco_shallow_class_decl:bool ->
   ?po_rust_parser_errors:bool ->
   ?po_rust_lowerer:bool ->
@@ -419,8 +417,6 @@ val log_levels : t -> int SMap.t
 val po_disable_lval_as_an_expression : t -> bool
 
 val tco_typecheck_xhp_cvars : t -> bool
-
-val tco_ignore_collection_expr_type_arguments : t -> bool
 
 val tco_shallow_class_decl : t -> bool
 

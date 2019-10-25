@@ -1954,10 +1954,7 @@ and expr_
     (* Use expected type to determine expected key and value types *)
     let (env, kexpected, vexpected, th) =
       match th with
-      | Some ((_, tk), (_, tv))
-        when not
-               (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env))
-        ->
+      | Some ((_, tk), (_, tv)) ->
         let (env, tk, tk_expected) = localize_targ env tk in
         let (env, tv, tv_expected) = localize_targ env tv in
         (env, Some tk_expected, Some tv_expected, Some (tk, tv))
@@ -2004,10 +2001,7 @@ and expr_
     (* Use expected type to determine expected element type *)
     let (env, elem_expected, th) =
       match th with
-      | Some (_, tv)
-        when not
-               (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env))
-        ->
+      | Some (_, tv) ->
         let (env, tv, tv_expected) = localize_targ env tv in
         (env, Some tv_expected, Some tv)
       | _ ->
@@ -2040,10 +2034,7 @@ and expr_
     (* Use expected type to determine expected element type *)
     let (env, elem_expected, th) =
       match th with
-      | Some (_, tv)
-        when not
-               (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env))
-        ->
+      | Some (_, tv) ->
         let (env, tv, tv_expected) = localize_targ env tv in
         (env, Some tv_expected, Some tv)
       | _ ->
@@ -2086,10 +2077,7 @@ and expr_
     (* Use expected type to determine expected key and value types *)
     let (env, kexpected, vexpected, th) =
       match th with
-      | Some ((_, tk), (_, tv))
-        when not
-               (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env))
-        ->
+      | Some ((_, tk), (_, tv)) ->
         let (env, tk, tk_expected) = localize_targ env tk in
         let (env, tv, tv_expected) = localize_targ env tv in
         (env, Some tk_expected, Some tv_expected, Some (tk, tv))

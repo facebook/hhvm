@@ -186,7 +186,6 @@ let parse_options () =
   let timeout = ref None in
   let disallow_invalid_arraykey = ref None in
   let typecheck_xhp_cvars = ref (Some false) in
-  let ignore_collection_expr_type_arguments = ref (Some false) in
   let allow_ref_param_on_constructor = ref (Some false) in
   let disallow_byref_dynamic_calls = ref (Some false) in
   let disallow_byref_calls = ref (Some false) in
@@ -398,10 +397,6 @@ let parse_options () =
       ( "--check-xhp-attribute",
         Arg.Set check_xhp_attribute,
         "Typechecks xhp required attributes" );
-      ( "--ignore-collection-expr-type-arguments",
-        Arg.Unit (set_bool ignore_collection_expr_type_arguments),
-        "Typechecker ignores type arguments to vec<T>[...] style expressions"
-      );
       ( "--allow-ref-param-on-constructor",
         Arg.Unit (set_bool allow_ref_param_on_constructor),
         "Allow class constructors to take reference parameters" );
@@ -531,8 +526,6 @@ let parse_options () =
       ?tco_disallow_invalid_arraykey:!disallow_invalid_arraykey
       ?po_auto_namespace_map:!auto_namespace_map
       ?tco_typecheck_xhp_cvars:!typecheck_xhp_cvars
-      ?tco_ignore_collection_expr_type_arguments:
-        !ignore_collection_expr_type_arguments
       ?tco_disallow_byref_dynamic_calls:!disallow_byref_dynamic_calls
       ?tco_disallow_byref_calls:!disallow_byref_calls
       ?tco_disallow_invalid_arraykey_constraint:

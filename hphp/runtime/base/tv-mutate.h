@@ -204,13 +204,6 @@ enable_if_lval_t<C&&, void> cellDup(const Cell fr, C&& to) {
   tvCopy(fr, to);
   tvIncRefGen(as_tv(to));
 }
-template<typename R> ALWAYS_INLINE
-enable_if_lval_t<R&&, void> refDup(const Ref fr, R&& to) {
-  assertx(refIsPlausible(fr));
-  type(to) = KindOfRef;
-  val(to).pref = fr.m_data.pref;
-  val(to).pref->incRefCount();
-}
 
 namespace detail {
 
@@ -427,47 +420,6 @@ enable_if_lval_t<T&&, void> tvSetWithRef(const TypedValue fr, T&& to) {
   tvDupWithRef(fr, to);
   tvDecRefGen(old);
   assertx(tvIsPlausible(as_tv(to)));
-}
-
-/*
- * Binding assignment from `fr' to `to'.
- *
- * This behaves just like tvSetIgnoreRef(), in that we always overwrite `to'
- * directly, rather than its inner value.  Notably, this causes `to' to refer
- * to the RefData of `fr'---it does not set the inner value of `to' to be that
- * of `fr'.
- *
- * @requires: isRefType(fr->m_type)
- */
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvBind(const TypedValue fr, T&& to) {
-  assertx(isRefType(fr.m_type));
-  auto const old = as_tv(to);
-  refDup(fr, to);
-  tvDecRefGen(old);
-}
-
-/*
- * Binding assignment from `fr' to `to'.
- *
- * Like tvBind(), except with a raw RefData* instead of a TypedValue.
- */
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvBindRef(RefData* fr, T&& to) {
-  auto const old = as_tv(to);
-  fr->incRefCount();
-  tvCopy(make_tv<KindOfRef>(fr), to);
-  tvDecRefGen(old);
-}
-
-/*
- * Bind `from' to `to', boxing `from' if necessary first.
- */
-template<typename From, typename To> ALWAYS_INLINE
-enable_if_lval_t<From&&, enable_if_lval_t<To&&, void>>
-tvSetRef(From&& from, To&& to) {
-  tvBoxIfNeeded(from);
-  tvBindRef(val(from).pref, to);
 }
 
 /*

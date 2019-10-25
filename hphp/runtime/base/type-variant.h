@@ -295,7 +295,6 @@ struct Variant : private TypedValue {
   enum class CellCopy {};
   enum class CellDup {};
   enum class ArrayInitCtor {};
-  enum class StrongBind {};
   enum class Attach {};
   enum class WithRefBind {};
   enum class Wrap {};
@@ -473,12 +472,6 @@ struct Variant : private TypedValue {
     m_type = v.m_type;
     m_data = v.m_data;
     tvIncRefGen(*asTypedValue());
-  }
-
-  Variant(StrongBind, Variant& v) {
-    assertx(tvIsPlausible(v));
-    tvBoxIfNeeded(*v.asTypedValue());
-    refDup(*v.asTypedValue(), *asTypedValue());
   }
 
   Variant& operator=(const Variant& v) noexcept {
@@ -961,16 +954,6 @@ struct Variant : private TypedValue {
   Variant& assign(const Variant& v) noexcept {
     tvSet(tvToInitCell(*v.asTypedValue()), *asTypedValue());
     return *this;
-  }
-  Variant& assignRef(tv_lval tv) noexcept {
-    tvSetRef(tv, asTypedValue());
-    return *this;
-  }
-  Variant& assignRef(variant_ref v) noexcept {
-    return assignRef(v.lval());
-  }
-  Variant& assignRef(Variant& v) noexcept {
-    return assignRef(v.asTypedValue());
   }
 
   // Generic assignment operator. Forward argument (preserving rvalue-ness and

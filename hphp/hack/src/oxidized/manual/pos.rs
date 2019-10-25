@@ -61,6 +61,38 @@ impl Pos {
         }
     }
 
+    /// Returns a closed interval that's incorrect for multi-line spans.
+    pub fn info_pos(self) -> (usize, usize, usize) {
+        fn compute<P: FilePos>(pos_start: P, pos_end: P) -> (usize, usize, usize) {
+            let (line, start_minus1, bol) = pos_start.line_column_beg();
+            let start = start_minus1 + 1;
+            let end_offset = pos_end.offset();
+            let mut end = end_offset - bol;
+            // To represent the empty interval, pos_start and pos_end are equal because
+            // end_offset is exclusive. Here, it's best for error messages to the user if
+            // we print characters N to N (highlighting a single character) rather than characters
+            // N to (N-1), which is very unintuitive.
+            if start == end + 1 {
+                end = start
+            }
+            (line, start, end)
+        }
+        match self.0 {
+            Small { start, end, .. } => compute(start, end),
+            Large { start, end, .. } => compute(*start, *end),
+        }
+    }
+
+    pub fn info_pos_extended(self) -> (usize, usize, usize, usize) {
+        let (line_begin, start, end) = self.clone().info_pos();
+        let line_end = match self.0 {
+            Small { end, .. } => end.line_column_beg(),
+            Large { end, .. } => (*end).line_column_beg(),
+        }
+        .0;
+        (line_begin, line_end, start, end)
+    }
+
     pub fn line(&self) -> usize {
         match &self.0 {
             Small { start, .. } => start.line(),
@@ -293,6 +325,26 @@ impl PartialEq for Pos {
             && self.end_cnum() == other.end_cnum()
     }
 }
+
+// TODO(hrust) eventually move this into a separate file used by Small & Large
+trait FilePos {
+    fn offset(self) -> usize;
+    fn line_column_beg(self) -> (usize, usize, usize);
+}
+macro_rules! impl_file_pos {
+    ($type: ty) => {
+        impl FilePos for $type {
+            fn offset(self) -> usize {
+                self.offset()
+            }
+            fn line_column_beg(self) -> (usize, usize, usize) {
+                self.line_column_beg()
+            }
+        }
+    };
+}
+impl_file_pos!(FilePosSmall);
+impl_file_pos!(FilePosLarge);
 
 #[cfg(test)]
 mod tests {

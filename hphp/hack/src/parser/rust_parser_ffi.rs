@@ -24,7 +24,7 @@ use rust_to_ocaml::{SerializationContext, ToOcaml};
 use syntax_tree::{mode_parser::parse_mode, SyntaxTree};
 
 #[inline(always)]
-pub unsafe fn parse<'a, Sc, ScState>(
+pub fn parse<'a, Sc, ScState>(
     ocaml_source_text: UnsafeOcamlPtr,
     env: FullFidelityParserEnv,
 ) -> UnsafeOcamlPtr
@@ -75,10 +75,20 @@ where
         let try_parse = move || {
             let stack_limit = StackLimit::relative(relative_stack_size);
             stack_limit.reset();
-            let stack_limit_ref: &'a StackLimit = std::mem::transmute(&stack_limit);
+            // Safety: the parser asks for a stack limit with the same lifetime
+            // as the source text, but no syntax tree borrows the stack limit,
+            // so we really only need it to live as long as the parser.
+            // Transmute away its lifetime to satisfy the parser API.
+            let stack_limit_ref: &'a StackLimit = unsafe { std::mem::transmute(&stack_limit) };
             let mut pool = Pool::new();
             let parse_result = std::panic::catch_unwind(move || {
-                let source_text = SourceText::from_ocaml(ocaml_source_text.as_usize()).unwrap();
+                // We only convert the source text from OCaml in this innermost
+                // closure because it contains an Rc. If we converted it
+                // earlier, we'd need to pass it across an unwind boundary or
+                // send it between threads, but it has internal mutablility and
+                // is not Send.
+                let source_text =
+                    unsafe { SourceText::from_ocaml(ocaml_source_text.as_usize()).unwrap() };
                 let mut parser = <Parser<'a, Sc, ScState>>::make(&source_text, env);
                 let root = parser.parse_script(Some(&stack_limit_ref));
                 let errors = parser.errors();
@@ -86,9 +96,9 @@ where
 
                 // traversing the parsed syntax tree uses about 1/3 of the stack
                 let context = SerializationContext::new(ocaml_source_text.as_usize());
-                let ocaml_root = root.to_ocaml(&context);
+                let ocaml_root = unsafe { root.to_ocaml(&context) };
                 let ocaml_errors = pool.add(&errors);
-                let ocaml_state = state.to_ocaml(&context);
+                let ocaml_state = unsafe { state.to_ocaml(&context) };
                 let tree = if leak_rust_tree {
                     let required_stack_size = if default_stack_size_sufficient {
                         None
@@ -110,21 +120,29 @@ where
                 };
                 let ocaml_tree = pool.add(&tree);
 
+                // Safety: We only invoke set_field with `res`, and only with
+                // indices less than the size we gave. The UnsafeOcamlPtr must
+                // point to the first field in the block. It must be handed back
+                // to OCaml before the garbage collector is given an opportunity
+                // to run.
                 let res = pool.block_with_size(4);
-                Pool::set_field(res, 0, ocamlrep::Value::from_bits(ocaml_state));
-                Pool::set_field(res, 1, ocamlrep::Value::from_bits(ocaml_root));
-                Pool::set_field(res, 2, ocaml_errors);
-                Pool::set_field(res, 3, ocaml_tree);
-                UnsafeOcamlPtr::new(res as usize)
+                unsafe {
+                    Pool::set_field(res, 0, ocamlrep::Value::from_bits(ocaml_state));
+                    Pool::set_field(res, 1, ocamlrep::Value::from_bits(ocaml_root));
+                    Pool::set_field(res, 2, ocaml_errors);
+                    Pool::set_field(res, 3, ocaml_tree);
+                    UnsafeOcamlPtr::new(res as usize)
+                }
             });
             match parse_result {
                 Ok(result) => Some(result),
                 Err(_) if stack_limit.exceeded() => {
                     // Not always printing warning here because this would fail some HHVM tests
-                    let istty = libc::isatty(libc::STDERR_FILENO as i32) != 0;
+                    let istty = unsafe { libc::isatty(libc::STDERR_FILENO as i32) != 0 };
                     if istty || std::env::var_os("HH_TEST_MODE").is_some() {
-                        let source_text =
-                            SourceText::from_ocaml(ocaml_source_text.as_usize()).unwrap();
+                        let source_text = unsafe {
+                            SourceText::from_ocaml(ocaml_source_text.as_usize()).unwrap()
+                        };
                         let file_path = source_text.file_path().path_str();
                         eprintln!(
                             "[hrust] warning: parser exceeded stack of {} KiB on: {}",
@@ -165,11 +183,11 @@ macro_rules! parse {
         // pool and create a new one.
         #[no_mangle]
         pub extern "C" fn $name(ocaml_source_text: usize, env: usize) -> usize {
-            ocamlrep_ocamlpool::catch_unwind(|| unsafe {
+            ocamlrep_ocamlpool::catch_unwind(|| {
                 use ocamlrep::{ptr::UnsafeOcamlPtr, OcamlRep};
                 use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
-                let ocaml_source_text = UnsafeOcamlPtr::new(ocaml_source_text);
-                let env = FullFidelityParserEnv::from_ocaml(env).unwrap();
+                let ocaml_source_text = unsafe { UnsafeOcamlPtr::new(ocaml_source_text) };
+                let env = unsafe { FullFidelityParserEnv::from_ocaml(env).unwrap() };
                 $crate::parse::<'_, $sc, $scstate>(ocaml_source_text, env).as_usize()
             })
         }

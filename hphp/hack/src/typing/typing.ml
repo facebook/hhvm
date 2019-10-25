@@ -3003,7 +3003,12 @@ and expr_
     in
     let env = Env.forget_members env (Fake.Blame_call p) in
     make_result env p (T.New (tc, tal, tel, tuel, (p1, ctor_fty))) ty
-  | Record _ -> expr_error env (Reason.Rwitness p) outer
+  | Record ((pos, id), _is_array, _values) ->
+    (match Decl_provider.get_record_def id with
+    | Some rd -> if rd.rdt_abstract then Errors.new_abstract_record (pos, id)
+    | None -> ());
+
+    expr_error env (Reason.Rwitness p) outer
   | Cast ((_, Harray (None, None)), _)
     when Partial.should_check_error (Env.get_mode env) 4007
          || TCO.migration_flag_enabled (Env.get_tcopt env) "array_cast" ->

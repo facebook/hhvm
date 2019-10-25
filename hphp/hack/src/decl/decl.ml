@@ -1049,7 +1049,12 @@ and method_decl_acc ~is_static c (acc, condition_types) m =
 (*****************************************************************************)
 
 let record_def_decl rd : Typing_defs.record_def_type =
-  { rdt_name = rd.rd_name; rdt_pos = rd.rd_span; rdt_errors = None }
+  {
+    rdt_name = rd.rd_name;
+    rdt_abstract = rd.rd_abstract;
+    rdt_pos = rd.rd_span;
+    rdt_errors = None;
+  }
 
 let record_def_decl_if_missing rd =
   let (_, rdid) = rd.rd_name in

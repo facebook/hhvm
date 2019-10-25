@@ -605,6 +605,7 @@ and enum_type = {
 
 and record_def_type = {
   rdt_name: Nast.sid;
+  rdt_abstract: bool;
   rdt_pos: Pos.t;
   rdt_errors: Errors.t option;
 }

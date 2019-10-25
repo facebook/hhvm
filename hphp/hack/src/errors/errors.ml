@@ -1372,6 +1372,13 @@ let uninstantiable_class usage_pos decl_pos name reason_msgl =
   in
   add_list (Typing.err_code Typing.UninstantiableClass) msgl
 
+let new_abstract_record (pos, name) =
+  let name = strip_ns name in
+  add
+    (Typing.err_code Typing.NewAbstractRecord)
+    pos
+    (Printf.sprintf "Cannot create instance of abstract record `%s`" name)
+
 let abstract_const_usage usage_pos decl_pos name =
   let name = strip_ns name in
   add_list

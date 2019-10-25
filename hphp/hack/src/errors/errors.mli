@@ -237,6 +237,8 @@ val unexpected_ty_in_tast :
 val uninstantiable_class :
   Pos.t -> Pos.t -> string -> (Pos.t * string) list -> unit
 
+val new_abstract_record : Pos.t * string -> unit
+
 val abstract_const_usage : Pos.t -> Pos.t -> string -> unit
 
 val const_without_typehint : Pos.t * string -> unit

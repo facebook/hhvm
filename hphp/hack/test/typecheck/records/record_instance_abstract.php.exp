@@ -1,0 +1,4 @@
+File "record_instance_abstract.php", line 8, characters 10-10:
+Cannot create instance of abstract record `A` (Typing[4353])
+File "record_instance_abstract.php", line 12, characters 10-10:
+Cannot create instance of abstract record `A` (Typing[4353])

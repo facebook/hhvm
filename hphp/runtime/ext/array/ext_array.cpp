@@ -423,11 +423,11 @@ TypedValue HHVM_FUNCTION(array_keys,
 }
 
 static bool couldRecur(const Variant& v, const ArrayData* arr) {
-  return v.isReferenced() || arr->kind() == ArrayData::kGlobalsKind;
+  return arr->kind() == ArrayData::kGlobalsKind;
 }
 
 static bool couldRecur(tv_lval lval, const ArrayData* arr) {
-  return tvIsReferenced(lval.tv()) || arr->kind() == ArrayData::kGlobalsKind;
+  return arr->kind() == ArrayData::kGlobalsKind;
 }
 
 using PointerSet = ArrayUtil::PointerSet;

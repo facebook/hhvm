@@ -197,7 +197,6 @@ enum class AnnotAction {
  */
 inline AnnotAction
 annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
-  assertx(!isRefType(dt));
   assertx(IMPLIES(at == AnnotType::Object, annotClsName != nullptr));
 
   auto const metatype = getAnnotMetaType(at);

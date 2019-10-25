@@ -663,7 +663,7 @@ ALWAYS_INLINE Array& asArrRef(tv_lval tv) {
 }
 
 ALWAYS_INLINE Array& toArrRef(tv_lval tv) {
-  return asArrRef(isRefType(type(tv)) ? val(tv).pref->cell() : tv);
+  return asArrRef(tv);
 }
 
 ALWAYS_INLINE const Array& asCArrRef(tv_rval tv) {
@@ -672,7 +672,7 @@ ALWAYS_INLINE const Array& asCArrRef(tv_rval tv) {
 }
 
 ALWAYS_INLINE const Array& toCArrRef(tv_rval tv) {
-  return asCArrRef(tvIsRef(tv) ? val(tv).pref->cell() : tv);
+  return asCArrRef(tv);
 }
 
 template <IntishCast IC = IntishCast::None>

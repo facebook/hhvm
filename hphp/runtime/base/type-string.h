@@ -540,7 +540,7 @@ ALWAYS_INLINE const String& asCStrRef(tv_rval tv) {
 }
 
 ALWAYS_INLINE const String& toCStrRef(tv_rval tv) {
-  return asCStrRef(tvIsRef(tv) ? val(tv).pref->cell() : tv);
+  return asCStrRef(tv);
 }
 
 ALWAYS_INLINE String toString(tv_rval tv) {

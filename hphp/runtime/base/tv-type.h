@@ -52,18 +52,12 @@ CASE(Dict)
 CASE(Keyset)
 CASE(Object)
 CASE(Resource)
-CASE(Ref)
 CASE(Func)
 CASE(Class)
 CASE(ClsMeth)
 CASE(Record)
 
 #undef CASE
-
-ALWAYS_INLINE bool tvIsReferenced(TypedValue tv) {
-  return isRefType(tv.m_type) &&
-         tv.m_data.pref->isReferenced();
-}
 
 template<typename T>
 ALWAYS_INLINE bool tvIsVecOrVArray(T&& tv) {

@@ -108,7 +108,6 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
       auto const DEBUG_ONLY rval = GetValueRef(arr, i);
       assertx(type(rval) != KindOfUninit);
       assertx(tvIsPlausible(*rval));
-      assertx(!arr->isVecArray() || !isRefType(type(rval)));
     }
   }
   return true;
@@ -250,8 +249,7 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
     // convertingPackedToVec = false, it can't fail. All we have to do
     // afterwards is fix the capacity and refcount on the copy; it's easiest
     // to do that by reinitializing the whole header.
-    auto const DEBUG_ONLY ok = CopyPackedHelper<false>(adIn, ad);
-    assertx(ok);
+    CopyPackedHelper(adIn, ad);
     ad->initHeader_16(
       adIn->m_kind,
       OneReference,
@@ -307,9 +305,8 @@ ArrayData* PackedArray::PrepareForInsert(ArrayData* adIn, bool copy) {
  * It is the callers responsibility to free ad and throw an appropriate
  * exception in this case.
  */
-template<bool convertingPackedToVec>
 ALWAYS_INLINE
-bool PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad) {
+void PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad) {
   // Copy everything from `adIn' to `ad', including refcount, kind and cap
   auto const size = adIn->m_size;
   static_assert(sizeof(ArrayData) == 16 && sizeof(TypedValue) == 16, "");
@@ -321,24 +318,8 @@ bool PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad) {
   // Copy counted types correctly, especially RefData.
   for (uint32_t i = 0; i < size; ++i) {
     auto const elm = LvalUncheckedInt(ad, i);
-    if (UNLIKELY(isRefType(type(elm)))) {
-      assertx(!adIn->isVecArray());
-      auto const ref = val(elm).pref;
-      // See also tvDup()
-      if (!ref->isReferenced() && ref->cell()->m_data.parr != adIn) {
-        cellDup(*ref->cell(), elm);
-        continue;
-      } else if (convertingPackedToVec) {
-        // Unwind the operation by decref-ing all elements before element i.
-        for (; i-- > 0;) {
-          tvDecRefGen(LvalUncheckedInt(ad, i));
-        }
-        return false;
-      }
-    }
     tvIncRefGen(*elm);
   }
-  return true;
 }
 
 NEVER_INLINE
@@ -348,10 +329,9 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   auto ad = static_cast<ArrayData*>(tl_heap->objMallocIndex(sizeClass(adIn)));
 
   // CopyPackedHelper will copy the header (including capacity and kind), and
-  // m_sizeAndPos; since we pass convertingPackedToVec = false, it can't fail.
-  // All we have to do afterwards is fix the refcount on the copy.
-  auto const DEBUG_ONLY ok = CopyPackedHelper<false>(adIn, ad);
-  assertx(ok);
+  // m_sizeAndPos.  All we have to do afterwards is fix the refcount on the
+  // copy.
+  CopyPackedHelper(adIn, ad);
   ad->m_count = OneReference;
 
   assertx(ad->kind() == adIn->kind());
@@ -369,12 +349,10 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
 
   auto const sizeIndex = capacityToSizeIndex(adIn->m_size);
   auto ad = alloc_packed_static(adIn->m_size);
-  // CopyPackedHelper will copy the header and m_sizeAndPos; since we pass
-  // convertingPackedToVec = false, it can't fail. All we have to do afterwards
-  // is fix the capacity and refcount on the copy; it's easiest to do that by
-  // reinitializing the whole header.
-  auto const DEBUG_ONLY ok = CopyPackedHelper<false>(adIn, ad);
-  assertx(ok);
+  // CopyPackedHelper will copy the header and m_sizeAndPos. All we have to do
+  // afterwards is fix the capacity and refcount on the copy; it's easiest to do
+  // that by reinitializing the whole header.
+  CopyPackedHelper(adIn, ad);
   ad->initHeader_16(
     adIn->m_kind,
     StaticValue,
@@ -1204,16 +1182,11 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
   if (adIn->empty()) return ArrayData::CreateVec();
 
   auto const do_copy = [&] {
-    // CopyPackedHelper will copy the header and m_sizeAndPos; since we pass
-    // convertingPackedToVec = true, it can fail and we have to handle that.
-    // All we have to do afterwards is fix the kind and refcount in the copy;
-    // it's easiest to do that by reinitializing the whole header.
+    // CopyPackedHelper will copy the header and m_sizeAndPos. All we have to do
+    // afterwards is fix the kind and refcount in the copy; it's easiest to do
+    // that by reinitializing the whole header.
     auto ad = static_cast<ArrayData*>(tl_heap->objMallocIndex(sizeClass(adIn)));
-    if (!CopyPackedHelper<true>(adIn, ad)) {
-      tl_heap->objFreeIndex(ad, sizeClass(adIn));
-      SystemLib::throwInvalidArgumentExceptionObject(
-        "Vecs cannot contain references");
-    }
+    CopyPackedHelper(adIn, ad);
     ad->initHeader_16(
       HeaderKind::VecArray,
       OneReference,

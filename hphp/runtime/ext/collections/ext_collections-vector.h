@@ -148,7 +148,6 @@ public:
 
   template <bool throwOnMiss>
   static tv_lval OffsetAt(ObjectData* obj, const TypedValue* key) {
-    assertx(!isRefType(key->m_type));
     auto vec = static_cast<BaseVector*>(obj);
     if (key->m_type == KindOfInt64) {
       return throwOnMiss ? vec->at(key->m_data.num)
@@ -172,7 +171,6 @@ public:
     return dataAt(key);
   }
   tv_lval at(const TypedValue* key) {
-    assertx(!isRefType(key->m_type));
     if (LIKELY(key->m_type == KindOfInt64)) {
       return at(key->m_data.num);
     }
@@ -188,7 +186,6 @@ public:
     return dataAt(key);
   }
   tv_lval get(const TypedValue* key) {
-    assertx(!isRefType(key->m_type));
     if (LIKELY(key->m_type == KindOfInt64)) {
       return get(key->m_data.num);
     }
@@ -265,7 +262,6 @@ public:
     set(key, val.toCell());
   }
   void set(const TypedValue* key, const TypedValue* val) {
-    assertx(!isRefType(key->m_type));
     if (key->m_type != KindOfInt64) {
       throwBadKeyType();
     }
@@ -344,7 +340,6 @@ protected:
 
   template<bool raw> ALWAYS_INLINE
   void addImpl(TypedValue tv) {
-    assertx(!isRefType(tv.m_type));
     auto oldAd = arrayData();
     if (raw) {
       assertx(canMutateBuffer());
@@ -369,7 +364,6 @@ protected:
   // check for an immutable buffer, so it's only safe to use in some cases.
   // If you're not sure, use set() instead.
   void setRaw(int64_t key, TypedValue val) {
-    assertx(!isRefType(val.m_type));
     assertx(canMutateBuffer());
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       collections::throwOOB(key);
@@ -387,7 +381,6 @@ protected:
     setRaw(key, val.toCell());
   }
   void setRaw(const TypedValue* key, const TypedValue* val) {
-    assertx(!isRefType(key->m_type));
     if (key->m_type != KindOfInt64) {
       throwBadKeyType();
     }

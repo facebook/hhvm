@@ -87,7 +87,6 @@ struct c_Pair : ObjectData {
 
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
-    assertx(!isRefType(key->m_type));
     auto pair = static_cast<c_Pair*>(obj);
     if (key->m_type == KindOfInt64) {
       return throwOnMiss ? pair->at(key->m_data.num)

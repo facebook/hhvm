@@ -258,7 +258,6 @@ void BaseMap::setImpl(int64_t k, TypedValue tv) {
   if (!raw) {
     mutate();
   }
-  assertx(!isRefType(tv.m_type));
   assertx(canMutateBuffer());
   auto h = hash_int64(k);
 retry:
@@ -288,7 +287,6 @@ void BaseMap::setImpl(StringData* key, TypedValue tv) {
   if (!raw) {
     mutate();
   }
-  assertx(!isRefType(tv.m_type));
   assertx(canMutateBuffer());
 retry:
   strhash_t h = key->hash();
@@ -326,7 +324,6 @@ void BaseMap::OffsetSet(ObjectData* obj, const TypedValue* key,
 }
 
 bool BaseMap::OffsetIsset(ObjectData* obj, const TypedValue* key) {
-  assertx(!isRefType(key->m_type));
   auto map = static_cast<BaseMap*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -341,7 +338,6 @@ bool BaseMap::OffsetIsset(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseMap::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
-  assertx(!isRefType(key->m_type));
   auto map = static_cast<BaseMap*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -356,7 +352,6 @@ bool BaseMap::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseMap::OffsetContains(ObjectData* obj, const TypedValue* key) {
-  assertx(!isRefType(key->m_type));
   auto map = static_cast<BaseMap*>(obj);
   if (key->m_type == KindOfInt64) {
     return map->contains(key->m_data.num);
@@ -368,7 +363,6 @@ bool BaseMap::OffsetContains(ObjectData* obj, const TypedValue* key) {
 }
 
 void BaseMap::OffsetUnset(ObjectData* obj, const TypedValue* key) {
-  assertx(!isRefType(key->m_type));
   auto map = static_cast<BaseMap*>(obj);
   if (key->m_type == KindOfInt64) {
     map->remove(key->m_data.num);

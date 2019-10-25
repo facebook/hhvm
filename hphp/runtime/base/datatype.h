@@ -350,7 +350,6 @@ constexpr bool isDoubleType(DataType t) { return t == KindOfDouble; }
 constexpr bool isObjectType(DataType t) { return t == KindOfObject; }
 constexpr bool isRecordType(DataType t) { return t == KindOfRecord; }
 constexpr bool isResourceType(DataType t) { return t == KindOfResource; }
-constexpr bool isRefType(DataType t) { return t == KindOfRef; }
 constexpr bool isFuncType(DataType t) { return t == KindOfFunc; }
 constexpr bool isClassType(DataType t) { return t == KindOfClass; }
 constexpr bool isClsMethType(DataType t) { return t == KindOfClsMeth; }

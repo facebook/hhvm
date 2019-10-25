@@ -175,12 +175,6 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
   return a1;
 }
 
-RefData* boxValue(TypedValue tv) {
-  assertx(!isRefType(tv.m_type));
-  if (tv.m_type == KindOfUninit) tv = make_tv<KindOfNull>();
-  return RefData::Make(tv);
-}
-
 ArrayData* convCellToArrHelper(TypedValue tv) {
   // Note: the call sites of this function all assume that
   // no user code will run and no recoverable exceptions will
@@ -1005,7 +999,6 @@ uint64_t vectorIsset(c_Vector* vec, int64_t index) {
 TypedValue incDecElem(tv_lval base, TypedValue key,
                       IncDecOp op, const MInstrPropState* pState) {
   auto const result = HPHP::IncDecElem(op, base, key, pState);
-  assertx(!isRefType(result.m_type));
   return result;
 }
 

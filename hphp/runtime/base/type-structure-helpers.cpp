@@ -39,7 +39,6 @@ namespace {
 
 template<typename F>
 bool cellInstanceOfImpl(const Cell* tv, F lookupClass) {
-  assertx(!isRefType(tv->m_type));
   switch (tv->m_type) {
     case KindOfUninit:
     case KindOfNull:

@@ -695,7 +695,7 @@ void VariableSerializer::preventOverflow(const Object& v,
 }
 
 void VariableSerializer::write(const_variant_ref v, bool isArrayKey) {
-  setReferenced(v.isReferenced());
+  setReferenced(false);
   if (m_type == Type::DebugDump) {
     setRefCount(v.getRefCount());
   }
@@ -1222,14 +1222,9 @@ void VariableSerializer::writeArrayValue(
   case Type::Internal:
   case Type::APCSerialize:
   case Type::DebuggerSerialize:
-    // Do not count referenced refs after the first time we see them (for
-    // compatibility with PHP).
     // Do not count values in keysets because they're also keys, and it's not
     // possible to have back references to keys.
-    if (!(
-      (value.isReferenced() && m_refs[value.asTypedValue()].m_id != NO_ID) ||
-      kind == VariableSerializer::ArrayKind::Keyset
-    )) {
+    if (kind != VariableSerializer::ArrayKind::Keyset) {
       m_valueCount++;
     }
     write(value);
@@ -1437,25 +1432,6 @@ void VariableSerializer::decNestedLevel(tv_rval tv) {
   }
 }
 
-void VariableSerializer::serializeRef(tv_rval tv, bool isArrayKey) {
-  assertx(tvIsRef(tv));
-  // Ugly, but behavior is different for serialize
-  if (getType() == VariableSerializer::Type::Serialize ||
-      getType() == VariableSerializer::Type::Internal ||
-      getType() == VariableSerializer::Type::APCSerialize ||
-      getType() == VariableSerializer::Type::DebuggerSerialize) {
-    if (incNestedLevel(tv)) {
-      writeOverflow(tv);
-    } else {
-      // Tell the inner variant to skip the nesting check for data inside
-      serializeVariant(val(tv).pref->cell(), isArrayKey, true);
-    }
-    decNestedLevel(tv);
-  } else {
-    serializeVariant(val(tv).pref->cell(), isArrayKey);
-  }
-}
-
 void VariableSerializer::serializeFunc(const Func* func) {
   auto const name = func->fullName();
   switch (getType()) {
@@ -1644,7 +1620,6 @@ void VariableSerializer::serializeVariant(tv_rval tv,
       return;
 
     case KindOfRef:
-      serializeRef(tv, isArrayKey);
       return;
 
     case KindOfFunc:

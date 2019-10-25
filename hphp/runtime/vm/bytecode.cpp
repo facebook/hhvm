@@ -459,11 +459,7 @@ Array VarEnv::getDefinedVariables() const {
     if (s_reified_generics_var.equal(sd)) {
       continue;
     }
-    if (tvAsCVarRef(tv).isReferenced()) {
-      ret.set(StrNR(sd).asString(), tvAsCVarRef(tv));
-    } else {
-      ret.set(StrNR(sd).asString(), tvAsCVarRef(tv));
-    }
+    ret.set(StrNR(sd).asString(), tvAsCVarRef(tv));
   }
   {
     // Make result independent of the hashtable implementation.
@@ -1552,7 +1548,7 @@ OPTBLD_INLINE void iopPopFrame(uint32_t nout) {
 OPTBLD_INLINE void iopPopL(local_var to) {
   assertx(to.index < vmfp()->m_func->numLocals());
   Cell* fr = vmStack().topC();
-  if (isRefType(to->m_type) || vmfp()->m_func->isPseudoMain()) {
+  if (vmfp()->m_func->isPseudoMain()) {
     // Manipulate the ref-counts as if this was a SetL, PopC pair to preserve
     // destructor ordering.
     tvSet(*fr, *to);
@@ -3011,7 +3007,6 @@ OPTBLD_INLINE void iopCGetL2(local_var fr) {
 
 OPTBLD_INLINE void iopPushL(local_var locVal) {
   assertx(locVal->m_type != KindOfUninit);
-  assertx(!isRefType(locVal->m_type));
   TypedValue* dest = vmStack().allocTV();
   *dest = *locVal;
   locVal->m_type = KindOfUninit;

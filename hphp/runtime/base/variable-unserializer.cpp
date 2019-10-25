@@ -1364,7 +1364,6 @@ Array VariableUnserializer::unserializeDict() {
       putInOverwrittenList(lval);
     }
     unserializeVariant(lval, UnserializeMode::DictValue);
-    assertx(!tvIsRef(lval));
 
     if (i < (size - 1)) {
       auto lastChar = peekBack();
@@ -1414,7 +1413,6 @@ Array VariableUnserializer::unserializeVec() {
     auto const lval = PackedArray::LvalForceNewVec(arr.get(), false);
     assertx(lval.arr == arr.get());
     unserializeVariant(lval, UnserializeMode::VecValue);
-    assertx(!tvIsRef(lval));
 
     if (i < (size - 1)) {
       auto lastChar = peekBack();
@@ -1492,7 +1490,6 @@ Array VariableUnserializer::unserializeVArray() {
     auto const lval = arr.lvalForce();
     assertx(lval.arr == arr.get());
     unserializeVariant(lval, mode);
-    assertx(!arr.isHackArray() || !tvIsRef(lval));
 
     if (i < (size - 1)) {
       auto lastChar = peekBack();
@@ -1560,7 +1557,6 @@ Array VariableUnserializer::unserializeDArray() {
     }
 
     unserializeVariant(value, mode);
-    assertx(!arr.isHackArray() || !tvIsRef(value));
 
     if (i < (size - 1)) {
       auto lastChar = peekBack();

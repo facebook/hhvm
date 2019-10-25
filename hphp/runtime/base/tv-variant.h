@@ -64,16 +64,6 @@ ALWAYS_INLINE const Variant& cellAsCVarRef(const Cell& cell) {
   return reinterpret_cast<const Variant&>(cell);
 }
 
-ALWAYS_INLINE Variant& refAsVariant(Ref& ref) {
-  assertx(refIsPlausible(ref));
-  return reinterpret_cast<Variant&>(ref);
-}
-
-ALWAYS_INLINE const Variant& refAsCVarRef(const Ref& ref) {
-  assertx(refIsPlausible(ref));
-  return reinterpret_cast<const Variant&>(ref);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }

@@ -147,16 +147,6 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
                                  tv_rval result) {
   if (LIKELY(&val(result) != &localTvRef.m_data)) {
     tvIncRefGen(*result);
-  } else {
-    // If a magic getter or array access method returned by reference, we have
-    // to incref the inner cell and drop our reference to the RefData.
-    // Otherwise we do nothing, since we already own a reference to result.
-    if (UNLIKELY(isRefType(localTvRef.m_type))) {
-      auto inner = *localTvRef.m_data.pref->cell();
-      tvIncRefGen(inner);
-      decRefRef(localTvRef.m_data.pref);
-      return inner;
-    }
   }
 
   return *result;
@@ -268,16 +258,12 @@ inline TypedValue setOpPropCO(Class* ctx, ObjectData* base, TypedValue key,
 
 inline TypedValue incDecPropC(Class* ctx, tv_lval base, TypedValue key,
                               IncDecOp op, const MInstrPropState* pState) {
-  auto const result = HPHP::IncDecProp(ctx, op, base, key, pState);
-  assertx(!isRefType(result.m_type));
-  return result;
+  return HPHP::IncDecProp(ctx, op, base, key, pState);
 }
 
 inline TypedValue incDecPropCO(Class* ctx, ObjectData* base, TypedValue key,
                                IncDecOp op) {
-  auto const result = HPHP::IncDecPropObj(ctx, op, base, key);
-  assertx(!isRefType(result.m_type));
-  return result;
+  return HPHP::IncDecPropObj(ctx, op, base, key);
 }
 
 //////////////////////////////////////////////////////////////////////

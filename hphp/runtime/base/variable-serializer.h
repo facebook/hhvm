@@ -181,7 +181,6 @@ private:
   void preventOverflow(const Object& v, const std::function<void()>& func);
   void writePropertyKey(const String& prop);
 
-  void serializeRef(tv_rval tv, bool isArrayKey);
   // Serialize a Variant recursively.
   // The last param noQuotes indicates to serializer to not put the output in
   // double quotes (used when printing the output of a __toDebugDisplay() of

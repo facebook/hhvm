@@ -90,7 +90,6 @@ void c_Pair::throwBadKeyType() {
 }
 
 bool c_Pair::OffsetIsset(ObjectData* obj, const TypedValue* key) {
-  assertx(!isRefType(key->m_type));
   auto pair = static_cast<c_Pair*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -103,7 +102,6 @@ bool c_Pair::OffsetIsset(ObjectData* obj, const TypedValue* key) {
 }
 
 bool c_Pair::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
-  assertx(!isRefType(key->m_type));
   auto pair = static_cast<c_Pair*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -116,7 +114,6 @@ bool c_Pair::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
 }
 
 bool c_Pair::OffsetContains(ObjectData* obj, const TypedValue* key) {
-  assertx(!isRefType(key->m_type));
   auto pair = static_cast<c_Pair*>(obj);
   if (key->m_type == KindOfInt64) {
     return pair->contains(key->m_data.num);

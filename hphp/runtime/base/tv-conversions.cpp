@@ -137,9 +137,6 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
 
 bool tvCastToBoolean(TypedValue tv) {
   assertx(tvIsPlausible(tv));
-  if (isRefType(tv.m_type)) {
-    tv = *tv.m_data.pref->cell();
-  }
   return cellToBool(tv);
 }
 
@@ -312,18 +309,11 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
 
 int64_t tvCastToInt64(TypedValue tv) {
   assertx(tvIsPlausible(tv));
-  if (isRefType(tv.m_type)) {
-    tv = *tv.m_data.pref->cell();
-  }
   return cellToInt(tv);
 }
 
 double tvCastToDouble(TypedValue tv) {
   assertx(tvIsPlausible(tv));
-  if (isRefType(tv.m_type)) {
-    tv = *tv.m_data.pref->cell();
-  }
-
   switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -489,9 +479,6 @@ void cellCastToStringInPlace(tv_lval tv) {
 
 StringData* tvCastToStringData(TypedValue tv) {
   assertx(tvIsPlausible(tv));
-  if (isRefType(tv.m_type)) {
-    tv = *tv.m_data.pref->cell();
-  }
   return cellCastToStringData(tv);
 }
 
@@ -583,10 +570,6 @@ String tvCastToString(TypedValue tv) {
 template <IntishCast IC>
 ArrayData* tvCastToArrayLikeData(TypedValue tv) {
   assertx(tvIsPlausible(tv));
-  if (isRefType(tv.m_type)) {
-    tv = *tv.m_data.pref->cell();
-  }
-
   switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -1404,10 +1387,6 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
 
 ObjectData* tvCastToObjectData(TypedValue tv) {
   assertx(tvIsPlausible(tv));
-  if (isRefType(tv.m_type)) {
-    tv = *tv.m_data.pref->cell();
-  }
-
   switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:

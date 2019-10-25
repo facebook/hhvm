@@ -484,21 +484,6 @@ MixedArray* MixedArray::SlowCopy(MixedArray* ad, const ArrayData& old,
 
   for (; elm < end; ++elm) {
     if (elm->hasStrKey()) elm->skey->incRefCount();
-    if (UNLIKELY(isRefType(elm->data.m_type))) {
-      auto const ref = elm->data.m_data.pref;
-      // See also tvDup()
-      if (!ref->isReferenced() && ref->cell()->m_data.parr != &old) {
-        cellDup(*ref->cell(), *reinterpret_cast<Cell*>(&elm->data));
-        continue;
-      } else if (ad->m_kind == HeaderKind::Dict) {
-        auto const i = uintptr_t(elm - ad->data()) / sizeof(MixedArrayElm);
-        ad->m_used = i;
-        ad->m_size = i;
-        ad->m_pos = 0;
-        Release(ad);
-        throwRefInvalidArrayValueException(ArrayData::CreateDict());
-      }
-    }
     // When we convert an element to a tombstone, we set its value type to
     // kInvalidDataType, which is not a refcounted type.
     tvIncRefGenUnsafe(elm->data);
@@ -569,9 +554,6 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   }
   for (; elm < end; ++elm) {
     assertx(IMPLIES(elm->hasStrKey(), elm->strKey()->isStatic()));
-    if (UNLIKELY(isRefType(elm->data.m_type))) {
-      return check(SlowCopy(ad, other, elm, end));
-    }
     // When we convert an element to a tombstone, we set its key type to int
     // and value type to kInvalidDataType, neither of which are refcounted.
     tvIncRefGenUnsafe(elm->data);
@@ -992,14 +974,6 @@ MixedArray* MixedArray::SlowGrow(MixedArray* ad, const ArrayData& old,
                                  MixedArrayElm* elm, MixedArrayElm* end) {
   for (; elm < end; ++elm) {
     if (elm->hasStrKey()) elm->skey->incRefCount();
-    if (UNLIKELY(isRefType(elm->data.m_type))) {
-      auto ref = elm->data.m_data.pref;
-      // See also tvDup()
-      if (!ref->isReferenced() && ref->cell()->m_data.parr != &old) {
-        cellDup(*ref->cell(), elm->data);
-        continue;
-      }
-    }
     // When we convert an element to a tombstone, we set its value type to
     // kInvalidDataType, which is not a refcounted type.
     tvIncRefGenUnsafe(elm->data);
@@ -1057,9 +1031,6 @@ MixedArray* MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
       return check(SlowGrow(ad, *old, elm, end));
     }
     for (; elm < end; ++elm) {
-      if (UNLIKELY(isRefType(elm->data.m_type))) {
-        return check(SlowGrow(ad, *old, elm, end));
-      }
       // When we convert an element to a tombstone, we set its key type to int
       // and value type to kInvalidDataType, neither of which are refcounted.
       tvIncRefGenUnsafe(elm->data);

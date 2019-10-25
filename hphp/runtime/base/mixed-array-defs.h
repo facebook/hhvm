@@ -252,12 +252,6 @@ void ConvertTvToUncounted(
     DataWalker::PointerMap* seen = nullptr) {
   auto& data = source.val();
   auto& type = source.type();
-  if (isRefType(type)) {
-    // unbox
-    auto const inner = data.pref->cell();
-    tvCopy(*inner, source);
-  }
-
   auto const handlePersistent = [&] (MaybeCountable* elm) {
     if (elm->isRefCounted()) return false;
     if (elm->isStatic()) return true;

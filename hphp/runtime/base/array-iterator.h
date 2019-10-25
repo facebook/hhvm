@@ -531,7 +531,6 @@ bool IterateV(const TypedValue& it,
               ArrFn arrFn,
               PreCollFn preCollFn,
               ObjFn objFn) {
-  assertx(!isRefType(it.m_type));
   ArrayData* adata;
   if (LIKELY(isArrayLikeType(it.m_type))) {
     adata = it.m_data.parr;
@@ -631,7 +630,6 @@ bool IterateKV(const TypedValue& it,
                ArrFn arrFn,
                PreCollFn preCollFn,
                ObjFn objFn) {
-  assertx(!isRefType(it.m_type));
   ArrayData* adata;
   if (LIKELY(isArrayLikeType(it.m_type))) {
     adata = it.m_data.parr;

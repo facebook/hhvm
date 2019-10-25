@@ -466,8 +466,6 @@ static bool soap_check_zval_ref(const Variant& data, xmlNodePtr node) {
   HeapObject* hash = nullptr;
   if (data.isObject()) {
     hash = data.getObjectData();
-  } else if (data.isReferenced()) {
-    hash = data.asTypedValue()->m_data.pref;
   }
   if (hash) {
     auto& node_map = SOAP_GLOBAL(node_map);

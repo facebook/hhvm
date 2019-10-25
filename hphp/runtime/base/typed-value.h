@@ -206,7 +206,6 @@ using TypedNum = TypedValue;
  */
 bool tvIsPlausible(TypedValue);
 bool cellIsPlausible(Cell);
-bool refIsPlausible(Ref);
 
 ///////////////////////////////////////////////////////////////////////////////
 

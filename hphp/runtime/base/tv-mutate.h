@@ -34,10 +34,6 @@ namespace HPHP {
  *  - is the identity otherwise.
  */
 ALWAYS_INLINE Cell tvToInitCell(TypedValue tv) {
-  if (UNLIKELY(isRefType(tv.m_type))) {
-    assertx(tv.m_data.pref->cell()->m_type != KindOfUninit);
-    return *tv.m_data.pref->cell();
-  }
   if (tv.m_type == KindOfUninit) return make_tv<KindOfNull>();
   return tv;
 }
@@ -95,11 +91,6 @@ enable_if_lval_t<T&&, void> tvCopy(const TypedValue& fr, T&& to) {
 template<typename C> ALWAYS_INLINE
 enable_if_lval_t<C&&, void> cellCopy(const Cell fr, C&& to) {
   assertx(cellIsPlausible(fr));
-  tvCopy(fr, to);
-}
-template<typename R> ALWAYS_INLINE
-enable_if_lval_t<R&&, void> refCopy(const Ref fr, R&& to) {
-  assertx(refIsPlausible(fr));
   tvCopy(fr, to);
 }
 

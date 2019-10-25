@@ -320,7 +320,6 @@ inline bool isValueType(DataType type) {
 
 template <bool throwOnMiss>
 inline tv_lval atImpl(ObjectData* obj, const TypedValue* key) {
-  assertx(!isRefType(key->m_type));
   switch (obj->collectionType()) {
 #define X(type) case CollectionType::type: \
                   return c_##type::OffsetAt<throwOnMiss>(obj, key);
@@ -340,7 +339,6 @@ tv_lval get(ObjectData* obj, const TypedValue* key) {
 }
 
 tv_lval atLval(ObjectData* obj, const TypedValue* key) {
-  assertx(!isRefType(key->m_type));
   tv_lval ret;
   switch (obj->collectionType()) {
     case CollectionType::Pair:
@@ -398,7 +396,6 @@ tv_lval atLval(ObjectData* obj, const TypedValue* key) {
 }
 
 tv_lval atRw(ObjectData* obj, const TypedValue* key) {
-  assertx(!isRefType(key->m_type));
   switch (obj->collectionType()) {
     case CollectionType::Vector:
       // Since we're exposing an element of a Vector in an read/write context,
@@ -438,7 +435,6 @@ bool contains(ObjectData* obj, const Variant& offset) {
 }
 
 bool isset(ObjectData* obj, const TypedValue* key) {
-  assertx(!isRefType(key->m_type));
   switch (obj->collectionType()) {
     case CollectionType::Vector:
     case CollectionType::ImmVector:
@@ -456,7 +452,6 @@ bool isset(ObjectData* obj, const TypedValue* key) {
 }
 
 bool empty(ObjectData* obj, const TypedValue* key) {
-  assertx(!isRefType(key->m_type));
   switch (obj->collectionType()) {
     case CollectionType::Vector:
     case CollectionType::ImmVector:
@@ -474,7 +469,6 @@ bool empty(ObjectData* obj, const TypedValue* key) {
 }
 
 void unset(ObjectData* obj, const TypedValue* key) {
-  assertx(!isRefType(key->m_type));
   switch (obj->collectionType()) {
     case CollectionType::Vector:
       c_Vector::OffsetUnset(obj, key);
@@ -494,7 +488,6 @@ void unset(ObjectData* obj, const TypedValue* key) {
 }
 
 void append(ObjectData* obj, TypedValue* val) {
-  assertx(!isRefType(val->m_type));
   assertx(val->m_type != KindOfUninit);
   switch (obj->collectionType()) {
     case CollectionType::Vector:
@@ -515,8 +508,6 @@ void append(ObjectData* obj, TypedValue* val) {
 }
 
 void set(ObjectData* obj, const TypedValue* key, const TypedValue* val) {
-  assertx(!isRefType(key->m_type));
-  assertx(!isRefType(val->m_type));
   assertx(val->m_type != KindOfUninit);
   switch (obj->collectionType()) {
     case CollectionType::Vector:

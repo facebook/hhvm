@@ -321,8 +321,7 @@ private:
   static ArrayData* MakePackedImpl(uint32_t, const Cell*,
                                    HeaderKind, ArrayData::DVArray);
 
-  template<bool convertingPackedToVec>
-  static bool CopyPackedHelper(const ArrayData* adIn, ArrayData* ad);
+  static void CopyPackedHelper(const ArrayData* adIn, ArrayData* ad);
 
   static bool VecEqualHelper(const ArrayData*, const ArrayData*, bool);
   static int64_t VecCmpHelper(const ArrayData*, const ArrayData*);

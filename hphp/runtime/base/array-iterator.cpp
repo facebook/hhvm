@@ -329,8 +329,6 @@ tv_rval ArrayIter::secondRvalPlus() {
 //////////////////////////////////////////////////////////////////////
 
 bool Iter::init(Cell* base) {
-  assertx(!isRefType(base->m_type));
-
   // Get easy cases out of the way. Class methods promote to arrays and both
   // of them are just an ArrayIter contructor. end() never throws for arrays.
   if (isClsMethType(base->m_type)) {
@@ -436,7 +434,6 @@ namespace {
 template <bool typeArray>
 static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   auto const oldVal = *out;
-  assertx(!isRefType(oldVal.m_type));
   TRACE(2, "%s: typeArray: %s, I %p, out %p\n",
            __func__, typeArray ? "true" : "false", iter, out);
   auto& arrIter = *unwrap(iter);
@@ -446,7 +443,6 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
     cellDup(arrIter.nvSecond().tv(), *out);
   } else {
     Variant val = arrIter.second();
-    assertx(!isRefType(val.getRawType()));
     cellDup(*val.asTypedValue(), *out);
   }
   tvDecRefGen(oldVal);
@@ -455,7 +451,6 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
 template <bool typeArray>
 static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
   auto const oldVal = *out;
-  assertx(!isRefType(oldVal.m_type));
   TRACE(2, "%s: I %p, out %p\n", __func__, iter, out);
   auto& arrIter = *unwrap(iter);
   assertx((typeArray && arrIter.getIterType() == ArrayIter::TypeArray) ||
@@ -473,7 +468,6 @@ inline void liter_value_cell_local_impl(Iter* iter,
                                         TypedValue* out,
                                         const ArrayData* ad) {
   auto const oldVal = *out;
-  assertx(!isRefType(oldVal.m_type));
   auto const& arrIter = *unwrap(iter);
   assertx(arrIter.getIterType() == ArrayIter::TypeArray);
   assertx(!arrIter.getArrayData());
@@ -486,7 +480,6 @@ inline void liter_key_cell_local_impl(Iter* iter,
                                       TypedValue* out,
                                       const ArrayData* ad) {
   auto const oldVal = *out;
-  assertx(!isRefType(oldVal.m_type));
   auto const& arrIter = *unwrap(iter);
   assertx(arrIter.getIterType() == ArrayIter::TypeArray);
   assertx(!arrIter.getArrayData());
@@ -898,7 +891,6 @@ static int64_t iter_next_apc_array(Iter* iter,
 
   // Note that APCLocalArray can never return KindOfRefs.
   auto const rval = APCLocalArray::RvalAtPos(arr->asArrayData(), pos);
-  assertx(!isRefType(rval.type()));
   cellSet(rval.tv(), *valOut);
   if (LIKELY(!keyOut)) return 1;
 

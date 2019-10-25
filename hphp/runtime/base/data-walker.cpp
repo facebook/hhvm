@@ -91,21 +91,6 @@ bool DataWalker::visitTypedValue(TypedValue rval,
                                  DataFeature& features,
                                  PointerSet& visited,
                                  PointerMap* seenArrs) const {
-  if (isRefType(rval.m_type)) {
-    if (rval.m_data.pref->isReferenced()) {
-      if (markVisited(rval.m_data.pref, features, visited)) {
-        // Don't recurse forever; we already went down this path, and
-        // stop the walk if we've already got everything we need.
-        return canStopWalk(features);
-      }
-      // Right now consider it circular even if the referenced variant
-      // only showed up in one spot.  This could be revisted later.
-      features.isCircular = true;
-      if (canStopWalk(features)) return true;
-    }
-    rval = *rval.m_data.pref->cell();
-  }
-
   auto const serialize_funcs = RuntimeOption::EvalAPCSerializeFuncs;
 
   if (rval.m_type == KindOfObject) {

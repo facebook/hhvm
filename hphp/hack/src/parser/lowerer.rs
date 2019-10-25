@@ -7,7 +7,6 @@
 use escaper::*;
 use itertools::{Either, Either::Left, Either::Right};
 use naming_special_names_rust::{special_functions, special_idents};
-use ocamlvalue_macro::Ocamlvalue;
 use oxidized::{
     aast, aast::Expr_ as E_, aast_defs, ast_defs, doc_comment::DocComment, file_info,
     global_options::GlobalOptions, namespace_env::Env as NamespaceEnv, pos::Pos, s_map,
@@ -319,7 +318,6 @@ pub enum Error {
     Failwith(String),
 }
 
-#[derive(Ocamlvalue)]
 pub struct Result {
     pub aast: aast!(Program<,>),
 }

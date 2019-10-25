@@ -11,7 +11,4 @@ path = "../../aast_parser_ffi.rs"
 aast_parser = { path = "../aast_parser", package = "aast_parser" }
 parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
 oxidized = {path = "../../../oxidized", package = "hack_oxidized" }
-ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
-ocamlrep = { path = "../../../ocamlrep", package = "hack_ocamlrep" }
-ocaml = "^0.7"
-libc = "^0.2.60"
+ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool" }

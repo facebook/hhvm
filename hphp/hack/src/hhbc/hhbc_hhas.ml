@@ -1354,14 +1354,8 @@ and string_of_param_default_value ~env expr =
       | _ -> ""
     in
     prefix ^ e ^ "(" ^ String.concat ~sep:", " es ^ ")"
-  | A.Record (e, _, es) ->
+  | A.Record ((_, e), _, es) ->
     let es = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
-    let e =
-      match e with
-      | (_, A.CIexpr e) ->
-        String_utils.lstrip (string_of_param_default_value ~env e) "\\\\"
-      | _ -> failwith "Expected CIexpr in ast_to_aast"
-    in
     e ^ string_of_afield_list ~env es
   | A.Class_get (cid, cge) ->
     let s1 =

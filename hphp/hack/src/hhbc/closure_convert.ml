@@ -1033,7 +1033,6 @@ let rec convert_expr env st ((p, expr_) as expr) =
       let (st, el2) = convert_exprs env st el2 in
       (st, (p, New (cid, targs, el1, el2, annot)))
     | Record (cid, is_array, es) ->
-      let (st, cid) = convert_class_id env st cid in
       let convert_pair st (e1, e2) =
         let (st, e1) = convert_expr env st e1 in
         let (st, e2) = convert_expr env st e2 in

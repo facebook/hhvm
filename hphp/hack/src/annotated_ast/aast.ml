@@ -191,7 +191,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       * ('ex, 'fb, 'en, 'hi) expr list
       * 'ex (* constructor *)
   | Record of
-      ('ex, 'fb, 'en, 'hi) class_id
+      sid
       * (* is array *) bool
       * (('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr) list
   | Efun of ('ex, 'fb, 'en, 'hi) fun_ * lid list

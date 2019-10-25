@@ -299,13 +299,13 @@ let namespace_elaborater =
             List.map el ~f:(self#on_expr env),
             List.map uel ~f:(self#on_expr env),
             ex )
-      | Record ((p1, CIexpr (p2, Id x)), is_array, l) ->
-        let x = elaborate_type_name env x in
+      | Record (id, is_array, l) ->
+        let id = elaborate_type_name env id in
         let l =
           List.map l ~f:(fun (e1, e2) ->
               (self#on_expr env e1, self#on_expr env e2))
         in
-        Record ((p1, CIexpr (p2, Id x)), is_array, l)
+        Record (id, is_array, l)
       | Class_const ((p1, CIexpr (p2, Id x1)), pstr) ->
         let name = elaborate_type_name env x1 in
         Class_const ((p1, CIexpr (p2, Id name)), pstr)

@@ -500,7 +500,7 @@ and expr_ =
   | BracedExpr of expr
   | ParenthesizedExpr of expr
   | New of expr * targ list * expr list * expr list
-  | Record of expr * (* is array *) bool * (expr * expr) list
+  | Record of id * (* is array *) bool * (expr * expr) list
   (* Traditional PHP-style closure with a use list. Each use element is
     a variable name. *)
   | Efun of fun_ * id list

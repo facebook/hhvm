@@ -1932,15 +1932,9 @@ if there already is one, since that one will likely be better than this one. *)
               record_creation_array_token = array_token;
               _;
             } ->
-          let e =
-            match syntax rec_type with
-            | SimpleTypeSpecifier _ ->
-              let name = pos_name rec_type env in
-              (fst name, Id name)
-            | _ -> pExpr rec_type env
-          in
+          let id = pos_name rec_type env in
           let is_record_array = token_kind array_token = Some TK.At in
-          Record (e, is_record_array, couldMap ~f:pMember members env)
+          Record (id, is_record_array, couldMap ~f:pMember members env)
         | LiteralExpression { literal_expression = expr } ->
           (match syntax expr with
           | Token _ ->

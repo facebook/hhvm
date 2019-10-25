@@ -540,7 +540,7 @@ module Visitor_DEPRECATED = struct
 
       method on_new : 'a -> class_id -> expr list -> expr list -> 'a
 
-      method on_record : 'a -> class_id -> (expr * expr) list -> 'a
+      method on_record : 'a -> sid -> (expr * expr) list -> 'a
 
       method on_efun : 'a -> fun_ -> id list -> 'a
 
@@ -1048,9 +1048,7 @@ module Visitor_DEPRECATED = struct
           failwith
             "lambdas expected to be named in the context of the surrounding function"
 
-      method on_record acc cid fl =
-        let acc = this#on_class_id acc cid in
-        List.fold_left fl ~f:this#on_field ~init:acc
+      method on_record acc _ fl = List.fold_left fl ~f:this#on_field ~init:acc
 
       method on_xml acc _ attrl el =
         let acc =

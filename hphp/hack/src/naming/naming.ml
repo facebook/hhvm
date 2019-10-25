@@ -2635,17 +2635,17 @@ module Make (GetLocals : GetLocals) = struct
           exprl env uel,
           p )
     | Aast.New _ -> failwith "ast_to_nast aast.new"
-    | Aast.Record ((_, Aast.CIexpr (_, Aast.Id x)), is_array, l) ->
+    | Aast.Record (id, is_array, l) ->
+      let id =
+        Env.type_name
+          ~elaborate_namespace:false
+          env
+          id
+          ~allow_typedef:false
+          ~allow_generics:false
+      in
       let l = List.map l (fun (e1, e2) -> (expr env e1, expr env e2)) in
-      N.Record (make_class_id env x, is_array, l)
-    | Aast.Record ((_, Aast.CIexpr (_, Aast.Lvar (pos, x))), is_array, l) ->
-      let l = List.map l (fun (e1, e2) -> (expr env e1, expr env e2)) in
-      N.Record (make_class_id env (pos, Local_id.to_string x), is_array, l)
-    | Aast.Record ((p, _e), is_array, l) ->
-      let l = List.map l (fun (e1, e2) -> (expr env e1, expr env e2)) in
-      if (fst env).in_mode = FileInfo.Mstrict then
-        Errors.dynamic_new_in_strict_mode p;
-      N.Record ((p, N.CI (p, SN.Classes.cUnknown)), is_array, l)
+      N.Record (id, is_array, l)
     | Aast.Efun (f, idl) ->
       let idl =
         List.fold_right idl ~init:[] ~f:(fun ((p, x) as id) acc ->

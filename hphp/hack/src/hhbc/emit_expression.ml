@@ -999,22 +999,16 @@ and emit_new
     empty )
 
 (* TODO(T36697624) more efficient bytecode for static records *)
-and emit_record env pos cid is_array es =
-  let cexpr =
-    class_id_to_class_expr ~resolve_self:false (Emit_env.get_scope env) cid
+and emit_record env pos id is_array es =
+  let fq_id = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
+  let instr =
+    if is_array then
+      instr_new_recordarray
+    else
+      instr_new_record
   in
-  match cexpr with
-  | Class_id id ->
-    let fq_id = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
-    let instr =
-      if is_array then
-        instr_new_recordarray
-      else
-        instr_new_record
-    in
-    Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
-    emit_struct_array env pos es (instr fq_id)
-  | _ -> failwith "No record with specified name found"
+  Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
+  emit_struct_array env pos es (instr fq_id)
 
 and emit_clone env expr = gather [emit_expr env expr; instr_clone]
 

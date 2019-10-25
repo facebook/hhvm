@@ -3550,7 +3550,7 @@ function b_hover(): string {
                 wait_for_server=False,
                 use_serverless_ide=True,
             )
-            assert False, "No assertion failure raised"
+            raise AssertionError("Expected an error here")
         except AssertionError as e:
             self.assertEqual(
                 self._sanitize_gutter_line_numbers(str(e)),
@@ -3676,7 +3676,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             self.run_spec(
                 spec, variables, wait_for_server=True, use_serverless_ide=False
             )
-            assert False, "No assertion failure raised"
+            raise AssertionError("Expected an error here")
         except AssertionError as e:
             self.assertEqual(
                 self._sanitize_gutter_line_numbers(str(e)),

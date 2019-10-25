@@ -9,8 +9,6 @@ path = "lib.rs"
 
 [dependencies]
 ocaml = "^0.7"
-ocamlvalue_macro = {path = "../utils/ocamlpool_rust/macro", package = "hack_utils_ocamlvalue_macro" }
-ocamlpool_rust = {path = "../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
 ocamlrep = {path = "../ocamlrep", package = "hack_ocamlrep"}
 ocamlrep_derive = {path = "../ocamlrep_derive", package = "hack_ocamlrep_derive"}
 

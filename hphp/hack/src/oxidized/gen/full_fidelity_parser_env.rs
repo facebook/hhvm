@@ -3,18 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0b201cbac6efa5581e15ea0daf349bac>>
+// @generated SignedSource<<bea2b99c6acce2d8d5922271ba2e4f30>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use ocamlrep_derive::OcamlRep;
-use ocamlvalue_macro::Ocamlvalue;
 
 use crate::file_info;
 use crate::stats_container;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct FullFidelityParserEnv {
     pub hhvm_compat_mode: bool,
     pub php5_compat_mode: bool,

@@ -6,18 +6,6 @@
 use crate::gen::file_info::Mode;
 
 impl Mode {
-    pub unsafe fn from_ocamlvalue(value: ocaml::Value) -> Self {
-        let mode_raw = value.i32_val() as u32;
-        match mode_raw {
-            0 => Mode::Mphp,
-            1 => Mode::Mdecl,
-            2 => Mode::Mstrict,
-            3 => Mode::Mpartial,
-            4 => Mode::Mexperimental,
-            _ => panic!("mode {} is not defined", mode_raw.to_string()),
-        }
-    }
-
     pub fn from_string(s: &str) -> Option<Self> {
         match s {
             "strict" | "" => Some(Mode::Mstrict),

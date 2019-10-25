@@ -3,13 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6b808e404dd398feb50e64b2206d3ff8>>
+// @generated SignedSource<<92435daca3ab80aca7c044da0ace8162>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use ocamlrep_derive::OcamlRep;
-use ocamlvalue_macro::Ocamlvalue;
 
 use crate::aast_defs;
 use crate::ast_defs;
@@ -53,10 +52,10 @@ pub use aast_defs::XhpChildOp;
 
 pub type Program<Ex, Fb, En, Hi> = Vec<Def<Ex, Fb, En, Hi>>;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Stmt<Ex, Fb, En, Hi>(pub Pos, pub Stmt_<Ex, Fb, En, Hi>);
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum Stmt_<Ex, Fb, En, Hi> {
     Fallthrough,
     Expr(Box<Expr<Ex, Fb, En, Hi>>),
@@ -112,7 +111,7 @@ pub enum Stmt_<Ex, Fb, En, Hi> {
     Markup(Box<(Pstring, Option<Expr<Ex, Fb, En, Hi>>)>),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct UsingStmt<Ex, Fb, En, Hi> {
     pub is_block_scoped: bool,
     pub has_await: bool,
@@ -120,7 +119,7 @@ pub struct UsingStmt<Ex, Fb, En, Hi> {
     pub block: Block<Ex, Fb, En, Hi>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum AsExpr<Ex, Fb, En, Hi> {
     AsV(Expr<Ex, Fb, En, Hi>),
     AsKv(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>),
@@ -130,10 +129,10 @@ pub enum AsExpr<Ex, Fb, En, Hi> {
 
 pub type Block<Ex, Fb, En, Hi> = Vec<Stmt<Ex, Fb, En, Hi>>;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct ClassId<Ex, Fb, En, Hi>(pub Ex, pub ClassId_<Ex, Fb, En, Hi>);
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum ClassId_<Ex, Fb, En, Hi> {
     CIparent,
     CIself,
@@ -142,16 +141,16 @@ pub enum ClassId_<Ex, Fb, En, Hi> {
     CI(Sid),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Expr<Ex, Fb, En, Hi>(pub Ex, pub Expr_<Ex, Fb, En, Hi>);
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum CollectionTarg<Hi> {
     CollectionTV(Targ<Hi>),
     CollectionTKV(Targ<Hi>, Targ<Hi>),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum Expr_<Ex, Fb, En, Hi> {
     Array(Vec<Afield<Ex, Fb, En, Hi>>),
     Darray(
@@ -262,42 +261,42 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     Any,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum ClassGetExpr<Ex, Fb, En, Hi> {
     CGstring(Pstring),
     CGexpr(Expr<Ex, Fb, En, Hi>),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum AssertExpr<Ex, Fb, En, Hi> {
     AEAssert(Expr<Ex, Fb, En, Hi>),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum Case<Ex, Fb, En, Hi> {
     Default(Pos, Block<Ex, Fb, En, Hi>),
     Case(Expr<Ex, Fb, En, Hi>, Block<Ex, Fb, En, Hi>),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Catch<Ex, Fb, En, Hi>(pub Sid, pub Lid, pub Block<Ex, Fb, En, Hi>);
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Field<Ex, Fb, En, Hi>(pub Expr<Ex, Fb, En, Hi>, pub Expr<Ex, Fb, En, Hi>);
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum Afield<Ex, Fb, En, Hi> {
     AFvalue(Expr<Ex, Fb, En, Hi>),
     AFkvalue(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum XhpAttribute<Ex, Fb, En, Hi> {
     XhpSimple(Pstring, Expr<Ex, Fb, En, Hi>),
     XhpSpread(Expr<Ex, Fb, En, Hi>),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum SpecialFunc<Ex, Fb, En, Hi> {
     Genva(Vec<Expr<Ex, Fb, En, Hi>>),
 }
@@ -306,7 +305,7 @@ pub type IsReference = bool;
 
 pub type IsVariadic = bool;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct FunParam<Ex, Fb, En, Hi> {
     pub annotation: Ex,
     pub type_hint: TypeHint<Hi>,
@@ -320,14 +319,14 @@ pub struct FunParam<Ex, Fb, En, Hi> {
     pub visibility: Option<Visibility>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum FunVariadicity<Ex, Fb, En, Hi> {
     FVvariadicArg(FunParam<Ex, Fb, En, Hi>),
     FVellipsis(Pos),
     FVnonVariadic,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Fun_<Ex, Fb, En, Hi> {
     pub span: Pos,
     pub annotation: En,
@@ -348,33 +347,33 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     pub static_: bool,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct FuncBody<Ex, Fb, En, Hi> {
     pub ast: Block<Ex, Fb, En, Hi>,
     pub annotation: Fb,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct TypeHint<Hi>(pub Hi, pub TypeHint_);
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Targ<Hi>(pub Hi, pub Hint);
 
 pub type TypeHint_ = Option<Hint>;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct UserAttribute<Ex, Fb, En, Hi> {
     pub name: Sid,
     pub params: Vec<Expr<Ex, Fb, En, Hi>>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct FileAttribute<Ex, Fb, En, Hi> {
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub namespace: Nsenv,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Tparam<Ex, Fb, En, Hi> {
     pub variance: ast_defs::Variance,
     pub name: Sid,
@@ -383,13 +382,13 @@ pub struct Tparam<Ex, Fb, En, Hi> {
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct ClassTparams<Ex, Fb, En, Hi> {
     pub list: Vec<Tparam<Ex, Fb, En, Hi>>,
     pub constraints: s_map::SMap<(ReifyKind, Vec<(ast_defs::ConstraintKind, Hint)>)>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct UseAsAlias(
     pub Option<Sid>,
     pub Pstring,
@@ -397,12 +396,12 @@ pub struct UseAsAlias(
     pub Vec<UseAsVisibility>,
 );
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct InsteadofAlias(pub Sid, pub Pstring, pub Vec<Sid>);
 
 pub type IsExtends = bool;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Class_<Ex, Fb, En, Hi> {
     pub span: Pos,
     pub annotation: En,
@@ -437,13 +436,13 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub doc_comment: Option<DocComment>,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum XhpAttrTag {
     Required,
     LateInit,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct XhpAttr<Ex, Fb, En, Hi>(
     pub Option<Hint>,
     pub ClassVar<Ex, Fb, En, Hi>,
@@ -451,13 +450,13 @@ pub struct XhpAttr<Ex, Fb, En, Hi>(
     pub Option<(Pos, bool, Vec<Expr<Ex, Fb, En, Hi>>)>,
 );
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum ClassAttr<Ex, Fb, En, Hi> {
     CAName(Sid),
     CAField(CaField<Ex, Fb, En, Hi>),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct CaField<Ex, Fb, En, Hi> {
     pub type_: CaType,
     pub id: Sid,
@@ -465,13 +464,13 @@ pub struct CaField<Ex, Fb, En, Hi> {
     pub required: bool,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum CaType {
     CAHint(Hint),
     CAEnum(Vec<String>),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct ClassConst<Ex, Fb, En, Hi> {
     pub type_: Option<Hint>,
     pub id: Sid,
@@ -479,14 +478,14 @@ pub struct ClassConst<Ex, Fb, En, Hi> {
     pub doc_comment: Option<DocComment>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum TypeconstAbstractKind {
     TCAbstract(Option<Hint>),
     TCPartiallyAbstract,
     TCConcrete,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct ClassTypeconst<Ex, Fb, En, Hi> {
     pub abstract_: TypeconstAbstractKind,
     pub name: Sid,
@@ -497,12 +496,12 @@ pub struct ClassTypeconst<Ex, Fb, En, Hi> {
     pub doc_comment: Option<DocComment>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct XhpAttrInfo {
     pub xai_tag: Option<XhpAttrTag>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct ClassVar<Ex, Fb, En, Hi> {
     pub final_: bool,
     pub xhp_attr: Option<XhpAttrInfo>,
@@ -518,7 +517,7 @@ pub struct ClassVar<Ex, Fb, En, Hi> {
     pub span: Pos,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Method_<Ex, Fb, En, Hi> {
     pub span: Pos,
     pub annotation: En,
@@ -539,7 +538,7 @@ pub struct Method_<Ex, Fb, En, Hi> {
     pub doc_comment: Option<DocComment>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct MethodRedeclaration<Ex, Fb, En, Hi> {
     pub final_: bool,
     pub abstract_: bool,
@@ -559,7 +558,7 @@ pub struct MethodRedeclaration<Ex, Fb, En, Hi> {
 
 pub type Nsenv = namespace_env::Env;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Typedef<Ex, Fb, En, Hi> {
     pub annotation: En,
     pub name: Sid,
@@ -572,7 +571,7 @@ pub struct Typedef<Ex, Fb, En, Hi> {
     pub namespace: Nsenv,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Gconst<Ex, Fb, En, Hi> {
     pub annotation: En,
     pub mode: file_info::Mode,
@@ -583,7 +582,7 @@ pub struct Gconst<Ex, Fb, En, Hi> {
     pub span: Pos,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct RecordDef<Ex, Fb, En, Hi> {
     pub name: Sid,
     pub extends: Option<Hint>,
@@ -595,7 +594,7 @@ pub struct RecordDef<Ex, Fb, En, Hi> {
     pub doc_comment: Option<DocComment>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct PuEnum<Ex, Fb, En, Hi> {
     pub name: Sid,
     pub is_final: bool,
@@ -604,7 +603,7 @@ pub struct PuEnum<Ex, Fb, En, Hi> {
     pub members: Vec<PuMember<Ex, Fb, En, Hi>>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct PuMember<Ex, Fb, En, Hi> {
     pub atom: Sid,
     pub types: Vec<(Sid, Hint)>,
@@ -613,7 +612,7 @@ pub struct PuMember<Ex, Fb, En, Hi> {
 
 pub type FunDef<Ex, Fb, En, Hi> = Fun_<Ex, Fb, En, Hi>;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum Def<Ex, Fb, En, Hi> {
     Fun(Box<FunDef<Ex, Fb, En, Hi>>),
     Class(Box<Class_<Ex, Fb, En, Hi>>),
@@ -627,7 +626,7 @@ pub enum Def<Ex, Fb, En, Hi> {
     FileAttributes(Box<FileAttribute<Ex, Fb, En, Hi>>),
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum NsKind {
     NSNamespace,
     NSClass,
@@ -636,14 +635,14 @@ pub enum NsKind {
     NSConst,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum ReifyKind {
     Erased,
     SoftReified,
     Reified,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum BreakContinueLevel {
     LevelOk(Option<isize>),
     LevelNonLiteral,

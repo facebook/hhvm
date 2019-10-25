@@ -2,15 +2,14 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use ocamlpool_rust::utils::*;
+
 use ocamlrep::rc::RcOc;
 use ocamlrep_derive::OcamlRep;
-use ocamlvalue_macro::Ocamlvalue;
 use std::convert::TryFrom;
-use std::fmt::{Display, Formatter, Result};
+use std::fmt::{self, Display};
 use std::path::{Path, PathBuf};
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum Prefix {
     Root,
     Hhi,
@@ -21,7 +20,7 @@ pub enum Prefix {
 impl TryFrom<usize> for Prefix {
     type Error = String;
 
-    fn try_from(prefix_raw: usize) -> std::result::Result<Self, String> {
+    fn try_from(prefix_raw: usize) -> Result<Self, String> {
         match prefix_raw {
             0 => Ok(Prefix::Root),
             1 => Ok(Prefix::Hhi),
@@ -33,7 +32,7 @@ impl TryFrom<usize> for Prefix {
 }
 
 impl Display for Prefix {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Prefix::*;
         match self {
             Root => write!(f, "root"),
@@ -44,17 +43,10 @@ impl Display for Prefix {
     }
 }
 
-#[derive(Clone, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Debug, Eq, OcamlRep, PartialEq)]
 pub struct RelativePath(RcOc<(Prefix, PathBuf)>);
 
 impl RelativePath {
-    // TODO(shiqicao): consider adding a FromOcamlvalue derive
-    pub unsafe fn from_ocamlvalue(block: &ocaml::Value) -> RelativePath {
-        let prefix = Prefix::try_from(usize_field(block, 0)).unwrap();
-        let path = str_field(block, 1);
-        RelativePath::make(prefix, PathBuf::from(path.as_str()))
-    }
-
     pub fn make(prefix: Prefix, pathbuf: PathBuf) -> Self {
         RelativePath(RcOc::new((prefix, pathbuf)))
     }
@@ -81,7 +73,7 @@ impl RelativePath {
 }
 
 impl Display for RelativePath {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", (self.0).0, (self.0).1.display())
     }
 }

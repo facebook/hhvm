@@ -3,13 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cec038d0cef9bcbb40aca0c49a65e2f4>>
+// @generated SignedSource<<3bf3dd58f5b19995a32f51d9f315172c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use ocamlrep_derive::OcamlRep;
-use ocamlvalue_macro::Ocamlvalue;
 
 use crate::pos;
 
@@ -17,26 +16,26 @@ pub use crate::shape_map;
 
 pub use pos::Pos;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Id(pub Pos, pub String);
 
 pub type Pstring = (Pos, String);
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum ShapeFieldName {
     SFlitInt(Pstring),
     SFlitStr(Pstring),
     SFclassConst(Id, Pstring),
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum Variance {
     Covariant,
     Contravariant,
     Invariant,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum ConstraintKind {
     ConstraintAs,
     ConstraintEq,
@@ -45,7 +44,7 @@ pub enum ConstraintKind {
 
 pub type Reified = bool;
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum ClassKind {
     Cabstract,
     Cnormal,
@@ -54,18 +53,18 @@ pub enum ClassKind {
     Cenum,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum ParamKind {
     Pinout,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum OgNullFlavor {
     OGNullthrows,
     OGNullsafe,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum FunKind {
     FSync,
     FAsync,
@@ -74,7 +73,7 @@ pub enum FunKind {
     FCoroutine,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum Bop {
     Plus,
     Minus,
@@ -104,7 +103,7 @@ pub enum Bop {
     Eq(Option<Box<Bop>>),
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum Uop {
     Utild,
     Unot,
@@ -117,7 +116,7 @@ pub enum Uop {
     Usilence,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum FunDeclKind {
     FDeclAsync,
     FDeclSync,

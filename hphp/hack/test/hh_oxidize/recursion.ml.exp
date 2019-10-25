@@ -1,13 +1,12 @@
 use ocamlrep_derive::OcamlRep;
-use ocamlvalue_macro::Ocamlvalue;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum IntList {
     Nil,
     Cons(isize, Box<IntList>),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum NAryTree<A> {
     Leaf(A),
     Children(Vec<NAryTree<A>>),

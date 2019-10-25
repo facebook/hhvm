@@ -3,13 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<80efa5ccf7f2be394734c9d2c0341d58>>
+// @generated SignedSource<<ee553f3a45a00f8412571a90bd023b9f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use ocamlrep_derive::OcamlRep;
-use ocamlvalue_macro::Ocamlvalue;
 
 use crate::opaque_digest;
 use crate::pos;
@@ -18,7 +17,7 @@ use crate::s_set;
 
 use crate::prim_defs::*;
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum Mode {
     Mphp,
     Mdecl,
@@ -27,7 +26,7 @@ pub enum Mode {
     Mexperimental,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum NameType {
     Fun,
     Class,
@@ -36,18 +35,18 @@ pub enum NameType {
     Const,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum Pos {
     Full(pos::Pos),
     File(NameType, relative_path::RelativePath),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Id(pub Pos, pub String);
 
 pub type HashType = Option<opaque_digest::OpaqueDigest>;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct FileInfo {
     pub hash: HashType,
     pub file_mode: Option<Mode>,
@@ -59,7 +58,7 @@ pub struct FileInfo {
     pub comments: Option<Vec<(pos::Pos, Comment)>>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Names {
     pub funs: s_set::SSet,
     pub classes: s_set::SSet,
@@ -68,7 +67,7 @@ pub struct Names {
     pub consts: s_set::SSet,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Saved {
     pub names: Names,
     pub hash: Option<opaque_digest::OpaqueDigest>,

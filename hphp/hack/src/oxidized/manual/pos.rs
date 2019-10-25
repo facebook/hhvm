@@ -6,7 +6,6 @@
 use std::ops::Range;
 
 use ocamlrep_derive::OcamlRep;
-use ocamlvalue_macro::Ocamlvalue;
 
 use crate::file_pos_large::FilePosLarge;
 use crate::file_pos_small::FilePosSmall;
@@ -16,7 +15,7 @@ use std::cmp::Ordering;
 use std::path::PathBuf;
 use std::result::Result::*;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 enum PosImpl {
     Small {
         file: RelativePath,
@@ -32,7 +31,7 @@ enum PosImpl {
 
 use PosImpl::*;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Pos(PosImpl);
 
 impl Pos {

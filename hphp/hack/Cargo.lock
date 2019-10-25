@@ -332,8 +332,6 @@ version = "3.49.0"
 dependencies = [
  "hack_ocamlrep 3.49.0",
  "hack_ocamlrep_derive 3.49.0",
- "hack_utils_ocamlpool 3.49.0",
- "hack_utils_ocamlvalue_macro 3.49.0",
  "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

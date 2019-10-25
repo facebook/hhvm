@@ -23,7 +23,6 @@ use parser_rust::{
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 use syntax_tree::{mode_parser::parse_mode, SyntaxTree};
 
-#[inline(always)]
 pub fn parse<'a, Sc, ScState>(
     ocaml_source_text: UnsafeOcamlPtr,
     env: FullFidelityParserEnv,

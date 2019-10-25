@@ -3,13 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<47bb06ce4ea7be9e4db57c1ac85b5916>>
+// @generated SignedSource<<3b25b1763fb5606e47095a89d308d2c5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use ocamlrep_derive::OcamlRep;
-use ocamlvalue_macro::Ocamlvalue;
 
 use crate::aast;
 use crate::ast_defs;
@@ -24,89 +23,89 @@ use crate::tany_sentinel;
 
 pub use crate::typing_reason as reason;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum Visibility {
     Vpublic,
     Vprivate(String),
     Vprotected(String),
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum Exact {
     Exact,
     Nonexact,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum ValKind {
     Lval,
     LvalSubexpr,
     Other,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum ParamMutability {
     ParamOwnedMutable,
     ParamBorrowedMutable,
     ParamMaybeMutable,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum FunTparamsKind {
     FTKtparams,
     FTKinstantiatedTargs,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum ShapeKind {
     ClosedShape,
     OpenShape,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum ParamMode {
     FPnormal,
     FPref,
     FPinout,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum PuKind {
     PuPlain,
     PuAtom(String),
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum XhpAttrTag {
     Required,
     Lateinit,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct XhpAttr {
     pub tag: Option<XhpAttrTag>,
     pub has_default: bool,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum ConsistentKind {
     Inconsistent,
     ConsistentConstruct,
     FinalClass,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Ty(pub reason::Reason, pub Box<Ty_>);
 
 pub type DeclTy = Ty;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct ShapeFieldType {
     pub optional: bool,
     pub ty: Ty,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum Ty_ {
     Tthis,
     Tapply(nast::Sid, Vec<DeclTy>),
@@ -136,17 +135,17 @@ pub enum Ty_ {
 
 pub type Nullsafe = Option<pos::Pos>;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum DependentType {
     DTthis,
     DTcls(String),
     DTexpr(ident::Ident),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct TaccessType(pub DeclTy, pub Vec<nast::Sid>);
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum Reactivity {
     Nonreactive,
     Local(Option<DeclTy>),
@@ -156,7 +155,7 @@ pub enum Reactivity {
     RxVar(Option<Box<Reactivity>>),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct FunType<Ty> {
     pub is_coroutine: bool,
     pub arity: FunArity<Ty>,
@@ -174,7 +173,7 @@ pub struct FunType<Ty> {
 
 pub type DeclFunType = FunType<DeclTy>;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum FunArity<Ty> {
     Fstandard(isize, isize),
     Fvariadic(isize, FunParam<Ty>),
@@ -183,13 +182,13 @@ pub enum FunArity<Ty> {
 
 pub type DeclFunArity = FunArity<DeclTy>;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum ParamRxAnnotation {
     ParamRxVar,
     ParamRxIfImpl(DeclTy),
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct PossiblyEnforcedTy<Ty> {
     pub enforced: bool,
     pub type_: Ty,
@@ -197,7 +196,7 @@ pub struct PossiblyEnforcedTy<Ty> {
 
 pub type DeclPossiblyEnforcedTy = PossiblyEnforcedTy<DeclTy>;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct FunParam<Ty> {
     pub pos: pos::Pos,
     pub name: Option<String>,
@@ -214,7 +213,7 @@ pub type FunParams<Ty> = Vec<FunParam<Ty>>;
 
 pub type DeclFunParams = FunParams<DeclTy>;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct ClassElt {
     pub abstract_: bool,
     pub final_: bool,
@@ -232,7 +231,7 @@ pub struct ClassElt {
     pub pos: lazy::Lazy<pos::Pos>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct FunElt {
     pub deprecated: Option<String>,
     pub type_: DeclTy,
@@ -240,7 +239,7 @@ pub struct FunElt {
     pub pos: pos::Pos,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct ClassConst {
     pub synthesized: bool,
     pub abstract_: bool,
@@ -250,10 +249,10 @@ pub struct ClassConst {
     pub origin: String,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Requirement(pub pos::Pos, pub DeclTy);
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct ClassType {
     pub need_init: bool,
     pub members_fully_known: bool,
@@ -286,14 +285,14 @@ pub struct ClassType {
     pub decl_errors: Option<errors::Errors>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum TypeconstAbstractKind {
     TCAbstract(Option<DeclTy>),
     TCPartiallyAbstract,
     TCConcrete,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct TypeconstType {
     pub abstract_: TypeconstAbstractKind,
     pub name: nast::Sid,
@@ -304,7 +303,7 @@ pub struct TypeconstType {
     pub reifiable: Option<pos::Pos>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct PuEnumType {
     pub name: nast::Sid,
     pub is_final: bool,
@@ -313,27 +312,27 @@ pub struct PuEnumType {
     pub members: s_map::SMap<PuMemberType>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct PuMemberType {
     pub atom: nast::Sid,
     pub types: s_map::SMap<(nast::Sid, DeclTy)>,
     pub exprs: s_map::SMap<nast::Sid>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct EnumType {
     pub base: DeclTy,
     pub constraint: Option<DeclTy>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct RecordDefType {
     pub name: nast::Sid,
     pub pos: pos::Pos,
     pub errors: Option<errors::Errors>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct TypedefType {
     pub pos: pos::Pos,
     pub vis: aast::TypedefVisibility,
@@ -343,7 +342,7 @@ pub struct TypedefType {
     pub decl_errors: Option<errors::Errors>,
 }
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Tparam<Ty> {
     pub variance: ast_defs::Variance,
     pub name: ast_defs::Id,
@@ -354,12 +353,12 @@ pub struct Tparam<Ty> {
 
 pub type DeclTparam = Tparam<DeclTy>;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub struct WhereConstraint<Ty>(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
 
 pub type DeclWhereConstraint = WhereConstraint<DeclTy>;
 
-#[derive(Clone, Debug, OcamlRep, Ocamlvalue)]
+#[derive(Clone, Debug, OcamlRep)]
 pub enum DeserializationError {
     WrongPhase(String),
     NotSupported(String),

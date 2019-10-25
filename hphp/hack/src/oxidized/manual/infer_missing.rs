@@ -4,9 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocamlrep_derive::OcamlRep;
-use ocamlvalue_macro::Ocamlvalue;
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ocamlvalue, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum InferMissing {
     Deactivated,
     InferReturn,

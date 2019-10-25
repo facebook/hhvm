@@ -6,7 +6,6 @@
 use std::fmt;
 
 use ocamlrep::OcamlRep;
-use ocamlvalue_macro::Ocamlvalue;
 
 // Three values packed into one 64-bit integer:
 //
@@ -33,7 +32,7 @@ use ocamlvalue_macro::Ocamlvalue;
 // behave incorrectly on a 32-bit machine. We use `usize` here to match its
 // behavior, but once parity is no longer necessary, we may want to switch to
 // `u64`.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Ocamlvalue)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub struct FilePosSmall(usize);
 
 const COLUMN_BITS: usize = 9;

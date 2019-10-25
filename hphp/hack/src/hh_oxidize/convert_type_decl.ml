@@ -18,12 +18,7 @@ open Convert_longident
 open Convert_type
 
 let derived_traits =
-  [
-    (None, "Clone");
-    (None, "Debug");
-    (Some "ocamlrep_derive", "OcamlRep");
-    (Some "ocamlvalue_macro", "Ocamlvalue");
-  ]
+  [(None, "Clone"); (None, "Debug"); (Some "ocamlrep_derive", "OcamlRep")]
 
 (* HACK: ignore phases since we are only considering decl tys *)
 let blacklisted_types =

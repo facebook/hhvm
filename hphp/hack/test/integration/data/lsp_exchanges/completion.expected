@@ -66,6 +66,7 @@
           "kind": 7,
           "detail": "class",
           "inlineDetail": "class",
+          "sortText": "ab:cd:alpha",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -90,6 +91,7 @@
           "kind": 7,
           "detail": "class",
           "inlineDetail": "class",
+          "sortText": "ab:cd:text",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -123,6 +125,7 @@
           "kind": 7,
           "detail": "class",
           "inlineDetail": "class",
+          "sortText": "ab:cd:alpha",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -147,6 +150,7 @@
           "kind": 7,
           "detail": "class",
           "inlineDetail": "class",
+          "sortText": "ab:cd:text",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -180,6 +184,7 @@
           "kind": 7,
           "detail": "class",
           "inlineDetail": "class",
+          "sortText": "ab:cd:alpha",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -204,6 +209,7 @@
           "kind": 7,
           "detail": "class",
           "inlineDetail": "class",
+          "sortText": "ab:cd:text",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -237,6 +243,7 @@
           "kind": 10,
           "detail": "?int",
           "inlineDetail": "?int",
+          "sortText": "width",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -264,6 +271,7 @@
           "kind": 10,
           "detail": "?string",
           "inlineDetail": "?string",
+          "sortText": "color",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -300,6 +308,7 @@
           "kind": 10,
           "detail": "?int",
           "inlineDetail": "?int",
+          "sortText": "width",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -327,6 +336,7 @@
           "kind": 10,
           "detail": "?string",
           "inlineDetail": "?string",
+          "sortText": "color",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -363,6 +373,7 @@
           "kind": 7,
           "detail": "class",
           "inlineDetail": "class",
+          "sortText": ":ab:cd:alpha",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -387,6 +398,7 @@
           "kind": 7,
           "detail": "class",
           "inlineDetail": "class",
+          "sortText": ":ab:cd:text",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -420,6 +432,7 @@
           "kind": 7,
           "detail": "class",
           "inlineDetail": "class",
+          "sortText": ":ab:cd:alpha",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -444,6 +457,7 @@
           "kind": 7,
           "detail": "class",
           "inlineDetail": "class",
+          "sortText": ":ab:cd:text",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -495,6 +509,7 @@
           "kind": 10,
           "detail": "?int",
           "inlineDetail": "?int",
+          "sortText": ":width",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -522,6 +537,7 @@
           "kind": 10,
           "detail": "?string",
           "inlineDetail": "?string",
+          "sortText": ":color",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -558,6 +574,7 @@
           "kind": 10,
           "detail": "?int",
           "inlineDetail": "?int",
+          "sortText": ":width",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -585,6 +602,7 @@
           "kind": 10,
           "detail": "?string",
           "inlineDetail": "?string",
+          "sortText": ":color",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -621,6 +639,7 @@
           "kind": 3,
           "detail": "function",
           "inlineDetail": "function",
+          "sortText": "test_function",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -684,6 +703,7 @@
           "kind": 21,
           "detail": "classname<this>",
           "inlineDetail": "classname<this>",
+          "sortText": "class",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -711,6 +731,7 @@
           "kind": 21,
           "detail": "Elsa",
           "inlineDetail": "Elsa",
+          "sortText": "Bard",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -738,6 +759,7 @@
           "kind": 21,
           "detail": "Elsa",
           "inlineDetail": "Elsa",
+          "sortText": "Alonso",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -766,6 +788,7 @@
           "detail": "function(mixed $value): bool",
           "inlineDetail": "(mixed $value)",
           "itemType": "bool",
+          "sortText": "isValid",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -794,6 +817,7 @@
           "detail": "function(): darray<string, Elsa>",
           "inlineDetail": "()",
           "itemType": "darray<string, Elsa>",
+          "sortText": "getValues",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -822,6 +846,7 @@
           "detail": "function(): darray<Elsa, string>",
           "inlineDetail": "()",
           "itemType": "darray<Elsa, string>",
+          "sortText": "getNames",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -850,6 +875,7 @@
           "detail": "function(mixed $value): ?Elsa",
           "inlineDetail": "(mixed $value)",
           "itemType": "?Elsa",
+          "sortText": "coerce",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -878,6 +904,7 @@
           "detail": "function(Traversable<mixed> $values): Container<Elsa>",
           "inlineDetail": "(Traversable<mixed> $values)",
           "itemType": "Container<Elsa>",
+          "sortText": "assertAll",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -906,6 +933,7 @@
           "detail": "function(mixed $value): Elsa",
           "inlineDetail": "(mixed $value)",
           "itemType": "Elsa",
+          "sortText": "assert",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -984,6 +1012,7 @@
           "kind": 3,
           "detail": "function",
           "inlineDetail": "function",
+          "sortText": "test_func",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {
@@ -1018,6 +1047,7 @@
           "detail": "function(): void",
           "inlineDetail": "()",
           "itemType": "void",
+          "sortText": "interfaceDocBlockMethod",
           "insertTextFormat": 1,
           "textEdit": {
             "range": {

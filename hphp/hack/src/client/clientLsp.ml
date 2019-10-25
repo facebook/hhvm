@@ -1472,6 +1472,19 @@ let make_ide_completion_response
                    ("base_class", base_class);
                  ])
         in
+        let hack_to_sort_text (completion : complete_autocomplete_result) :
+            string option =
+          let label = completion.res_name in
+          let should_downrank label =
+            (String.length label > 2 && Str.string_before label 2 = "__")
+            || Str.string_match (Str.regexp_case_fold ".*do_not_use.*") label 0
+          in
+          let downranked_result_prefix_character = "~" in
+          if should_downrank label then
+            Some (downranked_result_prefix_character ^ label)
+          else
+            Some label
+        in
         {
           label =
             ( completion.res_name
@@ -1493,7 +1506,7 @@ let make_ide_completion_response
           sortText =
             (match completion.ranking_details with
             | Some detail -> Some detail.sort_text
-            | None -> None);
+            | None -> hack_to_sort_text completion);
           filterText = None;
           insertText;
           insertTextFormat = Some insertTextFormat;

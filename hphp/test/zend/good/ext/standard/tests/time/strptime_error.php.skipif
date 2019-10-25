@@ -1,4 +1,6 @@
-<?hh 
+<?hh
+<<__EntryPoint>> function main(): void {
 if (!function_exists('strptime')) {
-	echo "SKIP strptime function not available in build";
-}	 
+    echo "SKIP strptime function not available in build";
+}
+}

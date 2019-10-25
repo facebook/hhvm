@@ -1,4 +1,6 @@
 <?hh
-    if (!extension_loaded('sockets')) {
-        die('skip - sockets extension not available.');
-    }
+<<__EntryPoint>> function main(): void {
+if (!extension_loaded('sockets')) {
+    die('skip - sockets extension not available.');
+}
+}

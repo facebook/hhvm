@@ -1,2 +1,4 @@
 <?hh
-	if(!extension_loaded('zip')) die('skip');
+<<__EntryPoint>> function main(): void {
+if(!extension_loaded('zip')) die('skip');
+}

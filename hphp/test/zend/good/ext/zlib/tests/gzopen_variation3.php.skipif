@@ -1,4 +1,6 @@
-<?hh 
+<?hh
+<<__EntryPoint>> function main(): void {
 if (!extension_loaded("zlib")) {
-	print "skip - zlib extension not loaded"; 
-}	 
+    print "skip - zlib extension not loaded";
+}
+}

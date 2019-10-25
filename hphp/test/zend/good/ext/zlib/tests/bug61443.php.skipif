@@ -1,2 +1,4 @@
 <?hh
+<<__EntryPoint>> function main(): void {
 extension_loaded("zlib") || die("skip");
+}

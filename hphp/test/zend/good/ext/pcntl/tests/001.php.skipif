@@ -1,3 +1,5 @@
 <?hh
-	if (!extension_loaded("pcntl")) print "skip"; 
-	elseif (!function_exists("posix_kill")) print "skip posix_kill() not available";
+<<__EntryPoint>> function main(): void {
+if (!extension_loaded("pcntl")) print "skip";
+elseif (!function_exists("posix_kill")) print "skip posix_kill() not available";
+}

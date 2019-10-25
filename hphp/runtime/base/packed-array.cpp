@@ -1179,19 +1179,7 @@ ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
 
   if (ad->empty()) return ArrayData::CreateDict();
 
-  auto mixed = [&] {
-    switch (ArrayCommon::CheckForRefs(ad)) {
-      case ArrayCommon::RefCheckResult::Pass:
-        return copy ? ToMixedCopy(ad) : ToMixed(ad);
-      case ArrayCommon::RefCheckResult::Collapse:
-        // Unconditionally copy to remove unreferenced refs
-        return ToMixedCopy(ad);
-      case ArrayCommon::RefCheckResult::Fail:
-        throwRefInvalidArrayValueException(ArrayData::CreateDict());
-        break;
-    }
-    not_reached();
-  }();
+  auto const mixed = copy ? ToMixedCopy(ad) : ToMixed(ad);
   auto const out = MixedArray::ToDictInPlace(mixed);
   return RuntimeOption::EvalArrayProvenance
     ? tagArrProv(out, ad)
@@ -1238,16 +1226,9 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
   if (copy) {
     ad = do_copy();
   } else {
-    auto const result = ArrayCommon::CheckForRefs(adIn);
-    if (LIKELY(result == ArrayCommon::RefCheckResult::Pass)) {
-      adIn->m_kind = HeaderKind::VecArray;
-      adIn->setDVArray(ArrayData::kNotDVArray);
-      ad = adIn;
-    } else if (result == ArrayCommon::RefCheckResult::Collapse) {
-      ad = do_copy();
-    } else {
-      throwRefInvalidArrayValueException(ArrayData::CreateVec());
-    }
+    adIn->m_kind = HeaderKind::VecArray;
+    adIn->setDVArray(ArrayData::kNotDVArray);
+    ad = adIn;
   }
 
   assertx(ad->isVecArray());

@@ -61,17 +61,7 @@ ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return ArrayData::CreateVec();
   VecArrayInit init{size};
-  IterateVNoInc(
-    a,
-    [&](TypedValue v) {
-      if (UNLIKELY(isRefType(v.m_type))) {
-        if (v.m_data.pref->isReferenced()) {
-          throwRefInvalidArrayValueException(init.toArray());
-        }
-      }
-      init.append(v);
-    }
-  );
+  IterateVNoInc(a, [&](TypedValue v) { init.append(v); });
   auto const out = init.create();
   return RuntimeOption::EvalArrayProvenance && out->isRefCounted()
     ? tagArrProv(out, a)
@@ -82,17 +72,7 @@ ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return ArrayData::CreateDict();
   DictInit init{size};
-  IterateKVNoInc(
-    a,
-    [&](Cell k, TypedValue v) {
-      if (UNLIKELY(isRefType(v.m_type))) {
-        if (v.m_data.pref->isReferenced()) {
-          throwRefInvalidArrayValueException(init.toArray());
-        }
-      }
-      init.setValidKey(k, v);
-    }
-  );
+  IterateKVNoInc(a, [&](Cell k, TypedValue v) { init.setValidKey(k, v); });
   auto const out = init.create();
   return RuntimeOption::EvalArrayProvenance && out->isRefCounted()
     ? tagArrProv(out, a)
@@ -106,14 +86,6 @@ ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
   IterateVNoInc(
     a,
     [&](TypedValue v) {
-      if (UNLIKELY(isRefType(v.m_type))) {
-        if (v.m_data.pref->isReferenced()) {
-          throwRefInvalidArrayValueException(init.toArray());
-        }
-        v = *v.m_data.pref->cell();
-        assertx(!isRefType(v.m_type));
-      }
-
       if (LIKELY(isStringType(v.m_type))) {
         init.add(v.m_data.pstr);
       } else if (LIKELY(isIntType(v.m_type))) {
@@ -147,26 +119,6 @@ ArrayData* ArrayCommon::ToDArray(ArrayData* a, bool) {
     }
   );
   return init.create();
-}
-
-ArrayCommon::RefCheckResult
-ArrayCommon::CheckForRefs(const ArrayData* ad) {
-  auto result = RefCheckResult::Pass;
-  IterateVNoInc(
-    ad,
-    [&](TypedValue v) {
-      if (UNLIKELY(isRefType(v.m_type))) {
-        auto const ref = v.m_data.pref;
-        if (ref->isReferenced() || ref->cell()->m_data.parr == ad) {
-          result = RefCheckResult::Fail;
-          return true;
-        }
-        result = RefCheckResult::Collapse;
-      }
-      return false;
-    }
-  );
-  return result;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -252,7 +252,7 @@ ArrayData* ArrayData::GetScalarArray(Array&& arr) {
 }
 
 ArrayData* ArrayData::GetScalarArray(Variant&& arr) {
-  assertx(arr.isArray() && !isRefType(arr.getRawType()));
+  assertx(arr.isArray());
   auto a = arr.detach().m_data.parr;
   GetScalarArray(&a);
   return a;

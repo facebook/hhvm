@@ -1808,18 +1808,7 @@ ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
     );
     return tryTagArrProvDict(out);
   } else {
-    auto const result = ArrayCommon::CheckForRefs(a);
-    if (LIKELY(result == ArrayCommon::RefCheckResult::Pass)) {
-      return tryTagArrProvDict(ToDictInPlace(a));
-    } else if (result == ArrayCommon::RefCheckResult::Collapse) {
-      auto const out = CopyMixed(
-        *a, AllocMode::Request,
-        HeaderKind::Dict, ArrayData::kNotDVArray
-      );
-      return tryTagArrProvDict(out);
-    } else {
-      throwRefInvalidArrayValueException(ArrayData::CreateDict());
-    }
+    return tryTagArrProvDict(ToDictInPlace(a));
   }
 }
 

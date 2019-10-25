@@ -36,6 +36,7 @@
   (modules decl_service_client)
   (libraries
     core_kernel
+    decl_ipc_ffi_externs
     marshal_tools
     utils_core
     sys_utils)

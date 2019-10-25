@@ -104,6 +104,12 @@
     shared_lru))
 
 (library
+  (name decl_ipc_ffi_externs)
+  (wrapped false)
+  (modules
+    decl_ipc_ffi_externs))
+
+(library
   (name experiments_config_file_stubs)
   (wrapped false)
   (modules

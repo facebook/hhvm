@@ -6,12 +6,12 @@
  *
  *)
 
-(** an opaque type, the pointer to the base of shared memory *)
-type sharedmem_base_address
-
 type t = {
   rpc_get_gconst: string -> (string, Marshal_tools.error) result;
       (** fetches a global const *)
 }
 
-val init : string -> sharedmem_base_address -> (t, Marshal_tools.error) result
+val init :
+  string ->
+  Decl_ipc_ffi_externs.sharedmem_base_address ->
+  (t, Marshal_tools.error) result

@@ -16,14 +16,6 @@ type autoimport_ns =
   | Global
   | HH
 
-(**
- * Convenience function for maps that have been completely unified to autoimport
- * into the HH namespace.
- *)
-let autoimport_map_of_list ids =
-  List.fold_left ids ~init:SMap.empty ~f:(fun map id ->
-      SMap.add id (HH, HH) map)
-
 let autoimport_map_of_tuples ids =
   List.fold_left ids ~init:SMap.empty ~f:(fun map (id, typechecker_ns) ->
       SMap.add id (typechecker_ns, HH) map)
@@ -83,51 +75,52 @@ let types =
     ]
 
 let funcs =
-  autoimport_map_of_list
-    [
-      "asio_get_current_context_idx";
-      "asio_get_running_in_context";
-      "asio_get_running";
-      "class_meth";
-      "darray";
-      "dict";
-      "fun";
-      "heapgraph_create";
-      "heapgraph_dfs_edges";
-      "heapgraph_dfs_nodes";
-      "heapgraph_edge";
-      "heapgraph_foreach_edge";
-      "heapgraph_foreach_node";
-      "heapgraph_foreach_root";
-      "heapgraph_node_in_edges";
-      "heapgraph_node_out_edges";
-      "heapgraph_node";
-      "heapgraph_stats";
-      "idx";
-      "inst_meth";
-      "invariant_callback_register";
-      "invariant_violation";
-      "invariant";
-      "is_darray";
-      "is_dict";
-      "is_keyset";
-      "is_varray";
-      "is_vec";
-      "keyset";
-      "meth_caller";
-      "objprof_get_data";
-      "objprof_get_paths";
-      "objprof_get_strings";
-      "server_warmup_status";
-      "thread_mark_stack";
-      "thread_memory_stats";
-      "type_structure";
-      "varray";
-      "vec";
-      "xenon_get_data";
-    ]
+  [
+    "asio_get_current_context_idx";
+    "asio_get_running_in_context";
+    "asio_get_running";
+    "class_meth";
+    "darray";
+    "dict";
+    "fun";
+    "heapgraph_create";
+    "heapgraph_dfs_edges";
+    "heapgraph_dfs_nodes";
+    "heapgraph_edge";
+    "heapgraph_foreach_edge";
+    "heapgraph_foreach_node";
+    "heapgraph_foreach_root";
+    "heapgraph_node_in_edges";
+    "heapgraph_node_out_edges";
+    "heapgraph_node";
+    "heapgraph_stats";
+    "idx";
+    "inst_meth";
+    "invariant_callback_register";
+    "invariant_violation";
+    "invariant";
+    "is_darray";
+    "is_dict";
+    "is_keyset";
+    "is_varray";
+    "is_vec";
+    "keyset";
+    "meth_caller";
+    "objprof_get_data";
+    "objprof_get_paths";
+    "objprof_get_strings";
+    "server_warmup_status";
+    "thread_mark_stack";
+    "thread_memory_stats";
+    "type_structure";
+    "varray";
+    "vec";
+    "xenon_get_data";
+  ]
 
-let consts = autoimport_map_of_list ["Rx\\IS_ENABLED"]
+let consts = []
+
+let namespaces = ["Rx"]
 
 let is_hh_autoimport s = SMap.mem s types
 
@@ -141,10 +134,6 @@ let reverse_type id =
   match String.chop_prefix ~prefix:"HH\\" id with
   | Some stripped_id when is_hh_autoimport stripped_id -> stripped_id
   | _ -> id
-
-let lookup_func id = SMap.get id funcs
-
-let lookup_const id = SMap.get id consts
 
 let string_of_ns ns =
   match ns with

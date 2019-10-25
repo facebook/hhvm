@@ -31,9 +31,10 @@
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
-        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
-        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+        ns_is_codegen = false };
       c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_pu_enums = []; c_doc_comment = None });
   (Fun
@@ -123,9 +124,10 @@
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
-       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
-         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false };
        f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [25:1-29:2]; f_annotation = (); f_mode = Mpartial;
@@ -167,8 +169,9 @@
        f_user_attributes = [{ ua_name = ([25:3-7], "__Rx"); ua_params = [] }];
        f_file_attributes = []; f_external = false;
        f_namespace =
-       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
-         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false };
        f_doc_comment = None; f_static = false })
   ]

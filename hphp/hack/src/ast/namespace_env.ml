@@ -10,27 +10,36 @@
 open Core_kernel
 
 type env = {
-  ns_ns_uses: string SMap.t;
-  ns_class_uses: string SMap.t;
-  ns_record_def_uses: string SMap.t;
-  ns_fun_uses: string SMap.t;
-  ns_const_uses: string SMap.t;
+  ns_ns_uses: string SMap.t; [@opaque]
+  ns_class_uses: string SMap.t; [@opaque]
+  ns_record_def_uses: string SMap.t; [@opaque]
+  ns_fun_uses: string SMap.t; [@opaque]
+  ns_const_uses: string SMap.t; [@opaque]
   ns_name: string option;
   ns_auto_ns_map: (string * string) list;
   ns_is_codegen: bool;
 }
 [@@deriving eq, show]
 
-let empty auto_ns_map is_code_gen =
+let hh_autoimport_map_of_list ids =
+  List.map ids ~f:(fun id -> (id, "HH\\" ^ id)) |> SMap.of_list
+
+let default_fun_uses = hh_autoimport_map_of_list Hh_autoimport.funcs
+
+let default_const_uses = hh_autoimport_map_of_list Hh_autoimport.consts
+
+let default_ns_uses = hh_autoimport_map_of_list Hh_autoimport.namespaces
+
+let empty auto_ns_map is_codegen =
   {
-    ns_ns_uses = SMap.of_list auto_ns_map;
+    ns_ns_uses = SMap.union (SMap.of_list auto_ns_map) default_ns_uses;
     ns_class_uses = SMap.empty;
     ns_record_def_uses = SMap.empty;
-    ns_fun_uses = SMap.empty;
-    ns_const_uses = SMap.empty;
+    ns_fun_uses = default_fun_uses;
+    ns_const_uses = default_const_uses;
     ns_name = None;
     ns_auto_ns_map = auto_ns_map;
-    ns_is_codegen = is_code_gen;
+    ns_is_codegen = is_codegen;
   }
 
 let empty_with_default =

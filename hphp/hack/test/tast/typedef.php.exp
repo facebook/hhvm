@@ -33,9 +33,10 @@
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
-        ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
-        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+        ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+        ns_is_codegen = false };
       c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_pu_enums = []; c_doc_comment = None });
   (Class
@@ -52,9 +53,10 @@
        c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
        c_xhp_attrs = [];
        c_namespace =
-       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
-         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false };
        c_user_attributes = []; c_file_attributes = []; c_enum = None;
        c_pu_enums = []; c_doc_comment = None });
   (Class
@@ -71,9 +73,10 @@
        c_vars = []; c_methods = []; c_attributes = []; c_xhp_children = [];
        c_xhp_attrs = [];
        c_namespace =
-       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
-         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false };
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false };
        c_user_attributes = []; c_file_attributes = []; c_enum = None;
        c_pu_enums = []; c_doc_comment = None });
   (Typedef
@@ -89,9 +92,10 @@
          ];
        t_mode = Mstrict; t_vis = Transparent;
        t_namespace =
-       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
-         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false }
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false }
        });
   (Typedef
      { t_annotation = (); t_name = ([11:6-8], "\\T2"); t_tparams = [];
@@ -101,9 +105,10 @@
        [{ ua_name = ([10:3-18], "\\SingleAttribute"); ua_params = [] }];
        t_mode = Mstrict; t_vis = Transparent;
        t_namespace =
-       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
-         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false }
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false }
        });
   (Typedef
      { t_annotation = (); t_name = ([13:6-23], "\\Serialized_contra");
@@ -114,9 +119,10 @@
        t_constraint = None; t_kind = ([13:30-36], (Hprim Tstring));
        t_user_attributes = []; t_mode = Mstrict; t_vis = Transparent;
        t_namespace =
-       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
-         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false }
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false }
        });
   (Typedef
      { t_annotation = (); t_name = ([14:6-19], "\\Serialized_co");
@@ -127,8 +133,9 @@
        t_constraint = None; t_kind = ([14:26-32], (Hprim Tstring));
        t_user_attributes = []; t_mode = Mstrict; t_vis = Transparent;
        t_namespace =
-       { Namespace_env.ns_ns_uses = {}; ns_class_uses = {};
-         ns_record_def_uses = {}; ns_fun_uses = {}; ns_const_uses = {};
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false }
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+         ns_is_codegen = false }
        })
   ]

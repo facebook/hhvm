@@ -25,8 +25,8 @@ let get_autoimport_name_namespace id kind =
   match kind with
   | ElaborateClass -> Hh_autoimport.lookup_type id
   | ElaborateRecord -> Hh_autoimport.lookup_type id
-  | ElaborateFun -> Hh_autoimport.lookup_func id
-  | ElaborateConst -> Hh_autoimport.lookup_const id
+  | ElaborateFun -> None
+  | ElaborateConst -> None
 
 let elaborate_into_ns ns_name id =
   match ns_name with

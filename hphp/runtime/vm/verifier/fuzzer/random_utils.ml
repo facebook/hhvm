@@ -110,7 +110,6 @@ let random_adata_id () : adata_id =  "A_" ^ (Random.int 10 |> string_of_int)
 let all_instrs (_ : IS.t) : lazy_instruct list =
    [(fun () -> IBasic Nop);
     (fun () -> IBasic EntryNop);
-    (fun () -> IGet (VGetL (random_local ())));
     (fun () -> ILitConst Null);
     (fun () -> ILitConst True);
     (fun () -> ILitConst (Int (Random.int64 Int64.max_int)));

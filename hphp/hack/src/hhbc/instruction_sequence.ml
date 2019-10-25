@@ -207,8 +207,6 @@ let instr_cgetl local = instr (IGet (CGetL local))
 
 let instr_cugetl local = instr (IGet (CUGetL local))
 
-let instr_vgetl local = instr (IGet (VGetL local))
-
 let instr_cgetl2 local = instr (IGet (CGetL2 local))
 
 let instr_cgetquietl local = instr (IGet (CGetQuietL local))

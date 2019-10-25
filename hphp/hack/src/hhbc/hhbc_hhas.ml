@@ -217,7 +217,6 @@ let string_of_get x =
   | PushL id -> sep ["PushL"; string_of_local_id id]
   | CGetG -> "CGetG"
   | CGetS -> "CGetS"
-  | VGetL id -> sep ["VGetL"; string_of_local_id id]
   | ClassGetC -> "ClassGetC"
   | ClassGetTS -> "ClassGetTS"
 

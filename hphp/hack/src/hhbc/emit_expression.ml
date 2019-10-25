@@ -591,30 +591,20 @@ and get_local env (pos, (str : string)) : Hhbc_ast.local_id =
   else
     Local.Named str
 
-and emit_local ~notice ~need_ref env (lid : Aast.lid) =
+and emit_local ~notice env (lid : Aast.lid) =
   let (pos, id) = lid in
   let str = Local_id.get_name id in
   if SN.Superglobals.globals = str || SN.Superglobals.is_superglobal str then
-    if need_ref then
-      Emit_fatal.raise_fatal_parse
-        pos
-        "Superglobals may not be taken by reference."
-    else
-      gather
-        [
-          instr_string (SU.Locals.strip_dollar str);
-          emit_pos pos;
-          instr (IGet CGetG);
-        ]
+    gather
+      [
+        instr_string (SU.Locals.strip_dollar str);
+        emit_pos pos;
+        instr (IGet CGetG);
+      ]
   else
     let local = get_local env (pos, str) in
     if is_local_this env id && not (Emit_env.get_needs_local_this env) then
-      if need_ref then
-        instr_vgetl local
-      else
-        emit_pos_then pos @@ instr (IMisc (BareThis notice))
-    else if need_ref then
-      instr_vgetl local
+      emit_pos_then pos @@ instr (IMisc (BareThis notice))
     else
       instr_cgetl local
 
@@ -1331,7 +1321,7 @@ and emit_call_isset_expr env outer_pos (expr : Tast.expr) =
     gather
       [
         emit_pos outer_pos;
-        emit_local ~notice:NoNotice ~need_ref:false env id;
+        emit_local ~notice:NoNotice env id;
         emit_pos outer_pos;
         instr_istypec OpNull;
         instr_not;
@@ -1663,7 +1653,7 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
   | A.ParenthesizedExpr e ->
     emit_expr env e
   | A.Lvar ((pos, _) as lid) ->
-    gather [emit_pos pos; emit_local ~notice:Notice ~need_ref:false env lid]
+    gather [emit_pos pos; emit_local ~notice:Notice env lid]
   | A.Class_const (cid, id) -> emit_class_const env pos cid id
   | A.Unop (op, e) -> emit_unop env pos op e
   | A.Binop (op, e1, e2) -> emit_binop env annot op e1 e2
@@ -3013,7 +3003,7 @@ and emit_base_worker
       emit_default empty empty (instr (IBase (BaseL (v, base_mode)))) 0 0
   | A.Lvar lid ->
     emit_default
-      (emit_local ~notice ~need_ref:false env lid)
+      (emit_local ~notice env lid)
       empty
       (instr (IBase (BaseC (base_offset, base_mode))))
       1
@@ -3974,7 +3964,7 @@ and emit_special_function
         Some
           (gather
              [
-               emit_local ~notice:NoNotice ~need_ref:false env arg_id;
+               emit_local ~notice:NoNotice env arg_id;
                emit_pos pos;
                instr (IIsset (IsTypeC i));
              ])
@@ -4396,7 +4386,7 @@ and emit_lval_op_nonlist_steps
       rhs_instrs,
       emit_final_global_op outer_pos op )
   | A.Lvar ((_, str) as id) when is_local_this env str && is_incdec op ->
-    (emit_local ~notice:Notice ~need_ref:false env id, rhs_instrs, empty)
+    (emit_local ~notice:Notice env id, rhs_instrs, empty)
   | A.Lvar (pos, name) when (not (is_local_this env name)) || op = LValOp.Unset
     ->
     ( empty,

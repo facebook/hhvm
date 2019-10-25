@@ -3698,14 +3698,6 @@ OPTBLD_INLINE void iopMemoSetEager(LocalRange keys) {
   memoSetImpl(keys, val);
 }
 
-OPTBLD_INLINE void iopVGetL(local_var fr) {
-  Ref* to = vmStack().allocV();
-  if (!isRefType(fr->m_type)) {
-    tvBox(*fr);
-  }
-  refDup(*fr, *to);
-}
-
 OPTBLD_INLINE void iopIssetG() {
   StringData* name;
   TypedValue* tv1 = vmStack().topTV();

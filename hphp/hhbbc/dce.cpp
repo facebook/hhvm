@@ -1669,7 +1669,6 @@ void dce(Env& env, const bc::VerifyParamTypeTS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyRetNonNullC& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyRetTypeC& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyRetTypeTS& op) { no_dce(env, op); }
-void dce(Env& env, const bc::VGetL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::WHResult& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Yield& op) { no_dce(env, op); }
 void dce(Env& env, const bc::YieldFromDelegate& op) { no_dce(env, op); }

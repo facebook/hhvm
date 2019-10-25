@@ -1776,12 +1776,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       return true;
     }
 
-    // unsafe: operations definitely involving boxes
-    case Op::VGetL:
-      ferror("references are forbidden in Rx functions: {}\n",
-             opcodeToName(op));
-      return RuntimeOption::EvalRxVerifyBody < 2;
-
     // unsafe: globals
     case Op::BaseGC:
     case Op::BaseGL:

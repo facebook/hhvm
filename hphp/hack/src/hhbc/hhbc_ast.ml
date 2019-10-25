@@ -329,7 +329,6 @@ type instruct_get =
   | PushL of local_id
   | CGetG
   | CGetS
-  | VGetL of local_id
   | ClassGetC
   | ClassGetTS
 

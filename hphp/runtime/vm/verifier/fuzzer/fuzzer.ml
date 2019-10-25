@@ -298,7 +298,6 @@ let mut_imms (is : IS.t) : IS.t =
     | CGetQuietL  id     -> CGetQuietL (mutate_local_id id !mag)
     | CGetL2      id     -> CGetL2     (mutate_local_id id !mag)
     | PushL       id     -> PushL      (mutate_local_id id !mag)
-    | VGetL       id     -> VGetL      (mutate_local_id id !mag)
     | _ -> s in  (*TODO: in general it might be worthwhile to get rid of wild
                    card cases like this. It would make the code more verbose,
                    but it will make adding new bytecodes easier since this will

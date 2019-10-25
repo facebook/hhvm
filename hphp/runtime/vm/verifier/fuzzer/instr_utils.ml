@@ -89,7 +89,6 @@ let stk_data : instruct -> stack_sig = function
   | IBasic Dup                             -> ["C"], ["C"; "C"]
   | IMisc CGetCUNop                        -> ["U"], ["C"]
   | IMisc UGetCUNop                        -> ["C"], ["U"]
-  | IGet VGetL _                           -> [], ["V"]
   | ILitConst NullUninit                   -> [], ["U"]
   | ILitConst NewVecArray n
   | ILitConst NewKeysetArray n

@@ -200,18 +200,6 @@ void emitCGetL2(IRGS& env, int32_t id) {
   push(env, oldTop);
 }
 
-void emitVGetL(IRGS& env, int32_t id) {
-  auto const value = ldLoc(env, id, makeExit(env), DataTypeBoxAndCountnessInit);
-  auto const boxed = boxHelper(
-    env,
-    gen(env, AssertType, TCell | TBoxedInitCell, value),
-    [&] (SSATmp* v) {
-      stLocRaw(env, id, fp(env), v);
-    });
-
-  pushIncRef(env, boxed);
-}
-
 void emitUnsetL(IRGS& env, int32_t id) {
   auto const prev = ldLoc(env, id, makeExit(env), DataTypeBoxAndCountness);
   stLocRaw(env, id, fp(env), cns(env, TUninit));

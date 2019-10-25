@@ -1469,13 +1469,6 @@ CGetS    [C C:Class]  ->  [C]
   instruction throws a fatal error. Otherwise, this instruction pushes the
   static property onto the stack as a cell.
 
-VGetL <local variable id>    []  ->  [V]
-
-  Get local as ref. This instruction boxes the local variable given by %1 if
-  necessary and pushes it onto the stack as a ref. If the given local variable
-  is not defined, this instruction defines it, sets it to null, boxes it, and
-  pushes a the value of the local variable onto the stack as a ref.
-
 ClassGetC                          [C]  ->  [C:Class]
 
   Fetch class. This instruction checks if $1 is a string, object, or class. If

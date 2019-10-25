@@ -244,12 +244,6 @@ interpOutputLocals(IRGS& env,
       setImmLocType(0, handleBoxiness(locType, stackType));
       break;
     }
-    case OpVGetL: {
-      assertx(pushedType.hasValue());
-      assertx(*pushedType <= TBoxedCell);
-      setImmLocType(0, pushedType.value());
-      break;
-    }
 
     case OpUnsetL:
     case OpPushL:

@@ -2493,12 +2493,6 @@ void in(ISS& env, const bc::CGetS& op) {
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::VGetL& op) {
-  nothrow(env);
-  setLocRaw(env, op.loc1, TRef);
-  push(env, TRef);
-}
-
 void in(ISS& env, const bc::ClassGetC& op) {
   auto const t = topC(env);
 

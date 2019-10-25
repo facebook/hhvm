@@ -590,13 +590,6 @@ public:
   }
 
   ALWAYS_INLINE
-  Ref* allocV() {
-    assertx(m_top != m_elms);
-    m_top--;
-    return (Ref*)m_top;
-  }
-
-  ALWAYS_INLINE
   TypedValue* allocTV() {
     assertx(m_top != m_elms);
     m_top--;

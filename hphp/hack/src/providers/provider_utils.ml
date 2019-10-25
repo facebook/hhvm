@@ -86,7 +86,13 @@ let compute_tast ~(ctx : Provider_context.t) ~(entry : Provider_context.entry)
 let compute_tast_and_errors
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     Errors.t * Tast.program =
-  Errors.do_ (fun () ->
-      let nast = Naming.program entry.Provider_context.ast in
-      let tast = Typing.nast_to_tast ctx.Provider_context.tcopt nast in
-      tast)
+  let (nast_errors, nast) =
+    Errors.do_with_context entry.Provider_context.path Errors.Naming (fun () ->
+        Naming.program entry.Provider_context.ast)
+  in
+  let (tast_errors, tast) =
+    Errors.do_with_context entry.Provider_context.path Errors.Typing (fun () ->
+        Typing.nast_to_tast ctx.Provider_context.tcopt nast)
+  in
+  let errors = Errors.merge nast_errors tast_errors in
+  (errors, tast)

@@ -94,14 +94,13 @@ const RegSet kSF = RegSet(RegSF{0});
 /*
  * Registers that can safely be used within a prologue.
  */
-const RegSet kPrologueRegs =
-  kSIMDCallerSaved | (kGPUnreserved - arm::vm_regs_with_sp());
+const RegSet kPrologueRegs = kSIMDCallerSaved | kGPUnreserved;
 
 /*
  * Registers that can safely be used for scratch purposes in-between traces.
  */
 const RegSet kScratchCrossTraceRegs =
-  kSIMDCallerSaved | (kGPUnreserved - arm::vm_regs_with_sp() - vixl::x25 - vixl::x26 - vixl::x27 - vixl::x28);
+  kSIMDCallerSaved | (kGPUnreserved - vixl::x25 - vixl::x26 - vixl::x27 - vixl::x28);
 
 /*
  * Helper code ABI registers.

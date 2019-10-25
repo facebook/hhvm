@@ -74,8 +74,7 @@ const RegSet kSF = RegSet(RegSF{0});
 /*
  * Registers that can safely be used within a prologue.
  */
-const RegSet kPrologueRegs =
-  kXMMCallerSaved | (kGPUnreserved - x64::vm_regs_with_sp());
+const RegSet kPrologueRegs = kXMMCallerSaved | kGPUnreserved;
 
 /*
  * Registers that can safely be used for scratch purposes in-between traces.

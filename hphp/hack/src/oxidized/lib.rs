@@ -31,6 +31,7 @@ pub use stubs::errors;
 pub use stubs::lazy;
 pub use stubs::opaque_digest;
 pub use stubs::sequence;
+pub use stubs::stats_container;
 
 mod impl_gen;
 pub use impl_gen::*;
@@ -43,6 +44,7 @@ pub use gen::ast_defs;
 pub use gen::decl_defs;
 pub use gen::direct_decl_parser;
 pub use gen::file_info;
+pub use gen::full_fidelity_parser_env;
 pub use gen::global_options;
 pub use gen::ident;
 pub use gen::namespace_env;

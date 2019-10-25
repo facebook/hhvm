@@ -9,6 +9,7 @@ pub mod doc_comment;
 pub mod file_info_impl;
 pub mod file_pos_large;
 pub mod file_pos_small;
+pub mod full_fidelity_parser_env_impl;
 pub mod global_options_impl;
 pub mod i_map;
 pub mod i_set;

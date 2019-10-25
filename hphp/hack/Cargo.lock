@@ -92,6 +92,7 @@ name = "coroutine_parser_leak_tree_ffi"
 version = "3.49.0"
 dependencies = [
  "coroutine_parser_leak_tree 3.49.0",
+ "hack_ocamlrep 3.49.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
@@ -139,6 +140,7 @@ name = "decl_mode_parser_ffi"
 version = "3.49.0"
 dependencies = [
  "decl_mode_parser 3.49.0",
+ "hack_ocamlrep 3.49.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
@@ -493,6 +495,7 @@ dependencies = [
 name = "minimal_parser_ffi"
 version = "3.49.0"
 dependencies = [
+ "hack_ocamlrep 3.49.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
@@ -563,6 +566,7 @@ dependencies = [
 name = "positioned_coroutine_parser_ffi"
 version = "3.49.0"
 dependencies = [
+ "hack_ocamlrep 3.49.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
@@ -588,6 +592,7 @@ dependencies = [
 name = "positioned_parser_ffi"
 version = "3.49.0"
 dependencies = [
+ "hack_ocamlrep 3.49.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
@@ -948,6 +953,7 @@ dependencies = [
 name = "verify_parser_ffi"
 version = "3.49.0"
 dependencies = [
+ "hack_ocamlrep 3.49.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",

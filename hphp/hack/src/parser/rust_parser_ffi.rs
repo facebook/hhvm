@@ -29,6 +29,7 @@ macro_rules! parse {
             }
 
             use ocaml::Value;
+            use ocamlrep::OcamlRep;
             use ocamlpool_rust::{caml_raise, ocamlvalue::Ocamlvalue, utils::*};
             use parser_rust::{
                 self as parser,
@@ -39,24 +40,17 @@ macro_rules! parse {
             };
             use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
             use syntax_tree::{mode_parser::parse_mode, SyntaxTree};
-            use oxidized::relative_path::RelativePath;
+            use oxidized::{
+                full_fidelity_parser_env::FullFidelityParserEnv,
+                relative_path::RelativePath,
+            };
 
-            pub unsafe fn parse(ocaml_source_text : Value, opts : Value, mut l : Value) -> Value {
+            pub unsafe fn parse(ocaml_source_text : Value, env : Value, mut l : Value) -> Value {
                     let ocaml_source_text_value = ocaml_source_text.0;
 
-                    let is_experimental_mode = bool_field(&opts, 0);
-                    let hhvm_compat_mode = bool_field(&opts, 1);
-                    let php5_compat_mode = bool_field(&opts, 2);
-                    let codegen = bool_field(&opts, 3);
-                    let allow_new_attribute_syntax = bool_field(&opts, 4);
-                    let leak_rust_tree = bool_field(&opts, 5);
-                    let env = ParserEnv {
-                        is_experimental_mode,
-                        hhvm_compat_mode,
-                        php5_compat_mode,
-                        codegen,
-                        allow_new_attribute_syntax,
-                    };
+                    let env = FullFidelityParserEnv::from_ocaml(env.0).unwrap();
+                    let leak_rust_tree = env.leak_rust_tree;
+                    let env = ParserEnv::from(env);
 
                     // Note: Determining the current thread size cannot be done portably,
                     // therefore assume the worst (running on non-main thread with min size, 2MiB)

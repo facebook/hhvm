@@ -32,6 +32,7 @@ buck run hphp/hack/src/hh_oxidize --                                          \
   hphp/hack/src/options/globalOptions.ml                                      \
   hphp/hack/src/options/parserOptions.ml                                      \
   hphp/hack/src/options/typecheckerOptions.ml                                 \
+  hphp/hack/src/parser/full_fidelity_parser_env.ml                            \
   hphp/hack/src/typing/typing_defs.ml                                         \
   hphp/hack/src/typing/typing_reason.ml                                       \
   hphp/hack/src/utils/core/prim_defs.ml                                       \

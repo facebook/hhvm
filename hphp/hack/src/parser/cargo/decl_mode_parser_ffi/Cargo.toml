@@ -18,4 +18,5 @@ rust_parser_ffi = { path = "../rust_parser_ffi", package = "rust_parser_ffi" }
 rust_to_ocaml = { path = "../rust_to_ocaml", package = "rust_to_ocaml" }
 ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
 ocaml = "^0.7"
+ocamlrep = { path = "../../../ocamlrep", package = "hack_ocamlrep" }
 oxidized = { path = "../../../oxidized", package = "hack_oxidized" }

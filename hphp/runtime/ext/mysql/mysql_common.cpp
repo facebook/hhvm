@@ -994,207 +994,6 @@ MySQLFieldInfo *MySQLResult::fetchFieldInfo() {
   return getFieldInfo(m_current_field);
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// MySQLStmtVariables
-
-MySQLStmtVariables::MySQLStmtVariables(RefVector&& v): m_arr(std::move(v)) {
-  int count = m_arr.size();
-  m_vars   = req::calloc_raw_array<MYSQL_BIND>(count);
-  m_null   = req::calloc_raw_array<my_bool>(count);
-  m_length = req::calloc_raw_array<unsigned long>(count);
-
-  for (int i = 0; i < count; i++) {
-    m_null[i] = false;
-    m_length[i] = 0;
-
-    MYSQL_BIND *b = &m_vars[i];
-    b->is_null = &m_null[i];
-    b->length  = &m_length[i];
-    b->buffer = nullptr;
-    b->buffer_length = 0;
-    b->buffer_type = MYSQL_TYPE_STRING;
-  }
-}
-
-MySQLStmtVariables::~MySQLStmtVariables() {
-  for (int i = 0; i < m_arr.size(); i++) {
-    auto buf = &m_vars[i];
-    if (buf->buffer_length > 0) {
-      req::free(buf->buffer);
-    }
-  }
-
-  req::free(m_vars);
-  req::free(m_null);
-  req::free(m_length);
-}
-
-bool MySQLStmtVariables::bind_result(MYSQL_STMT *stmt) {
-  assertx(m_arr.size() == mysql_stmt_field_count(stmt));
-
-  MYSQL_RES *res = mysql_stmt_result_metadata(stmt);
-  MYSQL_FIELD *fields = mysql_fetch_fields(res);
-  for(int i = 0; i < m_arr.size(); i++) {
-    MYSQL_BIND *b = &m_vars[i];
-    b->is_unsigned = (fields[i].flags & UNSIGNED_FLAG) ? 1 : 0;
-
-    switch (fields[i].type) {
-      case MYSQL_TYPE_NULL:
-        b->buffer_type = MYSQL_TYPE_NULL;
-      case MYSQL_TYPE_DOUBLE:
-      case MYSQL_TYPE_FLOAT:
-        b->buffer_type = MYSQL_TYPE_DOUBLE;
-        b->buffer_length = sizeof(double);
-        break;
-      case MYSQL_TYPE_LONGLONG:
-#if MYSQL_VERSION_ID > 50002
-      case MYSQL_TYPE_BIT:
-#endif
-      case MYSQL_TYPE_LONG:
-      case MYSQL_TYPE_INT24:
-      case MYSQL_TYPE_SHORT:
-      case MYSQL_TYPE_YEAR:
-      case MYSQL_TYPE_TINY:
-        b->buffer_type = MYSQL_TYPE_LONGLONG;
-        b->buffer_length = sizeof(int64_t);
-        break;
-      case MYSQL_TYPE_DATE:
-      case MYSQL_TYPE_NEWDATE:
-      case MYSQL_TYPE_DATETIME:
-      case MYSQL_TYPE_TIMESTAMP:
-      case MYSQL_TYPE_TIME:
-      case MYSQL_TYPE_STRING:
-      case MYSQL_TYPE_VARCHAR:
-      case MYSQL_TYPE_VAR_STRING:
-      case MYSQL_TYPE_ENUM:
-      case MYSQL_TYPE_SET:
-      case MYSQL_TYPE_LONG_BLOB:
-      case MYSQL_TYPE_MEDIUM_BLOB:
-      case MYSQL_TYPE_BLOB:
-      case MYSQL_TYPE_TINY_BLOB:
-      case MYSQL_TYPE_GEOMETRY:
-      case MYSQL_TYPE_DECIMAL:
-      case MYSQL_TYPE_NEWDECIMAL:
-        b->buffer_type = MYSQL_TYPE_STRING;
-        b->buffer_length = fields[i].max_length ?
-                             fields[i].max_length :
-                             fields[i].length;
-        break;
-      default:
-        // There exists some more types in this enum like MYSQL_TYPE_TIMESTAMP2,
-        // MYSQL_TYPE_DATETIME2, MYSQL_TYPE_TIME2 but they are just used on the
-        // server
-        assertx(false);
-    }
-
-    if (b->buffer_length > 0) {
-      b->buffer = req::calloc_untyped(b->buffer_length, 1);
-    }
-  }
-  mysql_free_result(res);
-
-  return !mysql_stmt_bind_result(stmt, m_vars);
-}
-
-void MySQLStmtVariables::update_result() {
-  for (int i = 0; i < m_arr.size(); i++) {
-    MYSQL_BIND *b = &m_vars[i];
-    Variant v;
-
-    if (!*b->is_null && b->buffer_type != MYSQL_TYPE_NULL) {
-      switch (b->buffer_type) {
-        case MYSQL_TYPE_DOUBLE:
-          v = *(double*)b->buffer;
-          break;
-        case MYSQL_TYPE_LONGLONG:
-          v = *(int64_t*)b->buffer;
-          break;
-        case MYSQL_TYPE_STRING:
-          v = String((char *)b->buffer, *b->length, CopyString);
-          break;
-        default:
-          // We never ask for anything else than DOUBLE, LONGLONG and STRING
-          // so in the case we get something else back something is really wrong
-          assertx(false);
-      }
-    }
-
-    tvSet(*v.asTypedValue(), m_arr[i]->cell());
-  }
-}
-
-bool MySQLStmtVariables::init_params(MYSQL_STMT *stmt, const String& types) {
-  assertx(m_arr.size() == types.size());
-
-  for (int i = 0; i < types.size(); i++) {
-    MYSQL_BIND *b = &m_vars[i];
-    switch (types[i]) {
-      case 'i':
-        b->buffer_type = MYSQL_TYPE_LONGLONG;
-        break;
-      case 'd':
-        b->buffer_type = MYSQL_TYPE_DOUBLE;
-        break;
-      case 's':
-        b->buffer_type = MYSQL_TYPE_STRING;
-        break;
-      case 'b':
-        b->buffer_type = MYSQL_TYPE_LONG_BLOB;
-        break;
-      default:
-        assertx(false);
-    }
-  }
-
-  return !mysql_stmt_bind_param(stmt, m_vars);
-}
-
-bool MySQLStmtVariables::bind_params(MYSQL_STMT *stmt) {
-  m_value_arr.clear();
-  for (int i = 0; i < m_arr.size(); i++) {
-    MYSQL_BIND *b = &m_vars[i];
-    tv_rval var = m_arr[i]->cell();
-    Variant v;
-    if (isNullType(var.type())) {
-      *b->is_null = 1;
-    } else {
-      switch (b->buffer_type) {
-        case MYSQL_TYPE_LONGLONG:
-          {
-            m_value_arr.push_back(cellToInt(var.tv()));
-            b->buffer = m_value_arr.back().getInt64Data();
-          }
-          break;
-        case MYSQL_TYPE_DOUBLE:
-          {
-            m_value_arr.push_back(tvCastToDouble(var.tv()));
-            b->buffer = m_value_arr.back().getDoubleData();
-          }
-          break;
-        case MYSQL_TYPE_STRING:
-          {
-            m_value_arr.push_back(tvCastToString(var.tv()));
-            StringData *sd = m_value_arr.back().getStringData();
-            b->buffer = (void *)sd->data();
-            // FIXME: setting buffer_length will cause the destructor to free
-            // memory owned by the string
-            *b->length = sd->size();
-          }
-          break;
-        case MYSQL_TYPE_LONG_BLOB:
-          // The value are set using send_long_data so we don't have to do
-          // anything here
-          break;
-        default:
-          assertx(false);
-      }
-    }
-  }
-
-  return !mysql_stmt_bind_param(stmt, m_vars);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // MySQLStmt
 
@@ -1258,20 +1057,6 @@ Variant MySQLStmt::attr_set(int64_t attr, int64_t value) {
   return !mysql_stmt_attr_set(m_stmt, (enum_stmt_attr_type)attr, &value);
 }
 
-Variant MySQLStmt::bind_param(const String& types, RefVector&& vars) {
-  VALIDATE_PREPARED
-
-  m_param_vars = req::make_unique<MySQLStmtVariables>(std::move(vars));
-  return m_param_vars->init_params(m_stmt, types);
-}
-
-Variant MySQLStmt::bind_result(RefVector&& vars) {
-  VALIDATE_PREPARED
-
-  m_result_vars = req::make_unique<MySQLStmtVariables>(std::move(vars));
-  return m_result_vars->bind_result(m_stmt);
-}
-
 Variant MySQLStmt::data_seek(int64_t offset) {
   VALIDATE_PREPARED
 
@@ -1303,10 +1088,6 @@ Variant MySQLStmt::close() {
 Variant MySQLStmt::execute() {
   VALIDATE_PREPARED
 
-  if (m_param_vars) {
-    m_param_vars->bind_params(m_stmt);
-  }
-
   return !mysql_stmt_execute(m_stmt);
 }
 
@@ -1321,10 +1102,6 @@ Variant MySQLStmt::fetch() {
 
   if (ret) {
     return false;
-  }
-
-  if (m_result_vars) {
-    m_result_vars->update_result();
   }
 
   return true;
@@ -1357,10 +1134,6 @@ Variant MySQLStmt::param_count() {
 
 Variant MySQLStmt::prepare(const String& query) {
   VALIDATE_STMT
-
-  // Cleaning up just in case they have been set before
-  m_param_vars.reset();
-  m_result_vars.reset();
 
   m_prepared = !mysql_stmt_prepare(m_stmt, query.c_str(), query.size());
   return m_prepared;

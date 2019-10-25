@@ -50,7 +50,7 @@ enum class HeaderKind : uint8_t {
   // Hack arrays
   Dict, VecArray, Keyset,
   // Other ordinary refcounted heap objects
-  String, Resource, Ref, ClsMeth, Record,
+  String, Resource, ClsMeth, Record,
 
   // Valid kinds for an ObjectData; all but Object and NativeObject are
   // isCppBuiltin()
@@ -144,7 +144,6 @@ enum class GCBits : uint8_t {};
  * [ cnt | kind | marks |                          ] Empty, Globals, Keyset
  * [ cnt | kind | marks | sizeClass:16             ] String
  * [ cnt | kind | marks | heapSize:16              ] Resource (ResourceHdr)
- * [ cnt | kind | marks |                          ] Ref (RefData)
  * [ cnt | kind | marks | Attribute    |           ] Object..ImmSet (ObjectData)
  *
  * Note: arrBits includes several flags, mostly from the Hack array migration:

@@ -315,7 +315,7 @@ void PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad) {
   // Clear the provenance bit if we had one set
   ad->m_aux16 &= ~ArrayData::kHasProvenanceData;
 
-  // Copy counted types correctly, especially RefData.
+  // Copy counted types correctly
   for (uint32_t i = 0; i < size; ++i) {
     auto const elm = LvalUncheckedInt(ad, i);
     tvIncRefGen(*elm);

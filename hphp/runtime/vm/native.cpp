@@ -791,7 +791,6 @@ static std::string nativeTypeString(NativeSig::Type ty) {
   case T::StringArg:  return "string";
   case T::ArrayArg:   return "array";
   case T::ResourceArg:return "resource";
-  case T::OutputArg:  return "mixed&";
   case T::Mixed:      return "mixed";
   case T::MixedTV:    return "mixed";
   case T::This:       return "this";
@@ -851,7 +850,7 @@ bool registerConstant(const StringData* cnsName,
                       ConstantCallback callback) {
   TypedValueAux tv;
   tv.m_type = KindOfUninit;
-  tv.m_data.pref = reinterpret_cast<RefData*>(callback);
+  tv.m_data.pcnt = reinterpret_cast<MaybeCountable*>(callback);
   tv.dynamic() = true;
   if (!Unit::defNativeConstantCallback(cnsName, tv)) {
     return false;

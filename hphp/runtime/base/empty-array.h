@@ -35,7 +35,6 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct Variant;
-struct RefData;
 struct StringData;
 struct MixedArray;
 

@@ -355,10 +355,10 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
         StrNR key(const_cast<StringData*>(to_sdata(it->first)));
         tbl->set(key, tvAsVariant(&tv), true);
       } else {
-        assertx(tv.m_data.pref);
+        assertx(tv.m_data.pcnt);
         StrNR key(const_cast<StringData*>(to_sdata(it->first)));
         auto callback =
-          reinterpret_cast<Native::ConstantCallback>(tv.m_data.pref);
+          reinterpret_cast<Native::ConstantCallback>(tv.m_data.pcnt);
         auto cns = callback();
         if (cns.isInitialized()) {
           tbl->set(key, cns, true);

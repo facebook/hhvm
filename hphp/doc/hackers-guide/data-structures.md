@@ -88,14 +88,6 @@ that like most smart pointer types, these wrappers can all represent a `null`
 value, but the pointer in a `TypedValue` representing an array, string, etc.
 must *never* be `nullptr`. A `null` value is represented using `KindOfNull`.
 
-### `RefData`
-
-[`RefData`](../../runtime/base/ref-data.h) is used to implement
-[references](http://php.net/manual/en/language.references.whatare.php), a
-feature inherited from PHP that we're trying to eliminate from Hack. They're
-nothing more than a reference counted wrapper for a `TypedValue`, which contains
-the referenced value.
-
 ## Runtime-internal data structures
 
 ### `Unit`

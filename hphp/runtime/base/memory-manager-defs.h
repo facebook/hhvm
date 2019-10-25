@@ -264,7 +264,6 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* KeySet */
     0, /* String */
     0, /* Resource */
-    sizeClass<RefData>(),
     sizeClass<ClsMethData>(),
     0, /* Record */
     0, /* Object */
@@ -295,7 +294,6 @@ inline size_t allocSize(const HeapObject* h) {
   static_assert(kind_sizes[(int)HeaderKind::knd] == sizeClass<type>(), #knd);
   CHECKSIZE(Empty, ArrayData)
   CHECKSIZE(Globals, GlobalsArray)
-  CHECKSIZE(Ref, RefData)
   CHECKSIZE(ClsMeth, ClsMethData)
   CHECKSIZE(AsyncFuncWH, c_AsyncFunctionWaitHandle)
   CHECKSIZE(Vector, c_Vector)
@@ -451,7 +449,6 @@ inline size_t allocSize(const HeapObject* h) {
     case HeaderKind::ImmVector:
     case HeaderKind::ImmMap:
     case HeaderKind::ImmSet:
-    case HeaderKind::Ref:
     case HeaderKind::ClsMeth:
       not_reached();
   }

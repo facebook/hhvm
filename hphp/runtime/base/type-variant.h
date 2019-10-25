@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/record-data.h"
-#include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -252,8 +251,7 @@ inline variant_ref::operator const_variant_ref() const {
  * a replacement yet, sorry).
  *
  * In C++ extensions, this class can be used as a generic handle to
- * one of our other data types (e.g. StringData, ArrayData), and it
- * may also be a handle to a RefData.
+ * one of our other data types (e.g. StringData, ArrayData)
  *
  * Beware:
  *
@@ -611,9 +609,7 @@ struct Variant : private TypedValue {
 
   ALWAYS_INLINE int64_t toInt64Val() const {
     assertx(is(KindOfInt64));
-    return
-        LIKELY(m_type == KindOfInt64) ?
-        m_data.num : m_data.pref->var()->m_data.num;
+    return m_data.num;
   }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -626,9 +622,7 @@ struct Variant : private TypedValue {
 
   ALWAYS_INLINE double toDoubleVal() const {
     assertx(is(KindOfDouble));
-    return
-        LIKELY(m_type == KindOfDouble) ?
-        m_data.dbl : m_data.pref->var()->m_data.dbl;
+    return m_data.dbl;
   }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -641,9 +635,7 @@ struct Variant : private TypedValue {
 
   ALWAYS_INLINE bool toBooleanVal() const {
     assertx(is(KindOfBoolean));
-    return
-        LIKELY(m_type == KindOfBoolean) ?
-        m_data.num : m_data.pref->var()->m_data.num;
+    return m_data.num;
   }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -657,8 +649,7 @@ struct Variant : private TypedValue {
   ALWAYS_INLINE const String& toCStrRef() const {
     assertx(isString());
     assertx(m_data.pstr);
-    return *reinterpret_cast<const String*>(LIKELY(isStringType(m_type)) ?
-        &m_data.pstr : &m_data.pref->cell()->m_data.pstr);
+    return *reinterpret_cast<const String*>(&m_data.pstr);
   }
 
   ALWAYS_INLINE String& asStrRef() {
@@ -672,11 +663,11 @@ struct Variant : private TypedValue {
   ALWAYS_INLINE String& toStrRef() {
     assertx(isString());
     assertx(m_data.pstr);
+
     // The caller is likely going to modify the string, so we have to eagerly
     // promote KindOfPersistentString -> KindOfString.
-    auto tv = LIKELY(isStringType(m_type)) ? this : m_data.pref->cell();
-    tv->m_type = KindOfString;
-    return *reinterpret_cast<String*>(&tv->m_data.pstr);
+    m_type = KindOfString;
+    return *reinterpret_cast<String*>(&m_data.pstr);
   }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -690,8 +681,7 @@ struct Variant : private TypedValue {
   ALWAYS_INLINE const Array& toCArrRef() const {
     assertx(isArray());
     assertx(m_data.parr);
-    return *reinterpret_cast<const Array*>(LIKELY(isArrayLikeType(m_type)) ?
-        &m_data.parr : &m_data.pref->cell()->m_data.parr);
+    return *reinterpret_cast<const Array*>(&m_data.parr);
   }
 
   ALWAYS_INLINE Array& asArrRef() {
@@ -703,9 +693,8 @@ struct Variant : private TypedValue {
   ALWAYS_INLINE Array& toArrRef() {
     assertx(isArray());
     assertx(m_data.parr);
-    auto tv = LIKELY(isArrayLikeType(m_type)) ? this : m_data.pref->cell();
-    tv->m_type = tv->m_data.parr->toDataType();
-    return *reinterpret_cast<Array*>(&tv->m_data.parr);
+    m_type = m_data.parr->toDataType();
+    return *reinterpret_cast<Array*>(&m_data.parr);
   }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -719,8 +708,7 @@ struct Variant : private TypedValue {
   ALWAYS_INLINE const Object& toCObjRef() const {
     assertx(is(KindOfObject));
     assertx(m_data.pobj);
-    return *reinterpret_cast<const Object*>(LIKELY(m_type == KindOfObject) ?
-        &m_data.pobj : &m_data.pref->cell()->m_data.pobj);
+    return *reinterpret_cast<const Object*>(&m_data.pobj);
   }
 
   ALWAYS_INLINE Object & asObjRef() {
@@ -736,8 +724,7 @@ struct Variant : private TypedValue {
   ALWAYS_INLINE const Resource& toCResRef() const {
     assertx(is(KindOfResource));
     assertx(m_data.pres);
-    return *reinterpret_cast<const Resource*>(LIKELY(m_type == KindOfResource) ?
-        &m_data.pres : &m_data.pref->cell()->m_data.pres);
+    return *reinterpret_cast<const Resource*>(&m_data.pres);
   }
 
   ALWAYS_INLINE Resource & asResRef() {
@@ -748,8 +735,7 @@ struct Variant : private TypedValue {
   ALWAYS_INLINE Object& toObjRef() {
     assertx(is(KindOfObject));
     assertx(m_data.pobj);
-    return *reinterpret_cast<Object*>(LIKELY(m_type == KindOfObject) ?
-        &m_data.pobj : &m_data.pref->cell()->m_data.pobj);
+    return *reinterpret_cast<Object*>(&m_data.pobj);
   }
 
   /**
@@ -1560,14 +1546,6 @@ inline void concat_assign(Variant &v1, const char* s2) = delete;
 inline void concat_assign(tv_lval lhs, const String& s2) {
   if (!isStringType(type(lhs))) cellCastToStringInPlace(lhs);
   asStrRef(lhs) += s2;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-// Defined here for include order reasons.
-inline RefData::~RefData() {
-  assertx(m_kind == HeaderKind::Ref);
-  tvAsVariant(&m_cell).~Variant();
 }
 
 //////////////////////////////////////////////////////////////////////

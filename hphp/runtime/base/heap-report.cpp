@@ -60,7 +60,6 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
       out << "[" << static_cast<const StringData*>(h)->size() << "]";
       break;
     case HeaderKind::Resource:
-    case HeaderKind::Ref:
     case HeaderKind::ClsMeth:
       break;
     case HeaderKind::Object:

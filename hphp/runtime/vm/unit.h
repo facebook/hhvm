@@ -719,7 +719,7 @@ public:
   /*
    * Define a constant with name `cnsName' with a magic callback. The
    * Cell should be KindOfUninit, with a Native::ConstantCallback in
-   * its m_data.pref.
+   * its m_data.pcnt.
    *
    * The canonical examples are STDIN, STDOUT, and STDERR.
    */

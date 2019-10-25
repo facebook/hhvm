@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/tv-val.h"
-#include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/typed-value.h"
 

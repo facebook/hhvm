@@ -1637,22 +1637,11 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
            *   - if we had a ref-counted type, and it was converted
            *     to a Bool, Int or Dbl above, we explicitly DecReffed it
            *     (in coerce_value).
-           *   - if we had a non-RefData nativeArg, we did a CoerceMem
-           *     which implicitly DecReffed the old value
+           *   - if we did a CoerceMem which implicitly DecReffed the old value
            * In either case, the old value is taken care of, and any future
            * DecRefs (from exceptions, or after the call on the normal flow
            * of execution) should DecRef param.value (ie the post-coercion
            * value).
-           *
-           * But if we had an OutputArg, we did not DecRef the old value,
-           * and the post-coercion value is a RefData* or nullptr.
-           * If its a RefData*, we need to DecRef that - but in that case
-           * the new value is the same as the old.
-           * If its Nullptr, we need to DecRef the old value.
-           *
-           * So in both cases we actually want to DecRef the *old* value, so
-           * we have to restore it here (because realize_param replaced it
-           * with the new value).
            */
           auto v = param.value;
           return v;

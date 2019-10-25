@@ -419,20 +419,6 @@ class ObjectDataPrinter(object):
     def children(self):
         return self._iterator(self.val)
 
-
-#------------------------------------------------------------------------------
-# RefData.
-
-class RefDataPrinter(object):
-    RECOGNIZE = '^HPHP::RefData$'
-
-    def __init__(self, val):
-        self.val = val
-
-    def to_string(self):
-        return "RefData { %s }" % self.val['m_tv']
-
-
 #------------------------------------------------------------------------------
 # HHBBC::Bytecode
 
@@ -546,7 +532,6 @@ printer_classes = [
     StringDataPrinter,
     ArrayDataPrinter,
     ObjectDataPrinter,
-    RefDataPrinter,
     HhbbcBytecodePrinter,
     CompactVectorPrinter,
     SrcKeyPrinter,

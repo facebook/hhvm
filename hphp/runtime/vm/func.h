@@ -72,16 +72,6 @@ using NativeFunction = void(*)(NativeArgs*);
  */
 using DVFuncletsVec = std::vector<std::pair<int, Offset>>;
 
-/*
- * Call ABI for a function parameter: input only (normal behavior), by
- * reference (RefData), or inout (desugars to multiple return values).
- */
-enum class ParamMode : uint8_t {
-  In,
-  Ref,
-  InOut,
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 // EH table.
 

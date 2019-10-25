@@ -17,7 +17,6 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/ref-data.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"

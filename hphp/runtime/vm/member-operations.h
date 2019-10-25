@@ -938,8 +938,6 @@ inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
 
 /*
  * Intermediate elem operation for defining member instructions.
- *
- * Returned pointer is not yet unboxed.  (I.e. it cannot point into a RefData.)
  */
 template<MOpMode mode, KeyType keyType = KeyType::Any, bool copyProv>
 tv_lval ElemD(TypedValue& tvRef, tv_lval base,
@@ -1189,8 +1187,6 @@ inline tv_lval ElemUObject(TypedValue& tvRef, tv_lval base,
 
 /*
  * Intermediate Elem operation for an unsetting member instruction.
- *
- * Returned pointer is not yet unboxed.  (I.e. it cannot point into a RefData.)
  */
 template <KeyType keyType = KeyType::Any>
 tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
@@ -3132,8 +3128,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
 /*
  * Generic property access (PropX and PropDX end up here).
  *
- * Returns a pointer to a number of possible places, but does not unbox it.
- * (The returned pointer is never pointing into a RefData.)
+ * Returns a pointer to a number of possible places.
  */
 template<MOpMode mode, KeyType keyType = KeyType::Any>
 inline tv_lval PropObj(TypedValue& tvRef, const Class* ctx,

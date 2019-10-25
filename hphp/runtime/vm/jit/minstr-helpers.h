@@ -16,7 +16,6 @@
 #ifndef incl_HPHP_MINSTR_HELPERS_H_
 #define incl_HPHP_MINSTR_HELPERS_H_
 
-#include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/typed-value.h"

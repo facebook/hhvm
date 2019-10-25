@@ -266,7 +266,6 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
 
       case HeaderKind::AwaitAllWH:
       case HeaderKind::WaitHandle:
-      case HeaderKind::Ref:
       case HeaderKind::ClsMeth:
         break;
 

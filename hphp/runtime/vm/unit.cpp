@@ -1207,9 +1207,9 @@ tv_rval Unit::lookupCns(const StringData* cnsName) {
       return &tv;
     }
 
-    assertx(tv.m_data.pref != nullptr);
+    assertx(tv.m_data.pcnt != nullptr);
     auto const callback =
-      reinterpret_cast<Native::ConstantCallback>(tv.m_data.pref);
+      reinterpret_cast<Native::ConstantCallback>(tv.m_data.pcnt);
     const Cell* tvRet = callback().asTypedValue();
     assertx(cellIsPlausible(*tvRet));
     if (LIKELY(tvRet->m_type != KindOfUninit)) {
@@ -1255,11 +1255,11 @@ static bool defCnsHelper(rds::Handle ch,
 
   if (!rds::isHandleInit(ch)) {
     cns->m_type = KindOfUninit;
-    cns->m_data.pref = nullptr;
+    cns->m_data.pcnt = nullptr;
   }
 
   if (UNLIKELY(cns->m_type != KindOfUninit ||
-               cns->m_data.pref != nullptr)) {
+               cns->m_data.pcnt != nullptr)) {
     raise_notice(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
     return false;
   }

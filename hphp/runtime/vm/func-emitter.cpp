@@ -278,7 +278,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
           case Native::NativeSig::Type::StringArg:
           case Native::NativeSig::Type::ArrayArg:
           case Native::NativeSig::Type::ResourceArg:
-          case Native::NativeSig::Type::OutputArg:
           case Native::NativeSig::Type::MixedTV:
             fParams[i].nativeArg = true;
             break;

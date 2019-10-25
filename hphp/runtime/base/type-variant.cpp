@@ -90,15 +90,6 @@ Variant::Variant(const_variant_ref v) noexcept {
   implCopyConstruct(*v.rval(), *this);
 }
 
-/*
- * The destruct functions below all arbitrarily take RefData* as an
- * example of a refcounted object, then just cast to the proper type.
- * This is safe because we have compile time assertions that guarantee that
- * the _count field will always be exactly FAST_REFCOUNT_OFFSET bytes from
- * the beginning of the object for the StringData, ArrayData, ObjectData,
- * ResourceHdr, and RefData classes.
- */
-
 namespace {
 
 void objReleaseWrapper(ObjectData* obj) noexcept {

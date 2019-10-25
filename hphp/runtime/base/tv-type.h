@@ -18,7 +18,6 @@
 #define incl_HPHP_TV_TYPE_H_
 
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {

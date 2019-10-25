@@ -38,7 +38,6 @@ namespace HPHP {
   X(StringData)\
   X(ObjectData)\
   X(ResourceData)\
-  X(RefData)\
   /* collections */\
   X(c_Pair)\
   X(BaseVector)\

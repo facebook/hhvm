@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"

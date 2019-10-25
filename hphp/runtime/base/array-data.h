@@ -42,7 +42,6 @@ struct APCArray;
 struct Array;
 struct String;
 struct StringData;
-struct RefData;
 struct VariableSerializer;
 struct Variant;
 

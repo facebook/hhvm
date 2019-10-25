@@ -653,7 +653,7 @@ void define_stdio_constants() {
     auto cns = rds::handleToPtr<TypedValue, rds::Mode::NonLocal>(handle);
 
     cns->m_type = KindOfUninit;
-    cns->m_data.pref = reinterpret_cast<RefData*>(func);
+    cns->m_data.pcnt = reinterpret_cast<MaybeCountable*>(func);
   };
 
   defcns(s_STDIN.get(),  BuiltinFiles::GetSTDIN);

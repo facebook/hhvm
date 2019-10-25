@@ -443,7 +443,7 @@ void MemoryManager::flush() {
 const std::array<char*,NumHeaderKinds> header_names = {{
   "PackedArray", "MixedArray", "EmptyArray", "ApcArray", "GlobalsArray",
   "RecordArray", "DictArray", "VecArray", "KeysetArray",
-  "String", "Resource", "Ref", "ClsMeth", "Record",
+  "String", "Resource", "ClsMeth", "Record",
   "Object", "NativeObject", "WaitHandle", "AsyncFuncWH", "AwaitAllWH",
   "Closure", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
   "AsyncFuncFrame", "NativeData", "ClosureHdr", "MemoData", "Cpp",
@@ -550,7 +550,6 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::ImmMap:
       case HeaderKind::ImmSet:
       case HeaderKind::Resource:
-      case HeaderKind::Ref:
       case HeaderKind::ClsMeth:
       case HeaderKind::AsyncFuncFrame:
       case HeaderKind::NativeData:

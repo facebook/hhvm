@@ -165,8 +165,8 @@ Cell lookupCnsEHelperNormal(rds::Handle tv_handle,
   assertx(rds::isNormalHandle(tv_handle));
   if (UNLIKELY(rds::isHandleInit(tv_handle))) {
     auto const tv = rds::handleToPtr<TypedValue, rds::Mode::Normal>(tv_handle);
-    if (tv->m_data.pref != nullptr) {
-      auto callback = (Native::ConstantCallback)(tv->m_data.pref);
+    if (tv->m_data.pcnt != nullptr) {
+      auto callback = (Native::ConstantCallback)(tv->m_data.pcnt);
       const Cell* cns = callback().asTypedValue();
       if (LIKELY(cns->m_type != KindOfUninit)) {
         Cell c1;
@@ -187,8 +187,8 @@ Cell lookupCnsEHelperPersistent(rds::Handle tv_handle,
   assertx(tv->m_type == KindOfUninit);
 
   // Deferred system constants.
-  if (UNLIKELY(tv->m_data.pref != nullptr)) {
-    auto callback = (Native::ConstantCallback)(tv->m_data.pref);
+  if (UNLIKELY(tv->m_data.pcnt != nullptr)) {
+    auto callback = (Native::ConstantCallback)(tv->m_data.pcnt);
     const Cell* cns = callback().asTypedValue();
     if (LIKELY(cns->m_type != KindOfUninit)) {
       Cell c1;

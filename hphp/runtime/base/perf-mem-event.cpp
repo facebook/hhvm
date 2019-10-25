@@ -332,7 +332,6 @@ bool record_request_heap_mem_event(const void* addr,
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::AwaitAllWH:
     case HeaderKind::Resource:
-    case HeaderKind::Ref:
     case HeaderKind::ClsMeth:
 
     case HeaderKind::Vector:

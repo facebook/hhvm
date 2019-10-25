@@ -262,7 +262,6 @@ void callFunc(const Func* func, const void* ctx,
   X(StringArg,  StringArg,            StringArg)      \
   X(ArrayArg,   ArrayArg,             ArrayArg)       \
   X(ResourceArg,ResourceArg,          ResourceArg)    \
-  X(OutputArg,  OutputArg,            OutputArg)      \
   X(MixedTV,    TypedValue,           TypedValue)     \
   X(This,       ObjectData*,          ObjectData*)    \
   X(Void,       void,                 void)           \
@@ -304,7 +303,6 @@ using ObjectArg   = Native::NativeArg<ObjectData>;
 using StringArg   = Native::NativeArg<StringData>;
 using ArrayArg    = Native::NativeArg<ArrayData>;
 using ResourceArg = Native::NativeArg<ResourceData>;
-using OutputArg   = Native::NativeArg<RefData>;
 
 namespace Native {
 

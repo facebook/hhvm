@@ -104,7 +104,6 @@ components:
       * [StringData](data-structures.md#stringdata)
       * [ObjectData](data-structures.md#objectdata)
       * [Smart pointer wrappers](data-structures.md#smart-pointer-wrappers)
-      * [RefData](data-structures.md#refdata)
     * [Runtime-internal](data-structures.md#runtime-internal-data-structures)
       * [Unit](data-structures.md#unit)
       * [PreClass/Class](data-structures.md#preclass-and-class)

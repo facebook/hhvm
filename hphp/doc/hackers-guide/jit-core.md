@@ -189,28 +189,12 @@ the Hack level).
   Counted        | `{CountedStr+CountedArr+Obj+BoxedCell}`
   Cell           | `{Null+Bool+Int+Dbl+Str+Arr+Obj}`
 
-A PHP reference is implemented as a container object (`RefData`) which contains
-one value. The contained value cannot be another PHP reference. For every type
-T in the table above, there is a corresponding type BoxedT, which is a pointer
-to a `RefData` struct containing a value of type T.
-
-  Type           | HHVM representation
-  ---------------|--------------------
-  BoxedInitNull  | `RefData*` containing `InitNull`
-  ...            | Everything from the table above except `Uninit` can be boxed
-
-Finally, there is one top-level type representing all possible PHP values:
-
-  Type           | HHVM representation
-  ---------------|--------------------
-  Gen            | `{Cell+BoxedCell}`
-
 The VM also manipulates values of various internal types, which are never
 visible at the PHP level.
 
   Type           | HHVM representation
   ---------------|--------------------
-  PtrToT         | Exists for all T in `Gen`. Represents a `TypedValue*`
+  PtrToT         | Exists for all T in `Cell`. Represents a `TypedValue*`
   Bottom         | No value, `{}`. Subtype of every other type
   Top            | Supertype of every other type
   VarEnv         | `VarEnv*`

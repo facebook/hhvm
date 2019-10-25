@@ -34,7 +34,6 @@ namespace HPHP {
 struct ArrayData;
 struct MaybeCountable;
 struct ObjectData;
-struct RefData;
 struct ResourceHdr;
 struct StringData;
 struct MemoCacheBase;
@@ -57,7 +56,6 @@ union Value {
   ArrayData*    parr;   // KindOfArray, KindOfVec, KindOfDict, KindOfKeyset
   ObjectData*   pobj;   // KindOfObject
   ResourceHdr*  pres;   // KindOfResource
-  RefData*      pref;   // KindOfRef
   MaybeCountable* pcnt; // for alias-safe generic refcounting operations
   MemoCacheBase* pcache; // Not valid except when in a MemoSlot
   const Func*   pfunc;  // KindOfFunc
@@ -186,11 +184,9 @@ constexpr size_t kTVSimdAlign = 0x10;
 /*
  * Alias for TypedValue.
  *
- * See bytecode.specification for details.  Note that in
- * bytecode.specification, refs are abbreviated as "V".
+ * See bytecode.specification for details.
  */
 using Cell = TypedValue;
-using Ref = TypedValue;
 
 /*
  * A TypedNum is a TypedValue that is either KindOfDouble or KindOfInt64.

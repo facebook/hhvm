@@ -113,8 +113,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   // may give it an XMM register, and the instruction will store the whole 16
   // bytes into memory.  Therefore it's important *not* to return true if the
   // TypedValue.m_aux field in memory has important data.  This is the case for
-  // MixedArray elements, Map elements, and RefData inner values.  We don't
-  // have StMem in here since it sometimes stores to RefDatas.
+  // MixedArray elements, and Map elements.
   switch (inst.op()) {
   case StLoc:
     return srcIdx == 1;
@@ -124,6 +123,8 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
     return srcIdx == 1;
   case InitPackedLayoutArray:
     return srcIdx == 1;
+  case StMem:
+    return srcIdx == 1 && (!wide_tv_val || inst.src(0)->isA(TPtrToCell));
   default:
     return false;
   }

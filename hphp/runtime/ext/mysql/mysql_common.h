@@ -366,27 +366,6 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using RefVector = req::vector<req::ptr<RefData>>;
-
-struct MySQLStmtVariables {
-  explicit MySQLStmtVariables(RefVector&& refs);
-  ~MySQLStmtVariables();
-
-  bool init_params(MYSQL_STMT *stmt, const String& types);
-  bool bind_result(MYSQL_STMT *stmt);
-  bool bind_params(MYSQL_STMT *stmt);
-  void update_result();
-
-private:
-  RefVector              m_arr;
-  req::vector<Variant>   m_value_arr;
-  MYSQL_BIND             *m_vars;
-  my_bool                *m_null;
-  unsigned long          *m_length;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 struct MySQLStmt : public SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(MySQLStmt);
 
@@ -405,8 +384,6 @@ struct MySQLStmt : public SweepableResourceData {
   Variant affected_rows();
   Variant attr_get(int64_t attr);
   Variant attr_set(int64_t attr, int64_t value);
-  Variant bind_param(const String& types, RefVector&& vars);
-  Variant bind_result(RefVector&& vars);
   Variant data_seek(int64_t offset);
   Variant get_errno();
   Variant get_error();
@@ -427,8 +404,6 @@ struct MySQLStmt : public SweepableResourceData {
 protected:
   MYSQL_STMT *m_stmt;
   bool m_prepared;
-  req::unique_ptr<MySQLStmtVariables> m_param_vars;
-  req::unique_ptr<MySQLStmtVariables> m_result_vars;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

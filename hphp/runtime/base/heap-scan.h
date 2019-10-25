@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/rds-header.h"
-#include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/string-data.h"
@@ -176,9 +175,6 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       return scanner.scanByIndex(res->typeIndex(), res->data(),
                                  res->heapSize() - sizeof(ResourceHdr));
     }
-    case HeaderKind::Ref:
-      scanner.scan(*static_cast<const RefData*>(h)->cell());
-      return;
     case HeaderKind::ClsMeth:
       // ClsMeth only holds pointers to non-request allocated data
       return;

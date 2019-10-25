@@ -48,7 +48,13 @@ module Shared (Env : Env_S) = struct
     | _ -> false
 end
 
-include Shared (Typing_env_types)
+include Shared (struct
+  type env = Typing_env_types.env
+
+  let env_reactivity = Typing_env_types.env_reactivity
+
+  let get_fun = Typing_env.get_fun
+end)
 
 let handle_value_in_return
     ~function_returns_mutable

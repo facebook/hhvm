@@ -628,7 +628,7 @@ and fun_def tcopt f : (Tast.fun_def * Typing_env_types.global_tvenv) option =
       let nb = TNBody.func_body f in
       add_decl_errors
         (Option.map
-           (get_fun env (snd f.f_name))
+           (Env.get_fun env (snd f.f_name))
            ~f:(fun x -> Option.value_exn x.fe_decl_errors));
       let env = Env.open_tyvars env (fst f.f_name) in
       let env = Env.set_env_function_pos env pos in
@@ -5339,7 +5339,7 @@ and dispatch_call
       ty
 
 and fun_type_of_id env x tal el =
-  match get_fun env (snd x) with
+  match Env.get_fun env (snd x) with
   | None ->
     let (env, _, ty) = unbound_name env x (Pos.none, Aast.Null) in
     (env, ty, [])

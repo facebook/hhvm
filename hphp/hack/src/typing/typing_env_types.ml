@@ -176,10 +176,4 @@ and anon = {
     env * Tast.expr * locl_ty;
 }
 
-let get_fun env x =
-  let dep = Typing_deps.Dep.Fun x in
-  Option.iter env.decl_env.Decl_env.droot (fun root ->
-      Typing_deps.add_idep root dep);
-  Decl_provider.get_fun x
-
 let env_reactivity env = env.lenv.local_reactive

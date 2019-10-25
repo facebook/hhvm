@@ -73,6 +73,8 @@ val get_class : env -> class_key -> class_decl option
 
 val get_class_dep : env -> class_key -> class_decl option
 
+val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
+
 val get_typedef : env -> typedef_key -> typedef_decl option
 
 val get_const : env -> class_decl -> string -> class_const option

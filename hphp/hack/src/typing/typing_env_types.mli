@@ -110,6 +110,4 @@ and anon = {
     env * Tast.expr * locl_ty;
 }
 
-val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
-
 val env_reactivity : env -> reactivity

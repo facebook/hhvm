@@ -637,6 +637,12 @@ let get_class_dep env x =
   Decl_env.add_extends_dependency env.decl_env x;
   get_class env x
 
+let get_fun env x =
+  let dep = Typing_deps.Dep.Fun x in
+  Option.iter env.decl_env.Decl_env.droot (fun root ->
+      Typing_deps.add_idep root dep);
+  Decl_provider.get_fun x
+
 let get_enum_constraint env x =
   match get_class env x with
   | None -> None

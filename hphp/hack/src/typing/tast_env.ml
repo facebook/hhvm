@@ -242,7 +242,7 @@ let local_is_mutable = Typing_env.local_is_mutable
 
 let get_env_mutability = Typing_env.get_env_mutability
 
-let get_fun = Typing_env_types.get_fun
+let get_fun = Typing_env.get_fun
 
 let set_env_reactive = Typing_env.set_env_reactive
 

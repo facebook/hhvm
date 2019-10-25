@@ -1,1 +1,4 @@
-<?hh extension_loaded('mbstring') || die('skip mbstring not available');
+<?hh
+<<__EntryPoint>> function main(): void {
+extension_loaded('mbstring') || die('skip mbstring not available');
+}

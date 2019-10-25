@@ -1,4 +1,6 @@
 <?hh
-	if (!defined("IMAGETYPE_JPEG")) {
-		die("skip jpeg format is not available");
-	}
+<<__EntryPoint>> function main(): void {
+if (!defined("IMAGETYPE_JPEG")) {
+    die("skip jpeg format is not available");
+}
+}

@@ -1,1 +1,4 @@
-<?hh extension_loaded('reflection') || die('skip');
+<?hh
+<<__EntryPoint>> function main(): void {
+extension_loaded('reflection') || die('skip');
+}

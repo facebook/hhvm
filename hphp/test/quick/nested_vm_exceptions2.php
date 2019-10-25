@@ -9,7 +9,7 @@ function error_handler() {
 }
 set_error_handler(fun('error_handler'));
 
-function unary_function($x) {
+function unary_function($_1, $_2, inout $_3, $_4, inout $_5) {
   // Raise a warning and throw from
   // the user error handler.
   trigger_error("raise a notice", E_USER_NOTICE);

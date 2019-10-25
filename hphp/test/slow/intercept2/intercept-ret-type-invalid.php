@@ -1,6 +1,6 @@
 <?hh
 
-function handler($name, $obj, $args) {
+function handler($name, $obj, inout $args) {
   var_dump($obj);
   return 1;
 }

@@ -33,7 +33,7 @@ def iva_imm_types():
 @memoized
 def vec_imm_types():
     # keep this in sync with vec_elm_sizes()
-    return [V('HPHP::' + t) for t in ['BLA', 'VSA', 'SLA', 'I32LA', 'BLLA']]
+return [V('HPHP::' + t) for t in ['BLA', 'VSA', 'SLA', 'BLLA']]
 
 @memoized
 def vec_elm_sizes():
@@ -41,7 +41,6 @@ def vec_elm_sizes():
         'HPHP::Offset',      # BLA
         'HPHP::Id',          # VSA
         'HPHP::StrVecItem',  # SLA
-        'uint32_t',          # I32LA
         'uint8_t'            # BLLA
     ]]
 

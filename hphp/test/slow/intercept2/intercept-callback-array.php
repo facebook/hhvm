@@ -1,6 +1,6 @@
 <?hh
 
-function handler($name, $obj, $args) {
+function handler($_1, $_2, inout $_3) {
   return shape('prepend_this' => true, 'callback' => varray['C', 'bar']);
 }
 

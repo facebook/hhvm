@@ -1,4 +1,4 @@
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'has_ref() expects parameter 65 by reference, but the call was not annotated with '&'' in %s/unpack_call_ref.php:75
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'has_ref() expects parameter 65 to be inout, but the call was not annotated with 'inout'' in %s/unpack_call_ref.php:75
 Stack trace:
 #0 (): main()
 #1 {main}

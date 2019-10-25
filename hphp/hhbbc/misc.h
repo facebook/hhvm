@@ -55,7 +55,7 @@ enum class Flavor { C, V, U, CU, CV, CVU };
 /*
  * Types of parameter preparation (or unknown).
  */
-enum class PrepKind { Ref, Val, Unknown };
+enum class PrepKind { InOut, Val, Unknown };
 
 using LocalId = uint32_t;
 constexpr const LocalId NoLocalId = -1;

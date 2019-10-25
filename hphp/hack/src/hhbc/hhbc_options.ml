@@ -21,7 +21,6 @@ type t = {
   option_php7_uvs: bool;
   option_php7_ltr_assign: bool;
   option_create_in_out_wrapper_functions: bool;
-  option_reffiness_invariance: int;
   option_hack_arr_compat_notices: bool;
   option_hack_arr_dv_arrs: bool;
   option_dynamic_invoke_functions: SSet.t;
@@ -75,7 +74,6 @@ let default =
      * HHVM it's helpful to renumber in order that the labels match more closely *)
     option_relabel = true;
     option_create_in_out_wrapper_functions = true;
-    option_reffiness_invariance = 0;
     option_hack_arr_compat_notices = false;
     option_hack_arr_dv_arrs = false;
     option_dynamic_invoke_functions = SSet.empty;
@@ -134,8 +132,6 @@ let php7_ltr_assign o = o.option_php7_ltr_assign
 
 let create_in_out_wrapper_functions o =
   o.option_create_in_out_wrapper_functions
-
-let reffiness_invariance o = o.option_reffiness_invariance
 
 let hack_arr_compat_notices o = o.option_hack_arr_compat_notices
 
@@ -241,7 +237,6 @@ let to_string o =
       Printf.sprintf "php7_ltr_assign: %B" @@ php7_ltr_assign o;
       Printf.sprintf "create_in_out_wrapper_functions: %B"
       @@ create_in_out_wrapper_functions o;
-      Printf.sprintf "reffiness_invariance: %d" @@ reffiness_invariance o;
       Printf.sprintf "hack_arr_compat_notices: %B" @@ hack_arr_compat_notices o;
       Printf.sprintf "hack_arr_dv_arrs: %B" @@ hack_arr_dv_arrs o;
       Printf.sprintf "dynamic_invoke_functions: [%s]" dynamic_invokes;
@@ -324,8 +319,6 @@ let set_option options name value =
   | "hack.compiler.relabel" -> { options with option_relabel = as_bool value }
   | "eval.createinoutwrapperfunctions" ->
     { options with option_create_in_out_wrapper_functions = as_bool value }
-  | "eval.reffinessinvariance" ->
-    { options with option_reffiness_invariance = int_of_string value }
   | "eval.hackarrcompatnotices" ->
     { options with option_hack_arr_compat_notices = as_bool value }
   | "eval.hackarrdvarrs" ->
@@ -478,8 +471,6 @@ let value_setters =
     ( set_value "hhvm.create_in_out_wrapper_functions" get_value_from_config_int
     @@ fun opts v ->
     { opts with option_create_in_out_wrapper_functions = v = 1 } );
-    ( set_value "hhvm.reffiness_invariance" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_reffiness_invariance = v }) );
     ( set_value "hhvm.hack_arr_compat_notices" get_value_from_config_int
     @@ (fun opts v -> { opts with option_hack_arr_compat_notices = v = 1 }) );
     ( set_value "hhvm.hack_arr_dv_arrs" get_value_from_config_int

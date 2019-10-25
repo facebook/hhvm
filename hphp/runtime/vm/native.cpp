@@ -140,7 +140,7 @@ void populateArgs(Registers& regs, const Func* const func,
     auto const& arg = args[-i];
     auto const& pi = func->params()[i];
     auto const type = pi.builtinType;
-    if (pi.inout) {
+    if (func->isInOut(i)) {
       if (auto const iv = builtinInValue(func, i)) {
         *io = *iv;
         tvDecRefGen(arg);
@@ -379,7 +379,7 @@ void coerceFCallArgs(TypedValue* args,
 
 
     auto msg = param_type_error_message(
-      func->displayName()->data(),
+      func->name()->data(),
       i+1,
       *targetType,
       args[-i].m_type
@@ -429,12 +429,12 @@ TypedValue* methodWrapper(ActRec* ar) {
   void* ctx;  // ObjectData* or Class*
   if (ar->hasThis()) {
     if (isStatic) {
-      throw_instance_method_fatal(func->fullDisplayName()->data());
+      throw_instance_method_fatal(func->fullName()->data());
     }
     ctx = ar->getThis();
   } else {
     if (!isStatic) {
-      throw_instance_method_fatal(func->fullDisplayName()->data());
+      throw_instance_method_fatal(func->fullName()->data());
     }
     ctx = ar->getClass();
   }
@@ -467,7 +467,7 @@ TypedValue* unimplementedWrapper(ActRec* ar) {
     }
   } else {
     raise_error("Call to unimplemented native function %s()",
-                func->displayName()->data());
+                func->name()->data());
     tvWriteNull(*ar->retSlot());
     frame_free_locals_no_this_inl(ar, func->numParams(), ar->retSlot());
   }
@@ -526,7 +526,6 @@ MaybeDataType builtinOutType(
 static folly::Optional<TypedValue> builtinInValue(
   const Func::ParamInfo& pinfo
 ) {
-  assertx(pinfo.inout);
   auto& map = pinfo.userAttributes;
 
   auto const it = map.find(s_outOnly.get());

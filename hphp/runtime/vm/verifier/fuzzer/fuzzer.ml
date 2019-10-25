@@ -329,16 +329,14 @@ let mut_imms (is : IS.t) : IS.t =
   let mutate_call s =
     match s with (*It's not worth mutating arg numbers for Push* or Call*,
                    because we already know it will fail the verifier/assembler*)
-    | FCallObjMethod   (i, Hhbc_ast.Obj_null_throws, pl)    ->
+    | FCallObjMethod   (i, Hhbc_ast.Obj_null_throws)    ->
          FCallObjMethod(i,    (if should_mutate()
                               then Hhbc_ast.Obj_null_safe
-                              else Hhbc_ast.Obj_null_throws),
-                        pl)
-    | FCallObjMethod   (i, Hhbc_ast.Obj_null_safe, pl)      ->
+                              else Hhbc_ast.Obj_null_throws))
+    | FCallObjMethod   (i, Hhbc_ast.Obj_null_safe)      ->
          FCallObjMethod(i,    (if should_mutate()
                               then Hhbc_ast.Obj_null_throws
-                              else Hhbc_ast.Obj_null_safe),
-                        pl)
+                              else Hhbc_ast.Obj_null_safe))
     | FCallObjMethodD  (i, Hhbc_ast.Obj_null_throws, m) ->
         FCallObjMethodD(i, (if should_mutate()
                               then Hhbc_ast.Obj_null_safe
@@ -640,7 +638,6 @@ let mutate_metadata (input : HP.t)  =
         (m |> Hhas_method.is_final          |> mutate_bool)
         (m |> Hhas_method.is_abstract       |> mutate_bool)
         (m |> Hhas_method.no_injection      |> mutate_bool)
-        (m |> Hhas_method.inout_wrapper     |> mutate_bool)
         (m |> Hhas_method.name)
         (m |> Hhas_method.body              |> mutate_body_data)
         (m |> Hhas_method.span)
@@ -726,7 +723,6 @@ let mutate_metadata (input : HP.t)  =
       (f |> Hhas_function.is_pair_generator |> mutate_bool)
       (f.Hhas_function.function_hoisted     |> mutate_hoisted)
       (f |> Hhas_function.no_injection      |> mutate_bool)
-      (f |> Hhas_function.inout_wrapper     |> mutate_bool)
       (f |> Hhas_function.is_interceptable  |> mutate_bool)
       (f |> Hhas_function.is_memoize_impl   |> mutate_bool)
       (f |> Hhas_function.rx_level)

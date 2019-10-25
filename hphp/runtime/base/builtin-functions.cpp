@@ -141,7 +141,7 @@ bool is_callable(const Variant& v, bool syntax_only, Variant* name) {
 
   auto const tv_func = v.toCell();
   if (isFuncType(tv_func->m_type)) {
-    auto func_name = tv_func->m_data.pfunc->fullDisplayName();
+    auto func_name = tv_func->m_data.pfunc->fullName();
     if (name) *name = Variant{func_name, Variant::PersistentStrInit{}};
     return true;
   }
@@ -188,7 +188,7 @@ bool is_callable(const Variant& v, bool syntax_only, Variant* name) {
 
     if (isFuncType(mthname.type())) {
       if (name) {
-        *name = Variant{mthname.val().pfunc->fullDisplayName(),
+        *name = Variant{mthname.val().pfunc->fullName(),
                                Variant::PersistentStrInit{}};
       }
       return true;
@@ -370,7 +370,7 @@ const Func* vm_decode_func_from_name(
       raise_warning(
         "vm_decode_function() used to decode a %s method: %s",
         f->attrs() & AttrPrivate ? "private" : "protected",
-        f->fullDisplayName()->data()
+        f->fullName()->data()
       );
     }
   }
@@ -864,7 +864,7 @@ void throw_parameter_wrong_type(TypedValue tv,
                                 unsigned int arg_num,
                                 DataType expected_type) {
   auto msg = param_type_error_message(
-    callee->displayName()->data(), arg_num, expected_type,
+    callee->name()->data(), arg_num, expected_type,
     type(tv));
 
   if (RuntimeOption::PHP7_EngineExceptions) {

@@ -103,13 +103,13 @@ static void raiseForbiddenDynCall(const Func* func) {
     string_printf(
       msg,
       error_msg,
-      func->fullDisplayName()->data()
+      func->fullName()->data()
     );
     throw_invalid_operation_exception(makeStaticString(msg));
   } else {
     raise_notice(
       error_msg,
-      func->fullDisplayName()->data()
+      func->fullName()->data()
     );
   }
 }
@@ -182,8 +182,8 @@ IMPL_OPCODE_CALL(ThrowMissingArg)
 IMPL_OPCODE_CALL(ThrowMissingThis)
 IMPL_OPCODE_CALL(ThrowOutOfBounds)
 IMPL_OPCODE_CALL(ThrowParameterWrongType)
-IMPL_OPCODE_CALL(ThrowParamRefMismatch)
-IMPL_OPCODE_CALL(ThrowParamRefMismatchRange)
+IMPL_OPCODE_CALL(ThrowParamInOutMismatch)
+IMPL_OPCODE_CALL(ThrowParamInOutMismatchRange)
 
 ///////////////////////////////////////////////////////////////////////////////
 

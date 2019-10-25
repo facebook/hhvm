@@ -1458,8 +1458,8 @@ struct FuncEntryData : IRExtraData {
   uint32_t argc;
 };
 
-struct CheckRefsData : IRExtraData {
-  CheckRefsData(unsigned firstBit, uint64_t mask, uint64_t vals)
+struct CheckInOutsData : IRExtraData {
+  CheckInOutsData(unsigned firstBit, uint64_t mask, uint64_t vals)
     : firstBit(safe_cast<int>(firstBit))
     , mask(mask)
     , vals(vals)
@@ -1716,8 +1716,8 @@ X(LookupFuncCached,             FuncNameData);
 X(LdObjMethodS,                 FuncNameData);
 X(ThrowMissingArg,              FuncArgData);
 X(RaiseTooManyArg,              FuncData);
-X(ThrowParamRefMismatch,        ParamData);
-X(ThrowParamRefMismatchRange,   CheckRefsData);
+X(ThrowParamInOutMismatch,      ParamData);
+X(ThrowParamInOutMismatchRange, CheckInOutsData);
 X(ThrowArrayIndexException,     ThrowArrayIndexExceptionData);
 X(ThrowArrayKeyException,       ThrowArrayKeyExceptionData);
 X(ThrowParameterWrongType,      FuncArgTypeData);
@@ -1822,7 +1822,7 @@ X(DecRef,                       DecRefData);
 X(DecRefNZ,                     DecRefData);
 X(ProfileDecRef,                DecRefData);
 X(LdTVAux,                      LdTVAuxData);
-X(CheckRefs,                    CheckRefsData);
+X(CheckInOuts,                  CheckInOutsData);
 X(RaiseHackArrParamNotice,      RaiseHackArrParamNoticeData);
 X(RaiseHackArrPropNotice,       RaiseHackArrTypehintNoticeData);
 X(DbgAssertRefCount,            AssertReason);

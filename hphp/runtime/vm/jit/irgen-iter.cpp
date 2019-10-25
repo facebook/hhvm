@@ -54,7 +54,7 @@ void logArrayIterProfile(IRGS& env) {
   auto line_int = 0;
   if (marker.hasFunc()) {
     auto const func = marker.func();
-    func_str = func->fullDisplayName()->data();
+    func_str = func->fullName()->data();
     file_str = func->filename()->data();
     line_int = func->unit()->getLineNumber(marker.bcOff());
   }

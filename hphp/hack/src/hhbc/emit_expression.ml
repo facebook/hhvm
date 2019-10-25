@@ -1882,13 +1882,6 @@ and is_packed_init ?(hack_arr_compat = true) es =
         | A.AFvalue _ -> true
         | _ -> false)
   in
-  let has_references =
-    (* Reference can only exist as a value *)
-    List.exists es ~f:(function
-        | A.AFkvalue (_, e)
-        | A.AFvalue e
-        -> expr_starts_with_ref e)
-  in
   let has_bool_keys =
     List.exists es ~f:(function
         | A.AFkvalue ((_, (A.True | A.False)), _) -> true
@@ -1896,17 +1889,9 @@ and is_packed_init ?(hack_arr_compat = true) es =
   in
   (is_only_values || keys_are_zero_indexed_properly_formed)
   && (not (has_bool_keys && hack_arr_compat && hack_arr_compat_notices ()))
-  && (not has_references)
   && List.length es > 0
 
 and is_struct_init env es allow_numerics =
-  let has_references =
-    (* Reference can only exist as a value *)
-    List.exists es ~f:(function
-        | A.AFkvalue (_, e)
-        | A.AFvalue e
-        -> expr_starts_with_ref e)
-  in
   let keys = ULS.empty in
   let (are_all_keys_non_numeric_strings, keys) =
     List.fold_right es ~init:(true, keys) ~f:(fun field (b, keys) ->
@@ -1932,7 +1917,6 @@ and is_struct_init env es allow_numerics =
   let limit = max_array_elem_on_stack () in
   (allow_numerics || are_all_keys_non_numeric_strings)
   && (not has_duplicate_keys)
-  && (not has_references)
   && num_keys <= limit
   && num_keys <> 0
 
@@ -3462,8 +3446,8 @@ and get_fcall_args ?(lock_while_unwinding = false) args uargs async_eager_label
   let flags =
     { default_fcall_flags with has_unpack = uargs <> []; lock_while_unwinding }
   in
-  let by_refs = List.map args expr_starts_with_ref in
-  make_fcall_args ~flags ~num_rets ~by_refs ?async_eager_label num_args
+  let inouts = List.map args is_inout_arg in
+  make_fcall_args ~flags ~num_rets ~inouts ?async_eager_label num_args
 
 (* Expression that appears in an object context, such as expr->meth(...) *)
 and emit_object_expr env (expr : Tast.expr) =
@@ -3482,10 +3466,8 @@ and emit_call_lhs_and_fcall
     env
     (expr : Tast.expr)
     fcall_args
-    (targs : Tast.targ list)
-    inout_arg_positions =
+    (targs : Tast.targ list) =
   let ((pos, _), expr_) = expr in
-  let has_inout_args = List.length inout_arg_positions <> 0 in
   let does_not_have_non_tparam_generics =
     not (has_non_tparam_generics_targs env targs)
   in
@@ -3500,14 +3482,6 @@ and emit_call_lhs_and_fcall
   | A.Obj_get (obj, (_, A.String id), null_flavor)
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
     let name = Hhbc_id.Method.from_ast_name id in
-    let name =
-      if has_inout_args then
-        Hhbc_id.Method.add_suffix
-          name
-          (Emit_inout_helpers.inout_suffix inout_arg_positions)
-      else
-        name
-    in
     let obj = emit_object_expr env obj in
     let (generics, fcall_args) = emit_generics fcall_args in
     let null_flavor = from_ast_null_flavor null_flavor in
@@ -3528,21 +3502,13 @@ and emit_call_lhs_and_fcall
       gather
         [
           instr_pushl tmp;
-          instr_fcallobjmethod fcall_args null_flavor inout_arg_positions;
+          instr_fcallobjmethod fcall_args null_flavor;
         ] )
   | A.Class_const (cid, (_, id)) ->
     let cexpr =
       class_id_to_class_expr ~resolve_self:false (Emit_env.get_scope env) cid
     in
     let method_id = Hhbc_id.Method.from_ast_name id in
-    let method_id =
-      if has_inout_args then
-        Hhbc_id.Method.add_suffix
-          method_id
-          (Emit_inout_helpers.inout_suffix inout_arg_positions)
-      else
-        method_id
-    in
     let method_id_string = Hhbc_id.Method.to_raw_string method_id in
     let cexpr =
       match cexpr with
@@ -3579,8 +3545,7 @@ and emit_call_lhs_and_fcall
               instr_classgetc;
               instr_fcallclsmethod
                 ~is_log_as_dynamic_call:DontLogAsDynamicCall
-                fcall_args
-                [];
+                fcall_args;
             ]
         in
         ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
@@ -3601,7 +3566,7 @@ and emit_call_lhs_and_fcall
               instr_string method_id_string;
               instr_pushl tmp;
               instr_classgetc;
-              instr_fcallclsmethod fcall_args [];
+              instr_fcallclsmethod fcall_args;
             ] )
     end
   | A.Class_get (cid, e) ->
@@ -3636,7 +3601,7 @@ and emit_call_lhs_and_fcall
             [
               instr_pushl tmp;
               emit_known_class_id env cid;
-              instr_fcallclsmethod fcall_args inout_arg_positions;
+              instr_fcallclsmethod fcall_args;
             ] )
       | Class_special clsref ->
         let tmp = Local.get_unnamed_local () in
@@ -3667,7 +3632,7 @@ and emit_call_lhs_and_fcall
               instr_pushl meth;
               instr_pushl cls;
               instr_classgetc;
-              instr_fcallclsmethod fcall_args inout_arg_positions;
+              instr_fcallclsmethod fcall_args;
             ] )
       | Class_reified instrs ->
         let cls = Local.get_unnamed_local () in
@@ -3687,7 +3652,7 @@ and emit_call_lhs_and_fcall
               instr_pushl meth;
               instr_pushl cls;
               instr_classgetc;
-              instr_fcallclsmethod fcall_args inout_arg_positions;
+              instr_fcallclsmethod fcall_args;
             ] )
     end
   | A.Id ((_, s) as id) ->
@@ -3702,14 +3667,6 @@ and emit_call_lhs_and_fcall
       | "max" when num_args = 2 && not flags.has_unpack ->
         Hhbc_id.Function.from_raw_string "__SystemLib\\max2"
       | _ -> fq_id
-    in
-    let fq_id =
-      if has_inout_args then
-        Hhbc_id.Function.add_suffix
-          fq_id
-          (Emit_inout_helpers.inout_suffix inout_arg_positions)
-      else
-        fq_id
     in
     let (generics, fcall_args) = emit_generics fcall_args in
     ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
@@ -3729,7 +3686,7 @@ and emit_call_lhs_and_fcall
           emit_expr env expr;
           instr_popl tmp;
         ],
-      gather [instr_pushl tmp; instr_fcallfunc fcall_args inout_arg_positions]
+      gather [instr_pushl tmp; instr_fcallfunc fcall_args]
     )
 
 and get_call_builtin_func_info lower_fq_id =
@@ -4040,12 +3997,6 @@ and emit_special_function
         end
     end
 
-and get_inout_arg_positions args =
-  List.filter_mapi args ~f:(fun i ->
-    function
-    | (_, A.Callconv (Ast_defs.Pinout, _)) -> Some i
-    | _ -> None)
-
 and emit_call
     env
     pos
@@ -4059,13 +4010,13 @@ and emit_call
   | A.Id (_, s) -> Emit_symbol_refs.add_function s
   | _ -> ());
   let fcall_args = get_fcall_args args uargs async_eager_label in
-  let inout_arg_positions = get_inout_arg_positions args in
-  let num_uninit = List.length inout_arg_positions in
+  let (_flags, _args, num_ret, _inouts, _eager) = fcall_args in
+  let num_uninit = num_ret - 1 in
   let default () =
     Scope.with_unnamed_locals
     @@ fun () ->
     let (instr_lhs, instr_fcall) =
-      emit_call_lhs_and_fcall env expr fcall_args targs inout_arg_positions
+      emit_call_lhs_and_fcall env expr fcall_args targs
     in
     let (instr_args, instr_inout_setters) =
       emit_args_and_inout_setters env args
@@ -4340,9 +4291,6 @@ and emit_lval_op_list
     in
     (lhs, rest)
 
-and expr_starts_with_ref = function
-  | _ -> false
-
 (* Emit code for an l-value operation *)
 and emit_lval_op
     ?(null_coalesce_assignment = false)
@@ -4352,8 +4300,6 @@ and emit_lval_op
     (expr1 : Tast.expr)
     opt_expr2 =
   match (op, expr1, opt_expr2) with
-  | (LValOp.Set, _, Some e) when expr_starts_with_ref e ->
-    failwith "parser should not allow by-ref assignments"
   (* Special case for list destructuring, only on assignment *)
   | (LValOp.Set, (_, A.List l), Some expr2) ->
     let instr_rhs = emit_expr env expr2 in

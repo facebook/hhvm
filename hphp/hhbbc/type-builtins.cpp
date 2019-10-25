@@ -111,7 +111,7 @@ Type native_function_return_type(const php::Func* f) {
 
 Type native_function_out_type(const php::Func* f, uint32_t index) {
   assertx(f->nativeInfo);
-  assertx(f->attrs & AttrTakesInOutParams);
+  assertx(f->hasInOutArgs);
 
   for (auto& p : f->params) {
     if (!p.inout) continue;

@@ -406,22 +406,6 @@ bool FuncChecker::checkImmSLA(PC& pc, PC const /*instr*/) {
   return checkImmVec(pc, sizeof(Id) + sizeof(Offset));
 }
 
-bool FuncChecker::checkImmI32LA(PC& pc, PC const instr) {
-  auto inst_copy = instr;
-  auto const op = decode_op(inst_copy);
-  assertx(isFCall(op));
-  auto const fca = decodeFCallArgs(op, inst_copy);
-  auto const count = decode_iva(pc);
-  for (int i = 0; i < count; ++i) {
-    auto const num = decode_raw<uint32_t>(pc);
-    if (fca.numArgs <= num) {
-      error("invalid argument number (%i) in inout argument vector\n", i);
-      return false;
-    }
-  }
-  return true;
-}
-
 bool FuncChecker::checkImmILA(PC& pc, PC const /*instr*/) {
   auto const ids = iterBreakIds(pc);
   if (ids.size() < 1) {
@@ -993,7 +977,6 @@ std::set<int> localImmediates(Op op) {
 #define BLA(n)
 #define SLA(n)
 #define ILA(n)
-#define I32LA(n)
 #define IVA(n)
 #define I64A(n)
 #define IA(n)
@@ -1022,7 +1005,6 @@ std::set<int> localImmediates(Op op) {
 #undef BLA
 #undef SLA
 #undef ILA
-#undef I32LA
 #undef IVA
 #undef I64A
 #undef IA

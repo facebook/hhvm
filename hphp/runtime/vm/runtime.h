@@ -51,11 +51,11 @@ void raiseWarning(const StringData* sd);
 void raiseNotice(const StringData* sd);
 [[noreturn]] void throwArrayIndexException(int64_t index, bool isInOut);
 [[noreturn]] void throwArrayKeyException(const StringData* key, bool isInOut);
-std::string formatParamRefMismatch(const char* fname, uint32_t index,
+std::string formatParamInOutMismatch(const char* fname, uint32_t index,
                                    bool funcByRef);
-void throwParamRefMismatch(const Func* func, uint32_t index);
-void throwParamRefMismatchRange(const Func* func, unsigned firstBit,
-                                uint64_t mask, uint64_t vals);
+void throwParamInOutMismatch(const Func* func, uint32_t index);
+void throwParamInOutMismatchRange(const Func* func, unsigned firstBit,
+                                  uint64_t mask, uint64_t vals);
 void raiseRxCallViolation(const ActRec* caller, const Func* callee);
 
 inline Iter*

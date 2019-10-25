@@ -1259,12 +1259,12 @@ void raiseClsmethCompatTypeHint(
     gen(env, RaiseNotice, cns(env, makeStaticString(
       folly::sformat("class_meth Compat: Value returned from function {}() "
       "must be of type {}, clsmeth given",
-        func->fullDisplayName(), name))));
+        func->fullName(), name))));
   } else {
     gen(env, RaiseNotice, cns(env, makeStaticString(
       folly::sformat("class_meth Compat: Argument {} passed to {}() "
       "must be of type {}, clsmeth given",
-        id + 1, func->fullDisplayName(), name))));
+        id + 1, func->fullName(), name))));
   }
 }
 
@@ -1276,9 +1276,6 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
   auto const& tc = (id == TypeConstraint::ReturnId)
     ? func->returnTypeConstraint()
     : func->params()[id].typeConstraint;
-  bool isByRefArg = (id == TypeConstraint::ReturnId)
-    ? false
-    : func->byRef(id);
   assertx(ind >= 0);
 
   verifyTypeImpl(
@@ -1320,9 +1317,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       updateMarker(env);
       env.irb->exceptionStackBoundary();
       auto const failHard =
-        hard && RuntimeOption::EvalCheckReturnTypeHints >= 3 &&
-        // we never hard enforce "return" typehints for by-reference arguments
-        !isByRefArg;
+        hard && RuntimeOption::EvalCheckReturnTypeHints >= 3;
       gen(
         env,
         failHard ? VerifyRetFailHard : VerifyRetFail,

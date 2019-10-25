@@ -55,7 +55,7 @@ function main_entry(): void {
   }
 
   // Replace with closure
-  fb_intercept('frap', function () {
+  fb_intercept('frap', function ($_1, $_2, inout $_3, $_4, inout $_5) {
                          echo "Closure! wooooo\n";
                          throw new Exception;
                        });

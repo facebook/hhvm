@@ -557,7 +557,7 @@ void emitCalleeDynamicCallCheck(IRGS& env, SSATmp* callFlags) {
       string_printf(
         str,
         error_msg,
-        func->fullDisplayName()->data()
+        func->fullName()->data()
       );
       auto const msg = cns(env, makeStaticString(str));
 

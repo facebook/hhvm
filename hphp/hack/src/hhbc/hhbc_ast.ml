@@ -62,8 +62,6 @@ type classref_id = int
 (* Conventionally this is "A_" followed by an integer *)
 type adata_id = string
 
-type param_locations = int list
-
 module SpecialClsRef = struct
   type t =
     | Static
@@ -429,14 +427,14 @@ type instruct_call =
   | NewObjS of SpecialClsRef.t
   | FCall of fcall_args
   | FCallBuiltin of num_params * num_params * num_params * string
-  | FCallClsMethod of fcall_args * param_locations * is_log_as_dynamic_call_op
+  | FCallClsMethod of fcall_args * is_log_as_dynamic_call_op
   | FCallClsMethodD of fcall_args * class_id * method_id
   | FCallClsMethodS of fcall_args * SpecialClsRef.t
   | FCallClsMethodSD of fcall_args * SpecialClsRef.t * method_id
   | FCallCtor of fcall_args
-  | FCallFunc of fcall_args * param_locations
+  | FCallFunc of fcall_args
   | FCallFuncD of fcall_args * function_id
-  | FCallObjMethod of fcall_args * obj_null_flavor * param_locations
+  | FCallObjMethod of fcall_args * obj_null_flavor
   | FCallObjMethodD of fcall_args * obj_null_flavor * method_id
 
 type instruct_base =

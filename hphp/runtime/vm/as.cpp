@@ -1361,7 +1361,7 @@ read_fcall_flags(AsmState& as, Op thisOpcode) {
 }
 
 // Read a vector of booleans formatted as a quoted string of '0' and '1'.
-std::unique_ptr<uint8_t[]> read_by_refs(AsmState& as, uint32_t numArgs) {
+std::unique_ptr<uint8_t[]> read_inouts(AsmState& as, uint32_t numArgs) {
   as.in.skipSpaceTab();
   std::string strVal;
   if (!as.in.readQuotedStr(strVal)) {
@@ -1390,11 +1390,11 @@ read_fcall_args(AsmState& as, Op thisOpcode) {
   std::tie(flags, lockWhileUnwinding) = read_fcall_flags(as, thisOpcode);
   auto const numArgs = read_opcode_arg<uint32_t>(as);
   auto const numRets = read_opcode_arg<uint32_t>(as);
-  auto byRefs = read_by_refs(as, numArgs);
+  auto inoutArgs = read_inouts(as, numArgs);
   auto asyncEagerLabel = read_opcode_arg<std::string>(as);
   return std::make_tuple(
     FCallArgsBase(flags, numArgs, numRets, lockWhileUnwinding),
-    std::move(byRefs),
+    std::move(inoutArgs),
     std::move(asyncEagerLabel)
   );
 }
@@ -1480,14 +1480,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
     if (it.kind == KindOfLIter) {                  \
       as.ue->emitIVA(it.local);                    \
     }                                              \
-  }                                                \
-} while (0)
-
-#define IMM_I32LA do {                             \
-  std::vector<uint32_t> vecImm = read_argv32(as);  \
-  as.ue->emitIVA(vecImm.size());                   \
-  for (auto i : vecImm) {                          \
-    as.ue->emitInt32(i);                           \
   }                                                \
 } while (0)
 
@@ -1638,7 +1630,6 @@ OPCODES
 #undef IMM_LA
 #undef IMM_BA
 #undef IMM_ILA
-#undef IMM_I32LA
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_OA
@@ -2326,7 +2317,6 @@ void parse_parameter_list(AsmState& as) {
 
   for (;;) {
     FuncEmitter::ParamInfo param;
-    param.byRef = false;
     param.inout = false;
 
     as.in.skipWhitespace();
@@ -2359,7 +2349,6 @@ void parse_parameter_list(AsmState& as) {
         as.error("functions cannot contain both inout and ref parameters");
       }
       param.inout = true;
-      as.fe->attrs |= AttrTakesInOutParams;
     }
 
     std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
@@ -2367,20 +2356,6 @@ void parse_parameter_list(AsmState& as) {
     as.in.skipWhitespace();
     ch = as.in.getc();
 
-    if (ch == '&') {
-      if (param.variadic) {
-        as.error("ref parameters cannot be variadic");
-      }
-      if (param.inout) {
-        as.error("parameters cannot be marked both inout and ref");
-      }
-      if (as.fe->attrs & AttrTakesInOutParams) {
-        as.error("functions cannot contain both inout and ref parameters");
-      }
-      seenRef = true;
-      param.byRef = true;
-      ch = as.in.getc();
-    }
     if (ch != '$') {
       as.error("function parameters must have a $ prefix");
     }

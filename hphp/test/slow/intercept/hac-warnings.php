@@ -3,7 +3,7 @@
 <<__NEVER_INLINE>>
 function foo() {}
 
-function intercept($n) { var_dump($n); }
+function intercept($n, $_2, inout $_3, $_4, inout $_5) { var_dump($n); }
 
 <<__EntryPoint>>
 function main() {

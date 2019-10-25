@@ -28,7 +28,7 @@ std::vector<Bytecode> samples {
   bc::True {},
   bc::Int { 52 },
   bc::False {},
-  bc::FCallFunc { FCallArgs(2), {} },
+  bc::FCallFunc { FCallArgs(2) },
 };
 
 TEST(Bytecode, EqualityComparable) {

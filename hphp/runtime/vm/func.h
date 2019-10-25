@@ -152,8 +152,6 @@ struct Func final {
     bool variadic{false};
     // Does this use a NativeArg?
     bool nativeArg{false};
-    // Is this an inout parameter?
-    bool inout{false};
     // DV initializer funclet offset.
     Offset funcletOff{InvalidAbsoluteOffset};
     // Set to Uninit if there is no DV, or if there's a nonscalar DV.
@@ -344,19 +342,6 @@ struct Func final {
   StrNR fullNameStr() const;
 
   /*
-   * The function's display name, which is almost always name(), except for some
-   * internal functions. In that case, return the original function's name.
-   */
-  const StringData* displayName() const;
-
-  /*
-   * The function's full display name, which is almost always fullName(), except
-   * for some internal functions. In that case, return the original function's
-   * full name.
-   */
-  const StringData* fullDisplayName() const;
-
-  /*
    * The function's named entity.  Only valid for non-methods.
    *
    * @requires: shared()->m_preClass == nullptr
@@ -534,19 +519,14 @@ struct Func final {
   uint32_t numRequiredParams() const;
 
   /*
-   * Whether the arg-th parameter are taken by reference.
-   */
-  bool byRef(int32_t arg) const;
-
-  /*
-   * Whether any parameters are taken by reference.
-   */
-  bool anyByRef() const;
-
-  /*
    * Whether the function is declared with a `...' parameter.
    */
   bool hasVariadicCaptureParam() const;
+
+  /*
+   * Whether the arg-th parameter was declared inout.
+   */
+  bool isInOut(int32_t arg) const;
 
   /*
    * Whether any of the parameters to this function are inout parameters.
@@ -557,17 +537,6 @@ struct Func final {
    * Returns the number of inout parameters taken by func.
    */
   uint32_t numInOutParams() const;
-
-  /*
-   * When isInOutWrapper() is true--
-   *
-   * If takesInOutParams() this function has inout params and wraps a function
-   * which takes parameters by reference
-   *
-   * If !takesInOutParams() this function has reference parameters and wraps a
-   * function with inout paramaters.
-   */
-  bool isInOutWrapper() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and stack.                                      [const]
@@ -1095,7 +1064,7 @@ struct Func final {
   OFF(maybeIntercepted)
   OFF(paramCounts)
   OFF(prologueTable)
-  OFF(refBitVal)
+  OFF(inoutBitVal)
   OFF(shared)
   OFF(unit)
   OFF(methCallerMethName)
@@ -1113,8 +1082,8 @@ struct Func final {
     return offsetof(SharedData, m_base);
   }
 
-  static constexpr ptrdiff_t sharedRefBitPtrOff() {
-    return offsetof(SharedData, m_refBitPtr);
+  static constexpr ptrdiff_t sharedInOutBitPtrOff() {
+    return offsetof(SharedData, m_inoutBitPtr);
   }
 
 
@@ -1155,8 +1124,8 @@ private:
     int m_line1;
     LowStringPtr m_docComment;
     // Bits 64 and up of the reffiness guards (the first 64 bits are in
-    // Func::m_refBitVal for faster access).
-    uint64_t* m_refBitPtr;
+    // Func::m_inoutBitVal for faster access).
+    uint64_t* m_inoutBitPtr;
     ParamInfoVec m_params;
     NamedLocalsMap m_localNames;
     EHEntVec m_ehtab;
@@ -1429,7 +1398,7 @@ private:
   bool m_serialized : 1;
   bool m_hasForeignThis : 1;
   int m_maxStackCells{0};
-  uint64_t m_refBitVal{0};
+  uint64_t m_inoutBitVal{0};
   Unit* const m_unit;
   AtomicSharedPtr<SharedData> m_shared;
   // Initialized by Func::finishedEmittingParams.  The least significant bit is

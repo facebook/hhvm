@@ -3747,7 +3747,8 @@ bool fcallOptimizeChecks(
   const res::Func& func,
   FCallWithFCA fcallWithFCA
 ) {
-  if (fca.enforceReffiness()) {
+  auto const numOut = env.index.lookup_num_inout_params(env.ctx, func);
+  if (fca.enforceInOut() && numOut == fca.numRets - 1) {
     bool match = true;
     for (auto i = 0; i < fca.numArgs; ++i) {
       auto const kind = env.index.lookup_param_prep(env.ctx, func, i);
@@ -3756,11 +3757,15 @@ bool fcallOptimizeChecks(
         break;
       }
 
-      if (kind != (fca.byRef(i) ? PrepKind::Ref : PrepKind::Val)) {
-        // Reffiness mismatch
+      if (kind != (fca.isInOut(i) ? PrepKind::InOut : PrepKind::Val)) {
+        // The function/method may not exist, in which case we should raise a
+        // different error. Just defer the checks to the runtime.
+        if (!func.exactFunc()) return false;
+
+        // inout mismatch
         auto const exCls = makeStaticString("InvalidArgumentException");
-        auto const err = makeStaticString(formatParamRefMismatch(
-          func.name()->data(), i, !fca.byRef(i)));
+        auto const err = makeStaticString(formatParamInOutMismatch(
+          func.name()->data(), i, !fca.isInOut(i)));
 
         reduce(
           env,
@@ -4085,7 +4090,7 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
   }
 
   auto const updateBC = [&] (FCallArgs fca) {
-    return bc::FCallFunc { std::move(fca), op.argv };
+    return bc::FCallFunc { std::move(fca) };
   };
 
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC)) return;
@@ -4095,8 +4100,6 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
 } // namespace
 
 void in(ISS& env, const bc::FCallFunc& op) {
-  if (op.argv.size() != 0) return fcallFuncUnknown(env, op);
-
   auto const callable = topC(env);
   if (callable.subtypeOf(BFunc)) return fcallFuncFunc(env, op);
   if (callable.subtypeOf(BClsMeth)) return fcallFuncClsMeth(env, op);
@@ -4247,7 +4250,7 @@ void in(ISS& env, const bc::FCallObjMethodD& op) {
 
 void in(ISS& env, const bc::FCallObjMethod& op) {
   auto const methName = getNameFromType(topC(env));
-  if (!methName || op.argv.size() != 0) {
+  if (!methName) {
     popC(env);
     fcallUnknownImpl(env, op.fca);
     return;
@@ -4266,7 +4269,7 @@ void in(ISS& env, const bc::FCallObjMethod& op) {
 
   auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
     if (!clsHint) clsHint = op.str2;
-    return bc::FCallObjMethod { std::move(fca), clsHint, op.subop3, op.argv };
+    return bc::FCallObjMethod { std::move(fca), clsHint, op.subop3 };
   };
   fcallObjMethodImpl(env, op, methName, true, true, updateBC);
 }
@@ -4329,7 +4332,7 @@ void in(ISS& env, const bc::FCallClsMethodD& op) {
 
 void in(ISS& env, const bc::FCallClsMethod& op) {
   auto const methName = getNameFromType(topC(env, 1));
-  if (!methName || op.argv.size() != 0) {
+  if (!methName) {
     popC(env);
     popC(env);
     fcallUnknownImpl(env, op.fca);
@@ -4340,7 +4343,7 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
   auto const skipLogAsDynamicCall =
     !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
-      op.subop4 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
+      op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
       (!rfunc.mightCareAboutDynCalls() || skipLogAsDynamicCall)) {
     auto const clsName = dcls_of(clsTy).cls.name();
@@ -4354,7 +4357,7 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
 
   auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
     if (!clsHint) clsHint = op.str2;
-    return bc::FCallClsMethod { std::move(fca), clsHint, op.argv, op.subop4 };
+    return bc::FCallClsMethod { std::move(fca), clsHint, op.subop3 };
   };
   fcallClsMethodImpl(env, op, clsTy, methName, true, 2, updateBC);
 }
@@ -4431,7 +4434,7 @@ void in(ISS& env, const bc::FCallClsMethodSD& op) {
 
 void in(ISS& env, const bc::FCallClsMethodS& op) {
   auto const methName = getNameFromType(topC(env));
-  if (!methName || op.argv.size() != 0) {
+  if (!methName) {
     popC(env);
     fcallUnknownImpl(env, op.fca);
     return;
@@ -4449,7 +4452,7 @@ void in(ISS& env, const bc::FCallClsMethodS& op) {
 
   auto const updateBC = [&] (FCallArgs fca, SString clsHint = nullptr) {
     if (!clsHint) clsHint = op.str2;
-    return bc::FCallClsMethodS { std::move(fca), clsHint, op.subop3, op.argv };
+    return bc::FCallClsMethodS { std::move(fca), clsHint, op.subop3 };
   };
   fcallClsMethodSImpl(env, op, methName, true, true, updateBC);
 }
@@ -5303,12 +5306,6 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
 }
 
 void in(ISS& env, const bc::VerifyOutType& op) {
-  // We reuse VerifyOutType bytecode for log typehint violations on
-  // byref parameters. Do not perform any optimizations for byref parameters,
-  // as we do not enforce those.
-  if (env.ctx.func->params[op.arg1].byRef) {
-    return;
-  }
   verifyRetImpl(env, env.ctx.func->params[op.arg1].typeConstraint,
                 false, false);
 }

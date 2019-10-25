@@ -158,10 +158,10 @@ bool checkNumArgs(SrcKey callSK,
     return refuse("callee called with too few arguments");
   }
 
-  if (fca.enforceReffiness()) {
+  if (fca.enforceInOut()) {
     for (auto i = 0; i < fca.numArgs; ++i) {
-      if (callee->byRef(i) != fca.byRef(i)) {
-        return refuse("callee called with arguments of mismatched reffiness");
+      if (callee->isInOut(i) != fca.isInOut(i)) {
+        return refuse("callee called with arguments with mismatched inout");
       }
     }
   }

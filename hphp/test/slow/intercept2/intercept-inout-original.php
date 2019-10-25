@@ -1,6 +1,6 @@
 <?hh
 
-function handler($name, $obj, $args) {
+function handler($name, $obj, inout $args) {
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args);
   echo "---------------\n";

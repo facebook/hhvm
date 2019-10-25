@@ -364,7 +364,7 @@ void AutoloadHandler::setAutoloadMapFromFactory(
 
 bool AutoloadHandler::autoloadFunc(StringData* name) {
   return m_map &&
-    loadFromMap(String{stripInOutSuffix(name)},
+    loadFromMap(String{name},
                 AutoloadMap::KindOf::Function,
                 true,
                 FuncExistsChecker(name)) != AutoloadMap::Result::Failure;

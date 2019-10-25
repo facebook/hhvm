@@ -1,4 +1,4 @@
-string(79) "foo() expects parameter 1 by reference, but the call was not annotated with '&'"
+string(82) "foo() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
 array(1) {
   [0]=>
   int(1)
@@ -7,7 +7,7 @@ array(1) {
   [0]=>
   int(1)
 }
-string(79) "foo() expects parameter 1 by reference, but the call was not annotated with '&'"
+string(82) "foo() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
 array(1) {
   [0]=>
   int(1)
@@ -16,7 +16,7 @@ array(1) {
   [0]=>
   int(1)
 }
-string(79) "foo() expects parameter 1 by reference, but the call was not annotated with '&'"
+string(82) "foo() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
 array(1) {
   [0]=>
   int(1)
@@ -25,7 +25,7 @@ array(1) {
   [0]=>
   int(1)
 }
-string(79) "foo() expects parameter 1 by reference, but the call was not annotated with '&'"
+string(82) "foo() expects parameter 1 to be inout, but the call was not annotated with 'inout'"
 array(1) {
   [0]=>
   int(1)

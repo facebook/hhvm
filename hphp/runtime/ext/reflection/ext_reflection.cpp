@@ -765,10 +765,7 @@ static Array get_function_param_info(const Func* func) {
       param.set(s_defaultText, make_tv<KindOfPersistentString>(fpi.phpCode));
     }
 
-    if (func->byRef(i)) {
-      param.set(s_ref, make_tv<KindOfBoolean>(true));
-    }
-    if ((func->isInOutWrapper() && func->byRef(i)) || fpi.inout) {
+    if (func->isInOut(i)) {
       param.set(s_inout, make_tv<KindOfBoolean>(true));
     }
     if (fpi.isVariadic()) {

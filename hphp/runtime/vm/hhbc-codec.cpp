@@ -83,14 +83,14 @@ LocalRange decodeLocalRange(const unsigned char*& pc) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
-                         const uint8_t* byRefs, bool hasAsyncEagerOffset) {
+                         const uint8_t* inoutArgs, bool hasAsyncEagerOffset) {
   auto constexpr kFirstNumArgsBit = FCallArgsBase::kFirstNumArgsBit;
   bool smallNumArgs = ((fca.numArgs + 1) << kFirstNumArgsBit) <= 0xff;
   auto flags = uint8_t{fca.flags};
   assertx(!(flags & ~FCallArgsBase::kInternalFlags));
   if (smallNumArgs) flags |= (fca.numArgs + 1) << kFirstNumArgsBit;
   if (fca.numRets != 1) flags |= FCallArgsBase::HasInOut;
-  if (byRefs != nullptr) flags |= FCallArgsBase::EnforceReffiness;
+  if (inoutArgs != nullptr) flags |= FCallArgsBase::EnforceInOut;
   if (hasAsyncEagerOffset) flags |= FCallArgsBase::HasAsyncEagerOffset;
   if (fca.lockWhileUnwinding) {
     // intentionally re-using the SupportsAsyncEagerReturn bit
@@ -102,9 +102,9 @@ void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
   if (!smallNumArgs) ue.emitIVA(fca.numArgs);
   if (fca.numRets != 1) ue.emitIVA(fca.numRets);
 
-  if (byRefs != nullptr) {
+  if (inoutArgs != nullptr) {
     auto const numBytes = (fca.numArgs + 7) / 8;
-    for (auto i = 0; i < numBytes; ++i) ue.emitByte(byRefs[i]);
+    for (auto i = 0; i < numBytes; ++i) ue.emitByte(inoutArgs[i]);
   }
 }
 
@@ -123,13 +123,13 @@ FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc) {
   auto const numArgs = (flags >> FCallArgs::kFirstNumArgsBit)
     ? (flags >> FCallArgs::kFirstNumArgsBit) - 1 : decode_iva(pc);
   auto const numRets = (flags & FCallArgs::HasInOut) ? decode_iva(pc) : 1;
-  auto const byRefs = (flags & FCallArgs::EnforceReffiness) ? pc : nullptr;
-  if (byRefs != nullptr) pc += (numArgs + 7) / 8;
+  auto const inoutArgs = (flags & FCallArgs::EnforceInOut) ? pc : nullptr;
+  if (inoutArgs != nullptr) pc += (numArgs + 7) / 8;
   auto const asyncEagerOffset = (flags & FCallArgs::HasAsyncEagerOffset)
     ? decode_ba(pc) : kInvalidOffset;
   return FCallArgs(
     static_cast<FCallArgs::Flags>(flags & FCallArgs::kInternalFlags),
-    numArgs, numRets, byRefs, asyncEagerOffset, lockWhileUnwinding
+    numArgs, numRets, inoutArgs, asyncEagerOffset, lockWhileUnwinding
   );
 }
 

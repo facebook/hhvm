@@ -1,11 +1,11 @@
 <?hh
 
 function bar() { return count(func_get_args()); }
-function baz() {}
+function baz($_1, $_2, inout $_3, $_4, inout $_5) {}
 
 function test($f, $x) {
   call_user_func_array($f, array($x));
-  baz();
+  baz(null, null, inout $f, null, inout $x);
 }
 
 <<__EntryPoint>> function main(): void {

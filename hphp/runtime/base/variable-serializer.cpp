@@ -1457,7 +1457,7 @@ void VariableSerializer::serializeRef(tv_rval tv, bool isArrayKey) {
 }
 
 void VariableSerializer::serializeFunc(const Func* func) {
-  auto const name = func->fullDisplayName();
+  auto const name = func->fullName();
   switch (getType()) {
     case Type::VarExport:
     case Type::PHPOutput:

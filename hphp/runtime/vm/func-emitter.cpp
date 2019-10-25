@@ -128,7 +128,7 @@ void FuncEmitter::commit(RepoTxn& txn) const {
 }
 
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
-  bool isGenerated = isdigit(name->data()[0]) || needsStripInOut(name);
+  bool isGenerated = isdigit(name->data()[0]);
 
   auto attrs = fix_attrs(this->attrs);
   if (preClass && preClass->attrs() & AttrInterface) {
@@ -211,7 +211,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       pi.builtinType = RuntimeOption::EvalHackArrDVArrs
         ? KindOfVec : KindOfArray;
     }
-    f->appendParam(params[i].byRef, pi, fParams);
+    f->appendParam(params[i].inout, pi, fParams);
   }
 
   auto const originalFullName =
@@ -301,7 +301,7 @@ String FuncEmitter::nativeFullname() const {
 Native::NativeFunctionInfo FuncEmitter::getNativeInfo() const {
   return Native::getNativeFunction(
       m_ue.m_nativeFuncs,
-      stripInOutSuffix(name),
+      name,
       m_pce ? m_pce->name() : nullptr,
       (attrs & AttrStatic)
     );

@@ -228,7 +228,7 @@ bool eagerRecord(const Func* func) {
   };
 
   for (auto str : list) {
-    if (!strcmp(func->displayName()->data(), str)) return true;
+    if (!strcmp(func->name()->data(), str)) return true;
   }
 
   return false;

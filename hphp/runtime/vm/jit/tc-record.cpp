@@ -217,7 +217,7 @@ static void logFrame(const Vunit& unit, const size_t frame) {
     return esc(e);                                                          \
   }) | folly::gen::as<std::vector>()
 
-  auto fullnames = MAP(f->fullDisplayName()->data());
+  auto fullnames = MAP(f->fullName()->data());
   auto names = MAP(f->name()->data());
   auto impl_classes = MAP(f->implCls() ? f->implCls()->name()->data() : "");
   auto base_classes = MAP(f->baseCls() ? f->baseCls()->name()->data() : "");

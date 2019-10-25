@@ -65,7 +65,7 @@ array(4) {
   [1]=>
   object(ReflectionParameter) (3) {
     ["info"]=>
-    array(12) {
+    array(11) {
       ["index"]=>
       int(1)
       ["name"]=>
@@ -81,8 +81,6 @@ array(4) {
       ["nullable"]=>
       bool(true)
       ["type_hint_nullable"]=>
-      bool(true)
-      ["ref"]=>
       bool(true)
       ["inout"]=>
       bool(true)

@@ -191,11 +191,6 @@ struct Param {
   bool inout: 1;
 
   /*
-   * Whether this parameter is passed by reference.
-   */
-  bool byRef: 1;
-
-  /*
    * Whether this parameter is a variadic capture.
    */
   bool isVariadic: 1;
@@ -388,6 +383,8 @@ struct Func : FuncBase {
   bool isRxDisabled: 1;
 
   bool noContextSensitiveAnalysis: 1;
+
+  bool hasInOutArgs : 1;
 
   /*
    * Return type specified in the source code (ex. "function foo(): Bar").

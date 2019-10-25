@@ -514,8 +514,8 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowMissingThis:
   case ThrowOutOfBounds:
   case ThrowParameterWrongType:
-  case ThrowParamRefMismatch:
-  case ThrowParamRefMismatchRange:
+  case ThrowParamInOutMismatch:
+  case ThrowParamInOutMismatchRange:
   case UnsetElem:
   case UnsetProp:
   case VecSet:
@@ -591,7 +591,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckRange:
   case CheckRDSInitialized:
   case CheckRefInner:
-  case CheckRefs:
+  case CheckInOuts:
   case CheckSmashableClass:
   case CheckStk:
   case CheckSubClsCns:

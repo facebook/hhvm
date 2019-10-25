@@ -178,14 +178,6 @@ bool UnitChecker::checkClosure(const PreClassEmitter* cls){
   if (!cls->hasMethod(s_invoke.get()) ||
       !(cls->lookupMethod(s_invoke.get())->attrs & AttrPublic)) {
     invalidMethods();
-  } else if (cls->methods().size() == 2) {
-    auto invoke = cls->lookupMethod(s_invoke.get());
-    for (auto m : cls->methods()) {
-      if (m != invoke && !(m->attrs & AttrIsInOutWrapper)) {
-        invalidMethods();
-        break;
-      }
-    }
   } else if (cls->methods().size() != 1) {
     invalidMethods();
   }

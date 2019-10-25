@@ -284,7 +284,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     if (TVOFF(m_data) && !pi.nativeArg && isReqPtrRef(pi.builtinType)) {
       assertx(inst->src(srcNum)->type() <= TPtrToGen);
       args.addr(srcLoc(env, inst, srcNum).reg(), TVOFF(m_data));
-    } else if (pi.nativeArg && !pi.builtinType && !callee->byRef(i)) {
+    } else if (pi.nativeArg && !pi.builtinType) {
       // This condition indicates a MixedTV (i.e., TypedValue-by-value) arg.
       args.typedValue(srcNum);
     } else {
@@ -477,11 +477,11 @@ void cgProfileCall(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
+void cgCheckInOuts(IRLS& env, const IRInstruction* inst)  {
   auto const func = srcLoc(env, inst, 0).reg();
   auto const nparams = srcLoc(env, inst, 1).reg();
 
-  auto const extra = inst->extra<CheckRefs>();
+  auto const extra = inst->extra<CheckInOuts>();
   auto const mask64 = extra->mask;
   auto const vals64 = extra->vals;
   assertx(mask64);
@@ -497,12 +497,12 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
     auto cond = CC_NE;
 
     if (extra->firstBit == 0) {
-      bitsOff = Func::refBitValOff();
+      bitsOff = Func::inoutBitValOff();
       bitsPtr = func;
     } else {
       auto const shared = v.makeReg();
       v << load{func[Func::sharedOff()], shared};
-      v << load{shared[Func::sharedRefBitPtrOff()], bitsPtr};
+      v << load{shared[Func::sharedInOutBitPtrOff()], bitsPtr};
       bitsOff -= sizeof(uint64_t);
     }
 

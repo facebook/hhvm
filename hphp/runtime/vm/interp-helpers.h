@@ -32,12 +32,12 @@
 
 namespace HPHP {
 
-inline void callerReffinessChecks(const Func* func, const FCallArgs& fca) {
+inline void callerInOutChecks(const Func* func, const FCallArgs& fca) {
   for (auto i = 0; i < fca.numArgs; ++i) {
-    auto const byRef = func->byRef(i);
-    if (byRef != fca.byRef(i)) {
+    auto const inout = func->isInOut(i);
+    if (inout != fca.isInOut(i)) {
       SystemLib::throwInvalidArgumentExceptionObject(
-        formatParamRefMismatch(func->fullDisplayName()->data(), i, byRef));
+        formatParamInOutMismatch(func->fullName()->data(), i, inout));
     }
   }
 }
@@ -72,13 +72,13 @@ inline bool callerDynamicCallChecks(const Func* func,
     string_printf(
       msg,
       error_msg,
-      func->fullDisplayName()->data()
+      func->fullName()->data()
     );
     throw_invalid_operation_exception(makeStaticString(msg));
   } else {
     raise_notice(
       error_msg,
-      func->fullDisplayName()->data()
+      func->fullName()->data()
     );
     return false;
   }
@@ -116,7 +116,7 @@ inline void calleeDynamicCallChecks(const Func* func, bool dynamicCall,
   if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) {
     raise_notice(
       error_msg,
-      func->fullDisplayName()->data()
+      func->fullName()->data()
     );
   }
 }

@@ -426,7 +426,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     }
 
     // Check for include.
-    String funcname{const_cast<StringData*>(fp->func()->displayName())};
+    String funcname{const_cast<StringData*>(fp->func()->name())};
     if (fp->func()->isClosureBody()) {
       // Strip the file hash from the closure name.
       String fullName{const_cast<StringData*>(fp->func()->baseCls()->name())};
@@ -756,7 +756,7 @@ Array CompactTrace::Key::extract() const {
     auto const f = m_frames[idx].func;
 
     // Check for include.
-    String funcname{const_cast<StringData*>(f->displayName())};
+    String funcname{const_cast<StringData*>(f->name())};
     if (f->isClosureBody()) {
       // Strip the file hash from the closure name.
       String fullName{const_cast<StringData*>(f->baseCls()->name())};

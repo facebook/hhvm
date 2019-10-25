@@ -16,7 +16,7 @@ class B {
 <<__EntryPoint>>
 function main_2078() {
 A::m();
-fb_intercept("A::m", function() {
+fb_intercept("A::m", function($_1, $_2, inout $_3, $_4, inout $_5) {
  echo "new
 ";
  }

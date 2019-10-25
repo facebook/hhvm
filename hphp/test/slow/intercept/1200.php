@@ -6,7 +6,7 @@ class X {
  return self::$g;
  }
 }
-function bar() {
+function bar($_1, $_2, inout $_3, $_4, inout $_5) {
   var_dump('Intercepted');
 }
 function test() {

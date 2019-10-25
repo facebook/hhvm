@@ -49,15 +49,6 @@ inline bool notClassMethodPair(const StringData* name) {
   return strstr(name->data(), "::") == nullptr;
 }
 
-const char kInOutSuffix[] = "$inout";
-inline bool needsStripInOut(const StringData* name) {
-  auto const sz = name->size();
-  return sz > 6 &&
-    !memcmp(name->data() + sz - 6, kInOutSuffix, 6) &&
-    folly::qfind(name->slice().subpiece(0, sz - 6), folly::StringPiece("$")) !=
-      std::string::npos;
-}
-
 /*
  * Normalizes a given class or function name removing the leading '\'.
  * Leaves the name unchanged if more than one '\' is leading.
@@ -78,44 +69,6 @@ inline String normalizeNS(const String& name) {
     return String(name.data() + 1, name.size() - 1, CopyString);
   }
   return name;
-}
-
-inline const StringData* stripInOutSuffix(const StringData* name) {
-  if (UNLIKELY(needsStripInOut(name))) {
-    assertx(name->size() > sizeof(kInOutSuffix));
-    auto const s = name->data();
-    size_t len = name->size() - sizeof(kInOutSuffix);
-    for (; s[len] != '$'; --len) assertx(len != 0);
-    return makeStaticString(folly::StringPiece(name->data(), len));
-  }
-  return name;
-}
-
-inline StringData* stripInOutSuffix(StringData* name) {
-  return const_cast<StringData*>(
-    stripInOutSuffix((const StringData*)name)
-  );
-}
-
-inline String stripInOutSuffix(String& s) {
-  return String(stripInOutSuffix(s.get()));
-}
-
-inline std::string mangleInOutFuncName(const char* name,
-                                       std::vector<uint32_t> params) {
-  return folly::sformat("{}${}$inout", name, folly::join(";", params));
-}
-
-inline std::string mangleInOutFuncName(const std::string& name,
-                                       std::vector<uint32_t> params) {
-  return mangleInOutFuncName(name.data(), std::move(params));
-}
-
-inline String mangleInOutFuncName(const StringData* name,
-                                  std::vector<uint32_t> params) {
-  return String(makeStaticString(
-    mangleInOutFuncName(name->data(), std::move(params))
-  ));
 }
 
 std::string mangleReifiedGenericsName(const ArrayData* tsList);

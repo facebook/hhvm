@@ -995,7 +995,7 @@ struct Index::IndexData {
 
   ISStringToMany<const php::Class>       classes;
   ISStringToMany<const php::Func>        methods;
-  ISStringToOneT<uint64_t>               method_ref_params_by_name;
+  ISStringToOneT<uint64_t>               method_inout_params_by_name;
   ISStringToMany<const php::Func>        funcs;
   ISStringToMany<const php::TypeAlias>   typeAliases;
   ISStringToMany<const php::Class>       enums;
@@ -1924,22 +1924,22 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
 
       if (RuntimeOption::RepoAuthoritative) {
         uint64_t refs = 0, cur = 1;
-        bool anyByRef = false;
+        bool anyInOut = false;
         for (auto& p : m->params) {
-          if (p.byRef) {
+          if (p.inout) {
             refs |= cur;
-            anyByRef = true;
+            anyInOut = true;
           }
           // It doesn't matter that we lose parameters beyond the 64th,
           // for those, we'll conservatively check everything anyway.
           cur <<= 1;
         }
-        if (anyByRef) {
+        if (anyInOut) {
           // Multiple methods with the same name will be combined in the same
           // cell, thus we use |=. This only makes sense in WholeProgram mode
           // since we use this field to check that no functions uses its n-th
           // parameter byref, which requires global knowledge.
-          index.method_ref_params_by_name[m->name] |= refs;
+          index.method_inout_params_by_name[m->name] |= refs;
         }
       }
     }
@@ -3483,7 +3483,15 @@ PrepKind func_param_prep(const php::Func* func,
   if (paramId >= func->params.size()) {
     return PrepKind::Val;
   }
-  return func->params[paramId].byRef ? PrepKind::Ref : PrepKind::Val;
+  return func->params[paramId].inout ? PrepKind::InOut : PrepKind::Val;
+}
+
+folly::Optional<uint32_t> func_num_inout(const php::Func* func) {
+  if (func->attrs & AttrInterceptable) return folly::none;
+  if (!func->hasInOutArgs) return 0;
+  uint32_t count = 0;
+  for (auto& p : func->params) count += p.inout;
+  return count;
 }
 
 template<class PossibleFuncRange>
@@ -3520,9 +3528,9 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
     switch (func_param_prep(FuncFind::get(item), paramId)) {
     case PrepKind::Unknown:
       return PrepKind::Unknown;
-    case PrepKind::Ref:
-      if (prep && *prep != PrepKind::Ref) return PrepKind::Unknown;
-      prep = PrepKind::Ref;
+    case PrepKind::InOut:
+      if (prep && *prep != PrepKind::InOut) return PrepKind::Unknown;
+      prep = PrepKind::InOut;
       break;
     case PrepKind::Val:
       if (prep && *prep != PrepKind::Val) return PrepKind::Unknown;
@@ -3531,6 +3539,45 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
     }
   }
   return *prep;
+}
+
+template<class PossibleFuncRange>
+folly::Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
+
+  /*
+   * In sinlge-unit mode, the range is not complete. Without konwing all
+   * possible resolutions, HHBBC cannot deduce anything about inout args.
+   * So the caller should make sure not calling this in single-unit mode.
+   */
+  assert(RuntimeOption::RepoAuthoritative);
+
+  if (begin(range) == end(range)) {
+    /*
+     * We can assume it's by value, because either we're calling a function
+     * that doesn't exist (about to fatal), or we're going to an __call (which
+     * never takes parameters by reference).
+     *
+     * Or if we've got AllFuncsInterceptable we need to assume someone could
+     * rename a function to the new name.
+     */
+    if (RuntimeOption::EvalJitEnableRenameFunction) return folly::none;
+    return 0;
+  }
+
+  struct FuncFind {
+    using F = const php::Func*;
+    static F get(std::pair<SString,F> p) { return p.second; }
+    static F get(const MethTabEntryPair* mte) { return mte->second.func; }
+  };
+
+  folly::Optional<uint32_t> num;
+  for (auto& item : range) {
+    auto const n = func_num_inout(FuncFind::get(item));
+    if (!n.hasValue()) return folly::none;
+    if (num.hasValue() && n != num) return folly::none;
+    num = n;
+  }
+  return num;
 }
 
 template<typename F> auto
@@ -5326,6 +5373,39 @@ bool Index::lookup_this_available(const php::Func* f) const {
   return !(f->cls->attrs & AttrTrait) && !(f->attrs & AttrStatic);
 }
 
+folly::Optional<uint32_t> Index::lookup_num_inout_params(
+  Context,
+  res::Func rfunc
+) const {
+  return match<folly::Optional<uint32_t>>(
+    rfunc.val,
+    [&] (res::Func::FuncName s) -> folly::Optional<uint32_t> {
+      if (!RuntimeOption::RepoAuthoritative || s.renamable) return folly::none;
+      return num_inout_from_set(find_range(m_data->funcs, s.name));
+    },
+    [&] (res::Func::MethodName s) -> folly::Optional<uint32_t> {
+      if (!RuntimeOption::RepoAuthoritative) return folly::none;
+      auto const it = m_data->method_inout_params_by_name.find(s.name);
+      if (it == end(m_data->method_inout_params_by_name)) {
+        // There was no entry, so no method by this name takes a parameter
+        // by inout.
+        return 0;
+      }
+      return num_inout_from_set(find_range(m_data->methods, s.name));
+    },
+    [&] (FuncInfo* finfo) {
+      return func_num_inout(finfo->func);
+    },
+    [&] (const MethTabEntryPair* mte) {
+      return func_num_inout(mte->second.func);
+    },
+    [&] (FuncFamily* fam) {
+      assert(RuntimeOption::RepoAuthoritative);
+      return num_inout_from_set(fam->possibleFuncs());
+    }
+  );
+}
+
 PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
                                   uint32_t paramId) const {
   return match<PrepKind>(
@@ -5336,14 +5416,14 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
     },
     [&] (res::Func::MethodName s) {
       if (!RuntimeOption::RepoAuthoritative) return PrepKind::Unknown;
-      auto const it = m_data->method_ref_params_by_name.find(s.name);
-      if (it == end(m_data->method_ref_params_by_name)) {
+      auto const it = m_data->method_inout_params_by_name.find(s.name);
+      if (it == end(m_data->method_inout_params_by_name)) {
         // There was no entry, so no method by this name takes a parameter
         // by reference.
         return PrepKind::Val;
       }
       /*
-       * If we think it's supposed to be PrepKind::Ref, we still can't be sure
+       * If we think it's supposed to be PrepKind::InOut, we still can't be sure
        * unless we go through some effort to guarantee that it can't be going
        * to an __call function magically (which will never take anything by
        * ref).
@@ -5356,7 +5436,7 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
         find_range(m_data->methods, s.name),
         paramId
       );
-      return kind == PrepKind::Ref ? PrepKind::Unknown : kind;
+      return kind == PrepKind::InOut ? PrepKind::Unknown : kind;
     },
     [&] (FuncInfo* finfo) {
       return func_param_prep(finfo->func, paramId);
@@ -5745,7 +5825,7 @@ void Index::init_return_type(const php::Func* func) {
   auto tcT = make_type(func->retTypeConstraint);
   if (tcT == TBottom) return;
 
-  if (func->attrs & AttrTakesInOutParams) {
+  if (func->hasInOutArgs) {
     std::vector<Type> types;
     types.emplace_back(intersection_of(TInitCell, std::move(tcT)));
     for (auto& p : func->params) {
@@ -6198,7 +6278,7 @@ void Index::cleanup_post_emit() {
   #define CLEAR_PARALLEL(x) clearers.push_back([&] CLEAR(x));
   CLEAR_PARALLEL(m_data->classes);
   CLEAR_PARALLEL(m_data->methods);
-  CLEAR_PARALLEL(m_data->method_ref_params_by_name);
+  CLEAR_PARALLEL(m_data->method_inout_params_by_name);
   CLEAR_PARALLEL(m_data->funcs);
   CLEAR_PARALLEL(m_data->typeAliases);
   CLEAR_PARALLEL(m_data->enums);

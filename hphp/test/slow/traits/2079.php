@@ -17,7 +17,7 @@ class B {
 function main_2079() {
 T::m();
 A::m();
-fb_intercept("T::m", function() {
+fb_intercept("T::m", function($_1, $_2, inout $_3, $_4, inout $_5) {
  echo "new
 ";
  }

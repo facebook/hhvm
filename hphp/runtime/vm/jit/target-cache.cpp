@@ -95,7 +95,7 @@ const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
   }
   auto const pair = keyToPair(thiz, sd);
   if (stringMatches(pair->m_key, sd)) {
-    assertx(stringMatches(pair->m_key, pair->m_value->displayName()));
+    assertx(stringMatches(pair->m_key, pair->m_value->name()));
     pair->m_value->validate();
     return pair->m_value;
   }
@@ -110,7 +110,7 @@ const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
   assertx(!func->implCls());
   func->validate();
   // use a static name
-  pair->m_key = const_cast<StringData*>(func->displayName());
+  pair->m_key = const_cast<StringData*>(func->name());
   pair->m_value = func;
   return func;
 }

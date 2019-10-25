@@ -182,9 +182,9 @@ FCallArgs decodeFCallArgs(Op, PC&);
 
 template<typename T>
 void encodeFCallArgs(UnitEmitter& ue, const FCallArgsBase& fca,
-                     const uint8_t* byRefs, bool hasAsyncEagerOffset,
+                     const uint8_t* inoutArgs, bool hasAsyncEagerOffset,
                      T emitAsyncEagerOffset) {
-  encodeFCallArgsBase(ue, fca, byRefs, hasAsyncEagerOffset);
+  encodeFCallArgsBase(ue, fca, inoutArgs, hasAsyncEagerOffset);
   if (hasAsyncEagerOffset) emitAsyncEagerOffset();
 }
 

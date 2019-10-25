@@ -9,7 +9,7 @@ function foo() {
   var_dump(__METHOD__);
 }
 
-function bar() {
+function bar($_1, $_2, inout $_3, $_4, inout $_5) {
   var_dump(__METHOD__);
 }
 

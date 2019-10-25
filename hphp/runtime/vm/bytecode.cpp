@@ -737,7 +737,7 @@ static std::string toStringElm(const TypedValue* tv) {
       continue;
     case KindOfFunc:
       os << ":Func("
-         << tv->m_data.pfunc->fullDisplayName()->data()
+         << tv->m_data.pfunc->fullName()->data()
          << ")";
       continue;
     case KindOfClass:
@@ -749,7 +749,7 @@ static std::string toStringElm(const TypedValue* tv) {
       os << ":ClsMeth("
        << tv->m_data.pclsmeth->getCls()->name()->data()
        << ", "
-       << tv->m_data.pclsmeth->getFunc()->fullDisplayName()->data()
+       << tv->m_data.pclsmeth->getFunc()->fullName()->data()
        << ")";
        continue;
 
@@ -1048,7 +1048,7 @@ static void shuffleExtraStackArgs(ActRec* ar) {
 // The stack contains numArgs arguments plus an extra cell containing
 // arguments to unpack.
 uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
-                           bool checkRefAnnot) {
+                           bool checkRefAnnot, ActRec* ar) {
   auto& stack = vmStack();
   auto unpackArgs = popUnpackArgs();
   SCOPE_EXIT { tvDecRefGen(unpackArgs); };
@@ -1075,17 +1075,12 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   ArrayIter iter(unpackArgs);
   if (LIKELY(numArgs < numParams)) {
     for (auto i = numArgs; iter && (i < numParams); ++i, ++iter) {
-      auto const from = iter.secondValPlus();
-      if (LIKELY(!func->byRef(i))) {
-        cellDup(tvToCell(from), *stack.allocTV());
-      } else if (LIKELY(isRefType(from.m_type) &&
-                        from.m_data.pref->hasMultipleRefs())) {
-        if (checkRefAnnot) throwParamRefMismatch(func, i);
-        refDup(from, *stack.allocTV());
-      } else {
-        if (checkRefAnnot) throwParamRefMismatch(func, i);
-        cellDup(tvToCell(from), *stack.allocTV());
+      if (UNLIKELY(checkRefAnnot && func->isInOut(i))) {
+        if (ar) ar->setNumArgs(i);
+        throwParamInOutMismatch(func, i);
       }
+      auto const from = iter.secondValPlus();
+      cellDup(tvToCell(from), *stack.allocTV());
     }
 
     if (LIKELY(!iter)) {
@@ -3940,7 +3935,6 @@ OPTBLD_INLINE void iopAKExists() {
 OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
   DEBUG_ONLY auto const func = vmfp()->m_func;
   assertx(func->isMemoizeWrapper());
-  assertx(!func->anyByRef());
 
   assertx(tvIsPlausible(*loc.ptr));
 
@@ -4244,7 +4238,7 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
 
     if (hasUnpack) {
       checkStack(vmStack(), ar->func(), 0);
-      numArgs = prepareUnpackArgs(ar->func(), numArgs, true /*checkRefAnnot*/);
+      numArgs = prepareUnpackArgs(ar->func(), numArgs, true, ar);
       ar->setNumArgs(numArgs);
     }
 
@@ -4260,7 +4254,12 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
       while (vmStack().top() != (void*)ar) {
         vmStack().popTV();
       }
-      auto const numInOutParams = ar->func()->numInOutParams();
+      auto const numInOutParams = [&] () -> uint32_t {
+        if (!ar->func()->takesInOutParams()) return 0;
+        uint32_t i = 0;
+        for (int p = 0; p < ar->numArgs(); ++p) i += ar->func()->isInOut(p);
+        return i;
+      }();
       vmStack().popAR();
       vmStack().ndiscard(numInOutParams);
     }
@@ -4278,7 +4277,7 @@ namespace {
 template<bool dynamic, class InitActRec>
 void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
                InitActRec initActRec, bool logAsDynamicCall = true) {
-  if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
+  if (fca.enforceInOut()) callerInOutChecks(func, fca);
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   callerRxChecks(vmfp(), func);
   checkStack(vmStack(), func, 0);
@@ -4317,7 +4316,7 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   }
 
   // Enforce reffiness before reshuffling.
-  if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
+  if (fca.enforceInOut()) callerInOutChecks(func, fca);
 
   // Magic methods don't support reified generics.
   assertx(!func->hasReifiedGenerics());
@@ -4334,36 +4333,16 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   fcallImpl<dynamic>(origpc, pc, fca2, func, initActRec, logAsDynamicCall);
 }
 
-ALWAYS_INLINE std::string concat_arg_list(imm_array<uint32_t> args) {
-  auto const n = args.size;
-  assertx(n != 0);
-  std::string ret;
-  folly::toAppend(args[0], &ret);
-  for (int i = 1; i != n; ++i) folly::toAppend(";", args[i], &ret);
-  return ret;
-}
-
-ALWAYS_INLINE StringData* mangleInOutName(const StringData* name,
-                                          imm_array<uint32_t> args) {
-  return StringData::Make(
-    name, folly::sformat("${}$inout", concat_arg_list(args)));
-}
-
 const StaticString s___invoke("__invoke");
 
 // This covers both closures and functors.
-OPTBLD_INLINE void fcallFuncObj(PC origpc, PC& pc, const FCallArgs& fca,
-                                imm_array<uint32_t> args) {
+OPTBLD_INLINE void fcallFuncObj(PC origpc, PC& pc, const FCallArgs& fca) {
   assertx(tvIsObject(vmStack().topC()));
   auto obj = Object::attach(vmStack().topC()->m_data.pobj);
   vmStack().discard();
 
   auto const cls = obj->getVMClass();
-  auto const func = LIKELY(!args.size)
-    ? cls->lookupMethod(s___invoke.get())
-    : cls->lookupMethod(makeStaticString(
-        folly::sformat("__invoke${}$inout", concat_arg_list(args))
-      ));
+  auto const func = cls->lookupMethod(s___invoke.get());
 
   if (func == nullptr) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
@@ -4391,27 +4370,10 @@ OPTBLD_INLINE void fcallFuncObj(PC origpc, PC& pc, const FCallArgs& fca,
  *   array(Class*, Func*),
  *   array(ObjectData*, Func*),
  */
-OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca,
-                                imm_array<uint32_t> args) {
+OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca) {
   assertx(tvIsArrayLike(vmStack().topC()));
   auto arr = Array::attach(vmStack().topC()->m_data.parr);
   vmStack().discard();
-
-  // Handle inout name mangling
-  if (UNLIKELY(args.size) && arr->size() == 2) {
-    auto const methName = [&]() -> const StringData* {
-      auto const meth = arr->at(int64_t{1});
-      if (tvIsString(meth)) return meth.m_data.pstr;
-      if (tvIsFunc(meth)) return meth.m_data.pfunc->fullDisplayName();
-      return nullptr;
-    }();
-    if (methName) {
-      VArrayInit ai{2};
-      ai.append(arr->at(int64_t{0}));
-      ai.append(Variant::attach(mangleInOutName(methName, args)));
-      arr = ai.toArray();
-    }
-  }
 
   ObjectData* thiz = nullptr;
   HPHP::Class* cls = nullptr;
@@ -4446,16 +4408,10 @@ OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca,
  *   'func_name'
  *   'class::method'
  */
-OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca,
-                                imm_array<uint32_t> args) {
+OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca) {
   assertx(tvIsString(vmStack().topC()));
   auto str = String::attach(vmStack().topC()->m_data.pstr);
   vmStack().discard();
-
-  // Handle inout name mangling
-  if (UNLIKELY(args.size)) {
-    str = String::attach(mangleInOutName(str.get(), args));
-  }
 
   ObjectData* thiz = nullptr;
   HPHP::Class* cls = nullptr;
@@ -4467,8 +4423,7 @@ OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca,
                                        DecodeFlags::NoWarn);
   assertx(dynamic);
   if (UNLIKELY(func == nullptr)) {
-    raise_call_to_undefined(
-      args.size ? stripInOutSuffix(str.get()) : str.get());
+    raise_call_to_undefined(str.get());
   }
 
   fcallImpl<true>(origpc, pc, fca, func, String::attach(invName),
@@ -4486,8 +4441,7 @@ OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca,
   });
 }
 
-OPTBLD_INLINE void fcallFuncFunc(PC origpc, PC& pc, const FCallArgs& fca,
-                                 imm_array<uint32_t> args) {
+OPTBLD_INLINE void fcallFuncFunc(PC origpc, PC& pc, const FCallArgs& fca) {
   assertx(tvIsFunc(vmStack().topC()));
   auto func = vmStack().topC()->m_data.pfunc;
   vmStack().discard();
@@ -4496,27 +4450,12 @@ OPTBLD_INLINE void fcallFuncFunc(PC origpc, PC& pc, const FCallArgs& fca,
     raise_error(Strings::CALL_ILLFORMED_FUNC);
   }
 
-  // Handle inout name mangling
-  if (UNLIKELY(args.size)) {
-    auto const funcName = func->fullDisplayName();
-    auto const v = Variant::attach(mangleInOutName(funcName, args));
-    ObjectData* thiz = nullptr;
-    Class* cls = nullptr;
-    StringData* invName = nullptr;
-    bool dynamic = false;
-    func = vm_decode_function(v, vmfp(), thiz, cls, invName, dynamic,
-                              DecodeFlags::NoWarn);
-    if (func == nullptr) raise_call_to_undefined(funcName);
-    assertx(!thiz && !cls && !invName);
-  }
-
   fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
     ar->trashThis();
   });
 }
 
-OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca,
-                                    imm_array<uint32_t> args) {
+OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
   assertx(tvIsClsMeth(vmStack().topC()));
   auto const clsMeth = vmStack().topC()->m_data.pclsmeth;
   vmStack().discard();
@@ -4524,20 +4463,6 @@ OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca,
   const Func* func = clsMeth->getFunc();
   auto const cls = clsMeth->getCls();
   assertx(func && cls);
-
-  // Handle inout name mangling
-  if (UNLIKELY(args.size)) {
-    auto const funcName = func->fullDisplayName();
-    auto const v = Variant::attach(mangleInOutName(funcName, args));
-    ObjectData* thiz = nullptr;
-    Class* cls2 = nullptr;
-    StringData* invName = nullptr;
-    bool dynamic = false;
-    func = vm_decode_function(v, vmfp(), thiz, cls2, invName, dynamic,
-                              DecodeFlags::NoWarn);
-    if (func == nullptr) raise_call_to_undefined(funcName);
-    assertx(!thiz && cls == cls2 && !invName);
-  }
 
   fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
     ar->setClass(cls);
@@ -4554,14 +4479,13 @@ OPTBLD_INLINE void iopResolveFunc(Id id) {
   vmStack().pushFunc(func);
 }
 
-OPTBLD_INLINE void iopFCallFunc(PC origpc, PC& pc, FCallArgs fca,
-                                imm_array<uint32_t> args) {
+OPTBLD_INLINE void iopFCallFunc(PC origpc, PC& pc, FCallArgs fca) {
   auto const type = vmStack().topC()->m_type;
-  if (isObjectType(type)) return fcallFuncObj(origpc, pc, fca, args);
-  if (isArrayLikeType(type)) return fcallFuncArr(origpc, pc, fca, args);
-  if (isStringType(type)) return fcallFuncStr(origpc, pc, fca, args);
-  if (isFuncType(type)) return fcallFuncFunc(origpc, pc, fca, args);
-  if (isClsMethType(type)) return fcallFuncClsMeth(origpc, pc, fca, args);
+  if (isObjectType(type)) return fcallFuncObj(origpc, pc, fca);
+  if (isArrayLikeType(type)) return fcallFuncArr(origpc, pc, fca);
+  if (isStringType(type)) return fcallFuncStr(origpc, pc, fca);
+  if (isFuncType(type)) return fcallFuncFunc(origpc, pc, fca);
+  if (isClsMethType(type)) return fcallFuncClsMeth(origpc, pc, fca);
 
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
@@ -4667,7 +4591,7 @@ fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
 
 OPTBLD_INLINE void
 iopFCallObjMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                  ObjMethodOp op, imm_array<uint32_t> args) {
+                  ObjMethodOp op) {
   Cell* c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
@@ -4675,11 +4599,6 @@ iopFCallObjMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
 
   StringData* methName = c1->m_data.pstr;
   if (fcallObjMethodHandleInput(fca, op, methName, true)) return;
-
-  if (UNLIKELY(args.size)) {
-    String s = String::attach(methName);
-    methName = mangleInOutName(methName, args);
-  }
 
   // We handle decReffing method name in fcallObjMethodImpl
   vmStack().discard();
@@ -4864,7 +4783,7 @@ Class* specialClsRefToCls(SpecialClsRef ref) {
 
 OPTBLD_INLINE void
 iopFCallClsMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                  imm_array<uint32_t> args, IsLogAsDynamicCallOp op) {
+                  IsLogAsDynamicCallOp op) {
   auto const c1 = vmStack().topC();
   if (!isClassType(c1->m_type)) {
     raise_error("Attempting to use non-class in FCallClsMethod");
@@ -4876,11 +4795,6 @@ iopFCallClsMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   auto methName = c2->m_data.pstr;
-
-  if (UNLIKELY(args.size)) {
-    String s = String::attach(methName);
-    methName = mangleInOutName(methName, args);
-  }
 
   // fcallClsMethodImpl will take care of decReffing method name
   vmStack().ndiscard(2);
@@ -4907,18 +4821,13 @@ iopFCallClsMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
 
 OPTBLD_INLINE void
 iopFCallClsMethodS(PC origpc, PC& pc, FCallArgs fca, const StringData*,
-                   SpecialClsRef ref, imm_array<uint32_t> args) {
+                   SpecialClsRef ref) {
   auto const c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   auto const cls = specialClsRefToCls(ref);
   auto methName = c1->m_data.pstr;
-
-  if (UNLIKELY(args.size)) {
-    String s = String::attach(methName);
-    methName = mangleInOutName(methName, args);
-  }
 
   // fcallClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(1);
@@ -5079,7 +4988,7 @@ void iopFCallBuiltin(
 
   if (func->numInOutParams() != numOut) {
     raise_error("Call to function %s() with incorrectly annotated inout "
-                "parameter", func->fullDisplayName()->data());
+                "parameter", func->fullName()->data());
   }
 
   callerRxChecks(vmfp(), func);
@@ -6432,7 +6341,6 @@ struct litstr_id {
 #define DECODE_BLA decode_imm_array<Offset>(pc)
 #define DECODE_SLA decode_imm_array<StrVecItem>(pc)
 #define DECODE_ILA decode_iter_table(pc)
-#define DECODE_I32LA decode_imm_array<uint32_t>(pc)
 #define DECODE_VSA decode_imm_array<Id>(pc)
 
 #define DECODE_NA
@@ -6484,7 +6392,6 @@ OPCODES
 #undef DECODE_BLA
 #undef DECODE_SLA
 #undef DECODE_ILA
-#undef DECODE_I32LA
 #undef DECODE_VSA
 
 #undef DECODE_NA

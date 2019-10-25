@@ -2,25 +2,21 @@ array(1) {
   [0]=>
   object(ReflectionParameter) (3) {
     ["info"]=>
-    array(12) {
+    array(10) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(1) "a"
       ["type"]=>
-      string(0) ""
+      string(7) "HH\bool"
       ["type_hint"]=>
       string(7) "HH\bool"
       ["type_hint_builtin"]=>
-      bool(false)
+      bool(true)
       ["function"]=>
       string(1) "f"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
-      bool(true)
-      ["ref"]=>
-      bool(true)
+      bool(false)
       ["inout"]=>
       bool(true)
       ["attributes"]=>
@@ -36,9 +32,9 @@ array(1) {
       ["name"]=>
       string(7) "HH\bool"
       ["nullable"]=>
-      bool(true)
-      ["builtin"]=>
       bool(false)
+      ["builtin"]=>
+      bool(true)
     }
   }
 }
@@ -46,25 +42,21 @@ array(2) {
   [0]=>
   object(ReflectionParameter) (3) {
     ["info"]=>
-    array(12) {
+    array(10) {
       ["index"]=>
       int(0)
       ["name"]=>
       string(1) "a"
       ["type"]=>
-      string(0) ""
+      string(7) "HH\bool"
       ["type_hint"]=>
       string(7) "HH\bool"
       ["type_hint_builtin"]=>
-      bool(false)
+      bool(true)
       ["function"]=>
       string(1) "g"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
-      bool(true)
-      ["ref"]=>
-      bool(true)
+      bool(false)
       ["inout"]=>
       bool(true)
       ["attributes"]=>
@@ -80,31 +72,29 @@ array(2) {
       ["name"]=>
       string(7) "HH\bool"
       ["nullable"]=>
-      bool(true)
-      ["builtin"]=>
       bool(false)
+      ["builtin"]=>
+      bool(true)
     }
   }
   [1]=>
   object(ReflectionParameter) (3) {
     ["info"]=>
-    array(10) {
+    array(9) {
       ["index"]=>
       int(1)
       ["name"]=>
       string(9) "not_inout"
       ["type"]=>
-      string(0) ""
+      string(7) "HH\bool"
       ["type_hint"]=>
       string(7) "HH\bool"
       ["type_hint_builtin"]=>
-      bool(false)
+      bool(true)
       ["function"]=>
       string(1) "g"
-      ["nullable"]=>
-      bool(true)
       ["type_hint_nullable"]=>
-      bool(true)
+      bool(false)
       ["attributes"]=>
       array(0) {
       }
@@ -118,9 +108,9 @@ array(2) {
       ["name"]=>
       string(7) "HH\bool"
       ["nullable"]=>
-      bool(true)
-      ["builtin"]=>
       bool(false)
+      ["builtin"]=>
+      bool(true)
     }
   }
 }

@@ -84,8 +84,6 @@ type state = {
   hoisted_functions: fun_ list;
   (* Hoisted meth_caller functions *)
   named_hoisted_functions: fun_ SMap.t;
-  (* Functions with inout_wrappers *)
-  inout_wrappers: fun_ list;
   (* The current namespace environment *)
   namespace: Namespace_env.env;
   (* Empty namespace as constructed by parser *)
@@ -154,7 +152,6 @@ let initial_state empty_namespace =
     hoisted_classes = [];
     hoisted_functions = [];
     named_hoisted_functions = SMap.empty;
-    inout_wrappers = [];
     namespace = empty_namespace;
     explicit_use_set = SSet.empty;
     closure_namespaces = SMap.empty;

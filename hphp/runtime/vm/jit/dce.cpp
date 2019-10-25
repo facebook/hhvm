@@ -403,7 +403,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckInit:
   case CheckInitMem:
   case CheckCold:
-  case CheckRefs:
+  case CheckInOuts:
   case EndGuards:
   case CheckNonNull:
   case DivDbl:
@@ -732,8 +732,8 @@ bool canDCE(IRInstruction* inst) {
   case ThrowMissingArg:
   case ThrowMissingThis:
   case ThrowParameterWrongType:
-  case ThrowParamRefMismatch:
-  case ThrowParamRefMismatchRange:
+  case ThrowParamInOutMismatch:
+  case ThrowParamInOutMismatchRange:
   case StMBase:
   case StMIPropState:
   case FinishMemberOp:

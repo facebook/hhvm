@@ -17,7 +17,6 @@ type t = {
   function_is_pair_generator: bool;
   function_hoisted: Closure_convert.hoist_kind;
   function_no_injection: bool;
-  function_inout_wrapper: bool;
   function_is_interceptable: bool;
   function_is_memoize_impl: bool;
   function_rx_level: Rx.t;
@@ -34,7 +33,6 @@ let make
     function_is_pair_generator
     function_hoisted
     function_no_injection
-    function_inout_wrapper
     function_is_interceptable
     function_is_memoize_impl
     function_rx_level
@@ -49,7 +47,6 @@ let make
     function_is_pair_generator;
     function_hoisted;
     function_no_injection;
-    function_inout_wrapper;
     function_is_interceptable;
     function_is_memoize_impl;
     function_rx_level;
@@ -76,8 +73,6 @@ let is_top f =
   | Closure_convert.Hoisted -> false
 
 let no_injection f = f.function_no_injection
-
-let inout_wrapper f = f.function_inout_wrapper
 
 let is_interceptable f = f.function_is_interceptable
 

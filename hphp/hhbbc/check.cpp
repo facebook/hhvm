@@ -169,7 +169,7 @@ bool check(const php::Class& c) {
     assert(c.methods.size() == 1 || c.methods.size() == 2);
     assert(c.methods[0]->name->isame(s_invoke.get()));
     assert(c.methods[0]->isClosureBody);
-    assert(c.methods.size() == 1 || (c.methods[1]->attrs & AttrIsInOutWrapper));
+    assert(c.methods.size() == 1);
   } else {
     assert(!c.closureContextCls);
   }

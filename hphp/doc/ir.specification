@@ -279,7 +279,7 @@ loaded, using a separate CheckRefInner instruction.
   a fixed threshold). If it's not (i.e. such translation has reached the
   "hotness threshold"), then branch to block B.
 
-| CheckRefs<firstBit,mask,vals>, ND, S(Func) S(Int), B
+| CheckInOuts<firstBit,mask,vals>, ND, S(Func) S(Int), B
 
   Perform reffiness guard checks. Operands:
 
@@ -2278,17 +2278,17 @@ To string conversions:
 
   Raises a Hack array compat notice with the text in S0 as its message.
 
-| ThrowParamRefMismatch<paramIndex>, ND, S(Func), T
+| ThrowParamInOutMismatch<paramIndex>, ND, S(Func), T
 
   Throw an exception indicating that the reffiness of a parameter was
   incorrectly annotated at the callsite.
 
-| ThrowParamRefMismatchRange<firstBit,mask,vals>, ND, S(Func), T
+| ThrowParamInOutMismatchRange<firstBit,mask,vals>, ND, S(Func), T
 
   Throw an exception indicating that the reffiness of at least one parameter
   within a given range was incorrectly annotated at the callsite.
 
-  See CheckRefs for meaning of firstBit, mask and vals.
+  See CheckInOuts for meaning of firstBit, mask and vals.
 
 | RaiseForbiddenDynCall, ND, S(Func), NF
 

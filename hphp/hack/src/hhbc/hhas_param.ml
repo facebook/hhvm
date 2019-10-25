@@ -59,15 +59,3 @@ let without_type p =
   | None -> p
 
 let with_name name p = { p with param_name = name }
-
-let switch_inout_to_reference p =
-  if p.param_is_inout then
-    { p with param_is_inout = false; param_is_reference = true }
-  else
-    p
-
-let switch_reference_to_inout p =
-  if p.param_is_reference then
-    { p with param_is_inout = true; param_is_reference = false }
-  else
-    p

@@ -13,8 +13,8 @@ getName: string(2) "ar"
 isPassedByReference: bool(false)
 getClass: NULL
 getDeclaringClass: NULL
-isArray: bool(false)
-allowsNull: bool(true)
+isArray: bool(true)
+allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===2===
@@ -29,28 +29,28 @@ isDefaultValueAvailable: bool(false)
 ===3===
 getName: string(3) "std"
 isPassedByReference: bool(false)
-getClass: NULL
+getClass: stdClass
 getDeclaringClass: NULL
 isArray: bool(false)
-allowsNull: bool(true)
+allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===4===
 getName: string(2) "na"
 isPassedByReference: bool(false)
-getClass: NULL
+Class NonExistingClass does not exist
 getDeclaringClass: NULL
 isArray: bool(false)
-allowsNull: bool(true)
+allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===5===
 getName: string(3) "opt"
 isPassedByReference: bool(true)
-getClass: NULL
+getClass: stdClass
 getDeclaringClass: NULL
 isArray: bool(false)
-allowsNull: bool(true)
+allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===6===

@@ -1,6 +1,6 @@
 <?hh
 
-function handler($name, $obj, $args) {
+function handler($name, $obj, inout $args) {
   return shape('prepend_this' => true,
                'callback' =>
     ($_this, $arg) ==> { var_dump("In callback!", $_this, $arg); });

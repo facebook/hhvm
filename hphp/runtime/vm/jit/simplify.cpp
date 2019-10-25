@@ -2686,17 +2686,17 @@ SSATmp* simplifyCheckNonNull(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyCheckRefs(State& env, const IRInstruction* inst) {
+SSATmp* simplifyCheckInOuts(State& env, const IRInstruction* inst) {
   if (!inst->src(0)->hasConstVal()) return nullptr;
 
   auto const func = inst->src(0)->funcVal();
-  auto const extra = inst->extra<CheckRefs>();
+  auto const extra = inst->extra<CheckInOuts>();
   auto i = extra->firstBit;
   auto m = extra->mask;
   auto v = extra->vals;
   while (m) {
     if (m & 1) {
-      if (func->byRef(i) != (v & 1)) {
+      if (func->isInOut(i) != (v & 1)) {
         // This shouldn't happen - the mask/value are predictions
         // based on previously seen Funcs; but we're now claiming its
         // always this Func. But unreachable code mumble mumble.
@@ -3794,7 +3794,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(MarkRDSInitialized)
   X(CheckLoc)
   X(CheckMBase)
-  X(CheckRefs)
+  X(CheckInOuts)
   X(CheckRefInner)
   X(CheckStk)
   X(CheckType)

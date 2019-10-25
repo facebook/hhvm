@@ -64,12 +64,12 @@ let default_fcall_flags =
 let make_fcall_args
     ?(flags = default_fcall_flags)
     ?(num_rets = 1)
-    ?(by_refs = [])
+    ?(inouts = [])
     ?async_eager_label
     num_args =
-  if by_refs <> [] && List.length by_refs <> num_args then
-    failwith "length of by_refs must be either zero or num_args";
-  (flags, num_args, num_rets, by_refs, async_eager_label)
+  if inouts <> [] && List.length inouts <> num_args then
+    failwith "length of inouts must be either zero or num_args";
+  (flags, num_args, num_rets, inouts, async_eager_label)
 
 let instr_lit_const l = instr (ILitConst l)
 
@@ -315,8 +315,8 @@ let instr_dim_warn_pt key = instr_dim MemberOpMode.Warn (MemberKey.PT key)
 let instr_dim_define_pt key = instr_dim MemberOpMode.Define (MemberKey.PT key)
 
 let instr_fcallclsmethod
-    ?(is_log_as_dynamic_call = LogAsDynamicCall) fcall_args pl =
-  instr (ICall (FCallClsMethod (fcall_args, pl, is_log_as_dynamic_call)))
+    ?(is_log_as_dynamic_call = LogAsDynamicCall) fcall_args =
+  instr (ICall (FCallClsMethod (fcall_args, is_log_as_dynamic_call)))
 
 let instr_fcallclsmethodd fcall_args method_name class_name =
   instr (ICall (FCallClsMethodD (fcall_args, class_name, method_name)))
@@ -329,14 +329,14 @@ let instr_fcallclsmethodsd fcall_args scref method_name =
 
 let instr_fcallctor fcall_args = instr (ICall (FCallCtor fcall_args))
 
-let instr_fcallfunc fcall_args param_locs =
-  instr (ICall (FCallFunc (fcall_args, param_locs)))
+let instr_fcallfunc fcall_args =
+  instr (ICall (FCallFunc (fcall_args)))
 
 let instr_fcallfuncd fcall_args id =
   instr (ICall (FCallFuncD (fcall_args, id)))
 
-let instr_fcallobjmethod fcall_args flavor pl =
-  instr (ICall (FCallObjMethod (fcall_args, flavor, pl)))
+let instr_fcallobjmethod fcall_args flavor =
+  instr (ICall (FCallObjMethod (fcall_args, flavor)))
 
 let instr_fcallobjmethodd fcall_args method_ flavor =
   instr (ICall (FCallObjMethodD (fcall_args, flavor, method_)))

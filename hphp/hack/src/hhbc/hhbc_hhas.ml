@@ -343,13 +343,13 @@ let string_of_list_of_bools l =
   "\"" ^ String.concat ~sep:"" (List.map ~f:bool_to_str l) ^ "\""
 
 let string_of_fcall_args fcall_args =
-  let (flags, num_args, num_rets, by_refs, async_eager_label) = fcall_args in
+  let (flags, num_args, num_rets, inouts, async_eager_label) = fcall_args in
   sep
     [
       string_of_fcall_flags flags;
       string_of_int num_args;
       string_of_int num_rets;
-      string_of_list_of_bools by_refs;
+      string_of_list_of_bools inouts;
       string_of_optional_label async_eager_label;
     ]
 
@@ -476,12 +476,6 @@ let string_of_final instruction =
 | SetOpM of num_params  * eq_op * MemberKey.t
 *)
 
-let string_of_param_locations pl =
-  if List.length pl = 0 then
-    ""
-  else
-    "<" ^ String.concat ~sep:", " (List.map ~f:string_of_int pl) ^ ">"
-
 let string_of_call instruction =
   match instruction with
   | NewObj -> "NewObj"
@@ -500,13 +494,12 @@ let string_of_call instruction =
         string_of_int n3;
         SU.quote_string id;
       ]
-  | FCallClsMethod (fcall_args, pl, is_log_as_dynamic_call) ->
+  | FCallClsMethod (fcall_args, is_log_as_dynamic_call) ->
     sep
       [
         "FCallClsMethod";
         string_of_fcall_args fcall_args;
         "\"\"";
-        string_of_param_locations pl;
         string_of_is_log_as_dynamic_call_op is_log_as_dynamic_call;
       ]
   | FCallClsMethodD (fcall_args, cid, mid) ->
@@ -537,24 +530,22 @@ let string_of_call instruction =
       ]
   | FCallCtor fcall_args ->
     sep ["FCallCtor"; string_of_fcall_args fcall_args; "\"\""]
-  | FCallFunc (fcall_args, pl) ->
+  | FCallFunc fcall_args ->
     sep
       [
         "FCallFunc";
         string_of_fcall_args fcall_args;
-        string_of_param_locations pl;
       ]
   | FCallFuncD (fcall_args, id) ->
     sep
       ["FCallFuncD"; string_of_fcall_args fcall_args; string_of_function_id id]
-  | FCallObjMethod (fcall_args, nf, pl) ->
+  | FCallObjMethod (fcall_args, nf) ->
     sep
       [
         "FCallObjMethod";
         string_of_fcall_args fcall_args;
         "\"\"";
         string_of_null_flavor nf;
-        string_of_param_locations pl;
       ]
   | FCallObjMethodD (fcall_args, nf, id) ->
     sep
@@ -1628,12 +1619,6 @@ let function_attributes f =
       attrs
   in
   let attrs =
-    if Hhas_function.inout_wrapper f then
-      "inout_wrapper" :: attrs
-    else
-      attrs
-  in
-  let attrs =
     if Hhas_function.no_injection f then
       "no_injection" :: attrs
     else
@@ -1748,12 +1733,6 @@ let method_attributes (m : Hhas_method.t) =
   let attrs =
     if is_systemlib && is_native then
       "unique" :: attrs
-    else
-      attrs
-  in
-  let attrs =
-    if Hhas_method.inout_wrapper m then
-      "inout_wrapper" :: attrs
     else
       attrs
   in

@@ -1769,11 +1769,7 @@ TypedValue ExecutionContext::invokeFuncFew(
   for (auto i = 0; i < numArgs; ++i) {
     const TypedValue *from = &argv[i];
     TypedValue* to = vmStack().allocTV();
-    if (LIKELY(!isRefType(from->m_type) || !f->byRef(i))) {
-      cellDup(*tvToCell(from), *to);
-    } else {
-      refDup(*from, *to);
-    }
+    cellDup(*tvToCell(from), *to);
   }
   if (UNLIKELY(invName != nullptr)) {
     shuffleMagicArgs(String::attach(invName), numArgs, false);

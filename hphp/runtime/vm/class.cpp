@@ -176,16 +176,6 @@ unsigned loadUsedTraits(PreClass* preClass,
       auto newName = rule.newMethodName();
       if (origName != newName) {
         methodCount++;
-        auto const trait = Unit::lookupClass(rule.traitName());
-        // traitName should be one of the traits loaded above, so it
-        // should already exist; if it doesn't, there's a bug, and
-        // we'll fatal importing the trait anyway.
-        if (trait) {
-          auto const meth = trait->lookupMethod(origName);
-          if (meth && meth->isInOutWrapper()) {
-            methodCount++;
-          }
-        }
       }
     }
   }
@@ -1641,7 +1631,7 @@ void Class::setSpecial() {
   // Look for __construct() declared in either this class or a trait
   auto const func = lookupMethod(s_construct.get());
   if (func && func->cls() == this) {
-    if (func->takesInOutParams() || func->isInOutWrapper()) {
+    if (func->takesInOutParams()) {
       raise_error("Parameters may not be marked inout on constructors");
     }
 
@@ -1679,70 +1669,40 @@ inline void checkRefCompat(const char* kind, const Func* self,
   // anyway.
   if (inherit->attrs() & AttrPrivate) return;
 
-  // Because of name mangling inout functions should only have the same names as
-  // other inout functions.
-  assertx(self->takesInOutParams() == inherit->takesInOutParams());
+  if (!self->takesInOutParams() && !inherit->takesInOutParams()) return;
 
-  // Inout functions have the parameter offsets of their inout parameters
-  // mangled into their names, so doing this check on them would be meaningless,
-  // instead we will check their wrappers.
-  if (self->takesInOutParams()) {
-    // When reffiness invariance is disabled we cannot create wrappers for ref
-    // functions, as those wrappers would violate our invariance rules for inout
-    // functions.
-    assertx(RuntimeOption::EvalReffinessInvariance == 2 ||
-            !self->isInOutWrapper());
-    return;
-  }
-
-  // When ReffinessInvariance is set we check the invariance of all functions,
-  // otherwise we only check the reffiness of functions which wrap inout
-  // inout functions.
-  if (!RuntimeOption::EvalReffinessInvariance) {
-    if (!self->isInOutWrapper() && !inherit->isInOutWrapper()) return;
-  } else {
-    if (!self->anyByRef() && !inherit->anyByRef()) return;
-  }
-
-  auto const fatal =
-    RuntimeOption::EvalReffinessInvariance == 2 ||
-    (self->isInOutWrapper() || inherit->isInOutWrapper());
-
-  auto const sname = self->fullDisplayName()->data();
-  auto const iname = inherit->fullDisplayName()->data();
   auto const max = std::max(
     self->numNonVariadicParams(),
     inherit->numNonVariadicParams()
   );
 
-  auto const both_wrap = self->isInOutWrapper() == inherit->isInOutWrapper();
-
   for (int i = 0; i < max; ++i) {
     // Since we're looking at ref wrappers of inout functions we need to check
-    // byRef, but if one of the functions isn't a wrapper we do actually have
+    // inout, but if one of the functions isn't a wrapper we do actually have
     // a mismatch.
-    auto const smode = self->byRef(i);
-    auto const imode = inherit->byRef(i);
-    if (smode != imode || (smode && !both_wrap)) {
+    auto const smode = self->isInOut(i);
+    auto const imode = inherit->isInOut(i);
+    if (smode != imode) {
       auto const msg = [&] {
-        if (smode && (!imode || self->isInOutWrapper() || both_wrap)) {
-          auto const sdecl = self->isInOutWrapper() ? "inout " : "'&' ";
-          auto const idecl = i >= inherit->numNonVariadicParams() ? "" : sdecl;
+        auto const sname = self->fullName()->data();
+        auto const iname = inherit->fullName()->data();
+
+        if (smode) {
+          auto const idecl =
+            i >= inherit->numNonVariadicParams() ? "" : "inout ";
           return folly::sformat(
-            "Parameter {} on function {} was declared {}but is not "
-            "declared {}on {} function {}", i + 1, sname, sdecl, idecl,
+            "Parameter {} on function {} was declared inout but is not "
+            "declared {}on {} function {}", i + 1, sname, idecl,
             kind, iname);
         } else {
-          auto const idecl = inherit->isInOutWrapper() ? "inout " : "'&' ";
-          auto const sdecl = i >= self->numNonVariadicParams() ? "" : idecl;
+          auto const sdecl = i >= self->numNonVariadicParams() ? "" : "inout ";
           return folly::sformat(
             "Parameter {} on function {} was not declared {}but is "
-            "declared {}on {} function {}", i + 1, sname, sdecl, idecl,
+            "declared inout on {} function {}", i + 1, sname, sdecl,
             kind, iname);
         }
       }();
-      if (fatal) raise_error(msg);
-      else       raise_warning(msg);
+      raise_error(msg);
     }
   }
 }
@@ -1785,15 +1745,8 @@ void checkDeclarationCompat(const PreClass* preClass,
         firstOptional = i + 1;
       }
     }
-    if (ivariadic) {
-      assertx(iparams[iparams.size() - 1].isVariadic());
-      assertx(params[params.size() - 1].isVariadic());
-      // reffiness of the variadics must match
-      if (imeth->byRef(iparams.size() - 1) !=
-          func->byRef(params.size() - 1)) {
-        raiseIncompat(preClass, imeth);
-      }
-    }
+    assertx(!ivariadic || iparams[iparams.size() - 1].isVariadic());
+    assertx(!ivariadic || params[params.size() - 1].isVariadic());
   }
 
   // Verify that meth provides defaults, starting with the parameter that

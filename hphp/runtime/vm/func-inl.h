@@ -61,7 +61,6 @@ inline void Func::ParamInfo::serde(SerDe& sd) {
     (variadic)
     (userAttributes)
     (userType)
-    (inout)
     ;
 }
 
@@ -153,15 +152,6 @@ inline const StringData* Func::fullName() const {
 inline StrNR Func::fullNameStr() const {
   assertx(m_fullName != nullptr);
   return StrNR(fullName());
-}
-
-inline const StringData* Func::displayName() const {
-  return LIKELY(!takesInOutParams()) ? name() : stripInOutSuffix(name());
-}
-
-inline const StringData* Func::fullDisplayName() const {
-  return
-    LIKELY(!takesInOutParams()) ? fullName() : stripInOutSuffix(fullName());
 }
 
 inline const StringData* funcToStringHelper(const Func* func) {
@@ -341,23 +331,6 @@ inline bool Func::hasVariadicCaptureParam() const {
          (numParams() && params()[numParams() - 1].variadic));
 #endif
   return m_attrs & AttrVariadicParam;
-}
-
-inline bool Func::takesInOutParams() const {
-  return m_attrs & AttrTakesInOutParams;
-}
-
-inline bool Func::isInOutWrapper() const {
-  return m_attrs & AttrIsInOutWrapper;
-}
-
-inline uint32_t Func::numInOutParams() const {
-  if (!takesInOutParams()) return 0;
-  uint32_t count = 0;
-  for (uint32_t i = 0; i < numParams(); ++i) {
-    if (params()[i].inout) ++count;
-  }
-  return count;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

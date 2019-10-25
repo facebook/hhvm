@@ -343,7 +343,7 @@ translate(TransArgs args, FPInvOffset spOff,
   WorkloadStats guard(WorkloadStats::InTrans);
 
   rqtrace::ScopeGuard trace{"JIT_TRANSLATE"};
-  trace.annotate("func_name", args.sk.func()->fullDisplayName()->data());
+  trace.annotate("func_name", args.sk.func()->fullName()->data());
   trace.annotate("trans_kind", show(args.kind));
   trace.setEventPrefix("JIT_");
 

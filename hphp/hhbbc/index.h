@@ -732,6 +732,11 @@ struct Index {
   PrepKind lookup_param_prep(Context, res::Func, uint32_t paramId) const;
 
   /*
+   * Returns the number of inout parameters expected by func (if known).
+   */
+  folly::Optional<uint32_t> lookup_num_inout_params(Context, res::Func) const;
+
+  /*
    * Returns the control-flow insensitive inferred private instance
    * property types for a Class.  The Class doesn't need to be
    * resolved, because private properties don't depend on the

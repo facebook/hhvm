@@ -1108,7 +1108,6 @@ struct RuntimeOption {
        0 - do nothing
        1 - raise a warning on reffiness mismatch
        2 - raise a fatal on reffiness mismatch */                       \
-  F(uint32_t, ReffinessInvariance, 0)                                   \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
   F(bool, RxPretendIsEnabled, false)                                    \
   F(bool, NoArrayAccessInIdx, false)                                    \

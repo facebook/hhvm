@@ -48,7 +48,6 @@ let make_86method
   let method_is_memoize_wrapper = false in
   let method_is_memoize_wrapper_lsb = false in
   let method_no_injection = true in
-  let method_inout_wrapper = false in
   let method_doc_comment = None in
   let method_is_interceptable = false in
   let method_is_memoize_impl = false in
@@ -72,7 +71,6 @@ let make_86method
     method_is_final
     is_abstract
     method_no_injection
-    method_inout_wrapper
     (Hhbc_id.Method.from_ast_name name)
     method_body
     span

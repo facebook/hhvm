@@ -838,7 +838,7 @@ std::string formatArgumentErrMsg(const Func* func, const char* amount,
                                  uint32_t expected, uint32_t got) {
   return folly::sformat(
     "{}() expects {} {} parameter{}, {} given",
-    func->fullDisplayName()->data(),
+    func->fullName()->data(),
     amount,
     expected,
     expected == 1 ? "" : "s",

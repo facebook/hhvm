@@ -522,7 +522,7 @@ dynamic getTransContext(const TransContext& ctx) {
                         ("id", ctx.transID)
                         ("optIndex", ctx.optIndex)
                         ("srcKey", getSrcKey(ctx.initSrcKey))
-                        ("funcName", func->fullDisplayName()->data())
+                        ("funcName", func->fullName()->data())
                         ("sourceFile", func->filename()->data())
                         ("startLine", func->line1())
                         ("endLine", func->line2());

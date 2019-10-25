@@ -590,6 +590,19 @@ bool can_emit_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
     return false;
   }
 
+  if (fca.enforceInOut()) {
+    // Don't convert functions with mis-annotated inout arguments
+    for (int i = 0; i < func->params.size(); ++i) {
+      auto const isInOut = i < fca.numArgs && fca.isInOut(i);
+      if (func->params[i].inout != isInOut) return false;
+    }
+
+    // Don't convert functions with extra inout arguments
+    for (int i = func->params.size(); i < fca.numArgs; ++i) {
+      if (fca.isInOut(i)) return false;
+    }
+  }
+
   // Check for missing non-optional arguments.
   for (int i = fca.numArgs; i < concrete_params; i++) {
     auto const& pi = func->params[i];

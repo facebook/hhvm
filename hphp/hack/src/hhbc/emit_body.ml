@@ -422,18 +422,7 @@ let emit_body
       ~scope
       ast_params
   in
-  let params =
-    if is_closure_body then
-      List.map ~f:Hhas_param.switch_inout_to_reference params
-    else
-      params
-  in
-  let (num_out, verify_out) =
-    if is_closure_body then
-      (0, empty)
-    else
-      emit_verify_out params
-  in
+  let (num_out, verify_out) = emit_verify_out params in
   Emit_statement.set_verify_return verify_return;
   Emit_statement.set_verify_out verify_out;
   Emit_statement.set_num_out num_out;

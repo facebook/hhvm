@@ -152,12 +152,6 @@ std::string show(const Func& func, const Bytecode& bc) {
     ret += ">";
   };
 
-  auto append_argv32 = [&] (const CompactVector<uint32_t>& argv) {
-    if (!argv.empty()) {
-      ret += folly::sformat(" <{}>", folly::join(", ", argv));
-    }
-  };
-
   auto append_mkey = [&](MKey mkey) {
     ret += memberCodeString(mkey.mcode);
 
@@ -194,7 +188,6 @@ std::string show(const Func& func, const Bytecode& bc) {
 #define IMM_BLA(n)     ret += " "; append_switch(data.targets);
 #define IMM_SLA(n)     ret += " "; append_sswitch(data.targets);
 #define IMM_ILA(n)     ret += " "; append_itertab(data.iterTab);
-#define IMM_I32LA(n)   append_argv32(data.argv);
 #define IMM_IVA(n)     folly::toAppend(" ", data.arg##n, &ret);
 #define IMM_I64A(n)    folly::toAppend(" ", data.arg##n, &ret);
 #define IMM_LA(n)      ret += " " + local_string(func, data.loc##n);
@@ -214,7 +207,7 @@ std::string show(const Func& func, const Bytecode& bc) {
     ? folly::sformat("<aeblk:{}>", data.fca.asyncEagerTarget)     \
     : "-";                                                        \
   folly::toAppend(                                                \
-    " ", show(data.fca, data.fca.byRefs.get(), aeTarget), &ret);  \
+    " ", show(data.fca, data.fca.inoutArgs.get(), aeTarget), &ret);  \
 } while (false);
 
 #define IMM_NA
@@ -242,7 +235,6 @@ std::string show(const Func& func, const Bytecode& bc) {
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_ILA
-#undef IMM_I32LA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

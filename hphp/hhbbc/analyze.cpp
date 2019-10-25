@@ -140,7 +140,7 @@ State entry_state(const Index& index, Context const ctx,
       continue;
     }
     auto const& param = ctx.func->params[locId];
-    if (ctx.func->isMemoizeImpl && !param.byRef) {
+    if (ctx.func->isMemoizeImpl) {
       auto const& constraint = param.typeConstraint;
       if (constraint.hasConstraint() && !constraint.isTypeVar() &&
           !constraint.isTypeConstant()) {
@@ -149,11 +149,9 @@ State entry_state(const Index& index, Context const ctx,
         continue;
       }
     }
-    ret.locals[locId] = param.byRef
-      ? TGen
-      : ctx.func->params[locId].isVariadic
-        ? (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)
-        : TCell;
+    ret.locals[locId] = ctx.func->params[locId].isVariadic
+      ? (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)
+      : TCell;
   }
 
   // Closures have use vars, we need to look up their types from the index.

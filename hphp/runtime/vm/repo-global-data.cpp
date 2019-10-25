@@ -53,7 +53,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(WarnOnNonLiteralClsMeth);
   SHOW(LogKnownMethodsAsDynamicCalls);
   SHOW(NoticeOnBuiltinDynamicCalls);
-  SHOW(ReffinessInvariance);
   SHOW(AbortBuildOnVerifyError);
   SHOW(EnableArgsInBacktraces);
   SHOW(Signature);

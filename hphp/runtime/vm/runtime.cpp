@@ -192,33 +192,33 @@ void throwArrayKeyException(const StringData* key, bool isInOut) {
     key->data()));
 }
 
-std::string formatParamRefMismatch(const char* fname, uint32_t index,
+std::string formatParamInOutMismatch(const char* fname, uint32_t index,
                                    bool funcByRef) {
   if (funcByRef) {
     return folly::sformat(
-      "{}() expects parameter {} by reference, but the call was "
-      "not annotated with '&'", fname, index + 1
+      "{}() expects parameter {} to be inout, but the call was "
+      "not annotated with 'inout'", fname, index + 1
     );
   } else {
     return folly::sformat(
-      "{}() expects parameter {} by value, but the call was "
-      "annotated with '&'", fname, index + 1
+      "{}() does not expect parameter {} to be inout, but the call was "
+      "annotated with 'inout'", fname, index + 1
     );
   }
 }
 
-void throwParamRefMismatch(const Func* func, uint32_t index) {
-  SystemLib::throwInvalidArgumentExceptionObject(formatParamRefMismatch(
-    func->fullDisplayName()->data(), index, func->byRef(index)));
+void throwParamInOutMismatch(const Func* func, uint32_t index) {
+  SystemLib::throwInvalidArgumentExceptionObject(formatParamInOutMismatch(
+    func->fullName()->data(), index, func->isInOut(index)));
 }
 
-void throwParamRefMismatchRange(const Func* func, unsigned firstVal,
-                                uint64_t mask, uint64_t vals) {
+void throwParamInOutMismatchRange(const Func* func, unsigned firstVal,
+                                  uint64_t mask, uint64_t vals) {
   for (auto i = 0; i < 64; ++i) {
     if (mask & (1UL << i)) {
-      bool byRef = vals & (1UL << i);
-      if (func->byRef(firstVal + i) != byRef) {
-        throwParamRefMismatch(func, firstVal + i);
+      bool isInOut = vals & (1UL << i);
+      if (func->isInOut(firstVal + i) != isInOut) {
+        throwParamInOutMismatch(func, firstVal + i);
       }
     }
   }

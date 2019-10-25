@@ -1,5 +1,5 @@
 <?hh
-
+function mkh($c) { return ($_1, $_2, inout $_3, $_4, inout $_5) ==> $c(); }
 function handler($name, $obj, inout $args, $data, inout $done) {
   echo "----HANDLER----\n";
   var_dump($name, $obj, $args, $data, $done);
@@ -40,7 +40,7 @@ function test_standard_function() {
   call_user_func(fun('frap'), 'callfunc');
 
   // Replace with closure
-  fb_intercept('frap', function () { echo "Closure! wooooo\n"; });
+  fb_intercept('frap', mkh(function () { echo "Closure! wooooo\n"; }));
   frap('claptrap');
 
   // Reset
@@ -68,7 +68,7 @@ function test_variadic_function() {
   call_user_func(fun('var_frap'), 'callfunc');
 
   // Replace with closure
-  fb_intercept('var_frap', function () { echo "Closure! wooooo\n"; });
+  fb_intercept('var_frap', mkh(function () { echo "Closure! wooooo\n"; }));
   var_frap('claptrap', 'blah');
 
   // Reset

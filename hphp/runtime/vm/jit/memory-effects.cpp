@@ -917,7 +917,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
             if (cls.maybe(AStackAny)) {
               ret = ret | cls;
               auto const paramOff = callee->isMethod() ? 3 : 2;
-              if (i >= paramOff && callee->params()[i - paramOff].inout) {
+              if (i >= paramOff && callee->isInOut(i - paramOff)) {
                 out_stk = out_stk | cls;
               }
             }
@@ -1844,7 +1844,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ChrInt:
   case CreateSSWH:
   case NewLikeArray:
-  case CheckRefs:
+  case CheckInOuts:
   case BeginCatch:
   case CheckSurpriseFlags:
   case CheckType:
@@ -2139,8 +2139,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowMissingArg:
   case ThrowMissingThis:
   case ThrowParameterWrongType:
-  case ThrowParamRefMismatch:
-  case ThrowParamRefMismatchRange:
+  case ThrowParamInOutMismatch:
+  case ThrowParamInOutMismatchRange:
   case SetLegacyDict:
   case SetLegacyVec:
   case SetOpCell:

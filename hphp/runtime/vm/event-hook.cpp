@@ -228,7 +228,7 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
   vm_call_user_func(g_context->m_setprofileCallback, params);
 }
 
-static Array get_frame_args(const ActRec* ar, bool with_ref) {
+static Array get_frame_args(const ActRec* ar) {
   int numNonVariadic = ar->func()->numNonVariadicParams();
   int numArgs = ar->numArgs();
   auto const variadic = ar->func()->hasVariadicCaptureParam();
@@ -250,8 +250,7 @@ static Array get_frame_args(const ActRec* ar, bool with_ref) {
   int i = 0;
   // The function's formal parameters are on the stack
   for (; i < numArgs && i < numNonVariadic; ++i) {
-    if (with_ref) retArray.appendWithRef(tvAsCVarRef(local));
-    else          retArray.append(tvAsCVarRef(local));
+    retArray.append(tvAsCVarRef(local));
     --local;
   }
 
@@ -261,8 +260,7 @@ static Array get_frame_args(const ActRec* ar, bool with_ref) {
     // been shuffled into a packed array stored in the variadic capture
     // param on the stack.
     for (ArrayIter iter(tvAsCVarRef(local)); iter; ++iter) {
-      if (with_ref) retArray.appendWithRef(iter.secondVal());
-      else          retArray.append(iter.secondVal());
+      retArray.append(iter.secondVal());
     }
   }
   return retArray.toArray();
@@ -283,40 +281,23 @@ static Variant call_intercept_handler(
   auto f = callCtx.func;
   if (!f) return uninit_null();
 
-  auto const inout = [&] {
-    std::vector<uint32_t> ind = {2};
-    if (!newCallback) ind.push_back(4);
-    if (f->isInOutWrapper()) {
-      auto const name = mangleInOutFuncName(f->name(), ind);
-      if (!f->isMethod()) {
-        f = Unit::lookupFunc(name.get());
-      } else {
-        assertx(callCtx.cls);
-        f = callCtx.cls->lookupMethod(name.get());
-      }
-      if (!f) {
-        raise_error(
-          "fb_intercept%s used with an inout handler with a bad signature "
-          "(expected parameter%s to be inout)",
-          newCallback ? "2" : "",
-          newCallback ? " three" : "s three and five"
-        );
-      }
-      return true;
-    } else if (f->isClosureBody() && f->anyByRef()) {
-      auto const name = mangleInOutFuncName(f->name(), ind);
-      auto const impl = f->implCls();
-      assertx(impl);
-
-      if (auto const invoke = impl->lookupMethod(name.get())) {
-        f = invoke;
-        return true;
-      }
-    }
-    return f->takesInOutParams();
+  auto const okay = [&] {
+    if (f->numInOutParams() != (newCallback ? 1 : 2)) return false;
+    if (newCallback) return f->params().size() >= 3 && f->isInOut(2);
+    return
+      f->params().size() >= 5 && f->isInOut(2) && f->isInOut(4);
   }();
 
-  args = get_frame_args(ar, !inout);
+  if (!okay) {
+    raise_error(
+      "fb_intercept%s used with an inout handler with a bad signature "
+      "(expected parameter%s to be inout)",
+      newCallback ? "2" : "",
+      newCallback ? " three" : "s three and five"
+    );
+  }
+
+  args = get_frame_args(ar);
 
   PackedArrayInit par(newCallback ? 3 : 5);
   par.append(called);
@@ -326,11 +307,7 @@ static Variant call_intercept_handler(
 
   Variant intArgs = [&] {
     if (newCallback) return par.toArray();
-    if (inout) return par.append(done).toArray();
-    SuppressHACRefBindNotices _guard;
-    Variant tmp;
-    tmp.assignRef(done);
-    return par.appendWithRef(tmp).toArray();
+    return par.append(done).toArray();
   }();
 
   auto ret = Variant::attach(
@@ -338,15 +315,10 @@ static Variant call_intercept_handler(
                           callCtx.invName, callCtx.dynamic)
   );
 
-  if (inout) {
-    auto& arr = ret.asCArrRef();
-    if (arr[1].isArray()) args = arr[1].toArray();
-    if (!newCallback && arr[2].isBoolean()) done = arr[2].toBoolean();
-    return arr[0];
-  } else if (!ar->func()->takesInOutParams()) {
-    args.reset();
-  }
-  return ret;
+  auto& arr = ret.asCArrRef();
+  if (arr[1].isArray()) args = arr[1].toArray();
+  if (!newCallback && arr[2].isBoolean()) done = arr[2].toBoolean();
+  return arr[0];
 }
 
 const StaticString
@@ -368,12 +340,12 @@ static Variant call_intercept_handler_callback(
     SystemLib::throwRuntimeExceptionObject(
       Variant("Mismatch between reifiedness of callee and callback"));
   }
-  if (f->takesInOutParams() || f->isInOutWrapper()) {
+  if (f->takesInOutParams()) {
     //TODO(T52751806): Support inout arguments on fb_intercept2 callback
     SystemLib::throwRuntimeExceptionObject(
       Variant("The callback for fb_intercept2 cannot have inout parameters"));
   }
-  auto const curArgs = get_frame_args(ar, false);
+  auto const curArgs = get_frame_args(ar);
   PackedArrayInit args(prepend_this + curArgs.size());
   if (prepend_this) {
     auto const thiz = [&] {
@@ -409,12 +381,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   // Intercept only original generator / async function calls, not resumption.
   if (isResumed(ar)) return true;
 
-  // Don't intercept inout wrappers. We'll intercept the inner function.
-  if (func->isInOutWrapper()) return true;
-
-  auto const name = func->takesInOutParams()
-    ? stripInOutSuffix(func->fullName())
-    : func->fullName();
+  auto const name = func->fullName();
 
   Variant* h = get_intercept_handler(StrNR(name), &func->maybeIntercepted());
   if (!h) return true;
@@ -449,7 +416,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   }();
 
   Array args;
-  VarNR called(ar->func()->fullDisplayName());
+  VarNR called(ar->func()->fullName());
 
   auto const& hArr = h->asCArrRef();
   auto const newCallback = hArr[2].toBoolean();
@@ -479,21 +446,6 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
       doneFlag = false;
     }
   }
-
-  auto const rebind_locals = [&] {
-    auto local = reinterpret_cast<TypedValue*>(
-      uintptr_t(ar) - sizeof(TypedValue)
-    );
-    uint32_t param = 0;
-    IterateKV(args.get(), [&] (Cell, TypedValue v) {
-      if (param < func->numParams() && func->byRef(param++)) {
-        if (tvIsReferenced(*local)) {
-          cellSet(tvToCell(v), val(local).pref->cell());
-        }
-      }
-      --local;
-    });
-  };
 
   if (doneFlag.toBoolean()) {
     Offset pcOff;
@@ -526,16 +478,13 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
 
       uint32_t param = 0;
       IterateKV(args.get(), [&] (Cell, TypedValue v) {
-        if (param >= func->numParams() || !func->params()[param++].inout) {
+        if (param >= func->numParams() || !func->isInOut(param++)) {
           return;
         }
         push(v);
       });
 
       while (start < end) push(make_tv<KindOfNull>());
-    } else if (!args.isNull()) {
-      rebind_locals();
-      trim(); // discard the callee frame after binding refs
     } else {
       trim(); // nothing to do throw away the frame
     }
@@ -548,8 +497,6 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     if (vmpc() && !vmEntry) vmpc() = skipCall(vmpc());
 
     return false;
-  } else if (!func->takesInOutParams() && !args.isNull()) {
-    rebind_locals();
   }
   vmfp() = ar;
   vmpc() = savePc;

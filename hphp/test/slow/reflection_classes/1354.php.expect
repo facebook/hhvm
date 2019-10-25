@@ -8,9 +8,9 @@ int(0)
 string(2) "p1"
 bool(false)
 NULL
-NULL
+string(4) "cls1"
 bool(false)
-bool(true)
+bool(false)
 bool(false)
 bool(false)
 int(0)

@@ -51,14 +51,14 @@ struct LocalRange {
 
 
 // Arguments to FCall opcodes.
-// hhas format: <flags> <numArgs> <numRets> <byRefs> <asyncEagerOffset>
+// hhas format: <flags> <numArgs> <numRets> <inoutArgs> <asyncEagerOffset>
 // hhbc format: <uint8:flags> ?<iva:numArgs> ?<iva:numRets>
-//              ?<boolvec:byRefs> ?<ba:asyncEagerOffset>
+//              ?<boolvec:inoutArgs> ?<ba:asyncEagerOffset>
 //   flags            = flags (hhas doesn't have HHBC-only flags)
 //   numArgs          = flags >> kFirstNumArgsBit
 //                        ? flags >> kFirstNumArgsBit - 1 : decode_iva()
 //   numRets          = flags & HasInOut ? decode_iva() : 1
-//   byRefs           = flags & EnforceReffiness ? decode bool vec : nullptr
+//   inoutArgs        = flags & EnforceInOut ? decode bool vec : nullptr
 //   asyncEagerOffset = flags & HasAEO ? decode_ba() : kInvalidOffset
 struct FCallArgsBase {
   enum Flags : uint8_t {
@@ -73,7 +73,7 @@ struct FCallArgsBase {
     // HHBC-only: is the number of returns provided? false => 1
     HasInOut                 = (1 << 3),
     // HHBC-only: should this FCall enforce argument reffiness?
-    EnforceReffiness         = (1 << 4),
+    EnforceInOut             = (1 << 4),
     // HHBC-only: is the async eager offset provided? false => kInvalidOffset
     HasAsyncEagerOffset      = (1 << 5),
     // HHBC-only: the remaining space is used for number of arguments
@@ -109,28 +109,28 @@ struct FCallArgsBase {
 
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
-                     const uint8_t* byRefs, Offset asyncEagerOffset,
+                     const uint8_t* inoutArgs, Offset asyncEagerOffset,
                      bool lockWhileUnwinding)
     : FCallArgsBase(flags, numArgs, numRets, lockWhileUnwinding)
     , asyncEagerOffset(asyncEagerOffset)
-    , byRefs(byRefs) {
-    assertx(IMPLIES(byRefs != nullptr, numArgs != 0));
+    , inoutArgs(inoutArgs) {
+    assertx(IMPLIES(inoutArgs != nullptr, numArgs != 0));
     assertx(IMPLIES(asyncEagerOffset == kInvalidOffset,
                     !supportsAsyncEagerReturn()));
   }
-  bool enforceReffiness() const { return byRefs != nullptr; }
-  bool byRef(uint32_t i) const {
-    assertx(enforceReffiness());
-    return byRefs[i / 8] & (1 << (i % 8));
+  bool enforceInOut() const { return inoutArgs != nullptr; }
+  bool isInOut(uint32_t i) const {
+    assertx(enforceInOut());
+    return inoutArgs[i / 8] & (1 << (i % 8));
   }
   Offset asyncEagerOffset;
-  const uint8_t* byRefs;
+  const uint8_t* inoutArgs;
 };
 
 static_assert(1 << FCallArgs::kFirstNumArgsBit == FCallArgs::NumArgsStart, "");
 
 std::string show(const LocalRange&);
-std::string show(const FCallArgsBase&, const uint8_t* byRefs,
+std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
                  std::string asyncEagerLabel);
 
 /*
@@ -140,7 +140,7 @@ std::string show(const FCallArgsBase&, const uint8_t* byRefs,
  * and the byte is the value. Otherwise, it's 4 bytes, and bits 8..31 must be
  * logical-shifted to the right by one to get rid of the flag bit.
  *
- * The types in this macro for BLA, SLA, ILA, I32LA and VSA are meaningless
+ * The types in this macro for BLA, SLA, ILA, and VSA are meaningless
  * since they are never read out of ArgUnion (they use ImmVector).
  *
  * ArgTypes and their various decoding helpers should be kept in sync with the
@@ -151,7 +151,6 @@ std::string show(const FCallArgsBase&, const uint8_t* byRefs,
   ARGTYPEVEC(BLA, Offset)        /* Bytecode offset vector immediate */        \
   ARGTYPEVEC(SLA, Id)            /* String id/offset pair vector */            \
   ARGTYPEVEC(ILA, Id)            /* IterKind/IterId pair vector */             \
-  ARGTYPEVEC(I32LA,uint32_t)     /* Vector of 32-bit uint */                   \
   ARGTYPE(IVA,    uint32_t)      /* Variable size: 8 or 32-bit uint */         \
   ARGTYPE(I64A,   int64_t)       /* 64-bit Integer */                          \
   ARGTYPE(LA,     int32_t)       /* Local variable ID: 8 or 32-bit int */      \
@@ -658,18 +657,18 @@ constexpr uint32_t kMaxConcatN = 4;
   O(NewObjS,         ONE(OA(SpecialClsRef)),                            \
                                        NOV,             ONE(CV),    NF) \
   O(LockObj,         NA,               ONE(CV),         ONE(CV),    NF) \
-  O(FCallClsMethod,  FOUR(FCA,SA,I32LA,OA(IsLogAsDynamicCallOp)),       \
+  O(FCallClsMethod,  THREE(FCA,SA,OA(IsLogAsDynamicCallOp)),            \
                                        FCALL(2, 0),     FCALL,      CF) \
   O(FCallClsMethodD, FOUR(FCA,SA,SA,SA),                                \
                                        FCALL(0, 0),     FCALL,      CF) \
-  O(FCallClsMethodS, FOUR(FCA,SA,OA(SpecialClsRef),I32LA),              \
+  O(FCallClsMethodS, THREE(FCA,SA,OA(SpecialClsRef)),                   \
                                        FCALL(1, 0),     FCALL,      CF) \
   O(FCallClsMethodSD,FOUR(FCA,SA,OA(SpecialClsRef),SA),                 \
                                        FCALL(0, 0),     FCALL,      CF) \
   O(FCallCtor,       TWO(FCA,SA),      FCALL(0, 1),     FCALL,      CF) \
-  O(FCallFunc,       TWO(FCA,I32LA),   FCALL(1, 0),     FCALL,      CF) \
+  O(FCallFunc,       ONE(FCA),         FCALL(1, 0),     FCALL,      CF) \
   O(FCallFuncD,      TWO(FCA,SA),      FCALL(0, 0),     FCALL,      CF) \
-  O(FCallObjMethod,  FOUR(FCA,SA,OA(ObjMethodOp),I32LA),                \
+  O(FCallObjMethod,  THREE(FCA,SA,OA(ObjMethodOp)),                     \
                                        FCALL(1, 1),     FCALL,      CF) \
   O(FCallObjMethodD, FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
                                        FCALL(0, 1),     FCALL,      CF) \

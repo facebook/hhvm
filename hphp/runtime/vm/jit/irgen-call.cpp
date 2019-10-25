@@ -44,29 +44,29 @@ namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
-bool emitCallerReffinessChecksKnown(IRGS& env, const Func* callee,
+bool emitCallerInOutChecksKnown(IRGS& env, const Func* callee,
                                     const FCallArgs& fca) {
-  if (!fca.enforceReffiness()) return true;
+  if (!fca.enforceInOut()) return true;
 
   for (auto i = 0; i < fca.numArgs; ++i) {
-    if (callee->byRef(i) != fca.byRef(i)) {
+    if (callee->isInOut(i) != fca.isInOut(i)) {
       auto const func = cns(env, callee);
-      gen(env, ThrowParamRefMismatch, ParamData { i }, func);
+      gen(env, ThrowParamInOutMismatch, ParamData { i }, func);
       return false;
     }
   }
   return true;
 }
 
-void emitCallerReffinessChecksUnknown(IRGS& env, SSATmp* callee,
+void emitCallerInOutChecksUnknown(IRGS& env, SSATmp* callee,
                                       const FCallArgs& fca) {
-  if (!fca.enforceReffiness()) return;
+  if (!fca.enforceInOut()) return;
 
   SSATmp* numParams = nullptr;
   for (uint32_t i = 0; i * 8 < fca.numArgs; i += 8) {
     uint64_t vals = 0;
     for (uint32_t j = 0; j < 8 && (i + j) * 8 < fca.numArgs; ++j) {
-      vals |= ((uint64_t)fca.byRefs[i + j]) << (8 * j);
+      vals |= ((uint64_t)fca.inoutArgs[i + j]) << (8 * j);
     }
 
     uint64_t bits = fca.numArgs - i * 8;
@@ -74,7 +74,7 @@ void emitCallerReffinessChecksUnknown(IRGS& env, SSATmp* callee,
       ? std::numeric_limits<uint64_t>::max()
       : (1UL << bits) - 1;
 
-    // CheckRefs only needs to know the number of parameters when there are more
+    // CheckInOuts only needs to know the number of parameters when there are more
     // than 64 args.
     if (i == 0) {
       numParams = cns(env, 64);
@@ -82,15 +82,15 @@ void emitCallerReffinessChecksUnknown(IRGS& env, SSATmp* callee,
       numParams = gen(env, LdFuncNumParams, callee);
     }
 
-    auto const crData = CheckRefsData { i * 8, mask, vals };
+    auto const crData = CheckInOutsData { i * 8, mask, vals };
     ifThen(
       env,
       [&] (Block* taken) {
-        gen(env, CheckRefs, taken, crData, callee, numParams);
+        gen(env, CheckInOuts, taken, crData, callee, numParams);
       },
       [&] {
         hint(env, Block::Hint::Unlikely);
-        gen(env, ThrowParamRefMismatchRange, crData, callee);
+        gen(env, ThrowParamInOutMismatchRange, crData, callee);
       }
     );
   }
@@ -352,7 +352,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   assertx(callee);
 
   // Caller checks
-  if (!emitCallerReffinessChecksKnown(env, callee, fca)) return;
+  if (!emitCallerInOutChecksKnown(env, callee, fca)) return;
   if (dynamicCall) emitCallerDynamicCallChecksKnown(env, callee);
   emitCallerRxChecksKnown(env, callee);
 
@@ -461,7 +461,7 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   }
 
   // Caller checks
-  emitCallerReffinessChecksUnknown(env, callee, fca);
+  emitCallerInOutChecksUnknown(env, callee, fca);
   if (dynamicCall) {
     emitCallerDynamicCallChecksUnknown(env, callee, mightCareAboutDynCall);
   }
@@ -833,10 +833,10 @@ void fcallObjMethodMagic(IRGS& env, const Func* callee, const FCallArgs& fca,
                          SSATmp* obj, const StringData* methodName,
                          bool dynamic, uint32_t numExtraInputs) {
   if (fca.hasUnpack() || fca.numRets != 1) return interpOne(env);
-  if (fca.enforceReffiness()) {
+  if (fca.enforceInOut()) {
     for (auto i = 0; i < fca.numArgs; ++i) {
-      if (fca.byRef(i)) {
-        gen(env, ThrowParamRefMismatch, ParamData { i }, cns(env, callee));
+      if (fca.isInOut(i)) {
+        gen(env, ThrowParamInOutMismatch, ParamData { i }, cns(env, callee));
         return;
       }
     }
@@ -1059,8 +1059,7 @@ void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
   prepareAndCallProfiled(env, func, fca, nullptr, false, false);
 }
 
-void emitFCallFunc(IRGS& env, FCallArgs fca, const ImmVector& v) {
-  if (v.size() != 0) return interpOne(env);
+void emitFCallFunc(IRGS& env, FCallArgs fca) {
   auto const callee = topC(env);
   if (callee->isA(TObj)) return fcallFuncObj(env, fca);
   if (callee->isA(TFunc)) return fcallFuncFunc(env, fca);
@@ -1316,9 +1315,9 @@ void fcallObjMethod(IRGS& env, const FCallArgs& fca, const StringData* clsHint,
 } // namespace
 
 void emitFCallObjMethod(IRGS& env, FCallArgs fca, const StringData* clsHint,
-                        ObjMethodOp subop, const ImmVector& v) {
+                        ObjMethodOp subop) {
   auto const methodName = topC(env);
-  if (v.size() != 0 || !methodName->isA(TStr)) return interpOne(env);
+  if (!methodName->isA(TStr)) return interpOne(env);
   fcallObjMethod(env, fca, clsHint, subop, methodName, true, true);
 }
 
@@ -1614,10 +1613,10 @@ void fcallClsMethodCommon(IRGS& env,
 }
 
 void emitFCallClsMethod(IRGS& env, FCallArgs fca, const StringData* clsHint,
-                        const ImmVector& v, IsLogAsDynamicCallOp op) {
+                        IsLogAsDynamicCallOp op) {
   auto const cls = topC(env);
   auto const methName = topC(env, BCSPRelOffset { 1 });
-  if (v.size() != 0 || !cls->isA(TCls) || !methName->isA(TStr)) {
+  if (!cls->isA(TCls) || !methName->isA(TStr)) {
     return interpOne(env);
   }
 
@@ -1629,10 +1628,10 @@ void emitFCallClsMethod(IRGS& env, FCallArgs fca, const StringData* clsHint,
 }
 
 void emitFCallClsMethodS(IRGS& env, FCallArgs fca, const StringData* clsHint,
-                         SpecialClsRef ref, const ImmVector& v) {
+                         SpecialClsRef ref) {
   auto const cls = specialClsRefToCls(env, ref);
   auto const methName = topC(env);
-  if (v.size() != 0 || !cls || !methName->isA(TStr)) return interpOne(env);
+  if (!cls || !methName->isA(TStr)) return interpOne(env);
 
   auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
   fcallClsMethodCommon(env, fca, clsHint, cls, methName, fwd, true, true, 1);
@@ -1702,7 +1701,7 @@ Type callOutType(const Func* callee, uint32_t index) {
   if (callee->isCPPBuiltin()) {
     uint32_t param_idx = 0;
     for (; param_idx < callee->numParams(); param_idx++) {
-      if (!callee->params()[param_idx].inout) continue;
+      if (!callee->isInOut(param_idx)) continue;
       if (!index) break;
       index--;
     }

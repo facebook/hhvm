@@ -440,7 +440,9 @@ bool canFold(ISS& env, const php::Func* func, const FCallArgs& fca,
   // TODO(T31677864): Detect the arity mismatch at HHBBC and enable them to
   // be foldable
   if (func->isReified) return false;
-  if (func->attrs & AttrTakesInOutParams) return false;
+
+  // We only fold functions when numRets == 1
+  if (func->hasInOutArgs) return false;
 
   // Foldable builtins are always worth trying
   if (func->attrs & AttrIsFoldable) return true;

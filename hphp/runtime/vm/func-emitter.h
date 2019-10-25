@@ -57,19 +57,19 @@ struct FuncEmitter {
 
   struct ParamInfo : public Func::ParamInfo {
     ParamInfo()
-      : byRef(false)
+      : inout(false)
     {}
 
     template<class SerDe>
     void serde(SerDe& sd) {
       Func::ParamInfo* parent = this;
       parent->serde(sd);
-      sd(byRef);
+      sd(inout);
     }
 
-    // Whether the parameter is passed by reference.  This field is absent from
+    // Whether the parameter is passed as an inout.  This field is absent from
     // Func::ParamInfo because we store it in a bitfield on Func.
-    bool byRef;
+    bool inout;
   };
 
   typedef std::vector<ParamInfo> ParamInfoVec;

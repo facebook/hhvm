@@ -1245,13 +1245,14 @@ prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* ctx,
     // need to apply a conversion there.
     cur.needsConversion = cur.isOutputArg ||
       (offset < numNonDefault && ty > TBottom);
-    cur.isInOut = pi.inout;
+    cur.isInOut = callee->isInOut(offset);
     // We do actually mean exact type equality here.  We're only capable of
     // passing the following primitives through registers; everything else goes
     // by address unless its flagged "nativeArg".
-    if (ty == TBool || ty == TInt || ty == TDbl || pi.nativeArg || pi.inout) {
+    if (ty == TBool || ty == TInt || ty == TDbl || pi.nativeArg) {
       continue;
     }
+    if (cur.isInOut) continue;
 
     ++ret.numByAddr;
     cur.passByAddr = true;
@@ -1605,7 +1606,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
                     targetTy == TInt ||
                     targetTy == TDbl ||
                     callee->params()[paramIdx].nativeArg ||
-                    callee->params()[paramIdx].inout);
+                    callee->isInOut(paramIdx));
             return gen(env, LdMem,
                        targetTy == TBottom ? TCell : targetTy,
                        param.value);
@@ -2068,7 +2069,7 @@ bool collectionMethodReturnsThis(const Func* callee) {
 
 Type builtinOutType(const Func* builtin, uint32_t i) {
   assertx(builtin->isCPPBuiltin());
-  assertx(builtin->params()[i].inout);
+  assertx(builtin->isInOut(i));
 
   if (auto const dt = Native::builtinOutType(builtin, i)) return Type{*dt};
 
@@ -2520,7 +2521,6 @@ void emitAKExists(IRGS& env) {
 void emitGetMemoKeyL(IRGS& env, int32_t locId) {
   DEBUG_ONLY auto const func = curFunc(env);
   assertx(func->isMemoizeWrapper());
-  assertx(!func->anyByRef());
 
   auto const value = ldLocInnerWarn(
     env,

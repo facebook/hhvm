@@ -155,12 +155,6 @@ struct Repo::GlobalData {
   bool NoticeOnBuiltinDynamicCalls = false;
 
   /*
-   * Should we enforce that reffiness annotations are invaraint in overridden
-   * methods?
-   */
-  uint32_t ReffinessInvariance = 0;
-
-  /*
    * Should HHBBC do build time verification?
    */
   bool AbortBuildOnVerifyError = false;
@@ -219,7 +213,6 @@ struct Repo::GlobalData {
       (HackArrCompatSerializeNotices)
       (HackArrDVArrs)
       (EnableIntrinsicsExtension)
-      (ReffinessInvariance)
       (ForbidDynamicCallsToFunc)
       (ForbidDynamicCallsToClsMeth)
       (ForbidDynamicCallsToInstMeth)

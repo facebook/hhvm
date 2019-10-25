@@ -282,7 +282,6 @@ let emit_wrapper_function
     false (* is_pair_generator *)
     Closure_convert.TopLevel
     false (* no_injection *)
-    false (* inout_wrapper *)
     is_interceptable
     false (* is_memoize_impl *)
     function_rx_level

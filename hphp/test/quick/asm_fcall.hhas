@@ -81,7 +81,7 @@
   CGetL $funk
   Null
   PopL $funk
-  FCallFuncD <> 1 2 "0" - "byref"
+  FCallFuncD <> 1 2 "1" - "byref"
   PopC
   Print
   PopC

@@ -834,7 +834,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalHackCompilerVerboseErrors ? '1' : '0')
     + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
     + (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0')
-    + std::to_string(RuntimeOption::EvalReffinessInvariance)
     + std::to_string(RuntimeOption::EvalForbidDynamicCallsToFunc)
     + std::to_string(RuntimeOption::EvalForbidDynamicCallsToClsMeth)
     + std::to_string(RuntimeOption::EvalForbidDynamicCallsToInstMeth)

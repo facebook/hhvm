@@ -13,17 +13,6 @@ module T = Aast
 open Core_kernel
 open Instruction_sequence
 
-(* Extracts inout params
- * Or ref params only if the function is a closure
- *)
-let extract_inout_or_ref_param_locations is_closure_or_func md =
-  let (_, l) =
-    Emit_inout_helpers.extract_method_inout_or_ref_param_locations
-      ~is_closure_or_func
-      md
-  in
-  l
-
 let from_ast_wrapper privatize make_name ast_class ast_method =
   let (pos, original_name) = ast_method.T.m_name in
   let class_name = SU.Xhp.mangle @@ Utils.strip_ns @@ snd ast_class.T.c_name in
@@ -72,23 +61,11 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
   in
   let is_no_injection = Hhas_attribute.is_no_injection method_attributes in
   let ret = T.hint_of_type_hint ast_method.T.m_ret in
-  let original_method_id = make_name ast_method.T.m_name in
+  let method_id = make_name ast_method.T.m_name in
   if not (method_is_static || method_is_closure_body) then
     List.iter ast_method.T.m_params ~f:(fun p ->
         if p.T.param_name = SN.SpecialIdents.this then
           Emit_fatal.raise_fatal_parse p.T.param_pos "Cannot re-assign $this");
-  let inout_param_locations =
-    extract_inout_or_ref_param_locations method_is_closure_body ast_method
-  in
-  let has_inout_args = List.length inout_param_locations <> 0 in
-  let renamed_method_id =
-    if has_inout_args then
-      Hhbc_id.Method.from_ast_name
-      @@ snd ast_method.T.m_name
-      ^ Emit_inout_helpers.inout_suffix inout_param_locations
-    else
-      original_method_id
-  in
   let method_is_async =
     ast_method.T.m_fun_kind = Ast_defs.FAsync
     || ast_method.T.m_fun_kind = Ast_defs.FAsyncGenerator
@@ -153,9 +130,6 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
     SMap.get class_name (Emit_env.get_closure_namespaces ())
   in
   let namespace = Option.value closure_namespace ~default:namespace in
-  let has_ref_params =
-    List.exists ast_method.T.m_params ~f:(fun p -> p.T.param_is_reference)
-  in
   let method_rx_level =
     match Rx.rx_level_from_ast ast_method.T.m_user_attributes with
     | Some l -> l
@@ -209,17 +183,8 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
         ret
         [T.Stmt (Pos.none, T.Block ast_body_block)]
   in
-  let method_id =
-    if has_inout_args && (method_is_closure_body || has_ref_params) then
-      original_method_id
-    else
-      renamed_method_id
-  in
   let method_is_interceptable =
-    Interceptable.is_method_interceptable
-      namespace
-      ast_class
-      original_method_id
+    Interceptable.is_method_interceptable namespace ast_class method_id
   in
   let method_span =
     if is_native_opcode_impl then
@@ -235,7 +200,6 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
       method_is_final
       method_is_abstract
       is_no_injection
-      false (*method_inout_wrapper*)
       method_id
       method_body
       method_span
@@ -248,23 +212,7 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
       method_rx_level
       method_rx_disabled
   in
-  let decl_vars = Hhas_body.decl_vars @@ Hhas_method.body normal_function in
-  if has_inout_args && not (method_is_abstract && has_ref_params) then
-    let wrapper =
-      Emit_inout_function.emit_wrapper_method
-        ~is_closure:method_is_closure_body
-        ~decl_vars
-        ~original_id:original_method_id
-        ~renamed_id:renamed_method_id
-        ast_class
-        ast_method
-    in
-    if method_is_closure_body || has_ref_params then
-      [normal_function; wrapper]
-    else
-      [wrapper; normal_function]
-  else
-    [normal_function]
+  [normal_function]
 
 let from_ast class_ method_ =
   let is_memoize =

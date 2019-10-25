@@ -72,7 +72,7 @@ NameValueTable::NameValueTable(const NameValueTable& nvTable, ActRec* fp)
         dst.m_tv.m_type = kNamedLocalDataType;
         dst.m_tv.m_data.num = src.m_tv.m_data.num;
       } else {
-        tvDupWithRef(src.m_tv, dst.m_tv);
+        tvDup(src.m_tv, dst.m_tv);
       }
     }
   }

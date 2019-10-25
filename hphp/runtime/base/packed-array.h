@@ -100,10 +100,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* SetIntInPlace(ArrayData*, int64_t k, Cell v);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);
   static ArrayData* SetStrInPlace(ArrayData*, StringData* k, Cell v);
-  static ArrayData* SetWithRefInt(ArrayData*, int64_t k, TypedValue v);
-  static ArrayData* SetWithRefIntInPlace(ArrayData*, int64_t k, TypedValue v);
-  static ArrayData* SetWithRefStr(ArrayData*, StringData* k, TypedValue v);
-  static ArrayData* SetWithRefStrInPlace(ArrayData*, StringData*, TypedValue);
   static size_t Vsize(const ArrayData*);
   static tv_rval GetValueRef(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) {
@@ -136,8 +132,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool Uasort(ArrayData*, const Variant&);
   static ArrayData* Append(ArrayData*, Cell v);
   static ArrayData* AppendInPlace(ArrayData*, Cell v);
-  static ArrayData* AppendWithRef(ArrayData*, TypedValue v);
-  static ArrayData* AppendWithRefInPlace(ArrayData*, TypedValue v);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
@@ -163,18 +157,12 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* SetIntInPlaceVec(ArrayData*, int64_t, Cell);
   static ArrayData* SetStrVec(ArrayData*, StringData*, Cell);
   static constexpr auto SetStrInPlaceVec = &SetStrVec;
-  static ArrayData* SetWithRefIntVec(ArrayData*, int64_t k, TypedValue v);
-  static ArrayData* SetWithRefIntInPlaceVec(ArrayData*, int64_t, TypedValue);
-  static ArrayData* SetWithRefStrVec(ArrayData*, StringData* k, TypedValue v);
-  static constexpr auto SetWithRefStrInPlaceVec = &SetWithRefStrVec;
   static ArrayData* RemoveIntVec(ArrayData*, int64_t);
   static ArrayData* RemoveIntInPlaceVec(ArrayData*, int64_t);
   static arr_lval LvalIntVec(ArrayData*, int64_t, bool);
   static arr_lval LvalStrVec(ArrayData*, StringData*, bool);
   static constexpr auto LvalSilentIntVec = &LvalSilentInt;
   static constexpr auto LvalSilentStrVec = &LvalSilentStr;
-  static ArrayData* AppendWithRefVec(ArrayData*, TypedValue);
-  static ArrayData* AppendWithRefInPlaceVec(ArrayData*, TypedValue);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
   static ArrayData* ToPHPArrayVec(ArrayData*, bool);
   static constexpr auto ToPHPArrayIntishCastVec = &ToPHPArrayVec;
@@ -342,16 +330,7 @@ private:
   static ArrayData* RemoveImpl(ArrayData*, int64_t, bool);
   static ArrayData* RemoveImplVec(ArrayData*, int64_t, bool);
 
-  static ArrayData* SetWithRefIntImpl(ArrayData*, int64_t k, TypedValue v,
-                                      bool copy);
-  static ArrayData* SetWithRefStrImpl(ArrayData*, StringData* k, TypedValue v,
-                                      bool copy);
-  static ArrayData* SetWithRefIntVecImpl(ArrayData*, int64_t k,
-                                         TypedValue v, bool copy);
-
   static ArrayData* AppendImpl(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendWithRefImpl(ArrayData*, TypedValue v, bool copy);
-  static ArrayData* AppendWithRefVecImpl(ArrayData*, TypedValue, bool copy);
 
   struct VecInitializer;
   static VecInitializer s_vec_initializer;

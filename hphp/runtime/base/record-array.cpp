@@ -194,22 +194,6 @@ ArrayData* RecordArray::SetIntInPlace(ArrayData*, int64_t, Cell) {
   throw_not_implemented("This method on RecordArray");
 }
 
-ArrayData* RecordArray::SetWithRefInt(ArrayData*, int64_t, Cell) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::SetWithRefIntInPlace(ArrayData*, int64_t, Cell) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::SetWithRefStr(ArrayData*, StringData*, Cell) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::SetWithRefStrInPlace(ArrayData*, StringData*, Cell) {
-  throw_not_implemented("This method on RecordArray");
-}
-
 tv_rval RecordArray::GetValueRef(const ArrayData*, ssize_t) {
   throw_not_implemented("This method on RecordArray");
 }
@@ -323,14 +307,6 @@ ArrayData* RecordArray::Append(ArrayData*, Cell) {
 }
 
 ArrayData* RecordArray::AppendInPlace(ArrayData*, Cell) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::AppendWithRef(ArrayData*, TypedValue) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::AppendWithRefInPlace(ArrayData*, TypedValue) {
   throw_not_implemented("This method on RecordArray");
 }
 

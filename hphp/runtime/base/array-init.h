@@ -295,29 +295,6 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
   }
 
   /*
-   * Call setWithRef() on the underlying array.
-   */
-  MixedPHPArrayInitBase& setWithRef(int64_t name, TypedValue tv) {
-    this->performOp([&]{
-      return MixedArray::SetWithRefInt(this->m_arr, name, tv);
-    });
-    return *this;
-  }
-  MixedPHPArrayInitBase& setWithRef(const String& name, TypedValue tv) {
-    this->performOp([&]{
-      return MixedArray::SetWithRefStr(this->m_arr, name.get(), tv);
-    });
-    return *this;
-  }
-  template<class T>
-  MixedPHPArrayInitBase& setWithRef(const T& name, TypedValue tv) {
-    this->performOp([&]{
-      return this->m_arr->setWithRefInPlace(name, tv);
-    });
-    return *this;
-  }
-
-  /*
    * Call add() on the underlying array.
    */
   MixedPHPArrayInitBase& add(int64_t name, TypedValue tv,
@@ -519,16 +496,6 @@ struct PackedPHPArrayInitBase : PackedArrayInitBase<TArray, KindOfArray> {
   PackedPHPArrayInitBase& append(const Variant& v) {
     return append(*v.asTypedValue());
   }
-
-  PackedPHPArrayInitBase& appendWithRef(TypedValue v) {
-    this->performOp([&]{
-      return PackedArray::AppendWithRefInPlace(this->m_arr, v);
-    });
-    return *this;
-  }
-  PackedPHPArrayInitBase& appendWithRef(const Variant& v) {
-    return appendWithRef(*v.asTypedValue());
-  }
 };
 
 using PackedArrayInit = PackedPHPArrayInitBase<PackedArray>;
@@ -596,14 +563,6 @@ struct VArrayInit {
   }
   VArrayInit& append(const Variant& v) {
     return append(*v.asTypedValue());
-  }
-
-  VArrayInit& appendWithRef(TypedValue v) {
-    performOp([&]{ return m_arr->appendWithRefInPlace(v); });
-    return *this;
-  }
-  VArrayInit& appendWithRef(const Variant& v) {
-    return appendWithRef(*v.asTypedValue());
   }
 
   Variant toVariant() {

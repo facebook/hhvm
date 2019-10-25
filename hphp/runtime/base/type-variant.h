@@ -296,7 +296,6 @@ struct Variant : private TypedValue {
   enum class CellDup {};
   enum class ArrayInitCtor {};
   enum class Attach {};
-  enum class WithRefBind {};
   enum class Wrap {};
 
   Variant() noexcept { m_type = KindOfUninit; }
@@ -344,11 +343,6 @@ struct Variant : private TypedValue {
     assertx(v.get() && !v.get()->isRefCounted());
     m_type = KindOfPersistentString;
     m_data.pstr = v.get();
-  }
-
-  Variant(const Variant& other, WithRefBind) {
-    tvDupWithRef(*other.asTypedValue(), *asTypedValue());
-    if (m_type == KindOfUninit) m_type = KindOfNull;
   }
 
   /* implicit */ Variant(const String& v) noexcept : Variant(v.get()) {}
@@ -613,19 +607,6 @@ struct Variant : private TypedValue {
    */
   void setNull() noexcept {
     tvSetNull(*asTypedValue());
-  }
-
-  /**
-   * Clear the original data, and set it to be the same as in v, and if
-   * v is referenced, keep the reference.
-   */
-  Variant& setWithRef(TypedValue v) noexcept {
-    tvSetWithRef(v, *asTypedValue());
-    if (m_type == KindOfUninit) m_type = KindOfNull;
-    return *this;
-  }
-  Variant& setWithRef(const Variant& v) noexcept {
-    return setWithRef(*v.asTypedValue());
   }
 
   static Variant attach(TypedValue tv) noexcept {
@@ -1682,9 +1663,6 @@ inline Variant Array::operator[](const Variant& key) const {
 
 inline void Array::append(const Variant& v) {
   append(*v.asTypedValue());
-}
-inline void Array::appendWithRef(const Variant& v) {
-  appendWithRef(*v.asTypedValue());
 }
 inline void Array::prepend(const Variant& v) {
   prepend(*v.asTypedValue());

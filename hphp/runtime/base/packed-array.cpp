@@ -227,7 +227,7 @@ MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
     auto const h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
-    tvDupWithRef(*GetValueRef(old, i), dstData->data, old);
+    tvDup(*GetValueRef(old, i), dstData->data);
     ++dstData;
   }
 
@@ -324,7 +324,7 @@ bool PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad) {
     if (UNLIKELY(isRefType(type(elm)))) {
       assertx(!adIn->isVecArray());
       auto const ref = val(elm).pref;
-      // See also tvDupWithRef()
+      // See also tvDup()
       if (!ref->isReferenced() && ref->cell()->m_data.parr != adIn) {
         cellDup(*ref->cell(), elm);
         continue;
@@ -418,7 +418,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   auto pos_limit = arr->iter_end();
   for (auto pos = arr->iter_begin(); pos != pos_limit;
        pos = arr->iter_advance(pos), ++i) {
-    tvDupWithRef(arr->atPos(pos), LvalUncheckedInt(ad, i), arr);
+    tvDup(arr->atPos(pos), LvalUncheckedInt(ad, i));
   }
 
   if (RuntimeOption::EvalArrayProvenance) {
@@ -920,90 +920,6 @@ ArrayData* PackedArray::SetStrVec(ArrayData* adIn, StringData* k, Cell v) {
   throwInvalidArrayKeyException(k, adIn);
 }
 
-ArrayData* PackedArray::SetWithRefIntImpl(ArrayData* adIn, int64_t k,
-                                          TypedValue v, bool copy) {
-  auto const checkHackArrRef = [&] {
-    if (checkHACRefBind() && tvIsReferenced(v)) {
-      raiseHackArrCompatRefBind(k);
-    }
-  };
-
-  return MutableOpInt(adIn, k, copy,
-    [&] (ArrayData* ad) {
-      checkHackArrRef();
-      setElemWithRef(LvalUncheckedInt(ad, k), v);
-      return ad;
-    },
-    [&] { return AppendWithRefImpl(adIn, v, copy); },
-    [&] (MixedArray* mixed) {
-      checkHackArrRef();
-      auto const lval = mixed->addLvalImpl<false>(k);
-      tvSetWithRef(v, lval);
-      return lval.arr;
-    }
-  );
-}
-
-ArrayData*
-PackedArray::SetWithRefInt(ArrayData* adIn, int64_t k, TypedValue v) {
-  return SetWithRefIntImpl(adIn, k, v, adIn->cowCheck());
-}
-
-ArrayData*
-PackedArray::SetWithRefIntInPlace(ArrayData* adIn, int64_t k, TypedValue v) {
-  return SetWithRefIntImpl(adIn, k, v, false/*copy*/);
-}
-
-ArrayData* PackedArray::SetWithRefIntVecImpl(ArrayData* adIn, int64_t k,
-                                             TypedValue v, bool copy) {
-  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(adIn);
-
-  return MutableOpIntVec(adIn, k, copy,
-    [&] (ArrayData* ad) { setElemNoRef(LvalUncheckedInt(ad, k), v); return ad; }
-  );
-}
-
-ArrayData*
-PackedArray::SetWithRefIntVec(ArrayData* a, int64_t k, TypedValue v) {
-  return SetWithRefIntVecImpl(a, k, v, a->cowCheck());
-}
-
-ArrayData*
-PackedArray::SetWithRefIntInPlaceVec(ArrayData* a, int64_t k, TypedValue v) {
-  return SetWithRefIntVecImpl(a, k, v, false/*copy*/);
-}
-
-ArrayData* PackedArray::SetWithRefStrImpl(ArrayData* adIn, StringData* k,
-                                          TypedValue v, bool copy) {
-  return MutableOpStr(adIn, k, copy,
-    [&] (MixedArray* mixed) {
-      if (checkHACRefBind() && tvIsReferenced(v)) {
-        raiseHackArrCompatRefBind(k);
-      }
-      auto const lval = mixed->addLvalImpl<false>(k);
-      tvSetWithRef(v, lval);
-      return lval.arr;
-    }
-  );
-}
-
-ArrayData*
-PackedArray::SetWithRefStr(ArrayData* adIn, StringData* k, TypedValue v) {
-  return SetWithRefStrImpl(adIn, k, v, adIn->cowCheck());
-}
-
-ArrayData*
-PackedArray::SetWithRefStrInPlace(ArrayData* a, StringData* k, TypedValue v) {
-  return SetWithRefStrImpl(a, k, v, false/*copy*/);
-}
-
-ArrayData* PackedArray::SetWithRefStrVec(ArrayData* adIn, StringData* k,
-                                         TypedValue) {
-  assertx(checkInvariants(adIn));
-  assertx(adIn->isVecArray());
-  throwInvalidArrayKeyException(k, adIn);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 ArrayData* PackedArray::RemoveImpl(ArrayData* adIn, int64_t k, bool copy) {
@@ -1111,51 +1027,6 @@ ArrayData* PackedArray::Append(ArrayData* adIn, Cell v) {
 
 ArrayData* PackedArray::AppendInPlace(ArrayData* adIn, Cell v) {
   return AppendImpl(adIn, v, false);
-}
-
-ArrayData*
-PackedArray::AppendWithRefImpl(ArrayData* adIn, TypedValue v, bool copy) {
-  assertx(checkInvariants(adIn));
-  assertx(adIn->isPacked());
-
-  if (checkHACRefBind() && tvIsReferenced(v)) {
-    raiseHackArrCompatRefNew();
-  }
-
-  auto const ad = PrepareForInsert(adIn, copy);
-  auto lval = LvalUncheckedInt(ad, ad->m_size++);
-  type(lval) = KindOfNull;
-  tvSetWithRef(v, lval);
-  if (type(lval) == KindOfUninit) type(lval) = KindOfNull;
-  return ad;
-}
-
-ArrayData*
-PackedArray::AppendWithRef(ArrayData* adIn, TypedValue v) {
-  return AppendWithRefImpl(adIn, v, adIn->cowCheck());
-}
-
-ArrayData*
-PackedArray::AppendWithRefInPlace(ArrayData* adIn, TypedValue v) {
-  return AppendWithRefImpl(adIn, v, false);
-}
-
-ArrayData*
-PackedArray::AppendWithRefVecImpl(ArrayData* adIn, TypedValue v, bool copy) {
-  assertx(checkInvariants(adIn));
-  assertx(adIn->isVecArray());
-  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(adIn);
-  return AppendImpl(adIn, tvToInitCell(v), copy);
-}
-
-ArrayData*
-PackedArray::AppendWithRefVec(ArrayData* a, TypedValue v) {
-  return AppendWithRefVecImpl(a, v, a->cowCheck());
-}
-
-ArrayData*
-PackedArray::AppendWithRefInPlaceVec(ArrayData* a, TypedValue v) {
-  return AppendWithRefVecImpl(a, v, false);
 }
 
 ArrayData* PackedArray::PlusEq(ArrayData* adIn, const ArrayData* elems) {

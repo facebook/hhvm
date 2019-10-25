@@ -205,67 +205,6 @@ enable_if_lval_t<C&&, void> cellDup(const Cell fr, C&& to) {
   tvIncRefGen(as_tv(to));
 }
 
-namespace detail {
-
-/*
- * Duplicate `fr' to `to' with custom reference demotion semantics.
- */
-template<typename T, typename Fn>
-enable_if_lval_t<T&&, void>
-tvDupWithRef(const TypedValue& fr, T&& to, Fn should_demote) {
-  assertx(tvIsPlausible(fr));
-
-  tvCopy(fr, to);
-  if (!isRefcountedType(fr.m_type)) return;
-  if (!isRefType(fr.m_type)) {
-    tvIncRefCountable(as_tv(to));
-    return;
-  }
-  auto ref = fr.m_data.pref;
-  if (should_demote(ref)) {
-    cellDup(*ref->cell(), to);
-    return;
-  }
-  assertx(isRefType(type(to)));
-  val(to).pref->incRefCount();
-}
-
-}
-
-/*
- * Duplicate `fr' to `to' with reference demotion semantics.
- *
- * If `fr' has type KindOfRef but is not "observably referenced"---i.e.,
- * RefData::isReferenced() is false---this does cellDup(tvToCell(fr), to).
- * Otherwise, it's the same as tvDup().
- *
- * In other words, this is a tvDup() that unboxes single-reference refs.
- */
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void>
-tvDupWithRef(const TypedValue& fr, T&& to) {
-  detail::tvDupWithRef(fr, to, [] (RefData* ref) {
-    return !ref->isReferenced();
-  });
-}
-
-/*
- * Duplicate `fr' to `to' with reference demotion semantics.
- *
- * Just like tvDupWithRef(fr, to), except we won't demote if the ref's
- * inner value is `container'.
- */
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void>
-tvDupWithRef(const TypedValue& fr, T&& to, const ArrayData* container) {
-  assertx(container);
-  detail::tvDupWithRef(fr, to, [&] (RefData* ref) {
-    return !ref->isReferenced() &&
-           (!isArrayType(ref->cell()->m_type) ||
-            container != ref->cell()->m_data.parr);
-  });
-}
-
 /*
  * Write a value to `to', with Dup semantics.
  */
@@ -404,22 +343,6 @@ enable_if_lval_t<C&&, void> cellSetWithAux(const Cell fr, C&& to) {
   to = fr;
   tvIncRefGen(to);
   tvDecRefGen(old);
-}
-
-/*
- * Set `fr' to `to' with reference demotion semantics.
- *
- * This is just like tvDupWithRef(), except it decrefs the old value of `to'.
- * Unlike the other Set functions, this accepts any TypedValue as `fr', since
- * it is ref-preserving (modulo demotion).
- */
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvSetWithRef(const TypedValue fr, T&& to) {
-  assertx(tvIsPlausible(as_tv(to)));
-  auto const old = as_tv(to);
-  tvDupWithRef(fr, to);
-  tvDecRefGen(old);
-  assertx(tvIsPlausible(as_tv(to)));
 }
 
 /*

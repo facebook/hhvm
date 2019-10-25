@@ -501,20 +501,6 @@ public:
   ArrayData* setInPlace(const StringData*, const Variant&) = delete;
 
   /*
-   * Like set(), except the reffiness of `v' is preserved unless it is
-   * singly-referenced.
-   */
-  ArrayData* setWithRef(int64_t k, TypedValue v);
-  ArrayData* setWithRef(StringData* k, TypedValue v);
-  ArrayData* setWithRef(Cell k, TypedValue v);
-  ArrayData* setWithRef(const String& k, TypedValue v);
-  ArrayData* setWithRef(const StringData*, TypedValue) = delete;
-  ArrayData* setWithRefInPlace(Cell k, TypedValue v);
-  ArrayData* setWithRefInPlace(const String& k, TypedValue v);
-  ArrayData* setWithRefInPlace(StringData* k, TypedValue v);
-  ArrayData* setWithRefInPlace(int64_t k, TypedValue v);
-
-  /*
    * Remove the value at key `k'. remove() will make a copy first if necessary;
    * removeInPlace() will never copy, but may escalate.
    *
@@ -538,14 +524,6 @@ public:
    */
   ArrayData* append(Cell v);
   ArrayData* appendInPlace(Cell v);
-
-  /*
-   * Like append(), except the reffiness of `v' is preserved unless it is
-   * singly-referenced.
-   */
-  ArrayData* appendWithRef(TypedValue v);
-  ArrayData* appendWithRefInPlace(TypedValue v);
-  ArrayData* appendWithRef(const Variant& v);
 
   /////////////////////////////////////////////////////////////////////////////
   // Iteration.
@@ -912,11 +890,6 @@ struct ArrayFunctions {
   ArrayData* (*setIntInPlace[NK])(ArrayData*, int64_t k, Cell v);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v);
   ArrayData* (*setStrInPlace[NK])(ArrayData*, StringData* k, Cell v);
-  ArrayData* (*setWithRefInt[NK])(ArrayData*, int64_t k, TypedValue v);
-  ArrayData* (*setWithRefIntInPlace[NK])(ArrayData*, int64_t k, TypedValue v);
-  ArrayData* (*setWithRefStr[NK])(ArrayData*, StringData* k, TypedValue v);
-  ArrayData* (*setWithRefStrInPlace[NK])(ArrayData*, StringData* k,
-                                         TypedValue v);
   size_t (*vsize[NK])(const ArrayData*);
   tv_rval (*nvGetPos[NK])(const ArrayData*, ssize_t pos);
   bool (*isVectorData[NK])(const ArrayData*);
@@ -947,8 +920,6 @@ struct ArrayFunctions {
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, Cell v);
   ArrayData* (*appendInPlace[NK])(ArrayData*, Cell v);
-  ArrayData* (*appendWithRef[NK])(ArrayData*, TypedValue v);
-  ArrayData* (*appendWithRefInPlace[NK])(ArrayData*, TypedValue v);
   ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);

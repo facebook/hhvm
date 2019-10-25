@@ -667,18 +667,6 @@ ArrayData* SetArray::SetStr(ArrayData*, StringData*, Cell) {
   );
 }
 
-ArrayData* SetArray::SetWithRefInt(ArrayData*, int64_t, TypedValue) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (set with ref int)"
-  );
-}
-
-ArrayData* SetArray::SetWithRefStr(ArrayData*, StringData*, TypedValue) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (set with ref string)"
-  );
-}
-
 template<class K> ArrayData*
 SetArray::RemoveImpl(ArrayData* ad, K k, bool copy, SetArrayElm::hash_t h) {
   auto a = asSet(ad);
@@ -748,16 +736,6 @@ ArrayData* SetArray::Append(ArrayData* ad, Cell v) {
 
 ArrayData* SetArray::AppendInPlace(ArrayData* ad, Cell v) {
   return AppendImpl(ad, v, false);
-}
-
-ArrayData* SetArray::AppendWithRef(ArrayData* ad, TypedValue v) {
-  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
-  return Append(ad, tvToInitCell(v));
-}
-
-ArrayData* SetArray::AppendWithRefInPlace(ArrayData* ad, TypedValue v) {
-  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
-  return AppendInPlace(ad, tvToInitCell(v));
 }
 
 ArrayData* SetArray::PlusEq(ArrayData* ad, const ArrayData*) {

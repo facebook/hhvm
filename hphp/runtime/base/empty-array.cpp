@@ -238,25 +238,6 @@ EmptyArray::SetStr(ArrayData*, StringData* k, Cell v) {
   return EmptyArray::MakeMixed(k, v).arr;
 }
 
-ArrayData* EmptyArray::SetWithRefInt(ArrayData* ad, int64_t k, TypedValue v) {
-  if (checkHACRefBind() && tvIsReferenced(v)) {
-    raiseHackArrCompatRefBind(k);
-  }
-  auto const lval = LvalIntImpl<false>(ad, k, ad->cowCheck());
-  tvSetWithRef(v, lval);
-  return lval.arr;
-}
-
-ArrayData* EmptyArray::SetWithRefStr(ArrayData* ad, StringData* k,
-                                     TypedValue v) {
-  if (checkHACRefBind() && tvIsReferenced(v)) {
-    raiseHackArrCompatRefBind(k);
-  }
-  auto const lval = LvalStrImpl<false>(ad, k, ad->cowCheck());
-  tvSetWithRef(v, lval);
-  return lval.arr;
-}
-
 ArrayData* EmptyArray::RemoveInt(ArrayData* ad, int64_t) {
   return ad;
 }
@@ -288,15 +269,6 @@ arr_lval EmptyArray::LvalForceNew(ArrayData*, bool) {
 ArrayData* EmptyArray::Append(ArrayData*, Cell v) {
   tvIncRefGen(v);
   return EmptyArray::MakePackedInl(v).arr;
-}
-
-ArrayData* EmptyArray::AppendWithRef(ArrayData*, TypedValue v) {
-  if (checkHACRefBind() && tvIsReferenced(v)) {
-    raiseHackArrCompatRefNew();
-  }
-  auto tv = make_tv<KindOfNull>();
-  tvAsVariant(&tv).setWithRef(v);
-  return EmptyArray::MakePacked(tv).arr;
 }
 
 //////////////////////////////////////////////////////////////////////

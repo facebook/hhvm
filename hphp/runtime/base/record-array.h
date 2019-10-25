@@ -61,10 +61,6 @@ struct RecordArray : ArrayData,
   static ArrayData* SetIntInPlace(ArrayData*, int64_t key, Cell v);
   static ArrayData* SetStr(ArrayData*, StringData*, Cell v);
   static ArrayData* SetStrInPlace(ArrayData*, StringData*, Cell v);
-  static ArrayData* SetWithRefInt(ArrayData*, int64_t k, Cell v);
-  static ArrayData* SetWithRefIntInPlace(ArrayData*, int64_t k, Cell v);
-  static ArrayData* SetWithRefStr(ArrayData*, StringData* k, Cell v);
-  static ArrayData* SetWithRefStrInPlace(ArrayData*, StringData* k, Cell v);
   static size_t Vsize(const ArrayData*);
   static tv_rval GetValueRef(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
@@ -95,8 +91,6 @@ struct RecordArray : ArrayData,
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell v);
   static ArrayData* AppendInPlace(ArrayData*, Cell v);
-  static ArrayData* AppendWithRef(ArrayData*, TypedValue v);
-  static ArrayData* AppendWithRefInPlace(ArrayData*, TypedValue v);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);

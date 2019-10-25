@@ -507,7 +507,7 @@ void ObjectData::o_getArray(Array& props,
     auto const declProps = cls->declProperties();
     auto const prop = declProps[slot];
     auto val = this->propRvalAtOffset(slot);
-    props.setWithRef(StrNR(prop.name).asString(), val.tv());
+    props.set(StrNR(prop.name).asString(), val.tv());
   }
   IteratePropToArrayOrderNoInc(
     this,
@@ -521,12 +521,12 @@ void ObjectData::o_getArray(Array& props,
         // Skip all the reified properties since we already prepended the
         // current class' reified property to the list
         if (prop.name != s_86reified_prop.get()) {
-          props.setWithRef(StrNR(prop.mangledName).asString(), val.tv());
+          props.set(StrNR(prop.mangledName).asString(), val.tv());
         }
       }
     },
     [&](Cell key_tv, TypedValue val) {
-      props.setWithRef(key_tv, val, true);
+      props.set(key_tv, val, true);
       if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
         auto const key = tvCastToString(key_tv);
         raiseReadDynamicProp(key.get());
@@ -613,7 +613,7 @@ size_t getPropertyIfAccessible(ObjectData* obj,
     if (mode == ObjectData::EraseRefs) {
       properties.set(StrNR(key), prop.tv(), true);
     } else {
-      properties.setWithRef(StrNR(key), prop.tv(), true);
+      properties.set(StrNR(key), prop.tv(), true);
     }
   }
   return propLeft;
@@ -704,7 +704,7 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
         }
         case PreserveRefs: {
           auto const val = dynProps.get()->at(key.m_data.num);
-          retArray.setWithRef(key.m_data.num, val);
+          retArray.set(key.m_data.num, val);
           break;
         }
         }
@@ -720,7 +720,7 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
       }
       case PreserveRefs: {
         auto const val = dynProps.get()->at(strKey);
-        retArray.setWithRef(make_tv<KindOfString>(strKey),
+        retArray.set(make_tv<KindOfString>(strKey),
                             val, true /* isKey */);
         break;
       }
@@ -857,7 +857,7 @@ ObjectData* ObjectData::clone() {
   auto const clonePropVec = clone->propVecForConstruct();
   for (auto slot = Slot{0}; slot < nProps; slot++) {
     auto index = m_cls->propSlotToIndex(slot);
-    tvDupWithRef(propVec()[index], clonePropVec[index]);
+    tvDup(propVec()[index], clonePropVec[index]);
     assertx(assertTypeHint(&clonePropVec[index], slot));
   }
 

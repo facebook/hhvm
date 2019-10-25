@@ -486,7 +486,7 @@ MixedArray* MixedArray::SlowCopy(MixedArray* ad, const ArrayData& old,
     if (elm->hasStrKey()) elm->skey->incRefCount();
     if (UNLIKELY(isRefType(elm->data.m_type))) {
       auto const ref = elm->data.m_data.pref;
-      // See also tvDupWithRef()
+      // See also tvDup()
       if (!ref->isReferenced() && ref->cell()->m_data.parr != &old) {
         cellDup(*ref->cell(), *reinterpret_cast<Cell*>(&elm->data));
         continue;
@@ -960,18 +960,6 @@ bool MixedArray::ExistsStr(const ArrayData* ad, const StringData* k) {
 //=============================================================================
 // Append/insert/update.
 
-ALWAYS_INLINE
-MixedArray* MixedArray::initWithRef(TypedValue& tv, TypedValue v) {
-  tvWriteNull(tv);
-  tvAsVariant(&tv).setWithRef(v);
-  return this;
-}
-
-ALWAYS_INLINE
-MixedArray* MixedArray::initWithRef(TypedValue& tv, const Variant& v) {
-  return initWithRef(tv, *v.asTypedValue());
-}
-
 /*
  * This is a streamlined copy of Variant.constructValHelper()
  * with no incref+decref because we're moving v to this array.
@@ -1006,7 +994,7 @@ MixedArray* MixedArray::SlowGrow(MixedArray* ad, const ArrayData& old,
     if (elm->hasStrKey()) elm->skey->incRefCount();
     if (UNLIKELY(isRefType(elm->data.m_type))) {
       auto ref = elm->data.m_data.pref;
-      // See also tvDupWithRef()
+      // See also tvDup()
       if (!ref->isReferenced() && ref->cell()->m_data.parr != &old) {
         cellDup(*ref->cell(), elm->data);
         continue;
@@ -1186,27 +1174,6 @@ void MixedArray::nextInsert(Cell v) {
   cellDup(v, e->data);
 }
 
-ArrayData* MixedArray::nextInsertWithRef(TypedValue data) {
-  assertx(!isFull());
-
-  int64_t ki = m_nextKI;
-  auto h = hash_int64(ki);
-  auto ei = findForNewInsert(h);
-  assertx(!isValidPos(ei));
-
-  // Allocate a new element.
-  auto e = allocElm(ei);
-  e->setIntKey(ki, h);
-  mutableKeyTypes()->recordInt();
-  m_nextKI = static_cast<uint64_t>(ki) + 1; // Update next free element.
-  return initWithRef(e->data, data);
-}
-
-ALWAYS_INLINE
-ArrayData* MixedArray::nextInsertWithRef(const Variant& data) {
-  return nextInsertWithRef(*data.asTypedValue());
-}
-
 template <class K> ALWAYS_INLINE
 ArrayData* MixedArray::update(K k, Cell data) {
   assertx(!isFull());
@@ -1279,40 +1246,6 @@ ArrayData*
 MixedArray::SetStrInPlace(ArrayData* ad, StringData* k, Cell v) {
   assertx(ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(false/*copy*/)->update(k, v);
-}
-
-ArrayData* MixedArray::SetWithRefInt(ArrayData* ad, int64_t k,
-                                     TypedValue v) {
-  if (checkHACRefBind() && tvIsReferenced(v)) {
-    raiseHackArrCompatRefBind(k);
-  }
-  auto mixed = asMixed(ad);
-  return mixed->prepareForInsert(mixed->cowCheck())->updateWithRef(k, v);
-}
-
-ArrayData* MixedArray::SetWithRefIntInPlace(ArrayData* ad, int64_t k,
-                                            TypedValue v) {
-  if (checkHACRefBind() && tvIsReferenced(v)) {
-    raiseHackArrCompatRefBind(k);
-  }
-  return asMixed(ad)->prepareForInsert(false/*copy*/)->updateWithRef(k, v);
-}
-
-ArrayData* MixedArray::SetWithRefStr(ArrayData* ad, StringData* k,
-                                     TypedValue v) {
-  if (checkHACRefBind() && tvIsReferenced(v)) {
-    raiseHackArrCompatRefBind(k);
-  }
-  auto mixed = asMixed(ad);
-  return mixed->prepareForInsert(mixed->cowCheck())->updateWithRef(k, v);
-}
-
-ArrayData* MixedArray::SetWithRefStrInPlace(ArrayData* ad, StringData* k,
-                                     TypedValue v) {
-  if (checkHACRefBind() && tvIsReferenced(v)) {
-    raiseHackArrCompatRefBind(k);
-  }
-  return asMixed(ad)->prepareForInsert(false/*copy*/)->updateWithRef(k, v);
 }
 
 ArrayData*
@@ -1413,26 +1346,6 @@ ArrayData* MixedArray::AppendInPlace(ArrayData* ad, Cell v) {
   return AppendImpl(ad, v, false);
 }
 
-ArrayData*
-MixedArray::AppendWithRefImpl(ArrayData* ad, TypedValue v, bool copy) {
-  auto a = asMixed(ad);
-  assertx(a->isMixed());
-
-  if (checkHACRefBind() && tvIsReferenced(v)) {
-    raiseHackArrCompatRefNew();
-  }
-
-  return a->prepareForInsert(copy)->nextInsertWithRef(v);
-}
-
-ArrayData* MixedArray::AppendWithRef(ArrayData* ad, TypedValue v) {
-  return AppendWithRefImpl(ad, v, ad->cowCheck());
-}
-
-ArrayData* MixedArray::AppendWithRefInPlace(ArrayData* ad, TypedValue v) {
-  return AppendWithRefImpl(ad, v, false);
-}
-
 /*
  * Copy an array to a new array of mixed kind, with a particular
  * pre-reserved size.
@@ -1476,7 +1389,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   auto mask = MixedArray::Mask(scale);
   for (; srcElm != srcStop; ++srcElm) {
     if (srcElm->isTombstone()) continue;
-    tvDupWithRef(srcElm->data, dstElm->data, src);
+    tvDup(srcElm->data, dstElm->data);
     auto const hash = static_cast<int32_t>(srcElm->probe());
     if (hash < 0) {
       dstElm->setIntKey(srcElm->ikey, hash);
@@ -1539,7 +1452,7 @@ ArrayData* MixedArray::ArrayPlusEqGeneric(ArrayData* ad,
       ? ret->insert(tv->m_data.num)
       : ret->insert(tv->m_data.pstr);
     if (!p.found) {
-      ret->initWithRef(p.tv, value);
+      tvDup(value, p.tv);
     }
   }
 
@@ -1583,14 +1496,14 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
       auto e = ret->allocElm(ei);
       e->setStrKey(srcElem->skey, hash);
       ret->mutableKeyTypes()->recordStr(srcElem->skey);
-      ret->initWithRef(e->data, tvAsCVarRef(&srcElem->data));
+      tvDup(srcElem->data, e->data);
     } else {
       auto const ei = ret->findForInsertUpdate(srcElem->ikey, hash);
       if (isValidPos(ei)) continue;
       auto e = ret->allocElm(ei);
       e->setIntKey(srcElem->ikey, hash);
       ret->mutableKeyTypes()->recordInt();
-      ret->initWithRef(e->data, tvAsCVarRef(&srcElem->data));
+      tvDup(srcElem->data, e->data);
     }
   }
 
@@ -1607,12 +1520,12 @@ ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
     Variant key = it.first();
     auto const value = it.secondVal();
     if (key.asTypedValue()->m_type == KindOfInt64) {
-      ret->nextInsertWithRef(value);
+      ret->nextInsert(value);
     } else {
       StringData* sd = key.getStringData();
       auto const lval = ret->addLvalImpl<false>(sd);
       assertx(value.m_type != KindOfUninit);
-      tvSetWithRef(value, lval);
+      tvSet(value, lval);
     }
   }
   return ret;
@@ -1635,11 +1548,11 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
       if (isTombstone(srcElem->data.m_type)) continue;
 
       if (srcElem->hasIntKey()) {
-        ret->nextInsertWithRef(tvAsCVarRef(&srcElem->data));
+        ret->nextInsert(srcElem->data);
       } else {
         auto const lval = ret->addLvalImpl<false>(srcElem->skey);
         assertx(srcElem->data.m_type != KindOfUninit);
-        tvSetWithRef(srcElem->data, lval);
+        tvSet(srcElem->data, lval);
       }
     }
     return ret;
@@ -1653,7 +1566,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
   auto src           = packedData(elems);
   auto const srcStop = src + elems->m_size;
   for (; src != srcStop; ++src) {
-    ret->nextInsertWithRef(tvAsCVarRef(src));
+    ret->nextInsert(*src);
   }
 
   return ret;
@@ -1774,12 +1687,12 @@ ArrayData* MixedArray::copyWithIntishCast(MixedArray* adIn,
     auto const& e = elms[i];
     if (e.isTombstone()) continue;
     if (e.hasIntKey()) {
-      out->updateWithRef(e.ikey, e.data);
+      out->update(e.ikey, e.data);
     } else {
       if (auto const intish = tryIntishCast<IC>(e.skey)) {
-        out->updateWithRef(*intish, e.data);
+        out->update(*intish, e.data);
       } else {
-        out->updateWithRef(e.skey, e.data);
+        out->update(e.skey, e.data);
       }
     }
   }
@@ -1955,48 +1868,6 @@ tv_rval MixedArray::NvTryGetStrDict(const ArrayData* ad,
   auto const ptr = MixedArray::NvGetStr(ad, k);
   if (UNLIKELY(!ptr)) throwOOBArrayKeyException(k, ad);
   return ptr;
-}
-
-ArrayData* MixedArray::SetWithRefIntDict(ArrayData* ad, int64_t k,
-                                         TypedValue v) {
-  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
-  auto mixed = asMixed(ad);
-  return mixed->prepareForInsert(mixed->cowCheck())->updateWithRef(k, v);
-}
-
-ArrayData* MixedArray::SetWithRefIntInPlaceDict(ArrayData* ad, int64_t k,
-                                                TypedValue v) {
-  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
-  return asMixed(ad)->prepareForInsert(false)->updateWithRef(k, v);
-}
-
-ArrayData* MixedArray::SetWithRefStrDict(ArrayData* ad, StringData* k,
-                                         TypedValue v) {
-  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
-  auto mixed = asMixed(ad);
-  return mixed->prepareForInsert(mixed->cowCheck())->updateWithRef(k, v);
-}
-
-ArrayData* MixedArray::SetWithRefStrInPlaceDict(ArrayData* ad, StringData* k,
-                                                TypedValue v) {
-  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
-  return asMixed(ad)->prepareForInsert(false)->updateWithRef(k, v);
-}
-
-ArrayData*
-MixedArray::AppendWithRefDict(ArrayData* adIn, TypedValue v) {
-  assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDict());
-  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(adIn);
-  return Append(adIn, tvToInitCell(v));
-}
-
-ArrayData*
-MixedArray::AppendWithRefInPlaceDict(ArrayData* adIn, TypedValue v) {
-  assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDict());
-  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(adIn);
-  return AppendInPlace(adIn, tvToInitCell(v));
 }
 
 //////////////////////////////////////////////////////////////////////

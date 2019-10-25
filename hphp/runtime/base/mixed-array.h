@@ -375,10 +375,6 @@ public:
   static ArrayData* SetIntInPlace(ArrayData*, int64_t k, Cell v);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);
   static ArrayData* SetStrInPlace(ArrayData*, StringData* k, Cell v);
-  static ArrayData* SetWithRefInt(ArrayData*, int64_t k, TypedValue v);
-  static ArrayData* SetWithRefIntInPlace(ArrayData*, int64_t k, TypedValue v);
-  static ArrayData* SetWithRefStr(ArrayData*, StringData* k, TypedValue v);
-  static ArrayData* SetWithRefStrInPlace(ArrayData*, StringData*, TypedValue);
   static ArrayData* AddInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
@@ -389,8 +385,6 @@ public:
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell v);
   static ArrayData* AppendInPlace(ArrayData*, Cell v);
-  static ArrayData* AppendWithRef(ArrayData*, TypedValue v);
-  static ArrayData* AppendWithRefInPlace(ArrayData*, TypedValue v);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
@@ -483,13 +477,6 @@ public:
   static constexpr auto CopyStaticDict = &CopyStatic;
   static constexpr auto AppendDict = &Append;
   static constexpr auto AppendInPlaceDict = &AppendInPlace;
-  static ArrayData* SetWithRefIntDict(ArrayData*, int64_t k, TypedValue v);
-  static ArrayData* SetWithRefIntInPlaceDict(ArrayData*, int64_t, TypedValue);
-  static ArrayData* SetWithRefStrDict(ArrayData*, StringData* k, TypedValue v);
-  static ArrayData* SetWithRefStrInPlaceDict(ArrayData*, StringData* k,
-                                             TypedValue v);
-  static ArrayData* AppendWithRefDict(ArrayData*, TypedValue);
-  static ArrayData* AppendWithRefInPlaceDict(ArrayData*, TypedValue);
   static constexpr auto PlusEqDict = &PlusEq;
   static constexpr auto MergeDict = &Merge;
   static constexpr auto PopDict = &Pop;
@@ -687,18 +674,14 @@ private:
   static ArrayData* RemoveIntImpl(ArrayData*, int64_t, bool);
   static ArrayData* RemoveStrImpl(ArrayData*, const StringData*, bool);
   static ArrayData* AppendImpl(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendWithRefImpl(ArrayData*, TypedValue v, bool copy);
 
   void nextInsert(Cell);
-  ArrayData* nextInsertWithRef(TypedValue data);
-  ArrayData* nextInsertWithRef(const Variant& data);
   ArrayData* addVal(int64_t ki, Cell data);
   ArrayData* addVal(StringData* key, Cell data);
   ArrayData* addValNoAsserts(StringData* key, Cell data);
 
   template <bool warn, class K> arr_lval addLvalImpl(K k);
   template <class K> ArrayData* update(K k, Cell data);
-  template <class K> ArrayData* updateWithRef(K k, TypedValue data);
 
   void eraseNoCompact(ssize_t pos);
   void erase(ssize_t pos) {
@@ -713,8 +696,6 @@ private:
 
   bool hasIntishKeys() const;
 
-  MixedArray* initWithRef(TypedValue& tv, TypedValue v);
-  MixedArray* initWithRef(TypedValue& tv, const Variant& v);
   MixedArray* moveVal(TypedValue& tv, TypedValue v);
 
   /*

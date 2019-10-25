@@ -460,7 +460,7 @@ Array VarEnv::getDefinedVariables() const {
       continue;
     }
     if (tvAsCVarRef(tv).isReferenced()) {
-      ret.setWithRef(StrNR(sd).asString(), tvAsCVarRef(tv));
+      ret.set(StrNR(sd).asString(), tvAsCVarRef(tv));
     } else {
       ret.set(StrNR(sd).asString(), tvAsCVarRef(tv));
     }
@@ -1031,7 +1031,7 @@ static void shuffleExtraStackArgs(ActRec* ar) {
   auto tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs + numVarArgs - 1;
   VArrayInit ai{numVarArgs};
   for (uint32_t i = 0; i < numVarArgs; ++i) {
-    ai.appendWithRef(*(tvArgs--));
+    ai.append(*(tvArgs--));
   }
   // Discard the arguments from the stack
   for (uint32_t i = 0; i < numVarArgs; ++i) stack.popTV();
@@ -1120,7 +1120,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
     for (auto i = numParams; i < numArgs; ++i) {
       // appendWithRef bumps the refcount and splits if necessary,
       // to compensate for the upcoming pop from the stack
-      ai.appendWithRef(*--ptr);
+      ai.append(*--ptr);
     }
     for (auto i = numParams; i < numArgs; ++i) {
       stack.popTV();
@@ -1129,7 +1129,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   for (; iter; ++iter) {
     // appendWithRef bumps the refcount to compensate for the
     // eventual decref of arrayArgs.
-    ai.appendWithRef(iter.secondValPlus());
+    ai.append(iter.secondValPlus());
   }
   auto const ad = ai.create();
   assertx(ad->hasExactlyOneRef());

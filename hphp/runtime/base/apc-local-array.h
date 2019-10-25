@@ -57,10 +57,6 @@ struct APCLocalArray final : ArrayData,
   static constexpr auto SetIntInPlace = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);
   static constexpr auto SetStrInPlace = &SetStr;
-  static ArrayData* SetWithRefInt(ArrayData*, int64_t k, TypedValue v);
-  static constexpr auto SetWithRefIntInPlace = &SetWithRefInt;
-  static ArrayData* SetWithRefStr(ArrayData*, StringData* k, TypedValue v);
-  static constexpr auto SetWithRefStrInPlace = &SetWithRefStr;
   static ArrayData *RemoveInt(ArrayData* ad, int64_t k);
   static constexpr auto RemoveIntInPlace = &RemoveInt;
   static ArrayData *RemoveStr(ArrayData* ad, const StringData* k);
@@ -68,8 +64,6 @@ struct APCLocalArray final : ArrayData,
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* Append(ArrayData* a, Cell v);
   static constexpr auto AppendInPlace = &Append;
-  static ArrayData* AppendWithRef(ArrayData*, TypedValue v);
-  static constexpr auto AppendWithRefInPlace = &AppendWithRef;
   static ArrayData* PlusEq(ArrayData*, const ArrayData *elems);
   static ArrayData* Merge(ArrayData*, const ArrayData *elems);
   static ArrayData* Prepend(ArrayData*, Cell v);

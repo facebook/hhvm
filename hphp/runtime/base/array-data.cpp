@@ -392,27 +392,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(SetStrInPlace)
 
   /*
-   * ArrayData* SetWithRefInt(ArrayData*, int64_t k, Cell v)
-   *
-   *   Set a value in the array for an integer key, preserving refs unless they
-   *   are singly-referenced. SetWithRefInt() has copy/grow semantics;
-   *   SetWithRefIntInPlace() may only escalate or grow.
-   */
-  DISPATCH(SetWithRefInt)
-  DISPATCH(SetWithRefIntInPlace)
-
-  /*
-   * ArrayData* SetWithRefStr(ArrayData*, StringData* k, Cell v)
-   *
-   *   Set a value in the array for a string key, preserving refs unless they
-   *   are singly-referenced. SetWithRefStr() has copy/grow semantics, and is
-   *   not responsible for intish-string casts. SetWithRefStrInPlace() may
-   *   only escalate or grow.
-   */
-  DISPATCH(SetWithRefStr)
-  DISPATCH(SetWithRefStrInPlace)
-
-  /*
    * size_t Vsize(const ArrayData*)
    *
    *   This entry point essentially is only for GlobalsArray;
@@ -645,20 +624,6 @@ const ArrayFunctions g_array_funcs = {
    */
   DISPATCH(Append)
   DISPATCH(AppendInPlace)
-
-  /*
-   * ArrayData* AppendWithRef(ArrayData*, TypedValue v)
-   *
-   *   "With ref" append.  This function appends a new value to the
-   *   array with the next available integer key, if there is a next
-   *   available integer key.  It either sets the value to `v', or
-   *   binds the value to `v', depending on whether `v' is "observably
-   *   referenced"---i.e. if `v' is already KindOfRef and
-   *   RefData::isReferenced is true. AppendWithRef() has copy/grow
-   *   semantics; AppendWithRefInPlace may only grow or escalate.
-   */
-  DISPATCH(AppendWithRef)
-  DISPATCH(AppendWithRefInPlace)
 
   /*
    * ArrayData* PlusEq(ArrayData*, const ArrayData* elems)

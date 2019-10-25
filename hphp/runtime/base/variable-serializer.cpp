@@ -1870,7 +1870,7 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
         } while (key[sizeToCut] != '\0');
         key = key.substr(sizeToCut+1);
       }
-      props.setWithRef(key, iter.secondVal());
+      props.set(key, iter.secondVal());
     }
     return props;
   }

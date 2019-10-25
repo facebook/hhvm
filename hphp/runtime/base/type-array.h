@@ -498,11 +498,6 @@ public:
    */
   FOR_EACH_KEY_TYPE(set, TypedValue)
 
-  /*
-   * Set an element to `v', preserving refs unless they are singly-referenced.
-   */
-  FOR_EACH_KEY_TYPE(setWithRef, TypedValue)
-
 #undef D
 #undef I
 #undef V
@@ -518,7 +513,6 @@ public:
    * Variant overloads.
    */
   FOR_EACH_KEY_TYPE(set, const Variant&)
-  FOR_EACH_KEY_TYPE(setWithRef, const Variant&)
 
 #undef D
 #undef I
@@ -526,12 +520,10 @@ public:
 #undef C
 
   /*
-   * Append or prepend an element, with semantics like set{,WithRef}().
+   * Append or prepend an element, with semantics like set().
    */
   void append(TypedValue v);
   void append(const Variant& v);
-  void appendWithRef(TypedValue v);
-  void appendWithRef(const Variant& v);
   void prepend(TypedValue v);
   void prepend(const Variant& v);
 
@@ -567,7 +559,6 @@ private:
   template<typename T> bool existsImpl(const T& key) const;
   template<typename T> void removeImpl(const T& key);
   template<typename T> void setImpl(const T& key, TypedValue v);
-  template<typename T> void setWithRefImpl(const T& key, TypedValue v);
 
   static void compileTimeAssertions();
 

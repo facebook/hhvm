@@ -90,9 +90,9 @@ TypedValue HHVM_FUNCTION(array_chunk,
   int current = 0;
   for (ArrayIter iter(cellInput); iter; ++iter) {
     if (preserve_keys) {
-      chunk.setWithRef(iter.first(), iter.secondValPlus(), true);
+      chunk.set(iter.first(), iter.secondValPlus(), true);
     } else {
-      chunk.appendWithRef(iter.secondValPlus());
+      chunk.append(iter.secondValPlus());
     }
     if ((++current % chunkSize) == 0) {
       ret.append(chunk);
@@ -199,10 +199,10 @@ TypedValue HHVM_FUNCTION(array_combine,
        iter1; ++iter1, ++iter2) {
     auto const key = iter1.secondRvalPlus().unboxed();
     if (key.type() == KindOfInt64 || isStringType(key.type())) {
-      ret.setWithRef(ret.convertKey<IntishCast::Cast>(key.tv()),
+      ret.set(ret.convertKey<IntishCast::Cast>(key.tv()),
                      iter2.secondValPlus());
     } else {
-      ret.setWithRef(ret.convertKey<IntishCast::Cast>(tvCastToString(key.tv())),
+      ret.set(ret.convertKey<IntishCast::Cast>(tvCastToString(key.tv())),
                      iter2.secondValPlus());
     }
   }
@@ -447,7 +447,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
   for (ArrayIter iter(arr2); iter; ++iter) {
     Variant key(iter.first());
     if (key.isNumeric()) {
-      arr1.appendWithRef(iter.secondVal());
+      arr1.append(iter.secondVal());
     } else if (arr1.exists(key, true)) {
       // There is no need to do toKey() conversion, for a key that is already
       // in the array.
@@ -463,7 +463,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
       tvUnset(lval); // avoid contamination of the value that was strongly bound
       tvSet(make_tv<KindOfArray>(subarr1.get()), lval);
     } else {
-      arr1.setWithRef(key, iter.secondVal(), true);
+      arr1.set(key, iter.secondVal(), true);
     }
   }
 
@@ -618,7 +618,7 @@ TypedValue HHVM_FUNCTION(array_merge_recursive,
 static void php_array_replace(Array &arr1, const Array& arr2) {
   for (ArrayIter iter(arr2); iter; ++iter) {
     Variant key = iter.first();
-    arr1.setWithRef(key, iter.secondVal(), true);
+    arr1.set(key, iter.secondVal(), true);
   }
 }
 
@@ -659,7 +659,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
         arr1.set(key, iter.secondVal(), true);
       }
     } else {
-      arr1.setWithRef(key, iter.secondVal(), true);
+      arr1.set(key, iter.secondVal(), true);
     }
   }
 
@@ -986,7 +986,7 @@ TypedValue HHVM_FUNCTION(array_slice,
   if (input_is_packed && (offset == 0 || !preserve_keys)) {
     PackedArrayInit ret(len);
     for (; pos < (offset + len) && iter; ++pos, ++iter) {
-      ret.appendWithRef(iter.secondValPlus());
+      ret.append(iter.secondValPlus());
     }
     return tvReturn(ret.toVariant());
   }
@@ -1002,9 +1002,9 @@ TypedValue HHVM_FUNCTION(array_slice,
       if (key.asCStrRef().get()->isStrictlyInteger(n)) key = n;
     }
     if (!preserve_keys && key.isInteger()) {
-      ret.appendWithRef(iter.secondValPlus());
+      ret.append(iter.secondValPlus());
     } else {
-      ret.setWithRef(key, iter.secondValPlus(), true);
+      ret.set(key, iter.secondValPlus(), true);
     }
   }
   return tvReturn(std::move(ret));
@@ -1162,9 +1162,9 @@ TypedValue HHVM_FUNCTION(array_unshift,
           for (ArrayIter iter(array.toArray()); iter; ++iter) {
             Variant key(iter.first());
             if (key.isInteger()) {
-              newArray.appendWithRef(iter.secondVal());
+              newArray.append(iter.secondVal());
             } else {
-              newArray.setWithRef(key, iter.secondVal(), true);
+              newArray.set(key, iter.secondVal(), true);
             }
           }
         }
@@ -1240,7 +1240,7 @@ Variant array_values(const Variant& input) {
                        ai.emplace(adata->size());
                      },
                      [&](TypedValue v) {
-                       ai->appendWithRef(v);
+                       ai->append(v);
                      },
                      [&](ObjectData* coll) {
                        if (coll->collectionType() == CollectionType::Pair) {
@@ -1808,7 +1808,7 @@ TypedValue HHVM_FUNCTION(array_diff,
     auto const key = convertIntLikeStrs
       ? ret.convertKey<IntishCast::Cast>(iter.first())
       : *iter.first().asTypedValue();
-    ret.setWithRef(key, iter.secondValPlus(), true);
+    ret.set(key, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));
 }
@@ -1997,8 +1997,8 @@ TypedValue HHVM_FUNCTION(array_diff_key,
     if (leftSize == 0) return empty_array();
 
     ArrayInit ret(leftSize, ArrayInit::Map{});
-    auto setInt = [&](int64_t k, TypedValue v) { ret.setWithRef(k, v); };
-    auto setStr = [&](StringData* k, TypedValue v) { ret.setWithRef(k, v); };
+    auto setInt = [&](int64_t k, TypedValue v) { ret.set(k, v); };
+    auto setStr = [&](StringData* k, TypedValue v) { ret.set(k, v); };
 
     auto iterate_left_with = [&](auto test_key) {
       IterateKV(
@@ -2414,7 +2414,7 @@ TypedValue HHVM_FUNCTION(array_intersect,
     const auto key = convertIntLikeStrs
       ? Variant::wrap(ret.convertKey<IntishCast::Cast>(iter.first()))
       : iter.first();
-    ret.setWithRef(key, iter.secondValPlus(), true);
+    ret.set(key, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));
 }
@@ -2524,19 +2524,19 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
         for (auto pos : positions) {
           auto const k = leftAd->nvGetKey(pos);
           if (k.m_type == KindOfInt64) {
-            ret.setWithRef(k.m_data.num, leftAd->atPos(pos));
+            ret.set(k.m_data.num, leftAd->atPos(pos));
           } else {
             int64_t n;
             if (k.m_data.pstr->isStrictlyInteger(n)) {
-              ret.setWithRef(n, leftAd->atPos(pos));
+              ret.set(n, leftAd->atPos(pos));
             } else {
-              ret.setWithRef(k.m_data.pstr, leftAd->atPos(pos));
+              ret.set(k.m_data.pstr, leftAd->atPos(pos));
             }
           }
         }
       } else {
         for (auto pos : positions) {
-          ret.setWithRef(leftAd->nvGetKey(pos), leftAd->atPos(pos));
+          ret.set(leftAd->nvGetKey(pos), leftAd->atPos(pos));
         }
       }
 
@@ -2544,8 +2544,8 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
     }
 
     ArrayInit ret(leftSize, ArrayInit::Map{});
-    auto setInt = [&](int64_t k, TypedValue v) { ret.setWithRef(k, v); };
-    auto setStr = [&](StringData* k, TypedValue v) { ret.setWithRef(k, v); };
+    auto setInt = [&](int64_t k, TypedValue v) { ret.set(k, v); };
+    auto setStr = [&](StringData* k, TypedValue v) { ret.set(k, v); };
 
     auto iterate_left_with = [&](auto test_key) {
       IterateKV(

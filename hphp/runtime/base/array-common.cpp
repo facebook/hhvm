@@ -131,7 +131,7 @@ ArrayData* ArrayCommon::ToVArray(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return ArrayData::CreateVArray();
   VArrayInit init{size};
-  IterateVNoInc(a, [&](TypedValue v) { init.appendWithRef(v); });
+  IterateVNoInc(a, [&](TypedValue v) { init.append(v); });
   return init.create();
 }
 

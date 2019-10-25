@@ -61,9 +61,9 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
     Variant key(iter.first());
     auto const v = iter.secondVal();
     if (key.isNumeric()) {
-      out_hash.appendWithRef(v);
+      out_hash.append(v);
     } else {
-      out_hash.setWithRef(key, v, true);
+      out_hash.set(key, v, true);
     }
   }
 
@@ -72,9 +72,9 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
       Variant key(iter.first());
       auto const v = iter.secondVal();
       if (key.isNumeric()) {
-        removed->appendWithRef(v);
+        removed->append(v);
       } else {
-        removed->setWithRef(key, v, true);
+        removed->set(key, v, true);
       }
     }
   }
@@ -83,7 +83,7 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
   if (!arr.empty()) {
     for (ArrayIter iterb(arr); iterb; ++iterb) {
       auto const v = iterb.secondVal();
-      out_hash.appendWithRef(v);
+      out_hash.append(v);
     }
   }
 
@@ -91,9 +91,9 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
     Variant key(iter.first());
     auto const v = iter.secondVal();
     if (key.isNumeric()) {
-      out_hash.appendWithRef(v);
+      out_hash.append(v);
     } else {
-      out_hash.setWithRef(key, v, true);
+      out_hash.set(key, v, true);
     }
   }
 
@@ -131,9 +131,9 @@ Variant ArrayUtil::PadLeft(const Array& input, const Variant& pad_value,
     Variant key(iter.first());
     auto const v = iter.secondVal();
     if (key.isNumeric()) {
-      ret.appendWithRef(v);
+      ret.append(v);
     } else {
-      ret.setWithRef(key, v, true);
+      ret.set(key, v, true);
     }
   }
   return ret;
@@ -298,9 +298,9 @@ Variant ArrayUtil::Reverse(const Array& input, bool preserve_keys /* = false */)
        pos = input->iter_rewind(pos)) {
     auto const key = input->nvGetKey(pos);
     if (preserve_keys || isStringType(key.m_type)) {
-      ret.setWithRef(key, input->atPos(pos), true);
+      ret.set(key, input->atPos(pos), true);
     } else {
-      ret.appendWithRef(input->atPos(pos));
+      ret.append(input->atPos(pos));
     }
   }
   return ret;
@@ -361,7 +361,7 @@ Variant ArrayUtil::Shuffle(const Array& input) {
     PackedArrayInit ret(count);
     for (int i = 0; i < count; i++) {
       ssize_t pos = indices[i];
-      ret.appendWithRef(input->atPos(pos));
+      ret.append(input->atPos(pos));
     }
     return ret.toVariant();
   }

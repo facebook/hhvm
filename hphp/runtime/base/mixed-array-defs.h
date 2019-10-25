@@ -157,23 +157,6 @@ inline ArrayData* MixedArray::addValNoAsserts(StringData* key, Cell data) {
   return this;
 }
 
-template <class K>
-ArrayData* MixedArray::updateWithRef(K k, TypedValue data) {
-  assertx(!isFull());
-  auto p = insert(k);
-  if (p.found) {
-    // TODO(#3888164): We should restructure things so we don't have to check
-    // KindOfUninit here.
-    setElemWithRef(p.tv, data);
-    return this;
-  }
-  // TODO(#3888164): We should restructure things so we don't have to check
-  // KindOfUninit here.
-  tvDupWithRef(data, p.tv);
-  if (p.tv.m_type == KindOfUninit) p.tv.m_type = KindOfNull;
-  return this;
-}
-
 template <bool warn, class K>
 arr_lval MixedArray::addLvalImpl(K k) {
   assertx(!isFull());

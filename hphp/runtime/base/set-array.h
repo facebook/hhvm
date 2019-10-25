@@ -428,10 +428,6 @@ public:
   static constexpr auto SetIntInPlace = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData*, Cell);
   static constexpr auto SetStrInPlace = &SetStr;
-  static ArrayData* SetWithRefInt(ArrayData*, int64_t, TypedValue);
-  static constexpr auto SetWithRefIntInPlace = &SetWithRefInt;
-  static ArrayData* SetWithRefStr(ArrayData*, StringData*, TypedValue);
-  static constexpr auto SetWithRefStrInPlace = &SetWithRefStr;
   static ArrayData* RemoveInt(ArrayData*, int64_t);
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t);
   static ArrayData* RemoveStr(ArrayData*, const StringData*);
@@ -440,8 +436,6 @@ public:
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell);
   static ArrayData* AppendInPlace(ArrayData*, Cell);
-  static ArrayData* AppendWithRef(ArrayData*, TypedValue);
-  static ArrayData* AppendWithRefInPlace(ArrayData*, TypedValue);
   static ArrayData* PlusEq(ArrayData*, const ArrayData*);
   static ArrayData* Merge(ArrayData*, const ArrayData*);
   static ArrayData* Pop(ArrayData*, Variant&);

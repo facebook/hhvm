@@ -98,7 +98,7 @@ void Array::escalate() {
 Array Array::values() const {
   PackedArrayInit ai(size());
   for (ArrayIter iter(*this); iter; ++iter) {
-    ai.appendWithRef(iter.secondVal());
+    ai.append(iter.secondVal());
   }
   return ai.toArray();
 }
@@ -207,7 +207,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
       if (found == match) {
         // this setWithRef never intish casted, even when *this or array is a
         // hack array
-        ret.setWithRef(key, value, true);
+        ret.set(key, value, true);
       }
     }
     return ret;
@@ -302,7 +302,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
 
     if (found == match) {
       // This never intish casted
-      ret.setWithRef(iter.first(), iter.secondVal(), true);
+      ret.set(iter.first(), iter.secondVal(), true);
     }
   }
   return ret;
@@ -669,18 +669,6 @@ void Array::setImpl(const T& key, TypedValue v) {
   }
 }
 
-template<typename T> ALWAYS_INLINE
-void Array::setWithRefImpl(const T& key, TypedValue v) {
-  if (!m_arr) {
-    ArrayInit init(1, ArrayInit::Map{});
-    init.setWithRef(key, v);
-    m_arr = Ptr::attach(init.create());
-  } else {
-    auto const escalated = m_arr->setWithRef(key, v);
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace detail {
@@ -821,7 +809,6 @@ FOR_EACH_KEY_TYPE(void, remove, )
   }
 
 FOR_EACH_KEY_TYPE(set, TypedValue)
-FOR_EACH_KEY_TYPE(setWithRef, TypedValue)
 
 #undef I
 #undef V
@@ -838,7 +825,6 @@ FOR_EACH_KEY_TYPE(setWithRef, TypedValue)
   }
 
 FOR_EACH_KEY_TYPE(set)
-FOR_EACH_KEY_TYPE(setWithRef)
 
 #undef I
 #undef V
@@ -861,12 +847,6 @@ void Array::append(TypedValue v) {
   if (!m_arr) operator=(Create());
   assertx(m_arr);
   auto const escalated = m_arr->append(tvToInitCell(v));
-  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-}
-
-void Array::appendWithRef(TypedValue v) {
-  if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  auto const escalated = m_arr->appendWithRef(v);
   if (escalated != m_arr) m_arr = Ptr::attach(escalated);
 }
 
@@ -981,9 +961,9 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
   for (int i = 0; i < count; i++) {
     ssize_t pos = opaque.positions[indices[i]];
     if (renumber) {
-      sorted.appendWithRef(m_arr->atPos(pos));
+      sorted.append(m_arr->atPos(pos));
     } else {
-      sorted.setWithRef(m_arr->nvGetKey(pos), m_arr->atPos(pos), true);
+      sorted.set(m_arr->nvGetKey(pos), m_arr->atPos(pos), true);
     }
   }
   operator=(sorted);

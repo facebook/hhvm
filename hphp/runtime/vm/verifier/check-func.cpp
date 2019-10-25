@@ -661,11 +661,8 @@ static const char* stkflav(FlavorDesc f) {
   switch (f) {
   case NOV:  return "N";
   case CV:   return "C";
-  case VV:   return "V";
   case UV:   return "U";
   case CUV:  return "C|U";
-  case CVV:  return "C|V";
-  case CVUV: return "C|V|U";
   }
   not_reached();
 }
@@ -674,9 +671,7 @@ static bool checkArg(FlavorDesc expect, FlavorDesc check) {
   if (expect == check) return true;
 
   switch (expect) {
-    case CVV:  return check == CV || check == VV;
     case CUV:  return check == CV || check == UV;
-    case CVUV: return check == CV || check == VV || check == UV || check == CUV;
     default:   return false;
   }
 }
@@ -758,7 +753,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     m_tmp_sig[idx++] = inputSigs[size_t(peek_op(pc))][0];
     m_tmp_sig[idx++] = UV;
     m_tmp_sig[idx++] = UV;
-    for (int i = 0; i < fca.numArgs; ++i) m_tmp_sig[idx++] = CVV;
+    for (int i = 0; i < fca.numArgs; ++i) m_tmp_sig[idx++] = CV;
     if (fca.hasUnpack()) m_tmp_sig[idx++] = CV;
     if (fca.hasGenerics()) m_tmp_sig[idx++] = CV;
     assertx(idx == numPops || idx + 1 == numPops || idx + 2 == numPops);
@@ -773,7 +768,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = UV;
     }
     for (int i = nout; i < nargs + nout; i++) {
-      m_tmp_sig[i] = CVUV;
+      m_tmp_sig[i] = CUV;
     }
     return m_tmp_sig;
   }
@@ -2132,17 +2127,10 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   }
   for (int i = 0, n = cur.stklen; i < n; i++) {
     if (state.stk[i] != cur.stk[i]) {
-      // Allow C and V to unify into C|V
-      if ((state.stk[i] == CV || state.stk[i] == VV || state.stk[i] == CVV) &&
-          (cur.stk[i] == CV || cur.stk[i] == VV || cur.stk[i] == CVV)) {
-        stateChange = true;
-        state.stk[i] = CVV;
-      } else {
-        error("mismatch on edge B%d->B%d, current %s target %s\n",
-               b->id, t->id, stkToString(n, cur.stk).c_str(),
-               stkToString(n, state.stk).c_str());
-        return false;
-      }
+      error("mismatch on edge B%d->B%d, current %s target %s\n",
+             b->id, t->id, stkToString(n, cur.stk).c_str(),
+             stkToString(n, state.stk).c_str());
+      return false;
     }
   }
   // Check iterator variable state.

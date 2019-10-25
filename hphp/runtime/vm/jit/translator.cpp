@@ -1185,8 +1185,6 @@ Type flavorToType(FlavorDesc f) {
     case CV: return TCell;  // TODO(#3029148) this could be InitCell
     case CUV: return TCell;
     case UV: return TUninit;
-    case VV: return TBoxedInitCell;
-    case CVV: case CVUV: return TGen;
   }
   not_reached();
 }

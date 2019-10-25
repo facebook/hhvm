@@ -267,7 +267,6 @@ enum OutTypeConstraints {
                         // counted and unspecialized
   OutCInput,            // type is C(input)
   OutCInputL,           // type is C(type) of local input
-  OutVInputL,           // type is V(type) of local input
 
   OutArith,             // For Add, Sub, Mul
   OutArithO,            // For AddO, SubO, MulO

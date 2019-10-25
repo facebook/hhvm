@@ -529,7 +529,7 @@ FlavorDesc fcallFlavor(PC op, uint32_t i) {
   i -= fca.hasGenerics() ? 1 : 0;
   if (i == 0 && fca.hasUnpack()) return CV;
   i -= fca.hasUnpack() ? 1 : 0;
-  if (i < fca.numArgs) return CVV;
+  if (i < fca.numArgs) return CV;
   i -= fca.numArgs;
   if (i == 2 && nobj) return CV;
   return UV;
@@ -538,7 +538,7 @@ FlavorDesc fcallFlavor(PC op, uint32_t i) {
 FlavorDesc fcallBuiltinFlavor(PC op, uint32_t i) {
   assertx(i < getImm(op, 0).u_IVA + getImm(op, 2).u_IVA);
   auto const nargs = getImm(op, 0).u_IVA;
-  if (i < nargs) return CVUV;
+  if (i < nargs) return CUV;
   return UV;
 }
 

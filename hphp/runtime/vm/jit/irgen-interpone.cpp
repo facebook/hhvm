@@ -101,13 +101,6 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     return env.irb->local(locId, DataTypeSpecific).type;
   };
 
-  auto boxed = [&] (Type t) -> Type {
-    if (t == TGen) return TBoxedInitCell;
-    assertx(t <= TCell || t <= TBoxedCell);
-    checkTypeType = t <= TBoxedCell ? t : boxType(t);
-    return TBoxedInitCell;
-  };
-
   switch (getInstrInfo(sk.op()).type) {
     case OutNull:        return TInitNull;
     case OutNullUninit:  return TUninit;
@@ -141,7 +134,6 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutSameAsInput2: return topType(env, BCSPRelOffset{1});
     case OutModifiedInput2: return topType(env, BCSPRelOffset{1}).modified();
     case OutModifiedInput3: return topType(env, BCSPRelOffset{2}).modified();
-    case OutVInputL:     return boxed(localType());
 
     case OutArith:
       return arithOpResult(topType(env, BCSPRelOffset{0}),

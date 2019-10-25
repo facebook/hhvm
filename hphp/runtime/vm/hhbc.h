@@ -189,11 +189,8 @@ const Offset InvalidAbsoluteOffset = -1;
 enum FlavorDesc {
   NOV,  // None
   CV,   // Cell
-  VV,   // Var
   UV,   // Uninit
-  CVV,  // Cell or Var argument
   CUV,  // Cell, or Uninit argument
-  CVUV, // Cell, Var, or Uninit argument
 };
 
 enum InstrFlags {

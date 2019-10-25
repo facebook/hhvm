@@ -16,11 +16,12 @@ use parser_rust::{
 };
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 
-pub type DeclModeParser<'a> = Parser<
-    'a,
-    WithKind<DeclModeSmartConstructors<'a, PositionedSyntax, PositionedToken, PositionedValue>>,
-    DeclModeState<'a, PositionedSyntax>,
->;
+pub type SmartConstructors<'a> =
+    WithKind<DeclModeSmartConstructors<'a, PositionedSyntax, PositionedToken, PositionedValue>>;
+
+pub type ScState<'a> = DeclModeState<'a, PositionedSyntax>;
+
+pub type DeclModeParser<'a> = Parser<'a, SmartConstructors<'a>, ScState<'a>>;
 
 impl<S> ToOcaml for DeclModeState<'_, S> {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {

@@ -16,17 +16,17 @@ use parser_rust::{
 };
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 
-pub type CoroutineParser<'a> = Parser<
-    'a,
-    WithKind<
-        CoroutineSmartConstructors<
-            'a,
-            OcamlSyntax<PositionedValue>,
-            OcamlCoroutineState<'a, OcamlSyntax<PositionedValue>>,
-        >,
+pub type SmartConstructors<'a> = WithKind<
+    CoroutineSmartConstructors<
+        'a,
+        OcamlSyntax<PositionedValue>,
+        OcamlCoroutineState<'a, OcamlSyntax<PositionedValue>>,
     >,
-    OcamlCoroutineState<'a, OcamlSyntax<PositionedValue>>,
 >;
+
+pub type ScState<'a> = OcamlCoroutineState<'a, OcamlSyntax<PositionedValue>>;
+
+pub type CoroutineParser<'a> = Parser<'a, SmartConstructors<'a>, ScState<'a>>;
 
 impl<'a, S> ToOcaml for OcamlCoroutineState<'a, S> {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {

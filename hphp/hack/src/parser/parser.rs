@@ -30,10 +30,11 @@ where
     S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
-    pub fn make(source: &'a SourceText<'a>, env: ParserEnv) -> Self {
-        let sc = S::new(&env, source);
+    pub fn make(source: &SourceText<'a>, env: ParserEnv) -> Self {
+        let source = source.clone();
+        let sc = S::new(&env, &source);
         Self {
-            lexer: Lexer::make(source, env.is_experimental_mode),
+            lexer: Lexer::make(&source, env.is_experimental_mode),
             errors: vec![],
             env,
             sc,

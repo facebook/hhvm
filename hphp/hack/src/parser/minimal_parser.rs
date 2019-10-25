@@ -13,4 +13,6 @@ use parser_rust::{
     parser::Parser, smart_constructors::NoState, smart_constructors_wrappers::WithKind,
 };
 
-pub type MinimalSyntaxParser<'a> = Parser<'a, WithKind<MinimalSmartConstructors>, NoState>;
+pub type SmartConstructors = WithKind<MinimalSmartConstructors>;
+pub type ScState = NoState;
+pub type MinimalSyntaxParser<'a> = Parser<'a, SmartConstructors, ScState>;

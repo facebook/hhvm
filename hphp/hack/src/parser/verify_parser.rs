@@ -11,7 +11,11 @@ use ocaml::core::mlvalues::Value;
 use parser_rust::{parser::Parser, smart_constructors_wrappers::WithKind};
 use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
 
-pub type VerifyParser<'a> = Parser<'a, WithKind<VerifySmartConstructors>, VerifyState>;
+pub type SmartConstructors = WithKind<VerifySmartConstructors>;
+
+pub type ScState = VerifyState;
+
+pub type VerifyParser<'a> = Parser<'a, SmartConstructors, ScState>;
 
 impl ToOcaml for VerifyState {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {

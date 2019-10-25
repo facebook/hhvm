@@ -10,4 +10,6 @@ use parser_rust::{
 };
 use positioned_smart_constructors::*;
 
-pub type PositionedSyntaxParser<'a> = Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
+pub type SmartConstructors = WithKind<PositionedSmartConstructors>;
+pub type ScState = NoState;
+pub type PositionedSyntaxParser<'a> = Parser<'a, SmartConstructors, ScState>;

@@ -4,53 +4,37 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_ocamlpool::ocaml_ffi;
-use oxidized::file_info;
+use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, OcamlRep};
+use ocamlrep_ocamlpool::{ocaml_ffi, Pool};
+use oxidized::{file_info, full_fidelity_parser_env::FullFidelityParserEnv};
 use parser_rust::{
+    self,
     lexer::Lexer,
     minimal_token::MinimalToken,
     minimal_trivia::MinimalTrivia,
     operator::{Assoc, Operator},
+    parser::Parser,
+    parser_env::ParserEnv,
+    smart_constructors::{NodeType, SmartConstructors},
     source_text::SourceText,
+    stack_limit::StackLimit,
     token_kind::TokenKind,
 };
-use syntax_tree::mode_parser::parse_mode;
+use rust_to_ocaml::{SerializationContext, ToOcaml};
+use syntax_tree::{mode_parser::parse_mode, SyntaxTree};
 
-#[macro_export]
-macro_rules! parse {
-    ($name:ident, $parser:ident, $syntax:ty) => {
-        use ocamlpool_rust::caml_raise;
-        use std::panic::AssertUnwindSafe;
-        use $name::{ocamlpool_enter, ocamlpool_leave};
-        mod $name {
-            use super::*;
-            extern "C" {
-                pub fn ocamlpool_enter();
-                pub fn ocamlpool_leave();
-            }
-
-            use ocaml::Value;
-            use ocamlrep::{Allocator, OcamlRep};
-            use ocamlrep_ocamlpool::Pool;
-            use ocamlpool_rust::{caml_raise, utils::*};
-            use parser_rust::{
-                self as parser,
-                lexer::Lexer,
-                parser_env::ParserEnv,
-                source_text::SourceText,
-                stack_limit::StackLimit,
-            };
-            use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
-            use syntax_tree::{mode_parser::parse_mode, SyntaxTree};
-            use oxidized::{
-                full_fidelity_parser_env::FullFidelityParserEnv,
-                relative_path::RelativePath,
-            };
-
-            pub unsafe fn parse(ocaml_source_text : usize, env : usize) -> usize {
-                    let ocaml_source_text_value = ocaml_source_text;
-
-                    let env = FullFidelityParserEnv::from_ocaml(env).unwrap();
+#[rustfmt::skip]
+#[inline(always)]
+pub unsafe fn parse<'a, Sc, ScState>(
+    ocaml_source_text: UnsafeOcamlPtr,
+    env: FullFidelityParserEnv,
+) -> UnsafeOcamlPtr
+where
+    Sc: SmartConstructors<'a, ScState>,
+    Sc::R: NodeType,
+    <Sc::R as NodeType>::R: ToOcaml,
+    ScState: Clone + ToOcaml,
+{
                     let leak_rust_tree = env.leak_rust_tree;
                     let env = ParserEnv::from(env);
 
@@ -61,7 +45,7 @@ macro_rules! parse {
                     const MAX_STACK_SIZE: usize = 1024 * MI;
                     let mut stack_size = 2 * MI;
                     let mut default_stack_size_sufficient = true;
-                    parser::stack_limit::init();
+                    parser_rust::stack_limit::init();
                     loop {
                         if stack_size > MAX_STACK_SIZE {
                             panic!("Rust FFI exceeded maximum allowed stack of {} KiB", MAX_STACK_SIZE / KI);
@@ -83,31 +67,22 @@ macro_rules! parse {
                         // TODO: rewrite to_ocaml iteratively & reduce it to "stack_size - MB" as in HHVM
                         // (https://github.com/facebook/hhvm/blob/master/hphp/runtime/base/request-info.h)
                         let relative_stack_size = stack_size - stack_size*6/10;
-                        let content = str_field(&ocaml::Value(ocaml_source_text), 2);
-                        let relative_path_raw = block_field(&ocaml::Value(ocaml_source_text), 0);
 
                         let env = env.clone();
                         let try_parse = move || {
                             let stack_limit = StackLimit::relative(relative_stack_size);
                             stack_limit.reset();
-                            let stack_limit_ref = &stack_limit;
-                            let relative_path = RelativePath::from_ocaml(relative_path_raw.0).unwrap();
-                            let file_path = relative_path.path_str().to_owned();
-                            let relative_path = AssertUnwindSafe(relative_path);
+                            let stack_limit_ref: &'a StackLimit = std::mem::transmute(&stack_limit);
                             let mut pool = Pool::new();
                             let parse_result = std::panic::catch_unwind(move || {
-                                let source_text = SourceText::make_with_raw(
-                                    &*relative_path,
-                                    &content.data(),
-                                    ocaml_source_text_value,
-                                );
-                                let mut parser = $parser::make(&source_text, env);
+                                let source_text = SourceText::from_ocaml(ocaml_source_text.as_usize()).unwrap();
+                                let mut parser = <Parser<'a, Sc, ScState>>::make(&source_text, env);
                                 let root = parser.parse_script(Some(&stack_limit_ref));
                                 let errors = parser.errors();
                                 let state = parser.sc_state();
 
                                 // traversing the parsed syntax tree uses about 1/3 of the stack
-                                let context = SerializationContext::new(ocaml_source_text_value);
+                                let context = SerializationContext::new(ocaml_source_text.as_usize());
                                 let ocaml_root = root.to_ocaml(&context);
                                 let ocaml_errors = pool.add(&errors);
                                 let ocaml_state = state.to_ocaml(&context);
@@ -119,7 +94,7 @@ macro_rules! parse {
                                     };
                                     let mode = parse_mode(&source_text);
                                     let tree = Box::new(SyntaxTree::build(&source_text, root, errors, mode, (), required_stack_size));
-                                    Some(Box::leak(tree) as *const SyntaxTree<$syntax, ()> as usize)
+                                    Some(Box::leak(tree) as *const SyntaxTree<_, ()> as usize)
                                 } else {
                                     None
                                 };
@@ -130,7 +105,7 @@ macro_rules! parse {
                                 Pool::set_field(res, 1, ocamlrep::Value::from_bits(ocaml_root));
                                 Pool::set_field(res, 2, ocaml_errors);
                                 Pool::set_field(res, 3, ocaml_tree);
-                                res as usize
+                                UnsafeOcamlPtr::new(res as usize)
                             });
                             match parse_result {
                                 Ok(result) => Some(result),
@@ -138,6 +113,8 @@ macro_rules! parse {
                                     // Not always printing warning here because this would fail some HHVM tests
                                     let istty = libc::isatty(libc::STDERR_FILENO as i32) != 0;
                                     if istty || std::env::var_os("HH_TEST_MODE").is_some() {
+                                        let source_text = SourceText::from_ocaml(ocaml_source_text.as_usize()).unwrap();
+                                        let file_path = source_text.file_path().path_str();
                                         eprintln!("[hrust] warning: parser exceeded stack of {} KiB on: {}",
                                                   stack_limit.get() / KI,
                                                   file_path,
@@ -163,19 +140,25 @@ macro_rules! parse {
                             _ => default_stack_size_sufficient = false,
                         }
                     }
-            }
-        }
+}
 
+#[macro_export]
+macro_rules! parse {
+    ($name:ident, $sc:ty, $scstate:ty $(,)?) => {
         // We don't use the ocaml_ffi! macro here because we want precise
         // control over the Pool--when a parse fails, we want to free the old
         // pool and create a new one.
         #[no_mangle]
         pub extern "C" fn $name(ocaml_source_text: usize, env: usize) -> usize {
             ocamlrep_ocamlpool::catch_unwind(|| unsafe {
-                $name::parse(ocaml_source_text, env)
+                use ocamlrep::{ptr::UnsafeOcamlPtr, OcamlRep};
+                use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
+                let ocaml_source_text = UnsafeOcamlPtr::new(ocaml_source_text);
+                let env = FullFidelityParserEnv::from_ocaml(env).unwrap();
+                $crate::parse::<'_, $sc, $scstate>(ocaml_source_text, env).as_usize()
             })
         }
-    }
+    };
 }
 
 fn trivia_lexer<'a>(source_text: SourceText<'a>, offset: usize) -> Lexer<'a, MinimalToken> {

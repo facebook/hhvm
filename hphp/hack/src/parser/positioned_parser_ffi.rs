@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use parser_core_types::positioned_syntax::PositionedSyntax;
-use positioned_parser::PositionedSyntaxParser;
+use positioned_parser::{ScState, SmartConstructors};
 
-rust_parser_ffi::parse!(parse_positioned, PositionedSyntaxParser, PositionedSyntax);
+rust_parser_ffi::parse!(parse_positioned, SmartConstructors, ScState);

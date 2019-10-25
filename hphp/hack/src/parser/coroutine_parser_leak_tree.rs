@@ -8,10 +8,10 @@ use parser_rust::{
     parser::Parser, positioned_syntax::PositionedSyntax, smart_constructors_wrappers::WithKind,
 };
 
-pub type CoroutineParserLeakTree<'a> = Parser<
-    'a,
-    WithKind<
-        CoroutineSmartConstructors<'a, PositionedSyntax, CoroutineState<'a, PositionedSyntax>>,
-    >,
-    CoroutineState<'a, PositionedSyntax>,
+pub type SmartConstructors<'a> = WithKind<
+    CoroutineSmartConstructors<'a, PositionedSyntax, CoroutineState<'a, PositionedSyntax>>,
 >;
+
+pub type ScState<'a> = CoroutineState<'a, PositionedSyntax>;
+
+pub type CoroutineParserLeakTree<'a> = Parser<'a, SmartConstructors<'a>, ScState<'a>>;

@@ -43,11 +43,19 @@ val find_matching_symbols :
   kind_filter:SearchUtils.si_kind option ->
   SearchUtils.si_results
 
-(* Notify the search service that certain files have been updated locally *)
+(* SLOWER: Update from a FileInfo.t object.  May need to do extra work to parse
+ * into a usable format. *)
 val update_files :
   sienv:SearchUtils.si_env ref ->
   workers:MultiWorker.worker list option ->
   paths:(Relative_path.t * SearchUtils.info * SearchUtils.file_source) list ->
+  unit
+
+(* FASTER: Update from facts directly *)
+val update_from_facts :
+  sienv:SearchUtils.si_env ref ->
+  path:Relative_path.t ->
+  facts:Facts.facts ->
   unit
 
 (* Notify the search service that certain files have been removed locally *)

@@ -92,16 +92,16 @@ let log_file_info_change
  * Result: (old * new)
  *)
 let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
-    (FileInfo.t option * FileInfo.t option) Lwt.t =
+    (FileInfo.t option * FileInfo.t option * Facts.facts option) Lwt.t =
   let start_time = Unix.gettimeofday () in
   let naming_table = env.ServerEnv.naming_table in
   let old_file_info = Naming_table.get_file_info naming_table path in
   (* Fetch file contents *)
   let%lwt contents = Lwt_utils.read_all (Relative_path.to_absolute path) in
   let contents = Result.ok contents in
-  let new_file_info =
+  let (new_file_info, facts) =
     match contents with
-    | None -> None
+    | None -> (None, None)
     (* The file couldn't be read from disk. Assume it's been deleted or is
       otherwise inaccessible. We've already deleted the entries from the naming
       table and reverse naming table, so there's nothing left to do here. *)
@@ -187,20 +187,21 @@ let compute_fileinfo_for_path (env : ServerEnv.env) (path : Relative_path.t) :
         |> Option.value (* TODO: is this a reasonable default? *)
              ~default:FileInfo.Mstrict
       in
-      Some
-        {
-          FileInfo.file_mode = Some fi_mode;
-          funs;
-          classes;
-          record_defs;
-          typedefs;
-          consts;
-          hash = None;
-          comments = None;
-        }
+      ( Some
+          {
+            FileInfo.file_mode = Some fi_mode;
+            funs;
+            classes;
+            record_defs;
+            typedefs;
+            consts;
+            hash = None;
+            comments = None;
+          },
+        facts )
   in
   log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
-  Lwt.return (old_file_info, new_file_info)
+  Lwt.return (old_file_info, new_file_info, facts)
 
 let update_naming_table
     ~(env : ServerEnv.env)
@@ -264,34 +265,33 @@ let invalidate_decls ~(old_file_info : FileInfo.t option) : unit =
 let update_symbol_index
     ~(env : ServerEnv.env)
     ~(path : Relative_path.t)
-    ~(new_file_info : FileInfo.t option) : unit =
-  match new_file_info with
+    ~(facts : Facts.facts option) : unit =
+  match facts with
   | None ->
     let paths = Relative_path.Set.singleton path in
     SymbolIndex.remove_files ~sienv:env.ServerEnv.local_symbol_table ~paths
-  | Some fileinfo ->
-    let paths = [(path, SearchUtils.Full fileinfo, SearchUtils.TypeChecker)] in
-    SymbolIndex.update_files
+  | Some facts ->
+    SymbolIndex.update_from_facts
       ~sienv:env.ServerEnv.local_symbol_table
-      ~workers:None
-      ~paths
+      ~path
+      ~facts
 
 let process_changed_file (env : ServerEnv.env) (path : Path.t) :
     ServerEnv.env Lwt.t =
-  let path = Path.to_string path in
-  match Relative_path.strip_root_if_possible path with
+  let str_path = Path.to_string path in
+  match Relative_path.strip_root_if_possible str_path with
   | None ->
-    log "Ignored change to file %s, as it is not within our repo root" path;
+    log "Ignored change to file %s, as it is not within our repo root" str_path;
     Lwt.return env
   | Some path ->
     let path = Relative_path.from_root path in
     if not (FindUtils.path_filter path) then
       Lwt.return env
     else
-      let%lwt (old_file_info, new_file_info) =
+      let%lwt (old_file_info, new_file_info, facts) =
         compute_fileinfo_for_path env path
       in
       invalidate_decls ~old_file_info;
       let env = update_naming_table ~env ~path ~old_file_info ~new_file_info in
-      update_symbol_index ~env ~path ~new_file_info;
+      update_symbol_index ~env ~path ~facts;
       Lwt.return env

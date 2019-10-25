@@ -39,13 +39,70 @@ let get_details_from_info (info_opt : Facts.type_facts option) :
       let is_final = info.flags land flags_final > 0 in
       (k, is_abstract, is_final))
 
+let convert_facts ~(path : Relative_path.t) ~(facts : Facts.facts) : si_capture
+    =
+  let relative_path_str = Relative_path.suffix path in
+  (* Identify all classes in the file *)
+  let class_keys = InvSMap.keys facts.types in
+  let classes_mapped =
+    List.map class_keys ~f:(fun key ->
+        let info_opt = InvSMap.get key facts.types in
+        let (kind, is_abstract, is_final) = get_details_from_info info_opt in
+        {
+          (* We need to strip away the preceding backslash for hack classes
+            * but leave intact the : for xhp classes. The preceding : symbol
+            * is needed to distinguish which type of a class you want. *)
+          sif_name = Utils.strip_ns key;
+          sif_kind = kind;
+          sif_filepath = relative_path_str;
+          sif_is_abstract = is_abstract;
+          sif_is_final = is_final;
+        })
+  in
+  (* Identify all functions in the file *)
+  let functions_mapped =
+    List.map facts.functions ~f:(fun funcname ->
+        {
+          sif_name = funcname;
+          sif_kind = SI_Function;
+          sif_filepath = relative_path_str;
+          sif_is_abstract = false;
+          sif_is_final = false;
+        })
+  in
+  (* Handle typedefs *)
+  let types_mapped =
+    List.map facts.type_aliases ~f:(fun typename ->
+        {
+          sif_name = typename;
+          sif_kind = SI_Typedef;
+          sif_filepath = relative_path_str;
+          sif_is_abstract = false;
+          sif_is_final = false;
+        })
+  in
+  (* Handle constants *)
+  let constants_mapped =
+    List.map facts.constants ~f:(fun constantname ->
+        {
+          sif_name = constantname;
+          sif_kind = SI_GlobalConstant;
+          sif_filepath = relative_path_str;
+          sif_is_abstract = false;
+          sif_is_final = false;
+        })
+  in
+  (* Return unified results *)
+  List.append classes_mapped functions_mapped
+  |> List.append types_mapped
+  |> List.append constants_mapped
+
 (* Parse one single file and capture information about it *)
 let parse_one_file ~(path : Relative_path.t) : si_capture =
   let filename = Relative_path.to_absolute path in
   if Sys.is_directory filename then
     []
   else
-    let relative_path_str = Relative_path.suffix path in
     let text = In_channel.read_all filename in
     (* Just the facts ma'am *)
     Facts_parser.mangle_xhp_mode := false;
@@ -63,63 +120,7 @@ let parse_one_file ~(path : Relative_path.t) : si_capture =
     (* Iterate through facts and print them out *)
     let result =
       match fact_opt with
-      | Some facts ->
-        (* Identify all classes in the file *)
-        let class_keys = InvSMap.keys facts.types in
-        let classes_mapped =
-          List.map class_keys ~f:(fun key ->
-              let info_opt = InvSMap.get key facts.types in
-              let (kind, is_abstract, is_final) =
-                get_details_from_info info_opt
-              in
-              {
-                (* We need to strip away the preceding backslash for hack classes
-                 * but leave intact the : for xhp classes. The preceding : symbol
-                 * is needed to distinguish which type of a class you want. *)
-                sif_name = Utils.strip_ns key;
-                sif_kind = kind;
-                sif_filepath = relative_path_str;
-                sif_is_abstract = is_abstract;
-                sif_is_final = is_final;
-              })
-        in
-        (* Identify all functions in the file *)
-        let functions_mapped =
-          List.map facts.functions ~f:(fun funcname ->
-              {
-                sif_name = funcname;
-                sif_kind = SI_Function;
-                sif_filepath = relative_path_str;
-                sif_is_abstract = false;
-                sif_is_final = false;
-              })
-        in
-        (* Handle typedefs *)
-        let types_mapped =
-          List.map facts.type_aliases ~f:(fun typename ->
-              {
-                sif_name = typename;
-                sif_kind = SI_Typedef;
-                sif_filepath = relative_path_str;
-                sif_is_abstract = false;
-                sif_is_final = false;
-              })
-        in
-        (* Handle constants *)
-        let constants_mapped =
-          List.map facts.constants ~f:(fun constantname ->
-              {
-                sif_name = constantname;
-                sif_kind = SI_GlobalConstant;
-                sif_filepath = relative_path_str;
-                sif_is_abstract = false;
-                sif_is_final = false;
-              })
-        in
-        (* Return unified results *)
-        List.append classes_mapped functions_mapped
-        |> List.append types_mapped
-        |> List.append constants_mapped
+      | Some facts -> convert_facts ~path ~facts
       | None -> []
     in
     files_scanned := !files_scanned + 1;

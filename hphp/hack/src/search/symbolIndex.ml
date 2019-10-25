@@ -237,6 +237,12 @@ let update_files
           sienv := LocalSearchService.update_file ~sienv:!sienv ~path ~info)
   | TrieIndex -> HackSearchService.update_from_typechecker workers paths
 
+(* Update from fast facts parser directly *)
+let update_from_facts
+    ~(sienv : si_env ref) ~(path : Relative_path.t) ~(facts : Facts.facts) :
+    unit =
+  sienv := LocalSearchService.update_file_facts ~sienv:!sienv ~path ~facts
+
 (*
  * This method is called when the typechecker is about to re-check a file.
  * Any local caches should be cleared of values for this file.

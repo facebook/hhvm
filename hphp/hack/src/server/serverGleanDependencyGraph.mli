@@ -11,4 +11,6 @@ open Typing_deps
 
 (** Convert all of dependencies into a glean-friendly json format.
  * Returns None if an empty set of dependencies was passed in *)
-val convert_deps_to_json : (Dep.variant * Dep.variant) HashSet.t -> json option
+val convert_deps_to_json :
+  (Dep.dependency Dep.variant * Dep.dependent Dep.variant) HashSet.t ->
+  json option

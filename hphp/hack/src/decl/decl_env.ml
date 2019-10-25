@@ -13,7 +13,7 @@ module Dep = Typing_deps.Dep
 
 type env = {
   mode: FileInfo.mode;
-  droot: Typing_deps.Dep.variant option;
+  droot: Typing_deps.Dep.dependent Typing_deps.Dep.variant option;
   decl_tcopt: TypecheckerOptions.t;
 }
 

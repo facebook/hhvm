@@ -56,7 +56,7 @@ val empty :
   ?mode:FileInfo.mode ->
   TypecheckerOptions.t ->
   Relative_path.t ->
-  droot:Typing_deps.Dep.variant option ->
+  droot:Typing_deps.Dep.dependent Typing_deps.Dep.variant option ->
   env
 
 val is_typedef : typedef_key -> bool

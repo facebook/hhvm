@@ -8,25 +8,70 @@
  *)
 
 module Dep : sig
-  type variant =
-    | GConst of string
-    | GConstName of string
-    | Const of string * string
-    | AllMembers of string
-    | Class of string
-    | RecordDef of string
-    | Fun of string
-    | FunName of string
-    | Prop of string * string
-    | SProp of string * string
-    | Method of string * string
-    | SMethod of string * string
-    | Cstr of string
-    | Extends of string
+  (** A node in the dependency graph that must be rechecked when its dependencies change. *)
+  type dependent
+
+  (** A node in the dependency graph that, when changed, must recheck all of its dependents. *)
+  type dependency
+
+  (** A type of dependency.
+
+  An ['a variant] can be either the dependent or the dependency. For example,
+  a function body can itself depend on a [Fun] (when it must be rechecked if
+  the other function changed).
+
+  A [dependency variant] can only be a dependency. Other symbols can take on
+  this kind of dependency on something, but this kind of thing can't take a
+  dependency on other symbols. For example, an "extends" is not a symbol in
+  the code, so [Extends] cannot take on dependencies on other things. *)
+  type _ variant =
+    | GConst : string -> 'a variant
+        (** Represents a global constant depending on something, or something
+        depending on a global constant. *)
+    | GConstName : string -> 'a variant
+        (** Like [GConst], but used only in conservative redecl. May not be
+        necessary anymore. *)
+    | Const : (string * string) -> 'a variant
+        (** Represents either a class constant depending on something, or
+        something depending on a class constant. *)
+    | AllMembers : string -> dependency variant
+        (** Represents a dependency on all members of a class. Particularly
+        useful for switch exhaustiveness-checking. We establish a dependency
+        on all members of an enum in that case. *)
+    | Class : string -> 'a variant
+        (** Represents either a class depending on something, or something
+        depending on a class. *)
+    | RecordDef : string -> 'a variant
+        (** Represents either a record depending on something, or something
+        depending on a record. *)
+    | Fun : string -> 'a variant
+        (** Represents either a global function depending on something, or
+        something depending on a global function. *)
+    | FunName : string -> 'a variant
+        (** Like [Fun], but used only in conservative redecl. May not be
+        necessary anymore. *)
+    | Prop : (string * string) -> 'a variant
+        (** Represents either a class's instance property depending on
+        something, or something depending on that property. *)
+    | SProp : (string * string) -> 'a variant
+        (** Represents either a class's static property depending on
+        something, or something depending on that property. *)
+    | Method : (string * string) -> 'a variant
+        (** Represents either a class's instance method depending on
+        something, or something depending on that method. *)
+    | SMethod : (string * string) -> 'a variant
+        (** Represents either a class's static method depending on
+        something, or something depending on that method. *)
+    | Cstr : string -> dependency variant
+        (** Represents something depending on a class constructor. *)
+    | Extends : string -> dependency variant
+        (** Represents a class depending on an another class via an
+        inheritance-like mechanism (`extends`, `implements`, `use`, `require
+        extends`, `require implements`, etc.) *)
 
   type t
 
-  val make : variant -> t
+  val make : 'a variant -> t
 
   val is_class : t -> bool
 
@@ -34,9 +79,9 @@ module Dep : sig
 
   val compare : t -> t -> int
 
-  val extract_name : variant -> string
+  val extract_name : 'a variant -> string
 
-  val to_string : variant -> string
+  val to_string : 'a variant -> string
 end
 
 module DepSet : sig
@@ -49,16 +94,18 @@ end
 val trace : bool ref
 
 val add_dependency_callback :
-  string -> (Dep.variant -> Dep.variant -> unit) -> unit
+  string ->
+  (Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit) ->
+  unit
 
 (* returns the previous value of the flag *)
 val allow_dependency_table_reads : bool -> bool
 
-val add_idep : Dep.variant -> Dep.variant -> unit
+val add_idep : Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
 
 val get_ideps_from_hash : Dep.t -> DepSet.t
 
-val get_ideps : Dep.variant -> DepSet.t
+val get_ideps : Dep.dependency Dep.variant -> DepSet.t
 
 val get_files : DepSet.t -> Relative_path.Set.t
 

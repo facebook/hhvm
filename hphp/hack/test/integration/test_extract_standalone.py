@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import os
-from difflib import ndiff
 from sys import stderr
 
 import hh_paths
@@ -45,13 +44,14 @@ auto_namespace_map = {}
         return func.replace("\\", "__")
 
     def assert_output_matches(self, output: str, fname_expected: str) -> None:
-        expected_file = os.path.join(
-            self.repo_dir, "expected/{}.php.exp".format(fname_expected)
-        )
-        with open(expected_file) as expected:
+        expected_file = "expected/{}.php.exp".format(fname_expected)
+        expected_file_absolute = os.path.join(self.repo_dir, expected_file)
+        with open(expected_file_absolute) as expected:
             expected = expected.read().strip()
             output = output.strip()
-            self.assertMultiLineEqual(output, expected)
+            self.assertMultiLineEqual(
+                output, expected, f"Mismatch in file {expected_file}"
+            )
 
     def check_extract_standalone(
         self, function_to_extract: str, typecheck=True

@@ -38,7 +38,8 @@ let get_class_exn name =
   let not_found_msg = Printf.sprintf "Class %s" name in
   value_or_not_found not_found_msg @@ Decl_provider.get_class name
 
-let get_class_name (dep : Typing_deps.Dep.variant) =
+let get_class_name : type a. a Typing_deps.Dep.variant -> string option =
+ fun dep ->
   Typing_deps.Dep.(
     match dep with
     | Const (cls, _)
@@ -46,11 +47,11 @@ let get_class_name (dep : Typing_deps.Dep.variant) =
     | SMethod (cls, _)
     | Prop (cls, _)
     | SProp (cls, _)
-    | Cstr cls
-    | Class cls
-    | AllMembers cls
-    | Extends cls ->
+    | Class cls ->
       Some cls
+    | Cstr cls -> Some cls
+    | AllMembers cls -> Some cls
+    | Extends cls -> Some cls
     | Fun _
     | FunName _
     | GConst _
@@ -197,7 +198,9 @@ let is_builtin_dep dep =
     Relative_path.prefix (Pos.filename pos) = Relative_path.Hhi
   | RecordDef _ -> records_not_supported ()
 
-let is_relevant_dependency (target : target) (dep : Typing_deps.Dep.variant) =
+let is_relevant_dependency
+    (target : target) (dep : Typing_deps.Dep.dependent Typing_deps.Dep.variant)
+    =
   match target with
   | Function f ->
     dep = Typing_deps.Dep.Fun f || dep = Typing_deps.Dep.FunName f
@@ -675,7 +678,7 @@ let get_typeconst_declaration tcopt tconst name =
 let get_class_elt_declaration
     tcopt
     (cls : Decl_provider.class_decl)
-    (class_elt : Typing_deps.Dep.variant) =
+    (class_elt : 'a Typing_deps.Dep.variant) =
   Typing_deps.Dep.(
     Decl_provider.(
       let from_interface = Class.kind cls = Ast_defs.Cinterface in
@@ -1056,7 +1059,7 @@ and add_signature_dependencies deps obj =
       add_dep deps ty
     | _ -> raise UnexpectedDependency)
 
-let get_dependency_origin cls (dep : Typing_deps.Dep.variant) =
+let get_dependency_origin cls (dep : 'a Typing_deps.Dep.variant) =
   Decl_provider.(
     Typing_deps.Dep.(
       let description = to_string dep in
@@ -1084,7 +1087,9 @@ let get_dependency_origin cls (dep : Typing_deps.Dep.variant) =
 
 let get_dependencies tcopt target =
   let dependencies = HashSet.create 0 in
-  let add_dependency root obj =
+  let add_dependency
+      (root : Typing_deps.Dep.dependent Typing_deps.Dep.variant)
+      (obj : Typing_deps.Dep.dependency Typing_deps.Dep.variant) : unit =
     if is_relevant_dependency target root then do_add_dep dependencies obj
   in
   Typing_deps.add_dependency_callback "add_dependency" add_dependency;

@@ -48,8 +48,9 @@ let convert_inheritance_to_json (inheritances : inheritanceInfo list) :
     in
     Some (create_predicate_json "hackdependency.inheritance.1" facts)
 
-let convert_deps_to_json (deps : (Dep.variant * Dep.variant) HashSet.t) :
-    json option =
+let convert_deps_to_json
+    (deps : (Dep.dependency Dep.variant * Dep.dependent Dep.variant) HashSet.t)
+    : json option =
   let inheritance_list =
     HashSet.fold
       (fun (dep_left, dep_right) acc ->

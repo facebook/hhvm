@@ -34,7 +34,8 @@ let mark_mro_invalidated (deps : t) (mro_invalidated : DepSet.t) : t =
 let mark_as_needing_recheck (deps : t) (needs_recheck : DepSet.t) : t =
   { deps with needs_recheck = DepSet.union deps.needs_recheck needs_recheck }
 
-let mark_all_dependents_as_needing_recheck (deps : t) (dep : Dep.variant) : t =
+let mark_all_dependents_as_needing_recheck
+    (deps : t) (dep : Dep.dependency Dep.variant) : t =
   mark_as_needing_recheck deps (Typing_deps.get_ideps dep)
 
 let add_maximum_fanout (deps : t) (changed_dep : Dep.t) : t =

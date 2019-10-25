@@ -1,11 +1,11 @@
 <?hh
 class WithProperties {
+  public int $first;
   public static int $third = 0;
+  public int $second;
   public function __construct(int $arg) {
     throw new \Exception();
   }
-  public int $second;
-  public int $first;
 }
 function use_properties(WithProperties $arg): int {
   return $arg->first + $arg->second + WithProperties::$third;

@@ -42,7 +42,8 @@ val mark_mro_invalidated : t -> DepSet.t -> t
 
 val mark_as_needing_recheck : t -> DepSet.t -> t
 
-val mark_all_dependents_as_needing_recheck : t -> Dep.variant -> t
+val mark_all_dependents_as_needing_recheck :
+  t -> Dep.dependency Dep.variant -> t
 
 val add_maximum_fanout : t -> Dep.t -> t
 

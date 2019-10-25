@@ -50,7 +50,7 @@ type genv = {
   current_cls: (Ast_defs.id * Ast_defs.class_kind) option;
   (* Normally we don't need to add dependencies at this stage, but there
    * are edge cases when we do. *)
-  droot: Typing_deps.Dep.variant;
+  droot: Typing_deps.Dep.dependent Typing_deps.Dep.variant;
   (* Namespace environment, e.g., what namespace we're in and what use
    * declarations are in play. *)
   namespace: Namespace_env.env;

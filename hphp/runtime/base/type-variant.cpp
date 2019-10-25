@@ -116,12 +116,11 @@ static_assert(typeToDestrIdx(KindOfRecord)   == 4, "Record destruct index");
 static_assert(typeToDestrIdx(KindOfString)   == 5, "String destruct index");
 static_assert(typeToDestrIdx(KindOfObject)   == 7, "Object destruct index");
 static_assert(typeToDestrIdx(KindOfResource) == 8, "Resource destruct index");
-static_assert(typeToDestrIdx(KindOfRef)      == 9, "Ref destruct index");
 #ifndef USE_LOWPTR
-static_assert(typeToDestrIdx(KindOfClsMeth)  == 10, "ClsMeth destruct index");
+static_assert(typeToDestrIdx(KindOfClsMeth)  == 9, "ClsMeth destruct index");
 #endif
 
-static_assert(kDestrTableSize == (use_lowptr ? 10 : 11),
+static_assert(kDestrTableSize == (use_lowptr ? 9 : 10),
               "size of g_destructors[] must be kDestrTableSize");
 
 RawDestructor g_destructors[] = {
@@ -134,7 +133,6 @@ RawDestructor g_destructors[] = {
   nullptr, // hole
   (RawDestructor)&objReleaseWrapper,                  // KindOfObject
   (RawDestructor)getMethodPtr(&ResourceHdr::release), // KindOfResource
-  (RawDestructor)getMethodPtr(&RefData::release),     // KindOfRef
 #ifndef USE_LOWPTR
   (RawDestructor)&ClsMethDataRef::Release,            // KindOfClsMeth
 #endif
@@ -283,9 +281,6 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfPersistentString:
     case KindOfString:
       return checkString ? m_data.pstr->toNumeric(ival, dval) : m_type;
-
-    case KindOfRef:
-      return m_data.pref->var()->toNumeric(ival, dval, checkString);
   }
   not_reached();
 }
@@ -316,9 +311,6 @@ bool Variant::isScalar() const noexcept {
     case KindOfFunc:
     case KindOfClass:
       return true;
-
-    case KindOfRef:
-      always_assert(false && "isScalar() called on a boxed value");
   }
   not_reached();
 }
@@ -359,7 +351,6 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
 
     case KindOfUninit:
     case KindOfObject:
-    case KindOfRef:
     case KindOfClass:
     case KindOfRecord:
       return false;
@@ -406,7 +397,6 @@ bool Variant::toBooleanHelper() const {
     case KindOfClass:
       return classToStringHelper(m_data.pclass)->toBoolean();
     case KindOfClsMeth:       return true;
-    case KindOfRef:           return m_data.pref->var()->toBoolean();
     case KindOfRecord:
       raise_convert_record_to_type("bool");
       return false;
@@ -440,7 +430,6 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfClsMeth:
       raiseClsMethConvertWarningHelper("int");
       return 1;
-    case KindOfRef:           return m_data.pref->var()->toInt64(base);
     case KindOfRecord:
       raise_convert_record_to_type("int");
       return 0;
@@ -474,7 +463,6 @@ double Variant::toDoubleHelper() const {
     case KindOfClsMeth:
       raiseClsMethConvertWarningHelper("double");
       return 1.0;
-    case KindOfRef:           return m_data.pref->var()->toDouble();
     case KindOfRecord:
       raise_convert_record_to_type("double");
       return 0.0;
@@ -513,7 +501,6 @@ Array Variant::toPHPArrayHelper() const {
       raiseClsMethToVecWarningHelper();
       return make_packed_array(
         m_data.pclsmeth->getCls(), m_data.pclsmeth->getFunc());
-    case KindOfRef:           return m_data.pref->var()->toArray();
     case KindOfRecord:
       raise_convert_record_to_type("array");
       return empty_array();
@@ -547,9 +534,6 @@ Resource Variant::toResourceHelper() const {
 
     case KindOfResource:
       return Resource{m_data.pres};
-
-    case KindOfRef:
-      return m_data.pref->var()->toResource();
   }
   not_reached();
 }
@@ -631,7 +615,6 @@ void Variant::setEvalScalar() {
 
     case KindOfObject:
     case KindOfResource:
-    case KindOfRef:
     case KindOfFunc:
     case KindOfClass:
       break;

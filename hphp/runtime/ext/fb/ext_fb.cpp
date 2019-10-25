@@ -549,7 +549,6 @@ static int fb_compact_serialize_variant(
 
     case KindOfObject:
     case KindOfResource:
-    case KindOfRef:
     case KindOfRecord: // TODO(T41025646)
       fb_compact_serialize_code(sb, FB_CS_NULL);
       raise_warning(

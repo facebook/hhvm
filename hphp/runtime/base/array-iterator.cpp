@@ -889,7 +889,6 @@ static int64_t iter_next_apc_array(Iter* iter,
   }
   arrIter->setPos(pos);
 
-  // Note that APCLocalArray can never return KindOfRefs.
   auto const rval = APCLocalArray::RvalAtPos(arr->asArrayData(), pos);
   cellSet(rval.tv(), *valOut);
   if (LIKELY(!keyOut)) return 1;

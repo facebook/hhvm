@@ -1210,9 +1210,7 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
               !(decl.attrs & AttrNoImplicitNullable)) {
             return true;
           }
-          return sProp->m_type == KindOfRef
-            ? decl.typeConstraint.maybeMixed()
-            : decl.typeConstraint.assertCheck(sProp);
+          return decl.typeConstraint.assertCheck(sProp);
         }();
         always_assert(typeOk);
       }
@@ -2686,7 +2684,6 @@ bool Class::compatibleTraitPropInit(const TypedValue& tv1,
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
-    case KindOfRef:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:

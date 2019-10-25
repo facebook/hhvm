@@ -149,9 +149,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
 
     case KindOfRecord:
       return op.recordVsNonRecord();
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -223,9 +220,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
 
     case KindOfRecord:
       return op.recordVsNonRecord();
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -312,9 +306,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
 
     case KindOfRecord:
       return op.recordVsNonRecord();
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -401,9 +392,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
 
     case KindOfRecord:
       return op.recordVsNonRecord();
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -485,9 +473,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
 
     case KindOfRecord:
       return op.recordVsNonRecord();
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -572,9 +557,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
 
     case KindOfRecord:
       return op.recordVsNonRecord();
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -696,8 +678,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, ClsMethDataRef clsMeth) {
     }
     case KindOfRecord:
       return op.recordVsNonRecord();
-
-    case KindOfRef: break;
   }
   not_reached();
 }
@@ -788,9 +768,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const Func* val) {
 
     case KindOfRecord:
       return op.recordVsNonRecord();
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -881,9 +858,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const Class* val) {
 
     case KindOfRecord:
       return op.recordVsNonRecord();
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -919,8 +893,6 @@ typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
   case KindOfClass:        return cellRelOp(op, c1, c2.m_data.pclass);
   case KindOfClsMeth:      return cellRelOp(op, c1, c2.m_data.pclsmeth);
   case KindOfRecord:       return cellRelOp(op, c1, c2.m_data.prec);
-  case KindOfRef:
-    break;
   }
   not_reached();
 }
@@ -1365,7 +1337,6 @@ bool cellSame(Cell c1, Cell c2) {
 
     case KindOfUninit:
     case KindOfNull:
-    case KindOfRef:
       break;
   }
   not_reached();

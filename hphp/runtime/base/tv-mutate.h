@@ -136,10 +136,6 @@ enable_if_lval_t<T&&, void> tvWriteNull(T&& to) {
  * However, unlike the copy and duplicate operations above, these assume that
  * `to' is live, and will thus decref it as appropriate.
  *
- * Additionally, unlike Copy and Dup, Move and Set will transfer `fr' into the
- * inner type of `to' when `to' is a KindOfRef.  (Meanwhile, MoveIgnoreRef and
- * SetIgnoreRef are exactly Copy and Dup which decref `to' after assignment.)
- *
  * Specifically:
  *
  *  - Move represents ownership transfer, and doesn't incref the moved value.
@@ -153,9 +149,6 @@ enable_if_lval_t<T&&, void> tvWriteNull(T&& to) {
  *
  * To represent move semantics, we decref the original value of `to', but we do
  * not increment its new value (i.e., `fr').
- *
- * If `to' is KindOfRef, places the value of `fr' in the RefData pointed to by
- * `to' instead.
  */
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvMove(const Cell fr, T&& to) {
@@ -167,9 +160,6 @@ enable_if_lval_t<T&&, void> tvMove(const Cell fr, T&& to) {
 
 /*
  * Move the value of the Cell in `fr' to `to'.
- *
- * Just like tvMove(), except we always overwrite `to' itself rather than its
- * inner value if it has type KindOfRef.
  */
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvMoveIgnoreRef(const Cell fr, T&& to) {
@@ -198,9 +188,6 @@ enable_if_lval_t<C&&, void> cellMove(const Cell fr, C&& to) {
 /*
  * Assign the value of the Cell in `fr' to `to', with appropriate reference
  * count modifications.
- *
- * If `to' has type KindOfRef, places the value of `fr' in the RefData pointed
- * to by `to'.
  */
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvSet(const Cell fr, T&& to) {
@@ -213,9 +200,6 @@ enable_if_lval_t<T&&, void> tvSet(const Cell fr, T&& to) {
 /*
  * Assign the value of the Cell in `fr' to `to', with appropriate reference
  * count modifications.
- *
- * Just like tvSet(), except we always overwrite `to' itself rather than its
- * inner value if it has type KindOfRef.
  */
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvSetIgnoreRef(const Cell fr, T&& to) {
@@ -280,9 +264,6 @@ enable_if_lval_t<C&&, void> cellSetNull(C&& to) {
 
 /*
  * Assign KindOfNull to `to'.
- *
- * If `to' has type KindOfRef, places the value of `fr' in the RefData pointed
- * to by `to'.
  *
  * Equivalent to tvSet(make_tv<KindOfNull>(), to).
  */

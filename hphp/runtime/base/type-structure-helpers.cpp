@@ -119,9 +119,6 @@ bool cellInstanceOfImpl(const Cell* tv, F lookupClass) {
       }
       return false;
     }
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }

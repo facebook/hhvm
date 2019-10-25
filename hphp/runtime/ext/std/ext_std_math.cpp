@@ -279,7 +279,6 @@ static MaybeDataType convert_for_pow(const Variant& val,
     case KindOfArray:
     case KindOfClsMeth:
       // Not reachable since HHVM_FN(pow) deals with these base cases first.
-    case KindOfRef:
     case KindOfRecord:
       break;
   }

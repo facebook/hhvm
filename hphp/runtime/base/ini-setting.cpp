@@ -805,10 +805,6 @@ IniSettingMap IniSetting::FromStringAsMap(const std::string& ini,
     return uninit_null();
   }
   // We have the final values for our ini settings.
-  // Unbox everything so that we have no more references in the map since we do
-  // things that might require us not to have references
-  // (e.g. calling Variant::SetEvalScalar(), which will assert if an
-  // arraydata's elements are KindOfRef)
   std::set<ArrayData*> seen;
   bool use_defaults = false;
   Variant ret = Unbox(parsed, seen, use_defaults, empty_string());

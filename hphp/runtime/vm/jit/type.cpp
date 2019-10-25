@@ -514,8 +514,6 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
     case KindOfClass            : return kCls;
     case KindOfClsMeth          : return kClsMeth;
     case KindOfRecord           : return kRecord;
-    case KindOfRef:
-      always_assert(false);
   }
   not_reached();
 }

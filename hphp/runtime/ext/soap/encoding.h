@@ -279,8 +279,7 @@ inline int dataTypeToSoap(DataType dt) {
     case KindOfClsMeth: return SOAP_ENC_ARRAY_DT;
     case KindOfObject:  return SOAP_ENC_OBJECT;
     case KindOfResource:
-    case KindOfRecord:
-    case KindOfRef:     return INVALID_TYPE;
+    case KindOfRecord:  return INVALID_TYPE;
   }
   return INVALID_TYPE;
 }

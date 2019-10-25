@@ -675,9 +675,6 @@ const char* VariablesCommand::getTypeName(const Variant& variable) {
     case KindOfObject:
       return variable.toCObjRef()->getClassName().c_str();
 
-    case KindOfRef:
-      return "reference";
-
     default:
       VSDebugLogger::Log(
         VSDebugLogger::LogLevelError,
@@ -757,10 +754,6 @@ const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
     case KindOfKeyset: {
       return VariableValue{format("keyset[{}]", variable.toArray().size()).str()};
     }
-
-    case KindOfRef:
-      // Note: PHP references are not supported in Hack.
-      return VariableValue{"reference"};
 
     case KindOfObject:
       return getObjectSummary(session, debugger, requestId, variable.toCObjRef());

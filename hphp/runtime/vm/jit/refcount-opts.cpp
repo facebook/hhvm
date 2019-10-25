@@ -473,15 +473,14 @@ alone (whatever was causing our lower bound to be one), and therefore a decref
 through this unknown pointer won't think it is removing the last reference.
 
 Also worth discussing is that there are several runtime objects in the VM with
-operations that have behavioral differences based on whether the reference
-count is greater than one.  For instance, types like KindOfString and
-KindOfArray do in place updates when they have a refcount of one, and KindOfRef
-is treated "observably" as a php reference only if the refcount is greater than
-one.  Making sure we don't change these situations is actually the same
-condition as discussed above: by the above scheme for not changing whether
-pointers we don't know about constitute the last counted reference to an
-object, we are both preventing decrefs from going to zero when they shouldn't,
-and modifications to objects from failing to COW when they should.
+operations that have behavioral differences based on whether the reference count
+is greater than one.  For instance, types like KindOfString and KindOfArray do
+in place updates when they have a refcount of one. Making sure we don't change
+these situations is actually the same condition as discussed above: by the above
+scheme for not changing whether pointers we don't know about constitute the last
+counted reference to an object, we are both preventing decrefs from going to
+zero when they shouldn't, and modifications to objects from failing to COW when
+they should.
 
 A fundamental meta-rule that arises out of all the above considerations is that
 we cannot move (or remove) increfs unless the lower bound on the incref node is

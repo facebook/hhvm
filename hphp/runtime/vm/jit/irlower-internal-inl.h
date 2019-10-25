@@ -228,7 +228,6 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
     if (type == TUncounted) {
       return ccNegate(emitIsTVTypeRefCounted(v, sf, typeSrc));
     }
-    if (type == TCell)          return cmp(KindOfRef, CC_NE);
 
     always_assert(type.isKnownDataType());
 

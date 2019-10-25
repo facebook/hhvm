@@ -1619,9 +1619,6 @@ void VariableSerializer::serializeVariant(tv_rval tv,
       serializeResource(val(tv).pres->data());
       return;
 
-    case KindOfRef:
-      return;
-
     case KindOfFunc:
       assertx(!isArrayKey);
       serializeFunc(val(tv).pfunc);
@@ -1964,7 +1961,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
     assertx(!obj->isCollection());
     if (ret.isArray()) {
       Array wanted = Array::Create();
-      assertx(isArrayType(ret.getRawType())); // can't be KindOfRef
+      assertx(isArrayType(ret.getRawType()));
       const Array &props = ret.asCArrRef();
       for (ArrayIter iter(props); iter; ++iter) {
         String memberName = iter.second().toString();

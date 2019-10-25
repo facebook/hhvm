@@ -304,7 +304,6 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromContainer,
     case KindOfBoolean:
     case KindOfResource:
     case KindOfInt64:
-    case KindOfRef:
     case KindOfDouble:
     case KindOfFunc:
     case KindOfClass:

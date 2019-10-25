@@ -253,8 +253,7 @@ void callFunc(const Func* const func, const void* const ctx,
     case KindOfClsMeth:
     case KindOfObject:
     case KindOfResource:
-    case KindOfRecord:
-    case KindOfRef: {
+    case KindOfRecord: {
       assertx(isBuiltinByRef(ret.m_type));
       if (func->isReturnByValue()) {
         auto val = callFuncInt64Impl(f, GP_args, GP_count, SIMD_args,
@@ -552,7 +551,6 @@ static folly::Optional<TypedValue> builtinInValue(
   case KindOfUninit:
   case KindOfObject:
   case KindOfResource:
-  case KindOfRef:
   case KindOfFunc:
   case KindOfClass:
   case KindOfClsMeth:
@@ -607,7 +605,6 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfFunc:         return ty == T::Func;
     case KindOfClass:        return ty == T::Class;
     case KindOfClsMeth:      return ty == T::ClsMeth;
-    case KindOfRef:
     case KindOfRecord:       return false; // TODO (T41031632)
   }
   not_reached();
@@ -640,7 +637,6 @@ static bool tcCheckNativeIO(
       case KindOfFunc:         return ty == T::FuncIO;
       case KindOfClass:        return ty == T::ClassIO;
       case KindOfClsMeth:      return ty == T::ClsMethIO;
-      case KindOfRef:
       case KindOfRecord:       return false; // TODO (T41031632)
     }
     not_reached();

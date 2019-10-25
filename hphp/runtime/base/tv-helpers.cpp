@@ -132,9 +132,6 @@ bool cellIsPlausible(const Cell cell) {
       case KindOfClsMeth:
         assertx(cell.m_data.pclsmeth->validate());
         return;
-      case KindOfRef:
-        assertx(!"KindOfRef found in a Cell");
-        break;
     }
     not_reached();
   }();

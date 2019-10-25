@@ -210,7 +210,6 @@ void deepCopy(tv_lval lval) {
     DT_UNCOUNTED_CASE:
     case KindOfString:
     case KindOfResource:
-    case KindOfRef:
     case KindOfKeyset:
     case KindOfClsMeth:
       return;

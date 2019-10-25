@@ -117,7 +117,7 @@ bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
   if (prop.type() == KindOfUninit && (propDecl.attrs & AttrLateInit)) {
     return true;
   }
-  if (prop.type() == KindOfRef || prop.type() == KindOfUninit) {
+  if (prop.type() == KindOfUninit) {
     return propDecl.typeConstraint.maybeMixed();
   }
   return propDecl.typeConstraint.assertCheck(prop);

@@ -294,7 +294,6 @@ std::pair<int, double> sizeOfArray(
         case KindOfResource:
         case KindOfVec:
         case KindOfDict:
-        case KindOfRef:
         case KindOfArray:
         case KindOfKeyset:
         case KindOfFunc:
@@ -393,7 +392,6 @@ void stringsOfArray(
         case KindOfResource:
         case KindOfVec:
         case KindOfDict:
-        case KindOfRef:
         case KindOfArray:
         case KindOfKeyset:
         case KindOfFunc:
@@ -558,37 +556,6 @@ std::pair<int, double> tvGetSize(
       }
       break;
     }
-    case KindOfRef: {
-      auto ref_ref_count = int{tvGetCount(tv)};
-      RefData* ref = tv.m_data.pref;
-      size += sizeof(*ref);
-      sized += sizeof(*ref);
-
-      FTRACE(3, " RefData tv at {} that with ref count {}\n",
-        (void*)ref,
-        ref_ref_count
-      );
-
-      Cell* cell = ref->cell();
-      auto size_of_tv_pair = tvGetSize(
-        *cell,
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        flags
-      );
-      size += size_of_tv_pair.first;
-
-      if (one_bit_refcount) {
-        sized += size_of_tv_pair.second;
-      } else {
-        assertx(ref_ref_count > 0);
-        sized += size_of_tv_pair.second / (double)(ref_ref_count);
-      }
-      break;
-    }
     case KindOfPersistentString:
     case KindOfString: {
       StringData* str = tv.m_data.pstr;
@@ -681,12 +648,6 @@ void tvGetStrings(
     case HPHP::KindOfArray: {
       auto* arr = tv.m_data.parr;
       stringsOfArray(arr, metrics, path, pointers, val_stack);
-      break;
-    }
-    case HPHP::KindOfRef: {
-      RefData* ref = tv.m_data.pref;
-      Cell* cell = ref->cell();
-      tvGetStrings(*cell, metrics, path, pointers, val_stack);
       break;
     }
     case HPHP::KindOfPersistentString:

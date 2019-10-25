@@ -241,16 +241,6 @@ inline void ObjectData::verifyPropTypeHintImpl(tv_rval val,
   auto const& tc = prop.typeConstraint;
   if (!tc.isCheckable()) return;
 
-  if (UNLIKELY(type(val) == KindOfRef)) {
-    if (tc.isMixedResolved()) return;
-    raise_property_typehint_binding_error(
-      prop.cls,
-      prop.name,
-      tc.isSoft()
-    );
-    return;
-  }
-
   if (UNLIKELY(type(val) == KindOfUninit)) {
     if ((prop.attrs & AttrLateInit) || tc.isMixedResolved()) return;
     raise_property_typehint_unset_error(

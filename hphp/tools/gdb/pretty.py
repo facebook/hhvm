@@ -138,9 +138,6 @@ class TypedValuePrinter(object):
         elif t == DT('HPHP::KindOfResource'):
             val = data['pres']
 
-        elif t == DT('HPHP::KindOfRef'):
-            val = data['pref'].dereference()
-
         else:
             t = 'Invalid(%d)' % t.cast(T('int8_t'))
             val = "0x%x" % int(data['num'])

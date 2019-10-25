@@ -184,8 +184,7 @@ struct TypedValueAux : TypedValue {
 constexpr size_t kTVSimdAlign = 0x10;
 
 /*
- * These may be used to provide a little more self-documentation about whether
- * typed values must be cells (not KindOfRef) or ref (must be KindOfRef).
+ * Alias for TypedValue.
  *
  * See bytecode.specification for details.  Note that in
  * bytecode.specification, refs are abbreviated as "V".
@@ -293,7 +292,6 @@ X(KindOfKeyset,       ArrayData*);
 X(KindOfPersistentKeyset, const ArrayData*);
 X(KindOfObject,       ObjectData*);
 X(KindOfResource,     ResourceHdr*);
-X(KindOfRef,          RefData*);
 X(KindOfString,       StringData*);
 X(KindOfPersistentString, const StringData*);
 X(KindOfFunc,         Func*);

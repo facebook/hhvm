@@ -390,7 +390,6 @@ void SetVariableCommand::setVariableValue(
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfRef:
     case KindOfObject:
       // For complex types, we need to run PHP code to create a new object
       // or determine what reference to assign, making direct assignment via

@@ -59,8 +59,7 @@ inline bool cellToBool(Cell cell) {
     case KindOfArray:         return !cell.m_data.parr->empty();
     case KindOfObject:        return cell.m_data.pobj->toBoolean();
     case KindOfResource:      return cell.m_data.pres->data()->o_toBoolean();
-    case KindOfRecord:        raise_convert_record_to_type("bool");
-    case KindOfRef:           break;
+    case KindOfRecord:        raise_convert_record_to_type("bool"); break;
     case KindOfFunc:
       if (RuntimeOption::EvalRaiseFuncConversionWarning) {
         raise_warning("Func to bool conversion");
@@ -94,8 +93,7 @@ inline int64_t cellToInt(Cell cell) {
     case KindOfArray:         return cell.m_data.parr->empty() ? 0 : 1;
     case KindOfObject:        return cell.m_data.pobj->toInt64();
     case KindOfResource:      return cell.m_data.pres->data()->o_toInt64();
-    case KindOfRecord:        raise_convert_record_to_type("int");
-    case KindOfRef:           break;
+    case KindOfRecord:        raise_convert_record_to_type("int"); break;
     case KindOfFunc:
       if (RuntimeOption::EvalRaiseFuncConversionWarning) {
         raise_warning("Func to int conversion");
@@ -185,7 +183,6 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
     case KindOfPersistentString:
     case KindOfFunc:
     case KindOfClass:
-    case KindOfRef:
       break;
   }
   not_reached();

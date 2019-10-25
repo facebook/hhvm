@@ -408,7 +408,6 @@ StaticString getDataTypeString(DataType t) {
     case KindOfArray:      return s_array;
     case KindOfObject:     return s_object;
     case KindOfResource:   return s_resource;
-    case KindOfRef:        return s_ref;
     case KindOfFunc:       return s_func;
     case KindOfClass:      return s_class;
     case KindOfClsMeth:    return s_clsmeth;

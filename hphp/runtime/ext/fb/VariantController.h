@@ -108,7 +108,6 @@ struct VariantControllerImpl {
         }
 
       case KindOfResource:
-      case KindOfRef:
       case KindOfRecord: // TODO(T41025646): implement serialization for records
         throw HPHP::serialize::SerializeError(
           "don't know how to serialize HPHP Variant");

@@ -996,8 +996,6 @@ std::string describe_actual_type(tv_rval val, bool isHHType) {
     case KindOfClsMeth:       return "clsmeth";
     case KindOfRecord:
       return val.val().prec->record()->name()->data();
-    case KindOfRef:
-      break;
     case KindOfObject: {
       auto const obj = val.val().pobj;
       auto const cls = obj->getVMClass();
@@ -1389,7 +1387,6 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfRecord:
         case KindOfNull:         return MK::None;
         case KindOfUninit:
-        case KindOfRef:
         case KindOfFunc:
         case KindOfClass:
           always_assert_flog(false, "Unexpected DataType");

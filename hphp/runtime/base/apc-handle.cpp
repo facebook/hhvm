@@ -163,9 +163,6 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
 
     case KindOfRecord: // TODO (T41019518)
       raise_error(Strings::RECORD_NOT_SUPPORTED);
-
-    case KindOfRef:
-      return {nullptr, 0};
   }
   not_reached();
 }

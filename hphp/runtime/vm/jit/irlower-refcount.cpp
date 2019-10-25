@@ -280,8 +280,6 @@ CallSpec getDtorCallSpec(Vout& v, Vreg obj, DataType type, ArgGroup& args) {
     }
     case KindOfResource:
       return CallSpec::method(&ResourceHdr::release);
-    case KindOfRef:
-      return CallSpec::method(&RefData::release);
     case KindOfRecord:
       return CallSpec::method(&RecordData::release);
     case KindOfClsMeth:

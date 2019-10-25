@@ -742,7 +742,6 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
-      case KindOfRef:
       case KindOfFunc:
       case KindOfClass:
       case KindOfClsMeth:

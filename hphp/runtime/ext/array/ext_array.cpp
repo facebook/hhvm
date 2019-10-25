@@ -390,8 +390,6 @@ bool HHVM_FUNCTION(array_key_exists,
     }
     case KindOfInt64:
       return ad->exists(cell->m_data.num);
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -772,7 +770,6 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfNull:
       case KindOfBoolean:
       case KindOfInt64:
-      case KindOfRef:
         i *= cellToInt(rval.tv());
         continue;
 
@@ -818,7 +815,6 @@ DOUBLE:
     switch (rval.type()) {
       DT_UNCOUNTED_CASE:
       case KindOfString:
-      case KindOfRef:
         d *= cellToDouble(rval.tv());
 
       case KindOfVec:
@@ -1049,7 +1045,6 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfNull:
       case KindOfBoolean:
       case KindOfInt64:
-      case KindOfRef:
         i += cellToInt(rval.tv());
         continue;
 
@@ -1095,7 +1090,6 @@ DOUBLE:
     switch (rval.type()) {
       DT_UNCOUNTED_CASE:
       case KindOfString:
-      case KindOfRef:
         d += cellToDouble(rval.tv());
 
       case KindOfVec:
@@ -1343,9 +1337,6 @@ int64_t HHVM_FUNCTION(count,
 
     case KindOfRecord: // TODO (T41258617)
       raise_error(Strings::RECORD_NOT_SUPPORTED);
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -3376,8 +3367,6 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
       SystemLib::throwInvalidArgumentExceptionObject(
         "Records cannot be cast to an array-key"
       );
-    case KindOfRef:
-      break;
   }
   not_reached();
 }

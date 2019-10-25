@@ -465,8 +465,8 @@ public:
   explicit Type(DataType outer);
 
   /*
-   * Return true iff there exists a DataType in the range [KindOfUninit,
-   * KindOfRef] that represents a non-strict supertype of this type.
+   * Return true iff there exists a DataType that represents a non-strict
+   * supertype of this type.
    *
    * @requires: *this <= Cell
    */

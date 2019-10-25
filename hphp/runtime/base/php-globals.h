@@ -29,8 +29,7 @@ struct Array;
 
 /*
  * Set a $GLOBALS[foo] to the supplied value, using normal php set
- * semantics.  (I.e. if the global is a KindOfRef, this will set the
- * value in its RefData.)
+ * semantics.
  */
 void php_global_set(const StaticString&, Variant);
 

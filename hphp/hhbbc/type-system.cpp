@@ -3502,7 +3502,6 @@ Type from_cell(Cell cell) {
     always_assert(cell.m_data.parr->isPHPArray());
     return aval(cell.m_data.parr);
 
-  case KindOfRef:
   case KindOfObject:
   case KindOfResource:
   case KindOfFunc:
@@ -3531,7 +3530,6 @@ Type from_DataType(DataType dt) {
   case KindOfRecord:   return TRecord;
   case KindOfPersistentArray:
   case KindOfArray:    return TArr;
-  case KindOfRef:      return TBottom;
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
   case KindOfFunc:     return TFunc;

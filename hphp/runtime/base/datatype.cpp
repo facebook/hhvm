@@ -40,7 +40,6 @@ static_assert(!isStringType(KindOfPersistentKeyset),"");
 static_assert(!isStringType(KindOfKeyset),          "");
 static_assert(!isStringType(KindOfObject),          "");
 static_assert(!isStringType(KindOfResource),        "");
-static_assert(!isStringType(KindOfRef),             "");
 
 static_assert(isArrayType(KindOfArray),             "");
 static_assert(isArrayType(KindOfPersistentArray),   "");
@@ -59,7 +58,6 @@ static_assert(!isArrayType(KindOfPersistentString), "");
 static_assert(!isArrayType(KindOfString),           "");
 static_assert(!isArrayType(KindOfObject),           "");
 static_assert(!isArrayType(KindOfResource),         "");
-static_assert(!isArrayType(KindOfRef),              "");
 
 static_assert(isVecType(KindOfVec),                 "");
 static_assert(isVecType(KindOfPersistentVec),       "");
@@ -78,7 +76,6 @@ static_assert(!isVecType(KindOfPersistentString),   "");
 static_assert(!isVecType(KindOfString),             "");
 static_assert(!isVecType(KindOfObject),             "");
 static_assert(!isVecType(KindOfResource),           "");
-static_assert(!isVecType(KindOfRef),                "");
 
 static_assert(isDictType(KindOfDict),               "");
 static_assert(isDictType(KindOfPersistentDict),     "");
@@ -97,7 +94,6 @@ static_assert(!isDictType(KindOfPersistentString),  "");
 static_assert(!isDictType(KindOfString),            "");
 static_assert(!isDictType(KindOfObject),            "");
 static_assert(!isDictType(KindOfResource),          "");
-static_assert(!isDictType(KindOfRef),               "");
 
 static_assert(isKeysetType(KindOfKeyset),           "");
 static_assert(isKeysetType(KindOfPersistentKeyset), "");
@@ -116,7 +112,6 @@ static_assert(!isKeysetType(KindOfPersistentString),"");
 static_assert(!isKeysetType(KindOfString),          "");
 static_assert(!isKeysetType(KindOfObject),          "");
 static_assert(!isKeysetType(KindOfResource),        "");
-static_assert(!isKeysetType(KindOfRef),             "");
 
 static_assert(isArrayLikeType(KindOfArray),             "");
 static_assert(isArrayLikeType(KindOfPersistentArray),   "");
@@ -135,7 +130,6 @@ static_assert(!isArrayLikeType(KindOfPersistentString), "");
 static_assert(!isArrayLikeType(KindOfString),           "");
 static_assert(!isArrayLikeType(KindOfObject),           "");
 static_assert(!isArrayLikeType(KindOfResource),         "");
-static_assert(!isArrayLikeType(KindOfRef),              "");
 
 static_assert(isNullType(KindOfUninit),            "");
 static_assert(isNullType(KindOfNull),              "");
@@ -154,12 +148,10 @@ static_assert(!isNullType(KindOfPersistentString), "");
 static_assert(!isNullType(KindOfString),           "");
 static_assert(!isNullType(KindOfObject),           "");
 static_assert(!isNullType(KindOfResource),         "");
-static_assert(!isNullType(KindOfRef),              "");
 
 static_assert(isRefcountedType(KindOfString),            "");
 static_assert(isRefcountedType(KindOfObject),            "");
 static_assert(isRefcountedType(KindOfResource),          "");
-static_assert(isRefcountedType(KindOfRef),               "");
 static_assert(isRefcountedType(KindOfArray),             "");
 static_assert(isRefcountedType(KindOfVec),               "");
 static_assert(isRefcountedType(KindOfDict),              "");

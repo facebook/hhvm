@@ -124,9 +124,6 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
 
       case KindOfRecord:
         raise_convert_record_to_type("bool");
-
-      case KindOfRef:
-        break;
     }
     not_reached();
   } while (0);
@@ -212,9 +209,6 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
 
       case KindOfRecord:
         raise_convert_record_to_type("double");
-
-      case KindOfRef:
-        break;
     }
     not_reached();
   } while (0);
@@ -296,9 +290,6 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
 
       case KindOfRecord:
         raise_convert_record_to_type("int");
-
-      case KindOfRef:
-        break;
     }
     not_reached();
   } while (0);
@@ -363,9 +354,6 @@ double tvCastToDouble(TypedValue tv) {
 
     case KindOfRecord:
       raise_convert_record_to_type("double");
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -470,9 +458,6 @@ void cellCastToStringInPlace(tv_lval tv) {
 
     case KindOfRecord:
       raise_convert_record_to_type("string");
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -483,8 +468,6 @@ StringData* tvCastToStringData(TypedValue tv) {
 }
 
 StringData* cellCastToStringData(Cell tv) {
-  assertx(tv.m_type != KindOfRef);
-
   switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -556,9 +539,6 @@ StringData* cellCastToStringData(Cell tv) {
 
     case KindOfRecord:
       raise_convert_record_to_type("string");
-
-    case KindOfRef:
-      not_reached();
   }
   not_reached();
 }
@@ -610,9 +590,6 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
 
     case KindOfRecord:
       raise_convert_record_to_type("array");
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -788,9 +765,6 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
 
       case KindOfRecord:
         raise_convert_record_to_type("array");
-
-      case KindOfRef:
-        break;
     }
     not_reached();
   } while (0);
@@ -902,9 +876,6 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
 
       case KindOfRecord:
         raise_convert_record_to_type("vec");
-
-      case KindOfRef:
-        break;
     }
     not_reached();
   } while (0);
@@ -1013,9 +984,6 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
 
       case KindOfRecord:
         raise_convert_record_to_type("dict");
-
-      case KindOfRef:
-        break;
     }
     not_reached();
   } while (0);
@@ -1126,9 +1094,6 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
 
       case KindOfRecord:
         raise_convert_record_to_type("keyset");
-
-      case KindOfRef:
-        break;
     }
     not_reached();
   } while (0);
@@ -1246,9 +1211,6 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
 
       case KindOfRecord:
         raise_convert_record_to_type("varray");
-
-      case KindOfRef:
-        break;
     }
     not_reached();
   } while (0);
@@ -1370,9 +1332,6 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
 
       case KindOfRecord:
         raise_convert_record_to_type("darray");
-
-      case KindOfRef:
-        break;
     }
     not_reached();
   } while (0);
@@ -1432,9 +1391,6 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
 
     case KindOfRecord:
       raise_convert_record_to_type("object");
-
-    case KindOfRef:
-      break;
   }
   not_reached();
 }
@@ -1466,8 +1422,6 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
       case KindOfResource:
         // no op, return
         return;
-      case KindOfRef:
-        break;
     }
     not_reached();
   } while (0);

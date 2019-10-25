@@ -1040,7 +1040,6 @@ Bytecode gen_constant(const Cell& cell) {
       assert(cell.m_data.parr->isPHPArray());
       return bc::Array { cell.m_data.parr };
 
-    case KindOfRef:
     case KindOfResource:
     case KindOfObject:
     case KindOfFunc:

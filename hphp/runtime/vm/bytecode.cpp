@@ -611,12 +611,6 @@ static std::string toStringElm(const TypedValue* tv) {
   };
 
   switch (tv->m_type) {
-  case KindOfRef:
-    os << "V:(";
-    os << "@" << tv->m_data.pref;
-    os << toStringElm(tv->m_data.pref->cell());
-    os << ")";
-    return os.str();
   case KindOfUninit:
   case KindOfNull:
   case KindOfBoolean:
@@ -748,9 +742,6 @@ static std::string toStringElm(const TypedValue* tv) {
        << tv->m_data.pclsmeth->getFunc()->fullName()->data()
        << ")";
        continue;
-
-    case KindOfRef:
-      break;
     }
     not_reached();
   } while (0);
@@ -2547,7 +2538,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfArray:
             case KindOfObject:
             case KindOfResource:
-            case KindOfRef:
             case KindOfFunc:
             case KindOfClass:
             case KindOfClsMeth:
@@ -2599,9 +2589,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
 
         case KindOfRecord: // TODO (T41029094)
           raise_error(Strings::RECORD_NOT_SUPPORTED);
-
-        case KindOfRef:
-          break;
       }
       not_reached();
     }();

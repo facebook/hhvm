@@ -65,7 +65,6 @@ bool APCLocalArray::checkInvariants(const ArrayData* ad) {
   DEBUG_ONLY auto const local = static_cast<const APCLocalArray*>(ad);
   DEBUG_ONLY auto p = local->localCache();
   for (auto end = p + local->getSize(); p < end; ++p) {
-    // Elements in the local cache must not be KindOfRef.
     assertx(cellIsPlausible(*p));
   }
   return true;

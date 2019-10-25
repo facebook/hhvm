@@ -386,7 +386,6 @@ void ConvertTvToUncounted(
       raise_error(Strings::RECORD_NOT_SUPPORTED);
     case KindOfObject:
     case KindOfResource:
-    case KindOfRef:
       not_reached();
   }
 }

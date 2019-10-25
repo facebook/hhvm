@@ -376,15 +376,6 @@ struct Variant : private TypedValue {
       m_type = KindOfNull;
     }
   }
-  explicit Variant(RefData* r) noexcept {
-    if (r) {
-      m_type = KindOfRef;
-      m_data.pref = r;
-      r->incRefCount();
-    } else {
-      m_type = KindOfNull;
-    }
-  }
 
   explicit Variant(const Func* f) noexcept {
     assertx(f);
@@ -603,9 +594,6 @@ struct Variant : private TypedValue {
     return Variant{var, Attach{}};
   }
   static Variant attach(ResourceHdr* var) noexcept {
-    return Variant{var, Attach{}};
-  }
-  static Variant attach(RefData* var) noexcept {
     return Variant{var, Attach{}};
   }
 
@@ -857,8 +845,6 @@ struct Variant : private TypedValue {
       case KindOfClsMeth:
       case KindOfRecord:
         return false;
-      case KindOfRef:
-        return m_data.pref->var()->isIntVal();
     }
     not_reached();
   }
@@ -1173,8 +1159,7 @@ struct Variant : private TypedValue {
         TypedValue* asTypedValue()       { return this; }
 
   /*
-   * Access this Variant as a Cell.  I.e. unboxes it if it was a
-   * KindOfRef.
+   * Access this Variant as a Cell.
    */
   const Cell* toCell() const { return asTypedValue(); }
         Cell* toCell()       { return asTypedValue(); }
@@ -1300,14 +1285,6 @@ struct Variant : private TypedValue {
     if (var) {
       m_type = KindOfResource;
       m_data.pres = var;
-    } else {
-      m_type = KindOfNull;
-    }
-  }
-  Variant(RefData* var, Attach) noexcept {
-    if (var) {
-      m_type = KindOfRef;
-      m_data.pref = var;
     } else {
       m_type = KindOfNull;
     }
@@ -1520,9 +1497,6 @@ private:
         return;
       case KindOfResource:
         assertx(m_data.pres->checkCount());
-        return;
-      case KindOfRef:
-        assertx(m_data.pref->checkCount());
         return;
       case KindOfRecord:
         assertx(m_data.prec->checkCount());

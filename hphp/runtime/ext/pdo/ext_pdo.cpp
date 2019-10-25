@@ -2512,7 +2512,6 @@ safe:
               case KindOfArray:
               case KindOfObject:
               case KindOfResource:
-              case KindOfRef:
               case KindOfFunc:
               case KindOfClass:
               case KindOfClsMeth:

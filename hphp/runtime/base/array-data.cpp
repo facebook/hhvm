@@ -118,7 +118,6 @@ struct ScalarHash {
           case KindOfKeyset:
           case KindOfObject:
           case KindOfResource:
-          case KindOfRef:
           case KindOfFunc:
           case KindOfClass:
           case KindOfClsMeth:
@@ -1124,8 +1123,6 @@ std::string describeKeyType(const TypedValue* tv) {
   case KindOfFunc:            return "func";
   case KindOfClass:           return "class";
   case KindOfClsMeth:         return "clsmeth";
-  case KindOfRef:
-    return describeKeyType(tv->m_data.pref->var()->asTypedValue());
   }
   not_reached();
 }
@@ -1137,8 +1134,6 @@ std::string describeKeyValue(TypedValue tv) {
     return folly::sformat("\"{}\"", tv.m_data.pstr->data());
   case KindOfInt64:
     return folly::to<std::string>(tv.m_data.num);
-  case KindOfRef:
-    return describeKeyValue(*tv.m_data.pref->var()->asTypedValue());
   case KindOfUninit:
   case KindOfNull:
   case KindOfBoolean:

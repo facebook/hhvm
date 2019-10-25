@@ -578,9 +578,6 @@ NEVER_INLINE tv_rval ElemSlow(TypedValue& tvRef,
 
     case KindOfRecord:
       return ElemRecord<keyType>(base.val().prec, key);
-
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -983,8 +980,6 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base,
       throw_cannot_write_for_clsmeth();
     case KindOfRecord:
       return ElemDRecord<keyType>(base, key);
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -1239,8 +1234,6 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
       return ElemUObject<keyType>(tvRef, base, key);
     case KindOfRecord:
       raise_error(Strings::OP_NOT_SUPPORTED_RECORD);
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -1356,8 +1349,6 @@ inline tv_lval NewElem(TypedValue& tvRef,
       throw_cannot_use_newelem_for_lval_read_clsmeth();
     case KindOfRecord:
       throw_cannot_use_newelem_for_lval_read_record();
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -1797,8 +1788,6 @@ StringData* SetElemSlow(tv_lval base,
     case KindOfRecord:
       SetElemRecord<keyType>(base, key, value);
       return nullptr;
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -2002,9 +1991,6 @@ inline void SetNewElem(tv_lval base,
       throw_cannot_write_for_clsmeth();
     case KindOfRecord:
       raise_error(Strings::OP_NOT_SUPPORTED_RECORD);
-    case KindOfRef:
-
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -2138,9 +2124,6 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
       setopBody(result, op, rhs);
       return result;
     }
-
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -2233,9 +2216,6 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
 
     case KindOfRecord:
       throw_cannot_use_newelem_for_lval_read_record();
-
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -2391,9 +2371,6 @@ inline Cell IncDecElem(
       auto result = ElemDRecord<KeyType::Any>(base, key);
       return IncDecBody(op, tvAssertCell(result));
     }
-
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -2487,9 +2464,6 @@ inline Cell IncDecNewElem(
 
     case KindOfRecord:
       throw_cannot_use_newelem_for_lval_read_record();
-
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -2718,9 +2692,6 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
 
     case KindOfRecord:
       raise_error("Cannot unset a record field");
-
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -2947,9 +2918,6 @@ NEVER_INLINE bool IssetEmptyElemSlow(tv_rval base, key_type<keyType> key) {
 
     case KindOfRecord:
       return IssetEmptyElemRecord<useEmpty, keyType>(val(base).prec, key);
-
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -3121,9 +3089,6 @@ tv_lval propPre(TypedValue& tvRef, tv_lval base, MInstrPropState* pState) {
 
     case KindOfObject:
       return base;
-
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -3160,8 +3125,6 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
       return &tvRef;
     case KindOfObject:
       return val(base).pobj->prop(&tvRef, ctx, key);
-    case KindOfRef:
-      always_assert(false);
   }
   not_reached();
 }
@@ -3303,9 +3266,6 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
 
     case KindOfObject:
       return SetPropObj<keyType>(ctx, HPHP::val(base).pobj, key, val);
-
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -3384,9 +3344,6 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
 
     case KindOfObject:
       return SetOpPropObj(tvRef, ctx, op, instanceFromTv(base), key, rhs);
-
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }
@@ -3469,9 +3426,6 @@ inline Cell IncDecProp(
 
     case KindOfObject:
       return IncDecPropObj(ctx, op, instanceFromTv(base), key);
-
-    case KindOfRef:
-      break;
   }
   unknownBaseType(type(base));
 }

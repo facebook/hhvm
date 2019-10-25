@@ -1769,7 +1769,7 @@ TypedValue ExecutionContext::invokeFuncFew(
   for (auto i = 0; i < numArgs; ++i) {
     const TypedValue *from = &argv[i];
     TypedValue* to = vmStack().allocTV();
-    cellDup(*tvToCell(from), *to);
+    cellDup(*from, *to);
   }
   if (UNLIKELY(invName != nullptr)) {
     shuffleMagicArgs(String::attach(invName), numArgs, false);

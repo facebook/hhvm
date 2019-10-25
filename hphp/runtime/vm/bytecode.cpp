@@ -1080,7 +1080,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
         throwParamInOutMismatch(func, i);
       }
       auto const from = iter.secondValPlus();
-      cellDup(tvToCell(from), *stack.allocTV());
+      cellDup(from, *stack.allocTV());
     }
 
     if (LIKELY(!iter)) {
@@ -2634,7 +2634,7 @@ void iopSSwitch(PC origpc, PC& pc, imm_array<StrVecItem> jmptab) {
   auto const veclen = jmptab.size;
   assertx(veclen > 1);
   unsigned cases = veclen - 1; // the last vector item is the default case
-  Cell* val = tvToCell(vmStack().topTV());
+  Cell* val = vmStack().topTV();
   Unit* u = vmfp()->m_func->unit();
   unsigned i;
   for (i = 0; i < cases; ++i) {
@@ -2968,7 +2968,7 @@ static void raise_undefined_local(ActRec* fp, Id pind) {
 
 static inline void cgetl_inner_body(TypedValue* fr, TypedValue* to) {
   assertx(fr->m_type != KindOfUninit);
-  cellDup(*tvToCell(fr), *to);
+  cellDup(*fr, *to);
 }
 
 OPTBLD_INLINE void cgetl_body(ActRec* fp,
@@ -2998,7 +2998,7 @@ OPTBLD_INLINE void iopCGetQuietL(local_var fr) {
 
 OPTBLD_INLINE void iopCUGetL(local_var fr) {
   auto to = vmStack().allocTV();
-  tvDup(*tvToCell(fr.ptr), *to);
+  tvDup(*fr.ptr, *to);
 }
 
 OPTBLD_INLINE void iopCGetL2(local_var fr) {
@@ -3071,7 +3071,7 @@ OPTBLD_INLINE void iopCGetS() {
                 ss.cls->name()->data(),
                 ss.name->data());
   }
-  cellDup(*tvToCell(ss.val), *ss.output);
+  cellDup(*ss.val, *ss.output);
 }
 
 static inline MInstrState& initMState() {
@@ -3107,7 +3107,7 @@ OPTBLD_INLINE void iopBaseGC(uint32_t idx, MOpMode mode) {
 }
 
 OPTBLD_INLINE void iopBaseGL(local_var loc, MOpMode mode) {
-  baseGImpl(tvToCell(loc.ptr), mode);
+  baseGImpl(loc.ptr, mode);
 }
 
 OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, uint32_t clsIdx, MOpMode mode) {
@@ -3145,7 +3145,7 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, uint32_t clsIdx, MOpMode mode) {
 
 OPTBLD_INLINE void baseLImpl(local_var loc, MOpMode mode) {
   auto& mstate = initMState();
-  auto local = tvToCell(loc.ptr);
+  auto local = loc.ptr;
   if (mode == MOpMode::Warn && local->m_type == KindOfUninit) {
     raise_notice(Strings::UNDEFINED_VARIABLE,
                  vmfp()->m_func->localVarName(loc.index)->data());
@@ -3245,7 +3245,7 @@ static inline TypedValue key_tv(MemberKey key) {
     case MW:
       return TypedValue{};
     case MEL: case MPL: {
-      auto local = tvToCell(frame_local(vmfp(), key.iva));
+      auto local = frame_local(vmfp(), key.iva);
       if (local->m_type == KindOfUninit) {
         raise_undefined_local(vmfp(), key.iva);
         return make_tv<KindOfNull>();
@@ -3312,7 +3312,7 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
     case QueryMOp::CGet:
     case QueryMOp::CGetQuiet:
       dimDispatch(getQueryMOpMode(op), mk);
-      tvDup(*tvToCell(mstate.base), result);
+      tvDup(*mstate.base, result);
       break;
 
     case QueryMOp::Isset:
@@ -3428,7 +3428,6 @@ OPTBLD_INLINE void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk) {
   }
 
   vmStack().popC();
-  result = tvToCell(result);
   tvIncRefGen(*result);
   mFinal(mstate, nDiscard, *result);
 }
@@ -3708,7 +3707,7 @@ OPTBLD_INLINE void iopIssetG() {
   if (tv == nullptr) {
     e = false;
   } else {
-    e = !cellIsNull(tvToCell(tv));
+    e = !cellIsNull(tv);
   }
   vmStack().replaceC<KindOfBoolean>(e);
 }
@@ -3719,14 +3718,14 @@ OPTBLD_INLINE void iopIssetS() {
   if (!(ss.visible && ss.accessible)) {
     e = false;
   } else {
-    e = !cellIsNull(tvToCell(ss.val));
+    e = !cellIsNull(ss.val);
   }
   ss.output->m_data.num = e;
   ss.output->m_type = KindOfBoolean;
 }
 
 OPTBLD_INLINE void iopIssetL(local_var tv) {
-  bool ret = !is_null(tvToCell(tv.ptr));
+  bool ret = !is_null(tv.ptr);
   TypedValue* topTv = vmStack().allocTV();
   topTv->m_data.num = ret;
   topTv->m_type = KindOfBoolean;
@@ -3838,7 +3837,7 @@ OPTBLD_INLINE void iopIsTypeL(local_var loc, IsTypeOp op) {
   if (loc.ptr->m_type == KindOfUninit) {
     raise_undefined_local(vmfp(), loc.index);
   }
-  vmStack().pushBool(isTypeHelper(tvToCell(loc.ptr), op));
+  vmStack().pushBool(isTypeHelper(loc.ptr, op));
 }
 
 OPTBLD_INLINE void iopIsTypeC(IsTypeOp op) {
@@ -3885,7 +3884,7 @@ OPTBLD_INLINE void iopBreakTraceHint() {
 }
 
 OPTBLD_INLINE void iopEmptyL(local_var loc) {
-  bool e = !cellToBool(*tvToCell(loc.ptr));
+  bool e = !cellToBool(*loc.ptr);
   vmStack().pushBool(e);
 }
 
@@ -3899,7 +3898,7 @@ OPTBLD_INLINE void iopEmptyG() {
   if (tv == nullptr) {
     e = true;
   } else {
-    e = !cellToBool(*tvToCell(tv));
+    e = !cellToBool(*tv);
   }
   vmStack().replaceC<KindOfBoolean>(e);
 }
@@ -3910,7 +3909,7 @@ OPTBLD_INLINE void iopEmptyS() {
   if (!(ss.visible && ss.accessible)) {
     e = true;
   } else {
-    e = !cellToBool(*tvToCell(ss.val));
+    e = !cellToBool(*ss.val);
   }
   ss.output->m_data.num = e;
   ss.output->m_type = KindOfBoolean;
@@ -3934,7 +3933,7 @@ OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
     tvWriteNull(*loc.ptr);
     raise_undefined_local(vmfp(), loc.index);
   }
-  auto const cell = tvToCell(loc.ptr);
+  auto const cell = loc.ptr;
 
   // Use the generic scheme, which is performed by
   // serialize_memoize_param.
@@ -4070,7 +4069,7 @@ OPTBLD_INLINE void iopSetS() {
 
 OPTBLD_INLINE void iopSetOpL(local_var loc, SetOpOp op) {
   Cell* fr = vmStack().topC();
-  Cell* to = tvToCell(loc.ptr);
+  Cell* to = loc.ptr;
   setopBody(to, op, fr);
   tvDecRefGen(fr);
   cellDup(*to, *fr);
@@ -4085,10 +4084,10 @@ OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
   lookupd_gbl(vmfp(), name, tv2, to);
   SCOPE_EXIT { decRefStr(name); };
   assertx(to != nullptr);
-  setopBody(tvToCell(to), op, fr);
+  setopBody(to, op, fr);
   tvDecRefGen(fr);
   tvDecRefGen(tv2);
-  cellDup(*tvToCell(to), *tv2);
+  cellDup(*to, *tv2);
   vmStack().discard();
 }
 
@@ -4118,7 +4117,6 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
   if (constant) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
   }
-  val = tvToCell(val);
   auto const& sprop = cls->staticProperties()[slot];
   if (setOpNeedsTypeCheck(sprop.typeConstraint, op, val)) {
     Cell temp;
@@ -4145,8 +4143,6 @@ OPTBLD_INLINE void iopIncDecL(local_var fr, IncDecOp op) {
   if (UNLIKELY(fr.ptr->m_type == KindOfUninit)) {
     raise_undefined_local(vmfp(), fr.index);
     tvWriteNull(*fr.ptr);
-  } else {
-    fr.ptr = tvToCell(fr.ptr);
   }
   cellCopy(IncDecBody(op, fr.ptr), *to);
 }
@@ -4162,7 +4158,7 @@ OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
     tvDecRefGen(oldNameCell);
   };
   assertx(gbl != nullptr);
-  cellCopy(IncDecBody(op, tvToCell(gbl)), *nameCell);
+  cellCopy(IncDecBody(op, gbl), *nameCell);
 }
 
 OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
@@ -4182,7 +4178,7 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
     return sprop.typeConstraint.isCheckable() ? &sprop : nullptr;
   }();
 
-  auto const val = tvToCell(ss.val);
+  auto const val = ss.val;
   if (checkable_sprop) {
     Cell temp;
     cellDup(*val, temp);
@@ -5037,24 +5033,15 @@ void initIterator(PC& pc, PC targetpc, Iter* it, IterTypeOp op,
     return;
   }
 
-  // Now we can unbox the base and fall back to generic Iter methods.
-  //
   // NOTE: It looks like we could call new_iter_object at this point. However,
-  // doing so is incorrect, for two reasons:
-  //
-  //  1. We may have unboxed an array-like. (This is the ref-to-array case
-  //     noted in the comment above.) As a result, we need to redo all checks
-  //     on the base again here to account for unboxing.
-  //
-  //  2. new_iter_array / new_iter_object only handle array-like and object
-  //     bases, respectively. We may have some other kind of base which the
-  //     generic Iter::init handles correctly.
+  // doing so is incorrect, new_iter_array / new_iter_object only handle
+  // array-like and object bases, respectively. We may have some other kind of
+  // base which the generic Iter::init handles correctly.
   //
   // As a result, the simplest code we could have here is the generic case.
   // It's also about as fast as it can get, because at this point, we're almost
   // always going to create an object iter, which can't really be optimized.
   //
-  base = local ? tvToCell(base) : tvAssertCell(base);
   if (isClsMethType(type(base))) {
     raise_error("Invalid operand type was used: "
                 "expects iterable, clsmeth was given");
@@ -5099,7 +5086,7 @@ OPTBLD_INLINE void iopLIterInitK(PC& pc, Iter* it, local_var local, PC targetpc,
 }
 
 OPTBLD_INLINE void iopIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
-  if (iter_next_ind(it, tvToCell(val.ptr))) {
+  if (iter_next_ind(it, val.ptr)) {
     vmpc() = targetpc;
     jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
@@ -5108,7 +5095,7 @@ OPTBLD_INLINE void iopIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
 
 OPTBLD_INLINE
 void iopIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  if (iter_next_key_ind(it, tvToCell(val.ptr), tvToCell(key.ptr))) {
+  if (iter_next_key_ind(it, val.ptr, key.ptr)) {
     vmpc() = targetpc;
     jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
@@ -5117,7 +5104,7 @@ void iopIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
 
 OPTBLD_INLINE void iopLIterNext(PC& pc, Iter* it, local_var base,
                                 PC targetpc, local_var val, IterTypeOp op) {
-  auto valOut = tvToCell(val.ptr);
+  auto valOut = val.ptr;
   auto const hasMore = isArrayLikeType(base.ptr->m_type)
     ? liter_next_ind(it, valOut, base.ptr->m_data.parr)
     : iter_next_ind(it, valOut);
@@ -5130,8 +5117,8 @@ OPTBLD_INLINE void iopLIterNext(PC& pc, Iter* it, local_var base,
 
 OPTBLD_INLINE void iopLIterNextK(PC& pc, Iter* it, local_var base, PC targetpc,
                                  local_var val, local_var key, IterTypeOp op) {
-  auto valOut = tvToCell(val.ptr);
-  auto keyOut = tvToCell(key.ptr);
+  auto valOut = val.ptr;
+  auto keyOut = key.ptr;
   auto const hasMore = isArrayLikeType(base.ptr->m_type)
     ? liter_next_key_ind(it, valOut, keyOut, base.ptr->m_data.parr)
     : iter_next_key_ind(it, valOut, keyOut);
@@ -6122,7 +6109,7 @@ OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
     } break;
   }
 
-  cellDup(*fr, *tvToCell(tv));
+  cellDup(*fr, *tv);
   vmStack().popC();
 }
 

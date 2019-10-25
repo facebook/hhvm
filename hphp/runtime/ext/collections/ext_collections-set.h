@@ -229,7 +229,7 @@ protected:
     ssize_t pos_limit = ad->iter_end();
     for (ssize_t pos = ad->iter_begin(); pos != pos_limit;
          pos = ad->iter_advance(pos)) {
-      set->addRaw(tvToCell(ad->atPos(pos)));
+      set->addRaw(ad->atPos(pos));
     }
     set->shrinkIfCapacityTooHigh(oldCap); // ... and shrink if we were wrong
     return Object(std::move(set));

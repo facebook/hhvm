@@ -117,11 +117,7 @@ Object c_AwaitAllWaitHandle::Create(Iter iter) {
   auto ctx_idx = std::numeric_limits<context_idx_t>::max();
   uint32_t cnt = 0;
 
-  auto toCell = convert
-    ? [](TypedValue tv) { return tvToCell(tv); }
-    : [](TypedValue tv) { return tvAssertCell(tv); };
-
-  iter([&](TypedValue v) { prepareChild(toCell(v), ctx_idx, cnt); });
+  iter([&](TypedValue v) { prepareChild(v, ctx_idx, cnt); });
 
   if (!cnt) {
     return Object{returnEmpty()};
@@ -131,7 +127,7 @@ Object c_AwaitAllWaitHandle::Create(Iter iter) {
   auto next = &result->m_children[cnt];
   uint32_t idx = cnt - 1;
 
-  iter([&](TypedValue v) { addChild(toCell(v), next, idx); });
+  iter([&](TypedValue v) { addChild(v, next, idx); });
 
   assertx(next == &result->m_children[0]);
   result->initialize(ctx_idx);

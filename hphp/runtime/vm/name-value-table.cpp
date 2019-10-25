@@ -151,7 +151,7 @@ void NameValueTable::leak() {
 
 TypedValue* NameValueTable::set(const StringData* name, tv_rval val) {
   TypedValue* target = findTypedValue(name);
-  tvSet(*tvToCell(val), *target);
+  tvSet(*val, *target);
   return target;
 }
 

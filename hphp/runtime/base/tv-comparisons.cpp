@@ -929,7 +929,7 @@ template<class Op>
 typename Op::RetType tvRelOp(Op op, TypedValue tv1, TypedValue tv2) {
   assertx(tvIsPlausible(tv1));
   assertx(tvIsPlausible(tv2));
-  return cellRelOp(op, *tvToCell(&tv1), *tvToCell(&tv2));
+  return cellRelOp(op, tv1, tv2);
 }
 
 /*
@@ -1374,7 +1374,7 @@ bool cellSame(Cell c1, Cell c2) {
 bool tvSame(TypedValue tv1, TypedValue tv2) {
   assertx(tvIsPlausible(tv1));
   assertx(tvIsPlausible(tv2));
-  return cellSame(*tvToCell(&tv1), *tvToCell(&tv2));
+  return cellSame(tv1, tv2);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1423,9 +1423,7 @@ bool cellEqual(Cell c1, Cell c2) {
 }
 
 bool tvEqual(TypedValue tv1, TypedValue tv2) {
-  auto const c1 = *tvToCell(&tv1);
-  auto const c2 = *tvToCell(&tv2);
-  return cellEqual(c1, c2);
+  return cellEqual(tv1, tv2);
 }
 
 bool cellLess(Cell cell, bool val) {

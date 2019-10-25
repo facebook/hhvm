@@ -81,7 +81,7 @@ void BaseSet::addAll(const Variant& t) {
       return false;
     },
     [this](TypedValue v) {
-      addRaw(tvToCell(v));
+      addRaw(v);
     },
     [this](ObjectData* coll) {
       if (!m_size && coll->collectionType() == CollectionType::Set) {

@@ -194,7 +194,7 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
 template <IntishCast IC>
 inline Cell tvToKey(TypedValue tv, const ArrayData* ad) {
   assertx(tvIsPlausible(tv));
-  return cellToKey<IC>(tvToCell(tv), ad);
+  return cellToKey<IC>(tv, ad);
 }
 
 

@@ -29,22 +29,6 @@ namespace HPHP {
 /*
  * Return a reference to an unboxed `tv'.
  */
-ALWAYS_INLINE Cell& tvToCell(TypedValue& tv) {
-  return LIKELY(!isRefType(tv.m_type)) ? tv : *tv.m_data.pref->cell();
-}
-ALWAYS_INLINE Cell tvToCell(const TypedValue& tv) {
-  return LIKELY(!isRefType(tv.m_type)) ? tv : *tv.m_data.pref->cell();
-}
-ALWAYS_INLINE Cell* tvToCell(TypedValue* tv) {
-  return LIKELY(!isRefType(tv->m_type)) ? tv : tv->m_data.pref->cell();
-}
-ALWAYS_INLINE const Cell* tvToCell(const TypedValue* tv) {
-  return LIKELY(!isRefType(tv->m_type)) ? tv : tv->m_data.pref->cell();
-}
-template<bool is_const, typename tag_t>
-INLINE_FLATTEN tv_val<is_const, tag_t> tvToCell(tv_val<is_const, tag_t> tv) {
-  return tv.unboxed();
-}
 template<bool is_const, typename tag_t>
 INLINE_FLATTEN
 tv_val<is_const, tag_t> tv_val<is_const, tag_t>::unboxed() const {
@@ -55,7 +39,6 @@ tv_val<is_const, tag_t> tv_val<is_const, tag_t>::unboxed() const {
  * Return an unboxed and initialized `tv'.
  *
  * This function:
- *  - is *tvToCell() if `tv' is KindOfRef.
  *  - returns a KindOfNull when `tv' is KindOfUninit.
  *  - is the identity otherwise.
  */
@@ -195,9 +178,8 @@ enable_if_lval_t<T&&, void> tvWriteNull(T&& to) {
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvMove(const Cell fr, T&& to) {
   assertx(cellIsPlausible(fr));
-  auto&& cell = tvToCell(to);
-  auto const old = as_tv(cell);
-  cellCopy(fr, cell);
+  auto const old = as_tv(to);
+  cellCopy(fr, to);
   tvDecRefGen(old);
 }
 
@@ -241,9 +223,8 @@ enable_if_lval_t<C&&, void> cellMove(const Cell fr, C&& to) {
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvSet(const Cell fr, T&& to) {
   assertx(cellIsPlausible(fr));
-  auto&& cell = tvToCell(to);
-  auto const old = as_tv(cell);
-  cellDup(fr, cell);
+  auto const old = as_tv(to);
+  cellDup(fr, to);
   tvDecRefGen(old);
 }
 
@@ -325,31 +306,28 @@ enable_if_lval_t<C&&, void> cellSetNull(C&& to) {
  */
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvSetNull(T&& to) {
-  cellSetNull(tvToCell(to));
+  cellSetNull(to);
 }
 
 /*
  * tvSet() analogues for raw data elements.
  */
 template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvSetBool(bool v, T&& inTo) {
-  auto&& to = tvToCell(inTo);
+enable_if_lval_t<T&&, void> tvSetBool(bool v, T&& to) {
   auto const old = as_tv(to);
   type(to) = KindOfBoolean;
   val(to).num = v;
   tvDecRefGen(old);
 }
 template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvSetInt(int64_t v, T&& inTo) {
-  auto&& to = tvToCell(inTo);
+enable_if_lval_t<T&&, void> tvSetInt(int64_t v, T&& to) {
   auto const old = as_tv(to);
   type(to) = KindOfInt64;
   val(to).num = v;
   tvDecRefGen(old);
 }
 template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvSetDouble(double v, T&& inTo) {
-  auto&& to = tvToCell(inTo);
+enable_if_lval_t<T&&, void> tvSetDouble(double v, T&& to) {
   auto const old = as_tv(to);
   type(to) = KindOfDouble;
   val(to).dbl = v;

@@ -333,9 +333,8 @@ TCA sswitchHelperFast(const StringData* val,
 
 TCA sswitchHelperSlow(TypedValue tv, const StringData** strs,
                       int numCases, TCA* jmptab) {
-  auto const cell = tvToCell(&tv);
   for (int i = 0; i < numCases; ++i) {
-    if (cellEqual(*cell, strs[i])) return jmptab[i];
+    if (cellEqual(tv, strs[i])) return jmptab[i];
   }
   return jmptab[numCases]; // default case
 }

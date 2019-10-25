@@ -111,7 +111,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   assertx(cellIsPlausible(value));
   // set will decRef any old value that may have been overwritten
   // if appropriate
-  auto const retval = ad->set(key, *tvToCell(&value));
+  auto const retval = ad->set(key, value);
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
@@ -1010,9 +1010,8 @@ TypedValue incDecElem(tv_lval base, TypedValue key,
 }
 
 tv_lval elemVecIU(tv_lval base, int64_t key) {
-  auto cbase = tvToCell(base);
-  assertx(isVecType(type(cbase)));
-  return ElemUVec<KeyType::Int>(cbase, key);
+  assertx(isVecType(type(base)));
+  return ElemUVec<KeyType::Int>(base, key);
 }
 
 }

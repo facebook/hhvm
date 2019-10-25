@@ -50,7 +50,7 @@ enable_if_lval_t<C&&, void> setElemNoRef(C&& elem, Cell v) {
 
 template<typename C> ALWAYS_INLINE
 enable_if_lval_t<C&&, void> setElem(C&& elem, Cell v) {
-  setElemNoRef(tvToCell(elem), v);
+  setElemNoRef(elem, v);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

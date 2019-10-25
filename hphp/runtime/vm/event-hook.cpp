@@ -470,10 +470,9 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
       auto const end = start + count;
 
       auto push = [&] (TypedValue v) {
-        auto const c = tvToCell(v);
         assertx(start < end);
-        tvIncRefGen(c);
-        *start++ = c;
+        tvIncRefGen(v);
+        *start++ = v;
       };
 
       uint32_t param = 0;

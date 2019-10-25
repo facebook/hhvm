@@ -51,7 +51,7 @@ tv_lval baseGImpl(TypedValue key) {
       return const_cast<TypedValue*>(&immutable_null_base);
     }
   }
-  return tvToCell(base);
+  return base;
 }
 
 #define BASE_G_HELPER_TABLE(m)                  \
@@ -146,7 +146,6 @@ inline tv_lval propCOQ(Class* ctx, ObjectData* base, StringData* key,
 inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
                                  tv_rval result) {
   if (LIKELY(&val(result) != &localTvRef.m_data)) {
-    result = tvToCell(result);
     tvIncRefGen(*result);
   } else {
     // If a magic getter or array access method returned by reference, we have
@@ -463,9 +462,8 @@ ELEMD_HELPER_TABLE(X)
 
 #define X(nm, keyType)                                          \
 inline tv_lval nm(tv_lval base, key_type<keyType> key) {        \
-  auto cbase = tvToCell(base);                                  \
-  assertx(isArrayType(type(cbase)));                            \
-  return ElemDArray<MOpMode::None, keyType>(cbase, key); \
+  assertx(isArrayType(type(base)));                            \
+  return ElemDArray<MOpMode::None, keyType>(base, key); \
 }
 ELEM_ARRAY_D_HELPER_TABLE(X)
 #undef X
@@ -477,9 +475,8 @@ ELEM_ARRAY_D_HELPER_TABLE(X)
 
 #define X(nm, keyType)                                     \
 inline tv_lval nm(tv_lval base, key_type<keyType> key) {   \
-  auto cbase = tvToCell(base);                             \
-  assertx(isArrayType(type(cbase)));                       \
-  return ElemUArray<keyType>(cbase, key);                  \
+  assertx(isArrayType(type(base)));                       \
+  return ElemUArray<keyType>(base, key);                  \
 }
 ELEM_ARRAY_U_HELPER_TABLE(X)
 #undef X
@@ -546,9 +543,8 @@ ARRAYGET_HELPER_TABLE(X)
 
 #define X(nm, copyProv) \
 inline tv_lval nm(tv_lval base, int64_t key) {                 \
-  auto cbase = tvToCell(base);                                 \
-  assertx(isVecType(type(cbase)));                             \
-  return ElemDVec<KeyType::Int, copyProv>(cbase, key);  \
+  assertx(isVecType(type(base)));                             \
+  return ElemDVec<KeyType::Int, copyProv>(base, key);  \
 }
 ELEM_VEC_D_HELPER_TABLE(X)
 #undef X
@@ -564,9 +560,8 @@ ELEM_VEC_D_HELPER_TABLE(X)
 
 #define X(nm, keyType, copyProv)                          \
 inline tv_lval nm(tv_lval base, key_type<keyType> key) {  \
-  auto cbase = tvToCell(base);                            \
-  assertx(isDictType(type(cbase)));                       \
-  return ElemDDict<keyType, copyProv>(cbase, key); \
+  assertx(isDictType(type(base)));                       \
+  return ElemDDict<keyType, copyProv>(base, key); \
 }
 ELEM_DICT_D_HELPER_TABLE(X)
 #undef X
@@ -578,9 +573,8 @@ ELEM_DICT_D_HELPER_TABLE(X)
 
 #define X(nm, keyType)                                                 \
 inline tv_lval nm(tv_lval base, key_type<keyType> key) {               \
-  auto cbase = tvToCell(base);                                         \
-  assertx(isDictType(type(cbase)));                                    \
-  return ElemUDict<keyType>(cbase, key);                               \
+  assertx(isDictType(type(base)));                                    \
+  return ElemUDict<keyType>(base, key);                               \
 }
 ELEM_DICT_U_HELPER_TABLE(X)
 #undef X
@@ -610,9 +604,8 @@ ELEM_DICT_HELPER_TABLE(X)
 
 #define X(nm, keyType)                                                 \
 inline tv_lval nm(tv_lval base, key_type<keyType> key) {               \
-  auto cbase = tvToCell(base);                                         \
-  assertx(isKeysetType(type(cbase)));                                  \
-  return ElemUKeyset<keyType>(cbase, key);                             \
+  assertx(isKeysetType(type(base)));                                  \
+  return ElemUKeyset<keyType>(base, key);                             \
 }
 ELEM_KEYSET_U_HELPER_TABLE(X)
 #undef X
@@ -795,7 +788,6 @@ inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, StringData* s) {
 
 template<KeyType keyType>
 void keysetSetNewElemImpl(tv_lval base, key_type<keyType> key) {
-  base = tvToCell(base);
   assertx(tvIsPlausible(*base));
   assertx(tvIsKeyset(base));
   auto oldArr = val(base).parr;

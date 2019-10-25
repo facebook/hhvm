@@ -550,11 +550,10 @@ IniSettingMap& IniSettingMap::operator=(const IniSettingMap& i) {
 namespace {
 void mergeSettings(tv_lval curval, TypedValue v) {
   auto const cur_inner = curval.unboxed();
-  auto const cell = tvToCell(v);
 
-  if (isArrayLikeType(cell.m_type) &&
+  if (isArrayLikeType(v.m_type) &&
       isArrayLikeType(cur_inner.type())) {
-    for (auto i = ArrayIter(cell.m_data.parr); !i.end(); i.next()) {
+    for (auto i = ArrayIter(v.m_data.parr); !i.end(); i.next()) {
       auto& cur_inner_ref = asArrRef(cur_inner);
       if (!cur_inner_ref.exists(i.first())) {
         cur_inner_ref.set(i.first(), empty_array());

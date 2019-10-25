@@ -92,8 +92,7 @@ void MixedArray::getArrayElm(ssize_t pos,
                             TypedValue* keyOut) const {
   assertx(size_t(pos) < m_used);
   auto& elm = data()[pos];
-  auto const cur = tvToCell(&elm.data);
-  cellDup(*cur, *valOut);
+  cellDup(elm.data, *valOut);
   cellCopy(getElmKey(elm), *keyOut);
 }
 
@@ -101,8 +100,7 @@ ALWAYS_INLINE
 void MixedArray::getArrayElm(ssize_t pos, TypedValue* valOut) const {
   assertx(size_t(pos) < m_used);
   auto& elm = data()[pos];
-  auto const cur = tvToCell(&elm.data);
-  cellDup(*cur, *valOut);
+  cellDup(elm.data, *valOut);
 }
 
 ALWAYS_INLINE

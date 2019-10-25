@@ -657,7 +657,6 @@ bool TypeConstraint::checkImpl(tv_rval val,
   assertx(!isProp   || validForProp());
   assertx(!isRecField || validForRecField());
 
-  val = tvToCell(val);
   if (isNullable() && val.type() == KindOfNull) return true;
 
   if (val.type() == KindOfObject) {
@@ -974,7 +973,6 @@ void TypeConstraint::verifyReturnNonNull(TypedValue* tv,
 }
 
 std::string describe_actual_type(tv_rval val, bool isHHType) {
-  val = tvToCell(val);
   switch (val.type()) {
     case KindOfUninit:        return "undefined variable";
     case KindOfNull:          return "null";
@@ -1054,15 +1052,14 @@ void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
     (isThis() && couldSeeMockObject()) ||
     (RuntimeOption::EvalHackArrCompatTypeHintNotices &&
      (RuntimeOption::EvalHackArrCompatTypeHintPolymorphism ||
-      isArrayType(tvToCell(tv)->m_type))) ||
+      isArrayType(tv->m_type))) ||
     check(tv, func->cls())
   );
 }
 
 void TypeConstraint::verifyOutParamFail(const Func* func,
-                                        TypedValue* tv,
+                                        TypedValue* c,
                                         int paramNum) const {
-  auto c = tvToCell(tv);
   if (checkDVArray(c)) {
     raise_hackarr_compat_type_hint_outparam_notice(
       func, c->m_data.parr, displayName(func->cls()).c_str(), paramNum
@@ -1115,7 +1112,7 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
       paramNum + 1,
       func->fullName(),
       displayName(func->cls()),
-      describe_actual_type(tv, isHHType())
+      describe_actual_type(c, isHHType())
   );
 
   if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()
@@ -1157,7 +1154,6 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(validForProp());
 
-  val = tvToCell(val);
   if (checkDVArray(val)) {
     raise_hackarr_compat_type_hint_property_notice(
       declCls, val.val().parr, displayName().c_str(), propName, isStatic
@@ -1208,13 +1204,11 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
   );
 }
 
-void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
+void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
                                 int id) const {
   VMRegAnchor _;
   std::string name = displayName(func->cls());
-  auto const givenType = describe_actual_type(tv, isHHType());
-
-  auto const c = tvToCell(tv);
+  auto const givenType = describe_actual_type(c, isHHType());
 
   if (checkDVArray(c)) {
     if (id == ReturnId) {

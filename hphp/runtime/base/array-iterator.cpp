@@ -443,7 +443,7 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   assertx((typeArray && arrIter.getIterType() == ArrayIter::TypeArray) ||
          (!typeArray && arrIter.getIterType() == ArrayIter::TypeIterator));
   if (typeArray) {
-    cellDup(tvToCell(arrIter.nvSecond().tv()), *out);
+    cellDup(arrIter.nvSecond().tv(), *out);
   } else {
     Variant val = arrIter.second();
     assertx(!isRefType(val.getRawType()));
@@ -478,7 +478,7 @@ inline void liter_value_cell_local_impl(Iter* iter,
   assertx(arrIter.getIterType() == ArrayIter::TypeArray);
   assertx(!arrIter.getArrayData());
   auto const cur = arrIter.nvSecondLocal(ad);
-  cellDup(tvToCell(cur.tv()), *out);
+  cellDup(cur.tv(), *out);
   tvDecRefGen(oldVal);
 }
 
@@ -537,8 +537,6 @@ NEVER_INLINE
 int64_t new_iter_array_cold(Iter* dest, ArrayData* arr, TypedValue* valOut,
                             TypedValue* keyOut) {
   TRACE(2, "%s: I %p, arr %p\n", __func__, dest, arr);
-  valOut = tvToCell(valOut);
-  if (keyOut) keyOut = tvToCell(keyOut);
   if (!arr->empty()) {
     // We are transferring ownership of the array to the iterator, therefore
     // we do not need to adjust the refcount.
@@ -601,7 +599,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       aiter.m_end = size;
       aiter.setArrayNext(IterNextIndex::ArrayPacked);
     }
-    cellDup(*tvToCell(PackedArray::GetValueRef(ad, 0)), *valOut);
+    cellDup(*PackedArray::GetValueRef(ad, 0), *valOut);
     return 1;
   }
 
@@ -677,7 +675,7 @@ int64_t new_iter_array_key(Iter*       dest,
     aiter.m_pos = 0;
     aiter.m_end = size;
     aiter.setArrayNext(IterNextIndex::ArrayPacked);
-    cellDup(*tvToCell(PackedArray::GetValueRef(ad, 0)), *valOut);
+    cellDup(*PackedArray::GetValueRef(ad, 0), *valOut);
     keyOut->m_type = KindOfInt64;
     keyOut->m_data.num = 0;
     return 1;
@@ -785,14 +783,14 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
   }
 
   if (itType == ArrayIter::TypeIterator) {
-    iter_value_cell_local_impl<false>(dest, tvToCell(valOut));
+    iter_value_cell_local_impl<false>(dest, valOut);
     if (keyOut) {
-      iter_key_cell_local_impl<false>(dest, tvToCell(keyOut));
+      iter_key_cell_local_impl<false>(dest, keyOut);
     }
   } else {
-    iter_value_cell_local_impl<true>(dest, tvToCell(valOut));
+    iter_value_cell_local_impl<true>(dest, valOut);
     if (keyOut) {
-      iter_key_cell_local_impl<true>(dest, tvToCell(keyOut));
+      iter_key_cell_local_impl<true>(dest, keyOut);
     }
   }
   return 1LL;
@@ -957,7 +955,7 @@ int64_t iter_next_packed_pointer_cold(Iter* it,
                                       Cell* valOut,
                                       TypedValue* elm) {
   auto const oldVal = *valOut;
-  cellDup(*tvToCell(elm), *valOut);
+  cellDup(*elm, *valOut);
   tvDecRefGen(oldVal);
   return 1;
 }
@@ -974,7 +972,7 @@ int64_t iter_next_mixed_pointer_cold(Iter* it,
                                      Cell* keyOut,
                                      MixedArrayElm* elm) {
   auto const oldVal = *valOut;
-  cellDup(*tvToCell(elm->datatv()), *valOut);
+  cellDup(*elm->datatv(), *valOut);
   tvDecRefGen(oldVal);
   if (keyOut != nullptr) {
     auto const oldKey = *keyOut;
@@ -994,7 +992,7 @@ int64_t iter_next_mixed_pointer_cold_key(Iter* it,
                                          Cell* valOut,
                                          Cell* keyOut,
                                          MixedArrayElm* elm) {
-  cellDup(*tvToCell(elm->datatv()), *valOut);
+  cellDup(*elm->datatv(), *valOut);
   if (keyOut != nullptr) {
     auto const oldKey = *keyOut;
     cellCopy(elm->getKey(), *keyOut);
@@ -1036,7 +1034,7 @@ int64_t iter_next_packed_pointer(Iter* it, Cell* valOut, ArrayData* arr) {
     valOut->m_data.pcnt->decRefCount();
   }
 
-  cellDup(*tvToCell(elm), *valOut);
+  cellDup(*elm, *valOut);
   return 1;
 }
 
@@ -1082,7 +1080,7 @@ int64_t iter_next_mixed_pointer(Iter* it,
     keyOut->m_data.pcnt->decRefCount();
   }
 
-  cellDup(*tvToCell(elm->datatv()), *valOut);
+  cellDup(*elm->datatv(), *valOut);
   if (HasKey) cellCopy(elm->getKey(), *keyOut);
   return 1;
 }
@@ -1183,7 +1181,7 @@ int64_t iter_next_packed_impl(Iter* it,
       keyOut->m_data.pcnt->decRefCount();
     }
     iter.setPos(pos);
-    cellDup(*tvToCell(PackedArray::GetValueRef(ad, pos)), *valOut);
+    cellDup(*PackedArray::GetValueRef(ad, pos), *valOut);
     if (HasKey) {
       keyOut->m_data.num = pos;
       keyOut->m_type = KindOfInt64;

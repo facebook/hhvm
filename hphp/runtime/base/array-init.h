@@ -439,12 +439,12 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
 
   DictInit& setValidKey(TypedValue name, TypedValue v) {
     performOp([&]{
-      auto const k = tvToCell(name);
-      assertx(isIntType(k.m_type) || isStringType(k.m_type));
+      assertx(isIntType(name.m_type) || isStringType(name.m_type));
 
-      return isIntType(k.m_type)
-        ? MixedArray::SetIntInPlaceDict(m_arr, k.m_data.num, tvToInitCell(v))
-        : MixedArray::SetStrInPlaceDict(m_arr, k.m_data.pstr, tvToInitCell(v));
+      return isIntType(name.m_type)
+        ? MixedArray::SetIntInPlaceDict(m_arr, name.m_data.num, tvToInitCell(v))
+        : MixedArray::SetStrInPlaceDict(m_arr, name.m_data.pstr,
+                                        tvToInitCell(v));
     });
     return *this;
   }

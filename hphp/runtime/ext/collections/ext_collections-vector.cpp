@@ -328,7 +328,7 @@ void BaseVector::addAllImpl(const Variant& t) {
       return false;
     },
     [this](TypedValue v) {
-      addRaw(tvToCell(v));
+      addRaw(v);
     },
     [&, this](ObjectData* coll) {
       if (coll->collectionType() == CollectionType::Pair) {
@@ -336,7 +336,7 @@ void BaseVector::addAllImpl(const Variant& t) {
       }
     },
     [this](const TypedValue* item) {
-      add(*tvToCell(item));
+      add(*item);
     });
 
   if (UNLIKELY(!ok)) {
@@ -378,7 +378,7 @@ bool BaseVector::OffsetIsset(ObjectData* obj, const TypedValue* key) {
   }
   const auto vec = static_cast<BaseVector*>(obj);
   const auto result = vec->get(key->m_data.num);
-  return result ? !cellIsNull(*tvToCell(result)) : false;
+  return result ? !cellIsNull(*result) : false;
 }
 
 bool BaseVector::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
@@ -711,7 +711,7 @@ Object c_Vector::fromArray(const Class*, const Variant& arr) {
   ssize_t pos = ad->iter_begin();
   do {
     assertx(pos != ad->iter_end());
-    cellDup(tvToCell(ad->atPos(pos)), target->dataAt(i));
+    cellDup(ad->atPos(pos), target->dataAt(i));
     pos = ad->iter_advance(pos);
   } while (++i < sz);
   return Object{std::move(target)};

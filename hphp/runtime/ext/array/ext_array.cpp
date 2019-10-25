@@ -238,9 +238,8 @@ TypedValue HHVM_FUNCTION(array_fill_keys,
       ai.emplace(adata->size(), ArrayInit::Mixed{});
     },
     [&](TypedValue v) {
-      auto const inner = tvToCell(v);
-      if (isIntType(inner.m_type) || isStringType(inner.m_type)) {
-        ai->setUnknownKey<IntishCast::Cast>(VarNR(inner), value);
+      if (isIntType(v.m_type) || isStringType(v.m_type)) {
+        ai->setUnknownKey<IntishCast::Cast>(VarNR(v), value);
       } else {
         raise_hack_strict(RuntimeOption::StrictArrayFillKeys,
                           "strict_array_fill_keys",
@@ -504,7 +503,7 @@ TypedValue HHVM_FUNCTION(array_map,
       keyConverted = !collectionAllowsIntStringKeys(col_type);
     }
     for (ArrayIter iter(arr1); iter; ++iter) {
-      auto const arg = tvToCell(iter.secondValPlus());
+      auto const arg = iter.secondValPlus();
       auto result = Variant::attach(g_context->invokeFuncFew(ctx, 1, &arg));
       // if keyConverted is false, it's possible that ret will have fewer
       // elements than cell_arr1; keys int(1) and string('1') may both be
@@ -521,7 +520,7 @@ TypedValue HHVM_FUNCTION(array_map,
   size_t maxLen = getContainerSize(cell_arr1);
   iters.emplace_back(cell_arr1);
   for (ArrayIter it(_argv); it; ++it) {
-    auto const c = tvToCell(it.secondValPlus());
+    auto const c = it.secondValPlus();
     if (UNLIKELY(!isContainer(c))) {
       raise_warning("array_map(): Argument #%d should be an array or "
                     "collection", (int)(iters.size() + 2));
@@ -1186,7 +1185,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
         auto pos_limit = args->iter_end();
         for (ssize_t pos = args->iter_last(); pos != pos_limit;
              pos = args->iter_rewind(pos)) {
-          vec->addFront(tvToCell(args->atPos(pos)));
+          vec->addFront(args->atPos(pos));
         }
       }
       vec->addFront(*var.toCell());
@@ -1198,7 +1197,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
         auto pos_limit = args->iter_end();
         for (ssize_t pos = args->iter_last(); pos != pos_limit;
              pos = args->iter_rewind(pos)) {
-          st->addFront(tvToCell(args->atPos(pos)));
+          st->addFront(args->atPos(pos));
         }
       }
       st->addFront(*var.toCell());
@@ -1696,7 +1695,7 @@ static void containerValuesToSetHelper(const req::ptr<c_Set>& st,
   Variant strHolder(empty_string_variant());
   TypedValue* strTv = strHolder.asTypedValue();
   for (ArrayIter iter(container); iter; ++iter) {
-    auto const c = tvToCell(iter.secondValPlus());
+    auto const c = iter.secondValPlus();
     addToSetHelper(st, c, strTv, true);
   }
 }
@@ -1756,7 +1755,7 @@ TypedValue HHVM_FUNCTION(array_diff,
   if (UNLIKELY(moreThanTwo)) {
     int pos = 3;
     for (ArrayIter argvIter(args); argvIter; ++argvIter, ++pos) {
-      auto const c = tvToCell(argvIter.secondVal());
+      auto const c = argvIter.secondVal();
       if (!isContainer(c)) {
         raise_warning("%s() expects parameter %d to be an array or collection",
                       __FUNCTION__+2, /* remove the "f_" prefix */
@@ -1803,7 +1802,7 @@ TypedValue HHVM_FUNCTION(array_diff,
   TypedValue* strTv = strHolder.asTypedValue();
   bool convertIntLikeStrs = !isArrayLikeType(c1.m_type);
   for (ArrayIter iter(container1); iter; ++iter) {
-    auto const c = tvToCell(iter.secondValPlus());
+    auto const c = iter.secondValPlus();
     if (checkSetHelper(st, c, strTv, true)) continue;
     auto const key = convertIntLikeStrs
       ? ret.convertKey<IntishCast::Cast>(iter.first())
@@ -2184,7 +2183,7 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
   tvCopy(*a.toCell(), containers[0]);
   int pos = 1;
   for (ArrayIter argvIter(argv); argvIter; ++argvIter, ++pos) {
-    cellCopy(tvToCell(argvIter.secondVal()), containers[pos]);
+    cellCopy(argvIter.secondVal(), containers[pos]);
   }
   // Perform a swap so that the smallest container occurs at the first
   // position in the TypedValue array; this helps improve the performance
@@ -2269,7 +2268,7 @@ static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
   TypedValue* strTv = strHolder.asTypedValue();
   TypedValue intOneTv = make_tv<KindOfInt64>(1);
   for (ArrayIter iter(tvAsCVarRef(&containers[0])); iter; ++iter) {
-    auto const c = tvToCell(iter.secondValPlus());
+    auto const c = iter.secondValPlus();
     // For each value v in containers[0], we add the key/value pair (v, 1)
     // to the map. If a value (after various conversions) occurs more than
     // once in the container, we'll simply overwrite the old entry and that's
@@ -2278,7 +2277,7 @@ static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
   }
   for (int pos = 1; pos < count; ++pos) {
     for (ArrayIter iter(tvAsCVarRef(&containers[pos])); iter; ++iter) {
-      auto const c = tvToCell(iter.secondValPlus());
+      auto const c = iter.secondValPlus();
       // We check if the value is present as a key in the map. If an entry
       // exists and its value equals pos, we increment it, otherwise we do
       // nothing. This is essential so that we don't accidentally double-count
@@ -2363,7 +2362,7 @@ TypedValue HHVM_FUNCTION(array_intersect,
   if (UNLIKELY(moreThanTwo)) {
     int pos = 1;
     for (ArrayIter argvIter(args); argvIter; ++argvIter, ++pos) {
-      auto const c = tvToCell(argvIter.secondVal());
+      auto const c = argvIter.secondVal();
       if (!isContainer(c)) {
         raise_warning("%s() expects parameter %d to be an array or collection",
                       __FUNCTION__+2, /* remove the "f_" prefix */
@@ -2409,7 +2408,7 @@ TypedValue HHVM_FUNCTION(array_intersect,
   TypedValue* strTv = strHolder.asTypedValue();
   bool convertIntLikeStrs = !isArrayLikeType(c1.m_type);
   for (ArrayIter iter(container1); iter; ++iter) {
-    auto const c = tvToCell(iter.secondValPlus());
+    auto const c = iter.secondValPlus();
     if (!checkSetHelper(st, c, strTv, true)) continue;
     const auto key = convertIntLikeStrs
       ? Variant::wrap(ret.convertKey<IntishCast::Cast>(iter.first()))

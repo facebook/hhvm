@@ -56,8 +56,7 @@ struct Resumable;
 #define EVAL_FILENAME_SUFFIX ") : eval()'d code"
 
 // perform the set(op) operation on lhs & rhs, leaving the result in lhs.
-// The old value of lhs is decrefed. Caller must call tvToCell() if lhs or
-// rhs might be a ref.
+// The old value of lhs is decrefed.
 ALWAYS_INLINE
 void setopBody(tv_lval lhs, SetOpOp op, Cell* rhs) {
   assertx(cellIsPlausible(*lhs));

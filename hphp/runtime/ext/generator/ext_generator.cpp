@@ -141,7 +141,7 @@ void Generator::yield(Offset resumeOffset,
 void Generator::done(TypedValue tv) {
   assertx(isRunning());
   cellSetNull(m_key);
-  cellSet(*tvToCell(&tv), m_value);
+  cellSet(tv, m_value);
   setState(State::Done);
 }
 

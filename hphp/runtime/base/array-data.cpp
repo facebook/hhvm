@@ -762,8 +762,7 @@ const ArrayFunctions g_array_funcs = {
 namespace {
 
 DEBUG_ONLY void assertForCreate(TypedValue name) {
-  auto const k = tvToCell(name);
-  always_assert(isIntType(k.m_type) || isStringType(k.m_type));
+  always_assert(isIntType(name.m_type) || isStringType(name.m_type));
 }
 
 }

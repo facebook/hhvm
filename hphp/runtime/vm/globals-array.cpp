@@ -185,7 +185,7 @@ ArrayData* GlobalsArray::SetIntInPlace(ArrayData* ad, int64_t k, Cell v) {
 ArrayData*
 GlobalsArray::SetStrInPlace(ArrayData* ad, StringData* k, Cell v) {
   auto a = asGlobals(ad);
-  cellSet(v, *tvToCell(a->m_tab->lookupAdd(k)));
+  cellSet(v, *a->m_tab->lookupAdd(k));
   return a;
 }
 

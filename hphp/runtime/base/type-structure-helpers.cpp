@@ -772,7 +772,7 @@ bool checkTypeStructureMatchesCellImpl(
           auto const& ts2 = asCArrRef(tsElems->rval(k.m_data.num));
           auto thisElemWarns = false;
           if (!checkTypeStructureMatchesCellImpl<genErrorMessage>(
-              ts2, tvToCell(elem), givenType, expectedType,
+              ts2, elem, givenType, expectedType,
               errorKey, thisElemWarns, isOrAsOp)) {
             errOnKey(k);
             if (thisElemWarns) {
@@ -885,7 +885,7 @@ bool checkTypeStructureMatchesCellImpl(
           bool thisFieldWarns = false;
           numExpectedFields++;
           if (!checkTypeStructureMatchesCellImpl<genErrorMessage>(
-              ArrNR(tsField), tvToCell(field), givenType,
+              ArrNR(tsField), field, givenType,
               expectedType, errorKey, thisFieldWarns, isOrAsOp)) {
             errOnKey(k);
             if (thisFieldWarns) {

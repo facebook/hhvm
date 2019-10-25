@@ -391,7 +391,7 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
   auto const lookup = getPropImpl<false, true, true>(ctx, propName.get());
   if (lookup.val && lookup.accessible) {
     if (lookup.val.type() != KindOfUninit) {
-      return Variant::wrap(tvToCell(lookup.val.tv()));
+      return Variant::wrap(lookup.val.tv());
     } else if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
       if (error) throw_late_init_prop(lookup.prop->cls, propName.get(), false);
       return uninit_null();
@@ -1596,7 +1596,7 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
       tvCastToBooleanInPlace(&r.val);
       if (!r.val.m_data.num) return true;
       if (auto r2 = invokeNativeGetProp(key)) {
-        auto const emptyResult = !cellToBool(*tvToCell(&r2.val));
+        auto const emptyResult = !cellToBool(r2.val);
         tvDecRefGen(&r2.val);
         return emptyResult;
       }
@@ -1613,7 +1613,7 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
 
   if (m_cls->rtAttribute(Class::UseGet)) {
     if (auto r = invokeGet(key)) {
-      auto const emptyResult = !cellToBool(*tvToCell(&r.val));
+      auto const emptyResult = !cellToBool(r.val);
       tvDecRefGen(&r.val);
       return emptyResult;
     }
@@ -1693,7 +1693,7 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
       if (auto r = invokeGet(key)) {
         SCOPE_EXIT { tvDecRefGen(r.val); };
         // don't unbox until after setopBody; see longer comment below
-        setopBody(tvToCell(&r.val), op, val);
+        setopBody(&r.val, op, val);
         if (m_cls->rtAttribute(Class::UseSet)) {
           cellDup(tvAssertCell(r.val), tvRef);
           if (invokeSet(key, tvAssertCell(tvRef))) {
@@ -1712,7 +1712,6 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
     if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
       throwMutateConstProp(lookup.slot);
     }
-    prop = tvToCell(prop);
 
     if (lookup.prop &&
         setOpNeedsTypeCheck(lookup.prop->typeConstraint, op, prop)) {
@@ -1740,8 +1739,8 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
   if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
     if (auto r = invokeNativeGetProp(key)) {
       tvCopy(r.val, tvRef);
-      setopBody(tvToCell(&tvRef), op, val);
-      if (invokeNativeSetProp(key, tvToCell(tvRef))) {
+      setopBody(&tvRef, op, val);
+      if (invokeNativeSetProp(key, tvRef)) {
         return &tvRef;
       }
     }
@@ -1756,7 +1755,7 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
     if (!r) tvWriteNull(r.val);
     SCOPE_EXIT { tvDecRefGen(r.val); };
 
-    setopBody(tvToCell(&r.val), op, val);
+    setopBody(&r.val, op, val);
 
     if (prop) raise_error("Cannot access protected property");
     prop = makeDynProp(key);
@@ -1776,8 +1775,8 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
       // value that gets passed to the magic setter, though, since
       // __set functions can't take parameters by reference.)
       tvCopy(r.val, tvRef);
-      setopBody(tvToCell(&tvRef), op, val);
-      invokeSet(key, tvToCell(tvRef));
+      setopBody(&tvRef, op, val);
+      invokeSet(key, tvRef);
       return &tvRef;
     }
   }
@@ -1820,8 +1819,6 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     }
     if (type(prop) == KindOfUninit) {
       tvWriteNull(prop);
-    } else {
-      prop = tvToCell(prop);
     }
 
     /*

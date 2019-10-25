@@ -132,7 +132,7 @@ bool objOffsetEmpty(ObjectData* base, TypedValue offset) {
   }
 
   auto value = objOffsetGet(base, offset, false);
-  auto result = !cellToBool(*tvToCell(&value));
+  auto result = !cellToBool(value);
   tvDecRefGen(value);
   return result;
 }
@@ -165,7 +165,7 @@ void objOffsetSet(
   auto const method = base->methodNamed(s_offsetSet.get());
   assertx(method != nullptr);
 
-  TypedValue args[2] = { offset, *tvToCell(val) };
+  TypedValue args[2] = { offset, *val };
   g_context->invokeMethodV(base, method, folly::range(args));
 }
 
@@ -468,7 +468,6 @@ template<bool reverse>
 void SetRange(
   tv_lval base, int64_t offset, TypedValue src, int64_t count, int64_t size
 ) {
-  base = tvToCell(base);
   if (!tvIsString(base)) {
     fail_invalid("Invalid base type {} for range set operation",
                  getDataTypeString(type(base)).data());

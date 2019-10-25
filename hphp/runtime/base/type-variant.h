@@ -103,7 +103,7 @@ public:
   auto& toCArrRef() const { return HPHP::toCArrRef(m_val); }
   auto& toCObjRef() const { return HPHP::toCObjRef(m_val); }
 
-  tv_rval toCell() const { return tvToCell(m_val); }
+  tv_rval toCell() const { return m_val; }
 
   ArrayData *getArrayData() const {
     assertx(isArray());
@@ -1241,8 +1241,8 @@ struct Variant : private TypedValue {
    * Access this Variant as a Cell.  I.e. unboxes it if it was a
    * KindOfRef.
    */
-  const Cell* toCell() const { return tvToCell(asTypedValue()); }
-        Cell* toCell()       { return tvToCell(asTypedValue()); }
+  const Cell* toCell() const { return asTypedValue(); }
+        Cell* toCell()       { return asTypedValue(); }
 
   /*
    * Read this Variant as an InitCell, without incrementing the
@@ -1667,7 +1667,6 @@ ALWAYS_INLINE Variant init_null() {
 inline void concat_assign(Variant &v1, const char* s2) = delete;
 
 inline void concat_assign(tv_lval lhs, const String& s2) {
-  lhs = tvToCell(lhs);
   if (!isStringType(type(lhs))) cellCastToStringInPlace(lhs);
   asStrRef(lhs) += s2;
 }

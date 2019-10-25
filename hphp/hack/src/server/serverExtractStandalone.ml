@@ -25,8 +25,6 @@ exception DependencyNotFound of string
 
 exception Unsupported
 
-exception InvalidInput
-
 let records_not_supported () = failwith "Records are not supported"
 
 let value_exn ex opt =
@@ -1322,9 +1320,6 @@ let go tcopt target =
     get_code strict_declarations partial_declarations
   with
   | NotFound -> "Not found!"
-  | InvalidInput ->
-    "Unrecognized input. "
-    ^ "Expected: fully qualified function name or [fully qualified class name]::[method_name]"
   | DependencyNotFound d -> Printf.sprintf "Dependency not found: %s" d
   | Unsupported
   | UnexpectedDependency ->

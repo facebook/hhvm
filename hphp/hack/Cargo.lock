@@ -93,6 +93,7 @@ version = "3.49.0"
 dependencies = [
  "coroutine_parser_leak_tree 3.49.0",
  "hack_ocamlrep 3.49.0",
+ "hack_ocamlrep_ocamlpool 3.72.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
@@ -141,6 +142,7 @@ version = "3.49.0"
 dependencies = [
  "decl_mode_parser 3.49.0",
  "hack_ocamlrep 3.49.0",
+ "hack_ocamlrep_ocamlpool 3.72.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
@@ -315,6 +317,15 @@ dependencies = [
  "quote 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "syn 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "synstructure 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "hack_ocamlrep_ocamlpool"
+version = "3.72.0"
+dependencies = [
+ "hack_ocamlrep 3.49.0",
+ "hack_utils_ocamlpool 3.49.0",
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -496,6 +507,7 @@ name = "minimal_parser_ffi"
 version = "3.49.0"
 dependencies = [
  "hack_ocamlrep 3.49.0",
+ "hack_ocamlrep_ocamlpool 3.72.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
@@ -567,6 +579,7 @@ name = "positioned_coroutine_parser_ffi"
 version = "3.49.0"
 dependencies = [
  "hack_ocamlrep 3.49.0",
+ "hack_ocamlrep_ocamlpool 3.72.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
@@ -593,6 +606,7 @@ name = "positioned_parser_ffi"
 version = "3.49.0"
 dependencies = [
  "hack_ocamlrep 3.49.0",
+ "hack_ocamlrep_ocamlpool 3.72.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
@@ -752,6 +766,7 @@ name = "rust_parser_ffi"
 version = "3.49.0"
 dependencies = [
  "hack_ocamlrep 3.49.0",
+ "hack_ocamlrep_ocamlpool 3.72.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
@@ -954,6 +969,7 @@ name = "verify_parser_ffi"
 version = "3.49.0"
 dependencies = [
  "hack_ocamlrep 3.49.0",
+ "hack_ocamlrep_ocamlpool 3.72.0",
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",

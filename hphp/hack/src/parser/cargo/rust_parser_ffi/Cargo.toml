@@ -10,6 +10,7 @@ ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils
 libc = "^0.2.60"
 ocaml = "^0.7"
 ocamlrep = { path = "../../../ocamlrep", package = "hack_ocamlrep" }
+ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool" }
 oxidized = {path = "../../../oxidized", package = "hack_oxidized" }
 syntax_tree = {path = "../syntax_tree", package = "syntax_tree" }
 rust_to_ocaml = {path = "../rust_to_ocaml", package = "rust_to_ocaml" }

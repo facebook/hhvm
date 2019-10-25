@@ -11,19 +11,20 @@ use ocamlpool_rust::{
     ocamlvalue::Ocamlvalue,
     utils::{caml_tuple, usize_to_ocaml},
 };
+use ocamlrep_derive::OcamlRep;
 use std::borrow::Cow;
 
 // many errors are static strings, but not all of them
 pub type Error = Cow<'static, str>;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, OcamlRep, PartialEq, Eq)]
 pub enum ErrorType {
     ParseError,
     RuntimeError,
 }
 use ErrorType::*;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, OcamlRep, PartialEq, Eq)]
 pub struct SyntaxError {
     pub child: Option<Box<SyntaxError>>,
     pub start_offset: usize,

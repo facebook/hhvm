@@ -4,16 +4,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlpool_rust::{caml_raise, ocamlvalue::Ocamlvalue, utils::*};
-use ocamlrep::OcamlRep;
+use ocamlrep_ocamlpool::ocaml_ffi;
+use oxidized::file_info;
 use parser_rust::{
-    lexer::Lexer, minimal_token::MinimalToken, minimal_trivia::MinimalTrivia, operator::Operator,
-    source_text::SourceText, token_kind::TokenKind,
+    lexer::Lexer,
+    minimal_token::MinimalToken,
+    minimal_trivia::MinimalTrivia,
+    operator::{Assoc, Operator},
+    source_text::SourceText,
+    token_kind::TokenKind,
 };
-use rust_to_ocaml::{to_list, SerializationContext};
 use syntax_tree::mode_parser::parse_mode;
-
-use oxidized::relative_path::RelativePath;
 
 #[macro_export]
 macro_rules! parse {
@@ -29,8 +30,9 @@ macro_rules! parse {
             }
 
             use ocaml::Value;
-            use ocamlrep::OcamlRep;
-            use ocamlpool_rust::{caml_raise, ocamlvalue::Ocamlvalue, utils::*};
+            use ocamlrep::{Allocator, OcamlRep};
+            use ocamlrep_ocamlpool::Pool;
+            use ocamlpool_rust::{caml_raise, utils::*};
             use parser_rust::{
                 self as parser,
                 lexer::Lexer,
@@ -45,10 +47,10 @@ macro_rules! parse {
                 relative_path::RelativePath,
             };
 
-            pub unsafe fn parse(ocaml_source_text : Value, env : Value, mut l : Value) -> Value {
-                    let ocaml_source_text_value = ocaml_source_text.0;
+            pub unsafe fn parse(ocaml_source_text : usize, env : usize) -> usize {
+                    let ocaml_source_text_value = ocaml_source_text;
 
-                    let env = FullFidelityParserEnv::from_ocaml(env.0).unwrap();
+                    let env = FullFidelityParserEnv::from_ocaml(env).unwrap();
                     let leak_rust_tree = env.leak_rust_tree;
                     let env = ParserEnv::from(env);
 
@@ -81,19 +83,19 @@ macro_rules! parse {
                         // TODO: rewrite to_ocaml iteratively & reduce it to "stack_size - MB" as in HHVM
                         // (https://github.com/facebook/hhvm/blob/master/hphp/runtime/base/request-info.h)
                         let relative_stack_size = stack_size - stack_size*6/10;
-                        let content = str_field(&ocaml_source_text, 2);
-                        let relative_path_raw = block_field(&ocaml_source_text, 0);
+                        let content = str_field(&ocaml::Value(ocaml_source_text), 2);
+                        let relative_path_raw = block_field(&ocaml::Value(ocaml_source_text), 0);
 
                         let env = env.clone();
                         let try_parse = move || {
                             let stack_limit = StackLimit::relative(relative_stack_size);
                             stack_limit.reset();
                             let stack_limit_ref = &stack_limit;
-                            let relative_path = RelativePath::from_ocamlvalue(&relative_path_raw);
+                            let relative_path = RelativePath::from_ocaml(relative_path_raw.0).unwrap();
                             let file_path = relative_path.path_str().to_owned();
                             let relative_path = AssertUnwindSafe(relative_path);
-                            ocamlpool_enter();
-                            let maybe_l = std::panic::catch_unwind(move || {
+                            let mut pool = Pool::new();
+                            let parse_result = std::panic::catch_unwind(move || {
                                 let source_text = SourceText::make_with_raw(
                                     &*relative_path,
                                     &content.data(),
@@ -107,7 +109,7 @@ macro_rules! parse {
                                 // traversing the parsed syntax tree uses about 1/3 of the stack
                                 let context = SerializationContext::new(ocaml_source_text_value);
                                 let ocaml_root = root.to_ocaml(&context);
-                                let ocaml_errors = errors.ocamlvalue();
+                                let ocaml_errors = pool.add(&errors);
                                 let ocaml_state = state.to_ocaml(&context);
                                 let tree = if leak_rust_tree {
                                     let required_stack_size = if default_stack_size_sufficient {
@@ -121,20 +123,17 @@ macro_rules! parse {
                                 } else {
                                     None
                                 };
-                                let ocaml_tree = tree.ocamlvalue();
+                                let ocaml_tree = pool.add(&tree);
 
-                                let res = caml_tuple(&[
-                                    ocaml_state,
-                                    ocaml_root,
-                                    ocaml_errors,
-                                    ocaml_tree,
-                                ]);
-                                let l = ocaml::Value::new(res);
-                                l
+                                let res = pool.block_with_size(4);
+                                Pool::set_field(res, 0, ocamlrep::Value::from_bits(ocaml_state));
+                                Pool::set_field(res, 1, ocamlrep::Value::from_bits(ocaml_root));
+                                Pool::set_field(res, 2, ocaml_errors);
+                                Pool::set_field(res, 3, ocaml_tree);
+                                res as usize
                             });
-                            ocamlpool_leave();  // note: must run even if a panic occurs
-                            match maybe_l {
-                                Ok(l) => Some(l),
+                            match parse_result {
+                                Ok(result) => Some(result),
                                 Err(_) if stack_limit.exceeded() => {
                                     // Not always printing warning here because this would fail some HHVM tests
                                     let istty = libc::isatty(libc::STDERR_FILENO as i32) != 0;
@@ -151,7 +150,7 @@ macro_rules! parse {
                         };
                         stack_size = next_stack_size;
 
-                        let l_opt = if default_stack_size_sufficient {
+                        let result_opt = if default_stack_size_sufficient {
                             try_parse()
                         } else {
                             std::thread::Builder::new().stack_size(stack_size).spawn(try_parse)
@@ -159,132 +158,85 @@ macro_rules! parse {
                                 .join().expect("ERROR: failed to wait on new thread")
                         };
 
-                        match l_opt {
-                            Some(ocaml_result) => {
-                                l = ocaml_result;
-                                break;
-                            },
+                        match result_opt {
+                            Some(ocaml_result) => return ocaml_result,
                             _ => default_stack_size_sufficient = false,
                         }
                     }
-                    l
             }
         }
 
-        caml_raise!($name, |ocaml_source_text, opts|, <l>, {
-            l = $name::parse(ocaml_source_text, opts, l)
-        } -> l);
+        // We don't use the ocaml_ffi! macro here because we want precise
+        // control over the Pool--when a parse fails, we want to free the old
+        // pool and create a new one.
+        #[no_mangle]
+        pub extern "C" fn $name(ocaml_source_text: usize, env: usize) -> usize {
+            ocamlrep_ocamlpool::catch_unwind(|| unsafe {
+                $name::parse(ocaml_source_text, env)
+            })
+        }
     }
 }
 
-extern "C" {
-    fn ocamlpool_enter();
-    fn ocamlpool_leave();
+fn trivia_lexer<'a>(source_text: SourceText<'a>, offset: usize) -> Lexer<'a, MinimalToken> {
+    let is_experimental_mode = false;
+    Lexer::make_at(&source_text, is_experimental_mode, offset)
 }
 
-caml_raise!(rust_parse_mode, |ocaml_source_text|, <l>, {
-    let relative_path_raw = block_field(&ocaml_source_text, 0);
-    let relative_path = RelativePath::from_ocamlvalue(&relative_path_raw);
-    let content = str_field(&ocaml_source_text, 2);
-    let source_text = SourceText::make(&relative_path, &content.data());
+ocaml_ffi! {
+    fn rust_parse_mode(source_text: SourceText) -> Option<file_info::Mode> {
+        parse_mode(&source_text)
+    }
 
-    let mode = parse_mode(&source_text);
+    fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivia> {
+        trivia_lexer(source_text, offset).scan_leading_xhp_trivia()
+    }
+    fn scan_trailing_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivia> {
+        trivia_lexer(source_text, offset).scan_trailing_xhp_trivia()
+    }
+    fn scan_leading_php_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivia> {
+        trivia_lexer(source_text, offset).scan_leading_php_trivia()
+    }
+    fn scan_trailing_php_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivia> {
+        trivia_lexer(source_text, offset).scan_trailing_php_trivia()
+    }
 
-    ocamlpool_enter();
-    let ocaml_mode = mode.ocamlvalue();
-    l = ocaml::Value::new(ocaml_mode);
-    ocamlpool_leave();
-} -> l);
+    fn trailing_from_token(token: TokenKind) -> Operator {
+        Operator::trailing_from_token(token)
+    }
+    fn prefix_unary_from_token(token: TokenKind) -> Operator {
+        Operator::prefix_unary_from_token(token)
+    }
 
-macro_rules! scan_trivia {
-    ($name:ident) => {
-        caml_raise!($name, |ocaml_source_text, offset|, <l>, {
-            let relative_path_raw = block_field(&ocaml_source_text, 0);
-            let relative_path = RelativePath::from_ocamlvalue(&relative_path_raw);
-            let content = str_field(&ocaml_source_text, 2);
-            let source_text = SourceText::make(&relative_path, &content.data());
+    fn is_trailing_operator_token(token: TokenKind) -> bool {
+        Operator::is_trailing_operator_token(token)
+    }
+    fn is_binary_operator_token(token: TokenKind) -> bool {
+        Operator::is_binary_operator_token(token)
+    }
 
-            let offset = offset.usize_val();
+    fn is_comparison(op: Operator) -> bool {
+        op.is_comparison()
+    }
+    fn is_assignment(op: Operator) -> bool {
+        op.is_assignment()
+    }
 
-            let is_experimental_mode = false;
+    fn rust_precedence_helper(op: Operator) -> usize {
+        // NOTE: ParserEnv is not used in operator::precedence(), so we just create an empty ParserEnv
+        // If operator::precedence() starts using ParserEnv, this function and the callsites in OCaml must be updated
+        use parser_rust::parser_env::ParserEnv;
+        op.precedence(&ParserEnv::default())
+    }
 
-            let mut lexer : Lexer<MinimalToken> = Lexer::make_at(
-                &source_text,
-                is_experimental_mode,
-                offset,
-            );
+    fn rust_precedence_for_assignment_in_expressions_helper() -> usize {
+        Operator::precedence_for_assignment_in_expressions()
+    }
 
-            let res : Vec<MinimalTrivia> = lexer.$name();
-
-            ocamlpool_enter();
-            let context = SerializationContext::new(ocaml_source_text.0);
-            let trivia_list = to_list(&res, &context);
-            l = ocaml::Value::new(trivia_list);
-            ocamlpool_leave();
-        } -> l);
-    };
+    fn rust_associativity_helper(op: Operator) -> Assoc {
+        // NOTE: ParserEnv is not used in operator::associativity(), so we just create an empty ParserEnv
+        // If operator::associativity() starts using ParserEnv, this function and the callsites in OCaml must be updated
+        use parser_rust::parser_env::ParserEnv;
+        op.associativity(&ParserEnv::default())
+    }
 }
-
-scan_trivia!(scan_leading_xhp_trivia);
-scan_trivia!(scan_trailing_xhp_trivia);
-scan_trivia!(scan_leading_php_trivia);
-scan_trivia!(scan_trailing_php_trivia);
-
-macro_rules! from_token {
-    ($name:ident) => {
-        caml_raise!($name, |token|, <l>, {
-            let token = TokenKind::from_ocaml(token.0);
-            let res = Operator::$name(token.unwrap());
-            let res = res.ocamlvalue();
-            l = ocaml::Value::new(res);
-        } -> l);
-    };
-}
-
-from_token!(trailing_from_token);
-from_token!(prefix_unary_from_token);
-from_token!(is_trailing_operator_token);
-from_token!(is_binary_operator_token);
-
-macro_rules! from_operator {
-    ($name:ident) => {
-        caml_raise!($name, |op|, <l>, {
-            let op = Operator::from_ocaml(op.0);
-            let op = op.unwrap();
-            let res = op.$name();
-            let res = res.ocamlvalue();
-            l = ocaml::Value::new(res);
-        } -> l);
-    };
-}
-
-from_operator!(is_comparison);
-from_operator!(is_assignment);
-
-caml_raise!(rust_precedence_helper, |op|, <l>, {
-    let op = Operator::from_ocaml(op.0);
-    let op = op.unwrap();
-    // NOTE: ParserEnv is not used in operator::precedence(), so we just create an empty ParserEnv
-    // If operator::precedence() starts using ParserEnv, this macro and the callsites in OCaml must be updated
-    let env = parser_rust::parser_env::ParserEnv::default();
-    let res = op.precedence(&env);
-    let res = res.ocamlvalue();
-    l = ocaml::Value::new(res);
-} -> l);
-
-caml_raise!(rust_precedence_for_assignment_in_expressions_helper, |_val|, <l>, {
-    let res = Operator::precedence_for_assignment_in_expressions();
-    let res = res.ocamlvalue();
-    l = ocaml::Value::new(res);
-} -> l);
-
-caml_raise!(rust_associativity_helper, |op|, <l>, {
-    let op = Operator::from_ocaml(op.0);
-    let op = op.unwrap();
-    // NOTE: ParserEnv is not used in operator::associativity(), so we just create an empty ParserEnv
-    // If operator::associativity() starts using ParserEnv, this macro and the callsites in OCaml must be updated
-    let env = parser_rust::parser_env::ParserEnv::default();
-    let res = op.associativity(&env);
-    let res = res.ocamlvalue();
-    l = ocaml::Value::new(res);
-} -> l);

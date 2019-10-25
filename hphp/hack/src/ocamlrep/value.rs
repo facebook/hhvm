@@ -8,14 +8,17 @@ use std::marker::PhantomData;
 
 use crate::block::{Block, Header};
 
+#[inline(always)]
 pub const fn is_ocaml_int(value: usize) -> bool {
     value & 1 == 1
 }
 
+#[inline(always)]
 pub const fn isize_to_ocaml_int(value: isize) -> usize {
     ((value as usize) << 1) | 1
 }
 
+#[inline(always)]
 pub const fn ocaml_int_to_isize(value: usize) -> isize {
     (value as isize) >> 1
 }
@@ -25,14 +28,17 @@ pub const fn ocaml_int_to_isize(value: usize) -> isize {
 pub struct Value<'arena>(pub(crate) usize, PhantomData<&'arena ()>);
 
 impl<'a> Value<'a> {
+    #[inline(always)]
     pub fn is_immediate(self) -> bool {
         is_ocaml_int(self.0)
     }
 
+    #[inline(always)]
     pub fn int(value: isize) -> Value<'static> {
         Value(isize_to_ocaml_int(value), PhantomData)
     }
 
+    #[inline(always)]
     pub fn as_int(self) -> Option<isize> {
         if self.is_immediate() {
             Some(ocaml_int_to_isize(self.0))
@@ -41,6 +47,7 @@ impl<'a> Value<'a> {
         }
     }
 
+    #[inline(always)]
     pub fn as_block(self) -> Option<Block<'a>> {
         if self.is_immediate() {
             return None;
@@ -59,10 +66,12 @@ impl<'a> Value<'a> {
     /// correctly describing the block's size and tag (i.e., value.offset(1)
     /// should point to that Header). To be used only with pointers returned by
     /// Arena allocation methods.
+    #[inline(always)]
     pub unsafe fn from_ptr(value: *const Value<'a>) -> Value<'a> {
         Value(value as usize, PhantomData)
     }
 
+    #[inline(always)]
     pub unsafe fn from_bits(value: usize) -> Value<'a> {
         Value(value, PhantomData)
     }
@@ -70,6 +79,7 @@ impl<'a> Value<'a> {
     /// This method is unsafe because it decouples the value from the lifetime
     /// of its containing arena or slab. Take care that the returned value does
     /// not outlive the arena.
+    #[inline(always)]
     pub unsafe fn to_bits(self) -> usize {
         self.0
     }
@@ -89,10 +99,12 @@ impl Debug for Value<'_> {
 pub struct OpaqueValue<'arena>(usize, PhantomData<&'arena ()>);
 
 impl<'a> OpaqueValue<'a> {
+    #[inline(always)]
     pub(crate) fn is_immediate(self) -> bool {
         is_ocaml_int(self.0)
     }
 
+    #[inline(always)]
     fn as_int(self) -> Option<isize> {
         if self.is_immediate() {
             Some(ocaml_int_to_isize(self.0))
@@ -101,18 +113,22 @@ impl<'a> OpaqueValue<'a> {
         }
     }
 
+    #[inline(always)]
     pub(crate) fn as_header(self) -> Header {
         Header::from_bits(self.0)
     }
 
+    #[inline(always)]
     pub(crate) unsafe fn from_bits(value: usize) -> OpaqueValue<'a> {
         OpaqueValue(value, PhantomData)
     }
 
+    #[inline(always)]
     pub(crate) unsafe fn to_bits(self) -> usize {
         self.0
     }
 
+    #[inline(always)]
     pub(crate) unsafe fn add_ptr_offset(&mut self, diff: isize) {
         if !self.is_immediate() {
             self.0 = (self.0 as isize + diff) as usize;

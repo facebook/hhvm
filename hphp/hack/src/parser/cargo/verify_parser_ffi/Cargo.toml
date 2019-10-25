@@ -18,4 +18,5 @@ parser_rust = { path = "../..", package = "hack_parser" }
 syntax_tree = { path = "../syntax_tree", package = "syntax_tree" }
 libc = "^0.2.60"
 ocamlrep = { path = "../../../ocamlrep", package = "hack_ocamlrep" }
+ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized", package = "hack_oxidized" }

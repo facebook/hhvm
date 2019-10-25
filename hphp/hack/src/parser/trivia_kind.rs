@@ -17,7 +17,9 @@
  *
  */
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+use ocamlrep_derive::OcamlRep;
+
+#[derive(Debug, Copy, Clone, OcamlRep, PartialEq)]
 pub enum TriviaKind {
     WhiteSpace,
     EndOfLine,

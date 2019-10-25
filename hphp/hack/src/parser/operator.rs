@@ -21,8 +21,8 @@ pub enum Assoc {
 use self::Operator::*;
 
 impl Operator {
-    // NOTE: ParserEnv is not used in operator::precedence(). The macro rust_precedence_helper (defined in rust_parser_ffi.rs)
-    // assumes that ParserEnv is not used. If operator::precedence() starts using ParserEnv, the macro and the callsites in OCaml
+    // NOTE: ParserEnv is not used in operator::precedence(). The function rust_precedence_helper (defined in rust_parser_ffi.rs)
+    // assumes that ParserEnv is not used. If operator::precedence() starts using ParserEnv, the helper and the callsites in OCaml
     // must be updated.
     pub fn precedence(&self, _: &ParserEnv) -> usize {
         // TODO: eval
@@ -94,8 +94,8 @@ impl Operator {
         25
     }
 
-    // NOTE: ParserEnv is not used in operator::associativity(). The macro rust_associativity_helper (defined in rust_parser_ffi.rs)
-    // assumes that ParserEnv is not used. If operator::associativity() starts using ParserEnv, the macro and the callsites in OCaml
+    // NOTE: ParserEnv is not used in operator::associativity(). The function rust_associativity_helper (defined in rust_parser_ffi.rs)
+    // assumes that ParserEnv is not used. If operator::associativity() starts using ParserEnv, the function and the callsites in OCaml
     // must be updated.
     pub fn associativity(&self, _: &ParserEnv) -> Assoc {
         match self {

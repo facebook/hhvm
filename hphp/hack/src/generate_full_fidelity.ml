@@ -2568,7 +2568,9 @@ module GenerateFFRustTriviaKind = struct
     make_header CStyle ""
     ^ "
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+use ocamlrep_derive::OcamlRep;
+
+#[derive(Debug, Copy, Clone, OcamlRep, PartialEq)]
 pub enum TriviaKind {
 TRIVIA}
 

@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::{Borrow, Cow};
 use std::collections::{btree_map, btree_set, BTreeMap, BTreeSet};
 use std::convert::TryInto;
 use std::path::PathBuf;
@@ -389,6 +390,16 @@ impl OcamlRep for String {
 
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
         Ok(String::from(str_from_ocamlrep(value)?))
+    }
+}
+
+impl OcamlRep for Cow<'_, str> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        str_to_ocamlrep(self.borrow(), alloc)
+    }
+
+    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
+        Ok(Cow::Owned(String::from(str_from_ocamlrep(value)?)))
     }
 }
 

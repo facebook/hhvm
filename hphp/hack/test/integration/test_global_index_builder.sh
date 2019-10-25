@@ -54,6 +54,7 @@ spot_check "Derp\\\\Lib\\\\Herp\\\\f"
 spot_check "HH\\\\vec"
 spot_check "__CLASS__ 9 acid"
 spot_check ":xhp:helloworld 1 acid"
+spot_check "SymbolInsideHackFile 1 acid  acnew  actype"
 
 # Clean up
 rm -rf "${TEMP_REPO}"

@@ -189,7 +189,7 @@ let init_workers () =
 let gather_file_list (path : string) : Relative_path.t list =
   let cmdline =
     Printf.sprintf
-      "find %s \\( \\( -name \"*.php\" -o -name \"*.hhi\" \\) -and -not -path \"*/.hg/*\" \\)"
+      "find %s \\( \\( -name \"*.php\" -o -name \"*.hhi\" -o -name \"*.hack\" \\) -and -not -path \"*/.hg/*\" \\)"
       path
   in
   let channel = Unix.open_process_in cmdline in

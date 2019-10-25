@@ -1,3 +1,5 @@
 <?hh
+<<__EntryPoint>> function main(): void {
 $filters = stream_get_filters();
 if(! in_array( "string.rot13", $filters )) die( "skip rot13 filter not available." );
+}

@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 if (!getenv('REDIS_TEST_HOST')) {
   echo 'skip';
 } else {
@@ -9,4 +9,5 @@ if (!getenv('REDIS_TEST_HOST')) {
   if ($output[0] !== "PONG") {
     echo 'skip';
   }
+}
 }

@@ -1,6 +1,6 @@
 <?hh
+<<__EntryPoint>> function main(): void {
 $drivers = PDO::getAvailableDrivers();
-
 if (!in_array('mysql', $drivers))
   die("Skip. Driver not found");
 
@@ -14,4 +14,5 @@ try {
   $pdo = new PDO("mysql:dbname=$db;host=$host", $user, $passwd);
 } catch (PDOException $e) {
   die($e->getMessage());
+}
 }

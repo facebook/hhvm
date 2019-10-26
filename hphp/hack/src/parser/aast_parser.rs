@@ -47,7 +47,6 @@ impl<'a> AastParser {
         } else {
             let mut env = lowerer::Env::make(
                 env.codegen,
-                env.elaborate_namespaces,
                 env.quick_mode,
                 env.keep_errors,
                 env.show_all_errors,

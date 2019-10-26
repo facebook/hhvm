@@ -148,7 +148,6 @@ pub struct State {
 #[derive(Debug, Clone)]
 pub struct Env<'a> {
     codegen: bool,
-    elaborate_namespaces: bool,
     pub keep_errors: bool,
     quick_mode: bool,
     /* Show errors even in quick mode. Does not override keep_errors. Hotfix
@@ -176,7 +175,6 @@ pub struct Env<'a> {
 impl<'a> Env<'a> {
     pub fn make(
         codegen: bool,
-        elaborate_namespaces: bool,
         quick_mode: bool,
         keep_errors: bool,
         show_all_errors: bool,
@@ -186,7 +184,6 @@ impl<'a> Env<'a> {
     ) -> Self {
         Env {
             codegen,
-            elaborate_namespaces,
             keep_errors,
             quick_mode,
             show_all_errors,
@@ -4932,9 +4929,6 @@ where
             },
         };
 
-        if env.elaborate_namespaces {
-            not_impl!()
-        }
         let aast = Self::elaborate_halt_compiler(aast, env);
         Ok(Result { aast })
     }

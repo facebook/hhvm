@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3b25b1763fb5606e47095a89d308d2c5>>
+// @generated SignedSource<<17bb917549ca02c9fbaed1d2f711b2ce>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -328,6 +328,7 @@ pub struct EnumType {
 #[derive(Clone, Debug, OcamlRep)]
 pub struct RecordDefType {
     pub name: nast::Sid,
+    pub abstract_: bool,
     pub pos: pos::Pos,
     pub errors: Option<errors::Errors>,
 }

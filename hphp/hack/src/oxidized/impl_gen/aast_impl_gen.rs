@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8c9301ca73460f3d91119a552097257e>>
+// @generated SignedSource<<3926e4f8b90105b7213d98ad87d3f0e4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -293,7 +293,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         Expr_::New(Box::new((p0, p1, p2, p3, p4)))
     }
     pub fn mk_record(
-        p0: ClassId<Ex, Fb, En, Hi>,
+        p0: Sid,
         p1: bool,
         p2: Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>,
     ) -> Self {

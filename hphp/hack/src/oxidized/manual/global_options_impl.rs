@@ -48,7 +48,6 @@ impl Default for GlobalOptions {
             log_levels: s_map::SMap::new(),
             po_disable_lval_as_an_expression: false,
             tco_typecheck_xhp_cvars: false,
-            tco_ignore_collection_expr_type_arguments: false,
             tco_shallow_class_decl: false,
             po_rust_parser_errors: false,
             po_rust_lowerer: false,

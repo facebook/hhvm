@@ -2005,18 +2005,11 @@ where
                 Ok(E_::mk_id(name))
             }
             RecordCreationExpression(c) => {
-                let rec_type = &c.record_creation_type;
-                let e = match &rec_type.syntax {
-                    SimpleTypeSpecifier(_) => {
-                        let name = Self::pos_name(rec_type, env)?;
-                        E::new(name.0.clone(), E_::mk_id(name))
-                    }
-                    _ => Self::p_expr(rec_type, env)?,
-                };
+                let id = Self::pos_name(&c.record_creation_type, env)?;
                 let is_record_array =
                     Self::token_kind(&c.record_creation_array_token) == Some(TK::At);
                 Ok(E_::mk_record(
-                    aast::ClassId(pos, aast::ClassId_::CIexpr(e)),
+                    id,
                     is_record_array,
                     Self::could_map(Self::p_member, &c.record_creation_members, env)?,
                 ))

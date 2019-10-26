@@ -3,7 +3,7 @@
       f_ret =
       ((Awaitable<string>),
        (Some ([3:38-55],
-              (Happly (([3:38-47], "\\Awaitable"),
+              (Happly (([3:38-47], "\\HH\\Awaitable"),
                  [([3:48-54], (Hprim Tstring))])))));
       f_name = ([3:16-25], "\\genString"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;

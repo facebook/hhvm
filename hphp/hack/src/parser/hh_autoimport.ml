@@ -29,7 +29,7 @@ let types =
       ("AsyncGeneratorWaitHandle", HH);
       ("AsyncIterator", Global);
       ("AsyncKeyedIterator", Global);
-      ("Awaitable", Global);
+      ("Awaitable", HH);
       ("AwaitAllWaitHandle", HH);
       ("classname", HH);
       ("Collection", HH);

@@ -22,7 +22,7 @@ module Classes = struct
 
   (* Used for dynamic classnames, e.g. new $foo(); *)
 
-  let cAwaitable = "\\Awaitable"
+  let cAwaitable = "\\HH\\Awaitable"
 
   let cGenerator = "\\Generator"
 

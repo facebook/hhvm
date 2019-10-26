@@ -134,20 +134,12 @@ final class AsyncGeneratorWaitHandle<Tk, +Tv>
   extends ResumableWaitHandle<?(Tk, Tv)> {
 }
 
-} // namespace HH
-
-namespace {
-
 <<__Sealed(StaticWaitHandle::class, WaitableWaitHandle::class)>>
 abstract class Awaitable<+T> {
   public static function setOnIOWaitEnterCallback(?(function(): void) $callback) {}
   public static function setOnIOWaitExitCallback(?(function(): void) $callback) {}
   public static function setOnJoinCallback(?(function(WaitableWaitHandle<mixed>): void) $callback) {}
 }
-
-} // namespace
-
-namespace HH {
 
 <<__Sealed(AsyncFunctionWaitHandle::class, AsyncGeneratorWaitHandle::class)>>
 abstract class ResumableWaitHandle<+T> extends WaitableWaitHandle<T> {

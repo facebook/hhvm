@@ -21,7 +21,7 @@ pub mod classes {
 
     /* Used for dynamic classnames, e.g. new $foo(); */
 
-    pub const AWAITABLE: &str = "\\Awaitable";
+    pub const AWAITABLE: &str = "\\HH\\Awaitable";
 
     pub const GENERATOR: &str = "\\Generator";
 

@@ -122,9 +122,9 @@ mod label_rewriter {
         map
     }
 
-    fn relabel_instr<F>(instr: Instruct, relabel: &mut F) -> Instruct
+    fn relabel_instr<F>(instr: &mut Instruct, relabel: &mut F)
     where
-        F: FnMut(&Label) -> Label,
+        F: FnMut(&mut Label),
     {
         use GenDelegation::*;
         use Instruct::*;
@@ -133,72 +133,38 @@ mod label_rewriter {
         use InstructIterator::*;
         use InstructMisc::*;
         match instr {
-            IIterator(IterInit(id, l, v)) => IIterator(IterInit(id, relabel(&l), v)),
-            IIterator(IterInitK(id, l, k, v)) => IIterator(IterInitK(id, relabel(&l), k, v)),
-            IIterator(LIterInit(id, b, l, v)) => IIterator(LIterInit(id, b, relabel(&l), v)),
-            IIterator(LIterInitK(id, b, l, k, v)) => {
-                IIterator(LIterInitK(id, b, relabel(&l), k, v))
+            IIterator(IterInit(_, l, _))
+            | IIterator(IterInitK(_, l, _, _))
+            | IIterator(LIterInit(_, _, l, _))
+            | IIterator(LIterInitK(_, _, l, _, _))
+            | IIterator(IterNext(_, l, _))
+            | IIterator(IterNextK(_, l, _, _))
+            | IIterator(LIterNext(_, _, l, _))
+            | IIterator(LIterNextK(_, _, l, _, _))
+            | IIterator(IterBreak(l, _))
+            | IGenDelegation(YieldFromDelegate(_, l))
+            | ICall(FCall(FcallArgs(_, _, _, _, Some(l))))
+            | ICall(FCallClsMethod(FcallArgs(_, _, _, _, Some(l)), _, _))
+            | ICall(FCallClsMethodD(FcallArgs(_, _, _, _, Some(l)), _, _))
+            | ICall(FCallClsMethodS(FcallArgs(_, _, _, _, Some(l)), _))
+            | ICall(FCallClsMethodSD(FcallArgs(_, _, _, _, Some(l)), _, _))
+            | ICall(FCallFunc(FcallArgs(_, _, _, _, Some(l)), _))
+            | ICall(FCallFuncD(FcallArgs(_, _, _, _, Some(l)), _))
+            | ICall(FCallObjMethod(FcallArgs(_, _, _, _, Some(l)), _, _))
+            | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, Some(l)), _, _))
+            | IContFlow(Jmp(l))
+            | IContFlow(JmpNS(l))
+            | IContFlow(JmpZ(l))
+            | IContFlow(JmpNZ(l))
+            | IMisc(MemoGet(l, _))
+            | ILabel(l) => relabel(l),
+            IContFlow(Switch(_, _, ll)) => ll.iter_mut().for_each(|l| relabel(l)),
+            IContFlow(SSwitch(pairs)) => pairs.iter_mut().for_each(|(_, l)| relabel(l)),
+            IMisc(MemoGetEager(l1, l2, _)) => {
+                relabel(l1);
+                relabel(l2);
             }
-            IIterator(IterNext(id, l, v)) => IIterator(IterNext(id, relabel(&l), v)),
-            IIterator(IterNextK(id, l, k, v)) => IIterator(IterNextK(id, relabel(&l), k, v)),
-            IIterator(LIterNext(id, b, l, v)) => IIterator(LIterNext(id, b, relabel(&l), v)),
-            IIterator(LIterNextK(id, b, l, k, v)) => {
-                IIterator(LIterNextK(id, b, relabel(&l), k, v))
-            }
-            IIterator(IterBreak(l, x)) => IIterator(IterBreak(relabel(&l), x)),
-            IGenDelegation(YieldFromDelegate(i, l)) => {
-                IGenDelegation(YieldFromDelegate(i, relabel(&l)))
-            }
-            ICall(FCall(FcallArgs(fl, na, nr, br, Some(l)))) => {
-                ICall(FCall(FcallArgs(fl, na, nr, br, Some(relabel(&l)))))
-            }
-            ICall(FCallClsMethod(
-                FcallArgs(fl, na, nr, br, Some(l)),
-                p,
-                is_log_as_dynamic_call,
-            )) => ICall(FCallClsMethod(
-                FcallArgs(fl, na, nr, br, Some(relabel(&l))),
-                p,
-                is_log_as_dynamic_call,
-            )),
-            ICall(FCallClsMethodD(FcallArgs(fl, na, nr, br, Some(l)), c, m)) => ICall(
-                FCallClsMethodD(FcallArgs(fl, na, nr, br, Some(relabel(&l))), c, m),
-            ),
-            ICall(FCallClsMethodS(FcallArgs(fl, na, nr, br, Some(l)), c)) => ICall(
-                FCallClsMethodS(FcallArgs(fl, na, nr, br, Some(relabel(&l))), c),
-            ),
-            ICall(FCallClsMethodSD(FcallArgs(fl, na, nr, br, Some(l)), c, m)) => ICall(
-                FCallClsMethodSD(FcallArgs(fl, na, nr, br, Some(relabel(&l))), c, m),
-            ),
-            ICall(FCallFunc(FcallArgs(fl, na, nr, br, Some(l)), p)) => {
-                ICall(FCallFunc(FcallArgs(fl, na, nr, br, Some(relabel(&l))), p))
-            }
-            ICall(FCallFuncD(FcallArgs(fl, na, nr, br, Some(l)), f)) => {
-                ICall(FCallFuncD(FcallArgs(fl, na, nr, br, Some(relabel(&l))), f))
-            }
-            ICall(FCallObjMethod(FcallArgs(fl, na, nr, br, Some(l)), f, p)) => ICall(
-                FCallObjMethod(FcallArgs(fl, na, nr, br, Some(relabel(&l))), f, p),
-            ),
-            ICall(FCallObjMethodD(FcallArgs(fl, na, nr, br, Some(l)), f, m)) => ICall(
-                FCallObjMethodD(FcallArgs(fl, na, nr, br, Some(relabel(&l))), f, m),
-            ),
-            IContFlow(Jmp(l)) => IContFlow(Jmp(relabel(&l))),
-            IContFlow(JmpNS(l)) => IContFlow(JmpNS(relabel(&l))),
-            IContFlow(JmpZ(l)) => IContFlow(JmpZ(relabel(&l))),
-            IContFlow(JmpNZ(l)) => IContFlow(JmpNZ(relabel(&l))),
-            IContFlow(Switch(k, n, ll)) => {
-                IContFlow(Switch(k, n, ll.into_iter().map(|l| relabel(&l)).collect()))
-            }
-            IContFlow(SSwitch(pairs)) => IContFlow(SSwitch(
-                pairs
-                    .into_iter()
-                    .map(|(id, l)| (id, relabel(&l)))
-                    .collect::<Vec<_>>(),
-            )),
-            IMisc(MemoGet(l, r)) => IMisc(MemoGet(relabel(&l), r)),
-            IMisc(MemoGetEager(l1, l2, r)) => IMisc(MemoGetEager(relabel(&l1), relabel(&l2), r)),
-            ILabel(l) => ILabel(relabel(&l)),
-            _ => instr,
+            _ => (),
         }
     }
 
@@ -206,46 +172,42 @@ mod label_rewriter {
         defs: &HashMap<Id, usize>,
         used: &HashSet<Id>,
         refs: &HashMap<Id, usize>,
-        mut params: Vec<HhasParam>,
-        body: &Instr,
-    ) -> (Vec<HhasParam>, Instr) {
-        let relabel_id = |id: Id| {
-            *refs
+        params: &mut Vec<HhasParam>,
+        body: &mut Instr,
+    ) {
+        let relabel_id = |id: &mut Id| {
+            *id = *refs
                 .get(&lookup_def(&id, defs))
                 .expect("relabel_instrseq: offset not in refs")
         };
-        let relabel_define_label_id = |id: Id| {
+        let relabel_define_label_id = |id: &mut Id| {
             if used.contains(&id) {
-                refs.get(&lookup_def(&id, &defs)).map(|x| *x)
-            } else {
-                None
+                *id = refs.get(&lookup_def(&id, defs)).map(|x| *x).unwrap_or(*id);
             }
         };
-        let mut rewrite_instr = |instr: &Instruct| match instr {
-            Instruct::ILabel(l) => match l.option_map(relabel_define_label_id) {
-                Ok(Some(l)) => Some(Instruct::ILabel(l)),
-                _ => None,
-            },
-            _ => Some(relabel_instr(instr.clone(), &mut |l| {
-                l.map(relabel_id).unwrap()
-            })),
+        let mut rewrite_instr = |instr: &mut Instruct| {
+            if let Instruct::ILabel(l) = instr {
+                l.map_mut(relabel_define_label_id);
+            } else {
+                relabel_instr(instr, &mut |l| l.map_mut(relabel_id));
+            }
         };
         let rewrite_param = |param: &mut HhasParam| {
-            if let Some((l, _)) = &param.default_value {
-                param.replace_default_value_label(l.map(relabel_id).unwrap())
+            if let Some((l, _)) = &mut param.default_value {
+                l.map_mut(relabel_id);
             }
         };
-        params.iter_mut().map(rewrite_param);
-        (params, instr_seq::filter_map(body, &mut rewrite_instr))
+        params.iter_mut().for_each(|param| rewrite_param(param));
+        instr_seq::map_mut(body, &mut rewrite_instr);
     }
 
-    pub fn relabel_function(params: Vec<HhasParam>, body: &Instr) -> (Vec<HhasParam>, Instr) {
+    pub fn relabel_function(params: &mut Vec<HhasParam>, body: &mut Instr) {
         let defs = create_label_to_offset_map(body);
         let (used, refs) = create_label_ref_map(&defs, &params, body);
         rewrite_params_and_body(&defs, &used, &refs, params, body)
     }
 
-    pub fn clone_with_fresh_regular_labels(emitter: &mut Emitter, block: Instr) -> Instr {
+    pub fn clone_with_fresh_regular_labels(emitter: &mut Emitter, block: &mut Instr) {
         let mut folder =
             |(mut regular, mut named): (HashMap<Id, Label>, HashMap<String, Label>),
              instr: &Instruct| {
@@ -261,20 +223,20 @@ mod label_rewriter {
                 (regular, named)
             };
         let (regular_labels, named_labels) =
-            instr_seq::fold_left(&block, &mut folder, (HashMap::new(), HashMap::new()));
+            instr_seq::fold_left(block, &mut folder, (HashMap::new(), HashMap::new()));
 
-        if regular_labels.is_empty() && named_labels.is_empty() {
-            return block;
-        }
-
-        let mut relabel = |l: &Label| {
-            let lopt = match l {
-                Label::Regular(id) => regular_labels.get(id),
-                Label::Named(name) => named_labels.get(name),
-                _ => None,
+        if !regular_labels.is_empty() || !named_labels.is_empty() {
+            let relabel = |l: &mut Label| {
+                let lopt = match l {
+                    Label::Regular(id) => regular_labels.get(id),
+                    Label::Named(name) => named_labels.get(name),
+                    _ => None,
+                };
+                lopt.unwrap_or(l).to_owned()
             };
-            lopt.unwrap_or(l).clone()
-        };
-        instr_seq::map(&block, &mut |instr| relabel_instr(instr, &mut relabel))
+            instr_seq::map_mut(block, &mut |instr| {
+                relabel_instr(instr, &mut |l| *l = relabel(l))
+            })
+        }
     }
 }

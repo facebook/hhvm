@@ -1100,6 +1100,18 @@ pub mod instr_seq {
         }
     }
 
+    pub fn map_mut<F>(instrseq: &mut Instr, f: &mut F)
+    where
+        F: FnMut(&mut Instruct),
+    {
+        match instrseq {
+            Instr::Empty => (),
+            Instr::One(x) => f(x),
+            Instr::List(instr_lst) => instr_lst.iter_mut().for_each(|x| f(x)),
+            Instr::Concat(instrseq_lst) => instrseq_lst.iter_mut().for_each(|x| map_mut(x, f)),
+        }
+    }
+
     pub fn map<F>(instrseq: &Instr, f: &mut F) -> Instr
     where
         F: FnMut(Instruct) -> Instruct,

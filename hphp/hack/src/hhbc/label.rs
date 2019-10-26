@@ -30,6 +30,13 @@ impl Label {
         }
     }
 
+    pub fn map_mut<F: FnOnce(&mut Id) -> ()>(&mut self, f: F) {
+        match self {
+            Label::Regular(id) | Label::DefaultArg(id) => f(id),
+            Label::Named(_) => panic!("Label should be rewritten before this point"),
+        }
+    }
+
     pub fn option_map<F: FnOnce(Id) -> Option<Id>>(&self, f: F) -> Result<Option<Label>, Error> {
         match self {
             Label::Regular(id) => {

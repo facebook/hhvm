@@ -619,100 +619,50 @@ class DOMDocument extends DOMNode {
    * @param string $filename - The path to the XML document.
    * @param int $options - Bitwise OR of the libxml option constants.
    *
-   * @return mixed - Returns TRUE on success or FALSE on failure. If called
-   *   statically, returns a DOMDocument and issues E_STRICT warning.
-   *
+   * @return bool - Returns TRUE on success or FALSE on failure.
    */
-  <<__AllowStatic>>
-  public function load($filename, $options = 0): mixed {
-    if (!($this ?? false)) {
-      $ret = new DOMDocument();
-      if (!$ret->_load($filename, $options, true)) {
-        return null;
-      }
-      return $ret;
-    }
+  public function load($filename, $options = 0): bool {
     return $this->_load($filename, $options, true);
   }
 
   /**
    * The function parses the HTML contained in the string source. Unlike
-   *   loading XML, HTML does not have to be well-formed to load. This function
-   *   may also be called statically to load and create a DOMDocument object.
-   *   The static invocation may be used when no DOMDocument properties need to
-   *   be set prior to loading.
+   *   loading XML, HTML does not have to be well-formed to load.
    *
    * @param string $source - The HTML string.
    * @param int $options - Since PHP 5.4.0 and libxml 2.6.0, you may also use
    *   the options parameter to specify additional Libxml parameters
    *
-   * @return mixed - Returns TRUE on success or FALSE on failure. If called
-   *   statically, returns a DOMDocument and issues E_STRICT warning.
-   *
+   * @return bool - Returns TRUE on success or FALSE on failure.
    */
-  <<__AllowStatic>>
-  public function loadHTML($source, $options = 0): mixed {
-    if (!($this ?? false)) {
-      $ret = new DOMDocument();
-      if (!$ret->_loadHTML($source, $options, false)) {
-        return null;
-      }
-      return $ret;
-    }
+  public function loadHTML($source, $options = 0): bool {
     return $this->_loadHTML($source, $options, false);
   }
 
 
   /**
    * The function parses the HTML document in the file named filename. Unlike
-   *   loading XML, HTML does not have to be well-formed to load.  Though not
-   *   recommended, this function may also be called statically to load and
-   *   create a DOMDocument object. The static invocation may be used when no
-   *   DOMDocument properties need to be set prior to loading. However, doing so
-   *   will result an in E_STRICT error being generated.
+   *   loading XML, HTML does not have to be well-formed to load.
    *
    * @param string $filename - The path to the HTML file.
    * @param int $options - Since PHP 5.4.0 and libxml 2.6.0, you may also use
    *   the options parameter to specify additional Libxml parameters
    *
-   * @return mixed - Returns TRUE on success or FALSE on failure. If called
-   *   statically, returns a DOMDocument and issues E_STRICT warning.
-   *
+   * @return bool - Returns TRUE on success or FALSE on failure.
    */
-  <<__AllowStatic>>
-  public function loadHTMLFile($filename, $options = 0): mixed {
-    if (!($this ?? false)) {
-      $ret = new DOMDocument();
-      if (!$ret->_loadHTML($filename, $options, true)) {
-        return null;
-      }
-      return $ret;
-    }
+  public function loadHTMLFile($filename, $options = 0): bool {
     return $this->_loadHTML($filename, $options, true);
   }
 
   /**
-   * Loads an XML document from a string.  This method may also be called
-   *   statically to load and create a DOMDocument object. The static invocation
-   *   may be used when no DOMDocument properties need to be set prior to
-   *   loading.
+   * Loads an XML document from a string.
    *
    * @param string $source - The string containing the XML.
    * @param int $options - Bitwise OR of the libxml option constants.
    *
-   * @return mixed - Returns TRUE on success or FALSE on failure. If called
-   *   statically, returns a DOMDocument and issues E_STRICT warning.
-   *
+   * @return bool - Returns TRUE on success or FALSE on failure.
    */
-  <<__AllowStatic>>
-  public function loadXML($source, $options = 0): mixed {
-    if (!($this ?? false)) {
-      $ret = new DOMDocument();
-      if (!$ret->_load($source, $options, false)) {
-        return null;
-      }
-      return $ret;
-    }
+  public function loadXML($source, $options = 0): bool {
     return $this->_load($source, $options, false);
   }
 
@@ -1339,7 +1289,7 @@ class DOMImplementation {
    *   element
    *
    */
-  <<__Native,__AllowStatic>>
+  <<__Native>>
   public function createDocument(?string $namespaceuri = null,
                           ?string $qualifiedname = null,
                           ?DOMDocumentType $doctypeobj = null): mixed;
@@ -1358,7 +1308,7 @@ class DOMImplementation {
    *   NULL.
    *
    */
-  <<__Native,__AllowStatic>>
+  <<__Native>>
   public function createDocumentType(?string $qualifiedname = null,
                               ?string $publicid = null,
                               ?string $systemid = null): mixed;
@@ -1371,7 +1321,7 @@ class DOMImplementation {
    * @return bool - Returns TRUE on success or FALSE on failure.
    *
    */
-  <<__Native,__AllowStatic>>
+  <<__Native>>
   public function hasFeature(string $feature, string $version): bool;
 }
 

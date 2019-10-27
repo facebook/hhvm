@@ -80,11 +80,6 @@ let make_hover_attr_docs name =
       ^ " Normally these values cannot be passed to functions."
       ^ "\n\nYou cannot save references to `__AcceptDisposable` parameters, to ensure they are disposed at the end of their using block.";
     ]
-  | "__AllowStatic" ->
-    [
-      "Allows this instance method to be called statically on the class."
-      ^ "\n\nThis purely for PHP compatibility.";
-    ]
   | "__AtMostRxAsArgs" ->
     [
       "Marks a reactive function as being conditionally reactive, depending on the type of its arguments."
@@ -322,10 +317,6 @@ let make_hover_attr_docs name =
       ^ " This is useful for migrating partial code where you're unsure about the type."
       ^ "\n\nThe type checker will still use the type, so callers will get checked."
       ^ " If the type is wrong at runtime, a warning will be logged.";
-    ]
-  | "__VMSwitchMode" ->
-    [
-      "Used by HHVM to decide how it handles catch data when switching to the debugger.";
     ]
   | "__Warn" ->
     [

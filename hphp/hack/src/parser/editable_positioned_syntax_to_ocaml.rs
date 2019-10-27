@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocaml::core::mlvalues::Value;
-use ocamlpool_rust::ocamlvalue::Ocamlvalue;
 use ocamlpool_rust::utils::{caml_block, caml_tuple, u8_to_ocaml, usize_to_ocaml};
+use ocamlrep_ocamlpool::add_to_ambient_pool;
 use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
 
 use crate::editable_positioned_original_source_data::SourceData;
@@ -62,8 +62,8 @@ impl ToOcaml for EditablePositionedToken<'_> {
         // }
         caml_tuple(&[
             self.kind.to_ocaml(context),
-            self.leading_text.ocamlvalue(),
-            self.trailing_text.ocamlvalue(),
+            add_to_ambient_pool(&self.leading_text),
+            add_to_ambient_pool(&self.trailing_text),
             self.token_data.to_ocaml(context),
         ])
     }
@@ -75,7 +75,7 @@ impl ToOcaml for SyntheticTokenData {
         // type synthetic_token_data = {
         //   text: string;
         // }
-        caml_tuple(&[self.text.ocamlvalue()])
+        caml_tuple(&[add_to_ambient_pool(&self.text)])
     }
 }
 

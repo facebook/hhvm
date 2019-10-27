@@ -44,11 +44,10 @@ fn parse(file_path: String, parse_only: bool) {
     };
 
     let content = fs::read(&file_path).expect("failed to read file");
-    let content_str = &String::from_utf8_lossy(&content);
     if parse_only {
-        println!("{}", from_text(content_str, opts).is_some());
+        println!("{}", from_text(&content, opts).is_some());
         return;
     }
-    let json = extract_as_json(content_str, opts).unwrap_or("{}".to_owned());
+    let json = extract_as_json(&content, opts).unwrap_or("{}".to_owned());
     println!("{}", json);
 }

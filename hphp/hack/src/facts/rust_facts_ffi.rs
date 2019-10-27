@@ -6,6 +6,7 @@
 
 use facts_rust as facts;
 use hhbc_string_utils_rust::without_xhp_mangling;
+use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_ocamlpool::ocaml_ffi_no_panic;
 use oxidized::relative_path::RelativePath;
 
@@ -15,15 +16,19 @@ ocaml_ffi_no_panic! {
     fn extract_as_json_ffi(
         flags: i32,
         filename: RelativePath,
-        text: String,
+        text_ptr: UnsafeOcamlPtr,
         mangle_xhp: bool,
     ) -> Option<String> {
+        // Safety: the OCaml garbage collector must not run as long as text_ptr
+        // and text_value exist. We don't call into OCaml here, so it won't.
+        let text_value = unsafe { text_ptr.as_value() };
+        let text = bytes_from_ocamlrep(text_value).expect("expected string");
         extract_as_json_ffi0(
             ((1 << 0) & flags) != 0, // php5_compat_mode
             ((1 << 1) & flags) != 0, // hhvm_compat_mode
             ((1 << 2) & flags) != 0, // allow_new_attribute_syntax
             filename,
-            &text,
+            text,
             mangle_xhp,
         )
     }
@@ -34,7 +39,7 @@ fn extract_as_json_ffi0(
     hhvm_compat_mode: bool,
     allow_new_attribute_syntax: bool,
     filename: RelativePath,
-    text: &str,
+    text: &[u8],
     mangle_xhp: bool,
 ) -> Option<String> {
     let opts = ExtractAsJsonOpts {

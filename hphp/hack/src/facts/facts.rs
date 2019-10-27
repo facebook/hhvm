@@ -53,7 +53,7 @@ pub struct Facts {
     pub file_attributes: Attributes,
 }
 impl Facts {
-    pub fn to_json(&self, text: &str) -> String {
+    pub fn to_json(&self, text: &[u8]) -> String {
         let (md5sum, sha1sum) = md5_and_sha1(text);
         let mut json = json!(&self);
         json.as_object_mut().map(|m| {
@@ -103,7 +103,7 @@ impl Flag {
     }
 }
 
-pub fn md5_and_sha1(text: &str) -> (String, String) {
+pub fn md5_and_sha1(text: &[u8]) -> (String, String) {
     (
         hash_and_hexify(crypto::md5::Md5::new(), text),
         hash_and_hexify(crypto::sha1::Sha1::new(), text),
@@ -158,8 +158,8 @@ impl TypeFacts {
     }
 }
 
-fn hash_and_hexify<D: Digest>(mut digest: D, text: &str) -> String {
-    digest.input_str(text);
+fn hash_and_hexify<D: Digest>(mut digest: D, text: &[u8]) -> String {
+    digest.input(text);
     digest.result_str()
 }
 
@@ -188,7 +188,7 @@ mod tests {
 
     #[test]
     fn md5_and_sha1_some_text() {
-        let text = "some text";
+        let text = b"some text";
         assert_eq!(
             md5_and_sha1(text),
             (
@@ -294,7 +294,7 @@ mod tests {
                 type_aliases: vec!["my_type_alias".into()],
                 types,
             })
-            .to_json("some text"),
+            .to_json(b"some text"),
             r#"{
   "constants": [
     "c1",

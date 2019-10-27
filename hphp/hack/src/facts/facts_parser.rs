@@ -24,12 +24,12 @@ pub struct ExtractAsJsonOpts {
     pub filename: RelativePath,
 }
 
-pub fn extract_as_json(text: &str, opts: ExtractAsJsonOpts) -> Option<String> {
+pub fn extract_as_json(text: &[u8], opts: ExtractAsJsonOpts) -> Option<String> {
     from_text(text, opts).map(|facts| facts.to_json(text))
 }
 
-pub fn from_text(text: &str, opts: ExtractAsJsonOpts) -> Option<Facts> {
-    let text = SourceText::make(&opts.filename, text.as_bytes());
+pub fn from_text(text: &[u8], opts: ExtractAsJsonOpts) -> Option<Facts> {
+    let text = SourceText::make(&opts.filename, text);
     let is_experimental = match parse_mode(&text) {
         Some(Mode::Mexperimental) => true,
         _ => false,

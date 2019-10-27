@@ -30,6 +30,13 @@ impl UnsafeOcamlPtr {
     pub fn as_usize(self) -> usize {
         self.0.get()
     }
+
+    /// Interpret this pointer as an OCaml value which is valid for lifetime 'a.
+    /// The OCaml garbage collector must not run during this lifetime (even if
+    /// the value is rooted).
+    pub unsafe fn as_value<'a>(&'a self) -> Value<'a> {
+        Value::from_bits(self.0.get())
+    }
 }
 
 impl fmt::Debug for UnsafeOcamlPtr {

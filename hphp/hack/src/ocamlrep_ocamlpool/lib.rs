@@ -101,6 +101,19 @@ pub fn catch_unwind(f: impl FnOnce() -> usize + UnwindSafe) -> usize {
     unreachable!();
 }
 
+/// Assume that some Pool exists in some parent scope. Since ocamlpool is
+/// implemented with statics, we don't need a reference to that pool to write to
+/// it.
+#[inline(always)]
+pub unsafe fn add_to_ambient_pool<T: OcamlRep>(value: &T) -> usize {
+    let mut fake_pool = Pool {
+        _phantom: PhantomData,
+    };
+    let result = value.to_ocamlrep(&mut fake_pool).to_bits();
+    std::mem::forget(fake_pool);
+    result
+}
+
 #[macro_export]
 macro_rules! ocaml_ffi_no_panic_fn {
     (fn $name:ident($($param:ident: $ty:ty),+  $(,)?) -> $ret:ty $code:block) => {

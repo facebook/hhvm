@@ -767,6 +767,8 @@ dependencies = [
 name = "rust_to_ocaml"
 version = "3.49.0"
 dependencies = [
+ "hack_ocamlrep 3.49.0",
+ "hack_ocamlrep_ocamlpool 3.72.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
  "hack_utils_ocamlpool 3.49.0",

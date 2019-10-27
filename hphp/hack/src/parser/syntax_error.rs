@@ -7,10 +7,6 @@
 //
 
 use crate::token_kind::TokenKind;
-use ocamlpool_rust::{
-    ocamlvalue::Ocamlvalue,
-    utils::{caml_tuple, usize_to_ocaml},
-};
 use ocamlrep_derive::OcamlRep;
 use std::borrow::Cow;
 
@@ -22,7 +18,6 @@ pub enum ErrorType {
     ParseError,
     RuntimeError,
 }
-use ErrorType::*;
 
 #[derive(Debug, Clone, OcamlRep, PartialEq, Eq)]
 pub struct SyntaxError {
@@ -58,34 +53,6 @@ impl SyntaxError {
             ErrorType::ParseError,
             message,
         )
-    }
-}
-
-impl Ocamlvalue for ErrorType {
-    fn ocamlvalue(&self) -> usize {
-        match self {
-            ParseError => usize_to_ocaml(0),
-            RuntimeError => usize_to_ocaml(1),
-        }
-    }
-}
-impl Ocamlvalue for SyntaxError {
-    fn ocamlvalue(&self) -> usize {
-        // type error_type = ParseError | RuntimeError
-        //
-        // type t = {
-        //   child        : t option;
-        //   start_offset : int;
-        //   end_offset   : int;
-        //   error_type   : error_type;
-        //   message      : string;
-        // }
-        let child = self.child.ocamlvalue();
-        let start_offset = usize_to_ocaml(self.start_offset);
-        let end_offset = usize_to_ocaml(self.end_offset);
-        let error_type = self.error_type.ocamlvalue();
-        let message = self.message.ocamlvalue();
-        caml_tuple(&[child, start_offset, end_offset, error_type, message])
     }
 }
 

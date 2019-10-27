@@ -8,7 +8,8 @@ use ocaml::core::mlvalues::{empty_list, Value};
 
 use std::iter::Iterator;
 
-use ocamlpool_rust::{ocamlvalue::Ocamlvalue, utils::*};
+use ocamlpool_rust::utils::*;
+use ocamlrep_ocamlpool::add_to_ambient_pool;
 use parser_rust::{
     lexable_token::LexableToken, minimal_syntax::MinimalValue, minimal_token::MinimalToken,
     minimal_trivia::MinimalTrivia, positioned_syntax::PositionedValue,
@@ -45,65 +46,43 @@ where
 
 impl ToOcaml for bool {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        usize_to_ocaml(*self as usize)
+        add_to_ambient_pool(self)
     }
 }
 
 impl ToOcaml for Vec<bool> {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        self.ocamlvalue()
+        add_to_ambient_pool(self)
     }
 }
 
 impl ToOcaml for TokenKind {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        u8_to_ocaml(self.ocaml_tag())
+        add_to_ambient_pool(self)
     }
 }
 
 impl ToOcaml for TriviaKind {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        u8_to_ocaml(self.ocaml_tag())
+        add_to_ambient_pool(self)
     }
 }
 
 impl ToOcaml for MinimalTrivia {
-    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
-        // From full_fidelity_minimal_trivia.ml:
-        // type t = {
-        //   kind: Full_fidelity_trivia_kind.t;
-        //   width: int
-        // }
-        let kind = self.kind.to_ocaml(context);
-        let width = usize_to_ocaml(self.width);
-        caml_tuple(&[kind, width])
+    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
+        add_to_ambient_pool(self)
     }
 }
 
 impl ToOcaml for MinimalToken {
-    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
-        let kind = self.kind().to_ocaml(context);
-        let width = usize_to_ocaml(self.width());
-        let leading = to_list(&self.leading, context);
-        let trailing = to_list(&self.trailing, context);
-
-        // From full_fidelity_minimal_token.ml:
-        // type t = {
-        //   kind: TokenKind.t;
-        //   width: int;
-        //   leading: Trivia.t list;
-        //   trailing: Trivia.t list
-        // }
-        caml_tuple(&[kind, width, leading, trailing])
+    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
+        add_to_ambient_pool(self)
     }
 }
 
 impl ToOcaml for MinimalValue {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        // From full_fidelity_minimal_syntax.ml:
-        // type t = { full_width: int }
-        let full_width = usize_to_ocaml(self.full_width);
-        caml_tuple(&[full_width])
+        add_to_ambient_pool(self)
     }
 }
 
@@ -272,19 +251,19 @@ impl ToOcaml for PositionedValue {
 
 impl ToOcaml for SyntaxError {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        self.ocamlvalue()
+        add_to_ambient_pool(self)
     }
 }
 
 impl ToOcaml for NoState {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        ocaml::core::mlvalues::UNIT
+        add_to_ambient_pool(self)
     }
 }
 
 impl ToOcaml for SyntaxKind {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        u8_to_ocaml(self.ocaml_tag())
+        add_to_ambient_pool(self)
     }
 }
 

@@ -4,6 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ocamlrep_derive::OcamlRep;
+
 use parser_core_types::syntax_kind::SyntaxKind;
 use parser_core_types::token_kind::TokenKind;
 
@@ -41,7 +43,7 @@ macro_rules! S_ {
     }}
 }
 
-#[derive(Clone)]
+#[derive(Clone, OcamlRep)]
 pub struct NoState; // zero-overhead placeholder when there is no state
 
 pub trait NodeType {

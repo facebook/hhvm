@@ -4,12 +4,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ocamlrep_derive::OcamlRep;
+
 use crate::lexable_token::LexableToken;
 use crate::minimal_token::MinimalToken;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, OcamlRep, PartialEq)]
 pub struct MinimalValue {
     pub full_width: usize,
 }

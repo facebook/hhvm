@@ -6,6 +6,8 @@
  *
  */
 
+void ocamlpool_enter(void) {}
+void ocamlpool_leave(void) {}
 void ocamlpool_cursor(void) {}
 void ocamlpool_limit(void) {}
 void ocamlpool_reserve_block(void) {}

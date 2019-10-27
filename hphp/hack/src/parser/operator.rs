@@ -6,12 +6,11 @@
 
 use crate::parser_env::ParserEnv;
 use ocamlrep_derive::OcamlRep;
-use ocamlvalue_macro::Ocamlvalue;
 use parser_core_types::token_kind::TokenKind;
 
 pub use crate::operator_generated::*;
 
-#[derive(PartialEq, Ocamlvalue, OcamlRep)]
+#[derive(PartialEq, OcamlRep)]
 pub enum Assoc {
     LeftAssociative,
     RightAssociative,

@@ -9,7 +9,6 @@ path = "../../lowerer_lib.rs"
 
 [dependencies]
 ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
-ocamlvalue_macro = {path = "../../../utils/ocamlpool_rust/macro", package = "hack_utils_ocamlvalue_macro" }
 oxidized = {path = "../../../oxidized", package = "hack_oxidized" }
 escaper = {path = "../../../utils/escaper", package = "hack_escaper" }
 ocaml_helper = {path = "../../../utils/ocaml_helper", package = "hack_ocaml_helper" }

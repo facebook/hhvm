@@ -2999,10 +2999,9 @@ module GenerateFFOperatorRust = struct
     make_header CStyle ""
     ^ "
 
-use ocamlvalue_macro::Ocamlvalue;
 use ocamlrep_derive::OcamlRep;
 
-#[derive(Ocamlvalue, OcamlRep)]
+#[derive(OcamlRep)]
 pub enum Operator {
 OPERATORS}
 "

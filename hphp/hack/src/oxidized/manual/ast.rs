@@ -8,7 +8,6 @@ use crate::pos::Pos;
 
 pub use crate::ast_defs::shape_map;
 
-pub use aast::Id;
 pub use aast::Sid;
 
 pub type Afield = aast::Afield<Pos, (), (), ()>;

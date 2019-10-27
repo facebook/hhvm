@@ -236,8 +236,6 @@ let string_of_use_as_visibility vis =
   | UseAsProtected -> "protected"
   | UseAsFinal -> "final"
 
-type id = lid [@@deriving eq, show]
-
 type pstring = Ast_defs.pstring [@@deriving eq, show]
 
 type og_null_flavor = Ast_defs.og_null_flavor =

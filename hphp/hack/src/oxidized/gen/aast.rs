@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<557372a3e38ad20a2a6c69bd5313164e>>
+// @generated SignedSource<<dd29ef78d7ec43310b9d89039e15b675>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -23,7 +23,6 @@ pub use aast_defs::FuncReactive;
 pub use aast_defs::Hint;
 pub use aast_defs::HintFun;
 pub use aast_defs::Hint_;
-pub use aast_defs::Id;
 pub use aast_defs::ImportFlavor;
 pub use aast_defs::IsCoroutine;
 pub use aast_defs::IsReified;

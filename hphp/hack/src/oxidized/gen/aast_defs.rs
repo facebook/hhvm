@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bb098651cdc9343957cf97a644d7e8bc>>
+// @generated SignedSource<<dcfb9a1bd5dedc83ddbf107eea32f527>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -198,5 +198,3 @@ pub struct Enum_ {
 
 #[derive(Clone, Debug, OcamlRep)]
 pub struct WhereConstraint(pub Hint, pub ast_defs::ConstraintKind, pub Hint);
-
-pub type Id = Lid;

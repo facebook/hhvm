@@ -49,12 +49,16 @@ inline void exception_handler(Action action) {
     // case a __destruct method needs to run.
     g_context->popVMState();
     g_context->pushVMState(vmStack().top());
-    // fall through
-  }
 
-  catch (VMSwitchMode&) {
-    checkVMRegState();
-    ITRACE_MOD(Trace::unwind, 1, "unwind: VMSwitchMode\n");
+    // We need to restore the vm state to where it was.
+    // Note that we've preserved vmStack.top(), and vmFirstAR was invalid
+    // prior to the popVMState above.
+    // Also, we don't really need to null out vmfp() here, but doing so will
+    // cause an assert to fire if we try to re-enter before the next
+    // popVMState.
+    vmpc() = nullptr;
+    vmfp() = nullptr;
+
     return;
   }
 
@@ -62,32 +66,21 @@ inline void exception_handler(Action action) {
     checkVMRegState();
     ITRACE_MOD(Trace::unwind, 1, "unwind: Exception: {}\n", e.what());
     unwindCpp(e.clone());
-    not_reached();
   }
 
   catch (std::exception& e) {
     checkVMRegState();
     ITRACE_MOD(Trace::unwind, 1, "unwind: std::exception: {}\n", e.what());
     unwindCpp(new Exception("unexpected %s: %s", typeid(e).name(), e.what()));
-    not_reached();
   }
 
   catch (...) {
     checkVMRegState();
     ITRACE_MOD(Trace::unwind, 1, "unwind: unknown\n");
     unwindCpp(new Exception("unknown exception"));
-    not_reached();
   }
 
-  // We've come from the const Object& case, and need to restore
-  // the vm state to where it was.
-  // Note that we've preserved vmStack.top(), and vmFirstAR was invalid
-  // prior to the popVMState above.
-  // Also, we don't really need to null out vmfp() here, but doing so will
-  // cause an assert to fire if we try to re-enter before the next
-  // popVMState.
-  vmpc() = nullptr;
-  vmfp() = nullptr;
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

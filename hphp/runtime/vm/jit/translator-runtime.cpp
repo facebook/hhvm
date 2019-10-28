@@ -881,13 +881,6 @@ Class* lookupClsRDS(const StringData* name) {
   return NamedEntity::get(name)->getCachedClass();
 }
 
-void throwSwitchMode() {
-  // This is only called right after dispatchBB, so the VM regs really are
-  // clean.
-  tl_regState = VMRegState::CLEAN;
-  throw VMSwitchMode();
-}
-
 bool methodExistsHelper(Class* cls, StringData* meth) {
   assertx(isNormalClass(cls) && !isAbstract(cls));
   return cls->lookupMethod(meth) != nullptr;

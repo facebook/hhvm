@@ -2662,7 +2662,8 @@ struct JitReturn {
 
 OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
   auto savedRip = fp->m_savedRip;
-  if (isReturnHelper(reinterpret_cast<void*>(savedRip))) {
+  auto const isRetHelper = isReturnHelper(reinterpret_cast<void*>(savedRip));
+  if (isRetHelper) {
     // This frame wasn't called from the TC, so it's ok to return using the
     // interpreter. callToExit is special: it's a return helper but we don't
     // treat it like one in here in order to simplify some things higher up in
@@ -2670,14 +2671,8 @@ OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
     if (reinterpret_cast<TCA>(savedRip) != jit::tc::ustubs().callToExit) {
       savedRip = 0;
     }
-  } else if (!RID().getJit()) {
-    // We entered this frame in the TC but the jit is now disabled, probably
-    // because a debugger is attached. If we leave this frame in the
-    // interpreter, we might be skipping a catch block that our caller expects
-    // to be run. Switch to the interpreter before even beginning the
-    // instruction.
-    throw VMSwitchMode();
   }
+  assertx(isRetHelper || RID().getJit());
 
   return {savedRip, fp, fp->sfp(), fp->callOffset()};
 }
@@ -6602,28 +6597,6 @@ static void dispatch() {
   assertx(retAddr == nullptr);
 }
 
-// We are about to go back to translated code, check whether we should
-// stick with the interpreter. NB: if we've just executed a return
-// from pseudomain, then there's no PC and no more code to interpret.
-OPTBLD_INLINE TCA switchModeForDebugger(TCA retAddr) {
-  if (DEBUGGER_FORCE_INTR && (vmpc() != 0)) {
-    if (retAddr) {
-      // We just interpreted a bytecode that decided we need to return to an
-      // address in the TC rather than interpreting up into our caller. This
-      // means it might not be safe to throw an exception right now (see
-      // discussion in jitReturnPost). So, resume execution in the TC at a stub
-      // that will throw the execution from a safe place.
-      FTRACE(1, "Want to throw VMSwitchMode but retAddr = {}, "
-             "overriding with throwSwitchMode stub.\n", retAddr);
-      return jit::tc::ustubs().throwSwitchMode;
-    } else {
-      throw VMSwitchMode();
-    }
-  }
-
-  return retAddr;
-}
-
 TCA dispatchBB() {
   auto sk = [] {
     return SrcKey(vmfp()->func(), vmpc(), resumeModeFromActRec(vmfp()));
@@ -6637,8 +6610,7 @@ TCA dispatchBB() {
   if (Trace::moduleEnabled(Trace::ringbuffer)) {
     Trace::ringbufferEntry(Trace::RBTypeDispatchBB, sk().toAtomicInt(), 0);
   }
-  auto retAddr = dispatchImpl<true>();
-  return switchModeForDebugger(retAddr);
+  return dispatchImpl<true>();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

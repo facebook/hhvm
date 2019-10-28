@@ -198,10 +198,6 @@ ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData*);
  * Both functions decref the input array by turning it into a static array
  */
 ArrayData* recordReifiedGenericsAndGetTSList(ArrayData*);
-/*
- * Throw a VMSwitchMode exception.
- */
-[[noreturn]] void throwSwitchMode();
 
 [[noreturn]] void throwOOBException(TypedValue base, TypedValue key);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);

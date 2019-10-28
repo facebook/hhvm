@@ -410,11 +410,6 @@ struct UniqueStubs {
    */
   TCA handleSRHelper;
 
-  /*
-   * Throw a VMSwitchMode exception.  Used in switchModeForDebugger().
-   */
-  TCA throwSwitchMode;
-
   /////////////////////////////////////////////////////////////////////////////
 
   /*

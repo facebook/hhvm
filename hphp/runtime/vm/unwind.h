@@ -70,17 +70,6 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev);
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Thrown when we need to "switch modes" by re-starting the current VM
- * invocation.  For example, if we need to break for the debugger, or
- * enable code coverage mode.
- */
-struct VMSwitchMode : BaseException {
-  const char* what() const noexcept override { return "VMSwitchMode"; }
-};
-
-//////////////////////////////////////////////////////////////////////
-
 }
 
 #define incl_HPHP_VM_UNWIND_INL_H_

@@ -1125,15 +1125,6 @@ TCA emitUnknownExceptionHandler(CodeBlock& cb,
   return ret;
 }
 
-TCA emitThrowSwitchMode(CodeBlock& cb, DataBlock& data) {
-  alignJmpTarget(cb);
-
-  return vwrap(cb, data, [] (Vout& v) {
-    v << call{TCA(throwSwitchMode)};
-    v << trap{TRAP_REASON};
-  });
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -1206,7 +1197,6 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(decRefGeneric,  hotView(), emitDecRefGeneric(hot(), data));
 
   ADD(callToExit,         hotView(), emitCallToExit(hot(), data, *this));
-  ADD(throwSwitchMode,    view, emitThrowSwitchMode(frozen, data));
 
   EMIT(
     "freeLocalsHelpers",

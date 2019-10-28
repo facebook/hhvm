@@ -679,7 +679,7 @@ let check_redundant_rx_condition env pos r =
   | Local (Some cond_ty)
   | Shallow (Some cond_ty) ->
     let (env, cond_ty) = Tast_env.localize_with_self env cond_ty in
-    if Tast_env.can_subtype env (Tast_env.get_self_exn env) cond_ty then
+    if Tast_env.can_subtype env (Tast_env.get_self_ty_exn env) cond_ty then
       Errors.redundant_rx_condition pos
   | _ -> ()
 

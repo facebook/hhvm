@@ -211,12 +211,12 @@ and obj_get_concrete_ty
             paraml
         in
         let old_member_info = Env.get_member is_method env class_info id_str in
-        let self = Env.get_self_id env in
+        let self_id = Option.value (Env.get_self_id env) ~default:"" in
         let (member_info, shadowed) =
-          if Cls.has_ancestor class_info self then
+          if Cls.has_ancestor class_info self_id then
             (* We look up the current context to see if there is a field/method with
         * private visibility. If there is one, that one takes precedence *)
-            match Env.get_class env self with
+            match Env.get_self_class env with
             | None -> (old_member_info, false)
             | Some self_class ->
               (match Env.get_member is_method env self_class id_str with
@@ -329,7 +329,7 @@ and obj_get_concrete_ty
                 let old_mem_pos = Reason.to_pos (fst old_member) in
                 begin
                   match class_id with
-                  | CIexpr (_, This) when snd x = self -> ()
+                  | CIexpr (_, This) when snd x = self_id -> ()
                   | _ ->
                     Errors.ambiguous_object_access
                       id_pos
@@ -337,7 +337,7 @@ and obj_get_concrete_ty
                       mem_pos
                       (TUtils.string_of_visibility old_vis)
                       old_mem_pos
-                      self
+                      self_id
                       (snd x)
                 end
               | _ -> () );

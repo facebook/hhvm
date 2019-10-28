@@ -49,19 +49,14 @@ let ty_to_json = Typing_print.to_json
 
 let json_to_locl_ty = Typing_print.json_to_locl_ty
 
-let get_self_id_exn env =
-  match Typing_env.get_self_id env with
-  | "" -> raise Not_in_class
-  | id -> id
+let get_self_id = Typing_env.get_self_id
 
-let get_self_id env =
-  (try Some (get_self_id_exn env) with Not_in_class -> None)
+let get_self_ty = Typing_env.get_self_ty
 
-let get_self_exn env =
-  let _ = get_self_id_exn env in
-  Typing_env.get_self env
-
-let get_self env = (try Some (get_self_exn env) with Not_in_class -> None)
+let get_self_ty_exn env =
+  match get_self_ty env with
+  | Some self_ty -> self_ty
+  | None -> raise Not_in_class
 
 let get_class = Typing_env.get_class
 

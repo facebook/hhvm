@@ -8330,7 +8330,7 @@ and method_def env cls m =
           Env.set_local env this (Env.get_self env)
       in
       let env =
-        match Env.get_class env (Env.get_self_id env) with
+        match Env.get_self_class env with
         | None -> env
         | Some c ->
           (* Mark $this as a using variable if it has a disposable type *)

@@ -75,10 +75,9 @@ and genv = {
   condition_types: decl_ty SMap.t;
   (* Identifier and type of the parent class if it exists *)
   parent: (string * decl_ty) option;
-  (* Identifier of the enclosing class *)
-  self_id: string;
-  (* Type of the enclosing class, instantiated at its generic parameters *)
-  self: locl_ty;
+  (* Identifier and type (instatiated at its generic parameters) of
+     the enclosing class if there is one *)
+  self: (string * locl_ty) option;
   static: bool;
   fun_kind: Ast_defs.fun_kind;
   val_kind: Typing_defs.val_kind;

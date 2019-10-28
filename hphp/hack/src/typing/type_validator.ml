@@ -138,7 +138,7 @@ class virtual type_validator =
                   substs = SMap.empty;
                   this_ty =
                     Option.value
-                      (Env.get_self env)
+                      (Env.get_self_ty env)
                       ~default:(MakeType.nothing Reason.none);
                   from_class = Some Aast.CIstatic;
                   quiet = true;

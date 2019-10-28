@@ -545,8 +545,7 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot =
           };
         params = LID.Map.empty;
         condition_types = SMap.empty;
-        self_id = "";
-        self = (Reason.none, Typing_defs.make_tany ());
+        self = None;
         static = false;
         val_kind = Other;
         parent = None;
@@ -827,11 +826,18 @@ let is_static env = env.genv.static
 
 let get_val_kind env = env.genv.val_kind
 
-let get_self env = env.genv.self
+let get_self_ty env = Option.map env.genv.self ~f:snd
 
-let get_self_id env = env.genv.self_id
+let get_self env =
+  match get_self_ty env with
+  | Some self -> self
+  | None -> (Reason.none, Typing_defs.make_tany ())
 
-let is_outside_class env = env.genv.self_id = ""
+let get_self_id env = Option.map env.genv.self ~f:fst
+
+let get_self_class env =
+  let open Option in
+  get_self_id env >>= get_class env
 
 let get_parent_ty env = Option.map env.genv.parent ~f:snd
 
@@ -860,14 +866,9 @@ let add_anonymous env x =
 
 let get_anonymous env x = IMap.get x env.genv.anons
 
-let set_self_id env x =
+let set_self env self_id self_ty =
   let genv = env.genv in
-  let genv = { genv with self_id = x } in
-  { env with genv }
-
-let set_self env x =
-  let genv = env.genv in
-  let genv = { genv with self = x } in
+  let genv = { genv with self = Some (self_id, self_ty) } in
   { env with genv }
 
 let set_parent env parent_id parent_ty =

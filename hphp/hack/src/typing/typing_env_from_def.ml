@@ -39,11 +39,11 @@ let class_env tcopt c =
   let droot = Some (Typing_deps.Dep.Class (snd c.c_name)) in
   let env = Env.empty tcopt file ~mode:c.c_mode ~droot in
   (* Set up self identifier and type *)
-  let env = Env.set_self_id env (snd c.c_name) in
+  let self_id = snd c.c_name in
   let self = get_self_from_c c in
   (* For enums, localize makes self:: into an abstract type, which we don't
    * want *)
-  let (env, self) =
+  let (env, self_ty) =
     match c.c_kind with
     | Ast_defs.Cenum -> (env, MakeType.class_type (fst self) (snd c.c_name) [])
     | Ast_defs.Cinterface
@@ -52,7 +52,7 @@ let class_env tcopt c =
     | Ast_defs.Cnormal ->
       Typing_phase.localize_with_self env self
   in
-  let env = Env.set_self env self in
+  let env = Env.set_self env self_id self_ty in
   (* In order to type-check a class, we need to know what "parent"
    * refers to. Sometimes people write "parent::", when that happens,
    * we need to know the type of parent.

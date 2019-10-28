@@ -102,7 +102,6 @@ module Env = struct
   }
 
   let rec make tenv c =
-    let tenv = Typing_env.set_self_id tenv (snd c.c_name) in
     let (_, _, methods) = split_methods c in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty methods in
     let sc = Shallow_decl.class_ c in

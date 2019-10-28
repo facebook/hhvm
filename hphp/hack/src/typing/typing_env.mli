@@ -120,11 +120,13 @@ val is_static : env -> bool
 
 val get_val_kind : env -> Typing_defs.val_kind
 
+val get_self_ty : env -> locl_ty option
+
 val get_self : env -> locl_ty
 
-val get_self_id : env -> string
+val get_self_id : env -> string option
 
-val is_outside_class : env -> bool
+val get_self_class : env -> class_decl option
 
 val get_parent_id : env -> string option
 
@@ -146,9 +148,7 @@ val get_anonymous : env -> int -> anon option
 
 val iter_anonymous : env -> (Pos.t -> locl_ty list -> unit) -> unit
 
-val set_self_id : env -> string -> env
-
-val set_self : env -> locl_ty -> env
+val set_self : env -> string -> locl_ty -> env
 
 val set_parent : env -> string -> decl_ty -> env
 

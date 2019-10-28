@@ -112,15 +112,16 @@ let is_private_visible_for_class env x self_id cid class_ =
         "Private members cannot be accessed dynamically. Did you mean to use 'self::'?"
 
 let is_visible_for_obj env vis =
-  let self_id = Env.get_self_id env in
   match vis with
   | Vpublic -> None
-  | Vprivate _
-  | Vprotected _
-    when Env.is_outside_class env ->
-    Some "You cannot access this member"
-  | Vprivate x -> is_private_visible env x self_id
-  | Vprotected x -> is_protected_visible env x self_id
+  | Vprivate x ->
+    (match Env.get_self_id env with
+    | None -> Some "You cannot access this member"
+    | Some self_id -> is_private_visible env x self_id)
+  | Vprotected x ->
+    (match Env.get_self_id env with
+    | None -> Some "You cannot access this member"
+    | Some self_id -> is_protected_visible env x self_id)
 
 (* The only permitted way to access an LSB property is via
    static::, ClassName::, or $class_name:: *)
@@ -132,15 +133,16 @@ let is_lsb_permitted cid =
 
 (* LSB property accessibility is relative to the defining class *)
 let is_lsb_accessible env vis =
-  let self_id = Env.get_self_id env in
   match vis with
   | Vpublic -> None
-  | Vprivate _
-  | Vprotected _
-    when Env.is_outside_class env ->
-    Some "You cannot access this member"
-  | Vprivate x -> is_private_visible env x self_id
-  | Vprotected x -> is_protected_visible env x self_id
+  | Vprivate x ->
+    (match Env.get_self_id env with
+    | None -> Some "You cannot access this member"
+    | Some self_id -> is_private_visible env x self_id)
+  | Vprotected x ->
+    (match Env.get_self_id env with
+    | None -> Some "You cannot access this member"
+    | Some self_id -> is_protected_visible env x self_id)
 
 let is_lsb_visible_for_class env vis cid =
   match is_lsb_permitted cid with
@@ -151,21 +153,22 @@ let is_visible_for_class env (vis, lsb) cid cty =
   if lsb then
     is_lsb_visible_for_class env vis cid
   else
-    let self_id = Env.get_self_id env in
     match vis with
     | Vpublic -> None
-    | Vprivate _
-    | Vprotected _
-      when Env.is_outside_class env ->
-      Some "You cannot access this member"
-    | Vprivate x -> is_private_visible_for_class env x self_id cid cty
+    | Vprivate x ->
+      (match Env.get_self_id env with
+      | None -> Some "You cannot access this member"
+      | Some self_id -> is_private_visible_for_class env x self_id cid cty)
     | Vprotected x ->
-      let their_class = Env.get_class env x in
-      (match (cid, their_class) with
-      | (CI _, Some cls) when Cls.kind cls = Ast_defs.Ctrait ->
-        Some
-          "You cannot access protected members using the trait's name (did you mean to use static:: or self::?)"
-      | _ -> is_protected_visible env x self_id)
+      (match Env.get_self_id env with
+      | None -> Some "You cannot access this member"
+      | Some self_id ->
+        let their_class = Env.get_class env x in
+        (match (cid, their_class) with
+        | (CI _, Some cls) when Cls.kind cls = Ast_defs.Ctrait ->
+          Some
+            "You cannot access protected members using the trait's name (did you mean to use static:: or self::?)"
+        | _ -> is_protected_visible env x self_id))
 
 let is_visible env (vis, lsb) cid class_ =
   let msg_opt =

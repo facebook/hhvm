@@ -42,20 +42,16 @@ val json_to_locl_ty :
   (Typing_defs.locl_ty, Typing_defs.deserialization_error) result
 
 (** Return the name of the enclosing class definition.
-    When not in a class definition, raise {!Not_in_class}. *)
-val get_self_id_exn : env -> string
-
-(** Return the name of the enclosing class definition.
     When not in a class definition, return {!None}. *)
 val get_self_id : env -> string option
 
 (** Return the type of the enclosing class definition.
-    When not in a class definition, raise {!Not_in_class}. *)
-val get_self_exn : env -> Tast.ty
+    When not in a class definition, return {!None}. *)
+val get_self_ty : env -> Tast.ty option
 
 (** Return the type of the enclosing class definition.
-    When not in a class definition, return {!None}. *)
-val get_self : env -> Tast.ty option
+    When not in a class definition, raise {!Not_in_class}. *)
+val get_self_ty_exn : env -> Tast.ty
 
 (** Return the info of the given class from the typing heap. *)
 val get_class :
@@ -139,7 +135,7 @@ val localize :
     This is mostly provided as legacy support for {!AutocompleteService}, and
     should not be considered a general mechanism for transforming a {decl_ty} to
     a {!Tast.ty}.
-        
+
     {!quiet} silences certain errors because those errors have already fired
     and/or are not appropriate at the time we call localize.
     *)

@@ -967,6 +967,14 @@ static inline uint32_t hotTextHugePagesDefault() {
   return arch() == Arch::ARM ? 12 : 8;
 }
 
+static inline uint32_t arrayIterDefaultCount() {
+  return debug ? 0 : 10000;
+}
+
+static inline double arrayIterDefaultRate() {
+  return debug ? 0.9 : 0.9999;
+}
+
 static inline std::string reorderPropsDefault() {
   if (isJitDeserializing()) {
     return "countedness-hotness";

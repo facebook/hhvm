@@ -781,7 +781,8 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgProfileDecRef(IRLS& env, const IRInstruction* inst) {
-  const auto profile = decRefProfile(env.unit, inst);
+  auto const local = inst->extra<ProfileDecRef>()->locId;
+  auto const profile = decRefProfile(env.unit, inst);
   if (!profile.profiling()) return;
 
   auto const type = inst->src(0)->type();
@@ -795,8 +796,7 @@ void cgProfileDecRef(IRLS& env, const IRInstruction* inst) {
     incrementProfile(v, profile, amount, offset);
   };
 
-  increment(v, offsetof(DecRefProfile, total));
-  ifRefCountedType(v, v, type, srcLoc(env, inst, 0), [&] (Vout& v) {
+  auto const handle_refcounted_type = [&](Vout& v) {
     increment(v, offsetof(DecRefProfile, refcounted));
     auto const sf = emitCmpRefCount(v, OneReference, base);
     ifThenElse(v, CC_E, sf,
@@ -806,7 +806,15 @@ void cgProfileDecRef(IRLS& env, const IRInstruction* inst) {
             increment(v, offsetof(DecRefProfile, decremented)); })
         : increment(v, offsetof(DecRefProfile, decremented)); }
     );
-  });
+  };
+
+  increment(v, offsetof(DecRefProfile, total));
+  if (type <= (TArrLike | TObj) && local == kInvalidId) {
+    // We don't need to read the type byte for iterator bases. Avoid doing so.
+    handle_refcounted_type(v);
+  } else {
+    ifRefCountedType(v, v, type, srcLoc(env, inst, 0), handle_refcounted_type);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

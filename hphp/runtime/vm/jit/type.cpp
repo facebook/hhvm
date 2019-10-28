@@ -632,7 +632,7 @@ bool Type::operator<=(Type rhs) const {
 
   // If `rhs' is a constant, we must be the same constant.
   if (rhs.m_hasConstVal) {
-    assertx(!rhs.isUnion());
+    assertx(rhs.ptrKind() == Ptr::Elem || !rhs.isUnion());
     return lhs.m_hasConstVal && lhs.m_extra == rhs.m_extra;
   }
 
@@ -683,11 +683,19 @@ Type Type::operator|(Type rhs) const {
 Type Type::operator&(Type rhs) const {
   auto lhs = *this;
 
-  // When intersecting a constant value with another type, the result will be
-  // the constant value if the other value is a supertype of the constant, and
-  // Bottom otherwise.
-  if (lhs.m_hasConstVal) return lhs <= rhs ? lhs : TBottom;
-  if (rhs.m_hasConstVal) return rhs <= lhs ? rhs : TBottom;
+  // When intersecting a constant non-ptr type with another type, the result is
+  // the constant type if the other type is a supertype of the constant, and
+  // Bottom otherwise. However, for pointer types, we have to account for the
+  // fact that we can't have a constant, specialized pointer.
+  auto const handle_constant = [](const Type& constant, const Type& other) {
+    auto const refines = constant.m_ptr == Ptr::NotPtr
+      ? constant <= other
+      : constant <= other.unspecialize();
+    return refines ? constant : TBottom;
+  };
+
+  if (lhs.m_hasConstVal) return handle_constant(lhs, rhs);
+  if (rhs.m_hasConstVal) return handle_constant(rhs, lhs);
 
   auto bits = lhs.m_bits & rhs.m_bits;
   auto ptr = lhs.ptrKind() & rhs.ptrKind();

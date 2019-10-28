@@ -641,4 +641,48 @@ TEST(Type, PtrKinds) {
   EXPECT_EQ(TInt | TArr, frameCellOrCell & stackOrArrOrInt);
 }
 
+TEST(Type, ConstantPtrTypes) {
+  std::vector<TypedValue> darrays;
+  for (auto const key : {"foo", "bar"}) {
+    DArrayInit dinit{1};
+    dinit.set(key, make_tv<KindOfBoolean>(true));
+    auto const darray = dinit.toArray();
+    MixedArray::asMixed(darray.get())->onSetEvalScalar();
+    auto const static_darray = MixedArray::CopyStatic(darray.get());
+    darrays.push_back(make_tv<KindOfPersistentArray>(static_darray));
+  }
+
+  // In typical iterator usage, the constant pointer may point to an invalid
+  // TypedValue that's off the end of the array being iterated over.
+  auto const arr_type1 = Type::cns(darrays[0]);
+  auto const arr_type2 = Type::cns(darrays[1]);
+  auto const tv = &darrays[2];
+  auto const spec_ptr_type = (arr_type1 | arr_type2).ptr(Ptr::Elem);
+  auto const base_ptr_type = spec_ptr_type.unspecialize();
+  auto const cons_ptr_type = Type::cns(tv, spec_ptr_type);
+
+  EXPECT_EQ("PtrToElemStaticArr=MixedKind", spec_ptr_type.toString());
+  EXPECT_EQ("PtrToElemStaticArr", base_ptr_type.toString());
+  auto const str = folly::format("PtrToElemStaticArr<TV: {}>", tv).str();
+  EXPECT_EQ(str, cons_ptr_type.toString());
+
+  // The specialized ptr type is not constant. The constant ptr type is not
+  // specialized, because we can't represent both.
+  EXPECT_TRUE(spec_ptr_type.isSpecialized());
+  EXPECT_FALSE(spec_ptr_type.hasConstVal());
+  EXPECT_FALSE(base_ptr_type.isSpecialized());
+  EXPECT_FALSE(base_ptr_type.hasConstVal());
+  EXPECT_FALSE(cons_ptr_type.isSpecialized());
+  EXPECT_TRUE(cons_ptr_type.hasConstVal());
+
+  // Because of these representation issues, the intersection of these two
+  // types should just return the constant pointer type alone.
+  EXPECT_FALSE(cons_ptr_type <= spec_ptr_type);
+  EXPECT_TRUE(cons_ptr_type <= base_ptr_type);
+  EXPECT_EQ(cons_ptr_type, cons_ptr_type & spec_ptr_type);
+  EXPECT_EQ(cons_ptr_type, spec_ptr_type & cons_ptr_type);
+  EXPECT_EQ(base_ptr_type, cons_ptr_type | spec_ptr_type);
+  EXPECT_EQ(base_ptr_type, spec_ptr_type | cons_ptr_type);
+}
+
 } }

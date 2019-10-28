@@ -337,7 +337,7 @@ inline Type Type::dropConstVal() const {
 
   // A constant pointer iterator type will still have a target that's a union
   // of possible values for the array it points into.
-  assertx(*this <= TPtrToElemCell || !isUnion());
+  assertx(ptrKind() == Ptr::Elem || !isUnion());
 
   if (*this <= TStaticArr)    return Type::StaticArray(arrVal()->kind());
   if (*this <= TStaticVec)    return TStaticVec;
@@ -509,11 +509,14 @@ inline bool Type::supports(SpecKind kind) const {
 inline ArraySpec Type::arrSpec() const {
   if (!supports(SpecKind::Array)) return ArraySpec::Bottom;
 
-  // Currently, a Type which supports multiple specializations is trivial along
-  // all of them.
+  // Currently, a Type which supports multiple specializations is trivial
+  // along all of them.
   if (supports(SpecKind::Class)) return ArraySpec::Top;
 
-  if (m_hasConstVal) return ArraySpec(m_arrVal->kind());
+  if (m_hasConstVal) {
+    if (m_ptr != Ptr::NotPtr) return ArraySpec::Top;
+    return ArraySpec(m_arrVal->kind());
+  }
 
   assertx(m_arrSpec != ArraySpec::Bottom);
   return m_arrSpec;
@@ -522,13 +525,15 @@ inline ArraySpec Type::arrSpec() const {
 inline ClassSpec Type::clsSpec() const {
   if (!supports(SpecKind::Class)) return ClassSpec::Bottom;
 
-  // Currently, a Type which supports multiple specializations is trivial along
-  // all of them.
+  // Currently, a Type which supports multiple specializations is trivial
+  // along all of them.
   if (supports(SpecKind::Array)) return ClassSpec::Top;
 
   if (m_hasConstVal) {
+    if (m_ptr != Ptr::NotPtr) return ClassSpec::Top;
     return ClassSpec(clsVal(), ClassSpec::ExactTag{});
   }
+
   assertx(m_clsSpec != ClassSpec::Bottom);
   return m_clsSpec;
 }

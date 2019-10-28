@@ -613,9 +613,25 @@ public:
   /*
    * Does this Type have a constant value?  If true, we can call xxVal().
    *
-   * Note: Bottom is a type with no value, and Uninit/InitNull/Nullptr are
+   * NOTE: Bottom is a type with no value, and Uninit/InitNull/Nullptr are
    * considered types with a single unique value, so this function returns false
    * for those types.  You may want to explicitly check for them as needed.
+   *
+   * NOTE: Constant pointer values differ from other constants in a few ways:
+   *  1. They may be a "union" - i.e. m_bits may have multiple bits set.
+   *  2. The ptrVal result does not necessary point to a valid value.
+   *  3. Constant pointer types never have specializations.
+   *
+   * The motivation for these changes is to provide types for a specialized
+   * pointer iterator's `pos` and `end` fields. Consider the `end` pointer for
+   * some static vec with int and dict values. The type of this pointer is a
+   * constant subtype of the type "PtrToElem{Int|Dict}" (1). It points one
+   * element past the end of the vec, so its target is invalid (2).
+   *
+   * (3) is a consequence of (2). We use the same union field to store constant
+   * types and type specializations. For non-pointer types, we can recover the
+   * specialization from the constant, so this usage is okay, but for pointer
+   * types, we can't, so constant pointers lose the specialization.
    */
   bool hasConstVal() const;
 

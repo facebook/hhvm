@@ -182,9 +182,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   ObjectData(const ObjectData&) = delete;
   ObjectData& operator=(const ObjectData&) = delete;
 
+  enum class InitRaw {};
  protected:
   enum class NoInit {};
-  enum class InitRaw {};
 
   // for JIT-generated instantiation with inlined property init
   explicit ObjectData(Class* cls, InitRaw, uint8_t flags = 0,

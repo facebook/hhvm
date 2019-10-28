@@ -152,6 +152,18 @@ int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+ObjectData* createClosureRepoAuthRawSmall(Class* cls, size_t size,
+                                          size_t index) {
+  assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
+  assertx(!cls->needInitialization());
+  assertx(cls->parent() == c_Closure::classof() && cls != c_Closure::classof());
+  auto mem = tl_heap->mallocSmallIndexSize(index, size);
+  auto hdr = new (mem) ClosureHdr(size, ClosureHdr::NoThrow{});
+  auto obj = new (hdr + 1) c_Closure(cls, ObjectData::InitRaw{});
+  assertx(obj->hasExactlyOneRef());
+  return obj;
+}
+
 ObjectData* createClosureRepoAuth(Class* cls) {
   assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
   assertx(!cls->needInitialization());

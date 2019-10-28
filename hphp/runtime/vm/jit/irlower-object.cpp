@@ -111,13 +111,35 @@ void cgConstructInstance(IRLS& env, const IRInstruction* inst) {
 void cgConstructClosure(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const cls = inst->extra<ConstructClosure>()->cls;
+  assertx(cls);
   auto& v = vmain(env);
 
-  auto const args = argGroup(env, inst).immPtr(cls);
-  cgCallHelper(v, env,
-               CallSpec::direct(RuntimeOption::RepoAuthoritative
-                 ? createClosureRepoAuth : createClosure),
-               callDest(dst), SyncOptions::None, args);
+  // c_Closure is not allowed to use the fast path, as the constructor will
+  // throw immediately.  No other closure's constructor is able to throw, so we
+  // are able to make some optimizations that would be unsafe if unwinding.
+  if (!RuntimeOption::RepoAuthoritative || cls == c_Closure::classof()) {
+    auto const args = argGroup(env, inst).immPtr(cls);
+    cgCallHelper(vmain(env), env, CallSpec::direct(createClosure),
+                 callDest(dst), SyncOptions::None, args);
+  } else {
+    auto const size = c_Closure::size(cls);
+
+    auto const index = MemoryManager::size2Index(size);
+    auto const size_class = MemoryManager::sizeIndex2Size(index);
+
+    // We don't specialize the large allocation case since it is unlikely.
+    auto const target = index < kNumSmallSizes
+                        ? CallSpec::direct(&createClosureRepoAuthRawSmall)
+                        : CallSpec::direct(&createClosureRepoAuth);
+
+    auto args = argGroup(env, inst).immPtr(cls);
+    if (index < kNumSmallSizes) {
+      args.imm(size_class).imm(index);
+    }
+
+    cgCallHelper(vmain(env), env, target,
+                 callDest(dst), SyncOptions::None, args);
+  }
 
   if (inst->src(0)->isA(TNullptr)) {
     v << storeqi{0, dst[c_Closure::ctxOffset()]};

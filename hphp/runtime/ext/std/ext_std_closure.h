@@ -32,12 +32,16 @@ extern const StaticString s_Closure;
 // native data for closures. Memory layout looks like this:
 // [ClosureHdr][ObjectData, kind=Closure][captured vars]
 struct ClosureHdr : HeapObject {
+  enum class NoThrow {};
   explicit ClosureHdr(uint32_t size) {
     initHeader_32(HeaderKind::ClosureHdr, size);
     // we need to set this here, because the next thing 'new Closure'
     // will do is call the constructor, which will throw, and the
     // destructor will examine this field.
     ctx = nullptr;
+  }
+  ClosureHdr(uint32_t size, NoThrow) {
+    initHeader_32(HeaderKind::ClosureHdr, size);
   }
   uint32_t& size() { return m_aux32; }
   uint32_t size() const { return m_aux32; }
@@ -63,6 +67,11 @@ struct c_Closure final : ObjectData {
 
   explicit c_Closure(Class* cls)
     : ObjectData(cls, 0, HeaderKind::Closure) {
+    // hdr()->ctx must be initialized by init() or the TC.
+    if (debug) setThis(reinterpret_cast<ObjectData*>(-uintptr_t(1)));
+  }
+  c_Closure(Class* cls, InitRaw)
+    : ObjectData(cls, InitRaw{}, 0, HeaderKind::Closure) {
     // hdr()->ctx must be initialized by init() or the TC.
     if (debug) setThis(reinterpret_cast<ObjectData*>(-uintptr_t(1)));
   }
@@ -144,6 +153,14 @@ struct c_Closure final : ObjectData {
   /////////////////////////////////////////////////////////////////////////////
 
   /*
+   * Size of a closure allocation for a given class.
+   */
+  static size_t size(const Class* cls) {
+    return sizeof(ClosureHdr) +
+           ObjectData::sizeForNProps(cls->numDeclProperties());
+  }
+
+  /*
    * Offsets for the JIT.
    */
   static constexpr ssize_t ctxOffset() {
@@ -158,6 +175,8 @@ private:
   static void setAllocators(Class* cls);
 };
 
+ObjectData* createClosureRepoAuthRawSmall(Class* cls, size_t size,
+                                          size_t index);
 ObjectData* createClosureRepoAuth(Class* cls);
 ObjectData* createClosure(Class* cls);
 

@@ -1,0 +1,9 @@
+string(5) "%s"
+string(6) "%s"
+
+Notice: Observing vec in fb_compact_serialize from %s in %s on line %d
+string(5) "%s"
+
+Notice: Observing dict in fb_compact_serialize from %s in %s on line %d
+string(8) "%s"
+string(8) "%s"

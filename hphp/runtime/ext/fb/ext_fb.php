@@ -9,7 +9,7 @@ namespace {
  * @param options bitmask of options: FB_SERIALIZE_HACK_ARRAYS.
  * @return mixed - Serialized data.
  */
-<<__HipHopSpecific, __Native, __IsFoldable, __Rx>>
+<<__HipHopSpecific, __Native, __Rx>>
 function fb_serialize(mixed $thing, int $options = 0): mixed;
 
 /** Unserialize previously fb_serialize()-ed data.
@@ -34,7 +34,7 @@ function fb_unserialize(mixed $thing,
  * supported.
  * @return mixed - Serialized data.
  */
-<<__HipHopSpecific, __Native, __IsFoldable, __Rx>>
+<<__HipHopSpecific, __Native, __Rx>>
 function fb_compact_serialize(mixed $thing): mixed;
 
 /** Unserialize a previously fb_compact_serialize()-ed data.

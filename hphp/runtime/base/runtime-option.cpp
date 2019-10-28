@@ -47,7 +47,7 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/cpuid.h"
-#include "hphp/util/current-executable.h"
+#include "hphp/util/current-executable.h" // @donotremove
 #include "hphp/util/file-cache.h"
 #include "hphp/util/gzip.h"
 #include "hphp/util/hardware-counter.h"

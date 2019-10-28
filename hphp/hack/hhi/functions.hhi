@@ -77,6 +77,7 @@ function hphp_create_object<T>(string $class_name, varray<mixed> $argv): T;
 namespace HH {
   // autoload-map
   function could_include($file): bool;
+  function autoload_is_native(): bool;
   function autoload_set_paths(
     KeyedContainer<string, KeyedContainer<string, string>> $map,
     string $root,

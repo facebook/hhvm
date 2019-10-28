@@ -59,6 +59,14 @@ struct AutoloadMap {
   }
 
   /**
+   * True iff this AutoloadMap knows which files contain which symbols without
+   * needing to query userland Hack code. If we're using a native AutoloadMap,
+   * we'll be able to use any symbol when the very first line of Hack code is
+   * run.
+   */
+  virtual bool isNative() const noexcept = 0;
+
+  /**
    * Given the name of a type and the kind of type we're looking for,
    * return the absolute path of the file defining that type.
    *

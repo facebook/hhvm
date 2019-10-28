@@ -60,6 +60,11 @@ const StaticString
   s_falseMemoKey("\xf2");
 
 ///////////////////////////////////////////////////////////////////////////////
+bool HHVM_FUNCTION(autoload_is_native) {
+  auto const* autoloadMap = AutoloadHandler::s_instance->getAutoloadMap();
+  return autoloadMap && autoloadMap->isNative();
+}
+
 bool HHVM_FUNCTION(autoload_set_paths,
                    const Variant& map,
                    const String& root) {
@@ -741,6 +746,7 @@ TypedValue HHVM_FUNCTION(dynamic_class_meth_force, StringArg cls,
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
+    HHVM_NAMED_FE(HH\\autoload_is_native, HHVM_FN(autoload_is_native));
     HHVM_NAMED_FE(HH\\autoload_set_paths, HHVM_FN(autoload_set_paths));
     HHVM_NAMED_FE(HH\\could_include, HHVM_FN(could_include));
     HHVM_NAMED_FE(HH\\serialize_memoize_param,

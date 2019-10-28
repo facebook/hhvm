@@ -66,6 +66,14 @@ struct UserAutoloadMap : AutoloadMap {
   static UserAutoloadMap fromFullMap(const Array& fullMap,
                                      String root);
 
+  /**
+   * This map is not native because it gets data when userspace calls the
+   * builtin function `autoload_set_paths()`.
+   */
+  virtual bool isNative() const noexcept override {
+    return false;
+  }
+
   virtual folly::Optional<String> getTypeFile(
       const String& typeName) override;
   virtual folly::Optional<String> getFunctionFile(

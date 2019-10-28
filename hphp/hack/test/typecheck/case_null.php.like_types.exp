@@ -1,6 +1,0 @@
-File "case_null.php", line 24, characters 10-11:
-Invalid return type (Typing[4110])
-File "case_null.php", line 11, characters 22-24:
-Expected int
-File "case_null.php", line 12, characters 8-11:
-But got ?int

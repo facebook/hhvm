@@ -1428,6 +1428,10 @@ and case_list parent_locals ty env switch_pos cl =
     in
     let is_enum =
       match snd ty with
+      | Tunion tyl when Typing_utils.is_dynamic env ty ->
+        List.exists tyl ~f:(function
+            | (_, Tabstract (AKnewtype (cid, _), _)) -> Env.is_enum env cid
+            | _ -> false)
       | Tabstract (AKnewtype (cid, _), _) -> Env.is_enum env cid
       | _ -> false
     in

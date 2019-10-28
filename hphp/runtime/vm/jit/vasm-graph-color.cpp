@@ -5544,52 +5544,51 @@ void hoist_spills_in_loop(State& state,
 
     // Remove any instructions which are now unneeded because the Vreg
     // is always spilled within the loop.
-    unit.blocks[b].code.erase(
-      std::remove_if(
-        unit.blocks[b].code.begin(),
-        unit.blocks[b].code.end(),
-        [&] (Vinstr& inst) {
-          switch (inst.op) {
-            case Vinstr::copy:
-            case Vinstr::copyargs:
-            case Vinstr::ssaalias:
-            case Vinstr::phidef:
-            case Vinstr::phijmp:
-              // These handle spilled Vregs fine, they need to be kept
-              // in.
-              return false;
-            case Vinstr::spill:
-              // Spills should be removed
-              if (candidates[canonicalize(inst.spill_.s)]) {
-                assertx(inst.spill_.s == inst.spill_.d);
-                return true;
-              }
-              return false;
-            case Vinstr::reload:
-              // Reloads should be removed
-              if (candidates[canonicalize(inst.reload_.s)]) {
-                assertx(candidates[canonicalize(inst.reload_.d)]);
-                return true;
-              }
-              return false;
-            default:
-              // Never remove non-pure instructions
-              if (!debug && !isPure(inst)) return false;
-              auto const& defs = defs_set_cached(state, inst);
-              if (defs.size() != 1) return false;
-              auto const r = *defs.begin();
-              // Hoisted Vregs should only be written by single def,
-              // pure instructions.
-              if (candidates[canonicalize(r)]) {
-                assertx(isPure(inst));
-                return true;
-              }
-              return false;
+    for (auto& inst : unit.blocks[b].code) {
+      switch (inst.op) {
+        case Vinstr::copy:
+        case Vinstr::copyargs:
+        case Vinstr::ssaalias:
+        case Vinstr::phidef:
+        case Vinstr::phijmp:
+          // These handle spilled Vregs fine, they need to be kept as
+          // is.
+          break;
+        case Vinstr::spill:
+          // Spills should be removed
+          if (candidates[canonicalize(inst.spill_.s)]) {
+            inst.copy_ = copy{inst.spill_.s, inst.spill_.d};
+            inst.op = Vinstr::copy;
+            invalidate_cached_operands(inst);
           }
-        }
-      ),
-      unit.blocks[b].code.end()
-    );
+          break;
+        case Vinstr::reload:
+          // Reloads should be removed
+          if (candidates[canonicalize(inst.reload_.s)]) {
+            assertx(candidates[canonicalize(inst.reload_.d)]);
+            inst.copy_ = copy{inst.reload_.s, inst.reload_.d};
+            inst.op = Vinstr::copy;
+            invalidate_cached_operands(inst);
+          }
+          break;
+        default:
+          // Never change non-pure instructions
+          if (!debug && !isPure(inst)) break;
+          auto const& defs = defs_set_cached(state, inst);
+          if (defs.size() != 1) break;
+          auto const r = *defs.begin();
+          // Hoisted Vregs should only be written by single def,
+          // pure instructions.
+          if (candidates[canonicalize(r)]) {
+            assertx(results.rematerialized);
+            assertx(isPure(inst));
+            inst.nop_ = nop{};
+            inst.op = Vinstr::nop;
+            invalidate_cached_operands(inst);
+          }
+          break;
+      }
+    }
 
     assertx(in->checkInvariants(b, !!inPhi));
     assertx(out->checkInvariants(b, unit.blocks[b].code.size()));
@@ -6472,6 +6471,7 @@ void insert_spills(State& state) {
     }
     return mappings;
   }();
+  assertx(check(state.unit));
 
   // Update the reg-classes of spilled Vregs to mark that they are
   // spills.

@@ -7424,25 +7424,6 @@ and check_implements_tparaml (env : env) ht =
       (Cls.tparams class_)
       paraml
 
-(* In order to type-check a class, we need to know what "parent"
- * refers to. Sometimes people write "parent::", when that happens,
- * we need to know the type of parent.
- *)
-and class_def_parent env class_def class_type =
-  match class_def.c_extends with
-  | ((_, Happly ((_, x), _)) as parent_ty) :: _ ->
-    Option.iter
-      (Env.get_class_dep env x)
-      ~f:(check_parent class_def class_type);
-    let parent_ty = Decl_hint.hint env.decl_env parent_ty in
-    (env, Some x, parent_ty)
-  (* The only case where we have more than one parent class is when
-   * dealing with interfaces and interfaces cannot use parent.
-   *)
-  | _ :: _
-  | _ ->
-    (env, None, (Reason.Rnone, Typing_utils.decl_tany env))
-
 and check_parent class_def class_type parent_type =
   let position = fst class_def.c_name in
   if Cls.const class_type && not (Cls.const parent_type) then
@@ -7648,9 +7629,11 @@ and class_def_ env c tc =
     | _ -> ()
   in
   List.iter impl (check_where_constraints env);
+  let parent_id = Env.get_parent_id env in
+  if parent_id <> "" then
+    Option.iter (Env.get_class_dep env parent_id) ~f:(check_parent c tc);
   check_parents_sealed env c tc;
 
-  let (env, parent_id, parent) = class_def_parent env c tc in
   let is_final = Cls.final tc in
   if (Cls.kind tc = Ast_defs.Cnormal || is_final) && Cls.members_fully_known tc
   then (
@@ -7660,12 +7643,6 @@ and class_def_ env c tc =
     check_extend_abstract_const ~is_final pc (Cls.consts tc);
     check_extend_abstract_typeconst ~is_final pc (Cls.typeconsts tc)
   );
-  let env = Env.set_parent_ty env parent in
-  let env =
-    match parent_id with
-    | None -> env
-    | Some parent_id -> Env.set_parent_id env parent_id
-  in
   if Cls.const tc then List.iter c.c_uses (check_const_trait_members pc env);
   let (static_vars, vars) = split_vars c in
   List.iter static_vars ~f:(fun { cv_id = (p, id); _ } ->

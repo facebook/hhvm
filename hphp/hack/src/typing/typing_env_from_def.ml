@@ -53,11 +53,23 @@ let class_env tcopt c =
       Typing_phase.localize_with_self env self
   in
   let env = Env.set_self env self in
+  (* In order to type-check a class, we need to know what "parent"
+   * refers to. Sometimes people write "parent::", when that happens,
+   * we need to know the type of parent.
+   *)
   let env =
     match c.c_extends with
-    | ((_, Happly ((_, parent_id), _)) as _parent_ty) :: _ ->
-      Env.set_parent_id env parent_id
-    | _ -> env
+    | ((_, Happly ((_, parent_id), _)) as parent_ty) :: _ ->
+      let parent_ty = Decl_hint.hint env.Typing_env_types.decl_env parent_ty in
+      let env = Env.set_parent_id env parent_id in
+      let env = Env.set_parent_ty env parent_ty in
+      env
+    (* The only case where we have more than one parent class is when
+     * dealing with interfaces and interfaces cannot use parent.
+     *)
+    | _ :: _
+    | _ ->
+      env
   in
   (* Set the ppl env flag *)
   let is_ppl =

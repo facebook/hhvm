@@ -553,8 +553,7 @@ let genv_as_value env genv =
     return;
     params;
     condition_types;
-    parent_id;
-    parent_ty;
+    parent;
     self_id;
     self;
     static;
@@ -572,14 +571,19 @@ let genv_as_value env genv =
         ("params", local_id_map_as_value (param_as_value env) params);
         ( "condition_types",
           smap_as_value (decl_type_as_value env) condition_types );
-        ("parent_id", string_as_value parent_id);
-        ("parent_ty", decl_type_as_value env parent_ty);
         ("self_id", string_as_value self_id);
         ("self", type_as_value env self);
         ("static", bool_as_value static);
         ("val_kind", string_as_value (val_kind_to_string val_kind));
         ("fun_kind", string_as_value (fun_kind_to_string fun_kind));
       ]
+    @ (match parent with
+      | Some (parent_id, parent_ty) ->
+        [
+          ("parent_id", string_as_value parent_id);
+          ("parent_ty", decl_type_as_value env parent_ty);
+        ]
+      | None -> [])
     @
     match fun_mutable with
     | None -> []

@@ -18,16 +18,12 @@ let check_expr env (pos, e) =
   | Class_const ((_, CIparent), (_, construct))
     when construct = SN.Members.__construct ->
     let tenv = Env.tast_env_as_typing_env env in
-    begin
-      match Env.get_class env (Typing_env.get_parent_id tenv) with
-      | Some parent_class when Cls.kind parent_class = Ast_defs.Cabstract ->
-        if fst (Cls.construct parent_class) = None then
-          Errors.parent_abstract_call
-            construct
-            (fst pos)
-            (Cls.pos parent_class)
-      | _ -> ()
-    end
+    (match Typing_env.get_parent_class tenv with
+    | Some parent_class
+      when Cls.kind parent_class = Ast_defs.Cabstract
+           && fst (Cls.construct parent_class) = None ->
+      Errors.parent_abstract_call construct (fst pos) (Cls.pos parent_class)
+    | _ -> ())
   | _ -> ()
 
 let check_method_body env m =

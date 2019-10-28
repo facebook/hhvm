@@ -126,9 +126,11 @@ val get_self_id : env -> string
 
 val is_outside_class : env -> bool
 
-val get_parent_id : env -> string
+val get_parent_id : env -> string option
 
-val get_parent_ty : env -> decl_ty
+val get_parent_ty : env -> decl_ty option
+
+val get_parent_class : env -> class_decl option
 
 val get_fn_kind : env -> Ast_defs.fun_kind
 
@@ -148,9 +150,7 @@ val set_self_id : env -> string -> env
 
 val set_self : env -> locl_ty -> env
 
-val set_parent_id : env -> string -> env
-
-val set_parent_ty : env -> decl_ty -> env
+val set_parent : env -> string -> decl_ty -> env
 
 val set_static : env -> env
 

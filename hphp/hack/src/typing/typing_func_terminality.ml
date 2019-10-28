@@ -45,7 +45,7 @@ let static_meth_is_noreturn env ci meth_id =
     | CIself
     | CIstatic ->
       Some (Env.get_self_id env)
-    | CIparent -> Some (Env.get_parent_id env)
+    | CIparent -> Env.get_parent_id env
     | CIexpr _ -> None
     (* we declared the types, but didn't check the bodies yet
                        so can't tell anything here *)

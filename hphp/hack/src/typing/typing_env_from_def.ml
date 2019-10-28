@@ -61,9 +61,7 @@ let class_env tcopt c =
     match c.c_extends with
     | ((_, Happly ((_, parent_id), _)) as parent_ty) :: _ ->
       let parent_ty = Decl_hint.hint env.Typing_env_types.decl_env parent_ty in
-      let env = Env.set_parent_id env parent_id in
-      let env = Env.set_parent_ty env parent_ty in
-      env
+      Env.set_parent env parent_id parent_ty
     (* The only case where we have more than one parent class is when
      * dealing with interfaces and interfaces cannot use parent.
      *)

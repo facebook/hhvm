@@ -549,8 +549,7 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot =
         self = (Reason.none, Typing_defs.make_tany ());
         static = false;
         val_kind = Other;
-        parent_id = "";
-        parent_ty = (Reason.none, Typing_defs.make_tany ());
+        parent = None;
         fun_kind = Ast_defs.FSync;
         fun_mutable = None;
         anons = IMap.empty;
@@ -834,9 +833,13 @@ let get_self_id env = env.genv.self_id
 
 let is_outside_class env = env.genv.self_id = ""
 
-let get_parent_ty env = env.genv.parent_ty
+let get_parent_ty env = Option.map env.genv.parent ~f:snd
 
-let get_parent_id env = env.genv.parent_id
+let get_parent_id env = Option.map env.genv.parent ~f:fst
+
+let get_parent_class env =
+  let open Option in
+  get_parent_id env >>= get_class_dep env
 
 let get_fn_kind env = env.genv.fun_kind
 
@@ -867,14 +870,9 @@ let set_self env x =
   let genv = { genv with self = x } in
   { env with genv }
 
-let set_parent_id env x =
+let set_parent env parent_id parent_ty =
   let genv = env.genv in
-  let genv = { genv with parent_id = x } in
-  { env with genv }
-
-let set_parent_ty env x =
-  let genv = env.genv in
-  let genv = { genv with parent_ty = x } in
+  let genv = { genv with parent = Some (parent_id, parent_ty) } in
   { env with genv }
 
 let set_static env =

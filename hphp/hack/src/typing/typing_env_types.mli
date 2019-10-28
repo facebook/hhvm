@@ -73,8 +73,8 @@ and genv = {
      fresh type parameter (see: make_local_param_ty) and store mapping
      fresh type name -> condition type in env so it can be retrieved later *)
   condition_types: decl_ty SMap.t;
-  parent_id: string;
-  parent_ty: decl_ty;
+  (* Identifier and type of the parent class if it exists *)
+  parent: (string * decl_ty) option;
   (* Identifier of the enclosing class *)
   self_id: string;
   (* Type of the enclosing class, instantiated at its generic parameters *)

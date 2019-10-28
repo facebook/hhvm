@@ -318,7 +318,7 @@ where
             Some(markup_section)
         } else {
             if self.lexer().source().length() > 0
-                && self.lexer().source().file_path().ends_with(".php")
+                && self.lexer().source().file_path().has_extension("php")
             {
                 self.with_error(Errors::error1001);
             }

@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocamlrep::ptr::UnsafeOcamlPtr;
+use ocamlrep::rc::RcOc;
 use ocamlrep::OcamlRep;
 use oxidized::relative_path::RelativePath;
 use std::rc::Rc;
@@ -22,7 +23,7 @@ struct SourceTextImpl<'a> {
     // with compiler trying to guide us towards unicode semantics.
     text: &'a [u8],
 
-    file_path: RelativePath,
+    file_path: RcOc<RelativePath>,
 
     ocaml_source_text: Option<UnsafeOcamlPtr>,
 }
@@ -30,17 +31,17 @@ struct SourceTextImpl<'a> {
 pub struct SourceText<'a>(Rc<SourceTextImpl<'a>>);
 
 impl<'a> SourceText<'a> {
-    pub fn make(file_path: &RelativePath, text: &'a [u8]) -> Self {
+    pub fn make(file_path: RcOc<RelativePath>, text: &'a [u8]) -> Self {
         Self::make_with_raw(file_path, text, 0)
     }
 
     pub fn make_with_raw(
-        file_path: &RelativePath,
+        file_path: RcOc<RelativePath>,
         text: &'a [u8],
         ocaml_source_text: usize,
     ) -> Self {
         Self(Rc::new(SourceTextImpl {
-            file_path: file_path.clone(),
+            file_path,
             text,
             ocaml_source_text: if ocaml_source_text == 0 {
                 None
@@ -51,7 +52,11 @@ impl<'a> SourceText<'a> {
     }
 
     pub fn file_path(&self) -> &RelativePath {
-        &self.0.file_path
+        self.0.file_path.as_ref()
+    }
+
+    pub fn file_path_rc(&self) -> RcOc<RelativePath> {
+        RcOc::clone(&self.0.file_path)
     }
 
     pub fn text(&self) -> &'a [u8] {
@@ -100,7 +105,7 @@ impl<'content> OcamlRep for SourceText<'content> {
 
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
         let block = ocamlrep::from::expect_tuple(value, 4)?;
-        let file_path: RelativePath = ocamlrep::from::field(block, 0)?;
+        let file_path: RcOc<RelativePath> = ocamlrep::from::field(block, 0)?;
         // Unsafely transmute away the lifetime of `value` and allow the caller
         // to choose the lifetime. This is no more unsafe than what we already
         // do by storing the ocaml_source_text pointer--if the OCaml source text

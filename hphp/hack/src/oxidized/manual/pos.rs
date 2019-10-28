@@ -3,27 +3,27 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::cmp::Ordering;
 use std::ops::Range;
+use std::path::PathBuf;
+use std::result::Result::*;
 
+use ocamlrep::rc::RcOc;
 use ocamlrep_derive::OcamlRep;
 
 use crate::file_pos_large::FilePosLarge;
 use crate::file_pos_small::FilePosSmall;
 use crate::relative_path::{Prefix, RelativePath};
 
-use std::cmp::Ordering;
-use std::path::PathBuf;
-use std::result::Result::*;
-
 #[derive(Clone, Debug, OcamlRep)]
 enum PosImpl {
     Small {
-        file: RelativePath,
+        file: RcOc<RelativePath>,
         start: FilePosSmall,
         end: FilePosSmall,
     },
     Large {
-        file: RelativePath,
+        file: RcOc<RelativePath>,
         start: Box<FilePosLarge>,
         end: Box<FilePosLarge>,
     },
@@ -38,7 +38,7 @@ impl Pos {
     pub fn make_none() -> Self {
         // TODO: shiqicao make NONE static, lazy_static doesn't allow Rc
         Pos(PosImpl::Small {
-            file: RelativePath::make(Prefix::Dummy, PathBuf::from("")),
+            file: RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(""))),
             start: FilePosSmall::make_dummy(),
             end: FilePosSmall::make_dummy(),
         })
@@ -100,7 +100,7 @@ impl Pos {
     }
 
     pub fn from_lnum_bol_cnum(
-        file: RelativePath,
+        file: RcOc<RelativePath>,
         start: (usize, usize, usize),
         end: (usize, usize, usize),
     ) -> Self {
@@ -124,7 +124,7 @@ impl Pos {
 
     /// For single-line spans only.
     pub fn from_line_cols_offset(
-        file: RelativePath,
+        file: RcOc<RelativePath>,
         line: usize,
         cols: Range<usize>,
         start_offset: usize,
@@ -352,7 +352,7 @@ mod tests {
 
     fn make_pos(name: &str, start: (usize, usize, usize), end: (usize, usize, usize)) -> Pos {
         Pos::from_lnum_bol_cnum(
-            RelativePath::make(Prefix::Dummy, PathBuf::from(name)),
+            RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(name))),
             start,
             end,
         )
@@ -363,7 +363,7 @@ mod tests {
         assert_eq!(Pos::make_none().is_none(), true);
         assert_eq!(
             Pos::from_lnum_bol_cnum(
-                RelativePath::make(Prefix::Dummy, PathBuf::from("a")),
+                RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a"))),
                 (0, 0, 0),
                 (0, 0, 0)
             )
@@ -372,7 +372,7 @@ mod tests {
         );
         assert_eq!(
             Pos::from_lnum_bol_cnum(
-                RelativePath::make(Prefix::Dummy, PathBuf::from("")),
+                RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(""))),
                 (1, 0, 0),
                 (0, 0, 0)
             )

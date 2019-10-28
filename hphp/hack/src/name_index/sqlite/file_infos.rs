@@ -5,6 +5,7 @@
 
 use crate::datatypes::*;
 
+use ocamlrep::rc::RcOc;
 use oxidized::file_info::FileInfo;
 use oxidized::relative_path::RelativePath;
 use rusqlite::{params, Connection};
@@ -17,7 +18,7 @@ pub(crate) struct FileInfoTable {
 
 #[derive(Debug)]
 pub(crate) struct FileInfoItem {
-    path: RelativePath,
+    path: RcOc<RelativePath>,
     file_info: FileInfo,
 }
 
@@ -99,6 +100,7 @@ impl FileInfoTable {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ocamlrep::rc::RcOc;
     use oxidized::file_info::{Id, Mode, NameType, Pos};
     use oxidized::relative_path::Prefix;
     use std::path::PathBuf;
@@ -107,7 +109,7 @@ mod tests {
     fn test_add_file_info() {
         let file_info_table = FileInfoTable::new(Arc::new(Connection::open_in_memory().unwrap()));
         file_info_table.create();
-        let path = RelativePath::make(Prefix::Root, PathBuf::from("foo.php"));
+        let path = RcOc::new(RelativePath::make(Prefix::Root, PathBuf::from("foo.php")));
         let file_infos = [FileInfoItem {
             path: path.clone(),
             file_info: FileInfo {

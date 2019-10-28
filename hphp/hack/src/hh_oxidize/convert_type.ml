@@ -25,6 +25,11 @@ let add_box_between =
 let should_add_box ty =
   List.mem add_box_between (curr_module_name (), self (), ty) ~equal:( = )
 
+let add_rc_between = [("file_info", "Pos", "relative_path::RelativePath")]
+
+let should_add_rc ty =
+  List.mem add_rc_between (curr_module_name (), self (), ty) ~equal:( = )
+
 (* These types inherently add an indirection, so we don't need to box instances
    of recursion in their type arguments. *)
 let indirection_types = SSet.of_list ["Vec"]
@@ -65,8 +70,10 @@ let rec core_type ?(seen_indirection = false) ct =
       | _ -> args
     in
     let args = type_args ~seen_indirection args in
+    if should_add_rc id then
+      sprintf "ocamlrep::rc::RcOc<%s%s>" id args
     (* Direct or indirect recursion *)
-    if (not seen_indirection) && (self () = id || should_add_box id) then
+    else if (not seen_indirection) && (self () = id || should_add_box id) then
       sprintf "Box<%s%s>" id args
     else
       id ^ args

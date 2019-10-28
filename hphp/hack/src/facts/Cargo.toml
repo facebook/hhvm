@@ -16,6 +16,7 @@ serde = "^1.0.98"
 serde_derive = "^1.0.98"
 serde_json = "^1.0.40"
 hhbc_string_utils_rust = { path = "../hhbc/cargo/string_utils", package = "hack_hhbc_string_utils" }
+ocamlrep = {path = "../ocamlrep", package = "hack_ocamlrep" }
 oxidized = {path = "../oxidized", package = "hack_oxidized" }
 escaper = {path = "../utils/escaper", package = "hack_escaper"}
 

@@ -37,7 +37,7 @@ pub fn parse_mode(text: &SourceText) -> Option<Mode> {
                         SyntaxVariant::Missing => Some(Mode::Mphp),
                         SyntaxVariant::Token(t) if t.kind() == TokenKind::Equal => Some(Mode::Mphp),
                         _ => {
-                            let is_hhi = text.file_path().ends_with(".hhi");
+                            let is_hhi = text.file_path().has_extension("hhi");
                             let skip_length = pfx.value.full_width
                                 + txt.value.full_width
                                 + ltq.value.full_width

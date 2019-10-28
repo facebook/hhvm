@@ -7,6 +7,7 @@
 use parser_rust as parser;
 
 use crate::direct_decl_smart_constructors::*;
+use ocamlrep::rc::RcOc;
 use oxidized::{direct_decl_parser::Decls, file_info::Mode, relative_path::RelativePath};
 use parser::{
     parser::Parser, parser_env::ParserEnv, smart_constructors_wrappers::WithKind,
@@ -16,8 +17,8 @@ use syntax_tree::mode_parser::parse_mode;
 
 pub type DirectDeclParser<'a> = Parser<'a, WithKind<DirectDeclSmartConstructors<'a>>, State<'a>>;
 
-pub fn parse_decls(filename: &RelativePath, text: &str, trace: bool) -> Result<Decls, String> {
-    let text = SourceText::make(filename, text.as_bytes());
+pub fn parse_decls(filename: RelativePath, text: &str, trace: bool) -> Result<Decls, String> {
+    let text = SourceText::make(RcOc::new(filename), text.as_bytes());
     let is_experimental = match parse_mode(&text) {
         Some(Mode::Mexperimental) => true,
         _ => false,

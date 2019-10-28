@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep::rc::RcOc;
 use ocamlrep_derive::OcamlRep;
 use std::convert::TryFrom;
 use std::fmt::{self, Display};
@@ -44,37 +43,40 @@ impl Display for Prefix {
 }
 
 #[derive(Clone, Debug, Eq, OcamlRep, PartialEq)]
-pub struct RelativePath(RcOc<(Prefix, PathBuf)>);
+pub struct RelativePath {
+    prefix: Prefix,
+    path: PathBuf,
+}
 
 impl RelativePath {
-    pub fn make(prefix: Prefix, pathbuf: PathBuf) -> Self {
-        RelativePath(RcOc::new((prefix, pathbuf)))
+    pub fn make(prefix: Prefix, path: PathBuf) -> Self {
+        Self { prefix, path }
     }
 
     pub fn is_empty(&self) -> bool {
-        self.prefix() == Prefix::Dummy && self.path_str().is_empty()
+        self.prefix == Prefix::Dummy && self.path.as_os_str().is_empty()
     }
 
-    pub fn ends_with(&self, s: &str) -> bool {
-        (self.0).1.to_str().unwrap().ends_with(s)
+    pub fn has_extension(&self, s: impl AsRef<Path>) -> bool {
+        self.path.extension() == Some(s.as_ref().as_os_str())
     }
 
     pub fn path(&self) -> &Path {
-        &(self.0).1
+        &self.path
     }
 
     pub fn path_str(&self) -> &str {
-        (self.0).1.to_str().unwrap()
+        self.path.to_str().unwrap()
     }
 
     pub fn prefix(&self) -> Prefix {
-        (self.0).0
+        self.prefix
     }
 }
 
 impl Display for RelativePath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", (self.0).0, (self.0).1.display())
+        write!(f, "{} {}", self.prefix, self.path.display())
     }
 }
 

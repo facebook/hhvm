@@ -3060,7 +3060,7 @@ where
                 let markup_text = &c.markup_text;
                 let markup_expression = &c.markup_expression;
                 let pos = Self::p_pos(node, env);
-                let has_dot_hack_extension = pos.filename().ends_with(".hack");
+                let has_dot_hack_extension = pos.filename().has_extension("hack");
                 if has_dot_hack_extension {
                     Self::raise_parsing_error(node, env, &syntax_error::error1060);
                 } else if markup_prefix.value.is_missing()

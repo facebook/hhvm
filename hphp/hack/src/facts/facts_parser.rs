@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hhbc_string_utils_rust::mangle_xhp_id;
+use ocamlrep::rc::RcOc;
 use oxidized::{file_info::Mode, relative_path::RelativePath};
 use parser_rust::{
     parser::Parser, parser_env::ParserEnv, smart_constructors_wrappers::WithKind,
@@ -29,16 +30,22 @@ pub fn extract_as_json(text: &[u8], opts: ExtractAsJsonOpts) -> Option<String> {
 }
 
 pub fn from_text(text: &[u8], opts: ExtractAsJsonOpts) -> Option<Facts> {
-    let text = SourceText::make(&opts.filename, text);
-    let is_experimental = match parse_mode(&text) {
+    let ExtractAsJsonOpts {
+        php5_compat_mode,
+        hhvm_compat_mode,
+        allow_new_attribute_syntax,
+        filename,
+    } = opts;
+    let text = SourceText::make(RcOc::new(filename), text);
+    let is_experimental_mode = match parse_mode(&text) {
         Some(Mode::Mexperimental) => true,
         _ => false,
     };
     let env = ParserEnv {
-        php5_compat_mode: opts.php5_compat_mode,
-        hhvm_compat_mode: opts.hhvm_compat_mode,
-        is_experimental_mode: is_experimental,
-        allow_new_attribute_syntax: opts.allow_new_attribute_syntax,
+        php5_compat_mode,
+        hhvm_compat_mode,
+        is_experimental_mode,
+        allow_new_attribute_syntax,
         ..ParserEnv::default()
     };
     let mut parser = FactsParser::make(&text, env);

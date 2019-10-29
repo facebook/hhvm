@@ -21,6 +21,7 @@ mod tests {
 
     use decl_rust::direct_decl_parser;
     use facts_rust::facts_parser;
+    use ocamlrep::rc::RcOc;
     use oxidized::{
         global_options,
         relative_path::{Prefix, RelativePath},
@@ -44,8 +45,9 @@ mod tests {
     #[bench]
     fn bench_facts_parse(b: &mut Bencher) {
         get_file().map(|(filename, text)| {
+            let filename = RcOc::new(filename);
             b.iter(|| {
-                let text = SourceText::make(&filename, text.as_bytes());
+                let text = SourceText::make(RcOc::clone(&filename), text.as_bytes());
                 let mut parser = facts_parser::FactsParser::make(&text, ParserEnv::default());
                 parser.parse_script(None)
             });
@@ -55,8 +57,9 @@ mod tests {
     #[bench]
     fn bench_direct_decl_parse(b: &mut Bencher) {
         get_file().map(|(filename, text)| {
+            let filename = RcOc::new(filename);
             b.iter(|| {
-                let text = SourceText::make(&filename, text.as_bytes());
+                let text = SourceText::make(RcOc::clone(&filename), text.as_bytes());
                 let mut parser =
                     direct_decl_parser::DirectDeclParser::make(&text, ParserEnv::default());
                 parser.parse_script(None)
@@ -67,8 +70,9 @@ mod tests {
     #[bench]
     fn bench_aast_full_parse(b: &mut Bencher) {
         get_file().map(|(filename, text)| {
+            let filename = RcOc::new(filename);
             b.iter(|| {
-                let text = SourceText::make(&filename, text.as_bytes());
+                let text = SourceText::make(RcOc::clone(&filename), text.as_bytes());
                 let indexed_source_text = IndexedSourceText::new(text.clone());
                 aast_parser::AastParser::from_text(
                     &rust_aast_parser_types::Env {
@@ -94,8 +98,9 @@ mod tests {
     #[bench]
     fn bench_aast_quick_parse(b: &mut Bencher) {
         get_file().map(|(filename, text)| {
+            let filename = RcOc::new(filename);
             b.iter(|| {
-                let text = SourceText::make(&filename, text.as_bytes());
+                let text = SourceText::make(RcOc::clone(&filename), text.as_bytes());
                 let indexed_source_text = IndexedSourceText::new(text.clone());
                 aast_parser::AastParser::from_text(
                     &rust_aast_parser_types::Env {

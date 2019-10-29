@@ -192,6 +192,7 @@ let emit_return ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
               Emit_expression.get_type_structure_for_hint
                 env
                 ~targ_map:SMap.empty
+                ~tparams:[]
                 h;
               instr_verifyRetTypeTS;
             ]

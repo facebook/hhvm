@@ -185,6 +185,7 @@ let make_memoize_instance_method_with_params_code
         ~pos
         ~params
         ~ast_params
+        ~tparams:[]
         ~should_emit_init_this:false;
       deprecation_body;
       instr_checkthis;
@@ -334,6 +335,7 @@ let make_memoize_static_method_with_params_code
         ~pos
         ~params
         ~ast_params
+        ~tparams:[]
         ~should_emit_init_this:false;
       deprecation_body;
       param_code_sets params param_count;

@@ -51,6 +51,7 @@ val emit_method_prolog :
   pos:Pos.t ->
   params:Hhas_param.t list ->
   ast_params:Tast.fun_param list ->
+  tparams:string list ->
   should_emit_init_this:bool ->
   Instruction_sequence.t
 

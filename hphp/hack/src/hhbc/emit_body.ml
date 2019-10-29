@@ -42,7 +42,8 @@ let emit_generics_upper_bounds tparams ~skipawaitable ~namespace =
       else
         Some (snd t.A.tp_name, ubs))
 
-let emit_method_prolog ~env ~pos ~params ~ast_params ~should_emit_init_this =
+let emit_method_prolog
+    ~env ~pos ~params ~ast_params ~tparams ~should_emit_init_this =
   let init_this =
     if not should_emit_init_this then
       empty
@@ -70,6 +71,7 @@ let emit_method_prolog ~env ~pos ~params ~ast_params ~should_emit_init_this =
                Emit_expression.get_type_structure_for_hint
                  env
                  ~targ_map:SMap.empty
+                 ~tparams
                  h;
                instr (IMisc (VerifyParamTypeTS param_name));
              ])
@@ -575,6 +577,7 @@ let emit_body
               ~pos
               ~params
               ~ast_params
+              ~tparams
               ~should_emit_init_this );
           emit_deprecation_warning scope deprecation_info;
           generator_instr;

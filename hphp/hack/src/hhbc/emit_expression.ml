@@ -690,10 +690,10 @@ and emit_binop env annot op (e1 : Tast.expr) (e2 : Tast.expr) =
       | _ -> default ()
     )
 
-and get_type_structure_for_hint env ~targ_map (h : Aast.hint) =
+and get_type_structure_for_hint env ~targ_map ~tparams (h : Aast.hint) =
   let namespace = Emit_env.get_namespace env in
   let tv =
-    Emit_type_constant.hint_to_type_constant ~tparams:[] ~namespace ~targ_map h
+    Emit_type_constant.hint_to_type_constant ~tparams ~namespace ~targ_map h
   in
   let i = Emit_adata.get_array_identifier tv in
   if hack_arr_dv_arrs () then
@@ -736,7 +736,7 @@ and emit_as env pos e h is_nullable =
       (* Store type struct in a variable and reuse it. *)
         ( if is_static then
           main_block
-            (get_type_structure_for_hint env ~targ_map:SMap.empty h)
+            (get_type_structure_for_hint env ~targ_map:SMap.empty ~tparams:[] h)
             Resolve
         else
           main_block ts_instrs DontResolve );
@@ -755,7 +755,7 @@ and emit_is env pos (h : Aast.hint) =
     | _ ->
       gather
         [
-          get_type_structure_for_hint env ~targ_map:SMap.empty h;
+          get_type_structure_for_hint env ~targ_map:SMap.empty ~tparams:[] h;
           instr_istypestructc Resolve;
         ]
   else
@@ -3325,7 +3325,7 @@ and emit_reified_arg env ~isas pos (hint : Aast.hint) =
   | Aast.Happly ((_, name), []) when SMap.mem name current_targs ->
     (emit_reified_type env pos name, false)
   | _ ->
-    let ts = get_type_structure_for_hint env ~targ_map hint in
+    let ts = get_type_structure_for_hint env ~targ_map ~tparams:[] hint in
     let ts_list =
       if count = 0 then
         ts

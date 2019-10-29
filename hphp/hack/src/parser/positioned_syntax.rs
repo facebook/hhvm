@@ -71,12 +71,12 @@ impl PositionedValue {
             | (TokenSpan { left: l, .. }, TokenValue(r))
             | (TokenValue(l), TokenSpan { right: r, .. })
             | (TokenSpan { left: l, .. }, TokenSpan { right: r, .. }) => {
-                if RcOc::ptr_eq(&l.0, &r.0) {
-                    TokenValue(PositionedToken::clone_rc(l))
+                if RcOc::ptr_eq(&l, &r) {
+                    TokenValue(RcOc::clone(&l))
                 } else {
                     TokenSpan {
-                        left: PositionedToken::clone_rc(l),
-                        right: PositionedToken::clone_rc(r),
+                        left: RcOc::clone(&l),
+                        right: RcOc::clone(&r),
                     }
                 }
             }
@@ -189,7 +189,7 @@ impl SyntaxValueType<PositionedToken> for PositionedValue {
                 offset: token.end_offset(),
             }
         } else {
-            PositionedValue::TokenValue(PositionedToken::clone_rc(token))
+            PositionedValue::TokenValue(RcOc::clone(&token))
         }
     }
 

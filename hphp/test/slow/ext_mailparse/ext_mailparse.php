@@ -310,3 +310,41 @@ VS($output,
    "UUE\n".
    "this is a test\n");
 }
+
+//////////////////////////////////////////////////////////////////////
+
+$text =
+  "To: fred@bloggs.com\n".
+  "Content-Type: multipart/mixed;\n".
+  "\tboundary=\"----=_NextPart_\"\n".
+  "\n".
+  "This is a multi-part message in MIME format.\n".
+  "\n".
+  "------=_NextPart_\n".
+  "Content-Type: tex/plain;\n".
+  "\tcharset=\"us-ascii\"\n".
+  "Content-Transfer-Encoding: 7bit\n".
+  "\n".
+  "this is a regular mime attachment.\n".
+  "\n";
+
+# MAXPARTS is 300, but the error does not occur until the 302nd
+# MIME part is parsed.
+for ($i = 0; $i < 301; $i++) {
+  $text .=
+    "------=_NextPart_\n".
+    "Content-Type: application/octet-stream;\n".
+    "\tname=\"README{$i}\"\n".
+    "Content-Transfer-Encoding: 7bit\n".
+    "Content-Disposition: attachment;;\n".
+    "\tfilename=\"README{$i}\"\n".
+    "\n".
+    "Part{$i}\n".
+    "\n";
+}
+
+$text .= "------=_NextPart_--\n";
+
+$mime = mailparse_msg_create();
+$result = mailparse_msg_parse($mime, $text);
+VS($result, false);

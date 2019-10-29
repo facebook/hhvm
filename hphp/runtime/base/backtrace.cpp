@@ -312,7 +312,7 @@ using namespace backtrace_detail;
 
 Array createBacktrace(const BacktraceArgs& btArgs) {
   if (btArgs.isCompact()) {
-    return createCompactBacktrace()->extract();
+    return createCompactBacktrace(btArgs.m_skipTop)->extract();
   }
 
   auto bt = Array::CreateVArray();
@@ -650,14 +650,14 @@ int64_t createBacktraceHash(bool consider_metadata) {
   return hash;
 }
 
-req::ptr<CompactTrace> createCompactBacktrace() {
+req::ptr<CompactTrace> createCompactBacktrace(bool skipTop) {
   auto ret = req::make<CompactTrace>();
   walkStack([&] (ActRec* fp, Offset prevPc) {
     // Do not capture frame for HPHP only functions.
     if (fp->func()->isNoInjection()) return;
 
     ret->insert(fp, prevPc);
-  });
+  }, skipTop);
   return ret;
 }
 

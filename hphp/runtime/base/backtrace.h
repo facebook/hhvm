@@ -199,7 +199,6 @@ struct BacktraceArgs {
   bool isCompact() const {
     return
       RuntimeOption::EvalEnableCompactBacktrace &&
-      !m_skipTop &&
       !m_skipInlined &&
       !m_withSelf &&
       !m_withThis &&
@@ -308,7 +307,7 @@ struct IStack {
 Array createBacktrace(const BacktraceArgs& backtraceArgs);
 void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols);
 int64_t createBacktraceHash(bool consider_metadata);
-req::ptr<CompactTrace> createCompactBacktrace();
+req::ptr<CompactTrace> createCompactBacktrace(bool skipTop = false);
 std::pair<const Func*, Offset> getCurrentFuncAndOffset();
 
 /*

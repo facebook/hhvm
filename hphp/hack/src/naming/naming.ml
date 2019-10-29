@@ -548,6 +548,8 @@ end
 (* Helpers *)
 (*****************************************************************************)
 
+let elaborate_namespaces = new Elaborate_namespaces_endo.generic_elaborator
+
 let check_repetition s param =
   let name = param.Aast.param_name in
   if SSet.mem name s then Errors.already_bound param.Aast.param_pos name;
@@ -1175,7 +1177,7 @@ module Make (GetLocals : GetLocals) = struct
     let constraints = make_constraints c.Aast.c_tparams.Aast.c_tparam_list in
     let env = Env.make_class_env constraints c in
     let c =
-      Elaborate_namespaces_endo.namespace_elaborater#on_class_
+      elaborate_namespaces#on_class_
         (Elaborate_namespaces_endo.make_env (fst env).namespace)
         c
     in
@@ -1829,7 +1831,7 @@ module Make (GetLocals : GetLocals) = struct
     let lenv = Env.empty_local None in
     let env = (genv, lenv) in
     let f =
-      Elaborate_namespaces_endo.namespace_elaborater#on_fun_def
+      elaborate_namespaces#on_fun_def
         (Elaborate_namespaces_endo.make_env (fst env).namespace)
         f
     in
@@ -3032,7 +3034,7 @@ module Make (GetLocals : GetLocals) = struct
   let record_def rd =
     let env = Env.make_top_level_env () in
     let rd =
-      Elaborate_namespaces_endo.namespace_elaborater#on_record_def
+      elaborate_namespaces#on_record_def
         (Elaborate_namespaces_endo.make_env (fst env).namespace)
         rd
     in
@@ -3064,7 +3066,7 @@ module Make (GetLocals : GetLocals) = struct
     let cstrs = make_constraints tdef.Aast.t_tparams in
     let env = Env.make_typedef_env cstrs tdef in
     let tdef =
-      Elaborate_namespaces_endo.namespace_elaborater#on_typedef
+      elaborate_namespaces#on_typedef
         (Elaborate_namespaces_endo.make_env (fst env).namespace)
         tdef
     in
@@ -3090,7 +3092,7 @@ module Make (GetLocals : GetLocals) = struct
   let global_const cst =
     let env = Env.make_const_env cst in
     let cst =
-      Elaborate_namespaces_endo.namespace_elaborater#on_gconst
+      elaborate_namespaces#on_gconst
         (Elaborate_namespaces_endo.make_env (fst env).namespace)
         cst
     in
@@ -3112,7 +3114,7 @@ module Make (GetLocals : GetLocals) = struct
 
   let program ast =
     let ast =
-      Elaborate_namespaces_endo.namespace_elaborater#on_program
+      elaborate_namespaces#on_program
         (Elaborate_namespaces_endo.make_env Namespace_env.empty_with_default)
         ast
     in

@@ -55,7 +55,7 @@ let extend_tparams env tparaml =
   in
   { env with type_params }
 
-let namespace_elaborater =
+class ['a, 'b, 'c, 'd] generic_elaborator =
   object (self)
     inherit [_] Aast.endo as super
 
@@ -116,16 +116,6 @@ let namespace_elaborater =
     method! on_file_attribute env fa =
       let env = { env with namespace = fa.fa_namespace } in
       super#on_file_attribute env fa
-
-    method! on_func_body env fb =
-      let env =
-        match fb.fb_annotation with
-        | Nast.Named
-        | Nast.NamedWithUnsafeBlocks ->
-          env
-        | Nast.Unnamed nsenv -> { env with namespace = nsenv }
-      in
-      super#on_func_body env fb
 
     method! on_record_def env rd =
       let env = { env with namespace = rd.rd_namespace } in
@@ -372,7 +362,7 @@ let namespace_elaborater =
       in
       { ua_name; ua_params = List.map ~f:(self#on_expr env) ua.ua_params }
 
-    method! on_program (env : env) (p : Nast.program) =
+    method! on_program (env : env) (p : ('a, 'b, 'c, 'd) Aast.program) =
       let aux (env, defs) def =
         match def with
         | SetNamespaceEnv nsenv ->

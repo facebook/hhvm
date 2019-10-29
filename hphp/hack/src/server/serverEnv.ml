@@ -150,6 +150,11 @@ type env = {
    * Full_check_started and entire thing will be retried on next iteration. *)
   needs_recheck: Relative_path.Set.t;
   init_env: init_env;
+  (* Set by `hh --pause` or `hh --resume`. Indicates whether full/global recheck
+    should be triggered on file changes. If paused, it would still be triggered
+    by commands that require a full recheck, such as STATUS, i.e., `hh`
+    on the command line. *)
+  full_recheck_on_file_changes: full_recheck_on_file_changes;
   full_check: full_check_status;
   prechecked_files: prechecked_files_status;
   (* Not every caller of rechecks expects that they can be interrupted,
@@ -159,8 +164,6 @@ type env = {
     genv ->
     env ->
     (Unix.file_descr * env MultiThreadedCall.interrupt_handler) list;
-  (* Upon `hh --pause` we no longer trigger a full check upon file changes *)
-  paused: bool;
   (* Whether we should force remote type checking or not *)
   remote: bool;
   (* When persistent client sends a command that cannot be handled (due to
@@ -184,6 +187,13 @@ type env = {
   local_symbol_table: SearchUtils.si_env ref; [@opaque]
 }
 [@@deriving show]
+
+and full_recheck_on_file_changes =
+  | Not_paused
+  | Paused of paused_env
+  | Resumed
+
+and paused_env = { paused_recheck_id: string option }
 
 and dirty_deps = {
   (* We are rechecking dirty files to bootstrap the dependency graph.

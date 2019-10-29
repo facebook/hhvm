@@ -433,11 +433,11 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request
       let disk_needs_parsing =
         Relative_path.Set.union updates env.disk_needs_parsing
       in
-      if env.paused then
+      match env.full_recheck_on_file_changes with
+      | Paused _ ->
         let () = Hh_logger.log "Skipping full check due to `hh --pause`" in
         { env with disk_needs_parsing; full_check = Full_check_needed }
-      else
-        { env with disk_needs_parsing; full_check = Full_check_started }
+      | _ -> { env with disk_needs_parsing; full_check = Full_check_started }
   in
   let env =
     match env.default_client_pending_command_needs_full_check with

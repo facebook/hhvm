@@ -377,7 +377,18 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     Provider_utils.with_context ~ctx ~f:(fun () ->
         (env, ServerGoToDefinition.go_ctx ~ctx ~entry ~line ~column))
   | BIGCODE filename -> (env, ServerBigCode.go env filename)
-  | PAUSE pause -> ({ env with paused = pause }, ())
+  | PAUSE pause ->
+    let env =
+      if pause then
+        {
+          env with
+          full_recheck_on_file_changes =
+            Paused { paused_recheck_id = env.init_env.recheck_id };
+        }
+      else
+        { env with full_recheck_on_file_changes = Resumed }
+    in
+    (env, ())
   | GLOBAL_INFERENCE (submode, files) ->
     (* We are getting files in the reverse order*)
     let files = List.rev files in

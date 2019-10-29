@@ -1035,7 +1035,7 @@ static void shuffleExtraStackArgs(ActRec* ar) {
 // The stack contains numArgs arguments plus an extra cell containing
 // arguments to unpack.
 uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
-                           bool checkRefAnnot, ActRec* ar) {
+                           bool checkInOutAnnot, ActRec* ar) {
   auto& stack = vmStack();
   auto unpackArgs = popUnpackArgs();
   SCOPE_EXIT { tvDecRefGen(unpackArgs); };
@@ -1062,7 +1062,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
   ArrayIter iter(unpackArgs);
   if (LIKELY(numArgs < numParams)) {
     for (auto i = numArgs; iter && (i < numParams); ++i, ++iter) {
-      if (UNLIKELY(checkRefAnnot && func->isInOut(i))) {
+      if (UNLIKELY(checkInOutAnnot && func->isInOut(i))) {
         if (ar) ar->setNumArgs(i);
         throwParamInOutMismatch(func, i);
       }

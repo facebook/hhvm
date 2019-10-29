@@ -736,7 +736,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
 void enterVMAtCurPC();
 void shuffleMagicArgs(String&& invName, uint32_t numArgs, bool hasUnpack);
 uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
-                           bool checkRefAnnot, ActRec* ar = nullptr);
+                           bool checkInOutAnnot, ActRec* ar = nullptr);
 
 ///////////////////////////////////////////////////////////////////////////////
 

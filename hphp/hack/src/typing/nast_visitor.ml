@@ -110,6 +110,8 @@ class type handler =
 
     method at_method_ : env -> Nast.method_ -> unit
 
+    method at_record_def : env -> Nast.record_def -> unit
+
     method at_expr : env -> Nast.expr -> unit
 
     method at_stmt : env -> Nast.stmt -> unit
@@ -130,6 +132,8 @@ class virtual handler_base : handler =
     method at_class_ _ _ = ()
 
     method at_method_ _ _ = ()
+
+    method at_record_def _ _ = ()
 
     method at_expr _ _ = ()
 
@@ -159,6 +163,10 @@ let iter_with (handlers : handler list) : iter =
     method! on_method_ env x =
       List.iter handlers (fun v -> v#at_method_ env x);
       super#on_method_ env x
+
+    method! on_record_def env x =
+      List.iter handlers (fun v -> v#at_record_def env x);
+      super#on_record_def env x
 
     method! on_expr env x =
       List.iter handlers (fun v -> v#at_expr env x);

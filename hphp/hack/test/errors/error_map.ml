@@ -245,6 +245,7 @@ ByRefProperty = 3079
 ByRefCall = 3080
 SwitchNonTerminalDefault = 3081
 SwitchMultipleDefault = 3082
+RepeatedRecordFieldName = 3083
 
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001

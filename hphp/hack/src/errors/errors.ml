@@ -1116,6 +1116,12 @@ let fd_name_already_bound pos =
     pos
     "Field name already bound"
 
+let repeated_record_field name pos prev_pos =
+  let msg = Printf.sprintf "Duplicate record field `%s`" name in
+  add_list
+    (NastCheck.err_code NastCheck.RepeatedRecordFieldName)
+    [(pos, msg); (prev_pos, "Previous field is here")]
+
 let primitive_toplevel pos =
   add
     (Naming.err_code Naming.PrimitiveToplevel)

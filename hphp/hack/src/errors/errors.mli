@@ -159,6 +159,8 @@ val unexpected_typedef : Pos.t -> Pos.t -> unit
 
 val fd_name_already_bound : Pos.t -> unit
 
+val repeated_record_field : string -> Pos.t -> Pos.t -> unit
+
 val primitive_toplevel : Pos.t -> unit
 
 val primitive_invalid_alias : Pos.t -> string -> string -> unit

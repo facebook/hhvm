@@ -370,15 +370,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
  public:
 
-  enum IterMode { EraseRefs, PreserveRefs };
-  /*
-   * Create an array of object properties suitable for iteration.
-   *
-   * EraseRefs    - array should contain unboxed properties
-   * PreserveRefs - reffiness of properties should be preserved in returned
-   *                array
-   */
-  Array o_toIterArray(const String& context, IterMode mode);
+  Array o_toIterArray(const String& context);
 
   Variant o_get(const String& s, bool error = true,
                 const String& context = null_string);

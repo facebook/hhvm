@@ -360,7 +360,7 @@ bool Iter::init(Cell* base) {
     } else {
       Class* ctx = arGetContextClass(vmfp());
       auto ctxStr = ctx ? ctx->nameStr() : StrNR();
-      Array iterArray(obj->o_toIterArray(ctxStr, ObjectData::EraseRefs));
+      Array iterArray(obj->o_toIterArray(ctxStr));
       ArrayData* ad = iterArray.get();
       new (&m_iter) ArrayIter(ad);
     }
@@ -756,7 +756,7 @@ static int64_t new_iter_object_any(Iter* dest, ObjectData* obj, Class* ctx,
         TRACE(2, "%s: I %p, obj %p, ctx %p, iterate as array\n",
               __func__, dest, obj, ctx);
         auto ctxStr = ctx ? ctx->nameStr() : StrNR();
-        Array iterArray(itObj->o_toIterArray(ctxStr, ObjectData::EraseRefs));
+        Array iterArray(itObj->o_toIterArray(ctxStr));
         ArrayData* ad = iterArray.get();
         new (iter) ArrayIter(ad);
         itType = ArrayIter::TypeArray;

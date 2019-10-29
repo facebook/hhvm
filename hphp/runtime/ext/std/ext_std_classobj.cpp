@@ -350,9 +350,7 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
 }
 
 Array HHVM_FUNCTION(get_object_vars, const Object& object) {
-  return object
-    ->o_toIterArray(ctxClassName(), ObjectData::PreserveRefs)
-    .toDArray();
+  return object->o_toIterArray(ctxClassName()).toDArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

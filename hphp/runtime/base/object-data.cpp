@@ -604,25 +604,20 @@ namespace {
 size_t getPropertyIfAccessible(ObjectData* obj,
                                const Class* ctx,
                                const StringData* key,
-                               ObjectData::IterMode mode,
                                Array& properties,
                                size_t propLeft) {
   auto const prop = obj->getProp(ctx, key);
   if (prop && prop.type() != KindOfUninit) {
     --propLeft;
-    if (mode == ObjectData::EraseRefs) {
-      properties.set(StrNR(key), prop.tv(), true);
-    } else {
-      properties.set(StrNR(key), prop.tv(), true);
-    }
+    properties.set(StrNR(key), prop.tv(), true);
   }
   return propLeft;
 }
 
 }
 
-Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
-  if (mode == PreserveRefs && !m_cls->numDeclProperties()) {
+Array ObjectData::o_toIterArray(const String& context) {
+  if (!m_cls->numDeclProperties()) {
     if (getAttribute(HasDynPropArr)) {
       auto const props = dynPropArray();
       if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
@@ -659,7 +654,7 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
     for (size_t i = 0; i < numProps; ++i) {
       auto key = const_cast<StringData*>(props[i].name());
       accessibleProps = getPropertyIfAccessible(
-          this, ctx, key, mode, retArray, accessibleProps);
+          this, ctx, key, retArray, accessibleProps);
     }
     klass = klass->parent();
   }
@@ -669,7 +664,7 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
       auto const key = prop.name.get();
       if (!retArray.get()->exists(key)) {
         accessibleProps = getPropertyIfAccessible(
-          this, ctx, key, mode, retArray, accessibleProps);
+          this, ctx, key, retArray, accessibleProps);
         if (accessibleProps == 0) break;
       }
     }
@@ -696,35 +691,14 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
       // property with a non-string name.
       if (UNLIKELY(!isStringType(key.m_type))) {
         assertx(key.m_type == KindOfInt64);
-        switch (mode) {
-        case EraseRefs: {
-          auto const val = dynProps.get()->at(key.m_data.num);
-          retArray.set(key.m_data.num, val);
-          break;
-        }
-        case PreserveRefs: {
-          auto const val = dynProps.get()->at(key.m_data.num);
-          retArray.set(key.m_data.num, val);
-          break;
-        }
-        }
+        auto const val = dynProps.get()->at(key.m_data.num);
+        retArray.set(key.m_data.num, val);
         continue;
       }
 
       auto const strKey = key.m_data.pstr;
-      switch (mode) {
-      case EraseRefs: {
-        auto const val = dynProps.get()->at(strKey);
-        retArray.set(StrNR(strKey), val, true /* isKey */);
-        break;
-      }
-      case PreserveRefs: {
-        auto const val = dynProps.get()->at(strKey);
-        retArray.set(make_tv<KindOfString>(strKey),
-                            val, true /* isKey */);
-        break;
-      }
-      }
+      auto const val = dynProps.get()->at(strKey);
+      retArray.set(StrNR(strKey), val, true /* isKey */);
       decRefStr(strKey);
     }
   }

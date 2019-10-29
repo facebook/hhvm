@@ -53,7 +53,7 @@ let make_next ~(indexer : unit -> string list) ~(extra_roots : Path.t list) :
     compose (List.map Relative_path.(create Root)) indexer
   in
   let hhi_root = Hhi.get_hhi_root () in
-  let hhi_filter = FindUtils.is_php in
+  let hhi_filter = FindUtils.is_hack in
   let next_files_hhi =
     compose
       (List.map Relative_path.(create Hhi))

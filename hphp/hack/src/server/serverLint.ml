@@ -83,7 +83,7 @@ let lint_all genv env code =
         |> List.map ~f:(fun fn ->
                { filename = RP.create RP.Root fn; contents = None })
         |> Hack_bucket.of_list)
-      (genv.indexer FindUtils.is_php)
+      (genv.indexer FindUtils.is_hack)
   in
   let errs =
     MultiWorker.call

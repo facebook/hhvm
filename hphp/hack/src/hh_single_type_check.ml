@@ -337,7 +337,7 @@ let parse_options () =
         ^ " in provided file" );
       ( "--shallow-class-diff",
         Arg.Unit (set_mode Shallow_class_diff),
-        "Test shallow class comparison used in incremental mode on shallow class declarations"
+        " Test shallow class comparison used in incremental mode on shallow class declarations"
       );
       ( "--forbid_nullable_cast",
         Arg.Set forbid_nullable_cast,
@@ -393,41 +393,41 @@ let parse_options () =
         " Disallow using non-string, non-int types as array key constraints" );
       ( "--check-xhp-cvar-arity",
         Arg.Unit (set_bool typecheck_xhp_cvars),
-        "Typechecks xhp cvar arity" );
+        " Typechecks xhp cvar arity" );
       ( "--check-xhp-attribute",
         Arg.Set check_xhp_attribute,
-        "Typechecks xhp required attributes" );
+        " Typechecks xhp required attributes" );
       ( "--allow-ref-param-on-constructor",
         Arg.Unit (set_bool allow_ref_param_on_constructor),
         "Allow class constructors to take reference parameters" );
       ( "--disallow-byref-dynamic-calls",
         Arg.Unit (set_bool disallow_byref_dynamic_calls),
-        "Disallow passing arguments by reference to dynamically called functions [e.g. $foo(&$bar)]"
+        " Disallow passing arguments by reference to dynamically called functions [e.g. $foo(&$bar)]"
       );
       ( "--disallow-byref-calls",
         Arg.Unit (set_bool disallow_byref_calls),
-        "Disallow passing arguments by reference in any form [e.g. foo(&$bar)]"
+        " Disallow passing arguments by reference in any form [e.g. foo(&$bar)]"
       );
       ( "--shallow-class-decl",
         Arg.Set shallow_class_decl,
-        "Look up class members lazily from shallow declarations" );
+        " Look up class members lazily from shallow declarations" );
       ( "--union-intersection-type-hints",
         Arg.Set union_intersection_type_hints,
-        "Allows union and intersection types to be written in type hint positions"
+        " Allows union and intersection types to be written in type hint positions"
       );
       ( "--like-type-hints",
         Arg.Set like_type_hints,
-        "Allows like types to be written in type hint positions" );
+        " Allows like types to be written in type hint positions" );
       ( "--like-casts",
         Arg.Set like_casts,
-        "Allows like types to be written in as expressions" );
+        " Allows like types to be written in as expressions" );
       ( "--simple-pessimize",
         Arg.Set_float simple_pessimize,
-        "At coercion points, if a type is not enforceable, wrap it in like. Float argument 0.0 to 1.0 sets frequency"
+        " At coercion points, if a type is not enforceable, wrap it in like. Float argument 0.0 to 1.0 sets frequency"
       );
       ( "--complex-coercion",
         Arg.Set complex_coercion,
-        "Allows complex coercions that involve like types" );
+        " Allows complex coercions that involve like types" );
       ( "--like-types-all",
         Arg.Unit
           (fun () ->
@@ -435,29 +435,30 @@ let parse_options () =
             set_bool_ like_casts ();
             set_float_ simple_pessimize 1.0;
             set_bool_ complex_coercion ()),
-        "Enables all like types features" );
+        " Enables all like types features" );
       ( "--disable-partially-abstract-typeconsts",
         Arg.Set disable_partially_abstract_typeconsts,
-        "Treat partially abstract type constants as concrete type constants" );
+        " Treat partially abstract type constants as concrete type constants"
+      );
       ( "--rust-parser-errors",
         Arg.Bool (fun x -> rust_parser_errors := x),
-        "Use rust parser error checker" );
+        " Use rust parser error checker" );
       ( "--symbolindex-file",
         Arg.String (fun str -> symbolindex_file := Some str),
-        "Load the symbol index from this file" );
+        " Load the symbol index from this file" );
       ( "--enable-class-level-where-clauses",
         Arg.Set enable_class_level_where_clauses,
         "Enables support for class-level where clauses" );
       ( "--disable-legacy-soft-typehints",
         Arg.Set disable_legacy_soft_typehints,
-        "Disables the legacy @ syntax for soft typehints (use __Soft instead)"
+        " Disables the legacy @ syntax for soft typehints (use __Soft instead)"
       );
       ( "--allow-new-attribute-syntax",
         Arg.Set allow_new_attribute_syntax,
-        "Allow the new @ attribute syntax (disables legacy soft typehints)" );
+        " Allow the new @ attribute syntax (disables legacy soft typehints)" );
       ( "--allow-toplevel-requires",
         Arg.Set allow_toplevel_requires,
-        "Allow `require()` and similar at the top-level" );
+        " Allow `require()` and similar at the top-level" );
       ( "--infer-missing",
         Arg.String
           (fun s -> infer_missing := GlobalOptions.InferMissing.from_string s),
@@ -465,43 +466,43 @@ let parse_options () =
       );
       ( "--const-static-props",
         Arg.Set const_static_props,
-        "Enable static properties to be const" );
+        " Enable static properties to be const" );
       ( "--disable-legacy-attribute-syntax",
         Arg.Set disable_legacy_attribute_syntax,
-        "Disable the legacy <<...>> user attribute syntax" );
-      ("--const-attribute", Arg.Set const_attribute, "Allow __Const attribute");
+        " Disable the legacy <<...>> user attribute syntax" );
+      ("--const-attribute", Arg.Set const_attribute, " Allow __Const attribute");
       ( "--disallow-goto",
         Arg.Set disallow_goto,
-        "Forbid the goto operator and goto labels in the parser" );
+        " Forbid the goto operator and goto labels in the parser" );
       ( "--const-default-func-args",
         Arg.Set const_default_func_args,
-        "Statically check default function arguments are constant initializers"
+        " Statically check default function arguments are constant initializers"
       );
       ( "--disallow-silence",
         Arg.Set disallow_silence,
-        "Disallow the error suppression operator, @" );
+        " Disallow the error suppression operator, @" );
       ( "--abstract-static-props",
         Arg.Set abstract_static_props,
-        "Static properties can be abstract" );
+        " Static properties can be abstract" );
       ( "--disable-unset-class-const",
         Arg.Set disable_unset_class_const,
-        "Make unsetting a class const a parse error" );
+        " Make unsetting a class const a parse error" );
       ( "--disable-halt-compiler",
         Arg.Set disable_halt_compiler,
-        "Disable using PHP __halt_compiler()" );
+        " Disable using PHP __halt_compiler()" );
       ( "--glean-service",
         Arg.String (fun str -> glean_service := str),
-        "glean service name" );
+        " glean service name" );
       ( "--glean-hostname",
         Arg.String (fun str -> glean_hostname := str),
-        "glean hostname" );
-      ("--glean-port", Arg.Int (fun x -> glean_port := x), "glean port number");
+        " glean hostname" );
+      ("--glean-port", Arg.Int (fun x -> glean_port := x), " glean port number");
       ( "--glean-reponame",
         Arg.String (fun str -> glean_reponame := str),
         "glean repo name" );
       ( "--disallow-func-ptrs-in-constants",
         Arg.Set disallow_func_ptrs_in_constants,
-        "Disallow use of HH\\fun and HH\\class_meth in constants and constant initializers"
+        " Disallow use of HH\\fun and HH\\class_meth in constants and constant initializers"
       );
     ]
   in

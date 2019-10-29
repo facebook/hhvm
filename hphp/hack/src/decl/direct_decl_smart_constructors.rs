@@ -13,11 +13,14 @@ use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use hhbc_string_utils_rust::GetName;
 use oxidized::{
     aast,
-    ast_defs::Id,
+    ast_defs::{FunKind, Id},
     direct_decl_parser::Decls,
     pos::Pos,
     s_map::SMap,
-    typing_defs::{Ty, Ty_, TypedefType},
+    typing_defs::{
+        DeclTy, FunArity, FunElt, FunParam, FunParams, FunTparamsKind, FunType, ParamMode,
+        PossiblyEnforcedTy, Reactivity, Ty, Ty_, TypedefType,
+    },
     typing_reason::Reason,
 };
 use parser::{
@@ -135,6 +138,37 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> 
     }
 }
 
+fn into_variables_list(list: Node_) -> Result<FunParams<DeclTy>, String> {
+    match list {
+        Node_::List(nodes) => {
+            nodes
+                .into_iter()
+                .fold(Ok(Vec::new()), |acc, variable| match (acc, variable) {
+                    (Ok(mut variables), Node_::Variable(innards)) => {
+                        let (name, pos, ty) = *innards;
+                        variables.push(FunParam {
+                            pos,
+                            name: Some(name),
+                            type_: PossiblyEnforcedTy {
+                                enforced: false,
+                                type_: ty,
+                            },
+                            kind: ParamMode::FPnormal,
+                            accept_disposable: false,
+                            mutability: None,
+                            rx_annotation: None,
+                        });
+                        Ok(variables)
+                    }
+                    (Ok(_), n) => Err(format!("Expected a variable, but got {:?}", n)),
+                    (acc @ Err(_), _) => acc,
+                })
+        }
+        Node_::Ignored => Ok(Vec::new()),
+        n => Err(format!("Expected a list of variables, but got {:?}", n)),
+    }
+}
+
 #[derive(Clone, Debug)]
 enum NamespaceType {
     Simple(String),
@@ -223,11 +257,14 @@ impl<'a> State<'a> {
 
 #[derive(Clone, Debug)]
 pub enum HintValue {
-    String,
+    Void,
     Int,
-    Float,
-    Num,
     Bool,
+    Float,
+    String,
+    Num,
+    ArrayKey,
+    NoReturn,
     Apply(GetName),
 }
 
@@ -242,6 +279,7 @@ pub enum Node_ {
     Hint(HintValue, Pos),
     Backslash(Pos), // This needs a pos since it shows up in names.
     ListItem(Box<(Node_, Node_)>),
+    Variable(Box<(String, Pos, Ty)>),
     Class,
     Interface,
     Trait,
@@ -254,7 +292,6 @@ pub enum Node_ {
     ScopeResolutionExpression(Box<(Node_, Node_)>),
     // declarations
     ClassDecl(Box<ClassDeclChildren>),
-    FunctionDecl(Box<Node_>),
     MethodDecl(Box<Node_>),
     EnumDecl(Box<EnumDeclChildren>),
     TraitUseClause(Box<Node_>),
@@ -320,11 +357,14 @@ impl DirectDeclSmartConstructors<'_> {
             Node_::Hint(hv, pos) => {
                 let reason = Reason::Rhint(pos.clone());
                 let ty_ = match hv {
-                    HintValue::String => Ty_::Tprim(aast::Tprim::Tstring),
+                    HintValue::Void => Ty_::Tprim(aast::Tprim::Tvoid),
                     HintValue::Int => Ty_::Tprim(aast::Tprim::Tint),
-                    HintValue::Float => Ty_::Tprim(aast::Tprim::Tfloat),
-                    HintValue::Num => Ty_::Tprim(aast::Tprim::Tnum),
                     HintValue::Bool => Ty_::Tprim(aast::Tprim::Tbool),
+                    HintValue::Float => Ty_::Tprim(aast::Tprim::Tfloat),
+                    HintValue::String => Ty_::Tprim(aast::Tprim::Tstring),
+                    HintValue::Num => Ty_::Tprim(aast::Tprim::Tnum),
+                    HintValue::ArrayKey => Ty_::Tprim(aast::Tprim::Tarraykey),
+                    HintValue::NoReturn => Ty_::Tprim(aast::Tprim::Tnoreturn),
                     HintValue::Apply(gn) => Ty_::Tapply(
                         Id(pos.clone(), "\\".to_string() + &(gn.to_unescaped_string())),
                         Vec::new(),
@@ -336,6 +376,8 @@ impl DirectDeclSmartConstructors<'_> {
                 let (name, pos) = get_name("", node)?;
                 let name = if name.starts_with("\\") {
                     name
+                } else if self.state.namespace_builder.current_namespace().is_empty() {
+                    "\\".to_owned() + &name
                 } else {
                     "\\".to_owned()
                         + self.state.namespace_builder.current_namespace()
@@ -481,7 +523,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // So there we have it. Fully inline namespace tracking, and all it cost
         // was a little elbow grease and a lot of dignity.
         Ok(match kind {
-            TokenKind::Name => {
+            TokenKind::Name | TokenKind::Variable => {
                 let name = GetName::new(token_text(), |string| string);
                 if self.state.namespace_builder.is_building_namespace {
                     self.state
@@ -522,6 +564,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 HintValue::Apply(GetName::new(token_text(), |string| string)),
                 token_pos(),
             ),
+            TokenKind::Void => Node_::Hint(HintValue::Void, token_pos()),
             TokenKind::Backslash => {
                 if self.state.namespace_builder.is_building_namespace {
                     self.state
@@ -706,6 +749,20 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         Ok(Node_::Ignored)
     }
 
+    fn make_parameter_declaration(
+        &mut self,
+        _arg0: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        hint: Self::R,
+        name: Self::R,
+        _arg5: Self::R,
+    ) -> Self::R {
+        let (name, pos) = get_name("", &name?)?;
+        let ty = self.node_to_ty(&hint?)?;
+        Ok(Node_::Variable(Box::new((name, pos, ty))))
+    }
+
     fn make_function_declaration(
         &mut self,
         _attributes: Self::R,
@@ -726,15 +783,51 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         name: Self::R,
         _type_params: Self::R,
         _left_parens: Self::R,
-        _param_list: Self::R,
+        param_list: Self::R,
         _right_parens: Self::R,
         _colon: Self::R,
-        _type: Self::R,
+        ret_hint: Self::R,
         _where: Self::R,
     ) -> Self::R {
         Ok(match name? {
             Node_::Ignored => Node_::Ignored,
-            name => Node_::FunctionDecl(Box::new(name)),
+            name => {
+                let (name, pos) =
+                    get_name(self.state.namespace_builder.current_namespace(), &name)?;
+                let params = into_variables_list(param_list?)?;
+                self.state.decls.funs.insert(
+                    name,
+                    FunElt {
+                        deprecated: None,
+                        type_: Ty(
+                            Reason::Rwitness(pos.clone()),
+                            Box::new(Ty_::Tfun(FunType {
+                                is_coroutine: false,
+                                arity: FunArity::Fstandard(
+                                    params.len() as isize,
+                                    params.len() as isize,
+                                ),
+                                tparams: (Vec::new(), FunTparamsKind::FTKtparams),
+                                where_constraints: Vec::new(),
+                                params,
+                                ret: PossiblyEnforcedTy {
+                                    enforced: false,
+                                    type_: self.node_to_ty(&ret_hint?)?,
+                                },
+                                fun_kind: FunKind::FSync,
+                                reactive: Reactivity::Nonreactive,
+                                return_disposable: false,
+                                mutability: None,
+                                returns_mutable: false,
+                                returns_void_to_rx: false,
+                            })),
+                        ),
+                        decl_errors: None,
+                        pos,
+                    },
+                );
+                Node_::Ignored
+            }
         })
     }
 

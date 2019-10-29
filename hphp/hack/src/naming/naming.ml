@@ -112,7 +112,6 @@ module Env : sig
 
   val type_name :
     ?elaborate_kind:NS.elaborate_kind ->
-    elaborate_namespace:bool ->
     genv * lenv ->
     Ast_defs.id ->
     allow_typedef:bool ->
@@ -441,12 +440,10 @@ end = struct
 
   let type_name
       ?(elaborate_kind = NS.ElaborateClass)
-      ~elaborate_namespace
       (genv, _)
-      x
+      ((p, name) as x)
       ~allow_typedef
       ~allow_generics =
-    let (p, name) = x in
     match SMap.find_opt name genv.type_params with
     | Some (reified, _) ->
       if not allow_generics then Errors.generics_not_allowed p;
@@ -458,20 +455,14 @@ end = struct
       end;
       x
     | None ->
-      let ((pos, name) as x) =
-        if elaborate_namespace then
-          NS.elaborate_id genv.namespace elaborate_kind x
-        else
-          x
-      in
       (match Naming_table.Types.get_pos name with
-      | Some (_def_pos, Naming_table.TClass) -> (pos, name)
+      | Some (_def_pos, Naming_table.TClass) -> x
       | Some (def_pos, Naming_table.TTypedef) when not allow_typedef ->
         let (full_pos, _) = GEnv.get_full_pos (def_pos, name) in
-        Errors.unexpected_typedef pos full_pos;
-        (pos, name)
-      | Some (_def_pos, Naming_table.TTypedef) -> (pos, name)
-      | Some (_def_pos, Naming_table.TRecordDef) -> (pos, name)
+        Errors.unexpected_typedef p full_pos;
+        x
+      | Some (_def_pos, Naming_table.TTypedef) -> x
+      | Some (_def_pos, Naming_table.TRecordDef) -> x
       | None ->
         let kind =
           match elaborate_kind with
@@ -577,12 +568,7 @@ let convert_shape_name env = function
           Errors.self_outside_class pos;
           (pos, SN.Classes.cUnknown)
       ) else
-        Env.type_name
-          ~elaborate_namespace:false
-          env
-          x
-          ~allow_typedef:false
-          ~allow_generics:false
+        Env.type_name env x ~allow_typedef:false ~allow_generics:false
     in
     Ast_defs.SFclass_const (class_name, (pos, y))
 
@@ -669,9 +655,12 @@ module Make (GetLocals : GetLocals) = struct
 
   and unwrap_mutability p =
     match p with
-    | (_, Aast.Happly ((_, "Mutable"), [t])) -> (Some N.PMutable, t)
-    | (_, Aast.Happly ((_, "MaybeMutable"), [t])) -> (Some N.PMaybeMutable, t)
-    | (_, Aast.Happly ((_, "OwnedMutable"), [t])) -> (Some N.POwnedMutable, t)
+    | (_, Aast.Happly ((_, hn), [t])) when hn = SN.Rx.hMutable ->
+      (Some N.PMutable, t)
+    | (_, Aast.Happly ((_, hn), [t])) when hn = SN.Rx.hMaybeMutable ->
+      (Some N.PMaybeMutable, t)
+    | (_, Aast.Happly ((_, hn), [t])) when hn = SN.Rx.hOwnedMutable ->
+      (Some N.POwnedMutable, t)
     | t -> (None, t)
 
   and hfun env reactivity is_coroutine hl kl variadic_hint h =
@@ -762,7 +751,7 @@ module Make (GetLocals : GetLocals) = struct
       hfun env reactivity coroutine hl kl variadic_hint h
     (* Special case for Rx<function> *)
     | Aast.Happly
-        ( (_, "Rx"),
+        ( (_, hname),
           [
             ( _,
               Aast.Hfun
@@ -777,11 +766,12 @@ module Make (GetLocals : GetLocals) = struct
                     hf_return_ty = h;
                     hf_is_mutable_return = _;
                   } );
-          ] ) ->
+          ] )
+      when hname = SN.Rx.hRx ->
       hfun env N.FReactive hf_is_coroutine hl kl variadic_hint h
     (* Special case for RxShallow<function> *)
     | Aast.Happly
-        ( (_, "RxShallow"),
+        ( (_, hname),
           [
             ( _,
               Aast.Hfun
@@ -796,11 +786,12 @@ module Make (GetLocals : GetLocals) = struct
                     hf_return_ty = h;
                     hf_is_mutable_return = _;
                   } );
-          ] ) ->
+          ] )
+      when hname = SN.Rx.hRxShallow ->
       hfun env N.FShallow hf_is_coroutine hl kl variadic_hint h
     (* Special case for RxLocal<function> *)
     | Aast.Happly
-        ( (_, "RxLocal"),
+        ( (_, hname),
           [
             ( _,
               Aast.Hfun
@@ -815,7 +806,8 @@ module Make (GetLocals : GetLocals) = struct
                     hf_return_ty = h;
                     hf_is_mutable_return = _;
                   } );
-          ] ) ->
+          ] )
+      when hname = SN.Rx.hRxLocal ->
       hfun env N.FLocal hf_is_coroutine hl kl variadic_hint h
     | Aast.Happly (((p, _x) as id), hl) ->
       let hint_id =
@@ -1012,7 +1004,6 @@ module Make (GetLocals : GetLocals) = struct
         | _ ->
           let name =
             Env.type_name
-              ~elaborate_namespace:true
               ~elaborate_kind
               env
               id
@@ -1193,7 +1184,6 @@ module Make (GetLocals : GetLocals) = struct
     in
     let name =
       Env.type_name
-        ~elaborate_namespace:false
         env
         c.Aast.c_name
         ~allow_typedef:false
@@ -1344,12 +1334,7 @@ module Make (GetLocals : GetLocals) = struct
         if SN.UserAttributes.is_reserved name then
           ua_name
         else
-          Env.type_name
-            ~elaborate_namespace:false
-            env
-            ua_name
-            ~allow_typedef:false
-            ~allow_generics:false
+          Env.type_name env ua_name ~allow_typedef:false ~allow_generics:false
       in
       if not (validate_seen ua_name) then
         acc
@@ -2295,12 +2280,7 @@ module Make (GetLocals : GetLocals) = struct
         match Naming_table.Types.get_pos name with
         | Some (_, Naming_table.TTypedef) when snd x2 = "class" ->
           N.Typename
-            (Env.type_name
-               ~elaborate_namespace:false
-               env
-               x1
-               ~allow_typedef:true
-               ~allow_generics:false)
+            (Env.type_name env x1 ~allow_typedef:true ~allow_generics:false)
         | _ -> N.Class_const (make_class_id env x1, x2)
       end
     | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), x2) ->
@@ -2311,12 +2291,7 @@ module Make (GetLocals : GetLocals) = struct
         match Naming_table.Types.get_pos name with
         | Some (_, Naming_table.TTypedef) when snd x2 = "class" ->
           N.Typename
-            (Env.type_name
-               ~elaborate_namespace:false
-               env
-               x1
-               ~allow_typedef:true
-               ~allow_generics:false)
+            (Env.type_name env x1 ~allow_typedef:true ~allow_generics:false)
         | _ -> N.Class_const (make_class_id env x1, x2)
       end
     | Aast.Class_const _ -> (* TODO: report error in strict mode *) N.Any
@@ -2403,7 +2378,6 @@ module Make (GetLocals : GetLocals) = struct
             | ((pc, N.String cl), (pm, N.String meth)) ->
               N.Method_caller
                 ( Env.type_name
-                    ~elaborate_namespace:false
                     env
                     (pc, cl)
                     ~allow_typedef:false
@@ -2413,7 +2387,6 @@ module Make (GetLocals : GetLocals) = struct
               when mem = SN.Members.mClass ->
               N.Method_caller
                 ( Env.type_name
-                    ~elaborate_namespace:false
                     env
                     cl
                     ~allow_typedef:false
@@ -2442,7 +2415,6 @@ module Make (GetLocals : GetLocals) = struct
             | ((pc, N.String cl), (pm, N.String meth)) ->
               N.Smethod_id
                 ( Env.type_name
-                    ~elaborate_namespace:false
                     env
                     (pc, cl)
                     ~allow_typedef:false
@@ -2465,7 +2437,6 @@ module Make (GetLocals : GetLocals) = struct
               when mem = SN.Members.mClass ->
               N.Smethod_id
                 ( Env.type_name
-                    ~elaborate_namespace:false
                     env
                     cl
                     ~allow_typedef:false
@@ -2649,12 +2620,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.New _ -> failwith "ast_to_nast aast.new"
     | Aast.Record (id, is_array, l) ->
       let id =
-        Env.type_name
-          ~elaborate_namespace:false
-          env
-          id
-          ~allow_typedef:false
-          ~allow_generics:false
+        Env.type_name env id ~allow_typedef:false ~allow_generics:false
       in
       let l = List.map l (fun (e1, e2) -> (expr env e1, expr env e2)) in
       N.Record (id, is_array, l)
@@ -2695,12 +2661,7 @@ module Make (GetLocals : GetLocals) = struct
       N.Lfun (f, !to_capture)
     | Aast.Xml (x, al, el) ->
       N.Xml
-        ( Env.type_name
-            ~elaborate_namespace:false
-            env
-            x
-            ~allow_typedef:false
-            ~allow_generics:false,
+        ( Env.type_name env x ~allow_typedef:false ~allow_generics:false,
           attrl env al,
           exprl env el )
     | Aast.Shape fdl ->
@@ -2806,13 +2767,8 @@ module Make (GetLocals : GetLocals) = struct
           (p, N.Lvar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar))
       | x when x.[0] = '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
       | _ ->
-        N.CI
-          (Env.type_name
-             ~elaborate_namespace:false
-             env
-             cid
-             ~allow_typedef:false
-             ~allow_generics:true) )
+        N.CI (Env.type_name env cid ~allow_typedef:false ~allow_generics:true)
+    )
 
   and casel env l = List.map l (case env)
 
@@ -2842,12 +2798,7 @@ module Make (GetLocals : GetLocals) = struct
             Env.new_let_local env (p2, name2)
         in
         let b = branch env b in
-        ( Env.type_name
-            ~elaborate_namespace:false
-            env
-            (p1, lid1)
-            ~allow_typedef:true
-            ~allow_generics:false,
+        ( Env.type_name env (p1, lid1) ~allow_typedef:true ~allow_generics:false,
           x2,
           b ))
 

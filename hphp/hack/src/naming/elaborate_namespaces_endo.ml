@@ -31,6 +31,11 @@ let is_special_identifier =
   in
   (fun name -> List.exists ~f:(fun ident -> ident = name) special_identifiers)
 
+let is_reserved_type_hint name =
+  let base_name = Utils.strip_ns name in
+  SN.Typehints.is_reserved_type_hint base_name
+  || SN.Rx.is_reactive_typehint name
+
 let elaborate_type_name env ((_, name) as id) =
   if
     SSet.mem name env.type_params
@@ -93,6 +98,16 @@ let namespace_elaborater =
     method! on_method_redeclaration env mt =
       let env = extend_tparams env mt.mt_tparams in
       super#on_method_redeclaration env mt
+
+    method! on_pu_enum env pue =
+      let type_params =
+        List.fold
+          pue.pu_case_types
+          ~f:(fun acc sid -> SSet.add (snd sid) acc)
+          ~init:env.type_params
+      in
+      let env = { env with type_params } in
+      super#on_pu_enum env pue
 
     method! on_gconst env gc =
       let env = { env with namespace = gc.cst_namespace } in
@@ -319,6 +334,27 @@ let namespace_elaborater =
             List.map al ~f:(self#on_xhp_attribute env),
             List.map el ~f:(self#on_expr env) )
       | _ -> super#on_expr_ env expr
+
+    method! on_hint_ env h =
+      let is_rx name =
+        name = SN.Rx.hRx || name = SN.Rx.hRxLocal || name = SN.Rx.hRxShallow
+      in
+      let is_xhp_screwup name =
+        name = "Xhp" || name = ":Xhp" || name = "XHP"
+      in
+      match h with
+      | Happly ((_, name), _) when is_xhp_screwup name -> super#on_hint_ env h
+      | Happly ((_, name), [(_, Hfun _)]) when is_rx name ->
+        super#on_hint_ env h
+      | Happly (((_, name) as x), hl) when is_rx name ->
+        let x = elaborate_type_name env x in
+        Happly (x, List.map hl ~f:(self#on_hint env))
+      | Happly ((_, name), _) when is_reserved_type_hint name ->
+        super#on_hint_ env h
+      | Happly (x, hl) ->
+        let x = elaborate_type_name env x in
+        Happly (x, List.map hl ~f:(self#on_hint env))
+      | _ -> super#on_hint_ env h
 
     method! on_shape_field_name env sfn =
       match sfn with

@@ -520,6 +520,41 @@ module Typehints = struct
 
   let wildcard = "_"
 
+  let is_reserved_type_hint =
+    let reserved_typehints =
+      [
+        null;
+        void;
+        resource;
+        num;
+        arraykey;
+        noreturn;
+        mixed;
+        nonnull;
+        this;
+        dynamic;
+        nothing;
+        int;
+        bool;
+        float;
+        string;
+        array;
+        darray;
+        varray;
+        varray_or_darray;
+        integer;
+        boolean;
+        double;
+        real;
+        callable;
+        unset_cast;
+        wildcard;
+      ]
+    in
+    let h = HashSet.create (List.length reserved_typehints) in
+    List.iter reserved_typehints (HashSet.add h);
+    (fun x -> HashSet.mem h x)
+
   let is_reserved_global_name x =
     x = array || x = callable || x = Classes.cSelf || x = Classes.cParent
 
@@ -644,6 +679,24 @@ module Rx = struct
   let cAsyncIterator = "\\HH\\Rx\\AsyncIterator"
 
   let move = "\\HH\\Rx\\move"
+
+  let hRx = "Rx"
+
+  let hRxShallow = "RxShallow"
+
+  let hRxLocal = "RxLocal"
+
+  let hMutable = "Mutable"
+
+  let hMaybeMutable = "MaybeMutable"
+
+  let hOwnedMutable = "OwnedMutable"
+
+  let is_reactive_typehint =
+    let reactive_typehints =
+      [hRx; hRxShallow; hRxLocal; hMutable; hMaybeMutable; hOwnedMutable]
+    in
+    (fun name -> List.exists reactive_typehints ~f:(fun th -> th = name))
 end
 
 module Shapes = struct

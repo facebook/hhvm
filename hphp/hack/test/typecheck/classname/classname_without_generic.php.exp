@@ -1,0 +1,2 @@
+File "classname_without_generic.php", line 4, characters 13-21:
+Missing type parameter to classname; classname is entirely meaningless without one (Naming[2066])

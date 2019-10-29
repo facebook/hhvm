@@ -726,6 +726,9 @@ pub mod superglobals {
     pub fn is_superglobal(x: &str) -> bool {
         SUPERGLOBALS_SET.contains(x)
     }
+    pub fn is_any_global(x: &str) -> bool {
+        is_superglobal(x) || x == GLOBALS
+    }
 }
 
 pub mod ppl_functions {

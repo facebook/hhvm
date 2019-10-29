@@ -2717,9 +2717,7 @@ where
                     if let Token(token) = &x.prefix_unary_operator.syntax {
                         if token.kind() == TokenKind::Ampersand {
                             let text = self.text(&x.prefix_unary_operand);
-                            if sn::superglobals::is_superglobal(text)
-                                || text == sn::superglobals::GLOBALS
-                            {
+                            if sn::superglobals::is_any_global(text) {
                                 return Some(errors::error2078);
                             } else if in_constructor_call {
                                 return Some(errors::reference_param_in_construct);
@@ -2736,6 +2734,13 @@ where
                         let expression = &x.decorated_expression_expression;
                         match &expression.syntax {
                             _ if in_constructor_call => Some(errors::inout_param_in_construct),
+                            VariableExpression(x)
+                                if sn::superglobals::is_any_global(
+                                    self.text(&x.variable_expression),
+                                ) =>
+                            {
+                                Some(errors::fun_arg_invalid_arg)
+                            }
                             BinaryExpression(_) => Some(errors::fun_arg_inout_set),
                             QualifiedName(_) => Some(errors::fun_arg_inout_const),
                             Token(_) if expression.is_name() => Some(errors::fun_arg_inout_const),
@@ -2750,9 +2755,7 @@ where
                                 }
                                 _ => {
                                     let text = self.text(&x.subscript_receiver);
-                                    if sn::superglobals::is_superglobal(text)
-                                        || text == sn::superglobals::GLOBALS
-                                    {
+                                    if sn::superglobals::is_any_global(text) {
                                         Some(errors::fun_arg_inout_containers)
                                     } else {
                                         None
@@ -4509,9 +4512,7 @@ where
     fn is_global_in_const_decl(&self, init: &'a Syntax<Token, Value>) -> bool {
         if let SimpleInitializer(x) = &init.syntax {
             if let VariableExpression(x) = &x.simple_initializer_value.syntax {
-                let text = self.text(&x.variable_expression);
-                return sn::superglobals::is_superglobal(&text)
-                    || text == sn::superglobals::GLOBALS;
+                return sn::superglobals::is_any_global(self.text(&x.variable_expression));
             }
         }
         false

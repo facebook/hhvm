@@ -6,8 +6,9 @@
  *
  *)
 
-let update ~(file : string) ~(ttl : float) : (string, string) result =
-  ignore (file, ttl);
+let update ~(file : string) ~(source : string option) ~(ttl : float) :
+    (string, string) result =
+  ignore (file, source, ttl);
   Ok "Experiments config update: nothing to do"
 
 let get_primary_owner () : string option = Some "user"

@@ -11,6 +11,7 @@
     ast
     core_kernel
     heap_ident
+    hh_autoimport
     ide_rpc_api_types
     nast
     pos

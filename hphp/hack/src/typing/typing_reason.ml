@@ -8,7 +8,8 @@
  *)
 
 open Core_kernel
-open Utils
+
+let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
 
 (* The reason why something is expected to have a certain type *)
 type t =
@@ -286,7 +287,7 @@ let rec to_string prefix r =
       (p2, "It was implicitly typed as " ^ s ^ " during this operation");
     ]
   | Rlost_info (s, r1, p2, under_lambda) ->
-    let s = Utils.strip_ns s in
+    let s = strip_ns s in
     let cause =
       if under_lambda then
         "by this lambda function"
@@ -313,7 +314,7 @@ let rec to_string prefix r =
       ( p,
         prefix
         ^ "; implicitly defined constant ::class is a string that contains the fully qualified name of "
-        ^ Utils.strip_ns s );
+        ^ strip_ns s );
     ]
   | Runknown_class _ -> [(p, prefix ^ "; this class name is unknown to Hack")]
   | Rdynamic_yield (_, yield_pos, implicit_name, yield_name) ->
@@ -441,14 +442,14 @@ let rec to_string prefix r =
     @ [
         ( p,
           "Considering that this type argument is contravariant with respect to "
-          ^ class_name );
+          ^ strip_ns class_name );
       ]
   | Rinvariant_generic (r_orig, class_name) ->
     to_string prefix r_orig
     @ [
         ( p,
           "Considering that this type argument is invariant with respect to "
-          ^ class_name );
+          ^ strip_ns class_name );
       ]
   | Rregex _ -> [(p, prefix ^ " resulting from this regex pattern")]
   | Rlambda_use p ->
@@ -776,7 +777,7 @@ let string_of_ureason = function
   | URxhp (cls, attr) ->
     "Invalid xhp value for attribute " ^ attr ^ " in " ^ strip_ns cls
   | URxhp_spread -> "The attribute spread operator cannot be called on non-XHP"
-  | URindex s -> "Invalid index type for this " ^ s
+  | URindex s -> "Invalid index type for this " ^ strip_ns s
   | URparam -> "Invalid argument"
   | URparam_inout -> "Invalid argument to an inout parameter"
   | URarray_value -> "Incompatible field values"

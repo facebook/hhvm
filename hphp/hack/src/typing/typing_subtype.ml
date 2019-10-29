@@ -194,13 +194,13 @@ let check_mutability
   (* immutable is not compatible with mutable *)
   | (None, Some (Param_borrowed_mutable | Param_owned_mutable))
   (* mutable is not compatible with immutable  *)
-  
+
   | (Some (Param_borrowed_mutable | Param_owned_mutable), None)
   (* borrowed mutable is not compatible with owned mutable *)
-  
+
   | (Some Param_borrowed_mutable, Some Param_owned_mutable)
   (* maybe-mutable is not compatible with immutable/mutable *)
-  
+
   | ( Some Param_maybe_mutable,
       (None | Some (Param_borrowed_mutable | Param_owned_mutable)) ) ->
     ( env,
@@ -1570,14 +1570,11 @@ and simplify_subtype_variance
       | Ast_defs.Covariant -> simplify_subtype child super env
       | Ast_defs.Contravariant ->
         let super =
-          ( Reason.Rcontravariant_generic (fst super, Utils.strip_ns cid),
-            snd super )
+          (Reason.Rcontravariant_generic (fst super, cid), snd super)
         in
         simplify_subtype super child env
       | Ast_defs.Invariant ->
-        let super' =
-          (Reason.Rinvariant_generic (fst super, Utils.strip_ns cid), snd super)
-        in
+        let super' = (Reason.Rinvariant_generic (fst super, cid), snd super) in
         env |> simplify_subtype child super' &&& simplify_subtype super' child
     end
     &&& simplify_subtype_variance cid variance_reifiedl childrenl superl
@@ -1797,7 +1794,7 @@ and subtype_reactivity
   (* ok:
      <<__Rx>>
      function f(<<__AtMostRxAsFunc>> (function(): int) $f) { return $f() }  *)
-  
+
   | (RxVar None, RxVar _, _) ->
     true
   | (RxVar (Some sub), RxVar (Some super), _)

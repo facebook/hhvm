@@ -1,5 +1,5 @@
 File "constraints_stack_overflow.php", line 18, characters 5-19:
-Invalid index type for this HH\dict (Typing[4324])
+Invalid index type for this dict (Typing[4324])
 File "constraints_stack_overflow.php", line 4, characters 15-16:
 This is a value of generic type Tk
 File "constraints_stack_overflow.php", line 7, characters 16-17:

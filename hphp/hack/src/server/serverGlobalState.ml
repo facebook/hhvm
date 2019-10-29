@@ -13,7 +13,6 @@ type t = {
   saved_tmp: Path.t;
   saved_gi_tmp: string;
   trace: bool;
-  fuzzy: bool;
   profile_log: bool;
   fixme_codes: ISet.t;
   strict_codes: ISet.t;
@@ -29,7 +28,6 @@ let save ~logging_init =
     saved_tmp = Path.make Relative_path.(path_of_prefix Tmp);
     saved_gi_tmp = Typing_global_inference.get_path ();
     trace = !Typing_deps.trace;
-    fuzzy = SymbolIndex.fuzzy_search_enabled ();
     profile_log = !Utils.profile;
     fixme_codes = !Errors.ignored_fixme_codes;
     strict_codes = !Errors.error_codes_treated_strictly;
@@ -51,7 +49,6 @@ let restore state ~(worker_id : int) =
   Relative_path.(set_path_prefix Tmp state.saved_tmp);
   Typing_global_inference.restore_path state.saved_gi_tmp;
   Typing_deps.trace := state.trace;
-  SymbolIndex.set_fuzzy_search_enabled state.fuzzy;
   Utils.profile := state.profile_log;
   Errors.ignored_fixme_codes := state.fixme_codes;
   Errors.error_codes_treated_strictly := state.strict_codes;
@@ -66,12 +63,6 @@ let to_string state =
   let saved_tmp = Path.to_string state.saved_tmp in
   let trace =
     if state.trace then
-      "true"
-    else
-      "false"
-  in
-  let fuzzy =
-    if state.fuzzy then
       "true"
     else
       "false"
@@ -92,7 +83,6 @@ let to_string state =
     ("saved_tmp", saved_tmp);
     ("saved_gi_tmp", state.saved_gi_tmp);
     ("trace", trace);
-    ("fuzzy", fuzzy);
     ("profile_log", profile_log);
     ("fixme_codes", fixme_codes);
     ("strict_codes", strict_codes);

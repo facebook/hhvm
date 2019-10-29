@@ -1000,10 +1000,7 @@ let scan_files_for_symbol_index
         (filename, SearchUtils.Full fileinfo, SearchUtils.TypeChecker))
   in
   let sienv_ref = ref sienv in
-  SymbolIndex.update_files
-    ~sienv:sienv_ref
-    ~workers:None
-    ~paths:transformed_list;
+  SymbolIndex.update_files ~sienv:sienv_ref ~paths:transformed_list;
   !sienv_ref
 
 let handle_mode

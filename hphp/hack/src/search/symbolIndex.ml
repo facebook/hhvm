@@ -10,11 +10,6 @@
 open Core_kernel
 open SearchUtils
 
-(* Note that fuzzy search does not currently do anything *)
-let fuzzy_search_enabled () = !HackSearchService.fuzzy
-
-let set_fuzzy_search_enabled x = HackSearchService.fuzzy := x
-
 (* Set the currently selected search provider *)
 let initialize
     ~(globalrev : int option)
@@ -41,8 +36,7 @@ let initialize
       CustomSearchService.initialize ~globalrev ~gleanopt;
       sienv
     | NoIndex
-    | LocalIndex
-    | TrieIndex ->
+    | LocalIndex ->
       sienv
   in
   (* Fetch namespaces from provider-specific query *)
@@ -51,8 +45,7 @@ let initialize
     | SqliteIndex -> SqliteSearchService.fetch_namespaces ~sienv
     | CustomIndex -> CustomSearchService.fetch_namespaces ()
     | NoIndex
-    | LocalIndex
-    | TrieIndex ->
+    | LocalIndex ->
       []
   in
   (* Register all namespaces *)
@@ -157,9 +150,7 @@ let find_matching_symbols
      * that we haven't seen before *)
     let local_results =
       match sienv.sie_provider with
-      | NoIndex
-      | TrieIndex ->
-        []
+      | NoIndex -> []
       | CustomIndex
       | LocalIndex
       | SqliteIndex ->
@@ -192,8 +183,6 @@ let find_matching_symbols
             ~kind_filter
         in
         LocalSearchService.extract_dead_results ~sienv ~results
-      | TrieIndex ->
-        HackSearchService.index_search query_text max_results kind_filter
       | LocalIndex
       | NoIndex ->
         []
@@ -225,7 +214,6 @@ let find_matching_symbols
  *)
 let update_files
     ~(sienv : si_env ref)
-    ~(workers : MultiWorker.worker list option)
     ~(paths : (Relative_path.t * info * file_source) list) : unit =
   match !sienv.sie_provider with
   | NoIndex -> ()
@@ -235,7 +223,6 @@ let update_files
     List.iter paths ~f:(fun (path, info, detector) ->
         if detector = SearchUtils.TypeChecker then
           sienv := LocalSearchService.update_file ~sienv:!sienv ~path ~info)
-  | TrieIndex -> HackSearchService.update_from_typechecker workers paths
 
 (* Update from fast facts parser directly *)
 let update_from_facts
@@ -256,7 +243,6 @@ let remove_files
   | SqliteIndex ->
     Relative_path.Set.iter paths ~f:(fun path ->
         sienv := LocalSearchService.remove_file ~sienv:!sienv ~path)
-  | TrieIndex -> HackSearchService.MasterApi.clear_shared_memory paths
 
 (* Fetch best available position information for a symbol *)
 let get_position_for_symbol (symbol : string) (kind : si_kind) :

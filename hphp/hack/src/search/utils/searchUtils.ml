@@ -13,7 +13,6 @@ type search_provider =
   | CustomIndex
   | NoIndex
   | SqliteIndex
-  | TrieIndex
   | LocalIndex
 [@@deriving show]
 
@@ -35,9 +34,8 @@ let provider_of_string (provider_str : string) : search_provider =
   | "SqliteIndex" -> SqliteIndex
   | "NoIndex" -> NoIndex
   | "CustomIndex" -> CustomIndex
-  | "TrieIndex" -> TrieIndex
   | "LocalIndex" -> LocalIndex
-  | _ -> TrieIndex
+  | _ -> SqliteIndex
 
 (* Convert a string to a human readable description of the provider *)
 let descriptive_name_of_provider (provider : search_provider) : string =
@@ -45,7 +43,6 @@ let descriptive_name_of_provider (provider : search_provider) : string =
   | CustomIndex -> "Custom symbol index"
   | NoIndex -> "Symbol index disabled"
   | SqliteIndex -> "Sqlite"
-  | TrieIndex -> "SharedMem/Trie"
   | LocalIndex -> "Local file index only"
 
 (* Shared Search code between Fuzzy and Trie based searches *)

@@ -7,10 +7,6 @@
  *
  *)
 
-val fuzzy_search_enabled : unit -> bool
-
-val set_fuzzy_search_enabled : bool -> unit
-
 (* Get or set the currently selected search provider *)
 val initialize :
   globalrev:int option ->
@@ -47,7 +43,6 @@ val find_matching_symbols :
  * into a usable format. *)
 val update_files :
   sienv:SearchUtils.si_env ref ->
-  workers:MultiWorker.worker list option ->
   paths:(Relative_path.t * SearchUtils.info * SearchUtils.file_source) list ->
   unit
 

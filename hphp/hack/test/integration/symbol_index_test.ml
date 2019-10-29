@@ -204,7 +204,7 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
       (foo3path, Full foo3fileinfo, TypeChecker);
     ]
   in
-  SymbolIndex.update_files ~sienv ~workers:None ~paths:changelist;
+  SymbolIndex.update_files ~sienv ~paths:changelist;
   let n = LocalSearchService.count_local_fileinfos !sienv in
   Hh_logger.log "Added back; local search service now contains %d files" n;
 

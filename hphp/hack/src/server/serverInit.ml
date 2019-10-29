@@ -23,7 +23,7 @@ let run_search
       !sienv.SearchUtils.sie_provider
   then (
     (* The duration is already logged by SearchServiceRunner *)
-    SearchServiceRunner.run_completely genv sienv;
+    SearchServiceRunner.run_completely sienv;
     HackEventLogger.update_search_end t
   ) else
     ()

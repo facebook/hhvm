@@ -322,7 +322,7 @@ let parsing genv env to_check ~stop_at_errors =
       genv
       !sie.SearchUtils.sie_provider
   then
-    SearchServiceRunner.run_completely genv env.local_symbol_table;
+    SearchServiceRunner.run_completely env.local_symbol_table;
 
   if stop_at_errors then (
     (* Revert changes and ignore results for IDE files that failed parsing *)

@@ -79,8 +79,6 @@ let monitor_daemon_main
   if local_config.ServerLocalConfig.use_full_fidelity_parser then
     HackEventLogger.set_use_full_fidelity_parser true;
 
-  SymbolIndex.set_fuzzy_search_enabled
-    local_config.ServerLocalConfig.enable_fuzzy_search;
   if ServerArgs.check_mode options then
     ServerMain.run_once options config local_config
   else

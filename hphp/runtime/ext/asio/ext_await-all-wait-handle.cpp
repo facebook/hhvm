@@ -112,7 +112,7 @@ void HHVM_STATIC_METHOD(AwaitAllWaitHandle, setOnCreateCallback,
   AsioSession::Get()->setOnAwaitAllCreate(callback);
 }
 
-template<bool convert, typename Iter>
+template<typename Iter>
 Object c_AwaitAllWaitHandle::Create(Iter iter) {
   auto ctx_idx = std::numeric_limits<context_idx_t>::max();
   uint32_t cnt = 0;
@@ -178,12 +178,12 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
 
   switch (ad->kind()) {
     case ArrayData::kPackedKind:
-      return c_AwaitAllWaitHandle::Create<true>([=](auto fn) {
+      return c_AwaitAllWaitHandle::Create([=](auto fn) {
         PackedArray::IterateV(ad, fn);
       });
 
     case ArrayData::kMixedKind:
-      return c_AwaitAllWaitHandle::Create<true>([=](auto fn) {
+      return c_AwaitAllWaitHandle::Create([=](auto fn) {
         MixedArray::IterateV(MixedArray::asMixed(ad), fn);
       });
 
@@ -220,7 +220,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
   assertx(ad);
   assertx(ad->isVecArray());
   if (!ad->size()) return Object{returnEmpty()};
-  return c_AwaitAllWaitHandle::Create<false>([=](auto fn) {
+  return c_AwaitAllWaitHandle::Create([=](auto fn) {
     PackedArray::IterateV(ad, fn);
   });
 }
@@ -231,7 +231,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
   assertx(ad);
   assertx(ad->isDict());
   if (!ad->size()) return Object{returnEmpty()};
-  return c_AwaitAllWaitHandle::Create<false>([=](auto fn) {
+  return c_AwaitAllWaitHandle::Create([=](auto fn) {
     MixedArray::IterateV(MixedArray::asMixed(ad), fn);
   });
 }
@@ -243,7 +243,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
     if (LIKELY(obj->isCollection() && isMapCollection(obj->collectionType()))) {
       assertx(collections::isType(obj->getVMClass(), CollectionType::Map,
                                                      CollectionType::ImmMap));
-      return c_AwaitAllWaitHandle::Create<false>([=](auto fn) {
+      return c_AwaitAllWaitHandle::Create([=](auto fn) {
         MixedArray::IterateV(static_cast<BaseMap*>(obj)->arrayData(), fn);
       });
     }
@@ -259,7 +259,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
                isVectorCollection(obj->collectionType()))) {
       assertx(collections::isType(obj->getVMClass(), CollectionType::Vector,
                                                   CollectionType::ImmVector));
-      return c_AwaitAllWaitHandle::Create<false>([=](auto fn) {
+      return c_AwaitAllWaitHandle::Create([=](auto fn) {
         PackedArray::IterateV(static_cast<BaseVector*>(obj)->arrayData(), fn);
       });
     }

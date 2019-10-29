@@ -152,19 +152,6 @@ void raise_record_field_error(const StringData* recName,
                               fieldName, recName));
 }
 
-void raise_property_typehint_binding_error(const Class* declCls,
-                                           const StringData* propName,
-                                           bool isSoft) {
-  raise_property_typehint_error(
-    folly::sformat(
-      "Property '{}::{}' with type annotation binding to ref",
-      declCls->name(),
-      propName
-    ),
-    isSoft
-  );
-}
-
 void raise_property_typehint_unset_error(const Class* declCls,
                                          const StringData* propName,
                                          bool isSoft) {

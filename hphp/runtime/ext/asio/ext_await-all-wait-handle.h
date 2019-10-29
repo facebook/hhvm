@@ -105,7 +105,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   void scan(type_scan::Scanner&) const;
 
  private:
-  template<bool convert, typename Iter>
+  template<typename Iter>
   static Object Create(Iter iter);
   static req::ptr<c_AwaitAllWaitHandle> Alloc(int32_t cnt);
   void initialize(context_idx_t ctx_idx);

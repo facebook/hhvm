@@ -695,7 +695,6 @@ void VariableSerializer::preventOverflow(const Object& v,
 }
 
 void VariableSerializer::write(const_variant_ref v, bool isArrayKey) {
-  setReferenced(false);
   if (m_type == Type::DebugDump) {
     setRefCount(v.getRefCount());
   }
@@ -739,8 +738,6 @@ void VariableSerializer::writeNull() {
 }
 
 void VariableSerializer::writeOverflow(tv_rval tv) {
-  bool wasRef = m_referenced;
-  setReferenced(false);
   switch (m_type) {
   case Type::PrintR:
     if (!m_objClass.empty()) {
@@ -774,11 +771,7 @@ void VariableSerializer::writeOverflow(tv_rval tv) {
       int optId = m_refs[tv].m_id;
       assertx(optId != NO_ID);
       bool isObject = tvIsResource(tv) || tvIsObject(tv);
-      if (wasRef) {
-        m_buf->append("R:");
-        m_buf->append(optId);
-        m_buf->append(';');
-      } else if (isObject) {
+      if (isObject) {
         m_buf->append("r:");
         m_buf->append(optId);
         m_buf->append(';');
@@ -1373,13 +1366,6 @@ void VariableSerializer::indent() {
   for (int i = 0; i < m_indent; i++) {
     m_buf->append(' ');
   }
-  if (m_referenced) {
-    if (m_indent > 0 && (m_type == Type::VarDump ||
-                         m_type == Type::DebugDump)) {
-      m_buf->append('&');
-    }
-    m_referenced = false;
-  }
 }
 
 bool VariableSerializer::incNestedLevel(tv_rval tv) {
@@ -1410,7 +1396,7 @@ bool VariableSerializer::incNestedLevel(tv_rval tv) {
       auto& ref = m_refs[tv];
       int ct = ++ref.m_count;
       bool isObject = tvIsResource(tv) || tvIsObject(tv);
-      if (ref.m_id != NO_ID && (m_referenced || isObject)) {
+      if (ref.m_id != NO_ID && isObject) {
         return true;
       }
       ref.m_id = m_valueCount;

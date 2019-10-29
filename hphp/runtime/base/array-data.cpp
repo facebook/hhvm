@@ -1209,23 +1209,6 @@ void throwOOBArrayKeyException(const StringData* key, const ArrayData* ad) {
   );
 }
 
-void throwRefInvalidArrayValueException(const ArrayData* ad) {
-  assertx(ad->isHackArray());
-  const char* type = [&]{
-    if (ad->isVecArray()) return "Vecs";
-    if (ad->isDict()) return "Dicts";
-    if (ad->isKeyset()) return "Keysets";
-    not_reached();
-  }();
-  SystemLib::throwInvalidArgumentExceptionObject(
-    folly::sformat("{} cannot contain references", type)
-  );
-}
-
-void throwRefInvalidArrayValueException(const Array& arr) {
-  throwRefInvalidArrayValueException(arr.get());
-}
-
 void throwInvalidKeysetOperation() {
   SystemLib::throwInvalidOperationExceptionObject(s_InvalidKeysetOperationMsg);
 }

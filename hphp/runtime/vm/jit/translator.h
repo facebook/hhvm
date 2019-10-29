@@ -200,9 +200,6 @@ public:
 
   // Never break the tracelet nor generate a guard on account of this input.
   bool dontGuard{false};
-
-  // Never guard the inner type if this input is KindOfRef.
-  bool dontGuardInner{false};
 };
 
 /*

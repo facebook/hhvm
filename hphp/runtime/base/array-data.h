@@ -953,8 +953,6 @@ extern const ArrayFunctions g_array_funcs;
                                             const ArrayData* ad);
 [[noreturn]] void throwOOBArrayKeyException(const StringData* key,
                                             const ArrayData* ad);
-[[noreturn]] void throwRefInvalidArrayValueException(const ArrayData* ad);
-[[noreturn]] void throwRefInvalidArrayValueException(const Array& arr);
 [[noreturn]] void throwInvalidKeysetOperation();
 [[noreturn]] void throwInvalidAdditionException(const ArrayData* ad);
 [[noreturn]] void throwVecUnsetException();

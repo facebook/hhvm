@@ -383,7 +383,6 @@ const StaticString
   s_keyset("keyset"),
   s_object("object"),
   s_resource("resource"),
-  s_ref("reference"),
   s_func("function"),
   s_class("class"),
   s_clsmeth("clsmeth"),

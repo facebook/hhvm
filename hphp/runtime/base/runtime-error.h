@@ -168,14 +168,6 @@ void raise_record_init_error(const StringData* recName,
                                            const StringData* fieldName);
 
 /*
- * Raise the appropriate warning or error if we try to bind a property to a ref,
- * and that property has a type-hint which we're enforcing.
- */
-void raise_property_typehint_binding_error(const Class* declCls,
-                                           const StringData* propName,
-                                           bool isSoft);
-
-/*
  * Raise the appropriate warning or error if we try to unset a property, and
  * that property has a type-hint which we're enforcing.
  */

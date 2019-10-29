@@ -190,16 +190,6 @@ GlobalsArray::SetStrInPlace(ArrayData* ad, StringData* k, Cell v) {
 }
 
 ArrayData*
-GlobalsArray::SetWithRefIntInPlace(ArrayData*, int64_t, TypedValue) {
-  throw_not_implemented("references not allowed in $GLOBALS");
-}
-
-ArrayData*
-GlobalsArray::SetWithRefStrInPlace(ArrayData*,  StringData*, TypedValue) {
-  throw_not_implemented("references not allowed in $GLOBALS");
-}
-
-ArrayData*
 GlobalsArray::RemoveIntInPlace(ArrayData* ad, int64_t k) {
   return RemoveStrInPlace(ad, String(k).get());
 }
@@ -219,10 +209,6 @@ GlobalsArray::RemoveStrInPlace(ArrayData* ad, const StringData* k) {
 
 ArrayData* GlobalsArray::AppendInPlace(ArrayData*, Cell /*v*/) {
   throw_not_implemented("append on $GLOBALS");
-}
-
-ArrayData* GlobalsArray::AppendWithRefInPlace(ArrayData*, TypedValue) {
-  throw_not_implemented("appendWithRef on $GLOBALS");
 }
 
 ArrayData* GlobalsArray::PlusEq(ArrayData*, const ArrayData*) {

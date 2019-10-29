@@ -165,7 +165,6 @@ private:
    * Helpers.
    */
   void indent();
-  void setReferenced(bool referenced) { m_referenced = referenced;}
   void setRefCount(int count) { m_refCount = count;}
   bool incNestedLevel(tv_rval tv);
   void decNestedLevel(tv_rval tv);
@@ -251,7 +250,6 @@ private:
   int m_indent{0};
   SavedRefMap m_refs;            // reference ids and counts for objs/arrays
   int m_valueCount{0};           // current ref index
-  bool m_referenced{false};      // mark current array element as reference
   bool m_keepDVArrays;           // serialize d/varrays as themselves or arrays
   bool m_forcePHPArrays{false};  // serialize PHP and Hack arrays as PHP arrays
   bool m_hackWarn{false};        // warn when attempting on Hack arrays

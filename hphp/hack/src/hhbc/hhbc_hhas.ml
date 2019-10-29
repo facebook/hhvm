@@ -1184,6 +1184,23 @@ and string_of_param_default_value ~env expr =
     let e2 = string_of_param_default_value ~env e2 in
     e1 ^ s ^ e2
   in
+  let elaborate_id id elaborate get_string =
+    let id =
+      match env.codegen_env with
+      | Some env ->
+        let nsenv = Emit_env.get_namespace env in
+        let fq_id = elaborate nsenv id |> get_string in
+        if
+          nsenv.Namespace_env.ns_name = None
+          && (not @@ String.contains fq_id '\\')
+        then
+          fq_id
+        else
+          "\\" ^ fq_id
+      | _ -> snd id
+    in
+    Php_escaping.escape id
+  in
   let fmt_class_name ~is_class_constant cn =
     let cn =
       if SU.Xhp.is_xhp (Utils.strip_ns cn) then
@@ -1276,17 +1293,8 @@ and string_of_param_default_value ~env expr =
   in
   let escape_fn c = escape_char_for_printing c ^ Php_escaping.escape_char c in
   match snd expr with
-  | A.Id (p, id) ->
-    let id =
-      match env.codegen_env with
-      | Some env when SU.has_ns id ->
-        let id =
-          Hhbc_id.Const.elaborate_id (Emit_env.get_namespace env) (p, id)
-        in
-        "\\" ^ Hhbc_id.Const.to_raw_string id
-      | _ -> id
-    in
-    Php_escaping.escape id
+  | A.Id id ->
+    elaborate_id id Hhbc_id.Const.elaborate_id Hhbc_id.Const.to_raw_string
   | A.Lvar (_, litstr) -> Php_escaping.escape (Local_id.get_name litstr)
   | A.Float litstr -> SU.Float.with_scientific_notation litstr
   | A.Int litstr -> SU.Integer.to_decimal litstr
@@ -1332,6 +1340,26 @@ and string_of_param_default_value ~env expr =
     let e1 = string_of_param_default_value ~env e1 in
     let e2 = string_of_param_default_value ~env e2 in
     e1 ^ " " ^ bop ^ " " ^ e2
+  | A.Call (_, (_, A.Id call_id), _, es, ues) ->
+    let call_id =
+      elaborate_id
+        call_id
+        Hhbc_id.Function.elaborate_id
+        Hhbc_id.Function.to_raw_string
+    in
+    let call_id = String_utils.lstrip call_id "\\\\" in
+    let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in
+    call_id ^ "(" ^ String.concat ~sep:", " es ^ ")"
+  | A.New ((_, A.CIexpr (_, A.Id class_id)), _, es, ues, _) ->
+    let class_id =
+      elaborate_id
+        class_id
+        Hhbc_id.Class.elaborate_id
+        Hhbc_id.Class.to_raw_string
+    in
+    let class_id = String_utils.lstrip class_id "\\\\" in
+    let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in
+    "new " ^ class_id ^ "(" ^ String.concat ~sep:", " es ^ ")"
   | A.New ((_, A.CIexpr e), _, es, ues, _)
   | A.Call (_, e, _, es, ues) ->
     let e =
@@ -1344,9 +1372,16 @@ and string_of_param_default_value ~env expr =
       | _ -> ""
     in
     prefix ^ e ^ "(" ^ String.concat ~sep:", " es ^ ")"
-  | A.Record ((_, e), _, es) ->
+  | A.Record (record_id, _, es) ->
+    let record_id =
+      elaborate_id
+        record_id
+        Hhbc_id.Record.elaborate_id
+        Hhbc_id.Record.to_raw_string
+    in
+    let record_id = String_utils.lstrip record_id "\\\\" in
     let es = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
-    e ^ string_of_afield_list ~env es
+    record_id ^ string_of_afield_list ~env es
   | A.Class_get (cid, cge) ->
     let s1 =
       match snd cid with

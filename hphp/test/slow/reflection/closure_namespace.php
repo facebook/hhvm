@@ -32,6 +32,6 @@ namespace Foo {
     \var_dump($rp->getDeclaringClass()->getName());
     \var_dump($rp->getDefaultValue());
     \var_dump($rp->getDefaultValueText());
-    \var_dump($rp->getDefaultValueConstantName()); // returning NULL for closures
+    \var_dump($rp->getDefaultValueConstantName());
   }
 }

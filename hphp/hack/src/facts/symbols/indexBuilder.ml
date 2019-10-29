@@ -185,26 +185,9 @@ let init_workers () =
     ~gc_control
     ~heap_handle
 
-(* Let's use the unix find command which seems to be really quick at this sort of thing *)
 let gather_file_list (path : string) : Relative_path.t list =
-  let cmdline =
-    Printf.sprintf
-      "find %s \\( \\( -name \"*.php\" -o -name \"*.hhi\" -o -name \"*.hack\" \\) -and -not -path \"*/.hg/*\" \\)"
-      path
-  in
-  let channel = Unix.open_process_in cmdline in
-  let result = ref [] in
-  (try
-     while true do
-       let line_opt = In_channel.input_line channel in
-       match line_opt with
-       | Some line ->
-         result := Relative_path.create_detect_prefix line :: !result
-       | None -> raise End_of_file
-     done
-   with End_of_file -> ());
-  assert (Unix.close_process_in channel = Unix.WEXITED 0);
-  !result
+  Find.find ~filter:FindUtils.file_filter [Path.make path]
+  |> List.map ~f:(fun path -> Relative_path.create_detect_prefix path)
 
 (* Run something and measure its duration *)
 let measure_time ~(silent : bool) ~f ~(name : string) =

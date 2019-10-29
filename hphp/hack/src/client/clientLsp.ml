@@ -2477,8 +2477,7 @@ let report_connect_end (ienv : In_init_env.t) : state =
 
 (* After the server has sent 'hello', it means the persistent connection is   *)
 (* ready, so we can send our backlog of file-edits to the server.             *)
-let connect_after_hello
-    (server_conn : server_conn) (file_edits : Hh_json.json ImmQueue.t) :
+let connect_after_hello (server_conn : server_conn) (state : state) :
     unit Lwt.t =
   Hh_logger.log "connect_after_hello";
   let ignore = ref 0.0 in
@@ -2505,36 +2504,27 @@ let connect_after_hello
       let%lwt () =
         rpc server_conn ignore (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0)
       in
-      (* send open files and unsaved buffers to server *)
-      let handle_file_edit (json : Hh_json.json) =
-        Jsonrpc.(
-          let c = Jsonrpc.parse_message ~json ~timestamp:0.0 in
-          let%lwt () =
-            match c.method_ with
-            | "textDocument/didOpen" ->
-              let%lwt () =
-                parse_didOpen c.params |> do_didOpen server_conn ignore
-              in
-              Lwt.return_unit
-            | "textDocument/didChange" ->
-              let%lwt () =
-                parse_didChange c.params |> do_didChange server_conn ignore
-              in
-              Lwt.return_unit
-            | "textDocument/didClose" ->
-              let%lwt () =
-                parse_didClose c.params |> do_didClose server_conn ignore
-              in
-              Lwt.return_unit
-            | _ -> failwith "should only buffer up didOpen/didChange/didClose"
-          in
-          Lwt.return_unit)
+      (* Extract the list of file changes we're tracking *)
+      let editor_open_files =
+        SMap.elements
+          (match state with
+          | Main_loop menv -> Main_env.(menv.editor_open_files)
+          | In_init ienv -> In_init_env.(ienv.editor_open_files)
+          | Lost_server lenv -> Lost_env.(lenv.editor_open_files)
+          | _ -> SMap.empty)
       in
+      (* send open files and unsaved buffers to server *)
+      let float_unblocked_time = ref 0.0 in
+      (* Note: do serially since these involve RPC calls. *)
       let%lwt () =
-        file_edits
-        |> ImmQueue.to_list
-        (* Note: do serially since these involve RPC calls. *)
-        |> Lwt_list.iter_s handle_file_edit
+        Lwt_list.iter_s
+          (fun (filename, textDocument) ->
+            let command =
+              ServerCommandTypes.OPEN_FILE
+                (filename, textDocument.TextDocumentItem.text)
+            in
+            rpc server_conn float_unblocked_time command)
+          editor_open_files
       in
       Lwt.return_unit
     with e ->
@@ -2849,13 +2839,8 @@ and reconnect_from_lost_if_necessary
       | (_, _) -> false
     in
     if should_reconnect then
-      let has_unsaved_changes =
-        not (SSet.is_empty (get_uris_with_unsaved_changes state))
-      in
       let%lwt current_version = read_hhconfig_version () in
-      let needs_to_terminate =
-        has_unsaved_changes || !hhconfig_version <> current_version
-      in
+      let needs_to_terminate = !hhconfig_version <> current_version in
       if needs_to_terminate then (
         (* In these cases we have to terminate our LSP server, and trust the    *)
         (* client to restart us. Note that we can't do clientStart because that *)
@@ -3575,11 +3560,7 @@ let handle_event
             Lwt.return_unit)
         (* server completes initialization *)
         | (In_init ienv, Server_hello) ->
-          let%lwt () =
-            connect_after_hello
-              ienv.In_init_env.conn
-              ienv.In_init_env.file_edits
-          in
+          let%lwt () = connect_after_hello ienv.In_init_env.conn !state in
           state := report_connect_end ienv;
           Lwt.return_unit
         (* any "hello" from the server when we weren't expecting it. This is so *)

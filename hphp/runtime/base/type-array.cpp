@@ -205,7 +205,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
         }
       }
       if (found == match) {
-        // this setWithRef never intish casted, even when *this or array is a
+        // this set never intish casted, even when *this or array is a
         // hack array
         ret.set(key, value, true);
       }

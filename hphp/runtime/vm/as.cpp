@@ -1364,7 +1364,7 @@ std::unique_ptr<uint8_t[]> read_inouts(AsmState& as, uint32_t numArgs) {
 
   if (strVal.empty()) return nullptr;
   if (strVal.length() != numArgs) {
-    as.error("reffiness vector must be either empty or match number of args");
+    as.error("inout-ness vector must be either empty or match number of args");
   }
 
   auto result = std::make_unique<uint8_t[]>((numArgs + 7) / 8);

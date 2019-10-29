@@ -158,7 +158,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
  * the heap) and emit a type check in optimizing translations to
  * refine some properties of the types observed during profiling.
  * Such refinements include checking a specific type in case it's
- * monomorphic, or checking that it's uncounted or unboxed.  In case
+ * monomorphic, or checking that it's uncounted.  In case
  * the check fails dynamically, a side exit is taken.  The `finish'
  * lambda is invoked to emit code before exiting the region at the
  * next bytecode-instruction boundary.

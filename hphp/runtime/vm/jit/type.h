@@ -54,9 +54,7 @@ struct ProfDataDeserializer;
  * whether it's a pointer at all, and what kind of location it may point to.
  *
  * We have a pointer kind for each of the major segregated locations in which
- * php values can live (eval stack, frame slots, properties, etc...). For most
- * of the primitive kinds, we have a predefined union of the kind and "inside a
- * Ref", so PtrToRStkCell is exactly the same as PtrTo{Ref|Stk}Cell.  These
+ * php values can live (eval stack, frame slots, properties, etc...).  These
  * classify PtrTo* types into some categories that cannot possibly alias,
  * without any smarter analysis needed to prove it.  There is also a union for
  * the various locations things can point after a fully generic member
@@ -68,8 +66,7 @@ struct ProfDataDeserializer;
  * property array. Other contains init_null_variant, uninit_variant, or the
  * lvalBlackHole.
  *
- * ClsInit is a pointer to class property initializer data.  These can never be
- * refs, so we don't have a RClsInit type.
+ * ClsInit is a pointer to class property initializer data.
  *
  * ClsCns is a pointer to class constant values in RDS.
  *

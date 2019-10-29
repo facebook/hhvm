@@ -521,7 +521,7 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
    * Normal case, where the base is an object (and not a pointer to
    * something)---just do a lea with the type information we got from static
    * analysis.  The caller of this function will use it to know whether it can
-   * avoid a generic incref, unbox, etc.
+   * avoid a generic incref, etc.
    */
   if (baseType <= TObj) {
     return {
@@ -1281,7 +1281,7 @@ void simpleBaseImpl(IRGS& env, SSATmp* base, MOpMode mode, Location l) {
 }
 
 /*
- * Load and fully unpack---i.e., dereference and unbox---the member base.
+ * Load and fully unpack---i.e., dereference---the member base.
  *
  * Also constrains the base value (and, if applicable, its inner value) to
  * DataTypeSpecific; it's expected that the caller only uses extractBase() when

@@ -223,7 +223,7 @@ void throwParamInOutMismatchRange(const Func* func, unsigned firstVal,
     }
   }
 
-  // Caller guarantees at least one parameter with reffiness mismatch.
+  // Caller guarantees at least one parameter with inout-ness mismatch.
   not_reached();
 }
 

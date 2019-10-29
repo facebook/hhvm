@@ -3777,7 +3777,7 @@ bool fcallOptimizeChecks(
     }
 
     if (match) {
-      // Optimize away the runtime reffiness check.
+      // Optimize away the runtime inout-ness check.
       reduce(env, fcallWithFCA(FCallArgs(
         fca.flags, fca.numArgs, fca.numRets, nullptr, fca.asyncEagerTarget,
         fca.lockWhileUnwinding)));

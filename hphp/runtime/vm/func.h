@@ -1113,7 +1113,7 @@ private:
     Id m_numIterators;
     int m_line1;
     LowStringPtr m_docComment;
-    // Bits 64 and up of the reffiness guards (the first 64 bits are in
+    // Bits 64 and up of the inout-ness guards (the first 64 bits are in
     // Func::m_inoutBitVal for faster access).
     uint64_t* m_inoutBitPtr;
     ParamInfoVec m_params;

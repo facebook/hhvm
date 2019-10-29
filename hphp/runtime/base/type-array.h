@@ -494,7 +494,7 @@ public:
 #define D(key_t, name, value_t) void name(key_t k, value_t v) = delete;
 
   /*
-   * Set an element to `v', unboxing `v' if it's boxed.
+   * Set an element to `v'.
    */
   FOR_EACH_KEY_TYPE(set, TypedValue)
 

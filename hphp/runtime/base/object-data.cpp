@@ -1692,7 +1692,6 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
     if (type(prop) == KindOfUninit && m_cls->rtAttribute(Class::UseGet)) {
       if (auto r = invokeGet(key)) {
         SCOPE_EXIT { tvDecRefGen(r.val); };
-        // don't unbox until after setopBody; see longer comment below
         setopBody(&r.val, op, val);
         if (m_cls->rtAttribute(Class::UseSet)) {
           cellDup(tvAssertCell(r.val), tvRef);
@@ -1770,10 +1769,6 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
 
   if (useGet && useSet) {
     if (auto r = invokeGet(key)) {
-      // Matching zend again: incDecProp does an unbox before the
-      // operation, but setop doesn't need to here.  (We'll unbox the
-      // value that gets passed to the magic setter, though, since
-      // __set functions can't take parameters by reference.)
       tvCopy(r.val, tvRef);
       setopBody(&tvRef, op, val);
       invokeSet(key, tvRef);

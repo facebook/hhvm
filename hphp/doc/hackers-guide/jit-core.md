@@ -26,8 +26,8 @@ basic block of bytecodes by holding a starting offset and length in
 instructions. The list of `Block`s is kept sorted in reverse post order. Blocks
 also contain optional metadata about the code they contain and the state of the
 VM before, during, and after execution of that code. This metadata includes
-type predictions, parameter reffiness predictions, statically known call
-destinations, and certain postconditions.
+type predictions, statically known call destinations, and certain
+postconditions.
 
 ### Tracelet Region Selection
 

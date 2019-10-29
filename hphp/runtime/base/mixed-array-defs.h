@@ -260,9 +260,8 @@ void ConvertTvToUncounted(
     return false;
   };
 
-  // `source' cannot be Ref here as we already did an unbox.  It won't be
-  // Object or Resource, as these should never appear in an uncounted array.
-  // Thus we only need to deal with strings/arrays.
+  // `source' won't be Object or Resource, as these should never appear in an
+  // uncounted array.  Thus we only need to deal with strings/arrays.
   switch (type) {
     case KindOfFunc:
     if (RuntimeOption::EvalAPCSerializeFuncs) {

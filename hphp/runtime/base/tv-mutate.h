@@ -26,7 +26,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Return an unboxed and initialized `tv'.
+ * Return an initialized `tv'.
  *
  * This function:
  *  - returns a KindOfNull when `tv' is KindOfUninit.

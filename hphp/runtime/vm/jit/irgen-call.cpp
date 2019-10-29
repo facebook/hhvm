@@ -430,8 +430,6 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   auto const generics = fca.hasGenerics() ? popC(env) : nullptr;
   auto const numToPack = fca.numArgs - callee->numNonVariadicParams();
   for (auto i = 0; i < numToPack; ++i) {
-    // The emitNew*Array() helpers assume non-refs. We already checked for
-    // reffiness mismatch so this is safe.
     assertTypeStack(env, BCSPRelOffset{i}, TInitCell);
   }
   if (RuntimeOption::EvalHackArrDVArrs) {
@@ -445,7 +443,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     static_cast<FCallArgs::Flags>(fca.flags | FCallArgs::Flags::HasUnpack),
     callee->numNonVariadicParams(),
     fca.numRets,
-    nullptr,  // reffiness already checked
+    nullptr,  // inout-ness already checked
     fca.asyncEagerOffset,
     fca.lockWhileUnwinding
   ));

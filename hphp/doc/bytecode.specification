@@ -1785,14 +1785,14 @@ FCall* opcodes
   specified by the FCA (FCall arguments) immediate consisting of the following
   data:
 
-  <flags> <num args> <num returns> <reffiness bool vector> <async eager offset>
+  <flags> <num args> <num returns> <inout bool vector> <async eager offset>
   [C|V..C|V]  ->  [C..C]
 
   FCall* first looks up the callee function according to the specific opcode.
 
   The vector %4 must be either empty or it must contain exactly %2 booleans.
-  If it is non-empty, FCall* checks whether reffiness of parameters 0..(%2-1)
-  of the callee matches the corresponding reffiness values specified by the
+  If it is non-empty, FCall* checks whether inout-ness of parameters 0..(%2-1)
+  of the callee matches the corresponding inout-ness values specified by the
   vector %4. Throws an exception if there is a mismatch.
 
   Finally, FCall* transfers the top %2 values from the stack to the callee as
@@ -3757,8 +3757,8 @@ Unary plus and negation "+(<expression>)" gets converted to "(0 +
 Assignment-by operators are converted to use the SetOp* instructions.
 
 3) List assignment (list)
-List assignments are converted to use an unnamed local variable and the SetM
-and VGetL instructions. In case of exception, the unnamed local variable is
+List assignments are converted to use an unnamed local variable and the QueryM
+and SetL instructions. In case of exception, the unnamed local variable is
 freed using EH entry.
 
 4) Logical and and logical or operators (and/&&, or/||)

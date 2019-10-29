@@ -533,7 +533,7 @@ void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
     push(env, gen(env, CreateSSWH, retVal));
   } else {
     // Async eager return was requested. Continue execution at the async eager
-    // offset with the unboxed value.
+    // offset with the returned value.
     push(env, retVal);
     jmpImpl(env, bcOff(env) + rt.asyncEagerOffset);
   }

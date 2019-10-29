@@ -82,12 +82,6 @@ using Iter = boost::variant<DeadIter, LiveIter>;
 /*
  * Tag indicating what sort of thing contains the current member base.
  *
- * The base is always the unboxed version of the type, and its location could be
- * inside of a Ref. So, for example, a base with BaseLoc::Frame could be located
- * inside of a Ref that is pointed to by the Frame. (We may want to distinguish
- * these two cases at some point if we start trying to track real information
- * about Refs, but not yet.)
- *
  * Note that if we're in an array-chain, the base location always reflects the
  * location of the array which started the array-chain.
  */

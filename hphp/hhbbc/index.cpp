@@ -1937,8 +1937,8 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
         if (anyInOut) {
           // Multiple methods with the same name will be combined in the same
           // cell, thus we use |=. This only makes sense in WholeProgram mode
-          // since we use this field to check that no functions uses its n-th
-          // parameter byref, which requires global knowledge.
+          // since we use this field to check that no functions has its n-th
+          // parameter as inout, which requires global knowledge.
           index.method_inout_params_by_name[m->name] |= refs;
         }
       }

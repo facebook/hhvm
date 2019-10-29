@@ -33,8 +33,7 @@ struct StringData;
  * TypedValue conversions that update `tv' in place (decrefing the old value,
  * if necessary).
  *
- * We have two kinds of type conversions, both of which unbox their argument
- * before doing anything:
+ * We have two kinds of type conversions:
  *
  * - Cast forcibly changes the value to the new type and will not fail (though
  *   the result may be silly).

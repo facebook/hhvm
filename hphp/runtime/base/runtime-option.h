@@ -1110,12 +1110,6 @@ struct RuntimeOption {
   F(bool, NoticeOnReadDynamicProp, false)                               \
   F(bool, NoticeOnImplicitInvokeToString, false)                        \
   F(bool, FatalOnConvertObjectToString, false)                          \
-  /* Indicates whether parameters of overridden methods must match the
-     reffiness of the parent method. When set to enforcing mode, inout
-     wrappers will be created for methods.
-       0 - do nothing
-       1 - raise a warning on reffiness mismatch
-       2 - raise a fatal on reffiness mismatch */                       \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
   F(bool, RxPretendIsEnabled, false)                                    \
   F(bool, NoArrayAccessInIdx, false)                                    \

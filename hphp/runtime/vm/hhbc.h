@@ -72,7 +72,7 @@ struct FCallArgsBase {
     SupportsAsyncEagerReturn = (1 << 2),
     // HHBC-only: is the number of returns provided? false => 1
     HasInOut                 = (1 << 3),
-    // HHBC-only: should this FCall enforce argument reffiness?
+    // HHBC-only: should this FCall enforce argument inout-ness?
     EnforceInOut             = (1 << 4),
     // HHBC-only: is the async eager offset provided? false => kInvalidOffset
     HasAsyncEagerOffset      = (1 << 5),

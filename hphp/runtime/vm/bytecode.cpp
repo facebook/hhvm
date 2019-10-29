@@ -1105,8 +1105,6 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
     // The arguments are pushed in order, so we should start from the bottom.
     auto ptr = stack.indTV(numArgs - numParams);
     for (auto i = numParams; i < numArgs; ++i) {
-      // appendWithRef bumps the refcount and splits if necessary,
-      // to compensate for the upcoming pop from the stack
       ai.append(*--ptr);
     }
     for (auto i = numParams; i < numArgs; ++i) {
@@ -1114,8 +1112,6 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
     }
   }
   for (; iter; ++iter) {
-    // appendWithRef bumps the refcount to compensate for the
-    // eventual decref of arrayArgs.
     ai.append(iter.secondValPlus());
   }
   auto const ad = ai.create();
@@ -4280,7 +4276,7 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
     return;
   }
 
-  // Enforce reffiness before reshuffling.
+  // Enforce inout-ness before reshuffling.
   if (fca.enforceInOut()) callerInOutChecks(func, fca);
 
   // Magic methods don't support reified generics.
@@ -4989,17 +4985,6 @@ namespace {
 template <bool HasKey>
 void initIterator(PC& pc, PC targetpc, Iter* it, IterTypeOp op,
                   TypedValue* base, TypedValue* val, TypedValue* key) {
-  // WARNING: This code requires caution regarding cells vs. refs. It takes
-  // some case analysis to show that it is correct:
-  //
-  //  - For IterInit / IterInitK bytecodes, the base is popped from the stack
-  //    and is always a cell. We can check for array-like before "unboxing".
-  //
-  //  - For LIterInit / LIterInitK bytecodes, we must do the array-like check
-  //    prior to unboxing ref bases. The local iterator optimization should
-  //    not kick in if the base is a ref to an array - these are non-local
-  //    iterators handled by the generic iterator init code below.
-  //
   auto const local = op != IterTypeOp::NonLocal;
   if (isArrayLikeType(type(base))) {
     auto const arr = base->m_data.parr;

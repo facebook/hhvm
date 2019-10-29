@@ -525,9 +525,7 @@ public:
   uint32_t iterLimit() const { return m_used; }
 
   // Fetch a value and optional key (if keyPos != nullptr), given an
-  // iterator pos.  If withref is true, copy the value with "withRef"
-  // semantics, and decref the previous key before copying the key.
-  // Otherwise get the value cell (unboxing), and initialize keyOut.
+  // iterator pos.  Get the value cell, and initialize keyOut.
   void getArrayElm(ssize_t pos, TypedValue* out, TypedValue* keyOut) const;
   void getArrayElm(ssize_t pos, TypedValue* out) const;
 

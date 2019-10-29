@@ -258,11 +258,10 @@ inline variant_ref::operator const_variant_ref() const {
  *    For historical reasons, this class does a lot of things you
  *    don't really expect in a well-behaved C++ class.
  *
- *    For example, the copy constructor is not a copy constructor (it
- *    unboxes refs and converts KindOfUninit to KindOfNull).  A
- *    similar story applies to the move constructor.  (And this means
- *    we may actually rely on whether copy elision (NRVO etc) is
- *    happening in some places for correctness.)
+ *    For example, the copy constructor is not a copy constructor (it converts
+ *    KindOfUninit to KindOfNull).  A similar story applies to the move
+ *    constructor.  (And this means we may actually rely on whether copy
+ *    elision (NRVO etc) is happening in some places for correctness.)
  *
  *    Use carefully.
  *
@@ -427,7 +426,7 @@ struct Variant : private TypedValue {
 
   /*
    * Copy constructor and copy assignment do not semantically make
-   * copies: they unbox refs and turn uninits to null.
+   * copies: they turn uninits to null.
    */
 
   Variant(const Variant& v) noexcept;
@@ -452,7 +451,7 @@ struct Variant : private TypedValue {
    * Move ctors
    *
    * Note: not semantically moves.  Like our "copy constructor", these
-   * unbox refs and turn uninits to null.
+   * turn uninits to null.
    */
 
   Variant(Variant&& v) noexcept {
@@ -517,8 +516,8 @@ struct Variant : private TypedValue {
   /*
    * Move assign
    *
-   * Note: not semantically moves.  Like our "copies", these unbox
-   * refs and turn uninits to null.
+   * Note: not semantically moves.  Like our "copies", these turn uninits
+   * to null.
    */
   Variant& operator=(Variant &&rhs) noexcept {
     assertx(this != &rhs); // we end up as null on a self move-assign.
@@ -1139,7 +1138,7 @@ struct Variant : private TypedValue {
   void setEvalScalar();
 
   /*
-   * Access this Variant as a TypedValue. Does not unbox refs, etc.
+   * Access this Variant as a TypedValue.
    */
   const TypedValue* asTypedValue() const { return this; }
         TypedValue* asTypedValue()       { return this; }
@@ -1152,8 +1151,7 @@ struct Variant : private TypedValue {
 
   /*
    * Read this Variant as an InitCell, without incrementing the
-   * reference count.  I.e. unbox if it is boxed, and turn
-   * KindOfUninit into KindOfNull.
+   * reference count.  I.e. turn KindOfUninit into KindOfNull.
    */
   Cell asInitCellTmp() const {
     if (m_type == KindOfUninit) return make_tv<KindOfNull>();

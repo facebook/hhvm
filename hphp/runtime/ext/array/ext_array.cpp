@@ -622,11 +622,8 @@ static void php_array_replace(Array &arr1, const Array& arr2) {
 static void php_array_replace_recursive(PointerSet &seen, bool check,
                                         Array &arr1, const Array& arr2) {
   if (arr1.get() == arr2.get()) {
-    // This is an optimization, but it also avoids an assert in
-    // setWithRef (Variant::setWithRef asserts that its source
-    // and destination are not the same).
-    // If the arrays are self recursive, this does change the behavior
-    // slightly - it skips the "recursion detected" warning.
+    // This is an optimization; if the arrays are self recursive, this does
+    // change the behavior slightly - it skips the "recursion detected" warning.
     return;
   }
 

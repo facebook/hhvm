@@ -151,7 +151,7 @@ public:
   /*
    * Create a new kPackedKind ArrayData with a single element, `value'.
    *
-   * Unboxes `value' and initializes it if it's UninitNull.
+   * Initializes `value' if it's UninitNull.
    */
   static ArrayData* Create(TypedValue value);
   static ArrayData* Create(const Variant& value);
@@ -160,7 +160,7 @@ public:
    * Create a new kMixedKind ArrayData with a single key `name' and value
    * `value'.
    *
-   * Unboxes `value' and initializes it if it's UninitNull.
+   * Initializes `value' if it's UninitNull.
    */
   static ArrayData* Create(TypedValue name, TypedValue value);
   static ArrayData* Create(const Variant& name, TypedValue value);

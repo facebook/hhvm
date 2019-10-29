@@ -217,7 +217,6 @@ interpOutputLocals(IRGS& env,
     case OpSetL:
     case OpPopL: {
       auto stackType = topType(env, BCSPRelOffset{0});
-      // [Set,Pop]L preserves reffiness of a local.
       setImmLocType(0, stackType);
       break;
     }

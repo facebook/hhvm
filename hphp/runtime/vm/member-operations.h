@@ -257,8 +257,7 @@ inline tv_rval ElemArrayPre(ArrayData* base, TypedValue key) {
 }
 
 /**
- * Fast path for Elem assuming base is an Array.  Does not unbox the returned
- * pointer.
+ * Fast path for Elem assuming base is an Array.
  */
 template<MOpMode mode, KeyType keyType>
 inline tv_rval ElemArray(ArrayData* base, key_type<keyType> key) {

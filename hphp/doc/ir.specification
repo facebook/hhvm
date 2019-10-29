@@ -258,7 +258,7 @@ Instruction set
 
 | CheckInOuts<firstBit,mask,vals>, ND, S(Func) S(Int), B
 
-  Perform reffiness guard checks. Operands:
+  Perform inout-ness guard checks. Operands:
 
     S0 - function pointer for the callee
     S1 - num params expected in the func
@@ -266,7 +266,7 @@ Instruction set
     mask - mask to check
     vals - values to check
 
-  For each bit `i` set in the mask, checks whether reffiness of parameter
+  For each bit `i` set in the mask, checks whether inout-ness of parameter
   `firstBit + i` of S0 is equal to the bit `i` of vals.
 
   If any of the checks fail, branch to block B.
@@ -2210,12 +2210,12 @@ To string conversions:
 
 | ThrowParamInOutMismatch<paramIndex>, ND, S(Func), T
 
-  Throw an exception indicating that the reffiness of a parameter was
+  Throw an exception indicating that the inout-ness of a parameter was
   incorrectly annotated at the callsite.
 
 | ThrowParamInOutMismatchRange<firstBit,mask,vals>, ND, S(Func), T
 
-  Throw an exception indicating that the reffiness of at least one parameter
+  Throw an exception indicating that the inout-ness of at least one parameter
   within a given range was incorrectly annotated at the callsite.
 
   See CheckInOuts for meaning of firstBit, mask and vals.

@@ -804,49 +804,7 @@ IniSettingMap IniSetting::FromStringAsMap(const std::string& ini,
   if (parsed.isNull()) {
     return uninit_null();
   }
-  // We have the final values for our ini settings.
-  std::set<ArrayData*> seen;
-  bool use_defaults = false;
-  Variant ret = Unbox(parsed, seen, use_defaults, empty_string());
-  if (use_defaults) {
-    return uninit_null();
-  }
-  return ret;
-}
-
-Variant IniSetting::Unbox(const_variant_ref boxed, std::set<ArrayData*>& seen,
-                          bool& use_defaults, const String& array_key) {
-  assertx(boxed.isArray());
-  Variant unboxed(Array::Create());
-  auto ad = boxed.getArrayData();
-  if (seen.insert(ad).second) {
-    for (auto it = boxed.toArray().begin(); it; it.next()) {
-      auto key = it.first();
-      // asserting here to ensure that key is  a scalar type that can be
-      // converted to a string.
-      assertx(key.isScalar());
-      auto elem = it.secondRef();
-      unboxed.asArrRef().set(
-        key,
-        elem.isArray()
-          ? *Unbox(elem, seen, use_defaults, key.toString()).asTypedValue()
-          : *elem.rval()
-      );
-    }
-    seen.erase(ad);
-  } else {
-    // The insert into seen wasn't successful. We have recursion.  break the
-    // recursive cycle, so the elements can be freed by the MM. The
-    // as_variant_ref() is ok because we fully own the array, with no sharing.
-
-    // Use the current array key to give a little help in the log message
-    boxed.as_variant_ref().unset();
-    use_defaults = true;
-    Logger::Warning("INI Recursion Detected at offset named %s. "
-                    "Using default runtime settings.",
-                    array_key.toCppString().c_str());
-  }
-  return unboxed;
+  return parsed;
 }
 
 struct IniCallbackData {

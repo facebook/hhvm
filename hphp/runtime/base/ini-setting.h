@@ -414,12 +414,6 @@ private:
     std::function<bool(const Variant&)>updateCallback,
     std::function<Variant()> getCallback,
     std::function<UserIniData *(void)> userDataCallback = nullptr);
-
-  /**
-   * Take a Variant full of KindOfRefs and unbox it.
-   */
-  static Variant Unbox(const_variant_ref boxed, std::set<ArrayData*>& seen,
-                       bool& use_defaults, const String& array_key);
 };
 
 int64_t convert_bytes_to_long(folly::StringPiece value);

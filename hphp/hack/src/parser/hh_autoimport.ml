@@ -25,10 +25,10 @@ let types =
     [
       ("arraylike", HH);
       ("AsyncFunctionWaitHandle", HH);
-      ("AsyncGenerator", Global);
+      ("AsyncGenerator", HH);
       ("AsyncGeneratorWaitHandle", HH);
-      ("AsyncIterator", Global);
-      ("AsyncKeyedIterator", Global);
+      ("AsyncIterator", HH);
+      ("AsyncKeyedIterator", HH);
       ("Awaitable", HH);
       ("AwaitAllWaitHandle", HH);
       ("classname", HH);

@@ -83,7 +83,7 @@ interface KeyedIterator<+Tk, +Tv>
 }
 
 /* See documentation for \AsyncIterator */
-interface AsyncIterator<+Tv> extends \AsyncIterator<Tv> {
+interface AsyncIterator<+Tv> extends \HH\AsyncIterator<Tv> {
   /**
    * Move the async iterator to the next `Awaitable` position.
    *
@@ -101,7 +101,7 @@ interface AsyncIterator<+Tv> extends \AsyncIterator<Tv> {
 
 /* See documentation for \AsyncKeyedIterator */
 interface AsyncKeyedIterator<+Tk, +Tv>
-  extends namespace\AsyncIterator<Tv>, \AsyncKeyedIterator<Tk, Tv> {
+  extends namespace\AsyncIterator<Tv>, \HH\AsyncKeyedIterator<Tk, Tv> {
   /**
    * Move the async iterator to the next `Awaitable` position.
    *

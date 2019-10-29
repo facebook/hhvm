@@ -160,6 +160,10 @@ interface Iterator<+Tv> extends Traversable<Tv> {
   public function valid(): bool;
 }
 
+} // namespace
+
+namespace HH {
+
 /**
  * Allows for the iteration over the values provided by an `async` function.
  *
@@ -226,6 +230,10 @@ interface AsyncKeyedIterator<+Tk, +Tv> extends AsyncIterator<Tv> {
    */
   public function next(): Awaitable<?(Tk, Tv)>;
 }
+
+} // namespace HH
+
+namespace {
 
 /**
  * For those entities that are `KeyedTraversable`, the `KeyedIterator`

@@ -25,7 +25,7 @@ pub mod classes {
 
     pub const GENERATOR: &str = "\\Generator";
 
-    pub const ASYNC_GENERATOR: &str = "\\AsyncGenerator";
+    pub const ASYNC_GENERATOR: &str = "\\HH\\AsyncGenerator";
 
     pub const FORMAT_STRING: &str = "\\FormatString";
 
@@ -48,9 +48,9 @@ pub mod classes {
 
     pub const DATE_TIME_IMMUTABLE: &str = "\\DateTimeImmutable";
 
-    pub const ASYNC_ITERATOR: &str = "\\AsyncIterator";
+    pub const ASYNC_ITERATOR: &str = "\\HH\\AsyncIterator";
 
-    pub const ASYNC_KEYED_ITERATOR: &str = "\\AsyncKeyedIterator";
+    pub const ASYNC_KEYED_ITERATOR: &str = "\\HH\\AsyncKeyedIterator";
 
     pub const STRINGISH: &str = "\\Stringish";
 

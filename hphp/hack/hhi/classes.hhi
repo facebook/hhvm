@@ -16,6 +16,23 @@
 
 namespace {
 
+final class Generator<+Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {
+  public function getOrigFuncName(): string {}
+  public function current(): Tv {}
+  public function key(): Tk {}
+  public function valid(): bool {}
+  public function next(): void {}
+  public function send(?Ts $v): void {}
+  public function raise(Exception $e): void {}
+  public function rewind(): void {}
+}
+
+final class stdClass {}
+
+} // namespace
+
+namespace HH {
+
 /**
  * Async generators are similar to
  * [PHP Generators](http://php.net/manual/en/language.generators.overview.php),
@@ -93,25 +110,8 @@ final class AsyncGenerator<Tk, +Tv, -Ts>
    *           the exception is processed. What is returned is a tuple or
    *           `null`.
    */
-  public function raise(Exception $e): Awaitable<?(Tk, Tv)> {}
+  public function raise(\Exception $e): Awaitable<?(Tk, Tv)> {}
 }
-
-final class Generator<+Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {
-  public function getOrigFuncName(): string {}
-  public function current(): Tv {}
-  public function key(): Tk {}
-  public function valid(): bool {}
-  public function next(): void {}
-  public function send(?Ts $v): void {}
-  public function raise(Exception $e): void {}
-  public function rewind(): void {}
-}
-
-final class stdClass {}
-
-} // namespace
-
-namespace HH {
 
 <<__Sealed(
   AwaitAllWaitHandle::class,

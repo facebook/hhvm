@@ -26,7 +26,7 @@ module Classes = struct
 
   let cGenerator = "\\Generator"
 
-  let cAsyncGenerator = "\\AsyncGenerator"
+  let cAsyncGenerator = "\\HH\\AsyncGenerator"
 
   let cFormatString = "\\FormatString"
 
@@ -44,9 +44,9 @@ module Classes = struct
 
   let cDateTimeImmutable = "\\DateTimeImmutable"
 
-  let cAsyncIterator = "\\AsyncIterator"
+  let cAsyncIterator = "\\HH\\AsyncIterator"
 
-  let cAsyncKeyedIterator = "\\AsyncKeyedIterator"
+  let cAsyncKeyedIterator = "\\HH\\AsyncKeyedIterator"
 
   let cStringish = "\\Stringish"
 

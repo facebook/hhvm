@@ -13,19 +13,20 @@ use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use hhbc_string_utils_rust::GetName;
 use oxidized::{
     aast,
-    ast_defs::{FunKind, Id},
+    ast_defs::{FunKind, Id, Variance},
     direct_decl_parser::Decls,
     pos::Pos,
     s_map::SMap,
     typing_defs::{
         DeclTy, FunArity, FunElt, FunParam, FunParams, FunTparamsKind, FunType, ParamMode,
-        PossiblyEnforcedTy, Reactivity, Ty, Ty_, TypedefType,
+        PossiblyEnforcedTy, Reactivity, Tparam, Ty, Ty_, TypedefType,
     },
     typing_reason::Reason,
 };
 use parser::{
     indexed_source_text::IndexedSourceText, lexable_token::LexableToken, token_kind::TokenKind,
 };
+use std::collections::HashSet;
 
 pub use crate::direct_decl_smart_constructors_generated::*;
 
@@ -138,37 +139,6 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> 
     }
 }
 
-fn into_variables_list(list: Node_) -> Result<FunParams<DeclTy>, String> {
-    match list {
-        Node_::List(nodes) => {
-            nodes
-                .into_iter()
-                .fold(Ok(Vec::new()), |acc, variable| match (acc, variable) {
-                    (Ok(mut variables), Node_::Variable(innards)) => {
-                        let (name, pos, ty) = *innards;
-                        variables.push(FunParam {
-                            pos,
-                            name: Some(name),
-                            type_: PossiblyEnforcedTy {
-                                enforced: false,
-                                type_: ty,
-                            },
-                            kind: ParamMode::FPnormal,
-                            accept_disposable: false,
-                            mutability: None,
-                            rx_annotation: None,
-                        });
-                        Ok(variables)
-                    }
-                    (Ok(_), n) => Err(format!("Expected a variable, but got {:?}", n)),
-                    (acc @ Err(_), _) => acc,
-                })
-        }
-        Node_::Ignored => Ok(Vec::new()),
-        n => Err(format!("Expected a list of variables, but got {:?}", n)),
-    }
-}
-
 #[derive(Clone, Debug)]
 enum NamespaceType {
     Simple(String),
@@ -269,6 +239,13 @@ pub enum HintValue {
 }
 
 #[derive(Clone, Debug)]
+pub struct VariableDecl {
+    hint: Node_,
+    name: String,
+    pos: Pos,
+}
+
+#[derive(Clone, Debug)]
 pub enum Node_ {
     List(Vec<Node_>),
     Ignored,
@@ -279,7 +256,7 @@ pub enum Node_ {
     Hint(HintValue, Pos),
     Backslash(Pos), // This needs a pos since it shows up in names.
     ListItem(Box<(Node_, Node_)>),
-    Variable(Box<(String, Pos, Ty)>),
+    Variable(Box<VariableDecl>),
     Class,
     Interface,
     Trait,
@@ -329,6 +306,14 @@ impl Node_ {
             _ => Err(format!("No pos found for node {:?}", self)),
         }
     }
+
+    fn into_vec(self) -> Vec<Self> {
+        match self {
+            Node_::List(items) => items,
+            Node_::Ignored => Vec::new(),
+            n => vec![n],
+        }
+    }
 }
 
 pub type Node = Result<Node_, String>;
@@ -352,7 +337,7 @@ pub struct EnumDeclChildren {
 }
 
 impl DirectDeclSmartConstructors<'_> {
-    fn node_to_ty(&self, node: &Node_) -> Result<Ty, String> {
+    fn node_to_ty(&self, node: &Node_, type_variables: &HashSet<String>) -> Result<Ty, String> {
         match node {
             Node_::Hint(hv, pos) => {
                 let reason = Reason::Rhint(pos.clone());
@@ -374,20 +359,59 @@ impl DirectDeclSmartConstructors<'_> {
             }
             node => {
                 let (name, pos) = get_name("", node)?;
-                let name = if name.starts_with("\\") {
-                    name
-                } else if self.state.namespace_builder.current_namespace().is_empty() {
-                    "\\".to_owned() + &name
-                } else {
-                    "\\".to_owned()
-                        + self.state.namespace_builder.current_namespace()
-                        + "\\"
-                        + &name
-                };
                 let reason = Reason::Rhint(pos.clone());
-                let ty_ = Ty_::Tapply(Id(pos.clone(), name.to_owned()), Vec::new());
+                let ty_ = if type_variables.contains(&name) {
+                    Ty_::Tgeneric(name)
+                } else {
+                    let name = if name.starts_with("\\") {
+                        name
+                    } else if self.state.namespace_builder.current_namespace().is_empty() {
+                        "\\".to_owned() + &name
+                    } else {
+                        "\\".to_owned()
+                            + self.state.namespace_builder.current_namespace()
+                            + "\\"
+                            + &name
+                    };
+                    Ty_::Tapply(Id(pos, name), Vec::new())
+                };
                 Ok(Ty(reason, Box::new(ty_)))
             }
+        }
+    }
+
+    fn into_variables_list(
+        &self,
+        list: Node_,
+        type_variables: &HashSet<String>,
+    ) -> Result<FunParams<DeclTy>, String> {
+        match list {
+            Node_::List(nodes) => {
+                nodes
+                    .into_iter()
+                    .fold(Ok(Vec::new()), |acc, variable| match (acc, variable) {
+                        (Ok(mut variables), Node_::Variable(innards)) => {
+                            let VariableDecl { hint, name, pos } = *innards;
+                            variables.push(FunParam {
+                                pos,
+                                name: Some(name),
+                                type_: PossiblyEnforcedTy {
+                                    enforced: false,
+                                    type_: self.node_to_ty(&hint, type_variables)?,
+                                },
+                                kind: ParamMode::FPnormal,
+                                accept_disposable: false,
+                                mutability: None,
+                                rx_annotation: None,
+                            });
+                            Ok(variables)
+                        }
+                        (Ok(_), n) => Err(format!("Expected a variable, but got {:?}", n)),
+                        (acc @ Err(_), _) => acc,
+                    })
+            }
+            Node_::Ignored => Ok(Vec::new()),
+            n => Err(format!("Expected a list of variables, but got {:?}", n)),
         }
     }
 }
@@ -701,7 +725,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             _ => {
                 let (name, pos) =
                     get_name(self.state.namespace_builder.current_namespace(), &name)?;
-                match self.node_to_ty(&aliased_type) {
+                match self.node_to_ty(&aliased_type, &HashSet::new()) {
                     Ok(ty) => {
                         self.state.decls.typedefs.insert(
                             name,
@@ -749,6 +773,17 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         Ok(Node_::Ignored)
     }
 
+    fn make_type_parameter(
+        &mut self,
+        _arg0: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        name: Self::R,
+        _arg4: Self::R,
+    ) -> Self::R {
+        name
+    }
+
     fn make_parameter_declaration(
         &mut self,
         _arg0: Self::R,
@@ -759,8 +794,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg5: Self::R,
     ) -> Self::R {
         let (name, pos) = get_name("", &name?)?;
-        let ty = self.node_to_ty(&hint?)?;
-        Ok(Node_::Variable(Box::new((name, pos, ty))))
+        let hint = hint?;
+        Ok(Node_::Variable(Box::new(VariableDecl { hint, name, pos })))
     }
 
     fn make_function_declaration(
@@ -781,7 +816,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _modifiers: Self::R,
         _keyword: Self::R,
         name: Self::R,
-        _type_params: Self::R,
+        type_params: Self::R,
         _left_parens: Self::R,
         param_list: Self::R,
         _right_parens: Self::R,
@@ -789,12 +824,29 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         ret_hint: Self::R,
         _where: Self::R,
     ) -> Self::R {
+        let mut type_variables = HashSet::new();
+        let type_params = type_params?
+            .into_vec()
+            .into_iter()
+            .map(|node| {
+                let (name, pos) = get_name("", &node)?;
+                type_variables.insert(name.clone());
+                Ok(Tparam {
+                    variance: Variance::Invariant,
+                    name: Id(pos, name),
+                    constraints: Vec::new(),
+                    reified: aast::ReifyKind::Erased,
+                    user_attributes: Vec::new(),
+                })
+            })
+            .collect::<Vec<Result<Tparam<DeclTy>, String>>>();
+        let type_params = try_collect(type_params)?;
         Ok(match name? {
             Node_::Ignored => Node_::Ignored,
             name => {
                 let (name, pos) =
                     get_name(self.state.namespace_builder.current_namespace(), &name)?;
-                let params = into_variables_list(param_list?)?;
+                let params = self.into_variables_list(param_list?, &type_variables)?;
                 self.state.decls.funs.insert(
                     name,
                     FunElt {
@@ -807,12 +859,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                     params.len() as isize,
                                     params.len() as isize,
                                 ),
-                                tparams: (Vec::new(), FunTparamsKind::FTKtparams),
+                                tparams: (type_params, FunTparamsKind::FTKtparams),
                                 where_constraints: Vec::new(),
                                 params,
                                 ret: PossiblyEnforcedTy {
                                     enforced: false,
-                                    type_: self.node_to_ty(&ret_hint?)?,
+                                    type_: self.node_to_ty(&ret_hint?, &type_variables)?,
                                 },
                                 fun_kind: FunKind::FSync,
                                 reactive: Reactivity::Nonreactive,
@@ -877,7 +929,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     [name, _initializer] => {
                         let (name, _) =
                             get_name(self.state.namespace_builder.current_namespace(), name)?;
-                        match self.node_to_ty(&hint) {
+                        match self.node_to_ty(&hint, &HashSet::new()) {
                             Ok(ty) => self.state.decls.consts.insert(name, ty),
                             Err(msg) => {
                                 return Err(format!(

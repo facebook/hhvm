@@ -68,15 +68,14 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> 
         pos: &Pos,
     ) -> Result<(String, Pos), String> {
         let mut qualified_name = String::new();
-        let mut leading_backslash = false;
-        for (index, part) in parts.into_iter().enumerate() {
+        for part in parts {
             match part {
                 Node_::Name(name, _pos) => {
                     qualified_name.push_str(&String::from_utf8_lossy(name.get().as_slice()))
                 }
-                Node_::Backslash if index == 0 => leading_backslash = true,
+                Node_::Backslash(_) => qualified_name.push('\\'),
                 Node_::ListItem(listitem) => {
-                    if let (Node_::Name(name, _pos), Node_::Backslash) = &**listitem {
+                    if let (Node_::Name(name, _), Node_::Backslash(_)) = &**listitem {
                         qualified_name.push_str(&String::from_utf8_lossy(name.get().as_slice()));
                         qualified_name.push_str("\\");
                     } else {
@@ -94,10 +93,16 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> 
                 }
             }
         }
-        let name = if leading_backslash || namespace.is_empty() {
+        let name = if namespace.is_empty() {
             qualified_name // globally qualified name
         } else {
-            namespace.to_owned() + "\\" + &qualified_name
+            let namespace = namespace.to_owned();
+            let namespace = if namespace.ends_with("\\") {
+                namespace
+            } else {
+                namespace + "\\"
+            };
+            namespace + &qualified_name
         };
         let pos = pos.clone();
         Ok((name, pos))
@@ -143,6 +148,12 @@ fn hint_to_ty(hint: &HintValue, pos: &Pos) -> Ty {
             Vec::new(),
         ),
     };
+    Ty(reason, Box::new(ty_))
+}
+
+fn name_to_ty(name: &str, pos: &Pos) -> Ty {
+    let reason = Reason::Rhint(pos.clone());
+    let ty_ = Ty_::Tapply(Id(pos.clone(), name.to_owned()), Vec::new());
     Ty(reason, Box::new(ty_))
 }
 
@@ -251,7 +262,7 @@ pub enum Node_ {
     String(GetName),
     XhpName(GetName, Pos),
     Hint(HintValue, Pos),
-    Backslash,
+    Backslash(Pos), // This needs a pos since it shows up in names.
     ListItem(Box<(Node_, Node_)>),
     Class,
     Interface,
@@ -281,7 +292,25 @@ impl Node_ {
         match self {
             Node_::Name(_, pos) => Ok(pos.clone()),
             Node_::Hint(_, pos) => Ok(pos.clone()),
-            Node_::List(_) => panic!("Handle this!"),
+            Node_::Backslash(pos) => Ok(pos.clone()),
+            Node_::ListItem(items) => {
+                let fst = &items.0;
+                let snd = &items.1;
+                match (fst.get_pos(), snd.get_pos()) {
+                    (Ok(fst_pos), Ok(snd_pos)) => Pos::merge(fst_pos, snd_pos),
+                    (Ok(pos), Err(_)) => Ok(pos),
+                    (Err(_), Ok(pos)) => Ok(pos),
+                    (Err(_), Err(_)) => Err(format!("No pos found for {:?} or {:?}", fst, snd)),
+                }
+            }
+            Node_::List(items) => items.into_iter().fold(
+                Err(format!("No pos found for any children under {:?}", self)),
+                |acc, elem| match (acc, elem.get_pos()) {
+                    (Ok(acc_pos), Ok(elem_pos)) => Pos::merge(acc_pos, elem_pos),
+                    (Err(_), Ok(elem_pos)) => Ok(elem_pos),
+                    (acc, Err(_)) => acc,
+                },
+            ),
             _ => Err(format!("No pos found for node {:?}", self)),
         }
     }
@@ -346,7 +375,7 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'_> {
                 Node_::String(_) |
                 Node_::XhpName(_, _) |
                 Node_::Hint(_, _) |
-                Node_::Backslash |
+                Node_::Backslash(_) |
                 Node_::ListItem(_) |
                 Node_::Class |
                 Node_::Interface |
@@ -487,7 +516,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         .push('\\');
                     Node_::Ignored
                 } else {
-                    Node_::Backslash
+                    Node_::Backslash(token_pos())
                 }
             }
             TokenKind::Class => Node_::Class,
@@ -631,10 +660,38 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         );
                     }
                     n => {
-                        return Err(format!(
-                            "Expected hint for type alias {}, but was {:?}",
-                            name, n
-                        ))
+                        let aliased_name = get_name("", &n);
+                        match aliased_name {
+                            Ok((aliased_name, aliased_pos)) => {
+                                let aliased_name = if aliased_name.starts_with("\\") {
+                                    aliased_name
+                                } else {
+                                    "\\".to_owned()
+                                        + self.state.namespace_builder.current_namespace()
+                                        + "\\"
+                                        + &aliased_name
+                                };
+                                // TODO(jupi): Consider rolling this and hint_to_ty into a single node_to_ty
+                                let ty = name_to_ty(&aliased_name, &aliased_pos);
+                                self.state.decls.typedefs.insert(
+                                    name,
+                                    TypedefType {
+                                        pos,
+                                        vis: aast::TypedefVisibility::Transparent,
+                                        tparams: Vec::new(),
+                                        constraint: None,
+                                        type_: ty,
+                                        decl_errors: None,
+                                    },
+                                );
+                            }
+                            Err(msg) => {
+                                return Err(format!(
+                                    "Expected hint or name for type alias {}, but was {:?} ({})",
+                                    name, n, msg
+                                ))
+                            }
+                        }
                     }
                 }
             }
@@ -748,10 +805,25 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 self.state.decls.consts.insert(name, ty);
                             }
                             n => {
-                                return Err(format!(
-                                    "Expected primitive value for constant {}, but was {:?}",
-                                    name, n
-                                ))
+                                let apply_name =
+                                    get_name(self.state.namespace_builder.current_namespace(), &n);
+                                match apply_name {
+                                    Ok((apply_name, apply_pos)) => {
+                                        let apply_name = if apply_name.starts_with("\\") {
+                                            apply_name
+                                        } else {
+                                            "\\".to_owned() + &apply_name
+                                        };
+
+                                        // TODO(jupi): Consider rolling this and hint_to_ty into a single node_to_ty
+                                        let ty = name_to_ty(&apply_name, &apply_pos);
+                                        self.state.decls.consts.insert(name, ty);
+                                    }
+                                    Err(msg) => return Err(format!(
+                                        "Expected hint or name for constant {}, but was {:?} ({})",
+                                        name, n, msg
+                                    )),
+                                }
                             }
                         };
                         Node_::Ignored

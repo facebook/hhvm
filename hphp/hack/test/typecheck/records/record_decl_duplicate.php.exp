@@ -1,0 +1,4 @@
+File "record_decl_duplicate.php", line 6, characters 8-8:
+Name already bound: A (Naming[2012])
+File "record_decl_duplicate.php", line 3, characters 8-8:
+Previous definition is here

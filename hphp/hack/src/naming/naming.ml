@@ -473,7 +473,12 @@ end = struct
       | Some (_def_pos, Naming_table.TTypedef) -> (pos, name)
       | Some (_def_pos, Naming_table.TRecordDef) -> (pos, name)
       | None ->
-        handle_unbound_name genv GEnv.type_pos GEnv.type_canon_name x `cls)
+        let kind =
+          match elaborate_kind with
+          | NS.ElaborateRecord -> `record
+          | _ -> `cls
+        in
+        handle_unbound_name genv GEnv.type_pos GEnv.type_canon_name x kind)
 
   let fun_id (genv, _) x =
     let canonicalize =
@@ -637,6 +642,7 @@ module Make (GetLocals : GetLocals) = struct
    * Used with with Ast_to_nast to go from Ast_defs.hint -> Nast.hint
    *)
   let rec hint
+      ?(elaborate_kind = NS.ElaborateClass)
       ?(forbid_this = false)
       ?(allow_retonly = false)
       ?(allow_typedef = true)
@@ -650,6 +656,7 @@ module Make (GetLocals : GetLocals) = struct
     if Option.is_some mut then Errors.misplaced_mutability_hint p;
     ( p,
       hint_
+        ~elaborate_kind
         ~forbid_this
         ~allow_retonly
         ~allow_typedef
@@ -702,6 +709,7 @@ module Make (GetLocals : GetLocals) = struct
         }
 
   and hint_
+      ?(elaborate_kind = NS.ElaborateClass)
       ~forbid_this
       ~allow_retonly
       ~allow_typedef
@@ -812,6 +820,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Happly (((p, _x) as id), hl) ->
       let hint_id =
         hint_id
+          ~elaborate_kind
           ~forbid_this
           ~allow_retonly
           ~allow_typedef
@@ -848,6 +857,7 @@ module Make (GetLocals : GetLocals) = struct
         | Aast.Happly (root, _) ->
           let h =
             hint_id
+              ~elaborate_kind
               ~forbid_this
               ~allow_retonly
               ~allow_typedef
@@ -911,6 +921,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Hpu_access (h, id) -> N.Hpu_access (hint ~allow_retonly env h, id)
 
   and hint_id
+      ?(elaborate_kind = NS.ElaborateClass)
       ~forbid_this
       ~allow_retonly
       ~allow_typedef
@@ -1002,6 +1013,7 @@ module Make (GetLocals : GetLocals) = struct
           let name =
             Env.type_name
               ~elaborate_namespace:true
+              ~elaborate_kind
               env
               id
               ~allow_typedef
@@ -3060,6 +3072,12 @@ module Make (GetLocals : GetLocals) = struct
     let methods = List.map nc.N.c_methods (meth_body genv) in
     { nc with N.c_methods = methods }
 
+  let record_field env rf =
+    let (id, h, e) = rf in
+    let h = hint env h in
+    let e = oexpr env e in
+    (id, h, e)
+
   let record_def rd =
     let env = Env.make_top_level_env () in
     let rd =
@@ -3068,12 +3086,18 @@ module Make (GetLocals : GetLocals) = struct
         rd
     in
     let attrs = user_attributes env rd.Aast.rd_user_attributes in
+    let extends =
+      match rd.Aast.rd_extends with
+      | Some extends ->
+        Some (hint ~elaborate_kind:NS.ElaborateRecord env extends)
+      | None -> None
+    in
+    let fields = List.map rd.Aast.rd_fields ~f:(record_field env) in
     {
       N.rd_name = rd.Aast.rd_name;
       rd_abstract = rd.Aast.rd_abstract;
-      (* TODO: look at hint_ and see if the checks make sense for records. *)
-      rd_extends = rd.Aast.rd_extends;
-      rd_fields = rd.Aast.rd_fields;
+      rd_extends = extends;
+      rd_fields = fields;
       rd_user_attributes = attrs;
       rd_namespace = rd.Aast.rd_namespace;
       rd_span = rd.Aast.rd_span;

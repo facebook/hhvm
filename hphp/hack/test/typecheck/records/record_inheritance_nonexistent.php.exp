@@ -1,0 +1,2 @@
+File "record_inheritance_nonexistent.php", line 3, characters 18-29:
+Unbound name: NoSuchRecord (a record type) (Naming[2049])

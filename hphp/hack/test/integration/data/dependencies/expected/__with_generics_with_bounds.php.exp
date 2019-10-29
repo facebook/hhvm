@@ -1,0 +1,10 @@
+<?hh
+function with_generics_with_bounds(int $x): keyset<int> {
+  return generic_with_bound($x);
+}
+function generic_with_bound<T as arraykey>(T $x): \HH\keyset<T> {
+  throw new \Exception();
+}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

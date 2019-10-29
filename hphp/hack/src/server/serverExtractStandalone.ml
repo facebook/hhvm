@@ -324,12 +324,27 @@ let print_fun_args tcopt fun_type =
   else
     Printf.sprintf "%s, %s" args variadic
 
+let print_constraint_kind = function
+  | Ast_defs.Constraint_as -> "as"
+  | Ast_defs.Constraint_super -> "super"
+  | Ast_defs.Constraint_eq -> "="
+
+let print_tparam_constraint tcopt (ck, cty) =
+  print_constraint_kind ck ^ " " ^ Typing_print.full_decl tcopt cty
+
+let print_tparam tcopt { tp_name = (_, name); tp_constraints = cstrl; _ } =
+  String.concat
+    ~sep:" "
+    (name :: List.map cstrl ~f:(print_tparam_constraint tcopt))
+
 let get_function_declaration tcopt fun_name fun_type =
   let tparams =
     match fun_type.ft_tparams with
     | ([], _) -> ""
     | (tparams, _) ->
-      Printf.sprintf "<%s>" @@ list_items @@ List.map tparams tparam_name
+      Printf.sprintf "<%s>"
+      @@ list_items
+      @@ List.map tparams ~f:(print_tparam tcopt)
   in
   let args = print_fun_args tcopt fun_type in
   let rtype =
@@ -566,7 +581,7 @@ let get_class_declaration tcopt (cls : Decl_provider.class_decl) =
       else
         Printf.sprintf
           "<%s>"
-          (list_items @@ List.map (Class.tparams cls) tparam_name)
+          (list_items @@ List.map (Class.tparams cls) ~f:(print_tparam tcopt))
     in
     let { extends; implements; _ } = get_direct_ancestors cls in
     let prefix_if_nonempty prefix s =

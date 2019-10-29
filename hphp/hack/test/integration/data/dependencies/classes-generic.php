@@ -72,3 +72,13 @@ function with_is_refinement<Tfirst, Tsecond>(
     $x->foo();
   }
 }
+
+class BoundedGeneric<T as arraykey> {
+  public function emptyKeyset(): keyset<T> {
+    return keyset[];
+  }
+}
+
+function with_bounded_generic_class_tparam(BoundedGeneric<int> $x): keyset<int> {
+  return $x->emptyKeyset();
+}

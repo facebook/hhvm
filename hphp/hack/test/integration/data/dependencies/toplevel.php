@@ -24,6 +24,10 @@ function generic<T>(): int {
   return 1;
 }
 
+function generic_with_bound<T as arraykey>(T $x): keyset<T> {
+  return keyset[$x];
+}
+
 function g() : void {
   $b = new B();
 }
@@ -34,6 +38,10 @@ function shallow_toplevel(C $c): void  {
 
 function with_generics<Tfirst, Tsecond>(D<Tfirst, Tsecond> $d, E<Tfirst> $e): int {
   return generic<C>();
+}
+
+function with_generics_with_bounds(int $x): keyset<int> {
+  return generic_with_bound($x);
 }
 
 function with_typedefs(Complex $c, shape('x' => int, 'y' => C) $pair) : Point {

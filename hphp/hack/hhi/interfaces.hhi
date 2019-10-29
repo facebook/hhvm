@@ -119,6 +119,10 @@ interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {}
 <<__Sealed(ConstVector::class, ConstMap::class, ConstSet::class, dict::class, keyset::class, vec::class)>>
 interface KeyedContainer<+Tk as arraykey, +Tv> extends \HH\Rx\KeyedTraversable<Tk, Tv>, Container<Tv> {}
 
+} // namespace
+
+namespace HH {
+
 /**
  * For those entities that are `Traversable`, the `Iterator` interfaces provides
  * the methods of iteration.
@@ -159,10 +163,6 @@ interface Iterator<+Tv> extends Traversable<Tv> {
    */
   public function valid(): bool;
 }
-
-} // namespace
-
-namespace HH {
 
 /**
  * Allows for the iteration over the values provided by an `async` function.
@@ -231,10 +231,6 @@ interface AsyncKeyedIterator<+Tk, +Tv> extends AsyncIterator<Tv> {
   public function next(): Awaitable<?(Tk, Tv)>;
 }
 
-} // namespace HH
-
-namespace {
-
 /**
  * For those entities that are `KeyedTraversable`, the `KeyedIterator`
  * interfaces provides the methods of iteration, included being able to get
@@ -254,6 +250,10 @@ interface KeyedIterator<+Tk, +Tv> extends KeyedTraversable<Tk,Tv>, Iterator<Tv> 
    */
   public function key(): Tk;
 }
+
+} // namespace HH
+
+namespace {
 
 /**
  * Represents objects that can produce an `Iterator` object to iterate over
@@ -276,6 +276,10 @@ interface IteratorAggregate<+Tv> extends Traversable<Tv> {
   public function getIterator(): Iterator<Tv>;
 }
 
+} // namespace
+
+namespace HH {
+
 /**
  * Represents any entity that can be iterated over using something like
  * `foreach`. The entity does not necessarily have to have a key, just values.
@@ -285,7 +289,7 @@ interface IteratorAggregate<+Tv> extends Traversable<Tv> {
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
-interface Iterable<+Tv> extends IteratorAggregate<Tv> {
+interface Iterable<+Tv> extends \IteratorAggregate<Tv> {
   /**
    * Returns an iterator that points to beginning of the current `Iterable`.
    *
@@ -790,6 +794,10 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    */
   public function lastKey(): ?Tk;
 }
+
+} // namespace HH
+
+namespace {
 
 interface Serializable {
   public function serialize(): string;

@@ -43,11 +43,11 @@ let types =
       ("ImmSet", HH);
       ("ImmVector", HH);
       ("InvariantException", HH);
-      ("Iterable", Global);
-      ("Iterator", Global);
+      ("Iterable", HH);
+      ("Iterator", HH);
       ("KeyedContainer", Global);
-      ("KeyedIterable", Global);
-      ("KeyedIterator", Global);
+      ("KeyedIterable", HH);
+      ("KeyedIterator", HH);
       ("KeyedTraversable", Global);
       ("keyset", HH);
       ("Map", HH);

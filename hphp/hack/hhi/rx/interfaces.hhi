@@ -34,8 +34,8 @@ interface Traversable<+Tv> extends \Traversable<Tv> {}
 interface KeyedTraversable<+Tk, +Tv>
   extends namespace\Traversable<Tv>, \KeyedTraversable<Tk, Tv> {}
 
-/* See documentation for \Iterator */
-interface Iterator<+Tv> extends namespace\Traversable<Tv>, \Iterator<Tv> {
+/* See documentation for \HH\Iterator */
+interface Iterator<+Tv> extends namespace\Traversable<Tv>, \HH\Iterator<Tv> {
   /**
    * Return the current value at the current iterator position.
    *
@@ -72,7 +72,7 @@ interface KeyedIterator<+Tk, +Tv>
   extends
     namespace\KeyedTraversable<Tk, Tv>,
     namespace\Iterator<Tv>,
-    \KeyedIterator<Tk, Tv> {
+    \HH\KeyedIterator<Tk, Tv> {
   /**
    * Return the current key at the current iterator position.
    *
@@ -130,7 +130,7 @@ interface IteratorAggregate<+Tv>
 }
 
 interface Iterable<+Tv>
-  extends namespace\IteratorAggregate<Tv>, \Iterable<Tv> {
+  extends namespace\IteratorAggregate<Tv>, \HH\Iterable<Tv> {
   /**
    * Returns an iterator that points to beginning of the current `Iterable`.
    *
@@ -388,7 +388,7 @@ interface KeyedIterable<Tk, +Tv>
   extends
     namespace\KeyedTraversable<Tk, Tv>,
     namespace\Iterable<Tv>,
-    \KeyedIterable<Tk, Tv> {
+    \HH\KeyedIterable<Tk, Tv> {
   /**
    * Returns an iterator that points to beginning of the current
    * `KeyedIterable`.

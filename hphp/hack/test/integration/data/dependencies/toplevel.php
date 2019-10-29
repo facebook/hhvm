@@ -71,3 +71,7 @@ class WithRecursiveMethods {
 function with_mapped_namespace(): void {
   PHP\ini_set('foo', 'bar');
 }
+
+function with_built_in_constant(): int {
+  return PHP_INT_MAX;
+}

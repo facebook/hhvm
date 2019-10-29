@@ -177,26 +177,9 @@ let is_strict_fun name = is_strict_dep (Typing_deps.Dep.Fun name)
 let is_strict_class name = is_strict_dep (Typing_deps.Dep.Class name)
 
 let is_builtin_dep dep =
-  let open Typing_deps.Dep in
-  match dep with
-  | GConst c
-  | GConstName c ->
-    Naming_special_names.PseudoConsts.is_pseudo_const c
-  | Fun _
-  | FunName _
-  | Class _
-  | Const _
-  | Method _
-  | SMethod _
-  | Prop _
-  | SProp _
-  | Cstr _
-  | AllMembers _
-  | Extends _ ->
-    let msg = Typing_deps.Dep.to_string dep in
-    let pos = value_or_not_found msg (get_dep_pos dep) in
-    Relative_path.prefix (Pos.filename pos) = Relative_path.Hhi
-  | RecordDef _ -> records_not_supported ()
+  let msg = Typing_deps.Dep.to_string dep in
+  let pos = value_or_not_found msg (get_dep_pos dep) in
+  Relative_path.prefix (Pos.filename pos) = Relative_path.Hhi
 
 let is_relevant_dependency
     (target : target) (dep : Typing_deps.Dep.dependent Typing_deps.Dep.variant)

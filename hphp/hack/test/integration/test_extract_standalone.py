@@ -66,7 +66,7 @@ auto_namespace_map = {}
                 ),
                 file=stderr,
             )
-            assert False
+            raise AssertionError()
 
         extracted_file = os.path.join(self.repo_dir, "extracted.php.out")
         # Check if the generated code is the same as expected
@@ -137,6 +137,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_classname",
             "\\with_parent_constructor_call",
             "\\with_type_const_from_required_interface",
+            "\\with_built_in_constant",
         ]
 
         for path in paths:

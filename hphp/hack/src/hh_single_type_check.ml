@@ -153,6 +153,14 @@ let print_error_list format errors max_errors =
 let print_errors format (errors : Errors.t) max_errors : unit =
   print_error_list format (Errors.get_error_list errors) max_errors
 
+let print_errors_if_present (errors : Errors.error list) =
+  if not (List.is_empty errors) then (
+    let errors_output = Errors.convert_errors_to_string errors in
+    Printf.printf "Errors:\n";
+    List.iter errors_output (fun err_output ->
+        Printf.printf "  %s\n" err_output)
+  )
+
 let parse_options () =
   let fn_ref = ref [] in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
@@ -1257,7 +1265,7 @@ let handle_mode
     let (errors, tasts) =
       compute_tasts_expand_types tcopt files_info files_contents
     in
-    Errors.print_errors_if_present (parse_errors @ Errors.get_error_list errors);
+    print_errors_if_present (parse_errors @ Errors.get_error_list errors);
     print_tasts tasts tcopt
   | Check_tast ->
     iter_over_files (fun filename ->
@@ -1423,7 +1431,7 @@ let handle_mode
     let filename = expect_single_file () in
     test_decl_compare filename popt builtins files_contents files_info
   | Shallow_class_diff ->
-    Errors.print_errors_if_present parse_errors;
+    print_errors_if_present parse_errors;
     let filename = expect_single_file () in
     test_shallow_class_diff popt filename
   | Linearization ->

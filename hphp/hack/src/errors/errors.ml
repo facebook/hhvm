@@ -4812,14 +4812,27 @@ let to_json (error : Pos.absolute error_) =
   in
   Hh_json.JSON_Object [("message", Hh_json.JSON_Array elts)]
 
-let print_errors_if_present (errors : error list) =
-  if not (List.is_empty errors) then (
-    Printf.printf "Errors:\n";
-    List.iter errors (fun err ->
-        List.iter (to_list err) (fun (pos, msg) ->
-            Format.printf "  %a %s" Pos.pp pos msg;
-            Format.print_newline ()))
-  )
+let convert_errors_to_string ?(include_filename = false) (errors : error list)
+    : string list =
+  List.fold_right
+    ~init:[]
+    ~f:(fun err acc_out ->
+      List.fold_right
+        ~init:acc_out
+        ~f:(fun (pos, msg) acc_in ->
+          let result = Format.asprintf "%a %s" Pos.pp pos msg in
+          if include_filename then
+            let full_result =
+              Printf.sprintf
+                "%s %s"
+                (Pos.to_absolute pos |> Pos.filename)
+                result
+            in
+            full_result :: acc_in
+          else
+            result :: acc_in)
+        (to_list err))
+    errors
 
 (*****************************************************************************)
 (* Try if errors. *)

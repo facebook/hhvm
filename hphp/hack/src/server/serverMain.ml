@@ -850,7 +850,33 @@ let priority_client_interrupt_handler genv client_provider env =
             ("unexpected command needing writes in priority channel: " ^ reason)
         | ServerUtils.Done env -> env)
     in
-    (env, MultiThreadedCall.Continue)
+    (* Global rechecks in response to file changes can be paused.
+      Here, we check if the user requested global rechecks to be paused during
+      the current recheck (the one that we're in the middle of). The above call
+      to `handle_connection` could have resulted in this state change if
+      the RPC was `PAUSE true`.
+
+      If the state did change to `Paused` during the current recheck,
+      we should cancel the current recheck.
+
+      Note that `PAUSE false`, which resumes global rechecks in response to
+      file changes, requires a full recheck by policy - see ServerCommand's
+      `rpc_command_needs_full_check`. Commands that require a full recheck
+      do not use `priority pipe`, so they don't end up handled here.
+      Such commands don't interrupt MultiWorker calls, by design.
+
+      The effect of `PAUSE true` during a recheck is that the recheck will be
+      canceled, while the result of `PAUSE false` is that the client will wait
+      for the recheck to be finished. *)
+    let decision =
+      match (env.full_recheck_on_file_changes, env.init_env.recheck_id) with
+      | ( Paused { paused_recheck_id = Some paused_recheck_id; _ },
+          Some recheck_id )
+        when paused_recheck_id = recheck_id ->
+        MultiThreadedCall.Cancel
+      | _ -> MultiThreadedCall.Continue
+    in
+    (env, decision)
 
 let persistent_client_interrupt_handler genv env =
   match env.persistent_client with

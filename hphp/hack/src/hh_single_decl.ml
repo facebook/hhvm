@@ -103,11 +103,25 @@ let compare_decl verbosity fn =
           "The following %s differed between the legacy and parsed versions:\n"
           name;
         List.iter different_decls ~f:(fun (key, legacy_decl, parsed_decl) ->
-            Printf.eprintf
-              "\n\n[%s]\nLegacy decl:\n%s\n\nParsed decl:\n%s\n"
-              key
-              legacy_decl
-              parsed_decl);
+            Tempfile.with_real_tempdir (fun dir ->
+                let temp_dir = Path.to_string dir in
+                let temp_file () =
+                  Filename.temp_file
+                    ~temp_dir
+                    (Printf.sprintf "%s_%s" name key)
+                    ".txt"
+                in
+                let expected = temp_file () in
+                let actual = temp_file () in
+                Disk.write_file ~file:expected ~contents:legacy_decl;
+                Disk.write_file ~file:actual ~contents:parsed_decl;
+                Printf.eprintf "\n\n[%s]\n" key;
+                Out_channel.flush stderr;
+                Ppxlib_print_diff.print
+                  ~diff_command:"diff -U9999 --label legacy --label parsed"
+                  ~file1:expected
+                  ~file2:actual
+                  ()));
         false
     in
     [

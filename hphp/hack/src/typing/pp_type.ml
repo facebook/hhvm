@@ -406,6 +406,8 @@ and pp_fun_elt : Format.formatter -> fun_elt -> unit =
 
   Format.fprintf fmt "@ }@]"
 
+and show_fun_elt x = Format.asprintf "%a" pp_fun_elt x
+
 and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
  fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";

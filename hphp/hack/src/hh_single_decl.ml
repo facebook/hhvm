@@ -121,6 +121,11 @@ let compare_decl verbosity fn =
         (fun a b -> Decl.declare_const_in_file a b |> fst)
         (Pp_type.show_decl_ty ())
         decls.consts;
+      compare
+        "function(s)"
+        Decl.declare_fun_in_file
+        Pp_type.show_fun_elt
+        decls.funs;
     ]
     |> List.reduce_exn ~f:( && )
   in

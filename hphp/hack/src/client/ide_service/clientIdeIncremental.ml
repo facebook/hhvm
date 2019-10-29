@@ -253,9 +253,12 @@ let update_naming_table
 let invalidate_decls ~(old_file_info : FileInfo.t option) : unit =
   match old_file_info with
   | None -> ()
-  | Some { FileInfo.funs; classes; typedefs; consts; _ } ->
+  | Some { FileInfo.funs; classes; record_defs; typedefs; consts; _ } ->
     funs |> strip_positions |> SSet.iter ~f:Decl_provider.invalidate_fun;
     classes |> strip_positions |> SSet.iter ~f:Decl_provider.invalidate_class;
+    record_defs
+    |> strip_positions
+    |> SSet.iter ~f:Decl_provider.invalidate_record_def;
     typedefs
     |> strip_positions
     |> SSet.iter ~f:Decl_provider.invalidate_typedef;

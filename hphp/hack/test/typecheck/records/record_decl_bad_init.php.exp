@@ -1,0 +1,6 @@
+File "record_decl_bad_init.php", line 4, characters 6-8:
+Wrong type hint (Typing[4351])
+File "record_decl_bad_init.php", line 4, characters 6-8:
+Expected int
+File "record_decl_bad_init.php", line 4, characters 12-15:
+But got null

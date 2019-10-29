@@ -5535,6 +5535,7 @@ where
                 );
                 self.check_constant_expression(&init)
             }
+            RecordField(x) => self.check_constant_expression(&x.record_field_init),
             XHPClassAttribute(x) => {
                 self.check_constant_expression(&x.xhp_attribute_decl_initializer)
             }

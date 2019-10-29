@@ -50,6 +50,8 @@ val invalidate_fun : fun_key -> unit
 
 val invalidate_class : class_key -> unit
 
+val invalidate_record_def : record_def_key -> unit
+
 val invalidate_typedef : typedef_key -> unit
 
 val invalidate_gconst : gconst_key -> unit

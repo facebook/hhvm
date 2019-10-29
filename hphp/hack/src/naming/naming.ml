@@ -202,7 +202,7 @@ end = struct
       | `func -> Typing_deps.Dep.Fun name
       | `cls -> Typing_deps.Dep.Class name
       | `const -> Typing_deps.Dep.GConst name
-      | `record -> Typing_deps.Dep.GConst name
+      | `record -> Typing_deps.Dep.RecordDef name
     end
     |> Typing_deps.add_idep genv.droot;
     Errors.unbound_name pos name kind
@@ -3094,7 +3094,8 @@ module Make (GetLocals : GetLocals) = struct
     in
     let fields = List.map rd.Aast.rd_fields ~f:(record_field env) in
     {
-      N.rd_name = rd.Aast.rd_name;
+      N.rd_annotation = ();
+      rd_name = rd.Aast.rd_name;
       rd_abstract = rd.Aast.rd_abstract;
       rd_extends = extends;
       rd_fields = fields;

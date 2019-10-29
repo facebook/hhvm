@@ -822,6 +822,7 @@ let converter
     in
     Aast.
       {
+        rd_annotation = env_annotation;
         rd_name = rd.Ast.rd_name;
         rd_abstract = rd.Ast.rd_abstract;
         rd_extends = optional on_hint (List.hd rd.Ast.rd_extends);

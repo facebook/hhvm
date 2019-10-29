@@ -8477,7 +8477,7 @@ and record_field env f =
   match e with
   | Some e ->
     let (env, te, ty) = expr ~expected env e in
-    let _env =
+    let env =
       Typing_coercion.coerce_type
         p
         Reason.URhint
@@ -8486,21 +8486,21 @@ and record_field env f =
         (MakeType.unenforced cty)
         Errors.record_init_value_does_not_match_hint
     in
-    (id, hint, Some te)
-  | None -> (id, hint, None)
+    (env, (id, hint, Some te))
+  | None -> (env, (id, hint, None))
 
-(* Type check records to ensure their initial values match the field
-   type. TODO, see T44306013 *)
 and record_def_def tcopt rd =
   let env = EnvFromDef.record_def_env tcopt rd in
   let (env, attributes) =
     List.map_env env rd.rd_user_attributes user_attribute
   in
+  let (env, fields) = List.map_env env rd.rd_fields record_field in
   {
+    T.rd_annotation = Env.save (Env.get_tpenv env) env;
     T.rd_name = rd.rd_name;
     T.rd_extends = rd.rd_extends;
     T.rd_abstract = rd.rd_abstract;
-    T.rd_fields = List.map rd.rd_fields (record_field env);
+    T.rd_fields = fields;
     T.rd_user_attributes = attributes;
     T.rd_namespace = rd.rd_namespace;
     T.rd_span = rd.rd_span;

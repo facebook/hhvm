@@ -531,6 +531,7 @@ and ('ex, 'fb, 'en, 'hi) gconst = {
 }
 
 and ('ex, 'fb, 'en, 'hi) record_def = {
+  rd_annotation: 'en;
   rd_name: sid;
   rd_extends: hint option;
   rd_abstract: bool;

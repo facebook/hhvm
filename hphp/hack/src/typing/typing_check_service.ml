@@ -136,14 +136,15 @@ let type_class
     def_opt
   | None -> None
 
-let type_record_def opts fn (x : string) =
+let type_record_def
+    (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
+    Tast.def option =
   match Ast_provider.find_record_def_in_file ~full:true fn x with
   | Some rd ->
     let rd = Naming.record_def rd in
     Nast_check.def (Aast.RecordDef rd);
 
-    (* TODO: type check records T44306013 *)
-    let def = Typing.record_def_def opts rd |> (fun rd -> Aast.RecordDef rd) in
+    let def = Aast.RecordDef (Typing.record_def_def opts rd) in
     Tast_check.def opts def;
     Some def
   | None -> None

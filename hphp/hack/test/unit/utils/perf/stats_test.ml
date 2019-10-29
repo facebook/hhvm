@@ -33,9 +33,19 @@ let test_quantiles_equal_step4 () =
   in
   compare_quantiles qs [1.; 9.; 81.]
 
+let test_quantiles_equal_uniform_4 () =
+  let qs = Perf_stats.quantiles [1.; 2.; 3.; 4.] 4 in
+  compare_quantiles qs [1.; 2.; 3.; 4.]
+
+let test_quantiles_equal_uniform_3 () =
+  let qs = Perf_stats.quantiles [1.; 2.; 3.; 4.] 3 in
+  compare_quantiles qs [2.; 3.; 4.]
+
 let () =
   Unit_test.run_all
     [
       ("test_quantiles_equal_step2", test_quantiles_equal_step2);
       ("test_quantiles_equal_step4", test_quantiles_equal_step4);
+      ("test_quantiles_equal_uniform_4", test_quantiles_equal_uniform_4);
+      ("test_quantiles_equal_uniform_3", test_quantiles_equal_uniform_3);
     ]

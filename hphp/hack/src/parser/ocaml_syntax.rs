@@ -38,7 +38,14 @@ where
     ) -> OcamlValue {
         unsafe {
             let ocaml_value = value.to_ocaml(ctx.serialization_context());
-            caml_tuple(&[caml_block(kind.ocaml_tag(), children), ocaml_value])
+            let syntax = reserve_block(kind.ocaml_tag().into(), children.len());
+            for (i, &child) in children.iter().enumerate() {
+                caml_set_field(syntax, i, child);
+            }
+            let node = reserve_block(0, 2);
+            caml_set_field(node, 0, syntax);
+            caml_set_field(node, 1, ocaml_value);
+            node
         }
     }
 }
@@ -56,8 +63,11 @@ where
             let value = V::from_children(SyntaxKind::Missing, offset, &[]);
             let ocaml_value = value.to_ocaml(ctx.serialization_context());
             let kind = u8_to_ocaml(SyntaxKind::Missing.ocaml_tag());
+            let node = reserve_block(0, 2);
+            caml_set_field(node, 0, kind);
+            caml_set_field(node, 1, ocaml_value);
             Self {
-                syntax: caml_tuple(&[kind, ocaml_value]),
+                syntax: node,
                 value,
             }
         }
@@ -67,14 +77,15 @@ where
         unsafe {
             let value = V::from_token(&arg);
             let ocaml_value = value.to_ocaml(ctx.serialization_context());
-            let syntax = caml_tuple(&[
-                caml_block(
-                    SyntaxKind::Token(arg.kind()).ocaml_tag(),
-                    &[arg.to_ocaml(ctx.serialization_context())],
-                ),
-                ocaml_value,
-            ]);
-            Self { syntax, value }
+            let syntax = reserve_block(SyntaxKind::Token(arg.kind()).ocaml_tag().into(), 1);
+            caml_set_field(syntax, 0, arg.to_ocaml(ctx.serialization_context()));
+            let node = reserve_block(0.into(), 2);
+            caml_set_field(node, 0, syntax);
+            caml_set_field(node, 1, ocaml_value);
+            Self {
+                syntax: node,
+                value,
+            }
         }
     }
 
@@ -87,14 +98,15 @@ where
                 let lst_slice = &args.iter().map(|x| &x.value).collect::<Vec<_>>();
                 let value = V::from_children(SyntaxKind::SyntaxList, offset, lst_slice);
                 let ocaml_value = value.to_ocaml(ctx.serialization_context());
-                let syntax = caml_tuple(&[
-                    caml_block(
-                        SyntaxKind::SyntaxList.ocaml_tag(),
-                        &[to_list(&args, ctx.serialization_context())],
-                    ),
-                    ocaml_value,
-                ]);
-                Self { syntax, value }
+                let syntax = reserve_block(SyntaxKind::SyntaxList.ocaml_tag().into(), 1);
+                caml_set_field(syntax, 0, to_list(&args, ctx.serialization_context()));
+                let node = reserve_block(0.into(), 2);
+                caml_set_field(node, 0, syntax);
+                caml_set_field(node, 1, ocaml_value);
+                Self {
+                    syntax: node,
+                    value,
+                }
             }
         }
     }

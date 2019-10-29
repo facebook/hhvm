@@ -39,7 +39,10 @@ where
     let mut res = empty_list();
 
     for v in values.iter().rev() {
-        res = caml_tuple(&[v.to_ocaml(context), res])
+        let tmp = res;
+        res = reserve_block(0.into(), 2);
+        caml_set_field(res, 0, v.to_ocaml(context));
+        caml_set_field(res, 1, tmp);
     }
     res
 }
@@ -99,16 +102,20 @@ where
             SyntaxVariant::Token(token) => {
                 let token_kind = token.kind();
                 let token = token.to_ocaml(context);
-                caml_block(SyntaxKind::Token(token_kind).ocaml_tag(), &[token])
+                let block = reserve_block(SyntaxKind::Token(token_kind).ocaml_tag().into(), 1);
+                caml_set_field(block, 0, token);
+                block
             }
             SyntaxVariant::SyntaxList(l) => {
                 let l = to_list(l, context);
-                caml_block(SyntaxKind::SyntaxList.ocaml_tag(), &[l])
+                let block = reserve_block(SyntaxKind::SyntaxList.ocaml_tag().into(), 1);
+                caml_set_field(block, 0, l);
+                block
             }
             _ => {
                 let tag = self.kind().ocaml_tag() as u8;
                 // This could be much more readable by constructing a vector of children and
-                // passing it to caml_block, but the cost of this intermediate vector allocation is
+                // passing it to to_list, but the cost of this intermediate vector allocation is
                 // too big
                 let n = self.iter_children().count();
                 let result = reserve_block(tag, n);
@@ -121,7 +128,10 @@ where
                 result
             }
         };
-        caml_tuple(&[syntax, value])
+        let block = reserve_block(0.into(), 2);
+        caml_set_field(block, 0, syntax);
+        caml_set_field(block, 1, value);
+        block
     }
 }
 
@@ -134,12 +144,12 @@ impl ToOcaml for PositionedTrivia {
         //   offset : int;
         //   width : int
         // }
-        caml_tuple(&[
-            self.kind.to_ocaml(context),
-            context.source_text,
-            usize_to_ocaml(self.offset),
-            usize_to_ocaml(self.width),
-        ])
+        let block = reserve_block(0.into(), 4);
+        caml_set_field(block, 0, self.kind.to_ocaml(context));
+        caml_set_field(block, 1, context.source_text);
+        caml_set_field(block, 2, usize_to_ocaml(self.offset));
+        caml_set_field(block, 3, usize_to_ocaml(self.width));
+        block
     }
 }
 
@@ -194,7 +204,10 @@ impl ToOcaml for PositionedToken {
                 //( Trivia.t list * Trivia.t list)
                 let leading = to_list(self.leading(), context);
                 let trailing = to_list(self.trailing(), context);
-                caml_tuple(&[leading, trailing])
+                let block = reserve_block(0.into(), 2);
+                caml_set_field(block, 0, leading);
+                caml_set_field(block, 1, trailing);
+                block
             }
         };
         // From full_fidelity_positioned_token.ml:
@@ -207,15 +220,14 @@ impl ToOcaml for PositionedToken {
         //   trailing_width: int;
         //   trivia: LazyTrivia.t;
         // }
-        let res = caml_tuple(&[
-            kind,
-            context.source_text,
-            offset,
-            leading_width,
-            width,
-            trailing_width,
-            trivia,
-        ]);
+        let res = reserve_block(0.into(), 7);
+        caml_set_field(res, 0, kind);
+        caml_set_field(res, 1, context.source_text);
+        caml_set_field(res, 2, offset);
+        caml_set_field(res, 3, leading_width);
+        caml_set_field(res, 4, width);
+        caml_set_field(res, 5, trailing_width);
+        caml_set_field(res, 6, trivia);
         set_forward_pointer(self, res);
         res
     }
@@ -231,18 +243,26 @@ impl ToOcaml for PositionedValue {
             PositionedValue::TokenValue(t) => {
                 let token = t.to_ocaml(context);
                 // TokenValue of  ...
-                caml_block(TOKEN_VALUE_VARIANT, &[token])
+                let block = reserve_block(TOKEN_VALUE_VARIANT.into(), 1);
+                caml_set_field(block, 0, token);
+                block
             }
             PositionedValue::TokenSpan { left, right } => {
                 let left = left.to_ocaml(context);
                 let right = right.to_ocaml(context);
                 // TokenSpan { left: Token.t; right: Token.t }
-                caml_block(TOKEN_SPAN_VARIANT, &[left, right])
+                let block = reserve_block(TOKEN_SPAN_VARIANT.into(), 2);
+                caml_set_field(block, 0, left);
+                caml_set_field(block, 1, right);
+                block
             }
             PositionedValue::Missing { offset } => {
                 let offset = usize_to_ocaml(*offset);
                 // Missing of {...}
-                caml_block(MISSING_VALUE_VARIANT, &[context.source_text, offset])
+                let block = reserve_block(MISSING_VALUE_VARIANT.into(), 2);
+                caml_set_field(block, 0, context.source_text);
+                caml_set_field(block, 1, offset);
+                block
             }
         }
     }

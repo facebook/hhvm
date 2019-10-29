@@ -135,28 +135,6 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> 
     }
 }
 
-fn hint_to_ty(hint: &HintValue, pos: &Pos) -> Ty {
-    let reason = Reason::Rhint(pos.clone());
-    let ty_ = match hint {
-        HintValue::String => Ty_::Tprim(aast::Tprim::Tstring),
-        HintValue::Int => Ty_::Tprim(aast::Tprim::Tint),
-        HintValue::Float => Ty_::Tprim(aast::Tprim::Tfloat),
-        HintValue::Num => Ty_::Tprim(aast::Tprim::Tnum),
-        HintValue::Bool => Ty_::Tprim(aast::Tprim::Tbool),
-        HintValue::Apply(gn) => Ty_::Tapply(
-            Id(pos.clone(), "\\".to_string() + &(gn.to_unescaped_string())),
-            Vec::new(),
-        ),
-    };
-    Ty(reason, Box::new(ty_))
-}
-
-fn name_to_ty(name: &str, pos: &Pos) -> Ty {
-    let reason = Reason::Rhint(pos.clone());
-    let ty_ = Ty_::Tapply(Id(pos.clone(), name.to_owned()), Vec::new());
-    Ty(reason, Box::new(ty_))
-}
-
 #[derive(Clone, Debug)]
 enum NamespaceType {
     Simple(String),
@@ -334,6 +312,42 @@ pub struct ClassDeclChildren {
 pub struct EnumDeclChildren {
     pub name: Node_,
     pub attributes: Node_,
+}
+
+impl DirectDeclSmartConstructors<'_> {
+    fn node_to_ty(&self, node: &Node_) -> Result<Ty, String> {
+        match node {
+            Node_::Hint(hv, pos) => {
+                let reason = Reason::Rhint(pos.clone());
+                let ty_ = match hv {
+                    HintValue::String => Ty_::Tprim(aast::Tprim::Tstring),
+                    HintValue::Int => Ty_::Tprim(aast::Tprim::Tint),
+                    HintValue::Float => Ty_::Tprim(aast::Tprim::Tfloat),
+                    HintValue::Num => Ty_::Tprim(aast::Tprim::Tnum),
+                    HintValue::Bool => Ty_::Tprim(aast::Tprim::Tbool),
+                    HintValue::Apply(gn) => Ty_::Tapply(
+                        Id(pos.clone(), "\\".to_string() + &(gn.to_unescaped_string())),
+                        Vec::new(),
+                    ),
+                };
+                Ok(Ty(reason, Box::new(ty_)))
+            }
+            node => {
+                let (name, pos) = get_name("", node)?;
+                let name = if name.starts_with("\\") {
+                    name
+                } else {
+                    "\\".to_owned()
+                        + self.state.namespace_builder.current_namespace()
+                        + "\\"
+                        + &name
+                };
+                let reason = Reason::Rhint(pos.clone());
+                let ty_ = Ty_::Tapply(Id(pos.clone(), name.to_owned()), Vec::new());
+                Ok(Ty(reason, Box::new(ty_)))
+            }
+        }
+    }
 }
 
 impl<'a> FlattenOp for DirectDeclSmartConstructors<'_> {
@@ -644,9 +658,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             _ => {
                 let (name, pos) =
                     get_name(self.state.namespace_builder.current_namespace(), &name)?;
-                match aliased_type {
-                    Node_::Hint(hv, hint_pos) => {
-                        let ty = hint_to_ty(&hv, &hint_pos);
+                match self.node_to_ty(&aliased_type) {
+                    Ok(ty) => {
                         self.state.decls.typedefs.insert(
                             name,
                             TypedefType {
@@ -659,39 +672,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             },
                         );
                     }
-                    n => {
-                        let aliased_name = get_name("", &n);
-                        match aliased_name {
-                            Ok((aliased_name, aliased_pos)) => {
-                                let aliased_name = if aliased_name.starts_with("\\") {
-                                    aliased_name
-                                } else {
-                                    "\\".to_owned()
-                                        + self.state.namespace_builder.current_namespace()
-                                        + "\\"
-                                        + &aliased_name
-                                };
-                                // TODO(jupi): Consider rolling this and hint_to_ty into a single node_to_ty
-                                let ty = name_to_ty(&aliased_name, &aliased_pos);
-                                self.state.decls.typedefs.insert(
-                                    name,
-                                    TypedefType {
-                                        pos,
-                                        vis: aast::TypedefVisibility::Transparent,
-                                        tparams: Vec::new(),
-                                        constraint: None,
-                                        type_: ty,
-                                        decl_errors: None,
-                                    },
-                                );
-                            }
-                            Err(msg) => {
-                                return Err(format!(
-                                    "Expected hint or name for type alias {}, but was {:?} ({})",
-                                    name, n, msg
-                                ))
-                            }
-                        }
+                    Err(msg) => {
+                        return Err(format!(
+                            "Expected hint or name for type alias {}, but was {:?} ({})",
+                            name, aliased_type, msg
+                        ))
                     }
                 }
             }
@@ -799,31 +784,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     [name, _initializer] => {
                         let (name, _) =
                             get_name(self.state.namespace_builder.current_namespace(), name)?;
-                        match hint {
-                            Node_::Hint(hv, pos) => {
-                                let ty = hint_to_ty(&hv, &pos);
-                                self.state.decls.consts.insert(name, ty);
-                            }
-                            n => {
-                                let apply_name =
-                                    get_name(self.state.namespace_builder.current_namespace(), &n);
-                                match apply_name {
-                                    Ok((apply_name, apply_pos)) => {
-                                        let apply_name = if apply_name.starts_with("\\") {
-                                            apply_name
-                                        } else {
-                                            "\\".to_owned() + &apply_name
-                                        };
-
-                                        // TODO(jupi): Consider rolling this and hint_to_ty into a single node_to_ty
-                                        let ty = name_to_ty(&apply_name, &apply_pos);
-                                        self.state.decls.consts.insert(name, ty);
-                                    }
-                                    Err(msg) => return Err(format!(
-                                        "Expected hint or name for constant {}, but was {:?} ({})",
-                                        name, n, msg
-                                    )),
-                                }
+                        match self.node_to_ty(&hint) {
+                            Ok(ty) => self.state.decls.consts.insert(name, ty),
+                            Err(msg) => {
+                                return Err(format!(
+                                    "Expected hint or name for constant {}, but was {:?} ({})",
+                                    name, hint, msg
+                                ))
                             }
                         };
                         Node_::Ignored

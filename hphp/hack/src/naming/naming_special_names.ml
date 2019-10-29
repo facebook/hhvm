@@ -96,11 +96,11 @@ module Collections = struct
 
   let cConstCollection = "\\ConstCollection"
 
-  let cDict = "\\dict"
+  let cDict = "\\HH\\dict"
 
-  let cVec = "\\vec"
+  let cVec = "\\HH\\vec"
 
-  let cKeyset = "\\keyset"
+  let cKeyset = "\\HH\\keyset"
 end
 
 module Members = struct

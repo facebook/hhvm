@@ -8,6 +8,10 @@
  *
  */
 
-abstract final class dict<+Tk as arraykey, +Tv> implements KeyedContainer<Tk, Tv>, XHPChild {}
-abstract final class keyset<+T as arraykey> implements KeyedContainer<T, T>, XHPChild {}
-abstract final class vec<+T> implements KeyedContainer<int, T>, XHPChild {}
+namespace HH {
+
+abstract final class dict<+Tk as arraykey, +Tv> implements KeyedContainer<Tk, Tv>, \XHPChild {}
+abstract final class keyset<+T as arraykey> implements KeyedContainer<T, T>, \XHPChild {}
+abstract final class vec<+T> implements KeyedContainer<int, T>, \XHPChild {}
+
+} // namespace HH

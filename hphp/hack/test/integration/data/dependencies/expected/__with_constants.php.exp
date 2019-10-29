@@ -32,7 +32,7 @@ enum SecondEnum: string {
   SECOND = "";
   FIRST = "";
 }
-const \keyset<string> KEYSET = keyset[];
+const \HH\keyset<string> KEYSET = keyset[];
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

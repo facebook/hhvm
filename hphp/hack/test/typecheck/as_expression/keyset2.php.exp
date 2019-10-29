@@ -2,19 +2,19 @@ File "keyset2.php", line 13, characters 18-38:
 Invalid argument (Typing[4110])
 File "keyset2.php", line 23, characters 32-37:
 Expected string
-File "hackarray.hhi", line 12, characters 35-42:
+File "hackarray.hhi", line 14, characters 35-42:
 But got arraykey
 File "keyset2.php", line 16, characters 18-41:
 Invalid argument (Typing[4110])
 File "keyset2.php", line 23, characters 32-37:
 Expected string
-File "hackarray.hhi", line 12, characters 35-42:
+File "hackarray.hhi", line 14, characters 35-42:
 But got arraykey
 File "keyset2.php", line 12, characters 33-38:
 The type keyset expects 1 type parameter(s) (Typing[4101])
-File "hackarray.hhi", line 12, characters 22-27:
+File "hackarray.hhi", line 14, characters 22-27:
 Definition is here
 File "keyset2.php", line 13, characters 33-38:
 The type keyset expects 1 type parameter(s) (Typing[4101])
-File "hackarray.hhi", line 12, characters 22-27:
+File "hackarray.hhi", line 14, characters 22-27:
 Definition is here

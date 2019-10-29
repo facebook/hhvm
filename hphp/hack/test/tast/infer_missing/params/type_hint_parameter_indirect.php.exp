@@ -123,7 +123,7 @@ Errors:
           param_type_hint =
           ((vec<int>),
            (Some ([15:19-27],
-                  (Happly (([15:19-22], "\\vec"),
+                  (Happly (([15:19-22], "\\HH\\vec"),
                      [([15:23-26], (Hprim Tint))])))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [15:28-30]; param_name = "$x"; param_expr = None;

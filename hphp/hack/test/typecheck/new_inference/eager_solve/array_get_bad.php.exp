@@ -5,7 +5,7 @@ This is a string
 File "array_get_bad.php", line 39, characters 19-20:
 It is incompatible with an int
 File "array_get_bad.php", line 41, characters 15-20:
-Invalid index type for this dict (Typing[4324])
+Invalid index type for this HH\dict (Typing[4324])
 File "array_get_bad.php", line 21, characters 8-13:
 This is a string
 File "array_get_bad.php", line 41, characters 18-19:
@@ -23,7 +23,7 @@ This is a string
 File "array_get_bad.php", line 45, characters 21-22:
 It is incompatible with an int
 File "array_get_bad.php", line 49, characters 16-22:
-Invalid index type for this keyset (Typing[4324])
+Invalid index type for this HH\keyset (Typing[4324])
 File "array_get_bad.php", line 25, characters 10-15:
 This is a string
 File "array_get_bad.php", line 49, characters 20-21:

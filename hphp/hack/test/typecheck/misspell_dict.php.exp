@@ -1,4 +1,2 @@
 File "misspell_dict.php", line 4, characters 8-11:
-Could not find Dict (Naming[2006])
-File "hackarray.hhi", line 11, characters 22-25:
-Did you mean dict?
+Unbound name: Dict (an object type) (Naming[2049])

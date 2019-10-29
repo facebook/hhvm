@@ -18,7 +18,7 @@
             param_type_hint =
             ((dict<string, int>),
              (Some ([6:31-48],
-                    (Happly (([6:31-35], "\\dict"),
+                    (Happly (([6:31-35], "\\HH\\dict"),
                        [([6:36-42], (Hprim Tstring));
                          ([6:44-47], (Hprim Tint))]
                        )))));

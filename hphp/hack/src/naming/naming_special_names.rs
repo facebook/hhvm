@@ -100,11 +100,11 @@ pub mod collections {
 
     pub const CONST_COLLECTION: &str = "\\ConstCollection";
 
-    pub const DICT: &str = "\\dict";
+    pub const DICT: &str = "\\HH\\dict";
 
-    pub const VEC: &str = "\\vec";
+    pub const VEC: &str = "\\HH\\vec";
 
-    pub const KEYSET: &str = "\\keyset";
+    pub const KEYSET: &str = "\\HH\\keyset";
 }
 
 pub mod members {

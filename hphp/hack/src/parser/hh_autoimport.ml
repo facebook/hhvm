@@ -36,7 +36,7 @@ let types =
       ("ConditionWaitHandle", HH);
       ("Container", Global);
       ("darray", HH);
-      ("dict", Global);
+      ("dict", HH);
       ("ExternalThreadEventWaitHandle", HH);
       ("IMemoizeParam", HH);
       ("ImmMap", HH);
@@ -49,7 +49,7 @@ let types =
       ("KeyedIterable", Global);
       ("KeyedIterator", Global);
       ("KeyedTraversable", Global);
-      ("keyset", Global);
+      ("keyset", HH);
       ("Map", HH);
       ("ObjprofObjectStats", HH);
       ("ObjprofPathsStats", HH);
@@ -68,7 +68,7 @@ let types =
       ("varray_or_darray", HH);
       ("varray", HH);
       ("vec_or_dict", HH);
-      ("vec", Global);
+      ("vec", HH);
       ("Vector", HH);
       ("WaitableWaitHandle", HH);
       ("XenonSample", HH);

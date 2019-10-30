@@ -11,9 +11,7 @@ function beta() {
 function gamma() {
   beta();
 }
-
+<<__EntryPoint>>
 function main() {
   gamma();
 }
-
-main();

@@ -27,11 +27,7 @@ object(Exception) (8) {
       }
     }
     [1]=>
-    array(4) {
-      ["file"]=>
-      string(%d) "%s/test/slow/exceptions/chain-fault.php"
-      ["line"]=>
-      int(31)
+    array(2) {
       ["function"]=>
       string(4) "main"
       ["args"]=>
@@ -66,11 +62,7 @@ object(Exception) (8) {
         }
       }
       [1]=>
-      array(4) {
-        ["file"]=>
-        string(%d) "%s/test/slow/exceptions/chain-fault.php"
-        ["line"]=>
-        int(31)
+      array(2) {
         ["function"]=>
         string(4) "main"
         ["args"]=>

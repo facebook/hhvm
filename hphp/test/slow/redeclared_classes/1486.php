@@ -2,10 +2,10 @@
 
 if (isset($g)) {
   include '1486-1.inc';
- }
- else {
+}
+else {
   include '1486-2.inc';
- }
+}
 class d extends c {
   private $b = 'b';
   function t2() {

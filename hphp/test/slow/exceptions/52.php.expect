@@ -12,16 +12,14 @@ array(2) {
     }
   }
   [1]=>
-  array(4) {
-    ["file"]=>
-    string(6) "string"
-    ["line"]=>
-    int(31)
+  array(3) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
     array(0) {
     }
+    ["file"]=>
+    string(6) "string"
   }
 }
 int(16)

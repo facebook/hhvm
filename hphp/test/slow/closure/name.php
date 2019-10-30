@@ -36,7 +36,7 @@ class Test {
     return () ==> debug_backtrace();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $closures = array(
   testOne(),
   testTwo(),
@@ -49,4 +49,5 @@ $closures = array(
 foreach ($closures as $t) {
   var_dump(array_map($x ==> $x['function'],
                      $t()));
+}
 }

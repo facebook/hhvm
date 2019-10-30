@@ -17,7 +17,7 @@ class A1 {
   public function corge() {}
   public static function flob() {}
 }
-
+<<__EntryPoint>>
 function test() {
   echo "======== Called without using a function pointer ========\n\n";
   $foo = 'foo';
@@ -55,5 +55,3 @@ function test() {
   HH\dynamic_fun($corge)();
   HH\dynamic_class_meth($a1, $flob)();
 }
-
-test();

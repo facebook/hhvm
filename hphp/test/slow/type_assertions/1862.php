@@ -35,15 +35,15 @@ class A1 {
       var_dump($this->d1prop);
       var_dump($this->d1method());
     }
- else if ($this is C1) {
+    else if ($this is C1) {
       var_dump($this->c1prop);
       var_dump($this->c1method());
     }
- else if ($this is B1) {
+    else if ($this is B1) {
       var_dump($this->b1prop);
       var_dump($this->b1method());
     }
- else if ($this is A1) {
+    else if ($this is A1) {
       var_dump($this->a1prop);
       var_dump($this->a1method());
     }

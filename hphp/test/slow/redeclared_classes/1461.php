@@ -14,7 +14,7 @@ function foo() {
   try {
     throw new Exception2();
   }
- catch (Exception $e) {
+  catch (Exception $e) {
     var_dump($e->getCode());
   }
 }

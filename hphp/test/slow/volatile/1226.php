@@ -15,6 +15,6 @@ if (class_exists('A')) {
   $obj = new A;
   $obj->f();
 }
- else {
+else {
   var_dump('correct');
 }

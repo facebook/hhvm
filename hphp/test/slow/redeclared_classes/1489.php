@@ -3,7 +3,7 @@
 if (isset($g)) {
   include '1489-1.inc';
 }
- else {
+else {
   include '1489-2.inc';
 }
 class Y extends X {
@@ -30,7 +30,7 @@ function foo($x) {
     apc_store('foo', $y);
     $z = __hhvm_intrinsics\apc_fetch_no_check('foo');
   }
- else {
+  else {
     $z = clone $y;
   }
   var_dump($z);

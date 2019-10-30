@@ -5,7 +5,7 @@ function funk($alice, $bob) {
   debug_print_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 }
 
-
+<<__EntryPoint>>
 function main() {
   $use_by_val = 123;
 
@@ -31,5 +31,3 @@ function main() {
   var_dump(is_darray($debuginfo['static']));
   var_dump(is_darray($debuginfo['parameter']));
 }
-
-main();

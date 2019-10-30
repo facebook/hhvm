@@ -1,9 +1,11 @@
 <?hh
+<<__EntryPoint>> function main(): void {
+try {
+} finally {
   try {
-  } finally {
-    try {
-       goto foo;
-    }
-    finally {}
+     goto foo;
   }
-  foo:
+  finally {}
+}
+foo:
+}

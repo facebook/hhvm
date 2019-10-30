@@ -10,8 +10,8 @@ namespace A {
   function j($k = \PHP_VERSION, $l = B, $m = array(\PHP_VERSION), $n = array(B)) {
   }
 }
-
 namespace {
+<<__EntryPoint>> function main(): void {
   $tests = array(
     new ReflectionMethod('A\D', 'e'),
     new ReflectionFunction('A\j'),
@@ -26,4 +26,5 @@ namespace {
       );
     }
   }
+}
 }

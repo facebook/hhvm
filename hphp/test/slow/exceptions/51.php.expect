@@ -1,15 +1,25 @@
-array(1) {
+array(2) {
   [0]=>
   array(4) {
     ["file"]=>
     string(6) "string"
     ["line"]=>
-    int(11)
+    int(12)
     ["function"]=>
     string(7) "thrower"
     ["args"]=>
     array(0) {
     }
+  }
+  [1]=>
+  array(3) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    array(0) {
+    }
+    ["file"]=>
+    string(6) "string"
   }
 }
 int(8)

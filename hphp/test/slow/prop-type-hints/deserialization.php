@@ -17,7 +17,7 @@ class A {
 class B extends A {
   public int $p1 = 123;
 }
-
+<<__EntryPoint>>
 function test() {
   $s = 'O:1:"B":10:{s:2:"p1";i:123;s:2:"p2";s:3:"abc";s:2:"p3";i:456;s:2:"p4";i:789;s:2:"p5";b:1;s:2:"p6";v:3:{i:1;i:2;i:3;}s:2:"p7";v:0:{}s:2:"p8";y:0:{}s:2:"p9";Y:0:{}s:3:"p10";a:0:{}}';
   unserialize($s);
@@ -25,4 +25,3 @@ function test() {
   $s2 = 'O:1:"B":9:{s:2:"p1";s:3:"zyz";s:2:"p2";i:707;s:2:"p3";N;s:2:"p4";i:789;s:2:"p5";i:1;s:2:"p6";k:3:{i:1;i:2;i:3;}s:2:"p8";Y:0:{}s:2:"p9";a:0:{}s:3:"p10";y:0:{}}';
   __hhvm_intrinsics\deserialize_keep_dvarrays($s2);
 }
-test();

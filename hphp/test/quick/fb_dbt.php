@@ -1,6 +1,6 @@
 <?hh
 
-$_SERVER['PHP_ROOT'] = dirname(__FILE__)."../../..";
+
 
 function h() {
     var_dump(fb_debug_backtrace());
@@ -84,5 +84,8 @@ function fb_debug_backtrace($skip_top_libcore=true, $bt=null) {
 function g() {
   C::f();
 }
-g();
 
+<<__EntryPoint>> function main(): void {
+$_SERVER['PHP_ROOT'] = dirname(__FILE__)."../../..";
+g();
+}

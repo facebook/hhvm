@@ -3,7 +3,7 @@
 function pt($f) {
   $trace = implode(
     ', ',
-    array_map($x ==> $x['function'].':'.$x['line'], debug_backtrace())
+    array_map($x ==> $x['function'].':'.($x['line'] ?? '???'), debug_backtrace())
   );
   echo "$f: $trace\n";
 }
@@ -28,5 +28,6 @@ function blue() {
 function main() {
   blue();
 }
-
+<<__EntryPoint>> function main_entry(): void {
 for ($i = 0; $i < 10; $i++) main();
+}

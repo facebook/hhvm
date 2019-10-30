@@ -3,8 +3,8 @@
 NullsafeNullsafeProp10Php::$z = new stdClass;
 NullsafeNullsafeProp10Php::$z->m = 1;
 function something($x) {
-return NullsafeNullsafeProp10Php::$z; }
-
+return NullsafeNullsafeProp10Php::$z;
+}
 function test() {
 
   $foo = null;

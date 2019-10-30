@@ -1,41 +1,41 @@
 <?hh
 class mystring { function __toString() { return "hello, world"; } }
+<<__EntryPoint>> function main(): void {
 /* Make a string's first character uppercase */
 echo "#### Basic and Various operations ####\n";
 $str_array = array(
-		    "testing ucfirst.",
- 		    "1.testing ucfirst",
-		    "hELLO wORLD",
-		    'hELLO wORLD',
-                    "\0",		// Null
-                    "\x00",		// Hex Null
-                    "\x000",
-                    "abcd",		// double quoted string
-                    'xyz',		// single quoted string
-                    "-3",
-                    -3,
-                    '-3.344',
-                    -3.344,
-                    NULL,
-                    "NULL",
-                    "0",
-                    0,
-                    TRUE,		// bool type
-                    "TRUE",
-                    "1",
-                    1,
-                    1.234444,
-                    FALSE,
-                    "FALSE",
-                    " ",
-                    "     ",
-                    'b',		// single char
-                    '\t',		// escape sequences
-                    "\t",
-                    "12",
-                    "12twelve",		// int + string
-	     	  );
-/* loop to test working of ucfirst with different values */
+  "testing ucfirst.",
+  "1.testing ucfirst",
+  "hELLO wORLD",
+  'hELLO wORLD',
+  "\0",       // Null
+  "\x00",     // Hex Null
+  "\x000",
+  "abcd",     // double quoted string
+  'xyz',      // single quoted string
+  "-3",
+  -3,
+  '-3.344',
+  -3.344,
+  NULL,
+  "NULL",
+  "0",
+  0,
+  TRUE,       // bool type
+  "TRUE",
+  "1",
+  1,
+  1.234444,
+  FALSE,
+  "FALSE",
+  " ",
+  "     ",
+  'b',        // single char
+  '\t',       // escape sequences
+  "\t",
+  "12",
+  "12twelve",     // int + string
+);
 foreach ($str_array as $string) {
   try { var_dump( ucfirst($string) ); } catch (Exception $e) { var_dump($e->getMessage()); }
 }
@@ -122,3 +122,4 @@ try { ucfirst($str_array[0], $str_array[1]); } catch (Exception $e) { echo "\n".
 try { ucfirst((int)10, (int)20); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
+}

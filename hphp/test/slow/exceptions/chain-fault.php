@@ -15,7 +15,7 @@ function thrower() {
     throw new Exception('finally');
   }
 }
-
+<<__EntryPoint>>
 function main() {
   try {
     echo "Calling thrower\n";
@@ -27,5 +27,3 @@ function main() {
   }
   echo "Leaving main\n";
 }
-
-main();

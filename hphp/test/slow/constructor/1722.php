@@ -3,7 +3,7 @@
 if (isset($g)) {
   include '1722-1.inc';
 }
- else {
+else {
   include '1722-2.inc';
 }
 class Y extends X {

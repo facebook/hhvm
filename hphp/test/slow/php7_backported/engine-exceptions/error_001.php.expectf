@@ -4,5 +4,5 @@ Stack trace:
 #0 %s/error_001.php(8): alpha()
 #1 %s/error_001.php(12): beta()
 #2 %s/error_001.php(16): gamma()
-#3 %s/error_001.php(19): main()
+#3 %S(%S): main()
 #4 {main}

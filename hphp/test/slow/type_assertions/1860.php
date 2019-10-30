@@ -7,7 +7,7 @@ class Base {
 }
 function get() {
  return true;
- }
+}
 if (get()) {
   include '1860-1.inc';
 } else {

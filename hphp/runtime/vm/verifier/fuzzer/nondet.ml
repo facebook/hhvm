@@ -26,7 +26,7 @@ let fmap = (>>|)
 
 let lift f l = l >>| f
 
-let bind = Hh_core.List.bind
+let bind lst f = Hh_core.List.bind lst ~f
 
 let (>>=) = bind
 

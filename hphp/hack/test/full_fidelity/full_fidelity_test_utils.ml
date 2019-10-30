@@ -142,7 +142,7 @@ let tree_dump_node node =
   in
   aux 0 node
 
-let tree_dump_list lst =
+let tree_dump_list (lst : PositionedSyntax.t list) =
   List.concat_map ~f:tree_dump_node lst |> String.concat "\n"
 
 let printer w1 w2 s1 s2 =
@@ -166,7 +166,8 @@ let adjust l1 l2 =
   let len = max (List.length l1) (List.length l2) in
   (aux l1 len, aux l2 len)
 
-let dump_diff expected actual =
+let dump_diff
+    (expected : PositionedSyntax.t list) (actual : PositionedSyntax.t list) =
   let l1 = List.concat_map ~f:tree_dump_node expected in
   let l2 = List.concat_map ~f:tree_dump_node actual in
   let (l1, l2) = adjust l1 l2 in

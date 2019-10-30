@@ -48,7 +48,7 @@ let test () =
   in
   let expected_dependent_classes =
     List.sort
-      ~cmp:String.compare
+      ~compare:String.compare
       [
         "\\C";
         "\\D";

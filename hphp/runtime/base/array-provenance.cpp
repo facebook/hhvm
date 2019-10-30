@@ -47,6 +47,8 @@ std::string Tag::toString() const {
 
 namespace {
 
+RDS_LOCAL(c_WaitableWaitHandle*, rl_wh_override);
+
 RDS_LOCAL(ArrayProvenanceTable, rl_array_provenance);
 folly::F14FastMap<const void*, Tag> s_static_array_provenance;
 std::mutex s_static_provenance_lock;
@@ -290,27 +292,46 @@ ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TagOverride::TagOverride(c_WaitableWaitHandle* wh)
+  : m_saved_wh{*rl_wh_override}
+{
+  assertx(rl_wh_override);
+  assertx(wh != nullptr);
+
+  *rl_wh_override = wh;
+}
+
+TagOverride::~TagOverride() {
+  *rl_wh_override = m_saved_wh;
+}
+
 folly::Optional<Tag> tagFromPC() {
   VMRegAnchor _(VMRegAnchor::Soft);
   if (tl_regState != VMRegState::CLEAN || vmfp() == nullptr) {
     return folly::none;
   }
 
-  auto const tag = fromLeaf(
-    [&] (const ActRec* fp, Offset offset) -> folly::Optional<Tag> {
-      auto const func = fp->func();
-      auto const unit = fp->unit();
-      // grab the filename off the Func* since it might be different
-      // from the unit's for flattened trait methods
-      auto const filename = func->filename();
-      auto const line = unit->getLineNumber(offset);
-      return Tag { filename, line };
-    },
-    [] (const ActRec* fp) {
-      return !fp->func()->isProvenanceSkipFrame() &&
-             !fp->func()->isCPPBuiltin();
-    }
-  );
+  auto const make_tag = [&] (
+    const ActRec* fp,
+    Offset offset
+  ) -> folly::Optional<Tag> {
+    auto const func = fp->func();
+    auto const unit = fp->unit();
+    // grab the filename off the Func* since it might be different
+    // from the unit's for flattened trait methods
+    auto const filename = func->filename();
+    auto const line = unit->getLineNumber(offset);
+    return Tag { filename, line };
+  };
+
+  auto const skip_frame = [] (const ActRec* fp) {
+    return !fp->func()->isProvenanceSkipFrame() &&
+           !fp->func()->isCPPBuiltin();
+  };
+
+  auto const tag = rl_wh_override && *rl_wh_override
+    ? fromLeafWH(*rl_wh_override, make_tag, skip_frame)
+    : fromLeaf(make_tag, skip_frame);
   assertx(!tag || tag->filename() != nullptr);
   return tag;
 }

@@ -329,12 +329,30 @@ struct IStack {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Everything we need to represent a frame in the backtrace.
+ */
+struct BTFrame {
+  ActRec* fp{nullptr};
+  Offset pc{kInvalidOffset};
+
+  operator bool() const { return fp != nullptr; }
+};
+
 Array createBacktrace(const BacktraceArgs& backtraceArgs);
 void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols);
 int64_t createBacktraceHash(bool consider_metadata);
 void fillCompactBacktrace(CompactTraceData* trace, bool skipTop);
 req::ptr<CompactTrace> createCompactBacktrace(bool skipTop = false);
 std::pair<const Func*, Offset> getCurrentFuncAndOffset();
+
+/*
+ * Walk up the dependency chain for `wh` and return the first frame found.
+ */
+BTFrame getARFromWH(
+  c_WaitableWaitHandle* currentWaitHandle,
+  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+);
 
 /*
  * Walk the logical VM stack, including inlined frames.
@@ -381,8 +399,18 @@ backtrace_detail::from_ret_t<F> fromCaller(
 );
 
 /*
- * Like fromLeaf() and fromCaller(), but for the first function whose frame
- * satisfies `pred(fp)`.
+ * Like fromLeaf(), but with the first frame pointer and PC in the dependency
+ * chain of `wh` instead of the current Hack function.
+ */
+template<typename F>
+backtrace_detail::from_ret_t<F> fromLeafWH(
+  c_WaitableWaitHandle* wh, F f,
+  backtrace_detail::from_ret_t<F> def = backtrace_detail::from_ret_t<F>{}
+);
+
+/*
+ * Like the above functions, but for the first function whose frame satisfies
+ * `pred(fp)`.
  */
 template<typename F, typename Pred>
 backtrace_detail::from_ret_t<F> fromLeaf(
@@ -392,6 +420,11 @@ backtrace_detail::from_ret_t<F> fromLeaf(
 template<typename F, typename Pred>
 backtrace_detail::from_ret_t<F> fromCaller(
   F f, Pred pred,
+  backtrace_detail::from_ret_t<F> def = backtrace_detail::from_ret_t<F>{}
+);
+template<typename F, typename Pred>
+backtrace_detail::from_ret_t<F> fromLeafWH(
+  c_WaitableWaitHandle* wh, F f, Pred pred,
   backtrace_detail::from_ret_t<F> def = backtrace_detail::from_ret_t<F>{}
 );
 

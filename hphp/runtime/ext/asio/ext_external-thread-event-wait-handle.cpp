@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
@@ -174,6 +175,7 @@ void c_ExternalThreadEventWaitHandle::process() {
   Cell result;
   try {
     try {
+      arrprov::TagOverride tag_override { this };
       m_event->unserialize(result);
     } catch (ExtendedException& exception) {
       exception.recomputeBacktraceFromWH(this);

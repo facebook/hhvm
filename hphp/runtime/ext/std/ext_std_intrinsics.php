@@ -39,6 +39,12 @@ function dummy_array_builtin(array $x): array;
 function dummy_dict_builtin(dict $x): dict;
 
 <<__Native, __HipHopSpecific>>
+function dummy_darray_await(): Awaitable;
+
+<<__Native, __HipHopSpecific>>
+function dummy_dict_await(): Awaitable;
+
+<<__Native, __HipHopSpecific>>
 function create_class_pointer(string $name): mixed;
 
 function apc_fetch_no_check(mixed $key) {

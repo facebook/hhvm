@@ -32,6 +32,7 @@ namespace HPHP {
 struct APCArray;
 struct ArrayData;
 struct StringData;
+struct c_WaitableWaitHandle;
 
 namespace arrprov {
 
@@ -91,6 +92,19 @@ struct ArrayProvenanceTable {
  * Attempts to sync VM regs and returns folly::none on failure.
  */
 folly::Optional<Tag> tagFromPC();
+
+/*
+ * RAII struct for modifying the behavior of tagFromPC().
+ *
+ * When this is in effect, we backtrace from `wh` instead of vmfp().
+ */
+struct TagOverride {
+  explicit TagOverride(c_WaitableWaitHandle* wh);
+  ~TagOverride();
+
+private:
+  c_WaitableWaitHandle* m_saved_wh;
+};
 
 /*
  * Whether `a` or `tv` admits a provenance tag---i.e., whether it's either a

@@ -96,9 +96,10 @@ const ActRec* BTContext::clone(const BTContext& src, const ActRec* fp) {
 namespace {
 
 c_WaitableWaitHandle* getParentWH(
-    c_WaitableWaitHandle* wh,
-    context_idx_t contextIdx,
-    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
+  c_WaitableWaitHandle* wh,
+  context_idx_t contextIdx,
+  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+) {
   assertx(!wh->isFinished());
   auto p = wh->getParentChain().firstInContext(contextIdx);
   if (p == nullptr ||
@@ -112,48 +113,42 @@ c_WaitableWaitHandle* getParentWH(
   return p;
 }
 
-// walks up the wait handle dependency chain, until it finds activation record
-ActRec* getActRecFromWaitHandle(
-    c_WaitableWaitHandle* currentWaitHandle,
-    context_idx_t contextIdx,
-    Offset* prevPc,
-    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
+BTFrame getARFromWHImpl(
+  c_WaitableWaitHandle* currentWaitHandle,
+  context_idx_t contextIdx,
+  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+) {
   while (currentWaitHandle != nullptr) {
     assertx(!currentWaitHandle->isFinished());
+
     if (currentWaitHandle->getKind() == c_Awaitable::Kind::AsyncFunction) {
-      auto resumable = currentWaitHandle->asAsyncFunction()->resumable();
-      *prevPc = resumable->resumeOffset();
-      return resumable->actRec();
+      auto const resumable = currentWaitHandle->asAsyncFunction()->resumable();
+      return BTFrame { resumable->actRec(), resumable->resumeOffset() };
     }
     if (currentWaitHandle->getKind() == c_Awaitable::Kind::AsyncGenerator) {
-      auto resumable = currentWaitHandle->asAsyncGenerator()->resumable();
-      *prevPc = resumable->resumeOffset();
-      return resumable->actRec();
+      auto const resumable = currentWaitHandle->asAsyncGenerator()->resumable();
+      return BTFrame { resumable->actRec(), resumable->resumeOffset() };
     }
-
     currentWaitHandle = getParentWH(currentWaitHandle, contextIdx, visitedWHs);
   }
-  *prevPc = 0;
-  return AsioSession::Get()->getContext(contextIdx)->getSavedFP();
+  return BTFrame {
+    AsioSession::Get()->getContext(contextIdx)->getSavedFP(),
+    0
+  };
 }
 
-// wrapper around getActRecFromWaitHandle, which does some extra validation
-ActRec* getActRecFromWaitHandleWrapper(
-    c_WaitableWaitHandle* currentWaitHandle, Offset* prevPc,
-    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
-  if (currentWaitHandle->isFinished()) {
-    return nullptr;
-  }
+}
+
+BTFrame getARFromWH(
+  c_WaitableWaitHandle* currentWaitHandle,
+  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+) {
+  if (currentWaitHandle->isFinished()) return BTFrame{};
 
   auto const contextIdx = currentWaitHandle->getContextIdx();
-  if (contextIdx <= 0) {
-    return nullptr;
-  }
+  if (contextIdx == 0) return BTFrame{};
 
-  return getActRecFromWaitHandle(
-    currentWaitHandle, contextIdx, prevPc, visitedWHs);
-}
-
+  return getARFromWHImpl(currentWaitHandle, contextIdx, visitedWHs);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -294,7 +289,7 @@ BTFrame getPrevActRec(
     auto const contextIdx = wh->getContextIdx();
 
     auto const parent = getParentWH(wh, contextIdx, visitedWHs);
-    prev.fp = getActRecFromWaitHandle(parent, contextIdx, &prev.pc, visitedWHs);
+    prev = getARFromWHImpl(parent, contextIdx, visitedWHs);
   } else {
     prev.fp = g_context->getPrevVMState(fp, &prev.pc, nullptr, nullptr, &rip);
   }
@@ -334,8 +329,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   auto frm = BTFrame{};
 
   if (btArgs.m_fromWaitHandle) {
-    frm.fp = getActRecFromWaitHandleWrapper(btArgs.m_fromWaitHandle,
-                                            &frm.pc, visitedWHs);
+    frm = getARFromWH(btArgs.m_fromWaitHandle, visitedWHs);
     // No frames found, we are done.
     if (!frm) return bt;
   } else {

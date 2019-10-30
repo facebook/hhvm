@@ -14,15 +14,20 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/ext/std/ext_std.h"
-#include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/runtime/vm/jit/inlining-decider.h"
+
+#include "hphp/runtime/ext/asio/asio-external-thread-event.h"
+#include "hphp/runtime/ext/std/ext_std.h"
+
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void HHVM_FUNCTION(trigger_oom, bool oom) {
@@ -80,6 +85,8 @@ String HHVM_FUNCTION(serialize_with_format, const Variant& thing,
 }
 
 namespace {
+
+///////////////////////////////////////////////////////////////////////////////
 
 timespec from_micros(int64_t us) {
   struct timespec ts;
@@ -234,6 +241,40 @@ int64_t HHVM_FUNCTION(
   return t1;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+struct DummyDArrayAwait : AsioExternalThreadEvent {
+  DummyDArrayAwait() { markAsFinished(); }
+
+  void unserialize(TypedValue& tv) override {
+    auto arr = make_darray("foo", "bar", "baz", "quux");
+    type(tv) = KindOfArray;
+    val(tv).parr = arr.detach();
+  }
+};
+
+struct DummyDictAwait : AsioExternalThreadEvent {
+  DummyDictAwait() { markAsFinished(); }
+
+  void unserialize(TypedValue& tv) override {
+    auto arr = make_dict_array("foo", "bar", "baz", "quux");
+    type(tv) = KindOfDict;
+    val(tv).parr = arr.detach();
+  }
+};
+
+Object HHVM_FUNCTION(dummy_darray_await) {
+  auto ev = new DummyDArrayAwait();
+  return Object{ev->getWaitHandle()};
+}
+
+Object HHVM_FUNCTION(dummy_dict_await) {
+  auto ev = new DummyDictAwait();
+  return Object{ev->getWaitHandle()};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 void StandardExtension::initIntrinsics() {
@@ -255,6 +296,9 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_builtin, dummy_array_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_builtin, dummy_dict_builtin);
 
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_darray_await, dummy_darray_await);
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_await, dummy_dict_await);
+
   HHVM_FALIAS(__hhvm_intrinsics\\serialize_with_format, serialize_with_format);
 
   HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_event, rqtrace_create_event);
@@ -269,4 +313,5 @@ void StandardExtension::initIntrinsics() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-} // namespace HPHP
+
+}

@@ -972,7 +972,7 @@ static inline uint32_t arrayIterDefaultCount() {
 }
 
 static inline double arrayIterDefaultRate() {
-  return debug ? 0.9 : 0.9999;
+  return 0.99;
 }
 
 static inline std::string reorderPropsDefault() {

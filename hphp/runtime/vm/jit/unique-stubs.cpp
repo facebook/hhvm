@@ -816,7 +816,10 @@ TCA emitInterpOneCFHelper(CodeBlock& cb, DataBlock& data, Op op,
   alignJmpTarget(cb);
 
   return vwrap(cb, data, [&] (Vout& v) {
-    v << copy2{rvmfp(), rvmsp(), rarg(0), rarg(1)};
+    v << copyargs{
+      v.makeTuple({rvmfp(), rvmsp()}),
+      v.makeTuple({rarg(0), rarg(1)})
+    };
     // rarg(2) is set at the stub callsite.
 
     auto const handler = reinterpret_cast<TCA>(

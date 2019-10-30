@@ -668,7 +668,10 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
 
       unlikelyIfThen(v, vcold(env), cc, sf, [&] (Vout& v) {
         auto const stub = tc::ustubs().decRefGeneric;
-        v << copy2{data, type, rarg(0), rarg(1)};
+        v << copyargs{
+          v.makeTuple({data, type}),
+          v.makeTuple({rarg(0), rarg(1)})
+        };
         v << callfaststub{stub, makeFixup(inst->marker()), arg_regs(2)};
       });
       return;

@@ -272,7 +272,10 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
 
   if (dst_arity == 2) {
     always_assert(src_arity == 2);
-    v << copy2{src.reg(0), src.reg(1), dst.reg(0), dst.reg(1)};
+    v << copyargs{
+      v.makeTuple({src.reg(0), src.reg(1)}),
+      v.makeTuple({dst.reg(0), dst.reg(1)})
+    };
     return;
   }
   always_assert(dst_arity == 1);

@@ -29,6 +29,7 @@ let visitor =
       Shape_name_check.handler;
       Fun_pointer_name_check.handler;
       Record_field_check.handler;
+      Php_lambda_check.handler;
     ]
 
 let program = visitor#go

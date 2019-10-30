@@ -3989,6 +3989,12 @@ let pu_typing pos kind msg =
        kind
        msg)
 
+let php_lambda_disallowed pos =
+  add
+    (NastCheck.err_code NastCheck.PhpLambdaDisallowed)
+    pos
+    "PHP style anonymous functions are not allowed."
+
 (*****************************************************************************)
 (* Typing decl errors *)
 (*****************************************************************************)

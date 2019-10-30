@@ -1228,3 +1228,5 @@ val invalid_trait_use_as_visibility : Pos.t -> unit
 val unresolved_type_variable : Pos.t -> unit
 
 val invalid_sub_string : Pos.t -> string -> unit
+
+val php_lambda_disallowed : Pos.t -> unit

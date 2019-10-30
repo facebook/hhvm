@@ -252,6 +252,7 @@ module NastCheck = struct
     | SwitchNonTerminalDefault
     | SwitchMultipleDefault
     | RepeatedRecordFieldName
+    | PhpLambdaDisallowed
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 

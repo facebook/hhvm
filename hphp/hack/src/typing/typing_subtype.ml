@@ -194,13 +194,13 @@ let check_mutability
   (* immutable is not compatible with mutable *)
   | (None, Some (Param_borrowed_mutable | Param_owned_mutable))
   (* mutable is not compatible with immutable  *)
-
+  
   | (Some (Param_borrowed_mutable | Param_owned_mutable), None)
   (* borrowed mutable is not compatible with owned mutable *)
-
+  
   | (Some Param_borrowed_mutable, Some Param_owned_mutable)
   (* maybe-mutable is not compatible with immutable/mutable *)
-
+  
   | ( Some Param_maybe_mutable,
       (None | Some (Param_borrowed_mutable | Param_owned_mutable)) ) ->
     ( env,
@@ -1518,7 +1518,47 @@ and simplify_subtype_i
     | (_, Tpu_access _) ->
       (* TODO(T36532263) implement subtyping *)
       invalid ())
-  | _ -> invalid ()
+  | (ConstraintType ty_sub, ConstraintType ty_super) ->
+    (match (ty_sub, ty_super) with
+    | ((_, Thas_member hm_sub), (_, Thas_member hm_super)) ->
+      let {
+        hm_name = name_sub;
+        hm_type = ty_sub;
+        hm_nullsafe = nullsafe_sub;
+        hm_class_id = cid_sub;
+      } =
+        hm_sub
+      in
+      let {
+        hm_name = name_super;
+        hm_type = ty_super;
+        hm_nullsafe = nullsafe_super;
+        hm_class_id = cid_super;
+      } =
+        hm_super
+      in
+      if
+        name_sub = name_super
+        && class_id_equal cid_sub cid_super
+        && is_sub_type_nullsafe nullsafe_sub nullsafe_super
+      then
+        simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
+      else
+        invalid ())
+  | (ConstraintType ty_sub, LoclType ty_super) ->
+    (match (ty_sub, ty_super) with
+    | ((_, Thas_member _), _ty_super) -> invalid ())
+  | (LoclType _ty_sub, ConstraintType _ty_super) ->
+    (* TODO *)
+    invalid ()
+
+and is_sub_type_nullsafe nullsafe_sub nullsafe_super =
+  match (nullsafe_sub, nullsafe_super) with
+  | (None, None)
+  | (None, Some _)
+  | (Some _, Some _) ->
+    true
+  | (Some _, None) -> false
 
 and simplify_subtype_variance
     ~(subtype_env : subtype_env)
@@ -1794,7 +1834,7 @@ and subtype_reactivity
   (* ok:
      <<__Rx>>
      function f(<<__AtMostRxAsFunc>> (function(): int) $f) { return $f() }  *)
-
+  
   | (RxVar None, RxVar _, _) ->
     true
   | (RxVar (Some sub), RxVar (Some super), _)

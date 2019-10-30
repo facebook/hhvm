@@ -1024,6 +1024,8 @@ let class_id_compare cid1 cid2 =
   | (Aast.CI (_, id1), Aast.CI (_, id2)) -> compare id1 id2
   | _ -> class_id_con_ordinal cid2 - class_id_con_ordinal cid1
 
+let class_id_equal cid1 cid2 = class_id_compare cid1 cid2 = 0
+
 let has_member_compare ~normalize_lists hm1 hm2 =
   let ty_compare = ty_compare ~normalize_lists in
   let {

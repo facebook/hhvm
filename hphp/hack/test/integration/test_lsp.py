@@ -1517,6 +1517,120 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 powered_by="serverless_ide",
             )
+            .notification(
+                comment="Add 'DeprecatedClass::'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 41},
+                            },
+                            "text": "DeprecatedClass::",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after 'DeprecatedClass::'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 17},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "class",
+                            "kind": 21,
+                            "detail": "classname<this>",
+                            "inlineDetail": "classname<this>",
+                            "sortText": "class",
+                            "insertText": "class",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "class",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 18,
+                                "char": 13,
+                                "base_class": "\\DeprecatedClass",
+                            },
+                        },
+                        {
+                            "label": "test_do_not_use",
+                            "kind": 2,
+                            "detail": "function(): void",
+                            "inlineDetail": "()",
+                            "itemType": "void",
+                            "sortText": "~test_do_not_use",
+                            "insertText": "test_do_not_use",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "test_do_not_use",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 22,
+                                "char": 26,
+                                "base_class": "\\DeprecatedClass",
+                            },
+                        },
+                        {
+                            "label": "getName",
+                            "kind": 2,
+                            "detail": "function(): void",
+                            "inlineDetail": "()",
+                            "itemType": "void",
+                            "sortText": "getName",
+                            "insertText": "getName",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "getName",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 19,
+                                "char": 26,
+                                "base_class": "\\DeprecatedClass",
+                            },
+                        },
+                        {
+                            "label": "getAttributes_DO_NOT_USE",
+                            "kind": 2,
+                            "detail": "function(): void",
+                            "inlineDetail": "()",
+                            "itemType": "void",
+                            "sortText": "~getAttributes_DO_NOT_USE",
+                            "insertText": "getAttributes_DO_NOT_USE",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "getAttributes_DO_NOT_USE",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 21,
+                                "char": 26,
+                                "base_class": "\\DeprecatedClass",
+                            },
+                        },
+                        {
+                            "label": "__getLoader",
+                            "kind": 2,
+                            "detail": "function(): void",
+                            "inlineDetail": "()",
+                            "itemType": "void",
+                            "sortText": "~__getLoader",
+                            "insertText": "__getLoader",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "__getLoader",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 20,
+                                "char": 26,
+                                "base_class": "\\DeprecatedClass",
+                            },
+                        },
+                    ],
+                },
+                powered_by="serverless_ide",
+            )
             .request(method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
@@ -2379,6 +2493,120 @@ class TestLsp(TestCase[LspTestDriver]):
                     "position": {"line": 3, "character": 42},
                 },
                 result={"isIncomplete": False, "items": []},
+                powered_by="serverless_ide",
+            )
+            .notification(
+                comment="Add 'DeprecatedClass::'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 41},
+                            },
+                            "text": "DeprecatedClass::",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after 'DeprecatedClass::'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 17},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "class",
+                            "kind": 21,
+                            "detail": "classname<this>",
+                            "inlineDetail": "classname<this>",
+                            "sortText": "class",
+                            "insertText": "class",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "class",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 18,
+                                "char": 13,
+                                "base_class": "\\DeprecatedClass",
+                            },
+                        },
+                        {
+                            "label": "test_do_not_use",
+                            "kind": 2,
+                            "detail": "function(): void",
+                            "inlineDetail": "()",
+                            "itemType": "void",
+                            "sortText": "~test_do_not_use",
+                            "insertText": "test_do_not_use",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "test_do_not_use",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 22,
+                                "char": 26,
+                                "base_class": "\\DeprecatedClass",
+                            },
+                        },
+                        {
+                            "label": "getName",
+                            "kind": 2,
+                            "detail": "function(): void",
+                            "inlineDetail": "()",
+                            "itemType": "void",
+                            "sortText": "getName",
+                            "insertText": "getName",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "getName",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 19,
+                                "char": 26,
+                                "base_class": "\\DeprecatedClass",
+                            },
+                        },
+                        {
+                            "label": "getAttributes_DO_NOT_USE",
+                            "kind": 2,
+                            "detail": "function(): void",
+                            "inlineDetail": "()",
+                            "itemType": "void",
+                            "sortText": "~getAttributes_DO_NOT_USE",
+                            "insertText": "getAttributes_DO_NOT_USE",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "getAttributes_DO_NOT_USE",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 21,
+                                "char": 26,
+                                "base_class": "\\DeprecatedClass",
+                            },
+                        },
+                        {
+                            "label": "__getLoader",
+                            "kind": 2,
+                            "detail": "function(): void",
+                            "inlineDetail": "()",
+                            "itemType": "void",
+                            "sortText": "~__getLoader",
+                            "insertText": "__getLoader",
+                            "insertTextFormat": 1,
+                            "data": {
+                                "fullname": "__getLoader",
+                                "filename": "${root_path}/completion_extras.php",
+                                "line": 20,
+                                "char": 26,
+                                "base_class": "\\DeprecatedClass",
+                            },
+                        },
+                    ],
+                },
                 powered_by="serverless_ide",
             )
             .request(method="shutdown", params={}, result=None)

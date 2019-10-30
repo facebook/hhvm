@@ -705,11 +705,15 @@ let to_constructor_string r =
   | Rkey_value_collection_key _ -> "Rkey_value_collection_key"
 
 let pp fmt r =
+  let pos = to_pos r in
   Format.pp_print_string fmt
   @@ Printf.sprintf
        "%s (%s)"
        (to_constructor_string r)
-       (to_pos r |> Pos.to_absolute |> Pos.string)
+       (Printf.sprintf
+          "%s %s"
+          (Relative_path.S.to_string (Pos.filename pos))
+          (Pos.string_no_file pos))
 
 type ureason =
   | URnone

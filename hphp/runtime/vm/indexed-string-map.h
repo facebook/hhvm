@@ -220,15 +220,16 @@ public:
    */
 
   // Deserialization version.
-  template<class SerDe>
-  typename std::enable_if<SerDe::deserializing>::type serde(SerDe& sd) {
+  template<class SerDe, class F>
+  typename std::enable_if<SerDe::deserializing>::type serde(SerDe& sd,
+                                                            F lambda) {
     uint32_t size;
     sd(size);
     for (uint32_t i = 0; i < size; ++i) {
-      const StringData* name;
       T t;
-      sd(name)(t);
+      sd(t);
 
+      auto name = lambda(t);
       if (name) {
         add(name, t);
       } else {
@@ -238,38 +239,17 @@ public:
   }
 
   // Serialization version.
-  template<class SerDe>
-  typename std::enable_if<!SerDe::deserializing>::type serde(SerDe& sd) {
-    std::vector<const StringData*> names(m_list.size());
-    for (typename Map::const_iterator it = m_map.begin();
-        it != m_map.end();
-        ++it) {
-      names[it->second] = it->first;
-    }
-
+  template<class SerDe, class F>
+  typename std::enable_if<!SerDe::deserializing>::type serde(SerDe& sd,
+                                                             F lambda) {
     sd(uint32_t(m_list.size()));
     for (uint32_t i = 0; i < m_list.size(); ++i) {
-      sd(names[i])(m_list[i]);
+      sd(m_list[i]);
     }
   }
 
   const std::vector<T>& list() const {
     return m_list;
-  }
-
-  void fromList(const std::vector<T>&& list) {
-    assertx(
-      !size() && "IndexedStringMap::Builder::fromList called more than once"
-    );
-    m_list = std::move(list);
-    for (Offset i = 0; i < list.size(); ++i) {
-      if (!m_map.emplace(list[i], i).second) {
-        always_assert(
-          false && "IndexedStringMap::Builder::fromList key already exists"
-        );
-
-      }
-    }
   }
 
 private:

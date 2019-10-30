@@ -369,8 +369,8 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
     (m_traitPrecRules)
     (m_traitAliasRules)
     (m_userAttributes)
-    (m_propMap)
-    (m_constMap)
+    (m_propMap, [](Prop p) { return p.name(); })
+    (m_constMap, [](Const c) { return c.name(); })
     (m_enumBaseTy)
     ;
 

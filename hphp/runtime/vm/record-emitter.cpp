@@ -141,7 +141,7 @@ template<class SerDe> void RecordEmitter::serdeMetaData(SerDe& sd) {
     (m_docComment)
 
     (m_userAttributes)
-    (m_fieldMap)
+    (m_fieldMap, [](Field f) { return f.name(); })
     ;
 
     if (SerDe::deserializing) {

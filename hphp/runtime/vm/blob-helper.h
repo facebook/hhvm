@@ -46,9 +46,11 @@
  * Types may provide their own serialization logic by implementing a
  * single-argument member function template called `serde' (as in
  * "serialization/deserialization"), and pushing data it wants to
- * serialize into the parameter.  Those members may in turn have
- * customized serialization behavior, or they may "bottom out" to
- * these helpers if they are basic-enough types.
+ * serialize into the parameter.  The function may take a set of
+ * optional arguments but if your function require those arguments
+ * they also have to be passed in when calling sd. Those members may
+ * in turn have customized serialization behavior, or they may "bottom
+ * out" to these helpers if they are basic-enough types.
  *
  * For example:
  *
@@ -86,11 +88,12 @@ namespace HPHP {
  * "SFINAE".
  */
 
-template<class T, class SerDe>
+template<class T, class SerDe, class... F>
 struct IsNontrivialSerializable {
 private:
-  template<class U, void (U::*)(SerDe&)> struct Checker;
-  template<class U> static char test(Checker<U,&U::template serde<SerDe> >*);
+  template<class U, void (U::*)(SerDe&, F...)> struct Checker;
+  template<class U> static char test(
+    Checker<U,&U::template serde<SerDe, F...> >*);
   template<class>   static long test(...);
 public:
   enum { value = sizeof(test<T>(0)) == 1 };
@@ -133,11 +136,11 @@ struct BlobEncoder {
     std::copy(buf, buf + buf_size, &m_blob[start]);
   }
 
-  template<class T>
+  template<class T, class... F>
   typename std::enable_if<
-    IsNontrivialSerializable<T,BlobEncoder>::value
-  >::type encode(const T& t) {
-    const_cast<T&>(t).serde(*this);
+    IsNontrivialSerializable<T,BlobEncoder, F...>::value
+  >::type encode(const T& t, F... lambdas) {
+    const_cast<T&>(t).serde(*this, lambdas...);
   }
 
   void encode(bool b) {
@@ -341,11 +344,11 @@ struct BlobDecoder {
     m_p = range.begin();
   }
 
-  template<class T>
+  template<class T, class... F>
   typename std::enable_if<
-    IsNontrivialSerializable<T,BlobDecoder>::value
-  >::type decode(T& t) {
-    t.serde(*this);
+    IsNontrivialSerializable<T,BlobDecoder, F...>::value
+  >::type decode(T& t, F... lambdas) {
+    t.serde(*this, lambdas...);
   }
 
   void decode(SHA1& sha1) {

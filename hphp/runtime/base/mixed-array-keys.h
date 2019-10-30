@@ -96,7 +96,7 @@ struct MixedArrayKeys {
    * Call these methods to get key types in m_aux format. We initialize m_aux
    * in a single store when we write a header, so we can't use the APIs below.
    */
-  uint16_t packForAux() {
+  uint16_t packForAux() const {
     return m_bits << 8;
   }
   static uint16_t packIntsForAux() {
@@ -118,7 +118,7 @@ struct MixedArrayKeys {
   void makeCompact() {
     m_bits &= ~kTombstoneKey;
   }
-  void makeUncounted() {
+  void makeStatic() {
     if (kTrackStaticStrKeys && (m_bits & kNonStaticStrKey)) {
       m_bits = (m_bits & ~kNonStaticStrKey) | kStaticStrKey;
     } else {
@@ -142,6 +142,9 @@ struct MixedArrayKeys {
       if (!sd->isStatic()) m_bits |= kNonStaticStrKey;
     }
   }
+  void recordNonStaticStr() {
+    m_bits |= kNonStaticStrKey;
+  }
   void recordTombstone() {
     m_bits |= kTombstoneKey;
   }
@@ -158,7 +161,7 @@ private:
   //
   // If this flag is unset, we'll never be able to successfully prove that a
   // MixedArray only contains int keys using this bitset.
-  static constexpr bool kTrackStaticStrKeys = false;
+  static constexpr bool kTrackStaticStrKeys = true;
 
   static constexpr uint8_t kNonStaticStrKey = 0b0001;
   static constexpr uint8_t kStaticStrKey    = 0b0010;

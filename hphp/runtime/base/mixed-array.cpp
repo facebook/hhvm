@@ -620,6 +620,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
   ad->m_aux16 &= ~kHasProvenanceData;
   assertx(ad->keyTypes() == a->keyTypes());
   CopyHash(ad->hashTab(), a->hashTab(), scale);
+  ad->mutableKeyTypes()->makeStatic();
 
   // Need to make sure keys and values are all uncounted.
   auto dstElem = ad->data();
@@ -627,22 +628,25 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
     auto& te = dstElem[i];
     auto const type = te.data.m_type;
     if (UNLIKELY(isTombstone(type))) continue;
-    if (te.hasStrKey() &&
-        !te.skey->isStatic() &&
-        (!te.skey->isUncounted() || !te.skey->uncountedIncRef())) {
-      te.skey = [&] {
-        if (auto const st = lookupStaticString(te.skey)) return st;
-        HeapObject** seenStr = nullptr;
-        if (seen && te.skey->hasMultipleRefs()) {
-          seenStr = &(*seen)[te.skey];
-          if (auto const st = static_cast<StringData*>(*seenStr)) {
-            if (st->uncountedIncRef()) return st;
+    if (te.hasStrKey() && !te.skey->isStatic()) {
+      if (te.skey->isUncounted() && te.skey->uncountedIncRef()) {
+        ad->mutableKeyTypes()->recordNonStaticStr();
+      } else {
+        te.skey = [&] {
+          if (auto const st = lookupStaticString(te.skey)) return st;
+          ad->mutableKeyTypes()->recordNonStaticStr();
+          HeapObject** seenStr = nullptr;
+          if (seen && te.skey->hasMultipleRefs()) {
+            seenStr = &(*seen)[te.skey];
+            if (auto const st = static_cast<StringData*>(*seenStr)) {
+              if (st->uncountedIncRef()) return st;
+            }
           }
-        }
-        auto const st = StringData::MakeUncounted(te.skey->slice());
-        if (seenStr) *seenStr = st;
-        return st;
-      }();
+          auto const st = StringData::MakeUncounted(te.skey->slice());
+          if (seenStr) *seenStr = st;
+          return st;
+        }();
+      }
     }
     ConvertTvToUncounted(&te.data, seen);
   }
@@ -650,7 +654,6 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
     APCStats::getAPCStats().addAPCUncountedBlock();
   }
   if (updateSeen) (*seen)[array] = ad;
-  assertx(ad->keyTypes() == a->keyTypes());
   assertx(ad->checkInvariants());
   return tryTagArrProvDict<true>(ad, array);
 }
@@ -1796,7 +1799,7 @@ void MixedArray::OnSetEvalScalar(ArrayData* ad) {
   if (UNLIKELY(a->m_size < a->m_used)) {
     a->compact(/*renumber=*/false);
   }
-  a->mutableKeyTypes()->makeUncounted();
+  a->mutableKeyTypes()->makeStatic();
   auto elm = a->data();
   for (auto const end = elm + a->m_used; elm < end; ++elm) {
     assertx(!elm->isTombstone());

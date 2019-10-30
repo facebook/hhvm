@@ -247,7 +247,7 @@ private:
 public:
   static constexpr size_t kKeyTypesOffset = 7;
 
-  MixedArrayKeys keyTypes() const {
+  const MixedArrayKeys& keyTypes() const {
     auto const pointer = uintptr_t(this) + kKeyTypesOffset;
     return *reinterpret_cast<MixedArrayKeys*>(pointer);
   }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dd29ef78d7ec43310b9d89039e15b675>>
+// @generated SignedSource<<331e94bb5c05e3fa85aee00ac061de5b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -577,6 +577,7 @@ pub struct Gconst<Ex, Fb, En, Hi> {
 
 #[derive(Clone, Debug, OcamlRep)]
 pub struct RecordDef<Ex, Fb, En, Hi> {
+    pub annotation: En,
     pub name: Sid,
     pub extends: Option<Hint>,
     pub abstract_: bool,

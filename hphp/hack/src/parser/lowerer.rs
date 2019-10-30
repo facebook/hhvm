@@ -4691,6 +4691,7 @@ where
                     _ => Self::missing_syntax(None, "record_field", n, e),
                 };
                 Ok(vec![aast::Def::mk_record_def(aast::RecordDef {
+                    annotation: (),
                     name: Self::pos_name(&c.record_name, env)?,
                     extends: Self::could_map(Self::p_hint, &c.record_extends_list, env)?
                         .into_iter()

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bea2b99c6acce2d8d5922271ba2e4f30>>
+// @generated SignedSource<<38d5349b69dfd54bee8393aec5046a03>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -11,7 +11,6 @@
 use ocamlrep_derive::OcamlRep;
 
 use crate::file_info;
-use crate::stats_container;
 
 #[derive(Clone, Debug, OcamlRep)]
 pub struct FullFidelityParserEnv {
@@ -21,7 +20,6 @@ pub struct FullFidelityParserEnv {
     pub disable_lval_as_an_expression: bool,
     pub disable_nontoplevel_declarations: bool,
     pub mode: Option<file_info::Mode>,
-    pub stats: Option<stats_container::StatsContainer>,
     pub rust: bool,
     pub disable_legacy_soft_typehints: bool,
     pub allow_new_attribute_syntax: bool,

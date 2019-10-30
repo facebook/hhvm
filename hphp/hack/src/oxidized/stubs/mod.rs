@@ -7,4 +7,3 @@ pub mod errors;
 pub mod lazy;
 pub mod opaque_digest;
 pub mod sequence;
-pub mod stats_container;

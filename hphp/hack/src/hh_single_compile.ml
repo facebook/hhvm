@@ -34,7 +34,6 @@ type options = {
   mode: mode;
   input_file_list: string option;
   dump_symbol_refs: bool;
-  dump_stats: bool;
   dump_config: bool;
   extract_facts: bool;
   log_stats: bool;
@@ -108,7 +107,6 @@ let parse_options () =
   let input_file_list = ref None in
   let dump_symbol_refs = ref false in
   let extract_facts = ref false in
-  let dump_stats = ref false in
   let dump_config = ref false in
   let log_stats = ref false in
   let for_debugger_eval = ref false in
@@ -151,7 +149,6 @@ let parse_options () =
       ( "--dump-symbol-refs",
         Arg.Set dump_symbol_refs,
         " Dump symbol ref sections of HHAS" );
-      ("--dump-stats", Arg.Set dump_stats, " Dump timing stats for functions");
       ("--dump-config", Arg.Set dump_config, " Dump configuration settings");
       ( "--enable-logging-stats",
         Arg.Unit (fun () -> log_stats := true),
@@ -199,7 +196,6 @@ let parse_options () =
     mode = !mode;
     input_file_list = !input_file_list;
     dump_symbol_refs = !dump_symbol_refs;
-    dump_stats = !dump_stats;
     dump_config = !dump_config;
     log_stats = !log_stats;
     extract_facts = !extract_facts;
@@ -255,18 +251,7 @@ let rec dispatch_loop handlers =
       | _ -> fail_daemon None ("Unhandled message type '" ^ msg_type ^ "'"));
       dispatch_loop handlers))
 
-let set_stats_if_enabled ~compiler_options =
-  if compiler_options.dump_stats then
-    Stats_container.set_instance (Some (Stats_container.new_container ()))
-
-let write_stats_if_enabled ~compiler_options =
-  if compiler_options.dump_stats then
-    match Stats_container.get_instance () with
-    | Some s -> Stats_container.write_out ~out:Caml.stderr s
-    | None -> ()
-
-let parse_text compiler_options popt fn text =
-  let () = set_stats_if_enabled ~compiler_options in
+let parse_text popt fn text =
   let ignore_pos =
     not (Hhbc_options.source_mapping !Hhbc_options.compiler_options)
   in
@@ -294,17 +279,10 @@ let parse_text compiler_options popt fn text =
       fn
   in
   let source_text = SourceText.make fn text in
-  let (ast, is_hh_file) =
-    Full_fidelity_ast.from_text_to_empty_tast env source_text
-  in
-  let () = write_stats_if_enabled ~compiler_options in
-  (ast, is_hh_file)
+  Full_fidelity_ast.from_text_to_empty_tast env source_text
 
-let parse_file compiler_options popt filename text =
-  try
-    `ParseResult
-      (Errors.do_ (fun () -> parse_text compiler_options popt filename text))
-  with
+let parse_file popt filename text =
+  try `ParseResult (Errors.do_ (fun () -> parse_text popt filename text)) with
   (* FFP failed to parse *)
   | Failure s -> `ParseFailure (SyntaxError.make 0 0 s, Pos.none)
   (* FFP generated an error *)
@@ -486,9 +464,7 @@ let process_single_source_unit
       if compiler_options.extract_facts then
         extract_facts ~filename source_text
       else
-        let fail_or_ast =
-          parse_file compiler_options popt filename source_text
-        in
+        let fail_or_ast = parse_file popt filename source_text in
         ignore @@ add_to_time_ref debug_time.parsing_t t;
         do_compile filename compiler_options popt fail_or_ast debug_time
     in

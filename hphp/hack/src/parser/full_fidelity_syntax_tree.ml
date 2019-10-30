@@ -82,19 +82,13 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       let errors = process_errors errors in
       build text root rust_tree errors mode state
 
-    let make_impl ?(env = Env.default) text =
+    let make ?(env = Env.default) text =
       let mode = Full_fidelity_parser.parse_mode text in
       let parser = Parser.make env text in
       let (parser, root, rust_tree) = Parser.parse_script parser in
       let errors = Parser.errors parser in
       let state = Parser.sc_state parser in
       create text root rust_tree errors mode state
-
-    let make ?(env = Env.default) text =
-      Stats_container.wrap_nullary_fn_timing
-        ?stats:(Env.stats env)
-        ~key:"Syntax_tree.make"
-        ~f:(fun () -> make_impl ~env text)
 
     let root tree = tree.root
 

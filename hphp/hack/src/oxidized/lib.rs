@@ -32,7 +32,6 @@ pub use stubs::errors;
 pub use stubs::lazy;
 pub use stubs::opaque_digest;
 pub use stubs::sequence;
-pub use stubs::stats_container;
 
 mod impl_gen;
 pub use impl_gen::*;

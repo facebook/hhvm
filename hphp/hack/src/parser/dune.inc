@@ -25,7 +25,6 @@
    full_fidelity_positioned_trivia
    full_fidelity_rewriter
    full_fidelity_source_text
-   stats_container
    full_fidelity_token_kind
    full_fidelity_syntax
    full_fidelity_syntax_error

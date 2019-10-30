@@ -89,7 +89,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         failwith
           "expected to find Rust tree. ~leak_rust_tree was not set correctly somwhere earlier"
 
-    let parse_errors_impl env =
+    let parse_errors env =
       (*
   Minimum: suppress cascading errors; no second-pass errors if there are
   any first-pass errors.
@@ -112,12 +112,6 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       with e ->
         let error_msg = "UNEXPECTED_ERROR: " ^ Exn.to_string e in
         [make_error_from_node (SyntaxTree.root env.syntax_tree) error_msg]
-
-    let parse_errors env =
-      Stats_container.wrap_nullary_fn_timing
-        ?stats:(Stats_container.get_instance ())
-        ~key:"full_fidelity_parse_errors:parse_errors"
-        ~f:(fun () -> parse_errors_impl env)
   end
 
   include WithSmartConstructors (SyntaxSmartConstructors.WithSyntax (Syntax))

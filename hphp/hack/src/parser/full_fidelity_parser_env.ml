@@ -14,7 +14,6 @@ type t = {
   disable_lval_as_an_expression: bool;
   disable_nontoplevel_declarations: bool;
   mode: FileInfo.mode option;
-  stats: Stats_container.t option;
   rust: bool;
   disable_legacy_soft_typehints: bool;
   allow_new_attribute_syntax: bool;
@@ -32,7 +31,6 @@ let default =
     disable_nontoplevel_declarations = false;
     rust = true;
     mode = None;
-    stats = None;
     disable_legacy_soft_typehints = false;
     allow_new_attribute_syntax = false;
     disable_legacy_attribute_syntax = false;
@@ -47,7 +45,6 @@ let make
     ?(disable_nontoplevel_declarations =
       default.disable_nontoplevel_declarations)
     ?mode
-    ?stats
     ?(rust = default.rust)
     ?(disable_legacy_soft_typehints = default.disable_legacy_soft_typehints)
     ?(allow_new_attribute_syntax = default.allow_new_attribute_syntax)
@@ -64,7 +61,6 @@ let make
     disable_lval_as_an_expression;
     disable_nontoplevel_declarations;
     mode;
-    stats;
     rust;
     disable_legacy_soft_typehints;
     allow_new_attribute_syntax;
@@ -83,8 +79,6 @@ let disable_lval_as_an_expression e = e.disable_lval_as_an_expression
 let disable_nontoplevel_declarations e = e.disable_nontoplevel_declarations
 
 let mode e = e.mode
-
-let stats e = e.stats
 
 let is_experimental_mode e = e.mode = Some FileInfo.Mexperimental
 

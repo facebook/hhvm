@@ -119,7 +119,6 @@
 #include <folly/portability/Stdlib.h>
 #include <folly/portability/Unistd.h>
 
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -1437,26 +1436,6 @@ static void set_stack_size() {
   }
 }
 
-#if defined(BOOST_VERSION) && BOOST_VERSION <= 105400
-std::string get_right_option_name(const basic_parsed_options<char>& opts,
-                                  std::string& wrong_name) {
-  // Remove any - from the wrong name for better comparing
-  // since it will probably come prepended with --
-  wrong_name.erase(
-    std::remove(wrong_name.begin(), wrong_name.end(), '-'), wrong_name.end());
-  for (basic_option<char> opt : opts.options) {
-    std::string s_opt = opt.string_key;
-    // We are only dealing with options that have a - in them.
-    if (s_opt.find("-") != std::string::npos) {
-      if (s_opt.find(wrong_name) != std::string::npos) {
-        return s_opt;
-      }
-    }
-  }
-  return "";
-}
-#endif
-
 static int execute_program_impl(int argc, char** argv) {
   std::string usage = "Usage:\n\n   ";
   usage += argv[0];
@@ -1626,20 +1605,6 @@ static int execute_program_impl(int argc, char** argv) {
           }
         );
       }
-// When we upgrade boost, we can remove this and also get rid of the parent
-// try statement and move opts back into the original try block
-#if defined(BOOST_VERSION) && BOOST_VERSION >= 105000 && BOOST_VERSION <= 105400
-    } catch (const error_with_option_name &e) {
-      std::string wrong_name = e.get_option_name();
-      std::string right_name = get_right_option_name(opts, wrong_name);
-      std::string message = e.what();
-      if (right_name != "") {
-        boost::replace_all(message, wrong_name, right_name);
-      }
-      Logger::Error("Error in command line: %s", message.c_str());
-      cout << desc << "\n";
-      return -1;
-#endif
     } catch (const error &e) {
       Logger::Error("Error in command line: %s", e.what());
       cout << desc << "\n";

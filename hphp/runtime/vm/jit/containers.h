@@ -116,10 +116,7 @@ template<class K, class Pred = std::less<K>>
 // There's some leak in boost's flat_set that caused serious memory problems to
 // be reported externally: https://github.com/facebook/hhvm/issues/4268. The
 // bug looks to be https://svn.boost.org/trac/boost/ticket/9166 but it's not
-// totally clear. There were a ton of leaks fixed in 1.55 -- but FB is using
-// 1.51 internally and we aren't hitting the leak. So also unclear where it was
-// *introduced*. So for now just picking those two bounds; they may need to be
-// adjusted with future reports.
+// totally clear. There were a ton of leaks fixed in 1.55.
 //
 // It sounds like the leak might affect other boost containers as well, but we
 // only definitively observed it mattering for flat_set.

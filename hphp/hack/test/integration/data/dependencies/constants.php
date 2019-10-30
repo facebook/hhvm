@@ -24,6 +24,7 @@ abstract class WithAbstractConst {
 
 class WithConst {
   const float CFLOAT = 1.2;
+  const string CSTRING = 'foo';
   const SomeEnum CENUM = SomeEnum::SECOND;
   const type WITH_CONSTRAINT = A0;
   const type WITH_THIS = this::WITH_CONSTRAINT;
@@ -33,8 +34,10 @@ class WithConst {
                                       this::WITH_CONSTRAINT $arg2): void {}
 }
 
-const shape('x' => int, 'y' => SecondEnum) SHAPE =
+const shape('x' => int, 'y' => SecondEnum) SHAPE1 =
   shape('x' => 5, 'y' => SecondEnum::SECOND);
+const shape(WithConst::CSTRING => int) SHAPE2 =
+  shape(WithConst::CSTRING => 42);
 const (int, ?(string, float)) OPTION = tuple(7, null);
 const array<string, int> ARR = array('a' => 1, 'b' => 2);
 const darray<string, int> AGE_RANGE = darray['min' => 21];
@@ -46,7 +49,7 @@ const TypedefForString TYPEDEF = "hello";
 function with_constants(): void {
   $a = WithConst::CFLOAT;
   $b = WithConst::CENUM;
-  $c = SHAPE;
+  $c = SHAPE1;
   $d = OPTION;
   $e = ARR;
   $f = AGE_RANGE;
@@ -54,6 +57,7 @@ function with_constants(): void {
   $h = CLASSNAME;
   $i = KEYSET;
   $j = TYPEDEF;
+  $k = SHAPE2;
 }
 
 function with_type_constants(WithAbstractConst::NESTED::WITH_THIS $arg)
@@ -80,3 +84,7 @@ function with_switch(SomeEnum $x): void {
       return;
   }
 }
+
+type SomeShape = shape(WithConst::CSTRING => mixed);
+
+function with_shape_type_alias(SomeShape $_): void {}

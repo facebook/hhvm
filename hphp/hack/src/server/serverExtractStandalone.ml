@@ -926,6 +926,19 @@ and add_dep deps ?cls:(this_cls = None) ty : unit =
                    do_add_dep deps (Typing_deps.Dep.Const (name, const_name)))
         | _ -> ()
 
+      method! on_tshape _ _ _ fdm =
+        Nast.ShapeMap.iter
+          (fun name { sft_ty; _ } ->
+            (match name with
+            | Ast_defs.SFlit_int _
+            | Ast_defs.SFlit_str _ ->
+              ()
+            | Ast_defs.SFclass_const ((_, c), (_, s)) ->
+              do_add_dep deps (Typing_deps.Dep.Class c);
+              do_add_dep deps (Typing_deps.Dep.Const (c, s)));
+            add_dep deps ~cls:this_cls sft_ty)
+          fdm
+
       method! on_taccess _ _ ((_, cls_type), tconsts) =
         let class_name =
           match cls_type with

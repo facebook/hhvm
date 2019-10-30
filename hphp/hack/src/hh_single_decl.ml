@@ -22,12 +22,22 @@ let init root =
   Parser_options_provider.set ParserOptions.default;
   GlobalNamingOptions.set TypecheckerOptions.default
 
+let time verbosity msg f =
+  let before = Unix.gettimeofday () in
+  let ret = f () in
+  let after = Unix.gettimeofday () in
+  if verbosity = Verbose then
+    Printf.printf "%s: %f ms\n" msg ((after -. before) *. 1000.);
+  ret
+
 let compare_decl verbosity fn =
   let fn = Path.to_string fn in
   let text = RealDisk.cat fn in
   let fn = Relative_path.(create Root fn) in
   let decls =
-    Result.ok_or_failwith (parse_decls ~trace:(verbosity = Verbose) fn)
+    time verbosity "Parsed decls" (fun () ->
+        Result.ok_or_failwith
+          (parse_decls ~contents:text ~trace:(verbosity = Verbose) fn))
   in
   let facts =
     Option.value_exn
@@ -77,6 +87,13 @@ let compare_decl verbosity fn =
     |> List.reduce_exn ~f:( && )
   in
   let passes_decl_check () =
+    let () =
+      time verbosity "Calculated legacy decls" (fun () ->
+          (* Put the file contents in the disk heap so both the decl parsing and
+           * legacy decl branches can avoid having to wait for file I/O. *)
+          File_provider.provide_file fn (File_provider.Disk text);
+          Decl.make_env fn)
+    in
     let compare name get_decl show_decl parsed_decls =
       let different_decls =
         SMap.fold

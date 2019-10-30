@@ -28,12 +28,6 @@ use std::{
 
 use crate::lowerer_modifier as modifier;
 
-macro_rules! not_impl {
-    () => {
-        panic!("NOT IMPLEMENTED")
-    };
-}
-
 macro_rules! aast {
     ($ty:ident) =>  {oxidized::aast::$ty};
     // NOTE: In <,> pattern, comma prevents rustfmt eating <>
@@ -817,7 +811,7 @@ where
                 };
                 if env.codegen() {
                     // aorenste: Not sure why the original code had this as
-                    // not_impl, but returning the type is better than
+                    // unimplemented!(), but returning the type is better than
                     // nothing...
                     Ok(Happly(name, type_args))
                 } else {
@@ -4891,7 +4885,7 @@ where
 
     fn elaborate_halt_compiler(ast: aast!(Program<,>), env: &mut Env) -> aast!(Program<,>) {
         match *env.saw_compiler_halt_offset() {
-            Some(_) => not_impl!(),
+            Some(_) => unimplemented!(),
             _ => ast,
         }
     }

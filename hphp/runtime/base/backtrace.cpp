@@ -650,14 +650,17 @@ int64_t createBacktraceHash(bool consider_metadata) {
   return hash;
 }
 
-req::ptr<CompactTrace> createCompactBacktrace(bool skipTop) {
-  auto ret = req::make<CompactTrace>();
-  walkStack([&] (ActRec* fp, Offset prevPc) {
+void fillCompactBacktrace(CompactTraceData* trace, bool skipTop) {
+  walkStack([trace, skipTop] (ActRec* fp, Offset prevPc) {
     // Do not capture frame for HPHP only functions.
     if (fp->func()->isNoInjection()) return;
-
-    ret->insert(fp, prevPc);
+    trace->insert(fp, prevPc);
   }, skipTop);
+}
+
+req::ptr<CompactTrace> createCompactBacktrace(bool skipTop) {
+  auto ret = req::make<CompactTrace>();
+  fillCompactBacktrace(ret->get(), skipTop);
   return ret;
 }
 
@@ -679,8 +682,12 @@ std::pair<const Func*, Offset> getCurrentFuncAndOffset() {
 namespace {
 
 struct CTKHasher final {
-  uint64_t hash(const CompactTrace::Key& k) const { return k.m_hash; }
-  bool equal(const CompactTrace::Key& k1, const CompactTrace::Key& k2) const;
+  uint64_t hash(const CompactTraceData::Ptr& k) const {
+    if (!k) return 0;
+    return k->hash();
+  }
+  bool equal(const CompactTraceData::Ptr& k1,
+             const CompactTraceData::Ptr& k2) const;
 };
 
 struct CacheDeleter final {
@@ -693,19 +700,19 @@ struct CacheDeleter final {
 };
 
 using CachedArray = std::shared_ptr<ArrayData>;
-using Cache = ConcurrentScalableCache<CompactTrace::Key,CachedArray,CTKHasher>;
+using Cache = ConcurrentScalableCache<CompactTraceData::Ptr,
+                                      CachedArray,CTKHasher>;
 Cache s_cache(1024);
 
-bool CTKHasher::equal(
-  const CompactTrace::Key& k1,
-  const CompactTrace::Key& k2
-) const {
-  if (k1.m_hash != k2.m_hash || k1.m_frames.size() != k2.m_frames.size()) {
+bool CTKHasher::equal(const CompactTraceData::Ptr& k1,
+                      const CompactTraceData::Ptr& k2) const {
+  assertx(k1 && k2);
+  if (k1->size() != k2->size() || k1->hash() != k2->hash()) {
     return false;
   }
-  for (int i = 0; i < k1.m_frames.size(); ++i) {
-    auto& a = k1.m_frames[i];
-    auto& b = k2.m_frames[i];
+  for (int i = 0; i < k1->frames().size(); ++i) {
+    const auto& a = k1->frames()[i];
+    const auto& b = k2->frames()[i];
     if (a.func != b.func || a.prevPcAndHasThis != b.prevPcAndHasThis) {
       return false;
     }
@@ -717,26 +724,31 @@ bool CTKHasher::equal(
 
 IMPLEMENT_RESOURCE_ALLOCATION(CompactTrace)
 
-void CompactTrace::Key::insert(const ActRec* fp, int32_t prevPc) {
-  auto const funcHash = use_lowptr
-    ? (uintptr_t)fp->func() << 32
-    : (uintptr_t)fp->func();
-  m_hash ^= funcHash + 0x9e3779b9 + (m_hash << 6) + (m_hash >> 2);
-  m_hash ^= prevPc + 0x9e3779b9 + (m_hash << 6) + (m_hash >> 2);
+uint64_t CompactTraceData::hash() const {
+  if (m_hash != 0) return m_hash;
+  m_hash = 0xffffffff;
+  for (auto frame : m_frames) {
+    m_hash = hash_int64_pair(m_hash, frame.hash());
+  }
+  return m_hash;
+}
+
+void CompactTraceData::insert(const ActRec* fp, int32_t prevPc) {
+  m_hash = 0;                           // invalidate
 
   auto const curUnit = fp->func()->unit();
   auto const curOp = curUnit->getOp(prevPc);
   auto const isReturning =
     curOp == Op::RetC || curOp == Op::RetCSuspended || curOp == Op::RetM ||
     curOp == Op::CreateCont || curOp == Op::Await || fp->localsDecRefd();
-  m_frames.push_back(Frame{
+  m_frames.emplace_back(
     fp->func(),
     prevPc,
     !isReturning && arGetContextClass(fp) && fp->hasThis()
-  });
+  );
 }
 
-Array CompactTrace::Key::extract() const {
+Array CompactTraceData::extract() const {
   VArrayInit aInit(m_frames.size());
   for (int idx = 0; idx < m_frames.size(); ++idx) {
     auto const prev = idx < m_frames.size() - 1 ? &m_frames[idx + 1] : nullptr;
@@ -794,21 +806,21 @@ Array CompactTrace::Key::extract() const {
 }
 
 Array CompactTrace::extract() const {
-  if (m_key.m_frames.size() == 1) return Array::CreateVArray();
+  if (size() <= 1) return Array::CreateVArray();
 
   Cache::ConstAccessor acc;
-  if (s_cache.find(acc, m_key)) {
+  if (s_cache.find(acc, m_backtrace)) {
     return Array(acc.get()->get());
   }
 
-  auto arr = m_key.extract();
+  auto arr = m_backtrace->extract();
   auto ins = CachedArray(
     arr.get()->empty()
       ? ArrayData::CreateVArray()
       : PackedArray::MakeUncounted(arr.get()),
     CacheDeleter()
   );
-  if (!s_cache.insert(m_key, ins)) {
+  if (!s_cache.insert(m_backtrace, ins)) {
     return arr;
   }
   return Array(ins.get());

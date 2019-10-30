@@ -27,6 +27,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <memory>
 #include <type_traits>
 
 namespace HPHP {
@@ -45,46 +46,70 @@ struct c_WaitableWaitHandle;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct CompactTrace : SweepableResourceData {
-  Array extract() const;
-  void insert(const ActRec* fp, int32_t prevPc) { m_key.insert(fp, prevPc); }
+struct CompactFrame final {
+  CompactFrame(const Func* f = nullptr, int32_t ppc = 0, bool ht = false)
+    : func(LowPtr<const Func>::Unchecked{}, f)
+    , prevPc(ppc)
+    , hasThis(ht) {}
 
-  DECLARE_RESOURCE_ALLOCATION(CompactTrace)
-
-  struct Frame final {
-    Frame() = default;
-    Frame(const Func* f, int32_t ppc, bool ht)
-      : func(LowPtr<const Func>::Unchecked{}, f)
-      , prevPc(ppc)
-      , hasThis(ht)
-    {}
-
-    const LowPtr<const Func> func;
-    union {
-      struct {
-        int32_t prevPc : 31;
-        bool hasThis   : 1;
-      };
-      uint32_t prevPcAndHasThis;
-    };
-  };
-
-  struct Key final {
-    Array extract() const;
-    void insert(const ActRec* fp, int32_t prevPc);
-
-    TYPE_SCAN_IGNORE_ALL;
-
-    uint64_t m_hash{0x9e3779b9};
-    folly::small_vector<Frame, 16> m_frames;
-  };
-
-  const folly::small_vector<Frame, 16>& frames() const {
-    return m_key.m_frames;
+  uint64_t hash() const {
+    auto const f = reinterpret_cast<uintptr_t>(func.get());
+    return hash_int64_pair(prevPcAndHasThis, f >> 4);
   }
 
-private:
-  Key m_key;
+  const LowPtr<const Func> func;
+  union {
+    struct {
+      int32_t prevPc : 31;
+      bool hasThis   : 1;
+    };
+    uint32_t prevPcAndHasThis;
+  };
+};
+
+struct CompactTraceData {
+  Array extract() const;
+  void insert(const ActRec* fp, int32_t prevPc);
+  uint64_t hash() const;
+  const auto& frames() const { return m_frames; }
+  auto size() const { return m_frames.size(); }
+
+  using Ptr = std::shared_ptr<CompactTraceData>;
+  static Ptr Create() {
+    return std::make_shared<CompactTraceData>();
+  }
+
+ private:
+  folly::small_vector<CompactFrame, 16> m_frames;
+  mutable uint64_t m_hash{0};
+};
+
+struct CompactTrace : SweepableResourceData {
+  Array extract() const;
+
+  CompactTraceData* get() const {
+    if (!m_backtrace) m_backtrace = CompactTraceData::Create();
+    return m_backtrace.get();
+  }
+
+  void insert(const ActRec* fp, int32_t prevPc) {
+    get()->insert(fp, prevPc);
+  }
+
+  DECLARE_RESOURCE_ALLOCATION(CompactTrace)
+  TYPE_SCAN_IGNORE_ALL;
+
+  uint32_t size() const {
+    if (!m_backtrace) return 0;
+    return m_backtrace->size();
+  }
+
+  const auto& frames() const {
+    return get()->frames();
+  }
+
+ private:
+  mutable CompactTraceData::Ptr m_backtrace;
 };
 
 struct BacktraceArgs {
@@ -307,6 +332,7 @@ struct IStack {
 Array createBacktrace(const BacktraceArgs& backtraceArgs);
 void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols);
 int64_t createBacktraceHash(bool consider_metadata);
+void fillCompactBacktrace(CompactTraceData* trace, bool skipTop);
 req::ptr<CompactTrace> createCompactBacktrace(bool skipTop = false);
 std::pair<const Func*, Offset> getCurrentFuncAndOffset();
 

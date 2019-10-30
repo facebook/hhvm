@@ -254,7 +254,11 @@ and intersect_ty_union env r ty1 (r_union, tyl2) =
   (env, not_collapsed @ collapsed)
 
 let intersect_list env r tyl =
-  List.fold_left_env env tyl ~init:(MkType.mixed r) ~f:(intersect ~r)
+  (* We need to match tyl here because we'd mess the reason if tyl was just
+  [mixed] *)
+  match tyl with
+  | [] -> (env, MkType.mixed r)
+  | ty :: tyl -> List.fold_left_env env tyl ~init:ty ~f:(intersect ~r)
 
 let normalize_intersection env ?on_tyvar tyl =
   let orr r_opt r = Some (Option.value r_opt ~default:r) in

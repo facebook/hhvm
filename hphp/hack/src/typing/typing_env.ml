@@ -1099,22 +1099,47 @@ let update_lost_info name blame env ty =
     | Fake.Blame_lambda pos -> (pos, true)
   in
   let info r = Reason.Rlost_info (name, r, pos, under_lambda) in
-  let rec update_ty env ty =
+  let rec update_ty (env, seen_tyvars) ty =
     match ty with
     | (_, Tvar v) ->
       let (env, v') = get_var env v in
       (match IMap.get v' env.tenv with
-      | None -> (env, ty)
+      | None ->
+        if ISet.mem v' seen_tyvars then
+          ((env, seen_tyvars), ty)
+        else
+          let seen_tyvars = ISet.add v' seen_tyvars in
+          let bs = get_tyvar_lower_bounds env v' in
+          let ((env, seen_tyvars), bs) =
+            ITySet.fold_map bs ~init:(env, seen_tyvars) ~f:update_ty_i
+          in
+          let env = set_tyvar_lower_bounds env v' bs in
+          let bs = get_tyvar_upper_bounds env v' in
+          let ((env, seen_tyvars), bs) =
+            ITySet.fold_map bs ~init:(env, seen_tyvars) ~f:update_ty_i
+          in
+          let env = set_tyvar_upper_bounds env v' bs in
+          ((env, seen_tyvars), ty)
       | Some ty ->
-        let (env, ty) = update_ty env ty in
+        let ((env, seen_tyvars), ty) = update_ty (env, seen_tyvars) ty in
         let env = add env v ty in
-        (env, ty))
+        ((env, seen_tyvars), ty))
     | (r, Tunion tyl) ->
-      let (env, tyl) = List.map_env env tyl update_ty in
-      (env, (info r, Tunion tyl))
-    | (r, ty) -> (env, (info r, ty))
+      let ((env, seen_tyvars), tyl) =
+        List.fold_map tyl ~init:(env, seen_tyvars) ~f:update_ty
+      in
+      ((env, seen_tyvars), (info r, Tunion tyl))
+    | (r, ty) -> ((env, seen_tyvars), (info r, ty))
+  and update_ty_i (env, seen_tyvars) ty =
+    match ty with
+    | LoclType ty ->
+      let ((env, seen_tyvars), ty) = update_ty (env, seen_tyvars) ty in
+      ((env, seen_tyvars), LoclType ty)
+    | ConstraintType (r, ty) ->
+      ((env, seen_tyvars), ConstraintType (info r, ty))
   in
-  update_ty env ty
+  let ((env, _seen_tyvars), ty) = update_ty (env, ISet.empty) ty in
+  (env, ty)
 
 let forget_members env blame =
   let fake_members = get_fake_members env in

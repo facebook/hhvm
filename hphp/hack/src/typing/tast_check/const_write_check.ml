@@ -46,6 +46,7 @@ let check_prop env c pid cty_opt =
 let rec check_expr env (_, e) =
   match e with
   | Class_get (((_, cty), _), CGstring pid) ->
+    let (env, cty) = Env.expand_type env cty in
     begin
       match snd cty with
       | Tclass ((_, c), _, _) -> check_prop env c pid None
@@ -62,6 +63,7 @@ let rec check_expr env (_, e) =
       | _ -> ()
     end
   | Obj_get (((_, cty), _), (_, Id id), _) ->
+    let (env, cty) = Env.expand_type env cty in
     begin
       match snd cty with
       | Tclass ((_, c), _, _) -> check_prop env c id (Some cty)

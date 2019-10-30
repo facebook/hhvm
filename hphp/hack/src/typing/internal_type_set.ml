@@ -27,6 +27,15 @@ end
 
 include Caml.Set.Make (Ty_)
 
+let fold_map set ~init:acc ~f =
+  fold
+    (fun x (acc, res) ->
+      let (acc, x) = f acc x in
+      let res = add x res in
+      (acc, res))
+    set
+    (acc, empty)
+
 let pp fmt t =
   Format.fprintf fmt "@[<hv 2>{";
   ignore

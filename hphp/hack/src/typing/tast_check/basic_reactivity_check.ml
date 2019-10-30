@@ -65,7 +65,8 @@ let rec is_valid_mutable_subscript_expression_target env v =
        || expr_is_valid_borrowed_arg env e )
   | _ -> false
 
-let is_valid_append_target ty =
+let is_valid_append_target env ty =
+  let (_env, ty) = Env.expand_type env ty in
   match ty with
   | (_, Tclass ((_, n), _, [])) ->
     n <> SN.Collections.cVector
@@ -84,7 +85,7 @@ let check_assignment_or_unset_target
   (* Setting mutable locals is okay *)
   | Obj_get (e1, _, _) when expr_is_valid_borrowed_arg env e1 -> ()
   | Array_get (e1, i)
-    when is_assignment && not (is_valid_append_target (get_type e1)) ->
+    when is_assignment && not (is_valid_append_target env (get_type e1)) ->
     Errors.nonreactive_indexing
       (i = None)
       (Option.value append_pos_opt ~default:p)

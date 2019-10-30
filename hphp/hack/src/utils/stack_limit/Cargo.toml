@@ -1,0 +1,8 @@
+[package]
+name = "hack_stack_limit"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "stack_limit"
+path = "lib.rs"

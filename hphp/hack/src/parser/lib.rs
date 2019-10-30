@@ -10,7 +10,6 @@ pub mod operator;
 mod operator_generated;
 pub mod parser;
 pub mod parser_env;
-pub mod stack_limit;
 
 #[macro_use]
 pub mod smart_constructors; // must be before users of providing macros (*_parser)

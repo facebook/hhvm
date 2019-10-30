@@ -6,14 +6,15 @@ edition = "2018"
 [dependencies]
 parser_rust = { path = "../..", package = "hack_parser" }
 parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
-ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
+rust_to_ocaml = { path = "../rust_to_ocaml", package = "rust_to_ocaml" }
+syntax_tree = { path = "../syntax_tree", package = "syntax_tree" }
 libc = "^0.2.60"
 ocaml = "^0.7"
 ocamlrep = { path = "../../../ocamlrep", package = "hack_ocamlrep" }
+ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool" }
-oxidized = {path = "../../../oxidized", package = "hack_oxidized" }
-syntax_tree = {path = "../syntax_tree", package = "syntax_tree" }
-rust_to_ocaml = {path = "../rust_to_ocaml", package = "rust_to_ocaml" }
+oxidized = { path = "../../../oxidized", package = "hack_oxidized" }
+stack_limit = { path = "../../../utils/stack_limit", package = "hack_stack_limit" }
 
 [lib]
 name = "rust_parser_ffi"

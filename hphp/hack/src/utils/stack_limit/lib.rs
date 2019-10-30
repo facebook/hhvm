@@ -8,17 +8,13 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use detail::*;
 
-#[derive(Debug)]
-pub struct StackLimit {
-    value: usize,
-    overflow: AtomicBool,
-}
-
 /// Lightweight stack size tracking facility
 ///
 /// # Usage:
 /// ```
-/// use parser_rust::stack_limit::StackLimit;
+/// use crate::stack_limit::{init, StackLimit, MI};
+/// init();  // important: initialize if needed (cheap to call multiple times)
+///
 /// let limit = std::sync::Arc::new(StackLimit::relative(3_000_000));
 /// limit.reset(); // set the baseline (when the stack is low)
 /// let limit_ref = limit.clone();
@@ -30,7 +26,7 @@ pub struct StackLimit {
 ///  deeply_recursive_task();  // detect if it would consume >3MB of stack
 ///  if limit.exceeded() {
 ///      // handle stack overflow preemptively (e.g., retry with custom stack space)
-///      std::thread::Builder::new().stack_size(16_000_000)
+///      std::thread::Builder::new().stack_size(16 * MI) // 16 MiB
 ///          .spawn(deeply_recursive_task)
 ///          .expect("ERROR: thread::spawn")
 ///          .join();
@@ -43,6 +39,19 @@ pub struct StackLimit {
 /// - if you decrease the limit for the same thread, you need to call `reset` beforehand
 ///   (this is a design choice; doing it automatically upon initialization would risk
 ///   silently missing stack overflows if you re-create an instance on the same thread!)
+#[derive(Debug)]
+pub struct StackLimit {
+    value: usize,
+    overflow: AtomicBool,
+}
+
+/// Kibi unit (2^10) - a stack size is usually a multiple of it
+pub const KI: usize = 1024;
+// Mebi unit (2^20)
+pub const MI: usize = KI * KI;
+// Gibi unit (2^30)
+pub const GI: usize = KI * MI;
+
 impl StackLimit {
     pub fn relative(value: usize) -> Self {
         Self {
@@ -210,5 +219,12 @@ mod tests {
         })
         .join()
         .unwrap();
+    }
+
+    #[test]
+    fn units() {
+        assert_eq!(1_024, KI);
+        assert_eq!(1_048_576, MI);
+        assert_eq!(1_073_741_824, GI);
     }
 }

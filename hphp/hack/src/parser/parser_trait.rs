@@ -7,11 +7,11 @@
 use crate::lexer::{self, Lexer};
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::{NodeType, SmartConstructors};
-use crate::stack_limit::StackLimit;
 use parser_core_types::lexable_token::LexableToken;
 use parser_core_types::lexable_trivia::LexableTrivia;
 use parser_core_types::syntax_error::{self as Errors, Error, SyntaxError};
 use parser_core_types::token_kind::TokenKind;
+use stack_limit::StackLimit;
 
 #[derive(PartialEq)]
 pub enum SeparatedListKind {

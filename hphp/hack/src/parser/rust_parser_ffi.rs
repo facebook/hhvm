@@ -17,10 +17,10 @@ use parser_rust::{
     parser_env::ParserEnv,
     smart_constructors::{NodeType, SmartConstructors},
     source_text::SourceText,
-    stack_limit::StackLimit,
     token_kind::TokenKind,
 };
 use rust_to_ocaml::{SerializationContext, ToOcaml};
+use stack_limit::StackLimit;
 use syntax_tree::{mode_parser::parse_mode, SyntaxTree};
 
 pub fn parse<'a, Sc, ScState>(
@@ -43,7 +43,7 @@ where
     const MAX_STACK_SIZE: usize = 1024 * MI;
     let mut stack_size = 2 * MI;
     let mut default_stack_size_sufficient = true;
-    parser_rust::stack_limit::init();
+    stack_limit::init();
     loop {
         if stack_size > MAX_STACK_SIZE {
             panic!(

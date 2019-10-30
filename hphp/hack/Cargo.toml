@@ -15,5 +15,6 @@ members = [
     "src/parser/ffi",
     "src/utils/escaper",
     "src/utils/ocamlpool_rust",
+    "src/utils/stack_limit",
     "test",
 ]

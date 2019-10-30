@@ -16,21 +16,25 @@
 */
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 
-#include <folly/Likely.h>
-
-#include "hphp/util/logger.h"
-#include "hphp/util/hphp-config.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/ext/collections/ext_collections.h"
-#include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/globals-array.h"
+
 #include "hphp/runtime/vm/jit/translator-inline.h"
+
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/server/http-protocol.h"
+
+#include "hphp/util/hphp-config.h"
+#include "hphp/util/logger.h"
+
+#include <folly/Likely.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,7 +65,7 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
     return s_NULL;
   }
   if (RuntimeOption::EvalLogArrayProvenance &&
-      (v.isVecArray() || v.isDict())) {
+      v.isArray() && arrprov::arrayWantsTag(v.asCArrRef().get())) {
     raise_array_serialization_notice("gettype", v.getArrayData());
   }
   return getDataTypeString(v.getType());

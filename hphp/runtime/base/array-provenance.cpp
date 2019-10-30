@@ -96,8 +96,7 @@ namespace {
  * thread.
  *
  * This is pretty hacky, but it's only used for one specific purpose: for
- * obtaining a copy of the static empty vec or dict which has specific
- * provenance.
+ * obtaining a copy of a static array which has specific provenance.
  *
  * The static array cache is set up to distinguish arrays by provenance tag.
  * However, it's a tbb::concurrent_hash_set, which we can't jam a tag into.
@@ -112,8 +111,8 @@ namespace {
  * this way:
  *
  * So instead, we have a thread-local tag that is only "active" when we're
- * trying to retrieve or create a specifically tagged copy of the empty vec or
- * dict, which facilitates the desired behavior in the static array cache.
+ * trying to retrieve or create a specifically tagged copy of a static array,
+ * which facilitates the desired behavior in the static array cache.
  */
 thread_local folly::Optional<Tag> tl_tag_override = folly::none;
 
@@ -213,10 +212,10 @@ namespace {
 void tagTVImpl(TypedValue& tv, folly::Optional<Tag> tag) {
   assertx(RuntimeOption::EvalArrayProvenance);
 
-  if (!tvWantsTag(tv)) return;
+  if (!isArrayType(type(tv))) return;
 
   auto ad = val(tv).parr;
-  if (ad->hasProvenanceData()) return;
+  if (!arrayWantsTag(ad) || ad->hasProvenanceData()) return;
 
   if (!tag) tag = tagFromPC();
   if (!tag) return;

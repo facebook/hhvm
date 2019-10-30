@@ -1662,15 +1662,15 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr) {
     kind
   );
 
-  if (m_type == Type::Internal && RuntimeOption::EvalArrayProvenance) {
-    if (kind == ArrayKind::Dict || kind == ArrayKind::Vec) {
-      if (auto tag = arrprov::getTag(arr)) {
-        auto const line = tag->line();
-        auto const filename = tag->filename();
-        m_buf->append("p:");
-        write(line);
-        write(filename->data(), filename->size());
-      }
+  if (m_type == Type::Internal &&
+      RuntimeOption::EvalArrayProvenance &&
+      arrprov::arrayWantsTag(arr)) {
+    if (auto tag = arrprov::getTag(arr)) {
+      auto const line = tag->line();
+      auto const filename = tag->filename();
+      m_buf->append("p:");
+      write(line);
+      write(filename->data(), filename->size());
     }
   }
 
@@ -1704,7 +1704,7 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
 
   if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance &&
                !m_forcePHPArrays &&
-               (arr->isDict() || arr->isVecArray()))) {
+               arrprov::arrayWantsTag(arr))) {
     auto const source = [&]() -> const char* {
       switch (getType()) {
       case VariableSerializer::Type::JSON:

@@ -112,7 +112,6 @@ private:
  */
 bool arrayWantsTag(const ArrayData* a);
 bool arrayWantsTag(const APCArray* a);
-bool tvWantsTag(TypedValue tv);
 
 /*
  * Get the provenance tag for `a`.
@@ -169,9 +168,5 @@ ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag = folly::none);
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-
-#define incl_HPHP_ARRAY_PROVENANCE_INL_H_
-#include "hphp/runtime/base/array-provenance-inl.h"
-#undef incl_HPHP_ARRAY_PROVENANCE_INL_H_
 
 #endif

@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"

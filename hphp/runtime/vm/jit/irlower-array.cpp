@@ -295,10 +295,7 @@ void cgNewMixedArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, MixedArray::MakeReserveMixed);
 }
 void cgNewDictArray(IRLS& env, const IRInstruction* inst) {
-  implNewArray(
-    env, inst, MixedArray::MakeReserveDict,
-    RuntimeOption::EvalArrayProvenance ? SyncOptions::Sync : SyncOptions::None
-  );
+  implNewArray(env, inst, MixedArray::MakeReserveDict);
 }
 void cgNewDArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, MixedArray::MakeReserveDArray);
@@ -308,10 +305,7 @@ void cgAllocPackedArray(IRLS& env, const IRInstruction* inst) {
   implAllocArray(env, inst, PackedArray::MakeUninitialized);
 }
 void cgAllocVecArray(IRLS& env, const IRInstruction* inst) {
-  implAllocArray(
-    env, inst, PackedArray::MakeUninitializedVec,
-    RuntimeOption::EvalArrayProvenance ? SyncOptions::Sync : SyncOptions::None
-  );
+  implAllocArray(env, inst, PackedArray::MakeUninitializedVec);
 }
 void cgAllocVArray(IRLS& env, const IRInstruction* inst) {
   implAllocArray(env, inst, PackedArray::MakeUninitializedVArray);

@@ -1,0 +1,20 @@
+File "constants.php", line 9, characters 7-12:
+Invalid type hint 'double'. Use 'float' instead (Parsing[1002])
+File "constants.php", line 12, characters 7-13:
+Invalid type hint 'boolean'. Use 'bool' instead (Parsing[1002])
+File "constants.php", line 9, characters 7-12:
+Unbound name: double (an object type) (Naming[2049])
+File "constants.php", line 9, characters 7-12:
+Wrong type hint (Typing[4110])
+File "constants.php", line 9, characters 7-12:
+Expected double
+File "constants.php", line 9, characters 26-28:
+But got float
+File "constants.php", line 12, characters 7-13:
+Unbound name: boolean (an object type) (Naming[2049])
+File "constants.php", line 12, characters 7-13:
+Wrong type hint (Typing[4110])
+File "constants.php", line 12, characters 7-13:
+Expected boolean
+File "constants.php", line 12, characters 27-31:
+But got bool

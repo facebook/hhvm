@@ -1,9 +1,9 @@
 <?hh
 
 namespace {
-    type MyAnonymousNamespaceType = string;
+  type MyAnonymousNamespaceType = string;
 }
 
 namespace MyNamespace {
-    type MyNamespaceType = string;
+  type MyNamespaceType = string;
 }

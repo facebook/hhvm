@@ -3,16 +3,16 @@ Parsed decls:
 { Direct_decl_parser.classes = {}; funs = {};
   typedefs =
   { "MyAnonymousNamespaceType" ->
-    { td_pos = [4:10-34]; td_vis = Transparent; td_tparams = [];
+    { td_pos = [4:8-32]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
-      (Rhint (root|namespaces1.php line 4, characters 37-42), (Tprim Tstring))
+      (Rhint (root|namespaces1.php line 4, characters 35-40), (Tprim Tstring))
       };
     "MyNamespace\\MyNamespaceType" ->
-    { td_pos = [8:10-25]; td_vis = Transparent; td_tparams = [];
+    { td_pos = [8:8-23]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
-      (Rhint (root|namespaces1.php line 8, characters 28-33), (Tprim Tstring))
+      (Rhint (root|namespaces1.php line 8, characters 26-31), (Tprim Tstring))
       } };
   consts = {} }
 

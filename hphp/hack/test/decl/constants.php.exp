@@ -3,15 +3,15 @@ Parsed decls:
 { Direct_decl_parser.classes = {}; funs = {}; typedefs = {};
   consts =
   { "MY_CONST" ->
-    (Rhint (root|constants.php line 3, characters 7-12), (Tprim Tstring));
+    (Rhint (root|constants.php line 6, characters 7-12), (Tprim Tstring));
     "MY_CONST2" ->
-    (Rhint (root|constants.php line 4, characters 7-9), (Tprim Tint));
+    (Rhint (root|constants.php line 7, characters 7-9), (Tprim Tint));
     "MY_CONST3" ->
-    (Rhint (root|constants.php line 5, characters 7-11), (Tprim Tfloat));
+    (Rhint (root|constants.php line 8, characters 7-11), (Tprim Tfloat));
     "MY_CONST5" ->
-    (Rhint (root|constants.php line 6, characters 7-9), (Tprim Tnum));
+    (Rhint (root|constants.php line 9, characters 7-9), (Tprim Tnum));
     "MY_CONST6" ->
-    (Rhint (root|constants.php line 7, characters 7-10), (Tprim Tbool)) }
+    (Rhint (root|constants.php line 10, characters 7-10), (Tprim Tbool)) }
   }
 
 They matched!

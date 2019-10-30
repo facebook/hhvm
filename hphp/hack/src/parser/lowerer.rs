@@ -4848,7 +4848,7 @@ where
                             && Self::partial_should_check_error(env.file_mode(), 1002)
                     }
                 };
-                if raise_error && !env.top_level_statements {
+                if raise_error {
                     Self::raise_parsing_error_pos(&s.0, env, &syntax_error::toplevel_statements);
                 }
             }

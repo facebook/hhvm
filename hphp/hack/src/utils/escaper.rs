@@ -324,12 +324,12 @@ fn find(s: &[u8], needle: u8) -> Option<usize> {
 }
 
 fn rfind(s: &[u8], needle: u8) -> Option<usize> {
-    let mut i = s.len() - 1;
-    while i < s.len() {
+    let mut i = s.len();
+    while i > 0 {
+        i -= 1;
         if s[i] == needle {
             return Some(i);
         }
-        i -= 1
     }
     None
 }
@@ -506,4 +506,11 @@ mod tests {
         );
     }
 
+    #[test]
+    fn rfind_test() {
+        assert_eq!(rfind(b"", b'a'), None);
+        assert_eq!(rfind(b"a", b'a'), Some(0));
+        assert_eq!(rfind(b"b", b'a'), None);
+        assert_eq!(rfind(b"ba", b'a'), Some(1));
+    }
 }

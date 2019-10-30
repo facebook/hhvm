@@ -1040,15 +1040,17 @@ where
         }
     }
 
+    // (hrust) `i` is initial index
     fn rfind(s: &[u8], mut i: usize, c: u8) -> ret!(usize) {
         if i >= s.len() {
             return Self::failwith("index out of range");
         }
-        while i < s.len() {
+        i += 1;
+        while i > 0 {
+            i -= 1;
             if s[i] == c {
                 return Ok(i);
             }
-            i -= 1;
         }
         Self::failwith("char not found")
     }

@@ -4,23 +4,31 @@ async function genWasteMilliseconds($ms) {
   await SleepWaitHandle::create($ms * 1000);
 }
 
+function randomFunction() {
+  rand() * rand();
+}
+
 async function genLongFunction() {
-  $seconds = 4;
-  $buffer = 20;  // asan can be really slow
-  set_time_limit($seconds + $buffer);
+  $test_time_seconds = 5;
+  set_time_limit(10);
   $start = time();
   $vecI = Vector { 0 };
-  set_pre_timeout_handler(2 + $buffer, () ==> {
-    $sec_remaining1 = time() - $start;
-    echo "$sec_remaining1 into the request on callback1 (i={$vecI[0]})\n";
-    set_pre_timeout_handler(1 + $buffer, () ==> {
-      $sec_remaining2 = time() - $start;
-      echo "$sec_remaining2 into the request on callback2 (i={$vecI[0]})\n";
+  set_pre_timeout_handler(1, () ==> {
+    $now = time() - $start;
+    randomFunction();
+    echo "$now seconds into the request on callback1 (i={$vecI[0]})\n";
+    set_pre_timeout_handler(1, () ==> {
+      $now = time() - $start;
+      randomFunction();
+      echo "$now seconds into the request on callback2 (i={$vecI[0]})\n";
+      set_pre_timeout_handler(-5, () ==> {
+        echo "This should never happen\n";
+      });
     });
   });
 
   // Sleep X amount of seconds in intervals of 100ms
-  for ($i = 0; $i < ($seconds * 10); ++$i) {
+  for ($i = 0; $i < ($test_time_seconds * 10); ++$i) {
     $vecI[0] = $i;
     await genWasteMilliseconds(100);
   }

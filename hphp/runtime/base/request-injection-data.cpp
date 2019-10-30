@@ -601,17 +601,13 @@ void RequestInjectionData::setCPUTimeout(int seconds) {
 }
 
 void RequestInjectionData::setPreTimeout(int seconds) {
-  auto remaining = RuntimeOption::TimeoutsUseWallTime
-    ? getRemainingTime()
-    : getRemainingCPUTime();
-
-  if (seconds == 0 || remaining - seconds < 0) {
+  if (seconds == 0) {
     #if !defined(__APPLE__) && !defined(_MSC_VER)
       m_preTimeoutTimer.m_timerActive.store(false, std::memory_order_relaxed);
     #endif
-  } else {
-    m_preTimeoutTimer.setTimeout(remaining - seconds);
   }
+
+  m_preTimeoutTimer.setTimeout(seconds);
 }
 
 void RequestInjectionData::invokePreTimeoutCallback() {
@@ -661,10 +657,13 @@ int RequestInjectionData::getPreTimeoutRemainingTime() const {
   return m_preTimeoutTimer.getRemainingTime();
 }
 
+// Called on fatal error, PSP and hphp_invoke
 void RequestInjectionData::resetTimers(int time_sec, int cputime_sec) {
   resetTimer(time_sec);
-  resetCPUTimer(time_sec);
-  resetPreTimeoutTimer(time_sec);
+  resetCPUTimer(cputime_sec);
+
+  // Keep the pre-timeout timer the same
+  resetPreTimeoutTimer(0);
 }
 
 /*

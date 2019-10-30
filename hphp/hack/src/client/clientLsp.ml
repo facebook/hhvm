@@ -3802,6 +3802,20 @@ let handle_event
           in
           respond_jsonrpc ~powered_by:Serverless_ide c Hh_json.JSON_Null;
           Lwt.return_unit
+        | (_, Client_message c) when c.method_ = "$test/stopHhServer" ->
+          let root_folder =
+            Path.make (Relative_path.path_of_prefix Relative_path.Root)
+          in
+          ClientStop.kill_server root_folder env.from;
+          respond_jsonrpc ~powered_by:Serverless_ide c Hh_json.JSON_Null;
+          Lwt.return_unit
+        | (_, Client_message c) when c.method_ = "$test/startHhServer" ->
+          let root_folder =
+            Path.make (Relative_path.path_of_prefix Relative_path.Root)
+          in
+          start_server root_folder;
+          respond_jsonrpc ~powered_by:Serverless_ide c Hh_json.JSON_Null;
+          Lwt.return_unit
         (* catch-all for client reqs/notifications we haven't yet implemented *)
         | (Main_loop _menv, Client_message c) ->
           let message = Printf.sprintf "not implemented: %s" c.method_ in

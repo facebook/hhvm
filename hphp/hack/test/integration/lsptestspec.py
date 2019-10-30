@@ -171,6 +171,24 @@ class LspTestSpec:
         messages.append(_WaitForHhServerReadySpec())
         return self._update(messages=messages)
 
+    def start_hh_server(self, comment: str) -> "LspTestSpec":
+        return self.request(
+            comment=comment,
+            method="$test/startHhServer",
+            params=None,
+            result=None,
+            powered_by="serverless_ide",
+        )
+
+    def stop_hh_server(self, comment: str) -> "LspTestSpec":
+        return self.request(
+            comment=comment,
+            method="$test/stopHhServer",
+            params=None,
+            result=None,
+            powered_by="serverless_ide",
+        )
+
     def write_to_disk(
         self, *, comment: Optional[str] = None, uri: str, contents: str, notify: bool
     ) -> "LspTestSpec":

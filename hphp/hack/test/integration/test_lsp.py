@@ -5125,3 +5125,91 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .request(method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
+
+    def test_serverless_ide_during_hh_server_restart(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("didchange.php"))
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_serverless_ide_during_hh_server_restart"),
+                use_serverless_ide=True,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                comment="Send a 'didChange' notification before HH Server is functional.",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 7, "character": 11},
+                                "end": {"line": 7, "character": 12},
+                            },
+                            "text": "a",
+                        }
+                    ],
+                },
+            )
+            .start_hh_server("Start HH Server; should detect the bad edit")
+            .wait_for_notification(
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 7, "character": 11},
+                                "end": {"line": 7, "character": 11},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon (';') is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .stop_hh_server("Shutdown HH Server")
+            .start_hh_server("Restart HH Server")
+            .wait_for_notification(
+                comment="On startup it thinks everything is okay ...",
+                method="textDocument/publishDiagnostics",
+                params={"uri": "${php_file_uri}", "diagnostics": []},
+            )
+            .wait_for_notification(
+                comment="But then hh_server sends a hello message and it gets the edited files, which leads it to see the problem.",
+                method="textDocument/publishDiagnostics",
+                params={
+                    "uri": "${php_file_uri}",
+                    "diagnostics": [
+                        {
+                            "range": {
+                                "start": {"line": 7, "character": 11},
+                                "end": {"line": 7, "character": 11},
+                            },
+                            "severity": 1,
+                            "code": 1002,
+                            "source": "Hack",
+                            "message": "A semicolon (';') is expected here.",
+                            "relatedLocations": [],
+                            "relatedInformation": [],
+                        }
+                    ],
+                },
+            )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)

@@ -14,8 +14,8 @@ type verbosity =
   | Verbose
   | Silent
 
-let init () =
-  Relative_path.(set_path_prefix Root (Path.make "/"));
+let init root =
+  Relative_path.(set_path_prefix Root root);
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config
   in
@@ -23,12 +23,7 @@ let init () =
   GlobalNamingOptions.set TypecheckerOptions.default
 
 let compare_decl verbosity fn =
-  let fn =
-    if Filename.is_relative fn then
-      Path.concat (Path.getcwd ()) fn |> Path.to_string
-    else
-      fn
-  in
+  let fn = Path.to_string fn in
   let text = RealDisk.cat fn in
   let fn = Relative_path.(create Root fn) in
   let decls =
@@ -143,7 +138,13 @@ let compare_decl verbosity fn =
     ]
     |> List.reduce_exn ~f:( && )
   in
-  passes_symbol_check () && passes_decl_check ()
+  let matched = passes_symbol_check () && passes_decl_check () in
+  if matched then (
+    print_endline "Parsed decls:\n";
+    print_endline (show_decls decls);
+    print_endline "\nThey matched!"
+  );
+  matched
 
 type modes = CompareDirectDeclParser
 
@@ -199,12 +200,7 @@ let () =
       match !file with
       | None -> usage_and_exit ()
       | Some file ->
-        init ();
-        if compare_decl !verbosity file then
-          if !verbosity <> Silent then
-            print_endline "They matched!"
-          else
-            ()
-        else
-          exit 1
+        let file = Path.make file in
+        init (Path.dirname file);
+        if not @@ compare_decl !verbosity file then exit 1
     end

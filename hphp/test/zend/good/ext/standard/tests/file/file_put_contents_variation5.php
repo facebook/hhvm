@@ -2,7 +2,7 @@
 
 function runtest() {
 
-   file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$filename, (binary) "File written in working directory", FILE_USE_INCLUDE_PATH);
+   file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$filename, (string)"File written in working directory", FILE_USE_INCLUDE_PATH);
    if(file_exists(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$scriptLocFile)) {
       echo "Fail - this is PHP52 behaviour\n";
       unlink(ZendGoodExtStandardTestsFileFilePutContentsVariation5::$scriptLocFile);

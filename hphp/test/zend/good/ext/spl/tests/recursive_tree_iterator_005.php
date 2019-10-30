@@ -2,11 +2,11 @@
 <<__EntryPoint>> function main(): void {
 $ary = array(
 	0 => array(
-		(binary) "binary",
+		(string)"binary",
 		"abc2",
 		1,
 	),
-	(binary) "binary" => array(
+	(string)"binary" => array(
 		2,
 		"b",
 		3 => array(

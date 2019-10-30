@@ -1,7 +1,7 @@
 <?hh <<__EntryPoint>> function main(): void {
 $dom = new DOMDocument("1.0", "UTF-8");
 $dom->preserveWhiteSpace = false;
-$xml = (binary)'<?xml version="1.0" encoding="utf-8"?>
+$xml = (string)'<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <entry xmlns="http://www.w3.org/2005/Atom">
     <updated>2007-02-14T00:00:00+01:00</updated>

@@ -70,7 +70,7 @@ $inputs = array(
 
        // binary data
 /*21*/ b"binary",
-       (binary)"binary",
+       (string)"binary",
 
        // object data
 /*23*/ new classA(),

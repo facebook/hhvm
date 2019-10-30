@@ -10,7 +10,7 @@ require_once('fopen_include_path.inc');
 function runtest() {
     $tmpfile =  basename(__FILE__, ".php") . ".tmp";
     $h = fopen($tmpfile, "w", true);
-    fwrite($h, (binary) "This is the test file");
+    fwrite($h, (string)"This is the test file");
     fclose($h);
 
 

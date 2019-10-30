@@ -77,7 +77,7 @@ $values = array(
 "binary" => array(
        // binary data
        b"binary",
-       (binary)"binary"),
+       (string)"binary"),
 
 /*9*/
 "undefined" => array(

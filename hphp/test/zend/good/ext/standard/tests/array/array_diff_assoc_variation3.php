@@ -81,7 +81,7 @@ $inputs = array(
 /*7*/
 'binary' => array(
        b"binary",
-       (binary)"binary"),
+       (string)"binary"),
 
        // object data
 /*8*/

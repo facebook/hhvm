@@ -18,3 +18,10 @@ function function_with_non_primitive_args(Typedef $arg1): Typedef {
 function test_generic_fun<T>(T $arg1): T {
   return $arg1;
 }
+
+function test_constrained_generic_fun<T1 super int, T2 as string>(
+  T1 $arg1,
+  T2 $arg2,
+): T1 {
+  return $arg1;
+}

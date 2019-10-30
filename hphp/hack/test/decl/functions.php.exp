@@ -113,6 +113,54 @@ Parsed decls:
             ft_reactive = Nonreactive; ft_return_disposable = false;
             ft_mutable = none; ft_returns_mutable = false }));
       fe_deprecated = None;  };
+    "test_constrained_generic_fun" ->
+    { fe_pos = [22:10-38];
+      fe_type =
+      (Rwitness (root|functions.php line 22, characters 10-37),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (2, 2));
+            ft_tparams =
+            [(Invariant, ([22:39-41], "T1"),
+              [(Constraint_super,
+                (Rhint (root|functions.php line 22, characters 48-50),
+                 (Tprim Tint)))
+                ]);
+              (Invariant, ([22:53-55], "T2"),
+               [(Constraint_as,
+                 (Rhint (root|functions.php line 22, characters 59-64),
+                  (Tprim Tstring)))
+                 ])
+              ];
+            ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [23:6-11]; fp_name = (Some "$arg1");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|functions.php line 23, characters 3-4),
+                  (Tgeneric "T1"))
+                 };
+               fp_kind = FPnormal; fp_accept_disposable = false;
+               fp_mutable = none };
+              { fp_pos = [24:6-11]; fp_name = (Some "$arg2");
+                fp_type =
+                { et_enforced = false;
+                  et_type =
+                  (Rhint (root|functions.php line 24, characters 3-4),
+                   (Tgeneric "T2"))
+                  };
+                fp_kind = FPnormal; fp_accept_disposable = false;
+                fp_mutable = none }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|functions.php line 25, characters 4-5),
+               (Tgeneric "T1"))
+              };
+            ft_reactive = Nonreactive; ft_return_disposable = false;
+            ft_mutable = none; ft_returns_mutable = false }));
+      fe_deprecated = None;  };
     "test_generic_fun" ->
     { fe_pos = [18:10-26];
       fe_type =

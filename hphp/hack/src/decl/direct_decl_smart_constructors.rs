@@ -13,7 +13,7 @@ use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use hhbc_string_utils_rust::GetName;
 use oxidized::{
     aast,
-    ast_defs::{FunKind, Id, Variance},
+    ast_defs::{ConstraintKind, FunKind, Id, Variance},
     direct_decl_parser::Decls,
     pos::Pos,
     s_map::SMap,
@@ -257,6 +257,13 @@ pub enum Node_ {
     Backslash(Pos), // This needs a pos since it shows up in names.
     ListItem(Box<(Node_, Node_)>),
     Variable(Box<VariableDecl>),
+    TypeConstraint(Box<(ConstraintKind, Node_)>),
+
+    // Box the insides of the vector so we don't need to reallocate them when
+    // we pull them out of the TypeConstraint variant.
+    TypeParameter(Box<(Node_, Vec<Box<(ConstraintKind, Node_)>>)>),
+    As,
+    Super,
     Class,
     Interface,
     Trait,
@@ -600,6 +607,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Node_::Backslash(token_pos())
                 }
             }
+            TokenKind::As => Node_::As,
+            TokenKind::Super => Node_::Super,
             TokenKind::Class => Node_::Class,
             TokenKind::Trait => Node_::Trait,
             TokenKind::Interface => Node_::Interface,
@@ -773,15 +782,39 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         Ok(Node_::Ignored)
     }
 
+    fn make_type_constraint(&mut self, kind: Self::R, value: Self::R) -> Self::R {
+        let kind = match kind? {
+            Node_::As => ConstraintKind::ConstraintAs,
+            Node_::Super => ConstraintKind::ConstraintSuper,
+            n => return Err(format!("Expected either As or Super, but was {:?}", n)),
+        };
+        Ok(Node_::TypeConstraint(Box::new((kind, value?))))
+    }
+
     fn make_type_parameter(
         &mut self,
         _arg0: Self::R,
         _arg1: Self::R,
         _arg2: Self::R,
         name: Self::R,
-        _arg4: Self::R,
+        constraints: Self::R,
     ) -> Self::R {
-        name
+        let constraints =
+            constraints?
+                .into_vec()
+                .into_iter()
+                .fold(Ok(Vec::new()), |acc, node| match acc {
+                    acc @ Err(_) => acc,
+                    Ok(mut acc) => match node {
+                        Node_::TypeConstraint(innards) => {
+                            acc.push(innards);
+                            Ok(acc)
+                        }
+                        Node_::Ignored => Ok(acc),
+                        n => Err(format!("Expected a type constraint, but was {:?}", n)),
+                    },
+                })?;
+        Ok(Node_::TypeParameter(Box::new((name?, constraints))))
     }
 
     fn make_parameter_declaration(
@@ -829,12 +862,24 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             .into_vec()
             .into_iter()
             .map(|node| {
-                let (name, pos) = get_name("", &node)?;
+                let (name, constraints) = match node {
+                    Node_::TypeParameter(innards) => *innards,
+                    n => return Err(format!("Expected a type parameter, but got {:?}", n)),
+                };
+                let (name, pos) = get_name("", &name)?;
+                let constraints: Vec<Result<(ConstraintKind, Ty), String>> = constraints
+                    .into_iter()
+                    .map(|constraint| {
+                        let (kind, value) = *constraint;
+                        Ok((kind, self.node_to_ty(&value, &HashSet::new())?))
+                    })
+                    .collect();
+                let constraints = try_collect(constraints)?;
                 type_variables.insert(name.clone());
                 Ok(Tparam {
                     variance: Variance::Invariant,
                     name: Id(pos, name),
-                    constraints: Vec::new(),
+                    constraints,
                     reified: aast::ReifyKind::Erased,
                     user_attributes: Vec::new(),
                 })

@@ -36,8 +36,8 @@ let is_private_visible env x self_id =
           (List.map (Cls.tparams their_class) make_tany)
       in
       if
-        Typing_subtype.is_sub_type env my_class_ty their_class_ty
-        && Typing_subtype.is_sub_type env their_class_ty my_class_ty
+        Typing_utils.is_sub_type env my_class_ty their_class_ty
+        && Typing_utils.is_sub_type env their_class_ty my_class_ty
       then
         None
       else
@@ -69,7 +69,7 @@ let is_protected_visible env x self_id =
           (List.map (Cls.tparams their_class) make_tany)
       in
       if
-        Typing_subtype.is_sub_type env my_class_ty their_class_ty
+        Typing_utils.is_sub_type env my_class_ty their_class_ty
         || Cls.extends their_class self_id
         || (not (Cls.members_fully_known my_class))
         (* This is for the case where type generics are emitted *)

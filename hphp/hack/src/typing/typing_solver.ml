@@ -16,12 +16,77 @@ module Env = Typing_env
 module Inter = Typing_intersection
 module ITySet = Internal_type_set
 module Union = Typing_union
+module TL = Typing_logic
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
 module TySet = Typing_set
 module MakeType = Typing_make_type
 
 let use_bind_to_equal_bound = ref true
+
+let tvenv_to_prop tvenv =
+  let props_per_tvar =
+    IMap.mapi
+      (fun id tyvar_info ->
+        match tyvar_info with
+        | LocalTyvar { lower_bounds; upper_bounds; _ } ->
+          let tyvar = (Reason.Rnone, Tvar id) in
+          let lower_bounds = ITySet.elements lower_bounds in
+          let upper_bounds = ITySet.elements upper_bounds in
+          let lower_bounds_props =
+            List.map
+              ~f:(fun ty -> TL.IsSubtype (ty, LoclType tyvar))
+              lower_bounds
+          in
+          (* If an upper bound of variable n1 is a `Tvar n2`,
+        then we have already added "Tvar n1 <: Tvar n2" when traversing
+        lower bounds of n2, so we can filter out upper bounds that are Tvars. *)
+          let can_be_removed = function
+            | LoclType (_, Tvar n) ->
+              begin
+                match IMap.find_opt n tvenv with
+                | Some _ -> true
+                | None -> false
+              end
+            | _ -> false
+          in
+          let upper_bounds =
+            List.filter ~f:(fun ty -> not (can_be_removed ty)) upper_bounds
+          in
+          let upper_bounds_props =
+            List.map
+              ~f:(fun ty -> TL.IsSubtype (LoclType tyvar, ty))
+              upper_bounds
+          in
+          TL.conj_list (lower_bounds_props @ upper_bounds_props)
+        | GlobalTyvar -> TL.conj_list [])
+      tvenv
+  in
+  let (_ids, props) = List.unzip (IMap.bindings props_per_tvar) in
+  TL.conj_list props
+
+let env_to_prop env = TL.conj (tvenv_to_prop env.tvenv) env.subtype_prop
+
+let log_prop env =
+  let filename = Pos.filename (Pos.to_absolute env.function_pos) in
+  if Str.string_match (Str.regexp {|.*\.hhi|}) filename 0 then
+    ()
+  else
+    let prop = env_to_prop env in
+    ( if TypecheckerOptions.log_inference_constraints (Env.get_tcopt env) then
+      let p_as_string = Typing_print.subtype_prop env prop in
+      let pos = Pos.string (Pos.to_absolute env.function_pos) in
+      let size = TL.size prop in
+      let n_disj = TL.n_disj prop in
+      let n_conj = TL.n_conj prop in
+      TypingLogger.InferenceCnstr.log p_as_string ~pos ~size ~n_disj ~n_conj );
+    if (not (Errors.currently_has_errors ())) && not (TL.is_valid prop) then
+      Typing_log.log_prop
+        1
+        env.function_pos
+        "There are remaining unsolved constraints!"
+        env
+        prop
 
 (* Given a type ty, replace any covariant or contravariant components of the type
  * with fresh type variables. Components replaced include
@@ -351,7 +416,7 @@ let bind_to_lower_bound ~freshen env r var lower_bounds on_error =
     let (env, ty) =
       if freshen then
         let (env, newty) = freshen_inside_ty env ty in
-        let env = Typing_subtype.sub_type env ty newty on_error in
+        let env = Typing_utils.sub_type env ty newty on_error in
         (env, newty)
       else
         (env, ty)
@@ -515,10 +580,10 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
                   let (env, ty) = Env.expand_var env r var in
                   let ty = LoclType ty in
                   let env =
-                    Typing_subtype.sub_type_i env lower_bound ty on_error
+                    Typing_utils.sub_type_i env lower_bound ty on_error
                   in
                   let env =
-                    Typing_subtype.sub_type_i env ty upper_bound on_error
+                    Typing_utils.sub_type_i env ty upper_bound on_error
                   in
                   env
                 else
@@ -527,10 +592,10 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
                     when ty_equal_shallow lower_bound upper_bound ->
                     let (env, ty) = freshen_inside_ty env lower_bound in
                     let env =
-                      Typing_subtype.sub_type env lower_bound ty on_error
+                      Typing_utils.sub_type env lower_bound ty on_error
                     in
                     let env =
-                      Typing_subtype.sub_type env ty upper_bound on_error
+                      Typing_utils.sub_type env ty upper_bound on_error
                     in
                     let (env, ty) =
                       union_any_if_any_in_lower_bounds env ty lower_bounds
@@ -651,7 +716,7 @@ let solve_all_unsolved_tyvars env on_error =
          env.tvenv
          env
   in
-  Typing_subtype.log_prop env;
+  log_prop env;
   env
 
 let solve_all_unsolved_tyvars_gi env make_on_error =
@@ -730,10 +795,7 @@ let widen env widen_concrete_type ty =
   widen env ty
 
 let is_nothing env ty =
-  Typing_subtype.is_sub_type_ignore_generic_params
-    env
-    ty
-    (Reason.none, Tunion [])
+  Typing_utils.is_sub_type_ignore_generic_params env ty (Reason.none, Tunion [])
 
 (* Using the `widen_concrete_type` function to compute an upper bound,
  * narrow the constraints on a type that are valid for an operation.
@@ -798,7 +860,7 @@ let expand_type_and_narrow
     else
       Errors.try_
         (fun () ->
-          let env = Typing_subtype.sub_type env ty widened_ty on_error in
+          let env = Typing_utils.sub_type env ty widened_ty on_error in
           (env, widened_ty))
         (fun _ ->
           if Option.is_some default then
@@ -831,7 +893,7 @@ let is_sub_type env ty1 ty2 =
    *  errors here. Using unify_error for now to maintain existing behavior. *)
   let (env, ty1) = expand_type_and_solve_eq env ty1 Errors.unify_error in
   let (env, ty2) = expand_type_and_solve_eq env ty2 Errors.unify_error in
-  Typing_subtype.is_sub_type env ty1 ty2
+  Typing_utils.is_sub_type env ty1 ty2
 
 let rec push_option_out pos env ty =
   let is_option = function

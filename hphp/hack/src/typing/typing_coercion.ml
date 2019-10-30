@@ -45,7 +45,7 @@ let coerce_type_impl env ty_have ty_expect on_error =
   | (_, (_, Tdynamic)) -> env
   | ((_, Tdynamic), _) when ty_expect.et_enforced -> env
   | _ when ty_expect.et_enforced ->
-    Typing_subtype.sub_type_with_dynamic_as_bottom
+    Typing_utils.sub_type_with_dynamic_as_bottom
       env
       ty_have
       ty_expect.et_type
@@ -54,12 +54,12 @@ let coerce_type_impl env ty_have ty_expect on_error =
     when ( ((not ty_expect.et_enforced) && env.Typing_env_types.pessimize)
          || Typing_utils.is_dynamic env ety_expect )
          && complex_coercion ->
-    Typing_subtype.sub_type_with_dynamic_as_bottom
+    Typing_utils.sub_type_with_dynamic_as_bottom
       env
       ty_have
       ty_expect.et_type
       on_error
-  | _ -> Typing_subtype.sub_type env ty_have ty_expect.et_type on_error
+  | _ -> Typing_utils.sub_type env ty_have ty_expect.et_type on_error
 
 (* The Errors.try_ allows us to report a union ty_have in an error
  * instead of just elements in the union *)

@@ -32,7 +32,7 @@ let sub_type p ur env ty_sub ty_super on_error =
   Errors.try_add_err
     p
     (Reason.string_of_ureason ur)
-    (fun () -> Typing_subtype.sub_type env ty_sub ty_super on_error)
+    (fun () -> Typing_utils.sub_type env ty_sub ty_super on_error)
     (fun () -> env)
 
 let sub_type_decl p ur env ty_sub ty_super =

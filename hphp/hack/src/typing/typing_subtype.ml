@@ -711,6 +711,39 @@ and simplify_subtype_i
           | Tanon _ | Tobject | Tclass _ | Tarraykind _ ) ),
       LoclType (_, Tunion []) ) ->
     invalid ()
+  (* Ideally, we'd want this case to come after the case with an intersection 
+  on the left, to deal properly with (#1 & A) <: Thas_member(#2) by potentially
+  adding an upper bound to #1, but that would result in a disjunction 
+  which we don't handle very well at the moment.
+  TODO: when we have a better treatment of disjunctions, move that case after
+  the case with an intersection on the left. 
+  For now, if there is an intersection on the left here,
+  we rely on how obj_get itself treats intersections. If that
+  intersection contains a type variable, this type variable will be eagerly
+  solved. Once this case is moved, we can clean up obj_get from the Tvar and 
+  Tintersection cases *)
+  | ( LoclType ty,
+      ConstraintType
+        ( r,
+          Thas_member
+            {
+              hm_name = name;
+              hm_type = member_ty;
+              hm_nullsafe = nullsafe;
+              hm_class_id = class_id;
+            } ) ) ->
+    let (env, (obj_get_ty, _tal)) =
+      Typing_object_get.obj_get
+        ~obj_pos:(Reason.to_pos r)
+        ~is_method:false
+        ~coerce_from_ty:None
+        ~nullsafe
+        env
+        ty
+        class_id
+        name
+    in
+    simplify_subtype ~subtype_env ~this_ty obj_get_ty member_ty env
   | (_, LoclType ((_, Tunion (_ :: _ as tyl)) as ty_super)) ->
     (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
      * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
@@ -1548,9 +1581,6 @@ and simplify_subtype_i
   | (ConstraintType ty_sub, LoclType ty_super) ->
     (match (ty_sub, ty_super) with
     | ((_, Thas_member _), _ty_super) -> invalid ())
-  | (LoclType _ty_sub, ConstraintType _ty_super) ->
-    (* TODO *)
-    invalid ()
 
 and is_sub_type_nullsafe nullsafe_sub nullsafe_super =
   match (nullsafe_sub, nullsafe_super) with
@@ -2464,49 +2494,6 @@ and prop_to_env ~treat_dynamic_as_bottom env prop on_error =
   in
   (env, TL.conj_list props')
 
-and env_to_prop env = TL.conj (tvenv_to_prop env.tvenv) env.subtype_prop
-
-and tvenv_to_prop tvenv =
-  let props_per_tvar =
-    IMap.mapi
-      (fun id tyvar_info ->
-        match tyvar_info with
-        | LocalTyvar { lower_bounds; upper_bounds; _ } ->
-          let tyvar = (Reason.Rnone, Tvar id) in
-          let lower_bounds = ITySet.elements lower_bounds in
-          let upper_bounds = ITySet.elements upper_bounds in
-          let lower_bounds_props =
-            List.map
-              ~f:(fun ty -> TL.IsSubtype (ty, LoclType tyvar))
-              lower_bounds
-          in
-          (* If an upper bound of variable n1 is a `Tvar n2`,
-        then we have already added "Tvar n1 <: Tvar n2" when traversing
-        lower bounds of n2, so we can filter out upper bounds that are Tvars. *)
-          let can_be_removed = function
-            | LoclType (_, Tvar n) ->
-              begin
-                match IMap.find_opt n tvenv with
-                | Some _ -> true
-                | None -> false
-              end
-            | _ -> false
-          in
-          let upper_bounds =
-            List.filter ~f:(fun ty -> not (can_be_removed ty)) upper_bounds
-          in
-          let upper_bounds_props =
-            List.map
-              ~f:(fun ty -> TL.IsSubtype (LoclType tyvar, ty))
-              upper_bounds
-          in
-          TL.conj_list (lower_bounds_props @ upper_bounds_props)
-        | GlobalTyvar -> TL.conj_list [])
-      tvenv
-  in
-  let (_ids, props) = List.unzip (IMap.bindings props_per_tvar) in
-  TL.conj_list props
-
 and sub_type_inner
     (env : env)
     ~(subtype_env : subtype_env)
@@ -3097,27 +3084,6 @@ let add_constraint
     in
     iter 0 env
 
-let log_prop env =
-  let filename = Pos.filename (Pos.to_absolute env.function_pos) in
-  if Str.string_match (Str.regexp {|.*\.hhi|}) filename 0 then
-    ()
-  else
-    let prop = env_to_prop env in
-    ( if TypecheckerOptions.log_inference_constraints (Env.get_tcopt env) then
-      let p_as_string = Typing_print.subtype_prop env prop in
-      let pos = Pos.string (Pos.to_absolute env.function_pos) in
-      let size = TL.size prop in
-      let n_disj = TL.n_disj prop in
-      let n_conj = TL.n_conj prop in
-      TypingLogger.InferenceCnstr.log p_as_string ~pos ~size ~n_disj ~n_conj );
-    if (not (Errors.currently_has_errors ())) && not (TL.is_valid prop) then
-      Typing_log.log_prop
-        1
-        env.function_pos
-        "There are remaining unsolved constraints!"
-        env
-        prop
-
 let sub_type_with_dynamic_as_bottom = sub_type ~treat_dynamic_as_bottom:true
 
 let is_sub_type_ignore_generic_params =
@@ -3142,6 +3108,18 @@ let sub_type_i = sub_type_i ~treat_dynamic_as_bottom:false
 
 let () = Typing_utils.sub_type_ref := sub_type
 
+let () = Typing_utils.sub_type_i_ref := sub_type_i
+
+let () =
+  Typing_utils.sub_type_with_dynamic_as_bottom_ref :=
+    sub_type_with_dynamic_as_bottom
+
 let () = Typing_utils.add_constraint_ref := add_constraint
 
+let () = Typing_utils.is_sub_type_ref := is_sub_type
+
 let () = Typing_utils.is_sub_type_for_union_ref := is_sub_type_for_union
+
+let () =
+  Typing_utils.is_sub_type_ignore_generic_params_ref :=
+    is_sub_type_ignore_generic_params

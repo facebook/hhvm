@@ -77,8 +77,6 @@ val subtype_reactivity :
 val add_constraint :
   Pos.t -> env -> Ast_defs.constraint_kind -> locl_ty -> locl_ty -> env
 
-val log_prop : env -> unit
-
 val add_tyvar_upper_bound_and_close :
   env -> int -> internal_type -> Errors.typing_error_callback -> env
 

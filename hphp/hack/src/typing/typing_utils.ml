@@ -57,13 +57,39 @@ let (sub_type_ref : sub_type ref) = ref (not_implemented "sub_type")
 
 let sub_type x = !sub_type_ref x
 
+type sub_type_i =
+  env -> internal_type -> internal_type -> Errors.typing_error_callback -> env
+
+let (sub_type_i_ref : sub_type_i ref) = ref (not_implemented "sub_type_i")
+
+let sub_type_i x = !sub_type_i_ref x
+
+type sub_type_with_dynamic_as_bottom =
+  env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env
+
+let (sub_type_with_dynamic_as_bottom_ref : sub_type_with_dynamic_as_bottom ref)
+    =
+  ref (not_implemented "sub_type_with_dynamic_as_bottom")
+
+let sub_type_with_dynamic_as_bottom x = !sub_type_with_dynamic_as_bottom_ref x
+
 type is_sub_type_type = env -> locl_ty -> locl_ty -> bool
 
-(*let (is_sub_type_ref: is_sub_type_type ref) = ref not_implemented*)
+let (is_sub_type_ref : is_sub_type_type ref) =
+  ref (not_implemented "is_sub_type")
+
+let is_sub_type x = !is_sub_type_ref x
+
 let (is_sub_type_for_union_ref : is_sub_type_type ref) =
   ref (not_implemented "is_sub_type_for_union")
 
 let is_sub_type_for_union x = !is_sub_type_for_union_ref x
+
+let (is_sub_type_ignore_generic_params_ref : is_sub_type_type ref) =
+  ref (not_implemented "is_sub_type_ignore_generic_params")
+
+let is_sub_type_ignore_generic_params x =
+  !is_sub_type_ignore_generic_params_ref x
 
 type add_constraint =
   Pos.Map.key -> env -> Ast_defs.constraint_kind -> locl_ty -> locl_ty -> env

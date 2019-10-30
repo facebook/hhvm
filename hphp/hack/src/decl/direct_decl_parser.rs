@@ -17,7 +17,7 @@ use syntax_tree::mode_parser::parse_mode;
 
 pub type DirectDeclParser<'a> = Parser<'a, WithKind<DirectDeclSmartConstructors<'a>>, State<'a>>;
 
-pub fn parse_decls(filename: RelativePath, text: &str, trace: bool) -> Result<Decls, String> {
+pub fn parse_decls(filename: RelativePath, text: &str) -> Result<Decls, String> {
     let text = SourceText::make(RcOc::new(filename), text.as_bytes());
     let is_experimental = match parse_mode(&text) {
         Some(Mode::Mexperimental) => true,
@@ -29,15 +29,6 @@ pub fn parse_decls(filename: RelativePath, text: &str, trace: bool) -> Result<De
     };
     let mut parser = DirectDeclParser::make(&text, env);
     let root = parser.parse_script(None);
-    let decls = root.map(|root| {
-        if trace {
-            println!("Parsed:");
-            println!("{:?}", &root);
-        }
-        parser.into_sc_state().decls
-    });
-    if trace {
-        println!("Returning {:?}", decls);
-    }
+    let decls = root.map(|_| parser.into_sc_state().decls);
     decls
 }

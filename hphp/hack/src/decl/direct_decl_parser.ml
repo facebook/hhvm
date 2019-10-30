@@ -17,18 +17,17 @@ type decls = {
 }
 [@@deriving show]
 
-external parse_decls_ffi :
-  Relative_path.t -> string -> bool -> (decls, string) result
+external parse_decls_ffi : Relative_path.t -> string -> (decls, string) result
   = "parse_decls_ffi"
 
-let parse_decls ?contents ?(trace = false) relative_path =
+let parse_decls ?contents relative_path =
   let contents =
     match contents with
     | Some c -> Some c
     | None -> File_provider.get_contents relative_path
   in
   match contents with
-  | Some contents -> parse_decls_ffi relative_path contents trace
+  | Some contents -> parse_decls_ffi relative_path contents
   | None ->
     Error
       (Printf.sprintf

@@ -36,8 +36,7 @@ let compare_decl verbosity fn =
   let fn = Relative_path.(create Root fn) in
   let decls =
     time verbosity "Parsed decls" (fun () ->
-        Result.ok_or_failwith
-          (parse_decls ~contents:text ~trace:(verbosity = Verbose) fn))
+        Result.ok_or_failwith (parse_decls ~contents:text fn))
   in
   let facts =
     Option.value_exn

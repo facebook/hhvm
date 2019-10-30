@@ -10,7 +10,7 @@ use oxidized::direct_decl_parser::Decls;
 use oxidized::relative_path::RelativePath;
 
 ocaml_ffi! {
-    fn parse_decls_ffi(filename: RelativePath, text: String, trace: bool) -> Result<Decls, String> {
-        parse_decls(filename, &text, trace)
+    fn parse_decls_ffi(filename: RelativePath, text: String) -> Result<Decls, String> {
+        parse_decls(filename, &text)
     }
 }

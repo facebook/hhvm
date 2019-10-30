@@ -14,5 +14,4 @@ type decls = {
 }
 [@@deriving show]
 
-val parse_decls :
-  ?contents:string -> ?trace:bool -> Relative_path.t -> (decls, string) result
+val parse_decls : ?contents:string -> Relative_path.t -> (decls, string) result

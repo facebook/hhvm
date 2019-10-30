@@ -63,3 +63,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         Expr_::String(unsafe { String::from_utf8_unchecked(s) })
     }
 }
+
+// This wrapper constructor can avoid other crates (HackNative, etc)
+// depends on ocamlrep.
+pub fn new_nsenv(env: crate::namespace_env::Env) -> Nsenv {
+    ocamlrep::rc::RcOc::new(env)
+}

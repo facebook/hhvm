@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<331e94bb5c05e3fa85aee00ac061de5b>>
+// @generated SignedSource<<41faa67df2574a9b48786bb84c8c414f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -549,7 +549,7 @@ pub struct MethodRedeclaration<Ex, Fb, En, Hi> {
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
 }
 
-pub type Nsenv = namespace_env::Env;
+pub type Nsenv = ocamlrep::rc::RcOc<namespace_env::Env>;
 
 #[derive(Clone, Debug, OcamlRep)]
 pub struct Typedef<Ex, Fb, En, Hi> {

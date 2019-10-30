@@ -577,10 +577,11 @@ module LowererTest_ = struct
       | OCAML -> Skip
       | _ -> build_tree rust_env true file source_text
     in
+    let aast_equal = Aast.equal_program ( = ) ( = ) ( = ) ( = ) in
     let compare_result r1 r2 =
       Lowerer.(
         if
-          r1.ast = r2.ast
+          aast_equal r1.ast r2.ast
           && r1.is_hh_file = r2.is_hh_file
           && Scoured_comments.equal r1.comments r2.comments
           && r1.fi_mode = r2.fi_mode
@@ -598,7 +599,7 @@ module LowererTest_ = struct
                 "NOT_" )
           in
           Printf.printf ":NOT_EQUAL: ";
-          print "Tree" (r1.ast = r2.ast);
+          print "Tree" (aast_equal r1.ast r2.ast);
           print "HH_File" (r1.is_hh_file = r2.is_hh_file);
           print "Comments" (Scoured_comments.equal r1.comments r2.comments);
           print "Mode" (r1.fi_mode = r2.fi_mode);

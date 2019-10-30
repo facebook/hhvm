@@ -4,75 +4,135 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use lazy_static::lazy_static;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 lazy_static! {
-    static ref ALIASES: Vec<String> = vec![
-        "AsyncIterator".to_string(),
-        "AsyncKeyedIterator".to_string(),
-        "Traversable".to_string(),
-        "Container".to_string(),
-        "KeyedTraversable".to_string(),
-        "KeyedContainer".to_string(),
-        "Iterator".to_string(),
-        "KeyedIterator".to_string(),
-        "Iterable".to_string(),
-        "KeyedIterable".to_string(),
-        "Collection".to_string(),
-        "Vector".to_string(),
-        "Map".to_string(),
-        "Set".to_string(),
-        "Pair".to_string(),
-        "ImmVector".to_string(),
-        "ImmMap".to_string(),
-        "ImmSet".to_string(),
-        "InvariantException".to_string(),
-        "IMemoizeParam".to_string(),
-        "Shapes".to_string(),
-        "TypeStructureKind".to_string(),
-        "TypeStructure".to_string(),
-        "dict".to_string(),
-        "vec".to_string(),
-        "keyset".to_string(),
-        "varray".to_string(),
-        "darray".to_string(),
-        "Awaitable".to_string(),
-        "AsyncGenerator".to_string(),
-        "StaticWaitHandle".to_string(),
-        "WaitableWaitHandle".to_string(),
-        "ResumableWaitHandle".to_string(),
-        "AsyncFunctionWaitHandle".to_string(),
-        "AsyncGeneratorWaitHandle".to_string(),
-        "AwaitAllWaitHandle".to_string(),
-        "ConditionWaitHandle".to_string(),
-        "RescheduleWaitHandle".to_string(),
-        "SleepWaitHandle".to_string(),
-        "ExternalThreadEventWaitHandle".to_string(),
-        "bool".to_string(),
-        "int".to_string(),
-        "float".to_string(),
-        "string".to_string(),
-        "void".to_string(),
-        "num".to_string(),
-        "arraykey".to_string(),
-        "resource".to_string(),
-        "mixed".to_string(),
-        "noreturn".to_string(),
-        "this".to_string(),
-        "varray_or_darray".to_string(),
-        "vec_or_dict".to_string(),
-        "arraylike".to_string(),
-        "nonnull".to_string(),
-        "null".to_string(),
-        "nothing".to_string(),
-        "dynamic".to_string(),
-    ];
     static ref ALIAS_MAP: HashMap<String, String> = {
         ALIASES.iter().fold(HashMap::new(), |mut map, s| {
             map.insert(s.to_lowercase(), "HH\\".to_string() + s);
             map
         })
     };
+    pub static ref FUNCS_MAP: BTreeMap<String, String> = make_map(FUNCS);
+    pub static ref CONSTS_MAP: BTreeMap<String, String> = make_map(CONSTS);
+    pub static ref NAMESPACES_MAP: BTreeMap<String, String> = make_map(NAMESPACES);
+}
+
+static ALIASES: &'static [&'static str] = &[
+    "AsyncIterator",
+    "AsyncKeyedIterator",
+    "Traversable",
+    "Container",
+    "KeyedTraversable",
+    "KeyedContainer",
+    "Iterator",
+    "KeyedIterator",
+    "Iterable",
+    "KeyedIterable",
+    "Collection",
+    "Vector",
+    "Map",
+    "Set",
+    "Pair",
+    "ImmVector",
+    "ImmMap",
+    "ImmSet",
+    "InvariantException",
+    "IMemoizeParam",
+    "Shapes",
+    "TypeStructureKind",
+    "TypeStructure",
+    "dict",
+    "vec",
+    "keyset",
+    "varray",
+    "darray",
+    "Awaitable",
+    "AsyncGenerator",
+    "StaticWaitHandle",
+    "WaitableWaitHandle",
+    "ResumableWaitHandle",
+    "AsyncFunctionWaitHandle",
+    "AsyncGeneratorWaitHandle",
+    "AwaitAllWaitHandle",
+    "ConditionWaitHandle",
+    "RescheduleWaitHandle",
+    "SleepWaitHandle",
+    "ExternalThreadEventWaitHandle",
+    "bool",
+    "int",
+    "float",
+    "string",
+    "void",
+    "num",
+    "arraykey",
+    "resource",
+    "mixed",
+    "noreturn",
+    "this",
+    "varray_or_darray",
+    "vec_or_dict",
+    "arraylike",
+    "nonnull",
+    "null",
+    "nothing",
+    "dynamic",
+];
+
+static FUNCS: &'static [&'static str] = &[
+    "asio_get_current_context_idx",
+    "asio_get_running_in_context",
+    "asio_get_running",
+    "class_meth",
+    "darray",
+    "dict",
+    "fun",
+    "heapgraph_create",
+    "heapgraph_dfs_edges",
+    "heapgraph_dfs_nodes",
+    "heapgraph_edge",
+    "heapgraph_foreach_edge",
+    "heapgraph_foreach_node",
+    "heapgraph_foreach_root",
+    "heapgraph_node_in_edges",
+    "heapgraph_node_out_edges",
+    "heapgraph_node",
+    "heapgraph_stats",
+    "idx",
+    "inst_meth",
+    "invariant_callback_register",
+    "invariant_violation",
+    "invariant",
+    "is_darray",
+    "is_dict",
+    "is_keyset",
+    "is_varray",
+    "is_vec",
+    "keyset",
+    "meth_caller",
+    "objprof_get_data",
+    "objprof_get_paths",
+    "objprof_get_strings",
+    "server_warmup_status",
+    "thread_mark_stack",
+    "thread_memory_stats",
+    "type_structure",
+    "varray",
+    "vec",
+    "xenon_get_data",
+];
+
+static CONSTS: &'static [&'static str] = &[];
+
+static NAMESPACES: &'static [&'static str] = &["Rx"];
+
+fn make_map(items: &[&str]) -> BTreeMap<String, String> {
+    items.iter().fold(BTreeMap::new(), |mut map, s| {
+        let prefix = "HH\\";
+        let v = String::with_capacity(prefix.len() + s.len());
+        map.insert(s.to_string(), v + prefix + s);
+        map
+    })
 }
 
 pub fn normalize(s: &str) -> &str {
@@ -95,9 +155,9 @@ pub fn is_hh_autoimport(s: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use crate::hh_autoimport::is_hh_autoimport;
-    use crate::hh_autoimport::normalize;
-    use crate::hh_autoimport::opt_normalize;
+    use crate::is_hh_autoimport;
+    use crate::normalize;
+    use crate::opt_normalize;
 
     #[test]
     fn test_is_hh_autoimport() {

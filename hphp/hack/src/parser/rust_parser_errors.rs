@@ -20,7 +20,7 @@ use parser_core_types::{
 };
 use syntax_tree::SyntaxTree;
 
-use parser_rust::hh_autoimport;
+use hh_autoimport_rust as hh_autoimport;
 
 #[derive(Clone, PartialEq, Debug)]
 struct Location {

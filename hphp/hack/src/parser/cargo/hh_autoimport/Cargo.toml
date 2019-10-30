@@ -1,0 +1,11 @@
+[package]
+name = "hack_hh_autoimport"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "hh_autoimport"
+path = "../../hh_autoimport.rs"
+
+[dependencies]
+lazy_static = "^1.3.0"

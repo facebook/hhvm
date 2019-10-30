@@ -5,11 +5,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use escaper::*;
+use hh_autoimport_rust as hh_autoimport;
 use itertools::{Either, Either::Left, Either::Right};
 use naming_special_names_rust::{special_functions, special_idents};
+use ocamlrep::rc::RcOc;
 use oxidized::{
     aast, aast::Expr_ as E_, aast_defs, ast_defs, doc_comment::DocComment, file_info,
     global_options::GlobalOptions, namespace_env::Env as NamespaceEnv, pos::Pos, s_map,
+    s_map::SMap,
 };
 use parser_core_types::{
     indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
@@ -154,13 +157,13 @@ pub struct Env<'a> {
 
     // Cache none pos, lazy_static doesn't allow Rc.
     pos_none: Pos,
+    empty_ns_env: RcOc<NamespaceEnv>,
 
     pub saw_yield: bool, /* Information flowing back up */
     pub lifted_awaits: Option<LiftedAwaits>,
     pub tmp_var_counter: isize,
 
     pub indexed_source_text: &'a IndexedSourceText<'a>,
-    pub auto_ns_map: &'a [(String, String)],
     pub parser_options: &'a GlobalOptions,
 
     state: Rc<RefCell<State>>,
@@ -176,6 +179,25 @@ impl<'a> Env<'a> {
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
     ) -> Self {
+        // Ported from namespace_env.ml
+        let mut ns_uses = hh_autoimport::NAMESPACES_MAP.clone();
+        parser_options
+            .po_auto_namespace_map
+            .iter()
+            .for_each(|(k, v)| {
+                &ns_uses.insert(k.into(), v.into());
+            });
+        let empty_ns_env = NamespaceEnv {
+            ns_uses,
+            class_uses: SMap::new(),
+            fun_uses: hh_autoimport::FUNCS_MAP.clone(),
+            const_uses: hh_autoimport::CONSTS_MAP.clone(),
+            record_def_uses: SMap::new(),
+            name: None,
+            auto_ns_map: parser_options.po_auto_namespace_map.clone(),
+            is_codegen: codegen,
+        };
+
         Env {
             codegen,
             keep_errors,
@@ -188,9 +210,9 @@ impl<'a> Env<'a> {
             lifted_awaits: None,
             tmp_var_counter: 1,
             indexed_source_text,
-            auto_ns_map: &[],
             parser_options,
             pos_none: Pos::make_none(),
+            empty_ns_env: RcOc::new(empty_ns_env),
 
             state: Rc::new(RefCell::new(State {
                 saw_compiler_halt_offset: None,
@@ -320,10 +342,6 @@ where
     Syntax<T, V>: PositionedSyntaxTrait,
     V: SyntaxValueWithKind + SyntaxValueType<T> + std::fmt::Debug,
 {
-    fn make_empty_ns_env(env: &Env) -> NamespaceEnv {
-        NamespaceEnv::empty(Vec::from(env.auto_ns_map), env.codegen())
-    }
-
     fn mode_annotation(mode: file_info::Mode) -> file_info::Mode {
         match mode {
             file_info::Mode::Mphp => file_info::Mode::Mdecl,
@@ -3666,8 +3684,8 @@ where
         Ok((r?, saw_yield))
     }
 
-    fn mk_empty_ns_env(env: &Env) -> NamespaceEnv {
-        NamespaceEnv::empty(env.auto_ns_map.to_vec(), env.codegen())
+    fn mk_empty_ns_env(env: &Env) -> RcOc<NamespaceEnv> {
+        RcOc::clone(&env.empty_ns_env)
     }
 
     fn extract_docblock(node: &Syntax<T, V>, env: &Env) -> Option<DocComment> {
@@ -4588,7 +4606,7 @@ where
                                 name: Self::pos_name(name, env)?,
                                 type_: Self::mp_optional(Self::p_hint, ty, env)?,
                                 value: Self::p_simple_initializer(init, env)?,
-                                namespace: Self::make_empty_ns_env(env),
+                                namespace: Self::mk_empty_ns_env(env),
                                 span: Self::p_pos(node, env),
                             };
                             aast::Def::mk_constant(gconst)

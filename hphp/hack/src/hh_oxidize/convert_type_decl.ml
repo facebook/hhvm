@@ -60,6 +60,11 @@ let box_variant = [("aast", "Expr_"); ("aast", "Stmt_"); ("aast", "Def")]
 let should_box_variant ty =
   List.mem box_variant (curr_module_name (), ty) ~equal:( = )
 
+let add_rcoc = [("aast", "Nsenv")]
+
+let should_add_rcoc ty =
+  List.mem add_rcoc (curr_module_name (), ty) ~equal:( = )
+
 let override_field_type =
   SMap.of_list
     [
@@ -226,7 +231,11 @@ let type_declaration name td =
         add_ty_use id ty_name;
         raise (Skip_type_decl ("it is a re-export of " ^ id))
       ) else
-        sprintf "pub type %s%s = %s;" name tparams (core_type ty)
+        let ty = core_type ty in
+        if should_add_rcoc name then
+          sprintf "pub type %s%s = ocamlrep::rc::RcOc<%s>;" name tparams ty
+        else
+          sprintf "pub type %s%s = %s;" name tparams ty
     | _ ->
       if should_use_alias_instead_of_tuple_struct name then
         sprintf "pub type %s%s = %s;" name tparams (core_type ty)

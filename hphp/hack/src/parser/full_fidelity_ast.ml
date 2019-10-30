@@ -379,12 +379,6 @@ struct
       end
     | _ -> p
 
-  exception Lowerer_invariant_failure of string * string
-
-  let invariant_failure node msg env =
-    let pos = Pos.string (Pos.to_absolute (pPos node env)) in
-    raise (Lowerer_invariant_failure (pos, msg))
-
   let scuba_table = Scuba.Table.of_name "hh_missing_lowerer_cases"
 
   let log_missing ?(caught = false) ~(env : env) ~expecting node : unit =
@@ -1108,13 +1102,11 @@ if there already is one, since that one will likely be better than this one. *)
             (as_list closure_parameter_list)
         in
         let hd_variadic_hint hints =
-          ( if List.length hints > 1 then
-            let msg =
-              Printf.sprintf
-                "%d variadic parameters found. There should be no more than one."
-                (List.length hints)
-            in
-            invariant_failure node msg env );
+          if List.length hints > 1 then
+            failwith
+              (Printf.sprintf
+                 "%d variadic parameters found. There should be no more than one."
+                 (List.length hints));
           match List.hd hints with
           | Some h -> h
           | None -> None

@@ -311,7 +311,6 @@ pub enum Error {
         node_name: String,
         kind: syntax_kind::SyntaxKind,
     },
-    LowererInvariantFailure(Pos, String),
     Failwith(String),
 }
 
@@ -396,14 +395,9 @@ where
         // A placehold for error raised in ast_to_aast.ml
     }
 
-    fn invariant_failure_error<N>(node: &Syntax<T, V>, env: &Env, msg: &str) -> ret!(N) {
-        let pos = Self::p_pos(node, env);
-        Err(Error::LowererInvariantFailure(pos, String::from(msg)))
-    }
-
     #[inline]
-    fn failwith<N>(msg: &str) -> ret!(N) {
-        Err(Error::Failwith(String::from(msg)))
+    fn failwith<N>(msg: impl Into<String>) -> ret!(N) {
+        Err(Error::Failwith(msg.into()))
     }
 
     #[inline]
@@ -865,11 +859,10 @@ where
                     })
                     .collect::<std::result::Result<Vec<_>, _>>()?;
                 if variadic_hints.len() > 1 {
-                    let msg = format!(
+                    return Self::failwith(format!(
                         "{} variadic parameters found. There should be no more than one.",
                         variadic_hints.len().to_string()
-                    );
-                    Self::invariant_failure_error(node, env, &msg)?;
+                    ));
                 }
                 Ok(Hfun(aast::HintFun {
                     reactive_kind: aast::FuncReactive::FNonreactive,

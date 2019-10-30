@@ -137,3 +137,5 @@ let abstract_static_props = GlobalOptions.po_abstract_static_props
 let set_infer_missing = GlobalOptions.set_infer_missing
 
 let check_attribute_locations = GlobalOptions.tco_check_attribute_locations
+
+let error_php_lambdas = GlobalOptions.tco_error_php_lambdas

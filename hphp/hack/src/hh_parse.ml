@@ -70,6 +70,7 @@ module FullFidelityParseArgs = struct
     abstract_static_props: bool;
     disable_halt_compiler: bool;
     disallow_func_ptrs_in_constants: bool;
+    error_php_lambdas: bool;
   }
 
   let make
@@ -104,7 +105,8 @@ module FullFidelityParseArgs = struct
       const_static_props
       abstract_static_props
       disable_halt_compiler
-      disallow_func_ptrs_in_constants =
+      disallow_func_ptrs_in_constants
+      error_php_lambdas =
     {
       full_fidelity_json;
       full_fidelity_dot;
@@ -138,6 +140,7 @@ module FullFidelityParseArgs = struct
       abstract_static_props;
       disable_halt_compiler;
       disallow_func_ptrs_in_constants;
+      error_php_lambdas;
     }
 
   let parse_args () =
@@ -188,6 +191,7 @@ module FullFidelityParseArgs = struct
     let abstract_static_props = ref false in
     let disable_halt_compiler = ref false in
     let disallow_func_ptrs_in_constants = ref false in
+    let error_php_lambdas = ref false in
     let options =
       [
         (* modes *)
@@ -320,6 +324,9 @@ No errors are filtered out."
           Arg.Set disallow_func_ptrs_in_constants,
           "Disallow use of HH\\fun and HH\\class_meth in constants and constant initializers"
         );
+        ( "--error-php-lambdas",
+          Arg.Set error_php_lambdas,
+          "Report errors on php style anonymous functions" );
       ]
     in
     Arg.parse options push_file usage;
@@ -373,6 +380,7 @@ No errors are filtered out."
       !abstract_static_props
       !disable_halt_compiler
       !disallow_func_ptrs_in_constants
+      !error_php_lambdas
 end
 
 open FullFidelityParseArgs

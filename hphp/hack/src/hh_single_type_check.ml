@@ -231,6 +231,7 @@ let parse_options () =
   let glean_port = ref (GleanOptions.port GlobalOptions.default) in
   let glean_reponame = ref (GleanOptions.reponame GlobalOptions.default) in
   let disallow_func_ptrs_in_constants = ref false in
+  let error_php_lambdas = ref false in
   let options =
     [
       ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
@@ -512,6 +513,9 @@ let parse_options () =
         Arg.Set disallow_func_ptrs_in_constants,
         " Disallow use of HH\\fun and HH\\class_meth in constants and constant initializers"
       );
+      ( "--disallow-php-lambdas",
+        Arg.Set error_php_lambdas,
+        "Disallow php style anonymous functions." );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -566,6 +570,7 @@ let parse_options () =
       ~po_disable_halt_compiler:!disable_halt_compiler
       ~po_disallow_func_ptrs_in_constants:!disallow_func_ptrs_in_constants
       ~tco_check_attribute_locations:true
+      ~tco_error_php_lambdas:!error_php_lambdas
       ~glean_service:!glean_service
       ~glean_hostname:!glean_hostname
       ~glean_port:!glean_port

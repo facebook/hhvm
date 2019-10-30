@@ -232,6 +232,8 @@ type t = {
   glean_reponame: string;
   (* Flag to disallow HH\fun and HH\class_meth in constants and constant initializers *)
   po_disallow_func_ptrs_in_constants: bool;
+  (* Flag to report an error on php style anonymous functions *)
+  tco_error_php_lambdas: bool;
 }
 [@@deriving show]
 
@@ -309,6 +311,7 @@ val make :
   ?glean_port:int ->
   ?glean_reponame:string ->
   ?po_disallow_func_ptrs_in_constants:bool ->
+  ?tco_error_php_lambdas:bool ->
   unit ->
   t
 
@@ -487,3 +490,5 @@ val glean_port : t -> int
 val glean_reponame : t -> string
 
 val po_disallow_func_ptrs_in_constants : t -> bool
+
+val tco_error_php_lambdas : t -> bool

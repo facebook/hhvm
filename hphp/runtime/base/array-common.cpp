@@ -134,7 +134,14 @@ ArrayData* castObjToHackArrImpl(ObjectData* obj,
                                 const char* msg) {
   if (LIKELY(obj->isCollection())) {
     if (auto ad = collections::asArray(obj)) {
-      return cast(ArrNR{ad}.asArray()).detach();
+      auto out = cast(ArrNR{ad}.asArray()).detach();
+      if (out->isRefCounted() && !out->hasExactlyOneRef()) {
+        decRefArr(out);
+        out = out->copy();
+      }
+      return RuntimeOption::EvalArrayProvenance
+        ? tagArrProv(out)
+        : out;
     }
     return cast(collections::toArray(obj)).detach();
   }

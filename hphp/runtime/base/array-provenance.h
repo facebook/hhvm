@@ -150,6 +150,7 @@ TypedValue tagTVKnown(TypedValue tv, Tag tag);
  */
 ArrayData* makeEmptyVec(folly::Optional<Tag> tag = folly::none);
 ArrayData* makeEmptyDict(folly::Optional<Tag> tag = folly::none);
+ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag = folly::none);
 
 ///////////////////////////////////////////////////////////////////////////////
 

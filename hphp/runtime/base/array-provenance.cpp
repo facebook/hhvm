@@ -249,11 +249,10 @@ TypedValue tagTVKnown(TypedValue tv, Tag tag) {
 namespace {
 
 template<typename Copy>
-ArrayData* makeEmptyImpl(ArrayData* ad,
+ArrayData* tagStaticImpl(ArrayData* ad,
                          folly::Optional<Tag> tag,
                          Copy&& copy) {
   assertx(RuntimeOption::EvalArrayProvenance);
-  assertx(ad->empty());
   assertx(ad->isStatic());
   assertx(arrayWantsTag(ad));
 
@@ -269,19 +268,27 @@ ArrayData* makeEmptyImpl(ArrayData* ad,
 
 }
 
-ArrayData* makeEmptyVec(folly::Optional<Tag> tag /* = folly::none */) {
-  return makeEmptyImpl(
+ArrayData* makeEmptyVec(folly::Optional<Tag> tag) {
+  return tagStaticImpl(
     staticEmptyVecArray(), tag,
     [] (const ArrayData* ad) { return PackedArray::CopyVec(ad); }
   );
 }
 
-ArrayData* makeEmptyDict(folly::Optional<Tag> tag /* = folly::none */) {
-  return makeEmptyImpl(
+ArrayData* makeEmptyDict(folly::Optional<Tag> tag) {
+  return tagStaticImpl(
     staticEmptyDictArray(), tag,
     [] (const ArrayData* ad) { return MixedArray::CopyDict(ad); }
   );
 }
+
+ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag) {
+  return tagStaticImpl(ad, tag,
+    [] (const ArrayData* ad) { return ad->copy(); }
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 folly::Optional<Tag> tagFromPC() {
   VMRegAnchor _(VMRegAnchor::Soft);

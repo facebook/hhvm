@@ -601,7 +601,6 @@ std::string show(const AliasAnalysis& ainfo) {
       " {: <20}       : {}\n"
       " {: <20}       : {}\n"
       " {: <20}       : {}\n"
-      " {: <20}       : {}\n"
       " {: <20}       : {}\n",
 
       "all props",          show(ainfo.all_props),

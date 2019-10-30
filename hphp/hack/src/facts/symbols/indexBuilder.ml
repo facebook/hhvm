@@ -100,31 +100,28 @@ let convert_facts ~(path : Relative_path.t) ~(facts : Facts.facts) : si_capture
 (* Parse one single file and capture information about it *)
 let parse_one_file ~(path : Relative_path.t) : si_capture =
   let filename = Relative_path.to_absolute path in
-  if Sys.is_directory filename then
-    []
-  else
-    let text = In_channel.read_all filename in
-    (* Just the facts ma'am *)
-    Facts_parser.mangle_xhp_mode := false;
-    let fact_opt =
-      Facts_parser.from_text
-        ~php5_compat_mode:false
-        ~hhvm_compat_mode:true
-        ~disable_nontoplevel_declarations:false
-        ~disable_legacy_soft_typehints:false
-        ~allow_new_attribute_syntax:false
-        ~disable_legacy_attribute_syntax:false
-        ~filename:path
-        ~text
-    in
-    (* Iterate through facts and print them out *)
-    let result =
-      match fact_opt with
-      | Some facts -> convert_facts ~path ~facts
-      | None -> []
-    in
-    files_scanned := !files_scanned + 1;
-    result
+  let text = In_channel.read_all filename in
+  (* Just the facts ma'am *)
+  Facts_parser.mangle_xhp_mode := false;
+  let fact_opt =
+    Facts_parser.from_text
+      ~php5_compat_mode:false
+      ~hhvm_compat_mode:true
+      ~disable_nontoplevel_declarations:false
+      ~disable_legacy_soft_typehints:false
+      ~allow_new_attribute_syntax:false
+      ~disable_legacy_attribute_syntax:false
+      ~filename:path
+      ~text
+  in
+  (* Iterate through facts and print them out *)
+  let result =
+    match fact_opt with
+    | Some facts -> convert_facts ~path ~facts
+    | None -> []
+  in
+  files_scanned := !files_scanned + 1;
+  result
 
 (* Parse the file using the existing context*)
 let parse_file (ctxt : index_builder_context) (path : Relative_path.t) :
@@ -186,7 +183,7 @@ let init_workers () =
     ~heap_handle
 
 let gather_file_list (path : string) : Relative_path.t list =
-  Find.find ~filter:FindUtils.file_filter [Path.make path]
+  Find.find ~file_only:true ~filter:FindUtils.file_filter [Path.make path]
   |> List.map ~f:(fun path -> Relative_path.create_detect_prefix path)
 
 (* Run something and measure its duration *)

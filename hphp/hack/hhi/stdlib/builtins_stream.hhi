@@ -101,17 +101,7 @@ function stream_copy_to_stream(resource $source, resource $dest, int $maxlength 
 <<__PHPStdLib>>
 function stream_encoding($stream, $encoding = null);
 <<__PHPStdLib>>
-function stream_bucket_append(resource $brigade, $bucket);
-<<__PHPStdLib>>
-function stream_bucket_prepend(resource $brigade, $bucket);
-<<__PHPStdLib>>
-function stream_bucket_make_writeable(resource $brigade);
-<<__PHPStdLib>>
-function stream_bucket_new(resource $stream, string $buffer);
-<<__PHPStdLib>>
 function stream_get_contents(resource $handle, int $maxlen = 0, int $offset = 0);
-<<__PHPStdLib>>
-function stream_get_filters();
 <<__PHPStdLib>>
 function stream_get_line(resource $handle, int $length = 0, $ending = null);
 <<__PHPStdLib>>

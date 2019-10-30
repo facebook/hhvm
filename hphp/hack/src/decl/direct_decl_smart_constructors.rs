@@ -39,13 +39,6 @@ pub fn empty_decls() -> Decls {
     }
 }
 
-fn try_collect<T, E>(vec: Vec<Result<T, E>>) -> Result<Vec<T>, E> {
-    vec.into_iter().try_fold(Vec::new(), |mut acc, elem| {
-        acc.push(elem?);
-        Ok(acc)
-    })
-}
-
 fn mangle_xhp_id(mut name: String) -> String {
     fn ignore_id(name: &str) -> bool {
         name.starts_with("class@anonymous") || name.starts_with("Closure$")
@@ -427,7 +420,7 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'_> {
     type S = Node;
 
     fn flatten(lst: Vec<Self::S>) -> Self::S {
-        let r = lst
+        let mut r = lst
             .into_iter()
             .map(|s| match s {
                 Ok(Node_::List(children)) => children.into_iter().map(|x| Ok(x)).collect(),
@@ -440,8 +433,7 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'_> {
                 }
             })
             .flatten()
-            .collect::<Vec<Self::S>>();
-        let mut r = try_collect(r)?;
+            .collect::<Result<Vec<_>, String>>()?;
         Ok(match r.as_slice() {
             [] => Node_::Ignored,
             [_] => r.pop().unwrap(),
@@ -652,7 +644,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Ok(Node_::Ignored) => true,
                 _ => false,
             }) {
-            let items = try_collect(items)?;
+            let items = items.into_iter().collect::<Result<Vec<_>, String>>()?;
             Node_::List(items)
         } else {
             Node_::Ignored
@@ -867,14 +859,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     n => return Err(format!("Expected a type parameter, but got {:?}", n)),
                 };
                 let (name, pos) = get_name("", &name)?;
-                let constraints: Vec<Result<(ConstraintKind, Ty), String>> = constraints
+                let constraints = constraints
                     .into_iter()
                     .map(|constraint| {
                         let (kind, value) = *constraint;
                         Ok((kind, self.node_to_ty(&value, &HashSet::new())?))
                     })
-                    .collect();
-                let constraints = try_collect(constraints)?;
+                    .collect::<Result<Vec<_>, String>>()?;
                 type_variables.insert(name.clone());
                 Ok(Tparam {
                     variance: Variance::Invariant,
@@ -884,8 +875,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     user_attributes: Vec::new(),
                 })
             })
-            .collect::<Vec<Result<Tparam<DeclTy>, String>>>();
-        let type_params = try_collect(type_params)?;
+            .collect::<Result<Vec<_>, String>>()?;
         Ok(match name? {
             Node_::Ignored => Node_::Ignored,
             name => {

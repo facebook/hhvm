@@ -121,7 +121,7 @@ macro_rules! ocaml_ffi_no_panic_fn {
         pub extern "C" fn $name ($($param: usize,)*) -> usize {
             use $crate::OcamlRep;
             $(let $param = unsafe { <$ty>::from_ocaml($param).unwrap() };)*
-            $crate::to_ocaml::<$ret>(&$code)
+            $crate::to_ocaml::<$ret>(&(|| $code)())
         }
     };
 
@@ -161,7 +161,7 @@ macro_rules! ocaml_ffi_fn {
             $crate::catch_unwind(|| {
                 use $crate::OcamlRep;
                 $(let $param = unsafe { <$ty>::from_ocaml($param).unwrap() };)*
-                $crate::to_ocaml::<$ret>(&$code)
+                $crate::to_ocaml::<$ret>(&(|| $code)())
             })
         }
     };

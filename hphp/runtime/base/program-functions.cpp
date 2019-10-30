@@ -2011,9 +2011,9 @@ static int execute_program_impl(int argc, char** argv) {
     SCOPE_EXIT { hphp_process_exit(); };
 
     try {
-      auto const unit = lookupUnit(
-        makeStaticString(po.lint.c_str()), "", nullptr,
-        Native::s_noNativeFuncs, false);
+      auto const filename = makeStaticString(po.lint.c_str());
+      auto const unit = lookupUnit(filename, "", nullptr,
+                                   Native::s_noNativeFuncs, false);
       if (unit == nullptr) {
         throw FileOpenException(po.lint);
       }
@@ -2021,7 +2021,7 @@ static int execute_program_impl(int argc, char** argv) {
       int line;
       if (unit->compileTimeFatal(msg, line)) {
         VMParserFrame parserFrame;
-        parserFrame.filename = po.lint.c_str();
+        parserFrame.filename = filename;
         parserFrame.lineNumber = line;
         Array bt = createBacktrace(BacktraceArgs()
                                    .withSelf()

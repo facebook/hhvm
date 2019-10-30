@@ -319,7 +319,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   if (btArgs.m_parserFrame) {
     bt.append(
       make_darray(
-        s_file, btArgs.m_parserFrame->filename,
+        s_file, VarNR(btArgs.m_parserFrame->filename.get()),
         s_line, btArgs.m_parserFrame->lineNumber
       )
     );
@@ -379,7 +379,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       frame.set(s_line, func->unit()->getLineNumber(curFrm.pc));
       if (btArgs.m_parserFrame) {
         frame.set(s_function, s_include);
-        frame.set(s_args, make_varray(btArgs.m_parserFrame->filename));
+        frame.set(s_args,
+                  make_varray(VarNR(btArgs.m_parserFrame->filename.get())));
       }
       bt.append(frame.toVariant());
       depth++;

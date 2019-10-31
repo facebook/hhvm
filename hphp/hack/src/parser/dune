@@ -15,6 +15,7 @@ let rust =
 (library
   (name rust_parser_ffi)
   (modules)
+  (wrapped false)
   (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
   (libraries ocamlpool)
   (c_library_flags -lpthread)
@@ -36,6 +37,7 @@ let rust =
 (library
   (name rust_parser_errors_ffi)
   (modules)
+  (wrapped false)
   (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
   (libraries ocamlpool)
   (c_library_flags -lpthread)

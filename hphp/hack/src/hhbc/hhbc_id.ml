@@ -70,7 +70,7 @@ module Function = struct
 
   let add_suffix s suffix = s ^ suffix
 
-  let elaborate_id ns id = elaborate_id ns Namespaces.ElaborateFun id
+  let elaborate_id _ns (_, id) = SU.strip_global_ns id
 end
 
 module Const = struct
@@ -94,5 +94,5 @@ module Record = struct
 
   let to_raw_string s = s
 
-  let elaborate_id ns id = elaborate_id ns Namespaces.ElaborateRecord id
+  let elaborate_id _ns (_, id) = SU.strip_global_ns id
 end

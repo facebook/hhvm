@@ -733,13 +733,13 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
       Tast_annotate.with_pos p
       @@ Call
            ( Aast.Cnormal,
-             Tast_annotate.with_pos p (Id (p, "invariant")),
+             Tast_annotate.with_pos p (Id (p, "\\HH\\invariant")),
              [],
              [
                Tast_annotate.with_pos p
                @@ Call
                     ( Aast.Cnormal,
-                      Tast_annotate.with_pos p (Id (p, "is_a")),
+                      Tast_annotate.with_pos p (Id (p, "\\is_a")),
                       [],
                       [obj_lvar; Tast_annotate.with_pos pc (String cls)],
                       [] );

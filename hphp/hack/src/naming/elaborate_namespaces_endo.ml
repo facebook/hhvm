@@ -206,7 +206,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
        * the statement position or expression position.
        *)
       | Expr (p, Call (p2, (p3, Id (p4, fn)), targs, el, uel))
-        when fn = SN.SpecialFunctions.invariant ->
+        when fn = SN.SpecialFunctions.invariant && (not @@ in_codegen env) ->
         Expr
           ( p,
             Call
@@ -227,12 +227,22 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       super#on_Efun env e
 
     (* The function that actually rewrites names *)
+    (* TODO: SN.SpecialFunctions are problematically special
+     * Make naming behave more like emit_special_function in emit_expression.ml
+     *)
     method! on_expr_ env expr =
       match expr with
       | Call (ct, (p, Id (p2, cn)), targs, [(p3, String fn)], uargs)
         when cn = SN.SpecialFunctions.fun_ ->
         (* Functions referenced by fun() are always fully-qualified *)
         let fn = Utils.add_ns fn in
+        (* TODO: Make naming expect the fully qualified '\\HH\\fun' *)
+        let (p2, cn) =
+          if in_codegen env then
+            NS.elaborate_id env.namespace NS.ElaborateFun (p2, cn)
+          else
+            (p2, cn)
+        in
         Call (ct, (p, Id (p2, cn)), targs, [(p3, String fn)], uargs)
       | Call (ct, (p, Id ((_, cn) as id)), tal, el, uel)
         when cn = SN.SpecialFunctions.invariant ->
@@ -260,6 +270,12 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
           else
             cl
         in
+        let (p2, cn) =
+          if in_codegen env then
+            NS.elaborate_id env.namespace NS.ElaborateFun (p2, cn)
+          else
+            (p2, cn)
+        in
         Call
           ( self#on_call_type env ct,
             (p1, Id (p2, cn)),
@@ -276,11 +292,29 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
              || cn = SN.SpecialFunctions.class_meth )
              && mem = SN.Members.mClass ->
         let cl = elaborate_type_name env cl in
+        let (p2, cn) =
+          if in_codegen env then
+            NS.elaborate_id env.namespace NS.ElaborateFun (p2, cn)
+          else
+            (p2, cn)
+        in
         Call
           ( self#on_call_type env ct,
             (p1, Id (p2, cn)),
             List.map targs ~f:(self#on_targ env),
             [(p3, Class_const ((p4, CI cl), (p5, mem))); (p6, String meth)],
+            List.map uel ~f:(self#on_expr env) )
+      | Call (ct, (p, Aast.Id ((_, cn) as id)), tal, el, uel)
+        when ( cn = SN.SpecialFunctions.inst_meth
+             || cn = SN.SpecialFunctions.class_meth
+             || cn = SN.SpecialFunctions.meth_caller )
+             && in_codegen env ->
+        let new_id = NS.elaborate_id env.namespace NS.ElaborateFun id in
+        Call
+          ( ct,
+            (p, Id new_id),
+            List.map tal ~f:(self#on_targ env),
+            List.map el ~f:(self#on_expr env),
             List.map uel ~f:(self#on_expr env) )
       | Call (ct, (p, Id (p2, cn)), targs, el, uargs)
         when SN.SpecialFunctions.is_special_function cn

@@ -958,10 +958,7 @@ module Make (GetLocals : GetLocals) = struct
                || x = "\\" ^ SN.Typehints.mixed
                || x = "\\" ^ SN.Typehints.nonnull
                || x = "\\" ^ SN.Typehints.array
-               || x = "\\" ^ SN.Typehints.arraykey
-               || x = "\\" ^ SN.Typehints.integer
-               || x = "\\" ^ SN.Typehints.boolean
-               || x = "\\" ^ SN.Typehints.double ->
+               || x = "\\" ^ SN.Typehints.arraykey ->
           Errors.primitive_toplevel p;
           N.Herr
         | x when x = "\\" ^ SN.Typehints.nothing ->

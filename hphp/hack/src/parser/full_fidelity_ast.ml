@@ -1003,13 +1003,11 @@ if there already is one, since that one will likely be better than this one. *)
             (`Node node)
             (SyntaxError.invalid_typehint_alias hint canonical)
         in
-        if hint = SN.Typehints.integer then
+        if hint = "integer" then
           suggest SN.Typehints.int
-        else if hint = SN.Typehints.boolean then
+        else if hint = "boolean" then
           suggest SN.Typehints.bool
-        else if hint = SN.Typehints.double then
-          suggest SN.Typehints.float
-        else if hint = SN.Typehints.real then
+        else if hint = "double" || hint = "real" then
           suggest SN.Typehints.float;
         Happly ((pos, name), [])
       | ShapeTypeSpecifier { shape_type_fields; shape_type_ellipsis; _ } ->
@@ -1954,7 +1952,7 @@ if there already is one, since that one will likely be better than this one. *)
             | (_, Some TK.HexadecimalLiteral)
             (* We allow underscores while lexing the integer literals. This gets rid of them before
              * the literal is created. *)
-            
+
             | (_, Some TK.BinaryLiteral) ->
               Int (Str.global_replace underscore "" s)
             | (_, Some TK.FloatingLiteral) -> Float s
@@ -3913,7 +3911,7 @@ if there already is one, since that one will likely be better than this one. *)
     let rec aux env acc = function
       | []
       (* EOF happens only as the last token in the list. *)
-      
+
       | [{ syntax = EndOfFile _; _ }] ->
         List.concat (List.rev acc)
       (* HaltCompiler stops processing the list in PHP but can be disabled in Hack *)

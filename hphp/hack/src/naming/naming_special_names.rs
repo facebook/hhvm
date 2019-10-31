@@ -530,14 +530,6 @@ pub mod typehints {
 
     pub const VARRAY_OR_DARRAY: &str = "varray_or_darray";
 
-    pub const INTEGER: &str = "integer";
-
-    pub const BOOLEAN: &str = "boolean";
-
-    pub const DOUBLE: &str = "double";
-
-    pub const REAL: &str = "real";
-
     pub const CALLABLE: &str = "callable";
 
     pub const OBJECT_CAST: &str = "object";
@@ -564,7 +556,7 @@ pub mod typehints {
     lazy_static! {
         static ref RESERVED_HH_NAMES: HashSet<&'static str> = vec![
             VOID, NORETURN, INT, BOOL, FLOAT, NUM, STRING, RESOURCE, MIXED, ARRAY, ARRAYKEY,
-            INTEGER, BOOLEAN, DOUBLE, REAL, DYNAMIC, WILDCARD, NONNULL, NOTHING, THIS
+            DYNAMIC, WILDCARD, NONNULL, NOTHING, THIS
         ]
         .into_iter()
         .collect();

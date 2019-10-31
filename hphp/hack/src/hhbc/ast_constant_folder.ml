@@ -429,15 +429,15 @@ let binop_on_values binop v1 v2 =
 let cast_value hint v =
   match hint with
   | A.Happly ((_, id), []) ->
-    if id = SN.Typehints.int || id = SN.Typehints.integer then
+    if id = SN.Typehints.int then
       (* temporarily disabled *)
       (* TV.cast_to_int v *)
       None
-    else if id = SN.Typehints.bool || id = SN.Typehints.boolean then
+    else if id = SN.Typehints.bool then
       TV.cast_to_bool v
     else if id = SN.Typehints.string then
       TV.cast_to_string v
-    else if id = SN.Typehints.double || id = SN.Typehints.float then
+    else if id = SN.Typehints.float then
       TV.cast_to_float v
     else
       None

@@ -768,14 +768,11 @@ and emit_cast env pos hint expr =
       let id = String.lowercase id in
       begin
         match id with
-        | _ when id = SN.Typehints.int || id = SN.Typehints.integer ->
-          instr (IOp CastInt)
-        | _ when id = SN.Typehints.bool || id = SN.Typehints.boolean ->
-          instr (IOp CastBool)
+        | _ when id = SN.Typehints.int -> instr (IOp CastInt)
+        | _ when id = SN.Typehints.bool -> instr (IOp CastBool)
         | _ when id = SN.Typehints.string -> instr (IOp CastString)
         | _ when id = SN.Typehints.array -> instr (IOp CastArray)
-        | _ when id = SN.Typehints.double || id = SN.Typehints.float ->
-          instr (IOp CastDouble)
+        | _ when id = SN.Typehints.float -> instr (IOp CastDouble)
         | _ when id = "unset" -> gather [instr_popc; instr_null]
         | _ -> Emit_fatal.raise_fatal_parse pos ("Invalid cast type: " ^ id)
       end
@@ -3452,10 +3449,7 @@ and is_inout_arg = function
 and has_inout_args es = List.exists es ~f:is_inout_arg
 
 and emit_call_lhs_and_fcall
-    env
-    (expr : Tast.expr)
-    fcall_args
-    (targs : Tast.targ list) =
+    env (expr : Tast.expr) fcall_args (targs : Tast.targ list) =
   let ((pos, _), expr_) = expr in
   let does_not_have_non_tparam_generics =
     not (has_non_tparam_generics_targs env targs)
@@ -3488,11 +3482,7 @@ and emit_call_lhs_and_fcall
           emit_expr env method_expr;
           instr_popl tmp;
         ],
-      gather
-        [
-          instr_pushl tmp;
-          instr_fcallobjmethod fcall_args null_flavor;
-        ] )
+      gather [instr_pushl tmp; instr_fcallobjmethod fcall_args null_flavor] )
   | A.Class_const (cid, (_, id)) ->
     let cexpr =
       class_id_to_class_expr ~resolve_self:false (Emit_env.get_scope env) cid
@@ -3675,8 +3665,7 @@ and emit_call_lhs_and_fcall
           emit_expr env expr;
           instr_popl tmp;
         ],
-      gather [instr_pushl tmp; instr_fcallfunc fcall_args]
-    )
+      gather [instr_pushl tmp; instr_fcallfunc fcall_args] )
 
 and get_call_builtin_func_info lower_fq_id =
   match lower_fq_id with

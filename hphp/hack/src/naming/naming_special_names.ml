@@ -506,14 +506,6 @@ module Typehints = struct
 
   let varray_or_darray = "varray_or_darray"
 
-  let integer = "integer"
-
-  let boolean = "boolean"
-
-  let double = "double"
-
-  let real = "real"
-
   let callable = "callable"
 
   let unset_cast = "unset"
@@ -542,10 +534,6 @@ module Typehints = struct
         darray;
         varray;
         varray_or_darray;
-        integer;
-        boolean;
-        double;
-        real;
         callable;
         unset_cast;
         wildcard;
@@ -570,10 +558,6 @@ module Typehints = struct
     || x = mixed
     || x = array
     || x = arraykey
-    || x = integer
-    || x = boolean
-    || x = double
-    || x = real
     || x = dynamic
     || x = wildcard
     || x = null

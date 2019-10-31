@@ -12,5 +12,5 @@
 // Abstract method in "normal" class
 
 class A {
-  abstract function f(): int;
+  public abstract function f(): int;
 }

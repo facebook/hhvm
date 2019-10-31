@@ -2,9 +2,9 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class B<T> {
-  function __construct() {}
+  public function __construct() {}
 }
 
 class C<T> {
-  function __construct<Tc>() {}
+  public function __construct<Tc>() {}
 }

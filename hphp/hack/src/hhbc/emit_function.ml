@@ -49,7 +49,7 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
   in
   let (ast_body, is_rx_body, function_rx_disabled) =
     if function_rx_level <> Rx.NonRx then
-      match Rx.halves_of_is_enabled_body namespace ast_fun.T.f_body with
+      match Rx.halves_of_is_enabled_body ast_fun.T.f_body with
       | Some (enabled_body, disabled_body) ->
         if Hhbc_options.rx_is_enabled !Hhbc_options.compiler_options then
           (enabled_body, true, false)

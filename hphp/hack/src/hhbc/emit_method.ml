@@ -141,7 +141,7 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
   in
   let (ast_body_block, is_rx_body, method_rx_disabled) =
     if method_rx_level <> Rx.NonRx then
-      match Rx.halves_of_is_enabled_body namespace ast_method.T.m_body with
+      match Rx.halves_of_is_enabled_body ast_method.T.m_body with
       | Some (enabled_body, disabled_body) ->
         if Hhbc_options.rx_is_enabled !Hhbc_options.compiler_options then
           (enabled_body, true, false)

@@ -1138,8 +1138,8 @@ static bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
 
   case PDO_ATTR_DEFAULT_FETCH_MODE:
     if (value.isArray()) {
-      if (value.toCArrRef().exists(0)) {
-        Variant tmp = value.toCArrRef()[0];
+      if (value.asCArrRef().exists(0)) {
+        Variant tmp = value.asCArrRef()[0];
         if (tmp.isInteger() && ((tmp.toInt64() == PDO_FETCH_INTO ||
                                  tmp.toInt64() == PDO_FETCH_CLASS))) {
           pdo_raise_impl_error(data->m_dbh, nullptr, "HY000",
@@ -1877,8 +1877,8 @@ static bool do_fetch(sp_PDOStatement stmt,
     switch (how) {
     case PDO_FETCH_ASSOC: {
       auto const name_key =
-        ret.toArrRef().convertKey<IntishCast::Cast>(name);
-      ret.toArrRef().set(name_key, *val.asTypedValue());
+        ret.asArrRef().convertKey<IntishCast::Cast>(name);
+      ret.asArrRef().set(name_key, *val.asTypedValue());
       break;
     }
     case PDO_FETCH_KEY_PAIR: {
@@ -1886,31 +1886,31 @@ static bool do_fetch(sp_PDOStatement stmt,
       fetch_value(stmt, tmp, ++i, NULL);
       if (return_all) {
         auto const val_key_ret =
-          return_all->toArrRef().convertKey<IntishCast::Cast>(val);
-        return_all->toArrRef().set(val_key_ret, *tmp.asTypedValue());
+          return_all->asArrRef().convertKey<IntishCast::Cast>(val);
+        return_all->asArrRef().set(val_key_ret, *tmp.asTypedValue());
       } else {
         auto const val_key =
-          ret.toArrRef().convertKey<IntishCast::Cast>(val);
-        ret.toArrRef().set(val_key, *tmp.asTypedValue());
+          ret.asArrRef().convertKey<IntishCast::Cast>(val);
+        ret.asArrRef().set(val_key, *tmp.asTypedValue());
       }
       return true;
     }
     case PDO_FETCH_USE_DEFAULT:
     case PDO_FETCH_BOTH: {
       auto const name_key =
-        ret.toArrRef().convertKey<IntishCast::Cast>(name);
-      ret.toArrRef().set(name_key, *val.asTypedValue());
-      ret.toArrRef().append(val);
+        ret.asArrRef().convertKey<IntishCast::Cast>(name);
+      ret.asArrRef().set(name_key, *val.asTypedValue());
+      ret.asArrRef().append(val);
       break;
     }
 
     case PDO_FETCH_NAMED: {
       auto const name_key =
-        ret.toArrRef().convertKey<IntishCast::Cast>(name);
+        ret.asArrRef().convertKey<IntishCast::Cast>(name);
       /* already have an item with this name? */
       forceToDArray(ret);
-      if (ret.toArrRef().exists(name_key)) {
-        auto const curr_val = ret.toArrRef().lval(name_key);
+      if (ret.asArrRef().exists(name_key)) {
+        auto const curr_val = ret.asArrRef().lval(name_key);
         if (!isArrayLikeType(curr_val.type())) {
           Array arr = Array::CreateVArray();
           arr.append(curr_val.tv());
@@ -1920,12 +1920,12 @@ static bool do_fetch(sp_PDOStatement stmt,
           asArrRef(curr_val).append(val);
         }
       } else {
-        ret.toArrRef().set(name_key, *val.asTypedValue());
+        ret.asArrRef().set(name_key, *val.asTypedValue());
       }
       break;
     }
     case PDO_FETCH_NUM:
-      ret.toArrRef().append(val);
+      ret.asArrRef().append(val);
       break;
 
     case PDO_FETCH_OBJ:
@@ -1986,11 +1986,11 @@ static bool do_fetch(sp_PDOStatement stmt,
 
   if (return_all) {
     auto const grp_key =
-      return_all->toArrRef().convertKey<IntishCast::Cast>(grp_val);
+      return_all->asArrRef().convertKey<IntishCast::Cast>(grp_val);
     if ((flags & PDO_FETCH_UNIQUE) == PDO_FETCH_UNIQUE) {
-      return_all->toArrRef().set(grp_key, *ret.asTypedValue());
+      return_all->asArrRef().set(grp_key, *ret.asTypedValue());
     } else {
-      auto const lval = return_all->toArrRef().lval(grp_key);
+      auto const lval = return_all->asArrRef().lval(grp_key);
       forceToArray(lval).append(ret);
     }
   }
@@ -2927,7 +2927,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
     } else {
       return_value = Array::CreateVArray();
       do {
-        return_value.toArrRef().append(data);
+        return_value.asArrRef().append(data);
         data.unset();
       } while (do_fetch(self->m_stmt,  data, (PDOFetchType)(how | flags),
                         PDO_FETCH_ORI_NEXT, 0, NULL));

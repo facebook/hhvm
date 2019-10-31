@@ -948,21 +948,21 @@ Variant HHVM_FUNCTION(socket_select,
       raise_warning("socket_select() expects parameter 1 to be array()");
       return init_null();
     }
-    count += read.toCArrRef().size();
+    count += read.asCArrRef().size();
   }
   if (!write.isNull()) {
     if (!write.isArray()) {
       raise_warning("socket_select() expects parameter 2 to be array()");
       return init_null();
     }
-    count += write.toCArrRef().size();
+    count += write.asCArrRef().size();
   }
   if (!except.isNull()) {
     if (!except.isArray()) {
       raise_warning("socket_select() expects parameter 3 to be array()");
       return init_null();
     }
-    count += except.toCArrRef().size();
+    count += except.asCArrRef().size();
   }
   if (!count) {
     return false;
@@ -971,13 +971,13 @@ Variant HHVM_FUNCTION(socket_select,
   std::vector<pollfd> fds;
   fds.reserve(count);
   if (!read.isNull()) {
-    sock_array_to_fd_set(read.toCArrRef(), fds, POLLIN);
+    sock_array_to_fd_set(read.asCArrRef(), fds, POLLIN);
   }
   if (!write.isNull()) {
-    sock_array_to_fd_set(write.toCArrRef(), fds, POLLOUT);
+    sock_array_to_fd_set(write.asCArrRef(), fds, POLLOUT);
   }
   if (!except.isNull()) {
-    sock_array_to_fd_set(except.toCArrRef(), fds, POLLPRI);
+    sock_array_to_fd_set(except.asCArrRef(), fds, POLLPRI);
   }
   if (fds.empty()) {
     raise_warning("no resource arrays were passed to select");
@@ -998,7 +998,7 @@ Variant HHVM_FUNCTION(socket_select,
     // we use darray everywhere.
     auto hasData = Array::CreateDArray();
     IterateVNoInc(
-      read.toCArrRef().get(),
+      read.asCArrRef().get(),
       [&](TypedValue v) {
         assertx(v.m_type == KindOfResource);
         auto file = static_cast<File*>(v.m_data.pres->data());

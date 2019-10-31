@@ -139,7 +139,6 @@ public:
   const IniSettingMap operator[](const String& key) const;
   String toString() const { return m_map.toString();}
   Array toArray() const { return m_map.toArray();}
-  Array& toArrRef() { return m_map.toArrRef(); }
   Object toObject() const { return m_map.toObject();}
   bool isNull() const { return m_map.isNull();}
   bool isString() const { return m_map.isString();}

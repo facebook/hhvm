@@ -537,9 +537,9 @@ IniSettingMap::IniSettingMap(IniSettingMap&& i) noexcept {
 const IniSettingMap IniSettingMap::operator[](const String& key) const {
   assertx(this->isArray());
   if (auto const intish = tryIntishCast<IntishCast::Cast>(key.get())) {
-    return IniSettingMap(m_map.toCArrRef()[*intish]);
+    return IniSettingMap(m_map.asCArrRef()[*intish]);
   }
-  return IniSettingMap(m_map.toCArrRef()[key]);
+  return IniSettingMap(m_map.asCArrRef()[key]);
 }
 
 IniSettingMap& IniSettingMap::operator=(const IniSettingMap& i) {
@@ -566,7 +566,7 @@ void mergeSettings(tv_lval curval, TypedValue v) {
 
 void IniSettingMap::set(const String& key, const Variant& v) {
   assertx(this->isArray());
-  auto& mapref = m_map.toArrRef();
+  auto& mapref = m_map.asArrRef();
   if (!mapref.exists(key)) {
     mapref.set(key, empty_array());
   }
@@ -604,7 +604,7 @@ void IniSetting::ParserCallback::onPopEntry(
   forceToArray(*arr);
 
   String skey(key);
-  auto& arr_ref = arr->toArrRef();
+  auto& arr_ref = arr->asArrRef();
   if (!arr_ref.exists(skey)) {
     arr_ref.set(skey, empty_array());
   }
@@ -693,7 +693,7 @@ void IniSetting::SectionParserCallback::onSection(
     const std::string &name, void *arg) {
   auto const data = (CallbackData*)arg;
   if (!data->active_name.isNull()) {
-    data->arr.toArrRef().set(data->active_name, data->active_section);
+    data->arr.asArrRef().set(data->active_name, data->active_section);
     data->active_section.unset();
   }
   data->active_section = Array::Create();
@@ -779,7 +779,7 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
     data.arr = Array::Create();
     if (zend_parse_ini_string(ini_cpp, filename_cpp, scanner_mode, cb, &data)) {
       if (!data.active_name.isNull()) {
-        data.arr.toArrRef().set(data.active_name, data.active_section);
+        data.arr.asArrRef().set(data.active_name, data.active_section);
       }
       ret = data.arr;
     }

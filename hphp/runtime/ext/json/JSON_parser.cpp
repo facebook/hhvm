@@ -1082,7 +1082,7 @@ static void attach_zval(json_parser *json,
     if (container_type == JSONContainerType::COLLECTIONS) {
       collections::append(root.getObjectData(), child.toCell());
     } else {
-      root.toArrRef().append(child);
+      root.asArrRef().append(child);
     }
   } else if (up_mode == Mode::OBJECT) {
     object_set(json, root, key, child, assoc, container_type);
@@ -1430,7 +1430,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             if (container_type == JSONContainerType::COLLECTIONS) {
               collections::append(top.getObjectData(), mval.toCell());
             } else {
-              top.toArrRef().append(mval);
+              top.asArrRef().append(mval);
             }
             buf->clear();
             reset_type();
@@ -1514,7 +1514,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
               if (container_type == JSONContainerType::COLLECTIONS) {
                 collections::append(top.getObjectData(), mval.toCell());
               } else {
-                top.toArrRef().append(mval);
+                top.asArrRef().append(mval);
               }
             }
             state = 28;

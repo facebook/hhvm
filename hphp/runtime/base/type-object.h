@@ -200,10 +200,6 @@ ALWAYS_INLINE const Object& asCObjRef(tv_rval tv) {
   return reinterpret_cast<const Object&>(val(tv).pobj);
 }
 
-ALWAYS_INLINE const Object& toCObjRef(tv_rval tv) {
-  return asCObjRef(tv);
-}
-
 ALWAYS_INLINE Object toObject(tv_rval tv) {
   if (tvIsObject(tv)) return Object{assert_not_null(val(tv).pobj)};
   return Object::attach(tvCastToObjectData(*tv));

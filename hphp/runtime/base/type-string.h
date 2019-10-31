@@ -539,10 +539,6 @@ ALWAYS_INLINE const String& asCStrRef(tv_rval tv) {
   return reinterpret_cast<const String&>(val(tv).pstr);
 }
 
-ALWAYS_INLINE const String& toCStrRef(tv_rval tv) {
-  return asCStrRef(tv);
-}
-
 ALWAYS_INLINE String toString(tv_rval tv) {
   if (isStringType(type(tv))) return String{assert_not_null(val(tv).pstr)};
   return String::attach(tvCastToStringData(*tv));

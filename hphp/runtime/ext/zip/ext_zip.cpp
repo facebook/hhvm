@@ -528,7 +528,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, const Array& optio
   if (glob) {
     auto match = HHVM_FN(glob)(pattern, flags);
     if (match.isArray()) {
-      files = match.toArrRef();
+      files = match.asArrRef();
     } else {
       return false;
     }
@@ -538,7 +538,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, const Array& optio
     }
     auto allFiles = HHVM_FN(scandir)(path);
     if (allFiles.isArray()) {
-      files = allFiles.toArrRef();
+      files = allFiles.asArrRef();
     } else {
       return false;
     }

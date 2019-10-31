@@ -225,7 +225,7 @@ Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
 
   String num_prefix;
   if (!numeric_prefix.isNull()) {
-    num_prefix = numeric_prefix.toCStrRef();
+    num_prefix = numeric_prefix.asCStrRef();
   }
   url_encode_array(ret, formdata, seen_arrs,
                    num_prefix, String(), String(), arg_sep,

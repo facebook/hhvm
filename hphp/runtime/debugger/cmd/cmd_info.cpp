@@ -370,8 +370,8 @@ void CmdInfo::PrintDocComments(StringBuffer &sb, const Array& info) {
     if (!same(ret1, false) && !same(ret2, false) &&
         matches1.isArray() && matches2.isArray()) {
       // we have perfect doc comment blocks, so we can re-adjust spaces
-      space1 = matches1.toCArrRef()[1].toString().size();
-      space2 = matches2.toCArrRef()[1].toString().size();
+      space1 = matches1.asCArrRef()[1].toString().size();
+      space2 = matches2.asCArrRef()[1].toString().size();
     }
     String spaces = HHVM_FN(str_repeat)(" ", space2 - space1 - 1);
     sb.printf("%s%s\n", spaces.data(), doc.data());

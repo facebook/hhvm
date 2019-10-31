@@ -39,7 +39,7 @@ Variant HHVM_FUNCTION(apache_note, const String& note_name,
     raise_warning("apache_note() expects parameter 2 to be a nullable string");
     return false;
   } else {
-    auto const& value = note_value.toCStrRef();
+    auto const& value = note_value.asCStrRef();
     if (!value.empty()) {
       ServerNote::Add(note_name, value);
     }

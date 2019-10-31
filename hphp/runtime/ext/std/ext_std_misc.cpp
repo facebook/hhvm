@@ -580,7 +580,7 @@ Array HHVM_FUNCTION(sys_getloadavg) {
 
 Variant HHVM_FUNCTION(mark_legacy_hack_array, const Variant& v) {
   if (v.isVecArray() || v.isDict()) {
-    auto arr = v.toCArrRef().copy();
+    auto arr = v.asCArrRef().copy();
     arr->setLegacyArray(true);
     return arr;
   } else {

@@ -93,7 +93,7 @@ static char** readline_completion_cb(const char* text, int start, int end) {
       s_readline->completion,
       make_vec_array(text, start, end));
   if (completion.isArray()) {
-    s_readline->array = completion.toArrRef();
+    s_readline->array = completion.asArrRef();
     if (s_readline->array.length() > 0) {
       matches = rl_completion_matches(text, _readline_command_generator);
     } else {

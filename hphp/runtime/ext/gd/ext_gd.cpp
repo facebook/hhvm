@@ -4533,7 +4533,7 @@ Variant HHVM_FUNCTION(iptcembed, const String& iptcdata,
       return false;
     }
 
-    auto& stat_arr = stat.toCArrRef();
+    auto& stat_arr = stat.asCArrRef();
     auto st_size = stat_arr[s_size].toInt64();
     if (st_size < 0) {
       raise_warning("unsupported stream type");

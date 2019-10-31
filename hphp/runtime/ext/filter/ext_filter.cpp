@@ -337,7 +337,7 @@ Variant HHVM_FUNCTION(filter_var,
                       const Variant& options /* = shape() */) {
   int64_t filter_flags;
   if (options.isArray()) {
-    filter_flags = options.toCArrRef()[s_flags].toInt64();
+    filter_flags = options.asCArrRef()[s_flags].toInt64();
   } else {
     filter_flags = options.toInt64();
   }

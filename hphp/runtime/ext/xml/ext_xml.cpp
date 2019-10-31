@@ -410,10 +410,10 @@ static void _xml_add_to_info(const req::ptr<XmlParser>& parser,
     return;
   }
   forceToArray(parser->info);
-  if (!parser->info.toCArrRef().exists(nameStr)) {
-    parser->info.toArrRef().set(nameStr, Array::Create());
+  if (!parser->info.asCArrRef().exists(nameStr)) {
+    parser->info.asArrRef().set(nameStr, Array::Create());
   }
-  auto const inner = parser->info.toArrRef().lval(nameStr);
+  auto const inner = parser->info.asArrRef().lval(nameStr);
   forceToArray(inner).append(parser->curtag);
   parser->curtag++;
 }
@@ -447,7 +447,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
 
     if (!parser->data.isNull()) {
       if (parser->lastwasopen) {
-        asArrRef(parser->data.toArrRef().lval(parser->ctag))
+        asArrRef(parser->data.asArrRef().lval(parser->ctag))
           .set(s_type, s_complete);
       } else {
         DArrayInit tag(3);
@@ -455,7 +455,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name) {
         tag.set(s_tag, tag_name.substr(parser->toffset));
         tag.set(s_type, s_close);
         tag.set(s_level, parser->level);
-        parser->data.toArrRef().append(tag.toArray());
+        parser->data.asArrRef().append(tag.toArray());
       }
       parser->lastwasopen = 0;
     }
@@ -507,7 +507,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
       if (doprint || (! parser->skipwhite)) {
         if (parser->lastwasopen) {
           String myval;
-          auto ctag = parser->data.toArrRef().lval(parser->ctag);
+          auto ctag = parser->data.asArrRef().lval(parser->ctag);
           // check if value exists, if yes append to that
           if (asCArrRef(ctag).exists(s_value)) {
             myval = tvCastToString(asCArrRef(ctag).rval(s_value).tv());
@@ -524,20 +524,20 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           String myval;
           String mytype;
 
-          auto curtag = parser->data.toArrRef().pop();
+          auto curtag = parser->data.asArrRef().pop();
           SCOPE_EXIT {
             try {
-              parser->data.toArrRef().append(curtag);
+              parser->data.asArrRef().append(curtag);
             } catch (...) {}
           };
 
-          if (curtag.toArrRef().exists(s_type)) {
-            mytype = tvCastToString(curtag.toArrRef().rval(s_type).tv());
+          if (curtag.asArrRef().exists(s_type)) {
+            mytype = tvCastToString(curtag.asArrRef().rval(s_type).tv());
             if (!strcmp(mytype.data(), "cdata") &&
-                curtag.toArrRef().exists(s_value)) {
-              myval = tvCastToString(curtag.toArrRef().rval(s_value).tv());
+                curtag.asArrRef().exists(s_value)) {
+              myval = tvCastToString(curtag.asArrRef().rval(s_value).tv());
               myval += decoded_value;
-              curtag.toArrRef().set(s_value, myval);
+              curtag.asArrRef().set(s_value, myval);
               return;
             }
           }
@@ -550,7 +550,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
             tag.set(s_value, decoded_value);
             tag.set(s_type, s_cdata);
             tag.set(s_level, parser->level);
-            parser->data.toArrRef().append(tag);
+            parser->data.asArrRef().append(tag);
           } else if (parser->level == (XML_MAXLEVEL + 1)) {
             raise_warning("Maximum depth exceeded - Results truncated");
           }
@@ -632,7 +632,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         if (atcnt) {
           tag.set(s_attributes,atr);
         }
-        auto& arr = parser->data.toArrRef();
+        auto& arr = parser->data.asArrRef();
         auto lval = arr.lvalForce();
         type(lval) = KindOfArray;
         val(lval).parr = tag.detach();

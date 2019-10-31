@@ -123,7 +123,7 @@ Class* Reflection::s_ReflectionExtensionClass = nullptr;
 
 Class* get_cls(const Variant& class_or_object) {
   if (class_or_object.is(KindOfObject)) {
-    return class_or_object.toCObjRef()->getVMClass();
+    return class_or_object.asCObjRef()->getVMClass();
   } else if (class_or_object.isClass()) {
     return class_or_object.toClassVal();
   }
@@ -415,7 +415,7 @@ Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
     raise_error("Call to undefined method %s::%s()", cls.data(), name.data());
   }
 
-  auto const objData = obj.toCObjRef().get();
+  auto const objData = obj.asCObjRef().get();
   auto const implementingClass = selectedFunc->implCls();
   if (!objData->instanceof(implementingClass)) {
     Reflection::ThrowReflectionExceptionObject(s_invoke_not_instanceof_error);
@@ -609,7 +609,7 @@ Array HHVM_FUNCTION(type_structure,
 String HHVM_FUNCTION(type_structure_classname,
                      const Variant& cls_or_obj, const Variant& cns_name) {
   auto const ts = implTypeStructure(cls_or_obj, cns_name);
-  return ts[s_classname].toCStrRef();
+  return ts[s_classname].asCStrRef();
 }
 
 [[noreturn]]
@@ -1771,7 +1771,7 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
 
   // is there a dynamic property?
   if (cls_or_obj.is(KindOfObject)) {
-    auto obj = cls_or_obj.toCObjRef().get();
+    auto obj = cls_or_obj.asCObjRef().get();
     assertx(cls == obj->getVMClass());
     if (obj->getAttribute(ObjectData::HasDynPropArr) &&
         obj->dynPropArray().exists(

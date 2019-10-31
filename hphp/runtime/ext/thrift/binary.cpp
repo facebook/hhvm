@@ -527,8 +527,8 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
         throw_tprotocolexception("Attempt to send non-object "
                                  "type as a T_STRUCT", INVALID_DATA);
       }
-      Variant spec(get_tspec(value.toCObjRef()->getVMClass()));
-      binary_serialize_spec(value.toCObjRef(), transport, spec.toArray());
+      Variant spec(get_tspec(value.asCObjRef()->getVMClass()));
+      binary_serialize_spec(value.asCObjRef(), transport, spec.toArray());
     } return;
     case T_BOOL:
       transport.writeI8(value.toBoolean() ? 1 : 0);

@@ -1788,7 +1788,7 @@ static Variant HHVM_FUNCTION(iconv_mime_decode_headers,
         if (!elem.isArray()) {
           ret.set(header, make_packed_array(elem, value));
         } else {
-          elem.toArrRef().append(value);
+          elem.asArrRef().append(value);
           ret.set(header, elem);
         }
       } else {

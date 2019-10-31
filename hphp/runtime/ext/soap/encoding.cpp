@@ -1199,7 +1199,7 @@ tv_rval get_rval_property(const Variant &object, const char* name) {
     Object obj = object.toObject();
     return obj->getPropIgnoreAccessibility(sname.get());
   } else if (object.isArray()) {
-    auto const& arr = object.toCArrRef();
+    auto const& arr = object.asCArrRef();
     if (arr.exists(sname)) return arr.rval(sname);
   }
   return tv_rval {};
@@ -1256,8 +1256,8 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
         /* Add array element */
         if (name) {
           String name_str(name);
-          if (any.toArrRef().exists(name_str)) {
-            auto const el = any.toArrRef().lval(name_str);
+          if (any.asArrRef().exists(name_str)) {
+            auto const el = any.asArrRef().lval(name_str);
             if (!isArrayLikeType(el.type())) {
               /* Convert into array */
               Array arr = Array::Create();
@@ -1266,10 +1266,10 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
             }
             asArrRef(el).append(val);
           } else {
-            any.toArrRef().set(name_str, val);
+            any.asArrRef().set(name_str, val);
           }
         } else {
-          any.toArrRef().append(val);
+          any.asArrRef().append(val);
         }
         name = nullptr;
       }
@@ -2180,9 +2180,9 @@ xmlNodePtr to_xml_array(encodeType* type, const Variant& data_, int style,
     array_copy = Array::Create();
     for (ArrayIter iter(data.toObject().get()); iter; ++iter) {
       if (!iter.first().isNull() && iter.first().isString()) {
-        array_copy.toArrRef().set(iter.first(), iter.second());
+        array_copy.asArrRef().set(iter.first(), iter.second());
       } else {
-        array_copy.toArrRef().append(iter.second());
+        array_copy.asArrRef().append(iter.second());
       }
     }
     data = array_copy;
@@ -2509,14 +2509,14 @@ static Variant to_zval_array(encodeType* type, xmlNodePtr data) {
       i = 0;
       tv_lval ar = ret.asTypedValue();
       while (i < dimension-1) {
-        auto& arr = toArrRef(ar);
+        auto& arr = asArrRef(ar);
         if (!arr.exists(pos[i])) {
           arr.set(pos[i], Array::Create());
         }
         ar = arr.lval(pos[i]);
         i++;
       }
-      toArrRef(ar).set(pos[i], tmpVal);
+      asArrRef(ar).set(pos[i], tmpVal);
 
       /* Increment position */
       i = dimension;

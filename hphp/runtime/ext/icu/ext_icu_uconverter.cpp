@@ -107,12 +107,12 @@ static void ucnvToUCallback(ObjectData *objval,
   Variant ret = objval->o_invoke_few_args(
     s_toUCallback, 4,
     reason, source, String(codeUnits, length, CopyString), *pErrorCode);
-  if (ret.toCArrRef()[1].is(KindOfInt64)) {
-    *pErrorCode = (UErrorCode)ret.toCArrRef()[1].toInt64();
+  if (ret.asCArrRef()[1].is(KindOfInt64)) {
+    *pErrorCode = (UErrorCode)ret.asCArrRef()[1].toInt64();
   } else {
     data->failure(U_ILLEGAL_ARGUMENT_ERROR, "ucnvToUCallback()");
   }
-  appendToUTarget(data, ret.toCArrRef()[0], args);
+  appendToUTarget(data, ret.asCArrRef()[0], args);
 }
 
 void appendFromUTarget(IntlUConverter *data,
@@ -168,12 +168,12 @@ static void ucnvFromUCallback(ObjectData *objval,
     objval->o_invoke_few_args(
       s_fromUCallback, 4,
       reason, source, (int64_t)codePoint, *pErrorCode);
-  if (ret.toCArrRef()[1].is(KindOfInt64)) {
-    *pErrorCode = (UErrorCode)ret.toCArrRef()[1].toInt64();
+  if (ret.asCArrRef()[1].is(KindOfInt64)) {
+    *pErrorCode = (UErrorCode)ret.asCArrRef()[1].toInt64();
   } else {
     data->failure(U_ILLEGAL_ARGUMENT_ERROR, "ucnvFromUCallback()");
   }
-  appendFromUTarget(data, ret.toCArrRef()[0], args);
+  appendFromUTarget(data, ret.asCArrRef()[0], args);
 }
 
 static bool setCallback(const Object& this_, UConverter *cnv) {

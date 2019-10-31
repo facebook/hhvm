@@ -138,7 +138,7 @@ bool HHVM_FUNCTION(is_array, const Variant& v) {
 bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
     if (v.isPHPArray()) {
-      auto const& arr = v.toCArrRef();
+      auto const& arr = v.asCArrRef();
       if (arr.isVArray()) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_VEC);
       }
@@ -155,7 +155,7 @@ bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
 bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
     if (v.isPHPArray()) {
-      auto const& arr = v.toCArrRef();
+      auto const& arr = v.asCArrRef();
       if (arr.isDArray()) {
         raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
       }
@@ -207,7 +207,7 @@ bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {
 bool HHVM_FUNCTION(HH_is_list_like, const Variant& val) {
   if (val.isClsMeth()) return true;
   if (!val.isArray()) return false;
-  auto const& arr = val.toCArrRef();
+  auto const& arr = val.asCArrRef();
   return arr->isVectorData();
 }
 

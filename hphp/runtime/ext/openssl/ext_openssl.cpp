@@ -1407,7 +1407,7 @@ bool HHVM_FUNCTION(openssl_pkcs12_read, const String& pkcs12, Variant& certs,
         if (PEM_write_bio_X509(bio_out, cert)) {
           BUF_MEM *bio_buf;
           BIO_get_mem_ptr(bio_out, &bio_buf);
-          vcerts.toArrRef().set(s_cert,
+          vcerts.asArrRef().set(s_cert,
             String((char*)bio_buf->data, bio_buf->length, CopyString));
         }
         BIO_free(bio_out);
@@ -1418,7 +1418,7 @@ bool HHVM_FUNCTION(openssl_pkcs12_read, const String& pkcs12, Variant& certs,
         if (PEM_write_bio_PrivateKey(bio_out, pkey, nullptr, nullptr, 0, 0, nullptr)) {
           BUF_MEM *bio_buf;
           BIO_get_mem_ptr(bio_out, &bio_buf);
-          vcerts.toArrRef().set(s_pkey,
+          vcerts.asArrRef().set(s_pkey,
             String((char*)bio_buf->data, bio_buf->length, CopyString));
         }
         BIO_free(bio_out);
@@ -1438,7 +1438,7 @@ bool HHVM_FUNCTION(openssl_pkcs12_read, const String& pkcs12, Variant& certs,
           X509_free(aCA);
         }
         sk_X509_free(ca);
-        vcerts.toArrRef().set(s_extracerts, extracerts);
+        vcerts.asArrRef().set(s_extracerts, extracerts);
       }
       ret = true;
       PKCS12_free(p12);

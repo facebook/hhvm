@@ -91,10 +91,6 @@ public:
   auto& asCArrRef() const { return HPHP::asCArrRef(m_val); }
   auto& asCObjRef() const { return HPHP::asCObjRef(m_val); }
 
-  auto& toCStrRef() const { return HPHP::toCStrRef(m_val); }
-  auto& toCArrRef() const { return HPHP::toCArrRef(m_val); }
-  auto& toCObjRef() const { return HPHP::toCObjRef(m_val); }
-
   tv_rval toCell() const { return m_val; }
 
   ArrayData *getArrayData() const {
@@ -642,24 +638,8 @@ struct Variant : private TypedValue {
     return *reinterpret_cast<const String*>(&m_data.pstr);
   }
 
-  ALWAYS_INLINE const String& toCStrRef() const {
-    assertx(isString());
-    assertx(m_data.pstr);
-    return *reinterpret_cast<const String*>(&m_data.pstr);
-  }
-
   ALWAYS_INLINE String& asStrRef() {
     assertx(isStringType(m_type) && m_data.pstr);
-    // The caller is likely going to modify the string, so we have to eagerly
-    // promote KindOfPersistentString -> KindOfString.
-    m_type = KindOfString;
-    return *reinterpret_cast<String*>(&m_data.pstr);
-  }
-
-  ALWAYS_INLINE String& toStrRef() {
-    assertx(isString());
-    assertx(m_data.pstr);
-
     // The caller is likely going to modify the string, so we have to eagerly
     // promote KindOfPersistentString -> KindOfString.
     m_type = KindOfString;
@@ -674,21 +654,8 @@ struct Variant : private TypedValue {
     return *reinterpret_cast<const Array*>(&m_data.parr);
   }
 
-  ALWAYS_INLINE const Array& toCArrRef() const {
-    assertx(isArray());
-    assertx(m_data.parr);
-    return *reinterpret_cast<const Array*>(&m_data.parr);
-  }
-
   ALWAYS_INLINE Array& asArrRef() {
     assertx(isArrayLikeType(m_type) && m_data.parr);
-    m_type = m_data.parr->toDataType();
-    return *reinterpret_cast<Array*>(&m_data.parr);
-  }
-
-  ALWAYS_INLINE Array& toArrRef() {
-    assertx(isArray());
-    assertx(m_data.parr);
     m_type = m_data.parr->toDataType();
     return *reinterpret_cast<Array*>(&m_data.parr);
   }
@@ -698,12 +665,6 @@ struct Variant : private TypedValue {
 
   ALWAYS_INLINE const Object& asCObjRef() const {
     assertx(m_type == KindOfObject && m_data.pobj);
-    return *reinterpret_cast<const Object*>(&m_data.pobj);
-  }
-
-  ALWAYS_INLINE const Object& toCObjRef() const {
-    assertx(is(KindOfObject));
-    assertx(m_data.pobj);
     return *reinterpret_cast<const Object*>(&m_data.pobj);
   }
 
@@ -726,12 +687,6 @@ struct Variant : private TypedValue {
   ALWAYS_INLINE Resource & asResRef() {
     assertx(m_type == KindOfResource && m_data.pres);
     return *reinterpret_cast<Resource*>(&m_data.pres);
-  }
-
-  ALWAYS_INLINE Object& toObjRef() {
-    assertx(is(KindOfObject));
-    assertx(m_data.pobj);
-    return *reinterpret_cast<Object*>(&m_data.pobj);
   }
 
   /**
@@ -1544,7 +1499,7 @@ inline void concat_assign(tv_lval lhs, const String& s2) {
 
 inline Array& forceToArray(Variant& var) {
   if (!var.isArray()) var = Variant(Array::Create());
-  return var.toArrRef();
+  return var.asArrRef();
 }
 
 inline Array& forceToArray(tv_lval lval) {
@@ -1556,7 +1511,7 @@ inline Array& forceToArray(tv_lval lval) {
 
 inline Array& forceToDict(Variant& var) {
   if (!var.isDict()) var = Variant(Array::CreateDict());
-  return var.toArrRef();
+  return var.asArrRef();
 }
 
 inline Array& forceToDict(tv_lval lval) {
@@ -1568,10 +1523,10 @@ inline Array& forceToDict(tv_lval lval) {
 
 inline Array& forceToDArray(Variant& var) {
   if (RuntimeOption::EvalHackArrDVArrs) return forceToDict(var);
-  if (!(var.isPHPArray() && var.toCArrRef().isDArray())) {
+  if (!(var.isPHPArray() && var.asCArrRef().isDArray())) {
     var = Variant(Array::CreateDArray());
   }
-  return var.toArrRef();
+  return var.asArrRef();
 }
 
 inline Array& forceToDArray(tv_lval lval) {

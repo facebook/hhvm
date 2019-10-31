@@ -120,21 +120,21 @@ void functionTypeName(const Array& arr, std::string& name, bool forDisplay) {
   name += "(function (";
 
   assertx(arr.exists(s_return_type));
-  auto const retType = arr[s_return_type].toCArrRef();
+  auto const retType = arr[s_return_type].asCArrRef();
 
   assertx(arr.exists(s_param_types));
-  auto const params = arr[s_param_types].toCArrRef();
+  auto const params = arr[s_param_types].asCArrRef();
 
   auto sep = "";
   auto const sz = params.size();
   for (auto i = 0; i < sz; i++) {
-    auto const param = params[i].toCArrRef();
+    auto const param = params[i].asCArrRef();
     folly::toAppend(sep, fullName(param, forDisplay), &name);
     sep = ", ";
   }
 
   if (arr.exists(s_variadic_type)) {
-    auto const variadicType = arr[s_variadic_type].toCArrRef();
+    auto const variadicType = arr[s_variadic_type].asCArrRef();
     folly::toAppend(sep, fullName(variadicType, forDisplay), "...", &name);
   }
 
@@ -143,15 +143,15 @@ void functionTypeName(const Array& arr, std::string& name, bool forDisplay) {
 
 void accessTypeName(const Array& arr, std::string& name) {
   assertx(arr.exists(s_root_name));
-  auto const rootName = arr[s_root_name].toCStrRef();
+  auto const rootName = arr[s_root_name].asCStrRef();
   name += rootName.toCppString();
 
   assertx(arr.exists(s_access_list));
-  auto const accessList = arr[s_access_list].toCArrRef();
+  auto const accessList = arr[s_access_list].asCArrRef();
   auto const sz = accessList.size();
   for (auto i = 0; i < sz; i++) {
     folly::toAppend("::",
-                    accessList[i].toCStrRef().toCppString(),
+                    accessList[i].asCStrRef().toCppString(),
                     &name);
   }
 }
@@ -160,7 +160,7 @@ void accessTypeName(const Array& arr, std::string& name) {
 // see the mangling in ScannerToken::xhpLabel
 void xhpTypeName(const Array& arr, std::string& name) {
   assertx(arr.exists(s_classname));
-  std::string clsName = arr[s_classname].toCStrRef().toCppString();
+  std::string clsName = arr[s_classname].asCStrRef().toCppString();
   // remove prefix if any
   if (clsName.compare(0, sizeof("xhp_") - 1, "xhp_") == 0) {
     name += clsName.replace(0, sizeof("xhp_") - 1, ":");
@@ -175,11 +175,11 @@ void xhpTypeName(const Array& arr, std::string& name) {
 void tupleTypeName(const Array& arr, std::string& name, bool forDisplay) {
   name += "(";
   assertx(arr.exists(s_elem_types));
-  auto const elems = arr[s_elem_types].toCArrRef();
+  auto const elems = arr[s_elem_types].asCArrRef();
   auto const sz = elems.size();
   auto sep = "";
   for (auto i = 0; i < sz; i++) {
-    auto const elem = elems[i].toCArrRef();
+    auto const elem = elems[i].asCArrRef();
     folly::toAppend(sep, fullName(elem, forDisplay), &name);
     sep = ", ";
   }
@@ -190,11 +190,11 @@ void tupleTypeName(const Array& arr, std::string& name, bool forDisplay) {
 void genericTypeName(const Array& arr, std::string& name, bool forDisplay) {
   name += "<";
   assertx(arr.exists(s_generic_types));
-  auto const args = arr[s_generic_types].toCArrRef();
+  auto const args = arr[s_generic_types].asCArrRef();
   auto const sz = args.size();
   auto sep = "";
   for (auto i = 0; i < sz; i++) {
-    auto const arg = args[i].toCArrRef();
+    auto const arg = args[i].asCArrRef();
     folly::toAppend(sep, fullName(arg, forDisplay), &name);
     sep = ", ";
   }
@@ -205,13 +205,13 @@ void shapeTypeName(const Array& arr, std::string& name, bool forDisplay) {
   // works for both resolved and unresolved TypeStructures
   name += "(";
   assertx(arr.exists(s_fields));
-  auto const fields = arr[s_fields].toCArrRef();
+  auto const fields = arr[s_fields].asCArrRef();
   auto const sz = fields.size();
   auto sep = "";
   for (auto i = 0; i < sz; i++) {
     name += sep;
     auto const field = fields->getKey(i);
-    auto value = fields->getValue(i).toCArrRef();
+    auto value = fields->getValue(i).asCArrRef();
     auto quote = "'";
     if (value.exists(s_optional_shape_field)) {
       name += "?";
@@ -219,11 +219,11 @@ void shapeTypeName(const Array& arr, std::string& name, bool forDisplay) {
     if (value.exists(s_value)) {
       // if unresolved, ignore wrapper
       if (value.exists(s_is_cls_cns)) quote = "";
-      value = value[s_value].toCArrRef();
+      value = value[s_value].asCArrRef();
     }
     auto const fieldType = field.getType();
     if (isStringType(fieldType)) {
-      folly::toAppend(quote, field.toCStrRef().data(), quote, &name);
+      folly::toAppend(quote, field.asCStrRef().data(), quote, &name);
     } else if (isIntType(fieldType)) {
       folly::toAppend(field.toInt64Val(), &name);
     }
@@ -374,7 +374,7 @@ std::string fullName(const Array& arr, bool forDisplay) {
       break;
     case TypeStructure::Kind::T_typevar:
       assertx(arr.exists(s_name));
-      name += arr[s_name].toCStrRef().toCppString();
+      name += arr[s_name].asCStrRef().toCppString();
       break;
     case TypeStructure::Kind::T_typeaccess:
       accessTypeName(arr, name);
@@ -385,7 +385,7 @@ std::string fullName(const Array& arr, bool forDisplay) {
     case TypeStructure::Kind::T_reifiedtype:
       assertx(arr.exists(s_id));
       name += "reified ";
-      name += arr[s_id].toCStrRef().data();
+      name += arr[s_id].asCStrRef().data();
       break;
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
@@ -393,7 +393,7 @@ std::string fullName(const Array& arr, bool forDisplay) {
     case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_unresolved:
       assertx(arr.exists(s_classname));
-      name += arr[s_classname].toCStrRef().toCppString();
+      name += arr[s_classname].asCStrRef().toCppString();
       if (arr.exists(s_generic_types)) genericTypeName(arr, name, forDisplay);
       break;
   }
@@ -507,7 +507,7 @@ const Class* getClass(TSEnv& env,
         resolveContextMsg(typeCns, typeCnsCls).c_str(),
         name.data());
     }
-    name = ts[s_classname].toCStrRef();
+    name = ts[s_classname].asCStrRef();
     ts = getAlias(env, name);
   }
 
@@ -539,15 +539,15 @@ Array resolveShape(TSEnv& env,
   assertx(arr.exists(s_fields));
 
   auto newfields = Array::CreateDArray();
-  auto const fields = arr[s_fields].toCArrRef();
+  auto const fields = arr[s_fields].asCArrRef();
   auto const sz = fields.size();
   for (auto i = 0; i < sz; i++) {
     Variant key = fields->getKey(i);
-    auto const wrapper = fields->getValue(i).toCArrRef();
+    auto const wrapper = fields->getValue(i).asCArrRef();
     if (wrapper.exists(s_is_cls_cns)) {
       // if the shape field name is a class constant, its name is
       // double colon delimited clsName::cnsName
-      auto const clsCns = key.toCStrRef().toCppString();
+      auto const clsCns = key.asCStrRef().toCppString();
       std::string clsName, cnsName;
       folly::split("::", clsCns, clsName, cnsName);
 
@@ -649,7 +649,7 @@ Array resolveTS(TSEnv& env,
   switch (kind) {
     case TypeStructure::Kind::T_tuple: {
       assertx(arr.exists(s_elem_types));
-      auto const elemsArr = arr[s_elem_types].toCArrRef();
+      auto const elemsArr = arr[s_elem_types].asCArrRef();
       auto const elemTypes =
         resolveList(env, elemsArr, typeCns, typeCnsCls, generics);
       newarr.set(s_elem_types, Variant(elemTypes));
@@ -658,19 +658,19 @@ Array resolveTS(TSEnv& env,
     case TypeStructure::Kind::T_fun: {
       env.invalidType = true;
       assertx(arr.exists(s_return_type));
-      auto const returnArr = arr[s_return_type].toCArrRef();
+      auto const returnArr = arr[s_return_type].asCArrRef();
       auto const returnType =
         resolveTS(env, returnArr, typeCns, typeCnsCls, generics);
       newarr.set(s_return_type, Variant(returnType));
 
       assertx(arr.exists(s_param_types));
-      auto const paramsArr = arr[s_param_types].toCArrRef();
+      auto const paramsArr = arr[s_param_types].asCArrRef();
       auto const paramTypes =
         resolveList(env, paramsArr, typeCns, typeCnsCls, generics);
       newarr.set(s_param_types, Variant(paramTypes));
 
       if (arr.exists(s_variadic_type)) {
-        auto const variadicArr = arr[s_variadic_type].toCArrRef();
+        auto const variadicArr = arr[s_variadic_type].asCArrRef();
         auto const variadicType =
           resolveTS(env, variadicArr, typeCns, typeCnsCls, generics);
         newarr.set(s_variadic_type, Variant(variadicType));
@@ -708,7 +708,7 @@ Array resolveTS(TSEnv& env,
     }
     case TypeStructure::Kind::T_unresolved: {
       assertx(arr.exists(s_classname));
-      auto const clsName = arr[s_classname].toCStrRef();
+      auto const clsName = arr[s_classname].asCStrRef();
       auto ts = getAlias(env, clsName);
 
       auto resolve = [&] (const Array& generics = Array()) {
@@ -722,7 +722,7 @@ Array resolveTS(TSEnv& env,
       if (!ts.empty()) {
         if (ts.exists(s_typevars) && arr.exists(s_generic_types)) {
           std::vector<std::string> typevars;
-          folly::split(",", ts[s_typevars].toCStrRef().data(), typevars);
+          folly::split(",", ts[s_typevars].asCStrRef().data(), typevars);
           ts.remove(s_typevars);
 
           auto generic_types =
@@ -776,15 +776,15 @@ Array resolveTS(TSEnv& env,
        * than the last one in the chain must refer to a class or an
        * interface. */
       assertx(arr.exists(s_root_name));
-      auto clsName = arr[s_root_name].toCStrRef();
+      auto clsName = arr[s_root_name].asCStrRef();
       assertx(arr.exists(s_access_list));
-      auto const accList = arr[s_access_list].toCArrRef();
+      auto const accList = arr[s_access_list].asCArrRef();
       auto const sz = accList.size();
       Array typeCnsVal;
       for (auto i = 0; i < sz; i++) {
         auto const cls = getClass(env, clsName, typeCns, typeCnsCls);
         if (!cls) throw Exception("failed to resolve type access");
-        auto const cnsName = accList[i].toCStrRef();
+        auto const cnsName = accList[i].asCStrRef();
         if (!cls->hasTypeConstant(cnsName.get())) {
           throw Exception(
             "%s, class %s does not have non-abstract "
@@ -821,10 +821,10 @@ Array resolveTS(TSEnv& env,
             resolveContextMsg(typeCns, typeCnsCls).c_str(),
             clsName.data(),
             cnsName.data(),
-            accList[i+1].toCStrRef().data());
+            accList[i+1].asCStrRef().data());
         }
         assertx(typeCnsVal.exists(s_classname));
-        clsName = typeCnsVal[s_classname].toCStrRef();
+        clsName = typeCnsVal[s_classname].asCStrRef();
       }
       copyTypeModifiers(arr, typeCnsVal);
       return typeCnsVal;
@@ -832,7 +832,7 @@ Array resolveTS(TSEnv& env,
     case TypeStructure::Kind::T_typevar: {
       env.invalidType = true;
       assertx(arr.exists(s_name));
-      auto const name = arr[s_name].toCStrRef();
+      auto const name = arr[s_name].asCStrRef();
       return generics.exists(name) ? generics[name].toDArray() : arr.toDArray();
     }
     case TypeStructure::Kind::T_reifiedtype: {

@@ -342,23 +342,23 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
             if (node->type == XML_ELEMENT_NODE) {
               Object element = newNode(s_DOMElement,
                                        xmlCopyNode(node, /*extended*/ 1));
-              arg.toArrRef().append(element);
+              arg.asArrRef().append(element);
             } else if (node->type == XML_ATTRIBUTE_NODE) {
               Object attribute =
                 newNode(s_DOMAttr,
                         (xmlNodePtr)xmlCopyProp(nullptr, (xmlAttrPtr)node));
-              arg.toArrRef().append(attribute);
+              arg.asArrRef().append(attribute);
             } else if (node->type == XML_TEXT_NODE) {
               Object text =
                 newNode(s_DOMText,
                         (xmlNodePtr)xmlNewText(xmlNodeGetContent(node)));
-              arg.toArrRef().append(text);
+              arg.asArrRef().append(text);
             } else {
               raise_warning("Unhandled node type '%d'", node->type);
               // Use a generic DOMNode as fallback for now.
               Object nodeobj = newNode(s_DOMNode,
                                        xmlCopyNode(node, /*extended*/ 1));
-              arg.toArrRef().append(nodeobj);
+              arg.asArrRef().append(nodeobj);
             }
           }
         }

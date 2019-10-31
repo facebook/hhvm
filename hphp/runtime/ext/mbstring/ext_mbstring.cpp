@@ -3822,10 +3822,10 @@ static Variant _php_mb_regex_ereg_search_exec(const String& pattern,
         beg = MBSTRG(search_regs)->beg[i];
         end = MBSTRG(search_regs)->end[i];
         if (beg >= 0 && beg <= end && end <= len) {
-          ret.toArrRef().append(
+          ret.asArrRef().append(
             String((const char *)(str + beg), end - beg, CopyString));
         } else {
-          ret.toArrRef().append(false);
+          ret.asArrRef().append(false);
         }
       }
       break;

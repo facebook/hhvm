@@ -738,7 +738,7 @@ TypedValue HHVM_FUNCTION(array_pop,
     return make_tv<KindOfNull>();
   }
   if (isArrayLikeType(container->m_type)) {
-    return tvReturn(containerRef.toArrRef().pop());
+    return tvReturn(containerRef.asArrRef().pop());
   }
   assertx(container->m_type == KindOfObject);
   return tvReturn(collections::pop(container->m_data.pobj));
@@ -840,7 +840,7 @@ TypedValue HHVM_FUNCTION(array_push,
      * the Array&---we can't copy it to the stack or anything because we
      * might escalate.
      */
-    Array& arr_array = container.toArrRef();
+    Array& arr_array = container.asArrRef();
     arr_array.append(var);
     for (ArrayIter iter(args); iter; ++iter) {
       arr_array.append(iter.second());
@@ -913,7 +913,7 @@ TypedValue HHVM_FUNCTION(array_shift,
     return make_tv<KindOfNull>();
   }
   if (isArrayLikeType(cell_array->m_type)) {
-    return tvReturn(array.toArrRef().dequeue());
+    return tvReturn(array.asArrRef().dequeue());
   }
   assertx(cell_array->m_type == KindOfObject);
   return tvReturn(collections::shift(cell_array->m_data.pobj));
@@ -1115,7 +1115,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
     return make_tv<KindOfNull>();
   }
   if (isArrayLikeType(cell_array->m_type)) {
-    Array& arr_array = array.toArrRef();
+    Array& arr_array = array.asArrRef();
     if (cell_array->m_data.parr->isVectorData()) {
       if (!args.empty()) {
         auto pos_limit = args->iter_end();
@@ -1276,7 +1276,7 @@ bool HHVM_FUNCTION(shuffle,
     throw_expected_array_exception("shuffle");
     return false;
   }
-  array = ArrayUtil::Shuffle(array.toCArrRef());
+  array = ArrayUtil::Shuffle(array.asCArrRef());
   return true;
 }
 
@@ -1312,7 +1312,7 @@ int64_t HHVM_FUNCTION(count,
     case KindOfPersistentArray:
     case KindOfArray:
       if ((CountMode)mode == CountMode::RECURSIVE) {
-        const Array& arr_var = var.toCArrRef();
+        const Array& arr_var = var.asCArrRef();
         return php_count_recursive(arr_var);
       }
       return var.getArrayData()->size();

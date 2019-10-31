@@ -556,7 +556,7 @@ void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols) {
     return *strings.insert(std::move(s)).first;
   };
   auto addVariant = [&] (const Variant& v) -> folly::StringPiece {
-    if (v.isString()) return v.toCStrRef().slice();
+    if (v.isString()) return v.asCStrRef().slice();
     return addString(v.toString().toCppString());
   };
   for (ArrayIter it(bt.get()); it; ++it) {

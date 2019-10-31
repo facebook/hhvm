@@ -595,7 +595,7 @@ vm_decode_function(const_variant_ref function,
       name, ar, forwarding, this_, cls, ctx, cc, invName, flags);
   }
   if (function.isObject()) {
-    this_ = function.toCObjRef().get();
+    this_ = function.asCObjRef().get();
     cls = nullptr;
     dynamic = false;
     const HPHP::Func *f = this_->getVMClass()->lookupMethod(s___invoke.get());

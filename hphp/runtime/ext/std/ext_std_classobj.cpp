@@ -51,7 +51,7 @@ static StrNR ctxClassName() {
 static const Class* get_cls(const Variant& class_or_object) {
   Class* cls = nullptr;
   if (class_or_object.is(KindOfObject)) {
-    ObjectData* obj = class_or_object.toCObjRef().get();
+    ObjectData* obj = class_or_object.asCObjRef().get();
     cls = obj->getVMClass();
   } else if (class_or_object.isArray()) {
     // do nothing but avoid the toString conversion notice
@@ -228,7 +228,7 @@ Variant HHVM_FUNCTION(get_class, const Variant& object /* = uninit_variant */) {
     logOrThrow(object);
     return false;
   }
-  return Variant{object.toCObjRef()->getVMClass()->name(),
+  return Variant{object.asCObjRef()->getVMClass()->name(),
                  Variant::PersistentStrInit{}};
 }
 
@@ -255,9 +255,9 @@ Variant HHVM_FUNCTION(get_parent_class,
     if (!cls) return false;
   } else {
     if (object.isObject()) {
-      cls = object.toCObjRef()->getVMClass();
+      cls = object.asCObjRef()->getVMClass();
     } else if (object.isString()) {
-      cls = Unit::loadClass(object.toCStrRef().get());
+      cls = Unit::loadClass(object.asCStrRef().get());
       if (!cls) return false;
     } else {
       logOrThrow(object);

@@ -158,7 +158,7 @@ void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
     auto const error = DebuggerWireHelpers::WireUnserialize(sdata, m_ret);
     if (error == DebuggerWireHelpers::ErrorMsg) {
       assertx(m_ret.isString());
-      m_wireError = m_ret.toCStrRef().data();
+      m_wireError = m_ret.asCStrRef().data();
     }
     if (error != DebuggerWireHelpers::NoError) {
       m_ret = uninit_null();

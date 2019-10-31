@@ -69,7 +69,7 @@ bool HHVM_FUNCTION(autoload_set_paths,
                    const Variant& map,
                    const String& root) {
   if (map.isArray()) {
-    return AutoloadHandler::s_instance->setMap(map.toCArrRef(), root);
+    return AutoloadHandler::s_instance->setMap(map.asCArrRef(), root);
   }
   if (!(map.isObject() && map.toObject()->isCollection())) {
     return false;

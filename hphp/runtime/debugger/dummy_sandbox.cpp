@@ -95,7 +95,7 @@ void DummySandbox::run() {
         } else {
           auto server = php_global_exchange(s__SERVER, init_null());
           forceToDArray(server);
-          Array arr = server.toArrRef();
+          Array arr = server.asArrRef();
           server.unset();
           php_global_set(s__SERVER, sri.setServerVariables(std::move(arr)));
         }

@@ -313,7 +313,7 @@ Variant HHVM_FUNCTION(apc_store,
       }
       Variant v = iter.second();
 
-      auto const& strKey = key.toCStrRef();
+      auto const& strKey = key.asCStrRef();
       if (isKeyInvalid(strKey)) {
         throw_invalid_argument("apc key: (contains invalid characters)");
         return Variant(false);
@@ -373,7 +373,7 @@ Variant HHVM_FUNCTION(apc_add,
       }
       Variant v = iter.second();
 
-      auto const& strKey = key.toCStrRef();
+      auto const& strKey = key.asCStrRef();
       if (isKeyInvalid(strKey)) {
         throw_invalid_argument("apc key: (contains invalid characters)");
         return false;
@@ -444,7 +444,7 @@ Variant HHVM_FUNCTION(apc_delete,
       if (!k.isString()) {
         raise_warning("apc key is not a string");
         init.append(k);
-      } else if (!apc_store().eraseKey(k.toCStrRef())) {
+      } else if (!apc_store().eraseKey(k.asCStrRef())) {
         init.append(k);
       }
     }

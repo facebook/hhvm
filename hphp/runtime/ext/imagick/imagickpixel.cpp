@@ -53,7 +53,7 @@ req::ptr<WandResource<PixelWand>> getPixelWand(const Variant& obj) {
     IMAGICKPIXEL_THROW(
       "The parameter must be an instance of ImagickPixel or a string");
   } else {
-    auto wand = getPixelWandResource(obj.toCObjRef());
+    auto wand = getPixelWandResource(obj.asCObjRef());
     return req::make<WandResource<PixelWand>>(wand->getWand(), false);
   }
 }
@@ -71,7 +71,7 @@ req::ptr<WandResource<PixelWand>> buildColorWand(const Variant& color) {
     return getPixelWand(color);
   }
   auto ret = newPixelWand();
-  auto status = PixelSetColor(ret->getWand(), color.toCStrRef().c_str());
+  auto status = PixelSetColor(ret->getWand(), color.asCStrRef().c_str());
   if (status == MagickFalse) {
     IMAGICKPIXEL_THROW("Unrecognized color string");
   }

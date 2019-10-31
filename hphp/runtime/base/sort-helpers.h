@@ -336,7 +336,7 @@ struct ElmUCompare {
     );
     if (ctx->func->takesInOutParams()) {
       assertx(ret.isArray());
-      ret = ret.toCArrRef()[0];
+      ret = ret.asCArrRef()[0];
     }
     if (LIKELY(ret.isInteger())) {
       return ret.toInt64() > 0;

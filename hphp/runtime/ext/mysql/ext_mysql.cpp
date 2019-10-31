@@ -487,7 +487,7 @@ static bool HHVM_FUNCTION(mysql_async_query_start,
   }
   Variant ret = php_mysql_do_query_and_get_result(query, link_identifier,
                                                   true, true);
-  if (ret.getRawType() != KindOfBoolean) {
+  if (ret.getType() != KindOfBoolean) {
     raise_warning("runtime/ext_mysql: unexpected return from "
                   "php_mysql_do_query_and_get_result");
     return false;

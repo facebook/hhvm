@@ -61,9 +61,6 @@ public:
   DataType getType() const {
     return type(m_val);
   }
-  DataType getRawType() const {
-    return type(m_val);
-  }
   bool isNull()      const { return isNullType(getType()); }
   bool isBoolean()   const { return isBooleanType(getType()); }
   bool isInteger()   const { return isIntType(getType()); }
@@ -741,9 +738,6 @@ struct Variant : private TypedValue {
    * Type testing functions
    */
   DataType getType() const {
-    return m_type;
-  }
-  DataType getRawType() const {
     return m_type;
   }
   bool is(DataType type) const {

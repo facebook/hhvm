@@ -1947,7 +1947,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
     assertx(!obj->isCollection());
     if (ret.isArray()) {
       Array wanted = Array::Create();
-      assertx(isArrayType(ret.getRawType()));
+      assertx(isArrayType(ret.getType()));
       const Array &props = ret.asCArrRef();
       for (ArrayIter iter(props); iter; ++iter) {
         String memberName = iter.second().toString();

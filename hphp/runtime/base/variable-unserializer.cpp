@@ -1343,7 +1343,7 @@ Array VariableUnserializer::unserializeDict() {
   for (int64_t i = 0; i < size; i++) {
     Variant key;
     unserializeVariant(key.asTypedValue(), UnserializeMode::Key);
-    auto const rawType = key.getRawType();
+    auto const rawType = key.getType();
     if (UNLIKELY(!isIntType(rawType) && !isStringType(rawType))) {
       throwInvalidKey();
     }
@@ -1597,7 +1597,7 @@ Array VariableUnserializer::unserializeKeyset() {
     // variant (since its stack-allocated).
     unserializeVariant(key.asTypedValue(), UnserializeMode::Key);
 
-    auto const type = key.getRawType();
+    auto const type = key.getType();
     if (UNLIKELY(!isStringType(type) && !isIntType(type))) {
       throwKeysetValue();
     }

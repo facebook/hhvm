@@ -46,7 +46,7 @@ let simple_typ pos name = (pos, Happly ((pos, name), []))
 
 let create_mixed_type_hint pos =
   ( Typing_make_type.mixed (Typing_defs.Reason.Rhint pos),
-    Some (simple_typ pos "mixed") )
+    Some (simple_typ pos "\\HH\\mixed") )
 
 (* Error formatter *)
 let error_msg cls field name =
@@ -127,7 +127,7 @@ let gen_pu_accessor
         {
           param_annotation = annotation pos;
           param_type_hint =
-            (snd (annotation pos), Some (simple_typ pos "string"));
+            (snd (annotation pos), Some (simple_typ pos "\\HH\\string"));
           param_is_reference = false;
           param_is_variadic = false;
           param_pos = pos;

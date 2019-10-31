@@ -18,6 +18,8 @@ let hack_arr_dv_arrs () =
 let from_variadic_param_hint_opt ho =
   let p = Pos.none in
   match ho with
+  (* `"array"` here is intentionally not namespaced because for variadic params
+   * `"array"` is added to the list of tparams (see from_ast below) *)
   | None -> Some (p, Aast.Happly ((p, "array"), []))
   | Some h -> Some (p, Aast.Happly ((p, "array"), [h]))
 

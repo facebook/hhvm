@@ -25,14 +25,7 @@ module Class = struct
 
   let to_raw_string s = s
 
-  let elaborate_id ns (p, id_) =
-    let ns =
-      if SU.Xhp.is_xhp id_ then
-        Namespace_env.empty_from_env ns
-      else
-        ns
-    in
-    elaborate_id ns Namespaces.ElaborateClass (p, SU.Xhp.mangle id_)
+  let elaborate_id _ns (_, id_) = SU.strip_global_ns @@ SU.Xhp.mangle id_
 
   let to_unmangled_string s = SU.Xhp.unmangle s
 end

@@ -1615,7 +1615,7 @@ and add_reified_property cd c_vars =
      * varray/vec that holds a list of type structures
      * this prop will be initilized during runtime
      *)
-    let hint = Some (p, Happly ((p, "varray"), [])) in
+    let hint = Some (p, Happly ((p, "\\HH\\varray"), [])) in
     let var =
       {
         cv_final = false;

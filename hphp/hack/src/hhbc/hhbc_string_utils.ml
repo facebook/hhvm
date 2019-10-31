@@ -32,6 +32,11 @@ let strip_ns =
   (* strip zero or more chars followed by a backslash *)
   (fun s -> Str.replace_first rx "" s)
 
+(* Remove \HH\ or HH\ preceding a string *)
+let strip_hh_ns =
+  let rx = Str.regexp {|^\\?HH\\|} in
+  (fun s -> Str.replace_first rx "" s)
+
 let has_ns =
   let rx = Str.regexp {|.+\\.+|} in
   (fun s -> Str.string_match rx s 0)
@@ -92,7 +97,7 @@ module Integer = struct
       | 'b'
       | 'B'
       (* Hex *)
-      
+
       | 'x'
       | 'X' ->
         s

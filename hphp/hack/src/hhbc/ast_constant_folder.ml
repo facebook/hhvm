@@ -430,6 +430,7 @@ let binop_on_values binop v1 v2 =
 let cast_value hint v =
   match hint with
   | A.Happly ((_, id), []) ->
+    let id = SU.strip_hh_ns id in
     if id = SN.Typehints.int then
       (* temporarily disabled *)
       (* TV.cast_to_int v *)

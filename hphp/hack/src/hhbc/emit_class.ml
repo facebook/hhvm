@@ -412,6 +412,10 @@ let emit_class (ast_class, hoisted) =
   let class_method_trait_resolutions =
     let string_of_trait trait =
       match snd trait with
+      (* TODO: Currently, names are not elaborated.
+       * Names should be elaborated if this feature is to be supported
+       * T56629465
+       *)
       | Aast.Happly ((_, trait), _) -> trait
       (* Happly converted from naming *)
       | Aast.Hprim p -> Emit_type_hint.prim_to_string p

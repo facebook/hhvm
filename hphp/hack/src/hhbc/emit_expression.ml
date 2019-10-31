@@ -449,17 +449,17 @@ let is_isexp_op lower_fq_id : Aast.hint option =
   | "is_int"
   | "is_integer"
   | "is_long" ->
-    Some (h "int")
-  | "is_bool" -> Some (h "bool")
+    Some (h "\\HH\\int")
+  | "is_bool" -> Some (h "\\HH\\bool")
   | "is_float"
   | "is_real"
   | "is_double" ->
-    Some (h "float")
-  | "is_string" -> Some (h "string")
-  | "is_null" -> Some (h "void")
-  | "hh\\is_keyset" -> Some (h "keyset")
-  | "hh\\is_dict" -> Some (h "dict")
-  | "hh\\is_vec" -> Some (h "vec")
+    Some (h "\\HH\\float")
+  | "is_string" -> Some (h "\\HH\\string")
+  | "is_null" -> Some (h "\\HH\\void")
+  | "hh\\is_keyset" -> Some (h "\\HH\\keyset")
+  | "hh\\is_dict" -> Some (h "\\HH\\dict")
+  | "hh\\is_vec" -> Some (h "\\HH\\vec")
   | _ -> None
 
 let get_queryMOpMode op =
@@ -750,7 +750,7 @@ and emit_is env pos (h : Aast.hint) =
   let (ts_instrs, is_static) = emit_reified_arg env ~isas:true pos h in
   if is_static then
     match snd h with
-    | Aast.Happly ((_, id), []) when id = SN.Typehints.this ->
+    | Aast.Happly ((_, id), []) when SU.strip_hh_ns id = SN.Typehints.this ->
       instr_islateboundcls
     | _ ->
       gather
@@ -765,6 +765,8 @@ and emit_cast env pos hint expr =
   let op =
     match hint with
     | Aast.Happly ((_, id), []) ->
+      let id = SU.strip_ns id in
+      let id = SU.strip_hh_ns id in
       let id = String.lowercase id in
       begin
         match id with
@@ -773,6 +775,7 @@ and emit_cast env pos hint expr =
         | _ when id = SN.Typehints.string -> instr (IOp CastString)
         | _ when id = SN.Typehints.array -> instr (IOp CastArray)
         | _ when id = SN.Typehints.float -> instr (IOp CastDouble)
+        (* TODO: Is unset a real typehint? *)
         | _ when id = "unset" -> gather [instr_popc; instr_null]
         | _ ->
           Emit_fatal.raise_fatal_parse

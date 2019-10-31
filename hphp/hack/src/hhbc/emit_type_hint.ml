@@ -140,12 +140,12 @@ let can_be_nullable (_, h) =
   match h with
   | Aast.Hfun _
   | Aast.Hoption (_, Aast.Hfun _)
-  | Aast.Happly ((_, "dynamic"), _)
-  | Aast.Hoption (_, Aast.Happly ((_, "dynamic"), _))
-  | Aast.Happly ((_, "nonnull"), _)
-  | Aast.Hoption (_, Aast.Happly ((_, "nonnull"), _))
-  | Aast.Happly ((_, "mixed"), _)
-  | Aast.Hoption (_, Aast.Happly ((_, "mixed"), _))
+  | Aast.Happly ((_, "\\HH\\dynamic"), _)
+  | Aast.Hoption (_, Aast.Happly ((_, "\\HH\\dynamic"), _))
+  | Aast.Happly ((_, "\\HH\\nonnull"), _)
+  | Aast.Hoption (_, Aast.Happly ((_, "\\HH\\nonnull"), _))
+  | Aast.Happly ((_, "\\HH\\mixed"), _)
+  | Aast.Hoption (_, Aast.Happly ((_, "\\HH\\mixed"), _))
   | Aast.Hdynamic
   | Aast.Hnonnull
   | Aast.Hmixed
@@ -195,8 +195,8 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace (p, h)
   let is_awaitable s = s = SN.Classes.cAwaitable in
   match h with
   (* The dynamic and nonnull types are treated by the runtime as mixed *)
-  | Aast.Happly ((_, "dynamic"), [])
-  | Aast.Happly ((_, "mixed"), [])
+  | Aast.Happly ((_, "\\HH\\dynamic"), [])
+  | Aast.Happly ((_, "\\HH\\mixed"), [])
   | Aast.Hdynamic
   | Aast.Hlike _
   | Aast.Hfun _
@@ -206,7 +206,7 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace (p, h)
     TC.make None []
   | Aast.Hprim Aast.Tvoid when kind <> TypeDef -> TC.make None []
   | Aast.Happly ((_, s), [])
-    when String.lowercase s = "void" && kind <> TypeDef ->
+    when String.lowercase s = "\\hh\\void" && kind <> TypeDef ->
     TC.make None []
   | Aast.Haccess _ ->
     let tc_name = Some "" in
@@ -214,7 +214,7 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace (p, h)
     TC.make tc_name tc_flags
   (* Elide the Awaitable class for async return types only *)
   | Aast.Happly ((_, s), [(_, Aast.Hprim Aast.Tvoid)])
-  | Aast.Happly ((_, s), [(_, Aast.Happly ((_, "void"), []))])
+  | Aast.Happly ((_, s), [(_, Aast.Happly ((_, "\\HH\\void"), []))])
     when skipawaitable && is_awaitable s ->
     TC.make None []
   | Aast.Happly ((_, s), [h])
@@ -312,9 +312,9 @@ let param_hint_to_type_info
     | Aast.Haccess _
     | Aast.Hfun _
     | Aast.Happly (_, _ :: _)
-    | Aast.Happly ((_, "dynamic"), [])
-    | Aast.Happly ((_, "nonnull"), [])
-    | Aast.Happly ((_, "mixed"), [])
+    | Aast.Happly ((_, "\\HH\\dynamic"), [])
+    | Aast.Happly ((_, "\\HH\\nonnull"), [])
+    | Aast.Happly ((_, "\\HH\\mixed"), [])
     | Aast.Hdynamic
     | Aast.Hnonnull
     | Aast.Hmixed ->

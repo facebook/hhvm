@@ -98,7 +98,7 @@ let emit_xhp_attribute_array ~ns xal =
       match ho with
       | None when enumo = None ->
         (* attribute declared with the var identifier - we treat it as mixed *)
-        get_attribute_array_values "mixed" enumo
+        get_attribute_array_values "\\HH\\mixed" enumo
       | None -> get_attribute_array_values "enum" enumo
       (* As it turns out, if there is a type list, HHVM discards it *)
       | Some (_, Aast.Happly ((_, id), _))

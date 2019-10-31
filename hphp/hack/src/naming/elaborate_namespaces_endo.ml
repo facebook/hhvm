@@ -132,7 +132,19 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
 
     method! on_record_def env rd =
       let env = { env with namespace = rd.rd_namespace } in
-      super#on_record_def env rd
+      let rd_name =
+        NS.elaborate_id env.namespace NS.ElaborateRecord rd.rd_name
+      in
+      let rd_extends =
+        match rd.rd_extends with
+        | Some (p, Aast.Happly (name, hl)) ->
+          let name = NS.elaborate_id env.namespace NS.ElaborateRecord name in
+          let hl = List.map ~f:(self#on_hint env) hl in
+          Some (p, Aast.Happly (name, hl))
+        | _ -> Option.map ~f:(self#on_hint env) rd.rd_extends
+      in
+      let rd = super#on_record_def env rd in
+      { rd with rd_name; rd_extends }
 
     (* Sets let local env correctly *)
     method on_block_helper env b =
@@ -404,7 +416,8 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | Happly (((_, name) as x), hl) when is_rx name ->
         let x = elaborate_type_name env x in
         Happly (x, List.map hl ~f:(self#on_hint env))
-      | Happly ((_, name), _) when is_reserved_type_hint name ->
+      | Happly ((_, name), _)
+        when is_reserved_type_hint name && (not @@ in_codegen env) ->
         super#on_hint_ env h
       | Happly (x, hl) ->
         let x = elaborate_type_name env x in
@@ -426,6 +439,17 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
           elaborate_type_name env ua.ua_name
       in
       { ua_name; ua_params = List.map ~f:(self#on_expr env) ua.ua_params }
+
+    method! on_insteadof_alias env alias =
+      let (sid1, pstr, sid2) = alias in
+      ( elaborate_type_name env sid1,
+        pstr,
+        List.map ~f:(elaborate_type_name env) sid2 )
+
+    method! on_use_as_alias env alias =
+      let (sido1, pstr, sido2, visl) = alias in
+      let sido1 = Option.map ~f:(elaborate_type_name env) sido1 in
+      (sido1, pstr, sido2, visl)
 
     method! on_program (env : env) (p : ('a, 'b, 'c, 'd) Aast.program) =
       let aux (env, defs) def =

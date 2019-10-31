@@ -96,12 +96,13 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad,
   // this does not re-enter
   // set will decRef any old value that may have been overwritten
   // if appropriate
-  ArrayData* retval = ad->set(key, tvAsCVarRef(&value));
+  auto const retval = ad->set(key, tvAsCVarRef(&value));
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
   tvDecRefGen(&value);
-  return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
+  if (retval != ad) decRefArr(ad);
+  return retval;
 }
 
 ArrayData* addElemStringKeyHelper(ArrayData* ad,
@@ -117,7 +118,8 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // have to decrement it here
   decRefStr(key);
   tvDecRefGen(&value);
-  return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
+  if (retval != ad) decRefArr(ad);
+  return retval;
 }
 
 ArrayData* dictAddElemIntKeyHelper(ArrayData* ad,
@@ -126,12 +128,13 @@ ArrayData* dictAddElemIntKeyHelper(ArrayData* ad,
   assertx(ad->isDict());
   // set will decRef any old value that may have been overwritten
   // if appropriate
-  ArrayData* retval = MixedArray::SetIntDict(ad, key, *tvAssertCell(&value));
+  auto const retval = MixedArray::SetIntDict(ad, key, *tvAssertCell(&value));
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
   tvDecRefGen(&value);
-  return arrayRefShuffle<false, KindOfDict>(ad, retval, nullptr);
+  if (retval != ad) decRefArr(ad);
+  return retval;
 }
 
 ArrayData* dictAddElemStringKeyHelper(ArrayData* ad,
@@ -140,13 +143,14 @@ ArrayData* dictAddElemStringKeyHelper(ArrayData* ad,
   assertx(ad->isDict());
   // set will decRef any old value that may have been overwritten
   // if appropriate
-  ArrayData* retval = MixedArray::SetStrDict(ad, key, *tvAssertCell(&value));
+  auto const retval = MixedArray::SetStrDict(ad, key, *tvAssertCell(&value));
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
   decRefStr(key);
   tvDecRefGen(&value);
-  return arrayRefShuffle<false, KindOfDict>(ad, retval, nullptr);
+  if (retval != ad) decRefArr(ad);
+  return retval;
 }
 
 ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {

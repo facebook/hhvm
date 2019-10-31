@@ -1526,43 +1526,21 @@ inline void SetElemRecord(tv_lval base, key_type<keyType> key,
 }
 
 /*
- * arrayRefShuffle is used by SetElemArray and by helpers for translated code
- * to do the necessary bookkeeping after mutating an array. The helpers return
- * an ArrayData* if and only if the base array was not in a php reference. If
- * the base array was in a reference, that reference may no longer refer to an
- * array after the set operation, so the helpers don't return anything.
+ * arraySetUpdateBase is used by SetElem{Array,Vec,Dict} to do the necessary
+ * bookkeeping after mutating an array.
  */
-template<bool setRef> struct ShuffleReturn {};
+template<DataType dt>
+ALWAYS_INLINE
+void arraySetUpdateBase(ArrayData* oldData, ArrayData* newData, tv_lval base) {
+  if (newData == oldData) return;
 
-template<> struct ShuffleReturn<true> {
-  static void do_return(ArrayData* /*a*/) {}
-};
+  assertx(isArrayLikeType(type(base)));
+  assertx(val(base).parr == oldData);
+  type(base) = dt;
+  val(base).parr = newData;
+  assertx(cellIsPlausible(*base));
 
-template<> struct ShuffleReturn<false> {
-  static ArrayData* do_return(ArrayData* a) { return a; }
-};
-
-template<bool setRef, DataType dt> inline
-auto arrayRefShuffle(ArrayData* oldData, ArrayData* newData, tv_lval base) {
-  if (newData == oldData) {
-    return ShuffleReturn<setRef>::do_return(oldData);
-  }
-
-  if (setRef) {
-    if (isArrayLikeType(type(base)) && val(base).parr == oldData) {
-      type(base) = dt;
-      val(base).parr = newData;
-      assertx(cellIsPlausible(*base));
-    } else {
-      // The base was in a reference that was overwritten by the set operation,
-      // so we don't want to store the new ArrayData to it. oldData has already
-      // been decrefed and there's nobody left to care about newData, so decref
-      // newData instead of oldData.
-      oldData = newData;
-    }
-  }
   decRefArr(oldData);
-  return ShuffleReturn<setRef>::do_return(newData);
 }
 
 /**
@@ -1640,7 +1618,7 @@ inline void SetElemArray(tv_lval base, key_type<keyType> key, Cell* value) {
   // 'newData' if its not equal to 'a'.
   assertx(a == newData || newData->isPHPArray());
 
-  arrayRefShuffle<true, KindOfArray>(a, newData, base);
+  arraySetUpdateBase<KindOfArray>(a, newData, base);
 }
 
 /**
@@ -1682,7 +1660,7 @@ inline void SetElemVec(tv_lval base, key_type<keyType> key, Cell* value) {
   auto* newData = SetElemVecPre<setResult>(a, key, value);
   assertx(newData->isVecArray());
 
-  arrayRefShuffle<true, KindOfVec>(a, newData, base);
+  arraySetUpdateBase<KindOfVec>(a, newData, base);
 }
 
 /**
@@ -1726,7 +1704,7 @@ inline void SetElemDict(tv_lval base, key_type<keyType> key,
   auto newData = SetElemDictPre<setResult>(a, key, value);
   assertx(newData->isDict());
 
-  arrayRefShuffle<true, KindOfDict>(a, newData, base);
+  arraySetUpdateBase<KindOfDict>(a, newData, base);
 }
 
 /**

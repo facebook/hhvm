@@ -674,14 +674,14 @@ CGETELEM_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 template<KeyType keyType>
-auto arraySetImpl(ArrayData* a, key_type<keyType> key,
-                  Cell value, TypedValue* ref) {
+auto arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value) {
   static_assert(keyType != KeyType::Any,
                 "KeyType::Any is not supported in arraySetMImpl");
   assertx(cellIsPlausible(value));
   assertx(a->isPHPArray());
   auto const ret = a->set(key, value);
-  return arrayRefShuffle<false, KindOfArray>(a, ret, ref);
+  if (ret != a) decRefArr(a);
+  return ret;
 }
 
 #define ARRAYSET_HELPER_TABLE(m)  \
@@ -691,7 +691,7 @@ auto arraySetImpl(ArrayData* a, key_type<keyType> key,
 
 #define X(nm, keyType)                                                  \
 inline ArrayData* nm(ArrayData* a, key_type<keyType> key, Cell value) { \
-  return arraySetImpl<keyType>(a, key, value, nullptr);          \
+  return arraySetImpl<keyType>(a, key, value);                          \
 }
 ARRAYSET_HELPER_TABLE(X)
 #undef X
@@ -699,11 +699,12 @@ ARRAYSET_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 template<bool copyProv>
-auto vecSetImpl(ArrayData* a, int64_t key, Cell value, TypedValue* ref) {
+auto vecSetImpl(ArrayData* a, int64_t key, Cell value) {
   assertx(cellIsPlausible(value));
   assertx(a->isVecArray());
-  ArrayData* ret = PackedArray::SetIntVec(a, key, value);
-  return arrayRefShuffle<false, KindOfVec>(a, ret, ref);
+  auto const ret = PackedArray::SetIntVec(a, key, value);
+  if (ret != a) decRefArr(a);
+  return ret;
 }
 
 #define VECSET_HELPER_TABLE(m) \
@@ -713,7 +714,7 @@ auto vecSetImpl(ArrayData* a, int64_t key, Cell value, TypedValue* ref) {
 
 #define X(nm, copyProv)                                     \
 inline ArrayData* nm(ArrayData* a, int64_t key, Cell val) { \
-  return vecSetImpl<copyProv>(a, key, val, nullptr); \
+  return vecSetImpl<copyProv>(a, key, val); \
 }
 VECSET_HELPER_TABLE(X)
 #undef X
@@ -728,12 +729,12 @@ inline ArrayData* dictSetImplPre(ArrayData* a, StringData* s, Cell val) {
 }
 
 template<KeyType keyType, bool copyProv>
-auto
-dictSetImpl(ArrayData* a, key_type<keyType> key, Cell value, TypedValue* ref) {
+auto dictSetImpl(ArrayData* a, key_type<keyType> key, Cell value) {
   assertx(cellIsPlausible(value));
   assertx(a->isDict());
   auto ret = dictSetImplPre(a, key, value);
-  return arrayRefShuffle<false, KindOfDict>(a, ret, ref);
+  if (ret != a) decRefArr(a);
+  return ret;
 }
 
 #define DICTSET_HELPER_TABLE(m) \
@@ -745,7 +746,7 @@ dictSetImpl(ArrayData* a, key_type<keyType> key, Cell value, TypedValue* ref) {
 
 #define X(nm, keyType, copyProv)                                      \
 inline ArrayData* nm(ArrayData* a, key_type<keyType> key, Cell val) { \
-  return dictSetImpl<keyType, copyProv>(a, key, val, nullptr); \
+  return dictSetImpl<keyType, copyProv>(a, key, val); \
 }
 DICTSET_HELPER_TABLE(X)
 #undef X

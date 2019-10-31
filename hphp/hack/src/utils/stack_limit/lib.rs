@@ -4,6 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+pub mod retry;
+
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use detail::*;
@@ -165,14 +167,14 @@ mod detail {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
 
-    struct StackBounded {
-        limit: StackLimit,
+    pub(crate) struct StackBounded<'a> {
+        pub(crate) limit: &'a StackLimit,
     }
 
-    impl StackBounded {
+    impl StackBounded<'_> {
         fn ackermann(&self, m: i64, n: i64) -> Result<i64, ()> {
             if self.limit.check_exceeded() {
                 return Err(());
@@ -188,7 +190,7 @@ mod tests {
             }
         }
 
-        fn min_n_that_fails_ackermann(&self, m: i64) -> i64 {
+        pub(crate) fn min_n_that_fails_ackermann(&self, m: i64) -> i64 {
             for n in 2..20 {
                 if self.ackermann(m, n).is_err() {
                     return n;
@@ -204,9 +206,8 @@ mod tests {
             // new thread to avoid relying on StackGuard thread-localness
             const M: i64 = 3;
             const LIMIT: usize = 25_000; // 25 KB
-            let mut bounded = StackBounded {
-                limit: StackLimit::relative(LIMIT),
-            };
+            let limit = StackLimit::relative(LIMIT);
+            let bounded = StackBounded { limit: &limit };
 
             let n_err = bounded.min_n_that_fails_ackermann(M);
 
@@ -214,7 +215,8 @@ mod tests {
 
             // Ackermann recursion depth grows ~2x when n is increased by 1 and m is fixed,
             // so triple stack size (to avoid rounding errors) should always be sufficient
-            bounded.limit.set(3 * LIMIT);
+            let limit = StackLimit::relative(3 * LIMIT);
+            let bounded = StackBounded { limit: &limit };
             assert!(bounded.ackermann(M, n_err).is_ok());
         })
         .join()

@@ -33,77 +33,40 @@ where
     <Sc::R as NodeType>::R: ToOcaml,
     ScState: Clone + ToOcaml,
 {
+    let ocaml_source_text = ocaml_source_text.as_usize();
+
     let leak_rust_tree = env.leak_rust_tree;
     let env = ParserEnv::from(env);
 
-    // Note: Determining the current thread size cannot be done portably,
-    // therefore assume the worst (running on non-main thread with min size, 2MiB)
-    const KI: usize = 1024;
-    const MI: usize = KI * KI;
-    const MAX_STACK_SIZE: usize = 1024 * MI;
-    let mut stack_size = 2 * MI;
-    let mut default_stack_size_sufficient = true;
-    stack_limit::init();
-    loop {
-        if stack_size > MAX_STACK_SIZE {
-            panic!(
-                "Rust FFI exceeded maximum allowed stack of {} KiB",
-                MAX_STACK_SIZE / KI
-            );
-        }
-
-        // Avoid eagerly wasting of space that will not be used in practice (WWW),
-        // but only for degenerate test cases (/test/{slow,quick}), by starting off
-        // with small stack (default thread) then fall back to bigger ones (custom thread).
-        // Since we're doubling the stack the time is: t + 2*t + 4*t + ...
-        // where the total parse time with unbounded stack is T=k*t, which is
-        // bounded by 2*T (much less in practice due to superlinear parsing time).
-        let next_stack_size = if default_stack_size_sufficient {
-            13 * MI // assume we need much more if default stack size isn't enough
-        } else {
-            // exponential backoff to limit parsing time to at most twice as long
-            2 * stack_size
-        };
-        // Note: detect almost full stack by setting "slack" of 60% for StackLimit because
-        // Syntax::to_ocaml is deeply & mutually recursive and uses nearly 2.5x of stack
-        // TODO: rewrite to_ocaml iteratively & reduce it to "stack_size - MB" as in HHVM
-        // (https://github.com/facebook/hhvm/blob/master/hphp/runtime/base/request-info.h)
-        let relative_stack_size = stack_size - stack_size * 6 / 10;
-
+    let make_retryable = move || {
         let env = env.clone();
-        let try_parse = move || {
-            let stack_limit = StackLimit::relative(relative_stack_size);
-            stack_limit.reset();
-            // Safety: the parser asks for a stack limit with the same lifetime
-            // as the source text, but no syntax tree borrows the stack limit,
-            // so we really only need it to live as long as the parser.
-            // Transmute away its lifetime to satisfy the parser API.
-            let stack_limit_ref: &'a StackLimit = unsafe { std::mem::transmute(&stack_limit) };
-            let mut pool = Pool::new();
-            let parse_result = std::panic::catch_unwind(move || {
+        Box::new(
+            move |stack_limit: &StackLimit, nonmain_stack_size: Option<usize>| {
+                let mut pool = Pool::new();
+
+                // Safety: the parser asks for a stack limit with the same lifetime
+                // as the source text, but no syntax tree borrows the stack limit,
+                // so we really only need it to live as long as the parser.
+                // Transmute away its lifetime to satisfy the parser API.
+                let stack_limit_ref: &'a StackLimit = unsafe { std::mem::transmute(stack_limit) };
+
                 // We only convert the source text from OCaml in this innermost
                 // closure because it contains an Rc. If we converted it
                 // earlier, we'd need to pass it across an unwind boundary or
                 // send it between threads, but it has internal mutablility and
                 // is not Send.
-                let source_text =
-                    unsafe { SourceText::from_ocaml(ocaml_source_text.as_usize()).unwrap() };
+                let source_text = unsafe { SourceText::from_ocaml(ocaml_source_text).unwrap() };
                 let mut parser = <Parser<'a, Sc, ScState>>::make(&source_text, env);
                 let root = parser.parse_script(Some(&stack_limit_ref));
                 let errors = parser.errors();
                 let state = parser.sc_state();
 
                 // traversing the parsed syntax tree uses about 1/3 of the stack
-                let context = SerializationContext::new(ocaml_source_text.as_usize());
+                let context = SerializationContext::new(ocaml_source_text);
                 let ocaml_root = unsafe { root.to_ocaml(&context) };
                 let ocaml_errors = pool.add(&errors);
                 let ocaml_state = unsafe { state.to_ocaml(&context) };
                 let tree = if leak_rust_tree {
-                    let required_stack_size = if default_stack_size_sufficient {
-                        None
-                    } else {
-                        Some(stack_size)
-                    };
                     let mode = parse_mode(&source_text);
                     let tree = Box::new(SyntaxTree::build(
                         &source_text,
@@ -111,7 +74,7 @@ where
                         errors,
                         mode,
                         (),
-                        required_stack_size,
+                        nonmain_stack_size,
                     ));
                     Some(Box::leak(tree) as *const SyntaxTree<_, ()> as usize)
                 } else {
@@ -132,44 +95,53 @@ where
                     Pool::set_field(res, 3, ocaml_tree);
                     UnsafeOcamlPtr::new(res as usize)
                 }
-            });
-            match parse_result {
-                Ok(result) => Some(result),
-                Err(_) if stack_limit.exceeded() => {
-                    // Not always printing warning here because this would fail some HHVM tests
-                    let istty = unsafe { libc::isatty(libc::STDERR_FILENO as i32) != 0 };
-                    if istty || std::env::var_os("HH_TEST_MODE").is_some() {
-                        let source_text = unsafe {
-                            SourceText::from_ocaml(ocaml_source_text.as_usize()).unwrap()
-                        };
-                        let file_path = source_text.file_path().path_str();
-                        eprintln!(
-                            "[hrust] warning: parser exceeded stack of {} KiB on: {}",
-                            stack_limit.get() / KI,
-                            file_path,
-                        );
-                    }
-                    None
-                }
-                Err(msg) => panic!(msg),
-            }
-        };
-        stack_size = next_stack_size;
+            },
+        )
+    };
 
-        let result_opt = if default_stack_size_sufficient {
-            try_parse()
-        } else {
-            std::thread::Builder::new()
-                .stack_size(stack_size)
-                .spawn(try_parse)
-                .expect("ERROR: thread::spawn")
-                .join()
-                .expect("ERROR: failed to wait on new thread")
-        };
+    fn stack_slack_for_traversal_and_parsing(stack_size: usize) -> usize {
+        // Syntax::to_ocaml is deeply & mutually recursive and uses nearly 2.5x of stack
+        // TODO: rewrite to_ocaml iteratively & reduce it to "stack_size - MB" as in HHVM
+        // (https://github.com/facebook/hhvm/blob/master/hphp/runtime/base/request-info.h)
+        stack_size * 6 / 10
+    }
 
-        match result_opt {
-            Some(ocaml_result) => return ocaml_result,
-            _ => default_stack_size_sufficient = false,
+    const KI: usize = 1024;
+    const MI: usize = KI * KI;
+    const MAX_STACK_SIZE: usize = 1024 * MI;
+
+    let on_retry = &mut |stack_size_tried: usize| {
+        // Not always printing warning here because this would fail some HHVM tests
+        let istty = unsafe { libc::isatty(libc::STDERR_FILENO as i32) != 0 };
+        if istty || std::env::var_os("HH_TEST_MODE").is_some() {
+            let source_text = unsafe { SourceText::from_ocaml(ocaml_source_text).unwrap() };
+            let file_path = source_text.file_path().path_str();
+            eprintln!(
+                "[hrust] warning: parser exceeded stack of {} KiB on: {}",
+                (stack_size_tried - stack_slack_for_traversal_and_parsing(stack_size_tried)) / KI,
+                file_path,
+            );
+        }
+    };
+
+    use stack_limit::retry;
+    let job = retry::Job {
+        nonmain_stack_min: 13 * MI, // assume we need much more if default stack size isn't enough
+        nonmain_stack_max: Some(MAX_STACK_SIZE),
+        ..Default::default()
+    };
+
+    match job.with_elastic_stack(
+        &make_retryable,
+        on_retry,
+        stack_slack_for_traversal_and_parsing,
+    ) {
+        Ok(ocaml_result) => ocaml_result,
+        Err(failure) => {
+            panic!(
+                "Rust parser FFI exceeded maximum allowed stack of {} KiB",
+                failure.max_stack_size_tried / KI
+            );
         }
     }
 }

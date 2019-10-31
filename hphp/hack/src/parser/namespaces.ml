@@ -17,17 +17,6 @@ type elaborate_kind =
   | ElaborateRecord
   | ElaborateConst
 
-(**
- * Return the namespace into which id is auto imported for the typechecker and
- * compiler, respectively. Return None if it is not auto imported.
- *)
-let get_autoimport_name_namespace id kind =
-  match kind with
-  | ElaborateClass -> Hh_autoimport.lookup_type id
-  | ElaborateRecord -> Hh_autoimport.lookup_type id
-  | ElaborateFun -> None
-  | ElaborateConst -> None
-
 let elaborate_into_ns ns_name id =
   match ns_name with
   | None -> "\\" ^ id
@@ -58,21 +47,19 @@ let elaborate_defined_id nsenv (p, id) = (p, elaborate_into_current_ns nsenv id)
  *)
 let elaborate_raw_id nsenv kind id =
   if id <> "" && id.[0] = '\\' then
-    (* The name is already fully-qualified. *)
     id
   else
-    let global_id = Utils.add_ns id in
-    if kind = ElaborateConst && SN.PseudoConsts.is_pseudo_const global_id then
-      (* Pseudo-constants are always global. *)
-      global_id
-    else if
-      kind = ElaborateFun && SN.PseudoFunctions.is_pseudo_function global_id
-    then
-      global_id
-    else if kind = ElaborateClass && SN.Typehints.is_reserved_global_name id
-    then
-      global_id
-    else
+    let fqid = Utils.add_ns id in
+    match kind with
+    | ElaborateConst when SN.PseudoConsts.is_pseudo_const fqid -> fqid
+    | ElaborateFun when SN.PseudoFunctions.is_pseudo_function fqid -> fqid
+    | ElaborateClass when SN.Typehints.is_reserved_global_name id -> fqid
+    | ElaborateClass when SN.Typehints.is_reserved_hh_name id ->
+      if nsenv.ns_is_codegen then
+        elaborate_into_ns (Some "HH") id
+      else
+        fqid
+    | _ ->
       let (prefix, has_bslash) =
         match String.index id '\\' with
         | Some i -> (String.sub id 0 i, true)
@@ -81,8 +68,6 @@ let elaborate_raw_id nsenv kind id =
       if has_bslash && prefix = "namespace" then
         elaborate_into_current_ns nsenv (String_utils.lstrip id "namespace\\")
       else
-        (* Expand "use" imports. "use function" and "use const" only apply if the id
-         * is completely unqualified, otherwise the normal "use" imports apply. *)
         let uses =
           match kind with
           | _ when has_bslash -> nsenv.ns_ns_uses
@@ -91,21 +76,9 @@ let elaborate_raw_id nsenv kind id =
           | ElaborateConst -> nsenv.ns_const_uses
           | ElaborateRecord -> nsenv.ns_record_def_uses
         in
-        match SMap.get prefix uses with
+        (match SMap.get prefix uses with
         | Some use -> Utils.add_ns (use ^ String_utils.lstrip id prefix)
-        | None ->
-          begin
-            match get_autoimport_name_namespace id kind with
-            | None -> elaborate_into_current_ns nsenv id
-            | Some (typechecker_ns, compiler_ns) ->
-              let ns =
-                if nsenv.ns_is_codegen then
-                  compiler_ns
-                else
-                  typechecker_ns
-              in
-              elaborate_into_ns (Hh_autoimport.string_of_ns ns) id
-          end
+        | None -> elaborate_into_current_ns nsenv id)
 
 let elaborate_id nsenv kind (p, id) = (p, elaborate_raw_id nsenv kind id)
 

@@ -19,11 +19,7 @@ let elaborate_id ns kind id =
 module Class = struct
   type t = string
 
-  let from_ast_name s =
-    if Hh_autoimport.lookup_type (SU.strip_global_ns s) = None then
-      s
-    else
-      "HH\\" ^ s
+  let from_ast_name s = SU.strip_global_ns s
 
   let from_raw_string s = s
 

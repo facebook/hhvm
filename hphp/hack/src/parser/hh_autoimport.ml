@@ -9,70 +9,58 @@
 
 open Core_kernel
 
-(* The typechecker has a different view of HH autoimporting than the compiler.
- * This type exists to track the unification of HH autoimporting between the
- * typechecker and the compiler, after which it will be deleted. *)
-type autoimport_ns =
-  | Global
-  | HH
-
-let autoimport_map_of_tuples ids =
-  List.fold_left ids ~init:SMap.empty ~f:(fun map (id, typechecker_ns) ->
-      SMap.add id (typechecker_ns, HH) map)
-
 let types =
-  autoimport_map_of_tuples
-    [
-      ("arraylike", HH);
-      ("AsyncFunctionWaitHandle", HH);
-      ("AsyncGenerator", HH);
-      ("AsyncGeneratorWaitHandle", HH);
-      ("AsyncIterator", HH);
-      ("AsyncKeyedIterator", HH);
-      ("Awaitable", HH);
-      ("AwaitAllWaitHandle", HH);
-      ("classname", HH);
-      ("Collection", HH);
-      ("ConditionWaitHandle", HH);
-      ("Container", HH);
-      ("darray", HH);
-      ("dict", HH);
-      ("ExternalThreadEventWaitHandle", HH);
-      ("IMemoizeParam", HH);
-      ("ImmMap", HH);
-      ("ImmSet", HH);
-      ("ImmVector", HH);
-      ("InvariantException", HH);
-      ("Iterable", HH);
-      ("Iterator", HH);
-      ("KeyedContainer", HH);
-      ("KeyedIterable", HH);
-      ("KeyedIterator", HH);
-      ("KeyedTraversable", HH);
-      ("keyset", HH);
-      ("Map", HH);
-      ("ObjprofObjectStats", HH);
-      ("ObjprofPathsStats", HH);
-      ("ObjprofStringStats", HH);
-      ("Pair", HH);
-      ("RescheduleWaitHandle", HH);
-      ("ResumableWaitHandle", HH);
-      ("Set", HH);
-      ("Shapes", HH);
-      ("SleepWaitHandle", HH);
-      ("StaticWaitHandle", HH);
-      ("Traversable", HH);
-      ("typename", HH);
-      ("TypeStructure", HH);
-      ("TypeStructureKind", HH);
-      ("varray_or_darray", HH);
-      ("varray", HH);
-      ("vec_or_dict", HH);
-      ("vec", HH);
-      ("Vector", HH);
-      ("WaitableWaitHandle", HH);
-      ("XenonSample", HH);
-    ]
+  [
+    "arraylike";
+    "AsyncFunctionWaitHandle";
+    "AsyncGenerator";
+    "AsyncGeneratorWaitHandle";
+    "AsyncIterator";
+    "AsyncKeyedIterator";
+    "Awaitable";
+    "AwaitAllWaitHandle";
+    "classname";
+    "Collection";
+    "ConditionWaitHandle";
+    "Container";
+    "darray";
+    "dict";
+    "ExternalThreadEventWaitHandle";
+    "IMemoizeParam";
+    "ImmMap";
+    "ImmSet";
+    "ImmVector";
+    "InvariantException";
+    "Iterable";
+    "Iterator";
+    "KeyedContainer";
+    "KeyedIterable";
+    "KeyedIterator";
+    "KeyedTraversable";
+    "keyset";
+    "Map";
+    "ObjprofObjectStats";
+    "ObjprofPathsStats";
+    "ObjprofStringStats";
+    "Pair";
+    "RescheduleWaitHandle";
+    "ResumableWaitHandle";
+    "Set";
+    "Shapes";
+    "SleepWaitHandle";
+    "StaticWaitHandle";
+    "Traversable";
+    "typename";
+    "TypeStructure";
+    "TypeStructureKind";
+    "varray_or_darray";
+    "varray";
+    "vec_or_dict";
+    "vec";
+    "Vector";
+    "WaitableWaitHandle";
+    "XenonSample";
+  ]
 
 let funcs =
   [
@@ -122,20 +110,12 @@ let consts = []
 
 let namespaces = ["Rx"]
 
-let is_hh_autoimport s = SMap.mem s types
-
-let lookup_type id =
-  if Naming_special_names.Typehints.is_reserved_hh_name id then
-    Some (Global, HH)
-  else
-    SMap.get id types
+let is_hh_autoimport =
+  let h = HashSet.create (List.length types) in
+  List.iter types (HashSet.add h);
+  (fun x -> HashSet.mem h x)
 
 let reverse_type id =
   match String.chop_prefix ~prefix:"HH\\" id with
   | Some stripped_id when is_hh_autoimport stripped_id -> stripped_id
   | _ -> id
-
-let string_of_ns ns =
-  match ns with
-  | Global -> None
-  | HH -> Some "HH"

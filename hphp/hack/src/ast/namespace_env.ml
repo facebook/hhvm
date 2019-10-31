@@ -24,6 +24,8 @@ type env = {
 let hh_autoimport_map_of_list ids =
   List.map ids ~f:(fun id -> (id, "HH\\" ^ id)) |> SMap.of_list
 
+let default_class_uses = hh_autoimport_map_of_list Hh_autoimport.types
+
 let default_fun_uses = hh_autoimport_map_of_list Hh_autoimport.funcs
 
 let default_const_uses = hh_autoimport_map_of_list Hh_autoimport.consts
@@ -33,7 +35,7 @@ let default_ns_uses = hh_autoimport_map_of_list Hh_autoimport.namespaces
 let empty auto_ns_map is_codegen =
   {
     ns_ns_uses = SMap.union (SMap.of_list auto_ns_map) default_ns_uses;
-    ns_class_uses = SMap.empty;
+    ns_class_uses = default_class_uses;
     ns_record_def_uses = SMap.empty;
     ns_fun_uses = default_fun_uses;
     ns_const_uses = default_const_uses;

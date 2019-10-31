@@ -142,7 +142,7 @@ let test_process_file_deferring () =
     SharedMem.
       {
         global_size = 1024;
-        heap_size = 1024 * 4;
+        heap_size = 1024 * 8;
         dep_table_pow = 16;
         hash_table_pow = 10;
         shm_dirs = [];

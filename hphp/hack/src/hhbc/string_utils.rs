@@ -153,6 +153,21 @@ pub fn mangle_meth_caller(mangled_cls_name: &str, f_name: &str) -> String {
     format!("\\MethCaller${}${}", mangled_cls_name, f_name)
 }
 
+pub mod types {
+    pub fn fix_casing(s: &str) -> &str {
+        match s.to_lowercase().as_str() {
+            "vector" => "Vector",
+            "immvector" => "ImmVector",
+            "set" => "Set",
+            "immset" => "ImmSet",
+            "map" => "Map",
+            "immmap" => "ImmMap",
+            "pair" => "Pair",
+            _ => s,
+        }
+    }
+}
+
 #[cfg(test)]
 mod string_utils_tests {
     use pretty_assertions::assert_eq;
@@ -301,5 +316,64 @@ mod string_utils_tests {
             super::mangle_meth_caller(cls, f),
             "\\MethCaller$SomeClass$some_function"
         );
+    }
+
+    mod types {
+        mod fix_casing {
+
+            macro_rules! test_case {
+                ($name: ident, $input: expr, $expected: expr) => {
+                    #[test]
+                    fn $name() {
+                        assert_eq!(crate::types::fix_casing($input), $expected);
+                    }
+                };
+            }
+
+            test_case!(lowercase_vector, "vector", "Vector");
+            test_case!(mixedcase_vector, "vEcTor", "Vector");
+            test_case!(uppercase_vector, "VECTOR", "Vector");
+
+            test_case!(lowercase_immvector, "immvector", "ImmVector");
+            test_case!(mixedcase_immvector, "immvEcTor", "ImmVector");
+            test_case!(uppercase_immvector, "IMMVECTOR", "ImmVector");
+
+            test_case!(lowercase_set, "set", "Set");
+            test_case!(mixedcase_set, "SeT", "Set");
+            test_case!(uppercase_set, "SET", "Set");
+
+            test_case!(lowercase_immset, "immset", "ImmSet");
+            test_case!(mixedcase_immset, "ImMSeT", "ImmSet");
+            test_case!(uppercase_immset, "IMMSET", "ImmSet");
+
+            test_case!(lowercase_map, "map", "Map");
+            test_case!(mixedcase_map, "MaP", "Map");
+            test_case!(uppercase_map, "MAP", "Map");
+
+            test_case!(lowercase_immmap, "immmap", "ImmMap");
+            test_case!(mixedcase_immmap, "immMaP", "ImmMap");
+            test_case!(uppercase_immmap, "IMMMAP", "ImmMap");
+
+            test_case!(lowercase_pair, "pair", "Pair");
+            test_case!(mixedcase_pair, "pAiR", "Pair");
+            test_case!(uppercase_pair, "PAIR", "Pair");
+
+            test_case!(
+                non_hack_collection_returns_original_string,
+                "SomeStRinG",
+                "SomeStRinG"
+            );
+            test_case!(
+                hack_collection_with_leading_whitespace_returns_original_string,
+                " pair",
+                " pair"
+            );
+            test_case!(
+                hack_collection_with_trailing_whitespace_returns_original_string,
+                "pair ",
+                "pair "
+            );
+
+        }
     }
 }

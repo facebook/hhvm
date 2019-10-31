@@ -190,6 +190,16 @@ pub mod integer {
     }
 }
 
+pub mod locals {
+    pub fn strip_dollar(s: &str) -> &str {
+        if s.len() > 0 && s.as_bytes()[0] == b'$' {
+            &s[1..]
+        } else {
+            s
+        }
+    }
+}
+
 #[cfg(test)]
 mod string_utils_tests {
     use pretty_assertions::assert_eq;
@@ -515,6 +525,30 @@ mod string_utils_tests {
             fn unparsable_string() {
                 assert!(to_decimal("bad_string").is_err());
             }
+        }
+    }
+
+    mod locals {
+        use crate::locals::*;
+
+        #[test]
+        fn strip_single_leading_dollar() {
+            assert_eq!(strip_dollar("$foo"), "foo");
+        }
+
+        #[test]
+        fn return_string_if_no_leading_dollar() {
+            assert_eq!(strip_dollar("foo"), "foo");
+        }
+
+        #[test]
+        fn empty_string() {
+            assert_eq!(strip_dollar(""), "");
+        }
+
+        #[test]
+        fn string_of_single_dollar() {
+            assert_eq!(strip_dollar("$"), "");
         }
     }
 }

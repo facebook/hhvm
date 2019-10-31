@@ -82,16 +82,7 @@ void BaseMap::addAllImpl(const Variant& iterable) {
         replaceArray(adata);
         return true;
       } else {
-        ArrayData* dict;
-        try {
-          dict = adata->toDict(adata->cowCheck());
-        } catch (Object& e) {
-          // the array contained references, can't be turned into a dict as is
-          // we'll have to proceed one element at a time, unboxing as we go
-          reserve(sz);
-          mutate();
-          return false;
-        }
+        auto dict = adata->toDict(adata->cowCheck());
         replaceArray(dict);
         if (dict != adata) dict->decRefCount();
         return true;

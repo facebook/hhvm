@@ -4280,14 +4280,14 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   assertx(!func->hasReifiedGenerics());
   if (fca.hasGenerics()) vmStack().popC();
 
+  // Magic methods don't support inout args.
+  assertx(fca.numRets == 1);
+
   shuffleMagicArgs(std::move(invName), fca.numArgs, fca.hasUnpack());
 
   auto const flags = static_cast<FCallArgs::Flags>(
     fca.flags & ~(FCallArgs::Flags::HasUnpack | FCallArgs::Flags::HasGenerics));
-  // FIXME: Assert that fca.numRets is 1 once reffiness checks are used for
-  // inout. Currently we allow $obj->magicCall(inout $foo)...
-  auto const fca2 = FCallArgs(flags, 2, fca.numRets, nullptr, kInvalidOffset,
-                              false);
+  auto const fca2 = FCallArgs(flags, 2, 1, nullptr, kInvalidOffset, false);
   fcallImpl<dynamic>(origpc, pc, fca2, func, initActRec, logAsDynamicCall);
 }
 

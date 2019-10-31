@@ -169,17 +169,12 @@ bool UnitChecker::checkClosure(const PreClassEmitter* cls){
     ok = false;
   }
 
-  auto invalidMethods = [&] {
+  if (cls->methods().size() != 1 ||
+      !cls->hasMethod(s_invoke.get()) ||
+      !(cls->lookupMethod(s_invoke.get())->attrs & AttrPublic)) {
     error("Closure %s must have a single public method named __invoke\n",
           cls->name()->data());
     ok = false;
-  };
-
-  if (!cls->hasMethod(s_invoke.get()) ||
-      !(cls->lookupMethod(s_invoke.get())->attrs & AttrPublic)) {
-    invalidMethods();
-  } else if (cls->methods().size() != 1) {
-    invalidMethods();
   }
 
   if (cls->hasMethod(s_invoke.get()) &&

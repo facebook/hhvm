@@ -33,24 +33,8 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
     in
     match e_opt_ty with
     | (_, Tunion tyl) ->
-      (* If we cannot fold the union into a single type, we need to look at
-       * all the types *)
-      let (env, rtyl) =
-        List.fold_right
-          ~f:
-            begin
-              fun ty (env, rtyl) ->
-              let (env, rty) = extract_inner env ty in
-              (* We have the invariant we'll never have Tunion[Tunion], but
-               * the recursive call above can remove a layer of Awaitable, so we need
-               * to flatten any Tunion that may have been inside. *)
-              let (env, rtyl) = TUtils.flatten_unresolved env rty rtyl in
-              (env, rtyl)
-            end
-          tyl
-          ~init:(env, [])
-      in
-      (env, (r, Tunion rtyl))
+      let (env, tyl) = List.fold_map ~init:env ~f:extract_inner tyl in
+      TUtils.union_list env r tyl
     | (_, Toption ty) ->
       (* We want to try to avoid easy double nullables here, so we handle Toption
        * with some special logic. *)

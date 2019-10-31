@@ -84,9 +84,6 @@ val fully_expand : env -> Tast.ty -> Tast.ty
     identifiers of all classes the type may represent. *)
 val get_class_ids : env -> Tast.ty -> string list
 
-(** Flatten nested unresolved unions, turning ((A | B) | C) to (A | B | C). *)
-val flatten_unresolved : env -> Tast.ty -> Tast.ty list -> env * Tast.ty list
-
 (** Strip away all Toptions that we possibly can in a type, expanding type
     variables along the way, turning ?T -> T. *)
 val non_null : env -> Pos.t -> Tast.ty -> env * Tast.ty
@@ -186,6 +183,9 @@ val is_sub_type_for_union : env -> Tast.ty -> Tast.ty -> bool
 
 (** Simplify unions in a type. *)
 val simplify_unions : env -> Tast.ty -> env * Tast.ty
+
+(** Union a list of types. *)
+val union_list : env -> Typing_reason.t -> Tast.ty list -> env * Tast.ty
 
 (** Returns (class_name, tconst_name, tconst_reference_position) for each type
     constant referenced in the type access path. *)

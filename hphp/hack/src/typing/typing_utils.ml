@@ -441,20 +441,6 @@ let shape_field_name env (p, field) =
     None
 
 (*****************************************************************************)
-(* Try to unify all the types in a intersection *)
-(*****************************************************************************)
-let flatten_unresolved env ty acc =
-  let (env, ety) = Env.expand_type env ty in
-  let res =
-    match ety with
-    (* flatten Tunion[Tunion[...]] *)
-    | (_, Tunion tyl) -> tyl @ acc
-    | (_, Tany _) -> acc
-    | _ -> ty :: acc
-  in
-  (env, res)
-
-(*****************************************************************************)
 (* *)
 (*****************************************************************************)
 

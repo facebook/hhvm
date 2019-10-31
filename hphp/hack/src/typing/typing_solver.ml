@@ -915,28 +915,14 @@ let rec push_option_out pos env ty =
   | (r, Tunion tyl) ->
     let (env, tyl) = List.map_env env tyl (push_option_out pos) in
     if List.exists tyl is_option then
-      let ((env, tyl), r') =
-        List.fold_right
-          tyl
-          ~f:
-            begin
-              fun ty ((env, tyl), r) ->
-              match ty with
-              | (r', Toption ty') -> (TUtils.flatten_unresolved env ty' tyl, r')
-              | _ -> (TUtils.flatten_unresolved env ty tyl, r)
-            end
-          ~init:((env, []), r)
+      let (r', tyl) =
+        List.fold_map tyl ~init:Reason.none ~f:(fun r ty ->
+            match ty with
+            | (r', Toption ty') -> (r', ty')
+            | _ -> (r, ty))
       in
       (env, (r', Toption (r, Tunion tyl)))
     else
-      let (env, tyl) =
-        List.fold_right
-          tyl
-          ~f:begin
-               fun ty (env, tyl) -> TUtils.flatten_unresolved env ty tyl
-             end
-          ~init:(env, [])
-      in
       (env, (r, Tunion tyl))
   | (r, Tintersection tyl) ->
     let (env, tyl) = List.map_env env tyl (push_option_out pos) in

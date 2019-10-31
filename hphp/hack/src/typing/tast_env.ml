@@ -91,8 +91,6 @@ let fully_expand = Typing_expand.fully_expand
 
 let get_class_ids = Typing_utils.get_class_ids
 
-let flatten_unresolved = Typing_utils.flatten_unresolved
-
 let non_null = Typing_solver.non_null
 
 let get_concrete_supertypes = Typing_utils.get_concrete_supertypes
@@ -114,6 +112,8 @@ let get_upper_bounds = Typing_env.get_upper_bounds
 let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
 
 let simplify_unions env ty = Typing_union.simplify_unions env ty
+
+let union_list env r tyl = Typing_union.union_list env r tyl
 
 let get_reified = Typing_env.get_reified
 

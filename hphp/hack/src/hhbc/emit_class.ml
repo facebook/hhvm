@@ -327,7 +327,6 @@ let emit_reified_init_method env ast_class =
           (Some (Hhas_type_info.make (Some "HH\\varray") tc))
           None;
           (* default value *)
-
       ]
     in
     let instrs = emit_reified_init_body env num_reified ast_class in

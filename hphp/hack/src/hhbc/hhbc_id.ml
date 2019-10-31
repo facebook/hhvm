@@ -10,8 +10,7 @@
 open Core_kernel
 module SU = Hhbc_string_utils
 
-let elaborate_id ns kind id =
-  Namespaces.elaborate_id ns kind id |> snd |> SU.strip_global_ns
+let strip_ns (_, id) = SU.strip_global_ns id
 
 (* Class identifier, with namespace qualification if not global, but without
  * initial backslash.
@@ -25,7 +24,7 @@ module Class = struct
 
   let to_raw_string s = s
 
-  let elaborate_id _ns (_, id_) = SU.strip_global_ns @@ SU.Xhp.mangle id_
+  let elaborate_id _ns (p, id_) = strip_ns (p, SU.Xhp.mangle id_)
 
   let to_unmangled_string s = SU.Xhp.unmangle s
 end
@@ -63,7 +62,7 @@ module Function = struct
 
   let add_suffix s suffix = s ^ suffix
 
-  let elaborate_id _ns (_, id) = SU.strip_global_ns id
+  let elaborate_id _ns id = strip_ns id
 end
 
 module Const = struct
@@ -75,7 +74,7 @@ module Const = struct
 
   let to_raw_string s = s
 
-  let elaborate_id ns id = elaborate_id ns Namespaces.ElaborateConst id
+  let elaborate_id _ns id = strip_ns id
 end
 
 module Record = struct
@@ -87,5 +86,5 @@ module Record = struct
 
   let to_raw_string s = s
 
-  let elaborate_id _ns (_, id) = SU.strip_global_ns id
+  let elaborate_id _ns id = strip_ns id
 end

@@ -392,7 +392,9 @@ let get_init_from_type tcopt ty =
       | Toption _ -> "null"
       | Tarray _ -> "[]"
       | Tdarray _ -> "darray[]"
-      | Tvarray _ -> "varray[]"
+      | Tvarray _
+      | Tvarray_or_darray _ ->
+        "varray[]"
       | Ttuple elems ->
         Printf.sprintf "tuple(%s)" @@ list_items (List.map elems get_)
       (* Must be an enum, a containter type or a typedef for another supported type since those are the only

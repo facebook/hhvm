@@ -45,19 +45,21 @@ const varray<string> MAP_INDEX = varray['MAP_1', 'MAP_2'];
 const classname<WithConst> CLASSNAME = WithConst::class;
 const keyset<string> KEYSET = keyset['a', 'b'];
 const TypedefForString TYPEDEF = "hello";
+const varray_or_darray<int> CVARRAY_OR_DARRAY = varray[1, 2, 3];
 
 function with_constants(): void {
-  $a = WithConst::CFLOAT;
-  $b = WithConst::CENUM;
-  $c = SHAPE1;
-  $d = OPTION;
-  $e = ARR;
-  $f = AGE_RANGE;
-  $g = MAP_INDEX;
-  $h = CLASSNAME;
-  $i = KEYSET;
-  $j = TYPEDEF;
-  $k = SHAPE2;
+  $_ = WithConst::CFLOAT;
+  $_ = WithConst::CENUM;
+  $_ = SHAPE1;
+  $_ = OPTION;
+  $_ = ARR;
+  $_ = AGE_RANGE;
+  $_ = MAP_INDEX;
+  $_ = CLASSNAME;
+  $_ = KEYSET;
+  $_ = TYPEDEF;
+  $_ = SHAPE2;
+  $_ = CVARRAY_OR_DARRAY;
 }
 
 function with_type_constants(WithAbstractConst::NESTED::WITH_THIS $arg)

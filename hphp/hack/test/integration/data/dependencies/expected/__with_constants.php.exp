@@ -5,17 +5,18 @@ class WithConst {
   const \SomeEnum CENUM = \SomeEnum::FIRST;
 }
 function with_constants(): void {
-  $a = WithConst::CFLOAT;
-  $b = WithConst::CENUM;
-  $c = SHAPE1;
-  $d = OPTION;
-  $e = ARR;
-  $f = AGE_RANGE;
-  $g = MAP_INDEX;
-  $h = CLASSNAME;
-  $i = KEYSET;
-  $j = TYPEDEF;
-  $k = SHAPE2;
+  $_ = WithConst::CFLOAT;
+  $_ = WithConst::CENUM;
+  $_ = SHAPE1;
+  $_ = OPTION;
+  $_ = ARR;
+  $_ = AGE_RANGE;
+  $_ = MAP_INDEX;
+  $_ = CLASSNAME;
+  $_ = KEYSET;
+  $_ = TYPEDEF;
+  $_ = SHAPE2;
+  $_ = CVARRAY_OR_DARRAY;
 }
 const \TypedefForString TYPEDEF = "";
 const shape(\WithConst::CSTRING => int) SHAPE2 =
@@ -31,6 +32,7 @@ enum SomeEnum: int {
   SECOND = 0;
   FIRST = 0;
 }
+const varray_or_darray<int> CVARRAY_OR_DARRAY = varray[];
 const \HH\classname<\WithConst> CLASSNAME = \WithConst::class;
 enum SecondEnum: string {
   SECOND = "";

@@ -868,7 +868,7 @@ ArrayData*
 PackedArray::SetIntVec(ArrayData* adIn, int64_t k, Cell v) {
   assertx(adIn->cowCheck() || adIn->notCyclic(v));
   return MutableOpIntVec(adIn, k, adIn->cowCheck(),
-    [&] (ArrayData* ad) { setElemNoRef(LvalUncheckedInt(ad, k), v); return ad; }
+    [&] (ArrayData* ad) { setElem(LvalUncheckedInt(ad, k), v); return ad; }
   );
 }
 
@@ -876,7 +876,7 @@ ArrayData*
 PackedArray::SetIntInPlaceVec(ArrayData* adIn, int64_t k, Cell v) {
   assertx(adIn->notCyclic(v));
   return MutableOpIntVec(adIn, k, false,
-    [&] (ArrayData* ad) { setElemNoRef(LvalUncheckedInt(ad, k), v); return ad; }
+    [&] (ArrayData* ad) { setElem(LvalUncheckedInt(ad, k), v); return ad; }
   );
 }
 

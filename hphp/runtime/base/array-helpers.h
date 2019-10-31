@@ -36,21 +36,15 @@ ALWAYS_INLINE void initElem(TypedValue& elem, Cell v) {
 }
 
 /*
- * Modify an array element, with semantics like those in tv-mutate.h.
- *
- * These functions all promote uninit null values to init null values
+ * Modify an array element, with semantics like those in tv-mutate.h
+ * (i.e. promote uninit null values to init null values).
  */
 template<typename C> ALWAYS_INLINE
-enable_if_lval_t<C&&, void> setElemNoRef(C&& elem, Cell v) {
+enable_if_lval_t<C&&, void> setElem(C&& elem, Cell v) {
   if (UNLIKELY(v.m_type == KindOfUninit)) {
     v.m_type = KindOfNull;
   }
   cellSet(v, elem);
-}
-
-template<typename C> ALWAYS_INLINE
-enable_if_lval_t<C&&, void> setElem(C&& elem, Cell v) {
-  setElemNoRef(elem, v);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

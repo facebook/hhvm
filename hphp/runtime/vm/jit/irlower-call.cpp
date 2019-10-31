@@ -79,7 +79,6 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
 
   auto const callFlags = CallFlags(
     extra->hasGenerics,
-    extra->numOut != 0,
     extra->dynamicCall,
     extra->asyncEagerReturn,
     extra->callOffset,
@@ -169,7 +168,6 @@ void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
 
   auto const callFlags = CallFlags(
     extra->hasGenerics,
-    extra->numOut != 0,
     extra->dynamicCall,
     false,  // async eager return unsupported with unpack
     0, // call offset passed differently to unpack

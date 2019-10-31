@@ -1284,7 +1284,6 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, Array&& generics,
   prepareFuncEntry(enterFnAr, stk, std::move(generics));
 
   checkForReifiedGenericsErrors(enterFnAr, hasGenerics);
-  checkForRequiredInOut(enterFnAr, hasInOut);
   calleeDynamicCallChecks(enterFnAr->func(), dynamicCall,
                           allowDynCallNoPointer);
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
@@ -4228,7 +4227,6 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
   }
 
   checkForReifiedGenericsErrors(ar, callFlags.hasGenerics());
-  checkForRequiredInOut(ar, callFlags.hasInOut());
   calleeDynamicCallChecks(ar->func(), callFlags.isDynamicCall());
   return EventHook::FunctionCall(ar, EventHook::NormalFunc);
 }
@@ -4256,7 +4254,6 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
 
   auto const callFlags = CallFlags(
     fca.hasGenerics(),
-    fca.numRets != 1,
     dynamic,
     asyncEagerReturn,
     0, // call offset already set on the ActRec

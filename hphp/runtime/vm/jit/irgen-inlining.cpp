@@ -334,7 +334,6 @@ void beginInlining(IRGS& env,
 
   auto const callFlags = cns(env, CallFlags(
     generics != nullptr,
-    fca.numRets != 1,
     dynamicCall,
     returnTarget.asyncEagerOffset != kInvalidOffset,
     0, // call offset unused by the logic below

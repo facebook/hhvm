@@ -139,14 +139,6 @@ inline bool callerRxChecks(const ActRec* caller, const Func* callee) {
   return false;
 }
 
-inline void checkForRequiredInOut(const ActRec* ar, bool hasInOut) {
-  if (!ar->func()->takesInOutParams()) return;
-
-  if (!hasInOut) {
-    raise_error("In/out function called dynamically without inout annotations");
-  }
-}
-
 /*
  * This helper only does a stack overflow check for the native stack.
  * Both native and VM stack overflows are independently possible.

@@ -351,7 +351,6 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID,
   }
 
   emitGenericsMismatchCheck(env, callFlags);
-  emitCallInOutCheck(env, callFlags);
   emitCalleeDynamicCallCheck(env, callFlags);
 
   // Check surprise flags in the same place as the interpreter: after setting
@@ -567,31 +566,6 @@ void emitCalleeDynamicCallCheck(IRGS& env, SSATmp* callFlags) {
     }
   );
 }
-
-const StaticString
-  s_inoutError("In/out function called dynamically without inout annotations");
-
-void emitCallInOutCheck(IRGS& env, SSATmp* callFlags) {
-  auto const func = curFunc(env);
-
-  if (!func->takesInOutParams()) {
-    return;
-  }
-
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      auto constexpr flag = 1 << CallFlags::Flags::HasInOut;
-      auto const hasInOut = gen(env, AndInt, callFlags, cns(env, flag));
-      gen(env, JmpZero, taken, hasInOut);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseError, cns(env, s_inoutError.get()));
-    }
-  );
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 

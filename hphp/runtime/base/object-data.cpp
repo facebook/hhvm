@@ -1886,7 +1886,7 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
         throwMutateConstProp(lookup.slot);
       }
       unsetTypeHint(lookup.prop);
-      tvSetIgnoreRef(*uninit_variant.asTypedValue(), prop);
+      tvSet(*uninit_variant.asTypedValue(), prop);
     } else {
       // Dynamic property.
       dynPropArray().remove(StrNR(key).asString(), true /* isString */);

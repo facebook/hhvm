@@ -158,30 +158,15 @@ enable_if_lval_t<T&&, void> tvMove(const Cell fr, T&& to) {
 }
 
 /*
- * Move the value of the Cell in `fr' to `to'.
- */
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvMoveIgnoreRef(const Cell fr, T&& to) {
-  assertx(cellIsPlausible(fr));
-  auto const old = as_tv(to);
-  cellCopy(fr, to);
-  tvDecRefGen(old);
-  // NB: The dec-ref on "old" may trigger a destructor which may be
-  // able to bind or change the value in "to"; if to was the inner
-  // cell of a ref, there's no guarantee its even referring to valid
-  // memory any more. We can't do plausibility checks here.
-}
-
-/*
  * Move the value of the Cell in `fr' to the Cell `to'.
  *
- * Just like tvMove() or tvMoveIgnoreRef() with added assertions for `to'.
+ * Just like tvMove() with added assertions for `to'.
  */
 template<typename C> ALWAYS_INLINE
 enable_if_lval_t<C&&, void> cellMove(const Cell fr, C&& to) {
   assertx(cellIsPlausible(fr));
   assertx(cellIsPlausible(as_tv(to)));
-  tvMoveIgnoreRef(fr, to);
+  tvMove(fr, to);
 }
 
 /*
@@ -199,30 +184,14 @@ enable_if_lval_t<T&&, void> tvSet(const Cell fr, T&& to) {
 /*
  * Assign the value of the Cell in `fr' to `to', with appropriate reference
  * count modifications.
- */
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvSetIgnoreRef(const Cell fr, T&& to) {
-  assertx(cellIsPlausible(fr));
-  auto const old = as_tv(to);
-  cellDup(fr, to);
-  tvDecRefGen(old);
-  // NB: The dec-ref on "old" may trigger a destructor which may be
-  // able to bind or change the value in "to"; if to was the inner
-  // cell of a ref, there's no guarantee its even referring to valid
-  // memory any more. We can't do plausibility checks here.
-}
-
-/*
- * Assign the value of the Cell in `fr' to `to', with appropriate reference
- * count modifications.
  *
- * Just like tvSet() or tvSetIgnoreRef() with added assertions for `to'.
+ * Just like tvSet() or with added assertions for `to'.
  */
 template<typename C> ALWAYS_INLINE
 enable_if_lval_t<C&&, void> cellSet(const Cell fr, C&& to) {
   assertx(cellIsPlausible(fr));
   assertx(cellIsPlausible(as_tv(to)));
-  tvSetIgnoreRef(fr, to);
+  tvSet(fr, to);
 }
 
 /*
@@ -240,7 +209,7 @@ enable_if_lval_t<C&&, void> cellSetWithAux(const Cell fr, C&& to) {
 /*
  * Assign KindOfUninit to `to' directly, ignoring refs.
  *
- * Equivalent to tvSetIgnoreRef(make_tv<KindOfUninit>(), to).
+ * Equivalent to tvSet(make_tv<KindOfUninit>(), to).
  */
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvUnset(T&& to) {
@@ -252,7 +221,7 @@ enable_if_lval_t<T&&, void> tvUnset(T&& to) {
 /*
  * Assign KindOfNull to `to' directly, ignoring refs.
  *
- * Equivalent to tvSetIgnoreRef(make_tv<KindOfNull>(), to).
+ * Equivalent to tvSet(make_tv<KindOfNull>(), to).
  */
 template<typename C> ALWAYS_INLINE
 enable_if_lval_t<C&&, void> cellSetNull(C&& to) {

@@ -304,7 +304,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
 
   // Found an unset previous pointer, and result will not have a cycle so chain
   // the fault objects.
-  tvMoveIgnoreRef(make_tv<KindOfObject>(prev), prevLval);
+  tvMove(make_tv<KindOfObject>(prev), prevLval);
 }
 
 namespace {

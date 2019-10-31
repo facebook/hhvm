@@ -249,18 +249,18 @@ namespace {
         if (!f.func || f.func->isBuiltin()) continue;
 
         auto const ln = f.func->unit()->getLineNumber(f.prevPc);
-        tvSetIgnoreRef(
+        tvSet(
           make_tv<KindOfInt64>(ln),
           throwable->propLvalAtOffset(s_lineSlot)
         );
 
         if (auto fn = f.func->originalFilename()) {
-          tvSetIgnoreRef(
+          tvSet(
             make_tv<KindOfPersistentString>(fn),
             throwable->propLvalAtOffset(s_fileSlot)
           );
         } else {
-          tvSetIgnoreRef(
+          tvSet(
             make_tv<KindOfPersistentString>(f.func->unit()->filepath()),
             throwable->propLvalAtOffset(s_fileSlot)
           );
@@ -285,14 +285,14 @@ namespace {
       if (file || line) {
         if (file) {
           auto const tv = file.tv();
-          tvSetIgnoreRef(
+          tvSet(
             tvAssertCell(tv),
             throwable->propLvalAtOffset(s_fileSlot)
           );
         }
         if (line) {
           auto const tv = line.tv();
-          tvSetIgnoreRef(
+          tvSet(
             tvAssertCell(tv),
             throwable->propLvalAtOffset(s_lineSlot)
           );
@@ -340,11 +340,11 @@ void throwable_init(ObjectData* throwable) {
     auto const unit = funcAndOffset.first->unit();
     auto const file = const_cast<StringData*>(unit->filepath());
     auto const line = unit->getLineNumber(funcAndOffset.second);
-    tvSetIgnoreRef(
+    tvSet(
       make_tv<KindOfString>(file),
       throwable->propLvalAtOffset(s_fileSlot)
     );
-    tvSetIgnoreRef(
+    tvSet(
       make_tv<KindOfInt64>(line),
       throwable->propLvalAtOffset(s_lineSlot)
     );

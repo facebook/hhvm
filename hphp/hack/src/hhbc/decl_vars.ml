@@ -165,13 +165,17 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
           ()
       | Aast.Call (_, func_e, _, pos_args, unpacked_args) ->
         (match func_e with
-        | (_, Aast.Id (pos, "HH\\set_frame_metadata"))
-        | (_, Aast.Id (pos, "\\HH\\set_frame_metadata")) ->
+        | (_, Aast.Id (pos, call_name))
+          when call_name = SN.EmitterSpecialFunctions.set_frame_metadata ->
           state := add_local ~barethis:Bare_this !state (pos, "$86metadata")
         | _ -> ());
         let barethis =
           match func_e with
-          | (_, Aast.Id (_, ("isset" | "echo" | "empty"))) -> Bare_this
+          | (_, Aast.Id (_, name))
+            when name = SN.PseudoFunctions.isset
+                 || name = SN.PseudoFunctions.empty
+                 || "\\" ^ name = SN.PseudoFunctions.echo ->
+            Bare_this
           | _ -> Bare_this_as_ref
         in
         let on_arg e =

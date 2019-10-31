@@ -279,7 +279,19 @@ let parse_text popt fn text =
       fn
   in
   let source_text = SourceText.make fn text in
-  Full_fidelity_ast.from_text_to_empty_tast env source_text
+  let (ast, is_hh_file) =
+    Full_fidelity_ast.from_text_to_empty_tast env source_text
+  in
+  let elaborate_namespaces =
+    new Elaborate_namespaces_endo.generic_elaborator
+  in
+  let nsenv = Namespace_env.empty_from_popt popt in
+  let ast =
+    elaborate_namespaces#on_program
+      (Elaborate_namespaces_endo.make_env nsenv)
+      ast
+  in
+  (ast, is_hh_file)
 
 let parse_file popt filename text =
   try `ParseResult (Errors.do_ (fun () -> parse_text popt filename text)) with
@@ -326,10 +338,10 @@ let handle_conversion_errors errors =
       (* Ignore these errors to match legacy AST behavior *)
       | 2086
       (* Naming.MethodNeedsVisibility *)
-      
+
       | 2102
       (* Naming.UnsupportedTraitUseAs *)
-      
+
       | 2103 (* Naming.UnsupportedInsteadOf *) ->
         false
       | _ (* Emit fatal parse otherwise *) -> true)

@@ -366,6 +366,8 @@ module SpecialFunctions = struct
 
   let clone = "__clone"
 
+  let hhas_adata = "__hhas_adata"
+
   let is_special_function =
     let all_special_functions =
       [
@@ -380,6 +382,7 @@ module SpecialFunctions = struct
         call_user_func;
         autoload;
         clone;
+        hhas_adata;
       ]
     in
     let h = HashSet.create (List.length all_special_functions) in
@@ -426,6 +429,8 @@ module PseudoFunctions = struct
 
   let echo = "\\echo"
 
+  let empty = "\\empty"
+
   let exit = "\\exit"
 
   let die = "\\die"
@@ -441,6 +446,7 @@ module PseudoFunctions = struct
       hh_loop_forever;
       assert_;
       echo;
+      empty;
       exit;
       die;
     ]
@@ -498,6 +504,8 @@ module Typehints = struct
 
   let string = "string"
 
+  let binary = "binary"
+
   let array = "array"
 
   let darray = "darray"
@@ -530,6 +538,7 @@ module Typehints = struct
         bool;
         float;
         string;
+        binary;
         array;
         darray;
         varray;
@@ -605,6 +614,10 @@ module PseudoConsts = struct
 
   let g__FUNCTION_CREDENTIAL__ = "\\__FUNCTION_CREDENTIAL__"
 
+  let exit = "\\EXIT"
+
+  let die = "\\DIE"
+
   let all_pseudo_consts =
     [
       g__LINE__;
@@ -617,6 +630,8 @@ module PseudoConsts = struct
       g__NAMESPACE__;
       g__COMPILER_FRONTEND__;
       g__FUNCTION_CREDENTIAL__;
+      exit;
+      die;
     ]
 
   let is_pseudo_const =
@@ -742,4 +757,16 @@ end
 
 module Regex = struct
   let tPattern = "\\HH\\Lib\\Regex\\Pattern"
+end
+
+(* These are functions treated by the emitter specially. They are not
+ * autoimported (see hh_autoimport.ml) nor are they consider PseudoFunctions
+ * so they can be overridden by namespacing (at least currently)
+ *)
+module EmitterSpecialFunctions = struct
+  let eval = "\\eval"
+
+  let class_alias = "\\class_alias"
+
+  let set_frame_metadata = "\\HH\\set_frame_metadata"
 end

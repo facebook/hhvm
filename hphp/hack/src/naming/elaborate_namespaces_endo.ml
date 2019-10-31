@@ -19,9 +19,12 @@ type env = {
   in_ppl: bool;
 }
 
+let in_codegen env = env.namespace.Namespace_env.ns_is_codegen
+
 let is_special_identifier =
   let special_identifiers =
     [
+      SN.Members.mClass;
       SN.Classes.cParent;
       SN.Classes.cSelf;
       SN.Classes.cStatic;
@@ -41,6 +44,7 @@ let elaborate_type_name env ((_, name) as id) =
     SSet.mem name env.type_params
     || is_special_identifier name
     || (String.length name <> 0 && name.[0] = '$')
+    || name = SN.Typehints.wildcard
   then
     id
   else
@@ -97,7 +101,16 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
 
     method! on_method_redeclaration env mt =
       let env = extend_tparams env mt.mt_tparams in
-      super#on_method_redeclaration env mt
+      (* Codegen does not elaborate traits in the trait redeclaration node.
+       * TODO: This should be changed if this feature is to be shipped.
+       * Also change: class_method_trait_resolution in emit_class.ml
+       * T56629465
+       *)
+      if in_codegen env then
+        let mr_new = super#on_method_redeclaration env mt in
+        { mr_new with mt_trait = mt.mt_trait }
+      else
+        super#on_method_redeclaration env mt
 
     method! on_pu_enum env pue =
       let type_params =
@@ -241,7 +254,12 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
             uel )
         when cn = SN.SpecialFunctions.meth_caller
              || cn = SN.SpecialFunctions.class_meth ->
-        let cl = Utils.add_ns cl in
+        let cl =
+          if not @@ in_codegen env then
+            Utils.add_ns cl
+          else
+            cl
+        in
         Call
           ( self#on_call_type env ct,
             (p1, Id (p2, cn)),
@@ -291,6 +309,14 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | Id ((_, name) as sid) ->
         if SSet.mem name env.let_locals then
           expr
+        else if (name = "NAN" || name = "INF") && in_codegen env then
+          expr
+        else if
+          in_codegen env
+          && SN.PseudoConsts.is_pseudo_const
+               (Utils.add_ns @@ String.uppercase name)
+        then
+          expr
         else
           Id (NS.elaborate_id env.namespace NS.ElaborateConst sid)
       | PU_identifier ((p1, CIexpr (p2, Id x1)), s1, s2) ->
@@ -314,11 +340,16 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | Class_const ((p1, CIexpr (p2, Id x1)), pstr) ->
         let name = elaborate_type_name env x1 in
         Class_const ((p1, CIexpr (p2, Id name)), pstr)
-      | Class_get ((p1, CIexpr (p2, Id x1)), CGstring x2) ->
+      | Class_get ((p1, CIexpr (p2, Id x1)), cge) ->
         let x1 = elaborate_type_name env x1 in
-        Class_get ((p1, CIexpr (p2, Id x1)), CGstring x2)
+        Class_get ((p1, CIexpr (p2, Id x1)), self#on_class_get_expr env cge)
       | Xml (id, al, el) ->
-        let id = elaborate_type_name env id in
+        let id =
+          if in_codegen env then
+            id
+          else
+            elaborate_type_name env id
+        in
         Xml
           ( id,
             List.map al ~f:(self#on_xhp_attribute env),
@@ -368,6 +399,15 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         | SetNamespaceEnv nsenv ->
           let env = { env with namespace = nsenv } in
           (env, def :: defs)
+        | Stmt (_, Let ((_, lid), _, _)) ->
+          let new_env =
+            {
+              env with
+              let_locals = SSet.add (Local_id.get_name lid) env.let_locals;
+            }
+          in
+          let new_stmt = super#on_def env def in
+          (new_env, new_stmt :: defs)
         | _ -> (env, super#on_def env def :: defs)
       in
       let (_, rev_defs) = List.fold p ~f:aux ~init:(env, []) in

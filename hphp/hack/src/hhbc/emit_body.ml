@@ -264,8 +264,8 @@ let emit_deprecation_warning scope deprecation_info =
 
 let rec is_awaitable h =
   match snd h with
-  | Aast.Happly ((_, "Awaitable"), [])
-  | Aast.Happly ((_, "Awaitable"), [_]) ->
+  | Aast.Happly ((_, s), ([] | [_]))
+    when s = Naming_special_names.Classes.cAwaitable ->
     true
   | Aast.Hsoft h
   | Aast.Hoption h ->

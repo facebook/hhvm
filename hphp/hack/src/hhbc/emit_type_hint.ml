@@ -192,6 +192,7 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace (p, h)
       let tc_flags = [TC.HHType] in
       TC.make (Some tc_name) tc_flags
   in
+  let is_awaitable s = s = SN.Classes.cAwaitable in
   match h with
   (* The dynamic and nonnull types are treated by the runtime as mixed *)
   | Aast.Happly ((_, "dynamic"), [])
@@ -212,16 +213,16 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace (p, h)
     let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeConstant] in
     TC.make tc_name tc_flags
   (* Elide the Awaitable class for async return types only *)
-  | Aast.Happly ((_, "Awaitable"), [(_, Aast.Hprim Aast.Tvoid)])
-  | Aast.Happly ((_, "Awaitable"), [(_, Aast.Happly ((_, "void"), []))])
-    when skipawaitable ->
+  | Aast.Happly ((_, s), [(_, Aast.Hprim Aast.Tvoid)])
+  | Aast.Happly ((_, s), [(_, Aast.Happly ((_, "void"), []))])
+    when skipawaitable && is_awaitable s ->
     TC.make None []
-  | Aast.Happly ((_, "Awaitable"), [h])
-  | Aast.Hoption (_, Aast.Happly ((_, "Awaitable"), [h]))
-    when skipawaitable ->
+  | Aast.Happly ((_, s), [h])
+  | Aast.Hoption (_, Aast.Happly ((_, s), [h]))
+    when skipawaitable && is_awaitable s ->
     hint_to_type_constraint ~kind ~tparams ~skipawaitable:false ~namespace h
-  | Aast.Hoption (_, Aast.Hsoft (_, Aast.Happly ((_, "Awaitable"), [h])))
-    when skipawaitable ->
+  | Aast.Hoption (_, Aast.Hsoft (_, Aast.Happly ((_, s), [h])))
+    when skipawaitable && is_awaitable s ->
     make_tc_with_flags_if_non_empty_flags
       ~kind
       ~tparams
@@ -229,9 +230,9 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace (p, h)
       ~namespace
       h
       [TC.Soft; TC.HHType; TC.ExtendedHint]
-  | Aast.Happly ((_, "Awaitable"), [])
-  | Aast.Hoption (_, Aast.Happly ((_, "Awaitable"), []))
-    when skipawaitable ->
+  | Aast.Happly ((_, s), [])
+  | Aast.Hoption (_, Aast.Happly ((_, s), []))
+    when skipawaitable && is_awaitable s ->
     TC.make None []
   (* Need to differentiate between type params and classes *)
   | Aast.Happly ((pos, name), _) -> happly_helper (pos, name)

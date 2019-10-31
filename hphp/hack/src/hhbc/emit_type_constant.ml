@@ -220,7 +220,9 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
     let kind = get_kind ~tparams s_res in
     let n = String.lowercase @@ snd s in
     let generic_types =
-      if n = "classname" || n = "typename" then
+      let module SN = Naming_special_names.Classes in
+      if n = String.lowercase SN.cClassname || n = String.lowercase SN.cTypename
+      then
         []
       else
         get_generic_types ~tparams ~namespace ~targ_map l

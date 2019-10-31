@@ -140,7 +140,8 @@ let rec expr_to_typed_value
   | A.Float s -> TV.Float (float_of_string s)
   | A.Id (_, id) when id = "NAN" -> TV.Float Float.nan
   | A.Id (_, id) when id = "INF" -> TV.Float Float.infinity
-  | A.Call (_, (_, A.Id (_, "__hhas_adata")), _, [(_, A.String data)], []) ->
+  | A.Call (_, (_, A.Id (_, id)), _, [(_, A.String data)], [])
+    when id = SN.SpecialFunctions.hhas_adata ->
     TV.HhasAdata data
   | A.Array fields -> array_to_typed_value ns fields
   | A.Varray (_, fields) -> varray_to_typed_value ns fields

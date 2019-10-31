@@ -2,7 +2,7 @@
 
 function test() {
 $abc = 'abc';
- var_dump($abc is Nothing);
+ var_dump($abc is nothing);
  }
 
 <<__EntryPoint>>

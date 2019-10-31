@@ -10,6 +10,7 @@ open Core_kernel
 open Instruction_sequence
 module A = Ast_defs
 module T = Aast
+module SN = Naming_special_names
 
 type type_constraint =
   | DefinitelyReified (* There is a reified generic *)
@@ -86,7 +87,9 @@ let rec has_reified_type_constraint env h =
 
 let rec remove_awaitable ((pos, h_) as h) =
   match h_ with
-  | Aast.Happly ((_, id), [h]) when String.lowercase id = "awaitable" -> h
+  | Aast.Happly ((_, id), [h])
+    when String.Caseless.(id = SN.Classes.cAwaitable) ->
+    h
   (* For @Awaitable<T>, the soft type hint is moved to the inner type, i.e @T *)
   | Aast.Hsoft h -> (pos, Aast.Hsoft (remove_awaitable h))
   (* For ~Awaitable<T>, the like-type hint is moved to the inner type, i.e ~T *)

@@ -774,7 +774,10 @@ and emit_cast env pos hint expr =
         | _ when id = SN.Typehints.array -> instr (IOp CastArray)
         | _ when id = SN.Typehints.float -> instr (IOp CastDouble)
         | _ when id = "unset" -> gather [instr_popc; instr_null]
-        | _ -> Emit_fatal.raise_fatal_parse pos ("Invalid cast type: " ^ id)
+        | _ ->
+          Emit_fatal.raise_fatal_parse
+            pos
+            ("Invalid cast type: " ^ SU.strip_global_ns id)
       end
     | _ -> Emit_fatal.raise_fatal_parse pos "Invalid cast type"
   in
@@ -1010,27 +1013,34 @@ and emit_shape
 
 and emit_call_expr env pos e targs args uargs async_eager_label =
   match (snd e, targs, args, uargs) with
-  | (A.Id (_, "__hhas_adata"), _, [(_, A.String data)], []) ->
+  | (A.Id (_, id), _, [(_, A.String data)], [])
+    when id = SN.SpecialFunctions.hhas_adata ->
     let v = Typed_value.HhasAdata data in
     emit_pos_then pos @@ instr (ILitConst (TypedValue v))
-  | (A.Id (_, id), _, _, []) when String.lowercase id = "isset" ->
+  | (A.Id (_, id), _, _, [])
+    when String.lowercase id = SN.PseudoFunctions.isset ->
     emit_call_isset_exprs env pos args
-  | (A.Id (_, id), _, [arg1], []) when String.lowercase id = "empty" ->
+  | (A.Id (_, id), _, [arg1], [])
+    when String.lowercase id = SN.PseudoFunctions.empty ->
     emit_call_empty_expr env pos arg1
   | (A.Id (_, id), _, ([_; _] | [_; _; _]), [])
-    when String.lowercase id = "idx" && not (jit_enable_rename_function ()) ->
+    when String.lowercase id = String.lowercase SN.FB.idx
+         && not (jit_enable_rename_function ()) ->
     emit_idx env pos args
-  | (A.Id (_, id), _, [arg1], []) when String.lowercase id = "eval" ->
+  | (A.Id (_, id), _, [arg1], [])
+    when String.lowercase id = SN.EmitterSpecialFunctions.eval ->
     emit_eval env pos arg1
-  | (A.Id (_, "class_alias"), _, [(_, A.String c1); (_, A.String c2)], [])
-    when is_global_namespace env ->
+  | (A.Id (_, s), _, [(_, A.String c1); (_, A.String c2)], [])
+    when is_global_namespace env && s = SN.EmitterSpecialFunctions.class_alias
+    ->
     gather [emit_pos pos; instr_true; instr_alias_cls c1 c2]
-  | (A.Id (_, "class_alias"), _, [(_, A.String c1); (_, A.String c2); arg3], [])
-    when is_global_namespace env ->
+  | (A.Id (_, s), _, [(_, A.String c1); (_, A.String c2); arg3], [])
+    when is_global_namespace env && s = SN.EmitterSpecialFunctions.class_alias
+    ->
     gather [emit_expr env arg3; emit_pos pos; instr_alias_cls c1 c2]
   | (A.Id (_, id), _, [arg1], [])
-    when String.lowercase id = "hh\\set_frame_metadata"
-         || String.lowercase id = "\\hh\\set_frame_metadata" ->
+    when String.lowercase id
+         = String.lowercase SN.EmitterSpecialFunctions.set_frame_metadata ->
     gather
       [
         emit_expr env arg1;
@@ -1039,10 +1049,12 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
         instr_null;
       ]
   | (A.Id (_, s), _, [], [])
-    when String.lowercase s = "exit" || String.lowercase s = "die" ->
+    when String.lowercase s = SN.PseudoFunctions.exit
+         || String.lowercase s = SN.PseudoFunctions.die ->
     emit_pos_then pos @@ emit_exit env None
   | (A.Id (_, s), _, [arg1], [])
-    when String.lowercase s = "exit" || String.lowercase s = "die" ->
+    when String.lowercase s = SN.PseudoFunctions.exit
+         || String.lowercase s = SN.PseudoFunctions.die ->
     emit_pos_then pos @@ emit_exit env (Some arg1)
   | (_, _, _, _) ->
     let instrs = emit_call env pos e targs args uargs async_eager_label in
@@ -4067,7 +4079,7 @@ and emit_final_static_op cid (prop : Tast.class_get_expr) op =
     let id = text_of_prop prop in
     Emit_fatal.emit_fatal_runtime
       pos
-      ("Attempt to unset static property " ^ cid ^ "::" ^ id)
+      ("Attempt to unset static property " ^ SU.strip_ns cid ^ "::" ^ id)
 
 (* Given a local $local and a list of integer array indices i_1, ..., i_n,
  * generate code to extract the value of $local[i_n]...[i_1]:

@@ -115,8 +115,8 @@ enum class Ptr : uint16_t {
    * with less ridiculous names: TCell and TPtrToCell, respectively.
    */
   Bottom = 0,
-  Top    = 0x1fffU, // Keep this in sync with the number of bits used in
-                    // PTR_PRIMITIVE, to keep pretty-printing cleaner.
+  Top    = 0xfffU, // Keep this in sync with the number of bits used in
+                   // PTR_PRIMITIVE, to keep pretty-printing cleaner.
   NotPtr = 1U << 11,
   Ptr    = Top & ~NotPtr,
 

@@ -7,8 +7,8 @@ use lazy_static::lazy_static;
 use std::collections::{BTreeMap, HashMap};
 
 lazy_static! {
-    static ref ALIAS_MAP: HashMap<String, String> = {
-        ALIASES.iter().fold(HashMap::new(), |mut map, s| {
+    static ref TYPES_MAP: HashMap<String, String> = {
+        TYPES.iter().fold(HashMap::new(), |mut map, s| {
             map.insert(s.to_lowercase(), "HH\\".to_string() + s);
             map
         })
@@ -18,7 +18,7 @@ lazy_static! {
     pub static ref NAMESPACES_MAP: BTreeMap<String, String> = make_map(NAMESPACES);
 }
 
-static ALIASES: &'static [&'static str] = &[
+static TYPES: &'static [&'static str] = &[
     "AsyncIterator",
     "AsyncKeyedIterator",
     "Traversable",
@@ -135,29 +135,13 @@ fn make_map(items: &[&str]) -> BTreeMap<String, String> {
     })
 }
 
-pub fn normalize(s: &str) -> &str {
-    match ALIAS_MAP.get(&s.to_lowercase()[..]) {
-        None => s,
-        Some(alias) => normalize(alias),
-    }
-}
-
-pub fn opt_normalize(s: &str) -> Option<&str> {
-    match ALIAS_MAP.get(&s.to_lowercase()[..]) {
-        Some(v) => Some(normalize(v)),
-        None => None,
-    }
-}
-
 pub fn is_hh_autoimport(s: &str) -> bool {
-    ALIAS_MAP.contains_key(&s.to_lowercase()[..])
+    TYPES_MAP.contains_key(s)
 }
 
 #[cfg(test)]
 mod tests {
     use crate::is_hh_autoimport;
-    use crate::normalize;
-    use crate::opt_normalize;
 
     #[test]
     fn test_is_hh_autoimport() {
@@ -165,19 +149,4 @@ mod tests {
         assert_eq!(is_hh_autoimport("KeyedIterable"), true);
         assert_eq!(is_hh_autoimport("non-exisit"), false);
     }
-
-    #[test]
-    fn test_normalize() {
-        assert_eq!(normalize("float"), "HH\\float");
-        assert_eq!(normalize("KeyedIterable"), "HH\\KeyedIterable");
-        assert_eq!(normalize("non-exisit"), "non-exisit");
-    }
-
-    #[test]
-    fn test_opt_normalize() {
-        assert_eq!(opt_normalize("float"), Some("HH\\float"));
-        assert_eq!(opt_normalize("KeyedIterable"), Some("HH\\KeyedIterable"));
-        assert_eq!(opt_normalize("non-exisit"), None);
-    }
-
 }

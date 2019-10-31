@@ -8466,47 +8466,6 @@ and method_def env cls m =
       ( Typing_lambda_ambiguous.suggest_method_def env method_def,
         env.global_tvenv ))
 
-and record_field env f =
-  let (id, hint, e) = f in
-  let ((p, _) as cty) = hint in
-  let (env, cty) =
-    let cty = Decl_hint.hint env.decl_env cty in
-    Phase.localize_with_self env cty
-  in
-  let expected = ExpectedTy.make p Reason.URhint cty in
-  match e with
-  | Some e ->
-    let (env, te, ty) = expr ~expected env e in
-    let env =
-      Typing_coercion.coerce_type
-        p
-        Reason.URhint
-        env
-        ty
-        (MakeType.unenforced cty)
-        Errors.record_init_value_does_not_match_hint
-    in
-    (env, (id, hint, Some te))
-  | None -> (env, (id, hint, None))
-
-and record_def_def tcopt rd =
-  let env = EnvFromDef.record_def_env tcopt rd in
-  let (env, attributes) =
-    List.map_env env rd.rd_user_attributes user_attribute
-  in
-  let (env, fields) = List.map_env env rd.rd_fields record_field in
-  {
-    T.rd_annotation = Env.save (Env.get_tpenv env) env;
-    T.rd_name = rd.rd_name;
-    T.rd_extends = rd.rd_extends;
-    T.rd_abstract = rd.rd_abstract;
-    T.rd_fields = fields;
-    T.rd_user_attributes = attributes;
-    T.rd_namespace = rd.rd_namespace;
-    T.rd_span = rd.rd_span;
-    T.rd_doc_comment = rd.rd_doc_comment;
-  }
-
 and typedef_def tcopt typedef =
   let env = EnvFromDef.typedef_env tcopt typedef in
   let tdecl = Env.get_typedef env (snd typedef.t_name) in
@@ -8736,6 +8695,97 @@ and class_get_pu_ env cty name =
           (env, Some (cty, Subst.make_locl (Cls.tparams class_) paraml, et))
         | None -> (env, None))
     end
+
+let record_field env f =
+  let (id, hint, e) = f in
+  let ((p, _) as cty) = hint in
+  let (env, cty) =
+    let cty = Decl_hint.hint env.decl_env cty in
+    Phase.localize_with_self env cty
+  in
+  let expected = ExpectedTy.make p Reason.URhint cty in
+  match e with
+  | Some e ->
+    let (env, te, ty) = expr ~expected env e in
+    let env =
+      Typing_coercion.coerce_type
+        p
+        Reason.URhint
+        env
+        ty
+        (MakeType.unenforced cty)
+        Errors.record_init_value_does_not_match_hint
+    in
+    (env, (id, hint, Some te))
+  | None -> (env, (id, hint, None))
+
+(* Return a map describing all the fields in this record, including
+   inherited fields, and whether they have a default value. *)
+let rec all_record_fields (rd : Decl_provider.record_def_decl) :
+    (sid * Typing_defs.record_field_req) SMap.t =
+  let fields =
+    List.fold
+      rd.rdt_fields
+      ~init:SMap.empty
+      ~f:(fun acc (((_, name), _) as f) -> SMap.add name f acc)
+  in
+  match rd.rdt_extends with
+  | Some (_, parent) ->
+    (match Decl_provider.get_record_def parent with
+    | Some parent_rd -> SMap.union fields (all_record_fields parent_rd)
+    | None -> fields)
+  | _ -> fields
+
+let record_def_parent rd parent_hint =
+  match snd parent_hint with
+  | Aast.Happly ((parent_pos, parent_name), []) ->
+    (match Decl_provider.get_record_def parent_name with
+    | Some parent_rd ->
+      (* We can only inherit from abstract records. *)
+      ( if not parent_rd.rdt_abstract then
+        let (parent_pos, parent_name) = parent_rd.rdt_name in
+        Errors.extend_non_abstract_record
+          parent_name
+          (fst rd.rd_name)
+          parent_pos );
+
+      (* Ensure we aren't defining fields that overlap with
+         inherited fields. *)
+      let inherited_fields = all_record_fields parent_rd in
+      List.iter rd.rd_fields ~f:(fun ((pos, name), _, _) ->
+          match SMap.find_opt name inherited_fields with
+          | Some ((prev_pos, _), _) ->
+            Errors.repeated_record_field name pos prev_pos
+          | None -> ())
+    | None ->
+      (* Something exists with this name (naming succeeded), but it's
+         not a record. *)
+      Errors.unbound_name parent_pos parent_name `record)
+  | _ ->
+    failwith
+      "Record parent was not an Happly. This should have been a syntax error."
+
+let record_def_def tcopt rd =
+  let env = EnvFromDef.record_def_env tcopt rd in
+  (match rd.rd_extends with
+  | Some parent -> record_def_parent rd parent
+  | None -> ());
+
+  let (env, attributes) =
+    List.map_env env rd.rd_user_attributes user_attribute
+  in
+  let (_env, fields) = List.map_env env rd.rd_fields record_field in
+  {
+    T.rd_annotation = Env.save (Env.get_tpenv env) env;
+    T.rd_name = rd.rd_name;
+    T.rd_extends = rd.rd_extends;
+    T.rd_abstract = rd.rd_abstract;
+    T.rd_fields = fields;
+    T.rd_user_attributes = attributes;
+    T.rd_namespace = rd.rd_namespace;
+    T.rd_span = rd.rd_span;
+    T.rd_doc_comment = rd.rd_doc_comment;
+  }
 
 let nast_to_tast opts nast =
   let convert_def = function

@@ -2921,6 +2921,15 @@ let extend_final extend_pos decl_pos name =
       (decl_pos, "Declaration is here");
     ]
 
+let extend_non_abstract_record name extend_pos decl_pos =
+  let name = strip_ns name in
+  let msg =
+    Printf.sprintf "Cannot extend record `%s` because it isn't abstract" name
+  in
+  add_list
+    (Typing.err_code Typing.ExtendFinal)
+    [(extend_pos, msg); (decl_pos, "Declaration is here")]
+
 let extend_sealed child_pos parent_pos parent_name parent_kind verb =
   let name = strip_ns parent_name in
   add_list

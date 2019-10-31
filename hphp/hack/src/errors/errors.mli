@@ -391,6 +391,8 @@ val bad_call : Pos.t -> string -> unit
 
 val extend_final : Pos.t -> Pos.t -> string -> unit
 
+val extend_non_abstract_record : string -> Pos.t -> Pos.t -> unit
+
 val extend_sealed : Pos.t -> Pos.t -> string -> string -> string -> unit
 
 val trait_prop_const_class : Pos.t -> string -> unit

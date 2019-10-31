@@ -1,0 +1,4 @@
+File "record_inheritance_not_abstract.php", line 6, characters 8-8:
+Cannot extend record `A` because it isn't abstract (Typing[4035])
+File "record_inheritance_not_abstract.php", line 3, characters 8-8:
+Declaration is here

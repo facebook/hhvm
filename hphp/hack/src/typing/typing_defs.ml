@@ -603,8 +603,14 @@ and enum_type = {
   te_constraint: decl_ty option;
 }
 
+and record_field_req =
+  | ValueRequired
+  | HasDefaultValue
+
 and record_def_type = {
   rdt_name: Nast.sid;
+  rdt_extends: Nast.sid option;
+  rdt_fields: (Nast.sid * record_field_req) list;
   rdt_abstract: bool;
   rdt_pos: Pos.t;
   rdt_errors: Errors.t option;

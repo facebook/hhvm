@@ -1,0 +1,8 @@
+File "record_inheritance_duplicate_field.php", line 10, characters 3-3:
+Duplicate record field `x` (NastCheck[3083])
+File "record_inheritance_duplicate_field.php", line 4, characters 3-3:
+Previous field is here
+File "record_inheritance_duplicate_field.php", line 17, characters 3-3:
+Duplicate record field `x` (NastCheck[3083])
+File "record_inheritance_duplicate_field.php", line 4, characters 3-3:
+Previous field is here

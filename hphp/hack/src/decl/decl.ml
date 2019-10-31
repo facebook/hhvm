@@ -1049,25 +1049,43 @@ and method_decl_acc ~is_static c (acc, condition_types) m =
 (*****************************************************************************)
 
 let record_def_decl rd : Typing_defs.record_def_type =
+  let extends =
+    match rd.rd_extends with
+    (* The only valid type hint for record parents is a record
+       name. Records do not support generics. *)
+    | Some (_, Happly (id, [])) -> Some id
+    | _ -> None
+  in
+  let fields =
+    List.map rd.rd_fields ~f:(fun (id, _, default) ->
+        match default with
+        | Some _ -> (id, Typing_defs.HasDefaultValue)
+        | None -> (id, ValueRequired))
+  in
   {
     rdt_name = rd.rd_name;
+    rdt_extends = extends;
+    rdt_fields = fields;
     rdt_abstract = rd.rd_abstract;
     rdt_pos = rd.rd_span;
     rdt_errors = None;
   }
 
-let record_def_decl_if_missing rd =
-  let (_, rdid) = rd.rd_name in
-  if not (Decl_heap.RecordDefs.mem rdid) then
-    Decl_heap.RecordDefs.add rdid (record_def_decl rd)
-
-and type_record_def_naming_and_decl rd =
+let type_record_def_naming_and_decl rd =
   let rd = Errors.ignore_ (fun () -> Naming.record_def rd) in
   let (errors, tdecl) = Errors.do_ (fun () -> record_def_decl rd) in
   record_record_def (snd rd.rd_name);
   let tdecl = { tdecl with rdt_errors = Some errors } in
   Decl_heap.RecordDefs.add (snd rd.rd_name) tdecl;
   tdecl
+
+let record_def_decl_if_missing rd =
+  let (_, rdid) = rd.rd_name in
+  if not (Decl_heap.RecordDefs.mem rdid) then
+    let (_ : Typing_defs.record_def_type) =
+      type_record_def_naming_and_decl rd
+    in
+    ()
 
 (*****************************************************************************)
 (* Dealing with typedefs *)

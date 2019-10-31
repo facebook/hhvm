@@ -8,7 +8,4 @@ namespace Fiz\Biz\Buz {
             E
         }
     };
-
 }
-
-<<__EntryPoint>> function main(): void {}

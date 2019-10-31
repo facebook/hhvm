@@ -8,5 +8,3 @@ function __autoload($name)
 class C implements UndefI
 {
 }
-
-<<__EntryPoint>> function main(): void {}

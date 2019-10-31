@@ -8,5 +8,3 @@ function __autoload($name)
 class C extends UndefBase
 {
 }
-
-<<__EntryPoint>> function main(): void {}

@@ -80,13 +80,13 @@ module Collections = struct
   let cPair = "\\HH\\Pair"
 
   (* interfaces *)
-  let cContainer = "\\Container"
+  let cContainer = "\\HH\\Container"
 
-  let cKeyedContainer = "\\KeyedContainer"
+  let cKeyedContainer = "\\HH\\KeyedContainer"
 
-  let cTraversable = "\\Traversable"
+  let cTraversable = "\\HH\\Traversable"
 
-  let cKeyedTraversable = "\\KeyedTraversable"
+  let cKeyedTraversable = "\\HH\\KeyedTraversable"
 
   let cCollection = "\\Collection"
 

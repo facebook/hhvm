@@ -84,13 +84,13 @@ pub mod collections {
     pub const PAIR: &str = "\\HH\\Pair";
 
     /* interfaces */
-    pub const CONTAINER: &str = "\\Container";
+    pub const CONTAINER: &str = "\\HH\\Container";
 
-    pub const KEYED_CONTAINER: &str = "\\KeyedContainer";
+    pub const KEYED_CONTAINER: &str = "\\HH\\KeyedContainer";
 
-    pub const TRAVERSABLE: &str = "\\Traversable";
+    pub const TRAVERSABLE: &str = "\\HH\\Traversable";
 
-    pub const KEYED_TRAVERSABLE: &str = "\\KeyedTraversable";
+    pub const KEYED_TRAVERSABLE: &str = "\\HH\\KeyedTraversable";
 
     pub const COLLECTION: &str = "\\Collection";
 

@@ -26,7 +26,7 @@
           param_type_hint =
           ((Container<?string>),
            (Some ([6:3-21],
-                  (Happly (([6:3-12], "\\Container"),
+                  (Happly (([6:3-12], "\\HH\\Container"),
                      [([6:13-20], (Hoption ([6:14-20], (Hprim Tstring))))])))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [6:22-32]; param_name = "$container";
@@ -36,7 +36,7 @@
           param_type_hint =
           ((KeyedContainer<int, ?string>),
            (Some ([7:3-31],
-                  (Happly (([7:3-17], "\\KeyedContainer"),
+                  (Happly (([7:3-17], "\\HH\\KeyedContainer"),
                      [([7:18-21], (Hprim Tint));
                        ([7:23-30], (Hoption ([7:24-30], (Hprim Tstring))))]
                      )))));

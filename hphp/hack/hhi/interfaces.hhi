@@ -14,7 +14,7 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-namespace {
+namespace HH {
 
 /**
  * Represents an entity that can be iterated over using `foreach`, without
@@ -33,15 +33,15 @@ namespace {
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(
-  ArrayObject::class,
-  DOMNodeList::class,
-  Imagick::class,
+  \ArrayObject::class,
+  \DOMNodeList::class,
+  \Imagick::class,
   Iterator::class,
-  IteratorAggregate::class,
+  \IteratorAggregate::class,
   KeyedTraversable::class,
-  ResourceBundle::class,
-  SplHeap::class,
-  SplObjectStorage::class,
+  \ResourceBundle::class,
+  \SplHeap::class,
+  \SplObjectStorage::class,
   \HH\Rx\Traversable::class
 )>>
 interface Traversable<+Tv> {}
@@ -65,14 +65,14 @@ interface Traversable<+Tv> {}
  * @guide /hack/collections/interfaces
  */
 <<__Sealed(
-  ArrayIterator::class,
-  AsyncMysqlRowBlock::class,
-  DOMNamedNodeMap::class,
-  ImagickPixelIterator::class,
-  IntlBreakIterator::class,
+  \ArrayIterator::class,
+  \AsyncMysqlRowBlock::class,
+  \DOMNamedNodeMap::class,
+  \ImagickPixelIterator::class,
+  \IntlBreakIterator::class,
   KeyedIterable::class,
   KeyedIterator::class,
-  MysqlRow::class,
+  \MysqlRow::class,
   \HH\Rx\KeyedTraversable::class
 )>>
 interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
@@ -116,12 +116,8 @@ interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {}
  * @guide /hack/collections/interfaces
  * @guide /hack/collections/read-write
  */
-<<__Sealed(ConstVector::class, ConstMap::class, ConstSet::class, dict::class, keyset::class, vec::class)>>
+<<__Sealed(\ConstVector::class, \ConstMap::class, \ConstSet::class, dict::class, keyset::class, vec::class)>>
 interface KeyedContainer<+Tk as arraykey, +Tv> extends \HH\Rx\KeyedTraversable<Tk, Tv>, Container<Tv> {}
-
-} // namespace
-
-namespace HH {
 
 /**
  * For those entities that are `Traversable`, the `Iterator` interfaces provides

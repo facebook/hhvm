@@ -34,7 +34,7 @@ let types =
       ("classname", HH);
       ("Collection", HH);
       ("ConditionWaitHandle", HH);
-      ("Container", Global);
+      ("Container", HH);
       ("darray", HH);
       ("dict", HH);
       ("ExternalThreadEventWaitHandle", HH);
@@ -45,10 +45,10 @@ let types =
       ("InvariantException", HH);
       ("Iterable", HH);
       ("Iterator", HH);
-      ("KeyedContainer", Global);
+      ("KeyedContainer", HH);
       ("KeyedIterable", HH);
       ("KeyedIterator", HH);
-      ("KeyedTraversable", Global);
+      ("KeyedTraversable", HH);
       ("keyset", HH);
       ("Map", HH);
       ("ObjprofObjectStats", HH);
@@ -61,7 +61,7 @@ let types =
       ("Shapes", HH);
       ("SleepWaitHandle", HH);
       ("StaticWaitHandle", HH);
-      ("Traversable", Global);
+      ("Traversable", HH);
       ("typename", HH);
       ("TypeStructure", HH);
       ("TypeStructureKind", HH);

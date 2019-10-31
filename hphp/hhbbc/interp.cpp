@@ -3659,7 +3659,7 @@ void in(ISS& env, const bc::SetOpS& op) {
     if (vname && vname->m_type == KindOfPersistentString) {
       mergeSelfProp(env, vname->m_data.pstr, TInitCell);
     } else {
-      loseNonRefSelfPropTypes(env);
+      killSelfProps(env);
     }
   }
 
@@ -3705,7 +3705,7 @@ void in(ISS& env, const bc::IncDecS& op) {
     if (vname && vname->m_type == KindOfPersistentString) {
       mergeSelfProp(env, vname->m_data.pstr, TInitCell);
     } else {
-      loseNonRefSelfPropTypes(env);
+      killSelfProps(env);
     }
   }
 

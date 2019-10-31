@@ -322,7 +322,7 @@ void miThrow(ISS& env) {
 void setLocalForBase(ISS& env, Type ty, LocalId firstKeyLoc) {
   assert(mustBeInLocal(env.collect.mInstrState.base));
   if (env.collect.mInstrState.base.locLocal == NoLocalId) {
-    return loseNonRefLocalTypes(env);
+    return killLocals(env);
   }
   FTRACE(4, "      ${} := {}\n",
     env.collect.mInstrState.base.locName
@@ -1126,7 +1126,7 @@ void miFinalSetOpProp(ISS& env, int32_t nDiscard,
     if (name) {
       mergeThisProp(env, name, resultTy);
     } else {
-      loseNonRefThisPropTypes(env);
+      killThisProps(env);
     }
   }
 
@@ -1164,7 +1164,7 @@ void miFinalIncDecProp(ISS& env, int32_t nDiscard,
     if (name) {
       mergeThisProp(env, name, prePropTy);
     } else {
-      loseNonRefThisPropTypes(env);
+      killThisProps(env);
     }
   }
 

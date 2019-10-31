@@ -844,20 +844,6 @@ LocalId findLocal(ISS& env, SString name) {
   return NoLocalId;
 }
 
-// Force non-ref locals to TCell.  Used when something modifies an
-// unknown local's value, without changing reffiness.
-void loseNonRefLocalTypes(ISS& env) {
-  readUnknownLocals(env);
-  FTRACE(2, "    loseNonRefLocalTypes\n");
-  for (auto& l : env.state.locals) {
-    if (l.subtypeOf(BCell)) l = TCell;
-  }
-  killAllLocEquiv(env);
-  killAllStkEquiv(env);
-  killAllIterEquivs(env);
-  killThisLoc(env, NoLocalId);
-}
-
 void killLocals(ISS& env) {
   FTRACE(2, "    killLocals\n");
   readUnknownLocals(env);
@@ -995,22 +981,6 @@ void unsetUnknownThisProp(ISS& env) {
   }
 }
 
-/*
- * Forces non-ref property types up to TCell.  This is used when an
- * operation affects an unknown property on $this, but can't change
- * its reffiness.  This could only do TInitCell, but we're just
- * going to gradually get rid of the callsites of this.
- */
-void loseNonRefThisPropTypes(ISS& env) {
-  FTRACE(2, "    loseNonRefThisPropTypes\n");
-  for (auto& kv : env.collect.props.privateProperties()) {
-    if (kv.second.ty.subtypeOf(BCell)) {
-      kv.second.ty |=
-        adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TCell);
-    }
-  }
-}
-
 //////////////////////////////////////////////////////////////////////
 // properties on self::
 
@@ -1069,25 +1039,6 @@ template<class MapFn>
 void mergeEachSelfPropRaw(ISS& env, MapFn fn) {
   for (auto& kv : env.collect.props.privateStatics()) {
     mergeSelfProp(env, kv.first, fn(kv.second.ty));
-  }
-}
-
-/*
- * Forces non-ref static properties up to TCell.  This is used when
- * an operation affects an unknown static property on self::, but
- * can't change its reffiness.
- *
- * This could only do TInitCell because static properties can never
- * be unset.  We're just going to get rid of the callers of this
- * function over a few more changes, though.
- */
-void loseNonRefSelfPropTypes(ISS& env) {
-  FTRACE(2, "    loseNonRefSelfPropTypes\n");
-  for (auto& kv : env.collect.props.privateStatics()) {
-    if (kv.second.ty.subtypeOf(BInitCell)) {
-      kv.second.ty |=
-        adjust_type_for_prop(env.index, *env.ctx.cls, kv.second.tc, TCell);
-    }
   }
 }
 

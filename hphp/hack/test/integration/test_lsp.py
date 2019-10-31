@@ -4296,6 +4296,81 @@ class TestLsp(TestCase[LspTestDriver]):
                     "activeParameter": 0,
                 },
             )
+            .request(
+                comment="signature help is highlighting correct param"
+                "(right of open paren)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 24, "character": 33},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "function test_signature_help_highlight"
+                            "(\n  string $param1,\n  string $param2,"
+                            "\n  string $param3\n): string",
+                            "parameters": [
+                                {"label": "$param1"},
+                                {"label": "$param2"},
+                                {"label": "$param3"},
+                            ],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 0,
+                },
+            )
+            .request(
+                comment="signature help is highlighting correct param"
+                "(right of first comma)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 24, "character": 39},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "function test_signature_help_highlight"
+                            "(\n  string $param1,\n  string $param2,"
+                            "\n  string $param3\n): string",
+                            "parameters": [
+                                {"label": "$param1"},
+                                {"label": "$param2"},
+                                {"label": "$param3"},
+                            ],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 1,
+                },
+            )
+            .request(
+                comment="signature help is highlighting correct param"
+                "(right of second comma)",
+                method="textDocument/signatureHelp",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 24, "character": 48},
+                },
+                result={
+                    "signatures": [
+                        {
+                            "label": "function test_signature_help_highlight"
+                            "(\n  string $param1,\n  string $param2,"
+                            "\n  string $param3\n): string",
+                            "parameters": [
+                                {"label": "$param1"},
+                                {"label": "$param2"},
+                                {"label": "$param3"},
+                            ],
+                        }
+                    ],
+                    "activeSignature": 0,
+                    "activeParameter": 2,
+                },
+            )
             .request(method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)

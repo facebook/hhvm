@@ -22,6 +22,7 @@ function test_signature_help(): void
   test_signature_help_params1("hi", "there");
   test_signature_help_params2("hi", "there");
   test_signature_help_params3("hi", "there");
+  test_signature_help_highlight("hi", "there", "bootcamp");
 }
 
 /* comment describing the method
@@ -43,5 +44,13 @@ function test_signature_help_params2(string $param1, string $param2): void {}
  *         'hack'
 */
 function test_signature_help_params3(string $param1, string $param2): string {
+  return 'hack';
+}
+
+function test_signature_help_highlight(
+  string $param1,
+  string $param2,
+  string $param3,
+): string {
   return 'hack';
 }

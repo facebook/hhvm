@@ -158,9 +158,15 @@ struct ProxygenTransportTest : ProxygenTransportBasicTest {
   void expectPushPromiseAndHeaders(
     MockHTTPTransaction& pushTxn, uint8_t pri,
     HTTPPushTransactionHandler**pushHandlerPtr) {
-    EXPECT_CALL(m_txn, newPushedTransaction(_))
+#ifdef FACEBOOK
+    EXPECT_CALL(m_txn, newPushedTransaction(_,_))
       .WillOnce(DoAll(SaveArg<0>(pushHandlerPtr),
                       Return(&pushTxn)));
+#else
+    EXPECT_CALL(m_txn, newPushedTransaction(_))
+        .WillOnce(DoAll(SaveArg<0>(pushHandlerPtr),
+                        Return(&pushTxn)));
+#endif
     EXPECT_CALL(pushTxn, sendHeaders(_))
       .WillOnce(Invoke([pri] (const HTTPMessage& promise) {
             EXPECT_TRUE(promise.isRequest());

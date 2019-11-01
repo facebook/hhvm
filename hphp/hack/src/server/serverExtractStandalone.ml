@@ -759,18 +759,13 @@ let construct_enum tcopt enum fields =
     value_exn UnexpectedDependency @@ Decl_provider.Class.enum_type enum
   in
   let string_enum_const = function
-    | Typing_deps.Dep.Const (_, name) ->
-      (* Say we have an
-         enum MyEnum {
-           FIRST = 1;
-         }
-         To generate an initializer for FIRST, we should pass MyEnum's base type (int),
-         and not FIRST's type (MyEnum) *)
-      Printf.sprintf
-        "%s = %s;"
-        name
-        (get_init_from_type tcopt enum_type.te_base)
-    | _ -> raise UnexpectedDependency
+    | Typing_deps.Dep.Const (_, name) when name <> "class" ->
+      Some
+        (Printf.sprintf
+           "%s = %s;"
+           name
+           (get_init_from_type tcopt enum_type.te_base))
+    | _ -> None
   in
   let base = Typing_print.full_decl tcopt enum_type.te_base in
   let cons =
@@ -781,7 +776,7 @@ let construct_enum tcopt enum fields =
   let enum_decl =
     Printf.sprintf "enum %s: %s%s" (strip_ns enum_name) base cons
   in
-  let constants = List.map fields ~f:string_enum_const in
+  let constants = List.filter_map fields ~f:string_enum_const in
   Printf.sprintf "%s {%s}" enum_decl (String.concat ~sep:"\n" constants)
 
 let get_constructor_declaration tcopt cls prop_names =

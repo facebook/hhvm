@@ -1,0 +1,11 @@
+<?hh
+function with_enum_class_name(): void {
+  $_ = SomeEnum::class;
+}
+enum SomeEnum: int {
+  SECOND = 0;
+  FIRST = 0;
+}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

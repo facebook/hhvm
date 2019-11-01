@@ -21,6 +21,10 @@ enum ThirdEnum: SomeEnumType {
 
 function with_enum_type_alias(ThirdEnum $_): void {}
 
+function with_enum_class_name(): void {
+  $_ = SomeEnum::class;
+}
+
 abstract class WithAbstractConst {
   abstract const type ABS_WO_CONSTRAINT;
   abstract const type ABS_WITH_CONSTRAINT as string;

@@ -1447,12 +1447,19 @@ let make_ide_completion_response
               [("base_class", Hh_json.JSON_String base_class)]
             | None -> []
           in
+          let ranking_detail =
+            match completion.ranking_details with
+            | Some details ->
+              [("ranking_detail", Hh_json.JSON_String details.detail)]
+            | None -> []
+          in
           (* If we do not have a correct file position, skip sending that data *)
           if Int.equal line 0 && Int.equal start 0 then
             Some
               (Hh_json.JSON_Object
                  ( [("fullname", Hh_json.JSON_String completion.res_fullname)]
-                 @ base_class ))
+                 @ base_class
+                 @ ranking_detail ))
           else
             Some
               (Hh_json.JSON_Object
@@ -1469,7 +1476,8 @@ let make_ide_completion_response
                      ("line", Hh_json.int_ line);
                      ("char", Hh_json.int_ start);
                    ]
-                 @ base_class ))
+                 @ base_class
+                 @ ranking_detail ))
         in
         let hack_to_sort_text (completion : complete_autocomplete_result) :
             string option =
@@ -1603,6 +1611,13 @@ let docblock_to_markdown (raw_docblock : DocblockService.result) :
            | DocblockService.HackSnippet txt -> MarkedCode ("hack", txt) :: acc
            | DocblockService.XhpSnippet txt -> MarkedCode ("html", txt) :: acc))
 
+let docblock_with_ranking_detail
+    (raw_docblock : DocblockService.result) (ranking_detail : string option) :
+    DocblockService.result =
+  match ranking_detail with
+  | Some detail -> raw_docblock @ [DocblockService.Markdown detail]
+  | None -> raw_docblock
+
 let do_completionItemResolve
     (conn : server_conn)
     (ref_unblocked_time : float ref)
@@ -1623,6 +1638,7 @@ let do_completionItemResolve
         let line = Jget.int_exn data "line" in
         let column = Jget.int_exn data "char" in
         let base_class = Jget.string_opt data "base_class" in
+        let ranking_detail = Jget.string_opt data "ranking_detail" in
         (* If not found ... *)
         if line = 0 && column = 0 then (
           (* For global symbols such as functions, classes, enums, etc, we
@@ -1635,7 +1651,7 @@ let do_completionItemResolve
             ServerCommandTypes.DOCBLOCK_FOR_SYMBOL (fullname, kind)
           in
           let%lwt raw_docblock = rpc conn ref_unblocked_time command in
-          Lwt.return raw_docblock
+          Lwt.return (docblock_with_ranking_detail raw_docblock ranking_detail)
         ) else
           (* Okay let's get a docblock for this specific location *)
           let command =
@@ -1643,7 +1659,7 @@ let do_completionItemResolve
               (filename, line, column, base_class, kind)
           in
           let%lwt raw_docblock = rpc conn ref_unblocked_time command in
-          Lwt.return raw_docblock
+          Lwt.return (docblock_with_ranking_detail raw_docblock ranking_detail)
       (* If that failed, fetch docblock using just the symbol name *)
     with _ ->
       let symbolname = params.Completion.label in
@@ -1687,6 +1703,7 @@ let do_resolve_local
         let line = Jget.int_exn data "line" in
         let column = Jget.int_exn data "char" in
         let file_contents = get_document_contents editor_open_files uri in
+        let ranking_detail = Jget.string_opt data "ranking_detail" in
         if line = 0 && column = 0 then failwith "NoFileLineColumnData";
         let request =
           ClientIdeMessage.Completion_resolve_location
@@ -1704,7 +1721,10 @@ let do_resolve_local
         let%lwt location_result = ClientIdeService.rpc ide_service request in
         (match location_result with
         | Ok raw_docblock ->
-          let documentation = docblock_to_markdown raw_docblock in
+          let documentation =
+            docblock_with_ranking_detail raw_docblock ranking_detail
+            |> docblock_to_markdown
+          in
           Lwt.return { params with Completion.documentation }
         | Error error_message ->
           failwith (Printf.sprintf "Local resolve failed: %s" error_message))

@@ -80,7 +80,7 @@ Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum);
  * register issues.
  */
 template<typename T>
-Vreg emitTLSLea(Vout& v, TLSDatum<T> datum);
+Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset = 0);
 
 /*
  * Load the value of the ThreadLocalNoCheck `datum' into `d'.

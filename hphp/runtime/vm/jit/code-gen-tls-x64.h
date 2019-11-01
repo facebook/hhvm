@@ -57,10 +57,18 @@ Vptr emitTLSAddr(Vout& /*v*/, TLSDatum<T> datum) {
 }
 
 template<typename T>
-Vreg emitTLSLea(Vout& v, TLSDatum<T> datum) {
-  auto const vaddr = v.cns(uintptr_t(datum.tls) - tlsBase());
+Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset) {
+  auto const base = v.makeReg();
   auto const addr = v.makeReg();
-  v << addqmr{Vptr{baseless(0), Segment::FS}, vaddr, addr, v.makeReg()};
+  v << load{Vptr{baseless(0), Segment::FS}, base};
+
+  auto const tlsBaseAddr = tlsBase();
+  auto const datumAddr = uintptr_t(datum.tls) + offset;
+  if (datumAddr < tlsBaseAddr) {
+    v << subq{v.cns(tlsBaseAddr - datumAddr), base, addr, v.makeReg()};
+  } else {
+    v << addq{v.cns(datumAddr - tlsBaseAddr), base, addr, v.makeReg()};
+  }
   return addr;
 }
 
@@ -123,9 +131,9 @@ Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
 }
 
 template<typename T>
-Vreg emitTLSLea(Vout& v, TLSDatum<T> datum) {
+Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset) {
   auto const b = v.makeReg();
-  v << lea{detail::emitTLSAddr(v, datum), b};
+  v << lea{detail::emitTLSAddr(v, datum) + offset, b};
   return b;
 }
 

@@ -41,9 +41,9 @@ Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
 }
 
 template<typename T>
-Vreg emitTLSLea(Vout& v, TLSDatum<T> datum) {
+Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset) {
   auto const b = v.makeReg();
-  v << lea{detail::emitTLSAddr(v, datum), b};
+  v << lea{detail::emitTLSAddr(v, datum) + offset, b};
   return b;
 }
 

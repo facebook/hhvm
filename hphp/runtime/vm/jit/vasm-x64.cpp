@@ -94,7 +94,7 @@ struct Vgen {
 
   // native function abi
   void emit(const call& i);
-  void emit(const callm& i) { a.call(i.target); }
+  void emit(const callm& i) { a.prefix(i.target.mr()).call(i.target); }
   void emit(const callr& i) { a.call(i.target); }
   void emit(const calls& i);
   void emit(const ret& /*i*/) { a.ret(); }
@@ -125,17 +125,17 @@ struct Vgen {
   void emit(absdbl i) { unary(i); a.psllq(1, i.d); a.psrlq(1, i.d); }
   void emit(andb i) { commuteSF(i); a.andb(i.s0, i.d); }
   void emit(andbi i) { binary(i); a.andb(i.s0, i.d); }
-  void emit(const andbim& i) { a.andb(i.s, i.m); }
+  void emit(const andbim& i) { a.prefix(i.m.mr()).andb(i.s, i.m); }
   void emit(andw i) { commuteSF(i); a.andw(i.s0, i.d); }
   void emit(andwi i) { binary(i); a.andw(i.s0, i.d); }
   void emit(andl i) { commuteSF(i); a.andl(i.s0, i.d); }
   void emit(andli i) { binary(i); a.andl(i.s0, i.d); }
   void emit(andq i) { commuteSF(i); a.andq(i.s0, i.d); }
   void emit(andqi i);
-  void emit(const addwm& i) { a.addw(i.s0, i.m); }
+  void emit(const addwm& i) { a.prefix(i.m.mr()).addw(i.s0, i.m); }
   void emit(addl i) { commuteSF(i); a.addl(i.s0, i.d); }
   void emit(addli i) { binary(i); a.addl(i.s0, i.d); }
-  void emit(const addlm& i) { a.addl(i.s0, i.m); }
+  void emit(const addlm& i) { a.prefix(i.m.mr()).addl(i.s0, i.m); }
   void emit(const addlim& i);
   void emit(addq i) { commuteSF(i); a.addq(i.s0, i.d); }
   void emit(addqi i) { binary(i); a.addq(i.s0, i.d); }
@@ -155,57 +155,57 @@ struct Vgen {
   void emit(const cmpbm& i) { a.prefix(i.s1.mr()).cmpb(i.s0, i.s1); }
   void emit(const cmpw& i) { a.cmpw(i.s0, i.s1); }
   void emit(const cmpwi& i) { a.cmpw(i.s0, i.s1); }
-  void emit(const cmpwim& i) { a.cmpw(i.s0, i.s1); }
-  void emit(const cmpwm& i) { a.cmpw(i.s0, i.s1); }
+  void emit(const cmpwim& i) { a.prefix(i.s1.mr()).cmpw(i.s0, i.s1); }
+  void emit(const cmpwm& i) { a.prefix(i.s1.mr()).cmpw(i.s0, i.s1); }
   void emit(const cmpl& i) { a.cmpl(i.s0, i.s1); }
   void emit(const cmpli& i) { a.cmpl(i.s0, i.s1); }
-  void emit(const cmplim& i) { a.cmpl(i.s0, i.s1); }
-  void emit(const cmplm& i) { a.cmpl(i.s0, i.s1); }
+  void emit(const cmplim& i) { a.prefix(i.s1.mr()).cmpl(i.s0, i.s1); }
+  void emit(const cmplm& i) { a.prefix(i.s1.mr()).cmpl(i.s0, i.s1); }
   void emit(const cmpq& i) { a.cmpq(i.s0, i.s1); }
   void emit(const cmpqi& i) { a.cmpq(i.s0, i.s1); }
-  void emit(const cmpqim& i) { a.cmpq(i.s0, i.s1); }
-  void emit(const cmpqm& i) { a.cmpq(i.s0, i.s1); }
+  void emit(const cmpqim& i) { a.prefix(i.s1.mr()).cmpq(i.s0, i.s1); }
+  void emit(const cmpqm& i) { a.prefix(i.s1.mr()).cmpq(i.s0, i.s1); }
   void emit(cmpsd i) { noncommute(i); a.cmpsd(i.s0, i.d, i.pred); }
   void emit(const cqo& /*i*/) { a.cqo(); }
   void emit(const cvttsd2siq& i) { a.cvttsd2siq(i.s, i.d); }
   void emit(const cvtsi2sd& i);
   void emit(const cvtsi2sdm& i);
   void emit(decl i) { unary(i); a.decl(i.d); }
-  void emit(const declm& i) { a.decl(i.m); }
+  void emit(const declm& i) { a.prefix(i.m.mr()).decl(i.m); }
   void emit(decq i) { unary(i); a.decq(i.d); }
-  void emit(const decqm& i) { a.decq(i.m); }
-  void emit(const decqmlock& i) { a.decqlock(i.m); }
+  void emit(const decqm& i) { a.prefix(i.m.mr()).decq(i.m); }
+  void emit(const decqmlock& i) { a.prefix(i.m.mr()).decqlock(i.m); }
   void emit(divsd i) { noncommute(i); a.divsd(i.s0, i.d); }
   void emit(imul i) { commuteSF(i); a.imul(i.s0, i.d); }
   void emit(const idiv& i) { a.idiv(i.s); }
   void emit(incl i) { unary(i); a.incl(i.d); }
-  void emit(const inclm& i) { a.incl(i.m); }
+  void emit(const inclm& i) { a.prefix(i.m.mr()).incl(i.m); }
   void emit(incq i) { unary(i); a.incq(i.d); }
-  void emit(const incqm& i) { a.incq(i.m); }
-  void emit(const incwm& i) { a.incw(i.m); }
+  void emit(const incqm& i) { a.prefix(i.m.mr()).incq(i.m); }
+  void emit(const incwm& i) { a.prefix(i.m.mr()).incw(i.m); }
   void emit(const jcc& i);
   void emit(const jcci& i);
   void emit(const jmp& i);
   void emit(const jmpr& i) { a.jmp(i.target); }
-  void emit(const jmpm& i) { a.jmp(i.target); }
+  void emit(const jmpm& i) { a.prefix(i.target.mr()).jmp(i.target); }
   void emit(const jmpi& i);
   void emit(const lea& i);
   void emit(const leap& i) { a.lea(i.s, i.d); }
   void emit(const leav& i);
   void emit(const lead& i) { a.lea(rip[(intptr_t)i.s.get()], i.d); }
-  void emit(const loadups& i) { a.movups(i.s, i.d); }
-  void emit(const loadtqb& i) { a.loadb(i.s, i.d); }
-  void emit(const loadb& i) { a.loadb(i.s, i.d); }
-  void emit(const loadw& i) { a.loadw(i.s, i.d); }
-  void emit(const loadtql& i) { a.loadl(i.s, i.d); }
-  void emit(const loadl& i) { a.loadl(i.s, i.d); }
+  void emit(const loadups& i) { a.prefix(i.s.mr()).movups(i.s, i.d); }
+  void emit(const loadtqb& i) { a.prefix(i.s.mr()).loadb(i.s, i.d); }
+  void emit(const loadb& i) { a.prefix(i.s.mr()).loadb(i.s, i.d); }
+  void emit(const loadw& i) { a.prefix(i.s.mr()).loadw(i.s, i.d); }
+  void emit(const loadtql& i) { a.prefix(i.s.mr()).loadl(i.s, i.d); }
+  void emit(const loadl& i) { a.prefix(i.s.mr()).loadl(i.s, i.d); }
   void emit(const loadqp& i) { a.loadq(i.s, i.d); }
   void emit(const loadqd& i) { a.loadq(rip[(intptr_t)i.s.get()], i.d); }
-  void emit(const loadsd& i) { a.movsd(i.s, i.d); }
-  void emit(const loadzbl& i) { a.loadzbl(i.s, i.d); }
-  void emit(const loadzbq& i) { a.loadzbl(i.s, Reg32(i.d)); }
-  void emit(const loadsbq& i) { a.loadsbq(i.s, i.d); }
-  void emit(const loadzlq& i) { a.loadl(i.s, Reg32(i.d)); }
+  void emit(const loadsd& i) { a.prefix(i.s.mr()).movsd(i.s, i.d); }
+  void emit(const loadzbl& i) { a.prefix(i.s.mr()).loadzbl(i.s, i.d); }
+  void emit(const loadzbq& i) { a.prefix(i.s.mr()).loadzbl(i.s, Reg32(i.d)); }
+  void emit(const loadsbq& i) { a.prefix(i.s.mr()).loadsbq(i.s, i.d); }
+  void emit(const loadzlq& i) { a.prefix(i.s.mr()).loadl(i.s, Reg32(i.d)); }
   void emit(const movb& i) { a.movb(i.s, i.d); }
   void emit(const movl& i) { a.movl(i.s, i.d); }
   void emit(const movzbw& i) { a.movzbl(i.s, Reg32(i.d)); }
@@ -221,19 +221,19 @@ struct Vgen {
   void emit(not i) { unary(i); a.not(i.d); }
   void emit(notb i) { unary(i); a.notb(i.d); }
   void emit(orbi i) { binary(i); a.orb(i.s0, i.d); }
-  void emit(const orbim& i) { a.orb(i.s0, i.m); }
-  void emit(const orwim& i) { a.orw(i.s0, i.m); }
-  void emit(const orlim& i) { a.orl(i.s0, i.m); }
+  void emit(const orbim& i) { a.prefix(i.m.mr()).orb(i.s0, i.m); }
+  void emit(const orwim& i) { a.prefix(i.m.mr()).orw(i.s0, i.m); }
+  void emit(const orlim& i) { a.prefix(i.m.mr()).orl(i.s0, i.m); }
   void emit(orq i) { commuteSF(i); a.orq(i.s0, i.d); }
   void emit(orwi i) { binary(i); a.orw(i.s0, i.d); }
   void emit(orli i) { binary(i); a.orl(i.s0, i.d); }
   void emit(orqi i) { binary(i); a.orq(i.s0, i.d); }
-  void emit(const orqim& i) { a.orq(i.s0, i.m); }
+  void emit(const orqim& i) { a.prefix(i.m.mr()).orq(i.s0, i.m); }
   void emit(const pop& i) { a.pop(i.d); }
-  void emit(const popm& i) { a.pop(i.d); }
+  void emit(const popm& i) { a.prefix(i.d.mr()).pop(i.d); }
   void emit(const popf& i) { assertx(i.d == RegSF{0}); a.popf(); }
   void emit(const push& i) { a.push(i.s); }
-  void emit(const pushm& i) { a.push(i.s); }
+  void emit(const pushm& i) { a.prefix(i.s.mr()).push(i.s); }
   void emit(const pushf& i) { assertx(i.s == RegSF{0}); a.pushf(); }
   void emit(const roundsd& i) { a.roundsd(i.dir, i.s, i.d); }
   void emit(const sarq& i) { unary(i); a.sarq(i.d); }
@@ -246,15 +246,15 @@ struct Vgen {
   void emit(shrli i) { binary(i); a.shrl(i.s0, i.d); }
   void emit(shrqi i) { binary(i); a.shrq(i.s0, i.d); }
   void emit(const sqrtsd& i) { a.sqrtsd(i.s, i.d); }
-  void emit(const storeups& i) { a.movups(i.s, i.m); }
-  void emit(const storeb& i) { a.storeb(i.s, i.m); }
+  void emit(const storeups& i) { a.prefix(i.m.mr()).movups(i.s, i.m); }
+  void emit(const storeb& i) { a.prefix(i.m.mr()).storeb(i.s, i.m); }
   void emit(const storebi& i);
-  void emit(const storel& i) { a.storel(i.s, i.m); }
-  void emit(const storeli& i) { a.storel(i.s, i.m); }
+  void emit(const storel& i) { a.prefix(i.m.mr()).storel(i.s, i.m); }
+  void emit(const storeli& i) { a.prefix(i.m.mr()).storel(i.s, i.m); }
   void emit(const storeqi& i);
-  void emit(const storesd& i) { a.movsd(i.s, i.m); }
-  void emit(const storew& i) { a.storew(i.s, i.m); }
-  void emit(const storewi& i) { a.storew(i.s, i.m); }
+  void emit(const storesd& i) { a.prefix(i.m.mr()).movsd(i.s, i.m); }
+  void emit(const storew& i) { a.prefix(i.m.mr()).storew(i.s, i.m); }
+  void emit(const storewi& i) { a.prefix(i.m.mr()).storew(i.s, i.m); }
   void emit(subl i) { noncommute(i); a.subl(i.s0, i.d); }
   void emit(subli i) { binary(i); a.subl(i.s0, i.d); }
   void emit(subq i) { noncommute(i); a.subq(i.s0, i.d); }
@@ -262,19 +262,19 @@ struct Vgen {
   void emit(subsd i) { noncommute(i); a.subsd(i.s0, i.d); }
   void emit(const testb& i) { a.testb(i.s0, i.s1); }
   void emit(const testbi& i) { a.testb(i.s0, i.s1); }
-  void emit(const testbm& i) { a.testb(i.s0, i.s1); }
-  void emit(const testbim& i) { a.testb(i.s0, i.s1); }
+  void emit(const testbm& i) { a.prefix(i.s1.mr()).testb(i.s0, i.s1); }
+  void emit(const testbim& i) { a.prefix(i.s1.mr()).testb(i.s0, i.s1); }
   void emit(const testw& i) { a.testw(i.s0, i.s1); }
   void emit(const testwi& i);
-  void emit(const testwm& i) { a.testw(i.s0, i.s1); }
+  void emit(const testwm& i) { a.prefix(i.s1.mr()).testw(i.s0, i.s1); }
   void emit(const testwim& i);
   void emit(const testl& i) { a.testl(i.s0, i.s1); }
   void emit(const testli& i);
-  void emit(const testlm& i) { a.testl(i.s0, i.s1); }
+  void emit(const testlm& i) { a.prefix(i.s1.mr()).testl(i.s0, i.s1); }
   void emit(const testlim& i);
   void emit(const testq& i) { a.testq(i.s0, i.s1); }
   void emit(const testqi& i);
-  void emit(const testqm& i) { a.testq(i.s0, i.s1); }
+  void emit(const testqm& i) { a.prefix(i.s1.mr()).testq(i.s0, i.s1); }
   void emit(const testqim& i);
   void emit(const trap& i);
   void emit(const ucomisd& i) { a.ucomisd(i.s0, i.s1); }
@@ -801,13 +801,13 @@ void Vgen<X64Asm>::emit(const cloadq& i) {
       // We can't move f over d or we'll clobber the Vptr we need to load from.
       // Since cload does the load unconditionally anyway, we can just load and
       // cmov.
-      a.loadq(i.t, i.d);
+      a.prefix(m.mr()).loadq(i.t, i.d);
       a.cmov_reg64_reg64(ccNegate(i.cc), i.f, i.d);
       return;
     }
     a.movq(i.f, i.d);
   }
-  a.cload_reg64_disp_reg64(i.cc, m.base, m.disp, i.d);
+  a.prefix(m.mr()).cload_reg64_disp_reg64(i.cc, m.base, m.disp, i.d);
 }
 
 // add s0 s1 d => mov s1->d; d += s0
@@ -875,6 +875,7 @@ void Vgen<X64Asm>::emit(const jmpi& i) {
 
 template<class X64Asm>
 void Vgen<X64Asm>::emit(const lea& i) {
+  assertx(i.s.seg == Segment::DS);
   // could do this in a simplify pass
   if (i.s.disp == 0 && i.s.base.isValid() && !i.s.index.isValid()) {
     emit(copy{i.s.base, i.d});
@@ -929,13 +930,13 @@ void Vgen<X64Asm>::emit(const testwi& i) {
 template<class X64Asm>
 void Vgen<X64Asm>::Vgen::emit(const testwim& i) {
   if (testimHelper(*this, i, i.s0.w())) return;
-  a.testw(i.s0, i.s1);
+  a.prefix(i.s1.mr()).testw(i.s0, i.s1);
 }
 
 template<class X64Asm>
 void Vgen<X64Asm>::Vgen::emit(const testlim& i) {
   if (testimHelper(*this, i, i.s0.l())) return;
-  a.testl(i.s0, i.s1);
+  a.prefix(i.s1.mr()).testl(i.s0, i.s1);
 }
 
 template<class X64Asm>
@@ -968,7 +969,7 @@ void Vgen<X64Asm>::emit(const testqim& i) {
     // by emitting a testlim.
     emit(testlim{int32_t(i.s0.q()), i.s1, i.sf});
   } else {
-    a.testq(i.s0, i.s1);
+    a.prefix(i.s1.mr()).testq(i.s0, i.s1);
   }
 }
 

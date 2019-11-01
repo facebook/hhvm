@@ -44,14 +44,14 @@ inline Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
 }
 
 template<typename T>
-inline Vreg emitTLSLea(Vout& v, TLSDatum<T> datum) {
+inline Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset) {
   switch (arch()) {
     case Arch::X64:
-      return x64::detail::emitTLSLea(v, datum);
+      return x64::detail::emitTLSLea(v, datum, offset);
     case Arch::ARM:
-      return arm::detail::emitTLSLea(v, datum);
+      return arm::detail::emitTLSLea(v, datum, offset);
     case Arch::PPC64:
-      return ppc64::detail::emitTLSLea(v, datum);
+      return ppc64::detail::emitTLSLea(v, datum, offset);
   }
   not_reached();
 }

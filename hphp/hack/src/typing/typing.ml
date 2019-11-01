@@ -34,7 +34,6 @@ module Inter = Typing_intersection
 module SN = Naming_special_names
 module TVis = Typing_visibility
 module TNBody = Typing_naming_body
-module T = Aast
 module Phase = Typing_phase
 module TOG = Typing_object_get
 module Subst = Decl_subst
@@ -505,16 +504,16 @@ let rec bind_param env (ty1, param) =
   in
   let tparam =
     {
-      T.param_annotation = Tast.make_expr_annotation param.param_pos ty1;
-      T.param_type_hint = (ty1, hint_of_type_hint param.param_type_hint);
-      T.param_is_reference = param.param_is_reference;
-      T.param_is_variadic = param.param_is_variadic;
-      T.param_pos = param.param_pos;
-      T.param_name = param.param_name;
-      T.param_expr = param_te;
-      T.param_callconv = param.param_callconv;
-      T.param_user_attributes = user_attributes;
-      T.param_visibility = param.param_visibility;
+      Aast.param_annotation = Tast.make_expr_annotation param.param_pos ty1;
+      Aast.param_type_hint = (ty1, hint_of_type_hint param.param_type_hint);
+      Aast.param_is_reference = param.param_is_reference;
+      Aast.param_is_variadic = param.param_is_variadic;
+      Aast.param_pos = param.param_pos;
+      Aast.param_name = param.param_name;
+      Aast.param_expr = param_te;
+      Aast.param_callconv = param.param_callconv;
+      Aast.param_user_attributes = user_attributes;
+      Aast.param_visibility = param.param_visibility;
     }
   in
   let mode = get_param_mode param.param_is_reference param.param_callconv in
@@ -606,12 +605,12 @@ and get_callable_variadicity
     let (env, ty) = make_param_local_ty env variadicity_decl_ty vparam in
     check_param env vparam ty partial_callback;
     let (env, t_variadic) = bind_param env (ty, vparam) in
-    (env, T.FVvariadicArg t_variadic)
+    (env, Aast.FVvariadicArg t_variadic)
   | FVellipsis p ->
     if is_function && Partial.should_check_error (Env.get_mode env) 4223 then
       Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
-    (env, T.FVellipsis p)
-  | FVnonVariadic -> (env, T.FVnonVariadic)
+    (env, Aast.FVellipsis p)
+  | FVnonVariadic -> (env, Aast.FVnonVariadic)
 
 (*****************************************************************************)
 (* Now we are actually checking stuff! *)
@@ -742,27 +741,27 @@ and fun_def tcopt f : (Tast.fun_def * Typing_env_types.global_tvenv) option =
       let env = Typing_solver.expand_bounds_of_global_tyvars env in
       let fundef =
         {
-          T.f_annotation = Env.save local_tpenv env;
-          T.f_span = f.f_span;
-          T.f_mode = f.f_mode;
-          T.f_ret = (locl_ty, hint_of_type_hint f.f_ret);
-          T.f_name = f.f_name;
-          T.f_tparams = tparams;
-          T.f_where_constraints = f.f_where_constraints;
-          T.f_variadic = t_variadic;
-          T.f_params = typed_params;
-          T.f_fun_kind = f.f_fun_kind;
-          T.f_file_attributes = file_attrs;
-          T.f_user_attributes = user_attributes;
-          T.f_body =
+          Aast.f_annotation = Env.save local_tpenv env;
+          Aast.f_span = f.f_span;
+          Aast.f_mode = f.f_mode;
+          Aast.f_ret = (locl_ty, hint_of_type_hint f.f_ret);
+          Aast.f_name = f.f_name;
+          Aast.f_tparams = tparams;
+          Aast.f_where_constraints = f.f_where_constraints;
+          Aast.f_variadic = t_variadic;
+          Aast.f_params = typed_params;
+          Aast.f_fun_kind = f.f_fun_kind;
+          Aast.f_file_attributes = file_attrs;
+          Aast.f_user_attributes = user_attributes;
+          Aast.f_body =
             {
-              T.fb_ast = tb;
+              Aast.fb_ast = tb;
               fb_annotation = map_funcbody_annotation nb.fb_annotation;
             };
-          T.f_external = f.f_external;
-          T.f_namespace = f.f_namespace;
-          T.f_doc_comment = f.f_doc_comment;
-          T.f_static = f.f_static;
+          Aast.f_external = f.f_external;
+          Aast.f_namespace = f.f_namespace;
+          Aast.f_doc_comment = f.f_doc_comment;
+          Aast.f_static = f.f_static;
         }
       in
       (Typing_lambda_ambiguous.suggest_fun_def env fundef, env.global_tvenv))
@@ -865,9 +864,9 @@ and check_using_expr has_await env ((pos, content) as using_clause) =
       ( Tast.make_typed_expr
           pos
           ty
-          (T.Binop
+          (Aast.Binop
              ( Ast_defs.Eq None,
-               Tast.make_typed_expr lvar_pos ty (T.Lvar lvar),
+               Tast.make_typed_expr lvar_pos ty (Aast.Lvar lvar),
                te )),
         [snd lvar] ) )
   (* Arbitrary expression. This will be assigned to a temporary *)
@@ -898,7 +897,7 @@ and check_using_clause env has_await ((pos, content) as using_clause) =
     let ty_ = Ttuple (List.map typed_using_clauses Tast.get_type) in
     let ty = (Reason.Rnone, ty_) in
     ( env,
-      Tast.make_typed_expr pos ty (T.Expr_list typed_using_clauses),
+      Tast.make_typed_expr pos ty (Aast.Expr_list typed_using_clauses),
       List.concat vars_list )
   | _ ->
     let (env, (typed_using_clause, vars)) =
@@ -951,14 +950,14 @@ and stmt_ env pos st =
       else
         env
     in
-    (env, T.Fallthrough)
+    (env, Aast.Fallthrough)
   | Goto (_, label) ->
     let env = LEnv.move_and_merge_next_in_cont env (C.Goto label) in
-    (env, T.Noop)
+    (env, Aast.Noop)
   | GotoLabel (_, label) ->
     let env = LEnv.update_next_from_conts env [C.Next; C.Goto label] in
-    (env, T.Noop)
-  | Noop -> (env, T.Noop)
+    (env, Aast.Noop)
+  | Noop -> (env, Aast.Noop)
   | Expr e ->
     let (env, te, _) = expr env e in
     let env =
@@ -967,7 +966,7 @@ and stmt_ env pos st =
       else
         env
     in
-    (env, T.Expr te)
+    (env, Aast.Expr te)
   | If (e, b1, b2) ->
     let (env, te, _) = expr env e in
     (* We stash away the locals environment because condition updates it
@@ -984,7 +983,7 @@ and stmt_ env pos st =
     let lenv2 = env.lenv in
     let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
     (* TODO TAST: annotate with joined types *)
-    (env, T.If (te, tb1, tb2))
+    (env, Aast.If (te, tb1, tb2))
   | Return None ->
     let env = check_inout_return env in
     let rty = MakeType.void (Reason.Rwitness pos) in
@@ -1007,7 +1006,7 @@ and stmt_ env pos st =
           ~actual:rty
     in
     let env = LEnv.move_and_merge_next_in_cont env C.Exit in
-    (env, T.Return None)
+    (env, Aast.Return None)
   | Return (Some e) ->
     let env = check_inout_return env in
     let expr_pos = fst e in
@@ -1067,7 +1066,7 @@ and stmt_ env pos st =
         Errors.unify_error
     in
     let env = LEnv.move_and_merge_next_in_cont env C.Exit in
-    (env, T.Return (Some te))
+    (env, Aast.Return (Some te))
   | Do (b, e) as st ->
     (* NOTE: leaks scope as currently implemented; this matches
        the behavior in naming (cf. `do_stmt` in naming/naming.ml).
@@ -1107,7 +1106,7 @@ and stmt_ env pos st =
           let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
           (env, (tb, te)))
     in
-    (env, T.Do (tb, te))
+    (env, Aast.Do (tb, te))
   | While (e, b) as st ->
     let (env, (te, tb)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
@@ -1139,7 +1138,7 @@ and stmt_ env pos st =
           let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
           (env, (te, tb)))
     in
-    (env, T.While (te, tb))
+    (env, Aast.While (te, tb))
   | Using
       {
         us_has_await = has_await;
@@ -1155,8 +1154,8 @@ and stmt_ env pos st =
      * be in scope outside the block *)
     let env = List.fold_left using_vars ~init:env ~f:Env.unset_local in
     ( env,
-      T.Using
-        T.
+      Aast.Using
+        Aast.
           {
             us_has_await = has_await;
             us_expr = typed_using_clause;
@@ -1199,7 +1198,7 @@ and stmt_ env pos st =
           let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
           (env, (te1, te2, te3, tb)))
     in
-    (env, T.For (te1, te2, te3, tb))
+    (env, Aast.For (te1, te2, te3, tb))
   | Switch (((pos, _) as e), cl) ->
     let (env, te, ty) = expr env e in
     (* Exhaustiveness etc is sensitive to unions, so normalize to avoid
@@ -1218,7 +1217,7 @@ and stmt_ env pos st =
           in
           (env, (te, tcl)))
     in
-    (env, T.Switch (te, tcl))
+    (env, Aast.Switch (te, tcl))
   | Foreach (e1, e2, b) as st ->
     (* It's safe to do foreach over a disposable, as no leaking is possible *)
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
@@ -1248,10 +1247,10 @@ and stmt_ env pos st =
           in
           (env, (te1, te2, tb)))
     in
-    (env, T.Foreach (te1, te2, tb))
+    (env, Aast.Foreach (te1, te2, tb))
   | Try (tb, cl, fb) ->
     let (env, ttb, tcl, tfb) = try_catch env tb cl fb in
-    (env, T.Try (ttb, tcl, tfb))
+    (env, Aast.Try (ttb, tcl, tfb))
   | Def_inline _ ->
     (* Do nothing, this doesn't occur in Hack code. *)
     failwith "Should never typecheck nested definitions"
@@ -1270,19 +1269,19 @@ and stmt_ env pos st =
           | None -> (env, (None, te2) :: tel))
     in
     let (env, b) = block env b in
-    (env, T.Awaitall (el, b))
+    (env, Aast.Awaitall (el, b))
   | Throw e ->
     let p = fst e in
     let (env, te, ty) = expr env e in
     let env = exception_ty p env ty in
     let env = move_and_merge_next_in_catch env in
-    (env, T.Throw te)
+    (env, Aast.Throw te)
   | Continue ->
     let env = LEnv.move_and_merge_next_in_cont env C.Continue in
-    (env, T.Continue)
+    (env, Aast.Continue)
   | Break ->
     let env = LEnv.move_and_merge_next_in_cont env C.Break in
-    (env, T.Break)
+    (env, Aast.Break)
   | Let (((p, x) as id), h, rhs) ->
     let (env, hint_ty, expected) =
       match h with
@@ -1312,7 +1311,7 @@ and stmt_ env pos st =
         Option.value_map eid_rhs ~default:env ~f:(Env.set_local_expr_id env x)
       | _ -> env
     in
-    (env, T.Let (id, h, t_rhs))
+    (env, Aast.Let (id, h, t_rhs))
   | Block _
   | Markup _ ->
     failwith
@@ -1451,14 +1450,14 @@ and case_list parent_locals ty env switch_pos cl =
       let (env, tb) = block env b in
       check_fallthrough env switch_pos pos b rl ~is_default:true;
       let (env, tcl) = case_list env rl in
-      (env, T.Default (pos, tb) :: tcl)
+      (env, Aast.Default (pos, tb) :: tcl)
     | Case (((pos, _) as e), b) :: rl ->
       let env = initialize_next_cont env in
       let (env, te, _) = expr env e in
       let (env, tb) = block env b in
       check_fallthrough env switch_pos pos b rl ~is_default:false;
       let (env, tcl) = case_list env rl in
-      (env, T.Case (te, tb) :: tcl)
+      (env, Aast.Case (te, tb) :: tcl)
   in
   let (env, cl, added_empty_default) =
     make_exhaustive_equivalent_case_list env cl
@@ -1527,27 +1526,27 @@ and bind_as_expr env p ty1 ty2 aexpr =
   | As_v ev ->
     let (env, te, _) = assign p env ev ty2 in
     let env = check_reassigned_mutable env te in
-    (env, T.As_v te)
+    (env, Aast.As_v te)
   | Await_as_v (p, ev) ->
     let (env, te, _) = assign p env ev ty2 in
     let env = check_reassigned_mutable env te in
-    (env, T.Await_as_v (p, te))
+    (env, Aast.Await_as_v (p, te))
   | As_kv ((p, ImmutableVar ((_, k) as id)), ev)
   | As_kv ((p, Lvar ((_, k) as id)), ev) ->
     let env = set_valid_rvalue p env k ty1 in
     let (env, te, _) = assign p env ev ty2 in
-    let tk = Tast.make_typed_expr p ty1 (T.Lvar id) in
+    let tk = Tast.make_typed_expr p ty1 (Aast.Lvar id) in
     let env = check_reassigned_mutable env tk in
     let env = check_reassigned_mutable env te in
-    (env, T.As_kv (tk, te))
+    (env, Aast.As_kv (tk, te))
   | Await_as_kv (p, (p1, ImmutableVar ((_, k) as id)), ev)
   | Await_as_kv (p, (p1, Lvar ((_, k) as id)), ev) ->
     let env = set_valid_rvalue p env k ty1 in
     let (env, te, _) = assign p env ev ty2 in
-    let tk = Tast.make_typed_expr p1 ty1 (T.Lvar id) in
+    let tk = Tast.make_typed_expr p1 ty1 (Aast.Lvar id) in
     let env = check_reassigned_mutable env tk in
     let env = check_reassigned_mutable env te in
-    (env, T.Await_as_kv (p, tk, te))
+    (env, Aast.Await_as_kv (p, tk, te))
   | _ ->
     (* TODO Probably impossible, should check that *)
     assert false
@@ -1676,7 +1675,7 @@ and eif env ~(expected : ExpectedTy.t option) p c e1 e2 =
   let lenv2 = env.lenv in
   let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
   let (env, ty) = Union.union env ty1 ty2 in
-  make_result env p (T.Eif (tc, te1, te2)) ty
+  make_result env p (Aast.Eif (tc, te1, te2)) ty
 
 and is_parameter env x = Local_id.Map.mem x (Env.get_params env)
 
@@ -1846,14 +1845,14 @@ and expr_
   | Omitted ->
     let r = Reason.Rwitness p in
     let ty = (r, Typing_utils.tany env) in
-    make_result env p T.Omitted ty
+    make_result env p Aast.Omitted ty
   | ParenthesizedExpr e ->
     let (env, te, ty) = expr env e in
-    make_result env p (T.ParenthesizedExpr te) ty
+    make_result env p (Aast.ParenthesizedExpr te) ty
   | Any -> expr_error env (Reason.Rwitness p) outer
   | Array [] ->
     (* TODO: use expected type to determine expected element type *)
-    make_result env p (T.Array []) (Reason.Rwitness p, Tarraykind AKempty)
+    make_result env p (Aast.Array []) (Reason.Rwitness p, Tarraykind AKempty)
   | Array (x :: rl as l) ->
     (* True if all fields are values, or all fields are key => value *)
     let fields_consistent = check_consistent_fields x rl in
@@ -1888,7 +1887,7 @@ and expr_
       make_result
         env
         p
-        (T.Array (List.map tel (fun e -> T.AFvalue e)))
+        (Aast.Array (List.map tel (fun e -> Aast.AFvalue e)))
         (Reason.Rwitness p, Tarraykind arraykind)
     else if (* TODO TAST: produce a typed expression here *)
             is_vec then
@@ -1914,7 +1913,7 @@ and expr_
       make_result
         env
         p
-        T.Any
+        Aast.Any
         (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
     else
       (* Use expected type to determine expected element type *)
@@ -1950,9 +1949,9 @@ and expr_
       make_result
         env
         p
-        (T.Array
+        (Aast.Array
            (List.map (List.zip_exn key_exprs value_exprs) (fun (tek, tev) ->
-                T.AFkvalue (tek, tev))))
+                Aast.AFkvalue (tek, tev))))
         (Reason.Rwitness p, Tarraykind (AKdarray (key_ty, value_ty)))
   | Varray (th, el)
   | ValCollection (_, th, el) ->
@@ -1975,14 +1974,14 @@ and expr_
         ( get_vc_inst kind,
           class_name,
           subtype_val,
-          (fun th elements -> T.ValCollection (kind, th, elements)),
+          (fun th elements -> Aast.ValCollection (kind, th, elements)),
           fun value_ty ->
             MakeType.class_type (Reason.Rwitness p) class_name [value_ty] )
       | Varray _ ->
         ( get_varray_inst,
           "varray",
           array_value,
-          (fun th elements -> T.Varray (th, elements)),
+          (fun th elements -> Aast.Varray (th, elements)),
           (fun value_ty -> (Reason.Rwitness p, Tarraykind (AKvarray value_ty)))
         )
       | _ ->
@@ -2025,13 +2024,13 @@ and expr_
         let class_name = Nast.kvc_kind_to_name kind in
         ( get_kvc_inst p kind,
           class_name,
-          (fun th pairs -> T.KeyValCollection (kind, th, pairs)),
+          (fun th pairs -> Aast.KeyValCollection (kind, th, pairs)),
           (fun k v -> MakeType.class_type (Reason.Rwitness p) class_name [k; v])
         )
       | Darray _ ->
         ( get_darray_inst p,
           "darray",
-          (fun th pairs -> T.Darray (th, pairs)),
+          (fun th pairs -> Aast.Darray (th, pairs)),
           (fun k v -> (Reason.Rwitness p, Tarraykind (AKdarray (k, v)))) )
       | _ ->
         (* The parent match makes this case impossible *)
@@ -2086,7 +2085,7 @@ and expr_
     (* Clone only works on objects; anything else fatals at runtime *)
     let tobj = (Reason.Rwitness p, Tobject) in
     let env = Type.sub_type p Reason.URclone env ty tobj Errors.unify_error in
-    make_result env p (T.Clone te) ty
+    make_result env p (Aast.Clone te) ty
   | This ->
     let (r, _) = Env.get_self env in
     if r = Reason.Rnone then Errors.this_var_outside_class p;
@@ -2094,7 +2093,7 @@ and expr_
     let (_, ty) = Env.get_local env this in
     let r = Reason.Rwitness p in
     let ty = (r, TUtils.this_of (r, ty)) in
-    make_result env p T.This ty
+    make_result env p Aast.This ty
   | Assert (AE_assert e) ->
     let (env, te, _) = expr env e in
     let env = LEnv.save_and_merge_next_in_cont env C.Exit in
@@ -2102,25 +2101,25 @@ and expr_
     make_result
       env
       p
-      (T.Assert (T.AE_assert te))
+      (Aast.Assert (Aast.AE_assert te))
       (MakeType.void (Reason.Rwitness p))
-  | True -> make_result env p T.True (MakeType.bool (Reason.Rwitness p))
-  | False -> make_result env p T.False (MakeType.bool (Reason.Rwitness p))
+  | True -> make_result env p Aast.True (MakeType.bool (Reason.Rwitness p))
+  | False -> make_result env p Aast.False (MakeType.bool (Reason.Rwitness p))
   (* TODO TAST: consider checking that the integer is in range. Right now
    * it's possible for HHVM to fail on well-typed Hack code
    *)
-  | Int s -> make_result env p (T.Int s) (MakeType.int (Reason.Rwitness p))
+  | Int s -> make_result env p (Aast.Int s) (MakeType.int (Reason.Rwitness p))
   | Float s ->
-    make_result env p (T.Float s) (MakeType.float (Reason.Rwitness p))
+    make_result env p (Aast.Float s) (MakeType.float (Reason.Rwitness p))
   (* TODO TAST: consider introducing a "null" type, and defining ?t to
    * be null | t
    *)
-  | Null -> make_result env p T.Null (MakeType.null (Reason.Rwitness p))
+  | Null -> make_result env p Aast.Null (MakeType.null (Reason.Rwitness p))
   | String s ->
-    make_result env p (T.String s) (MakeType.string (Reason.Rwitness p))
+    make_result env p (Aast.String s) (MakeType.string (Reason.Rwitness p))
   | String2 idl ->
     let (env, tel) = string2 env idl in
-    make_result env p (T.String2 tel) (MakeType.string (Reason.Rwitness p))
+    make_result env p (Aast.String2 tel) (MakeType.string (Reason.Rwitness p))
   | PrefixedString (n, e) ->
     if n <> "re" then (
       Errors.experimental_feature
@@ -2138,7 +2137,7 @@ and expr_
             make_result
               env
               p
-              (T.PrefixedString (n, te))
+              (Aast.PrefixedString (n, te))
               (Typing_regex.type_pattern e)
           with
           | Pcre.Error (Pcre.BadPattern (s, i)) ->
@@ -2163,22 +2162,22 @@ and expr_
         expr_error env (Reason.Rregex pe) e)
   | Fun_id x ->
     let (env, fty, _tal) = fun_type_of_id env x [] [] in
-    make_result env p (T.Fun_id x) fty
+    make_result env p (Aast.Fun_id x) fty
   | Id ((cst_pos, cst_name) as id) ->
     (match Env.get_gconst env cst_name with
     | None when Partial.should_check_error (Env.get_mode env) 4106 ->
       Errors.unbound_global cst_pos;
       let ty = (Reason.Rwitness cst_pos, Typing_utils.terr env) in
-      make_result env cst_pos (T.Id id) ty
+      make_result env cst_pos (Aast.Id id) ty
     | None ->
       make_result
         env
         p
-        (T.Id id)
+        (Aast.Id id)
         (Reason.Rwitness cst_pos, Typing_utils.tany env)
     | Some (ty, _) ->
       let (env, ty) = Phase.localize_with_self env ty in
-      make_result env p (T.Id id) ty)
+      make_result env p (Aast.Id id) ty)
   | Method_id (instance, meth) ->
     (* Method_id is used when creating a "method pointer" using the magic
      * inst_meth function.
@@ -2204,7 +2203,7 @@ and expr_
     let (env, result) =
       Env.FakeMembers.check_instance_invalid env instance (snd meth) result
     in
-    make_result env p (T.Method_id (te, meth)) result
+    make_result env p (Aast.Method_id (te, meth)) result
   | Method_caller (((pos, class_name) as pos_cname), meth_name) ->
     (* meth_caller('X', 'foo') desugars to:
      * $x ==> $x->foo()
@@ -2288,14 +2287,14 @@ and expr_
         make_result
           env
           p
-          (T.Method_caller (pos_cname, meth_name))
+          (Aast.Method_caller (pos_cname, meth_name))
           (reason, Tfun caller)
       | _ ->
         (* This can happen if the method lives in PHP *)
         make_result
           env
           p
-          (T.Method_caller (pos_cname, meth_name))
+          (Aast.Method_caller (pos_cname, meth_name))
           (Reason.Rwitness pos, Typing_utils.tany env)))
   | Smethod_id (c, meth) ->
     (* Smethod_id is used when creating a "method pointer" using the magic
@@ -2384,7 +2383,7 @@ and expr_
           let use_pos = fst meth in
           TVis.check_deprecated ~use_pos ~def_pos ce_deprecated;
           (match ce_visibility with
-          | Vpublic -> make_result env p (T.Smethod_id (c, meth)) ty
+          | Vpublic -> make_result env p (Aast.Smethod_id (c, meth)) ty
           | Vprivate _ ->
             Errors.private_class_meth ~def_pos ~use_pos;
             expr_error env r outer
@@ -2397,14 +2396,14 @@ and expr_
   | Lplaceholder p ->
     let r = Reason.Rplaceholder p in
     let ty = MakeType.void r in
-    make_result env p (T.Lplaceholder p) ty
+    make_result env p (Aast.Lplaceholder p) ty
   | Dollardollar _ when valkind = `lvalue ->
     Errors.dollardollar_lvalue p;
     expr_error env (Reason.Rwitness p) outer
   | Dollardollar id ->
     let ty = Env.get_local_check_defined env id in
     let env = might_throw env in
-    make_result env p (T.Dollardollar id) ty
+    make_result env p (Aast.Dollardollar id) ty
   | Lvar ((_, x) as id) ->
     if not accept_using_var then check_escaping_var env id;
     let ty =
@@ -2413,10 +2412,10 @@ and expr_
       else
         Env.get_local env x
     in
-    make_result env p (T.Lvar id) ty
+    make_result env p (Aast.Lvar id) ty
   | ImmutableVar ((_, x) as id) ->
     let ty = Env.get_local env x in
-    make_result env p (T.ImmutableVar id) ty
+    make_result env p (Aast.ImmutableVar id) ty
   | List el ->
     let (env, tel, tyl) =
       match valkind with
@@ -2431,7 +2430,7 @@ and expr_
         | _ -> exprs env el)
     in
     let ty = (Reason.Rwitness p, Ttuple tyl) in
-    make_result env p (T.List tel) ty
+    make_result env p (Aast.List tel) ty
   | Pair (e1, e2) ->
     (* Use expected type to determine expected element types *)
     let (env, expected1, expected2) =
@@ -2446,19 +2445,19 @@ and expr_
     let (env, te1, ty1) = expr ?expected:expected1 env e1 in
     let (env, te2, ty2) = expr ?expected:expected2 env e2 in
     let ty = MakeType.pair (Reason.Rwitness p) ty1 ty2 in
-    make_result env p (T.Pair (te1, te2)) ty
+    make_result env p (Aast.Pair (te1, te2)) ty
   | Expr_list el ->
     (* TODO: use expected type to determine tuple component types *)
     let (env, tel, tyl) = exprs env el in
     let ty = (Reason.Rwitness p, Ttuple tyl) in
-    make_result env p (T.Expr_list tel) ty
+    make_result env p (Aast.Expr_list tel) ty
   | Array_get (e, None) ->
     let (env, te, _) = update_array_type p env e None valkind in
     let env = might_throw env in
     (* NAST check reports an error if [] is used for reading in an
          lvalue context. *)
     let ty = (Reason.Rwitness p, Typing_utils.terr env) in
-    make_result env p (T.Array_get (te, None)) ty
+    make_result env p (Aast.Array_get (te, None)) ty
   | Array_get (e1, Some e2) ->
     let (env, te1, ty1) =
       update_array_type ?lhs_of_null_coalesce p env e1 (Some e2) valkind
@@ -2477,7 +2476,7 @@ and expr_
         e2
         ty2
     in
-    make_result env p (T.Array_get (te1, Some te2)) ty
+    make_result env p (Aast.Array_get (te1, Some te2)) ty
   | Call (Cnormal, (pos_id, Id ((_, s) as id)), [], el, [])
     when is_pseudo_function s ->
     let (env, tel, tys) = exprs ~accept_using_var:true env el in
@@ -2505,12 +2504,12 @@ and expr_
     make_result
       env
       p
-      (T.Call
+      (Aast.Call
          ( Cnormal,
            Tast.make_typed_expr
              pos_id
              (Reason.Rnone, TUtils.tany env)
-             (T.Id id),
+             (Aast.Id id),
            [],
            tel,
            [] ))
@@ -2549,7 +2548,11 @@ and expr_
     let (env, ty_result) = Env.fresh_type env (fst e2) in
     let env = SubType.sub_type env ty1' ty_result Errors.unify_error in
     let env = SubType.sub_type env ty2 ty_result Errors.unify_error in
-    make_result env p (T.Binop (Ast_defs.QuestionQuestion, te1, te2)) ty_result
+    make_result
+      env
+      p
+      (Aast.Binop (Ast_defs.QuestionQuestion, te1, te2))
+      ty_result
   (* For example, e1 += e2. This is typed and translated as if
    * written e1 = e1 + e2.
    * TODO TAST: is this right? e1 will get evaluated more than once
@@ -2569,8 +2572,8 @@ and expr_
         let (env, te_fake, ty) = raw_expr env e_fake in
         begin
           match snd te_fake with
-          | T.Binop (_, te1, (_, T.Binop (_, _, te2))) ->
-            let te = T.Binop (Ast_defs.Eq (Some op), te1, te2) in
+          | Aast.Binop (_, te1, (_, Aast.Binop (_, _, te2))) ->
+            let te = Aast.Binop (Ast_defs.Eq (Some op), te1, te2) in
             make_result env p te ty
           | _ -> assert false
         end
@@ -2600,8 +2603,8 @@ and expr_
       let env =
         Option.value_map eid2 ~default:env ~f:(Env.set_local_expr_id env x1)
       in
-      make_result env p (T.Binop (Ast_defs.Eq None, te1, te2)) ty
-    | _ -> make_result env p (T.Binop (Ast_defs.Eq None, te1, te2)) ty)
+      make_result env p (Aast.Binop (Ast_defs.Eq None, te1, te2)) ty
+    | _ -> make_result env p (Aast.Binop (Ast_defs.Eq None, te1, te2)) ty)
   | Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2) ->
     let c = bop = Ast_defs.Ampamp in
     let (env, te1, _) = expr env e1 in
@@ -2612,7 +2615,7 @@ and expr_
     make_result
       env
       p
-      (T.Binop (bop, te1, te2))
+      (Aast.Binop (bop, te1, te2))
       (MakeType.bool (Reason.Rlogic_ret p))
   | Binop (bop, e1, e2) ->
     let (env, te1, ty1) = raw_expr env e1 in
@@ -2656,7 +2659,7 @@ and expr_
       | None -> Env.unset_local env dd_var
       | Some ty -> Env.set_local env dd_var ty
     in
-    make_result env p (T.Pipe (e0, te1, te2)) ty2
+    make_result env p (Aast.Pipe (e0, te1, te2)) ty2
   | Unop (uop, e) ->
     let (env, te, ty) = raw_expr env e in
     let env = might_throw env in
@@ -2693,7 +2696,7 @@ and expr_
           Phase.check_tparams_constraints ~use_pos:p ~ety_env env tparaml
         in
         let (env, ty) = Phase.localize ~ety_env env typename in
-        make_result env p (T.Typename sid) ty
+        make_result env p (Aast.Typename sid) ty
       | None ->
         (* Should never hit this case since we only construct this AST node
          * if in the expression Foo::class, Foo is a type def.
@@ -2709,7 +2712,7 @@ and expr_
     let (env, _tal, te, _) =
       static_class_id ~check_constraints:false cpos env [] cid
     in
-    make_result env p (T.Class_get (te, T.CGstring mid)) ty
+    make_result env p (Aast.Class_get (te, Aast.CGstring mid)) ty
   | Class_get ((cpos, cid), CGstring mid) ->
     let (env, _tal, te, cty) =
       static_class_id ~check_constraints:false cpos env [] cid
@@ -2728,7 +2731,7 @@ and expr_
     let (env, ty) =
       Env.FakeMembers.check_static_invalid env cid (snd mid) ty
     in
-    make_result env p (T.Class_get (te, T.CGstring mid)) ty
+    make_result env p (Aast.Class_get (te, Aast.CGstring mid)) ty
   (* Fake member property access. For example:
    *   if ($x->f !== null) { ...$x->f... }
    *)
@@ -2740,8 +2743,8 @@ and expr_
     let local = (p, Lvar (p, local)) in
     let (env, _, ty) = expr env local in
     let (env, t_lhs, _) = expr ~accept_using_var:true env e in
-    let t_rhs = Tast.make_typed_expr pid ty (T.Id (py, y)) in
-    make_result env p (T.Obj_get (t_lhs, t_rhs, nf)) ty
+    let t_rhs = Tast.make_typed_expr pid ty (Aast.Id (py, y)) in
+    make_result env p (Aast.Obj_get (t_lhs, t_rhs, nf)) ty
   (* Statically-known instance property access e.g. $x->f *)
   | Obj_get (e1, (pm, Id m), nullflavor) ->
     let nullsafe =
@@ -2751,7 +2754,7 @@ and expr_
     in
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let env = might_throw env in
-    (* We typecheck Obj_get by checking whether it is a subtype of 
+    (* We typecheck Obj_get by checking whether it is a subtype of
     Thas_member(m, #1) where #1 is a fresh type variable. *)
     let (env, mem_ty) = Env.fresh_type env p in
     let r = Reason.Rwitness (fst e1) in
@@ -2764,7 +2767,7 @@ and expr_
         let env = SubType.sub_type_i env ty1 has_member_ty on_error in
         (env, mem_ty)
       | Some _ ->
-        (* In that case ty1 is a subtype of ?Thas_member(m, #1) 
+        (* In that case ty1 is a subtype of ?Thas_member(m, #1)
         and the result is ?#1 if ty1 is nullable. *)
         let (env, has_member_ty) =
           SubType.cstr_ty_as_tyvar_with_upper_bound env has_member_ty
@@ -2783,7 +2786,8 @@ and expr_
     make_result
       env
       p
-      (T.Obj_get (te1, Tast.make_typed_expr pm result_ty (T.Id m), nullflavor))
+      (Aast.Obj_get
+         (te1, Tast.make_typed_expr pm result_ty (Aast.Id m), nullflavor))
       result_ty
   (* Dynamic instance property access e.g. $x->$f *)
   | Obj_get (e1, e2, nullflavor) ->
@@ -2798,9 +2802,13 @@ and expr_
     let ((pos, _), te2) = te2 in
     let env = might_throw env in
     let te2 = Tast.make_typed_expr pos ty te2 in
-    make_result env p (T.Obj_get (te1, te2, nullflavor)) ty
+    make_result env p (Aast.Obj_get (te1, te2, nullflavor)) ty
   | Yield_break ->
-    make_result env p T.Yield_break (Reason.Rwitness p, Typing_utils.tany env)
+    make_result
+      env
+      p
+      Aast.Yield_break
+      (Reason.Rwitness p, Typing_utils.tany env)
   | Yield af ->
     let (env, (taf, opt_key, value)) = array_field env af in
     let (env, send) = Env.fresh_type env p in
@@ -2853,7 +2861,7 @@ and expr_
     make_result
       env
       p
-      (T.Yield taf)
+      (Aast.Yield taf)
       (MakeType.nullable_locl (Reason.Ryield_send p) send)
   | Yield_from e ->
     let (env, key) = Env.fresh_type env p in
@@ -2916,13 +2924,13 @@ and expr_
         Errors.unify_error
     in
     let env = Env.forget_members env (Fake.Blame_call p) in
-    make_result env p (T.Yield_from te) (MakeType.void (Reason.Rwitness p))
+    make_result env p (Aast.Yield_from te) (MakeType.void (Reason.Rwitness p))
   | Await e ->
     let env = might_throw env in
     (* Await is permitted in a using clause e.g. using (await make_handle()) *)
     let (env, te, rty) = expr ~is_using_clause env e in
     let (env, ty) = Async.overload_extract_from_awaitable env p rty in
-    make_result env p (T.Await te) ty
+    make_result env p (Aast.Await te) ty
   | Suspend e ->
     let (env, te, ty) =
       match e with
@@ -2949,7 +2957,7 @@ and expr_
           (Reason.to_string ("This is " ^ Typing_print.error env ty) (fst ty));
         (env, te, ty)
     in
-    make_result env p (T.Suspend te) ty
+    make_result env p (Aast.Suspend te) ty
   | Special_func func -> special_func env p func
   | New ((pos, c), explicit_targs, el, uel, p1) ->
     let env = might_throw env in
@@ -2967,7 +2975,7 @@ and expr_
         uel
     in
     let env = Env.forget_members env (Fake.Blame_call p) in
-    make_result env p (T.New (tc, tal, tel, tuel, (p1, ctor_fty))) ty
+    make_result env p (Aast.New (tc, tal, tel, tuel, (p1, ctor_fty))) ty
   | Record ((pos, id), _is_array, _values) ->
     (match Decl_provider.get_record_def id with
     | Some rd -> if rd.rdt_abstract then Errors.new_abstract_record (pos, id)
@@ -3006,10 +3014,10 @@ and expr_
         env
     in
     let (env, ty) = Phase.localize_hint_with_self env hint in
-    make_result env p (T.Cast (hint, te)) ty
+    make_result env p (Aast.Cast (hint, te)) ty
   | Is (e, hint) ->
     let (env, te, _) = expr env e in
-    make_result env p (T.Is (te, hint)) (MakeType.bool (Reason.Rwitness p))
+    make_result env p (Aast.Is (te, hint)) (MakeType.bool (Reason.Rwitness p))
   | As (e, hint, is_nullable) ->
     let refine_type env lpos lty rty =
       let reason = Reason.Ras lpos in
@@ -3045,7 +3053,7 @@ and expr_
       else
         refine_type env (fst e) expr_ty hint_ty
     in
-    make_result env p (T.As (te, hint, is_nullable)) hint_ty
+    make_result env p (Aast.As (te, hint, is_nullable)) hint_ty
   | Efun (f, idl)
   | Lfun (f, idl) ->
     let is_anon =
@@ -3393,7 +3401,7 @@ and expr_
           let (env, te, _) = expr env e in
           (env, te))
     in
-    let txml = T.Xml (sid, typed_attrs, List.rev tel) in
+    let txml = Aast.Xml (sid, typed_attrs, List.rev tel) in
     (match class_info with
     | None -> make_result env p txml (Reason.Runknown_class p, Tobject)
     | Some class_info ->
@@ -3430,7 +3438,7 @@ and expr_
       make_result env p txml obj)
   | Callconv (kind, e) ->
     let (env, te, ty) = expr env e in
-    make_result env p (T.Callconv (kind, te)) ty
+    make_result env p (Aast.Callconv (kind, te)) ty
   | Shape fdm ->
     let (env, fdm_with_expected) =
       match expand_expected env expected with
@@ -3475,7 +3483,7 @@ and expr_
     make_result
       env
       p
-      (T.Shape (List.map ~f:(fun (k, (te, _)) -> (k, te)) tfdm))
+      (Aast.Shape (List.map ~f:(fun (k, (te, _)) -> (k, te)) tfdm))
       (Reason.Rwitness p, Tshape (Closed_shape, fdm))
   | PU_atom s ->
     (* TODO(T36532263): Pocket Universes *)
@@ -3504,7 +3512,7 @@ and class_const ?(incl_tc = false) env p ((cpos, cid), mid) =
       mid
       cid
   in
-  make_result env p (T.Class_const (ce, mid)) const_ty
+  make_result env p (Aast.Class_const (ce, mid)) const_ty
   (*****************************************************************************)
   (* XHP attribute/body helpers. *)
   (*****************************************************************************)
@@ -3518,7 +3526,7 @@ and xhp_spread_attribute env c_onto valexpr =
   let (p, _) = valexpr in
   let (env, te, valty) = expr env valexpr in
   (* Build the typed attribute node *)
-  let typed_attr = T.Xhp_spread te in
+  let typed_attr = Aast.Xhp_spread te in
   let (env, attr_ptys) =
     match c_onto with
     | None -> (env, [])
@@ -3537,7 +3545,7 @@ and xhp_simple_attribute env id valexpr =
   (* This converts the attribute name to a member name. *)
   let name = ":" ^ snd id in
   let attr_pty = ((fst id, name), (p, valty)) in
-  let typed_attr = T.Xhp_simple (id, te) in
+  let typed_attr = Aast.Xhp_simple (id, te) in
   (env, typed_attr, [attr_pty])
 
 (**
@@ -3756,7 +3764,7 @@ and anon_make tenv p f ft idl is_anon outer =
                   let (env, t_param) =
                     anon_bind_variadic env varg (r, union)
                   in
-                  (env, T.FVvariadicArg t_param)
+                  (env, Aast.FVvariadicArg t_param)
                 in
                 let (env, t_variadic) =
                   match (f.f_variadic, supplied_arity) with
@@ -3764,8 +3772,8 @@ and anon_make tenv p f ft idl is_anon outer =
                     make_variadic_arg env arg [variadic.fp_type.et_type]
                   | (FVvariadicArg arg, Fstandard _) ->
                     make_variadic_arg env arg []
-                  | (FVellipsis pos, _) -> (env, T.FVellipsis pos)
-                  | (_, _) -> (env, T.FVnonVariadic)
+                  | (FVellipsis pos, _) -> (env, Aast.FVellipsis pos)
+                  | (_, _) -> (env, Aast.FVnonVariadic)
                 in
                 let params = ref f.f_params in
                 let (env, t_params) =
@@ -3889,32 +3897,33 @@ and anon_make tenv p f ft idl is_anon outer =
                 in
                 let tfun_ =
                   {
-                    T.f_annotation = Env.save local_tpenv env;
-                    T.f_span = f.f_span;
-                    T.f_mode = f.f_mode;
-                    T.f_ret = (hret, hint_of_type_hint f.f_ret);
-                    T.f_name = f.f_name;
-                    T.f_tparams = tparams;
-                    T.f_where_constraints = f.f_where_constraints;
-                    T.f_fun_kind = f.f_fun_kind;
-                    T.f_file_attributes = [];
-                    T.f_user_attributes = user_attributes;
-                    T.f_body = { T.fb_ast = tb; fb_annotation = annotation };
-                    T.f_params = t_params;
-                    T.f_variadic = t_variadic;
+                    Aast.f_annotation = Env.save local_tpenv env;
+                    Aast.f_span = f.f_span;
+                    Aast.f_mode = f.f_mode;
+                    Aast.f_ret = (hret, hint_of_type_hint f.f_ret);
+                    Aast.f_name = f.f_name;
+                    Aast.f_tparams = tparams;
+                    Aast.f_where_constraints = f.f_where_constraints;
+                    Aast.f_fun_kind = f.f_fun_kind;
+                    Aast.f_file_attributes = [];
+                    Aast.f_user_attributes = user_attributes;
+                    Aast.f_body =
+                      { Aast.fb_ast = tb; fb_annotation = annotation };
+                    Aast.f_params = t_params;
+                    Aast.f_variadic = t_variadic;
                     (* TODO TAST: Variadic efuns *)
-                    T.f_external = f.f_external;
-                    T.f_namespace = f.f_namespace;
-                    T.f_doc_comment = f.f_doc_comment;
-                    T.f_static = f.f_static;
+                    Aast.f_external = f.f_external;
+                    Aast.f_namespace = f.f_namespace;
+                    Aast.f_doc_comment = f.f_doc_comment;
+                    Aast.f_static = f.f_static;
                   }
                 in
                 let ty = (Reason.Rwitness p, Tfun ft) in
                 let te =
                   if is_anon then
-                    Tast.make_typed_expr p ty (T.Efun (tfun_, idl))
+                    Tast.make_typed_expr p ty (Aast.Efun (tfun_, idl))
                   else
-                    Tast.make_typed_expr p ty (T.Lfun (tfun_, idl))
+                    Tast.make_typed_expr p ty (Aast.Lfun (tfun_, idl))
                 in
                 let env = Env.set_tyvar_variance env ty in
                 (env, te, hret)))
@@ -3931,10 +3940,10 @@ and special_func env p func =
     | Genva el ->
       let (env, tel, etyl) = exprs env el in
       let (env, ty) = Async.genva env p etyl in
-      (env, T.Genva tel, ty)
+      (env, Aast.Genva tel, ty)
   in
   let result_ty = MakeType.awaitable (Reason.Rwitness p) ty in
-  make_result env p (T.Special_func tfunc) result_ty
+  make_result env p (Aast.Special_func tfunc) result_ty
 
 and requires_consistent_construct = function
   | CIstatic -> true
@@ -4001,7 +4010,7 @@ and new_object
   in
   let allow_abstract_bound_generic =
     match tcid with
-    | ((_, (_, Tabstract (AKgeneric tt, _))), T.CI (_, tn)) -> tt = tn
+    | ((_, (_, Tabstract (AKgeneric tt, _))), Aast.CI (_, tn)) -> tt = tn
     | _ -> false
   in
   let finish env tcid tel tuel ty ctor_fty =
@@ -4149,7 +4158,7 @@ and new_object
 
 (* FIXME: we need to separate our instantiability into two parts. Currently,
  * all this function is doing is checking if a given type is inhabited --
- * that is, whether there are runtime values of type T. However,
+ * that is, whether there are runtime values of type Aast. However,
  * instantiability should be the stricter notion that T has a runtime
  * constructor; that is, `new T()` should be valid. In particular, interfaces
  * are inhabited, but not instantiable.
@@ -4295,10 +4304,10 @@ and assign_ p ur env e1 ty2 =
   match e1 with
   | (_, Lvar ((_, x) as id)) ->
     let env = set_valid_rvalue p env x ty2 in
-    make_result env (fst e1) (T.Lvar id) ty2
+    make_result env (fst e1) (Aast.Lvar id) ty2
   | (_, Lplaceholder id) ->
     let placeholder_ty = MakeType.void (Reason.Rplaceholder p) in
-    make_result env (fst e1) (T.Lplaceholder id) placeholder_ty
+    make_result env (fst e1) (Aast.Lplaceholder id) placeholder_ty
   | (_, List el) ->
     let (env, tyl) =
       List.map_env env el ~f:(fun env _ ->
@@ -4314,7 +4323,7 @@ and assign_ p ur env e1 ty2 =
           let (env, te, _) = assign p env lvalue ty2 in
           (env, te :: tel))
     in
-    make_result env (fst e1) (T.List (List.rev reversed_tel)) ty2
+    make_result env (fst e1) (Aast.List (List.rev reversed_tel)) ty2
   | (pobj, Obj_get (obj, (pm, Id ((_, member_name) as m)), nullflavor)) ->
     let lenv = env.lenv in
     let no_fakes = LEnv.env_with_empty_fakes env in
@@ -4349,7 +4358,8 @@ and assign_ p ur env e1 ty2 =
       Tast.make_typed_expr
         pobj
         result
-        (T.Obj_get (tobj, Tast.make_typed_expr pm result (T.Id m), nullflavor))
+        (Aast.Obj_get
+           (tobj, Tast.make_typed_expr pm result (Aast.Id m), nullflavor))
     in
     let env = { env with lenv } in
     begin
@@ -4424,7 +4434,7 @@ and assign_ p ur env e1 ty2 =
         let (env, te1, _) = assign_ p ur env e1 ty1' in
         (env, te1)
     in
-    make_result env pos (T.Array_get (te1, None)) ty2
+    make_result env pos (Aast.Array_get (te1, None)) ty2
   | (pos, Array_get (e1, Some e)) ->
     let (env, te1, ty1) = update_array_type pos env e1 (Some e) `lvalue in
     let (env, te, ty) = expr env e in
@@ -4446,7 +4456,7 @@ and assign_ p ur env e1 ty2 =
         let (env, te1, _) = assign_ p ur env e1 ty1' in
         (env, te1)
     in
-    (env, ((pos, ty2), T.Array_get (te1, Some te)), ty2)
+    (env, ((pos, ty2), Aast.Array_get (te1, Some te)), ty2)
   | _ -> assign_simple p ur env e1 ty2
 
 and assign_simple pos ur env e1 ty2 =
@@ -4465,11 +4475,11 @@ and assign_simple pos ur env e1 ty2 =
 and array_field env = function
   | AFvalue ve ->
     let (env, tve, tv) = expr env ve in
-    (env, (T.AFvalue tve, None, tv))
+    (env, (Aast.AFvalue tve, None, tv))
   | AFkvalue (ke, ve) ->
     let (env, tke, tk) = expr env ke in
     let (env, tve, tv) = expr env ve in
-    (env, (T.AFkvalue (tke, tve), Some tk, tv))
+    (env, (Aast.AFkvalue (tke, tve), Some tk, tv))
 
 and array_value ~(expected : ExpectedTy.t option) env x =
   let (env, te, ty) = expr ?expected env x in
@@ -4600,13 +4610,13 @@ and dispatch_call
     uel
     ~in_suspend =
   let make_call env te tal tel tuel ty =
-    make_result env p (T.Call (call_type, te, tal, tel, tuel)) ty
+    make_result env p (Aast.Call (call_type, te, tal, tel, tuel)) ty
   in
   (* TODO: Avoid Tany annotations in TAST by eliminating `make_call_special` *)
   let make_call_special env id tel ty =
     make_call
       env
-      (Tast.make_typed_expr fpos (Reason.Rnone, TUtils.tany env) (T.Id id))
+      (Tast.make_typed_expr fpos (Reason.Rnone, TUtils.tany env) (Aast.Id id))
       []
       tel
       []
@@ -4620,7 +4630,7 @@ and dispatch_call
       | (_, Tfun ft) -> ft.ft_ret.et_type
       | _ -> (Reason.Rwitness p, ty_)
     in
-    make_call env (Tast.make_typed_expr fpos fty (T.Id id)) tal tel [] ty
+    make_call env (Tast.make_typed_expr fpos fty (Aast.Id id)) tal tel [] ty
   in
   let overload_function = overload_function e make_call fpos in
   let check_coroutine_call env fty =
@@ -4837,7 +4847,7 @@ and dispatch_call
       | (r, Tfun ft) -> (r, Tfun { ft with ft_ret = MakeType.unenforced rty })
       | _ -> fty
     in
-    make_call env (Tast.make_typed_expr fpos fty (T.Id id)) tal tel tuel rty
+    make_call env (Tast.make_typed_expr fpos fty (Aast.Id id)) tal tel tuel rty
   (* Special function `type_structure` *)
   | Id (p, type_structure)
     when type_structure = SN.StdlibFunctions.type_structure
@@ -4952,7 +4962,7 @@ and dispatch_call
       | _ -> (env, fty)
     in
     let (env, (tel, tuel, ty)) = call ~expected p env fty el [] in
-    make_call env (Tast.make_typed_expr fpos fty (T.Id x)) tal tel tuel ty
+    make_call env (Tast.make_typed_expr fpos fty (Aast.Id x)) tal tel tuel ty
   (* Special function `Shapes::idx` *)
   | Class_const (((_, CI (_, shapes)) as class_id), ((_, idx) as method_id))
     when shapes = SN.Shapes.cShapes && idx = SN.Shapes.idx ->
@@ -5077,7 +5087,7 @@ and dispatch_call
       (Tast.make_typed_expr
          fpos
          ctor_fty
-         (T.Class_const (((pos, pty), T.CIparent), id)))
+         (Aast.Class_const (((pos, pty), Aast.CIparent), id)))
       [] (* tal: no type arguments to constructor *)
       tel
       tuel
@@ -5149,7 +5159,7 @@ and dispatch_call
     in
     make_call
       env
-      (Tast.make_typed_expr fpos fty (T.Class_const (tcid, m)))
+      (Tast.make_typed_expr fpos fty (Aast.Class_const (tcid, m)))
       tal
       tel
       tuel
@@ -5191,7 +5201,13 @@ and dispatch_call
         el
         uel
     in
-    make_call env (Tast.make_typed_expr fpos tfty (T.Fun_id m)) tal tel tuel ty
+    make_call
+      env
+      (Tast.make_typed_expr fpos tfty (Aast.Fun_id m))
+      tal
+      tel
+      tuel
+      ty
   (* Call instance method *)
   | Obj_get (e1, (pos_id, Id m), nullflavor) ->
     let is_method = call_type = Cnormal in
@@ -5236,7 +5252,8 @@ and dispatch_call
       (Tast.make_typed_expr
          fpos
          tfty
-         (T.Obj_get (te1, Tast.make_typed_expr pos_id tfty (T.Id m), nullflavor)))
+         (Aast.Obj_get
+            (te1, Tast.make_typed_expr pos_id tfty (Aast.Id m), nullflavor)))
       tal
       tel
       tuel
@@ -5246,7 +5263,13 @@ and dispatch_call
     let (env, fty, tal) = fun_type_of_id env x explicit_targs el in
     let env = check_coroutine_call env fty in
     let (env, (tel, tuel, ty)) = call ~expected p env fty el uel in
-    make_call env (Tast.make_typed_expr fpos fty (T.Fun_id x)) tal tel tuel ty
+    make_call
+      env
+      (Tast.make_typed_expr fpos fty (Aast.Fun_id x))
+      tal
+      tel
+      tuel
+      ty
   | Id ((_, id) as x) ->
     let (env, fty, tal) = fun_type_of_id env x explicit_targs el in
     let env = check_coroutine_call env fty in
@@ -5276,7 +5299,7 @@ and dispatch_call
       else
         env
     in
-    make_call env (Tast.make_typed_expr fpos fty (T.Id x)) tal tel tuel ty
+    make_call env (Tast.make_typed_expr fpos fty (Aast.Id x)) tal tel tuel ty
   | _ ->
     let (env, te, fty) = expr env e in
     let (env, fty) =
@@ -5687,8 +5710,8 @@ and class_id_for_new ~exact p env cid explicit_targs =
             (* When computing the classes for a new T() where T is a generic,
              * the class must be consistent (final, final constructor, or
              * <<__ConsistentConstruct>>) for its constructor to be considered *)
-            | ((_, T.CI (_, c)), (_, Tabstract (AKgeneric cg, _))) when c = cg
-              ->
+            | ((_, Aast.CI (_, c)), (_, Tabstract (AKgeneric cg, _)))
+              when c = cg ->
               (* Only have this choosing behavior for new T(), not all generic types
                * i.e. new classname<T>, TODO: T41190512 *)
               if Tast_utils.valid_newable_class class_info then
@@ -5789,7 +5812,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           make_result
             env
             []
-            T.CIparent
+            Aast.CIparent
             (Reason.Rwitness p, Typing_utils.terr env)
         | Some (_, parent_ty) ->
           (* inside a trait, parent is SN.Typehints.this, but with the
@@ -5797,7 +5820,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
            * "require extend"-ed *)
           let r = Reason.Rwitness p in
           let (env, parent_ty) = Phase.localize_with_self env parent_ty in
-          make_result env [] T.CIparent (r, TUtils.this_of parent_ty))
+          make_result env [] Aast.CIparent (r, TUtils.this_of parent_ty))
       | _ ->
         let parent =
           match Env.get_parent_ty env with
@@ -5809,7 +5832,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         let r = Reason.Rwitness p in
         let (env, parent) = Phase.localize_with_self env parent in
         (* parent is still technically the same object. *)
-        make_result env [] T.CIparent (r, TUtils.this_of (r, snd parent)))
+        make_result env [] Aast.CIparent (r, TUtils.this_of (r, snd parent)))
     | ( _,
         ( Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _
         | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic | Tdestructure _
@@ -5827,17 +5850,17 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
       let r = Reason.Rwitness p in
       let (env, parent) = Phase.localize_with_self env parent in
       (* parent is still technically the same object. *)
-      make_result env [] T.CIparent (r, TUtils.this_of (r, snd parent)))
+      make_result env [] Aast.CIparent (r, TUtils.this_of (r, snd parent)))
   | CIstatic ->
     let this = (Reason.Rwitness p, TUtils.this_of (Env.get_self env)) in
-    make_result env [] T.CIstatic this
+    make_result env [] Aast.CIstatic this
   | CIself ->
     let self =
       match snd (Env.get_self env) with
       | Tclass (c, _, tyl) -> Tclass (c, exact, tyl)
       | self -> self
     in
-    make_result env [] T.CIself (Reason.Rwitness p, self)
+    make_result env [] Aast.CIself (Reason.Rwitness p, self)
   | CI ((p, id) as c) as e1 ->
     if Env.is_generic_parameter env id then
       let (env, tal) =
@@ -5852,12 +5875,16 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
       in
       let r = Reason.Rhint p in
       let tgeneric = (r, Tabstract (AKgeneric id, None)) in
-      make_result env tal (T.CI c) tgeneric
+      make_result env tal (Aast.CI c) tgeneric
     else
       let class_ = Env.get_class env (snd c) in
       (match class_ with
       | None ->
-        make_result env [] (T.CI c) (Reason.Rwitness p, Typing_utils.tany env)
+        make_result
+          env
+          []
+          (Aast.CI c)
+          (Reason.Rwitness p, Typing_utils.tany env)
       | Some class_ ->
         let (env, ty, tal) =
           List.map ~f:snd tal
@@ -5871,7 +5898,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
                e1
                (Cls.tparams class_)
         in
-        make_result env tal (T.CI c) ty)
+        make_result env tal (Aast.CI c) ty)
   | CIexpr ((p, _) as e) ->
     let (env, te, ty) = expr env e in
     let rec resolve_ety env ty =
@@ -5916,7 +5943,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         (env, (Reason.Rwitness p, Typing_utils.terr env))
     in
     let (env, result_ty) = resolve_ety env ty in
-    make_result env [] (T.CIexpr te) result_ty
+    make_result env [] (Aast.CIexpr te) result_ty
 
 and call_construct p env class_ params el uel cid =
   let cid =
@@ -6633,7 +6660,7 @@ and is_super_num env t =
 
 and unop p env uop te ty outer =
   let make_result env te result_ty =
-    (env, Tast.make_typed_expr p result_ty (T.Unop (uop, te)), result_ty)
+    (env, Tast.make_typed_expr p result_ty (Aast.Unop (uop, te)), result_ty)
   in
   let is_any = TUtils.is_any env in
   match uop with
@@ -6667,7 +6694,7 @@ and unop p env uop te ty outer =
      * check for immutability violation here *)
     begin
       match te with
-      | (_, T.ImmutableVar (p, x)) ->
+      | (_, Aast.ImmutableVar (p, x)) ->
         Errors.let_var_immutability_violation p (Local_id.get_name x);
         expr_error env (Reason.Rwitness p) outer
       | _ ->
@@ -6724,7 +6751,7 @@ and unop p env uop te ty outer =
 
 and binop p env bop p1 te1 ty1 p2 te2 ty2 =
   let make_result env te1 te2 ty =
-    (env, Tast.make_typed_expr p ty (T.Binop (bop, te1, te2)), ty)
+    (env, Tast.make_typed_expr p ty (Aast.Binop (bop, te1, te2)), ty)
   in
   let is_any = TUtils.is_any env in
   let contains_any = is_any ty1 || is_any ty2 in
@@ -6978,14 +7005,14 @@ and refine_lvalue_type env (((_p, ty), _) as te) ~refine =
 and condition_nullity ~nonnull (env : env) te =
   match te with
   (* assignment: both the rhs and lhs of the '=' must be made null/non-null *)
-  | (_, T.Binop (Ast_defs.Eq None, var, te)) ->
+  | (_, Aast.Binop (Ast_defs.Eq None, var, te)) ->
     let env = condition_nullity ~nonnull env te in
     condition_nullity ~nonnull env var
   (* case where `Shapes::idx(...)` must be made null/non-null *)
   | ( _,
-      T.Call
+      Aast.Call
         ( _,
-          (_, T.Class_const ((_, T.CI (_, shapes)), (_, idx))),
+          (_, Aast.Class_const ((_, Aast.CI (_, shapes)), (_, idx))),
           _,
           [shape; field],
           _ ) )
@@ -7009,7 +7036,7 @@ and condition_nullity ~nonnull (env : env) te =
     refine_lvalue_type env te ~refine
 
 and condition_isset env = function
-  | (_, T.Array_get (x, _)) -> condition_isset env x
+  | (_, Aast.Array_get (x, _)) -> condition_isset env x
   | v -> condition_nullity ~nonnull:true env v
 
 (**
@@ -7023,28 +7050,28 @@ and condition
     ((((p, ty) as pty), e) as te : Tast.expr) =
   let condition = condition ?lhs_of_null_coalesce in
   match e with
-  | T.True
-  | T.Expr_list []
+  | Aast.True
+  | Aast.Expr_list []
     when not tparamet ->
     LEnv.drop_cont env C.Next
-  | T.False when tparamet -> LEnv.drop_cont env C.Next
-  | T.Expr_list [] -> env
-  | T.Expr_list [x] -> condition env tparamet x
-  | T.Expr_list (_ :: xs) -> condition env tparamet (pty, T.Expr_list xs)
-  | T.Call (Cnormal, (_, T.Id (_, func)), _, [param], [])
+  | Aast.False when tparamet -> LEnv.drop_cont env C.Next
+  | Aast.Expr_list [] -> env
+  | Aast.Expr_list [x] -> condition env tparamet x
+  | Aast.Expr_list (_ :: xs) -> condition env tparamet (pty, Aast.Expr_list xs)
+  | Aast.Call (Cnormal, (_, Aast.Id (_, func)), _, [param], [])
     when SN.PseudoFunctions.isset = func && tparamet && not (Env.is_strict env)
     ->
     condition_isset env param
-  | T.Call (Cnormal, (_, T.Id (_, func)), _, [te], [])
+  | Aast.Call (Cnormal, (_, Aast.Id (_, func)), _, [te], [])
     when SN.StdlibFunctions.is_null = func ->
     condition_nullity ~nonnull:(not tparamet) env te
-  | T.Binop ((Ast_defs.Eqeq | Ast_defs.Eqeqeq), (_, T.Null), e)
-  | T.Binop ((Ast_defs.Eqeq | Ast_defs.Eqeqeq), e, (_, T.Null)) ->
+  | Aast.Binop ((Ast_defs.Eqeq | Ast_defs.Eqeqeq), (_, Aast.Null), e)
+  | Aast.Binop ((Ast_defs.Eqeq | Ast_defs.Eqeqeq), e, (_, Aast.Null)) ->
     condition_nullity ~nonnull:(not tparamet) env e
-  | T.Lvar _
-  | T.Obj_get _
-  | T.Class_get _
-  | T.Binop (Ast_defs.Eq None, _, _) ->
+  | Aast.Lvar _
+  | Aast.Obj_get _
+  | Aast.Class_get _
+  | Aast.Binop (Ast_defs.Eq None, _, _) ->
     let (env, ety) = Env.expand_type env ty in
     (match ety with
     | (_, Tarraykind AKempty)
@@ -7058,15 +7085,15 @@ and condition
         | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tpu _
         | Tpu_access _ ) ) ->
       condition_nullity ~nonnull:tparamet env te)
-  | T.Binop (((Ast_defs.Diff | Ast_defs.Diff2) as op), e1, e2) ->
+  | Aast.Binop (((Ast_defs.Diff | Ast_defs.Diff2) as op), e1, e2) ->
     let op =
       if op = Ast_defs.Diff then
         Ast_defs.Eqeq
       else
         Ast_defs.Eqeqeq
     in
-    condition env (not tparamet) (pty, T.Binop (op, e1, e2))
-  | T.Id (_, s) when s = SN.Rx.is_enabled ->
+    condition env (not tparamet) (pty, Aast.Binop (op, e1, e2))
+  | Aast.Id (_, s) when s = SN.Rx.is_enabled ->
     (* when Rx\IS_ENABLED is false - switch env to non-reactive *)
     if not tparamet then
       Env.set_env_reactive env Nonreactive
@@ -7076,7 +7103,7 @@ and condition
       if (cond1 && cond2)
       if (!(cond1 || cond2))
   *)
-  | T.Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2)
+  | Aast.Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2)
     when tparamet = (bop = Ast_defs.Ampamp) ->
     let env = condition env tparamet e1 in
     (* This is necessary in case there is an assignment in e2
@@ -7089,7 +7116,7 @@ and condition
       if (cond1 || cond2)
       if (!(cond1 && cond2))
   *)
-  | T.Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2)
+  | Aast.Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2)
     when tparamet = (bop = Ast_defs.Barbar) ->
     (* Either cond1 is true and we don't know anything about cond2... *)
     let env1 = condition env tparamet e1 in
@@ -7101,12 +7128,12 @@ and condition
     let (env2, _, _) = expr env2 (Tast.to_nast_expr e2) in
     let env2 = condition env2 tparamet e2 in
     LEnv.union_envs env env1 env2
-  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
+  | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_array ->
     is_array env `PHPArray p f lv
-  | T.Call
+  | Aast.Call
       ( Cnormal,
-        (_, T.Class_const ((_, T.CI (_, class_name)), (_, method_name))),
+        (_, Aast.Class_const ((_, Aast.CI (_, class_name)), (_, method_name))),
         _,
         [shape; field],
         [] )
@@ -7114,8 +7141,8 @@ and condition
          && class_name = SN.Shapes.cShapes
          && method_name = SN.Shapes.keyExists ->
     key_exists env p shape field
-  | T.Unop (Ast_defs.Unot, e) -> condition env (not tparamet) e
-  | T.Is (ivar, h) when is_instance_var (Tast.to_nast_expr ivar) ->
+  | Aast.Unop (Ast_defs.Unot, e) -> condition env (not tparamet) e
+  | Aast.Is (ivar, h) when is_instance_var (Tast.to_nast_expr ivar) ->
     let ety_env =
       { (Phase.env_with_self env) with from_class = Some CIstatic }
     in
@@ -7266,7 +7293,7 @@ and safely_refine_class_type
    * further assumptions on type parameters. For example, we might have
    *   class B<Tb> { ... }
    *   class C extends B<int>
-   * and have obj_ty = C and x_ty = B<T> for a generic parameter T.
+   * and have obj_ty = C and x_ty = B<T> for a generic parameter Aast.
    * Then SubType.add_constraint will deduce that T=int and add int as
    * both lower and upper bound on T in env.lenv.tpenv
    *)
@@ -7736,40 +7763,40 @@ and class_def_ env c tc =
   in
   let env = Typing_solver.expand_bounds_of_global_tyvars env in
   ( {
-      T.c_span = c.c_span;
-      T.c_annotation = Env.save (Env.get_tpenv env) env;
-      T.c_mode = c.c_mode;
-      T.c_final = c.c_final;
-      T.c_is_xhp = c.c_is_xhp;
-      T.c_kind = c.c_kind;
-      T.c_name = c.c_name;
-      T.c_tparams = tparams;
-      T.c_extends = c.c_extends;
-      T.c_uses = c.c_uses;
+      Aast.c_span = c.c_span;
+      Aast.c_annotation = Env.save (Env.get_tpenv env) env;
+      Aast.c_mode = c.c_mode;
+      Aast.c_final = c.c_final;
+      Aast.c_is_xhp = c.c_is_xhp;
+      Aast.c_kind = c.c_kind;
+      Aast.c_name = c.c_name;
+      Aast.c_tparams = tparams;
+      Aast.c_extends = c.c_extends;
+      Aast.c_uses = c.c_uses;
       (* c_use_as_alias and c_insteadof_alias are PHP features not supported
        * in Hack but are required since we have runtime support for it
        *)
-      T.c_use_as_alias = [];
-      T.c_insteadof_alias = [];
-      T.c_method_redeclarations = typed_method_redeclarations;
-      T.c_xhp_attr_uses = c.c_xhp_attr_uses;
-      T.c_xhp_category = c.c_xhp_category;
-      T.c_reqs = c.c_reqs;
-      T.c_implements = c.c_implements;
-      T.c_where_constraints = c.c_where_constraints;
-      T.c_consts = typed_consts;
-      T.c_typeconsts = typed_typeconsts;
-      T.c_vars = typed_static_vars @ typed_vars;
-      T.c_methods = methods;
-      T.c_file_attributes = file_attrs;
-      T.c_user_attributes = user_attributes;
-      T.c_namespace = c.c_namespace;
-      T.c_enum = c.c_enum;
-      T.c_doc_comment = c.c_doc_comment;
-      T.c_attributes = [];
-      T.c_xhp_children = c.c_xhp_children;
-      T.c_xhp_attrs = [];
-      T.c_pu_enums = pu_enums;
+      Aast.c_use_as_alias = [];
+      Aast.c_insteadof_alias = [];
+      Aast.c_method_redeclarations = typed_method_redeclarations;
+      Aast.c_xhp_attr_uses = c.c_xhp_attr_uses;
+      Aast.c_xhp_category = c.c_xhp_category;
+      Aast.c_reqs = c.c_reqs;
+      Aast.c_implements = c.c_implements;
+      Aast.c_where_constraints = c.c_where_constraints;
+      Aast.c_consts = typed_consts;
+      Aast.c_typeconsts = typed_typeconsts;
+      Aast.c_vars = typed_static_vars @ typed_vars;
+      Aast.c_methods = methods;
+      Aast.c_file_attributes = file_attrs;
+      Aast.c_user_attributes = user_attributes;
+      Aast.c_namespace = c.c_namespace;
+      Aast.c_enum = c.c_enum;
+      Aast.c_doc_comment = c.c_doc_comment;
+      Aast.c_attributes = [];
+      Aast.c_xhp_children = c.c_xhp_children;
+      Aast.c_xhp_attrs = [];
+      Aast.c_pu_enums = pu_enums;
     },
     typed_methods_global_tvenv
     @ typed_static_methods_global_tvenv
@@ -7877,13 +7904,13 @@ and typeconst_def
   in
   ( env,
     {
-      T.c_tconst_abstract;
-      T.c_tconst_name = id;
-      T.c_tconst_constraint;
-      T.c_tconst_type = hint;
-      T.c_tconst_user_attributes = user_attributes;
-      T.c_tconst_span;
-      T.c_tconst_doc_comment;
+      Aast.c_tconst_abstract;
+      Aast.c_tconst_name = id;
+      Aast.c_tconst_constraint;
+      Aast.c_tconst_type = hint;
+      Aast.c_tconst_user_attributes = user_attributes;
+      Aast.c_tconst_span;
+      Aast.c_tconst_doc_comment;
     } )
 
 and pu_enum_def
@@ -7979,19 +8006,19 @@ and pu_enum_def
         (sid, expr)
       in
       {
-        T.pum_atom = pum.pum_atom;
-        T.pum_types = pum.pum_types;
-        T.pum_exprs = List.map ~f:process_mapping pum.pum_exprs;
+        Aast.pum_atom = pum.pum_atom;
+        Aast.pum_types = pum.pum_types;
+        Aast.pum_exprs = List.map ~f:process_mapping pum.pum_exprs;
       }
     in
     List.map ~f:process_member pu_members
   in
   {
-    T.pu_name;
-    T.pu_is_final;
-    T.pu_case_types = case_types;
-    T.pu_case_values;
-    T.pu_members = members;
+    Aast.pu_name;
+    Aast.pu_is_final;
+    Aast.pu_case_types = case_types;
+    Aast.pu_case_values;
+    Aast.pu_members = members;
   }
 
 and class_const_def env cc =
@@ -8027,10 +8054,10 @@ and class_const_def env cc =
   in
   ( env,
     ( {
-        T.cc_type = cc.cc_type;
-        T.cc_id = cc.cc_id;
-        T.cc_expr = eopt;
-        T.cc_doc_comment = cc.cc_doc_comment;
+        Aast.cc_type = cc.cc_type;
+        Aast.cc_id = cc.cc_id;
+        Aast.cc_expr = eopt;
+        Aast.cc_doc_comment = cc.cc_doc_comment;
       },
       ty ) )
 
@@ -8110,19 +8137,19 @@ and class_var_def ~is_static env cv =
       cv.cv_id;
   ( env,
     {
-      T.cv_final = cv.cv_final;
-      T.cv_xhp_attr = cv.cv_xhp_attr;
-      T.cv_abstract = cv.cv_abstract;
-      T.cv_visibility = cv.cv_visibility;
-      T.cv_type = cv.cv_type;
-      T.cv_id = cv.cv_id;
-      T.cv_expr = typed_cv_expr;
-      T.cv_user_attributes = user_attributes;
-      T.cv_is_promoted_variadic = cv.cv_is_promoted_variadic;
-      T.cv_doc_comment = cv.cv_doc_comment;
+      Aast.cv_final = cv.cv_final;
+      Aast.cv_xhp_attr = cv.cv_xhp_attr;
+      Aast.cv_abstract = cv.cv_abstract;
+      Aast.cv_visibility = cv.cv_visibility;
+      Aast.cv_type = cv.cv_type;
+      Aast.cv_id = cv.cv_id;
+      Aast.cv_expr = typed_cv_expr;
+      Aast.cv_user_attributes = user_attributes;
+      Aast.cv_is_promoted_variadic = cv.cv_is_promoted_variadic;
+      Aast.cv_doc_comment = cv.cv_doc_comment;
       (* Can make None to save space *)
-      T.cv_is_static = is_static;
-      T.cv_span = cv.cv_span;
+      Aast.cv_is_static = is_static;
+      Aast.cv_span = cv.cv_span;
     } )
 
 and add_constraints p env constraints =
@@ -8185,8 +8212,8 @@ and file_attributes env file_attrs =
       in
       ( env,
         {
-          T.fa_user_attributes = user_attributes;
-          T.fa_namespace = fa.fa_namespace;
+          Aast.fa_user_attributes = user_attributes;
+          Aast.fa_namespace = fa.fa_namespace;
         } ))
 
 and user_attribute env ua =
@@ -8195,12 +8222,12 @@ and user_attribute env ua =
         let (env, te, _) = expr env e in
         (env, te))
   in
-  (env, { T.ua_name = ua.ua_name; T.ua_params = typed_ua_params })
+  (env, { Aast.ua_name = ua.ua_name; Aast.ua_params = typed_ua_params })
 
 and reify_kind = function
-  | Erased -> T.Erased
-  | SoftReified -> T.SoftReified
-  | Reified -> T.Reified
+  | Erased -> Aast.Erased
+  | SoftReified -> Aast.SoftReified
+  | Reified -> Aast.Reified
 
 and type_param env t =
   let env =
@@ -8215,19 +8242,19 @@ and type_param env t =
   in
   ( env,
     {
-      T.tp_variance = t.tp_variance;
-      T.tp_name = t.tp_name;
-      T.tp_constraints = t.tp_constraints;
-      T.tp_reified = reify_kind t.tp_reified;
-      T.tp_user_attributes = user_attributes;
+      Aast.tp_variance = t.tp_variance;
+      Aast.tp_name = t.tp_name;
+      Aast.tp_constraints = t.tp_constraints;
+      Aast.tp_reified = reify_kind t.tp_reified;
+      Aast.tp_user_attributes = user_attributes;
     } )
 
 and class_type_param env ct =
   let (env, tparam_list) = List.map_env env ct.c_tparam_list type_param in
   ( env,
     {
-      T.c_tparam_list = tparam_list;
-      T.c_tparam_constraints =
+      Aast.c_tparam_list = tparam_list;
+      Aast.c_tparam_constraints =
         SMap.map (Tuple.T2.map_fst ~f:reify_kind) ct.c_tparam_constraints;
     } )
 
@@ -8459,23 +8486,23 @@ and method_def env cls m =
       let env = Typing_solver.expand_bounds_of_global_tyvars env in
       let method_def =
         {
-          T.m_annotation = Env.save local_tpenv env;
-          T.m_span = m.m_span;
-          T.m_final = m.m_final;
-          T.m_static = m.m_static;
-          T.m_abstract = m.m_abstract;
-          T.m_visibility = m.m_visibility;
-          T.m_name = m.m_name;
-          T.m_tparams = tparams;
-          T.m_where_constraints = m.m_where_constraints;
-          T.m_variadic = t_variadic;
-          T.m_params = typed_params;
-          T.m_fun_kind = m.m_fun_kind;
-          T.m_user_attributes = user_attributes;
-          T.m_ret = (locl_ty, hint_of_type_hint m.m_ret);
-          T.m_body = { T.fb_ast = tb; fb_annotation = annotation };
-          T.m_external = m.m_external;
-          T.m_doc_comment = m.m_doc_comment;
+          Aast.m_annotation = Env.save local_tpenv env;
+          Aast.m_span = m.m_span;
+          Aast.m_final = m.m_final;
+          Aast.m_static = m.m_static;
+          Aast.m_abstract = m.m_abstract;
+          Aast.m_visibility = m.m_visibility;
+          Aast.m_name = m.m_name;
+          Aast.m_tparams = tparams;
+          Aast.m_where_constraints = m.m_where_constraints;
+          Aast.m_variadic = t_variadic;
+          Aast.m_params = typed_params;
+          Aast.m_fun_kind = m.m_fun_kind;
+          Aast.m_user_attributes = user_attributes;
+          Aast.m_ret = (locl_ty, hint_of_type_hint m.m_ret);
+          Aast.m_body = { Aast.fb_ast = tb; fb_annotation = annotation };
+          Aast.m_external = m.m_external;
+          Aast.m_doc_comment = m.m_doc_comment;
         }
       in
       ( Typing_lambda_ambiguous.suggest_method_def env method_def,
@@ -8547,15 +8574,15 @@ and typedef_def tcopt typedef =
     List.map_env env typedef.t_user_attributes user_attribute
   in
   {
-    T.t_annotation = Env.save (Env.get_tpenv env) env;
-    T.t_name = typedef.t_name;
-    T.t_mode = typedef.t_mode;
-    T.t_vis = typedef.t_vis;
-    T.t_user_attributes = user_attributes;
-    T.t_constraint = typedef.t_constraint;
-    T.t_kind = typedef.t_kind;
-    T.t_tparams = tparams;
-    T.t_namespace = typedef.t_namespace;
+    Aast.t_annotation = Env.save (Env.get_tpenv env) env;
+    Aast.t_name = typedef.t_name;
+    Aast.t_mode = typedef.t_mode;
+    Aast.t_vis = typedef.t_vis;
+    Aast.t_user_attributes = user_attributes;
+    Aast.t_constraint = typedef.t_constraint;
+    Aast.t_kind = typedef.t_kind;
+    Aast.t_tparams = tparams;
+    Aast.t_namespace = typedef.t_namespace;
   }
 
 and gconst_def tcopt cst =
@@ -8591,13 +8618,13 @@ and gconst_def tcopt cst =
       (te, env)
   in
   {
-    T.cst_annotation = Env.save (Env.get_tpenv env) env;
-    T.cst_mode = cst.cst_mode;
-    T.cst_name = cst.cst_name;
-    T.cst_type = cst.cst_type;
-    T.cst_value = typed_cst_value;
-    T.cst_namespace = cst.cst_namespace;
-    T.cst_span = cst.cst_span;
+    Aast.cst_annotation = Env.save (Env.get_tpenv env) env;
+    Aast.cst_mode = cst.cst_mode;
+    Aast.cst_name = cst.cst_name;
+    Aast.cst_type = cst.cst_type;
+    Aast.cst_value = typed_cst_value;
+    Aast.cst_namespace = cst.cst_namespace;
+    Aast.cst_span = cst.cst_span;
   }
 
 (* Calls the method of a class, but allows the f callback to override the
@@ -8638,7 +8665,9 @@ and overload_function
       | (r, Tfun ft) -> (r, Tfun { ft with ft_ret = MakeType.unenforced ty })
       | _ -> fty
     in
-    let te = Tast.make_typed_expr fpos fty (T.Class_const (tcid, method_id)) in
+    let te =
+      Tast.make_typed_expr fpos fty (Aast.Class_const (tcid, method_id))
+    in
     make_call env te tal tel tuel ty
 
 and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind =
@@ -8791,15 +8820,15 @@ let record_def_def tcopt rd =
   in
   let (_env, fields) = List.map_env env rd.rd_fields record_field in
   {
-    T.rd_annotation = Env.save (Env.get_tpenv env) env;
-    T.rd_name = rd.rd_name;
-    T.rd_extends = rd.rd_extends;
-    T.rd_abstract = rd.rd_abstract;
-    T.rd_fields = fields;
-    T.rd_user_attributes = attributes;
-    T.rd_namespace = rd.rd_namespace;
-    T.rd_span = rd.rd_span;
-    T.rd_doc_comment = rd.rd_doc_comment;
+    Aast.rd_annotation = Env.save (Env.get_tpenv env) env;
+    Aast.rd_name = rd.rd_name;
+    Aast.rd_extends = rd.rd_extends;
+    Aast.rd_abstract = rd.rd_abstract;
+    Aast.rd_fields = fields;
+    Aast.rd_user_attributes = attributes;
+    Aast.rd_namespace = rd.rd_namespace;
+    Aast.rd_span = rd.rd_span;
+    Aast.rd_doc_comment = rd.rd_doc_comment;
   }
 
 let nast_to_tast opts nast =
@@ -8807,31 +8836,31 @@ let nast_to_tast opts nast =
     | Fun f ->
       begin
         match fun_def opts f with
-        | Some (f, _) -> T.Fun f
+        | Some (f, _) -> Aast.Fun f
         | None ->
           failwith
           @@ Printf.sprintf
                "Error when typechecking function: %s"
                (snd f.f_name)
       end
-    | Constant gc -> T.Constant (gconst_def opts gc)
-    | Typedef td -> T.Typedef (typedef_def opts td)
+    | Constant gc -> Aast.Constant (gconst_def opts gc)
+    | Typedef td -> Aast.Typedef (typedef_def opts td)
     | Class c ->
       begin
         match class_def opts c with
-        | Some (c, _) -> T.Class c
+        | Some (c, _) -> Aast.Class c
         | None ->
           failwith
           @@ Printf.sprintf "Error in declaration of class: %s" (snd c.c_name)
       end
-    | RecordDef rd -> T.RecordDef (record_def_def opts rd)
+    | RecordDef rd -> Aast.RecordDef (record_def_def opts rd)
     (* We don't typecheck top level statements:
      * https://docs.hhvm.com/hack/unsupported/top-level
      * so just create the minimal env for us to construct a Stmt.
      *)
     | Stmt s ->
       let env = Env.empty opts Relative_path.default None in
-      T.Stmt (snd (stmt env s))
+      Aast.Stmt (snd (stmt env s))
     | Namespace _
     | NamespaceUse _
     | SetNamespaceEnv _

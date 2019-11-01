@@ -307,7 +307,15 @@ and has_member = {
   hm_name: Nast.sid;
   hm_type: locl_ty;
   hm_nullsafe: nullsafe;
+      (** a 'nullsafe' field is required to typecheck method calls with nullsafe
+  operator like $x?->foo(). In this case, if $x is nullable and foo has type 
+  `function(...): X`, we typecheck the call with function(...): ?X.
+  TODO: remove this field and treat the nullsafe operator outside of subtyping.
+  *)
   hm_class_id: Nast.class_id_;
+      (** This is required to check ambiguous object access, where sometimes
+  HHVM would access the private member of a parent class instead of the 
+  one from the current class. *)
 }
 
 and nullsafe = Pos.t option

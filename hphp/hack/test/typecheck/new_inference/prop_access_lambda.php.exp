@@ -1,0 +1,8 @@
+File "prop_access_lambda.php", line 10, characters 6-7:
+Invalid argument (Typing[4110])
+File "prop_access_lambda.php", line 9, characters 22-27:
+Expected string
+File "prop_access_lambda.php", line 13, characters 20-20:
+  via this generic T
+File "prop_access_lambda.php", line 5, characters 38-40:
+But got int

@@ -12,13 +12,12 @@ open Typing_defs
 
 (* Logical proposition about types *)
 type subtype_prop =
-  (* IsSubtype(ty1,ty2) if ty1 is a subtype of ty2, written ty1 <: ty2 *)
   | IsSubtype of internal_type * internal_type
-  (* Conjunction. Conj [] means "true" *)
-  | Conj of subtype_prop list
-  (* Disjunction. Disj f [] means "false".  The error message function f
-   * wraps the error that should be produced in this case. *)
+      (** IsSubtype(ty1,ty2) if ty1 is a subtype of ty2, written ty1 <: ty2 *)
+  | Conj of subtype_prop list  (** Conjunction. Conj [] means "true" *)
   | Disj of (unit -> unit) * subtype_prop list
+      (** Disjunction. Disj f [] means "false".  The error message function f
+   * wraps the error that should be produced in this case. *)
 
 let rec size (p : subtype_prop) : int =
   match p with

@@ -2751,25 +2751,21 @@ and expr_
     in
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let env = might_throw env in
-    let (env, (result, _tal)) =
-      TOG.obj_get
-        ~obj_pos:(fst e1)
-        ~is_method:false
-        ~coerce_from_ty:None
-        ~nullsafe
-        env
-        ty1
-        (CIexpr e1)
-        m
-    in
-    let (env, result) =
-      Env.FakeMembers.check_instance_invalid env e1 (snd m) result
+    (* We typecheck Obj_get by checking whether it is a subtype of 
+    Thas_member(m, #1) where #1 is a fresh type variable. *)
+    let (env, mem_ty) = Env.fresh_type env p in
+    let r = Reason.Rwitness (fst e1) in
+    let ty_has_member = MakeType.has_member r m mem_ty nullsafe (CIexpr e1) in
+    let ty1 = LoclType ty1 in
+    let env = SubType.sub_type_i env ty1 ty_has_member Errors.unify_error in
+    let (env, mem_ty) =
+      Env.FakeMembers.check_instance_invalid env e1 (snd m) mem_ty
     in
     make_result
       env
       p
-      (T.Obj_get (te1, Tast.make_typed_expr pm result (T.Id m), nullflavor))
-      result
+      (T.Obj_get (te1, Tast.make_typed_expr pm mem_ty (T.Id m), nullflavor))
+      mem_ty
   (* Dynamic instance property access e.g. $x->$f *)
   | Obj_get (e1, e2, nullflavor) ->
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in

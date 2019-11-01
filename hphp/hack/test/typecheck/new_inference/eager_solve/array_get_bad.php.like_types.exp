@@ -2,7 +2,7 @@ File "array_get_bad.php", line 29, characters 14-21:
 Invalid index type for this array (Typing[4324])
 File "array_get_bad.php", line 29, characters 18-20:
 Expected int
-File "array_get_bad.php", line 14, characters 3-13:
+File "array_get_bad.php", line 28, characters 9-28:
 This can only be indexed with integers
 File "array_get_bad.php", line 29, characters 18-20:
 But got string
@@ -30,7 +30,7 @@ File "array_get_bad.php", line 37, characters 14-26:
 Invalid index type for this ImmVector (Typing[4324])
 File "array_get_bad.php", line 37, characters 23-25:
 Expected int
-File "array_get_bad.php", line 18, characters 3-17:
+File "array_get_bad.php", line 36, characters 14-38:
 This can only be indexed with integers
 File "array_get_bad.php", line 37, characters 23-25:
 But got string

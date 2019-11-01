@@ -1,0 +1,8 @@
+File "prop_access.php", line 15, characters 7-15:
+Invalid assignment (Typing[4110])
+File "prop_access.php", line 12, characters 14-19:
+Expected string
+File "prop_access.php", line 20, characters 20-20:
+  via this generic T
+File "prop_access.php", line 5, characters 38-40:
+But got int

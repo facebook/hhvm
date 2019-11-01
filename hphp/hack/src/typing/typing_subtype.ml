@@ -395,6 +395,7 @@ and simplify_subtype_i
   let invalid_env env = invalid_env_with env fail in
   (* We *know* that the assertion is valid *)
   let valid () = (env, TL.valid) in
+  let valid_env env = (env, TL.valid) in
   (* We don't know whether the assertion is valid or not *)
   let default () = (env, TL.IsSubtype (ety_sub, ety_super)) in
   let simplify_subtype_generic_sub name_sub opt_sub_cstr ty_sub ty_super env =
@@ -732,18 +733,25 @@ and simplify_subtype_i
               hm_nullsafe = nullsafe;
               hm_class_id = class_id;
             } ) ) ->
-    let (env, (obj_get_ty, _tal)) =
-      Typing_object_get.obj_get
-        ~obj_pos:(Reason.to_pos r)
-        ~is_method:false
-        ~coerce_from_ty:None
-        ~nullsafe
-        env
-        ty
-        class_id
-        name
+    let (obj_get_ty, error_prop) =
+      Errors.try_with_result
+        (fun () ->
+          let (env, (obj_get_ty, _tal)) =
+            Typing_object_get.obj_get
+              ~obj_pos:(Reason.to_pos r)
+              ~is_method:false
+              ~coerce_from_ty:None
+              ~nullsafe
+              env
+              ty
+              class_id
+              name
+          in
+          (obj_get_ty, valid_env env))
+        (fun (obj_get_ty, _) error ->
+          (obj_get_ty, invalid_with (fun () -> Errors.add_error error)))
     in
-    simplify_subtype ~subtype_env ~this_ty obj_get_ty member_ty env
+    error_prop &&& simplify_subtype ~subtype_env ~this_ty obj_get_ty member_ty
   | (_, LoclType ((_, Tunion (_ :: _ as tyl)) as ty_super)) ->
     (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
      * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
@@ -2481,7 +2489,7 @@ and props_to_env ~treat_dynamic_as_bottom env remain props on_error =
           (fun _ -> try_disj disj_props')
     in
     try_disj disj_props
-  | prop :: props ->
+  | (TL.IsSubtype _ as prop) :: props ->
     props_to_env ~treat_dynamic_as_bottom env (prop :: remain) props on_error
 
 (* Move any top-level conjuncts of the form Tvar v <: t or t <: Tvar v to

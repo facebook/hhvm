@@ -56,6 +56,14 @@ function call_defaulted(int $arg): void {
   with_defaults();
 }
 
+function with_default_and_variadic(mixed $x, ?string $y = null, mixed ...$z): void {}
+
+function call_with_default_and_variadic(string $s): void {
+  with_default_and_variadic(42);
+  with_default_and_variadic(42, 'meaning of life');
+  with_default_and_variadic(42, '%s', $s);
+}
+
 function nonexistent_dependency(BogusType $arg): void {}
 
 function builtin_argument_types(Exception $e, keyset<string> $k): void {}

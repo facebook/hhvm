@@ -111,6 +111,8 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_requiring_trait",
             "\\with_nontrivial_fun_decls",
             "\\call_defaulted",
+            "\\call_with_default_and_variadic",
+            "\\call_with_default_and_anonymous_variadic",
             "\\use_properties",
             "\\call_constructors",
             "\\with_constants",

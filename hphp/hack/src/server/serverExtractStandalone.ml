@@ -272,11 +272,7 @@ let call_make_default = Printf.sprintf "\\%s()" function_make_default
 
 let print_fun_args tcopt fun_type =
   let with_default arg_idx =
-    match fun_type.ft_arity with
-    | Fstandard (min, _) -> arg_idx >= min
-    | Fvariadic _
-    | Fellipsis _ ->
-      false
+    arg_idx >= Typing_defs.arity_min fun_type.ft_arity
   in
   let print_arg ?is_variadic:(var = false) idx arg =
     let name =
@@ -308,21 +304,14 @@ let print_fun_args tcopt fun_type =
     else
       Printf.sprintf "%s%s%s%s" inout typ name default
   in
+  let args = List.mapi fun_type.ft_params print_arg in
   let args =
-    String.concat ~sep:", " @@ List.mapi fun_type.ft_params print_arg
-  in
-  let variadic =
     match fun_type.ft_arity with
-    (* variadic argument comes last *)
-    | Fvariadic (arity, arg) -> print_arg ~is_variadic:true arity arg
-    | Fstandard _
-    | Fellipsis _ ->
-      ""
+    | Fvariadic (min, arg) -> args @ [print_arg ~is_variadic:true min arg]
+    | Fellipsis _ -> args @ ["..."]
+    | Fstandard _ -> args
   in
-  if String.is_empty args then
-    variadic
-  else
-    Printf.sprintf "%s, %s" args variadic
+  String.concat ~sep:", " args
 
 let print_constraint_kind = function
   | Ast_defs.Constraint_as -> "as"

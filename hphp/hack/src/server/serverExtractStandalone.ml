@@ -1052,7 +1052,10 @@ and add_signature_dependencies deps obj =
             Sequence.iter (Class.smethods interf) ~f:add_smethod_impl
           )
         in
-        Sequence.iter (Class.all_ancestor_names cls) add_implementations
+        Sequence.iter (Class.all_ancestor_names cls) add_implementations;
+        Option.iter (Class.enum_type cls) ~f:(fun { te_base; te_constraint } ->
+            add_dep te_base;
+            Option.iter te_constraint ~f:add_dep)
       | AllMembers _ ->
         (* AllMembers is used for dependencies on enums, so we should depend on all constants *)
         Sequence.iter (Class.consts cls) (fun (name, c) ->

@@ -1,0 +1,13 @@
+<?hh
+type SomeEnumType = \SomeEnum;
+function with_enum_type_alias(ThirdEnum $_): void {}
+enum SomeEnum: int {
+  SECOND = 0;
+  FIRST = 0;
+}
+enum ThirdEnum: \SomeEnumType {
+  MUMBLE = \SomeEnum::FIRST;
+}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

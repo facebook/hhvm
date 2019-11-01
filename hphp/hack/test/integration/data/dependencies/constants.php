@@ -13,6 +13,14 @@ enum SecondEnum: string {
   SECOND = "5";
 }
 
+type SomeEnumType = SomeEnum;
+
+enum ThirdEnum: SomeEnumType {
+  MUMBLE = SomeEnum::FIRST;
+}
+
+function with_enum_type_alias(ThirdEnum $_): void {}
+
 abstract class WithAbstractConst {
   abstract const type ABS_WO_CONSTRAINT;
   abstract const type ABS_WITH_CONSTRAINT as string;

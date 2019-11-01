@@ -293,12 +293,38 @@ let parse_text popt fn text =
   in
   (ast, is_hh_file)
 
-let parse_file popt filename text =
-  try `ParseResult (Errors.do_ (fun () -> parse_text popt filename text)) with
-  (* FFP failed to parse *)
-  | Failure s -> `ParseFailure (SyntaxError.make 0 0 s, Pos.none)
-  (* FFP generated an error *)
-  | SyntaxError.ParserFatal (e, p) -> `ParseFailure (e, p)
+let parse_file filename text =
+  let popt =
+    Hhbc_options.(
+      let co = !compiler_options in
+      ParserOptions.make
+        ~auto_namespace_map:(aliased_namespaces co)
+        ~codegen:true
+        ~disallow_execution_operator:(phpism_disallow_execution_operator co)
+        ~disable_nontoplevel_declarations:
+          (phpism_disable_nontoplevel_declarations co)
+        ~disable_static_closures:(phpism_disable_static_closures co)
+        ~disable_halt_compiler:(phpism_disable_halt_compiler co)
+        ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
+        ~enable_class_level_where_clauses:(enable_class_level_where_clauses co)
+        ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
+        ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
+        ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
+        ~const_default_func_args:(const_default_func_args co)
+        ~disallow_silence:false
+        ~const_static_props:(const_static_props co)
+        ~abstract_static_props:(abstract_static_props co)
+        ~disable_unset_class_const:(disable_unset_class_const co)
+        ~disallow_func_ptrs_in_constants:(disallow_func_ptrs_in_constants co))
+  in
+  ( (try
+       `ParseResult (Errors.do_ (fun () -> parse_text popt filename text))
+     with
+    (* FFP failed to parse *)
+    | Failure s -> `ParseFailure (SyntaxError.make 0 0 s, Pos.none)
+    (* FFP generated an error *)
+    | SyntaxError.ParserFatal (e, p) -> `ParseFailure (e, p)),
+    popt )
 
 let add_to_time_ref r t0 =
   let t = Unix.gettimeofday () in
@@ -346,19 +372,33 @@ let handle_conversion_errors errors =
         false
       | _ (* Emit fatal parse otherwise *) -> true)
 
-let do_compile filename compiler_options popt fail_or_ast debug_time =
+let do_compile
+    ~is_systemlib (compiler_options : options) filename source_text debug_time
+    =
   let t = Unix.gettimeofday () in
-  let t = add_to_time_ref debug_time.parsing_t t in
-  let hhas_prog =
-    match fail_or_ast with
+  let (fail_or_tast, popt) = parse_file filename source_text in
+  ignore @@ add_to_time_ref debug_time.parsing_t t;
+  let env =
+    Compile.
+      {
+        is_systemlib;
+        filepath = filename;
+        is_evaled = is_file_path_for_evaled_code filename;
+        for_debugger_eval = compiler_options.for_debugger_eval;
+        dump_symbol_refs = compiler_options.dump_symbol_refs;
+        empty_namespace = Namespace_env.empty_from_popt popt;
+        hhbc_options = !Hhbc_options.compiler_options;
+      }
+  in
+  let (tast_hh, is_runtime_error, error) =
+    match fail_or_tast with
     | `ParseFailure (e, pos) ->
-      let error_t =
+      let is_runtime_error =
         match SyntaxError.error_type e with
-        | SyntaxError.ParseError -> Hhbc_ast.FatalOp.Parse
-        | SyntaxError.RuntimeError -> Hhbc_ast.FatalOp.Runtime
+        | SyntaxError.ParseError -> false
+        | SyntaxError.RuntimeError -> true
       in
-      let s = SyntaxError.message e in
-      Emit_program.emit_fatal_program ~ignore_message:false error_t pos s
+      (None, is_runtime_error, Some (pos, Some (SyntaxError.message e)))
     | `ParseResult (errors, (tast, is_hh_file)) ->
       let error_list = Errors.get_error_list errors in
       let error_list = handle_conversion_errors error_list in
@@ -366,38 +406,28 @@ let do_compile filename compiler_options popt fail_or_ast debug_time =
           P.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
       if List.is_empty error_list then
         let tast =
-          if
-            Hhbc_options.enable_pocket_universes !Hhbc_options.compiler_options
+          if Hhbc_options.enable_pocket_universes Compile.(env.hhbc_options)
           then
             Pocket_universes.translate tast
           else
             tast
         in
-        Emit_program.from_ast
-          ~is_hh_file
-          ~is_evaled:(is_file_path_for_evaled_code filename)
-          ~for_debugger_eval:compiler_options.for_debugger_eval
-          ~empty_namespace:(Namespace_env.empty_from_popt popt)
-          tast
+        (Some (tast, is_hh_file), false, None)
       else
-        Emit_program.emit_fatal_program
-          ~ignore_message:true
-          Hhbc_ast.FatalOp.Parse
-          Pos.none
-          "Syntax error"
+        (None, false, Some (Pos.none, None))
   in
-  let t = add_to_time_ref debug_time.codegen_t t in
-  let hhas =
-    Hhbc_hhas.to_segments
-      ~path:filename
-      ~dump_symbol_refs:compiler_options.dump_symbol_refs
-      hhas_prog
+  let ret =
+    match (tast_hh, error) with
+    | (Some (tast, is_hh_file), _) -> Compile.from_ast ~env ~is_hh_file tast
+    | (_, Some (pos, msg)) -> Compile.fatal ~env ~is_runtime_error pos msg
+    | _ -> failwith "Impossible case: emits program or fatals"
   in
-  ignore @@ add_to_time_ref debug_time.printing_t t;
+  (debug_time.codegen_t := Compile.(ret.codegen_t));
+  (debug_time.printing_t := Compile.(ret.printing_t));
   if compiler_options.debug_time then print_debug_time_info filename debug_time;
   if compiler_options.log_stats then
     log_success compiler_options filename debug_time;
-  hhas
+  Compile.(ret.bytecode_segments)
 
 let extract_facts ~filename text =
   [
@@ -443,42 +473,25 @@ let parse_hh_file filename body =
 (* Main entry point *)
 (*****************************************************************************)
 
-let make_popt () =
-  Hhbc_options.(
-    let co = !compiler_options in
-    ParserOptions.make
-      ~auto_namespace_map:(aliased_namespaces co)
-      ~codegen:true
-      ~disallow_execution_operator:(phpism_disallow_execution_operator co)
-      ~disable_nontoplevel_declarations:
-        (phpism_disable_nontoplevel_declarations co)
-      ~disable_static_closures:(phpism_disable_static_closures co)
-      ~disable_halt_compiler:(phpism_disable_halt_compiler co)
-      ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
-      ~enable_class_level_where_clauses:(enable_class_level_where_clauses co)
-      ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
-      ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
-      ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
-      ~const_default_func_args:(const_default_func_args co)
-      ~disallow_silence:false
-      ~const_static_props:(const_static_props co)
-      ~abstract_static_props:(abstract_static_props co)
-      ~disable_unset_class_const:(disable_unset_class_const co)
-      ~disallow_func_ptrs_in_constants:(disallow_func_ptrs_in_constants co))
-
 let process_single_source_unit
-    compiler_options handle_output handle_exception filename source_text =
+    ~is_systemlib
+    compiler_options
+    handle_output
+    handle_exception
+    filename
+    source_text =
   try
-    let popt = make_popt () in
     let debug_time = new_debug_time () in
-    let t = Unix.gettimeofday () in
     let output =
       if compiler_options.extract_facts then
         extract_facts ~filename source_text
       else
-        let fail_or_ast = parse_file popt filename source_text in
-        ignore @@ add_to_time_ref debug_time.parsing_t t;
-        do_compile filename compiler_options popt fail_or_ast debug_time
+        do_compile
+          ~is_systemlib
+          compiler_options
+          filename
+          source_text
+          debug_time
     in
     handle_output filename output debug_time
   with exc ->
@@ -602,9 +615,8 @@ let decl_and_run_mode compiler_options =
                 in
                 let is_systemlib =
                   get_field_opt (get_bool "is_systemlib") header
+                  |> Option.value ~default:false
                 in
-                Emit_env.set_is_systemlib
-                @@ Option.value ~default:false is_systemlib;
                 let for_debugger_eval =
                   get_field
                     (get_bool "for_debugger_eval")
@@ -625,6 +637,7 @@ let decl_and_run_mode compiler_options =
                 in
                 let result =
                   process_single_source_unit
+                    ~is_systemlib
                     compiler_options
                     handle_output
                     handle_exception
@@ -719,6 +732,7 @@ let decl_and_run_mode compiler_options =
           let filename = Relative_path.create Relative_path.Dummy filename in
           let abs_path = Relative_path.to_absolute filename in
           process_single_source_unit
+            ~is_systemlib:false
             compiler_options
             handle_output
             handle_exception

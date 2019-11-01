@@ -326,7 +326,7 @@ let resolve_ty
         { AutocompleteTypes.is_xhp_classname = true; _ },
         _ ) ->
       let newname = lstrip x.name ":" in
-      (newname, newname)
+      (newname, x.name)
     | ( SearchUtils.SI_Literal,
         { AutocompleteTypes.is_before_apostrophe = true; _ },
         Some Acshape_key ) ->
@@ -762,7 +762,7 @@ let find_global_results
          * return should omit the leading colon *)
         let (res_name, res_fullname) =
           if autocomplete_context.is_xhp_classname then
-            (Utils.strip_xhp_ns r.si_name, Utils.strip_xhp_ns r.si_fullname)
+            (Utils.strip_xhp_ns r.si_name, Utils.add_xhp_ns r.si_fullname)
           else
             (r.si_name, r.si_fullname)
         in

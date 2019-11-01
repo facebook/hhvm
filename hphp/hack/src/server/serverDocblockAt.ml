@@ -213,7 +213,7 @@ let symboldefinition_kind_from_si_kind (kind : SearchUtils.si_kind) :
   | SearchUtils.SI_Namespace -> failwith "Cannot look up a namespace"
 
 (* Given a location and file contents, find best doc block *)
-let go_docblock_at_contents
+let rec go_docblock_at_contents
     ~(filename : string)
     ~(contents : string)
     ~(line : int)
@@ -230,7 +230,17 @@ let go_docblock_at_contents
       ~contents
       ~kind:def_kind
   with
-  | None -> []
+  | None ->
+    (* Special case: Classes with an assumed default constructor *)
+    if kind = SearchUtils.SI_Constructor then
+      go_docblock_at_contents
+        ~filename
+        ~contents
+        ~line
+        ~column
+        ~kind:SearchUtils.SI_Class
+    else
+      []
   | Some "" -> []
   | Some comments -> [DocblockService.Markdown comments]
 

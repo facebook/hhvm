@@ -523,7 +523,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "sortText": "ab:cd:alpha",
                             "insertText": "ab:cd:alpha",
                             "insertTextFormat": 1,
-                            "data": {"fullname": "ab:cd:alpha"},
+                            "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
                             "label": "ab:cd:text",
@@ -533,7 +533,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "sortText": "ab:cd:text",
                             "insertText": "ab:cd:text",
                             "insertTextFormat": 1,
-                            "data": {"fullname": "ab:cd:text"},
+                            "data": {"fullname": ":ab:cd:text"},
                         },
                     ],
                 },
@@ -573,7 +573,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "sortText": "ab:cd:alpha",
                             "insertText": "ab:cd:alpha",
                             "insertTextFormat": 1,
-                            "data": {"fullname": "ab:cd:alpha"},
+                            "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
                             "label": "ab:cd:text",
@@ -583,7 +583,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "sortText": "ab:cd:text",
                             "insertText": "ab:cd:text",
                             "insertTextFormat": 1,
-                            "data": {"fullname": "ab:cd:text"},
+                            "data": {"fullname": ":ab:cd:text"},
                         },
                     ],
                 },
@@ -623,7 +623,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "sortText": "ab:cd:alpha",
                             "insertText": "ab:cd:alpha",
                             "insertTextFormat": 1,
-                            "data": {"fullname": "ab:cd:alpha"},
+                            "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
                             "label": "ab:cd:text",
@@ -633,7 +633,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "sortText": "ab:cd:text",
                             "insertText": "ab:cd:text",
                             "insertTextFormat": 1,
-                            "data": {"fullname": "ab:cd:text"},
+                            "data": {"fullname": ":ab:cd:text"},
                         },
                     ],
                 },
@@ -674,7 +674,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertText": "width",
                             "insertTextFormat": 1,
                             "data": {
-                                "fullname": "width",
+                                "fullname": ":width",
                                 "filename": "${root_path}/completion_extras.php",
                                 "line": 5,
                                 "char": 27,
@@ -690,7 +690,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertText": "color",
                             "insertTextFormat": 1,
                             "data": {
-                                "fullname": "color",
+                                "fullname": ":color",
                                 "filename": "${root_path}/completion_extras.php",
                                 "line": 5,
                                 "char": 13,
@@ -736,7 +736,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertText": "width",
                             "insertTextFormat": 1,
                             "data": {
-                                "fullname": "width",
+                                "fullname": ":width",
                                 "filename": "${root_path}/completion_extras.php",
                                 "line": 5,
                                 "char": 27,
@@ -752,7 +752,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertText": "color",
                             "insertTextFormat": 1,
                             "data": {
-                                "fullname": "color",
+                                "fullname": ":color",
                                 "filename": "${root_path}/completion_extras.php",
                                 "line": 5,
                                 "char": 13,
@@ -863,36 +863,111 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 powered_by="serverless_ide",
             )
+            # Note that this request should match the result in the previous example
             .request(
                 comment="autocomplete resolving after '$x = new :a'",
                 method="completionItem/resolve",
                 params={
                     "label": ":ab:cd:alpha",
-                    "kind": 4,
-                    "detail": "function(): :ab:cd:alpha",
-                    "inlineDetail": "()",
+                    "kind": 7,
+                    "detail": "class",
+                    "inlineDetail": "class",
                     "itemType": ":ab:cd:alpha",
                     "insertText": ":ab:cd:alpha",
                     "insertTextFormat": 1,
-                    "data": {
-                        "filename": "${root_path}/completion_extras.php",
-                        "line": 9,
-                        "char": 13,
-                    },
+                    "data": {"fullname": ":ab:cd:alpha"},
                 },
                 result={
                     "label": ":ab:cd:alpha",
-                    "kind": 4,
-                    "detail": "function(): :ab:cd:alpha",
-                    "inlineDetail": "()",
+                    "kind": 7,
+                    "detail": "class",
+                    "inlineDetail": "class",
                     "itemType": ":ab:cd:alpha",
+                    "documentation": {
+                        "kind": "markdown",
+                        "value": ":ab:cd:alpha docblock",
+                    },
                     "insertText": ":ab:cd:alpha",
                     "insertTextFormat": 1,
-                    "data": {
-                        "filename": "${root_path}/completion_extras.php",
-                        "line": 9,
-                        "char": 13,
+                    "data": {"fullname": ":ab:cd:alpha"},
+                },
+                powered_by="serverless_ide",
+            )
+            # Try the same thing again, but this time without "new", instead using "<xhp" style
+            .notification(
+                comment="Add '$x = <a'",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "contentChanges": [
+                        {
+                            "range": {
+                                "start": {"line": 3, "character": 0},
+                                "end": {"line": 3, "character": 11},
+                            },
+                            "text": "$x = <a",
+                        }
+                    ],
+                },
+            )
+            .request(
+                comment="autocomplete after '$x = <a'",
+                method="textDocument/completion",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 7},
+                },
+                result={
+                    "isIncomplete": False,
+                    "items": [
+                        {
+                            "label": "ab:cd:alpha",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "sortText": "ab:cd:alpha",
+                            "insertText": "ab:cd:alpha",
+                            "insertTextFormat": 1,
+                            "data": {"fullname": ":ab:cd:alpha"},
+                        },
+                        {
+                            "label": "ab:cd:text",
+                            "kind": 7,
+                            "detail": "class",
+                            "inlineDetail": "class",
+                            "sortText": "ab:cd:text",
+                            "insertText": "ab:cd:text",
+                            "insertTextFormat": 1,
+                            "data": {"fullname": ":ab:cd:text"},
+                        },
+                    ],
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="autocomplete resolving after '$x = <a'",
+                method="completionItem/resolve",
+                params={
+                    "label": "ab:cd:alpha",
+                    "kind": 7,
+                    "detail": "class",
+                    "inlineDetail": "class",
+                    "insertText": "ab:cd:alpha",
+                    "insertTextFormat": 1,
+                    "data": {"fullname": ":ab:cd:alpha"},
+                },
+                result={
+                    "label": "ab:cd:alpha",
+                    "kind": 7,
+                    "detail": "class",
+                    "inlineDetail": "class",
+                    "documentation": {
+                        "kind": "markdown",
+                        "value": ":ab:cd:alpha docblock",
                     },
+                    "insertText": "ab:cd:alpha",
+                    "insertTextFormat": 1,
+                    "data": {"fullname": ":ab:cd:alpha"},
                 },
                 powered_by="serverless_ide",
             )
@@ -905,7 +980,7 @@ class TestLsp(TestCase[LspTestDriver]):
                         {
                             "range": {
                                 "start": {"line": 3, "character": 0},
-                                "end": {"line": 3, "character": 11},
+                                "end": {"line": 3, "character": 7},
                             },
                             "text": "$x = <ab:cd:text/>; $y = $x->",
                         }
@@ -1682,7 +1757,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "sortText": "ab:cd:alpha",
                             "insertText": "ab:cd:alpha",
                             "insertTextFormat": 1,
-                            "data": {"fullname": "ab:cd:alpha"},
+                            "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
                             "label": "ab:cd:text",
@@ -1692,7 +1767,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "sortText": "ab:cd:text",
                             "insertText": "ab:cd:text",
                             "insertTextFormat": 1,
-                            "data": {"fullname": "ab:cd:text"},
+                            "data": {"fullname": ":ab:cd:text"},
                         },
                     ],
                 },
@@ -1732,7 +1807,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "sortText": "ab:cd:alpha",
                             "insertText": "ab:cd:alpha",
                             "insertTextFormat": 1,
-                            "data": {"fullname": "ab:cd:alpha"},
+                            "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
                             "label": "ab:cd:text",
@@ -1742,7 +1817,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "sortText": "ab:cd:text",
                             "insertText": "ab:cd:text",
                             "insertTextFormat": 1,
-                            "data": {"fullname": "ab:cd:text"},
+                            "data": {"fullname": ":ab:cd:text"},
                         },
                     ],
                 },
@@ -1782,7 +1857,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "sortText": "ab:cd:alpha",
                             "insertText": "ab:cd:alpha",
                             "insertTextFormat": 1,
-                            "data": {"fullname": "ab:cd:alpha"},
+                            "data": {"fullname": ":ab:cd:alpha"},
                         },
                         {
                             "label": "ab:cd:text",
@@ -1792,7 +1867,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "sortText": "ab:cd:text",
                             "insertText": "ab:cd:text",
                             "insertTextFormat": 1,
-                            "data": {"fullname": "ab:cd:text"},
+                            "data": {"fullname": ":ab:cd:text"},
                         },
                     ],
                 },
@@ -1833,7 +1908,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertText": "width",
                             "insertTextFormat": 1,
                             "data": {
-                                "fullname": "width",
+                                "fullname": ":width",
                                 "filename": "${root_path}/completion_extras.php",
                                 "line": 5,
                                 "char": 27,
@@ -1849,7 +1924,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertText": "color",
                             "insertTextFormat": 1,
                             "data": {
-                                "fullname": "color",
+                                "fullname": ":color",
                                 "filename": "${root_path}/completion_extras.php",
                                 "line": 5,
                                 "char": 13,
@@ -1895,7 +1970,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertText": "width",
                             "insertTextFormat": 1,
                             "data": {
-                                "fullname": "width",
+                                "fullname": ":width",
                                 "filename": "${root_path}/completion_extras.php",
                                 "line": 5,
                                 "char": 27,
@@ -1911,7 +1986,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "insertText": "color",
                             "insertTextFormat": 1,
                             "data": {
-                                "fullname": "color",
+                                "fullname": ":color",
                                 "filename": "${root_path}/completion_extras.php",
                                 "line": 5,
                                 "char": 13,
@@ -2022,36 +2097,33 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 powered_by="serverless_ide",
             )
+            # Note that this request sent should match the result given in the previous example
             .request(
                 comment="autocomplete resolving after '$x = new :a'",
                 method="completionItem/resolve",
                 params={
                     "label": ":ab:cd:alpha",
-                    "kind": 4,
-                    "detail": "function(): :ab:cd:alpha",
-                    "inlineDetail": "()",
+                    "kind": 7,
+                    "detail": "class",
+                    "inlineDetail": "class",
                     "itemType": ":ab:cd:alpha",
                     "insertText": ":ab:cd:alpha",
                     "insertTextFormat": 1,
-                    "data": {
-                        "filename": "${root_path}/completion_extras.php",
-                        "line": 9,
-                        "char": 13,
-                    },
+                    "data": {"fullname": ":ab:cd:alpha"},
                 },
                 result={
                     "label": ":ab:cd:alpha",
-                    "kind": 4,
-                    "detail": "function(): :ab:cd:alpha",
-                    "inlineDetail": "()",
+                    "kind": 7,
+                    "detail": "class",
+                    "inlineDetail": "class",
                     "itemType": ":ab:cd:alpha",
+                    "documentation": {
+                        "kind": "markdown",
+                        "value": ":ab:cd:alpha docblock",
+                    },
                     "insertText": ":ab:cd:alpha",
                     "insertTextFormat": 1,
-                    "data": {
-                        "filename": "${root_path}/completion_extras.php",
-                        "line": 9,
-                        "char": 13,
-                    },
+                    "data": {"fullname": ":ab:cd:alpha"},
                 },
                 powered_by="serverless_ide",
             )
@@ -4287,81 +4359,6 @@ class TestLsp(TestCase[LspTestDriver]):
                     ],
                     "activeSignature": 0,
                     "activeParameter": 0,
-                },
-            )
-            .request(
-                comment="signature help is highlighting correct param"
-                "(right of open paren)",
-                method="textDocument/signatureHelp",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 24, "character": 33},
-                },
-                result={
-                    "signatures": [
-                        {
-                            "label": "function test_signature_help_highlight"
-                            "(\n  string $param1,\n  string $param2,"
-                            "\n  string $param3\n): string",
-                            "parameters": [
-                                {"label": "$param1"},
-                                {"label": "$param2"},
-                                {"label": "$param3"},
-                            ],
-                        }
-                    ],
-                    "activeSignature": 0,
-                    "activeParameter": 0,
-                },
-            )
-            .request(
-                comment="signature help is highlighting correct param"
-                "(right of first comma)",
-                method="textDocument/signatureHelp",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 24, "character": 39},
-                },
-                result={
-                    "signatures": [
-                        {
-                            "label": "function test_signature_help_highlight"
-                            "(\n  string $param1,\n  string $param2,"
-                            "\n  string $param3\n): string",
-                            "parameters": [
-                                {"label": "$param1"},
-                                {"label": "$param2"},
-                                {"label": "$param3"},
-                            ],
-                        }
-                    ],
-                    "activeSignature": 0,
-                    "activeParameter": 1,
-                },
-            )
-            .request(
-                comment="signature help is highlighting correct param"
-                "(right of second comma)",
-                method="textDocument/signatureHelp",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 24, "character": 48},
-                },
-                result={
-                    "signatures": [
-                        {
-                            "label": "function test_signature_help_highlight"
-                            "(\n  string $param1,\n  string $param2,"
-                            "\n  string $param3\n): string",
-                            "parameters": [
-                                {"label": "$param1"},
-                                {"label": "$param2"},
-                                {"label": "$param3"},
-                            ],
-                        }
-                    ],
-                    "activeSignature": 0,
-                    "activeParameter": 2,
                 },
             )
             .request(method="shutdown", params={}, result=None)

@@ -247,7 +247,8 @@ let remove_files
 (* Fetch best available position information for a symbol *)
 let get_position_for_symbol (symbol : string) (kind : si_kind) :
     (Relative_path.t * int * int) option =
-  (* Symbols can only be found if they have a backslash *)
+  (* Symbols can only be found if they are properly namespaced.
+   * Even XHP classes must start with a backslash. *)
   let name_with_ns = Utils.add_ns symbol in
   let pos_opt =
     match kind with
@@ -257,6 +258,7 @@ let get_position_for_symbol (symbol : string) (kind : si_kind) :
     | SI_Enum
     | SI_Typedef
     | SI_Class
+    | SI_Constructor
     | SI_RecordDef ->
       let fipos =
         match Naming_table.Types.get_pos name_with_ns with
@@ -275,7 +277,6 @@ let get_position_for_symbol (symbol : string) (kind : si_kind) :
     | SI_Property
     | SI_LocalVariable
     | SI_Keyword
-    | SI_Constructor
     | SI_Mixed ->
       None
   in

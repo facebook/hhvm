@@ -82,7 +82,7 @@
             "newText": "ab:cd:alpha"
           },
           "data": {
-            "fullname": "ab:cd:alpha"
+            "fullname": ":ab:cd:alpha"
           }
         },
         {
@@ -106,7 +106,7 @@
             "newText": "ab:cd:text"
           },
           "data": {
-            "fullname": "ab:cd:text"
+            "fullname": ":ab:cd:text"
           }
         }
       ]
@@ -139,7 +139,7 @@
             "newText": "ab:cd:alpha"
           },
           "data": {
-            "fullname": "ab:cd:alpha"
+            "fullname": ":ab:cd:alpha"
           }
         },
         {
@@ -163,7 +163,7 @@
             "newText": "ab:cd:text"
           },
           "data": {
-            "fullname": "ab:cd:text"
+            "fullname": ":ab:cd:text"
           }
         }
       ]
@@ -196,7 +196,7 @@
             "newText": "ab:cd:alpha"
           },
           "data": {
-            "fullname": "ab:cd:alpha"
+            "fullname": ":ab:cd:alpha"
           }
         },
         {
@@ -220,7 +220,7 @@
             "newText": "ab:cd:text"
           },
           "data": {
-            "fullname": "ab:cd:text"
+            "fullname": ":ab:cd:text"
           }
         }
       ]
@@ -253,7 +253,7 @@
             "newText": "width"
           },
           "data": {
-            "fullname": "width",
+            "fullname": ":width",
             "filename": "${root_path}/completion_extras.php",
             "line": 5,
             "char": 27,
@@ -281,7 +281,7 @@
             "newText": "color"
           },
           "data": {
-            "fullname": "color",
+            "fullname": ":color",
             "filename": "${root_path}/completion_extras.php",
             "line": 5,
             "char": 13,
@@ -318,7 +318,7 @@
             "newText": "width"
           },
           "data": {
-            "fullname": "width",
+            "fullname": ":width",
             "filename": "${root_path}/completion_extras.php",
             "line": 5,
             "char": 27,
@@ -346,7 +346,7 @@
             "newText": "color"
           },
           "data": {
-            "fullname": "color",
+            "fullname": ":color",
             "filename": "${root_path}/completion_extras.php",
             "line": 5,
             "char": 13,
@@ -479,6 +479,10 @@
       "detail": "function(): :ab:cd:alpha",
       "inlineDetail": "()",
       "itemType": ":ab:cd:alpha",
+      "documentation": {
+        "kind": "markdown",
+        "value": ":ab:cd:alpha docblock"
+      },
       "insertText": ":ab:cd:alpha",
       "insertTextFormat": 1,
       "data": {

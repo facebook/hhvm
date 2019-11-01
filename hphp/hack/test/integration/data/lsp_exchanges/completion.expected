@@ -82,8 +82,7 @@
             "newText": "ab:cd:alpha"
           },
           "data": {
-            "fullname": "ab:cd:alpha",
-            "base_class": null
+            "fullname": "ab:cd:alpha"
           }
         },
         {
@@ -107,8 +106,7 @@
             "newText": "ab:cd:text"
           },
           "data": {
-            "fullname": "ab:cd:text",
-            "base_class": null
+            "fullname": "ab:cd:text"
           }
         }
       ]
@@ -141,8 +139,7 @@
             "newText": "ab:cd:alpha"
           },
           "data": {
-            "fullname": "ab:cd:alpha",
-            "base_class": null
+            "fullname": "ab:cd:alpha"
           }
         },
         {
@@ -166,8 +163,7 @@
             "newText": "ab:cd:text"
           },
           "data": {
-            "fullname": "ab:cd:text",
-            "base_class": null
+            "fullname": "ab:cd:text"
           }
         }
       ]
@@ -200,8 +196,7 @@
             "newText": "ab:cd:alpha"
           },
           "data": {
-            "fullname": "ab:cd:alpha",
-            "base_class": null
+            "fullname": "ab:cd:alpha"
           }
         },
         {
@@ -225,8 +220,7 @@
             "newText": "ab:cd:text"
           },
           "data": {
-            "fullname": "ab:cd:text",
-            "base_class": null
+            "fullname": "ab:cd:text"
           }
         }
       ]
@@ -389,8 +383,7 @@
             "newText": ":ab:cd:alpha"
           },
           "data": {
-            "fullname": ":ab:cd:alpha",
-            "base_class": null
+            "fullname": ":ab:cd:alpha"
           }
         },
         {
@@ -414,8 +407,7 @@
             "newText": ":ab:cd:text"
           },
           "data": {
-            "fullname": ":ab:cd:text",
-            "base_class": null
+            "fullname": ":ab:cd:text"
           }
         }
       ]
@@ -448,8 +440,7 @@
             "newText": ":ab:cd:alpha"
           },
           "data": {
-            "fullname": ":ab:cd:alpha",
-            "base_class": null
+            "fullname": ":ab:cd:alpha"
           }
         },
         {
@@ -473,8 +464,7 @@
             "newText": ":ab:cd:text"
           },
           "data": {
-            "fullname": ":ab:cd:text",
-            "base_class": null
+            "fullname": ":ab:cd:text"
           }
         }
       ]
@@ -655,8 +645,7 @@
             "newText": "test_function"
           },
           "data": {
-            "fullname": "test_function",
-            "base_class": null
+            "fullname": "test_function"
           }
         }
       ]
@@ -1028,8 +1017,7 @@
             "newText": "test_func"
           },
           "data": {
-            "fullname": "TestNS\\test_func",
-            "base_class": null
+            "fullname": "TestNS\\test_func"
           }
         }
       ]

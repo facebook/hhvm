@@ -340,21 +340,12 @@ let rec process_simplify_subtype_result prop =
   match prop with
   | TL.IsSubtype (_ty1, _ty2) ->
     (* All subtypes should have been resolved *)
-    assert false
+    failwith "unexpected subtype assertion"
   | TL.Conj props ->
     (* Evaluates list from left-to-right so preserves order of conjuncts *)
     List.iter ~f:process_simplify_subtype_result props
-  | TL.Disj (f, props) ->
-    let rec try_disj props =
-      match props with
-      | [] -> f ()
-      | prop :: props ->
-        Errors.try_
-          (fun () ->
-            ignore_hh_fixmes (fun () -> process_simplify_subtype_result prop))
-          (fun _ -> try_disj props)
-    in
-    try_disj props
+  | TL.Disj (f, []) -> f ()
+  | TL.Disj _ -> failwith "non-empty disjunction"
 
 and cstr_ty_as_tyvar_with_upper_bound env ~treat_dynamic_as_bottom ty =
   match ty with
@@ -769,16 +760,16 @@ and simplify_subtype_i
           | Tanon _ | Tobject | Tclass _ | Tarraykind _ ) ),
       LoclType (_, Tunion []) ) ->
     invalid ()
-  (* Ideally, we'd want this case to come after the case with an intersection 
+  (* Ideally, we'd want this case to come after the case with an intersection
   on the left, to deal properly with (#1 & A) <: Thas_member(#2) by potentially
-  adding an upper bound to #1, but that would result in a disjunction 
+  adding an upper bound to #1, but that would result in a disjunction
   which we don't handle very well at the moment.
   TODO: when we have a better treatment of disjunctions, move that case after
-  the case with an intersection on the left. 
+  the case with an intersection on the left.
   For now, if there is an intersection on the left here,
   we rely on how obj_get itself treats intersections. If that
   intersection contains a type variable, this type variable will be eagerly
-  solved. Once this case is moved, we can clean up obj_get from the Tvar and 
+  solved. Once this case is moved, we can clean up obj_get from the Tvar and
   Tintersection cases *)
   | ( LoclType ty,
       ConstraintType
@@ -2362,9 +2353,7 @@ and sub_type env (ty_sub : locl_ty) (ty_super : locl_ty) =
  * in tyl we have ty_sub <: ty.
  *)
 and add_tyvar_upper_bound_and_close
-    ~treat_dynamic_as_bottom env var ty on_error =
-  Env.log_env_change "add_tyvar_upper_bound_and_close" env
-  @@
+    ~treat_dynamic_as_bottom (env, prop) var ty on_error =
   let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
   let env =
     Env.add_tyvar_upper_bound
@@ -2378,9 +2367,9 @@ and add_tyvar_upper_bound_and_close
     ITySet.diff upper_bounds_after upper_bounds_before
   in
   let lower_bounds = Env.get_tyvar_lower_bounds env var in
-  let env =
+  let (env, prop) =
     ITySet.fold
-      (fun upper_bound env ->
+      (fun upper_bound (env, prop) ->
         let env =
           Typing_subtype_tconst.make_all_type_consts_equal
             env
@@ -2389,28 +2378,29 @@ and add_tyvar_upper_bound_and_close
             ~as_tyvar_with_cnstr:true
         in
         ITySet.fold
-          (fun lower_bound env ->
-            sub_type_i
-              ~treat_dynamic_as_bottom
-              env
-              lower_bound
-              upper_bound
-              on_error)
+          (fun lower_bound (env, prop1) ->
+            let (env, prop2) =
+              simplify_subtype_i
+                ~subtype_env:
+                  (make_subtype_env ~treat_dynamic_as_bottom on_error)
+                lower_bound
+                upper_bound
+                env
+            in
+            (env, TL.conj prop1 prop2))
           lower_bounds
-          env)
+          (env, prop))
       added_upper_bounds
-      env
+      (env, prop)
   in
-  env
+  (env, prop)
 
-(* Add a new lower bound ty on var.  Apply transitivity of sutyping,
- * so if we already have var <: tyl, then check that for each ty_super
- * in tyl we have ty <: ty_super.
+(* Add a new lower bound ty on var.  Apply transitivity of subtyping
+ * (so if var <: ty1,...,tyn then assert ty <: tyi for each tyi), using
+ * simplify_subtype to produce a subtype proposition.
  *)
 and add_tyvar_lower_bound_and_close
-    ~treat_dynamic_as_bottom env var ty on_error =
-  Env.log_env_change "add_tyvar_lower_bound_and_close" env
-  @@
+    ~treat_dynamic_as_bottom (env, prop) var ty on_error =
   let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
   let env =
     Env.add_tyvar_lower_bound
@@ -2424,9 +2414,9 @@ and add_tyvar_lower_bound_and_close
     ITySet.diff lower_bounds_after lower_bounds_before
   in
   let upper_bounds = Env.get_tyvar_upper_bounds env var in
-  let env =
+  let (env, prop) =
     ITySet.fold
-      (fun lower_bound env ->
+      (fun lower_bound (env, prop) ->
         let env =
           Typing_subtype_tconst.make_all_type_consts_equal
             env
@@ -2435,19 +2425,22 @@ and add_tyvar_lower_bound_and_close
             ~as_tyvar_with_cnstr:false
         in
         ITySet.fold
-          (fun upper_bound env ->
-            sub_type_i
-              ~treat_dynamic_as_bottom
-              env
-              lower_bound
-              upper_bound
-              on_error)
+          (fun upper_bound (env, prop1) ->
+            let (env, prop2) =
+              simplify_subtype_i
+                ~subtype_env:
+                  (make_subtype_env ~treat_dynamic_as_bottom on_error)
+                lower_bound
+                upper_bound
+                env
+            in
+            (env, TL.conj prop1 prop2))
           upper_bounds
-          env)
+          (env, prop))
       added_lower_bounds
-      env
+      (env, prop)
   in
-  env
+  (env, prop)
 
 and props_to_env ~treat_dynamic_as_bottom env remain props on_error =
   match props with
@@ -2456,43 +2449,48 @@ and props_to_env ~treat_dynamic_as_bottom env remain props on_error =
       ( (LoclType (_, Tvar var_sub) as ty_sub),
         (LoclType (_, Tvar var_super) as ty_super) )
     :: props ->
-    let env =
+    let (env, prop1) =
       add_tyvar_upper_bound_and_close
         ~treat_dynamic_as_bottom
-        env
+        (valid env)
         var_sub
         ty_super
         on_error
     in
-    let env =
+    let (env, prop2) =
       add_tyvar_lower_bound_and_close
         ~treat_dynamic_as_bottom
-        env
+        (valid env)
         var_super
         ty_sub
         on_error
     in
-    props_to_env ~treat_dynamic_as_bottom env remain props on_error
+    props_to_env
+      ~treat_dynamic_as_bottom
+      env
+      remain
+      (prop1 :: prop2 :: props)
+      on_error
   | TL.IsSubtype (LoclType (_, Tvar var), ty) :: props ->
-    let env =
+    let (env, prop) =
       add_tyvar_upper_bound_and_close
         ~treat_dynamic_as_bottom
-        env
+        (valid env)
         var
         ty
         on_error
     in
-    props_to_env ~treat_dynamic_as_bottom env remain props on_error
+    props_to_env ~treat_dynamic_as_bottom env remain (prop :: props) on_error
   | TL.IsSubtype (ty, LoclType (_, Tvar var)) :: props ->
-    let env =
+    let (env, prop) =
       add_tyvar_lower_bound_and_close
         ~treat_dynamic_as_bottom
-        env
+        (valid env)
         var
         ty
         on_error
     in
-    props_to_env ~treat_dynamic_as_bottom env remain props on_error
+    props_to_env ~treat_dynamic_as_bottom env remain (prop :: props) on_error
   | TL.Conj props' :: props ->
     props_to_env ~treat_dynamic_as_bottom env remain (props' @ props) on_error
   | TL.Disj (f, disj_props) :: conj_props ->
@@ -2509,16 +2507,18 @@ and props_to_env ~treat_dynamic_as_bottom env remain props on_error =
           conj_props
           on_error
       | prop :: disj_props' ->
-        Errors.try_
-          (fun () ->
-            ignore_hh_fixmes (fun () ->
-                props_to_env
-                  ~treat_dynamic_as_bottom
-                  env
-                  remain
-                  (prop :: conj_props)
-                  on_error))
-          (fun _ -> try_disj disj_props')
+        let (env', other) =
+          props_to_env ~treat_dynamic_as_bottom env remain [prop] on_error
+        in
+        if TL.is_unsat (TL.conj_list other) then
+          try_disj disj_props'
+        else
+          props_to_env
+            ~treat_dynamic_as_bottom
+            env'
+            (remain @ other)
+            conj_props
+            on_error
     in
     try_disj disj_props
   | (TL.IsSubtype _ as prop) :: props ->
@@ -3134,12 +3134,6 @@ let is_sub_type_ignore_generic_params =
 
 let is_sub_type_for_union =
   is_sub_type_for_union ~treat_dynamic_as_bottom:false
-
-let add_tyvar_upper_bound_and_close =
-  add_tyvar_upper_bound_and_close ~treat_dynamic_as_bottom:false
-
-let add_tyvar_lower_bound_and_close =
-  add_tyvar_lower_bound_and_close ~treat_dynamic_as_bottom:false
 
 let sub_type = sub_type ~treat_dynamic_as_bottom:false
 

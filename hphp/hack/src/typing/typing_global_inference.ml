@@ -77,18 +77,20 @@ module StateConstraintGraph = struct
           (* Add the missing upper and lower bounds - and do the transitive closure *)
           |> ITySet.fold
                (fun bound env ->
-                 Typing_subtype.add_tyvar_upper_bound_and_close
+                 Typing_subtype.sub_type_i
                    env
-                   var
+                   (Typing_defs.LoclType
+                      (Typing_reason.Rwitness pos, Typing_defs.Tvar var))
                    bound
                    (make_error_callback errors var))
                tyvar_info.upper_bounds
           |> ITySet.fold
                (fun bound env ->
-                 Typing_subtype.add_tyvar_lower_bound_and_close
+                 Typing_subtype.sub_type_i
                    env
-                   var
                    bound
+                   (Typing_defs.LoclType
+                      (Typing_reason.Rwitness pos, Typing_defs.Tvar var))
                    (make_error_callback errors var))
                tyvar_info.lower_bounds)
         subgraph

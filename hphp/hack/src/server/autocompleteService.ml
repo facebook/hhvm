@@ -859,18 +859,27 @@ let go
         {
           With_complete_flag.is_complete = !autocomplete_is_complete;
           value =
-            ( if sienv.use_ranked_autocomplete then
+            ( if sienv.use_ranked_autocomplete then (
+              let ranking_start_time = Unix.gettimeofday () in
               let ranking_context =
                 (new ranking_context_extract)#get_context tast
               in
-              AutocompleteRankService.rank_autocomplete_result
-                ~query_text:""
-                ~results:complete_autocomplete_results
-                ~max_results:3
+              let ranked_results =
+                AutocompleteRankService.rank_autocomplete_result
+                  ~query_text:""
+                  ~results:complete_autocomplete_results
+                  ~max_results:3
+                  ~context:completion_type
+                  ~kind_filter:!kind_filter
+                  ~ranking_context
+              in
+              AutocompleteRankService.log_ranked_autocomplete
+                ~sienv
+                ~results:(List.length complete_autocomplete_results)
                 ~context:completion_type
-                ~kind_filter:!kind_filter
-                ~ranking_context
-            else
+                ~start_time:ranking_start_time;
+              ranked_results
+            ) else
               complete_autocomplete_results );
         }
       in

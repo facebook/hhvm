@@ -21,3 +21,14 @@ let rank_autocomplete_result
   let _ = kind_filter in
   let _ = ranking_context in
   results
+
+let log_ranked_autocomplete
+    ~(sienv : SearchUtils.si_env)
+    ~(results : int)
+    ~(context : SearchUtils.autocomplete_type option)
+    ~(start_time : float) : unit =
+  let _ = sienv in
+  let _ = results in
+  let _ = context in
+  let _ = start_time in
+  ()

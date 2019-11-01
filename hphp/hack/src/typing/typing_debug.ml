@@ -18,7 +18,7 @@ let constraint_ty_size env ty =
   | (_, Thas_member hm) ->
     1
     +
-    let { hm_type = ty; hm_name = _; hm_nullsafe = _; hm_class_id = _ } = hm in
+    let { hm_type = ty; hm_name = _; hm_class_id = _ } = hm in
     Typing_utils.ty_size env ty
 
 let ty_size env ty =

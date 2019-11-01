@@ -274,6 +274,66 @@ let find_type_with_exact_negation env tyl =
   in
   find env tyl []
 
+let rec describe_ty_super env ?(short = false) ty =
+  let print ty =
+    Typing_print.with_blank_tyvars (fun () ->
+        Typing_print.full_strip_ns_i env ty)
+  in
+  let default () = print ty in
+  match ty with
+  | LoclType ty ->
+    (match ty with
+    | (_, Tvar v) ->
+      let upper_bounds = ITySet.elements (Env.get_tyvar_upper_bounds env v) in
+      (* The constraint graph is transitively closed so we can filter tyvars. *)
+      let is_not_tyvar = function
+        | LoclType (_, Tvar _) -> false
+        | _ -> true
+      in
+      let upper_bounds = List.filter upper_bounds ~f:is_not_tyvar in
+      (match upper_bounds with
+      | [] -> "some type not known yet"
+      | tyl ->
+        let (locl_tyl, cstr_tyl) = List.partition_tf tyl ~f:is_locl_type in
+        let prefix =
+          if short then
+            ""
+          else
+            "something "
+        in
+        let sep =
+          match (locl_tyl, cstr_tyl) with
+          | (_ :: _, _ :: _) -> " and "
+          | _ -> ""
+        in
+        let locl_descr =
+          match locl_tyl with
+          | [] -> ""
+          | tyl ->
+            let prefix =
+              if short then
+                ""
+              else
+                "of type "
+            in
+            prefix ^ String.concat ~sep:" & " (List.map tyl ~f:print)
+        in
+        let cstr_descr =
+          String.concat
+            ~sep:" and "
+            (List.map cstr_tyl ~f:(describe_ty_super env))
+        in
+        prefix ^ locl_descr ^ sep ^ cstr_descr)
+    | (_, Toption ((_, Tvar _) as ty)) ->
+      "null or " ^ describe_ty_super env (LoclType ty)
+    | _ -> default ())
+  | ConstraintType ty ->
+    (match ty with
+    | (_, Thas_member hm) ->
+      let { hm_name = (_, name); hm_type = ty; hm_class_id = _ } = hm in
+      let ty_descr = describe_ty_super env ~short:true (LoclType ty) in
+      Printf.sprintf "that has a member named %s of type %s" name ty_descr)
+
 (* Process the constraint proposition. There should only be errors left now,
 i.e. empty disjunction with error functions we call here. *)
 let rec process_simplify_subtype_result prop =
@@ -358,10 +418,7 @@ and simplify_subtype_i
   let fail () =
     let r_super = reason ety_super in
     let r_sub = reason ety_sub in
-    let ty_super_descr =
-      Typing_print.with_blank_tyvars (fun () ->
-          Typing_print.full_strip_ns_i env ety_super)
-    in
+    let ty_super_descr = describe_ty_super env ety_super in
     let ty_sub_descr =
       Typing_print.with_blank_tyvars (fun () ->
           Typing_print.full_strip_ns_i env ety_sub)
@@ -727,12 +784,8 @@ and simplify_subtype_i
       ConstraintType
         ( r,
           Thas_member
-            {
-              hm_name = name;
-              hm_type = member_ty;
-              hm_nullsafe = nullsafe;
-              hm_class_id = class_id;
-            } ) ) ->
+            { hm_name = name; hm_type = member_ty; hm_class_id = class_id } )
+    ) ->
     let (obj_get_ty, error_prop) =
       Errors.try_with_result
         (fun () ->
@@ -741,7 +794,7 @@ and simplify_subtype_i
               ~obj_pos:(Reason.to_pos r)
               ~is_method:false
               ~coerce_from_ty:None
-              ~nullsafe
+              ~nullsafe:None
               env
               ty
               class_id
@@ -1562,41 +1615,20 @@ and simplify_subtype_i
   | (ConstraintType ty_sub, ConstraintType ty_super) ->
     (match (ty_sub, ty_super) with
     | ((_, Thas_member hm_sub), (_, Thas_member hm_super)) ->
-      let {
-        hm_name = name_sub;
-        hm_type = ty_sub;
-        hm_nullsafe = nullsafe_sub;
-        hm_class_id = cid_sub;
-      } =
+      let { hm_name = name_sub; hm_type = ty_sub; hm_class_id = cid_sub } =
         hm_sub
       in
-      let {
-        hm_name = name_super;
-        hm_type = ty_super;
-        hm_nullsafe = nullsafe_super;
-        hm_class_id = cid_super;
-      } =
+      let { hm_name = name_super; hm_type = ty_super; hm_class_id = cid_super }
+          =
         hm_super
       in
-      if
-        name_sub = name_super
-        && class_id_equal cid_sub cid_super
-        && is_sub_type_nullsafe nullsafe_sub nullsafe_super
-      then
+      if name_sub = name_super && class_id_equal cid_sub cid_super then
         simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
       else
         invalid ())
   | (ConstraintType ty_sub, LoclType ty_super) ->
     (match (ty_sub, ty_super) with
     | ((_, Thas_member _), _ty_super) -> invalid ())
-
-and is_sub_type_nullsafe nullsafe_sub nullsafe_super =
-  match (nullsafe_sub, nullsafe_super) with
-  | (None, None)
-  | (None, Some _)
-  | (Some _, Some _) ->
-    true
-  | (Some _, None) -> false
 
 and simplify_subtype_variance
     ~(subtype_env : subtype_env)
@@ -3091,6 +3123,9 @@ let add_constraint
           iter (n + 1) env
     in
     iter 0 env
+
+let cstr_ty_as_tyvar_with_upper_bound =
+  cstr_ty_as_tyvar_with_upper_bound ~treat_dynamic_as_bottom:false
 
 let sub_type_with_dynamic_as_bottom = sub_type ~treat_dynamic_as_bottom:true
 

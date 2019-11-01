@@ -278,9 +278,7 @@ module Full = struct
   let tpu_access k ty' access = k ty' ^^ text (":@" ^ access)
 
   let thas_member k hm =
-    let { hm_name = (_, name); hm_type; hm_nullsafe = _; hm_class_id = _ } =
-      hm
-    in
+    let { hm_name = (_, name); hm_type; hm_class_id = _ } = hm in
     Concat
       [text "has_member"; text "("; text name; comma_sep; k hm_type; text ")"]
 

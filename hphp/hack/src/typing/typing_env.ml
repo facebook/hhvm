@@ -1124,6 +1124,9 @@ let update_lost_info name blame env ty =
         let ((env, seen_tyvars), ty) = update_ty (env, seen_tyvars) ty in
         let env = add env v ty in
         ((env, seen_tyvars), ty))
+    | (r, Toption ty) ->
+      let ((env, seen_tyvars), ty) = update_ty (env, seen_tyvars) ty in
+      ((env, seen_tyvars), (info r, Toption ty))
     | (r, Tunion tyl) ->
       let ((env, seen_tyvars), tyl) =
         List.fold_map tyl ~init:(env, seen_tyvars) ~f:update_ty
@@ -1366,7 +1369,7 @@ and get_tyvars_i env (ty : internal_type) =
   | ConstraintType ty ->
     (match ty with
     | (_, Thas_member hm) ->
-      let { hm_type; hm_name = _; hm_nullsafe = _; hm_class_id = _ } = hm in
+      let { hm_type; hm_name = _; hm_class_id = _ } = hm in
       get_tyvars env hm_type)
 
 and get_tyvars_variance_list (env, acc_positive, acc_negative) variancel tyl =

@@ -113,13 +113,6 @@ let intersection r tyl =
 
 let unenforced ty = { et_type = ty; et_enforced = false }
 
-let has_member r name ty nullsafe class_id =
+let has_member r name ty class_id =
   ConstraintType
-    ( r,
-      Thas_member
-        {
-          hm_name = name;
-          hm_type = ty;
-          hm_nullsafe = nullsafe;
-          hm_class_id = class_id;
-        } )
+    (r, Thas_member { hm_name = name; hm_type = ty; hm_class_id = class_id })

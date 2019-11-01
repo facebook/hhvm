@@ -306,12 +306,6 @@ and constraint_type_ = Thas_member of has_member
 and has_member = {
   hm_name: Nast.sid;
   hm_type: locl_ty;
-  hm_nullsafe: nullsafe;
-      (** a 'nullsafe' field is required to typecheck method calls with nullsafe
-  operator like $x?->foo(). In this case, if $x is nullable and foo has type 
-  `function(...): X`, we typecheck the call with function(...): ?X.
-  TODO: remove this field and treat the nullsafe operator outside of subtyping.
-  *)
   hm_class_id: Nast.class_id_;
       (** This is required to check ambiguous object access, where sometimes
   HHVM would access the private member of a parent class instead of the 
@@ -687,6 +681,10 @@ type expand_env = {
   T54121530 aims at offering a better mechanism. *)
 }
 
+let is_locl_type = function
+  | LoclType _ -> true
+  | _ -> false
+
 let is_type_no_return ty = ty = Tprim Aast.Tnoreturn
 
 let has_expanded { type_expansions; _ } x =
@@ -1042,29 +1040,12 @@ let class_id_equal cid1 cid2 = class_id_compare cid1 cid2 = 0
 
 let has_member_compare ~normalize_lists hm1 hm2 =
   let ty_compare = ty_compare ~normalize_lists in
-  let {
-    hm_name = (_, m1);
-    hm_type = ty1;
-    hm_nullsafe = nullsafe1;
-    hm_class_id = cid1;
-  } =
-    hm1
-  in
-  let {
-    hm_name = (_, m2);
-    hm_type = ty2;
-    hm_nullsafe = nullsafe2;
-    hm_class_id = cid2;
-  } =
-    hm2
-  in
+  let { hm_name = (_, m1); hm_type = ty1; hm_class_id = cid1 } = hm1 in
+  let { hm_name = (_, m2); hm_type = ty2; hm_class_id = cid2 } = hm2 in
   match compare m1 m2 with
   | 0 ->
     (match ty_compare ty1 ty2 with
-    | 0 ->
-      (match nullsafe_compare nullsafe1 nullsafe2 with
-      | 0 -> class_id_compare cid1 cid2
-      | comp -> comp)
+    | 0 -> class_id_compare cid1 cid2
     | comp -> comp)
   | comp -> comp
 

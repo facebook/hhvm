@@ -20,6 +20,8 @@ module ConditionTypes : sig
   val localize_condition_type : env -> decl_ty -> locl_ty
 end
 
+val cstr_ty_as_tyvar_with_upper_bound : env -> internal_type -> env * locl_ty
+
 val is_sub_type_LEGACY_DEPRECATED : env -> locl_ty -> locl_ty -> bool
 
 (** Non-side-effecting test for subtypes.

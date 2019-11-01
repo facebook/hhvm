@@ -2755,17 +2755,36 @@ and expr_
     Thas_member(m, #1) where #1 is a fresh type variable. *)
     let (env, mem_ty) = Env.fresh_type env p in
     let r = Reason.Rwitness (fst e1) in
-    let ty_has_member = MakeType.has_member r m mem_ty nullsafe (CIexpr e1) in
-    let ty1 = LoclType ty1 in
-    let env = SubType.sub_type_i env ty1 ty_has_member Errors.unify_error in
-    let (env, mem_ty) =
-      Env.FakeMembers.check_instance_invalid env e1 (snd m) mem_ty
+    let has_member_ty = MakeType.has_member r m mem_ty (CIexpr e1) in
+    let on_error = Errors.unify_error in
+    let (env, result_ty) =
+      match nullsafe with
+      | None ->
+        let ty1 = LoclType ty1 in
+        let env = SubType.sub_type_i env ty1 has_member_ty on_error in
+        (env, mem_ty)
+      | Some _ ->
+        (* In that case ty1 is a subtype of ?Thas_member(m, #1) 
+        and the result is ?#1 if ty1 is nullable. *)
+        let (env, has_member_ty) =
+          SubType.cstr_ty_as_tyvar_with_upper_bound env has_member_ty
+        in
+        let r = Reason.Rnullsafe_op p in
+        let null_ty = MakeType.null r in
+        let (env, null_has_mem_ty) = Union.union env null_ty has_member_ty in
+        let env = SubType.sub_type env ty1 null_has_mem_ty on_error in
+        let (env, null_or_nothing_ty) = Inter.intersect env ~r null_ty ty1 in
+        let (env, result_ty) = Union.union env null_or_nothing_ty mem_ty in
+        (env, result_ty)
+    in
+    let (env, result_ty) =
+      Env.FakeMembers.check_instance_invalid env e1 (snd m) result_ty
     in
     make_result
       env
       p
-      (T.Obj_get (te1, Tast.make_typed_expr pm mem_ty (T.Id m), nullflavor))
-      mem_ty
+      (T.Obj_get (te1, Tast.make_typed_expr pm result_ty (T.Id m), nullflavor))
+      result_ty
   (* Dynamic instance property access e.g. $x->$f *)
   | Obj_get (e1, e2, nullflavor) ->
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in

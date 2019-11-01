@@ -165,6 +165,10 @@ HttpServer::HttpServer() {
   m_adminServer = serverFactory->createServer(admin_options);
   m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
     RuntimeOption::RequestTimeoutSeconds);
+  if (RuntimeOption::AdminServerEnableSSLWithPlainText) {
+    assertx(SSLInit::IsInited());
+    m_adminServer->enableSSLWithPlainText();
+  }
 
   for (auto const& info : RuntimeOption::SatelliteServerInfos) {
     auto satellite(SatelliteServer::Create(info));

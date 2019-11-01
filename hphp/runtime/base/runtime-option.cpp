@@ -737,6 +737,7 @@ std::string RuntimeOption::TakeoverFilename;
 std::string RuntimeOption::AdminServerIP;
 int RuntimeOption::AdminServerPort = 0;
 int RuntimeOption::AdminThreadCount = 1;
+bool RuntimeOption::AdminServerEnableSSLWithPlainText = false;
 bool RuntimeOption::AdminServerStatsNeedPassword = true;
 std::string RuntimeOption::AdminPassword;
 std::set<std::string> RuntimeOption::AdminPasswords;
@@ -2473,6 +2474,8 @@ void RuntimeOption::Load(
     Config::Bind(AdminServerIP, ini, config, "AdminServer.IP", ServerIP);
     Config::Bind(AdminServerPort, ini, config, "AdminServer.Port", 0);
     Config::Bind(AdminThreadCount, ini, config, "AdminServer.ThreadCount", 1);
+    Config::Bind(AdminServerEnableSSLWithPlainText, ini, config,
+                 "AdminServer.EnableSSLWithPlainText", false);
     Config::Bind(AdminServerStatsNeedPassword, ini, config,
                  "AdminServer.StatsNeedPassword", AdminServerStatsNeedPassword);
     Config::Bind(AdminPassword, ini, config, "AdminServer.Password");

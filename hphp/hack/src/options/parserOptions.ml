@@ -81,6 +81,9 @@ let disable_unset_class_const = GlobalOptions.po_disable_unset_class_const
 
 let parser_errors_only = GlobalOptions.po_parser_errors_only
 
+let with_parser_errors_only po b =
+  { po with GlobalOptions.po_parser_errors_only = b }
+
 let disable_halt_compiler = GlobalOptions.po_disable_halt_compiler
 
 let with_disable_halt_compiler po b =

@@ -4179,8 +4179,6 @@ end)
 module DeclModeParser_ = Full_fidelity_parser.WithSyntax (PositionedSyntax)
 module DeclModeParser = DeclModeParser_.WithSmartConstructors (DeclModeSC)
 module FromPositionedSyntax = WithPositionedSyntax (PositionedSyntax)
-module FromEditablePositionedSyntax =
-  WithPositionedSyntax (Full_fidelity_editable_positioned_syntax)
 
 (* Creates a relative position out of the error and the given path and source text. *)
 let pos_of_error path source_text error =
@@ -4302,14 +4300,19 @@ external rust_from_text_ffi :
   Rust_aast_parser_types.env -> SourceText.t -> Rust_aast_parser_types.result
   = "from_text"
 
+let rewrite_coroutines source_text script =
+  Full_fidelity_editable_positioned_syntax.from_positioned_syntax script
+  |> Ppl_class_rewriter.rewrite_ppl_classes
+  |> Coroutine_lowerer.lower_coroutines
+  |> Full_fidelity_editable_positioned_syntax.text
+  |> SourceText.make (SourceText.file_path source_text)
+
 let lower_tree_
-    editable_lower
-    lower
     check_syntax_error
     (env : env)
     (source_text : SourceText.t)
     (mode : FileInfo.mode option)
-    (tree : PositionedSyntaxTree.t) : 'a result_ =
+    (tree : PositionedSyntaxTree.t) : aast_result =
   let env =
     {
       env with
@@ -4329,23 +4332,33 @@ let lower_tree_
    *)
   let popt = ParserOptions.with_codegen popt env.codegen in
   let env = { env with parser_options = popt } in
-  let lower () =
+  let tree_to_lower =
     if env.lower_coroutines then
-      let script =
-        Full_fidelity_editable_positioned_syntax.from_positioned_syntax script
-        |> Ppl_class_rewriter.rewrite_ppl_classes
-        |> Coroutine_lowerer.lower_coroutines
+      let rewritten_source_text = rewrite_coroutines source_text script in
+      (* The rewritten tree will not be passed to post-parse error check phase *)
+      let rewritten_popt = ParserOptions.with_parser_errors_only popt true in
+      let (_, rewritten_tree) =
+        parse_text
+          { env with parser_options = rewritten_popt }
+          rewritten_source_text
       in
-      editable_lower env ~source_text ~script comments
+      rewritten_tree
     else
-      lower env ~source_text ~tree comments
+      tree
   in
   let ast_opt = ref None in
   Utils.try_finally
     ~f:(fun () ->
-      let ret = lower () in
+      let ret =
+        FromPositionedSyntax.lower
+          env
+          ~source_text
+          ~script:(PositionedSyntaxTree.root tree_to_lower)
+          comments
+      in
       ast_opt := Some ret.ast;
-      ret)
+      let aast = Ast_to_aast.convert_program (fun x -> x) () () () ret.ast in
+      { ret with ast = aast })
     ~finally:(fun () ->
       check_syntax_error env source_text tree !ast_opt;
       flush_parsing_errors env)
@@ -4406,22 +4419,11 @@ let lower_tree =
         Rust_pointer.free_leaked_pointer ~warn:false ();
         report_error error
   in
-  let lower env ~source_text:st ~tree comments =
-    FromPositionedSyntax.lower
-      env
-      ~source_text:st
-      ~script:(PositionedSyntaxTree.root tree)
-      comments
-  in
-  lower_tree_ FromEditablePositionedSyntax.lower lower check_syntax_error
+  lower_tree_ check_syntax_error
 
 let from_text_ocaml (env : env) (source_text : SourceText.t) : aast_result =
   let (mode, tree) = parse_text env source_text in
-  let ast_result = lower_tree env source_text mode tree in
-  let aast =
-    Ast_to_aast.convert_program (fun x -> x) () () () ast_result.ast
-  in
-  { ast_result with ast = aast }
+  lower_tree env source_text mode tree
 
 let from_text_rust (env : env) (source_text : SourceText.t) : aast_result =
   let rust_env =
@@ -4541,12 +4543,7 @@ let from_text_with_legacy_and_cst (env : env) (source_text : SourceText.t) :
   let (mode, tree) = parse_text env source_text in
   let ast_result = lower_tree env source_text mode tree in
   let aast_result =
-    {
-      ast_result with
-      ast =
-        Ast_to_aast.convert_program (fun x -> x) () () () ast_result.ast
-        |> elaborate_top_level_defs env;
-    }
+    { ast_result with ast = ast_result.ast |> elaborate_top_level_defs env }
   in
   (tree, legacy aast_result)
 

@@ -228,7 +228,7 @@ pub enum HintValue {
     Num,
     ArrayKey,
     NoReturn,
-    Apply(GetName),
+    Apply(Box<(Id, Vec<Node_>)>),
 }
 
 #[derive(Clone, Debug)]
@@ -241,6 +241,7 @@ pub struct VariableDecl {
 #[derive(Clone, Debug)]
 pub enum Node_ {
     List(Vec<Node_>),
+    BracketedList(Box<(Pos, Vec<Node_>, Pos)>),
     Ignored,
     // tokens
     Name(GetName, Pos),
@@ -251,6 +252,8 @@ pub enum Node_ {
     ListItem(Box<(Node_, Node_)>),
     Variable(Box<VariableDecl>),
     TypeConstraint(Box<(ConstraintKind, Node_)>),
+    LessThan(Pos),    // This needs a pos since it shows up in generics.
+    GreaterThan(Pos), // This needs a pos since it shows up in generics.
 
     // Box the insides of the vector so we don't need to reallocate them when
     // we pull them out of the TypeConstraint variant.
@@ -284,7 +287,9 @@ impl Node_ {
         match self {
             Node_::Name(_, pos) => Ok(pos.clone()),
             Node_::Hint(_, pos) => Ok(pos.clone()),
-            Node_::Backslash(pos) => Ok(pos.clone()),
+            Node_::Backslash(pos) | Node_::LessThan(pos) | Node_::GreaterThan(pos) => {
+                Ok(pos.clone())
+            }
             Node_::ListItem(items) => {
                 let fst = &items.0;
                 let snd = &items.1;
@@ -295,21 +300,36 @@ impl Node_ {
                     (Err(_), Err(_)) => Err(format!("No pos found for {:?} or {:?}", fst, snd)),
                 }
             }
-            Node_::List(items) => items.into_iter().fold(
-                Err(format!("No pos found for any children under {:?}", self)),
-                |acc, elem| match (acc, elem.get_pos()) {
-                    (Ok(acc_pos), Ok(elem_pos)) => Pos::merge(acc_pos, elem_pos),
-                    (Err(_), Ok(elem_pos)) => Ok(elem_pos),
-                    (acc, Err(_)) => acc,
-                },
-            ),
+            Node_::List(items) => self.pos_from_vec(&items),
+            Node_::BracketedList(innards) => {
+                let (first_pos, inner_list, second_pos) = &**innards;
+                Pos::merge(
+                    first_pos.clone(),
+                    Pos::merge(self.pos_from_vec(&inner_list)?, second_pos.clone())?,
+                )
+            }
             _ => Err(format!("No pos found for node {:?}", self)),
         }
+    }
+
+    fn pos_from_vec(&self, nodes: &Vec<Node_>) -> Result<Pos, String> {
+        nodes.iter().fold(
+            Err(format!("No pos found for any children under {:?}", self)),
+            |acc, elem| match (acc, elem.get_pos()) {
+                (Ok(acc_pos), Ok(elem_pos)) => Pos::merge(acc_pos, elem_pos),
+                (Err(_), Ok(elem_pos)) => Ok(elem_pos),
+                (acc, Err(_)) => acc,
+            },
+        )
     }
 
     fn into_vec(self) -> Vec<Self> {
         match self {
             Node_::List(items) => items,
+            Node_::BracketedList(innards) => {
+                let (_, items, _) = *innards;
+                items
+            }
             Node_::Ignored => Vec::new(),
             n => vec![n],
         }
@@ -350,10 +370,16 @@ impl DirectDeclSmartConstructors<'_> {
                     HintValue::Num => Ty_::Tprim(aast::Tprim::Tnum),
                     HintValue::ArrayKey => Ty_::Tprim(aast::Tprim::Tarraykey),
                     HintValue::NoReturn => Ty_::Tprim(aast::Tprim::Tnoreturn),
-                    HintValue::Apply(gn) => Ty_::Tapply(
-                        Id(pos.clone(), "\\".to_string() + &(gn.to_unescaped_string())),
-                        Vec::new(),
-                    ),
+                    HintValue::Apply(innards) => {
+                        let (id, inner_types) = &**innards;
+                        Ty_::Tapply(
+                            id.clone(),
+                            inner_types
+                                .into_iter()
+                                .map(|node| self.node_to_ty(&node, type_variables))
+                                .collect::<Result<Vec<_>, String>>()?,
+                        )
+                    }
                 };
                 Ok(Ty(reason, Box::new(ty_)))
             }
@@ -578,13 +604,25 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Int => Node_::Hint(HintValue::Int, token_pos()),
             TokenKind::Float => Node_::Hint(HintValue::Float, token_pos()),
             TokenKind::Double => Node_::Hint(
-                HintValue::Apply(GetName::new(token_text(), |string| string)),
+                HintValue::Apply(Box::new((
+                    Id(
+                        token_pos(),
+                        GetName::new(token_text(), |string| string).to_string(),
+                    ),
+                    Vec::new(),
+                ))),
                 token_pos(),
             ),
             TokenKind::Num => Node_::Hint(HintValue::Num, token_pos()),
             TokenKind::Bool => Node_::Hint(HintValue::Bool, token_pos()),
             TokenKind::Boolean => Node_::Hint(
-                HintValue::Apply(GetName::new(token_text(), |string| string)),
+                HintValue::Apply(Box::new((
+                    Id(
+                        token_pos(),
+                        GetName::new(token_text(), |string| string).to_string(),
+                    ),
+                    Vec::new(),
+                ))),
                 token_pos(),
             ),
             TokenKind::Void => Node_::Hint(HintValue::Void, token_pos()),
@@ -599,6 +637,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Node_::Backslash(token_pos())
                 }
             }
+            TokenKind::LessThan => Node_::LessThan(token_pos()),
+            TokenKind::GreaterThan => Node_::GreaterThan(token_pos()),
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
             TokenKind::Class => Node_::Class,
@@ -682,12 +722,40 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         })
     }
 
+    fn make_type_arguments(
+        &mut self,
+        less_than: Self::R,
+        arguments: Self::R,
+        greater_than: Self::R,
+    ) -> Self::R {
+        Ok(Node_::BracketedList(Box::new((
+            less_than?.get_pos()?,
+            arguments?.into_vec(),
+            greater_than?.get_pos()?,
+        ))))
+    }
+
     fn make_generic_type_specifier(
         &mut self,
         class_type: Self::R,
-        _argument_list: Self::R,
+        argument_list: Self::R,
     ) -> Self::R {
-        class_type
+        let (class_type, argument_list) = (class_type?, argument_list?);
+        let (class_type, pos) = get_name(
+            self.state.namespace_builder.current_namespace(),
+            &class_type,
+        )?;
+        let full_pos = match argument_list.get_pos() {
+            Ok(p2) => Pos::merge(pos.clone(), p2)?,
+            Err(_) => pos.clone(),
+        };
+        Ok(Node_::Hint(
+            HintValue::Apply(Box::new((
+                Id(pos, "\\".to_string() + &class_type),
+                argument_list.into_vec(),
+            ))),
+            full_pos,
+        ))
     }
 
     fn make_enum_declaration(
@@ -791,22 +859,29 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         name: Self::R,
         constraints: Self::R,
     ) -> Self::R {
-        let constraints =
-            constraints?
-                .into_vec()
-                .into_iter()
-                .fold(Ok(Vec::new()), |acc, node| match acc {
-                    acc @ Err(_) => acc,
-                    Ok(mut acc) => match node {
-                        Node_::TypeConstraint(innards) => {
-                            acc.push(innards);
-                            Ok(acc)
-                        }
-                        Node_::Ignored => Ok(acc),
-                        n => Err(format!("Expected a type constraint, but was {:?}", n)),
-                    },
-                })?;
+        let constraints = constraints?.into_vec().into_iter().fold(
+            Ok(Vec::new()),
+            |acc: Result<Vec<_>, String>, node| match acc {
+                acc @ Err(_) => acc,
+                Ok(mut acc) => match node {
+                    Node_::TypeConstraint(innards) => {
+                        acc.push(innards);
+                        Ok(acc)
+                    }
+                    Node_::Ignored => Ok(acc),
+                    n => Err(format!("Expected a type constraint, but was {:?}", n)),
+                },
+            },
+        )?;
         Ok(Node_::TypeParameter(Box::new((name?, constraints))))
+    }
+
+    fn make_type_parameters(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        Ok(Node_::BracketedList(Box::new((
+            arg0?.get_pos()?,
+            arg1?.into_vec(),
+            arg2?.get_pos()?,
+        ))))
     }
 
     fn make_parameter_declaration(

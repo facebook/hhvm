@@ -188,6 +188,25 @@ Parsed decls:
               };
             ft_reactive = Nonreactive; ft_return_disposable = false;
             ft_mutable = none; ft_returns_mutable = false }));
+      fe_deprecated = None;  };
+    "test_returns_generic" ->
+    { fe_pos = [29:10-30];
+      fe_type =
+      (Rwitness (root|functions.php line 29, characters 10-29),
+       (Tfun
+          { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
+            ft_tparams = []; ft_where_constraints = []; ft_params = [];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|functions.php line 29, characters 34-52),
+               (Tapply (([29:34-48], "\\HH\\Traversable"),
+                  [(Rhint (root|functions.php line 29, characters 49-51),
+                    (Tprim Tint))]
+                  )))
+              };
+            ft_reactive = Nonreactive; ft_return_disposable = false;
+            ft_mutable = none; ft_returns_mutable = false }));
       fe_deprecated = None;  } };
   typedefs =
   { "Typedef" ->

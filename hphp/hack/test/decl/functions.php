@@ -25,3 +25,7 @@ function test_constrained_generic_fun<T1 super int, T2 as string>(
 ): T1 {
   return $arg1;
 }
+
+function test_returns_generic(): HH\Traversable<int> {
+  return vec[5];
+}

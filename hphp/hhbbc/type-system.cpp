@@ -5364,11 +5364,15 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
        valTy.couldBe(BVArr)) {
      return true;
    }
-   return RuntimeOption::EvalIsVecNotices &&
-          RuntimeOption::EvalHackArrDVArrs && valTy.couldBe(BClsMeth);
+   return (RuntimeOption::EvalIsVecNotices &&
+           RuntimeOption::EvalHackArrDVArrs && valTy.couldBe(BClsMeth)) ||
+          (RuntimeOption::EvalArrayProvenance &&
+            valTy.couldBe(TVec));
   } else if (testTy == TDict) {
-    return RuntimeOption::EvalHackArrCompatIsArrayNotices &&
-           valTy.couldBe(BDArr);
+    return (RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+            valTy.couldBe(BDArr)) ||
+           (RuntimeOption::EvalArrayProvenance &&
+            valTy.couldBe(TDict));
   }
   return false;
 }

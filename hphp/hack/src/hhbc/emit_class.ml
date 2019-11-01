@@ -84,16 +84,16 @@ let make_86method
     (* method_rx_disabled *)
     false
 
-let from_extends ~namespace ~is_enum _tparams extends =
+let from_extends ~is_enum _tparams extends =
   if is_enum then
     Some (Hhbc_id.Class.from_raw_string "HH\\BuiltinEnum")
   else
     match extends with
     | [] -> None
-    | h :: _ -> Some (Emit_type_hint.hint_to_class ~namespace h)
+    | h :: _ -> Some (Emit_type_hint.hint_to_class h)
 
-let from_implements ~namespace implements =
-  List.map implements (Emit_type_hint.hint_to_class ~namespace)
+let from_implements implements =
+  List.map implements Emit_type_hint.hint_to_class
 
 let from_constant env (_, name) expr =
   let (value, init_instrs) =
@@ -111,7 +111,7 @@ let from_constant env (_, name) expr =
   in
   Hhas_constant.make name value init_instrs
 
-let from_type_constant namespace tc =
+let from_type_constant tc =
   let type_constant_name = snd tc.A.c_tconst_name in
   match (tc.A.c_tconst_abstract, tc.A.c_tconst_type) with
   | (A.TCAbstract None, _)
@@ -125,7 +125,6 @@ let from_type_constant namespace tc =
       Some
         (Emit_type_constant.hint_to_type_constant
            ~tparams:[]
-           ~namespace
            ~targ_map:SMap.empty
            init)
     in
@@ -165,7 +164,6 @@ let from_class_elt_constants env class_ =
   List.map ~f:map_aux class_.A.c_consts
 
 let from_class_elt_requirements class_ =
-  let ns = class_.A.c_namespace in
   List.map
     ~f:(fun (h, is_extends) ->
       let kind =
@@ -174,22 +172,17 @@ let from_class_elt_requirements class_ =
         else
           Hhas_class.MustImplement
       in
-      (kind, Hhbc_id.Class.to_raw_string (Emit_type_hint.hint_to_class ns h)))
+      (kind, Hhbc_id.Class.to_raw_string (Emit_type_hint.hint_to_class h)))
     class_.A.c_reqs
 
 let from_class_elt_typeconsts class_ =
-  List.map ~f:(from_type_constant class_.A.c_namespace) class_.A.c_typeconsts
+  List.map ~f:from_type_constant class_.A.c_typeconsts
 
-let from_enum_type ~namespace opt =
+let from_enum_type opt =
   match opt with
   | Some e ->
     let type_info_user_type =
-      Some
-        (Emit_type_hint.fmt_hint
-           ~namespace
-           ~tparams:[]
-           ~strip_tparams:true
-           e.A.e_base)
+      Some (Emit_type_hint.fmt_hint ~tparams:[] ~strip_tparams:true e.A.e_base)
     in
     let type_info_type_constraint =
       Hhas_type_constraint.make
@@ -374,7 +367,7 @@ let emit_class (ast_class, hoisted) =
    * class_is_const, but for now class_is_const is the only thing that turns
    * it on. *)
   let class_no_dynamic_props = class_is_const in
-  let class_id = Hhbc_id.Class.elaborate_id namespace ast_class.A.c_name in
+  let class_id = Hhbc_id.Class.elaborate_id ast_class.A.c_name in
   let class_is_trait = ast_class.A.c_kind = Ast_defs.Ctrait in
   let class_is_interface = ast_class.A.c_kind = Ast_defs.Cinterface in
   let class_uses =
@@ -387,14 +380,14 @@ let emit_class (ast_class, hoisted) =
             Some name
         | _ -> None)
   in
-  let elaborate_namespace_id namespace id =
-    let id = Hhbc_id.Class.elaborate_id namespace id in
+  let elaborate_namespace_id id =
+    let id = Hhbc_id.Class.elaborate_id id in
     Hhbc_id.Class.to_raw_string id
   in
   let class_use_aliases =
     List.map
       ~f:(fun (ido1, id, ido2, vis) ->
-        let id1 = Option.map ido1 ~f:(elaborate_namespace_id namespace) in
+        let id1 = Option.map ido1 ~f:elaborate_namespace_id in
         let id2 = Option.map ido2 ~f:snd in
         (id1, snd id, id2, vis))
       ast_class.A.c_use_as_alias
@@ -402,9 +395,9 @@ let emit_class (ast_class, hoisted) =
   let class_use_precedences =
     List.map
       ~f:(fun (id1, id2, ids) ->
-        let id1 = elaborate_namespace_id namespace id1 in
+        let id1 = elaborate_namespace_id id1 in
         let id2 = snd id2 in
-        let ids = List.map ids ~f:(elaborate_namespace_id namespace) in
+        let ids = List.map ids ~f:elaborate_namespace_id in
         (id1, id2, ids))
       ast_class.A.c_insteadof_alias
   in
@@ -437,7 +430,7 @@ let emit_class (ast_class, hoisted) =
   in
   let class_enum_type =
     if ast_class.A.c_kind = Ast_defs.Cenum then
-      from_enum_type ~namespace:ast_class.A.c_namespace ast_class.A.c_enum
+      from_enum_type ast_class.A.c_enum
     else
       None
   in
@@ -471,7 +464,6 @@ let emit_class (ast_class, hoisted) =
     else
       let base =
         from_extends
-          ~namespace
           ~is_enum:(class_enum_type <> None)
           tparams
           ast_class.A.c_extends
@@ -491,7 +483,7 @@ let emit_class (ast_class, hoisted) =
     else
       ast_class.A.c_implements
   in
-  let class_implements = from_implements ~namespace implements in
+  let class_implements = from_implements implements in
   let class_span = Hhas_pos.pos_to_span ast_class.A.c_span in
   (* TODO: communicate this without looking at the name *)
   let additional_methods = [] in
@@ -517,7 +509,6 @@ let emit_class (ast_class, hoisted) =
     else
       additional_methods
       @ Emit_xhp.from_attribute_declaration
-          ~ns:namespace
           ast_class
           class_xhp_attributes
           ast_class.A.c_xhp_attr_uses
@@ -637,7 +628,6 @@ let emit_class (ast_class, hoisted) =
       Emit_body.emit_generics_upper_bounds
         ast_class.A.c_tparams.A.c_tparam_list
         ~skipawaitable:false
-        ~namespace
     else
       []
   in

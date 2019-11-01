@@ -20,7 +20,7 @@ let has_type_constraint env ti ast_param =
     (RGH.has_reified_type_constraint env h, Some h)
   | _ -> (RGH.NoConstraint, None)
 
-let emit_generics_upper_bounds tparams ~skipawaitable ~namespace =
+let emit_generics_upper_bounds tparams ~skipawaitable =
   List.filter_map tparams ~f:(fun t ->
       let ubs =
         List.filter_map t.A.tp_constraints ~f:(fun c ->
@@ -33,7 +33,6 @@ let emit_generics_upper_bounds tparams ~skipawaitable ~namespace =
                    ~tparams
                    ~nullable:false
                    ~skipawaitable
-                   ~namespace
                    h)
             | _ -> None)
       in
@@ -69,7 +68,6 @@ let emit_method_prolog
           (gather
              [
                Emit_expression.get_type_structure_for_hint
-                 env
                  ~targ_map:SMap.empty
                  ~tparams
                  h;
@@ -188,7 +186,7 @@ let make_body
     doc_comment
     env
 
-let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
+let emit_return_type_info ~scope ~skipawaitable ret =
   let tparams =
     List.map (Ast_scope.Scope.get_tparams scope) (fun t -> snd t.A.tp_name)
   in
@@ -200,7 +198,6 @@ let emit_return_type_info ~scope ~skipawaitable ~namespace ret =
       ~nullable:false
       ~skipawaitable
       ~tparams
-      ~namespace
       h
 
 let emit_deprecation_warning scope deprecation_info =
@@ -383,9 +380,7 @@ let emit_body
   in
   Label.reset_label ();
   Iterator.reset_iterator ();
-  let return_type_info =
-    emit_return_type_info ~scope ~skipawaitable ~namespace ret
-  in
+  let return_type_info = emit_return_type_info ~scope ~skipawaitable ret in
   let return_type_info =
     if not is_native then
       return_type_info
@@ -600,7 +595,7 @@ let emit_body
   in
   let upper_bounds =
     if Hhbc_options.enforce_generics_ub !Hhbc_options.compiler_options then
-      emit_generics_upper_bounds immediate_tparams ~skipawaitable ~namespace
+      emit_generics_upper_bounds immediate_tparams ~skipawaitable
     else
       []
   in

@@ -242,7 +242,6 @@ let emit_wrapper_function
     Emit_body.emit_return_type_info
       ~scope
       ~skipawaitable:function_is_async
-      ~namespace
       (T.hint_of_type_hint ast_fun.T.f_ret)
   in
   let is_reified =
@@ -270,9 +269,7 @@ let emit_wrapper_function
   let memoized_body =
     make_wrapper_body env return_type_info params body_instrs is_reified
   in
-  let is_interceptable =
-    Interceptable.is_function_interceptable namespace ast_fun
-  in
+  let is_interceptable = Interceptable.is_function_interceptable ast_fun in
   Hhas_function.make
     function_attributes
     original_id

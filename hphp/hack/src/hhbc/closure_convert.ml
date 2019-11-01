@@ -936,7 +936,7 @@ let rec convert_expr env st ((p, expr_) as expr) =
                 when (not (SU.is_self id))
                      && (not (SU.is_parent id))
                      && not (SU.is_static id) ->
-                let fq_id = Hhbc_id.Class.elaborate_id st.namespace (pc, id) in
+                let fq_id = Hhbc_id.Class.elaborate_id (pc, id) in
                 Hhbc_id.Class.to_raw_string fq_id
               | _ -> Emit_fatal.raise_fatal_parse pc "Invalid class"
             in

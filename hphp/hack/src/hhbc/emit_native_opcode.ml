@@ -73,7 +73,7 @@ let emit_body scope namespace class_attrs name params ret =
       params
   in
   let return_type_info =
-    Emit_body.emit_return_type_info ~scope ~skipawaitable:false ~namespace ret
+    Emit_body.emit_return_type_info ~scope ~skipawaitable:false ret
   in
   Hhas_body.make
     body_instrs

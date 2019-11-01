@@ -690,11 +690,8 @@ and emit_binop env annot op (e1 : Tast.expr) (e2 : Tast.expr) =
       | _ -> default ()
     )
 
-and get_type_structure_for_hint env ~targ_map ~tparams (h : Aast.hint) =
-  let namespace = Emit_env.get_namespace env in
-  let tv =
-    Emit_type_constant.hint_to_type_constant ~tparams ~namespace ~targ_map h
-  in
+and get_type_structure_for_hint ~targ_map ~tparams (h : Aast.hint) =
+  let tv = Emit_type_constant.hint_to_type_constant ~tparams ~targ_map h in
   let i = Emit_adata.get_array_identifier tv in
   if hack_arr_dv_arrs () then
     instr (ILitConst (Dict i))
@@ -736,7 +733,7 @@ and emit_as env pos e h is_nullable =
       (* Store type struct in a variable and reuse it. *)
         ( if is_static then
           main_block
-            (get_type_structure_for_hint env ~targ_map:SMap.empty ~tparams:[] h)
+            (get_type_structure_for_hint ~targ_map:SMap.empty ~tparams:[] h)
             Resolve
         else
           main_block ts_instrs DontResolve );
@@ -755,7 +752,7 @@ and emit_is env pos (h : Aast.hint) =
     | _ ->
       gather
         [
-          get_type_structure_for_hint env ~targ_map:SMap.empty ~tparams:[] h;
+          get_type_structure_for_hint ~targ_map:SMap.empty ~tparams:[] h;
           instr_istypestructc Resolve;
         ]
   else
@@ -945,7 +942,7 @@ and emit_new
     match cexpr with
     (* Special case for statically-known class *)
     | Class_id id ->
-      let fq_id = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
+      let fq_id = Hhbc_id.Class.elaborate_id id in
       Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
       begin
         match has_generics with
@@ -992,7 +989,7 @@ and emit_new
 
 (* TODO(T36697624) more efficient bytecode for static records *)
 and emit_record env pos id is_array es =
-  let fq_id = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
+  let fq_id = Hhbc_id.Class.elaborate_id id in
   let instr =
     if is_array then
       instr_new_recordarray
@@ -1063,8 +1060,8 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
     let instrs = emit_call env pos e targs args uargs async_eager_label in
     emit_pos_then pos instrs
 
-and emit_known_class_id (env : Emit_env.t) id =
-  let fq_id = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
+and emit_known_class_id id =
+  let fq_id = Hhbc_id.Class.elaborate_id id in
   Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
   gather [instr_string (Hhbc_id.Class.to_raw_string fq_id); instr_classgetc]
 
@@ -1075,7 +1072,7 @@ and emit_load_class_ref env pos cexpr =
   | Class_special SpecialClsRef.Self -> instr_self
   | Class_special SpecialClsRef.Static -> instr_lateboundcls
   | Class_special SpecialClsRef.Parent -> instr_parent
-  | Class_id id -> emit_known_class_id env id
+  | Class_id id -> emit_known_class_id id
   | Class_expr expr ->
     gather [emit_pos pos; emit_expr env expr; instr_classgetc]
   | Class_reified instrs -> gather [emit_pos pos; instrs; instr_classgetc]
@@ -1153,11 +1150,11 @@ and emit_class_const env pos (cid : Tast.class_id) (_, id) :
     | _ -> cexpr
   in
   match cexpr with
-  | Class_id cid -> emit_class_const_impl env cid id
+  | Class_id cid -> emit_class_const_impl cid id
   | _ -> emit_load_class_const env pos cexpr id
 
-and emit_class_const_impl (env : Emit_env.t) cid id =
-  let fq_id = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
+and emit_class_const_impl cid id =
+  let fq_id = Hhbc_id.Class.elaborate_id cid in
   let fq_id_str = Hhbc_id.Class.to_raw_string fq_id in
   emit_pos_then (fst cid)
   @@
@@ -1216,10 +1213,8 @@ and emit_lambda (env : Emit_env.t) (fundef : Tast.fun_) (ids : Aast.lid list) =
       instr (IMisc (CreateCl (List.length ids, class_num)));
     ]
 
-and emit_id (env : Emit_env.t) (id : Aast.sid) =
-  let (p, s) = id in
-  let s = String.uppercase s in
-  match s with
+and emit_id (env : Emit_env.t) ((p, s) : Aast.sid) =
+  match String.uppercase s with
   | "__FILE__" -> instr (ILitConst File)
   | "__DIR__" -> instr (ILitConst Dir)
   | "__CLASS__" -> gather [instr_self; instr_classname]
@@ -1237,8 +1232,8 @@ and emit_id (env : Emit_env.t) (id : Aast.sid) =
   | "DIE" ->
     emit_exit env None
   | _ ->
-    let fq_id = Hhbc_id.Const.elaborate_id (Emit_env.get_namespace env) id in
-    Emit_symbol_refs.add_constant (snd id);
+    let fq_id = Hhbc_id.Const.from_ast_name s in
+    Emit_symbol_refs.add_constant s;
     emit_pos_then p @@ instr (ILitConst (CnsE fq_id))
 
 and rename_xhp (p, s) = (p, SU.Xhp.mangle s)
@@ -2821,9 +2816,7 @@ and get_elem_member_key
         failwith
           "Unreachable due to is_special_class_constant_accessed_with_class_id"
     in
-    let fq_id =
-      Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) (p, cName)
-    in
+    let fq_id = Hhbc_id.Class.elaborate_id (p, cName) in
     MemberKey.ET (Hhbc_id.Class.to_raw_string fq_id)
   (* General case *)
   | Some _ -> MemberKey.EC stack_index
@@ -3336,7 +3329,7 @@ and emit_reified_arg env ~isas pos (hint : Aast.hint) =
   | Aast.Happly ((_, name), []) when SMap.mem name current_targs ->
     (emit_reified_type env pos name, false)
   | _ ->
-    let ts = get_type_structure_for_hint env ~targ_map ~tparams:[] hint in
+    let ts = get_type_structure_for_hint ~targ_map ~tparams:[] hint in
     let ts_list =
       if count = 0 then
         ts
@@ -3514,9 +3507,7 @@ and emit_call_lhs_and_fcall
       match cexpr with
       (* Statically known *)
       | Class_id cid ->
-        let fq_cid =
-          Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid
-        in
+        let fq_cid = Hhbc_id.Class.elaborate_id cid in
         let fq_cid_string = Hhbc_id.Class.to_raw_string fq_cid in
         Emit_symbol_refs.add_class fq_cid_string;
         let (generics, fcall_args) = emit_generics fcall_args in
@@ -3594,7 +3585,7 @@ and emit_call_lhs_and_fcall
           gather
             [
               instr_pushl tmp;
-              emit_known_class_id env cid;
+              emit_known_class_id cid;
               instr_fcallclsmethod fcall_args;
             ] )
       | Class_special clsref ->
@@ -3649,10 +3640,8 @@ and emit_call_lhs_and_fcall
               instr_fcallclsmethod fcall_args;
             ] )
     end
-  | A.Id ((_, s) as id) ->
-    let fq_id =
-      Hhbc_id.Function.elaborate_id (Emit_env.get_namespace env) id
-    in
+  | A.Id (_, s) ->
+    let fq_id = Hhbc_id.Function.from_ast_name s in
     let fq_id =
       let (flags, num_args, _, _, _) = fcall_args in
       match SU.strip_global_ns s with
@@ -3721,14 +3710,13 @@ and emit_name_string env e = emit_expr env e
 and emit_special_function
     env pos annot id (args : Tast.expr list) (uargs : Tast.expr list) default =
   let nargs = List.length args + List.length uargs in
-  let fq_id =
-    Hhbc_id.Function.elaborate_id (Emit_env.get_namespace env) (Pos.none, id)
+  let lower_fq_name =
+    Hhbc_id.Function.from_ast_name id
+    |> Hhbc_id.Function.to_raw_string
+    |> String.lowercase
   in
   (* Make sure that we do not treat a special function that is aliased as not
    * aliased *)
-  let lower_fq_name =
-    String.lowercase (Hhbc_id.Function.to_raw_string fq_id)
-  in
   match (lower_fq_name, args) with
   | (id, _) when id = SN.SpecialFunctions.echo ->
     let instrs =

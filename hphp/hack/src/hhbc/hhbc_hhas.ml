@@ -529,12 +529,7 @@ let string_of_call instruction =
       ]
   | FCallCtor fcall_args ->
     sep ["FCallCtor"; string_of_fcall_args fcall_args; "\"\""]
-  | FCallFunc fcall_args ->
-    sep
-      [
-        "FCallFunc";
-        string_of_fcall_args fcall_args;
-      ]
+  | FCallFunc fcall_args -> sep ["FCallFunc"; string_of_fcall_args fcall_args]
   | FCallFuncD (fcall_args, id) ->
     sep
       ["FCallFuncD"; string_of_fcall_args fcall_args; string_of_function_id id]
@@ -975,13 +970,8 @@ and string_of_uop = function
   | Ast_defs.Updecr ->
     failwith "string_of_uop - should have been captures earlier"
 
-and string_of_hint ~env ~ns h =
-  let namespace =
-    match env.codegen_env with
-    | None -> Namespace_env.empty_with_default
-    | Some env -> Emit_env.get_namespace env
-  in
-  let h = Emit_type_hint.fmt_hint ~tparams:[] ~namespace h in
+and string_of_hint ~ns h =
+  let h = Emit_type_hint.fmt_hint ~tparams:[] h in
   let h =
     if ns then
       h
@@ -1026,7 +1016,7 @@ and string_of_fun ~env f use_list =
         Option.value_map
           (A.hint_of_type_hint p.A.param_type_hint)
           ~default:""
-          ~f:(string_of_hint ~env ~ns:true)
+          ~f:(string_of_hint ~ns:true)
       in
       let default_val =
         Option.value_map p.A.param_expr ~default:"" ~f:(fun e ->
@@ -1184,20 +1174,20 @@ and string_of_param_default_value ~env expr =
     let e2 = string_of_param_default_value ~env e2 in
     e1 ^ s ^ e2
   in
-  let elaborate_id id elaborate get_string =
+  (* If we are in the global namespace and the id is a global id, strip \ *)
+  let adjust_id id =
     let id =
       match env.codegen_env with
       | Some env ->
         let nsenv = Emit_env.get_namespace env in
-        let fq_id = elaborate nsenv id |> get_string in
         if
           nsenv.Namespace_env.ns_name = None
-          && (not @@ String.contains fq_id '\\')
+          && (not @@ String.contains (SU.strip_global_ns id) '\\')
         then
-          fq_id
+          SU.strip_global_ns id
         else
-          "\\" ^ fq_id
-      | _ -> snd id
+          Utils.add_ns id
+      | _ -> id
     in
     Php_escaping.escape id
   in
@@ -1241,9 +1231,8 @@ and string_of_param_default_value ~env expr =
     else
       let id =
         match env with
-        | Some env ->
-          Hhbc_id.Class.to_raw_string
-          @@ Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) (p, id)
+        | Some _ ->
+          Hhbc_id.Class.to_raw_string @@ Hhbc_id.Class.elaborate_id (p, id)
         | _ -> id
       in
       if should_format then
@@ -1293,8 +1282,7 @@ and string_of_param_default_value ~env expr =
   in
   let escape_fn c = escape_char_for_printing c ^ Php_escaping.escape_char c in
   match snd expr with
-  | A.Id id ->
-    elaborate_id id Hhbc_id.Const.elaborate_id Hhbc_id.Const.to_raw_string
+  | A.Id (_, id) -> adjust_id id
   | A.Lvar (_, litstr) -> Php_escaping.escape (Local_id.get_name litstr)
   | A.Float litstr -> SU.Float.with_scientific_notation litstr
   | A.Int litstr -> SU.Integer.to_decimal litstr
@@ -1340,22 +1328,15 @@ and string_of_param_default_value ~env expr =
     let e1 = string_of_param_default_value ~env e1 in
     let e2 = string_of_param_default_value ~env e2 in
     e1 ^ " " ^ bop ^ " " ^ e2
-  | A.Call (_, (_, A.Id call_id), _, es, ues) ->
-    let call_id =
-      elaborate_id
-        call_id
-        Hhbc_id.Function.elaborate_id
-        Hhbc_id.Function.to_raw_string
-    in
+  | A.Call (_, (_, A.Id (_, call_id)), _, es, ues) ->
+    let call_id = adjust_id call_id in
     let call_id = String_utils.lstrip call_id "\\\\" in
     let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in
     call_id ^ "(" ^ String.concat ~sep:", " es ^ ")"
   | A.New ((_, A.CIexpr (_, A.Id class_id)), _, es, ues, _) ->
     let class_id =
-      elaborate_id
-        class_id
-        Hhbc_id.Class.elaborate_id
-        Hhbc_id.Class.to_raw_string
+      adjust_id
+        (Hhbc_id.Class.elaborate_id class_id |> Hhbc_id.Class.to_raw_string)
     in
     let class_id = String_utils.lstrip class_id "\\\\" in
     let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in
@@ -1372,13 +1353,8 @@ and string_of_param_default_value ~env expr =
       | _ -> ""
     in
     prefix ^ e ^ "(" ^ String.concat ~sep:", " es ^ ")"
-  | A.Record (record_id, _, es) ->
-    let record_id =
-      elaborate_id
-        record_id
-        Hhbc_id.Record.elaborate_id
-        Hhbc_id.Record.to_raw_string
-    in
+  | A.Record ((_, record_id), _, es) ->
+    let record_id = adjust_id record_id in
     let record_id = String_utils.lstrip record_id "\\\\" in
     let es = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
     record_id ^ string_of_afield_list ~env es
@@ -1463,13 +1439,13 @@ and string_of_param_default_value ~env expr =
   | A.BracedExpr e -> "{" ^ string_of_param_default_value ~env e ^ "}"
   | A.ParenthesizedExpr e -> "(" ^ string_of_param_default_value ~env e ^ ")"
   | A.Cast (h, e) ->
-    let h = string_of_hint ~env ~ns:false h in
+    let h = string_of_hint ~ns:false h in
     let e = string_of_param_default_value ~env e in
     "(" ^ h ^ ")" ^ e
   | A.Pipe (_, e1, e2) -> middle_aux e1 " |> " e2
   | A.Is (e, h) ->
     let e = string_of_param_default_value ~env e in
-    let h = string_of_hint ~env ~ns:true h in
+    let h = string_of_hint ~ns:true h in
     e ^ " is " ^ h
   | A.As (e, h, b) ->
     let e = string_of_param_default_value ~env e in
@@ -1479,7 +1455,7 @@ and string_of_param_default_value ~env expr =
       else
         " as "
     in
-    let h = string_of_hint ~env ~ns:true h in
+    let h = string_of_hint ~ns:true h in
     e ^ o ^ h
   | A.Varray (_, es) ->
     let es = List.map ~f:(string_of_param_default_value ~env) es in

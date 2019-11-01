@@ -163,9 +163,8 @@ and emit_stmt env (pos, stmt) =
   | A.Let _ -> assert false
   (* Let statement is converted to assignment in closure convert *)
   | A.Expr (_, A.Yield_break) -> gather [instr_null; emit_return env]
-  | A.Expr (((pos, _), A.Call (_, (_, A.Id s), _, exprl, [])) as expr) ->
-    let ns = Emit_env.get_namespace env in
-    let s = Hhbc_id.Function.(elaborate_id ns s |> to_raw_string) in
+  | A.Expr (((pos, _), A.Call (_, (_, A.Id (_, s)), _, exprl, [])) as expr) ->
+    let s = Hhbc_id.Function.(from_ast_name s |> to_raw_string) in
     if String.lowercase s = "unset" then
       gather (List.map exprl (emit_unset_expr env))
     else (
@@ -723,9 +722,7 @@ and emit_catch
   (* Note that this is a "regular" label; we're not going to branch to
     it directly in the event of an exception. *)
   let next_catch = Label.next_regular () in
-  let id =
-    Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) catch_type
-  in
+  let id = Hhbc_id.Class.elaborate_id catch_type in
   gather
     [
       instr_dup;

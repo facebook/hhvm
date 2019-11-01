@@ -50,7 +50,7 @@ let xhp_attribute_declaration_method
       m_doc_comment = None;
     }
 
-let emit_xhp_attribute_array ~ns xal =
+let emit_xhp_attribute_array xal =
   (* Taken from hphp/parser/hphp.y *)
   let hint_to_num id =
     match id with
@@ -74,7 +74,7 @@ let emit_xhp_attribute_array ~ns xal =
     | Some (_, es) -> Tast_annotate.make (T.Varray (None, es))
   in
   let get_attribute_array_values id enumo =
-    let id = Hhbc_id.Class.elaborate_id ns (p, id) in
+    let id = Hhbc_id.Class.elaborate_id (p, id) in
     let id = Hhbc_id.Class.to_raw_string id in
     let type_ = hint_to_num id in
     let type_ident = Tast_annotate.make (T.Int (string_of_int type_)) in
@@ -171,7 +171,7 @@ let properties_for_cache ~ns class_ class_is_const =
   [prop]
 
 (* AST transformations taken from hphp/parser/hphp.y *)
-let from_attribute_declaration ~ns class_ xal xual =
+let from_attribute_declaration class_ xal xual =
   (* $r = self::$__xhpAttributeDeclarationCache; *)
   let var_r = Tast_annotate.make (T.Lvar (p, Local_id.make_unscoped "$r")) in
   let self = Tast_annotate.make (T.Id (p, "self")) in
@@ -209,7 +209,7 @@ let from_attribute_declaration ~ns class_ xal xual =
            [] ))
   in
   let args =
-    (arg1 :: emit_xhp_use_attributes xual) @ [emit_xhp_attribute_array ~ns xal]
+    (arg1 :: emit_xhp_use_attributes xual) @ [emit_xhp_attribute_array xal]
   in
   let array_merge_call =
     Tast_annotate.make

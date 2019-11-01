@@ -203,7 +203,7 @@ let rec expr_to_typed_value
     let d = update_duplicates_in_map values in
     TV.Dict (d, Some pos)
   | A.Shape fields -> shape_to_typed_value ns fields
-  | A.Class_const (cid, id) -> class_const_to_typed_value ns cid id
+  | A.Class_const (cid, id) -> class_const_to_typed_value cid id
   | A.BracedExpr e -> expr_to_typed_value ~allow_maps ~restrict_keys ns e
   | A.Id _
   | A.Class_get _ ->
@@ -232,12 +232,12 @@ and update_duplicates_in_map kvs =
   in
   List.rev values
 
-and class_const_to_typed_value ns cid id =
+and class_const_to_typed_value cid id =
   if snd id = SN.Members.mClass then
     let cexpr = class_id_to_class_expr ~resolve_self:true [] cid in
     match cexpr with
     | Class_id cid ->
-      let fq_id = Hhbc_id.Class.elaborate_id ns cid in
+      let fq_id = Hhbc_id.Class.elaborate_id cid in
       TV.String (Hhbc_id.Class.to_raw_string fq_id)
     | _ -> raise UserDefinedConstant
   else
@@ -299,7 +299,7 @@ and shape_to_typed_value ns fields =
         end
       | Ast_defs.SFlit_str id -> TV.String (snd id)
       | Ast_defs.SFclass_const (class_id, id) ->
-        class_const_to_typed_value ns (Tast_annotate.make (A.CI class_id)) id
+        class_const_to_typed_value (Tast_annotate.make (A.CI class_id)) id
     in
     (key, expr_to_typed_value ns expr)
   in

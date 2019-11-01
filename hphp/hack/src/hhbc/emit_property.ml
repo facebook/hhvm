@@ -130,7 +130,6 @@ let from_ast
           ~nullable:false
           ~skipawaitable:false
           ~tparams
-          ~namespace
           h
       in
       if not (valid_tc_for_prop (Hhas_type_info.type_constraint tc)) then

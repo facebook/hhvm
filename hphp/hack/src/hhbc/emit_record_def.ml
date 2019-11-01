@@ -26,7 +26,6 @@ let emit_field namespace (f : Aast.sid * Aast.hint * Tast.expr option) =
       ~nullable:false
       ~skipawaitable:false
       ~tparams:[]
-      ~namespace
       hint
   in
   if valid_tc_for_record_field (Hhas_type_info.type_constraint tc) then
@@ -39,7 +38,7 @@ let emit_field namespace (f : Aast.sid * Aast.hint * Tast.expr option) =
          (Utils.strip_ns name))
 
 let emit_record_def rd =
-  let elaborate = Hhbc_id.Record.elaborate_id rd.rd_namespace in
+  let elaborate (_, name) = Hhbc_id.Record.from_ast_name name in
   let name = elaborate rd.rd_name in
   let parent_name =
     match rd.rd_extends with

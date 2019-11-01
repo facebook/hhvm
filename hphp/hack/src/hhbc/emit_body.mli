@@ -58,7 +58,6 @@ val emit_method_prolog :
 val emit_return_type_info :
   scope:Ast_scope.Scope.t ->
   skipawaitable:bool ->
-  namespace:Namespace_env.env ->
   Aast.hint option ->
   Hhas_type_info.t
 
@@ -72,5 +71,4 @@ val emit_deprecation_warning :
 val emit_generics_upper_bounds :
   Tast.tparam list ->
   skipawaitable:bool ->
-  namespace:Namespace_env.env ->
   (string * Hhas_type_info.t list) list

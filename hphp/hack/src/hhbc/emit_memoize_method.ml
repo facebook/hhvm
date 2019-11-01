@@ -517,11 +517,7 @@ let emit_memoize_wrapper_body
     List.map (Ast_scope.Scope.get_tparams scope) ~f:(fun t -> snd t.T.tp_name)
   in
   let return_type_info =
-    Emit_body.emit_return_type_info
-      ~scope
-      ~skipawaitable:is_async
-      ~namespace
-      ret
+    Emit_body.emit_return_type_info ~scope ~skipawaitable:is_async ret
   in
   let params =
     Emit_param.from_asts
@@ -572,7 +568,7 @@ let make_memoize_wrapper_method env info ast_class ast_method =
   in
   let namespace = ast_class.T.c_namespace in
   let method_is_interceptable =
-    Interceptable.is_method_interceptable namespace ast_class method_id
+    Interceptable.is_method_interceptable ast_class method_id
   in
   let method_attributes =
     Emit_attribute.from_asts namespace ast_method.T.m_user_attributes

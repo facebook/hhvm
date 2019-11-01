@@ -21,7 +21,7 @@ let from_attribute_base namespace ((_, attr_name) as attribute_id) arguments =
         attr_name
       (* don't do anything to builtin attributes *)
       else
-        let fq_id = Hhbc_id.Class.elaborate_id namespace attribute_id in
+        let fq_id = Hhbc_id.Class.elaborate_id attribute_id in
         Php_escaping.escape (Hhbc_id.Class.to_raw_string fq_id)
     in
     Hhas_attribute.make fq_id attribute_arguments

@@ -17,7 +17,7 @@ module T = Aast
  *)
 let emit_function (ast_fun, hoisted) : Hhas_function.t list =
   let namespace = ast_fun.T.f_namespace in
-  let original_id = Hhbc_id.Function.elaborate_id namespace ast_fun.T.f_name in
+  let original_id = Hhbc_id.Function.from_ast_name (snd ast_fun.T.f_name) in
   let function_is_async =
     ast_fun.T.f_fun_kind = Ast_defs.FAsync
     || ast_fun.T.f_fun_kind = Ast_defs.FAsyncGenerator
@@ -85,7 +85,7 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
       [T.Stmt (Pos.none, T.Block ast_body)]
   in
   let is_interceptable =
-    Interceptable.is_function_interceptable namespace ast_fun
+    Interceptable.is_function_interceptable ast_fun
   in
   let normal_function =
     Hhas_function.make

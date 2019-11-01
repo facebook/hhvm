@@ -109,18 +109,17 @@ and is_resolved_classname = function
     true
   | _ -> false
 
-let add_ns ~namespace id =
-  let classname = Hhbc_id.Class.elaborate_id namespace id in
-  Hhbc_id.Class.to_raw_string classname
+(* Rename *)
+let add_ns id = Hhbc_id.Class.(elaborate_id id |> to_raw_string)
 
-let shape_field_name ~namespace = function
+let shape_field_name = function
   | A.SFlit_int (_, s)
   | A.SFlit_str (_, s) ->
     (s, false)
-  | A.SFclass_const (id, (_, s)) -> (add_ns ~namespace id ^ "::" ^ s, true)
+  | A.SFclass_const (id, (_, s)) -> (add_ns id ^ "::" ^ s, true)
 
-let rec shape_field_to_pair ~tparams ~namespace ~targ_map sfi =
-  let (name, is_class_const) = shape_field_name ~namespace sfi.Aast.sfi_name in
+let rec shape_field_to_pair ~tparams ~targ_map sfi =
+  let (name, is_class_const) = shape_field_name sfi.Aast.sfi_name in
   let is_optional = sfi.Aast.sfi_optional in
   let hint = sfi.Aast.sfi_hint in
   let class_const =
@@ -136,21 +135,16 @@ let rec shape_field_to_pair ~tparams ~namespace ~targ_map sfi =
       []
   in
   let inner_value =
-    [
-      ( TV.String "value",
-        hint_to_type_constant ~tparams ~namespace ~targ_map hint );
-    ]
+    [(TV.String "value", hint_to_type_constant ~tparams ~targ_map hint)]
   in
   let inner_value = class_const @ optional @ inner_value in
   let value = dict_or_darray inner_value in
   (TV.String name, value)
 
-and shape_info_to_typed_value
-    ~tparams ~namespace ~targ_map (si : Aast.nast_shape_info) : TV.t =
+and shape_info_to_typed_value ~tparams ~targ_map (si : Aast.nast_shape_info) :
+    TV.t =
   let info =
-    List.map
-      ~f:(shape_field_to_pair ~tparams ~namespace ~targ_map)
-      si.Aast.nsi_field_map
+    List.map ~f:(shape_field_to_pair ~tparams ~targ_map) si.Aast.nsi_field_map
   in
   dict_or_darray info
 
@@ -164,13 +158,13 @@ and type_constant_access_list sl =
   let l = List.map ~f:(fun (_, s) -> TV.String s) sl in
   vec_or_varray l
 
-and resolve_classname ~tparams ~namespace (p, s) =
+and resolve_classname ~tparams (p, s) =
   let is_tparam = s = "_" || List.mem ~equal:( = ) tparams s in
   let s =
     if is_tparam then
       s
     else
-      add_ns namespace (p, Types.fix_casing s)
+      add_ns (p, Types.fix_casing s)
   in
   if is_prim s || is_resolved_classname s then
     ([], s)
@@ -183,30 +177,27 @@ and resolve_classname ~tparams ~namespace (p, s) =
     in
     ([(TV.String id, TV.String s)], s)
 
-and get_generic_types ~tparams ~namespace ~targ_map hl =
+and get_generic_types ~tparams ~targ_map hl =
   match hl with
   | [] -> []
   | _ ->
-    [
-      ( TV.String "generic_types",
-        hints_to_type_constant ~tparams ~namespace ~targ_map hl );
-    ]
+    [(TV.String "generic_types", hints_to_type_constant ~tparams ~targ_map hl)]
 
 and get_kind ~tparams s =
   [(TV.String "kind", TV.Int (get_kind_num ~tparams s))]
 
-and root_to_string ~namespace s =
+and root_to_string s =
   if s = "this" then
     prefix_namespace "HH" s
   else
-    add_ns namespace (Pos.none, s)
+    add_ns (Pos.none, s)
 
 and get_typevars = function
   | [] -> []
   | tparams ->
     [(TV.String "typevars", TV.String (String.concat ~sep:"," tparams))]
 
-and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
+and hint_to_type_constant_list ~tparams ~targ_map (h : Aast.hint) =
   match snd h with
   | Aast.Happly ((_, name), []) when SMap.mem name targ_map ->
     let id =
@@ -216,7 +207,7 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
     in
     get_kind ~tparams "$$internal$$reifiedtype" @ [(TV.String "id", TV.Int id)]
   | Aast.Happly (s, l) ->
-    let (classname, s_res) = resolve_classname ~tparams ~namespace s in
+    let (classname, s_res) = resolve_classname ~tparams s in
     let kind = get_kind ~tparams s_res in
     let n = String.lowercase @@ snd s in
     let generic_types =
@@ -226,21 +217,18 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
       then
         []
       else
-        get_generic_types ~tparams ~namespace ~targ_map l
+        get_generic_types ~tparams ~targ_map l
     in
     kind @ classname @ generic_types
   | Aast.Hshape si ->
     shape_allows_unknown_fields si
     @ get_kind ~tparams "shape"
-    @ [
-        ( TV.String "fields",
-          shape_info_to_typed_value ~tparams ~namespace ~targ_map si );
-      ]
+    @ [(TV.String "fields", shape_info_to_typed_value ~tparams ~targ_map si)]
   (* Matches the structure in ast_to_nast.ml on_hint for Haccess *)
   | Aast.Haccess ((_, Aast.Happly ((_, root_id), [])), ids) ->
     get_kind ~tparams "$$internal$$typeaccess"
     @ [
-        (TV.String "root_name", TV.String (root_to_string ~namespace root_id));
+        (TV.String "root_name", TV.String (root_to_string root_id));
         (TV.String "access_list", type_constant_access_list ids);
       ]
   | Aast.Haccess _ ->
@@ -262,37 +250,31 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map (h : Aast.hint) =
     (* TODO(mqian): Implement for inout parameters *)
     let kind = get_kind ~tparams "$$internal$$fun" in
     let single_hint name h =
-      [(TV.String name, hint_to_type_constant ~tparams ~namespace ~targ_map h)]
+      [(TV.String name, hint_to_type_constant ~tparams ~targ_map h)]
     in
     let return_type = single_hint "return_type" h in
     let variadic_type =
       Option.value_map vh ~f:(single_hint "variadic_type") ~default:[]
     in
     let param_types =
-      [
-        ( TV.String "param_types",
-          hints_to_type_constant ~tparams ~namespace ~targ_map hl );
-      ]
+      [(TV.String "param_types", hints_to_type_constant ~tparams ~targ_map hl)]
     in
     kind @ return_type @ param_types @ variadic_type
   | Aast.Hoption h ->
     [(TV.String "nullable", TV.Bool true)]
-    @ hint_to_type_constant_list ~tparams ~namespace ~targ_map h
+    @ hint_to_type_constant_list ~tparams ~targ_map h
   | Aast.Htuple hl ->
     let kind = get_kind ~tparams "tuple" in
     let elem_types =
-      [
-        ( TV.String "elem_types",
-          hints_to_type_constant ~tparams ~namespace ~targ_map hl );
-      ]
+      [(TV.String "elem_types", hints_to_type_constant ~tparams ~targ_map hl)]
     in
     kind @ elem_types
   | Aast.Hsoft h ->
     [(TV.String "soft", TV.Bool true)]
-    @ hint_to_type_constant_list ~tparams ~namespace ~targ_map h
+    @ hint_to_type_constant_list ~tparams ~targ_map h
   | Aast.Hlike h ->
     [(TV.String "like", TV.Bool true)]
-    @ hint_to_type_constant_list ~tparams ~namespace ~targ_map h
+    @ hint_to_type_constant_list ~tparams ~targ_map h
   | Aast.Hpu_access _ -> failwith "TODO(T36532263) hint_to_type_constant_list"
   (* TAST hints not found on the legacy AST *)
   | Aast.Hany
@@ -316,10 +298,9 @@ and hint_to_type_constant
     ?(is_typedef = false)
     ?(is_opaque = false)
     ~tparams
-    ~namespace
     ~targ_map
     (h : Aast.hint) =
-  let l = hint_to_type_constant_list ~tparams ~namespace ~targ_map h in
+  let l = hint_to_type_constant_list ~tparams ~targ_map h in
   let tconsts =
     if is_typedef then
       l @ get_typevars tparams
@@ -334,8 +315,6 @@ and hint_to_type_constant
   in
   dict_or_darray tconsts
 
-and hints_to_type_constant ~tparams ~namespace ~targ_map hl =
+and hints_to_type_constant ~tparams ~targ_map hl =
   vec_or_varray
-  @@ List.map
-       ~f:(fun h -> hint_to_type_constant ~tparams ~namespace ~targ_map h)
-       hl
+  @@ List.map ~f:(fun h -> hint_to_type_constant ~tparams ~targ_map h) hl

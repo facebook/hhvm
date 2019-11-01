@@ -184,7 +184,7 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
         [T.Stmt (Pos.none, T.Block ast_body_block)]
   in
   let method_is_interceptable =
-    Interceptable.is_method_interceptable namespace ast_class method_id
+    Interceptable.is_method_interceptable ast_class method_id
   in
   let method_span =
     if is_native_opcode_impl then

@@ -144,7 +144,6 @@ let from_ast ~tparams ~namespace ~generate_defaults ~scope p =
           ~kind:Param
           ~skipawaitable:false
           ~nullable
-          ~namespace
           ~tparams)
   in
   (* Do the type check for default value type and hint type *)

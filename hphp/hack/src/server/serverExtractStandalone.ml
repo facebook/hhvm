@@ -271,43 +271,42 @@ let function_make_default = "extract_standalone_make_default"
 let call_make_default = Printf.sprintf "\\%s()" function_make_default
 
 let print_fun_args tcopt fun_type =
-  let with_default arg_idx =
-    arg_idx >= Typing_defs.arity_min fun_type.ft_arity
-  in
-  let print_arg ?is_variadic:(var = false) idx arg =
+  let print_arg (pos : [ `standard of int | `variadic ]) arg =
     let name =
       match arg.fp_name with
       | Some n -> n
       | None -> ""
     in
-    let inout =
-      if arg.fp_kind = FPinout then
-        "inout "
-      else
-        ""
-    in
-    let typ =
+    let ty =
       match snd arg.fp_type.et_type with
       | Typing_defs.Tany _ -> ""
       | _ ->
         Printf.sprintf "%s "
         @@ Typing_print.full_decl tcopt arg.fp_type.et_type
     in
-    let default =
-      if with_default idx then
-        Printf.sprintf " = %s" call_make_default
-      else
-        ""
-    in
-    if var then
-      Printf.sprintf "%s...%s" typ name
-    else
-      Printf.sprintf "%s%s%s%s" inout typ name default
+    match pos with
+    | `standard index ->
+      let inout =
+        match arg.fp_kind with
+        | FPinout -> "inout "
+        | _ -> ""
+      in
+      let default =
+        if index >= Typing_defs.arity_min fun_type.ft_arity then
+          Printf.sprintf " = %s" call_make_default
+        else
+          ""
+      in
+      Printf.sprintf "%s%s%s%s" inout ty name default
+    | `variadic -> Printf.sprintf "%s...%s" ty name
   in
-  let args = List.mapi fun_type.ft_params print_arg in
+  let args =
+    List.mapi fun_type.ft_params ~f:(fun index arg ->
+        print_arg (`standard index) arg)
+  in
   let args =
     match fun_type.ft_arity with
-    | Fvariadic (min, arg) -> args @ [print_arg ~is_variadic:true min arg]
+    | Fvariadic (_, arg) -> args @ [print_arg `variadic arg]
     | Fellipsis _ -> args @ ["..."]
     | Fstandard _ -> args
   in

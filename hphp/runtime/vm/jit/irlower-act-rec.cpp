@@ -95,7 +95,7 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   v << movtql{numArgs, numArgs32};
   v << storel{numArgs32, newFP + AROFF(m_numArgs)};
 
-  if (func->implCls()) {
+  if (func->cls()) {
     v << store{ctx, newFP + AROFF(m_thisUnsafe)};
   } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
     emitImmStoreq(v, ActRec::kTrashedThisSlot, newFP + AROFF(m_thisUnsafe));

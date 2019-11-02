@@ -465,7 +465,7 @@ void getFunctionPointers(const NativeFunctionInfo& info,
  * Fallback method bound to declared methods with no matching
  * internal implementation.
  */
-TypedValue* unimplementedWrapper(ActRec* ar);
+[[noreturn]] TypedValue* unimplementedWrapper(ActRec* ar);
 
 /////////////////////////////////////////////////////////////////////////////
 

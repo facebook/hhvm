@@ -454,25 +454,15 @@ TypedValue* methodWrapper(ActRec* ar) {
   return ar->retSlot();
 }
 
-TypedValue* unimplementedWrapper(ActRec* ar) {
+[[noreturn]] TypedValue* unimplementedWrapper(ActRec* ar) {
   auto func = ar->m_func;
   auto cls = func->cls();
   if (cls) {
     raise_error("Call to unimplemented native method %s::%s()",
                 cls->name()->data(), func->name()->data());
-    tvWriteNull(*ar->retSlot());
-    if (func->isStatic()) {
-      frame_free_locals_no_this_inl(ar, func->numParams(), ar->retSlot());
-    } else {
-      frame_free_locals_inl(ar, func->numParams(), ar->retSlot());
-    }
-  } else {
-    raise_error("Call to unimplemented native function %s()",
-                func->name()->data());
-    tvWriteNull(*ar->retSlot());
-    frame_free_locals_no_this_inl(ar, func->numParams(), ar->retSlot());
   }
-  return ar->retSlot();
+  raise_error("Call to unimplemented native function %s()",
+              func->name()->data());
 }
 
 void getFunctionPointers(const NativeFunctionInfo& info, int nativeAttrs,

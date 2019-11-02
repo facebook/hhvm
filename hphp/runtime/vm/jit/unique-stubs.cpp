@@ -1112,22 +1112,6 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   });
 }
 
-TCA emitUnknownExceptionHandler(CodeBlock& cb,
-                                DataBlock& data,
-                                UniqueStubs& us) {
-  alignJmpTarget(cb);
-
-  CGMeta meta;
-  auto const ret = vwrap(cb, data, meta, [&] (Vout& v) {
-    v << call{
-      TCA(unknownExceptionHandler), {}, &us.unknownExceptionHandlerPast
-    };
-  });
-  meta.process(nullptr);
-
-  return ret;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -1167,9 +1151,6 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   // These guys are required by a number of other stubs.
   ADD(handleSRHelper, hotView(), emitHandleSRHelper(hot(), data));
   ADD(endCatchHelper, hotView(), emitEndCatchHelper(hot(), data, *this));
-  ADD(unknownExceptionHandler,
-      view,
-      emitUnknownExceptionHandler(cold, data, *this));
 
   ADD(funcPrologueRedispatch,
       hotView(),

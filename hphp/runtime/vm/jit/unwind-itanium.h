@@ -64,9 +64,7 @@ struct UnwindRDS {
      * endCatchHelper that it should perform a REQ_POST_DEBUGGER_RET
      * rather than resuming the unwind process. */
     TypedValue* debuggerReturnSP;
-    void* originalRip;
   };
-  TYPE_SCAN_IGNORE_FIELD(originalRip);
   Offset debuggerCallOff;
 
   /* This will be true iff the currently executing catch trace should side exit
@@ -84,7 +82,6 @@ IMPLEMENT_OFF(TV, tv)
 IMPLEMENT_OFF(SideExit, doSideExit)
 IMPLEMENT_OFF(DebuggerCallOff, debuggerCallOff)
 IMPLEMENT_OFF(DebuggerReturnSP, debuggerReturnSP)
-IMPLEMENT_OFF(OriginalRip, originalRip)
 #undef IMPLEMENT_OFF
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -122,11 +119,6 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp);
  * TC.
  */
 void initUnwinder(TCA base, size_t size, PersonalityFunc fn);
-
-/*
- * Handle unknown exceptions for tc_unwind_personality
- */
-[[noreturn]] void unknownExceptionHandler();
 
 ///////////////////////////////////////////////////////////////////////////////
 

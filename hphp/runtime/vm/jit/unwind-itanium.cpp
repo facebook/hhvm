@@ -65,34 +65,6 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-enum class ExceptionKind {
-  Unclassified,
-  StdException,
-  NonStdException,
-  PhpException,
-  CppException,
-  InvalidSetMException,
-};
-
-struct TIHash {
-  std::size_t operator()(const std::type_info* ti) const {
-    return ti->hash_code();
-  }
-};
-
-struct TIEqual {
-  bool operator()(const std::type_info* lhs, const std::type_info* rhs) const {
-    if (intptr_t(lhs) < 0) return false;
-    return *lhs == *rhs;
-  }
-};
-
-using TypeInfoMap = folly::AtomicHashArray<const std::type_info*,
-                                           ExceptionKind,
-                                           TIHash, TIEqual>;
-
-TypeInfoMap::SmartPtr typeInfoMap;
-
 /*
  * Sync VM regs for the TC frame represented by `context'.
  */
@@ -192,50 +164,8 @@ bool install_catch_trace(_Unwind_Context* ctx, TCA rip, _Unwind_Exception* exn,
   return true;
 }
 
-__thread std::pair<const std::type_info*, ExceptionKind> cachedTypeInfo;
-
 ///////////////////////////////////////////////////////////////////////////////
 
-}
-
-void unknownExceptionHandler() {
-#ifndef _MSC_VER
-  __cxxabiv1::__cxa_begin_catch(g_unwind_rds->exn);
-#endif
-  auto const exn = std::current_exception();
-#ifndef _MSC_VER
-  __cxxabiv1::__cxa_end_catch();
-#endif
-  ExceptionKind ek;
-  try {
-    try {
-      std::rethrow_exception(exn);
-    } catch (const InvalidSetMException&) {
-      ek = ExceptionKind::InvalidSetMException;
-      throw;
-    } catch (const req::root<Object>&) {
-      ek = ExceptionKind::PhpException;
-      throw;
-    } catch (const Object&) {
-      ek = ExceptionKind::PhpException;
-      Logger::Error("Throwing an unwrapped Object");
-      throw;
-    } catch (const BaseException&) {
-      ek = ExceptionKind::CppException;
-      throw;
-    } catch (const std::exception& e) {
-      ek = ExceptionKind::Unclassified;
-      throw FatalErrorException(
-        0, "Invalid exception with message `%s'", e.what());
-    } catch (...) {
-      ek = ExceptionKind::Unclassified;
-      throw FatalErrorException("Unknown invalid exception");
-    }
-  } catch (...) {
-    cachedTypeInfo.second = ek;
-    typeInfoMap->emplace(cachedTypeInfo.first, ek);
-    throw;
-  };
 }
 
 _Unwind_Reason_Code
@@ -278,60 +208,14 @@ tc_unwind_personality(int version,
            (TCA)_Unwind_GetIP(context), exnType);
   }
 
-  auto const exceptionKind = [&] () -> ExceptionKind {
-    if (ti != cachedTypeInfo.first) {
-      auto const it = typeInfoMap->find(ti);
-      cachedTypeInfo.first = ti;
-      cachedTypeInfo.second = it == typeInfoMap->end() ?
-        ExceptionKind::Unclassified : it->second;
-    }
-    return cachedTypeInfo.second;
-  }();
-
   InvalidSetMException* ism = nullptr;
-
-  switch (exceptionKind) {
-    case ExceptionKind::InvalidSetMException:
-      ism = static_cast<InvalidSetMException*>(exceptionFromUE(ue));
-      if (actions & _UA_SEARCH_PHASE) {
-        FTRACE(1, "thrown value: {} returning _URC_HANDLER_FOUND\n ",
-               ism->tv().pretty());
-        return _URC_HANDLER_FOUND;
-      }
-      break;
-    default:
-      if (!(actions & _UA_HANDLER_FRAME)) break;
-      // if we get here, we saw an unclassified exception in the search phase,
-      // returned _URC_HANDLER_FOUND to try to classify it, but during the
-      // unwind through the c++ portion of the stack, we could re-enter and
-      // classify it. But having said we'd handle it here, we *must* handle it,
-      // so the easiest thing is to just go through the classification again
-      // (which will rethrow the exception, and start a new search phase).
-      assertx(actions & _UA_CLEANUP_PHASE);
-    case ExceptionKind::Unclassified:
-      if (actions & _UA_SEARCH_PHASE) {
-        FTRACE(1,
-               "Unclassified exception was thrown, exn {}, ti {}, "
-               "returning _URC_HANDLER_FOUND\n", (void*)ue, (void*)ti);
-        return _URC_HANDLER_FOUND;
-      } else {
-        FTRACE(1,
-               "Unclassified exception was thrown, exn {}, ti {}, "
-               "Installing unknownExceptionHandler\n", (void*)ue, (void*)ti);
-        auto const& stubs = tc::ustubs();
-        auto ip = (TCA)_Unwind_GetIP(context);
-        if (ip == stubs.unknownExceptionHandlerPast) {
-          assertx(g_unwind_rds->originalRip);
-          ip = (TCA)g_unwind_rds->originalRip;
-        }
-        if (tl_regState == VMRegState::DIRTY) {
-          sync_regstate(ip, context);
-        }
-        g_unwind_rds->originalRip = ip;
-        g_unwind_rds->exn = ue;
-        _Unwind_SetIP(context, (uint64_t)stubs.unknownExceptionHandler);
-        return _URC_INSTALL_CONTEXT;
-      }
+  if (*ti == typeid(InvalidSetMException)) {
+    ism = static_cast<InvalidSetMException*>(exceptionFromUE(ue));
+    if (actions & _UA_SEARCH_PHASE) {
+      FTRACE(1, "thrown value: {} returning _URC_HANDLER_FOUND\n ",
+              ism->tv().pretty());
+      return _URC_HANDLER_FOUND;
+    }
   }
 
   /*
@@ -343,19 +227,6 @@ tc_unwind_personality(int version,
   if (actions & _UA_CLEANUP_PHASE) {
     auto const& stubs = tc::ustubs();
     auto ip = TCA(_Unwind_GetIP(context));
-
-    if (ip == stubs.unknownExceptionHandlerPast) {
-      assertx(g_unwind_rds->originalRip);
-      assertx(exceptionKind != ExceptionKind::Unclassified);
-
-      ip = (TCA)g_unwind_rds->originalRip;
-      FTRACE(1,
-             "rip == unknownExceptionHandlerPast; setting rip = {} exn={}\n",
-             ip, (void*)ue);
-      g_unwind_rds->originalRip = nullptr;
-    } else {
-      assertx(!g_unwind_rds->originalRip);
-    }
     if (tl_regState == VMRegState::DIRTY) {
       sync_regstate(ip, context);
     }
@@ -538,7 +409,6 @@ void initUnwinder(TCA base, size_t size, PersonalityFunc personality) {
   ehfw.end_fde(size);
   ehfw.null_fde();
   s_ehFrames.push_back(ehfw.register_and_release());
-  typeInfoMap = TypeInfoMap::create(512, {});
 }
 
 ///////////////////////////////////////////////////////////////////////////////

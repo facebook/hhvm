@@ -127,7 +127,7 @@ void emitCGetL(IRGS& env, int32_t id) {
     env,
     id,
     ldPMExit,
-    DataTypeBoxAndCountnessInit
+    DataTypeCountnessInit
   );
   pushIncRef(env, loc);
 }
@@ -141,7 +141,7 @@ void emitCGetQuietL(IRGS& env, int32_t id) {
         env,
         id,
         ldPMExit,
-        DataTypeBoxAndCountnessInit
+        DataTypeCountnessInit
       );
 
       if (loc->type() <= TUninit) {
@@ -187,14 +187,14 @@ void emitCGetL2(IRGS& env, int32_t id) {
     env,
     id,
     ldPMExit,
-    DataTypeBoxAndCountnessInit
+    DataTypeCountnessInit
   );
   pushIncRef(env, val);
   push(env, oldTop);
 }
 
 void emitUnsetL(IRGS& env, int32_t id) {
-  auto const prev = ldLoc(env, id, makeExit(env), DataTypeBoxAndCountness);
+  auto const prev = ldLoc(env, id, makeExit(env), DataTypeCountness);
   stLocRaw(env, id, fp(env), cns(env, TUninit));
   decRef(env, prev);
 }
@@ -214,8 +214,8 @@ void emitInitThisLoc(IRGS& env, int32_t id) {
     // Do nothing if this is null
     return;
   }
-  auto const ldrefExit = makeExit(env);
-  auto const oldLoc = ldLoc(env, id, ldrefExit, DataTypeBoxAndCountness);
+  auto const ldExit = makeExit(env);
+  auto const oldLoc = ldLoc(env, id, ldExit, DataTypeCountness);
   auto const this_  = ldThis(env);
   gen(env, IncRef, this_);
   stLocRaw(env, id, fp(env), this_);

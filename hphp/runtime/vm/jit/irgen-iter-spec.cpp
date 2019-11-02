@@ -485,7 +485,7 @@ void iterIfThen(IRGS& env, Branch branch, Taken taken) {
 void iterClear(IRGS& env, uint32_t local) {
   assertx(local != kInvalidId);
   assertx(!curFunc(env)->isPseudoMain());
-  env.irb->constrainLocal(local, DataTypeBoxAndCountness, "iterClear");
+  env.irb->constrainLocal(local, DataTypeCountness, "iterClear");
   decRef(env, gen(env, LdLoc, TCell, LocalId(local), fp(env)), local);
 }
 

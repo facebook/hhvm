@@ -179,8 +179,7 @@ MaybeDataType get_datatype(
 #define DT_CATEGORIES(func)                     \
   func(Generic)                                 \
   func(Countness)                               \
-  func(BoxAndCountness)                         \
-  func(BoxAndCountnessInit)                     \
+  func(CountnessInit)                           \
   func(Specific)                                \
   func(Specialized)
 

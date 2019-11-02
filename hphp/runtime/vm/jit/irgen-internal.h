@@ -704,7 +704,7 @@ inline SSATmp* ldLocWarn(IRGS& env,
     return cns(env, TInitNull);
   };
 
-  env.irb->constrainLocal(id, DataTypeBoxAndCountnessInit, "ldLocInnerWarn");
+  env.irb->constrainLocal(id, DataTypeCountnessInit, "ldLocWarn");
 
   if (locVal->type() <= TUninit) return warnUninit();
   if (!locVal->type().maybe(TUninit)) return locVal;
@@ -753,7 +753,7 @@ inline SSATmp* stLocImpl(IRGS& env,
                          SSATmp* newVal,
                          bool decRefOld,
                          bool incRefNew) {
-  auto const cat = decRefOld ? DataTypeBoxAndCountness : DataTypeGeneric;
+  auto const cat = decRefOld ? DataTypeCountness : DataTypeGeneric;
   auto const oldLoc = ldLoc(env, id, ldPMExit, cat);
 
   stLocRaw(env, id, fp(env), newVal);
@@ -784,7 +784,7 @@ inline void stLocMove(IRGS& env,
                       uint32_t id,
                       Block* ldPMExit,
                       SSATmp* newVal) {
-  auto const oldLoc = ldLoc(env, id, ldPMExit, DataTypeBoxAndCountness);
+  auto const oldLoc = ldLoc(env, id, ldPMExit, DataTypeCountness);
 
   if (curFunc(env)->isPseudoMain()) gen(env, IncRef, newVal);
   stLocRaw(env, id, fp(env), newVal);
@@ -807,7 +807,7 @@ inline SSATmp* pushStLoc(IRGS& env,
     incRefNew
   );
 
-  env.irb->constrainValue(ret, DataTypeBoxAndCountness);
+  env.irb->constrainValue(ret, DataTypeCountness);
   return push(env, ret);
 }
 

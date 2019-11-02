@@ -327,8 +327,8 @@ inline bool fits(Type t, GuardConstraint gc) {
 
 TEST(Type, GuardConstraints) {
   EXPECT_TRUE(fits(TCell, DataTypeGeneric));
-  EXPECT_FALSE(fits(TCell, DataTypeBoxAndCountness));
-  EXPECT_FALSE(fits(TCell, DataTypeBoxAndCountnessInit));
+  EXPECT_FALSE(fits(TCell, DataTypeCountness));
+  EXPECT_FALSE(fits(TCell, DataTypeCountnessInit));
   EXPECT_FALSE(fits(TCell, DataTypeSpecific));
   EXPECT_FALSE(fits(TCell,
                     GuardConstraint(DataTypeSpecialized).setWantArrayKind()));
@@ -352,13 +352,13 @@ TEST(Type, RelaxType) {
 }
 
 TEST(Type, RelaxConstraint) {
-  EXPECT_EQ(GuardConstraint(DataTypeBoxAndCountness),
+  EXPECT_EQ(GuardConstraint(DataTypeCountnessInit),
             relaxConstraint(GuardConstraint{DataTypeSpecific},
                             TCell,
                             TArr));
 
   EXPECT_EQ(GuardConstraint(DataTypeGeneric),
-            relaxConstraint(GuardConstraint{DataTypeBoxAndCountness},
+            relaxConstraint(GuardConstraint{DataTypeCountness},
                             TArr,
                             TCell));
 }

@@ -1700,7 +1700,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
 
     auto propTy = propPtr->type().deref();
 
-    env.irb->constrainValue(value, DataTypeBoxAndCountness);
+    env.irb->constrainValue(value, DataTypeCountness);
     auto const oldVal = gen(env, LdMem, propTy, propPtr);
     gen(env, IncRef, value);
     gen(env, StMem, propPtr, value);
@@ -1933,7 +1933,7 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
       } else if (t == TStaticStr) {
         // Base is a string. Stack result is a new string so we're responsible
         // for decreffing value.
-        env.irb->constrainValue(value, DataTypeBoxAndCountness);
+        env.irb->constrainValue(value, DataTypeCountness);
         decRef(env, value);
         value = result;
       } else {

@@ -156,24 +156,12 @@ struct VarEnv {
 bool isVMFrame(const ActRec* ar, bool may_be_non_runtime = false);
 
 /*
- * Returns true iff the given address is one of the special debugger return
- * helpers.
- */
-bool isDebuggerReturnHelper(void* addr);
-
-/*
  * If ar->m_savedRip points somewhere in the TC that is not a return helper,
  * change it to point to an appropriate return helper. The two different
  * versions are for the different needs of the C++ unwinder and debugger hooks,
  * respectively.
  */
 void unwindPreventReturnToTC(ActRec* ar);
-void debuggerPreventReturnToTC(ActRec* ar);
-
-/*
- * Call debuggerPreventReturnToTC() on all live VM frames in this thread.
- */
-void debuggerPreventReturnsToTC();
 
 ///////////////////////////////////////////////////////////////////////////////
 

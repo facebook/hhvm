@@ -41,7 +41,6 @@
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-tls.h"
-#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
@@ -545,22 +544,6 @@ void loadGenFrame(Vout& v, Vreg d) {
   v << lea{gen[arOff], d};
 }
 
-void debuggerRetImpl(Vout& v, Vreg ar) {
-  auto const callOffAndFlags = v.makeReg();
-  auto const callOff = v.makeReg();
-
-  v << loadl{ar[AROFF(m_callOffAndFlags)], callOffAndFlags};
-  v << shrli{int32_t{ActRec::CallOffsetStart}, callOffAndFlags, callOff,
-             v.makeReg()};
-  v << storel{callOff, rvmtl()[unwinderDebuggerCallOffOff()]};
-  v << store{rvmsp(), rvmtl()[unwinderDebuggerReturnSPOff()]};
-
-  auto const ret = v.makeReg();
-  v << simplecall(v, unstashDebuggerCatch, ar, ret);
-
-  v << jmpr{ret};
-}
-
 TCA emitInterpRet(CodeBlock& cb, DataBlock& data) {
   alignCacheLine(cb);
 
@@ -592,33 +575,6 @@ TCA emitInterpGenRet(CodeBlock& cb, DataBlock& data) {
   });
   svcreq::emit_persistent(cb, data, folly::none, REQ_POST_INTERP_RET);
   return start;
-}
-
-TCA emitDebuggerInterpRet(CodeBlock& cb, DataBlock& data) {
-  alignJmpTarget(cb);
-
-  return vwrap(cb, data, [] (Vout& v) {
-    // Sync return regs before calling native assert function.
-    storeReturnRegs(v);
-    assertNativeStackAligned(v);
-
-    auto const ar = v.makeReg();
-    v << lea{rvmsp()[-kArRetOff], ar};
-    debuggerRetImpl(v, ar);
-  });
-}
-
-template<bool async>
-TCA emitDebuggerInterpGenRet(CodeBlock& cb, DataBlock& data) {
-  alignJmpTarget(cb);
-
-  return vwrap(cb, data, [] (Vout& v) {
-    assertNativeStackAligned(v);
-
-    auto const ar = v.makeReg();
-    loadGenFrame<async>(v, ar);
-    debuggerRetImpl(v, ar);
-  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1062,14 +1018,6 @@ TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
 TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   alignCacheLine(cb);
 
-  auto const udrspo = rvmtl()[unwinderDebuggerReturnSPOff()];
-
-  auto const debuggerReturn = vwrap(cb, data, [&] (Vout& v) {
-    v << load{udrspo, rvmsp()};
-    v << storeqi{0, udrspo};
-  });
-  svcreq::emit_persistent(cb, data, folly::none, REQ_POST_DEBUGGER_RET);
-
   CGMeta meta;
 
   auto const resumeCPPUnwind = vwrap(cb, data, meta, [&] (Vout& v) {
@@ -1087,13 +1035,6 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   alignJmpTarget(cb);
 
   return vwrap(cb, data, [&] (Vout& v) {
-    auto const done1 = v.makeBlock();
-    auto const sf1 = v.makeReg();
-
-    v << cmpqim{0, udrspo, sf1};
-    v << jcci{CC_NE, sf1, done1, debuggerReturn};
-    v = done1;
-
     // Normal end catch situation: call back to tc_unwind_resume, which returns
     // the catch trace (or null) in the first return register, and the new vmfp
     // in the second.
@@ -1101,12 +1042,12 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << call{TCA(tc_unwind_resume), arg_regs(1)};
     v << copy{rret(1), rvmfp()};
 
-    auto const done2 = v.makeBlock();
-    auto const sf2 = v.makeReg();
+    auto const done = v.makeBlock();
+    auto const sf = v.makeReg();
 
-    v << testq{rret(0), rret(0), sf2};
-    v << jcci{CC_Z, sf2, done2, resumeCPPUnwind};
-    v = done2;
+    v << testq{rret(0), rret(0), sf};
+    v << jcci{CC_Z, sf, done, resumeCPPUnwind};
+    v = done;
 
     v << jmpr{rret(0)};
   });
@@ -1167,11 +1108,6 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(genRetHelper, view, emitInterpGenRet<false>(cold, data));
   ADD(asyncGenRetHelper, hotView(), emitInterpGenRet<true>(hot(), data));
   ADD(retInlHelper, hotView(), emitInterpRet(hot(), data));
-  ADD(debuggerRetHelper, view, emitDebuggerInterpRet(cold, data));
-  ADD(debuggerGenRetHelper, view, emitDebuggerInterpGenRet<false>(cold, data));
-  ADD(debuggerAsyncGenRetHelper,
-      view,
-      emitDebuggerInterpGenRet<true>(cold, data));
 
   ADD(immutableBindCallStub, view, emitBindCallStub(cold, data));
   ADD(fcallUnpackHelper,

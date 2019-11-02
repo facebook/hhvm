@@ -56,17 +56,6 @@ struct UnwindRDS {
    * on the eval stack. When present, that value lives here. */
   TypedValue tv;
 
-  union {
-    /* When returning from a frame that had its m_savedRip smashed by
-     * the debugger, the return stub stashes values here to be used
-     * after running the appropriate catch trace. In addition, a
-     * non-nullptr debuggerReturnSP is used as the flag to
-     * endCatchHelper that it should perform a REQ_POST_DEBUGGER_RET
-     * rather than resuming the unwind process. */
-    TypedValue* debuggerReturnSP;
-  };
-  Offset debuggerCallOff;
-
   /* This will be true iff the currently executing catch trace should side exit
    * to somewhere else in the TC, rather than resuming the unwind process. */
   bool doSideExit;
@@ -80,8 +69,6 @@ extern rds::Link<UnwindRDS, rds::Mode::Normal> g_unwind_rds;
 IMPLEMENT_OFF(Exn, exn)
 IMPLEMENT_OFF(TV, tv)
 IMPLEMENT_OFF(SideExit, doSideExit)
-IMPLEMENT_OFF(DebuggerCallOff, debuggerCallOff)
-IMPLEMENT_OFF(DebuggerReturnSP, debuggerReturnSP)
 #undef IMPLEMENT_OFF
 
 ///////////////////////////////////////////////////////////////////////////////

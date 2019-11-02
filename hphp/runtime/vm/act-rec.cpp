@@ -43,14 +43,6 @@ bool isReturnHelper(void* address) {
          tca == u.callToExit;
 }
 
-bool isDebuggerReturnHelper(void* address) {
-  auto tca = reinterpret_cast<jit::TCA>(address);
-  auto& u = jit::tc::ustubs();
-  return tca == u.debuggerRetHelper ||
-         tca == u.debuggerGenRetHelper ||
-         tca == u.debuggerAsyncGenRetHelper;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void ActRec::setReturn(ActRec* fp, PC callPC, void* retAddr,

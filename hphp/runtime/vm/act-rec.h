@@ -342,7 +342,6 @@ static_assert(kArRetOff % sizeof(TypedValue) == 0, "");
  * ActRec::m_savedRip to.
  */
 bool isReturnHelper(void* address);
-bool isDebuggerReturnHelper(void* address);
 
 /* Offset of the m_func and m_thisUnsafe fields in cells */
 

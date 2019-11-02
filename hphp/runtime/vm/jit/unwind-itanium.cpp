@@ -26,7 +26,6 @@
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
@@ -310,13 +309,6 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
 
     assertx(g_unwind_rds.isInit());
     auto catchTrace = lookup_catch_trace(savedRip, g_unwind_rds->exn);
-
-    if (isDebuggerReturnHelper(savedRip)) {
-      // If this frame had its return address smashed by the debugger, the real
-      // catch trace is saved in a side table.
-      assertx(catchTrace == nullptr);
-      catchTrace = unstashDebuggerCatch(fp);
-    }
 
     if (fp->m_savedRip != reinterpret_cast<uint64_t>(savedRip)) {
       ITRACE(1, "Smashed m_savedRip of fp {} from {} to {:#x}\n",

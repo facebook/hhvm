@@ -80,26 +80,6 @@ int DebuggerHook::s_numAttached {0};
 DebuggerHook* DebuggerHook::s_activeHook {nullptr};
 
 //////////////////////////////////////////////////////////////////////////
-// Helpers
-
-namespace {
-
-// Ensure we interpret an entire function when the debugger is attached.
-void blacklistFuncInJit(const Func* f) {
-  if (jit::addDbgBLFunc(f)) {
-    if (!jit::tc::addDbgGuards(f)) {
-      Logger::Warning("Failed to set breakpoints in Jitted code");
-    }
-    // In this case, we may be setting a breakpoint in a tracelet which could
-    // already be jitted, and present on the stack. Make sure we don't return
-    // to it so we have a chance to honor breakpoints.
-    debuggerPreventReturnsToTC();
-  }
-}
-
-}
-
-//////////////////////////////////////////////////////////////////////////
 // Hooks
 
 // Hook called from the bytecode interpreter before every opcode executed while
@@ -336,9 +316,6 @@ void phpDebuggerErrorHook(const ExtendedException& ee,
 
 void phpDebuggerEvalHook(const Func* f) {
   VMRegAnchor anchor;
-  if (RuntimeOption::EvalJit) {
-    blacklistFuncInJit(f);
-  }
   getDebuggerHook()->onEval(f);
 }
 

@@ -98,18 +98,12 @@ struct CGMeta;
                           \
   /*
    * post_interp_ret(ActRec* arg, ActRec* caller)
-   * post_debugger_ret()
    *
    * post_interp_ret is invoked in the case that translated code in the TC
    * executes the return for a frame that was pushed by the interpreter---since
    * there is no TCA to return to.
-   *
-   * post_debugger_ret is a similar request that is used when translated code
-   * returns from a frame that had its saved return address smashed by the
-   * debugger.
    */                     \
-  REQ(POST_INTERP_RET)    \
-  REQ(POST_DEBUGGER_RET)
+  REQ(POST_INTERP_RET)
 
 /*
  * Service request types.

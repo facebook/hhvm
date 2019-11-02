@@ -1346,44 +1346,6 @@ void unwindPreventReturnToTC(ActRec* ar) {
   }
 }
 
-void debuggerPreventReturnToTC(ActRec* ar) {
-  auto const savedRip = reinterpret_cast<jit::TCA>(ar->m_savedRip);
-  always_assert_flog(jit::tc::isValidCodeAddress(savedRip),
-                     "preventReturnToTC({}): {} isn't in TC",
-                     ar, savedRip);
-
-  if (isReturnHelper(savedRip) || isDebuggerReturnHelper(savedRip)) return;
-
-  // We're going to smash the return address. Before we do, save the catch
-  // block attached to the call in a side table so the return helpers and
-  // unwinder can find it when needed.
-  jit::stashDebuggerCatch(ar);
-
-  auto& ustubs = jit::tc::ustubs();
-  if (isResumed(ar)) {
-    // async functions use callToExit stub
-    assertx(ar->func()->isGenerator());
-    ar->setJitReturn(ar->func()->isAsync()
-      ? ustubs.debuggerAsyncGenRetHelper : ustubs.debuggerGenRetHelper);
-  } else {
-    ar->setJitReturn(ustubs.debuggerRetHelper);
-  }
-}
-
-// Walk the stack and find any return address to jitted code and bash it to the
-// appropriate RetFromInterpreted*Frame helper. This ensures that we don't
-// return into jitted code and gives the system the proper chance to interpret
-// blacklisted tracelets.
-void debuggerPreventReturnsToTC() {
-  assertx(isDebuggerAttached());
-  if (!RuntimeOption::EvalJit) return;
-
-  auto& ec = *g_context;
-  for (auto ar = vmfp(); ar; ar = ec.getPrevVMState(ar)) {
-    debuggerPreventReturnToTC(ar);
-  }
-}
-
 static inline StringData* lookup_name(TypedValue* key) {
   return prepareKey(*key);
 }
@@ -2674,16 +2636,6 @@ OPTBLD_INLINE JitReturn jitReturnPre(ActRec* fp) {
 
 OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
   if (retInfo.savedRip) {
-    if (isDebuggerReturnHelper(reinterpret_cast<void*>(retInfo.savedRip))) {
-      // Our return address was smashed by the debugger. Do the work of the
-      // debuggerRetHelper by setting some unwinder RDS info and resuming at
-      // the approprate catch trace.
-      assertx(jit::g_unwind_rds.isInit());
-      jit::g_unwind_rds->debuggerReturnSP = vmsp();
-      jit::g_unwind_rds->debuggerCallOff = retInfo.callOff;
-      return jit::unstashDebuggerCatch(retInfo.fp);
-    }
-
     // This frame was called by translated code so we can't interpret out of
     // it. Resume in the TC right after our caller. This situation most
     // commonly happens when we interpOne a RetC due to having a VarEnv or some

@@ -358,19 +358,6 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       start = getTranslation(TransArgs{sk});
       break;
     }
-
-    case REQ_POST_DEBUGGER_RET: {
-      auto fp = vmfp();
-      auto caller = fp->func();
-      assertx(g_unwind_rds.isInit());
-      vmpc() = skipCall(caller->unit()->at(caller->base() +
-                                           g_unwind_rds->debuggerCallOff));
-      FTRACE(3, "REQ_DEBUGGER_RET: pc {} in {}\n",
-             vmpc(), fp->func()->fullName()->data());
-      sk = liveSK();
-      start = getTranslation(TransArgs{sk});
-      break;
-    }
   }
 
   if (smashed && info.stub) {

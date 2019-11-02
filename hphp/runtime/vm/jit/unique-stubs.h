@@ -208,20 +208,6 @@ struct UniqueStubs {
   TCA retInlHelper;
 
   /*
-   * Return from a function when the ActRec was called from jitted code but
-   * had its m_savedRip smashed by the debugger.
-   *
-   * These stubs call a helper that looks up the original catch trace from the
-   * call, executes it, then executes a REQ_POST_DEBUGGER_RET.
-   *
-   * @reached:  phpret from TC
-   * @context:  func body (after returning to caller)
-   */
-  TCA debuggerRetHelper;
-  TCA debuggerGenRetHelper;
-  TCA debuggerAsyncGenRetHelper;
-
-  /*
    * Return from a resumed async function.
    *
    * Store result into the AsyncFunctionWaitHandle, mark it as finished and

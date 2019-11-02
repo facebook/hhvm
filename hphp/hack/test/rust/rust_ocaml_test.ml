@@ -535,10 +535,11 @@ module LowererTest_ = struct
         (Scoured_comments.show result.comments)
         (print_lowpri_errs !(result.lowpri_errors_)))
 
-  let build_tree _env is_rust file source_text =
+  let build_tree args _env is_rust file source_text =
     let lower_env =
       Lowerer.make_env
         file
+        ~codegen:args.codegen
         ~rust_compare_mode:true
         ~show_all_errors:true
         ~keep_errors:true
@@ -570,12 +571,12 @@ module LowererTest_ = struct
     let ocaml_tree =
       match args.mode with
       | RUST -> Skip
-      | _ -> build_tree ocaml_env false file source_text
+      | _ -> build_tree args ocaml_env false file source_text
     in
     let rust_tree =
       match args.mode with
       | OCAML -> Skip
-      | _ -> build_tree rust_env true file source_text
+      | _ -> build_tree args rust_env true file source_text
     in
     let aast_equal = Aast.equal_program ( = ) ( = ) ( = ) ( = ) in
     let compare_result r1 r2 =

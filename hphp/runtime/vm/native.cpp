@@ -409,6 +409,7 @@ TypedValue* functionWrapper(ActRec* ar) {
   assertx(rv.m_type != KindOfUninit);
   frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
   tvCopy(rv, *ar->retSlot());
+  ar->retSlot()->m_aux.u_asyncEagerReturnFlag = 0;
   return ar->retSlot();
 }
 
@@ -449,6 +450,7 @@ TypedValue* methodWrapper(ActRec* ar) {
     frame_free_locals_inl(ar, func->numLocals(), &rv);
   }
   tvCopy(rv, *ar->retSlot());
+  ar->retSlot()->m_aux.u_asyncEagerReturnFlag = 0;
   return ar->retSlot();
 }
 

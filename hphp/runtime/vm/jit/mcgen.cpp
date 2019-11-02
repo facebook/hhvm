@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/mcgen-prologue.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 
-#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"

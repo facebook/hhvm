@@ -26,7 +26,6 @@
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-tls.h"
-#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -96,10 +95,6 @@ bool addDbgGuards(const Func* func) {
     auto codeLock = lockCode();
     auto metaLock = lockMetadata();
 
-    auto view = code().view();
-    auto& main = view.main();
-    auto& data = view.data();
-
     HPHP::Timer::GetMonotonicTime(tsBegin);
     // Doc says even find _could_ invalidate iterator, in practice it should
     // be very rare, so go with it now.
@@ -111,11 +106,6 @@ bool addDbgGuards(const Func* func) {
       if (!Func::isFuncIdValid(sk.funcID())) continue;
       SrcRec* sr = pair.second;
       auto srLock = sr->writelock();
-      if (sk.func() == func &&
-          !sr->hasDebuggerGuard() &&
-          isSrcKeyInDbgBL(sk)) {
-        addDbgGuardImpl(sk, sr, main, data, fixups);
-      }
     }
     fixups.process(nullptr);
   }
@@ -137,12 +127,6 @@ bool addDbgGuard(const Func* func, Offset offset, ResumeMode resumeMode) {
   } else {
     // no translation yet
     return true;
-  }
-  if (debug) {
-    if (!isSrcKeyInDbgBL(sk)) {
-      TRACE(5, "calling addDbgGuard on PC that is not in blacklist");
-      return false;
-    }
   }
 
   auto codeLock = lockCode();

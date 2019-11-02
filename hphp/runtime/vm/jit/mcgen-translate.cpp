@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/vm/jit/mcgen.h"
 
-#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
@@ -391,13 +390,6 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   auto sr = tc::findSrcRec(args.sk);
   auto const initialNumTrans = sr->numTrans();
   auto const funcId = args.sk.funcID();
-
-  if (isDebuggerAttachedProcess() && isSrcKeyInDbgBL(args.sk)) {
-    // We are about to translate something known to be blacklisted by
-    // debugger, exit early
-    SKTRACE(1, args.sk, "retranslate abort due to debugger\n");
-    return nullptr;
-  }
 
   // We need to recompute the kind after acquiring the write lease in case the
   // answer to profileFunc() changes, so use a lambda rather than just

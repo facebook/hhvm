@@ -25,7 +25,6 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/guard-type-profile.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -292,8 +291,6 @@ void requestExit() {
     }
     Trace::traceRelease("\n");
   }
-
-  clearDebuggerCatches();
 }
 
 void codeEmittedThisRequest(size_t& requestEntry, size_t& now) {

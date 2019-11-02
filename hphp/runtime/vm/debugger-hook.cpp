@@ -23,7 +23,6 @@
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/async-flow-stepper.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
-#include "hphp/runtime/vm/jit/debugger.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/pc-filter.h"
@@ -71,7 +70,6 @@ void DebuggerHook::detach(RequestInfo* ti /* = nullptr */) {
   Lock lock(s_lock);
   if (--s_numAttached == 0) {
     s_activeHook = nullptr;
-    jit::clearDbgBL();
   }
 }
 

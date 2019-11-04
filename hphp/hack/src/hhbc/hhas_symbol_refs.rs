@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Data structure for keeping track of symbols (and includes) we encounter in
@@ -21,7 +22,7 @@ pub type IncludePathSet = BTreeSet<IncludePath>;
 
 type SSet = BTreeSet<String>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq)]
 pub enum IncludePath {
     Absolute(String),                    // /foo/bar/baz.php
     SearchPathRelative(String),          // foo/bar/baz.php
@@ -51,5 +52,28 @@ impl IncludePath {
             };
         }
         self
+    }
+
+    fn extract_str(&self) -> (&str, &str) {
+        use IncludePath::*;
+        match self {
+            Absolute(s) | SearchPathRelative(s) | DocRootRelative(s) => (s, ""),
+            IncludeRootRelative(s1, s2) => (s1, s2),
+        }
+    }
+}
+impl Ord for IncludePath {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.extract_str().cmp(&other.extract_str())
+    }
+}
+impl PartialOrd for IncludePath {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+impl PartialEq for IncludePath {
+    fn eq(&self, other: &Self) -> bool {
+        self.extract_str().eq(&other.extract_str())
     }
 }

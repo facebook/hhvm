@@ -1894,6 +1894,11 @@ where
                 use ExprLocation::*;
                 match (location, t.kind()) {
                     (MemberSelect, TK::Variable) => mk_lvar(node, env),
+                    (InDoubleQuotedString, TK::HeredocStringLiteral)
+                    | (InDoubleQuotedString, TK::HeredocStringLiteralHead)
+                    | (InDoubleQuotedString, TK::HeredocStringLiteralTail) => Ok(E_::String(
+                        Self::wrap_unescaper(unescape_heredoc, Self::text_str(node, env))?,
+                    )),
                     (InDoubleQuotedString, _) => Ok(E_::String(Self::wrap_unescaper(
                         Self::unesc_dbl,
                         Self::text_str(node, env),

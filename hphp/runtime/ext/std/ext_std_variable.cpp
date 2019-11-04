@@ -600,6 +600,17 @@ String HHVM_FUNCTION(HH_serialize_with_options,
   );
 }
 
+String serialize_keep_dvarrays(const Variant& value) {
+  return serialize_impl(
+      value,
+      /* keepDVArrays */ true,
+      false,
+      false,
+      false,
+      false
+  );
+}
+
 String HHVM_FUNCTION(hhvm_intrinsics_serialize_keep_dvarrays,
                      const Variant& value) {
   return serialize_impl(value, true, false, false, false, false);

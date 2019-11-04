@@ -336,6 +336,7 @@ char const kUnserializableString[] = "\x01";
  * runtime/base that depend on these two functions.
  */
 String f_serialize(const Variant& value);
+String serialize_keep_dvarrays(const Variant& value);
 Variant unserialize_ex(const String& str,
                        VariableUnserializer::Type type,
                        const Array& options = null_array);

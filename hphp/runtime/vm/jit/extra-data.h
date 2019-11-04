@@ -1583,17 +1583,19 @@ struct EndCatchData : IRSPRelOffsetData {
     SideExit
   };
 
-  explicit EndCatchData(IRSPRelOffset offset, CatchMode mode) :
-      IRSPRelOffsetData{offset}, mode{mode} {}
+  explicit EndCatchData(IRSPRelOffset offset, CatchMode mode, bool stublogue) :
+      IRSPRelOffsetData{offset}, mode{mode}, stublogue{stublogue} {}
 
   std::string show() const {
     return folly::to<std::string>(
       IRSPRelOffsetData::show(), ",",
       mode == UnwindOnly ? "UnwindOnly" :
-      mode == SwitchMode ? "SwitchMode" : "SideExit");
+      mode == SwitchMode ? "SwitchMode" : "SideExit",
+      stublogue ? ",stublogue" : "");
   }
 
   CatchMode mode;
+  bool stublogue;
 };
 
 /*

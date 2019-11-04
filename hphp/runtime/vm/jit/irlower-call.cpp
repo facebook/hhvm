@@ -475,6 +475,12 @@ void cgProfileCall(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void cgEnterPrologue(IRLS& env, const IRInstruction*) {
+  vmain(env) << stublogue{false};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void cgCheckInOuts(IRLS& env, const IRInstruction* inst)  {
   auto const func = srcLoc(env, inst, 0).reg();
   auto const nparams = srcLoc(env, inst, 1).reg();

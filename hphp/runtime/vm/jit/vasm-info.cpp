@@ -428,6 +428,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::tailcallstub:
     case Vinstr::tailcallstubr:
     case Vinstr::trap:
+    case Vinstr::unstublogue:
     case Vinstr::unwind:
     case Vinstr::vcall:
     case Vinstr::vcallunpack:

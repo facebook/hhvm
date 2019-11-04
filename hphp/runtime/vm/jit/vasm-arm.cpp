@@ -1682,6 +1682,13 @@ void lower(const VLS& e, stublogue& /*i*/, Vlabel b, size_t z) {
   });
 }
 
+void lower(const VLS& e, unstublogue& /*i*/, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    // Pop LR and remove FP from the stack.
+    v << popp{PhysReg(rAsm), rlr()};
+  });
+}
+
 void lower(const VLS& e, stubret& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Pop LR and (optionally) FP.

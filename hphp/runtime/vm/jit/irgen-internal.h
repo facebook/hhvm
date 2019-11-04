@@ -858,7 +858,8 @@ Block* create_catch_block(
 
  gen(env, BeginCatch);
  body();
- gen(env, EndCatch, EndCatchData { spOffBCFromIRSP(env), mode },
+ auto const stublogue = env.irb->fs().stublogue();
+ gen(env, EndCatch, EndCatchData { spOffBCFromIRSP(env), mode, stublogue },
      fp(env), sp(env));
  return catchBlock;
 }

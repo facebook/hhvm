@@ -1623,9 +1623,10 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
       gen(env, UnwindCheckSideExit, taken, fp(env), sp(env));
     },
     [&] {
+      assertx(!env.irb->fs().stublogue());
       hint(env, Block::Hint::Unused);
       gen(env, EndCatch,
-          EndCatchData { spOffBCFromIRSP(env), EndCatchData::SideExit },
+          EndCatchData { spOffBCFromIRSP(env), EndCatchData::SideExit, false },
           fp(env), sp(env));
     }
   );

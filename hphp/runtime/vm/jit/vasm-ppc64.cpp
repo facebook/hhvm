@@ -497,6 +497,7 @@ struct Vgen {
   void emit(const tailcallstubr& i);
   void emit(const testqi& i);
   void emit(const ucomisd& i);
+  void emit(const unstublogue& i);
   void emit(const unwind& i);
 
   void emit_nop() {
@@ -874,6 +875,15 @@ void Vgen::emit(const stublogue& i) {
   // save return address on this frame
   a.mflr(rfuncln());
   a.std(rfuncln(), rsfp()[AROFF(m_savedRip)]);
+}
+
+void Vgen::emit(const unstublogue& i) {
+  // Restore return address.
+  a.ld(rfuncln(), rsfp()[AROFF(m_savedRip)]);
+  a.mtlr(rfuncln());
+
+  // Undo stublogue allocation.
+  a.mr(rsfp(), rsp());
 }
 
 void Vgen::emit(const stubret& i) {

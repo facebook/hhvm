@@ -1675,6 +1675,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefCallNumArgs:
   case DefCallCtx:
   case EndGuards:
+  case EnterPrologue:
   case EqBool:
   case EqCls:
   case EqRecDesc:

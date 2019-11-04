@@ -706,6 +706,7 @@ bool canDCE(IRInstruction* inst) {
   case DbgTrashFrame:
   case DbgTrashMem:
   case DbgTrashRetVal:
+  case EnterPrologue:
   case CheckStackOverflow:
   case CheckSurpriseFlagsEnter:
   case JmpPlaceholder:

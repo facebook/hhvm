@@ -48,9 +48,15 @@ void cgBeginCatch(IRLS& env, const IRInstruction* /*inst*/) {
   emitIncStat(v, Stats::TC_CatchTrace);
 }
 
-void cgEndCatch(IRLS& env, const IRInstruction* /*inst*/) {
-  // endCatchHelper only expects vm_regs_no_sp() to be alive.
-  vmain(env) << jmpi{tc::ustubs().endCatchHelper, vm_regs_no_sp()};
+void cgEndCatch(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+
+  auto const helper = inst->extra<EndCatch>()->stublogue
+    ? tc::ustubs().endCatchStublogueHelper
+    : tc::ustubs().endCatchHelper;
+
+  // endCatch*Helpers only expect vm_regs_no_sp() to be alive.
+  v << jmpi{helper, vm_regs_no_sp()};
 }
 
 void cgUnwindCheckSideExit(IRLS& env, const IRInstruction* inst) {

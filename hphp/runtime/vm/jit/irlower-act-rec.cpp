@@ -74,6 +74,7 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   v << store{prevFP, newFP + AROFF(m_sfp)};
+  v << unstublogue{};
   v << phplogue{newFP};
   emitImmStoreq(v, uintptr_t(func), newFP + AROFF(m_func));
 

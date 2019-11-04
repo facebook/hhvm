@@ -3439,7 +3439,7 @@ fields of that struct for holding intermediate values.
   Marks the beginning of a catch region. Exact behavior is implementation and
   architecture specific.
 
-| EndCatch<spOffset>, ND, S(FramePtr) S(StkPtr), T
+| EndCatch<spOffset,mode,stublogue>, ND, S(FramePtr) S(StkPtr), T
 
   Marks the end of a catch region and returns control to the unwinder.  The
   `spOffset' field represents a logical adjustment to S1 (in cells) to yield
@@ -3448,6 +3448,9 @@ fields of that struct for holding intermediate values.
   instead relies on fixup map information to find the appropriate stack
   pointers.  Instead it's part of this instruction to facilitate assertions and
   memory effect analysis.
+
+  If the `stublogue' flag is set, the native stack pointer is updated to reflect
+  the state prior to entering the stublogue context.
 
 | UnwindCheckSideExit, ND, S(FramePtr) S(StkPtr), B
 
@@ -3461,6 +3464,11 @@ fields of that struct for holding intermediate values.
 
 
 19. Function prologues
+
+| EnterPrologue, ND, NA, NF
+
+  Enter prologue context, which operates in the same mode as unique stubs.
+  Makes sure the native stack is properly aligned.
 
 | CheckStackOverflow, ND, S(FramePtr), NF
 

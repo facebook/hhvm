@@ -107,6 +107,7 @@ struct Vunit;
   O(ret, Inone, U(args), Dn)\
   /* stub function abi */\
   O(stublogue, Inone, Un, Dn)\
+  O(unstublogue, Inone, Un, Dn)\
   O(stubret, Inone, U(args), Dn)\
   O(callstub, I(target), U(args), Dn)\
   O(callfaststub, I(fix), U(args), Dn)\
@@ -675,6 +676,11 @@ struct ret { RegSet args; };
  * pointer will only be adjusted if the stub code does so intentionally.
  */
 struct stublogue { bool saveframe; };
+
+/*
+ * Reverse the effects of stublogue{false}.
+ */
+struct unstublogue {};
 
 /*
  * Return from a stub.

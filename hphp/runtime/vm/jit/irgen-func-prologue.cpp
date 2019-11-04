@@ -248,15 +248,21 @@ StackCheck stack_check_kind(const Func* func, uint32_t argc) {
    */
   auto const safeFromSEGV = Stack::sSurprisePageSize / sizeof(TypedValue);
 
-  return func->numLocals() - argc < safeFromSEGV
+  return func->numLocals() < safeFromSEGV + argc
     ? StackCheck::Combine
     : StackCheck::Early;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitPrologueEntry(IRGS& env, uint32_t argc, SSATmp* callFlags,
-                       SSATmp* closure) {
+Type prologueCtxType(const Func* func) {
+  assertx(func->isClosureBody() || func->cls());
+  if (func->isClosureBody()) return Type::ExactObj(func->implCls());
+  if (func->isStatic()) return Type::SubCls(func->cls());
+  return thisTypeFromFunc(func);
+}
+
+void emitPrologueEntry(IRGS& env, uint32_t argc) {
   auto const func = curFunc(env);
 
   // Emit debug code.
@@ -277,24 +283,23 @@ void emitPrologueEntry(IRGS& env, uint32_t argc, SSATmp* callFlags,
     gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), numArgsOK);
   }
 
+  gen(env, EnterPrologue);
+}
+
+void emitSpillFrame(IRGS& env, uint32_t argc, SSATmp* callFlags,
+                    SSATmp* prologueCtx) {
+  auto const func = curFunc(env);
   auto const ctx = [&] {
-    assertx(func->isClosureBody() == (closure != nullptr));
-    if (func->isClosureBody()) {
-      if (!func->cls()) return cns(env, nullptr);
-      if (func->isStatic()) {
-        return gen(env, LdClosureCls, Type::SubCls(func->cls()), closure);
-      }
-      auto const closureThis =
-        gen(env, LdClosureThis, Type::SubObj(func->cls()), closure);
-      gen(env, IncRef, closureThis);
-      return closureThis;
-    }
+    if (!func->isClosureBody()) return prologueCtx;
 
     if (!func->cls()) return cns(env, nullptr);
-    auto const ctxType = func->isStatic()
-      ? Type::SubCls(func->cls())
-      : thisTypeFromFunc(func);
-    return gen(env, DefCallCtx, ctxType);
+    if (func->isStatic()) {
+      return gen(env, LdClosureCls, Type::SubCls(func->cls()), prologueCtx);
+    }
+    auto const closureThis =
+      gen(env, LdClosureThis, Type::SubObj(func->cls()), prologueCtx);
+    gen(env, IncRef, closureThis);
+    return closureThis;
   }();
 
   // If we don't have variadics, unpack arg will be dropped.
@@ -304,12 +309,6 @@ void emitPrologueEntry(IRGS& env, uint32_t argc, SSATmp* callFlags,
       fp(env), sp(env), callFlags, cns(env, arNumArgs), ctx);
   auto const spOffset = FPInvOffset { func->numSlotsInFrame() };
   gen(env, DefFrameRelSP, FPInvOffsetData { spOffset }, fp(env));
-
-  // Emit early stack overflow check if necessary.
-  if (stack_check_kind(func, argc) == StackCheck::Early) {
-    env.irb->exceptionStackBoundary();
-    gen(env, CheckStackOverflow, fp(env));
-  }
 }
 
 void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID,
@@ -320,6 +319,12 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID,
   if (isProfiling(env.context.kind)) {
     gen(env, IncProfCounter, TransIDData{transID});
     profData()->setProfiling(func->getFuncId());
+  }
+
+  // Emit early stack overflow check if necessary.
+  if (stack_check_kind(func, argc) == StackCheck::Early) {
+    env.irb->exceptionStackBoundary();
+    gen(env, CheckStackOverflow, fp(env));
   }
 
   auto const unpackArgsForTooManyArgs = [&]() -> SSATmp* {
@@ -402,12 +407,15 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   auto const func = curFunc(env);
   assertx(argc <= func->numNonVariadicParams() + 1);
 
+  // Define register inputs before doing anything else that may clobber them.
   auto const callFlags = gen(env, DefCallFlags);
-  auto const closure = func->isClosureBody()
-    ? gen(env, DefCallCtx, Type::ExactObj(func->implCls()))
-    : nullptr;
+  auto const prologueCtx = (func->isClosureBody() || func->cls())
+    ? gen(env, DefCallCtx, prologueCtxType(func))
+    : cns(env, nullptr);
+  auto const closure = func->isClosureBody() ? prologueCtx : nullptr;
 
-  emitPrologueEntry(env, argc, callFlags, closure);
+  emitPrologueEntry(env, argc);
+  emitSpillFrame(env, argc, callFlags, prologueCtx);
   emitPrologueBody(env, argc, transID, callFlags, closure);
 }
 

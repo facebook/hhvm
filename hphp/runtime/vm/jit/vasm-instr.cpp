@@ -142,6 +142,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::ret:
     // stub function abi
     case Vinstr::stublogue:
+    case Vinstr::unstublogue:
     case Vinstr::stubret:
     case Vinstr::callstub:
     case Vinstr::callfaststub:

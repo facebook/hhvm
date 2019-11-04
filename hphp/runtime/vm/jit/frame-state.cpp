@@ -141,6 +141,9 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // We must always have the same spValue.
   always_assert(dst.spValue == src.spValue);
 
+  // We must always have the same stublogue mode.
+  always_assert(dst.stublogue == src.stublogue);
+
   if (dst.needRatchet != src.needRatchet) {
     dst.needRatchet = true;
     changed = true;
@@ -406,6 +409,11 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case DefFuncEntryFP:
     cur().fpValue = inst->dst();
     cur().ctx = inst->src(4);
+    cur().stublogue = false;
+    break;
+
+  case EnterPrologue:
+    cur().stublogue = true;
     break;
 
   case RetCtrl:

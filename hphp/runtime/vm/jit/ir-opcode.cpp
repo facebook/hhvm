@@ -695,6 +695,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EndBlock:
   case EndCatch:
   case EndGuards:
+  case EnterPrologue:
   case EqArrayDataPtr:
   case EqBool:
   case EqCls:

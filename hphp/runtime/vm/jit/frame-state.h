@@ -149,6 +149,13 @@ struct FrameState {
   FPInvOffset bcSPOff{0};
 
   /*
+   * Tracks whether we are currently in the stublogue context. This is set in
+   * prologues prior to spilling the ActRec and used by catch blocks to ensure
+   * the proper alignment of native stack.
+   */
+  bool stublogue{false};
+
+  /*
    * Tracks whether we will need to ratchet tvRef and tvRef2 after emitting an
    * intermediate member instruction.
    */
@@ -309,6 +316,7 @@ struct FrameStateMgr final {
   SSATmp*     ctx()               const { return cur().ctx; }
   FPInvOffset irSPOff()           const { return cur().irSPOff; }
   FPInvOffset bcSPOff()           const { return cur().bcSPOff; }
+  bool        stublogue()         const { return cur().stublogue; }
   bool        needRatchet()       const { return cur().needRatchet; }
   bool        stackModified()     const { return cur().stackModified; }
 

@@ -148,12 +148,13 @@ Block* make_opt_catch(IRGS& env, const ParamPrep& params) {
   env.irb->setCurMarker(makeMarker(env, nextBcOff(env)));
   env.irb->exceptionStackBoundary();
 
+  assertx(!env.irb->fs().stublogue());
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, nextBcOff(env)), exit);
   gen(env, BeginCatch);
   params.decRefParams(env);
   gen(env, EndCatch,
-      EndCatchData { spOffBCFromIRSP(env), EndCatchData::UnwindOnly },
+      EndCatchData { spOffBCFromIRSP(env), EndCatchData::UnwindOnly, false },
       fp(env), sp(env));
   return exit;
 }
@@ -1311,6 +1312,7 @@ struct CatchMaker {
   }
 
   Block* makeUnusualCatch() const {
+    assertx(!env.irb->fs().stublogue());
     auto const exit = defBlock(env, Block::Hint::Unlikely);
     BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
     gen(env, BeginCatch);
@@ -1320,7 +1322,8 @@ struct CatchMaker {
         EndCatch,
         EndCatchData {
           spOffBCFromIRSP(env),
-          EndCatchData::UnwindOnly
+          EndCatchData::UnwindOnly,
+          false
         },
         fp(env), sp(env));
     return exit;

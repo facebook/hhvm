@@ -129,6 +129,10 @@ let serverless_ide_crash ~message:_ ~stack:_ = ()
 
 let client_lsp_exception ~root:_ ~message:_ ~stack:_ ~source:_ = ()
 
+let serverless_ide_startup ~component:_ ~start_time:_ = ()
+
+let serverless_ide_local_files ~local_file_count:_ = ()
+
 let client_bad_exit ~command _ = ()
 
 let monitor_dead_but_typechecker_alive () = ()

@@ -100,7 +100,9 @@ let load_saved_state
         let%lwt server_env =
           load_naming_table_from_saved_state_info env saved_state_info
         in
-        log "[saved-state] Load succeeded";
+        (* Track how many files we have to change locally *)
+        HackEventLogger.serverless_ide_local_files
+          ~local_file_count:(List.length changed_files);
 
         Lwt.return_ok
           (Initialized
@@ -126,6 +128,11 @@ let load_saved_state
   in
   Lwt.return result
 
+let log_startup_time (component : string) (start_time : float) : float =
+  let now = Unix.gettimeofday () in
+  HackEventLogger.serverless_ide_startup ~component ~start_time;
+  now
+
 let initialize
     ({
        ClientIdeMessage.Initialize_from_saved_state.root;
@@ -134,6 +141,7 @@ let initialize
      } :
       ClientIdeMessage.Initialize_from_saved_state.t) :
     (state, string) Lwt_result.t =
+  let start_time = Unix.gettimeofday () in
   set_up_hh_logger_for_client_ide_service ~root;
 
   Relative_path.set_path_prefix Relative_path.Root root;
@@ -184,6 +192,7 @@ let initialize
   GlobalNamingOptions.set server_env.ServerEnv.tcopt;
 
   (* Use server_config to modify server_env with the correct symbol index *)
+  let start_time = log_startup_time "basic_startup" start_time in
   let namespace_map =
     GlobalOptions.po_auto_namespace_map server_env.ServerEnv.tcopt
   in
@@ -209,10 +218,12 @@ let initialize
   let server_env =
     { server_env with ServerEnv.local_symbol_table = ref sienv }
   in
+  let start_time = log_startup_time "symbol_index" start_time in
   if use_ranked_autocomplete then AutocompleteRankService.initialize ();
   let%lwt load_state_result =
     load_saved_state server_env ~root ~hhi_root ~naming_table_saved_state_path
   in
+  let _ = log_startup_time "saved_state" start_time in
   match load_state_result with
   | Ok state ->
     log "Serverless IDE has completed initialization";

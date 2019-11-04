@@ -2878,7 +2878,7 @@ where
                         S_::mk_using(aast::UsingStmt {
                             is_block_scoped: false,
                             has_await: !&c.using_function_await_keyword.is_missing(),
-                            expr: Self::p_expr_l_with_loc(
+                            expr: Self::p_expr_with_loc(
                                 ExprLocation::UsingStatement,
                                 &c.using_function_expression,
                                 e,

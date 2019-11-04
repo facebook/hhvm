@@ -1039,8 +1039,11 @@ void lower(Vunit& unit, stublogue& inst, Vlabel b, size_t i) {
   }
 }
 
-void lower(Vunit& unit, stubunwind& /*inst*/, Vlabel b, size_t i) {
-  unit.blocks[b].code[i] = lea{reg::rsp[16], reg::rsp};
+void lower(Vunit& unit, stubunwind& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << lea{reg::rsp[8], reg::rsp};
+    v << pop{inst.d};
+  });
 }
 
 void lower(Vunit& unit, stubtophp& /*inst*/, Vlabel b, size_t i) {

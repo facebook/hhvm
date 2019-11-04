@@ -915,16 +915,20 @@ void Vgen::emit(const loadstubret& i) {
   a.ld(i.d, rsp()[AROFF(m_savedRip)]);
 }
 
-void Vgen::emit(const stubunwind& /*i*/) {
-  // reset the return address from native frame due to call to the vm frame
-  a.ld(rfuncln(), rsp()[AROFF(m_savedRip)]);
-  a.mtlr(rfuncln());
+void Vgen::emit(const stubunwind& i) {
+  // load the return address and restore the return address register
+  a.ld(i.d, rsp()[AROFF(m_savedRip)]);
+  a.mtlr(i.d);
   // pop this frame as created by stublogue
   a.addi(rsp(), rsp(), min_frame_size);
 }
 
 void Vgen::emit(const stubtophp& /*i*/) {
-  emit(stubunwind{});
+  // reset the return address from native frame due to call to the vm frame
+  a.ld(rfuncln(), rsp()[AROFF(m_savedRip)]);
+  a.mtlr(rfuncln());
+  // pop this frame as created by stublogue
+  a.addi(rsp(), rsp(), min_frame_size);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

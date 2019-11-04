@@ -110,10 +110,9 @@ void assertNativeStackAligned(Vout& v) {
 /*
  * Load and store the VM registers from/to RDS.
  */
-void loadVMRegs(Vout& v) {
-  v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
-  v << load{rvmtl()[rds::kVmspOff], rvmsp()};
-}
+void loadVmfp(Vout& v) { v << load{rvmtl()[rds::kVmfpOff], rvmfp()}; }
+void loadVmsp(Vout& v) { v << load{rvmtl()[rds::kVmspOff], rvmsp()}; }
+void loadVMRegs(Vout& v) { loadVmfp(v); loadVmsp(v); }
 void storeVMRegs(Vout& v) {
   v << store{rvmfp(), rvmtl()[rds::kVmfpOff]};
   v << store{rvmsp(), rvmtl()[rds::kVmspOff]};
@@ -155,11 +154,10 @@ Vinstr simplecall(Vout& v, F helper, Vreg arg, Vreg d) {
  */
 template<class GenFn>
 void emitStubCatch(Vout& v, const UniqueStubs& us, GenFn gen) {
-  always_assert(us.endCatchHelper);
+  always_assert(us.endCatchStublogueHelper);
   v << landingpad{};
-  auto const args = gen(v);
-  v << stubunwind{};
-  v << jmpi{us.endCatchHelper, args};
+  gen(v);
+  v << jmpi{us.endCatchStublogueHelper, vm_regs_no_sp()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -375,10 +373,7 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data,
     };
 
     vc = ctch;
-    emitStubCatch(vc, us, [] (Vout& v) {
-      loadVMRegs(v);
-      return vm_regs_with_sp();
-    });
+    emitStubCatch(vc, us, [] (Vout& v) { loadVmfp(v); });
 
     v = done;
 
@@ -459,7 +454,6 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
       v << lea{rsp()[16], rsp()};
       // Undo our stub frame, so that rvmfp() points to the parent VM frame.
       v << load{rsp()[AROFF(m_sfp)], rvmfp()};
-      return rsp() | rvmfp();
     });
 
     v = done;
@@ -519,7 +513,7 @@ TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& main,
                  v.makeVcallArgs({{rvmfp()}}), v.makeTuple({}),
                  {done, ctch}};
     vc = ctch;
-    emitStubCatch(vc, us, [](Vout&) { return RegSet{}; });
+    emitStubCatch(vc, us, [] (Vout& v) { loadVmfp(v); });
 
     v = done;
     v << tailcallstub{us.functionEnterHelper};
@@ -665,13 +659,7 @@ TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
       DestType::SSA
     };
     vc = ctch;
-    emitStubCatch(
-      vc, us,
-      [] (Vout& v) {
-        loadVMRegs(v);
-        return php_return_regs();
-      }
-    );
+    emitStubCatch(vc, us, [] (Vout& v) { loadVmfp(v); });
 
     v = done;
 
@@ -689,7 +677,7 @@ TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
       loadReturnRegs(v);
       v << stubret{php_return_regs()};
     });
-    v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
+    loadVmfp(v);
 
     // If true was returned, we're calling the callee, so undo the stublogue{}
     // and convert to a phplogue{}.
@@ -727,7 +715,7 @@ ResumeHelperEntryPoints emitResumeHelpers(CodeBlock& cb, DataBlock& data) {
   });
 
   rh.handleResume = vwrap(cb, data, [] (Vout& v) {
-    v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
+    loadVmfp(v);
 
     auto const handler = reinterpret_cast<TCA>(svcreq::handleResume);
     v << call{handler, arg_regs(1)};
@@ -1020,7 +1008,7 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
   CGMeta meta;
 
-  auto const resumeCPPUnwind = vwrap(cb, data, meta, [&] (Vout& v) {
+  us.resumeCPPUnwind = vwrap(cb, data, meta, [&] (Vout& v) {
     static_assert(sizeof(tl_regState) == 8,
                   "The following store must match the size of tl_regState.");
     auto const regstate = emitTLSAddr(v, tls_datum(tl_regState));
@@ -1046,10 +1034,35 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     auto const sf = v.makeReg();
 
     v << testq{rret(0), rret(0), sf};
-    v << jcci{CC_Z, sf, done, resumeCPPUnwind};
+    v << jcci{CC_Z, sf, done, us.resumeCPPUnwind};
     v = done;
 
-    v << jmpr{rret(0)};
+    v << jmpr{rret(0), vm_regs_no_sp()};
+  });
+}
+
+TCA emitEndCatchStublogueHelper(CodeBlock& cb, DataBlock& data,
+                                UniqueStubs& us) {
+  alignJmpTarget(cb);
+
+  return vwrap(cb, data, [&] (Vout& v) {
+    // End catch situation in stublogue context: pop the native frame and
+    // pass the curent rvmfp() and saved RIP from the native frame to
+    // tc_unwind_resume_stublogue(),which returns the catch trace (or null)
+    // in the first return register, and the new vmfp in the second.
+    v << copy{rvmfp(), rarg(0)};
+    v << stubunwind{rarg(1)};
+    v << call{TCA(tc_unwind_resume_stublogue), arg_regs(2)};
+    v << copy{rret(1), rvmfp()};
+
+    auto const done = v.makeBlock();
+    auto const sf = v.makeReg();
+
+    v << testq{rret(0), rret(0), sf};
+    v << jcci{CC_Z, sf, done, us.resumeCPPUnwind};
+    v = done;
+
+    v << jmpr{rret(0), vm_regs_no_sp()};
   });
 }
 
@@ -1092,6 +1105,9 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   // These guys are required by a number of other stubs.
   ADD(handleSRHelper, hotView(), emitHandleSRHelper(hot(), data));
   ADD(endCatchHelper, hotView(), emitEndCatchHelper(hot(), data, *this));
+  ADD(endCatchStublogueHelper,
+      hotView(),
+      emitEndCatchStublogueHelper(hot(), data, *this));
 
   ADD(funcPrologueRedispatch,
       hotView(),

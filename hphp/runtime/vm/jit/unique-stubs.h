@@ -373,11 +373,20 @@ struct UniqueStubs {
   /*
    * Perform dispatch at the end of a catch block.
    *
+   * The endCatchHelper passes the current vmfp() to the unwinder to determine
+   * the catch trace of the return address of the parent frame.
+   *
+   * The endCatchStublogueHelper passes the current vmfp() and RIP saved in
+   * the stublogue header. Unwinder uses it to determine the catch trace of
+   * the return adddress belonging to the same logical vmfp().
+   *
    * If the unwinder has set state indicating a return address to jump to, we
    * load vmfp and vmsp and jump there.  Otherwise, we call _Unwind_Resume.
    */
+  TCA resumeCPPUnwind;
   TCA endCatchHelper;
   TCA endCatchHelperPast;
+  TCA endCatchStublogueHelper;
 
   /*
    * Service request helper.

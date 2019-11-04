@@ -112,7 +112,7 @@ struct Vunit;
   O(callfaststub, I(fix), U(args), Dn)\
   O(tailcallstub, I(target), U(args), Dn)\
   O(tailcallstubr, Inone, U(target) U(args), Dn)\
-  O(stubunwind, Inone, Un, Dn)\
+  O(stubunwind, Inone, Un, D(d))\
   O(stubtophp, Inone, Un, Dn)\
   O(loadstubret, Inone, Un, D(d))\
   /* php function abi */\
@@ -721,7 +721,8 @@ struct tailcallstub { CodeAddress target; RegSet args; };
 struct tailcallstubr { Vreg target; RegSet args; };
 
 /*
- * Restore %rsp when leaving a stub context via an exception edge.
+ * Restore %rsp when leaving a stub context via an exception edge, moving
+ * the saved return address to the provided register.
  *
  * When we unwind into normal TC frames (i.e., for PHP functions), we require
  * that %rsp be restored correctly, since we use spill space as our means of
@@ -729,7 +730,7 @@ struct tailcallstubr { Vreg target; RegSet args; };
  * exception, we have to undo the stack effects of both the stublogue{} and the
  * callstub{}.
  */
-struct stubunwind {};
+struct stubunwind { Vreg d; };
 
 /*
  * Convert from a stublogue{} context to a phplogue{} context.

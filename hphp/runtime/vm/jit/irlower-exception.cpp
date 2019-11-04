@@ -49,8 +49,8 @@ void cgBeginCatch(IRLS& env, const IRInstruction* /*inst*/) {
 }
 
 void cgEndCatch(IRLS& env, const IRInstruction* /*inst*/) {
-  // endCatchHelper only expects rvmtl() and rvmfp() to be live.
-  vmain(env) << jmpi{tc::ustubs().endCatchHelper, rvmtl() | rvmfp()};
+  // endCatchHelper only expects vm_regs_no_sp() to be alive.
+  vmain(env) << jmpi{tc::ustubs().endCatchHelper, vm_regs_no_sp()};
 }
 
 void cgUnwindCheckSideExit(IRLS& env, const IRInstruction* inst) {

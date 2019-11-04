@@ -100,6 +100,7 @@ struct TCUnwindInfo {
   ActRec* fp;
 };
 TCUnwindInfo tc_unwind_resume(ActRec* fp);
+TCUnwindInfo tc_unwind_resume_stublogue(ActRec* fp, TCA savedRip);
 
 /*
  * Called to initialize the unwinder and register an .eh_frame that covers the

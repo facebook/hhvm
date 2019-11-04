@@ -1714,10 +1714,10 @@ void lower(const VLS& e, tailcallstubr& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(const VLS& e, stubunwind& /*i*/, Vlabel b, size_t z) {
+void lower(const VLS& e, stubunwind& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     // Pop the call frame.
-    v << lea{rsp()[16], rsp()};
+    v << popp{PhysReg(rAsm), i.d};
   });
 }
 

@@ -330,6 +330,27 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
   }
 }
 
+TCUnwindInfo tc_unwind_resume_stublogue(ActRec* fp, TCA savedRip) {
+  // We can't consume the current `fp' when unwinding from a stublogue context,
+  // as that would skip the Catch of the instruction that called the stublogue.
+  // Instead, try to use the savedRip from stublogue to continue unwinding the
+  // same logical VM frame, but in the context before entering this stub.
+  ITRACE(1, "tc_unwind_resume_stublogue: fp {}, saved rip {}\n",
+         fp, savedRip);
+  assertx(g_unwind_rds.isInit());
+  auto catchTrace = lookup_catch_trace(savedRip, g_unwind_rds->exn);
+  if (catchTrace) {
+    ITRACE(1,
+           "tc_unwind_resume_stublogue returning catch trace {} with fp: {}\n",
+           catchTrace, fp);
+    return {catchTrace, fp};
+  }
+
+  // The caller of this stublogue doesn't have a catch trace. Continue with
+  // tc_unwind_resume().
+  return tc_unwind_resume(fp);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {

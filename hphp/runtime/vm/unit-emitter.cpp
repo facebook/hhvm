@@ -131,11 +131,12 @@ void UnitEmitter::setBc(const unsigned char* bc, size_t bclen) {
 // Litstrs and Arrays.
 
 const StringData* UnitEmitter::lookupLitstr(Id id) const {
-  if (isGlobalLitstrId(id)) {
-    return LitstrTable::get().lookupLitstrId(decodeGlobalLitstrId(id));
+  if (!isUnitLitstrId(id)) {
+    return LitstrTable::get().lookupLitstrId(id);
   }
-  assertx(id < m_litstrs.size());
-  return m_litstrs[id];
+  auto unitId = decodeUnitLitstrId(id);
+  assertx(unitId < m_litstrs.size());
+  return m_litstrs[unitId];
 }
 
 const ArrayData* UnitEmitter::lookupArray(Id id) const {
@@ -156,9 +157,9 @@ void UnitEmitter::repopulateArrayTypeTable(
 
 Id UnitEmitter::mergeLitstr(const StringData* litstr) {
   if (m_useGlobalIds) {
-    return encodeGlobalLitstrId(LitstrTable::get().mergeLitstr(litstr));
+    return LitstrTable::get().mergeLitstr(litstr);
   }
-  return mergeUnitLitstr(litstr);
+  return encodeUnitLitstrId(mergeUnitLitstr(litstr));
 }
 
 Id UnitEmitter::mergeUnitLitstr(const StringData* litstr) {

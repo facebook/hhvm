@@ -202,19 +202,19 @@ inline size_t Unit::numLitstrs() const {
 }
 
 inline bool Unit::isLitstrId(Id id) const {
-  if (isGlobalLitstrId(id)) {
-    auto globalID = decodeGlobalLitstrId(id);
-    return LitstrTable::get().contains(globalID);
+  if (!isUnitLitstrId(id)) {
+    return LitstrTable::get().contains(id);
   }
-  return m_extended && getExtended()->m_namedInfo.contains(id);
+  auto unitID = decodeUnitLitstrId(id);
+  return m_extended && getExtended()->m_namedInfo.contains(unitID);
 }
 
 inline StringData* Unit::lookupLitstrId(Id id) const {
-  if (isGlobalLitstrId(id)) {
-    auto globalID = decodeGlobalLitstrId(id);
-    return LitstrTable::get().lookupLitstrId(globalID);
+  if (!isUnitLitstrId(id)) {
+    return LitstrTable::get().lookupLitstrId(id);
   }
-  return getExtended()->m_namedInfo.lookupLitstr(id);
+  auto unitID = decodeUnitLitstrId(id);
+  return getExtended()->m_namedInfo.lookupLitstr(unitID);
 }
 
 inline const NamedEntity* Unit::lookupNamedEntityId(Id id) const {
@@ -222,11 +222,11 @@ inline const NamedEntity* Unit::lookupNamedEntityId(Id id) const {
 }
 
 inline NamedEntityPair Unit::lookupNamedEntityPairId(Id id) const {
-  if (isGlobalLitstrId(id)) {
-    auto globalID = decodeGlobalLitstrId(id);
-    return LitstrTable::get().lookupNamedEntityPairId(globalID);
+  if (!isUnitLitstrId(id)) {
+    return LitstrTable::get().lookupNamedEntityPairId(id);
   }
-  return getExtended()->m_namedInfo.lookupNamedEntityPair(id);
+  auto unitID = decodeUnitLitstrId(id);
+  return getExtended()->m_namedInfo.lookupNamedEntityPair(unitID);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

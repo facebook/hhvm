@@ -35,9 +35,9 @@ struct StringData;
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Global litstr Id's are all above this mark.
+ * Unit litstr Id's are all above this mark.
  */
-constexpr int kGlobalLitstrOffset = 0x40000000;
+constexpr int kUnitLitstrOffset = 0x40000000;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -156,11 +156,11 @@ private:
 // ID helpers.
 
 /*
- * Functions for differentiating global litstrId's from unit-local Id's.
+ * Functions for differentiating unit-local Id's from global litstrId's.
  */
-bool isGlobalLitstrId(Id id);
-Id encodeGlobalLitstrId(Id id);
-Id decodeGlobalLitstrId(Id id);
+bool isUnitLitstrId(Id id);
+Id encodeUnitLitstrId(Id id);
+Id decodeUnitLitstrId(Id id);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

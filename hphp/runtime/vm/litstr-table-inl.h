@@ -84,16 +84,16 @@ inline void LitstrTable::setWriting() {
 ///////////////////////////////////////////////////////////////////////////////
 // ID helpers.
 
-inline bool isGlobalLitstrId(Id id) {
-  return id >= kGlobalLitstrOffset;
+inline bool isUnitLitstrId(Id id) {
+  return id >= kUnitLitstrOffset;
 }
 
-inline Id encodeGlobalLitstrId(Id id) {
-  return id + kGlobalLitstrOffset;
+inline Id encodeUnitLitstrId(Id id) {
+  return id + kUnitLitstrOffset;
 }
 
-inline Id decodeGlobalLitstrId(Id id) {
-  return id - kGlobalLitstrOffset;
+inline Id decodeUnitLitstrId(Id id) {
+  return id - kUnitLitstrOffset;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

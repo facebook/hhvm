@@ -115,7 +115,7 @@ bool UnitChecker::checkLiteral(size_t id,
 bool UnitChecker::checkStrings() {
   bool ok = true;
   for (size_t i = 0, n = m_unit->numLitstrs(); i < n; ++i) {
-    ok &= checkLiteral(i, m_unit->lookupLitstr(i), "string");
+    ok &= checkLiteral(i, m_unit->lookupLitstr(encodeUnitLitstrId(i)), "string");
   }
   return ok;
   // Notes

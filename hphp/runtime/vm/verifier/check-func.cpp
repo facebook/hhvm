@@ -379,11 +379,11 @@ bool FuncChecker::checkLocal(PC pc, int k) {
 }
 
 bool FuncChecker::checkString(PC /*pc*/, Id id) {
-  if (isGlobalLitstrId(id)) {
-    auto globalID = decodeGlobalLitstrId(id);
-    return LitstrTable::get().contains(globalID);
+  if (!isUnitLitstrId(id)) {
+    return LitstrTable::get().contains(id);
   }
-  return id < unit()->numLitstrs();
+  auto unitID = decodeUnitLitstrId(id);
+  return unitID < unit()->numLitstrs();
 }
 
 bool FuncChecker::checkImmVec(PC& pc, size_t elemSize) {

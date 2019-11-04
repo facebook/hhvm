@@ -36,7 +36,7 @@ struct RecordArray : ArrayData,
 
 
   static size_t sizeWithFields(const RecordDesc* rec) {
-    return sizeof(RecordArray) + fieldSize(rec) + sizeof(ExtraFieldMap);
+    return sizeof(RecordArray) + fieldSize(rec) + sizeof(ExtraFieldMapPtr);
   }
   size_t heapSize() const;
   bool kindIsValid() const;
@@ -114,8 +114,8 @@ struct RecordArray : ArrayData,
   static MixedArray* ToMixed(ArrayData*);
 
 private:
-  using ExtraFieldMap = req::StringFastMap<TypedValue>;
-  const ExtraFieldMap* extraFieldMap() const;
+  using ExtraFieldMapPtr = MixedArray*;
+  ExtraFieldMapPtr& extraFieldMap() const;
   bool checkInvariants() const;
   /**
    * Returns index of the field with name `key` if it exists and

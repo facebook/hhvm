@@ -367,7 +367,7 @@ const ArrayFunctions g_array_funcs = {
    * Cell NvGetKey(const ArrayData*, ssize_t pos)
    *
    *   Look up the key for an array position.  `pos' must be a valid
-   *   position for this array.
+   *   position for this array. This function must IncRef the key if needed.
    */
   DISPATCH(NvGetKey)
 

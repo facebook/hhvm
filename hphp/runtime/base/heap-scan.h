@@ -228,8 +228,7 @@ inline void RecordData::scan(type_scan::Scanner& scanner) const {
 
 inline void RecordArray::scan(type_scan::Scanner& scanner) const {
   RecordBase::scan(scanner);
-  auto const extraMap = extraFieldMap();
-  scanner.scan(*extraMap);
+  scanner.scan(extraFieldMap());
 }
 
 inline void ObjectData::scan(type_scan::Scanner& scanner) const {

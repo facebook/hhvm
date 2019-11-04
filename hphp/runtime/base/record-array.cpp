@@ -31,7 +31,7 @@ RecordArray::RecordArray(const RecordDesc* record)
   : ArrayData(ArrayData::kRecordKind)
   , RecordBase(record)
 {
-  new (const_cast<ExtraFieldMap*>(extraFieldMap())) ExtraFieldMap();
+  extraFieldMap() = MixedArray::asMixed(staticEmptyDArray());
   auto const sizeIdx = MemoryManager::size2Index(sizeWithFields(record));
   m_aux16 = static_cast<uint16_t>(sizeIdx) << 8;
   m_size = record->numFields();
@@ -57,8 +57,8 @@ RecordArray* RecordArray::newRecordArray(const RecordDesc* rec,
   return newRecordImpl<RecordArray>(rec, initSize, keys, values);
 }
 
-const RecordArray::ExtraFieldMap* RecordArray::extraFieldMap() const {
-  return reinterpret_cast<const ExtraFieldMap*>(
+RecordArray::ExtraFieldMapPtr& RecordArray::extraFieldMap() const {
+  return *reinterpret_cast<ExtraFieldMapPtr*>(
       uintptr_t(this + 1) + fieldSize(m_record));
 }
 
@@ -81,11 +81,9 @@ const RecordArray* RecordArray::asRecordArray(const ArrayData* in) {
 
 RecordArray* RecordArray::copyRecordArray() const {
   auto const ra = copyRecordBase(this);
-  auto const extra = new (const_cast<ExtraFieldMap*>(ra->extraFieldMap()))
-    ExtraFieldMap(*extraFieldMap());
-  for (auto& p : *extra) {
-    tvIncRefGen(p.second);
-  }
+  auto const extra = extraFieldMap();
+  ra->extraFieldMap() = extra;
+  extra->incRefCount();
   return ra;
 }
 
@@ -99,12 +97,7 @@ void RecordArray::Release(ArrayData* in) {
   for (auto idx = 0; idx < numRecFields; ++idx) {
     tvDecRefGen(recFields[idx]);
   }
-  auto const extraMap = ad->extraFieldMap();
-  for (auto& p : *extraMap) {
-    // String keys should be dec-ref'd in map destructor.
-    tvDecRefGen(p.second);
-  }
-  extraMap->~ExtraFieldMap();
+  decRefArr(ad->extraFieldMap());
   tl_heap->objFree(ad, ad->heapSize());
   AARCH64_WALKABLE_FRAME();
 }
@@ -128,14 +121,13 @@ void RecordArray::updateField(StringData* key, Cell val, Slot idx) {
     auto const& tv = lvalAt(idx);
     tvSet(val, tv);
   } else {
-    auto const extraMap = const_cast<ExtraFieldMap*>(extraFieldMap());
-    String keyStr(key);
-    auto it = extraMap->find(keyStr);
-    if (it == extraMap->end()) {
-      ++m_size;
-      extraMap->emplace(keyStr, val);
-    } else {
-      tvSet(val, it->second);
+    auto& extra = extraFieldMap();
+    if (!MixedArray::ExistsStr(extra, key)) ++m_size;
+    auto const newExtra =
+      MixedArray::asMixed(MixedArray::SetStr(extra, key, val));
+    if (extra != newExtra) {
+      decRefArr(extra);
+      extra = newExtra;
     }
   }
 }
@@ -144,10 +136,8 @@ tv_rval RecordArray::NvGetStr(const ArrayData* base, const StringData* key) {
   auto const ra = asRecordArray(base);
   auto const idx = ra->record()->lookupField(key);
   if (idx != kInvalidSlot) return ra->rvalAt(idx);
-  auto const extraMap = ra->extraFieldMap();
-  auto it = extraMap->find(String::attach(const_cast<StringData*>(key)));
-  if (it != extraMap->end()) return tv_rval(&it->second);
-  return nullptr;
+  auto const extra = ra->extraFieldMap();
+  return MixedArray::NvGetStr(extra, key);
 }
 
 ArrayData* RecordArray::SetStrInPlace(ArrayData* base,
@@ -216,15 +206,18 @@ MixedArray* RecordArray::ToMixed(ArrayData* adIn) {
     tvDup(*val, dstData->data);
     ++dstData;
   }
-  for (auto const& p : *old->extraFieldMap()) {
-    auto const k = p.first.get();
-    auto const h = k->hash();
-    dstData->setStrKey(k, h);
+  // If a record-array has non-empty ExtraFieldMap, we conservatively set
+  // MixedArrayKeys to have  on-static keys in ToMixedHeader.
+  auto const extra = old->extraFieldMap();
+  MixedArray::IterateKV(extra, [&](Cell k, TypedValue v) {
+    auto const kstr = k.m_data.pstr;
+    auto const h = kstr->hash();
+    dstData->setStrKey(kstr, h);
     *ad->findForNewInsert(dstHash, mask, h) = i;
-    tvDup(p.second, dstData->data);
+    tvDup(v, dstData->data);
     ++dstData;
     ++i;
-  }
+  });
   assertx(ad->checkInvariants());
   assertx(ad->hasExactlyOneRef());
   return ad;
@@ -263,8 +256,8 @@ ssize_t RecordArray::NvGetStrPos(const ArrayData* ad, const StringData* key) {
   auto const idx = ra->record()->lookupField(key);
   if (LIKELY(idx != kInvalidSlot)) return idx;
   auto const extra = ra->extraFieldMap();
-  return ra->record()->numFields() +
-    std::distance(extra->find(StrNR(key)), extra->begin());
+  auto const posInExtra = MixedArray::NvGetStrPos(extra, key);
+  return ra->record()->numFields() + posInExtra;
 }
 
 Cell RecordArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
@@ -277,9 +270,7 @@ Cell RecordArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
     return make_tv<KindOfPersistentString>(name);
   }
   auto const extra = ra->extraFieldMap();
-  auto it = extra->begin();
-  std::advance(it, pos - rec->numFields());
-  return make_tv<KindOfString>(it->first.get());
+  return MixedArray::NvGetKey(extra, pos - rec->numFields());
 }
 
 bool RecordArray::IsVectorData(const ArrayData*) {
@@ -294,8 +285,7 @@ bool RecordArray::ExistsStr(const ArrayData* ad, const StringData* key) {
   auto const ra = asRecordArray(ad);
   auto const idx = ra->record()->lookupField(key);
   if (idx != kInvalidSlot) return true;
-  auto const extra = ra->extraFieldMap();
-  return extra->find(StrNR(key)) != extra->end();
+  return MixedArray::ExistsStr(ra->extraFieldMap(), key);
 }
 
 arr_lval RecordArray::LvalForceNew(ArrayData* ad, bool /*copy*/) {
@@ -318,13 +308,15 @@ arr_lval RecordArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   auto const rec = ra->record();
   auto const idx = rec->lookupField(k);
   if (idx != kInvalidSlot) return arr_lval {ra, ra->lvalAt(idx)};
-  auto const extra = const_cast<ExtraFieldMap*>(ra->extraFieldMap());
-  auto const keyStr = String::attach(k);
-  auto const it = extra->find(keyStr);
-  if (it != extra->end()) return arr_lval {ra, &it->second};
-  ra->m_size++;
-  auto const p = extra->emplace(keyStr, make_tv<KindOfNull>());
-  return arr_lval {ra, &p.first->second};
+  auto& extra = ra->extraFieldMap();
+  if (!MixedArray::ExistsStr(extra, k)) ra->m_size++;
+  auto const ret = MixedArray::LvalStr(extra, k, extra->cowCheck());
+  auto const newExtra = MixedArray::asMixed(ret.arr);
+  if (extra != newExtra) {
+    decRefArr(extra);
+    extra = newExtra;
+  }
+  return arr_lval {ra, tv_lval(ret)};
 }
 
 arr_lval RecordArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
@@ -333,10 +325,14 @@ arr_lval RecordArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
   auto const rec = ra->record();
   auto const idx = rec->lookupField(k);
   if (idx != kInvalidSlot) return arr_lval {ra, ra->lvalAt(idx)};
-  auto const extra = const_cast<ExtraFieldMap*>(ra->extraFieldMap());
-  auto const it = extra->find(StrNR(k));
-  if (it != extra->end()) return arr_lval {ra, &it->second};
-  return arr_lval {ra, nullptr};
+  auto& extra = ra->extraFieldMap();
+  auto const ret = MixedArray::LvalSilentStr(extra, k, extra->cowCheck());
+  auto const newExtra = MixedArray::asMixed(ret.arr);
+  if (extra != newExtra) {
+    decRefArr(extra);
+    extra = newExtra;
+  }
+  return arr_lval {ra, tv_lval(ret)};
 }
 
 arr_lval RecordArray::LvalSilentInt(ArrayData* ad, int64_t, bool) {

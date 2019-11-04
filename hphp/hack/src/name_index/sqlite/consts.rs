@@ -7,11 +7,11 @@ use crate::datatypes::*;
 
 use oxidized::relative_path::RelativePath;
 use rusqlite::{params, Connection};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 #[derive(Debug)]
 pub(crate) struct ConstsTable {
-    connection: Arc<Connection>,
+    connection: Arc<Mutex<Connection>>,
 }
 
 #[derive(Debug)]
@@ -23,7 +23,7 @@ pub(crate) struct ConstItem {
 // TODO: some functions is only used in unit tests for now
 #[allow(dead_code)]
 impl ConstsTable {
-    pub fn new(connection: Arc<Connection>) -> Self {
+    pub fn new(connection: Arc<Mutex<Connection>>) -> Self {
         ConstsTable {
             connection: connection.clone(),
         }
@@ -36,7 +36,11 @@ impl ConstsTable {
                 FILE_INFO_ID INTEGER NOT NULL
             );";
 
-        self.connection.execute(&statement, params![]).unwrap();
+        self.connection
+            .lock()
+            .unwrap()
+            .execute(&statement, params![])
+            .unwrap();
     }
 
     pub fn insert(self, items: &[ConstItem]) {
@@ -47,7 +51,9 @@ impl ConstsTable {
             ) VALUES (
                 ?, ?
             );";
-        let mut insert_statement = self.connection.prepare(&insert_statement).unwrap();
+
+        let connection = self.connection.lock().unwrap();
+        let mut insert_statement = connection.prepare(&insert_statement).unwrap();
 
         for item in items {
             let hash = Convert::name_to_hash(&item.name);
@@ -76,7 +82,8 @@ impl ConstsTable {
                 NAMING_CONSTS.HASH = ?
             ";
 
-        let mut select_statement = self.connection.prepare(&select_statement).unwrap();
+        let connection = self.connection.lock().unwrap();
+        let mut select_statement = connection.prepare(&select_statement).unwrap();
         names
             .into_iter()
             .map(|name| {
@@ -101,7 +108,8 @@ mod tests {
 
     #[test]
     fn test_add_const() {
-        let const_table = ConstsTable::new(Arc::new(Connection::open_in_memory().unwrap()));
+        let const_table =
+            ConstsTable::new(Arc::new(Mutex::new(Connection::open_in_memory().unwrap())));
         const_table.create();
         let consts = [ConstItem {
             name: "Foo".to_string(),

@@ -9,7 +9,7 @@ use crate::file_infos::*;
 use oxidized::relative_path::RelativePath;
 use rusqlite::{Connection, OpenFlags};
 use std::path::Path;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 // TODO: file_infos is not used yet
 #[allow(dead_code)]
@@ -21,8 +21,9 @@ pub struct Names {
 
 impl Names {
     pub fn new(path: &Path) -> Self {
-        let connection =
-            Arc::new(Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap());
+        let connection = Arc::new(Mutex::new(
+            Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap(),
+        ));
 
         Names {
             consts: ConstsTable::new(connection.clone()),

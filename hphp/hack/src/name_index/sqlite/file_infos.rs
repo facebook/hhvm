@@ -9,11 +9,11 @@ use ocamlrep::rc::RcOc;
 use oxidized::file_info::FileInfo;
 use oxidized::relative_path::RelativePath;
 use rusqlite::{params, Connection};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 #[derive(Debug)]
 pub(crate) struct FileInfoTable {
-    connection: Arc<Connection>,
+    connection: Arc<Mutex<Connection>>,
 }
 
 #[derive(Debug)]
@@ -25,7 +25,7 @@ pub(crate) struct FileInfoItem {
 // TODO: some functions is only used in unit tests for now
 #[allow(dead_code)]
 impl FileInfoTable {
-    pub fn new(connection: Arc<Connection>) -> Self {
+    pub fn new(connection: Arc<Mutex<Connection>>) -> Self {
         FileInfoTable {
             connection: connection.clone(),
         }
@@ -46,7 +46,11 @@ impl FileInfoTable {
                 TYPEDEFS TEXT
             );";
 
-        self.connection.execute(&statement, params![]).unwrap();
+        self.connection
+            .lock()
+            .unwrap()
+            .execute(&statement, params![])
+            .unwrap();
     }
 
     pub fn insert(self, items: &[FileInfoItem]) {
@@ -64,7 +68,8 @@ impl FileInfoTable {
             ) VALUES (
                 ?, ?, ?, ?, ?, ?, ?, ?, ?
             );";
-        let mut insert_statement = self.connection.prepare(&insert_statement).unwrap();
+        let connection = self.connection.lock().unwrap();
+        let mut insert_statement = connection.prepare(&insert_statement).unwrap();
 
         for item in items {
             let path_prefix_type = Convert::prefix_to_i64(item.path.prefix());
@@ -107,7 +112,8 @@ mod tests {
 
     #[test]
     fn test_add_file_info() {
-        let file_info_table = FileInfoTable::new(Arc::new(Connection::open_in_memory().unwrap()));
+        let file_info_table =
+            FileInfoTable::new(Arc::new(Mutex::new(Connection::open_in_memory().unwrap())));
         file_info_table.create();
         let path = RcOc::new(RelativePath::make(Prefix::Root, PathBuf::from("foo.php")));
         let file_infos = [FileInfoItem {

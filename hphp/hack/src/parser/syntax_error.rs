@@ -930,3 +930,10 @@ pub fn multiple_visibility_modifiers_for_declaration(decl: &str) -> Error {
 }
 pub const break_continue_n_not_supported: Error =
     Cow::Borrowed("Break/continue N operators are not supported.");
+pub fn invalid_typehint_alias(alias: &str, hint: &str) -> Error {
+    Cow::Owned(format!(
+        "Invalid type hint '{}'. Use '{}' instead",
+        alias.to_string(),
+        hint.to_string(),
+    ))
+}

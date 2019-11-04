@@ -7,7 +7,9 @@
 use escaper::*;
 use hh_autoimport_rust as hh_autoimport;
 use itertools::{Either, Either::Left, Either::Right};
-use naming_special_names_rust::{classes as special_classes, special_functions, special_idents};
+use naming_special_names_rust::{
+    classes as special_classes, special_functions, special_idents, typehints as special_typehints,
+};
 use ocamlrep::rc::RcOc;
 use oxidized::{
     aast,
@@ -805,7 +807,24 @@ where
         match &node.syntax {
             /* Dirty hack; CastExpression can have type represented by token */
             Token(_) | SimpleTypeSpecifier(_) | QualifiedName(_) => {
-                Ok(Happly(Self::pos_name(node, env)?, vec![]))
+                let ast_defs::Id(pos, name) = Self::pos_name(node, env)?;
+                let mut suggest = |name: &str, canonical: &str| {
+                    Self::raise_parsing_error(
+                        node,
+                        env,
+                        &syntax_error::invalid_typehint_alias(name, canonical),
+                    );
+                };
+                if "integer".eq_ignore_ascii_case(&name) {
+                    suggest(&name, special_typehints::INT);
+                } else if "boolean".eq_ignore_ascii_case(&name) {
+                    suggest(&name, special_typehints::BOOL);
+                } else if "double".eq_ignore_ascii_case(&name) {
+                    suggest(&name, special_typehints::FLOAT);
+                } else if "real".eq_ignore_ascii_case(&name) {
+                    suggest(&name, special_typehints::FLOAT);
+                }
+                Ok(Happly(ast_defs::Id(pos, name), vec![]))
             }
             ShapeTypeSpecifier(c) => {
                 let allows_unknown_fields = !c.shape_type_ellipsis.is_missing();

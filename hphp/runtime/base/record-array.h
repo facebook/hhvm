@@ -24,6 +24,7 @@
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
+struct MixedArray;
 
 struct RecordArray : ArrayData,
                      RecordBase,
@@ -51,14 +52,14 @@ struct RecordArray : ArrayData,
   // Array interface
   static void Release(ArrayData*);
   static tv_rval NvGetInt(const ArrayData*, int64_t key);
-  static tv_rval NvTryGetInt(const ArrayData*, int64_t key);
+  static constexpr auto NvTryGetInt = &NvGetInt;
   static tv_rval NvGetStr(const ArrayData*, const StringData*);
   static constexpr auto NvTryGetStr = &NvGetStr;
   static ssize_t NvGetIntPos(const ArrayData*, int64_t k);
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t key, Cell v);
-  static ArrayData* SetIntInPlace(ArrayData*, int64_t key, Cell v);
+  static constexpr auto SetIntInPlace = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData*, Cell v);
   static ArrayData* SetStrInPlace(ArrayData*, StringData*, Cell v);
   static size_t Vsize(const ArrayData*);
@@ -110,6 +111,8 @@ struct RecordArray : ArrayData,
   static RecordArray* asRecordArray(ArrayData*);
   static const RecordArray* asRecordArray(const ArrayData*);
 
+  static MixedArray* ToMixed(ArrayData*);
+
 private:
   using ExtraFieldMap = req::StringFastMap<TypedValue>;
   const ExtraFieldMap* extraFieldMap() const;
@@ -126,6 +129,8 @@ private:
    * in the extra field map.
    */
   void updateField(StringData* key, Cell val, Slot idx);
+
+  static MixedArray* ToMixedHeader(RecordArray*);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

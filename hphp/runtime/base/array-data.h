@@ -804,6 +804,7 @@ protected:
   friend struct BaseMap;
   friend struct c_Map;
   friend struct c_ImmMap;
+  friend struct RecordArray;
 
   // The following fields are blocked into unions with qwords so we
   // can combine the stores when initializing arrays.  (gcc won't do

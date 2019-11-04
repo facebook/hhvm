@@ -14,10 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/record-array.h"
+
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/base/tv-refcount.h"
+
+#include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/packed-array-defs.h"
 
 namespace HPHP {
 
@@ -60,6 +64,7 @@ const RecordArray::ExtraFieldMap* RecordArray::extraFieldMap() const {
 
 bool RecordArray::checkInvariants() const {
   assertx(checkCount());
+  assertx(m_pos == 0);
   return true;
 }
 
@@ -124,7 +129,7 @@ void RecordArray::updateField(StringData* key, Cell val, Slot idx) {
     tvSet(val, tv);
   } else {
     auto const extraMap = const_cast<ExtraFieldMap*>(extraFieldMap());
-    auto const keyStr = String::attach(key);
+    String keyStr(key);
     auto it = extraMap->find(keyStr);
     if (it == extraMap->end()) {
       ++m_size;
@@ -165,32 +170,99 @@ ArrayData* RecordArray::SetStr(ArrayData* base, StringData* key, Cell val) {
 
 size_t RecordArray::Vsize(const ArrayData*) { always_assert(false); }
 
+MixedArray* RecordArray::ToMixedHeader(RecordArray* old) {
+  assertx(old->checkInvariants());
+  auto const extra = old->extraFieldMap();
+  auto const keyType = extra->empty() ?
+                       MixedArrayKeys::packStaticStrsForAux() :
+                       MixedArrayKeys::packStrsForAux();
+  auto const aux = keyType | ArrayData::kNotDVArray;
+  auto const oldSize = old->m_size;
+  auto const scale = MixedArray::computeScaleFromSize(oldSize);
+  auto const ad = MixedArray::reqAlloc(scale);
+  ad->m_sizeAndPos = oldSize;
+  ad->initHeader_16(HeaderKind::Mixed, OneReference, aux);
+  ad->m_scale_used = scale | uint64_t{oldSize} << 32; // used=oldSize
+  ad->m_nextKI = 0;
+
+  assertx(ad->m_size == oldSize);
+  assertx(ad->m_pos == old->m_pos);
+  assertx(ad->kind() == ArrayData::kMixedKind);
+  assertx(ad->isDArray() == old->isVArray());
+  assertx(ad->hasExactlyOneRef());
+  assertx(ad->m_used == oldSize);
+  assertx(ad->m_scale == scale);
+  assertx(ad->m_nextKI == 0);
+  // Can't checkInvariants yet, since we haven't populated the payload.
+  return ad;
+}
+
+MixedArray* RecordArray::ToMixed(ArrayData* adIn) {
+  auto const old = asRecordArray(adIn);
+  auto const ad = ToMixedHeader(old);
+  auto const mask = ad->mask();
+  auto dstData = ad->data();
+  auto const dstHash = ad->initHash(ad->scale());
+  auto const rec = old->record();
+  auto i = 0;
+  for (; i < rec->numFields(); ++i) {
+    auto const& field = rec->field(i);
+    auto const k = field.name();
+    assertx(k->isStatic());
+    auto const h = k->hash();
+    dstData->setStaticKey(const_cast<StringData*>(k), h);
+    *ad->findForNewInsert(dstHash, mask, h) = i;
+    auto const& val = old->rvalAt(i);
+    tvDup(*val, dstData->data);
+    ++dstData;
+  }
+  for (auto const& p : *old->extraFieldMap()) {
+    auto const k = p.first.get();
+    auto const h = k->hash();
+    dstData->setStrKey(k, h);
+    *ad->findForNewInsert(dstHash, mask, h) = i;
+    tvDup(p.second, dstData->data);
+    ++dstData;
+    ++i;
+  }
+  assertx(ad->checkInvariants());
+  assertx(ad->hasExactlyOneRef());
+  return ad;
+}
+
+tv_rval RecordArray::NvGetInt(const ArrayData*, int64_t key) {
+  // RecordArrays may never have int keys.
+  // Setting int keys escalate them to mixed arrays
+  return nullptr;
+}
+
+namespace {
+template <typename Op>
+auto PromoteForOp(ArrayData* ad, Op op, const std::string& opname) {
+  raise_recordarray_promotion_notice(opname);
+  auto const mixed = RecordArray::ToMixed(ad);
+  return op(mixed);
+}
+}
+
+ArrayData* RecordArray::SetInt(ArrayData* adIn, int64_t k, Cell v) {
+  return PromoteForOp(adIn,
+    [&] (MixedArray* mixed) { return mixed->addVal(k, v); },
+    "SetInt"
+  );
+}
+
 // TODO: T47449944: methods below this are stubs
-tv_rval RecordArray::NvGetInt(const ArrayData*, int64_t) {
+
+ssize_t RecordArray::NvGetStrPos(ArrayData const*, StringData const*) {
   throw_not_implemented("This method on RecordArray");
 }
 
-tv_rval RecordArray::NvTryGetInt(const ArrayData*, int64_t) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ssize_t RecordArray::NvGetIntPos(const ArrayData*, int64_t) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ssize_t RecordArray::NvGetStrPos(const ArrayData*, const StringData*) {
+ssize_t RecordArray::NvGetIntPos(ArrayData const*, int64_t) {
   throw_not_implemented("This method on RecordArray");
 }
 
 Cell RecordArray::NvGetKey(const ArrayData*, ssize_t) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::SetInt(ArrayData*, int64_t, Cell) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::SetIntInPlace(ArrayData*, int64_t, Cell) {
   throw_not_implemented("This method on RecordArray");
 }
 

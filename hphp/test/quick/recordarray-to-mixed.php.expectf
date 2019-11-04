@@ -1,0 +1,20 @@
+Notice: Record-array to mixed-array promotion for SetInt in %s/recordarray-to-mixed.php on line 20
+array(3) {
+  ["z"]=>
+  object(Bar) (1) {
+    ["f"]=>
+    int(10)
+  }
+  ["abc2"]=>
+  int(42)
+  [1]=>
+  object(Bar) (1) {
+    ["f"]=>
+    int(10)
+  }
+}
+object(Bar) (1) {
+  ["f"]=>
+  int(42)
+}
+

@@ -105,6 +105,9 @@ struct MixedArrayKeys {
   static uint16_t packStaticStrsForAux() {
     return kTrackStaticStrKeys ? (kStaticStrKey << 8) : 0;
   }
+  static uint16_t packStrsForAux() {
+    return packStaticStrsForAux() | (kNonStaticStrKey << 8);
+  }
   static uint16_t compactPacked(uint16_t aux) {
     return aux & ~(static_cast<uint16_t>(kTombstoneKey) << 8);
   }

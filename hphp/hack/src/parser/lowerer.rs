@@ -16,7 +16,7 @@ use oxidized::{
     aast::Expr_ as E_,
     aast_defs,
     aast_visitor::{Node, Visitor},
-    ast_defs,
+    ast, ast_defs,
     doc_comment::DocComment,
     file_info,
     global_options::GlobalOptions,
@@ -41,19 +41,13 @@ use std::{
 
 use crate::lowerer_modifier as modifier;
 
-macro_rules! aast {
-    ($ty:ident) =>  {oxidized::aast::$ty};
-    // NOTE: In <,> pattern, comma prevents rustfmt eating <>
-    ($ty:ident<,>) =>  {oxidized::aast::$ty<Pos, (), (), ()>}
-}
-
 macro_rules! ret {
     ($ty:ty) => { std::result::Result<$ty, Error> }
 }
 
 macro_rules! ret_aast {
-    ($ty:ident) => { std::result::Result<aast!($ty), Error> };
-    ($ty:ident<,>) => { std::result::Result<aast!($ty<,>), Error> }
+    ($ty:ident) => { std::result::Result<ast::$ty, Error> };
+    ($ty:ident<,>) => { std::result::Result<ast::$ty, Error> }
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -62,7 +56,7 @@ pub enum LiftedAwaitKind {
     LiftedFromConcurrent,
 }
 
-type LiftedAwaitExprs = Vec<(Option<aast!(Lid)>, aast!(Expr<,>))>;
+type LiftedAwaitExprs = Vec<(Option<ast::Lid>, ast::Expr)>;
 
 #[derive(Debug, Clone)]
 pub struct LiftedAwaits {
@@ -107,11 +101,11 @@ pub enum TokenOp {
 #[derive(Debug)]
 pub struct FunHdr {
     suspension_kind: SuspensionKind,
-    name: aast!(Sid),
+    name: ast::Sid,
     constrs: Vec<aast_defs::WhereConstraint>,
-    type_parameters: Vec<aast!(Tparam<,>)>,
-    parameters: Vec<aast!(FunParam<,>)>,
-    return_type: Option<aast!(Hint)>,
+    type_parameters: Vec<ast::Tparam>,
+    parameters: Vec<ast::FunParam>,
+    return_type: Option<ast::Hint>,
 }
 
 impl FunHdr {
@@ -341,7 +335,7 @@ pub enum Error {
 }
 
 pub struct Result {
-    pub aast: aast!(Program<,>),
+    pub aast: ast::Program,
 }
 
 use parser_core_types::syntax::SyntaxVariant::*;
@@ -647,7 +641,7 @@ where
         }
     }
 
-    fn check_valid_reified_hint(env: &mut Env, node: &Syntax<T, V>, hint: &aast!(Hint)) {
+    fn check_valid_reified_hint(env: &mut Env, node: &Syntax<T, V>, hint: &ast::Hint) {
         struct Checker<F: FnMut(&String)>(F);
         impl<F: FnMut(&String)> Visitor for Checker<F> {
             type Context = ();
@@ -663,7 +657,7 @@ where
                 self
             }
 
-            fn visit_hint(&mut self, c: &mut (), h: &aast!(Hint)) {
+            fn visit_hint(&mut self, c: &mut (), h: &ast::Hint) {
                 match h.1.as_ref() {
                     aast::Hint_::Happly(id, _) => {
                         self.0(&id.1);
@@ -689,7 +683,7 @@ where
     fn p_closure_parameter(
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret!((aast!(Hint), Option<ast_defs::ParamKind>)) {
+    ) -> ret!((ast::Hint, Option<ast_defs::ParamKind>)) {
         match &node.syntax {
             ClosureParameterTypeSpecifier(c) => {
                 let kind = Self::mp_optional(
@@ -1013,7 +1007,7 @@ where
         }
     }
 
-    fn p_member(node: &Syntax<T, V>, env: &mut Env) -> ret!((aast!(Expr<,>), aast!(Expr<,>))) {
+    fn p_member(node: &Syntax<T, V>, env: &mut Env) -> ret!((ast::Expr, ast::Expr)) {
         match &node.syntax {
             ElementInitializer(c) => Ok((
                 Self::p_expr(&c.element_key, env)?,
@@ -1023,7 +1017,7 @@ where
         }
     }
 
-    fn expand_type_args(ty: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(Hint)>) {
+    fn expand_type_args(ty: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<ast::Hint>) {
         match &ty.syntax {
             TypeArguments(c) => Self::could_map(Self::p_hint, &c.type_arguments_types, env),
             _ => Ok(vec![]),
@@ -1043,7 +1037,7 @@ where
     fn check_intrinsic_type_arg_varity(
         node: &Syntax<T, V>,
         env: &mut Env,
-        tys: Vec<aast!(Hint)>,
+        tys: Vec<ast::Hint>,
     ) -> Option<aast::CollectionTarg<()>> {
         let count = tys.len();
         let mut tys = tys.into_iter();
@@ -1224,7 +1218,7 @@ where
         }
     }
 
-    fn p_string2(nodes: &[Syntax<T, V>], env: &mut Env) -> ret!(Vec<aast!(Expr<,>)>) {
+    fn p_string2(nodes: &[Syntax<T, V>], env: &mut Env) -> ret!(Vec<ast::Expr>) {
         use TokenOp::*;
         let (head_op, tail_op) = Self::prep_string2(nodes, env)?;
         let mut result = Vec::with_capacity(nodes.len());
@@ -1422,7 +1416,7 @@ where
         use aast::Expr as E;
         let split_args_varargs = |arg_list_node: &Syntax<T, V>,
                                   e: &mut Env|
-         -> ret!((Vec<aast!(Expr<,>)>, Vec<aast!(Expr<,>)>)) {
+         -> ret!((Vec<ast::Expr>, Vec<ast::Expr>)) {
             let mut arg_list = Self::as_list(arg_list_node);
             if let Some(last_arg) = arg_list.last() {
                 if let DecoratedExpression(c) = &last_arg.syntax {
@@ -1444,7 +1438,7 @@ where
             Ok(mk_lid(name.0, name.1))
         };
         let mk_lvar = |name: &Syntax<T, V>, env: &mut Env| Ok(E_::mk_lvar(mk_name_lid(name, env)?));
-        let mk_id_expr = |name: aast!(Sid)| E::new(name.0.clone(), E_::mk_id(name));
+        let mk_id_expr = |name: ast::Sid| E::new(name.0.clone(), E_::mk_id(name));
         let p_intri_expr = |kw, ty, v, e: &mut Env| {
             let hints = Self::expand_type_args(ty, e)?;
             let hints = Self::check_intrinsic_type_arg_varity(node, e, hints);
@@ -2259,7 +2253,7 @@ where
                 Self::pos_name(&c.pocket_atom_expression, env)?.1,
             )),
             PocketIdentifierExpression(c) => {
-                let mk_class_id = |e: aast!(Expr<,>)| aast::ClassId(pos, aast::ClassId_::CIexpr(e));
+                let mk_class_id = |e: ast::Expr| aast::ClassId(pos, aast::ClassId_::CIexpr(e));
                 let qual = Self::p_expr(&c.pocket_identifier_qualifier, env)?;
                 let qual = if env.codegen() {
                     mk_class_id(qual)
@@ -2294,7 +2288,7 @@ where
         }
     }
 
-    fn check_lvalue(aast::Expr(p, expr_): &aast!(Expr<,>), env: &mut Env) {
+    fn check_lvalue(aast::Expr(p, expr_): &ast::Expr, env: &mut Env) {
         use E_::*;
         let mut raise = |s| Self::raise_parsing_error_pos(p, env, s);
         match expr_ {
@@ -2441,8 +2435,8 @@ where
     fn p_bop(
         pos: Pos,
         node: &Syntax<T, V>,
-        lhs: aast!(Expr<,>),
-        rhs: aast!(Expr<,>),
+        lhs: ast::Expr,
+        rhs: ast::Expr,
         env: &mut Env,
     ) -> ret_aast!(Expr_<,>) {
         use ast_defs::Bop::*;
@@ -2505,7 +2499,7 @@ where
         }
     }
 
-    fn is_noop(stmt: &aast!(Stmt<,>)) -> bool {
+    fn is_noop(stmt: &ast::Stmt) -> bool {
         if let aast::Stmt_::Noop = stmt.1 {
             true
         } else {
@@ -2517,7 +2511,7 @@ where
         pos: &Pos,
         mut nodes: Iter<&Syntax<T, V>>,
         env: &mut Env,
-    ) -> ret!(Vec<aast!(Stmt<,>)>) {
+    ) -> ret!(Vec<ast::Stmt>) {
         let mut r = vec![];
         loop {
             match nodes.next() {
@@ -2691,7 +2685,7 @@ where
 
     fn lift_await(
         parent_pos: Pos,
-        expr: aast!(Expr<,>),
+        expr: ast::Expr,
         env: &mut Env,
         location: ExprLocation,
     ) -> ret_aast!(Expr_<,>) {
@@ -2746,7 +2740,7 @@ where
                         _ => Self::missing_syntax(None, "switch label", n, e),
                     }
                 };
-                let p_section = |n: &Syntax<T, V>, e: &mut Env| -> ret!(Vec<aast!(Case<,>)>) {
+                let p_section = |n: &Syntax<T, V>, e: &mut Env| -> ret!(Vec<ast::Case>) {
                     match &n.syntax {
                         SwitchSection(c) => {
                             let mut blk =
@@ -2777,16 +2771,15 @@ where
                 Self::lift_awaits_in_statement(f, node, env)
             }
             IfStatement(c) => {
-                let p_else_if =
-                    |n: &Syntax<T, V>, e: &mut Env| -> ret!((aast!(Expr<,>), aast!(Block<,>))) {
-                        match &n.syntax {
-                            ElseifClause(c) => Ok((
-                                Self::p_expr(&c.elseif_condition, e)?,
-                                Self::p_block(true, &c.elseif_statement, e)?,
-                            )),
-                            _ => Self::missing_syntax(None, "elseif clause", n, e),
-                        }
-                    };
+                let p_else_if = |n: &Syntax<T, V>, e: &mut Env| -> ret!((ast::Expr, ast::Block)) {
+                    match &n.syntax {
+                        ElseifClause(c) => Ok((
+                            Self::p_expr(&c.elseif_condition, e)?,
+                            Self::p_block(true, &c.elseif_statement, e)?,
+                        )),
+                        _ => Self::missing_syntax(None, "elseif clause", n, e),
+                    }
+                };
                 let f = |env: &mut Env| -> ret_aast!(Stmt<,>) {
                     let condition = Self::p_expr(&c.if_condition, env)?;
                     let statement =
@@ -3117,7 +3110,7 @@ where
         }
     }
 
-    fn check_mutate_class_const(e: &aast!(Expr<,>), node: &Syntax<T, V>, env: &mut Env) {
+    fn check_mutate_class_const(e: &ast::Expr, node: &Syntax<T, V>, env: &mut Env) {
         match &e.1 {
             E_::ArrayGet(c) if c.1.is_some() => Self::check_mutate_class_const(&c.0, node, env),
             E_::ClassConst(_) => {
@@ -3232,24 +3225,21 @@ where
         }
     }
 
-    fn p_visibility(node: &Syntax<T, V>, env: &mut Env) -> ret!(Option<aast!(Visibility)>) {
+    fn p_visibility(node: &Syntax<T, V>, env: &mut Env) -> ret!(Option<ast::Visibility>) {
         let first_vis =
-            |r: Option<aast!(Visibility)>, kind| r.or_else(|| modifier::to_visibility(kind));
+            |r: Option<ast::Visibility>, kind| r.or_else(|| modifier::to_visibility(kind));
         Self::p_modifiers(first_vis, None, node, env).map(|r| r.1)
     }
 
     fn p_visibility_or(
         node: &Syntax<T, V>,
         env: &mut Env,
-        default: aast!(Visibility),
+        default: ast::Visibility,
     ) -> ret_aast!(Visibility) {
         Self::p_visibility(node, env).map(|v| v.unwrap_or(default))
     }
 
-    fn p_visibility_last_win(
-        node: &Syntax<T, V>,
-        env: &mut Env,
-    ) -> ret!(Option<aast!(Visibility)>) {
+    fn p_visibility_last_win(node: &Syntax<T, V>, env: &mut Env) -> ret!(Option<ast::Visibility>) {
         let last_vis = |r, kind| modifier::to_visibility(kind).or(r);
         Self::p_modifiers(last_vis, None, node, env).map(|r| r.1)
     }
@@ -3257,16 +3247,16 @@ where
     fn p_visibility_last_win_or(
         node: &Syntax<T, V>,
         env: &mut Env,
-        default: aast!(Visibility),
+        default: ast::Visibility,
     ) -> ret_aast!(Visibility) {
         Self::p_visibility_last_win(node, env).map(|v| v.unwrap_or(default))
     }
 
-    fn has_soft(attrs: &[aast!(UserAttribute<,>)]) -> bool {
+    fn has_soft(attrs: &[ast::UserAttribute]) -> bool {
         attrs.iter().any(|attr| attr.name.1 == "__Soft")
     }
 
-    fn soften_hint(attrs: &[aast!(UserAttribute<,>)], hint: aast!(Hint)) -> aast!(Hint) {
+    fn soften_hint(attrs: &[ast::UserAttribute], hint: ast::Hint) -> ast::Hint {
         if Self::has_soft(attrs) {
             aast::Hint::new(hint.0.clone(), aast::Hint_::Hsoft(hint))
         } else {
@@ -3274,10 +3264,7 @@ where
         }
     }
 
-    fn p_fun_param_default_value(
-        node: &Syntax<T, V>,
-        env: &mut Env,
-    ) -> ret!(Option<aast!(Expr<,>)>) {
+    fn p_fun_param_default_value(node: &Syntax<T, V>, env: &mut Env) -> ret!(Option<ast::Expr>) {
         match &node.syntax {
             SimpleInitializer(c) => {
                 Self::mp_optional(Self::p_expr, &c.simple_initializer_value, env)
@@ -3293,7 +3280,7 @@ where
         }
     }
 
-    fn param_template(node: &Syntax<T, V>, env: &Env) -> aast!(FunParam<,>) {
+    fn param_template(node: &Syntax<T, V>, env: &Env) -> ast::FunParam {
         let pos = Self::p_pos(node, env);
         aast::FunParam {
             annotation: pos.clone(),
@@ -3399,7 +3386,7 @@ where
     fn p_tconstraint(
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret!((ast_defs::ConstraintKind, aast!(Hint))) {
+    ) -> ret!((ast_defs::ConstraintKind, ast::Hint)) {
         match &node.syntax {
             TypeConstraint(c) => Ok((
                 match Self::token_kind(&c.constraint_keyword) {
@@ -3457,11 +3444,7 @@ where
         }
     }
 
-    fn p_tparam_l(
-        is_class: bool,
-        node: &Syntax<T, V>,
-        env: &mut Env,
-    ) -> ret!(Vec<aast!(Tparam<,>)>) {
+    fn p_tparam_l(is_class: bool, node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<ast::Tparam>) {
         match &node.syntax {
             Missing => Ok(vec![]),
             TypeParameters(c) => Self::could_map(
@@ -3525,7 +3508,7 @@ where
         }
     }
 
-    fn determine_variadicity(params: &[aast!(FunParam<,>)]) -> aast!(FunVariadicity<,>) {
+    fn determine_variadicity(params: &[ast::FunParam]) -> ast::FunVariadicity {
         use aast::FunVariadicity::*;
         if let Some(x) = params.last() {
             match (x.is_variadic, &x.name) {
@@ -3572,7 +3555,7 @@ where
         }
     }
 
-    fn mk_noop(env: &Env) -> aast!(Stmt<,>) {
+    fn mk_noop(env: &Env) -> ast::Stmt {
         aast::Stmt::noop(env.mk_none_pos())
     }
 
@@ -3702,7 +3685,7 @@ where
         Ok(aast::UserAttribute { name, params })
     }
 
-    fn p_user_attribute(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(UserAttribute<,>)>) {
+    fn p_user_attribute(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<ast::UserAttribute>) {
         let p_attr = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(UserAttribute<,>) {
             match &n.syntax {
                 ConstructorCall(c) => Self::process_attribute_constructor_call(
@@ -3735,10 +3718,10 @@ where
         }
     }
 
-    fn p_user_attributes(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(UserAttribute<,>)>) {
+    fn p_user_attributes(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<ast::UserAttribute>) {
         Self::map_fold(
             &Self::p_user_attribute,
-            &|mut acc: Vec<aast!(UserAttribute<,>)>, mut x: Vec<aast!(UserAttribute<,>)>| {
+            &|mut acc: Vec<ast::UserAttribute>, mut x: Vec<ast::UserAttribute>| {
                 acc.append(&mut x);
                 acc
             },
@@ -3862,7 +3845,7 @@ where
         }
     }
 
-    fn p_class_elt_(class: &mut aast!(Class_<,>), node: &Syntax<T, V>, env: &mut Env) -> ret!(()) {
+    fn p_class_elt_(class: &mut ast::Class_, node: &Syntax<T, V>, env: &mut Env) -> ret!(()) {
         let doc_comment_opt = Self::extract_docblock(node, env);
         let has_fun_header = |m: &MethodishDeclarationChildren<T, V>| {
             if let FunctionDeclarationHeader(_) = m.methodish_function_decl_header.syntax {
@@ -3975,7 +3958,7 @@ where
                     doc_comment_opt
                 };
                 let name_exprs = Self::could_map(
-                    |n, e| -> ret!((Pos, aast!(Sid), Option<aast!(Expr<,>)>)) {
+                    |n, e| -> ret!((Pos, ast::Sid, Option<ast::Expr>)) {
                         match &n.syntax {
                             PropertyDeclarator(c) => {
                                 let name = Self::pos_name_(&c.property_name, e, Some('$'))?;
@@ -4015,50 +3998,46 @@ where
                 Ok(())
             }
             MethodishDeclaration(c) if has_fun_header(c) => {
-                let classvar_init =
-                    |param: &aast!(FunParam<,>)| -> (aast!(Stmt<,>), aast!(ClassVar<,>)) {
-                        let cvname = Self::drop_prefix(&param.name, '$');
-                        let p = &param.pos;
-                        let span = match &param.expr {
-                            Some(aast::Expr(pos_end, _)) => {
-                                Pos::btw(p, pos_end).unwrap_or_else(|_| p.clone())
-                            }
-                            _ => p.clone(),
-                        };
-                        let e = |expr_: aast!(Expr_<,>)| -> aast!(Expr<,>) {
-                            aast::Expr::new(p.clone(), expr_)
-                        };
-                        let lid =
-                            |s: &str| -> aast!(Lid) { aast::Lid(p.clone(), (0, s.to_string())) };
-                        (
-                            aast::Stmt::new(
-                                p.clone(),
-                                aast::Stmt_::mk_expr(e(E_::mk_binop(
-                                    ast_defs::Bop::Eq(None),
-                                    e(E_::mk_obj_get(
-                                        e(E_::mk_lvar(lid("$this"))),
-                                        e(E_::mk_id(ast_defs::Id(p.clone(), cvname.to_string()))),
-                                        aast::OgNullFlavor::OGNullthrows,
-                                    )),
-                                    e(E_::mk_lvar(lid(&param.name))),
-                                ))),
-                            ),
-                            aast::ClassVar {
-                                final_: false,
-                                xhp_attr: None,
-                                abstract_: false,
-                                visibility: param.visibility.unwrap(),
-                                type_: param.type_hint.1.clone(),
-                                id: ast_defs::Id(p.clone(), cvname.to_string()),
-                                expr: None,
-                                user_attributes: param.user_attributes.clone(),
-                                doc_comment: None,
-                                is_promoted_variadic: param.is_variadic,
-                                is_static: false,
-                                span,
-                            },
-                        )
+                let classvar_init = |param: &ast::FunParam| -> (ast::Stmt, ast::ClassVar) {
+                    let cvname = Self::drop_prefix(&param.name, '$');
+                    let p = &param.pos;
+                    let span = match &param.expr {
+                        Some(aast::Expr(pos_end, _)) => {
+                            Pos::btw(p, pos_end).unwrap_or_else(|_| p.clone())
+                        }
+                        _ => p.clone(),
                     };
+                    let e = |expr_: ast::Expr_| -> ast::Expr { aast::Expr::new(p.clone(), expr_) };
+                    let lid = |s: &str| -> ast::Lid { aast::Lid(p.clone(), (0, s.to_string())) };
+                    (
+                        aast::Stmt::new(
+                            p.clone(),
+                            aast::Stmt_::mk_expr(e(E_::mk_binop(
+                                ast_defs::Bop::Eq(None),
+                                e(E_::mk_obj_get(
+                                    e(E_::mk_lvar(lid("$this"))),
+                                    e(E_::mk_id(ast_defs::Id(p.clone(), cvname.to_string()))),
+                                    aast::OgNullFlavor::OGNullthrows,
+                                )),
+                                e(E_::mk_lvar(lid(&param.name))),
+                            ))),
+                        ),
+                        aast::ClassVar {
+                            final_: false,
+                            xhp_attr: None,
+                            abstract_: false,
+                            visibility: param.visibility.unwrap(),
+                            type_: param.type_hint.1.clone(),
+                            id: ast_defs::Id(p.clone(), cvname.to_string()),
+                            expr: None,
+                            user_attributes: param.user_attributes.clone(),
+                            doc_comment: None,
+                            is_promoted_variadic: param.is_variadic,
+                            is_static: false,
+                            span,
+                        },
+                    )
+                };
                 let header = &c.methodish_function_decl_header;
                 let h = match &header.syntax {
                     FunctionDeclarationHeader(h) => h,
@@ -4072,10 +4051,7 @@ where
                         &syntax_error::no_generics_on_constructors,
                     );
                 }
-                let (mut member_init, mut member_def): (
-                    Vec<aast!(Stmt<,>)>,
-                    Vec<aast!(ClassVar<,>)>,
-                ) = hdr
+                let (mut member_init, mut member_def): (Vec<ast::Stmt>, Vec<ast::ClassVar>) = hdr
                     .parameters
                     .iter()
                     .filter_map(|p| p.visibility.map(|_| classvar_init(p)))
@@ -4158,7 +4134,7 @@ where
                 Ok(())
             }
             TraitUseConflictResolution(c) => {
-                type Ret = ret!(Either<aast!(InsteadofAlias), aast!(UseAsAlias)>);
+                type Ret = ret!(Either<ast::InsteadofAlias, ast::UseAsAlias>);
                 let p_item = |n: &Syntax<T, V>, e: &mut Env| -> Ret {
                     match &n.syntax {
                         TraitUsePrecedenceItem(c) => {
@@ -4249,7 +4225,7 @@ where
                 Ok(class.reqs.push((hint, is_extends)))
             }
             XHPClassAttributeDeclaration(c) => {
-                type Ret = ret!(Either<aast!(XhpAttr<,>), aast!(Hint)>);
+                type Ret = ret!(Either<ast::XhpAttr, ast::Hint>);
                 let p_attr = |node: &Syntax<T, V>, env: &mut Env| -> Ret {
                     let mut mk_attr_use = |n: &Syntax<T, V>| {
                         Ok(Either::Right(aast::Hint(
@@ -4418,7 +4394,7 @@ where
         }
     }
 
-    fn p_class_elt(class: &mut aast!(Class_<,>), node: &Syntax<T, V>, env: &mut Env) -> ret!(()) {
+    fn p_class_elt(class: &mut ast::Class_, node: &Syntax<T, V>, env: &mut Env) -> ret!(()) {
         let r = Self::p_class_elt_(class, node, env);
         match r {
             // match ocaml behavior, don't throw if missing syntax when fail_open is true
@@ -4439,7 +4415,7 @@ where
         parent: &Syntax<T, V>,
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret!(Vec<aast!(WhereConstraint)>) {
+    ) -> ret!(Vec<ast::WhereConstraint>) {
         match &node.syntax {
             Missing => Ok(vec![]),
             WhereClause(c) => {
@@ -4502,7 +4478,7 @@ where
         kind: ret_aast!(NsKind),
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret!((aast!(NsKind), aast!(Sid), aast!(Sid))) {
+    ) -> ret!((ast::NsKind, ast::Sid, ast::Sid)) {
         lazy_static! {
             static ref NAMESPACE_USE: regex::Regex = regex::Regex::new("[^\\\\]*$").unwrap();
         }
@@ -4546,7 +4522,7 @@ where
         }
     }
 
-    fn p_def(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<aast!(Def<,>)>) {
+    fn p_def(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<ast::Def>) {
         let doc_comment_opt = Self::extract_docblock(node, env);
         match &node.syntax {
             FunctionDeclaration(c) => {
@@ -4885,9 +4861,9 @@ where
         }
     }
 
-    fn post_process(env: &mut Env, program: aast!(Program<,>), acc: &mut aast!(Program<,>)) {
+    fn post_process(env: &mut Env, program: ast::Program, acc: &mut ast::Program) {
         use aast::{Def, Def::*, Stmt_::*};
-        let mut saw_ns: Option<(aast!(Sid), aast!(Program<,>))> = None;
+        let mut saw_ns: Option<(ast::Sid, ast::Program)> = None;
         for def in program.into_iter() {
             if let Namespace(_) = &def {
                 if let Some((n, ns_acc)) = saw_ns {
@@ -4981,7 +4957,7 @@ where
         }
     }
 
-    fn elaborate_halt_compiler(ast: aast!(Program<,>), env: &mut Env) -> aast!(Program<,>) {
+    fn elaborate_halt_compiler(ast: ast::Program, env: &mut Env) -> ast::Program {
         match *env.saw_compiler_halt_offset() {
             Some(_) => unimplemented!(),
             _ => ast,

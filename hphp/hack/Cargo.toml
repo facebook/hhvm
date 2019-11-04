@@ -16,5 +16,6 @@ members = [
     "src/utils/escaper",
     "src/utils/ocamlpool_rust",
     "src/utils/stack_limit",
+    "src/hh_codegen",
     "test",
 ]

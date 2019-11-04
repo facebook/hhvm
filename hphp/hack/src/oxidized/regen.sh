@@ -48,6 +48,17 @@ buck run //hphp/hack/src/hh_codegen:hh_codegen --                             \
   --input "hphp/hack/src/oxidized/gen/aast_defs.rs|crate::aast_defs::*"       \
   --output "hphp/hack/src/oxidized/impl_gen/"                                 \
 
+buck run //hphp/hack/src/hh_codegen:hh_codegen --                             \
+  --signer "$SIGNER_PATH"                                                     \
+  --regen-cmd "$REGEN_COMMAND"                                                \
+  --rustfmt "$RUSTFMT_PATH"                                                   \
+  visitor                                                                     \
+  --input "hphp/hack/src/oxidized/gen/aast.rs"                                \
+  --input "hphp/hack/src/oxidized/gen/aast_defs.rs"                           \
+  --input "hphp/hack/src/oxidized/gen/ast_defs.rs"                           \
+  --output "hphp/hack/src/oxidized/aast_visitor/"                             \
+  --root "Program"                                                            \
+
 # Re-export generated modules (listed in gen/mod.rs) in the crate root, lib.rs
 cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null
 sed -i "/^pub use gen::/d" lib.rs

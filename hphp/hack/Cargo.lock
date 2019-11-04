@@ -260,6 +260,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "hack_hh_codegen"
+version = "3.49.0"
+dependencies = [
+ "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "itertools 0.7.11 (registry+https://github.com/rust-lang/crates.io-index)",
+ "proc-macro2 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quote 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "synstructure 0.12.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "hack_hhbc_string_utils"
 version = "3.49.0"
 dependencies = [

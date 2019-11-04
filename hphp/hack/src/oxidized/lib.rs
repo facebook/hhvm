@@ -36,6 +36,8 @@ pub use stubs::sequence;
 mod impl_gen;
 pub use impl_gen::*;
 
+pub mod aast_visitor;
+
 mod gen;
 
 pub use gen::aast;

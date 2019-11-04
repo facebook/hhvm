@@ -8,6 +8,7 @@ extern crate clap;
 
 mod common;
 mod gen_enum_constr;
+mod gen_visitor;
 
 use common::*;
 use std::{fs::File, io::prelude::*, path::PathBuf, process::Command};
@@ -19,6 +20,11 @@ fn main() -> Result<()> {
         (@arg signer: -s --signer +takes_value "file signer")
         (@subcommand enum_constr =>
             (@arg input: -i --input +required +takes_value ... "Rust file contains enums")
+            (@arg output: -o --output +takes_value "mod output path")
+        )
+        (@subcommand visitor =>
+            (@arg input: -i --input +required +takes_value ... "Rust file contains all types")
+            (@arg root: -r --root +required +takes_value "root type")
             (@arg output: -o --output +takes_value "mod output path")
         )
     )
@@ -35,6 +41,7 @@ fn main() -> Result<()> {
 
     let files = match matches.subcommand() {
         ("enum_constr", Some(sub_m)) => gen_enum_constr::run(sub_m)?,
+        ("visitor", Some(sub_m)) => gen_visitor::run(sub_m)?,
         _ => vec![],
     };
 

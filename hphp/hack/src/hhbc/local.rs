@@ -2,7 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
 use naming_special_names_rust::special_idents;
 
 use std::collections::HashMap;
@@ -95,9 +94,61 @@ impl Gen {
         result
     }
 
+    pub fn store_current_state(&mut self) {
+        STORED.with(|x| {
+            let stored_mut: &mut Stored = &mut *x.borrow_mut();
+            stored_mut.store(self.counter, self.dedicated.temp_map.clone());
+        });
+    }
+
+    pub fn state_has_changed(&self) -> bool {
+        STORED.with(|stored| self.counter.eq(&*stored.borrow().get_counter()))
+    }
+
+    /// Revert to the old state stored in STORED, and return the ids of newly registered
+    /// unnamed locals to be unset
+    pub fn revert_state(&mut self) -> Vec<Id> {
+        STORED.with(|stored| {
+            let stored: &Stored = &*stored.borrow();
+            let old_counter = stored.get_counter().clone();
+            let old_temp_map = stored.get_temp_map().clone();
+            let (Counter(new_id), Counter(old_id)) = (self.counter, old_counter);
+            let local_ids_to_unset = vec![old_id; new_id];
+            self.counter = old_counter;
+            self.dedicated.temp_map = old_temp_map;
+            local_ids_to_unset
+        })
+    }
+
     pub fn reset(&mut self, base: Id) {
         self.counter = Counter(base);
         self.dedicated = Dedicated::default();
+    }
+}
+
+use ::std::cell::RefCell;
+thread_local! {
+    static STORED: RefCell<Stored> = RefCell::new( Stored::default() );
+}
+
+#[derive(Default)]
+struct Stored {
+    counter: Counter,
+    temp_map: HashMap<String, Type>,
+}
+
+impl Stored {
+    fn store(&mut self, counter: Counter, temp_map: HashMap<String, Type>) {
+        self.counter = counter;
+        self.temp_map = temp_map;
+    }
+
+    fn get_counter(&self) -> &Counter {
+        &self.counter
+    }
+
+    fn get_temp_map(&self) -> &HashMap<String, Type> {
+        &self.temp_map
     }
 }
 
@@ -126,5 +177,10 @@ impl Counter {
                 _ => curr,
             },
         }
+    }
+
+    fn eq(&self, other: &Self) -> bool {
+        let (Counter(id1), Counter(id2)) = (self, other);
+        *id1 == *id2
     }
 }

@@ -33,6 +33,12 @@ pub struct Emitter {
     pub symbol_refs_state: DynState,
 }
 
+pub struct StateRef<'a> {
+    pub label_gen: &'a mut label::Gen,
+    pub local_gen: &'a mut local::Gen,
+    pub iterator: &'a mut Iter,
+}
+
 impl Emitter {
     pub fn new(opts: Options, state: GlobalState) -> Emitter {
         Emitter {
@@ -68,6 +74,14 @@ impl Emitter {
 
     pub fn local_gen_mut(&mut self) -> &mut local::Gen {
         &mut self.local_gen
+    }
+
+    pub fn refined_state_mut(&mut self) -> StateRef {
+        StateRef {
+            label_gen: &mut self.label_gen,
+            local_gen: &mut self.local_gen,
+            iterator: &mut self.iterator,
+        }
     }
 }
 

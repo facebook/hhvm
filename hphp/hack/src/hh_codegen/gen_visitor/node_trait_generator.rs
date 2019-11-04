@@ -29,11 +29,19 @@ trait NodeTrait {
             #use_visitor
 
             pub trait #trait_name#ty_params {
-                fn accept(#receiver, ctx: &mut #context, v: &mut dyn #visitor#ty_param_bindings) {
+                fn accept(
+                    #receiver,
+                    ctx: &mut #context,
+                    v: &mut dyn #visitor#ty_param_bindings,
+                ) {
                     self.recurse(ctx, v)
                 }
 
-                fn recurse(#receiver, ctx: &mut #context, v: &mut dyn #visitor#ty_param_bindings) {}
+                fn recurse(
+                    #receiver,
+                    ctx: &mut #context,
+                    v: &mut dyn #visitor#ty_param_bindings,
+                ) { }
             }
         })
     }

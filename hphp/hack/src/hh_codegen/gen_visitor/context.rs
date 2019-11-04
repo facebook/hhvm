@@ -22,7 +22,7 @@ pub struct Context<'a> {
 impl<'a> Context<'a> {
     pub fn new(files: &'a [syn::File], root: &'a str) -> Result<Self> {
         let mut defs = HashMap::new();
-        for f in files.iter() {
+        for f in files {
             for i in f.items.iter() {
                 if let Ok(name) = get_ty_def_name(i) {
                     if let Some(old) = defs.insert(name, i) {

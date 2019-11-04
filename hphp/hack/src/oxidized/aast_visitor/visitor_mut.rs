@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1063e9e02df2429bb20cc2a0a55132fe>>
+// @generated SignedSource<<c5d8761875c4ca3d0d562e352e041f1b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -11,6 +11,13 @@
 #![allow(unused_variables)]
 use super::node_mut::NodeMut;
 use crate::{aast::*, aast_defs::*, ast_defs::*};
+pub fn visit<Context, Ex, Fb, En, Hi>(
+    v: &mut impl VisitorMut<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
+    c: &mut Context,
+    p: &mut impl NodeMut<Context, Ex, Fb, En, Hi>,
+) {
+    p.accept(c, v);
+}
 pub trait VisitorMut {
     type Context;
     type Ex;

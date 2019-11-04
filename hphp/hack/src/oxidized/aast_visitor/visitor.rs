@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<223041a9edded39eddc529f05ca02aac>>
+// @generated SignedSource<<d2a4d0cd3296dd39ddf8709ebd47ff45>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -11,6 +11,13 @@
 #![allow(unused_variables)]
 use super::node::Node;
 use crate::{aast::*, aast_defs::*, ast_defs::*};
+pub fn visit<Context, Ex, Fb, En, Hi>(
+    v: &mut impl Visitor<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
+    c: &mut Context,
+    p: &impl Node<Context, Ex, Fb, En, Hi>,
+) {
+    p.accept(c, v);
+}
 pub trait Visitor {
     type Context;
     type Ex;

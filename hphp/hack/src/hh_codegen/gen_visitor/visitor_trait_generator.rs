@@ -14,6 +14,7 @@ pub trait VisitorTrait {
     fn trait_name() -> syn::Ident;
     fn node_ref_kind() -> TokenStream;
     fn use_node() -> TokenStream;
+    fn node_trait_name() -> syn::Ident;
 
     fn gen(ctx: &Context) -> Result<TokenStream> {
         let associate_ty_decls = ctx
@@ -25,6 +26,7 @@ pub trait VisitorTrait {
 
         let use_node = Self::use_node();
         let trait_name = Self::trait_name();
+        let node_dispatcher_function = Self::gen_node_dispatcher_function(ctx)?;
         let visit_functions = Self::gen_visit_functions(ctx)?;
         let visit_ty_params = Self::gen_visit_ty_params(ctx)?;
 
@@ -34,6 +36,8 @@ pub trait VisitorTrait {
 
             use crate::{aast::*, aast_defs::*, ast_defs::*};
             #use_node
+
+            #node_dispatcher_function
 
             pub trait #trait_name {
 
@@ -83,6 +87,25 @@ pub trait VisitorTrait {
         }
         Ok(visit_fn)
     }
+
+    fn gen_node_dispatcher_function(ctx: &Context) -> Result<TokenStream> {
+        let ty_params = &gen_ty_params(ctx.root_ty_params_with_context());
+        let visitor_trait_name = Self::trait_name();
+        let visitor_ty_param_bindings = gen_ty_param_bindings(ctx.root_ty_params_with_context());
+        let context = ctx.visitor_context();
+        let node_ref_kind = Self::node_ref_kind();
+        let node_trait_name = Self::node_trait_name();
+
+        Ok(quote! {
+            pub fn visit#ty_params(
+                v: &mut impl #visitor_trait_name#visitor_ty_param_bindings,
+                c: &mut #context,
+                p: #node_ref_kind impl #node_trait_name#ty_params,
+            ) {
+                p.accept(c, v);
+            }
+        })
+    }
 }
 
 pub fn gen_visit_fn_name(ty: impl AsRef<str>) -> syn::Ident {
@@ -106,6 +129,10 @@ impl VisitorTrait for RefVisitorTrait {
     fn use_node() -> TokenStream {
         quote! { use super::node::Node; }
     }
+
+    fn node_trait_name() -> syn::Ident {
+        format_ident!("Node")
+    }
 }
 impl_generator!(RefVisitorTrait, VisitorTrait);
 
@@ -125,6 +152,10 @@ impl VisitorTrait for MutVisitorTrait {
 
     fn use_node() -> TokenStream {
         quote! { use super::node_mut::NodeMut; }
+    }
+
+    fn node_trait_name() -> syn::Ident {
+        format_ident!("NodeMut")
     }
 }
 impl_generator!(MutVisitorTrait, VisitorTrait);

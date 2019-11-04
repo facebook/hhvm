@@ -60,11 +60,19 @@ pub trait NodeImpl {
         let context = ctx.visitor_context();
         Ok(quote! {
             impl#root_ty_params #node_trait_name#root_ty_params for #ty_name#ty_params {
-                fn accept(#self_ref_kind self, c: &mut #context, v: &mut dyn #visitor_trait_name#visitor_ty_param_bindings) {
+                fn accept(
+                    #self_ref_kind self,
+                    c: &mut #context,
+                    v: &mut dyn #visitor_trait_name#visitor_ty_param_bindings
+                ) {
                     v.#visit_fn(c, self);
                 }
 
-                fn recurse(#self_ref_kind self, c: &mut #context, v: &mut dyn #visitor_trait_name#visitor_ty_param_bindings) {
+                fn recurse(
+                    #self_ref_kind self,
+                    c: &mut #context,
+                    v: &mut dyn #visitor_trait_name#visitor_ty_param_bindings
+                ) {
                     #recurse_body
                 }
             }

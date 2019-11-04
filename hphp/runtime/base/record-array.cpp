@@ -252,53 +252,100 @@ ArrayData* RecordArray::SetInt(ArrayData* adIn, int64_t k, Cell v) {
   );
 }
 
-// TODO: T47449944: methods below this are stubs
-
-ssize_t RecordArray::NvGetStrPos(ArrayData const*, StringData const*) {
-  throw_not_implemented("This method on RecordArray");
+ssize_t RecordArray::NvGetIntPos(const ArrayData* ad, int64_t) {
+  raise_recordarray_unsupported_op_notice("NvGetIntPos");
+  return ad->m_size;
 }
 
-ssize_t RecordArray::NvGetIntPos(ArrayData const*, int64_t) {
-  throw_not_implemented("This method on RecordArray");
+ssize_t RecordArray::NvGetStrPos(const ArrayData* ad, const StringData* key) {
+  raise_recordarray_unsupported_op_notice("NvGetStrPos");
+  auto const ra = asRecordArray(ad);
+  auto const idx = ra->record()->lookupField(key);
+  if (LIKELY(idx != kInvalidSlot)) return idx;
+  auto const extra = ra->extraFieldMap();
+  return ra->record()->numFields() +
+    std::distance(extra->find(StrNR(key)), extra->begin());
 }
 
-Cell RecordArray::NvGetKey(const ArrayData*, ssize_t) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-tv_rval RecordArray::GetValueRef(const ArrayData*, ssize_t) {
-  throw_not_implemented("This method on RecordArray");
+Cell RecordArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
+  raise_recordarray_unsupported_op_notice("NvGetKey");
+  assertx(pos < ad->m_size);
+  auto const ra = asRecordArray(ad);
+  auto const rec = ra->record();
+  if (pos < rec->numFields()) {
+    auto const name = const_cast<StringData*>(rec->field(pos).name());
+    return make_tv<KindOfPersistentString>(name);
+  }
+  auto const extra = ra->extraFieldMap();
+  auto it = extra->begin();
+  std::advance(it, pos - rec->numFields());
+  return make_tv<KindOfString>(it->first.get());
 }
 
 bool RecordArray::IsVectorData(const ArrayData*) {
-  throw_not_implemented("This method on RecordArray");
+  return false;
 }
 
 bool RecordArray::ExistsInt(const ArrayData*, int64_t) {
-  throw_not_implemented("This method on RecordArray");
+  return false;
 }
 
-bool RecordArray::ExistsStr(const ArrayData*, const StringData*) {
-  throw_not_implemented("This method on RecordArray");
+bool RecordArray::ExistsStr(const ArrayData* ad, const StringData* key) {
+  auto const ra = asRecordArray(ad);
+  auto const idx = ra->record()->lookupField(key);
+  if (idx != kInvalidSlot) return true;
+  auto const extra = ra->extraFieldMap();
+  return extra->find(StrNR(key)) != extra->end();
 }
 
-arr_lval RecordArray::LvalInt(ArrayData*, int64_t, bool) {
-  throw_not_implemented("This method on RecordArray");
+arr_lval RecordArray::LvalForceNew(ArrayData* ad, bool /*copy*/) {
+  return PromoteForOp(ad,
+    [&] (MixedArray* mixed) { return MixedArray::LvalForceNew(mixed, false); },
+    "LvalNew"
+  );
 }
 
-arr_lval RecordArray::LvalStr(ArrayData*, StringData*, bool) {
-  throw_not_implemented("This method on RecordArray");
+arr_lval RecordArray::LvalInt(ArrayData* ad, int64_t k, bool /*copy*/) {
+  return PromoteForOp(ad,
+    [&] (MixedArray* mixed) { return MixedArray::LvalInt(mixed, k, false); },
+    "LvalInt"
+  );
 }
 
-arr_lval RecordArray::LvalSilentInt(ArrayData*, int64_t, bool) {
-  throw_not_implemented("This method on RecordArray");
+arr_lval RecordArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
+  auto ra = asRecordArray(ad);
+  if (copy) ra = ra->copyRecordArray();
+  auto const rec = ra->record();
+  auto const idx = rec->lookupField(k);
+  if (idx != kInvalidSlot) return arr_lval {ra, ra->lvalAt(idx)};
+  auto const extra = const_cast<ExtraFieldMap*>(ra->extraFieldMap());
+  auto const keyStr = String::attach(k);
+  auto const it = extra->find(keyStr);
+  if (it != extra->end()) return arr_lval {ra, &it->second};
+  ra->m_size++;
+  auto const p = extra->emplace(keyStr, make_tv<KindOfNull>());
+  return arr_lval {ra, &p.first->second};
 }
 
-arr_lval RecordArray::LvalSilentStr(ArrayData*, StringData*, bool) {
-  throw_not_implemented("This method on RecordArray");
+arr_lval RecordArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
+  auto ra = asRecordArray(ad);
+  if (copy) ra = ra->copyRecordArray();
+  auto const rec = ra->record();
+  auto const idx = rec->lookupField(k);
+  if (idx != kInvalidSlot) return arr_lval {ra, ra->lvalAt(idx)};
+  auto const extra = const_cast<ExtraFieldMap*>(ra->extraFieldMap());
+  auto const it = extra->find(StrNR(k));
+  if (it != extra->end()) return arr_lval {ra, &it->second};
+  return arr_lval {ra, nullptr};
 }
 
-arr_lval RecordArray::LvalForceNew(ArrayData*, bool) {
+arr_lval RecordArray::LvalSilentInt(ArrayData* ad, int64_t, bool) {
+  return arr_lval {ad, nullptr};
+}
+
+// TODO: T47449944: methods below this are stubs
+
+tv_rval RecordArray::GetValueRef(const ArrayData*, ssize_t) {
   throw_not_implemented("This method on RecordArray");
 }
 

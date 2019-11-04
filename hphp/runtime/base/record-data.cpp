@@ -38,7 +38,7 @@ RecordData* RecordData::newRecord(const RecordDesc* rec,
 }
 
 RecordData* RecordData::copyRecord() const {
-  auto const rd = copyRecordBase(this);
+  auto const rd = copyRecordBase(this, AllocMode::Request);
   rd->initHeader(this->kind(), OneReference);
   return rd;
 }

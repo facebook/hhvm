@@ -100,11 +100,15 @@ const RecordArray* RecordArray::asRecordArray(const ArrayData* in) {
   return asRecordArray(const_cast<ArrayData*>(in));
 }
 
-RecordArray* RecordArray::copyRecordArray() const {
-  auto const ra = copyRecordBase(this);
+RecordArray* RecordArray::copyRecordArray(AllocMode mode) const {
+  auto const ra = copyRecordBase(this, mode);
   auto const extra = extraFieldMap();
-  ra->extraFieldMap() = extra;
-  extra->incRefCount();
+  if (mode == AllocMode::Request) {
+    ra->extraFieldMap() = extra;
+    extra->incRefCount();
+  } else {
+    ra->extraFieldMap() = MixedArray::asMixed(MixedArray::CopyStatic(extra));
+  }
   return ra;
 }
 
@@ -136,7 +140,7 @@ Slot RecordArray::checkFieldForWrite(const StringData* key, Cell val) const {
   return idx;
 }
 
-void RecordArray::updateField(StringData* key, Cell val, Slot idx) {
+void RecordArray::updateField(StringData* key, TypedValue val, Slot idx) {
   if (idx != kInvalidSlot) {
     assertx(idx == record()->lookupField(key));
     auto const& tv = lvalAt(idx);
@@ -174,14 +178,14 @@ ArrayData* RecordArray::SetStr(ArrayData* base, StringData* key, Cell val) {
   assertx(base->cowCheck() || base->notCyclic(val));
   auto ra = asRecordArray(base);
   auto const idx = ra->checkFieldForWrite(key, val);
-  if (ra->cowCheck()) ra = ra->copyRecordArray();
+  if (ra->cowCheck()) ra = ra->copyRecordArray(AllocMode::Request);
   ra->updateField(key, val, idx);
   return ra;
 }
 
 size_t RecordArray::Vsize(const ArrayData*) { always_assert(false); }
 
-MixedArray* RecordArray::ToMixedHeader(RecordArray* old) {
+MixedArray* RecordArray::ToMixedHeader(const RecordArray* old) {
   assertx(old->checkInvariants());
   auto const extra = old->extraFieldMap();
   auto const keyType = extra->empty() ?
@@ -208,7 +212,7 @@ MixedArray* RecordArray::ToMixedHeader(RecordArray* old) {
   return ad;
 }
 
-MixedArray* RecordArray::ToMixed(ArrayData* adIn) {
+MixedArray* RecordArray::ToMixed(const ArrayData* adIn) {
   auto const old = asRecordArray(adIn);
   auto const ad = ToMixedHeader(old);
   auto const mask = ad->mask();
@@ -325,7 +329,7 @@ arr_lval RecordArray::LvalInt(ArrayData* ad, int64_t k, bool /*copy*/) {
 
 arr_lval RecordArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   auto ra = asRecordArray(ad);
-  if (copy) ra = ra->copyRecordArray();
+  if (copy) ra = ra->copyRecordArray(AllocMode::Request);
   auto const rec = ra->record();
   auto const idx = rec->lookupField(k);
   if (idx != kInvalidSlot) return arr_lval {ra, ra->lvalAt(idx)};
@@ -342,7 +346,7 @@ arr_lval RecordArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
 
 arr_lval RecordArray::LvalSilentStr(ArrayData* ad, StringData* k, bool copy) {
   auto ra = asRecordArray(ad);
-  if (copy) ra = ra->copyRecordArray();
+  if (copy) ra = ra->copyRecordArray(AllocMode::Request);
   auto const rec = ra->record();
   auto const idx = rec->lookupField(k);
   if (idx != kInvalidSlot) return arr_lval {ra, ra->lvalAt(idx)};
@@ -417,110 +421,118 @@ tv_rval RecordArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   return MixedArray::GetValueRef(ra->extraFieldMap(), pos - rec->numFields());
 }
 
-// TODO: T47449944: methods below this are stubs
-
-ArrayData* RecordArray::EscalateForSort(ArrayData*, SortFunction) {
-  throw_not_implemented("This method on RecordArray");
+ArrayData* RecordArray::EscalateForSort(ArrayData* ad, SortFunction) {
+  return ToMixed(ad);
 }
 
+// Record-arrays always escalate to mixed-arrays before sorts.
 void RecordArray::Ksort(ArrayData*, int, bool) {
-  throw_not_implemented("This method on RecordArray");
+  always_assert(false);
 }
 
 void RecordArray::Sort(ArrayData*, int, bool) {
-  throw_not_implemented("This method on RecordArray");
+  always_assert(false);
 }
 
 void RecordArray::Asort(ArrayData*, int, bool) {
-  throw_not_implemented("This method on RecordArray");
+  always_assert(false);
 }
 
 bool RecordArray::Uksort(ArrayData*, const Variant&) {
-  throw_not_implemented("This method on RecordArray");
+  always_assert(false);
+  return false;
 }
 
 bool RecordArray::Usort(ArrayData*, const Variant&) {
-  throw_not_implemented("This method on RecordArray");
+  always_assert(false);
+  return false;
 }
 
 bool RecordArray::Uasort(ArrayData*, const Variant&) {
-  throw_not_implemented("This method on RecordArray");
+  always_assert(false);
+  return false;
 }
 
-ArrayData* RecordArray::Copy(const ArrayData*) {
-  throw_not_implemented("This method on RecordArray");
+ArrayData* RecordArray::Copy(const ArrayData* ad) {
+  return asRecordArray(ad)->copyRecordArray(AllocMode::Request);
 }
 
-ArrayData* RecordArray::CopyStatic(const ArrayData*) {
-  throw_not_implemented("This method on RecordArray");
+ArrayData* RecordArray::CopyStatic(const ArrayData* ad) {
+  return asRecordArray(ad)->copyRecordArray(AllocMode::Static);
 }
 
-ArrayData* RecordArray::Append(ArrayData*, Cell) {
-  throw_not_implemented("This method on RecordArray");
+ArrayData* RecordArray::Append(ArrayData* ad, Cell v) {
+  return PromoteForOp(ad,
+    [&] (MixedArray* mixed) { return mixed->AppendImpl(mixed, v, false); },
+    "Append"
+  );
 }
 
-ArrayData* RecordArray::AppendInPlace(ArrayData*, Cell) {
-  throw_not_implemented("This method on RecordArray");
+ArrayData* RecordArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
+  return PromoteForOp(ad,
+    [&] (MixedArray* mixed) {
+      return mixed->PlusEq(mixed, elems);
+    },
+    "PlusEq"
+  );
 }
 
-ArrayData* RecordArray::PlusEq(ArrayData*, const ArrayData*) {
-  throw_not_implemented("This method on RecordArray");
+ArrayData* RecordArray::Merge(ArrayData* ad, const ArrayData* elems) {
+  return PromoteForOp(ad,
+    [&] (MixedArray* mixed) {
+      return mixed->Merge(mixed, elems);
+    },
+    "Merge"
+  );
 }
 
-ArrayData* RecordArray::Merge(ArrayData*, const ArrayData*) {
-  throw_not_implemented("This method on RecordArray");
+ArrayData* RecordArray::Pop(ArrayData* ad, Variant& v) {
+  return PromoteForOp(ad,
+    [&] (MixedArray* mixed) {
+      return mixed->Pop(mixed, v);
+    },
+    "Pop"
+  );
 }
 
-ArrayData* RecordArray::Pop(ArrayData*, Variant&) {
-  throw_not_implemented("This method on RecordArray");
+ArrayData* RecordArray::Dequeue(ArrayData* ad, Variant& v) {
+  return PromoteForOp(ad,
+    [&] (MixedArray* mixed) {
+      return mixed->Dequeue(mixed, v);
+    },
+    "Dequeue"
+  );
 }
 
-ArrayData* RecordArray::Dequeue(ArrayData*, Variant&) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::Prepend(ArrayData*, Cell) {
-  throw_not_implemented("This method on RecordArray");
+ArrayData* RecordArray::Prepend(ArrayData* ad, Cell v) {
+  return PromoteForOp(ad,
+    [&] (MixedArray* mixed) {
+      return mixed->Prepend(mixed, v);
+    },
+    "Prepend"
+  );
 }
 
 void RecordArray::Renumber(ArrayData*) {
-  throw_not_implemented("This method on RecordArray");
+  throw_not_supported("Renumber", "Record-array");
 }
 
-void RecordArray::OnSetEvalScalar(ArrayData*) {
-  throw_not_implemented("This method on RecordArray");
+void RecordArray::OnSetEvalScalar(ArrayData* ad) {
+  auto const ra = asRecordArray(ad);
+  auto const numRecFields = ra->record()->numFields();
+  auto const fields = const_cast<TypedValue*>(ra->fieldVec());
+  for (auto idx = 0; idx < numRecFields; ++idx) {
+    tvAsVariant(&fields[idx]).setEvalScalar();
+  }
+  MixedArray::OnSetEvalScalar(ra->extraFieldMap());
 }
 
-ArrayData* RecordArray::Escalate(const ArrayData*) {
-  throw_not_implemented("This method on RecordArray");
+ArrayData* RecordArray::Escalate(const ArrayData* ad) {
+  return ToMixed(ad);
 }
 
-ArrayData* RecordArray::ToPHPArray(ArrayData*, bool) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::ToPHPArrayIntishCast(ArrayData*, bool) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::ToDict(ArrayData*, bool) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::ToVec(ArrayData*, bool) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::ToKeyset(ArrayData*, bool) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::ToVArray(ArrayData*, bool) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::ToDArray(ArrayData*, bool) {
-  throw_not_implemented("This method on RecordArray");
+ArrayData* RecordArray::ToPHPArray(ArrayData* ad, bool) {
+  return ad;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

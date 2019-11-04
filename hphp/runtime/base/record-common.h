@@ -34,6 +34,7 @@ struct RecordBase {
   }
 
 protected:
+  enum class AllocMode : bool { Request, Static };
   explicit RecordBase(const RecordDesc*);
   const TypedValue* fieldVec() const;
   void scan(type_scan::Scanner&) const;
@@ -45,7 +46,10 @@ protected:
                                    const StringData* const* keys,
                                    const TypedValue* values);
   template<class RecordType>
-  static RecordType* copyRecordBase(const RecordType*);
+  static RecordType* copyRecordBase(const RecordType*, AllocMode);
+
+  template<class RecordType>
+  static RecordType* allocRecord(size_t size, AllocMode mode);
 };
 } // namespace HPHP
 #endif // incl_HPHP_RECORD_COMMON_H_

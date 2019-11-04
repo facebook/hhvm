@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_RECORD_ARRAY_H_
 #define incl_HPHP_RECORD_ARRAY_H_
 
+#include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/base/string-hash-map.h"
@@ -47,7 +48,7 @@ struct RecordArray : ArrayData,
                                      uint32_t initSize,
                                      const StringData* const* keys,
                                      const TypedValue* values);
-  RecordArray* copyRecordArray() const;
+  RecordArray* copyRecordArray(AllocMode) const;
 
   // Array interface
   static void Release(ArrayData*);
@@ -91,7 +92,7 @@ struct RecordArray : ArrayData,
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell v);
-  static ArrayData* AppendInPlace(ArrayData*, Cell v);
+  static constexpr auto AppendInPlace = &Append;
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
@@ -101,17 +102,17 @@ struct RecordArray : ArrayData,
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData*);
   static ArrayData* ToPHPArray(ArrayData*, bool);
-  static ArrayData* ToPHPArrayIntishCast(ArrayData*, bool);
-  static ArrayData* ToDict(ArrayData*, bool);
-  static ArrayData* ToVec(ArrayData*, bool);
-  static ArrayData* ToKeyset(ArrayData*, bool);
-  static ArrayData* ToVArray(ArrayData*, bool);
-  static ArrayData* ToDArray(ArrayData*, bool);
+  static constexpr auto ToPHPArrayIntishCast = &ToPHPArray;
+  static constexpr auto ToDict = &ArrayCommon::ToDict;
+  static constexpr auto ToVec = &ArrayCommon::ToVec;
+  static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArray = &ArrayCommon::ToVArray;
+  static constexpr auto ToDArray = &ArrayCommon::ToDArray;
 
   static RecordArray* asRecordArray(ArrayData*);
   static const RecordArray* asRecordArray(const ArrayData*);
 
-  static MixedArray* ToMixed(ArrayData*);
+  static MixedArray* ToMixed(const ArrayData*);
 
 private:
   using ExtraFieldMapPtr = MixedArray*;
@@ -128,9 +129,9 @@ private:
    * Updates the field at idx if idx is valid. Otherwise inserts key, val pair
    * in the extra field map.
    */
-  void updateField(StringData* key, Cell val, Slot idx);
+  void updateField(StringData* key, TypedValue val, Slot idx);
 
-  static MixedArray* ToMixedHeader(RecordArray*);
+  static MixedArray* ToMixedHeader(const RecordArray*);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

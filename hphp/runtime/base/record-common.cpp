@@ -28,15 +28,27 @@ RecordBase::RecordBase(const RecordDesc* record)
   memset(const_cast<TypedValue*>(fieldVec()), 0, fieldSize(record));
 }
 
+template<class RecordType>
+RecordType* RecordBase::allocRecord(size_t size, AllocMode mode) {
+  if (mode == AllocMode::Request) {
+    return static_cast<RecordType*>(tl_heap->objMalloc(size));
+  }
+  auto const mem =  RuntimeOption::EvalLowStaticArrays ?
+                    lower_malloc(size) : uncounted_malloc(size);
+  return static_cast<RecordType*>(mem);
+}
+
 template
-RecordData* RecordBase::copyRecordBase<RecordData>(const RecordData*);
+RecordData* RecordBase::copyRecordBase<RecordData>(const RecordData*,
+                                                   AllocMode);
 template
-RecordArray* RecordBase::copyRecordBase<RecordArray>(const RecordArray*);
+RecordArray* RecordBase::copyRecordBase<RecordArray>(const RecordArray*,
+                                                   AllocMode);
 
 template<class RecordType>
-RecordType* RecordBase::copyRecordBase(const RecordType* old) {
+RecordType* RecordBase::copyRecordBase(const RecordType* old, AllocMode mode) {
   auto const size = RecordType::sizeWithFields(old->record());
-  auto const newRec = static_cast<RecordType*>(tl_heap->objMalloc(size));
+  auto const newRec = allocRecord<RecordType>(size, mode);
   memcpy(newRec, old, size);
   auto const fields = newRec->fieldVec();
   for (auto i = 0; i < old->record()->numFields(); ++i) {

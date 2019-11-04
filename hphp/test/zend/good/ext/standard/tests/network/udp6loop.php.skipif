@@ -8,6 +8,7 @@
  * cannot tell for sure if IPv6 works until we probe it at run time,
  * this isn't really practical.
  */
-@stream_socket_client('tcp://[::1]:0', $errno);
+$errno = 0;
+@stream_socket_client('tcp://[::1]:0', inout $errno);
 if ($errno != 111) die('skip IPv6 not supported.');
 }

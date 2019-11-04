@@ -6,7 +6,8 @@
     }
     $bound = false;
     for($port = 31337; $port < 31357; ++$port) {
-        if (socket_bind($server, '::1', $port)) {
+        // HACK: Stifle "port in use" warnings.
+        if (@socket_bind($server, '::1', $port)) {
             $bound = true;
             break;
         }
@@ -41,4 +42,3 @@
     socket_close($client);
     socket_close($socket);
     socket_close($server);
-

@@ -6,6 +6,7 @@
  * Note: Might be a good idea to export an IPv6 support indicator (such as AF_INET6 exported by
  * ext/sockets).
  */
-@stream_socket_client('tcp://[::1]:0', $errno);
+$errno = 0;
+@stream_socket_client('tcp://[::1]:0', inout $errno);
 if ($errno != 111) die('skip IPv6 not supported.');
 }

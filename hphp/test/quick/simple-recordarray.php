@@ -14,6 +14,7 @@ record FooBar {
 
 function foo(array $a) : array {
   $a['x'] = $a['x'] + 1;
+  unset($a[0]); // no-op
   $a['y'] = 42;
   return $a;
 }

@@ -73,9 +73,9 @@ struct RecordArray : ArrayData,
   static arr_lval LvalSilentStr(ArrayData*, StringData* key, bool copy);
   static arr_lval LvalForceNew(ArrayData*, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t key);
-  static ArrayData* RemoveIntInPlace(ArrayData*, int64_t key);
+  static constexpr auto RemoveIntInPlace = &RemoveInt;
   static ArrayData* RemoveStr(ArrayData*, const StringData*);
-  static ArrayData* RemoveStrInPlace(ArrayData*, const StringData*);
+  static constexpr auto RemoveStrInPlace = &RemoveStr;
   static ssize_t IterEnd(const ArrayData*);
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);

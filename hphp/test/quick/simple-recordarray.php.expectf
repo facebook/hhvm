@@ -6,12 +6,12 @@ int(42)
 string(18) "Undefined index: y"
 string(18) "Undefined index: 0"
 
-Notice: Record-array to mixed-array promotion for SetInt in %s/simple-recordarray.php on line 47
+Notice: Record-array to mixed-array promotion for SetInt in %s/simple-recordarray.php on line 48
 int(43)
 int(44)
 int(10)
 
-Notice: Record-array to mixed-array promotion for SetInt in %s/simple-recordarray.php on line 22
+Notice: Record-array to mixed-array promotion for SetInt in %s/simple-recordarray.php on line 23
 array(3) {
   ["x"]=>
   int(11)

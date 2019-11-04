@@ -54,6 +54,23 @@ RecordArray* RecordArray::newRecordArray(const RecordDesc* rec,
   if (!RuntimeOption::EvalHackRecordArrays) {
     raise_error("Record Arrays are not supported");
   }
+  if (initSize < rec->numFields()) {
+    raise_error(
+      "All %lu declared fields of record-array %s must be initialized"
+      "in the constructor; got %d fields",
+      rec->numFields(), rec->name()->data(), initSize);
+  }
+  for (auto i = 0; i < rec->numFields(); ++i) {
+    auto const declFieldName = rec->field(i).name();
+    auto const key = keys[i];
+    assertx(key->isStatic());
+    if (declFieldName != key) {
+      raise_error("Error initializing record-array %s:"
+                  "field %d should be %s; got %s",
+                  rec->name()->data(), i, declFieldName->data(), key->data());
+    }
+    assertx(declFieldName->same(key));
+  }
   return newRecordImpl<RecordArray>(rec, initSize, keys, values);
 }
 
@@ -63,8 +80,12 @@ RecordArray::ExtraFieldMapPtr& RecordArray::extraFieldMap() const {
 }
 
 bool RecordArray::checkInvariants() const {
+  assertx(isRecordArray());
   assertx(checkCount());
   assertx(m_pos == 0);
+  DEBUG_ONLY auto const extra = extraFieldMap();
+  assertx(extra->checkInvariants());
+  assertx(extra->getSize() == extra->iterLimit());
   return true;
 }
 
@@ -339,47 +360,64 @@ arr_lval RecordArray::LvalSilentInt(ArrayData* ad, int64_t, bool) {
   return arr_lval {ad, nullptr};
 }
 
-// TODO: T47449944: methods below this are stubs
-
-tv_rval RecordArray::GetValueRef(const ArrayData*, ssize_t) {
-  throw_not_implemented("This method on RecordArray");
+ArrayData* RecordArray::RemoveInt(ArrayData* ad, int64_t) {
+  // Record-arrays do not have int keys
+  return ad;
 }
 
-ArrayData* RecordArray::RemoveInt(ArrayData*, int64_t) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::RemoveIntInPlace(ArrayData*, int64_t) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::RemoveStr(ArrayData*, const StringData*) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ArrayData* RecordArray::RemoveStrInPlace(ArrayData*, const StringData*) {
-  throw_not_implemented("This method on RecordArray");
-}
-
-ssize_t RecordArray::IterEnd(const ArrayData*) {
-  throw_not_implemented("This method on RecordArray");
+ArrayData* RecordArray::RemoveStr(ArrayData* ad, const StringData* k) {
+  return PromoteForOp(ad,
+    [&] (MixedArray* mixed) {
+      return MixedArray::RemoveStrImpl(mixed, k, false);
+    },
+    "RemoveStr"
+  );
 }
 
 ssize_t RecordArray::IterBegin(const ArrayData*) {
-  throw_not_implemented("This method on RecordArray");
+  raise_recordarray_unsupported_op_notice("IterBegin");
+  return 0;
 }
 
-ssize_t RecordArray::IterLast(const ArrayData*) {
-  throw_not_implemented("This method on RecordArray");
+ssize_t RecordArray::IterEnd(const ArrayData* ad) {
+  raise_recordarray_unsupported_op_notice("IterEnd");
+  return ad->m_size;
 }
 
-ssize_t RecordArray::IterAdvance(const ArrayData*, ssize_t) {
-  throw_not_implemented("This method on RecordArray");
+ssize_t RecordArray::IterLast(const ArrayData* ad) {
+  raise_recordarray_unsupported_op_notice("IterLast");
+  auto const numFields = ad->m_size;
+  return numFields ? numFields - 1 : 0;
 }
 
-ssize_t RecordArray::IterRewind(const ArrayData*, ssize_t) {
-  throw_not_implemented("This method on RecordArray");
+ssize_t RecordArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
+  raise_recordarray_unsupported_op_notice("IterAdvance");
+  auto const numFields = ad->m_size;
+  assertx(pos >= 0);
+  assertx(pos <= numFields);
+  return (pos < numFields) ? pos + 1 : pos;
 }
+
+ssize_t RecordArray::IterRewind(const ArrayData* ad, ssize_t pos) {
+  raise_recordarray_unsupported_op_notice("IterRewind");
+  assertx(pos >= 0);
+  assertx(pos <= ad->m_size);
+  return (pos > 0) ? pos - 1  : pos;
+}
+
+tv_rval RecordArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+  raise_recordarray_unsupported_op_notice("GetValueRef");
+  assertx(pos < ad->m_size);
+  assertx(pos >= 0);
+  auto const ra = asRecordArray(ad);
+  auto const rec = ra->record();
+  if (pos < rec->numFields()) {
+    return ra->rvalAt(pos);
+  }
+  return MixedArray::GetValueRef(ra->extraFieldMap(), pos - rec->numFields());
+}
+
+// TODO: T47449944: methods below this are stubs
 
 ArrayData* RecordArray::EscalateForSort(ArrayData*, SortFunction) {
   throw_not_implemented("This method on RecordArray");

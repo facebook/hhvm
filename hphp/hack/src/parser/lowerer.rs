@@ -7,12 +7,20 @@
 use escaper::*;
 use hh_autoimport_rust as hh_autoimport;
 use itertools::{Either, Either::Left, Either::Right};
-use naming_special_names_rust::{special_functions, special_idents};
+use naming_special_names_rust::{classes as special_classes, special_functions, special_idents};
 use ocamlrep::rc::RcOc;
 use oxidized::{
-    aast, aast::Expr_ as E_, aast_defs, ast_defs, doc_comment::DocComment, file_info,
-    global_options::GlobalOptions, namespace_env::Env as NamespaceEnv, pos::Pos, s_map,
-    s_map::SMap,
+    aast,
+    aast::Expr_ as E_,
+    aast_defs,
+    aast_visitor::{Node, Visitor},
+    ast_defs,
+    doc_comment::DocComment,
+    file_info,
+    global_options::GlobalOptions,
+    namespace_env::Env as NamespaceEnv,
+    pos::Pos,
+    s_map,
 };
 use parser_core_types::{
     indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
@@ -189,10 +197,10 @@ impl<'a> Env<'a> {
             });
         let empty_ns_env = NamespaceEnv {
             ns_uses,
-            class_uses: SMap::new(),
+            class_uses: s_map::SMap::new(),
             fun_uses: hh_autoimport::FUNCS_MAP.clone(),
             const_uses: hh_autoimport::CONSTS_MAP.clone(),
-            record_def_uses: SMap::new(),
+            record_def_uses: s_map::SMap::new(),
             name: None,
             auto_ns_map: parser_options.po_auto_namespace_map.clone(),
             is_codegen: codegen,
@@ -637,8 +645,43 @@ where
         }
     }
 
-    fn check_valid_reified_hint(env: &Env, node: &Syntax<T, V>, hint: &aast_defs::Hint) {
-        // TODO:
+    fn check_valid_reified_hint(env: &mut Env, node: &Syntax<T, V>, hint: &aast!(Hint)) {
+        struct Checker<F: FnMut(&String)>(F);
+        impl<F: FnMut(&String)> Visitor for Checker<F> {
+            type Context = ();
+            type Ex = Pos;
+            type Fb = ();
+            type En = ();
+            type Hi = ();
+
+            fn object(
+                &mut self,
+            ) -> &mut dyn Visitor<Context = Self::Context, Ex = Pos, Fb = (), En = (), Hi = ()>
+            {
+                self
+            }
+
+            fn visit_hint(&mut self, c: &mut (), h: &aast!(Hint)) {
+                match h.1.as_ref() {
+                    aast::Hint_::Happly(id, _) => {
+                        self.0(&id.1);
+                    }
+                    aast::Hint_::Haccess(_, ids) => {
+                        ids.iter().for_each(|id| self.0(&id.1));
+                    }
+                    _ => {}
+                }
+                h.recurse(c, self);
+            }
+        }
+
+        if *env.in_static_method() {
+            let f = |id: &String| {
+                Self::fail_if_invalid_reified_generic(node, env, id);
+            };
+            let mut visitor = Checker(f);
+            visitor.visit_hint(&mut (), hint);
+        }
     }
 
     fn p_closure_parameter(
@@ -1034,9 +1077,20 @@ where
         unescaper(s).map_err(|e| Error::Failwith(e.msg))
     }
 
-    fn fail_if_invalid_reified_generic(node: &Syntax<T, V>, env: &mut Env, id: &str) {
-        let in_static_method = *env.in_static_method();
-        if in_static_method && env.cls_reified_generics().contains(id) {
+    fn fail_if_invalid_class_creation(node: &Syntax<T, V>, env: &mut Env, id: impl AsRef<str>) {
+        let id = id.as_ref();
+        let is_in_static_method = *env.in_static_method();
+        if is_in_static_method
+            && ((id == special_classes::SELF && !env.cls_reified_generics().is_empty())
+                || (id == special_classes::PARENT && *env.parent_maybe_reified()))
+        {
+            Self::raise_parsing_error(node, env, &syntax_error::static_method_reified_obj_creation);
+        }
+    }
+
+    fn fail_if_invalid_reified_generic(node: &Syntax<T, V>, env: &mut Env, id: impl AsRef<str>) {
+        let is_in_static_method = *env.in_static_method();
+        if is_in_static_method && env.cls_reified_generics().contains(id.as_ref()) {
             Self::raise_parsing_error(
                 node,
                 env,
@@ -1986,11 +2040,9 @@ where
                     }
                     _ => (Self::p_expr(&c.constructor_call_type, env)?, vec![]),
                 };
-                match e.1 {
-                    E_::Id(_) => {
-                        // TODO: report
-                    }
-                    _ => {}
+                if let E_::Id(name) = &e.1 {
+                    Self::fail_if_invalid_reified_generic(node, env, &name.1);
+                    Self::fail_if_invalid_class_creation(node, env, &name.1);
                 }
                 Ok(E_::mk_new(
                     aast::ClassId(pos.clone(), aast::ClassId_::CIexpr(e)),
@@ -4531,7 +4583,10 @@ where
                     constraints: s_map::SMap::new(),
                 };
                 let extends = Self::could_map(Self::p_hint, &c.classish_extends_list, env)?;
-                // TODO: env.parent_may_reified =
+                *env.parent_maybe_reified() = match extends.first().map(|h| h.1.as_ref()) {
+                    Some(aast::Hint_::Happly(_, hl)) => !hl.is_empty(),
+                    _ => false,
+                };
                 let implements = Self::could_map(Self::p_hint, &c.classish_implements_list, env)?;
                 let where_constraints =
                     Self::p_where_constraint(true, node, &c.classish_where_clause, env)?;

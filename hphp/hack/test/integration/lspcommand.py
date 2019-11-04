@@ -225,7 +225,7 @@ class LspCommandProcessor:
             return False
 
         while not any(is_target_message(entry) for entry in transcript.values()):
-            timeout_seconds = 5.0
+            timeout_seconds = 30.0
             message = self._try_read_logged(timeout_seconds=timeout_seconds)
             params_pretty = pprint.pformat(params)
             assert (

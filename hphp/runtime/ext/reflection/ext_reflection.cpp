@@ -574,15 +574,16 @@ Array implTypeStructure(const Variant& cls_or_obj, const Variant& cns_name) {
   }
 
   auto const cls_sd = cls->name();
+
+  if (!cls->hasTypeConstant(cns_sd, true)) {
+    raise_error("Non-existent type constant %s::%s",
+                cls_sd->data(), cns_sd->data());
+  }
+
   auto typeCns = cls->clsCnsGet(cns_sd, ClsCnsLookup::IncludeTypes);
   if (typeCns.m_type == KindOfUninit) {
-    if (cls->hasTypeConstant(cns_sd, true)) {
-      raise_error("Type constant %s::%s is abstract",
-                  cls_sd->data(), cns_sd->data());
-    } else {
-      raise_error("Non-existent type constant %s::%s",
-                  cls_sd->data(), cns_sd->data());
-    }
+    raise_error("Type constant %s::%s is abstract",
+                cls_sd->data(), cns_sd->data());
   }
 
   assertx(isArrayLikeType(typeCns.m_type));

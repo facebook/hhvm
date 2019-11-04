@@ -77,9 +77,7 @@ module Hg_actual = struct
   let current_mergebase_hg_rev repo =
     (* "bottom^" does not work in plain mode *)
     let process =
-      exec_hg
-        ~plain:false
-        ["id"; "--debug"; "-i"; "--rev"; "bottom^"; "--cwd"; repo]
+      exec_hg ~plain:false ["id"; "-i"; "--rev"; "bottom^"; "--cwd"; repo]
     in
     Future.make process
     @@ fun result ->
@@ -93,7 +91,7 @@ module Hg_actual = struct
    *
    * hg id -i --cwd <repo> *)
   let current_working_copy_hg_rev repo =
-    let process = exec_hg ["id"; "--debug"; "-i"; "--cwd"; repo] in
+    let process = exec_hg ["id"; "-i"; "--cwd"; repo] in
     Future.make process
     @@ fun result ->
     let result = String.trim result in

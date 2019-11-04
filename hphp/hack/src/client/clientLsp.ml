@@ -3088,7 +3088,7 @@ let hack_log_error
     (unblocked_time : float)
     (env : env) : unit =
   let root = get_root_opt () in
-  log "Exception: message: %s, stack trace: %s" message stack;
+  log "Exception %s: message: %s, stack trace: %s" source message stack;
   match event with
   | Some (Client_message c) ->
     Jsonrpc.(
@@ -3997,7 +3997,7 @@ let main (env : env) : Exit_status.t Lwt.t =
           !ref_event
           message
           stack
-          "from_server"
+          "1:from_server"
           !ref_unblocked_time
           env;
         Lsp_helpers.telemetry_error
@@ -4063,7 +4063,7 @@ let main (env : env) : Exit_status.t Lwt.t =
         !ref_event
         message
         stack
-        "from_client"
+        "2:from_client"
         !ref_unblocked_time
         env;
       Lsp_helpers.telemetry_error
@@ -4078,7 +4078,7 @@ let main (env : env) : Exit_status.t Lwt.t =
         !ref_event
         message
         stack
-        "from_client"
+        "3:from_client"
         !ref_unblocked_time
         env;
       Lsp_helpers.telemetry_error
@@ -4091,7 +4091,7 @@ let main (env : env) : Exit_status.t Lwt.t =
         !ref_event
         message
         stack
-        "from_server"
+        "4:from_server"
         !ref_unblocked_time
         env;
       respond_to_error !ref_event (Error.Unknown message) stack;
@@ -4112,7 +4112,7 @@ let main (env : env) : Exit_status.t Lwt.t =
         !ref_event
         message
         stack
-        "from_lsp"
+        "5:from_lsp"
         !ref_unblocked_time
         env;
       Lwt.return_unit

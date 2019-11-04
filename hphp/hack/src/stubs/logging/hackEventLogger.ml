@@ -125,6 +125,8 @@ let client_lsp_method_exception
     ~source:_ =
   ()
 
+let serverless_ide_crash ~message:_ ~stack:_ = ()
+
 let client_lsp_exception ~root:_ ~message:_ ~stack:_ ~source:_ = ()
 
 let client_bad_exit ~command _ = ()

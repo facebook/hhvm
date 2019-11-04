@@ -307,12 +307,18 @@ let rec serve (t : t) : unit Lwt.t =
               t.notification_emitter;
           ]
       in
+      if should_continue = false then
+        HackEventLogger.serverless_ide_crash
+          ~message:
+            "No crash, but should_continue set to false by message queue."
+          ~stack:"No stack";
       Lwt.return should_continue
     with e ->
       let e = Exception.wrap e in
-      log
-        "Exception occurred in ClientIdeService.serve: %s"
-        (Exception.to_string e);
+      let stack = Exception.get_backtrace_string e in
+      let message = Exception.to_string e in
+      HackEventLogger.serverless_ide_crash ~message ~stack;
+      log "Exception occurred in ClientIdeService.serve: %s" message;
       Lwt.return false
   in
   if should_continue then

@@ -403,8 +403,8 @@ let unop_to_incdec_op op =
       PostDec
   | _ -> failwith "invalid incdec op"
 
-let istype_op lower_fq_id =
-  match lower_fq_id with
+let istype_op id =
+  match id with
   | "is_int"
   | "is_integer"
   | "is_long" ->
@@ -423,24 +423,24 @@ let istype_op lower_fq_id =
      is-expressions because they only do type checks.
   | "is_resource" -> Some OpRes *)
   | "is_scalar" -> Some OpScalar
-  | "hh\\is_keyset" -> Some OpKeyset
-  | "hh\\is_dict" -> Some OpDict
-  | "hh\\is_vec" -> Some OpVec
-  | "hh\\is_varray" ->
+  | "HH\\is_keyset" -> Some OpKeyset
+  | "HH\\is_dict" -> Some OpDict
+  | "HH\\is_vec" -> Some OpVec
+  | "HH\\is_varray" ->
     Some
       ( if hack_arr_dv_arrs () then
         OpVec
       else
         OpVArray )
-  | "hh\\is_darray" ->
+  | "HH\\is_darray" ->
     Some
       ( if hack_arr_dv_arrs () then
         OpDict
       else
         OpDArray )
-  | "hh\\is_any_array" -> Some OpArrLike
-  | "hh\\is_class_meth" -> Some OpClsMeth
-  | "hh\\is_fun" -> Some OpFunc
+  | "HH\\is_any_array" -> Some OpArrLike
+  | "HH\\is_class_meth" -> Some OpClsMeth
+  | "HH\\is_fun" -> Some OpFunc
   | _ -> None
 
 let is_isexp_op lower_fq_id : Aast.hint option =
@@ -457,9 +457,9 @@ let is_isexp_op lower_fq_id : Aast.hint option =
     Some (h "\\HH\\float")
   | "is_string" -> Some (h "\\HH\\string")
   | "is_null" -> Some (h "\\HH\\void")
-  | "hh\\is_keyset" -> Some (h "\\HH\\keyset")
-  | "hh\\is_dict" -> Some (h "\\HH\\dict")
-  | "hh\\is_vec" -> Some (h "\\HH\\vec")
+  | "HH\\is_keyset" -> Some (h "\\HH\\keyset")
+  | "HH\\is_dict" -> Some (h "\\HH\\dict")
+  | "HH\\is_vec" -> Some (h "\\HH\\vec")
   | _ -> None
 
 let get_queryMOpMode op =
@@ -764,7 +764,6 @@ and emit_cast env pos hint expr =
     | Aast.Happly ((_, id), []) ->
       let id = SU.strip_ns id in
       let id = SU.strip_hh_ns id in
-      let id = String.lowercase id in
       begin
         match id with
         | _ when id = SN.Typehints.int -> instr (IOp CastInt)
@@ -1017,18 +1016,14 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
     when id = SN.SpecialFunctions.hhas_adata ->
     let v = Typed_value.HhasAdata data in
     emit_pos_then pos @@ instr (ILitConst (TypedValue v))
-  | (A.Id (_, id), _, _, [])
-    when String.lowercase id = SN.PseudoFunctions.isset ->
+  | (A.Id (_, id), _, _, []) when id = SN.PseudoFunctions.isset ->
     emit_call_isset_exprs env pos args
-  | (A.Id (_, id), _, [arg1], [])
-    when String.lowercase id = SN.PseudoFunctions.empty ->
+  | (A.Id (_, id), _, [arg1], []) when id = SN.PseudoFunctions.empty ->
     emit_call_empty_expr env pos arg1
   | (A.Id (_, id), _, ([_; _] | [_; _; _]), [])
-    when String.lowercase id = String.lowercase SN.FB.idx
-         && not (jit_enable_rename_function ()) ->
+    when id = SN.FB.idx && not (jit_enable_rename_function ()) ->
     emit_idx env pos args
-  | (A.Id (_, id), _, [arg1], [])
-    when String.lowercase id = SN.EmitterSpecialFunctions.eval ->
+  | (A.Id (_, id), _, [arg1], []) when id = SN.EmitterSpecialFunctions.eval ->
     emit_eval env pos arg1
   | (A.Id (_, s), _, [(_, A.String c1); (_, A.String c2)], [])
     when is_global_namespace env && s = SN.EmitterSpecialFunctions.class_alias
@@ -1039,8 +1034,7 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
     ->
     gather [emit_expr env arg3; emit_pos pos; instr_alias_cls c1 c2]
   | (A.Id (_, id), _, [arg1], [])
-    when String.lowercase id
-         = String.lowercase SN.EmitterSpecialFunctions.set_frame_metadata ->
+    when id = SN.EmitterSpecialFunctions.set_frame_metadata ->
     gather
       [
         emit_expr env arg1;
@@ -1049,12 +1043,10 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
         instr_null;
       ]
   | (A.Id (_, s), _, [], [])
-    when String.lowercase s = SN.PseudoFunctions.exit
-         || String.lowercase s = SN.PseudoFunctions.die ->
+    when s = SN.PseudoFunctions.exit || s = SN.PseudoFunctions.die ->
     emit_pos_then pos @@ emit_exit env None
   | (A.Id (_, s), _, [arg1], [])
-    when String.lowercase s = SN.PseudoFunctions.exit
-         || String.lowercase s = SN.PseudoFunctions.die ->
+    when s = SN.PseudoFunctions.exit || s = SN.PseudoFunctions.die ->
     emit_pos_then pos @@ emit_exit env (Some arg1)
   | (_, _, _, _) ->
     let instrs = emit_call env pos e targs args uargs async_eager_label in
@@ -1462,7 +1454,7 @@ and try_inline_gen_call env (e : Tast.expr) =
   else
     match snd e with
     | A.Call (_, (_, A.Id (_, s)), _, [arg], [])
-      when String.lowercase (SU.strip_global_ns s) = "gena" ->
+      when SU.strip_global_ns s = "gena" ->
       Some (inline_gena_call env arg)
     | _ -> None
 
@@ -3671,8 +3663,8 @@ and emit_call_lhs_and_fcall
         ],
       gather [instr_pushl tmp; instr_fcallfunc fcall_args] )
 
-and get_call_builtin_func_info lower_fq_id =
-  match lower_fq_id with
+and get_call_builtin_func_info id =
+  match id with
   | "array_key_exists" -> Some (2, IMisc AKExists)
   | "hphp_array_idx" -> Some (3, IMisc ArrayIdx)
   | "intval" -> Some (1, IOp CastInt)
@@ -3681,10 +3673,10 @@ and get_call_builtin_func_info lower_fq_id =
   | "floatval"
   | "doubleval" ->
     Some (1, IOp CastDouble)
-  | "hh\\vec" -> Some (1, IOp CastVec)
-  | "hh\\keyset" -> Some (1, IOp CastKeyset)
-  | "hh\\dict" -> Some (1, IOp CastDict)
-  | "hh\\varray" ->
+  | "HH\\vec" -> Some (1, IOp CastVec)
+  | "HH\\keyset" -> Some (1, IOp CastKeyset)
+  | "HH\\dict" -> Some (1, IOp CastDict)
+  | "HH\\varray" ->
     Some
       ( 1,
         IOp
@@ -3692,7 +3684,7 @@ and get_call_builtin_func_info lower_fq_id =
             CastVec
           else
             CastVArray ) )
-  | "hh\\darray" ->
+  | "HH\\darray" ->
     Some
       ( 1,
         IOp
@@ -3700,8 +3692,8 @@ and get_call_builtin_func_info lower_fq_id =
             CastDict
           else
             CastDArray ) )
-  | "hh\\global_get" -> Some (1, IGet CGetG)
-  | "hh\\global_isset" -> Some (1, IIsset IssetG)
+  | "HH\\global_get" -> Some (1, IGet CGetG)
+  | "HH\\global_isset" -> Some (1, IIsset IssetG)
   | _ -> None
 
 (* TODO: work out what HHVM does special here *)
@@ -3713,7 +3705,6 @@ and emit_special_function
   let lower_fq_name =
     Hhbc_id.Function.from_ast_name id
     |> Hhbc_id.Function.to_raw_string
-    |> String.lowercase
   in
   (* Make sure that we do not treat a special function that is aliased as not
    * aliased *)
@@ -3734,9 +3725,10 @@ and emit_special_function
                ])
     in
     Some instrs
-  | ("hh\\invariant", e :: rest) ->
+  | ("HH\\invariant", e :: rest) ->
     let l = Label.next_regular () in
     let annot = (pos, snd annot) in
+    (* TODO: Can we capitalize hh to HH? *)
     let expr_id = (annot, A.Id (pos, "\\hh\\invariant_violation")) in
     Some
       (gather
@@ -3768,8 +3760,8 @@ and emit_special_function
            instr_true;
            instr_label l1;
          ])
-  | ("hh\\sequence", []) -> Some instr_null
-  | ("hh\\sequence", args) ->
+  | ("HH\\sequence", []) -> Some instr_null
+  | ("HH\\sequence", args) ->
     Some
       (gather (List.intersperse (List.map args ~f:(emit_expr env)) instr_popc))
   | ((("class_exists" | "interface_exists" | "trait_exists") as id), arg1 :: _)
@@ -3795,7 +3787,7 @@ and emit_special_function
          ])
   | (("exit" | "die"), _) when nargs = 0 || nargs = 1 ->
     Some (emit_exit env (List.hd args))
-  | ("hh\\fun", _) ->
+  | ("HH\\fun", _) ->
     if nargs <> 1 then
       Emit_fatal.raise_fatal_runtime
         pos
@@ -3826,7 +3818,7 @@ and emit_special_function
       | _ ->
         Emit_fatal.raise_fatal_runtime pos "Constant string expected in fun()"
     )
-  | ("hh\\inst_meth", _) ->
+  | ("HH\\inst_meth", _) ->
     begin
       match args with
       | [obj_expr; method_name] ->
@@ -3850,7 +3842,7 @@ and emit_special_function
           ^ string_of_int nargs
           ^ " given" )
     end
-  | ("hh\\class_meth", _) ->
+  | ("HH\\class_meth", _) ->
     begin
       match args with
       | [
@@ -3892,7 +3884,7 @@ and emit_special_function
           ^ string_of_int nargs
           ^ " given" )
     end
-  | ("hh\\global_set", _) ->
+  | ("HH\\global_set", _) ->
     begin
       match args with
       | [gkey; gvalue] ->
@@ -3913,7 +3905,7 @@ and emit_special_function
           ^ string_of_int nargs
           ^ " given" )
     end
-  | ("hh\\global_unset", _) ->
+  | ("HH\\global_unset", _) ->
     begin
       match args with
       | [gkey] ->
@@ -4100,7 +4092,7 @@ and emit_array_get_fixed last_usage local indices =
 and can_use_as_rhs_in_list_assignment (expr : Tast.expr_) =
   Aast.(
     match expr with
-    | Call (_, (_, Id (_, s)), _, _, _) when String.lowercase s = "echo" ->
+    | Call (_, (_, Id (_, s)), _, _, _) when s = SN.SpecialFunctions.echo ->
       false
     | Lvar _
     | Array_get _

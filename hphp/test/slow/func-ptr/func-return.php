@@ -1,11 +1,11 @@
 <?hh
 
 function bar(): @string {
-  return hh\fun('bar');
+  return HH\fun('bar');
 }
 
 function foo(): string {
-  return hh\fun('foo');
+  return HH\fun('foo');
 }
 
 <<__EntryPoint>>

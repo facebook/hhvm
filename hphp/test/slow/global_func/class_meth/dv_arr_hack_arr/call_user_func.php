@@ -13,11 +13,11 @@ function test($f) {
 <<__EntryPoint>>
 function main() {
   test('afunc');
-  test(hh\fun('afunc'));
+  test(HH\fun('afunc'));
   test(array('C', 'cfunc'));
-  test(hh\class_meth('C', 'cfunc'));
-  \var_dump(is_callable(hh\class_meth('C', 'cfunc')));
-  \var_dump(call_user_func_array(hh\class_meth('C', 'cfunc'), array(2)));
-  register_postsend_function(hh\class_meth('C', 'postSend'));
-  register_shutdown_function(hh\class_meth('C', 'onShutdown'));
+  test(HH\class_meth('C', 'cfunc'));
+  \var_dump(is_callable(HH\class_meth('C', 'cfunc')));
+  \var_dump(call_user_func_array(HH\class_meth('C', 'cfunc'), array(2)));
+  register_postsend_function(HH\class_meth('C', 'postSend'));
+  register_shutdown_function(HH\class_meth('C', 'onShutdown'));
 }

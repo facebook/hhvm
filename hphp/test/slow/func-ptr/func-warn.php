@@ -24,11 +24,11 @@ function bar($f) {
 }
 
 function baz(): string {
-  return hh\fun('baz');
+  return HH\fun('baz');
 }
 
 function buz() {
-  return hh\fun('buz');
+  return HH\fun('buz');
 }
 
 function io(inout string $a, inout $b): string {
@@ -39,10 +39,10 @@ function io(inout string $a, inout $b): string {
 
 function main() {
   foo("hello");
-  foo(hh\fun('foo'));
+  foo(HH\fun('foo'));
 
   bar("hello");
-  bar(hh\fun('bar'));
+  bar(HH\fun('bar'));
 
   var_dump(baz(), is_string(baz()), baz() is string, baz() as string);
   var_dump(buz(), is_string(buz()), buz() is string, buz() as string);
@@ -50,10 +50,10 @@ function main() {
   wrap(() ==> (new Props)->a = buz());
   wrap(() ==> Props::$b = buz());
 
-  $x = hh\fun('foo');             var_dump(io(inout $x, inout $x));
+  $x = HH\fun('foo');             var_dump(io(inout $x, inout $x));
   $y = 'foo';                     var_dump(io(inout $y, inout $y));
-  $x = hh\fun('foo'); $y = 'foo'; var_dump(io(inout $x, inout $y));
-  $x = hh\fun('foo'); $y = 'foo'; var_dump(io(inout $y, inout $x));
+  $x = HH\fun('foo'); $y = 'foo'; var_dump(io(inout $x, inout $y));
+  $x = HH\fun('foo'); $y = 'foo'; var_dump(io(inout $y, inout $x));
   var_dump($x, $y);
 }
 <<__EntryPoint>>

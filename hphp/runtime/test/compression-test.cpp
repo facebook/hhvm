@@ -95,6 +95,14 @@ struct MockHeaders : ITransportHeaders {
       respHeaders(std::move(resp)) {}
 
   /* Request header methods */
+  Method getMethod() override {
+    return Method::Unknown;
+  }
+
+  const void *getPostData(size_t &size) override {
+    return nullptr;
+  }
+
   const char *getUrl() override {
     return nullptr;
   }

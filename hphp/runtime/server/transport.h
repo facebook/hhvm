@@ -50,11 +50,20 @@ using HeaderMap = CaseInsenMap<std::vector<std::string>>;
 using CookieList = std::vector<std::pair<std::string, std::string>>;
 
 struct ITransportHeaders {
+  enum class Method {
+    Unknown,
+    GET,
+    POST,
+    HEAD,
+    AUTO, // check GET parameter first, then POST
+  };
   /* Request header methods */
   virtual const char *getUrl() = 0;
   virtual std::string getCommand() = 0; // URL with params stripped
   virtual std::string getHeader(const char *name) = 0;
   virtual const HeaderMap& getHeaders() = 0;
+  virtual Method getMethod() = 0;
+  virtual const void *getPostData(size_t &size) = 0;
 
   /* Response header methods */
   virtual void addHeaderNoLock(const char *name, const char *value) = 0;
@@ -77,14 +86,7 @@ struct ITransportHeaders {
  * one transport is ONLY accessed from one single thread.
  */
 struct Transport : IDebuggable, ITransportHeaders {
-  enum class Method {
-    Unknown,
-
-    GET,
-    POST,
-    HEAD,
-    AUTO, // check GET parameter first, then POST
-  };
+  using Method = ITransportHeaders::Method;
 
   // TODO: add all status codes
   // (http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html)

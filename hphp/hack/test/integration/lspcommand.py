@@ -225,14 +225,15 @@ class LspCommandProcessor:
             return False
 
         while not any(is_target_message(entry) for entry in transcript.values()):
-            message = self._try_read_logged(timeout_seconds=5)
+            timeout_seconds = 5.0
+            message = self._try_read_logged(timeout_seconds=timeout_seconds)
             params_pretty = pprint.pformat(params)
             assert (
                 message is not None
             ), f"""\
-Timed out while waiting for a {method!r} message to be sent from the server,
-which must not have an ID in {received_request_ids!r}.
-The message was expected to have params:
+Timed out after {timeout_seconds} seconds while waiting for a {method!r}
+message to be sent from the server, which must not have an ID in
+{received_request_ids!r}. The message was expected to have params:
 
 {params_pretty}
 

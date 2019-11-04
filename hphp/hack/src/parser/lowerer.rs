@@ -35,20 +35,10 @@ use std::{
     collections::HashSet,
     mem,
     rc::Rc,
-    result::Result::{Err, Ok},
     slice::Iter,
 };
 
 use crate::lowerer_modifier as modifier;
-
-macro_rules! ret {
-    ($ty:ty) => { std::result::Result<$ty, Error> }
-}
-
-macro_rules! ret_aast {
-    ($ty:ident) => { std::result::Result<ast::$ty, Error> };
-    ($ty:ident<,>) => { std::result::Result<ast::$ty, Error> }
-}
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum LiftedAwaitKind {
@@ -334,7 +324,9 @@ pub enum Error {
     Failwith(String),
 }
 
-pub struct Result {
+type Result<T> = std::result::Result<T, Error>;
+
+pub struct LoweredAst {
     pub aast: ast::Program,
 }
 
@@ -412,7 +404,7 @@ where
     }
 
     #[inline]
-    fn failwith<N>(msg: impl Into<String>) -> ret!(N) {
+    fn failwith<N>(msg: impl Into<String>) -> Result<N> {
         Err(Error::Failwith(msg.into()))
     }
 
@@ -442,7 +434,7 @@ where
         expecting: &str,
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret!(N) {
+    ) -> Result<N> {
         let pos = Self::p_pos(node, env);
         let text = Self::text(node, env);
         Self::lowering_error(env, &pos, &text, expecting);
@@ -463,9 +455,9 @@ where
         !s.chars().any(|c| c == '8' || c == '9')
     }
 
-    fn mp_optional<F, R>(p: F, node: &Syntax<T, V>, env: &mut Env) -> ret!(Option<R>)
+    fn mp_optional<F, R>(p: F, node: &Syntax<T, V>, env: &mut Env) -> Result<Option<R>>
     where
-        F: FnOnce(&Syntax<T, V>, &mut Env) -> ret!(R),
+        F: FnOnce(&Syntax<T, V>, &mut Env) -> Result<R>,
     {
         match &node.syntax {
             Missing => Ok(None),
@@ -473,7 +465,7 @@ where
         }
     }
 
-    fn pos_qualified_name(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Sid) {
+    fn pos_qualified_name(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Sid> {
         if let QualifiedName(c) = &node.syntax {
             if let SyntaxList(l) = &c.qualified_name_parts.syntax {
                 let p = Self::p_pos(node, env);
@@ -494,23 +486,23 @@ where
     }
 
     #[inline]
-    fn pos_name(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Sid) {
+    fn pos_name(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Sid> {
         Self::pos_name_(node, env, None)
     }
 
-    fn lid_from_pos_name(pos: Pos, name: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Lid) {
+    fn lid_from_pos_name(pos: Pos, name: &Syntax<T, V>, env: &mut Env) -> Result<ast::Lid> {
         let name = Self::pos_name(name, env)?;
         Ok(aast::Lid::new(pos, name.1))
     }
 
-    fn lid_from_name(name: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Lid) {
+    fn lid_from_name(name: &Syntax<T, V>, env: &mut Env) -> Result<ast::Lid> {
         let name = Self::pos_name(name, env)?;
         Ok(aast::Lid::new(name.0, name.1))
     }
 
     // TODO: after porting unify Sid and Pstring
     #[inline]
-    fn p_pstring(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Pstring) {
+    fn p_pstring(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Pstring> {
         Self::p_pstring_(node, env, None)
     }
 
@@ -519,7 +511,7 @@ where
         node: &Syntax<T, V>,
         env: &mut Env,
         drop_prefix: Option<char>,
-    ) -> ret_aast!(Pstring) {
+    ) -> Result<ast::Pstring> {
         let ast_defs::Id(p, id) = Self::pos_name_(node, env, drop_prefix)?;
         Ok((p, id))
     }
@@ -533,7 +525,11 @@ where
         }
     }
 
-    fn pos_name_(node: &Syntax<T, V>, env: &mut Env, drop_prefix: Option<char>) -> ret_aast!(Sid) {
+    fn pos_name_(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        drop_prefix: Option<char>,
+    ) -> Result<ast::Sid> {
         match &node.syntax {
             QualifiedName(_) => Self::pos_qualified_name(node, env),
             SimpleTypeSpecifier(c) => Self::pos_name_(&c.simple_type_specifier, env, drop_prefix),
@@ -683,7 +679,7 @@ where
     fn p_closure_parameter(
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret!((ast::Hint, Option<ast_defs::ParamKind>)) {
+    ) -> Result<(ast::Hint, Option<ast_defs::ParamKind>)> {
         match &node.syntax {
             ClosureParameterTypeSpecifier(c) => {
                 let kind = Self::mp_optional(
@@ -702,9 +698,9 @@ where
         f: F,
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret!((ast_defs::ShapeFieldName, R))
+    ) -> Result<(ast_defs::ShapeFieldName, R)>
     where
-        F: Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
+        F: Fn(&Syntax<T, V>, &mut Env) -> Result<R>,
     {
         match &node.syntax {
             FieldInitializer(c) => {
@@ -716,7 +712,7 @@ where
         }
     }
 
-    fn p_shape_field_name(node: &Syntax<T, V>, env: &mut Env) -> ret!(ast_defs::ShapeFieldName) {
+    fn p_shape_field_name(node: &Syntax<T, V>, env: &mut Env) -> Result<ast_defs::ShapeFieldName> {
         use ast_defs::ShapeFieldName::*;
         let is_valid_shape_literal = |t: &T| {
             let is_str = t.kind() == TK::SingleQuotedStringLiteral
@@ -755,7 +751,7 @@ where
         }
     }
 
-    fn p_shape_field(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(ShapeFieldInfo) {
+    fn p_shape_field(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::ShapeFieldInfo> {
         match &node.syntax {
             FieldSpecifier(c) => {
                 let optional = !c.field_question.is_missing();
@@ -778,11 +774,11 @@ where
         }
     }
 
-    fn p_targ(node: &Syntax<T, V>, env: &mut Env) -> ret!(aast::Targ<()>) {
+    fn p_targ(node: &Syntax<T, V>, env: &mut Env) -> Result<aast::Targ<()>> {
         Ok(aast::Targ((), Self::p_hint(node, env)?))
     }
 
-    fn p_hint_(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Hint_) {
+    fn p_hint_(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Hint_> {
         use aast_defs::Hint_::*;
         let unary = |kw, ty, env: &mut Env| {
             Ok(Happly(
@@ -992,7 +988,7 @@ where
         }
     }
 
-    fn p_hint(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Hint) {
+    fn p_hint(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Hint> {
         let hint_ = Self::p_hint_(node, env)?;
         let pos = Self::p_pos(node, env);
         let hint = aast::Hint::new(pos, hint_);
@@ -1000,14 +996,14 @@ where
         Ok(hint)
     }
 
-    fn p_simple_initializer(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Expr<,>) {
+    fn p_simple_initializer(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Expr> {
         match &node.syntax {
             SimpleInitializer(c) => Self::p_expr(&c.simple_initializer_value, env),
             _ => Self::missing_syntax(None, "simple initializer", node, env),
         }
     }
 
-    fn p_member(node: &Syntax<T, V>, env: &mut Env) -> ret!((ast::Expr, ast::Expr)) {
+    fn p_member(node: &Syntax<T, V>, env: &mut Env) -> Result<(ast::Expr, ast::Expr)> {
         match &node.syntax {
             ElementInitializer(c) => Ok((
                 Self::p_expr(&c.element_key, env)?,
@@ -1017,14 +1013,14 @@ where
         }
     }
 
-    fn expand_type_args(ty: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<ast::Hint>) {
+    fn expand_type_args(ty: &Syntax<T, V>, env: &mut Env) -> Result<Vec<ast::Hint>> {
         match &ty.syntax {
             TypeArguments(c) => Self::could_map(Self::p_hint, &c.type_arguments_types, env),
             _ => Ok(vec![]),
         }
     }
 
-    fn p_afield(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Afield<,>) {
+    fn p_afield(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Afield> {
         match &node.syntax {
             ElementInitializer(c) => Ok(aast::Afield::AFkvalue(
                 Self::p_expr(&c.element_key, env)?,
@@ -1062,7 +1058,7 @@ where
         }
     }
 
-    fn p_import_flavor(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(ImportFlavor) {
+    fn p_import_flavor(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::ImportFlavor> {
         use aast::ImportFlavor::*;
         match Self::token_kind(node) {
             Some(TK::Include) => Ok(Include),
@@ -1073,7 +1069,7 @@ where
         }
     }
 
-    fn p_null_flavor(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(OgNullFlavor) {
+    fn p_null_flavor(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::OgNullFlavor> {
         use aast::OgNullFlavor::*;
         match Self::token_kind(node) {
             Some(TK::QuestionMinusGreaterThan) => Ok(OGNullsafe),
@@ -1083,7 +1079,7 @@ where
     }
 
     #[inline]
-    fn wrap_unescaper<F>(unescaper: F, s: &str) -> ret!(String)
+    fn wrap_unescaper<F>(unescaper: F, s: &str) -> Result<String>
     where
         F: FnOnce(&str) -> std::result::Result<String, InvalidString>,
     {
@@ -1113,7 +1109,7 @@ where
     }
 
     // (hrust) `i` is initial index
-    fn rfind(s: &[u8], mut i: usize, c: u8) -> ret!(usize) {
+    fn rfind(s: &[u8], mut i: usize, c: u8) -> Result<usize> {
         if i >= s.len() {
             return Self::failwith("index out of range");
         }
@@ -1127,7 +1123,7 @@ where
         Self::failwith("char not found")
     }
 
-    fn prep_string2(nodes: &[Syntax<T, V>], env: &mut Env) -> ret!((TokenOp, TokenOp)) {
+    fn prep_string2(nodes: &[Syntax<T, V>], env: &mut Env) -> Result<(TokenOp, TokenOp)> {
         use TokenOp::*;
         let is_qoute = |c| c == b'\"' || c == b'`';
         let start_is_qoute = |s: &[u8]| {
@@ -1193,7 +1189,7 @@ where
         }
     }
 
-    fn process_token_op(op: TokenOp, node: &Syntax<T, V>) -> ret!(Option<Syntax<T, V>>) {
+    fn process_token_op(op: TokenOp, node: &Syntax<T, V>) -> Result<Option<Syntax<T, V>>> {
         use TokenOp::*;
         match op {
             LeftTrim(n) => match &node.syntax {
@@ -1218,7 +1214,7 @@ where
         }
     }
 
-    fn p_string2(nodes: &[Syntax<T, V>], env: &mut Env) -> ret!(Vec<ast::Expr>) {
+    fn p_string2(nodes: &[Syntax<T, V>], env: &mut Env) -> Result<Vec<ast::Expr>> {
         use TokenOp::*;
         let (head_op, tail_op) = Self::prep_string2(nodes, env)?;
         let mut result = Vec::with_capacity(nodes.len());
@@ -1267,7 +1263,7 @@ where
         Ok(result)
     }
 
-    fn p_expr_l(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Expr<,>) {
+    fn p_expr_l(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Expr> {
         Self::p_expr_l_with_loc(ExprLocation::TopLevel, node, env)
     }
 
@@ -1275,8 +1271,8 @@ where
         loc: ExprLocation,
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret_aast!(Expr<,>) {
-        let p_expr = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(Expr<,>) {
+    ) -> Result<ast::Expr> {
+        let p_expr = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::Expr> {
             Self::p_expr_with_loc(loc, n, e)
         };
         Ok(aast::Expr::new(
@@ -1286,7 +1282,7 @@ where
     }
 
     #[inline]
-    fn p_expr(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Expr<,>) {
+    fn p_expr(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Expr> {
         Self::p_expr_with_loc(ExprLocation::TopLevel, node, env)
     }
 
@@ -1295,7 +1291,7 @@ where
         location: ExprLocation,
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret_aast!(Expr<,>) {
+    ) -> Result<ast::Expr> {
         Self::p_expr_impl(location, node, env, None)
     }
 
@@ -1304,7 +1300,7 @@ where
         node: &Syntax<T, V>,
         env: &mut Env,
         parent_pos: Option<Pos>,
-    ) -> ret_aast!(Expr<,>) {
+    ) -> Result<ast::Expr> {
         match &node.syntax {
             BracedExpression(c) => {
                 let expr = &c.braced_expression_expression;
@@ -1339,7 +1335,7 @@ where
         parent: &Syntax<T, V>,
         expr: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret_aast!(Expr_<,>) {
+    ) -> Result<ast::Expr_> {
         match &expr.syntax {
             Token(_) => {
                 let s = expr.text(env.indexed_source_text.source_text());
@@ -1403,7 +1399,7 @@ where
         location: ExprLocation,
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret_aast!(Expr_<,>) {
+    ) -> Result<ast::Expr_> {
         Self::p_expr_impl_(location, node, env, None)
     }
 
@@ -1412,11 +1408,11 @@ where
         node: &Syntax<T, V>,
         env: &mut Env,
         parent_pos: Option<Pos>,
-    ) -> ret_aast!(Expr_<,>) {
+    ) -> Result<ast::Expr_> {
         use aast::Expr as E;
         let split_args_varargs = |arg_list_node: &Syntax<T, V>,
                                   e: &mut Env|
-         -> ret!((Vec<ast::Expr>, Vec<ast::Expr>)) {
+         -> Result<(Vec<ast::Expr>, Vec<ast::Expr>)> {
             let mut arg_list = Self::as_list(arg_list_node);
             if let Some(last_arg) = arg_list.last() {
                 if let DecoratedExpression(c) = &last_arg.syntax {
@@ -1449,7 +1445,7 @@ where
             ))
         };
         let p_special_call =
-            |recv: &Syntax<T, V>, args: &Syntax<T, V>, e: &mut Env| -> ret_aast!(Expr_<,>) {
+            |recv: &Syntax<T, V>, args: &Syntax<T, V>, e: &mut Env| -> Result<ast::Expr_> {
                 let pos_if_has_parens = match &recv.syntax {
                     ParenthesizedExpression(_) => Some(Self::p_pos(recv, e)),
                     _ => None,
@@ -1473,7 +1469,7 @@ where
                          op: &Syntax<T, V>,
                          name: &Syntax<T, V>,
                          e: &mut Env|
-         -> ret_aast!(Expr_<,>) {
+         -> Result<ast::Expr_> {
             if recv.is_object_creation_expression() && !e.codegen() {
                 Self::raise_parsing_error(recv, e, &syntax_error::invalid_constructor_method_call);
             }
@@ -1648,7 +1644,7 @@ where
             }
             ListExpression(c) => {
                 /* TODO: Or tie in with other intrinsics and post-process to List */
-                let p_binder_or_ignore = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(Expr<,>) {
+                let p_binder_or_ignore = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::Expr> {
                     match &n.syntax {
                         Missing => Ok(E::new(e.mk_none_pos(), E_::Omitted)),
                         _ => Self::p_expr(n, e),
@@ -2327,7 +2323,7 @@ where
         }
     }
 
-    fn p_xhp_embedded<F>(escaper: F, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Expr<,>)
+    fn p_xhp_embedded<F>(escaper: F, node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Expr>
     where
         F: FnOnce(&[u8]) -> Vec<u8>,
     {
@@ -2360,7 +2356,7 @@ where
         }
     }
 
-    fn p_xhp_attr(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(XhpAttribute<,>) {
+    fn p_xhp_attr(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::XhpAttribute> {
         match &node.syntax {
             XHPSimpleAttribute(c) => {
                 let attr_expr = &c.xhp_simple_attribute_expression;
@@ -2386,7 +2382,7 @@ where
 
     fn aggregate_xhp_tokens<'b>(
         nodes: &'b Syntax<T, V>,
-    ) -> ret!(Vec<Either<Syntax<T, V>, &'b Syntax<T, V>>>) {
+    ) -> Result<Vec<Either<Syntax<T, V>, &'b Syntax<T, V>>>> {
         let nodes = Self::as_list(nodes);
         let mut state = (None, None, vec![]); // (start, end, result)
         let combine = |state: &mut (
@@ -2438,7 +2434,7 @@ where
         lhs: ast::Expr,
         rhs: ast::Expr,
         env: &mut Env,
-    ) -> ret_aast!(Expr_<,>) {
+    ) -> Result<ast::Expr_> {
         use ast_defs::Bop::*;
         let mk = |op, l, r| Ok(E_::mk_binop(op, l, r));
         let mk_eq = |op, l, r| Ok(E_::mk_binop(Eq(Some(Box::new(op))), l, r));
@@ -2511,7 +2507,7 @@ where
         pos: &Pos,
         mut nodes: Iter<&Syntax<T, V>>,
         env: &mut Env,
-    ) -> ret!(Vec<ast::Stmt>) {
+    ) -> Result<Vec<ast::Stmt>> {
         let mut r = vec![];
         loop {
             match nodes.next() {
@@ -2547,7 +2543,7 @@ where
     }
 
     // TODO: rename to p_stmt_list
-    fn handle_loop_body(pos: Pos, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
+    fn handle_loop_body(pos: Pos, node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Stmt> {
         let list = Self::as_list(node);
         let blk: Vec<_> = Self::p_stmt_list_(&pos, list.iter(), env)?
             .into_iter()
@@ -2590,9 +2586,9 @@ where
         result
     }
 
-    fn with_new_concurrent_scrope<F, R>(f: F, env: &mut Env) -> ret!((LiftedAwaitExprs, R))
+    fn with_new_concurrent_scrope<F, R>(f: F, env: &mut Env) -> Result<(LiftedAwaitExprs, R)>
     where
-        F: FnOnce(&mut Env) -> ret!(R),
+        F: FnOnce(&mut Env) -> Result<R>,
     {
         let saved_lifted_awaits = env.lifted_awaits.replace(LiftedAwaits {
             awaits: vec![],
@@ -2608,7 +2604,7 @@ where
         Ok((awaits, result))
     }
 
-    fn process_lifted_awaits(mut awaits: LiftedAwaits, env: &Env) -> ret!(LiftedAwaitExprs) {
+    fn process_lifted_awaits(mut awaits: LiftedAwaits, env: &Env) -> Result<LiftedAwaitExprs> {
         for await_ in awaits.awaits.iter() {
             if (await_.1).0.is_none() {
                 return Self::failwith("none pos in lifted awaits");
@@ -2636,9 +2632,9 @@ where
         }
     }
 
-    fn lift_awaits_in_statement<F>(f: F, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>)
+    fn lift_awaits_in_statement<F>(f: F, node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Stmt>
     where
-        F: FnOnce(&mut Env) -> ret_aast!(Stmt<,>),
+        F: FnOnce(&mut Env) -> Result<ast::Stmt>,
     {
         Self::lift_awaits_in_statement_(f, Either::Left(node), env)
     }
@@ -2647,9 +2643,9 @@ where
         f: F,
         pos: Either<&Syntax<T, V>, &Pos>,
         env: &mut Env,
-    ) -> ret_aast!(Stmt<,>)
+    ) -> Result<ast::Stmt>
     where
-        F: FnOnce(&mut Env) -> ret_aast!(Stmt<,>),
+        F: FnOnce(&mut Env) -> Result<ast::Stmt>,
     {
         use LiftedAwaitKind::*;
         let (lifted_awaits, result) = match env.lifted_awaits {
@@ -2688,7 +2684,7 @@ where
         expr: ast::Expr,
         env: &mut Env,
         location: ExprLocation,
-    ) -> ret_aast!(Expr_<,>) {
+    ) -> Result<ast::Expr_> {
         use ExprLocation::*;
         match (&env.lifted_awaits, location) {
             (_, UsingStatement) | (_, RightOfAssignmentInUsingStatement) | (None, _) => {
@@ -2712,7 +2708,7 @@ where
         }
     }
 
-    fn p_stmt(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
+    fn p_stmt(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Stmt> {
         Self::clear_statement_scope(
             |e: &mut Env| {
                 let docblock = Self::extract_docblock(node, e);
@@ -2725,12 +2721,12 @@ where
         )
     }
 
-    fn p_stmt_(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
+    fn p_stmt_(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Stmt> {
         let pos = Self::p_pos(node, env);
         use aast::{Stmt as S, Stmt_ as S_};
         match &node.syntax {
             SwitchStatement(c) => {
-                let p_label = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(Case<,>) {
+                let p_label = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::Case> {
                     match &n.syntax {
                         CaseLabel(c) => Ok(aast::Case::Case(
                             Self::p_expr(&c.case_expression, e)?,
@@ -2740,7 +2736,7 @@ where
                         _ => Self::missing_syntax(None, "switch label", n, e),
                     }
                 };
-                let p_section = |n: &Syntax<T, V>, e: &mut Env| -> ret!(Vec<ast::Case>) {
+                let p_section = |n: &Syntax<T, V>, e: &mut Env| -> Result<Vec<ast::Case>> {
                     match &n.syntax {
                         SwitchSection(c) => {
                             let mut blk =
@@ -2759,7 +2755,7 @@ where
                         _ => Self::missing_syntax(None, "switch section", n, e),
                     }
                 };
-                let f = |env: &mut Env| -> ret_aast!(Stmt<,>) {
+                let f = |env: &mut Env| -> Result<ast::Stmt> {
                     Ok(S::new(
                         pos,
                         S_::mk_switch(
@@ -2771,16 +2767,17 @@ where
                 Self::lift_awaits_in_statement(f, node, env)
             }
             IfStatement(c) => {
-                let p_else_if = |n: &Syntax<T, V>, e: &mut Env| -> ret!((ast::Expr, ast::Block)) {
-                    match &n.syntax {
-                        ElseifClause(c) => Ok((
-                            Self::p_expr(&c.elseif_condition, e)?,
-                            Self::p_block(true, &c.elseif_statement, e)?,
-                        )),
-                        _ => Self::missing_syntax(None, "elseif clause", n, e),
-                    }
-                };
-                let f = |env: &mut Env| -> ret_aast!(Stmt<,>) {
+                let p_else_if =
+                    |n: &Syntax<T, V>, e: &mut Env| -> Result<(ast::Expr, ast::Block)> {
+                        match &n.syntax {
+                            ElseifClause(c) => Ok((
+                                Self::p_expr(&c.elseif_condition, e)?,
+                                Self::p_block(true, &c.elseif_statement, e)?,
+                            )),
+                            _ => Self::missing_syntax(None, "elseif clause", n, e),
+                        }
+                    };
+                let f = |env: &mut Env| -> Result<ast::Stmt> {
                     let condition = Self::p_expr(&c.if_condition, env)?;
                     let statement =
                         Self::p_block(true /* remove noop */, &c.if_statement, env)?;
@@ -2802,7 +2799,7 @@ where
             }
             ExpressionStatement(c) => {
                 let expr = &c.expression_statement_expression;
-                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                let f = |e: &mut Env| -> Result<ast::Stmt> {
                     if expr.is_missing() {
                         Ok(S::new(pos, S_::Noop))
                     } else {
@@ -2823,7 +2820,7 @@ where
             CompoundStatement(c) => Self::handle_loop_body(pos, &c.compound_statements, env),
             SyntaxList(_) => Self::handle_loop_body(pos, node, env),
             ThrowStatement(c) => Self::lift_awaits_in_statement(
-                |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                |e: &mut Env| -> Result<ast::Stmt> {
                     Ok(S::new(
                         pos,
                         S_::mk_throw(Self::p_expr(&c.throw_expression, e)?),
@@ -2847,7 +2844,7 @@ where
                 ),
             )),
             UsingStatementBlockScoped(c) => {
-                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                let f = |e: &mut Env| -> Result<ast::Stmt> {
                     Ok(S::new(
                         pos,
                         S_::mk_using(aast::UsingStmt {
@@ -2865,7 +2862,7 @@ where
                 Self::lift_awaits_in_statement(f, node, env)
             }
             UsingStatementFunctionScoped(c) => {
-                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                let f = |e: &mut Env| -> Result<ast::Stmt> {
                     Ok(S::new(
                         pos,
                         S_::mk_using(aast::UsingStmt {
@@ -2883,7 +2880,7 @@ where
                 Self::lift_awaits_in_statement(f, node, env)
             }
             LetStatement(c) => {
-                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                let f = |e: &mut Env| -> Result<ast::Stmt> {
                     let id = Self::lid_from_pos_name(pos.clone(), &c.let_statement_name, e)?;
                     let ty = Self::mp_optional(Self::p_hint, &c.let_statement_type, e)?;
                     let expr = Self::p_simple_initializer(&c.let_statement_initializer, e)?;
@@ -2892,7 +2889,7 @@ where
                 Self::lift_awaits_in_statement(f, node, env)
             }
             ForStatement(c) => {
-                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                let f = |e: &mut Env| -> Result<ast::Stmt> {
                     let ini = Self::p_expr_l(&c.for_initializer, e)?;
                     let ctr = Self::p_expr_l(&c.for_control, e)?;
                     let eol = Self::p_expr_l(&c.for_end_of_loop, e)?;
@@ -2902,7 +2899,7 @@ where
                 Self::lift_awaits_in_statement(f, node, env)
             }
             ForeachStatement(c) => {
-                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                let f = |e: &mut Env| -> Result<ast::Stmt> {
                     let col = Self::p_expr(&c.foreach_collection, e)?;
                     let akw = match Self::token_kind(&c.foreach_await_keyword) {
                         Some(TK::Await) => Some(Self::p_pos(&c.foreach_await_keyword, e)),
@@ -2945,7 +2942,7 @@ where
                 ),
             )),
             ReturnStatement(c) => {
-                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                let f = |e: &mut Env| -> Result<ast::Stmt> {
                     let expr = match &c.return_expression.syntax {
                         Missing => None,
                         _ => Some(Self::p_expr_with_loc(
@@ -2984,7 +2981,7 @@ where
                 ))
             }
             EchoStatement(c) => {
-                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                let f = |e: &mut Env| -> Result<ast::Stmt> {
                     let echo = match &c.echo_keyword.syntax {
                         QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
                             let name = Self::pos_name(&c.echo_keyword, e)?;
@@ -3004,7 +3001,7 @@ where
                 Self::lift_awaits_in_statement(f, node, env)
             }
             UnsetStatement(c) => {
-                let f = |e: &mut Env| -> ret_aast!(Stmt<,>) {
+                let f = |e: &mut Env| -> Result<ast::Stmt> {
                     let args = Self::could_map(Self::p_expr, &c.unset_variables, e)?;
                     if e.parser_options.po_disable_unset_class_const {
                         args.iter()
@@ -3129,7 +3126,7 @@ where
         RE.is_match(text)
     }
 
-    fn p_markup(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Stmt<,>) {
+    fn p_markup(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Stmt> {
         match &node.syntax {
             MarkupSection(c) => {
                 let markup_prefix = &c.markup_prefix;
@@ -3165,7 +3162,7 @@ where
         mut init: R,
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret!((modifier::KindSet, R)) {
+    ) -> Result<(modifier::KindSet, R)> {
         let nodes = Self::as_list(node);
         let mut kind_set = modifier::KindSet::new();
         for n in nodes.iter() {
@@ -3181,23 +3178,23 @@ where
         Ok((kind_set, init))
     }
 
-    fn p_kinds(node: &Syntax<T, V>, env: &mut Env) -> ret!(modifier::KindSet) {
+    fn p_kinds(node: &Syntax<T, V>, env: &mut Env) -> Result<modifier::KindSet> {
         Self::p_modifiers(|_, _| {}, (), node, env).map(|r| r.0)
     }
 
     // TODO: change name to map_flatten after porting
     #[inline]
-    fn could_map<R, F>(f: F, node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<R>)
+    fn could_map<R, F>(f: F, node: &Syntax<T, V>, env: &mut Env) -> Result<Vec<R>>
     where
-        F: Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
+        F: Fn(&Syntax<T, V>, &mut Env) -> Result<R>,
     {
         Self::map_flatten_(f, node, env, vec![])
     }
 
     #[inline]
-    fn map_flatten_<R, F>(f: F, node: &Syntax<T, V>, env: &mut Env, acc: Vec<R>) -> ret!(Vec<R>)
+    fn map_flatten_<R, F>(f: F, node: &Syntax<T, V>, env: &mut Env, acc: Vec<R>) -> Result<Vec<R>>
     where
-        F: Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
+        F: Fn(&Syntax<T, V>, &mut Env) -> Result<R>,
     {
         let op = |mut v: Vec<R>, a| {
             v.push(a);
@@ -3206,9 +3203,9 @@ where
         Self::map_fold(&f, &op, node, env, acc)
     }
 
-    fn map_fold<A, R, F, O>(f: &F, op: &O, node: &Syntax<T, V>, env: &mut Env, acc: A) -> ret!(A)
+    fn map_fold<A, R, F, O>(f: &F, op: &O, node: &Syntax<T, V>, env: &mut Env, acc: A) -> Result<A>
     where
-        F: Fn(&Syntax<T, V>, &mut Env) -> ret!(R),
+        F: Fn(&Syntax<T, V>, &mut Env) -> Result<R>,
         O: Fn(A, R) -> A,
     {
         match &node.syntax {
@@ -3225,7 +3222,7 @@ where
         }
     }
 
-    fn p_visibility(node: &Syntax<T, V>, env: &mut Env) -> ret!(Option<ast::Visibility>) {
+    fn p_visibility(node: &Syntax<T, V>, env: &mut Env) -> Result<Option<ast::Visibility>> {
         let first_vis =
             |r: Option<ast::Visibility>, kind| r.or_else(|| modifier::to_visibility(kind));
         Self::p_modifiers(first_vis, None, node, env).map(|r| r.1)
@@ -3235,11 +3232,14 @@ where
         node: &Syntax<T, V>,
         env: &mut Env,
         default: ast::Visibility,
-    ) -> ret_aast!(Visibility) {
+    ) -> Result<ast::Visibility> {
         Self::p_visibility(node, env).map(|v| v.unwrap_or(default))
     }
 
-    fn p_visibility_last_win(node: &Syntax<T, V>, env: &mut Env) -> ret!(Option<ast::Visibility>) {
+    fn p_visibility_last_win(
+        node: &Syntax<T, V>,
+        env: &mut Env,
+    ) -> Result<Option<ast::Visibility>> {
         let last_vis = |r, kind| modifier::to_visibility(kind).or(r);
         Self::p_modifiers(last_vis, None, node, env).map(|r| r.1)
     }
@@ -3248,7 +3248,7 @@ where
         node: &Syntax<T, V>,
         env: &mut Env,
         default: ast::Visibility,
-    ) -> ret_aast!(Visibility) {
+    ) -> Result<ast::Visibility> {
         Self::p_visibility_last_win(node, env).map(|v| v.unwrap_or(default))
     }
 
@@ -3264,7 +3264,7 @@ where
         }
     }
 
-    fn p_fun_param_default_value(node: &Syntax<T, V>, env: &mut Env) -> ret!(Option<ast::Expr>) {
+    fn p_fun_param_default_value(node: &Syntax<T, V>, env: &mut Env) -> Result<Option<ast::Expr>> {
         match &node.syntax {
             SimpleInitializer(c) => {
                 Self::mp_optional(Self::p_expr, &c.simple_initializer_value, env)
@@ -3273,7 +3273,7 @@ where
         }
     }
 
-    fn p_param_kind(node: &Syntax<T, V>, env: &mut Env) -> ret!(ast_defs::ParamKind) {
+    fn p_param_kind(node: &Syntax<T, V>, env: &mut Env) -> Result<ast_defs::ParamKind> {
         match Self::token_kind(node) {
             Some(TK::Inout) => Ok(ast_defs::ParamKind::Pinout),
             _ => Self::missing_syntax(None, "param kind", node, env),
@@ -3296,7 +3296,7 @@ where
         }
     }
 
-    fn p_fun_param(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(FunParam<,>) {
+    fn p_fun_param(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::FunParam> {
         match &node.syntax {
             ParameterDeclaration(c) => {
                 let parameter_attribute = &c.parameter_attribute;
@@ -3376,7 +3376,7 @@ where
         }
     }
 
-    fn p_tconstraint_ty(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Hint) {
+    fn p_tconstraint_ty(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Hint> {
         match &node.syntax {
             TypeConstraint(c) => Self::p_hint(&c.constraint_type, env),
             _ => Self::missing_syntax(None, "type constraint", node, env),
@@ -3386,7 +3386,7 @@ where
     fn p_tconstraint(
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret!((ast_defs::ConstraintKind, ast::Hint)) {
+    ) -> Result<(ast_defs::ConstraintKind, ast::Hint)> {
         match &node.syntax {
             TypeConstraint(c) => Ok((
                 match Self::token_kind(&c.constraint_keyword) {
@@ -3406,7 +3406,7 @@ where
         }
     }
 
-    fn p_tparam(is_class: bool, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Tparam<,>) {
+    fn p_tparam(is_class: bool, node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Tparam> {
         match &node.syntax {
             TypeParameter(c) => {
                 let user_attributes = Self::p_user_attributes(&c.type_attribute_spec, env)?;
@@ -3444,7 +3444,7 @@ where
         }
     }
 
-    fn p_tparam_l(is_class: bool, node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<ast::Tparam>) {
+    fn p_tparam_l(is_class: bool, node: &Syntax<T, V>, env: &mut Env) -> Result<Vec<ast::Tparam>> {
         match &node.syntax {
             Missing => Ok(vec![]),
             TypeParameters(c) => Self::could_map(
@@ -3456,7 +3456,7 @@ where
         }
     }
 
-    fn p_fun_hdr(node: &Syntax<T, V>, env: &mut Env) -> ret!(FunHdr) {
+    fn p_fun_hdr(node: &Syntax<T, V>, env: &mut Env) -> Result<FunHdr> {
         match &node.syntax {
             FunctionDeclarationHeader(c) => {
                 let function_modifiers = &c.function_modifiers;
@@ -3541,7 +3541,7 @@ where
         }
     }
 
-    fn p_block(remove_noop: bool, node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Block<,>) {
+    fn p_block(remove_noop: bool, node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Block> {
         let aast::Stmt(p, stmt_) = Self::p_stmt(node, env)?;
         if let aast::Stmt_::Block(blk) = stmt_ {
             if remove_noop && blk.len() == 1 {
@@ -3559,9 +3559,9 @@ where
         aast::Stmt::noop(env.mk_none_pos())
     }
 
-    fn p_function_body(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Block<,>) {
+    fn p_function_body(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Block> {
         let mk_noop_result = |e: &Env| Ok(vec![Self::mk_noop(e)]);
-        let f = |e: &mut Env| -> ret_aast!(Block<,>) {
+        let f = |e: &mut Env| -> Result<ast::Block> {
             match &node.syntax {
                 Missing => Ok(vec![]),
                 CompoundStatement(c) => {
@@ -3649,7 +3649,7 @@ where
         constructor_call_argument_list: &Syntax<T, V>,
         constructor_call_type: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret_aast!(UserAttribute<,>) {
+    ) -> Result<ast::UserAttribute> {
         let name = Self::pos_name(constructor_call_type, env)?;
         if name.1.eq_ignore_ascii_case("__reified")
             || name.1.eq_ignore_ascii_case("__hasreifiedparent")
@@ -3661,7 +3661,7 @@ where
             Self::raise_parsing_error(node, env, &syntax_error::soft_no_arguments);
         }
         let params = Self::could_map(
-            |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(Expr<,>) {
+            |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::Expr> {
                 if let ScopeResolutionExpression(c) = &n.syntax {
                     if let Some(TK::Name) = Self::token_kind(&c.scope_resolution_name) {
                         Self::raise_parsing_error(
@@ -3685,8 +3685,8 @@ where
         Ok(aast::UserAttribute { name, params })
     }
 
-    fn p_user_attribute(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<ast::UserAttribute>) {
-        let p_attr = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(UserAttribute<,>) {
+    fn p_user_attribute(node: &Syntax<T, V>, env: &mut Env) -> Result<Vec<ast::UserAttribute>> {
+        let p_attr = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::UserAttribute> {
             match &n.syntax {
                 ConstructorCall(c) => Self::process_attribute_constructor_call(
                     node,
@@ -3705,7 +3705,7 @@ where
                 Self::could_map(p_attr, &c.old_attribute_specification_attributes, env)
             }
             AttributeSpecification(c) => Self::could_map(
-                |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(UserAttribute<,>) {
+                |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::UserAttribute> {
                     match &n.syntax {
                         Attribute(c) => p_attr(&c.attribute_attribute_name, e),
                         _ => Self::missing_syntax(None, "attribute", node, e),
@@ -3718,7 +3718,7 @@ where
         }
     }
 
-    fn p_user_attributes(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<ast::UserAttribute>) {
+    fn p_user_attributes(node: &Syntax<T, V>, env: &mut Env) -> Result<Vec<ast::UserAttribute>> {
         Self::map_fold(
             &Self::p_user_attribute,
             &|mut acc: Vec<ast::UserAttribute>, mut x: Vec<ast::UserAttribute>| {
@@ -3731,9 +3731,9 @@ where
         )
     }
 
-    fn mp_yielding<F, R>(p: F, node: &Syntax<T, V>, env: &mut Env) -> ret!((R, bool))
+    fn mp_yielding<F, R>(p: F, node: &Syntax<T, V>, env: &mut Env) -> Result<(R, bool)>
     where
-        F: FnOnce(&Syntax<T, V>, &mut Env) -> ret!(R),
+        F: FnOnce(&Syntax<T, V>, &mut Env) -> Result<R>,
     {
         let outer_saw_yield = env.saw_yield;
         env.saw_yield = false;
@@ -3815,7 +3815,7 @@ where
         parse(str, 0, Free, 0).map(Rc::new)
     }
 
-    fn p_xhp_child(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(XhpChild) {
+    fn p_xhp_child(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::XhpChild> {
         use aast::XhpChild::*;
         use aast::XhpChildOp::*;
         match &node.syntax {
@@ -3845,7 +3845,7 @@ where
         }
     }
 
-    fn p_class_elt_(class: &mut ast::Class_, node: &Syntax<T, V>, env: &mut Env) -> ret!(()) {
+    fn p_class_elt_(class: &mut ast::Class_, node: &Syntax<T, V>, env: &mut Env) -> Result<()> {
         let doc_comment_opt = Self::extract_docblock(node, env);
         let has_fun_header = |m: &MethodishDeclarationChildren<T, V>| {
             if let FunctionDeclarationHeader(_) = m.methodish_function_decl_header.syntax {
@@ -3859,7 +3859,7 @@ where
             }
             false
         };
-        let p_method_vis = |node: &Syntax<T, V>, env: &mut Env| -> ret_aast!(Visibility) {
+        let p_method_vis = |node: &Syntax<T, V>, env: &mut Env| -> Result<ast::Visibility> {
             match Self::p_visibility_last_win(node, env)? {
                 None => {
                     Self::raise_nast_error("method_needs_visiblity");
@@ -3876,7 +3876,7 @@ where
                 // if anything throw, it will discard all lowered elements. So adding to class
                 // must be at the last.
                 let mut class_consts = Self::could_map(
-                    |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(ClassConst<,>) {
+                    |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::ClassConst> {
                         match &n.syntax {
                             ConstantDeclarator(c) => {
                                 let id = Self::pos_name(&c.constant_declarator_name, e)?;
@@ -3958,7 +3958,7 @@ where
                     doc_comment_opt
                 };
                 let name_exprs = Self::could_map(
-                    |n, e| -> ret!((Pos, ast::Sid, Option<ast::Expr>)) {
+                    |n, e| -> Result<(Pos, ast::Sid, Option<ast::Expr>)> {
                         match &n.syntax {
                             PropertyDeclarator(c) => {
                                 let name = Self::pos_name_(&c.property_name, e, Some('$'))?;
@@ -4134,7 +4134,7 @@ where
                 Ok(())
             }
             TraitUseConflictResolution(c) => {
-                type Ret = ret!(Either<ast::InsteadofAlias, ast::UseAsAlias>);
+                type Ret = Result<Either<ast::InsteadofAlias, ast::UseAsAlias>>;
                 let p_item = |n: &Syntax<T, V>, e: &mut Env| -> Ret {
                     match &n.syntax {
                         TraitUsePrecedenceItem(c) => {
@@ -4225,7 +4225,7 @@ where
                 Ok(class.reqs.push((hint, is_extends)))
             }
             XHPClassAttributeDeclaration(c) => {
-                type Ret = ret!(Either<ast::XhpAttr, ast::Hint>);
+                type Ret = Result<Either<ast::XhpAttr, ast::Hint>>;
                 let p_attr = |node: &Syntax<T, V>, env: &mut Env| -> Ret {
                     let mut mk_attr_use = |n: &Syntax<T, V>| {
                         Ok(Either::Right(aast::Hint(
@@ -4394,7 +4394,7 @@ where
         }
     }
 
-    fn p_class_elt(class: &mut ast::Class_, node: &Syntax<T, V>, env: &mut Env) -> ret!(()) {
+    fn p_class_elt(class: &mut ast::Class_, node: &Syntax<T, V>, env: &mut Env) -> Result<()> {
         let r = Self::p_class_elt_(class, node, env);
         match r {
             // match ocaml behavior, don't throw if missing syntax when fail_open is true
@@ -4415,7 +4415,7 @@ where
         parent: &Syntax<T, V>,
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret!(Vec<ast::WhereConstraint>) {
+    ) -> Result<Vec<ast::WhereConstraint>> {
         match &node.syntax {
             Missing => Ok(vec![]),
             WhereClause(c) => {
@@ -4426,7 +4426,7 @@ where
                         "Class-level where clauses are disabled",
                     );
                 }
-                let f = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(WhereConstraint) {
+                let f = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::WhereConstraint> {
                     match &n.syntax {
                         WhereConstraint(c) => {
                             use ast_defs::ConstraintKind::*;
@@ -4459,7 +4459,7 @@ where
         }
     }
 
-    fn p_namespace_use_kind(kind: &Syntax<T, V>, env: &mut Env) -> ret_aast!(NsKind) {
+    fn p_namespace_use_kind(kind: &Syntax<T, V>, env: &mut Env) -> Result<ast::NsKind> {
         use aast::NsKind::*;
         match &kind.syntax {
             Missing => Ok(NSClassAndNamespace),
@@ -4475,10 +4475,10 @@ where
 
     fn p_namespace_use_clause(
         prefix: Option<&Syntax<T, V>>,
-        kind: ret_aast!(NsKind),
+        kind: Result<ast::NsKind>,
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> ret!((ast::NsKind, ast::Sid, ast::Sid)) {
+    ) -> Result<(ast::NsKind, ast::Sid, ast::Sid)> {
         lazy_static! {
             static ref NAMESPACE_USE: regex::Regex = regex::Regex::new("[^\\\\]*$").unwrap();
         }
@@ -4522,7 +4522,7 @@ where
         }
     }
 
-    fn p_def(node: &Syntax<T, V>, env: &mut Env) -> ret!(Vec<ast::Def>) {
+    fn p_def(node: &Syntax<T, V>, env: &mut Env) -> Result<Vec<ast::Def>> {
         let doc_comment_opt = Self::extract_docblock(node, env);
         match &node.syntax {
             FunctionDeclaration(c) => {
@@ -4702,7 +4702,7 @@ where
                 })])
             }
             EnumDeclaration(c) => {
-                let p_enumerator = |n: &Syntax<T, V>, e: &mut Env| -> ret_aast!(ClassConst<,>) {
+                let p_enumerator = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::ClassConst> {
                     match &n.syntax {
                         Enumerator(c) => Ok(aast::ClassConst {
                             type_: None,
@@ -4919,7 +4919,7 @@ where
         }
     }
 
-    fn p_program(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Program<,>) {
+    fn p_program(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Program> {
         let is_halt = |syntax: &SyntaxVariant<T, V>| -> bool {
             match syntax {
                 ExpressionStatement(c) => match &c.expression_statement_expression.syntax {
@@ -4950,7 +4950,7 @@ where
         Ok(program)
     }
 
-    fn p_script(node: &Syntax<T, V>, env: &mut Env) -> ret_aast!(Program<,>) {
+    fn p_script(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Program> {
         match &node.syntax {
             Script(children) => Self::p_program(&children.script_declarations, env),
             _ => Self::missing_syntax(None, "script", node, env),
@@ -4964,7 +4964,7 @@ where
         }
     }
 
-    fn lower(env: &mut Env<'a>, script: &Syntax<T, V>) -> std::result::Result<Result, String> {
+    fn lower(env: &mut Env<'a>, script: &Syntax<T, V>) -> std::result::Result<LoweredAst, String> {
         let aast_result = Self::p_script(script, env);
         let aast = match aast_result {
             Ok(ast) => ast,
@@ -4986,6 +4986,6 @@ where
         };
 
         let aast = Self::elaborate_halt_compiler(aast, env);
-        Ok(Result { aast })
+        Ok(LoweredAst { aast })
     }
 }

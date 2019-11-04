@@ -306,6 +306,7 @@ void beginInlining(IRGS& env,
   data.spOffset      = calleeAROff;
   data.numArgs       = numArgs;
   data.asyncEagerReturn = returnTarget.asyncEagerOffset != kInvalidOffset;
+  data.syncVmfp = false;
 
   assertx(startSk.func() == target &&
           startSk.offset() == target->getEntryForNumArgs(numArgs) &&

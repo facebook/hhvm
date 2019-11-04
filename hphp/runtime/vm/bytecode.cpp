@@ -4158,28 +4158,42 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
       hasUnpack ? StackArgsState::Trimmed : StackArgsState::Untrimmed,
       std::move(generics)
     );
+
+    checkForReifiedGenericsErrors(ar, callFlags.hasGenerics());
+    calleeDynamicCallChecks(ar->func(), callFlags.isDynamicCall());
+    return EventHook::FunctionCall(ar, EventHook::NormalFunc);
   } catch (...) {
-    // If the callee's frame is still pre-live, free it explicitly.
+    // Manually unwind the pre-live or live frame, as we may be called from JIT
+    // and expected to enter JIT unwinder with vmfp() set to the callee.
+    assertx(vmfp() == ar || vmfp() == ar->m_sfp);
+
+    auto const func = ar->func();
+    auto const numInOutParams = [&] () -> uint32_t {
+      if (!func->takesInOutParams()) return 0;
+      uint32_t i = 0;
+      for (int p = 0; p < ar->numArgs(); ++p) i += func->isInOut(p);
+      return i;
+    }();
+
     if (ar->m_sfp == vmfp()) {
+      // Unwind pre-live frame.
       assertx(vmStack().top() <= (void*)ar);
       while (vmStack().top() != (void*)ar) {
         vmStack().popTV();
       }
-      auto const numInOutParams = [&] () -> uint32_t {
-        if (!ar->func()->takesInOutParams()) return 0;
-        uint32_t i = 0;
-        for (int p = 0; p < ar->numArgs(); ++p) i += ar->func()->isInOut(p);
-        return i;
-      }();
       vmStack().popAR();
-      vmStack().ndiscard(numInOutParams);
+    } else {
+      // Unwind live frame.
+      vmfp() = ar->m_sfp;
+      vmpc() = vmfp()->func()->getEntry() + ar->callOffset();
+      assertx(vmStack().top() + func->numSlotsInFrame() == (void*)ar);
+      frame_free_locals_inl_no_hook(ar, func->numLocals());
+      vmStack().ndiscard(func->numSlotsInFrame());
+      vmStack().discardAR();
     }
+    vmStack().ndiscard(numInOutParams);
     throw;
   }
-
-  checkForReifiedGenericsErrors(ar, callFlags.hasGenerics());
-  calleeDynamicCallChecks(ar->func(), callFlags.isDynamicCall());
-  return EventHook::FunctionCall(ar, EventHook::NormalFunc);
 }
 
 namespace {

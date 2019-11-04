@@ -775,7 +775,9 @@ void recordNewUse(InlineAnalysis& ia,
 
 bool insertDefInlineFP(InlineAnalysis& ia, OptimizeContext& ctx, Block* block) {
   assertx(block->numPreds() == 1);
+  assertx(ctx.deadFp->inst()->is(DefInlineFP));
   auto newDef = ctx.unit->clone(ctx.deadFp->inst());
+  if (block->isCatch()) newDef->extra<DefInlineFP>()->syncVmfp = true;
   auto newFp  = newDef->dst();
   block->prepend(newDef);
   auto const inlineExit = replaceFP(block, ctx.deadFp, newFp, *ctx.fpUses);

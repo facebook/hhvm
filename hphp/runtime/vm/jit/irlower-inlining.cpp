@@ -96,6 +96,21 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
     emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_varEnv));
   }
 
+  if (extra->syncVmfp) {
+    // If we are in a catch block, update the vmfp() to point to the inlined
+    // frame if it was pointing to the parent frame, letting the unwinder see
+    // the inlined frame.
+    auto const newFP = v.makeReg();
+    auto const oldVmfp = v.makeReg();
+    auto const newVmfp = v.makeReg();
+    auto const sf = v.makeReg();
+    v << lea{ar, newFP};
+    v << load{rvmtl()[rds::kVmfpOff], oldVmfp};
+    v << cmpq{oldVmfp, callerFP, sf};
+    v << cmovq{CC_E, sf, oldVmfp, newFP, newVmfp};
+    v << store{newVmfp, rvmtl()[rds::kVmfpOff]};
+  }
+
   v << pushframe{};
   v << lea{ar, dstLoc(env, inst, 0).reg()};
 }

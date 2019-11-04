@@ -764,6 +764,7 @@ struct DefInlineFPData : IRExtraData {
   IRSPRelOffset spOffset; // offset from caller SP to bottom of callee's ActRec
   uint32_t numArgs;
   bool asyncEagerReturn;
+  bool syncVmfp;
 };
 
 struct SyncReturnBCData : IRExtraData {

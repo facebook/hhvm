@@ -219,7 +219,8 @@ let convert_capture (incoming : si_capture) : si_scan_result =
         Caml.Hashtbl.add result.sisr_filepaths s.sif_filepath path_hash);
   result
 
-let export_to_custom_writer json_exported_files ctxt =
+let export_to_custom_writer
+    (json_exported_files : string list) (ctxt : index_builder_context) : unit =
   match (ctxt.custom_service, ctxt.custom_repo_name) with
   | (Some _, None)
   | (None, Some _) ->

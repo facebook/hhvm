@@ -504,8 +504,6 @@ module Typehints = struct
 
   let string = "string"
 
-  let binary = "binary"
-
   let array = "array"
 
   let darray = "darray"
@@ -538,7 +536,6 @@ module Typehints = struct
         bool;
         float;
         string;
-        binary;
         array;
         darray;
         varray;

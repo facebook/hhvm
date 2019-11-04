@@ -578,6 +578,7 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
 
 const StaticString
   s_forcePHPArrays("forcePHPArrays"),
+  s_keepDVArrays("keepDVArrays"),
   s_warnOnHackArrays("warnOnHackArrays"),
   s_warnOnPHPArrays("warnOnPHPArrays"),
   s_ignoreLateInit("ignoreLateInit");
@@ -586,7 +587,8 @@ String HHVM_FUNCTION(HH_serialize_with_options,
                      const Variant& value, const Array& options) {
   return serialize_impl(
     value,
-    false,
+    options.exists(s_keepDVArrays) &&
+      options[s_keepDVArrays].toBoolean(),
     options.exists(s_forcePHPArrays) &&
       options[s_forcePHPArrays].toBoolean(),
     options.exists(s_warnOnHackArrays) &&

@@ -12,6 +12,7 @@ function serialize_test($a) {
 }
 
 function unserialize_test($s) {
+  echo "unserialize_test(\"".$s."\")\n";
   $a = __hhvm_intrinsics\deserialize_keep_dvarrays(
     __hhvm_intrinsics\launder_value($s)
   );

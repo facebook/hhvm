@@ -234,6 +234,8 @@ namespace HH {
   * warnOnPHPArrays  - If true, emit a Hack array compat notice if serializing a
   *                    PHP array
   * forcePHPArrays   - If true, serialize all Hack arrays as PHP arrays
+  * keepDVArrays     - If true, use custom HHVM-specific serialization format,
+  *                    which preserves varray and darray intact.
   */
   <<__Native, __IsFoldable>>
   function serialize_with_options(mixed $value, dict $options = dict[]): string;

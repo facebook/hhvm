@@ -87,12 +87,22 @@ struct VariantControllerImpl {
         if (HackArraysMode == VariantControllerHackArraysMode::ON) {
           return HPHP::serialize::Type::MAP;
         }
+        if (RuntimeOption::EvalHackArrCompatFBSerializeHackArraysNotices) {
+          raise_hackarr_compat_notice(
+              "attempted to fb_serialize dict without "
+              "FB_SERIALIZE_HACK_ARRAYS flag");
+        }
         throw HPHP::serialize::HackArraySerializeError{};
       }
       case KindOfPersistentVec:
       case KindOfVec: {
         if (HackArraysMode == VariantControllerHackArraysMode::ON) {
           return HPHP::serialize::Type::LIST;
+        }
+        if (RuntimeOption::EvalHackArrCompatFBSerializeHackArraysNotices) {
+          raise_hackarr_compat_notice(
+              "attempted to fb_serialize vec without "
+              "FB_SERIALIZE_HACK_ARRAYS flag");
         }
         throw HPHP::serialize::HackArraySerializeError{};
       }

@@ -173,9 +173,8 @@ let get_deps_set classes =
     ~init:Relative_path.Set.empty
 
 let get_deps_set_function f_name =
-  match Naming_table.Funs.get_pos f_name with
-  | Some pos ->
-    let fn = FileInfo.get_pos_filename pos in
+  match Naming_table.Funs.get_filename f_name with
+  | Some fn ->
     let dep = Typing_deps.Dep.Fun f_name in
     let ideps = Typing_deps.get_ideps dep in
     let files = Typing_deps.get_files ideps in

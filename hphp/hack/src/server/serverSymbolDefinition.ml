@@ -40,9 +40,8 @@ let get_class_by_name x =
   @@ (fun () -> Ast_provider.find_class_in_file fn x)
 
 let get_function_by_name x =
-  Naming_table.Funs.get_pos x
-  >>= fun pos ->
-  let fn = FileInfo.get_pos_filename pos in
+  Naming_table.Funs.get_filename x
+  >>= fun fn ->
   Ide_parser_cache.with_ide_cache
   @@ (fun () -> Ast_provider.find_fun_in_file fn x)
 

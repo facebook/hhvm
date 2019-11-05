@@ -39,9 +39,8 @@ let get_fun x =
   match Funs.get x with
   | Some c -> Some c
   | None ->
-    (match Naming_table.Funs.get_pos x with
-    | Some pos ->
-      let filename = FileInfo.get_pos_filename pos in
+    (match Naming_table.Funs.get_filename x with
+    | Some filename ->
       let ft =
         Errors.run_in_decl_mode filename (fun () ->
             Decl.declare_fun_in_file filename x)

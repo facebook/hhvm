@@ -41,9 +41,8 @@ let get_fun (fun_name : fun_key) : fun_decl option =
         ~key:(Provider_config.Fun_decl fun_name)
         ~default:(fun () ->
           let result : fun_decl option =
-            match Naming_table.Funs.get_pos fun_name with
-            | Some pos ->
-              let filename = FileInfo.get_pos_filename pos in
+            match Naming_table.Funs.get_filename fun_name with
+            | Some filename ->
               let ft =
                 Errors.run_in_decl_mode filename (fun () ->
                     Decl.declare_fun_in_file filename fun_name)

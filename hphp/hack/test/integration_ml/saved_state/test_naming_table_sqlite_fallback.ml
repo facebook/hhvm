@@ -33,8 +33,7 @@ let get_type_path type_name =
     ~f:(fun (pos, _) -> FileInfo.get_pos_filename pos)
     (Naming_table.Types.get_pos type_name)
 
-let get_fun_path fun_name =
-  Option.map ~f:FileInfo.get_pos_filename (Naming_table.Funs.get_pos fun_name)
+let get_fun_path fun_name = Naming_table.Funs.get_filename fun_name
 
 let get_const_path fun_name = Naming_table.Consts.get_filename fun_name
 

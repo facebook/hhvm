@@ -20,10 +20,9 @@ let get_class id =
     | Some class_ -> Some (Naming.class_ class_))
 
 let get_fun id =
-  match Naming_table.Funs.get_pos id with
+  match Naming_table.Funs.get_filename id with
   | None -> None
-  | Some pos ->
-    let fn = FileInfo.get_pos_filename pos in
+  | Some fn ->
     (match Ast_provider.find_fun_in_file fn id with
     | None -> None
     | Some fun_ -> Some (Naming.fun_ fun_))

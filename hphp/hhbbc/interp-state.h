@@ -67,15 +67,17 @@ struct LiveIter {
   IterTypes types;
   // If the base came from a local, and all updates to it have been "safe",
   // this field will be the id of that local. Otherwise, it will be NoLocalId.
-  LocalId baseLocal = NoLocalId;
+  LocalId baseLocal       = NoLocalId;
   // The local that is known to be equivalent to the current key in the iter.
   // Used to detect "safe" updates to the base.
-  LocalId keyLocal  = NoLocalId;
+  LocalId keyLocal        = NoLocalId;
   // The block id where this iterator was initialized. If there's more than one
   // such block, it will be NoBlockId.
-  BlockId initBlock = NoBlockId;
+  BlockId initBlock       = NoBlockId;
   // Set whenever we see any mutation, even "safe" ones that don't affect keys.
-  bool baseUpdated = false;
+  bool baseUpdated        = false;
+  // Set whenever the base of the iterator cannot be an iterator
+  bool baseCannotBeObject = false;
 };
 using Iter = boost::variant<DeadIter, LiveIter>;
 

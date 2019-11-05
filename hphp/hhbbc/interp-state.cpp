@@ -89,6 +89,8 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
           auto const initBlock = (diter.initBlock != siter.initBlock)
             ? NoBlockId
             : diter.initBlock;
+          auto const baseCannotBeObject =
+            diter.baseCannotBeObject && siter.baseCannotBeObject;
           auto const changed =
             !equivalently_refined(key, diter.types.key) ||
             !equivalently_refined(value, diter.types.value) ||
@@ -98,7 +100,8 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
             keyLocal != diter.keyLocal ||
             baseLocal != diter.baseLocal ||
             baseUpdated != diter.baseUpdated ||
-            initBlock != diter.initBlock;
+            initBlock != diter.initBlock ||
+            baseCannotBeObject != diter.baseCannotBeObject;
           diter.types =
             IterTypes {
               std::move(key),
@@ -111,6 +114,7 @@ bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
           diter.baseLocal = baseLocal;
           diter.keyLocal = keyLocal;
           diter.initBlock = initBlock;
+          diter.baseCannotBeObject = baseCannotBeObject;
           return changed;
         }
       );

@@ -4626,7 +4626,9 @@ void iterInitImpl(ISS& env, IterId iter, LocalId valueLoc,
   auto ity = iter_types(base);
 
   auto const fallthrough = [&] {
-    setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.bid });
+    auto const baseCannotBeObject = !base.couldBe(BObj);
+    setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.bid,
+                                  false, baseCannotBeObject });
     // Do this after setting the iterator, in case it clobbers the base local
     // equivalency.
     setLoc(env, valueLoc, std::move(ity.value));
@@ -4677,7 +4679,9 @@ void iterInitKImpl(ISS& env, IterId iter, LocalId valueLoc, LocalId keyLoc,
   auto ity = iter_types(base);
 
   auto const fallthrough = [&]{
-    setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.bid });
+    auto const baseCannotBeObject = !base.couldBe(BObj);
+    setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.bid,
+                                  false, baseCannotBeObject });
     // Do this after setting the iterator, in case it clobbers the base local
     // equivalency.
     setLoc(env, valueLoc, std::move(ity.value));

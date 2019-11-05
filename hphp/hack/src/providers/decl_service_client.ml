@@ -16,9 +16,9 @@ let rpc_get_gconst
     (name : string) : (string, Marshal_tools.error) result =
   (* TODO: this is just a placeholder for now *)
   Printf.printf "GET GCONST... %s\n%!" name;
-  let i = Decl_ipc_ffi_externs.get_gconst_ffi fd base name in
-  Printf.printf "GOT GCONST... %s = %d\n%!" name i;
-  Ok (Printf.sprintf "%d" i)
+  let s = Decl_ipc_ffi_externs.get_gconst_ffi fd base name in
+  Printf.printf "GOT GCONST... %s = %s\n%!" name s;
+  Ok s
 
 let init
     (decl_sock_file : string)

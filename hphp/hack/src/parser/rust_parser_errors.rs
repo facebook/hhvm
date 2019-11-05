@@ -669,7 +669,7 @@ where
 
     fn is_clone(&self, label: &'a Syntax<Token, Value>) -> bool {
         self.text(label)
-            .eq_ignore_ascii_case(sn::special_functions::CLONE)
+            .eq_ignore_ascii_case(sn::members::__CLONE)
     }
 
     fn class_constructor_has_static(&self, node: &'a Syntax<Token, Value>) -> bool {

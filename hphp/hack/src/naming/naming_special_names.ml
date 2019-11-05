@@ -364,8 +364,6 @@ module SpecialFunctions = struct
 
   let autoload = "__autoload"
 
-  let clone = "__clone"
-
   let hhas_adata = "__hhas_adata"
 
   let is_special_function =
@@ -381,7 +379,6 @@ module SpecialFunctions = struct
         meth_caller;
         call_user_func;
         autoload;
-        clone;
         hhas_adata;
       ]
     in

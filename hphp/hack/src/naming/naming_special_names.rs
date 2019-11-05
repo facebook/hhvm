@@ -407,8 +407,6 @@ pub mod special_functions {
     pub const CALL_USER_FUNC: &str = "call_user_func";
 
     pub const AUTOLOAD: &str = "__autoload";
-
-    pub const CLONE: &str = "__clone";
 }
 
 pub mod special_idents {

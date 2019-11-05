@@ -9,10 +9,22 @@
 extern crate test;
 
 fn main() {
-    let command = "FILE_TO_PARSE=<file> buck run @mode/opt //hphp/hack/src/parser/bench:bench-unittest -- --bench";
-    println!("Run this bench suite with: {}", command);
-    println!();
-    println!("Running this bench suite without FILE_TO_PARSE set will cause the benchmarks to complete instantly.");
+    println!(
+        "\
+Run this bench suite with:
+
+  FILE_TO_PARSE=<file> buck run @mode/opt //hphp/hack/src/parser/bench:bench-unittest -- --bench
+
+Running this bench suite without FILE_TO_PARSE set will cause the benchmarks to complete instantly,
+which is useful for not slowing down automated builds at diff or contbuild time.
+
+If you want to run this test suite under a performance analyzer, use the following commands
+(relative to the hack directory):
+
+  ./scripts/facebook/cargo.sh bench -p hack_parser_bench --no-run
+  perf record -g target/release/hack_parser_bench-* --bench <benchmark function to profile>
+  perf report -t perf.data"
+    );
 }
 
 #[cfg(test)]

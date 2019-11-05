@@ -311,7 +311,8 @@ end = struct
     let genv = { genv with in_ppl } in
     (genv, lenv)
 
-  let lookup genv (env : string -> FileInfo.pos option) (p, x) =
+  let if_unbound_then_dep_edge_and_report
+      genv (env : string -> FileInfo.pos option) (p, x) =
     let v = env x in
     match v with
     | None ->
@@ -427,7 +428,7 @@ end = struct
     | Provider_config.Lru_shared_memory
     | Provider_config.Shared_memory
     | Provider_config.Local_memory _ ->
-      lookup genv get_pos x;
+      if_unbound_then_dep_edge_and_report genv get_pos x;
       x
     | Provider_config.Decl_service _ ->
       (* TODO: we need to refactor this so naming phase doesn't report *)

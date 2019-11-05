@@ -187,18 +187,18 @@ tc_unwind_personality(int version,
           exn_cls == kLLVMMagicDependentClass);
   assertx(version == 1);
 
-  auto const ti = &typeinfoFromUE(ue);
+  auto const& ti = typeinfoFromUE(ue);
 
   if (Trace::moduleEnabled(TRACEMOD, 1)) {
     DEBUG_ONLY auto const* unwindType =
       (actions & _UA_SEARCH_PHASE) ? "search" : "cleanup";
 #ifndef _MSC_VER
     int status;
-    auto* exnType = abi::__cxa_demangle(ti->name(), nullptr, nullptr, &status);
+    auto* exnType = abi::__cxa_demangle(ti.name(), nullptr, nullptr, &status);
     SCOPE_EXIT { free(exnType); };
     assertx(status == 0);
 #else
-    auto* exnType = ti->name();
+    auto* exnType = ti.name();
 #endif
     FTRACE(1, "unwind {} exn {}: regState {}, ip {}, type {}\n",
            unwindType, ue,
@@ -208,7 +208,7 @@ tc_unwind_personality(int version,
   }
 
   InvalidSetMException* ism = nullptr;
-  if (*ti == typeid(InvalidSetMException)) {
+  if (ti == typeid(InvalidSetMException)) {
     ism = static_cast<InvalidSetMException*>(exceptionFromUE(ue));
     if (actions & _UA_SEARCH_PHASE) {
       FTRACE(1, "thrown value: {} returning _URC_HANDLER_FOUND\n ",
@@ -217,53 +217,50 @@ tc_unwind_personality(int version,
     }
   }
 
+  if (actions & _UA_SEARCH_PHASE) {
+    /*
+     * We don't do anything during the search phase---before attempting cleanup,
+     * we want all deeper frames to have run their object destructors (which can
+     * have side effects like setting tl_regState) and spilled any values they
+     * may have been holding in callee-saved regs.
+     */
+    FTRACE(1, "returning _URC_CONTINUE_UNWIND\n");
+    return _URC_CONTINUE_UNWIND;
+  }
+
   /*
    * During the cleanup phase, we can either use a landing pad to perform
    * cleanup (with _Unwind_SetIP and _URC_INSTALL_CONTEXT), or we can do it
    * here. We sync the VM registers here, then optionally use a landing pad,
    * which is an exit trace from hhir with a few special instructions.
    */
-  if (actions & _UA_CLEANUP_PHASE) {
-    auto const& stubs = tc::ustubs();
-    auto ip = TCA(_Unwind_GetIP(context));
-    if (tl_regState == VMRegState::DIRTY) {
-      sync_regstate(ip, context);
-    }
+  assertx(actions & _UA_CLEANUP_PHASE);
+  auto const& stubs = tc::ustubs();
+  auto ip = TCA(_Unwind_GetIP(context));
+  if (tl_regState == VMRegState::DIRTY) sync_regstate(ip, context);
 
-    TypedValue tv = ism ? ism->tv() : TypedValue();
-    // If we have a catch trace at the IP in the frame given by `context',
-    // install it.
-    if (install_catch_trace(context, ip, ue, bool(ism), tv)) {
-      // Note that we should always have a catch trace for the special runtime
-      // helper exceptions above.
-      always_assert(bool(ism) == bool(actions & _UA_HANDLER_FRAME));
-      return _URC_INSTALL_CONTEXT;
-    }
-    always_assert(!(actions & _UA_HANDLER_FRAME));
-
-    assertx(g_unwind_rds.isInit());
-
-    if (ip == stubs.endCatchHelperPast) {
-      FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
-      return _URC_CONTINUE_UNWIND;
-    }
-
-    FTRACE(1, "unwinder hit normal TC frame, going to tc_unwind_resume\n");
-    g_unwind_rds->exn = ue;
-    _Unwind_SetIP(context, uint64_t(stubs.endCatchHelper));
+  auto const tv = ism ? ism->tv() : TypedValue{};
+  // If we have a catch trace at the IP in the frame given by `context',
+  // install it.
+  if (install_catch_trace(context, ip, ue, bool(ism), tv)) {
+    // Note that we should always have a catch trace for the special runtime
+    // helper exceptions above.
+    always_assert(bool(ism) == bool(actions & _UA_HANDLER_FRAME));
     return _URC_INSTALL_CONTEXT;
   }
-
-  /*
-   * We don't do anything during the search phase---before attempting cleanup,
-   * we want all deeper frames to have run their object destructors (which can
-   * have side effects like setting tl_regState) and spilled any values they
-   * may have been holding in callee-saved regs.
-   */
   always_assert(!(actions & _UA_HANDLER_FRAME));
 
-  FTRACE(1, "returning _URC_CONTINUE_UNWIND\n");
-  return _URC_CONTINUE_UNWIND;
+  assertx(g_unwind_rds.isInit());
+
+  if (ip == stubs.endCatchHelperPast) {
+    FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
+    return _URC_CONTINUE_UNWIND;
+  }
+
+  FTRACE(1, "unwinder hit normal TC frame, going to tc_unwind_resume\n");
+  g_unwind_rds->exn = ue;
+  _Unwind_SetIP(context, uint64_t(stubs.endCatchHelper));
+  return _URC_INSTALL_CONTEXT;
 }
 
 TCUnwindInfo tc_unwind_resume(ActRec* fp) {

@@ -53,9 +53,8 @@ let get_gconst cst_name =
   match GConsts.get cst_name with
   | Some c -> Some c
   | None ->
-    (match Naming_table.Consts.get_pos cst_name with
-    | Some pos ->
-      let filename = FileInfo.get_pos_filename pos in
+    (match Naming_table.Consts.get_filename cst_name with
+    | Some filename ->
       let gconst =
         Errors.run_in_decl_mode filename (fun () ->
             Decl.declare_const_in_file filename cst_name)

@@ -63,9 +63,8 @@ let get_gconst gconst_name =
       match Lru_worker.get_with_offset gconst_name_key with
       | Some s -> Some s
       | None ->
-        (match Naming_table.Consts.get_pos gconst_name with
-        | Some pos ->
-          let filename = FileInfo.get_pos_filename pos in
+        (match Naming_table.Consts.get_filename gconst_name with
+        | Some filename ->
           let gconst =
             Errors.run_in_decl_mode filename (fun () ->
                 Decl.declare_const_in_file filename gconst_name)

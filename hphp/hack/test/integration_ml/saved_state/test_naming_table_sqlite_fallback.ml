@@ -36,10 +36,7 @@ let get_type_path type_name =
 let get_fun_path fun_name =
   Option.map ~f:FileInfo.get_pos_filename (Naming_table.Funs.get_pos fun_name)
 
-let get_const_path fun_name =
-  Option.map
-    ~f:FileInfo.get_pos_filename
-    (Naming_table.Consts.get_pos fun_name)
+let get_const_path fun_name = Naming_table.Consts.get_filename fun_name
 
 let make_full_pos path_name (start_lnum, start_cnum) (end_lnum, end_cnum) =
   Pos.make_from_lexing_pos

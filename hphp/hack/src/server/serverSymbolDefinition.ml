@@ -47,9 +47,8 @@ let get_function_by_name x =
   @@ (fun () -> Ast_provider.find_fun_in_file fn x)
 
 let get_gconst_by_name x =
-  Naming_table.Consts.get_pos x
-  >>= fun pos ->
-  let fn = FileInfo.get_pos_filename pos in
+  Naming_table.Consts.get_filename x
+  >>= fun fn ->
   Ide_parser_cache.with_ide_cache
   @@ (fun () -> Ast_provider.find_gconst_in_file fn x)
 

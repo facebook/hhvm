@@ -163,9 +163,8 @@ let get_record_def (record_name : string) : record_def_decl option =
         ~key:(Provider_config.Record_decl record_name)
         ~default:(fun () ->
           let result : record_def_decl option =
-            match Naming_table.Consts.get_pos record_name with
-            | Some pos ->
-              let filename = FileInfo.get_pos_filename pos in
+            match Naming_table.Consts.get_filename record_name with
+            | Some filename ->
               let rdecl =
                 Errors.run_in_decl_mode filename (fun () ->
                     Decl.declare_record_def_in_file filename record_name)
@@ -192,9 +191,8 @@ let get_gconst (gconst_name : string) : gconst_decl option =
         ~key:(Provider_config.Gconst_decl gconst_name)
         ~default:(fun () ->
           let result : gconst_decl option =
-            match Naming_table.Consts.get_pos gconst_name with
-            | Some pos ->
-              let filename = FileInfo.get_pos_filename pos in
+            match Naming_table.Consts.get_filename gconst_name with
+            | Some filename ->
               let gconst =
                 Errors.run_in_decl_mode filename (fun () ->
                     Decl.declare_const_in_file filename gconst_name)

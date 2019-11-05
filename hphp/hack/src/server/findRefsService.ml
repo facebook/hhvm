@@ -183,9 +183,8 @@ let get_deps_set_function f_name =
   | None -> Relative_path.Set.empty
 
 let get_deps_set_gconst cst_name =
-  match Naming_table.Consts.get_pos cst_name with
-  | Some pos ->
-    let fn = FileInfo.get_pos_filename pos in
+  match Naming_table.Consts.get_filename cst_name with
+  | Some fn ->
     let dep = Typing_deps.Dep.GConst cst_name in
     let ideps = Typing_deps.get_ideps dep in
     let files = Typing_deps.get_files ideps in

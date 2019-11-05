@@ -69,30 +69,19 @@ let update_context
   in
   (ctx, entry)
 
-let compute_tast ~(ctx : Provider_context.t) ~(entry : Provider_context.entry)
-    : Tast.program =
-  Errors.ignore_ (fun () ->
-      let make_tast () =
-        let nast = Naming.program entry.Provider_context.ast in
-        Typing.nast_to_tast ctx.Provider_context.tcopt nast
-      in
-      match Provider_context.get_global_context () with
-      | None -> with_context ~ctx ~f:make_tast
-      | Some _ ->
-        (* No need for [with_context] -- assume that's already the context we're
-    operating under. *)
-        make_tast ())
-
 let compute_tast_and_errors
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    Errors.t * Tast.program =
-  let (nast_errors, nast) =
-    Errors.do_with_context entry.Provider_context.path Errors.Naming (fun () ->
-        Naming.program entry.Provider_context.ast)
+    Tast.program * Errors.t =
+  let make_tast () =
+    let (errors, tast) =
+      Errors.do_ (fun () ->
+          let nast = Naming.program entry.Provider_context.ast in
+          let tast = Typing.nast_to_tast ctx.Provider_context.tcopt nast in
+          tast)
+    in
+    (tast, errors)
   in
-  let (tast_errors, tast) =
-    Errors.do_with_context entry.Provider_context.path Errors.Typing (fun () ->
-        Typing.nast_to_tast ctx.Provider_context.tcopt nast)
-  in
-  let errors = Errors.merge nast_errors tast_errors in
-  (errors, tast)
+  (* If global context is not set, set it and proceed *)
+  match Provider_context.get_global_context () with
+  | None -> with_context ~ctx ~f:make_tast
+  | Some _ -> make_tast ()

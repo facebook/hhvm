@@ -1056,7 +1056,10 @@ let test () =
             ~path
             ~file_input
         in
-        let hover = ServerHover.go_ctx ~ctx ~entry ~line ~column in
+        let hover =
+          Provider_utils.with_context ~ctx ~f:(fun () ->
+              ServerHover.go_ctx ~ctx ~entry ~line ~column)
+        in
         let expected = list_to_string expectedHover in
         let actual = list_to_string hover in
         if expected <> actual then

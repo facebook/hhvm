@@ -82,12 +82,8 @@ let go_ctx
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) =
-  let symbols =
-    IdentifySymbolService.go
-      (Provider_utils.compute_tast ~ctx ~entry)
-      line
-      column
-  in
+  let (tast, _errors) = Provider_utils.compute_tast_and_errors ~ctx ~entry in
+  let symbols = IdentifySymbolService.go tast line column in
   let symbols = take_best_suggestions (List.sort by_nesting symbols) in
   List.map symbols ~f:(fun symbol ->
       let symbol_definition =

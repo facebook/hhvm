@@ -46,7 +46,7 @@ let go_ctx
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) : ServerCommandTypes.Go_to_type_definition.result =
-  let tast = Provider_utils.compute_tast ~ctx ~entry in
+  let (tast, _errors) = Provider_utils.compute_tast_and_errors ~ctx ~entry in
   go_common tast ~line ~column
 
 let go

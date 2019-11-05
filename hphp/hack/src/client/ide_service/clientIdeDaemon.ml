@@ -347,9 +347,11 @@ let handle_message :
           ~path
           ~file_input:(ServerCommandTypes.FileContent file_contents)
       in
-      (* Do a typecheck just to warm up the caches when you open a file. In the
-    future, we'll actually surface typechecking errors. *)
-      let _tast : Tast.program = Provider_utils.compute_tast ~ctx ~entry in
+      (* Do a typecheck just to warm up the caches when you open a file. In
+      the future, we'll actually surface typechecking errors. *)
+      let (_tast, _errors) =
+        Provider_utils.compute_tast_and_errors ~ctx ~entry
+      in
       Lwt.return (state, Handle_message_result.Response ())
     | (Initialized { server_env; _ }, Hover document_location) ->
       let (ctx, entry) =
@@ -411,7 +413,9 @@ let handle_message :
         in
         let matches =
           Provider_utils.with_context ~ctx ~f:(fun () ->
-              let tast = Provider_utils.compute_tast ~ctx ~entry in
+              let (tast, _errors) =
+                Provider_utils.compute_tast_and_errors ~ctx ~entry
+              in
               AutocompleteService.go ~tcopt ~autocomplete_context ~sienv tast)
         in
         let result =

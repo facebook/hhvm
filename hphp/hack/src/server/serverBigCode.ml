@@ -190,7 +190,7 @@ let go : ServerEnv.env -> string -> string =
       ~file_input:(ServerCommandTypes.FileContent file_content)
   in
   (* Extract TAST and convert to string *)
-  let tast = Provider_utils.compute_tast ~ctx ~entry in
+  let (tast, _) = Provider_utils.compute_tast_and_errors ~ctx ~entry in
   let serialized_tast = serialize_tast tast env.ServerEnv.tcopt in
   (* Visit the TAST and extract autocompleteion items for Acclass_get *)
   let data = (new visitor)#get_entries tast in

@@ -108,12 +108,8 @@ let go_ctx
     ~(column : int)
     ~(tcopt : TypecheckerOptions.t) : ServerHighlightRefsTypes.result =
   let { Provider_context.path; ast; _ } = entry in
-  let symbol_to_highlight =
-    IdentifySymbolService.go
-      (Provider_utils.compute_tast ~ctx ~entry)
-      line
-      column
-  in
+  let (tast, _errors) = Provider_utils.compute_tast_and_errors ~ctx ~entry in
+  let symbol_to_highlight = IdentifySymbolService.go tast line column in
   let file_info = Provider_context.get_fileinfo entry in
   let results =
     List.fold symbol_to_highlight ~init:[] ~f:(fun acc s ->

@@ -386,13 +386,18 @@ struct RuntimeOption {
   // If true, terminate connection immediately if a client fails ACL,
   // otherwise log it and let in.
   static bool ClientAuthFailClose;
-  // Sampling ratio for logging clients that pass authentication.
-  // Must be an int within [0, 100]. 0 => disabled; 100 => log all successes.
-  static uint32_t ClientAuthSuccessLogSampleRatio;
-  // Sampling ratio for logging clients that fail authentication.
-  // Must be an int within [0, 100]. 0 => disabled; 100 => log all failures.
-  static uint32_t ClientAuthFailureLogSampleRatio;
 
+  // On average, sample X connections per ClientAuthLogSampleBase connections,
+  // where X is ClientAuthSuccessLogSampleRatio for client auth successes, and
+  // ClientAuthFailureLogSampleRatio for client auth failures. Set X to 0 to
+  // disable sampling.
+  // For example, if ClientAuthLogSampleBase = 100,
+  // ClientAuthSuccessLogSampleRatio = 0, and
+  // ClientAuthFailureLogSampleRatio = 50, then no (0/100) client auth successes
+  // and half (50/100) of client auth failures will be logged.
+  static uint32_t ClientAuthLogSampleBase;
+  static uint32_t ClientAuthSuccessLogSampleRatio;
+  static uint32_t ClientAuthFailureLogSampleRatio;
 
   static int XboxServerThreadCount;
   static int XboxServerMaxQueueLength;

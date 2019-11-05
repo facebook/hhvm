@@ -348,11 +348,12 @@ end = struct
         unbound_name_error genv p name kind);
       (p, name)
 
-  let canonicalize genv get_pos get_full_pos get_canon (p, name) kind =
+  let canonicalize genv is_defined get_full_pos get_canon (p, name) kind =
     (* Get the canonical name to check if the name exists in the heap *)
-    match get_pos name with
-    | Some _ -> (p, name)
-    | None -> handle_unbound_name genv get_full_pos get_canon (p, name) kind
+    if is_defined name then
+      (p, name)
+    else
+      handle_unbound_name genv get_full_pos get_canon (p, name) kind
 
   (* Adds a local variable, without any check *)
   let add_lvar (_, lenv) (_, name) (p, x) =
@@ -470,7 +471,7 @@ end = struct
   let fun_id (genv, _) x =
     canonicalize
       genv
-      Naming_table.Funs.get_pos
+      Naming_table.Funs.is_defined
       GEnv.fun_pos
       GEnv.fun_canon_name
       x

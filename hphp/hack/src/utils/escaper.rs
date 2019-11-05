@@ -84,16 +84,24 @@ fn escape_(s: &[u8]) -> Vec<u8> {
 }
 
 fn codepoint_to_utf8(n: u32, output: &mut Vec<u8>) -> Result<(), InvalidString> {
-    match std::char::from_u32(n) {
-        None => Err("UTF-8 codepoint too large".into()),
-        Some(v) => {
-            match v.len_utf8() {
-                1 => output.push(v as u8),
-                _ => output.extend_from_slice(v.encode_utf8(&mut [0; 4]).as_bytes()),
-            }
-            Ok(())
-        }
+    if n <= 0x7f {
+        output.push(n as u8);
+    } else if n <= 0x7ff {
+        output.push(0xc0 | (n >> 6) as u8);
+        output.push(0x80 | (n & 0b111111) as u8);
+    } else if n <= 0x00ffff {
+        output.push(0xe0 | (n >> 12) as u8);
+        output.push(0x80 | ((n >> 6) & 0b111111) as u8);
+        output.push(0x80 | (n & 0x3f) as u8);
+    } else if n <= 0x10ffff {
+        output.push(0xf0 | (n >> 18) as u8);
+        output.push(0x80 | ((n >> 12) & 0b111111) as u8);
+        output.push(0x80 | ((n >> 6) & 0b111111) as u8);
+        output.push(0x80 | (n & 0x3f) as u8);
+    } else {
+        return Err("UTF-8 codepoint too large".into());
     }
+    Ok(())
 }
 
 fn parse_int(s: &[u8], base: u32) -> Result<u32, InvalidString> {
@@ -451,6 +459,12 @@ mod tests {
         assert_eq!(
             unescape_long_string(euro).unwrap().as_bytes(),
             &[226u8, 130u8, 172u8]
+        );
+
+        let invalid = r#"\u{D800}\u{DF1E}"#;
+        assert_eq!(
+            unescape_double(invalid).unwrap().as_bytes(),
+            &[237u8, 160u8, 128u8, 237u8, 188u8, 158u8]
         );
     }
 

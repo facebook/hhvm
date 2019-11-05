@@ -4,79 +4,65 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use lazy_static::lazy_static;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
 lazy_static! {
-    static ref TYPES_MAP: HashMap<String, String> = {
-        TYPES.iter().fold(HashMap::new(), |mut map, s| {
-            map.insert(s.to_lowercase(), "HH\\".to_string() + s);
-            map
-        })
-    };
+    pub static ref TYPES_MAP: BTreeMap<String, String> = make_map(TYPES);
     pub static ref FUNCS_MAP: BTreeMap<String, String> = make_map(FUNCS);
     pub static ref CONSTS_MAP: BTreeMap<String, String> = make_map(CONSTS);
     pub static ref NAMESPACES_MAP: BTreeMap<String, String> = make_map(NAMESPACES);
 }
 
 static TYPES: &'static [&'static str] = &[
+    "arraylike",
+    "AsyncFunctionWaitHandle",
+    "AsyncGenerator",
+    "AsyncGeneratorWaitHandle",
     "AsyncIterator",
     "AsyncKeyedIterator",
-    "Traversable",
-    "Container",
-    "KeyedTraversable",
-    "KeyedContainer",
-    "Iterator",
-    "KeyedIterator",
-    "Iterable",
-    "KeyedIterable",
+    "Awaitable",
+    "AwaitAllWaitHandle",
+    "classname",
     "Collection",
-    "Vector",
-    "Map",
-    "Set",
-    "Pair",
-    "ImmVector",
+    "ConditionWaitHandle",
+    "Container",
+    "darray",
+    "dict",
+    "ExternalThreadEventWaitHandle",
+    "IMemoizeParam",
     "ImmMap",
     "ImmSet",
+    "ImmVector",
     "InvariantException",
-    "IMemoizeParam",
-    "Shapes",
-    "TypeStructureKind",
-    "TypeStructure",
-    "dict",
-    "vec",
+    "Iterable",
+    "Iterator",
+    "KeyedContainer",
+    "KeyedIterable",
+    "KeyedIterator",
+    "KeyedTraversable",
     "keyset",
-    "varray",
-    "darray",
-    "Awaitable",
-    "AsyncGenerator",
-    "StaticWaitHandle",
-    "WaitableWaitHandle",
-    "ResumableWaitHandle",
-    "AsyncFunctionWaitHandle",
-    "AsyncGeneratorWaitHandle",
-    "AwaitAllWaitHandle",
-    "ConditionWaitHandle",
+    "Map",
+    "ObjprofObjectStats",
+    "ObjprofPathsStats",
+    "ObjprofStringStats",
+    "Pair",
     "RescheduleWaitHandle",
+    "ResumableWaitHandle",
+    "Set",
+    "Shapes",
     "SleepWaitHandle",
-    "ExternalThreadEventWaitHandle",
-    "bool",
-    "int",
-    "float",
-    "string",
-    "void",
-    "num",
-    "arraykey",
-    "resource",
-    "mixed",
-    "noreturn",
-    "this",
+    "StaticWaitHandle",
+    "Traversable",
+    "typename",
+    "TypeStructure",
+    "TypeStructureKind",
     "varray_or_darray",
+    "varray",
     "vec_or_dict",
-    "arraylike",
-    "nonnull",
-    "null",
-    "nothing",
-    "dynamic",
+    "vec",
+    "Vector",
+    "WaitableWaitHandle",
+    "XenonSample",
 ];
 
 static FUNCS: &'static [&'static str] = &[

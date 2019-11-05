@@ -173,7 +173,7 @@ impl<'a> Env<'a> {
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
     ) -> Self {
-        // Ported from namespace_env.ml
+        // (hrust) Ported from namespace_env.ml
         let mut ns_uses = hh_autoimport::NAMESPACES_MAP.clone();
         parser_options
             .po_auto_namespace_map
@@ -183,7 +183,7 @@ impl<'a> Env<'a> {
             });
         let empty_ns_env = NamespaceEnv {
             ns_uses,
-            class_uses: s_map::SMap::new(),
+            class_uses: hh_autoimport::TYPES_MAP.clone(),
             fun_uses: hh_autoimport::FUNCS_MAP.clone(),
             const_uses: hh_autoimport::CONSTS_MAP.clone(),
             record_def_uses: s_map::SMap::new(),

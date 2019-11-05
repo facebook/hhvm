@@ -337,6 +337,11 @@ let to_collection env shape_ty res return_type =
 
       method! on_type env (r, ty) =
         match ty with
+        | Tdynamic ->
+          (* This makes it so that to_collection on a dynamic value returns a dynamic
+           * value instead of the standard dict<arraykey, mixed> declared in the HHI, 
+           * which would otherwise subsume any other inferred type due to covariance. *)
+          (env, (r, ty))
         | Tvar _
         | Tunion _
         | Tshape _ ->

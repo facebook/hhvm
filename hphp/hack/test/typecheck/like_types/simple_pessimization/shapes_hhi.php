@@ -10,3 +10,8 @@ function test(shape('a' => int) $s, shape('b' => float, 'c' => string) $u): void
   hh_show(Shapes::toDict($s));
   hh_show(Shapes::at($s, 'a'));
 }
+
+function dynamic_collection(dynamic $d): void {
+  hh_show(Shapes::toArray($d));
+  hh_show(Shapes::toDict($d));
+}

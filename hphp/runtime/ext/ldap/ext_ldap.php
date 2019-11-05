@@ -111,7 +111,7 @@ function ldap_mod_add(resource $link, string $dn, array $entry): bool;
  *
  */
 <<__Native>>
-function ldap_mod_del(resource $link, string $dn, array $entry): bool;
+function ldap_mod_del(resource $link, string $dn, darray $entry): bool;
 
 /**
  * Replaces one or more attributes from the specified dn. It performs the
@@ -127,7 +127,7 @@ function ldap_mod_del(resource $link, string $dn, array $entry): bool;
  *
  */
 <<__Native>>
-function ldap_mod_replace(resource $link, string $dn, array $entry): bool;
+function ldap_mod_replace(resource $link, string $dn, darray $entry): bool;
 
 /**
  * Modify the existing entries in the LDAP directory. The structure of the
@@ -142,7 +142,7 @@ function ldap_mod_replace(resource $link, string $dn, array $entry): bool;
  *
  */
 <<__Native>>
-function ldap_modify(resource $link, string $dn, array $entry): bool;
+function ldap_modify(resource $link, string $dn, darray $entry): bool;
 
 /**
  * Modify the existing entries in the LDAP directory. Allows detailed

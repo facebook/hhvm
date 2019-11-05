@@ -1,2 +1,2 @@
-File "unset_cast.php", line 13, characters 11-15:
-Don't use (unset), just assign null! (Naming[2056])
+File "unset_cast.php", line 13, characters 16-16:
+An expression is expected here. (Parsing[1002])

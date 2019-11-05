@@ -514,8 +514,6 @@ module Typehints = struct
 
   let callable = "callable"
 
-  let unset_cast = "unset"
-
   let wildcard = "_"
 
   let is_reserved_type_hint =
@@ -541,7 +539,6 @@ module Typehints = struct
         varray;
         varray_or_darray;
         callable;
-        unset_cast;
         wildcard;
       ]
     in

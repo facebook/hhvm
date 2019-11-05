@@ -1766,8 +1766,7 @@ where
                 | TokenKind::Integer
                 | TokenKind::Object
                 | TokenKind::String
-                | TokenKind::Binary
-                | TokenKind::Unset => true,
+                | TokenKind::Binary => true,
                 _ => false,
             };
         if is_cast {

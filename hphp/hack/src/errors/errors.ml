@@ -1200,15 +1200,6 @@ let this_no_argument pos =
     pos
     "\"this\" expects no arguments"
 
-let void_cast pos =
-  add (Naming.err_code Naming.VoidCast) pos "Cannot cast to void."
-
-let unset_cast pos =
-  add
-    (Naming.err_code Naming.UnsetCast)
-    pos
-    "Don't use (unset), just assign null!"
-
 let object_cast pos cls_opt =
   let msg1 = "Object casts are unsupported." in
   let msg2 =

@@ -771,8 +771,6 @@ and emit_cast env pos hint expr =
         | _ when id = SN.Typehints.string -> instr (IOp CastString)
         | _ when id = SN.Typehints.array -> instr (IOp CastArray)
         | _ when id = SN.Typehints.float -> instr (IOp CastDouble)
-        (* TODO: Is unset a real typehint? *)
-        | _ when id = "unset" -> gather [instr_popc; instr_null]
         | _ ->
           Emit_fatal.raise_fatal_parse
             pos

@@ -534,8 +534,6 @@ pub mod typehints {
 
     pub const OBJECT_CAST: &str = "object";
 
-    pub const UNSET_CAST: &str = "unset";
-
     pub const WILDCARD: &str = "_";
 
     lazy_static! {

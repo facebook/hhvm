@@ -87,6 +87,8 @@ module type ReverseNamingTable = sig
 
   val get_pos : ?bypass_cache:bool -> string -> pos option
 
+  val is_defined : string -> bool
+
   val remove_batch : SSet.t -> unit
 
   val heap_string_of_key : string -> string

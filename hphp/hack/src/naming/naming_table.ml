@@ -1261,6 +1261,8 @@ module type ReverseNamingTable = sig
 
   val get_pos : ?bypass_cache:bool -> string -> pos option
 
+  val is_defined : string -> bool
+
   val remove_batch : SSet.t -> unit
 
   val heap_string_of_key : string -> string
@@ -1332,6 +1334,8 @@ module Types = struct
       ~add_func:add
       ~measure_name:"Reverse naming table (types) cache hit rate"
       ~key:id
+
+  let is_defined id = get_pos id <> None
 
   let get_canon_name id =
     Core_kernel.(
@@ -1447,6 +1451,8 @@ module Funs = struct
       ~measure_name:"Reverse naming table (functions) cache hit rate"
       ~key:id
 
+  let is_defined id = get_pos id <> None
+
   let get_canon_name name =
     Core_kernel.(
       let map_result path =
@@ -1521,6 +1527,8 @@ module Consts = struct
       ~add_func:add
       ~measure_name:"Reverse naming table (consts) cache hit rate"
       ~key:id
+
+  let is_defined id = get_pos id <> None
 
   let remove_batch consts =
     ConstPosHeap.remove_batch consts;

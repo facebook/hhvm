@@ -312,18 +312,15 @@ end = struct
     (genv, lenv)
 
   let if_unbound_then_dep_edge_and_report
-      genv (env : string -> FileInfo.pos option) (p, x) =
-    let v = env x in
-    match v with
-    | None ->
-      (match genv.in_mode with
+      genv (is_defined : string -> bool) (p, x) =
+    if not (is_defined x) then
+      match genv.in_mode with
       | FileInfo.Mstrict
       | FileInfo.Mexperimental
       | FileInfo.Mpartial
       | FileInfo.Mdecl ->
         unbound_name_error genv p x `const
-      | FileInfo.Mphp -> ())
-    | _ -> ()
+      | FileInfo.Mphp -> ()
 
   let handle_unbound_name genv get_full_pos get_canon (p, name) kind =
     match get_canon name with
@@ -428,7 +425,7 @@ end = struct
     | Provider_config.Lru_shared_memory
     | Provider_config.Shared_memory
     | Provider_config.Local_memory _ ->
-      if_unbound_then_dep_edge_and_report genv Naming_table.Consts.get_pos x;
+      if_unbound_then_dep_edge_and_report genv Naming_table.Consts.is_defined x;
       x
     | Provider_config.Decl_service _ ->
       (* TODO: we need to refactor this so naming phase doesn't report *)

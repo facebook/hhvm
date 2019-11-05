@@ -404,8 +404,6 @@ pub mod special_functions {
 
     pub const METH_CALLER: &str = "meth_caller";
 
-    pub const CALL_USER_FUNC: &str = "call_user_func";
-
     pub const AUTOLOAD: &str = "__autoload";
 }
 
@@ -480,6 +478,8 @@ pub mod std_lib_functions {
     pub const ARRAY_FILTER: &str = "\\array_filter";
 
     pub const ARRAY_MAP: &str = "\\array_map";
+
+    pub const CALL_USER_FUNC: &str = "\\call_user_func";
 
     pub const TYPE_STRUCTURE: &str = "\\HH\\type_structure";
 

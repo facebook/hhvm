@@ -2308,7 +2308,7 @@ module Make (GetLocals : GetLocals) = struct
           exprl env el,
           [] )
     | Aast.Call (_, (p, Aast.Id (_, cn)), tal, el, uel)
-      when cn = SN.SpecialFunctions.call_user_func ->
+      when cn = SN.StdlibFunctions.call_user_func ->
       arg_unpack_unexpected uel;
       begin
         match el with

@@ -360,8 +360,6 @@ module SpecialFunctions = struct
 
   let meth_caller = "meth_caller"
 
-  let call_user_func = "call_user_func"
-
   let autoload = "__autoload"
 
   let hhas_adata = "__hhas_adata"
@@ -377,7 +375,6 @@ module SpecialFunctions = struct
         inst_meth;
         class_meth;
         meth_caller;
-        call_user_func;
         autoload;
         hhas_adata;
       ]
@@ -464,6 +461,8 @@ module StdlibFunctions = struct
   let array_filter = "\\array_filter"
 
   let array_map = "\\array_map"
+
+  let call_user_func = "\\call_user_func"
 
   let type_structure = "\\HH\\type_structure"
 

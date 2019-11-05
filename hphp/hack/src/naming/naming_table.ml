@@ -1261,6 +1261,8 @@ module type ReverseNamingTable = sig
 
   val get_pos : ?bypass_cache:bool -> string -> pos option
 
+  val get_filename : string -> Relative_path.t option
+
   val is_defined : string -> bool
 
   val remove_batch : SSet.t -> unit
@@ -1334,6 +1336,11 @@ module Types = struct
       ~add_func:add
       ~measure_name:"Reverse naming table (types) cache hit rate"
       ~key:id
+
+  let get_filename id =
+    match get_pos id with
+    | None -> None
+    | Some (pos, _) -> Some (FileInfo.get_pos_filename pos)
 
   let is_defined id = get_pos id <> None
 
@@ -1451,6 +1458,9 @@ module Funs = struct
       ~measure_name:"Reverse naming table (functions) cache hit rate"
       ~key:id
 
+  let get_filename id =
+    get_pos id |> Core_kernel.Option.map ~f:FileInfo.get_pos_filename
+
   let is_defined id = get_pos id <> None
 
   let get_canon_name name =
@@ -1527,6 +1537,9 @@ module Consts = struct
       ~add_func:add
       ~measure_name:"Reverse naming table (consts) cache hit rate"
       ~key:id
+
+  let get_filename id =
+    get_pos id |> Core_kernel.Option.map ~f:FileInfo.get_pos_filename
 
   let is_defined id = get_pos id <> None
 

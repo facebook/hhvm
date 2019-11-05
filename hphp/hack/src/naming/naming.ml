@@ -472,14 +472,13 @@ end = struct
         handle_unbound_name genv GEnv.type_pos GEnv.type_canon_name x kind)
 
   let fun_id (genv, _) x =
-    let canonicalize =
-      canonicalize
-        genv
-        Naming_table.Funs.get_pos
-        GEnv.fun_pos
-        GEnv.fun_canon_name
-    in
-    canonicalize x `func
+    canonicalize
+      genv
+      Naming_table.Funs.get_pos
+      GEnv.fun_pos
+      GEnv.fun_canon_name
+      x
+      `func
 
   (**
    * Returns the position of the goto label declaration, if it exists.

@@ -11,7 +11,7 @@ use oxidized::relative_path::RelativePath;
 use rusqlite::{params, Connection};
 use std::sync::{Arc, Mutex};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct FileInfoTable {
     connection: Arc<Mutex<Connection>>,
 }

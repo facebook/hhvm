@@ -9,12 +9,12 @@ use oxidized::relative_path::RelativePath;
 use rusqlite::{params, Connection};
 use std::sync::{Arc, Mutex};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct ConstsTable {
     connection: Arc<Mutex<Connection>>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct ConstItem {
     name: String,
     file_info_id: i64,

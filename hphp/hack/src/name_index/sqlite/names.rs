@@ -13,7 +13,7 @@ use std::sync::{Arc, Mutex};
 
 // TODO: file_infos is not used yet
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Names {
     consts: ConstsTable,
     file_infos: FileInfoTable,

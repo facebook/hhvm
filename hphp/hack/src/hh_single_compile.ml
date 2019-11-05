@@ -251,21 +251,13 @@ let rec dispatch_loop handlers =
       | _ -> fail_daemon None ("Unhandled message type '" ^ msg_type ^ "'"));
       dispatch_loop handlers))
 
-let parse_text popt fn text =
-  let ignore_pos =
-    not (Hhbc_options.source_mapping !Hhbc_options.compiler_options)
-  in
+let parse_text ~hhbc_options popt fn text =
+  let ignore_pos = not (Hhbc_options.source_mapping hhbc_options) in
   let php5_compat_mode =
-    not
-      (Hhbc_options.enable_uniform_variable_syntax
-         !Hhbc_options.compiler_options)
+    not (Hhbc_options.enable_uniform_variable_syntax hhbc_options)
   in
-  let hacksperimental =
-    Hhbc_options.hacksperimental !Hhbc_options.compiler_options
-  in
-  let lower_coroutines =
-    Hhbc_options.enable_coroutines !Hhbc_options.compiler_options
-  in
+  let hacksperimental = Hhbc_options.hacksperimental hhbc_options in
+  let lower_coroutines = Hhbc_options.enable_coroutines hhbc_options in
   let env =
     Full_fidelity_ast.make_env
       ~parser_options:popt
@@ -293,10 +285,10 @@ let parse_text popt fn text =
   in
   (ast, is_hh_file)
 
-let parse_file filename text =
+let parse_file ~hhbc_options filename text =
   let popt =
     Hhbc_options.(
-      let co = !compiler_options in
+      let co = hhbc_options in
       ParserOptions.make
         ~auto_namespace_map:(aliased_namespaces co)
         ~codegen:true
@@ -318,7 +310,8 @@ let parse_file filename text =
         ~disallow_func_ptrs_in_constants:(disallow_func_ptrs_in_constants co))
   in
   ( (try
-       `ParseResult (Errors.do_ (fun () -> parse_text popt filename text))
+       `ParseResult
+         (Errors.do_ (fun () -> parse_text popt filename text ~hhbc_options))
      with
     (* FFP failed to parse *)
     | Failure s -> `ParseFailure (SyntaxError.make 0 0 s, Pos.none)
@@ -364,19 +357,23 @@ let handle_conversion_errors errors =
       (* Ignore these errors to match legacy AST behavior *)
       | 2086
       (* Naming.MethodNeedsVisibility *)
-
+      
       | 2102
       (* Naming.UnsupportedTraitUseAs *)
-
+      
       | 2103 (* Naming.UnsupportedInsteadOf *) ->
         false
       | _ (* Emit fatal parse otherwise *) -> true)
 
 let do_compile
-    ~is_systemlib (compiler_options : options) filename source_text debug_time
-    =
+    ~is_systemlib
+    ~hhbc_options
+    (compiler_options : options)
+    filename
+    source_text
+    debug_time =
   let t = Unix.gettimeofday () in
-  let (fail_or_tast, popt) = parse_file filename source_text in
+  let (fail_or_tast, popt) = parse_file filename source_text ~hhbc_options in
   ignore @@ add_to_time_ref debug_time.parsing_t t;
   let env =
     Compile.
@@ -387,7 +384,7 @@ let do_compile
         for_debugger_eval = compiler_options.for_debugger_eval;
         dump_symbol_refs = compiler_options.dump_symbol_refs;
         empty_namespace = Namespace_env.empty_from_popt popt;
-        hhbc_options = !Hhbc_options.compiler_options;
+        hhbc_options;
       }
   in
   let (tast_hh, is_runtime_error, error) =
@@ -406,8 +403,7 @@ let do_compile
           P.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
       if List.is_empty error_list then
         let tast =
-          if Hhbc_options.enable_pocket_universes Compile.(env.hhbc_options)
-          then
+          if Hhbc_options.enable_pocket_universes hhbc_options then
             Pocket_universes.translate tast
           else
             tast
@@ -429,10 +425,10 @@ let do_compile
     log_success compiler_options filename debug_time;
   Compile.(ret.bytecode_segments)
 
-let extract_facts ~filename text =
+let extract_facts ~hhbc_options ~filename text =
+  let co = hhbc_options in
   [
     Hhbc_options.(
-      let co = !compiler_options in
       Facts_parser.extract_as_json_string
         ~php5_compat_mode:true
         ~hhvm_compat_mode:true
@@ -446,9 +442,9 @@ let extract_facts ~filename text =
       |> Option.value ~default:"");
   ]
 
-let parse_hh_file filename body =
+let parse_hh_file ~hhbc_options filename body =
+  let co = hhbc_options in
   Hhbc_options.(
-    let co = !compiler_options in
     let file = Relative_path.create Relative_path.Dummy filename in
     let source_text = SourceText.make file body in
     let mode = Full_fidelity_parser.parse_mode source_text in
@@ -475,6 +471,7 @@ let parse_hh_file filename body =
 
 let process_single_source_unit
     ~is_systemlib
+    ~hhbc_options
     compiler_options
     handle_output
     handle_exception
@@ -484,10 +481,11 @@ let process_single_source_unit
     let debug_time = new_debug_time () in
     let output =
       if compiler_options.extract_facts then
-        extract_facts ~filename source_text
+        extract_facts source_text ~filename ~hhbc_options
       else
         do_compile
           ~is_systemlib
+          ~hhbc_options
           compiler_options
           filename
           source_text
@@ -507,22 +505,21 @@ let decl_and_run_mode compiler_options =
         List.iter ~f:(P.printf "%s") strings;
         P.printf "%!"
       in
+      let pending_config = ref Hhbc_options.default in
       let set_compiler_options config_json =
         let options =
           Hhbc_options.get_options_from_config
             config_json
-            ~init:!Hhbc_options.compiler_options
+            ~init:!pending_config
             ~config_list:compiler_options.config_list
         in
-        Hhbc_options.set_compiler_options options
+        pending_config := options
       in
       let ini_config_json =
         Option.map ~f:json_of_file compiler_options.config_file
       in
       set_compiler_options ini_config_json;
-      let dumped_options =
-        lazy (Hhbc_options.to_string !Hhbc_options.compiler_options)
-      in
+      let dumped_options = lazy (Hhbc_options.to_string !pending_config) in
       Ident.track_names := true;
 
       match compiler_options.mode with
@@ -540,10 +537,7 @@ let decl_and_run_mode compiler_options =
             ]
           in
           let msg =
-            if
-              Hhbc_options.log_extern_compiler_perf
-                !Hhbc_options.compiler_options
-            then
+            if Hhbc_options.log_extern_compiler_perf !pending_config then
               let json_microsec t = int_ @@ int_of_float @@ (t *. 1000000.0) in
               ("parsing_time", json_microsec !(debug_time.parsing_t))
               :: ("codegen_time", json_microsec !(debug_time.codegen_t))
@@ -624,7 +618,7 @@ let decl_and_run_mode compiler_options =
                       fail_daemon None ("for_debugger_eval flag missing: " ^ af))
                     header
                 in
-                let old_config = !Hhbc_options.compiler_options in
+                let old_config = !pending_config in
                 let config_overrides =
                   get_field
                     (get_obj "config_overrides")
@@ -638,13 +632,14 @@ let decl_and_run_mode compiler_options =
                 let result =
                   process_single_source_unit
                     ~is_systemlib
+                    ~hhbc_options:!pending_config
                     compiler_options
                     handle_output
                     handle_exception
                     (Relative_path.create Relative_path.Dummy filename)
                     body
                 in
-                Hhbc_options.set_compiler_options old_config;
+                pending_config := old_config;
                 result);
             facts =
               (fun header body ->
@@ -667,7 +662,7 @@ let decl_and_run_mode compiler_options =
                  let path =
                    Relative_path.create Relative_path.Dummy filename
                  in
-                 let old_config = !Hhbc_options.compiler_options in
+                 let old_config = !pending_config in
                  let config_overrides =
                    get_field
                      (get_obj "config_overrides")
@@ -676,9 +671,14 @@ let decl_and_run_mode compiler_options =
                  in
                  set_compiler_options (Some config_overrides);
                  let result =
-                   handle_output path (extract_facts ~filename:path body)
+                   handle_output
+                     path
+                     (extract_facts
+                        ~hhbc_options:!pending_config
+                        ~filename:path
+                        body)
                  in
-                 Hhbc_options.set_compiler_options old_config;
+                 pending_config := old_config;
                  result)
                   (new_debug_time ()));
             parse =
@@ -698,7 +698,7 @@ let decl_and_run_mode compiler_options =
                    else
                      body
                  in
-                 let old_config = !Hhbc_options.compiler_options in
+                 let old_config = !pending_config in
                  let config_overrides =
                    get_field
                      (get_obj "config_overrides")
@@ -709,9 +709,9 @@ let decl_and_run_mode compiler_options =
                  let result =
                    handle_output
                      (Relative_path.create Relative_path.Dummy filename)
-                     (parse_hh_file filename body)
+                     (parse_hh_file filename body ~hhbc_options:!pending_config)
                  in
-                 Hhbc_options.set_compiler_options old_config;
+                 pending_config := old_config;
                  result)
                   (new_debug_time ()));
           }
@@ -733,6 +733,7 @@ let decl_and_run_mode compiler_options =
           let abs_path = Relative_path.to_absolute filename in
           process_single_source_unit
             ~is_systemlib:false
+            ~hhbc_options:!pending_config
             compiler_options
             handle_output
             handle_exception

@@ -59,7 +59,15 @@ let update_context
         Ast_provider.parse_file_input ~full:true path file_input)
   in
   Ast_provider.provide_ast_hint path ast Ast_provider.Full;
-  let entry = { Provider_context.path; file_input; ast } in
+  let entry =
+    {
+      Provider_context.path;
+      file_input;
+      ast;
+      tast = ref None;
+      errors = ref None;
+    }
+  in
   let ctx =
     {
       ctx with
@@ -73,13 +81,20 @@ let compute_tast_and_errors
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     Tast.program * Errors.t =
   let make_tast () =
-    let (errors, tast) =
-      Errors.do_ (fun () ->
-          let nast = Naming.program entry.Provider_context.ast in
-          let tast = Typing.nast_to_tast ctx.Provider_context.tcopt nast in
-          tast)
-    in
-    (tast, errors)
+    match
+      (!(entry.Provider_context.tast), !(entry.Provider_context.errors))
+    with
+    | (Some tast, Some errors) -> (tast, errors)
+    | _ ->
+      let (errors, tast) =
+        Errors.do_ (fun () ->
+            let nast = Naming.program entry.Provider_context.ast in
+            let tast = Typing.nast_to_tast ctx.Provider_context.tcopt nast in
+            tast)
+      in
+      entry.Provider_context.tast := Some tast;
+      entry.Provider_context.errors := Some errors;
+      (tast, errors)
   in
   (* If global context is not set, set it and proceed *)
   match Provider_context.get_global_context () with

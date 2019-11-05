@@ -28,10 +28,7 @@ end
 
 module FileInfoAsserter = Asserter.Make_asserter (FileInfoComparator)
 
-let get_type_path type_name =
-  Option.map
-    ~f:(fun (pos, _) -> FileInfo.get_pos_filename pos)
-    (Naming_table.Types.get_pos type_name)
+let get_type_path type_name = Naming_table.Types.get_filename type_name
 
 let get_fun_path fun_name = Naming_table.Funs.get_filename fun_name
 

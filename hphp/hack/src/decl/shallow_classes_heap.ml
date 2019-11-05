@@ -64,8 +64,8 @@ let declare_class_in_file file name =
   | None -> err_not_found file name
 
 let get_class_filename x =
-  match Naming_table.Types.get_pos x with
-  | Some (pos, Naming_table.TClass) -> Some (FileInfo.get_pos_filename pos)
+  match Naming_table.Types.get_filename_and_kind x with
+  | Some (fn, Naming_table.TClass) -> Some fn
   | _ -> None
 
 let get cid =

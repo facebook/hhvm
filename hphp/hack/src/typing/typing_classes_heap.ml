@@ -89,13 +89,12 @@ module Classes = struct
         match cached with
         | Some dc -> dc
         | None ->
-          (match Naming_table.Types.get_pos class_name with
+          (match Naming_table.Types.get_filename_and_kind class_name with
           | Some (_, Naming_table.TTypedef)
           | Some (_, Naming_table.TRecordDef)
           | None ->
             raise Exit
-          | Some (pos, Naming_table.TClass) ->
-            let file = FileInfo.get_pos_filename pos in
+          | Some (file, Naming_table.TClass) ->
             Option.iter (defer_threshold ()) ~f:(fun threshold ->
                 Deferred_decl.should_defer ~d:file ~threshold);
             let class_type =

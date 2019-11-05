@@ -8,13 +8,12 @@
  *)
 
 let get_class id =
-  match Naming_table.Types.get_pos id with
+  match Naming_table.Types.get_filename_and_kind id with
   | None
   | Some (_, Naming_table.TTypedef) ->
     None
   | Some (_, Naming_table.TRecordDef) -> None
-  | Some (pos, Naming_table.TClass) ->
-    let fn = FileInfo.get_pos_filename pos in
+  | Some (fn, Naming_table.TClass) ->
     (match Ast_provider.find_class_in_file fn id with
     | None -> None
     | Some class_ -> Some (Naming.class_ class_))

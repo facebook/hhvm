@@ -92,7 +92,7 @@ let check_extend_kind parent_pos parent_kind child_pos child_kind =
       (Ast_defs.Cabstract | Ast_defs.Cnormal) )
   | (Ast_defs.Cabstract, Ast_defs.Cenum)
   (* enums extend BuiltinEnum under the hood *)
-  
+
   | (Ast_defs.Ctrait, Ast_defs.Ctrait)
   | (Ast_defs.Cinterface, Ast_defs.Cinterface) ->
     ()
@@ -441,9 +441,8 @@ and class_type_decl class_env hint =
   match hint with
   | (_, Tapply ((_, cid), _)) ->
     begin
-      match Naming_table.Types.get_pos cid with
-      | Some (pos, Naming_table.TClass) when not (Decl_heap.Classes.mem cid) ->
-        let fn = FileInfo.get_pos_filename pos in
+      match Naming_table.Types.get_filename_and_kind cid with
+      | Some (fn, Naming_table.TClass) when not (Decl_heap.Classes.mem cid) ->
         (* We are supposed to redeclare the class *)
         let class_opt = Ast_provider.find_class_in_file fn cid in
         Errors.run_in_context fn Errors.Decl (fun () ->

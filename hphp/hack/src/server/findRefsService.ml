@@ -139,8 +139,8 @@ let get_origin_class_name class_name member =
   Option.value origin ~default:class_name
 
 let get_child_classes_files class_name =
-  match Naming_table.Types.get_pos class_name with
-  | Some (_, Naming_table.TClass) ->
+  match Naming_table.Types.get_kind class_name with
+  | Some Naming_table.TClass ->
     (* Find the files that contain classes that extend class_ *)
     let cid_hash = Typing_deps.Dep.make (Typing_deps.Dep.Class class_name) in
     let extend_deps =
@@ -152,16 +152,12 @@ let get_child_classes_files class_name =
   | _ -> Relative_path.Set.empty
 
 let get_deps_set classes =
-  let get_filename class_name =
-    Naming_table.Types.get_pos class_name
-    >>= (fun (pos, _) -> Some (FileInfo.get_pos_filename pos))
-  in
   SSet.fold
     classes
     ~f:
       begin
         fun class_name acc ->
-        match get_filename class_name with
+        match Naming_table.Types.get_filename class_name with
         | None -> acc
         | Some fn ->
           let dep = Typing_deps.Dep.Class class_name in
@@ -277,15 +273,15 @@ let get_definitions = function
   | IClass class_name ->
     Option.value
       ~default:[]
-      ( Naming_table.Types.get_pos class_name
+      ( Naming_table.Types.get_kind class_name
       >>= function
-      | (_, Naming_table.TClass) ->
+      | Naming_table.TClass ->
         Decl_provider.get_class class_name
         >>= (fun class_ -> Some [(class_name, Cls.pos class_)])
-      | (_, Naming_table.TTypedef) ->
+      | Naming_table.TTypedef ->
         Decl_provider.get_typedef class_name
         >>= (fun type_ -> Some [(class_name, type_.td_pos)])
-      | (_, Naming_table.TRecordDef) ->
+      | Naming_table.TRecordDef ->
         Decl_provider.get_record_def class_name
         >>= (fun rd -> Some [(class_name, rd.rdt_pos)]) )
   | IRecord record_name ->

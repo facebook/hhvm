@@ -26,10 +26,8 @@ module RecordDef = SharedMem.LocalCache (StringKey) (Decl_heap.RecordDef)
 module Typedefs = SharedMem.LocalCache (StringKey) (Decl_heap.Typedef)
 
 let get_type_id_filename x expected_kind =
-  match Naming_table.Types.get_pos x with
-  | Some (pos, kind) when kind = expected_kind ->
-    let res = FileInfo.get_pos_filename pos in
-    Some res
+  match Naming_table.Types.get_filename_and_kind x with
+  | Some (fn, kind) when kind = expected_kind -> Some fn
   | _ -> None
 
 let get_fun (fun_name : fun_key) : fun_decl option =

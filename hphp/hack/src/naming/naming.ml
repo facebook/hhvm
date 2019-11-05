@@ -2272,8 +2272,8 @@ module Make (GetLocals : GetLocals) = struct
       let (genv, _) = env in
       let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
       begin
-        match Naming_table.Types.get_pos name with
-        | Some (_, Naming_table.TTypedef) when snd x2 = "class" ->
+        match Naming_table.Types.get_kind name with
+        | Some Naming_table.TTypedef when snd x2 = "class" ->
           N.Typename
             (Env.type_name env x1 ~allow_typedef:true ~allow_generics:false)
         | _ -> N.Class_const (make_class_id env x1, x2)
@@ -2283,8 +2283,8 @@ module Make (GetLocals : GetLocals) = struct
       let (genv, _) = env in
       let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
       begin
-        match Naming_table.Types.get_pos name with
-        | Some (_, Naming_table.TTypedef) when snd x2 = "class" ->
+        match Naming_table.Types.get_kind name with
+        | Some Naming_table.TTypedef when snd x2 = "class" ->
           N.Typename
             (Env.type_name env x1 ~allow_typedef:true ~allow_generics:false)
         | _ -> N.Class_const (make_class_id env x1, x2)

@@ -115,10 +115,8 @@ let get_static_method (class_name : class_key) (method_name : fun_key) :
     convert_class_elt_to_fun_decl smeth
 
 let get_type_id_filename x expected_kind =
-  match Naming_table.Types.get_pos x with
-  | Some (pos, kind) when kind = expected_kind ->
-    let res = FileInfo.get_pos_filename pos in
-    Some res
+  match Naming_table.Types.get_filename_and_kind x with
+  | Some (fn, kind) when kind = expected_kind -> Some fn
   | _ -> None
 
 let get_typedef (typedef_name : string) : typedef_decl option =

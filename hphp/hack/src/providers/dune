@@ -78,7 +78,9 @@
     decl_lru_cache
     decl_provider)
   (libraries
+    decl_service_client
     lru_worker_stubs
+    marshal_tools
     provider_config
     typing_heap)
   (preprocess (pps ppx_deriving.std)))

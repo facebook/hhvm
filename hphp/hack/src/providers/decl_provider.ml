@@ -206,9 +206,12 @@ let get_gconst (gconst_name : string) : gconst_decl option =
     in
     let result : gconst_decl option = Obj.obj result in
     result
-  | Provider_config.Decl_service _ ->
-    (* TODO: provide a real decl here from the decl service! *)
-    None
+  | Provider_config.Decl_service decl ->
+    begin
+      match decl.Decl_service_client.rpc_get_gconst gconst_name with
+      | Ok _ -> None (* TODO: implement it! *)
+      | Error e -> failwith (Marshal_tools.error_to_verbose_string e)
+    end
 
 let invalidate_fun (fun_name : fun_key) : unit =
   match Provider_config.get_backend () with

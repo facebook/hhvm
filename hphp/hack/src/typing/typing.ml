@@ -442,6 +442,23 @@ let make_param_local_ty env decl_hint param =
   Typing_reactivity.disallow_atmost_rx_as_rxfunc_on_non_functions env param ty;
   (env, ty)
 
+(* Return a map describing all the fields in this record, including
+   inherited fields, and whether they have a default value. *)
+let rec all_record_fields (rd : Decl_provider.record_def_decl) :
+    (sid * Typing_defs.record_field_req) SMap.t =
+  let fields =
+    List.fold
+      rd.rdt_fields
+      ~init:SMap.empty
+      ~f:(fun acc (((_, name), _) as f) -> SMap.add name f acc)
+  in
+  match rd.rdt_extends with
+  | Some (_, parent) ->
+    (match Decl_provider.get_record_def parent with
+    | Some parent_rd -> SMap.union fields (all_record_fields parent_rd)
+    | None -> fields)
+  | _ -> fields
+
 (* Given a localized parameter type and parameter information, infer
  * a type for the parameter default expression (if present) and check that
  * it is a subtype of the parameter type (if present). If no parameter type
@@ -2976,9 +2993,49 @@ and expr_
     in
     let env = Env.forget_members env (Fake.Blame_call p) in
     make_result env p (Aast.New (tc, tal, tel, tuel, (p1, ctor_fty))) ty
-  | Record ((pos, id), _is_array, _values) ->
+  | Record ((pos, id), _is_array, field_values) ->
     (match Decl_provider.get_record_def id with
-    | Some rd -> if rd.rdt_abstract then Errors.new_abstract_record (pos, id)
+    | Some rd ->
+      if rd.rdt_abstract then Errors.new_abstract_record (pos, id);
+
+      let field_name (pos, expr_) =
+        match expr_ with
+        | Aast.String name -> Some (pos, name)
+        | _ ->
+          (* TODO T44306013: Ensure that other values for field names are banned. *)
+          None
+      in
+      let fields_declared = all_record_fields rd in
+      let fields_present =
+        List.map field_values ~f:(fun (name, _value) -> field_name name)
+        |> List.filter_opt
+      in
+      (* Check for missing required fields. *)
+      let fields_present_names =
+        List.map ~f:snd fields_present |> SSet.of_list
+      in
+      SMap.iter
+        (fun field_name info ->
+          let ((field_pos, _), req) = info in
+          match req with
+          | Typing_defs.ValueRequired
+            when not (SSet.mem field_name fields_present_names) ->
+            Errors.missing_record_field_name
+              ~field_name
+              ~new_pos:pos
+              ~record_name:id
+              ~field_decl_pos:field_pos
+          | _ -> ())
+        fields_declared;
+
+      (* Check for unknown fields.*)
+      List.iter fields_present ~f:(fun (pos, field_name) ->
+          if not (SMap.mem field_name fields_declared) then
+            Errors.unexpected_record_field_name
+              ~field_name
+              ~field_pos:pos
+              ~record_name:id
+              ~decl_pos:(fst rd.rdt_name))
     | None -> ());
 
     expr_error env (Reason.Rwitness p) outer
@@ -8762,23 +8819,6 @@ let record_field env f =
     in
     (env, (id, hint, Some te))
   | None -> (env, (id, hint, None))
-
-(* Return a map describing all the fields in this record, including
-   inherited fields, and whether they have a default value. *)
-let rec all_record_fields (rd : Decl_provider.record_def_decl) :
-    (sid * Typing_defs.record_field_req) SMap.t =
-  let fields =
-    List.fold
-      rd.rdt_fields
-      ~init:SMap.empty
-      ~f:(fun acc (((_, name), _) as f) -> SMap.add name f acc)
-  in
-  match rd.rdt_extends with
-  | Some (_, parent) ->
-    (match Decl_provider.get_record_def parent with
-    | Some parent_rd -> SMap.union fields (all_record_fields parent_rd)
-    | None -> fields)
-  | _ -> fields
 
 let record_def_parent rd parent_hint =
   match snd parent_hint with

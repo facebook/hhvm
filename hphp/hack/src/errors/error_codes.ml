@@ -614,6 +614,8 @@ module Typing = struct
     | RecordInitValueDoesNotMatchHint
     | AbstractTconstNotAllowed
     | NewAbstractRecord
+    | RecordMissingRequiredField
+    | RecordUnknownField
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 

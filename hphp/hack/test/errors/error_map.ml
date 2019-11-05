@@ -602,4 +602,6 @@ PocketUniversesTyping = 4350
 RecordInitValueDoesNotMatchHint = 4351
 AbstractTconstNotAllowed = 4352
 NewAbstractRecord = 4353
+RecordMissingRequiredField = 4354
+RecordUnknownField = 4355
   |}]

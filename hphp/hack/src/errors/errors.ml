@@ -1122,6 +1122,30 @@ let repeated_record_field name pos prev_pos =
     (NastCheck.err_code NastCheck.RepeatedRecordFieldName)
     [(pos, msg); (prev_pos, "Previous field is here")]
 
+let unexpected_record_field_name ~field_name ~field_pos ~record_name ~decl_pos
+    =
+  let msg =
+    Printf.sprintf
+      "Record `%s` has no field `%s`"
+      (strip_ns record_name)
+      field_name
+  in
+  add_list
+    (Typing.err_code Typing.RecordUnknownField)
+    [(field_pos, msg); (decl_pos, "Definition is here")]
+
+let missing_record_field_name ~field_name ~new_pos ~record_name ~field_decl_pos
+    =
+  let msg =
+    Printf.sprintf
+      "Mising required field `%s` in `%s`"
+      field_name
+      (strip_ns record_name)
+  in
+  add_list
+    (Typing.err_code Typing.RecordMissingRequiredField)
+    [(new_pos, msg); (field_decl_pos, "Field definition is here")]
+
 let primitive_toplevel pos =
   add
     (Naming.err_code Naming.PrimitiveToplevel)

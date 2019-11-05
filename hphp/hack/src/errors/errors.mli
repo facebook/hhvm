@@ -161,6 +161,20 @@ val fd_name_already_bound : Pos.t -> unit
 
 val repeated_record_field : string -> Pos.t -> Pos.t -> unit
 
+val unexpected_record_field_name :
+  field_name:string ->
+  field_pos:Pos.t ->
+  record_name:string ->
+  decl_pos:Pos.t ->
+  unit
+
+val missing_record_field_name :
+  field_name:string ->
+  new_pos:Pos.t ->
+  record_name:string ->
+  field_decl_pos:Pos.t ->
+  unit
+
 val primitive_toplevel : Pos.t -> unit
 
 val primitive_invalid_alias : Pos.t -> string -> string -> unit

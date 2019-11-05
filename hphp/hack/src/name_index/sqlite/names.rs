@@ -22,10 +22,22 @@ pub struct Names {
 
 impl Names {
     pub fn new(path: &Path) -> Self {
-        // TODO: check if the path exists, and create an in-memory representation if it doesn't
-        let connection = Arc::new(Mutex::new(
-            Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap(),
-        ));
+        let connection = if path.exists() {
+            println!("Loading name index from '{:#?}' in read-only mode", path);
+            Arc::new(Mutex::new(
+                Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap(),
+            ))
+        } else {
+            println!(
+                "Path '{:#?}' does not point to a file on disk - creating an in-memory read-write database",
+                path,
+            );
+            let connection = Arc::new(Mutex::new(Connection::open_in_memory().unwrap()));
+            FileInfoTable::new(connection.clone()).create();
+            ConstsTable::new(connection.clone()).create();
+
+            connection
+        };
 
         Names {
             consts: ConstsTable::new(connection.clone()),

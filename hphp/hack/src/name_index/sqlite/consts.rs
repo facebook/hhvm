@@ -6,7 +6,7 @@
 use crate::datatypes::*;
 
 use oxidized::relative_path::RelativePath;
-use rusqlite::{params, Connection};
+use rusqlite::{params, Connection, OptionalExtension};
 use std::sync::{Arc, Mutex};
 
 #[derive(Clone, Debug)]
@@ -67,7 +67,7 @@ impl ConstsTable {
         }
     }
 
-    pub fn map_names_to_paths(self, names: &[&str]) -> Vec<RelativePath> {
+    pub fn map_names_to_paths(self, names: &[&str]) -> Vec<Option<RelativePath>> {
         let select_statement = "
             SELECT
                 NAMING_FILE_INFO.PATH_PREFIX_TYPE,
@@ -94,6 +94,7 @@ impl ConstsTable {
                         let suffix: SqlitePathBuf = row.get(1).unwrap();
                         Ok(RelativePath::make(prefix.value, suffix.value))
                     })
+                    .optional()
                     .unwrap();
 
                 path.clone()

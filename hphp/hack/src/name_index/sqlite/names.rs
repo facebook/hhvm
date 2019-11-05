@@ -46,7 +46,31 @@ impl Names {
         }
     }
 
-    pub fn paths_of_consts(self, names: &[&str]) -> Vec<RelativePath> {
+    pub fn paths_of_consts(self, names: &[&str]) -> Vec<Option<RelativePath>> {
         self.consts.map_names_to_paths(names)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_non_existent_const() {
+        let names = Names::new(Path::new(""));
+
+        let result = names.paths_of_consts(&["\\Foo"]);
+
+        assert_eq!(
+            1,
+            result.len(),
+            "The result vec must have exactly 1 element"
+        );
+
+        match result.first() {
+            Some(Some(path)) => assert!(false, format!("Unexpected path: {:?}", path)),
+            Some(None) => assert!(true),
+            None => assert!(false, "Expected an element but got none"),
+        }
     }
 }

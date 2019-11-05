@@ -57,3 +57,38 @@ impl OcamlRep for UnsafeOcamlPtr {
         Ok(unsafe { Self::new(value.to_bits()) })
     }
 }
+
+/// Any kind of naked pointer. In OCaml these are represented as opaque types e.g.
+/// `type addr;`. They're serialized to ocaml purely as a usize-sized value.
+#[repr(transparent)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+pub struct NakedPtr<T>(*const T);
+
+impl<T> NakedPtr<T> {
+    pub fn new(ptr: *const T) -> Self {
+        Self(ptr)
+    }
+
+    pub fn as_ptr(self) -> *const T {
+        self.0
+    }
+}
+
+impl<T> fmt::Debug for NakedPtr<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:p}", self.0)
+    }
+}
+
+impl<T> OcamlRep for NakedPtr<T> {
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, _alloc: &mut A) -> Value<'a> {
+        unsafe { Value::from_bits(self.0 as usize) }
+    }
+
+    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
+        if value.is_immediate() {
+            return Err(FromError::ExpectedBlock(value.as_int().unwrap()));
+        }
+        Ok(unsafe { Self::new(value.to_bits() as *const T) })
+    }
+}

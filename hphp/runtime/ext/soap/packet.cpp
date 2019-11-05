@@ -369,7 +369,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
               if (return_value.asCArrRef().exists(key)) {
                 auto const lval = return_value.asArrRef().lval(key);
                 if (!isArrayLikeType(lval.type())) {
-                  auto const tv = make_tv<KindOfArray>(
+                  auto const tv = make_array_like_tv(
                     tvCastToArrayLikeData(lval.tv())
                   );
                   cellMove(tv, lval);

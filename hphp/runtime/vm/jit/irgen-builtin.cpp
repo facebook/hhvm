@@ -714,7 +714,7 @@ SSATmp* opt_foldable(IRGS& env,
       case KindOfArray:
         return cns(
           env,
-          make_tv<KindOfPersistentArray>(scalar_array())
+          make_persistent_array_like_tv(scalar_array())
         );
       case KindOfUninit:
       case KindOfObject:

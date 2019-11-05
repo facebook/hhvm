@@ -77,7 +77,7 @@ AsyncGenerator::yield(Offset resumeOffset,
   auto keyValueTuple = make_varray(
     key ? Variant(tvAsCVarRef(key), Variant::CellCopy()) : init_null_variant,
     Variant(tvAsCVarRef(&value), Variant::CellCopy()));
-  auto keyValueTupleTV = make_tv<KindOfArray>(keyValueTuple.detach());
+  auto keyValueTupleTV = make_array_like_tv(keyValueTuple.detach());
 
   if (m_waitHandle) {
     // Resumed execution.

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/record-array.h"
 #include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/base/tv-array-like.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -430,7 +431,7 @@ public:
     assertx(a->isPHPArray());
     assertx(m_top != m_elms);
     m_top--;
-    *m_top = make_tv<KindOfArray>(a);
+    *m_top = make_array_like_tv(a);
   }
 
   ALWAYS_INLINE
@@ -491,7 +492,7 @@ public:
     assertx(a->isPHPArray());
     assertx(m_top != m_elms);
     m_top--;
-    *m_top = make_tv<KindOfPersistentArray>(a);
+    *m_top = make_persistent_array_like_tv(const_cast<ArrayData*>(a));
   }
 
   ALWAYS_INLINE
@@ -547,7 +548,7 @@ public:
   void pushRecordArrayNoRc(RecordArray* r) {
     assertx(m_top != m_elms);
     m_top--;
-    *m_top = make_tv<KindOfArray>(r);
+    *m_top = make_array_like_tv(r);
   }
 
   ALWAYS_INLINE

@@ -1411,7 +1411,7 @@ void AsyncMysqlConnectAndMultiQueryEvent::unserialize(Cell& result) {
       m_connect_op, m_clientStats);
   auto resTuple = make_packed_array(connResult, queryResults);
   if (m_multi_query_op->ok()) {
-    cellCopy(make_tv<KindOfArray>(resTuple.detach()), result);
+    cellCopy(make_array_like_tv(resTuple.detach()), result);
   } else {
     throwAsyncMysqlQueryException("AsyncMysqlQueryException", m_multi_query_op,
                                   std::move(m_clientStats), queryResults);

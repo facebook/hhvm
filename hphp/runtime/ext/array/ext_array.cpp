@@ -458,7 +458,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
         tvCastToArrayLike<IntishCast::Cast>(iter.secondVal())
       );
       tvUnset(lval); // avoid contamination of the value that was strongly bound
-      tvSet(make_tv<KindOfArray>(subarr1.get()), lval);
+      tvSet(make_array_like_tv(subarr1.get()), lval);
     } else {
       arr1.set(key, iter.secondVal(), true);
     }
@@ -648,7 +648,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
         ).toPHPArrayIntishCast();
         php_array_replace_recursive(seen, couldRecur(lval, subarr1.get()),
                                     subarr1, ArrNR(rval.val().parr));
-        tvSet(make_tv<KindOfArray>(subarr1.get()), lval);
+        tvSet(make_array_like_tv(subarr1.get()), lval);
       } else {
         arr1.set(key, iter.secondVal(), true);
       }
@@ -947,7 +947,7 @@ TypedValue HHVM_FUNCTION(array_slice,
   }
 
   if (len <= 0) {
-    return make_tv<KindOfPersistentArray>(ArrayData::Create());
+    return make_persistent_array_like_tv(ArrayData::Create());
   }
 
   bool input_is_packed = isClsMethType(cell_input.m_type) ||
@@ -1758,7 +1758,7 @@ TypedValue HHVM_FUNCTION(array_diff,
   }
   /* If container1 is empty, we can stop here and return the empty array */
   if (!getContainerSize(c1)) {
-    return make_tv<KindOfPersistentArray>(ArrayData::Create());
+    return make_persistent_array_like_tv(ArrayData::Create());
   }
   /* If all of the containers (except container1) are empty, we can just
      return container1 (converting it to an array if needed) */
@@ -1968,7 +1968,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
     return make_tv<KindOfNull>();
   }
   if (getContainerSize(c1) == 0) {
-    return make_tv<KindOfPersistentArray>(ArrayData::Create());
+    return make_persistent_array_like_tv(ArrayData::Create());
   }
   if (largestSize == 0) {
     if (isArrayLikeType(c1.m_type)) {
@@ -2051,9 +2051,9 @@ TypedValue HHVM_FUNCTION(array_diff_key,
 
   auto ret = diff_step(c1, c2);
   IterateVNoInc(args.get(), [&](TypedValue v) {
-    ret = diff_step(make_tv<KindOfArray>(ret.get()), v);
+    ret = diff_step(make_array_like_tv(ret.get()), v);
   });
-  return make_tv<KindOfArray>(ret.detach());
+  return make_array_like_tv(ret.detach());
 }
 
 TypedValue HHVM_FUNCTION(array_udiff,
@@ -2367,7 +2367,7 @@ TypedValue HHVM_FUNCTION(array_intersect,
   /* If any of the containers were empty, we can stop here and return the
      empty array */
   if (!getContainerSize(c1) || !smallestSize) {
-    return make_tv<KindOfPersistentArray>(ArrayData::Create());
+    return make_persistent_array_like_tv(ArrayData::Create());
   }
 
   Array ret = Array::Create();
@@ -2422,7 +2422,7 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
     return make_tv<KindOfNull>();
   }
   if ((getContainerSize(c1) == 0) || empty_arg) {
-    return make_tv<KindOfPersistentArray>(ArrayData::Create());
+    return make_persistent_array_like_tv(ArrayData::Create());
   }
 
   auto intersect_step = [](TypedValue left, TypedValue right) {
@@ -2598,9 +2598,9 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
 
   auto ret = intersect_step(c1, c2);
   IterateVNoInc(args.get(), [&](TypedValue v) {
-    ret = intersect_step(make_tv<KindOfArray>(ret.get()), v);
+    ret = intersect_step(make_array_like_tv(ret.get()), v);
   });
-  return make_tv<KindOfArray>(ret.detach());
+  return make_array_like_tv(ret.detach());
 }
 
 TypedValue HHVM_FUNCTION(array_uintersect,

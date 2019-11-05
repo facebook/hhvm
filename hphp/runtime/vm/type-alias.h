@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/tv-array-like.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
@@ -66,9 +67,7 @@ struct TypeAlias {
       (attrs)
       ;
     // Can't use make_array_like_tv because of include ordering issues
-    auto tv = RuntimeOption::EvalHackArrDVArrs
-      ? make_tv<KindOfDict>(typeStructure.get())
-      : make_tv<KindOfArray>(typeStructure.get());
+    auto tv = make_array_like_tv(typeStructure.get());
     sd(tv);
   }
 

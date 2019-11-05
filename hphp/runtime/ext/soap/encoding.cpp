@@ -1262,7 +1262,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
               /* Convert into array */
               Array arr = Array::Create();
               arr.append(el.tv());
-              cellSet(make_tv<KindOfArray>(arr.get()), el);
+              cellSet(make_array_like_tv(arr.get()), el);
             }
             asArrRef(el).append(val);
           } else {

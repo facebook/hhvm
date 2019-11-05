@@ -1041,8 +1041,7 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
 }
 
 void ObjectData::setReifiedGenerics(Class* cls, ArrayData* reifiedTypes) {
-  auto const arg = RuntimeOption::EvalHackArrDVArrs
-    ? make_tv<KindOfVec>(reifiedTypes) : make_tv<KindOfArray>(reifiedTypes);
+  auto const arg = make_array_like_tv(reifiedTypes);
   auto const meth = cls->lookupMethod(s_86reifiedinit.get());
   assertx(meth != nullptr);
   g_context->invokeMethod(this, meth, InvokeArgs(&arg, 1));

@@ -1504,7 +1504,7 @@ inline Array& forceToArray(Variant& var) {
 
 inline Array& forceToArray(tv_lval lval) {
   if (!isArrayLikeType(lval.type())) {
-    tvMove(make_tv<KindOfArray>(ArrayData::Create()), lval);
+    tvMove(make_array_like_tv(ArrayData::Create()), lval);
   }
   return asArrRef(lval);
 }

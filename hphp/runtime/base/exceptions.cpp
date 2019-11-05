@@ -316,9 +316,7 @@ void throwable_init(ObjectData* throwable) {
      opts != k_DEBUG_BACKTRACE_IGNORE_ARGS)
     ) {
     auto trace = HHVM_FN(debug_backtrace)(opts);
-    auto tv = RuntimeOption::EvalHackArrDVArrs ?
-      make_tv<KindOfVec>(trace.detach()) :
-      make_tv<KindOfArray>(trace.detach());
+    auto tv = make_array_like_tv(trace.detach());
     cellMove(tv, trace_lval);
   } else {
     cellMove(

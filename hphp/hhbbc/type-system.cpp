@@ -2999,6 +2999,11 @@ struct tvHelper {
   static R make(Args&&... args) {
     return make_tv<dt>(std::forward<Args>(args)...);
   }
+  template<typename... Args>
+  static R makePersistentArray(Args&&... args) {
+    return make_persistent_array_like_tv(std::forward<Args>(args)...);
+  }
+
   template<typename Init, typename... Args>
   static R fromMap(Args&&... args) {
     return fromTypeMap<Init, force_static>(std::forward<Args>(args)...);
@@ -3013,6 +3018,10 @@ template<bool ignored>
 struct tvHelper<bool, ignored> {
   template <DataType dt, typename... Args>
   static bool make(Args&&... /*args*/) {
+    return true;
+  }
+  template <typename... Args>
+  static bool makePersistentArray(Args&&... /*args*/) {
     return true;
   }
   template<typename Init, typename... Args>
@@ -3037,15 +3046,15 @@ R tvImpl(const Type& t) {
   case BFalse:       return H::template make<KindOfBoolean>(false);
   case BPArrE:
   case BSPArrE:
-    return H::template make<KindOfPersistentArray>(staticEmptyArray());
+    return H::makePersistentArray(staticEmptyArray());
   case BVArrE:
   case BSVArrE:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return H::template make<KindOfPersistentArray>(staticEmptyVArray());
+    return H::makePersistentArray(staticEmptyVArray());
   case BDArrE:
   case BSDArrE:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
-    return H::template make<KindOfPersistentArray>(staticEmptyDArray());
+    return H::makePersistentArray(staticEmptyDArray());
   case BVecE:
   case BSVecE:
     if (t.m_dataTag == DataTag::ArrLikeVal) {
@@ -3103,7 +3112,7 @@ R tvImpl(const Type& t) {
       return H::template make<KindOfPersistentString>(t.m_data.sval);
     case DataTag::ArrLikeVal:
       if (t.subtypeOf(BArrN)) {
-        return H::template make<KindOfPersistentArray>(
+        return H::makePersistentArray(
           const_cast<ArrayData*>(t.m_data.aval)
         );
       }

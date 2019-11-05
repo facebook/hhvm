@@ -53,7 +53,7 @@ static Array HHVM_METHOD(Closure, __debugInfo) {
       useVars.set(StrNR(propsInfos[i].name), props[i]);
     }
 
-    ret.set(s_static, make_tv<KindOfArray>(useVars.toArray().get()));
+    ret.set(s_static, make_array_like_tv(useVars.toArray().get()));
   }
 
   auto const func = closure->getInvokeFunc();

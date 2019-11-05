@@ -180,7 +180,7 @@ ALWAYS_INLINE void checkPromotion(tv_rval base, const MInstrPropState* pState) {
     auto const cls = pState->getClass();
     if (UNLIKELY(cls != nullptr)) {
       auto const slot = pState->getSlot();
-      auto const tv = make_tv<KindOfArray>(staticEmptyArray());
+      auto const tv = make_array_like_tv(staticEmptyArray());
       if (pState->isStatic()) {
         assertx(slot < cls->numStaticProperties());
         auto const& sprop = cls->staticProperties()[slot];
@@ -837,7 +837,7 @@ inline tv_lval ElemDEmptyish(tv_lval base,
   detail::checkPromotion(base, pState);
   auto scratchKey = initScratchKey(key);
 
-  tvMove(make_tv<KindOfArray>(ArrayData::Create()), base);
+  tvMove(make_array_like_tv(ArrayData::Create()), base);
 
   auto const result = asArrRef(base).lval(cellAsCVarRef(scratchKey));
   if (mode == MOpMode::Warn) {
@@ -1238,7 +1238,7 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
  */
 inline tv_lval NewElemEmptyish(tv_lval base, const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
-  tvMove(make_tv<KindOfArray>(ArrayData::Create()), base);
+  tvMove(make_array_like_tv(ArrayData::Create()), base);
 
   if (checkHACFalseyPromote()) {
     raise_hac_falsey_promote_notice("Lval on missing array element");
@@ -1356,7 +1356,7 @@ inline void SetElemEmptyish(tv_lval base, key_type<keyType> key,
                             Cell* value, const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
   auto const& scratchKey = initScratchKey(key);
-  cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
+  cellMove(make_array_like_tv(ArrayData::Create()), base);
   asArrRef(base).set(tvAsCVarRef(&scratchKey), tvAsCVarRef(value));
 }
 
@@ -1802,7 +1802,7 @@ inline void SetNewElemEmptyish(tv_lval base,
   detail::checkPromotion(base, pState);
   Array a = Array::Create();
   a.append(cellAsCVarRef(*value));
-  cellMove(make_tv<KindOfArray>(a.detach()), base);
+  cellMove(make_array_like_tv(a.detach()), base);
 }
 
 /**
@@ -1978,7 +1978,7 @@ inline tv_lval SetOpElemEmptyish(SetOpOp op, tv_lval base,
 
   detail::checkPromotion(base, pState);
 
-  cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
+  cellMove(make_array_like_tv(ArrayData::Create()), base);
   auto const lval = asArrRef(base).lval(tvAsCVarRef(&key));
   setopBody(lval, op, rhs);
   return lval;
@@ -2104,7 +2104,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
 inline tv_lval SetOpNewElemEmptyish(SetOpOp op, tv_lval base, Cell* rhs,
                                     const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
-  cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
+  cellMove(make_array_like_tv(ArrayData::Create()), base);
   if (checkHACFalseyPromote()) {
     raise_hac_falsey_promote_notice("Lval on missing array element");
   }
@@ -2234,7 +2234,7 @@ inline Cell IncDecElemEmptyish(
 ) {
   detail::checkPromotion(base, pState);
 
-  cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
+  cellMove(make_array_like_tv(ArrayData::Create()), base);
   auto const lval = asArrRef(base).lval(tvAsCVarRef(&key));
   assertx(type(lval) == KindOfNull);
   return IncDecBody(op, lval);
@@ -2354,7 +2354,7 @@ inline Cell IncDecNewElemEmptyish(
   const MInstrPropState* pState
 ) {
   detail::checkPromotion(base, pState);
-  cellMove(make_tv<KindOfArray>(ArrayData::Create()), base);
+  cellMove(make_array_like_tv(ArrayData::Create()), base);
   if (checkHACFalseyPromote()) {
     raise_hac_falsey_promote_notice("Lval on missing array element");
   }

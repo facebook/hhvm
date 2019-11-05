@@ -18,6 +18,7 @@
 #define incl_HPHP_TV_MUTATE_H_
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/tv-array-like.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -300,25 +301,6 @@ enable_if_both_lvals_t<T&&, U&&> tvSwap(T&& a, U&& b) {
  */
 ALWAYS_INLINE void tvDebugTrash(TypedValue* tv) {
   if (debug) memset(tv, kTVTrashFill, sizeof *tv);
-}
-
-/*
- * Like make_tv(), but determine the appropriate Datatype from an ArrayData.
- */
-ALWAYS_INLINE TypedValue make_array_like_tv(ArrayData* a) {
-  TypedValue ret;
-  ret.m_data.parr = a;
-  ret.m_type = a->toDataType();
-  assertx(cellIsPlausible(ret));
-  return ret;
-}
-
-ALWAYS_INLINE TypedValue make_persistent_array_like_tv(ArrayData* a) {
-  TypedValue ret;
-  ret.m_data.parr = a;
-  ret.m_type = a->toPersistentDataType();
-  assertx(cellIsPlausible(ret));
-  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

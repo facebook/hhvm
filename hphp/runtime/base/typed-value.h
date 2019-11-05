@@ -331,7 +331,8 @@ inline Value make_value(ClsMethDataRef clsMeth) {
  */
 template<DataType DType>
 typename std::enable_if<
-  !std::is_same<typename DataTypeCPPType<DType>::type,void>::value,
+  !std::is_same<typename DataTypeCPPType<DType>::type,void>::value &&
+  DType != KindOfArray && DType != KindOfPersistentArray,
   TypedValue
 >::type make_tv(typename DataTypeCPPType<DType>::type val) {
   TypedValue ret;

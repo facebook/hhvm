@@ -2103,7 +2103,7 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
   } else if (!data->m_soap_functions.ft.empty()) {
     return Variant::attach(
       HHVM_FN(array_keys)(
-        make_tv<KindOfArray>(data->m_soap_functions.ftOriginal.get())
+        make_array_like_tv(data->m_soap_functions.ftOriginal.get())
       )
     );
   }

@@ -235,6 +235,7 @@ inline DataType ArrayData::toDataType() const {
   if (k < kRecordKind) return KindOfArray;
   if (k == kVecKind) return KindOfVec;
   if (k == kDictKind) return KindOfDict;
+  if (k == kRecordKind) return KindOfArray;
   assertx(k == kKeysetKind);
   return KindOfKeyset;
 }

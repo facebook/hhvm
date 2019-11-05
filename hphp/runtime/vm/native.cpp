@@ -539,7 +539,7 @@ static folly::Optional<TypedValue> builtinInValue(
   case KindOfPersistentKeyset:
   case KindOfKeyset:  return make_tv<KindOfNull>();
   case KindOfPersistentArray:
-  case KindOfArray:   return make_tv<KindOfArray>(ArrayData::Create());
+  case KindOfArray:   return make_array_like_tv(ArrayData::Create());
   case KindOfUninit:
   case KindOfObject:
   case KindOfResource:

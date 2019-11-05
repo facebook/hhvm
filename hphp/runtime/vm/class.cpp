@@ -1384,7 +1384,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
   // We're going to run the 86cinit to get the constant's value. Store the
   // globals array in the constant's cache entry to prevent recursion.
   makeCache();
-  auto marker = make_tv<KindOfArray>(get_global_variables());
+  auto marker = make_array_like_tv(get_global_variables());
   clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(&marker), true /* isKey */);
 
   // The class constant has not been initialized yet; do so.

@@ -649,7 +649,7 @@ TEST(Type, ConstantPtrTypes) {
     auto const darray = dinit.toArray();
     MixedArray::asMixed(darray.get())->onSetEvalScalar();
     auto const static_darray = MixedArray::CopyStatic(darray.get());
-    darrays.push_back(make_tv<KindOfPersistentArray>(static_darray));
+    darrays.push_back(make_persistent_array_like_tv(static_darray));
   }
 
   // In typical iterator usage, the constant pointer may point to an invalid

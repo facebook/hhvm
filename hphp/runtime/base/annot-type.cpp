@@ -291,10 +291,10 @@ Cell annotDefaultValue(AnnotType at) {
     case AnnotType::Bool:     return make_tv<KindOfBoolean>(false);
     case AnnotType::Float:    return make_tv<KindOfDouble>(0);
     case AnnotType::DArray:
-      return make_tv<KindOfPersistentArray>(staticEmptyDArray());
+      return make_persistent_array_like_tv(staticEmptyDArray());
     case AnnotType::VArray:
     case AnnotType::VArrOrDArr:
-      return make_tv<KindOfPersistentArray>(staticEmptyVArray());
+      return make_persistent_array_like_tv(staticEmptyVArray());
     case AnnotType::ArrayLike:
     case AnnotType::VecOrDict:
     case AnnotType::Vec:
@@ -302,7 +302,7 @@ Cell annotDefaultValue(AnnotType at) {
     case AnnotType::String:
       return make_tv<KindOfPersistentString>(staticEmptyString());
     case AnnotType::Array:
-      return make_tv<KindOfPersistentArray>(staticEmptyArray());
+      return make_persistent_array_like_tv(staticEmptyArray());
     case AnnotType::Dict:
       return make_tv<KindOfPersistentDict>(staticEmptyDictArray());
     case AnnotType::Keyset:

@@ -1915,7 +1915,7 @@ static bool do_fetch(sp_PDOStatement stmt,
           Array arr = Array::CreateVArray();
           arr.append(curr_val.tv());
           arr.append(val);
-          ret.toArray().set(name_key, make_tv<KindOfArray>(arr.get()));
+          ret.toArray().set(name_key, make_array_like_tv(arr.get()));
         } else {
           asArrRef(curr_val).append(val);
         }

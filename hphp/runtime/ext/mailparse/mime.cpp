@@ -712,7 +712,7 @@ bool MimePart::processHeader() {
           Array zarr = Array::Create();
           zarr.append(zheaderval.tv());
           zarr.append(String(header_val, CopyString));
-          m_headers.set(header_arrkey, make_tv<KindOfArray>(zarr.get()));
+          m_headers.set(header_arrkey, make_array_like_tv(zarr.get()));
         }
       } else {
         String str(header_val, CopyString);

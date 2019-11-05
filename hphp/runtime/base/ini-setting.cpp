@@ -642,7 +642,7 @@ void IniSetting::ParserCallback::makeArray(tv_lval val,
     // Similar to the above, in the case of a nested array we need to ensure
     // that we create empty arrays on the way down if they don't already exist.
     if (!arr.exists(key)) {
-      arr.set(key, make_tv<KindOfArray>(ArrayData::Create()));
+      arr.set(key, make_array_like_tv(ArrayData::Create()));
     }
     val = arr.lval(key);
     p += index.size() + 1;

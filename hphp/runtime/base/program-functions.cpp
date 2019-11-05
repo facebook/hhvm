@@ -364,7 +364,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
           symtable->convertKey<IntishCast::Cast>(key_str.toCell());
         auto const v = symtable->rval(key);
         if (isNullType(v.type()) || !isArrayLikeType(v.type())) {
-          symtable->set(key, make_tv<KindOfPersistentArray>(ArrayData::Create()));
+          symtable->set(key, make_persistent_array_like_tv(ArrayData::Create()));
         }
         symtable = &asArrRef(symtable->lval(key));
       }

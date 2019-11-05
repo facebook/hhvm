@@ -2177,9 +2177,7 @@ void parse_user_attribute(AsmState& as,
     }
 
     userAttrs[name] =
-      RuntimeOption::EvalHackArrDVArrs
-        ? make_tv<KindOfVec>(ArrayData::GetScalarArray(std::move(var)))
-        : make_tv<KindOfArray>(ArrayData::GetScalarArray(std::move(var)));
+      make_array_like_tv(ArrayData::GetScalarArray(std::move(var)));
   });
 }
 

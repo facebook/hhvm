@@ -423,12 +423,12 @@ end = struct
     | Some lcl -> Some (p, snd lcl)
     | None -> None
 
-  let get_name genv get_pos x =
+  let global_const (genv, _env) x =
     match Provider_config.get_backend () with
     | Provider_config.Lru_shared_memory
     | Provider_config.Shared_memory
     | Provider_config.Local_memory _ ->
-      if_unbound_then_dep_edge_and_report genv get_pos x;
+      if_unbound_then_dep_edge_and_report genv Naming_table.Consts.get_pos x;
       x
     | Provider_config.Decl_service _ ->
       (* TODO: we need to refactor this so naming phase doesn't report *)
@@ -436,8 +436,6 @@ end = struct
       (* which is when we look up the decl service. The decl service *)
       (* is the only one who'll tell us whether a name is unbound. *)
       x
-
-  let global_const (genv, _env) x = get_name genv Naming_table.Consts.get_pos x
 
   let type_name
       ?(elaborate_kind = NS.ElaborateClass)

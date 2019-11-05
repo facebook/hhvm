@@ -236,7 +236,7 @@ let export_to_custom_writer
     measure_time
       ~silent:ctxt.silent
       ~f:(fun () ->
-        CustomSymbolIndexWriter.send_to_custom_writer
+        CustomJsonUploader.send_to_custom_writer
           json_exported_files
           service
           repo_name

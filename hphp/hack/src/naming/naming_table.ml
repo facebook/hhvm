@@ -1337,6 +1337,16 @@ module Types = struct
       ~measure_name:"Reverse naming table (types) cache hit rate"
       ~key:id
 
+  let get_kind id =
+    match get_pos id with
+    | Some (_pos, kind) -> Some kind
+    | None -> None
+
+  let get_filename_and_kind id =
+    match get_pos id with
+    | Some (pos, kind) -> Some (FileInfo.get_pos_filename pos, kind)
+    | None -> None
+
   let get_filename id =
     match get_pos id with
     | None -> None

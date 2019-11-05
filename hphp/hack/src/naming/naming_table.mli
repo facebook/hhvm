@@ -105,6 +105,10 @@ type type_of_type =
 module Types : sig
   include ReverseNamingTable with type pos = FileInfo.pos * type_of_type
 
+  val get_kind : string -> type_of_type option
+
+  val get_filename_and_kind : string -> (Relative_path.t * type_of_type) option
+
   val get_canon_name : string -> string option
 end
 

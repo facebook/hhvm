@@ -119,7 +119,7 @@ void cgJmp(IRLS& env, const IRInstruction* inst) {
 
     // Handle phi for the value.
     auto val = sloc.reg(0);
-    if (src->isA(TBool) && !def.dst(i)->isA(TBool)) {
+    if (src->type().nonTrivialSubtypeOf(TBool) && !def.dst(i)->isA(TBool)) {
       val = v.makeReg();
       v << movzbq{sloc.reg(0), val};
     }

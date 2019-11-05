@@ -204,6 +204,10 @@ inline bool Type::subtypeOfAny() const {
   return false;
 }
 
+inline bool Type::nonTrivialSubtypeOf(Type t2) const {
+  return !(*this <= TBottom) && (*this <= t2);
+}
+
 inline bool Type::maybe(Type t2) const {
   return (*this & t2) != TBottom;
 }

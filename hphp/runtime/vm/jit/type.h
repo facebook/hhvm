@@ -506,6 +506,11 @@ public:
   bool subtypeOfAny() const;
 
   /*
+   * Is this a non-strict subtype of `t2' and is not Bottom?
+   */
+  bool nonTrivialSubtypeOf(Type t2) const;
+
+  /*
    * Return true if this has nontrivial intersection with `t2'.
    */
   bool maybe(Type t2) const;

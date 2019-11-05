@@ -26,3 +26,9 @@ val compute_tast_and_errors :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   Tast.program * Errors.t
+
+(** Find an existing entry within the context *)
+val find_entry :
+  ctx:Provider_context.t ->
+  path:Relative_path.t ->
+  Provider_context.entry option

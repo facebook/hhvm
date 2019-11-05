@@ -11,7 +11,8 @@ module Class : sig
   (* Class name as represented in assembler syntax. *)
   type t
 
-  (* TODO: remove this and use elaborate_id everywhere *)
+  (* Given a qualified identifier, determine the HHAS representation
+   * Does XHP mangling. Removes initial backslash. *)
   val from_ast_name : string -> t
 
   (* For use only in assembler. Quotes have been removed already *)
@@ -22,10 +23,6 @@ module Class : sig
 
   (* Without mangled XHP *)
   val to_unmangled_string : t -> string
-
-  (* Given a qualified identifier, determine the HHAS representation
-   * Does XHP mangling. Removes initial backslash. *)
-  val elaborate_id : Ast_defs.id -> t
 end
 
 module Function : sig

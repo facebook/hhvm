@@ -367,7 +367,7 @@ let emit_class (ast_class, hoisted) =
    * class_is_const, but for now class_is_const is the only thing that turns
    * it on. *)
   let class_no_dynamic_props = class_is_const in
-  let class_id = Hhbc_id.Class.elaborate_id ast_class.A.c_name in
+  let class_id = Hhbc_id.Class.from_ast_name (snd ast_class.A.c_name) in
   let class_is_trait = ast_class.A.c_kind = Ast_defs.Ctrait in
   let class_is_interface = ast_class.A.c_kind = Ast_defs.Cinterface in
   let class_uses =
@@ -380,9 +380,8 @@ let emit_class (ast_class, hoisted) =
             Some name
         | _ -> None)
   in
-  let elaborate_namespace_id id =
-    let id = Hhbc_id.Class.elaborate_id id in
-    Hhbc_id.Class.to_raw_string id
+  let elaborate_namespace_id (_, name) =
+    Hhbc_id.Class.(from_ast_name name |> to_raw_string)
   in
   let class_use_aliases =
     List.map

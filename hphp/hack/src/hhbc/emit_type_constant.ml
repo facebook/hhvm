@@ -109,14 +109,13 @@ and is_resolved_classname = function
     true
   | _ -> false
 
-(* Rename *)
-let add_ns id = Hhbc_id.Class.(elaborate_id id |> to_raw_string)
-
 let shape_field_name = function
   | A.SFlit_int (_, s)
   | A.SFlit_str (_, s) ->
     (s, false)
-  | A.SFclass_const (id, (_, s)) -> (add_ns id ^ "::" ^ s, true)
+  | A.SFclass_const ((_, cname), (_, s)) ->
+    let id = Hhbc_id.Class.(from_ast_name cname |> to_raw_string) in
+    (id ^ "::" ^ s, true)
 
 let rec shape_field_to_pair ~tparams ~targ_map sfi =
   let (name, is_class_const) = shape_field_name sfi.Aast.sfi_name in
@@ -158,13 +157,13 @@ and type_constant_access_list sl =
   let l = List.map ~f:(fun (_, s) -> TV.String s) sl in
   vec_or_varray l
 
-and resolve_classname ~tparams (p, s) =
+and resolve_classname ~tparams (_, s) =
   let is_tparam = s = "_" || List.mem ~equal:( = ) tparams s in
   let s =
     if is_tparam then
       s
     else
-      add_ns (p, Types.fix_casing s)
+      Hhbc_id.Class.(from_ast_name s |> to_raw_string)
   in
   if is_prim s || is_resolved_classname s then
     ([], s)
@@ -190,7 +189,7 @@ and root_to_string s =
   if s = "this" then
     prefix_namespace "HH" s
   else
-    add_ns (Pos.none, s)
+    Hhbc_id.Class.(from_ast_name s |> to_raw_string)
 
 and get_typevars = function
   | [] -> []

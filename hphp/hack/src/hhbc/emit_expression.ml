@@ -940,18 +940,18 @@ and emit_new
   let newobj_instrs =
     match cexpr with
     (* Special case for statically-known class *)
-    | Class_id id ->
-      let fq_id = Hhbc_id.Class.elaborate_id id in
-      Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
+    | Class_id (_, cname) ->
+      let id = Hhbc_id.Class.from_ast_name cname in
+      Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string id);
       begin
         match has_generics with
-        | H.NoGenerics -> gather [emit_pos pos; instr_newobjd fq_id]
+        | H.NoGenerics -> gather [emit_pos pos; instr_newobjd id]
         | H.HasGenerics ->
           gather
             [
               emit_pos pos;
               emit_reified_targs env pos (List.map ~f:snd targs);
-              instr_newobjrd fq_id;
+              instr_newobjrd id;
             ]
         | H.MaybeGenerics ->
           failwith "Internal error: This case should have been transformed"
@@ -987,16 +987,16 @@ and emit_new
     empty )
 
 (* TODO(T36697624) more efficient bytecode for static records *)
-and emit_record env pos id is_array es =
-  let fq_id = Hhbc_id.Class.elaborate_id id in
+and emit_record env pos (_, rname) is_array es =
+  let id = Hhbc_id.Class.from_ast_name rname in
   let instr =
     if is_array then
       instr_new_recordarray
     else
       instr_new_record
   in
-  Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
-  emit_struct_array env pos es (instr fq_id)
+  Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string id);
+  emit_struct_array env pos es (instr id)
 
 and emit_clone env expr = gather [emit_expr env expr; instr_clone]
 
@@ -1052,10 +1052,10 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
     let instrs = emit_call env pos e targs args uargs async_eager_label in
     emit_pos_then pos instrs
 
-and emit_known_class_id id =
-  let fq_id = Hhbc_id.Class.elaborate_id id in
-  Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
-  gather [instr_string (Hhbc_id.Class.to_raw_string fq_id); instr_classgetc]
+and emit_known_class_id (_, cname) =
+  let cname = Hhbc_id.Class.(from_ast_name cname |> to_raw_string) in
+  Emit_symbol_refs.add_class cname;
+  gather [instr_string cname; instr_classgetc]
 
 and emit_load_class_ref env pos cexpr =
   emit_pos_then pos
@@ -1145,16 +1145,16 @@ and emit_class_const env pos (cid : Tast.class_id) (_, id) :
   | Class_id cid -> emit_class_const_impl cid id
   | _ -> emit_load_class_const env pos cexpr id
 
-and emit_class_const_impl cid id =
-  let fq_id = Hhbc_id.Class.elaborate_id cid in
-  let fq_id_str = Hhbc_id.Class.to_raw_string fq_id in
-  emit_pos_then (fst cid)
+and emit_class_const_impl (p, cname) const_id =
+  let cid = Hhbc_id.Class.from_ast_name cname in
+  let cname = Hhbc_id.Class.to_raw_string cid in
+  emit_pos_then p
   @@
-  if SU.is_class id then
-    instr_string fq_id_str
+  if SU.is_class const_id then
+    instr_string cname
   else (
-    Emit_symbol_refs.add_class fq_id_str;
-    instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id, fq_id)))
+    Emit_symbol_refs.add_class cname;
+    instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name const_id, cid)))
   )
 
 and emit_yield env pos = function
@@ -2796,7 +2796,7 @@ and get_elem_member_key
   (* Special case for literal string *)
   | Some (_, A.String str) -> MemberKey.ET str
   (* Special case for class name *)
-  | Some (_, A.Class_const ((_, cid), (p, id)))
+  | Some (_, A.Class_const ((_, cid), (_, id)))
     when is_special_class_constant_accessed_with_class_id cid id ->
     let cName =
       match (cid, Ast_scope.Scope.get_class (Emit_env.get_scope env)) with
@@ -2808,7 +2808,7 @@ and get_elem_member_key
         failwith
           "Unreachable due to is_special_class_constant_accessed_with_class_id"
     in
-    let fq_id = Hhbc_id.Class.elaborate_id (p, cName) in
+    let fq_id = Hhbc_id.Class.from_ast_name cName in
     MemberKey.ET (Hhbc_id.Class.to_raw_string fq_id)
   (* General case *)
   | Some _ -> MemberKey.EC stack_index
@@ -3498,14 +3498,13 @@ and emit_call_lhs_and_fcall
     begin
       match cexpr with
       (* Statically known *)
-      | Class_id cid ->
-        let fq_cid = Hhbc_id.Class.elaborate_id cid in
-        let fq_cid_string = Hhbc_id.Class.to_raw_string fq_cid in
-        Emit_symbol_refs.add_class fq_cid_string;
+      | Class_id (_, cname) ->
+        let id = Hhbc_id.Class.from_ast_name cname in
+        let cname = Hhbc_id.Class.to_raw_string id in
+        Emit_symbol_refs.add_class cname;
         let (generics, fcall_args) = emit_generics fcall_args in
         ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
-          gather [generics; instr_fcallclsmethodd fcall_args method_id fq_cid]
-        )
+          gather [generics; instr_fcallclsmethodd fcall_args method_id id] )
       | Class_special clsref ->
         let (generics, fcall_args) = emit_generics fcall_args in
         ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],

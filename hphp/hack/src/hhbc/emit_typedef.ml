@@ -29,7 +29,7 @@ let kind_to_type_structure ~tparams ~is_opaque h =
 
 let emit_typedef ast_typedef : Hhas_typedef.t =
   let namespace = ast_typedef.T.t_namespace in
-  let typedef_name = Hhbc_id.Class.elaborate_id ast_typedef.T.t_name in
+  let typedef_name = Hhbc_id.Class.from_ast_name (snd ast_typedef.T.t_name) in
   let typedef_attributes =
     Emit_attribute.from_asts namespace ast_typedef.T.t_user_attributes
   in

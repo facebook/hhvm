@@ -932,12 +932,11 @@ let rec convert_expr env st ((p, expr_) as expr) =
             let (_, (_, ex)) = convert_class_id env st cid in
             let get_mangle_cls_name =
               match ex with
-              | CIexpr (_, Id (pc, id))
+              | CIexpr (_, Id (_, id))
                 when (not (SU.is_self id))
                      && (not (SU.is_parent id))
                      && not (SU.is_static id) ->
-                let fq_id = Hhbc_id.Class.elaborate_id (pc, id) in
-                Hhbc_id.Class.to_raw_string fq_id
+                Hhbc_id.Class.(from_ast_name id |> to_raw_string)
               | _ -> Emit_fatal.raise_fatal_parse pc "Invalid class"
             in
             get_mangle_cls_name

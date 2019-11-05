@@ -74,8 +74,7 @@ let emit_xhp_attribute_array xal =
     | Some (_, es) -> Tast_annotate.make (T.Varray (None, es))
   in
   let get_attribute_array_values id enumo =
-    let id = Hhbc_id.Class.elaborate_id (p, id) in
-    let id = Hhbc_id.Class.to_raw_string id in
+    let id = Hhbc_id.Class.(from_ast_name id |> to_raw_string) in
     let type_ = hint_to_num id in
     let type_ident = Tast_annotate.make (T.Int (string_of_int type_)) in
     let class_name =

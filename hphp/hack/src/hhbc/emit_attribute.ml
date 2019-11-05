@@ -11,7 +11,7 @@ open Core_kernel
 module TV = Typed_value
 module A = Aast
 
-let from_attribute_base namespace ((_, attr_name) as attribute_id) arguments =
+let from_attribute_base namespace (p, attr_name) arguments =
   try
     let attribute_arguments =
       Ast_constant_folder.literals_from_exprs namespace arguments
@@ -21,13 +21,13 @@ let from_attribute_base namespace ((_, attr_name) as attribute_id) arguments =
         attr_name
       (* don't do anything to builtin attributes *)
       else
-        let fq_id = Hhbc_id.Class.elaborate_id attribute_id in
-        Php_escaping.escape (Hhbc_id.Class.to_raw_string fq_id)
+        let id = Hhbc_id.Class.(from_ast_name attr_name |> to_raw_string) in
+        Php_escaping.escape id
     in
     Hhas_attribute.make fq_id attribute_arguments
   with Ast_constant_folder.UserDefinedConstant ->
     Emit_fatal.raise_fatal_parse
-      (fst attribute_id)
+      p
       "User-defined constants are not allowed in user attribute expressions"
 
 let from_ast namespace ast_attr =

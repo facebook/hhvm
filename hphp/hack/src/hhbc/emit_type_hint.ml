@@ -20,17 +20,16 @@ type type_hint_kind =
   | TypeDef
 
 (* Produce the "userType" bit of the annotation *)
-let rec fmt_name_or_prim ~tparams x =
-  let name = snd x in
+let rec fmt_name_or_prim ~tparams (_, name) =
   if List.mem ~equal:( = ) tparams name || is_self name || is_parent name then
     name
   else
     let needs_unmangling = Xhp.is_xhp (strip_ns name) in
-    let fq_id = Hhbc_id.Class.elaborate_id x in
+    let id = Hhbc_id.Class.from_ast_name name in
     if needs_unmangling then
-      Hhbc_id.Class.to_unmangled_string fq_id
+      Hhbc_id.Class.to_unmangled_string id
     else
-      Hhbc_id.Class.to_raw_string fq_id
+      Hhbc_id.Class.to_raw_string id
 
 and prim_to_string prim =
   match prim with
@@ -104,10 +103,7 @@ and fmt_hint ~tparams ?(strip_tparams = false) (pos, h) =
         else
           ""
       in
-      prefix
-      ^ fmt_field_name sfi_name
-      ^ "=>"
-      ^ fmt_hint ~tparams sfi_hint
+      prefix ^ fmt_field_name sfi_name ^ "=>" ^ fmt_hint ~tparams sfi_hint
     in
     let shape_fields = List.map ~f:format nsi_field_map in
     prefix_namespace "HH" "shape(" ^ String.concat ~sep:", " shape_fields ^ ")"
@@ -170,9 +166,8 @@ let can_be_nullable (_, h) =
     true
   | _ -> true
 
-let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h)
-    =
-  let happly_helper ((pos, name) as id) =
+let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h) =
+  let happly_helper (pos, name) =
     if List.mem ~equal:( = ) tparams name then
       let tc_name = Some "" in
       let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeVar] in
@@ -186,8 +181,7 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h)
         if is_self name || is_parent name then
           name
         else
-          let fq_id = Hhbc_id.Class.elaborate_id id in
-          Hhbc_id.Class.to_raw_string fq_id
+          Hhbc_id.Class.(from_ast_name name |> to_raw_string)
       in
       let tc_flags = [TC.HHType] in
       TC.make (Some tc_name) tc_flags
@@ -227,7 +221,6 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h)
       ~kind
       ~tparams
       ~skipawaitable
-
       h
       [TC.Soft; TC.HHType; TC.ExtendedHint]
   | Aast.Happly ((_, s), [])
@@ -250,7 +243,6 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h)
       ~kind
       ~tparams
       ~skipawaitable
-
       t
       [TC.Nullable; TC.DisplayNullable; TC.HHType; TC.ExtendedHint]
   | Aast.Hsoft t ->
@@ -258,7 +250,6 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h)
       ~kind
       ~tparams
       ~skipawaitable
-
       t
       [TC.Soft; TC.HHType; TC.ExtendedHint]
   | Aast.Herr
@@ -276,11 +267,9 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h)
   | Aast.Habstr s -> happly_helper (p, s)
   | Aast.Hpu_access _ -> TC.make None []
 
-and make_tc_with_flags_if_non_empty_flags
-    ~kind ~tparams ~skipawaitable t flags =
-  let tc =
-    hint_to_type_constraint ~kind ~tparams ~skipawaitable t
-  in
+and make_tc_with_flags_if_non_empty_flags ~kind ~tparams ~skipawaitable t flags
+    =
+  let tc = hint_to_type_constraint ~kind ~tparams ~skipawaitable t in
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in
   match (tc_name, tc_flags) with
@@ -303,8 +292,7 @@ let make_type_info ~tparams h tc_name tc_flags =
   let type_info_type_constraint = TC.make tc_name tc_flags in
   Hhas_type_info.make type_info_user_type type_info_type_constraint
 
-let param_hint_to_type_info
-    ~kind ~skipawaitable ~nullable ~tparams h =
+let param_hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams h =
   let is_simple_hint =
     match snd h with
     | Aast.Hsoft _
@@ -335,9 +323,7 @@ let param_hint_to_type_info
     | Aast.Hthis -> true
     | _ -> true
   in
-  let tc =
-    hint_to_type_constraint ~kind ~tparams ~skipawaitable h
-  in
+  let tc = hint_to_type_constraint ~kind ~tparams ~skipawaitable h in
   let tc_name = TC.name tc in
   if is_simple_hint then
     let tc_flags = try_add_nullable ~nullable h [TC.HHType] in
@@ -349,18 +335,9 @@ let param_hint_to_type_info
 
 let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams h =
   match kind with
-  | Param ->
-    param_hint_to_type_info
-      ~kind
-      ~skipawaitable
-      ~nullable
-      ~tparams
-
-      h
+  | Param -> param_hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams h
   | _ ->
-    let tc =
-      hint_to_type_constraint ~kind ~tparams ~skipawaitable h
-    in
+    let tc = hint_to_type_constraint ~kind ~tparams ~skipawaitable h in
     let tc_name = TC.name tc in
     let tc_flags = TC.flags tc in
     let tc_flags =
@@ -379,9 +356,7 @@ let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams h =
 
 let hint_to_class (h : Aast.hint) =
   match h with
-  | (_, Aast.Happly (id, _)) ->
-    let fq_id = Hhbc_id.Class.elaborate_id id in
-    fq_id
+  | (_, Aast.Happly ((_, name), _)) -> Hhbc_id.Class.from_ast_name name
   | _ -> Hhbc_id.Class.from_raw_string "__type_is_not_class__"
 
 let emit_type_constraint_for_native_function tparams ret ti =

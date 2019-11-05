@@ -718,11 +718,11 @@ and block_pos b =
     Pos.btw (List.hd_exn valid_pos) (List.last_exn valid_pos)
 
 and emit_catch
-    (env : Emit_env.t) pos end_label (catch_type, (_, catch_local), b) =
+    (env : Emit_env.t) pos end_label ((_, catch_type), (_, catch_local), b) =
   (* Note that this is a "regular" label; we're not going to branch to
     it directly in the event of an exception. *)
   let next_catch = Label.next_regular () in
-  let id = Hhbc_id.Class.elaborate_id catch_type in
+  let id = Hhbc_id.Class.from_ast_name catch_type in
   gather
     [
       instr_dup;

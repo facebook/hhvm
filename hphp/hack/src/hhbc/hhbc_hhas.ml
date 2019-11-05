@@ -1231,8 +1231,7 @@ and string_of_param_default_value ~env expr =
     else
       let id =
         match env with
-        | Some _ ->
-          Hhbc_id.Class.to_raw_string @@ Hhbc_id.Class.elaborate_id (p, id)
+        | Some _ -> Hhbc_id.Class.(from_ast_name id |> to_raw_string)
         | _ -> id
       in
       if should_format then
@@ -1333,10 +1332,10 @@ and string_of_param_default_value ~env expr =
     let call_id = String_utils.lstrip call_id "\\\\" in
     let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in
     call_id ^ "(" ^ String.concat ~sep:", " es ^ ")"
-  | A.New ((_, A.CIexpr (_, A.Id class_id)), _, es, ues, _) ->
+  | A.New ((_, A.CIexpr (_, A.Id (_, cname))), _, es, ues, _) ->
     let class_id =
       adjust_id
-        (Hhbc_id.Class.elaborate_id class_id |> Hhbc_id.Class.to_raw_string)
+        (Hhbc_id.Class.from_ast_name cname |> Hhbc_id.Class.to_raw_string)
     in
     let class_id = String_utils.lstrip class_id "\\\\" in
     let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in

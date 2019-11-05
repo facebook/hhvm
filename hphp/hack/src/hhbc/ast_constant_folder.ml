@@ -236,9 +236,9 @@ and class_const_to_typed_value cid id =
   if snd id = SN.Members.mClass then
     let cexpr = class_id_to_class_expr ~resolve_self:true [] cid in
     match cexpr with
-    | Class_id cid ->
-      let fq_id = Hhbc_id.Class.elaborate_id cid in
-      TV.String (Hhbc_id.Class.to_raw_string fq_id)
+    | Class_id (_, cname) ->
+      let cname = Hhbc_id.Class.(from_ast_name cname |> to_raw_string) in
+      TV.String cname
     | _ -> raise UserDefinedConstant
   else
     raise UserDefinedConstant

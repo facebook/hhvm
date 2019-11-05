@@ -16,15 +16,13 @@ module SU = Hhbc_string_utils
 module Class = struct
   type t = string
 
-  let from_ast_name s = SU.strip_global_ns s
+  let from_ast_name s = SU.strip_global_ns @@ SU.Xhp.mangle s
 
   let from_raw_string s = s
 
   let to_raw_string s = s
 
   let to_unmangled_string s = SU.Xhp.unmangle s
-
-  let elaborate_id (_, id_) = SU.strip_global_ns @@ SU.Xhp.mangle id_
 end
 
 module Prop = struct

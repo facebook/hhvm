@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function test($s) {
-  $a = __hhvm_intrinsics\deserialize_keep_dvarrays(
+  $a = unserialize(
     __hhvm_intrinsics\launder_value($s)
   );
   var_dump($a);

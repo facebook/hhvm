@@ -13,13 +13,6 @@ function serialize_test($a) {
 
 function unserialize_test($s) {
   echo "unserialize_test(\"".$s."\")\n";
-  $a = __hhvm_intrinsics\deserialize_keep_dvarrays(
-    __hhvm_intrinsics\launder_value($s)
-  );
-  var_dump($a);
-  var_dump(is_varray($a));
-  var_dump(is_darray($a));
-  echo "----------------------------------------------------\n";
   $a = unserialize(__hhvm_intrinsics\launder_value($s));
   var_dump($a);
   var_dump(is_varray($a));
@@ -37,7 +30,7 @@ function unserialize_test($s) {
 
 function round_trip($a) {
   $a2 = __hhvm_intrinsics\launder_value($a);
-  $a3 = __hhvm_intrinsics\deserialize_keep_dvarrays(
+  $a3 = unserialize(
     __hhvm_intrinsics\serialize_keep_dvarrays($a2)
   );
   if ($a2 !== $a3) {

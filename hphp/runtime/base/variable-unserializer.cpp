@@ -1245,7 +1245,9 @@ Array VariableUnserializer::unserializeArray() {
   expectChar('{');
   if (size == 0) {
     expectChar('}');
-    return m_forceDArrays ? Array::CreateDArray() : Array::Create();
+    return m_forceDArrays || type() == Type::Serialize
+      ? Array::CreateDArray()
+      : Array::Create();
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -1260,7 +1262,7 @@ Array VariableUnserializer::unserializeArray() {
 
   // Pre-allocate an ArrayData of the given size, to avoid escalation in the
   // middle, which breaks references.
-  auto arr = m_forceDArrays
+  auto arr = m_forceDArrays || type() == Type::Serialize
     ? DArrayInit(size).toArray()
     : MixedArrayInit(size).toArray();
   reserveForAdd(size);

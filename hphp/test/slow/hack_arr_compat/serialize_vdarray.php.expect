@@ -10,9 +10,9 @@ string(18) "v:3:{i:1;i:2;i:3;}"
 string(6) "D:0:{}"
 string(22) "D:2:{i:1;i:1;i:2;i:2;}"
 === unserialize ===
-legacy array array(0) {
+darray array(0) {
 }
-legacy array array(3) {
+darray array(3) {
   [0]=>
   int(1)
   [1]=>

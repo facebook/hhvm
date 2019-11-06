@@ -625,17 +625,6 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
   );
 }
 
-Variant HHVM_FUNCTION(hhvm_intrinsics_unserialize_keep_dvarrays,
-                      const String& str) {
-  return unserialize_from_string(
-    str,
-    // This is fine because the only difference between Serialize and Internal
-    // right now is d/varray serialization.
-    VariableUnserializer::Type::Internal,
-    null_array
-  );
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // variable table
 
@@ -760,8 +749,6 @@ void StandardExtension::initVariable() {
   if (RuntimeOption::EnableIntrinsicsExtension) {
     HHVM_FALIAS(__hhvm_intrinsics\\serialize_keep_dvarrays,
                 hhvm_intrinsics_serialize_keep_dvarrays);
-    HHVM_FALIAS(__hhvm_intrinsics\\deserialize_keep_dvarrays,
-                hhvm_intrinsics_unserialize_keep_dvarrays);
     HHVM_FALIAS(__hhvm_intrinsics\\create_class_pointer,
                 hhvm_intrinsics_create_class_pointer);
   }

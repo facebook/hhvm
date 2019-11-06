@@ -618,6 +618,13 @@ let get_options_from_config ?(init = default) ?(config_list = []) config_json =
       | [name; value] -> set_option options name value
       | _ -> options)
 
+let apply_config_overrides_statelessly config_list config_jsons =
+  List.fold_right
+    ~init:default
+    ~f:(fun config_json init ->
+      get_options_from_config config_json ~init ~config_list)
+    config_jsons
+
 let compiler_options = ref default
 
 let set_compiler_options o = compiler_options := o

@@ -425,8 +425,12 @@ let do_compile
     log_success compiler_options filename debug_time;
   Compile.(ret.bytecode_segments)
 
-let extract_facts ~hhbc_options ~filename text =
-  let co = hhbc_options in
+let extract_facts ~compiler_options ~config_jsons ~filename text =
+  let co =
+    Hhbc_options.apply_config_overrides_statelessly
+      compiler_options.config_list
+      config_jsons
+  in
   [
     Hhbc_options.(
       Facts_parser.extract_as_json_string
@@ -442,8 +446,12 @@ let extract_facts ~hhbc_options ~filename text =
       |> Option.value ~default:"");
   ]
 
-let parse_hh_file ~hhbc_options filename body =
-  let co = hhbc_options in
+let parse_hh_file ~config_jsons ~compiler_options filename body =
+  let co =
+    Hhbc_options.apply_config_overrides_statelessly
+      compiler_options.config_list
+      config_jsons
+  in
   Hhbc_options.(
     let file = Relative_path.create Relative_path.Dummy filename in
     let source_text = SourceText.make file body in
@@ -471,7 +479,7 @@ let parse_hh_file ~hhbc_options filename body =
 
 let process_single_source_unit
     ~is_systemlib
-    ~hhbc_options
+    ~config_jsons
     compiler_options
     handle_output
     handle_exception
@@ -481,8 +489,13 @@ let process_single_source_unit
     let debug_time = new_debug_time () in
     let output =
       if compiler_options.extract_facts then
-        extract_facts source_text ~filename ~hhbc_options
+        extract_facts ~compiler_options ~config_jsons ~filename source_text
       else
+        let hhbc_options =
+          Hhbc_options.apply_config_overrides_statelessly
+            compiler_options.config_list
+            config_jsons
+        in
         do_compile
           ~is_systemlib
           ~hhbc_options
@@ -505,21 +518,34 @@ let decl_and_run_mode compiler_options =
         List.iter ~f:(P.printf "%s") strings;
         P.printf "%!"
       in
+      (* NOTE: these two are only needed to check log_extern_compiler_perf
+       * from OCaml; the rest of get/sets will be from Rust only *)
       let pending_config = ref Hhbc_options.default in
-      let set_compiler_options config_json =
+      let old_hhbc_options = ref Hhbc_options.default in
+      let config_jsons = ref [] in
+      (* list of pending config JSONs *)
+      let add_config config_json =
         let options =
           Hhbc_options.get_options_from_config
             config_json
             ~init:!pending_config
             ~config_list:compiler_options.config_list
         in
-        pending_config := options
+        old_hhbc_options := !pending_config;
+        pending_config := options;
+        config_jsons := config_json :: !config_jsons
+      in
+      let pop_config () =
+        pending_config := !old_hhbc_options;
+        config_jsons :=
+          match !config_jsons with
+          | _ :: old_config_jsons -> old_config_jsons
+          | _ -> !config_jsons
       in
       let ini_config_json =
         Option.map ~f:json_of_file compiler_options.config_file
       in
-      set_compiler_options ini_config_json;
-      let dumped_options = lazy (Hhbc_options.to_string !pending_config) in
+      add_config ini_config_json;
       Ident.track_names := true;
 
       match compiler_options.mode with
@@ -572,7 +598,7 @@ let decl_and_run_mode compiler_options =
                   else
                     Some (json_of_string body)
                 in
-                set_compiler_options config_json);
+                add_config config_json);
             error =
               (fun header _body ->
                 let filename =
@@ -618,28 +644,27 @@ let decl_and_run_mode compiler_options =
                       fail_daemon None ("for_debugger_eval flag missing: " ^ af))
                     header
                 in
-                let old_config = !pending_config in
                 let config_overrides =
                   get_field
                     (get_obj "config_overrides")
                     (fun _af -> JSON_Object [])
                     header
                 in
-                set_compiler_options (Some config_overrides);
+                add_config (Some config_overrides);
                 let compiler_options =
                   { compiler_options with for_debugger_eval }
                 in
                 let result =
                   process_single_source_unit
                     ~is_systemlib
-                    ~hhbc_options:!pending_config
+                    ~config_jsons:!config_jsons
                     compiler_options
                     handle_output
                     handle_exception
                     (Relative_path.create Relative_path.Dummy filename)
                     body
                 in
-                pending_config := old_config;
+                pop_config ();
                 result);
             facts =
               (fun header body ->
@@ -662,23 +687,23 @@ let decl_and_run_mode compiler_options =
                  let path =
                    Relative_path.create Relative_path.Dummy filename
                  in
-                 let old_config = !pending_config in
                  let config_overrides =
                    get_field
                      (get_obj "config_overrides")
                      (fun _af -> JSON_Object [])
                      header
                  in
-                 set_compiler_options (Some config_overrides);
+                 add_config (Some config_overrides);
                  let result =
                    handle_output
                      path
                      (extract_facts
-                        ~hhbc_options:!pending_config
+                        ~compiler_options
+                        ~config_jsons:!config_jsons
                         ~filename:path
                         body)
                  in
-                 pending_config := old_config;
+                 pop_config ();
                  result)
                   (new_debug_time ()));
             parse =
@@ -698,26 +723,31 @@ let decl_and_run_mode compiler_options =
                    else
                      body
                  in
-                 let old_config = !pending_config in
                  let config_overrides =
                    get_field
                      (get_obj "config_overrides")
                      (fun _af -> JSON_Object [])
                      header
                  in
-                 set_compiler_options (Some config_overrides);
+                 add_config (Some config_overrides);
                  let result =
                    handle_output
                      (Relative_path.create Relative_path.Dummy filename)
-                     (parse_hh_file filename body ~hhbc_options:!pending_config)
+                     (parse_hh_file
+                        ~config_jsons:!config_jsons
+                        ~compiler_options
+                        filename
+                        body)
                  in
-                 pending_config := old_config;
+                 pop_config ();
                  result)
                   (new_debug_time ()));
           }
         in
         dispatch_loop handlers
       | CLI ->
+        (* Note: makes sense only if Hhbc_options stay frozen after first call *)
+        let dumped_options = lazy (Hhbc_options.to_string !pending_config) in
         let handle_exception filename exc =
           if not compiler_options.quiet_mode then (
             let stack = Caml.Printexc.get_backtrace () in
@@ -733,7 +763,7 @@ let decl_and_run_mode compiler_options =
           let abs_path = Relative_path.to_absolute filename in
           process_single_source_unit
             ~is_systemlib:false
-            ~hhbc_options:!pending_config
+            ~config_jsons:!config_jsons
             compiler_options
             handle_output
             handle_exception

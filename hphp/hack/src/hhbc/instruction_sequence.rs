@@ -660,6 +660,10 @@ impl Instr {
         Self::make_instr(Instruct::IOp(InstructOperator::ResolveClsMethod(mode)))
     }
 
+    pub fn make_instr_fatal(op: FatalOp) -> Self {
+        Self::make_instr(Instruct::IOp(InstructOperator::Fatal(op)))
+    }
+
     pub fn make_instr_await() -> Self {
         Self::make_instr(Instruct::IAsync(AsyncFunctions::Await))
     }

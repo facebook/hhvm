@@ -613,18 +613,25 @@ std::string show(const AliasAnalysis& ainfo) {
       "all frame",          show(ainfo.all_frame),
       "all rds",            show(ainfo.all_rds)
   );
+  std::vector<std::string> tmp;
   for (auto& kv : ainfo.loc_expand_map) {
-    folly::format(&ret, " ex {: <17}       : {}\n",
-      show(kv.first),
-      show(kv.second));
+    tmp.push_back(folly::sformat(" ex {: <17}       : {}\n",
+                                 show(kv.first),
+                                 show(kv.second)));
   }
+  std::sort(tmp.begin(), tmp.end());
+  for (auto& s : tmp) ret += s;
+  tmp.clear();
   folly::format(&ret, " {: <20}       : {}\n",
      "all stack",  show(ainfo.all_stack));
   for (auto& kv : ainfo.stack_ranges) {
-    folly::format(&ret, " ex {: <17}       : {}\n",
-      show(kv.first),
-      show(kv.second));
+    tmp.push_back(folly::sformat(" ex {: <17}       : {}\n",
+                                 show(kv.first),
+                                 show(kv.second)));
   }
+  std::sort(tmp.begin(), tmp.end());
+  for (auto& s : tmp) ret += s;
+  tmp.clear();
   return ret;
 }
 

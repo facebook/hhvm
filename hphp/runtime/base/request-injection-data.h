@@ -442,6 +442,7 @@ private:
   int64_t m_brotliLgWindowSize;
   int64_t m_brotliQuality;
   int64_t m_zstdLevel;
+  int64_t m_zstdChecksumRate;
 
   /*
    * Instead of using several surprise flags, we can track the timeout info

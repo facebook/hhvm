@@ -16,6 +16,7 @@
 
 #include "hphp/util/zstd.h"
 
+#include <folly/Conv.h>
 #include <folly/Format.h>
 #include <folly/Memory.h>
 
@@ -25,6 +26,16 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+size_t throwIfZstdError(size_t code, const std::string& msg) {
+  if (!ZSTD_isError(code)) {
+    return code;
+  }
+  throw std::runtime_error(
+      folly::to<std::string>(msg, ZSTD_getErrorName(code)));
+}
+} // namespace
+
 ZstdCompressor::ContextPool ZstdCompressor::streaming_cctx_pool{};
 
 ZstdCompressor::ContextPool ZstdCompressor::single_shot_cctx_pool{};
@@ -32,15 +43,17 @@ ZstdCompressor::ContextPool ZstdCompressor::single_shot_cctx_pool{};
 bool ZstdCompressor::s_useLocalArena = false;
 
 void ZstdCompressor::zstd_cctx_deleter(ZSTD_CCtx* ctx) {
-  size_t err = ZSTD_freeCCtx(ctx);
-  if (ZSTD_isError(err)) {
-    throw std::runtime_error(folly::sformat(
-        "Error freeing ZSTD_CCtx: {}", ZSTD_getErrorName(err)));
-  }
+  size_t error = ZSTD_freeCCtx(ctx);
+  throwIfZstdError(error, "Error freeing ZSTD_CCtx! ");
 }
 
-ZstdCompressor::ZstdCompressor(int compression_level)
-    : compression_level_(compression_level) {}
+ZstdCompressor::ZstdCompressor(int compression_level, bool should_checksum)
+    : compression_level_(compression_level), should_checksum_(should_checksum) {
+}
+
+void ZstdCompressor::setChecksum(bool should_checksum) {
+  should_checksum_ = should_checksum;
+}
 
 ZstdCompressor::ContextPool::Ref ZstdCompressor::make_zstd_cctx(bool last) {
   auto ptr = (last ? single_shot_cctx_pool : streaming_cctx_pool).get();
@@ -66,47 +79,35 @@ StringHolder ZstdCompressor::compress(const void* data,
 
   if (!ctx_) {
     ctx_ = make_zstd_cctx(last);
-    if (last) {
-      // optimize single segment (avoid copying into intermediate buffers
-      auto ret = ZSTD_compressCCtx(
-          ctx_.get(), out, outSize, data, len, compression_level_);
-      if (ZSTD_isError(ret)) return nullptr;
-      ctx_.reset();
-      len = ret;
-      holder.shrinkTo(len);
-      return holder;
-    } else {
-      ZSTD_initCStream(ctx_.get(), compression_level_);
-    }
+    throwIfZstdError(
+        ZSTD_CCtx_reset(ctx_.get(), ZSTD_reset_session_and_parameters),
+        "ZSTD_CCtx_reset() Compression context reset failed! ");
+    throwIfZstdError(
+        ZSTD_CCtx_setParameter(ctx_.get(), ZSTD_c_compressionLevel,
+                               compression_level_),
+        "ZSTD_CCtx_setParameter() Setting compression level failed! ");
+    throwIfZstdError(ZSTD_CCtx_setParameter(
+        ctx_.get(), ZSTD_c_checksumFlag, should_checksum_),
+        "ZSTD_CCtx_setParameter() Setting checksum failed! ");
   }
 
-  ZSTD_inBuffer inBuf = { data, len, 0 };
-  ZSTD_outBuffer outBuf = { out, outSize, 0 };
-
+  ZSTD_inBuffer inBuf = {data, len, 0};
+  ZSTD_outBuffer outBuf = {out, outSize, 0};
+  const auto endMode = last ? ZSTD_e_end : ZSTD_e_flush;
   size_t ret;
+
   do {
-    ret = ZSTD_compressStream(ctx_.get(), &outBuf, &inBuf);
-    if (ZSTD_isError(ret)) {
-      throw std::runtime_error(folly::sformat(
-          "Failed to compress into zstd stream!: {}", ZSTD_getErrorName(ret)));
-    }
+    ret = ZSTD_compressStream2(ctx_.get(), &outBuf, &inBuf, endMode);
+    throwIfZstdError(ret, "Failed to compress into zstd stream! ");
   } while (inBuf.pos != inBuf.size);
 
   if (last) {
-    ret = ZSTD_endStream(ctx_.get(), &outBuf);
     ctx_.reset();
-  } else {
-    ret = ZSTD_flushStream(ctx_.get(), &outBuf);
-  }
-
-  if (ret != 0) {
-    throw std::runtime_error("Failed to flush zstd stream!");
   }
 
   len = outBuf.pos;
   holder.shrinkTo(len);
   return holder;
 }
-
 ///////////////////////////////////////////////////////////////////////////////
 }

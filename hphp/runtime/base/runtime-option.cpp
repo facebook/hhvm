@@ -618,6 +618,7 @@ int RuntimeOption::BrotliCompressionQuality = 6;
 int RuntimeOption::BrotliCompressionLgWindowSize = 20;
 int RuntimeOption::ZstdCompressionEnabled = -1;
 int RuntimeOption::ZstdCompressionLevel = 3;
+int RuntimeOption::ZstdChecksumRate = 0;
 int RuntimeOption::GzipCompressionLevel = 3;
 int RuntimeOption::GzipMaxCompressionLevel = 9;
 bool RuntimeOption::EnableKeepAlive = true;
@@ -2166,6 +2167,8 @@ void RuntimeOption::Load(
                  "Server.ZstdUseLocalArena", ZstdCompressor::s_useLocalArena);
     Config::Bind(ZstdCompressionLevel, ini, config,
                  "Server.ZstdCompressionLevel", 3);
+    Config::Bind(ZstdChecksumRate, ini, config,
+                "Server.ZstdChecksumRate", 0);
     Config::Bind(GzipCompressionLevel, ini, config,
                  "Server.GzipCompressionLevel", 3);
     Config::Bind(GzipMaxCompressionLevel, ini, config,

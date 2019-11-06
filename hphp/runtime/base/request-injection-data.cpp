@@ -518,6 +518,12 @@ void RequestInjectionData::threadInit() {
       "zstd.compression_level",
       std::to_string(RuntimeOption::ZstdCompressionLevel).c_str(),
       &m_zstdLevel);
+  IniSetting::Bind(
+      IniSetting::CORE,
+      IniSetting::PHP_INI_ALL,
+      "zstd.checksum_rate",
+      std::to_string(RuntimeOption::ZstdChecksumRate).c_str(),
+      &m_zstdChecksumRate);
 
   // Assertions
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,

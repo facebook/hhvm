@@ -18,6 +18,8 @@
 
 #include <strings.h>
 
+#include <folly/Random.h>
+
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/ini-setting.h"
 
@@ -346,8 +348,12 @@ ZstdCompressor* ZstdResponseCompressor::getCompressor() {
     Variant quality;
     IniSetting::Get("zstd.compression_level", quality);
     auto compression_level = quality.asInt64Val();
+    Variant checksumRate;
+    IniSetting::Get("zstd.checksum_rate", checksumRate);
+    auto checksum_rate = checksumRate.asInt64Val();
 
-    m_compressor = std::make_unique<ZstdCompressor>(compression_level);
+    m_compressor = std::make_unique<ZstdCompressor>(
+        compression_level, folly::Random::oneIn(checksum_rate));
   }
 
   return m_compressor.get();

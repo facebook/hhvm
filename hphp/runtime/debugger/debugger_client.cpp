@@ -32,7 +32,6 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/process-exec.h"
 #include "hphp/util/process.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/string-vsnprintf.h"

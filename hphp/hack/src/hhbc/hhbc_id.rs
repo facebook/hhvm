@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_string_utils_rust::{is_xhp, mangle_xhp_id, strip_global_ns};
+use hhbc_string_utils_rust::{mangle_xhp_id, strip_global_ns};
 
 use std::convert::From;
 
@@ -19,17 +19,15 @@ pub trait Id<'a>: Sized {
         strip_global_ns(s).into()
     }
 
-    fn map_namespace_env(&self, ns: NamespaceEnv) -> NamespaceEnv {
-        ns
-    }
-
-    fn elaborate(&self) -> Self
+    fn strip_gbl_ns(&self) -> Self
     where
-        Self: From<String> + Elaborable,
+        Self: From<String>,
     {
-        let mut unstripped = Self::ELABORATE_KIND.elaborate_id(self.to_raw_string()).1;
+        use std::borrow::Cow;
+        let mut unstripped = Cow::Borrowed(self.to_raw_string());
         if Self::MANGLE {
-            unstripped = mangle_xhp_id(self.to_raw_string().to_owned());
+            // allocate String only if mangling is required
+            unstripped = Cow::Owned(mangle_xhp_id(unstripped.to_owned().to_string()));
         }
         strip_global_ns(&unstripped).to_owned().into()
     }
@@ -100,27 +98,6 @@ macro_rules! impl_add_suffix {
     };
 }
 
-pub trait Elaborable {
-    const ELABORATE_KIND: ElaborateKind;
-}
-
-/// Helper macro to avoid the following boilerplate in each module:
-/// ```
-/// use super::*;
-/// impl<'a> Elaborable for Type<'a> {
-///    const ELABORATE_KIND: ElaborateKind = ElaborateKind::Fun;
-/// }
-/// ```
-macro_rules! impl_elaborable {
-    ($type: ident, $kind: path, { $($trait_impl: tt)* }) => {
-        use crate::{Elaborable, ElaborateKind};
-        impl<'a> Elaborable for $type<'a> {
-            const ELABORATE_KIND: ElaborateKind = $kind;
-            $( $trait_impl )*
-        }
-    };
-}
-
 pub mod class {
     use super::*;
 
@@ -136,17 +113,7 @@ pub mod class {
                 ret.into()
             }
         }
-
-        fn map_namespace_env(&self, ns: NamespaceEnv) -> super::NamespaceEnv {
-            if is_xhp(self.to_raw_string()) {
-                // TODO(hrust) namespace_env::empty_from_env(ns)
-                ns
-            } else {
-                ns
-            }
-        }
     });
-    impl_elaborable!(Type, ElaborateKind::Class, {});
 }
 
 pub mod prop {
@@ -162,32 +129,15 @@ pub mod method {
 pub mod function {
     impl_id!(Type, mangle = false, {});
     impl_add_suffix!(Type);
-    impl_elaborable!(Type, ElaborateKind::Fun, {});
 }
 
 // escape reserved keyword via r#
 pub mod r#const {
     impl_id!(Type, mangle = false, {});
-    impl_elaborable!(Type, ElaborateKind::Const, {});
 }
 
 pub mod record {
     impl_id!(Type, mangle = false, {});
-    impl_elaborable!(Type, ElaborateKind::Record, {});
-}
-
-// TODO(hrust) port namespaces to Rust, and move this there
-type NamespaceEnv = ();
-pub enum ElaborateKind {
-    Fun,
-    Class,
-    Record,
-    Const,
-}
-impl ElaborateKind {
-    pub fn elaborate_id(&self, _id: &str) -> ((), String) {
-        ((), "not yet implemented".into())
-    }
 }
 
 #[cfg(test)]

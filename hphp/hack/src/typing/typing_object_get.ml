@@ -391,7 +391,7 @@ and obj_get_concrete_ty
                   Typing_enforceability.compute_enforced_and_pessimize_ty
                     env
                     member_decl_ty
-                    ~is_xhp_attr
+                    ~explicitly_untrusted:is_xhp_attr
                 in
                 let (env, member_ty) = Phase.localize ~ety_env env et_type in
                 (* TODO(T52753871): same as for class_get *)

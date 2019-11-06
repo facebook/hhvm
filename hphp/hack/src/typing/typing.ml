@@ -395,7 +395,10 @@ let make_param_local_ty env decl_hint param =
         (env, (r, TUtils.tany env))
     | Some ty ->
       let { et_type = ty; _ } =
-        Typing_enforceability.compute_enforced_and_pessimize_ty env ty
+        Typing_enforceability.compute_enforced_and_pessimize_ty
+          ~explicitly_untrusted:param.param_is_variadic
+          env
+          ty
       in
       let condition_type =
         Decl_fun_utils.condition_type_from_attributes
@@ -6438,12 +6441,12 @@ and call
                         let traversable_ty =
                           make_unpacked_traversable_ty pos param_ty.et_type
                         in
-                        Type.sub_type
+                        Typing_coercion.coerce_type
                           pos
                           Reason.URparam
                           env
                           ety
-                          traversable_ty
+                          { et_type = traversable_ty; et_enforced = false }
                           Errors.unify_error)
                   in
                   (env, [te], List.length el, true))
@@ -6497,12 +6500,12 @@ and call
                 let (env, ty) = Env.fresh_type env pos in
                 let traversable_ty = make_unpacked_traversable_ty pos ty in
                 let env =
-                  Type.sub_type
+                  Typing_coercion.coerce_type
                     pos
                     Reason.URparam
                     env
                     ety
-                    traversable_ty
+                    { et_type = traversable_ty; et_enforced = false }
                     Errors.unify_error
                 in
                 let param =

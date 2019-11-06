@@ -1,0 +1,30 @@
+File "hint_expected_type_mismatch.php", line 22, characters 5-45:
+Invalid argument (Typing[4110])
+File "hint_expected_type_mismatch.php", line 22, characters 11-12:
+Expected D (variadic argument)
+File "hint_expected_type_mismatch.php", line 15, characters 29-29:
+But got C
+File "hint_expected_type_mismatch.php", line 30, characters 12-18:
+Invalid argument (Typing[4110])
+File "hint_expected_type_mismatch.php", line 27, characters 19-20:
+Expected D (variadic argument)
+File "hint_expected_type_mismatch.php", line 15, characters 29-29:
+But got C
+File "hint_expected_type_mismatch.php", line 32, characters 14-15:
+Invalid argument (Typing[4110])
+File "hint_expected_type_mismatch.php", line 27, characters 19-20:
+Expected D (variadic argument)
+File "hint_expected_type_mismatch.php", line 20, characters 15-15:
+But got C
+File "hint_expected_type_mismatch.php", line 34, characters 11-17:
+Invalid argument (Typing[4110])
+File "hint_expected_type_mismatch.php", line 27, characters 19-20:
+Expected D (variadic argument)
+File "hint_expected_type_mismatch.php", line 34, characters 15-15:
+But got C
+File "hint_expected_type_mismatch.php", line 34, characters 20-26:
+Invalid argument (Typing[4110])
+File "hint_expected_type_mismatch.php", line 27, characters 19-20:
+Expected D (variadic argument)
+File "hint_expected_type_mismatch.php", line 34, characters 24-24:
+But got C

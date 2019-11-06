@@ -1,6 +1,0 @@
-File "expected_as_upper_bound.php", line 5, characters 10-16:
-Some elements in this Vector are incompatible (Typing[4110])
-File "expected_as_upper_bound.php", line 4, characters 32-32:
-Expected T
-File "expected_as_upper_bound.php", line 4, characters 21-21:
-But got dynamic because it is an unenforceable type

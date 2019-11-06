@@ -116,7 +116,7 @@ let make_locl_like_type env ty =
   else
     (env, ty)
 
-let is_enforced env ~is_xhp_attr ty =
+let is_enforced env ~explicitly_untrusted ty =
   let enforceable = is_enforceable env ty in
   let is_hhi =
     fst ty
@@ -125,7 +125,7 @@ let is_enforced env ~is_xhp_attr ty =
     |> Relative_path.prefix
     |> ( = ) Relative_path.Hhi
   in
-  enforceable && (not is_hhi) && not is_xhp_attr
+  enforceable && (not is_hhi) && not explicitly_untrusted
 
 let pessimize_type env { et_type; et_enforced } =
   let et_type =
@@ -138,13 +138,13 @@ let pessimize_type env { et_type; et_enforced } =
   in
   { et_type; et_enforced }
 
-let compute_enforced_ty env ?(is_xhp_attr = false) (ty : decl_ty) =
-  let et_enforced = is_enforced env ~is_xhp_attr ty in
+let compute_enforced_ty env ?(explicitly_untrusted = false) (ty : decl_ty) =
+  let et_enforced = is_enforced env ~explicitly_untrusted ty in
   { et_type = ty; et_enforced }
 
-let compute_enforced_and_pessimize_ty env ?(is_xhp_attr = false) (ty : decl_ty)
-    =
-  let ety = compute_enforced_ty env ~is_xhp_attr ty in
+let compute_enforced_and_pessimize_ty
+    env ?(explicitly_untrusted = false) (ty : decl_ty) =
+  let ety = compute_enforced_ty env ~explicitly_untrusted ty in
   pessimize_type env ety
 
 let handle_awaitable_return

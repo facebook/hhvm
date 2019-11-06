@@ -22,13 +22,14 @@ let module_blacklist =
       "aast";
     "aast_defs_visitors_ancestors";
     "ast_defs_visitors_ancestors";
+    "core_kernel";
     "hh_core";
+    "hh_prelude";
     "naming_special_names";
     "pp_type";
     "reordered_argument_collections";
     "string_utils";
     "utils";
-    "core_kernel";
   ]
 
 (* HACK: These submodules are defined inline in another module. We don't convert

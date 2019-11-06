@@ -82,9 +82,9 @@ impl Pos {
         }
     }
 
-    pub fn info_pos_extended(self) -> (usize, usize, usize, usize) {
+    pub fn info_pos_extended(&self) -> (usize, usize, usize, usize) {
         let (line_begin, start, end) = self.clone().info_pos();
-        let line_end = match self.0 {
+        let line_end = match &self.0 {
             Small { end, .. } => end.line_column_beg(),
             Large { end, .. } => (*end).line_column_beg(),
         }

@@ -857,6 +857,20 @@ impl Instr {
         Self::make_instr(Instruct::IMisc(InstructMisc::NativeImpl))
     }
 
+    pub fn make_instr_srcloc(
+        line_begin: isize,
+        line_end: isize,
+        col_begin: isize,
+        col_end: isize,
+    ) -> Self {
+        Self::make_instr(Instruct::ISrcLoc(Srcloc {
+            line_begin,
+            line_end,
+            col_begin,
+            col_end,
+        }))
+    }
+
     pub fn create_try_catch(
         label_gen: &mut label::Gen,
         opt_done_label: Option<Label>,

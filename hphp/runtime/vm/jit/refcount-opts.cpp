@@ -784,7 +784,7 @@ using BlockState = StateVector<Block, PreBlockInfo>;
 
 struct PreEnv {
   using IncDecKey = std::tuple<Block*,uint32_t,bool>; /* blk, id, at front */
-  using InsertMap = jit::fast_map<IncDecKey, SSATmp*>;
+  using InsertMap = jit::vector<std::pair<IncDecKey, SSATmp*>>;
 
   explicit PreEnv(Env& env, RCAnalysis& rca) :
       env(env),
@@ -3042,7 +3042,7 @@ bool pre_insertions_for_delete(PreEnv& penv,
     auto const key = std::make_tuple(elm.first,
                                      penv.env.asetMap[elm.second],
                                      insertAtFront);
-    penv.insMap[key] = elm.second;
+    penv.insMap.emplace_back(key, elm.second);
   }
 
   return true;

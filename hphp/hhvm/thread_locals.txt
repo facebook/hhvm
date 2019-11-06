@@ -99,6 +99,7 @@ HPHP::Trace::dumpEntry(HPHP::Trace::RingBufferEntry const*)::indentDepth
 HPHP::high_arena_tcache # Only needed in lowptr builds.
 HPHP::(anonymous namespace)::s_localCounters
 HPHP::WatchmanAutoload::t_adb
+HPHP::WatchmanAutoload::(anonymous namespace)::t_savedStates
 HPHP::arrprov::(anonymous namespace)::tl_tag_override
 
 # TODO: (T9683397) Un-whitelist these Call Threaded Interpreter TLS vars.

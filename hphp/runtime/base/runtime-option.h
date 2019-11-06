@@ -96,6 +96,7 @@ struct RepoOptions {
 
 #define AUTOLOADFLAGS() \
   N(std::string,    Query,                                        "") \
+  N(std::string,    TrustedDBPath,                                "") \
   /**/
 
   std::string path() const { return m_path; }
@@ -105,6 +106,7 @@ struct RepoOptions {
   folly::dynamic toDynamic() const;
   struct stat stat() const { return m_stat; }
   std::string autoloadQuery() const noexcept { return Query; }
+  std::string trustedDBPath() const noexcept { return TrustedDBPath; }
 
   bool operator==(const RepoOptions& o) const;
 

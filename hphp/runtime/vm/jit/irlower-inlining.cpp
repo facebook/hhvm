@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/dce.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -101,14 +102,14 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
     // frame if it was pointing to the parent frame, letting the unwinder see
     // the inlined frame.
     auto const newFP = v.makeReg();
-    auto const oldVmfp = v.makeReg();
-    auto const newVmfp = v.makeReg();
     auto const sf = v.makeReg();
     v << lea{ar, newFP};
-    v << load{rvmtl()[rds::kVmfpOff], oldVmfp};
-    v << cmpq{oldVmfp, callerFP, sf};
-    v << cmovq{CC_E, sf, oldVmfp, newFP, newVmfp};
-    v << store{newVmfp, rvmtl()[rds::kVmfpOff]};
+    v << cmpqm{callerFP, rvmtl()[rds::kVmfpOff], sf};
+    ifThen(v, CC_E, sf, [&](Vout& v) {
+      v << store{newFP, rvmtl()[rds::kVmfpOff]};
+      emitImmStoreq(v, intptr_t(inst->marker().sk().pc()),
+                    rvmtl()[rds::kVmpcOff]);
+    });
   }
 
   v << pushframe{};

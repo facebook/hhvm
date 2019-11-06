@@ -148,6 +148,7 @@ class AsyncMysqlConnection {
     dict<string, string> $query_attributes = dict[],
   ): Awaitable<AsyncMysqlQueryResult>{ }
   public function queryf(HH\FormatString<HH\SQLFormatter> $query, ...$args): Awaitable<AsyncMysqlQueryResult>{ }
+  public function queryAsync(\HH\Lib\SQL\Query $query): Awaitable<AsyncMysqlQueryResult>;
   public function multiQuery(
     Traversable<string> $query,
     int $timeout_micros = -1,
@@ -305,5 +306,72 @@ namespace HH {
     public function format_s(\ConstVector<string> $strs): string; // %Ls
     public function format_d(\ConstVector<int> $ints): string; // %Ld
     public function format_f(\ConstVector<float> $floats): string; // %Lf
+  }
+}
+
+namespace HH\Lib\SQL {
+  interface ScalarFormat {
+    public function format_f(?float $s): string;
+    public function format_d(?int $int): string;
+    public function format_s(?string $string): string;
+  }
+
+  interface ListFormat {
+    // %LC - columns
+    public function format_upcase_c(vec<string> $cols): string;
+    // %Ls
+    public function format_s(vec<string> $strs): string;
+    // %Ld
+    public function format_d(vec<int> $ints): string;
+    // %Lf
+    public function format_f(vec<float> $floats): string;
+
+    /* INTENTIONALLY NOT IMPLEMENTED: %LO, %LA
+     *
+     * These are `dict<column, value>`; not added as the value
+     * type must be `mixed`; use `%Q` instead to build queries in
+     * a type-safe manner.
+     */
+  }
+
+  interface QueryFormat extends ScalarFormat {
+    // %%
+    public function format_0x25(): string;
+
+    // %T - table name
+    public function format_upcase_t(string $s): string;
+    // %C - column name
+    public function format_upcase_c(string $s): string;
+    // %K - SQL comment
+    public function format_upcase_k(string $s): string;
+    // %Q - subquery
+    public function format_upcase_q(Query $q): string;
+
+    // %L[sdfC] - lists
+    public function format_upcase_l(): ListFormat;
+    // %=[fds] - comparison
+    public function format_0x3d(): ScalarFormat;
+
+    /* INTENTIONALLY NOT IMPLEMEMENTED: %U, %W, %V, %m
+     *
+     * %U %W are `dict<column, value>`, and %V is
+     * `vec<n-tuple(value, value...)>`, with `mixed` values. Use `%Q` instead
+     * to build the query in a type-safe manner.
+     *
+     * %m is a straightforward `mixed` value, so also not implemented.
+     */
+  }
+
+  type QueryFormatString = \HH\FormatString<QueryFormat>;
+
+  final class Query {
+    public function __construct(QueryFormatString $format, mixed ...$args) {}
+
+    public function toString__FOR_DEBUGGING_ONLY(
+      \AsyncMysqlConnection $conn
+    ): string {}
+
+    public function toUnescapedString__FOR_DEBUGGING_ONLY__UNSAFE(
+    ): string {}
   }
 }

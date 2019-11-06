@@ -631,16 +631,11 @@ let iterator_instruction_name_prefix instruction =
   let iterator_instruction_name =
     match instruction with
     | IterInit _ -> "IterInit"
-    | LIterInit _ -> "LIterInit"
     | IterInitK _ -> "IterInitK"
-    | LIterInitK _ -> "LIterInitK"
     | IterNext _ -> "IterNext"
-    | LIterNext _ -> "LIterNext"
     | IterNextK _ -> "IterNextK"
-    | LIterNextK _ -> "LIterNextK"
     | IterFree _ -> "IterFree"
-    | LIterFree _ -> "LIterFree"
-    | _ -> failwith "invalid iterator instruction"
+    | IterBreak _ -> "IterBreak"
   in
   iterator_instruction_name ^ " "
 
@@ -649,15 +644,6 @@ let string_of_iterator instruction =
   | IterInit (id, label, value) ->
     iterator_instruction_name_prefix instruction
     ^ string_of_iterator_id id
-    ^ " "
-    ^ string_of_label label
-    ^ " "
-    ^ string_of_local_id value
-  | LIterInit (id, base, label, value) ->
-    iterator_instruction_name_prefix instruction
-    ^ string_of_iterator_id id
-    ^ " "
-    ^ string_of_local_id base
     ^ " "
     ^ string_of_label label
     ^ " "
@@ -671,29 +657,9 @@ let string_of_iterator instruction =
     ^ string_of_local_id key
     ^ " "
     ^ string_of_local_id value
-  | LIterInitK (id, base, label, key, value) ->
-    iterator_instruction_name_prefix instruction
-    ^ string_of_iterator_id id
-    ^ " "
-    ^ string_of_local_id base
-    ^ " "
-    ^ string_of_label label
-    ^ " "
-    ^ string_of_local_id key
-    ^ " "
-    ^ string_of_local_id value
   | IterNext (id, label, value) ->
     iterator_instruction_name_prefix instruction
     ^ string_of_iterator_id id
-    ^ " "
-    ^ string_of_label label
-    ^ " "
-    ^ string_of_local_id value
-  | LIterNext (id, base, label, value) ->
-    iterator_instruction_name_prefix instruction
-    ^ string_of_iterator_id id
-    ^ " "
-    ^ string_of_local_id base
     ^ " "
     ^ string_of_label label
     ^ " "
@@ -707,24 +673,8 @@ let string_of_iterator instruction =
     ^ string_of_local_id key
     ^ " "
     ^ string_of_local_id value
-  | LIterNextK (id, base, label, key, value) ->
-    iterator_instruction_name_prefix instruction
-    ^ string_of_iterator_id id
-    ^ " "
-    ^ string_of_local_id base
-    ^ " "
-    ^ string_of_label label
-    ^ " "
-    ^ string_of_local_id key
-    ^ " "
-    ^ string_of_local_id value
   | IterFree id ->
     iterator_instruction_name_prefix instruction ^ string_of_iterator_id id
-  | LIterFree (id, base) ->
-    iterator_instruction_name_prefix instruction
-    ^ string_of_iterator_id id
-    ^ " "
-    ^ string_of_local_id base
   | IterBreak (label, iterlist) ->
     let map_item (kind, id) =
       let id = string_of_iterator_id id in
@@ -732,8 +682,9 @@ let string_of_iterator instruction =
       | Iter -> "(Iter) " ^ id
       | LIter -> "(LIter) " ^ id
     in
+    let prefix = iterator_instruction_name_prefix instruction in
     let values = String.concat ~sep:", " (List.rev_map ~f:map_item iterlist) in
-    "IterBreak " ^ string_of_label label ^ " <" ^ values ^ ">"
+    prefix ^ string_of_label label ^ " <" ^ values ^ ">"
 
 let string_of_try instruction =
   match instruction with

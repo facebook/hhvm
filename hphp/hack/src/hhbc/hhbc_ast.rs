@@ -506,14 +506,9 @@ pub enum IterKind {
 pub enum InstructIterator {
     IterInit(Iter, label::Label, local::Id),
     IterInitK(Iter, label::Label, local::Id, local::Id),
-    LIterInit(Iter, local::Id, label::Label, local::Id),
-    LIterInitK(Iter, local::Id, label::Label, local::Id, local::Id),
     IterNext(Iter, label::Label, local::Id),
     IterNextK(Iter, label::Label, local::Id, local::Id),
-    LIterNext(Iter, local::Id, label::Label, local::Id),
-    LIterNextK(Iter, local::Id, label::Label, local::Id, local::Id),
     IterFree(Iter),
-    LIterFree(Iter, local::Id),
     IterBreak(label::Label, Vec<(IterKind, Iter)>),
 }
 

@@ -29,12 +29,8 @@ let get_regular_labels instr =
   match instr with
   | IIterator (IterInit (_, l, _))
   | IIterator (IterInitK (_, l, _, _))
-  | IIterator (LIterInit (_, _, l, _))
-  | IIterator (LIterInitK (_, _, l, _, _))
   | IIterator (IterNext (_, l, _))
   | IIterator (IterNextK (_, l, _, _))
-  | IIterator (LIterNext (_, _, l, _))
-  | IIterator (LIterNextK (_, _, l, _, _))
   | IIterator (IterBreak (l, _))
   | ICall (FCall (_, _, _, _, Some l))
   | ICall (FCallClsMethod ((_, _, _, _, Some l), _))
@@ -89,17 +85,9 @@ let relabel_instr instr relabel =
   | IIterator (IterInit (id, l, v)) -> IIterator (IterInit (id, relabel l, v))
   | IIterator (IterInitK (id, l, k, v)) ->
     IIterator (IterInitK (id, relabel l, k, v))
-  | IIterator (LIterInit (id, b, l, v)) ->
-    IIterator (LIterInit (id, b, relabel l, v))
-  | IIterator (LIterInitK (id, b, l, k, v)) ->
-    IIterator (LIterInitK (id, b, relabel l, k, v))
   | IIterator (IterNext (id, l, v)) -> IIterator (IterNext (id, relabel l, v))
   | IIterator (IterNextK (id, l, k, v)) ->
     IIterator (IterNextK (id, relabel l, k, v))
-  | IIterator (LIterNext (id, b, l, v)) ->
-    IIterator (LIterNext (id, b, relabel l, v))
-  | IIterator (LIterNextK (id, b, l, k, v)) ->
-    IIterator (LIterNextK (id, b, relabel l, k, v))
   | IIterator (IterBreak (l, x)) -> IIterator (IterBreak (relabel l, x))
   | IGenDelegation (YieldFromDelegate (i, l)) ->
     IGenDelegation (YieldFromDelegate (i, relabel l))

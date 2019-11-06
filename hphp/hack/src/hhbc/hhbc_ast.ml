@@ -460,14 +460,9 @@ type iter_kind =
 type instruct_iterator =
   | IterInit of Iterator.t * Label.t * local_id
   | IterInitK of Iterator.t * Label.t * local_id * local_id
-  | LIterInit of Iterator.t * local_id * Label.t * local_id
-  | LIterInitK of Iterator.t * local_id * Label.t * local_id * local_id
   | IterNext of Iterator.t * Label.t * local_id
   | IterNextK of Iterator.t * Label.t * local_id * local_id
-  | LIterNext of Iterator.t * local_id * Label.t * local_id
-  | LIterNextK of Iterator.t * local_id * Label.t * local_id * local_id
   | IterFree of Iterator.t
-  | LIterFree of Iterator.t * local_id
   | IterBreak of Label.t * (iter_kind * Iterator.t) list
 
 type instruct_include_eval_define =

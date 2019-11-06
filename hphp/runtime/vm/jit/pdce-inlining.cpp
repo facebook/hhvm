@@ -185,6 +185,15 @@ using InstructionSet = jit::fast_set<IRInstruction*>;
 using FPUseMap = jit::fast_map<SSATmp*, InstructionSet>;
 using FPMap = jit::fast_map<Block*, SSATmp*>;
 
+struct BlockCmp {
+  bool operator()(const Block* a, const Block* b) {
+    if (a->id() == b->id()) return false;
+    return a->id() < b->id();
+  }
+};
+
+using OrderedBlockSet = std::set<Block*, BlockCmp>;
+
 struct InlineAnalysis {
   IRUnit* unit;
   /*
@@ -202,7 +211,7 @@ struct InlineAnalysis {
    * Map fp -> set, where all blocks in set exit the unit while still within the
    * the inlined region for fp.
    */
-  jit::fast_map<SSATmp*, BlockSet> exitBlocks;
+  jit::fast_map<SSATmp*, OrderedBlockSet> exitBlocks;
   /*
    * Cache of a SSATmp (defined by a DefLabel), to the "resolved"
    * operands of that DefLabel.
@@ -469,7 +478,7 @@ InlineAnalysis analyze(IRUnit& unit) {
         depth++;
         possibleFps = SSATmpSet{inst.dst()};
         ia.fpUses.emplace(inst.dst(), InstructionSet{});
-        ia.exitBlocks.emplace(inst.dst(), BlockSet{});
+        ia.exitBlocks.emplace(inst.dst(), OrderedBlockSet{});
         addFPUse(inst, inst.src(1));
         ITRACE(2, "Found DefInlineFP (depth = {}): {}\n", depth, inst);
       } else {
@@ -615,9 +624,15 @@ bool canAdjustFrame(IRInstruction& inst) {
  * will be after the BeginCatch. The marker for BeginCatch must match the
  * marker on inst.
  */
-void updateCatchMarker(IRInstruction& inst) {
+void updateCatchMarker(
+    IRInstruction& inst,
+    folly::Optional<std::map<uint32_t, std::vector<std::string>>>& traces) {
   if (inst.taken() && inst.taken()->isCatch()) {
-    ITRACE(4, "Updating catch marker: {}", inst);
+    if (traces) {
+      (*traces)[inst.block()->id()].push_back(
+        folly::sformat("Updating catch marker: {}\n", inst)
+      );
+    }
     auto it = inst.taken()->skipHeader();
     assertx(it != inst.taken()->begin());
     (--it)->marker() = inst.marker();
@@ -732,8 +747,9 @@ BlockSet findMainBlocks(Block* enterBlock, Block* exitBlock) {
  * 4) exit head can only have a single predecessor (the main-block) as the
  *    main-block must have another successor.
  */
-BlockList findExitHeads(OptimizeContext& ctx, BlockSet& exits) {
+BlockList findExitHeads(OptimizeContext& ctx, OrderedBlockSet& exits) {
   std::deque<Block*> workQ(exits.begin(), exits.end());
+
   BlockSet seen;
   seen.insert(exits.begin(), exits.end());
 
@@ -888,13 +904,22 @@ void transformUses(InlineAnalysis& ia,
                    OptimizeContext& ctx,
                    InstructionSet& uses,
                    bool& reflow) {
+  if (!uses.size()) return;
+
   auto fp = ctx.deadFp;
   auto def = fp->inst();
   auto parentFp = ctx.deadFp->inst()->src(1);
 
-  auto it = uses.begin();
-  while (it != uses.end()) {
-    auto inst = *it;
+  jit::vector<IRInstruction*> vuses(uses.begin(), uses.end());
+  std::sort(vuses.begin(), vuses.end(),
+            [] (IRInstruction* a, IRInstruction* b) {
+              if (a->block() != b->block()) {
+                return a->block()->id() < b->block()->id();
+              }
+              if (a->id() == b->id()) return false;
+              return a->id() < b->id();
+            });
+  for (auto inst : vuses) {
     auto block = inst->block();
     /*
      * We may have previously sunk a child DefInlineFP into an exit block, so
@@ -931,8 +956,8 @@ void transformUses(InlineAnalysis& ia,
        */
       always_assert(false);
     }
-    it = uses.erase(it);
   }
+  uses.clear();
 }
 
 /*
@@ -1012,6 +1037,11 @@ void adjustBCMarkers(OptimizeContext& ctx) {
    */
   auto const callSK = findCallSK(*def);
 
+  // if we're tracing, use a map to make sure the output is produced in a
+  // deterministic order.
+  folly::Optional<std::map<uint32_t, std::vector<std::string>>> traces;
+  if (Trace::moduleEnabled(Trace::pdce_inline, 4)) traces.emplace();
+
   // We need to fix up the main trace-- if a function can reenter we need to be
   // sure that we've adjusted its BC marker so that it doesn't stomp on the
   // stack
@@ -1037,18 +1067,30 @@ void adjustBCMarkers(OptimizeContext& ctx) {
        * the live ActRec.
        */
       auto newOff = inst.marker().spOff() + spAdjust;
-      ITRACE(4, "Updating marker (old spOff = {}, new spOff = {}): {}\n",
-             inst.marker().spOff().offset, newOff.offset, inst);
+      if (traces) {
+        (*traces)[block->id()].push_back(
+          folly::sformat(
+            "Updating marker (old spOff = {}, new spOff = {}): {}\n",
+            inst.marker().spOff().offset, newOff.offset, inst));
+      }
 
       inst.marker() = inst.marker().adjustFP(parentFp)
                                    .adjustSP(newOff)
                                    .adjustFixupSK(callSK);
-      updateCatchMarker(inst);
+      updateCatchMarker(inst, traces);
+    }
+  }
+
+  if (traces) {
+    for (auto const& t : *traces) {
+      for (auto const DEBUG_ONLY& s : t.second) {
+        ITRACE(4, "{}", s);
+      }
     }
   }
 }
 
-void syncCatchTraces(OptimizeContext& ctx, BlockSet& exitBlocks) {
+void syncCatchTraces(OptimizeContext& ctx, OrderedBlockSet& exitBlocks) {
   for (auto block : exitBlocks) {
     /*
      * Catch blocks are special: we need to sync vmfp() and vmsp() so that the
@@ -1111,9 +1153,12 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
   if (numMainUses > 0) {
     ITRACE(2, "skipping unsuitable InlineReturn (uses = {})\n", numMainUses);
     if (Trace::moduleEnabled(Trace::pdce_inline, 3)) {
+      std::vector<std::string> tmp;
       for (auto const inst : uses) {
-        if (hasMainUse(inst)) ITRACE(3, "  use: {}\n", inst->toString());
+        if (hasMainUse(inst)) tmp.push_back(inst->toString());
       }
+      std::sort(tmp.begin(), tmp.end());
+      for (auto const DEBUG_ONLY& s : tmp) ITRACE(3, "  use: {}\n", s);
     }
     return false;
   }

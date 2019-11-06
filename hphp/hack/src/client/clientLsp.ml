@@ -102,7 +102,6 @@ module In_init_env = struct
     most_recent_start_time: float;
     (* for subsequent retries *)
     editor_open_files: Lsp.TextDocumentItem.t SMap.t;
-    file_edits: Hh_json.json ImmQueue.t;
     uris_with_unsaved_changes: SSet.t;
         (* see comment in get_uris_with_unsaved_changes *)
   }
@@ -367,7 +366,7 @@ let read_hhconfig_version () : string Lwt.t =
 (* whether or not they've yet been synced with hh_server.                     *)
 (* As it happens: in Main_loop state all these files will already have been   *)
 (* sent to hh_server; in In_init state all these files will have been queued  *)
-(* up inside file_edits ready to be sent when we receive the hello; in        *)
+(* up inside editor_open_files ready to be sent when we receive the hello; in *)
 (* Lost_server state they're not even queued up, and if ever we see hh_server *)
 (* ready then we'll terminate the LSP server and trust the client to relaunch *)
 (* us and resend a load of didOpen/didChange events.                          *)
@@ -984,8 +983,6 @@ let state_to_rage (state : state) : string =
           ienv.most_recent_start_time |> string_of_float;
           "editor_open_files";
           ienv.editor_open_files |> SMap.keys |> List.length |> string_of_int;
-          "file_edits";
-          ienv.file_edits |> ImmQueue.length |> string_of_int;
           "uris_with_unsaved_changes";
           ienv.uris_with_unsaved_changes |> SSet.cardinal |> string_of_int;
         ]
@@ -2783,11 +2780,6 @@ let rec connect (state : state) : state Lwt.t =
              (* Pre_init will of course be empty; *)
              (* Lost_server will exit rather than reconnect with unsaved changes. *)
              uris_with_unsaved_changes = get_uris_with_unsaved_changes state;
-             (* TODO(ljw): if a file is already open, and we connect here, and then *)
-             (* the user closes the file -- then at that time we'll send CLOSE to the *)
-             (* server without it having first received OPEN. I've seen erratic behavior *)
-             (* from the server in that situation but haven't been able to repro it. *)
-             file_edits = ImmQueue.empty;
            })
   with e ->
     (* Exit_with Out_of_retries, Exit_with Out_of_time: raised when we        *)
@@ -3536,29 +3528,21 @@ let handle_event
           |> respond_jsonrpc ~powered_by:Language_server c;
           Lwt.return_unit
         (* any request/notification if we're not yet ready *)
-        | (In_init ienv, Client_message c) ->
-          In_init_env.(
-            begin
-              match c.method_ with
-              | "textDocument/didOpen"
-              | "textDocument/didChange"
-              | "textDocument/didClose" ->
-                (* These three crucial-for-correctness notifications will be buffered *)
-                (* up so we'll be able to handle them when we're ready.               *)
-                state :=
-                  In_init
-                    {
-                      ienv with
-                      file_edits = ImmQueue.push ienv.file_edits c.json;
-                    };
-                Lwt.return_unit
-              | _ ->
-                raise
-                  (Error.RequestCancelled
-                     (Hh_server_initializing |> hh_server_state_to_string))
-                (* We deny all other requests. Operation_cancelled is the only *)
-                (* error-response that won't produce logs/warnings on most clients. *)
-            end)
+        | (In_init _, Client_message c) ->
+          begin
+            match c.method_ with
+            | "textDocument/didOpen"
+            | "textDocument/didChange"
+            | "textDocument/didClose" ->
+              (* Already handled by [track_open_files]. *)
+              Lwt.return_unit
+            | _ ->
+              raise
+                (Error.RequestCancelled
+                   (Hh_server_initializing |> hh_server_state_to_string))
+              (* We deny all other requests. Operation_cancelled is the only *)
+              (* error-response that won't produce logs/warnings on most clients. *)
+          end
         (* idle tick while waiting for server to complete initialization *)
         | (In_init ienv, Tick) ->
           In_init_env.(

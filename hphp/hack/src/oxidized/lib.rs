@@ -53,7 +53,6 @@ pub use gen::namespace_env;
 pub use gen::nast;
 pub use gen::parser_options;
 pub use gen::prim_defs;
-pub use gen::rust_aast_parser_types;
 pub use gen::scoured_comments;
 pub use gen::shallow_decl_defs;
 pub use gen::typechecker_options;

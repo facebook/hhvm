@@ -16,5 +16,8 @@ coroutine_smart_constructors = { path = "../coroutine_smart_constructors", packa
 positioned_parser = { path = "../positioned_parser", package = "positioned_parser" }
 syntax_tree = { path = "../syntax_tree", package = "syntax_tree" }
 oxidized = {path = "../../../oxidized", package = "hack_oxidized" }
+rust_parser_errors = { path = "../errors", package = "hack_parser_errors" }
+ocamlrep = {path = "../../../ocamlrep", package = "hack_ocamlrep"}
+ocamlrep_derive = {path = "../../../ocamlrep_derive", package = "hack_ocamlrep_derive"}
 regex = "^1.2.1"
 lazy_static = "^1.3.0"

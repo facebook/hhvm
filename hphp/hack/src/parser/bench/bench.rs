@@ -31,13 +31,13 @@ If you want to run this test suite under a performance analyzer, use the followi
 mod tests {
     use test::Bencher;
 
+    use aast_parser::rust_aast_parser_types;
     use decl_rust::direct_decl_parser;
     use facts_rust::facts_parser;
     use ocamlrep::rc::RcOc;
     use oxidized::{
         global_options,
         relative_path::{Prefix, RelativePath},
-        rust_aast_parser_types,
     };
     use parser_rust::{
         indexed_source_text::IndexedSourceText, parser_env::ParserEnv, source_text::SourceText,

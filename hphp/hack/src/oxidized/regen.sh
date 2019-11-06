@@ -37,7 +37,6 @@ buck run hphp/hack/src/hh_oxidize --                                          \
   hphp/hack/src/typing/typing_reason.ml                                       \
   hphp/hack/src/utils/core/prim_defs.ml                                       \
   hphp/hack/src/parser/scoured_comments.ml                                    \
-  hphp/hack/src/parser/rust_aast_parser_types.ml                              \
 
 buck run //hphp/hack/src/hh_codegen:hh_codegen --                             \
   --signer "$SIGNER_PATH"                                                     \

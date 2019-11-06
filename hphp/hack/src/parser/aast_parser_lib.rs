@@ -6,4 +6,5 @@
 
 mod aast_parser;
 
+pub mod rust_aast_parser_types;
 pub use aast_parser::AastParser;

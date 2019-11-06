@@ -4964,28 +4964,31 @@ where
         }
     }
 
-    fn lower(env: &mut Env<'a>, script: &Syntax<T, V>) -> std::result::Result<LoweredAst, String> {
+    fn lower(
+        env: &mut Env<'a>,
+        script: &Syntax<T, V>,
+    ) -> std::result::Result<ast::Program, String> {
         let aast_result = Self::p_script(script, env);
         let aast = match aast_result {
             Ok(ast) => ast,
-            Err(err) => match err {
-                Error::APIMissingSyntax {
-                    expecting,
-                    pos,
-                    node_name,
-                    kind,
-                } => Err(format!(
+            Err(err) => {
+                return match err {
+                    Error::APIMissingSyntax {
+                        expecting,
+                        pos,
+                        node_name,
+                        kind,
+                    } => Err(format!(
                     "missing case in {:?}.\n - pos: {:?}\n - unexpected: '{:?}'\n - kind: {:?}\n",
                     expecting.to_string(),
                     pos,
                     node_name.to_string(),
                     kind,
-                ))?,
-                _ => Err(format!("Lowerer Error: {:?}", err))?,
-            },
+                )),
+                    Error::Failwith(msg) => Err(msg),
+                }
+            }
         };
-
-        let aast = Self::elaborate_halt_compiler(aast, env);
-        Ok(LoweredAst { aast })
+        Ok(Self::elaborate_halt_compiler(aast, env))
     }
 }

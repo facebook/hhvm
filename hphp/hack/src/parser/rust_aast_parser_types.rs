@@ -2,19 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-//
-// @generated SignedSource<<18bba48e32cc11a6abac4fca48199cee>>
-//
-// To regenerate this file, run:
-//   hphp/hack/src/oxidized/regen.sh
 
 use ocamlrep_derive::OcamlRep;
 
-use crate::aast;
-use crate::file_info;
-use crate::parser_options;
-use crate::pos;
-use crate::scoured_comments;
+use oxidized::{aast, file_info, parser_options, pos, scoured_comments};
+use parser_core_types::syntax_error::SyntaxError;
 
 #[derive(Clone, Debug, OcamlRep)]
 pub struct Env {
@@ -38,4 +30,5 @@ pub struct Result {
     pub scoured_comments: scoured_comments::ScouredComments,
     pub aast: aast::Program<pos::Pos, (), (), ()>,
     pub lowpri_errors: Vec<(pos::Pos, String)>,
+    pub errors: Vec<SyntaxError>,
 }

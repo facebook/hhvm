@@ -72,9 +72,12 @@ val subtype_reactivity :
   ?extra_info:reactivity_extra_info ->
   ?is_call_site:bool ->
   env ->
+  Pos.t ->
   reactivity ->
+  Pos.t ->
   reactivity ->
-  bool
+  Errors.typing_error_callback ->
+  env
 
 val add_constraint :
   Pos.t -> env -> Ast_defs.constraint_kind -> locl_ty -> locl_ty -> env

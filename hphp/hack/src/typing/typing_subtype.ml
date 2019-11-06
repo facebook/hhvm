@@ -917,15 +917,6 @@ and simplify_subtype_i
           ftys := TUtils.add_function_type env ety_super !ftys;
           (env, TL.valid)
           |> check_with
-               ( subtype_reactivity env reactivity ft.ft_reactive
-               || TypecheckerOptions.unsafe_rx (Env.get_tcopt env) )
-               (fun () ->
-                 Errors.fun_reactivity_mismatch
-                   p_super
-                   (TUtils.reactivity_to_string env reactivity)
-                   p_sub
-                   (TUtils.reactivity_to_string env ft.ft_reactive))
-          |> check_with
                (Aast.equal_is_coroutine is_coroutine ft.ft_is_coroutine)
                (fun () ->
                  Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub)
@@ -938,6 +929,17 @@ and simplify_subtype_i
           |> fun (env, prop) ->
           let (env, _, ret) = anon env ft.ft_params ft.ft_arity in
           (env, prop)
+          &&& (fun env ->
+                if TypecheckerOptions.unsafe_rx (Env.get_tcopt env) then
+                  (env, TL.valid)
+                else
+                  simplify_subtype_reactivity
+                    ~subtype_env
+                    p_sub
+                    reactivity
+                    p_super
+                    ft.ft_reactive
+                    env)
           &&& simplify_subtype ~subtype_env ~this_ty ret ft.ft_ret.et_type
       end
     | (Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tfun _) ->
@@ -1756,7 +1758,7 @@ and simplify_subtype_params
     env
     |> begin
          if check_params_reactivity then
-           subtype_fun_params_reactivity sub super
+           simplify_subtype_fun_params_reactivity ~subtype_env sub super
          else valid
        end
     &&& begin
@@ -1829,12 +1831,25 @@ and simplify_supertype_params_with_variadic
     |> simplify_subtype_possibly_enforced variadic_ty super
     &&& simplify_supertype_params_with_variadic superl variadic_ty
 
-and subtype_reactivity
+and simplify_subtype_reactivity
+    ~subtype_env
     ?(extra_info : reactivity_extra_info option)
     ?(is_call_site = false)
-    (env : env)
+    p_sub
     (r_sub : reactivity)
-    (r_super : reactivity) : bool =
+    p_super
+    (r_super : reactivity)
+    (env : env) : env * TL.subtype_prop =
+  let fail () =
+    let msg_super =
+      "This function is " ^ TUtils.reactivity_to_string env r_super ^ "."
+    in
+    let msg_sub =
+      "This function is " ^ TUtils.reactivity_to_string env r_sub ^ "."
+    in
+    subtype_env.on_error [(p_super, msg_super)] [(p_sub, msg_sub)]
+  in
+  let invalid () = (env, TL.invalid ~fail) in
   let maybe_localize t =
     match t with
     | DeclTy t ->
@@ -1852,87 +1867,8 @@ and subtype_reactivity
      that derived class will have to redefine the method with a shape required
      by condition type (reactivity of redefined method must be subtype of reactivity
      of method in interface) *)
-  let condition_type_has_matching_reactive_method
-      condition_type_super (method_name, is_static) =
-    let m =
-      ConditionTypes.try_get_method_from_condition_type
-        env
-        condition_type_super
-        is_static
-        method_name
-    in
-    match m with
-    | Some { ce_type = (lazy (_, Tfun f)); _ } ->
-      (* check that reactivity of interface method (effectively a promised
-         reactivity of a method in derived class) is a subtype of r_super.
-         NOTE: we check only for unconditional reactivity since conditional
-         version does not seems to yield a lot and will requre implementing
-         cycle detection for condition types *)
-      begin
-        match f.ft_reactive with
-        | Reactive None
-        | Shallow None
-        | Local None ->
-          let extra_info =
-            {
-              empty_extra_info with
-              parent_class_ty = Some (DeclTy condition_type_super);
-            }
-          in
-          subtype_reactivity ~extra_info env f.ft_reactive r_super
-        | _ -> false
-      end
-    | _ -> false
-  in
-  match (r_sub, r_super, extra_info) with
-  (* anything is a subtype of nonreactive functions *)
-  | (_, Nonreactive, _) -> true
-  (* to compare two maybe reactive values we need to unwrap them *)
-  | (MaybeReactive sub, MaybeReactive super, _) ->
-    subtype_reactivity ?extra_info ~is_call_site env sub super
-  (* for explicit checks at callsites implicitly unwrap maybereactive value:
-     function f(<<__AtMostRxAsFunc>> F $f)
-     f(<<__RxLocal>> () ==> {... })
-     here parameter will be maybereactive and argument - rxlocal
-     *)
-  | (sub, MaybeReactive super, _) when is_call_site ->
-    subtype_reactivity ?extra_info ~is_call_site env sub super
-  (* if is_call_site is falst ignore maybereactive flavors.
-     This usually happens during subtype checks for arguments and when target
-     function is conditionally reactive we'll do the proper check
-     in typing_reactivity.check_call. *)
-  | (_, MaybeReactive _, _) when not is_call_site -> true
-  (* ok:
-    class A { function f((function(): int) $f) {} }
-    class B extends A {
-      <<__Rx>>
-      function f(<<__AtMostRxAsFunc>> (function(): int) $f);
-    }
-    reactivity for arguments is checked contravariantly *)
-  | (_, RxVar None, _)
-  (* ok:
-     <<__Rx>>
-     function f(<<__AtMostRxAsFunc>> (function(): int) $f) { return $f() }  *)
-  
-  | (RxVar None, RxVar _, _) ->
-    true
-  | (RxVar (Some sub), RxVar (Some super), _)
-  | (sub, RxVar (Some super), _) ->
-    subtype_reactivity ?extra_info ~is_call_site env sub super
-  | (RxVar _, _, _) -> false
-  | ( (Local cond_sub | Shallow cond_sub | Reactive cond_sub),
-      Local cond_super,
-      _ )
-  | ((Shallow cond_sub | Reactive cond_sub), Shallow cond_super, _)
-  | (Reactive cond_sub, Reactive cond_super, _)
-    when subtype_param_rx_if_impl
-           ~is_param:false
-           env
-           cond_sub
-           class_ty
-           cond_super ->
-    true
-  (* function type TSub of method M with arbitrary reactivity in derive class
+  let check_condition_type_has_matching_reactive_method env =
+    (* function type TSub of method M with arbitrary reactivity in derive class
      can be subtype of conditionally reactive function type TSuper of method M
      defined in base class when condition type has reactive method M.
      interface Rx {
@@ -1953,45 +1889,173 @@ and subtype_reactivity
      to redeclare f which now will shadow B::f. Note that B::f will still be
      accessible as parent::f() but will be treated as non-reactive call.
      *)
-  | ( _,
-      (Reactive (Some t) | Shallow (Some t) | Local (Some t)),
-      Some { method_info = Some mi; _ } )
-    when condition_type_has_matching_reactive_method t mi ->
-    true
+    match (r_super, extra_info) with
+    | ( ( Reactive (Some condition_type_super)
+        | Shallow (Some condition_type_super)
+        | Local (Some condition_type_super) ),
+        Some { method_info = Some (method_name, is_static); _ } ) ->
+      let m =
+        ConditionTypes.try_get_method_from_condition_type
+          env
+          condition_type_super
+          is_static
+          method_name
+      in
+      begin
+        match m with
+        | Some { ce_type = (lazy (_, Tfun f)); _ } ->
+          (* check that reactivity of interface method (effectively a promised
+         reactivity of a method in derived class) is a subtype of r_super.
+         NOTE: we check only for unconditional reactivity since conditional
+         version does not seems to yield a lot and will requre implementing
+         cycle detection for condition types *)
+          begin
+            match f.ft_reactive with
+            | Reactive None
+            | Shallow None
+            | Local None ->
+              let extra_info =
+                {
+                  empty_extra_info with
+                  parent_class_ty = Some (DeclTy condition_type_super);
+                }
+              in
+              simplify_subtype_reactivity
+                ~subtype_env
+                ~extra_info
+                p_sub
+                f.ft_reactive
+                p_super
+                r_super
+                env
+            | _ -> invalid ()
+          end
+        | _ -> invalid ()
+      end
+    | _ -> invalid ()
+  in
+  match (r_sub, r_super) with
+  (* anything is a subtype of nonreactive functions *)
+  | (_, Nonreactive) -> valid env
+  (* to compare two maybe reactive values we need to unwrap them *)
+  | (MaybeReactive sub, MaybeReactive super) ->
+    simplify_subtype_reactivity
+      ~subtype_env
+      ?extra_info
+      ~is_call_site
+      p_sub
+      sub
+      p_super
+      super
+      env
+  (* for explicit checks at callsites implicitly unwrap maybereactive value:
+     function f(<<__AtMostRxAsFunc>> F $f)
+     f(<<__RxLocal>> () ==> {... })
+     here parameter will be maybereactive and argument - rxlocal
+     *)
+  | (sub, MaybeReactive super) when is_call_site ->
+    simplify_subtype_reactivity
+      ~subtype_env
+      ?extra_info
+      ~is_call_site
+      p_sub
+      sub
+      p_super
+      super
+      env
+  (* if is_call_site is falst ignore maybereactive flavors.
+     This usually happens during subtype checks for arguments and when target
+     function is conditionally reactive we'll do the proper check
+     in typing_reactivity.check_call. *)
+  | (_, MaybeReactive _) when not is_call_site -> valid env
+  (* ok:
+    class A { function f((function(): int) $f) {} }
+    class B extends A {
+      <<__Rx>>
+      function f(<<__AtMostRxAsFunc>> (function(): int) $f);
+    }
+    reactivity for arguments is checked contravariantly *)
+  | (_, RxVar None)
+  (* ok:
+     <<__Rx>>
+     function f(<<__AtMostRxAsFunc>> (function(): int) $f) { return $f() }  *)
+  
+  | (RxVar None, RxVar _) ->
+    valid env
+  | (RxVar (Some sub), RxVar (Some super))
+  | (sub, RxVar (Some super)) ->
+    simplify_subtype_reactivity
+      ~subtype_env
+      ?extra_info
+      ~is_call_site
+      p_sub
+      sub
+      p_super
+      super
+      env
+  | (RxVar _, _) -> invalid ()
+  | ((Local cond_sub | Shallow cond_sub | Reactive cond_sub), Local cond_super)
+  | ((Shallow cond_sub | Reactive cond_sub), Shallow cond_super)
+  | (Reactive cond_sub, Reactive cond_super) ->
+    let (env, p1) =
+      simplify_subtype_param_rx_if_impl
+        ~subtype_env
+        ~is_param:false
+        p_sub
+        cond_sub
+        class_ty
+        p_super
+        cond_super
+        env
+    in
+    let (env, p2) = check_condition_type_has_matching_reactive_method env in
+    (env, TL.disj ~fail p1 p2)
   (* call_site specific cases *)
   (* shallow can call into local *)
-  | (Local cond_sub, Shallow cond_super, _)
-    when is_call_site
-         && subtype_param_rx_if_impl
-              ~is_param:false
-              env
-              cond_sub
-              class_ty
-              cond_super ->
-    true
+  | (Local cond_sub, Shallow cond_super) when is_call_site ->
+    simplify_subtype_param_rx_if_impl
+      ~subtype_env
+      ~is_param:false
+      p_sub
+      cond_sub
+      class_ty
+      p_super
+      cond_super
+      env
   (* local can call into non-reactive *)
-  | (Nonreactive, Local _, _) when is_call_site -> true
-  | _ -> false
+  | (Nonreactive, Local _) when is_call_site -> valid env
+  | _ -> check_condition_type_has_matching_reactive_method env
 
 and should_check_fun_params_reactivity (ft_super : locl_fun_type) =
   not (equal_reactivity ft_super.ft_reactive Nonreactive)
 
 (* checks condition described by OnlyRxIfImpl condition on parameter is met  *)
-and subtype_param_rx_if_impl
+and simplify_subtype_param_rx_if_impl
+    ~subtype_env
     ~is_param
-    (env : env)
+    p_sub
     (cond_type_sub : decl_ty option)
     (declared_type_sub : locl_ty option)
-    (cond_type_super : decl_ty option) =
+    p_super
+    (cond_type_super : decl_ty option)
+    (env : env) : env * TL.subtype_prop =
   let cond_type_sub =
     Option.map cond_type_sub ~f:(ConditionTypes.localize_condition_type env)
   in
   let cond_type_super =
     Option.map cond_type_super ~f:(ConditionTypes.localize_condition_type env)
   in
+  let invalid () =
+    ( env,
+      TL.invalid ~fail:(fun () ->
+          Errors.rx_parameter_condition_mismatch
+            SN.UserAttributes.uaOnlyRxIfImpl
+            p_sub
+            p_super) )
+  in
   match (cond_type_sub, cond_type_super) with
   (* no condition types - do nothing *)
-  | (None, None) -> true
+  | (None, None) -> valid env
   (* condition type is specified only for super - ok for receiver case (is_param is false)
     abstract class A {
       <<__RxLocal, __OnlyRxIfImpl(Rx1::class)>>
@@ -2026,13 +2090,14 @@ and subtype_param_rx_if_impl
     here declared type of sub is A
     and cond type of super is RxA
   *)
-  | (None, Some _) when not is_param -> true
+  | (None, Some _) when not is_param -> valid env
   | (None, Some cond_type_super) ->
-    Option.value_map
-      declared_type_sub
-      ~default:false
-      ~f:(fun declared_type_sub ->
-        is_sub_type_LEGACY_DEPRECATED env declared_type_sub cond_type_super)
+    begin
+      match declared_type_sub with
+      | None -> invalid ()
+      | Some declared_type_sub ->
+        simplify_subtype ~subtype_env declared_type_sub cond_type_super env
+    end
   (* condition types are set for both sub and super types: contravariant check
     interface A {}
     interface B extends A {}
@@ -2062,7 +2127,7 @@ and subtype_param_rx_if_impl
     }
    *)
   | (Some cond_type_sub, Some cond_type_super) ->
-    is_sub_type_LEGACY_DEPRECATED env cond_type_super cond_type_sub
+    simplify_subtype ~subtype_env cond_type_super cond_type_sub env
   (* condition type is set for super type, check if declared type of
      subtype is a subtype of condition type
      interface Rx {
@@ -2078,15 +2143,16 @@ and subtype_param_rx_if_impl
      class B extends A<int> implements Rx {
      } *)
   | (Some cond_type_sub, None) ->
-    Option.value_map
-      declared_type_sub
-      ~default:false
-      ~f:(fun declared_type_sub ->
-        is_sub_type_LEGACY_DEPRECATED env declared_type_sub cond_type_sub)
+    begin
+      match declared_type_sub with
+      | None -> invalid ()
+      | Some declared_type_sub ->
+        simplify_subtype ~subtype_env declared_type_sub cond_type_sub env
+    end
 
 (* checks reactivity conditions for function parameters *)
-and subtype_fun_params_reactivity
-    (p_sub : locl_fun_param) (p_super : locl_fun_param) env =
+and simplify_subtype_fun_params_reactivity
+    ~subtype_env (p_sub : locl_fun_param) (p_super : locl_fun_param) env =
   match (p_sub.fp_rx_annotation, p_super.fp_rx_annotation) with
   (* no conditions on parameters - do nothing *)
   | (None, None) -> valid env
@@ -2144,22 +2210,26 @@ and subtype_fun_params_reactivity
       | Some (Param_rx_if_impl t) -> Some t
       | _ -> None
     in
-    let ok =
-      subtype_param_rx_if_impl
-        ~is_param:true
-        env
-        cond_type_sub
-        (Some p_sub.fp_type.et_type)
-        cond_type_super
+    let subtype_env =
+      {
+        subtype_env with
+        on_error =
+          (fun _ _ ->
+            Errors.rx_parameter_condition_mismatch
+              SN.UserAttributes.uaOnlyRxIfImpl
+              p_sub.fp_pos
+              p_super.fp_pos);
+      }
     in
-    check_with
-      ok
-      (fun () ->
-        Errors.rx_parameter_condition_mismatch
-          SN.UserAttributes.uaOnlyRxIfImpl
-          p_sub.fp_pos
-          p_super.fp_pos)
-      (env, TL.valid)
+    simplify_subtype_param_rx_if_impl
+      ~subtype_env
+      ~is_param:true
+      p_sub.fp_pos
+      cond_type_sub
+      (Some p_sub.fp_type.et_type)
+      p_super.fp_pos
+      cond_type_super
+      env
 
 (* Helper function for subtyping on function types: performs all checks that
  * don't involve actual types:
@@ -2170,7 +2240,8 @@ and subtype_fun_params_reactivity
  *   whether or not the function is a coroutine
  *   variadic arity
  *)
-and check_subtype_funs_attributes
+and simplify_subtype_funs_attributes
+    ~subtype_env
     ?(extra_info : reactivity_extra_info option)
     (r_sub : Reason.t)
     (ft_sub : locl_fun_type)
@@ -2179,19 +2250,21 @@ and check_subtype_funs_attributes
     env =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
-  (env, TL.valid)
-  |> check_with
-       (subtype_reactivity
-          ?extra_info
-          env
-          ft_sub.ft_reactive
-          ft_super.ft_reactive)
-       (fun () ->
-         Errors.fun_reactivity_mismatch
-           p_super
-           (TUtils.reactivity_to_string env ft_super.ft_reactive)
-           p_sub
-           (TUtils.reactivity_to_string env ft_sub.ft_reactive))
+  let on_error _ _ =
+    Errors.fun_reactivity_mismatch
+      p_super
+      (TUtils.reactivity_to_string env ft_super.ft_reactive)
+      p_sub
+      (TUtils.reactivity_to_string env ft_sub.ft_reactive)
+  in
+  simplify_subtype_reactivity
+    ~subtype_env:{ subtype_env with on_error }
+    ?extra_info
+    p_sub
+    ft_sub.ft_reactive
+    p_super
+    ft_super.ft_reactive
+    env
   |> check_with
        (Bool.equal ft_sub.ft_is_coroutine ft_super.ft_is_coroutine)
        (fun () ->
@@ -2319,7 +2392,13 @@ and simplify_subtype_funs
   let simplify_subtype_params = simplify_subtype_params ~subtype_env in
   (* First apply checks on attributes, coroutine-ness and variadic arity *)
   env
-  |> check_subtype_funs_attributes ?extra_info r_sub ft_sub r_super ft_super
+  |> simplify_subtype_funs_attributes
+       ~subtype_env
+       ?extra_info
+       r_sub
+       ft_sub
+       r_super
+       ft_super
   &&& (* Now do contravariant subtyping on parameters *)
       begin
         match (variadic_subtype, variadic_supertype) with
@@ -2823,6 +2902,30 @@ and try_union ~treat_dynamic_as_bottom env ty tyl =
       | _ ->
         failwith "The union of two locl type should always be a locl type.")
 
+let subtype_reactivity
+    ?extra_info ?is_call_site env p_sub r_sub p_super r_super on_error =
+  let subtype_env = make_subtype_env ~treat_dynamic_as_bottom:false on_error in
+  let (env, prop) =
+    simplify_subtype_reactivity
+      ~subtype_env
+      ?extra_info
+      ?is_call_site
+      p_sub
+      r_sub
+      p_super
+      r_super
+      env
+  in
+  let (env, prop) =
+    prop_to_env
+      ~treat_dynamic_as_bottom:subtype_env.treat_dynamic_as_bottom
+      env
+      prop
+      subtype_env.on_error
+  in
+  process_simplify_subtype_result prop;
+  env
+
 (** Check that the method with signature ft_sub can be used to override
  * (is a subtype of) method with signature ft_super.
  *
@@ -2948,10 +3051,9 @@ let subtype_method
    *)
   let env =
     if
-      not
-        (Int.equal
-           (List.length (fst ft_sub.ft_tparams))
-           (List.length (fst ft_super.ft_tparams)))
+      Int.( <> )
+        (List.length (fst ft_sub.ft_tparams))
+        (List.length (fst ft_super.ft_tparams))
     then
       env
     else
@@ -3152,7 +3254,7 @@ let add_constraint
                         ty_super'
                         Errors.unify_error)))
         in
-        if Env.get_tpenv_size env = oldsize then
+        if Int.equal (Env.get_tpenv_size env) oldsize then
           env
         else
           iter (n + 1) env

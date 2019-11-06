@@ -140,24 +140,21 @@ let try_get_reactivity_from_condition_type env receiver_info =
 let check_reactivity_matches
     env pos reason caller_reactivity (callee_reactivity, cause_pos) =
   let callee_reactivity = strip_conditional_reactivity callee_reactivity in
-  let ok =
-    SubType.subtype_reactivity
-      ~is_call_site:true
-      env
-      callee_reactivity
-      caller_reactivity
-  in
-  if ok then
-    true
-  else
-    (* for better error reporting remove rxvar from caller reactivity *)
-    let caller_reactivity =
-      match caller_reactivity with
-      | MaybeReactive (RxVar (Some r)) -> MaybeReactive r
-      | RxVar (Some r) -> r
-      | r -> r
-    in
-    begin
+  SubType.subtype_reactivity
+    ~is_call_site:true
+    env
+    (Reason.to_pos reason)
+    callee_reactivity
+    pos
+    caller_reactivity
+    (fun _ _ ->
+      (* for better error reporting remove rxvar from caller reactivity *)
+      let caller_reactivity =
+        match caller_reactivity with
+        | MaybeReactive (RxVar (Some r)) -> MaybeReactive r
+        | RxVar (Some r) -> r
+        | r -> r
+      in
       match (caller_reactivity, callee_reactivity) with
       | ( (MaybeReactive (Reactive _) | Reactive _),
           ( MaybeReactive (Shallow _ | Local _ | Nonreactive)
@@ -179,27 +176,27 @@ let check_reactivity_matches
           (Reason.to_pos reason)
           (TU.reactivity_to_string env callee_reactivity)
           cause_pos
-          (TU.reactivity_to_string env caller_reactivity)
-    end;
-    false
+          (TU.reactivity_to_string env caller_reactivity))
 
 let get_effective_reactivity env r ft arg_types =
-  let go ((res, _) as acc) (p, arg_ty) =
-    if
-      Option.equal
-        equal_param_rx_annotation
-        p.fp_rx_annotation
-        (Some Param_rx_var)
-    then
-      match arg_ty with
-      | (reason, Tfun { ft_reactive = r; _ }) ->
-        if SubType.subtype_reactivity env ~is_call_site:true r res then
-          acc
-        else
-          (r, Some (Reason.to_pos reason))
-      | _ -> acc
-    else
-      acc
+  let go ((env, res, opt_pos) as acc) (p, arg_ty) =
+    match (p.fp_rx_annotation, arg_ty) with
+    | (Some Param_rx_var, (reason, Tfun { ft_reactive = r; _ })) ->
+      Errors.try_
+        (fun () ->
+          let _env =
+            SubType.subtype_reactivity
+              env
+              ~is_call_site:true
+              Pos.none
+              r
+              Pos.none
+              res
+              Errors.unify_error
+          in
+          (env, res, opt_pos))
+        (fun _ -> (env, r, Some (Reason.to_pos reason)))
+    | _ -> acc
   in
   match r with
   | RxVar (Some rx)
@@ -207,21 +204,21 @@ let get_effective_reactivity env r ft arg_types =
   | rx ->
     begin
       match List.zip ft.ft_params arg_types with
-      | Some l -> List.fold ~init:(rx, None) ~f:go l
-      | None -> (r, None)
+      | Some l -> List.fold ~init:(env, rx, None) ~f:go l
+      | None -> (env, r, None)
     end
 
 let check_call env method_info pos reason ft arg_types =
   (* do nothing if unsafe_rx is set *)
   if TypecheckerOptions.unsafe_rx (Env.get_tcopt env) then
-    ()
+    env
   else
     match env_reactivity env with
     (* non reactive and locally reactive functions can call pretty much anything
      - do nothing *)
     | Nonreactive
     | Local _ ->
-      ()
+      env
     | _ ->
       (* check steps:
      1. ensure that conditions for all parameters (including receiver) are met
@@ -331,28 +328,26 @@ let check_call env method_info pos reason ft arg_types =
       (* if call is not allowed - this means that that at least one of conditions
      was not met and since errors were already reported we can bail out. Otherwise
      we need to verify that reactivities for callee and caller are in agreement. *)
-      if allow_call then
-        (* pick the function we are trying to invoke *)
-        let ok =
-          Option.value_map
-            (try_get_reactivity_from_condition_type env method_info)
-            ~f:(fun r ->
-              check_reactivity_matches
-                env
-                pos
-                reason
-                caller_reactivity
-                (r, None))
-            ~default:false
-        in
-        if not ok then
-          check_reactivity_matches
-            env
-            pos
-            reason
-            caller_reactivity
-            (get_effective_reactivity env ft.ft_reactive ft arg_types)
-          |> ignore
+      let env =
+        if allow_call then
+          (* pick the function we are trying to invoke *)
+          match try_get_reactivity_from_condition_type env method_info with
+          | None ->
+            let (env, r, opt_pos) =
+              get_effective_reactivity env ft.ft_reactive ft arg_types
+            in
+            check_reactivity_matches
+              env
+              pos
+              reason
+              caller_reactivity
+              (r, opt_pos)
+          | Some r ->
+            check_reactivity_matches env pos reason caller_reactivity (r, None)
+        else
+          env
+      in
+      env
 
 let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
   let module UA = Naming_special_names.UserAttributes in

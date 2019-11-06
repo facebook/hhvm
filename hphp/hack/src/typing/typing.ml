@@ -6425,7 +6425,7 @@ and call
               let l = List.map rl (fun (_, opt) -> get_param opt) in
               List.unzip l
             in
-            TR.check_call env method_call_info pos r2 ft tys;
+            let env = TR.check_call env method_call_info pos r2 ft tys in
             let (env, tuel, arity, did_unpack) =
               match uel with
               | [] -> (env, [], List.length el, false)

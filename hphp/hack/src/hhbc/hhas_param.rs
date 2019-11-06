@@ -6,7 +6,7 @@
 use hhas_attribute_rust::HhasAttribute;
 use hhas_type::{constraint, Info};
 use label_rust::Label;
-use tast_rust::TastExpr;
+use oxidized::ast as tast;
 extern crate bitflags;
 
 #[derive(Clone)]
@@ -17,14 +17,13 @@ pub struct HhasParam {
     pub is_inout: bool,
     pub user_attributes: Vec<HhasAttribute>,
     pub type_info: Option<Info>,
-    pub default_value: Option<(Label, TastExpr)>,
+    pub default_value: Option<(Label, tast::Expr)>,
 }
 
 impl HhasParam {
     pub fn replace_default_value_label(&mut self, new_label: Label) {
-        let old_default_value = std::mem::replace(&mut self.default_value, None);
-        if let Some((_, e)) = old_default_value {
-            self.default_value = Some((new_label, e));
+        if let Some((label, _)) = self.default_value.as_mut() {
+            *label = new_label;
         }
     }
 

@@ -80,7 +80,7 @@ impl<'a> AastParser {
             Ok(ParserResult {
                 file_mode: mode,
                 scoured_comments,
-                aast: ret?,
+                aast: ret,
                 lowpri_errors,
                 errors,
             })

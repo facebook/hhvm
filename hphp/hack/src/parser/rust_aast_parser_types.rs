@@ -28,7 +28,7 @@ pub struct Env {
 pub struct Result {
     pub file_mode: file_info::Mode,
     pub scoured_comments: scoured_comments::ScouredComments,
-    pub aast: aast::Program<pos::Pos, (), (), ()>,
+    pub aast: std::result::Result<aast::Program<pos::Pos, (), (), ()>, String>,
     pub lowpri_errors: Vec<(pos::Pos, String)>,
     pub errors: Vec<SyntaxError>,
 }

@@ -28,7 +28,11 @@ type env = {
 type result = {
   file_mode: FileInfo.mode;
   scoured_comments: Scoured_comments.t;
-  aast: (Pos.t, unit, unit, unit) Aast.program;
+  aast: ((Pos.t, unit, unit, unit) Aast.program, string) Pervasives.result;
   lowpri_errors: (Pos.t * string) list;
   errors: Full_fidelity_syntax_error.t list;
 }
+
+type error =
+  | ParserFatal of Full_fidelity_syntax_error.t * Pos.t
+  | Other of string

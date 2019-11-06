@@ -158,8 +158,6 @@ type 'a result_ = {
 }
 [@@deriving show]
 
-type ast_result = Ast.program result_
-
 type aast_result = (pos, unit, unit, unit) Aast.program result_
 
 module WithPositionedSyntax (Syntax : Positioned_syntax_sig.PositionedSyntax_S) =
@@ -1952,7 +1950,7 @@ if there already is one, since that one will likely be better than this one. *)
             | (_, Some TK.HexadecimalLiteral)
             (* We allow underscores while lexing the integer literals. This gets rid of them before
              * the literal is created. *)
-
+            
             | (_, Some TK.BinaryLiteral) ->
               Int (Str.global_replace underscore "" s)
             | (_, Some TK.FloatingLiteral) -> Float s
@@ -3911,7 +3909,7 @@ if there already is one, since that one will likely be better than this one. *)
     let rec aux env acc = function
       | []
       (* EOF happens only as the last token in the list. *)
-
+      
       | [{ syntax = EndOfFile _; _ }] ->
         List.concat (List.rev acc)
       (* HaltCompiler stops processing the list in PHP but can be disabled in Hack *)
@@ -4141,24 +4139,9 @@ if there already is one, since that one will likely be better than this one. *)
       elaborate_halt_compiler_const ast
     | None -> ast
 
-  let lower env ~source_text ~script comments : ast_result =
+  let lower env ~source_text ~script : program =
     let ast = runP pScript script env in
-    let ast = elaborate_halt_compiler ast env source_text in
-    let content =
-      if env.codegen then
-        ""
-      else
-        SourceText.text source_text
-    in
-    {
-      fi_mode = env.fi_mode;
-      is_hh_file = env.is_hh_file;
-      ast;
-      content;
-      comments;
-      file = env.file;
-      lowpri_errors_ = ref (List.rev !(env.lowpri_errors));
-    }
+    elaborate_halt_compiler ast env source_text
 end
 
 (* TODO: Make these not default to positioned_syntax *)
@@ -4257,29 +4240,24 @@ let parse_text (env : env) (source_text : SourceText.t) :
   (mode, tree)
 
 let scour_comments_and_add_fixmes (env : env) source_text script =
-  let sc =
-    FromPositionedSyntax.scour_comments
-      env.file
-      source_text
-      script
-      env
-      ~collect_fixmes:env.keep_errors
-      ~include_line_comments:env.include_line_comments
-  in
-  let () =
-    if (not env.rust_compare_mode) && env.keep_errors then (
-      Fixme_provider.provide_disallowed_fixmes env.file sc.sc_misuses;
-      if env.quick_mode then
-        Fixme_provider.provide_decl_hh_fixmes env.file sc.sc_fixmes
-      else
-        Fixme_provider.provide_hh_fixmes env.file sc.sc_fixmes
-    )
-  in
-  sc
+  FromPositionedSyntax.scour_comments
+    env.file
+    source_text
+    script
+    env
+    ~collect_fixmes:env.keep_errors
+    ~include_line_comments:env.include_line_comments
 
-let flush_parsing_errors env =
-  let lowpri_errors = List.rev !(env.lowpri_errors) in
-  env.lowpri_errors := [];
+let process_scour_comments (env : env) (sc : Scoured_comments.t) =
+  if (not env.rust_compare_mode) && env.keep_errors then (
+    Fixme_provider.provide_disallowed_fixmes env.file sc.sc_misuses;
+    if env.quick_mode then
+      Fixme_provider.provide_decl_hh_fixmes env.file sc.sc_fixmes
+    else
+      Fixme_provider.provide_hh_fixmes env.file sc.sc_fixmes
+  )
+
+let process_lowpri_errors (env : env) (lowpri_errors : (Pos.t * string) list) =
   if should_surface_errors env then
     List.iter ~f:Errors.parsing_error lowpri_errors
   else if env.codegen then
@@ -4297,7 +4275,9 @@ let elaborate_top_level_defs env aast =
     aast
 
 external rust_from_text_ffi :
-  Rust_aast_parser_types.env -> SourceText.t -> Rust_aast_parser_types.result
+  Rust_aast_parser_types.env ->
+  SourceText.t ->
+  (Rust_aast_parser_types.result, Rust_aast_parser_types.error) result
   = "from_text"
 
 let rewrite_coroutines source_text script =
@@ -4307,12 +4287,47 @@ let rewrite_coroutines source_text script =
   |> Full_fidelity_editable_positioned_syntax.text
   |> SourceText.make (SourceText.file_path source_text)
 
-let lower_tree_
-    check_syntax_error
+let check_syntax_error (env : env) tree ast_opt :
+    Full_fidelity_syntax_error.t list =
+  let find_errors hhi_mode =
+    let error_env =
+      ParserErrors.make_env
+        tree
+        ~hhvm_compat_mode:ParserErrors.HHVMCompat
+        ~codegen:env.codegen
+        ~parser_options:env.parser_options
+        ~hhi_mode
+    in
+    ParserErrors.parse_errors error_env
+    @
+    match ast_opt with
+    | Some ast -> Ast_check.check_program ast
+    | _ -> []
+  in
+  if env.codegen then
+    find_errors false
+  else if env.keep_errors then (
+    match PositionedSyntaxTree.errors tree with
+    | [] when env.quick_mode ->
+      Rust_pointer.free_leaked_pointer ~warn:false ();
+      []
+    | [] when ParserOptions.parser_errors_only env.parser_options -> []
+    | [] ->
+      let is_hhi =
+        String_utils.string_ends_with Relative_path.(suffix env.file) "hhi"
+      in
+      find_errors is_hhi
+    | error :: _ ->
+      Rust_pointer.free_leaked_pointer ~warn:false ();
+      [error]
+  ) else
+    []
+
+let lower_tree
     (env : env)
     (source_text : SourceText.t)
     (mode : FileInfo.mode option)
-    (tree : PositionedSyntaxTree.t) : aast_result =
+    (tree : PositionedSyntaxTree.t) : Rust_aast_parser_types.result =
   let env =
     {
       env with
@@ -4346,86 +4361,65 @@ let lower_tree_
     else
       tree
   in
-  let ast_opt = ref None in
-  Utils.try_finally
-    ~f:(fun () ->
-      let ret =
-        FromPositionedSyntax.lower
-          env
-          ~source_text
-          ~script:(PositionedSyntaxTree.root tree_to_lower)
-          comments
-      in
-      ast_opt := Some ret.ast;
-      let aast = Ast_to_aast.convert_program (fun x -> x) () () () ret.ast in
-      { ret with ast = aast })
-    ~finally:(fun () ->
-      check_syntax_error env source_text tree !ast_opt;
-      flush_parsing_errors env)
-
-let lower_tree =
-  let check_syntax_error (env : env) source_text tree ast_opt =
-    let relative_pos = pos_of_error env.file source_text in
-    let find_errors error_env =
-      ParserErrors.parse_errors error_env
-      @
-      match ast_opt with
-      | Some ast -> Ast_check.check_program ast
-      | _ -> []
-    in
-    if env.codegen then
-      let error_env =
-        ParserErrors.make_env
-          tree
-          ~hhvm_compat_mode:ParserErrors.HHVMCompat
-          ~codegen:env.codegen
-          ~parser_options:env.parser_options
-      in
-      let errors = find_errors error_env in
-      (* Prioritize runtime errors *)
-      let runtime_errors =
-        List.filter
-          errors
-          ~f:SyntaxError.((fun e -> error_type e = RuntimeError))
-      in
-      match (errors, runtime_errors) with
-      | ([], []) -> ()
-      | (_, e :: _)
-      | (e :: _, _) ->
-        raise @@ SyntaxError.ParserFatal (e, relative_pos e)
-    else if env.keep_errors then
-      let report_error e =
-        Errors.parsing_error (relative_pos e, SyntaxError.message e)
-      in
-      let is_hhi =
-        String_utils.string_ends_with Relative_path.(suffix env.file) "hhi"
-      in
-      match PositionedSyntaxTree.errors tree with
-      | [] when env.quick_mode ->
-        Rust_pointer.free_leaked_pointer ~warn:false ()
-      | [] when ParserOptions.parser_errors_only env.parser_options -> ()
-      | [] ->
-        let error_env =
-          ParserErrors.make_env
-            tree
-            ~hhvm_compat_mode:ParserErrors.HHVMCompat
-            ~codegen:env.codegen
-            ~hhi_mode:is_hhi
-            ~parser_options:env.parser_options
-        in
-        let errors = find_errors error_env in
-        List.iter ~f:report_error errors
-      | error :: _ ->
-        Rust_pointer.free_leaked_pointer ~warn:false ();
-        report_error error
+  let ast_result =
+    try
+      Ok
+        (FromPositionedSyntax.lower
+           env
+           ~source_text
+           ~script:(PositionedSyntaxTree.root tree_to_lower))
+    with
+    | Failure msg -> Error msg
+    | e -> Error (Caml.Printexc.to_string e)
   in
-  lower_tree_ check_syntax_error
+  let syntax_errors =
+    match ast_result with
+    | Ok ast -> check_syntax_error env tree (Some ast)
+    | Error _ -> check_syntax_error env tree None
+  in
+  let aast_result =
+    match ast_result with
+    | Ok ast -> Ok (Ast_to_aast.convert_program (fun x -> x) () () () ast)
+    | Error e -> Error e
+  in
+  Rust_aast_parser_types.
+    {
+      file_mode = mode;
+      scoured_comments = comments;
+      aast = aast_result;
+      lowpri_errors = List.rev !(env.lowpri_errors);
+      errors = syntax_errors;
+    }
 
-let from_text_ocaml (env : env) (source_text : SourceText.t) : aast_result =
+let process_syntax_errors
+    (env : env)
+    (source_text : SourceText.t)
+    (errors : Full_fidelity_syntax_error.t list) =
+  let relative_pos = pos_of_error env.file source_text in
+  if env.codegen then
+    let runtime_errors =
+      List.filter
+        errors
+        ~f:SyntaxError.((fun e -> error_type e = RuntimeError))
+    in
+    match (errors, runtime_errors) with
+    | ([], []) -> ()
+    | (_, e :: _)
+    | (e :: _, _) ->
+      raise @@ SyntaxError.ParserFatal (e, relative_pos e)
+  else
+    let report_error e =
+      Errors.parsing_error (relative_pos e, SyntaxError.message e)
+    in
+    List.iter ~f:report_error errors
+
+let from_text_ocaml (env : env) (source_text : SourceText.t) :
+    Rust_aast_parser_types.result =
   let (mode, tree) = parse_text env source_text in
   lower_tree env source_text mode tree
 
-let from_text_rust (env : env) (source_text : SourceText.t) : aast_result =
+let from_text_rust (env : env) (source_text : SourceText.t) :
+    Rust_aast_parser_types.result =
   let rust_env =
     Rust_aast_parser_types.
       {
@@ -4443,21 +4437,37 @@ let from_text_rust (env : env) (source_text : SourceText.t) : aast_result =
         hacksperimental = env.hacksperimental;
       }
   in
-  let result = rust_from_text_ffi rust_env source_text in
-  Rust_aast_parser_types.
-    {
-      fi_mode = result.file_mode;
-      is_hh_file = result.file_mode <> FileInfo.Mphp;
-      ast = result.aast;
-      content =
-        ( if env.codegen then
-          ""
-        else
-          SourceText.text source_text );
-      comments = result.scoured_comments;
-      file = env.file;
-      lowpri_errors_ = ref result.lowpri_errors;
-    }
+  match rust_from_text_ffi rust_env source_text with
+  | Ok r -> r
+  | Error (Rust_aast_parser_types.ParserFatal (e, p)) ->
+    raise @@ SyntaxError.ParserFatal (e, p)
+  | Error (Rust_aast_parser_types.Other msg) -> failwith msg
+
+let process_lowerer_result
+    (env : env)
+    (source_text : SourceText.t)
+    (r : Rust_aast_parser_types.result) : aast_result =
+  Rust_aast_parser_types.(
+    process_scour_comments env r.scoured_comments;
+    process_syntax_errors env source_text r.errors;
+    process_lowpri_errors env r.lowpri_errors);
+  match r.Rust_aast_parser_types.aast with
+  | Error msg -> failwith msg
+  | Ok aast ->
+    Rust_aast_parser_types.
+      {
+        fi_mode = r.file_mode;
+        is_hh_file = r.file_mode <> FileInfo.Mphp;
+        ast = elaborate_top_level_defs env aast;
+        content =
+          ( if env.codegen then
+            ""
+          else
+            SourceText.text source_text );
+        comments = r.scoured_comments;
+        file = env.file;
+        lowpri_errors_ = ref r.lowpri_errors;
+      }
 
 let from_text (env : env) (source_text : SourceText.t) : aast_result =
   let result =
@@ -4466,7 +4476,7 @@ let from_text (env : env) (source_text : SourceText.t) : aast_result =
     else
       from_text_ocaml env source_text
   in
-  { result with ast = elaborate_top_level_defs env result.ast }
+  process_lowerer_result env source_text result
 
 let from_file (env : env) : aast_result =
   let source_text = SourceText.from_file env.file in
@@ -4541,10 +4551,8 @@ let from_file_with_legacy env = legacy (from_file env)
 let from_text_with_legacy_and_cst (env : env) (source_text : SourceText.t) :
     PositionedSyntaxTree.t * Parser_return.t =
   let (mode, tree) = parse_text env source_text in
-  let ast_result = lower_tree env source_text mode tree in
-  let aast_result =
-    { ast_result with ast = ast_result.ast |> elaborate_top_level_defs env }
-  in
+  let aast_result = lower_tree env source_text mode tree in
+  let aast_result = process_lowerer_result env source_text aast_result in
   (tree, legacy aast_result)
 
 (******************************************************************************(

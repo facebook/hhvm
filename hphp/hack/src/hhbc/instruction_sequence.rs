@@ -280,7 +280,7 @@ impl Instr {
         Self::make_instr(Instruct::IMutator(InstructMutator::SetS))
     }
 
-    pub fn make_instr_setl(local: local::Id) -> Self {
+    pub fn make_instr_setl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IMutator(InstructMutator::SetL(local)))
     }
 
@@ -320,7 +320,7 @@ impl Instr {
         Self::make_instr(Instruct::IGet(InstructGet::CGetG))
     }
 
-    pub fn make_instr_cgetl(local: local::Id) -> Self {
+    pub fn make_instr_cgetl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::CGetL(local)))
     }
 
@@ -520,7 +520,7 @@ impl Instr {
         Self::make_instr(Instruct::IMisc(InstructMisc::MemoSetEager(range)))
     }
 
-    pub fn make_instr_getmemokeyl(local: local::Id) -> Self {
+    pub fn make_instr_getmemokeyl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::GetMemoKeyL(local)))
     }
 

@@ -339,7 +339,7 @@ pub enum InstructSpecialFlow {
 
 #[derive(Clone, Debug)]
 pub enum InstructGet {
-    CGetL(local::Id),
+    CGetL(local::Type),
     CGetQuietL(local::Id),
     CGetL2(local::Id),
     CUGetL(local::Id),
@@ -432,7 +432,7 @@ pub enum InitpropOp {
 
 #[derive(Clone, Debug)]
 pub enum InstructMutator {
-    SetL(local::Id),
+    SetL(local::Type),
     /// PopL is put in mutators since it behaves as SetL + PopC
     PopL(local::Type),
     SetG,
@@ -577,7 +577,7 @@ pub enum InstructMisc {
     AssertRATStk(StackIndex, RepoAuthType),
     BreakTraceHint,
     Silence(local::Id, OpSilence),
-    GetMemoKeyL(local::Id),
+    GetMemoKeyL(local::Type),
     CGetCUNop,
     UGetCUNop,
     MemoGet(label::Label, Option<(local::Id, isize)>),

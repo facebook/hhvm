@@ -157,13 +157,13 @@ let add_grand_parents_or_traits
   let (extends, is_complete, pass) = acc in
   let class_pos = fst shallow_class.sc_name in
   let class_kind = shallow_class.sc_kind in
-  if pass = `Extends_pass then
+  if phys_equal pass `Extends_pass then
     check_extend_kind parent_pos parent_type.dc_kind class_pos class_kind;
 
   (* If we are crawling the xhp attribute deps, we need to merge their xhp deps
    * as well *)
   let parent_deps =
-    if pass = `Xhp_pass then
+    if phys_equal pass `Xhp_pass then
       SSet.union parent_type.dc_extends parent_type.dc_xhp_attr_deps
     else
       parent_type.dc_extends
@@ -179,8 +179,8 @@ let get_class_parent_or_trait env shallow_class (parents, is_complete, pass) ty
   (* See comment on check_no_duplicate_traits for reasoning here *)
   let no_trait_reuse =
     experimental_no_trait_reuse_enabled env
-    && pass <> `Xhp_pass
-    && shallow_class.sc_kind <> Ast_defs.Cinterface
+    && (not (phys_equal pass `Xhp_pass))
+    && not Ast_defs.(equal_class_kind shallow_class.sc_kind Cinterface)
   in
   let (_, (parent_pos, parent), _) = Decl_utils.unwrap_class_type ty in
   (* If we already had this exact trait, we need to flag trait reuse *)
@@ -291,7 +291,7 @@ and fun_decl_in_env env f =
     ( Reason.Rwitness (fst f.f_name),
       Tfun
         {
-          ft_is_coroutine = f.f_fun_kind = Ast_defs.FCoroutine;
+          ft_is_coroutine = Ast_defs.(equal_fun_kind f.f_fun_kind FCoroutine);
           ft_arity = arity;
           ft_tparams = (tparams, FTKtparams);
           ft_where_constraints = where_constraints;
@@ -532,7 +532,7 @@ and class_decl c =
       ~init:(typeconsts, consts)
   in
   let (typeconsts, consts) =
-    if c.sc_kind = Ast_defs.Cnormal then
+    if Ast_defs.(equal_class_kind c.sc_kind Cnormal) then
       SMap.fold synthesize_defaults typeconsts (typeconsts, consts)
     else
       (typeconsts, consts)
@@ -563,9 +563,10 @@ and class_decl c =
   let impl =
     match
       List.find c.sc_methods ~f:(fun sm ->
-          snd sm.sm_name = SN.Members.__toString)
+          String.equal (snd sm.sm_name) SN.Members.__toString)
     with
-    | Some { sm_name = (pos, _); _ } when cls_name <> SN.Classes.cStringish ->
+    | Some { sm_name = (pos, _); _ }
+      when String.( <> ) cls_name SN.Classes.cStringish ->
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
       (* Declare Stringish and parents if not already declared *)
@@ -589,8 +590,8 @@ and class_decl c =
    * implementation of a disposable class as disposable itself.
    *)
   let is_disposable_class_name cls_name =
-    cls_name = SN.Classes.cIDisposable
-    || cls_name = SN.Classes.cIAsyncDisposable
+    String.equal cls_name SN.Classes.cIDisposable
+    || String.equal cls_name SN.Classes.cIAsyncDisposable
   in
   let is_disposable =
     is_disposable_class_name cls_name
@@ -615,7 +616,7 @@ and class_decl c =
   let consts =
     Decl_enum.rewrite_class c.sc_name enum (fun x -> SMap.get x impl) consts
   in
-  let has_own_cstr = has_concrete_cstr && None <> c.sc_constructor in
+  let has_own_cstr = has_concrete_cstr && Option.is_some c.sc_constructor in
   let deferred_members =
     if shallow_decl_enabled () then
       SSet.empty
@@ -672,8 +673,8 @@ and get_sealed_whitelist c =
   | Some { ua_params = params; _ } ->
     let add_class_name names param =
       match param with
-      | (_, Class_const ((_, CI cls), (_, name))) when name = SN.Members.mClass
-        ->
+      | (_, Class_const ((_, CI cls), (_, name)))
+        when String.equal name SN.Members.mClass ->
         SSet.add (snd cls) names
       | _ -> names
     in
@@ -907,7 +908,7 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
         | None -> (Pos.none, false)
     in
     let reifiable =
-      if stc.stc_reifiable <> None then
+      if Option.is_some stc.stc_reifiable then
         stc.stc_reifiable
       else
         Option.bind ptc_opt (fun ptc -> ptc.ttc_reifiable)
@@ -932,7 +933,7 @@ and method_check_override c m acc =
   let override = m.sm_override in
   match SMap.get id acc with
   | Some _ -> false (* overriding final methods is handled in typing *)
-  | None when override && c.sc_kind = Ast_defs.Ctrait -> true
+  | None when override && Ast_defs.(equal_class_kind c.sc_kind Ctrait) -> true
   | None when override ->
     Errors.should_be_override pos class_id id;
     false

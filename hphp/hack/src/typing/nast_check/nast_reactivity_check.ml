@@ -25,7 +25,7 @@ let check_conditionally_reactive_annotations
     match l with
     | [] -> ()
     | { ua_name = (_, name); ua_params } :: xs
-      when name = SN.UserAttributes.uaOnlyRxIfImpl ->
+      when String.equal name SN.UserAttributes.uaOnlyRxIfImpl ->
       if seen then
         Errors.multiple_conditionally_reactive_annotations p method_name
       else if is_reactive then
@@ -53,11 +53,11 @@ let check_maybe_rx_attributes_on_params is_reactive parent_attrs params =
     in
     match (only_rx_if_rxfunc_attr, only_rx_if_impl_attr) with
     | (Some { ua_name = (p, _); _ }, _) ->
-      if parent_only_rx_if_args = None || not is_reactive then
+      if Option.is_none parent_only_rx_if_args || not is_reactive then
         Errors.atmost_rx_as_rxfunc_invalid_location p;
       true
     | (_, Some { ua_name = (p, _); ua_params; _ }) ->
-      if parent_only_rx_if_args = None || not is_reactive then
+      if Option.is_none parent_only_rx_if_args || not is_reactive then
         Errors.atmost_rx_as_rxfunc_invalid_location p
       else
         check_conditionally_reactive_annotation_params
@@ -89,7 +89,8 @@ let handler =
       match e with
       | Id (pos, const) ->
         let const = Utils.add_ns const in
-        if const = SN.Rx.is_enabled && not env.rx_is_enabled_allowed then
+        if String.equal const SN.Rx.is_enabled && not env.rx_is_enabled_allowed
+        then
           Errors.rx_is_enabled_invalid_location pos
       | Call (_, e1, _, _, _)
         when Nast_check_env.is_rx_move e1 && not env.rx_move_allowed ->

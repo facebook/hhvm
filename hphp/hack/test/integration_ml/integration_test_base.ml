@@ -15,6 +15,7 @@ open ServerCommandTypes
 open SearchServiceRunner
 open Coverage_level
 open Coverage_level_defs
+open Int.Replace_polymorphic_compare
 
 exception Integration_test_tailure
 
@@ -207,7 +208,7 @@ let assert_responded (error : string) loop_output =
 let assertEqual expected got =
   let expected = String.strip expected in
   let got = String.strip got in
-  if expected <> got then
+  if String.( <> ) expected got then
     fail (Printf.sprintf "Expected:\n%s\nGot:\n%s\n" expected got)
 
 let change_files env disk_changes =
@@ -699,7 +700,8 @@ let assert_diagnostics loop_output expected =
 let assert_diagnostics_in loop_output filename expected =
   let diagnostics = get_diagnostics loop_output in
   let diagnostics =
-    SMap.filter diagnostics ~f:(fun path _ -> path = prepend_root filename)
+    SMap.filter diagnostics ~f:(fun path _ ->
+        String.equal path (prepend_root filename))
   in
   let diagnostics_as_string = diagnostics_to_string diagnostics in
   assertEqual expected diagnostics_as_string
@@ -729,7 +731,7 @@ let assert_coverage_levels loop_output expected =
   in
   let results_as_string =
     List.map results ~f:coverage_levels_to_str_helper
-    |> List.sort ~compare
+    |> List.sort ~compare:String.compare
     |> List.append strings_of_stats
     |> list_to_string
   in
@@ -746,8 +748,12 @@ let assert_autocomplete loop_output expected =
     results |> List.map ~f:(fun x -> x.AutocompleteTypes.res_name)
   in
   (* The autocomplete results out of hack are unsorted *)
-  let results_as_string = results |> List.sort ~compare |> list_to_string in
-  let expected_as_string = expected |> List.sort ~compare |> list_to_string in
+  let results_as_string =
+    results |> List.sort ~compare:String.compare |> list_to_string
+  in
+  let expected_as_string =
+    expected |> List.sort ~compare:String.compare |> list_to_string
+  in
   assertEqual expected_as_string results_as_string
 
 let assert_ide_autocomplete loop_output expected =

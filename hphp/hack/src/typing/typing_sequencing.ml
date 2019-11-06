@@ -128,7 +128,7 @@ let sequence_visitor ~require_used used_vars =
    * have been properly sequenced or an error would already have been reported.
    *)
   let check_unsequenced env1 env2 =
-    let id_matches (_p1, x1) (_p2, x2) = x1 = x2 in
+    let id_matches (_p1, x1) (_p2, x2) = Local_id.equal x1 x2 in
     let check_write_conflicts reads writes ((p, _) as id) =
       let conflicting_reads = List.filter reads (id_matches id) in
       let conflicting_writes = List.filter writes (id_matches id) in
@@ -143,9 +143,9 @@ let sequence_visitor ~require_used used_vars =
               Local_id.Set.mem x used_vars)
       in
       let cleanup = List.map ~f:fst in
-      if conflicting_reads <> [] then
+      if not (List.is_empty conflicting_reads) then
         Errors.local_variable_modified_and_used p (cleanup conflicting_reads);
-      if conflicting_writes <> [] then
+      if not (List.is_empty conflicting_writes) then
         Errors.local_variable_modified_twice p (cleanup conflicting_writes)
     in
     (* reversing the lists makes things sorted more naturally in the output *)

@@ -74,7 +74,7 @@ let validator =
                 match
                   List.fold2 ~init:acc targs tparams ~f:(fun acc targ tparam ->
                       let covariant =
-                        tparam.tp_variance = Ast_defs.Covariant
+                        Ast_defs.(equal_variance tparam.tp_variance Covariant)
                       in
                       let like_casts_enabled =
                         TypecheckerOptions.like_casts
@@ -83,7 +83,7 @@ let validator =
                       if this#is_wildcard targ then
                         acc
                       else if
-                        tparam.tp_reified = Nast.Reified
+                        Aast.(equal_reify_kind tparam.tp_reified Reified)
                         || (acc.like_context && covariant && like_casts_enabled)
                       then
                         this#on_type acc targ
@@ -107,7 +107,10 @@ let validator =
       | None -> acc
 
     method! on_alias acc r id tyl ty =
-      if tyl = [] || snd id = Naming_special_names.FB.cIncorrectType then
+      if
+        List.is_empty tyl
+        || String.equal (snd id) Naming_special_names.FB.cIncorrectType
+      then
         this#on_type acc ty
       else
         this#invalid
@@ -121,7 +124,7 @@ let validator =
 
     method is_wildcard =
       function
-      | (_, Tapply ((_, name), _)) -> name = SN.Typehints.wildcard
+      | (_, Tapply ((_, name), _)) -> String.equal name SN.Typehints.wildcard
       | _ -> false
 
     method check_generic acc r name =

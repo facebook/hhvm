@@ -61,7 +61,7 @@ let matches_auto_complete_suffix x =
   suffix = AutocompleteTypes.autocomplete_token
 
 let is_auto_complete x =
-  if !autocomplete_results = [] then
+  if List.is_empty !autocomplete_results then
     matches_auto_complete_suffix x
   else
     false
@@ -422,7 +422,7 @@ let visitor =
                   AutocompleteTypes.autocomplete_token
                   mid
               in
-              if offset = -1 then
+              if Int.equal offset (-1) then
                 autocomplete_shape_key env fields (pos, mid)
               else
                 let mid =
@@ -826,6 +826,7 @@ let go
         | None -> Tast_env.empty tcopt
       in
       let completion_type = !argument_global_type in
+      let ( = ) = Option.equal equal_autocomplete_type in
       if
         completion_type = Some Acid
         || completion_type = Some Acnew

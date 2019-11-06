@@ -16,7 +16,7 @@ let error_if_no_typehint gconst =
     | _ -> ()
 
 let error_if_pseudo_constant gconst =
-  if gconst.cst_namespace.Namespace_env.ns_name <> None then
+  if Option.is_some gconst.cst_namespace.Namespace_env.ns_name then
     let (pos, name) = gconst.cst_name in
     let name = Utils.strip_all_ns name in
     if Naming_special_names.PseudoConsts.is_pseudo_const (Utils.add_ns name)

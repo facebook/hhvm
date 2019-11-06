@@ -185,7 +185,12 @@ let check_reactivity_matches
 
 let get_effective_reactivity env r ft arg_types =
   let go ((res, _) as acc) (p, arg_ty) =
-    if p.fp_rx_annotation = Some Param_rx_var then
+    if
+      Option.equal
+        equal_param_rx_annotation
+        p.fp_rx_annotation
+        (Some Param_rx_var)
+    then
       match arg_ty with
       | (reason, Tfun { ft_reactive = r; _ }) ->
         if SubType.subtype_reactivity env ~is_call_site:true r res then
@@ -352,7 +357,7 @@ let check_call env method_info pos reason ft arg_types =
 let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
   let module UA = Naming_special_names.UserAttributes in
   if Attributes.mem UA.uaAtMostRxAsFunc param.Aast.param_user_attributes then
-    if Aast.hint_of_type_hint param.Aast.param_type_hint = None then
+    if Option.is_none (Aast.hint_of_type_hint param.Aast.param_type_hint) then
       Errors.missing_annotation_for_atmost_rx_as_rxfunc_parameter
         param.Aast.param_pos
     else
@@ -429,7 +434,7 @@ let try_substitute_type_with_condition env cond_ty ty =
    and it is not assignable to fresh type parameter. To handle this for returns we reduce
    return type to its upper bound if return type is TFresh and current context is non-reactive *)
 let strip_condition_type_in_return env ty =
-  if env_reactivity env <> Nonreactive then
+  if not (equal_reactivity (env_reactivity env) Nonreactive) then
     ty
   else
     match ty with

@@ -121,7 +121,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
       | (Reason.Rnone, ty) -> (r, ty)
       | (Reason.Rexpr_dep_type (_, pos, s), ty) ->
         (Reason.Rexpr_dep_type (r, pos, s), ty)
-      | (reason, ty) when ety_env.from_class <> None -> (reason, ty)
+      | (reason, ty) when Option.is_some ety_env.from_class -> (reason, ty)
       | (reason, ty) -> (Reason.Rinstantiate (reason, SN.Typehints.this, r), ty)
     in
     let (env, ty) =
@@ -188,7 +188,8 @@ let rec localize ~ety_env env (dty : decl_ty) =
     in
     (env, (r, Tfun ft))
   | (r, Tapply ((_, x), [arg]))
-    when Env.is_typedef x && x = Naming_special_names.FB.cIncorrectType ->
+    when Env.is_typedef x
+         && String.equal x Naming_special_names.FB.cIncorrectType ->
     localize ~ety_env env (r, Tlike arg)
   | (r, Tapply ((_, x), argl)) when Env.is_typedef x ->
     let (env, argl) = List.map_env env argl (localize ~ety_env) in
@@ -294,7 +295,7 @@ and localize_tparams ~ety_env env pos tyl tparams =
 
 and localize_tparam pos (env, ety_env) ty tparam =
   match ty with
-  | (r, Tapply ((_, x), _argl)) when x = SN.Typehints.wildcard ->
+  | (r, Tapply ((_, x), _argl)) when String.equal x SN.Typehints.wildcard ->
     let {
       tp_name = (_, name);
       tp_constraints = cstrl;
@@ -344,7 +345,7 @@ and localize_targ env hint =
   (* For explicit type arguments we support a wildcard syntax `_` for which
   * Hack will generate a fresh type variable *)
   match ty with
-  | (r, Tapply ((_, id), [])) when id = SN.Typehints.wildcard ->
+  | (r, Tapply ((_, id), [])) when String.equal id SN.Typehints.wildcard ->
     let (env, ty) = Env.fresh_type env (Reason.to_pos r) in
     (env, (ty, hint))
   | _ ->
@@ -357,7 +358,7 @@ and localize_targs ~is_method ~def_pos ~use_pos ~use_name env tparaml targl =
   let targ_count = List.length targl in
   (* If there are explicit type arguments but too few or too many then
    * report an error *)
-  if targ_count <> 0 && tparam_count <> targ_count then
+  if Int.( <> ) targ_count 0 && Int.( <> ) tparam_count targ_count then
     if is_method then
       Errors.expected_tparam ~definition_pos:def_pos ~use_pos tparam_count
     else
@@ -407,7 +408,7 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
     | Some { explicit_targs; use_name = _; use_pos } ->
       if
         (not (List.is_empty explicit_targs))
-        && List.length explicit_targs <> List.length tparams
+        && Int.( <> ) (List.length explicit_targs) (List.length tparams)
       then
         Errors.expected_tparam
           ~definition_pos:def_pos
@@ -435,7 +436,7 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
   in
   (* restore reactivity *)
   let env =
-    if saved_r <> env_reactivity env then
+    if not (equal_reactivity saved_r (env_reactivity env)) then
       Env.set_env_reactive env saved_r
     else
       env

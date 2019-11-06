@@ -13,7 +13,7 @@ module SN = Naming_special_names
 
 let attribute_exists x1 x2 attrs =
   List.exists attrs (fun { ua_name; _ } ->
-      x1 = snd ua_name || x2 = snd ua_name)
+      String.equal x1 (snd ua_name) || String.equal x2 (snd ua_name))
 
 let static_memoized_check m =
   if

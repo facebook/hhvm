@@ -15,7 +15,7 @@ module TUtils = Typing_utils
 module Cls = Decl_provider.Class
 
 let is_private_visible env x self_id =
-  if x = self_id then
+  if String.equal x self_id then
     None
   else
     let my_class = Env.get_class env self_id in
@@ -45,7 +45,7 @@ let is_private_visible env x self_id =
     | (_, _) -> Some "You cannot access this member"
 
 let is_protected_visible env x self_id =
-  if x = self_id then
+  if String.equal x self_id then
     None
   else
     let my_class = Env.get_class env self_id in
@@ -99,7 +99,7 @@ let is_private_visible_for_class env x self_id cid class_ =
     | Some _ ->
       begin
         match Env.get_class env called_ci with
-        | Some cls when Cls.kind cls = Ast_defs.Ctrait ->
+        | Some cls when Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) ->
           Some
             "You cannot access private members using the trait's name (did you mean to use self::?)"
         | _ -> Some "You cannot access this member"
@@ -165,7 +165,8 @@ let is_visible_for_class env (vis, lsb) cid cty =
       | Some self_id ->
         let their_class = Env.get_class env x in
         (match (cid, their_class) with
-        | (CI _, Some cls) when Cls.kind cls = Ast_defs.Ctrait ->
+        | (CI _, Some cls)
+          when Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) ->
           Some
             "You cannot access protected members using the trait's name (did you mean to use static:: or self::?)"
         | _ -> is_protected_visible env x self_id))

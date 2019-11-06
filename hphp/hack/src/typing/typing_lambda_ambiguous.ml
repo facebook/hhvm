@@ -57,8 +57,8 @@ let visitor =
                 | ( { fp_type; _ } :: tfun_params,
                     ({ Tast.param_annotation = (pos, _); _ } as param)
                     :: params )
-                  when Tast.hint_of_type_hint param.Tast.param_type_hint = None
-                  ->
+                  when Option.is_none
+                         (Tast.hint_of_type_hint param.Tast.param_type_hint) ->
                   {
                     param with
                     Tast.param_annotation =

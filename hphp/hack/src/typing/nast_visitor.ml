@@ -68,7 +68,7 @@ class virtual iter =
       match fb.fb_ast with
       | [(_, If (((_, Id (_, c)) as id), then_stmt, else_stmt))] ->
         super#on_expr
-          { env with rx_is_enabled_allowed = c = SN.Rx.is_enabled }
+          { env with rx_is_enabled_allowed = String.equal c SN.Rx.is_enabled }
           id;
         self#on_block env then_stmt;
         self#on_block env else_stmt

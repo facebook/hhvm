@@ -36,7 +36,8 @@ let check_is_interface (env, error_verb) (p, h) =
     begin
       match Env.get_class env name with
       | None -> ()
-      | Some cls when Cls.kind cls = Ast_defs.Cinterface -> ()
+      | Some cls when Ast_defs.(equal_class_kind (Cls.kind cls) Cinterface) ->
+        ()
       | Some cls -> Errors.non_interface p (Cls.name cls) error_verb
     end
   | Aast.Habstr _ -> Errors.non_interface p "generic" error_verb
@@ -49,7 +50,7 @@ let check_is_trait env (p, h) =
     begin
       match type_info with
       | None -> ()
-      | Some cls when Cls.kind cls = Ast_defs.Ctrait -> ()
+      | Some cls when Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) -> ()
       | Some cls ->
         let name = Cls.name cls in
         let kind = Cls.kind cls in

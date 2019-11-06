@@ -35,7 +35,7 @@ module ClassDiff = struct
         let ty2 = SMap.get x s2 in
         match ty2 with
         | Some ty2 ->
-          if ty1 = ty2 then
+          if Polymorphic_compare.( = ) ty1 ty2 then
             diff
           else
             SSet.add x diff
@@ -84,7 +84,9 @@ module ClassDiff = struct
       add_inverted_deps acc (fun x -> Dep.SMethod (cid, x)) smethods_diff
     in
     (* compare class constructors *)
-    let cstr_diff = class1.dc_construct <> class2.dc_construct in
+    let cstr_diff =
+      Polymorphic_compare.( <> ) class1.dc_construct class2.dc_construct
+    in
     let is_unchanged = is_unchanged && not cstr_diff in
     let cstr_ideps = Typing_deps.get_ideps (Dep.Cstr cid) in
     let acc =
@@ -137,12 +139,12 @@ module ClassEltDiff = struct
         let key = (cid, name) in
         let match1 =
           match elt1 with
-          | Some elt -> elt.elt_origin = cid
+          | Some elt -> String.equal elt.elt_origin cid
           | _ -> false
         in
         let match2 =
           match elt2 with
-          | Some elt -> elt.elt_origin = cid
+          | Some elt -> String.equal elt.elt_origin cid
           | _ -> false
         in
         if match1 || match2 then
@@ -153,7 +155,7 @@ module ClassEltDiff = struct
           | (Some x1, Some x2) ->
             let ty1 = normalize x1 in
             let ty2 = normalize x2 in
-            if ty1 = ty2 then
+            if Polymorphic_compare.( = ) ty1 ty2 then
               None
             else
               Some ()
@@ -219,12 +221,12 @@ module ClassEltDiff = struct
     let cid = class1.dc_name in
     let match1 =
       match class1.dc_construct with
-      | (Some elt, _) -> elt.elt_origin = cid
+      | (Some elt, _) -> String.equal elt.elt_origin cid
       | _ -> false
     in
     let match2 =
       match class2.dc_construct with
-      | (Some elt, _) -> elt.elt_origin = cid
+      | (Some elt, _) -> String.equal elt.elt_origin cid
       | _ -> false
     in
     if match1 || match2 then
@@ -235,7 +237,7 @@ module ClassEltDiff = struct
       | (Some fe1, Some fe2) ->
         let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
         let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
-        if fe1 = fe2 then
+        if Polymorphic_compare.( = ) fe1 fe2 then
           (DepSet.empty, `Unchanged)
         else
           (Typing_deps.get_ideps (Dep.Cstr cid), `Changed)
@@ -265,6 +267,7 @@ let add_changed acc dep = DepSet.add acc (Dep.make dep)
 let class_big_diff class1 class2 =
   let class1 = Decl_pos_utils.NormalizeSig.class_type class1 in
   let class2 = Decl_pos_utils.NormalizeSig.class_type class2 in
+  let ( <> ) = Polymorphic_compare.( <> ) in
   class1.dc_need_init <> class2.dc_need_init
   || SSet.compare
        class1.dc_deferred_init_members
@@ -280,7 +283,7 @@ let class_big_diff class1 class2 =
   || SMap.compare Pervasives.compare class1.dc_ancestors class2.dc_ancestors
      <> 0
   || List.compare
-       Pervasives.compare
+       Polymorphic_compare.compare
        class1.dc_req_ancestors
        class2.dc_req_ancestors
      <> 0
@@ -368,7 +371,7 @@ let get_fun_deps
   | (Some fe1, Some fe2) ->
     let fe1 = Decl_pos_utils.NormalizeSig.fun_elt fe1 in
     let fe2 = Decl_pos_utils.NormalizeSig.fun_elt fe2 in
-    if fe1 = fe2 then
+    if Polymorphic_compare.( = ) fe1 fe2 then
       (changed, to_redecl, to_recheck)
     else
       (* No need to add Dep.FunName stuff here -- we found a function with the
@@ -400,7 +403,7 @@ let get_type_deps old_types tid (changed, to_recheck) =
   | (Some tdef1, Some tdef2) ->
     let tdef1 = Decl_pos_utils.NormalizeSig.typedef tdef1 in
     let tdef2 = Decl_pos_utils.NormalizeSig.typedef tdef2 in
-    let is_same_signature = tdef1 = tdef2 in
+    let is_same_signature = Polymorphic_compare.( = ) tdef1 tdef2 in
     if is_same_signature then
       (changed, to_recheck)
     else
@@ -436,7 +439,7 @@ let get_gconst_deps
     in
     (add_changed changed dep, to_redecl, DepSet.union const_name to_recheck)
   | (Some cst1, Some cst2) ->
-    let is_same_signature = cst1 = cst2 in
+    let is_same_signature = Polymorphic_compare.( = ) cst1 cst2 in
     if is_same_signature then
       (changed, to_redecl, to_recheck)
     else
@@ -525,8 +528,9 @@ let get_class_deps
      * classes.
      *)
     let (deps, is_changed) = ClassEltDiff.compare class1 class2 in
+    let is_changed = phys_equal is_changed `Changed in
     let changed =
-      if is_changed = `Changed then
+      if is_changed then
         add_changed changed dep
       else
         changed
@@ -544,7 +548,7 @@ let get_class_deps
        inference on them and rechecking method bodies may not be necessary,
        but decl-validation and typechecking happen in the same step. *)
     let to_recheck =
-      if (not conservative_redecl) && is_changed = `Changed then
+      if (not conservative_redecl) && is_changed then
         Typing_deps.get_extend_deps trace cid_hash to_recheck
       else
         to_recheck
@@ -580,7 +584,7 @@ let get_record_def_deps
     let to_recheck = DepSet.union where_record_is_used to_recheck in
     (add_changed changed dep, to_redecl, to_recheck)
   | (Some rd1, Some rd2) ->
-    if rd1 = rd2 then
+    if Polymorphic_compare.( = ) rd1 rd2 then
       (changed, to_redecl, to_recheck)
     else
       let dep = Dep.RecordDef rdid in

@@ -16,26 +16,26 @@ module MakeType = Typing_make_type
 
 (* The regular strip_awaitable function depends on expand_type and only works on locl types *)
 let strip_awaitable_decl fun_kind env (ty : decl_ty) =
-  if fun_kind <> Ast_defs.FAsync then
+  if not Ast_defs.(equal_fun_kind fun_kind FAsync) then
     ty
   else
     match (Env.get_fn_kind env, ty) with
     | (Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty])))
-      when class_name = Naming_special_names.Classes.cAwaitable ->
+      when String.equal class_name Naming_special_names.Classes.cAwaitable ->
       inner_ty
     | _ -> ty
 
 let strip_awaitable fun_kind env et =
-  if fun_kind <> Ast_defs.FAsync then
+  if not Ast_defs.(equal_fun_kind fun_kind FAsync) then
     et
   else
     match Env.expand_type env et.et_type with
     | (_env, (_, Tclass ((_, class_name), _, [ty])))
-      when class_name = Naming_special_names.Classes.cAwaitable ->
+      when String.equal class_name Naming_special_names.Classes.cAwaitable ->
       { et with et_type = ty }
     (* In non-strict code we might find Awaitable without type arguments. Assume Tany *)
     | (_env, (_, Tclass ((_, class_name), _, [])))
-      when class_name = Naming_special_names.Classes.cAwaitable ->
+      when String.equal class_name Naming_special_names.Classes.cAwaitable ->
       { et with et_type = (Reason.Rnone, TUtils.tany env) }
     | _ -> et
 
@@ -49,7 +49,7 @@ let enforce_return_not_disposable fun_kind env et =
   | None -> ()
 
 let has_attribute attr l =
-  List.exists l (fun { Aast.ua_name; _ } -> attr = snd ua_name)
+  List.exists l (fun { Aast.ua_name; _ } -> String.equal attr (snd ua_name))
 
 let has_return_disposable_attribute attrs =
   has_attribute SN.UserAttributes.uaReturnDisposable attrs
@@ -99,11 +99,11 @@ let wrap_awaitable env p rty =
 let make_return_type localize env (ty : decl_ty) =
   match (Env.get_fn_kind env, ty) with
   | (Ast_defs.FAsync, (r, Tapply ((_, class_name), [inner_ty])))
-    when class_name = Naming_special_names.Classes.cAwaitable ->
+    when String.equal class_name Naming_special_names.Classes.cAwaitable ->
     let (env, ty) = localize env inner_ty in
     (env, wrap_awaitable env (Reason.to_pos r) ty)
   | (Ast_defs.FAsync, (r_like, Tlike (r, Tapply ((_, class_name), [inner_ty]))))
-    when class_name = Naming_special_names.Classes.cAwaitable ->
+    when String.equal class_name Naming_special_names.Classes.cAwaitable ->
     let ty = (r_like, Tlike inner_ty) in
     let (env, ty) = localize env ty in
     (env, wrap_awaitable env (Reason.to_pos r) ty)
@@ -113,12 +113,12 @@ let force_awaitable env p ty =
   let fun_kind = Env.get_fn_kind env in
   match Env.expand_type env ty with
   | (env, (_, Tclass ((_, class_name), _, _)))
-    when fun_kind = Ast_defs.FAsync
-         && class_name = Naming_special_names.Classes.cAwaitable ->
+    when Ast_defs.(equal_fun_kind fun_kind FAsync)
+         && String.equal class_name Naming_special_names.Classes.cAwaitable ->
     (env, ty)
-  | (env, (_, Tany _)) when fun_kind = Ast_defs.FAsync ->
+  | (env, (_, Tany _)) when Ast_defs.(equal_fun_kind fun_kind FAsync) ->
     (env, wrap_awaitable env p ty)
-  | _ when fun_kind = Ast_defs.FAsync ->
+  | _ when Ast_defs.(equal_fun_kind fun_kind FAsync) ->
     let (env, underlying_ty) = Env.fresh_type env p in
     let wrapped_ty = wrap_awaitable env p underlying_ty in
     Errors.try_add_err
@@ -136,7 +136,7 @@ let make_default_return ~is_method ~is_infer_missing_on env name =
   let pos = fst name in
   let reason = Reason.Rwitness pos in
   let default = (reason, Typing_utils.tany env) in
-  if is_method && snd name = SN.Members.__construct then
+  if is_method && String.equal (snd name) SN.Members.__construct then
     (env, MakeType.void (Reason.Rwitness pos))
   else if is_infer_missing_on then
     (* When infer missing is turned on we create a fresh variable for the
@@ -150,13 +150,14 @@ let make_default_return ~is_method ~is_infer_missing_on env name =
     (env, default)
 
 let async_suggest_return fkind hint pos =
-  let is_async = Ast_defs.FAsync = fkind in
+  let is_async = Ast_defs.(equal_fun_kind FAsync fkind) in
   if is_async then
     let e_func = Errors.expecting_awaitable_return_type_hint in
     match snd hint with
     | Aast.Hlike (_, Aast.Happly (s, _))
     | Aast.Happly (s, _) ->
-      if snd s <> Naming_special_names.Classes.cAwaitable then e_func pos
+      if String.( <> ) (snd s) Naming_special_names.Classes.cAwaitable then
+        e_func pos
     | _ -> e_func pos
 
 let implicit_return env pos ~expected ~actual =

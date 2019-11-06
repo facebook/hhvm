@@ -95,12 +95,12 @@ type delta =
 let rec compute_value_delta (oldval : value) (newval : value) : delta =
   match (oldval, newval) with
   | (Bool b1, Bool b2) ->
-    if b1 = b2 then
+    if Bool.equal b1 b2 then
       Unchanged
     else
       Updated newval
   | (Atom s1, Atom s2) ->
-    if s1 = s2 then
+    if String.equal s1 s2 then
       Unchanged
     else
       Updated newval
@@ -112,7 +112,7 @@ let rec compute_value_delta (oldval : value) (newval : value) : delta =
     else
       Set_delta { added; removed }
   | (List l1, List l2) ->
-    if l1 = l2 then
+    if List.equal l1 l2 equal_value then
       Unchanged
     else
       Updated newval
@@ -392,7 +392,7 @@ let log_position p ?function_name f =
     indentEnv
       ~color:(Bold Yellow)
       ( Pos.string (Pos.to_absolute p)
-      ^ ( if n = 1 then
+      ^ ( if Int.equal n 1 then
           ""
         else
           "[" ^ string_of_int n ^ "]" )

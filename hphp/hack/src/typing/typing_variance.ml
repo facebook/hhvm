@@ -259,7 +259,7 @@ let check_final_this_pos_variance env_variance rpos class_ty =
 
 let get_class_variance root (pos, class_name) =
   match class_name with
-  | name when name = SN.Classes.cAwaitable ->
+  | name when String.equal name SN.Classes.cAwaitable ->
     [Vcovariant [(pos, Rtype_argument (Utils.strip_ns name), Pcovariant)]]
   | _ ->
     let dep = Typing_deps.Dep.Class class_name in
@@ -327,7 +327,7 @@ and typedef tcopt type_name =
   | None -> ()
 
 and class_member class_type tcopt root static env (_member_name, member) =
-  if static = `Static then
+  if phys_equal static `Static then
     if
       (* Check whether the type of a static property (class variable) contains
        * any generic type parameters. Outside of traits, this is illegal as static
@@ -335,7 +335,7 @@ and class_member class_type tcopt root static env (_member_name, member) =
        * Although not strictly speaking a variance check, it fits here because
        * it concerns the presence of generic type parameters in types.
        *)
-      Cls.kind class_type = Ast_defs.Ctrait
+      Ast_defs.(equal_class_kind (Cls.kind class_type) Ctrait)
     then
       ()
     else
@@ -364,7 +364,7 @@ and class_method tcopt root static env (_method_name, method_) =
   | _ ->
     (* Final methods can't be overridden, so it's ok to use covariant
        and contravariant type parameters in any position in the type *)
-    if method_.ce_final && static = `Static then
+    if method_.ce_final && phys_equal static `Static then
       ()
     else (
       match method_.ce_type with
@@ -534,9 +534,9 @@ and type_ tcopt root variance env (reason, ty) =
      *)
     let variance =
       match variance with
-      | Vcovariant ((pos', x, y) :: rest) when pos <> pos' ->
+      | Vcovariant ((pos', x, y) :: rest) when not (Pos.equal pos pos') ->
         Vcovariant ((pos, x, y) :: rest)
-      | Vcontravariant ((pos', x, y) :: rest) when pos <> pos' ->
+      | Vcontravariant ((pos', x, y) :: rest) when not (Pos.equal pos pos') ->
         Vcontravariant ((pos, x, y) :: rest)
       | x -> x
     in

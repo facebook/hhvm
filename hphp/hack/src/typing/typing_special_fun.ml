@@ -84,7 +84,7 @@ let transform_special_fun_ty fty id nargs =
     String.equal (snd id) SN.StdlibFunctions.array_map && nargs > 0
   then
     let arity = nargs - 1 in
-    if arity = 0 then
+    if Int.equal arity 0 then
       fty
     else
       let (param1, param2) =
@@ -97,7 +97,7 @@ let transform_special_fun_ty fty id nargs =
       let rret = fst fty.ft_ret.et_type in
       let tr = (rret, Tgeneric "Tr") in
       let rec make_tparam_names i =
-        if i = 0 then
+        if Int.equal i 0 then
           []
         else
           ("T" ^ string_of_int i) :: make_tparam_names (i - 1)

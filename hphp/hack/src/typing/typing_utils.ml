@@ -30,7 +30,7 @@ let ty_size env ty =
       method! on_tvar acc r v =
         let (_, ty) = Env.expand_var env r v in
         match ty with
-        | (_, Tvar v') when v' = v -> acc
+        | (_, Tvar v') when Ident.equal v' v -> acc
         | _ -> super#on_type acc ty
     end
   in
@@ -145,6 +145,7 @@ let simplify_unions x = !simplify_unions_ref x
 type approx =
   | ApproxUp
   | ApproxDown
+[@@deriving eq]
 
 type non = env -> Reason.t -> locl_ty -> approx:approx -> env * locl_ty
 
@@ -339,7 +340,7 @@ let rec is_any env ty =
 let rec get_base_type env ty =
   match snd ty with
   | Tabstract (AKnewtype (classname, _), _)
-    when classname = SN.Classes.cClassname ->
+    when String.equal classname SN.Classes.cClassname ->
     ty
   (* If we have an expression dependent type and it only has one super
     type, we can treat it similarly to AKdependent _, Some ty  *)
@@ -384,7 +385,7 @@ let get_class_ids env ty =
     | (_, Tintersection tys) ->
       List.fold tys ~init:acc ~f:(aux seen)
     | (_, Tabstract (AKgeneric name, None))
-      when not (List.mem ~equal:( = ) seen name) ->
+      when not (List.mem ~equal:String.equal seen name) ->
       let seen = name :: seen in
       let upper_bounds = Env.get_upper_bounds env name in
       TySet.fold (fun ty acc -> aux seen acc ty) upper_bounds acc
@@ -519,10 +520,11 @@ let default_fun_param ?(pos = Pos.none) ty : 'a fun_param =
 let fun_mutable user_attributes =
   let rec go = function
     | [] -> None
-    | { Aast.ua_name = (_, n); _ } :: _ when n = SN.UserAttributes.uaMutable ->
+    | { Aast.ua_name = (_, n); _ } :: _
+      when String.equal n SN.UserAttributes.uaMutable ->
       Some Param_borrowed_mutable
     | { Aast.ua_name = (_, n); _ } :: _
-      when n = SN.UserAttributes.uaMaybeMutable ->
+      when String.equal n SN.UserAttributes.uaMaybeMutable ->
       Some Param_maybe_mutable
     | _ :: tl -> go tl
   in

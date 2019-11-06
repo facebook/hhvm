@@ -105,7 +105,7 @@ let rec collect_class
     | Some data ->
       let decls = { decls with classes = SMap.add decls.classes cid data } in
       let collect_elt add mid { elt_origin; _ } decls =
-        if cid = elt_origin then
+        if String.equal cid elt_origin then
           add decls cid mid
         else
           decls
@@ -144,7 +144,7 @@ let rec collect_class
       let decls =
         fst data.dc_construct
         |> Option.value_map ~default:decls ~f:(fun { elt_origin; _ } ->
-               if cid <> elt_origin then
+               if String.( <> ) cid elt_origin then
                  decls
                else
                  match Constructors.get cid with

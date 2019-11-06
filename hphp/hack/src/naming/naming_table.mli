@@ -100,7 +100,7 @@ type type_of_type =
   | TClass
   | TTypedef
   | TRecordDef
-[@@deriving enum]
+[@@deriving eq, enum]
 
 module Types : sig
   include ReverseNamingTable with type pos = FileInfo.pos * type_of_type

@@ -167,5 +167,5 @@ let go
   let (res, (), cancelled) =
     go_with_interrupt lru_host_env opts dynamic_view_files fnl ~interrupt
   in
-  assert (cancelled = []);
+  assert (List.is_empty cancelled);
   res

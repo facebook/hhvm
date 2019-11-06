@@ -72,7 +72,7 @@ let class_env tcopt c =
   (* Set the ppl env flag *)
   let is_ppl =
     List.exists c.c_user_attributes (fun { ua_name; _ } ->
-        SN.UserAttributes.uaProbabilisticModel = snd ua_name)
+        String.equal SN.UserAttributes.uaProbabilisticModel (snd ua_name))
   in
   let env = Env.set_inside_ppl_class env is_ppl in
   env

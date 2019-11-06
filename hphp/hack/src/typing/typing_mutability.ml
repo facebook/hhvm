@@ -89,7 +89,8 @@ let handle_value_in_return
     | T.New _
     | T.Xml _ ->
       env
-    | T.Call (_, (_, T.Id (_, id)), _, _, _) when id = SN.Rx.mutable_ ->
+    | T.Call (_, (_, T.Id (_, id)), _, _, _)
+      when String.equal id SN.Rx.mutable_ ->
       (* ok to return result of Rx\mutable - implicit Rx\move *)
       env
     | T.Pipe (_, _, r) ->
@@ -120,7 +121,7 @@ let handle_value_in_return
       end
     | T.This
       when (not function_returns_mutable)
-           && Env.function_is_mutable env <> None ->
+           && Option.is_some (Env.function_is_mutable env) ->
       (* mutable this is treated as borrowed and this cannot be returned as immutable
          unless function is marked with __ReturnsVoidToRx in which case caller
          will not be able to alias the value *)
@@ -190,7 +191,7 @@ let move_local (p : Pos.t) (env : Typing_env_types.env) (tel : Tast.expr list)
 let rec is_move_or_mutable_call ?(allow_move = true) te =
   match te with
   | T.Call (_, (_, T.Id (_, n)), _, _, _) ->
-    n = SN.Rx.mutable_ || (allow_move && n = SN.Rx.move)
+    String.equal n SN.Rx.mutable_ || (allow_move && String.equal n SN.Rx.move)
   | T.Pipe (_, _, (_, r)) -> is_move_or_mutable_call ~allow_move:false r
   | _ -> false
 
@@ -203,7 +204,10 @@ let handle_assignment_mutability
   let mut_env =
     match (snd te1, te2) with
     | (_, Some T.This)
-      when Env.function_is_mutable env = Some Param_borrowed_mutable ->
+      when Option.equal
+             equal_param_mutability
+             (Env.function_is_mutable env)
+             (Some Param_borrowed_mutable) ->
       (* aliasing $this - bad for __Mutable and __MaybeMutable functions *)
       ( Env.error_if_reactive_context env
       @@ fun () ->
@@ -213,7 +217,10 @@ let handle_assignment_mutability
         (Tast.get_position te1) );
       mut_env
     | (_, Some T.This)
-      when Env.function_is_mutable env = Some Param_maybe_mutable ->
+      when Option.equal
+             equal_param_mutability
+             (Env.function_is_mutable env)
+             (Some Param_maybe_mutable) ->
       (* aliasing $this - bad for __Mutable and __MaybeMutable functions *)
       ( Env.error_if_reactive_context env
       @@ fun () ->
@@ -237,7 +244,7 @@ let handle_assignment_mutability
       when Option.value_map
              (LMap.get id2 mut_env)
              ~default:false
-             ~f:(fun (_, m) -> m <> Immutable) ->
+             ~f:(fun (_, m) -> not (equal_mut_type m Immutable)) ->
       ( Env.error_if_reactive_context env
       @@ fun () ->
       match LMap.find id2 mut_env with

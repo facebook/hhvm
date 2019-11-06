@@ -1504,7 +1504,7 @@ let handle_mode
                       "%s%s%s"
                       name
                       targs
-                      ( if modifiers = "" then
+                      ( if String.equal modifiers "" then
                         ""
                       else
                         Printf.sprintf "(%s)" modifiers )))

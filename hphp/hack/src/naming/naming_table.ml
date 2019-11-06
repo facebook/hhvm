@@ -181,7 +181,7 @@ type type_of_type =
   | TClass
   | TTypedef
   | TRecordDef
-[@@deriving enum]
+[@@deriving eq, enum]
 
 module Sqlite : sig
   val get_db_path : unit -> string option

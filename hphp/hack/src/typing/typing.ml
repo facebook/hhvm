@@ -179,7 +179,8 @@ let unbound_name env (pos, name) e =
 let get_value_collection_inst ty =
   match ty with
   | (_, Tclass ((_, c), _, [vty]))
-    when c = SN.Collections.cTraversable || c = SN.Collections.cContainer ->
+    when String.equal c SN.Collections.cTraversable
+         || String.equal c SN.Collections.cContainer ->
     Some vty
   (* If we're expecting a mixed or a nonnull then we can just assume
    * that the element type is mixed *)
@@ -194,8 +195,8 @@ let get_value_collection_inst ty =
 let get_key_value_collection_inst p ty =
   match ty with
   | (_, Tclass ((_, c), _, [kty; vty]))
-    when c = SN.Collections.cKeyedTraversable
-         || c = SN.Collections.cKeyedContainer ->
+    when String.equal c SN.Collections.cKeyedTraversable
+         || String.equal c SN.Collections.cKeyedContainer ->
     Some (kty, vty)
   (* If we're expecting a mixed or a nonnull then we can just assume
    * that the key type is arraykey and the value type is mixed *)
@@ -216,7 +217,8 @@ let get_varray_inst ty =
 (* Is this type one of the value collection types with element type vty? *)
 let get_vc_inst vc_kind ty =
   match ty with
-  | (_, Tclass ((_, c), _, [vty])) when c = Nast.vc_kind_to_name vc_kind ->
+  | (_, Tclass ((_, c), _, [vty]))
+    when String.equal c (Nast.vc_kind_to_name vc_kind) ->
     Some vty
   | _ -> get_value_collection_inst ty
 
@@ -236,8 +238,8 @@ let get_akdarray_inst p ty =
  * e.g. dict<kty,vty> or a supertype for some kty and vty? *)
 let get_kvc_inst p kvc_kind ty =
   match ty with
-  | (_, Tclass ((_, c), _, [kty; vty])) when c = Nast.kvc_kind_to_name kvc_kind
-    ->
+  | (_, Tclass ((_, c), _, [kty; vty]))
+    when String.equal c (Nast.kvc_kind_to_name kvc_kind) ->
     Some (kty, vty)
   | _ -> get_key_value_collection_inst p ty
 
@@ -250,7 +252,7 @@ let get_darray_inst p ty =
 
 let with_timeout env fun_name ~(do_ : env -> 'b) : 'b option =
   let timeout = (Env.get_tcopt env).GlobalOptions.tco_timeout in
-  if timeout = 0 then
+  if Int.equal timeout 0 then
     Some (do_ env)
   else
     let big_envs = ref [] in
@@ -270,7 +272,7 @@ let with_timeout env fun_name ~(do_ : env -> 'b) : 'b option =
 (*****************************************************************************)
 let param_has_attribute param attr =
   List.exists param.param_user_attributes (fun { ua_name; _ } ->
-      attr = snd ua_name)
+      String.equal attr (snd ua_name))
 
 let has_accept_disposable_attribute param =
   param_has_attribute param SN.UserAttributes.uaAcceptDisposable
@@ -1058,7 +1060,7 @@ and stmt_ env pos st =
       expr ~is_using_clause:return_disposable ?expected env e
     in
     let env =
-      if env_reactivity env <> Nonreactive then
+      if not (equal_reactivity (env_reactivity env) Nonreactive) then
         Typing_mutability.handle_value_in_return
           ~function_returns_mutable:return_mutable
           ~function_returns_void_for_rx:return_void_to_rx
@@ -1653,11 +1655,11 @@ and lvalues env el =
     (env, te :: tel, ty :: tyl)
 
 and is_pseudo_function s =
-  s = SN.PseudoFunctions.hh_show
-  || s = SN.PseudoFunctions.hh_show_env
-  || s = SN.PseudoFunctions.hh_log_level
-  || s = SN.PseudoFunctions.hh_force_solve
-  || s = SN.PseudoFunctions.hh_loop_forever
+  String.equal s SN.PseudoFunctions.hh_show
+  || String.equal s SN.PseudoFunctions.hh_show_env
+  || String.equal s SN.PseudoFunctions.hh_log_level
+  || String.equal s SN.PseudoFunctions.hh_force_solve
+  || String.equal s SN.PseudoFunctions.hh_loop_forever
 
 and loop_forever env =
   (* forever = up to 10 minutes, to avoid accidentally stuck processes *)
@@ -1701,7 +1703,7 @@ and is_parameter env x = Local_id.Map.mem x (Env.get_params env)
 
 and check_escaping_var env (pos, x) =
   if Env.is_using_var env x then
-    if x = this then
+    if Local_id.equal x this then
       Errors.escaping_this pos
     else if is_parameter env x then
       Errors.escaping_disposable_parameter pos
@@ -1789,7 +1791,10 @@ and expr_
         Type.sub_type p reason env ty supertype Errors.unify_error
       in
       let env = List.fold_left tys ~init:env ~f:subtype_value in
-      if List.exists tys (fun (_, ty) -> ty = Typing_utils.tany env) then
+      if
+        List.exists tys (fun (_, ty) ->
+            equal_locl_ty_ ty (Typing_utils.tany env))
+      then
         (* If one of the values comes from PHP land, we have to be conservative
          * and consider that we don't know what the type of the values are. *)
         (env, (Reason.Rwitness p, Typing_utils.tany env))
@@ -1825,8 +1830,8 @@ and expr_
      * To avoid adding too many undue HH_FIXMEs. *)
     match callexpr with
     | (_, Id (_, func))
-      when func = SN.StdlibFunctions.is_null || func = SN.PseudoFunctions.isset
-      ->
+      when String.equal func SN.StdlibFunctions.is_null
+           || String.equal func SN.PseudoFunctions.isset ->
       env
     | _ -> Env.forget_members env (Fake.Blame_call p)
   in
@@ -2108,7 +2113,7 @@ and expr_
     make_result env p (Aast.Clone te) ty
   | This ->
     let (r, _) = Env.get_self env in
-    if r = Reason.Rnone then Errors.this_var_outside_class p;
+    if Reason.equal r Reason.Rnone then Errors.this_var_outside_class p;
     if not accept_using_var then check_escaping_var env (p, this);
     let (_, ty) = Env.get_local env this in
     let r = Reason.Rwitness p in
@@ -2141,7 +2146,7 @@ and expr_
     let (env, tel) = string2 env idl in
     make_result env p (Aast.String2 tel) (MakeType.string (Reason.Rwitness p))
   | PrefixedString (n, e) ->
-    if n <> "re" then (
+    if String.( <> ) n "re" then (
       Errors.experimental_feature
         p
         "String prefixes other than `re` are not yet supported.";
@@ -2417,7 +2422,7 @@ and expr_
     let r = Reason.Rplaceholder p in
     let ty = MakeType.void r in
     make_result env p (Aast.Lplaceholder p) ty
-  | Dollardollar _ when valkind = `lvalue ->
+  | Dollardollar _ when phys_equal valkind `lvalue ->
     Errors.dollardollar_lvalue p;
     expr_error env (Reason.Rwitness p) outer
   | Dollardollar id ->
@@ -2456,7 +2461,7 @@ and expr_
     let (env, expected1, expected2) =
       match expand_expected env expected with
       | (env, Some (pos, reason, (_, Tclass ((_, k), _, [ty1; ty2]))))
-        when k = SN.Collections.cPair ->
+        when String.equal k SN.Collections.cPair ->
         let ty1_expected = ExpectedTy.make pos reason ty1 in
         let ty2_expected = ExpectedTy.make pos reason ty2 in
         (env, Some ty1_expected, Some ty2_expected)
@@ -2501,20 +2506,20 @@ and expr_
     when is_pseudo_function s ->
     let (env, tel, tys) = exprs ~accept_using_var:true env el in
     let env =
-      if s = SN.PseudoFunctions.hh_show then (
+      if String.equal s SN.PseudoFunctions.hh_show then (
         List.iter tys (Typing_log.hh_show p env);
         env
-      ) else if s = SN.PseudoFunctions.hh_show_env then (
+      ) else if String.equal s SN.PseudoFunctions.hh_show_env then (
         Typing_log.hh_show_env p env;
         env
-      ) else if s = SN.PseudoFunctions.hh_log_level then
+      ) else if String.equal s SN.PseudoFunctions.hh_log_level then
         match el with
         | [(_, String key_str); (_, Int level_str)] ->
           Env.set_log_level env key_str (int_of_string level_str)
         | _ -> env
-      else if s = SN.PseudoFunctions.hh_force_solve then
+      else if String.equal s SN.PseudoFunctions.hh_force_solve then
         Typing_solver.solve_all_unsolved_tyvars env Errors.unify_error
-      else if s = SN.PseudoFunctions.hh_loop_forever then (
+      else if String.equal s SN.PseudoFunctions.hh_loop_forever then (
         loop_forever env;
         env
       ) else
@@ -2626,7 +2631,7 @@ and expr_
       make_result env p (Aast.Binop (Ast_defs.Eq None, te1, te2)) ty
     | _ -> make_result env p (Aast.Binop (Ast_defs.Eq None, te1, te2)) ty)
   | Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2) ->
-    let c = bop = Ast_defs.Ampamp in
+    let c = Ast_defs.(equal_bop bop Ampamp) in
     let (env, te1, _) = expr env e1 in
     let lenv = env.lenv in
     let env = condition env c te1 in
@@ -3348,7 +3353,7 @@ and expr_
                     let (env, ty) = Env.fresh_type env pos in
                     (env, { et with et_type = ty })
                   | Tclass (id, e, [(_, Tany _)])
-                    when snd id = SN.Classes.cAwaitable ->
+                    when String.equal (snd id) SN.Classes.cAwaitable ->
                     let (env, t) = Env.fresh_type env pos in
                     ( env,
                       {
@@ -3781,7 +3786,7 @@ and anon_make tenv p f ft idl is_anon outer =
   let anon_lenv = tenv.lenv in
   let is_typing_self = ref false in
   let nb = Nast.assert_named_body f.f_body in
-  let is_coroutine = f.f_fun_kind = Ast_defs.FCoroutine in
+  let is_coroutine = Ast_defs.(equal_fun_kind f.f_fun_kind FCoroutine) in
   ( is_coroutine,
     ref ([], []),
     p,
@@ -4070,7 +4075,8 @@ and new_object
   in
   let allow_abstract_bound_generic =
     match tcid with
-    | ((_, (_, Tabstract (AKgeneric tt, _))), Aast.CI (_, tn)) -> tt = tn
+    | ((_, (_, Tabstract (AKgeneric tt, _))), Aast.CI (_, tn)) ->
+      String.equal tt tn
     | _ -> false
   in
   let finish env tcid tel tuel ty ctor_fty =
@@ -4172,7 +4178,8 @@ and new_object
         let env = check_expected_ty "New" env new_ty expected in
         call_construct p env class_info params el uel cid
       in
-      ( if snd (Cls.construct class_info) = Inconsistent then
+      ( if equal_consistent_kind (snd (Cls.construct class_info)) Inconsistent
+      then
         match cid with
         | CIstatic -> Errors.new_inconsistent_construct p cname `static
         | CIexpr _ -> Errors.new_inconsistent_construct p cname `classname
@@ -4231,8 +4238,8 @@ and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs =
   in
   List.iter classes (fun ((pos, name), class_info, c_ty) ->
       if
-        Cls.kind class_info = Ast_defs.Ctrait
-        || Cls.kind class_info = Ast_defs.Cenum
+        Ast_defs.(equal_class_kind (Cls.kind class_info) Ctrait)
+        || Ast_defs.(equal_class_kind (Cls.kind class_info) Cenum)
       then
         match cid with
         | CIexpr _
@@ -4242,7 +4249,9 @@ and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs =
         | CIparent
         | CIself ->
           ()
-      else if Cls.kind class_info = Ast_defs.Cabstract && Cls.final class_info
+      else if
+        Ast_defs.(equal_class_kind (Cls.kind class_info) Cabstract)
+        && Cls.final class_info
       then
         uninstantiable_error env p cid (Cls.pos class_info) name pos c_ty
       else
@@ -4279,7 +4288,7 @@ and check_shape_keys_validity env pos keys =
     match key with
     | Ast_defs.SFlit_int _ -> (env, key_pos, None)
     | Ast_defs.SFlit_str (_, key_name) ->
-      if String.length key_name = 0 then
+      if Int.equal 0 (String.length key_name) then
         Errors.invalid_shape_field_name_empty key_pos;
       (env, key_pos, None)
     | Ast_defs.SFclass_const (((p, cls) as x), y) ->
@@ -4305,7 +4314,7 @@ and check_shape_keys_validity env pos keys =
       env
     | (None, None) -> env
     | (Some (cls1, ty1), Some (cls2, ty2)) ->
-      if cls1 <> cls2 then
+      if String.( <> ) cls1 cls2 then
         Errors.shape_field_class_mismatch
           key_pos
           witness_pos
@@ -4608,7 +4617,8 @@ and check_class_get env p def_pos cid mid ce e =
          * the trait's code *)
         begin
           match Env.get_class env self with
-          | Some cls when Cls.kind cls = Ast_defs.Ctrait -> ()
+          | Some cls when Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) ->
+            ()
           | _ -> Errors.self_abstract_call mid p def_pos
         end
       | _ -> ()
@@ -4630,7 +4640,7 @@ and call_parent_construct pos env el uel =
     (match Env.get_self env with
     | (_, Tclass ((_, self), _, _)) ->
       (match Env.get_class env self with
-      | Some trait when Cls.kind trait = Ast_defs.Ctrait ->
+      | Some trait when Ast_defs.(equal_class_kind (Cls.kind trait) Ctrait) ->
         (match trait_most_concrete_req_class trait env with
         | None ->
           Errors.parent_in_trait pos;
@@ -4738,7 +4748,10 @@ and dispatch_call
         | Some x :: xs ->
           (*if rest of the list has the same value as the first element
             return value of the first element or None otherwise*)
-          if List.for_all xs ~f:(Option.value_map ~default:false ~f:(( = ) x))
+          if
+            List.for_all
+              xs
+              ~f:(Option.value_map ~default:false ~f:(Bool.equal x))
           then
             Some x
           else
@@ -4772,24 +4785,27 @@ and dispatch_call
   in
   match fun_expr with
   (* Special function `echo` *)
-  | Id ((p, pseudo_func) as id) when pseudo_func = SN.SpecialFunctions.echo ->
+  | Id ((p, pseudo_func) as id)
+    when String.equal pseudo_func SN.SpecialFunctions.echo ->
     check_function_in_suspend SN.SpecialFunctions.echo;
     let (env, tel, _) = exprs ~accept_using_var:true env el in
     make_call_special env id tel (MakeType.void (Reason.Rwitness p))
   (* Special function `isset` *)
-  | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.isset ->
+  | Id ((_, pseudo_func) as id)
+    when String.equal pseudo_func SN.PseudoFunctions.isset ->
     check_function_in_suspend SN.PseudoFunctions.isset;
     let (env, tel, _) =
       exprs ~accept_using_var:true ~check_defined:false env el
     in
-    if uel <> [] then
+    if not (List.is_empty uel) then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
     make_call_special_from_def env id tel (Tprim Tbool)
   (* Special function `unset` *)
-  | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.unset ->
+  | Id ((_, pseudo_func) as id)
+    when String.equal pseudo_func SN.PseudoFunctions.unset ->
     check_function_in_suspend SN.PseudoFunctions.unset;
     let (env, tel, _) = exprs env el in
-    if uel <> [] then
+    if not (List.is_empty uel) then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
     let checked_unset_error =
       if Partial.should_check_error (Env.get_mode env) 4135 then
@@ -4838,8 +4854,9 @@ and dispatch_call
     | _ -> make_call_special_from_def env id tel (Tprim Tvoid))
   (* Special function `array_filter` *)
   | Id ((_, array_filter) as id)
-    when array_filter = SN.StdlibFunctions.array_filter && el <> [] && uel = []
-    ->
+    when String.equal array_filter SN.StdlibFunctions.array_filter
+         && (not (List.is_empty el))
+         && List.is_empty uel ->
     check_function_in_suspend SN.StdlibFunctions.array_filter;
 
     (* dispatch the call to typecheck the arguments *)
@@ -4910,9 +4927,9 @@ and dispatch_call
     make_call env (Tast.make_typed_expr fpos fty (Aast.Id id)) tal tel tuel rty
   (* Special function `type_structure` *)
   | Id (p, type_structure)
-    when type_structure = SN.StdlibFunctions.type_structure
-         && List.length el = 2
-         && uel = [] ->
+    when String.equal type_structure SN.StdlibFunctions.type_structure
+         && Int.equal (List.length el) 2
+         && List.is_empty uel ->
     check_function_in_suspend SN.StdlibFunctions.type_structure;
     (match el with
     | [e1; e2] ->
@@ -4923,7 +4940,7 @@ and dispatch_call
           match e1 with
           | (_, Class_const (cid, (_, x)))
           | (_, Class_get (cid, CGstring (_, x)))
-            when x = SN.Members.mClass ->
+            when String.equal x SN.Members.mClass ->
             cid
           | _ -> (fst e1, CIexpr e1)
         in
@@ -4934,7 +4951,9 @@ and dispatch_call
     | _ -> assert false)
   (* Special function `array_map` *)
   | Id ((_, array_map) as x)
-    when array_map = SN.StdlibFunctions.array_map && el <> [] && uel = [] ->
+    when String.equal array_map SN.StdlibFunctions.array_map
+         && (not (List.is_empty el))
+         && List.is_empty uel ->
     check_function_in_suspend SN.StdlibFunctions.array_map;
 
     (* This uses the arity to determine a signature for array_map. But there
@@ -5025,7 +5044,8 @@ and dispatch_call
     make_call env (Tast.make_typed_expr fpos fty (Aast.Id x)) tal tel tuel ty
   (* Special function `Shapes::idx` *)
   | Class_const (((_, CI (_, shapes)) as class_id), ((_, idx) as method_id))
-    when shapes = SN.Shapes.cShapes && idx = SN.Shapes.idx ->
+    when String.equal shapes SN.Shapes.cShapes
+         && String.equal idx SN.Shapes.idx ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.idx;
     overload_function p env class_id method_id el uel (fun env fty res el ->
         match el with
@@ -5053,7 +5073,8 @@ and dispatch_call
         | _ -> (env, res))
   (* Special function `Shapes::at` *)
   | Class_const (((_, CI (_, shapes)) as class_id), ((_, at) as method_id))
-    when shapes = SN.Shapes.cShapes && at = SN.Shapes.at ->
+    when String.equal shapes SN.Shapes.cShapes && String.equal at SN.Shapes.at
+    ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.at;
     overload_function p env class_id method_id el uel (fun env _fty res el ->
         match el with
@@ -5069,7 +5090,8 @@ and dispatch_call
   (* Special function `Shapes::keyExists` *)
   | Class_const
       (((_, CI (_, shapes)) as class_id), ((_, key_exists) as method_id))
-    when shapes = SN.Shapes.cShapes && key_exists = SN.Shapes.keyExists ->
+    when String.equal shapes SN.Shapes.cShapes
+         && String.equal key_exists SN.Shapes.keyExists ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.keyExists;
     overload_function p env class_id method_id el uel (fun env fty res el ->
         match el with
@@ -5093,7 +5115,8 @@ and dispatch_call
   (* Special function `Shapes::removeKey` *)
   | Class_const
       (((_, CI (_, shapes)) as class_id), ((_, remove_key) as method_id))
-    when shapes = SN.Shapes.cShapes && remove_key = SN.Shapes.removeKey ->
+    when String.equal shapes SN.Shapes.cShapes
+         && String.equal remove_key SN.Shapes.removeKey ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.removeKey;
     overload_function p env class_id method_id el uel (fun env _ res el ->
         match el with
@@ -5116,7 +5139,8 @@ and dispatch_call
   (* Special function `Shapes::toArray` *)
   | Class_const
       (((_, CI (_, shapes)) as class_id), ((_, to_array) as method_id))
-    when shapes = SN.Shapes.cShapes && to_array = SN.Shapes.toArray ->
+    when String.equal shapes SN.Shapes.cShapes
+         && String.equal to_array SN.Shapes.toArray ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.toArray;
     overload_function p env class_id method_id el uel (fun env _ res el ->
         match el with
@@ -5127,7 +5151,8 @@ and dispatch_call
   (* Special function `Shapes::toDict` *)
   | Class_const
       (((_, CI (_, shapes)) as class_id), ((_, to_array) as method_id))
-    when shapes = SN.Shapes.cShapes && to_array = SN.Shapes.toDict ->
+    when String.equal shapes SN.Shapes.cShapes
+         && String.equal to_array SN.Shapes.toDict ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.toDict;
     overload_function p env class_id method_id el uel (fun env _ res el ->
         match el with
@@ -5137,7 +5162,7 @@ and dispatch_call
         | _ -> (env, res))
   (* Special function `parent::__construct` *)
   | Class_const ((pos, CIparent), ((_, construct) as id))
-    when construct = SN.Members.__construct ->
+    when String.equal construct SN.Members.__construct ->
     check_class_function_in_suspend "parent" SN.Members.__construct;
     let (env, tel, tuel, ty, pty, ctor_fty) =
       call_parent_construct p env el uel
@@ -5155,7 +5180,12 @@ and dispatch_call
   (* Calling parent / class method *)
   | Class_const ((pos, e1), m) ->
     let (env, _tal, tcid, ty1) =
-      static_class_id ~check_constraints:(e1 <> CIparent) pos env [] e1
+      static_class_id
+        ~check_constraints:(not (Nast.equal_class_id_ e1 CIparent))
+        pos
+        env
+        []
+        e1
     in
     let this_ty = (Reason.Rwitness fpos, TUtils.this_of (Env.get_self env)) in
     (* In static context, you can only call parent::foo() on static methods.
@@ -5163,7 +5193,9 @@ and dispatch_call
      * methods as well as instance methods
      *)
     let is_static =
-      e1 <> CIparent || Env.is_static env || class_contains_smethod env ty1 m
+      (not (Nast.equal_class_id_ e1 CIparent))
+      || Env.is_static env
+      || class_contains_smethod env ty1 m
     in
     let (env, (fty, tal)) =
       if is_static then
@@ -5197,7 +5229,7 @@ and dispatch_call
     in
     let env = check_coroutine_call env fty in
     let ty =
-      if e1 = CIparent then
+      if Nast.equal_class_id_ e1 CIparent then
         this_ty
       else
         ty1
@@ -5207,7 +5239,7 @@ and dispatch_call
         ~expected
         ~method_call_info:
           (TR.make_call_info
-             ~receiver_is_self:(e1 = CIself)
+             ~receiver_is_self:(Nast.equal_class_id_ e1 CIself)
              ~is_static
              ty
              (snd m))
@@ -5270,7 +5302,7 @@ and dispatch_call
       ty
   (* Call instance method *)
   | Obj_get (e1, (pos_id, Id m), nullflavor) ->
-    let is_method = call_type = Cnormal in
+    let is_method = Aast_defs.equal_call_type call_type Cnormal in
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let nullsafe =
       match nullflavor with
@@ -5334,9 +5366,9 @@ and dispatch_call
     let (env, fty, tal) = fun_type_of_id env x explicit_targs el in
     let env = check_coroutine_call env fty in
     let (env, (tel, tuel, ty)) = call ~expected p env fty el uel in
-    let is_mutable = id = SN.Rx.mutable_ in
-    let is_move = id = SN.Rx.move in
-    let is_freeze = id = SN.Rx.freeze in
+    let is_mutable = String.equal id SN.Rx.mutable_ in
+    let is_move = String.equal id SN.Rx.move in
+    let is_freeze = String.equal id SN.Rx.freeze in
     (* error when rx builtins are used in non-reactive context *)
     if not (Env.env_local_reactive env) then
       if is_mutable then
@@ -5347,7 +5379,7 @@ and dispatch_call
         Errors.freeze_in_nonreactive_context p;
 
     (* ban unpacking when calling builtings *)
-    if (is_mutable || is_move || is_freeze) && uel <> [] then
+    if (is_mutable || is_move || is_freeze) && not (List.is_empty uel) then
       Errors.unpacking_disallowed_builtin_function p id;
 
     (* adjust env for Rx\freeze or Rx\move calls *)
@@ -5771,7 +5803,7 @@ and class_id_for_new ~exact p env cid explicit_targs =
              * the class must be consistent (final, final constructor, or
              * <<__ConsistentConstruct>>) for its constructor to be considered *)
             | ((_, Aast.CI (_, c)), (_, Tabstract (AKgeneric cg, _)))
-              when c = cg ->
+              when String.equal c cg ->
               (* Only have this choosing behavior for new T(), not all generic types
                * i.e. new classname<T>, TODO: T41190512 *)
               if Tast_utils.valid_newable_class class_info then
@@ -5813,8 +5845,9 @@ and trait_most_concrete_req_class trait env =
           let class_ = Env.get_class env name in
           match class_ with
           | None -> acc
-          | Some c when Cls.kind c = Ast_defs.Cinterface -> acc
-          | Some c when Cls.kind c = Ast_defs.Ctrait ->
+          | Some c when Ast_defs.(equal_class_kind (Cls.kind c) Cinterface) ->
+            acc
+          | Some c when Ast_defs.(equal_class_kind (Cls.kind c) Ctrait) ->
             (* this is an error case for which the nastCheck spits out
              * an error, but does *not* currently remove the offending
              * 'require extends' or 'require implements' *)
@@ -5865,7 +5898,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
     (match Env.get_self env with
     | (_, Tclass ((_, self), _, _)) ->
       (match Env.get_class env self with
-      | Some trait when Cls.kind trait = Ast_defs.Ctrait ->
+      | Some trait when Ast_defs.(equal_class_kind (Cls.kind trait) Ctrait) ->
         (match trait_most_concrete_req_class trait env with
         | None ->
           Errors.parent_in_trait p;
@@ -5972,7 +6005,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
       in
       match TUtils.get_base_type env ty with
       | (_, Tabstract (AKnewtype (classname, [the_cls]), _))
-        when classname = SN.Classes.cClassname ->
+        when String.equal classname SN.Classes.cClassname ->
         resolve_ety env the_cls
       | (_, Tabstract (AKgeneric _, _))
       | (_, Tclass _) ->
@@ -6007,7 +6040,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
 
 and call_construct p env class_ params el uel cid =
   let cid =
-    if cid = CIparent then
+    if Nast.equal_class_id_ cid CIparent then
       CIstatic
     else
       cid
@@ -6048,8 +6081,8 @@ and call_construct p env class_ params el uel cid =
     match fst cstr with
     | None ->
       if
-        el <> []
-        && (FileInfo.is_strict mode || mode = FileInfo.Mpartial)
+        (not (List.is_empty el))
+        && (FileInfo.is_strict mode || FileInfo.(equal_mode mode Mpartial))
         && Cls.members_fully_known class_
       then
         Errors.constructor_no_args p;
@@ -6237,7 +6270,7 @@ and call
             in
             let env = call_untyped_unpack env uel in
             let ty =
-              if snd efty = Tdynamic then
+              if equal_locl_ty_ (snd efty) Tdynamic then
                 MakeType.dynamic (Reason.Rdynamic_call pos)
               else
                 (Reason.Rnone, Typing_utils.tany env)
@@ -6835,7 +6868,7 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
     (* TODO: extend this behaviour to other operators. Consider producing dynamic
      * result if *either* operand is dynamic
      *)
-    if is_dynamic1 && is_dynamic2 && bop = Ast_defs.Plus then
+    if is_dynamic1 && is_dynamic2 && Ast_defs.(equal_bop bop Plus) then
       make_result env te1 te2 (MakeType.dynamic (Reason.Rsum_dynamic p))
     else if
       (* If either argument is a float then return float *)
@@ -7076,7 +7109,8 @@ and condition_nullity ~nonnull (env : env) te =
           _,
           [shape; field],
           _ ) )
-    when shapes = SN.Shapes.cShapes && idx = SN.Shapes.idx ->
+    when String.equal shapes SN.Shapes.cShapes
+         && String.equal idx SN.Shapes.idx ->
     let field = Tast.to_nast_expr field in
     let refine env shape_ty =
       if nonnull then
@@ -7119,11 +7153,12 @@ and condition
   | Aast.Expr_list [x] -> condition env tparamet x
   | Aast.Expr_list (_ :: xs) -> condition env tparamet (pty, Aast.Expr_list xs)
   | Aast.Call (Cnormal, (_, Aast.Id (_, func)), _, [param], [])
-    when SN.PseudoFunctions.isset = func && tparamet && not (Env.is_strict env)
-    ->
+    when String.equal SN.PseudoFunctions.isset func
+         && tparamet
+         && not (Env.is_strict env) ->
     condition_isset env param
   | Aast.Call (Cnormal, (_, Aast.Id (_, func)), _, [te], [])
-    when SN.StdlibFunctions.is_null = func ->
+    when String.equal SN.StdlibFunctions.is_null func ->
     condition_nullity ~nonnull:(not tparamet) env te
   | Aast.Binop ((Ast_defs.Eqeq | Ast_defs.Eqeqeq), (_, Aast.Null), e)
   | Aast.Binop ((Ast_defs.Eqeq | Ast_defs.Eqeqeq), e, (_, Aast.Null)) ->
@@ -7147,13 +7182,13 @@ and condition
       condition_nullity ~nonnull:tparamet env te)
   | Aast.Binop (((Ast_defs.Diff | Ast_defs.Diff2) as op), e1, e2) ->
     let op =
-      if op = Ast_defs.Diff then
+      if Ast_defs.(equal_bop op Diff) then
         Ast_defs.Eqeq
       else
         Ast_defs.Eqeqeq
     in
     condition env (not tparamet) (pty, Aast.Binop (op, e1, e2))
-  | Aast.Id (_, s) when s = SN.Rx.is_enabled ->
+  | Aast.Id (_, s) when String.equal s SN.Rx.is_enabled ->
     (* when Rx\IS_ENABLED is false - switch env to non-reactive *)
     if not tparamet then
       Env.set_env_reactive env Nonreactive
@@ -7164,7 +7199,7 @@ and condition
       if (!(cond1 || cond2))
   *)
   | Aast.Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2)
-    when tparamet = (bop = Ast_defs.Ampamp) ->
+    when Bool.equal tparamet Ast_defs.(equal_bop bop Ampamp) ->
     let env = condition env tparamet e1 in
     (* This is necessary in case there is an assignment in e2
      * We essentially redo what has been undone in the
@@ -7177,7 +7212,7 @@ and condition
       if (!(cond1 && cond2))
   *)
   | Aast.Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2)
-    when tparamet = (bop = Ast_defs.Barbar) ->
+    when Bool.equal tparamet Ast_defs.(equal_bop bop Barbar) ->
     (* Either cond1 is true and we don't know anything about cond2... *)
     let env1 = condition env tparamet e1 in
     (* ... Or cond1 is false and therefore cond2 must be true *)
@@ -7189,7 +7224,7 @@ and condition
     let env2 = condition env2 tparamet e2 in
     LEnv.union_envs env env1 env2
   | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_array ->
+    when tparamet && String.equal f SN.StdlibFunctions.is_array ->
     is_array env `PHPArray p f lv
   | Aast.Call
       ( Cnormal,
@@ -7198,8 +7233,8 @@ and condition
         [shape; field],
         [] )
     when tparamet
-         && class_name = SN.Shapes.cShapes
-         && method_name = SN.Shapes.keyExists ->
+         && String.equal class_name SN.Shapes.cShapes
+         && String.equal method_name SN.Shapes.keyExists ->
     key_exists env p shape field
   | Aast.Unop (Ast_defs.Unot, e) -> condition env (not tparamet) e
   | Aast.Is (ivar, h) when is_instance_var (Tast.to_nast_expr ivar) ->
@@ -7250,7 +7285,7 @@ and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
       | None -> (env, (Reason.Rwitness ivar_pos, Tobject))
     end
   | (Ttuple ivar_tyl, Ttuple hint_tyl)
-    when List.length ivar_tyl = List.length hint_tyl ->
+    when Int.equal (List.length ivar_tyl) (List.length hint_tyl) ->
     let (env, tyl) =
       List.map2_env env ivar_tyl hint_tyl (fun env ivar_ty hint_ty ->
           class_for_refinement env p reason ivar_pos ivar_ty hint_ty)
@@ -7578,7 +7613,7 @@ and check_parents_sealed env child_def child_type =
 and check_const_trait_members pos env use_list =
   let (_, trait, _) = Decl_utils.unwrap_class_hint use_list in
   match Env.get_class env trait with
-  | Some c when Cls.kind c = Ast_defs.Ctrait ->
+  | Some c when Ast_defs.(equal_class_kind (Cls.kind c) Ctrait) ->
     Sequence.iter (Cls.props c) (fun (x, ce) ->
         if not ce.ce_const then Errors.trait_prop_const_class pos x)
   | _ -> ()
@@ -7638,7 +7673,10 @@ and class_def_ env c tc =
     in
     Typing_attributes.check_def env new_object kind c.c_user_attributes
   in
-  if c.c_kind = Ast_defs.Cnormal && not (shallow_decl_enabled ()) then (
+  if
+    Ast_defs.(equal_class_kind c.c_kind Cnormal)
+    && not (shallow_decl_enabled ())
+  then (
     (* This check is only for eager mode. The same check is performed
      * for shallow mode in Typing_inheritance *)
     let method_pos ~is_static class_id meth_id =
@@ -7714,7 +7752,7 @@ and class_def_ env c tc =
     match TUtils.get_base_type env locl_ty with
     | (_, Tclass (cls, _, tyl)) ->
       (match Env.get_class env (snd cls) with
-      | Some cls when Cls.where_constraints cls <> [] ->
+      | Some cls when not (List.is_empty (Cls.where_constraints cls)) ->
         let tc_tparams = Cls.tparams cls in
         let ety_env =
           {
@@ -7738,7 +7776,9 @@ and class_def_ env c tc =
   check_parents_sealed env c tc;
 
   let is_final = Cls.final tc in
-  if (Cls.kind tc = Ast_defs.Cnormal || is_final) && Cls.members_fully_known tc
+  if
+    (Ast_defs.(equal_class_kind (Cls.kind tc) Cnormal) || is_final)
+    && Cls.members_fully_known tc
   then (
     check_extend_abstract_meth ~is_final pc (Cls.methods tc);
     check_extend_abstract_meth ~is_final pc (Cls.smethods tc);
@@ -7912,7 +7952,7 @@ and check_extend_abstract_prop ~is_final p seq =
  *)
 and check_extend_abstract_typeconst ~is_final p seq =
   Sequence.iter seq (fun (x, tc) ->
-      if tc.ttc_type = None then
+      if Option.is_none tc.ttc_type then
         Errors.implement_abstract
           ~is_final
           p
@@ -8406,7 +8446,7 @@ and method_def env cls m =
         match TUtils.fun_mutable m.m_user_attributes with
         | None ->
           (* <<__Mutable>> is implicit on constructors  *)
-          if snd m.m_name = SN.Members.__construct then
+          if String.equal (snd m.m_name) SN.Members.__construct then
             Some Param_borrowed_mutable
           else
             None
@@ -8517,7 +8557,7 @@ and method_def env cls m =
       let env = Env.set_env_reactive env reactive in
       let type_hint' =
         match hint_of_type_hint m.m_ret with
-        | None when snd m.m_name = SN.Members.__construct ->
+        | None when String.equal (snd m.m_name) SN.Members.__construct ->
           Some (pos, Hprim Tvoid)
         | None ->
           if partial_callback 4030 then Errors.expecting_return_type_hint pos;

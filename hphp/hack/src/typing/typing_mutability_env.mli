@@ -25,6 +25,7 @@ type mut_type =
   | Borrowed
   | MaybeMutable
   | Immutable
+[@@deriving eq]
 
 type mutability = Pos.t * mut_type
 

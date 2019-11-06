@@ -17,14 +17,18 @@ let check_param _env params p user_attributes f_type name =
       match param.param_callconv with
       | Some Ast_defs.Pinout ->
         let pos = param.param_pos in
-        if f_type <> Ast_defs.FSync then
+        if not Ast_defs.(equal_fun_kind f_type FSync) then
           Errors.inout_params_outside_of_sync pos;
         if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos;
         Option.iter byref ~f:(fun p ->
             Errors.inout_params_mix_byref pos p.param_pos)
       | None -> ());
   let inout =
-    List.find params (fun x -> x.param_callconv = Some Ast_defs.Pinout)
+    List.find params (fun x ->
+        Option.equal
+          Ast_defs.equal_param_kind
+          x.param_callconv
+          (Some Ast_defs.Pinout))
   in
   match inout with
   | Some param ->
@@ -53,8 +57,10 @@ let check_callconv_expr e =
     match snd e1 with
     | Lvar (_, x)
       when not
-             ( Local_id.to_string x = SN.SpecialIdents.this
-             || Local_id.to_string x = SN.SpecialIdents.dollardollar ) ->
+             ( String.equal (Local_id.to_string x) SN.SpecialIdents.this
+             || String.equal
+                  (Local_id.to_string x)
+                  SN.SpecialIdents.dollardollar ) ->
       ()
     | Array_get (e2, Some _) -> check_callconv_expr_helper e2
     | _ -> Errors.inout_argument_bad_expr (fst e)

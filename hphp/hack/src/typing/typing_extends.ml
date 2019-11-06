@@ -118,7 +118,8 @@ let check_ambiguous_inheritance f parent child pos class_ origin =
   Errors.try_when
     (f parent child)
     ~when_:(fun () ->
-      Cls.name class_ <> origin && Errors.has_no_errors (f child parent))
+      String.( <> ) (Cls.name class_) origin
+      && Errors.has_no_errors (f child parent))
     ~do_:(fun error ->
       Errors.ambiguous_inheritance pos (Cls.name class_) origin error)
 
@@ -141,7 +142,7 @@ let check_final_method member_source parent_class_elt class_elt =
   in
   let is_override =
     parent_class_elt.ce_final
-    && parent_class_elt.ce_origin <> class_elt.ce_origin
+    && String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
   in
   if is_method && is_override && not class_elt.ce_synthesized then
     (* we have a final method being overridden by a user-declared method *)
@@ -160,7 +161,9 @@ let check_memoizelsb_method member_source parent_class_elt class_elt =
     | _ -> false
   in
   let is_memoizelsb = class_elt.ce_memoizelsb in
-  let is_override = parent_class_elt.ce_origin <> class_elt.ce_origin in
+  let is_override =
+    String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
+  in
   if is_method && is_memoizelsb && is_override then
     (* we have a __MemoizeLSB method which is overriding something else *)
     let (lazy (parent_pos, _)) = parent_class_elt.ce_type in
@@ -176,7 +179,9 @@ let check_lsb_overrides member_source member_name parent_class_elt class_elt =
     | _ -> false
   in
   let parent_is_lsb = parent_class_elt.ce_lsb in
-  let is_override = parent_class_elt.ce_origin <> class_elt.ce_origin in
+  let is_override =
+    String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
+  in
   if is_sprop && parent_is_lsb && is_override then
     (* __LSB attribute is being overridden *)
     let (lazy (parent_pos, _)) = parent_class_elt.ce_type in
@@ -186,8 +191,12 @@ let check_lsb_overrides member_source member_name parent_class_elt class_elt =
     Errors.override_lsb member_name parent_pos pos
 
 let check_lateinit parent_class_elt class_elt =
-  let is_override = parent_class_elt.ce_origin <> class_elt.ce_origin in
-  let lateinit_diff = parent_class_elt.ce_lateinit <> class_elt.ce_lateinit in
+  let is_override =
+    String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
+  in
+  let lateinit_diff =
+    Bool.( <> ) parent_class_elt.ce_lateinit class_elt.ce_lateinit
+  in
   if is_override && lateinit_diff then
     let (lazy (parent_reason, _)) = parent_class_elt.ce_type in
     let (lazy (child_reason, _)) = class_elt.ce_type in
@@ -256,7 +265,7 @@ let check_override
   let (lazy fty_parent) = parent_class_elt.ce_type in
   let pos = Reason.to_pos (fst fty_child) in
   let parent_pos = Reason.to_pos (fst fty_parent) in
-  if class_elt.ce_const <> parent_class_elt.ce_const then
+  if Bool.( <> ) class_elt.ce_const parent_class_elt.ce_const then
     Errors.overriding_prop_const_mismatch
       parent_pos
       parent_class_elt.ce_const
@@ -269,7 +278,9 @@ let check_override
     Errors.abstract_concrete_override
       pos
       parent_pos
-      ( if mem_source = `FromMethod || mem_source = `FromSMethod then
+      ( if
+        phys_equal mem_source `FromMethod || phys_equal mem_source `FromSMethod
+      then
         `method_
       else
         `property );
@@ -359,7 +370,8 @@ let check_override
           env)
       (fun errorl ->
         let err_code = Errors.get_code errorl in
-        if err_code = Error_codes.Typing.(to_enum MultipleConcreteDefs) then
+        if Int.equal err_code Error_codes.Typing.(to_enum MultipleConcreteDefs)
+        then
           Errors.add_error errorl
         else
           Errors.bad_method_override pos member_name errorl;
@@ -383,9 +395,9 @@ let check_const_override
       (* The parent we are checking is synthetic, no point in checking *)
       && (not parent_class_const.cc_synthesized)
       (* defined on original class *)
-      && class_const.cc_origin <> Cls.name class_
+      && String.( <> ) class_const.cc_origin (Cls.name class_)
       (* defined from parent class, nothing to check *)
-      && class_const.cc_origin <> parent_class_const.cc_origin
+      && String.( <> ) class_const.cc_origin parent_class_const.cc_origin
       (* Only check if there are multiple concrete definitions *)
       && (not class_const.cc_abstract)
       && not parent_class_const.cc_abstract
@@ -448,9 +460,9 @@ let check_members
       (* The parent we are checking is synthetic, no point in checking *)
       && (not parent_class_elt.ce_synthesized)
       (* defined on original class *)
-      && class_elt.ce_origin <> Cls.name class_
+      && String.( <> ) class_elt.ce_origin (Cls.name class_)
       (* defined from parent class, nothing to check *)
-      && class_elt.ce_origin <> parent_class_elt.ce_origin
+      && String.( <> ) class_elt.ce_origin parent_class_elt.ce_origin
     | _ -> false
   in
   Sequence.fold
@@ -474,7 +486,7 @@ let check_members
           let check_member_unique =
             should_check_member_unique class_elt parent_class_elt
           in
-          ( if parent_class_elt.ce_origin <> class_elt.ce_origin then
+          ( if String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin then
             let dep =
               match mem_source with
               | `FromMethod ->
@@ -570,8 +582,13 @@ let default_constructor_ce class_ =
 (* When an interface defines a constructor, we check that they are compatible *)
 let check_constructors
     env (parent_class, parent_ty) (class_, class_ty) psubst subst =
-  let consistent = snd (Cls.construct parent_class) <> Inconsistent in
-  if Cls.kind parent_class = Ast_defs.Cinterface || consistent then
+  let consistent =
+    not (equal_consistent_kind (snd (Cls.construct parent_class)) Inconsistent)
+  in
+  if
+    Ast_defs.(equal_class_kind (Cls.kind parent_class) Cinterface)
+    || consistent
+  then
     match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
     | (Some parent_cstr, _) when parent_cstr.ce_synthesized -> env
     | (Some parent_cstr, None) ->
@@ -584,7 +601,7 @@ let check_constructors
     | (Some parent_cstr, Some cstr) ->
       let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
       let cstr = Inst.instantiate_ce subst cstr in
-      if parent_cstr.ce_origin <> cstr.ce_origin then
+      if String.( <> ) parent_cstr.ce_origin cstr.ce_origin then
         Typing_deps.add_idep
           (Dep.Class (Cls.name class_))
           (Dep.Cstr parent_cstr.ce_origin);
@@ -602,7 +619,7 @@ let check_constructors
       let parent_cstr = default_constructor_ce parent_class in
       let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
       let cstr = Inst.instantiate_ce subst cstr in
-      if parent_cstr.ce_origin <> cstr.ce_origin then
+      if String.( <> ) parent_cstr.ce_origin cstr.ce_origin then
         Typing_deps.add_idep
           (Dep.Class (Cls.name class_))
           (Dep.Cstr parent_cstr.ce_origin);
@@ -757,7 +774,7 @@ let check_consts env parent_class class_ psubst subst =
     Sequence.fold consts ~init:SMap.empty ~f:(fun m (k, v) -> SMap.add k v m)
   in
   Sequence.iter pconsts (fun (const_name, parent_const) ->
-      if const_name <> SN.Members.mClass then
+      if String.( <> ) const_name SN.Members.mClass then
         match SMap.get const_name consts with
         | Some const ->
           (* skip checks for typeconst derived class constants *)
@@ -798,7 +815,9 @@ let check_class_implements
       psubst
       subst
   in
-  let check_privates : bool = Cls.kind parent_class = Ast_defs.Ctrait in
+  let check_privates : bool =
+    Ast_defs.(equal_class_kind (Cls.kind parent_class) Ctrait)
+  in
   if not fully_known then
     ()
   else
@@ -831,7 +850,7 @@ let check_implements env removals parent_type type_ =
       (Reason.to_pos parent_r, parent_class, parent_tparaml)
     in
     let class_ = (Reason.to_pos r, class_, tparaml) in
-    if snd parent_name = SN.Classes.cHH_BuiltinEnum then
+    if String.equal (snd parent_name) SN.Classes.cHH_BuiltinEnum then
       (* sadly, enum error reporting requires this to keep the error in the file
                with the enum *)
       Errors.try_

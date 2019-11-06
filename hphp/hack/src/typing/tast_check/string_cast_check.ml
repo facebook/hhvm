@@ -21,8 +21,8 @@ module SN = Naming_special_names
 
 let check__toString m =
   let (pos, name) = m.m_name in
-  if name = SN.Members.__toString then (
-    if m.m_visibility <> Public || m.m_static then
+  if String.equal name SN.Members.__toString then (
+    if (not (Aast.equal_visibility m.m_visibility Public)) || m.m_static then
       Errors.toString_visibility pos;
     match hint_of_type_hint m.m_ret with
     | Some (_, Hprim Tstring) -> ()

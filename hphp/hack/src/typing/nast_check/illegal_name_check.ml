@@ -18,14 +18,14 @@ let is_magic =
   let a x = Caml.Hashtbl.add h x true in
   let _ =
     SSet.iter
-      (fun m -> if m <> SN.Members.__toString then a m)
+      (fun m -> if String.( <> ) m SN.Members.__toString then a m)
       SN.Members.as_set
   in
   (fun (_, s) -> Caml.Hashtbl.mem h s)
 
 (* Class consts and typeconsts cannot be named "class" *)
 let error_if_is_named_class (pos, name) =
-  if String.lowercase name = "class" then
+  if String.equal (String.lowercase name) "class" then
     Errors.illegal_member_variable_class pos
 
 let handler =
@@ -44,17 +44,26 @@ let handler =
         let ck = env.class_kind in
         if not (SN.PseudoConsts.is_pseudo_const const) then
           ()
-        else if const = SN.PseudoConsts.g__CLASS__ && ck = None then
+        else if
+          String.equal const SN.PseudoConsts.g__CLASS__ && Option.is_none ck
+        then
           Errors.illegal_CLASS pos
         else if
-          const = SN.PseudoConsts.g__TRAIT__ && ck <> Some Ast_defs.Ctrait
+          String.equal const SN.PseudoConsts.g__TRAIT__
+          && not
+               (Option.equal
+                  Ast_defs.equal_class_kind
+                  ck
+                  (Some Ast_defs.Ctrait))
         then
           Errors.illegal_TRAIT pos
       | Class_const ((_, CIexpr (_, Id (_, "parent"))), (_, m_name))
-        when env.function_name = Some m_name ->
+        when Option.equal String.equal env.function_name (Some m_name) ->
         ()
       | Class_const (_, ((_, m_name) as mid))
-        when is_magic mid && env.function_name <> Some m_name ->
+        when is_magic mid
+             && not (Option.equal String.equal env.function_name (Some m_name))
+        ->
         Errors.magic mid
       | Obj_get (_, (_, Id s), _) when is_magic s -> Errors.magic s
       | _ -> ()
@@ -62,12 +71,16 @@ let handler =
     method! at_fun_ _ f =
       let (pos, fname) = f.f_name in
       let fname_lower = String.lowercase (strip_ns fname) in
-      if fname_lower = SN.Members.__construct || fname_lower = "using" then
+      if
+        String.equal fname_lower SN.Members.__construct
+        || String.equal fname_lower "using"
+      then
         Errors.illegal_function_name pos fname
 
     method! at_method_ env m =
       let (pos, name) = m.m_name in
-      if name = SN.Members.__destruct then Errors.illegal_destructor pos;
+      if String.equal name SN.Members.__destruct then
+        Errors.illegal_destructor pos;
       match env.class_name with
       | Some _ -> ()
       | None -> assert false

@@ -71,7 +71,7 @@ let apply_rules ?(ignore_type_structure = false) env ty f =
     (* Special case for `TypeStructure<_> as shape { ... }`, because some clients care about the
      * fact that we have the special type TypeStructure *)
     | (_, Tabstract (AKnewtype (cid, _), Some (_, Tshape _)))
-      when cid = SN.FB.cTypeStructure && ignore_type_structure ->
+      when String.equal cid SN.FB.cTypeStructure && ignore_type_structure ->
       default ()
     (* Enums with arraykey upper bound are treated as "abstract" *)
     | (_, Tabstract (AKnewtype (cid, _), Some (_, Tprim Aast.Tarraykey)))

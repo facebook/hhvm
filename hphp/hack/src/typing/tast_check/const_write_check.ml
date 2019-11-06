@@ -35,7 +35,7 @@ let check_prop env c pid cty_opt =
   let class_ = Env.get_class env c in
   (* Check we're in the LHS of an assignment, so we don't get confused
      by $foo->bar(), which is an Obj_get but not a property. *)
-  if Env.get_val_kind env = Typing_defs.Lval then
+  if Typing_defs.(equal_val_kind (Env.get_val_kind env) Lval) then
     Option.iter class_ ~f:(fun class_ ->
         match cty_opt with
         | Some cty ->
@@ -71,7 +71,8 @@ let rec check_expr env (_, e) =
         check_prop env c id ty
       | _ -> ()
     end
-  | Call (_, (_, Id (_, f)), _, el, []) when f = SN.PseudoFunctions.unset ->
+  | Call (_, (_, Id (_, f)), _, el, [])
+    when String.equal f SN.PseudoFunctions.unset ->
     let rec check_unset_exp e =
       match e with
       | (_, Array_get (e, Some _)) -> check_unset_exp e

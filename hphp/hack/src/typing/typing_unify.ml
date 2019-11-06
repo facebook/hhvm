@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
 open Core_kernel
 open Typing_defs
 
@@ -15,14 +16,14 @@ let unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =
     (* we want to allow use the "..." syntax in the declaration of
      * anonymous function types to match named variadic arguments
      * of the "...$args" form as well as unnamed ones *)
-    a_min = f_min
+    Int.equal a_min f_min
   | (Fvariadic (a_min, _), Fstandard (f_min, _))
   | (Fvariadic (a_min, _), Fvariadic (f_min, _))
   | (Fellipsis (a_min, _), Fstandard (f_min, _))
   | (Fellipsis (a_min, _), Fellipsis (f_min, _)) ->
     a_min <= f_min
   | (Fstandard (a_min, a_max), Fstandard (f_min, f_max)) ->
-    a_min = f_min && a_max = f_max
+    Int.equal a_min f_min && Int.equal a_max f_max
   | (_, _) -> false
 
 let unify_param_modes ?(enforce_ctpbr = true) param1 param2 =

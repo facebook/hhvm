@@ -11,16 +11,24 @@ open Core_kernel
 open Aast
 open Nast_check_env
 
-let is_coroutine env = env.function_kind = Some Ast_defs.FCoroutine
+let is_coroutine env =
+  Option.equal
+    Ast_defs.equal_fun_kind
+    env.function_kind
+    (Some Ast_defs.FCoroutine)
 
 let is_generator env =
   let fun_kind = env.function_kind in
-  fun_kind = Some Ast_defs.FGenerator
-  || fun_kind = Some Ast_defs.FAsyncGenerator
+  Option.equal Ast_defs.equal_fun_kind fun_kind (Some Ast_defs.FGenerator)
+  || Option.equal
+       Ast_defs.equal_fun_kind
+       fun_kind
+       (Some Ast_defs.FAsyncGenerator)
 
 let is_sync env =
   let fun_kind = env.function_kind in
-  fun_kind = Some Ast_defs.FGenerator || fun_kind = Some Ast_defs.FSync
+  Option.equal Ast_defs.equal_fun_kind fun_kind (Some Ast_defs.FGenerator)
+  || Option.equal Ast_defs.equal_fun_kind fun_kind (Some Ast_defs.FSync)
 
 let handler =
   object

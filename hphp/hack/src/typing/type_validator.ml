@@ -56,7 +56,7 @@ class virtual type_validator =
       | [] -> this#on_type acc root
       | (_, tconst) :: rest ->
         let root =
-          if rest = [] then
+          if List.is_empty rest then
             root
           else
             (r, Taccess (root, List.rev rest))
@@ -90,7 +90,7 @@ class virtual type_validator =
             | _ -> acc)
 
     method! on_tapply acc r (pos, name) tyl =
-      if Env.is_enum acc.env name && tyl = [] then
+      if Env.is_enum acc.env name && List.is_empty tyl then
         this#on_enum acc r (pos, name)
       else
         match Env.get_typedef acc.env name with
@@ -116,7 +116,11 @@ class virtual type_validator =
             let subst = Decl_instantiate.make_subst td_tparams tyl in
             let td_type = Decl_instantiate.instantiate subst td_type in
             (match td_vis with
-            | Aast.Opaque when Pos.filename td_pos <> Env.get_file acc.env ->
+            | Aast.Opaque
+              when not
+                     (Relative_path.equal
+                        (Pos.filename td_pos)
+                        (Env.get_file acc.env)) ->
               let td_constraint =
                 match td_constraint with
                 | None -> (r, Tmixed)
@@ -163,8 +167,7 @@ class virtual type_validator =
       this#validate_type env hint_ty emit_error
 
     method invalid state r msg =
-      if state.validity = Valid then
-        { state with validity = Invalid (r, msg) }
-      else
-        state
+      match state.validity with
+      | Valid -> { state with validity = Invalid (r, msg) }
+      | Invalid _ -> state
   end

@@ -133,7 +133,7 @@ let rec to_string prefix r =
   | Ridx (_, r2) ->
     [(p, prefix)]
     @ [
-        ( ( if r2 = Rnone then
+        ( ( if equal r2 Rnone then
             p
           else
             to_pos r2 ),
@@ -361,7 +361,7 @@ let rec to_string prefix r =
       ]
   | Rtypeconst (Rnone, (pos, tconst), ty_str, r_root) ->
     let prefix =
-      if prefix = "" then
+      if String.equal prefix "" then
         ""
       else
         prefix ^ "\n  "
@@ -821,10 +821,10 @@ let compare r1 r2 =
     | _ -> 2
   in
   let d = get_pri r2 - get_pri r1 in
-  if d <> 0 then
+  if Int.( <> ) d 0 then
     d
   else
-    compare (to_pos r1) (to_pos r2)
+    Pos.compare (to_pos r1) (to_pos r2)
 
 let none = Rnone
 

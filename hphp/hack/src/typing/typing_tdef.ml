@@ -41,7 +41,8 @@ let expand_typedef_ ?(force_expand = false) ety_env env r x argl =
       force_expand
       ||
       match td_vis with
-      | Aast.Opaque -> Pos.filename td_pos = Env.get_file env
+      | Aast.Opaque ->
+        Relative_path.equal (Pos.filename td_pos) (Env.get_file env)
       | Aast.Transparent -> true
     in
     let ety_env =

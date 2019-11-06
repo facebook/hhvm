@@ -82,6 +82,7 @@ type tyvar_info_ = {
     * locl_ty )
     SMap.t;
 }
+[@@deriving eq]
 
 (* For global inference we are distinguishing global tyvars and local tyvars.
 Global tyvars are tyvars which have to remain unsolved until all of the files
@@ -96,6 +97,7 @@ can be found in the globalenv.
 type tyvar_info =
   | LocalTyvar of tyvar_info_
   | GlobalTyvar
+[@@deriving eq]
 
 type tvenv = tyvar_info IMap.t
 

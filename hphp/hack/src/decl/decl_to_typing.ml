@@ -86,7 +86,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
   let ty =
     lazy
       begin
-        if child_class = mro.mro_name then
+        if String.equal child_class mro.mro_name then
           ty
         else Decl_instantiate.instantiate subst ty
       end
@@ -139,7 +139,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
           | None -> (Reason.Rwitness (fst sp_name), Typing_defs.make_tany ())
           | Some ty -> ty
         in
-        if child_class = mro.mro_name then
+        if String.equal child_class mro.mro_name then
           ty
         else
           Decl_instantiate.instantiate subst ty
@@ -173,7 +173,7 @@ let shallow_const_to_class_const child_class mro subst const =
   in
   let ty =
     let ty = scc_type in
-    if child_class = mro.mro_name then
+    if String.equal child_class mro.mro_name then
       ty
     else
       Decl_instantiate.instantiate subst ty
@@ -248,20 +248,20 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
     stc
   in
   let constraint_ =
-    if child_class = mro.mro_name then
+    if String.equal child_class mro.mro_name then
       stc_constraint
     else
       Option.map stc_constraint (Decl_instantiate.instantiate subst)
   in
   let ty =
-    if child_class = mro.mro_name then
+    if String.equal child_class mro.mro_name then
       stc_type
     else
       Option.map stc_type (Decl_instantiate.instantiate subst)
   in
   let abstract =
     match stc_abstract with
-    | TCAbstract default_opt when child_class <> mro.mro_name ->
+    | TCAbstract default_opt when String.( <> ) child_class mro.mro_name ->
       TCAbstract (Option.map default_opt (Decl_instantiate.instantiate subst))
     | _ -> stc_abstract
   in

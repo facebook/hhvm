@@ -20,6 +20,7 @@ module MakeType = Typing_make_type
 module SubType = Typing_subtype
 module Partial = Partial_provider
 module GenericRules = Typing_generic_rules
+open String.Replace_polymorphic_compare
 
 let err_witness env p = (Reason.Rwitness p, TUtils.terr env)
 
@@ -257,7 +258,8 @@ let rec array_get
         let env = type_index env expr_pos ty2 ty1 Reason.index_array in
         (env, ty)
       | Tclass (((_, cn) as id), _, argl)
-        when cn = SN.Collections.cVector || cn = SN.Collections.cVec ->
+        when String.equal cn SN.Collections.cVector
+             || String.equal cn SN.Collections.cVec ->
         let ty =
           match argl with
           | [ty] -> ty
@@ -278,8 +280,8 @@ let rec array_get
         ) else
           let (k, v) =
             match argl with
-            | [t] when cn = SN.Collections.cKeyset -> (t, t)
-            | [k; v] when cn <> SN.Collections.cKeyset -> (k, v)
+            | [t] when String.equal cn SN.Collections.cKeyset -> (t, t)
+            | [k; v] when String.( <> ) cn SN.Collections.cKeyset -> (k, v)
             | _ ->
               arity_error id;
               let any = err_witness env expr_pos in
@@ -293,7 +295,10 @@ let rec array_get
            *)
           let (env, k) = Env.expand_type env k in
           let env =
-            if cn = SN.Collections.cDict || cn = SN.Collections.cKeyset then
+            if
+              String.equal cn SN.Collections.cDict
+              || String.equal cn SN.Collections.cKeyset
+            then
               check_arraykey_index env expr_pos ety1 ty2
             else
               type_index env expr_pos ty2 k (Reason.index_class cn)
@@ -306,9 +311,9 @@ let rec array_get
        *   $x[0]; // OK
        *)
       | Tclass (((_, cn) as id), _, argl)
-        when cn = SN.Collections.cConstMap
-             || cn = SN.Collections.cImmMap
-             || cn = SN.Collections.cKeyedContainer ->
+        when String.equal cn SN.Collections.cConstMap
+             || String.equal cn SN.Collections.cImmMap
+             || String.equal cn SN.Collections.cKeyedContainer ->
         if is_lvalue then
           error_const_mutation env expr_pos ety1
         else
@@ -324,8 +329,8 @@ let rec array_get
           (env, v)
       | Tclass (((_, cn) as id), _, argl)
         when (not is_lvalue)
-             && ( cn = SN.Collections.cConstVector
-                || cn = SN.Collections.cImmVector ) ->
+             && ( String.equal cn SN.Collections.cConstVector
+                || String.equal cn SN.Collections.cImmVector ) ->
         let ty =
           match argl with
           | [ty] -> ty
@@ -338,8 +343,8 @@ let rec array_get
         (env, ty)
       | Tclass ((_, cn), _, _)
         when is_lvalue
-             && ( cn = SN.Collections.cConstVector
-                || cn = SN.Collections.cImmVector ) ->
+             && ( String.equal cn SN.Collections.cConstVector
+                || String.equal cn SN.Collections.cImmVector ) ->
         error_const_mutation env expr_pos ety1
       | Tarraykind (AKdarray (_k, v)) ->
         let env = check_arraykey_index env expr_pos ety1 ty2 in
@@ -373,7 +378,8 @@ let rec array_get
             p
             (Reason.string_of_ureason Reason.URtuple_access);
           (env, err_witness env p))
-      | Tclass (((_, cn) as id), _, argl) when cn = SN.Collections.cPair ->
+      | Tclass (((_, cn) as id), _, argl)
+        when String.equal cn SN.Collections.cPair ->
         let (ty1, ty2) =
           match argl with
           | [ty1; ty2] -> (ty1, ty2)
@@ -433,7 +439,7 @@ let rec array_get
                   if sft_optional then (
                     let declared_field =
                       List.find_exn
-                        ~f:(fun x -> Ast_defs.ShapeField.compare field x = 0)
+                        ~f:(fun x -> Ast_defs.ShapeField.equal field x)
                         (ShapeMap.keys fdm)
                     in
                     Errors.array_get_with_optional_field
@@ -455,7 +461,7 @@ let rec array_get
         else
           (env, (Reason.Rwitness expr_pos, TUtils.tany env))
       | Tabstract (AKnewtype (ts, [ty]), Some (r, Tshape (shape_kind, fields)))
-        when ts = SN.FB.cTypeStructure ->
+        when String.equal ts SN.FB.cTypeStructure ->
         let (env, fields) =
           Typing_structure.transform_shapemap env array_pos ty fields
         in
@@ -502,10 +508,10 @@ let rec array_get
 let widen_for_assign_array_append ~expr_pos env ty =
   match ty with
   | (r, Tclass (((_, cn) as id), _, tyl))
-    when cn = SN.Collections.cVec
-         || cn = SN.Collections.cKeyset
-         || cn = SN.Collections.cVector
-         || cn = SN.Collections.cMap ->
+    when String.equal cn SN.Collections.cVec
+         || String.equal cn SN.Collections.cKeyset
+         || String.equal cn SN.Collections.cVector
+         || String.equal cn SN.Collections.cMap ->
     let (env, params) =
       List.map_env env tyl (fun env _ty ->
           Env.fresh_invariant_type_var env expr_pos)
@@ -532,7 +538,8 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       | (_, (Tany _ | Tarraykind AKempty)) -> (env, ty1)
       | (_, Terr) -> (env, ty1)
       | (_, Tclass ((_, n), _, [tv]))
-        when n = SN.Collections.cVector || n = SN.Collections.cSet ->
+        when String.equal n SN.Collections.cVector
+             || String.equal n SN.Collections.cSet ->
         let env =
           Typing_ops.sub_type expr_pos ur env ty2 tv Errors.unify_error
         in
@@ -540,9 +547,11 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       (* Handle the case where Vector or Set was used as a typehint
        without type parameters *)
       | (_, Tclass ((_, n), _, []))
-        when n = SN.Collections.cVector || n = SN.Collections.cSet ->
+        when String.equal n SN.Collections.cVector
+             || String.equal n SN.Collections.cSet ->
         (env, ty1)
-      | (_, Tclass ((_, n), _, [tk; tv])) when n = SN.Collections.cMap ->
+      | (_, Tclass ((_, n), _, [tk; tv]))
+        when String.equal n SN.Collections.cMap ->
         let tpair = MakeType.pair (Reason.Rmap_append expr_pos) tk tv in
         let env =
           Typing_ops.sub_type expr_pos ur env ty2 tpair Errors.unify_error
@@ -550,7 +559,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
         (env, ty1)
       (* Handle the case where Map was used as a typehint without
        type parameters *)
-      | (_, Tclass ((_, n), _, [])) when n = SN.Collections.cMap ->
+      | (_, Tclass ((_, n), _, [])) when String.equal n SN.Collections.cMap ->
         let tpair =
           MakeType.class_type
             (Reason.Rmap_append expr_pos)
@@ -562,7 +571,8 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
         in
         (env, ty1)
       | (r, Tclass (((_, n) as id), e, [tv]))
-        when n = SN.Collections.cVec || n = SN.Collections.cKeyset ->
+        when String.equal n SN.Collections.cVec
+             || String.equal n SN.Collections.cKeyset ->
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, (r, Tclass (id, e, [tv'])))
       | (r, Tarraykind (AKvarray tv)) ->
@@ -687,7 +697,8 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
         let env = type_index env expr_pos tkey tk Reason.index_array in
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, (r, Tarraykind (AKvarray_or_darray tv')))
-      | Tclass (((_, cn) as id), _, argl) when cn = SN.Collections.cVector ->
+      | Tclass (((_, cn) as id), _, argl)
+        when String.equal cn SN.Collections.cVector ->
         let tv =
           match argl with
           | [tv] -> tv
@@ -701,7 +712,8 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
           Typing_ops.sub_type expr_pos ur env ty2 tv Errors.unify_error
         in
         (env, ety1)
-      | Tclass (((_, cn) as id), e, argl) when cn = SN.Collections.cVec ->
+      | Tclass (((_, cn) as id), e, argl)
+        when String.equal cn SN.Collections.cVec ->
         let tv =
           match argl with
           | [tv] -> tv
@@ -728,7 +740,8 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
           Typing_ops.sub_type expr_pos ur env ty2 tv Errors.unify_error
         in
         (env, ety1)
-      | Tclass (((_, cn) as id), e, argl) when cn = SN.Collections.cDict ->
+      | Tclass (((_, cn) as id), e, argl)
+        when String.equal cn SN.Collections.cDict ->
         let env = check_arraykey_index env expr_pos ety1 tkey in
         let (tk, tv) =
           match argl with
@@ -741,16 +754,16 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
         let (env, tk') = Typing_union.union env tk tkey in
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, (r, Tclass (id, e, [tk'; tv'])))
-      | Tclass ((_, cn), _, _) when cn = SN.Collections.cKeyset ->
+      | Tclass ((_, cn), _, _) when String.equal cn SN.Collections.cKeyset ->
         Errors.keyset_set expr_pos (Reason.to_pos r);
         error
       | Tclass ((_, cn), _, _)
-        when cn = SN.Collections.cConstMap
-             || cn = SN.Collections.cImmMap
-             || cn = SN.Collections.cKeyedContainer
-             || cn = SN.Collections.cConstVector
-             || cn = SN.Collections.cImmVector
-             || cn = SN.Collections.cPair ->
+        when String.equal cn SN.Collections.cConstMap
+             || String.equal cn SN.Collections.cImmMap
+             || String.equal cn SN.Collections.cKeyedContainer
+             || String.equal cn SN.Collections.cConstVector
+             || String.equal cn SN.Collections.cImmVector
+             || String.equal cn SN.Collections.cPair ->
         Errors.const_mutation
           expr_pos
           (Reason.to_pos r)

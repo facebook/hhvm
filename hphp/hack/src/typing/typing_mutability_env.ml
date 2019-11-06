@@ -7,7 +7,11 @@
  *
  *)
 
+[@@@warning "-33"]
+
 open Core_kernel
+
+[@@@warning "+33"]
 
 (* Tracks the different types of mutability of a given local variable.
   See typing_mutability.ml for a description of the fields.
@@ -19,6 +23,7 @@ type mut_type =
   | Borrowed
   | MaybeMutable
   | Immutable
+[@@deriving eq]
 
 type mutability = Pos.t * mut_type
 
@@ -53,7 +58,7 @@ let intersect_mutability
     match (v1_opt, v2_opt) with
     | (Some (p1, mut1), Some (p2, mut2)) ->
       let assumed_mut =
-        if mut1 = mut2 then
+        if equal_mut_type mut1 mut2 then
           mut1
         else (
           Errors.inconsistent_mutability

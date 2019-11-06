@@ -13,7 +13,7 @@ open Aast
 let enforce_no_body m =
   match m.m_body.fb_ast with
   | [] ->
-    if m.m_visibility = Private then
+    if Aast.equal_visibility m.m_visibility Private then
       Errors.not_public_or_protected_interface (fst m.m_name)
   | _ -> Errors.abstract_body (fst m.m_name)
 
@@ -39,7 +39,10 @@ let check_interface c =
 
   (* make sure interfaces do not contain partially abstract type constants *)
   List.iter c.c_typeconsts (fun tc ->
-      if tc.c_tconst_constraint <> None && tc.c_tconst_type <> None then
+      if
+        Option.is_some tc.c_tconst_constraint
+        && Option.is_some tc.c_tconst_type
+      then
         Errors.interface_with_partial_typeconst (fst tc.c_tconst_name));
 
   (* make sure that interfaces only have empty public methods *)
@@ -50,5 +53,5 @@ let handler =
     inherit Nast_visitor.handler_base
 
     method! at_class_ _ c =
-      if c.c_kind = Ast_defs.Cinterface then check_interface c
+      if Ast_defs.(equal_class_kind c.c_kind Cinterface) then check_interface c
   end

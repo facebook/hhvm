@@ -167,7 +167,7 @@ and simplify_union_ env ty1 ty2 r =
       let r = union_reason r1 r2 in
       (env, Some (MakeType.num r))
     | ((_, Tclass ((p, id1), e1, tyl1)), (_, Tclass ((_, id2), e2, tyl2)))
-      when id1 = id2 ->
+      when String.equal id1 id2 ->
       let e = exact_least_upper_bound e1 e2 in
       let (env, tyl) = union_class env id1 tyl1 tyl2 in
       (env, Some (r, Tclass ((p, id1), e, tyl)))
@@ -182,7 +182,7 @@ and simplify_union_ env ty1 ty2 r =
     | (ty2, (_, Tabstract (AKdependent _, Some ((_, Tclass _) as ty1)))) ->
       ty_equiv env ty1 ty2 ~are_ty_param:false
     | ((_, Ttuple tyl1), (_, Ttuple tyl2)) ->
-      if List.length tyl1 = List.length tyl2 then
+      if Int.equal (List.length tyl1) (List.length tyl2) then
         let (env, tyl) = List.map2_env env tyl1 tyl2 ~f:union in
         (env, Some (r, Ttuple tyl))
       else
@@ -195,7 +195,7 @@ and simplify_union_ env ty1 ty2 r =
     | ((_, Tfun ft1), (_, Tfun ft2)) ->
       let (env, ft) = union_funs env ft1 ft2 in
       (env, Some (r, Tfun ft))
-    | ((_, Tanon (_, id1)), (_, Tanon (_, id2))) when id1 = id2 ->
+    | ((_, Tanon (_, id1)), (_, Tanon (_, id2))) when Ident.equal id1 id2 ->
       (env, Some ty1)
     (* TODO with Tclass, union type arguments if covariant *)
     | ( ( _,
@@ -324,17 +324,12 @@ and union_arraykind env ak1 ak2 =
 and union_funs env fty1 fty2 =
   (* TODO: If we later add fields to ft, they will be forgotten here. *)
   if
-    ( fty1.ft_is_coroutine,
-      fty1.ft_arity,
-      fty1.ft_reactive,
-      fty1.ft_return_disposable,
-      fty1.ft_returns_mutable )
-    = ( fty2.ft_is_coroutine,
-        fty2.ft_arity,
-        fty2.ft_reactive,
-        fty2.ft_return_disposable,
-        fty2.ft_returns_mutable )
-    && ft_params_compare fty1.ft_params fty2.ft_params = 0
+    Bool.equal fty1.ft_is_coroutine fty2.ft_is_coroutine
+    && equal_locl_fun_arity fty1.ft_arity fty2.ft_arity
+    && equal_reactivity fty1.ft_reactive fty2.ft_reactive
+    && Bool.equal fty1.ft_return_disposable fty2.ft_return_disposable
+    && Bool.equal fty1.ft_returns_mutable fty2.ft_returns_mutable
+    && Int.equal (ft_params_compare fty1.ft_params fty2.ft_params) 0
   then
     let (env, ft_ret) =
       union_possibly_enforced_tys env fty1.ft_ret fty2.ft_ret
@@ -357,11 +352,11 @@ and union_class env name tyl1 tyl2 =
 
 and union_ak env ak1 ak2 =
   match (ak1, ak2) with
-  | (AKnewtype (id1, tyl1), AKnewtype (id2, tyl2)) when id1 = id2 ->
+  | (AKnewtype (id1, tyl1), AKnewtype (id2, tyl2)) when String.equal id1 id2 ->
     let (env, tyl) = union_newtype env id1 tyl1 tyl2 in
     (env, AKnewtype (id1, tyl))
   | _ ->
-    if abstract_kind_compare ak1 ak2 = 0 then
+    if Int.equal 0 (abstract_kind_compare ak1 ak2) then
       (env, ak1)
     else
       raise Dont_simplify
@@ -449,9 +444,9 @@ and union_shape_kind shape_kind1 shape_kind2 =
 (* TODO: add a new reason with positions of merge point and possibly merged
  * envs.*)
 and union_reason r1 r2 =
-  if r1 = Reason.none then
+  if Reason.(equal r1 none) then
     r2
-  else if r2 = Reason.none then
+  else if Reason.(equal r2 none) then
     r1
   else if Reason.compare r1 r2 <= 0 then
     r1

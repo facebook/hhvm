@@ -28,10 +28,12 @@ type tyvar_info_ = {
   upper_bounds: ITySet.t;
   type_constants: (Aast.sid * locl_ty) SMap.t;
 }
+[@@deriving eq]
 
 type tyvar_info =
   | LocalTyvar of tyvar_info_
   | GlobalTyvar
+[@@deriving eq]
 
 type tvenv = tyvar_info IMap.t
 

@@ -226,7 +226,8 @@ and class_ tenv c =
   let env = { env with tenv } in
   let (c_constructor, c_statics, c_methods) = split_methods c in
   let (c_static_vars, c_vars) = split_vars c in
-  if not (c.c_kind = Ast_defs.Cinterface) then maybe method_ env c_constructor;
+  if not Ast_defs.(equal_class_kind c.c_kind Cinterface) then
+    maybe method_ env c_constructor;
   List.iter c.c_tparams.c_tparam_list (tparam env);
   List.iter c.c_where_constraints (where_constr env);
   List.iter c.c_extends (hint env);

@@ -193,7 +193,8 @@ and expand env ~as_tyvar_with_cnstr root id ~allow_abstract_tconst =
     TODO: T54081153 fix `self` in traits and clean this up *)
     | Tclass ((_, class_name), _, _)
       when match Env.get_class env.tenv class_name with
-           | Some ci -> Decl_provider.Class.kind ci = Ast_defs.Ctrait
+           | Some ci ->
+             Ast_defs.(equal_class_kind (Decl_provider.Class.kind ci) Ctrait)
            | None -> false ->
       true
     | _ -> allow_abstract_tconst
@@ -360,7 +361,9 @@ and create_root_from_type_constant
    * class name + ids that means we have entered a cycle.
    *)
   let type_expansions = (tconst_pos, ty_name) :: ety_env.type_expansions in
-  ( if List.mem ~equal:( = ) (List.map ety_env.type_expansions snd) ty_name then
+  ( if
+    List.mem ~equal:String.equal (List.map ety_env.type_expansions snd) ty_name
+  then
     let seen = List.rev_map type_expansions snd in
     raise_error (fun () ->
         Errors.cyclic_typeconst (fst typeconst.ttc_name) seen) );
@@ -379,7 +382,7 @@ and create_root_from_type_constant
   match typeconst with
   (* Concrete type constants *)
   | { ttc_type = Some ty; _ }
-    when typeconst.ttc_constraint = None || env.choose_assigned_type ->
+    when Option.is_none typeconst.ttc_constraint || env.choose_assigned_type ->
     let (tenv, (r, ty)) = Phase.localize ~ety_env env.tenv ty in
     ( { env with choose_assigned_type = true; tenv },
       (make_reason tenv r ~root, ty) )

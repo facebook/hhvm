@@ -14,8 +14,8 @@ open Typing_defs
 let conditionally_reactive_attribute_to_hint env { ua_params = l; _ } =
   match l with
   (* convert class const expression to non-generic type hint *)
-  | [(p, Class_const ((_, CI cls), (_, name)))] when name = SN.Members.mClass
-    ->
+  | [(p, Class_const ((_, CI cls), (_, name)))]
+    when String.equal name SN.Members.mClass ->
     (* set Extends dependency for between class that contains
          method and condition type *)
     Decl_env.add_extends_dependency env (snd cls);
@@ -176,7 +176,9 @@ let minimum_arity paraml =
   in a call to this method. Variadic "..." parameters need not be specified,
   parameters with default values need not be specified, so this method counts
   non-default-value, non-variadic parameters. *)
-  let f param = (not param.param_is_variadic) && param.param_expr = None in
+  let f param =
+    (not param.param_is_variadic) && Option.is_none param.param_expr
+  in
   List.count paraml f
 
 let check_params env paraml =
@@ -195,15 +197,15 @@ let check_params env paraml =
       (* Assume that a variadic parameter is the last one we need
             to check. We've already given a parse error if the variadic
             parameter is not last. *)
-      else if seen_default && param.param_expr = None then
+      else if seen_default && Option.is_none param.param_expr then
         Errors.previous_default param.param_pos
       (* We've seen at least one required parameter, and there's an
           optional parameter after it.  Given an error, and then stop looking
           for more errors in this parameter list. *)
       else
-        loop (param.param_expr <> None) rl
+        loop (Option.is_some param.param_expr) rl
   in
   (* PHP allows non-default valued parameters after default valued parameters. *)
-  if env.Decl_env.mode <> FileInfo.Mphp then loop false paraml
+  if not FileInfo.(equal_mode env.Decl_env.mode Mphp) then loop false paraml
 
 let make_params env paraml = List.map paraml ~f:(make_param_ty env)

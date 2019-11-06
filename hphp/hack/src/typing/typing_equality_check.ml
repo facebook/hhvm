@@ -56,7 +56,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
   | ( (_, Tabstract (AKnewtype (e1, _), Some (_, Tprim N.Tarraykey))),
       (_, Tabstract (AKnewtype (e2, _), Some (_, Tprim N.Tarraykey))) )
     when Env.is_enum env e1 && Env.is_enum env e2 ->
-    if e1 = e2 then
+    if String.equal e1 e2 then
       ()
     else
       eq_incompatible_types env p ety1 ety2
@@ -80,7 +80,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
     | (_, (r, Tprim N.Tvoid)) ->
       (* Ideally we shouldn't hit this case, but well... *)
       Errors.void_usage p (Reason.to_string "This is void" r)
-    | ((_, Tprim a), (_, Tprim b)) when a <> b ->
+    | ((_, Tprim a), (_, Tprim b)) when not (Aast.equal_tprim a b) ->
       trivial_comparison_error env p bop ty1 ty2 trail1 trail2
     | ((_, Toption ty1), ((_, Tprim _) as ty2))
     | (((_, Tprim _) as ty1), (_, Toption ty2)) ->

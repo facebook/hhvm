@@ -17,7 +17,7 @@ module TLazyHeap = Decl_provider
 
 let has_ppl_attribute c =
   List.exists c.c_user_attributes (fun { ua_name; _ } ->
-      SN.UserAttributes.uaProbabilisticModel = snd ua_name)
+      String.equal SN.UserAttributes.uaProbabilisticModel (snd ua_name))
 
 (* If an object's type is wrapped in a Tabstract, recurse until we've hit the base *)
 let rec base_type ty =
@@ -39,7 +39,7 @@ let check_ppl_class c =
       begin
         match TLazyHeap.get_class name with
         | Some parent_type ->
-          if Cls.ppl parent_type <> is_ppl then
+          if Bool.( <> ) (Cls.ppl parent_type) is_ppl then
             error
               (Cls.pos parent_type)
               parent_class_string
@@ -147,7 +147,7 @@ let on_call_expr env ((p, _), x) =
   match x with
   | Obj_get (e, (_, _), _) -> check_ppl_obj_get env e
   | Class_const ((_, CIparent), (_, construct))
-    when construct = SN.Members.__construct ->
+    when String.equal construct SN.Members.__construct ->
     ()
   | Class_const ((_, CIparent), _) -> check_ppl_parent_method env p
   | Class_const ((_, e), _) -> check_ppl_class_const env p e

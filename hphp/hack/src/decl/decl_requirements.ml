@@ -98,7 +98,7 @@ let naive_dedup req_extends =
         begin
           try
             let hl' = Caml.Hashtbl.find h name in
-            if List.compare Pervasives.compare hl hl' <> 0 then
+            if not (List.equal hl hl' equal_decl_ty) then
               raise Exit
             else
               None
@@ -135,7 +135,7 @@ let get_class_requirements env shallow_class =
     List.fold_left
       ~f:(flatten_parent_class_reqs env shallow_class)
       ~init:acc
-      ( if shallow_class.sc_kind = Ast_defs.Cinterface then
+      ( if Ast_defs.(equal_class_kind shallow_class.sc_kind Cinterface) then
         shallow_class.sc_extends
       else
         shallow_class.sc_implements )

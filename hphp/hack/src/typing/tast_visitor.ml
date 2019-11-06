@@ -23,7 +23,11 @@ class virtual iter =
 
     method! on_method_ env x =
       let env =
-        if snd x.Aast.m_name = Naming_special_names.Members.__construct then
+        if
+          String.equal
+            (snd x.Aast.m_name)
+            Naming_special_names.Members.__construct
+        then
           Env.set_inside_constructor env
         else if x.Aast.m_static then
           Env.set_static env
@@ -68,7 +72,11 @@ class virtual ['state] iter_with_state =
 
     method! on_method_ (env, state) x =
       let env =
-        if snd x.Aast.m_name = Naming_special_names.Members.__construct then
+        if
+          String.equal
+            (snd x.Aast.m_name)
+            Naming_special_names.Members.__construct
+        then
           Env.set_inside_constructor env
         else if x.Aast.m_static then
           Env.set_static env
@@ -106,7 +114,11 @@ class virtual ['a] reduce =
 
     method! on_method_ env x =
       let env =
-        if snd x.Aast.m_name = Naming_special_names.Members.__construct then
+        if
+          String.equal
+            (snd x.Aast.m_name)
+            Naming_special_names.Members.__construct
+        then
           Env.set_inside_constructor env
         else if x.Aast.m_static then
           Env.set_static env
@@ -151,7 +163,11 @@ class virtual map =
 
     method! on_method_ env x =
       let env =
-        if snd x.Aast.m_name = Naming_special_names.Members.__construct then
+        if
+          String.equal
+            (snd x.Aast.m_name)
+            Naming_special_names.Members.__construct
+        then
           Env.set_inside_constructor env
         else if x.Aast.m_static then
           Env.set_static env
@@ -195,7 +211,11 @@ class virtual endo =
 
     method! on_method_ env x =
       let env =
-        if snd x.Aast.m_name = Naming_special_names.Members.__construct then
+        if
+          String.equal
+            (snd x.Aast.m_name)
+            Naming_special_names.Members.__construct
+        then
           Env.set_inside_constructor env
         else if x.Aast.m_static then
           Env.set_static env

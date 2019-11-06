@@ -18,7 +18,7 @@ module MakeType = Typing_make_type
 let get_constant tc (seen, has_default) = function
   | Default _ -> (seen, true)
   | Case (((pos, _), Class_const ((_, CI (_, cls)), (_, const))), _) ->
-    if cls <> Cls.name tc then (
+    if String.( <> ) cls (Cls.name tc) then (
       Errors.enum_switch_wrong_class
         pos
         (strip_ns (Cls.name tc))
@@ -44,7 +44,7 @@ let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
   let unhandled =
     Cls.consts tc
     |> Sequence.map ~f:fst
-    |> Sequence.filter ~f:(( <> ) SN.Members.mClass)
+    |> Sequence.filter ~f:(fun id -> String.( <> ) id SN.Members.mClass)
     |> Sequence.filter ~f:(fun id -> not (SMap.mem id seen))
     |> Sequence.to_list_rev
   in

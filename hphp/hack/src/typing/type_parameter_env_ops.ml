@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
 module TP = Type_parameter_env
 module TySet = Typing_set
 module Env = Typing_env
@@ -148,7 +149,7 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
     match SMap.find_opt tparam substs with
     | None -> (substs, None)
     | Some ((_, Tabstract (AKgeneric tparam', _)) as subst)
-      when tparam' <> tparam ->
+      when String.( <> ) tparam' tparam ->
       let (substs, new_subst_opt) = reduce substs tparam' in
       begin
         match new_subst_opt with

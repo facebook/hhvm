@@ -49,7 +49,11 @@ let enforce_is_disposable env hint =
       match Env.get_class_dep env c with
       | None -> ()
       | Some c ->
-        if not (Cls.is_disposable c || Cls.kind c = Ast_defs.Cinterface) then
+        if
+          not
+            ( Cls.is_disposable c
+            || Ast_defs.(equal_class_kind (Cls.kind c) Cinterface) )
+        then
           Errors.must_extend_disposable p
     end
   | _ -> ()

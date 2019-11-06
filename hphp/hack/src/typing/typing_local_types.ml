@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
 open Core_kernel
 open Typing_defs
 
@@ -19,7 +20,7 @@ let pp_locl_ty _ _ = Printf.printf "%s\n" "<locl_ty>"
 * then they refer to the same late bound type, and thus have compatible
 * 'this' types.
 *)
-type expression_id = Ident.t [@@deriving show]
+type expression_id = Ident.t [@@deriving eq, show]
 
 type local = locl_ty * expression_id [@@deriving show]
 

@@ -26,7 +26,7 @@ type autocomplete_type =
   | Acshape_key
   | Actrait_only
   | Ac_no_namespace (* used for symbol search *)
-[@@deriving show]
+[@@deriving eq, show]
 
 (* Convert a string to a provider *)
 let provider_of_string (provider_str : string) : search_provider =
@@ -93,7 +93,7 @@ type si_kind =
   | SI_Keyword
   | SI_Constructor
   | SI_RecordDef
-[@@deriving show]
+[@@deriving eq, show]
 
 (* Individual result object as known by the autocomplete system *)
 type symbol = (Pos.absolute, si_kind) term

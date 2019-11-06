@@ -92,7 +92,7 @@ module ConditionTypes = struct
       let ty =
         match try_get_class_for_condition_type env ty with
         | None -> ty
-        | Some (_, cls) when Cls.tparams cls = [] -> ty
+        | Some (_, cls) when List.is_empty (Cls.tparams cls) -> ty
         | Some (((p, _) as sid), cls) ->
           let params =
             List.map (Cls.tparams cls) ~f:(fun { tp_name = (p, x); _ } ->
@@ -587,14 +587,14 @@ and simplify_subtype_i
       LoclType
         (_, Toption ((_, Tabstract (AKnewtype (name_sup, _), _)) as ty_super'))
     )
-    when name_sup = name_sub ->
+    when String.equal name_sup name_sub ->
     simplify_subtype ~subtype_env ~this_ty ty_sub ty_super' env
   | ( LoclType ((_, Tabstract (AKdependent d_sub, Some bound_sub)) as ty_sub),
       LoclType ((_, Tabstract (AKdependent d_sup, Some bound_sup)) as ty_super)
     ) ->
     let this_ty = Option.first_some this_ty (Some ty_sub) in
     (* Dependent types are identical but bound might be different *)
-    if d_sub = d_sup then
+    if equal_dependent_type d_sub d_sup then
       simplify_subtype ~subtype_env ~this_ty bound_sub bound_sup env
     else
       simplify_subtype ~subtype_env ~this_ty bound_sub ty_super env
@@ -674,7 +674,7 @@ and simplify_subtype_i
     else
       valid ()
   | (LoclType (_, Tvar var_sub), LoclType (_, Tvar var_super))
-    when var_sub = var_super ->
+    when Ident.equal var_sub var_super ->
     valid ()
   | (LoclType (_, Tvar _), _)
   | (_, LoclType (_, Tvar _)) ->
@@ -719,7 +719,7 @@ and simplify_subtype_i
   (* If subtype and supertype are the same generic parameter, we're done *)
   | ( LoclType (_, Tabstract (AKgeneric name_sub, _)),
       LoclType (_, Tabstract (AKgeneric name_super, _)) )
-    when name_sub = name_super ->
+    when String.equal name_sub name_super ->
     valid ()
   (* When decomposing subtypes for the purpose of adding bounds on generic
    * parameters to the context, (so seen_generic_params = None), leave
@@ -864,7 +864,7 @@ and simplify_subtype_i
     | (Tprim (Nast.Tint | Nast.Tfloat), Tprim Nast.Tnum) -> valid ()
     | (Tprim (Nast.Tint | Nast.Tstring), Tprim Nast.Tarraykey) -> valid ()
     | (Tprim p1, Tprim p2) ->
-      if p1 = p2 then
+      if Aast.equal_tprim p1 p2 then
         valid ()
       else
         invalid ()
@@ -925,7 +925,9 @@ and simplify_subtype_i
                    (TUtils.reactivity_to_string env reactivity)
                    p_sub
                    (TUtils.reactivity_to_string env ft.ft_reactive))
-          |> check_with (is_coroutine = ft.ft_is_coroutine) (fun () ->
+          |> check_with
+               (Aast.equal_is_coroutine is_coroutine ft.ft_is_coroutine)
+               (fun () ->
                  Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub)
           |> check_with
                (Unify.unify_arities
@@ -947,7 +949,7 @@ and simplify_subtype_i
       invalid ()
     (* (t1,...,tn) <: (u1,...,un) iff t1<:u1, ... , tn <: un *)
     | (Ttuple tyl_sub, Ttuple tyl_super) ->
-      if List.length tyl_super = List.length tyl_sub then
+      if Int.equal (List.length tyl_super) (List.length tyl_sub) then
         wfold_left2
           (fun res ty_sub ty_super ->
             res &&& simplify_subtype ~subtype_env ty_sub ty_super)
@@ -1043,7 +1045,7 @@ and simplify_subtype_i
       let this_ty = Option.first_some this_ty (Some ety_sub) in
       simplify_subtype ~subtype_env ~this_ty ty ety_super env
     | (Tclass ((_, class_name), _, _), Tabstract (AKnewtype (enum_name, _), _))
-      when Env.is_enum env enum_name && enum_name = class_name ->
+      when Env.is_enum env enum_name && String.equal enum_name class_name ->
       valid ()
     | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
         | Tshape _ | Tanon _ | Tobject | Tclass _ | Tarraykind _ ),
@@ -1051,12 +1053,13 @@ and simplify_subtype_i
       invalid ()
     | ( Tabstract (AKnewtype (e_sub, _), _),
         Tabstract (AKnewtype (e_super, _), _) )
-      when Env.is_enum env e_sub && Env.is_enum env e_super && e_sub = e_super
-      ->
+      when Env.is_enum env e_sub
+           && Env.is_enum env e_super
+           && String.equal e_sub e_super ->
       valid ()
     | ( Tabstract (AKnewtype (name_sub, tyl_sub), _),
         Tabstract (AKnewtype (name_super, tyl_super), _) )
-      when name_super = name_sub ->
+      when String.equal name_super name_sub ->
       let td = Env.get_typedef env name_super in
       begin
         match td with
@@ -1095,7 +1098,12 @@ and simplify_subtype_i
             else
               tyl_super
           in
-          if List.length (Cls.tparams class_ty) <> List.length tyl_super then
+          if
+            not
+              (Int.equal
+                 (List.length (Cls.tparams class_ty))
+                 (List.length tyl_super))
+          then
             invalid_with (fun () ->
                 Errors.expected_tparam
                   ~definition_pos:(Cls.pos class_ty)
@@ -1132,11 +1140,11 @@ and simplify_subtype_i
       begin
         match (snd ety_sub, tyopt) with
         | (Tclass ((_, y), _, _), Some (_, Tclass (((_, x) as id), _, _)))
-          when y = x ->
+          when String.equal y x ->
           invalid_with (fun () ->
               Errors.try_ fail (fun error ->
                   let p = Reason.to_pos (fst ety_sub) in
-                  if expr_dep = DTcls x then
+                  if equal_dependent_type expr_dep (DTcls x) then
                     Errors.exact_class_final id p error
                   else
                     Errors.this_final id p error))
@@ -1150,7 +1158,7 @@ and simplify_subtype_i
         Tanon _ ) ->
       invalid ()
     | (Tanon (_, id1), Tanon (_, id2)) ->
-      if id1 = id2 then
+      if Ident.equal id1 id2 then
         valid ()
       else
         invalid ()
@@ -1168,34 +1176,38 @@ and simplify_subtype_i
       simplify_subtype ~subtype_env ~this_ty ty ety_super env
     | ( Tabstract (AKnewtype (cid, _), _),
         Tclass ((_, class_name), _, [ty_super']) )
-      when Env.is_enum env cid && class_name = SN.Classes.cHH_BuiltinEnum ->
+      when Env.is_enum env cid
+           && String.equal class_name SN.Classes.cHH_BuiltinEnum ->
       env
       |> simplify_subtype ~subtype_env ~this_ty ety_sub ty_super'
       &&& simplify_subtype ~subtype_env ~this_ty ty_super' ety_sub
     | ( Tabstract (AKnewtype (enum_name, _), _),
         Tclass ((_, class_name), Nonexact, _) )
-      when (Env.is_enum env enum_name && enum_name = class_name)
-           || class_name = SN.Classes.cXHPChild ->
+      when (Env.is_enum env enum_name && String.equal enum_name class_name)
+           || String.equal class_name SN.Classes.cXHPChild ->
       valid ()
     | ( Tabstract (AKnewtype (enum_name, _), Some ty),
         Tclass ((_, class_name), exact, _) )
       when Env.is_enum env enum_name ->
-      if enum_name = class_name && exact = Nonexact then
+      if String.equal enum_name class_name && equal_exact exact Nonexact then
         valid ()
       else
         simplify_subtype ~subtype_env ~this_ty ty ety_super env
     | (Tprim Nast.Tstring, Tclass ((_, class_name), exact, _)) ->
       if
-        ( class_name = SN.Classes.cStringish
-        || class_name = SN.Classes.cXHPChild )
-        && exact = Nonexact
+        ( String.equal class_name SN.Classes.cStringish
+        || String.equal class_name SN.Classes.cXHPChild )
+        && equal_exact exact Nonexact
       then
         valid ()
       else
         invalid ()
     | ( Tprim Nast.(Tarraykey | Tint | Tfloat | Tnum),
         Tclass ((_, class_name), exact, _) ) ->
-      if class_name = SN.Classes.cXHPChild && exact = Nonexact then
+      if
+        String.equal class_name SN.Classes.cXHPChild
+        && equal_exact exact Nonexact
+      then
         valid ()
       else
         invalid ()
@@ -1221,7 +1233,7 @@ and simplify_subtype_i
       let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
       (* This is side-effecting as it registers a dependency *)
       let class_def_sub = Env.get_class env cid_sub in
-      if cid_super = cid_sub then
+      if String.equal cid_super cid_sub then
         (* If class is final then exactness is superfluous *)
         let is_final =
           match class_def_sub with
@@ -1250,7 +1262,7 @@ and simplify_subtype_i
             else
               tyl_sub
           in
-          if List.length tyl_sub <> List.length tyl_super then
+          if Int.( <> ) (List.length tyl_sub) (List.length tyl_super) then
             let n_sub = String_utils.soi (List.length tyl_sub) in
             let n_super = String_utils.soi (List.length tyl_super) in
             invalid_with (fun () ->
@@ -1301,7 +1313,12 @@ and simplify_subtype_i
             else
               tyl_sub
           in
-          if List.length (Cls.tparams class_sub) <> List.length tyl_sub then
+          if
+            not
+              (Int.equal
+                 (List.length (Cls.tparams class_sub))
+                 (List.length tyl_sub))
+          then
             invalid_with (fun () ->
                 Errors.expected_tparam
                   ~definition_pos:(Cls.pos class_sub)
@@ -1325,8 +1342,8 @@ and simplify_subtype_i
               simplify_subtype ~subtype_env ~this_ty up_obj ety_super env
             | None ->
               if
-                Cls.kind class_sub = Ast_defs.Ctrait
-                || Cls.kind class_sub = Ast_defs.Cinterface
+                Ast_defs.(equal_class_kind (Cls.kind class_sub) Ctrait)
+                || Ast_defs.(equal_class_kind (Cls.kind class_sub) Cinterface)
               then
                 let rec try_upper_bounds_on_this up_objs env =
                   match Sequence.next up_objs with
@@ -1358,12 +1375,12 @@ and simplify_subtype_i
     | (Tabstract (AKnewtype _, Some ty), Tclass _) ->
       simplify_subtype ~subtype_env ~this_ty ty ety_super env
     | (Tarraykind _, Tclass ((_, class_name), Nonexact, _))
-      when class_name = SN.Classes.cXHPChild ->
+      when String.equal class_name SN.Classes.cXHPChild ->
       valid ()
     | (Tarraykind akind, Tclass ((_, coll), Nonexact, [tv_super]))
-      when coll = SN.Collections.cTraversable
-           || coll = SN.Rx.cTraversable
-           || coll = SN.Collections.cContainer ->
+      when String.equal coll SN.Collections.cTraversable
+           || String.equal coll SN.Rx.cTraversable
+           || String.equal coll SN.Collections.cContainer ->
       (match akind with
       (* array <: Traversable<_> and emptyarray <: Traversable<t> for any t *)
       | AKempty -> valid ()
@@ -1378,9 +1395,9 @@ and simplify_subtype_i
       | AKvarray_or_darray tv ->
         simplify_subtype ~subtype_env ~this_ty tv tv_super env)
     | (Tarraykind akind, Tclass ((_, coll), Nonexact, [tk_super; tv_super]))
-      when coll = SN.Collections.cKeyedTraversable
-           || coll = SN.Rx.cKeyedTraversable
-           || coll = SN.Collections.cKeyedContainer ->
+      when String.equal coll SN.Collections.cKeyedTraversable
+           || String.equal coll SN.Rx.cKeyedTraversable
+           || String.equal coll SN.Collections.cKeyedContainer ->
       let r = fst ety_sub in
       (match akind with
       | AKempty -> valid ()
@@ -1400,9 +1417,9 @@ and simplify_subtype_i
         |> simplify_subtype ~subtype_env ~this_ty tk tk_super
         &&& simplify_subtype ~subtype_env ~this_ty tv tv_super)
     | (Tarraykind _, Tclass ((_, coll), Nonexact, []))
-      when coll = SN.Collections.cKeyedTraversable
-           || coll = SN.Rx.cKeyedTraversable
-           || coll = SN.Collections.cKeyedContainer ->
+      when String.equal coll SN.Collections.cKeyedTraversable
+           || String.equal coll SN.Rx.cKeyedTraversable
+           || String.equal coll SN.Collections.cKeyedContainer ->
       (* All arrays are subtypes of the untyped KeyedContainer / Traversables *)
       valid ()
     | (Tarraykind _, Tclass _) -> invalid ()
@@ -1445,7 +1462,7 @@ and simplify_subtype_i
       end
     (* List destructuring *)
     | (Ttuple tyl, Tdestructure tyl_dest) ->
-      if List.length tyl <> List.length tyl_dest then
+      if Int.( <> ) (List.length tyl) (List.length tyl_dest) then
         invalid ()
       else
         List.fold2_exn
@@ -1455,15 +1472,15 @@ and simplify_subtype_i
           ~f:(fun res ty ty_dest ->
             res &&& simplify_subtype ~subtype_env ~this_ty ty ty_dest)
     | (Tclass ((_, x), _, [elt_type]), Tdestructure tyl_dest)
-      when x = SN.Collections.cVector
-           || x = SN.Collections.cImmVector
-           || x = SN.Collections.cVec
-           || x = SN.Collections.cConstVector ->
+      when String.equal x SN.Collections.cVector
+           || String.equal x SN.Collections.cImmVector
+           || String.equal x SN.Collections.cVec
+           || String.equal x SN.Collections.cConstVector ->
       List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
           res &&& simplify_subtype ~subtype_env ~this_ty elt_type ty_dest)
     | (Tclass ((_, x), _, tyl), Tdestructure tyl_dest)
-      when x = SN.Collections.cPair ->
-      if List.length tyl <> List.length tyl_dest then
+      when String.equal x SN.Collections.cPair ->
+      if Int.( <> ) (List.length tyl) (List.length tyl_dest) then
         invalid ()
       else
         List.fold2_exn
@@ -1613,7 +1630,8 @@ and simplify_subtype_i
           =
         hm_super
       in
-      if name_sub = name_super && class_id_equal cid_sub cid_super then
+      if Nast.equal_sid name_sub name_super && class_id_equal cid_sub cid_super
+      then
         simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
       else
         invalid ())
@@ -1649,7 +1667,7 @@ and simplify_subtype_variance
 
      *)
     let subtype_env =
-      if reify_kind <> Aast.Erased then
+      if not Aast.(equal_reify_kind reify_kind Erased) then
         { subtype_env with treat_dynamic_as_bottom = false }
       else
         subtype_env
@@ -1956,7 +1974,7 @@ and subtype_reactivity
   | _ -> false
 
 and should_check_fun_params_reactivity (ft_super : locl_fun_type) =
-  ft_super.ft_reactive <> Nonreactive
+  not (equal_reactivity ft_super.ft_reactive Nonreactive)
 
 (* checks condition described by OnlyRxIfImpl condition on parameter is met  *)
 and subtype_param_rx_if_impl
@@ -2102,7 +2120,9 @@ and subtype_fun_params_reactivity
     let (_, p_sub_type) = Env.expand_type env p_sub.fp_type.et_type in
     begin
       match p_sub_type with
-      | (_, Tfun tfun) when tfun.ft_reactive <> Nonreactive -> valid env
+      | (_, Tfun tfun) when not (equal_reactivity tfun.ft_reactive Nonreactive)
+        ->
+        valid env
       | (_, Tfun _) ->
         ( env,
           TL.invalid ~fail:(fun () ->
@@ -2172,10 +2192,12 @@ and check_subtype_funs_attributes
            (TUtils.reactivity_to_string env ft_super.ft_reactive)
            p_sub
            (TUtils.reactivity_to_string env ft_sub.ft_reactive))
-  |> check_with (ft_sub.ft_is_coroutine = ft_super.ft_is_coroutine) (fun () ->
+  |> check_with
+       (Bool.equal ft_sub.ft_is_coroutine ft_super.ft_is_coroutine)
+       (fun () ->
          Errors.coroutinness_mismatch ft_super.ft_is_coroutine p_super p_sub)
   |> check_with
-       (ft_sub.ft_return_disposable = ft_super.ft_return_disposable)
+       (Bool.equal ft_sub.ft_return_disposable ft_super.ft_return_disposable)
        (fun () ->
          Errors.return_disposable_mismatch
            ft_super.ft_return_disposable
@@ -2188,16 +2210,16 @@ and check_subtype_funs_attributes
   NOTE: error is not reported if child is non-reactive since it does not have
   immutability-by-default behavior *)
      check_with
-       ( ft_sub.ft_returns_mutable = ft_super.ft_returns_mutable
+       ( Bool.equal ft_sub.ft_returns_mutable ft_super.ft_returns_mutable
        || (not ft_super.ft_returns_mutable)
-       || ft_sub.ft_reactive = Nonreactive )
+       || equal_reactivity ft_sub.ft_reactive Nonreactive )
        (fun () ->
          Errors.mutable_return_result_mismatch
            ft_super.ft_returns_mutable
            p_super
            p_sub)
   |> check_with
-       ( ft_super.ft_reactive = Nonreactive
+       ( equal_reactivity ft_super.ft_reactive Nonreactive
        || ft_super.ft_returns_void_to_rx
        || not ft_sub.ft_returns_void_to_rx )
        (fun () ->
@@ -2224,7 +2246,8 @@ and check_subtype_funs_attributes
   |>
   (* check mutability only for reactive functions *)
   let check_params_mutability =
-    ft_super.ft_reactive <> Nonreactive && ft_sub.ft_reactive <> Nonreactive
+    (not (equal_reactivity ft_super.ft_reactive Nonreactive))
+    && not (equal_reactivity ft_sub.ft_reactive Nonreactive)
   in
   fun (env, prop) ->
     ( if check_params_mutability (* check mutability of receivers *) then
@@ -2306,12 +2329,14 @@ and simplify_subtype_funs
       end
   &&& begin
         let check_params_mutability =
-          ft_super.ft_reactive <> Nonreactive
-          && ft_sub.ft_reactive <> Nonreactive
+          (not (equal_reactivity ft_super.ft_reactive Nonreactive))
+          && not (equal_reactivity ft_sub.ft_reactive Nonreactive)
         in
         let is_method =
-          Option.map extra_info (fun i -> Option.is_some i.method_info)
-          = Some true
+          Option.equal
+            Bool.equal
+            (Option.map extra_info (fun i -> Option.is_some i.method_info))
+            (Some true)
         in
         simplify_subtype_params
           ~is_method
@@ -2629,6 +2654,7 @@ and is_sub_type_alt ~ignore_generic_params ~no_top_bottom env ty1 ty2 =
     (LoclType ty2)
 
 and is_sub_type env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt
     ~ignore_generic_params:false
     ~no_top_bottom:false
@@ -2639,6 +2665,7 @@ and is_sub_type env ty1 ty2 =
   = Some true
 
 and is_sub_type_for_coercion env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt
     ~ignore_generic_params:false
     ~no_top_bottom:false
@@ -2649,6 +2676,7 @@ and is_sub_type_for_coercion env ty1 ty2 =
   = Some true
 
 and is_sub_type_for_union ~treat_dynamic_as_bottom env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt
     ~ignore_generic_params:false
     ~no_top_bottom:true
@@ -2659,6 +2687,7 @@ and is_sub_type_for_union ~treat_dynamic_as_bottom env ty1 ty2 =
   = Some true
 
 and is_sub_type_for_union_i ~treat_dynamic_as_bottom env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt_i
     ~ignore_generic_params:false
     ~no_top_bottom:true
@@ -2669,6 +2698,7 @@ and is_sub_type_for_union_i ~treat_dynamic_as_bottom env ty1 ty2 =
   = Some true
 
 and can_sub_type env ty1 ty2 =
+  let ( <> ) a b = not (Option.equal Bool.equal a b) in
   is_sub_type_alt
     ~ignore_generic_params:false
     ~no_top_bottom:true
@@ -2679,6 +2709,7 @@ and can_sub_type env ty1 ty2 =
   <> Some false
 
 and is_sub_type_ignore_generic_params ~treat_dynamic_as_bottom env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt
     ~ignore_generic_params:true
     ~no_top_bottom:true
@@ -2689,6 +2720,7 @@ and is_sub_type_ignore_generic_params ~treat_dynamic_as_bottom env ty1 ty2 =
   = Some true
 
 and is_sub_type_ignore_generic_params_i ~treat_dynamic_as_bottom env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt_i
     ~ignore_generic_params:true
     ~no_top_bottom:true
@@ -2916,8 +2948,10 @@ let subtype_method
    *)
   let env =
     if
-      List.length (fst ft_sub.ft_tparams)
-      <> List.length (fst ft_super.ft_tparams)
+      not
+        (Int.equal
+           (List.length (fst ft_sub.ft_tparams))
+           (List.length (fst ft_super.ft_tparams)))
     then
       env
     else
@@ -3089,6 +3123,7 @@ let add_constraint
     ty_super;
   let oldsize = Env.get_tpenv_size env in
   let env = decompose_constraint p env ck ty_sub ty_super in
+  let ( = ) = Int.equal in
   if Env.get_tpenv_size env = oldsize then
     env
   else

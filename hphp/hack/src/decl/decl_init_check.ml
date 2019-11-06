@@ -26,16 +26,17 @@ let add_parent_construct decl_env c props parent_ty =
   | (_, Tapply ((_, parent), _)) ->
     begin
       match Decl_env.get_class_dep decl_env parent with
-      | Some class_ when class_.dc_need_init && c.sc_constructor <> None ->
+      | Some class_ when class_.dc_need_init && Option.is_some c.sc_constructor
+        ->
         SSet.add parent_init_prop props
       | _ -> props
     end
   | _ -> props
 
 let parent decl_env c acc =
-  if c.sc_mode = FileInfo.Mdecl then
+  if FileInfo.(equal_mode c.sc_mode Mdecl) then
     acc
-  else if c.sc_kind = Ast_defs.Ctrait then
+  else if Ast_defs.(equal_class_kind c.sc_kind Ctrait) then
     List.fold_left
       c.sc_req_extends
       ~f:(add_parent_construct decl_env c)
@@ -130,9 +131,12 @@ let trait_props decl_env c props =
             begin
               match fst cstr with
               | None -> SSet.union members acc
-              | Some cstr when cstr.elt_origin <> trait || cstr.elt_abstract ->
+              | Some cstr
+                when String.( <> ) cstr.elt_origin trait || cstr.elt_abstract
+                ->
                 SSet.union members acc
-              | _ when c.sc_constructor <> None -> SSet.union members acc
+              | _ when Option.is_some c.sc_constructor ->
+                SSet.union members acc
               | _ -> acc
             end)
         | _ -> acc
@@ -149,7 +153,7 @@ let get_deferred_init_props decl_env c =
         let visibility = sp.sp_visibility in
         if not (prop_needs_init sp) then
           (priv_props, props)
-        else if visibility = Private then
+        else if Aast.(equal_visibility visibility Private) then
           (SSet.add name priv_props, SSet.add name props)
         else
           (priv_props, SSet.add name props))
@@ -164,7 +168,7 @@ let class_ ~has_own_cstr decl_env c =
   match c.sc_kind with
   | Ast_defs.Cabstract when not has_own_cstr ->
     let (priv_props, props) = get_deferred_init_props decl_env c in
-    if priv_props <> SSet.empty then
+    if not (SSet.is_empty priv_props) then
       (* XXX: should priv_props be checked for a trait?
        * see chown_privates in typing_inherit *)
       Errors.constructor_required c.sc_name priv_props;

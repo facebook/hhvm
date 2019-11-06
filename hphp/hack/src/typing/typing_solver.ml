@@ -205,7 +205,7 @@ and freshen_tparams env variancel tyl =
   | (variance :: variancel, ty :: tyl) ->
     let (env, tyl) = freshen_tparams env variancel tyl in
     let (env, ty) =
-      if variance = Ast_defs.Invariant then
+      if Ast_defs.(equal_variance variance Invariant) then
         (env, ty)
       else
         freshen_ty env ty
@@ -221,7 +221,7 @@ let var_occurs_in_ty env var ty =
       method! on_tvar (env, occurs) r v =
         let (env, ty) = Env.expand_var env r v in
         match ty with
-        | (_, Tvar v) -> (env, v = var)
+        | (_, Tvar v) -> (env, Ident.equal v var)
         | ty -> this#on_type (env, occurs) ty
 
       method! on_type (env, occurs) ty =
@@ -278,7 +278,7 @@ let remove_tyvar_from_lower_bound env var r lower_bound =
   let rec remove env ty =
     let (env, ty) = Env.expand_type env ty in
     match ty with
-    | (_, Tvar v) when v = var -> (env, MakeType.nothing r)
+    | (_, Tvar v) when Ident.equal v var -> (env, MakeType.nothing r)
     | (r, Toption ty) ->
       let (env, ty) = remove env ty in
       (env, MakeType.nullable_locl r ty)
@@ -331,7 +331,7 @@ let remove_tyvar_from_upper_bound env var r upper_bound =
   let rec remove env ty =
     let (env, ty) = Env.expand_type env ty in
     match ty with
-    | (_, Tvar v) when v = var -> (env, MakeType.mixed r)
+    | (_, Tvar v) when Ident.equal v var -> (env, MakeType.mixed r)
     | (r, Toption ty) ->
       let (env, ty) = remove env ty in
       (env, MakeType.nullable_locl r ty)
@@ -475,7 +475,7 @@ let tyvar_is_solved env var =
   Env.is_global_tyvar env var
   ||
   match snd @@ snd @@ Env.expand_type env (var_as_ty var) with
-  | Tvar var' when var' = var -> false
+  | Tvar var' when Ident.equal var' var -> false
   | _ -> true
 
 (* Is the outer skeleton of the types the same (everything that isn't a nested type)?
@@ -504,28 +504,29 @@ let ty_equal_shallow ty1 ty2 =
   | (Tarraykind (AKvarray_or_darray _), Tarraykind (AKvarray_or_darray _))
   | (Tarraykind (AKdarray _), Tarraykind (AKdarray _)) ->
     true
-  | (Tprim p1, Tprim p2) -> p1 = p2
+  | (Tprim p1, Tprim p2) -> Aast_defs.equal_tprim p1 p2
   | (Tclass (x_sub, exact_sub, _), Tclass (x_super, exact_super, _)) ->
-    snd x_sub = snd x_super && exact_sub = exact_super
+    String.equal (snd x_sub) (snd x_super) && equal_exact exact_sub exact_super
   | (Tfun fty1, Tfun fty2) ->
-    fty1.ft_is_coroutine = fty2.ft_is_coroutine
-    && fty1.ft_arity = fty2.ft_arity
-    && fty1.ft_reactive = fty2.ft_reactive
-    && fty1.ft_return_disposable = fty2.ft_return_disposable
-    && fty1.ft_mutability = fty2.ft_mutability
+    Bool.equal fty1.ft_is_coroutine fty2.ft_is_coroutine
+    && equal_locl_fun_arity fty1.ft_arity fty2.ft_arity
+    && equal_reactivity fty1.ft_reactive fty2.ft_reactive
+    && Bool.equal fty1.ft_return_disposable fty2.ft_return_disposable
+    && Option.equal
+         equal_param_mutability
+         fty1.ft_mutability
+         fty2.ft_mutability
   | (Tshape (shape_kind1, fdm1), Tshape (shape_kind2, fdm2)) ->
-    shape_kind1 = shape_kind2
-    && List.compare
-         (fun (k1, v1) (k2, v2) ->
-           match Ast_defs.ShapeField.compare k1 k2 with
-           | 0 -> compare v1.sft_optional v2.sft_optional
-           | n -> n)
+    equal_shape_kind shape_kind1 shape_kind2
+    && List.equal
+         ~equal:(fun (k1, v1) (k2, v2) ->
+           Ast_defs.ShapeField.equal k1 k2
+           && Bool.equal v1.sft_optional v2.sft_optional)
          (ShapeFieldMap.elements fdm1)
          (ShapeFieldMap.elements fdm2)
-       = 0
   | (Tabstract (AKnewtype (n1, _), _), Tabstract (AKnewtype (n2, _), _)) ->
-    n1 = n2
-  | (Tabstract (ak1, _), Tabstract (ak2, _)) -> ak1 = ak2
+    String.equal n1 n2
+  | (Tabstract (ak1, _), Tabstract (ak2, _)) -> equal_abstract_kind ak1 ak2
   | _ -> false
 
 let union_any_if_any_in_lower_bounds env ty lower_bounds =
@@ -629,7 +630,7 @@ let rec always_solve_tyvar ~freshen env r var on_error =
   else
     let tyvar_info = Env.get_tyvar_info env var in
     let r =
-      if r = Reason.Rnone then
+      if Reason.(equal r Rnone) then
         Reason.Rwitness tyvar_info.tyvar_pos
       else
         r
@@ -639,7 +640,7 @@ let rec always_solve_tyvar ~freshen env r var on_error =
     in
     let (env, ety) = Env.expand_var env r var in
     match ety with
-    | (_, Tvar var') when var <> var' ->
+    | (_, Tvar var') when not (Ident.equal var var') ->
       always_solve_tyvar ~freshen env r var on_error
     | _ -> env
 
@@ -676,7 +677,7 @@ let solve_tyvar_wrt_variance env r var on_error =
   else
     let tyvar_info = Env.get_tyvar_info env var in
     let r =
-      if r = Reason.Rnone then
+      if Reason.equal r Reason.Rnone then
         Reason.Rwitness tyvar_info.tyvar_pos
       else
         r
@@ -706,7 +707,8 @@ let solve_tyvar_wrt_variance env r var on_error =
     let env = solve_tyvar_wrt_variance env r v on_error in
     let (env, ety) = Env.expand_var env r v in
     match ety with
-    | (_, Tvar v') when v <> v' -> solve_until_concrete_ty env v'
+    | (_, Tvar v') when not (Ident.equal v v') ->
+      solve_until_concrete_ty env v'
     | _ -> env
   in
   solve_until_concrete_ty env var
@@ -977,7 +979,7 @@ let rec push_option_out pos env ty =
           Errors.unify_error
       in
       (* To avoid infinite loops *)
-      if ty <> ty' then
+      if not (equal_locl_ty ty ty') then
         push_option_out pos env ty'
       else
         (env, ty)

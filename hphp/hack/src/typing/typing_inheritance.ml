@@ -45,7 +45,7 @@ let check_override_annotations cls ~static =
         | Some meth ->
           let parent_method_exists =
             List.exists (all_methods_named cls id) (fun parent_meth ->
-                meth.ce_origin <> parent_meth.ce_origin)
+                String.( <> ) meth.ce_origin parent_meth.ce_origin)
           in
           if not parent_method_exists then
             Errors.should_be_override pos (Cls.name cls) id)
@@ -63,20 +63,21 @@ let check_trait_override_annotations env cls ~static =
   Sequence.iter (methods cls) (fun (id, meth) ->
       if not meth.ce_override then
         ()
-      else if meth.ce_origin = Cls.name cls then
+      else if String.equal meth.ce_origin (Cls.name cls) then
         ()
       else
         match Env.get_class env meth.ce_origin with
         | None -> ()
         | Some parent_class ->
-          if Cls.kind parent_class <> Ast_defs.Ctrait then
+          if not Ast_defs.(equal_class_kind (Cls.kind parent_class) Ctrait)
+          then
             ()
           else (
             match meth with
             | { ce_type = (lazy (r, _)); _ } ->
               let parent_method_exists =
                 List.exists (all_methods_named cls id) (fun parent_meth ->
-                    meth.ce_origin <> parent_meth.ce_origin)
+                    String.( <> ) meth.ce_origin parent_meth.ce_origin)
               in
               if not parent_method_exists then
                 Errors.override_per_trait
@@ -148,11 +149,11 @@ let check_class env cls =
   let shallow_class = Cls.shallow_decl cls in
   check_extend_kinds shallow_class;
   if no_trait_reuse_enabled env then check_trait_reuse shallow_class;
-  if Cls.kind cls <> Ast_defs.Ctrait then (
+  if not Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) then (
     check_override_annotations cls ~static:false;
     check_override_annotations cls ~static:true
   );
-  if Cls.kind cls = Ast_defs.Cnormal then (
+  if Ast_defs.(equal_class_kind (Cls.kind cls) Cnormal) then (
     check_trait_override_annotations env cls ~static:false;
     check_trait_override_annotations env cls ~static:true
   );

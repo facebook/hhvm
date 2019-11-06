@@ -104,9 +104,9 @@ let rec truthiness env ty =
     Possibly_falsy
   | Tabstract (AKnewtype (id, _), _) when Env.is_enum env id -> Possibly_falsy
   | Tclass ((_, cid), _, _) ->
-    if cid = SN.Classes.cStringish then
+    if String.equal cid SN.Classes.cStringish then
       Possibly_falsy
-    else if cid = SN.Classes.cXHPChild then
+    else if String.equal cid SN.Classes.cXHPChild then
       Possibly_falsy
     else if tclass_is_falsy_when_empty env ty then
       Possibly_falsy
@@ -152,7 +152,8 @@ let rec truthiness env ty =
       | [] -> Unknown
       | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
     end
-  | Tshape (Closed_shape, fields) when ShapeMap.cardinal fields = 0 ->
+  | Tshape (Closed_shape, fields) when Int.equal 0 (ShapeMap.cardinal fields)
+    ->
     Always_falsy
   | Tshape (_, fields) ->
     let has_non_optional_fields =
@@ -199,9 +200,9 @@ let rec find_sketchy_types env acc ty =
   | Tprim Tstring -> String :: acc
   | Tprim Tarraykey -> Arraykey :: acc
   | Tclass ((_, cid), _, _) ->
-    if cid = SN.Classes.cStringish then
+    if String.equal cid SN.Classes.cStringish then
       Stringish :: acc
-    else if cid = SN.Classes.cXHPChild then
+    else if String.equal cid SN.Classes.cXHPChild then
       XHPChild :: acc
     else if tclass_is_falsy_when_empty env ty || not (is_traversable env ty)
     then
@@ -255,7 +256,8 @@ let valid_newable_class cls =
   match Cls.kind cls with
   | Ast_defs.Cnormal
   | Ast_defs.Cabstract ->
-    Cls.final cls || snd (Cls.construct cls) <> Inconsistent
+    Cls.final cls
+    || not (equal_consistent_kind (snd (Cls.construct cls)) Inconsistent)
   (* There is currently a bug with interfaces that allows constructors to change
    * their signature, so they are not considered here. TODO: T41093452 *)
   | _ -> false

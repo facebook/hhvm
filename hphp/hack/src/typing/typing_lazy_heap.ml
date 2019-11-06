@@ -12,14 +12,16 @@ open Typing_heap
 
 let check_cache_consistency x expected_kind expected_result =
   if
-    expected_result = Relative_path.default
+    Relative_path.equal expected_result Relative_path.default
     && (not @@ Naming_table.has_local_changes ())
   then (
     Hh_logger.log "WARNING: found dummy path in shared heap for %s" x;
     match Naming_table.Types.get_pos ~bypass_cache:true x with
     | Some (pos, kind)
-      when kind = expected_kind
-           && FileInfo.get_pos_filename pos = expected_result ->
+      when Naming_table.equal_type_of_type kind expected_kind
+           && Relative_path.equal
+                (FileInfo.get_pos_filename pos)
+                expected_result ->
       ()
     | _ ->
       Hh_logger.log "WARNING: get and get_no_cache returned different results"
@@ -27,7 +29,7 @@ let check_cache_consistency x expected_kind expected_result =
 
 let get_type_id_filename x expected_kind =
   match Naming_table.Types.get_filename_and_kind x with
-  | Some (fn, kind) when kind = expected_kind ->
+  | Some (fn, kind) when Naming_table.equal_type_of_type kind expected_kind ->
     check_cache_consistency x expected_kind fn;
     Some fn
   | _ -> None

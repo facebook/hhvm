@@ -100,7 +100,7 @@ let mark_inconsistent tpenv = { tpenv with consistent = false }
 
 let rec is_generic_param ~elide_nullable ty name =
   match ty with
-  | (_, Tabstract (AKgeneric name', None)) -> name = name'
+  | (_, Tabstract (AKgeneric name', None)) -> String.equal name name'
   | (_, Toption ty) when elide_nullable ->
     is_generic_param ~elide_nullable ty name
   | _ -> false

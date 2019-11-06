@@ -12,6 +12,7 @@ open Coverage_level_defs
 open Ide_api_types
 open Typing_defs
 open Utils
+open Int_replace_polymorphic_compare
 module TUtils = Typing_utils
 module Reason = Typing_reason
 

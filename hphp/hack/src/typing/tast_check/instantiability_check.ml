@@ -50,17 +50,18 @@ let rec check_hint env (pos, hint) =
       | Some cls
         when let kind = Cls.kind cls in
              let tc_name = Cls.name cls in
-             ( kind = Ast_defs.Ctrait
-             || (kind = Ast_defs.Cabstract && Cls.final cls) )
-             && tc_name <> SN.Collections.cDict
-             && tc_name <> SN.Collections.cKeyset
-             && tc_name <> SN.Collections.cVec ->
+             ( Ast_defs.(equal_class_kind kind Ctrait)
+             || (Ast_defs.(equal_class_kind kind Cabstract) && Cls.final cls)
+             )
+             && String.( <> ) tc_name SN.Collections.cDict
+             && String.( <> ) tc_name SN.Collections.cKeyset
+             && String.( <> ) tc_name SN.Collections.cVec ->
         let tc_pos = Cls.pos cls in
         let tc_name = Cls.name cls in
         Errors.uninstantiable_class pos tc_pos tc_name []
       | _ -> ()
     end;
-    if class_id = SN.Classes.cClassname then
+    if String.equal class_id SN.Classes.cClassname then
       Option.iter (List.hd tal) validate_classname
     else
       List.iter tal (check_hint env)

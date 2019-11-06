@@ -23,10 +23,11 @@ let get_localvars fn_def lv_acc =
     List.fold symbols ~init:[] ~f:(fun acc symbol ->
         match symbol.type_ with
         | LocalVar ->
-          if List.exists ~f:(fun x -> x.lv_name = symbol.name) acc then
+          if List.exists ~f:(fun x -> String.equal x.lv_name symbol.name) acc
+          then
             (* if we found a localvar already, update it *)
             List.map acc ~f:(fun lv ->
-                if lv.lv_name = symbol.name then
+                if String.equal lv.lv_name symbol.name then
                   { lv with lvs = symbol :: lv.lvs }
                 else
                   lv)

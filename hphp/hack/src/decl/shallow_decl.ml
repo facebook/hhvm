@@ -46,7 +46,7 @@ let class_const env c cc =
           | None ->
             if
               Partial.should_check_error c.c_mode 2035
-              && c.c_kind <> Ast_defs.Cenum
+              && not Ast_defs.(equal_class_kind c.c_kind Cenum)
             then (
               Errors.missing_typehint pos;
               ((Reason.Rwitness pos, Terr), false)
@@ -148,7 +148,8 @@ let prop env cv =
     Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes
   in
   if cv.cv_final then Errors.final_property cv_pos;
-  if lateinit && cv.cv_expr <> None then Errors.lateinit_with_default cv_pos;
+  if lateinit && Option.is_some cv.cv_expr then
+    Errors.lateinit_with_default cv_pos;
   {
     sp_const = const;
     sp_xhp_attr = make_xhp_attr cv;
@@ -172,7 +173,9 @@ and static_prop env c cv =
   let abstract = cv.cv_abstract in
   let lsb = Attrs.mem SN.UserAttributes.uaLSB cv.cv_user_attributes in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
-  ( if cv.cv_expr = None && FileInfo.(is_strict c.c_mode || c.c_mode = Mpartial)
+  ( if
+    Option.is_none cv.cv_expr
+    && FileInfo.(is_strict c.c_mode || equal_mode c.c_mode Mpartial)
   then
     match cv.cv_type with
     | None
@@ -181,7 +184,8 @@ and static_prop env c cv =
       ()
     | _ when (not lateinit) && not abstract -> Errors.missing_assign cv_pos
     | _ -> () );
-  if lateinit && cv.cv_expr <> None then Errors.lateinit_with_default cv_pos;
+  if lateinit && Option.is_some cv.cv_expr then
+    Errors.lateinit_with_default cv_pos;
   {
     sp_const = const;
     sp_xhp_attr = make_xhp_attr cv;
@@ -210,7 +214,7 @@ let method_type env m =
     match hint_of_type_hint m.m_ret with
     | None ->
       ret_from_fun_kind
-        ~is_constructor:(snd m.m_name = SN.Members.__construct)
+        ~is_constructor:(String.equal (snd m.m_name) SN.Members.__construct)
         (fst m.m_name)
         m.m_fun_kind
     | Some ret -> Decl_hint.hint env ret
@@ -219,7 +223,7 @@ let method_type env m =
     match m.m_variadic with
     | FVvariadicArg param ->
       assert param.param_is_variadic;
-      assert (param.param_expr = None);
+      assert (Option.is_none param.param_expr);
       Fvariadic (arity_min, make_param_ty env param)
     | FVellipsis p -> Fellipsis (arity_min, p)
     | FVnonVariadic -> Fstandard (arity_min, List.length m.m_params)
@@ -229,7 +233,7 @@ let method_type env m =
     List.map m.m_where_constraints (where_constraint env)
   in
   {
-    ft_is_coroutine = m.m_fun_kind = Ast_defs.FCoroutine;
+    ft_is_coroutine = Ast_defs.(equal_fun_kind m.m_fun_kind FCoroutine);
     ft_arity = arity;
     ft_tparams = (tparams, FTKtparams);
     ft_where_constraints = where_constraints;
@@ -251,7 +255,7 @@ let method_redeclaration_type env m =
     match hint_of_type_hint m.mt_ret with
     | None ->
       ret_from_fun_kind
-        ~is_constructor:(snd m.mt_name = SN.Members.__construct)
+        ~is_constructor:(String.equal (snd m.mt_name) SN.Members.__construct)
         (fst m.mt_name)
         m.mt_fun_kind
     | Some ret -> Decl_hint.hint env ret
@@ -260,7 +264,7 @@ let method_redeclaration_type env m =
     match m.mt_variadic with
     | FVvariadicArg param ->
       assert param.param_is_variadic;
-      assert (param.param_expr = None);
+      assert (Option.is_none param.param_expr);
       Fvariadic (arity_min, make_param_ty env param)
     | FVellipsis p -> Fellipsis (arity_min, p)
     | FVnonVariadic -> Fstandard (arity_min, List.length m.mt_params)
@@ -270,7 +274,7 @@ let method_redeclaration_type env m =
     List.map m.mt_where_constraints (where_constraint env)
   in
   {
-    ft_is_coroutine = m.mt_fun_kind = Ast_defs.FCoroutine;
+    ft_is_coroutine = Ast_defs.(equal_fun_kind m.mt_fun_kind FCoroutine);
     ft_arity = arity;
     ft_tparams = (tparams, FTKtparams);
     ft_where_constraints = where_constraints;
@@ -287,7 +291,7 @@ let method_redeclaration_type env m =
 let method_ env c m =
   let override = Attrs.mem SN.UserAttributes.uaOverride m.m_user_attributes in
   let (pos, id) = m.m_name in
-  if m.m_visibility = Private && override then
+  if Aast.equal_visibility m.m_visibility Private && override then
     Errors.private_override pos (snd c.c_name) id;
   let has_memoizelsb =
     Attrs.mem SN.UserAttributes.uaMemoizeLSB m.m_user_attributes

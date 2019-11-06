@@ -28,8 +28,8 @@ let rec enforce_not_awaitable env p ty =
   | (_, Tunion tyl)
   | (_, Tintersection tyl) ->
     List.iter tyl (enforce_not_awaitable env p)
-  | (r, Tclass ((_, awaitable), _, _)) when awaitable = SN.Classes.cAwaitable
-    ->
+  | (r, Tclass ((_, awaitable), _, _))
+    when String.equal awaitable SN.Classes.cAwaitable ->
     Errors.discarded_awaitable p (Typing_reason.to_pos r)
   | ( _,
       ( Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tvar _

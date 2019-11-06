@@ -20,9 +20,7 @@ module Continuations = struct
     | Fallthrough
     | Finally
     | Goto of string
-  [@@deriving show]
-
-  let compare = Pervasives.compare
+  [@@deriving eq, ord, show]
 
   let to_string = function
     | Next -> "Next"

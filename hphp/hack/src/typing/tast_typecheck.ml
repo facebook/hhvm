@@ -52,8 +52,11 @@ let refine ((_p, (_r, cond_ty)), cond_expr) _cond_is_true gamma =
     ->
     raise Not_implemented
   | Call
-      (_, (_, Class_const ((_, CI (_, "\\HH\\Shapes")), (_, "keyExists"))), _, _, _)
-    ->
+      ( _,
+        (_, Class_const ((_, CI (_, "\\HH\\Shapes")), (_, "keyExists"))),
+        _,
+        _,
+        _ ) ->
     raise Not_implemented
   | Is _
   | As _
@@ -62,7 +65,7 @@ let refine ((_p, (_r, cond_ty)), cond_expr) _cond_is_true gamma =
   | True
   | False ->
     raise Not_implemented
-  | _ when cond_ty = Tprim Nast.Tbool -> gamma
+  | _ when equal_locl_ty_ cond_ty (Tprim Nast.Tbool) -> gamma
   | _ -> raise Not_implemented
 
 let check_assign (_lty, lvalue) ty gamma =
@@ -121,7 +124,7 @@ let check_expr env (expr : ETast.expr) (gamma : gamma) : gamma =
         | Ast_defs.Barbar ->
           self#on_expr env expr1;
           let gamma_ = gamma in
-          gamma <- refine expr1 (bop = Ast_defs.Ampamp) gamma;
+          gamma <- refine expr1 Ast_defs.(equal_bop bop Ampamp) gamma;
           self#on_expr env expr2;
           gamma <- gamma_
         | _ -> (* TODO *) super#on_Binop env bop expr1 expr2
@@ -132,7 +135,8 @@ let check_expr env (expr : ETast.expr) (gamma : gamma) : gamma =
 
       method! on_Class_const env class_id const_name =
         match (class_id, const_name) with
-        | ((_, CI (_, "\\HH\\Shapes")), (_, "removeKey")) -> raise Not_implemented
+        | ((_, CI (_, "\\HH\\Shapes")), (_, "removeKey")) ->
+          raise Not_implemented
         | _ -> super#on_Class_const env class_id const_name
 
       method! on_Eif _env _cond _e1 _e2 = raise Not_implemented
@@ -212,7 +216,7 @@ and check_block env (block : ETast.block) gamma =
   go block gamma (empty_delta_with_next_cont gamma)
 
 let check_func_body env (body : ETast.func_body) gamma =
-  if body.fb_annotation = Tast.HasUnsafeBlocks then
+  if Tast.equal_func_body_ann body.fb_annotation Tast.HasUnsafeBlocks then
     raise Cant_check
   else
     let _ = check_block env body.fb_ast gamma in
@@ -232,7 +236,8 @@ let localize env hint =
 
 let gamma_from_params env (params : ETast.fun_param list) =
   let add_param_to_gamma gamma param =
-    if param.param_user_attributes <> [] then raise Not_implemented;
+    if not (List.is_empty param.param_user_attributes) then
+      raise Not_implemented;
     let name = make_local_id param.param_name in
     let ty = localize env (hint_of_type_hint param.param_type_hint) in
     (* TODO can we avoid this? *)
@@ -248,9 +253,12 @@ let check_fun env (f : ETast.fun_def) =
   else
     let gamma = gamma_from_params env f.f_params in
     if
-      f.f_tparams <> []
-      || f.f_where_constraints <> []
-      || f.f_variadic <> FVnonVariadic
+      (not (List.is_empty f.f_tparams))
+      || (not (List.is_empty f.f_where_constraints))
+      ||
+      match f.f_variadic with
+      | FVnonVariadic -> false
+      | _ -> true
     then
       raise Not_implemented
     else

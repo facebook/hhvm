@@ -22,7 +22,8 @@ let enum_kind name enum get_ancestor =
   match enum with
   | None ->
     (match get_ancestor SN.FB.cEnum with
-    | Some (_, Tapply ((_, enum), [ty_exp])) when enum = SN.FB.cEnum ->
+    | Some (_, Tapply ((_, enum), [ty_exp])) when String.equal enum SN.FB.cEnum
+      ->
       (* If the class is a subclass of UncheckedEnum, ignore it. *)
       if Option.is_some (get_ancestor SN.FB.cUncheckedEnum) then
         None
@@ -47,7 +48,7 @@ let rewrite_class name enum get_ancestor consts =
      * want to rewrite its type. *)
     SMap.mapi
       (fun k c ->
-        if k = SN.Members.mClass then
+        if String.equal k SN.Members.mClass then
           c
         else
           { c with cc_type = ty })
@@ -63,7 +64,7 @@ let rewrite_class_consts enum_kind =
       | Some (_, ty, _) ->
         (* A special constant called "class" gets added, and we don't
          * want to rewrite its type. *)
-        if k = SN.Members.mClass then
+        if String.equal k SN.Members.mClass then
           pair
         else
           (k, { c with cc_type = ty }))

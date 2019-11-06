@@ -42,7 +42,8 @@ and hint_ p env = function
   | Hdynamic -> Tdynamic
   | Hnothing -> Tnothing
   | Harray (h1, h2) ->
-    if Partial.should_check_error env.Decl_env.mode 4045 && h1 = None then
+    if Partial.should_check_error env.Decl_env.mode 4045 && Option.is_none h1
+    then
       Errors.generic_array_strict p;
     let h1 = Option.map h1 (hint env) in
     let h2 = Option.map h2 (hint env) in

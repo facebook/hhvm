@@ -138,7 +138,7 @@ module Env = struct
     { methods; props; tenv; class_init_props }
 
   and method_ acc m =
-    if m.m_visibility <> Private then
+    if not (Aast.equal_visibility m.m_visibility Private) then
       acc
     else
       let name = snd m.m_name in
@@ -157,16 +157,16 @@ open Env
 (*****************************************************************************)
 
 let is_whitelisted = function
-  | x when x = SN.StdlibFunctions.get_class -> true
+  | x when String.equal x SN.StdlibFunctions.get_class -> true
   | _ -> false
 
 let rec class_ tenv c =
-  if c.c_mode = FileInfo.Mdecl then
+  if FileInfo.(equal_mode c.c_mode Mdecl) then
     ()
   else
     let (c_constructor, _, _) = split_methods c in
     match c_constructor with
-    | _ when c.c_kind = Ast_defs.Cinterface -> ()
+    | _ when Ast_defs.(equal_class_kind c.c_kind Cinterface) -> ()
     | Some { m_body = { fb_annotation = Nast.NamedWithUnsafeBlocks; _ }; _ } ->
       ()
     | _ ->
@@ -179,7 +179,7 @@ let rec class_ tenv c =
       let inits = constructor env c_constructor in
       let check_inits inits =
         let uninit_props = SSet.diff env.props inits in
-        if SSet.empty <> uninit_props then
+        if not (SSet.is_empty uninit_props) then
           if SSet.mem DeferredMembers.parent_init_prop uninit_props then
             Errors.no_construct_parent p
           else
@@ -188,7 +188,7 @@ let rec class_ tenv c =
                 (fun v -> not (SSet.mem v env.class_init_props))
                 uninit_props
             in
-            if SSet.empty <> class_uninit_props then
+            if not (SSet.is_empty class_uninit_props) then
               Errors.not_initialized
                 (p, snd c.c_name)
                 (SSet.elements class_uninit_props)
@@ -201,7 +201,10 @@ let rec class_ tenv c =
           ()
         | S.Set inits -> check_inits inits
       in
-      if c.c_kind = Ast_defs.Ctrait || c.c_kind = Ast_defs.Cabstract then
+      if
+        Ast_defs.(equal_class_kind c.c_kind Ctrait)
+        || Ast_defs.(equal_class_kind c.c_kind Cabstract)
+      then
         let has_constructor =
           match c_constructor with
           | None -> false
@@ -272,7 +275,7 @@ and stmt env acc st =
   match snd st with
   | Expr
       (_, Call (Cnormal, (_, Class_const ((_, CIparent), (_, m))), _, el, _uel))
-    when m = SN.Members.__construct ->
+    when String.equal m SN.Members.__construct ->
     let acc = List.fold_left ~f:expr ~init:acc el in
     assign env acc DeferredMembers.parent_init_prop
   | Expr e ->

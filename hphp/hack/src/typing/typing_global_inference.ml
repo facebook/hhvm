@@ -57,7 +57,7 @@ module StateConstraintGraph = struct
           in
           let pos =
             match (tyvar_info.tyvar_pos, current_tyvar_info.tyvar_pos) with
-            | (p, t) when t = Pos.none -> p
+            | (p, t) when Pos.equal t Pos.none -> p
             | (_, p) -> p
           in
           let current_tyvar_info =
@@ -111,7 +111,7 @@ module StateSubConstraintGraphs = struct
     let subcontraints =
       List.filter ~f:(fun e -> not @@ IMap.is_empty e) subcontraints
     in
-    if subcontraints = [] then
+    if List.is_empty subcontraints then
       ()
     else
       let path =

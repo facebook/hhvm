@@ -293,7 +293,8 @@ and linearize (env : env) (c : shallow_class) : linearization =
       mro_ty_pos = fst c.sc_name;
       mro_copy_private_members =
         Ast_defs.equal_class_kind c.sc_kind Ast_defs.Ctrait;
-      mro_passthrough_abstract_typeconst = c.sc_kind <> Ast_defs.Cnormal;
+      mro_passthrough_abstract_typeconst =
+        not Ast_defs.(equal_class_kind c.sc_kind Cnormal);
     }
   in
   let get_ancestors kind = List.map ~f:(ancestor_from_ty kind) in
@@ -451,7 +452,7 @@ and next_state
              it. *)
               let should_skip =
                 (next.mro_via_req_extends || next.mro_via_req_impl)
-                && next.mro_name <> SN.Classes.cStringish
+                && String.( <> ) next.mro_name SN.Classes.cStringish
               in
               let next =
                 if should_skip then

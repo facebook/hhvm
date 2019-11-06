@@ -624,5 +624,5 @@ let go
       ~memory_cap
       ~check_info
   in
-  assert (cancelled = []);
+  assert (List.is_empty cancelled);
   res

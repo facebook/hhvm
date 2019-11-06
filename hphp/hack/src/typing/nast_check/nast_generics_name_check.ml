@@ -10,10 +10,10 @@ open Core_kernel
 open Aast
 
 let error_if_is_this (pos, name) =
-  if String.lowercase name = "this" then Errors.this_reserved pos
+  if String.equal (String.lowercase name) "this" then Errors.this_reserved pos
 
 let error_if_does_not_start_with_T (pos, name) =
-  if name.[0] <> 'T' then Errors.start_with_T pos
+  if not (Char.equal name.[0] 'T') then Errors.start_with_T pos
 
 let check_constraint { Aast.tp_name = tp; _ } =
   error_if_is_this tp;
@@ -43,7 +43,8 @@ let check_method_shadowing class_tparams class_methods =
   let error_if_method_tparam_shadows_class_tparam method_ =
     List.iter method_.m_tparams ~f:(fun { tp_name = (pos, name); _ } ->
         List.iter class_tparams ~f:(fun { tp_name = (cpos, cname); _ } ->
-            if name = cname then Errors.shadowed_type_param pos cpos name))
+            if String.equal name cname then
+              Errors.shadowed_type_param pos cpos name))
   in
   List.iter class_methods ~f:error_if_method_tparam_shadows_class_tparam
 

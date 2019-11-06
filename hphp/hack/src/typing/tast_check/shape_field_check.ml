@@ -86,8 +86,8 @@ let handler =
               _,
               [shape; ((pos, _), String field_name)],
               [] ) )
-        when class_name = SN.Shapes.cShapes
-             && method_name = SN.Shapes.keyExists ->
+        when String.equal class_name SN.Shapes.cShapes
+             && String.equal method_name SN.Shapes.keyExists ->
         trivial_shapes_key_exists_check p env shape (pos, field_name)
       | ( (p, _),
           Call
@@ -103,8 +103,9 @@ let handler =
               _,
               [shape; ((pos, _), String field_name)],
               [] ) )
-        when class_name = SN.Shapes.cShapes
-             && (method_name = SN.Shapes.idx || method_name = SN.Shapes.at) ->
+        when String.equal class_name SN.Shapes.cShapes
+             && ( String.equal method_name SN.Shapes.idx
+                || String.equal method_name SN.Shapes.at ) ->
         shapes_method_access_with_non_existent_field
           p
           env

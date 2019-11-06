@@ -57,7 +57,7 @@ let empty =
 
 let should_keep_old_sig sig_ old_sig =
   ((not old_sig.elt_abstract) && sig_.elt_abstract)
-  || old_sig.elt_abstract = sig_.elt_abstract
+  || Bool.equal old_sig.elt_abstract sig_.elt_abstract
      && (not old_sig.elt_synthesized)
      && sig_.elt_synthesized
 
@@ -244,7 +244,9 @@ let remove_trait_redeclared (methods, smethods) m =
   let remove_from map =
     match SMap.get trait_method map with
     | Some decls ->
-      let decls = List.filter ~f:(fun d -> d.elt_origin <> trait) decls in
+      let decls =
+        List.filter ~f:(fun d -> String.( <> ) d.elt_origin trait) decls
+      in
       SMap.add trait_method decls map
     | None ->
       Errors.redeclaring_missing_method pos trait_method;

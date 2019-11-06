@@ -28,7 +28,7 @@ let from_class { dc_name; dc_props; dc_sprops; dc_methods; dc_smethods; _ } =
     SMap.fold
       begin
         fun name { elt_origin = cls; _ } set ->
-        if cls = dc_name then
+        if String.equal cls dc_name then
           EltHeap.KeySet.add (cls, name) set
         else
           set

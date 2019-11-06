@@ -123,7 +123,7 @@ let is_enforced env ~explicitly_untrusted ty =
     |> Reason.to_pos
     |> Pos.filename
     |> Relative_path.prefix
-    |> ( = ) Relative_path.Hhi
+    |> Relative_path.(equal_prefix Hhi)
   in
   enforceable && (not is_hhi) && not explicitly_untrusted
 
@@ -152,7 +152,7 @@ let handle_awaitable_return
   let { et_type = return_type; _ } = ft_ret in
   match (ft_fun_kind, return_type) with
   | (Ast_defs.FAsync, (_, Tapply ((_, name), [inner_ty])))
-    when name = Naming_special_names.Classes.cAwaitable ->
+    when String.equal name Naming_special_names.Classes.cAwaitable ->
     let { et_enforced; _ } = compute_enforced_ty env inner_ty in
     pessimize_type env { et_type = return_type; et_enforced }
   | _ -> compute_enforced_and_pessimize_ty env return_type
@@ -165,7 +165,7 @@ let compute_enforced_and_pessimize_fun_type env (ft : decl_fun_type) =
       ~f:(fun fp ->
         let { fp_type = { et_type; _ }; fp_kind; _ } = fp in
         let f =
-          if fp_kind = FPinout then
+          if equal_param_mode fp_kind FPinout then
             compute_enforced_and_pessimize_ty
           else
             compute_enforced_ty

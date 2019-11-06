@@ -22,12 +22,13 @@ let validator =
     inherit type_validator as super
 
     method! on_tapply acc r (p, h) tyl =
-      if h = SN.Classes.cTypename then
+      if String.equal h SN.Classes.cTypename then
         this#invalid acc r "a typename"
-      else if h = SN.Classes.cClassname then
+      else if String.equal h SN.Classes.cClassname then
         this#invalid acc r "a classname"
       else if
-        h = SN.Typehints.wildcard && not (Env.get_allow_wildcards acc.env)
+        String.equal h SN.Typehints.wildcard
+        && not (Env.get_allow_wildcards acc.env)
       then
         this#invalid acc r "a wildcard"
       else
@@ -47,7 +48,7 @@ let validator =
 
     method! on_typeconst acc is_concrete typeconst =
       match typeconst.ttc_abstract with
-      | _ when typeconst.ttc_reifiable <> None || is_concrete ->
+      | _ when Option.is_some typeconst.ttc_reifiable || is_concrete ->
         super#on_typeconst acc is_concrete typeconst
       | _ ->
         let r = Reason.Rwitness (fst typeconst.ttc_name) in
@@ -61,7 +62,8 @@ let validator =
   end
 
 let tparams_has_reified tparams =
-  List.exists tparams ~f:(fun tparam -> tparam.tp_reified <> Nast.Erased)
+  List.exists tparams ~f:(fun tparam ->
+      not (equal_reify_kind tparam.tp_reified Erased))
 
 let valid_newable_hint env tp (pos, hint) =
   match hint with
@@ -69,7 +71,7 @@ let valid_newable_hint env tp (pos, hint) =
     begin
       match Env.get_class env h with
       | Some cls ->
-        if Cls.kind cls <> Ast_defs.Cnormal then
+        if not Ast_defs.(equal_class_kind (Cls.kind cls) Cnormal) then
           Errors.invalid_newable_type_argument tp p
       | None ->
         (* This case should never happen *)
@@ -92,14 +94,14 @@ let verify_has_consistent_bound env (tparam : Tast.tparam) =
   let valid_classes =
     List.filter bound_classes ~f:Tast_utils.valid_newable_class
   in
-  if List.length valid_classes <> 1 then
+  if Int.( <> ) 1 (List.length valid_classes) then
     let cbs = List.map ~f:Cls.name valid_classes in
     Errors.invalid_newable_type_param_constraints tparam.tp_name cbs
 
 let is_wildcard (_, hint) =
   match hint with
-  | (_, Aast.Happly ((_, class_id), _)) when class_id = SN.Typehints.wildcard
-    ->
+  | (_, Aast.Happly ((_, class_id), _))
+    when String.equal class_id SN.Typehints.wildcard ->
     true
   | _ -> false
 
@@ -119,7 +121,7 @@ let verify_targ_valid env tparam ((_, hint) as targ) =
   (* There is some subtlety here. If a type *parameter* is declared reified,
    * even if it is soft, we require that the argument be concrete or reified, not soft
    * reified or erased *)
-  ( if tparam.tp_reified = Nast.Erased then
+  ( if equal_reify_kind tparam.tp_reified Erased then
     ()
   else
     match tparam.tp_reified with
@@ -154,7 +156,8 @@ let handler =
       (* only considering functions where one or more params are reified *)
       match x with
       | ((pos, _), Class_get ((_, CI (_, t)), _)) ->
-        if Env.get_reified env t = Reified then Errors.class_get_reified pos
+        if equal_reify_kind (Env.get_reified env t) Reified then
+          Errors.class_get_reified pos
       | ((pos, _), Call (_, ((_, (r, Tfun { ft_tparams; _ })), _), targs, _, _))
         ->
         let tparams = fst ft_tparams in
@@ -162,7 +165,8 @@ let handler =
       | ((pos, _), New (((_, ty), CI (_, class_id)), targs, _, _, _)) ->
         begin
           match ty with
-          | (_, Tabstract (AKgeneric ci, None)) when ci = class_id ->
+          | (_, Tabstract (AKgeneric ci, None)) when String.equal ci class_id
+            ->
             if not (Env.get_newable env ci) then
               Errors.new_without_newable pos ci;
             if not (List.is_empty targs) then Errors.tparam_with_tparam pos ci
@@ -201,9 +205,9 @@ let handler =
              * a nice Or_unequal_lengths.t result that replaces this if statement *)
             let tparams_length = List.length tparams in
             let targs_length = List.length hints in
-            if tparams_length <> targs_length then
+            if Int.( <> ) tparams_length targs_length then
               let c_pos = Cls.pos tc in
-              if targs_length <> 0 then
+              if Int.( <> ) targs_length 0 then
                 Errors.type_arity
                   pos
                   class_id
@@ -217,7 +221,7 @@ let handler =
       (* Can't use Attributes.mem here because of a conflict between Nast.user_attributes and Tast.user_attributes *)
       if
         List.exists tparam.tp_user_attributes (fun { ua_name; _ } ->
-            UA.uaNewable = snd ua_name)
+            String.equal UA.uaNewable (snd ua_name))
       then
         verify_has_consistent_bound env tparam
 
@@ -229,7 +233,7 @@ let handler =
           | (_, Typing_defs.ConsistentConstruct) ->
             if
               List.exists
-                ~f:(fun t -> t.tp_reified <> Nast.Erased)
+                ~f:(fun t -> not (equal_reify_kind t.tp_reified Erased))
                 (Cls.tparams cls)
             then
               Errors.consistent_construct_reified pos

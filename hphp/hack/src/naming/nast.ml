@@ -43,6 +43,7 @@ type user_attribute = (Pos.t, func_body_ann, unit, unit) Aast.user_attribute
 [@@deriving eq, show]
 
 type class_id_ = (Pos.t, func_body_ann, unit, unit) Aast.class_id_
+[@@deriving eq]
 
 type class_ = (Pos.t, func_body_ann, unit, unit) Aast.class_
 

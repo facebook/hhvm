@@ -119,8 +119,8 @@ let check_balanced_delimiters s delim =
     else if i < length then
       let (d2, i2) =
         match s.[i] with
-        | x when x = delim -> (d + 1, i + 1)
-        | x when x = delim_closed -> (d - 1, i + 1)
+        | x when Char.equal x delim -> (d + 1, i + 1)
+        | x when Char.equal x delim_closed -> (d - 1, i + 1)
         (* Skip escape characters *)
         | '\\' -> (d, i + 2)
         | _ -> (d, i + 1)
@@ -140,7 +140,7 @@ let check_and_strip_delimiters s =
   (*  Non-alphanumeric, non-whitespace, non-backslash characters are delimiter-eligible *)
   let delimiter = Str.regexp "[^a-zA-Z0-9\t\n\r\x0b\x0c \\]" in
   let length = String.length s in
-  if length = 0 then
+  if Int.equal length 0 then
     raise Empty_regex_pattern
   else
     let first = s.[0] in
@@ -153,7 +153,7 @@ let check_and_strip_delimiters s =
           get_global_options (String.sub s (i + 2) (length - i - 2))
         in
         let stripped_string = String.sub s 1 i in
-        if closed_delim <> first then
+        if not (Char.equal closed_delim first) then
           (check_balanced_delimiters stripped_string first, flags)
         else
           (stripped_string, flags)

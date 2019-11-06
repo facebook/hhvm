@@ -22,7 +22,7 @@ let handler =
       match
         Attributes.mem_pos SN.UserAttributes.uaDynamicallyCallable attr
       with
-      | Some p when vis <> Public ->
+      | Some p when not (Aast.equal_visibility vis Public) ->
         Errors.illegal_use_of_dynamically_callable
           p
           pos

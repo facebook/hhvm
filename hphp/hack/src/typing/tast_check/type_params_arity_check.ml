@@ -88,10 +88,10 @@ and check_tparams env p x tparams hl c_pos =
   List.iter hl (check_hint env)
 
 and check_arity env pos tname arity size c_pos =
-  if size = arity then
+  if Int.equal size arity then
     ()
   else if
-    size = 0
+    Int.equal size 0
     && (not (Partial.should_check_error (Env.get_mode env) 4101))
     && not
          (TypecheckerOptions.experimental_feature_enabled
@@ -156,7 +156,10 @@ let handler =
             let tparams_length = List.length (Cls.tparams class_) in
             let hargs_length = List.length targs in
             let c_pos = Cls.pos class_ in
-            if hargs_length <> tparams_length && hargs_length <> 0 then
+            if
+              Int.( <> ) hargs_length tparams_length
+              && Int.( <> ) 0 hargs_length
+            then
               Errors.type_arity p cid (string_of_int tparams_length) c_pos
         end
       | _ -> ()

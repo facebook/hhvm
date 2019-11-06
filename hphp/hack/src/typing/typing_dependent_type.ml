@@ -79,7 +79,7 @@ module ExprDepTy = struct
       let (r, dep_ty) = dep_ty in
       (match (dep_ty, ety) with
       (* Always represent exact types without an access path as Tclass(_,Exact,_) *)
-      | (DTcls n, (_, Tclass (c, _, tyl))) when n = snd c ->
+      | (DTcls n, (_, Tclass (c, _, tyl))) when String.equal n (snd c) ->
         (env, (r, Tclass (c, Exact, tyl)))
       | (dep_ty, _) -> (env, (r, Tabstract (AKdependent dep_ty, Some ety))))
 

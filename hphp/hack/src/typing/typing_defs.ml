@@ -117,6 +117,49 @@ type consistent_kind =
   | FinalClass
 [@@deriving eq]
 
+(* A dependent type consists of a base kind which indicates what the type is
+ * dependent on. It is either dependent on:
+ *  - The type 'this'
+ *  - A class
+ *  - An expression
+ *
+ * Dependent types also have a path component (derived from accessing a type
+ * constant). Thus the dependent type (`expr 0, ['A', 'B', 'C']) roughly means
+ * "The type resulting from accessing the type constant A then the type constant
+ * B and then the type constant C on the expression reference by 0"
+ *)
+type dependent_type =
+  (* Type that is the subtype of the late bound type within a class. *)
+  | DTthis
+  (* A class name, new type, or generic, i.e.
+   *
+   * abstract class C { abstract const type T }
+   *
+   * The type C::T is (`cls '\C', ['T'])
+   *)
+  | DTcls of string
+  (* A reference to some expression. For example:
+   *
+   *  $x->foo()
+   *
+   *  The expression $x would have a reference Ident.t
+   *  The expression $x->foo() would have a different one
+   *)
+  | DTexpr of Ident.t
+[@@deriving eq]
+
+type 'ty tparam = {
+  tp_variance: Ast_defs.variance;
+  tp_name: Ast_defs.id;
+  tp_constraints: (Ast_defs.constraint_kind * 'ty) list;
+  tp_reified: Aast.reify_kind;
+  tp_user_attributes: Nast.user_attribute list;
+}
+[@@deriving eq]
+
+type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
+[@@deriving eq]
+
 type 'phase ty = Reason.t * 'phase ty_
 
 and decl_ty = decl_phase ty
@@ -308,7 +351,7 @@ and has_member = {
   hm_type: locl_ty;
   hm_class_id: Nast.class_id_;
       (** This is required to check ambiguous object access, where sometimes
-  HHVM would access the private member of a parent class instead of the 
+  HHVM would access the private member of a parent class instead of the
   one from the current class. *)
 }
 
@@ -342,36 +385,6 @@ and abstract_kind =
   | AKgeneric of string
   (* see dependent_type *)
   | AKdependent of dependent_type
-
-(* A dependent type consists of a base kind which indicates what the type is
- * dependent on. It is either dependent on:
- *  - The type 'this'
- *  - A class
- *  - An expression
- *
- * Dependent types also have a path component (derived from accessing a type
- * constant). Thus the dependent type (`expr 0, ['A', 'B', 'C']) roughly means
- * "The type resulting from accessing the type constant A then the type constant
- * B and then the type constant C on the expression reference by 0"
- *)
-and dependent_type =
-  (* Type that is the subtype of the late bound type within a class. *)
-  | DTthis
-  (* A class name, new type, or generic, i.e.
-   *
-   * abstract class C { abstract const type T }
-   *
-   * The type C::T is (`cls '\C', ['T'])
-   *)
-  | DTcls of string
-  (* A reference to some expression. For example:
-   *
-   *  $x->foo()
-   *
-   *  The expression $x would have a reference Ident.t
-   *  The expression $x->foo() would have a different one
-   *)
-  | DTexpr of Ident.t
 
 and taccess_type = decl_ty * Nast.sid list
 
@@ -627,19 +640,9 @@ and typedef_type = {
   td_decl_errors: Errors.t option;
 }
 
-and 'ty tparam = {
-  tp_variance: Ast_defs.variance;
-  tp_name: Ast_defs.id;
-  tp_constraints: (Ast_defs.constraint_kind * 'ty) list;
-  tp_reified: Aast.reify_kind;
-  tp_user_attributes: Nast.user_attribute list;
-}
-
 and decl_tparam = decl_ty tparam
 
 and locl_tparam = locl_ty tparam
-
-and 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
 
 and decl_where_constraint = decl_ty where_constraint
 
@@ -685,11 +688,9 @@ let is_locl_type = function
   | LoclType _ -> true
   | _ -> false
 
-let is_type_no_return ty = ty = Tprim Aast.Tnoreturn
-
 let has_expanded { type_expansions; _ } x =
   List.exists type_expansions (function
-      | (_, x') when x = x' -> true
+      | (_, x') when String.equal x x' -> true
       | _ -> false)
 
 let reason = function
@@ -786,8 +787,8 @@ end
 let is_suggest_mode = ref false
 
 (* Ordinal value for type constructor, for localized types *)
-let ty_con_ordinal ty =
-  match snd ty with
+let ty_con_ordinal ty_ =
+  match ty_ with
   | Tany _
   | Terr ->
     0
@@ -812,8 +813,8 @@ let ty_con_ordinal ty =
   | Tpu_access _ -> 19
 
 (* Ordinal value for type constructor, for decl types *)
-let decl_ty_con_ordinal ty =
-  match snd ty with
+let decl_ty_con_ordinal ty_ =
+  match ty_ with
   | Tany _
   | Terr ->
     0
@@ -864,9 +865,8 @@ let abstract_kind_con_ordinal ak =
  *
  * TODO(T52611361): Make this comparison exhaustive on ty1 to remove the _ catchall
  *)
-let rec ty_compare ?(normalize_lists = false) ty1 ty2 =
-  let rec ty_compare ty1 ty2 =
-    let (ty_1, ty_2) = (snd ty1, snd ty2) in
+let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
+  let rec ty__compare ty_1 ty_2 =
     match (ty_1, ty_2) with
     | (Tprim ty1, Tprim ty2) -> compare ty1 ty2
     | (Toption ty, Toption ty2) -> ty_compare ty ty2
@@ -918,7 +918,7 @@ let rec ty_compare ?(normalize_lists = false) ty1 ty2 =
       end
     | (Tvar v1, Tvar v2) -> compare v1 v2
     | (Tanon (_, id1), Tanon (_, id2)) -> compare id1 id2
-    | _ -> ty_con_ordinal ty1 - ty_con_ordinal ty2
+    | _ -> ty_con_ordinal ty_1 - ty_con_ordinal ty_2
   and shape_kind_compare sk1 sk2 =
     match (sk1, sk2) with
     | (Closed_shape, Closed_shape)
@@ -966,8 +966,11 @@ let rec ty_compare ?(normalize_lists = false) ty1 ty2 =
     | (AKvarray_or_darray ty1, AKvarray_or_darray ty2) ->
       ty_compare ty1 ty2
     | _ -> array_kind_con_ordinal ak1 - array_kind_con_ordinal ak2
-  in
-  ty_compare ty1 ty2
+  and ty_compare ty1 ty2 = ty__compare (snd ty1) (snd ty2) in
+  ty__compare ty_1 ty_2
+
+and ty_compare ?(normalize_lists = false) ty1 ty2 =
+  ty__compare ~normalize_lists (snd ty1) (snd ty2)
 
 and tyl_compare ~sort ?(normalize_lists = false) tyl1 tyl2 =
   let (tyl1, tyl2) =
@@ -1036,7 +1039,7 @@ let class_id_compare cid1 cid2 =
   | (Aast.CI (_, id1), Aast.CI (_, id2)) -> compare id1 id2
   | _ -> class_id_con_ordinal cid2 - class_id_con_ordinal cid1
 
-let class_id_equal cid1 cid2 = class_id_compare cid1 cid2 = 0
+let class_id_equal cid1 cid2 = Int.equal (class_id_compare cid1 cid2) 0
 
 let has_member_compare ~normalize_lists hm1 hm2 =
   let ty_compare = ty_compare ~normalize_lists in
@@ -1055,7 +1058,37 @@ let constraint_ty_compare ?(normalize_lists = false) (_, ty1) (_, ty2) =
     has_member_compare ~normalize_lists hm1 hm2
 
 let ty_equal ?(normalize_lists = false) ty1 ty2 =
-  ty_compare ~normalize_lists ty1 ty2 = 0
+  Int.equal 0 (ty_compare ~normalize_lists ty1 ty2)
+
+let equal_locl_ty ty1 ty2 = ty_equal ty1 ty2
+
+let equal_locl_ty_ ty_1 ty_2 = Int.equal 0 (ty__compare ty_1 ty_2)
+
+let equal_locl_fun_arity a1 a2 =
+  match (a1, a2) with
+  | (Fstandard (min1, max1), Fstandard (min2, max2)) ->
+    Int.equal min1 min2 && Int.equal max1 max2
+  | (Fvariadic (min1, param1), Fvariadic (min2, param2)) ->
+    Int.equal min1 min2 && Int.equal 0 (ft_params_compare [param1] [param2])
+  | (Fellipsis (min1, pos1), Fellipsis (min2, pos2)) ->
+    Int.equal min1 min2 && Pos.equal pos1 pos2
+  | (Fstandard _, (Fvariadic _ | Fellipsis _))
+  | (Fvariadic _, (Fstandard _ | Fellipsis _))
+  | (Fellipsis _, (Fstandard _ | Fvariadic _)) ->
+    false
+
+let equal_abstract_kind ak1 ak2 =
+  match (ak1, ak2) with
+  | (AKnewtype (id1, tyl1), AKnewtype (id2, tyl2)) ->
+    String.equal id1 id2 && List.equal tyl1 tyl2 equal_locl_ty
+  | (AKgeneric id1, AKgeneric id2) -> String.equal id1 id2
+  | (AKdependent dt1, AKdependent dt2) -> equal_dependent_type dt1 dt2
+  | (AKnewtype _, (AKgeneric _ | AKdependent _))
+  | (AKgeneric _, (AKnewtype _ | AKdependent _))
+  | (AKdependent _, (AKnewtype _ | AKgeneric _)) ->
+    false
+
+let is_type_no_return = equal_locl_ty_ (Tprim Aast.Tnoreturn)
 
 let make_function_type_rxvar param_ty =
   match param_ty with
@@ -1064,123 +1097,123 @@ let make_function_type_rxvar param_ty =
     (r, Toption (r1, Tfun { tfun with ft_reactive = RxVar None }))
   | _ -> param_ty
 
-let rec equal_decl_ty ty1 ty2 =
-  let rec equal_ty ty1 ty2 =
-    let (ty_1, ty_2) = (snd ty1, snd ty2) in
-    match (ty_1, ty_2) with
-    | (Tany _, Tany _) -> true
-    | (Terr, Terr) -> true
-    | (Tthis, Tthis) -> true
-    | (Tmixed, Tmixed) -> true
-    | (Tnothing, Tnothing) -> true
-    | (Tnonnull, Tnonnull) -> true
-    | (Tdynamic, Tdynamic) -> true
-    | (Tapply (id1, tyl1), Tapply (id2, tyl2)) ->
-      Aast.equal_sid id1 id2 && equal_decl_tyl tyl1 tyl2
-    | (Tgeneric s1, Tgeneric s2) -> String.equal s1 s2
-    | (Taccess (ty1, idl1), Taccess (ty2, idl2)) ->
-      equal_ty ty1 ty2 && List.equal ~equal:Aast.equal_sid idl1 idl2
-    | (Tarray (tk1, tv1), Tarray (tk2, tv2)) ->
-      Option.equal equal_ty tk1 tk2 && Option.equal equal_ty tv1 tv2
-    | (Tdarray (tk1, tv1), Tdarray (tk2, tv2)) ->
-      equal_ty tk1 tk2 && equal_ty tv1 tv2
-    | (Tvarray ty1, Tvarray ty2) -> equal_ty ty1 ty2
-    | (Tvarray_or_darray ty1, Tvarray_or_darray ty2) -> equal_ty ty1 ty2
-    | (Tlike ty1, Tlike ty2) -> equal_ty ty1 ty2
-    | (Tprim ty1, Tprim ty2) -> Aast.equal_tprim ty1 ty2
-    | (Toption ty, Toption ty2) -> equal_ty ty ty2
-    | (Tfun fty1, Tfun fty2) -> equal_decl_fun_type fty1 fty2
-    | (Tunion tyl1, Tunion tyl2)
-    | (Tintersection tyl1, Tintersection tyl2)
-    | (Ttuple tyl1, Ttuple tyl2) ->
-      equal_decl_tyl tyl1 tyl2
-    | (Tshape (shape_kind1, fields1), Tshape (shape_kind2, fields2)) ->
-      equal_shape_kind shape_kind1 shape_kind2
-      && List.equal
-           ~equal:(fun (k1, v1) (k2, v2) ->
-             Ast_defs.ShapeField.equal k1 k2 && equal_shape_field_type v1 v2)
-           (Nast.ShapeMap.elements fields1)
-           (Nast.ShapeMap.elements fields2)
-    | (Tpu_access (ty1, id1), Tpu_access (ty2, id2)) ->
-      equal_ty ty1 ty2 && Aast.equal_sid id1 id2
-    | (Tvar v1, Tvar v2) -> Ident.equal v1 v2
-    | (Tany _, _)
-    | (Terr, _)
-    | (Tthis, _)
-    | (Tapply _, _)
-    | (Tgeneric _, _)
-    | (Taccess _, _)
-    | (Tarray _, _)
-    | (Tdarray _, _)
-    | (Tvarray _, _)
-    | (Tvarray_or_darray _, _)
-    | (Tmixed, _)
-    | (Tnothing, _)
-    | (Tlike _, _)
-    | (Tnonnull, _)
-    | (Tdynamic, _)
-    | (Toption _, _)
-    | (Tprim _, _)
-    | (Tfun _, _)
-    | (Ttuple _, _)
-    | (Tshape _, _)
-    | (Tpu_access _, _)
-    | (Tvar _, _)
-    | (Tunion _, _)
-    | (Tintersection _, _) ->
-      false
-  and equal_shape_kind sk1 sk2 =
-    match (sk1, sk2) with
-    | (Closed_shape, Closed_shape)
-    | (Open_shape, Open_shape) ->
-      true
-    | (Closed_shape, Open_shape) -> false
-    | (Open_shape, Closed_shape) -> false
-  and equal_shape_field_type sft1 sft2 =
-    equal_ty sft1.sft_ty sft2.sft_ty
-    && Bool.equal sft1.sft_optional sft2.sft_optional
-  in
-  equal_ty ty1 ty2
+let rec equal_decl_ty_ ty_1 ty_2 =
+  match (ty_1, ty_2) with
+  | (Tany _, Tany _) -> true
+  | (Terr, Terr) -> true
+  | (Tthis, Tthis) -> true
+  | (Tmixed, Tmixed) -> true
+  | (Tnothing, Tnothing) -> true
+  | (Tnonnull, Tnonnull) -> true
+  | (Tdynamic, Tdynamic) -> true
+  | (Tapply (id1, tyl1), Tapply (id2, tyl2)) ->
+    Aast.equal_sid id1 id2 && equal_decl_tyl tyl1 tyl2
+  | (Tgeneric s1, Tgeneric s2) -> String.equal s1 s2
+  | (Taccess (ty1, idl1), Taccess (ty2, idl2)) ->
+    equal_decl_ty ty1 ty2 && List.equal ~equal:Aast.equal_sid idl1 idl2
+  | (Tarray (tk1, tv1), Tarray (tk2, tv2)) ->
+    Option.equal equal_decl_ty tk1 tk2 && Option.equal equal_decl_ty tv1 tv2
+  | (Tdarray (tk1, tv1), Tdarray (tk2, tv2)) ->
+    equal_decl_ty tk1 tk2 && equal_decl_ty tv1 tv2
+  | (Tvarray ty1, Tvarray ty2) -> equal_decl_ty ty1 ty2
+  | (Tvarray_or_darray ty1, Tvarray_or_darray ty2) -> equal_decl_ty ty1 ty2
+  | (Tlike ty1, Tlike ty2) -> equal_decl_ty ty1 ty2
+  | (Tprim ty1, Tprim ty2) -> Aast.equal_tprim ty1 ty2
+  | (Toption ty, Toption ty2) -> equal_decl_ty ty ty2
+  | (Tfun fty1, Tfun fty2) -> equal_decl_fun_type fty1 fty2
+  | (Tunion tyl1, Tunion tyl2)
+  | (Tintersection tyl1, Tintersection tyl2)
+  | (Ttuple tyl1, Ttuple tyl2) ->
+    equal_decl_tyl tyl1 tyl2
+  | (Tshape (shape_kind1, fields1), Tshape (shape_kind2, fields2)) ->
+    equal_shape_kind shape_kind1 shape_kind2
+    && List.equal
+         ~equal:(fun (k1, v1) (k2, v2) ->
+           Ast_defs.ShapeField.equal k1 k2 && equal_shape_field_type v1 v2)
+         (Nast.ShapeMap.elements fields1)
+         (Nast.ShapeMap.elements fields2)
+  | (Tpu_access (ty1, id1), Tpu_access (ty2, id2)) ->
+    equal_decl_ty ty1 ty2 && Aast.equal_sid id1 id2
+  | (Tvar v1, Tvar v2) -> Ident.equal v1 v2
+  | (Tany _, _)
+  | (Terr, _)
+  | (Tthis, _)
+  | (Tapply _, _)
+  | (Tgeneric _, _)
+  | (Taccess _, _)
+  | (Tarray _, _)
+  | (Tdarray _, _)
+  | (Tvarray _, _)
+  | (Tvarray_or_darray _, _)
+  | (Tmixed, _)
+  | (Tnothing, _)
+  | (Tlike _, _)
+  | (Tnonnull, _)
+  | (Tdynamic, _)
+  | (Toption _, _)
+  | (Tprim _, _)
+  | (Tfun _, _)
+  | (Ttuple _, _)
+  | (Tshape _, _)
+  | (Tpu_access _, _)
+  | (Tvar _, _)
+  | (Tunion _, _)
+  | (Tintersection _, _) ->
+    false
+
+and equal_decl_ty ty1 ty2 = equal_decl_ty_ (snd ty1) (snd ty2)
+
+and equal_shape_field_type sft1 sft2 =
+  equal_decl_ty sft1.sft_ty sft2.sft_ty
+  && Bool.equal sft1.sft_optional sft2.sft_optional
+
+and equal_decl_fun_arity a1 a2 =
+  match (a1, a2) with
+  | (Fstandard (min1, max1), Fstandard (min2, max2)) ->
+    Int.equal min1 min2 && Int.equal max1 max2
+  | (Fvariadic (min1, param1), Fvariadic (min2, param2)) ->
+    Int.equal min1 min2 && equal_decl_ft_params [param1] [param2]
+  | (Fellipsis (min1, pos1), Fellipsis (min2, pos2)) ->
+    Int.equal min1 min2 && Pos.equal pos1 pos2
+  | (Fstandard _, (Fvariadic _ | Fellipsis _))
+  | (Fvariadic _, (Fstandard _ | Fellipsis _))
+  | (Fellipsis _, (Fstandard _ | Fvariadic _)) ->
+    false
 
 and equal_decl_fun_type fty1 fty2 =
-  let equal_arity a1 a2 =
-    match (a1, a2) with
-    | (Fstandard (min1, max1), Fstandard (min2, max2)) ->
-      Int.equal min1 min2 && Int.equal max1 max2
-    | (Fvariadic (min1, param1), Fvariadic (min2, param2)) ->
-      Int.equal min1 min2 && equal_decl_ft_params [param1] [param2]
-    | (Fellipsis (min1, pos1), Fellipsis (min2, pos2)) ->
-      Int.equal min1 min2 && Pos.equal pos1 pos2
-    | (Fstandard _, _)
-    | (Fvariadic _, _)
-    | (Fellipsis _, _) ->
-      false
-  in
-  let rec equal_reactivity r1 r2 =
-    match (r1, r2) with
-    | (Nonreactive, Nonreactive) -> true
-    | (Local ty1, Local ty2)
-    | (Shallow ty1, Shallow ty2)
-    | (Reactive ty1, Reactive ty2) ->
-      Option.equal equal_decl_ty ty1 ty2
-    | (MaybeReactive r1, MaybeReactive r2) -> equal_reactivity r1 r2
-    | (RxVar r1, RxVar r2) -> Option.equal equal_reactivity r1 r2
-    | (Nonreactive, _)
-    | (Local _, _)
-    | (Shallow _, _)
-    | (Reactive _, _)
-    | (MaybeReactive _, _)
-    | (RxVar _, _) ->
-      false
-  in
   equal_decl_possibly_enforced_ty fty1.ft_ret fty2.ft_ret
   && equal_decl_ft_params fty1.ft_params fty2.ft_params
   && Bool.equal fty1.ft_is_coroutine fty2.ft_is_coroutine
-  && equal_arity fty1.ft_arity fty2.ft_arity
+  && equal_decl_fun_arity fty1.ft_arity fty2.ft_arity
   && equal_reactivity fty1.ft_reactive fty2.ft_reactive
   && Bool.equal fty1.ft_return_disposable fty2.ft_return_disposable
   && Option.equal equal_param_mutability fty1.ft_mutability fty2.ft_mutability
   && Bool.equal fty1.ft_returns_mutable fty2.ft_returns_mutable
+
+and equal_reactivity r1 r2 =
+  match (r1, r2) with
+  | (Nonreactive, Nonreactive) -> true
+  | (Local ty1, Local ty2)
+  | (Shallow ty1, Shallow ty2)
+  | (Reactive ty1, Reactive ty2) ->
+    Option.equal equal_decl_ty ty1 ty2
+  | (MaybeReactive r1, MaybeReactive r2) -> equal_reactivity r1 r2
+  | (RxVar r1, RxVar r2) -> Option.equal equal_reactivity r1 r2
+  | (Nonreactive, _)
+  | (Local _, _)
+  | (Shallow _, _)
+  | (Reactive _, _)
+  | (MaybeReactive _, _)
+  | (RxVar _, _) ->
+    false
+
+and equal_param_rx_annotation pa1 pa2 =
+  match (pa1, pa2) with
+  | (Param_rx_var, Param_rx_var) -> true
+  | (Param_rx_if_impl ty1, Param_rx_if_impl ty2) -> equal_decl_ty ty1 ty2
+  | (Param_rx_var, Param_rx_if_impl _)
+  | (Param_rx_if_impl _, Param_rx_var) ->
+    false
 
 and equal_decl_tyl tyl1 tyl2 = List.equal ~equal:equal_decl_ty tyl1 tyl2
 

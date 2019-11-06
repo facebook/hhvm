@@ -54,7 +54,7 @@ let log_env_change name ?(level = 1) old_env new_env =
   new_env
 
 let add_subst env x x' =
-  if x <> x' then
+  if Int.( <> ) x x' then
     { env with subst = IMap.add x x' env.subst }
   else
     env
@@ -170,10 +170,12 @@ let get_tyvar_info_opt env var =
 let get_tyvar_info env var =
   Option.value (get_tyvar_info_opt env var) ~default:empty_tyvar_info
 
-let is_global_tyvar env var = IMap.get var env.tvenv = Some GlobalTyvar
+let is_global_tyvar env var =
+  Option.equal equal_tyvar_info (IMap.get var env.tvenv) (Some GlobalTyvar)
 
 let update_tyvar_info env var tyvar_info =
-  if IMap.get var env.tvenv = Some GlobalTyvar then
+  if Option.equal equal_tyvar_info (IMap.get var env.tvenv) (Some GlobalTyvar)
+  then
     let env = env_with_tvenv env (IMap.add var GlobalTyvar env.tvenv) in
     env_with_global_tvenv env (IMap.add var tyvar_info env.global_tvenv)
   else
@@ -374,7 +376,7 @@ let set_tyvar_upper_bounds env var upper_bounds =
 
 let rec is_tvar ~elide_nullable ty var =
   match ty with
-  | LoclType (_, Tvar var') -> var = var'
+  | LoclType (_, Tvar var') -> Ident.equal var var'
   | LoclType (_, Toption ty) when elide_nullable ->
     is_tvar ~elide_nullable (LoclType ty) var
   | _ -> false
@@ -592,7 +594,8 @@ let set_condition_type env n ty =
 let get_condition_type env n = SMap.get n env.genv.condition_types
 
 (* Some form (strict/shallow/local) of reactivity *)
-let env_local_reactive env = env_reactivity env <> Nonreactive
+let env_local_reactive env =
+  not (equal_reactivity (env_reactivity env) Nonreactive)
 
 let function_is_mutable env = env.genv.fun_mutable
 
@@ -657,10 +660,10 @@ let get_env_mutability env = env.lenv.local_mutability
 let get_enum env x =
   add_wclass env x;
   match Decl_provider.get_class x with
-  | Some tc when Cls.enum_type tc <> None -> Some tc
+  | Some tc when Option.is_some (Cls.enum_type tc) -> Some tc
   | _ -> None
 
-let is_enum env x = get_enum env x <> None
+let is_enum env x = Option.is_some (get_enum env x)
 
 let get_typeconst env class_ mid =
   add_wclass env (Cls.name class_);
@@ -895,7 +898,7 @@ let get_mode env = env.decl_env.mode
 
 let is_strict env = FileInfo.is_strict (get_mode env)
 
-let is_decl env = get_mode env = FileInfo.Mdecl
+let is_decl env = FileInfo.(equal_mode (get_mode env) Mdecl)
 
 let iter_anonymous env f =
   IMap.iter
@@ -989,7 +992,8 @@ let decl_tany = tany
 let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
   let not_found_is_ok x ctx =
     let xstr = LID.to_string x in
-    ((xstr = SG.globals || SG.is_superglobal xstr) && not (is_strict env))
+    (String.equal xstr SG.globals || SG.is_superglobal xstr)
+    && not (is_strict env)
     || Fake.is_valid ctx.LEnvC.fake_members x
   in
   let error_if_pos_provided posopt ctx =
@@ -1065,7 +1069,8 @@ let set_local_expr_id env x new_eid =
   | Some next_cont ->
     begin
       match LID.Map.get x next_cont.LEnvC.local_types with
-      | Some (type_, eid) when eid <> new_eid ->
+      | Some (type_, eid)
+        when not (Typing_local_types.equal_expression_id eid new_eid) ->
         let local = (type_, new_eid) in
         let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
         let env = { env with lenv = { env.lenv with per_cont_env } } in
@@ -1585,7 +1590,7 @@ let remove_tyvar_upper_bound env var upper_var =
     ITySet.filter
       (fun ty ->
         match expand_internal_type env ty with
-        | (_, LoclType (_, Tvar v)) -> v <> upper_var
+        | (_, LoclType (_, Tvar v)) -> not (Ident.equal v upper_var)
         | _ -> true)
       tvinfo.upper_bounds
   in
@@ -1601,7 +1606,7 @@ let remove_tyvar_lower_bound env var lower_var =
     ITySet.filter
       (fun ty ->
         match expand_internal_type env ty with
-        | (_, LoclType (_, Tvar v)) -> v <> lower_var
+        | (_, LoclType (_, Tvar v)) -> not (Ident.equal v lower_var)
         | _ -> true)
       tvinfo.lower_bounds
   in

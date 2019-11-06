@@ -67,7 +67,7 @@ module SPairSet = Reordered_argument_set (Caml.Set.Make (struct
   (* Equivalent to polymorphic compare; written explicitly for perf reasons *)
   let compare (a1, a2) (b1, b2) =
     let r = String.compare a1 b1 in
-    if not (Int.equal r 0) then
+    if Int.( <> ) r 0 then
       r
     else
       String.compare a2 b2
@@ -162,7 +162,7 @@ let filter_or_chown_privates
   Sequence.filter_map lin (fun DTT.{ id; inherit_when_private; elt } ->
       let ancestor_name = elt.ce_origin in
       let is_private_and_inherited =
-        (not (String.equal ancestor_name child_class_name)) && is_private elt
+        String.( <> ) ancestor_name child_class_name && is_private elt
       in
       if is_private_and_inherited && not inherit_when_private then
         None
@@ -175,7 +175,7 @@ let filter_or_chown_privates
 let should_use_ancestor_sig child_class_name descendant_sig ancestor_sig =
   (* Any member directly declared in the child class overrides ancestor members,
      even if it is abstract and an ancestor member is concrete. *)
-  (not (String.equal child_class_name descendant_sig.ce_origin))
+  String.( <> ) child_class_name descendant_sig.ce_origin
   (* Otherwise, concrete members take priority over abstract members. *)
   && (not ancestor_sig.ce_abstract)
   && descendant_sig.ce_abstract

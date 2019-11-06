@@ -48,7 +48,7 @@ let smember_not_found pos ~is_const ~is_method class_ member_name =
   match (static_suggestion, method_suggestion) with
   (* Prefer suggesting a different static method, unless there's a
      normal method whose name matches exactly. *)
-  | (Some _, Some (def_pos, v)) when v = member_name ->
+  | (Some _, Some (def_pos, v)) when String.equal v member_name ->
     error (`closest (def_pos, v))
   | (Some (def_pos, v), _) -> error (`did_you_mean (def_pos, v))
   | (None, Some (def_pos, v)) -> error (`closest (def_pos, v))
@@ -82,7 +82,7 @@ let member_not_found pos ~is_method class_ member_name r =
   match (method_suggestion, static_suggestion) with
   (* Prefer suggesting a different method, unless there's a
       static method whose name matches exactly. *)
-  | (Some _, Some (def_pos, v)) when v = member_name ->
+  | (Some _, Some (def_pos, v)) when String.equal v member_name ->
     error (`closest (def_pos, v))
   | (Some (def_pos, v), _) -> error (`did_you_mean (def_pos, v))
   | (None, Some (def_pos, v)) -> error (`closest (def_pos, v))
@@ -200,11 +200,11 @@ and obj_get_concrete_ty
         when (not is_method)
              && (not (Env.is_strict env))
              && (not (Partial.should_check_error (Env.get_mode env) 4053))
-             && Cls.name class_info = SN.Classes.cStdClass ->
+             && String.equal (Cls.name class_info) SN.Classes.cStdClass ->
         default ()
       | Some class_info ->
         let paraml =
-          if List.length paraml = 0 then
+          if List.is_empty paraml then
             List.map (Cls.tparams class_info) (fun _ ->
                 (Reason.Rwitness id_pos, Typing_utils.tany env))
           else
@@ -329,7 +329,7 @@ and obj_get_concrete_ty
                 let old_mem_pos = Reason.to_pos (fst old_member) in
                 begin
                   match class_id with
-                  | CIexpr (_, This) when snd x = self_id -> ()
+                  | CIexpr (_, This) when String.equal (snd x) self_id -> ()
                   | _ ->
                     Errors.ambiguous_object_access
                       id_pos
@@ -346,7 +346,7 @@ and obj_get_concrete_ty
               ~use_pos:id_pos
               ~def_pos:mem_pos
               ce_deprecated;
-            if class_id = CIparent && ce_abstract then
+            if Nast.equal_class_id_ class_id CIparent && ce_abstract then
               Errors.parent_abstract_call id_str id_pos mem_pos;
             let member_decl_ty = Typing_enum.member_type env member_ce in
             let ety_env = mk_ety_env r class_info x exact paraml in
@@ -484,7 +484,7 @@ and widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
         | Some { ce_origin; _ } ->
           (* If this member was inherited then we obtain the type from which
            * it is inherited as our wider type *)
-          if ce_origin = class_name then
+          if String.equal ce_origin class_name then
             default ()
           else (
             match Cls.get_ancestor class_info ce_origin with

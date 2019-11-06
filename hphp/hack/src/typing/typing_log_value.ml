@@ -15,6 +15,7 @@ type value =
   | List of value list
   | Set of SSet.t
   | Map of value SMap.t
+[@@deriving eq]
 
 let make_map l = Map (SMap.of_list l)
 

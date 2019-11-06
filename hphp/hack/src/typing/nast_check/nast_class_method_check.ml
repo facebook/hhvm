@@ -23,7 +23,8 @@ let error_if_duplicate_method_names methods =
 
 let error_if_clone_has_arguments method_ =
   match (method_.m_name, method_.m_params) with
-  | ((pos, name), _ :: _) when name = Naming_special_names.Members.__clone ->
+  | ((pos, name), _ :: _)
+    when String.equal name Naming_special_names.Members.__clone ->
     Errors.clone_too_many_arguments pos
   | _ -> ()
 

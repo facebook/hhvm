@@ -30,7 +30,7 @@ let non env r ty ~approx =
     | Tprim Aast.Tnull -> (r, Tnonnull)
     | Tnonnull -> (r, Tprim Aast.Tnull)
     | _ ->
-      if approx = Utils.ApproxUp then
+      if Utils.equal_approx approx Utils.ApproxUp then
         MkType.mixed r
       else
         MkType.nothing r
@@ -105,7 +105,7 @@ let rec intersect env ~r ty1 ty2 =
           try
             match (ty1, ty2) with
             | ((_, Ttuple tyl1), (_, Ttuple tyl2))
-              when List.length tyl1 = List.length tyl2 ->
+              when Int.equal (List.length tyl1) (List.length tyl2) ->
               let (env, inter_tyl) =
                 List.map2_env env tyl1 tyl2 ~f:(intersect ~r)
               in

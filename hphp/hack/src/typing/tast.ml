@@ -71,7 +71,7 @@ type func_body_ann =
   (* True if there are any UNSAFE blocks *)
   | HasUnsafeBlocks
   | NoUnsafeBlocks
-[@@deriving show]
+[@@deriving eq, show]
 
 type program = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.program
 [@@deriving show]

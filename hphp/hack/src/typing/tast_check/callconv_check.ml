@@ -24,9 +24,9 @@ let check_types env ((p, _), te) =
           true
         | (_, (Tarraykind _ | Ttuple _ | Tshape _)) -> true
         | (_, Tclass ((_, cn), _, _))
-          when cn = SN.Collections.cDict
-               || cn = SN.Collections.cKeyset
-               || cn = SN.Collections.cVec ->
+          when String.equal cn SN.Collections.cDict
+               || String.equal cn SN.Collections.cKeyset
+               || String.equal cn SN.Collections.cVec ->
           true
         | (_, Tunion tyl) -> List.for_all ~f:iter tyl
         | (_, Tabstract _) ->

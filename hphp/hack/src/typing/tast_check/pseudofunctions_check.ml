@@ -37,7 +37,7 @@ let handler =
               _,
               [(_, Class_get (_, CGexpr (_, Id _)))],
               _ )
-          when pseudo_func = SN.PseudoFunctions.isset ->
+          when String.equal pseudo_func SN.PseudoFunctions.isset ->
           Errors.isset_in_strict p
         | _ -> ()
   end

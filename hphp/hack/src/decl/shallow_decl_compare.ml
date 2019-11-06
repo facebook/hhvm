@@ -40,7 +40,7 @@ let compute_class_diffs
   SSet.fold possibly_changed_classes ~init:[] ~f:(fun cid acc ->
       let diff = diff_class_in_changed_file old_classes new_classes cid in
       Decl_compare_utils.log_class_diff cid diff;
-      if diff = Unchanged then
+      if ClassDiff.equal diff Unchanged then
         acc
       else
         (cid, diff) :: acc)

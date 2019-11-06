@@ -57,7 +57,7 @@ let diff_const c1 c2 : member_change option =
   let c2 = Decl_pos_utils.NormalizeSig.shallow_class_const c2 in
   if equal_shallow_class_const c1 c2 then
     None
-  else if not (Bool.equal c1.scc_abstract c2.scc_abstract) then
+  else if Bool.( <> ) c1.scc_abstract c2.scc_abstract then
     Some Changed_inheritance
   else
     Some Modified
@@ -84,7 +84,7 @@ let diff_prop p1 p2 : member_change option =
     None
   else if
     (not (Aast.equal_visibility p1.sp_visibility p2.sp_visibility))
-    || not (Bool.equal p1.sp_abstract p2.sp_abstract)
+    || Bool.( <> ) p1.sp_abstract p2.sp_abstract
   then
     Some Changed_inheritance
   else
@@ -97,7 +97,7 @@ let diff_method m1 m2 : member_change option =
     None
   else if
     (not (Aast.equal_visibility m1.sm_visibility m2.sm_visibility))
-    || not (Bool.equal m1.sm_abstract m2.sm_abstract)
+    || Bool.( <> ) m1.sm_abstract m2.sm_abstract
   then
     Some Changed_inheritance
   else

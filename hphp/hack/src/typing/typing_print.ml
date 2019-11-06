@@ -63,7 +63,7 @@ module Full = struct
     let max_idx = List.length l - 1 in
     let elements =
       List.mapi l ~f:(fun idx element ->
-          if idx = max_idx then
+          if Int.equal idx max_idx then
             f element
           else
             Concat [f element; s; split])
@@ -85,7 +85,9 @@ module Full = struct
 
   let shape_map fdm f_field =
     let compare (k1, _) (k2, _) =
-      compare (Env.get_shape_field_name k1) (Env.get_shape_field_name k2)
+      String.compare
+        (Env.get_shape_field_name k1)
+        (Env.get_shape_field_name k2)
     in
     let fields = List.sort ~compare (Nast.ShapeMap.elements fdm) in
     List.map fields f_field
@@ -352,7 +354,7 @@ module Full = struct
     | Toption (_, Tnonnull) -> text "mixed"
     | Toption (r, Tunion tyl)
       when TypecheckerOptions.like_type_hints (Env.get_tcopt env)
-           && List.exists ~f:(fun (_, ty) -> ty = Tdynamic) tyl ->
+           && List.exists ~f:(fun (_, ty) -> equal_locl_ty_ ty Tdynamic) tyl ->
       (* Unions with null become Toption, which leads to the awkward ?~...
        * The Tunion case can better handle this *)
       k (r, Tunion ((r, Tprim Nast.Tnull) :: tyl))
@@ -487,7 +489,8 @@ module Full = struct
         |> Typing_set.elements
       in
       let (null, nonnull) =
-        List.partition_tf tyl ~f:(fun (_, t) -> t = Tprim Nast.Tnull)
+        List.partition_tf tyl ~f:(fun (_, t) ->
+            equal_locl_ty_ t (Tprim Nast.Tnull))
       in
       begin
         match (null, nonnull) with
@@ -727,9 +730,11 @@ module ErrorString = struct
     | Tvar _ -> "some value"
     | Tanon _ -> "a function"
     | Tfun _ -> "a function"
-    | Tabstract (AKnewtype (x, _), _) when x = SN.Classes.cClassname ->
+    | Tabstract (AKnewtype (x, _), _) when String.equal x SN.Classes.cClassname
+      ->
       "a classname string"
-    | Tabstract (AKnewtype (x, _), _) when x = SN.Classes.cTypename ->
+    | Tabstract (AKnewtype (x, _), _) when String.equal x SN.Classes.cTypename
+      ->
       "a typename string"
     | Tabstract (ak, cstr) -> abstract env ak cstr
     | Tclass ((_, x), Exact, tyl) ->
@@ -806,12 +811,13 @@ module ErrorString = struct
 
   and union env l =
     let (null, nonnull) =
-      List.partition_tf l (fun ty -> snd ty = Tprim Nast.Tnull)
+      List.partition_tf l (fun ty ->
+          equal_locl_ty_ (snd ty) (Tprim Nast.Tnull))
     in
     let l = List.map nonnull (to_string env) in
     let s = List.fold_right l ~f:SSet.add ~init:SSet.empty in
     let l = SSet.elements s in
-    if null = [] then
+    if List.is_empty null then
       union_ l
     else
       "a nullable type"
@@ -1067,7 +1073,7 @@ module Json = struct
               (* We end up only needing the name of the typedef. *)
               Ok name
             | None ->
-              if name = "HackSuggest" then
+              if String.equal name "HackSuggest" then
                 not_supported
                   ~message:"HackSuggest types for lambdas are not supported"
                   ~keytrace
@@ -1345,7 +1351,7 @@ module Json = struct
           >>= fun (args, keytrace) ->
           aux_args args ~keytrace >>= (fun tyl -> ty (Tintersection tyl))
         | ("function" | "coroutine") as kind ->
-          let ft_is_coroutine = kind = "coroutine" in
+          let ft_is_coroutine = String.equal kind "coroutine" in
           get_array "params" (json, keytrace)
           >>= fun (params, params_keytrace) ->
           let params =
@@ -1598,7 +1604,7 @@ module PrintClass = struct
       else
         "" )
     ^
-    if reifiable <> None then
+    if Option.is_some reifiable then
       " (reifiable)"
     else
       ""

@@ -32,9 +32,9 @@ type env = {
 }
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
-  name = SN.UserAttributes.uaReactive
-  || name = SN.UserAttributes.uaLocalReactive
-  || name = SN.UserAttributes.uaShallowReactive
+  String.equal name SN.UserAttributes.uaReactive
+  || String.equal name SN.UserAttributes.uaLocalReactive
+  || String.equal name SN.UserAttributes.uaShallowReactive
 
 (* During NastCheck, all reactivity kinds are the same *)
 let fun_is_reactive user_attributes =
@@ -100,5 +100,5 @@ let def_env x =
 
 let is_rx_move e =
   match e with
-  | (_, Id (_, v)) -> Utils.add_ns v = SN.Rx.move
+  | (_, Id (_, v)) -> String.equal (Utils.add_ns v) SN.Rx.move
   | _ -> false

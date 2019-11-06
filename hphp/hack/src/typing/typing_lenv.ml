@@ -28,7 +28,7 @@ let get_all_locals env = env.lenv.per_cont_env
 let union env local1 local2 =
   let ((ty1, eid1), (ty2, eid2)) = (local1, local2) in
   let eid =
-    if eid1 = eid2 then
+    if Ident.equal eid1 eid2 then
       eid1
     else
       Ident.tmp ()

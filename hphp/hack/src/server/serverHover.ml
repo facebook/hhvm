@@ -313,10 +313,10 @@ let make_hover_attr_docs name =
     ]
   | "__Soft" ->
     [
-      "This parameter/property will not be type checked at runtime."
+      "A runtime type mismatch on this parameter/property will not throw a TypeError/Error."
       ^ " This is useful for migrating partial code where you're unsure about the type."
-      ^ "\n\nThe type checker will still use the type, so callers will get checked."
-      ^ " If the type is wrong at runtime, a warning will be logged.";
+      ^ "\n\nThe type checker will ignore this attribute, so your code will still get type checked."
+      ^ " If the type is wrong at runtime, a warning will be logged and code execution will continue.";
     ]
   | "__Warn" ->
     [

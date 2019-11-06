@@ -11,7 +11,7 @@
  * Typing-rule-equivalent types may get duplicated, as the equality induced
  * by ty_compare does not expand Tvars and type aliases.
  *)
-open Core_kernel
+open Hh_prelude
 open Typing_defs
 
 module Ty_ = struct

@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Hh_json
 open Aast
 open Ast_defs

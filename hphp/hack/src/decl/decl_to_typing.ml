@@ -12,7 +12,7 @@
     Converts Decl representations of class elements (Shallow_decl_defs) to the
     representations used by the typechecker (Typing_defs). *)
 
-open Core_kernel
+open Hh_prelude
 open Decl_defs
 open Aast
 open Shallow_decl_defs

@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Aast
 
 (* We use the same namespace as constants within the class so we cannot have

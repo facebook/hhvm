@@ -8,7 +8,7 @@
  *)
 
 (* Typing code concerned the <<__PPL>> attribute. *)
-open Core_kernel
+open Hh_prelude
 open Typing_defs
 open Aast
 module Cls = Decl_provider.Class

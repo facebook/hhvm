@@ -5,7 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Hh_prelude
 open Typing_env_types
 
 module StateErrors = struct

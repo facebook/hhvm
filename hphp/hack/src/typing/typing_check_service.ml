@@ -7,7 +7,7 @@
  *)
 
 module Hack_bucket = Bucket
-open Core_kernel
+open Hh_prelude
 module Bucket = Hack_bucket
 
 (*

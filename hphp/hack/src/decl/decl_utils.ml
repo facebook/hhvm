@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Reordered_argument_collections
 open Aast
 open Typing_defs

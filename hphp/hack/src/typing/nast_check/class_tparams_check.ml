@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Aast
 
 type ctx = { class_tparams: Nast.tparam list }

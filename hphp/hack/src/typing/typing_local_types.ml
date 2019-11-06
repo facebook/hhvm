@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Typing_defs
 
 let show_locl_ty _ = "<locl_ty>"

@@ -8,7 +8,7 @@
  *)
 
 (* cf: typing_env_types_sig.mli - These files should be the same *)
-open Core_kernel
+open Hh_prelude
 open Typing_defs
 module TPEnv = Type_parameter_env
 module ITySet = Internal_type_set

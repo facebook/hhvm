@@ -10,7 +10,7 @@
 (* Module checking that all the class members are properly initialized.
  * To be more precise, this checks that if the constructor does not throw,
  * it initializes all members. *)
-open Core_kernel
+open Hh_prelude
 open Aast
 open Nast
 module DICheck = Decl_init_check

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module C = Typing_continuations
 module Cont = Typing_per_cont_env
 module LEnvOps = Typing_per_cont_ops

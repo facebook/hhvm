@@ -31,7 +31,7 @@ created in a `foreach` or a `catch`, because those won't survive outside
 the block.
 *)
 
-open Core_kernel
+open Hh_prelude
 open Aast
 module C = Typing_continuations
 module LEnvC = Typing_per_cont_env

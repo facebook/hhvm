@@ -8,7 +8,7 @@
  *)
 
 open Aast
-open Core_kernel
+open Hh_prelude
 module Env = Tast_env
 module Cls = Decl_provider.Class
 module SN = Naming_special_names

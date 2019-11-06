@@ -13,7 +13,7 @@
  * the methods defined in the class plus everything that was inherited.
  *)
 (*****************************************************************************)
-open Core_kernel
+open Hh_prelude
 open Decl_defs
 open Decl_fun_utils
 open Aast

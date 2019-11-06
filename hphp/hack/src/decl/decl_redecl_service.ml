@@ -13,7 +13,7 @@
  * work to do. We need calculate what must be re-checked.
  *)
 (*****************************************************************************)
-open Core_kernel
+open Hh_prelude
 open Reordered_argument_collections
 open Typing_deps
 

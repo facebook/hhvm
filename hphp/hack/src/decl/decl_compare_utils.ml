@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 let log_class_diff (class_name : string) (diff : ClassDiff.t) : unit =
   let buf = Buffer.create 512 in

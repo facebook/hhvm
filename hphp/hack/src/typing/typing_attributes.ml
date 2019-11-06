@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Typing_reason
 module SN = Naming_special_names
 module MakeType = Typing_make_type

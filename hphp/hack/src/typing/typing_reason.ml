@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
 

@@ -10,7 +10,7 @@
 
 [@@@warning "-33"] (* in OCaml 4.06.0, this can be inlined *)
 
-open Core_kernel
+open Hh_prelude
 open Common
 
 [@@@warning "+33"]

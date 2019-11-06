@@ -8,7 +8,7 @@
  *)
 
 (* This module implements the typing for type_structure. *)
-open Core_kernel
+open Hh_prelude
 open Common
 open Aast
 open Typing_defs

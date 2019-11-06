@@ -19,7 +19,7 @@
    `if Env.is_strict env.tenv` style checks accordingly.
 *)
 
-open Core_kernel
+open Hh_prelude
 open Aast
 open Typing_defs
 open Typing_env_types

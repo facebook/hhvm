@@ -11,7 +11,7 @@
 (* Checks that a class implements an interface *)
 (*****************************************************************************)
 
-open Core_kernel
+open Hh_prelude
 
 val check_implements :
   Typing_env_types.env ->

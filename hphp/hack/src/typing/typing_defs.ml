@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module Reason = Typing_reason
 module SN = Naming_special_names
 

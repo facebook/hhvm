@@ -13,7 +13,7 @@
  * have the proper type, and restricts what types can be used for enums.
  *)
 (*****************************************************************************)
-open Core_kernel
+open Hh_prelude
 open Aast
 open Typing_defs
 module Phase = Typing_phase

@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Typing_defs
 module Env = Tast_env
 module MakeType = Typing_make_type

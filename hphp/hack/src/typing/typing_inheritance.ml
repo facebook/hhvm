@@ -10,7 +10,7 @@
 (** Module which checks class members against the full set of members it
     inherited, including those which were overridden. *)
 
-open Core_kernel
+open Hh_prelude
 open Decl_defs
 open Reordered_argument_collections
 open Shallow_decl_defs

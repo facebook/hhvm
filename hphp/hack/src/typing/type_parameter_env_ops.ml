@@ -10,7 +10,7 @@
 module TP = Type_parameter_env
 module TySet = Typing_set
 module Env = Typing_env
-open Core_kernel
+open Hh_prelude
 open Common
 open Typing_defs
 

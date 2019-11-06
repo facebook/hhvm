@@ -18,7 +18,7 @@
  *    either redeclared or checked again.
  *)
 (*****************************************************************************)
-open Core_kernel
+open Hh_prelude
 open Decl_defs
 open Typing_deps
 

@@ -31,7 +31,7 @@
  *)
 (*****************************************************************************)
 
-open Core_kernel
+open Hh_prelude
 open Common
 open Aast
 module Fake = Typing_fake_members

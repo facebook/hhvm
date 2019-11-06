@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module TUtils = Typing_utils
 module Reason = Typing_reason
 module Env = Typing_env

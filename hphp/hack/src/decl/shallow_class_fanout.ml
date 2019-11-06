@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ClassDiff
 open Reordered_argument_collections
 open Typing_deps

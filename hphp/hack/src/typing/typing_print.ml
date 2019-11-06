@@ -11,7 +11,7 @@
 (* Pretty printing of types *)
 (*****************************************************************************)
 
-open Core_kernel
+open Hh_prelude
 open Typing_defs
 open Typing_env_types
 open Typing_logic

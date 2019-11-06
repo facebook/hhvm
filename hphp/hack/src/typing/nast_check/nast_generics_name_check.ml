@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Aast
 
 let error_if_is_this (pos, name) =

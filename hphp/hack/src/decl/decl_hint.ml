@@ -10,7 +10,7 @@
 (*****************************************************************************)
 (* Converts a type hint into a type  *)
 (*****************************************************************************)
-open Core_kernel
+open Hh_prelude
 open Aast
 open Typing_defs
 module Partial = Partial_provider

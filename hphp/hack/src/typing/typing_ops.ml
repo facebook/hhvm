@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module Reason = Typing_reason
 module Env = Typing_env
 module MakeType = Typing_make_type

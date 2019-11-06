@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Hh_prelude
 open Decl_defs
 open Reordered_argument_collections
 open Shallow_decl_defs

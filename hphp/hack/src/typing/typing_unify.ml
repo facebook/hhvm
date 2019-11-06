@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Typing_defs
 
 let unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =

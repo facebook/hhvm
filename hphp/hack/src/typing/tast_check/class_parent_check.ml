@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Aast
 module Env = Tast_env
 module Cls = Decl_provider.Class

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Decl_defs
 module Dep = Typing_deps.Dep
 

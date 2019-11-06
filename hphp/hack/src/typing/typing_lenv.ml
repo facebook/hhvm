@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module Env = Typing_env
 open Typing_env_types
 module C = Typing_continuations

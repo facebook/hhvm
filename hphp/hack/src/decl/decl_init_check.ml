@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Decl_defs
 open Aast
 open Shallow_decl_defs

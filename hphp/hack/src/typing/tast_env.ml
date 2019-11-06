@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Aast
 
 (** {!Tast_env.env} is just an alias to {!Typing_env.env}, and the functions we

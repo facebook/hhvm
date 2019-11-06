@@ -9,7 +9,7 @@
 
 (* Typing code concerned with disposable types. *)
 
-open Core_kernel
+open Hh_prelude
 open Typing_defs
 module Env = Typing_env
 module MakeType = Typing_make_type

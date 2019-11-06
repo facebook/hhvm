@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Aast
 open Typing_defs
 module Cls = Decl_provider.Class

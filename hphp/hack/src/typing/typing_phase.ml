@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Common
 open Typing_defs
 open Typing_env_types

@@ -7,7 +7,7 @@
  *)
 
 module Hack_bucket = Bucket
-open Core_kernel
+open Hh_prelude
 open Hh_json
 open Aast
 open Typing_symbol_json_builder

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Decl_defs
 open Typing_defs
 module LSTable = Lazy_string_table

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Hh_core
 open Typing_defs
 module Env = Typing_env

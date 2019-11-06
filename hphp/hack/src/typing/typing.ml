@@ -12,7 +12,7 @@
  * Given an Nast.program, it infers the type of all the local
  * variables, and checks that all the types are correct (aka
  * consistent) *)
-open Core_kernel
+open Hh_prelude
 open Common
 open Aast
 open Tast

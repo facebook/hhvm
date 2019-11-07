@@ -45,12 +45,12 @@ let go
     (opts : TypecheckerOptions.t)
     ~(naming_table : Naming_table.t option)
     ~(naming_sqlite_path : string option)
-    ~(eden_threshold : int)
+    ~(vfs_threshold : int)
     (fnl : Relative_path.t list) : Errors.t =
   let t = Unix.gettimeofday () in
   let num_remote_workers = TypecheckerOptions.num_remote_workers opts in
   let version_specifier = TypecheckerOptions.remote_version_specifier opts in
-  let eden_threshold = Some eden_threshold in
+  let vfs_threshold = Some vfs_threshold in
   let files = Some fnl in
   RemoteScheduler.(
     let default_env =
@@ -62,7 +62,7 @@ let go
       go
         {
           default_env with
-          eden_threshold;
+          vfs_threshold;
           files;
           naming_sqlite_path;
           naming_table;

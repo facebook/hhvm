@@ -51,7 +51,7 @@ type t = {
   tco_remote_check_id: string option;
   tco_num_remote_workers: int;
   so_remote_version_specifier: string option;
-  so_remote_worker_eden_checkout_threshold: int;
+  so_remote_worker_vfs_checkout_threshold: int;
   so_naming_sqlite_path: string option;
   po_auto_namespace_map: (string * string) list;
   po_codegen: bool;
@@ -205,7 +205,7 @@ let default =
     tco_remote_check_id = None;
     tco_num_remote_workers = 4;
     so_remote_version_specifier = None;
-    so_remote_worker_eden_checkout_threshold = 10000;
+    so_remote_worker_vfs_checkout_threshold = 10000;
     so_naming_sqlite_path = None;
     po_auto_namespace_map = [];
     po_codegen = false;
@@ -292,8 +292,8 @@ let make
     ?tco_remote_check_id
     ?(tco_num_remote_workers = default.tco_num_remote_workers)
     ?so_remote_version_specifier
-    ?(so_remote_worker_eden_checkout_threshold =
-      default.so_remote_worker_eden_checkout_threshold)
+    ?(so_remote_worker_vfs_checkout_threshold =
+      default.so_remote_worker_vfs_checkout_threshold)
     ?so_naming_sqlite_path
     ?(po_auto_namespace_map = default.po_auto_namespace_map)
     ?(tco_disallow_ambiguous_lambda = default.tco_disallow_ambiguous_lambda)
@@ -373,7 +373,7 @@ let make
     tco_remote_check_id;
     tco_num_remote_workers;
     so_remote_version_specifier;
-    so_remote_worker_eden_checkout_threshold;
+    so_remote_worker_vfs_checkout_threshold;
     so_naming_sqlite_path;
     po_auto_namespace_map;
     po_codegen = false;
@@ -465,8 +465,8 @@ let tco_num_remote_workers t = t.tco_num_remote_workers
 
 let so_remote_version_specifier t = t.so_remote_version_specifier
 
-let so_remote_worker_eden_checkout_threshold t =
-  t.so_remote_worker_eden_checkout_threshold
+let so_remote_worker_vfs_checkout_threshold t =
+  t.so_remote_worker_vfs_checkout_threshold
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path
 

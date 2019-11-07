@@ -129,8 +129,8 @@ let maybe_remote_type_check genv env (fnl : Relative_path.t list) =
   in
   if do_remote then (
     set_up_remote_logging env;
-    let eden_threshold =
-      genv.local_config.remote_type_check.worker_eden_checkout_threshold
+    let vfs_threshold =
+      genv.local_config.remote_type_check.worker_vfs_checkout_threshold
     in
     let remote_errors =
       Typing_remote_check_service.go
@@ -138,7 +138,7 @@ let maybe_remote_type_check genv env (fnl : Relative_path.t list) =
         env.tcopt
         ~naming_table:(Some env.naming_table)
         ~naming_sqlite_path:(get_naming_table_fallback_path genv None)
-        ~eden_threshold
+        ~vfs_threshold
         fnl
     in
     Some remote_errors

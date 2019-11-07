@@ -20,7 +20,7 @@ impl Default for GlobalOptions {
             tco_remote_check_id: None,
             tco_num_remote_workers: 0,
             so_remote_version_specifier: None,
-            so_remote_worker_eden_checkout_threshold: 0,
+            so_remote_worker_vfs_checkout_threshold: 0,
             so_naming_sqlite_path: None,
             po_auto_namespace_map: vec![],
             po_codegen: false,

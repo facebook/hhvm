@@ -128,8 +128,9 @@ and remote_type_check = {
   (* If set, distributes type checking to remote workers if the number of files to
     type check exceeds the threshold. If not set, then always checks everything locally. *)
   recheck_threshold: int option;
-  (* Indicates the size of the job below which Eden should be used by the remote worker *)
-  worker_eden_checkout_threshold: int;
+  (* Indicates the size of the job below which a virtual file system should
+    be used by the remote worker *)
+  worker_vfs_checkout_threshold: int;
   (* Dictates the number of remote type checking workers *)
   num_workers: int;
 }
@@ -193,7 +194,7 @@ let default =
         enabled = true;
         num_workers = 4;
         recheck_threshold = None;
-        worker_eden_checkout_threshold = 10000;
+        worker_vfs_checkout_threshold = 10000;
       };
     remote_worker_key = None;
     remote_check_id = None;
@@ -271,14 +272,14 @@ let load_remote_type_check ~current_version config =
   let enabled =
     bool_if_min_version "enabled" ~prefix ~default:true ~current_version config
   in
-  let worker_eden_checkout_threshold =
+  let worker_vfs_checkout_threshold =
     int_
-      "worker_eden_checkout_threshold"
+      "worker_vfs_checkout_threshold"
       ~prefix
-      ~default:default.remote_type_check.worker_eden_checkout_threshold
+      ~default:default.remote_type_check.worker_vfs_checkout_threshold
       config
   in
-  { enabled; num_workers; recheck_threshold; worker_eden_checkout_threshold }
+  { enabled; num_workers; recheck_threshold; worker_vfs_checkout_threshold }
 
 let apply_overrides ~silent ~current_version ~config ~overrides =
   (* First of all, apply the CLI overrides so the settings below could be specified

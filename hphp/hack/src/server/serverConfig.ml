@@ -310,8 +310,8 @@ let load config_filename options =
       ?tco_remote_check_id:local_config.remote_check_id
       ?tco_num_remote_workers:(Some local_config.remote_type_check.num_workers)
       ?so_remote_version_specifier:local_config.remote_version_specifier
-      ?so_remote_worker_eden_checkout_threshold:
-        (Some local_config.remote_type_check.worker_eden_checkout_threshold)
+      ?so_remote_worker_vfs_checkout_threshold:
+        (Some local_config.remote_type_check.worker_vfs_checkout_threshold)
       ?so_naming_sqlite_path:local_config.naming_sqlite_path
       ?tco_language_feature_logging:
         (bool_opt "language_feature_logging" config)

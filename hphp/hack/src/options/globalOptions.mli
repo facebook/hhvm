@@ -64,7 +64,7 @@ type t = {
   (* The version specifier that is used to identify the remote worker package version to install *)
   so_remote_version_specifier: string option;
   (* Above this threshold of files to check, the remote type checking worker will not use Eden *)
-  so_remote_worker_eden_checkout_threshold: int;
+  so_remote_worker_vfs_checkout_threshold: int;
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   so_naming_sqlite_path: string option;
   (* Namespace aliasing map *)
@@ -258,7 +258,7 @@ val make :
   ?tco_remote_check_id:string ->
   ?tco_num_remote_workers:int ->
   ?so_remote_version_specifier:string ->
-  ?so_remote_worker_eden_checkout_threshold:int ->
+  ?so_remote_worker_vfs_checkout_threshold:int ->
   ?so_naming_sqlite_path:string ->
   ?po_auto_namespace_map:(string * string) list ->
   ?tco_disallow_ambiguous_lambda:bool ->
@@ -339,7 +339,7 @@ val tco_num_remote_workers : t -> int
 
 val so_remote_version_specifier : t -> string option
 
-val so_remote_worker_eden_checkout_threshold : t -> int
+val so_remote_worker_vfs_checkout_threshold : t -> int
 
 val so_naming_sqlite_path : t -> string option
 

@@ -45,5 +45,7 @@ void caml_raise_sys_blocked_io(void) {}
 void caml_raise_sys_error(void) {}
 void caml_raise_with_arg(void) {}
 void caml_raise_zero_divide(void) {}
+void caml_named_value(void) {}
+void caml_callbackN(void) {}
 
 int ocamlpool_generation = 0;

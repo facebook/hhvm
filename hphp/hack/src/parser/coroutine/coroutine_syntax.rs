@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+pub mod coroutine_lowerer;
+
 use parser_core_types::{
     syntax::{Syntax, SyntaxType, SyntaxTypeBase, SyntaxVariant},
     token_kind::TokenKind,

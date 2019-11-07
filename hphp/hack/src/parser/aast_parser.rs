@@ -19,6 +19,7 @@ use parser_core_types::{
 };
 use parser_rust::{parser_env::ParserEnv, smart_constructors_wrappers::WithKind};
 use regex::bytes::Regex;
+use rust_coroutine::coroutine_lowerer;
 use rust_parser_errors::ParserErrors;
 use std::borrow::Borrow;
 use syntax_tree::{make_syntax_tree, mode_parser::parse_mode, SyntaxTree};
@@ -48,19 +49,41 @@ type Result<T> = std::result::Result<T, Error>;
 
 pub struct AastParser;
 impl<'a> AastParser {
-    pub fn from_text(
+    pub fn from_text(env: &Env, source: &'a IndexedSourceText<'a>) -> Result<ParserResult> {
+        Self::from_text_(env, source, None)
+    }
+
+    // Full_fidelity_ast.lower_tree_ is inlined
+    fn from_text_(
         env: &Env,
         indexed_source_text: &'a IndexedSourceText<'a>,
+        rewritten_source: Option<&'a IndexedSourceText<'a>>,
     ) -> Result<ParserResult> {
         let (mode, tree) = Self::parse_text(env, indexed_source_text)?;
         let mode = mode.unwrap_or(Mode::Mpartial);
         let scoured_comments =
             Self::scour_comments_and_add_fixmes(env, indexed_source_text, &tree.root())?;
         let lower_coroutines = env.lower_coroutines && env.codegen && tree.sc_state().seen_ppl();
-        if lower_coroutines {
-            // TODO:
-            panic!("not impl");
+        if lower_coroutines && rewritten_source.is_none() {
+            let rewritten_source = coroutine_lowerer::rewrite_coroutines(
+                indexed_source_text.source_text(),
+                tree.root(),
+            );
+            Self::from_text_(
+                env,
+                &indexed_source_text,
+                Some(&IndexedSourceText::new(rewritten_source)),
+            )
         } else {
+            // TODO(shiqicao): we need to use rewritten source/tree when lowering, but original one when checking errors
+            let indexed_source_text = rewritten_source.unwrap_or(indexed_source_text);
+            let tree = if let Some(rewritten_source) = rewritten_source {
+                let (_, rewritten_tree) = Self::parse_text(env, rewritten_source)?;
+                rewritten_tree
+            } else {
+                tree
+            };
+
             let mut lowerer_env = lowerer::Env::make(
                 env.codegen,
                 env.quick_mode,

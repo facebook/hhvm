@@ -25,6 +25,8 @@ pub enum EditablePositionedValue<'a> {
     Synthetic,
 }
 
+use EditablePositionedValue::*;
+
 impl<'a> SyntaxValueType<EditablePositionedToken<'a>> for EditablePositionedValue<'a> {
     fn from_values(_nodes: &[&Self]) -> Self {
         panic!("TODO")
@@ -32,21 +34,18 @@ impl<'a> SyntaxValueType<EditablePositionedToken<'a>> for EditablePositionedValu
 
     fn from_syntax(variant: &SyntaxVariant<EditablePositionedToken<'a>, Self>) -> Self {
         let folder = |node: EditablePositionedSyntax<'a>, acc: (Self, Self)| match acc {
-            (Self::Synthetic, Self::Synthetic) => (node.value, Self::Synthetic),
+            (Synthetic, Synthetic) => (node.value, Synthetic),
             (val, _) => (val, node.value),
         };
-        let (first, last) = Syntax::fold_over_children_owned(
-            &folder,
-            (Self::Synthetic, Self::Synthetic),
-            variant.clone(),
-        );
+        let (first, last) =
+            Syntax::fold_over_children_owned(&folder, (Synthetic, Synthetic), variant.clone());
         match (first, last) {
-            (Self::Synthetic, Self::Synthetic) => Self::Synthetic,
-            (fst, Self::Synthetic) => fst,
-            (Self::Positioned(fst), Self::Positioned(lst)) => {
-                Self::Positioned(SourceData::spanning_between(&fst, &lst))
+            (Synthetic, Synthetic) => Synthetic,
+            (fst, Synthetic) => fst,
+            (Positioned(fst), Positioned(lst)) => {
+                Positioned(SourceData::spanning_between(&fst, &lst))
             }
-            _ => Self::Synthetic,
+            _ => Synthetic,
         }
     }
 
@@ -54,13 +53,13 @@ impl<'a> SyntaxValueType<EditablePositionedToken<'a>> for EditablePositionedValu
         if let Some((&last, rest)) = nodes.split_last() {
             match (last, rest.split_first()) {
                 (_, None) => last.clone(),
-                (Self::Positioned(lst), Some((&Self::Positioned(fst), _))) => {
-                    Self::Positioned(SourceData::spanning_between(fst, lst))
+                (Positioned(lst), Some((&Positioned(fst), _))) => {
+                    Positioned(SourceData::spanning_between(fst, lst))
                 }
-                _ => Self::Synthetic,
+                _ => Synthetic,
             }
         } else {
-            Self::Synthetic
+            Synthetic
         }
     }
 

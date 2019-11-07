@@ -16,6 +16,7 @@ dependencies = [
  "lazy_static 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "positioned_parser 3.49.0",
  "regex 1.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rust_coroutine 1.0.0",
  "syntax_tree 3.49.0",
 ]
 
@@ -159,6 +160,18 @@ dependencies = [
 name = "difference"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "editable_positioned_syntax"
+version = "1.0.0"
+dependencies = [
+ "hack_ocamlrep_ocamlpool 3.72.0",
+ "hack_parser 3.49.0",
+ "hack_parser_core_types 3.49.0",
+ "hack_utils_ocamlpool 3.49.0",
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rust_to_ocaml 3.49.0",
+]
 
 [[package]]
 name = "either"
@@ -795,6 +808,17 @@ dependencies = [
  "rand 0.3.23 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.24 (registry+https://github.com/rust-lang/crates.io-index)",
  "time 0.1.42 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "rust_coroutine"
+version = "1.0.0"
+dependencies = [
+ "editable_positioned_syntax 1.0.0",
+ "hack_ocamlrep_ocamlpool 3.72.0",
+ "hack_parser_core_types 3.49.0",
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rust_to_ocaml 3.49.0",
 ]
 
 [[package]]

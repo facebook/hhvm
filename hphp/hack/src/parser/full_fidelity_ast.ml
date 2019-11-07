@@ -4287,6 +4287,8 @@ let rewrite_coroutines source_text script =
   |> Full_fidelity_editable_positioned_syntax.text
   |> SourceText.make (SourceText.file_path source_text)
 
+let () = Callback.register "rewrite_coroutines" rewrite_coroutines
+
 let check_syntax_error (env : env) tree ast_opt :
     Full_fidelity_syntax_error.t list =
   let find_errors hhi_mode =

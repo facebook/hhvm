@@ -1,0 +1,16 @@
+[package]
+name = "editable_positioned_syntax"
+version = "1.0.0"
+edition = "2018"
+
+[lib]
+name = "editable_positioned_syntax"
+path = "../../editable_positioned_syntax.rs"
+
+[dependencies]
+parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
+parser_rust = { path = "../..", package = "hack_parser" }
+rust_to_ocaml = { path = "../rust_to_ocaml", package = "rust_to_ocaml" }
+ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool" }
+ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
+ocaml = "^0.7"

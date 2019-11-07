@@ -1,0 +1,15 @@
+[package]
+name = "rust_coroutine"
+version = "1.0.0"
+edition = "2018"
+
+[lib]
+name = "rust_coroutine"
+path = "coroutine_syntax.rs"
+
+[dependencies]
+rust_editable_positioned_syntax = { path = "../cargo/editable_positioned_syntax", package = "editable_positioned_syntax" }
+ocamlrep = { path = "../../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool" }
+parser_core_types = { path = "../cargo/core_types", package = "hack_parser_core_types" }
+rust_to_ocaml = { path = "../cargo/rust_to_ocaml", package = "rust_to_ocaml" }
+ocaml = "^0.7"

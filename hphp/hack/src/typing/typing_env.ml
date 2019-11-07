@@ -374,13 +374,6 @@ let set_tyvar_upper_bounds env var upper_bounds =
   let env = update_tyvar_info env var tyvar_info in
   env
 
-let rec is_tvar ~elide_nullable ty var =
-  match ty with
-  | LoclType (_, Tvar var') -> Ident.equal var var'
-  | LoclType (_, Toption ty) when elide_nullable ->
-    is_tvar ~elide_nullable (LoclType ty) var
-  | _ -> false
-
 let remove_tyvar env var =
   (* Don't remove it entirely if we have marked it as eager_solve_fail *)
   log_env_change "remove_tyvar" env
@@ -1563,22 +1556,18 @@ let fresh_invariant_type_var env p =
 let add_tyvar_upper_bound ?intersect env var (ty : internal_type) =
   log_env_change "add_tyvar_upper_bound" env
   @@
-  (* Don't add superfluous v <: v or v <: ?v to environment *)
-  if is_tvar ~elide_nullable:true ty var then
-    env
+  let tvinfo = get_tyvar_info env var in
+  let upper_bounds =
+    match intersect with
+    | None -> ITySet.add ty tvinfo.upper_bounds
+    | Some intersect ->
+      ITySet.of_list (intersect ty (ITySet.elements tvinfo.upper_bounds))
+  in
+  let env = update_tyvar_info env var { tvinfo with upper_bounds } in
+  if get_tyvar_appears_contravariantly env var then
+    update_variance_of_tyvars_occurring_in_upper_bound env ty
   else
-    let tvinfo = get_tyvar_info env var in
-    let upper_bounds =
-      match intersect with
-      | None -> ITySet.add ty tvinfo.upper_bounds
-      | Some intersect ->
-        ITySet.of_list (intersect ty (ITySet.elements tvinfo.upper_bounds))
-    in
-    let env = update_tyvar_info env var { tvinfo with upper_bounds } in
-    if get_tyvar_appears_contravariantly env var then
-      update_variance_of_tyvars_occurring_in_upper_bound env ty
-    else
-      env
+    env
 
 (* Remove type variable `upper_var` from the upper bounds on `var`, if it exists
  *)
@@ -1623,19 +1612,15 @@ let remove_tyvar_lower_bound env var lower_var =
 let add_tyvar_lower_bound ?union env var ty =
   log_env_change "add_tyvar_lower_bound" env
   @@
-  (* Don't add superfluous v <: v to environment *)
-  if is_tvar ~elide_nullable:false ty var then
-    env
+  let tvinfo = get_tyvar_info env var in
+  let lower_bounds =
+    match union with
+    | None -> ITySet.add ty tvinfo.lower_bounds
+    | Some union ->
+      ITySet.of_list (union ty (ITySet.elements tvinfo.lower_bounds))
+  in
+  let env = update_tyvar_info env var { tvinfo with lower_bounds } in
+  if get_tyvar_appears_covariantly env var then
+    update_variance_of_tyvars_occurring_in_lower_bound env ty
   else
-    let tvinfo = get_tyvar_info env var in
-    let lower_bounds =
-      match union with
-      | None -> ITySet.add ty tvinfo.lower_bounds
-      | Some union ->
-        ITySet.of_list (union ty (ITySet.elements tvinfo.lower_bounds))
-    in
-    let env = update_tyvar_info env var { tvinfo with lower_bounds } in
-    if get_tyvar_appears_covariantly env var then
-      update_variance_of_tyvars_occurring_in_lower_bound env ty
-    else
-      env
+    env

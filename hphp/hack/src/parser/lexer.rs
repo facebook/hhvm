@@ -891,7 +891,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
                     TokenKind::LeftBracket
                 }
                 ']' => {
-                    self.advance(1);;
+                    self.advance(1);
                     TokenKind::RightBracket
                 }
                 '-' => {

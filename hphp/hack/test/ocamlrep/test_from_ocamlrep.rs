@@ -3,8 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep::{Allocator, Arena, FromError::*, OcamlRep, Value};
 use ocamlrep_derive::OcamlRep;
+
+#[cfg(test)]
+use ocamlrep::{Allocator, Arena, FromError::*, OcamlRep, Value};
 
 #[test]
 fn expected_block_but_got_int() {

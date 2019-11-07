@@ -668,8 +668,7 @@ where
     }
 
     fn is_clone(&self, label: &'a Syntax<Token, Value>) -> bool {
-        self.text(label)
-            .eq_ignore_ascii_case(sn::members::__CLONE)
+        self.text(label).eq_ignore_ascii_case(sn::members::__CLONE)
     }
 
     fn class_constructor_has_static(&self, node: &'a Syntax<Token, Value>) -> bool {
@@ -2471,7 +2470,7 @@ where
                 let mut it = self.parents.iter().rev();
                 let p1 = it.next();
                 let _ = it.next();
-                let p3 = it.next();;
+                let p3 = it.next();
                 let p4 = it.next();
                 match (p1, p3, p4) {
                     (

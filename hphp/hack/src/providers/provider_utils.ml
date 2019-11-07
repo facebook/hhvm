@@ -90,12 +90,19 @@ let compute_tast_and_errors
     with
     | (Some tast, Some errors) -> (tast, errors)
     | _ ->
-      let (errors, tast) =
-        Errors.do_ (fun () ->
-            let nast = Naming.program entry.Provider_context.ast in
-            let tast = Typing.nast_to_tast ctx.Provider_context.tcopt nast in
-            tast)
+      let (nast_errors, nast) =
+        Errors.do_with_context
+          entry.Provider_context.path
+          Errors.Naming
+          (fun () -> Naming.program entry.Provider_context.ast)
       in
+      let (tast_errors, tast) =
+        Errors.do_with_context
+          entry.Provider_context.path
+          Errors.Typing
+          (fun () -> Typing.nast_to_tast ctx.Provider_context.tcopt nast)
+      in
+      let errors = Errors.merge nast_errors tast_errors in
       entry.Provider_context.tast := Some tast;
       entry.Provider_context.errors := Some errors;
       (tast, errors)

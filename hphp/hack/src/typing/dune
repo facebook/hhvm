@@ -71,6 +71,7 @@
     typing_log
     typing_log_value
     typing_logic
+    typing_logic_helpers
     typing_make_type
     typing_mutability
     typing_object_get

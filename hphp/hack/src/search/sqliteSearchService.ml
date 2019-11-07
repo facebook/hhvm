@@ -40,22 +40,6 @@ let sqlite_escape_str (str : string) : string =
       | '\\' -> acc ^ "\\\\"
       | _ -> acc ^ String.make 1 char)
 
-(* Select a filename for a temporary symbol index *)
-let get_filename_for_symbol_index (extension : string) : string =
-  (* Where does our repository live? *)
-  let repo_path = Relative_path.to_absolute (Relative_path.from_root "/") in
-  let timestamp = string_of_int (int_of_float (Unix.gettimeofday ())) in
-  (* Clean the path string *)
-  let cleanpath = Path.slash_escaped_string_of_path (Path.make repo_path) in
-  let tempdir = Path.make (Filename.get_temp_dir_name ()) in
-  let temppath =
-    Path.concat
-      tempdir
-      ("symbolindex." ^ cleanpath ^ "." ^ timestamp ^ extension)
-  in
-  let tempfilename = Path.to_string temppath in
-  tempfilename
-
 (* Attempt to fetch this file *)
 let find_saved_symbolindex () : (string, string) Core_kernel.result =
   try
@@ -92,7 +76,7 @@ let find_or_build_sqlite_file
       let repo_path = Relative_path.to_absolute (Relative_path.from_root "") in
       if not silent then
         Hh_logger.log "Unable to fetch sqlite symbol index: %s" errmsg;
-      let tempfilename = get_filename_for_symbol_index ".db" in
+      let tempfilename = Filename.temp_file "symbolindex" ".db" in
       if not silent then
         Hh_logger.log
           "Generating [%s] from repository [%s]"

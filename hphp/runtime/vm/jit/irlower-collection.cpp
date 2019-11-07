@@ -183,30 +183,38 @@ void cgLdVectorSize(IRLS& env, const IRInstruction* inst) {
   v << loadzlq{src[BaseVector::sizeOffset()], dst};
 }
 
-void cgLdVectorBase(IRLS& env, const IRInstruction* inst) {
-  assertHasVectorSrc(inst, true);
-
-  auto const src = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const arr = v.makeReg();
-  v << load{src[BaseVector::arrOffset()], arr};
-  v << lea{arr[PackedArray::entriesOffset()], dst};
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Pair
 
-void cgLdPairBase(IRLS& env, const IRInstruction* inst) {
+void cgLdPairElem(IRLS& env, const IRInstruction* inst) {
   DEBUG_ONLY auto const pair = inst->src(0);
   assertx(pair->type() < TObj);
   assertx(collections::isType(pair->type().clsSpec().cls(),
                               CollectionType::Pair));
 
+  auto& v = vmain(env);
+
   auto const src = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  vmain(env) << lea{src[c_Pair::dataOffset()], dst};
+  auto const idxReg = srcLoc(env, inst, 1).reg();
+  auto const idx = inst->src(1);
+
+  const size_t start = c_Pair::dataOffset();
+
+  auto const loadAt = [&](Vptr vptr) {
+    loadTV(v, inst->dst(0), dstLoc(env, inst, 0), vptr);
+  };
+
+  if (idx->hasConstVal()) {
+    auto const idxVal = idx->intVal();
+    assertx(idxVal >= 0 && idxVal <= 1);
+    loadAt(src[safe_cast<uint32_t>(start + idxVal * sizeof(TypedValue))]);
+  } else {
+    static_assert(sizeof(TypedValue) == 16, "");
+    auto const offset = v.makeReg();
+    auto const sf = v.makeReg();
+    v << shlqi{4, idxReg, offset, sf};
+    loadAt(src[offset + start]);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

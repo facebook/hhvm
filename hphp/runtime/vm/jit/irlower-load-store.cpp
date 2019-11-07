@@ -221,30 +221,22 @@ void cgDbgTrashMem(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgLdElem(IRLS& env, const IRInstruction* inst) {
-  auto const rbase = srcLoc(env, inst, 0).reg();
-  auto const ridx = srcLoc(env, inst, 1).reg();
-  auto const idx = inst->src(1);
+void cgLdClsInitElem(IRLS& env, const IRInstruction* inst) {
+  auto const base = srcLoc(env, inst, 0).reg();
+  auto const idx = inst->extra<IndexData>()->index;
   auto& v = vmain(env);
 
-  if (idx->hasConstVal() && deltaFits(idx->intVal(), sz::dword)) {
-    loadTV(v, inst->dst(), dstLoc(env, inst, 0), rbase[idx->intVal()]);
-  } else {
-    loadTV(v, inst->dst(), dstLoc(env, inst, 0), rbase[ridx]);
-  }
+  loadTV(v, inst->dst(), dstLoc(env, inst, 0), base[idx * sizeof(TypedValue)]);
 }
 
-void cgStElem(IRLS& env, const IRInstruction* inst) {
-  auto const rbase = srcLoc(env, inst, 0).reg();
-  auto const ridx = srcLoc(env, inst, 1).reg();
-  auto const idx = inst->src(1);
+void cgStClsInitElem(IRLS& env, const IRInstruction* inst) {
+  auto const base = srcLoc(env, inst, 0).reg();
+  auto const idx = inst->extra<IndexData>()->index;
   auto& v = vmain(env);
 
-  if (idx->hasConstVal() && deltaFits(idx->intVal(), sz::dword)) {
-    storeTV(v, rbase[idx->intVal()], srcLoc(env, inst, 2), inst->src(2));
-  } else {
-    storeTV(v, rbase[ridx], srcLoc(env, inst, 2), inst->src(2));
-  }
+  storeTV(v, base[idx * sizeof(TypedValue)],
+          srcLoc(env, inst, 1),
+          inst->src(1));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

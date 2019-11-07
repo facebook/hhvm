@@ -1115,23 +1115,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StMem:
     return PureStore { pointee(inst.src(0)), inst.src(1), inst.src(0) };
 
-  // TODO(#5962341): These take non-constant offset arguments, and are
-  // currently only used for collections and class property inits, so we aren't
-  // hooked up yet.
-  case StElem:
-    return PureStore {
-      inst.src(0)->type() <= TPtrToMembCell
-        ? AHeapAny
-        : AUnknown,
-      inst.src(2),
-      inst.src(0)
-    };
-  case LdElem:
-    return PureLoad {
-      inst.src(0)->type() <= TPtrToMembCell
-        ? AHeapAny
-        : AUnknown
-    };
+  case LdClsInitElem:
+    return PureLoad { AHeapAny };
+
+  case StClsInitElem:
+    return PureStore { AHeapAny };
+
+  case LdPairElem:
+    return PureLoad { AHeapAny };
 
   case LdMBase:
     return PureLoad { AMIStateBase };
@@ -1755,7 +1746,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DblAsBits:
   case LdMIPropStateAddr:
   case LdMIStateAddr:
-  case LdPairBase:
   case LdClsCns:
   case LdSubClsCns:
   case LdSubClsCnsClsName:
@@ -1936,7 +1926,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StringIsset:
   case LdSwitchDblIndex:
   case LdSwitchStrIndex:
-  case LdVectorBase:
   case LdWHResult:
   case LdWHState:
   case LdWHNotDone:

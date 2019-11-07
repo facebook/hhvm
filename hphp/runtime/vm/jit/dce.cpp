@@ -172,7 +172,7 @@ bool canDCE(IRInstruction* inst) {
   case LdRDSAddr:
   case LdMem:
   case LdContField:
-  case LdElem:
+  case LdClsInitElem:
   case LdIterBase:
   case LdIterPos:
   case LdIterEnd:
@@ -448,8 +448,7 @@ bool canDCE(IRInstruction* inst) {
   case Jmp:
   case DefLabel:
   case LdLocPseudoMain:
-  case LdVectorBase:
-  case LdPairBase:
+  case LdPairElem:
   case DefCls:
   case LdClsCtor:
   case LdCls:
@@ -519,8 +518,8 @@ bool canDCE(IRInstruction* inst) {
   case AsyncSwitchFast:
   case ReleaseVVAndSkip:
   case GenericRetDecRefs:
+  case StClsInitElem:
   case StMem:
-  case StElem:
   case StIterBase:
   case StIterType:
   case StIterEnd:

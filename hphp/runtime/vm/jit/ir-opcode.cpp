@@ -794,6 +794,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsCnsVecLen:
   case LdClsFromClsMeth:
   case LdClsInitData:
+  case LdClsInitElem:
   case LdClsMethod:
   case LdClsMethodCacheCls:
   case LdClsMethodCacheFunc:
@@ -807,7 +808,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdContArValue:
   case LdContField:
   case LdContResumeAddr:
-  case LdElem:
   case LdFuncCls:
   case LdFrameCls:
   case LdFrameThis:
@@ -840,7 +840,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdOutAddr:
   case LdPackedArrayDataElemAddr:
   case LdPackedElem:
-  case LdPairBase:
+  case LdPairElem:
   case LdPropAddr:
   case LdRDSAddr:
   case LdRetVal:
@@ -858,7 +858,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdTypeCns:
   case LdUnwinderValue:
   case LdVecElem:
-  case LdVectorBase:
   case LdVectorSize:
   case LdWHNotDone:
   case LdWHResult:
@@ -964,10 +963,10 @@ bool opcodeMayRaise(Opcode opc) {
   case Sqrt:
   case StArResumeAddr:
   case StClosureArg:
+  case StClsInitElem:
   case StContArKey:
   case StContArState:
   case StContArValue:
-  case StElem:
   case StIterBase:
   case StIterType:
   case StIterPos:

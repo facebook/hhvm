@@ -1639,6 +1639,8 @@ X(AssertLoc,                    LocalId);
 X(LdLocAddr,                    LocalId);
 X(LdLoc,                        LocalId);
 X(LdLocPseudoMain,              LocalId);
+X(LdClsInitElem,                IndexData);
+X(StClsInitElem,                IndexData);
 X(StLoc,                        LocalId);
 X(StLocPseudoMain,              LocalId);
 X(StLocRange,                   LocalIdRange);

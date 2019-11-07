@@ -388,8 +388,7 @@ void emitCheckProp(IRGS& env, const StringData* propName) {
   auto const slot = ctx->lookupDeclProp(propName);
   auto const idx = ctx->propSlotToIndex(slot);
 
-  auto const curVal = gen(env, LdElem, propInitVec,
-    cns(env, idx * sizeof(TypedValue)));
+  auto const curVal = gen(env, LdClsInitElem, IndexData{idx}, propInitVec);
   push(env, gen(env, IsNType, TUninit, curVal));
 }
 
@@ -430,6 +429,9 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
         TPtrToSPropCell
       );
     }
+
+    gen(env, StMem, base + idx * sizeof(TypedValue), val);
+
     break;
 
   case InitPropOp::NonStatic:
@@ -454,11 +456,11 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
       }
 
       base = gen(env, LdClsInitData, cls);
+
+      gen(env, StClsInitElem, IndexData{idx}, base, val);
     }
     break;
   }
-
-  gen(env, StElem, base, cns(env, idx * sizeof(TypedValue)), val);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -812,11 +812,10 @@ template<class Finish>
 SSATmp* emitVectorGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
   auto const size = gen(env, LdVectorSize, base);
   checkCollectionBounds(env, base, key, size);
-  base = gen(env, LdVectorBase, base);
-  static_assert(sizeof(TypedValue) == 16,
-                "TypedValue size expected to be 16 bytes");
-  auto idx = gen(env, Shl, key, cns(env, 4));
-  auto result = gen(env, LdElem, base, idx);
+
+  auto vec = gen(env, LdColVec, base);
+  auto result = gen(env, LdVecElem, vec, key);
+
   auto const profres = profiledType(env, result, [&] {
     gen(env, IncRef, result);
     finish(result);
@@ -833,19 +832,13 @@ SSATmp* emitPairGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
     if (key->hasConstVal()) {
       auto keyVal = key->intVal();
       if (keyVal < 0 || keyVal > 1) PUNT(emitPairGet);
-
-      // no reason to check bounds
-      return cns(env, keyVal * sizeof(TypedValue));
+    } else {
+      checkCollectionBounds(env, base, key, cns(env, 2));
     }
-
-    static_assert(sizeof(TypedValue) == 16,
-                  "TypedValue size expected to be 16 bytes");
-    checkCollectionBounds(env, base, key, cns(env, 2));
-    return gen(env, Shl, key, cns(env, 4));
+    return key;
   }();
 
-  auto const pairBase = gen(env, LdPairBase, base);
-  auto const result = gen(env, LdElem, pairBase, idx);
+  auto const result = gen(env, LdPairElem, base, idx);
   auto const profres = profiledType(env, result, [&] {
     gen(env, IncRef, result);
     finish(result);

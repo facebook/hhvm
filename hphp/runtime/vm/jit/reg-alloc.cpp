@@ -69,7 +69,6 @@ bool loadsCell(const IRInstruction& inst) {
   case LdStk:
   case LdLoc:
   case LdContField:
-  case LdElem:
   case InitClsCns:
   case CGetProp:
   case ArrayGet:
@@ -117,9 +116,9 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   switch (inst.op()) {
   case StLoc:
     return srcIdx == 1;
-  case StElem:
-    return srcIdx == 2;
   case StStk:
+    return srcIdx == 1;
+  case StClsInitElem:
     return srcIdx == 1;
   case InitPackedLayoutArray:
     return srcIdx == 1;

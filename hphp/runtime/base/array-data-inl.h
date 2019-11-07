@@ -231,22 +231,39 @@ inline uint8_t ArrayData::auxBits() const {
 inline bool ArrayData::useWeakKeys() const { return isPHPArray(); }
 
 inline DataType ArrayData::toDataType() const {
-  auto const k = kind();
-  if (k < kRecordKind) return KindOfArray;
-  if (k == kVecKind) return KindOfVec;
-  if (k == kDictKind) return KindOfDict;
-  if (k == kRecordKind) return KindOfArray;
-  assertx(k == kKeysetKind);
-  return KindOfKeyset;
+  switch (kind()) {
+    case kPackedKind:
+    case kMixedKind:
+    case kEmptyKind:
+    case kApcKind:
+    case kGlobalsKind:
+    case kRecordKind:
+      return KindOfArray;
+
+    case kDictKind:   return KindOfDict;
+    case kVecKind:    return KindOfVec;
+    case kKeysetKind: return KindOfKeyset;
+    case kNumKinds:   not_reached();
+  }
+  not_reached();
 }
 
 inline DataType ArrayData::toPersistentDataType() const {
-  auto const k = kind();
-  if (k < kRecordKind) return KindOfPersistentArray;
-  if (k == kVecKind) return KindOfPersistentVec;
-  if (k == kDictKind) return KindOfPersistentDict;
-  assertx(k == kKeysetKind);
-  return KindOfPersistentKeyset;
+  switch (kind()) {
+    case kPackedKind:
+    case kMixedKind:
+    case kEmptyKind:
+    case kApcKind:
+    case kGlobalsKind:
+    case kRecordKind:
+      return KindOfPersistentArray;
+
+    case kDictKind:   return KindOfPersistentDict;
+    case kVecKind:    return KindOfPersistentVec;
+    case kKeysetKind: return KindOfPersistentKeyset;
+    case kNumKinds:   not_reached();
+  }
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

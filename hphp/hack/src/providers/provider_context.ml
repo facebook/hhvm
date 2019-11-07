@@ -12,8 +12,9 @@ type entry = {
   file_input: ServerCommandTypes.file_input;
   path: Relative_path.t;
   ast: Nast.program;
-  tast: Tast.program option ref;
-  errors: Errors.t option ref;
+  mutable tast: Tast.program option;
+  mutable errors: Errors.t option;
+  mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }
 
 type t = {

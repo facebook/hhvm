@@ -160,7 +160,9 @@ let go
   with
   | None -> None
   | Some ((symbol_line, symbol_char), argument_idx) ->
-    let results = IdentifySymbolService.go tast symbol_line symbol_char in
+    let results =
+      IdentifySymbolService.go ~tast ~line:symbol_line ~column:symbol_char
+    in
     let results =
       List.filter results ~f:(fun r ->
           match r.SymbolOccurrence.type_ with

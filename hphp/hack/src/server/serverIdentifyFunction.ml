@@ -21,7 +21,7 @@ let get_occurrence_and_map tcopt content line char ~f =
     ~f:
       begin
         fun path file_info tast ->
-        let result = IdentifySymbolService.go tast line char in
+        let result = IdentifySymbolService.go ~tast ~line ~column:char in
         f path file_info result
       end
     tcopt
@@ -82,8 +82,7 @@ let go_ctx
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) =
-  let (tast, _errors) = Provider_utils.compute_tast_and_errors ~ctx ~entry in
-  let symbols = IdentifySymbolService.go tast line column in
+  let symbols = IdentifySymbolService.go_ctx ~ctx ~entry ~line ~column in
   let symbols = take_best_suggestions (List.sort by_nesting symbols) in
   List.map symbols ~f:(fun symbol ->
       let symbol_definition =

@@ -64,8 +64,9 @@ let update_context
       Provider_context.path;
       file_input;
       ast;
-      tast = ref None;
-      errors = ref None;
+      tast = None;
+      errors = None;
+      symbols = None;
     }
   in
   let ctx =
@@ -85,9 +86,7 @@ let compute_tast_and_errors
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     Tast.program * Errors.t =
   let make_tast () =
-    match
-      (!(entry.Provider_context.tast), !(entry.Provider_context.errors))
-    with
+    match (entry.Provider_context.tast, entry.Provider_context.errors) with
     | (Some tast, Some errors) -> (tast, errors)
     | _ ->
       let (nast_errors, nast) =
@@ -103,8 +102,8 @@ let compute_tast_and_errors
           (fun () -> Typing.nast_to_tast ctx.Provider_context.tcopt nast)
       in
       let errors = Errors.merge nast_errors tast_errors in
-      entry.Provider_context.tast := Some tast;
-      entry.Provider_context.errors := Some errors;
+      entry.Provider_context.tast <- Some tast;
+      entry.Provider_context.errors <- Some errors;
       (tast, errors)
   in
   (* If global context is not set, set it and proceed *)

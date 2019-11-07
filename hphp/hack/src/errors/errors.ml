@@ -350,7 +350,7 @@ let format_substring_underline
       else
         String.length first_context_line - start_column
   in
-  let underline = String.make underline_width '^' in
+  let underline = String.make (max underline_width 1) '^' in
   let underline_padding =
     if Option.is_some first_context_line then
       String.make start_column ' '

@@ -1,0 +1,11 @@
+Parsing[1002] A type specifier is expected here.
+   --> zero_width_syntax_err.php
+  3 | class Foo extends {}
+    |                   ^
+
+Parsing[1002] Encountered unexpected text '', was expecting a type hint.
+   --> zero_width_syntax_err.php
+  3 | class Foo extends {}
+    |                   ^
+
+2 errors found.

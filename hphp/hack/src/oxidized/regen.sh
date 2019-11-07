@@ -13,8 +13,6 @@ REGEN_COMMAND="$(realpath --relative-to=. "${BASH_SOURCE[0]}")"
 # rustfmt is committed at fbsource/tools/third-party/rustfmt/rustfmt
 RUSTFMT_PATH="$(realpath ../tools/third-party/rustfmt/rustfmt)"
 
-SIGNER_PATH="$(realpath ../tools/signedsource)"
-
 buck run hphp/hack/src/hh_oxidize --                                          \
   --out-dir hphp/hack/src/oxidized/gen                                        \
   --regen-command "$REGEN_COMMAND"                                            \
@@ -39,7 +37,6 @@ buck run hphp/hack/src/hh_oxidize --                                          \
   hphp/hack/src/parser/scoured_comments.ml                                    \
 
 buck run //hphp/hack/src/hh_codegen:hh_codegen --                             \
-  --signer "$SIGNER_PATH"                                                     \
   --regen-cmd "$REGEN_COMMAND"                                                \
   --rustfmt "$RUSTFMT_PATH"                                                   \
   enum_constr                                                                 \
@@ -48,7 +45,6 @@ buck run //hphp/hack/src/hh_codegen:hh_codegen --                             \
   --output "hphp/hack/src/oxidized/impl_gen/"                                 \
 
 buck run //hphp/hack/src/hh_codegen:hh_codegen --                             \
-  --signer "$SIGNER_PATH"                                                     \
   --regen-cmd "$REGEN_COMMAND"                                                \
   --rustfmt "$RUSTFMT_PATH"                                                   \
   visitor                                                                     \

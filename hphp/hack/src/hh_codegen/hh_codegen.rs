@@ -11,13 +11,14 @@ mod gen_enum_constr;
 mod gen_visitor;
 
 use common::*;
-use std::{fs::File, io::prelude::*, path::PathBuf, process::Command};
+use crypto::digest::Digest;
+use crypto::md5::Md5;
+use std::{fs, fs::File, io::prelude::*, path::PathBuf, process::Command};
 
 fn main() -> Result<()> {
     let matches = clap_app!(myapp =>
         (@arg regencmd: --("regen-cmd") +takes_value "command to re-genreate the output, this text will be included in file header")
         (@arg rustfmt: -f --rustfmt +takes_value "Rust formatter")
-        (@arg signer: -s --signer +takes_value "file signer")
         (@subcommand enum_constr =>
             (@arg input: -i --input +required +takes_value ... "Rust file contains enums")
             (@arg output: -o --output +takes_value "mod output path")
@@ -32,9 +33,6 @@ fn main() -> Result<()> {
 
     let formatter = matches.value_of("rustfmt");
     eprintln!("Rust formatter set to {:?}", formatter);
-
-    let signer = matches.value_of("signer");
-    eprintln!("Signer set to {:?}", signer);
 
     let regencmd = matches.value_of("regencmd");
     eprintln!("Re-generate cmd set to {:?}", regencmd);
@@ -60,7 +58,7 @@ fn main() -> Result<()> {
 
     if let Err(e) = output_files
         .iter()
-        .map(|o| sign(signer, o))
+        .map(|o| sign(o))
         .collect::<Result<Vec<_>>>()
     {
         eprintln!("signer failed:\n  {:#?}", e);
@@ -88,15 +86,27 @@ fn format(formatter: Option<&str>, file: &PathBuf) -> Result<()> {
     Ok(())
 }
 
-fn sign(signer: Option<&str>, file: &PathBuf) -> Result<()> {
-    match signer {
-        Some(signer) => {
-            let output = Command::new(signer).arg("sign").arg(file).output()?;
-            if !output.status.success() {
-                eprintln!("signer failed:\n  {:#?}", output);
-            }
-        }
-        _ => eprintln!("Skip: signer not found"),
+fn sign(file: &PathBuf) -> Result<()> {
+    // avoid putting the obvious literal in this source file, as that makes the
+    // file as generated
+    let token_tag = format!("@{}", "generated");
+    let token = "<<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>";
+    let expected = format!("{} {}", token_tag, token);
+
+    let contents = fs::read_to_string(file).expect("signing failed: could not read file");
+    if !contents.contains(&expected) {
+        let error = "signing failed: input does not contain marker";
+        eprintln!("{}", error);
+        return Err(error.into());
     }
+
+    let mut digest = Md5::new();
+    digest.input_str(&contents);
+    let md5 = digest.result_str();
+
+    let new_contents =
+        contents.replace(&expected, &format!("{} SignedSource<<{}>>", token_tag, md5));
+    fs::write(file, new_contents)?;
+
     Ok(())
 }

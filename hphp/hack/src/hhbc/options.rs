@@ -431,8 +431,8 @@ fn serialize_flags<S: Serializer, P: PrefixedFlags>(flags: &P, s: S) -> Result<S
     // TODO(leoo) iterate over each set bit: flags.bits() & ~(flags.bits() + 1)
     let mut map = s.serialize_map(None)?;
     for (key, value) in P::to_map().into_iter() {
-        let str_val = format!("{}", flags.contains(value));
-        map.serialize_entry(&format!("{}{}", &P::PREFIX, key), &Arg::new(str_val))?;
+        let bool_val = flags.contains(value);
+        map.serialize_entry(&format!("{}{}", &P::PREFIX, key), &Arg::new(bool_val))?;
     }
     map.end()
 }
@@ -520,91 +520,91 @@ mod tests {
     ]
   },
   "hhvm.array_provenance": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.create_in_out_wrapper_functions": {
-    "global_value": "true"
+    "global_value": true
   },
   "hhvm.dynamic_invoke_functions": {
     "global_value": []
   },
   "hhvm.emit_cls_meth_pointers": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.emit_func_pointers": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.emit_inst_meth_pointers": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.emit_meth_caller_func_pointers": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.enable_intrinsics_extension": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack.lang.abstract_static_props": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack.lang.allow_new_attribute_syntax": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack.lang.const_default_func_args": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack.lang.const_static_props": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack.lang.disable_legacy_attribute_syntax": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack.lang.disable_legacy_soft_typehints": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack.lang.disable_lval_as_an_expression": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack.lang.disable_unset_class_const": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack.lang.enable_class_level_where_clauses": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack.lang.enable_constant_visibility_modifiers": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack.lang.enable_coroutines": {
-    "global_value": "true"
+    "global_value": true
   },
   "hhvm.hack.lang.enable_pocket_universes": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack.lang.hacksperimental": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack_arr_compat_notices": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.hack_arr_dv_arrs": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.include_roots": {
     "global_value": {}
   },
   "hhvm.jit_enable_rename_function": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.log_extern_compiler_perf": {
-    "global_value": "false"
+    "global_value": false
   },
   "hhvm.notice_on_by_ref_argument_typehint_violation": {
-    "global_value": "true"
+    "global_value": true
   },
   "hhvm.reffiness_invariance": {
     "global_value": 5
   },
   "hhvm.rx_is_enabled": {
-    "global_value": "false"
+    "global_value": false
   }
 }"#;
 
@@ -827,12 +827,11 @@ mod tests {
             sm.map(|val| m.insert(KEY.to_owned(), val));
             j
         }
-        fn test<T: Serialize + std::fmt::Debug>(exp_val: &str, val: T) {
+        fn test<T: Serialize + std::fmt::Debug>(exp_val: bool, val: T) {
             let j = mk_source_mapping(dbg!(val));
             let opts: Options = serde_json::value::from_value(j).unwrap();
-            let set_exp = dbg!(exp_val == "true");
             assert_eq!(
-                set_exp,
+                exp_val,
                 opts.eval_flags
                     .contains(EvalFlags::DISASSEMBLER_SOURCE_MAPPING)
             );
@@ -840,12 +839,12 @@ mod tests {
             let j_exp = mk_source_mapping(exp_val);
             assert_eq!(j_exp, j_act);
         }
-        test("true", true);
-        test("true", 1);
-        test("true", "true");
-        test("false", 0);
-        test("false", false);
-        test("false", "false");
+        test(true, true);
+        test(true, 1);
+        test(true, "true");
+        test(false, 0);
+        test(false, false);
+        test(false, "false");
     }
 }
 

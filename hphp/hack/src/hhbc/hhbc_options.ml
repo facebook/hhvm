@@ -409,10 +409,20 @@ let get_value_from_config_ config key =
 
 let get_value_from_config_int config key =
   let json_opt = get_value_from_config_ config key in
-  Option.map json_opt ~f:(fun json ->
-      match J.get_string_exn json with
-      | "" -> 0
-      | x -> int_of_string x)
+  Option.map json_opt ~f:(function
+      | J.JSON_String s
+      | J.JSON_Number s ->
+        (match s with
+        | "" -> 0
+        | x -> int_of_string x)
+      | J.JSON_Bool s ->
+        (* Boolean options are currently parsed as ints; for migration to Rust,
+         * it is important they can be parsed from JSON bools as well *)
+        if s then
+          1
+        else
+          0
+      | _ -> raise (Arg.Bad ("option can't be cast to integer: " ^ key)))
 
 let get_value_from_config_string config key =
   get_value_from_config_ config key |> Option.map ~f:J.get_string_exn

@@ -11,6 +11,7 @@ open Core_kernel
 type entry = {
   file_input: ServerCommandTypes.file_input;
   path: Relative_path.t;
+  source_text: Full_fidelity_source_text.t;
   ast: Nast.program;
   mutable tast: Tast.program option;
   mutable errors: Errors.t option;

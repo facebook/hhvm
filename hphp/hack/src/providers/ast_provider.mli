@@ -44,7 +44,7 @@ val parse_file_input :
   ?full:bool ->
   Relative_path.t ->
   ServerCommandTypes.file_input ->
-  Nast.program
+  Full_fidelity_source_text.t * Nast.program
 
 val local_changes_push_stack : unit -> unit
 

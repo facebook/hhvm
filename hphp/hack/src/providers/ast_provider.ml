@@ -44,7 +44,8 @@ module LocalParserCache =
 let parse_file_input
     ?(full = false)
     (file_name : Relative_path.t)
-    (file_input : ServerCommandTypes.file_input) : Nast.program =
+    (file_input : ServerCommandTypes.file_input) :
+    Full_fidelity_source_text.t * Nast.program =
   let popt = Parser_options_provider.get () in
   let parser_env =
     Full_fidelity_ast.make_env
@@ -53,10 +54,8 @@ let parse_file_input
       ~parser_options:popt
       file_name
   in
+  let source = ServerCommandTypesUtils.source_tree_of_file_input file_input in
   let result =
-    let source =
-      ServerCommandTypesUtils.source_tree_of_file_input file_input
-    in
     Full_fidelity_ast.from_text_with_legacy
       parser_env
       source.Full_fidelity_source_text.text
@@ -71,7 +70,7 @@ let parse_file_input
     else
       ast
   in
-  ast
+  (source, ast)
 
 let get_from_local_cache ~full file_name =
   let fn = Relative_path.to_absolute file_name in
@@ -263,10 +262,13 @@ let get_ast ?(full = false) file_name =
     (match ast_opt with
     | Some ast -> ast
     | None ->
-      parse_file_input
-        ~full
-        file_name
-        (ServerCommandTypes.FileName (Relative_path.to_absolute file_name)))
+      let (_, ast) =
+        parse_file_input
+          ~full
+          file_name
+          (ServerCommandTypes.FileName (Relative_path.to_absolute file_name))
+      in
+      ast)
   | Provider_config.Decl_service _ ->
     failwith "Ast_provider.get_ast not supported with decl memory provider"
 

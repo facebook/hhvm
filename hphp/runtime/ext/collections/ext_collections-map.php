@@ -337,16 +337,28 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Native>>
-  public function retain(mixed $callback): object;
+  public function retain(mixed $callback): \HH\Map {
+    foreach ($this as $k => $v) {
+      if (!$callback($v)) {
+        unset($this[$k]);
+      }
+    }
+    return $this;
+  }
 
   /** Ensures that this Map contains only keys/values for which the specified
    * callback returns true when passed the key and the value.
    * @param mixed $callback
    * @return object
    */
-  <<__Native>>
-  public function retainWithKey(mixed $callback): object;
+  public function retainWithKey(mixed $callback): \HH\Map {
+    foreach ($this as $k => $v) {
+      if (!$callback($k, $v)) {
+        unset($this[$k]);
+      }
+    }
+    return $this;
+  }
 
   /** Returns a KeyedIterable produced by combined the specified Iterables
    * pair-wise.
@@ -394,8 +406,21 @@ final class Map implements \MutableMap {
    * @param mixed $fn
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): \HH\Map {
+    $ret = dict[];
+    $skipping = true;
+    foreach ($this as $k => $v) {
+      if ($skipping) {
+        if ($fn($v)) {
+          continue;
+        }
+        $skipping = false;
+      }
+      $ret[$k] = $v;
+    }
+    return new \HH\Map($ret);
+  }
 
   /** Returns a Map containing the specified range of key/value pairs from this
    * Map. The range is specified by two non-negative integers: a starting
@@ -770,8 +795,21 @@ final class ImmMap implements \ConstMap {
    * @param mixed $fn
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): \HH\ImmMap {
+    $ret = dict[];
+    $skipping = true;
+    foreach ($this as $k => $v) {
+      if ($skipping) {
+        if ($fn($v)) {
+          continue;
+        }
+        $skipping = false;
+      }
+      $ret[$k] = $v;
+    }
+    return new \HH\ImmMap($ret);
+  }
 
   /** Returns a ImmMap containing the specified range of key/value pairs from
    * this ImmMap. The range is specified by two non-negative integers: a

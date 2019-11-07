@@ -16,15 +16,6 @@ namespace HPHP {
 Class* c_Map::s_cls;
 Class* c_ImmMap::s_cls;
 
-inline
-bool invokeAndCastToBool(const CallCtx& ctx, int argc,
-                         const TypedValue* argv) {
-  auto ret = Variant::attach(
-      g_context->invokeFuncFew(ctx, argc, argv)
-  );
-  return ret.toBoolean();
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // BaseMap
 
@@ -411,47 +402,6 @@ BaseMap::php_differenceByKey(const Variant& it) {
   return ret;
 }
 
-template<bool useKey>
-Object BaseMap::php_retain(const Variant& callback) {
-  CallCtx ctx;
-  vm_decode_function(callback, ctx);
-  if (!ctx.func) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback");
-  }
-  auto size = m_size;
-  if (!size) { return Object{this}; }
-  constexpr int64_t argc = useKey ? 2 : 1;
-  TypedValue argv[argc];
-  for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    auto e = iter_elm(pos);
-    if (useKey) {
-      if (e->hasIntKey()) {
-        argv[0].m_type = KindOfInt64;
-        argv[0].m_data.num = e->ikey;
-      } else {
-        argv[0].m_type = KindOfString;
-        argv[0].m_data.pstr = e->skey;
-      }
-    }
-    argv[argc-1] = e->data;
-    bool b = invokeAndCastToBool(ctx, argc, argv);
-    if (b) {
-      continue;
-    }
-    mutate();
-    e = iter_elm(pos);
-    auto h = e->hash();
-    auto pp = e->hasIntKey() ? findForRemove(e->ikey, h) :
-              findForRemove(e->skey, h);
-    eraseNoCompact(pp);
-  }
-
-  assertx(m_size <= size);
-  compactOrShrinkIfDensityTooLow();
-  return Object{this};
-}
-
 template<typename TMap>
 ALWAYS_INLINE
 typename std::enable_if<
@@ -565,40 +515,6 @@ BaseMap::php_skip(const Variant& n) {
       map->updateNextKI(toE.ikey);
     } else {
       assertx(toE.hasStrKey());
-    }
-  }
-  return Object{std::move(map)};
-}
-
-template<class TMap>
-ALWAYS_INLINE
-typename std::enable_if<
-  std::is_base_of<BaseMap, TMap>::value, Object>::type
-BaseMap::php_skipWhile(const Variant& fn) {
-  CallCtx ctx;
-  vm_decode_function(fn, ctx);
-  if (!ctx.func) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback");
-  }
-  auto map = req::make<TMap>();
-  if (!m_size) return Object{std::move(map)};
-  ssize_t pos;
-  for (pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    auto e = iter_elm(pos);
-    bool b = invokeAndCastToBool(ctx, 1, &e->data);
-    if (!b) break;
-  }
-  if (iter_valid(pos)) {
-    auto eLimit = elmLimit();
-    auto e = iter_elm(pos);
-    for (; e != eLimit; e = nextElm(e, eLimit)) {
-      if (e->hasIntKey()) {
-        map->set(e->ikey, e->data);
-      } else {
-        assertx(e->hasStrKey());
-        map->set(e->skey, e->data);
-      }
     }
   }
   return Object{std::move(map)};
@@ -836,7 +752,6 @@ void CollectionsExtension::initMap() {
   TMPL_ME(differenceByKey, Map);
   TMPL_ME(slice,           Map);
   TMPL_ME(skip,            Map);
-  TMPL_ME(skipWhile,       Map);
   TMPL_ME(take,            Map);
   TMPL_ME(zip,             Map);
   TMPL_ME(keys,            Vector);
@@ -869,8 +784,6 @@ void CollectionsExtension::initMap() {
   HHVM_NAMED_ME(HH\\Map, reserve,       &c_Map::php_reserve);
 
   HHVM_NAMED_ME(HH\\Map, toImmMap,      &c_Map::getImmutableCopy);
-  HHVM_NAMED_ME(HH\\Map, retain,        &c_Map::php_retain<false>);
-  HHVM_NAMED_ME(HH\\Map, retainWithKey, &c_Map::php_retain<true>);
 
   loadSystemlib("collections-map");
 

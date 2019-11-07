@@ -16,15 +16,6 @@ namespace HPHP {
 Class* c_Set::s_cls;
 Class* c_ImmSet::s_cls;
 
-inline
-bool invokeAndCastToBool(const CallCtx& ctx, int argc,
-                         const TypedValue* argv) {
-  auto ret = Variant::attach(
-    g_context->invokeFuncFew(ctx, argc, argv)
-  );
-  return ret.toBoolean();
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // BaseSet
 
@@ -389,79 +380,6 @@ void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
   throwBadValueType();
 }
 
-template<typename TSet, bool useKey>
-typename std::enable_if<
-  std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_map(const Variant& callback) {
-  VMRegGuard _;
-  CallCtx ctx;
-  vm_decode_function(callback, ctx);
-  if (!ctx.func) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback");
-  }
-  auto set = req::make<TSet>();
-  if (!m_size) return Object{std::move(set)};
-  assertx(posLimit() != 0);
-  assertx(set->arrayData()->isStatic() &&
-          set->arrayData()->empty());
-  auto oldCap = set->cap();
-  set->reserve(posLimit()); // presume minimum collisions ...
-  assertx(set->canMutateBuffer());
-  constexpr int64_t argc = useKey ? 2 : 1;
-  TypedValue argv[argc];
-  for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    auto e = iter_elm(pos);
-    if (useKey) {
-      argv[0] = e->data;
-    }
-    argv[argc-1] = e->data;
-    auto cbRet = Variant::attach(
-      g_context->invokeFuncFew(ctx, argc, argv)
-    );
-    set->addRaw(*cbRet.asTypedValue());
-  }
-  // ... and shrink back if that was incorrect
-  set->shrinkIfCapacityTooHigh(oldCap);
-  return Object{std::move(set)};
-}
-
-template<typename TSet, bool useKey>
-typename std::enable_if<
-  std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_filter(const Variant& callback) {
-  VMRegGuard _;
-  CallCtx ctx;
-  vm_decode_function(callback, ctx);
-  if (!ctx.func) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      "Parameter must be a valid callback");
-  }
-  auto set = req::make<TSet>();
-  if (!m_size) return Object(std::move(set));
-  // we don't reserve(), because we don't know how selective callback will be
-  set->mutate();
-  constexpr int64_t argc = useKey ? 2 : 1;
-  TypedValue argv[argc];
-  for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    auto e = iter_elm(pos);
-    if (useKey) {
-      argv[0] = e->data;
-    }
-    argv[argc-1] = e->data;
-    bool b = invokeAndCastToBool(ctx, argc, argv);
-    if (!b) continue;
-    e = iter_elm(pos);
-    if (e->hasIntKey()) {
-      set->addRaw(e->data.m_data.num);
-    } else {
-      assertx(e->hasStrKey());
-      set->addRaw(e->data.m_data.pstr);
-    }
-  }
-  return Object(std::move(set));
-}
-
 template<class TSet>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
@@ -475,38 +393,6 @@ BaseSet::php_zip(const Variant& iterable) {
     throwBadValueType();
   }
   return Object(req::make<TSet>());
-}
-
-template<bool useKey>
-Object BaseSet::php_retain(const Variant& callback) {
-  CallCtx ctx;
-  vm_decode_function(callback, ctx);
-  if (!ctx.func) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback");
-  }
-  auto size = m_size;
-  if (!size) { return Object{this}; }
-  constexpr int64_t argc = useKey ? 2 : 1;
-  TypedValue argv[argc];
-  for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    auto e = iter_elm(pos);
-    if (useKey) {
-      argv[0] = e->data;
-    }
-    argv[argc-1] = e->data;
-    bool b = invokeAndCastToBool(ctx, argc, argv);
-    if (b) { continue; }
-    mutate();
-    e = iter_elm(pos);
-    auto h = e->hash();
-    auto pp = e->hasIntKey() ? findForRemove(e->ikey, h) :
-              findForRemove(e->skey, h);
-    eraseNoCompact(pp);
-  }
-  assertx(m_size <= size);
-  compactOrShrinkIfDensityTooLow();
-  return Object{this};
 }
 
 template<class TSet>
@@ -554,36 +440,6 @@ BaseSet::php_take(const Variant& n) {
 template<class TSet>
 typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_takeWhile(const Variant& fn) {
-  CallCtx ctx;
-  vm_decode_function(fn, ctx);
-  if (!ctx.func) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback");
-  }
-  auto set = req::make<TSet>();
-  if (!m_size) return Object(std::move(set));
-  set->mutate();
-  uint32_t used = posLimit();
-  for (uint32_t i = 0; i < used; ++i) {
-    if (isTombstone(i)) continue;
-    Elm* e = &data()[i];
-    bool b = invokeAndCastToBool(ctx, 1, &e->data);
-    if (!b) break;
-    e = &data()[i];
-    if (e->hasIntKey()) {
-      set->addRaw(e->data.m_data.num);
-    } else {
-      assertx(e->hasStrKey());
-      set->addRaw(e->data.m_data.pstr);
-    }
-  }
-  return Object(std::move(set));
-}
-
-template<class TSet>
-typename std::enable_if<
-  std::is_base_of<BaseSet, TSet>::value, Object>::type
 BaseSet::php_skip(const Variant& n) {
   if (!n.isInteger()) {
     SystemLib::throwInvalidArgumentExceptionObject(
@@ -626,41 +482,6 @@ BaseSet::php_skip(const Variant& n) {
     }
   }
   return Object{std::move(set)};
-}
-
-template<class TSet>
-typename std::enable_if<
-  std::is_base_of<BaseSet, TSet>::value, Object>::type
-BaseSet::php_skipWhile(const Variant& fn) {
-  CallCtx ctx;
-  vm_decode_function(fn, ctx);
-  if (!ctx.func) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-               "Parameter must be a valid callback");
-  }
-  auto set = req::make<TSet>();
-  if (!m_size) return Object(std::move(set));
-  // we don't reserve(), because we don't know how selective fn will be
-  set->mutate();
-  uint32_t used = posLimit();
-  uint32_t i = 0;
-  for (; i < used; ++i) {
-    if (isTombstone(i)) continue;
-    Elm& e = data()[i];
-    bool b = invokeAndCastToBool(ctx, 1, &e.data);
-    if (!b) break;
-  }
-  for (; i < used; ++i) {
-    if (isTombstone(i)) continue;
-    Elm& e = data()[i];
-    if (e.hasIntKey()) {
-      set->addRaw(e.data.m_data.num);
-    } else {
-      assertx(e.hasStrKey());
-      set->addRaw(e.data.m_data.pstr);
-    }
-  }
-  return Object(std::move(set));
 }
 
 template<class TSet>
@@ -829,31 +650,11 @@ void CollectionsExtension::initSet() {
   HHVM_NAMED_ME(HH\\ImmSet, mn, impl<c_Imm##ret>);
   TMPL_ME(zip,       &BaseSet::php_zip,       Set);
   TMPL_ME(take,      &BaseSet::php_take,      Set);
-  TMPL_ME(takeWhile, &BaseSet::php_takeWhile, Set);
   TMPL_ME(skip,      &BaseSet::php_skip,      Set);
-  TMPL_ME(skipWhile, &BaseSet::php_skipWhile, Set);
   TMPL_ME(slice,     &BaseSet::php_slice,     Set);
   TMPL_ME(values,    &BaseSet::php_values,    Vector);
   TMPL_ME(concat,    &BaseSet::php_concat,    Vector);
 #undef TMPL_ME
-
-  auto const m     = &BaseSet::php_map<c_Set, false>;
-  auto const mk    = &BaseSet::php_map<c_Set, true>;
-  auto const immm  = &BaseSet::php_map<c_ImmSet, false>;
-  auto const immmk = &BaseSet::php_map<c_ImmSet, true>;
-  HHVM_NAMED_ME(HH\\Set,    map,        m);
-  HHVM_NAMED_ME(HH\\Set,    mapWithKey, mk);
-  HHVM_NAMED_ME(HH\\ImmSet, map,        immm);
-  HHVM_NAMED_ME(HH\\ImmSet, mapWithKey, immmk);
-
-  auto const f     = &BaseSet::php_filter<c_Set, false>;
-  auto const fk    = &BaseSet::php_filter<c_Set, true>;
-  auto const immf  = &BaseSet::php_filter<c_ImmSet, false>;
-  auto const immfk = &BaseSet::php_filter<c_ImmSet, true>;
-  HHVM_NAMED_ME(HH\\Set,    filter,        f);
-  HHVM_NAMED_ME(HH\\Set,    filterWithKey, fk);
-  HHVM_NAMED_ME(HH\\ImmSet, filter,        immf);
-  HHVM_NAMED_ME(HH\\ImmSet, filterWithKey, immfk);
 
   HHVM_NAMED_ME(HH\\Set,    toVector,    materialize<c_Vector>);
   HHVM_NAMED_ME(HH\\Set,    toImmVector, materialize<c_ImmVector>);
@@ -872,8 +673,6 @@ void CollectionsExtension::initSet() {
   HHVM_NAMED_ME(HH\\Set, remove,         &c_Set::php_remove);
   HHVM_NAMED_ME(HH\\Set, removeAll,      &c_Set::php_removeAll);
   HHVM_NAMED_ME(HH\\Set, reserve,        &c_Set::php_reserve);
-  HHVM_NAMED_ME(HH\\Set, retain,         &c_Set::php_retain<false>);
-  HHVM_NAMED_ME(HH\\Set, retainWithKey,  &c_Set::php_retain<true>);
   HHVM_NAMED_ME(HH\\Set, toImmSet,       &c_Set::getImmutableCopy);
 
   loadSystemlib("collections-set");

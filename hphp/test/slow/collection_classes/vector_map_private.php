@@ -5,20 +5,13 @@ class MyClass {
     return $x + 3;
   }
 
-  public function foo(Vector<int> $v): void {
+  public function foo(Vector<int> $v): Vector<int> {
     return $v->map('MyClass::mapper');
   }
 }
 
+<<__EntryPoint>>
 function main(): void {
   $c = new MyClass();
   var_dump($c->foo(Vector { 0, 1, 2, 3, 4, 5, 6 }));
-}
-
-
-<<__EntryPoint>>
-function main_vector_map_private() {
-try {
-  main();
-} catch (Exception $e) { echo "nodice\n"; }
 }

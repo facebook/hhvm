@@ -1,4 +1,3 @@
-
 empty...
 bool(false)
 bool(true)
@@ -33,6 +32,34 @@ contains...
 bool(true)
 bool(false)
 bool(false)
+
+map...
+bool(true)
+----
+int(2)
+int(4)
+int(6)
+----
+
+mapWithKey...
+bool(true)
+----
+int(1)
+int(4)
+int(9)
+----
+
+filter...
+bool(true)
+----
+int(2)
+----
+
+filterWithKey...
+bool(true)
+----
+int(3)
+----
 
 toArray...
 array(3) {

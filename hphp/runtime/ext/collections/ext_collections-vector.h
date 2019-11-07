@@ -62,16 +62,6 @@ public:
     return Variant(tvAsCVarRef(&tv));
   }
 
-  template<class TVector, bool useKey>
-  typename std::enable_if<
-    std::is_base_of<BaseVector, TVector>::value, Object>::type
-  php_map(const Variant& callback);
-
-  template<class TVector, bool useKey>
-  typename std::enable_if<
-    std::is_base_of<BaseVector, TVector>::value, Object>::type
-  php_filter(const Variant& callback);
-
   template<class TVector>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, Object>::type
@@ -80,17 +70,7 @@ public:
   template<class TVector>
   typename std::enable_if<
     std::is_base_of<BaseVector, TVector>::value, Object>::type
-  php_takeWhile(const Variant& fn);
-
-  template<class TVector>
-  typename std::enable_if<
-    std::is_base_of<BaseVector, TVector>::value, Object>::type
   php_skip(const Variant& n);
-
-  template<class TVector>
-  typename std::enable_if<
-    std::is_base_of<BaseVector, TVector>::value, Object>::type
-  php_skipWhile(const Variant& fn);
 
   template<class TVector>
   typename std::enable_if<

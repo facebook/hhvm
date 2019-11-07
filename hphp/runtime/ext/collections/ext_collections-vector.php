@@ -318,32 +318,60 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\Vector {
+    $ret = vec[];
+    foreach ($this as $v) {
+      $ret[] = $callback($v);
+    }
+    return new \HH\Vector($ret);
+  }
 
   /** Returns a Vector of the values produced by applying the specified callback
    * on each key and value from this Vector.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Vector {
+    $ret = vec[];
+    foreach ($this as $k => $v) {
+      $ret[] = $callback($k, $v);
+    }
+    return new \HH\Vector($ret);
+  }
 
   /** Returns a Vector of all the values from this Vector for which the specified
    * callback returns true.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>> mixed $callback): \HH\Vector {
+    $ret = vec[];
+    foreach ($this as $v) {
+      if ($callback($v)) {
+        $ret[] = $v;
+      }
+    }
+    return new \HH\Vector($ret);
+  }
 
   /** Returns a Vector of all the values from this Vector for which the specified
    * callback returns true.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Vector {
+    $ret = vec[];
+    foreach ($this as $k => $v) {
+      if ($callback($k, $v)) {
+        $ret[] = $v;
+      }
+    }
+    return new \HH\Vector($ret);
+  }
 
   /** Returns a KeyedIterable produced by combined the specified Iterables
    * pair-wise.
@@ -366,8 +394,17 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): \HH\Vector {
+    $ret = vec[];
+    foreach ($this as $v) {
+      if (!$callback($v)) {
+        break;
+      }
+      $ret[] = $v;
+    }
+    return new \HH\Vector($ret);
+  }
 
   /** Returns a Vector containing all the values except the first n of this
    * Vector.
@@ -382,8 +419,21 @@ final class Vector implements \MutableVector {
    * @param mixed $fn
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): \HH\Vector {
+    $ret = vec[];
+    $skipping = true;
+    foreach ($this as $v) {
+      if ($skipping) {
+        if ($fn($v)) {
+          continue;
+        }
+        $skipping = false;
+      }
+      $ret[] = $v;
+    }
+    return new \HH\Vector($ret);
+  }
 
   /** Returns a Vector containing the specified range of values from this Vector.
    * The range is specified by two non-negative integers: a starting position
@@ -613,32 +663,60 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmVector {
+    $ret = vec[];
+    foreach ($this as $v) {
+      $ret[] = $callback($v);
+    }
+    return new \HH\ImmVector($ret);
+  }
 
   /** Returns a Vector of the values produced by applying the specified callback
    * on each key and value from this ImmVector.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmVector {
+    $ret = vec[];
+    foreach ($this as $k => $v) {
+      $ret[] = $callback($k, $v);
+    }
+    return new \HH\ImmVector($ret);
+  }
 
   /** Returns a Vector of all the values from this ImmVector for which the
    * specified callback returns true.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmVector {
+    $ret = vec[];
+    foreach ($this as $v) {
+      if ($callback($v)) {
+        $ret[] = $v;
+      }
+    }
+    return new \HH\ImmVector($ret);
+  }
 
   /** Returns a Vector of all the values from this ImmVector for which the
    * specified callback returns true.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmVector {
+    $ret = vec[];
+    foreach ($this as $k => $v) {
+      if ($callback($k, $v)) {
+        $ret[] = $v;
+      }
+    }
+    return new \HH\ImmVector($ret);
+  }
 
   /** Returns a KeyedIterable produced by combined the specified Iterables
    * pair-wise.
@@ -661,8 +739,17 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmVector {
+    $ret = vec[];
+    foreach ($this as $v) {
+      if (!$callback($v)) {
+        break;
+      }
+      $ret[] = $v;
+    }
+    return new \HH\ImmVector($ret);
+  }
 
   /** Returns a ImmVector containing all values except the first n of this
    * ImmVector.
@@ -677,8 +764,21 @@ final class ImmVector implements \ConstVector {
    * @param mixed $fn
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): \HH\ImmVector {
+    $ret = vec[];
+    $skipping = true;
+    foreach ($this as $v) {
+      if ($skipping) {
+        if ($fn($v)) {
+          continue;
+        }
+        $skipping = false;
+      }
+      $ret[] = $v;
+    }
+    return new \HH\ImmVector($ret);
+  }
 
   /** Returns an ImmVector containing the specified range of values from this
    * ImmVector. The range is specified by two non-negative integers: a starting

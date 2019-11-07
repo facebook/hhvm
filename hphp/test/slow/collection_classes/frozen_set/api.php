@@ -45,6 +45,27 @@ function api() {
   var_dump($fs->contains(1));
   var_dump($fs->contains(10));
   var_dump($e->contains(0));
+
+  echo "\nmap...\n";
+  $res = $fs->map(function ($v) { return 2 * $v; });
+  var_dump($res is ImmSet);
+  show_elems($res);
+
+  echo "\nmapWithKey...\n";
+  $res = $fs->mapWithKey(function ($k, $v) { return $k * $v; });
+  var_dump($res is ImmSet);
+  show_elems($res);
+
+  echo "\nfilter...\n";
+  $res = $fs->filter(function ($v) { return $v === 2; });
+  var_dump($res is ImmSet);
+  show_elems($res);
+
+  echo "\nfilterWithKey...\n";
+  $res = $fs->filterWithKey(function ($k, $v) { return $k === 3 && $v === 3; });
+  var_dump($res is ImmSet);
+  show_elems($res);
+
 }
 
 function materialization_methods() {

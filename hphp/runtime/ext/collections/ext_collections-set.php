@@ -226,48 +226,90 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+    $ret = new \HH\Set();
+    foreach ($this as $v) {
+      $ret[] = $callback($v);
+    }
+    return $ret;
+  }
 
   /** Returns a Set of the values produced by applying the specified callback on
    * each key and value from this Set.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+    $ret = new \HH\Set();
+    foreach ($this as $k => $v) {
+      $ret[] = $callback($k, $v);
+    }
+    return $ret;
+  }
 
   /** Returns a Set of all the values from this Set for which the specified
    * callback returns true.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+    $ret = new \HH\Set();
+    foreach ($this as $v) {
+      if ($callback($v)) {
+        $ret[] = $v;
+      }
+    }
+    return $ret;
+  }
 
   /** Returns a Set of all the values from this Set for which the specified
    * callback returns true.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+    $ret = new \HH\Set();
+    foreach ($this as $k => $v) {
+      if ($callback($k, $v)) {
+        $ret[] = $v;
+      }
+    }
+    return $ret;
+  }
 
   /** Ensures that this Set contains only values for which the specified callback
    * returns true.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function retain(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  public function retain(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+    foreach ($this as $k => $v) {
+      if (!$callback($v)) {
+        unset($this[$k]);
+      }
+    }
+    return $this;
+  }
 
   /** Ensures that this Set contains only keys/values for which the specified
    * callback returns true when passed the key and the value.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function retainWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  public function retainWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+    foreach ($this as $k => $v) {
+      if (!$callback($k, $v)) {
+        unset($this[$k]);
+      }
+    }
+    return $this;
+  }
 
   /** Returns a Iterable produced by combined the specified Iterables pair-wise.
    * @param mixed $iterable
@@ -288,8 +330,17 @@ final class Set implements \MutableSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): \HH\Set {
+    $ret = new \HH\Set();
+    foreach ($this as $v) {
+      if (!$callback($v)) {
+        break;
+      }
+      $ret[] = $v;
+    }
+    return $ret;
+  }
 
   /** Returns a Set containing all values except the first n of this Set.
    * @param mixed $n
@@ -303,8 +354,21 @@ final class Set implements \MutableSet {
    * @param mixed $fn
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): \HH\Set {
+    $ret = new \HH\Set();
+    $skipping = true;
+    foreach ($this as $v) {
+      if ($skipping) {
+        if ($fn($v)) {
+          continue;
+        }
+        $skipping = false;
+      }
+      $ret[] = $v;
+    }
+    return $ret;
+  }
 
   /** Returns a Set containing the specified range of values from this Set. The
    * range is specified by two non-negative integers: a starting position and a
@@ -588,32 +652,60 @@ final class ImmSet implements \ConstSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmSet {
+    $ret = new \HH\Set();
+    foreach ($this as $v) {
+      $ret[] = $callback($v);
+    }
+    return new \HH\ImmSet($ret);
+  }
 
   /** Returns a ImmSet of the values produced by applying the specified callback
    * on each key and value from this ImmSet.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmSet {
+    $ret = new \HH\Set();
+    foreach ($this as $k => $v) {
+      $ret[] = $callback($k, $v);
+    }
+    return new \HH\ImmSet($ret);
+  }
 
   /** Returns a ImmSet of all the values from this ImmSet for which the specified
    * callback returns true.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmSet {
+    $ret = new \HH\Set();
+    foreach ($this as $v) {
+      if ($callback($v)) {
+        $ret[] = $v;
+      }
+    }
+    return new \HH\ImmSet($ret);
+  }
 
   /** Returns a ImmSet of all the values from this ImmSet for which the specified
    * callback returns true.
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmSet {
+    $ret = new \HH\Set();
+    foreach ($this as $k => $v) {
+      if ($callback($k, $v)) {
+        $ret[] = $v;
+      }
+    }
+    return new \HH\ImmSet($ret);
+  }
 
   /** Returns an Iterable produced by combining the specified Iterables
    * pair-wise.
@@ -636,8 +728,17 @@ final class ImmSet implements \ConstSet {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmSet {
+    $ret = new \HH\Set();
+    foreach ($this as $v) {
+      if (!$callback($v)) {
+        break;
+      }
+      $ret[] = $v;
+    }
+    return new \HH\ImmSet($ret);
+  }
 
   /** Returns a ImmSet containing all values except the first n of this ImmSet.
    * @param mixed $n
@@ -651,8 +752,21 @@ final class ImmSet implements \ConstSet {
    * @param mixed $fn
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): object;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): \HH\ImmSet {
+    $ret = new \HH\Set();
+    $skipping = true;
+    foreach ($this as $v) {
+      if ($skipping) {
+        if ($fn($v)) {
+          continue;
+        }
+        $skipping = false;
+      }
+      $ret[] = $v;
+    }
+    return new \HH\ImmSet($ret);
+  }
 
   /** Returns a ImmSet containing the specified range of values from this ImmSet.
    * The range is specified by two non-negative integers: a starting position

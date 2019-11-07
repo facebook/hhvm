@@ -215,9 +215,6 @@ protected:
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_differenceByKey(const Variant& it);
 
-  template<bool useKey>
-  Object php_retain(const Variant& callback);
-
   template<class TMap>
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
@@ -232,11 +229,6 @@ protected:
   typename std::enable_if<
     std::is_base_of<BaseMap, TMap>::value, Object>::type
   php_skip(const Variant& n);
-
-  template<class TMap>
-  typename std::enable_if<
-    std::is_base_of<BaseMap, TMap>::value, Object>::type
-  php_skipWhile(const Variant& fn);
 
   template<class TMap>
   typename std::enable_if<

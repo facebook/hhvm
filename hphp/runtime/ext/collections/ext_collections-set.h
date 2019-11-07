@@ -141,19 +141,6 @@ protected:
     return Object{std::move(vec)};
   }
 
-  template<class TSet, bool useKey>
-  typename std::enable_if<
-    std::is_base_of<BaseSet, TSet>::value, Object>::type
-  php_map(const Variant& callback);
-
-  template<class TSet, bool useKey>
-  typename std::enable_if<
-    std::is_base_of<BaseSet, TSet>::value, Object>::type
-  php_filter(const Variant& callback);
-
-  template<bool useKey>
-  Object php_retain(const Variant& callback);
-
   template<class TSet>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
@@ -167,17 +154,7 @@ protected:
   template<class TSet>
   typename std::enable_if<
     std::is_base_of<BaseSet, TSet>::value, Object>::type
-  php_takeWhile(const Variant& fn);
-
-  template<class TSet>
-  typename std::enable_if<
-    std::is_base_of<BaseSet, TSet>::value, Object>::type
   php_skip(const Variant& n);
-
-  template<class TSet>
-  typename std::enable_if<
-    std::is_base_of<BaseSet, TSet>::value, Object>::type
-  php_skipWhile(const Variant& fn);
 
   template<class TSet>
   typename std::enable_if<

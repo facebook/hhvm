@@ -4270,7 +4270,13 @@ and uninstantiable_error env reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
 
 and exception_ty pos env ty =
   let exn_ty = MakeType.throwable (Reason.Rthrow pos) in
-  Type.sub_type pos Reason.URthrow env ty exn_ty Errors.unify_error
+  Typing_coercion.coerce_type
+    pos
+    Reason.URthrow
+    env
+    ty
+    { et_type = exn_ty; et_enforced = false }
+    Errors.unify_error
 
 and shape_field_pos = function
   | Ast_defs.SFlit_int (p, _)

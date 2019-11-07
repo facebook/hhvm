@@ -127,7 +127,7 @@ namespace {
 
 template <typename E, typename C, typename A>
 ALWAYS_INLINE
-ArrayData* castObjToHackArrImpl(ObjectData* obj,
+ArrayData* castObjToArrayLikeImpl(ObjectData* obj,
                                 E empty,
                                 C cast,
                                 A add,
@@ -139,7 +139,7 @@ ArrayData* castObjToHackArrImpl(ObjectData* obj,
         decRefArr(out);
         out = out->copy();
       }
-      return RuntimeOption::EvalArrayProvenance
+      return RuntimeOption::EvalArrayProvenance && arrprov::arrayWantsTag(out)
         ? tagArrProv(out)
         : out;
     }
@@ -158,7 +158,9 @@ ArrayData* castObjToHackArrImpl(ObjectData* obj,
   auto arr = empty();
   for (ArrayIter iter(iterObj); iter; ++iter) add(arr, iter);
   auto const out = arr.detach();
-  return RuntimeOption::EvalArrayProvenance && out->isRefCounted()
+  return RuntimeOption::EvalArrayProvenance
+    && arrprov::arrayWantsTag(out)
+    && out->isRefCounted()
     ? tagArrProv(out)
     : out;
 }
@@ -166,7 +168,7 @@ ArrayData* castObjToHackArrImpl(ObjectData* obj,
 }
 
 ArrayData* castObjToVec(ObjectData* obj) {
-  return castObjToHackArrImpl(
+  return castObjToArrayLikeImpl(
     obj,
     Array::CreateVec,
     [](const Array& arr) { return arr.toVec(); },
@@ -176,7 +178,7 @@ ArrayData* castObjToVec(ObjectData* obj) {
 }
 
 ArrayData* castObjToDict(ObjectData* obj) {
-  return castObjToHackArrImpl(
+  return castObjToArrayLikeImpl(
     obj,
     Array::CreateDict,
     [](const Array& arr) { return arr.toDict(); },
@@ -186,7 +188,7 @@ ArrayData* castObjToDict(ObjectData* obj) {
 }
 
 ArrayData* castObjToKeyset(ObjectData* obj) {
-  return castObjToHackArrImpl(
+  return castObjToArrayLikeImpl(
     obj,
     Array::CreateKeyset,
     [](const Array& arr) { return arr.toKeyset(); },
@@ -197,7 +199,7 @@ ArrayData* castObjToKeyset(ObjectData* obj) {
 
 ArrayData* castObjToVArray(ObjectData* obj) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return castObjToHackArrImpl(
+  return castObjToArrayLikeImpl(
     obj,
     Array::CreateVArray,
     [](const Array& arr) { return arr.toVArray(); },
@@ -209,7 +211,7 @@ ArrayData* castObjToVArray(ObjectData* obj) {
 
 ArrayData* castObjToDArray(ObjectData* obj) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return castObjToHackArrImpl(
+  return castObjToArrayLikeImpl(
     obj,
     Array::CreateDArray,
     [](const Array& arr) { return arr.toDArray(); },

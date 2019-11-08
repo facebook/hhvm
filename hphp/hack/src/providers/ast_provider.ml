@@ -45,7 +45,7 @@ let parse_file_input
     ?(full = false)
     (file_name : Relative_path.t)
     (file_input : ServerCommandTypes.file_input) :
-    Full_fidelity_source_text.t * Nast.program =
+    Full_fidelity_source_text.t * Nast.program * Parser_return.comments =
   let popt = Parser_options_provider.get () in
   let parser_env =
     Full_fidelity_ast.make_env
@@ -61,6 +61,7 @@ let parse_file_input
       source.Full_fidelity_source_text.text
   in
   let ast = result.Parser_return.ast in
+  let comments = result.Parser_return.comments in
   let ast =
     if
       Relative_path.prefix file_name = Relative_path.Hhi
@@ -70,7 +71,7 @@ let parse_file_input
     else
       ast
   in
-  (source, ast)
+  (source, ast, comments)
 
 let get_from_local_cache ~full file_name =
   let fn = Relative_path.to_absolute file_name in
@@ -262,7 +263,7 @@ let get_ast ?(full = false) file_name =
     (match ast_opt with
     | Some ast -> ast
     | None ->
-      let (_, ast) =
+      let (_, ast, _) =
         parse_file_input
           ~full
           file_name

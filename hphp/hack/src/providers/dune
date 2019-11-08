@@ -16,6 +16,7 @@
     ast
     collections
     nast
+    parser
     server_command_types
     typing_ast
     typing_deps

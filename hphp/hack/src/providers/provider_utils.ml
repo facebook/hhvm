@@ -54,7 +54,7 @@ let update_context
     ~(path : Relative_path.t)
     ~(file_input : ServerCommandTypes.file_input) :
     Provider_context.t * Provider_context.entry =
-  let (source_text, ast) =
+  let (source_text, ast, comments) =
     Errors.ignore_ (fun () ->
         Ast_provider.parse_file_input ~full:true path file_input)
   in
@@ -65,6 +65,7 @@ let update_context
       file_input;
       source_text;
       ast;
+      comments;
       tast = None;
       errors = None;
       symbols = None;

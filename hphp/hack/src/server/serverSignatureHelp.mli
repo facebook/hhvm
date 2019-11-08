@@ -14,3 +14,11 @@ val go :
   line:int ->
   column:int ->
   Lsp.SignatureHelp.result
+
+val go_ctx :
+  env:ServerEnv.env ->
+  ctx:Provider_context.t ->
+  entry:Provider_context.entry ->
+  line:int ->
+  column:int ->
+  Lsp.SignatureHelp.result

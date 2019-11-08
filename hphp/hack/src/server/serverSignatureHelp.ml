@@ -132,27 +132,7 @@ let get_occurrence_info
   | None -> None
   | Some ft -> Some (occurrence, ft, def_opt)
 
-let go
-    ~(env : ServerEnv.env)
-    ~(file : ServerCommandTypes.file_input)
-    ~(line : int)
-    ~(column : int) : Lsp.SignatureHelp.result =
-  let ServerEnv.{ tcopt; _ } = env in
-  let tcopt =
-    {
-      tcopt with
-      GlobalOptions.tco_dynamic_view = ServerDynamicView.dynamic_view_on ();
-    }
-  in
-  let source_text = ServerCommandTypesUtils.source_tree_of_file_input file in
-  let relative_path = source_text.SourceText.file_path in
-  let parser_env = Full_fidelity_ast.make_env relative_path in
-  let (cst, results) =
-    Full_fidelity_ast.from_text_with_legacy_and_cst parser_env source_text
-  in
-  let nast = results.Parser_return.ast in
-  let tast = ServerIdeUtils.check_ast tcopt nast in
-  let offset = SourceText.position_to_offset source_text (line, column) in
+let gather_signature_help env cst nast tast tcopt offset =
   match
     get_positional_info
       (Full_fidelity_ast.PositionedSyntaxTree.root cst)
@@ -236,3 +216,47 @@ let go
                 activeSignature = 0;
                 activeParameter = argument_idx;
               }))))
+
+let go
+    ~(env : ServerEnv.env)
+    ~(file : ServerCommandTypes.file_input)
+    ~(line : int)
+    ~(column : int) : Lsp.SignatureHelp.result =
+  let ServerEnv.{ tcopt; _ } = env in
+  let tcopt =
+    {
+      tcopt with
+      GlobalOptions.tco_dynamic_view = ServerDynamicView.dynamic_view_on ();
+    }
+  in
+  let source_text = ServerCommandTypesUtils.source_tree_of_file_input file in
+  let relative_path = source_text.SourceText.file_path in
+  let parser_env = Full_fidelity_ast.make_env relative_path in
+  let (cst, results) =
+    Full_fidelity_ast.from_text_with_legacy_and_cst parser_env source_text
+  in
+  let nast = results.Parser_return.ast in
+  let tast = ServerIdeUtils.check_ast tcopt nast in
+  let offset = SourceText.position_to_offset source_text (line, column) in
+  gather_signature_help env cst nast tast tcopt offset
+
+let go_ctx
+    ~(env : ServerEnv.env)
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~(line : int)
+    ~(column : int) : Lsp.SignatureHelp.result =
+  let cst = Provider_utils.compute_cst ~ctx ~entry in
+  let (tast, _) = Provider_utils.compute_tast_and_errors ~ctx ~entry in
+  let offset =
+    SourceText.position_to_offset
+      entry.Provider_context.source_text
+      (line, column)
+  in
+  gather_signature_help
+    env
+    cst
+    entry.Provider_context.ast
+    tast
+    env.ServerEnv.tcopt
+    offset

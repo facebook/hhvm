@@ -497,9 +497,10 @@ let handle_message :
       in
       let results =
         Provider_utils.with_context ~ctx ~f:(fun () ->
-            ServerSignatureHelp.go
+            ServerSignatureHelp.go_ctx
               ~env:initialized_state.server_env
-              ~file:entry.Provider_context.file_input
+              ~ctx
+              ~entry
               ~line:document_location.line
               ~column:document_location.column)
       in

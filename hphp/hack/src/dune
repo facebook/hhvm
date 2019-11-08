@@ -133,6 +133,7 @@
 (executable
   (name generate_full_fidelity)
   (modules
+    run_generate_full_fidelity
     generate_full_fidelity)
   (ocamlc_flags (:standard -custom))
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))

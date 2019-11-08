@@ -4041,7 +4041,7 @@ size_t process_phijmp_spills(State& state,
   // which will become the new inputs to the phi. We'll
   // reload/rematerialize into the new Vregs and have the phi take
   // those instead.
-  jit::fast_map<Vreg, Vreg> promotions;
+  jit::flat_map<Vreg, Vreg> promotions;
   for (size_t i = 0; i < uses.size(); ++i) {
     auto const r = uses[i];
     auto const s = spiller.forReg(r);
@@ -5649,12 +5649,12 @@ struct SpillMismatchState {
 
   // Map a spilled Vreg to the spill destination. If not present, the Vreg is
   // spilled to itself.
-  jit::fast_map<Vreg, Vreg> spillDests;
+  jit::flat_map<Vreg, Vreg> spillDests;
   // Map a reloaded Vreg to the reload destination. If not present, the Vreg is
   // reloaded to itself.
-  jit::fast_map<Vreg, Vreg> reloadDests;
+  jit::flat_map<Vreg, Vreg> reloadDests;
   // ssaalias instructions to insert
-  jit::fast_map<Vreg, Vreg> aliases;
+  jit::flat_map<Vreg, Vreg> aliases;
 
   // Index p1 of phijmp should be written to p2 (after all other
   // instructions have been inserted).
@@ -5958,7 +5958,7 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
 
       // Any new Vreg being used as a destination of a spill/reload/ssaalias
       // should have the same RegInfo as its source.
-      auto const processMap = [&] (const jit::fast_map<Vreg, Vreg>& m) {
+      auto const processMap = [&] (const jit::flat_map<Vreg, Vreg>& m) {
         for (auto const& p : m) {
           results.ssaize.add(p.first);
           results.ssaize.add(p.second);
@@ -8660,12 +8660,19 @@ template <typename T>
 jit::vector<MoveInfo<T>> make_move_plan(const jit::fast_map<T,T>& dstToSrc) {
   // Calculate in-degrees
   jit::fast_map<T, int> degree;
+  jit::vector<std::pair<T,T>> dstToSrcVec;
   degree.reserve(dstToSrc.size());
+  dstToSrcVec.reserve(dstToSrc.size());
   for (auto const& kv : dstToSrc) {
+    dstToSrcVec.push_back(kv);
     auto const src = kv.second;
     assertx(kv.first != src);
     ++degree[src];
   }
+  std::sort(dstToSrcVec.begin(), dstToSrcVec.end(),
+            [](const std::pair<T,T>& a, const std::pair<T,T>& b) {
+              return (size_t)Vreg{a.first} < (size_t)Vreg{b.first};
+            });
 
   // Compute the list of non-swap moves. Keep removing nodes from the graph that
   // have an in-degree of 0 (by setting their degree to -1, which makes it as
@@ -8673,7 +8680,7 @@ jit::vector<MoveInfo<T>> make_move_plan(const jit::fast_map<T,T>& dstToSrc) {
   auto moveInfo = [&]{
     jit::vector<MoveInfo<T>> info;
 
-    for (auto const& kv : dstToSrc) {
+    for (auto const& kv : dstToSrcVec) {
       auto dst = kv.first;
       auto src = kv.second;
 
@@ -8706,7 +8713,7 @@ jit::vector<MoveInfo<T>> make_move_plan(const jit::fast_map<T,T>& dstToSrc) {
   // At this point the transfer graph is nothing but loops. We can walk each
   // loop, emitting swaps for adjacent nodes.
 
-  for (auto const& kv : dstToSrc) {
+  for (auto const& kv : dstToSrcVec) {
     auto const begin = kv.first;
 
     // Ignore nodes already processed above.

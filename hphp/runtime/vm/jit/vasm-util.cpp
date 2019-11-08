@@ -691,7 +691,8 @@ struct SSAConverter {
     Vlabel block;
     VregList inputs;
   };
-  jit::fast_map<Vreg, Phi> phis;
+  // need stable iteration order.
+  jit::flat_map<Vreg, Phi> phis;
 
   /*
    * Indicates that any usage of the first Vreg should be (eventually) rewritten

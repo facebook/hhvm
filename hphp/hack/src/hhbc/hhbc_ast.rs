@@ -156,11 +156,11 @@ pub enum FatalOp {
 #[derive(Clone, Debug)]
 pub enum MemberKey {
     EC(StackIndex),
-    EL(local::Id),
+    EL(local::Type),
     ET(String),
     EI(i64),
     PC(StackIndex),
-    PL(local::Id),
+    PL(local::Type),
     PT(PropId),
     QT(PropId),
 }
@@ -224,7 +224,7 @@ pub enum InstructLitConst {
     /// capacity hint
     NewDArray(isize),
     /// capacity hint
-    NewLikeArrayL(local::Id, isize),
+    NewLikeArrayL(local::Type, isize),
     /// capacity hint
     NewPackedArray(isize),
     NewStructArray(Vec<String>),
@@ -340,13 +340,13 @@ pub enum InstructSpecialFlow {
 #[derive(Clone, Debug)]
 pub enum InstructGet {
     CGetL(local::Type),
-    CGetQuietL(local::Id),
-    CGetL2(local::Id),
-    CUGetL(local::Id),
-    PushL(local::Id),
+    CGetQuietL(local::Type),
+    CGetL2(local::Type),
+    CUGetL(local::Type),
+    PushL(local::Type),
     CGetG,
     CGetS,
-    VGetL(local::Id),
+    VGetL(local::Type),
     ClassGetC,
     ClassGetTS,
 }
@@ -377,14 +377,14 @@ pub enum IstypeOp {
 #[derive(Clone, Debug)]
 pub enum InstructIsset {
     IssetC,
-    IssetL(local::Id),
+    IssetL(local::Type),
     IssetG,
     IssetS,
-    EmptyL(local::Id),
+    EmptyL(local::Type),
     EmptyG,
     EmptyS,
     IsTypeC(IstypeOp),
-    IsTypeL(local::Id, IstypeOp),
+    IsTypeL(local::Type, IstypeOp),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -437,13 +437,13 @@ pub enum InstructMutator {
     PopL(local::Type),
     SetG,
     SetS,
-    SetOpL(local::Id, EqOp),
+    SetOpL(local::Type, EqOp),
     SetOpG(EqOp),
     SetOpS(EqOp),
-    IncDecL(local::Id, IncdecOp),
+    IncDecL(local::Type, IncdecOp),
     IncDecG(IncdecOp),
     IncDecS(IncdecOp),
-    UnsetL(local::Id),
+    UnsetL(local::Type),
     UnsetG,
     CheckProp(PropId),
     InitProp(PropId, InitpropOp),
@@ -478,9 +478,9 @@ pub enum InstructCall {
 #[derive(Clone, Debug)]
 pub enum InstructBase {
     BaseGC(StackIndex, MemberOpMode),
-    BaseGL(local::Id, MemberOpMode),
+    BaseGL(local::Type, MemberOpMode),
     BaseSC(StackIndex, StackIndex, MemberOpMode),
-    BaseL(local::Id, MemberOpMode),
+    BaseL(local::Type, MemberOpMode),
     BaseC(StackIndex, MemberOpMode),
     BaseH,
     Dim(MemberOpMode, MemberKey),
@@ -504,10 +504,10 @@ pub enum IterKind {
 
 #[derive(Clone, Debug)]
 pub enum InstructIterator {
-    IterInit(Iter, label::Label, local::Id),
-    IterInitK(Iter, label::Label, local::Id, local::Id),
-    IterNext(Iter, label::Label, local::Id),
-    IterNextK(Iter, label::Label, local::Id, local::Id),
+    IterInit(Iter, label::Label, local::Type),
+    IterInitK(Iter, label::Label, local::Type, local::Type),
+    IterNext(Iter, label::Label, local::Type),
+    IterNextK(Iter, label::Label, local::Type, local::Type),
     IterFree(Iter),
     IterBreak(label::Label, Vec<(IterKind, Iter)>),
 }
@@ -553,7 +553,7 @@ pub enum InstructMisc {
     This,
     BareThis(BareThisOp),
     CheckThis,
-    InitThisLoc(local::Id),
+    InitThisLoc(local::Type),
     FuncNumArgs,
     ChainFaults,
     OODeclExists(ClassKind),
@@ -573,17 +573,17 @@ pub enum InstructMisc {
     CreateCl(NumParams, ClassNum),
     Idx,
     ArrayIdx,
-    AssertRATL(local::Id, RepoAuthType),
+    AssertRATL(local::Type, RepoAuthType),
     AssertRATStk(StackIndex, RepoAuthType),
     BreakTraceHint,
-    Silence(local::Id, OpSilence),
+    Silence(local::Type, OpSilence),
     GetMemoKeyL(local::Type),
     CGetCUNop,
     UGetCUNop,
-    MemoGet(label::Label, Option<(local::Id, isize)>),
-    MemoGetEager(label::Label, label::Label, Option<(local::Id, isize)>),
-    MemoSet(Option<(local::Id, isize)>),
-    MemoSetEager(Option<(local::Id, isize)>),
+    MemoGet(label::Label, Option<(local::Type, isize)>),
+    MemoGetEager(label::Label, label::Label, Option<(local::Type, isize)>),
+    MemoSet(Option<(local::Type, isize)>),
+    MemoSetEager(Option<(local::Type, isize)>),
     LockObj,
 }
 

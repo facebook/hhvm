@@ -64,25 +64,35 @@ impl Instr {
         Self::make_instr_lit_const(InstructLitConst::TypedValue(TypedValue::VArray(vec![])))
     }
 
-    pub fn make_instr_iterinit(iter_id: Iter, label: Label, value: local::Id) -> Self {
+    pub fn make_instr_iterinit(iter_id: Iter, label: Label, value: local::Type) -> Self {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterInit(
             iter_id, label, value,
         )))
     }
 
-    pub fn make_instr_iterinitk(id: Iter, label: Label, key: local::Id, value: local::Id) -> Self {
+    pub fn make_instr_iterinitk(
+        id: Iter,
+        label: Label,
+        key: local::Type,
+        value: local::Type,
+    ) -> Self {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterInitK(
             id, label, key, value,
         )))
     }
 
-    pub fn make_instr_iternext(id: Iter, label: Label, value: local::Id) -> Self {
+    pub fn make_instr_iternext(id: Iter, label: Label, value: local::Type) -> Self {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterNext(
             id, label, value,
         )))
     }
 
-    pub fn make_instr_iternextk(id: Iter, label: Label, key: local::Id, value: local::Id) -> Self {
+    pub fn make_instr_iternextk(
+        id: Iter,
+        label: Label,
+        key: local::Type,
+        value: local::Type,
+    ) -> Self {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterNextK(
             id, label, key, value,
         )))
@@ -268,7 +278,7 @@ impl Instr {
         Self::make_instr(Instruct::IIsset(InstructIsset::IsTypeC(op)))
     }
 
-    pub fn make_instr_istypel(id: local::Id, op: IstypeOp) -> Self {
+    pub fn make_instr_istypel(id: local::Type, op: IstypeOp) -> Self {
         Self::make_instr(Instruct::IIsset(InstructIsset::IsTypeL(id, op)))
     }
 
@@ -284,11 +294,11 @@ impl Instr {
         Self::make_instr(Instruct::IMutator(InstructMutator::SetL(local)))
     }
 
-    pub fn make_instr_unsetl(local: local::Id) -> Self {
+    pub fn make_instr_unsetl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IMutator(InstructMutator::UnsetL(local)))
     }
 
-    pub fn make_instr_issetl(local: local::Id) -> Self {
+    pub fn make_instr_issetl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IIsset(InstructIsset::IssetL(local)))
     }
 
@@ -308,7 +318,7 @@ impl Instr {
         Self::make_instr(Instruct::IIsset(InstructIsset::EmptyG))
     }
 
-    pub fn make_instr_emptyl(local: local::Id) -> Self {
+    pub fn make_instr_emptyl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IIsset(InstructIsset::EmptyL(local)))
     }
 
@@ -324,19 +334,19 @@ impl Instr {
         Self::make_instr(Instruct::IGet(InstructGet::CGetL(local)))
     }
 
-    pub fn make_instr_cugetl(local: local::Id) -> Self {
+    pub fn make_instr_cugetl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::CUGetL(local)))
     }
 
-    pub fn make_instr_vgetl(local: local::Id) -> Self {
+    pub fn make_instr_vgetl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::VGetL(local)))
     }
 
-    pub fn make_instr_cgetl2(local: local::Id) -> Self {
+    pub fn make_instr_cgetl2(local: local::Type) -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::CGetL2(local)))
     }
 
-    pub fn make_instr_cgetquietl(local: local::Id) -> Self {
+    pub fn make_instr_cgetquietl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::CGetQuietL(local)))
     }
 
@@ -376,7 +386,7 @@ impl Instr {
         Self::make_instr(Instruct::IMutator(InstructMutator::PopL(l)))
     }
 
-    pub fn make_instr_pushl(local: local::Id) -> Self {
+    pub fn make_instr_pushl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::PushL(local)))
     }
 
@@ -474,7 +484,7 @@ impl Instr {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::TypedValue(xs)))
     }
 
-    pub fn make_instr_basel(local: local::Id, mode: MemberOpMode) -> Self {
+    pub fn make_instr_basel(local: local::Type, mode: MemberOpMode) -> Self {
         Self::make_instr(Instruct::IBase(InstructBase::BaseL(local, mode)))
     }
 
@@ -498,25 +508,25 @@ impl Instr {
         Self::make_instr(Instruct::IMisc(InstructMisc::UGetCUNop))
     }
 
-    pub fn make_instr_memoget(label: Label, range: Option<(local::Id, isize)>) -> Self {
+    pub fn make_instr_memoget(label: Label, range: Option<(local::Type, isize)>) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::MemoGet(label, range)))
     }
 
     pub fn make_instr_memoget_eager(
         label1: Label,
         label2: Label,
-        range: Option<(local::Id, isize)>,
+        range: Option<(local::Type, isize)>,
     ) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::MemoGetEager(
             label1, label2, range,
         )))
     }
 
-    pub fn make_instr_memoset(range: Option<(local::Id, isize)>) -> Self {
+    pub fn make_instr_memoset(range: Option<(local::Type, isize)>) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::MemoSet(range)))
     }
 
-    pub fn make_instr_memoset_eager(range: Option<(local::Id, isize)>) -> Self {
+    pub fn make_instr_memoset_eager(range: Option<(local::Type, isize)>) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::MemoSetEager(range)))
     }
 
@@ -773,14 +783,14 @@ impl Instr {
         ))
     }
 
-    pub fn make_instr_silence_start(local: local::Id) -> Self {
+    pub fn make_instr_silence_start(local: local::Type) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::Silence(
             local,
             OpSilence::Start,
         )))
     }
 
-    pub fn make_instr_silence_end(local: local::Id) -> Self {
+    pub fn make_instr_silence_end(local: local::Type) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::Silence(
             local,
             OpSilence::End,

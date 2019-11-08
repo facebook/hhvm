@@ -98,15 +98,11 @@ pub mod scope {
         // Pop the top of the stack into an unnamed local, run emit (), then push the
         // stashed value to the top of the stack
         let tmp = next_local.get_unnamed();
-        let (before, inner, after) = if let local::Type::Unnamed(tmp_id) = tmp {
-            (
-                Instr::make_instr_popl(tmp),
-                emit(),
-                Instr::make_instr_pushl(tmp_id),
-            )
-        } else {
-            panic!("Expects an unnamed local")
-        };
+        let (before, inner, after) = (
+            Instr::make_instr_popl(tmp.clone()),
+            emit(),
+            Instr::make_instr_pushl(tmp.clone()),
+        );
 
         if !next_local.state_has_changed() {
             Instr::gather(vec![before, inner, after])
@@ -124,7 +120,7 @@ pub mod scope {
     fn unset_unnamed_locals(ids: Vec<local::Id>) -> Instr {
         Instr::gather(
             ids.into_iter()
-                .map(|id| Instr::make_instr_unsetl(id))
+                .map(|id| Instr::make_instr_unsetl(local::Type::Unnamed(id)))
                 .collect(),
         )
     }

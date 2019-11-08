@@ -36,7 +36,7 @@ let set_log_level env key log_level =
   { env with log_levels = SMap.add key log_level env.log_levels }
 
 let get_log_level env key =
-  Option.value (SMap.get key env.log_levels) ~default:0
+  Option.value (SMap.find_opt key env.log_levels) ~default:0
 
 let env_log_function = ref (fun _pos _name _old_env _new_env -> ())
 
@@ -62,7 +62,7 @@ let add_subst env x x' =
 (* Apply variable-to-variable substitution from environment. Update environment
    if we ended up iterating (cf path compression in union-find) *)
 let rec get_var env x =
-  let x' = IMap.get x env.subst in
+  let x' = IMap.find_opt x env.subst in
   match x' with
   | None -> (env, x)
   | Some x' ->
@@ -155,26 +155,33 @@ let get_current_tyvars env =
 
 let get_type env x_reason x =
   let (env, x) = get_var env x in
-  let ty = IMap.get x env.tenv in
+  let ty = IMap.find_opt x env.tenv in
   match ty with
   | None -> (env, (x_reason, Tvar x))
   | Some ty -> (env, ty)
 
 let get_tyvar_info_opt env var =
-  let tyvaropt = IMap.get var env.tvenv in
+  let tyvaropt = IMap.find_opt var env.tvenv in
   match tyvaropt with
   | None -> None
-  | Some GlobalTyvar -> IMap.get var env.global_tvenv
+  | Some GlobalTyvar -> IMap.find_opt var env.global_tvenv
   | Some (LocalTyvar tyvar) -> Some tyvar
 
 let get_tyvar_info env var =
   Option.value (get_tyvar_info_opt env var) ~default:empty_tyvar_info
 
 let is_global_tyvar env var =
-  Option.equal equal_tyvar_info (IMap.get var env.tvenv) (Some GlobalTyvar)
+  Option.equal
+    equal_tyvar_info
+    (IMap.find_opt var env.tvenv)
+    (Some GlobalTyvar)
 
 let update_tyvar_info env var tyvar_info =
-  if Option.equal equal_tyvar_info (IMap.get var env.tvenv) (Some GlobalTyvar)
+  if
+    Option.equal
+      equal_tyvar_info
+      (IMap.find_opt var env.tvenv)
+      (Some GlobalTyvar)
   then
     let env = env_with_tvenv env (IMap.add var GlobalTyvar env.tvenv) in
     env_with_global_tvenv env (IMap.add var tyvar_info env.global_tvenv)
@@ -405,7 +412,7 @@ let get_tyvar_type_consts env var =
   tvinfo.type_constants
 
 let get_tyvar_type_const env var (_, tyconstid) =
-  SMap.get tyconstid (get_tyvar_type_consts env var)
+  SMap.find_opt tyconstid (get_tyvar_type_consts env var)
 
 let set_tyvar_type_const env var ((_, tyconstid_) as tyconstid) ty =
   let tvinfo = get_tyvar_info env var in
@@ -584,7 +591,7 @@ let set_condition_type env n ty =
       };
   }
 
-let get_condition_type env n = SMap.get n env.genv.condition_types
+let get_condition_type env n = SMap.find_opt n env.genv.condition_types
 
 (* Some form (strict/shallow/local) of reactivity *)
 let env_local_reactive env =
@@ -860,7 +867,7 @@ let add_anonymous env x =
   let genv = { genv with anons = IMap.add anon_id x genv.anons } in
   ({ env with genv }, anon_id)
 
-let get_anonymous env x = IMap.get x env.genv.anons
+let get_anonymous env x = IMap.find_opt x env.genv.anons
 
 let set_self env self_id self_ty =
   let genv = env.genv in
@@ -922,7 +929,7 @@ let set_local env x new_type =
   | None -> env
   | Some next_cont ->
     let expr_id =
-      match LID.Map.get x next_cont.LEnvC.local_types with
+      match LID.Map.find_opt x next_cont.LEnvC.local_types with
       | None -> Ident.tmp ()
       | Some (_, y) -> y
     in
@@ -968,7 +975,7 @@ let add_mutable_var env local mutability_type =
 
 let local_is_mutable ~include_borrowed env id =
   let module TME = Typing_mutability_env in
-  match LID.Map.get id (get_env_mutability env) with
+  match LID.Map.find_opt id (get_env_mutability env) with
   | Some (_, TME.Mutable) -> true
   | Some (_, TME.Borrowed) -> include_borrowed
   | _ -> false
@@ -1012,7 +1019,7 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
     have type nothing. *)
     Some (Typing_make_type.nothing Reason.Rnone, 0)
   | Some ctx ->
-    let lcl = LID.Map.get x ctx.LEnvC.local_types in
+    let lcl = LID.Map.find_opt x ctx.LEnvC.local_types in
     begin
       match lcl with
       | None ->
@@ -1061,7 +1068,7 @@ let set_local_expr_id env x new_eid =
   | None -> env
   | Some next_cont ->
     begin
-      match LID.Map.get x next_cont.LEnvC.local_types with
+      match LID.Map.find_opt x next_cont.LEnvC.local_types with
       | Some (type_, eid)
         when not (Typing_local_types.equal_expression_id eid new_eid) ->
         let local = (type_, new_eid) in
@@ -1075,7 +1082,7 @@ let get_local_expr_id env x =
   match next_cont_opt env with
   | None -> (* dead code *) None
   | Some next_cont ->
-    let lcl = LID.Map.get x next_cont.LEnvC.local_types in
+    let lcl = LID.Map.find_opt x next_cont.LEnvC.local_types in
     Option.map lcl ~f:(fun (_, x) -> x)
 
 let set_fake_members env fake_members =
@@ -1101,7 +1108,7 @@ let update_lost_info name blame env ty =
     match ty with
     | (_, Tvar v) ->
       let (env, v') = get_var env v in
-      (match IMap.get v' env.tenv with
+      (match IMap.find_opt v' env.tenv with
       | None ->
         if ISet.mem v' seen_tyvars then
           ((env, seen_tyvars), ty)

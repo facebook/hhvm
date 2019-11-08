@@ -31,7 +31,7 @@ let compare_result res1 res2 = compare_pos (get_pos res1) (get_pos res2)
 let map_patches_to_filename acc res =
   let pos = get_pos res in
   let fn = Pos.filename pos in
-  match SMap.get fn acc with
+  match SMap.find_opt fn acc with
   | Some lst -> SMap.add fn (res :: lst) acc
   | None -> SMap.add fn [res] acc
 

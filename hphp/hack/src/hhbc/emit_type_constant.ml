@@ -200,7 +200,7 @@ and hint_to_type_constant_list ~tparams ~targ_map (h : Aast.hint) =
   match snd h with
   | Aast.Happly ((_, name), []) when SMap.mem name targ_map ->
     let id =
-      match SMap.get name targ_map with
+      match SMap.find_opt name targ_map with
       | Some i -> Int64.of_int i
       | None -> failwith "impossible"
     in

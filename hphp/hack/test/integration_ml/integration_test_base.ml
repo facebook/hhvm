@@ -772,7 +772,7 @@ let assert_ide_autocomplete loop_output expected =
 
 let smap_to_str_list (f : 'a -> string) (m : 'a SMap.t) =
   (m |> SMap.ordered_keys |> List.map) ~f:(fun s ->
-      s ^ "< " ^ (m |> SMap.find s |> f) ^ ">")
+      s ^ "< " ^ (SMap.find m s |> f) ^ ">")
 
 let level_stats_to_str (ls : level_stats) =
   let lvls =
@@ -790,7 +790,7 @@ let rec trie_to_string (base : string) (f : 'a -> string) (t : 'a trie) =
   | Node (_, smap_of_tr) ->
     (*TODO: figure out why the first of the pair is duplicated*)
     List.map (SMap.ordered_keys smap_of_tr) ~f:(fun k ->
-        trie_to_string (base ^ "/" ^ k) f (SMap.find k smap_of_tr))
+        trie_to_string (base ^ "/" ^ k) f (SMap.find smap_of_tr k))
     |> list_to_string
 
 let assert_coverage_counts loop_output expected =

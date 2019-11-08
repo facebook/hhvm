@@ -76,7 +76,7 @@ let elaborate_raw_id nsenv kind id =
           | ElaborateConst -> nsenv.ns_const_uses
           | ElaborateRecord -> nsenv.ns_record_def_uses
         in
-        (match SMap.get prefix uses with
+        (match SMap.find_opt prefix uses with
         | Some use -> Utils.add_ns (use ^ String_utils.lstrip id prefix)
         | None -> elaborate_into_current_ns nsenv id)
 

@@ -24,7 +24,7 @@ let get_naming_table_fallback_path genv (naming_table_fn : string option) :
 let extend_fast_sequential fast naming_table additional_files =
   Hh_logger.log "Extending FAST sequentially (in memory)...";
   Relative_path.Set.fold additional_files ~init:fast ~f:(fun x acc ->
-      match Relative_path.Map.get fast x with
+      match Relative_path.Map.find_opt fast x with
       | None ->
         (try
            let info = Naming_table.get_file_info_unsafe naming_table x in

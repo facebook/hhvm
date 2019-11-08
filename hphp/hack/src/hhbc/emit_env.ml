@@ -70,7 +70,7 @@ let get_unique_id_for_method cls mthd =
 
 let get_lambda_rx_of_scope cd md =
   let key = get_unique_id_for_method cd md in
-  SMap.get key !global_state_.global_lambda_rx_of_scope
+  SMap.find_opt key !global_state_.global_lambda_rx_of_scope
   |> Option.value ~default:Rx.NonRx
 
 let set_global_state s = global_state_ := s

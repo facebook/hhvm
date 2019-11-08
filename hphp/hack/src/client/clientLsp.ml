@@ -356,7 +356,7 @@ let read_hhconfig_version () : string Lwt.t =
     let%lwt config = Config_file_lwt.parse_hhconfig file in
     (match config with
     | Ok (_hash, config) ->
-      let version = SMap.get "version" config in
+      let version = SMap.find_opt "version" config in
       Lwt.return (Option.value version ~default:"[NoVersion]")
     | Error message -> Lwt.return (Printf.sprintf "[NoHhconfig:%s]" message))
 
@@ -884,7 +884,7 @@ let hack_errors_to_lsp_diagnostic
 let get_document_contents
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t) (uri : string) :
     string option =
-  match SMap.get uri editor_open_files with
+  match SMap.find_opt uri editor_open_files with
   | Some document -> Some document.TextDocumentItem.text
   | None ->
     let rawpath = String_utils.lstrip uri "file://" in
@@ -1314,7 +1314,7 @@ let do_definition
     params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri
   in
   let labelled_file =
-    match SMap.get uri editor_open_files with
+    match SMap.find_opt uri editor_open_files with
     | Some document ->
       ServerCommandTypes.(
         LabelledFileContent
@@ -2139,7 +2139,7 @@ let patches_to_workspace_edit (patches : ServerRefactorTypes.patch list) :
   let changes = List.map patches ~f:patch_to_workspace_edit_change in
   let changes =
     List.fold changes ~init:SMap.empty ~f:(fun acc (uri, text_edit) ->
-        let current_edits = Option.value ~default:[] (SMap.get uri acc) in
+        let current_edits = Option.value ~default:[] (SMap.find_opt uri acc) in
         let new_edits = text_edit :: current_edits in
         SMap.add uri new_edits acc)
   in
@@ -2279,7 +2279,7 @@ let do_diagnostics
     | Some root -> Path.to_string root
   in
   let file_reports =
-    match SMap.get "" file_reports with
+    match SMap.find_opt "" file_reports with
     | None -> file_reports
     | Some errors ->
       SMap.remove "" file_reports
@@ -2955,7 +2955,7 @@ let track_open_files (state : state) (event : event) : state =
         let uri =
           params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
         in
-        let doc = SMap.get uri prev_opened_files in
+        let doc = SMap.find_opt uri prev_opened_files in
         Lsp.TextDocumentItem.(
           (match doc with
           | Some doc ->
@@ -3275,7 +3275,7 @@ let handle_event
             | _ -> failwith "malformed response id"
           in
           let (on_result, on_error) =
-            match IdMap.get id !callbacks_outstanding with
+            match IdMap.find_opt id !callbacks_outstanding with
             | Some callbacks -> callbacks
             | None ->
               failwith

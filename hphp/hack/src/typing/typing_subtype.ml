@@ -973,7 +973,7 @@ and simplify_subtype_i
                      printable_name)
       in
       let lookup_shape_field_type name r shape_kind fdm =
-        match ShapeMap.get name fdm with
+        match ShapeMap.find_opt name fdm with
         | Some sft -> sft
         | None ->
           let printable_name = TUtils.get_printable_shape_field_name name in

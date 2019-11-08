@@ -144,7 +144,7 @@ let get_array_identifier tv =
   if arrprov_enabled () then
     next_adata_id tv
   else
-    match TVMap.get tv !array_identifier_map with
+    match TVMap.find_opt tv !array_identifier_map with
     | None ->
       let id = next_adata_id tv in
       array_identifier_map := TVMap.add tv id !array_identifier_map;

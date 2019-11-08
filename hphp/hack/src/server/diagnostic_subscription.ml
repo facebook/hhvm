@@ -107,7 +107,7 @@ let update
     RP.Set.fold rechecked ~init:local_errors ~f:(fun source acc ->
         Errors.fold_errors_in global_errors ~source ~init:acc ~f:(fun e acc ->
             let file = error_filename e in
-            match RP.Map.get acc file with
+            match RP.Map.find_opt acc file with
             | None -> acc (* not an IDE-relevant file *)
             | Some sources -> RP.Map.add acc file (RP.Set.add sources source)))
   in
@@ -131,7 +131,7 @@ let update
         ~init:(false, local_errors)
         ~f:(fun source e (is_truncated, acc) ->
           let file = error_filename e in
-          match RP.Map.get acc file with
+          match RP.Map.find_opt acc file with
           | Some sources ->
             (* Add a source to already tracked file *)
             (is_truncated, RP.Map.add acc file (RP.Set.add sources source))

@@ -81,7 +81,7 @@ let update_context
 
 let find_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
     Provider_context.entry option =
-  Relative_path.Map.find_opt path ctx.Provider_context.entries
+  Relative_path.Map.find_opt ctx.Provider_context.entries path
 
 let compute_tast_and_errors
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :

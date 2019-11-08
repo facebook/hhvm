@@ -176,7 +176,7 @@ module ShapeField = struct
 end
 
 module ShapeMap = struct
-  include MyMap.Make (ShapeField)
+  include WrappedMap.Make (ShapeField)
 
   let map_and_rekey m f1 f2 =
     fold (fun k v acc -> add (f1 k) (f2 v) acc) m empty

@@ -356,7 +356,7 @@ let get_dirty_fast
     ~f:
       begin
         fun fn acc ->
-        let dirty_fast = Relative_path.Map.get fast fn in
+        let dirty_fast = Relative_path.Map.find_opt fast fn in
         let dirty_old_fast =
           Naming_table.get_file_info old_naming_table fn
           |> Option.map ~f:FileInfo.simplify
@@ -403,7 +403,7 @@ let get_files_to_recheck
       files_to_redeclare
       ~init:Relative_path.Map.empty
       ~f:(fun path acc ->
-        match Relative_path.Map.get dirty_fast path with
+        match Relative_path.Map.find_opt dirty_fast path with
         | Some info -> Relative_path.Map.add acc path info
         | None -> acc)
   in
@@ -412,7 +412,7 @@ let get_files_to_recheck
       Naming_table.get_file_info old_naming_table path
       |> Option.map ~f:FileInfo.simplify
     in
-    let new_names = Relative_path.Map.get new_fast path in
+    let new_names = Relative_path.Map.find_opt new_fast path in
     let classes_from_names x = x.FileInfo.n_classes in
     let old_classes = Option.map old_names classes_from_names in
     let new_classes = Option.map new_names classes_from_names in

@@ -16,7 +16,7 @@ module InvStringKey = struct
   let compare (x : t) (y : t) = Pervasives.compare y x
 end
 
-module InvSMap = MyMap.Make (InvStringKey)
+module InvSMap = WrappedMap.Make (InvStringKey)
 module InvSSet = Caml.Set.Make (InvStringKey)
 
 type type_kind =

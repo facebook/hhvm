@@ -41,7 +41,7 @@ let current_context : (Relative_path.t * phase) ref =
 
 let allow_errors_in_default_path = ref true
 
-module PhaseMap = Reordered_argument_map (MyMap.Make (struct
+module PhaseMap = Reordered_argument_map (WrappedMap.Make (struct
   type t = phase
 
   let rank = function
@@ -71,7 +71,7 @@ let files_t_merge ~f x y =
    * of first argument (like List.rev_append ) *)
   Relative_path.Map.fold x ~init:y ~f:(fun k x acc ->
       let y =
-        Option.value (Relative_path.Map.get y k) ~default:PhaseMap.empty
+        Option.value (Relative_path.Map.find_opt y k) ~default:PhaseMap.empty
       in
       Relative_path.Map.add
         acc
@@ -105,11 +105,11 @@ let get_last error_map =
   (* If this map has more than one element, we pick an arbitrary file. Because
    * of that, we might not end up with the most recent error and generate a
    * less-specific error message. This should be rare. *)
-  match Relative_path.Map.max_binding error_map with
+  match Relative_path.Map.max_binding_opt error_map with
   | None -> None
   | Some (_, phase_map) ->
     let error_list =
-      PhaseMap.max_binding phase_map |> Option.value_map ~f:snd ~default:[]
+      PhaseMap.max_binding_opt phase_map |> Option.value_map ~f:snd ~default:[]
     in
     (match List.rev error_list with
     | [] -> None
@@ -255,13 +255,13 @@ and get_sorted_error_list (err, _) = sort (files_t_to_list err)
 (* Getters and setter for passed-in map, based on current context *)
 let get_current_file_t file_t_map =
   let current_file = fst !current_context in
-  Relative_path.Map.get file_t_map current_file
+  Relative_path.Map.find_opt file_t_map current_file
   |> Option.value ~default:PhaseMap.empty
 
 let get_current_list file_t_map =
   let current_phase = snd !current_context in
   get_current_file_t file_t_map
-  |> (fun x -> PhaseMap.get x current_phase |> Option.value ~default:[])
+  |> (fun x -> PhaseMap.find_opt x current_phase |> Option.value ~default:[])
 
 let set_current_list file_t_map new_list =
   let (current_file, current_phase) = !current_context in
@@ -781,7 +781,7 @@ and incremental_update :
    * remove it too (i.e do not store empty maps or lists ever). *)
   let remove path phase acc =
     let new_phase_map =
-      match Relative_path.Map.get acc path with
+      match Relative_path.Map.find_opt acc path with
       | None -> None
       | Some phase_map ->
         let new_phase_map = PhaseMap.remove phase_map phase in
@@ -820,7 +820,7 @@ and incremental_update :
   (* For files that were rechecked, but had no errors - remove them from maps *)
   fold res (fun path acc ->
       let has_errors =
-        match Relative_path.Map.get new_ path with
+        match Relative_path.Map.find_opt new_ path with
         | None -> false
         | Some phase_map -> PhaseMap.mem phase_map phase
       in
@@ -879,12 +879,12 @@ let fold_errors ?phase err ~init ~f =
         List.fold_right errors ~init:acc ~f:(f source))
   | Some phase ->
     Relative_path.Map.fold (fst err) ~init ~f:(fun source phases acc ->
-        match PhaseMap.get phases phase with
+        match PhaseMap.find_opt phases phase with
         | None -> acc
         | Some errors -> List.fold_right errors ~init:acc ~f:(f source))
 
 let fold_errors_in ?phase err ~source ~init ~f =
-  Relative_path.Map.get (fst err) source
+  Relative_path.Map.find_opt (fst err) source
   |> Option.value ~default:PhaseMap.empty
   |> PhaseMap.fold ~init ~f:(fun p errors acc ->
          if phase <> None && phase <> Some p then

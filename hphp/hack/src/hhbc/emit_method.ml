@@ -127,7 +127,7 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
       scope
   in
   let closure_namespace =
-    SMap.get class_name (Emit_env.get_closure_namespaces ())
+    SMap.find_opt class_name (Emit_env.get_closure_namespaces ())
   in
   let namespace = Option.value closure_namespace ~default:namespace in
   let method_rx_level =

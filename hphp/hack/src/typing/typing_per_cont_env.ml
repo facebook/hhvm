@@ -54,18 +54,18 @@ let empty_entry =
 
 let initial_locals entry = CMap.add C.Next entry CMap.empty
 
-let get_cont_option = CMap.get
+let get_cont_option = CMap.find_opt
 
 let all_continuations = Typing_continuations.Map.keys
 
 (* Update an entry if it exists *)
 let update_cont_entry name m f =
-  match CMap.get name m with
+  match CMap.find_opt name m with
   | None -> m
   | Some entry -> CMap.add name (f entry) m
 
 let add_to_cont name key value m =
-  match CMap.get name m with
+  match CMap.find_opt name m with
   | None -> m
   | Some cont ->
     let cont =
@@ -74,7 +74,7 @@ let add_to_cont name key value m =
     CMap.add name cont m
 
 let remove_from_cont name key m =
-  match CMap.get name m with
+  match CMap.find_opt name m with
   | None -> m
   | Some c ->
     CMap.add name { c with local_types = LMap.remove key c.local_types } m

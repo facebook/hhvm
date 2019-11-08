@@ -145,7 +145,7 @@ module Env = struct
       let acc = SMap.add name (ref (Todo m.m_body)) acc in
       acc
 
-  let get_method env m = SMap.get m env.methods
+  let get_method env m = SMap.find_opt m env.methods
 end
 
 open Env

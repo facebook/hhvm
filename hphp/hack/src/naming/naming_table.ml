@@ -1067,9 +1067,9 @@ let get_files a =
 
 let get_file_info a key =
   match a with
-  | Unbacked a -> Relative_path.Map.get a key
+  | Unbacked a -> Relative_path.Map.find_opt a key
   | Backed local_changes ->
-    (match Relative_path.Map.get local_changes key with
+    (match Relative_path.Map.find_opt local_changes key with
     | Some (Modified fi) -> Some fi
     | Some Deleted -> None
     | None -> Sqlite.get_file_info key)

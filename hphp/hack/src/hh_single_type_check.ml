@@ -866,7 +866,7 @@ let test_decl_compare filenames popt builtins files_contents files_info =
     Ast_provider.remove_batch files;
 
     let get_classes path =
-      match Relative_path.Map.get files_info path with
+      match Relative_path.Map.find_opt files_info path with
       | None -> SSet.empty
       | Some info -> SSet.of_list @@ List.map info.FileInfo.classes snd
     in
@@ -1123,7 +1123,7 @@ let handle_mode
   | Cst_search ->
     let filename = expect_single_file () in
     let fileinfo =
-      match Relative_path.Map.get files_info filename with
+      match Relative_path.Map.find_opt files_info filename with
       | Some fileinfo -> fileinfo
       | None ->
         failwith
@@ -1149,7 +1149,7 @@ let handle_mode
       end)
   | Dump_symbol_info ->
     iter_over_files (fun filename ->
-        match Relative_path.Map.get files_info filename with
+        match Relative_path.Map.find_opt files_info filename with
         | Some fileinfo ->
           let raw_result =
             SymbolInfoService.helper tcopt [] [(filename, fileinfo)]
@@ -1261,7 +1261,7 @@ let handle_mode
   | Dump_nast ->
     iter_over_files (fun filename ->
         let nasts = create_nasts files_info in
-        let nast = Relative_path.Map.find filename nasts in
+        let nast = Relative_path.Map.find nasts filename in
         Printf.printf "%s\n" (Nast.show_program nast))
   | Dump_tast ->
     let (errors, tasts) =
@@ -1293,7 +1293,7 @@ let handle_mode
           Relative_path.Map.filter files_contents ~f:(fun k _v -> k = filename)
         in
         let (_, tasts) = compute_tasts tcopt files_info files_contents in
-        let tast = Relative_path.Map.find_unsafe tasts filename in
+        let tast = Relative_path.Map.find tasts filename in
         let nast = Tast.to_nast tast in
         Printf.printf "%s\n" (Nast.show_program nast))
   | Find_refs (line, column) ->

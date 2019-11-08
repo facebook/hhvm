@@ -140,11 +140,7 @@ let from_ast ~tparams ~namespace ~generate_defaults ~scope p =
     Option.map
       param_hint
       Emit_type_hint.(
-        hint_to_type_info
-          ~kind:Param
-          ~skipawaitable:false
-          ~nullable
-          ~tparams)
+        hint_to_type_info ~kind:Param ~skipawaitable:false ~nullable ~tparams)
   in
   (* Do the type check for default value type and hint type *)
   let _ =
@@ -182,7 +178,7 @@ let rename_params params =
   in
   let rec rename param_counts param =
     let name = Hhas_param.name param in
-    match SMap.get name param_counts with
+    match SMap.find_opt name param_counts with
     | None -> (SMap.add name 0 param_counts, param)
     | Some count ->
       let param_counts = SMap.add name (count + 1) param_counts in

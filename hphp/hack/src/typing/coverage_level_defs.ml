@@ -14,7 +14,7 @@ module CLKey = struct
 end
 
 module CLMap = struct
-  include MyMap.Make (CLKey)
+  include WrappedMap.Make (CLKey)
 end
 
 type checked_stats = {

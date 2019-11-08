@@ -120,7 +120,7 @@ let rec compute_value_delta (oldval : value) (newval : value) : delta =
     let removed =
       SMap.fold
         (fun i _ s ->
-          match SMap.get i m2 with
+          match SMap.find_opt i m2 with
           | None -> SSet.add i s
           | Some _ -> s)
         m1
@@ -129,7 +129,7 @@ let rec compute_value_delta (oldval : value) (newval : value) : delta =
     let added =
       SMap.fold
         (fun i v m ->
-          match SMap.get i m1 with
+          match SMap.find_opt i m1 with
           | None -> SMap.add i v m
           | _ -> m)
         m2
@@ -138,7 +138,7 @@ let rec compute_value_delta (oldval : value) (newval : value) : delta =
     let changed =
       SMap.fold
         (fun i oldx m ->
-          match SMap.get i m2 with
+          match SMap.find_opt i m2 with
           | None -> m
           | Some newx ->
             (match compute_value_delta oldx newx with
@@ -376,7 +376,7 @@ let per_cont_env_as_value env per_cont_env =
 
 let log_position p ?function_name f =
   let n =
-    match Pos.Map.get p !iterations with
+    match Pos.Map.find_opt p !iterations with
     | None ->
       iterations := Pos.Map.add p 1 !iterations;
       1

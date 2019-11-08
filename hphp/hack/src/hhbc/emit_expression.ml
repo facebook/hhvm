@@ -95,7 +95,7 @@ module InoutLocals = struct
   let has_single_ref r = r.num_uses < 2
 
   let update name i f m =
-    let r = SMap.get name m |> Option.value ~default:not_aliased |> f i in
+    let r = SMap.find_opt name m |> Option.value ~default:not_aliased |> f i in
     SMap.add name r m
 
   let add_write name i m = update (Local_id.get_name name) i add_write m
@@ -179,12 +179,18 @@ module InoutLocals = struct
   (* determines if value of a local 'name' that appear in parameter 'i'
      should be saved to local because it might be overwritten later *)
   let should_save_local_value name i aliases =
-    Option.value_map ~default:false ~f:(in_range i) (SMap.get name aliases)
+    Option.value_map
+      ~default:false
+      ~f:(in_range i)
+      (SMap.find_opt name aliases)
 
   let should_move_local_value local aliases =
     match local with
     | Local.Named name ->
-      Option.value_map ~default:true ~f:has_single_ref (SMap.get name aliases)
+      Option.value_map
+        ~default:true
+        ~f:has_single_ref
+        (SMap.find_opt name aliases)
     | Local.Unnamed _ -> false
 end
 
@@ -3296,7 +3302,7 @@ and emit_reified_arg env ~isas pos (hint : Aast.hint) =
       method! on_hint_ _ h =
         let add_name name =
           let (i, map) = !acc in
-          match SMap.get name current_targs with
+          match SMap.find_opt name current_targs with
           | Some _ when not (SMap.mem name map) ->
             acc := (i + 1, SMap.add name i map)
           | _ -> ()
@@ -3700,8 +3706,7 @@ and emit_special_function
     env pos annot id (args : Tast.expr list) (uargs : Tast.expr list) default =
   let nargs = List.length args + List.length uargs in
   let lower_fq_name =
-    Hhbc_id.Function.from_ast_name id
-    |> Hhbc_id.Function.to_raw_string
+    Hhbc_id.Function.from_ast_name id |> Hhbc_id.Function.to_raw_string
   in
   (* Make sure that we do not treat a special function that is aliased as not
    * aliased *)

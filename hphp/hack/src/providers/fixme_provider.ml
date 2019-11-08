@@ -95,16 +95,16 @@ let local_changes_revert_batch paths =
   DISALLOWED_FIXMES.LocalChanges.revert_batch paths
 
 let fixme_was_applied applied_fixmes fn err_line err_code =
-  match Relative_path.Map.get applied_fixmes fn with
+  match Relative_path.Map.find_opt applied_fixmes fn with
   | None -> false
   | Some r ->
-    (match IMap.get err_line r with
+    (match IMap.find_opt err_line r with
     | None -> false
     | Some code_set -> ISet.mem err_code code_set)
 
 let add_applied_fixme_file m err_code err_line =
   let line_value =
-    match IMap.get err_line m with
+    match IMap.find_opt err_line m with
     | None -> ISet.empty
     | Some x -> x
   in
@@ -112,7 +112,7 @@ let add_applied_fixme_file m err_code err_line =
 
 let add_applied_fixme applied_fixmes err_code fn err_line =
   let file_value =
-    match Relative_path.Map.get applied_fixmes fn with
+    match Relative_path.Map.find_opt applied_fixmes fn with
     | None -> IMap.empty
     | Some x -> x
   in
@@ -173,7 +173,7 @@ let get_fixmes_for_pos pos =
     let (line, _, _) = Pos.info_pos pos in
     get_fixmes filename
     |> Option.value ~default:IMap.empty
-    |> IMap.get line
+    |> IMap.find_opt line
     |> Option.value ~default:IMap.empty
   | Provider_config.Decl_service _ ->
     (* TODO: implement this! *)
@@ -191,14 +191,15 @@ let is_disallowed pos code =
     let (line, _, _) = Pos.info_pos pos in
     DISALLOWED_FIXMES.get filename
     |> Option.value ~default:IMap.empty
-    |> IMap.get line
+    |> IMap.find_opt line
     |> Option.value ~default:IMap.empty
-    |> IMap.get code
+    |> IMap.find_opt code
   | Provider_config.Decl_service _ -> None
 
 let () =
   (Errors.get_hh_fixme_pos :=
-     (fun err_pos err_code -> get_fixmes_for_pos err_pos |> IMap.get err_code));
+     fun err_pos err_code ->
+       get_fixmes_for_pos err_pos |> IMap.find_opt err_code);
   (Errors.is_hh_fixme :=
      fun err_pos err_code ->
        Option.is_some (!Errors.get_hh_fixme_pos err_pos err_code));

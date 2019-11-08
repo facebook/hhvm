@@ -19,7 +19,7 @@ let shapes_key_exists env shape field_name =
   match shape with
   | (r, Tshape (shape_kind, fields)) ->
     begin
-      match ShapeMap.get field_name fields with
+      match ShapeMap.find_opt field_name fields with
       | None ->
         begin
           match shape_kind with

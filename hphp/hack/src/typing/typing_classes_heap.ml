@@ -258,7 +258,7 @@ module Api = struct
   let get_ancestor t ancestor =
     match t with
     | Lazy lc -> LSTable.get lc.ancestors ancestor
-    | Eager c -> SMap.get ancestor c.tc_ancestors
+    | Eager c -> SMap.find_opt ancestor c.tc_ancestors
 
   let has_ancestor t ancestor =
     match t with
@@ -385,37 +385,37 @@ module Api = struct
   let get_const t id =
     match t with
     | Lazy lc -> LSTable.get lc.ih.consts id
-    | Eager c -> SMap.get id c.tc_consts
+    | Eager c -> SMap.find_opt id c.tc_consts
 
   let get_typeconst t id =
     match t with
     | Lazy lc -> LSTable.get lc.ih.typeconsts id
-    | Eager c -> SMap.get id c.tc_typeconsts
+    | Eager c -> SMap.find_opt id c.tc_typeconsts
 
   let get_pu_enum t id =
     match t with
     | Lazy lc -> LSTable.get lc.ih.pu_enums id
-    | Eager c -> SMap.get id c.tc_pu_enums
+    | Eager c -> SMap.find_opt id c.tc_pu_enums
 
   let get_prop t id =
     match t with
     | Lazy lc -> LSTable.get lc.ih.props id
-    | Eager c -> SMap.get id c.tc_props
+    | Eager c -> SMap.find_opt id c.tc_props
 
   let get_sprop t id =
     match t with
     | Lazy lc -> LSTable.get lc.ih.sprops id
-    | Eager c -> SMap.get id c.tc_sprops
+    | Eager c -> SMap.find_opt id c.tc_sprops
 
   let get_method t id =
     match t with
     | Lazy lc -> LSTable.get lc.ih.methods id
-    | Eager c -> SMap.get id c.tc_methods
+    | Eager c -> SMap.find_opt id c.tc_methods
 
   let get_smethod t id =
     match t with
     | Lazy lc -> LSTable.get lc.ih.smethods id
-    | Eager c -> SMap.get id c.tc_smethods
+    | Eager c -> SMap.find_opt id c.tc_smethods
 
   let has_const t id =
     match t with

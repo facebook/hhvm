@@ -93,7 +93,7 @@ module GenerateFFValidatedSyntax = struct
       ""
     else
       let get_type_string t =
-        match SMap.get t schema_map with
+        match SMap.find_opt t schema_map with
         | None -> failwith @@ sprintf "Unknown type: %s" t
         | Some t -> t.type_name
       in
@@ -370,7 +370,7 @@ module GenerateFFSyntaxType = struct
             | Aggregate t -> aggregate_type_name t
             | Token -> "Token.t"
             | Just t ->
-              (match SMap.get t schema_map with
+              (match SMap.find_opt t schema_map with
               | None -> failwith @@ sprintf "Unknown type: %s" t
               | Some t -> t.type_name)
             | ZeroOrMore ((Just _ | Aggregate _ | Token) as c) ->

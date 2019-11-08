@@ -39,7 +39,7 @@ let mod_customization =
     [("aast", (fun () -> Output.add_mod_use "doc_comment::DocComment"))]
 
 let get_mod_customizer name =
-  match SMap.find_opt name mod_customization with
+  match SMap.find_opt mod_customization name with
   | None -> (fun () -> ())
   | Some x -> x
 

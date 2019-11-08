@@ -62,7 +62,7 @@ let helper tcopt acc pos_infos =
   List.fold pos_infos ~init:acc ~f:(fun acc (pos, _) ->
       let (fn, line, char, range_end) = pos in
       let result =
-        Relative_path.Map.get tasts fn
+        Relative_path.Map.find_opt tasts fn
         |> Result.of_option ~error:"No such file or directory"
         |> Result.map ~f:(fun tast ->
                let env_and_ty =

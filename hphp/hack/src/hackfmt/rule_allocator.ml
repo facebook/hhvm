@@ -31,7 +31,7 @@ let make_rule t rule_kind =
 
 (* TODO: figure out how to share this logic with chunk_group.ml *)
 let get_rule_kind t id =
-  let r = IMap.find_unsafe id t.rule_map in
+  let r = IMap.find id t.rule_map in
   r.Rule.kind
 
 let mark_dependencies t lazy_rules active_rule_ids child_id =
@@ -39,9 +39,9 @@ let mark_dependencies t lazy_rules active_rule_ids child_id =
   let rule_ids = lazy_rule_list @ active_rule_ids in
   let new_dep_map =
     List.fold_left rule_ids ~init:t.dependency_map ~f:(fun dep_map id ->
-        let rule = IMap.find_unsafe id t.rule_map in
+        let rule = IMap.find id t.rule_map in
         if Rule.cares_about_children rule.Rule.kind then
-          let dependency_list = IMap.get child_id dep_map in
+          let dependency_list = IMap.find_opt child_id dep_map in
           IMap.add
             child_id
             (match dependency_list with

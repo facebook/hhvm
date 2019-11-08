@@ -31,11 +31,11 @@ let chunks t = t.chunk_group.Chunk_group.chunks
 
 let rbm_has_split_before_chunk c rbm =
   let rule_id = c.Chunk.rule in
-  IMap.get rule_id rbm |> Option.value ~default:false
+  IMap.find_opt rule_id rbm |> Option.value ~default:false
 
 let rbm_has_comma_after_chunk c rbm =
   Option.value_map c.Chunk.comma ~default:false ~f:(fun (rule_id, _) ->
-      IMap.get rule_id rbm |> Option.value ~default:false)
+      IMap.find_opt rule_id rbm |> Option.value ~default:false)
 
 let has_split_before_chunk t ~chunk = rbm_has_split_before_chunk chunk t.rbm
 
@@ -125,7 +125,7 @@ let build_candidate_rules_and_update_rbm rbm lines rule_dependency_map =
       (fun id acc ->
         ISet.union acc
         @@
-        try ISet.of_list @@ IMap.find_unsafe id deps
+        try ISet.of_list @@ IMap.find id deps
         with Caml.Not_found -> ISet.empty)
       base_candidate_rules
       base_candidate_rules
@@ -288,7 +288,8 @@ let is_overlapping s1 s2 =
   let s2_rules = get_rules_on_partially_bound_lines s2 in
   ISet.cardinal s1_rules = ISet.cardinal s2_rules
   && ISet.for_all
-       (fun s1_key -> IMap.get s1_key s1.rbm = IMap.get s1_key s2.rbm)
+       (fun s1_key ->
+         IMap.find_opt s1_key s1.rbm = IMap.find_opt s1_key s2.rbm)
        s1_rules
 
 let compare_rule_sets s1 s2 =
@@ -298,7 +299,7 @@ let compare_rule_sets s1 s2 =
     @ IMap.keys s2.rbm
   in
   let is_split rule_id state =
-    IMap.get rule_id state.rbm |> Option.value ~default:false
+    IMap.find_opt rule_id state.rbm |> Option.value ~default:false
   in
   let rec aux = function
     | [] -> 0

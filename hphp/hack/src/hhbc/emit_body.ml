@@ -120,7 +120,7 @@ and emit_defs env defs =
     | [A.Stmt s]
     (* emit statement as final if it is one before the last and last statement is
        empty markup (which will be no-op) *)
-
+    
     | [A.Stmt s; A.Stmt (_, A.Markup ((_, ""), None))] ->
       Emit_statement.emit_final_statement env s
     | [d] ->
@@ -510,7 +510,8 @@ let emit_body
   in
   begin
     match
-      SMap.get function_state_key @@ Emit_env.get_function_to_labels_map ()
+      SMap.find_opt function_state_key
+      @@ Emit_env.get_function_to_labels_map ()
     with
     | Some s ->
       Jump_targets.set_function_has_goto true;

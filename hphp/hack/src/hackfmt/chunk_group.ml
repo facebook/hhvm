@@ -23,7 +23,7 @@ let get_rules t =
   List.map (IMap.bindings t.rule_map) ~f:fst
 
 let get_rule_kind t id =
-  let r = IMap.find_unsafe id t.rule_map in
+  let r = IMap.find id t.rule_map in
   r.Rule.kind
 
 let get_char_range t =
@@ -38,7 +38,7 @@ let propagate_breakage t initial_bindings =
   |> IMap.keys
   |> List.fold ~init:initial_bindings ~f:(fun acc rule_id ->
          let dependencies =
-           try IMap.find_unsafe rule_id t.rule_dependency_map
+           try IMap.find rule_id t.rule_dependency_map
            with Caml.Not_found -> []
          in
          dependencies
@@ -74,12 +74,12 @@ let are_rule_bindings_valid t rbm =
     IMap.mapi
       (fun rule_id v ->
         let parent_list =
-          try IMap.find_unsafe rule_id t.rule_dependency_map
+          try IMap.find rule_id t.rule_dependency_map
           with Caml.Not_found -> []
         in
         List.for_all parent_list ~f:(fun parent_id ->
-            let parent_rule = IMap.find_unsafe parent_id t.rule_map in
-            let parent_value = IMap.get parent_id rbm in
+            let parent_rule = IMap.find parent_id t.rule_map in
+            let parent_value = IMap.find_opt parent_id rbm in
             is_dependency_satisfied parent_rule.Rule.kind parent_value v))
       rbm
   in

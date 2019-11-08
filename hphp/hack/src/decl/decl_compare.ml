@@ -32,7 +32,7 @@ module ClassDiff = struct
     SMap.fold
       begin
         fun x ty1 diff ->
-        let ty2 = SMap.get x s2 in
+        let ty2 = SMap.find_opt x s2 in
         match ty2 with
         | Some ty2 ->
           if Polymorphic_compare.( = ) ty1 ty2 then
@@ -348,7 +348,7 @@ let get_extend_deps cid_hash to_redecl =
 (*****************************************************************************)
 let get_fun_deps
     ~conservative_redecl old_funs fid (changed, to_redecl, to_recheck) =
-  match (SMap.find_unsafe fid old_funs, Decl_heap.Funs.get fid) with
+  match (SMap.find fid old_funs, Decl_heap.Funs.get fid) with
   (* Note that we must include all dependencies even if we get the None, None
    * case. Due to the fact we can declare types lazily, there may be no
    * existing declaration in the old Decl_heap that corresponds to a function
@@ -394,7 +394,7 @@ let get_funs_deps ~conservative_redecl old_funs funs =
  *)
 (*****************************************************************************)
 let get_type_deps old_types tid (changed, to_recheck) =
-  match (SMap.find_unsafe tid old_types, Decl_heap.Typedefs.get tid) with
+  match (SMap.find tid old_types, Decl_heap.Typedefs.get tid) with
   | (None, _)
   | (_, None) ->
     let dep = Dep.Class tid in
@@ -422,7 +422,7 @@ let get_types_deps old_types types =
 (*****************************************************************************)
 let get_gconst_deps
     ~conservative_redecl old_gconsts cst_id (changed, to_redecl, to_recheck) =
-  let cst1 = SMap.find_unsafe cst_id old_gconsts in
+  let cst1 = SMap.find cst_id old_gconsts in
   let cst2 = Decl_heap.GConsts.get cst_id in
   match (cst1, cst2) with
   | (None, _)
@@ -469,9 +469,7 @@ let get_class_deps
     trace
     cid
     (changed, to_redecl, to_recheck) =
-  match
-    (SMap.find_unsafe cid old_classes, SMap.find_unsafe cid new_classes)
-  with
+  match (SMap.find cid old_classes, SMap.find cid new_classes) with
   | _ when shallow_decl_enabled () ->
     get_all_dependencies
       ~conservative_redecl
@@ -574,9 +572,7 @@ let get_record_def_deps
     ~conservative_redecl old_record_defs rdid (changed, to_redecl, to_recheck)
     =
   let _ = conservative_redecl in
-  match
-    (SMap.find_unsafe rdid old_record_defs, Decl_heap.RecordDefs.get rdid)
-  with
+  match (SMap.find rdid old_record_defs, Decl_heap.RecordDefs.get rdid) with
   | (None, _)
   | (_, None) ->
     let dep = Dep.RecordDef rdid in

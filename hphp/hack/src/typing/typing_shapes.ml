@@ -21,7 +21,7 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
   match ty with
   | (r, Tshape (shape_kind, fields)) ->
     begin
-      match ShapeMap.get field_name fields with
+      match ShapeMap.find_opt field_name fields with
       | None ->
         let (env, element_ty) = Env.fresh_invariant_type_var env expr_pos in
         let sft = { sft_optional = true; sft_ty = element_ty } in
@@ -339,7 +339,7 @@ let to_collection env shape_ty res return_type =
         match ty with
         | Tdynamic ->
           (* This makes it so that to_collection on a dynamic value returns a dynamic
-           * value instead of the standard dict<arraykey, mixed> declared in the HHI, 
+           * value instead of the standard dict<arraykey, mixed> declared in the HHI,
            * which would otherwise subsume any other inferred type due to covariance. *)
           (env, (r, ty))
         | Tvar _

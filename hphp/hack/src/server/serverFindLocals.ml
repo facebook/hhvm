@@ -28,7 +28,7 @@ module LocalPositions = struct
   let empty = IMap.empty
 
   let get ident locals =
-    let current = IMap.get ident locals in
+    let current = IMap.find_opt ident locals in
     Option.value ~default:PosSet.empty current
 
   let add ident pos locals =
@@ -80,7 +80,7 @@ module ScopeChain = struct
     match scopechain with
     | [] -> None
     | h :: t ->
-      let result = SMap.get name h in
+      let result = SMap.find_opt name h in
       if result = None then
         get name t
       else

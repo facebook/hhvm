@@ -100,7 +100,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
       match TUtils.shape_field_name env index_expr with
       | None -> (env, None)
       | Some field ->
-        (match ShapeMap.get field fdm with
+        (match ShapeMap.find_opt field fdm with
         (* If field is in the lower bound but is optional, then no upper bound makes sense
          * unless this is a null-coalesce access *)
         | Some { sft_optional = true; _ } when not lhs_of_null_coalesce ->
@@ -428,7 +428,7 @@ let rec array_get
               (env, err_witness env p)
             | Some field ->
               begin
-                match ShapeMap.get field fdm with
+                match ShapeMap.find_opt field fdm with
                 | None ->
                   Errors.undefined_field
                     ~use_pos:p

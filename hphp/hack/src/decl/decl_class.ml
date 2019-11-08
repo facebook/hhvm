@@ -24,7 +24,7 @@ let wrap_not_found child_class_name elem_name find x =
     raise Decl_heap_elems_bug
 
 let rec apply_substs substs class_context (pos, ty) =
-  match SMap.get class_context substs with
+  match SMap.find_opt class_context substs with
   | None -> (pos, ty)
   | Some { sc_subst = subst; sc_class_context = next_class_context; _ } ->
     apply_substs substs next_class_context (pos, Inst.instantiate subst ty)

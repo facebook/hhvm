@@ -377,7 +377,7 @@ let declare_names env fast_parsed =
    * fast_parsed with them. *)
   let fast_parsed =
     Relative_path.Set.fold env.failed_naming ~init:fast_parsed ~f:(fun k acc ->
-        match Relative_path.Map.get acc k with
+        match Relative_path.Map.find_opt acc k with
         | Some _ -> acc (* the file was re-parsed already *)
         | None ->
           (* The file was not re-parsed, so it's correct to look up its contents

@@ -20,7 +20,7 @@ let create_label_to_offset_map instrseq =
          | _ -> (i + 1, m))
 
 let lookup_def l defs =
-  match IMap.get l defs with
+  match IMap.find_opt l defs with
   | None -> failwith "lookup_def: label missing"
   | Some ix -> ix
 
@@ -59,7 +59,7 @@ let create_label_ref_map defs params body =
   let process_ref ((n, (used, refs)) as acc) l =
     let l = Label.id l in
     let ix = lookup_def l defs in
-    match IMap.get ix refs with
+    match IMap.find_opt ix refs with
     (* This is the first time we've seen a reference to a label for
      * this instruction offset, so generate a new label *)
     | None -> (n + 1, (ISet.add l used, IMap.add ix n refs))
@@ -93,8 +93,8 @@ let relabel_instr instr relabel =
     IGenDelegation (YieldFromDelegate (i, relabel l))
   | ICall (FCall (fl, na, nr, br, Some l)) ->
     ICall (FCall (fl, na, nr, br, Some (relabel l)))
-  | ICall
-      (FCallClsMethod ((fl, na, nr, br, Some l), is_log_as_dynamic_call)) ->
+  | ICall (FCallClsMethod ((fl, na, nr, br, Some l), is_log_as_dynamic_call))
+    ->
     ICall
       (FCallClsMethod
          ((fl, na, nr, br, Some (relabel l)), is_log_as_dynamic_call))
@@ -104,8 +104,8 @@ let relabel_instr instr relabel =
     ICall (FCallClsMethodS ((fl, na, nr, br, Some (relabel l)), c))
   | ICall (FCallClsMethodSD ((fl, na, nr, br, Some l), c, m)) ->
     ICall (FCallClsMethodSD ((fl, na, nr, br, Some (relabel l)), c, m))
-  | ICall (FCallFunc ((fl, na, nr, br, Some l))) ->
-    ICall (FCallFunc ((fl, na, nr, br, Some (relabel l))))
+  | ICall (FCallFunc (fl, na, nr, br, Some l)) ->
+    ICall (FCallFunc (fl, na, nr, br, Some (relabel l)))
   | ICall (FCallFuncD ((fl, na, nr, br, Some l), f)) ->
     ICall (FCallFuncD ((fl, na, nr, br, Some (relabel l)), f))
   | ICall (FCallObjMethod ((fl, na, nr, br, Some l), f)) ->
@@ -134,7 +134,7 @@ let relabel_instr instr relabel =
 let rewrite_params_and_body defs used refs params body =
   let relabel_id l =
     let ix = lookup_def l defs in
-    match IMap.get ix refs with
+    match IMap.find_opt ix refs with
     | None -> failwith "relabel_instrseq: offset not in refs"
     | Some l' -> l'
   in
@@ -143,7 +143,7 @@ let rewrite_params_and_body defs used refs params body =
   (* Rewrite or remove a label definition *)
   let relabel_define_label_id id =
     if ISet.mem id used then
-      IMap.get (lookup_def id defs) refs
+      IMap.find_opt (lookup_def id defs) refs
     else
       None
   in
@@ -202,8 +202,8 @@ let clone_with_fresh_regular_labels block =
       Option.value ~default:l
       @@
       match l with
-      | Label.Regular id -> IMap.get id regular_labels
-      | Label.Named name -> SMap.get name named_labels
+      | Label.Regular id -> IMap.find_opt id regular_labels
+      | Label.Named name -> SMap.find_opt name named_labels
       | _ -> None
     in
     let rewrite_instr instr = relabel_instr instr relabel in

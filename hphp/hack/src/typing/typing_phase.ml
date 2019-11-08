@@ -161,7 +161,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
     (env, (r, ty))
   | (r, Tgeneric x) ->
     begin
-      match SMap.get x ety_env.substs with
+      match SMap.find_opt x ety_env.substs with
       | Some x_ty -> (env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
       | None -> (env, (r, Tabstract (AKgeneric x, None)))
     end
@@ -556,7 +556,7 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
   let check_tparam_constraints env t =
     List.fold_left t.tp_constraints ~init:env ~f:(fun env (ck, ty) ->
         let (env, ty) = localize_cstr_ty ~ety_env env ty t.tp_name in
-        match SMap.get (snd t.tp_name) ety_env.substs with
+        match SMap.find_opt (snd t.tp_name) ety_env.substs with
         | Some x_ty ->
           Typing_log.(
             log_with_level env "generics" 1 (fun () ->

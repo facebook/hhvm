@@ -9,7 +9,7 @@ open Hh_prelude
 open Typing_env_types
 
 module StateErrors = struct
-  module IdentMap = MyMap.Make (Ident)
+  module IdentMap = WrappedMap.Make (Ident)
 
   type t = unit IdentMap.t ref
 

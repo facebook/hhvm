@@ -256,7 +256,7 @@ let get_ast ?(full = false) file_name =
         Provider_context.(
           Provider_context.get_global_context ()
           >>= fun ctx ->
-          Relative_path.Map.get ctx.Provider_context.entries file_name
+          Relative_path.Map.find_opt ctx.Provider_context.entries file_name
           >>| (fun entry -> entry.ast)))
     in
     (match ast_opt with

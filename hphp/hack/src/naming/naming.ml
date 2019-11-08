@@ -372,7 +372,7 @@ end = struct
      1) if the local is not in the local environment then it is added.
      Return value: the given position and deduced/created identifier. *)
   let new_lvar (_, lenv) (p, x) =
-    let lcl = SMap.get x !(lenv.locals) in
+    let lcl = SMap.find_opt x !(lenv.locals) in
     let ident =
       match lcl with
       | Some lcl -> snd lcl
@@ -408,7 +408,7 @@ end = struct
       then
         (p, Local_id.make_unscoped x)
       else
-        let lcl = SMap.get x !(env.locals) in
+        let lcl = SMap.find_opt x !(env.locals) in
         match lcl with
         | Some lcl -> (p, snd lcl)
         | None -> handle_undefined_variable (genv, env) (p, x)
@@ -416,7 +416,7 @@ end = struct
     (p, ident)
 
   let let_local (_genv, env) (p, x) =
-    let lcl = SMap.get x !(env.let_locals) in
+    let lcl = SMap.find_opt x !(env.let_locals) in
     match lcl with
     | Some lcl -> Some (p, snd lcl)
     | None -> None
@@ -480,7 +480,8 @@ end = struct
   (**
    * Returns the position of the goto label declaration, if it exists.
    *)
-  let goto_label (_, { goto_labels; _ }) label = SMap.get label !goto_labels
+  let goto_label (_, { goto_labels; _ }) label =
+    SMap.find_opt label !goto_labels
 
   (**
    * Adds a goto label and the position of its declaration to the known labels.

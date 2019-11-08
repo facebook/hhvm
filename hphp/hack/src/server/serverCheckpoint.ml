@@ -27,14 +27,14 @@ let create_checkpoint x =
   checkpoints := SMap.add !checkpoints ~key:x ~data:Relative_path.Set.empty
 
 let retrieve_checkpoint x =
-  match SMap.get !checkpoints x with
+  match SMap.find_opt !checkpoints x with
   | Some files ->
     Some
       (List.map (Relative_path.Set.elements files) Relative_path.to_absolute)
   | None -> None
 
 let delete_checkpoint x =
-  match SMap.get !checkpoints x with
+  match SMap.find_opt !checkpoints x with
   | Some _ ->
     checkpoints := SMap.remove !checkpoints x;
     true

@@ -589,7 +589,7 @@ and expr_display_id_map = ref IMap.empty
 
 and get_expr_display_id id =
   let map = !expr_display_id_map in
-  match IMap.get id map with
+  match IMap.find_opt id map with
   | Some n -> n
   | None ->
     let n = IMap.cardinal map + 1 in

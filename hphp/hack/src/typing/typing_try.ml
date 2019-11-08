@@ -24,16 +24,16 @@ module LEnvC = Typing_per_cont_env
 (* See the type system specs for try for what's going on here *)
 
 let get_cont_cont cont_cont_map cont1 cont2 =
-  match CMap.get cont1 cont_cont_map with
+  match CMap.find_opt cont1 cont_cont_map with
   | None -> None
-  | Some cont_map -> CMap.get cont2 cont_map
+  | Some cont_map -> CMap.find_opt cont2 cont_map
 
 let make_new_cont locals_map env cont =
   match cont with
   | C.Next -> (env, get_cont_cont locals_map C.Finally C.Next)
   | _ ->
     let ctx_cont_cont = get_cont_cont locals_map cont cont in
-    let ctxs_x_cont = CMap.map (CMap.get cont) locals_map in
+    let ctxs_x_cont = CMap.map (CMap.find_opt cont) locals_map in
     let union env _key = LEnv.union_contextopts env in
     CMap.fold_env env union ctxs_x_cont ctx_cont_cont
 

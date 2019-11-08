@@ -116,7 +116,7 @@ let fail_if_goto_from_try_to_finally try_block finally_block =
 
 let emit_goto ~in_finally_epilogue env label =
   let err_pos = get_pos_for_error env in
-  match SMap.get label @@ JT.get_labels_in_function () with
+  match SMap.find_opt label @@ JT.get_labels_in_function () with
   | None ->
     Emit_fatal.raise_fatal_parse err_pos
     @@ "'goto' to undefined label '"
@@ -368,7 +368,7 @@ let emit_finally_epilogue
         else
           aux (n - 1) instructions (finally_end :: labels) (empty :: bodies)
     in
-    (* lst is already sorted - IMap.elements took care of it *)
+    (* lst is already sorted - IMap.bindings took care of it *)
     (* TODO: add is_sorted assert to make sure this behavior is preserved *)
     let (labels, bodies) = aux max_id lst [] [] in
     let labels = labels in

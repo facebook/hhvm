@@ -226,7 +226,7 @@ and update_duplicates_in_map kvs =
         (* map stores the latest value for a key
          if map has an value for a given key, put value in the result list
          and remove if from the map to ignore similar keys later *)
-        match TV.TVMap.get k uniq_map with
+        match TV.TVMap.find_opt k uniq_map with
         | Some v -> ((k, v) :: result, TV.TVMap.remove k uniq_map)
         | None -> (result, uniq_map))
   in

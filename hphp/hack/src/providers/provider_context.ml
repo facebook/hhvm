@@ -29,7 +29,7 @@ let global_context : t option ref = ref None
 
 let get_file_input ~(ctx : t) ~(path : Relative_path.t) :
     ServerCommandTypes.file_input =
-  match Relative_path.Map.get ctx.entries path with
+  match Relative_path.Map.find_opt ctx.entries path with
   | Some { file_input; _ } -> file_input
   | None -> ServerCommandTypes.FileName (Relative_path.to_absolute path)
 

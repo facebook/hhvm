@@ -154,9 +154,7 @@ let otf_decl_files filel =
   redeclare_files filel
 
 let compute_deps ~conservative_redecl fast filel =
-  let infol =
-    List.map filel (fun fn -> Relative_path.Map.find_unsafe fast fn)
-  in
+  let infol = List.map filel (fun fn -> Relative_path.Map.find fast fn) in
   let names =
     List.fold_left infol ~f:FileInfo.merge_names ~init:FileInfo.empty_names
   in

@@ -114,7 +114,7 @@ let helper h tcopt acc pos_infos =
       let (fn, line, char) = pos in
       let s = h.get_state fn in
       let result =
-        Relative_path.Map.get tasts fn
+        Relative_path.Map.find_opt tasts fn
         |> Result.of_option ~error:"No such file or directory"
         |> Result.map ~f:(fun tast ->
                (find_in_tree h.walker line char)#go tast

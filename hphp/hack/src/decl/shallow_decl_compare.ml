@@ -16,8 +16,8 @@ let diff_class_in_changed_file
     (old_classes : shallow_class option SMap.t)
     (new_classes : shallow_class option SMap.t)
     (class_name : string) : ClassDiff.t =
-  let old_class_opt = SMap.find_unsafe old_classes class_name in
-  let new_class_opt = SMap.find_unsafe new_classes class_name in
+  let old_class_opt = SMap.find old_classes class_name in
+  let new_class_opt = SMap.find new_classes class_name in
   match (old_class_opt, new_class_opt) with
   | (Some old_class, Some new_class) ->
     Shallow_class_diff.diff_class old_class new_class

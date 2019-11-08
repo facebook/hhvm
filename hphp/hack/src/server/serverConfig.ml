@@ -112,7 +112,7 @@ let process_experimental sl =
   | features -> List.fold_left features ~f:SSet.add ~init:SSet.empty
 
 let config_experimental_tc_features config =
-  match SMap.get config "enable_experimental_tc_features" with
+  match SMap.find_opt config "enable_experimental_tc_features" with
   | None -> SSet.empty
   | Some s ->
     let sl = Str.split config_list_regexp s in
@@ -129,7 +129,7 @@ let process_migration_flags sl =
     List.fold_left flags ~f:SSet.add ~init:SSet.empty
 
 let config_tc_migration_flags config =
-  SMap.get config "enable_tc_migration_flags"
+  SMap.find_opt config "enable_tc_migration_flags"
   |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
   |> List.map ~f:String.lowercase
   |> process_migration_flags
@@ -145,7 +145,7 @@ let convert_paths str =
     l
 
 let process_ignored_paths config =
-  SMap.get config "ignored_paths"
+  SMap.find_opt config "ignored_paths"
   |> Option.value_map ~f:convert_paths ~default:[]
 
 let maybe_relative_path fn =
@@ -159,16 +159,16 @@ let maybe_relative_path fn =
     end
 
 let process_extra_paths config =
-  match SMap.get config "extra_paths" with
+  match SMap.find_opt config "extra_paths" with
   | Some s -> Str.split config_list_regexp s |> List.map ~f:maybe_relative_path
   | _ -> []
 
 let process_coroutine_whitelist_paths config =
-  SMap.get config "coroutine_whitelist_paths"
+  SMap.find_opt config "coroutine_whitelist_paths"
   |> Option.value_map ~f:convert_paths ~default:[]
 
 let process_untrusted_mode config =
-  match SMap.get config "untrusted_mode" with
+  match SMap.find_opt config "untrusted_mode" with
   | Some s ->
     if bool_of_string s then
       let blacklist =
@@ -222,12 +222,12 @@ let convert_auto_namespace_to_map map =
 
 let prepare_auto_namespace_map config =
   Option.value_map
-    (SMap.get config "auto_namespace_map")
+    (SMap.find_opt config "auto_namespace_map")
     ~default:[]
     ~f:convert_auto_namespace_to_map
 
 let prepare_iset config config_name initial_values =
-  SMap.get config config_name
+  SMap.find_opt config config_name
   |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
   |> List.map ~f:int_of_string
   |> List.fold_right ~init:initial_values ~f:ISet.add
@@ -255,7 +255,7 @@ let load config_filename options =
       ~overrides:config_overrides
   in
   process_untrusted_mode config;
-  let version = Config_file.parse_version (SMap.get config "version") in
+  let version = Config_file.parse_version (SMap.find_opt config "version") in
   let local_config =
     ServerLocalConfig.load
       ~silent:false
@@ -286,7 +286,7 @@ let load config_filename options =
     bool_ "warn_on_non_opt_build" ~default:false config
   in
   let formatter_override =
-    Option.map (SMap.get config "formatter_override") maybe_relative_path
+    Option.map (SMap.find_opt config "formatter_override") maybe_relative_path
   in
   let global_opts =
     GlobalOptions.make

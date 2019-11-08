@@ -102,7 +102,7 @@ let handle_value_in_return
     | T.Lvar (_, id) ->
       let mut_env = Env.get_env_mutability env in
       begin
-        match LMap.get id mut_env with
+        match LMap.find_opt id mut_env with
         | Some (p, Mutable) ->
           (* it is ok to return mutably owned values *)
           let env = Env.unset_local env id in
@@ -150,7 +150,7 @@ let freeze_or_move_local
   | [(_, T.Lvar (id_pos, id))] ->
     let mut_env = Env.get_env_mutability env in
     begin
-      match LMap.get id mut_env with
+      match LMap.find_opt id mut_env with
       | Some (p, Mutable) ->
         let env = Env.unset_local env id in
         Env.env_with_mut env (LMap.add id (p, Mutable) mut_env)
@@ -232,7 +232,7 @@ let handle_assignment_mutability
     (* var = mutable(v)/move(v) - add the var to the env since it points to a owned mutable value *)
     | (T.Lvar (p, id), Some e) when is_move_or_mutable_call e ->
       begin
-        match LMap.get id mut_env with
+        match LMap.find_opt id mut_env with
         | Some ((_, (Immutable | Borrowed | MaybeMutable)) as mut) ->
           (* error when assigning owned mutable to another mutability flavor *)
           Errors.invalid_mutability_flavor p (to_string mut) "mutable"
@@ -242,7 +242,7 @@ let handle_assignment_mutability
     (* Reassigning mutables is not allowed; error *)
     | (_, Some (T.Lvar (p, id2)))
       when Option.value_map
-             (LMap.get id2 mut_env)
+             (LMap.find_opt id2 mut_env)
              ~default:false
              ~f:(fun (_, m) -> not (equal_mut_type m Immutable)) ->
       ( Env.error_if_reactive_context env
@@ -257,7 +257,7 @@ let handle_assignment_mutability
  *)
     | (T.Lvar (p, id), _) ->
       begin
-        match LMap.get id mut_env with
+        match LMap.find_opt id mut_env with
         (* ok if local is immutable*)
         | Some (_, Immutable) -> mut_env
         (* error assigning immutable value to local known to be mutable *)

@@ -82,39 +82,39 @@ module Getters = struct
 
   let string_opt key ?(prefix = None) config =
     let key = make_key key ~prefix in
-    SMap.get key config
+    SMap.find_opt key config
 
   let string_ key ?(prefix = None) ~default config =
     let key = make_key key ~prefix in
-    Option.value (SMap.get key config) ~default
+    Option.value (SMap.find_opt key config) ~default
 
   let int_ key ?(prefix = None) ~default config =
     let key = make_key key ~prefix in
-    Option.value_map (SMap.get key config) ~default ~f:int_of_string
+    Option.value_map (SMap.find_opt key config) ~default ~f:int_of_string
 
   let int_opt key ?(prefix = None) config =
     let key = make_key key ~prefix in
-    Option.map (SMap.get key config) ~f:int_of_string
+    Option.map (SMap.find_opt key config) ~f:int_of_string
 
   let float_ key ?(prefix = None) ~default config =
     let key = make_key key ~prefix in
-    Option.value_map (SMap.get key config) ~default ~f:float_of_string
+    Option.value_map (SMap.find_opt key config) ~default ~f:float_of_string
 
   let float_opt key ?(prefix = None) config =
     let key = make_key key ~prefix in
-    Option.map (SMap.get key config) ~f:float_of_string
+    Option.map (SMap.find_opt key config) ~f:float_of_string
 
   let bool_ key ?(prefix = None) ~default config =
     let key = make_key key ~prefix in
-    Option.value_map (SMap.get key config) ~default ~f:bool_of_string
+    Option.value_map (SMap.find_opt key config) ~default ~f:bool_of_string
 
   let bool_opt key ?(prefix = None) config =
     let key = make_key key ~prefix in
-    Option.map (SMap.get key config) ~f:bool_of_string
+    Option.map (SMap.find_opt key config) ~f:bool_of_string
 
   let string_list ~delim key ?(prefix = None) ~default config =
     let key = make_key key ~prefix in
-    Option.value_map (SMap.get key config) ~default ~f:(Str.split delim)
+    Option.value_map (SMap.find_opt key config) ~default ~f:(Str.split delim)
 
   (*
     Version aware toggling for boolean parameters take in either:

@@ -3511,7 +3511,7 @@ and expr_
         let fdme =
           List.map
             ~f:(fun (k, v) ->
-              match ShapeMap.get k expected_fdm with
+              match ShapeMap.find_opt k expected_fdm with
               | None -> (k, (v, None))
               | Some sft -> (k, (v, Some (ExpectedTy.make pos ur sft.sft_ty))))
             fdm

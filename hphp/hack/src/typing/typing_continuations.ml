@@ -37,9 +37,9 @@ end
 include Continuations
 
 module Map = struct
-  let show _ = "<MyMap.Make(Continuations)>"
+  let show _ = "<WrappedMap.Make(Continuations)>"
 
-  let pp _ _ = Printf.printf "%s\n" "<MyMap.Make(Continuations)>"
+  let pp _ _ = Printf.printf "%s\n" "<WrappedMap.Make(Continuations)>"
 
-  include MyMap.Make (Continuations)
+  include WrappedMap.Make (Continuations)
 end

@@ -46,7 +46,7 @@ let convert_facts ~(path : Relative_path.t) ~(facts : Facts.facts) : si_capture
   let class_keys = InvSMap.keys facts.types in
   let classes_mapped =
     List.map class_keys ~f:(fun key ->
-        let info_opt = InvSMap.get key facts.types in
+        let info_opt = InvSMap.find_opt key facts.types in
         let (kind, is_abstract, is_final) = get_details_from_info info_opt in
         {
           (* We need to strip away the preceding backslash for hack classes

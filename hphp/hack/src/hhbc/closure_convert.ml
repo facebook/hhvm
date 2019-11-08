@@ -206,7 +206,7 @@ let should_capture_var env var =
 
 let get_let_var st x =
   let let_vars = st.let_vars in
-  SMap.get x let_vars
+  SMap.find_opt x let_vars
 
 let next_let_var_id st x =
   match get_let_var st x with
@@ -722,7 +722,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
            [Tast_annotate.with_pos p (String mangle_name)],
            [] )
   in
-  if SMap.has_key mangle_name st.named_hoisted_functions then
+  if SMap.mem mangle_name st.named_hoisted_functions then
     (st, fun_handle)
   else
     (* Build a new meth_caller function *)

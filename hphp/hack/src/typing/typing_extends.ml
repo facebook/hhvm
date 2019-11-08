@@ -775,7 +775,7 @@ let check_consts env parent_class class_ psubst subst =
   in
   Sequence.iter pconsts (fun (const_name, parent_const) ->
       if String.( <> ) const_name SN.Members.mClass then
-        match SMap.get const_name consts with
+        match SMap.find_opt const_name consts with
         | Some const ->
           (* skip checks for typeconst derived class constants *)
           (match Cls.get_typeconst class_ const_name with

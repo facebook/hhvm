@@ -38,7 +38,7 @@ type t =
 
 and prov_tag = Pos.t option
 
-module TVMap : MyMap.S with type key = t = MyMap.Make (struct
+module TVMap : WrappedMap.S with type key = t = WrappedMap.Make (struct
   type key = t
 
   type t = key

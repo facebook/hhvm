@@ -126,7 +126,7 @@ let check_escaping_mutable env (pos, x) =
   let is_mutable =
     (Local_id.equal x this && Option.is_some (Env.function_is_mutable env))
     ||
-    match Local_id.Map.get x mut_env with
+    match Local_id.Map.find_opt x mut_env with
     | Some (_, TME.Immutable)
     | None ->
       false
@@ -200,7 +200,7 @@ let expr_is_maybe_mutable (env : Env.env) (e : expr) : bool =
   | (_, Lvar (_, id)) ->
     let mut_env = Env.get_env_mutability env in
     begin
-      match LMap.get id mut_env with
+      match LMap.find_opt id mut_env with
       | Some (_, TME.MaybeMutable) -> true
       | _ -> false
     end
@@ -534,7 +534,7 @@ let check =
               | (_, Lvar (p, id)) ->
                 let mut_env = Env.get_env_mutability env in
                 begin
-                  match LMap.get id mut_env with
+                  match LMap.find_opt id mut_env with
                   | Some (_, TME.Immutable)
                   | None ->
                     ()

@@ -92,7 +92,7 @@ let check_extend_kind parent_pos parent_kind child_pos child_kind =
       (Ast_defs.Cabstract | Ast_defs.Cnormal) )
   | (Ast_defs.Cabstract, Ast_defs.Cenum)
   (* enums extend BuiltinEnum under the hood *)
-
+  
   | (Ast_defs.Ctrait, Ast_defs.Ctrait)
   | (Ast_defs.Cinterface, Ast_defs.Cinterface) ->
     ()
@@ -614,7 +614,11 @@ and class_decl c =
     ();
   let enum = c.sc_enum_type in
   let consts =
-    Decl_enum.rewrite_class c.sc_name enum (fun x -> SMap.get x impl) consts
+    Decl_enum.rewrite_class
+      c.sc_name
+      enum
+      (fun x -> SMap.find_opt x impl)
+      consts
   in
   let has_own_cstr = has_concrete_cstr && Option.is_some c.sc_constructor in
   let deferred_members =
@@ -896,7 +900,7 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
     let c_name = snd c.sc_name in
     let ts = typeconst_structure c stc in
     let consts = SMap.add name ts consts in
-    let ptc_opt = SMap.get name typeconsts in
+    let ptc_opt = SMap.find_opt name typeconsts in
     let enforceable =
       (* Without the positions, this is a simple OR, but this way allows us to
        * report the position of the <<__Enforceable>> attribute to the user *)
@@ -931,7 +935,7 @@ and method_check_override c m acc =
   let (pos, id) = m.sm_name in
   let (_, class_id) = c.sc_name in
   let override = m.sm_override in
-  match SMap.get id acc with
+  match SMap.find_opt id acc with
   | Some _ -> false (* overriding final methods is handled in typing *)
   | None when override && Ast_defs.(equal_class_kind c.sc_kind Ctrait) -> true
   | None when override ->
@@ -942,7 +946,7 @@ and method_check_override c m acc =
 and method_redecl_acc c acc m =
   let (pos, id) = m.smr_name in
   let vis =
-    match (SMap.get id acc, m.smr_visibility) with
+    match (SMap.find_opt id acc, m.smr_visibility) with
     | (Some { elt_visibility = Vprotected _ as parent_vis; _ }, Protected) ->
       parent_vis
     | _ -> visibility (snd c.sc_name) m.smr_visibility
@@ -1003,7 +1007,7 @@ and method_decl_acc ~is_static c (acc, condition_types) m =
     | _ -> condition_types
   in
   let vis =
-    match (SMap.get id acc, m.sm_visibility) with
+    match (SMap.find_opt id acc, m.sm_visibility) with
     | (Some { elt_visibility = Vprotected _ as parent_vis; _ }, Protected) ->
       parent_vis
     | _ -> visibility (snd c.sc_name) m.sm_visibility

@@ -141,7 +141,7 @@ let test () =
         (Some
            {
              empty with
-             hash = SMap.get "foo.php" hashes;
+             hash = SMap.find_opt "foo.php" hashes;
              classes =
                [(File (Class, Relative_path.from_root "foo.php"), "\\Foo")];
            })
@@ -153,7 +153,7 @@ let test () =
         (Some
            {
              empty with
-             hash = SMap.get "bar.php" hashes;
+             hash = SMap.find_opt "bar.php" hashes;
              funs = [(File (Fun, Relative_path.from_root "bar.php"), "\\bar")];
            })
         (Naming_table.get_file_info
@@ -164,7 +164,7 @@ let test () =
         (Some
            {
              empty with
-             hash = SMap.get "baz.php" hashes;
+             hash = SMap.find_opt "baz.php" hashes;
              consts =
                [
                  (File (Const, Relative_path.from_root "baz.php"), "\\BAZCONST");
@@ -178,7 +178,7 @@ let test () =
         (Some
            {
              empty with
-             hash = SMap.get "qux.php" hashes;
+             hash = SMap.find_opt "qux.php" hashes;
              funs = [(Full (make_full_pos "qux.php" (2, 12) (2, 15)), "\\qux")];
            })
         (Naming_table.get_file_info

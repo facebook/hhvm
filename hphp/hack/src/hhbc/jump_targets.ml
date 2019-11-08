@@ -118,7 +118,8 @@ type id_key =
   | IdReturn
   | IdLabel of Label.t
 
-module LabelIdMap : MyMap.S with type key = id_key = MyMap.Make (struct
+module LabelIdMap : WrappedMap.S with type key = id_key =
+WrappedMap.Make (struct
   type t = id_key
 
   let compare = Pervasives.compare
@@ -186,7 +187,7 @@ end)
 let label_to_id = ref LabelIdMap.empty
 
 let new_id k =
-  match LabelIdMap.get k !label_to_id with
+  match LabelIdMap.find_opt k !label_to_id with
   | Some id -> id
   | None ->
     let rec aux n =

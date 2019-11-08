@@ -9,7 +9,7 @@
 
 module InvStringKey : Map.OrderedType with type t = string
 
-module InvSMap : MyMap.S with type key = InvStringKey.t
+module InvSMap : WrappedMap.S with type key = InvStringKey.t
 
 module InvSSet : Caml.Set.S with type elt = InvStringKey.t
 

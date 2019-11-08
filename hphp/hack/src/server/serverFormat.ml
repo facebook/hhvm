@@ -144,7 +144,7 @@ let go_ide
           | Position position -> position.Ide_api_types.filename
         in
         let uri = path_to_lsp_uri ~default_path:"" filename in
-        let lsp_doc = SMap.get uri editor_open_files in
+        let lsp_doc = SMap.find_opt uri editor_open_files in
         let content =
           Option.value_map ~default:"" ~f:(fun item -> item.text) lsp_doc
         in

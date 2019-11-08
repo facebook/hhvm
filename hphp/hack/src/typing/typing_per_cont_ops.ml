@@ -58,7 +58,7 @@ let union_opts union_types env ctxopt1 ctxopt2 =
 (* Union a list of continuations *)
 let union_conts env union_types local_types cont_list =
   let union_two env locals cont =
-    union_opts union_types env locals (CMap.get cont local_types)
+    union_opts union_types env locals (CMap.find_opt cont local_types)
   in
   List.fold_left_env env cont_list ~f:union_two ~init:None
 

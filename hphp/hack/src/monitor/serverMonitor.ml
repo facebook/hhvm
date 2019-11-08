@@ -207,7 +207,9 @@ struct
         ~silent:true
         (Relative_path.to_absolute filename)
     in
-    let new_version = Config_file.parse_version (SMap.get "version" config) in
+    let new_version =
+      Config_file.parse_version (SMap.find_opt "version" config)
+    in
     0 = Config_file.compare_versions env.current_version new_version
 
   (* Actually starts a new server. *)

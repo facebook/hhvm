@@ -327,8 +327,7 @@ let instr_fcallclsmethodsd fcall_args scref method_name =
 
 let instr_fcallctor fcall_args = instr (ICall (FCallCtor fcall_args))
 
-let instr_fcallfunc fcall_args =
-  instr (ICall (FCallFunc (fcall_args)))
+let instr_fcallfunc fcall_args = instr (ICall (FCallFunc fcall_args))
 
 let instr_fcallfuncd fcall_args id =
   instr (ICall (FCallFuncD (fcall_args, id)))
@@ -549,7 +548,7 @@ let instr_seq_to_list t =
   go [] [t] |> compact_src_locs []
 
 let get_or_put_label name_label_map name =
-  match SMap.get name name_label_map with
+  match SMap.find_opt name name_label_map with
   | Some label -> (label, name_label_map)
   | None ->
     let label = Label.next_regular () in

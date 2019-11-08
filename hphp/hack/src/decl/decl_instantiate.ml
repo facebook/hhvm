@@ -28,7 +28,7 @@ let rec instantiate subst ((r, ty) : decl_ty) =
   else
     match ty with
     | Tgeneric x ->
-      (match SMap.get x subst with
+      (match SMap.find_opt x subst with
       | Some x_ty -> (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty)
       | None -> (r, Tgeneric x))
     | _ ->

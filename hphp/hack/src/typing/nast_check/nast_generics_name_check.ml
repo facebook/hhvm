@@ -26,7 +26,7 @@ let error_if_contains_duplicates tparams =
       tparams
       ~init:SMap.empty
       ~f:(fun seen_tparams { Aast.tp_name = (pos, name); _ } ->
-        match SMap.get name seen_tparams with
+        match SMap.find_opt name seen_tparams with
         | None -> SMap.add name pos seen_tparams
         | Some seen_pos ->
           Errors.shadowed_type_param pos seen_pos name;

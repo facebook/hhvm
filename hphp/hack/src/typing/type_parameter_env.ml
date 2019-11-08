@@ -42,7 +42,7 @@ let empty = { tparams = SMap.empty; consistent = true }
 
 let mem name tpenv = SMap.mem name tpenv.tparams
 
-let get name tpenv = SMap.get name tpenv.tparams
+let get name tpenv = SMap.find_opt name tpenv.tparams
 
 let add name tpinfo tpenv =
   { tpenv with tparams = SMap.add name tpinfo tpenv.tparams }

@@ -222,7 +222,7 @@ let flip reason = function
 (*****************************************************************************)
 
 let get_tparam_variance env name =
-  match SMap.get name env with
+  match SMap.find_opt name env with
   | None -> Vboth
   | Some x -> x
 
@@ -668,7 +668,7 @@ and get_typarams root env (ty : decl_ty) =
   match snd ty with
   | Tgeneric id ->
     (* If it's in the environment then it's not a generic method parameter *)
-    if Option.is_some (SMap.get id env) then
+    if Option.is_some (SMap.find_opt id env) then
       empty
     else
       single id (fst ty)

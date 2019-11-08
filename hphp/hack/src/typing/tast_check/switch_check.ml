@@ -25,7 +25,7 @@ let get_constant tc (seen, has_default) = function
         (strip_ns cls);
       (seen, has_default)
     ) else (
-      match SMap.get const seen with
+      match SMap.find_opt const seen with
       | None -> (SMap.add const pos seen, has_default)
       | Some old_pos ->
         Errors.enum_switch_redundant const old_pos pos;

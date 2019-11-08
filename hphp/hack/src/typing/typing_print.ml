@@ -89,7 +89,7 @@ module Full = struct
         (Env.get_shape_field_name k1)
         (Env.get_shape_field_name k2)
     in
-    let fields = List.sort ~compare (Nast.ShapeMap.elements fdm) in
+    let fields = List.sort ~compare (Nast.ShapeMap.bindings fdm) in
     List.map fields f_field
 
   let rec fun_type ~ty to_doc st env ft =
@@ -957,7 +957,7 @@ module Json = struct
           @@ kind "shape"
           @ is_array false
           @ [("fields_known", JSON_Bool fields_known)]
-          @ fields (Nast.ShapeMap.elements fl)
+          @ fields (Nast.ShapeMap.bindings fl)
         | Tunion [] -> obj @@ kind "nothing"
         | Tunion [ty] -> from_type env ty
         | Tunion tyl -> obj @@ kind "union" @ args tyl

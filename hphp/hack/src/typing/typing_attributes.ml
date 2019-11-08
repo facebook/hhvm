@@ -19,7 +19,7 @@ let check_implements
     { Aast.ua_name = (attr_pos, attr_name); ua_params = params }
     env =
   let expr_kind =
-    match SMap.get attr_interface SN.AttributeKinds.plain_english_map with
+    match SMap.find_opt attr_interface SN.AttributeKinds.plain_english_map with
     | Some ek -> ek
     | None -> "this expression"
     (* this case should never execute *)
@@ -27,7 +27,7 @@ let check_implements
   if String_utils.string_starts_with attr_name "__" then
     (* Check against builtins *)
     let () =
-      match SMap.get attr_name SN.UserAttributes.as_map with
+      match SMap.find_opt attr_name SN.UserAttributes.as_map with
       | Some intfs ->
         let check_locations =
           TypecheckerOptions.check_attribute_locations

@@ -14,7 +14,7 @@ module CLKey : sig
 end
 
 module CLMap : sig
-  include module type of MyMap.Make (CLKey)
+  include module type of WrappedMap.Make (CLKey)
 end
 
 type checked_stats = {

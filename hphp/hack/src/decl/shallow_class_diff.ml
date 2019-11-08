@@ -28,7 +28,7 @@ let merge_member_lists
   in
   List.fold l2 ~init:map ~f:(fun map y ->
       let name = get_name y in
-      match SMap.get map name with
+      match SMap.find_opt map name with
       | Some (x, None) -> SMap.add map name (x, Some y)
       | None -> SMap.add map name (None, Some y)
       | Some (_, Some _) -> map)

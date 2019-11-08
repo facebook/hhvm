@@ -1122,7 +1122,7 @@ let group_class_dependencies_by_class dependencies =
       Typing_deps.Dep.(
         match obj with
         | Class cls ->
-          if SMap.has_key cls acc then
+          if SMap.mem cls acc then
             acc
           else
             SMap.add cls [] acc
@@ -1202,7 +1202,7 @@ let get_code strict_declarations partial_declarations =
     let decl_names = SMap.keys declarations in
     let global_namespace = sort_by_namespace decl_names in
     let code_from_namespace_decls name acc =
-      Option.value (SMap.get name declarations) ~default:[] @ acc
+      Option.value (SMap.find_opt name declarations) ~default:[] @ acc
     in
     let toplevel =
       HashSet.fold code_from_namespace_decls global_namespace.decls []

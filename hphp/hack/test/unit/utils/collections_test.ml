@@ -1,4 +1,4 @@
-module IntMap = MyMap.Make (struct
+module IntMap = WrappedMap.Make (struct
   type t = int
 
   let compare x y = x - y
@@ -7,7 +7,7 @@ end)
 let map_of_elements =
   List.fold_left (fun map (k, v) -> IntMap.add k v map) IntMap.empty
 
-let test_myMap_union () =
+let test_WrappedMap_union () =
   let map1 = map_of_elements [(1, 2); (3, 4)] in
   let map2 = map_of_elements [(1, 10); (5, 6)] in
   let () =
@@ -83,6 +83,9 @@ let test_ImmQueue () =
     true
 
 let tests =
-  [("test_myMap_union", test_myMap_union); ("test_ImmQueue", test_ImmQueue)]
+  [
+    ("test_WrappedMap_union", test_WrappedMap_union);
+    ("test_ImmQueue", test_ImmQueue);
+  ]
 
 let () = Unit_test.run_all tests

@@ -45,7 +45,7 @@ let dummify_local_id local_id =
 
 let lookup local_id gamma =
   let local_id = dummify_local_id local_id in
-  let tyopt = Local_id.Map.get local_id gamma in
+  let tyopt = Local_id.Map.find_opt local_id gamma in
   (* Convert from type (local = ty * expression_id) to
    * (Tast.annotation = Pos.t * ty). Ignore the expression id.
    * TODO Avoid this conversion? Do we need the expression ids? *)

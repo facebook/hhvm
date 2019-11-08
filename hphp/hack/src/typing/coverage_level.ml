@@ -66,12 +66,12 @@ let incr_reason_stats r p reason_stats =
     let reason_pos = Reason.to_pos r in
     let string_key = Reason.to_constructor_string r in
     let pos_stats_map =
-      match SMap.get string_key reason_stats with
+      match SMap.find_opt string_key reason_stats with
       | Some x -> x
       | None -> Pos.Map.empty
     in
     let pos_stats =
-      match Pos.Map.get reason_pos pos_stats_map with
+      match Pos.Map.find_opt reason_pos pos_stats_map with
       | Some x -> x
       | None -> empty_pos_stats_entry
     in
@@ -87,7 +87,7 @@ let incr_reason_stats r p reason_stats =
       reason_stats
 
 let incr_counter k (r, p, c) =
-  let v = CLMap.find_unsafe k c in
+  let v = CLMap.find k c in
   CLMap.add
     k
     {

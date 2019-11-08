@@ -15,7 +15,7 @@ open Oxidized_module
 let get_includes modules includes =
   let get_all_exported_types directly_included_mod acc =
     let rec aux mod_name acc =
-      let included_module = SMap.find mod_name modules in
+      let included_module = SMap.find modules mod_name in
       let acc = SSet.fold included_module.includes ~init:acc ~f:aux in
       let ty_uses = List.map included_module.ty_uses snd in
       let decls = List.map included_module.decls fst in

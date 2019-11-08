@@ -259,7 +259,17 @@ let make_context_from_file_input
     let (ctx, entry) = Provider_utils.update_context ~ctx ~path ~file_input in
     (Initialized { initialized_state with ctx }, ctx, entry)
   | Some entry ->
-    if entry.Provider_context.file_input <> file_input then
+    (* Only reparse the file if the contents have actually changed.
+     * If the user simply sends us a file_input variable with "FileName"
+     * we shouldn't count that as a change. *)
+    let any_changes =
+      match file_input with
+      | ServerCommandTypes.FileName _ -> false
+      | ServerCommandTypes.FileContent content ->
+        content
+        <> entry.Provider_context.source_text.Full_fidelity_source_text.text
+    in
+    if any_changes then
       let (ctx, entry) =
         Provider_utils.update_context ~ctx ~path ~file_input
       in

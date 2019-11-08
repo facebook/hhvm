@@ -23,9 +23,9 @@ val go_docblock_at :
   DocblockService.result
 
 (** Returns the docblock from these file contents *)
-val go_docblock_at_contents :
-  filename:string ->
-  contents:string ->
+val go_docblock_ctx :
+  ctx:Provider_context.t ->
+  entry:Provider_context.entry ->
   line:int ->
   column:int ->
   kind:SearchUtils.si_kind ->

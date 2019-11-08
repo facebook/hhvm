@@ -102,16 +102,12 @@ let fallback class_name member_name =
 (* Attempt to clean obvious cruft from a docblock *)
 let clean_comments (raw_comments : string) : string = String.strip raw_comments
 
-(* This is a faster version of "go_comments_for_symbol" because it already knows
-   the position *)
-let go_comments_for_position
+let go_comments_from_source_text
+    ~(source_text : Full_fidelity_source_text.t)
+    ~(filename : string)
     ~(line : int)
     ~(column : int)
-    ~(path : Relative_path.t)
-    ~(filename : string)
-    ~(contents : string)
     ~(kind : SymbolDefinition.kind) : string option =
-  let source_text = Full_fidelity_source_text.make path contents in
   let lp =
     {
       Lexing.pos_fname = filename;
@@ -133,6 +129,18 @@ let go_comments_for_position
     (match Docblock_finder.get_docblock ffps with
     | Some db -> Some (clean_comments db)
     | None -> None)
+
+(* This is a faster version of "go_comments_for_symbol" because it already knows
+   the position *)
+let go_comments_for_position
+    ~(filename : string)
+    ~(contents : string)
+    ~(line : int)
+    ~(column : int)
+    ~(path : Relative_path.t)
+    ~(kind : SymbolDefinition.kind) : string option =
+  let source_text = Full_fidelity_source_text.make path contents in
+  go_comments_from_source_text ~source_text ~filename ~line ~column ~kind
 
 (* Fetch a definition *)
 let go_comments_for_symbol
@@ -258,6 +266,32 @@ let go_docblock_at
   | None -> []
   | Some contents ->
     go_docblock_at_contents ~filename ~contents ~line ~column ~kind
+
+let rec go_docblock_ctx
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~(line : int)
+    ~(column : int)
+    ~(kind : SearchUtils.si_kind) : DocblockService.result =
+  let filename = Relative_path.to_absolute entry.Provider_context.path in
+  let source_text = entry.Provider_context.source_text in
+  let def_kind = symboldefinition_kind_from_si_kind kind in
+  match
+    go_comments_from_source_text
+      ~source_text
+      ~filename
+      ~line
+      ~column
+      ~kind:def_kind
+  with
+  | None ->
+    (* Special case: Classes with an assumed default constructor *)
+    if kind = SearchUtils.SI_Constructor then
+      go_docblock_ctx ~ctx ~entry ~line ~column ~kind:SearchUtils.SI_Class
+    else
+      []
+  | Some "" -> []
+  | Some comments -> [DocblockService.Markdown comments]
 
 (* Locate a symbol and return its docblock, no extra steps *)
 let go_docblock_for_symbol

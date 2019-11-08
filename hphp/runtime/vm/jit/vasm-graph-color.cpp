@@ -366,6 +366,9 @@ std::string show(const State& state) {
         | map([] (std::pair<Vreg, Color> p) {
             return folly::sformat("{}: {}", show(p.first), show(p.second));
           })
+        | orderBy([] (const std::string& p) {
+            return p;
+          })
         | unsplit<std::string>(", ")
       );
     }(),
@@ -385,15 +388,19 @@ std::string show(const State& state) {
     dumpBlockInfo(state.liveIn),
     dumpBlockInfo(state.liveOut),
     [&]{
-      std::string str;
-      for (auto const& kv : state.loopInfo) {
-        str += folly::sformat(
-          "  {:5} -> {}\n",
-          kv.first,
-          show(kv.second)
-        );
-      }
-      return str;
+      using namespace folly::gen;
+      return from(state.loopInfo)
+        | map([] (std::pair<Vlabel, LoopInfo> kv) {
+            return folly::sformat(
+              "  {:5} -> {}\n",
+              kv.first,
+              show(kv.second)
+            );
+          })
+        | orderBy([] (const std::string& p) {
+            return p;
+          })
+        | unsplit<std::string>("");
     }(),
     [&]{
       std::string str;
@@ -9965,6 +9972,10 @@ void lower_ssa(State& state) {
 void allocateRegistersWithGraphColor(Vunit& unit, const Abi& abi) {
   Timer timer(Timer::vasm_reg_alloc, unit.log_entry);
 
+  if (Trace::moduleEnabled(Trace::vasm_graph_color, 2)) {
+    printUnit(0, "before vasm-graph-color", unit);
+  }
+
   splitCriticalEdges(unit);
   assertx(check(unit));
 
@@ -9977,7 +9988,10 @@ void allocateRegistersWithGraphColor(Vunit& unit, const Abi& abi) {
   assign_colors(state);
   lower_ssa(state);
 
-  printUnit(kVasmRegAllocLevel, "after vasm-graph-color", unit);
+  if (Trace::moduleEnabled(Trace::vasm_graph_color, 1) ||
+      Trace::moduleEnabled(Trace::vasm, kVasmRegAllocLevel)) {
+    printUnit(0, "after vasm-graph-color", unit);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

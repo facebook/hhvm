@@ -56,6 +56,7 @@ HPHP::jit::(anonymous namespace)::cachedTypeInfo
 HPHP::jit::(anonymous namespace)::tl_active_prot
 HPHP::jit::(anonymous namespace)::threadCanAcquire
 HPHP::jit::(anonymous namespace)::threadCanAcquireConcurrent
+HPHP::jit::mcgen::(anonymous namespace)::s_bumpers
 HPHP::jit::tl_debuggerCatches
 HPHP::jit::VMProtect::is_protected
 HPHP::rds::s_constantsStorage

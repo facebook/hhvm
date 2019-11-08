@@ -310,6 +310,10 @@ struct BumpRelease {
     if (m_live) tl_levels[m_mod] += m_adjust;
   }
 
+  BumpRelease negate() const {
+    return BumpRelease{ m_mod, -m_adjust, m_live };
+  }
+
   BumpRelease(const BumpRelease&) = delete;
   BumpRelease& operator=(const BumpRelease&) = delete;
 

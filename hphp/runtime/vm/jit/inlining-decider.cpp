@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
@@ -326,6 +327,7 @@ Vcost computeTranslationCostSlow(SrcKey at,
   };
 
   rqtrace::DisableTracing notrace;
+  auto const unbumper = mcgen::unbumpFunctions();
 
   auto const unit = irGenInlineRegion(ctx, region);
   if (!unit) return {0, true};

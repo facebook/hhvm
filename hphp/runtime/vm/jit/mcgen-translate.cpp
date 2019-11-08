@@ -60,6 +60,7 @@ namespace {
 std::thread s_retranslateAllThread;
 std::atomic<bool> s_retranslateAllScheduled{false};
 std::atomic<bool> s_retranslateAllComplete{false};
+static __thread const CompactVector<Trace::BumpRelease>* s_bumpers;
 
 CompactVector<Trace::BumpRelease> bumpTraceFunctions(const Func* func) {
   auto def = [&] {
@@ -105,7 +106,12 @@ CompactVector<Trace::BumpRelease> bumpTraceFunctions(const Func* func) {
 void optimize(tc::FuncMetaInfo& info) {
   auto const func = info.func;
 
+  assertx(!s_bumpers);
+  SCOPE_EXIT { s_bumpers = nullptr; };
   auto const bumpers = bumpTraceFunctions(func);
+  if (bumpers.size()) {
+    s_bumpers = &bumpers;
+  }
 
   // Regenerate the prologues and DV funclets before the actual function body.
   auto const includedBody = regeneratePrologues(func, info);
@@ -115,6 +121,9 @@ void optimize(tc::FuncMetaInfo& info) {
   auto const regions = includedBody ? std::vector<RegionDescPtr>{}
                                     : regionizeFunc(func, transCFGAnnot);
 
+  FTRACE(4, "Translating {} regions for {} (includedBody={})\n",
+         regions.size(), func->fullName(), includedBody);
+
   auto optIndex = 0;
   for (auto region : regions) {
     always_assert(!region->empty());
@@ -123,6 +132,8 @@ void optimize(tc::FuncMetaInfo& info) {
     if (transCFGAnnot.size() > 0) {
       transArgs.annotations.emplace_back("TransCFG", transCFGAnnot);
     }
+    FTRACE(4, "Translating {} with optIndex={}\n",
+           func->fullName(), optIndex);
     transArgs.region = region;
     transArgs.kind = TransKind::Optimize;
     transArgs.optIndex = optIndex++;
@@ -580,6 +591,16 @@ int getActiveWorker() {
     return disp->getActiveWorker();
   }
   return 0;
+}
+
+CompactVector<Trace::BumpRelease> unbumpFunctions() {
+  CompactVector<Trace::BumpRelease> result;
+  if (s_bumpers) {
+    for (auto& bump : *s_bumpers) {
+      result.emplace_back(bump.negate());
+    }
+  }
+  return result;
 }
 
 }}}

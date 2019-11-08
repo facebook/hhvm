@@ -20,6 +20,8 @@
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/types.h"
 
+#include "hphp/util/trace.h"
+
 #include <folly/Optional.h>
 
 namespace HPHP { namespace jit {
@@ -77,6 +79,13 @@ bool retranslateAllComplete();
  * Also returns the average profile count across all profiled blocks.
  */
 std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs();
+
+/*
+ * Undo the effects of bumpTraceFunctions() (so that we don't trace
+ * all the inlined functions we're because we're tracing the function
+ * they're inlined into).
+ */
+CompactVector<Trace::BumpRelease> unbumpFunctions();
 
 }}}
 

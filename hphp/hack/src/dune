@@ -131,7 +131,7 @@
     utils_ocaml_overrides))
 
 (executable
-  (name run_generate_full_fidelity)
+  (name generate_full_fidelity)
   (modules
     run_generate_full_fidelity
     generate_full_fidelity)

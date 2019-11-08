@@ -566,15 +566,11 @@ let handle_message :
       in
       Lwt.return (state, Handle_message_result.Response result)
     (* Document Symbol *)
-    | (Initialized initialized_state, Document_symbol document_identifier) ->
-      let result =
-        match document_identifier.Document_symbol.file_contents with
-        | None -> []
-        | Some file_contents ->
-          FileOutline.outline
-            initialized_state.server_env.ServerEnv.popt
-            file_contents
+    | (Initialized initialized_state, Document_symbol document_location) ->
+      let (state, ctx, entry) =
+        make_context_from_document_location initialized_state document_location
       in
+      let result = FileOutline.outline_ctx ~ctx ~entry in
       Lwt.return (state, Handle_message_result.Response result)
     (* Type Coverage *)
     | (Initialized initialized_state, Type_coverage document_identifier) ->

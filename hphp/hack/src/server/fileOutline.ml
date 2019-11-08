@@ -522,6 +522,14 @@ let outline popt content =
   let result = outline_ast ast in
   add_docblocks result comments
 
+let outline_ctx ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    string SymbolDefinition.t list =
+  let _ = ctx in
+  let ast = entry.Provider_context.ast in
+  let comments = entry.Provider_context.comments in
+  let result = outline_ast ast in
+  add_docblocks result comments
+
 let rec print_def ~short_pos indent def =
   let {
     name;

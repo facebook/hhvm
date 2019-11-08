@@ -1872,13 +1872,16 @@ let do_documentSymbol_local
   DocumentSymbol.(
     TextDocumentIdentifier.(
       let filename = lsp_uri_to_path params.textDocument.uri in
-      let file_contents =
-        get_document_contents editor_open_files params.textDocument.uri
+      let document_location =
+        {
+          ClientIdeMessage.file_path = Path.make filename;
+          file_contents =
+            get_document_contents editor_open_files params.textDocument.uri;
+          line = 0;
+          column = 0;
+        }
       in
-      let request =
-        ClientIdeMessage.Document_symbol
-          { ClientIdeMessage.Document_symbol.file_contents }
-      in
+      let request = ClientIdeMessage.Document_symbol document_location in
       let%lwt results = ClientIdeService.rpc ide_service request in
       match results with
       | Ok outline ->

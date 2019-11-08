@@ -100,7 +100,7 @@ end
 
 (* Handles "textDocument/documentSymbol" LSP messages *)
 module Document_symbol = struct
-  type request = { file_contents: string option }
+  type request = document_location
 
   type result = FileOutline.outline
 end

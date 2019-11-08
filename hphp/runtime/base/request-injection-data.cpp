@@ -588,10 +588,10 @@ void RequestInjectionData::onTimeout(RequestTimer* timer) {
 #if !defined(__APPLE__) && !defined(_MSC_VER)
     m_cpuTimer.m_timerActive.store(false, std::memory_order_relaxed);
 #endif
-  } else if (timer == &m_preTimeoutTimer) {
+  } else if (timer == &m_userTimeoutTimer) {
     triggerTimeout(TimeoutSoft);
 #if !defined(__APPLE__) && !defined(_MSC_VER)
-    m_preTimeoutTimer.m_timerActive.store(false, std::memory_order_relaxed);
+    m_userTimeoutTimer.m_timerActive.store(false, std::memory_order_relaxed);
 #endif
   } else {
     always_assert(false && "Unknown timer fired");
@@ -606,17 +606,17 @@ void RequestInjectionData::setCPUTimeout(int seconds) {
   m_cpuTimer.setTimeout(seconds);
 }
 
-void RequestInjectionData::setPreTimeout(int seconds) {
+void RequestInjectionData::setUserTimeout(int seconds) {
   if (seconds == 0) {
     #if !defined(__APPLE__) && !defined(_MSC_VER)
-      m_preTimeoutTimer.m_timerActive.store(false, std::memory_order_relaxed);
+      m_userTimeoutTimer.m_timerActive.store(false, std::memory_order_relaxed);
     #endif
   }
 
-  m_preTimeoutTimer.setTimeout(seconds);
+  m_userTimeoutTimer.setTimeout(seconds);
 }
 
-void RequestInjectionData::invokePreTimeoutCallback() {
+void RequestInjectionData::invokeUserTimeoutCallback() {
   clearTimeoutFlag(TimeoutSoft);
   if (!g_context->m_timeThresholdCallback.isNull()) {
     VMRegAnchor _;
@@ -659,8 +659,8 @@ int RequestInjectionData::getRemainingCPUTime() const {
   return m_cpuTimer.getRemainingTime();
 }
 
-int RequestInjectionData::getPreTimeoutRemainingTime() const {
-  return m_preTimeoutTimer.getRemainingTime();
+int RequestInjectionData::getUserTimeoutRemainingTime() const {
+  return m_userTimeoutTimer.getRemainingTime();
 }
 
 // Called on fatal error, PSP and hphp_invoke
@@ -669,7 +669,7 @@ void RequestInjectionData::resetTimers(int time_sec, int cputime_sec) {
   resetCPUTimer(cputime_sec);
 
   // Keep the pre-timeout timer the same
-  resetPreTimeoutTimer(0);
+  resetUserTimeoutTimer(0);
 }
 
 /*
@@ -702,15 +702,15 @@ void RequestInjectionData::resetCPUTimer(int seconds /* = 0 */) {
   clearTimeoutFlag(TimeoutCPUTime);
 }
 
-void RequestInjectionData::resetPreTimeoutTimer(int seconds /* = 0 */) {
+void RequestInjectionData::resetUserTimeoutTimer(int seconds /* = 0 */) {
   if (seconds == 0) {
-    seconds = getPreTimeout();
+    seconds = getUserTimeout();
   } else if (seconds < 0) {
-    if (!getPreTimeout()) return;
+    if (!getUserTimeout()) return;
     seconds = -seconds;
-    if (seconds < getPreTimeoutRemainingTime()) return;
+    if (seconds < getUserTimeoutRemainingTime()) return;
   }
-  setPreTimeout(seconds);
+  setUserTimeout(seconds);
   clearTimeoutFlag(TimeoutSoft);
 }
 

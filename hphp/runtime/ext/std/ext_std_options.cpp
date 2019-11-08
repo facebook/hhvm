@@ -981,9 +981,9 @@ static void HHVM_FUNCTION(set_pre_timeout_handler,
   auto& req_data = RID();
   if (callback.isNull() || !callback.isObject()) {
     // We use 0 to signify no callback
-    req_data.setPreTimeout(0);
+    req_data.setUserTimeout(0);
   } else {
-    req_data.setPreTimeout(seconds);
+    req_data.setUserTimeout(seconds);
   }
   g_context->m_timeThresholdCallback = callback;
 }

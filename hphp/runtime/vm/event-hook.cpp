@@ -602,7 +602,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
     }
     // Time Thresholds
     if (flags & TimedOutFlag) {
-      RID().invokePreTimeoutCallback();
+      RID().invokeUserTimeoutCallback();
     }
 
     // Interval timer
@@ -668,7 +668,7 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
   }
   // Time Thresholds
   if (flags & TimedOutFlag) {
-    RID().invokePreTimeoutCallback();
+    RID().invokeUserTimeoutCallback();
   }
 
   if (flags & IntervalTimerFlag) {
@@ -693,7 +693,7 @@ void EventHook::onFunctionResumeAwait(const ActRec* ar) {
   }
   // Time Thresholds
   if (flags & TimedOutFlag) {
-    RID().invokePreTimeoutCallback();
+    RID().invokeUserTimeoutCallback();
   }
 
   if (flags & IntervalTimerFlag) {
@@ -717,7 +717,7 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
   }
   // Time Thresholds
   if (flags & TimedOutFlag) {
-    RID().invokePreTimeoutCallback();
+    RID().invokeUserTimeoutCallback();
   }
 
   if (flags & IntervalTimerFlag) {

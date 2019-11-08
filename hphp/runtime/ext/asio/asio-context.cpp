@@ -80,7 +80,7 @@ namespace {
         IntervalTimer::RunCallbacks(IntervalTimer::IOWaitSample, wait_handle);
       }
       if (flags & TimedOutFlag) {
-        RID().invokePreTimeoutCallback();
+        RID().invokeUserTimeoutCallback();
       }
     }
 

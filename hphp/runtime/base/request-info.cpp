@@ -144,7 +144,7 @@ void RequestInfo::onSessionExit() {
   // been destroyed.
   m_reqInjectionData.setTimeout(0);
   m_reqInjectionData.setCPUTimeout(0);
-  m_reqInjectionData.setPreTimeout(0);
+  m_reqInjectionData.setUserTimeout(0);
 
   m_reqInjectionData.reset();
 
@@ -283,7 +283,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
       // We use this flag at callsites as indication of TimeoutSoft callback
       flags -= TimedOutFlag;
     } else if (p.checkTimeoutKind(TimeoutSoft)) {
-      p.setPreTimeout(0); // Stop wall timer so we won't time out twice.
+      p.setUserTimeout(0); // Stop wall timer so we won't time out twice.
       if (!callbacksOk()) {
         setSurpriseFlag(TimedOutFlag);
         // We use this flag at callsites as indication of TimeoutSoft callback

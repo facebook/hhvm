@@ -96,7 +96,7 @@ static void handleSurpriseCheck() {
     EventHook::DoMemoryThresholdCallback();
   }
   if (flags & TimedOutFlag) {
-    RID().invokePreTimeoutCallback();
+    RID().invokeUserTimeoutCallback();
   }
 }
 

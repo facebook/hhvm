@@ -784,7 +784,7 @@ using BlockState = StateVector<Block, PreBlockInfo>;
 
 struct PreEnv {
   using IncDecKey = std::tuple<Block*,uint32_t,bool>; /* blk, id, at front */
-  using InsertMap = jit::fast_map<IncDecKey, SSATmp*>;
+  using InsertMap = jit::flat_map<IncDecKey, SSATmp*>;
 
   explicit PreEnv(Env& env, RCAnalysis& rca) :
       env(env),

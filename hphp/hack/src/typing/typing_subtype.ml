@@ -140,12 +140,6 @@ end
  *   If assertion is unsatisfiable (e.g. arraykey <: string) then
  *     we record this in the failed field of the result.
  *)
-let ignore_hh_fixmes f =
-  let is_hh_fixme = !Errors.is_hh_fixme in
-  (Errors.is_hh_fixme := (fun _ _ -> false));
-  let result = f () in
-  Errors.is_hh_fixme := is_hh_fixme;
-  result
 
 (** Check that a mutability type is a subtype of another mutability type *)
 let check_mutability
@@ -2637,30 +2631,6 @@ and sub_type_inner
   let env = Env.add_subtype_prop env prop in
   process_simplify_subtype_result prop;
   env
-
-(* BEWARE: hack upon hack here.
- * To implement a predicate that tests whether `ty_sub` is a subtype of
- * `ty_super`, we call sub_type but handle any unification errors and
- * turn them into `false` result. Unfortunately HH_FIXME might end up
- * hiding the "error", and so we need to disable the fixme mechanism
- * before calling sub_type and then re-enable it afterwards.
- *)
-and is_sub_type_LEGACY_DEPRECATED
-    (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) : bool =
-  (* quick short circuit to help perf *)
-  ty_equal ty_sub ty_super
-  || Errors.try_
-       (fun () ->
-         ignore_hh_fixmes (fun () ->
-             ignore
-               (sub_type
-                  ~treat_dynamic_as_bottom:false
-                  env
-                  ty_sub
-                  ty_super
-                  Errors.unify_error);
-             true))
-       (fun _ -> false)
 
 and is_sub_type_alt_i
     ~ignore_generic_params ~no_top_bottom ~treat_dynamic_as_bottom env ty1 ty2

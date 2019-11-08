@@ -22,8 +22,6 @@ end
 
 val cstr_ty_as_tyvar_with_upper_bound : env -> internal_type -> env * locl_ty
 
-val is_sub_type_LEGACY_DEPRECATED : env -> locl_ty -> locl_ty -> bool
-
 (** Non-side-effecting test for subtypes.
     result = true implies ty1 <: ty2
     result = false implies NOT ty1 <: ty2 OR we don't know

@@ -7008,8 +7008,7 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
     let ty_datetimeimmutable = MakeType.datetime_immutable (Reason.Rcomp p) in
     let ty_dynamic = MakeType.dynamic (Reason.Rcomp p) in
     let both_sub ty =
-      SubType.is_sub_type_LEGACY_DEPRECATED env ty1 ty
-      && SubType.is_sub_type_LEGACY_DEPRECATED env ty2 ty
+      SubType.can_sub_type env ty1 ty && SubType.can_sub_type env ty2 ty
     in
     (*
      * Comparison here is allowed when both args are num, both string, or both

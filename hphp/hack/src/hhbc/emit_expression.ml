@@ -3976,7 +3976,9 @@ and emit_call
     async_eager_label =
   let (annot, expr_) = expr in
   (match expr_ with
-  | A.Id (_, s) -> Emit_symbol_refs.add_function s
+  | A.Id (_, s) ->
+    let fname = Hhbc_id.Function.(from_ast_name s |> to_raw_string) in
+    Emit_symbol_refs.add_function fname
   | _ -> ());
   let fcall_args = get_fcall_args args uargs async_eager_label in
   let (_flags, _args, num_ret, _inouts, _eager) = fcall_args in

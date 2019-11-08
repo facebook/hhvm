@@ -283,6 +283,7 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
   if (!isValid) {
     logLowPriPerfWarning(
       "checkTmpsSpanningCalls",
+      100 * kDefaultPerfWarningRate,
       [&](StructuredLogEntry& cols) {
         cols.setStr("live_tmps", failures);
         cols.setStr("hhir_unit", show(unit));

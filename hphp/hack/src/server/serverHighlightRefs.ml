@@ -101,7 +101,7 @@ let go (content, line, char) tcopt =
               (highlight_symbol tcopt ast (line, char) path file_info symbol))
       | _ -> [])
 
-let go_ctx
+let go_quarantined
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
@@ -109,7 +109,7 @@ let go_ctx
     ~(tcopt : TypecheckerOptions.t) : ServerHighlightRefsTypes.result =
   let { Provider_context.path; ast; _ } = entry in
   let symbol_to_highlight =
-    IdentifySymbolService.go_ctx ~ctx ~entry ~line ~column
+    IdentifySymbolService.go_quarantined ~ctx ~entry ~line ~column
   in
   let file_info = Provider_context.get_fileinfo entry in
   let results =

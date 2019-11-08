@@ -387,8 +387,10 @@ let handle_message :
         make_context_from_document_location initialized_state document_location
       in
       let result =
-        Provider_utils.with_context ~ctx ~f:(fun () ->
-            ServerHover.go_ctx
+        Provider_utils.respect_but_quarantine_unsaved_changes
+          ~ctx
+          ~f:(fun () ->
+            ServerHover.go_quarantined
               ~ctx
               ~entry
               ~line:document_location.ClientIdeMessage.line
@@ -446,9 +448,11 @@ let handle_message :
             ~is_manually_invoked
         in
         let matches =
-          Provider_utils.with_context ~ctx:auto332_context ~f:(fun () ->
+          Provider_utils.respect_but_quarantine_unsaved_changes
+            ~ctx:auto332_context
+            ~f:(fun () ->
               let (tast, _errors) =
-                Provider_utils.compute_tast_and_errors
+                Provider_utils.compute_tast_and_errors_quarantined
                   ~ctx:auto332_context
                   ~entry
               in
@@ -496,8 +500,10 @@ let handle_message :
         make_context_from_document_location initialized_state document_location
       in
       let results =
-        Provider_utils.with_context ~ctx ~f:(fun () ->
-            ServerHighlightRefs.go_ctx
+        Provider_utils.respect_but_quarantine_unsaved_changes
+          ~ctx
+          ~f:(fun () ->
+            ServerHighlightRefs.go_quarantined
               ~ctx
               ~entry
               ~line:document_location.line
@@ -511,8 +517,10 @@ let handle_message :
         make_context_from_document_location initialized_state document_location
       in
       let results =
-        Provider_utils.with_context ~ctx ~f:(fun () ->
-            ServerSignatureHelp.go_ctx
+        Provider_utils.respect_but_quarantine_unsaved_changes
+          ~ctx
+          ~f:(fun () ->
+            ServerSignatureHelp.go_quarantined
               ~env:initialized_state.server_env
               ~ctx
               ~entry
@@ -526,8 +534,10 @@ let handle_message :
         make_context_from_document_location initialized_state document_location
       in
       let result =
-        Provider_utils.with_context ~ctx ~f:(fun () ->
-            ServerGoToDefinition.go_ctx
+        Provider_utils.respect_but_quarantine_unsaved_changes
+          ~ctx
+          ~f:(fun () ->
+            ServerGoToDefinition.go_quarantined
               ~ctx
               ~entry
               ~line:document_location.ClientIdeMessage.line
@@ -540,8 +550,10 @@ let handle_message :
         make_context_from_document_location initialized_state document_location
       in
       let result =
-        Provider_utils.with_context ~ctx ~f:(fun () ->
-            ServerTypeDefinition.go_ctx
+        Provider_utils.respect_but_quarantine_unsaved_changes
+          ~ctx
+          ~f:(fun () ->
+            ServerTypeDefinition.go_quarantined
               ~ctx
               ~entry
               ~line:document_location.ClientIdeMessage.line
@@ -569,8 +581,9 @@ let handle_message :
         make_context_from_document_location initialized_state document_location
       in
       let result =
-        Provider_utils.with_context ~ctx ~f:(fun () ->
-            ServerColorFile.go_ctx ~ctx ~entry)
+        Provider_utils.respect_but_quarantine_unsaved_changes
+          ~ctx
+          ~f:(fun () -> ServerColorFile.go_quarantined ~ctx ~entry)
       in
       Lwt.return (state, Handle_message_result.Response result))
 

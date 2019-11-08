@@ -352,12 +352,14 @@ let go ~(tast : Tast.program) ~(line : int) ~(column : int) :
     Relative_path.t SymbolOccurrence.t list =
   all_symbols tast |> List.filter ~f:(is_target line column)
 
-let go_ctx
+let go_quarantined
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) : Relative_path.t SymbolOccurrence.t list =
-  let (tast, _) = Provider_utils.compute_tast_and_errors ~ctx ~entry in
+  let (tast, _) =
+    Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
+  in
   let symbol_list =
     match entry.Provider_context.symbols with
     | None ->

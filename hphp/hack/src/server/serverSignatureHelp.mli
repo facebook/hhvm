@@ -15,7 +15,7 @@ val go :
   column:int ->
   Lsp.SignatureHelp.result
 
-val go_ctx :
+val go_quarantined :
   env:ServerEnv.env ->
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->

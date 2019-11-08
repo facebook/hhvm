@@ -1238,9 +1238,14 @@ let handle_mode
         ~path
         ~file_input
     in
+    (* TODO(ljw): surely this doesn't need quarantine? *)
     let result =
-      Provider_utils.with_context ~ctx ~f:(fun () ->
-          ServerIdentifyFunction.go_ctx_absolute ~ctx ~entry ~line ~column)
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerIdentifyFunction.go_quarantined_absolute
+            ~ctx
+            ~entry
+            ~line
+            ~column)
     in
     begin
       match result with

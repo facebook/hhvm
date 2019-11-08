@@ -19,7 +19,7 @@ val go :
   column:int ->
   Relative_path.t SymbolOccurrence.t list
 
-val go_ctx :
+val go_quarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   line:int ->

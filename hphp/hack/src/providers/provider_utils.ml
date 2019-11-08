@@ -7,7 +7,8 @@
  *)
 open Core_kernel
 
-let with_context ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =
+let respect_but_quarantine_unsaved_changes
+    ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =
   let make_then_revert_local_changes f () =
     Utils.with_context
       ~enter:(fun () ->
@@ -85,34 +86,38 @@ let find_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
     Provider_context.entry option =
   Relative_path.Map.find_opt ctx.Provider_context.entries path
 
-let compute_tast_and_errors
+let compute_tast_and_errors_unquarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     Tast.program * Errors.t =
-  let make_tast () =
-    match (entry.Provider_context.tast, entry.Provider_context.errors) with
-    | (Some tast, Some errors) -> (tast, errors)
-    | _ ->
-      let (nast_errors, nast) =
-        Errors.do_with_context
-          entry.Provider_context.path
-          Errors.Naming
-          (fun () -> Naming.program entry.Provider_context.ast)
-      in
-      let (tast_errors, tast) =
-        Errors.do_with_context
-          entry.Provider_context.path
-          Errors.Typing
-          (fun () -> Typing.nast_to_tast ctx.Provider_context.tcopt nast)
-      in
-      let errors = Errors.merge nast_errors tast_errors in
-      entry.Provider_context.tast <- Some tast;
-      entry.Provider_context.errors <- Some errors;
-      (tast, errors)
-  in
+  match (entry.Provider_context.tast, entry.Provider_context.errors) with
+  | (Some tast, Some errors) -> (tast, errors)
+  | _ ->
+    let (nast_errors, nast) =
+      Errors.do_with_context
+        entry.Provider_context.path
+        Errors.Naming
+        (fun () -> Naming.program entry.Provider_context.ast)
+    in
+    let (tast_errors, tast) =
+      Errors.do_with_context
+        entry.Provider_context.path
+        Errors.Typing
+        (fun () -> Typing.nast_to_tast ctx.Provider_context.tcopt nast)
+    in
+    let errors = Errors.merge nast_errors tast_errors in
+    entry.Provider_context.tast <- Some tast;
+    entry.Provider_context.errors <- Some errors;
+    (tast, errors)
+
+let compute_tast_and_errors_quarantined
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    Tast.program * Errors.t =
+  (* This is the core work that might have to be wrapped in a context *)
+  let f () = compute_tast_and_errors_unquarantined ~ctx ~entry in
   (* If global context is not set, set it and proceed *)
   match Provider_context.get_global_context () with
-  | None -> with_context ~ctx ~f:make_tast
-  | Some _ -> make_tast ()
+  | None -> respect_but_quarantine_unsaved_changes ~ctx ~f
+  | Some _ -> f ()
 
 let compute_cst ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     Full_fidelity_ast.PositionedSyntaxTree.t =

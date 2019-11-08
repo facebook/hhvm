@@ -240,14 +240,16 @@ let go
   let offset = SourceText.position_to_offset source_text (line, column) in
   gather_signature_help env cst nast tast tcopt offset
 
-let go_ctx
+let go_quarantined
     ~(env : ServerEnv.env)
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) : Lsp.SignatureHelp.result =
   let cst = Provider_utils.compute_cst ~ctx ~entry in
-  let (tast, _) = Provider_utils.compute_tast_and_errors ~ctx ~entry in
+  let (tast, _) =
+    Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
+  in
   let offset =
     SourceText.position_to_offset
       entry.Provider_context.source_text

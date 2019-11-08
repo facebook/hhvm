@@ -13,7 +13,7 @@ for the user's convenience. For example, when hovering over a constructor call,
 it may return both the definition for the class being constructed, and the
 `__construct` method of the class. Tooling should use
 [ServerCommandTypes.IDENTIFY_FUNCTION] instead. *)
-val go_ctx :
+val go_quarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   line:int ->

@@ -77,26 +77,29 @@ let go_absolute content line char tcopt =
       ( SymbolOccurrence.to_absolute x,
         Option.map y SymbolDefinition.to_absolute ))
 
-let go_ctx
+let go_quarantined
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) =
-  let symbols = IdentifySymbolService.go_ctx ~ctx ~entry ~line ~column in
+  let symbols =
+    IdentifySymbolService.go_quarantined ~ctx ~entry ~line ~column
+  in
   let symbols = take_best_suggestions (List.sort by_nesting symbols) in
+  (* TODO(ljw): shouldn't the following be quarantined also? *)
   List.map symbols ~f:(fun symbol ->
       let symbol_definition =
         ServerSymbolDefinition.go (Some entry.Provider_context.ast) symbol
       in
       (symbol, symbol_definition))
 
-let go_ctx_absolute
+let go_quarantined_absolute
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) :
     (string SymbolOccurrence.t * string SymbolDefinition.t option) list =
-  go_ctx ~ctx ~entry ~line ~column
+  go_quarantined ~ctx ~entry ~line ~column
   |> List.map ~f:(fun (occurrence, definition) ->
          let occurrence = SymbolOccurrence.to_absolute occurrence in
          let definition =

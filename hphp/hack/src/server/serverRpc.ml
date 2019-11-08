@@ -76,7 +76,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~path:relative_path
         ~file_input:(ServerCommandTypes.FileName path)
     in
-    let result = ServerHover.go_ctx ~ctx ~entry ~line ~column in
+    let result = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
     (env, result)
   | DOCBLOCK_AT (filename, line, column, _, kind) ->
     let r = ServerDocblockAt.go_docblock_at ~filename ~line ~column ~kind in
@@ -374,8 +374,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~path
         ~file_input
     in
-    Provider_utils.with_context ~ctx ~f:(fun () ->
-        (env, ServerGoToDefinition.go_ctx ~ctx ~entry ~line ~column))
+    Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+        (env, ServerGoToDefinition.go_quarantined ~ctx ~entry ~line ~column))
   | BIGCODE filename -> (env, ServerBigCode.go env filename)
   | PAUSE pause ->
     let env =

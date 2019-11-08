@@ -13,9 +13,12 @@ let go tcopt naming_table f_in =
   in
   Coverage_level.get_levels tast check
 
-let go_ctx ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) =
+let go_quarantined
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) =
   try
-    let (tast, _errors) = Provider_utils.compute_tast_and_errors ~ctx ~entry in
+    let (tast, _errors) =
+      Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
+    in
     Coverage_level.get_levels tast entry.Provider_context.path
   with _ ->
     (* The "Fixme Provider" will throw an exception if the file cannot be found.

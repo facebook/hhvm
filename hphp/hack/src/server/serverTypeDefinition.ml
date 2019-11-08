@@ -41,12 +41,14 @@ let go_common (tast : Tast.program) ~(line : int) ~(column : int) :
     List.map (handle_type [] ty) ~f:(fun (pos, s) -> (Pos.to_absolute pos, s))
 
 (* For serverless ide *)
-let go_ctx
+let go_quarantined
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) : ServerCommandTypes.Go_to_type_definition.result =
-  let (tast, _errors) = Provider_utils.compute_tast_and_errors ~ctx ~entry in
+  let (tast, _errors) =
+    Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
+  in
   go_common tast ~line ~column
 
 let go

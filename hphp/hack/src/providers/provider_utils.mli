@@ -15,14 +15,32 @@ val update_context :
   Provider_context.t * Provider_context.entry
 
 (** Load the declarations of [t] into any global-memory storage, then call
-[f], then unload those declarations. *)
-val with_context : ctx:Provider_context.t -> f:(unit -> 'a) -> 'a
+[f], then unload those declarations. Quarantine is REQUIRED in sIDE and
+hh_server scenarios because it embodies local-file-changes and the naming-
+table updates therein, and if you try to typecheck a local files without
+those updates them it will often fail. Quarantine is INAPPROPRIATE in
+mapreduce or other bulk-checking scenarios which operate solely off
+files-on-disk and have no concept of unsaved-file-changes.
+TODO: It's a bit confusing that quarantining is predicated upon ctx, and
+hopefully we'll remove that dependency in future. *)
+val respect_but_quarantine_unsaved_changes :
+  ctx:Provider_context.t -> f:(unit -> 'a) -> 'a
 
-(** Compute TAST and error-list by doing typechecking/type inference for the
-given entry in the given context. Note that you must call this function
-within a [with_context], to ensure that all global state reflects the
-contents of the context. *)
-val compute_tast_and_errors :
+(** Computes TAST and error-list by taking the AST in a context entry,
+and typechecking it, and memoizing the result (caching the results in the
+context entry). CAUTION: this function doesn't use a quarantine, and so
+is inappropriate for IDE scenarios. *)
+val compute_tast_and_errors_unquarantined :
+  ctx:Provider_context.t ->
+  entry:Provider_context.entry ->
+  Tast.program * Errors.t
+
+(** This function computes TAST and error-list. At the moment,
+the suffix "quarantined" means that this function enforces a quarantine
+in case one isn't yet in force. In future, it might mean that we assert
+that a quarantine is already in force. CAUTION: this function is only
+appropriate for IDE scenarios. *)
+val compute_tast_and_errors_quarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   Tast.program * Errors.t

@@ -508,16 +508,16 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_localNames, [](auto s) { return s; })
     (ehtab,
       [&](const EHEnt& prev, EHEnt cur) -> EHEnt {
-        cur.m_handler -= cur.m_past;
-        cur.m_past -= cur.m_base;
-        cur.m_base -= prev.m_base;
+        if (!SerDe::deserializing) {
+          cur.m_handler -= cur.m_past;
+          cur.m_past -= cur.m_base;
+          cur.m_base -= prev.m_base;
+        } else {
+          cur.m_base += prev.m_base;
+          cur.m_past += cur.m_base;
+          cur.m_handler += cur.m_past;
+        }
         return cur;
-      },
-      [&](const EHEnt& prev, EHEnt delta) -> EHEnt {
-        delta.m_base += prev.m_base;
-        delta.m_past += delta.m_base;
-        delta.m_handler += delta.m_past;
-        return delta;
       }
     )
     (userAttributes)

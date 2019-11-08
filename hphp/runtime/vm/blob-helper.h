@@ -266,21 +266,9 @@ struct BlobEncoder {
     encodeContainer(set, "set");
   }
 
-  template<class T>
-  BlobEncoder& operator()(const T& t) {
-    encode(t);
-    return *this;
-  }
-
-  template<class T, class DeltaEncode>
-  BlobEncoder& operator()(T& t, DeltaEncode e) {
-    encode(t, e);
-    return *this;
-  }
-
-  template<class T, class DeltaEncode, class DeltaDecode>
-  BlobEncoder& operator()(T& t, DeltaEncode e, DeltaDecode d) {
-    encode(t, e);
+  template<class T, class... F>
+  BlobEncoder& operator()(const T& t, F... lambdas) {
+    encode(t, lambdas...);
     return *this;
   }
 
@@ -488,21 +476,9 @@ struct BlobDecoder {
     }
   }
 
-  template<class T>
-  BlobDecoder& operator()(T& t) {
-    decode(t);
-    return *this;
-  }
-
-  template<class T, class DeltaDecode>
-  BlobDecoder& operator()(T& t, DeltaDecode d) {
-    decode(t, d);
-    return *this;
-  }
-
-  template<class T, class DeltaEncode, class DeltaDecode>
-  BlobDecoder& operator()(T& t, DeltaEncode e, DeltaDecode d) {
-    decode(t, d);
+  template<class T, class... F>
+  BlobDecoder& operator()(T& t, F... lambdas) {
+    decode(t, lambdas...);
     return *this;
   }
 

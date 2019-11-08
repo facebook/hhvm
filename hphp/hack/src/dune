@@ -130,24 +130,14 @@
     utils_config_file
     utils_ocaml_overrides))
 
-(library
-  (name generate_full_fidelity)
-  (modules generate_full_fidelity)
-  (libraries
-    core_kernel
-    html_entities
-    str
-    parser_schema
-    collections))
-
 (executable
   (name run_generate_full_fidelity)
   (modules
-    run_generate_full_fidelity)
+    run_generate_full_fidelity
+    generate_full_fidelity)
   (ocamlc_flags (:standard -custom))
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
-    generate_full_fidelity
     core_kernel
     html_entities
     str

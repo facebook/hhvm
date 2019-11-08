@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<41faa67df2574a9b48786bb84c8c414f>>
+// @generated SignedSource<<9158bfaab36cbee11080dfee13212d3d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -245,7 +245,6 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     MethodId(Box<(Expr<Ex, Fb, En, Hi>, Pstring)>),
     MethodCaller(Box<(Sid, Pstring)>),
     SmethodId(Box<(Sid, Pstring)>),
-    SpecialFunc(Box<SpecialFunc<Ex, Fb, En, Hi>>),
     Pair(Box<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
     Assert(Box<AssertExpr<Ex, Fb, En, Hi>>),
     Typename(Box<Sid>),
@@ -287,11 +286,6 @@ pub enum Afield<Ex, Fb, En, Hi> {
 pub enum XhpAttribute<Ex, Fb, En, Hi> {
     XhpSimple(Pstring, Expr<Ex, Fb, En, Hi>),
     XhpSpread(Expr<Ex, Fb, En, Hi>),
-}
-
-#[derive(Clone, Debug, OcamlRep)]
-pub enum SpecialFunc<Ex, Fb, En, Hi> {
-    Genva(Vec<Expr<Ex, Fb, En, Hi>>),
 }
 
 pub type IsReference = bool;

@@ -31,13 +31,6 @@ async function foo2(): Awaitable<int> {
   return $x + $y;
 }
 
-// We can't actually run this function because we don't have a genva
-// implementation...
-async function foo2_genva(): Awaitable<int> {
-  list($x, $y) = await genva(genNum(f(1)), genNum(f(2)));
-  return $x + $y;
-}
-
 async function foo3(): Awaitable<array<int, int>> {
   $nus = array();
   $nus[f(0)] = await genNum2(f(1), f(2));

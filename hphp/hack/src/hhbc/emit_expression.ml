@@ -25,11 +25,6 @@ let can_inline_gen_functions () =
 let max_array_elem_on_stack () =
   Hhbc_options.max_array_elem_size_on_the_stack !Hhbc_options.compiler_options
 
-type genva_inline_context =
-  | GI_expression
-  | GI_ignore_result
-  | GI_list_assignment of Tast.expr list
-
 type emit_jmp_result = {
   (* generated instruction sequence *)
   instrs: Instruction_sequence.t;
@@ -1752,7 +1747,6 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
   | A.Method_id (_, _) -> failwith "TODO Unimplemented expression Method"
   | A.Method_caller (_, _) -> failwith "TODO Unimplemented expression Method"
   | A.Smethod_id (_, _) -> failwith "TODO Unimplemented expression Smethod"
-  | A.Special_func _ -> failwith "TODO Unimplemented expression Special"
   | A.Assert _ -> failwith "TODO Unimplemented expression Assert"
 
 and emit_static_collection env ~transform_to_collection pos tv =
@@ -4137,7 +4131,6 @@ and can_use_as_rhs_in_list_assignment (expr : Tast.expr_) =
     | Method_id (_, _)
     | Method_caller (_, _)
     | Smethod_id (_, _)
-    | Special_func _
     | Pair (_, _)
     | Assert _
     | Typename _

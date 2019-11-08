@@ -246,7 +246,6 @@ let rec expr acc (_, e) =
   | Aast.Method_id _
   | Aast.Method_caller _
   | Aast.Smethod_id _
-  | Aast.Special_func _
   | Aast.Pair _
   | Aast.Assert _
   | Aast.Typename _ ->

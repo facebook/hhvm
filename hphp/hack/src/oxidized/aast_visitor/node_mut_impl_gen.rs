@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<64ff959f246d2d21fea6c829d4dc13f9>>
+// @generated SignedSource<<0fe92d8b82e3242c839a6ddd9feee59a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -819,9 +819,6 @@ impl<Context, Ex, Fb, En, Hi> NodeMut<Context, Ex, Fb, En, Hi> for Expr_<Ex, Fb,
                 a.0.accept(c, v);
                 a.1.accept(c, v);
             }
-            Expr_::SpecialFunc(a0) => {
-                a0.accept(c, v);
-            }
             Expr_::Pair(a) => {
                 a.0.accept(c, v);
                 a.1.accept(c, v);
@@ -1536,26 +1533,6 @@ impl<Context, Ex, Fb, En, Hi> NodeMut<Context, Ex, Fb, En, Hi> for ShapeFieldNam
             ShapeFieldName::SFclassConst(a0, a1) => {
                 a0.accept(c, v);
                 a1.accept(c, v);
-            }
-        }
-    }
-}
-impl<Context, Ex, Fb, En, Hi> NodeMut<Context, Ex, Fb, En, Hi> for SpecialFunc<Ex, Fb, En, Hi> {
-    fn accept(
-        &mut self,
-        c: &mut Context,
-        v: &mut dyn VisitorMut<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
-    ) {
-        v.visit_special_func(c, self);
-    }
-    fn recurse(
-        &mut self,
-        c: &mut Context,
-        v: &mut dyn VisitorMut<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
-    ) {
-        match self {
-            SpecialFunc::Genva(a0) => {
-                a0.accept(c, v);
             }
         }
     }

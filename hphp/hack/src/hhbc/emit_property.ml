@@ -43,7 +43,6 @@ let rec expr_requires_deep_init (_, expr_) =
   | T.Typename _
   | T.Assert _
   | T.Pair _
-  | T.Special_func _
   | T.Smethod_id _
   | T.Method_caller _
   | T.Method_id _

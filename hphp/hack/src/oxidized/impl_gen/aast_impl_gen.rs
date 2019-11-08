@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3926e4f8b90105b7213d98ad87d3f0e4>>
+// @generated SignedSource<<3f7bbe1060ee65d902ccb7a0d33fde8a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -346,9 +346,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_smethod_id(p0: Sid, p1: Pstring) -> Self {
         Expr_::SmethodId(Box::new((p0, p1)))
     }
-    pub fn mk_special_func(p0: SpecialFunc<Ex, Fb, En, Hi>) -> Self {
-        Expr_::SpecialFunc(Box::new(p0))
-    }
     pub fn mk_pair(p0: Expr<Ex, Fb, En, Hi>, p1: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::Pair(Box::new((p0, p1)))
     }
@@ -403,11 +400,6 @@ impl<Ex, Fb, En, Hi> XhpAttribute<Ex, Fb, En, Hi> {
     }
     pub fn mk_xhp_spread(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         XhpAttribute::XhpSpread(p0)
-    }
-}
-impl<Ex, Fb, En, Hi> SpecialFunc<Ex, Fb, En, Hi> {
-    pub fn mk_genva(p0: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
-        SpecialFunc::Genva(p0)
     }
 }
 impl<Ex, Fb, En, Hi> FunVariadicity<Ex, Fb, En, Hi> {

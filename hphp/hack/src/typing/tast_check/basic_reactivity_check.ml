@@ -520,8 +520,7 @@ let check =
         let ctx = set_nested_expr ctx in
         ( if not ctx.allow_awaitable then
           match (get_type expr, expr) with
-          | ( (_, Tclass ((_, cls), _, _)),
-              (_, (Call _ | Special_func _ | Pipe _)) )
+          | ((_, Tclass ((_, cls), _, _)), (_, (Call _ | Pipe _)))
             when String.equal cls SN.Classes.cAwaitable ->
             Errors.non_awaited_awaitable_in_rx (get_position expr)
           | _ -> () );
@@ -584,9 +583,6 @@ let check =
         | (_, Pipe (_, l, r)) ->
           self#on_expr (env, ctx) l;
           self#on_expr (env, allow_awaitable ctx) r
-        | (_, Special_func (Genva args)) ->
-          let ctx = allow_awaitable ctx in
-          List.iter args ~f:(self#on_expr (env, ctx))
         | (_, Eif (cond, e1, e2)) ->
           self#on_expr (env, disallow_awaitable ctx) cond;
           let ctx = allow_awaitable ctx in

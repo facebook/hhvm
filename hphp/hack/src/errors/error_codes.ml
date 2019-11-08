@@ -71,7 +71,7 @@ module Naming = struct
     | GenArrayVaRecArityDEPRECATED
     | GenaArityDEPRECATED
     | GenericClassVarDEPRECATED
-    | GenvaArity
+    | GenvaArityDEPRECATED
     | IllegalClass
     | IllegalClassMeth
     | IllegalConstant

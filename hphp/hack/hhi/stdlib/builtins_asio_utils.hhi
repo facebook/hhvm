@@ -144,9 +144,4 @@ function v<Tv>(
   Traversable<Awaitable<Tv>> $awaitables,
 ): Awaitable<Vector<Tv>> {}
 
-function va(
-  /* Awaitable<T1>, Awaitable<T2>, ..., Awaitable<Tn> */...$args
-/* HH_FIXME[4101] Cannot describe return type properly */
-): Awaitable/*<(T1,T2,...,Tn)>*/ {}
-
 } // namespace HH\Asio

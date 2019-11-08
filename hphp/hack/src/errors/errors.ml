@@ -1365,12 +1365,6 @@ let assert_arity pos =
     pos
     "assert expects exactly one argument"
 
-let genva_arity pos =
-  add
-    (Naming.err_code Naming.GenvaArity)
-    pos
-    "genva() expects at least 1 argument"
-
 let unexpected_ty_in_tast pos ~actual_ty ~expected_ty =
   add
     (Typing.err_code Typing.UnexpectedTy)
@@ -4672,7 +4666,7 @@ let non_awaited_awaitable_in_rx pos =
   add
     (Typing.err_code Typing.NonawaitedAwaitableInReactiveContext)
     pos
-    "This value has Awaitable type. Awaitable typed values in reactive code must be either immediately await'ed or passed as arguments to 'genva' function."
+    "This value has Awaitable type. Awaitable typed values in reactive code must be immediately await'ed."
 
 let shapes_key_exists_always_true pos1 name pos2 =
   add_list

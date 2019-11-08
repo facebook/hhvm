@@ -1111,8 +1111,6 @@ let rec convert_expr env st ((p, expr_) as expr) =
       failwith "TODO Unimplemented closure_convert Method_caller"
     | Smethod_id (_, _) ->
       failwith "TODO Unimplemented closure_convert Smethod_id"
-    | Special_func _ ->
-      failwith "TODO Unimplemented closure_convert Special_func"
     | Assert _ -> failwith "TODO Unimplemented closure_convert Assert"
     | Typename id -> (st, (p, Typename id))
     | PU_atom _

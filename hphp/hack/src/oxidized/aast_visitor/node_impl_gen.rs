@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b7b9ecd3c3b23d62b446eb814a2a0e37>>
+// @generated SignedSource<<e83b5739815d09bdf65d5b46adc69482>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -819,9 +819,6 @@ impl<Context, Ex, Fb, En, Hi> Node<Context, Ex, Fb, En, Hi> for Expr_<Ex, Fb, En
                 a.0.accept(c, v);
                 a.1.accept(c, v);
             }
-            Expr_::SpecialFunc(a0) => {
-                a0.accept(c, v);
-            }
             Expr_::Pair(a) => {
                 a.0.accept(c, v);
                 a.1.accept(c, v);
@@ -1536,26 +1533,6 @@ impl<Context, Ex, Fb, En, Hi> Node<Context, Ex, Fb, En, Hi> for ShapeFieldName {
             ShapeFieldName::SFclassConst(a0, a1) => {
                 a0.accept(c, v);
                 a1.accept(c, v);
-            }
-        }
-    }
-}
-impl<Context, Ex, Fb, En, Hi> Node<Context, Ex, Fb, En, Hi> for SpecialFunc<Ex, Fb, En, Hi> {
-    fn accept(
-        &self,
-        c: &mut Context,
-        v: &mut dyn Visitor<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
-    ) {
-        v.visit_special_func(c, self);
-    }
-    fn recurse(
-        &self,
-        c: &mut Context,
-        v: &mut dyn Visitor<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
-    ) {
-        match self {
-            SpecialFunc::Genva(a0) => {
-                a0.accept(c, v);
             }
         }
     }

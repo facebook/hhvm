@@ -58,7 +58,6 @@ pub type Program = aast::Program<Ex, Fb, En, Hi>;
 pub type PuEnum = aast::PuEnum<Ex, Fb, En, Hi>;
 pub type PuMember = aast::PuMember<Ex, Fb, En, Hi>;
 pub type RecordDef = aast::RecordDef<Ex, Fb, En, Hi>;
-pub type SpecialFunc = aast::SpecialFunc<Ex, Fb, En, Hi>;
 pub type Stmt = aast::Stmt<Ex, Fb, En, Hi>;
 pub type Stmt_ = aast::Stmt_<Ex, Fb, En, Hi>;
 pub type Targ = aast::Targ<Hi>;

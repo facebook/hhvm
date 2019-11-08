@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<17bb917549ca02c9fbaed1d2f711b2ce>>
+// @generated SignedSource<<0b5b00e8b608dfa64faa7d6583da2d2b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -95,6 +95,25 @@ pub enum ConsistentKind {
 }
 
 #[derive(Clone, Debug, OcamlRep)]
+pub enum DependentType {
+    DTthis,
+    DTcls(String),
+    DTexpr(ident::Ident),
+}
+
+#[derive(Clone, Debug, OcamlRep)]
+pub struct Tparam<Ty> {
+    pub variance: ast_defs::Variance,
+    pub name: ast_defs::Id,
+    pub constraints: Vec<(ast_defs::ConstraintKind, Ty)>,
+    pub reified: aast::ReifyKind,
+    pub user_attributes: Vec<nast::UserAttribute>,
+}
+
+#[derive(Clone, Debug, OcamlRep)]
+pub struct WhereConstraint<Ty>(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
+
+#[derive(Clone, Debug, OcamlRep)]
 pub struct Ty(pub reason::Reason, pub Box<Ty_>);
 
 pub type DeclTy = Ty;
@@ -134,13 +153,6 @@ pub enum Ty_ {
 }
 
 pub type Nullsafe = Option<pos::Pos>;
-
-#[derive(Clone, Debug, OcamlRep)]
-pub enum DependentType {
-    DTthis,
-    DTcls(String),
-    DTexpr(ident::Ident),
-}
 
 #[derive(Clone, Debug, OcamlRep)]
 pub struct TaccessType(pub DeclTy, pub Vec<nast::Sid>);
@@ -325,9 +337,17 @@ pub struct EnumType {
     pub constraint: Option<DeclTy>,
 }
 
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
+pub enum RecordFieldReq {
+    ValueRequired,
+    HasDefaultValue,
+}
+
 #[derive(Clone, Debug, OcamlRep)]
 pub struct RecordDefType {
     pub name: nast::Sid,
+    pub extends: Option<nast::Sid>,
+    pub fields: Vec<(nast::Sid, RecordFieldReq)>,
     pub abstract_: bool,
     pub pos: pos::Pos,
     pub errors: Option<errors::Errors>,
@@ -343,19 +363,7 @@ pub struct TypedefType {
     pub decl_errors: Option<errors::Errors>,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
-pub struct Tparam<Ty> {
-    pub variance: ast_defs::Variance,
-    pub name: ast_defs::Id,
-    pub constraints: Vec<(ast_defs::ConstraintKind, Ty)>,
-    pub reified: aast::ReifyKind,
-    pub user_attributes: Vec<nast::UserAttribute>,
-}
-
 pub type DeclTparam = Tparam<DeclTy>;
-
-#[derive(Clone, Debug, OcamlRep)]
-pub struct WhereConstraint<Ty>(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
 
 pub type DeclWhereConstraint = WhereConstraint<DeclTy>;
 

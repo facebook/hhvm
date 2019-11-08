@@ -465,7 +465,6 @@ and expr_ env acc p e =
     (* List is always an lvalue *)
     acc
   | Expr_list el -> exprl acc el
-  | Special_func (Genva el) -> exprl acc el
   | New (_, _, el, uel, _) -> exprl acc (el @ uel)
   | Record (_, _, fdl) -> List.fold_left ~f:field ~init:acc fdl
   | Pair (e1, e2) ->

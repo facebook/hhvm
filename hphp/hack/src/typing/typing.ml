@@ -2983,7 +2983,6 @@ and expr_
         (env, te, ty)
     in
     make_result env p (Aast.Suspend te) ty
-  | Special_func func -> special_func env p func
   | New ((pos, c), explicit_targs, el, uel, p1) ->
     let env = might_throw env in
     let (env, tc, tal, tel, tuel, ty, ctor_fty) =
@@ -3999,17 +3998,6 @@ and anon_make tenv p f ft idl is_anon outer =
 (*****************************************************************************)
 (* End of anonymous functions. *)
 (*****************************************************************************)
-and special_func env p func =
-  let (env, tfunc, ty) =
-    match func with
-    | Genva el ->
-      let (env, tel, etyl) = exprs env el in
-      let (env, ty) = Async.genva env p etyl in
-      (env, Aast.Genva tel, ty)
-  in
-  let result_ty = MakeType.awaitable (Reason.Rwitness p) ty in
-  make_result env p (Aast.Special_func tfunc) result_ty
-
 and requires_consistent_construct = function
   | CIstatic -> true
   | CIexpr _ -> true

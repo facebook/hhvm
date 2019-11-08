@@ -195,7 +195,7 @@ let tests : ((string * int * int) * string) list =
       {|
     {"position":{"file":"/f2.php","line":2,"character":10},
     "result":false,"errors":[{"message":[
-    {"descr":"This value has Awaitable type. Awaitable typed values in reactive code must be either immediately await'ed or passed as arguments to 'genva' function.",
+    {"descr":"This value has Awaitable type. Awaitable typed values in reactive code must be immediately await'ed.",
     "path":"/f2.php","line":3,"start":8,"end":16,"code":4248}]}]}
   |}
     );

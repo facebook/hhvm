@@ -102,8 +102,3 @@ let overload_extract_from_awaitable_shape env p fdm =
     end
     env
     fdm
-
-let genva env p tyl =
-  let (env, rtyl) = overload_extract_from_awaitable_list env p tyl in
-  let inner_type = (Reason.Rwitness p, Ttuple rtyl) in
-  (env, inner_type)

@@ -214,7 +214,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   (* meth_caller('Class name', 'method name') *)
   | Method_caller of sid * pstring
   | Smethod_id of sid * pstring
-  | Special_func of ('ex, 'fb, 'en, 'hi) special_func
   | Pair of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
   | Assert of ('ex, 'fb, 'en, 'hi) assert_expr
   | Typename of sid
@@ -250,9 +249,6 @@ and ('ex, 'fb, 'en, 'hi) afield =
 and ('ex, 'fb, 'en, 'hi) xhp_attribute =
   | Xhp_simple of pstring * ('ex, 'fb, 'en, 'hi) expr
   | Xhp_spread of ('ex, 'fb, 'en, 'hi) expr
-
-and ('ex, 'fb, 'en, 'hi) special_func =
-  | Genva of ('ex, 'fb, 'en, 'hi) expr list
 
 and is_reference = bool
 

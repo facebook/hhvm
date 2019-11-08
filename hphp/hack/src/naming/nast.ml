@@ -500,9 +500,6 @@ module Visitor_DEPRECATED = struct
 
       method on_string2 : 'a -> expr list -> 'a
 
-      method on_special_func :
-        'a -> (Pos.t, func_body_ann, unit, unit) special_func -> 'a
-
       method on_yield_break : 'a -> 'a
 
       method on_yield : 'a -> afield -> 'a
@@ -808,7 +805,6 @@ module Visitor_DEPRECATED = struct
         | Assert ae -> this#on_assert acc ae
         | Clone e -> this#on_clone acc e
         | Expr_list el -> this#on_expr_list acc el
-        | Special_func sf -> this#on_special_func acc sf
         | Obj_get (e1, e2, _) -> this#on_obj_get acc e1 e2
         | Array_get (e1, e2) -> this#on_array_get acc e1 e2
         | Class_get (cid, e) -> this#on_class_get acc cid e
@@ -968,10 +964,6 @@ module Visitor_DEPRECATED = struct
       method on_string2 acc el =
         let acc = List.fold_left el ~f:this#on_expr ~init:acc in
         acc
-
-      method on_special_func acc =
-        function
-        | Genva el -> List.fold_left el ~f:this#on_expr ~init:acc
 
       method on_yield_break acc = acc
 

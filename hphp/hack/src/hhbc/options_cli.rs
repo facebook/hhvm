@@ -51,7 +51,6 @@ lazy_static! {
             "hack.lang.enablecoroutines" => "hhvm.hack.lang.enable_coroutines",
             "hack.lang.enablepocketuniverses" => "hhvm.hack.lang.enable_pocket_universes",
             // group 6: we could assume "hack." between "hhvm." and "lang."
-            "hhvm.lang.enable_constant_visibility_modifiers" => "hhvm.hack.lang.enable_constant_visibility_modifiers",
             "hhvm.lang.enable_class_level_where_clauses" => "hhvm.hack.lang.enable_class_level_where_clauses",
             "hhvm.lang.disable_legacy_soft_typehints" => "hhvm.hack.lang.disable_legacy_soft_typehints",
             "hhvm.lang.allow_new_attribute_syntax" => "hhvm.hack.lang.allow_new_attribute_syntax",

@@ -169,6 +169,7 @@ prefixed_flags!(
     EMIT_INST_METH_POINTERS,
     EMIT_METH_CALLER_FUNC_POINTERS,
     ENABLE_INTRINSICS_EXTENSION,
+    ENFORCE_GENERICS_UB,
     LOG_EXTERN_COMPILER_PERF,
     JIT_ENABLE_RENAME_FUNCTION,
     HACK_ARR_COMPAT_NOTICES,
@@ -221,14 +222,15 @@ prefixed_flags!(
     "hhvm.hack.lang.",
     ABSTRACT_STATIC_PROPS,
     ALLOW_NEW_ATTRIBUTE_SYNTAX,
+    CHECK_INT_OVERFLOW,
     CONST_DEFAULT_FUNC_ARGS,
     CONST_STATIC_PROPS,
     DISABLE_LEGACY_ATTRIBUTE_SYNTAX,
     DISABLE_LEGACY_SOFT_TYPEHINTS,
     DISABLE_LVAL_AS_AN_EXPRESSION,
     DISABLE_UNSET_CLASS_CONST,
+    DISALLOW_FUNC_PTRS_IN_CONSTANTS,
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
-    ENABLE_CONSTANT_VISIBILITY_MODIFIERS,
     ENABLE_COROUTINES,
     ENABLE_POCKET_UNIVERSES,
     HACKSPERIMENTAL,
@@ -543,10 +545,16 @@ mod tests {
   "hhvm.enable_intrinsics_extension": {
     "global_value": false
   },
+  "hhvm.enforce_generics_ub": {
+    "global_value": false
+  },
   "hhvm.hack.lang.abstract_static_props": {
     "global_value": false
   },
   "hhvm.hack.lang.allow_new_attribute_syntax": {
+    "global_value": false
+  },
+  "hhvm.hack.lang.check_int_overflow": {
     "global_value": false
   },
   "hhvm.hack.lang.const_default_func_args": {
@@ -567,10 +575,10 @@ mod tests {
   "hhvm.hack.lang.disable_unset_class_const": {
     "global_value": false
   },
-  "hhvm.hack.lang.enable_class_level_where_clauses": {
+  "hhvm.hack.lang.disallow_func_ptrs_in_constants": {
     "global_value": false
   },
-  "hhvm.hack.lang.enable_constant_visibility_modifiers": {
+  "hhvm.hack.lang.enable_class_level_where_clauses": {
     "global_value": false
   },
   "hhvm.hack.lang.enable_coroutines": {
@@ -872,7 +880,6 @@ bitflags! {
         const HACKSPERIMENTAL = 1 << 13;
         const LOG_EXTERN_COMPILER_PERF = 1 << 14;
         const ENABLE_INTRINSICS_EXTENSION = 1 << 15;
-        const ENABLE_HHJS = 1 << 16;
         const DISALLOW_EXECUTION_OPERATOR = 1 << 21;
         const DISABLE_NONTOPLEVEL_DECLARATIONS = 1 << 22;
         const DISABLE_STATIC_CLOSURES = 1 << 23;
@@ -886,7 +893,6 @@ bitflags! {
         const ENABLE_POCKET_UNIVERSES = 1 << 31;
         const NOTICE_ON_BY_REF_ARGUMENT_TYPEHINT_VIOLATION = 1 << 32;
         const ARRAY_PROVENANCE = 1 << 33;
-        const ENABLE_CONSTANT_VISIBILITY_MODIFIERS = 1 << 34;
         const ENABLE_CLASS_LEVEL_WHERE_CLAUSES = 1 << 35;
         const DISABLE_LEGACY_SOFT_TYPEHINTS = 1 << 36;
         const ALLOW_NEW_ATTRIBUTE_SYNTAX = 1 << 37;
@@ -895,5 +901,8 @@ bitflags! {
         const CONST_STATIC_PROPS = 1 << 40;
         const ABSTRACT_STATIC_PROPS = 1 << 41;
         const DISABLE_UNSET_CLASS_CONST = 1 << 42;
+        const DISALLOW_FUNC_PTRS_IN_CONSTANTS = 1 << 43;
+        const ENFORCE_GENERICS_UB = 1 << 44;
+        const CHECK_INT_OVERFLOW = 1 << 45;
     }
 }

@@ -66,6 +66,7 @@ let update_context
       source_text;
       ast;
       comments;
+      cst = None;
       tast = None;
       errors = None;
       symbols = None;
@@ -112,3 +113,18 @@ let compute_tast_and_errors
   match Provider_context.get_global_context () with
   | None -> with_context ~ctx ~f:make_tast
   | Some _ -> make_tast ()
+
+let compute_cst ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    Full_fidelity_ast.PositionedSyntaxTree.t =
+  let _ = ctx in
+  match entry.Provider_context.cst with
+  | Some cst -> cst
+  | None ->
+    let parser_env = Full_fidelity_ast.make_env entry.Provider_context.path in
+    let (cst, _) =
+      Full_fidelity_ast.from_text_with_legacy_and_cst
+        parser_env
+        entry.Provider_context.source_text
+    in
+    entry.Provider_context.cst <- Some cst;
+    cst

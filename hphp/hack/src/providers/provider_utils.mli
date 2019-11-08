@@ -32,3 +32,9 @@ val find_entry :
   ctx:Provider_context.t ->
   path:Relative_path.t ->
   Provider_context.entry option
+
+(** Compute the CST *)
+val compute_cst :
+  ctx:Provider_context.t ->
+  entry:Provider_context.entry ->
+  Full_fidelity_ast.PositionedSyntaxTree.t

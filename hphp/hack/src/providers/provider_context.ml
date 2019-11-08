@@ -14,6 +14,7 @@ type entry = {
   source_text: Full_fidelity_source_text.t;
   comments: Parser_return.comments;
   ast: Nast.program;
+  mutable cst: Full_fidelity_ast.PositionedSyntaxTree.t option;
   mutable tast: Tast.program option;
   mutable errors: Errors.t option;
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;

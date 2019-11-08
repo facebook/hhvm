@@ -294,7 +294,7 @@ impl Node_ {
                 let fst = &items.0;
                 let snd = &items.1;
                 match (fst.get_pos(), snd.get_pos()) {
-                    (Ok(fst_pos), Ok(snd_pos)) => Pos::merge(fst_pos, snd_pos),
+                    (Ok(fst_pos), Ok(snd_pos)) => Pos::merge(&fst_pos, &snd_pos),
                     (Ok(pos), Err(_)) => Ok(pos),
                     (Err(_), Ok(pos)) => Ok(pos),
                     (Err(_), Err(_)) => Err(format!("No pos found for {:?} or {:?}", fst, snd)),
@@ -304,8 +304,8 @@ impl Node_ {
             Node_::BracketedList(innards) => {
                 let (first_pos, inner_list, second_pos) = &**innards;
                 Pos::merge(
-                    first_pos.clone(),
-                    Pos::merge(self.pos_from_vec(&inner_list)?, second_pos.clone())?,
+                    &first_pos,
+                    &Pos::merge(&self.pos_from_vec(&inner_list)?, &second_pos)?,
                 )
             }
             _ => Err(format!("No pos found for node {:?}", self)),
@@ -316,7 +316,7 @@ impl Node_ {
         nodes.iter().fold(
             Err(format!("No pos found for any children under {:?}", self)),
             |acc, elem| match (acc, elem.get_pos()) {
-                (Ok(acc_pos), Ok(elem_pos)) => Pos::merge(acc_pos, elem_pos),
+                (Ok(acc_pos), Ok(elem_pos)) => Pos::merge(&acc_pos, &elem_pos),
                 (Err(_), Ok(elem_pos)) => Ok(elem_pos),
                 (acc, Err(_)) => acc,
             },
@@ -746,7 +746,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             &class_type,
         )?;
         let full_pos = match argument_list.get_pos() {
-            Ok(p2) => Pos::merge(pos.clone(), p2)?,
+            Ok(p2) => Pos::merge(&pos, &p2)?,
             Err(_) => pos.clone(),
         };
         Ok(Node_::Hint(

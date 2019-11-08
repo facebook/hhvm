@@ -194,7 +194,7 @@ impl Pos {
         }
     }
 
-    pub fn merge(x1: Self, x2: Self) -> Result<Self, String> {
+    pub fn merge(x1: &Self, x2: &Self) -> Result<Self, String> {
         if x1.filename() != x2.filename() {
             // see comment above (T52404885)
             return Err(String::from("Position in separate files ")
@@ -202,7 +202,7 @@ impl Pos {
                 + " and "
                 + &x2.filename().to_string());
         }
-        match (x1.0, x2.0) {
+        match (&x1.0, &x2.0) {
             (
                 Small {
                     file,
@@ -233,7 +233,11 @@ impl Pos {
                 } else {
                     end1
                 };
-                Ok(Pos(Small { file, start, end }))
+                Ok(Pos(Small {
+                    file: file.clone(),
+                    start: *start,
+                    end: *end,
+                }))
             }
             (
                 Large {
@@ -265,20 +269,24 @@ impl Pos {
                 } else {
                     end1
                 };
-                Ok(Pos(Large { file, start, end }))
+                Ok(Pos(Large {
+                    file: file.clone(),
+                    start: Box::new(*start.clone()),
+                    end: Box::new(*end.clone()),
+                }))
             }
-            (Small { file, start, end }, x2 @ Large { .. }) => Self::merge(
-                Pos(Large {
-                    file,
+            (Small { file, start, end }, Large { .. }) => Self::merge(
+                &Pos(Large {
+                    file: file.clone(),
                     start: Box::new(Self::small_to_large_file_pos(&start)),
                     end: Box::new(Self::small_to_large_file_pos(&end)),
                 }),
-                Pos(x2),
+                x2,
             ),
-            (x1 @ Large { .. }, Small { file, start, end }) => Self::merge(
-                Pos(x1),
-                Pos(Large {
-                    file,
+            (Large { .. }, Small { file, start, end }) => Self::merge(
+                x1,
+                &Pos(Large {
+                    file: file.clone(),
                     start: Box::new(Self::small_to_large_file_pos(&start)),
                     end: Box::new(Self::small_to_large_file_pos(&end)),
                 }),
@@ -387,8 +395,8 @@ mod tests {
             assert_eq!(
                 Ok(make_pos("a", exp_start, exp_end)),
                 Pos::merge(
-                    make_pos("a", fst_start, fst_end),
-                    make_pos("a", snd_start, snd_end)
+                    &make_pos("a", fst_start, fst_end),
+                    &make_pos("a", snd_start, snd_end)
                 ),
                 "{}",
                 name
@@ -399,8 +407,8 @@ mod tests {
             assert_eq!(
                 Ok(make_pos("a", exp_start, exp_end)),
                 Pos::merge(
-                    make_pos("a", snd_start, snd_end),
-                    make_pos("a", fst_start, fst_end),
+                    &make_pos("a", snd_start, snd_end),
+                    &make_pos("a", fst_start, fst_end),
                 ),
                 "{} (reversed)",
                 name
@@ -434,8 +442,8 @@ mod tests {
         assert_eq!(
             Err("Position in separate files dummy a and dummy b".to_string()),
             Pos::merge(
-                make_pos("a", (0, 0, 0), (0, 0, 0)),
-                make_pos("b", (0, 0, 0), (0, 0, 0))
+                &make_pos("a", (0, 0, 0), (0, 0, 0)),
+                &make_pos("b", (0, 0, 0), (0, 0, 0))
             ),
             "should reject merges with different filenames"
         );

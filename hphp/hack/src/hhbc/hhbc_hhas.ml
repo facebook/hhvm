@@ -1735,6 +1735,7 @@ let add_method_def buf method_def =
   let method_name = Hhas_method.name method_def in
   let method_body = Hhas_method.body method_def in
   let method_return_type = Hhas_body.return_type method_body in
+  let method_upper_bounds = Hhas_body.upper_bounds method_body in
   let method_params = Hhas_body.params method_body in
   let env = Hhas_body.env method_body in
   let method_span = Hhas_method.span method_def in
@@ -1744,6 +1745,8 @@ let add_method_def buf method_def =
   let method_is_closure_body = Hhas_method.is_closure_body method_def in
   let method_rx_disabled = Hhas_method.rx_disabled method_def in
   Acc.add buf "\n  .method ";
+  if Hhbc_options.enforce_generics_ub !Hhbc_options.compiler_options then
+    Acc.add buf (string_of_upper_bounds method_upper_bounds);
   Acc.add buf (method_attributes method_def);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options then
     Acc.add buf (string_of_span method_span ^ " ");

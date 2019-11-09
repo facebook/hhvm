@@ -402,12 +402,6 @@ let do_compile
       List.iter error_list (fun e ->
           P.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
       if List.is_empty error_list then
-        let tast =
-          if Hhbc_options.enable_pocket_universes hhbc_options then
-            Pocket_universes.translate tast
-          else
-            tast
-        in
         (Some (tast, is_hh_file), false, None)
       else
         (None, false, Some (Pos.none, None))

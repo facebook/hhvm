@@ -96,7 +96,6 @@
     heap_ident
     logging
     naming
-    pocket_universes
     typing)
   (ocamlc_flags (:standard -custom))
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))

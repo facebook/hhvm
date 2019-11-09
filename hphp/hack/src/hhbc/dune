@@ -7,5 +7,6 @@
     core_kernel
     full_fidelity
     mutable_accumulator
+    pocket_universes
     tast
     utils_php_escape))

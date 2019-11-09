@@ -54,6 +54,12 @@ let with_global_state env f =
 
 let from_ast ~env ~is_hh_file tast =
   with_global_state env (fun () ->
+      let tast =
+        if Hhbc_options.enable_pocket_universes env.hhbc_options then
+          Pocket_universes.translate tast
+        else
+          tast
+      in
       Emit_program.from_ast
         ~is_evaled:env.is_evaled
         ~for_debugger_eval:env.for_debugger_eval

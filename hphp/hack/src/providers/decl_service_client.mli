@@ -13,7 +13,7 @@ type t = {
 }
 
 val init :
-  decl_sock:string ->
+  decl_sock:Path.t ->
   base_addr:Decl_ipc_ffi_externs.sharedmem_base_address ->
   hhi_root:Path.t ->
   (t, Marshal_tools.error) result

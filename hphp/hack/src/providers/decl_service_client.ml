@@ -24,10 +24,10 @@ let rpc_get_gconst
   Ok s
 
 let init
-    ~(decl_sock : string)
+    ~(decl_sock : Path.t)
     ~(base_addr : Decl_ipc_ffi_externs.sharedmem_base_address)
     ~(hhi_root : Path.t) : (t, Marshal_tools.error) result =
-  let sockaddr = Unix.ADDR_UNIX decl_sock in
+  let sockaddr = Unix.ADDR_UNIX (Path.to_string decl_sock) in
   let connect_res =
     try Ok (Timeout.open_connection sockaddr) with
     | Unix.Unix_error (Unix.ECONNREFUSED, _, _) as e ->

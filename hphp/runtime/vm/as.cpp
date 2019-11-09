@@ -2349,6 +2349,30 @@ UpperBoundMap parse_ubs(AsmState& as) {
   return ret;
 }
 
+// If ubs has a single upper-bound for typeName, return it.
+// If ubs does not contain any upper-bound for typeName, but class_ubs
+// contains a single upper-bound, return it.
+// Return nullptr otherwise.
+const TypeConstraint* getSingleUB(const StringData* typeName,
+                                  const UpperBoundMap& ubs,
+                                  const UpperBoundMap& class_ubs) {
+  if (!typeName) return nullptr;
+  assertx(typeName->isStatic());
+  auto count = ubs.count(typeName);
+  if (count == 1) {
+    auto const it = ubs.find(typeName);
+    return &(it->second);
+  }
+  if (count == 0) {
+    count = class_ubs.count(typeName);
+    if (count == 1) {
+      auto const it = class_ubs.find(typeName);
+      return &it->second;
+    }
+  }
+  return nullptr;
+}
+
 /*
  * parameter-list : '(' param-name-list ')'
  *                ;
@@ -2369,7 +2393,9 @@ UpperBoundMap parse_ubs(AsmState& as) {
  *             | '(' long-string-literal ')'
  *             ;
  */
-void parse_parameter_list(AsmState& as, const UpperBoundMap& ubs) {
+void parse_parameter_list(AsmState& as,
+                          const UpperBoundMap& ubs,
+                          const UpperBoundMap& class_ubs) {
   as.in.skipWhitespace();
   if (as.in.peek() != '(') return;
   as.in.getc();
@@ -2414,10 +2440,8 @@ void parse_parameter_list(AsmState& as, const UpperBoundMap& ubs) {
     }
 
     std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
-    if (ubs.count(param.userType) == 1) {
-      auto const it = ubs.find(param.userType);
-      param.typeConstraint = it->second;
-    }
+    auto const ub = getSingleUB(param.userType, ubs, class_ubs);
+    if (ub) param.typeConstraint = *ub;
 
     as.in.skipWhitespace();
     ch = as.in.getc();
@@ -2677,14 +2701,14 @@ void parse_function(AsmState& as) {
 
   as.fe = as.ue->newFuncEmitter(makeStaticString(name));
   as.fe->init(line0, line1, as.ue->bcPos(), attrs, isTop, 0);
-  if (ubs.count(retTypeInfo.first) == 1) {
-    auto const it = ubs.find(retTypeInfo.first);
-    retTypeInfo.second = it->second;
-  }
+
+  auto const ub = getSingleUB(retTypeInfo.first, ubs, {});
+  if (ub) retTypeInfo.second = *ub;
+
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = retTypeInfo;
   as.fe->userAttributes = userAttrs;
 
-  parse_parameter_list(as, ubs);
+  parse_parameter_list(as, ubs, {});
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
@@ -2701,10 +2725,11 @@ void parse_function(AsmState& as) {
  *                      parameter-list function-flags '{' function-body
  *                  ;
  */
-void parse_method(AsmState& as) {
+void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   as.in.skipWhitespace();
 
-  parse_ubs(as);
+  auto ubs = parse_ubs(as);
+
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
 
@@ -2714,7 +2739,7 @@ void parse_method(AsmState& as) {
   int line1;
   parse_line_range(as, line0, line1);
 
-  auto typeInfo = parse_type_info(as);
+  auto retTypeInfo = parse_type_info(as);
   std::string name;
   if (!as.in.readname(name)) {
     as.error(".method requires a method name");
@@ -2729,10 +2754,14 @@ void parse_method(AsmState& as) {
   as.pce->addMethod(as.fe);
   as.fe->init(line0, line1,
               as.ue->bcPos(), attrs, false, 0);
-  std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
+
+  auto const ub = getSingleUB(retTypeInfo.first, ubs, class_ubs);
+  if (ub) retTypeInfo.second = *ub;
+
+  std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = retTypeInfo;
   as.fe->userAttributes = userAttrs;
 
-  parse_parameter_list(as, {});
+  parse_parameter_list(as, ubs, class_ubs);
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
@@ -3080,7 +3109,8 @@ void parse_cls_doccomment(AsmState& as) {
  *                 | ".doc"          directive-doccomment
  *                 ;
  */
-void parse_class_body(AsmState& as, bool class_is_const) {
+void parse_class_body(AsmState& as, bool class_is_const,
+                      const UpperBoundMap& class_ubs) {
   if (!ensure_pseudomain(as)) {
     as.error(".class blocks must all follow the .main block");
   }
@@ -3091,7 +3121,7 @@ void parse_class_body(AsmState& as, bool class_is_const) {
       parse_property(as, class_is_const);
       continue;
     }
-    if (directive == ".method")       { parse_method(as);         continue; }
+    if (directive == ".method")       { parse_method(as, class_ubs); continue; }
     if (directive == ".const")        { parse_constant(as);       continue; }
     if (directive == ".use")          { parse_use(as);            continue; }
     if (directive == ".default_ctor") { parse_default_ctor(as);   continue; }
@@ -3238,7 +3268,7 @@ void parse_class(AsmState& as) {
   as.pce->setUserAttributes(userAttrs);
 
   as.in.expectWs('{');
-  parse_class_body(as, attrs & AttrIsConst);
+  parse_class_body(as, attrs & AttrIsConst, ubs);
 
   as.pce->setHoistable(
     isTop ? compute_hoistable(as, name, parentName) : PreClass::NotHoistable

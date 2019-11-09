@@ -6,6 +6,22 @@
  *
  *)
 
+(**
+ * AAST visitor that elaborates the names in bodies
+ *   call_some_function($args);
+ *     ->
+ *   \CurrentNamespace\CurrentSubnamespace\call_some_function($args);
+ * Both typechecking and codegen code expect that the AAST has been elaborated.
+ * Currently, this assumes that the AAST has been run through
+ *   Namespaces.elaborate_toplevel_defs, which elaborates the names of toplevel
+ *   classes, functions, without elaborating the names in their bodies.
+ * Elaboration is currently separated into these two passes based on the idea
+ *   that decl extraction does not need to do any work with function decls.
+ *   However, it should be viable to combine the two passes into a single pass.
+ * See also: parser/namespaces.ml, parser/hh_autoimport.ml,
+ *   naming/naming_special_names.ml
+ *)
+
 open Aast
 open Ast_defs
 open Core_kernel
@@ -19,6 +35,18 @@ type env = {
   in_ppl: bool;
 }
 
+let make_env namespace =
+  {
+    namespace;
+    let_locals = SSet.empty;
+    type_params = SSet.empty;
+    in_ppl = false;
+  }
+
+(* While elaboration for codegen and typing is similar, there are currently a
+ *   couple differences between the two and are toggled by this flag (XHP).
+ * It would be nice to eventually eliminate the discrepancies between the two.
+ *)
 let in_codegen env = env.namespace.Namespace_env.ns_is_codegen
 
 let is_special_identifier =
@@ -30,6 +58,7 @@ let is_special_identifier =
       SN.Classes.cStatic;
       SN.SpecialIdents.this;
       SN.SpecialIdents.dollardollar;
+      SN.Typehints.wildcard;
     ]
   in
   (fun name -> List.exists ~f:(fun ident -> ident = name) special_identifiers)
@@ -44,7 +73,6 @@ let elaborate_type_name env ((_, name) as id) =
     SSet.mem name env.type_params
     || is_special_identifier name
     || (String.length name <> 0 && name.[0] = '$')
-    || name = SN.Typehints.wildcard
   then
     id
   else
@@ -253,9 +281,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       super#on_Efun env e
 
     (* The function that actually rewrites names *)
-    (* TODO: SN.SpecialFunctions are problematically special
-     * Make naming behave more like emit_special_function in emit_expression.ml
-     *)
     method! on_expr_ env expr =
       match expr with
       | Call (ct, (p, Id (p2, cn)), targs, el, uargs)
@@ -398,12 +423,3 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let (_, rev_defs) = List.fold p ~f:aux ~init:(env, []) in
       List.rev rev_defs
   end
-
-(* Toplevel environment *)
-let make_env namespace =
-  {
-    namespace;
-    let_locals = SSet.empty;
-    type_params = SSet.empty;
-    in_ppl = false;
-  }

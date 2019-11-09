@@ -57,6 +57,12 @@ type by_refs = bool list
 type fcall_args =
   fcall_flags * num_params * num_params * by_refs * Label.t option
 
+type iter_args = {
+  iter_id: Iterator.t;
+  key_id: local_id option;
+  val_id: local_id;
+}
+
 type classref_id = int
 
 (* Conventionally this is "A_" followed by an integer *)
@@ -458,10 +464,8 @@ type iter_kind =
   | LIter
 
 type instruct_iterator =
-  | IterInit of Iterator.t * Label.t * local_id
-  | IterInitK of Iterator.t * Label.t * local_id * local_id
-  | IterNext of Iterator.t * Label.t * local_id
-  | IterNextK of Iterator.t * Label.t * local_id * local_id
+  | IterInit of iter_args * Label.t
+  | IterNext of iter_args * Label.t
   | IterFree of Iterator.t
   | IterBreak of Label.t * (iter_kind * Iterator.t) list
 

@@ -145,7 +145,6 @@ struct Stats {
   TypeStat privateStatics;
   TypeStat cgetmBase;
   TypeStat iterInitBase;
-  TypeStat iterInitKBase;
   Builtins builtins;
 };
 
@@ -208,7 +207,6 @@ std::string show(const Stats& stats) {
   type_stat_string(ret, "priv_static",    stats.privateStatics);
   type_stat_string(ret, "cgetm_base",     stats.cgetmBase);
   type_stat_string(ret, "iterInit_base",  stats.iterInitBase);
-  type_stat_string(ret, "iterInitK_base", stats.iterInitKBase);
 
   folly::format(
     &ret,
@@ -301,11 +299,6 @@ bool in(StatsSS& /*env*/, const OpCode&) {
 
 bool in(StatsSS& env, const bc::IterInit& /*op*/) {
   add_type(env.stats.iterInitBase, topC(env));
-  return false;
-}
-
-bool in(StatsSS& env, const bc::IterInitK& /*op*/) {
-  add_type(env.stats.iterInitKBase, topC(env));
   return false;
 }
 

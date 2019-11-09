@@ -393,6 +393,7 @@ void populate_block(ParseUnitState& puState,
                                        <= func.locals.size());           \
                          return LocalRange { range.first, range.count }; \
                        }();
+#define IMM_ITA(n)     auto ita = decodeIterArgs(pc);
 #define IMM_FCA(n)     auto fca = [&] {                                      \
                          auto const fca = decodeFCallArgs(op, pc);           \
                          auto const numBytes = (fca.numArgs + 7) / 8;        \
@@ -549,6 +550,7 @@ void populate_block(ParseUnitState& puState,
 #undef IMM_OA
 #undef IMM_VSA
 #undef IMM_LAR
+#undef IMM_ITA
 #undef IMM_FCA
 
 #undef IMM_NA

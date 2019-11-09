@@ -49,6 +49,46 @@ struct LocalRange {
   uint32_t count;
 };
 
+/*
+ * Arguments to IterInit / IterNext opcodes.
+ * hhas format: <iterId> K:<keyId> V:<valId> (for key-value iters)
+ *              <iterId> NK V:<valId>        (for value-only iters)
+ * hhbc format: <uint8:flags> <iva:iterId> <iva:(keyId + 1)> <iva:valId>
+ *
+ * For value-only iters, keyId will be -1 (an invalid local ID); to take
+ * advantage of the one-byte encoding for IVA arguments, we add 1 to the key
+ * when encoding these args in the hhbc format.
+ *
+ * We don't accept flags from hhas because our flags require analyses that we
+ * currently only do in HHBBC.
+ */
+struct IterArgs {
+  enum Flags : uint8_t {
+    None     = 0,
+    // The base is stored in a local, and that local is unmodified in the loop.
+    BaseConst = (1 << 0),
+  };
+
+  static constexpr int32_t kNoKey = -1;
+
+  explicit IterArgs(Flags flags, int32_t iterId, int32_t keyId, int32_t valId)
+    : iterId(iterId), keyId(keyId), valId(valId), flags(flags) {}
+
+  bool hasKey() const {
+    assertx(keyId == kNoKey || keyId >= 0);
+    return keyId != kNoKey;
+  };
+
+  bool operator==(const IterArgs& other) const {
+    return iterId == other.iterId && keyId == other.keyId &&
+           valId == other.valId && flags == other.flags;
+  }
+
+  int32_t iterId;
+  int32_t keyId;
+  int32_t valId;
+  Flags flags;
+};
 
 // Arguments to FCall opcodes.
 // hhas format: <flags> <numArgs> <numRets> <inoutArgs> <asyncEagerOffset>
@@ -129,6 +169,9 @@ struct FCallArgs : FCallArgsBase {
 
 static_assert(1 << FCallArgs::kFirstNumArgsBit == FCallArgs::NumArgsStart, "");
 
+using PrintLocal = std::function<std::string(int32_t local)>;
+std::string show(const IterArgs&, PrintLocal);
+
 std::string show(const LocalRange&);
 std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
                  std::string asyncEagerLabel);
@@ -163,6 +206,7 @@ std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
   ARGTYPE(OA,     unsigned char) /* Sub-opcode, untyped */                     \
   ARGTYPE(KA,     MemberKey)     /* Member key: local, stack, int, str */      \
   ARGTYPE(LAR,    LocalRange)    /* Contiguous range of locals */              \
+  ARGTYPE(ITA,    IterArgs)      /* Iterator arguments */                      \
   ARGTYPE(FCA,    FCallArgs)     /* FCall arguments */                         \
   ARGTYPEVEC(VSA, Id)            /* Vector of static string IDs */
 
@@ -669,18 +713,10 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FCallObjMethodD, FOUR(FCA,SA,OA(ObjMethodOp),SA),                   \
                                        FCALL(0, 1),     FCALL,      CF) \
   O(FCallBuiltin,    FOUR(IVA,IVA,IVA,SA),CALLNATIVE,   CALLNATIVE, NF) \
-  O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
-  O(LIterInit,       FIVE(IA,LA,BA,LA,OA(IterTypeOp)),                  \
-                                       NOV,             NOV,        CF) \
-  O(IterInitK,       FOUR(IA,BA,LA,LA),ONE(CV),         NOV,        CF) \
-  O(LIterInitK,      SIX(IA,LA,BA,LA,LA,OA(IterTypeOp)),                \
-                                       NOV,             NOV,        CF) \
-  O(IterNext,        THREE(IA,BA,LA),  NOV,             NOV,        CF) \
-  O(LIterNext,       FIVE(IA,LA,BA,LA,OA(IterTypeOp)),                  \
-                                       NOV,             NOV,        CF) \
-  O(IterNextK,       FOUR(IA,BA,LA,LA),NOV,             NOV,        CF) \
-  O(LIterNextK,      SIX(IA,LA,BA,LA,LA,OA(IterTypeOp)),                \
-                                       NOV,             NOV,        CF) \
+  O(IterInit,        TWO(ITA,BA),      ONE(CV),         NOV,        CF) \
+  O(LIterInit,       THREE(ITA,LA,BA), NOV,             NOV,        CF) \
+  O(IterNext,        TWO(ITA,BA),      NOV,             NOV,        CF) \
+  O(LIterNext,       THREE(ITA,LA,BA), NOV,             NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
   O(LIterFree,       TWO(IA,LA),       NOV,             NOV,        NF) \
   O(IterBreak,       TWO(BA,ILA),      NOV,             NOV,        CF_TF) \

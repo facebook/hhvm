@@ -311,6 +311,16 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     return show(m);
   };
 
+  // The HHAS format for IterArgs doesn't include flags, so we drop them.
+  auto print_ita = [&](const IterArgs& ita) {
+    always_assert_flog(ita.flags == IterArgs::Flags::None,
+                       "Tried to disassemble IterArgs w/ flags: %d",
+                       uint8_t(ita.flags));
+    auto const str = show(ita, [&](int32_t id) { return loc_name(finfo, id); });
+    assertx(folly::StringPiece(str).startsWith("<> "));
+    return str.substr(3);
+  };
+
   auto print_fca = [&] (FCallArgs fca) {
     auto const aeLabel = fca.asyncEagerOffset != kInvalidOffset
       ? rel_label(fca.asyncEagerOffset)
@@ -336,6 +346,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_VSA    print_stringvec();
 #define IMM_KA     out.fmt(" {}", print_mk(decode_member_key(pc, finfo.unit)));
 #define IMM_LAR    out.fmt(" {}", show(decodeLocalRange(pc)));
+#define IMM_ITA    out.fmt(" {}", print_ita(decodeIterArgs(pc)));
 #define IMM_FCA    out.fmt(" {}", print_fca(decodeFCallArgs(thisOpcode, pc)));
 
 #define IMM_NA
@@ -384,6 +395,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_VSA
 #undef IMM_KA
 #undef IMM_LAR
+#undef IMM_ITA
 #undef IMM_FCA
 
   out.nl();

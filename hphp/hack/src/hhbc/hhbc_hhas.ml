@@ -391,6 +391,16 @@ let string_of_control_flow instruction =
 
 let string_of_iterator_id i = Iterator.to_string i
 
+let string_of_iter_args iter_args =
+  let iter_id = string_of_iterator_id iter_args.iter_id in
+  let key_id =
+    match iter_args.key_id with
+    | Some k -> "K:" ^ string_of_local_id k
+    | None -> "NK"
+  in
+  let val_id = "V:" ^ string_of_local_id iter_args.val_id in
+  sep [iter_id; key_id; val_id]
+
 let string_of_null_flavor nf =
   match nf with
   | Hhbc_ast.Obj_null_throws -> "NullThrows"
@@ -631,9 +641,7 @@ let iterator_instruction_name_prefix instruction =
   let iterator_instruction_name =
     match instruction with
     | IterInit _ -> "IterInit"
-    | IterInitK _ -> "IterInitK"
     | IterNext _ -> "IterNext"
-    | IterNextK _ -> "IterNextK"
     | IterFree _ -> "IterFree"
     | IterBreak _ -> "IterBreak"
   in
@@ -641,38 +649,12 @@ let iterator_instruction_name_prefix instruction =
 
 let string_of_iterator instruction =
   match instruction with
-  | IterInit (id, label, value) ->
+  | IterInit (iter_args, label)
+  | IterNext (iter_args, label) ->
     iterator_instruction_name_prefix instruction
-    ^ string_of_iterator_id id
+    ^ string_of_iter_args iter_args
     ^ " "
     ^ string_of_label label
-    ^ " "
-    ^ string_of_local_id value
-  | IterInitK (id, label, key, value) ->
-    iterator_instruction_name_prefix instruction
-    ^ string_of_iterator_id id
-    ^ " "
-    ^ string_of_label label
-    ^ " "
-    ^ string_of_local_id key
-    ^ " "
-    ^ string_of_local_id value
-  | IterNext (id, label, value) ->
-    iterator_instruction_name_prefix instruction
-    ^ string_of_iterator_id id
-    ^ " "
-    ^ string_of_label label
-    ^ " "
-    ^ string_of_local_id value
-  | IterNextK (id, label, key, value) ->
-    iterator_instruction_name_prefix instruction
-    ^ string_of_iterator_id id
-    ^ " "
-    ^ string_of_label label
-    ^ " "
-    ^ string_of_local_id key
-    ^ " "
-    ^ string_of_local_id value
   | IterFree id ->
     iterator_instruction_name_prefix instruction ^ string_of_iterator_id id
   | IterBreak (label, iterlist) ->

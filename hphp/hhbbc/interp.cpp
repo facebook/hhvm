@@ -4620,41 +4620,46 @@ void in(ISS& env, const bc::LockObj& op) {
 
 namespace {
 
-void iterInitImpl(ISS& env, IterId iter, LocalId valueLoc,
-                  BlockId target, const Type& base, LocalId baseLoc,
-                  bool needsPop) {
+// baseLoc is NoLocalId for non-local iterators.
+void iterInitImpl(ISS& env, IterArgs ita, BlockId target, LocalId baseLoc) {
+  auto const local = baseLoc != NoLocalId;
+  auto const sourceLoc = local ? baseLoc : topStkLocal(env);
+  auto const base = local ? locAsCell(env, baseLoc) : topC(env);
   auto ity = iter_types(base);
 
   auto const fallthrough = [&] {
     auto const baseCannotBeObject = !base.couldBe(BObj);
-    setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.bid,
-                                  false, baseCannotBeObject });
+    setIter(env, ita.iterId, LiveIter { ity, sourceLoc, NoLocalId, env.bid,
+                                        false, baseCannotBeObject });
     // Do this after setting the iterator, in case it clobbers the base local
     // equivalency.
-    setLoc(env, valueLoc, std::move(ity.value));
+    setLoc(env, ita.valId, std::move(ity.value));
+    if (ita.hasKey()) {
+      setLoc(env, ita.keyId, std::move(ity.key));
+      setIterKey(env, ita.iterId, ita.keyId);
+    }
   };
 
-  assert(iterIsDead(env, iter));
+  assert(iterIsDead(env, ita.iterId));
 
   if (!ity.mayThrowOnInit) {
     if (ity.count == IterTypes::Count::Empty && will_reduce(env)) {
-      if (needsPop) {
-        reduce(env, bc::PopC{});
-      } else {
+      if (local) {
         reduce(env);
+      } else {
+        reduce(env, bc::PopC{});
       }
       return jmp_setdest(env, target);
     }
     nothrow(env);
   }
 
-  if (needsPop) {
-    popC(env);
-  }
+  if (!local) popC(env);
 
   switch (ity.count) {
     case IterTypes::Count::Empty:
-      mayReadLocal(env, valueLoc);
+      mayReadLocal(env, ita.valId);
+      if (ita.hasKey()) mayReadLocal(env, ita.keyId);
       jmp_setdest(env, target);
       return;
     case IterTypes::Count::Single:
@@ -4673,66 +4678,14 @@ void iterInitImpl(ISS& env, IterId iter, LocalId valueLoc,
   always_assert(false);
 }
 
-void iterInitKImpl(ISS& env, IterId iter, LocalId valueLoc, LocalId keyLoc,
-                   BlockId target, const Type& base, LocalId baseLoc,
-                   bool needsPop) {
-  auto ity = iter_types(base);
+// baseLoc is NoLocalId for non-local iterators.
+void iterNextImpl(ISS& env, IterArgs ita, BlockId target, LocalId baseLoc) {
+  auto const curVal = peekLocRaw(env, ita.valId);
+  auto const curKey = ita.hasKey() ? peekLocRaw(env, ita.keyId) : TBottom;
 
-  auto const fallthrough = [&]{
-    auto const baseCannotBeObject = !base.couldBe(BObj);
-    setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.bid,
-                                  false, baseCannotBeObject });
-    // Do this after setting the iterator, in case it clobbers the base local
-    // equivalency.
-    setLoc(env, valueLoc, std::move(ity.value));
-    setLoc(env, keyLoc, std::move(ity.key));
-    setIterKey(env, iter, keyLoc);
-  };
-
-  assert(iterIsDead(env, iter));
-
-  if (!ity.mayThrowOnInit) {
-    if (ity.count == IterTypes::Count::Empty && will_reduce(env)) {
-      if (needsPop) {
-        reduce(env, bc::PopC{});
-      } else {
-        reduce(env);
-      }
-      return jmp_setdest(env, target);
-    }
-    nothrow(env);
-  }
-
-  if (needsPop) {
-    popC(env);
-  }
-
-  switch (ity.count) {
-    case IterTypes::Count::Empty:
-      mayReadLocal(env, valueLoc);
-      mayReadLocal(env, keyLoc);
-      return jmp_setdest(env, target);
-    case IterTypes::Count::Single:
-    case IterTypes::Count::NonEmpty:
-      fallthrough();
-      return jmp_nevertaken(env);
-    case IterTypes::Count::ZeroOrOne:
-    case IterTypes::Count::Any:
-      env.propagate(target, &env.state);
-      fallthrough();
-      return;
-  }
-
-  always_assert(false);
-}
-
-void iterNextImpl(ISS& env,
-                  IterId iter, LocalId valueLoc, BlockId target,
-                  LocalId baseLoc) {
-  auto const curLoc = peekLocRaw(env, valueLoc);
   auto noThrow = false;
   auto const noTaken = match<bool>(
-    env.state.iters[iter],
+    env.state.iters[ita.iterId],
     [&] (DeadIter)           {
       always_assert(false && "IterNext on dead iter");
       return false;
@@ -4746,7 +4699,11 @@ void iterNextImpl(ISS& env,
           return true;
         case IterTypes::Count::NonEmpty:
         case IterTypes::Count::Any:
-          setLoc(env, valueLoc, ti.types.value);
+          setLoc(env, ita.valId, ti.types.value);
+          if (ita.hasKey()) {
+            setLoc(env, ita.keyId, ti.types.key);
+            setIterKey(env, ita.iterId, ita.keyId);
+          }
           return false;
         case IterTypes::Count::Empty:
           always_assert(false);
@@ -4756,154 +4713,47 @@ void iterNextImpl(ISS& env,
   );
 
   if (noTaken && noThrow && will_reduce(env)) {
-    if (baseLoc != NoLocalId) {
-      return reduce(env, bc::LIterFree { iter, baseLoc });
-    }
-    return reduce(env, bc::IterFree { iter });
+    auto const iterId = safe_cast<IterId>(ita.iterId);
+    return baseLoc == NoLocalId
+      ? reduce(env, bc::IterFree { iterId })
+      : reduce(env, bc::LIterFree { iterId, baseLoc });
   }
 
-  mayReadLocal(env, valueLoc);
   mayReadLocal(env, baseLoc);
+  mayReadLocal(env, ita.valId);
+  if (ita.hasKey()) mayReadLocal(env, ita.keyId);
 
   if (noThrow) nothrow(env);
 
   if (noTaken) {
     jmp_nevertaken(env);
-    freeIter(env, iter);
+    freeIter(env, ita.iterId);
     return;
   }
 
   env.propagate(target, &env.state);
 
-  freeIter(env, iter);
-  setLocRaw(env, valueLoc, curLoc);
-}
-
-void iterNextKImpl(ISS& env, IterId iter, LocalId valueLoc,
-                   LocalId keyLoc, BlockId target, LocalId baseLoc) {
-  auto const curValue = peekLocRaw(env, valueLoc);
-  auto const curKey = peekLocRaw(env, keyLoc);
-  auto noThrow = false;
-  auto const noTaken = match<bool>(
-    env.state.iters[iter],
-    [&] (DeadIter)           {
-      always_assert(false && "IterNextK on dead iter");
-      return false;
-    },
-    [&] (const LiveIter& ti) {
-      if (!ti.types.mayThrowOnNext) noThrow = true;
-      if (ti.baseLocal != NoLocalId) hasInvariantIterBase(env);
-      switch (ti.types.count) {
-        case IterTypes::Count::Single:
-        case IterTypes::Count::ZeroOrOne:
-          return true;
-        case IterTypes::Count::NonEmpty:
-        case IterTypes::Count::Any:
-          setLoc(env, valueLoc, ti.types.value);
-          setLoc(env, keyLoc, ti.types.key);
-          setIterKey(env, iter, keyLoc);
-          return false;
-        case IterTypes::Count::Empty:
-          always_assert(false);
-      }
-      not_reached();
-    }
-  );
-
-  if (noTaken && noThrow && will_reduce(env)) {
-    if (baseLoc != NoLocalId) {
-      return reduce(env, bc::LIterFree { iter, baseLoc });
-    }
-    return reduce(env, bc::IterFree { iter });
-  }
-
-  mayReadLocal(env, valueLoc);
-  mayReadLocal(env, keyLoc);
-  mayReadLocal(env, baseLoc);
-
-  if (noThrow) nothrow(env);
-
-  if (noTaken) {
-    jmp_nevertaken(env);
-    freeIter(env, iter);
-    return;
-  }
-
-  env.propagate(target, &env.state);
-
-  freeIter(env, iter);
-  setLocRaw(env, valueLoc, curValue);
-  setLocRaw(env, keyLoc, curKey);
+  freeIter(env, ita.iterId);
+  setLocRaw(env, ita.valId, curVal);
+  if (ita.hasKey()) setLocRaw(env, ita.keyId, curKey);
 }
 
 }
 
 void in(ISS& env, const bc::IterInit& op) {
-  auto base = topC(env);
-  iterInitImpl(
-    env,
-    op.iter1,
-    op.loc3,
-    op.target2,
-    std::move(base),
-    topStkLocal(env),
-    true
-  );
+  iterInitImpl(env, op.ita, op.target2, NoLocalId);
 }
 
 void in(ISS& env, const bc::LIterInit& op) {
-  iterInitImpl(
-    env,
-    op.iter1,
-    op.loc4,
-    op.target3,
-    locAsCell(env, op.loc2),
-    op.loc2,
-    false
-  );
-}
-
-void in(ISS& env, const bc::IterInitK& op) {
-  auto base = topC(env);
-  iterInitKImpl(
-    env,
-    op.iter1,
-    op.loc3,
-    op.loc4,
-    op.target2,
-    std::move(base),
-    topStkLocal(env),
-    true
-  );
-}
-
-void in(ISS& env, const bc::LIterInitK& op) {
-  iterInitKImpl(
-    env,
-    op.iter1,
-    op.loc4,
-    op.loc5,
-    op.target3,
-    locAsCell(env, op.loc2),
-    op.loc2,
-    false
-  );
+  iterInitImpl(env, op.ita, op.target3, op.loc2);
 }
 
 void in(ISS& env, const bc::IterNext& op) {
-  iterNextImpl(env, op.iter1, op.loc3, op.target2, NoLocalId);
+  iterNextImpl(env, op.ita, op.target2, NoLocalId);
 }
 
 void in(ISS& env, const bc::LIterNext& op) {
-  iterNextImpl(env, op.iter1, op.loc4, op.target3, op.loc2);
-}
-
-void in(ISS& env, const bc::IterNextK& op) {
-  iterNextKImpl(env, op.iter1, op.loc3, op.loc4, op.target2, NoLocalId);
-}
-
-void in(ISS& env, const bc::LIterNextK& op) {
-  iterNextKImpl(env, op.iter1, op.loc4, op.loc5, op.target3, op.loc2);
+  iterNextImpl(env, op.ita, op.target3, op.loc2);
 }
 
 void in(ISS& env, const bc::IterFree& op) {

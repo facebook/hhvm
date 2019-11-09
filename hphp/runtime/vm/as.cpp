@@ -1318,6 +1318,27 @@ LocalRange read_local_range(AsmState& as) {
   return LocalRange{uint32_t(firstLoc), count};
 }
 
+IterArgs read_iter_args(AsmState& as) {
+  auto const iterInt = read_opcode_arg<int32_t>(as);
+  auto const iterId = as.getIterId(iterInt);
+  auto const keyId = [&]{
+    auto const keyStr = read_opcode_arg<std::string>(as);
+    if (keyStr == "NK") return IterArgs::kNoKey;
+    if (!folly::StringPiece(keyStr).startsWith("K:")) {
+      as.error("Expected: NK | K:$local; got: `" + keyStr + "'");
+    }
+    return as.getLocalId(keyStr.substr(2));
+  }();
+  auto const valId = [&]{
+    auto const valStr = read_opcode_arg<std::string>(as);
+    if (!folly::StringPiece(valStr).startsWith("V:")) {
+      as.error("Expected: V:$local; got: `" + valStr + "'");
+    }
+    return as.getLocalId(valStr.substr(2));
+  }();
+  return IterArgs(IterArgs::Flags::None, iterId, keyId, valId);
+}
+
 std::pair<FCallArgs::Flags, bool>
 read_fcall_flags(AsmState& as, Op thisOpcode) {
   uint8_t flags = 0;
@@ -1437,6 +1458,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
                      read_opcode_arg<int32_t>(as)))
 #define IMM_OA(ty) as.ue->emitByte(read_subop<ty>(as));
 #define IMM_LAR    encodeLocalRange(*as.ue, read_local_range(as))
+#define IMM_ITA    encodeIterArgs(*as.ue, read_iter_args(as))
 #define IMM_FCA do {                                                \
     auto const fca = read_fcall_args(as, thisOpcode);               \
     encodeFCallArgs(                                                \

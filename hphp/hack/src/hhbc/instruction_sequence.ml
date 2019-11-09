@@ -76,17 +76,21 @@ let instr_lit_const l = instr (ILitConst l)
 let instr_lit_empty_varray =
   instr_lit_const (TypedValue (Typed_value.VArray []))
 
-let instr_iterinit iter_id label value =
-  instr (IIterator (IterInit (iter_id, label, value)))
+let instr_iterinit iter_id label val_id =
+  let iter_args = { iter_id; key_id = None; val_id } in
+  instr (IIterator (IterInit (iter_args, label)))
 
-let instr_iterinitk id label key value =
-  instr (IIterator (IterInitK (id, label, key, value)))
+let instr_iterinitk iter_id label val_id key_id =
+  let iter_args = { iter_id; key_id = Some key_id; val_id } in
+  instr (IIterator (IterInit (iter_args, label)))
 
-let instr_iternext id label value =
-  instr (IIterator (IterNext (id, label, value)))
+let instr_iternext iter_id label val_id =
+  let iter_args = { iter_id; key_id = None; val_id } in
+  instr (IIterator (IterNext (iter_args, label)))
 
-let instr_iternextk id label key value =
-  instr (IIterator (IterNextK (id, label, key, value)))
+let instr_iternextk iter_id label val_id key_id =
+  let iter_args = { iter_id; key_id = Some key_id; val_id } in
+  instr (IIterator (IterNext (iter_args, label)))
 
 let instr_iterfree id = instr (IIterator (IterFree id))
 

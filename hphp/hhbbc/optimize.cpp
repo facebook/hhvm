@@ -577,10 +577,8 @@ void visit_blocks(const char* what,
 
 IterId iterFromInit(const php::Func& func, BlockId initBlock) {
   auto const& op = func.blocks[initBlock]->hhbcs.back();
-  if (op.op == Op::IterInit)   return op.IterInit.iter1;
-  if (op.op == Op::IterInitK)  return op.IterInitK.iter1;
-  if (op.op == Op::LIterInit)  return op.LIterInit.iter1;
-  if (op.op == Op::LIterInitK) return op.LIterInitK.iter1;
+  if (op.op == Op::IterInit)  return op.IterInit.ita.iterId;
+  if (op.op == Op::LIterInit) return op.LIterInit.ita.iterId;
   always_assert(false);
 }
 
@@ -680,15 +678,11 @@ struct OptimizeIterState {
       // transformation.
       switch (op.op) {
         case Op::IterInit:
-        case Op::IterInitK:
           assertx(opIdx == blk->hhbcs.size() - 1);
           fixupForInit();
           break;
         case Op::IterNext:
-          fixupFromState(op.IterNext.iter1);
-          break;
-        case Op::IterNextK:
-          fixupFromState(op.IterNextK.iter1);
+          fixupFromState(op.IterNext.ita.iterId);
           break;
         case Op::IterFree:
           fixupFromState(op.IterFree.iter1);
@@ -762,75 +756,34 @@ void optimize_iterators(const Index& index,
       continue;
     }
 
-    auto const subop = state.updated[fixup.init]
-      ? IterTypeOp::LocalBaseMutable
-      : IterTypeOp::LocalBaseConst;
+    auto const flags = state.updated[fixup.init]
+      ? IterArgs::Flags::None
+      : IterArgs::Flags::BaseConst;
 
     BytecodeVec newOps;
     assertx(fixup.base != NoLocalId);
 
     // Rewrite the iteration op to its liter equivalent:
     switch (op.op) {
-      case Op::IterInit:
+      case Op::IterInit: {
+        auto args = op.IterInit.ita;
+        auto const target = op.IterInit.target2;
+        args.flags = flags;
         newOps = {
           bc_with_loc(op.srcLoc, bc::PopC {}),
-          bc_with_loc(
-            op.srcLoc,
-            bc::LIterInit {
-              op.IterInit.iter1,
-              fixup.base,
-              op.IterInit.target2,
-              op.IterInit.loc3,
-              subop
-            }
-          )
+          bc_with_loc(op.srcLoc, bc::LIterInit{args, fixup.base, target})
         };
         break;
-      case Op::IterInitK:
+      }
+      case Op::IterNext: {
+        auto args = op.IterNext.ita;
+        auto const target = op.IterNext.target2;
+        args.flags = flags;
         newOps = {
-          bc_with_loc(op.srcLoc, bc::PopC {}),
-          bc_with_loc(
-            op.srcLoc,
-            bc::LIterInitK {
-              op.IterInitK.iter1,
-              fixup.base,
-              op.IterInitK.target2,
-              op.IterInitK.loc3,
-              op.IterInitK.loc4,
-              subop
-            }
-          )
+          bc_with_loc(op.srcLoc, bc::LIterNext{args, fixup.base, target}),
         };
         break;
-      case Op::IterNext:
-        newOps = {
-          bc_with_loc(
-            op.srcLoc,
-            bc::LIterNext {
-              op.IterNext.iter1,
-              fixup.base,
-              op.IterNext.target2,
-              op.IterNext.loc3,
-              subop
-            }
-          )
-        };
-        break;
-      case Op::IterNextK:
-        newOps = {
-          bc_with_loc(
-            op.srcLoc,
-            bc::LIterNextK {
-              op.IterNextK.iter1,
-              fixup.base,
-              op.IterNextK.target2,
-              op.IterNextK.loc3,
-              op.IterNextK.loc4,
-              subop
-            }
-          )
-        };
-        break;
+      }
       case Op::IterFree:
         newOps = {
           bc_with_loc(

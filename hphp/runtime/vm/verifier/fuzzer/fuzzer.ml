@@ -389,18 +389,17 @@ let mut_imms (is : IS.t) : IS.t =
     | SetRangeM (i, op, s) ->
         SetRangeM (mutate_int i !mag, op, mutate_int s !mag)
   in
+  let mutate_iter_args args =
+    let {iter_id; key_id; val_id} = args in
+    let key_id = Option.map key_id (fun x -> mutate_local_id x !mag) in
+    {iter_id; key_id; val_id = mutate_local_id val_id !mag}
+  in
   let mutate_iterator data s =
     match s with
-    | IterInit   (i, l, id)      ->
-        IterInit   (i, mutate_label data l,      mutate_local_id id  !mag)
-    | IterInitK  (i, l, id, id') ->
-        IterInitK  (i, mutate_label data l,
-                       mutate_local_id  id !mag, mutate_local_id id' !mag)
-    | IterNext   (i, l, id)      ->
-        IterNext   (i, mutate_label data l,      mutate_local_id id  !mag)
-    | IterNextK  (i, l, id, id') ->
-        IterNextK  (i, mutate_label data l,
-                       mutate_local_id  id !mag, mutate_local_id id' !mag)
+    | IterInit   (a, l)          ->
+        IterInit   (mutate_iter_args a, mutate_label data l)
+    | IterNext   (a, l)          ->
+        IterNext   (mutate_iter_args a, mutate_label data l)
     | IterBreak  (l, lst)        ->
         IterBreak     (mutate_label data l,
                        List.map ~f:(fun (k, i) -> (k, i)) lst)

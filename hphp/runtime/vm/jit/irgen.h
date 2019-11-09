@@ -299,6 +299,7 @@ Type predictedType(const IRGS&, const Location&);
 #define IMM_OA(subop)  subop
 #define IMM_KA         MemberKey
 #define IMM_LAR        LocalRange
+#define IMM_ITA        IterArgs
 #define IMM_FCA        FCallArgs
 
 #define NA /*  */
@@ -338,6 +339,7 @@ Type predictedType(const IRGS&, const Location&);
 #undef IMM_OA
 #undef IMM_KA
 #undef IMM_LAR
+#undef IMM_ITA
 #undef IMM_FCA
 
 ///////////////////////////////////////////////////////////////////////////////

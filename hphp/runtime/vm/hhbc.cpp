@@ -138,6 +138,11 @@ int immSize(Op op, ArgType type, PC immPC) {
     return pc - immPC;
   }
 
+  if (type == ITA) {
+    decodeIterArgs(pc);
+    return pc - immPC;
+  }
+
   if (type == FCA) {
     decodeFCallArgs(op, pc);
     return pc - immPC;
@@ -207,6 +212,8 @@ ArgUnion getImm(const PC origPC, int idx, const Unit* unit) {
     retval.u_KA = decode_member_key(pc, unit);
   } else if (type == LAR) {
     retval.u_LAR = decodeLocalRange(pc);
+  } else if (type == ITA) {
+    retval.u_ITA = decodeIterArgs(pc);
   } else if (type == FCA) {
     retval.u_FCA = decodeFCallArgs(op, pc);
   } else if (type == RATA) {
@@ -268,6 +275,7 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #define IMM_VSA 0
 #define IMM_KA 0
 #define IMM_LAR 0
+#define IMM_ITA 0
 #define IMM_FCA 0
 #define NA                    { 0,        0,        0,        0,        0,       0      },
 #define ONE(a)                { IMM_##a,  0,        0,        0,        0,       0      },
@@ -296,6 +304,7 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #undef IMM_VSA
 #undef IMM_KA
 #undef IMM_LAR
+#undef IMM_ITA
 #undef IMM_FCA
 #undef O
 #undef OA
@@ -708,6 +717,10 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
     );
   };
 
+  auto printLocal = [](int32_t local) {
+    return folly::to<std::string>(local);
+  };
+
   auto showOffset = [&](Offset offset) {
     if (u == nullptr) return folly::sformat("{}", offset);
     auto const unitOff = offsetOf(iStart + offset);
@@ -818,6 +831,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 } while (false)
 #define H_KA (out += ' ', out += show(decode_member_key(it, u)))
 #define H_LAR (out += ' ', out += show(decodeLocalRange(it)))
+#define H_ITA (out += ' ', out += show(decodeIterArgs(it), printLocal))
 #define H_FCA do {                                               \
   auto const fca = decodeFCallArgs(thisOpcode, it);              \
   auto const aeOffset = fca.asyncEagerOffset != kInvalidOffset   \
@@ -862,6 +876,7 @@ OPCODES
 #undef H_VSA
 #undef H_KA
 #undef H_LAR
+#undef H_ITA
 #undef H_FCA
     default: assertx(false);
   };
@@ -1184,6 +1199,18 @@ IterTable getIterTable(PC opcode) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+std::string show(const IterArgs& ita, PrintLocal print_local) {
+  auto parts = std::vector<std::string>{};
+  if (ita.flags & IterArgs::Flags::BaseConst) parts.push_back("BaseConst");
+  auto const flags = folly::join(' ', parts);
+
+  auto const key = ita.hasKey()
+    ? folly::to<std::string>("K:", print_local(ita.keyId))
+    : folly::to<std::string>("NK");
+  auto const val = "V:" + print_local(ita.valId);
+  return folly::sformat("<{}> {} {} {}", flags, ita.iterId, key, val);
+}
 
 std::string show(const LocalRange& range) {
   return folly::sformat(

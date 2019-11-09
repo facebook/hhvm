@@ -25,7 +25,7 @@
 
          # Loop over array and jump to each label.
          CGetL $arr
-         IterInit 0 endfor $foo
+         IterInit 0 NK V:$foo endfor
 loop:    CGetL $foo
          Switch Unbounded 0 <label_0 label_1 label_2 label_3 label_4>
 
@@ -41,7 +41,7 @@ label_4: String "label_4\n"
 
 printer: Print
          PopC
-         IterNext 0 loop $foo
+         IterNext 0 NK V:$foo loop
 
 endfor:  Int 1
          RetC

@@ -95,20 +95,15 @@ inline bool isRet(PC pc) {
   return op == Op::RetC || op == Op::RetCSuspended || op == Op::RetM;
 }
 
-// Return true if pc points to an Iter instruction whose first immedate
-// argument is an iterator id.
+// Return true if pc points to an Iter instruction which takes either an
+// iterator ID or an IterArgs struct as its first immediate. This method
+// excludes IterBreak, because it has a variable-length list of iter IDs.
 inline bool isIter(PC pc) {
-  // IterBreak is not included, because it has a variable-length list of
-  // iterartor ids, rather than a single iterator id.
   switch (peek_op(pc)) {
   case Op::IterInit:
   case Op::LIterInit:
-  case Op::IterInitK:
-  case Op::LIterInitK:
   case Op::IterNext:
   case Op::LIterNext:
-  case Op::IterNextK:
-  case Op::LIterNextK:
   case Op::IterFree:
   case Op::LIterFree:
     return true;
@@ -116,6 +111,13 @@ inline bool isIter(PC pc) {
     break;
   }
   return false;
+}
+
+inline int getIterId(PC pc) {
+  assertx(isIter(pc));
+  auto const op = peek_op(pc);
+  auto const im = getImm(pc, 0);
+  return op == Op::IterFree || op == Op::LIterFree ? im.u_IA : im.u_ITA.iterId;
 }
 
 inline int getImmIva(PC pc) {

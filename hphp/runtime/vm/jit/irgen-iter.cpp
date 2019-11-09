@@ -85,132 +85,66 @@ bool iterInitEmptyBase(IRGS& env, Offset doneOffset,
 
 //////////////////////////////////////////////////////////////////////
 
-void emitIterInit(IRGS& env, int32_t iterId, Offset doneOffset,
-                  int32_t valLocalId) {
+void emitIterInit(IRGS& env, IterArgs ita, Offset doneOffset) {
   auto const base = topC(env);
   auto const type = IterTypeOp::NonLocal;
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
   if (iterInitEmptyBase(env, doneOffset, base, type)) return;
 
-  auto const data = IterInitData(iterId, kInvalidId, valLocalId, type);
+  auto const data = IterInitData(ita.iterId, ita.keyId, ita.valId, type);
   specializeIterInit(env, doneOffset, data, kInvalidId);
 
   discard(env, 1);
-  auto const result = gen(env, IterInit, data, base, fp(env));
+  auto const op = ita.hasKey() ? IterInitK : IterInit;
+  auto const result = gen(env, op, data, base, fp(env));
   implIterInitJmp(env, doneOffset, result);
 }
 
-void emitIterInitK(IRGS& env, int32_t iterId, Offset doneOffset,
-                   int32_t valLocalId, int32_t keyLocalId) {
-  auto const base = topC(env);
-  auto const type = IterTypeOp::NonLocal;
-  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInitK);
-  if (iterInitEmptyBase(env, doneOffset, base, type)) return;
-
-  auto const data = IterInitData(iterId, keyLocalId, valLocalId, type);
-  specializeIterInit(env, doneOffset, data, kInvalidId);
-
-  discard(env, 1);
-  auto const result = gen(env, IterInitK, data, base, fp(env));
-  implIterInitJmp(env, doneOffset, result);
-}
-
-void emitIterNext(IRGS& env,
-                  int32_t iterId,
-                  Offset loopOffset,
-                  int32_t valLocalId) {
-  auto const data = IterData(iterId, kInvalidId, valLocalId);
+void emitIterNext(IRGS& env, IterArgs ita, Offset loopOffset) {
+  auto const data = IterData(ita.iterId, ita.keyId, ita.valId);
   if (specializeIterNext(env, loopOffset, data, kInvalidId)) return;
 
-  auto const result = gen(env, IterNext, data, fp(env));
+  auto const op = ita.hasKey() ? IterNextK : IterNext;
+  auto const result = gen(env, op, data, fp(env));
   implIterNextJmp(env, loopOffset, result);
 }
 
-void emitIterNextK(IRGS& env,
-                   int32_t iterId,
-                   Offset loopOffset,
-                   int32_t valLocalId,
-                   int32_t keyLocalId) {
-  auto const data = IterData(iterId, keyLocalId, valLocalId);
-  if (specializeIterNext(env, loopOffset, data, kInvalidId)) return;
-
-  auto const result = gen(env, IterNextK, data, fp(env));
-  implIterNextJmp(env, loopOffset, result);
-}
-
-void emitLIterInit(IRGS& env,
-                   int32_t iterId,
-                   int32_t baseLocalId,
-                   Offset doneOffset,
-                   int32_t valLocalId,
-                   IterTypeOp subop) {
+void emitLIterInit(IRGS& env, IterArgs ita,
+                   int32_t baseLocalId, Offset doneOffset) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterInit-pseudomain);
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
+  auto const type = ita.flags & IterArgs::Flags::BaseConst
+    ? IterTypeOp::LocalBaseConst
+    : IterTypeOp::LocalBaseMutable;
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
-  if (iterInitEmptyBase(env, doneOffset, base, subop)) return;
+  if (iterInitEmptyBase(env, doneOffset, base, type)) return;
 
-  auto const data = IterInitData(iterId, kInvalidId, valLocalId, subop);
+  auto const data = IterInitData(ita.iterId, ita.keyId, ita.valId, type);
   specializeIterInit(env, doneOffset, data, baseLocalId);
 
   if (base->isA(TObj)) gen(env, IncRef, base);
-  auto const op = base->isA(TArrLike) ? LIterInit : IterInit;
+  auto const op = base->isA(TArrLike)
+    ? (ita.hasKey() ? LIterInitK : LIterInit)
+    : (ita.hasKey() ? IterInitK : IterInit);
   auto const result = gen(env, op, data, base, fp(env));
   implIterInitJmp(env, doneOffset, result);
 }
 
-void emitLIterInitK(IRGS& env,
-                    int32_t iterId,
-                    int32_t baseLocalId,
-                    Offset doneOffset,
-                    int32_t valLocalId,
-                    int32_t keyLocalId,
-                    IterTypeOp subop) {
-  if (curFunc(env)->isPseudoMain()) PUNT(LIterInitK-pseudomain);
-  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
-  if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInitK);
-  if (iterInitEmptyBase(env, doneOffset, base, subop)) return;
-
-  auto const data = IterInitData(iterId, keyLocalId, valLocalId, subop);
-  specializeIterInit(env, doneOffset, data, baseLocalId);
-
-  if (base->isA(TObj)) gen(env, IncRef, base);
-  auto const op = base->isA(TArrLike) ? LIterInitK : IterInitK;
-  auto const result = gen(env, op, data, base, fp(env));
-  implIterInitJmp(env, doneOffset, result);
-}
-
-void emitLIterNext(IRGS& env,
-                   int32_t iterId,
-                   int32_t baseLocalId,
-                   Offset loopOffset,
-                   int32_t valLocalId,
-                   IterTypeOp subop) {
+void emitLIterNext(IRGS& env, IterArgs ita,
+                   int32_t baseLocalId, Offset loopOffset) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterNext-pseudomain);
-  auto const data = IterData(iterId, kInvalidId, valLocalId);
+  auto const data = IterData(ita.iterId, ita.keyId, ita.valId);
   if (specializeIterNext(env, loopOffset, data, baseLocalId)) return;
 
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
-  auto const result = base->isA(TArrLike)
-    ? gen(env, LIterNext, data, base, fp(env))
-    : gen(env, IterNext, data, fp(env));
-  implIterNextJmp(env, loopOffset, result);
-}
-
-void emitLIterNextK(IRGS& env,
-                    int32_t iterId,
-                    int32_t baseLocalId,
-                    Offset loopOffset,
-                    int32_t valLocalId,
-                    int32_t keyLocalId,
-                    IterTypeOp subop) {
-  if (curFunc(env)->isPseudoMain()) PUNT(LIterNextK-pseudomain);
-  auto const data = IterData(iterId, keyLocalId, valLocalId);
-  if (specializeIterNext(env, loopOffset, data, baseLocalId)) return;
-
-  auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
-  auto const result = base->isA(TArrLike)
-    ? gen(env, LIterNextK, data, base, fp(env))
-    : gen(env, IterNextK, data, fp(env));
+  auto const result = [&]{
+    if (base->isA(TArrLike)) {
+      auto const op = ita.hasKey() ? LIterNextK : LIterNext;
+      return gen(env, op, data, base, fp(env));
+    }
+    auto const op = ita.hasKey() ? IterNextK : IterNext;
+    return gen(env, op, data, fp(env));
+  }();
   implIterNextJmp(env, loopOffset, result);
 }
 

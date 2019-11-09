@@ -48,10 +48,8 @@ mod label_rewriter {
         use InstructIterator::*;
         use InstructMisc::*;
         match instr {
-            IIterator(IterInit(_, l, _))
-            | IIterator(IterInitK(_, l, _, _))
-            | IIterator(IterNext(_, l, _))
-            | IIterator(IterNextK(_, l, _, _))
+            IIterator(IterInit(_, l))
+            | IIterator(IterNext(_, l))
             | IIterator(IterBreak(l, _))
             | IGenDelegation(YieldFromDelegate(_, l))
             | IMisc(MemoGet(l, _))
@@ -131,10 +129,8 @@ mod label_rewriter {
         use InstructIterator::*;
         use InstructMisc::*;
         match instr {
-            IIterator(IterInit(_, l, _))
-            | IIterator(IterInitK(_, l, _, _))
-            | IIterator(IterNext(_, l, _))
-            | IIterator(IterNextK(_, l, _, _))
+            IIterator(IterInit(_, l))
+            | IIterator(IterNext(_, l))
             | IIterator(IterBreak(l, _))
             | IGenDelegation(YieldFromDelegate(_, l))
             | ICall(FCall(FcallArgs(_, _, _, _, Some(l))))

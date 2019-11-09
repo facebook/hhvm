@@ -185,6 +185,11 @@ std::string show(const Func& func, const Bytecode& bc) {
     }
   };
 
+  auto append_ita = [&](const IterArgs& ita) {
+    auto const print = [&](int32_t local) { return local_string(func, local); };
+    folly::toAppend(show(ita, print), &ret);
+  };
+
 #define IMM_BLA(n)     ret += " "; append_switch(data.targets);
 #define IMM_SLA(n)     ret += " "; append_sswitch(data.targets);
 #define IMM_ILA(n)     ret += " "; append_itertab(data.iterTab);
@@ -202,6 +207,7 @@ std::string show(const Func& func, const Bytecode& bc) {
 #define IMM_VSA(n)     ret += " "; append_vsa(data.keys);
 #define IMM_KA(n)      ret += " "; append_mkey(data.mkey);
 #define IMM_LAR(n)     ret += " "; append_lar(data.locrange);
+#define IMM_ITA(n)     ret += " "; append_ita(data.ita);
 #define IMM_FCA(n)     do {                                       \
   auto const aeTarget = data.fca.asyncEagerTarget != NoBlockId    \
     ? folly::sformat("<aeblk:{}>", data.fca.asyncEagerTarget)     \

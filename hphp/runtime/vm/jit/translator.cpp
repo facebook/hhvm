@@ -301,12 +301,8 @@ static const struct {
 
   { OpIterInit,    {Stack1,           Local,        OutUnknown      }},
   { OpLIterInit,   {Local,            Local,        OutUnknown      }},
-  { OpIterInitK,   {Stack1,           Local,        OutUnknown      }},
-  { OpLIterInitK,  {Local,            Local,        OutUnknown      }},
   { OpIterNext,    {None,             Local,        OutUnknown      }},
   { OpLIterNext,   {Local,            Local,        OutUnknown      }},
-  { OpIterNextK,   {None,             Local,        OutUnknown      }},
-  { OpLIterNextK,  {Local,            Local,        OutUnknown      }},
   { OpIterFree,    {None,             None,         OutNone         }},
   { OpLIterFree,   {Local,            None,         OutNone         }},
   { OpIterBreak,   {Local,            None,         OutNone         }},
@@ -610,15 +606,14 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define VSA(n)
 #define KA(n)
 #define LAR(n)
+#define ITA(n)
 #define FCA(n)
 #define O(name, imm, ...) case Op::name: imm break;
 
 size_t localImmIdx(Op op) {
   switch (op) {
     case Op::LIterInit:
-    case Op::LIterInitK:
     case Op::LIterNext:
-    case Op::LIterNextK:
     case Op::LIterFree:
       return 1;
     default:
@@ -669,6 +664,7 @@ size_t memberKeyImmIdx(Op op) {
 #undef VSA
 #undef KA
 #undef LAR
+#undef ITA
 #undef FCA
 #undef O
 
@@ -842,12 +838,8 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   switch (ni.op()) {
   case Op::IterBreak:
   case Op::IterNext:
-  case Op::IterNextK:
   case Op::LIterNext:
-  case Op::LIterNextK:
-  case Op::IterInitK:
   case Op::IterInit:
-  case Op::LIterInitK:
   case Op::LIterInit:
   case Op::JmpZ:
   case Op::JmpNZ:
@@ -1130,6 +1122,7 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 #define IMM_OA(subop)  (subop)IMM_OA_IMPL
 #define IMM_KA(n)      ni.imm[n].u_KA
 #define IMM_LAR(n)     ni.imm[n].u_LAR
+#define IMM_ITA(n)     ni.imm[n].u_ITA
 #define IMM_FCA(n)     ni.imm[n].u_FCA
 
 #define ONE(x0)                , IMM_##x0(0)
@@ -1172,6 +1165,7 @@ static void translateDispatch(irgen::IRGS& irgs,
 #undef IMM_VSA
 #undef IMM_KA
 #undef IMM_LAR
+#undef IMM_ITA
 #undef IMM_FCA
 
 //////////////////////////////////////////////////////////////////////

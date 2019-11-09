@@ -238,6 +238,12 @@ struct hasher_impl {
     return HPHP::hash_int64_pair(range.first, range.count);
   }
 
+  static size_t hash(IterArgs ita) {
+    auto hash = HPHP::hash_int64_pair(ita.flags, ita.iterId);
+    hash = HPHP::hash_int64_pair(hash, ita.keyId);
+    return HPHP::hash_int64_pair(hash, ita.valId);
+  }
+
   static size_t hash(FCallArgs fca) {
     uint64_t hash = HPHP::hash_int64_pair(fca.numArgs, fca.numRets);
     hash = HPHP::hash_int64_pair(hash, fca.flags);
@@ -390,6 +396,7 @@ namespace imm {
 #define IMM_ID_VSA      VSA
 #define IMM_ID_KA       KA
 #define IMM_ID_LAR      LAR
+#define IMM_ID_ITA      ITA
 #define IMM_ID_FCA      FCA
 
 #define IMM_TY_BLA      SwitchTab
@@ -408,6 +415,7 @@ namespace imm {
 #define IMM_TY_VSA      CompactVector<LSString>
 #define IMM_TY_KA       MKey
 #define IMM_TY_LAR      LocalRange
+#define IMM_TY_ITA      IterArgs
 #define IMM_TY_FCA      FCallArgs
 
 #define IMM_NAME_BLA(n)     targets
@@ -427,6 +435,7 @@ namespace imm {
 #define IMM_NAME_VSA(n)     keys
 #define IMM_NAME_KA(n)      mkey
 #define IMM_NAME_LAR(n)     locrange
+#define IMM_NAME_ITA(n)     ita
 #define IMM_NAME_FCA(n)     fca
 
 #define IMM_TARGETS_BLA(n)  for (auto& t : targets) f(t);
@@ -446,6 +455,7 @@ namespace imm {
 #define IMM_TARGETS_VSA(n)
 #define IMM_TARGETS_KA(n)
 #define IMM_TARGETS_LAR(n)
+#define IMM_TARGETS_ITA(n)
 #define IMM_TARGETS_FCA(n)   if (fca.asyncEagerTarget != NoBlockId) { \
                                f(fca.asyncEagerTarget);               \
                              }
@@ -466,6 +476,7 @@ namespace imm {
 #define IMM_EXTRA_VSA
 #define IMM_EXTRA_KA
 #define IMM_EXTRA_LAR
+#define IMM_EXTRA_ITA
 #define IMM_EXTRA_FCA
 
 #define IMM_MEM(which, n)          IMM_TY_##which IMM_NAME_##which(n)
@@ -782,6 +793,7 @@ OPCODES
 #undef IMM_TY_VSA
 #undef IMM_TY_KA
 #undef IMM_TY_LAR
+#undef IMM_TY_ITA
 #undef IMM_TY_FCA
 
 // These are deliberately not undefined, so they can be used in other
@@ -818,6 +830,7 @@ OPCODES
 #undef IMM_TARGETS_OA
 #undef IMM_TARGETS_KA
 #undef IMM_TARGETS_LAR
+#undef IMM_TARGETS_ITA
 #undef IMM_TARGETS_FCA
 
 #undef IMM_TARGETS_NA
@@ -843,6 +856,7 @@ OPCODES
 #undef IMM_EXTRA_OA
 #undef IMM_EXTRA_KA
 #undef IMM_EXTRA_LAR
+#undef IMM_EXTRA_ITA
 #undef IMM_EXTRA_FCA
 
 #undef IMM_MEM

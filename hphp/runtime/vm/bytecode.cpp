@@ -4944,21 +4944,27 @@ void iopFCallBuiltin(
 
 namespace {
 
-template <bool HasKey>
-void initIterator(PC& pc, PC targetpc, Iter* it, IterTypeOp op,
-                  TypedValue* base, TypedValue* val, TypedValue* key) {
-  auto const local = op != IterTypeOp::NonLocal;
+void implIterInit(PC& pc, const IterArgs& ita, TypedValue* base,
+                  PC targetpc, IterTypeOp op) {
+  auto const local = base != nullptr;
+
+  if (!local) base = vmStack().topC();
+  auto val = frame_local(vmfp(), ita.valId);
+  auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
+  auto it = frame_iter(vmfp(), ita.iterId);
+
   if (isArrayLikeType(type(base))) {
     auto const arr = base->m_data.parr;
-    auto const res = HasKey ? new_iter_array_key_helper(op)(it, arr, val, key)
-                            : new_iter_array_helper(op)(it, arr, val);
+    auto const res = key
+      ? new_iter_array_key_helper(op)(it, arr, val, key)
+      : new_iter_array_helper(op)(it, arr, val);
     if (res == 0) pc = targetpc;
     if (!local) vmStack().discard();
     return;
   }
 
   // NOTE: It looks like we could call new_iter_object at this point. However,
-  // doing so is incorrect, new_iter_array / new_iter_object only handle
+  // doing so is incorrect, since new_iter_array / new_iter_object only handle
   // array-like and object bases, respectively. We may have some other kind of
   // base which the generic Iter::init handles correctly.
   //
@@ -4973,84 +4979,56 @@ void initIterator(PC& pc, PC targetpc, Iter* it, IterTypeOp op,
 
   if (it->init(base)) {
     tvAsVariant(val) = it->val();
-    if (HasKey) tvAsVariant(key) = it->key();
+    if (key) tvAsVariant(key) = it->key();
   } else {
     pc = targetpc;
   }
   if (!local) vmStack().popC();
 }
 
-}
+void implIterNext(PC& pc, const IterArgs& ita, TypedValue* base, PC targetpc) {
+  auto val = frame_local(vmfp(), ita.valId);
+  auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
+  auto it = frame_iter(vmfp(), ita.iterId);
 
-OPTBLD_INLINE void iopIterInit(PC& pc, Iter* it, PC targetpc, local_var val) {
-  auto const base = vmStack().topC();
-  auto constexpr HasKey = false;
-  auto constexpr op = IterTypeOp::NonLocal;
-  initIterator<HasKey>(pc, targetpc, it, op, base, val.ptr, nullptr);
-}
+  auto const more = [&]{
+    if (base != nullptr && isArrayLikeType(base->m_type)) {
+      auto const arr = base->m_data.parr;
+      return key ? liter_next_key_ind(it, val, key, arr)
+                 : liter_next_ind(it, val, arr);
+    }
+    return key ? iter_next_key_ind(it, val, key) : iter_next_ind(it, val);
+  }();
 
-OPTBLD_INLINE
-void iopIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  auto const base = vmStack().topC();
-  auto constexpr HasKey = true;
-  auto constexpr op = IterTypeOp::NonLocal;
-  initIterator<HasKey>(pc, targetpc, it, op, base, val.ptr, key.ptr);
-}
-
-OPTBLD_INLINE void iopLIterInit(PC& pc, Iter* it, local_var local,
-                                PC targetpc, local_var val, IterTypeOp op) {
-  auto constexpr HasKey = false;
-  initIterator<HasKey>(pc, targetpc, it, op, local.ptr, val.ptr, nullptr);
-}
-
-OPTBLD_INLINE void iopLIterInitK(PC& pc, Iter* it, local_var local, PC targetpc,
-                                 local_var val, local_var key, IterTypeOp op) {
-  auto constexpr HasKey = true;
-  initIterator<HasKey>(pc, targetpc, it, op, local.ptr, val.ptr, key.ptr);
-}
-
-OPTBLD_INLINE void iopIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
-  if (iter_next_ind(it, val.ptr)) {
+  if (more) {
     vmpc() = targetpc;
     jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
   }
 }
 
-OPTBLD_INLINE
-void iopIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  if (iter_next_key_ind(it, val.ptr, key.ptr)) {
-    vmpc() = targetpc;
-    jmpSurpriseCheck(targetpc - pc);
-    pc = targetpc;
-  }
 }
 
-OPTBLD_INLINE void iopLIterNext(PC& pc, Iter* it, local_var base,
-                                PC targetpc, local_var val, IterTypeOp op) {
-  auto valOut = val.ptr;
-  auto const hasMore = isArrayLikeType(base.ptr->m_type)
-    ? liter_next_ind(it, valOut, base.ptr->m_data.parr)
-    : iter_next_ind(it, valOut);
-  if (hasMore) {
-    vmpc() = targetpc;
-    jmpSurpriseCheck(targetpc - pc);
-    pc = targetpc;
-  }
+OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita, PC targetpc) {
+  auto const op = IterTypeOp::NonLocal;
+  implIterInit(pc, ita, nullptr, targetpc, op);
 }
 
-OPTBLD_INLINE void iopLIterNextK(PC& pc, Iter* it, local_var base, PC targetpc,
-                                 local_var val, local_var key, IterTypeOp op) {
-  auto valOut = val.ptr;
-  auto keyOut = key.ptr;
-  auto const hasMore = isArrayLikeType(base.ptr->m_type)
-    ? liter_next_key_ind(it, valOut, keyOut, base.ptr->m_data.parr)
-    : iter_next_key_ind(it, valOut, keyOut);
-  if (hasMore) {
-    vmpc() = targetpc;
-    jmpSurpriseCheck(targetpc - pc);
-    pc = targetpc;
-  }
+OPTBLD_INLINE void iopLIterInit(PC& pc, const IterArgs& ita,
+                                local_var base, PC targetpc) {
+  auto const op = ita.flags & IterArgs::Flags::BaseConst
+    ? IterTypeOp::LocalBaseConst
+    : IterTypeOp::LocalBaseMutable;
+  implIterInit(pc, ita, base.ptr, targetpc, op);
+}
+
+OPTBLD_INLINE void iopIterNext(PC& pc, const IterArgs& ita, PC targetpc) {
+  implIterNext(pc, ita, nullptr, targetpc);
+}
+
+OPTBLD_INLINE void iopLIterNext(PC& pc, const IterArgs& ita,
+                                local_var base, PC targetpc) {
+  implIterNext(pc, ita, base.ptr, targetpc);
 }
 
 OPTBLD_INLINE void iopIterFree(Iter* it) {
@@ -6240,6 +6218,7 @@ struct litstr_id {
 #define DECODE_OA(ty) decode<ty>(pc)
 #define DECODE_KA decode_member_key(pc, liveUnit())
 #define DECODE_LAR decodeLocalRange(pc)
+#define DECODE_ITA decodeIterArgs(pc)
 #define DECODE_FCA decodeFCallArgs(op, pc)
 #define DECODE_BLA decode_imm_array<Offset>(pc)
 #define DECODE_SLA decode_imm_array<StrVecItem>(pc)

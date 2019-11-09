@@ -243,23 +243,15 @@ interpOutputLocals(IRGS& env,
       smashesAllLocals = true;
       break;
 
-    case OpIterInitK:
-    case OpIterNextK:
-      setImmLocType(3, TCell);
-      /* fallthrough */
     case OpIterInit:
-    case OpIterNext:
-      setImmLocType(2, TCell);
-      break;
-
-    case OpLIterInitK:
-    case OpLIterNextK:
-      setImmLocType(4, TCell);
-      /* fallthrough */
     case OpLIterInit:
-    case OpLIterNext:
-      setImmLocType(3, TCell);
+    case OpIterNext:
+    case OpLIterNext: {
+      auto const ita = getImm(sk.pc(),  0).u_ITA;
+      setLocType(ita.valId, TCell);
+      if (ita.hasKey()) setLocType(ita.keyId, TCell);
       break;
+    }
 
     case OpVerifyParamTypeTS:
     case OpVerifyParamType: {

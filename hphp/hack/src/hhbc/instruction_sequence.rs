@@ -64,38 +64,50 @@ impl Instr {
         Self::make_instr_lit_const(InstructLitConst::TypedValue(TypedValue::VArray(vec![])))
     }
 
-    pub fn make_instr_iterinit(iter_id: Iter, label: Label, value: local::Type) -> Self {
-        Self::make_instr(Instruct::IIterator(InstructIterator::IterInit(
-            iter_id, label, value,
-        )))
+    pub fn make_instr_iterinit(id: Iter, label: Label, value: local::Type) -> Self {
+        let args = IterArgs {
+            iter_id: id,
+            key_id: None,
+            val_id: value,
+        };
+        Self::make_instr(Instruct::IIterator(InstructIterator::IterInit(args, label)))
     }
 
     pub fn make_instr_iterinitk(
         id: Iter,
         label: Label,
-        key: local::Type,
         value: local::Type,
+        key: local::Type,
     ) -> Self {
-        Self::make_instr(Instruct::IIterator(InstructIterator::IterInitK(
-            id, label, key, value,
-        )))
+        let args = IterArgs {
+            iter_id: id,
+            key_id: Some(key),
+            val_id: value,
+        };
+        Self::make_instr(Instruct::IIterator(InstructIterator::IterInit(args, label)))
     }
 
     pub fn make_instr_iternext(id: Iter, label: Label, value: local::Type) -> Self {
-        Self::make_instr(Instruct::IIterator(InstructIterator::IterNext(
-            id, label, value,
-        )))
+        let args = IterArgs {
+            iter_id: id,
+            key_id: None,
+            val_id: value,
+        };
+        Self::make_instr(Instruct::IIterator(InstructIterator::IterNext(args, label)))
     }
 
     pub fn make_instr_iternextk(
         id: Iter,
         label: Label,
-        key: local::Type,
         value: local::Type,
+        key: local::Type,
     ) -> Self {
-        Self::make_instr(Instruct::IIterator(InstructIterator::IterNextK(
-            id, label, key, value,
-        )))
+        let args = IterArgs {
+            iter_id: id,
+            key_id: Some(key),
+            val_id: value,
+        };
+        Self::make_instr(Instruct::IIterator(InstructIterator::IterNext(args, label)))
     }
 
     pub fn make_instr_iterfree(id: Iter) -> Self {

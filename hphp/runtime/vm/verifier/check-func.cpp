@@ -370,9 +370,8 @@ Offset decodeOffset(PC* ppc) {
 }
 
 bool FuncChecker::checkLocal(PC pc, int k) {
-  if (k < 0 || k >= numLocals()) {
-    error("invalid local variable id %d at Offset %d\n",
-           k, offset(pc));
+  if (!(0 <= k && k < numLocals())) {
+    error("invalid local variable id %d at Offset %d\n", k, offset(pc));
     return false;
   }
   return true;
@@ -426,10 +425,7 @@ bool FuncChecker::checkImmILA(PC& pc, PC const /*instr*/) {
       ok = false;
     }
     if (iter.kind == KindOfLIter) {
-      if (iter.local < 0 || iter.local >= numLocals()) {
-        error("invalid iterator local %d at %d\n", iter.local, offset(pc));
-        ok = false;
-      }
+      ok &= checkLocal(pc, iter.local);
     } else if (iter.local != kInvalidId) {
       error("invalid iterator local for non-LIter at %d\n", offset(pc));
       ok = false;
@@ -475,7 +471,7 @@ bool FuncChecker::checkImmLA(PC& pc, PC const instr) {
 
 bool FuncChecker::checkImmIA(PC& pc, PC const instr) {
   auto const k = decode_iva(pc);
-  if (k >= numIters()) {
+  if (!(0 <= k && k < numIters())) {
     error("invalid iterator variable id %d at %d\n", k, offset(instr));
     return false;
   }
@@ -581,6 +577,18 @@ bool FuncChecker::checkImmLAR(PC& pc, PC const instr) {
   for (auto i = uint32_t{0}; i < range.count; ++i) {
     ok &= checkLocal(instr, range.first + i);
   }
+  return ok;
+}
+
+bool FuncChecker::checkImmITA(PC& pc, PC const instr) {
+  auto ok = true;
+  auto ita = decodeIterArgs(pc);
+  if (!(0 <= ita.iterId && ita.iterId < numIters())) {
+    error("invalid iterator variable id %d at %d\n", ita.iterId, offset(instr));
+    ok = false;
+  }
+  ok &= checkLocal(pc, ita.valId);
+  if (ita.hasKey()) ok &= checkLocal(pc, ita.keyId);
   return ok;
 }
 
@@ -933,15 +941,12 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
 // iterator instruction is valid. For *IterInit, it must not already be
 // initialized; for *IterNext and *IterFree, it must be initialized.
 bool FuncChecker::checkIter(State* cur, PC const pc) {
-  assertx(isIter(pc));
-  int id = getImmIva(pc);
   bool ok = true;
   auto op = peek_op(pc);
-  if (op == Op::IterInit || op == Op::IterInitK ||
-      op == Op::LIterInit || op == Op::LIterInitK) {
+  auto const id = getIterId(pc);
+  if (op == Op::IterInit || op == Op::LIterInit) {
     if (cur->iters[id]) {
-      error(
-        "IterInit* <%d> trying to double-initialize\n", id);
+      error("IterInit* <%d> trying to double-initialize\n", id);
       ok = false;
     }
   } else {
@@ -956,9 +961,9 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
   return ok;
 }
 
-/* Returns a set of the immediates to op that are a local id */
-std::set<int> localImmediates(Op op) {
-  std::set<int> imms;
+/* Returns the set of local IDs that appear in the op's immediates */
+std::set<int> localIds(Op op, PC pc) {
+  std::set<int> result;
   switch (op) {
 #define NA
 #define ONE(a) a(0)
@@ -967,7 +972,7 @@ std::set<int> localImmediates(Op op) {
 #define FOUR(a, b, c, d) THREE(a, b, c) d(3)
 #define FIVE(a, b, c, d, e) FOUR(a, b, c, d) e(4)
 #define SIX(a, b, c, d, e, f) FIVE(a, b, c, d, f) f(5)
-#define LA(n) imms.insert(n);
+#define LA(n) result.insert(getImm(pc, n).u_LA);
 #define MA(n)
 #define BLA(n)
 #define SLA(n)
@@ -985,6 +990,11 @@ std::set<int> localImmediates(Op op) {
 #define VSA(n)
 #define KA(n)
 #define LAR(n)
+#define ITA(n) do {                             \
+    auto const ita = getImm(pc, n).u_ITA;       \
+    result.insert(ita.valId);                   \
+    if (ita.hasKey()) result.insert(ita.keyId); \
+  } while (false);
 #define FCA(n)
 #define O(name, imm, in, out, flags) case Op::name: imm; break;
     OPCODES
@@ -1013,10 +1023,11 @@ std::set<int> localImmediates(Op op) {
 #undef VSA
 #undef KA
 #undef LAR
+#undef ITA
 #undef FCA
 #undef O
   }
-  return imms;
+  return result;
 }
 
 bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
@@ -1342,8 +1353,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
   }
 
   if (op != Op::Silence && !isTypeAssert(op)) {
-    for (int imm : localImmediates(op)) {
-      auto local = getImm(pc, imm).u_LA;
+    for (auto const local : localIds(op, pc)) {
       if (cur->silences.size() > local && cur->silences[local]) {
         ferror("{} at PC {} affected a local variable ({}) which was reserved "
                "for storing the error reporting level\n",
@@ -1611,12 +1621,8 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     // iteration (safe variants)
     case Op::IterInit:
     case Op::LIterInit:
-    case Op::IterInitK:
-    case Op::LIterInitK:
     case Op::IterNext:
     case Op::LIterNext:
-    case Op::IterNextK:
-    case Op::LIterNextK:
     case Op::IterFree:
     case Op::LIterFree:
     case Op::IterBreak:
@@ -2011,11 +2017,9 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     // IterInit* and IterNext*, Both implicitly free their iterator variable
     // on the loop-exit path.  Compute the iterator state on the "taken" path;
     // the fall-through path has the opposite state.
-    int id = getImmIva(b->last);
+    auto const id = getIterId(b->last);
     auto const last_op = peek_op(b->last);
-    bool taken_state =
-      (last_op == OpIterNext || last_op == OpIterNextK ||
-       last_op == OpLIterNext || last_op == OpLIterNextK);
+    bool taken_state = last_op == OpIterNext || last_op == OpLIterNext;
     bool save = cur->iters[id];
     cur->iters[id] = taken_state;
     if (m_errmode == kVerbose) {

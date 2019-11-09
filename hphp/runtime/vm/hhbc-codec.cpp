@@ -82,6 +82,23 @@ LocalRange decodeLocalRange(const unsigned char*& pc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void encodeIterArgs(UnitEmitter& ue, const IterArgs& args) {
+  ue.emitByte(args.flags);
+  ue.emitIVA(args.iterId);
+  ue.emitIVA(args.keyId - IterArgs::kNoKey);
+  ue.emitIVA(args.valId);
+}
+
+IterArgs decodeIterArgs(PC& pc) {
+  auto const flags = static_cast<IterArgs::Flags>(decode_byte(pc));
+  auto const iterId = int32_t(decode_iva(pc));
+  auto const keyId = int32_t(decode_iva(pc)) + IterArgs::kNoKey;
+  auto const valId = int32_t(decode_iva(pc));
+  return IterArgs(flags, iterId, keyId, valId);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
                          const uint8_t* inoutArgs, bool hasAsyncEagerOffset) {
   auto constexpr kFirstNumArgsBit = FCallArgsBase::kFirstNumArgsBit;

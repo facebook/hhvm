@@ -27,10 +27,8 @@ let lookup_def l defs =
 (* Get any regular labels referenced by this instruction *)
 let get_regular_labels instr =
   match instr with
-  | IIterator (IterInit (_, l, _))
-  | IIterator (IterInitK (_, l, _, _))
-  | IIterator (IterNext (_, l, _))
-  | IIterator (IterNextK (_, l, _, _))
+  | IIterator (IterInit (_, l))
+  | IIterator (IterNext (_, l))
   | IIterator (IterBreak (l, _))
   | ICall (FCall (_, _, _, _, Some l))
   | ICall (FCallClsMethod ((_, _, _, _, Some l), _))
@@ -82,12 +80,8 @@ let create_label_ref_map defs params body =
 
 let relabel_instr instr relabel =
   match instr with
-  | IIterator (IterInit (id, l, v)) -> IIterator (IterInit (id, relabel l, v))
-  | IIterator (IterInitK (id, l, k, v)) ->
-    IIterator (IterInitK (id, relabel l, k, v))
-  | IIterator (IterNext (id, l, v)) -> IIterator (IterNext (id, relabel l, v))
-  | IIterator (IterNextK (id, l, k, v)) ->
-    IIterator (IterNextK (id, relabel l, k, v))
+  | IIterator (IterInit (id, l)) -> IIterator (IterInit (id, relabel l))
+  | IIterator (IterNext (id, l)) -> IIterator (IterNext (id, relabel l))
   | IIterator (IterBreak (l, x)) -> IIterator (IterBreak (relabel l, x))
   | IGenDelegation (YieldFromDelegate (i, l)) ->
     IGenDelegation (YieldFromDelegate (i, relabel l))

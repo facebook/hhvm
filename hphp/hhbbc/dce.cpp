@@ -1563,15 +1563,11 @@ void dce(Env& env, const bc::IssetL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IssetS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IterBreak& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IterFree& op) { no_dce(env, op); }
-void dce(Env& env, const bc::IterInit& op) { no_dce(env, op); }
-void dce(Env& env, const bc::IterNext& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Jmp& op) { no_dce(env, op); }
 void dce(Env& env, const bc::JmpNS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::JmpNZ& op) { no_dce(env, op); }
 void dce(Env& env, const bc::JmpZ& op) { no_dce(env, op); }
 void dce(Env& env, const bc::LIterFree& op) { no_dce(env, op); }
-void dce(Env& env, const bc::LIterInit& op) { no_dce(env, op); }
-void dce(Env& env, const bc::LIterNext& op) { no_dce(env, op); }
 void dce(Env& env, const bc::MemoGet& op) { no_dce(env, op); }
 void dce(Env& env, const bc::MemoGetEager& op) { no_dce(env, op); }
 void dce(Env& env, const bc::MemoSet& op) { no_dce(env, op); }
@@ -1626,71 +1622,57 @@ void dce(Env& env, const bc::YieldK& op) { no_dce(env, op); }
 
 ////////////////////////////////////////////////////////////////////////////////
 
+IterArgs drop_iter_key(const IterArgs& ita) {
+  return IterArgs(ita.flags, ita.iterId, IterArgs::kNoKey, ita.valId);
+}
+
+// This method attempts to convert key-value iters into value-only iters, which
+// is possible if the key local is dead (and a few other conditions are met).
+//
+// `bc` is the new op to use if we can DCE away the key; it's generally the old
+// op with the "keyId" field of IterArgs set to NoKey (by drop_iter_key).
 template<class Op, class Bc>
-void iter_key_dce(Env& env, const Op& op, const Bc& bc, const Iter& iter,
-                  const LocalId base, const LocalId value, const LocalId key) {
+void iter_key_dce(Env& env, const Op& op, const Bc& bc,
+                  const IterArgs& ita, const LocalId base) {
+  auto const& iter = env.stateBefore.iters[ita.iterId];
   auto const isIterEligible = match<bool>(
     iter,
     [] (DeadIter) { return false; },
     [] (const LiveIter& it) { return it.baseCannotBeObject; }
   );
-  if (!isIterEligible || key == value || isLocLive(env, key) ||
-      isLocVolatile(env, key)) {
-    // If key and value are the same, the key gets written after the value
-    // Lets be pessimistic about this case
+  if (!isIterEligible || !ita.hasKey() || ita.keyId == ita.valId ||
+      isLocLive(env, ita.keyId) || isLocVolatile(env, ita.keyId)) {
+    // If key and value are the same, the key gets written after the value.
+    // Let's be pessimistic about this case.
     return no_dce(env, op);
   }
   CompactVector<Bytecode> bcs { bc };
   env.dceState.replaceMap.emplace(env.id, std::move(bcs));
   env.dceState.actionMap.emplace(env.id, DceAction::Replace);
 
-  addLocGen(env, value);
+  addLocGen(env, ita.valId);
   if (base != kInvalidId) addLocGen(env, base);
   pop_inputs(env, op.numPop());
 }
 
-void dce(Env& env, const bc::IterInitK& op) {
-  auto bc = bc::IterInit {
-    op.iter1,
-    op.target2,
-    op.loc3
-  };
-  auto const& iter = env.stateAfter.iters[op.iter1];
-  iter_key_dce(env, op, bc, iter, kInvalidId, op.loc3, op.loc4);
+void dce(Env& env, const bc::IterInit& op) {
+  auto const bc = bc::IterInit{drop_iter_key(op.ita), op.target2};
+  iter_key_dce(env, op, bc, op.ita, kInvalidId);
 }
 
-void dce(Env& env, const bc::LIterInitK& op) {
-  auto bc = bc::LIterInit {
-    op.iter1,
-    op.loc2,
-    op.target3,
-    op.loc4,
-    op.subop6
-  };
-  auto const& iter = env.stateAfter.iters[op.iter1];
-  iter_key_dce(env, op, bc, iter, op.loc2, op.loc4, op.loc5);
+void dce(Env& env, const bc::LIterInit& op) {
+  auto const bc = bc::LIterInit{drop_iter_key(op.ita), op.loc2, op.target3};
+  iter_key_dce(env, op, bc, op.ita, op.loc2);
 }
 
-void dce(Env& env, const bc::IterNextK& op) {
-  auto bc = bc::IterNext {
-    op.iter1,
-    op.target2,
-    op.loc3
-  };
-  auto const& iter = env.stateBefore.iters[op.iter1];
-  iter_key_dce(env, op, bc, iter, kInvalidId, op.loc3, op.loc4);
+void dce(Env& env, const bc::IterNext& op) {
+  auto const bc = bc::IterNext{drop_iter_key(op.ita), op.target2};
+  iter_key_dce(env, op, bc, op.ita, kInvalidId);
 }
 
-void dce(Env& env, const bc::LIterNextK& op) {
-  auto bc = bc::LIterNext {
-    op.iter1,
-    op.loc2,
-    op.target3,
-    op.loc4,
-    op.subop6
-  };
-  auto const& iter = env.stateBefore.iters[op.iter1];
-  iter_key_dce(env, op, bc, iter, op.loc2, op.loc4, op.loc5);
+void dce(Env& env, const bc::LIterNext& op) {
+  auto const bc = bc::LIterNext{drop_iter_key(op.ita), op.loc2, op.target3};
+  iter_key_dce(env, op, bc, op.ita, op.loc2);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

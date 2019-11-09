@@ -514,6 +514,12 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       encodeLocalRange(ue, HPHP::LocalRange{first, range.count});
     };
 
+    auto emit_ita  = [&](IterArgs ita) {
+      ita.valId = map_local(ita.valId);
+      if (ita.hasKey()) ita.keyId = map_local(ita.keyId);
+      encodeIterArgs(ue, ita);
+    };
+
 #define IMM_BLA(n)     emit_switch(data.targets);
 #define IMM_SLA(n)     emit_sswitch(data.targets);
 #define IMM_ILA(n)     emit_itertab(data.iterTab);
@@ -532,6 +538,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_VSA(n)     emit_vsa(data.keys);
 #define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), ue);
 #define IMM_LAR(n)     emit_lar(data.locrange);
+#define IMM_ITA(n)     emit_ita(data.ita);
 #define IMM_FCA(n)     encodeFCallArgs(                                    \
                          ue, data.fca, data.fca.inoutArgs.get(),              \
                          data.fca.asyncEagerTarget != NoBlockId,           \

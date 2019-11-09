@@ -103,6 +103,13 @@ impl FcallArgs {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct IterArgs {
+    pub iter_id: Iter,
+    pub key_id: Option<local::Type>,
+    pub val_id: local::Type,
+}
+
 pub type ClassrefId = isize;
 
 /// Conventionally this is "A_" followed by an integer
@@ -504,10 +511,8 @@ pub enum IterKind {
 
 #[derive(Clone, Debug)]
 pub enum InstructIterator {
-    IterInit(Iter, label::Label, local::Type),
-    IterInitK(Iter, label::Label, local::Type, local::Type),
-    IterNext(Iter, label::Label, local::Type),
-    IterNextK(Iter, label::Label, local::Type, local::Type),
+    IterInit(IterArgs, label::Label),
+    IterNext(IterArgs, label::Label),
     IterFree(Iter),
     IterBreak(label::Label, Vec<(IterKind, Iter)>),
 }

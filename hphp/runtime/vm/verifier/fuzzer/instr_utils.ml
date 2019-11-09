@@ -81,7 +81,6 @@ let stk_data : instruct -> stack_sig = function
   | IMutator UnsetG
   | IMutator InitProp _
   | IIterator IterInit _
-  | IIterator IterInitK _
   | IMisc CheckReifiedGenericMismatch
   | IBasic PopC                            -> ["C"], []
   | IBasic PopU                            -> ["U"], []

@@ -176,6 +176,11 @@ LocalRange decodeLocalRange(const unsigned char*&);
 
 //////////////////////////////////////////////////////////////////////
 
+void encodeIterArgs(UnitEmitter&, const IterArgs&);
+IterArgs decodeIterArgs(const unsigned char*&);
+
+//////////////////////////////////////////////////////////////////////
+
 void encodeFCallArgsBase(UnitEmitter&, const FCallArgsBase&, const uint8_t*,
                          bool hasAsyncEagerOffset);
 FCallArgs decodeFCallArgs(Op, PC&);

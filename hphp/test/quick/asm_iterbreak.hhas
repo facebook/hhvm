@@ -30,7 +30,7 @@
   PopC
 
   CGetL $0
-  IterInitK 0 endOuter $1 $2
+  IterInit 0 K:$2 V:$1 endOuter
 startOuter:
 
   String "\n"
@@ -46,7 +46,7 @@ startOuter:
   PopC
 
   CGetL $0
-  IterInitK 1 endInner $3 $4
+  IterInit 1 K:$4 V:$3 endInner
 startInner:
   String "\n"
   CGetL2 $3
@@ -61,9 +61,9 @@ startInner:
   PopC
 
   IterBreak endOuter <(Iter) 1, (Iter) 0>
-  IterNextK 1 startInner $3 $4
+  IterNext 1 K:$4 V:$3 startInner
 endInner:
-  IterNextK 0 startOuter $1 $2
+  IterNext 0 K:$2 V:$1 startOuter
 endOuter:
 
   Int 1

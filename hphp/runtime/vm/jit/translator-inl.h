@@ -54,14 +54,10 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::RetCSuspended:
     case Op::Exit:
     case Op::Fatal:
-    case Op::IterNext:
-    case Op::IterNextK:
-    case Op::LIterNext:
-    case Op::LIterNextK:
-    case Op::IterInit: // May branch to fail case.
-    case Op::IterInitK: // Ditto
+    case Op::IterInit:  // May branch to fail case.
     case Op::LIterInit: // Ditto
-    case Op::LIterInitK: // Ditto
+    case Op::IterNext:  // Ditto
+    case Op::LIterNext: // Ditto
     case Op::IterBreak:
     case Op::Throw:
     case Op::Eval:

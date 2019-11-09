@@ -561,7 +561,7 @@ let parse_include (e : Tast.expr) =
   in
   let (var, lit) = split_var_lit e in
   let (var, lit) =
-    if var = "__DIR__" then
+    if var = SN.PseudoConsts.g__DIR__ then
       ("", strip_backslash lit)
     else
       (var, lit)
@@ -1206,21 +1206,22 @@ and emit_lambda (env : Emit_env.t) (fundef : Tast.fun_) (ids : Aast.lid list) =
 
 and emit_id (env : Emit_env.t) ((p, s) : Aast.sid) =
   match s with
-  | "__FILE__" -> instr (ILitConst File)
-  | "__DIR__" -> instr (ILitConst Dir)
-  | "__CLASS__" -> gather [instr_self; instr_classname]
-  | "__METHOD__" -> instr (ILitConst Method)
-  | "__FUNCTION_CREDENTIAL__" -> instr (ILitConst FuncCred)
-  | "__LINE__" ->
+  | _ when s = SN.PseudoConsts.g__FILE__ -> instr (ILitConst File)
+  | _ when s = SN.PseudoConsts.g__DIR__ -> instr (ILitConst Dir)
+  | _ when s = SN.PseudoConsts.g__CLASS__ ->
+    gather [instr_self; instr_classname]
+  | _ when s = SN.PseudoConsts.g__METHOD__ -> instr (ILitConst Method)
+  | _ when s = SN.PseudoConsts.g__FUNCTION_CREDENTIAL__ ->
+    instr (ILitConst FuncCred)
+  | _ when s = SN.PseudoConsts.g__LINE__ ->
     (* If the expression goes on multi lines, we return the last line *)
     let (_, line, _, _) = Pos.info_pos_extended p in
     instr_int line
-  | "__NAMESPACE__" ->
+  | _ when s = SN.PseudoConsts.g__NAMESPACE__ ->
     let ns = Emit_env.get_namespace env in
     instr_string (Option.value ~default:"" ns.Namespace_env.ns_name)
-  | "__COMPILER_FRONTEND__" -> instr_string "hackc"
-  | "exit"
-  | "die" ->
+  | _ when s = SN.PseudoConsts.g__COMPILER_FRONTEND__ -> instr_string "hackc"
+  | _ when s = SN.PseudoConsts.exit || s = SN.PseudoConsts.die ->
     emit_exit env None
   | _ ->
     let fq_id = Hhbc_id.Const.from_ast_name s in
@@ -1257,8 +1258,8 @@ and emit_xhp (env : Emit_env.t) annot id attributes (children : Tast.expr list)
   in
   let attribute_map = (annot, A.Shape (List.rev attributes)) in
   let children_vec = (annot, A.Varray (None, children)) in
-  let filename = (annot, A.Id (pos, "__FILE__")) in
-  let line = (annot, A.Id (pos, "__LINE__")) in
+  let filename = (annot, A.Id (pos, SN.PseudoConsts.g__FILE__)) in
+  let line = (annot, A.Id (pos, SN.PseudoConsts.g__LINE__)) in
   let renamed_id = rename_xhp id in
   Emit_symbol_refs.add_class (snd renamed_id);
   emit_expr env

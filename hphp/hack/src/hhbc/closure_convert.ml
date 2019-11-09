@@ -603,20 +603,20 @@ let convert_id (env : env) p ((pid, str) as id) =
   let return newstr = (p, String newstr) in
   let name c = (p, String (SU.Xhp.mangle @@ strip_id c.c_name)) in
   match str with
-  | "__TRAIT__" ->
+  | _ when str = SN.PseudoConsts.g__TRAIT__ ->
     begin
       match Scope.get_class env.scope with
       | Some c when c.c_kind = Ast_defs.Ctrait -> name c
       | _ -> return ""
     end
-  | "__CLASS__" ->
+  | _ when str = SN.PseudoConsts.g__CLASS__ ->
     begin
       match Scope.get_class env.scope with
       | Some c when c.c_kind <> Ast_defs.Ctrait -> name c
       | Some _ -> (p, Id (pid, snd id))
       | None -> return ""
     end
-  | "__METHOD__" ->
+  | _ when str = SN.PseudoConsts.g__METHOD__ ->
     let (prefix, is_trait) =
       match Scope.get_class env.scope with
       | None -> ("", false)
@@ -647,7 +647,7 @@ let convert_id (env : env) p ((pid, str) as id) =
       | ScopeItem.Class cd :: _ -> return @@ strip_id cd.c_name
       | _ -> return ""
     end
-  | "__FUNCTION__" ->
+  | _ when str = SN.PseudoConsts.g__FUNCTION__ ->
     begin
       match env.scope with
       | ScopeItem.Function fd :: _ -> return (strip_id fd.f_name)
@@ -656,7 +656,7 @@ let convert_id (env : env) p ((pid, str) as id) =
         return "{closure}"
       | _ -> return ""
     end
-  | "__LINE__" ->
+  | _ when str = SN.PseudoConsts.g__LINE__ ->
     (* If the expression goes on multi lines, we return the last line *)
     let (_, line, _, _) = Pos.info_pos_extended pid in
     (p, Int (string_of_int line))

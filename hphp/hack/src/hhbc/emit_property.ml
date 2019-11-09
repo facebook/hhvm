@@ -36,7 +36,9 @@ let rec expr_requires_deep_init (_, expr_) =
     List.exists fields aexpr_requires_deep_init
   | T.Varray (_, fields) -> List.exists fields expr_requires_deep_init
   | T.Darray (_, fields) -> List.exists fields expr_pair_requires_deep_init
-  | T.Id (_, ("__FILE__" | "__DIR__")) -> false
+  | T.Id (_, name)
+    when name = SN.PseudoConsts.g__FILE__ || name = SN.PseudoConsts.g__DIR__ ->
+    false
   | T.Class_const ((_, T.CIexpr (_, T.Id (_, s))), (_, p)) ->
     class_const_requires_deep_init s p
   | T.Shape fields -> List.exists fields shape_field_requires_deep_init

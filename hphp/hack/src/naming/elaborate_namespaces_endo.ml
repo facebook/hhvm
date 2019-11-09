@@ -290,10 +290,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
           expr
         else if (name = "NAN" || name = "INF") && in_codegen env then
           expr
-        else if
-          in_codegen env && SN.PseudoConsts.is_pseudo_const (Utils.add_ns name)
-        then
-          expr
         else
           Id (NS.elaborate_id env.namespace NS.ElaborateConst sid)
       | PU_identifier ((p1, CIexpr (p2, Id x1)), s1, s2) ->

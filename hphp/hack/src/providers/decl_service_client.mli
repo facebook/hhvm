@@ -7,11 +7,13 @@
  *)
 
 type t = {
+  hhi_root: Path.t;  (** where does the decl-service keep its hhi files *)
   rpc_get_gconst: string -> (string, Marshal_tools.error) result;
       (** fetches a global const *)
 }
 
 val init :
-  string ->
-  Decl_ipc_ffi_externs.sharedmem_base_address ->
+  decl_sock:string ->
+  base_addr:Decl_ipc_ffi_externs.sharedmem_base_address ->
+  hhi_root:Path.t ->
   (t, Marshal_tools.error) result

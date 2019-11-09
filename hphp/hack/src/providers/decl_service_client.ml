@@ -8,7 +8,10 @@
 
 open Core_kernel
 
-type t = { rpc_get_gconst: string -> (string, Marshal_tools.error) result }
+type t = {
+  hhi_root: Path.t;
+  rpc_get_gconst: string -> (string, Marshal_tools.error) result;
+}
 
 let rpc_get_gconst
     (fd : Unix.file_descr)
@@ -21,10 +24,10 @@ let rpc_get_gconst
   Ok s
 
 let init
-    (decl_sock_file : string)
-    (base : Decl_ipc_ffi_externs.sharedmem_base_address) :
-    (t, Marshal_tools.error) result =
-  let sockaddr = Unix.ADDR_UNIX decl_sock_file in
+    ~(decl_sock : string)
+    ~(base_addr : Decl_ipc_ffi_externs.sharedmem_base_address)
+    ~(hhi_root : Path.t) : (t, Marshal_tools.error) result =
+  let sockaddr = Unix.ADDR_UNIX decl_sock in
   let connect_res =
     try Ok (Timeout.open_connection sockaddr) with
     | Unix.Unix_error (Unix.ECONNREFUSED, _, _) as e ->
@@ -36,4 +39,4 @@ let init
   | Ok (ic, _oc) ->
     (* ic and oc have the same underlying Unix.file_descr *)
     let fd = Timeout.descr_of_in_channel ic in
-    Ok { rpc_get_gconst = rpc_get_gconst fd base }
+    Ok { hhi_root; rpc_get_gconst = rpc_get_gconst fd base_addr }

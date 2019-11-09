@@ -43,7 +43,7 @@ impl ConstsTable {
             .unwrap();
     }
 
-    pub fn insert(self, items: &[ConstItem]) {
+    pub fn insert(&self, items: &[ConstItem]) {
         let insert_statement = "
             INSERT INTO NAMING_CONSTS (
                 HASH,
@@ -67,7 +67,7 @@ impl ConstsTable {
         }
     }
 
-    pub fn map_names_to_paths(self, names: &[&str]) -> Vec<Option<RelativePath>> {
+    pub fn map_names_to_paths(&self, names: &[&str]) -> Vec<Option<RelativePath>> {
         let select_statement = "
             SELECT
                 NAMING_FILE_INFO.PATH_PREFIX_TYPE,

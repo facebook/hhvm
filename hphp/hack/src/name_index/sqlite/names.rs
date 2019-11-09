@@ -46,7 +46,7 @@ impl Names {
         }
     }
 
-    pub fn paths_of_consts(self, names: &[&str]) -> Vec<Option<RelativePath>> {
+    pub fn paths_of_consts(&self, names: &[&str]) -> Vec<Option<RelativePath>> {
         self.consts.map_names_to_paths(names)
     }
 }

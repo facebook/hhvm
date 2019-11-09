@@ -350,42 +350,32 @@ module SpecialFunctions = struct
 
   let assert_ = "assert"
 
-  let invariant = "invariant"
-
-  let fun_ = "fun"
-
-  let inst_meth = "inst_meth"
-
-  let class_meth = "class_meth"
-
-  let meth_caller = "meth_caller"
-
   let autoload = "__autoload"
 
   let hhas_adata = "__hhas_adata"
 
   let is_special_function =
-    let all_special_functions =
-      [
-        tuple;
-        echo;
-        assert_;
-        invariant;
-        fun_;
-        inst_meth;
-        class_meth;
-        meth_caller;
-        autoload;
-        hhas_adata;
-      ]
-    in
+    let all_special_functions = [tuple; echo; assert_; autoload; hhas_adata] in
     let h = HashSet.create (List.length all_special_functions) in
     List.iter all_special_functions (HashSet.add h);
     (fun x -> HashSet.mem h x)
 end
 
+(* There are a number of functions that are automatically imported into the
+ * namespace. The full list can be found in hh_autoimport.ml.
+ *)
 module AutoimportedFunctions = struct
   let invariant_violation = "\\HH\\invariant_violation"
+
+  let invariant = "\\HH\\invariant"
+
+  let fun_ = "\\HH\\fun"
+
+  let inst_meth = "\\HH\\inst_meth"
+
+  let class_meth = "\\HH\\class_meth"
+
+  let meth_caller = "\\HH\\meth_caller"
 end
 
 module SpecialIdents = struct
@@ -404,6 +394,9 @@ module SpecialIdents = struct
   let assert_tmp_var name = assert (is_tmp_var name)
 end
 
+(* PseudoFunctions are functions (or items that are parsed like functions)
+ * that are treated like builtins that do not have a public HHI or interface.
+ *)
 module PseudoFunctions = struct
   let isset = "\\isset"
 

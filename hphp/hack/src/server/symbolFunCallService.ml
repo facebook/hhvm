@@ -112,7 +112,7 @@ class visitor =
       in
       let special_fun_acc =
         let special_fun id = self#fun_call env Function id pos in
-        let module SF = SN.SpecialFunctions in
+        let module SF = SN.AutoimportedFunctions in
         match expr_ with
         | Tast.Fun_id _ -> special_fun SF.fun_
         | Tast.Method_id _ -> special_fun SF.inst_meth

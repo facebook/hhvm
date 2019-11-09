@@ -1582,8 +1582,8 @@ module Make (GetLocals : GetLocals) = struct
       (* Only check the values because shape field names are always legal *)
       List.iter fdl ~f:(fun (_, e) -> check_constant_expr env e)
     | Aast.Call (_, (_, Aast.Id (_, cn)), _, el, uel)
-      when cn = SN.SpecialFunctions.fun_
-           || cn = SN.SpecialFunctions.class_meth
+      when cn = SN.AutoimportedFunctions.fun_
+           || cn = SN.AutoimportedFunctions.class_meth
            || cn = SN.StdlibFunctions.mark_legacy_hack_array
            (* Tuples are not really function calls, they are just parsed that way*)
            || cn = SN.SpecialFunctions.tuple ->
@@ -1919,7 +1919,7 @@ module Make (GetLocals : GetLocals) = struct
         Errors.experimental_feature Pos.none "inlined definitions";
         N.Expr (Pos.none, N.Any)
       | Aast.Expr (cp, Aast.Call (_, (p, Aast.Id (fp, fn)), hl, el, uel))
-        when fn = SN.SpecialFunctions.invariant ->
+        when fn = SN.AutoimportedFunctions.invariant ->
         (* invariant is subject to a source-code transform in the HHVM
          * runtime: the arguments to invariant are lazily evaluated only in
          * the case in which the invariant condition does not hold. So:
@@ -2320,7 +2320,7 @@ module Make (GetLocals : GetLocals) = struct
           N.Call (N.Cuser_func, expr env f, targl env p tal, exprl env el, [])
       end
     | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, uel)
-      when cn = SN.SpecialFunctions.fun_ ->
+      when cn = SN.AutoimportedFunctions.fun_ ->
       arg_unpack_unexpected uel;
       let (genv, _) = env in
       begin
@@ -2342,7 +2342,7 @@ module Make (GetLocals : GetLocals) = struct
           N.Any
       end
     | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, uel)
-      when cn = SN.SpecialFunctions.inst_meth ->
+      when cn = SN.AutoimportedFunctions.inst_meth ->
       arg_unpack_unexpected uel;
       begin
         match el with
@@ -2360,7 +2360,7 @@ module Make (GetLocals : GetLocals) = struct
           N.Any
       end
     | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, uel)
-      when cn = SN.SpecialFunctions.meth_caller ->
+      when cn = SN.AutoimportedFunctions.meth_caller ->
       arg_unpack_unexpected uel;
       begin
         match el with
@@ -2397,7 +2397,7 @@ module Make (GetLocals : GetLocals) = struct
           N.Any
       end
     | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, uel)
-      when cn = SN.SpecialFunctions.class_meth ->
+      when cn = SN.AutoimportedFunctions.class_meth ->
       arg_unpack_unexpected uel;
       begin
         match el with

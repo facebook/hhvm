@@ -4558,8 +4558,8 @@ where
             let text = self_.text(receiver_token);
 
             (!self_.env.parser_options.po_disallow_func_ptrs_in_constants
-                && (text == sn::special_functions::FUN_
-                    || text == sn::special_functions::CLASS_METH))
+                && (text == Self::strip_hh_ns(sn::autoimported_functions::FUN_)
+                    || text == Self::strip_hh_ns(sn::autoimported_functions::CLASS_METH)))
                 || (text == sn::std_lib_functions::MARK_LEGACY_HACK_ARRAY)
         };
 
@@ -5369,6 +5369,10 @@ where
             Some('\\') => &name[1..],
             _ => name,
         }
+    }
+
+    fn strip_hh_ns(name: &str) -> &str {
+        name.trim_start_matches("\\HH\\")
     }
 
     fn is_global_namespace(&self) -> bool {

@@ -25,11 +25,11 @@ let handler =
        * we need to duplicate the logic here
        *)
       | Call (_, (_, Id (_, cn)), _, [(p, String fn)], _)
-        when cn = Naming_special_names.SpecialFunctions.fun_
+        when cn = Naming_special_names.AutoimportedFunctions.fun_
              && String.contains fn ':' ->
         Errors.illegal_meth_fun p
       | Call (_, (_, Id (_, cn)), _, [(p, String fn)], _)
-        when cn = Naming_special_names.SpecialFunctions.fun_ ->
+        when cn = Naming_special_names.AutoimportedFunctions.fun_ ->
         error_if_not_in_naming_table p fn
       | _ -> ()
   end

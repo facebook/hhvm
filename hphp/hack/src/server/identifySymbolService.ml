@@ -194,13 +194,13 @@ let visitor =
           typed_property env ty mid
         | Aast.Xml (cid, _, _) -> process_class_id cid
         | Aast.Fun_id id ->
-          process_fun_id (pos, "\\HH\\" ^ SN.SpecialFunctions.fun_)
+          process_fun_id (pos, SN.AutoimportedFunctions.fun_)
           + process_fun_id (remove_apostrophes_from_function_eval id)
         | Aast.Method_id (((_, ty), _), mid) ->
-          process_fun_id (pos, "\\HH\\" ^ SN.SpecialFunctions.inst_meth)
+          process_fun_id (pos, SN.AutoimportedFunctions.inst_meth)
           + typed_method env ty (remove_apostrophes_from_function_eval mid)
         | Aast.Smethod_id (((_, cid) as pcid), mid) ->
-          process_fun_id (pos, "\\HH\\" ^ SN.SpecialFunctions.class_meth)
+          process_fun_id (pos, SN.AutoimportedFunctions.class_meth)
           + process_class_id pcid
           + process_member
               cid
@@ -208,7 +208,7 @@ let visitor =
               ~is_method:true
               ~is_const:false
         | Aast.Method_caller (((_, cid) as pcid), mid) ->
-          process_fun_id (pos, "\\HH\\" ^ SN.SpecialFunctions.meth_caller)
+          process_fun_id (pos, SN.AutoimportedFunctions.meth_caller)
           + process_class_id pcid
           + process_member
               cid

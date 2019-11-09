@@ -59,6 +59,33 @@ let extend_tparams env tparaml =
   in
   { env with type_params }
 
+(* Functions such as fun, class_meth, and meth_caller require additional
+ * fixup on the strings that are passed in
+ *)
+let handle_special_calls env call =
+  match call with
+  | Call (ct, ((_, Id (_, cn)) as id), targs, [(p, String fn)], uargs)
+    when cn = SN.AutoimportedFunctions.fun_ ->
+    (* Functions referenced by fun() are always fully-qualified *)
+    let fn = Utils.add_ns fn in
+    Call (ct, id, targs, [(p, String fn)], uargs)
+  | Call
+      ( ct,
+        ((_, Id (_, cn)) as id),
+        targs,
+        [(p1, String cl); (p2, String meth)],
+        uel )
+    when cn = SN.AutoimportedFunctions.meth_caller
+         || cn = SN.AutoimportedFunctions.class_meth ->
+    let cl =
+      if not @@ in_codegen env then
+        Utils.add_ns cl
+      else
+        cl
+    in
+    Call (ct, id, targs, [(p1, String cl); (p2, String meth)], uel)
+  | _ -> call
+
 class ['a, 'b, 'c, 'd] generic_elaborator =
   object (self)
     inherit [_] Aast.endo as super
@@ -214,19 +241,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         let (env, b) = self#on_block_helper env b in
         let e = self#on_expr env e in
         Do (b, e)
-      (* invariant is handled differently in naming depending whether it is in
-       * the statement position or expression position.
-       *)
-      | Expr (p, Call (p2, (p3, Id (p4, fn)), targs, el, uel))
-        when fn = SN.SpecialFunctions.invariant && (not @@ in_codegen env) ->
-        Expr
-          ( p,
-            Call
-              ( p2,
-                (p3, Id (p4, fn)),
-                List.map targs ~f:(self#on_targ env),
-                List.map el ~f:(self#on_expr env),
-                List.map uel ~f:(self#on_expr env) ) )
       | _ -> super#on_stmt_ env stmt
 
     (* Lambda environments *)
@@ -244,90 +258,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
      *)
     method! on_expr_ env expr =
       match expr with
-      | Call (ct, (p, Id (p2, cn)), targs, [(p3, String fn)], uargs)
-        when cn = SN.SpecialFunctions.fun_ ->
-        (* Functions referenced by fun() are always fully-qualified *)
-        let fn = Utils.add_ns fn in
-        (* TODO: Make naming expect the fully qualified '\\HH\\fun' *)
-        let (p2, cn) =
-          if in_codegen env then
-            NS.elaborate_id env.namespace NS.ElaborateFun (p2, cn)
-          else
-            (p2, cn)
-        in
-        Call (ct, (p, Id (p2, cn)), targs, [(p3, String fn)], uargs)
-      | Call (ct, (p, Id ((_, cn) as id)), tal, el, uel)
-        when cn = SN.SpecialFunctions.invariant ->
-        (* invariant is handled differently in naming depending whether it is in
-         * the statement position or expression position.
-         *)
-        let new_id = NS.elaborate_id env.namespace NS.ElaborateFun id in
-        Call
-          ( ct,
-            (p, Id new_id),
-            List.map tal ~f:(self#on_targ env),
-            List.map el ~f:(self#on_expr env),
-            List.map uel ~f:(self#on_expr env) )
-      | Call
-          ( ct,
-            (p1, Id (p2, cn)),
-            targs,
-            [(p3, String cl); (p4, String meth)],
-            uel )
-        when cn = SN.SpecialFunctions.meth_caller
-             || cn = SN.SpecialFunctions.class_meth ->
-        let cl =
-          if not @@ in_codegen env then
-            Utils.add_ns cl
-          else
-            cl
-        in
-        let (p2, cn) =
-          if in_codegen env then
-            NS.elaborate_id env.namespace NS.ElaborateFun (p2, cn)
-          else
-            (p2, cn)
-        in
-        Call
-          ( self#on_call_type env ct,
-            (p1, Id (p2, cn)),
-            List.map targs ~f:(self#on_targ env),
-            [(p3, String cl); (p4, String meth)],
-            List.map uel ~f:(self#on_expr env) )
-      | Call
-          ( ct,
-            (p1, Id (p2, cn)),
-            targs,
-            [(p3, Class_const ((p4, CI cl), (p5, mem))); (p6, String meth)],
-            uel )
-        when ( cn = SN.SpecialFunctions.meth_caller
-             || cn = SN.SpecialFunctions.class_meth )
-             && mem = SN.Members.mClass ->
-        let cl = elaborate_type_name env cl in
-        let (p2, cn) =
-          if in_codegen env then
-            NS.elaborate_id env.namespace NS.ElaborateFun (p2, cn)
-          else
-            (p2, cn)
-        in
-        Call
-          ( self#on_call_type env ct,
-            (p1, Id (p2, cn)),
-            List.map targs ~f:(self#on_targ env),
-            [(p3, Class_const ((p4, CI cl), (p5, mem))); (p6, String meth)],
-            List.map uel ~f:(self#on_expr env) )
-      | Call (ct, (p, Aast.Id ((_, cn) as id)), tal, el, uel)
-        when ( cn = SN.SpecialFunctions.inst_meth
-             || cn = SN.SpecialFunctions.class_meth
-             || cn = SN.SpecialFunctions.meth_caller )
-             && in_codegen env ->
-        let new_id = NS.elaborate_id env.namespace NS.ElaborateFun id in
-        Call
-          ( ct,
-            (p, Id new_id),
-            List.map tal ~f:(self#on_targ env),
-            List.map el ~f:(self#on_expr env),
-            List.map uel ~f:(self#on_expr env) )
       | Call (ct, (p, Id (p2, cn)), targs, el, uargs)
         when SN.SpecialFunctions.is_special_function cn
              || (SN.PPLFunctions.is_reserved cn && env.in_ppl) ->
@@ -344,12 +274,15 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
           else
             NS.elaborate_id env.namespace NS.ElaborateFun id
         in
-        Call
-          ( ct,
-            (p, Id new_id),
-            List.map tal ~f:(self#on_targ env),
-            List.map el ~f:(self#on_expr env),
-            List.map uel ~f:(self#on_expr env) )
+        let renamed_call =
+          Call
+            ( ct,
+              (p, Id new_id),
+              List.map tal ~f:(self#on_targ env),
+              List.map el ~f:(self#on_expr env),
+              List.map uel ~f:(self#on_expr env) )
+        in
+        handle_special_calls env renamed_call
       | Obj_get (e1, (p, Id x), null_safe) ->
         Obj_get (self#on_expr env e1, (p, Id x), null_safe)
       | Id ((_, name) as sid) ->

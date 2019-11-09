@@ -1,0 +1,2 @@
+string(70) "Argument 1 passed to foo1() must be upper-bounded by num, string given"
+string(78) "Value returned from function foo2() must be upper-bounded by int, string given"

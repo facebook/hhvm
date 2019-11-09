@@ -2300,6 +2300,54 @@ TypeConstraint parse_type_constraint(AsmState& as) {
   return parse_type_info(as, true).second;
 }
 
+using UpperBoundMap =
+  std::unordered_multimap<const StringData*, TypeConstraint>;
+
+void parse_ub(AsmState& as, UpperBoundMap& ubs) {
+  as.in.skipWhitespace();
+  if (as.in.peek() != '(') return;
+  as.in.getc();
+  std::string name;
+  if (!as.in.readword(name)) {
+    as.error("Type name expected");
+  }
+  auto nameStr = makeStaticString(name);
+  if (!as.in.readword(name) || name != "as") {
+    as.error("Expected keyword as");
+  }
+  for (;;) {
+    const auto& tc = parse_type_info(as).second;
+    ubs.insert({nameStr, tc});
+    as.in.skipWhitespace();
+    if (as.in.peek() != ',') break;
+    as.in.getc();
+    as.in.skipWhitespace();
+  }
+  as.in.expectWs(')');
+}
+
+/*
+ * upper-bound-list : '{' upper-bound-name-list '}'
+ *                ;
+ *
+ * upper-bound-name-list : empty
+ *                       | '(' type-name 'as' type-constraint-list ')'
+ *                 ;
+ */
+
+UpperBoundMap parse_ubs(AsmState& as) {
+  UpperBoundMap ret;
+  as.in.skipWhitespace();
+  if (as.in.peek() != '{') return ret;
+  as.in.getc();
+  for (;;) {
+    parse_ub(as, ret);
+    if (as.in.peek() == '}') break;
+    as.in.expectWs(',');
+  }
+  as.in.expect('}');
+  return ret;
+}
 
 /*
  * parameter-list : '(' param-name-list ')'
@@ -2321,7 +2369,7 @@ TypeConstraint parse_type_constraint(AsmState& as) {
  *             | '(' long-string-literal ')'
  *             ;
  */
-void parse_parameter_list(AsmState& as) {
+void parse_parameter_list(AsmState& as, const UpperBoundMap& ubs) {
   as.in.skipWhitespace();
   if (as.in.peek() != '(') return;
   as.in.getc();
@@ -2366,6 +2414,10 @@ void parse_parameter_list(AsmState& as) {
     }
 
     std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
+    if (ubs.count(param.userType) == 1) {
+      auto const it = ubs.find(param.userType);
+      param.typeConstraint = it->second;
+    }
 
     as.in.skipWhitespace();
     ch = as.in.getc();
@@ -2580,7 +2632,8 @@ void check_native(AsmState& as, bool is_construct) {
 }
 
 /*
- * directive-function : attribute-list ?line-range type-info identifier
+ * directive-function : upper-bound-list attribute-list ?line-range type-info
+ *                      identifier
  *                      parameter-list function-flags '{' function-body
  *                    ;
  */
@@ -2590,6 +2643,8 @@ void parse_function(AsmState& as) {
   }
 
   as.in.skipWhitespace();
+
+  auto ubs = parse_ubs(as);
 
   bool isTop = true;
 
@@ -2614,7 +2669,7 @@ void parse_function(AsmState& as) {
   int line1;
   parse_line_range(as, line0, line1);
 
-  auto typeInfo = parse_type_info(as);
+  auto retTypeInfo = parse_type_info(as);
   std::string name;
   if (!as.in.readname(name)) {
     as.error(".function must have a name");
@@ -2622,10 +2677,14 @@ void parse_function(AsmState& as) {
 
   as.fe = as.ue->newFuncEmitter(makeStaticString(name));
   as.fe->init(line0, line1, as.ue->bcPos(), attrs, isTop, 0);
-  std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
+  if (ubs.count(retTypeInfo.first) == 1) {
+    auto const it = ubs.find(retTypeInfo.first);
+    retTypeInfo.second = it->second;
+  }
+  std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = retTypeInfo;
   as.fe->userAttributes = userAttrs;
 
-  parse_parameter_list(as);
+  parse_parameter_list(as, ubs);
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
@@ -2645,6 +2704,7 @@ void parse_function(AsmState& as) {
 void parse_method(AsmState& as) {
   as.in.skipWhitespace();
 
+  parse_ubs(as);
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
 
@@ -2672,7 +2732,7 @@ void parse_method(AsmState& as) {
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
   as.fe->userAttributes = userAttrs;
 
-  parse_parameter_list(as);
+  parse_parameter_list(as, {});
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
@@ -3093,8 +3153,9 @@ PreClass::Hoistable compute_hoistable(AsmState& as,
 }
 
 /*
- * directive-class : ?"top" attribute-list identifier ?line-range
- *                      extension-clause implements-clause '{' class-body
+ * directive-class : upper-bound-list ?"top" attribute-list identifier
+ *                   ?line-range extension-clause implements-clause '{'
+ *                   class-body
  *                 ;
  *
  * extension-clause : empty
@@ -3109,8 +3170,9 @@ PreClass::Hoistable compute_hoistable(AsmState& as,
 void parse_class(AsmState& as) {
   as.in.skipWhitespace();
 
-  bool isTop = true;
+  auto ubs = parse_ubs(as);
 
+  bool isTop = true;
   UserAttributeMap userAttrs;
   Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs, &isTop);
   if (!SystemLib::s_inited) {

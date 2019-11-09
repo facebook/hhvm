@@ -1290,10 +1290,11 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
     } else {
       msg =
         folly::format(
-          "Value returned from {}{} {}() must be of type {}, {} given",
+          "Value returned from {}{} {}() must be {} {}, {} given",
           func->isAsync() ? "async " : "",
           func->preClass() ? "method" : "function",
           func->fullName(),
+          isUpperBound() ? "upper-bounded by" : "of type",
           name,
           givenType
         ).str();
@@ -1337,8 +1338,10 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
     } else {
       raise_typehint_error(
         folly::format(
-          "Argument {} passed to {}() must be an instance of {}, {} given",
-          id + 1, func->fullName(), name, givenType
+          "Argument {} passed to {}() must be {} {}, {} given",
+          id + 1, func->fullName(),
+          isUpperBound() ? "upper-bounded by" : "an instance of",
+          name, givenType
         ).str()
       );
     }

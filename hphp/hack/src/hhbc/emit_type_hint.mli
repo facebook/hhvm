@@ -20,6 +20,7 @@ type type_hint_kind =
   | Return
   | Param
   | TypeDef
+  | UpperBound
 
 val hint_to_type_info :
   kind:type_hint_kind ->

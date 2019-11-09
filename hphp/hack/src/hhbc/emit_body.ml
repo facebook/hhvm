@@ -29,7 +29,7 @@ let emit_generics_upper_bounds tparams ~skipawaitable =
               let tparams = List.map tparams (fun t -> snd t.A.tp_name) in
               Some
                 (Emit_type_hint.hint_to_type_info
-                   ~kind:Emit_type_hint.Param
+                   ~kind:Emit_type_hint.UpperBound
                    ~tparams
                    ~nullable:false
                    ~skipawaitable

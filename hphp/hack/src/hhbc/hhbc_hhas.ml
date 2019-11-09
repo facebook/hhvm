@@ -1468,9 +1468,7 @@ let string_of_upper_bound ub =
   ^ ")"
 
 let string_of_upper_bounds ubs =
-  "[["
-  ^ String.concat ~sep:", " (List.map ~f:string_of_upper_bound ubs)
-  ^ "]] "
+  "{" ^ String.concat ~sep:", " (List.map ~f:string_of_upper_bound ubs) ^ "} "
 
 let add_indent buf indent = Acc.add buf (String.make indent ' ')
 
@@ -1614,11 +1612,11 @@ let add_fun_def buf fun_def =
   let function_is_pair_generator = Hhas_function.is_pair_generator fun_def in
   let function_rx_disabled = Hhas_function.rx_disabled fun_def in
   Acc.add buf "\n.function ";
+  if Hhbc_options.enforce_generics_ub !Hhbc_options.compiler_options then
+    Acc.add buf (string_of_upper_bounds function_upper_bounds);
   Acc.add buf (function_attributes fun_def);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options then
     Acc.add buf (string_of_span function_span ^ " ");
-  if Hhbc_options.enforce_generics_ub !Hhbc_options.compiler_options then
-    Acc.add buf (string_of_upper_bounds function_upper_bounds);
   Acc.add buf (string_of_type_info_option function_return_type);
   Acc.add buf (Hhbc_id.Function.to_raw_string function_name);
   Acc.add buf (string_of_params env function_params);

@@ -18,6 +18,7 @@ type type_hint_kind =
   | Return
   | Param
   | TypeDef
+  | UpperBound
 
 (* Produce the "userType" bit of the annotation *)
 let rec fmt_name_or_prim ~tparams (_, name) =
@@ -351,6 +352,12 @@ let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams h =
         add_nullable ~nullable tc_flags
       else
         try_add_nullable ~nullable h tc_flags
+    in
+    let tc_flags =
+      if kind = UpperBound then
+        List.stable_dedup (TC.UpperBound :: tc_flags)
+      else
+        tc_flags
     in
     make_type_info ~tparams h tc_name tc_flags
 

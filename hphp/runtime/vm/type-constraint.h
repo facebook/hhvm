@@ -108,6 +108,11 @@ struct TypeConstraint {
      * type-constraints even when resolved.
      */
     DisplayNullable = 0x100,
+
+    /*
+     * Indicates that a type-constraint came from an upper-bound constraint.
+     */
+    UpperBound = 0x200,
   };
 
   /*
@@ -238,6 +243,7 @@ struct TypeConstraint {
   bool isTypeVar()  const { return m_flags & TypeVar; }
   bool isTypeConstant() const { return m_flags & TypeConstant; }
   bool isResolved() const { return m_flags & Resolved; }
+  bool isUpperBound() const { return m_flags & UpperBound; }
   bool couldSeeMockObject() const { return !(m_flags & NoMockObjects); }
 
   bool isPrecise()  const { return metaType() == MetaType::Precise; }

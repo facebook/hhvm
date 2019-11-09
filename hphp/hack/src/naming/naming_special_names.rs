@@ -618,6 +618,10 @@ pub mod pseudo_consts {
 
     pub const G__FUNCTION_CREDENTIAL__: &str = "\\__FUNCTION_CREDENTIAL__";
 
+    pub const die: &str = "\\die";
+
+    pub const exit: &str = "\\exit";
+
     lazy_static! {
         static ref ALL_PSEUDO_CONSTS: Vec<&'static str> = vec![
             G__LINE__,
@@ -629,7 +633,9 @@ pub mod pseudo_consts {
             G__METHOD__,
             G__NAMESPACE__,
             G__COMPILER_FRONTEND__,
-            G__FUNCTION_CREDENTIAL__
+            G__FUNCTION_CREDENTIAL__,
+            die,
+            exit
         ];
         static ref PSEUDO_SET: HashSet<&'static str> =
             { ALL_PSEUDO_CONSTS.iter().cloned().collect() };

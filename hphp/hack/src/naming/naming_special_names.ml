@@ -597,9 +597,12 @@ module PseudoConsts = struct
 
   let g__FUNCTION_CREDENTIAL__ = "\\__FUNCTION_CREDENTIAL__"
 
-  let exit = "\\EXIT"
+  (* exit and die are not pseudo consts, but they are currently parsed as such.
+   * Would be more correct to parse them as special statements like return
+   *)
+  let exit = "\\exit"
 
-  let die = "\\DIE"
+  let die = "\\die"
 
   let all_pseudo_consts =
     [

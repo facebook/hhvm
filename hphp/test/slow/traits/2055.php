@@ -6,7 +6,7 @@ trait T1 {
   private static $incX =0;
   public function inc($who) {
     static::$incX++;
-    echo $who . " (" . __class__ . "): " . static::$incX . "\n";
+    echo $who . " (" . __CLASS__ . "): " . static::$incX . "\n";
   }
 }
 class B {

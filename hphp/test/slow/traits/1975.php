@@ -4,7 +4,7 @@ trait T {
   function foo() {
     echo "Foo";
     parent::bar();
-    echo "__class__: " . __class__ . "\n";
+    echo "__class__: " . __CLASS__ . "\n";
   }
 }
 class C {

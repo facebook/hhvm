@@ -2,19 +2,18 @@
 
 namespace test;
 
-\var_dump(__dir__);
-\var_dump(__file__);
-\var_dump(__line__);
+\var_dump(__DIR__);
+\var_dump(__FILE__);
+\var_dump(__LINE__);
 
 class foo {
 	public function __construct() {
-		\var_dump(__method__);
-		\var_dump(__class__);
-		\var_dump(__function__);
+		\var_dump(__METHOD__);
+		\var_dump(__CLASS__);
+		\var_dump(__FUNCTION__);
 	}
 }
 
 new foo;
 
-\var_dump(__namespace__);
-
+\var_dump(__NAMESPACE__);

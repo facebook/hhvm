@@ -6,10 +6,10 @@ function block() {
     1,
   );
 }
-async function aThrow() { throw new Exception(__function__); }
+async function aThrow() { throw new Exception(__FUNCTION__); }
 async function aaThrow() { await aThrow(); }
 
-async function bThrow() { await block(); throw new Exception(__function__); }
+async function bThrow() { await block(); throw new Exception(__FUNCTION__); }
 async function bbThrow() { await block(); await bThrow(); }
 
 function verify($a, $e) {

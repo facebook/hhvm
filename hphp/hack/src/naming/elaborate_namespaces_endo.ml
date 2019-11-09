@@ -291,9 +291,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         else if (name = "NAN" || name = "INF") && in_codegen env then
           expr
         else if
-          in_codegen env
-          && SN.PseudoConsts.is_pseudo_const
-               (Utils.add_ns @@ String.uppercase name)
+          in_codegen env && SN.PseudoConsts.is_pseudo_const (Utils.add_ns name)
         then
           expr
         else

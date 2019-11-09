@@ -1205,7 +1205,7 @@ and emit_lambda (env : Emit_env.t) (fundef : Tast.fun_) (ids : Aast.lid list) =
     ]
 
 and emit_id (env : Emit_env.t) ((p, s) : Aast.sid) =
-  match String.uppercase s with
+  match s with
   | "__FILE__" -> instr (ILitConst File)
   | "__DIR__" -> instr (ILitConst Dir)
   | "__CLASS__" -> gather [instr_self; instr_classname]
@@ -1219,8 +1219,8 @@ and emit_id (env : Emit_env.t) ((p, s) : Aast.sid) =
     let ns = Emit_env.get_namespace env in
     instr_string (Option.value ~default:"" ns.Namespace_env.ns_name)
   | "__COMPILER_FRONTEND__" -> instr_string "hackc"
-  | "EXIT"
-  | "DIE" ->
+  | "exit"
+  | "die" ->
     emit_exit env None
   | _ ->
     let fq_id = Hhbc_id.Const.from_ast_name s in

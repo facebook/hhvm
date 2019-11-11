@@ -42,7 +42,7 @@ namespace HH {
   \HH\Rx\Traversable::class,
   \SimpleXMLElement::class
 )>>
-interface Traversable {
+interface Traversable extends \Traversable {
 }
 
 <<__Sealed(

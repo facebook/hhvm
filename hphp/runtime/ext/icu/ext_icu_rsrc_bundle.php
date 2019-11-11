@@ -17,7 +17,7 @@
  * ResourceBundle object for complex ones. All resources are read-only.
  */
 <<__NativeData("ResourceBundle")>>
-class ResourceBundle implements \Iterator, \ArrayAccess, \Countable {
+class ResourceBundle implements \HH\Iterator, \ArrayAccess, \Countable {
   /**
    * Create a resource bundle
    *

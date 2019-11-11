@@ -1,4 +1,4 @@
-bool(false)
+bool(true)
 array(3) {
   [0]=>
   string(8) "cadena 1"

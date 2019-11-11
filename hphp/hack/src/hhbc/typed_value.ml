@@ -141,9 +141,6 @@ let string_to_int_opt ~allow_following ~allow_inf s =
     )
   | x -> x
 
-let php7_int_semantics () =
-  Hhbc_options.php7_int_semantics !Hhbc_options.compiler_options
-
 (* Cast to an integer: the (int) operator in PHP. Return None if we can't
  * or won't produce the correct value *)
 let to_int v =
@@ -184,7 +181,7 @@ let to_int v =
        *)
       | Float.Class.Nan
       | Float.Class.Infinite ->
-        if f = Float.infinity || php7_int_semantics () then
+        if f = Float.infinity then
           Some Int64.zero
         else
           Some Caml.Int64.min_int
@@ -296,8 +293,7 @@ let add v1 v2 =
 
 let shift_left v1 v2 =
   match (v1, v2) with
-  | (Int i1, Int i2)
-    when i2 >= 0L && (i2 < 64L || (not @@ php7_int_semantics ())) ->
+  | (Int i1, Int i2) when i2 >= 0L ->
     begin
       try
         let v = Int64.to_int_exn i2 in

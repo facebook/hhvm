@@ -258,9 +258,8 @@ impl Default for PhpismFlags {
 prefixed_flags!(
     Php7Flags,
     "hhvm.php7.",
-    INT_SEMANTICS, //
-    LTR_ASSIGN,    //
-    UVS,           //
+    LTR_ASSIGN, //
+    UVS,        //
 );
 impl Default for Php7Flags {
     fn default() -> Php7Flags {
@@ -875,7 +874,6 @@ bitflags! {
         const HACK_ARR_DV_ARRS = 1 << 8;
         const AUTHORITATIVE = 1 << 9;
         const JIT_ENABLE_RENAME_FUNCTION = 1 << 10;
-        const INT_SEMANTICS = 1 << 11;
         const ENABLE_COROUTINES = 1 << 12;
         const HACKSPERIMENTAL = 1 << 13;
         const LOG_EXTERN_COMPILER_PERF = 1 << 14;

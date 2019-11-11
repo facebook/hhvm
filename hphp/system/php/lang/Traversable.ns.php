@@ -21,6 +21,7 @@ namespace {
  * IteratorAggregate or Iterator before its name in the implements clause.
  *
  */
+<<__Sealed(\HH\Traversable::class, \Iterator::class)>>
 interface Traversable {
 }
 

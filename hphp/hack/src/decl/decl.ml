@@ -285,7 +285,10 @@ and fun_decl_in_env env f =
     List.map f.f_where_constraints (where_constraint env)
   in
   let fe_deprecated =
-    Attributes.deprecated ~kind:"function" f.f_name f.f_user_attributes
+    Attributes_deprecated.deprecated
+      ~kind:"function"
+      f.f_name
+      f.f_user_attributes
   in
   let fe_type =
     ( Reason.Rwitness (fst f.f_name),

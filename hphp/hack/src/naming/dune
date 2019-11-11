@@ -23,11 +23,26 @@
   (name naming_attributes)
   (wrapped false)
   (modules
-    attributes
+    attributes)
+  (libraries
+    annotated_ast
+    core_kernel)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name naming_attributes_deprecated)
+  (wrapped false)
+  (modules
+    attributes_deprecated
     nast_eval)
   (libraries
+    annotated_ast
+    naming_attributes
     core_kernel
-    nast)
+    errors
+    naming_special_names
+    nast
+    pos)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library

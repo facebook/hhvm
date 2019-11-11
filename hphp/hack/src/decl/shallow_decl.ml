@@ -310,7 +310,10 @@ let method_ env c m =
     | _ -> None
   in
   let sm_deprecated =
-    Attrs.deprecated ~kind:"method" m.m_name m.m_user_attributes
+    Attributes_deprecated.deprecated
+      ~kind:"method"
+      m.m_name
+      m.m_user_attributes
   in
   {
     sm_abstract = m.m_abstract;

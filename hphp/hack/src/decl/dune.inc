@@ -7,6 +7,7 @@
     heap_global_storage
     naming
     naming_attributes
+    naming_attributes_deprecated
     partial_provider
     procs_procs
     typing_defs

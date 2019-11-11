@@ -35,8 +35,9 @@ Parsed decls:
               (Rhint (root|functions.php line 11, characters 54-57),
                (Tprim Tvoid))
               };
-            ft_reactive = Nonreactive; ft_return_disposable = false;
-            ft_mutable = none; ft_returns_mutable = false }));
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "function_with_non_primitive_args" ->
     { fe_pos = [14:10-42];
@@ -62,8 +63,9 @@ Parsed decls:
               (Rhint (root|functions.php line 14, characters 59-65),
                (Tapply (([14:59-66], "\\Typedef"), [])))
               };
-            ft_reactive = Nonreactive; ft_return_disposable = false;
-            ft_mutable = none; ft_returns_mutable = false }));
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "simple_function" ->
     { fe_pos = [3:10-25];
@@ -78,8 +80,9 @@ Parsed decls:
               (Rhint (root|functions.php line 3, characters 29-32),
                (Tprim Tvoid))
               };
-            ft_reactive = Nonreactive; ft_return_disposable = false;
-            ft_mutable = none; ft_returns_mutable = false }));
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "simple_function_with_body" ->
     { fe_pos = [7:10-35];
@@ -94,8 +97,9 @@ Parsed decls:
               (Rhint (root|functions.php line 7, characters 39-43),
                (Tprim Tfloat))
               };
-            ft_reactive = Nonreactive; ft_return_disposable = false;
-            ft_mutable = none; ft_returns_mutable = false }));
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "simple_int_function" ->
     { fe_pos = [4:10-29];
@@ -110,8 +114,9 @@ Parsed decls:
               (Rhint (root|functions.php line 4, characters 33-35),
                (Tprim Tint))
               };
-            ft_reactive = Nonreactive; ft_return_disposable = false;
-            ft_mutable = none; ft_returns_mutable = false }));
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "test_constrained_generic_fun" ->
     { fe_pos = [22:10-38];
@@ -158,8 +163,9 @@ Parsed decls:
               (Rhint (root|functions.php line 25, characters 4-5),
                (Tgeneric "T1"))
               };
-            ft_reactive = Nonreactive; ft_return_disposable = false;
-            ft_mutable = none; ft_returns_mutable = false }));
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "test_generic_fun" ->
     { fe_pos = [18:10-26];
@@ -186,8 +192,9 @@ Parsed decls:
               (Rhint (root|functions.php line 18, characters 40-40),
                (Tgeneric "T"))
               };
-            ft_reactive = Nonreactive; ft_return_disposable = false;
-            ft_mutable = none; ft_returns_mutable = false }));
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
       fe_deprecated = None;  };
     "test_returns_generic" ->
     { fe_pos = [29:10-30];
@@ -205,8 +212,9 @@ Parsed decls:
                     (Tprim Tint))]
                   )))
               };
-            ft_reactive = Nonreactive; ft_return_disposable = false;
-            ft_mutable = none; ft_returns_mutable = false }));
+            ft_fun_kind = sync; ft_reactive = Nonreactive;
+            ft_return_disposable = false; ft_mutable = none;
+            ft_returns_mutable = false }));
       fe_deprecated = None;  } };
   typedefs =
   { "Typedef" ->

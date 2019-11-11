@@ -462,6 +462,11 @@ and pp_fun_type : type a. Format.formatter -> a ty fun_type -> unit =
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
+  Format.fprintf fmt "@[%s =@ " "ft_fun_kind";
+  Format.pp_print_string fmt (show_fun_kind x.ft_fun_kind);
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
   Format.fprintf fmt "@[%s =@ " "ft_reactive";
   pp_reactivity fmt x.ft_reactive;
   Format.fprintf fmt "@]";
@@ -494,6 +499,16 @@ and show_param_mutability : param_mutability -> string =
   | Param_owned_mutable -> "owned mutable"
   | Param_borrowed_mutable -> "mutable"
   | Param_maybe_mutable -> "maybe-mutable"
+
+and show_fun_kind : Ast_defs.fun_kind -> string =
+ fun x ->
+  Ast_defs.(
+    match x with
+    | FSync -> "sync"
+    | FAsync -> "async"
+    | FGenerator -> "generator"
+    | FAsyncGenerator -> "async generator"
+    | FCoroutine -> "coroutine")
 
 and show_fun_type : type a. a ty fun_type -> string =
  (fun x -> Format.asprintf "%a" pp_fun_type x)

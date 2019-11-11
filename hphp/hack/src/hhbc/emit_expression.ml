@@ -941,7 +941,7 @@ and emit_new
     (* Special case for statically-known class *)
     | Class_id (_, cname) ->
       let id = Hhbc_id.Class.from_ast_name cname in
-      Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string id);
+      Emit_symbol_refs.add_class id;
       begin
         match has_generics with
         | H.NoGenerics -> gather [emit_pos pos; instr_newobjd id]
@@ -994,7 +994,7 @@ and emit_record env pos (_, rname) is_array es =
     else
       instr_new_record
   in
-  Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string id);
+  Emit_symbol_refs.add_class id;
   emit_struct_array env pos es (instr id)
 
 and emit_clone env expr = gather [emit_expr env expr; instr_clone]
@@ -1052,8 +1052,8 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
     emit_pos_then pos instrs
 
 and emit_known_class_id (_, cname) =
-  let cname = Hhbc_id.Class.(from_ast_name cname |> to_raw_string) in
-  Emit_symbol_refs.add_class cname;
+  let cid = Hhbc_id.Class.from_ast_name cname in
+  Emit_symbol_refs.add_class cid;
   gather [instr_string cname; instr_classgetc]
 
 and emit_load_class_ref env pos cexpr =
@@ -1152,7 +1152,7 @@ and emit_class_const_impl (p, cname) const_id =
   if SU.is_class const_id then
     instr_string cname
   else (
-    Emit_symbol_refs.add_class cname;
+    Emit_symbol_refs.add_class cid;
     instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name const_id, cid)))
   )
 
@@ -1224,14 +1224,12 @@ and emit_id (env : Emit_env.t) ((p, s) : Aast.sid) =
   | _ when s = SN.PseudoConsts.exit || s = SN.PseudoConsts.die ->
     emit_exit env None
   | _ ->
-    let fq_id = Hhbc_id.Const.from_ast_name s in
-    Emit_symbol_refs.add_constant s;
-    emit_pos_then p @@ instr (ILitConst (CnsE fq_id))
+    let cid = Hhbc_id.Const.from_ast_name s in
+    Emit_symbol_refs.add_constant cid;
+    emit_pos_then p @@ instr (ILitConst (CnsE cid))
 
-and rename_xhp (p, s) = (p, SU.Xhp.mangle s)
-
-and emit_xhp (env : Emit_env.t) annot id attributes (children : Tast.expr list)
-    =
+and emit_xhp
+    (env : Emit_env.t) annot (p, name) attributes (children : Tast.expr list) =
   (* Translate into a constructor call. The arguments are:
    *  1) struct-like array of attributes
    *  2) vec-like array of children
@@ -1260,12 +1258,12 @@ and emit_xhp (env : Emit_env.t) annot id attributes (children : Tast.expr list)
   let children_vec = (annot, A.Varray (None, children)) in
   let filename = (annot, A.Id (pos, SN.PseudoConsts.g__FILE__)) in
   let line = (annot, A.Id (pos, SN.PseudoConsts.g__LINE__)) in
-  let renamed_id = rename_xhp id in
-  Emit_symbol_refs.add_class (snd renamed_id);
+  let renamed_id = Hhbc_id.Class.from_ast_name name in
+  Emit_symbol_refs.add_class renamed_id;
   emit_expr env
   @@ ( annot,
        A.New
-         ( (annot, A.CI renamed_id),
+         ( (annot, A.CI (p, Hhbc_id.Class.to_raw_string renamed_id)),
            [],
            [attribute_map; children_vec; filename; line],
            [],
@@ -3498,12 +3496,11 @@ and emit_call_lhs_and_fcall
       match cexpr with
       (* Statically known *)
       | Class_id (_, cname) ->
-        let id = Hhbc_id.Class.from_ast_name cname in
-        let cname = Hhbc_id.Class.to_raw_string id in
-        Emit_symbol_refs.add_class cname;
+        let cid = Hhbc_id.Class.from_ast_name cname in
+        Emit_symbol_refs.add_class cid;
         let (generics, fcall_args) = emit_generics fcall_args in
         ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
-          gather [generics; instr_fcallclsmethodd fcall_args method_id id] )
+          gather [generics; instr_fcallclsmethodd fcall_args method_id cid] )
       | Class_special clsref ->
         let (generics, fcall_args) = emit_generics fcall_args in
         ( gather [instr_nulluninit; instr_nulluninit; instr_nulluninit],
@@ -3993,8 +3990,8 @@ and emit_call
   let (annot, expr_) = expr in
   (match expr_ with
   | A.Id (_, s) ->
-    let fname = Hhbc_id.Function.(from_ast_name s |> to_raw_string) in
-    Emit_symbol_refs.add_function fname
+    let fid = Hhbc_id.Function.from_ast_name s in
+    Emit_symbol_refs.add_function fid
   | _ -> ());
   let fcall_args = get_fcall_args args uargs async_eager_label in
   let (_flags, _args, num_ret, _inouts, _eager) = fcall_args in

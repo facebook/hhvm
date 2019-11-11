@@ -15,7 +15,7 @@ type t = {
   option_constant_folding: bool;
   option_optimize_null_checks: bool;
   option_max_array_elem_size_on_the_stack: int;
-  option_aliased_namespaces: (string * string) list option;
+  option_aliased_namespaces: (string * string) list;
   option_source_mapping: bool;
   option_relabel: bool;
   option_php7_uvs: bool;
@@ -65,7 +65,7 @@ let default =
     option_constant_folding = true;
     option_optimize_null_checks = false;
     option_max_array_elem_size_on_the_stack = 64;
-    option_aliased_namespaces = None;
+    option_aliased_namespaces = [];
     option_source_mapping = false;
     option_php7_uvs = false;
     option_php7_ltr_assign = false;
@@ -120,7 +120,7 @@ let optimize_null_checks o = o.option_optimize_null_checks
 let max_array_elem_size_on_the_stack o =
   o.option_max_array_elem_size_on_the_stack
 
-let aliased_namespaces o = Option.value o.option_aliased_namespaces ~default:[]
+let aliased_namespaces o = o.option_aliased_namespaces
 
 let source_mapping o = o.option_source_mapping
 
@@ -214,6 +214,11 @@ let enforce_generics_ub o = o.option_enforce_generics_ub
 let check_int_overflow o = o.option_check_int_overflow
 
 let to_string o =
+  let aliased_namespaces_str =
+    aliased_namespaces o
+    |> List.map ~f:(fun (fst, snd) -> Printf.sprintf "(%s, %s)" fst snd)
+    |> String.concat ~sep:", "
+  in
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o))
   in
@@ -230,6 +235,7 @@ let to_string o =
       Printf.sprintf "optimize_null_checks: %B" @@ optimize_null_checks o;
       Printf.sprintf "max_array_elem_size_on_the_stack: %d"
       @@ max_array_elem_size_on_the_stack o;
+      Printf.sprintf "aliased_namespaces: %s" aliased_namespaces_str;
       Printf.sprintf "source_mapping: %B" @@ source_mapping o;
       Printf.sprintf "relabel: %B" @@ relabel o;
       Printf.sprintf "enable_uniform_variable_syntax: %B"
@@ -253,17 +259,19 @@ let to_string o =
       @@ log_extern_compiler_perf o;
       Printf.sprintf "enable_intrinsics_extension: %B"
       @@ enable_intrinsics_extension o;
-      Printf.sprintf "phpism_disallow_execution_operator %B"
+      Printf.sprintf "phpism_disallow_execution_operator: %B"
       @@ phpism_disallow_execution_operator o;
-      Printf.sprintf "phpism_disable_nontoplevel_declarations %B"
+      Printf.sprintf "phpism_disable_nontoplevel_declarations: %B"
       @@ phpism_disable_nontoplevel_declarations o;
-      Printf.sprintf "phpism_disable_static_closures %B"
+      Printf.sprintf "phpism_disable_static_closures: %B"
       @@ phpism_disable_static_closures o;
       Printf.sprintf "phpism_disable_halt_compiler: %B"
       @@ phpism_disable_halt_compiler o;
       Printf.sprintf "emit_func_pointers: %B" @@ emit_func_pointers o;
       Printf.sprintf "emit_cls_meth_pointers: %B" @@ emit_cls_meth_pointers o;
       Printf.sprintf "emit_inst_meth_pointers: %B" @@ emit_inst_meth_pointers o;
+      Printf.sprintf "emit_meth_caller_func_pointers: %B"
+      @@ emit_meth_caller_func_pointers o;
       Printf.sprintf "rx_is_enabled: %B" @@ rx_is_enabled o;
       Printf.sprintf "disable_lval_as_an_expression: %B"
       @@ disable_lval_as_an_expression o;
@@ -467,7 +475,7 @@ let set_value name get set config opts =
 let value_setters =
   [
     ( set_value "hhvm.aliased_namespaces" get_value_from_config_kv_list
-    @@ (fun opts v -> { opts with option_aliased_namespaces = Some v }) );
+    @@ (fun opts v -> { opts with option_aliased_namespaces = v }) );
     ( set_value "hack.compiler.constant_folding" get_value_from_config_int
     @@ (fun opts v -> { opts with option_constant_folding = v = 1 }) );
     ( set_value "hack.compiler.optimize_null_checks" get_value_from_config_int

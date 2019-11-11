@@ -14,7 +14,7 @@ import time
 import unittest
 from typing import ClassVar, List, Mapping, Optional, Tuple
 
-from hh_paths import hh_client, hh_merge_deps, hh_server
+from hh_paths import hackfmt, hh_client, hh_merge_deps, hh_server
 from test_case import TestCase, TestDriver
 from utils import Json, JsonObject
 
@@ -237,6 +237,20 @@ class CommonTestDriver(TestDriver):
         # If the file isn't found you will get this
         except FileNotFoundError:
             return False
+
+    def run_hackfmt(
+        self,
+        stdin: Optional[str] = None,
+        options: Optional[List[str]] = None,
+        expected_output: Optional[str] = None,
+    ) -> bool:
+        options = [] if options is None else options
+        (output, err, retcode) = self.proc_call([hackfmt] + options, stdin=stdin)
+        if retcode != 0:
+            print("check returned non-zero code: " + str(retcode), file=sys.stderr)
+        if expected_output is not None:
+            self.assertEqual(expected_output, output)
+        return True
 
     # Runs `hh_client check` asserting the stdout is equal the expected.
     # Returns stderr.
@@ -840,24 +854,16 @@ class CommonTests(BarebonesTests):
         if not self.test_driver.run_hackfmt_check():
             raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
 
-        self.test_driver.start_hh_server()
-        self.test_driver.check_cmd_and_json_cmd(
-            [
-                "function test1(int $x) {{",
-                "  $x = $x * x + 3;",
-                "  return f($x);",
-                "}}",
-            ],
-            [
-                '{{"error_message":"","result":"function test1(int $x) {{\\n'
-                "  $x"
-                ' = $x * x + 3;\\n  return f($x);\\n}}\\n","internal_error":false}}'
-            ],
-            options=["--format", "7", "63"],
+        self.test_driver.run_hackfmt(
+            expected_output="function test1(int $x) {\n"
+            + "  $x = $x * x + 3;\n"
+            + "  return f($x);\n"
+            + "}\n",
+            options=["--indent-width", "2", "--range", "7", "63"],
             stdin="""<?hh
 
 function test1(int $x) { $x = $x*x + 3; return f($x); }
-function test2(int $x) { $x = $x*x + 3; return f($x); }
+function test2(int $x) { $x = $x*x + 5; return f($x); }
 """,
         )
 

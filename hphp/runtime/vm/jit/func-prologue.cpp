@@ -93,10 +93,7 @@ TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
                         TransKind kind, CodeCache::View code) {
   auto context = prologue_context(kInvalidTransID, kind, func,
                                   func->numSlotsInFrame(), func->base());
-  IRUnit unit{context,
-              dumpIREnabled(kind) || RuntimeOption::EvalDumpInlDecision ?
-                std::make_unique<AnnotationData>() :
-                nullptr };
+  IRUnit unit{context, std::make_unique<AnnotationData>()};
   irgen::IRGS env{unit, nullptr, 0, nullptr};
 
   irgen::emitFuncBodyDispatch(env, dvs);

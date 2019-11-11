@@ -448,7 +448,7 @@ bool VarEnv::unset(const StringData* name) {
 const StaticString s_reified_generics_var("0ReifiedGenerics");
 
 Array VarEnv::getDefinedVariables() const {
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
 
   NameValueTable::Iterator iter(&m_nvTable);
   for (; iter.valid(); iter.next()) {
@@ -917,14 +917,14 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
 }
 
 Array getDefinedVariables(const ActRec* fp) {
-  if (UNLIKELY(fp == nullptr || fp->isInlined())) return empty_array();
+  if (UNLIKELY(fp == nullptr || fp->isInlined())) return empty_darray();
 
   if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
     return fp->m_varEnv->getDefinedVariables();
   }
   auto const func = fp->m_func;
   auto const numLocals = func->numNamedLocals();
-  ArrayInit ret(numLocals, ArrayInit::Map{});
+  DArrayInit ret(numLocals);
   for (Id id = 0; id < numLocals; ++id) {
     TypedValue* ptv = frame_local(fp, id);
     if (ptv->m_type == KindOfUninit) {

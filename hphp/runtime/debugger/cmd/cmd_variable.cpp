@@ -259,11 +259,7 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
     m_global = g_context->getVarEnv(fp) == g_context->m_globalVarEnv;
     auto oThis = g_context->getThis();
     if (nullptr != oThis) {
-      TypedValue tvThis;
-
-      tvThis.m_type = KindOfObject;
-      tvThis.m_data.pobj = oThis;
-
+      auto tvThis = make_tv<KindOfObject>(oThis);
       Variant thisName(s_this);
       m_variables.set(thisName, tvAsVariant(&tvThis));
     }
@@ -282,7 +278,7 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
   // Version 1 of this command means we want the names of all variables, but we
   // don't care about their values just yet.
   if (m_version == 1) {
-    ArrayInit ret(m_variables->size(), ArrayInit::Map{});
+    DArrayInit ret(m_variables->size());
     Variant v;
     for (ArrayIter iter(m_variables); iter; ++iter) {
       assertx(iter.first().isString());
@@ -300,7 +296,7 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
 
   // Variable name might not exist.
   if (!m_variables.exists(m_varName, true /* isKey */)) {
-    m_variables = Array::Create();
+    m_variables = Array::CreateDArray();
     return proxy.sendToClient(this);
   }
 
@@ -308,13 +304,13 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
   auto const result = m_formatMaxLen < 0
     ? DebuggerClient::FormatVariable(value)
     : DebuggerClient::FormatVariableWithLimit(value, m_formatMaxLen);
-  m_variables = make_map_array(m_varName, result);
+  m_variables = make_darray(m_varName, result);
 
   // Remove the entry if its name or context does not match the filter.
   if (!m_filter.empty() && m_varName.find(m_filter, 0, false) < 0) {
     auto const fullvalue = DebuggerClient::FormatVariable(value);
     if (fullvalue.find(m_filter, 0, false) < 0) {
-      m_variables = Array::Create();
+      m_variables = Array::CreateDArray();
     }
   }
 

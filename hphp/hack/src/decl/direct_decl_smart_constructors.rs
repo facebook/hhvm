@@ -25,6 +25,7 @@ use oxidized::{
 use parser::{
     indexed_source_text::IndexedSourceText, lexable_token::LexableToken, token_kind::TokenKind,
 };
+use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 
@@ -212,16 +213,16 @@ impl NamespaceBuilder {
 #[derive(Clone, Debug)]
 pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
-    pub decls: InProgressDecls,
-    namespace_builder: NamespaceBuilder,
+    pub decls: Cow<'a, InProgressDecls>,
+    namespace_builder: Cow<'a, NamespaceBuilder>,
 }
 
 impl<'a> State<'a> {
     pub fn new(source_text: IndexedSourceText) -> State {
         State {
             source_text,
-            decls: empty_decls(),
-            namespace_builder: NamespaceBuilder::new(),
+            decls: Cow::Owned(empty_decls()),
+            namespace_builder: Cow::Owned(NamespaceBuilder::new()),
         }
     }
 }
@@ -585,6 +586,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 if self.state.namespace_builder.is_building_namespace {
                     self.state
                         .namespace_builder
+                        .to_mut()
                         .in_progress_namespace
                         .push_str(&name.to_string());
                     Node_::Ignored
@@ -638,6 +640,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 if self.state.namespace_builder.is_building_namespace {
                     self.state
                         .namespace_builder
+                        .to_mut()
                         .in_progress_namespace
                         .push('\\');
                     Node_::Ignored
@@ -658,10 +661,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Final => Node_::Final,
             TokenKind::Static => Node_::Static,
             TokenKind::Namespace => {
-                self.state.namespace_builder.is_building_namespace = true;
+                self.state.namespace_builder.to_mut().is_building_namespace = true;
                 if !self.state.namespace_builder.current_namespace().is_empty() {
                     self.state
                         .namespace_builder
+                        .to_mut()
                         .in_progress_namespace
                         .push('\\')
                 }
@@ -670,11 +674,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::LeftBrace | TokenKind::Semicolon => {
                 if self.state.namespace_builder.is_building_namespace {
                     if kind == TokenKind::LeftBrace {
-                        self.state.namespace_builder.push_namespace();
+                        self.state.namespace_builder.to_mut().push_namespace();
                     } else {
-                        self.state.namespace_builder.set_namespace();
+                        self.state.namespace_builder.to_mut().set_namespace();
                     }
-                    self.state.namespace_builder.is_building_namespace = false;
+                    self.state.namespace_builder.to_mut().is_building_namespace = false;
                 }
                 Node_::Ignored
             }
@@ -804,7 +808,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     get_name(self.state.namespace_builder.current_namespace(), &name)?;
                 match self.node_to_ty(&aliased_type, &HashSet::new()) {
                     Ok(ty) => {
-                        self.state.decls.typedefs.insert(
+                        self.state.decls.to_mut().typedefs.insert(
                             name,
                             Rc::new(TypedefType {
                                 pos,
@@ -965,7 +969,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 let (name, pos) =
                     get_name(self.state.namespace_builder.current_namespace(), &name)?;
                 let params = self.into_variables_list(param_list?, &type_variables)?;
-                self.state.decls.funs.insert(
+                let type_ = self.node_to_ty(&ret_hint?, &type_variables)?;
+                self.state.decls.to_mut().funs.insert(
                     name,
                     Rc::new(FunElt {
                         deprecated: None,
@@ -982,7 +987,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 params,
                                 ret: PossiblyEnforcedTy {
                                     enforced: false,
-                                    type_: self.node_to_ty(&ret_hint?, &type_variables)?,
+                                    type_,
                                 },
                                 fun_kind: FunKind::FSync,
                                 reactive: Reactivity::Nonreactive,
@@ -1048,7 +1053,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         let (name, _) =
                             get_name(self.state.namespace_builder.current_namespace(), name)?;
                         match self.node_to_ty(&hint, &HashSet::new()) {
-                            Ok(ty) => self.state.decls.consts.insert(name, Rc::new(ty)),
+                            Ok(ty) => self.state.decls.to_mut().consts.insert(name, Rc::new(ty)),
                             Err(msg) => {
                                 return Err(format!(
                                     "Expected hint or name for constant {}, but was {:?} ({})",
@@ -1080,7 +1085,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         name: Self::R,
         body: Self::R,
     ) -> Self::R {
-        self.state.namespace_builder.pop_namespace();
+        self.state.namespace_builder.to_mut().pop_namespace();
         let (name, body) = (name?, body?);
         Ok(match body {
             Node_::Ignored => Node_::Ignored,

@@ -9,11 +9,11 @@
 # This also avoids the need to depend on gpg in the installation.
 
 if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
-  set(RUST_URL "https://static.rust-lang.org/dist/rust-1.36.0-x86_64-unknown-linux-gnu.tar.gz")
-  set(RUST_SHA256 "15e592ec52f14a0586dcebc87a957e472c4544e07359314f6354e2b8bd284c55")
+  set(RUST_URL "https://static.rust-lang.org/dist/rust-1.39.0-x86_64-unknown-linux-gnu.tar.gz")
+  set(RUST_SHA256 "b10a73e5ba90034fe51f0f02cb78f297ed3880deb7d3738aa09dc5a4d9704a25")
 elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
-  set(RUST_URL "https://static.rust-lang.org/dist/rust-1.36.0-x86_64-apple-darwin.tar.gz")
-  set(RUST_SHA256 "91f151ec7e24f5b0645948d439fc25172ec4012f0584dd16c3fb1acb709aa325")
+  set(RUST_URL "https://static.rust-lang.org/dist/rust-1.39.0-x86_64-apple-darwin.tar.gz")
+  set(RUST_SHA256 "3736d49c5e9592844e1a5d5452883aeaf8f1e25d671c1bc8f01e81c1766603b5")
 else()
   message(FATAL_ERROR "HHVM does not support this operating system")
 endif()

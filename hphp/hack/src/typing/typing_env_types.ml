@@ -110,6 +110,21 @@ type env = {
   tenv: locl_ty IMap.t;
   (* Mapping of type variables to other type variables *)
   subst: int IMap.t;
+  tyvar_occurrences: ISet.t IMap.t;
+      (** A map to track where each type variable occurs,
+          more precisely in the type of which other type variables.
+          E.g. if #1 is bound to (#2 | int), then this map contains the entry
+            #2 -> { #1 }
+          This is based on shallow binding, i.e. in the example above, if #2
+          is mapped to #3, then tyvar_occurrences would be:
+            #2 -> { #1 }
+            #3 -> { #2 }
+          but we would record that #3 occurs in #1.
+          When a type variable v gets solved or the type bound to it gets simplified, 
+          we simplify the unions and intersections of the types bound to the 
+          type variables associated to v in this map.
+          So in our example, if #2 gets solved to int,
+          we simplify #1 to (int | int) = int. *)
   fresh_typarams: SSet.t;
   lenv: local_env;
   genv: genv;

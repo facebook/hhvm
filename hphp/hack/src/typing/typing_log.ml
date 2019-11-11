@@ -411,7 +411,7 @@ let tenv_as_value env tenv =
   Map
     (IMap.fold
        (fun i x m ->
-         SMap.add (Printf.sprintf "#%d" i) (Atom (Typing_print.debug env x)) m)
+         SMap.add (var_as_string i) (Atom (Typing_print.debug env x)) m)
        tenv
        SMap.empty)
 
@@ -419,8 +419,15 @@ let subst_as_value subst =
   Map
     (IMap.fold
        (fun i x m ->
-         SMap.add (Printf.sprintf "#%d" i) (Atom (Printf.sprintf "#%d" x)) m)
+         SMap.add (var_as_string i) (Atom (Printf.sprintf "#%d" x)) m)
        subst
+       SMap.empty)
+
+let tyvar_occurrences_as_value tyvar_occurrences =
+  Map
+    (IMap.fold
+       (fun i vars m -> SMap.add (var_as_string i) (varset_as_value vars) m)
+       tyvar_occurrences
        SMap.empty)
 
 let global_tyvar_info_as_value = Atom "global"
@@ -455,12 +462,9 @@ let tvenv_as_value env tvenv =
        (fun i x m ->
          match x with
          | LocalTyvar x ->
-           SMap.add
-             (Printf.sprintf "#%d" i)
-             (local_tyvar_info_as_value env x)
-             m
+           SMap.add (var_as_string i) (local_tyvar_info_as_value env x) m
          | GlobalTyvar ->
-           SMap.add (Printf.sprintf "#%d" i) global_tyvar_info_as_value m)
+           SMap.add (var_as_string i) global_tyvar_info_as_value m)
        tvenv
        SMap.empty)
 
@@ -468,14 +472,14 @@ let global_tvenv_as_value env global_tvenv =
   Map
     (IMap.fold
        (fun i x m ->
-         SMap.add (Printf.sprintf "#%d" i) (local_tyvar_info_as_value env x) m)
+         SMap.add (var_as_string i) (local_tyvar_info_as_value env x) m)
        global_tvenv
        SMap.empty)
 
 let tyvars_stack_as_value tyvars_stack =
   List
     (List.map tyvars_stack (fun (_, l) ->
-         List (List.map l (fun i -> Atom (Printf.sprintf "#%d" i)))))
+         List (List.map l (fun i -> Atom (var_as_string i)))))
 
 let local_mutability_as_value local_mutability =
   local_id_map_as_value
@@ -599,6 +603,7 @@ let env_as_value env =
     function_pos;
     tenv;
     subst;
+    tyvar_occurrences;
     fresh_typarams;
     lenv;
     genv;
@@ -627,6 +632,7 @@ let env_as_value env =
       ("global_tvenv", global_tvenv_as_value env global_tvenv);
       ("tenv", tenv_as_value env tenv);
       ("subst", subst_as_value subst);
+      ("tyvar_occurrences", tyvar_occurrences_as_value tyvar_occurrences);
       ("fresh_typarams", Set fresh_typarams);
       ("tyvars_stack", tyvars_stack_as_value tyvars_stack);
       ("lenv", lenv_as_value env lenv);

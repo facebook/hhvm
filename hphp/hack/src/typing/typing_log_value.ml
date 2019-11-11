@@ -36,3 +36,8 @@ let local_id_set_as_value s =
        (fun id s -> SSet.add (local_id_as_string id) s)
        s
        SSet.empty)
+
+let var_as_string v = Printf.sprintf "#%d" v
+
+let varset_as_value s =
+  Set (ISet.fold (fun v s -> SSet.add (var_as_string v) s) s SSet.empty)

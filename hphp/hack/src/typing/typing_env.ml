@@ -524,6 +524,7 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot =
     function_pos = Pos.none;
     tenv = IMap.empty;
     subst = IMap.empty;
+    tyvar_occurrences = IMap.empty;
     fresh_typarams = SSet.empty;
     lenv = initial_local TPEnv.empty Nonreactive;
     in_loop = false;

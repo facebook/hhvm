@@ -8,7 +8,6 @@
 */
 use parser_rust as parser;
 
-use escaper::{extract_unquoted_string, unescape_double, unescape_single};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use hhbc_string_utils_rust::GetName;
 use oxidized::{
@@ -252,10 +251,9 @@ pub enum Node_ {
     List(Vec<Node_>),
     BracketedList(Box<(Pos, Vec<Node_>, Pos)>),
     Ignored,
-    // tokens
     Name(GetName, Pos),
-    String(GetName),
     XhpName(GetName, Pos),
+    QualifiedName(Vec<Node_>, Pos),
     Hint(HintValue, Pos),
     Backslash(Pos), // This needs a pos since it shows up in names.
     ListItem(Box<(Node_, Node_)>),
@@ -269,26 +267,6 @@ pub enum Node_ {
     TypeParameter(Box<(Node_, Vec<Box<(ConstraintKind, Node_)>>)>),
     As,
     Super,
-    Class,
-    Interface,
-    Trait,
-    Extends,
-    Implements,
-    Abstract,
-    Final,
-    Static,
-    QualifiedName(Vec<Node_>, Pos),
-    ScopeResolutionExpression(Box<(Node_, Node_)>),
-    // declarations
-    ClassDecl(Box<ClassDeclChildren>),
-    MethodDecl(Box<Node_>),
-    EnumDecl(Box<EnumDeclChildren>),
-    TraitUseClause(Box<Node_>),
-    RequireExtendsClause(Box<Node_>),
-    RequireImplementsClause(Box<Node_>),
-    Define(Box<Node_>),
-    NamespaceDecl(Box<Node_>, Box<Node_>),
-    EmptyBody,
 }
 
 impl Node_ {
@@ -346,24 +324,6 @@ impl Node_ {
 }
 
 pub type Node = Result<Node_, String>;
-
-#[derive(Clone, Debug)]
-pub struct ClassDeclChildren {
-    pub modifiers: Node_,
-    pub kind: Node_,
-    pub name: Node_,
-    pub attributes: Node_,
-    pub extends: Node_,
-    pub implements: Node_,
-    pub constrs: Node_,
-    pub body: Node_,
-}
-
-#[derive(Clone, Debug)]
-pub struct EnumDeclChildren {
-    pub name: Node_,
-    pub attributes: Node_,
-}
 
 impl DirectDeclSmartConstructors<'_> {
     fn node_to_ty(&self, node: &Node_, type_variables: &HashSet<String>) -> Result<Ty, String> {
@@ -481,30 +441,7 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'_> {
     }
 
     fn is_zero(s: &Self::S) -> bool {
-        if let Ok(s) = s {
-            match s {
-                Node_::Ignored |
-                // tokens
-                Node_::Name(_, _) |
-                Node_::String(_) |
-                Node_::XhpName(_, _) |
-                Node_::Hint(_, _) |
-                Node_::Backslash(_) |
-                Node_::ListItem(_) |
-                Node_::Class |
-                Node_::Interface |
-                Node_::Trait |
-                Node_::Extends |
-                Node_::Implements |
-                Node_::Abstract |
-                Node_::Final |
-                Node_::Static |
-                Node_::QualifiedName(_, _) => true,
-                _ => false,
-            }
-        } else {
-            false
-        }
+        s.is_ok()
     }
 }
 
@@ -594,19 +531,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Node_::Name(name, token_pos())
                 }
             }
-            TokenKind::DecimalLiteral => Node_::String(GetName::new(token_text(), |string| string)),
-            TokenKind::SingleQuotedStringLiteral => {
-                Node_::String(GetName::new(token_text(), |string| {
-                    let tmp = unescape_single(string.as_str()).ok().unwrap();
-                    extract_unquoted_string(&tmp, 0, tmp.len()).ok().unwrap()
-                }))
-            }
-            TokenKind::DoubleQuotedStringLiteral => {
-                Node_::String(GetName::new(token_text(), |string| {
-                    let tmp = unescape_double(string.as_str()).ok().unwrap();
-                    extract_unquoted_string(&tmp, 0, tmp.len()).ok().unwrap()
-                }))
-            }
             TokenKind::XHPClassName => {
                 Node_::XhpName(GetName::new(token_text(), |string| string), token_pos())
             }
@@ -652,14 +576,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::GreaterThan => Node_::GreaterThan(token_pos()),
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
-            TokenKind::Class => Node_::Class,
-            TokenKind::Trait => Node_::Trait,
-            TokenKind::Interface => Node_::Interface,
-            TokenKind::Extends => Node_::Extends,
-            TokenKind::Implements => Node_::Implements,
-            TokenKind::Abstract => Node_::Abstract,
-            TokenKind::Final => Node_::Final,
-            TokenKind::Static => Node_::Static,
             TokenKind::Namespace => {
                 self.state.namespace_builder.to_mut().is_building_namespace = true;
                 if !self.state.namespace_builder.current_namespace().is_empty() {
@@ -715,15 +631,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_simple_type_specifier(&mut self, arg0: Self::R) -> Self::R {
+        // Return this explicitly because flatten filters out non-error nodes.
         arg0
     }
 
     fn make_simple_initializer(&mut self, _arg0: Self::R, arg1: Self::R) -> Self::R {
         arg1
-    }
-
-    fn make_literal_expression(&mut self, arg0: Self::R) -> Self::R {
-        arg0
     }
 
     fn make_list_item(&mut self, item: Self::R, sep: Self::R) -> Self::R {
@@ -770,25 +683,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         ))
     }
 
-    fn make_enum_declaration(
-        &mut self,
-        attributes: Self::R,
-        _keyword: Self::R,
-        name: Self::R,
-        _colon: Self::R,
-        _base: Self::R,
-        _type: Self::R,
-        _left_brace: Self::R,
-        _enumerators: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
-        let (name, attributes) = (name?, attributes?);
-        Ok(match name {
-            Node_::Ignored => Node_::Ignored,
-            _ => Node_::EnumDecl(Box::new(EnumDeclChildren { name, attributes })),
-        })
-    }
-
     fn make_alias_declaration(
         &mut self,
         _attributes: Self::R,
@@ -828,28 +722,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     }
                 }
             }
-        };
-        Ok(Node_::Ignored)
-    }
-
-    fn make_define_expression(
-        &mut self,
-        _keyword: Self::R,
-        _left_paren: Self::R,
-        args: Self::R,
-        _right_paren: Self::R,
-    ) -> Self::R {
-        match args? {
-            Node_::List(mut nodes) => {
-                if let Some(_snd) = nodes.pop() {
-                    if let Some(fst @ Node_::String(_)) = nodes.pop() {
-                        if nodes.is_empty() {
-                            return Ok(Node_::Define(Box::new(fst)));
-                        }
-                    }
-                }
-            }
-            _ => (),
         };
         Ok(Node_::Ignored)
     }
@@ -1006,35 +878,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         })
     }
 
-    fn make_trait_use(
-        &mut self,
-        _keyword: Self::R,
-        names: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
-        Ok(match names? {
-            Node_::Ignored => Node_::Ignored,
-            names => Node_::TraitUseClause(Box::new(names)),
-        })
-    }
-
-    fn make_require_clause(
-        &mut self,
-        _keyword: Self::R,
-        kind: Self::R,
-        name: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
-        Ok(match name? {
-            Node_::Ignored => Node_::Ignored,
-            name => match kind? {
-                Node_::Extends => Node_::RequireExtendsClause(Box::new(name)),
-                Node_::Implements => Node_::RequireImplementsClause(Box::new(name)),
-                _ => Node_::Ignored,
-            },
-        })
-    }
-
     fn make_const_declaration(
         &mut self,
         _arg0: Self::R,
@@ -1082,122 +925,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_namespace_declaration(
         &mut self,
         _keyword: Self::R,
-        name: Self::R,
-        body: Self::R,
+        _name: Self::R,
+        _body: Self::R,
     ) -> Self::R {
         self.state.namespace_builder.to_mut().pop_namespace();
-        let (name, body) = (name?, body?);
-        Ok(match body {
-            Node_::Ignored => Node_::Ignored,
-            _ => Node_::NamespaceDecl(Box::new(name), Box::new(body)),
-        })
-    }
-
-    fn make_namespace_body(
-        &mut self,
-        _left_brace: Self::R,
-        decls: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
-        decls
-    }
-
-    fn make_namespace_empty_body(&mut self, _semicolon: Self::R) -> Self::R {
-        Ok(Node_::EmptyBody)
-    }
-
-    fn make_methodish_declaration(
-        &mut self,
-        _attributes: Self::R,
-        _function_decl_header: Self::R,
-        body: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
-        let body = body?;
-        Ok(match body {
-            Node_::Ignored => Node_::Ignored,
-            _ => Node_::MethodDecl(Box::new(body)),
-        })
-    }
-
-    fn make_classish_declaration(
-        &mut self,
-        attributes: Self::R,
-        modifiers: Self::R,
-        keyword: Self::R,
-        name: Self::R,
-        _type_params: Self::R,
-        _extends_keyword: Self::R,
-        extends: Self::R,
-        _implements_keyword: Self::R,
-        implements: Self::R,
-        constrs: Self::R,
-        body: Self::R,
-    ) -> Self::R {
-        let name = name?;
-        Ok(match name {
-            Node_::Ignored => Node_::Ignored,
-            _ => Node_::ClassDecl(Box::new(ClassDeclChildren {
-                modifiers: modifiers?,
-                kind: keyword?,
-                name,
-                attributes: attributes?,
-                extends: extends?,
-                implements: implements?,
-                constrs: constrs?,
-                body: body?,
-            })),
-        })
-    }
-
-    fn make_classish_body(
-        &mut self,
-        _left_brace: Self::R,
-        elements: Self::R,
-        _right_brace: Self::R,
-    ) -> Self::R {
-        elements
-    }
-
-    fn make_old_attribute_specification(
-        &mut self,
-        _left_double_angle: Self::R,
-        attributes: Self::R,
-        _right_double_angle: Self::R,
-    ) -> Self::R {
-        attributes
-    }
-
-    fn make_attribute_specification(&mut self, attributes: Self::R) -> Self::R {
-        attributes
-    }
-
-    fn make_attribute(&mut self, _at: Self::R, attibute: Self::R) -> Self::R {
-        attibute
-    }
-
-    fn make_constructor_call(
-        &mut self,
-        class_type: Self::R,
-        _left_paren: Self::R,
-        argument_list: Self::R,
-        _right_paren: Self::R,
-    ) -> Self::R {
-        Ok(Node_::ListItem(Box::new((class_type?, argument_list?))))
-    }
-
-    fn make_decorated_expression(&mut self, _decorator: Self::R, expression: Self::R) -> Self::R {
-        expression
-    }
-
-    fn make_scope_resolution_expression(
-        &mut self,
-        qualifier: Self::R,
-        _operator: Self::R,
-        name: Self::R,
-    ) -> Self::R {
-        Ok(Node_::ScopeResolutionExpression(Box::new((
-            qualifier?, name?,
-        ))))
+        Ok(Node_::Ignored)
     }
 }

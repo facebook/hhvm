@@ -134,8 +134,9 @@ let rec localize ~ety_env env (dty : decl_ty) =
     let (env, ty) =
       match (ty1, ty2) with
       | (None, None) ->
+        let tk = MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)) in
         let tany = (r, TUtils.tany env) in
-        (env, Tarraykind (AKvarray_or_darray tany))
+        (env, Tarraykind (AKvarray_or_darray (tk, tany)))
       | (Some tv, None) ->
         let (env, tv) = localize ~ety_env env tv in
         (env, Tarraykind (AKvarray tv))
@@ -156,8 +157,9 @@ let rec localize ~ety_env env (dty : decl_ty) =
     let ty = Tarraykind (AKvarray tv) in
     (env, (r, ty))
   | (r, Tvarray_or_darray tv) ->
+    let tk = MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)) in
     let (env, tv) = localize ~ety_env env tv in
-    let ty = Tarraykind (AKvarray_or_darray tv) in
+    let ty = Tarraykind (AKvarray_or_darray (tk, tv)) in
     (env, (r, ty))
   | (r, Tgeneric x) ->
     begin

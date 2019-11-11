@@ -35,8 +35,8 @@ let rec strip_ty ty =
     | Tarraykind (AKdarray (ty1, ty2)) ->
       Tarraykind (AKdarray (strip_ty ty1, strip_ty ty2))
     | Tarraykind (AKvarray ty) -> Tarraykind (AKvarray (strip_ty ty))
-    | Tarraykind (AKvarray_or_darray ty) ->
-      Tarraykind (AKvarray_or_darray (strip_ty ty))
+    | Tarraykind (AKvarray_or_darray (ty1, ty2)) ->
+      Tarraykind (AKvarray_or_darray (strip_ty ty1, strip_ty ty2))
     | Ttuple tyl -> Ttuple (strip_tyl tyl)
     | Tdestructure tyl -> Tdestructure (strip_tyl tyl)
     | Toption ty -> Toption (strip_ty ty)

@@ -369,7 +369,7 @@ and array_kind =
   (* An array declared as a darray. *)
   | AKdarray of locl_ty * locl_ty
   (* An array annotated as a varray_or_darray. *)
-  | AKvarray_or_darray of locl_ty
+  | AKvarray_or_darray of locl_ty * locl_ty
   (* This is a type created when we see array() literal *)
   | AKempty
 
@@ -960,11 +960,10 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
     | (Some ty1, Some ty2) -> ty_compare ty1 ty2
   and array_kind_compare ak1 ak2 =
     match (ak1, ak2) with
-    | (AKdarray (ty1, ty2), AKdarray (ty3, ty4)) ->
+    | (AKdarray (ty1, ty2), AKdarray (ty3, ty4))
+    | (AKvarray_or_darray (ty1, ty2), AKvarray_or_darray (ty3, ty4)) ->
       tyl_compare ~sort:false [ty1; ty2] [ty3; ty4]
-    | (AKvarray ty1, AKvarray ty2)
-    | (AKvarray_or_darray ty1, AKvarray_or_darray ty2) ->
-      ty_compare ty1 ty2
+    | (AKvarray ty1, AKvarray ty2) -> ty_compare ty1 ty2
     | _ -> array_kind_con_ordinal ak1 - array_kind_con_ordinal ak2
   and ty_compare ty1 ty2 = ty__compare (snd ty1) (snd ty2) in
   ty__compare ty_1 ty_2

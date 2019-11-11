@@ -178,9 +178,10 @@ let rec freshen_inside_ty env ((r, ty_) as ty) =
       | AKvarray ty ->
         let (env, ty) = freshen_ty env ty in
         (env, (r, Tarraykind (AKvarray ty)))
-      | AKvarray_or_darray ty ->
-        let (env, ty) = freshen_ty env ty in
-        (env, (r, Tarraykind (AKvarray_or_darray ty)))
+      | AKvarray_or_darray (ty1, ty2) ->
+        let (env, ty1) = freshen_ty env ty1 in
+        let (env, ty2) = freshen_ty env ty2 in
+        (env, (r, Tarraykind (AKvarray_or_darray (ty1, ty2))))
       | AKdarray (ty1, ty2) ->
         let (env, ty1) = freshen_ty env ty1 in
         let (env, ty2) = freshen_ty env ty2 in

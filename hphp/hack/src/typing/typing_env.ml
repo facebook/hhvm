@@ -1393,10 +1393,9 @@ and get_tyvars_i env (ty : internal_type) =
       begin
         match ak with
         | AKempty -> (env, ISet.empty, ISet.empty)
-        | AKvarray ty
-        | AKvarray_or_darray ty ->
-          get_tyvars env ty
-        | AKdarray (ty1, ty2) ->
+        | AKvarray ty -> get_tyvars env ty
+        | AKdarray (ty1, ty2)
+        | AKvarray_or_darray (ty1, ty2) ->
           let (env, positive1, negative1) = get_tyvars env ty1 in
           let (env, positive2, negative2) = get_tyvars env ty2 in
           (env, ISet.union positive1 positive2, ISet.union negative1 negative2)

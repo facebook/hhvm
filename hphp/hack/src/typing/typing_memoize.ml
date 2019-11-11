@@ -56,8 +56,9 @@ let check_param : env -> Nast.fun_param -> unit =
       List.iter tyl (check_memoizable env)
     (* Allow untyped arrays. *)
     | (_, Tarraykind AKempty) -> ()
-    | (_, Tarraykind (AKvarray ty | AKdarray (_, ty) | AKvarray_or_darray ty))
-      ->
+    | ( _,
+        Tarraykind (AKvarray ty | AKdarray (_, ty) | AKvarray_or_darray (_, ty))
+      ) ->
       check_memoizable env ty
     | (_, Tshape (_, fdm)) ->
       ShapeMap.iter

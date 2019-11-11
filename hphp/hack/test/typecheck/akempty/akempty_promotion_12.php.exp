@@ -3,4 +3,4 @@ Invalid assignment (Typing[4110])
 File "akempty_promotion_12.php", line 7, characters 27-33:
 Expected array (empty)
 File "akempty_promotion_12.php", line 7, characters 27-33:
-But got varray_or_darray<int>
+But got varray_or_darray<string, int>

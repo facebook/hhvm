@@ -220,6 +220,8 @@ module Full = struct
 
   let tvarray_or_darray k x = list "varray_or_darray<" k [x] ">"
 
+  let akvarray_or_darray k x y = list "varray_or_darray<" k [x; y] ">"
+
   let tarray k x y =
     match (x, y) with
     | (None, None) -> text "array"
@@ -344,7 +346,7 @@ module Full = struct
     | Terr -> terr ()
     | Tdynamic -> text "dynamic"
     | Tnonnull -> text "nonnull"
-    | Tarraykind (AKvarray_or_darray x) -> tvarray_or_darray k x
+    | Tarraykind (AKvarray_or_darray (x, y)) -> akvarray_or_darray k x y
     | Tarraykind AKempty -> text "array (empty)"
     | Tarraykind (AKvarray x) -> tvarray k x
     | Tarraykind (AKdarray (x, y)) -> tdarray k x y
@@ -978,8 +980,8 @@ module Json = struct
           let params fps = [("params", JSON_Array (List.map fps param))] in
           obj @@ fun_kind @ params ft.ft_params @ result ft.ft_ret.et_type
         | Tanon _ -> obj @@ kind "anon"
-        | Tarraykind (AKvarray_or_darray ty) ->
-          obj @@ kind "varray_or_darray" @ args [ty]
+        | Tarraykind (AKvarray_or_darray (ty1, ty2)) ->
+          obj @@ kind "varray_or_darray" @ args [ty1; ty2]
         | Tarraykind (AKdarray (ty1, ty2)) ->
           obj @@ kind "darray" @ args [ty1; ty2]
         | Tarraykind (AKvarray ty) -> obj @@ kind "varray" @ args [ty]
@@ -1169,14 +1171,16 @@ module Json = struct
           >>= fun (args, keytrace) ->
           begin
             match args with
-            | [ty1] ->
+            | [ty1; ty2] ->
               aux ty1 ~keytrace:("0" :: keytrace)
-              >>= (fun ty1 -> ty (Tarraykind (AKvarray_or_darray ty1)))
+              >>= fun ty1 ->
+              aux ty2 ~keytrace:("1" :: keytrace)
+              >>= (fun ty2 -> ty (Tarraykind (AKvarray_or_darray (ty1, ty2))))
             | _ ->
               deserialization_error
                 ~message:
                   (Printf.sprintf
-                     "Invalid number of type arguments to varray_or_darray (expected 1): %d"
+                     "Invalid number of type arguments to varray_or_darray (expected 2): %d"
                      (List.length args))
                 ~keytrace
           end
@@ -1192,7 +1196,7 @@ module Json = struct
                 ty (Tarraykind AKempty)
               else
                 let tany = (Reason.Rnone, Typing_defs.make_tany ()) in
-                ty (Tarraykind (AKvarray_or_darray tany))
+                ty (Tarraykind (AKvarray_or_darray (tany, tany)))
             | [ty1] ->
               aux ty1 ~keytrace:("0" :: keytrace)
               >>= (fun ty1 -> ty (Tarraykind (AKvarray ty1)))

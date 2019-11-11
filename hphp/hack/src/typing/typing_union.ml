@@ -316,9 +316,10 @@ and union_arraykind env ak1 ak2 =
     let (env, tk) = union env tk1 tk2 in
     let (env, tv) = union env tv1 tv2 in
     (env, AKdarray (tk, tv))
-  | (AKvarray_or_darray ty1, AKvarray_or_darray ty2) ->
-    let (env, ty) = union env ty1 ty2 in
-    (env, AKvarray_or_darray ty)
+  | (AKvarray_or_darray (tk1, tv1), AKvarray_or_darray (tk2, tv2)) ->
+    let (env, tk) = union env tk1 tk2 in
+    let (env, tv) = union env tv1 tv2 in
+    (env, AKvarray_or_darray (tk, tv))
   | _ -> raise Dont_simplify
 
 and union_funs env fty1 fty2 =

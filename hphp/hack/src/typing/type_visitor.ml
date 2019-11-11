@@ -274,10 +274,9 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
     method on_tarraykind acc _ array_kind =
       match array_kind with
       | AKempty -> acc
-      | AKvarray_or_darray ty
-      | AKvarray ty ->
-        this#on_type acc ty
-      | AKdarray (tk, tv) ->
+      | AKvarray ty -> this#on_type acc ty
+      | AKdarray (tk, tv)
+      | AKvarray_or_darray (tk, tv) ->
         let acc = this#on_type acc tk in
         this#on_type acc tv
 

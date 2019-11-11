@@ -7508,13 +7508,16 @@ and is_array env ty p pred_name arg_expr =
               (Env.get_tcopt env)
               TypecheckerOptions.experimental_isarray
           in
+          let tk =
+            MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r))
+          in
           let tv =
             if safe_isarray_enabled then
               tfresh
             else
               (r, TUtils.tany env)
           in
-          (r, Tarraykind (AKvarray_or_darray tv))
+          (r, Tarraykind (AKvarray_or_darray (tk, tv)))
       in
       (* Add constraints on generic parameters that must
        * hold for refined_ty <:arg_ty. For example, if arg_ty is Traversable<T>

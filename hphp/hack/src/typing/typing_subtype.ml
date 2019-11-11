@@ -163,13 +163,13 @@ let check_mutability
   (* immutable is not compatible with mutable *)
   | (None, Some (Param_borrowed_mutable | Param_owned_mutable))
   (* mutable is not compatible with immutable  *)
-  
+
   | (Some (Param_borrowed_mutable | Param_owned_mutable), None)
   (* borrowed mutable is not compatible with owned mutable *)
-  
+
   | (Some Param_borrowed_mutable, Some Param_owned_mutable)
   (* maybe-mutable is not compatible with immutable/mutable *)
-  
+
   | ( Some Param_maybe_mutable,
       (None | Some (Param_borrowed_mutable | Param_owned_mutable)) ) ->
     invalid
@@ -1357,7 +1357,7 @@ and simplify_subtype_i
        *)
       | AKvarray tv
       | AKdarray (_, tv)
-      | AKvarray_or_darray tv ->
+      | AKvarray_or_darray (_, tv) ->
         simplify_subtype ~subtype_env ~this_ty tv tv_super env)
     | (Tarraykind akind, Tclass ((_, coll), Nonexact, [tk_super; tv_super]))
       when String.equal coll SN.Collections.cKeyedTraversable
@@ -1370,13 +1370,7 @@ and simplify_subtype_i
         env
         |> simplify_subtype ~subtype_env ~this_ty (MakeType.int r) tk_super
         &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
-      | AKvarray_or_darray tv ->
-        let tk_sub =
-          MakeType.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos r))
-        in
-        env
-        |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
-        &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
+      | AKvarray_or_darray (tk, tv)
       | AKdarray (tk, tv) ->
         env
         |> simplify_subtype ~subtype_env ~this_ty tk tk_super
@@ -1403,22 +1397,18 @@ and simplify_subtype_i
         match (ak_sub, ak_super) with
         (* An empty array is a subtype of any array type *)
         | (AKempty, _) -> valid ()
-        (* varray_or_darray<ty1> <: varray_or_darray<ty2> iff t1 <: ty2
-       But, varray_or_darray<ty1> is never a subtype of a vect-like array *)
-        | (AKvarray_or_darray ty_sub, AKvarray_or_darray ty_super) ->
-          simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-        | (AKvarray ty_sub, (AKvarray ty_super | AKvarray_or_darray ty_super))
+        | (AKvarray ty_sub, (AKvarray ty_super))
           ->
           simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-        | (AKdarray (tk_sub, tv_sub), AKdarray (tk_super, tv_super)) ->
+        | (AKvarray_or_darray (tk_sub, tv_sub), AKvarray_or_darray (tk_super, tv_super))
+        | (AKdarray (tk_sub, tv_sub), AKdarray (tk_super, tv_super))
+        | (AKdarray (tk_sub, tv_sub), AKvarray_or_darray (tk_super, tv_super)) ->
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
-        | (AKdarray (tk_sub, tv_sub), AKvarray_or_darray tv_super) ->
-          let tk_super =
-            MakeType.arraykey
-              (Reason.Rvarray_or_darray_key (Reason.to_pos (fst ety_super)))
-          in
+        | (AKvarray tv_sub, AKvarray_or_darray (tk_super, tv_super)) ->
+          let pos = Reason.to_pos (fst ety_sub) in
+          let tk_sub = MakeType.int (Reason.Ridx_vector pos) in
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
@@ -1949,7 +1939,7 @@ and simplify_subtype_reactivity
   (* ok:
      <<__Rx>>
      function f(<<__AtMostRxAsFunc>> (function(): int) $f) { return $f() }  *)
-  
+
   | (RxVar None, RxVar _) ->
     valid ()
   | (RxVar (Some sub), RxVar (Some super))

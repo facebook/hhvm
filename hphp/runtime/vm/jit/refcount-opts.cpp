@@ -784,7 +784,18 @@ using BlockState = StateVector<Block, PreBlockInfo>;
 
 struct PreEnv {
   using IncDecKey = std::tuple<Block*,uint32_t,bool>; /* blk, id, at front */
-  using InsertMap = jit::flat_map<IncDecKey, SSATmp*>;
+  struct IDKeyCmp {
+    bool operator()(const IncDecKey& a, const IncDecKey& b) const {
+      if (std::get<0>(a)->id() != std::get<0>(b)->id()) {
+        return std::get<0>(a)->id() < std::get<0>(b)->id();
+      }
+      if (std::get<1>(a) != std::get<1>(b)) {
+        return std::get<1>(a) < std::get<1>(b);
+      }
+      return std::get<2>(a) < std::get<2>(b);
+    }
+  };
+  using InsertMap = jit::flat_map<IncDecKey, SSATmp*, IDKeyCmp>;
 
   explicit PreEnv(Env& env, RCAnalysis& rca) :
       env(env),

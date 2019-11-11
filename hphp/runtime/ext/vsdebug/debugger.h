@@ -205,7 +205,11 @@ struct ClientInfo {
 
 struct Debugger final {
   Debugger();
-  virtual ~Debugger() {
+  Debugger(const Debugger&) = delete;
+  Debugger& operator=(const Debugger&) = delete;
+  Debugger (Debugger && ) = delete;
+
+  ~Debugger() {
     shutdown();
   }
 

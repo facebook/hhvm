@@ -7,7 +7,7 @@ extern crate lazy_static;
 
 use escaper::*;
 use lazy_static::lazy_static;
-use naming_special_names_rust::{classes, members};
+use naming_special_names_rust::{classes as ns_classes, members};
 use regex::Regex;
 use std::borrow::Cow;
 use std::cell::Cell;
@@ -134,15 +134,15 @@ pub fn cmp(s1: &str, s2: &str, case_sensitive: bool, ignore_ns: bool) -> bool {
 }
 
 pub fn is_self(s: &str) -> bool {
-    s.eq_ignore_ascii_case(classes::SELF)
+    s.eq_ignore_ascii_case(ns_classes::SELF)
 }
 
 pub fn is_parent(s: &str) -> bool {
-    s.eq_ignore_ascii_case(classes::PARENT)
+    s.eq_ignore_ascii_case(ns_classes::PARENT)
 }
 
 pub fn is_static(s: &str) -> bool {
-    s.eq_ignore_ascii_case(classes::STATIC)
+    s.eq_ignore_ascii_case(ns_classes::STATIC)
 }
 
 pub fn is_class(s: &str) -> bool {
@@ -196,6 +196,21 @@ pub mod locals {
             &s[1..]
         } else {
             s
+        }
+    }
+}
+
+pub mod classes {
+    pub fn mangle_class(prefix: &str, scope: &str, idx: u32) -> String {
+        if idx == 1 {
+            format!("{}${}", prefix.to_string(), scope.to_string())
+        } else {
+            format!(
+                "{}${}#{}",
+                prefix.to_string(),
+                scope.to_string(),
+                idx.to_string()
+            )
         }
     }
 }
@@ -549,6 +564,22 @@ mod string_utils_tests {
         #[test]
         fn string_of_single_dollar() {
             assert_eq!(strip_dollar("$"), "");
+        }
+    }
+
+    mod classes {
+        mod mangle_class {
+            use crate::classes::mangle_class;
+
+            #[test]
+            fn idx_of_one() {
+                assert_eq!(mangle_class("foo", "bar", 1), "foo$bar");
+            }
+
+            #[test]
+            fn idx_of_two() {
+                assert_eq!(mangle_class("foo", "bar", 2), "foo$bar#2")
+            }
         }
     }
 }

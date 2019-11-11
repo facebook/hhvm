@@ -160,8 +160,6 @@ let union_lenvs_ env parent_lenv lenv1 lenv2 =
 let union_lenvs env parent_lenv lenv1 lenv2 =
   fst @@ union_lenvs_ env parent_lenv lenv1 lenv2
 
-let union_envs env env1 env2 = union_lenvs env env.lenv env1.lenv env2.lenv
-
 let rec union_lenv_list env parent_lenv = function
   | []
   | [_] ->

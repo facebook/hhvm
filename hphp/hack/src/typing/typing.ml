@@ -991,19 +991,16 @@ and stmt_ env pos st =
     (env, Aast.Expr te)
   | If (e, b1, b2) ->
     let (env, te, _) = expr env e in
-    (* We stash away the locals environment because condition updates it
-     * locally for checking b1. For example, we might have condition
-     * $x === null, or $x is C, which changes the type of $x in
-     * lenv *)
-    let parent_lenv = env.lenv in
-    let env = condition env true te in
-    let (env, tb1) = block env b1 in
-    let lenv1 = env.lenv in
-    let env = { env with lenv = parent_lenv } in
-    let env = condition env false te in
-    let (env, tb2) = block env b2 in
-    let lenv2 = env.lenv in
-    let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
+    let (env, tb1, tb2) =
+      branch
+        env
+        (fun env ->
+          let env = condition env true te in
+          block env b1)
+        (fun env ->
+          let env = condition env false te in
+          block env b2)
+    in
     (* TODO TAST: annotate with joined types *)
     (env, Aast.If (te, tb1, tb2))
   | Return None ->
@@ -1338,6 +1335,19 @@ and stmt_ env pos st =
   | Markup _ ->
     failwith
       "Unexpected nodes in AST. These nodes should have been removed in naming."
+
+and branch :
+    type res.
+    env -> (env -> env * res) -> (env -> env * res) -> env * res * res =
+ fun env branch1 branch2 ->
+  let parent_lenv = env.lenv in
+  let (env, tbr1) = branch1 env in
+  let lenv1 = env.lenv in
+  let env = { env with lenv = parent_lenv } in
+  let (env, tbr2) = branch2 env in
+  let lenv2 = env.lenv in
+  let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
+  (env, tbr1, tbr2)
 
 and finally_cont fb env ctx =
   let env = LEnv.replace_cont env C.Next (Some ctx) in
@@ -7206,16 +7216,24 @@ and condition
   *)
   | Aast.Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2)
     when Bool.equal tparamet Ast_defs.(equal_bop bop Barbar) ->
-    (* Either cond1 is true and we don't know anything about cond2... *)
-    let env1 = condition env tparamet e1 in
-    (* ... Or cond1 is false and therefore cond2 must be true *)
-    let env2 = condition env (not tparamet) e1 in
-    (* Similarly to the conjunction case, there might be an assignment in
-      cond2 which we must account for. Again we redo what has been undone in
-      the `Binop (Ampamp|Barbar)` case of `expr`*)
-    let (env2, _, _) = expr env2 (Tast.to_nast_expr e2) in
-    let env2 = condition env2 tparamet e2 in
-    LEnv.union_envs env env1 env2
+    let (env, (), ()) =
+      branch
+        env
+        (fun env ->
+          (* Either cond1 is true and we don't know anything about cond2... *)
+          let env = condition env tparamet e1 in
+          (env, ()))
+        (fun env ->
+          (* ... Or cond1 is false and therefore cond2 must be true *)
+          let env = condition env (not tparamet) e1 in
+          (* Similarly to the conjunction case, there might be an assignment in
+          cond2 which we must account for. Again we redo what has been undone in
+          the `Binop (Ampamp|Barbar)` case of `expr` *)
+          let (env, _, _) = expr env (Tast.to_nast_expr e2) in
+          let env = condition env tparamet e2 in
+          (env, ()))
+    in
+    env
   | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], [])
     when tparamet && String.equal f SN.StdlibFunctions.is_array ->
     is_array env `PHPArray p f lv

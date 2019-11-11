@@ -3830,7 +3830,12 @@ and emit_special_function
                then
                  instr_resolve_obj_method
                else
-                 instr (ILitConst (NewVArray 2)) );
+                 instr
+                   (ILitConst
+                      ( if hack_arr_dv_arrs () then
+                        NewVecArray 2
+                      else
+                        NewVArray 2 )) );
              ])
       | _ ->
         Emit_fatal.raise_fatal_runtime
@@ -3858,7 +3863,12 @@ and emit_special_function
                then
                  instr_resolve_cls_method NoWarn
                else
-                 instr (ILitConst (NewVArray 2)) );
+                 instr
+                   (ILitConst
+                      ( if hack_arr_dv_arrs () then
+                        NewVecArray 2
+                      else
+                        NewVArray 2 )) );
              ])
       | [class_name; method_name] ->
         Some
@@ -3872,7 +3882,12 @@ and emit_special_function
                then
                  instr_resolve_cls_method Warn
                else
-                 instr (ILitConst (NewVArray 2)) );
+                 instr
+                   (ILitConst
+                      ( if hack_arr_dv_arrs () then
+                        NewVecArray 2
+                      else
+                        NewVArray 2 )) );
              ])
       | _ ->
         Emit_fatal.raise_fatal_runtime

@@ -1421,7 +1421,11 @@ void emitResolveObjMethod(IRGS& env) {
   }
 
   assertx(func);
-  auto methPair = gen(env, AllocVArray, PackedArrayData { 2 });
+  auto methPair = gen(
+    env,
+    RuntimeOption::EvalHackArrDVArrs ? AllocVecArray : AllocVArray,
+    PackedArrayData { 2 }
+  );
   gen(env, InitPackedLayoutArray, IndexData { 0 }, methPair, obj);
   gen(env, InitPackedLayoutArray, IndexData { 1 }, methPair, func);
   decRef(env, name);

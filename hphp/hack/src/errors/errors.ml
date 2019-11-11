@@ -584,7 +584,7 @@ let to_string ?(indent = false) (error : Pos.absolute error_) : string =
         Buffer.add_string buf msg));
   Buffer.contents buf
 
-let add_error error =
+let add_error_impl error =
   if !accumulate_errors then
     let () =
       match !current_context with
@@ -681,7 +681,7 @@ let (is_hh_fixme_disallowed : (Pos.t -> error_code -> bool) ref) =
 
 let add_ignored_fixme_code_error pos code =
   if !is_hh_fixme_disallowed pos code then
-    add_error
+    add_error_impl
       (make_error
          code
          [
@@ -693,7 +693,7 @@ let add_ignored_fixme_code_error pos code =
   else if !is_hh_fixme pos code && is_ignored_code code then
     let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
     if code / 1000 = 5 then
-      add_error
+      add_error_impl
         (make_error
            code
            [
@@ -703,7 +703,7 @@ let add_ignored_fixme_code_error pos code =
                  code );
            ])
     else
-      add_error
+      add_error_impl
         (make_error
            code
            [
@@ -739,7 +739,7 @@ and add code pos msg =
   if (not (is_ignored_fixme code)) && !is_hh_fixme pos code then
     add_applied_fixme code pos
   else
-    add_error (make_error code pos_msg_l);
+    add_error_impl (make_error code pos_msg_l);
   add_ignored_fixme_code_error pos code
 
 and add_list code pos_msg_l =
@@ -748,8 +748,10 @@ and add_list code pos_msg_l =
   if (not (is_ignored_fixme code)) && !is_hh_fixme pos code then
     add_applied_fixme code pos
   else
-    add_error (make_error code pos_msg_l);
+    add_error_impl (make_error code pos_msg_l);
   add_ignored_fixme_code_error pos code
+
+and add_error (code, pos_msg_l) = add_list code pos_msg_l
 
 and merge (err', fixmes') (err, fixmes) =
   let append _ _ x y =
@@ -4866,7 +4868,7 @@ let try_ f1 f2 = try_with_result f1 (fun _ l -> f2 l)
 
 let try_with_error f1 f2 =
   try_ f1 (fun err ->
-      add_error err;
+      add_error_impl err;
       f2 ())
 
 let try_add_err pos err f1 f2 =

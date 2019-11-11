@@ -14,9 +14,8 @@ use hhbc_string_utils_rust::GetName;
 use oxidized::{
     aast,
     ast_defs::{ConstraintKind, FunKind, Id, Variance},
-    direct_decl_parser::Decls,
     pos::Pos,
-    s_map::SMap,
+    shallow_decl_defs, typing_defs,
     typing_defs::{
         DeclTy, FunArity, FunElt, FunParam, FunParams, FunTparamsKind, FunType, ParamMode,
         PossiblyEnforcedTy, Reactivity, Tparam, Ty, Ty_, TypedefType,
@@ -26,16 +25,25 @@ use oxidized::{
 use parser::{
     indexed_source_text::IndexedSourceText, lexable_token::LexableToken, token_kind::TokenKind,
 };
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 
 pub use crate::direct_decl_smart_constructors_generated::*;
 
-pub fn empty_decls() -> Decls {
-    Decls {
-        classes: SMap::new(),
-        funs: SMap::new(),
-        typedefs: SMap::new(),
-        consts: SMap::new(),
+#[derive(Clone, Debug)]
+pub struct InProgressDecls {
+    pub classes: HashMap<String, Rc<shallow_decl_defs::ShallowClass>>,
+    pub funs: HashMap<String, Rc<typing_defs::FunElt>>,
+    pub typedefs: HashMap<String, Rc<typing_defs::TypedefType>>,
+    pub consts: HashMap<String, Rc<typing_defs::DeclTy>>,
+}
+
+pub fn empty_decls() -> InProgressDecls {
+    InProgressDecls {
+        classes: HashMap::new(),
+        funs: HashMap::new(),
+        typedefs: HashMap::new(),
+        consts: HashMap::new(),
     }
 }
 
@@ -204,7 +212,7 @@ impl NamespaceBuilder {
 #[derive(Clone, Debug)]
 pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
-    pub decls: Decls,
+    pub decls: InProgressDecls,
     namespace_builder: NamespaceBuilder,
 }
 
@@ -798,14 +806,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Ok(ty) => {
                         self.state.decls.typedefs.insert(
                             name,
-                            TypedefType {
+                            Rc::new(TypedefType {
                                 pos,
                                 vis: aast::TypedefVisibility::Transparent,
                                 tparams: Vec::new(),
                                 constraint: None,
                                 type_: ty,
                                 decl_errors: None,
-                            },
+                            }),
                         );
                     }
                     Err(msg) => {
@@ -959,7 +967,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 let params = self.into_variables_list(param_list?, &type_variables)?;
                 self.state.decls.funs.insert(
                     name,
-                    FunElt {
+                    Rc::new(FunElt {
                         deprecated: None,
                         type_: Ty(
                             Reason::Rwitness(pos.clone()),
@@ -986,7 +994,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         ),
                         decl_errors: None,
                         pos,
-                    },
+                    }),
                 );
                 Node_::Ignored
             }
@@ -1040,7 +1048,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         let (name, _) =
                             get_name(self.state.namespace_builder.current_namespace(), name)?;
                         match self.node_to_ty(&hint, &HashSet::new()) {
-                            Ok(ty) => self.state.decls.consts.insert(name, ty),
+                            Ok(ty) => self.state.decls.consts.insert(name, Rc::new(ty)),
                             Err(msg) => {
                                 return Err(format!(
                                     "Expected hint or name for constant {}, but was {:?} ({})",

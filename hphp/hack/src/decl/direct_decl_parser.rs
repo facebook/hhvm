@@ -13,6 +13,7 @@ use parser::{
     parser::Parser, parser_env::ParserEnv, smart_constructors_wrappers::WithKind,
     source_text::SourceText,
 };
+use std::collections::BTreeMap;
 use syntax_tree::mode_parser::parse_mode;
 
 pub type DirectDeclParser<'a> = Parser<'a, WithKind<DirectDeclSmartConstructors<'a>>, State<'a>>;
@@ -29,6 +30,30 @@ pub fn parse_decls(filename: RelativePath, text: &str) -> Result<Decls, String> 
     };
     let mut parser = DirectDeclParser::make(&text, env);
     let root = parser.parse_script(None);
-    let decls = root.map(|_| parser.into_sc_state().decls);
+    let decls = root.map(|_| {
+        let decls = parser.into_sc_state().decls;
+        Decls {
+            classes: decls
+                .classes
+                .iter()
+                .map(|(name, class)| (name.clone(), (**class).clone()))
+                .collect::<BTreeMap<_, _>>(),
+            funs: decls
+                .funs
+                .iter()
+                .map(|(name, fun)| (name.clone(), (**fun).clone()))
+                .collect::<BTreeMap<_, _>>(),
+            typedefs: decls
+                .typedefs
+                .iter()
+                .map(|(name, typedef)| (name.clone(), (**typedef).clone()))
+                .collect::<BTreeMap<_, _>>(),
+            consts: decls
+                .consts
+                .iter()
+                .map(|(name, const_)| (name.clone(), (**const_).clone()))
+                .collect::<BTreeMap<_, _>>(),
+        }
+    });
     decls
 }

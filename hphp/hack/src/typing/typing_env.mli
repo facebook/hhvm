@@ -40,6 +40,8 @@ val rename : env -> int -> int -> env
 
 val add : env -> int -> locl_ty -> env
 
+val get_tyvar_occurrences : env -> int -> ISet.t
+
 val get_type : env -> Reason.t -> int -> env * locl_ty
 
 val expand_var : env -> Reason.t -> Ident.t -> env * locl_ty

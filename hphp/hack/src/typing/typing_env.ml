@@ -53,6 +53,20 @@ let log_env_change name ?(level = 1) old_env new_env =
     !env_log_function pos name old_env new_env );
   new_env
 
+let get_tyvar_occurrences env v =
+  let tyvar_occurrences = env.tyvar_occurrences in
+  Option.value (IMap.find_opt v tyvar_occurrences) ~default:ISet.empty
+
+let set_tyvar_occurrences env v vars =
+  { env with tyvar_occurrences = IMap.add v vars env.tyvar_occurrences }
+
+(** Make v occur in v', i.e. add v' to the occurrences of v. *)
+let add_tyvar_occurrence env v ~occurs_in:v' =
+  let vars = get_tyvar_occurrences env v in
+  let vars = ISet.add v' vars in
+  let env = set_tyvar_occurrences env v vars in
+  env
+
 let add_subst env x x' =
   if Int.( <> ) x x' then
     { env with subst = IMap.add x x' env.subst }
@@ -79,8 +93,25 @@ let rename env x x' =
   let env = add_subst env x x' in
   env
 
+let get_vars_in_ty ty =
+  let gatherer =
+    object
+      inherit [ISet.t] Type_visitor.locl_type_visitor
+
+      method! on_tvar vars _r v = ISet.add v vars
+    end
+  in
+  gatherer#on_type ISet.empty ty
+
+(** Binds type variable [x] to type [ty]. *)
 let add env x ty =
   let (env, x) = get_var env x in
+  let env =
+    ISet.fold
+      (fun v env -> add_tyvar_occurrence env v ~occurs_in:x)
+      (get_vars_in_ty ty)
+      env
+  in
   match ty with
   | (_, Tvar x') -> add_subst env x x'
   | _ -> { env with tenv = IMap.add x ty env.tenv }

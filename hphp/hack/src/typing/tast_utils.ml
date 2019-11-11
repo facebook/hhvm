@@ -92,6 +92,7 @@ let (tclass_is_falsy_when_empty, is_traversable) =
     indicates a logic error. *)
 let rec truthiness env ty =
   let (env, ty) = Env.simplify_unions env ty in
+  let (env, ty) = Env.expand_type env ty in
   match snd ty with
   | Tany _
   | Terr
@@ -195,6 +196,7 @@ type sketchy_type_kind =
 
 let rec find_sketchy_types env acc ty =
   let (env, ty) = Env.simplify_unions env ty in
+  let (env, ty) = Env.expand_type env ty in
   match snd ty with
   | Toption ty -> find_sketchy_types env acc ty
   | Tprim Tstring -> String :: acc

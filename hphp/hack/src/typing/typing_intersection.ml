@@ -282,8 +282,9 @@ let normalize_intersection env ?on_tyvar tyl =
           normalize_intersection env (orr r r') (tyl' @ tyl) tys_acc
         | ((_, Tunion _), _) ->
           let (env, ty) = Utils.simplify_unions env ty ?on_tyvar in
+          let (env, ety) = Env.expand_type env ty in
           begin
-            match ty with
+            match ety with
             | (_, Tunion _) -> proceed env ty
             | _ -> normalize_intersection env r (ty :: tyl) tys_acc
           end

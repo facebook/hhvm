@@ -1520,6 +1520,7 @@ and as_expr env ty1 pe e =
   let env = Env.open_tyvars env pe in
   (fun (env, expected_ty, tk, tv) ->
     let rec distribute_union env ty =
+      let (env, ty) = Env.expand_type env ty in
       match ty with
       | (_, Tdynamic) ->
         let env = SubType.sub_type env ty tk Errors.unify_error in

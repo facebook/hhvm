@@ -20,8 +20,6 @@ and lid = pos * local_id
 
 and sid = Ast_defs.id
 
-and is_terminal = bool
-
 and is_reified = bool
 
 and call_type =

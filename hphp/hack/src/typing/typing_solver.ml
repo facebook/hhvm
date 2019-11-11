@@ -751,10 +751,12 @@ let expand_type_and_solve env ~description_of_expected p ty on_error =
         let env = always_solve_tyvar ~freshen:true env r v on_error in
         Env.expand_var env r v)
   in
+  let (env', ety) = Env.expand_type env' ety in
   match (ty, ety) with
   | ((r, Tvar v), (_, Tunion []))
-    when Env.get_tyvar_appears_invariantly env v
-         || TypecheckerOptions.new_inference_lambda (Env.get_tcopt env) ->
+    when (not (tyvar_is_solved env v))
+         && ( Env.get_tyvar_appears_invariantly env v
+            || TypecheckerOptions.new_inference_lambda (Env.get_tcopt env) ) ->
     Errors.unknown_type
       description_of_expected
       p
@@ -764,9 +766,10 @@ let expand_type_and_solve env ~description_of_expected p ty on_error =
   | _ -> (env', ety)
 
 let expand_type_and_solve_eq env ty on_error =
-  Typing_utils.simplify_unions env ty ~on_tyvar:(fun env r v ->
-      let env = try_bind_to_equal_bound ~freshen:true env r v on_error in
-      Env.expand_var env r v)
+  (fun (env, ty) -> Env.expand_type env ty)
+  @@ Typing_utils.simplify_unions env ty ~on_tyvar:(fun env r v ->
+         let env = try_bind_to_equal_bound ~freshen:true env r v on_error in
+         Env.expand_var env r v)
 
 (* When applied to concrete types (typically classes), the `widen_concrete_type`
  * function should produce the largest supertype that is valid for an operation.
@@ -825,6 +828,8 @@ let is_nothing env ty =
  *)
 let expand_type_and_narrow
     env ?default ~description_of_expected widen_concrete_type p ty on_error =
+  (fun (env, ty) -> Env.expand_type env ty)
+  @@
   let (env, ty) = expand_type_and_solve_eq env ty on_error in
   (* Deconstruct the type into union elements (if it's a union). For variables,
    * take the lower bounds. If there are no variables, then we have a concrete

@@ -2091,10 +2091,7 @@ let do_signatureHelp
     (ref_unblocked_time : float ref)
     (params : SignatureHelp.params) : SignatureHelp.result Lwt.t =
   let (file, line, column) = lsp_file_position_to_hack params in
-  let command =
-    ServerCommandTypes.IDE_SIGNATURE_HELP
-      (ServerCommandTypes.FileName file, line, column)
-  in
+  let command = ServerCommandTypes.IDE_SIGNATURE_HELP (file, line, column) in
   rpc conn ref_unblocked_time command
 
 (* Serverless IDE version of signature help *)

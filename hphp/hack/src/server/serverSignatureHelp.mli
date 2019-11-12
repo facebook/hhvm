@@ -8,13 +8,6 @@
  *)
 
 (** Returns signature help for the given location. *)
-val go :
-  env:ServerEnv.env ->
-  file:ServerCommandTypes.file_input ->
-  line:int ->
-  column:int ->
-  Lsp.SignatureHelp.result
-
 val go_quarantined :
   env:ServerEnv.env ->
   ctx:Provider_context.t ->

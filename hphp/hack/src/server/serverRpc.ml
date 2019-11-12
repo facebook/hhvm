@@ -99,8 +99,15 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
                 loc.dbs_base_class ) )
     in
     r
-  | IDE_SIGNATURE_HELP (file, line, column) ->
-    (env, ServerSignatureHelp.go ~env ~file ~line ~column)
+  | IDE_SIGNATURE_HELP (path, line, column) ->
+    let file_input = ServerCommandTypes.FileName path in
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~path:(Relative_path.create_detect_prefix path)
+        ~file_input
+    in
+    (env, ServerSignatureHelp.go_quarantined ~env ~ctx ~entry ~line ~column)
   | COMMANDLINE_AUTOCOMPLETE content ->
     let autocomplete_context =
       {

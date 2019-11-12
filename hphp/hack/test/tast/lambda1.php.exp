@@ -12,11 +12,11 @@
                  (([3:8-13], string), (String "foo")))))));
           ([4:3-42],
            (Expr
-              (([4:3-41], (function(?(dynamic | bool | float | resource | arraykey | FormatString<nothing>) $n): string)),
+              (([4:3-41], (function((dynamic | ?(bool | float | resource | arraykey | FormatString<nothing>)) $n): string)),
                (Binop ((Eq None),
-                  (([4:3-5], (function(?(dynamic | bool | float | resource | arraykey | FormatString<nothing>) $n): string)),
+                  (([4:3-5], (function((dynamic | ?(bool | float | resource | arraykey | FormatString<nothing>)) $n): string)),
                    (Lvar ([4:3-5], $f))),
-                  (([4:8-41], (function(?(dynamic | bool | float | resource | arraykey | FormatString<nothing>) $n): string)),
+                  (([4:8-41], (function((dynamic | ?(bool | float | resource | arraykey | FormatString<nothing>)) $n): string)),
                    (Lfun (
                       { f_span = [4:8-41]; f_annotation = ();
                         f_mode = Mstrict; f_ret = ((string), None);
@@ -24,9 +24,9 @@
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =
                         [{ param_annotation =
-                           ([4:8-10], ?(dynamic | bool | float | resource | arraykey | FormatString<nothing>));
+                           ([4:8-10], (dynamic | ?(bool | float | resource | arraykey | FormatString<nothing>)));
                            param_type_hint =
-                           ((?(dynamic | bool | float | resource | arraykey | FormatString<nothing>)),
+                           (((dynamic | ?(bool | float | resource | arraykey | FormatString<nothing>))),
                             None);
                            param_is_reference = false;
                            param_is_variadic = false; param_pos = [4:8-10];
@@ -42,7 +42,7 @@
                                       (Binop (Dot,
                                          (([4:24-31], string),
                                           (Binop (Dot,
-                                             (([4:24-26], ?(dynamic | bool | float | resource | arraykey | FormatString<nothing>)),
+                                             (([4:24-26], (dynamic | ?(bool | float | resource | arraykey | FormatString<nothing>))),
                                               (Lvar ([4:24-26], $n))),
                                              (([4:29-31], string),
                                               (Lvar ([4:29-31], $s)))
@@ -69,7 +69,7 @@
                (Binop ((Eq None), (([5:3-5], string), (Lvar ([5:3-5], $x))),
                   (([5:8-13], string),
                    (Call (Cnormal,
-                      (([5:8-10], (function(?(dynamic | bool | float | resource | arraykey | FormatString<nothing>) $n): string)),
+                      (([5:8-10], (function((dynamic | ?(bool | float | resource | arraykey | FormatString<nothing>)) $n): string)),
                        (Lvar ([5:8-10], $f))),
                       [], [(([5:11-12], int), (Int "4"))], [])))
                   )))));
@@ -79,7 +79,7 @@
                (Binop ((Eq None), (([6:3-5], string), (Lvar ([6:3-5], $y))),
                   (([6:8-17], string),
                    (Call (Cnormal,
-                      (([6:8-10], (function(?(dynamic | bool | float | resource | arraykey | FormatString<nothing>) $n): string)),
+                      (([6:8-10], (function((dynamic | ?(bool | float | resource | arraykey | FormatString<nothing>)) $n): string)),
                        (Lvar ([6:8-10], $f))),
                       [], [(([6:11-16], string), (String "bar"))], [])))
                   )))))

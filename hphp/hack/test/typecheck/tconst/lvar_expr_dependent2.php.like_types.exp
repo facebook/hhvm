@@ -49,6 +49,6 @@ File "lvar_expr_dependent2.php", line 67, characters 5-22:
 File "lvar_expr_dependent2.php", line 22, characters 9-17:
 This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
 File "lvar_expr_dependent2.php", line 16, characters 24-32:
-This is a dynamic value or an object of type C
+This is a dynamic value or an object of type C because it is an unenforceable type
 File "lvar_expr_dependent2.php", line 16, characters 24-32:
-This is a dynamic value or an object of type C
+This is a dynamic value or an object of type C because it is an unenforceable type

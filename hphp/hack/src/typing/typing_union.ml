@@ -55,13 +55,7 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
 
 (** Constructor for unions and options, taking a list of types and whether the
 result should be nullable. Simplify things like singleton unions or nullable nothing. *)
-let rec make_union env r tyl reason_nullable_opt dyn_opt =
-  (* Some code is sensitive to dynamic appearing first in the union. *)
-  let tyl =
-    match dyn_opt with
-    | None -> tyl
-    | Some r -> MakeType.dynamic r :: tyl
-  in
+let rec make_union env r tyl reason_nullable_opt reason_dyn_opt =
   let ty =
     match tyl with
     | [ty] -> ty
@@ -101,11 +95,20 @@ let rec make_union env r tyl reason_nullable_opt dyn_opt =
     else
       (env, ty)
   in
+  let like_ty dyn_r ty = (dyn_r, Tunion [MakeType.dynamic dyn_r; ty]) in
+  (* Some code is sensitive to dynamic appearing first in the union. *)
   let ty =
-    match (reason_nullable_opt, ty) with
-    | (Some null_r, (_, Tunion [])) -> (null_r, Tprim Nast.Tnull)
-    | (None, ty) -> ty
-    | (Some null_r, ty) -> (null_r, Toption ty)
+    match (reason_nullable_opt, reason_dyn_opt, ty) with
+    | (None, Some dyn_r, (_, Tunion [])) -> MakeType.dynamic dyn_r
+    | (Some null_r, None, (_, Tunion [])) -> MakeType.null null_r
+    | (Some null_r, Some dyn_r, (_, Tunion [])) ->
+      like_ty dyn_r (MakeType.null null_r)
+    | (None, None, ty) -> ty
+    | (None, Some dyn_r, (r, Tunion tyl)) ->
+      (r, Tunion (MakeType.dynamic dyn_r :: tyl))
+    | (None, Some dyn_r, ty) -> like_ty dyn_r ty
+    | (Some null_r, None, ty) -> (null_r, Toption ty)
+    | (Some null_r, Some dyn_r, ty) -> like_ty dyn_r (null_r, Toption ty)
   in
   (env, ty)
 

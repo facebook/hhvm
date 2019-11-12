@@ -477,6 +477,12 @@ module Full = struct
             Concat [text "(dynamic |"; k ty; text ")"]
           else
             Concat [text "~"; k ty]
+        (* Type is like null *)
+        | (_ :: _, _ :: _, []) ->
+          if show_verbose env then
+            text "(dynamic | null)"
+          else
+            text "~null"
         (* Type is like nullable single type *)
         | (_, _, [ty]) ->
           if show_verbose env then

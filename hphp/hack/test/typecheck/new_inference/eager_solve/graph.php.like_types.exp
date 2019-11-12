@@ -4,5 +4,5 @@ File "graph.php", line 17, characters 61-64:
 This is a value of generic type Tkey
 File "graph.php", line 13, characters 11-14:
   via this generic Tkey
-File "graph.php", line 26, characters 14-19:
-It is incompatible with a dynamic value or a value of generic type Tkey
+File "graph.php", line 24, characters 37-60:
+It is incompatible with a dynamic value or a value of generic type Tkey because it is an unenforceable type

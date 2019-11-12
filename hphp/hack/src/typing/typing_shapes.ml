@@ -225,21 +225,20 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
             { et_type = fake_super_shape_ty; et_enforced = false }
             Errors.unify_error
         in
-        ( env,
-          if
-            experiment_enabled
-              env
-              TypecheckerOptions.experimental_stronger_shape_idx_ret
-            && is_shape_field_required
-                 env
-                 shape_pos
-                 "Shapes::idx"
-                 field_name
-                 shape_ty
-          then
-            res
-          else
-            TUtils.ensure_option env fun_pos res )
+        if
+          experiment_enabled
+            env
+            TypecheckerOptions.experimental_stronger_shape_idx_ret
+          && is_shape_field_required
+               env
+               shape_pos
+               "Shapes::idx"
+               field_name
+               shape_ty
+        then
+          (env, res)
+        else
+          TUtils.union env res (MakeType.null fun_pos)
       | Some (default_pos, default_ty) ->
         let env =
           Typing_coercion.coerce_type

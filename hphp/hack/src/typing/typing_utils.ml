@@ -190,12 +190,6 @@ let is_nothing env ty =
   let nothing = MakeType.nothing Reason.Rnone in
   is_sub_type_for_union env ty nothing
 
-let ensure_option env r ty =
-  if is_option env ty then
-    ty
-  else
-    (r, Toption ty)
-
 (* Grab all supertypes of a given type, recursively *)
 let get_all_supertypes env ty =
   let rec iter seen env acc tyl =

@@ -56,7 +56,9 @@ end = struct
         ty t1;
         ty t2
       | Tvarray t -> ty t
-      | Tvarray_or_darray t -> ty t
+      | Tvarray_or_darray (t1_opt, t2) ->
+        Option.iter ~f:ty t1_opt;
+        ty t2
       | Tshape (_, fdm) -> ShapeFieldMap.iter (fun _ v -> ty v) fdm
       | Tpu_access (base, _) -> ty base
     in

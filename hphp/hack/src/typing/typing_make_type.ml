@@ -16,6 +16,8 @@ let class_type r name tyl = (r, Tclass ((Reason.to_pos r, name), Nonexact, tyl))
 
 let prim_type r t = (r, Tprim t)
 
+let array_type r ak = (r, Tarraykind ak)
+
 let traversable r ty = class_type r SN.Collections.cTraversable [ty]
 
 let keyed_traversable r kty vty =
@@ -58,6 +60,8 @@ let const_vector r ty = class_type r SN.Collections.cConstVector [ty]
 let const_collection r ty = class_type r SN.Collections.cConstCollection [ty]
 
 let collection r ty = class_type r SN.Collections.cCollection [ty]
+
+let varray_or_darray r kty vty = array_type r (AKvarray_or_darray (kty, vty))
 
 let int r = prim_type r Nast.Tint
 

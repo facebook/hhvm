@@ -112,9 +112,16 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
     Format.fprintf fmt "(@[<2>Tvarray@ ";
     pp_ty fmt a0;
     Format.fprintf fmt "@])"
-  | Tvarray_or_darray a0 ->
+  | Tvarray_or_darray (a0, a1) ->
     Format.fprintf fmt "(@[<2>Tvarray_or_darray@ ";
-    pp_ty fmt a0;
+    (match a0 with
+    | None -> Format.pp_print_string fmt "None"
+    | Some x ->
+      Format.pp_print_string fmt "(Some ";
+      pp_ty fmt x;
+      Format.pp_print_string fmt ")");
+    Format.fprintf fmt ",@ ";
+    pp_ty fmt a1;
     Format.fprintf fmt "@])"
   | Toption a0 ->
     Format.fprintf fmt "(@[<2>Toption@ ";

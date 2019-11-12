@@ -51,7 +51,7 @@ let rec is_enforceable (env : env) (ty : decl_ty) =
                       match targ with
                       | (_, Tdynamic)
                       (* We accept the inner type being dynamic regardless of reification *)
-                      
+
                       | (_, Tlike _) ->
                         acc
                       | _ ->
@@ -101,7 +101,7 @@ let rec is_enforceable (env : env) (ty : decl_ty) =
   | Tdarray _ -> false
   | Tvarray _ -> false
   (* With no parameters, we enforce varray_or_darray just like array *)
-  | Tvarray_or_darray (_, Tany _) -> true
+  | Tvarray_or_darray (_, (_, Tany _)) -> true
   | Tvarray_or_darray _ -> false
   | Toption ty -> is_enforceable env ty
   (* TODO(T36532263) make sure that this is what we want *)

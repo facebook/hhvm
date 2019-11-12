@@ -146,7 +146,8 @@ struct
     | Tarray (ty1, ty2) -> Tarray (ty_opt ty1, ty_opt ty2)
     | Tdarray (ty1, ty2) -> Tdarray (ty ty1, ty ty2)
     | Tvarray root_ty -> Tvarray (ty root_ty)
-    | Tvarray_or_darray root_ty -> Tvarray_or_darray (ty root_ty)
+    | Tvarray_or_darray (ty1_opt, ty2) ->
+      Tvarray_or_darray (ty_opt ty1_opt, ty ty2)
     | Tprim _ as x -> x
     | Tgeneric _ as x -> x
     | Ttuple tyl -> Ttuple (List.map tyl ty)

@@ -42,7 +42,7 @@ let validator =
 
     method! on_tarray acc r _ _ = this#invalid acc r "an array type"
 
-    method! on_tvarray_or_darray acc r _ = this#invalid acc r "an array type"
+    method! on_tvarray_or_darray acc r _ _ = this#invalid acc r "an array type"
 
     method! on_tfun acc r _ = this#invalid acc r "a function type"
 

@@ -504,12 +504,8 @@ and type_ tcopt root variance env (reason, ty) =
   | Tdarray (ty1, ty2) ->
     type_ tcopt root variance env (reason, Tarray (Some ty1, Some ty2))
   | Tvarray ty -> type_ tcopt root variance env (reason, Tarray (Some ty, None))
-  | Tvarray_or_darray ty ->
-    let tk =
-      ( Typing_reason.Rvarray_or_darray_key (Reason.to_pos reason),
-        Tprim Aast.Tarraykey )
-    in
-    type_ tcopt root variance env (reason, Tarray (Some tk, Some ty))
+  | Tvarray_or_darray (ty1_opt, ty2) ->
+    type_ tcopt root variance env (reason, Tarray (ty1_opt, Some ty2))
   | Tthis ->
     (* Check that 'this' isn't being improperly referenced in a contravariant
      * position.
@@ -665,6 +661,9 @@ and get_typarams root env (ty : decl_ty) =
   let flip (pos, neg) = (neg, pos) in
   let single id pos = (SMap.singleton id [pos], SMap.empty) in
   let get_typarams_union acc ty = union acc (get_typarams root env ty) in
+  let get_typarams_opt ty_opt =
+    Option.value_map ty_opt ~f:(get_typarams root env) ~default:empty
+  in
   match snd ty with
   | Tgeneric id ->
     (* If it's in the environment then it's not a generic method parameter *)
@@ -776,16 +775,10 @@ and get_typarams root env (ty : decl_ty) =
     in
     let variancel = get_class_variance root pos_name in
     get_typarams_variance_list empty variancel tyl
-  | Tarray (ty1, ty2) ->
-    let get_typarams_opt tyopt =
-      match tyopt with
-      | None -> empty
-      | Some ty -> get_typarams root env ty
-    in
-    union (get_typarams_opt ty1) (get_typarams_opt ty2)
+  | Tarray (ty1, ty2) -> union (get_typarams_opt ty1) (get_typarams_opt ty2)
   | Tdarray (ty1, ty2) ->
     union (get_typarams root env ty1) (get_typarams root env ty2)
-  | Tvarray ty
-  | Tvarray_or_darray ty ->
-    get_typarams root env ty
+  | Tvarray ty -> get_typarams root env ty
+  | Tvarray_or_darray (ty1_opt, ty2) ->
+    union (get_typarams_opt ty1_opt) (get_typarams root env ty2)
   | Tpu_access (base, _) -> get_typarams root env base

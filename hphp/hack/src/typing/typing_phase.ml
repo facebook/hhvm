@@ -156,11 +156,15 @@ let rec localize ~ety_env env (dty : decl_ty) =
     let (env, tv) = localize ~ety_env env tv in
     let ty = Tarraykind (AKvarray tv) in
     (env, (r, ty))
-  | (r, Tvarray_or_darray tv) ->
-    let tk = MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)) in
+  | (r, Tvarray_or_darray (tk, tv)) ->
+    let (env, tk) =
+      match tk with
+      | Some tk -> localize ~ety_env env tk
+      | None ->
+        (env, MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)))
+    in
     let (env, tv) = localize ~ety_env env tv in
-    let ty = Tarraykind (AKvarray_or_darray (tk, tv)) in
-    (env, (r, ty))
+    (env, MakeType.varray_or_darray r tk tv)
   | (r, Tgeneric x) ->
     begin
       match SMap.find_opt x ety_env.substs with

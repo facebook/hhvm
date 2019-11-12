@@ -204,8 +204,8 @@ and _ ty_ =
   | Tdarray : decl_ty * decl_ty -> decl_phase ty_
   (* Tvarray (ty) => "varray<ty>" *)
   | Tvarray : decl_ty -> decl_phase ty_
-  (* Tvarray_or_darray (ty) => "varray_or_darray<ty>" *)
-  | Tvarray_or_darray : decl_ty -> decl_phase ty_
+  (* Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>" *)
+  | Tvarray_or_darray : decl_ty option * decl_ty -> decl_phase ty_
   (* "Any" is the type of a variable with a missing annotation, and "mixed" is
    * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
    * Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -1115,7 +1115,8 @@ let rec equal_decl_ty_ ty_1 ty_2 =
   | (Tdarray (tk1, tv1), Tdarray (tk2, tv2)) ->
     equal_decl_ty tk1 tk2 && equal_decl_ty tv1 tv2
   | (Tvarray ty1, Tvarray ty2) -> equal_decl_ty ty1 ty2
-  | (Tvarray_or_darray ty1, Tvarray_or_darray ty2) -> equal_decl_ty ty1 ty2
+  | (Tvarray_or_darray (tk1, tv1), Tvarray_or_darray (tk2, tv2)) ->
+    Option.equal equal_decl_ty tk1 tk2 && equal_decl_ty tv1 tv2
   | (Tlike ty1, Tlike ty2) -> equal_decl_ty ty1 ty2
   | (Tprim ty1, Tprim ty2) -> Aast.equal_tprim ty1 ty2
   | (Toption ty, Toption ty2) -> equal_decl_ty ty ty2

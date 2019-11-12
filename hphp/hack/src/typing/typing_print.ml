@@ -218,7 +218,13 @@ module Full = struct
 
   let tvarray k x = list "varray<" k [x] ">"
 
-  let tvarray_or_darray k x = list "varray_or_darray<" k [x] ">"
+  let tvarray_or_darray k x y =
+    let targs =
+      match x with
+      | Some x -> [x; y]
+      | None -> [y]
+    in
+    list "varray_or_darray<" k targs ">"
 
   let akvarray_or_darray k x y = list "varray_or_darray<" k [x; y] ">"
 
@@ -302,7 +308,7 @@ module Full = struct
     | Tnothing -> text "nothing"
     | Tdarray (x, y) -> tdarray k x y
     | Tvarray x -> tvarray k x
-    | Tvarray_or_darray x -> tvarray_or_darray k x
+    | Tvarray_or_darray (x, y) -> tvarray_or_darray k x y
     | Tarray (x, y) -> tarray k x y
     | Tapply ((_, s), []) -> to_doc s
     | Tgeneric s -> to_doc s

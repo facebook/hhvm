@@ -19,6 +19,71 @@ module Nast = Aast
 
 exception Dont_simplify
 
+module Log = struct
+  let log_union r ty1 ty2 (env, result) =
+    Typing_log.(
+      log_with_level env "union" 1 (fun () ->
+          log_types
+            (Reason.to_pos r)
+            env
+            [
+              Log_head
+                ( "Typing_union.union",
+                  [
+                    Log_type ("ty1", ty1);
+                    Log_type ("ty2", ty2);
+                    Log_type ("result", result);
+                  ] );
+            ]));
+    (env, result)
+
+  let log_simplify_union r ty1 ty2 (env, result) =
+    Typing_log.(
+      log_with_level env "union" 2 (fun () ->
+          log_types
+            (Reason.to_pos r)
+            env
+            [
+              Log_head
+                ( "Typing_union.simplify_union",
+                  [
+                    Log_type ("ty1", ty1);
+                    Log_type ("ty2", ty2);
+                    (match result with
+                    | None -> Log_head ("result: None", [])
+                    | Some ty -> Log_type ("result: Some", ty));
+                  ] );
+            ]));
+    (env, result)
+
+  let log_union_list r tyl (env, result) =
+    Typing_log.(
+      log_with_level env "union" 1 (fun () ->
+          log_types
+            (Reason.to_pos r)
+            env
+            [
+              Log_head
+                ( "Typing_union.union_list",
+                  List.map tyl ~f:(fun ty -> Log_type ("ty", ty))
+                  @ [Log_type ("result", result)] );
+            ]));
+    (env, result)
+
+  let log_simplify_unions r ty (env, result) =
+    Typing_log.(
+      log_with_level env "union" 1 (fun () ->
+          log_types
+            (Reason.to_pos r)
+            env
+            [
+              Log_head
+                ( "Typing_union.simplify_unions",
+                  [Log_type ("ty", ty); Log_type ("result", result)] );
+            ]));
+    (env, result)
+end
+
 (* Two types are "equivalent" if when expanded they are equal.
  * If they are equivalent, this function returns a type which is equivalent to
  * both, otherwise returns None.
@@ -118,32 +183,17 @@ let exact_least_upper_bound e1 e2 =
   | (_, _) -> Nonexact
 
 let rec union env ((r1, _) as ty1) ((r2, _) as ty2) =
-  let (env, result) =
-    if ty_equal ty1 ty2 then
-      (env, ty1)
-    else if Typing_utils.is_sub_type_for_union env ty1 ty2 then
-      (env, ty2)
-    else if Typing_utils.is_sub_type_for_union env ty2 ty1 then
-      (env, ty1)
-    else
-      let r = union_reason r1 r2 in
-      union_ env ty1 ty2 r
-  in
-  Typing_log.(
-    log_with_level env "union" 1 (fun () ->
-        log_types
-          (Reason.to_pos r2)
-          env
-          [
-            Log_head
-              ( "Typing_union.union",
-                [
-                  Log_type ("ty1", ty1);
-                  Log_type ("ty2", ty2);
-                  Log_type ("result", result);
-                ] );
-          ]));
-  (env, result)
+  Log.log_union r2 ty1 ty2
+  @@
+  if ty_equal ty1 ty2 then
+    (env, ty1)
+  else if Typing_utils.is_sub_type_for_union env ty1 ty2 then
+    (env, ty2)
+  else if Typing_utils.is_sub_type_for_union env ty2 ty1 then
+    (env, ty1)
+  else
+    let r = union_reason r1 r2 in
+    union_ env ty1 ty2 r
 
 and union_ env ty1 ty2 r = union_lists env [ty1] [ty2] r
 
@@ -151,6 +201,8 @@ and union_ env ty1 ty2 r = union_lists env [ty1] [ty2] r
 Returns None if there is no simplification.
 Does not deal with null, options, unions and intersections, which are dealt with by union_lists. *)
 and simplify_union env ty1 ty2 r =
+  Log.log_simplify_union r ty1 ty2
+  @@
   if ty_equal ty1 ty2 then
     (env, Some ty1)
   else if Typing_utils.is_sub_type_for_union env ty1 ty2 then
@@ -517,6 +569,8 @@ let union_list_2_by_2 env r tyl =
   (env, tyl)
 
 let union_list env r tyl =
+  Log.log_union_list r tyl
+  @@
   let (env, r_null, _r_union, r_dyn, tys) = normalize_union env tyl in
   let (env, tyl) = union_list_2_by_2 env r (TySet.elements tys) in
   make_union env r tyl r_null r_dyn
@@ -525,6 +579,8 @@ let fold_union env r tyl =
   List.fold_left_env env tyl ~init:(MakeType.nothing r) ~f:union
 
 let simplify_unions env ?on_tyvar ((r, _) as ty) =
+  Log.log_simplify_unions r ty
+  @@
   let (env, r_null, r_union, r_dyn, tys) =
     normalize_union env [ty] ?on_tyvar
   in

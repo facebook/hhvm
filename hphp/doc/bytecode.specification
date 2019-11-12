@@ -2978,164 +2978,118 @@ UnsetM <stack count> <member key>    [...]  ->  []
 11. Iterator instructions
 -------------------------
 
-IterInit  <iterator id> <rel offset> <local id>                [C]  ->  []
-IterInitK <iterator id> <rel offset> <local id> <local id>     [C]  ->  []
+Several iterator instructions take an IterArgs struct. This struct contains an
+iterator ID, an value output local ID, and optionally a key output local ID.
+Below, when we refer to "the iterator ID in %1", "the value local given in %1",
+etc., we're referring to these IDs.
 
-  Initialize iterator. If $1 is an array, these instructions create an array
-  iterator, rewind the array iterator to point to the beginning of the array,
-  and store the array iterator in the iterator variable %1. Then these
-  instructions check if the iterator is at the end, and if it is, these
-  instructions free the iterator and transfer control to the location specified
-  by %2.
+IterInit  <IterArgs> <rel offset>    [C]  ->  []
 
-  If $1 is an object that is an instance of an extension class that implements
-  the Traversable interface, these instructions create an extension class
-  iterator and store it in the iterator variable %1. Then these instructions
-  check if the iterator is at the end, and if it is these instructions free the
-  iterator and transfer control the location specified by %2.
+  Initialize an iterator. This instruction takes a "base" in $1. It creates an
+  iterator with ID given in %1 pointing to the beginning of $1 and, if $1 has
+  base-internal iteration state (see below), rewinds $1. It then checks if the
+  base is empty. If so, it frees the iterator (with an implicit IterFree) and
+  transfers control to the target %2.
 
-  If $1 is an object that implements the Iterator interface, these instructions
-  create an user class iterator, call $1->rewind(), and store the user class
-  iterator in the iterator variable %1. Then these instructions check if
-  $1->valid() returns false, and if it does these instructions free the
-  iterator and transfer control to the location specified by %2.
+  If the base is non-empty, this instruction writes the value of the base's
+  first element to the value local given in %1. If the iterator is a key-value
+  iterator, then this instruction also writes the key of the base's first
+  element to the key local given in %1.
 
-  If $1 is an object that implements the IteratorAggregate interface, these
-  instructions call $1->getIterator() and inspect the object x that is
-  returned. If x is an instance of IteratorAggregate, these instructions will
-  repeatedly execute "x = x->getIterator()" until x is not an object that is an
-  instance of IteratorAggregate. If x is an object that implements the
-  Traversable interface, then this instruction will behave according to the
-  appropriate case described above. Otherwise, these instructions will throw an
-  exception of type Exception.
+  This instruction stores to its key and value output locals with the same
+  semantics as SetL (non-binding assignment).
 
-  If $1 is an object that does not match any of the three cases above, these
-  instructions create a default class iterator, rewind the default class
-  iterator to point to the first accessible property, and store the default
-  class iterator in the iterator variable %1. Then these instructions check if
-  the iterator is at the end, and if it is these instructions free the iterator
-  and transfer control the location specified by %2.
+  The precise semantics of "rewind", "is empty", "get key", and "get value"
+  depend on the type of the base:
 
-  If $1 is not an array or an object, these instructions raise a warning and
-  transfer control to the location specified by %2.
+    - If $1 is array-like: "rewind" does nothing, "is empty" is a check on the
+      length of $1, and "get key" and "get value" load $1's first element.
+      (Array-like iterators don't have base-internal iteration state.)
 
-  The local ids in %3 (and %4, for the *K variants) represent the locals that
-  should receive the value (in %3) and key (in %4) for the iteration, in
-  accordance with the type of iterator initialized in %1.
+    - If $1 is an object that implements Iterator, or if it is an instance of
+      an extension class that implements Traversable, then we call $1->rewind()
+      to rewind the base's internal state, then call $1->valid() to check if it
+      is non-empty. If $1 is valid, then we call $1->current() (and $1->key())
+      to get the base's first value (and key).
 
-  The locals are stored to with the same semantics as SetL (non-binding
-  assignment).
+    - If the base is an object that implements the IteratorAggregate interface,
+      then we repeatedly execute "x = x->getIterator()" until x is no longer an
+      object that implements the IteratorAggregate interface. If x is now an
+      object that implements the Iterator interface, we proceed as above.
+      Otherwise, we throw an object of type Exception.
 
-  The logical value is computed differently depending on the iterator type that
-  is initialized in %1:
+    - If the base is an object that does not match any of the cases above, then
+      we will create a new default class iterator that iterates over accessible
+      properties of the class, in definition order. "get key" and "get value"
+      return the name and $1's value of the first property. (Default class
+      iterators don't have base-internal iteration state.)
 
-    If the iterator specified by %1 is a non-mutable array iterator or an
-    extension class iterator, these instructions store a copy of the current
-    value in %3.
+    - If the base is not an array-like or object, this method raises a warning
+      and transfers control to the target %2.
 
-    If the iterator specified by %1 is a user class iterator for object $x,
-    these instructions store the return value of $x->current() in %3.
+LIterInit  <IterArgs> <local id> <rel offset>    []   ->  []
 
-    If the iterator specified by %1 is a non-mutable default class iterator,
-    these instructions store a copy of the current property in %3.
+  Initialize iterator with local. If the local specified by %2 is array-like,
+  this instruction creates an array iterator pointing to the beginning of %2,
+  but leaves %2 in its local rather than copying it into the iterator and
+  inc-ref-ing it. Otherwise, it bahaves as IterInit, except that the base comes
+  from the local %2 rather than from the stack.
 
-  For the *K variants, the logical key to be stored in %4 is computed
-  differently depending on the iterator type initialized in %1:
+  If the base is non-empty, this instruction sets the output value (and, for
+  key-value iterators, the output key) to the first element of the base.
+  Otherwise, it frees the iterator and transfers control to the target %3.
 
-    If the iterator specified by %1 is an array iterator or an extension class
-    iterator, this instruction stores a copy of the current key in %4.
+  Since we don't store array-like bases in the iterator, all other operations
+  on this iterator must use the LIter variants (LIterNext, LIterFree) and must
+  provide the same local (containing the same array-like) as immediates.
 
-    If the iterator specified by %1 is a user class iterator for object $x,
-    this instruction stores the return value of $x->key() in %4.
+IterNext  <IterArgs> <rel offset>    []   ->  []
 
-    If the iterator specified by %1 is a non-mutable default class iterator,
-    this instruction stores a copy of the name of the current property in %4.
+  Iterator next. This instruction first advances the iterator with the ID given
+  in %1. If the iterator has more elements, then it writes the next element's
+  value (and, for key-value iters, its key) to the output locals given in %1,
+  Otherwise, the base frees the iterator (with an implicit IterFree) and
+  transfers control to the location specified by %2.
 
-LIterInit  <iterator id> <local id> <rel offset>
-           <local id> <IterTypeOp>                             []   ->  []
-LIterInitK <iterator id> <local id> <rel offset>
-           <local id> <local id> <IterTypeOp>                  []   ->  []
+  As with IterInit, the precise semantics of "advance" and "has more elements"
+  depend on the the type of the iterator's base $b:
 
-  Initialize iterator with local. If the local specified by %2 is not an
-  array-like, behave as IterInit or IterInitK, except loading the base value
-  from %2 instead of from the stack. Otherwise, create an array iterator,
-  rewind the array iterator to point to the beginning of the array in %2, but
-  do not store the value in %2 within the iterator. These instructions then
-  check if the iterator is at the end, and if it is, these instructions free
-  the iterator and transfer control to the location specified by %3. Since the
-  array-like in %2 was not stored within the iterator, all operations on this
-  iterator must use the LIter variants and provide the same local (containing
-  the same array-like).
+    - If $b is array-like: "advance" increments the iterator's position, and
+      the base "has more elements" if this position is not final. If the base
+      has more elements, we take the key and value at the new position.
 
-  The IterTypeOp enum distinguishes between cases where the base may be
-  updated during iteration and cases where it is guaranteed to be unchanged.
+    - If $b is an object that implements Iterator, or if it is an instance of
+      an extension class that implements Traversable, then we call $b->next()
+      to advance its position, then call $base->valid() to check whether it has
+      more elements. If so, we use $base->key() and $base->current() to get the
+      new key and value.
 
-IterNext  <iterator id> <rel offset> <local id>               []  ->  []
-IterNextK <iterator id> <rel offset> <local id> <local id>    []  ->  []
+    - If the iterator is a default class iterator, then we advance to the base's
+      class's next accessible property (if there are more) and we use its name
+      and value as the new key and value.
 
-  Iterator next. If the specified iterator is a non-mutable array iterator or
-  an extension class iterator, advance the iterator to point to the next
-  element. If the iterator is not at the end, these instructions transfer
-  control to the location specified by %2.
+LIterNext  <IterArgs> <local id> <rel offset>    []   ->  []
 
-  If the specified iterator is a user class iterator for object $x, this
-  instruction executes $x->next(). Then these instructions check if $x->valid()
-  returns true, and if it does these instructions transfer control to the
-  location specified by %2.
-
-  If the specified iterator is a non-mutable default class iterator, advance
-  the iterator to point to the next accessible property in the object. If the
-  iterator is not at the end, these instructions transfer control to the
-  location specified by %2.
-
-  If the specified iterator is at the end, free the iterator variable with an
-  implicit IterFree, then fall through to the next instruction.
-
-  If the specified iterator is not at the end, the local ids in %3 (and %4, for
-  the *K variants) represent the locals that should receive the value (in
-  %3) and key (in %4) for the iteration, in accordance with the type of
-  iterator initialized in %1.
-
-  These locals are stored to with the same semantics as SetL (non-binding
-  assignment).
-
-  The semantics of how to determine what the key and value are depend on %1 in
-  an analogous way to IterInit{K,}.
-
-LIterNext  <iterator id> <local id> <rel offset>
-           <local id> <IterTypeOp>                             []   ->  []
-LIterNextK <iterator id> <local id> <rel offset>
-           <local id> <local id> <IterTypeOp>                  []   ->  []
-
-  Iterator next with local. The iterator specified by %1 must have been
-  initialized with LIterInit or LIterNext. These instructions behave similarily
-  to IterNext and IterNextK, except they might use the value in local %2 as the
-  base, instead of one stored in the iterator. If the value in local %2 is a
-  non-array-like, the base stored in the iterator is used, otherwise the value
-  in the local is used.
-
-  The IterTypeOp enum distinguishes between cases where the base may be
-  updated during iteration and cases where it is guaranteed to be unchanged.
+  Iterator next with local. The iterator with ID given in %1 must have been
+  initialized with LIterInit. This instructions behaves similarily to IterNext,
+  except that if %2 is an array-like, it will use this local as the iterator's
+  base rather than the one stored in the iterator.
 
 IterFree <iterator id>    []  ->  []
 
-  Iterator free. This instruction frees the specified iterator variable.
-  Typically an iterator gets freed by IterNext, so IterFree is only needed for
-  guarding against exceptions and implementing break and return control flow
-  statements inside iterator loops.
+  Iterator free. This instruction frees the iterator with ID %1. An iterator is
+  typically freed by IterInit or IterNext when its base has no more elements,
+  so IterFree is only needed for guarding against exceptions.
 
 LIterFree <iterator id> <local id>   []  ->  []
 
-  Iterator free with local. This instruction frees the specified iterator
-  variable, which has been initialized with local %2.
+  Iterator free with local. This instruction frees the iterator with ID %1,
+  which must have been initialized by LIterInit with base %2.
 
 IterBreak <rel offset> <iter-vec>    []  ->  []
 
-  Iterator break. Frees vectors in %2 in left to right order then transfers
-  control to the location specified by %1. Surprise checks are performed before
-  iterators are freed so that in the event of an exception iterators are not
-  double freed. Note that as with normal jumps surprise checks will only be
-  performed if %1 is non-positive.
+  Iterator break. Frees iterators in %2 in left to right order, then transfers
+  control to the target %1.
 
 
 12. Include, eval, and define instructions

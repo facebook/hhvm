@@ -313,12 +313,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 
   // The HHAS format for IterArgs doesn't include flags, so we drop them.
   auto print_ita = [&](const IterArgs& ita) {
-    always_assert_flog(ita.flags == IterArgs::Flags::None,
-                       "Tried to disassemble IterArgs w/ flags: %d",
-                       uint8_t(ita.flags));
-    auto const str = show(ita, [&](int32_t id) { return loc_name(finfo, id); });
-    assertx(folly::StringPiece(str).startsWith("<> "));
-    return str.substr(3);
+    return show(ita, [&](int32_t id) { return loc_name(finfo, id); });
   };
 
   auto print_fca = [&] (FCallArgs fca) {

@@ -1632,9 +1632,8 @@ IterArgs drop_iter_key(const IterArgs& ita) {
 // `bc` is the new op to use if we can DCE away the key; it's generally the old
 // op with the "keyId" field of IterArgs set to NoKey (by drop_iter_key).
 template<class Op, class Bc>
-void iter_key_dce(Env& env, const Op& op, const Bc& bc,
+void iter_key_dce(Env& env, const Op& op, const Bc& bc, const Iter& iter,
                   const IterArgs& ita, const LocalId base) {
-  auto const& iter = env.stateBefore.iters[ita.iterId];
   auto const isIterEligible = match<bool>(
     iter,
     [] (DeadIter) { return false; },
@@ -1657,22 +1656,26 @@ void iter_key_dce(Env& env, const Op& op, const Bc& bc,
 
 void dce(Env& env, const bc::IterInit& op) {
   auto const bc = bc::IterInit{drop_iter_key(op.ita), op.target2};
-  iter_key_dce(env, op, bc, op.ita, kInvalidId);
+  auto const& iter = env.stateAfter.iters[op.ita.iterId];
+  iter_key_dce(env, op, bc, iter, op.ita, kInvalidId);
 }
 
 void dce(Env& env, const bc::LIterInit& op) {
   auto const bc = bc::LIterInit{drop_iter_key(op.ita), op.loc2, op.target3};
-  iter_key_dce(env, op, bc, op.ita, op.loc2);
+  auto const& iter = env.stateAfter.iters[op.ita.iterId];
+  iter_key_dce(env, op, bc, iter, op.ita, op.loc2);
 }
 
 void dce(Env& env, const bc::IterNext& op) {
   auto const bc = bc::IterNext{drop_iter_key(op.ita), op.target2};
-  iter_key_dce(env, op, bc, op.ita, kInvalidId);
+  auto const& iter = env.stateBefore.iters[op.ita.iterId];
+  iter_key_dce(env, op, bc, iter, op.ita, kInvalidId);
 }
 
 void dce(Env& env, const bc::LIterNext& op) {
   auto const bc = bc::LIterNext{drop_iter_key(op.ita), op.loc2, op.target3};
-  iter_key_dce(env, op, bc, op.ita, op.loc2);
+  auto const& iter = env.stateBefore.iters[op.ita.iterId];
+  iter_key_dce(env, op, bc, iter, op.ita, op.loc2);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

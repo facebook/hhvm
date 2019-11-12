@@ -832,7 +832,7 @@ hugifyText(char* from, char* to) {
       if (version.m_major < 5) return false;
       if (version.m_major > 5) return true;
       if (version.m_minor > 2) return true;
-      if ((version.m_minor == 2) && (version.m_fbk >= 1)) return true;
+      if ((version.m_minor == 2) && (version.m_fbk >= 5)) return true;
       return false;
     };
     if (hasKernelSupport()) {

@@ -168,8 +168,7 @@ pub mod members {
             __UNSET,
             __WAKEUP
         ]
-        .iter()
-        .cloned()
+        .into_iter()
         .collect();
         pub static ref AS_LOWERCASE_SET: HashSet<String> = {
             AS_SET
@@ -314,8 +313,7 @@ pub mod user_attributes {
             REIFIABLE,
             NEVER_INLINE,
         ]
-        .iter()
-        .cloned()
+        .into_iter()
         .collect();
     }
 
@@ -364,23 +362,23 @@ pub mod attribute_kinds {
 
     pub const TYPE_CONST: &str = "\\HH\\TypeConstantAttribute";
 
+    pub static PLAIN_ENGLISH: &'static [(&'static str, &'static str)] = &[
+        (CLS, "a class"),
+        (ENUM, "an enum"),
+        (TYPE_ALIAS, "a typealias"),
+        (FN, "a function"),
+        (MTHD, "a method"),
+        (INST_PROPERTY, "an instance property"),
+        (STATIC_PROPERTY, "a static property"),
+        (PARAMETER, "a parameter"),
+        (TYPE_PARAM, "a type parameter"),
+        (FILE, "a file"),
+        (TYPE_CONST, "a type pub constant"),
+    ];
+
     lazy_static! {
-        pub static ref PLAIN_ENGLISH_MAP: HashMap<&'static str, &'static str> = [
-            (CLS, "a class"),
-            (ENUM, "an enum"),
-            (TYPE_ALIAS, "a typealias"),
-            (FN, "a function"),
-            (MTHD, "a method"),
-            (INST_PROPERTY, "an instance property"),
-            (STATIC_PROPERTY, "a static property"),
-            (PARAMETER, "a parameter"),
-            (TYPE_PARAM, "a type parameter"),
-            (FILE, "a file"),
-            (TYPE_CONST, "a type pub constant")
-        ]
-        .iter()
-        .cloned()
-        .collect();
+        pub static ref PLAIN_ENGLISH_MAP: HashMap<&'static str, &'static str> =
+            PLAIN_ENGLISH.iter().cloned().collect();
     }
 }
 
@@ -618,9 +616,9 @@ pub mod pseudo_consts {
 
     pub const G__FUNCTION_CREDENTIAL__: &str = "\\__FUNCTION_CREDENTIAL__";
 
-    pub const die: &str = "\\die";
+    pub const DIE: &str = "\\die";
 
-    pub const exit: &str = "\\exit";
+    pub const EXIT: &str = "\\exit";
 
     lazy_static! {
         static ref ALL_PSEUDO_CONSTS: Vec<&'static str> = vec![
@@ -634,11 +632,10 @@ pub mod pseudo_consts {
             G__NAMESPACE__,
             G__COMPILER_FRONTEND__,
             G__FUNCTION_CREDENTIAL__,
-            die,
-            exit
+            DIE,
+            EXIT,
         ];
-        static ref PSEUDO_SET: HashSet<&'static str> =
-            { ALL_PSEUDO_CONSTS.iter().cloned().collect() };
+        static ref PSEUDO_SET: HashSet<&'static str> = ALL_PSEUDO_CONSTS.iter().cloned().collect();
     }
 
     pub fn is_pseudo_const(x: &str) -> bool {

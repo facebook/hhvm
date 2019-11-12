@@ -689,7 +689,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       end
     | MODE_FILE_DEPENDENTS ->
       let paths = filter_real_paths args.paths in
-      let%lwt responses = rpc args @@ Rpc.FILE_DEPENDENCIES paths in
+      let%lwt responses = rpc args @@ Rpc.FILE_DEPENDENTS paths in
       if args.output_json then
         Hh_json.(
           let json_path_list =

@@ -357,8 +357,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let env = { env with tcopt = env.ServerEnv.tcopt } in
     (env, ServerFunIsLocallableBatch.go genv.workers positions env)
   | LIST_FILES_WITH_ERRORS -> (env, ServerEnv.list_files env)
-  | FILE_DEPENDENCIES filenames ->
-    let files = ServerFileDependencies.go genv env filenames in
+  | FILE_DEPENDENTS filenames ->
+    let files = ServerFileDependents.go genv env filenames in
     (env, files)
   | IDENTIFY_TYPES (filename, line, char) ->
     (env, ServerTypeDefinition.go env (filename, line, char))

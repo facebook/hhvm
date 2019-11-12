@@ -88,7 +88,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | EDIT_FILE _ -> false
   | FUN_DEPS_BATCH _ -> false
   | FUN_IS_LOCALLABLE_BATCH _ -> false
-  | FILE_DEPENDENCIES _ -> true
+  | FILE_DEPENDENTS _ -> true
   | IDENTIFY_TYPES _ -> false
   | EXTRACT_STANDALONE _ -> false
   | GO_TO_DEFINITION _ -> false
@@ -168,7 +168,7 @@ let get_description : type a. a command -> string = function
   | Rpc (EDIT_FILE _) -> "EDIT_FILE"
   | Rpc (FUN_DEPS_BATCH _) -> "FUN_DEPS_BATCH"
   | Rpc (FUN_IS_LOCALLABLE_BATCH _) -> "FUN_IS_LOCALLABLE_BATCH"
-  | Rpc (FILE_DEPENDENCIES _) -> "FILE_DEPENDENCIES"
+  | Rpc (FILE_DEPENDENTS _) -> "FILE_DEPENDENTS"
   | Rpc (IDENTIFY_TYPES _) -> "IDENTIFY_TYPES"
   | Rpc (EXTRACT_STANDALONE _) -> "EXTRACT_STANDALONE"
   | Rpc (GO_TO_DEFINITION _) -> "GO_TO_DEFINITION"

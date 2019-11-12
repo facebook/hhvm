@@ -205,7 +205,7 @@
     serverEnvBuild
     serverError
     serverExtractStandalone
-    serverFileDependencies
+    serverFileDependents
     serverFileSync
     serverFindRefs
     serverFormat

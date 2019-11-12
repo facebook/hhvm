@@ -21,3 +21,4 @@ hhi/**/INDEX
 facebook/opam
 facebook/opam2-mini-repository
 target/
+dev_env.sh

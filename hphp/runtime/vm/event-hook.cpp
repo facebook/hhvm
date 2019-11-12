@@ -299,19 +299,17 @@ static Variant call_intercept_handler(
 
   args = get_frame_args(ar);
 
-  PackedArrayInit par(newCallback ? 3 : 5);
+  VArrayInit par{newCallback ? 3u : 5u};
   par.append(called);
   par.append(called_on);
   par.append(args);
-  if (!newCallback) par.append(ctx);
-
-  Variant intArgs = [&] {
-    if (newCallback) return par.toArray();
-    return par.append(done).toArray();
-  }();
+  if (!newCallback) {
+    par.append(ctx);
+    par.append(done);
+  }
 
   auto ret = Variant::attach(
-    g_context->invokeFunc(f, intArgs, callCtx.this_, callCtx.cls,
+    g_context->invokeFunc(f, par.toVariant(), callCtx.this_, callCtx.cls,
                           callCtx.invName, callCtx.dynamic)
   );
 

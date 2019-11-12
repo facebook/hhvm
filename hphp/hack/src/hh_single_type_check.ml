@@ -601,6 +601,7 @@ let parse_options () =
       ~namespace_map
       ~provider_name:"LocalIndex"
       ~quiet:true
+      ~ignore_hh_version:false
       ~savedstate_file_opt:!symbolindex_file
       ~workers:None
   in

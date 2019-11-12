@@ -89,6 +89,7 @@ let load_saved_state
           let%lwt result =
             State_loader_lwt.load
               ~repo:root
+              ~ignore_hh_version:false
               ~saved_state_type:Saved_state_loader.Naming_table
           in
           Lwt.return result
@@ -208,6 +209,7 @@ let initialize
       ~provider_name:
         server_local_config.ServerLocalConfig.symbolindex_search_provider
       ~quiet:server_local_config.ServerLocalConfig.symbolindex_quiet
+      ~ignore_hh_version:false
       ~savedstate_file_opt:
         server_local_config.ServerLocalConfig.symbolindex_file
       ~workers:None

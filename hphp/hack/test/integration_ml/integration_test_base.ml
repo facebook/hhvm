@@ -103,6 +103,7 @@ let setup_server ?custom_config ?(hhi_files = []) () =
       ~namespace_map:[]
       ~provider_name:"LocalIndex"
       ~quiet:true
+      ~ignore_hh_version:false
       ~savedstate_file_opt:None
       ~workers:None
   in

@@ -17,6 +17,7 @@ let initialize
     ~(namespace_map : (string * string) list)
     ~(provider_name : string)
     ~(quiet : bool)
+    ~(ignore_hh_version : bool)
     ~(savedstate_file_opt : string option)
     ~(workers : MultiWorker.worker list option) : si_env =
   (* Create the object *)
@@ -31,7 +32,11 @@ let initialize
   let sienv =
     match sienv.sie_provider with
     | SqliteIndex ->
-      SqliteSearchService.initialize ~sienv ~workers ~savedstate_file_opt
+      SqliteSearchService.initialize
+        ~sienv
+        ~workers
+        ~ignore_hh_version
+        ~savedstate_file_opt
     | CustomIndex ->
       CustomSearchService.initialize ~globalrev ~gleanopt;
       sienv

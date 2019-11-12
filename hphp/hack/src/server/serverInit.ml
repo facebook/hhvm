@@ -219,6 +219,7 @@ let init
         ~provider_name:
           genv.local_config.ServerLocalConfig.symbolindex_search_provider
         ~quiet:genv.local_config.ServerLocalConfig.symbolindex_quiet
+        ~ignore_hh_version:(ServerArgs.ignore_hh_version genv.options)
         ~savedstate_file_opt:
           genv.local_config.ServerLocalConfig.symbolindex_file
         ~workers:genv.workers;

@@ -41,13 +41,15 @@ let sqlite_escape_str (str : string) : string =
       | _ -> acc ^ String.make 1 char)
 
 (* Attempt to fetch this file *)
-let find_saved_symbolindex () : (string, string) Core_kernel.result =
+let find_saved_symbolindex ~(ignore_hh_version : bool) :
+    (string, string) Core_kernel.result =
   try
     let repo = Path.make (Relative_path.path_of_prefix Relative_path.Root) in
     let res =
       Future.get_exn
         (State_loader_futures.load
            ~repo
+           ~ignore_hh_version
            ~saved_state_type:Saved_state_loader.Symbol_index)
     in
     match res with
@@ -63,14 +65,15 @@ let find_saved_symbolindex () : (string, string) Core_kernel.result =
 
 (* Determine the correct filename to use for the db_path or build it *)
 let find_or_build_sqlite_file
-    (silent : bool)
     (workers : MultiWorker.worker list option)
-    (savedstate_file_opt : string option) : string =
+    (savedstate_file_opt : string option)
+    ~(silent : bool)
+    ~(ignore_hh_version : bool) : string =
   match savedstate_file_opt with
   | Some path -> path
   | None ->
     (* Can we get one from the saved state fetcher? *)
-    (match find_saved_symbolindex () with
+    (match find_saved_symbolindex ~ignore_hh_version with
     | Ok filename -> filename
     | Error errmsg ->
       let repo_path = Relative_path.to_absolute (Relative_path.from_root "") in
@@ -109,10 +112,15 @@ let find_or_build_sqlite_file
 let initialize
     ~(sienv : si_env)
     ~(workers : MultiWorker.worker list option)
+    ~(ignore_hh_version : bool)
     ~(savedstate_file_opt : string option) : si_env =
   (* Find the database and open it *)
   let db_path =
-    find_or_build_sqlite_file sienv.sie_quiet_mode workers savedstate_file_opt
+    find_or_build_sqlite_file
+      ~silent:sienv.sie_quiet_mode
+      ~ignore_hh_version
+      workers
+      savedstate_file_opt
   in
   let db = Sqlite3.db_open db_path in
   (* Report that the database has been loaded *)

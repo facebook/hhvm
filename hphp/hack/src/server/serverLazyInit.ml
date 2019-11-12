@@ -99,6 +99,7 @@ let download_and_load_state_exn
         Some
           (State_loader_futures.load
              ~repo:root
+             ~ignore_hh_version
              ~saved_state_type:Saved_state_loader.Naming_table)
       ) else
         None
@@ -591,9 +592,11 @@ let initialize_naming_table
 
 let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
     ServerEnv.env * float =
+  let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
   let loader_future =
     State_loader_futures.load
       ~repo:(Path.make Relative_path.(path_of_prefix Root))
+      ~ignore_hh_version
       ~saved_state_type:Saved_state_loader.Naming_table
   in
   match State_loader_futures.wait_for_finish loader_future with

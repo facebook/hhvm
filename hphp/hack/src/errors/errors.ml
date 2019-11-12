@@ -1446,7 +1446,7 @@ let did_you_mean_naming pos name suggest_pos suggest_name =
 
 let using_internal_class pos name =
   add
-    (Naming.err_code Naming.UsingInternalClassDEPRECATED)
+    (Naming.err_code Naming.UsingInternalClass)
     pos
     (name ^ " is an implementation internal class that cannot be used directly")
 

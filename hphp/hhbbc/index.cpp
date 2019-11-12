@@ -5803,10 +5803,7 @@ void Index::init_return_type(const php::Func* func) {
   }
 
   auto make_type = [&] (const TypeConstraint& tc) {
-    if (tc.isSoft() ||
-        (RuntimeOption::EvalThisTypeHintLevel != 3 && tc.isThis())) {
-      return TBottom;
-    }
+    if (tc.isSoft()) return TBottom;
     return loosen_dvarrayness(
       lookup_constraint(
         Context {

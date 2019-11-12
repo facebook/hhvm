@@ -1,2 +1,0 @@
--vHardReturnTypeHints=false -d hhvm.php7.all=0
--vRuntime.Eval.ThisTypeHintLevel=0 -d hhvm.php7.all=0

@@ -250,9 +250,6 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     if (s_globalData.HardReturnTypeHints) {
       RuntimeOption::EvalCheckReturnTypeHints = 3;
     }
-    if (s_globalData.ThisTypeHintLevel == 3) {
-      RuntimeOption::EvalThisTypeHintLevel = s_globalData.ThisTypeHintLevel;
-    }
 
     RuntimeOption::EvalIsCompatibleClsMethType =
       s_globalData.IsCompatibleClsMethType;

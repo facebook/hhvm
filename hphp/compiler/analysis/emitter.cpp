@@ -142,7 +142,6 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.PHP7_Builtins               = RuntimeOption::PHP7_Builtins;
   gd.PromoteEmptyObject          = RuntimeOption::EvalPromoteEmptyObject;
   gd.EnableRenameFunction        = RuntimeOption::EvalJitEnableRenameFunction;
-  gd.ThisTypeHintLevel           = RuntimeOption::EvalThisTypeHintLevel;
   gd.HackArrCompatNotices        = RuntimeOption::EvalHackArrCompatNotices;
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.ForbidDynamicCallsToFunc    = RuntimeOption::EvalForbidDynamicCallsToFunc;

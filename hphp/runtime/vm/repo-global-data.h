@@ -56,15 +56,6 @@ struct Repo::GlobalData {
   int32_t CheckPropTypeHints = 0;
 
   /*
-   * Indicates whether a repo was compiled assumming that `this` types will be
-   * verified by Verify*Type instructions at runtime.
-   *
-   * This changes program behavior because this type hints that are checked
-   * at runtime will enable additional HHBBC optimizations.
-   */
-  int32_t ThisTypeHintLevel = 0;
-
-  /*
    * Indicates whether a repo was compiled with HardPrivatePropInference.
    */
   bool HardPrivatePropInference = false;
@@ -195,7 +186,6 @@ struct Repo::GlobalData {
   template<class SerDe> void serde(SerDe& sd) {
     sd(InitialNamedEntityTableSize)
       (InitialStaticStringTableSize)
-      (ThisTypeHintLevel)
       (HardReturnTypeHints)
       (CheckPropTypeHints)
       (HardPrivatePropInference)

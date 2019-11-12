@@ -220,8 +220,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::This:
       return (dt == KindOfObject)
         ? AnnotAction::ObjectCheck
-        : (RuntimeOption::EvalThisTypeHintLevel == 0)
-          ? AnnotAction::Pass : AnnotAction::Fail;
+        : AnnotAction::Fail;
     case AnnotMetaType::Callable:
       // For "callable", if `dt' is not string/array/object/func we know
       // it's not compatible, otherwise more checks are required

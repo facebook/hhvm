@@ -431,7 +431,7 @@ static bool VerifyTypeSlowImpl(const Class* cls,
   // If we have a resolved class for the constraint, all we have to do is
   // check if the value's class is compatible with it
   if (LIKELY(constraint != nullptr)) {
-    if (expected->isThis() && RuntimeOption::EvalThisTypeHintLevel >= 2) {
+    if (expected->isThis()) {
       return cls == constraint;
     }
     return cls->classof(constraint);

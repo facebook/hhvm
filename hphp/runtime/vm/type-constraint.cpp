@@ -688,21 +688,10 @@ bool TypeConstraint::checkImpl(tv_rval val,
           if (isAssert) return true;
           if (isPasses) return false;
           if (isProp) return val.val().pobj->getVMClass() == context;
-          switch (RuntimeOption::EvalThisTypeHintLevel) {
-            case 0:   // Like Mixed.
-              return true;
-              break;
-            case 1:   // Like Self.
-              c = context;
-              break;
-            case 2:   // Soft this in irgen verifyTypeImpl and verifyFail.
-            case 3:   // Hard this.
-              if (auto const cls = getThis()) {
-                return val.val().pobj->getVMClass() == cls;
-              }
-              return false;
+          if (auto const cls = getThis()) {
+            return val.val().pobj->getVMClass() == cls;
           }
-          break;
+          return false;
         case MetaType::Parent:
           assertx(!isProp);
           assertx(!isRecField);
@@ -1113,8 +1102,7 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
       describe_actual_type(c, isHHType())
   );
 
-  if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()
-      && (!isThis() || RuntimeOption::EvalThisTypeHintLevel != 2)) {
+  if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()) {
     raise_return_typehint_error(msg);
   } else {
     raise_warning_unsampled(msg);
@@ -1299,8 +1287,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
           givenType
         ).str();
     }
-    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()
-        && (!isThis() || RuntimeOption::EvalThisTypeHintLevel != 2)) {
+    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()) {
       raise_return_typehint_error(msg);
     } else {
       raise_warning_unsampled(msg);
@@ -1309,8 +1296,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
   }
 
   // Handle parameter type constraint failures
-  if (isExtended() &&
-      (isSoft() || (isThis() && RuntimeOption::EvalThisTypeHintLevel == 2))) {
+  if (isExtended() && isSoft()) {
     // Soft extended type hints raise warnings instead of recoverable
     // errors, to ease migration.
     raise_warning_unsampled(

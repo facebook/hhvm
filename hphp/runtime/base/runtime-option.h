@@ -742,15 +742,6 @@ struct RuntimeOption {
    * 2 - Throw exception                                                \
    */                                                                   \
   F(int32_t, WarnOnUncalledPseudomain, 0)                               \
-  /* The following option enables the runtime checks for `this` typehints.
-   * There are 4 possible options:
-   * 0 - No checking of `this` typehints.
-   * 1 - Check `this` as hard `self` typehints.
-   * 2 - Check `this` typehints as soft `this` typehints
-   * 3 - Check `this` typehints as hard `this` typehints (unless explicitly
-   *     soft).  This is the only option which enable optimization in HHBBC.
-   */                                                                   \
-  F(int32_t, ThisTypeHintLevel,        3)                               \
   /* CheckReturnTypeHints:
      0 - No checks or enforcement for return type hints.
      1 - Raises E_WARNING if a return type hint fails.

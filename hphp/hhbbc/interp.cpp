@@ -4984,18 +4984,8 @@ void in(ISS& env, const bc::VerifyParamType& op) {
 
   /*
    * We assume that if this opcode doesn't throw, the parameter was of the
-   * specified type (although it may have been a Ref if the parameter was
-   * by reference).
-   *
-   * The env.setLoc here handles dealing with a parameter that was
-   * already known to be a reference.
-   *
-   * NB: VerifyParamType of a reference parameter can kill any references
-   * if it re-enters.
+   * specified type.
    */
-  if (RuntimeOption::EvalThisTypeHintLevel != 3 && constraint.isThis()) {
-    return;
-  }
   if (constraint.hasConstraint() && !constraint.isTypeVar() &&
       !constraint.isTypeConstant()) {
     auto t =
@@ -5116,8 +5106,7 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
   // If CheckReturnTypeHints < 3 OR if the constraint is soft,
   // then there are no optimizations we can safely do here, so
   // just leave the top of stack as is.
-  if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft() ||
-      (RuntimeOption::EvalThisTypeHintLevel != 3 && constraint.isThis())) {
+  if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft()) {
     if (ts_flavor) popC(env);
     popC(env);
     push(env, std::move(stackT), stackEquiv);
@@ -5197,8 +5186,7 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
 
 void in(ISS& env, const bc::VerifyRetNonNullC& /*op*/) {
   auto const constraint = env.ctx.func->retTypeConstraint;
-  if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft()
-      || (RuntimeOption::EvalThisTypeHintLevel != 3 && constraint.isThis())) {
+  if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft()) {
     return;
   }
 

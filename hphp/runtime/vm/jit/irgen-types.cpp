@@ -209,10 +209,8 @@ void verifyTypeImpl(IRGS& env,
                     VerifyCls verifyCls,
                     VerifyRecordDesc verifyRecDesc,
                     Giveup giveup) {
-  if (!tc.isCheckable() || (RuntimeOption::EvalThisTypeHintLevel == 0
-                            && !propCls && tc.isThis())) {
-    return;
-  }
+
+  if (!tc.isCheckable()) return;
 
   auto val = getVal();
   assertx(val->type() <= TCell);
@@ -224,29 +222,14 @@ void verifyTypeImpl(IRGS& env,
   if (tc.isNullable() && valType <= TInitNull) return;
 
   auto const genFail = [&] {
-    auto const thisFailsHard = [&] {
-      if (propCls) return !tc.couldSeeMockObject();
-      switch (RuntimeOption::EvalThisTypeHintLevel) {
-        case 0:
-          // We are not checking this typehints.
-        case 2:
-          // We are warning on this typehint failures.
-          return false;
-        case 1:
-          // We are checking this typehints like self typehints.
-          return true;
-        case 3:
-          // If we know there are no mock classes for the current class, it is
-          // okay to fail hard.  Otherwise, mock objects may still pass, and we
-          // have to be ready for execution to resume.
-          return !tc.couldSeeMockObject();
-      }
-      always_assert(false);
-    };
+    // If we know there are no mock classes for the current class, it is
+    // okay to fail hard.  Otherwise, mock objects may still pass, and we
+    // have to be ready for execution to resume.
+    auto const thisFailsHard = !tc.couldSeeMockObject();
 
     auto const failHard = RuntimeOption::RepoAuthoritative
       && !tc.isSoft()
-      && (!tc.isThis() || thisFailsHard());
+      && (!tc.isThis() || thisFailsHard);
     return fail(valType, failHard);
   };
 
@@ -345,7 +328,7 @@ void verifyTypeImpl(IRGS& env,
   }
 
   // At this point we know valType is Obj.
-  if (tc.isThis() && (propCls || RuntimeOption::EvalThisTypeHintLevel >= 2)) {
+  if (tc.isThis()) {
     // For this type checks, the class needs to be an exact match.
     auto const ctxCls = propCls ? propCls : ldCtxCls(env);
     auto const objClass = gen(env, LdObjClass, val);
@@ -361,8 +344,6 @@ void verifyTypeImpl(IRGS& env,
     );
     return;
   }
-  assertx(IMPLIES(tc.isThis(), RuntimeOption::EvalThisTypeHintLevel == 1));
-  assertx(IMPLIES(tc.isThis(), !propCls));
 
   // If we reach here then valType is Obj and tc is Object, Self, or Parent
   const StringData* clsName;
@@ -379,13 +360,11 @@ void verifyTypeImpl(IRGS& env,
       clsName = tc.typeName();
     }
   } else {
-    if (tc.isSelf()
-        || (tc.isThis() && RuntimeOption::EvalThisTypeHintLevel == 1)) {
-      assertx(!propCls);
+    assertx(!propCls);
+    if (tc.isSelf()) {
       knownConstraint = curFunc(env)->cls();
     } else {
       assertx(tc.isParent());
-      assertx(!propCls);
       if (auto cls = curFunc(env)->cls()) knownConstraint = cls->parent();
     }
     if (!knownConstraint) {

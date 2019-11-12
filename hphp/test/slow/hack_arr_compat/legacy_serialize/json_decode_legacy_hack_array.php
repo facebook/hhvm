@@ -3,7 +3,7 @@
 function decode(string $input, bool $legacy): mixed {
   return json_decode(
     $input,
-    false,
+    true,
     512,
     $legacy ? JSON_FB_LEGACY_HACK_ARRAYS : 0,
   );

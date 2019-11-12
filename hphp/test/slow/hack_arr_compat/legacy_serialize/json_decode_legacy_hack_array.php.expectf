@@ -6,6 +6,14 @@ Warning: is_marked_legacy_hack_array expects a dict or vec in %s/test/slow/hack_
 array(0) {
 }
 bool(true)
+dict(0) {
+}
+bool(true)
+
+Warning: is_marked_legacy_hack_array expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/json_decode_legacy_hack_array.php on line 25
+array(0) {
+}
+bool(true)
 vec(3) {
   int(1)
   int(2)
@@ -21,6 +29,18 @@ array(3) {
   int(2)
   [2]=>
   int(3)
+}
+bool(true)
+dict(1) {
+  ["foobar"]=>
+  NULL
+}
+bool(true)
+
+Warning: is_marked_legacy_hack_array expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/json_decode_legacy_hack_array.php on line 25
+array(1) {
+  ["foobar"]=>
+  NULL
 }
 bool(true)
 vec(1) {
@@ -42,5 +62,35 @@ bool(true)
 
 Warning: is_marked_legacy_hack_array expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/json_decode_legacy_hack_array.php on line 25
 array(0) {
+}
+bool(true)
+dict(1) {
+  ["crosby"]=>
+  dict(1) {
+    ["bing"]=>
+    NULL
+  }
+}
+bool(true)
+dict(1) {
+  ["bing"]=>
+  NULL
+}
+bool(true)
+
+Warning: is_marked_legacy_hack_array expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/json_decode_legacy_hack_array.php on line 25
+array(1) {
+  ["crosby"]=>
+  array(1) {
+    ["bing"]=>
+    NULL
+  }
+}
+bool(true)
+
+Warning: is_marked_legacy_hack_array expects a dict or vec in %s/test/slow/hack_arr_compat/legacy_serialize/json_decode_legacy_hack_array.php on line 25
+array(1) {
+  ["bing"]=>
+  NULL
 }
 bool(true)

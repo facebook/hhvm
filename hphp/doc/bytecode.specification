@@ -3002,29 +3002,33 @@ IterInit  <IterArgs> <rel offset>    [C]  ->  []
   The precise semantics of "rewind", "is empty", "get key", and "get value"
   depend on the type of the base:
 
-    - If $1 is array-like: "rewind" does nothing, "is empty" is a check on the
-      length of $1, and "get key" and "get value" load $1's first element.
-      (Array-like iterators don't have base-internal iteration state.)
+    - If $1 is array-like, we will create a new array iterator. "rewind" does
+      nothing in this case - array iterators don't have base-internal state.
+      The "is empty" check is a check on the length of $1, and "get key" and
+      "get value" load $1's first element.
+
+    - If $1 is a collection object, then we'll unpack or create the underlying
+      vec or dict and then create a new array iterator, as above.
 
     - If $1 is an object that implements Iterator, or if it is an instance of
-      an extension class that implements Traversable, then we call $1->rewind()
-      to rewind the base's internal state, then call $1->valid() to check if it
-      is non-empty. If $1 is valid, then we call $1->current() (and $1->key())
-      to get the base's first value (and key).
+      an extension class that implements Traversable, then we create a new
+      object iterator. We call $1->rewind() to reset the base's internal state,
+      then call $1->valid() to check if $1 is non-empty. If $1 is valid, then we
+      call $1->current() (and $1->key()) to get the $1's first value (and key).
 
-    - If the base is an object that implements the IteratorAggregate interface,
-      then we repeatedly execute "x = x->getIterator()" until x is no longer an
+    - If $1 is an object that implements the IteratorAggregate interface, then
+      we repeatedly execute "x = x->getIterator()" until x is no longer an
       object that implements the IteratorAggregate interface. If x is now an
-      object that implements the Iterator interface, we proceed as above.
-      Otherwise, we throw an object of type Exception.
+      object that implements the Iterator interface, we create a new object
+      iterator as above. Otherwise, we throw an object of type Exception.
 
-    - If the base is an object that does not match any of the cases above, then
-      we will create a new default class iterator that iterates over accessible
-      properties of the class, in definition order. "get key" and "get value"
-      return the name and $1's value of the first property. (Default class
-      iterators don't have base-internal iteration state.)
+    - If $1 is an object that does not match any of the cases above, then we
+      create a new default class iterator (with no base-internal state) that
+      iterates over accessible properties of the base's class, in the order
+      that they were defined. "get key" returns the name of the first property,
+      and "get value" returns the $1's value for that property.
 
-    - If the base is not an array-like or object, this method raises a warning
+    - If $1 is not an array-like or object, this method raises a warning
       and transfers control to the target %2.
 
 LIterInit  <IterArgs> <local id> <rel offset>    []   ->  []
@@ -3032,7 +3036,7 @@ LIterInit  <IterArgs> <local id> <rel offset>    []   ->  []
   Initialize iterator with local. If the local specified by %2 is array-like,
   this instruction creates an array iterator pointing to the beginning of %2,
   but leaves %2 in its local rather than copying it into the iterator and
-  inc-ref-ing it. Otherwise, it bahaves as IterInit, except that the base comes
+  inc-ref-ing it. Otherwise, it behaves as IterInit, except that the base comes
   from the local %2 rather than from the stack.
 
   If the base is non-empty, this instruction sets the output value (and, for
@@ -3052,21 +3056,22 @@ IterNext  <IterArgs> <rel offset>    []   ->  []
   transfers control to the location specified by %2.
 
   As with IterInit, the precise semantics of "advance" and "has more elements"
-  depend on the the type of the iterator's base $b:
+  depend on the iterator type. (We could also say it depends on the type of
+  the base, but we use some iterator types (e.g. array iterator) for multiple
+  base types (e.g. array-likes and collection objects).)
 
-    - If $b is array-like: "advance" increments the iterator's position, and
-      the base "has more elements" if this position is not final. If the base
-      has more elements, we take the key and value at the new position.
+    - For array iterators: "advance" increments the iterator's position, and
+      the base "has more elements" if this position is not the final position
+      for the stored array. If the array has more elements, we take its key
+      and value at the new position.
 
-    - If $b is an object that implements Iterator, or if it is an instance of
-      an extension class that implements Traversable, then we call $b->next()
-      to advance its position, then call $base->valid() to check whether it has
-      more elements. If so, we use $base->key() and $base->current() to get the
-      new key and value.
+    - For object iterators: we call $base->next() to update the base's internal
+      state, then call $base->valid() to check whether it has more elements. If
+      so, we use $base->key() and $base->current() to get the new key and value.
 
-    - If the iterator is a default class iterator, then we advance to the base's
-      class's next accessible property (if there are more) and we use its name
-      and value as the new key and value.
+    - For default class iterators, we advance to the base's class's next
+      accessible property (if there are more) and we use its name and value as
+      the new key and value.
 
 LIterNext  <IterArgs> <local id> <rel offset>    []   ->  []
 

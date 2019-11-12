@@ -599,6 +599,7 @@ int RuntimeOption::ServerGracefulShutdownWait = 0;
 bool RuntimeOption::ServerHarshShutdown = true;
 bool RuntimeOption::ServerEvilShutdown = true;
 bool RuntimeOption::ServerKillOnTimeout = true;
+bool RuntimeOption::Server503OnShutdownAbort = false;
 int RuntimeOption::ServerPreShutdownWait = 0;
 int RuntimeOption::ServerShutdownListenWait = 0;
 int RuntimeOption::ServerShutdownEOMWait = 0;

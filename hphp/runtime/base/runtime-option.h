@@ -293,6 +293,7 @@ struct RuntimeOption {
   static bool ServerHarshShutdown;
   static bool ServerEvilShutdown;
   static bool ServerKillOnTimeout;
+  static bool Server503OnShutdownAbort;
   static int ServerPreShutdownWait;
   static int ServerShutdownListenWait;
   static int ServerShutdownEOMWait;

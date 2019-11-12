@@ -806,7 +806,12 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
     }
     m_httpServerSocket.reset();
     m_httpsServerSocket.reset();
-    transport->abort();
+    if (RuntimeOption::Server503OnShutdownAbort) {
+      transport->sendString("", 503);
+      transport->onSendEnd();
+    } else {
+      transport->abort();
+    }
     return;
   }
 
@@ -821,7 +826,12 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
     m_dispatcher.enqueue(std::make_shared<ProxygenJob>(transport), priority);
   } else {
     // VM is shutdown
-    transport->abort();
+    if (RuntimeOption::Server503OnShutdownAbort) {
+      transport->sendString("", 503);
+      transport->onSendEnd();
+    } else {
+      transport->abort();
+    }
     Logger::Error("%p: throwing away one new request while shutting down",
                   this);
   }

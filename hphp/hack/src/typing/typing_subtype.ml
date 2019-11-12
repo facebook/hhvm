@@ -311,30 +311,33 @@ let rec process_simplify_subtype_result prop =
   | TL.IsSubtype (_ty1, _ty2) ->
     (* All subtypes should have been resolved *)
     failwith "unexpected subtype assertion"
+  | TL.Coerce _ ->
+    (* All coercions should have been resolved *)
+    failwith "unexpected coercions assertion"
   | TL.Conj props ->
     (* Evaluates list from left-to-right so preserves order of conjuncts *)
     List.iter ~f:process_simplify_subtype_result props
   | TL.Disj (f, []) -> f ()
   | TL.Disj _ -> failwith "non-empty disjunction"
 
-and cstr_ty_as_tyvar_with_upper_bound env ~treat_dynamic_as_bottom ty =
+and cstr_ty_as_tyvar_with_upper_bound env ty =
   match ty with
   | LoclType ty -> (env, ty)
   | ConstraintType _ ->
     let (env, tyvar) = Env.fresh_type_reason env (reason ty) in
     let tyvar' = LoclType tyvar in
     let on_error = Errors.unify_error in
-    let env = sub_type_i env ~treat_dynamic_as_bottom tyvar' ty on_error in
+    let env = sub_type_i env tyvar' ty on_error in
     (env, tyvar)
 
-and cstr_ty_as_tyvar_with_lower_bound env ~treat_dynamic_as_bottom ty =
+and cstr_ty_as_tyvar_with_lower_bound env ty =
   match ty with
   | LoclType ty -> (env, ty)
   | ConstraintType _ ->
     let (env, tyvar) = Env.fresh_type_reason env (reason ty) in
     let tyvar' = LoclType tyvar in
     let on_error = Errors.unify_error in
-    let env = sub_type_i env ~treat_dynamic_as_bottom ty tyvar' on_error in
+    let env = sub_type_i env ty tyvar' on_error in
     (env, tyvar)
 
 and simplify_subtype
@@ -505,7 +508,8 @@ and simplify_subtype_i
   | (LoclType (_, Tabstract ((AKnewtype _ | AKdependent _), None)), _)
   | (_, LoclType (_, Tabstract ((AKnewtype _ | AKdependent _), None))) ->
     assert false
-  | (LoclType (_, Tdynamic), _) when subtype_env.treat_dynamic_as_bottom ->
+  | (LoclType (_, Tdynamic), LoclType _)
+    when subtype_env.treat_dynamic_as_bottom ->
     valid ()
   (* everything subtypes mixed *)
   | (_, LoclType (_, Toption (_, Tnonnull))) -> valid ()
@@ -639,6 +643,10 @@ and simplify_subtype_i
   | (LoclType (_, Tvar var_sub), LoclType (_, Tvar var_super))
     when Ident.equal var_sub var_super ->
     valid ()
+  | (LoclType ((_, Tvar _) as ty_sub), LoclType ty_super)
+  | (LoclType ty_sub, LoclType ((_, Tvar _) as ty_super))
+    when subtype_env.treat_dynamic_as_bottom ->
+    (env, TL.Coerce (ty_sub, ty_super))
   | (LoclType (_, Tvar _), _)
   | (_, LoclType (_, Tvar _)) ->
     default ()
@@ -648,14 +656,11 @@ and simplify_subtype_i
          Option.is_some non_ty_opt ->
     let (env, non_ty_opt, tyl') = find_type_with_exact_negation env tyl in
     let non_ty = Option.value_exn non_ty_opt in
-    let treat_dynamic_as_bottom = subtype_env.treat_dynamic_as_bottom in
     (* We want to union ty_super with non_ty, but ty_super might be a
     constraint type, and we can't union with constraint types,
     so if ty_super is a constraint type, we turn it into a type variable
     which has this constraint (i.e. which has it as upper bound). *)
-    let (env, ty_super) =
-      cstr_ty_as_tyvar_with_upper_bound env ~treat_dynamic_as_bottom ty_super
-    in
+    let (env, ty_super) = cstr_ty_as_tyvar_with_upper_bound env ty_super in
     let (env, ty_super') = TUtils.union env ty_super non_ty in
     let ty_sub' = MakeType.intersection r tyl' in
     simplify_subtype ~subtype_env ty_sub' ty_super' env
@@ -669,14 +674,11 @@ and simplify_subtype_i
          | Tvar _ ->
            true
          | _ -> false ->
-    let treat_dynamic_as_bottom = subtype_env.treat_dynamic_as_bottom in
     (* We want to intersect ty_sub with nonnull, but ty_super might be a
     constraint type, and we can't intersect with constraint types,
     so if ty_sub is a constraint type, we turn it into a type variable
     with that constraint type as lower bound. *)
-    let (env, ty_sub) =
-      cstr_ty_as_tyvar_with_lower_bound env ~treat_dynamic_as_bottom ty_sub
-    in
+    let (env, ty_sub) = cstr_ty_as_tyvar_with_lower_bound env ty_sub in
     let (env, ty_sub') = Inter.intersect env r ty_sub (MakeType.nonnull r) in
     simplify_subtype ~subtype_env ty_sub' ty_super' env
   (* If subtype and supertype are the same generic parameter, we're done *)
@@ -2393,14 +2395,13 @@ and simplify_subtype_funs
 
 (* One of the main entry points to this module *)
 and sub_type_i
-    ~(treat_dynamic_as_bottom : bool)
     (env : env)
     (ty_sub : internal_type)
     (ty_super : internal_type)
     (on_error : Errors.typing_error_callback) : env =
   Env.log_env_change "sub_type" env
   @@ sub_type_inner
-       ~subtype_env:(make_subtype_env ~treat_dynamic_as_bottom on_error)
+       ~subtype_env:(make_subtype_env on_error)
        env
        ~this_ty:None
        ty_sub
@@ -2417,11 +2418,7 @@ and add_tyvar_upper_bound_and_close
     ~treat_dynamic_as_bottom (env, prop) var ty on_error =
   let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
   let env =
-    Env.add_tyvar_upper_bound
-      ~intersect:(try_intersect_i ~treat_dynamic_as_bottom env)
-      env
-      var
-      ty
+    Env.add_tyvar_upper_bound ~intersect:(try_intersect_i env) env var ty
   in
   let upper_bounds_after = Env.get_tyvar_upper_bounds env var in
   let added_upper_bounds =
@@ -2463,13 +2460,7 @@ and add_tyvar_upper_bound_and_close
 and add_tyvar_lower_bound_and_close
     ~treat_dynamic_as_bottom (env, prop) var ty on_error =
   let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
-  let env =
-    Env.add_tyvar_lower_bound
-      ~union:(try_union_i ~treat_dynamic_as_bottom env)
-      env
-      var
-      ty
-  in
+  let env = Env.add_tyvar_lower_bound ~union:(try_union_i env) env var ty in
   let lower_bounds_after = Env.get_tyvar_lower_bounds env var in
   let added_lower_bounds =
     ITySet.diff lower_bounds_after lower_bounds_before
@@ -2503,7 +2494,7 @@ and add_tyvar_lower_bound_and_close
   in
   (env, prop)
 
-and props_to_env ~treat_dynamic_as_bottom env remain props on_error =
+and props_to_env env remain props on_error =
   match props with
   | [] -> (env, List.rev remain)
   | TL.IsSubtype
@@ -2512,7 +2503,7 @@ and props_to_env ~treat_dynamic_as_bottom env remain props on_error =
     :: props ->
     let (env, prop1) =
       add_tyvar_upper_bound_and_close
-        ~treat_dynamic_as_bottom
+        ~treat_dynamic_as_bottom:false
         (valid env)
         var_sub
         ty_super
@@ -2520,40 +2511,74 @@ and props_to_env ~treat_dynamic_as_bottom env remain props on_error =
     in
     let (env, prop2) =
       add_tyvar_lower_bound_and_close
-        ~treat_dynamic_as_bottom
+        ~treat_dynamic_as_bottom:false
         (valid env)
         var_super
         ty_sub
         on_error
     in
-    props_to_env
-      ~treat_dynamic_as_bottom
-      env
-      remain
-      (prop1 :: prop2 :: props)
-      on_error
+    props_to_env env remain (prop1 :: prop2 :: props) on_error
   | TL.IsSubtype (LoclType (_, Tvar var), ty) :: props ->
     let (env, prop) =
       add_tyvar_upper_bound_and_close
-        ~treat_dynamic_as_bottom
+        ~treat_dynamic_as_bottom:false
         (valid env)
         var
         ty
         on_error
     in
-    props_to_env ~treat_dynamic_as_bottom env remain (prop :: props) on_error
+    props_to_env env remain (prop :: props) on_error
   | TL.IsSubtype (ty, LoclType (_, Tvar var)) :: props ->
     let (env, prop) =
       add_tyvar_lower_bound_and_close
-        ~treat_dynamic_as_bottom
+        ~treat_dynamic_as_bottom:false
         (valid env)
         var
         ty
         on_error
     in
-    props_to_env ~treat_dynamic_as_bottom env remain (prop :: props) on_error
+    props_to_env env remain (prop :: props) on_error
+  | TL.Coerce (((_, Tvar var_sub) as ty_sub), ((_, Tvar var_super) as ty_super))
+    :: props ->
+    let (env, prop1) =
+      add_tyvar_upper_bound_and_close
+        ~treat_dynamic_as_bottom:true
+        (valid env)
+        var_sub
+        (LoclType ty_super)
+        on_error
+    in
+    let (env, prop2) =
+      add_tyvar_lower_bound_and_close
+        ~treat_dynamic_as_bottom:true
+        (valid env)
+        var_super
+        (LoclType ty_sub)
+        on_error
+    in
+    props_to_env env remain (prop1 :: prop2 :: props) on_error
+  | TL.Coerce ((_, Tvar var), ty) :: props ->
+    let (env, prop) =
+      add_tyvar_upper_bound_and_close
+        ~treat_dynamic_as_bottom:true
+        (valid env)
+        var
+        (LoclType ty)
+        on_error
+    in
+    props_to_env env remain (prop :: props) on_error
+  | TL.Coerce (ty, (_, Tvar var)) :: props ->
+    let (env, prop) =
+      add_tyvar_lower_bound_and_close
+        ~treat_dynamic_as_bottom:true
+        (valid env)
+        var
+        (LoclType ty)
+        on_error
+    in
+    props_to_env env remain (prop :: props) on_error
   | TL.Conj props' :: props ->
-    props_to_env ~treat_dynamic_as_bottom env remain (props' @ props) on_error
+    props_to_env env remain (props' @ props) on_error
   | TL.Disj (f, disj_props) :: conj_props ->
     (* For now, just find the first prop in the disjunction that works *)
     let rec try_disj disj_props =
@@ -2561,38 +2586,25 @@ and props_to_env ~treat_dynamic_as_bottom env remain props on_error =
       | [] ->
         (* For now let it fail later when calling
         process_simplify_subtype_result on the remaining constraints. *)
-        props_to_env
-          ~treat_dynamic_as_bottom
-          env
-          (TL.invalid ~fail:f :: remain)
-          conj_props
-          on_error
+        props_to_env env (TL.invalid ~fail:f :: remain) conj_props on_error
       | prop :: disj_props' ->
-        let (env', other) =
-          props_to_env ~treat_dynamic_as_bottom env remain [prop] on_error
-        in
+        let (env', other) = props_to_env env remain [prop] on_error in
         if TL.is_unsat (TL.conj_list other) then
           try_disj disj_props'
         else
-          props_to_env
-            ~treat_dynamic_as_bottom
-            env'
-            (remain @ other)
-            conj_props
-            on_error
+          props_to_env env' (remain @ other) conj_props on_error
     in
     try_disj disj_props
   | (TL.IsSubtype _ as prop) :: props ->
-    props_to_env ~treat_dynamic_as_bottom env (prop :: remain) props on_error
+    props_to_env env (prop :: remain) props on_error
+  | TL.Coerce _ :: _ -> failwith "Coercion not expected"
 
 (* Move any top-level conjuncts of the form Tvar v <: t or t <: Tvar v to
  * the type variable environment. To do: use intersection and union to
  * simplify bounds.
  *)
-and prop_to_env ~treat_dynamic_as_bottom env prop on_error =
-  let (env, props') =
-    props_to_env ~treat_dynamic_as_bottom env [] [prop] on_error
-  in
+and prop_to_env env prop on_error =
+  let (env, props') = props_to_env env [] [prop] on_error in
   (env, TL.conj_list props')
 
 and sub_type_inner
@@ -2611,13 +2623,7 @@ and sub_type_inner
   let (env, prop) =
     simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super env
   in
-  let (env, prop) =
-    prop_to_env
-      ~treat_dynamic_as_bottom:subtype_env.treat_dynamic_as_bottom
-      env
-      prop
-      subtype_env.on_error
-  in
+  let (env, prop) = prop_to_env env prop subtype_env.on_error in
   let env = Env.add_subtype_prop env prop in
   process_simplify_subtype_result prop;
   env
@@ -2687,23 +2693,23 @@ and is_sub_type_for_coercion env ty1 ty2 =
     ty2
   = Some true
 
-and is_sub_type_for_union ~treat_dynamic_as_bottom env ty1 ty2 =
+and is_sub_type_for_union env ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt
     ~ignore_generic_params:false
     ~no_top_bottom:true
-    ~treat_dynamic_as_bottom
+    ~treat_dynamic_as_bottom:false
     env
     ty1
     ty2
   = Some true
 
-and is_sub_type_for_union_i ~treat_dynamic_as_bottom env ty1 ty2 =
+and is_sub_type_for_union_i env ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt_i
     ~ignore_generic_params:false
     ~no_top_bottom:true
-    ~treat_dynamic_as_bottom
+    ~treat_dynamic_as_bottom:false
     env
     ty1
     ty2
@@ -2720,23 +2726,23 @@ and can_sub_type env ty1 ty2 =
     ty2
   <> Some false
 
-and is_sub_type_ignore_generic_params ~treat_dynamic_as_bottom env ty1 ty2 =
+and is_sub_type_ignore_generic_params env ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt
     ~ignore_generic_params:true
     ~no_top_bottom:true
-    ~treat_dynamic_as_bottom
+    ~treat_dynamic_as_bottom:false
     env
     ty1
     ty2
   = Some true
 
-and is_sub_type_ignore_generic_params_i ~treat_dynamic_as_bottom env ty1 ty2 =
+and is_sub_type_ignore_generic_params_i env ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt_i
     ~ignore_generic_params:true
     ~no_top_bottom:true
-    ~treat_dynamic_as_bottom
+    ~treat_dynamic_as_bottom:false
     env
     ty1
     ty2
@@ -2752,38 +2758,26 @@ and is_sub_type_ignore_generic_params_i ~treat_dynamic_as_bottom env ty1 ty2 =
  * we simplify (as above) wherever practical.
  * It can be assumed that the original list contains no redundancy.
  *)
-and try_intersect_i ~treat_dynamic_as_bottom env ty tyl =
+and try_intersect_i env ty tyl =
   match tyl with
   | [] -> [ty]
   | ty' :: tyl' ->
-    if is_sub_type_ignore_generic_params_i ~treat_dynamic_as_bottom env ty ty'
-    then
-      try_intersect_i ~treat_dynamic_as_bottom env ty tyl'
-    else if
-      is_sub_type_ignore_generic_params_i ~treat_dynamic_as_bottom env ty' ty
-    then
+    if is_sub_type_ignore_generic_params_i env ty ty' then
+      try_intersect_i env ty tyl'
+    else if is_sub_type_ignore_generic_params_i env ty' ty then
       tyl
     else
       let nonnull_ty = LoclType (reason ty, Tnonnull) in
       (match (ty, ty') with
       | (LoclType (_, Toption t), _)
-        when is_sub_type_ignore_generic_params_i
-               ~treat_dynamic_as_bottom
-               env
-               ty'
-               nonnull_ty ->
-        try_intersect_i ~treat_dynamic_as_bottom env (LoclType t) (ty' :: tyl')
+        when is_sub_type_ignore_generic_params_i env ty' nonnull_ty ->
+        try_intersect_i env (LoclType t) (ty' :: tyl')
       | (_, LoclType (_, Toption t))
-        when is_sub_type_ignore_generic_params_i
-               ~treat_dynamic_as_bottom
-               env
-               ty
-               nonnull_ty ->
-        try_intersect_i ~treat_dynamic_as_bottom env (LoclType t) (ty :: tyl')
-      | (_, _) -> ty' :: try_intersect_i ~treat_dynamic_as_bottom env ty tyl')
+        when is_sub_type_ignore_generic_params_i env ty nonnull_ty ->
+        try_intersect_i env (LoclType t) (ty :: tyl')
+      | (_, _) -> ty' :: try_intersect_i env ty tyl')
 
-and try_intersect ~treat_dynamic_as_bottom env ty tyl =
-  let try_intersect_i = try_intersect_i ~treat_dynamic_as_bottom in
+and try_intersect env ty tyl =
   List.map
     (try_intersect_i
        env
@@ -2809,25 +2803,24 @@ and try_intersect ~treat_dynamic_as_bottom env ty tyl =
  * 3. It can be assumed that the original list contains no redundancy.
  * TODO: there are many more unions to implement yet.
  *)
-and try_union_i ~treat_dynamic_as_bottom env ty tyl =
+and try_union_i env ty tyl =
   match tyl with
   | [] -> [ty]
   | ty' :: tyl' ->
-    if is_sub_type_for_union_i ~treat_dynamic_as_bottom env ty ty' then
+    if is_sub_type_for_union_i env ty ty' then
       tyl
-    else if is_sub_type_for_union_i ~treat_dynamic_as_bottom env ty' ty then
-      try_union_i ~treat_dynamic_as_bottom env ty tyl'
+    else if is_sub_type_for_union_i env ty' ty then
+      try_union_i env ty tyl'
     else (
       match (ty, ty') with
       | (LoclType (_, Tprim Nast.Tfloat), LoclType (_, Tprim Nast.Tint))
       | (LoclType (_, Tprim Nast.Tint), LoclType (_, Tprim Nast.Tfloat)) ->
         let num = LoclType (MakeType.num (reason ty)) in
-        try_union_i env ~treat_dynamic_as_bottom num tyl'
-      | (_, _) -> ty' :: try_union_i ~treat_dynamic_as_bottom env ty tyl'
+        try_union_i env num tyl'
+      | (_, _) -> ty' :: try_union_i env ty tyl'
     )
 
-and try_union ~treat_dynamic_as_bottom env ty tyl =
-  let try_union_i = try_union_i ~treat_dynamic_as_bottom in
+and try_union env ty tyl =
   List.map
     (try_union_i env (LoclType ty) (List.map tyl ~f:(fun ty -> LoclType ty)))
     ~f:(function
@@ -2849,13 +2842,7 @@ let subtype_reactivity
       r_super
       env
   in
-  let (env, prop) =
-    prop_to_env
-      ~treat_dynamic_as_bottom:subtype_env.treat_dynamic_as_bottom
-      env
-      prop
-      subtype_env.on_error
-  in
+  let (env, prop) = prop_to_env env prop subtype_env.on_error in
   process_simplify_subtype_result prop;
   env
 
@@ -2956,9 +2943,7 @@ let subtype_method
       ft_super_no_tvars
       env
   in
-  let (env, res) =
-    prop_to_env ~treat_dynamic_as_bottom:false env res on_error
-  in
+  let (env, res) = prop_to_env env res on_error in
   let env = Env.add_subtype_prop env res in
   process_simplify_subtype_result res;
 
@@ -3016,11 +3001,7 @@ let decompose_subtype_add_bound
     if Typing_set.mem ty_super tys then
       env
     else
-      Env.add_upper_bound
-        ~intersect:(try_intersect ~treat_dynamic_as_bottom:false env)
-        env
-        name_sub
-        ty_super
+      Env.add_upper_bound ~intersect:(try_intersect env) env name_sub ty_super
   (* ty_sub <: name_super so add a lower bound on name_super *)
   | (_, (_, Tabstract (AKgeneric name_super, _)))
     when not (phys_equal ty_sub ty_super) ->
@@ -3036,11 +3017,7 @@ let decompose_subtype_add_bound
     if Typing_set.mem ty_sub tys then
       env
     else
-      Env.add_lower_bound
-        ~union:(try_union ~treat_dynamic_as_bottom:false env)
-        env
-        name_super
-        ty_sub
+      Env.add_lower_bound ~union:(try_union env) env name_super ty_sub
   | (_, _) -> env
 
 (* Given two types that we know are in a subtype relationship
@@ -3098,6 +3075,7 @@ and decompose_subtype_add_prop p env prop =
       env
       prop;
     env
+  | TL.Coerce _ -> failwith "Coercions should have been resolved beforehand"
   | TL.IsSubtype (LoclType ty1, LoclType ty2) ->
     decompose_subtype_add_bound env ty1 ty2
   | TL.IsSubtype _ ->
@@ -3194,20 +3172,31 @@ let add_constraint
     in
     iter 0 env
 
-let cstr_ty_as_tyvar_with_upper_bound =
-  cstr_ty_as_tyvar_with_upper_bound ~treat_dynamic_as_bottom:false
-
-let sub_type_with_dynamic_as_bottom = sub_type ~treat_dynamic_as_bottom:true
-
-let is_sub_type_ignore_generic_params =
-  is_sub_type_ignore_generic_params ~treat_dynamic_as_bottom:false
-
-let is_sub_type_for_union =
-  is_sub_type_for_union ~treat_dynamic_as_bottom:false
-
-let sub_type = sub_type ~treat_dynamic_as_bottom:false
-
-let sub_type_i = sub_type_i ~treat_dynamic_as_bottom:false
+let sub_type_with_dynamic_as_bottom
+    (env : env)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
+    (on_error : Errors.typing_error_callback) : env =
+  let env_change_log = Env.log_env_change "coercion" env in
+  log_subtype
+    ~level:1
+    ~this_ty:None
+    ~function_name:"coercion"
+    env
+    ty_sub
+    ty_super;
+  let (env, prop) =
+    simplify_subtype
+      ~subtype_env:(make_subtype_env ~treat_dynamic_as_bottom:true on_error)
+      ~this_ty:None
+      ty_sub
+      ty_super
+      env
+  in
+  let (env, prop) = prop_to_env env prop on_error in
+  let env = Env.add_subtype_prop env prop in
+  process_simplify_subtype_result prop;
+  env_change_log env
 
 (*****************************************************************************)
 (* Exporting *)

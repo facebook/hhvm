@@ -12,6 +12,7 @@ open Typing_defs
 
 (* Logical proposition about types *)
 type subtype_prop =
+  | Coerce of locl_ty * locl_ty
   | IsSubtype of internal_type * internal_type
       (** IsSubtype(ty1,ty2) if ty1 is a subtype of ty2, written ty1 <: ty2 *)
   | Conj of subtype_prop list  (** Conjunction. Conj [] means "true" *)
@@ -21,7 +22,9 @@ type subtype_prop =
 
 let rec size (p : subtype_prop) : int =
   match p with
-  | IsSubtype _ -> 1
+  | Coerce _
+  | IsSubtype _ ->
+    1
   | Conj l
   | Disj (_, l) ->
     let sizes = List.map l ~f:size in
@@ -30,7 +33,9 @@ let rec size (p : subtype_prop) : int =
 (** Sum of the sizes of the disjunctions. *)
 let rec n_disj (p : subtype_prop) : int =
   match p with
-  | IsSubtype _ -> 0
+  | Coerce _
+  | IsSubtype _ ->
+    0
   | Conj l ->
     let n_disjs = List.map l ~f:n_disj in
     List.fold ~init:0 ~f:( + ) n_disjs
@@ -41,7 +46,9 @@ let rec n_disj (p : subtype_prop) : int =
 (** Sum of the sizes of the conjunctions. *)
 let rec n_conj (p : subtype_prop) : int =
   match p with
-  | IsSubtype _ -> 0
+  | Coerce _
+  | IsSubtype _ ->
+    0
   | Disj (_, l) ->
     let n_conjs = List.map l ~f:n_conj in
     List.fold ~init:0 ~f:( + ) n_conjs
@@ -60,7 +67,9 @@ let rec is_valid p =
   match p with
   | Conj ps -> List.for_all ps is_valid
   | Disj (_, ps) -> List.exists ps is_valid
-  | IsSubtype (_, _) -> false
+  | Coerce _
+  | IsSubtype (_, _) ->
+    false
 
 (* Is this proposition always false? e.g. Unsat _ but also Conj [Conj []; Disj (_, [])]
 * if not simplified
@@ -69,7 +78,9 @@ and is_unsat p =
   match p with
   | Conj ps -> List.exists ps is_unsat
   | Disj (_, ps) -> List.for_all ps is_unsat
-  | IsSubtype (_, _) -> false
+  | Coerce _
+  | IsSubtype (_, _) ->
+    false
 
 (* Smart constructor for binary conjunction *)
 let conj p1 p2 =

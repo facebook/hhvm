@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
 open Ast_class_expr
 open Core_kernel
 module A = Aast
@@ -20,9 +21,6 @@ exception UserDefinedConstant
 
 let hack_arr_compat_notices () =
   Hhbc_options.hack_arr_compat_notices !Hhbc_options.compiler_options
-
-let hack_arr_dv_arrs () =
-  Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
 
 let radix (s : string) : [ `Oct | `Hex | `Dec | `Bin ] =
   if String.length s > 1 && s.[0] = '0' then
@@ -39,27 +37,6 @@ let radix (s : string) : [ `Oct | `Hex | `Dec | `Bin ] =
     | _ -> `Oct
   else
     `Dec
-
-let float_of_string_radix (s : string) (radix : int) : float =
-  let float_radix = float_of_int radix in
-  let float_of_char (c : char) : float =
-    float_of_int @@ (int_of_char c - 48)
-  in
-  let rec loop (idx : int) (acc : float) =
-    if idx < String.length s then
-      loop (idx + 1) ((acc *. float_radix) +. float_of_char s.[idx])
-    else
-      acc
-  in
-  loop 0 0.
-
-let float_of_string_custom (s : string) : float =
-  match radix s with
-  | `Bin -> float_of_string_radix (String_utils.string_after s 2) 2
-  | `Hex
-  | `Dec ->
-    float_of_string s
-  | `Oct -> float_of_string_radix (String_utils.string_after s 1) 8
 
 (* TODO: once we don't need to be PHP5 compliant, we may want to get rid of
 this octal truncation at the first non-octal digit, and instead throw an error
@@ -526,12 +503,6 @@ let fold_expr ns e = folder_visitor#on_expr ns e
 
 let fold_program ~empty_namespace p =
   folder_visitor#on_program empty_namespace p
-
-let literals_from_exprs_with_index ns exprs =
-  try
-    List.concat_mapi exprs (fun index e ->
-        [TV.Int (Int64.of_int index); expr_to_typed_value ns (fold_expr ns e)])
-  with NotLiteral -> failwith "literals_from_exprs_with_index: not literal"
 
 let literals_from_exprs ns exprs =
   try List.map exprs ~f:(fun e -> expr_to_typed_value ns (fold_expr ns e))

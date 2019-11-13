@@ -1104,8 +1104,10 @@ module Make (GetLocals : GetLocals) = struct
             (* Warning: These Hanys are here because they produce subtle
                 errors because of interaction with tco_experimental_isarray
                 if you change them to Herr *)
-            N.Hvarray_or_darray (p, N.Hany)
-          | [val_] -> N.Hvarray_or_darray (hint env val_)
+            N.Hvarray_or_darray (None, (p, N.Hany))
+          | [val_] -> N.Hvarray_or_darray (None, hint env val_)
+          | [key; val_] ->
+            N.Hvarray_or_darray (Some (hint env key), hint env val_)
           | _ ->
             Errors.too_many_type_arguments p;
             N.Hany)

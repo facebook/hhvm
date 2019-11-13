@@ -88,9 +88,10 @@ and hint_ env p = function
   | Hdarray (ty1, ty2) ->
     hint env ty1;
     hint env ty2
-  | Hvarray_or_darray ty
-  | Hvarray ty ->
-    hint env ty
+  | Hvarray_or_darray (ty1, ty2) ->
+    maybe hint env ty1;
+    hint env ty2
+  | Hvarray ty -> hint env ty
   | Htuple hl
   | Hunion hl
   | Hintersection hl ->

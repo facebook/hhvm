@@ -73,7 +73,9 @@ let rec check_hint env (pos, hint) =
     check_hint env h2
   | Aast.Hshape hm -> check_shape env hm
   | Aast.Haccess (h, ids) -> check_access env h ids
-  | Aast.Hvarray_or_darray h
+  | Aast.Hvarray_or_darray (hopt1, h2) ->
+    Option.iter hopt1 (check_hint env);
+    check_hint env h2
   | Aast.Hvarray h
   | Aast.Hoption h
   | Aast.Hlike h

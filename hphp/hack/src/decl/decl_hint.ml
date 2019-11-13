@@ -50,7 +50,8 @@ and hint_ p env = function
     Tarray (h1, h2)
   | Hdarray (h1, h2) -> Tdarray (hint env h1, hint env h2)
   | Hvarray h -> Tvarray (hint env h)
-  | Hvarray_or_darray h -> Tvarray_or_darray (None, hint env h)
+  | Hvarray_or_darray (h1, h2) ->
+    Tvarray_or_darray (Option.map h1 (hint env), hint env h2)
   | Hprim p -> Tprim p
   | Habstr x -> Tgeneric x
   | Hoption (_, Hprim Tnull) ->

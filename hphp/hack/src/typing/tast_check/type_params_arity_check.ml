@@ -41,9 +41,10 @@ let rec check_hint env (pos, hint) =
   | Aast.Hdarray (ty1, ty2) ->
     check_hint env ty1;
     check_hint env ty2
-  | Aast.Hvarray_or_darray ty
-  | Aast.Hvarray ty ->
-    check_hint env ty
+  | Aast.Hvarray_or_darray (ty1, ty2) ->
+    Option.iter ty1 (check_hint env);
+    check_hint env ty2
+  | Aast.Hvarray ty -> check_hint env ty
   | Aast.Htuple hl
   | Aast.Hunion hl
   | Aast.Hintersection hl ->

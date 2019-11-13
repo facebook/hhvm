@@ -112,7 +112,7 @@ and hint_ =
   | Harray of hint option * hint option
   | Hdarray of hint * hint
   | Hvarray of hint
-  | Hvarray_or_darray of hint
+  | Hvarray_or_darray of hint option * hint
   | Hprim of tprim
   | Hthis
   | Hdynamic

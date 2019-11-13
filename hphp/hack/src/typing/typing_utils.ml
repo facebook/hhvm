@@ -327,6 +327,18 @@ let rec is_any env ty =
   | (_, (_, Tintersection tyl)) -> List.exists tyl (is_any env)
   | _ -> false
 
+let is_tunion env ty =
+  let (_env, ty) = Env.expand_type env ty in
+  match ty with
+  | (_, Tunion _) -> true
+  | _ -> false
+
+let is_tintersection env ty =
+  let (_env, ty) = Env.expand_type env ty in
+  match ty with
+  | (_, Tintersection _) -> true
+  | _ -> false
+
 (*****************************************************************************)
 (* Gets the base type of an abstract type *)
 (*****************************************************************************)

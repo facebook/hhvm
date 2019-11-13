@@ -500,6 +500,52 @@ and simplify_subtype_i
       not (Sequence.is_empty (Cls.lower_bounds_on_this class_ty))
     | None -> false
   in
+  let simplify_sub_union env ty_sub ty_super tyl_super =
+    (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
+     * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
+     * But we deal with unions on the left first (see case above), so this
+     * particular situation won't arise.
+     * TODO: identify under what circumstances this reduction is complete.
+     *)
+    let rec try_each tys env =
+      match tys with
+      | [] ->
+        (* If type on left might have an explicit upper bound (e.g. generic parameters, new type)
+         * then we'd better check this too. e.g. consider foo<T as ~int> and T <: ~num
+         *)
+        begin
+          match ty_sub with
+          | LoclType (_, Tabstract ((AKnewtype _ | AKdependent _), Some ty)) ->
+            simplify_subtype ~subtype_env ~this_ty ty ty_super env
+          | LoclType
+              ((_, Tabstract (AKgeneric name_sub, opt_sub_cstr)) as ty_sub) ->
+            simplify_subtype_generic_sub
+              name_sub
+              opt_sub_cstr
+              ty_sub
+              ty_super
+              env
+          | _ -> invalid ()
+        end
+      | ty :: tys ->
+        let ty = LoclType ty in
+        env
+        |> simplify_subtype_i ~subtype_env ~this_ty ty_sub ty
+        ||| try_each tys
+    in
+    try_each tyl_super env
+  in
+  let simplify_super_intersection env tyl_sub ty_super =
+    (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
+     * not complete.
+     *)
+    List.fold_left
+      tyl_sub
+      ~init:(env, TL.invalid ~fail)
+      ~f:(fun res ty_sub ->
+        let ty_sub = LoclType ty_sub in
+        res ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super)
+  in
   match (ety_sub, ety_super) with
   (* Internally, newtypes and dependent types are always equipped with an upper bound.
    * In the case when no upper bound is specified in source code,
@@ -772,50 +818,32 @@ and simplify_subtype_i
           (obj_get_ty, invalid_with (fun () -> Errors.add_error error)))
     in
     error_prop &&& simplify_subtype ~subtype_env ~this_ty obj_get_ty member_ty
+  | ( (LoclType (_, Tintersection tyl_sub) as ty_sub),
+      (LoclType ((_, Tunion (_ :: _ as tyl_super)) as ty_super) as ity_super)
+    ) ->
+    (* Heuristicky logic to decide whether to "break" the intersection
+    or the union first, based on observing that the following cases often occur:
+      - A & B <: (A & B) | C
+        In which case we want to "break" the union on the right first
+        in order to have the following recursive calls :
+            A & B <: A & B
+            A & B <: C
+      - A & (B | C) <: B | C
+        In which case we want to "break" the intersection on the left first
+        in order to have the following recursive calls:
+            A <: B | C
+            B | C <: B | C
+    *)
+    if List.exists tyl_super ~f:(Typing_utils.is_tintersection env) then
+      simplify_sub_union env ty_sub ty_super tyl_super
+    else if List.exists tyl_sub ~f:(Typing_utils.is_tunion env) then
+      simplify_super_intersection env tyl_sub ity_super
+    else
+      simplify_sub_union env ty_sub ty_super tyl_super
   | (_, LoclType ((_, Tunion (_ :: _ as tyl)) as ty_super)) ->
-    (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
-     * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
-     * But we deal with unions on the left first (see case above), so this
-     * particular situation won't arise.
-     * TODO: identify under what circumstances this reduction is complete.
-     *)
-    let rec try_each tys env =
-      match tys with
-      | [] ->
-        (* If type on left might have an explicit upper bound (e.g. generic parameters, new type)
-         * then we'd better check this too. e.g. consider foo<T as ~int> and T <: ~num
-         *)
-        begin
-          match ety_sub with
-          | LoclType (_, Tabstract ((AKnewtype _ | AKdependent _), Some ty)) ->
-            simplify_subtype ~subtype_env ~this_ty ty ty_super env
-          | LoclType
-              ((_, Tabstract (AKgeneric name_sub, opt_sub_cstr)) as ty_sub) ->
-            simplify_subtype_generic_sub
-              name_sub
-              opt_sub_cstr
-              ty_sub
-              ty_super
-              env
-          | _ -> invalid ()
-        end
-      | ty :: tys ->
-        let ty = LoclType ty in
-        env
-        |> simplify_subtype_i ~subtype_env ~this_ty ety_sub ty
-        ||| try_each tys
-    in
-    try_each tyl env
-  (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
-   * not complete.
-   *)
+    simplify_sub_union env ety_sub ty_super tyl
   | (LoclType (_, Tintersection tyl), _) ->
-    List.fold_left
-      tyl
-      ~init:(env, TL.invalid ~fail)
-      ~f:(fun res ty_sub ->
-        let ty_sub = LoclType ty_sub in
-        res ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ety_super)
+    simplify_super_intersection env tyl ety_super
   | (LoclType ety_sub, LoclType ety_super) ->
     (match (snd ety_sub, snd ety_super) with
     | ( ( Tprim

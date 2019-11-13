@@ -110,8 +110,9 @@ let log_prop env =
  *   Contra<#1,t2>
  * leaving the invariant component alone.
  *)
-let rec freshen_inside_ty env ((r, ty_) as ty) =
+let rec freshen_inside_ty env ty =
   let default () = (env, ty) in
+  let (env, (r, ty_)) = Env.expand_type env ty in
   match ty_ with
   | Tany _
   | Tnonnull
@@ -493,7 +494,9 @@ let tyvar_is_solved env var =
  * (Or: there is some instantiation of the fresh type variables that
  * makes freshen_inside_ty ty1 and freshen_inside_ty ty2 the same.)
  *)
-let ty_equal_shallow ty1 ty2 =
+let ty_equal_shallow env ty1 ty2 =
+  let (env, ty1) = Env.expand_type env ty1 in
+  let (_env, ty2) = Env.expand_type env ty2 in
   match (snd ty1, snd ty2) with
   | (Tany _, Tany _)
   | (Tnonnull, Tnonnull)
@@ -596,7 +599,7 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
                 else
                   match (lower_bound, upper_bound) with
                   | (LoclType lower_bound, LoclType upper_bound)
-                    when ty_equal_shallow lower_bound upper_bound ->
+                    when ty_equal_shallow env lower_bound upper_bound ->
                     let (env, ty) = freshen_inside_ty env lower_bound in
                     let env =
                       Typing_utils.sub_type env lower_bound ty on_error
@@ -909,7 +912,9 @@ let is_sub_type env ty1 ty2 =
   Typing_utils.is_sub_type env ty1 ty2
 
 let rec push_option_out pos env ty =
-  let is_option = function
+  let is_option env ty =
+    let (_env, ty) = Env.expand_type env ty in
+    match ty with
     | (_, Toption _) -> true
     | _ -> false
   in
@@ -918,7 +923,7 @@ let rec push_option_out pos env ty =
   | (r, Toption ty) ->
     let (env, ty) = push_option_out pos env ty in
     ( env,
-      if is_option ty then
+      if is_option env ty then
         ty
       else
         (r, Toption ty) )
@@ -927,24 +932,32 @@ let rec push_option_out pos env ty =
     (env, (r, Toption ty))
   | (r, Tunion tyl) ->
     let (env, tyl) = List.map_env env tyl (push_option_out pos) in
-    if List.exists tyl is_option then
-      let (r', tyl) =
-        List.fold_map tyl ~init:Reason.none ~f:(fun r ty ->
-            match ty with
-            | (r', Toption ty') -> (r', ty')
-            | _ -> (r, ty))
+    if List.exists tyl (is_option env) then
+      let ((env, r'), tyl) =
+        List.fold_map tyl ~init:(env, Reason.none) ~f:(fun (env, r) ty ->
+            let (env, ty) = Env.expand_type env ty in
+            let (r, ty) =
+              match ty with
+              | (r', Toption ty') -> (r', ty')
+              | _ -> (r, ty)
+            in
+            ((env, r), ty))
       in
       (env, (r', Toption (r, Tunion tyl)))
     else
       (env, (r, Tunion tyl))
   | (r, Tintersection tyl) ->
     let (env, tyl) = List.map_env env tyl (push_option_out pos) in
-    if List.for_all tyl is_option then
-      let (r', tyl) =
-        List.fold_map tyl ~init:Reason.none ~f:(fun r' ty ->
-            match ty with
-            | (r, Toption ty) -> (r, ty)
-            | _ -> (r', ty))
+    if List.for_all tyl (is_option env) then
+      let ((env, r'), tyl) =
+        List.fold_map tyl ~init:(env, Reason.none) ~f:(fun (env, r') ty ->
+            let (env, ty) = Env.expand_type env ty in
+            let (r, ty) =
+              match ty with
+              | (r, Toption ty) -> (r, ty)
+              | _ -> (r', ty)
+            in
+            ((env, r), ty))
       in
       (env, (r', Toption (r, Tintersection tyl)))
     else
@@ -954,6 +967,7 @@ let rec push_option_out pos env ty =
       match TUtils.get_concrete_supertypes env ty with
       | (env, [ty']) ->
         let (env, ty') = push_option_out pos env ty' in
+        let (env, ty') = Env.expand_type env ty' in
         (match ty' with
         | (r', Toption ty') ->
           (env, (r', Toption (r, Tabstract (ak, Some ty'))))
@@ -1004,6 +1018,7 @@ let rec push_option_out pos env ty =
  *)
 let non_null env pos ty =
   let (env, ty) = push_option_out pos env ty in
+  let (env, ty) = Env.expand_type env ty in
   match ty with
   | (_, Toption ty') -> (env, ty')
   | _ -> (env, ty)

@@ -344,6 +344,7 @@ let is_tintersection env ty =
 (*****************************************************************************)
 
 let rec get_base_type env ty =
+  let (env, ty) = Env.expand_type env ty in
   match snd ty with
   | Tabstract (AKnewtype (classname, _), _)
     when String.equal classname SN.Classes.cClassname ->

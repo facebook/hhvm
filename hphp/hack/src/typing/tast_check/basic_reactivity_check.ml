@@ -301,6 +301,7 @@ let check_mutability_fun_params env mut_args fty el =
     | _ -> ()
 
 let enforce_mutable_constructor_call env ctor_fty el =
+  let (env, ctor_fty) = Env.expand_type env ctor_fty in
   match ctor_fty with
   | (_, Tfun fty) ->
     check_mutability_fun_params env Borrowable_args.empty fty el
@@ -519,7 +520,8 @@ let check =
         let is_expr_statement = ctx.is_expr_statement in
         let ctx = set_nested_expr ctx in
         ( if not ctx.allow_awaitable then
-          match (get_type expr, expr) with
+          let (_env, ty) = Env.expand_type env (get_type expr) in
+          match (ty, expr) with
           | ((_, Tclass ((_, cls), _, _)), (_, (Call _ | Pipe _)))
             when String.equal cls SN.Classes.cAwaitable ->
             Errors.non_awaited_awaitable_in_rx (get_position expr)
@@ -667,7 +669,8 @@ let check =
             | (_, Call (_, f, _, _, _)) ->
               enforce_mutable_call env expr;
               ( if not is_expr_statement then
-                match get_type f with
+                let (_env, fty) = Env.expand_type env (get_type f) in
+                match fty with
                 | (r, Tfun fty) when fty.ft_returns_void_to_rx ->
                   Errors
                   .returns_void_to_rx_function_as_non_expression_statement

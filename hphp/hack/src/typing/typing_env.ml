@@ -331,6 +331,7 @@ let env_with_global_tpenv env global_tpenv = { env with global_tpenv }
 
 let add_upper_bound_global env name ty =
   let tpenv =
+    let (env, ty) = expand_type env ty in
     match ty with
     | (r, Tabstract (AKgeneric formal_super, _)) ->
       TPEnv.add_lower_bound

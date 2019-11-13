@@ -1458,6 +1458,7 @@ and case_list parent_locals ty env switch_pos cl =
           Errors.unify_error
     in
     let is_enum =
+      let (_env, ty) = Env.expand_type env ty in
       match snd ty with
       | Tunion tyl when Typing_utils.is_dynamic env ty ->
         List.exists tyl ~f:(function

@@ -102,7 +102,6 @@ let rec shrink_shape pos field_name env shape =
  * useful typechecking of incomplete code (code in the process of being
  * written). *)
 let shapes_idx_not_null env shape_ty (p, field) =
-  let (env, shape_ty) = Env.expand_type env shape_ty in
   match TUtils.shape_field_name env (p, field) with
   | None -> (env, shape_ty)
   | Some field ->
@@ -116,6 +115,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
         Errors.unify_error
     in
     let refine_type env shape_ty =
+      let (env, shape_ty) = Env.expand_type env shape_ty in
       match shape_ty with
       | (r, Tshape (shape_kind, ftm)) ->
         let (env, field_type) =

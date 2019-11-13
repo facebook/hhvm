@@ -129,7 +129,7 @@ let merge_parse (acc1, status1, files1) (acc2, status2, files2) =
 
 let parse_files ?(quick = false) ?(show_all_errors = false) popt acc fnl =
   let parse =
-    if !Utils.profile then (
+    if !Utils.profile_log then (
       fun acc fn ->
     let t = Unix.gettimeofday () in
     let result = parse ~quick ~show_all_errors popt acc fn in

@@ -308,7 +308,7 @@ let process_files
     result
   in
   let process_file_wrapper =
-    if !Utils.profile then
+    if !Utils.profile_log then
       process_file_profiled
     else
       process_file
@@ -600,7 +600,7 @@ let go_with_interrupt
         ~check_info
     )
   in
-  if !Utils.profile then
+  if !Utils.profile_log then
     TypingLogger.ProfileTypeCheck.print_path
       ~init_id:check_info.init_id
       ~recheck_id:check_info.recheck_id;

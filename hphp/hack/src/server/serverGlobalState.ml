@@ -28,7 +28,7 @@ let save ~logging_init =
     saved_tmp = Path.make Relative_path.(path_of_prefix Tmp);
     saved_gi_tmp = Typing_global_inference.get_path ();
     trace = !Typing_deps.trace;
-    profile_log = !Utils.profile;
+    profile_log = !Utils.profile_log;
     fixme_codes = !Errors.ignored_fixme_codes;
     strict_codes = !Errors.error_codes_treated_strictly;
     paths_to_ignore = FilesToIgnore.get_paths_to_ignore ();
@@ -49,7 +49,7 @@ let restore state ~(worker_id : int) =
   Relative_path.(set_path_prefix Tmp state.saved_tmp);
   Typing_global_inference.restore_path state.saved_gi_tmp;
   Typing_deps.trace := state.trace;
-  Utils.profile := state.profile_log;
+  Utils.profile_log := state.profile_log;
   Errors.ignored_fixme_codes := state.fixme_codes;
   Errors.error_codes_treated_strictly := state.strict_codes;
   FilesToIgnore.set_paths_to_ignore state.paths_to_ignore;

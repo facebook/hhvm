@@ -4887,9 +4887,9 @@ and dispatch_call
       | (r, Tarraykind (AKvarray tv)) ->
         let (env, tv) = get_value_type env tv in
         (env, (r, Tarraykind (AKvarray tv)))
-      | (r, Tunion x) ->
-        let (acc, x) = List.map_env env x get_array_filter_return_type in
-        (acc, (r, Tunion x))
+      | (r, Tunion tyl) ->
+        let (env, tyl) = List.map_env env tyl get_array_filter_return_type in
+        Typing_union.union_list env r tyl
       | (r, Tintersection tyl) ->
         let (env, tyl) = List.map_env env tyl get_array_filter_return_type in
         Inter.intersect_list env r tyl

@@ -133,4 +133,20 @@ mod tests {
         let f = String::from("some_function");
         b.iter(|| string_utils::mangle_meth_caller(&cls, &f));
     }
+
+    #[bench]
+    fn bench_mangle_closure(b: &mut Bencher) {
+        b.iter(|| string_utils::closures::mangle_closure("foo", 2));
+    }
+
+    #[bench]
+    fn bench_unmangle_closure(b: &mut Bencher) {
+        b.iter(|| string_utils::closures::unmangle_closure("Closure$foo#2"));
+    }
+
+    #[bench]
+    fn bench_is_closure_name(b: &mut Bencher) {
+        b.iter(|| string_utils::closures::is_closure_name("Closure$foo"));
+    }
+
 }

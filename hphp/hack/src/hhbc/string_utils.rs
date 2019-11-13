@@ -215,6 +215,38 @@ pub mod classes {
     }
 }
 
+pub mod closures {
+    pub fn mangle_closure(scope: &str, idx: u32) -> String {
+        super::classes::mangle_class("Closure", scope, idx)
+    }
+
+    /* Closure classes have names of the form
+     *   Closure$ scope ix ; num
+     * where
+     *   scope  ::=
+     *     <function-name>
+     *   | <class-name> :: <method-name>
+     *   |
+     *   ix ::=
+     *     # <digits>
+     */
+    pub fn unmangle_closure(mangled_name: &str) -> Option<&str> {
+        if is_closure_name(mangled_name) {
+            let prefix_length = "Closure$".chars().count();
+            match mangled_name.find('#') {
+                Some(pos) => Some(&mangled_name[prefix_length..pos]),
+                None => Some(&mangled_name[prefix_length..]),
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn is_closure_name(s: &str) -> bool {
+        s.starts_with("Closure$")
+    }
+}
+
 #[cfg(test)]
 mod string_utils_tests {
     use pretty_assertions::assert_eq;
@@ -573,12 +605,68 @@ mod string_utils_tests {
 
             #[test]
             fn idx_of_one() {
-                assert_eq!(mangle_class("foo", "bar", 1), "foo$bar");
+                assert_eq!(mangle_class("foo", "bar", 1), "foo$bar")
             }
 
             #[test]
             fn idx_of_two() {
                 assert_eq!(mangle_class("foo", "bar", 2), "foo$bar#2")
+            }
+        }
+    }
+
+    mod closures {
+        mod mangle_closure {
+            use crate::closures::mangle_closure;
+
+            #[test]
+            fn idx_of_one() {
+                assert_eq!(mangle_closure("foo", 1), "Closure$foo")
+            }
+
+            #[test]
+            fn idx_of_two() {
+                assert_eq!(mangle_closure("foo", 2), "Closure$foo#2")
+            }
+        }
+
+        mod unmangle_closure {
+            use crate::closures::unmangle_closure;
+
+            #[test]
+            fn idx_of_one() {
+                assert_eq!(unmangle_closure("Closure$foo"), Some("foo"))
+            }
+
+            #[test]
+            fn idx_of_two() {
+                assert_eq!(unmangle_closure("Closure$foo#2"), Some("foo"))
+            }
+
+            #[test]
+            fn non_closure() {
+                assert_eq!(unmangle_closure("SomePrefix$foo"), None);
+                assert_eq!(unmangle_closure("SomePrefix$foo#2"), None)
+            }
+        }
+
+        mod is_closure_name {
+            use crate::closures::is_closure_name;
+
+            #[test]
+            fn closure_1() {
+                assert_eq!(is_closure_name("Closure$foo"), true)
+            }
+
+            #[test]
+            fn closure_2() {
+                assert_eq!(is_closure_name("Closure$foo#2"), true)
+            }
+
+            #[test]
+            fn non_closure() {
+                assert_eq!(is_closure_name("SomePrefix$foo"), false);
+                assert_eq!(is_closure_name("SomePrefix$foo#2"), false)
             }
         }
     }

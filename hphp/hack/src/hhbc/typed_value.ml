@@ -111,34 +111,19 @@ let to_bool v =
   | Vec (_, _) ->
     true
 
-(* try to convert numeric
- * or if allow_following passed then leading numeric string to a number *)
-let string_to_int_opt ~allow_following ~allow_inf s =
-  (* Interger conversion in scanf is slightly strange,
-   * both 3 and 3ab are converted to 3, so we take a separate approach
-   * when we do not want the following characters
-   *)
-  let int_opt =
-    if allow_following then
-      try Scanf.sscanf s "%Ld%s" (fun x _ -> Some x) with _ -> None
-    else
-      try Some (Int64.of_string s) with _ -> None
-  in
+(* try to convert numeric *)
+let string_to_int_opt ~allow_inf s =
+  let int_opt = (try Some (Int64.of_string s) with _ -> None) in
   match int_opt with
   | None ->
-    if allow_following then
-      try Scanf.sscanf s "%f%s" (fun x _ -> Some (Int64.of_float x))
-      with _ -> None
-    else (
-      try
-        let s = float_of_string s in
-        if (not allow_inf) && (s = Float.infinity || s = Float.neg_infinity)
-        then
-          None
-        else
-          Some (Int64.of_float s)
-      with _ -> None
-    )
+    (try
+       let s = float_of_string s in
+       if (not allow_inf) && (s = Float.infinity || s = Float.neg_infinity)
+       then
+         None
+       else
+         Some (Int64.of_float s)
+     with _ -> None)
   | x -> x
 
 (* Cast to an integer: the (int) operator in PHP. Return None if we can't
@@ -146,22 +131,9 @@ let string_to_int_opt ~allow_following ~allow_inf s =
 let to_int v =
   match v with
   | Uninit -> None (* Should not happen *)
-  | String s ->
-    begin
-      (*https://github.com/php/php-langspec/blob/master/spec/08-conversions.md
-      If the source is a numeric string or leading-numeric string having
-      integer format, if the precision can be preserved the result value
-      is that string's integer value; otherwise, the result is undefined.
-      If the source is a numeric string or leading-numeric string having
-      floating-point format, the string's floating-point value is treated as
-      described above for a conversion from float. The trailing non-numeric
-      characters in leading-numeric strings are ignored. For any other string,
-      the result value is 0.
-    *)
-      match string_to_int_opt ~allow_following:true ~allow_inf:true s with
-      | None -> Some Int64.zero
-      | x -> x
-    end
+  (* Unreachable - the only calliste of to_int is cast_to_arraykey, which never
+   * calls it with String *)
+  | String _ -> None
   | Int i -> Some i
   | Float f ->
     let fpClass = Float.classify f in

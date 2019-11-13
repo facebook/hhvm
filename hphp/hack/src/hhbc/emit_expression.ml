@@ -1890,10 +1890,7 @@ and is_struct_init env es allow_numerics =
             | A.String s ->
               ( b
                 && Option.is_none
-                   @@ Typed_value.string_to_int_opt
-                        ~allow_following:false
-                        ~allow_inf:false
-                        s,
+                   @@ Typed_value.string_to_int_opt ~allow_inf:false s,
                 ULS.add keys s )
             | _ -> (false, keys)
           end

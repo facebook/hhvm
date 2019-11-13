@@ -1,13 +1,6 @@
-EXTRA_INCLUDE_PATHS=
-EXTRA_LIB_PATHS=
-EXTRA_LINK_OPTS=
-EXTRA_NATIVE_LIBRARIES=
 BYTECODE=
-DUNE_BUILD_DIR=
-CMAKE_BINARY_DIR=
 
 ROOT=$(shell pwd)
-HACK_BIN_DIR="$(CMAKE_BINARY_DIR)/hphp/hack/bin"
 
 ################################################################################
 #                                    Rules                                     #

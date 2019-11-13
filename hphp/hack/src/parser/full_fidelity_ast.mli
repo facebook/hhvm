@@ -107,3 +107,12 @@ val defensive_program_with_default_popt :
   Relative_path.t ->
   string ->
   Parser_return.t
+
+(*
+  from_text_ocaml and from_text_rust are only used for testing
+*)
+val from_text_ocaml :
+  env -> Full_fidelity_source_text.t -> Rust_aast_parser_types.result
+
+val from_text_rust :
+  env -> Full_fidelity_source_text.t -> Rust_aast_parser_types.result

@@ -504,7 +504,7 @@ module LowererTest_ = struct
   module Lowerer = Full_fidelity_ast
 
   type r =
-    | Tree of Full_fidelity_ast.aast_result
+    | Tree of Rust_aast_parser_types.result
     | Crash of string
     | Skip
 
@@ -526,14 +526,24 @@ module LowererTest_ = struct
     let print_lowpri_errs errs =
       String.concat ~sep:"\n" @@ List.map ~f:print_lowpri_err errs
     in
+    let print_errs errs =
+      String.concat ~sep:"\n"
+      @@ List.map ~f:Full_fidelity_syntax_error.show errs
+    in
+    let print_aast_result r =
+      match r with
+      | Ok aast -> Aast.show_program pp_pos pp_unit pp_unit pp_unit aast
+      | Error msg -> Printf.sprintf "SYNTAX ERROR: %s" msg
+    in
     let oc = Pervasives.open_out path in
-    Lowerer.(
+    Rust_aast_parser_types.(
       Printf.fprintf
         oc
-        "%s\n%s\n%s"
-        (Aast.show_program pp_pos pp_unit pp_unit pp_unit result.ast)
-        (Scoured_comments.show result.comments)
-        (print_lowpri_errs !(result.lowpri_errors_)))
+        "%s\n%s\n%s\n%s"
+        (print_aast_result result.aast)
+        (Scoured_comments.show result.scoured_comments)
+        (print_lowpri_errs result.lowpri_errors)
+        (print_errs result.errors))
 
   let build_tree args _env is_rust file source_text =
     let lower_env =
@@ -556,7 +566,11 @@ module LowererTest_ = struct
       (Errors.get_hh_fixme_pos := (fun _ _ -> None));
       (Errors.is_hh_fixme_disallowed := (fun _ _ -> false));
       let (_err, r) =
-        Errors.do_ (fun () -> Lowerer.from_text lower_env source_text)
+        Errors.do_ (fun () ->
+            if is_rust then
+              Lowerer.from_text_rust lower_env source_text
+            else
+              Lowerer.from_text_ocaml lower_env source_text)
       in
       r
     in
@@ -580,14 +594,21 @@ module LowererTest_ = struct
     in
     let aast_equal = Aast.equal_program ( = ) ( = ) ( = ) ( = ) in
     let compare_result r1 r2 =
-      Lowerer.(
-        if
-          aast_equal r1.ast r2.ast
-          && r1.is_hh_file = r2.is_hh_file
-          && Scoured_comments.equal r1.comments r2.comments
-          && r1.fi_mode = r2.fi_mode
-          && !(r1.lowpri_errors_) = !(r2.lowpri_errors_)
-        then
+      Rust_aast_parser_types.(
+        let compare_aast_result a1 a2 =
+          match (a1, a2) with
+          | (Ok aast1, Ok aast2) -> aast_equal aast1 aast2
+          | (Error msg1, Error msg2) -> msg1 = msg2
+          | _ -> false
+        in
+        let tree = compare_aast_result r1.aast r2.aast in
+        let file_mode = r1.file_mode = r2.file_mode in
+        let lowpri_err = r1.lowpri_errors = r2.lowpri_errors in
+        let err = r1.errors = r2.errors in
+        let comments =
+          Scoured_comments.equal r1.scoured_comments r2.scoured_comments
+        in
+        if tree && file_mode && lowpri_err && err && comments then
           Printf.printf ":EQUAL: "
         else
           let print s r =
@@ -600,11 +621,11 @@ module LowererTest_ = struct
                 "NOT_" )
           in
           Printf.printf ":NOT_EQUAL: ";
-          print "Tree" (aast_equal r1.ast r2.ast);
-          print "HH_File" (r1.is_hh_file = r2.is_hh_file);
-          print "Comments" (Scoured_comments.equal r1.comments r2.comments);
-          print "Mode" (r1.fi_mode = r2.fi_mode);
-          print "Lerr" (!(r1.lowpri_errors_) = !(r2.lowpri_errors_)))
+          print "Tree" tree;
+          print "Comments" comments;
+          print "Mode" file_mode;
+          print "Lerr" lowpri_err;
+          print "Err" err)
     in
     let print_lowpri_errs o_le r_le =
       let print_pos pos = Format.asprintf "(%a)" Pos.pp pos in
@@ -629,10 +650,10 @@ module LowererTest_ = struct
     | Crash e -> Printf.printf ":RUST_CRASH(%s): " e
     | Skip -> Printf.printf ":RUST_SKIP: ");
     Printf.printf "%s\n" path;
-    Lowerer.(
+    Rust_aast_parser_types.(
       match (ocaml_tree, rust_tree) with
-      | (Tree ot, Tree rt) when !(ot.lowpri_errors_) <> !(rt.lowpri_errors_) ->
-        print_lowpri_errs !(ot.lowpri_errors_) !(rt.lowpri_errors_)
+      | (Tree ot, Tree rt) when ot.lowpri_errors <> rt.lowpri_errors ->
+        print_lowpri_errs ot.lowpri_errors rt.lowpri_errors
       | (_, _) -> ());
     flush stdout;
     if args.check_printed_tree then (

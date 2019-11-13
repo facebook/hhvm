@@ -4,3 +4,7 @@ File "akempty_promotion_4.php", line 12, characters 24-26:
 Expected int
 File "akempty_promotion_4.php", line 7, characters 17-23:
 But got array (empty)
+File "collections/Vector.hhi", line 50, characters 50-51:
+  via this generic Tv
+File "collections/interfaces.hhi", line 585, characters 49-50:
+  via this generic Tv

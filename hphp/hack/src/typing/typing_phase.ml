@@ -168,7 +168,9 @@ let rec localize ~ety_env env (dty : decl_ty) =
   | (r, Tgeneric x) ->
     begin
       match SMap.find_opt x ety_env.substs with
-      | Some x_ty -> (env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
+      | Some x_ty ->
+        let (env, x_ty) = Env.expand_type env x_ty in
+        (env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
       | None -> (env, (r, Tabstract (AKgeneric x, None)))
     end
   | (r, Toption ty) ->

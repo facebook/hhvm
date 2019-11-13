@@ -2279,6 +2279,7 @@ and expr_
           (CI (pos, class_name))
           meth_name
       in
+      let (env, fty) = Env.expand_type env fty in
       (match fty with
       | (reason, Tfun ftype) ->
         (* We are creating a fake closure:
@@ -2369,6 +2370,7 @@ and expr_
         let (env, _tal, _te, cid_ty) =
           static_class_id ~check_constraints:true (fst c) env [] cid
         in
+        let (env, cid_ty) = Env.expand_type env cid_ty in
         let tyargs =
           match cid_ty with
           | (_, Tclass (_, _, tyargs)) -> tyargs
@@ -4082,6 +4084,7 @@ and new_object
   let finish env tcid tel tuel ty ctor_fty =
     let (env, new_ty) =
       let ((_, cid_ty), _) = tcid in
+      let (env, cid_ty) = Env.expand_type env cid_ty in
       match cid_ty with
       | (_, Tabstract (AKgeneric _, _)) -> (env, cid_ty)
       | _ ->
@@ -4124,6 +4127,7 @@ and new_object
           p
           c_ty;
       let (env, obj_ty_, params) =
+        let (env, c_ty) = Env.expand_type env c_ty in
         match (cid, tal, snd c_ty) with
         (* Explicit type arguments *)
         | (CI _, _ :: _, Tclass (_, _, tyl)) -> (env, snd c_ty, tyl)
@@ -4162,6 +4166,7 @@ and new_object
       in
       let (env, new_ty) =
         let ((_, cid_ty), _) = tcid in
+        let (env, cid_ty) = Env.expand_type env cid_ty in
         match cid_ty with
         | (_, Tabstract (AKgeneric _, _)) -> (env, cid_ty)
         | _ ->
@@ -8788,6 +8793,7 @@ and overload_function
     (env, with_type res Tast.dummy_saved_env outer, res)
   else
     let (env, ty) = f env fty res el in
+    let (env, fty) = Env.expand_type env fty in
     let fty =
       match fty with
       | (r, Tfun ft) -> (r, Tfun { ft with ft_ret = MakeType.unenforced ty })

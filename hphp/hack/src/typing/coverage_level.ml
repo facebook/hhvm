@@ -125,33 +125,41 @@ let merge_and_sum cs1 cs2 =
     cs1
     cs2
 
-let rec is_tany ty =
+let rec is_tany env ty =
+  let (env, ty) = Tast_env.expand_type env ty in
   match ty with
-  | (r, (Tany _ | Terr)) -> Some r
-  | (_, Tunion []) -> None
+  | (r, (Tany _ | Terr)) -> (env, Some r)
+  | (_, Tunion []) -> (env, None)
   | (_, Tunion (h :: tl)) ->
-    begin
-      match is_tany h with
-      | Some r when List.for_all tl (compose Option.is_some is_tany) -> Some r
-      | _ -> None
-    end
-  | _ -> None
+    let (env, r_opt) = is_tany env h in
+    (match r_opt with
+    | Some r
+      when List.for_all tl (compose Option.is_some (compose snd (is_tany env)))
+      ->
+      (env, Some r)
+    | _ -> (env, None))
+  | _ -> (env, None)
 
-let level_of_type fixme_map (pos, ty) =
+let level_of_type env fixme_map (pos, ty) =
+  let (env, ty) = Tast_env.expand_type env ty in
   match ty with
-  | (_, Tobject) -> Partial
+  | (_, Tobject) -> (env, Partial)
   | (_, _) ->
-    (match is_tany ty with
-    | Some _ -> Unchecked
-    | None ->
-      (match TUtils.HasTany.check_why ty with
-      | Some _ -> Partial
-      | _ ->
-        (* If the line has a HH_FIXME, then mark it as (at most) partially checked *)
-        if IMap.mem (Pos.line pos) fixme_map then
-          Partial
-        else
-          Checked))
+    let (env, r_opt) = is_tany env ty in
+    let level =
+      match r_opt with
+      | Some _ -> Unchecked
+      | None ->
+        (match TUtils.HasTany.check_why ty with
+        | Some _ -> Partial
+        | _ ->
+          (* If the line has a HH_FIXME, then mark it as (at most) partially checked *)
+          if IMap.mem (Pos.line pos) fixme_map then
+            Partial
+          else
+            Checked)
+    in
+    (env, level)
 
 class level_getter fixme_map =
   object
@@ -183,7 +191,7 @@ class level_getter fixme_map =
        *)
       let (pmap, cmap) = super#on_expr env expr in
       let ((pos, ty), _) = expr in
-      let lvl = level_of_type fixme_map (pos, ty) in
+      let (_env, lvl) = level_of_type env fixme_map (pos, ty) in
       let should_update_pmap =
         match lvl with
         | Checked -> cmap.checked + cmap.partial + cmap.unchecked = 0

@@ -252,6 +252,7 @@ let rec describe_ty_super env ?(short = false) ty =
   let default () = print ty in
   match ty with
   | LoclType ty ->
+    let (env, ty) = Env.expand_type env ty in
     (match ty with
     | (_, Tvar v) ->
       let upper_bounds = ITySet.elements (Env.get_tyvar_upper_bounds env v) in
@@ -2808,6 +2809,8 @@ and try_intersect_i env ty tyl =
       tyl
     else
       let nonnull_ty = LoclType (reason ty, Tnonnull) in
+      let (env, ty) = Env.expand_internal_type env ty in
+      let (env, ty') = Env.expand_internal_type env ty' in
       (match (ty, ty') with
       | (LoclType (_, Toption t), _)
         when is_sub_type_ignore_generic_params_i env ty' nonnull_ty ->
@@ -2851,14 +2854,15 @@ and try_union_i env ty tyl =
       tyl
     else if is_sub_type_for_union_i env ty' ty then
       try_union_i env ty tyl'
-    else (
-      match (ty, ty') with
+    else
+      let (env, ty) = Env.expand_internal_type env ty in
+      let (env, ty') = Env.expand_internal_type env ty' in
+      (match (ty, ty') with
       | (LoclType (_, Tprim Nast.Tfloat), LoclType (_, Tprim Nast.Tint))
       | (LoclType (_, Tprim Nast.Tint), LoclType (_, Tprim Nast.Tfloat)) ->
         let num = LoclType (MakeType.num (reason ty)) in
         try_union_i env num tyl'
-      | (_, _) -> ty' :: try_union_i env ty tyl'
-    )
+      | (_, _) -> ty' :: try_union_i env ty tyl')
 
 and try_union env ty tyl =
   List.map

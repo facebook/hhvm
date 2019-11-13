@@ -48,7 +48,7 @@ class count_getter fixme_map =
       | None -> acc
       | Some kind ->
         let r = fst ty in
-        let lvl = level_of_type fixme_map (pos, ty) in
+        let (_env, lvl) = level_of_type env fixme_map (pos, ty) in
         let counter =
           match SMap.find_opt acc kind with
           | Some counter -> counter

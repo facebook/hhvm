@@ -524,6 +524,7 @@ let get_tpenv_tparams env =
             }
           acc ->
       let folder ty acc =
+        let (_env, ty) = expand_type env ty in
         match ty with
         | (_, Tabstract (AKgeneric _, _)) -> acc
         | _ -> get_tparams_aux env acc ty

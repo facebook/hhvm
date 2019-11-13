@@ -551,9 +551,10 @@ void HttpServer::stopOnSignal(int sig) {
         alarm(totalWait);
     }
   }
-  // Invoke HttpServer::stop() from the synchronous signal handler thread. This
-  // way, stopOnSignal() is asynchronous-signal safe.
-  raise(SIGTERM);
+  // Invoke on_kill_server() in the synchronous signal handler thread. We cannot
+  // directly call HttpServer::stop() here directly, because this function must
+  // be asynchronous-signal safe.
+  kill(getpid(), SIGTERM);
 }
 
 void HttpServer::EvictFileCache() {

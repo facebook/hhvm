@@ -43,6 +43,22 @@ class TestPushOptionOutGlobalInference(TestCase[GlobalInferenceDriver]):
         self.test_driver.check_cmd(["No errors!"])
 
 
+class TestDynamicNonnullHasMember(TestCase[GlobalInferenceDriver]):
+    @classmethod
+    def get_template_repo(cls) -> str:
+        return "hphp/hack/test/integration/data/global_inference/dynamic_nonnull_has_member"
+
+    @classmethod
+    def get_test_driver(cls) -> GlobalInferenceDriver:
+        return GlobalInferenceDriver()
+
+    def test(self) -> None:
+        self.test_driver.start_hh_server(
+            args=["--config", "infer_missing=global", "--config", "timeout=20"]
+        )
+        self.test_driver.check_cmd(["No errors!"])
+
+
 class TestThreeFilesGlobalInference(TestCase[GlobalInferenceDriver]):
     """
     Test if we got no datarace. This test might be non deterministic:

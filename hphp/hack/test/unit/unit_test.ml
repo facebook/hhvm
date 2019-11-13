@@ -57,3 +57,16 @@ let run_all (tests : (string * (unit -> bool)) list) =
       0
     else
       1 )
+
+let run_only tests names =
+  let f =
+    match names with
+    | [] -> const true
+    | _ -> (fun (n, _) -> List.mem names n ( = ))
+  in
+  let tests = List.filter tests ~f in
+  run_all tests
+
+let main tests =
+  let names = Option.value (List.tl @@ Array.to_list Sys.argv) ~default:[] in
+  run_only tests names

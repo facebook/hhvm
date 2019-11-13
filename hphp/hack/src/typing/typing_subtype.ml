@@ -163,13 +163,13 @@ let check_mutability
   (* immutable is not compatible with mutable *)
   | (None, Some (Param_borrowed_mutable | Param_owned_mutable))
   (* mutable is not compatible with immutable  *)
-
+  
   | (Some (Param_borrowed_mutable | Param_owned_mutable), None)
   (* borrowed mutable is not compatible with owned mutable *)
-
+  
   | (Some Param_borrowed_mutable, Some Param_owned_mutable)
   (* maybe-mutable is not compatible with immutable/mutable *)
-
+  
   | ( Some Param_maybe_mutable,
       (None | Some (Param_borrowed_mutable | Param_owned_mutable)) ) ->
     invalid
@@ -666,13 +666,24 @@ and simplify_subtype_i
     simplify_subtype ~subtype_env ty_sub' ty_super' env
   (* A <: ?B iif A & nonnull <: B
     Only apply if B is a type variable or an intersection, to avoid oscillating
-    forever between this case and the previous one.*)
+    forever between this case and the previous one.
+    Also make sure, in the case of a single type variable, that the type
+    variable has no constraints in its upper bounds, to avoid the following
+    loop:
+      subtype           (nonnull & _ & #1) <: has_member(m, #2)
+      simplify          (nonnull & _ & #1) <: has_member(m, #2)
+      simplifies to     (#1 & _) <: ?#3 with upper bound has_member(m, #2)
+      simplifies to     (#1 & _ & nonnull) <: #3
+      into prop_to_env  (#1 & _ & nonnull) <: #3
+      calls simplify on (#1 & _ & nonnull) <: has_member(m, #2)
+      back to start *)
   | (ty_sub, LoclType (r, Toption ty_super'))
     when let (_, (_, ety_super')) = Env.expand_type env ty_super' in
          match ety_super' with
-         | Tintersection _
-         | Tvar _ ->
-           true
+         | Tintersection _ -> true
+         | Tvar var ->
+           let upper_bounds = Env.get_tyvar_upper_bounds env var in
+           not @@ Internal_type_set.exists is_constraint_type upper_bounds
          | _ -> false ->
     (* We want to intersect ty_sub with nonnull, but ty_super might be a
     constraint type, and we can't intersect with constraint types,
@@ -1399,12 +1410,13 @@ and simplify_subtype_i
         match (ak_sub, ak_super) with
         (* An empty array is a subtype of any array type *)
         | (AKempty, _) -> valid ()
-        | (AKvarray ty_sub, (AKvarray ty_super))
-          ->
+        | (AKvarray ty_sub, AKvarray ty_super) ->
           simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-        | (AKvarray_or_darray (tk_sub, tv_sub), AKvarray_or_darray (tk_super, tv_super))
+        | ( AKvarray_or_darray (tk_sub, tv_sub),
+            AKvarray_or_darray (tk_super, tv_super) )
         | (AKdarray (tk_sub, tv_sub), AKdarray (tk_super, tv_super))
-        | (AKdarray (tk_sub, tv_sub), AKvarray_or_darray (tk_super, tv_super)) ->
+        | (AKdarray (tk_sub, tv_sub), AKvarray_or_darray (tk_super, tv_super))
+          ->
           env
           |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
@@ -1941,7 +1953,7 @@ and simplify_subtype_reactivity
   (* ok:
      <<__Rx>>
      function f(<<__AtMostRxAsFunc>> (function(): int) $f) { return $f() }  *)
-
+  
   | (RxVar None, RxVar _) ->
     valid ()
   | (RxVar (Some sub), RxVar (Some super))

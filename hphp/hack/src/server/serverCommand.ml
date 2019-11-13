@@ -58,7 +58,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | INFER_TYPE_BATCH _ -> false
   | IDE_HOVER _ -> false
   | DOCBLOCK_AT _ -> false
-  | LOCATE_SYMBOL _ -> false
   | DOCBLOCK_FOR_SYMBOL _ -> false
   | IDE_SIGNATURE_HELP _ -> false
   | COVERAGE_LEVELS _ -> false
@@ -138,7 +137,6 @@ let get_description : type a. a command -> string = function
   | Rpc (INFER_TYPE_BATCH _) -> "INFER_TYPE_BATCH"
   | Rpc (IDE_HOVER _) -> "IDE_HOVER"
   | Rpc (DOCBLOCK_AT _) -> "DOCBLOCK_AT"
-  | Rpc (LOCATE_SYMBOL _) -> "LOCATE_SYMBOL"
   | Rpc (DOCBLOCK_FOR_SYMBOL _) -> "DOCBLOCK_FOR_SYMBOL"
   | Rpc (IDE_SIGNATURE_HELP _) -> "IDE_SIGNATURE_HELP"
   | Rpc (COVERAGE_LEVELS _) -> "COVERAGE_LEVELS"

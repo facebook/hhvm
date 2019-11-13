@@ -251,9 +251,6 @@ type _ t =
       (string * int * int * (int * int) option) list * bool
       -> string list t
   | IDE_HOVER : string * int * int -> HoverService.result t
-  | LOCATE_SYMBOL :
-      (string * SearchUtils.si_kind)
-      -> (string * int * int * string option) option t
   | DOCBLOCK_AT :
       (string * int * int * string option * SearchUtils.si_kind)
       -> DocblockService.result t

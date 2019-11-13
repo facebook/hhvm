@@ -84,21 +84,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | DOCBLOCK_FOR_SYMBOL (symbol, kind) ->
     let r = ServerDocblockAt.go_docblock_for_symbol ~env ~symbol ~kind in
     (env, r)
-  | LOCATE_SYMBOL (symbol, kind) ->
-    let loc_opt = ServerDocblockAt.go_locate_symbol ~env ~symbol ~kind in
-    let r =
-      match loc_opt with
-      | None -> (env, None)
-      | Some loc ->
-        DocblockService.
-          ( env,
-            Some
-              ( loc.dbs_filename,
-                loc.dbs_line,
-                loc.dbs_column,
-                loc.dbs_base_class ) )
-    in
-    r
   | IDE_SIGNATURE_HELP (path, line, column) ->
     let file_input = ServerCommandTypes.FileName path in
     let (ctx, entry) =

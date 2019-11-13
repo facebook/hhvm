@@ -7,7 +7,6 @@ let debug_describe_t : type a. a t -> string = function
   | INFER_TYPE_BATCH _ -> "INFER_TYPE_BATCH"
   | IDE_HOVER _ -> "IDE_HOVER"
   | DOCBLOCK_AT _ -> "DOCBLOCK_AT"
-  | LOCATE_SYMBOL _ -> "LOCATE_SYMBOL"
   | DOCBLOCK_FOR_SYMBOL _ -> "DOCBLOCK_FOR_SYMBOL"
   | IDE_SIGNATURE_HELP _ -> "SIGNATURE_HELP"
   | COVERAGE_LEVELS _ -> "COVERAGE_LEVELS"

@@ -53,6 +53,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/timer.h"
+#include "hphp/util/user-info.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -196,22 +197,23 @@ static String HHVM_FUNCTION(get_current_user) {
 #ifdef _MSC_VER
   return Process::GetCurrentUser();
 #else
-  int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-  if (pwbuflen < 1) {
-    return empty_string();
-  }
-  char *pwbuf = (char*)req::malloc_noptrs(pwbuflen);
-  SCOPE_EXIT { req::free(pwbuf); };
-  struct passwd pw;
-  struct passwd *retpwptr = nullptr;
   auto uid = [] () -> uid_t {
     if (auto cred = get_cli_ucred()) return cred->uid;
     return getuid();
   }();
-  if (getpwuid_r(uid, &pw, pwbuf, pwbuflen, &retpwptr) != 0) {
+
+  auto buf = PasswdBuffer{};
+  passwd* pw;
+  if (getpwuid_r(uid, &buf.ent, buf.data.get(), buf.size, &pw) != 0) {
+    // Unable to lookup the current user.
     return empty_string();
   }
-  String ret(pw.pw_name, CopyString);
+  if (pw == nullptr) {
+    // Current user does not exist.
+    return empty_string();
+  }
+
+  String ret(pw->pw_name, CopyString);
   return ret;
 #endif
 }

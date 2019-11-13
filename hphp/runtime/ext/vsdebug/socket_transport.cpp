@@ -17,6 +17,7 @@
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/ext/vsdebug/socket_transport.h"
+#include "hphp/util/user-info.h"
 
 #include <pwd.h>
 #include <grp.h>
@@ -701,49 +702,36 @@ bool SocketTransport::validatePeerCreds(int newFd, ClientInfo& info) {
     (long)ucred.uid
   );
 
-  int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-  if (pwbuflen <= 1) {
+  auto buf = PasswdBuffer{};
+  passwd* pw;
+  if (getpwuid_r(ucred.uid, &buf.ent, buf.data.get(), buf.size, &pw)) {
     VSDebugLogger::Log(
       VSDebugLogger::LogLevelInfo,
-      "_SC_GETPW_R_SIZE_MAX is too small!"
+      "Failed to call getpwuid_r: %d",
+      errno
     );
     return false;
   }
 
-  char* buff = (char*)malloc(pwbuflen);
-  SCOPE_EXIT {
-    if (buff != nullptr) {
-      free(buff);
-    }
-    buff = nullptr;
-  };
-
-  struct passwd pw = {};
-  struct passwd *retpwptr = nullptr;
-  if (getpwuid_r(ucred.uid,
-                 &pw,
-                 buff,
-                 pwbuflen,
-                 &retpwptr) != 0) {
-     VSDebugLogger::Log(
-       VSDebugLogger::LogLevelInfo,
-       "Failed to call getpwuid_r: %d",
-       errno
-     );
-     return false;
+  if (pw == nullptr) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "No such uid: %d",
+      ucred.uid
+    );
+    return false;
   }
-
 
   VSDebugLogger::Log(
     VSDebugLogger::LogLevelInfo,
     "Client username is: %s",
-    pw.pw_name
+    pw->pw_name
   );
 
-  info.clientUser = std::string(pw.pw_name);
+  info.clientUser = std::string(pw->pw_name);
   info.clientPid = ucred.pid;
   info.clientUid = ucred.uid;
-  return pw.pw_name != nullptr && strlen(pw.pw_name) > 0;
+  return pw->pw_name != nullptr && strlen(pw->pw_name) > 0;
 #else
   return true;
 #endif

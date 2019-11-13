@@ -31,6 +31,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
+#include "hphp/util/user-info.h"
 
 #include <grp.h>
 #include <pwd.h>
@@ -679,19 +680,15 @@ void Repo::initCentral() {
   // Try the equivalent of "$HOME/.hhvm.hhbc", but look up the home directory
   // in the password database.
   {
-    passwd pwbuf;
-    passwd* pwbufp;
-    long bufsize = sysconf(_SC_GETPW_R_SIZE_MAX);
-    if (bufsize != -1) {
-      auto buf = new char[bufsize];
-      SCOPE_EXIT { delete[] buf; };
-      if (!getpwuid_r(getuid(), &pwbuf, buf, size_t(bufsize), &pwbufp)
-          && (HOME == nullptr || strcmp(HOME, pwbufp->pw_dir))) {
-        std::string centralPath = pwbufp->pw_dir;
-        centralPath += "/.hhvm.hhbc";
-        if (tryPath(centralPath.c_str())) {
-          return;
-        }
+    auto buf = PasswdBuffer{};
+    passwd* pw;
+    auto err = getpwuid_r(getuid(), &buf.ent, buf.data.get(), buf.size, &pw);
+    if (err == 0 && pw != nullptr &&
+        (HOME == nullptr || strcmp(HOME, pw->pw_dir))) {
+      std::string centralPath = pw->pw_dir;
+      centralPath += "/.hhvm.hhbc";
+      if (tryPath(centralPath.c_str())) {
+        return;
       }
     }
   }
@@ -733,31 +730,18 @@ std::string showPermissions(const struct stat& s) {
   return ret;
 }
 
-struct PasswdBuffer {
-  explicit PasswdBuffer(int name)
-    : size{sysconf(name)}
-  {
-    if (size == -1) size = 1024;
-    data = std::make_unique<char[]>(size);
-  }
-
-  long size;
-  std::unique_ptr<char[]> data;
-};
-
 /*
  * Return the name of the user with the given id.
  */
 std::string uidToName(uid_t uid) {
 #ifndef _WIN32
-  auto buffer = PasswdBuffer{_SC_GETPW_R_SIZE_MAX};
-  passwd pw;
-  passwd* result;
+  auto buf = PasswdBuffer{};
+  passwd* pw;
 
-  auto err = getpwuid_r(uid, &pw, buffer.data.get(), buffer.size, &result);
+  auto err = getpwuid_r(uid, &buf.ent, buf.data.get(), buf.size, &pw);
   if (err != 0) return folly::errnoStr(errno).toStdString();
-  if (result == nullptr) return "user does not exist";
-  return pw.pw_name;
+  if (pw == nullptr) return "user does not exist";
+  return pw->pw_name;
 #else
   return "<unsupported>";
 #endif
@@ -768,15 +752,12 @@ std::string uidToName(uid_t uid) {
  */
 uid_t nameToUid(const std::string& name) {
 #ifndef _WIN32
-  auto buffer = PasswdBuffer{_SC_GETPW_R_SIZE_MAX};
-  passwd pw;
-  passwd* result;
+  auto buf = PasswdBuffer{};
+  passwd* pw;
 
-  auto err = getpwnam_r(
-    name.c_str(), &pw, buffer.data.get(), buffer.size, &result
-  );
-  if (err != 0 || result == nullptr) return -1;
-  return pw.pw_uid;
+  auto err = getpwnam_r(name.c_str(), &buf.ent, buf.data.get(), buf.size, &pw);
+  if (err != 0 || pw == nullptr) return -1;
+  return pw->pw_uid;
 #else
   return -1;
 #endif
@@ -787,14 +768,13 @@ uid_t nameToUid(const std::string& name) {
  */
 std::string gidToName(gid_t gid) {
 #ifndef _WIN32
-  auto buffer = PasswdBuffer{_SC_GETGR_R_SIZE_MAX};
-  group grp;
-  group* result;
+  auto buf = GroupBuffer{};
+  group* grp;
 
-  auto err = getgrgid_r(gid, &grp, buffer.data.get(), buffer.size, &result);
+  auto err = getgrgid_r(gid, &buf.ent, buf.data.get(), buf.size, &grp);
   if (err != 0) return folly::errnoStr(errno).toStdString();
-  if (result == nullptr) return "group does not exist";
-  return grp.gr_name;
+  if (grp == nullptr) return "group does not exist";
+  return grp->gr_name;
 #else
   return "<unsupported>";
 #endif
@@ -805,15 +785,12 @@ std::string gidToName(gid_t gid) {
  */
 gid_t nameToGid(const std::string& name) {
 #ifndef _WIN32
-  auto buffer = PasswdBuffer{_SC_GETGR_R_SIZE_MAX};
-  group grp;
-  group* result;
+  auto buf = GroupBuffer{};
+  group* grp;
 
-  auto err = getgrnam_r(
-    name.c_str(), &grp, buffer.data.get(), buffer.size, &result
-  );
-  if (err != 0 || result == nullptr) return -1;
-  return grp.gr_gid;
+  auto err = getgrnam_r(name.c_str(), &buf.ent, buf.data.get(), buf.size, &grp);
+  if (err != 0 || grp == nullptr) return -1;
+  return grp->gr_gid;
 #else
   return -1;
 #endif

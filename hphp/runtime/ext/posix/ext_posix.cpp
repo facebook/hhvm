@@ -41,6 +41,7 @@
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/util/sync-signal.h"
+#include "hphp/util/user-info.h"
 
 namespace HPHP {
 
@@ -188,59 +189,47 @@ const StaticString
   s_dir("dir"),
   s_shell("shell");
 
-static Variant php_posix_group_to_array(int gid,
-                   const String& gname = uninit_variant.toString()) {
-  // Don't pass a gid *and* a gname to this.
-  assertx((gid <  0) || gname.size() == 0);
-
-  if ((gid < 0) && (gname.size() == 0)) {
-    return false;
-  }
-
-  int grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
-  if (grbuflen < 1) {
-    return false;
-  }
-
-  std::unique_ptr<char[]> grbuf(new char[grbuflen]);
-  struct group gr;
-  struct group *retgrptr = NULL;
-
-  // If we somehow reach this point and both gname and gid were
-  // passed, then the gid values will override the gname values,
-  // but it will otherwise function just fine.
-  // The assertx() clause above should prevent that, however.
-  if ((gname.size() > 0) &&
-      (getgrnam_r(gname.data(), &gr, grbuf.get(), grbuflen, &retgrptr) != 0 ||
-      retgrptr == nullptr)) {
-    return false;
-  } else if ((gid >= 0) &&
-      (getgrgid_r(gid, &gr, grbuf.get(), grbuflen, &retgrptr) != 0 ||
-      retgrptr == nullptr)) {
-    return false;
-  }
+static Variant php_posix_group_to_array(group* gr) {
+  // Invalid user.
+  if (gr == nullptr) return false;
 
   Array members = Array::Create();
-  for (int count=0; gr.gr_mem[count] != NULL; count++) {
-    members.append(String(gr.gr_mem[count], CopyString));
+  for (int count=0; gr->gr_mem[count] != NULL; count++) {
+    members.append(String(gr->gr_mem[count], CopyString));
   }
 
   return make_map_array(
-    s_name, String(gr.gr_name, CopyString),
-    s_passwd, String(gr.gr_passwd, CopyString),
+    s_name, String(gr->gr_name, CopyString),
+    s_passwd, String(gr->gr_passwd, CopyString),
     s_members, members,
-    s_gid, (int)gr.gr_gid
+    s_gid, (int)gr->gr_gid
   );
 }
 
 Variant HHVM_FUNCTION(posix_getgrgid,
                       int gid) {
-  return php_posix_group_to_array(gid);
+  if (gid < 0) return false;
+
+  auto buf = GroupBuffer{};
+  group* gr;
+  if (getgrgid_r(gid, &buf.ent, buf.data.get(), buf.size, &gr)) {
+    // Failed to obtain the record.
+    return false;
+  }
+  return php_posix_group_to_array(gr);
 }
 
 Variant HHVM_FUNCTION(posix_getgrnam,
                       const String& name) {
-  return php_posix_group_to_array(-1, name.data());
+  if (name.size() == 0) return false;
+
+  auto buf = GroupBuffer{};
+  group* gr;
+  if (getgrnam_r(name.data(), &buf.ent, buf.data.get(), buf.size, &gr)) {
+    // Failed to obtain the record.
+    return false;
+  }
+  return php_posix_group_to_array(gr);
 }
 
 Variant HHVM_FUNCTION(posix_getgroups) {
@@ -288,57 +277,45 @@ int64_t HHVM_FUNCTION(posix_getppid) {
   return getppid();
 }
 
-static Variant php_posix_passwd_to_array(int uid,
-                   const String& name = uninit_variant.toString()) {
-  // Don't pass a uid *and* a name to this.
-  assertx((uid <  0) || name.size() == 0);
-
-  if ((uid < 0) && name.size() == 0) {
-    return false;
-  }
-
-  int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-  if (pwbuflen < 1) {
-    return false;
-  }
-
-  std::unique_ptr<char[]> pwbuf(new char[pwbuflen]);
-  struct passwd pw;
-  struct passwd *retpwptr = NULL;
-
-  // If we somehow reach this point and both name and uid were
-  // passed, then the uid values will override the name values,
-  // but it will otherwise function just fine.
-  // The assertx() clauses above should prevent that, however.
-  if ((name.size() > 0) &&
-      getpwnam_r(name.data(), &pw, pwbuf.get(), pwbuflen, &retpwptr)) {
-    return false;
-  } else if ((uid >= 0) &&
-      getpwuid_r(uid, &pw, pwbuf.get(), pwbuflen, &retpwptr)) {
-    return false;
-  }
-
-  if (!retpwptr) return false;
+static Variant php_posix_passwd_to_array(passwd* pw) {
+  // Invalid user.
+  if (pw == nullptr) return false;
 
   return make_map_array(
-    s_name,   String(pw.pw_name,   CopyString),
-    s_passwd, String(pw.pw_passwd, CopyString),
-    s_uid,    (int)pw.pw_uid,
-    s_gid,    (int)pw.pw_gid,
-    s_gecos,  String(pw.pw_gecos,  CopyString),
-    s_dir,    String(pw.pw_dir,    CopyString),
-    s_shell,  String(pw.pw_shell,  CopyString)
+    s_name,   String(pw->pw_name,   CopyString),
+    s_passwd, String(pw->pw_passwd, CopyString),
+    s_uid,    (int)pw->pw_uid,
+    s_gid,    (int)pw->pw_gid,
+    s_gecos,  String(pw->pw_gecos,  CopyString),
+    s_dir,    String(pw->pw_dir,    CopyString),
+    s_shell,  String(pw->pw_shell,  CopyString)
   );
 }
 
 Variant HHVM_FUNCTION(posix_getpwnam,
                       const String& username) {
-  return php_posix_passwd_to_array(-1, username);
+  if (username.size() == 0) return false;
+
+  auto buf = PasswdBuffer{};
+  passwd* pw;
+  if (getpwnam_r(username.data(), &buf.ent, buf.data.get(), buf.size, &pw)) {
+    // Failed to obtain the record.
+    return false;
+  }
+  return php_posix_passwd_to_array(pw);
 }
 
 Variant HHVM_FUNCTION(posix_getpwuid,
                       int uid) {
-  return php_posix_passwd_to_array(uid);
+  if (uid < 0) return false;
+
+  auto buf = PasswdBuffer{};
+  passwd* pw;
+  if (getpwuid_r(uid, &buf.ent, buf.data.get(), buf.size, &pw)) {
+    // Failed to obtain the record.
+    return false;
+  }
+  return php_posix_passwd_to_array(pw);
 }
 
 static bool posix_addlimit(int limit, const char *name, Array &ret) {

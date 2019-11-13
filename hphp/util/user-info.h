@@ -27,65 +27,64 @@
 
 namespace HPHP {
 
+template <typename Entry>
+struct PwdGrpBuffer {
+  explicit PwdGrpBuffer(int name) : size{sysconf(name)} {
+    if (size < 1) size = 1024;
+    data = std::make_unique<char[]>(size);
+  }
+
+  Entry ent;
+  std::unique_ptr<char[]> data;
+  long size;
+};
+
+struct PasswdBuffer : PwdGrpBuffer<passwd> {
+  explicit PasswdBuffer() : PwdGrpBuffer(_SC_GETPW_R_SIZE_MAX) {}
+};
+
+struct GroupBuffer : PwdGrpBuffer<group> {
+  explicit GroupBuffer() : PwdGrpBuffer(_SC_GETGR_R_SIZE_MAX) {}
+};
+
 struct UserInfo final {
   explicit UserInfo(const char* name) {
-    ::passwd* retpwptr = nullptr;
-    int pwbuflen = ::sysconf(_SC_GETPW_R_SIZE_MAX);
-    if (pwbuflen < 1)   {
-      throw Exception("Could not get _SC_GETPW_R_SIZE_MAX");
-    }
-    pwbuf.resize(pwbuflen);
-
-    if (::getpwnam_r(name, &pwd, pwbuf.data(), pwbuf.size(), &retpwptr)) {
+    if (getpwnam_r(name, &buf.ent, buf.data.get(), buf.size, &pw)) {
       throw Exception("getpwnam_r: %s", folly::errnoStr(errno).c_str());
     }
 
-    if (!retpwptr) {
+    if (pw == nullptr) {
       throw Exception("getpwnam_r: no such user: %s", name);
     }
   }
 
   explicit UserInfo(uid_t uid) {
-    ::passwd* retpwptr = nullptr;
-    int pwbuflen = ::sysconf(_SC_GETPW_R_SIZE_MAX);
-    if (pwbuflen < 1)   {
-      throw Exception("Could not get _SC_GETPW_R_SIZE_MAX");
-    }
-    pwbuf.resize(pwbuflen);
-
-    if (::getpwuid_r(uid, &pwd, pwbuf.data(), pwbuf.size(), &retpwptr)) {
+    if (getpwuid_r(uid, &buf.ent, buf.data.get(), buf.size, &pw)) {
       throw Exception("getpwuid_r: %s", folly::errnoStr(errno).c_str());
     }
 
-    if (!retpwptr) {
+    if (pw == nullptr) {
       throw Exception("getpwuid_r: no such uid: %u", uid);
     }
   }
 
-  ::passwd pwd;
-  std::vector<char> pwbuf;
+  PasswdBuffer buf;
+  passwd* pw;
 };
 
 struct GroupInfo final {
   explicit GroupInfo(const char* name) {
-    ::group* retgrptr = nullptr;
-    int grbuflen = ::sysconf(_SC_GETGR_R_SIZE_MAX);
-    if (grbuflen < 1)   {
-      throw Exception("Could not get _SC_GETGR_R_SIZE_MAX");
-    }
-    grbuf.resize(grbuflen);
-
-    if (::getgrnam_r(name, &gr, grbuf.data(), grbuf.size(), &retgrptr)) {
+    if (getgrnam_r(name, &buf.ent, buf.data.get(), buf.size, &gr)) {
       throw Exception("getgrnam_r: %s", folly::errnoStr(errno).c_str());
     }
 
-    if (!retgrptr) {
+    if (gr == nullptr) {
       throw Exception("getgrnam_r: no such group: %s", name);
     }
   }
 
-  ::group gr;
-  std::vector<char> grbuf;
+  GroupBuffer buf;
+  group* gr;
 };
 
 } // namespace HPHP

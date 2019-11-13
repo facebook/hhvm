@@ -11,7 +11,7 @@ module String_comparator = struct
 
   let to_string x = x
 
-  let is_equal x y = x = y
+  let is_equal x y = String.equal x y
 end
 
 module Int_comparator = struct

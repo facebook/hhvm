@@ -62,7 +62,7 @@ let run_only tests names =
   let f =
     match names with
     | [] -> const true
-    | _ -> (fun (n, _) -> List.mem names n ( = ))
+    | _ -> (fun (n, _) -> List.mem names n ~equal:( = ))
   in
   let tests = List.filter tests ~f in
   run_all tests

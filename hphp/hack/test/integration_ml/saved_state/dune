@@ -2,6 +2,7 @@
   (name test_all_saved_state)
   (wrapped false)
   (modules
+    test_changed_type_in_base_class
     test_deps_all_members
     test_disable_conservative_redecl_class
     test_disk_race_conditions

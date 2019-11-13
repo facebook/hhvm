@@ -112,12 +112,16 @@ let compute_tast_and_errors_unquarantined
 let compute_tast_and_errors_quarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     Tast.program * Errors.t =
-  (* This is the core work that might have to be wrapped in a context *)
-  let f () = compute_tast_and_errors_unquarantined ~ctx ~entry in
-  (* If global context is not set, set it and proceed *)
-  match Provider_context.get_global_context () with
-  | None -> respect_but_quarantine_unsaved_changes ~ctx ~f
-  | Some _ -> f ()
+  (* If results have already been memoized, don't bother quarantining anything *)
+  match (entry.Provider_context.tast, entry.Provider_context.errors) with
+  | (Some tast, Some errors) -> (tast, errors)
+  (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
+  | _ ->
+    let f () = compute_tast_and_errors_unquarantined ~ctx ~entry in
+    (* If global context is not set, set it and proceed *)
+    (match Provider_context.get_global_context () with
+    | None -> respect_but_quarantine_unsaved_changes ~ctx ~f
+    | Some _ -> f ())
 
 let compute_cst ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     Full_fidelity_ast.PositionedSyntaxTree.t =

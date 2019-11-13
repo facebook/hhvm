@@ -102,6 +102,7 @@ and referenced_typeconsts env ety_env (root, ids) =
         let (env, tyl) = Typing_utils.get_concrete_supertypes env root in
         let acc =
           List.fold tyl ~init:acc ~f:(fun acc ty ->
+              let (env, ty) = Env.expand_type env ty in
               match snd ty with
               | Typing_defs.Tclass ((_, class_name), _, _) ->
                 let ( >>= ) = Option.( >>= ) in

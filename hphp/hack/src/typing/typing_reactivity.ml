@@ -57,6 +57,7 @@ let rec condition_type_from_reactivity r =
    type that was specified as parameter in attribute
    - for all other cases return None *)
 let get_associated_condition_type env ~is_self ty =
+  let (env, ty) = Env.expand_type env ty in
   match ty with
   | (_, Tabstract (AKgeneric n, _)) -> Env.get_condition_type env n
   | (_, Tabstract (AKdependent DTthis, _)) ->
@@ -195,6 +196,7 @@ let check_reactivity_matches
 
 let get_effective_reactivity env r ft arg_types =
   let go ((env, res, opt_pos) as acc) (p, arg_ty) =
+    let (env, arg_ty) = Env.expand_type env arg_ty in
     match (p.fp_rx_annotation, arg_ty) with
     | (Some Param_rx_var, (reason, Tfun { ft_reactive = r; _ })) ->
       Errors.try_
@@ -347,20 +349,15 @@ let check_call env method_info pos reason ft arg_types =
      was not met and since errors were already reported we can bail out. Otherwise
      we need to verify that reactivities for callee and caller are in agreement. *)
       let env =
-          (* pick the function we are trying to invoke *)
-          match try_get_reactivity_from_condition_type env method_info with
-          | None ->
-            let (env, r, opt_pos) =
-              get_effective_reactivity env ft.ft_reactive ft arg_types
-            in
-            check_reactivity_matches
-              env
-              pos
-              reason
-              caller_reactivity
-              (r, opt_pos)
-          | Some r ->
-            check_reactivity_matches env pos reason caller_reactivity (r, None)
+        (* pick the function we are trying to invoke *)
+        match try_get_reactivity_from_condition_type env method_info with
+        | None ->
+          let (env, r, opt_pos) =
+            get_effective_reactivity env ft.ft_reactive ft arg_types
+          in
+          check_reactivity_matches env pos reason caller_reactivity (r, opt_pos)
+        | Some r ->
+          check_reactivity_matches env pos reason caller_reactivity (r, None)
       in
       env
 
@@ -371,7 +368,8 @@ let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
       Errors.missing_annotation_for_atmost_rx_as_rxfunc_parameter
         param.Aast.param_pos
     else
-      let rec err_if_not_fun ty =
+      let rec err_if_not_fun env ty =
+        let (env, ty) = Env.expand_type env ty in
         match snd ty with
         (* if parameter has <<__AtMostRxAsFunc>> annotation then:
            - parameter should be typed as function or a like function *)
@@ -379,13 +377,13 @@ let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
         | Tunion [ty; (_, Tdynamic)]
         | Tunion [(_, Tdynamic); ty]
         | Toption ty ->
-          err_if_not_fun ty
+          err_if_not_fun env ty
         | _ ->
           Errors.invalid_type_for_atmost_rx_as_rxfunc_parameter
             (Reason.to_pos (fst param_ty))
             (Typing_print.full env param_ty)
       in
-      err_if_not_fun param_ty
+      err_if_not_fun env param_ty
 
 (* generate a name that uniquely identifies pair target_type * condition_type *)
 let generate_fresh_name_for_target_of_condition_type
@@ -413,6 +411,7 @@ let try_substitute_type_with_condition env cond_ty ty =
          if Env.is_generic_parameter env fresh_type_argument_name then
            (env, param_ty)
          else
+           let (env, ty) = Env.expand_type env ty in
            let (param_ty, ty) =
              match ty with
              | (_, Toption ty) -> ((fst param_ty, Toption param_ty), ty)
@@ -447,6 +446,7 @@ let strip_condition_type_in_return env ty =
   if not (equal_reactivity (env_reactivity env) Nonreactive) then
     ty
   else
+    let (env, ty) = Env.expand_type env ty in
     match ty with
     | (_, Tabstract (AKgeneric n, _))
       when Option.is_some (Env.get_condition_type env n) ->

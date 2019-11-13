@@ -123,6 +123,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
  *)
 let check_arraykey_index env pos container_ty index_ty =
   if TypecheckerOptions.disallow_invalid_arraykey (Env.get_tcopt env) then
+    let (env, container_ty) = Env.expand_type env container_ty in
     let reason =
       match container_ty with
       | (_, Tclass ((_, cn), _, _)) -> Reason.index_class cn

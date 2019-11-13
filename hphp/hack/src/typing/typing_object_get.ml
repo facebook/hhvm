@@ -165,6 +165,7 @@ and obj_get_concrete_ty
       quiet = true;
     }
   in
+  let (env, concrete_ty) = Env.expand_type env concrete_ty in
   match concrete_ty with
   | (r, Tclass (x, exact, paraml)) ->
     let get_member_from_constraints env class_info =

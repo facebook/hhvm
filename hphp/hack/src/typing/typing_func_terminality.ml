@@ -74,6 +74,11 @@ let expression_exits env (_, e) =
   | _ -> false
 
 let is_noreturn env =
-  match (Env.get_return env).Typing_env_return_info.return_type.et_type with
+  let (_env, ret_ty) =
+    Env.expand_type
+      env
+      (Env.get_return env).Typing_env_return_info.return_type.et_type
+  in
+  match ret_ty with
   | (_, Tprim Tnoreturn) -> true
   | _ -> false

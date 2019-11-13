@@ -64,6 +64,7 @@ class virtual type_validator =
         let (env, root) = Env.localize acc.env acc.ety_env root in
         let (env, tyl) = Env.get_concrete_supertypes env root in
         List.fold tyl ~init:acc ~f:(fun acc ty ->
+            let (env, ty) = Env.expand_type env ty in
             match snd ty with
             | Typing_defs.Tclass ((_, class_name), _, _) ->
               let ( >>= ) = Option.( >>= ) in

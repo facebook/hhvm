@@ -20,10 +20,11 @@ let has_ppl_attribute c =
       String.equal SN.UserAttributes.uaProbabilisticModel (snd ua_name))
 
 (* If an object's type is wrapped in a Tabstract, recurse until we've hit the base *)
-let rec base_type ty =
+let rec base_type env ty =
+  let (env, ty) = Env.expand_type env ty in
   match snd ty with
-  | Tabstract (_, Some ty) -> base_type ty
-  | _ -> ty
+  | Tabstract (_, Some ty) -> base_type env ty
+  | _ -> (env, ty)
 
 (**
  * Given a class, check the class's direct ancestors to verify that if
@@ -66,7 +67,8 @@ let check_ppl_class c =
  *)
 let check_ppl_obj_get env ((p, ty), e) =
   let check_type ty =
-    match snd (base_type ty) with
+    let (env, bty) = base_type env ty in
+    match snd bty with
     | Tclass ((_, name), _, _) ->
       begin
         match TLazyHeap.get_class name with
@@ -131,7 +133,8 @@ let check_ppl_meth_pointers p classname special_name =
 
 let check_ppl_inst_meth env ((p, ty), _) =
   let check_type ty =
-    match snd (base_type ty) with
+    let (_env, bty) = base_type env ty in
+    match snd bty with
     | Tclass ((_, name), _, _) ->
       begin
         match TLazyHeap.get_class name with

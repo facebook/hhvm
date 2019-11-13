@@ -59,6 +59,7 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
   if TUtils.HasTany.check ty then
     (env, shape)
   else
+    let (env, ty) = Env.expand_type env ty in
     match ty with
     | (_, Toption ty) -> transform_shapemap ~nullable:true env pos ty shape
     | _ ->
@@ -86,6 +87,7 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
             let acc_field_with_type sft_ty =
               ShapeMap.add field { sft_optional = false; sft_ty } shape
             in
+            let (env, sft_ty) = Env.expand_type env sft_ty in
             match (field, sft_ty, TUtils.get_base_type env ty) with
             | (SFlit_str (_, "nullable"), (_, Toption fty), _) when nullable ->
               (env, acc_field_with_type fty)

@@ -83,6 +83,7 @@ let lookup_magic_type (env : env) (class_ : locl_ty) (fname : string) :
     begin
       match ce_type with
       | Some (env, { ft_params = pars; ft_ret = { et_type = ty; _ }; _ }) ->
+        let (env, ty) = Env.expand_type env ty in
         let ty_opt =
           match ty with
           | (_, Tprim Tstring) -> None

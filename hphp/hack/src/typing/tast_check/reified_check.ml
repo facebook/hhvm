@@ -163,21 +163,19 @@ let handler =
         let tparams = fst ft_tparams in
         verify_call_targs env pos (Reason.to_pos r) tparams targs
       | ((pos, _), New (((_, ty), CI (_, class_id)), targs, _, _, _)) ->
-        begin
-          match ty with
-          | (_, Tabstract (AKgeneric ci, None)) when String.equal ci class_id
-            ->
-            if not (Env.get_newable env ci) then
-              Errors.new_without_newable pos ci;
-            if not (List.is_empty targs) then Errors.tparam_with_tparam pos ci
-          | _ ->
-            (match Env.get_class env class_id with
-            | Some cls ->
-              let tparams = Cls.tparams cls in
-              let class_pos = Cls.pos cls in
-              verify_call_targs env pos class_pos tparams targs
-            | None -> ())
-        end
+        let (env, ty) = Env.expand_type env ty in
+        (match ty with
+        | (_, Tabstract (AKgeneric ci, None)) when String.equal ci class_id ->
+          if not (Env.get_newable env ci) then
+            Errors.new_without_newable pos ci;
+          if not (List.is_empty targs) then Errors.tparam_with_tparam pos ci
+        | _ ->
+          (match Env.get_class env class_id with
+          | Some cls ->
+            let tparams = Cls.tparams cls in
+            let class_pos = Cls.pos cls in
+            verify_call_targs env pos class_pos tparams targs
+          | None -> ()))
       | ((pos, _), New ((_, CIstatic), _, _, _, _)) ->
         Option.(
           let t =

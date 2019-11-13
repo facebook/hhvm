@@ -90,6 +90,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | FILE_DEPENDENTS _ -> true
   | IDENTIFY_TYPES _ -> false
   | EXTRACT_STANDALONE _ -> false
+  | CONCATENATE_ALL _ -> true
   | GO_TO_DEFINITION _ -> false
   | BIGCODE _ -> false
   | PAUSE true -> false
@@ -169,6 +170,7 @@ let get_description : type a. a command -> string = function
   | Rpc (FILE_DEPENDENTS _) -> "FILE_DEPENDENTS"
   | Rpc (IDENTIFY_TYPES _) -> "IDENTIFY_TYPES"
   | Rpc (EXTRACT_STANDALONE _) -> "EXTRACT_STANDALONE"
+  | Rpc (CONCATENATE_ALL _) -> "CONCATENATE_ALL"
   | Rpc (GO_TO_DEFINITION _) -> "GO_TO_DEFINITION"
   | Rpc (BIGCODE _) -> "BIGCODE"
   | Rpc (PAUSE _) -> "PAUSE"

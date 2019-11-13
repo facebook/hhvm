@@ -290,6 +290,11 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         in
         print_endline pretty_printed_dependencies;
         Lwt.return Exit_status.No_error)
+    | MODE_CONCATENATE_ALL ->
+      let paths = filter_real_paths args.paths in
+      let%lwt single_file = rpc args @@ Rpc.CONCATENATE_ALL paths in
+      print_endline single_file;
+      Lwt.return Exit_status.No_error
     | MODE_IDENTIFY_SYMBOL1 arg
     | MODE_IDENTIFY_SYMBOL2 arg
     | MODE_IDENTIFY_SYMBOL3 arg ->

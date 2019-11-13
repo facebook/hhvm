@@ -40,6 +40,7 @@ else()
   set(DUNE_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
   set(OPAM_STAMP_FILE "opam.stamp")
 endif()
+set(HACK_BUILD_ROOT "${DUNE_BUILD_DIR}/default")
 
 add_custom_command(
   OUTPUT "${OPAM_STAMP_FILE}"
@@ -96,7 +97,7 @@ function(invoke_dune name target)
         export OPAMROOT=${OPAMROOT} &&
         export PYTHONPATH="${HPHP_HOME}" && # needed for verify.py for `hack_dune_test`
         export HACK_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}" &&
-        export HACK_BUILD_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/_build/default" &&
+        export HACK_BUILD_ROOT="${HACK_BUILD_ROOT}" &&
         PATH="${RUSTC_BIN_DIR}:${CARGO_BIN_DIR}:${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
         opam config exec --
         $(MAKE) --makefile=Makefile.dune ${target}

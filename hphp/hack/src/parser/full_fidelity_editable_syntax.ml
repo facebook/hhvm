@@ -89,14 +89,17 @@ let trailing_width node =
 let full_width node = leading_width node + width node + trailing_width node
 
 let is_in_body node position =
-  let rec aux = function
+  let rec aux parents =
+    match parents with
     | [] -> false
-    | h1 :: t1 when not (is_compound_statement h1) -> aux t1
-    | [_h1] -> false
-    | _h1 :: (h2 :: _ as t1) ->
-      is_methodish_declaration h2 || is_function_declaration h2 || aux t1
+    | h1 :: h2 :: _
+      when is_compound_statement h1
+           && (is_methodish_declaration h2 || is_function_declaration h2) ->
+      true
+    | _ :: rest -> aux rest
   in
-  aux (parentage node position)
+  let parents = parentage node position in
+  aux parents
 
 (* This function takes a parse tree and renders it in the GraphViz DOT
 language; this is a small domain-specific language for visualizing graphs.

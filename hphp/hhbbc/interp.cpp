@@ -5707,24 +5707,10 @@ void interpStep(ISS& env, const Bytecode& bc) {
 
     auto const numPop = bc.numPop();
     for (auto j = 0; j < numPop; j++) {
-      switch (bc.popFlavor(j)) {
-        case Flavor::CVU:
-          // Note that we only support C's for CVU so far (this only
-          // comes up with FCallBuiltin)---we'll fail the verifier if
-          // something changes to send V's or U's through here.
-          interpStep(env, bc::PopC {});
-          break;
-        case Flavor::CU:
-          // We only support C's for CU right now.
-          interpStep(env, bc::PopC {});
-          break;
-        case Flavor::C:
-          interpStep(env, bc::PopC {});
-          break;
-        case Flavor::V:  not_reached();
-        case Flavor::U:  not_reached();
-        case Flavor::CV: not_reached();
-      }
+      DEBUG_ONLY auto flavor = bc.popFlavor(j);
+      assertx(flavor != Flavor::U);
+      // Even for CU we only support C's.
+      interpStep(env, bc::PopC {});
     }
 
     while (i--) {

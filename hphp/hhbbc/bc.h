@@ -572,8 +572,8 @@ namespace imm {
 
 #define POP_UV  if (i == 0) return Flavor::U
 #define POP_CV  if (i == 0) return Flavor::C
-#define POP_VV  if (i == 0) return Flavor::V
-#define POP_CUV if (i == 0) return Flavor::CU
+#define POP_CU  if (i == 0) return Flavor::CU
+#define POP_CUV POP_CU
 
 #define POP_NOV             uint32_t numPop() const { return 0; } \
                             Flavor popFlavor(uint32_t) const { not_reached(); }
@@ -628,7 +628,7 @@ namespace imm {
 #define POP_CALLNATIVE uint32_t numPop() const { return arg1 + arg3; }  \
                        Flavor popFlavor(uint32_t i) const {             \
                          assert(i < numPop());                          \
-                         return i < arg1 ? Flavor::CVU : Flavor::U;     \
+                         return i < arg1 ? Flavor::CU : Flavor::U;     \
                        }
 
 #define POP_FCALL(nin, nobj)                                                   \
@@ -643,7 +643,7 @@ namespace imm {
                       i -= fca.hasGenerics() ? 1 : 0;                          \
                       if (i == 0 && fca.hasUnpack()) return Flavor::C;         \
                       i -= fca.hasUnpack() ? 1 : 0;                            \
-                      if (i < fca.numArgs) return Flavor::CV;                  \
+                      if (i < fca.numArgs) return Flavor::C;                   \
                       i -= fca.numArgs;                                        \
                       if (i == 2 && nobj) return Flavor::C;                    \
                       return Flavor::U;                                        \
@@ -761,7 +761,8 @@ OPCODES
 
 #undef POP_UV
 #undef POP_CV
-#undef POP_VV
+#undef POP_CU
+#undef POP_CUV
 
 #undef POP_NOV
 #undef POP_ONE

@@ -416,22 +416,10 @@ bool propagate_constants(const Bytecode& op, State& state, Gen gen) {
 
   // Pop the inputs, and push the constants.
   for (auto i = size_t{0}; i < numPop; ++i) {
-    switch (op.popFlavor(i)) {
-    case Flavor::C:  gen(bc::PopC {}); break;
-    case Flavor::V:  not_reached();    break;
-    case Flavor::U:  not_reached();    break;
-    case Flavor::CU:
-      // We only support C's for CU right now.
-      gen(bc::PopC {});
-      break;
-    case Flavor::CV: not_reached();    break;
-    case Flavor::CVU:
-      // Note that we only support C's for CVU so far (this only comes up with
-      // FCallBuiltin)---we'll fail the verifier if something changes to send
-      // V's or U's through here.
-      gen(bc::PopC {});
-      break;
-    }
+    DEBUG_ONLY auto flavor = op.popFlavor(i);
+    assertx(flavor != Flavor::U);
+    // Even for CU we only support C's.
+    gen(bc::PopC {});
   }
 
   for (auto i = size_t{0}; i < numPush; ++i) {

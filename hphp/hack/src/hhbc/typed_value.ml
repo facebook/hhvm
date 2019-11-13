@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-module SU = Hhbc_string_utils
 
 (* We introduce a type for Hack/PHP values, mimicking what happens at runtime.
  * Currently this is used for constant folding. By defining a special type, we
@@ -161,15 +160,8 @@ let to_int v =
 let to_float v =
   match v with
   | Uninit -> None (* Should not happen *)
-  | String s ->
-    (*If the source is a numeric string or leading-numeric string having
-    integer format, the string's integer value is treated as described above
-    for a conversion from int. If the source is a numeric string or
-    leading-numeric string having floating-point format, the result value
-    is the closest approximation to the string's floating-point value.
-    The trailing non-numeric characters in leading-numeric strings are ignored.
-    For any other string, the result value is 0.*)
-    (try Scanf.sscanf s "%f%s" (fun x _ -> Some x) with _ -> Some 0.0)
+  | String _ ->
+    None (* Not worth trying to replicate float printing sematics here *)
   | Int i -> (try Some (Int64.to_float i) with Failure _ -> None)
   | Float f -> Some f
   | _ ->
@@ -189,7 +181,8 @@ let to_string v =
   | Null -> Some ""
   | Int i -> Some (Int64.to_string i)
   | String s -> Some s
-  | Float f -> Some (SU.Float.to_string f)
+  | Float _ ->
+    None (* Not worth trying to replicate float printing sematics here *)
   | _ -> None
 
 (* Integer operations. For now, we don't attempt to implement the

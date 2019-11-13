@@ -138,6 +138,7 @@ def run_batch_tests(
     default_expect_regex,
     ignore_error_text,
     no_stderr: bool,
+    mode_flag,
     get_flags: Callable[[str], List[str]],
     out_extension: str,
     only_compare_error_lines: bool = False,
@@ -164,7 +165,9 @@ def run_batch_tests(
         test_dir = os.path.dirname(first_test.file_path)
         flags = get_flags(test_dir)
         test_flags = get_test_flags(first_test.file_path)
-        cmd = [program, "--batch-files", "--out-extension", out_extension]
+        cmd = [program]
+        cmd += mode_flag
+        cmd += ["--batch-files", "--out-extension", out_extension]
         cmd += flags + test_flags
         cmd += [os.path.basename(case.file_path) for case in test_cases]
         debug_cmd(test_dir, cmd)
@@ -225,6 +228,7 @@ def run_test_program(
     default_expect_regex,
     ignore_error_text,
     no_stderr,
+    mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
     timeout=None,
 ) -> List[Result]:
@@ -238,6 +242,7 @@ def run_test_program(
         flags = get_flags(test_dir)
         test_flags = get_test_flags(test_case.file_path)
         cmd = [program]
+        cmd += mode_flag
         if test_case.input is None:
             cmd.append(test_name)
         cmd += flags + test_flags
@@ -492,6 +497,7 @@ def run_tests(
     batch_mode: str,
     ignore_error_text: str,
     no_stderr: bool,
+    mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
     timeout=None,
     only_compare_error_lines: bool = False,
@@ -513,6 +519,7 @@ def run_tests(
             default_expect_regex,
             ignore_error_text,
             no_stderr,
+            mode_flag,
             get_flags,
             out_extension,
             only_compare_error_lines,
@@ -524,6 +531,7 @@ def run_tests(
             default_expect_regex,
             ignore_error_text,
             no_stderr,
+            mode_flag,
             get_flags,
             timeout=timeout,
         )
@@ -558,6 +566,7 @@ def run_idempotence_tests(
     out_extension: str,
     program: str,
     default_expect_regex,
+    mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
 ) -> None:
     idempotence_test_cases = [
@@ -570,7 +579,13 @@ def run_idempotence_tests(
     ]
 
     idempotence_results = run_test_program(
-        idempotence_test_cases, program, default_expect_regex, False, False, get_flags
+        idempotence_test_cases,
+        program,
+        default_expect_regex,
+        False,
+        False,
+        mode_flag,
+        get_flags,
     )
 
     num_idempotence_results = len(idempotence_results)
@@ -643,6 +658,7 @@ if __name__ == "__main__":
         action="store_true",
         help="On test failure, show the content of " "the files and a diff",
     )
+    parser.add_argument("--mode-flag", type=str)
     parser.add_argument("--flags", nargs=argparse.REMAINDER)
     parser.add_argument(
         "--stdin", action="store_true", help="Pass test input file via stdin"
@@ -695,6 +711,7 @@ if __name__ == "__main__":
     if len(files) == 0:
         raise Exception("Could not find any files to test in " + args.test_path)
 
+    mode_flag = [] if args.mode_flag is None else [args.mode_flag]
     get_flags = get_flags_cache(args.flags)
 
     results = run_tests(
@@ -708,6 +725,7 @@ if __name__ == "__main__":
         args.batch,
         args.ignore_error_text,
         args.no_stderr,
+        mode_flag,
         get_flags,
         timeout=args.timeout,
         only_compare_error_lines=args.only_compare_error_lines,
@@ -724,5 +742,6 @@ if __name__ == "__main__":
             args.out_extension,
             args.program,
             args.default_expect_regex,
+            mode_flag,
             get_flags,
         )

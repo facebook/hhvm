@@ -432,7 +432,8 @@ let get_value_from_config_kv_list config key =
   let json_opt = get_value_from_config_ config key in
   Option.map json_opt ~f:(fun json ->
       match json with
-      | J.JSON_Array [] -> []
+      | J.JSON_Array [] ->
+        raise (Arg.Bad ("Expected empty object ({}), not array for " ^ key))
       | json ->
         let keys_with_json = J.get_object_exn json in
         List.map ~f:(fun (k, v) -> (k, J.get_string_exn v)) keys_with_json)

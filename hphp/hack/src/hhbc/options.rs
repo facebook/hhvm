@@ -191,7 +191,7 @@ impl Default for HhvmFlags {
 #[derive(Serialize, Deserialize, Debug, Default, PartialEq)]
 pub struct Hhvm {
     #[serde(default)]
-    pub aliased_namespaces: Arg<Vec<(String, String)>>,
+    pub aliased_namespaces: Arg<BTreeMap<String, String>>,
 
     #[serde(default)]
     pub dynamic_invoke_functions: Arg<BTreeSet<String>>,
@@ -509,16 +509,10 @@ mod tests {
 
     const HHVM_1: &'static str = r#"{
   "hhvm.aliased_namespaces": {
-    "global_value": [
-      [
-        "foo",
-        "bar"
-      ],
-      [
-        "bar",
-        "baz"
-      ]
-    ]
+    "global_value": {
+      "bar": "baz",
+      "foo": "bar"
+    }
   },
   "hhvm.array_provenance": {
     "global_value": false
@@ -619,10 +613,12 @@ mod tests {
     fn test_hhvm_json_ser() {
         assert_eq!(1, 1);
         let hhvm = json!(Hhvm {
-            aliased_namespaces: Arg::new(vec![
-                ("foo".to_owned(), "bar".to_owned()),
-                ("bar".to_owned(), "baz".to_owned()),
-            ]),
+            aliased_namespaces: Arg::new({
+                let mut m = BTreeMap::new();
+                m.insert("foo".to_owned(), "bar".to_owned());
+                m.insert("bar".to_owned(), "baz".to_owned());
+                m
+            }),
             flags: (HhvmFlags::CREATE_IN_OUT_WRAPPER_FUNCTIONS
                 | HhvmFlags::NOTICE_ON_BY_REF_ARGUMENT_TYPEHINT_VIOLATION),
             reffiness_invariance: Arg::new(5),
@@ -635,7 +631,7 @@ mod tests {
     fn test_hhvm_json_de() {
         let j = serde_json::from_str(
             r#"{
-            "hhvm.aliased_namespaces": { "global_value": [ ["foo", "bar"] ] },
+            "hhvm.aliased_namespaces": { "global_value": {"foo": "bar"} },
             "hhvm.create_in_out_wrapper_functions": { "global_value": "1333" },
             "hhvm.jit_enable_rename_function": { "global_value": 2 },
             "hhvm.log_extern_compiler_perf": { "global_value": false },
@@ -715,6 +711,35 @@ mod tests {
     fn test_options_nonzero_defaults_json_de() {
         let act: Options = serde_json::value::from_value(json!({})).unwrap();
         assert_eq!(act, Options::default());
+    }
+
+    #[test]
+    fn test_options_map_str_str_json_de() {
+        let act: Options = serde_json::value::from_value(json!({
+            "hhvm.aliased_namespaces": { "global_value": {"ns1": "ns2"} }
+        }))
+        .unwrap();
+        assert_eq!(*act.hhvm.aliased_namespaces.get(), {
+            let mut m = BTreeMap::new();
+            m.insert("ns1".to_owned(), "ns2".to_owned());
+            m
+        },);
+    }
+
+    #[test]
+    fn test_options_set_str_json_de() {
+        let act: Options = serde_json::value::from_value(json!({
+            "hhvm.dynamic_invoke_functions": { "global_value": ["f", "g", "h"] }
+        }))
+        .unwrap();
+        assert_eq!(
+            act.hhvm
+                .dynamic_invoke_functions
+                .get()
+                .iter()
+                .collect::<Vec<&String>>(),
+            vec!["f", "g", "h"],
+        );
     }
 
     #[test]

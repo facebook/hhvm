@@ -559,7 +559,11 @@ and simplify_subtype_i
     when subtype_env.treat_dynamic_as_bottom ->
     valid ()
   (* everything subtypes mixed *)
-  | (_, LoclType (_, Toption (_, Tnonnull))) -> valid ()
+  | (_, LoclType (_, Toption ty))
+    when match snd @@ snd @@ Env.expand_type env ty with
+         | Tnonnull -> true
+         | _ -> false ->
+    valid ()
   (* null is the type of null and is a subtype of any option type. *)
   | (LoclType (_, Tprim Nast.Tnull), LoclType (_, Toption _)) -> valid ()
   (* void behaves with respect to subtyping as an abstract type with
@@ -598,10 +602,12 @@ and simplify_subtype_i
       LoclType (_, Toption ty_super') ) ->
     simplify_subtype ~subtype_env ~this_ty ty_sub ty_super' env
   | ( LoclType ((_, Tabstract (AKnewtype (name_sub, _), _)) as ty_sub),
-      LoclType
-        (_, Toption ((_, Tabstract (AKnewtype (name_sup, _), _)) as ty_super'))
-    )
-    when String.equal name_sup name_sub ->
+      LoclType (_, Toption ty_super') )
+    when let (_env, ty_super') = Env.expand_type env ty_super' in
+         match ty_super' with
+         | (_, Tabstract (AKnewtype (name_sup, _), _)) ->
+           String.equal name_sup name_sub
+         | _ -> false ->
     simplify_subtype ~subtype_env ~this_ty ty_sub ty_super' env
   | ( LoclType ((_, Tabstract (AKdependent d_sub, Some bound_sub)) as ty_sub),
       LoclType ((_, Tabstract (AKdependent d_sup, Some bound_sup)) as ty_super)
@@ -639,11 +645,11 @@ and simplify_subtype_i
     |> simplify_subtype ~subtype_env ~this_ty ty_sub arg_ty_super
     ||| (* Look up *)
         simplify_subtype_generic_sub name_sub opt_sub_cstr ty_sub ty_super
-  | ( _,
-      LoclType
-        (_, Tabstract (AKdependent _, Some ((_, Tclass ((_, x), _, _)) as ty)))
-    )
-    when is_final_and_not_contravariant env x ->
+  | (_, LoclType (_, Tabstract (AKdependent _, Some ty)))
+    when let (env, ty) = Env.expand_type env ty in
+         match ty with
+         | (_, Tclass ((_, x), _, _)) -> is_final_and_not_contravariant env x
+         | _ -> false ->
     (* For final class C, there is no difference between `this as X` and `X`,
      * and `expr<#n> as X` and `X`.
      * But we need to take care with contravariant classes, since we can't
@@ -1086,76 +1092,84 @@ and simplify_subtype_i
     | ( Tabstract ((AKnewtype _ | AKdependent _), Some ty),
         Tabstract (AKnewtype _, _) ) ->
       simplify_subtype ~subtype_env ~this_ty ty ety_super env
-    | ( Tclass _,
-        Tabstract (AKdependent DTthis, Some (_, Tclass ((_, x), _, tyl_super)))
-      )
-      when has_lower_bounds x ->
-      let class_def = Env.get_class env x in
-      begin
-        match class_def with
-        | Some class_ty ->
-          let p_super = fst ety_super in
-          let tyl_super =
-            if
-              List.is_empty tyl_super
-              && not (Partial.should_check_error (Env.get_mode env) 4029)
-            then
-              List.map (Cls.tparams class_ty) (fun _ ->
-                  (p_super, Typing_defs.make_tany ()))
-            else
-              tyl_super
-          in
-          if
-            not
-              (Int.equal
-                 (List.length (Cls.tparams class_ty))
-                 (List.length tyl_super))
-          then
-            invalid_with (fun () ->
-                Errors.expected_tparam
-                  ~definition_pos:(Cls.pos class_ty)
-                  ~use_pos:(Reason.to_pos p_super)
-                  (List.length (Cls.tparams class_ty)))
-          else
-            let ety_env =
-              {
-                type_expansions = [];
-                substs = Subst.make_locl (Cls.tparams class_ty) tyl_super;
-                this_ty = Option.value this_ty ~default:ety_super;
-                from_class = None;
-                quiet = true;
-              }
-            in
-            let lower_bounds_super = Cls.lower_bounds_on_this class_ty in
-            let rec try_constraints lower_bounds_super env =
-              match Sequence.next lower_bounds_super with
-              | None -> invalid_env env
-              | Some (ty_super, lower_bounds_super) ->
-                let (env, ty_super) = Phase.localize ~ety_env env ty_super in
-                env
-                |> simplify_subtype ~subtype_env ~this_ty ety_sub ty_super
-                ||| try_constraints lower_bounds_super
-            in
-            try_constraints lower_bounds_super env
-        | None -> invalid ()
-      end
     (* Primitives and other concrete types cannot be subtypes of dependent types *)
     | ( ( Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _
         | Tanon _ | Tclass _ | Tobject | Tarraykind _ ),
         Tabstract (AKdependent expr_dep, tyopt) ) ->
       (* If the bound is the same class try and show more explanation of the error *)
       begin
-        match (snd ety_sub, tyopt) with
-        | (Tclass ((_, y), _, _), Some (_, Tclass (((_, x) as id), _, _)))
-          when String.equal y x ->
-          invalid_with (fun () ->
-              Errors.try_ fail (fun error ->
-                  let p = Reason.to_pos (fst ety_sub) in
-                  if equal_dependent_type expr_dep (DTcls x) then
-                    Errors.exact_class_final id p error
+        match tyopt with
+        | None -> invalid ()
+        | Some ty_super' ->
+          let (env, ty_super') = Env.expand_type env ty_super' in
+          (match (snd ety_sub, expr_dep, snd ty_super') with
+          | (Tclass _, DTthis, Tclass ((_, x), _, tyl_super))
+            when has_lower_bounds x ->
+            let class_def = Env.get_class env x in
+            begin
+              match class_def with
+              | Some class_ty ->
+                let p_super = fst ety_super in
+                let tyl_super =
+                  if
+                    List.is_empty tyl_super
+                    && not (Partial.should_check_error (Env.get_mode env) 4029)
+                  then
+                    List.map (Cls.tparams class_ty) (fun _ ->
+                        (p_super, Typing_defs.make_tany ()))
                   else
-                    Errors.this_final id p error))
-        | _ -> invalid ()
+                    tyl_super
+                in
+                if
+                  not
+                    (Int.equal
+                       (List.length (Cls.tparams class_ty))
+                       (List.length tyl_super))
+                then
+                  invalid_with (fun () ->
+                      Errors.expected_tparam
+                        ~definition_pos:(Cls.pos class_ty)
+                        ~use_pos:(Reason.to_pos p_super)
+                        (List.length (Cls.tparams class_ty)))
+                else
+                  let ety_env =
+                    {
+                      type_expansions = [];
+                      substs = Subst.make_locl (Cls.tparams class_ty) tyl_super;
+                      this_ty = Option.value this_ty ~default:ety_super;
+                      from_class = None;
+                      quiet = true;
+                    }
+                  in
+                  let lower_bounds_super = Cls.lower_bounds_on_this class_ty in
+                  let rec try_constraints lower_bounds_super env =
+                    match Sequence.next lower_bounds_super with
+                    | None -> invalid_env env
+                    | Some (ty_super, lower_bounds_super) ->
+                      let (env, ty_super) =
+                        Phase.localize ~ety_env env ty_super
+                      in
+                      env
+                      |> simplify_subtype
+                           ~subtype_env
+                           ~this_ty
+                           ety_sub
+                           ty_super
+                      ||| try_constraints lower_bounds_super
+                  in
+                  try_constraints lower_bounds_super env
+              | None -> invalid ()
+            end
+          | (Tclass ((_, y), _, _), _, Tclass (((_, x) as id), _, _))
+            when String.equal y x ->
+            invalid_with (fun () ->
+                Errors.try_ fail (fun error ->
+                    let p = Reason.to_pos (fst ety_sub) in
+                    if equal_dependent_type expr_dep (DTcls x) then
+                      Errors.exact_class_final id p error
+                    else
+                      Errors.this_final id p error))
+          | _ -> invalid ())
       end
     | (Tabstract (AKnewtype _, Some ty), Tabstract (AKdependent _, _)) ->
       simplify_subtype ~subtype_env ~this_ty ty ety_super env

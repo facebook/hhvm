@@ -64,35 +64,11 @@ impl Instr {
         Self::make_instr_lit_const(InstructLitConst::TypedValue(TypedValue::VArray(vec![])))
     }
 
-    pub fn make_instr_iterinit(id: Iter, label: Label, value: local::Type) -> Self {
-        let args = IterArgs {
-            iter_id: id,
-            key_id: None,
-            val_id: value,
-        };
+    pub fn make_instr_iterinit(args: IterArgs, label: Label) -> Self {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterInit(args, label)))
     }
 
-    pub fn make_instr_iterinitk(
-        id: Iter,
-        label: Label,
-        value: local::Type,
-        key: local::Type,
-    ) -> Self {
-        let args = IterArgs {
-            iter_id: id,
-            key_id: Some(key),
-            val_id: value,
-        };
-        Self::make_instr(Instruct::IIterator(InstructIterator::IterInit(args, label)))
-    }
-
-    pub fn make_instr_iternext(id: Iter, label: Label, value: local::Type) -> Self {
-        let args = IterArgs {
-            iter_id: id,
-            key_id: None,
-            val_id: value,
-        };
+    pub fn make_instr_iternext(args: IterArgs, label: Label) -> Self {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterNext(args, label)))
     }
 
@@ -146,7 +122,7 @@ impl Instr {
         Self::make_instr(Instruct::ISpecialFlow(InstructSpecialFlow::Goto(label)))
     }
 
-    pub fn make_instr_iter_break(label: Label, itrs: Vec<(IterKind, Iter)>) -> Self {
+    pub fn make_instr_iter_break(label: Label, itrs: Vec<Iter>) -> Self {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterBreak(
             label, itrs,
         )))

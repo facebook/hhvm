@@ -53,9 +53,7 @@ let cleanup_try_body instrseq =
 let emit_jump_to_label l iters =
   match iters with
   | [] -> instr_jmp l
-  | iters ->
-    let iters = List.map iters ~f:(fun id -> (Iter, id)) in
-    instr_iter_break l iters
+  | iters -> instr_iter_break l iters
 
 let emit_save_label_id id =
   gather [instr_int id; instr_setl (Local.get_label_id_local ()); instr_popc]

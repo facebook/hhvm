@@ -1463,25 +1463,23 @@ and try_inline_gen_call env (e : Tast.expr) =
 and emit_iter ~collection f =
   Scope.with_unnamed_locals_and_iterators
   @@ fun () ->
-  let iter = Iterator.get_iterator () in
-  let value_local = Local.get_unnamed_local () in
-  let key_local = Local.get_unnamed_local () in
+  let iter_id = Iterator.get_iterator () in
+  let val_id = Local.get_unnamed_local () in
+  let key_id = Local.get_unnamed_local () in
   let loop_end = Label.next_regular () in
   let loop_next = Label.next_regular () in
-  let iter_init =
-    gather [collection; instr_iterinitk iter loop_end value_local key_local]
-  in
+  let iter_args = { iter_id; key_id = Some key_id; val_id } in
+  let iter_init = gather [collection; instr_iterinit iter_args loop_end] in
   let iterate =
     gather
       [
         instr_label loop_next;
-        f value_local key_local;
-        instr_iternextk iter loop_next value_local key_local;
+        f val_id key_id;
+        instr_iternext iter_args loop_next;
       ]
   in
   let iter_done =
-    gather
-      [instr_unsetl value_local; instr_unsetl key_local; instr_label loop_end]
+    gather [instr_unsetl val_id; instr_unsetl key_id; instr_label loop_end]
   in
   (iter_init, iterate, iter_done)
 

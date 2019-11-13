@@ -1128,29 +1128,22 @@ and emit_foreach_ env pos collection iterator block =
   let instr_collection = emit_expr env collection in
   Scope.with_unnamed_locals_and_iterators
   @@ fun () ->
-  let iterator_number = Iterator.get_iterator () in
+  let iter_id = Iterator.get_iterator () in
   let loop_break_label = Label.next_regular () in
   let loop_continue_label = Label.next_regular () in
   let loop_head_label = Label.next_regular () in
-  let (key_local_opt, value_local, preamble) =
+  let (key_id, val_id, preamble) =
     emit_iterator_key_value_storage env iterator
   in
-  let (init, next) =
-    match key_local_opt with
-    | Some key_local ->
-      ( instr_iterinitk iterator_number loop_break_label value_local key_local,
-        instr_iternextk iterator_number loop_head_label value_local key_local
-      )
-    | None ->
-      ( instr_iterinit iterator_number loop_break_label value_local,
-        instr_iternext iterator_number loop_head_label value_local )
-  in
+  let iter_args = { iter_id; key_id; val_id } in
+  let init = instr_iterinit iter_args loop_break_label in
+  let next = instr_iternext iter_args loop_head_label in
   let body =
     Emit_env.do_in_loop_body
       loop_break_label
       loop_continue_label
       env
-      ~iter:iterator_number
+      ~iter:iter_id
       block
       emit_stmt
   in

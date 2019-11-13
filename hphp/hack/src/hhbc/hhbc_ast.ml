@@ -459,15 +459,11 @@ type instruct_final =
   | UnsetM of num_params * MemberKey.t
   | SetRangeM of num_params * setrange_op * int
 
-type iter_kind =
-  | Iter
-  | LIter
-
 type instruct_iterator =
   | IterInit of iter_args * Label.t
   | IterNext of iter_args * Label.t
   | IterFree of Iterator.t
-  | IterBreak of Label.t * (iter_kind * Iterator.t) list
+  | IterBreak of Label.t * Iterator.t list
 
 type instruct_include_eval_define =
   | Incl

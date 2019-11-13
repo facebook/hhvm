@@ -503,18 +503,12 @@ pub enum InstructFinal {
     SetRangeM(NumParams, SetrangeOp, isize),
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum IterKind {
-    Iter,
-    LIter,
-}
-
 #[derive(Clone, Debug)]
 pub enum InstructIterator {
     IterInit(IterArgs, label::Label),
     IterNext(IterArgs, label::Label),
     IterFree(Iter),
-    IterBreak(label::Label, Vec<(IterKind, Iter)>),
+    IterBreak(label::Label, Vec<Iter>),
 }
 
 #[derive(Clone, Debug)]

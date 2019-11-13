@@ -370,9 +370,10 @@ impl Options {
         opts.map_err(|e| format!("failed to load config JSON:\n{}", e))
     }
 
-    fn from_cli_args(args: &[&str]) -> Result<Json, String> {
+    fn from_cli_args(args: &[impl AsRef<str>]) -> Result<Json, String> {
         let mut json = json!({});
         for arg in args {
+            let arg = arg.as_ref();
             match arg.find('=') {
                 Some(pos) => {
                     let (key, val) = arg.split_at(pos);
@@ -413,10 +414,18 @@ impl Options {
         }
     }
 
-    pub fn from_config(json: Option<&str>, cli_args: &[&str]) -> Result<Self, String> {
+    pub fn from_configs<S1, S2>(jsons: &[S1], cli_args: &[S2]) -> Result<Self, String>
+    where
+        S1: AsRef<str>,
+        S2: AsRef<str>,
+    {
         let mut merged = json!({});
-        if let Some(json) = json {
-            merged = serde_json::from_str(json).map_err(|e| e.to_string())?;
+        for json in jsons {
+            let json: &str = json.as_ref();
+            Self::merge(
+                &mut merged,
+                &serde_json::from_str(json).map_err(|e| e.to_string())?,
+            );
         }
         let overrides = Self::from_cli_args(cli_args)?;
         Self::merge(&mut merged, &overrides);
@@ -769,6 +778,38 @@ mod tests {
         );
     }
 
+    const EMPTY_STRS: [&str; 0] = [];
+
+    #[test]
+    fn test_options_de_multiple_jsons() {
+        let jsons: [String; 2] = [
+            json!({
+                // override an options from 1 to 0 in first JSON,
+                "hhvm.hack.lang.enable_coroutines": { "global_value": false },
+                // but specify the default (0) on rx_is_enabled)
+                "hhvm.rx_is_enabled": { "global_value": false }
+            })
+            .to_string(),
+            json!({
+                // override another option from 0 to 1 in second JSON for the first time
+                "hhvm.hack.lang.hacksperimental": { "global_value": true },
+                // and for the second time, respectively *)
+                "hhvm.rx_is_enabled": { "global_value": true }
+            })
+            .to_string(),
+        ];
+        let act = Options::from_configs(&jsons, &EMPTY_STRS).unwrap();
+        assert!(act
+            .hhvm
+            .hack_lang_flags
+            .contains(LangFlags::HACKSPERIMENTAL));
+        assert!(!act
+            .hhvm
+            .hack_lang_flags
+            .contains(LangFlags::ENABLE_COROUTINES));
+        assert!(act.hhvm.flags.contains(HhvmFlags::RX_IS_ENABLED));
+    }
+
     #[test]
     fn test_hhvm_flags_cli_de_missing_equals() {
         let args = ["eval.jitenablerenamefunction"];
@@ -813,7 +854,7 @@ mod tests {
                 "global_value": "true",
             },
         });
-        let act = Options::from_config(Some(&json.to_string()), &cli_args).unwrap();
+        let act = Options::from_configs(&[json.to_string()], &cli_args).unwrap();
         assert_eq!(act.hhvm.reffiness_invariance.global_value, 999);
     }
 
@@ -822,7 +863,8 @@ mod tests {
         let mut exp_dynamic_invoke_functions = BTreeSet::<String>::new();
         exp_dynamic_invoke_functions.insert("foo".into());
         exp_dynamic_invoke_functions.insert("bar".into());
-        let act = Options::from_config(None, &["hhvm.dynamic_invoke_functions=foo,bar"]).unwrap();
+        let act =
+            Options::from_configs(&EMPTY_STRS, &["hhvm.dynamic_invoke_functions=foo,bar"]).unwrap();
         assert_eq!(
             act.hhvm.dynamic_invoke_functions.global_value,
             exp_dynamic_invoke_functions,
@@ -835,7 +877,7 @@ mod tests {
         exp_include_roots.insert("foo".into(), "bar".into());
         exp_include_roots.insert("bar".into(), "baz".into());
         const CLI_ARG: &str = "hhvm.include_roots=foo:bar,bar:baz";
-        let act = Options::from_config(None, &[CLI_ARG]).unwrap();
+        let act = Options::from_configs(&EMPTY_STRS, &[CLI_ARG]).unwrap();
         assert_eq!(act.hhvm.include_roots.global_value, exp_include_roots,);
     }
 

@@ -7,8 +7,10 @@
  *
  *)
 
-(* Export all files matching this prefix to a custom symbol service *)
+(* Export all files matching this prefix to a custom symbol service.
+ * Parallelize the execution if workers are provided. *)
 let send_to_custom_writer
+    ?(_workers : MultiWorker.worker list option = None)
     (_files : string list)
     (_service : string)
     (_repo_name : string)

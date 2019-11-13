@@ -40,3 +40,21 @@ let init
     (* ic and oc have the same underlying Unix.file_descr *)
     let fd = Timeout.descr_of_in_channel ic in
     Ok { hhi_root; rpc_get_gconst = rpc_get_gconst fd base_addr }
+
+let inproc_get_gconst
+    (state : Decl_ipc_ffi_externs.inproc_state) (name : string) :
+    (string, Marshal_tools.error) result =
+  Printf.printf "INPROC GET GCONST... %s\n%!" name;
+  let s = Decl_ipc_ffi_externs.inproc_request_ffi state 1 name in
+  Printf.printf "INPROC GOT GCONST... %s = %s\n%!" name s;
+  Ok s
+
+let init_inproc ~(naming_table : Path.t) ~(root : Path.t) ~(hhi_root : Path.t)
+    : t =
+  let state =
+    Decl_ipc_ffi_externs.inproc_init_ffi
+      (Path.to_string naming_table)
+      (Path.to_string root)
+      (Path.to_string hhi_root)
+  in
+  { hhi_root; rpc_get_gconst = inproc_get_gconst state }

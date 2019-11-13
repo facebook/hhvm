@@ -4979,41 +4979,52 @@ and dispatch_call
         X                     -> f, where f R = Y
       *)
     let rec build_output_container env (x : locl_ty) :
-        env * (locl_ty -> locl_ty) =
+        env * (env -> locl_ty -> env * locl_ty) =
       let (env, x) = Env.expand_type env x in
       match x with
-      | (_, Tarraykind AKempty) as array_type -> (env, (fun _ -> array_type))
+      | (_, Tarraykind AKempty) as array_type ->
+        (env, (fun env _ -> (env, array_type)))
       | (r, Tarraykind (AKvarray _)) ->
-        (env, (fun tr -> (r, Tarraykind (AKvarray tr))))
-      | (r, Tany _) -> (env, (fun _ -> (r, Typing_utils.tany env)))
-      | (r, Terr) -> (env, (fun _ -> (r, Typing_utils.terr env)))
-      | (r, Tunion x) ->
-        let (env, x) = List.map_env env x build_output_container in
-        (env, (fun tr -> (r, Tunion (List.map x (fun f -> f tr)))))
+        (env, (fun env tr -> (env, (r, Tarraykind (AKvarray tr)))))
+      | (r, Tany _) -> (env, (fun env _ -> (env, (r, Typing_utils.tany env))))
+      | (r, Terr) -> (env, (fun env _ -> (env, (r, Typing_utils.terr env))))
+      | (r, Tunion tyl) ->
+        let (env, builders) = List.map_env env tyl build_output_container in
+        ( env,
+          fun env tr ->
+            let (env, tyl) =
+              List.map_env env builders (fun env f -> f env tr)
+            in
+            Typing_union.union_list env r tyl )
       | (r, Tintersection tyl) ->
         let (env, builders) = List.map_env env tyl build_output_container in
         ( env,
-          (fun tr -> (r, Tintersection (List.map builders (fun f -> f tr)))) )
+          fun env tr ->
+            let (env, tyl) =
+              List.map_env env builders (fun env f -> f env tr)
+            in
+            Typing_intersection.intersect_list env r tyl )
       | (r, _) ->
         let (env, tk) = Env.fresh_type env p in
         let (env, tv) = Env.fresh_type env p in
         let try_vector env =
           let vector_type = MakeType.const_vector r_fty tv in
           let env = SubType.sub_type env x vector_type Errors.unify_error in
-          (env, (fun tr -> (r, Tarraykind (AKvarray tr))))
+          (env, (fun env tr -> (env, (r, Tarraykind (AKvarray tr)))))
         in
         let try_keyed_container env =
           let keyed_container_type = MakeType.keyed_container r_fty tk tv in
           let env =
             SubType.sub_type env x keyed_container_type Errors.unify_error
           in
-          (env, (fun tr -> (r, Tarraykind (AKdarray (tk, tr)))))
+          (env, (fun env tr -> (env, (r, Tarraykind (AKdarray (tk, tr))))))
         in
         let try_container env =
           let container_type = MakeType.container r_fty tv in
           let env = SubType.sub_type env x container_type Errors.unify_error in
           ( env,
-            (fun tr -> (r, Tarraykind (AKdarray (MakeType.arraykey r, tr)))) )
+            fun env tr ->
+              (env, (r, Tarraykind (AKdarray (MakeType.arraykey r, tr)))) )
         in
         let (env, tr) =
           Errors.try_
@@ -5026,8 +5037,8 @@ and dispatch_call
                     (fun () -> try_container env)
                     (fun _ ->
                       ( env,
-                        (fun _ -> (Reason.Rwitness p, Typing_utils.tany env))
-                      ))))
+                        fun env _ ->
+                          (env, (Reason.Rwitness p, Typing_utils.tany env)) ))))
         in
         (env, tr)
     in
@@ -5040,7 +5051,8 @@ and dispatch_call
           match get_akvarray_inst funty.ft_ret.et_type with
           | None -> (env, fty)
           | Some elem_ty ->
-            let ft_ret = MakeType.unenforced (output_container elem_ty) in
+            let (env, elem_ty) = output_container env elem_ty in
+            let ft_ret = MakeType.unenforced elem_ty in
             (env, (r_fty, Tfun { funty with ft_ret }))
         end
       | _ -> (env, fty)

@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/util/dataflow-worklist.h"
-#include "hphp/util/either.h"
 #include "hphp/util/trace.h"
 
 #include <boost/dynamic_bitset.hpp>

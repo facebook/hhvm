@@ -38,7 +38,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
-using namespace HPHP::jit;
 
 const char padding_bytes[7] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0'};
 

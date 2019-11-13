@@ -22,7 +22,6 @@
 namespace HPHP {
 TRACE_SET_MOD(cti);
 using jit::X64Assembler;
-using jit::deltaFits;
 using jit::TCA;
 using Verifier::funcInstrs;
 using namespace jit::reg;

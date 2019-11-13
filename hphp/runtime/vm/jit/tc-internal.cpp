@@ -41,7 +41,6 @@
 
 #include "hphp/util/disasm.h"
 #include "hphp/util/mutex.h"
-#include "hphp/util/process.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 

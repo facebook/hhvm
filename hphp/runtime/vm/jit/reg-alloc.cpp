@@ -34,8 +34,6 @@
 
 namespace HPHP { namespace jit {
 
-using namespace jit::reg;
-using NativeCalls::CallMap;
 
 TRACE_SET_MOD(hhir);
 

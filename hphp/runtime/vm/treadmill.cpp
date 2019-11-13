@@ -22,7 +22,6 @@
 #include <memory>
 #include <algorithm>
 
-#include <stdlib.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <signal.h>

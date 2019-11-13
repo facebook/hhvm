@@ -86,7 +86,6 @@
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/ext/hash/hash_murmur.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
 
 #include "hphp/runtime/server/rpc-request-handler.h"

@@ -29,7 +29,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/compilation-flags.h"
 
 namespace HPHP { namespace jit {
 

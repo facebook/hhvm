@@ -18,7 +18,6 @@
 
 #include <cinttypes>
 #include <assert.h>
-#include <stdarg.h>
 #include <stdint.h>
 
 #include <algorithm>
@@ -61,7 +60,6 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/punt.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"

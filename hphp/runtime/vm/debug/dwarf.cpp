@@ -28,7 +28,6 @@
 #define USE_ELF_WRITER 1
 #endif
 
-using namespace HPHP::jit;
 
 namespace HPHP {
 namespace Debug {

@@ -104,7 +104,6 @@ void cgLdSmashableFunc(IRLS& env, const IRInstruction* inst) {
 
 void cgLdObjMethodD(IRLS& env, const IRInstruction* inst) {
   assertx(inst->taken() && inst->taken()->isCatch()); // must have catch block
-  using namespace MethodCache;
 
   auto const target = CallSpec::direct(MethodCache::handleDynamicCall);
   auto const args = argGroup(env, inst)

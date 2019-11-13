@@ -570,7 +570,6 @@ void insertIncRefs(PrcEnv& env) {
     id++;
   }
 
-  using Bits = PrcState::Bits;
   // compute anticipated
   do {
     auto const blk = env.rpoBlocks[antQ.pop()];

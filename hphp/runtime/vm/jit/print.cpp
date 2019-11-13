@@ -24,7 +24,6 @@
 #include <vector>
 #include <algorithm>
 
-#include "hphp/util/abi-cxx.h"
 #include "hphp/util/arch.h"
 #include "hphp/util/disasm.h"
 #include "hphp/util/struct-log.h"

@@ -84,7 +84,6 @@ using IFaceSupportFn = bool (*)(const StringData*);
 
 using StrCmpFn = bool (*)(const StringData*, const StringData*);
 using ObjCmpFn = bool (*)(const ObjectData*, const ObjectData*);
-using ArrCmpFn = bool (*)(const ArrayData*, const ArrayData*);
 using ResCmpFn = bool (*)(const ResourceHdr*, const ResourceHdr*);
 using StrIntCmpFn = bool (*)(const StringData*, int64_t);
 

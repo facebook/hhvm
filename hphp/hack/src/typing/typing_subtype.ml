@@ -2904,140 +2904,6 @@ let subtype_reactivity
   process_simplify_subtype_result prop;
   env
 
-(** Check that the method with signature ft_sub can be used to override
- * (is a subtype of) method with signature ft_super.
- *
- * This goes beyond subtyping on function types because methods can have
- * generic parameters with bounds, and `where` constraints.
- *
- * Suppose ft_super is of the form
- *    <T1 csuper1, ..., Tn csupern>(tsuper1, ..., tsuperm) : tsuper where wsuper
- * and ft_sub is of the form
- *    <T1 csub1, ..., Tn csubn>(tsub1, ..., tsubm) : tsub where wsub
- * where csuperX and csubX are constraints on type parameters and wsuper and
- * wsub are 'where' constraints. Note that all types in the superclass,
- * including constraints (so csuperX, tsuperX, tsuper and wsuper) have had
- * any class type parameters instantiated appropriately according to
- * the actual arguments of the superclass. For example, suppose we have
- *
- *   class Super<T> {
- *     function foo<Tu as A<T>>(T $x) : B<T> where T super C<T>
- *   }
- *   class Sub extends Super<D> {
- *     ...override of foo...
- *   }
- * then the actual signature in the superclass that we need to check is
- *     function foo<Tu as A<D>>(D $x) : B<D> where D super C<D>
- * Note in particular the general form of the 'where' constraint.
- *
- * (Currently, this instantiation happens in
- *   Typing_extends.check_class_implements which in turn calls
- *   Decl_instantiate.instantiate_ce)
- *
- * Then for ft_sub to be a subtype of ft_super it must be the case that
- * (1) tsuper1 <: tsub1, ..., tsupern <: tsubn (under constraints
- *     T1 csuper1, ..., Tn csupern and wsuper).
- *
- *     This is contravariant subtyping on parameter types.
- *
- * (2) tsub <: tsuper (under constraints T1 csuper1, ..., Tn csupern and wsuper)
- *     This is covariant subtyping on result type. For constraints consider
- *       e.g. consider ft_super = <T super I>(): T
- *                 and ft_sub = <T>(): I
- *
- * (3) The constraints for ft_super entail the constraints for ft_sub, because
- *     we might be calling the function having checked that csuperX are
- *     satisfied but the definition of the function (e.g. consider an override)
- *     has been checked under csubX.
- *     More precisely, we must assume constraints T1 csuper1, ..., Tn csupern
- *     and wsuper, and check that T1 satisfies csub1, ..., Tn satisfies csubn
- *     and that wsub holds under those assumptions.
- *)
-let subtype_method
-    ~(check_return : bool)
-    ~(extra_info : reactivity_extra_info)
-    (env : env)
-    (r_sub : Reason.t)
-    (ft_sub : decl_fun_type)
-    (r_super : Reason.t)
-    (ft_super : decl_fun_type)
-    (on_error : Errors.typing_error_callback) : env =
-  let ety_env = Phase.env_with_self env ~quiet:true in
-  let (env, ft_super_no_tvars) =
-    Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r_super) env ft_super
-  in
-  let (env, ft_sub_no_tvars) =
-    Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r_sub) env ft_sub
-  in
-  let old_tpenv = Env.get_tpenv env in
-  (* We check constraint entailment and contravariant parameter/covariant result
-   * subtyping in the context of the ft_super constraints. But we'd better
-   * restore tpenv afterwards *)
-  let add_tparams_constraints env (tparams : locl_tparam list) =
-    let add_bound env { tp_name = (pos, name); tp_constraints = cstrl; _ } =
-      List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
-          let tparam_ty =
-            (Reason.Rwitness pos, Tabstract (AKgeneric name, None))
-          in
-          Typing_utils.add_constraint pos env ck tparam_ty ty)
-    in
-    List.fold_left tparams ~f:add_bound ~init:env
-  in
-  let p_sub = Reason.to_pos r_sub in
-  let add_where_constraints env (cstrl : locl_where_constraint list) =
-    List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-        Typing_utils.add_constraint p_sub env ck ty1 ty2)
-  in
-  let env = add_tparams_constraints env (fst ft_super_no_tvars.ft_tparams) in
-  let env = add_where_constraints env ft_super_no_tvars.ft_where_constraints in
-  let (env, res) =
-    simplify_subtype_funs
-      ~subtype_env:(make_subtype_env on_error)
-      ~check_return
-      ~extra_info
-      r_sub
-      ft_sub_no_tvars
-      r_super
-      ft_super_no_tvars
-      env
-  in
-  let (env, res) = prop_to_env env res on_error in
-  let env = Env.add_subtype_prop env res in
-  process_simplify_subtype_result res;
-
-  (* This is (3) above *)
-  let check_tparams_constraints env tparams =
-    let check_tparam_constraints
-        env { tp_name = (p, name); tp_constraints = cstrl; _ } =
-      List.fold_left cstrl ~init:env ~f:(fun env (ck, cstr_ty) ->
-          let tgeneric =
-            (Reason.Rwitness p, Tabstract (AKgeneric name, None))
-          in
-          Typing_generic_constraint.check_constraint env ck tgeneric ~cstr_ty)
-    in
-    List.fold_left tparams ~init:env ~f:check_tparam_constraints
-  in
-  let check_where_constraints env cstrl =
-    List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-        Typing_generic_constraint.check_constraint env ck ty1 ~cstr_ty:ty2)
-  in
-  (* We only do this if the ft_tparam lengths match. Currently we don't even
-   * report this as an error, indeed different names for type parameters.
-   * TODO: make it an error to override with wrong number of type parameters
-   *)
-  let env =
-    if
-      Int.( <> )
-        (List.length (fst ft_sub.ft_tparams))
-        (List.length (fst ft_super.ft_tparams))
-    then
-      env
-    else
-      check_tparams_constraints env (fst ft_sub_no_tvars.ft_tparams)
-  in
-  let env = check_where_constraints env ft_sub_no_tvars.ft_where_constraints in
-  Env.env_with_tpenv env old_tpenv
-
 let decompose_subtype_add_bound
     (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) : env =
   let (env, ty_super) = Env.expand_type env ty_super in
@@ -3229,6 +3095,140 @@ let add_constraint
           iter (n + 1) env
     in
     iter 0 env
+
+(** Check that the method with signature ft_sub can be used to override
+ * (is a subtype of) method with signature ft_super.
+ *
+ * This goes beyond subtyping on function types because methods can have
+ * generic parameters with bounds, and `where` constraints.
+ *
+ * Suppose ft_super is of the form
+ *    <T1 csuper1, ..., Tn csupern>(tsuper1, ..., tsuperm) : tsuper where wsuper
+ * and ft_sub is of the form
+ *    <T1 csub1, ..., Tn csubn>(tsub1, ..., tsubm) : tsub where wsub
+ * where csuperX and csubX are constraints on type parameters and wsuper and
+ * wsub are 'where' constraints. Note that all types in the superclass,
+ * including constraints (so csuperX, tsuperX, tsuper and wsuper) have had
+ * any class type parameters instantiated appropriately according to
+ * the actual arguments of the superclass. For example, suppose we have
+ *
+ *   class Super<T> {
+ *     function foo<Tu as A<T>>(T $x) : B<T> where T super C<T>
+ *   }
+ *   class Sub extends Super<D> {
+ *     ...override of foo...
+ *   }
+ * then the actual signature in the superclass that we need to check is
+ *     function foo<Tu as A<D>>(D $x) : B<D> where D super C<D>
+ * Note in particular the general form of the 'where' constraint.
+ *
+ * (Currently, this instantiation happens in
+ *   Typing_extends.check_class_implements which in turn calls
+ *   Decl_instantiate.instantiate_ce)
+ *
+ * Then for ft_sub to be a subtype of ft_super it must be the case that
+ * (1) tsuper1 <: tsub1, ..., tsupern <: tsubn (under constraints
+ *     T1 csuper1, ..., Tn csupern and wsuper).
+ *
+ *     This is contravariant subtyping on parameter types.
+ *
+ * (2) tsub <: tsuper (under constraints T1 csuper1, ..., Tn csupern and wsuper)
+ *     This is covariant subtyping on result type. For constraints consider
+ *       e.g. consider ft_super = <T super I>(): T
+ *                 and ft_sub = <T>(): I
+ *
+ * (3) The constraints for ft_super entail the constraints for ft_sub, because
+ *     we might be calling the function having checked that csuperX are
+ *     satisfied but the definition of the function (e.g. consider an override)
+ *     has been checked under csubX.
+ *     More precisely, we must assume constraints T1 csuper1, ..., Tn csupern
+ *     and wsuper, and check that T1 satisfies csub1, ..., Tn satisfies csubn
+ *     and that wsub holds under those assumptions.
+ *)
+let subtype_method
+    ~(check_return : bool)
+    ~(extra_info : reactivity_extra_info)
+    (env : env)
+    (r_sub : Reason.t)
+    (ft_sub : decl_fun_type)
+    (r_super : Reason.t)
+    (ft_super : decl_fun_type)
+    (on_error : Errors.typing_error_callback) : env =
+  let ety_env = Phase.env_with_self env ~quiet:true in
+  let (env, ft_super_no_tvars) =
+    Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r_super) env ft_super
+  in
+  let (env, ft_sub_no_tvars) =
+    Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r_sub) env ft_sub
+  in
+  let old_tpenv = Env.get_tpenv env in
+  (* We check constraint entailment and contravariant parameter/covariant result
+   * subtyping in the context of the ft_super constraints. But we'd better
+   * restore tpenv afterwards *)
+  let add_tparams_constraints env (tparams : locl_tparam list) =
+    let add_bound env { tp_name = (pos, name); tp_constraints = cstrl; _ } =
+      List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
+          let tparam_ty =
+            (Reason.Rwitness pos, Tabstract (AKgeneric name, None))
+          in
+          add_constraint pos env ck tparam_ty ty)
+    in
+    List.fold_left tparams ~f:add_bound ~init:env
+  in
+  let p_sub = Reason.to_pos r_sub in
+  let add_where_constraints env (cstrl : locl_where_constraint list) =
+    List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
+        add_constraint p_sub env ck ty1 ty2)
+  in
+  let env = add_tparams_constraints env (fst ft_super_no_tvars.ft_tparams) in
+  let env = add_where_constraints env ft_super_no_tvars.ft_where_constraints in
+  let (env, res) =
+    simplify_subtype_funs
+      ~subtype_env:(make_subtype_env on_error)
+      ~check_return
+      ~extra_info
+      r_sub
+      ft_sub_no_tvars
+      r_super
+      ft_super_no_tvars
+      env
+  in
+  let (env, res) = prop_to_env env res on_error in
+  let env = Env.add_subtype_prop env res in
+  process_simplify_subtype_result res;
+
+  (* This is (3) above *)
+  let check_tparams_constraints env tparams =
+    let check_tparam_constraints
+        env { tp_name = (p, name); tp_constraints = cstrl; _ } =
+      List.fold_left cstrl ~init:env ~f:(fun env (ck, cstr_ty) ->
+          let tgeneric =
+            (Reason.Rwitness p, Tabstract (AKgeneric name, None))
+          in
+          Typing_generic_constraint.check_constraint env ck tgeneric ~cstr_ty)
+    in
+    List.fold_left tparams ~init:env ~f:check_tparam_constraints
+  in
+  let check_where_constraints env cstrl =
+    List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
+        Typing_generic_constraint.check_constraint env ck ty1 ~cstr_ty:ty2)
+  in
+  (* We only do this if the ft_tparam lengths match. Currently we don't even
+   * report this as an error, indeed different names for type parameters.
+   * TODO: make it an error to override with wrong number of type parameters
+   *)
+  let env =
+    if
+      Int.( <> )
+        (List.length (fst ft_sub.ft_tparams))
+        (List.length (fst ft_super.ft_tparams))
+    then
+      env
+    else
+      check_tparams_constraints env (fst ft_sub_no_tvars.ft_tparams)
+  in
+  let env = check_where_constraints env ft_sub_no_tvars.ft_where_constraints in
+  Env.env_with_tpenv env old_tpenv
 
 let sub_type_with_dynamic_as_bottom
     (env : env)

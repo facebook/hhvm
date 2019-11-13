@@ -1016,6 +1016,8 @@ and abstract_kind_compare ?(normalize_lists = false) t1 t2 =
   | (AKdependent d1, AKdependent d2) -> compare d1 d2
   | _ -> abstract_kind_con_ordinal t1 - abstract_kind_con_ordinal t2
 
+let tyl_equal tyl1 tyl2 = Int.equal 0 @@ tyl_compare ~sort:false tyl1 tyl2
+
 let nullsafe_compare nullsafe1 nullsafe2 =
   match (nullsafe1, nullsafe2) with
   | (Some _, Some _)

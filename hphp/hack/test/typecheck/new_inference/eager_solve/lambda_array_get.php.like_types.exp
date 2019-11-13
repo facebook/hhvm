@@ -1,8 +1,0 @@
-File "lambda_array_get.php", line 147, characters 39-44:
-Invalid argument (Typing[4110])
-File "lambda_array_get.php", line 137, characters 18-36:
-Expected <expr#1> because it is an unenforceable type
-File "lambda_array_get.php", line 147, characters 17-35:
-But got ConstVector<string>
-File "lambda_array_get.php", line 147, characters 17-35:
-Considering that this type argument is contravariant with respect to Contra

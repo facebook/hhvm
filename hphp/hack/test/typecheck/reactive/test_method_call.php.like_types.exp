@@ -1,5 +1,5 @@
 File "test_method_call.php", line 24, characters 3-14:
-  ~<expr#1> as ~Something
+  ~<expr#1> as Something
 File "test_method_call.php", line 12, characters 19-21:
 Invalid return type (Typing[4336])
 File "test_method_call.php", line 12, characters 19-21:

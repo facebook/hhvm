@@ -1,6 +1,0 @@
-File "parent__construct_expr_dep.php", line 13, characters 5-27:
-Typing error (Typing[4110])
-File "parent__construct_expr_dep.php", line 10, characters 27-27:
-Expected T
-File "parent__construct_expr_dep.php", line 12, characters 31-32:
-But got <expr#1> because it is an unenforceable type

@@ -1,6 +1,6 @@
-File "tconst_unsoundness.php", line 15, characters 5-6:
-Invalid argument (Typing[4062])
-File "tconst_unsoundness.php", line 12, characters 48-49:
-You are trying to access the property 'Ta' but this is a dynamic value
-File "tconst_unsoundness.php", line 14, characters 32-34:
-Definition is here
+File "tconst_unsoundness.php", line 16, characters 10-11:
+Invalid return type (Typing[4110])
+File "tconst_unsoundness.php", line 14, characters 49-52:
+Expected Tout
+File "tconst_unsoundness.php", line 14, characters 40-42:
+But got Tin

@@ -461,9 +461,7 @@ end = struct
         if
           name = SN.Classes.cHH_BuiltinEnum
           && not
-             (string_ends_with
-                (Relative_path.suffix (Pos.filename p))
-                ".hhi")
+               (string_ends_with (Relative_path.suffix (Pos.filename p)) ".hhi")
         then
           Errors.using_internal_class p (strip_ns name);
         x

@@ -23,7 +23,7 @@ pub struct Names {
 impl Names {
     pub fn new(path: &Path) -> Self {
         let connection = if path.exists() {
-            println!("Loading name index from '{:#?}' in read-only mode", path);
+            eprintln!("Loading name index from '{:#?}' in read-only mode", path);
             Arc::new(Mutex::new(
                 Connection::open_with_flags(path, OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap(),
             ))

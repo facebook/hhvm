@@ -60,9 +60,9 @@ val subtype_method :
   extra_info:reactivity_extra_info ->
   env ->
   Reason.t ->
-  decl_fun_type ->
+  locl_fun_type ->
   Reason.t ->
-  decl_fun_type ->
+  locl_fun_type ->
   Errors.typing_error_callback ->
   env
 

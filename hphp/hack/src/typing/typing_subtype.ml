@@ -3150,17 +3150,10 @@ let subtype_method
     ~(extra_info : reactivity_extra_info)
     (env : env)
     (r_sub : Reason.t)
-    (ft_sub : decl_fun_type)
+    (ft_sub : locl_fun_type)
     (r_super : Reason.t)
-    (ft_super : decl_fun_type)
+    (ft_super : locl_fun_type)
     (on_error : Errors.typing_error_callback) : env =
-  let ety_env = Phase.env_with_self env ~quiet:true in
-  let (env, ft_super_no_tvars) =
-    Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r_super) env ft_super
-  in
-  let (env, ft_sub_no_tvars) =
-    Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r_sub) env ft_sub
-  in
   let old_tpenv = Env.get_tpenv env in
   (* We check constraint entailment and contravariant parameter/covariant result
    * subtyping in the context of the ft_super constraints. But we'd better
@@ -3180,17 +3173,17 @@ let subtype_method
     List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
         add_constraint p_sub env ck ty1 ty2)
   in
-  let env = add_tparams_constraints env (fst ft_super_no_tvars.ft_tparams) in
-  let env = add_where_constraints env ft_super_no_tvars.ft_where_constraints in
+  let env = add_tparams_constraints env (fst ft_super.ft_tparams) in
+  let env = add_where_constraints env ft_super.ft_where_constraints in
   let (env, res) =
     simplify_subtype_funs
       ~subtype_env:(make_subtype_env on_error)
       ~check_return
       ~extra_info
       r_sub
-      ft_sub_no_tvars
+      ft_sub
       r_super
-      ft_super_no_tvars
+      ft_super
       env
   in
   let (env, res) = prop_to_env env res on_error in
@@ -3225,9 +3218,9 @@ let subtype_method
     then
       env
     else
-      check_tparams_constraints env (fst ft_sub_no_tvars.ft_tparams)
+      check_tparams_constraints env (fst ft_sub.ft_tparams)
   in
-  let env = check_where_constraints env ft_sub_no_tvars.ft_where_constraints in
+  let env = check_where_constraints env ft_sub.ft_where_constraints in
   Env.env_with_tpenv env old_tpenv
 
 let sub_type_with_dynamic_as_bottom

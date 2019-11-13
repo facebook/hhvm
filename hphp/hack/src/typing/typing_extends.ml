@@ -290,18 +290,6 @@ let check_override
         match (fty_parent, fty_child) with
         | ((r_parent, Tfun ft_parent), (r_child, Tfun ft_child)) ->
           let is_static = Cls.has_smethod parent_class member_name in
-          (* Add deps here when we override *)
-          let subtype_funs =
-            SubType.subtype_method
-              ~extra_info:
-                SubType.
-                  {
-                    method_info = Some (member_name, is_static);
-                    class_ty = Some (DeclTy class_ty);
-                    parent_class_ty = Some (DeclTy parent_ty);
-                  }
-              ~check_return:(not ignore_fun_return)
-          in
           let check (r1, ft1) (r2, ft2) () =
             ( if check_member_unique then
               match (parent_class_elt.ce_abstract, class_elt.ce_abstract) with
@@ -324,7 +312,29 @@ let check_override
               env
             | _ ->
               (* these unify errors are collected into errorl *)
-              subtype_funs env r2 ft2 r1 ft1 Errors.unify_error
+              let ety_env = Phase.env_with_self env ~quiet:true in
+              let (env, ft2) =
+                Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r2) env ft2
+              in
+              let (env, ft1) =
+                Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r1) env ft1
+              in
+              SubType.(
+                (* Add deps here when we override *)
+                subtype_method
+                  ~extra_info:
+                    {
+                      method_info = Some (member_name, is_static);
+                      class_ty = Some (DeclTy class_ty);
+                      parent_class_ty = Some (DeclTy parent_ty);
+                    }
+                  ~check_return:(not ignore_fun_return)
+                  env
+                  r2
+                  ft2
+                  r1
+                  ft1
+                  Errors.unify_error)
           in
           check_ambiguous_inheritance
             check

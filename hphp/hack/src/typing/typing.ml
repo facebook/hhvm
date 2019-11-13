@@ -8313,6 +8313,21 @@ and supertype_redeclared_method tc env m =
           ->
           Errors.try_
             (fun () ->
+              let ety_env = Phase.env_with_self env ~quiet:true in
+              let (env, ft_child) =
+                Phase.localize_ft
+                  ~ety_env
+                  ~def_pos:(Reason.to_pos r_child)
+                  env
+                  ft_child
+              in
+              let (env, ft_parent) =
+                Phase.localize_ft
+                  ~ety_env
+                  ~def_pos:(Reason.to_pos r_parent)
+                  env
+                  ft_parent
+              in
               Typing_subtype.(
                 subtype_method
                   ~check_return:true

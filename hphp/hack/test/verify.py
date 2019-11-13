@@ -380,7 +380,10 @@ def report_failures(
         first_test_file = os.path.realpath(failures[0].test_case.file_path)
         (exp_dir, out_dir) = get_exp_out_dirs(first_test_file)
         output_dir_var = "SOURCE_ROOT=%s OUTPUT_ROOT=%s " % (exp_dir, out_dir)
-        fname_map_var = lambda f: "hphp/hack/" + os.path.relpath(f, out_dir)
+
+        def fname_map_var(f: str) -> str:
+            return "hphp/hack/" + os.path.relpath(f, out_dir)
+
         print(
             "OUT_EXT=%s EXP_EXT=%s %s%sNO_COPY=%s ./hphp/hack/test/review.sh %s"
             % (

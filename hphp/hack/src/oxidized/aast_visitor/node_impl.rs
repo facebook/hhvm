@@ -135,9 +135,9 @@ where
         c: &mut Context,
         v: &mut dyn VisitorMut<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
     ) {
-        RcOc::get_mut(self)
-            .expect("Can not get mutable")
-            .accept(c, v)
+        if let Some(x) = RcOc::get_mut(self) {
+            x.accept(c, v)
+        }
     }
 }
 
@@ -163,9 +163,9 @@ where
         c: &mut Context,
         v: &mut dyn VisitorMut<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
     ) {
-        std::rc::Rc::get_mut(self)
-            .expect("Can not get mutable")
-            .accept(c, v)
+        if let Some(x) = std::rc::Rc::get_mut(self) {
+            x.accept(c, v);
+        }
     }
 }
 

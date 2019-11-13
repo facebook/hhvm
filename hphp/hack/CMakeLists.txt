@@ -145,6 +145,8 @@ endif()
 add_custom_target(hack ALL DEPENDS hack_dune)
 add_custom_target(hack_test DEPENDS hack_dune_test)
 
+configure_file(dev_env.sh.in dev_env.sh ESCAPE_QUOTES @ONLY)
+
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/hh_client
   DESTINATION bin
   COMPONENT dev)

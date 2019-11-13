@@ -99,6 +99,10 @@ struct MockHeaders : ITransportHeaders {
     return Method::Unknown;
   }
 
+  const char *getMethodName() override {
+    return nullptr;
+  }
+
   const void *getPostData(size_t &size) override {
     return nullptr;
   }

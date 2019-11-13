@@ -63,6 +63,7 @@ struct ITransportHeaders {
   virtual std::string getHeader(const char *name) = 0;
   virtual const HeaderMap& getHeaders() = 0;
   virtual Method getMethod() = 0;
+  virtual const char *getMethodName() = 0;
   virtual const void *getPostData(size_t &size) = 0;
 
   /* Response header methods */
@@ -191,7 +192,7 @@ public:
    */
   virtual Method getMethod() = 0;
   virtual const char *getExtendedMethod() { return nullptr;}
-  const char *getMethodName();
+  const char *getMethodName() override;
 
   /**
    * What version of HTTP was the request?

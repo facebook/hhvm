@@ -515,7 +515,7 @@ let normalize_union env ?on_tyvar tyl =
     match tyl with
     | [] -> (env, r_null, r_union, r_dyn, TySet.empty)
     | ty :: tyl ->
-      let ty = Typing_expand.fully_expand env ty in
+      let (env, ty) = Env.expand_type env ty in
       let proceed env ty = (env, r_null, r_union, r_dyn, TySet.singleton ty) in
       let (env, r_null, r_union, r_dyn, tys') =
         match (ty, on_tyvar) with

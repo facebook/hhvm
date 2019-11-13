@@ -159,7 +159,7 @@ def run_batch_tests(
     # for the output.
     def run(test_cases: List[TestCase]):
         if not test_cases:
-            assert False
+            raise AssertionError()
         first_test = test_cases[0]
         test_dir = os.path.dirname(first_test.file_path)
         flags = get_flags(test_dir)

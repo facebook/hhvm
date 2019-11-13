@@ -88,13 +88,12 @@ let handler =
     method! at_expr env (_, e) =
       match e with
       | Id (pos, const) ->
-        let const = Utils.add_ns const in
         if String.equal const SN.Rx.is_enabled && not env.rx_is_enabled_allowed
         then
           Errors.rx_is_enabled_invalid_location pos
-      | Call (_, e1, _, _, _)
-        when Nast_check_env.is_rx_move e1 && not env.rx_move_allowed ->
-        Errors.rx_move_invalid_location (fst e1)
+      | Call (_, (p, Id (_, cn)), _, _, _)
+        when String.equal cn SN.Rx.move && not env.rx_move_allowed ->
+        Errors.rx_move_invalid_location p
       | _ -> ()
 
     method! at_method_ _env m =

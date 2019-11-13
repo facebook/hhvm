@@ -97,8 +97,3 @@ let def_env x =
   | SetNamespaceEnv _
   | FileAttributes _ ->
     empty_env
-
-let is_rx_move e =
-  match e with
-  | (_, Id (_, v)) -> String.equal (Utils.add_ns v) SN.Rx.move
-  | _ -> false

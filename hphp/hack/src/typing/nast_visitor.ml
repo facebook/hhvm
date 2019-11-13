@@ -10,6 +10,7 @@
 open Hh_prelude
 open Aast
 open Nast_check_env
+module SN = Naming_special_names
 
 class virtual iter =
   object (self)
@@ -76,7 +77,8 @@ class virtual iter =
 
     method! on_expr env e =
       match e with
-      | (_, Call (ct, e1, ta, el, uel)) when Nast_check_env.is_rx_move e1 ->
+      | (_, Call (ct, ((_, Id (_, cn)) as e1), ta, el, uel))
+        when String.equal cn SN.Rx.move ->
         self#on_Call { env with rx_move_allowed = false } ct e1 ta el uel
       | (_, Call (ct, e1, ta, el, uel)) ->
         self#on_Call { env with rx_move_allowed = true } ct e1 ta el uel

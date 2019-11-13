@@ -86,7 +86,6 @@ endif()
 
 get_filename_component(RUSTC_BIN_DIR "${RUSTC_EXECUTABLE}" DIRECTORY)
 get_filename_component(CARGO_BIN_DIR "${CARGO_EXECUTABLE}" DIRECTORY)
-message(STATUS "link opts: ${extra_link_opts}")
 
 function(invoke_dune name target)
   add_custom_target(

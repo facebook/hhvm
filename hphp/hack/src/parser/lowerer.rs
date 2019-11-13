@@ -13,10 +13,9 @@ use naming_special_names_rust::{
 use ocamlrep::rc::RcOc;
 use oxidized::{
     aast,
-    aast::Expr_ as E_,
-    aast_defs,
     aast_visitor::{Node, Visitor},
-    ast, ast_defs,
+    ast,
+    ast::Expr_ as E_,
     doc_comment::DocComment,
     file_info,
     global_options::GlobalOptions,
@@ -92,7 +91,7 @@ pub enum TokenOp {
 pub struct FunHdr {
     suspension_kind: SuspensionKind,
     name: ast::Sid,
-    constrs: Vec<aast_defs::WhereConstraint>,
+    constrs: Vec<ast::WhereConstraint>,
     type_parameters: Vec<ast::Tparam>,
     parameters: Vec<ast::FunParam>,
     return_type: Option<ast::Hint>,
@@ -102,7 +101,7 @@ impl FunHdr {
     fn make_empty(env: &Env) -> Self {
         Self {
             suspension_kind: SuspensionKind::SKSync,
-            name: ast_defs::Id(env.mk_none_pos(), String::from("<ANONYMOUS>")),
+            name: ast::Id(env.mk_none_pos(), String::from("<ANONYMOUS>")),
             constrs: vec![],
             type_parameters: vec![],
             parameters: vec![],
@@ -479,7 +478,7 @@ where
                         _ => s += i.text(env.source_text()),
                     }
                 }
-                return Ok(ast_defs::Id(p, s));
+                return Ok(ast::Id(p, s));
             }
         }
         Self::missing_syntax(None, "qualified name", node, env)
@@ -492,12 +491,12 @@ where
 
     fn lid_from_pos_name(pos: Pos, name: &Syntax<T, V>, env: &mut Env) -> Result<ast::Lid> {
         let name = Self::pos_name(name, env)?;
-        Ok(aast::Lid::new(pos, name.1))
+        Ok(ast::Lid::new(pos, name.1))
     }
 
     fn lid_from_name(name: &Syntax<T, V>, env: &mut Env) -> Result<ast::Lid> {
         let name = Self::pos_name(name, env)?;
-        Ok(aast::Lid::new(name.0, name.1))
+        Ok(ast::Lid::new(name.0, name.1))
     }
 
     // TODO: after porting unify Sid and Pstring
@@ -512,7 +511,7 @@ where
         env: &mut Env,
         drop_prefix: Option<char>,
     ) -> Result<ast::Pstring> {
-        let ast_defs::Id(p, id) = Self::pos_name_(node, env, drop_prefix)?;
+        let ast::Id(p, id) = Self::pos_name_(node, env, drop_prefix)?;
         Ok((p, id))
     }
 
@@ -542,7 +541,7 @@ where
                     name = Self::drop_prefix(name, prefix);
                 }
                 let p = Self::p_pos(node, env);
-                Ok(ast_defs::Id(p, String::from(name)))
+                Ok(ast::Id(p, String::from(name)))
             }
         }
     }
@@ -655,10 +654,10 @@ where
 
             fn visit_hint(&mut self, c: &mut (), h: &ast::Hint) {
                 match h.1.as_ref() {
-                    aast::Hint_::Happly(id, _) => {
+                    ast::Hint_::Happly(id, _) => {
                         self.0(&id.1);
                     }
-                    aast::Hint_::Haccess(_, ids) => {
+                    ast::Hint_::Haccess(_, ids) => {
                         ids.iter().for_each(|id| self.0(&id.1));
                     }
                     _ => {}
@@ -679,7 +678,7 @@ where
     fn p_closure_parameter(
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> Result<(ast::Hint, Option<ast_defs::ParamKind>)> {
+    ) -> Result<(ast::Hint, Option<ast::ParamKind>)> {
         match &node.syntax {
             ClosureParameterTypeSpecifier(c) => {
                 let kind = Self::mp_optional(
@@ -698,7 +697,7 @@ where
         f: F,
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> Result<(ast_defs::ShapeFieldName, R)>
+    ) -> Result<(ast::ShapeFieldName, R)>
     where
         F: Fn(&Syntax<T, V>, &mut Env) -> Result<R>,
     {
@@ -712,8 +711,8 @@ where
         }
     }
 
-    fn p_shape_field_name(node: &Syntax<T, V>, env: &mut Env) -> Result<ast_defs::ShapeFieldName> {
-        use ast_defs::ShapeFieldName::*;
+    fn p_shape_field_name(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::ShapeFieldName> {
+        use ast::ShapeFieldName::*;
         let is_valid_shape_literal = |t: &T| {
             let is_str = t.kind() == TK::SingleQuotedStringLiteral
                 || t.kind() == TK::DoubleQuotedStringLiteral;
@@ -724,7 +723,7 @@ where
         if let LiteralExpression(c) = &node.syntax {
             if let Token(t) = &c.literal_expression.syntax {
                 if is_valid_shape_literal(t) {
-                    let ast_defs::Id(p, n) = Self::pos_name(node, env)?;
+                    let ast::Id(p, n) = Self::pos_name(node, env)?;
                     let str_ = Self::mk_str(node, env, Self::unesc_dbl, &n);
                     match ocaml_helper::int_of_string_opt(&str_.as_bytes()) {
                         Some(_) => Self::raise_parsing_error(
@@ -745,7 +744,7 @@ where
             )),
             _ => {
                 Self::raise_parsing_error(node, env, &syntax_error::invalid_shape_field_name);
-                let ast_defs::Id(p, n) = Self::pos_name(node, env)?;
+                let ast::Id(p, n) = Self::pos_name(node, env)?;
                 Ok(SFlitStr((p, Self::mk_str(node, env, Self::unesc_dbl, &n))))
             }
         }
@@ -757,7 +756,7 @@ where
                 let optional = !c.field_question.is_missing();
                 let name = Self::p_shape_field_name(&c.field_name, env)?;
                 let hint = Self::p_hint(&c.field_type, env)?;
-                Ok(aast::ShapeFieldInfo {
+                Ok(ast::ShapeFieldInfo {
                     optional,
                     hint,
                     name,
@@ -765,7 +764,7 @@ where
             }
             _ => {
                 let (name, hint) = Self::mp_shape_expression_field(Self::p_hint, node, env)?;
-                Ok(aast::ShapeFieldInfo {
+                Ok(ast::ShapeFieldInfo {
                     optional: false,
                     name,
                     hint,
@@ -774,12 +773,12 @@ where
         }
     }
 
-    fn p_targ(node: &Syntax<T, V>, env: &mut Env) -> Result<aast::Targ<()>> {
-        Ok(aast::Targ((), Self::p_hint(node, env)?))
+    fn p_targ(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Targ> {
+        Ok(ast::Targ((), Self::p_hint(node, env)?))
     }
 
     fn p_hint_(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Hint_> {
-        use aast_defs::Hint_::*;
+        use ast::Hint_::*;
         let unary = |kw, ty, env: &mut Env| {
             Ok(Happly(
                 Self::pos_name(kw, env)?,
@@ -797,7 +796,7 @@ where
         match &node.syntax {
             /* Dirty hack; CastExpression can have type represented by token */
             Token(_) | SimpleTypeSpecifier(_) | QualifiedName(_) => {
-                let ast_defs::Id(pos, name) = Self::pos_name(node, env)?;
+                let ast::Id(pos, name) = Self::pos_name(node, env)?;
                 let mut suggest = |name: &str, canonical: &str| {
                     Self::raise_parsing_error(
                         node,
@@ -814,7 +813,7 @@ where
                 } else if "real".eq_ignore_ascii_case(&name) {
                     suggest(&name, special_typehints::FLOAT);
                 }
-                Ok(Happly(ast_defs::Id(pos, name), vec![]))
+                Ok(Happly(ast::Id(pos, name), vec![]))
             }
             ShapeTypeSpecifier(c) => {
                 let allows_unknown_fields = !c.shape_type_ellipsis.is_missing();
@@ -831,7 +830,7 @@ where
 
                 let field_map = Self::could_map(Self::p_shape_field, &c.shape_type_fields, env)?;
 
-                Ok(Hshape(aast::NastShapeInfo {
+                Ok(Hshape(ast::NastShapeInfo {
                     allows_unknown_fields,
                     field_map,
                 }))
@@ -928,8 +927,8 @@ where
                         variadic_hints.len().to_string()
                     ));
                 }
-                Ok(Hfun(aast::HintFun {
-                    reactive_kind: aast::FuncReactive::FNonreactive,
+                Ok(Hfun(ast::HintFun {
+                    reactive_kind: ast::FuncReactive::FNonreactive,
                     is_coroutine: !c.closure_coroutine.is_missing(),
                     param_tys: type_hints,
                     param_kinds: kinds,
@@ -956,7 +955,7 @@ where
                     }
                     Happly(ty, param) => {
                         if param.is_empty() {
-                            let root = aast::Hint::new(ty.0.clone(), Happly(ty, param));
+                            let root = ast::Hint::new(ty.0.clone(), Happly(ty, param));
                             Ok(Haccess(root, vec![child]))
                         } else {
                             Self::missing_syntax(None, "type constant base", node, env)
@@ -969,10 +968,10 @@ where
                 let pos = Self::p_pos(&c.pu_access_left_type, env);
                 let child = Self::pos_name(&c.pu_access_right_type, env)?;
                 match Self::p_hint_(&c.pu_access_left_type, env)? {
-                    h @ HpuAccess(_, _) => Ok(HpuAccess(aast::Hint::new(pos, h), child)),
+                    h @ HpuAccess(_, _) => Ok(HpuAccess(ast::Hint::new(pos, h), child)),
                     Happly(id, hints) => {
                         if hints.is_empty() {
-                            Ok(HpuAccess(aast::Hint::new(pos, Happly(id, hints)), child))
+                            Ok(HpuAccess(ast::Hint::new(pos, Happly(id, hints)), child))
                         } else {
                             Self::missing_syntax(None, "pocket universe access base", node, env)
                         }
@@ -991,7 +990,7 @@ where
     fn p_hint(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Hint> {
         let hint_ = Self::p_hint_(node, env)?;
         let pos = Self::p_pos(node, env);
-        let hint = aast::Hint::new(pos, hint_);
+        let hint = ast::Hint::new(pos, hint_);
         Self::check_valid_reified_hint(env, node, &hint);
         Ok(hint)
     }
@@ -1022,11 +1021,11 @@ where
 
     fn p_afield(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Afield> {
         match &node.syntax {
-            ElementInitializer(c) => Ok(aast::Afield::AFkvalue(
+            ElementInitializer(c) => Ok(ast::Afield::AFkvalue(
                 Self::p_expr(&c.element_key, env)?,
                 Self::p_expr(&c.element_value, env)?,
             )),
-            _ => Ok(aast::Afield::AFvalue(Self::p_expr(node, env)?)),
+            _ => Ok(ast::Afield::AFvalue(Self::p_expr(node, env)?)),
         }
     }
 
@@ -1034,15 +1033,15 @@ where
         node: &Syntax<T, V>,
         env: &mut Env,
         tys: Vec<ast::Hint>,
-    ) -> Option<aast::CollectionTarg<()>> {
+    ) -> Option<ast::CollectionTarg> {
         let count = tys.len();
         let mut tys = tys.into_iter();
         match count {
-            2 => Some(aast::CollectionTarg::CollectionTKV(
-                aast::Targ((), tys.next().unwrap()),
-                aast::Targ((), tys.next().unwrap()),
+            2 => Some(ast::CollectionTarg::CollectionTKV(
+                ast::Targ((), tys.next().unwrap()),
+                ast::Targ((), tys.next().unwrap()),
             )),
-            1 => Some(aast::CollectionTarg::CollectionTV(aast::Targ(
+            1 => Some(ast::CollectionTarg::CollectionTV(ast::Targ(
                 (),
                 tys.next().unwrap(),
             ))),
@@ -1059,7 +1058,7 @@ where
     }
 
     fn p_import_flavor(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::ImportFlavor> {
-        use aast::ImportFlavor::*;
+        use ast::ImportFlavor::*;
         match Self::token_kind(node) {
             Some(TK::Include) => Ok(Include),
             Some(TK::Require) => Ok(Require),
@@ -1070,7 +1069,7 @@ where
     }
 
     fn p_null_flavor(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::OgNullFlavor> {
-        use aast::OgNullFlavor::*;
+        use ast::OgNullFlavor::*;
         match Self::token_kind(node) {
             Some(TK::QuestionMinusGreaterThan) => Ok(OGNullsafe),
             Some(TK::MinusGreaterThan) => Ok(OGNullthrows),
@@ -1275,7 +1274,7 @@ where
         let p_expr = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::Expr> {
             Self::p_expr_with_loc(loc, n, e)
         };
-        Ok(aast::Expr::new(
+        Ok(ast::Expr::new(
             Self::p_pos(node, env),
             E_::ExprList(Self::could_map(p_expr, node, env)?),
         ))
@@ -1307,13 +1306,10 @@ where
                 let inner = Self::p_expr_impl(location, expr, env, parent_pos)?;
                 let inner_pos = &inner.0;
                 let inner_expr_ = &inner.1;
-                use E_::*;
+                use aast::Expr_::*;
                 match inner_expr_ {
                     Lvar(_) | String(_) | Int(_) | Float(_) => Ok(inner),
-                    _ => Ok(aast::Expr::new(
-                        inner_pos.clone(),
-                        E_::mk_braced_expr(inner),
-                    )),
+                    _ => Ok(ast::Expr::new(inner_pos.clone(), E_::mk_braced_expr(inner))),
                 }
             }
             ParenthesizedExpression(c) => Self::p_expr_impl(
@@ -1325,7 +1321,7 @@ where
             _ => {
                 let pos = Self::p_pos(node, env);
                 let expr_ = Self::p_expr_impl_(location, node, env, parent_pos)?;
-                Ok(aast::Expr::new(pos, expr_))
+                Ok(ast::Expr::new(pos, expr_))
             }
         }
     }
@@ -1409,7 +1405,7 @@ where
         env: &mut Env,
         parent_pos: Option<Pos>,
     ) -> Result<ast::Expr_> {
-        use aast::Expr as E;
+        use ast::Expr as E;
         let split_args_varargs = |arg_list_node: &Syntax<T, V>,
                                   e: &mut Env|
          -> Result<(Vec<ast::Expr>, Vec<ast::Expr>)> {
@@ -1428,7 +1424,7 @@ where
             }
             Ok((Self::could_map(Self::p_expr, arg_list_node, e)?, vec![]))
         };
-        let mk_lid = |p: Pos, s: String| aast::Lid(p, (0, s));
+        let mk_lid = |p: Pos, s: String| ast::Lid(p, (0, s));
         let mk_name_lid = |name: &Syntax<T, V>, env: &mut Env| {
             let name = Self::pos_name(name, env)?;
             Ok(mk_lid(name.0, name.1))
@@ -1458,7 +1454,7 @@ where
                 };
                 let (args, varargs) = split_args_varargs(args, e)?;
                 Ok(E_::mk_call(
-                    aast::CallType::Cnormal,
+                    ast::CallType::Cnormal,
                     recv,
                     vec![],
                     args,
@@ -1492,11 +1488,11 @@ where
                         Self::mp_optional(Self::p_hint, &c.lambda_type, env)?,
                     ),
                     Token(_) => {
-                        let ast_defs::Id(p, n) = Self::pos_name(&c.lambda_signature, env)?;
+                        let ast::Id(p, n) = Self::pos_name(&c.lambda_signature, env)?;
                         (
-                            vec![aast::FunParam {
+                            vec![ast::FunParam {
                                 annotation: p.clone(),
-                                type_hint: aast::TypeHint((), None),
+                                type_hint: ast::TypeHint((), None),
                                 is_reference: false,
                                 is_variadic: false,
                                 pos: p,
@@ -1518,15 +1514,15 @@ where
                     Self::mp_yielding(&Self::p_function_body, &c.lambda_body, env1.as_mut())?
                 };
                 let external = c.lambda_body.is_external();
-                let fun = aast::Fun_ {
+                let fun = ast::Fun_ {
                     span: pos.clone(),
                     annotation: (),
                     mode: Self::mode_annotation(env.file_mode()),
-                    ret: aast::TypeHint((), ret),
-                    name: ast_defs::Id(pos, String::from(";anonymous")),
+                    ret: ast::TypeHint((), ret),
+                    name: ast::Id(pos, String::from(";anonymous")),
                     tparams: vec![],
                     where_constraints: vec![],
-                    body: aast::FuncBody {
+                    body: ast::FuncBody {
                         ast: body,
                         annotation: (),
                     },
@@ -1595,7 +1591,7 @@ where
                 let hints = Self::expand_type_args(&c.varray_intrinsic_explicit_type, env)?;
                 let hints = Self::check_intrinsic_type_arg_varity(node, env, hints);
                 let targ = match hints {
-                    Some(aast::CollectionTarg::CollectionTV(ty)) => Some(ty),
+                    Some(ast::CollectionTarg::CollectionTV(ty)) => Some(ty),
                     None => None,
                     _ => Self::missing_syntax(
                         None,
@@ -1613,7 +1609,7 @@ where
                 let hints = Self::expand_type_args(&c.darray_intrinsic_explicit_type, env)?;
                 let hints = Self::check_intrinsic_type_arg_varity(node, env, hints);
                 match hints {
-                    Some(aast::CollectionTarg::CollectionTKV(tk, tv)) => Ok(E_::mk_darray(
+                    Some(ast::CollectionTarg::CollectionTKV(tk, tv)) => Ok(E_::mk_darray(
                         Some((tk, tv)),
                         Self::could_map(Self::p_member, &c.darray_intrinsic_members, env)?,
                     )),
@@ -1687,7 +1683,7 @@ where
                         let s = extract_unquoted_string(Self::text_str(expr, env), 0, expr.width())
                             .map_err(|e| Error::Failwith(e.msg))?;
                         Ok(E_::mk_call(
-                            aast::CallType::Cnormal,
+                            ast::CallType::Cnormal,
                             Self::p_expr(recv, env)?,
                             vec![],
                             vec![E::new(literal_expression_pos, E_::String(s))],
@@ -1727,7 +1723,7 @@ where
                         };
                         let (args, varargs) = split_args_varargs(args, env)?;
                         Ok(E_::mk_call(
-                            aast::CallType::Cnormal,
+                            ast::CallType::Cnormal,
                             recv,
                             targs,
                             args,
@@ -1738,7 +1734,7 @@ where
             }
             QualifiedName(_) => {
                 if location.in_string() {
-                    let ast_defs::Id(_, n) = Self::pos_qualified_name(node, env)?;
+                    let ast::Id(_, n) = Self::pos_qualified_name(node, env)?;
                     Ok(E_::String(n))
                 } else {
                     Ok(E_::mk_id(Self::pos_qualified_name(node, env)?))
@@ -1792,7 +1788,7 @@ where
                  * the two operatores for which AST /does/ differentiate between
                  * fixities.
                  */
-                use ast_defs::Uop::*;
+                use ast::Uop::*;
                 let mk_unop = |op, e| Ok(E_::mk_unop(op, e));
                 match Self::token_kind(op) {
                     Some(TK::PlusPlus) if postfix => mk_unop(Upincr, expr),
@@ -1815,16 +1811,13 @@ where
                             Ok(expr.1)
                         }
                     }
-                    Some(TK::Inout) => Ok(E_::mk_callconv(ast_defs::ParamKind::Pinout, expr)),
+                    Some(TK::Inout) => Ok(E_::mk_callconv(ast::ParamKind::Pinout, expr)),
                     Some(TK::Await) => Self::lift_await(pos, expr, env, location),
                     Some(TK::Suspend) => Ok(E_::mk_suspend(expr)),
                     Some(TK::Clone) => Ok(E_::mk_clone(expr)),
                     Some(TK::Print) => Ok(E_::mk_call(
-                        aast::CallType::Cnormal,
-                        E::new(
-                            pos.clone(),
-                            E_::mk_id(ast_defs::Id(pos, String::from("echo"))),
-                        ),
+                        ast::CallType::Cnormal,
+                        E::new(pos.clone(), E_::mk_id(ast::Id(pos, String::from("echo")))),
                         vec![],
                         vec![expr],
                         vec![],
@@ -1841,7 +1834,7 @@ where
                                     )
                                 }
                                 let id = String::with_capacity(1 + s.len()) + "$" + &s;
-                                let lid = aast::Lid(pos, (0, id));
+                                let lid = ast::Lid(pos, (0, id));
                                 Ok(E_::mk_lvar(lid))
                             }
                             _ => {
@@ -1874,7 +1867,7 @@ where
                 let left = Self::p_expr(&c.binary_left_operand, env)?;
                 let bop_ast_node = Self::p_bop(pos, &c.binary_operator, left, right, env)?;
                 if let E_::Binop(bop) = &bop_ast_node {
-                    if let (ast_defs::Bop::Eq(_), lhs, _) = bop.as_ref() {
+                    if let (ast::Bop::Eq(_), lhs, _) = bop.as_ref() {
                         Self::check_lvalue(lhs, env);
                     }
                 }
@@ -1918,7 +1911,7 @@ where
                 if c.yield_operand.text(env.source_text()) == "break" {
                     Ok(E_::YieldBreak)
                 } else if c.yield_operand.is_missing() {
-                    Ok(E_::mk_yield(aast::Afield::AFvalue(E::new(pos, E_::Null))))
+                    Ok(E_::mk_yield(ast::Afield::AFvalue(E::new(pos, E_::Null))))
                 } else {
                     Ok(E_::mk_yield(Self::p_afield(&c.yield_operand, env)?))
                 }
@@ -1938,7 +1931,7 @@ where
             DefineExpression(c) => {
                 let name = Self::pos_name(&c.define_keyword, env)?;
                 Ok(E_::mk_call(
-                    aast_defs::CallType::Cnormal,
+                    ast::CallType::Cnormal,
                     mk_id_expr(name),
                     vec![],
                     Self::as_list(&c.define_argument_list)
@@ -1954,7 +1947,7 @@ where
                     qual
                 } else if let E_::Lvar(a) = qual.1 {
                     let pos = qual.0;
-                    E::new(pos.clone(), E_::mk_id(ast_defs::Id(pos, (a.1).1)))
+                    E::new(pos.clone(), E_::mk_id(ast::Id(pos, (a.1).1)))
                 } else {
                     qual
                 };
@@ -1963,36 +1956,36 @@ where
                 }
                 match &c.scope_resolution_name.syntax {
                     Token(token) if token.kind() == TK::Variable => {
-                        let ast_defs::Id(p, name) = Self::pos_name(&c.scope_resolution_name, env)?;
+                        let ast::Id(p, name) = Self::pos_name(&c.scope_resolution_name, env)?;
                         Ok(E_::mk_class_get(
-                            aast::ClassId(pos, aast::ClassId_::CIexpr(qual)),
-                            aast::ClassGetExpr::CGstring((p, name)),
+                            ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
+                            ast::ClassGetExpr::CGstring((p, name)),
                         ))
                     }
                     _ => {
                         let E(p, expr_) = Self::p_expr(&c.scope_resolution_name, env)?;
                         match expr_ {
                             E_::String(id) => Ok(E_::mk_class_const(
-                                aast::ClassId(pos, aast::ClassId_::CIexpr(qual)),
+                                ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
                                 (p, id),
                             )),
                             E_::Id(id) => {
-                                let ast_defs::Id(p, n) = *id;
+                                let ast::Id(p, n) = *id;
                                 Ok(E_::mk_class_const(
-                                    aast::ClassId(pos, aast::ClassId_::CIexpr(qual)),
+                                    ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
                                     (p, n),
                                 ))
                             }
                             E_::Lvar(id) => {
-                                let aast::Lid(p, (_, n)) = *id;
+                                let ast::Lid(p, (_, n)) = *id;
                                 Ok(E_::mk_class_get(
-                                    aast::ClassId(pos, aast::ClassId_::CIexpr(qual)),
-                                    aast::ClassGetExpr::CGstring((p, n)),
+                                    ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
+                                    ast::ClassGetExpr::CGstring((p, n)),
                                 ))
                             }
                             _ => Ok(E_::mk_class_get(
-                                aast::ClassId(pos, aast::ClassId_::CIexpr(qual)),
-                                aast::ClassGetExpr::CGexpr(E(p, expr_)),
+                                ast::ClassId(pos, ast::ClassId_::CIexpr(qual)),
+                                ast::ClassGetExpr::CGexpr(E(p, expr_)),
                             )),
                         }
                     }
@@ -2059,7 +2052,7 @@ where
                     Self::fail_if_invalid_class_creation(node, env, &name.1);
                 }
                 Ok(E_::mk_new(
-                    aast::ClassId(pos.clone(), aast::ClassId_::CIexpr(e)),
+                    ast::ClassId(pos.clone(), ast::ClassId_::CIexpr(e)),
                     hl,
                     args,
                     varargs,
@@ -2149,18 +2142,18 @@ where
                 let external = c.anonymous_body.is_external();
                 let params = Self::could_map(Self::p_fun_param, &c.anonymous_parameters, env)?;
                 let name_pos = Self::p_function(node, env);
-                let fun = aast::Fun_ {
+                let fun = ast::Fun_ {
                     span: Self::p_pos(node, env),
                     annotation: (),
                     mode: Self::mode_annotation(env.file_mode()),
-                    ret: aast::TypeHint(
+                    ret: ast::TypeHint(
                         (),
                         Self::mp_optional(Self::p_hint, &c.anonymous_type, env)?,
                     ),
-                    name: ast_defs::Id(name_pos, String::from(";anonymous")),
+                    name: ast::Id(name_pos, String::from(";anonymous")),
                     tparams: vec![],
                     where_constraints: vec![],
-                    body: aast::FuncBody {
+                    body: ast::FuncBody {
                         ast: body,
                         annotation: (),
                     },
@@ -2188,18 +2181,18 @@ where
                 let user_attributes = Self::p_user_attributes(&c.awaitable_attribute_spec, env)?;
                 let external = c.awaitable_compound_statement.is_external();
                 let name_pos = Self::p_function(node, env);
-                let body = aast::Fun_ {
+                let body = ast::Fun_ {
                     span: pos.clone(),
                     annotation: (),
                     mode: Self::mode_annotation(env.file_mode()),
-                    ret: aast::TypeHint((), None),
-                    name: ast_defs::Id(name_pos, String::from(";anonymous")),
+                    ret: ast::TypeHint((), None),
+                    name: ast::Id(name_pos, String::from(";anonymous")),
                     tparams: vec![],
                     where_constraints: vec![],
-                    body: aast::FuncBody {
+                    body: ast::FuncBody {
                         ast: if blk.len() == 0 {
                             let pos = Self::p_pos(&c.awaitable_compound_statement, env);
-                            vec![aast::Stmt::noop(pos)]
+                            vec![ast::Stmt::noop(pos)]
                         } else {
                             blk
                         },
@@ -2216,7 +2209,7 @@ where
                     static_: false,
                 };
                 Ok(E_::mk_call(
-                    aast::CallType::Cnormal,
+                    ast::CallType::Cnormal,
                     E::new(pos, E_::mk_lfun(body, vec![])),
                     vec![],
                     vec![],
@@ -2237,7 +2230,7 @@ where
 
                     Ok(E_::mk_xml(
                         // TODO: update pos_name to support prefix
-                        ast_defs::Id(name.0, String::from(":") + &name.1),
+                        ast::Id(name.0, String::from(":") + &name.1),
                         attrs,
                         exprs,
                     ))
@@ -2249,13 +2242,13 @@ where
                 Self::pos_name(&c.pocket_atom_expression, env)?.1,
             )),
             PocketIdentifierExpression(c) => {
-                let mk_class_id = |e: ast::Expr| aast::ClassId(pos, aast::ClassId_::CIexpr(e));
+                let mk_class_id = |e: ast::Expr| ast::ClassId(pos, ast::ClassId_::CIexpr(e));
                 let qual = Self::p_expr(&c.pocket_identifier_qualifier, env)?;
                 let qual = if env.codegen() {
                     mk_class_id(qual)
                 } else if let E_::Lvar(a) = qual.1 {
                     let p = qual.0;
-                    let expr = E::new(p.clone(), E_::mk_id(ast_defs::Id(p, (a.1).1)));
+                    let expr = E::new(p.clone(), E_::mk_id(ast::Id(p, (a.1).1)));
                     mk_class_id(expr)
                 } else {
                     mk_class_id(qual)
@@ -2264,7 +2257,7 @@ where
                 let field = match expr_ {
                     E_::String(id) => (p, id),
                     E_::Id(id) => {
-                        let ast_defs::Id(p, n) = *id;
+                        let ast::Id(p, n) = *id;
                         (p, n)
                     }
                     _ => Self::missing_syntax(None, "PocketIdentifierExpression field", node, env)?,
@@ -2273,7 +2266,7 @@ where
                 let name = match expr_ {
                     E_::String(id) => (p, id),
                     E_::Id(id) => {
-                        let ast_defs::Id(p, n) = *id;
+                        let ast::Id(p, n) = *id;
                         (p, n)
                     }
                     _ => Self::missing_syntax(None, "PocketIdentifierExpression name", node, env)?,
@@ -2284,15 +2277,15 @@ where
         }
     }
 
-    fn check_lvalue(aast::Expr(p, expr_): &ast::Expr, env: &mut Env) {
-        use E_::*;
+    fn check_lvalue(ast::Expr(p, expr_): &ast::Expr, env: &mut Env) {
+        use aast::Expr_::*;
         let mut raise = |s| Self::raise_parsing_error_pos(p, env, s);
         match expr_ {
             ObjGet(og) => match og.as_ref() {
-                (_, aast::Expr(_, Id(_)), ast_defs::OgNullFlavor::OGNullsafe) => {
+                (_, ast::Expr(_, Id(_)), ast::OgNullFlavor::OGNullsafe) => {
                     raise("?-> syntax is not supported for lvalues")
                 }
-                (_, aast::Expr(_, Id(sid)), _) if sid.1.as_bytes()[0] == b':' => {
+                (_, ast::Expr(_, Id(sid)), _) if sid.1.as_bytes()[0] == b':' => {
                     raise("->: syntax is not supported for lvalues")
                 }
                 _ => {}
@@ -2335,17 +2328,17 @@ where
                 let text = html_entities::decode(&Self::get_quoted_content(
                     node.full_text(env.source_text()),
                 ));
-                Ok(aast::Expr::new(p, E_::make_string(text)))
+                Ok(ast::Expr::new(p, E_::make_string(text)))
             } else if env.codegen() && TK::XHPBody == kind {
                 let p = Self::p_pos(node, env);
                 /* for XHP body - only decode HTML entities */
                 let text =
                     html_entities::decode(&Self::unesc_xhp(node.full_text(env.source_text())));
-                Ok(aast::Expr::new(p, E_::make_string(text)))
+                Ok(ast::Expr::new(p, E_::make_string(text)))
             } else {
                 let p = Self::p_pos(node, env);
                 let s = escaper(node.full_text(env.source_text()));
-                Ok(aast::Expr::new(p, E_::make_string(s)))
+                Ok(ast::Expr::new(p, E_::make_string(s)))
             }
         } else {
             let expr = Self::p_expr(node, env)?;
@@ -2365,16 +2358,16 @@ where
                     && env.file_mode() == file_info::Mode::Mdecl
                     && !env.codegen()
                 {
-                    aast::Expr::new(env.mk_none_pos(), E_::Null)
+                    ast::Expr::new(env.mk_none_pos(), E_::Null)
                 } else {
                     Self::p_xhp_embedded(Self::unesc_xhp_attr, attr_expr, env)?
                 };
-                Ok(aast::XhpAttribute::XhpSimple(name, expr))
+                Ok(ast::XhpAttribute::XhpSimple(name, expr))
             }
             XHPSpreadAttribute(c) => {
                 let expr =
                     Self::p_xhp_embedded(Self::unesc_xhp, &c.xhp_spread_attribute_expression, env)?;
-                Ok(aast::XhpAttribute::XhpSpread(expr))
+                Ok(ast::XhpAttribute::XhpSpread(expr))
             }
             _ => Self::missing_syntax(None, "XHP attribute", node, env),
         }
@@ -2435,7 +2428,7 @@ where
         rhs: ast::Expr,
         env: &mut Env,
     ) -> Result<ast::Expr_> {
-        use ast_defs::Bop::*;
+        use ast::Bop::*;
         let mk = |op, l, r| Ok(E_::mk_binop(op, l, r));
         let mk_eq = |op, l, r| Ok(E_::mk_binop(Eq(Some(Box::new(op))), l, r));
         match Self::token_kind(node) {
@@ -2483,11 +2476,8 @@ where
              * `bop`, but a `expr -> expr -> expr_`.
              */
             Some(TK::BarGreaterThan) => {
-                let lid = aast::Lid::from_counter(
-                    pos,
-                    env.next_local_id(),
-                    special_idents::DOLLAR_DOLLAR,
-                );
+                let lid =
+                    ast::Lid::from_counter(pos, env.next_local_id(), special_idents::DOLLAR_DOLLAR);
                 Ok(E_::mk_pipe(lid, lhs, rhs))
             }
             Some(TK::QuestionColon) => Ok(E_::mk_eif(lhs, None, rhs)),
@@ -2496,7 +2486,7 @@ where
     }
 
     fn is_noop(stmt: &ast::Stmt) -> bool {
-        if let aast::Stmt_::Noop = stmt.1 {
+        if let ast::Stmt_::Noop = stmt.1 {
             true
         } else {
             false
@@ -2515,9 +2505,9 @@ where
                     UsingStatementFunctionScoped(c) => {
                         let body = Self::p_stmt_list_(pos, nodes, env)?;
                         let f = |e: &mut Env| {
-                            Ok(aast::Stmt::new(
+                            Ok(ast::Stmt::new(
                                 pos.clone(),
-                                aast::Stmt_::mk_using(aast::UsingStmt {
+                                ast::Stmt_::mk_using(ast::UsingStmt {
                                     is_block_scoped: false,
                                     has_await: !c.using_function_await_keyword.is_missing(),
                                     expr: Self::p_expr_l_with_loc(
@@ -2554,7 +2544,7 @@ where
         } else {
             blk
         };
-        Ok(aast::Stmt::new(pos, aast::Stmt_::mk_block(body)))
+        Ok(ast::Stmt::new(pos, ast::Stmt_::mk_block(body)))
     }
 
     fn is_simple_assignment_await_expression(node: &Syntax<T, V>) -> bool {
@@ -2670,9 +2660,9 @@ where
                     Either::Left(n) => Self::p_pos(n, env),
                     Either::Right(p) => p.clone(),
                 };
-                return Ok(aast::Stmt::new(
+                return Ok(ast::Stmt::new(
                     pos,
-                    aast::Stmt_::mk_awaitall(awaits, vec![result]),
+                    ast::Stmt_::mk_awaitall(awaits, vec![result]),
                 ));
             }
         }
@@ -2693,8 +2683,8 @@ where
             (Some(_), _) => {
                 if location != AsStatement {
                     let name = env.make_tmp_var_name();
-                    let lid = aast::Lid::new(parent_pos, name.clone());
-                    let await_lid = aast::Lid::new(expr.0.clone(), name);
+                    let lid = ast::Lid::new(parent_pos, name.clone());
+                    let await_lid = ast::Lid::new(expr.0.clone(), name);
                     let await_ = (Some(await_lid), expr);
                     env.lifted_awaits.as_mut().map(|aw| aw.awaits.push(await_));
                     Ok(E_::mk_lvar(lid))
@@ -2723,16 +2713,16 @@ where
 
     fn p_stmt_(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Stmt> {
         let pos = Self::p_pos(node, env);
-        use aast::{Stmt as S, Stmt_ as S_};
+        use ast::{Stmt as S, Stmt_ as S_};
         match &node.syntax {
             SwitchStatement(c) => {
                 let p_label = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::Case> {
                     match &n.syntax {
-                        CaseLabel(c) => Ok(aast::Case::Case(
+                        CaseLabel(c) => Ok(ast::Case::Case(
                             Self::p_expr(&c.case_expression, e)?,
                             vec![],
                         )),
-                        DefaultLabel(_) => Ok(aast::Case::Default(Self::p_pos(n, e), vec![])),
+                        DefaultLabel(_) => Ok(ast::Case::Default(Self::p_pos(n, e), vec![])),
                         _ => Self::missing_syntax(None, "switch label", n, e),
                     }
                 };
@@ -2746,8 +2736,8 @@ where
                             }
                             let mut labels = Self::could_map(p_label, &c.switch_section_labels, e)?;
                             match labels.last_mut() {
-                                Some(aast::Case::Default(_, b)) => *b = blk,
-                                Some(aast::Case::Case(_, b)) => *b = blk,
+                                Some(ast::Case::Default(_, b)) => *b = blk,
+                                Some(ast::Case::Case(_, b)) => *b = blk,
                                 _ => Self::raise_parsing_error(n, e, "Malformed block result"),
                             }
                             Ok(labels)
@@ -2847,7 +2837,7 @@ where
                 let f = |e: &mut Env| -> Result<ast::Stmt> {
                     Ok(S::new(
                         pos,
-                        S_::mk_using(aast::UsingStmt {
+                        S_::mk_using(ast::UsingStmt {
                             is_block_scoped: true,
                             has_await: !&c.using_block_await_keyword.is_missing(),
                             expr: Self::p_expr_l_with_loc(
@@ -2865,7 +2855,7 @@ where
                 let f = |e: &mut Env| -> Result<ast::Stmt> {
                     Ok(S::new(
                         pos,
-                        S_::mk_using(aast::UsingStmt {
+                        S_::mk_using(ast::UsingStmt {
                             is_block_scoped: false,
                             has_await: !&c.using_function_await_keyword.is_missing(),
                             expr: Self::p_expr_with_loc(
@@ -2907,12 +2897,12 @@ where
                     };
                     let value = Self::p_expr(&c.foreach_value, e)?;
                     let akv = match (akw, &c.foreach_key.syntax) {
-                        (Some(p), Missing) => aast::AsExpr::AwaitAsV(p, value),
-                        (None, Missing) => aast::AsExpr::AsV(value),
+                        (Some(p), Missing) => ast::AsExpr::AwaitAsV(p, value),
+                        (None, Missing) => ast::AsExpr::AsV(value),
                         (Some(p), _) => {
-                            aast::AsExpr::AwaitAsKv(p, Self::p_expr(&c.foreach_key, e)?, value)
+                            ast::AsExpr::AwaitAsKv(p, Self::p_expr(&c.foreach_key, e)?, value)
                         }
-                        (None, _) => aast::AsExpr::AsKv(Self::p_expr(&c.foreach_key, e)?, value),
+                        (None, _) => ast::AsExpr::AsKv(Self::p_expr(&c.foreach_key, e)?, value),
                     };
                     let blk = Self::p_block(true, &c.foreach_body, e)?;
                     Ok(S::new(pos, S_::mk_foreach(col, akv, blk)))
@@ -2925,7 +2915,7 @@ where
                     Self::p_block(false, &c.try_compound_statement, env)?,
                     Self::could_map(
                         |n: &Syntax<T, V>, e| match &n.syntax {
-                            CatchClause(c) => Ok(aast::Catch(
+                            CatchClause(c) => Ok(ast::Catch(
                                 Self::pos_name(&c.catch_type, e)?,
                                 Self::lid_from_name(&c.catch_variable, e)?,
                                 Self::p_block(true, &c.catch_body, e)?,
@@ -2951,7 +2941,7 @@ where
                             e,
                         )?),
                     };
-                    Ok(aast::Stmt::new(pos, aast::Stmt_::mk_return(expr)))
+                    Ok(ast::Stmt::new(pos, ast::Stmt_::mk_return(expr)))
                 };
                 if Self::is_simple_await_expression(&c.return_expression) {
                     f(env)
@@ -2985,16 +2975,16 @@ where
                     let echo = match &c.echo_keyword.syntax {
                         QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
                             let name = Self::pos_name(&c.echo_keyword, e)?;
-                            aast::Expr::new(name.0.clone(), E_::mk_id(name))
+                            ast::Expr::new(name.0.clone(), E_::mk_id(name))
                         }
                         _ => Self::missing_syntax(None, "id", &c.echo_keyword, e)?,
                     };
                     let args = Self::could_map(Self::p_expr, &c.echo_expressions, e)?;
                     Ok(S::new(
                         pos.clone(),
-                        S_::mk_expr(aast::Expr::new(
+                        S_::mk_expr(ast::Expr::new(
                             pos,
-                            E_::mk_call(aast::CallType::Cnormal, echo, vec![], args, vec![]),
+                            E_::mk_call(ast::CallType::Cnormal, echo, vec![], args, vec![]),
                         )),
                     ))
                 };
@@ -3010,15 +3000,15 @@ where
                     let unset = match &c.unset_keyword.syntax {
                         QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
                             let name = Self::pos_name(&c.unset_keyword, e)?;
-                            aast::Expr::new(name.0.clone(), E_::mk_id(name))
+                            ast::Expr::new(name.0.clone(), E_::mk_id(name))
                         }
                         _ => Self::missing_syntax(None, "id", &c.unset_keyword, e)?,
                     };
                     Ok(S::new(
                         pos.clone(),
-                        S_::mk_expr(aast::Expr::new(
+                        S_::mk_expr(ast::Expr::new(
                             pos,
-                            E_::mk_call(aast::CallType::Cnormal, unset, vec![], args, vec![]),
+                            E_::mk_call(ast::CallType::Cnormal, unset, vec![], args, vec![]),
                         )),
                     ))
                 };
@@ -3033,8 +3023,8 @@ where
                 )?;
                 let stmt = match stmt {
                     S_::Block(stmts) => {
-                        use aast::Expr as E;
-                        use ast_defs::Bop::Eq;
+                        use ast::Bop::Eq;
+                        use ast::Expr as E;
                         /* Reuse tmp vars from lifted_awaits, this is safe because there will
                          * always be more awaits with tmp vars than statements with assignments */
                         let mut tmp_vars = lifted_awaits
@@ -3150,8 +3140,8 @@ where
                     _ => Self::failwith("expression expected")?,
                 };
                 let stmt_ =
-                    aast::Stmt_::mk_markup((pos.clone(), Self::text(&markup_text, env)), expr);
-                Ok(aast::Stmt::new(pos, stmt_))
+                    ast::Stmt_::mk_markup((pos.clone(), Self::text(&markup_text, env)), expr);
+                Ok(ast::Stmt::new(pos, stmt_))
             }
             _ => Self::failwith("invalid node"),
         }
@@ -3258,7 +3248,7 @@ where
 
     fn soften_hint(attrs: &[ast::UserAttribute], hint: ast::Hint) -> ast::Hint {
         if Self::has_soft(attrs) {
-            aast::Hint::new(hint.0.clone(), aast::Hint_::Hsoft(hint))
+            ast::Hint::new(hint.0.clone(), ast::Hint_::Hsoft(hint))
         } else {
             hint
         }
@@ -3273,18 +3263,18 @@ where
         }
     }
 
-    fn p_param_kind(node: &Syntax<T, V>, env: &mut Env) -> Result<ast_defs::ParamKind> {
+    fn p_param_kind(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::ParamKind> {
         match Self::token_kind(node) {
-            Some(TK::Inout) => Ok(ast_defs::ParamKind::Pinout),
+            Some(TK::Inout) => Ok(ast::ParamKind::Pinout),
             _ => Self::missing_syntax(None, "param kind", node, env),
         }
     }
 
     fn param_template(node: &Syntax<T, V>, env: &Env) -> ast::FunParam {
         let pos = Self::p_pos(node, env);
-        aast::FunParam {
+        ast::FunParam {
             annotation: pos.clone(),
-            type_hint: aast::TypeHint((), None),
+            type_hint: ast::TypeHint((), None),
             is_reference: false,
             is_variadic: false,
             pos,
@@ -3341,9 +3331,9 @@ where
                     );
                 }
                 let pos = Self::p_pos(name, env);
-                Ok(aast::FunParam {
+                Ok(ast::FunParam {
                     annotation: pos.clone(),
-                    type_hint: aast::TypeHint((), hint),
+                    type_hint: ast::TypeHint((), hint),
                     user_attributes,
                     is_reference,
                     is_variadic,
@@ -3386,13 +3376,13 @@ where
     fn p_tconstraint(
         node: &Syntax<T, V>,
         env: &mut Env,
-    ) -> Result<(ast_defs::ConstraintKind, ast::Hint)> {
+    ) -> Result<(ast::ConstraintKind, ast::Hint)> {
         match &node.syntax {
             TypeConstraint(c) => Ok((
                 match Self::token_kind(&c.constraint_keyword) {
-                    Some(TK::As) => ast_defs::ConstraintKind::ConstraintAs,
-                    Some(TK::Super) => ast_defs::ConstraintKind::ConstraintSuper,
-                    Some(TK::Equal) => ast_defs::ConstraintKind::ConstraintEq,
+                    Some(TK::As) => ast::ConstraintKind::ConstraintAs,
+                    Some(TK::Super) => ast::ConstraintKind::ConstraintSuper,
+                    Some(TK::Equal) => ast::ConstraintKind::ConstraintEq,
                     _ => Self::missing_syntax(
                         None,
                         "constraint operator",
@@ -3416,11 +3406,11 @@ where
                     env.cls_reified_generics().insert(type_name);
                 }
                 let variance = match Self::token_kind(&c.type_variance) {
-                    Some(TK::Plus) => ast_defs::Variance::Covariant,
-                    Some(TK::Minus) => ast_defs::Variance::Contravariant,
-                    _ => ast_defs::Variance::Invariant,
+                    Some(TK::Plus) => ast::Variance::Covariant,
+                    Some(TK::Minus) => ast::Variance::Contravariant,
+                    _ => ast::Variance::Invariant,
                 };
-                if is_reified && variance != ast_defs::Variance::Invariant {
+                if is_reified && variance != ast::Variance::Invariant {
                     Self::raise_parsing_error(
                         node,
                         env,
@@ -3428,11 +3418,11 @@ where
                     );
                 }
                 let reified = match (is_reified, Self::has_soft(&user_attributes)) {
-                    (true, true) => aast::ReifyKind::SoftReified,
-                    (true, false) => aast::ReifyKind::Reified,
-                    _ => aast::ReifyKind::Erased,
+                    (true, true) => ast::ReifyKind::SoftReified,
+                    (true, false) => ast::ReifyKind::Reified,
+                    _ => ast::ReifyKind::Erased,
                 };
-                Ok(aast::Tparam {
+                Ok(ast::Tparam {
                     variance,
                     name: Self::pos_name(&c.type_name, env)?,
                     constraints: Self::could_map(Self::p_tconstraint, &c.type_constraints, env)?,
@@ -3542,21 +3532,21 @@ where
     }
 
     fn p_block(remove_noop: bool, node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Block> {
-        let aast::Stmt(p, stmt_) = Self::p_stmt(node, env)?;
-        if let aast::Stmt_::Block(blk) = stmt_ {
+        let ast::Stmt(p, stmt_) = Self::p_stmt(node, env)?;
+        if let ast::Stmt_::Block(blk) = stmt_ {
             if remove_noop && blk.len() == 1 {
-                if let aast::Stmt_::Noop = blk[0].1 {
+                if let ast::Stmt_::Noop = blk[0].1 {
                     return Ok(vec![]);
                 }
             }
             return Ok(blk);
         } else {
-            Ok(vec![aast::Stmt(p, stmt_)])
+            Ok(vec![ast::Stmt(p, stmt_)])
         }
     }
 
     fn mk_noop(env: &Env) -> ast::Stmt {
-        aast::Stmt::noop(env.mk_none_pos())
+        ast::Stmt::noop(env.mk_none_pos())
     }
 
     fn p_function_body(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Block> {
@@ -3588,9 +3578,9 @@ where
                 _ => {
                     let f = |e: &mut Env| {
                         let expr = Self::p_expr(node, e)?;
-                        Ok(aast::Stmt::new(
+                        Ok(ast::Stmt::new(
                             expr.0.clone(),
-                            aast::Stmt_::mk_return(Some(expr)),
+                            ast::Stmt_::mk_return(Some(expr)),
                         ))
                     };
                     Ok(vec![Self::lift_awaits_in_statement(f, node, e)?])
@@ -3632,8 +3622,8 @@ where
         }
     }
 
-    fn mk_fun_kind(suspension_kind: SuspensionKind, yield_: bool) -> ast_defs::FunKind {
-        use ast_defs::FunKind::*;
+    fn mk_fun_kind(suspension_kind: SuspensionKind, yield_: bool) -> ast::FunKind {
+        use ast::FunKind::*;
         use SuspensionKind::*;
         match (suspension_kind, yield_) {
             (SKSync, true) => FGenerator,
@@ -3682,7 +3672,7 @@ where
             constructor_call_argument_list,
             env,
         )?;
-        Ok(aast::UserAttribute { name, params })
+        Ok(ast::UserAttribute { name, params })
     }
 
     fn p_user_attribute(node: &Syntax<T, V>, env: &mut Env) -> Result<Vec<ast::UserAttribute>> {
@@ -3816,8 +3806,8 @@ where
     }
 
     fn p_xhp_child(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::XhpChild> {
-        use aast::XhpChild::*;
-        use aast::XhpChildOp::*;
+        use ast::XhpChild::*;
+        use ast::XhpChildOp::*;
         match &node.syntax {
             Token(_) => Self::pos_name(node, env).map(ChildName),
             PostfixUnaryExpression(c) => {
@@ -3863,7 +3853,7 @@ where
             match Self::p_visibility_last_win(node, env)? {
                 None => {
                     Self::raise_nast_error("method_needs_visiblity");
-                    Ok(aast::Visibility::Public)
+                    Ok(ast::Visibility::Public)
                 }
                 Some(v) => Ok(v),
             }
@@ -3889,7 +3879,7 @@ where
                                         e,
                                     )?
                                 };
-                                Ok(aast::ClassConst {
+                                Ok(ast::ClassConst {
                                     type_: type_.clone(),
                                     id,
                                     expr,
@@ -3920,19 +3910,19 @@ where
                 let (type_, abstract_kind) = match (has_abstract, &constraint, &type__) {
                     (false, _, None) => {
                         Self::raise_nast_error("not_abstract_without_typeconst");
-                        (constraint.clone(), aast::TypeconstAbstractKind::TCConcrete)
+                        (constraint.clone(), ast::TypeconstAbstractKind::TCConcrete)
                     }
-                    (false, None, Some(_)) => (type__, aast::TypeconstAbstractKind::TCConcrete),
+                    (false, None, Some(_)) => (type__, ast::TypeconstAbstractKind::TCConcrete),
                     (false, Some(_), Some(_)) => {
-                        (type__, aast::TypeconstAbstractKind::TCPartiallyAbstract)
+                        (type__, ast::TypeconstAbstractKind::TCPartiallyAbstract)
                     }
                     (true, _, None) => (
                         type__.clone(),
-                        aast::TypeconstAbstractKind::TCAbstract(type__),
+                        ast::TypeconstAbstractKind::TCAbstract(type__),
                     ),
-                    (true, _, Some(_)) => (None, aast::TypeconstAbstractKind::TCAbstract(type__)),
+                    (true, _, Some(_)) => (None, ast::TypeconstAbstractKind::TCAbstract(type__)),
                 };
-                Ok(class.typeconsts.push(aast::ClassTypeconst {
+                Ok(class.typeconsts.push(ast::ClassTypeconst {
                     abstract_: abstract_kind,
                     name,
                     constraint,
@@ -3950,7 +3940,7 @@ where
                 let vis = Self::p_visibility_last_win_or(
                     &c.property_modifiers,
                     env,
-                    aast::Visibility::Public,
+                    ast::Visibility::Public,
                 )?;
                 let doc_comment = if env.quick_mode {
                     None
@@ -3979,7 +3969,7 @@ where
 
                 let mut i = 0;
                 for name_expr in name_exprs.into_iter() {
-                    class.vars.push(aast::ClassVar {
+                    class.vars.push(ast::ClassVar {
                         final_: kinds.has(modifier::FINAL),
                         xhp_attr: None,
                         abstract_: kinds.has(modifier::ABSTRACT),
@@ -4002,33 +3992,33 @@ where
                     let cvname = Self::drop_prefix(&param.name, '$');
                     let p = &param.pos;
                     let span = match &param.expr {
-                        Some(aast::Expr(pos_end, _)) => {
+                        Some(ast::Expr(pos_end, _)) => {
                             Pos::btw(p, pos_end).unwrap_or_else(|_| p.clone())
                         }
                         _ => p.clone(),
                     };
-                    let e = |expr_: ast::Expr_| -> ast::Expr { aast::Expr::new(p.clone(), expr_) };
-                    let lid = |s: &str| -> ast::Lid { aast::Lid(p.clone(), (0, s.to_string())) };
+                    let e = |expr_: ast::Expr_| -> ast::Expr { ast::Expr::new(p.clone(), expr_) };
+                    let lid = |s: &str| -> ast::Lid { ast::Lid(p.clone(), (0, s.to_string())) };
                     (
-                        aast::Stmt::new(
+                        ast::Stmt::new(
                             p.clone(),
-                            aast::Stmt_::mk_expr(e(E_::mk_binop(
-                                ast_defs::Bop::Eq(None),
+                            ast::Stmt_::mk_expr(e(E_::mk_binop(
+                                ast::Bop::Eq(None),
                                 e(E_::mk_obj_get(
                                     e(E_::mk_lvar(lid("$this"))),
-                                    e(E_::mk_id(ast_defs::Id(p.clone(), cvname.to_string()))),
-                                    aast::OgNullFlavor::OGNullthrows,
+                                    e(E_::mk_id(ast::Id(p.clone(), cvname.to_string()))),
+                                    ast::OgNullFlavor::OGNullthrows,
                                 )),
                                 e(E_::mk_lvar(lid(&param.name))),
                             ))),
                         ),
-                        aast::ClassVar {
+                        ast::ClassVar {
                             final_: false,
                             xhp_attr: None,
                             abstract_: false,
                             visibility: param.visibility.unwrap(),
                             type_: param.type_hint.1.clone(),
-                            id: ast_defs::Id(p.clone(), cvname.to_string()),
+                            id: ast::Id(p.clone(), cvname.to_string()),
                             expr: None,
                             user_attributes: param.user_attributes.clone(),
                             doc_comment: None,
@@ -4072,7 +4062,7 @@ where
                 let is_abstract = kinds.has(modifier::ABSTRACT);
                 let is_external = !is_abstract && c.methodish_function_body.is_external();
                 let user_attributes = Self::p_user_attributes(&c.methodish_attribute, env)?;
-                let method = aast::Method_ {
+                let method = ast::Method_ {
                     span: Self::p_function(node, env),
                     annotation: (),
                     final_: kinds.has(modifier::FINAL),
@@ -4084,13 +4074,13 @@ where
                     where_constraints: hdr.constrs,
                     variadic: Self::determine_variadicity(&hdr.parameters),
                     params: hdr.parameters,
-                    body: aast::FuncBody {
+                    body: ast::FuncBody {
                         annotation: (),
                         ast: body,
                     },
                     fun_kind: Self::mk_fun_kind(hdr.suspension_kind, body_has_yield),
                     user_attributes,
-                    ret: aast::TypeHint((), hdr.return_type),
+                    ret: ast::TypeHint((), hdr.return_type),
                     external: is_external,
                     doc_comment: doc_comment_opt,
                 };
@@ -4114,7 +4104,7 @@ where
                 };
                 let user_attributes = Self::p_user_attributes(&c.methodish_trait_attribute, env)?;
                 let visibility = p_method_vis(&h.function_modifiers, env)?;
-                let mtr = aast::MethodRedeclaration {
+                let mtr = ast::MethodRedeclaration {
                     final_: kind.has(modifier::FINAL),
                     abstract_: kind.has(modifier::ABSTRACT),
                     static_: kind.has(modifier::STATIC),
@@ -4125,7 +4115,7 @@ where
                     variadic: Self::determine_variadicity(&hdr.parameters),
                     params: hdr.parameters,
                     fun_kind: Self::mk_fun_kind(hdr.suspension_kind, false),
-                    ret: aast::TypeHint((), hdr.return_type),
+                    ret: ast::TypeHint((), hdr.return_type),
                     trait_: qualifier,
                     method: name,
                     user_attributes,
@@ -4148,7 +4138,7 @@ where
                             };
                             let removed_names = Self::could_map(Self::pos_name, removed_names, e)?;
                             Self::raise_nast_error("unsupported_instead_of");
-                            Ok(Either::Left(aast::InsteadofAlias(
+                            Ok(Either::Left(ast::InsteadofAlias(
                                 qualifier,
                                 name,
                                 removed_names,
@@ -4166,7 +4156,7 @@ where
                                 _ => (None, Self::p_pstring(aliasing_name, e)?),
                             };
                             let (kinds, mut vis_raw) = Self::p_modifiers(
-                                |mut acc, kind| -> Vec<aast_defs::UseAsVisibility> {
+                                |mut acc, kind| -> Vec<ast::UseAsVisibility> {
                                     if let Some(v) = modifier::to_use_as_visibility(kind) {
                                         acc.push(v);
                                     }
@@ -4179,7 +4169,7 @@ where
                             let vis = if kinds.is_empty() || kinds.has_any(modifier::VISIBILITIES) {
                                 vis_raw
                             } else {
-                                let mut v = vec![aast::UseAsVisibility::UseAsPublic];
+                                let mut v = vec![ast::UseAsVisibility::UseAsPublic];
                                 v.append(&mut vis_raw);
                                 v
                             };
@@ -4189,7 +4179,7 @@ where
                                 None
                             };
                             Self::raise_nast_error("unsupported_trait_use_as");
-                            Ok(Either::Right(aast::UseAsAlias(
+                            Ok(Either::Right(ast::UseAsAlias(
                                 qualifier,
                                 name,
                                 aliased_name,
@@ -4228,17 +4218,16 @@ where
                 type Ret = Result<Either<ast::XhpAttr, ast::Hint>>;
                 let p_attr = |node: &Syntax<T, V>, env: &mut Env| -> Ret {
                     let mut mk_attr_use = |n: &Syntax<T, V>| {
-                        Ok(Either::Right(aast::Hint(
+                        Ok(Either::Right(ast::Hint(
                             Self::p_pos(n, env),
-                            Box::new(aast::Hint_::Happly(Self::pos_name(n, env)?, vec![])),
+                            Box::new(ast::Hint_::Happly(Self::pos_name(n, env)?, vec![])),
                         )))
                     };
                     match &node.syntax {
                         XHPClassAttribute(c) => {
                             let ty = &c.xhp_attribute_decl_type;
                             let init = &c.xhp_attribute_decl_initializer;
-                            let ast_defs::Id(p, name) =
-                                Self::pos_name(&c.xhp_attribute_decl_name, env)?;
+                            let ast::Id(p, name) = Self::pos_name(&c.xhp_attribute_decl_name, env)?;
                             match &ty.syntax {
                                 TypeConstant(_) if env.is_typechecker() => {
                                     Self::raise_parsing_error(
@@ -4250,8 +4239,8 @@ where
                                 _ => {}
                             }
                             let req = match &c.xhp_attribute_decl_required.syntax {
-                                XHPRequired(_) => Some(aast::XhpAttrTag::Required),
-                                XHPLateinit(_) => Some(aast::XhpAttrTag::LateInit),
+                                XHPRequired(_) => Some(ast::XhpAttrTag::Required),
+                                XHPLateinit(_) => Some(ast::XhpAttrTag::LateInit),
                                 _ => None,
                             };
                             let pos = if init.is_missing() {
@@ -4271,15 +4260,15 @@ where
                             };
                             let init_expr =
                                 Self::mp_optional(Self::p_simple_initializer, init, env)?;
-                            let xhp_attr = aast::XhpAttr(
+                            let xhp_attr = ast::XhpAttr(
                                 hint.clone(),
-                                aast::ClassVar {
+                                ast::ClassVar {
                                     final_: false,
-                                    xhp_attr: Some(aast::XhpAttrInfo { xai_tag: req }),
+                                    xhp_attr: Some(ast::XhpAttrInfo { xai_tag: req }),
                                     abstract_: false,
-                                    visibility: aast::Visibility::Public,
+                                    visibility: ast::Visibility::Public,
                                     type_: hint,
-                                    id: ast_defs::Id(p, String::from(":") + &name),
+                                    id: ast::Id(p, String::from(":") + &name),
                                     expr: init_expr,
                                     user_attributes: vec![],
                                     doc_comment: None,
@@ -4362,7 +4351,7 @@ where
                                     }
                                 }
                             }
-                            members.push(aast::PuMember {
+                            members.push(ast::PuMember {
                                 atom: id,
                                 types,
                                 exprs,
@@ -4382,7 +4371,7 @@ where
                         }
                     }
                 }
-                Ok(class.pu_enums.push(aast::PuEnum {
+                Ok(class.pu_enums.push(ast::PuEnum {
                     name: id,
                     is_final,
                     case_types,
@@ -4429,7 +4418,7 @@ where
                 let f = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::WhereConstraint> {
                     match &n.syntax {
                         WhereConstraint(c) => {
-                            use ast_defs::ConstraintKind::*;
+                            use ast::ConstraintKind::*;
                             let l = Self::p_hint(&c.where_constraint_left_type, e)?;
                             let o = &c.where_constraint_operator;
                             let o = match Self::token_kind(o) {
@@ -4439,7 +4428,7 @@ where
                                 _ => Self::missing_syntax(None, "constraint operator", o, e)?,
                             };
                             let r = Self::p_hint(&c.where_constraint_right_type, e)?;
-                            Ok(aast::WhereConstraint(l, o, r))
+                            Ok(ast::WhereConstraint(l, o, r))
                         }
                         _ => Self::missing_syntax(None, "where constraint", n, e),
                     }
@@ -4460,7 +4449,7 @@ where
     }
 
     fn p_namespace_use_kind(kind: &Syntax<T, V>, env: &mut Env) -> Result<ast::NsKind> {
-        use aast::NsKind::*;
+        use ast::NsKind::*;
         match &kind.syntax {
             Missing => Ok(NSClassAndNamespace),
             _ => match Self::token_kind(kind) {
@@ -4488,15 +4477,15 @@ where
                 let clause_kind = &c.namespace_use_clause_kind;
                 let alias = &c.namespace_use_alias;
                 let name = &c.namespace_use_name;
-                let ast_defs::Id(p, n) = match (prefix, Self::pos_name(name, env)?) {
+                let ast::Id(p, n) = match (prefix, Self::pos_name(name, env)?) {
                     (None, id) => id,
-                    (Some(prefix), ast_defs::Id(p, n)) => {
-                        ast_defs::Id(p, Self::pos_name(prefix, env)?.1 + &n)
+                    (Some(prefix), ast::Id(p, n)) => {
+                        ast::Id(p, Self::pos_name(prefix, env)?.1 + &n)
                     }
                 };
                 let alias = if alias.is_missing() {
                     let x = NAMESPACE_USE.find(&n).unwrap().as_str();
-                    ast_defs::Id(p.clone(), x.to_string())
+                    ast::Id(p.clone(), x.to_string())
                 } else {
                     Self::pos_name(alias, env)?
                 };
@@ -4507,7 +4496,7 @@ where
                 }?;
                 Ok((
                     kind,
-                    ast_defs::Id(
+                    ast::Id(
                         p,
                         if n.len() > 0 && n.chars().nth(0) == Some('\\') {
                             n
@@ -4540,8 +4529,8 @@ where
                 };
                 let user_attributes = Self::p_user_attributes(function_attribute_spec, env)?;
                 let variadic = Self::determine_variadicity(&hdr.parameters);
-                let ret = aast::TypeHint((), hdr.return_type);
-                Ok(vec![aast::Def::mk_fun(aast::Fun_ {
+                let ret = ast::TypeHint((), hdr.return_type);
+                Ok(vec![ast::Def::mk_fun(ast::Fun_ {
                     span: Self::p_function(node, env),
                     annotation: (),
                     mode: Self::mode_annotation(env.file_mode()),
@@ -4550,7 +4539,7 @@ where
                     tparams: hdr.type_parameters,
                     where_constraints: hdr.constrs,
                     params: hdr.parameters,
-                    body: aast::FuncBody {
+                    body: ast::FuncBody {
                         ast: block,
                         annotation: (),
                     },
@@ -4578,13 +4567,13 @@ where
                 };
                 let name = Self::pos_name(&c.classish_name, env)?;
                 *env.cls_reified_generics() = HashSet::new();
-                let tparams = aast::ClassTparams {
+                let tparams = ast::ClassTparams {
                     list: Self::p_tparam_l(true, &c.classish_type_parameters, env)?,
                     constraints: s_map::SMap::new(),
                 };
                 let extends = Self::could_map(Self::p_hint, &c.classish_extends_list, env)?;
                 *env.parent_maybe_reified() = match extends.first().map(|h| h.1.as_ref()) {
-                    Some(aast::Hint_::Happly(_, hl)) => !hl.is_empty(),
+                    Some(ast::Hint_::Happly(_, hl)) => !hl.is_empty(),
                     _ => false,
                 };
                 let implements = Self::could_map(Self::p_hint, &c.classish_implements_list, env)?;
@@ -4593,16 +4582,14 @@ where
                 let namespace = Self::mk_empty_ns_env(env);
                 let span = Self::p_pos(node, env);
                 let class_kind = match Self::token_kind(&c.classish_keyword) {
-                    Some(TK::Class) if kinds.has(modifier::ABSTRACT) => {
-                        ast_defs::ClassKind::Cabstract
-                    }
-                    Some(TK::Class) => ast_defs::ClassKind::Cnormal,
-                    Some(TK::Interface) => ast_defs::ClassKind::Cinterface,
-                    Some(TK::Trait) => ast_defs::ClassKind::Ctrait,
-                    Some(TK::Enum) => ast_defs::ClassKind::Cenum,
+                    Some(TK::Class) if kinds.has(modifier::ABSTRACT) => ast::ClassKind::Cabstract,
+                    Some(TK::Class) => ast::ClassKind::Cnormal,
+                    Some(TK::Interface) => ast::ClassKind::Cinterface,
+                    Some(TK::Trait) => ast::ClassKind::Ctrait,
+                    Some(TK::Enum) => ast::ClassKind::Cenum,
                     _ => Self::missing_syntax(None, "class kind", &c.classish_keyword, env)?,
                 };
-                let mut class_ = aast::Class_ {
+                let mut class_ = ast::Class_ {
                     span,
                     annotation: (),
                     mode,
@@ -4644,7 +4631,7 @@ where
                     }
                     _ => Self::missing_syntax(None, "classish body", &c.classish_body, env)?,
                 }
-                Ok(vec![aast::Def::mk_class(class_)])
+                Ok(vec![ast::Def::mk_class(class_)])
             }
             ConstDeclaration(c) => {
                 let ty = &c.const_type_specifier;
@@ -4655,7 +4642,7 @@ where
                         ConstantDeclarator(c) => {
                             let name = &c.constant_declarator_name;
                             let init = &c.constant_declarator_initializer;
-                            let gconst = aast::Gconst {
+                            let gconst = ast::Gconst {
                                 annotation: (),
                                 mode: Self::mode_annotation(env.file_mode()),
                                 name: Self::pos_name(name, env)?,
@@ -4664,7 +4651,7 @@ where
                                 namespace: Self::mk_empty_ns_env(env),
                                 span: Self::p_pos(node, env),
                             };
-                            aast::Def::mk_constant(gconst)
+                            ast::Def::mk_constant(gconst)
                         }
                         _ => Self::missing_syntax(None, "constant declaration", decl, env)?,
                     };
@@ -4675,11 +4662,11 @@ where
             AliasDeclaration(c) => {
                 let tparams = Self::p_tparam_l(false, &c.alias_generic_parameter, env)?;
                 for tparam in tparams.iter() {
-                    if tparam.reified != aast::ReifyKind::Erased {
+                    if tparam.reified != ast::ReifyKind::Erased {
                         Self::raise_parsing_error(node, env, &syntax_error::invalid_reified)
                     }
                 }
-                Ok(vec![aast::Def::mk_typedef(aast::Typedef {
+                Ok(vec![ast::Def::mk_typedef(ast::Typedef {
                     annotation: (),
                     name: Self::pos_name(&c.alias_name, env)?,
                     tparams,
@@ -4694,8 +4681,8 @@ where
                     namespace: Self::mk_empty_ns_env(env),
                     mode: Self::mode_annotation(env.file_mode()),
                     vis: match Self::token_kind(&c.alias_keyword) {
-                        Some(TK::Type) => aast::TypedefVisibility::Transparent,
-                        Some(TK::Newtype) => aast::TypedefVisibility::Opaque,
+                        Some(TK::Type) => ast::TypedefVisibility::Transparent,
+                        Some(TK::Newtype) => ast::TypedefVisibility::Opaque,
                         _ => Self::missing_syntax(None, "kind", &c.alias_keyword, env)?,
                     },
                     kind: Self::p_hint(&c.alias_type, env)?,
@@ -4704,7 +4691,7 @@ where
             EnumDeclaration(c) => {
                 let p_enumerator = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::ClassConst> {
                     match &n.syntax {
-                        Enumerator(c) => Ok(aast::ClassConst {
+                        Enumerator(c) => Ok(ast::ClassConst {
                             type_: None,
                             id: Self::pos_name(&c.enumerator_name, e)?,
                             expr: Some(Self::p_expr(&c.enumerator_value, e)?),
@@ -4713,16 +4700,16 @@ where
                         _ => Self::missing_syntax(None, "enumerator", n, e),
                     }
                 };
-                Ok(vec![aast::Def::mk_class(aast::Class_ {
+                Ok(vec![ast::Def::mk_class(ast::Class_ {
                     annotation: (),
                     mode: Self::mode_annotation(env.file_mode()),
                     user_attributes: Self::p_user_attributes(&c.enum_attribute_spec, env)?,
                     file_attributes: vec![],
                     final_: false,
-                    kind: ast_defs::ClassKind::Cenum,
+                    kind: ast::ClassKind::Cenum,
                     is_xhp: false,
                     name: Self::pos_name(&c.enum_name, env)?,
-                    tparams: aast::ClassTparams {
+                    tparams: ast::ClassTparams {
                         list: vec![],
                         constraints: s_map::SMap::new(),
                     },
@@ -4732,7 +4719,7 @@ where
                     consts: Self::could_map(p_enumerator, &c.enum_enumerators, env)?,
                     namespace: Self::mk_empty_ns_env(env),
                     span: Self::p_pos(node, env),
-                    enum_: Some(aast::Enum_ {
+                    enum_: Some(ast::Enum_ {
                         base: Self::p_hint(&c.enum_base, env)?,
                         constraint: Self::mp_optional(Self::p_tconstraint_ty, &c.enum_type, env)?,
                     }),
@@ -4763,7 +4750,7 @@ where
                     )),
                     _ => Self::missing_syntax(None, "record_field", n, e),
                 };
-                Ok(vec![aast::Def::mk_record_def(aast::RecordDef {
+                Ok(vec![ast::Def::mk_record_def(ast::RecordDef {
                     annotation: (),
                     name: Self::pos_name(&c.record_name, env)?,
                     extends: Self::could_map(Self::p_hint, &c.record_extends_list, env)?
@@ -4783,9 +4770,9 @@ where
                     || env.codegen() =>
             {
                 let expr = Self::p_expr(&c.inclusion_expression, env)?;
-                Ok(vec![aast::Def::mk_stmt(aast::Stmt::new(
+                Ok(vec![ast::Def::mk_stmt(ast::Stmt::new(
                     Self::p_pos(node, env),
-                    aast::Stmt_::mk_expr(expr),
+                    ast::Stmt_::mk_expr(expr),
                 ))])
             }
             NamespaceDeclaration(c) => {
@@ -4803,7 +4790,7 @@ where
                     }
                     _ => vec![],
                 };
-                Ok(vec![aast::Def::mk_namespace(
+                Ok(vec![ast::Def::mk_namespace(
                     Self::pos_name(name, env)?,
                     defs,
                 )])
@@ -4821,7 +4808,7 @@ where
                             )
                         })
                         .collect();
-                Ok(vec![aast::Def::mk_namespace_use(uses?)])
+                Ok(vec![ast::Def::mk_namespace_use(uses?)])
             }
             NamespaceUseDeclaration(c) => {
                 let uses: std::result::Result<Vec<_>, _> = Self::as_list(&c.namespace_use_clauses)
@@ -4835,10 +4822,10 @@ where
                         )
                     })
                     .collect();
-                Ok(vec![aast::Def::mk_namespace_use(uses?)])
+                Ok(vec![ast::Def::mk_namespace_use(uses?)])
             }
             FileAttributeSpecification(_) => {
-                Ok(vec![aast::Def::mk_file_attributes(aast::FileAttribute {
+                Ok(vec![ast::Def::mk_file_attributes(ast::FileAttribute {
                     user_attributes: Self::p_user_attribute(node, env)?,
                     namespace: Self::mk_empty_ns_env(env),
                 })])
@@ -4848,7 +4835,7 @@ where
             {
                 Ok(vec![])
             }
-            _ => Ok(vec![aast::Def::mk_stmt(Self::p_stmt(node, env)?)]),
+            _ => Ok(vec![ast::Def::mk_stmt(Self::p_stmt(node, env)?)]),
         }
     }
 

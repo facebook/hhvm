@@ -29,20 +29,17 @@ let add_include inc =
   let srs = !symbol_refs in
   set_symbol_refs { srs with includes = IncludePathSet.add inc srs.includes }
 
-let add_constant cid =
-  let s = Hhbc_id.Const.to_raw_string cid in
+let add_constant s =
   if s <> "" then
     let srs = !symbol_refs in
     set_symbol_refs { srs with constants = SSet.add s srs.constants }
 
-let add_function fid =
-  let s = Hhbc_id.Function.to_raw_string fid in
+let add_function s =
   if s <> "" then
     let srs = !symbol_refs in
     set_symbol_refs { srs with functions = SSet.add s srs.functions }
 
-let add_class cid =
-  let s = Hhbc_id.Class.to_raw_string cid in
+let add_class s =
   if s <> "" then
     let srs = !symbol_refs in
     set_symbol_refs { srs with classes = SSet.add s srs.classes }

@@ -793,7 +793,12 @@ bool insertDefInlineFP(InlineAnalysis& ia, OptimizeContext& ctx, Block* block) {
   assertx(block->numPreds() == 1);
   assertx(ctx.deadFp->inst()->is(DefInlineFP));
   auto newDef = ctx.unit->clone(ctx.deadFp->inst());
-  if (block->isCatch()) newDef->extra<DefInlineFP>()->syncVmfp = true;
+  if (block->isCatch()) {
+    newDef->extra<DefInlineFP>()->syncVmfp = true;
+    // Update DefInlineFP's marker to be BeginCatch's marker so that we can
+    // later use it to correctly calculate PC
+    newDef->marker() = block->catchMarker();
+  }
   auto newFp  = newDef->dst();
   block->prepend(newDef);
   auto const inlineExit = replaceFP(block, ctx.deadFp, newFp, *ctx.fpUses);

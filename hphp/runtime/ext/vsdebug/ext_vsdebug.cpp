@@ -156,8 +156,15 @@ void VSDebugExtension::moduleInit() {
 }
 
 void VSDebugExtension::moduleShutdown() {
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "VSDebugExtension::moduleShutdown called."
+  );
+  VSDebugLogger::LogFlush();
+
   std::atomic_thread_fence(std::memory_order_acquire);
   if (s_debugger != nullptr) {
+    s_debugger->shutdown();
     delete s_debugger;
     s_debugger = nullptr;
   }

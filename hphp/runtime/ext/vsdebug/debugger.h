@@ -208,9 +208,11 @@ struct Debugger final {
   Debugger(const Debugger&) = delete;
   Debugger& operator=(const Debugger&) = delete;
   Debugger (Debugger && ) = delete;
-
   ~Debugger() {
-    shutdown();
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Debugger destructor called"
+    );
   }
 
   // Sets the transport mechanism to be used to communicate with a debug client.

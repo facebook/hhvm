@@ -11,6 +11,7 @@ open Config_file.Getters
 open Hh_core
 
 type t = {
+  min_log_level: Hh_logger.Level.t;
   experiments_config_meta: string;
   use_watchman: bool;
   watchman_init_timeout: int;
@@ -137,6 +138,7 @@ and remote_type_check = {
 
 let default =
   {
+    min_log_level = Hh_logger.Level.Info;
     experiments_config_meta = "";
     use_watchman = false;
     (* Buck and hgwatchman use a 10 second timeout too *)
@@ -342,6 +344,19 @@ let load_ fn ~silent ~current_version overrides =
   let config = Config_file.parse_local_config ~silent fn in
   let (experiments_config_meta, config) =
     apply_overrides ~silent ~current_version ~config ~overrides
+  in
+  let min_log_level =
+    match
+      String.lowercase_ascii (string_ "min_log_level" ~default:"info" config)
+    with
+    | "off" -> Hh_logger.Level.Off
+    | "fatal" -> Hh_logger.Level.Fatal
+    | "error" -> Hh_logger.Level.Error
+    | "warn" -> Hh_logger.Level.Warn
+    | "info" -> Hh_logger.Level.Info
+    | "debug"
+    | _ ->
+      Hh_logger.Level.Debug
   in
   let use_watchman =
     bool_if_version "use_watchman" ~default:default.use_watchman config
@@ -622,6 +637,7 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   {
+    min_log_level;
     experiments_config_meta;
     use_watchman;
     watchman_init_timeout;

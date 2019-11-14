@@ -90,6 +90,7 @@ impl<'a> AastParser {
                 env.quick_mode,
                 env.keep_errors,
                 env.show_all_errors,
+                env.fail_open,
                 mode,
                 indexed_source_text,
                 &env.parser_options,

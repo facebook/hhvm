@@ -168,6 +168,7 @@ impl<'a> Env<'a> {
         quick_mode: bool,
         keep_errors: bool,
         show_all_errors: bool,
+        fail_open: bool,
         mode: file_info::Mode,
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
@@ -196,7 +197,7 @@ impl<'a> Env<'a> {
             keep_errors,
             quick_mode,
             show_all_errors,
-            fail_open: true,
+            fail_open,
             file_mode: mode,
             top_level_statements: true,
             saw_yield: false,
@@ -2963,7 +2964,7 @@ where
             }
             GotoStatement(c) => {
                 if env.is_typechecker() && !env.parser_options.po_allow_goto {
-                    Self::raise_parsing_error(node, env, &syntax_error::goto_label);
+                    Self::raise_parsing_error(node, env, &syntax_error::goto);
                 }
                 Ok(S::new(
                     pos,

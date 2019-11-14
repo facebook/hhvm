@@ -8,7 +8,7 @@
 
 use crate::token_kind::TokenKind;
 use ocamlrep_derive::OcamlRep;
-use std::borrow::Cow;
+use std::{borrow::Cow, cmp::Ordering};
 
 // many errors are static strings, but not all of them
 pub type Error = Cow<'static, str>;
@@ -53,6 +53,20 @@ impl SyntaxError {
             ErrorType::ParseError,
             message,
         )
+    }
+
+    pub fn compare_offset(e1: &Self, e2: &Self) -> Ordering {
+        (e1.start_offset, e1.end_offset).cmp(&(e2.start_offset, e2.end_offset))
+    }
+
+    pub fn equal_offset(e1: &Self, e2: &Self) -> bool {
+        Self::compare_offset(e1, e2) == Ordering::Equal
+    }
+
+    pub fn weak_equal(e1: &Self, e2: &Self) -> bool {
+        e1.start_offset == e2.start_offset
+            && e1.end_offset == e2.end_offset
+            && e1.message == e2.message
     }
 }
 

@@ -236,6 +236,14 @@ where
         self.kind() == SyntaxKind::CompoundStatement
     }
 
+    pub fn is_methodish_declaration(&self) -> bool {
+        self.kind() == SyntaxKind::MethodishDeclaration
+    }
+
+    pub fn is_function_declaration(&self) -> bool {
+        self.kind() == SyntaxKind::FunctionDeclaration
+    }
+
     pub fn is_xhp_open(&self) -> bool {
         self.kind() == SyntaxKind::XHPOpen
     }

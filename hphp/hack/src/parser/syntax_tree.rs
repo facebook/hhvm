@@ -2,18 +2,23 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::cmp::Ordering;
-
 pub mod mode_parser;
 
 use crate::mode_parser::parse_mode;
 use oxidized::file_info::Mode;
-use parser_core_types::{source_text::SourceText, syntax_error::SyntaxError};
+use parser_core_types::{
+    lexable_token::LexableToken,
+    source_text::SourceText,
+    syntax::{Syntax, SyntaxValueType},
+    syntax_error::SyntaxError,
+    syntax_trait::SyntaxTrait,
+};
 use parser_rust::{
     parser::Parser,
     parser_env::ParserEnv,
     smart_constructors::{NodeType, SmartConstructors},
 };
+use std::borrow::Borrow;
 
 pub struct SyntaxTree<'a, Syntax, State> {
     text: &'a SourceText<'a>,
@@ -24,35 +29,65 @@ pub struct SyntaxTree<'a, Syntax, State> {
     required_stack_size: Option<usize>,
 }
 
-fn dedup_errors(errors: Vec<SyntaxError>) -> Vec<SyntaxError> {
-    let mut errors = errors.clone();
-    errors.dedup();
-    errors.reverse();
-    errors
-}
-
-fn process_errors(errors: Vec<SyntaxError>) -> Vec<SyntaxError> {
-    /* We've got the lexical errors and the parser errors together, both
-    with lexically later errors earlier in the list. We want to reverse the
-    list so that later errors come later, and then do a stable sort to put the
-    lexical and parser errors together. */
-    let mut errors = errors.clone();
-    errors.reverse();
-    // Vec::sort_by is a stable sort, which is required here
-    errors.sort_by(|e1, e2| {
-        if e1.start_offset < e2.start_offset {
-            Ordering::Less
-        } else if e1.start_offset > e2.start_offset {
-            Ordering::Greater
-        } else if e1.end_offset < e2.end_offset {
-            Ordering::Less
-        } else if e1.end_offset > e2.end_offset {
-            Ordering::Greater
+impl<'a, T, V, State> SyntaxTree<'a, Syntax<T, V>, State>
+where
+    T: LexableToken<'a>,
+    V: SyntaxValueType<T>,
+    Syntax<T, V>: SyntaxTrait,
+{
+    pub fn errors(&self) -> Vec<&SyntaxError>
+    where
+        State: Clone,
+    {
+        let mut errs: Vec<&SyntaxError> = if self.is_decl() {
+            self.errors
+                .iter()
+                .filter(|e| !Self::is_in_body(&self.root, e.start_offset))
+                .collect()
         } else {
-            Ordering::Equal
+            self.errors.iter().collect()
+        };
+        Self::remove_duplicates(&mut errs, SyntaxError::equal_offset);
+        errs
+    }
+
+    fn is_in_body(node: &Syntax<T, V>, position: usize) -> bool {
+        let p = Self::parentage(node, position);
+        for i in 1..p.len() {
+            if p[i - 1].is_compound_statement()
+                && (p[i].is_methodish_declaration() || p[i].is_function_declaration())
+            {
+                return true;
+            }
         }
-    });
-    dedup_errors(errors)
+        false
+    }
+
+    // TODO:(shiqicao) move this function to SyntaxTrait, see D18359931
+    fn parentage(node: &Syntax<T, V>, position: usize) -> Vec<&Syntax<T, V>> {
+        let mut acc = vec![];
+        if position < node.full_width() {
+            Self::parentage_(node, position, &mut acc);
+        }
+        acc
+    }
+
+    fn parentage_<'b>(
+        node: &'b Syntax<T, V>,
+        mut position: usize,
+        acc: &mut Vec<&'b Syntax<T, V>>,
+    ) {
+        for c in node.iter_children() {
+            let width = node.full_width();
+            if position < width {
+                Self::parentage_(c, position, acc);
+                break;
+            } else {
+                position -= width;
+            }
+        }
+        acc.push(node)
+    }
 }
 
 impl<'a, Syntax, State> SyntaxTree<'a, Syntax, State>
@@ -86,7 +121,7 @@ where
         let raw_tree = ptr as *mut SyntaxTree<Syntax, State>;
         let tree = match raw_tree.as_mut() {
             Some(t) => t,
-            None => return Err(String::from("null raw tree pointer")),
+            None => return Err("null raw tree pointer".into()),
         };
         // The tree already contains source text, but this source text contains a pointer into OCaml
         // heap, which might have been invalidated by GC in the meantime. Replacing the source text
@@ -113,13 +148,31 @@ where
     pub fn create(
         text: &'a SourceText<'a>,
         root: Syntax,
-        errors: Vec<SyntaxError>,
+        mut errors: Vec<SyntaxError>,
         mode: Option<Mode>,
         state: State,
         required_stack_size: Option<usize>,
     ) -> Self {
-        let errors = process_errors(errors);
+        Self::process_errors(&mut errors);
         Self::build(text, root, errors, mode, state, required_stack_size)
+    }
+
+    fn remove_duplicates<F>(errors: &mut Vec<impl Borrow<SyntaxError>>, equals: F)
+    where
+        F: Fn(&SyntaxError, &SyntaxError) -> bool,
+    {
+        errors.dedup_by(|e1, e2| equals((*e1).borrow(), (*e2).borrow()));
+    }
+
+    fn process_errors(errors: &mut Vec<SyntaxError>) {
+        /* We've got the lexical errors and the parser errors together, both
+        with lexically later errors earlier in the list. We want to reverse the
+        list so that later errors come later, and then do a stable sort to put the
+        lexical and parser errors together. */
+        errors.reverse();
+        // Vec::sort_by is a stable sort, which is required here
+        errors.sort_by(SyntaxError::compare_offset);
+        Self::remove_duplicates(errors, SyntaxError::weak_equal);
     }
 
     pub fn root(&self) -> &Syntax {
@@ -168,8 +221,8 @@ where
         self.text = text
     }
 
-    //TODO: errors and to_json require some unimplemented methods in syntax.rs, particularly
-    // is_in_body and and Hh_json.to_json
+    //TODO: to_json require some unimplemented methods in syntax.rs, particularly
+    // Hh_json.to_json
 }
 
 pub fn make_syntax_tree<'a, S, T>(
@@ -184,29 +237,30 @@ where
     let mode = parse_mode(source);
     let mut parser = Parser::<S, T>::make(&source, env);
     let root = parser.parse_script(None);
-    let (_, errors, _, sc) = parser.into_parts();
-    SyntaxTree::create(source, root, errors, mode, sc.into_state(), None)
+    let errors = parser.errors();
+    let sc_state = parser.into_sc_state();
+    SyntaxTree::create(source, root, errors, mode, sc_state, None)
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::process_errors;
+    use crate::SyntaxTree;
     use parser_core_types::syntax_error;
 
     #[test]
     fn test_process_errors() {
-        let test_errors = vec![
+        let mut test_errors = vec![
             syntax_error::SyntaxError::make(0, 10, syntax_error::error0001),
             syntax_error::SyntaxError::make(10, 20, syntax_error::error0001),
             syntax_error::SyntaxError::make(0, 10, syntax_error::error0001),
         ];
-        let processed_test_errors = process_errors(test_errors);
+        SyntaxTree::<(), ()>::process_errors(&mut test_errors);
         assert_eq!(
             vec![
-                syntax_error::SyntaxError::make(10, 20, syntax_error::error0001),
                 syntax_error::SyntaxError::make(0, 10, syntax_error::error0001),
+                syntax_error::SyntaxError::make(10, 20, syntax_error::error0001),
             ],
-            processed_test_errors
+            test_errors
         );
     }
 }

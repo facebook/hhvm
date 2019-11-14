@@ -122,22 +122,23 @@ impl<'a> AastParser {
         aast: Option<&Program<Pos, (), (), ()>>,
     ) -> Vec<SyntaxError> {
         let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {
-            let mut errors = ParserErrors::parse_errors(
+            let mut errors = tree.errors().into_iter().cloned().collect::<Vec<_>>();
+            errors.extend(ParserErrors::parse_errors(
                 &tree,
                 // TODO(hrust) change to parser_otions to ref in ParserErrors
                 env.parser_options.clone(),
                 true, /* hhvm_compat_mode */
                 hhi_mode,
                 env.codegen,
-            );
+            ));
+            errors.sort_by(SyntaxError::compare_offset);
             errors.extend(aast.map_or(vec![], Self::_ast_check_check_program));
             errors
         };
         if env.codegen {
             find_errors(false /* hhi_mode */)
         } else if env.keep_errors {
-            // TODO(hrust) add tree.errors(), it is different than all_errors!
-            let first_error = tree.all_errors().first();
+            let first_error = tree.errors().into_iter().next();
             match first_error {
                 None if !env.quick_mode && !env.parser_options.po_parser_errors_only => {
                     let is_hhi = indexed_source_text

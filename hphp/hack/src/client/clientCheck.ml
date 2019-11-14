@@ -246,7 +246,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ())
       in
       let%lwt results =
-        rpc args @@ Rpc.IDE_HIGHLIGHT_REFS (content, line, char)
+        rpc args @@ Rpc.IDE_HIGHLIGHT_REFS ("", content, line, char)
       in
       ClientHighlightRefs.go results ~output_json:args.output_json;
       Lwt.return Exit_status.No_error

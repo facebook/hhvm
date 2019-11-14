@@ -346,6 +346,19 @@ let visitor =
 
 let all_symbols tast = visitor#go tast |> Result_set.elements
 
+let all_symbols_ctx
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    Result_set.elt list =
+  match entry.Provider_context.symbols with
+  | None ->
+    let (tast, _) =
+      Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
+    in
+    let symbols = all_symbols tast in
+    entry.Provider_context.symbols <- Some symbols;
+    symbols
+  | Some symbols -> symbols
+
 let go ~(tast : Tast.program) ~(line : int) ~(column : int) :
     Relative_path.t SymbolOccurrence.t list =
   all_symbols tast |> List.filter ~f:(is_target line column)
@@ -355,15 +368,4 @@ let go_quarantined
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) : Relative_path.t SymbolOccurrence.t list =
-  let (tast, _) =
-    Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
-  in
-  let symbol_list =
-    match entry.Provider_context.symbols with
-    | None ->
-      let all_symbols = all_symbols tast in
-      entry.Provider_context.symbols <- Some all_symbols;
-      all_symbols
-    | Some symbols -> symbols
-  in
-  symbol_list |> List.filter ~f:(is_target line column)
+  all_symbols_ctx ~ctx ~entry |> List.filter ~f:(is_target line column)

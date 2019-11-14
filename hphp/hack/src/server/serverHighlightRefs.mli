@@ -7,14 +7,10 @@
  *
  *)
 
-val go :
-  string * int * int -> TypecheckerOptions.t -> ServerHighlightRefsTypes.result
-
 (* For serverless IDE *)
 val go_quarantined :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   line:int ->
   column:int ->
-  tcopt:TypecheckerOptions.t ->
   ServerHighlightRefsTypes.result

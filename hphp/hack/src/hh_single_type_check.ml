@@ -1368,9 +1368,19 @@ let handle_mode
         in
         ClientFindRefs.print_ide_readable results))
   | Highlight_refs (line, column) ->
-    let filename = expect_single_file () in
-    let file = cat (Relative_path.to_absolute filename) in
-    let results = ServerHighlightRefs.go (file, line, column) tcopt in
+    let path = expect_single_file () in
+    let file_input =
+      ServerCommandTypes.FileName (Relative_path.to_absolute path)
+    in
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt)
+        ~path
+        ~file_input
+    in
+    let results =
+      ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column
+    in
     ClientHighlightRefs.go results ~output_json:false
   | Errors when batch_mode ->
     (* For each file in our batch, run typechecking serially.

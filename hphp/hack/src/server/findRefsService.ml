@@ -185,51 +185,57 @@ let get_deps_set_gconst cst_name =
     Relative_path.Set.add files fn
   | None -> Relative_path.Set.empty
 
+let fold_one_tast target acc symbol =
+  let module SO = SymbolOccurrence in
+  let SO.{ type_; pos; name; _ } = symbol in
+  Pos.Map.union acc
+  @@
+  match (target, type_) with
+  | (IMember (classes, Typeconst tc), SO.Typeconst (c_name, tc_name)) ->
+    process_taccess classes tc (c_name, tc_name, pos)
+  | (IMember (classes, member), SO.Method (c_name, m_name))
+  | (IMember (classes, member), SO.ClassConst (c_name, m_name))
+  | (IMember (classes, member), SO.Property (c_name, m_name)) ->
+    let mid = (pos, m_name) in
+    let is_method =
+      match type_ with
+      | SO.Method _ -> true
+      | _ -> false
+    in
+    let is_const =
+      match type_ with
+      | SO.ClassConst _ -> true
+      | _ -> false
+    in
+    process_member_id classes member c_name mid ~is_method ~is_const
+  | (IFunction fun_name, SO.Function) -> process_fun_id fun_name (pos, name)
+  | (IClass c, SO.Class) -> process_class_id c (pos, name) None
+  | (IGConst cst_name, SO.GConst) -> process_gconst_id cst_name (pos, name)
+  | _ -> Pos.Map.empty
+
 let find_refs tcopt target acc fileinfo_l =
   let tasts = ServerIdeUtils.recheck tcopt fileinfo_l in
   let results =
-    let module SO = SymbolOccurrence in
     List.fold tasts ~init:Pos.Map.empty ~f:(fun acc (_, tast) ->
         IdentifySymbolService.all_symbols tast
-        |> List.filter ~f:(fun symbol -> not symbol.SO.is_declaration)
-        |> List.fold ~init:Pos.Map.empty ~f:(fun acc symbol ->
-               let SO.{ type_; pos; name; _ } = symbol in
-               Pos.Map.union acc
-               @@
-               match (target, type_) with
-               | ( IMember (classes, Typeconst tc),
-                   SO.Typeconst (c_name, tc_name) ) ->
-                 process_taccess classes tc (c_name, tc_name, pos)
-               | (IMember (classes, member), SO.Method (c_name, m_name))
-               | (IMember (classes, member), SO.ClassConst (c_name, m_name))
-               | (IMember (classes, member), SO.Property (c_name, m_name)) ->
-                 let mid = (pos, m_name) in
-                 let is_method =
-                   match type_ with
-                   | SO.Method _ -> true
-                   | _ -> false
-                 in
-                 let is_const =
-                   match type_ with
-                   | SO.ClassConst _ -> true
-                   | _ -> false
-                 in
-                 process_member_id
-                   classes
-                   member
-                   c_name
-                   mid
-                   ~is_method
-                   ~is_const
-               | (IFunction fun_name, SO.Function) ->
-                 process_fun_id fun_name (pos, name)
-               | (IClass c, SO.Class) -> process_class_id c (pos, name) None
-               | (IGConst cst_name, SO.GConst) ->
-                 process_gconst_id cst_name (pos, name)
-               | _ -> Pos.Map.empty)
+        |> List.filter ~f:(fun symbol ->
+               not symbol.SymbolOccurrence.is_declaration)
+        |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast target)
         |> Pos.Map.union acc)
   in
   Pos.Map.fold (fun p str acc -> (str, p) :: acc) results acc
+
+let find_refs_ctx
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~(target : action_internal) : (string * Pos.Map.key) list =
+  let symbols = IdentifySymbolService.all_symbols_ctx ~ctx ~entry in
+  let results =
+    symbols
+    |> List.filter ~f:(fun symbol -> not symbol.SymbolOccurrence.is_declaration)
+    |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast target)
+  in
+  Pos.Map.fold (fun p str acc -> (str, p) :: acc) results []
 
 let parallel_find_refs workers fileinfo_l target tcopt =
   MultiWorker.call

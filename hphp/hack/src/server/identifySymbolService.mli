@@ -13,6 +13,9 @@ val clean_member_name : string -> string
 
 val all_symbols : Tast.program -> Result_set.elt list
 
+val all_symbols_ctx :
+  ctx:Provider_context.t -> entry:Provider_context.entry -> Result_set.elt list
+
 val go :
   tast:Tast.program ->
   line:int ->

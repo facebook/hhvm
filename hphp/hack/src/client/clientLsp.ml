@@ -1935,7 +1935,7 @@ let do_documentHighlight
     (params : DocumentHighlight.params) : DocumentHighlight.result Lwt.t =
   let (file, line, column) = lsp_file_position_to_hack params in
   let command =
-    ServerCommandTypes.(IDE_HIGHLIGHT_REFS (FileName file, line, column))
+    ServerCommandTypes.(IDE_HIGHLIGHT_REFS (file, FileName file, line, column))
   in
   let%lwt results = rpc conn ref_unblocked_time command in
   Lwt.return (List.map results ~f:hack_range_to_lsp_highlight)

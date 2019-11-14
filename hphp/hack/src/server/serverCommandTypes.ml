@@ -274,7 +274,7 @@ type _ t =
       labelled_file * int * int
       -> Find_refs.ide_result_or_retry t
   | IDE_HIGHLIGHT_REFS :
-      file_input * int * int
+      string * file_input * int * int
       -> ServerHighlightRefsTypes.result t
   | REFACTOR : ServerRefactorTypes.action -> Refactor.result_or_retry t
   | IDE_REFACTOR : Ide_refactor_type.t -> Refactor.ide_result_or_retry t

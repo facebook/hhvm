@@ -27,33 +27,18 @@ let get_target symbol =
       | SymbolOccurrence.GConst -> Some (IGConst symbol.name)
       | _ -> None))
 
-let highlight_symbol tcopt ast (line, char) path file_info symbol =
+let highlight_symbol ctx entry line column symbol =
   let res =
     match get_target symbol with
     | Some target ->
-      let results =
-        FindRefsService.find_refs tcopt target [] [(path, file_info)]
-      in
+      let results = FindRefsService.find_refs_ctx ~ctx ~entry ~target in
       List.rev (List.map results snd)
     | None when symbol.SymbolOccurrence.type_ = SymbolOccurrence.LocalVar ->
-      ServerFindLocals.go_from_ast ast line char
+      let ast = entry.Provider_context.ast in
+      ServerFindLocals.go_from_ast ast line column
     | None -> []
   in
   List.map res Ide_api_types.pos_to_range
-
-let filter_result symbols result =
-  let result =
-    List.fold symbols ~init:result ~f:(fun result symbol ->
-        if
-          Pos.length symbol.SymbolOccurrence.pos
-          > Pos.length result.SymbolOccurrence.pos
-        then
-          result
-        else
-          symbol)
-  in
-  List.filter symbols ~f:(fun symbol ->
-      symbol.SymbolOccurrence.pos = result.SymbolOccurrence.pos)
 
 let compare r1 r2 =
   Ide_api_types.(
@@ -69,53 +54,18 @@ let compare r1 r2 =
     else
       0)
 
-let rec combine_result l l1 l2 =
-  match (l1, l2) with
-  | (l1, []) -> l @ l1
-  | ([], l2) -> l @ l2
-  | (h1 :: l1_, h2 :: l2_) ->
-    begin
-      match compare h1 h2 with
-      | -1 -> combine_result (l @ [h1]) l1_ l2
-      | 1 -> combine_result (l @ [h2]) l1 l2_
-      | 0 -> combine_result (l @ [h1]) l1_ l2_
-      | _ -> l
-    end
-
-let go (content, line, char) tcopt =
-  ServerIdentifyFunction.get_occurrence_and_map
-    tcopt
-    content
-    line
-    char
-    ~f:(fun path file_info symbols ->
-      let ast = Ast_provider.get_ast path in
-      match symbols with
-      | symbol :: _ ->
-        let symbols = filter_result symbols symbol in
-        List.fold symbols ~init:[] ~f:(fun acc symbol ->
-            combine_result
-              []
-              acc
-              (highlight_symbol tcopt ast (line, char) path file_info symbol))
-      | _ -> [])
-
 let go_quarantined
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
-    ~(column : int)
-    ~(tcopt : TypecheckerOptions.t) : ServerHighlightRefsTypes.result =
-  let { Provider_context.path; ast; _ } = entry in
+    ~(column : int) : ServerHighlightRefsTypes.result =
   let symbol_to_highlight =
     IdentifySymbolService.go_quarantined ~ctx ~entry ~line ~column
   in
-  let file_info = Provider_context.get_fileinfo entry in
   let results =
     List.fold symbol_to_highlight ~init:[] ~f:(fun acc s ->
-        let stuff =
-          highlight_symbol tcopt ast (line, column) path file_info s
-        in
+        let stuff = highlight_symbol ctx entry line column s in
         List.append stuff acc)
   in
+  let results = List.dedup_and_sort ~compare results in
   results

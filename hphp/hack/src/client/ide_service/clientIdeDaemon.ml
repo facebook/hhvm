@@ -476,12 +476,15 @@ let handle_message :
             param.document_location
         in
         let result =
-          ServerDocblockAt.go_docblock_ctx
+          Provider_utils.respect_but_quarantine_unsaved_changes
             ~ctx
-            ~entry
-            ~line:param.document_location.line
-            ~column:param.document_location.column
-            ~kind:param.kind
+            ~f:(fun () ->
+              ServerDocblockAt.go_docblock_ctx
+                ~ctx
+                ~entry
+                ~line:param.document_location.line
+                ~column:param.document_location.column
+                ~kind:param.kind)
         in
         Lwt.return (state, Handle_message_result.Response result))
     (* Document highlighting *)
@@ -495,8 +498,7 @@ let handle_message :
               ~ctx
               ~entry
               ~line:document_location.line
-              ~column:document_location.column
-              ~tcopt:initialized_state.server_env.ServerEnv.tcopt)
+              ~column:document_location.column)
       in
       Lwt.return (state, Handle_message_result.Response results)
     (* Signature help *)

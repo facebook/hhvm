@@ -160,9 +160,18 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         map_env
           ~f:(ServerFindRefs.to_ide name)
           (ServerGoToImpl.go action genv env)))
-  | IDE_HIGHLIGHT_REFS (input, line, char) ->
-    let content = ServerFileSync.get_file_content input in
-    (env, ServerHighlightRefs.go (content, line, char) env.tcopt)
+  | IDE_HIGHLIGHT_REFS (path, file_input, line, column) ->
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~path:(Relative_path.create_detect_prefix path)
+        ~file_input
+    in
+    let r =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          (env, ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column))
+    in
+    r
   | REFACTOR refactor_action -> ServerRefactor.go refactor_action genv env
   | IDE_REFACTOR
       { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name } ->

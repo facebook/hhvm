@@ -19,17 +19,13 @@ let hack_arr_dv_arrs () =
   Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
 
 let add_symbol_refs class_base class_implements class_uses class_requirements =
-  let add_hhbc_id id =
-    Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string id)
+  let add_from_ast_name c =
+    Hhbc_id.Class.from_ast_name c |> Emit_symbol_refs.add_class
   in
-  (match class_base with
-  | Some c -> add_hhbc_id c
-  | _ -> ());
-  List.iter class_implements add_hhbc_id;
-  List.iter class_uses (fun c ->
-      let c = Hhbc_string_utils.strip_global_ns c in
-      Emit_symbol_refs.add_class c);
-  List.iter class_requirements (function (_, c) -> Emit_symbol_refs.add_class c)
+  Option.iter class_base ~f:Emit_symbol_refs.add_class;
+  List.iter class_implements ~f:Emit_symbol_refs.add_class;
+  List.iter class_uses ~f:add_from_ast_name;
+  List.iter class_requirements ~f:(function (_, c) -> add_from_ast_name c)
 
 let make_86method ~name ~params ~is_static ~visibility ~is_abstract ~span instrs
     =

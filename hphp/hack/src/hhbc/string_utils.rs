@@ -64,7 +64,7 @@ pub fn is_xhp(name: &str) -> bool {
 
 pub fn mangle_xhp_id(mut name: String) -> String {
     fn ignore_id(name: &str) -> bool {
-        name.starts_with("class@anonymous") || name.starts_with("Closure$")
+        name.starts_with("Closure$")
     }
 
     if !ignore_id(&name) && MANGLE_XHP_MODE.with(|x| x.get()) {

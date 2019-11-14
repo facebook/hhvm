@@ -40,7 +40,6 @@ let handler =
     method! at_expr env (_, e) =
       match e with
       | Id (pos, const) ->
-        let const = add_ns const in
         let ck = env.class_kind in
         if not (SN.PseudoConsts.is_pseudo_const const) then
           ()

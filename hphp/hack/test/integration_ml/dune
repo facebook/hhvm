@@ -16,6 +16,18 @@
     server_env
     test_injector_config))
 
+(library
+  (name runner_base)
+  (wrapped false)
+  (modules runner_base)
+  (libraries
+    integration_test_base
+    errors
+    server_env
+    unit_test
+    test_coverage_levels
+    test_all_ide))
+
 (executable
   (name runner)
   (modules
@@ -47,14 +59,7 @@
     test_serverConfig_overrides
     test_unbound_name
     test_unbound_name_2)
-  (libraries
-    integration_test_base
-    errors
-    server_env
-    unit_test
-    test_coverage_levels
-    test_all_saved_state
-    test_all_ide))
+  (libraries runner_base))
 
 (rule
   (targets test_all.exe)

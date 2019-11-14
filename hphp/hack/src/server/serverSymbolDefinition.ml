@@ -236,3 +236,10 @@ let get_definition_cst_node fallback_fn definition =
         SourceText.from_file (Pos.filename definition.pos)
     in
     get_definition_cst_node_from_pos definition.kind source_text definition.pos)
+
+let get_definition_cst_node_ctx
+    ~(entry : Provider_context.entry) ~(def : 'a SymbolDefinition.t) :
+    Full_fidelity_positioned_syntax.t option =
+  SymbolDefinition.(
+    let source_text = entry.Provider_context.source_text in
+    get_definition_cst_node_from_pos def.kind source_text def.pos)

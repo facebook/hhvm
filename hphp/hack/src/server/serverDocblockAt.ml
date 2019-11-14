@@ -138,17 +138,14 @@ let go_comments_for_position
   go_comments_from_source_text ~source_text ~filename ~line ~column ~kind
 
 (* Fetch a definition *)
-let go_comments_for_symbol
+let go_comments_for_symbol_ctx
+    ~(entry : Provider_context.entry)
     ~(def : 'a SymbolDefinition.t)
-    ~(base_class_name : string option)
-    ~(file : ServerCommandTypes.file_input) : string option =
+    ~(base_class_name : string option) : string option =
   match def.SymbolDefinition.docblock with
   | Some db -> Some (clean_comments db)
   | None ->
-    let ffps_opt =
-      ServerSymbolDefinition.get_definition_cst_node_from_file_input file def
-    in
-    (match ffps_opt with
+    (match ServerSymbolDefinition.get_definition_cst_node_ctx ~entry ~def with
     | None -> None
     | Some ffps ->
       (match Docblock_finder.get_docblock ffps with

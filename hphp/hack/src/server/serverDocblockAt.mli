@@ -8,10 +8,10 @@
  *)
 
 (** Returns the documentation comments for the given symbol or expression. *)
-val go_comments_for_symbol :
+val go_comments_for_symbol_ctx :
+  entry:Provider_context.entry ->
   def:'a SymbolDefinition.t ->
   base_class_name:string option ->
-  file:ServerCommandTypes.file_input ->
   string option
 
 (** Returns the docblock most appropriate to this position *)

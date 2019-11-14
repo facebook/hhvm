@@ -185,14 +185,12 @@ let go_quarantined
                 SymbolOccurrence.enclosing_class occurrence
               in
               def_opt >>= fun def ->
-              let file =
-                ServerCommandTypes.FileName
-                  (def.SymbolDefinition.pos |> Pos.to_absolute |> Pos.filename)
-              in
-              ServerDocblockAt.go_comments_for_symbol
+              let path = def.SymbolDefinition.pos |> Pos.filename in
+              let entry = Provider_utils.get_entry_VOLATILE ~ctx ~path in
+              ServerDocblockAt.go_comments_for_symbol_ctx
+                ~entry
                 ~def
                 ~base_class_name
-                ~file
             in
             let param_docs =
               match siginfo_documentation with

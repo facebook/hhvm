@@ -9,7 +9,6 @@
 use parser_rust as parser;
 
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
-use hhbc_string_utils_rust::GetName;
 use oxidized::{
     aast,
     ast_defs::{ConstraintKind, FunKind, Id, Variance},
@@ -75,13 +74,11 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> 
         let mut qualified_name = String::new();
         for part in parts {
             match part {
-                Node_::Name(name, _pos) => {
-                    qualified_name.push_str(&String::from_utf8_lossy(name.get().as_slice()))
-                }
+                Node_::Name(name, _pos) => qualified_name.push_str(&name),
                 Node_::Backslash(_) => qualified_name.push('\\'),
                 Node_::ListItem(listitem) => {
                     if let (Node_::Name(name, _), Node_::Backslash(_)) = &**listitem {
-                        qualified_name.push_str(&String::from_utf8_lossy(name.get().as_slice()));
+                        qualified_name.push_str(&name);
                         qualified_name.push_str("\\");
                     } else {
                         return Err(format!(
@@ -251,8 +248,8 @@ pub enum Node_ {
     List(Vec<Node_>),
     BracketedList(Box<(Pos, Vec<Node_>, Pos)>),
     Ignored,
-    Name(GetName, Pos),
-    XhpName(GetName, Pos),
+    Name(String, Pos),
+    XhpName(String, Pos),
     QualifiedName(Vec<Node_>, Pos),
     Hint(HintValue, Pos),
     Backslash(Pos), // This needs a pos since it shows up in names.
@@ -448,14 +445,11 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'_> {
 impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors<'a> {
     fn make_token(&mut self, token: Self::Token) -> Self::R {
         let token_text = || {
-            self.state
-                .source_text
-                .source_text()
-                .sub(
-                    token.leading_start_offset().unwrap_or(0) + token.leading_width(),
-                    token.width(),
-                )
-                .to_vec()
+            String::from_utf8_lossy(self.state.source_text.source_text().sub(
+                token.leading_start_offset().unwrap_or(0) + token.leading_width(),
+                token.width(),
+            ))
+            .to_string()
         };
         let token_pos = || {
             self.state
@@ -519,7 +513,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // was a little elbow grease and a lot of dignity.
         Ok(match kind {
             TokenKind::Name | TokenKind::Variable => {
-                let name = GetName::new(token_text(), |string| string);
+                let name = token_text();
                 if self.state.namespace_builder.is_building_namespace {
                     self.state
                         .namespace_builder
@@ -531,32 +525,18 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Node_::Name(name, token_pos())
                 }
             }
-            TokenKind::XHPClassName => {
-                Node_::XhpName(GetName::new(token_text(), |string| string), token_pos())
-            }
+            TokenKind::XHPClassName => Node_::XhpName(token_text(), token_pos()),
             TokenKind::String => Node_::Hint(HintValue::String, token_pos()),
             TokenKind::Int => Node_::Hint(HintValue::Int, token_pos()),
             TokenKind::Float => Node_::Hint(HintValue::Float, token_pos()),
             TokenKind::Double => Node_::Hint(
-                HintValue::Apply(Box::new((
-                    Id(
-                        token_pos(),
-                        GetName::new(token_text(), |string| string).to_string(),
-                    ),
-                    Vec::new(),
-                ))),
+                HintValue::Apply(Box::new((Id(token_pos(), token_text()), Vec::new()))),
                 token_pos(),
             ),
             TokenKind::Num => Node_::Hint(HintValue::Num, token_pos()),
             TokenKind::Bool => Node_::Hint(HintValue::Bool, token_pos()),
             TokenKind::Boolean => Node_::Hint(
-                HintValue::Apply(Box::new((
-                    Id(
-                        token_pos(),
-                        GetName::new(token_text(), |string| string).to_string(),
-                    ),
-                    Vec::new(),
-                ))),
+                HintValue::Apply(Box::new((Id(token_pos(), token_text()), Vec::new()))),
                 token_pos(),
             ),
             TokenKind::Void => Node_::Hint(HintValue::Void, token_pos()),

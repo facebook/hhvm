@@ -25,10 +25,8 @@ type env = {
   for_debugger_eval: bool;
   dump_symbol_refs: bool;
   empty_namespace: Namespace_env.env;
-  (* TODO(hrust) replace with these avoid two-way conversion of Hhbc_options
   config_jsons: Hh_json.json option list;
-  config_list: string list; *)
-  hhbc_options: Hhbc_options.t;
+  config_list: string list;
 }
 
 let add_to_time t0 =
@@ -36,10 +34,15 @@ let add_to_time t0 =
   (t, t -. t0)
 
 let with_global_state env f =
-  Hhbc_options.set_compiler_options env.hhbc_options;
+  let hhbc_options =
+    Hhbc_options.apply_config_overrides_statelessly
+      env.config_list
+      env.config_jsons
+  in
+  Hhbc_options.set_compiler_options hhbc_options;
   Emit_env.set_is_systemlib env.is_systemlib;
   let t = Unix.gettimeofday () in
-  let hhas_prog = f () in
+  let hhas_prog = f hhbc_options in
   let (t, codegen_t) = add_to_time t in
   (* TODO(hrust) investigate if we can revert it here, or some parts of
   global state carry over across multiple emit requests  *)
@@ -53,9 +56,9 @@ let with_global_state env f =
   { bytecode_segments; codegen_t; printing_t }
 
 let from_ast ~env ~is_hh_file tast =
-  with_global_state env (fun () ->
+  with_global_state env (fun hhbc_options ->
       let tast =
-        if Hhbc_options.enable_pocket_universes env.hhbc_options then
+        if Hhbc_options.enable_pocket_universes hhbc_options then
           Pocket_universes.translate tast
         else
           tast
@@ -68,7 +71,7 @@ let from_ast ~env ~is_hh_file tast =
         tast)
 
 let fatal ~env ~is_runtime_error pos message =
-  with_global_state env (fun () ->
+  with_global_state env (fun _ ->
       let error_t =
         if is_runtime_error then
           Hhbc_ast.FatalOp.Runtime

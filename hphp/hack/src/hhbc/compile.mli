@@ -19,7 +19,8 @@ type env = {
   for_debugger_eval: bool;
   dump_symbol_refs: bool;
   empty_namespace: Namespace_env.env;
-  hhbc_options: Hhbc_options.t;
+  config_jsons: Hh_json.json option list;
+  config_list: string list;
 }
 
 val from_ast : env:env -> is_hh_file:bool -> Tast.program -> result

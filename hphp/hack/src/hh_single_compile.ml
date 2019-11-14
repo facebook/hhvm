@@ -283,7 +283,10 @@ let parse_text ~hhbc_options popt fn text =
   in
   (ast, is_hh_file)
 
-let parse_file ~hhbc_options filename text =
+let parse_file ~config_list ~config_jsons filename text =
+  let hhbc_options =
+    Hhbc_options.apply_config_overrides_statelessly config_list config_jsons
+  in
   let popt =
     Hhbc_options.(
       let co = hhbc_options in
@@ -363,13 +366,19 @@ let handle_conversion_errors errors =
 
 let do_compile
     ~is_systemlib
-    ~hhbc_options
+    ~config_jsons
     (compiler_options : options)
     filename
     source_text
     debug_time =
   let t = Unix.gettimeofday () in
-  let (fail_or_tast, popt) = parse_file filename source_text ~hhbc_options in
+  let (fail_or_tast, popt) =
+    parse_file
+      filename
+      source_text
+      ~config_list:compiler_options.config_list
+      ~config_jsons
+  in
   ignore @@ add_to_time_ref debug_time.parsing_t t;
   let env =
     Compile.
@@ -380,7 +389,8 @@ let do_compile
         for_debugger_eval = compiler_options.for_debugger_eval;
         dump_symbol_refs = compiler_options.dump_symbol_refs;
         empty_namespace = Namespace_env.empty_from_popt popt;
-        hhbc_options;
+        config_list = compiler_options.config_list;
+        config_jsons;
       }
   in
   let (tast_hh, is_runtime_error, error) =
@@ -481,14 +491,9 @@ let process_single_source_unit
       if compiler_options.extract_facts then
         extract_facts ~compiler_options ~config_jsons ~filename source_text
       else
-        let hhbc_options =
-          Hhbc_options.apply_config_overrides_statelessly
-            compiler_options.config_list
-            config_jsons
-        in
         do_compile
           ~is_systemlib
-          ~hhbc_options
+          ~config_jsons
           compiler_options
           filename
           source_text

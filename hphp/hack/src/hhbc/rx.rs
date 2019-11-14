@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use naming_special_names_rust::user_attributes::*;
+use oxidized::aast;
 use std::{convert::TryFrom, str::FromStr};
 
 /// The possible Rx levels of a function or method
@@ -57,6 +59,30 @@ impl FromStr for Level {
             "rx_shallow" => Ok(RxShallow),
             "rx" => Ok(Rx),
             _ => Err(RxNone),
+        }
+    }
+}
+
+impl Level {
+    pub fn from_ast<Ex, Fb, En, Hi>(
+        ast_attrs: &Vec<aast::UserAttribute<Ex, Fb, En, Hi>>,
+    ) -> Option<Self> {
+        let attrs_contain = |name| ast_attrs.iter().any(|attr| attr.name.1 == name);
+        let rx = attrs_contain(REACTIVE);
+        let non_rx = attrs_contain(NON_RX);
+        let rx_shallow = attrs_contain(SHALLOW_REACTIVE);
+        let rx_local = attrs_contain(LOCAL_REACTIVE);
+        let rx_conditional = attrs_contain(ONLY_RX_IF_IMPL) || attrs_contain(AT_MOST_RX_AS_ARGS);
+        match (rx_conditional, non_rx, rx_local, rx_shallow, rx) {
+            (false, false, false, false, false) => None,
+            (false, true, false, false, false) => Some(Self::NonRx),
+            (true, false, true, false, false) => Some(Self::ConditionalRxLocal),
+            (true, false, false, true, false) => Some(Self::ConditionalRxShallow),
+            (true, false, false, false, true) => Some(Self::ConditionalRx),
+            (false, false, true, false, false) => Some(Self::RxLocal),
+            (false, false, false, true, false) => Some(Self::RxShallow),
+            (false, false, false, false, true) => Some(Self::Rx),
+            _ => panic!("invalid combination of Rx attributes escaped the parser"),
         }
     }
 }

@@ -190,6 +190,41 @@ pub mod integer {
     }
 }
 
+pub mod float {
+
+    fn sprintf(f: f64) -> Option<String> {
+        const BUF_SIZE: usize = 256;
+
+        let format = "%.17g\0";
+        let mut buffer = [0u8; BUF_SIZE];
+        let n = unsafe {
+            libc::snprintf(
+                buffer.as_mut_ptr() as *mut libc::c_char,
+                BUF_SIZE,
+                format.as_ptr() as *const libc::c_char,
+                f,
+            ) as usize
+        };
+        if n >= BUF_SIZE {
+            None
+        } else {
+            String::from_utf8(buffer[..n].to_vec()).ok()
+        }
+    }
+
+    pub fn to_string(f: f64) -> String {
+        // or_else should not happen, but just in case it does fall back
+        // to Rust native formatting
+        let res = sprintf(f).unwrap_or_else(|| f.to_string());
+        match res.as_ref() {
+            "nan" => "NAN".to_string(),
+            "-inf" => "-INF".to_string(),
+            "inf" => "INF".to_string(),
+            _ => res,
+        }
+    }
+}
+
 pub mod locals {
     pub fn strip_dollar(s: &str) -> &str {
         if s.len() > 0 && s.as_bytes()[0] == b'$' {
@@ -453,6 +488,34 @@ mod string_utils_tests {
                 "pair "
             );
 
+        }
+    }
+
+    mod float {
+        use crate::float::*;
+        #[test]
+        fn test_no_float_part() {
+            assert_eq!(to_string(1.0), "1")
+        }
+
+        #[test]
+        fn test_precision() {
+            assert_eq!(to_string(1.1), "1.1000000000000001")
+        }
+
+        #[test]
+        fn test_no_trailing_zeroes() {
+            assert_eq!(to_string(1.2), "1.2")
+        }
+
+        #[test]
+        fn test_scientific() {
+            assert_eq!(to_string(1e+100), "1e+100")
+        }
+
+        #[test]
+        fn test_scientific_precision() {
+            assert_eq!(to_string(-2.1474836480001e9), "-2147483648.0001001")
         }
     }
 

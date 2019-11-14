@@ -211,6 +211,7 @@ pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
     pub decls: Cow<'a, InProgressDecls>,
     namespace_builder: Cow<'a, NamespaceBuilder>,
+    yields: Cow<'a, Vec<bool>>,
 }
 
 impl<'a> State<'a> {
@@ -219,6 +220,7 @@ impl<'a> State<'a> {
             source_text,
             decls: Cow::Owned(empty_decls()),
             namespace_builder: Cow::Owned(NamespaceBuilder::new()),
+            yields: Cow::Owned(Vec::new()),
         }
     }
 }
@@ -244,6 +246,15 @@ pub struct VariableDecl {
 }
 
 #[derive(Clone, Debug)]
+pub struct FunctionDecl {
+    name: Node_,
+    modifiers: Node_,
+    type_params: Node_,
+    param_list: Node_,
+    ret_hint: Node_,
+}
+
+#[derive(Clone, Debug)]
 pub enum Node_ {
     List(Vec<Node_>),
     BracketedList(Box<(Pos, Vec<Node_>, Pos)>),
@@ -255,6 +266,7 @@ pub enum Node_ {
     Backslash(Pos), // This needs a pos since it shows up in names.
     ListItem(Box<(Node_, Node_)>),
     Variable(Box<VariableDecl>),
+    FunctionHeader(Box<FunctionDecl>),
     TypeConstraint(Box<(ConstraintKind, Node_)>),
     LessThan(Pos),    // This needs a pos since it shows up in generics.
     GreaterThan(Pos), // This needs a pos since it shows up in generics.
@@ -264,6 +276,7 @@ pub enum Node_ {
     TypeParameter(Box<(Node_, Vec<Box<(ConstraintKind, Node_)>>)>),
     As,
     Super,
+    Async,
 }
 
 impl Node_ {
@@ -556,6 +569,17 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::GreaterThan => Node_::GreaterThan(token_pos()),
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
+            TokenKind::Async => Node_::Async,
+            TokenKind::Function => {
+                self.state.yields.to_mut().push(false);
+                Node_::Ignored
+            }
+            TokenKind::Yield => {
+                // First pop the one that we pushed when we saw the function keyword.
+                self.state.yields.to_mut().pop();
+                self.state.yields.to_mut().push(true);
+                Node_::Ignored
+            }
             TokenKind::Namespace => {
                 self.state.namespace_builder.to_mut().is_building_namespace = true;
                 if !self.state.namespace_builder.current_namespace().is_empty() {
@@ -766,62 +790,66 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         &mut self,
         _attributes: Self::R,
         header: Self::R,
-        body: Self::R,
+        _body: Self::R,
     ) -> Self::R {
-        Ok(match (header?, body?) {
-            (Node_::Ignored, Node_::Ignored) => Node_::Ignored,
-            (v, Node_::Ignored) | (Node_::Ignored, v) => v,
-            (v1, v2) => Node_::List(vec![v1, v2]),
-        })
-    }
-
-    fn make_function_declaration_header(
-        &mut self,
-        _modifiers: Self::R,
-        _keyword: Self::R,
-        name: Self::R,
-        type_params: Self::R,
-        _left_parens: Self::R,
-        param_list: Self::R,
-        _right_parens: Self::R,
-        _colon: Self::R,
-        ret_hint: Self::R,
-        _where: Self::R,
-    ) -> Self::R {
-        let mut type_variables = HashSet::new();
-        let type_params = type_params?
-            .into_vec()
-            .into_iter()
-            .map(|node| {
-                let (name, constraints) = match node {
-                    Node_::TypeParameter(innards) => *innards,
-                    n => return Err(format!("Expected a type parameter, but got {:?}", n)),
-                };
-                let (name, pos) = get_name("", &name)?;
-                let constraints = constraints
+        Ok(match header? {
+            Node_::FunctionHeader(decl) => {
+                let (name, pos) =
+                    get_name(self.state.namespace_builder.current_namespace(), &decl.name)?;
+                let mut type_variables = HashSet::new();
+                let type_params = decl
+                    .type_params
+                    .into_vec()
                     .into_iter()
-                    .map(|constraint| {
-                        let (kind, value) = *constraint;
-                        Ok((kind, self.node_to_ty(&value, &HashSet::new())?))
+                    .map(|node| {
+                        let (name, constraints) = match node {
+                            Node_::TypeParameter(innards) => *innards,
+                            n => return Err(format!("Expected a type parameter, but got {:?}", n)),
+                        };
+                        let (name, pos) = get_name("", &name)?;
+                        let constraints = constraints
+                            .into_iter()
+                            .map(|constraint| {
+                                let (kind, value) = *constraint;
+                                Ok((kind, self.node_to_ty(&value, &HashSet::new())?))
+                            })
+                            .collect::<Result<Vec<_>, String>>()?;
+                        type_variables.insert(name.clone());
+                        Ok(Tparam {
+                            variance: Variance::Invariant,
+                            name: Id(pos, name),
+                            constraints,
+                            reified: aast::ReifyKind::Erased,
+                            user_attributes: Vec::new(),
+                        })
                     })
                     .collect::<Result<Vec<_>, String>>()?;
-                type_variables.insert(name.clone());
-                Ok(Tparam {
-                    variance: Variance::Invariant,
-                    name: Id(pos, name),
-                    constraints,
-                    reified: aast::ReifyKind::Erased,
-                    user_attributes: Vec::new(),
-                })
-            })
-            .collect::<Result<Vec<_>, String>>()?;
-        Ok(match name? {
-            Node_::Ignored => Node_::Ignored,
-            name => {
-                let (name, pos) =
-                    get_name(self.state.namespace_builder.current_namespace(), &name)?;
-                let params = self.into_variables_list(param_list?, &type_variables)?;
-                let type_ = self.node_to_ty(&ret_hint?, &type_variables)?;
+                let params = self.into_variables_list(decl.param_list, &type_variables)?;
+                let type_ = self.node_to_ty(&decl.ret_hint, &type_variables)?;
+                let modifiers = decl.modifiers.into_vec();
+                let async_ = modifiers.iter().any(|node| match node {
+                    Node_::Async => true,
+                    _ => false,
+                });
+                let fun_kind = if self
+                    .state
+                    .yields
+                    .to_mut()
+                    .pop()
+                    .expect("Attempted to pop from an empty yield stack")
+                {
+                    if async_ {
+                        FunKind::FAsyncGenerator
+                    } else {
+                        FunKind::FGenerator
+                    }
+                } else {
+                    if async_ {
+                        FunKind::FAsync
+                    } else {
+                        FunKind::FSync
+                    }
+                };
                 self.state.decls.to_mut().funs.insert(
                     name,
                     Rc::new(FunElt {
@@ -841,7 +869,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                     enforced: false,
                                     type_,
                                 },
-                                fun_kind: FunKind::FSync,
+                                fun_kind,
                                 reactive: Reactivity::Nonreactive,
                                 return_disposable: false,
                                 mutability: None,
@@ -855,6 +883,32 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 );
                 Node_::Ignored
             }
+            _ => Node_::Ignored,
+        })
+    }
+
+    fn make_function_declaration_header(
+        &mut self,
+        modifiers: Self::R,
+        _keyword: Self::R,
+        name: Self::R,
+        type_params: Self::R,
+        _left_parens: Self::R,
+        param_list: Self::R,
+        _right_parens: Self::R,
+        _colon: Self::R,
+        ret_hint: Self::R,
+        _where: Self::R,
+    ) -> Self::R {
+        Ok(match name? {
+            Node_::Ignored => Node_::Ignored,
+            name => Node_::FunctionHeader(Box::new(FunctionDecl {
+                name,
+                modifiers: modifiers?,
+                type_params: type_params?,
+                param_list: param_list?,
+                ret_hint: ret_hint?,
+            })),
         })
     }
 

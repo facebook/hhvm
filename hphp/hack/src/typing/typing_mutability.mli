@@ -20,10 +20,7 @@ module Shared (Env : Env_S) : sig
 end
 
 val handle_assignment_mutability :
-  Typing_env_types.env ->
-  Tast.expr ->
-  Tast.expr_ option ->
-  Typing_env_types.env
+  Typing_env_types.env -> Tast.expr -> Tast.expr_ option -> Typing_env_types.env
 
 val freeze_local :
   Pos.t -> Typing_env_types.env -> Tast.expr list -> Typing_env_types.env

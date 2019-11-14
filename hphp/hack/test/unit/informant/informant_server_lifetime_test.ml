@@ -43,13 +43,11 @@ module Start_server_args_opt_asserter =
   Asserter.Make_asserter (Start_server_args_opt_comparator)
 
 module type Mock_server_config_sig = sig
-  include
-    ServerMonitorUtils.Server_config with type server_start_options = unit
+  include ServerMonitorUtils.Server_config with type server_start_options = unit
 
   val get_start_server_count : unit -> int
 
-  val get_last_start_server_call :
-    unit -> Start_server_args_comparator.t option
+  val get_last_start_server_call : unit -> Start_server_args_comparator.t option
 
   val get_kill_server_count : unit -> int
 end
@@ -326,9 +324,7 @@ let setup_global_test_state () =
   Relative_path.(set_path_prefix Root (Path.make "/tmp"));
   Relative_path.(set_path_prefix Root (Path.make Sys_utils.temp_dir_name));
   let hhconfig_path = Relative_path.(create Root "/tmp/.hhconfig") in
-  Disk.write_file
-    (Relative_path.to_absolute hhconfig_path)
-    "assume_php = false"
+  Disk.write_file (Relative_path.to_absolute hhconfig_path) "assume_php = false"
 
 let tests =
   [

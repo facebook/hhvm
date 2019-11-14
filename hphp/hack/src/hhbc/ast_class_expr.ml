@@ -35,9 +35,7 @@ let get_original_class_name ~resolve_self ~check_traits scope =
       | Some _ when resolve_self ->
         begin
           match
-            SMap.find_opt
-              class_name
-              (Emit_env.get_closure_enclosing_classes ())
+            SMap.find_opt class_name (Emit_env.get_closure_enclosing_classes ())
           with
           | Some cd when cd.A.c_kind <> Ast_defs.Ctrait ->
             Some (snd cd.A.c_name)

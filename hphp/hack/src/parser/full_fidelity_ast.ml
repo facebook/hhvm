@@ -380,8 +380,7 @@ struct
   let scuba_table = Scuba.Table.of_name "hh_missing_lowerer_cases"
 
   let log_missing ?(caught = false) ~(env : env) ~expecting node : unit =
-    EventLogger.log_if_initialized
-    @@ fun () ->
+    EventLogger.log_if_initialized @@ fun () ->
     let source = source_text node in
     let start = start_offset node in
     let end_ = end_offset node in
@@ -501,8 +500,7 @@ if there already is one, since that one will likely be better than this one. *)
     let p = pPos node env in
     let name =
       match syntax node with
-      | QualifiedName { qualified_name_parts = { syntax = SyntaxList l; _ } }
-        ->
+      | QualifiedName { qualified_name_parts = { syntax = SyntaxList l; _ } } ->
         String.concat ~sep:"" @@ List.map ~f:aux l
       | _ -> missing_syntax "qualified name" node env
     in
@@ -673,8 +671,8 @@ if there already is one, since that one will likely be better than this one. *)
       let rec unwind = function
         | [{ syntax = Token t; _ }]
           when Token.width t > 0
-               && is_double_quote_or_backtick
-                    (Token.text t).[Token.width t - 1] ->
+               && is_double_quote_or_backtick (Token.text t).[Token.width t - 1]
+          ->
           let s = make_token (trimRight ~n:1 t) in
           if width s > 0 then
             [s]
@@ -1052,11 +1050,8 @@ if there already is one, since that one will likely be better than this one. *)
           } ->
         Happly (pos_name kw env, pHint key env :: couldMap ~f:pHint value env)
       | DictionaryTypeSpecifier
-          {
-            dictionary_type_keyword = kw;
-            dictionary_type_members = members;
-            _;
-          } ->
+          { dictionary_type_keyword = kw; dictionary_type_members = members; _ }
+        ->
         Happly (pos_name kw env, couldMap ~f:pHint members env)
       | GenericTypeSpecifier { generic_class_type; generic_argument_list } ->
         let name = pos_name generic_class_type env in
@@ -1128,8 +1123,7 @@ if there already is one, since that one will likely be better than this one. *)
           raise_parsing_error env (`Node node) SyntaxError.only_soft_allowed;
         let (_, hint_) = soften_hint attrs hint in
         hint_
-      | TypeConstant { type_constant_left_type; type_constant_right_type; _ }
-        ->
+      | TypeConstant { type_constant_left_type; type_constant_right_type; _ } ->
         let child = pos_name type_constant_right_type env in
         (match pHint_ type_constant_left_type env with
         | Haccess (b, c, cs) -> Haccess (b, c, cs @ [child])
@@ -1508,8 +1502,7 @@ if there already is one, since that one will likely be better than this one. *)
             match hints with
             | Some (CollectionTV ty) -> Some ty
             | None -> None
-            | _ ->
-              missing_syntax "VarrayIntrinsicExpression type args" node env
+            | _ -> missing_syntax "VarrayIntrinsicExpression type args" node env
           in
           Varray (targ, couldMap ~f:pExpr members env)
         | DarrayIntrinsicExpression
@@ -1525,8 +1518,7 @@ if there already is one, since that one will likely be better than this one. *)
             | Some (CollectionTKV (tk, tv)) ->
               Darray (Some (tk, tv), couldMap ~f:pMember members env)
             | None -> Darray (None, couldMap ~f:pMember members env)
-            | _ ->
-              missing_syntax "DarrayIntrinsicExpression type args" node env
+            | _ -> missing_syntax "DarrayIntrinsicExpression type args" node env
           end
         | ArrayIntrinsicExpression { array_intrinsic_members = members; _ }
         | ArrayCreationExpression { array_creation_members = members; _ } ->
@@ -1676,10 +1668,7 @@ if there already is one, since that one will likely be better than this one. *)
           let op = pNullFlavor op env in
           Obj_get (recv, name, op)
         | PrefixUnaryExpression
-            {
-              prefix_unary_operator = operator;
-              prefix_unary_operand = operand;
-            }
+            { prefix_unary_operator = operator; prefix_unary_operand = operand }
         | PostfixUnaryExpression
             {
               postfix_unary_operand = operand;
@@ -1880,8 +1869,8 @@ if there already is one, since that one will likely be better than this one. *)
           in
           let (e, hl) =
             match syntax constructor_call_type with
-            | GenericTypeSpecifier
-                { generic_class_type; generic_argument_list } ->
+            | GenericTypeSpecifier { generic_class_type; generic_argument_list }
+              ->
               let name = pos_name generic_class_type env in
               let hints =
                 match syntax generic_argument_list with
@@ -1950,7 +1939,6 @@ if there already is one, since that one will likely be better than this one. *)
             | (_, Some TK.HexadecimalLiteral)
             (* We allow underscores while lexing the integer literals. This gets rid of them before
              * the literal is created. *)
-            
             | (_, Some TK.BinaryLiteral) ->
               Int (Str.global_replace underscore "" s)
             | (_, Some TK.FloatingLiteral) -> Float s
@@ -2103,11 +2091,10 @@ if there already is one, since that one will likely be better than this one. *)
               | x :: xs -> x :: search xs
             and track t b oe = function
               (* keep going through consecutive tokens *)
-              | { syntax = Token e; _ } :: xs
-                when Token.kind e <> TK.XHPComment ->
+              | { syntax = Token e; _ } :: xs when Token.kind e <> TK.XHPComment
+                ->
                 track t b (Some e) xs
-              | xs ->
-                Option.value_map oe ~default:t ~f:(combine b) :: search xs
+              | xs -> Option.value_map oe ~default:t ~f:(combine b) :: search xs
             in
             search (as_list node)
           in
@@ -2326,9 +2313,7 @@ if there already is one, since that one will likely be better than this one. *)
                           "Malformed block result";
                         []
                     in
-                    let blk =
-                      couldMap ~f:pStmt switch_section_statements env
-                    in
+                    let blk = couldMap ~f:pStmt switch_section_statements env in
                     let blk =
                       if is_missing switch_section_fallthrough then
                         blk
@@ -2530,8 +2515,7 @@ if there already is one, since that one will likely be better than this one. *)
                           mpStripNoop pBlock catch_body env )
                       | _ -> missing_syntax "catch clause" node env),
                   match syntax try_finally_clause with
-                  | FinallyClause { finally_body; _ } ->
-                    pBlock finally_body env
+                  | FinallyClause { finally_body; _ } -> pBlock finally_body env
                   | _ -> [] ) )
           | ReturnStatement { return_expression; _ } ->
             let f () =
@@ -2579,10 +2563,8 @@ if there already is one, since that one will likely be better than this one. *)
                           [],
                           couldMap ~f:pExpr exprs env,
                           [] ) ) ))
-          | UnsetStatement { unset_keyword = kw; unset_variables = exprs; _ }
-            ->
-            lift_awaits_in_statement env pos
-            @@ fun () ->
+          | UnsetStatement { unset_keyword = kw; unset_variables = exprs; _ } ->
+            lift_awaits_in_statement env pos @@ fun () ->
             let exprl = couldMap ~f:pExpr exprs env in
             ( if ParserOptions.disable_unset_class_const env.parser_options then
               let rec check_mutate_class_const = function
@@ -2611,8 +2593,7 @@ if there already is one, since that one will likely be better than this one. *)
                       [] ) ) )
           | BreakStatement _ -> (pos, Break)
           | ContinueStatement _ -> (pos, Continue)
-          | ConcurrentStatement { concurrent_statement = concurrent_stmt; _ }
-            ->
+          | ConcurrentStatement { concurrent_statement = concurrent_stmt; _ } ->
             let (lifted_awaits, stmt) =
               with_new_concurrent_scope env (fun () ->
                   pStmt concurrent_stmt env)
@@ -2854,11 +2835,7 @@ if there already is one, since that one will likely be better than this one. *)
       let fh_parameters = couldMap ~f:pFunParam function_parameter_list env in
       let fh_return_type = mpOptional pHint function_type env in
       let fh_suspension_kind =
-        mk_suspension_kind_
-          node
-          env
-          modifiers.has_async
-          modifiers.has_coroutine
+        mk_suspension_kind_ node env modifiers.has_async modifiers.has_coroutine
       in
       let fh_name = pos_name function_name env in
       let fh_constrs =
@@ -2920,8 +2897,7 @@ if there already is one, since that one will likely be better than this one. *)
           | (`MaybeDoc, _) -> go start `EmbeddedCmt next
           | (`MaybeDoc2, '/') -> go next `Free next
           (* Doc comments have a space after the second star *)
-          | (`MaybeDoc2, (' ' | '\t' | '\n' | '\r')) ->
-            go start `DocComment idx
+          | (`MaybeDoc2, (' ' | '\t' | '\n' | '\r')) -> go start `DocComment idx
           | (`MaybeDoc2, _) -> go start `EmbeddedCmt next
           | (`DocComment, '*') -> go start `EndDoc next
           | (`DocComment, _) -> go start `DocComment next
@@ -3086,8 +3062,8 @@ if there already is one, since that one will likely be better than this one. *)
               cv_names =
                 couldMap property_declarators env ~f:(fun node env ->
                     match syntax node with
-                    | PropertyDeclarator
-                        { property_name; property_initializer } ->
+                    | PropertyDeclarator { property_name; property_initializer }
+                      ->
                       let ((_, n) as name) = pos_name property_name env in
                       ( pPos node env,
                         ( if String.length n > 0 && n.[0] = '$' then
@@ -3128,9 +3104,8 @@ if there already is one, since that one will likely be better than this one. *)
                     ( Eq None,
                       ( p,
                         Obj_get
-                          ( (p, Lvar (p, "$this")),
-                            (p, Id cvname),
-                            OG_nullthrows ) ),
+                          ((p, Lvar (p, "$this")), (p, Id cvname), OG_nullthrows)
+                      ),
                       (p, Lvar param.param_id) ) ) ),
             ClassVars
               {
@@ -3228,8 +3203,7 @@ if there already is one, since that one will likely be better than this one. *)
               mt_constrs = hdr.fh_constrs;
               mt_name = hdr.fh_name;
               mt_params = hdr.fh_parameters;
-              mt_user_attributes =
-                pUserAttributes env methodish_trait_attribute;
+              mt_user_attributes = pUserAttributes env methodish_trait_attribute;
               mt_ret = hdr.fh_return_type;
               mt_fun_kind = mk_fun_kind hdr.fh_suspension_kind false;
               mt_trait = qualifier;
@@ -3371,8 +3345,7 @@ if there already is one, since that one will likely be better than this one. *)
           | XHPSimpleClassAttribute { xhp_simple_class_attribute_type = attr }
             ->
             XhpAttrUse (pPos attr env, Happly (pos_name attr env, []))
-          | Token _ ->
-            XhpAttrUse (pPos node env, Happly (pos_name node env, []))
+          | Token _ -> XhpAttrUse (pPos node env, Happly (pos_name node env, []))
           | _ -> missing_syntax "XHP attribute" node env
         in
         couldMap ~f:pXHPAttr xhp_attribute_attributes env
@@ -3534,10 +3507,7 @@ if there already is one, since that one will likely be better than this one. *)
             | Token token when Token.kind token = TK.As -> Constraint_as
             | Token token when Token.kind token = TK.Super -> Constraint_super
             | _ ->
-              missing_syntax
-                "constraint operator"
-                where_constraint_operator
-                env
+              missing_syntax "constraint operator" where_constraint_operator env
           in
           let r = pHint where_constraint_right_type env in
           (l, o, r)
@@ -3860,8 +3830,7 @@ if there already is one, since that one will likely be better than this one. *)
       let init_val = pSimpleInitializer init env in
       PUMappingID (id, init_val)
     | PocketMappingTypeDeclaration
-        { pocket_mapping_type_name = name; pocket_mapping_type_type = ty; _ }
-      ->
+        { pocket_mapping_type_name = name; pocket_mapping_type_type = ty; _ } ->
       let id = pos_name name env in
       let hint = pHint ty env in
       PUMappingType (id, hint)
@@ -3909,7 +3878,6 @@ if there already is one, since that one will likely be better than this one. *)
     let rec aux env acc = function
       | []
       (* EOF happens only as the last token in the list. *)
-      
       | [{ syntax = EndOfFile _; _ }] ->
         List.concat (List.rev acc)
       (* HaltCompiler stops processing the list in PHP but can be disabled in Hack *)
@@ -4037,8 +4005,7 @@ if there already is one, since that one will likely be better than this one. *)
               let pos = pPos node env in
               let line = Pos.line pos in
               let ignores =
-                try IMap.find line sc_fixmes
-                with Caml.Not_found -> IMap.empty
+                try IMap.find line sc_fixmes with Caml.Not_found -> IMap.empty
               in
               let misuses =
                 try IMap.find line sc_misuses
@@ -4185,9 +4152,7 @@ let parse_text (env : env) (source_text : SourceText.t) :
     | _ -> env.quick_mode
   in
   ( if
-    mode = Some FileInfo.Mexperimental
-    && env.codegen
-    && not env.hacksperimental
+    mode = Some FileInfo.Mexperimental && env.codegen && not env.hacksperimental
   then
     let e =
       SyntaxError.make
@@ -4400,9 +4365,7 @@ let process_syntax_errors
   let relative_pos = pos_of_error env.file source_text in
   if env.codegen then
     let runtime_errors =
-      List.filter
-        errors
-        ~f:SyntaxError.((fun e -> error_type e = RuntimeError))
+      List.filter errors ~f:SyntaxError.((fun e -> error_type e = RuntimeError))
     in
     match (errors, runtime_errors) with
     | ([], []) -> ()
@@ -4446,9 +4409,8 @@ let from_text_rust (env : env) (source_text : SourceText.t) :
   | Error (Rust_aast_parser_types.Other msg) -> failwith msg
 
 let process_lowerer_result
-    (env : env)
-    (source_text : SourceText.t)
-    (r : Rust_aast_parser_types.result) : aast_result =
+    (env : env) (source_text : SourceText.t) (r : Rust_aast_parser_types.result)
+    : aast_result =
   Rust_aast_parser_types.(
     process_scour_comments env r.scoured_comments;
     process_syntax_errors env source_text r.errors;

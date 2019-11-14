@@ -255,10 +255,9 @@ let get_ast ?(full = false) file_name =
     let ast_opt =
       Option.Monad_infix.(
         Provider_context.(
-          Provider_context.get_global_context ()
-          >>= fun ctx ->
+          Provider_context.get_global_context () >>= fun ctx ->
           Relative_path.Map.find_opt ctx.Provider_context.entries file_name
-          >>| (fun entry -> entry.ast)))
+          >>| fun entry -> entry.ast))
     in
     (match ast_opt with
     | Some ast -> ast

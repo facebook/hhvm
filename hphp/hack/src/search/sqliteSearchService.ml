@@ -57,8 +57,7 @@ let find_saved_symbolindex ~(ignore_hh_version : bool) :
       Ok
         (Path.to_string
            info
-             .Saved_state_loader.Symbol_index_saved_state_info
-              .symbol_index_path)
+             .Saved_state_loader.Symbol_index_saved_state_info.symbol_index_path)
     | Error load_error ->
       Error (Saved_state_loader.load_error_to_string load_error)
   with _ -> Error "Exception searching for saved state"
@@ -176,8 +175,7 @@ let search_symbols_by_kind
 
 (* Symbol search for all symbols. *)
 let search_all_symbols
-    ~(sienv : si_env) ~(query_text : string) ~(max_results : int) : si_results
-    =
+    ~(sienv : si_env) ~(query_text : string) ~(max_results : int) : si_results =
   let stmt =
     prepare_or_reset_statement
       sienv.sql_symbolindex_db
@@ -204,8 +202,8 @@ let search_acid ~(sienv : si_env) ~(query_text : string) ~(max_results : int) :
   read_si_results stmt
 
 (* Symbol search for symbols valid in ACNEW context *)
-let search_acnew ~(sienv : si_env) ~(query_text : string) ~(max_results : int)
-    : si_results =
+let search_acnew ~(sienv : si_env) ~(query_text : string) ~(max_results : int) :
+    si_results =
   let stmt =
     prepare_or_reset_statement
       sienv.sql_symbolindex_db
@@ -244,11 +242,7 @@ let sqlite_search
   | (Some Acnew, _) -> search_acnew ~sienv ~query_text ~max_results
   | (Some Actype, _) -> search_actype ~sienv ~query_text ~max_results
   | (Some Actrait_only, _) ->
-    search_symbols_by_kind
-      ~sienv
-      ~query_text
-      ~max_results
-      ~kind_filter:SI_Trait
+    search_symbols_by_kind ~sienv ~query_text ~max_results ~kind_filter:SI_Trait
   | (None, Some kind) ->
     search_symbols_by_kind ~sienv ~query_text ~max_results ~kind_filter:kind
   | _ -> search_all_symbols ~sienv ~query_text ~max_results

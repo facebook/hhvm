@@ -130,9 +130,7 @@ let test () =
   let test_ide env contents i expected =
     let path = "test" ^ string_of_int i ^ ".php" in
     let offset =
-      String_utils.substring_index
-        AutocompleteTypes.autocomplete_token
-        contents
+      String_utils.substring_index AutocompleteTypes.autocomplete_token contents
     in
     let position = File_content.offset_to_position contents offset in
     let line = position.File_content.line - 1 in

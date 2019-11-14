@@ -109,9 +109,7 @@ let debug_chunk_groups env ~range source_text chunk_groups =
                c.Chunk.start_char
                c.Chunk.end_char
                (Chunk.text c));
-         Printf.printf
-           "Rule count %d\n"
-           (IMap.cardinal cg.Chunk_group.rule_map);
+         Printf.printf "Rule count %d\n" (IMap.cardinal cg.Chunk_group.rule_map);
          IMap.iter
            (fun k v -> Printf.printf "%8d - %s\n" k (Rule.to_string v))
            cg.Chunk_group.rule_map;
@@ -142,8 +140,6 @@ let debug env ~range source_text syntax_tree doc chunk_groups =
   if !debug_config.print_ast then debug_ast syntax_tree;
   if !debug_config.print_doc then ignore (Doc.dump doc);
   let range =
-    Option.value
-      range
-      ~default:(0, Full_fidelity_source_text.length source_text)
+    Option.value range ~default:(0, Full_fidelity_source_text.length source_text)
   in
   debug_chunk_groups env ~range source_text chunk_groups

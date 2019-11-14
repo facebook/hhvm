@@ -132,7 +132,6 @@ module StaticProps =
 module Methods =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Method)
 module StaticMethods =
-  SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey)
-    (StaticMethod)
+  SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (StaticMethod)
 module Constructors =
   SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Constructor)

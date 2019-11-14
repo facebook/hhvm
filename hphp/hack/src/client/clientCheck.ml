@@ -193,9 +193,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       ClientColorFile.go file_input args.output_json pos_level_l;
       Lwt.return Exit_status.No_error
     | MODE_COVERAGE file ->
-      let%lwt counts_opt =
-        rpc args @@ Rpc.COVERAGE_COUNTS (expand_path file)
-      in
+      let%lwt counts_opt = rpc args @@ Rpc.COVERAGE_COUNTS (expand_path file) in
       ClientCoverageMetric.go ~json:args.output_json counts_opt;
       Lwt.return Exit_status.No_error
     | MODE_FIND_CLASS_REFS name ->
@@ -525,8 +523,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         | Some filename ->
           let contents = Sys_utils.read_stdin_to_string () in
           let%lwt results =
-            rpc args
-            @@ Rpc.LINT_STDIN { ServerCommandTypes.filename; contents }
+            rpc args @@ Rpc.LINT_STDIN { ServerCommandTypes.filename; contents }
           in
           ClientLint.go results args.output_json args.error_format;
           Lwt.return Exit_status.No_error
@@ -672,9 +669,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       Lwt.return Exit_status.No_error
     | MODE_CST_SEARCH files_to_search ->
       let sort_results = args.sort_results in
-      let input =
-        Sys_utils.read_stdin_to_string () |> Hh_json.json_of_string
-      in
+      let input = Sys_utils.read_stdin_to_string () |> Hh_json.json_of_string in
       let%lwt result =
         rpc args @@ Rpc.CST_SEARCH { Rpc.sort_results; input; files_to_search }
       in

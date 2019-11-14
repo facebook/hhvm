@@ -5,8 +5,7 @@ open No_op_common
 (* This test is the same as test_ide_open, except instead of no-op OPEN, we start
  * with no-op EDIT. Nuclide does send didEdit without preceding didOpen sometimes (see T30353394) *)
 let test () =
-  No_op_common.go
-  @@ fun env ->
+  No_op_common.go @@ fun env ->
   let env = Test.connect_persistent_client env in
   (* We EDIT the file without any changes *)
   let (env, _) = Test.edit_file env foo_name foo_contents in

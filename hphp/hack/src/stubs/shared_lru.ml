@@ -8,8 +8,7 @@
 
 type host_env = { num_workers: int }
 
-let init ~cache_name:_ ~cache_size_in_bytes:_ ~cache_dir_path:_ ~num_workers:_
-    =
+let init ~cache_name:_ ~cache_size_in_bytes:_ ~cache_dir_path:_ ~num_workers:_ =
   failwith "not implemented"
 
 let run ~host_env:_ ~initial_env:_ ~job:_ ~callback:_ ~next:_ =

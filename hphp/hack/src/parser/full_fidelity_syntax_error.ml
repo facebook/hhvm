@@ -26,8 +26,7 @@ type t = {
 exception ParserFatal of t * Pos.t
 
 let make
-    ?(child = None) ?(error_type = ParseError) start_offset end_offset message
-    =
+    ?(child = None) ?(error_type = ParseError) start_offset end_offset message =
   { child; error_type; start_offset; end_offset; message }
 
 let rec to_positioned_string error offset_to_position =

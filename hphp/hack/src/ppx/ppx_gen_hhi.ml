@@ -24,8 +24,7 @@ let with_in_channel filename f =
 
 (* Helper to extract the file contents *)
 let string_of_file filename =
-  with_in_channel filename
-  @@ fun ic ->
+  with_in_channel filename @@ fun ic ->
   let s = Bytes.create 32759 in
   let b = Buffer.create 1000 in
   let rec iter ic b s =

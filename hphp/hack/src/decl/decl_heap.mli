@@ -114,8 +114,7 @@ module GConsts :
 
 module Props :
     module type of
-      SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey)
-        (Property)
+      SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Property)
 
 module StaticProps :
     module type of

@@ -248,12 +248,19 @@ struct
     {
       tpum_atom = string_id pum.tpum_atom;
       tpum_types =
-        SMap.map begin
-                   fun (id, t) -> (string_id id, ty t)
-                 end pum.tpum_types;
-      tpum_exprs = SMap.map begin
-                              fun id -> string_id id
-                            end pum.tpum_exprs;
+        SMap.map
+          begin
+            fun (id, t) ->
+            (string_id id, ty t)
+          end
+          pum.tpum_types;
+      tpum_exprs =
+        SMap.map
+          begin
+            fun id ->
+            string_id id
+          end
+          pum.tpum_exprs;
     }
 
   and pu_enum pu =
@@ -264,7 +271,8 @@ struct
       tpu_case_values =
         SMap.map
           begin
-            fun (id, t) -> (string_id id, ty t)
+            fun (id, t) ->
+            (string_id id, ty t)
           end
           pu.tpu_case_values;
       tpu_members = SMap.map pu_enum_member pu.tpu_members;

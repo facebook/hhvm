@@ -244,9 +244,8 @@ let export_to_custom_writer
       ~name
 
 (* Run the index builder project *)
-let go
-    (ctxt : index_builder_context) (workers : MultiWorker.worker list option) :
-    unit =
+let go (ctxt : index_builder_context) (workers : MultiWorker.worker list option)
+    : unit =
   if ctxt.json_repo_name <> None then
     (* if json repo is specified, just export to custom writer directly *)
     let json_exported_files =

@@ -51,8 +51,7 @@ let test () =
       [
         (foo_name, foo_takes_int_contents);
         (bar_name, bar_contents);
-          (* no errors *)
-        
+        (* no errors *)
       ]
   in
   let env = Test.connect_persistent_client env in

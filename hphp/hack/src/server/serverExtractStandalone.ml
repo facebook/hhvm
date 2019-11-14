@@ -119,8 +119,7 @@ let get_dep_pos dep =
 
 let make_mode_getter ~get_pos ~find_in_file ~get_mode name =
   let open Option in
-  get_pos name
-  >>= (fun pos -> find_in_file (Pos.filename pos) name >>| get_mode)
+  get_pos name >>= fun pos -> find_in_file (Pos.filename pos) name >>| get_mode
 
 let get_fun_mode =
   make_mode_getter
@@ -185,8 +184,7 @@ let is_relevant_dependency
     (target : target) (dep : Typing_deps.Dep.dependent Typing_deps.Dep.variant)
     =
   match target with
-  | Function f ->
-    dep = Typing_deps.Dep.Fun f || dep = Typing_deps.Dep.FunName f
+  | Function f -> dep = Typing_deps.Dep.Fun f || dep = Typing_deps.Dep.FunName f
   (* We have to collect dependencies of the entire class because dependency collection is
      coarse-grained: if cls's member depends on D, we get a dependency edge cls --> D,
      not (cls, member) --> D *)
@@ -281,8 +279,7 @@ let print_fun_args tcopt fun_type =
       match snd arg.fp_type.et_type with
       | Typing_defs.Tany _ -> ""
       | _ ->
-        Printf.sprintf "%s "
-        @@ Typing_print.full_decl tcopt arg.fp_type.et_type
+        Printf.sprintf "%s " @@ Typing_print.full_decl tcopt arg.fp_type.et_type
     in
     match pos with
     | `standard index ->
@@ -675,8 +672,7 @@ let get_class_elt_declaration
       | Const (_, const_name) ->
         if Class.has_typeconst cls const_name then
           let tconst =
-            value_or_not_found description
-            @@ Class.get_typeconst cls const_name
+            value_or_not_found description @@ Class.get_typeconst cls const_name
           in
           get_typeconst_declaration tcopt tconst const_name
         else
@@ -804,9 +800,7 @@ let get_class_body tcopt cls meth class_elts =
   in
   let req_implements =
     List.map req_implements (fun s ->
-        Printf.sprintf
-          "require implements %s;"
-          (Typing_print.full_decl tcopt s))
+        Printf.sprintf "require implements %s;" (Typing_print.full_decl tcopt s))
   in
   let open Typing_deps in
   let prop_names =
@@ -1074,9 +1068,7 @@ let get_dependency_origin cls (dep : 'a Typing_deps.Dep.variant) =
         let m = value_or_not_found description @@ Class.get_method cls name in
         m.ce_origin
       | SMethod (_, name) ->
-        let sm =
-          value_or_not_found description @@ Class.get_smethod cls name
-        in
+        let sm = value_or_not_found description @@ Class.get_smethod cls name in
         sm.ce_origin
       | Const (_, name) ->
         let c = value_or_not_found description @@ Class.get_const cls name in

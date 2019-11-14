@@ -106,8 +106,7 @@ let should_be_rewritten receiver =
     (qualifier = "parent" && m <> "__construct")
     || qualifier = "static"
     || qualifier = "self"
-  | ScopeResolutionExpression { scope_resolution_qualifier = e; _ } ->
-    is_this e
+  | ScopeResolutionExpression { scope_resolution_qualifier = e; _ } -> is_this e
   | _ -> false
 
 (**
@@ -303,9 +302,7 @@ let rewrite_all_declarations declaration_list =
             classish_attribute = new_attributes;
           }
       in
-      let new_node =
-        Syntax.synthesize_from declaration new_class_declaration
-      in
+      let new_node = Syntax.synthesize_from declaration new_class_declaration in
       Rewriter.Replace new_node
     | _ -> Rewriter.Keep
   in

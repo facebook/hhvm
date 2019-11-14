@@ -218,8 +218,8 @@ let find_matching_symbols
  * this information should capture it here.
  *)
 let update_files
-    ~(sienv : si_env ref)
-    ~(paths : (Relative_path.t * info * file_source) list) : unit =
+    ~(sienv : si_env ref) ~(paths : (Relative_path.t * info * file_source) list)
+    : unit =
   match !sienv.sie_provider with
   | NoIndex -> ()
   | CustomIndex

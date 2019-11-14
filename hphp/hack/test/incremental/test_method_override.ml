@@ -17,11 +17,10 @@ abstract class Base {
 let make_disk_changes base_content =
   [
     ("base.php", base_content);
-    ( "parent.php",
-      "<?hh // strict
+    ("parent.php", "<?hh // strict
 
 abstract class ParentClass extends Base {
-}" );
+}");
     ( "child1.php",
       "<?hh // strict
 

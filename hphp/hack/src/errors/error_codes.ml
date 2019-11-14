@@ -43,8 +43,7 @@ module Parsing = struct
     | UnexpectedEofDEPRECATED
     | UnterminatedCommentDEPRECATED
     | UnterminatedXhpCommentDEPRECATED
-    | CallTimePassByReferenceDEPRECATED
-  (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | CallTimePassByReferenceDEPRECATED (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum
@@ -160,8 +159,7 @@ module Naming = struct
     | IllegalUseOfDynamicallyCallable
     | PocketUniversesNotInClass
     | PocketUniversesAtomMissing
-    | PocketUniversesAtomUnknown
-  (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | PocketUniversesAtomUnknown (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum
@@ -252,8 +250,7 @@ module NastCheck = struct
     | SwitchNonTerminalDefault
     | SwitchMultipleDefault
     | RepeatedRecordFieldName
-    | PhpLambdaDisallowed
-  (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | PhpLambdaDisallowed (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum
@@ -615,8 +612,7 @@ module Typing = struct
     | AbstractTconstNotAllowed
     | NewAbstractRecord
     | RecordMissingRequiredField
-    | RecordUnknownField
-  (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | RecordUnknownField (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

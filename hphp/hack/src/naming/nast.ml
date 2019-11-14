@@ -26,8 +26,7 @@ let show_func_body_ann = function
 let pp_func_body_ann fmt fba =
   Format.pp_print_string fmt (show_func_body_ann fba)
 
-type program = (Pos.t, func_body_ann, unit, unit) Aast.program
-[@@deriving show]
+type program = (Pos.t, func_body_ann, unit, unit) Aast.program [@@deriving show]
 
 type def = (Pos.t, func_body_ann, unit, unit) Aast.def
 
@@ -195,8 +194,7 @@ let get_defs ast =
       ~f:(fun def ((acc1, acc2, acc3, acc4, acc5) as acc) ->
         Aast.(
           match def with
-          | Fun f ->
-            (FileInfo.pos_full f.f_name :: acc1, acc2, acc3, acc4, acc5)
+          | Fun f -> (FileInfo.pos_full f.f_name :: acc1, acc2, acc3, acc4, acc5)
           | Class c ->
             (acc1, FileInfo.pos_full c.c_name :: acc2, acc3, acc4, acc5)
           | RecordDef rd ->
@@ -439,8 +437,7 @@ module Visitor_DEPRECATED = struct
       method on_using :
         'a -> (Pos.t, func_body_ann, unit, unit) using_stmt -> 'a
 
-      method on_as_expr :
-        'a -> (Pos.t, func_body_ann, unit, unit) as_expr -> 'a
+      method on_as_expr : 'a -> (Pos.t, func_body_ann, unit, unit) as_expr -> 'a
 
       method on_array : 'a -> afield list -> 'a
 
@@ -827,8 +824,7 @@ module Visitor_DEPRECATED = struct
         | Xml (sid, attrl, el) -> this#on_xml acc sid attrl el
         | Callconv (kind, e) -> this#on_callconv acc kind e
         | ValCollection (s, ta, el) -> this#on_valCollection acc s ta el
-        | KeyValCollection (s, tap, fl) ->
-          this#on_keyValCollection acc s tap fl
+        | KeyValCollection (s, tap, fl) -> this#on_keyValCollection acc s tap fl
         | Omitted -> acc
         | Lfun (f, idl) -> this#on_lfun acc f idl
         | Import (_, e) -> this#on_expr acc e

@@ -104,8 +104,7 @@ let convert_files env out_dir files regen_command =
   write_format_and_sign env manifest_filename manifest
 
 let convert_single_file env filename =
-  with_tempfile
-  @@ fun out_filename ->
+  with_tempfile @@ fun out_filename ->
   let (module_name, oxidized_module) = oxidize filename in
   let modules = SMap.of_list [(module_name, oxidized_module)] in
   let src = Stringify.stringify modules oxidized_module in

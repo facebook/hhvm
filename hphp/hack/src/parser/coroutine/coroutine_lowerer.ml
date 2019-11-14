@@ -163,8 +163,7 @@ let lower_coroutine_functions_and_types
   | LambdaExpression
       {
         lambda_coroutine;
-        lambda_signature =
-          { syntax = LambdaSignature _ as lambda_signature; _ };
+        lambda_signature = { syntax = LambdaSignature _ as lambda_signature; _ };
         lambda_body;
         _;
       }
@@ -175,9 +174,7 @@ let lower_coroutine_functions_and_types
         parents
         (Some lambda_count)
     in
-    let lambda_body =
-      CoroutineSuspendRewriter.fix_up_lambda_body lambda_body
-    in
+    let lambda_body = CoroutineSuspendRewriter.fix_up_lambda_body lambda_body in
     let (lambda, closure_syntax) =
       lower_coroutine_lambda
         context
@@ -260,8 +257,7 @@ let rec rewrite_namespace_declaration node lambda_count =
           namespace_body =
             {
               syntax =
-                NamespaceBody
-                  ({ namespace_declarations; _ } as namespace_body_s);
+                NamespaceBody ({ namespace_declarations; _ } as namespace_body_s);
               _;
             } as namespace_body;
           _;

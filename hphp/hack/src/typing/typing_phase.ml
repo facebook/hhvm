@@ -214,8 +214,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
         match Env.get_enum_constraint env x with
         (* If not specified, default bound is arraykey *)
         | None ->
-          ( env,
-            MakeType.arraykey (Reason.Rimplicit_upper_bound (p, "arraykey")) )
+          (env, MakeType.arraykey (Reason.Rimplicit_upper_bound (p, "arraykey")))
         | Some ty -> localize ~ety_env env ty
       in
       (env, (r, Tabstract (AKnewtype (x, []), Some cstr)))
@@ -429,9 +428,11 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
       ( env,
         List.fold_left
           tparams
-          ~f:begin
-               fun subst t -> SMap.remove (snd t.tp_name) subst
-             end
+          ~f:
+            begin
+              fun subst t ->
+              SMap.remove (snd t.tp_name) subst
+            end
           ~init:ety_env.substs )
   in
   let ety_env = { ety_env with substs } in
@@ -627,8 +628,7 @@ and localize_missing_tparams_class env r sid class_ =
     List.map_env env (Cls.tparams class_) (fun env tparam ->
         Env.fresh_type_reason
           env
-          (Reason.Rtype_variable_generics
-             (use_pos, snd tparam.tp_name, use_name)))
+          (Reason.Rtype_variable_generics (use_pos, snd tparam.tp_name, use_name)))
   in
   let c_ty = (r, Tclass (sid, Nonexact, tyl)) in
   let env = Env.set_tyvar_variance env c_ty in
@@ -706,8 +706,7 @@ let localize_generic_parameters_with_bounds
     ~ety_env (env : env) (tparams : decl_tparam list) =
   let env = Env.add_generic_parameters env tparams in
   let localize_bound
-      env ({ tp_name = (pos, name); tp_constraints = cstrl; _ } : decl_tparam)
-      =
+      env ({ tp_name = (pos, name); tp_constraints = cstrl; _ } : decl_tparam) =
     let tparam_ty = (Reason.Rwitness pos, Tabstract (AKgeneric name, None)) in
     List.map_env env cstrl (fun env (ck, cstr) ->
         let (env, ty) = localize env cstr ~ety_env in

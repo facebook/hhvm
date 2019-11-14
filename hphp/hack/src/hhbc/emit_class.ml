@@ -29,11 +29,10 @@ let add_symbol_refs class_base class_implements class_uses class_requirements =
   List.iter class_uses (fun c ->
       let c = Hhbc_string_utils.strip_global_ns c in
       Emit_symbol_refs.add_class c);
-  List.iter class_requirements (function (_, c) ->
-      Emit_symbol_refs.add_class c)
+  List.iter class_requirements (function (_, c) -> Emit_symbol_refs.add_class c)
 
-let make_86method
-    ~name ~params ~is_static ~visibility ~is_abstract ~span instrs =
+let make_86method ~name ~params ~is_static ~visibility ~is_abstract ~span instrs
+    =
   let method_attributes = [] in
   (* TODO: move this. We just know that there are no iterators in 86methods *)
   Iterator.reset_iterator ();
@@ -319,7 +318,7 @@ let emit_reified_init_method env ast_class =
           [] (* uattrs *)
           (Some (Hhas_type_info.make (Some "HH\\varray") tc))
           None;
-          (* default value *)
+        (* default value *)
       ]
     in
     let instrs = emit_reified_init_body env num_reified ast_class in
@@ -496,8 +495,7 @@ let emit_class (ast_class, hoisted) =
     match class_xhp_children with
     | None -> additional_methods
     | Some children ->
-      additional_methods
-      @ Emit_xhp.from_children_declaration ast_class children
+      additional_methods @ Emit_xhp.from_children_declaration ast_class children
   in
   let no_xhp_attributes =
     class_xhp_attributes = [] && ast_class.A.c_xhp_attr_uses = []

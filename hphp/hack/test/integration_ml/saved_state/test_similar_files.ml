@@ -84,8 +84,7 @@ function y(): int {
 |}
 
 let test () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let saved_state_dir = Path.to_string temp_dir in
   Test.save_state
     [

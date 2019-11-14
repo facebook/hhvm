@@ -61,9 +61,7 @@ val from_text : env -> Full_fidelity_source_text.t -> aast_result
 val from_text_with_legacy : env -> string -> Parser_return.t
 
 val from_text_with_legacy_and_cst :
-  env ->
-  Full_fidelity_source_text.t ->
-  PositionedSyntaxTree.t * Parser_return.t
+  env -> Full_fidelity_source_text.t -> PositionedSyntaxTree.t * Parser_return.t
 
 (* Only for hh_single_compile at the moment. *)
 val from_text_to_empty_tast :

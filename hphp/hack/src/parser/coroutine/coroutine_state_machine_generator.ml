@@ -615,7 +615,7 @@ let unnest_compound_statements node =
       |> List.concat_map ~f:(fun node ->
              Option.value (get_braced_statements node) ~default:[node])
       |> make_compound_statement_syntax
-      |> (fun statements -> Rewriter.Result.Replace statements)
+      |> fun statements -> Rewriter.Result.Replace statements
     | None -> Rewriter.Result.Keep
   in
   Rewriter.rewrite_post rewrite node
@@ -705,9 +705,7 @@ let compute_state_machine_data
     SSet.elements context.Coroutine_context.inner_variables
   in
   let inner_variables = generated_to_be_saved_variables @ inner_variables in
-  let saved_inner_variables =
-    List.map ~f:make_saved_variable inner_variables
-  in
+  let saved_inner_variables = List.map ~f:make_saved_variable inner_variables in
   let properties = saved_inner_variables @ coroutine_result_data_variables in
   let outer_variables =
     SSet.elements context.Coroutine_context.outer_variables

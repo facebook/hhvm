@@ -81,9 +81,7 @@ let basic_setup_rev_5_and_200_and_start_informant temp_dir =
         ignore_hhconfig = false;
       }
   in
-  let report =
-    HhMonitorInformant.report informant Informant_sig.Server_alive
-  in
+  let report = HhMonitorInformant.report informant Informant_sig.Server_alive in
   Report_asserter.assert_equals
     Informant_sig.Move_along
     report
@@ -95,6 +93,7 @@ let basic_setup_rev_5_and_200_and_start_informant temp_dir =
  * table for those revisions. *)
 let test_informant_restarts_significant_move temp_dir =
   let informant = basic_setup_rev_5_and_200_and_start_informant temp_dir in
+
   (**** Following tests all have a State_enter followed by a State_leave
    * and then a Changed_merge_base. *)
 
@@ -302,9 +301,7 @@ let test_informant_restarts_significant_move_delayed temp_dir =
         ignore_hhconfig = false;
       }
   in
-  let report =
-    HhMonitorInformant.report informant Informant_sig.Server_alive
-  in
+  let report = HhMonitorInformant.report informant Informant_sig.Server_alive in
   Report_asserter.assert_equals
     Informant_sig.Move_along
     report
@@ -374,9 +371,7 @@ let test_informant_no_saved_state_no_restart temp_dir =
         ignore_hhconfig = false;
       }
   in
-  let report =
-    HhMonitorInformant.report informant Informant_sig.Server_alive
-  in
+  let report = HhMonitorInformant.report informant Informant_sig.Server_alive in
   Report_asserter.assert_equals
     Informant_sig.Move_along
     report
@@ -419,9 +414,7 @@ let test_informant_xdb_saved_state_too_far temp_dir =
         ignore_hhconfig = false;
       }
   in
-  let report =
-    HhMonitorInformant.report informant Informant_sig.Server_alive
-  in
+  let report = HhMonitorInformant.report informant Informant_sig.Server_alive in
   Report_asserter.assert_equals
     Informant_sig.Move_along
     report
@@ -529,7 +522,7 @@ let tests =
   [
     ( "test_informant_restarts_significant_move",
       (fun () -> run_test test_informant_restarts_significant_move) );
-      (*"test_informant_restarts_significant_move_with_local_changes", (fun () ->
+    (*"test_informant_restarts_significant_move_with_local_changes", (fun () ->
       run_test test_informant_restarts_significant_move_with_local_changes);
     "test_informant_restarts_significant_move_delayed", (fun () ->
       run_test test_informant_restarts_significant_move_delayed);
@@ -541,5 +534,4 @@ let tests =
       run_test test_repo_starts_midupdate);
     "test_watcher_in_unknown_state", (fun () ->
       run_test test_watcher_in_unknown_state); *)
-    
   ]

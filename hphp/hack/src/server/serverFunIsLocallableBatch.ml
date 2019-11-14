@@ -33,9 +33,7 @@ let result_to_string result (fn, line, char) =
 
 let process_body env body =
   let ctx = BRC.new_ctx_for_is_locallable_pass (Local None) in
-  let (errors, _) =
-    Errors.do_ (fun () -> BRC.check#handle_body env ctx body)
-  in
+  let (errors, _) = Errors.do_ (fun () -> BRC.check#handle_body env ctx body) in
   Errors.get_error_list errors
 
 let walker =
@@ -69,5 +67,4 @@ let go :
     (string * int * int) list ->
     ServerEnv.env ->
     _ =
- fun workers pos_list env ->
-  ServerRxApiShared.go workers pos_list env handlers
+ (fun workers pos_list env -> ServerRxApiShared.go workers pos_list env handlers)

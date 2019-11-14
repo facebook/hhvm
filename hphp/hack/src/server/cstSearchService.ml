@@ -247,8 +247,8 @@ let rec search_node ~(env : env) ~(pattern : pattern) ~(node : Syntax.t) :
         Option.Monad_infix.(
           let patterns =
             List.map children ~f:(fun (index, pattern) ->
-                List.nth syntax_list index
-                >>| (fun child_node -> (child_node, pattern)))
+                List.nth syntax_list index >>| fun child_node ->
+                (child_node, pattern))
           in
           begin
             match Option.all patterns with
@@ -276,8 +276,7 @@ let rec search_node ~(env : env) ~(pattern : pattern) ~(node : Syntax.t) :
         let tys = Tast_type_collector.get_from_pos_map pos collected_types in
         let is_subtype_of (tast_env, ty) =
           match ty with
-          | Typing_defs.LoclTy ty ->
-            Tast_env.can_subtype tast_env ty subtype_of
+          | Typing_defs.LoclTy ty -> Tast_env.can_subtype tast_env ty subtype_of
           | Typing_defs.DeclTy _ty -> false
         in
         (match tys with
@@ -363,8 +362,7 @@ let compile_pattern (json : Hh_json.json) : (pattern, string) Result.t =
         >>= fun (pattern_type, pattern_type_keytrace) ->
         match pattern_type with
         | "node_pattern" -> compile_node_pattern ~json ~keytrace
-        | "missing_node_pattern" ->
-          compile_missing_node_pattern ~json ~keytrace
+        | "missing_node_pattern" -> compile_missing_node_pattern ~json ~keytrace
         | "match_pattern" -> compile_match_pattern ~json ~keytrace
         | "descendant_pattern" -> compile_descendant_pattern ~json ~keytrace
         | "list_pattern" -> compile_list_pattern ~json ~keytrace
@@ -378,8 +376,7 @@ let compile_pattern (json : Hh_json.json) : (pattern, string) Result.t =
             ~keytrace:pattern_type_keytrace
             (Printf.sprintf "Unknown pattern type '%s'" pattern_type)
       and compile_node_pattern ~json ~keytrace : (pattern, string) Result.t =
-        get_string "kind" (json, keytrace)
-        >>= fun (kind, kind_keytrace) ->
+        get_string "kind" (json, keytrace) >>= fun (kind, kind_keytrace) ->
         Schema_definition.(
           let kind_info =
             List.find schema ~f:(fun schema_node ->
@@ -391,15 +388,14 @@ let compile_pattern (json : Hh_json.json) : (pattern, string) Result.t =
               ~keytrace:kind_keytrace
               (Printf.sprintf "Kind '%s' doesn't exist" kind)
           | Some kind_info ->
-            Ok kind_info
-            >>= fun kind_info ->
+            Ok kind_info >>= fun kind_info ->
             get_obj "children" (json, keytrace)
             >>= fun (children_json, children_keytrace) ->
             (* This has already been verified to be an object above. *)
             let children = Hh_json.get_object_exn children_json in
             let get_child_type
-                (child_keytrace : Hh_json.Access.keytrace)
-                (child_name : string) : (child_type, string) Result.t =
+                (child_keytrace : Hh_json.Access.keytrace) (child_name : string)
+                : (child_type, string) Result.t =
               (* We're given a field name like `binary_right_operand`, but the field
       names in the schema are things like `right_operand`, and you have to
       affix the prefix yourself. For consistency with other tooling, we want
@@ -432,13 +428,12 @@ let compile_pattern (json : Hh_json.json) : (pattern, string) Result.t =
                   let child_keytrace =
                     string_of_int index :: children_keytrace
                   in
-                  get_child_type child_keytrace child_name
-                  >>= fun child_name ->
+                  get_child_type child_keytrace child_name >>= fun child_name ->
                   compile_pattern ~json:pattern_json ~keytrace:child_keytrace
-                  >>| (fun pattern -> (child_name, pattern)))
+                  >>| fun pattern -> (child_name, pattern))
             in
-            all children_patterns
-            >>| (fun children -> NodePattern { kind = NodeKind kind; children }))
+            all children_patterns >>| fun children ->
+            NodePattern { kind = NodeKind kind; children })
       and compile_missing_node_pattern ~json:_json ~keytrace:_keytrace =
         Ok MissingNodePattern
       and compile_match_pattern ~json ~keytrace =
@@ -449,7 +444,7 @@ let compile_pattern (json : Hh_json.json) : (pattern, string) Result.t =
         get_obj "pattern" (json, keytrace)
         >>= fun (pattern, pattern_keytrace) ->
         compile_pattern ~json:pattern ~keytrace:pattern_keytrace
-        >>| (fun pattern -> DescendantPattern { pattern })
+        >>| fun pattern -> DescendantPattern { pattern }
       and compile_list_pattern ~json ~keytrace =
         let max_length =
           Hh_json.get_field_opt
@@ -482,13 +477,13 @@ let compile_pattern (json : Hh_json.json) : (pattern, string) Result.t =
               end
               >>= fun index ->
               compile_pattern ~json:pattern_json ~keytrace:child_keytrace
-              >>| (fun pattern -> (index, pattern)))
+              >>| fun pattern -> (index, pattern))
         in
-        Result.all children_patterns
-        >>| (fun children -> ListPattern { children; max_length })
+        Result.all children_patterns >>| fun children ->
+        ListPattern { children; max_length }
       and compile_raw_text_pattern ~json ~keytrace =
         get_string "raw_text" (json, keytrace)
-        >>| (fun (raw_text, _raw_text_keytrace) -> RawTextPattern { raw_text })
+        >>| fun (raw_text, _raw_text_keytrace) -> RawTextPattern { raw_text }
       and compile_type_pattern ~json ~keytrace =
         get_obj "subtype_of" (json, keytrace)
         >>= fun (subtype_of_json, subtype_of_keytrace) ->
@@ -513,16 +508,15 @@ let compile_pattern (json : Hh_json.json) : (pattern, string) Result.t =
         in
         Result.all compiled_patterns
       and compile_and_pattern ~json ~keytrace =
-        compile_child_patterns_helper ~json ~keytrace
-        >>| (fun patterns -> AndPattern { patterns })
+        compile_child_patterns_helper ~json ~keytrace >>| fun patterns ->
+        AndPattern { patterns }
       and compile_or_pattern ~json ~keytrace =
-        compile_child_patterns_helper ~json ~keytrace
-        >>| (fun patterns -> OrPattern { patterns })
+        compile_child_patterns_helper ~json ~keytrace >>| fun patterns ->
+        OrPattern { patterns }
       and compile_not_pattern ~json ~keytrace =
-        get_obj "pattern" (json, keytrace)
-        >>= fun (json, keytrace) ->
-        compile_pattern ~json ~keytrace
-        >>| (fun pattern -> NotPattern { pattern })
+        get_obj "pattern" (json, keytrace) >>= fun (json, keytrace) ->
+        compile_pattern ~json ~keytrace >>| fun pattern ->
+        NotPattern { pattern }
       in
       compile_pattern ~json ~keytrace:[]))
 
@@ -579,8 +573,7 @@ let go
     ~(files_to_search : string list option)
     (input : Hh_json.json) : (Hh_json.json, string) Result.t =
   Result.Monad_infix.(
-    compile_pattern input
-    >>| fun pattern ->
+    compile_pattern input >>| fun pattern ->
     let num_files_searched = ref 0 in
     let last_printed_num_files_searched = ref 0 in
     let done_searching = ref false in

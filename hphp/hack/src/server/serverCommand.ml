@@ -269,8 +269,8 @@ let predeclare_ide_deps
            * heaps (similar to what Typing_check_service.check_files does) *)
           File_provider.local_changes_push_stack ();
           Ast_provider.local_changes_push_stack ();
-          let iter :
-              type a. (string -> bool) -> (string -> a) -> SSet.t -> unit =
+          let iter : type a. (string -> bool) -> (string -> a) -> SSet.t -> unit
+              =
            fun mem declare s ->
             SSet.iter
               begin
@@ -319,13 +319,10 @@ let with_decl_tracking f =
  * to be completed later (when full recheck is completed, when workers are
  * available, when current recheck is cancelled... *)
 let actually_handle genv client msg full_recheck_needed ~is_stale env =
-  with_dependency_table_reads full_recheck_needed
-  @@ fun () ->
-  Errors.ignore_
-  @@ fun () ->
+  with_dependency_table_reads full_recheck_needed @@ fun () ->
+  Errors.ignore_ @@ fun () ->
   assert (
-    (not full_recheck_needed) || ServerEnv.(env.full_check = Full_check_done)
-  );
+    (not full_recheck_needed) || ServerEnv.(env.full_check = Full_check_done) );
 
   (* There might be additional rechecking required when there are unsaved IDE
    * changes and we asked for an answer that requires ignoring those.
@@ -339,8 +336,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     Full_fidelity_parser_profiling.start_profiling ();
     let ((new_env, response), declared_names) =
       try
-        with_decl_tracking
-        @@ (fun () -> ServerRpc.handle ~is_stale genv env cmd)
+        with_decl_tracking @@ fun () -> ServerRpc.handle ~is_stale genv env cmd
       with e ->
         let stack = Caml.Printexc.get_raw_backtrace () in
         if ServerCommandTypes.is_critical_rpc cmd then

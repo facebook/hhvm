@@ -82,8 +82,7 @@ let print_ty ty =
 
 let get_first_suggested_type_as_string file type_map node =
   Option.Monad_infix.(
-    position file node
-    >>= fun pos ->
+    position file node >>= fun pos ->
     Tast_type_collector.get_from_pos_map (Pos.to_absolute pos) type_map
     >>= fun tys ->
     List.find_map tys ~f:(fun (env, phase_ty) ->
@@ -133,17 +132,14 @@ let get_patches tcopt file =
               | ListItem
                   {
                     list_item =
-                      {
-                        syntax = ParameterDeclaration { parameter_type; _ };
-                        _;
-                      } as list_item;
+                      { syntax = ParameterDeclaration { parameter_type; _ }; _ }
+                      as list_item;
                     _;
                   }
                 when is_missing parameter_type ->
                 get_first_suggested_type_as_string file type_map list_item
                 >>= fun type_str ->
-                position file list_item
-                >>| fun pos ->
+                position file list_item >>| fun pos ->
                 ServerRefactorTypes.Insert
                   ServerRefactorTypes.
                     {

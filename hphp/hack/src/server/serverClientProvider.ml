@@ -155,9 +155,7 @@ let send_push_message_to_client client response =
   | Persistent_client fd ->
     (try
        let (_ : int) =
-         Marshal_tools.to_fd_with_preamble
-           fd
-           (ServerCommandTypes.Push response)
+         Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Push response)
        in
        ()
      with Unix.Unix_error (Unix.EPIPE, "write", "") -> raise Client_went_away)

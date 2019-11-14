@@ -87,8 +87,8 @@ let rec has_reified_type_constraint env h =
 
 let rec remove_awaitable ((pos, h_) as h) =
   match h_ with
-  | Aast.Happly ((_, id), [h])
-    when String.Caseless.(id = SN.Classes.cAwaitable) ->
+  | Aast.Happly ((_, id), [h]) when String.Caseless.(id = SN.Classes.cAwaitable)
+    ->
     h
   (* For @Awaitable<T>, the soft type hint is moved to the inner type, i.e @T *)
   | Aast.Hsoft h -> (pos, Aast.Hsoft (remove_awaitable h))

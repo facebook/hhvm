@@ -72,8 +72,7 @@ let get_recording_path harness =
   in
   Option.(
     let logs = get_server_logs harness in
-    logs
-    >>= fun logs ->
+    logs >>= fun logs ->
     try
       let _ = Str.search_forward recording_re logs 0 in
       Some
@@ -134,11 +133,11 @@ let run_test ?(stop_server_in_teardown = true) config test_case =
       [
         ("HH_TEST_MODE", "1");
         (* ("HH_TMPDIR", (Path.to_string hh_tmpdir)); *)
-          ( "PATH",
-            Printf.sprintf
-              "'%s:%s:/bin:/usr/bin:/usr/local/bin"
-              (Path.to_string hh_server_dir)
-              (Path.to_string bin_dir) );
+        ( "PATH",
+          Printf.sprintf
+            "'%s:%s:/bin:/usr/bin:/usr/local/bin"
+            (Path.to_string hh_server_dir)
+            (Path.to_string bin_dir) );
         ("OCAMLRUNPARAM", "b");
         ("HH_LOCALCONF_PATH", Path.to_string repo_dir);
       ]

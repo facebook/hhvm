@@ -15,8 +15,7 @@ open ContextPredicates
 open Container
 open String_utils
 
-let local_variable_valid_in_context (context : context) (stub : string) : bool
-    =
+let local_variable_valid_in_context (context : context) (stub : string) : bool =
   is_expression_valid context && (stub = "" || string_starts_with stub "$")
 
 let should_complete_function (context : context) : bool =

@@ -77,6 +77,4 @@ let test () =
         env
         { default_loop_input with disk_changes = [(foo_name, foo_contents)] })
   in
-  Test.assertSingleError
-    bar_errors
-    (Errors.get_error_list env.ServerEnv.errorl)
+  Test.assertSingleError bar_errors (Errors.get_error_list env.ServerEnv.errorl)

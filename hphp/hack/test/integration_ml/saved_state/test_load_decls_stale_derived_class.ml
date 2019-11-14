@@ -383,8 +383,8 @@ let test_incremental_state saved_state_dir () =
    attempt to save the state. This can happen when responding to the SAVE_STATE
    ServerRpc command, though, so we need to ensure that Decl_export will declare
    the class if necessary. *)
-let save_state_incremental_hot_child
-    existing_state_dir incremental_state_dir () =
+let save_state_incremental_hot_child existing_state_dir incremental_state_dir ()
+    =
   assert (!hot_classes = ["Base"; "Child"]);
 
   (* Loading with Base modified in a master change will cause us to oldify Base,
@@ -427,8 +427,7 @@ let save_state_incremental_hot_child
   ()
 
 let hot_base_tests () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   hot_classes := ["Base"];
   let temp_dir = Path.to_string temp_dir in
   save_state temp_dir;
@@ -437,16 +436,14 @@ let hot_base_tests () =
   Test.in_daemon @@ test_local_change temp_dir;
   Test.in_daemon @@ test_master_change temp_dir;
 
-  Tempfile.with_real_tempdir
-  @@ fun incremental_state_dir ->
+  Tempfile.with_real_tempdir @@ fun incremental_state_dir ->
   let incremental_state_dir = Path.to_string incremental_state_dir in
   Test.in_daemon @@ save_state_incremental temp_dir incremental_state_dir;
   Test.in_daemon @@ test_incremental_state incremental_state_dir;
   ()
 
 let hot_base_and_child_tests () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   hot_classes := ["Base"; "Child"];
   let temp_dir = Path.to_string temp_dir in
   save_state temp_dir;
@@ -455,8 +452,7 @@ let hot_base_and_child_tests () =
   Test.in_daemon @@ test_local_change_with_hot_child temp_dir;
   Test.in_daemon @@ test_master_change_with_hot_child temp_dir;
 
-  Tempfile.with_real_tempdir
-  @@ fun incremental_state_dir ->
+  Tempfile.with_real_tempdir @@ fun incremental_state_dir ->
   let incremental_state_dir = Path.to_string incremental_state_dir in
   Test.in_daemon
   @@ save_state_incremental_hot_child temp_dir incremental_state_dir;

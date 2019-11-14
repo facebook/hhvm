@@ -187,8 +187,7 @@ let sequence_visitor ~require_used used_vars =
       match e_ with
       | Lvar id -> use_local env id
       | Unop
-          ( ( Ast_defs.Uincr | Ast_defs.Udecr | Ast_defs.Upincr
-            | Ast_defs.Updecr ),
+          ( (Ast_defs.Uincr | Ast_defs.Udecr | Ast_defs.Upincr | Ast_defs.Updecr),
             (_, Lvar id) ) ->
         assign_local env id
       (* Assignment. This is pretty hairy because of list(...)
@@ -227,9 +226,8 @@ let sequence_visitor ~require_used used_vars =
       (* leave && and || sequenced before making all
        * the other binops unsequenced *)
       | Binop
-          ( (Ast_defs.Ampamp | Ast_defs.Barbar | Ast_defs.QuestionQuestion),
-            _,
-            _ ) ->
+          ((Ast_defs.Ampamp | Ast_defs.Barbar | Ast_defs.QuestionQuestion), _, _)
+        ->
         parent#on_expr env e
       (* These operations have unsequenced subexpressions. *)
       | Binop (_, e1, e2)

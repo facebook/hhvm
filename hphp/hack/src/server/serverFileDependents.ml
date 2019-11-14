@@ -66,8 +66,7 @@ let deps_of_paths workers naming_table relative_paths =
   in
   all_deps |> Typing_deps.get_files |> Relative_path.Set.elements
 
-let go (genv : ServerEnv.genv) (env : ServerEnv.env) (filenames : string list)
-    =
+let go (genv : ServerEnv.genv) (env : ServerEnv.env) (filenames : string list) =
   let workers = genv.ServerEnv.workers in
   let naming_table = env.ServerEnv.naming_table in
   let paths = List.map ~f:Relative_path.create_detect_prefix filenames in

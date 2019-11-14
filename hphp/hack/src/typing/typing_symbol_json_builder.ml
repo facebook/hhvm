@@ -81,10 +81,7 @@ let update_json_data predicate json json_data_progress =
   | Symbol ->
     { json_data_progress with symbol = json :: json_data_progress.symbol }
   | Parameter ->
-    {
-      json_data_progress with
-      parameter = json :: json_data_progress.parameter;
-    }
+    { json_data_progress with parameter = json :: json_data_progress.parameter }
   | Filename ->
     { json_data_progress with filename = json :: json_data_progress.filename }
   | FunctionDeclaration ->
@@ -164,8 +161,7 @@ let json_of_fun tcopt fn_id fn json_data_progress =
       ~f:(fun (param_acc, progress_acc) f_param ->
         let ty =
           match hint_of_type_hint f_param.param_type_hint with
-          | None ->
-            (Typing_reason.Rhint f_param.param_pos, Typing_defs.Tnothing)
+          | None -> (Typing_reason.Rhint f_param.param_pos, Typing_defs.Tnothing)
           | Some h -> hint tcopt h
         in
         let json =
@@ -292,8 +288,7 @@ let json_of_symbol_occurrence_shared symbol_occurrence progress symbol_def =
     | _ ->
       JSON_Object
         [
-          ("symbol_kind", int_ symbol_kind);
-          ("class_attribute", class_attribute);
+          ("symbol_kind", int_ symbol_kind); ("class_attribute", class_attribute);
         ]
   in
   let (pos_json, progress) = json_of_pos symbol_occurrence.pos progress in

@@ -136,10 +136,8 @@ let make_memoize_function_with_params_code
           ]
       else
         gather
-          [
-            instr_memoget notfound (Some (first_local, param_count));
-            instr_retc;
-          ] );
+          [instr_memoget notfound (Some (first_local, param_count)); instr_retc]
+      );
       instr_label notfound;
       instr_nulluninit;
       instr_nulluninit;
@@ -232,9 +230,7 @@ let emit_wrapper_function
     Emit_attribute.from_asts namespace ast_fun.T.f_user_attributes
   in
   let function_attributes =
-    Emit_attribute.add_reified_attribute
-      function_attributes
-      ast_fun.T.f_tparams
+    Emit_attribute.add_reified_attribute function_attributes ast_fun.T.f_tparams
   in
   let function_is_async = ast_fun.T.f_fun_kind = Ast_defs.FAsync in
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
@@ -246,8 +242,7 @@ let emit_wrapper_function
   in
   let is_reified =
     List.exists
-      ~f:(fun t ->
-        t.T.tp_reified = T.Reified || t.T.tp_reified = T.SoftReified)
+      ~f:(fun t -> t.T.tp_reified = T.Reified || t.T.tp_reified = T.SoftReified)
       ast_fun.T.f_tparams
   in
   let body_instrs =

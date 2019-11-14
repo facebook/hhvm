@@ -40,8 +40,7 @@ let handler =
       match e with
       | Aast.Record (_, _, fields) ->
         let field_names =
-          List.map fields ~f:(fun (id, _) -> id_if_string id)
-          |> List.filter_opt
+          List.map fields ~f:(fun (id, _) -> id_if_string id) |> List.filter_opt
         in
         check_duplicates field_names
       | _ -> super#at_expr env (pos, e)

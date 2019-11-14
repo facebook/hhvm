@@ -202,8 +202,7 @@ let () =
                 | "verbose" -> Verbose
                 | _ ->
                   failwith
-                  @@ Printf.sprintf "Did not understand verbosity level %s" v
-          ),
+                  @@ Printf.sprintf "Did not understand verbosity level %s" v ),
         " Set the verbosity level. Silent will hide the \"no differences\" message on a successful "
         ^ "run, and verbose will print debugging information to the console" );
     ]

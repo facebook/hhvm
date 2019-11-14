@@ -69,8 +69,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       let e = end_offset end_node in
       SyntaxError.make ~error_type s e error
 
-    let make_error_from_node ?(error_type = SyntaxError.ParseError) node error
-        =
+    let make_error_from_node ?(error_type = SyntaxError.ParseError) node error =
       make_error_from_nodes ~error_type node node error
 
     let find_syntax_errors env =

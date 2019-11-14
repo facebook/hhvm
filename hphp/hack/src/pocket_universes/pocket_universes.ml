@@ -107,8 +107,7 @@ let gen_pu_accessor
             ( pos,
               Throw
                 ( annotation pos,
-                  New
-                    (class_id, [], [(annotation pos, msg)], [], annotation pos)
+                  New (class_id, [], [(annotation pos, msg)], [], annotation pos)
                 ) );
           ] )
   in
@@ -177,8 +176,7 @@ let gen_Members field pos (fields : pu_enum) =
                     (annot, Lvar (pos, Local_id.make_unscoped "$mems")),
                     (annot, Collection ((pos, "ImmVector"), None, mems)) ) ) );
           ( pos,
-            Return (Some (annot, Lvar (pos, Local_id.make_unscoped "$mems")))
-          );
+            Return (Some (annot, Lvar (pos, Local_id.make_unscoped "$mems"))) );
         ];
       fb_annotation = NoUnsafeBlocks;
     }

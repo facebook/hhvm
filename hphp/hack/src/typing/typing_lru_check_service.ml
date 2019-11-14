@@ -152,8 +152,7 @@ let go_with_interrupt
     (opts : TypecheckerOptions.t)
     (dynamic_view_files : Relative_path.Set.t)
     (fnl : Relative_path.t list)
-    ~(interrupt : 'a MultiWorker.interrupt_config) : (Errors.t, 'a) job_result
-    =
+    ~(interrupt : 'a MultiWorker.interrupt_config) : (Errors.t, 'a) job_result =
   Hh_logger.log "Using shared_lru workers to typecheck!";
   let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
   process_in_parallel dynamic_view_files lru_host_env opts fnl ~interrupt

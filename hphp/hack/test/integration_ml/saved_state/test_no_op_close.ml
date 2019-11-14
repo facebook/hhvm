@@ -7,8 +7,7 @@ open No_op_common
  * crashes the request and closes persistent connection, but including it for completness
  * if in the future we change that behaviour. *)
 let test () =
-  No_op_common.go
-  @@ fun env ->
+  No_op_common.go @@ fun env ->
   let env = Test.connect_persistent_client env in
   (* We CLOSE the file without any changes. *)
   let (env, _) = Test.close_file env foo_name ~ignore_response:true in

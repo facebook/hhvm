@@ -105,8 +105,7 @@ let error_to_string_verbose (error : error) : string * Utils.callstack =
   | Timed_out { stdout; stderr } ->
     ( Printf.sprintf "%s timed out" cmd_and_args,
       Utils.Callstack
-        (Printf.sprintf "STDOUT:\n%s\n\nSTDERR:\n%s\n%s" stdout stderr stack)
-    )
+        (Printf.sprintf "STDOUT:\n%s\n\nSTDERR:\n%s\n%s" stdout stderr stack) )
   | Process_aborted ->
     (Printf.sprintf "%s aborted" cmd_and_args, Utils.Callstack stack)
   | Transformer_raised (exn, Utils.Callstack substack) ->
@@ -178,8 +177,7 @@ let rec is_ready : 'a. 'a t -> bool =
     true
   | Delayed { remaining; _ } when remaining <= 0 -> true
   | Delayed { tapped; remaining; value } ->
-    promise :=
-      Delayed { tapped = tapped + 1; remaining = remaining - 1; value };
+    promise := Delayed { tapped = tapped + 1; remaining = remaining - 1; value };
     false
   | Merged (a, b, _) -> is_ready a && is_ready b
   | Bound (a, f) ->
@@ -233,8 +231,7 @@ let rec check_status : 'a. 'a t -> 'a status =
   | Delayed { value; remaining; _ } when remaining <= 0 ->
     Complete_with_result (Ok value)
   | Delayed { tapped; remaining; value } ->
-    promise :=
-      Delayed { tapped = tapped + 1; remaining = remaining - 1; value };
+    promise := Delayed { tapped = tapped + 1; remaining = remaining - 1; value };
     In_progress { age = float_of_int tapped }
   | Merged (a, b, handler) ->
     merge_status (check_status a) (check_status b) handler

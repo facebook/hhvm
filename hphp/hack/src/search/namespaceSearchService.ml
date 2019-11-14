@@ -107,8 +107,7 @@ let find_matching_namespaces ~(sienv : si_env) ~(query_text : string) :
             matches := [];
             Hashtbl.iter
               (fun key _ ->
-                if Core_kernel.String.is_substring key ~substring:leaf_name
-                then
+                if Core_kernel.String.is_substring key ~substring:leaf_name then
                   let node = Hashtbl.find !current_node.nss_children key in
                   matches :=
                     {
@@ -129,8 +128,8 @@ let find_matching_namespaces ~(sienv : si_env) ~(query_text : string) :
  * The alias will share the hashtbl of its target, so future namespaces
  * should appear in both places.
  *)
-let register_alias ~(sienv : si_env) ~(alias : string) ~(target : string) :
-    unit =
+let register_alias ~(sienv : si_env) ~(alias : string) ~(target : string) : unit
+    =
   try
     (* First find the target and make sure there's only one *)
     register_namespace ~sienv ~namespace:target;

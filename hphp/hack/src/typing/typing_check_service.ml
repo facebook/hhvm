@@ -107,8 +107,8 @@ let neutral = Errors.empty
 (* The job that will be run on the workers *)
 (*****************************************************************************)
 
-let type_fun (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string)
-    : (Tast.def * Typing_env_types.global_tvenv) option =
+let type_fun (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
+    (Tast.def * Typing_env_types.global_tvenv) option =
   match Ast_provider.find_fun_in_file ~full:true fn x with
   | Some f ->
     let fun_ = Naming.fun_ f in
@@ -121,9 +121,8 @@ let type_fun (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string)
     def_opt
   | None -> None
 
-let type_class
-    (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
-    (Tast.def * Typing_env_types.global_tvenv list) option =
+let type_class (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string)
+    : (Tast.def * Typing_env_types.global_tvenv list) option =
   match Ast_provider.find_class_in_file ~full:true fn x with
   | Some cls ->
     let class_ = Naming.class_ cls in
@@ -200,9 +199,7 @@ let process_file
   let ignore_type_record_def opts fn name =
     ignore (type_record_def opts fn name)
   in
-  let ignore_check_typedef opts fn name =
-    ignore (check_typedef opts fn name)
-  in
+  let ignore_check_typedef opts fn name = ignore (check_typedef opts fn name) in
   let ignore_check_const opts fn name = ignore (check_const opts fn name) in
   try
     let (errors', global_tvenvs) =
@@ -257,9 +254,7 @@ let should_exit ~(memory_cap : int option) =
     (* Use [quick_stat] instead of [stat] in order to avoid walking the major
        heap on each call, and just check the major heap because the minor
        heap is a) small and b) fixed size. *)
-    let heap_size_mb =
-      Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024
-    in
+    let heap_size_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in
     if heap_size_mb > max_heap_mb then (
       let error_msg =
         Printf.sprintf
@@ -318,8 +313,7 @@ let process_files
     | fn :: fns ->
       let (errors, deferred) =
         match fn with
-        | Check file ->
-          process_file_wrapper dynamic_view_files opts errors file
+        | Check file -> process_file_wrapper dynamic_view_files opts errors file
         | Declare path ->
           let errors = Decl_service.decl_file errors path in
           (errors, [])
@@ -572,8 +566,7 @@ let go_with_interrupt
     ~(memory_cap : int option)
     ~(check_info : check_info) : (Errors.t, 'a) job_result =
   let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
-  Mocking.with_test_mocking fnl
-  @@ fun fnl ->
+  Mocking.with_test_mocking fnl @@ fun fnl ->
   let result =
     if should_process_sequentially opts fnl then (
       Hh_logger.log "Type checking service will process files sequentially";

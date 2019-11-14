@@ -62,9 +62,7 @@ let test () =
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
   Test.assert_diagnostics loop_output bar_parse_error_diagnostics;
 
-  let env =
-    Test.open_file env foo_name ~contents:foo_returns_string_contents
-  in
+  let env = Test.open_file env foo_name ~contents:foo_returns_string_contents in
   let env = Test.wait env in
   let (_, loop_output) = Test.(run_loop_once env default_loop_input) in
   (* Bar depends on foo, so change of foo will trigger recheck of bar.

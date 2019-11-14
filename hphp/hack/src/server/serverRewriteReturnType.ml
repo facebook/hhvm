@@ -83,9 +83,7 @@ module Collector = struct
         if is_reserved then
           (0, [])
         else
-          ( 1,
-            [(method_.Aast.m_span, (Tast_env.tast_env_as_typing_env env, ty))]
-          )
+          (1, [(method_.Aast.m_span, (Tast_env.tast_env_as_typing_env env, ty))])
     end
 
   (* Build a collector object from a tast *)
@@ -167,10 +165,8 @@ let get_patches tcopt file =
       when is_missing function_type ->
       Option.Monad_infix.(
         let patch =
-          Collector.get ret_collector file fdh.function_name
-          >>= fun type_str ->
-          position_exclusive file function_type
-          >>| fun pos ->
+          Collector.get ret_collector file fdh.function_name >>= fun type_str ->
+          position_exclusive file function_type >>| fun pos ->
           ServerRefactorTypes.Insert
             ServerRefactorTypes.
               {

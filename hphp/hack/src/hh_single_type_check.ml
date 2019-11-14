@@ -330,14 +330,12 @@ let parse_options () =
             Arg.Int (fun x -> line := x);
             Arg.Int (fun column -> set_mode (Go_to_impl (!line, column)) ());
           ],
-        "<pos> Find all implementations of a symbol at given line and column"
-      );
+        "<pos> Find all implementations of a symbol at given line and column" );
       ( "--highlight-refs",
         Arg.Tuple
           [
             Arg.Int (fun x -> line := x);
-            Arg.Int
-              (fun column -> set_mode (Highlight_refs (!line, column)) ());
+            Arg.Int (fun column -> set_mode (Highlight_refs (!line, column)) ());
           ],
         "<pos> Highlight all usages of a symbol at given line and column" );
       ( "--decl-compare",
@@ -447,8 +445,7 @@ let parse_options () =
         " Enables all like types features" );
       ( "--disable-partially-abstract-typeconsts",
         Arg.Set disable_partially_abstract_typeconsts,
-        " Treat partially abstract type constants as concrete type constants"
-      );
+        " Treat partially abstract type constants as concrete type constants" );
       ( "--rust-parser-errors",
         Arg.Bool (fun x -> rust_parser_errors := x),
         " Use rust parser error checker" );
@@ -643,9 +640,7 @@ let print_colored fn type_acc =
     print_string (List.map ~f:replace_color results |> String.concat ~sep:"")
 
 let print_coverage type_acc =
-  ClientCoverageMetric.go
-    ~json:false
-    (Some (Coverage_level_defs.Leaf type_acc))
+  ClientCoverageMetric.go ~json:false (Some (Coverage_level_defs.Leaf type_acc))
 
 let check_file opts errors files_info =
   Relative_path.Map.fold
@@ -654,8 +649,7 @@ let check_file opts errors files_info =
       begin
         fun fn fileinfo errors ->
         errors
-        @ Errors.get_error_list
-            (Typing_check_utils.check_defs opts fn fileinfo)
+        @ Errors.get_error_list (Typing_check_utils.check_defs opts fn fileinfo)
       end
     ~init:errors
 
@@ -727,9 +721,7 @@ let parse_name_and_decl popt files_contents =
 let parse_name_and_shallow_decl popt filename file_contents :
     Shallow_decl_defs.shallow_class SMap.t =
   Errors.ignore_ (fun () ->
-      let files_contents =
-        Relative_path.Map.singleton filename file_contents
-      in
+      let files_contents = Relative_path.Map.singleton filename file_contents in
       let (parsed_files, _) = parse_and_name popt files_contents in
       let parsed_file = Relative_path.Map.values parsed_files |> List.hd_exn in
       parsed_file.Parser_return.ast
@@ -841,9 +833,11 @@ let test_decl_compare filenames popt builtins files_contents files_info =
     let files_info =
       Relative_path.Map.fold
         builtins
-        ~f:begin
-             fun k _ acc -> Relative_path.Map.remove acc k
-           end
+        ~f:
+          begin
+            fun k _ acc ->
+            Relative_path.Map.remove acc k
+          end
         ~init:files_info
     in
     let files =
@@ -1173,7 +1167,8 @@ let handle_mode
         List.sort
           ~compare:
             begin
-              fun x y -> Pos.compare (Lint.get_pos x) (Lint.get_pos y)
+              fun x y ->
+              Pos.compare (Lint.get_pos x) (Lint.get_pos y)
             end
           lint_errors
       in
@@ -1286,8 +1281,7 @@ let handle_mode
         print_tasts tasts tcopt;
         if not @@ Errors.is_empty errors then (
           print_errors error_format errors max_errors;
-          Printf.printf
-            "Did not typecheck the TAST as there are typing errors.";
+          Printf.printf "Did not typecheck the TAST as there are typing errors.";
           exit 2
         ) else
           let tast_check_errors = typecheck_tasts tasts tcopt filename in
@@ -1326,9 +1320,7 @@ let handle_mode
           ServerFindRefs.(
             go_from_file (labelled_file, line, column) env
             >>= fun (name, action) ->
-            go action include_defs genv env
-            |> map_env ~f:(to_ide name)
-            |> snd
+            go action include_defs genv env |> map_env ~f:(to_ide name) |> snd
             |> function
             | Done r -> r
             | Retry ->
@@ -1380,8 +1372,7 @@ let handle_mode
       Reset the heaps every time in between. *)
     iter_over_files (fun filename ->
         let oc =
-          Out_channel.create
-            (Relative_path.to_absolute filename ^ out_extension)
+          Out_channel.create (Relative_path.to_absolute filename ^ out_extension)
         in
         (* This means builtins had errors, so lets just print those if we see them *)
         if parse_errors <> [] then
@@ -1450,9 +1441,11 @@ let handle_mode
     let files_info =
       Relative_path.Map.fold
         builtins
-        ~f:begin
-             fun k _ acc -> Relative_path.Map.remove acc k
-           end
+        ~f:
+          begin
+            fun k _ acc ->
+            Relative_path.Map.remove acc k
+          end
         ~init:files_info
     in
     Relative_path.Map.iter files_info ~f:(fun _file info ->
@@ -1576,9 +1569,11 @@ let decl_and_run_mode
   let files_contents_with_builtins =
     Relative_path.Map.fold
       builtins
-      ~f:begin
-           fun k src acc -> Relative_path.Map.add acc ~key:k ~data:src
-         end
+      ~f:
+        begin
+          fun k src acc ->
+          Relative_path.Map.add acc ~key:k ~data:src
+        end
       ~init:files_contents
   in
   (* Don't declare all the filenames in batch_errors mode *)
@@ -1631,8 +1626,8 @@ let decl_and_run_mode
     dbg_glean_deps
     sienv
 
-let main_hack ({ files; mode; tcopt; _ } as opts) (sienv : SearchUtils.si_env)
-    : unit =
+let main_hack ({ files; mode; tcopt; _ } as opts) (sienv : SearchUtils.si_env) :
+    unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0;

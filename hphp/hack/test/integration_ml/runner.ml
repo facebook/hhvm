@@ -130,8 +130,7 @@ let () =
     let test_name = Sys.argv.(1) in
     let tests = List.filter (fun (name, _test) -> test_name = name) tests in
     match tests with
-    | [] ->
-      failwith (Printf.sprintf "Test named '%s' was not found!" test_name)
+    | [] -> failwith (Printf.sprintf "Test named '%s' was not found!" test_name)
     | [test] -> Unit_test.run_all [test]
     | _ :: _ :: _ ->
       failwith

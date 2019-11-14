@@ -97,7 +97,6 @@ module Integer = struct
       | 'b'
       | 'B'
       (* Hex *)
-
       | 'x'
       | 'X' ->
         s
@@ -252,9 +251,7 @@ module Xhp = struct
           s
       in
       let s =
-        s
-        |> Str.global_replace rx_dunder ":"
-        |> Str.global_replace rx_under "-"
+        s |> Str.global_replace rx_dunder ":" |> Str.global_replace rx_under "-"
       in
       if has_prefix then
         ":" ^ s
@@ -303,9 +300,7 @@ module Reified = struct
   let is_captured_generic id =
     let prefix = "$__captured$reifiedgeneric$" in
     let ( >>= ) = Option.( >>= ) in
-    String.chop_prefix ~prefix id
-    >>= String.lsplit2 ~on:'$'
-    >>= fun v ->
+    String.chop_prefix ~prefix id >>= String.lsplit2 ~on:'$' >>= fun v ->
     try
       match v with
       | ("function", i) -> Some (true, int_of_string i)

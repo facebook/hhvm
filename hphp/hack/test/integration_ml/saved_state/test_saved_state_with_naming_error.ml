@@ -10,8 +10,7 @@ class C {}
 |}
 
 let test () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   let expected_error =
     "File \"/foo.php\", line 3, characters 7-7:\n"

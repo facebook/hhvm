@@ -87,5 +87,4 @@ let source_text _ =
   raise (Invalid_argument "Editable token doesn't support source_text")
 
 let leading_start_offset _ =
-  raise
-    (Invalid_argument "Editable token doesn't support leading_start_offset")
+  raise (Invalid_argument "Editable token doesn't support leading_start_offset")

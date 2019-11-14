@@ -11,8 +11,7 @@ let main (env : ClientStart.env) : Exit_status.t Lwt.t =
   HackEventLogger.set_from env.ClientStart.from;
   HackEventLogger.client_restart ();
   if
-    MonitorConnection.server_exists
-      (ServerFiles.lock_file env.ClientStart.root)
+    MonitorConnection.server_exists (ServerFiles.lock_file env.ClientStart.root)
   then
     ClientStop.kill_server env.ClientStart.root env.ClientStart.from
   else

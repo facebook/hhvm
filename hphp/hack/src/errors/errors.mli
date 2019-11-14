@@ -824,8 +824,7 @@ val run_in_decl_mode : Relative_path.t -> (unit -> 'a) -> 'a
 (** ignore errors produced by function passed in argument. *)
 val ignore_ : (unit -> 'a) -> 'a
 
-val try_when :
-  (unit -> 'a) -> when_:(unit -> bool) -> do_:(error -> unit) -> 'a
+val try_when : (unit -> 'a) -> when_:(unit -> bool) -> do_:(error -> unit) -> 'a
 
 val has_no_errors : (unit -> 'a) -> bool
 
@@ -860,11 +859,7 @@ val from_error_list : error list -> t
 val iter_error_list : (error -> unit) -> t -> unit
 
 val fold_errors :
-  ?phase:phase ->
-  t ->
-  init:'a ->
-  f:(Relative_path.t -> error -> 'a -> 'a) ->
-  'a
+  ?phase:phase -> t -> init:'a -> f:(Relative_path.t -> error -> 'a -> 'a) -> 'a
 
 val fold_errors_in :
   ?phase:phase ->
@@ -997,11 +992,9 @@ val xhp_required : Pos.t -> string -> (Pos.t * string) list -> unit
 
 val illegal_xhp_child : Pos.t -> (Pos.t * string) list -> unit
 
-val missing_xhp_required_attr :
-  Pos.t -> string -> (Pos.t * string) list -> unit
+val missing_xhp_required_attr : Pos.t -> string -> (Pos.t * string) list -> unit
 
-val nonreactive_function_call :
-  Pos.t -> Pos.t -> string -> Pos.t option -> unit
+val nonreactive_function_call : Pos.t -> Pos.t -> string -> Pos.t option -> unit
 
 val nonreactive_indexing : bool -> Pos.t -> unit
 
@@ -1206,8 +1199,7 @@ val mutably_owned_argument_mismatch :
 
 val rx_move_invalid_location : Pos.t -> unit
 
-val inconsistent_mutability :
-  Pos.t -> string -> (Pos.t * string) option -> unit
+val inconsistent_mutability : Pos.t -> string -> (Pos.t * string) option -> unit
 
 val invalid_mutability_flavor : Pos.t -> string -> string -> unit
 

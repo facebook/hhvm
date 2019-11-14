@@ -50,8 +50,7 @@ let (expand_typedef_ref : expand_typedef ref) =
 
 let expand_typedef x = !expand_typedef_ref x
 
-type sub_type =
-  env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env
+type sub_type = env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env
 
 let (sub_type_ref : sub_type ref) = ref (not_implemented "sub_type")
 
@@ -282,8 +281,7 @@ Similarly to try_over_concrete_supertypes, we stay liberal with errors:
 discard the result of any run which has produced an error.
 If all runs have produced an error, gather all errors and results and add errors. *)
 let run_on_intersection :
-    'env -> f:('env -> locl_ty -> 'env * 'a) -> locl_ty list -> 'env * 'a list
-    =
+    'env -> f:('env -> locl_ty -> 'env * 'a) -> locl_ty list -> 'env * 'a list =
  fun env ~f tyl ->
   let (env, resl_errors) =
     List.map_env env tyl ~f:(fun env ty ->

@@ -9,8 +9,7 @@
 
 open Hh_core
 
-let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result
-    =
+let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
   ServerRageTypes.(
     (* Gather up the contents of all files that hh_server believes are in the *)
     (* IDE different from what's on disk *)

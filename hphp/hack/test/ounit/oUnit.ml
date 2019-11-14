@@ -191,10 +191,7 @@ module SetTestPath = Set.Make (String)
 
 let test_filter only test =
   let set_test =
-    List.fold_left
-      (fun st str -> SetTestPath.add str st)
-      SetTestPath.empty
-      only
+    List.fold_left (fun st str -> SetTestPath.add str st) SetTestPath.empty only
   in
   let foldi f acc lst =
     List.fold_left

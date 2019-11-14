@@ -188,10 +188,9 @@ let go_from_file (labelled_file, line, char) env =
   (* Find the symbol at given position *)
   ServerIdentifyFunction.go content line char env.ServerEnv.tcopt
   |> (* If there are few, arbitrarily pick the first *)
-     List.hd
+  List.hd
   >>= fun (occurrence, definition) ->
   (* Ignore symbols that lack definitions *)
-  definition
-  >>= fun definition ->
-  get_action occurrence (filename, content, line, char)
-  >>= (fun action -> Some (definition.SymbolDefinition.full_name, action))
+  definition >>= fun definition ->
+  get_action occurrence (filename, content, line, char) >>= fun action ->
+  Some (definition.SymbolDefinition.full_name, action)

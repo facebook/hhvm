@@ -62,8 +62,7 @@ let get_positional_info (cst : Syntax.t) (file_offset : int) :
                    children.constructor_call_argument_list )
              | _ -> None)
       >>= fun (callee_node, argument_list) ->
-      trailing_token callee_node
-      >>= fun callee_trailing_token ->
+      trailing_token callee_node >>= fun callee_trailing_token ->
       let function_symbol_offset = Token.end_offset callee_trailing_token in
       let pos =
         SourceText.offset_to_position
@@ -146,9 +145,7 @@ let go_quarantined
   let cst = Provider_utils.compute_cst ~ctx ~entry in
   let nast = entry.Provider_context.ast in
   match
-    get_positional_info
-      (Full_fidelity_ast.PositionedSyntaxTree.root cst)
-      offset
+    get_positional_info (Full_fidelity_ast.PositionedSyntaxTree.root cst) offset
   with
   | None -> None
   | Some ((symbol_line, symbol_char), argument_idx) ->
@@ -187,8 +184,7 @@ let go_quarantined
               let base_class_name =
                 SymbolOccurrence.enclosing_class occurrence
               in
-              def_opt
-              >>= fun def ->
+              def_opt >>= fun def ->
               let file =
                 ServerCommandTypes.FileName
                   (def.SymbolDefinition.pos |> Pos.to_absolute |> Pos.filename)

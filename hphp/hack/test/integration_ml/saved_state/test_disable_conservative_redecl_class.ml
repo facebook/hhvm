@@ -64,9 +64,8 @@ let test_cases =
   [
     (false, 3);
     (* Without disable flag, recheck Foo, Bar, Qux *)
-      (true, 2);
-      (* With conservative redecl disabled, recheck only Foo and Bar *)
-    
+    (true, 2);
+    (* With conservative redecl disabled, recheck only Foo and Bar *)
   ]
 
 let run_test saved_state_dir test_case () =
@@ -88,10 +87,9 @@ let run_test saved_state_dir test_case () =
   @@ "Wrong number of total files rechecked"
 
 let test () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let saved_state_dir = Path.to_string temp_dir in
   Test.save_state init_disk_state saved_state_dir;
   test_cases
-  |> List.iter
-     @@ (fun test_case -> Test.in_daemon @@ run_test saved_state_dir test_case)
+  |> List.iter @@ fun test_case ->
+     Test.in_daemon @@ run_test saved_state_dir test_case

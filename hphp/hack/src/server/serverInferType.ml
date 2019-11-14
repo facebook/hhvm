@@ -106,7 +106,7 @@ let range_visitor startl startc endl endc =
 
 let type_at_pos (tast : Tast.program) (line : int) (char : int) :
     (Tast_env.env * Tast.ty) option =
-  (base_visitor line char)#go tast >>| (fun (_, env, ty) -> (env, ty))
+  (base_visitor line char)#go tast >>| fun (_, env, ty) -> (env, ty)
 
 let type_at_range
     (tast : Tast.program)
@@ -124,7 +124,6 @@ let go :
   let ServerEnv.{ tcopt; naming_table; _ } = env in
   let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view } in
   let (_, tast) = ServerIdeUtils.check_file_input tcopt naming_table file in
-  type_at_pos tast line char
-  >>| fun (env, ty) ->
+  type_at_pos tast line char >>| fun (env, ty) ->
   ( Tast_env.print_ty env ty,
     Tast_env.ty_to_json env ty |> Hh_json.json_to_string )

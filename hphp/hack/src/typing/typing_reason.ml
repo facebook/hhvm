@@ -147,8 +147,7 @@ let rec to_string prefix r =
     ]
   | Rappend _ -> [(p, prefix ^ " because a value is appended to it")]
   | Rfield _ -> [(p, prefix ^ " because one of its field is accessed")]
-  | Rforeach _ ->
-    [(p, prefix ^ " because this is used in a foreach statement")]
+  | Rforeach _ -> [(p, prefix ^ " because this is used in a foreach statement")]
   | Rasyncforeach _ ->
     [
       ( p,
@@ -227,8 +226,7 @@ let rec to_string prefix r =
   | Rlogic _ -> [(p, prefix ^ " because this is used in a logical operation")]
   | Rlogic_ret _ ->
     [(p, prefix ^ " because this is the result of a logical operation")]
-  | Rbitwise _ ->
-    [(p, prefix ^ " because this is used in a bitwise operation")]
+  | Rbitwise _ -> [(p, prefix ^ " because this is used in a bitwise operation")]
   | Rbitwise_ret _ ->
     [(p, prefix ^ " because this is the result of a bitwise operation")]
   | Rstmt _ -> [(p, prefix ^ " because this is a statement")]
@@ -371,8 +369,7 @@ let rec to_string prefix r =
   | Rtypeconst (r_orig, (pos, tconst), ty_str, r_root) ->
     to_string prefix r_orig
     @ [
-        ( pos,
-          sprintf "  resulting from accessing the type constant '%s'" tconst );
+        (pos, sprintf "  resulting from accessing the type constant '%s'" tconst);
       ]
     @ to_string ("  on " ^ ty_str) r_root
   | Rtype_access (Rtypeconst (Rnone, _, _, _), (r, _) :: l) ->
@@ -599,9 +596,7 @@ and get_expr_display_id id =
 and expr_dep_type_reason_string = function
   | ERexpr id ->
     let did = get_expr_display_id id in
-    "where '<expr#"
-    ^ string_of_int did
-    ^ ">' is a reference to this expression"
+    "where '<expr#" ^ string_of_int did ^ ">' is a reference to this expression"
   | ERstatic ->
     "where '<static>' refers to the late bound type of the enclosing class"
   | ERclass c -> "where the class '" ^ strip_ns c ^ "' was referenced here"

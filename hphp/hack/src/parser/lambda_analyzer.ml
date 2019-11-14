@@ -98,8 +98,7 @@ let rec get_params_list node =
     get_params_list function_declaration_header
   | FunctionDeclarationHeader { function_parameter_list; _ } ->
     function_parameter_list
-  | LambdaExpression { lambda_signature; _ } ->
-    get_params_list lambda_signature
+  | LambdaExpression { lambda_signature; _ } -> get_params_list lambda_signature
   | LambdaSignature { lambda_parameters; _ } -> lambda_parameters
   | AnonymousFunction { anonymous_parameters; _ } -> anonymous_parameters
   | MethodishDeclaration { methodish_function_decl_header; _ } ->
@@ -190,9 +189,7 @@ let compute_outer_variables parents node =
 let partition_used_locals parents node =
   (* Set of function parameters *)
   let params =
-    get_params_list node
-    |> syntax_node_to_list
-    |> List.filter_map ~f:param_name
+    get_params_list node |> syntax_node_to_list |> List.filter_map ~f:param_name
   in
   let param_set = SSet.of_list params in
   (* Set of all variables referenced in the body except for $this *)

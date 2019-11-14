@@ -139,9 +139,7 @@ let ret_from_fun_kind ?(is_constructor = false) pos kind =
   match kind with
   | Ast_defs.FGenerator ->
     let r = Reason.Rret_fun_kind (pos, kind) in
-    ( r,
-      Tapply ((pos, SN.Classes.cGenerator), [ret_ty (); ret_ty (); ret_ty ()])
-    )
+    (r, Tapply ((pos, SN.Classes.cGenerator), [ret_ty (); ret_ty (); ret_ty ()]))
   | Ast_defs.FAsyncGenerator ->
     let r = Reason.Rret_fun_kind (pos, kind) in
     ( r,

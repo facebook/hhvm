@@ -357,8 +357,7 @@ let rust_parse_with_decl_mode_sc text env =
 let rust_parse_with_verify_sc_ref : t list rust_parse_type ref =
   ref (fun _ _ -> failwith "This should be lazily set in Rust_parser_ffi")
 
-let rust_parse_with_verify_sc text env =
-  !rust_parse_with_verify_sc_ref text env
+let rust_parse_with_verify_sc text env = !rust_parse_with_verify_sc_ref text env
 
 external rust_parser_errors :
   Full_fidelity_source_text.t ->

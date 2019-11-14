@@ -87,8 +87,7 @@ module Done_or_retry = struct
       else
         Lwt.return_unit )
       >>= fun () ->
-      f ()
-      >>= fun result ->
+      f () >>= fun result ->
       match result with
       | Done x -> Lwt.return x
       | Retry -> call ~f ~depth:(depth + 1))

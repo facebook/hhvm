@@ -13,8 +13,7 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module TriviaKind = Full_fidelity_trivia_kind
 module TokenKind = Full_fidelity_token_kind
 module EditableSyntax = Full_fidelity_editable_syntax
-module EditableSyntaxTree =
-  Full_fidelity_syntax_tree.WithSyntax (EditableSyntax)
+module EditableSyntaxTree = Full_fidelity_syntax_tree.WithSyntax (EditableSyntax)
 module EditableToken = EditableSyntax.Token
 module EditableTrivia = EditableToken.Trivia
 module EditableRewriter = Full_fidelity_rewriter.WithSyntax (EditableSyntax)
@@ -131,9 +130,7 @@ let tree_dump_node node =
       [print level (TokenKind.to_string (PositionedToken.kind token))]
     | _ ->
       let children =
-        List.concat_map
-          ~f:(aux @@ (level + 1))
-          (PositionedSyntax.children node)
+        List.concat_map ~f:(aux @@ (level + 1)) (PositionedSyntax.children node)
       in
       let name =
         print level (SyntaxKind.to_string (PositionedSyntax.kind node))

@@ -16,8 +16,7 @@ class Baz extends Foo {
 |}
 
 let test () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   let expected_error =
     "File \"/foo.php\", line 4, characters 19-19:\n"

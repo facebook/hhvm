@@ -163,13 +163,10 @@ let check_mutability
   (* immutable is not compatible with mutable *)
   | (None, Some (Param_borrowed_mutable | Param_owned_mutable))
   (* mutable is not compatible with immutable  *)
-  
   | (Some (Param_borrowed_mutable | Param_owned_mutable), None)
   (* borrowed mutable is not compatible with owned mutable *)
-  
   | (Some Param_borrowed_mutable, Some Param_owned_mutable)
   (* maybe-mutable is not compatible with immutable/mutable *)
-  
   | ( Some Param_maybe_mutable,
       (None | Some (Param_borrowed_mutable | Param_owned_mutable)) ) ->
     invalid
@@ -346,11 +343,7 @@ and simplify_subtype
     ?(this_ty : locl_ty option = None)
     ty_sub
     ty_super =
-  simplify_subtype_i
-    ~subtype_env
-    ~this_ty
-    (LoclType ty_sub)
-    (LoclType ty_super)
+  simplify_subtype_i ~subtype_env ~this_ty (LoclType ty_sub) (LoclType ty_super)
 
 (* Attempt to "solve" a subtype assertion ty_sub <: ty_super.
  * Return a proposition that is equivalent, but simpler, than
@@ -464,7 +457,7 @@ and simplify_subtype_i
              ( Option.to_list opt_sub_cstr
              @ Typing_set.elements (Env.get_upper_bounds env name_sub) )
         |> (* Turn error into a generic error about the type parameter *)
-           if_unsat invalid
+        if_unsat invalid
   in
   let simplify_subtype_generic_super ty_sub name_super env =
     match subtype_env.seen_generic_params with
@@ -644,7 +637,7 @@ and simplify_subtype_i
     env
     |> simplify_subtype ~subtype_env ~this_ty ty_sub arg_ty_super
     ||| (* Look up *)
-        simplify_subtype_generic_sub name_sub opt_sub_cstr ty_sub ty_super
+    simplify_subtype_generic_sub name_sub opt_sub_cstr ty_sub ty_super
   | (_, LoclType (_, Tabstract (AKdependent _, Some ty)))
     when let (env, ty) = Env.expand_type env ty in
          match ty with
@@ -804,8 +797,8 @@ and simplify_subtype_i
       ConstraintType
         ( r,
           Thas_member
-            { hm_name = name; hm_type = member_ty; hm_class_id = class_id } )
-    ) ->
+            { hm_name = name; hm_type = member_ty; hm_class_id = class_id } ) )
+    ->
     let (obj_get_ty, error_prop) =
       Errors.try_with_result
         (fun () ->
@@ -826,8 +819,8 @@ and simplify_subtype_i
     in
     error_prop &&& simplify_subtype ~subtype_env ~this_ty obj_get_ty member_ty
   | ( (LoclType (_, Tintersection tyl_sub) as ty_sub),
-      (LoclType ((_, Tunion (_ :: _ as tyl_super)) as ty_super) as ity_super)
-    ) ->
+      (LoclType ((_, Tunion (_ :: _ as tyl_super)) as ty_super) as ity_super) )
+    ->
     (* Heuristicky logic to decide whether to "break" the intersection
     or the union first, based on observing that the following cases often occur:
       - A & B <: (A & B) | C
@@ -857,8 +850,8 @@ and simplify_subtype_i
             Nast.(
               ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
               | Tnoreturn | Tatom _ ))
-        | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject
-        | Tclass _ | Tarraykind _ | Tpu _ ),
+        | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject | Tclass _
+        | Tarraykind _ | Tpu _ ),
         Tnonnull ) ->
       valid ()
     | ((Tdynamic | Toption _ | Tprim Nast.(Tnull | Tvoid)), Tnonnull) ->
@@ -879,8 +872,8 @@ and simplify_subtype_i
         valid ()
       else
         invalid ()
-    | ( ( Tnonnull | Tdynamic | Tfun _ | Ttuple _ | Tshape _ | Tanon _
-        | Tobject | Tclass _ | Tarraykind _ ),
+    | ( ( Tnonnull | Tdynamic | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject
+        | Tclass _ | Tarraykind _ ),
         Tprim _ ) ->
       invalid ()
     | ( Toption _,
@@ -1023,12 +1016,10 @@ and simplify_subtype_i
             match shape_kind with
             | Closed_shape ->
               MakeType.nothing
-                (Reason.Rmissing_required_field
-                   (Reason.to_pos r, printable_name))
+                (Reason.Rmissing_required_field (Reason.to_pos r, printable_name))
             | Open_shape ->
               MakeType.mixed
-                (Reason.Rmissing_optional_field
-                   (Reason.to_pos r, printable_name))
+                (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name))
           in
           { sft_ty; sft_optional = true }
       in
@@ -1093,8 +1084,8 @@ and simplify_subtype_i
         Tabstract (AKnewtype _, _) ) ->
       simplify_subtype ~subtype_env ~this_ty ty ety_super env
     (* Primitives and other concrete types cannot be subtypes of dependent types *)
-    | ( ( Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _
-        | Tanon _ | Tclass _ | Tobject | Tarraykind _ ),
+    | ( ( Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _
+        | Tclass _ | Tobject | Tarraykind _ ),
         Tabstract (AKdependent expr_dep, tyopt) ) ->
       (* If the bound is the same class try and show more explanation of the error *)
       begin
@@ -1150,11 +1141,7 @@ and simplify_subtype_i
                         Phase.localize ~ety_env env ty_super
                       in
                       env
-                      |> simplify_subtype
-                           ~subtype_env
-                           ~this_ty
-                           ety_sub
-                           ty_super
+                      |> simplify_subtype ~subtype_env ~this_ty ety_sub ty_super
                       ||| try_constraints lower_bounds_super
                   in
                   try_constraints lower_bounds_super env
@@ -1519,8 +1506,8 @@ and simplify_subtype_i
             Nast.(
               ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
               | Tnoreturn | Tatom _ | Tnull | Tvoid ))
-        | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject
-        | Tclass _ | Tarraykind _ | Tany _ | Tpu _ | Tdynamic | Toption _
+        | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject | Tclass _
+        | Tarraykind _ | Tany _ | Tpu _ | Tdynamic | Toption _
         | Tabstract ((AKnewtype _ | AKdependent _), Some _) ),
         Toption _ )
     | (Tabstract (AKdependent _, Some _), Tabstract (AKdependent _, Some _))
@@ -1765,22 +1752,23 @@ and simplify_subtype_params
     | None -> valid env
     | Some ty -> simplify_subtype_params_with_variadic subl ty env)
   | (sub :: subl, super :: superl) ->
-    env
+    ( env
     |> begin
          if check_params_reactivity then
            simplify_subtype_fun_params_reactivity ~subtype_env sub super
-         else valid
+         else
+           valid
        end
-    &&& begin
-          if check_params_mutability then
-            check_mutability
-              ~is_receiver:false
-              sub.fp_pos
-              sub.fp_mutability
-              super.fp_pos
-              super.fp_mutability
-          else valid
-        end
+    &&&
+    if check_params_mutability then
+      check_mutability
+        ~is_receiver:false
+        sub.fp_pos
+        sub.fp_mutability
+        super.fp_pos
+        super.fp_mutability
+    else
+      valid )
     &&& fun env ->
     begin
       let { fp_type = ty_sub; _ } = sub in
@@ -1996,7 +1984,6 @@ and simplify_subtype_reactivity
   (* ok:
      <<__Rx>>
      function f(<<__AtMostRxAsFunc>> (function(): int) $f) { return $f() }  *)
-  
   | (RxVar None, RxVar _) ->
     valid ()
   | (RxVar (Some sub), RxVar (Some super))
@@ -2296,15 +2283,15 @@ and simplify_subtype_funs_attributes
   returns mutable value and subtype yields immutable value - this is not safe.
   NOTE: error is not reported if child is non-reactive since it does not have
   immutability-by-default behavior *)
-     check_with
-       ( Bool.equal ft_sub.ft_returns_mutable ft_super.ft_returns_mutable
-       || (not ft_super.ft_returns_mutable)
-       || equal_reactivity ft_sub.ft_reactive Nonreactive )
-       (fun () ->
-         Errors.mutable_return_result_mismatch
-           ft_super.ft_returns_mutable
-           p_super
-           p_sub)
+  check_with
+    ( Bool.equal ft_sub.ft_returns_mutable ft_super.ft_returns_mutable
+    || (not ft_super.ft_returns_mutable)
+    || equal_reactivity ft_sub.ft_reactive Nonreactive )
+    (fun () ->
+      Errors.mutable_return_result_mismatch
+        ft_super.ft_returns_mutable
+        p_super
+        p_sub)
   |> check_with
        ( equal_reactivity ft_super.ft_reactive Nonreactive
        || ft_super.ft_returns_void_to_rx
@@ -2367,9 +2354,7 @@ and simplify_subtype_funs_attributes
       else
         res
     | (Fstandard _, _) ->
-      with_error
-        (fun () -> Errors.fun_unexpected_nonvariadic p_sub p_super)
-        res
+      with_error (fun () -> Errors.fun_unexpected_nonvariadic p_sub p_super) res
     | (_, _) -> res
 
 and simplify_subtype_possibly_enforced
@@ -2414,12 +2399,12 @@ and simplify_subtype_funs
        r_super
        ft_super
   &&& (* Now do contravariant subtyping on parameters *)
-      begin
-        match (variadic_subtype, variadic_supertype) with
-        | (Some var_sub, Some var_super) ->
-          simplify_subtype_possibly_enforced var_super var_sub
-        | _ -> valid
-      end
+  begin
+    match (variadic_subtype, variadic_supertype) with
+    | (Some var_sub, Some var_super) ->
+      simplify_subtype_possibly_enforced var_super var_sub
+    | _ -> valid
+  end
   &&& begin
         let check_params_mutability =
           (not (equal_reactivity ft_super.ft_reactive Nonreactive))
@@ -2433,8 +2418,7 @@ and simplify_subtype_funs
         in
         simplify_subtype_params
           ~is_method
-          ~check_params_reactivity:
-            (should_check_fun_params_reactivity ft_super)
+          ~check_params_reactivity:(should_check_fun_params_reactivity ft_super)
           ~check_params_mutability
           ft_super.ft_params
           ft_sub.ft_params
@@ -2476,9 +2460,7 @@ and add_tyvar_upper_bound_and_close
     Env.add_tyvar_upper_bound ~intersect:(try_intersect_i env) env var ty
   in
   let upper_bounds_after = Env.get_tyvar_upper_bounds env var in
-  let added_upper_bounds =
-    ITySet.diff upper_bounds_after upper_bounds_before
-  in
+  let added_upper_bounds = ITySet.diff upper_bounds_after upper_bounds_before in
   let lower_bounds = Env.get_tyvar_lower_bounds env var in
   let (env, prop) =
     ITySet.fold
@@ -2517,9 +2499,7 @@ and add_tyvar_lower_bound_and_close
   let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
   let env = Env.add_tyvar_lower_bound ~union:(try_union_i env) env var ty in
   let lower_bounds_after = Env.get_tyvar_lower_bounds env var in
-  let added_lower_bounds =
-    ITySet.diff lower_bounds_after lower_bounds_before
-  in
+  let added_lower_bounds = ITySet.diff lower_bounds_after lower_bounds_before in
   let upper_bounds = Env.get_tyvar_upper_bounds env var in
   let (env, prop) =
     ITySet.fold
@@ -2632,8 +2612,7 @@ and props_to_env env remain props on_error =
         on_error
     in
     props_to_env env remain (prop :: props) on_error
-  | TL.Conj props' :: props ->
-    props_to_env env remain (props' @ props) on_error
+  | TL.Conj props' :: props -> props_to_env env remain (props' @ props) on_error
   | TL.Disj (f, disj_props) :: conj_props ->
     (* For now, just find the first prop in the disjunction that works *)
     let rec try_disj disj_props =
@@ -2684,8 +2663,7 @@ and sub_type_inner
   env
 
 and is_sub_type_alt_i
-    ~ignore_generic_params ~no_top_bottom ~treat_dynamic_as_bottom env ty1 ty2
-    =
+    ~ignore_generic_params ~no_top_bottom ~treat_dynamic_as_bottom env ty1 ty2 =
   let this_ty =
     match ty1 with
     | LoclType ty1 -> Some ty1
@@ -2883,8 +2861,7 @@ and try_union env ty tyl =
     (try_union_i env (LoclType ty) (List.map tyl ~f:(fun ty -> LoclType ty)))
     ~f:(function
       | LoclType ty -> ty
-      | _ ->
-        failwith "The union of two locl type should always be a locl type.")
+      | _ -> failwith "The union of two locl type should always be a locl type.")
 
 let subtype_reactivity
     ?extra_info ?is_call_site env p_sub r_sub p_super r_super on_error =
@@ -2992,12 +2969,7 @@ and decompose_subtype_add_prop p env prop =
   | TL.Disj (_, []) -> Env.mark_inconsistent env
   | TL.Disj (_, [prop']) -> decompose_subtype_add_prop p env prop'
   | TL.Disj _ ->
-    Typing_log.log_prop
-      2
-      env.function_pos
-      "decompose_subtype_add_prop"
-      env
-      prop;
+    Typing_log.log_prop 2 env.function_pos "decompose_subtype_add_prop" env prop;
     env
   | TL.Coerce _ -> failwith "Coercions should have been resolved beforehand"
   | TL.IsSubtype (LoclType ty1, LoclType ty2) ->

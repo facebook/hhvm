@@ -76,10 +76,7 @@ let expect_stats ~nonempty ~used =
 let expect_heap_size count =
   (* Currently a single element takes 64 bytes *)
   let heap_space_per_element = 64 in
-  expect_equals
-    ~name:"heap_size"
-    (heap_size ())
-    (count * heap_space_per_element)
+  expect_equals ~name:"heap_size" (heap_size ()) (count * heap_space_per_element)
 
 let expect_mem key =
   expect ~msg:(Printf.sprintf "Expected key '%s' to be in hashtable" key)

@@ -102,9 +102,7 @@ let add_minor_change_fanout
   let acc =
     add_member_fanouts acc typeconsts (fun mid cid -> Dep.Const (cid, mid))
   in
-  let acc =
-    add_member_fanouts acc props (fun mid cid -> Dep.Prop (cid, mid))
-  in
+  let acc = add_member_fanouts acc props (fun mid cid -> Dep.Prop (cid, mid)) in
   let acc =
     add_member_fanouts acc sprops (fun mid cid -> Dep.Prop (cid, mid))
   in

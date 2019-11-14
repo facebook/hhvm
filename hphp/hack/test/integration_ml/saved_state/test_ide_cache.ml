@@ -62,8 +62,7 @@ let check_errors expected_errors = function
     Test.assertEqual expected_errors (Test.errors_to_string errors)
 
 let test () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let saved_state_dir = Path.to_string temp_dir in
   Test.save_state [] saved_state_dir;
   Ide_parser_cache.enable ();

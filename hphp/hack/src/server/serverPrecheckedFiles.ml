@@ -132,9 +132,7 @@ let update_after_local_changes genv env changes =
     (* This is cleared during transition from Initial_typechecking to
      * Prechecked_files_ready and should not be populated again *)
     assert (Typing_deps.DepSet.is_empty dirty_deps.dirty_local_deps);
-    let changes =
-      Typing_deps.DepSet.diff changes dirty_deps.clean_local_deps
-    in
+    let changes = Typing_deps.DepSet.diff changes dirty_deps.clean_local_deps in
     if Typing_deps.DepSet.is_empty changes then
       env
     else

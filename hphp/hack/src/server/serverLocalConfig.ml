@@ -23,8 +23,8 @@ type t = {
   require_saved_state: bool;
   (* if attempting saved-state, should we fail upon failure? *)
   load_state_script_timeout: int;
-      (* in seconds *)
       (** Prefer using Ocaml implementation over load script. *)
+  (* in seconds *)
   load_state_natively: bool;
   type_decl_bucket_size: int;
   extend_fast_bucket_size: int;
@@ -288,12 +288,7 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
   let config = Config_file.apply_overrides ~silent ~config ~overrides in
   let prefix = Some "experiments_config" in
   let enabled =
-    bool_if_min_version
-      "enabled"
-      ~prefix
-      ~default:false
-      ~current_version
-      config
+    bool_if_min_version "enabled" ~prefix ~default:false ~current_version config
   in
   if enabled then (
     match Experiments_config_file.get_primary_owner () with
@@ -439,9 +434,7 @@ let load_ fn ~silent ~current_version overrides =
       config
   in
   let io_priority = int_ "io_priority" ~default:default.io_priority config in
-  let cpu_priority =
-    int_ "cpu_priority" ~default:default.cpu_priority config
-  in
+  let cpu_priority = int_ "cpu_priority" ~default:default.cpu_priority config in
   let saved_state_cache_limit =
     int_
       "saved_state_cache_limit"
@@ -576,9 +569,7 @@ let load_ fn ~silent ~current_version overrides =
   let remote_type_check = load_remote_type_check ~current_version config in
   let remote_worker_key = string_opt "remote_worker_key" config in
   let remote_check_id = string_opt "remote_check_id" config in
-  let remote_version_specifier =
-    string_opt "remote_version_specifier" config
-  in
+  let remote_version_specifier = string_opt "remote_version_specifier" config in
   let naming_sqlite_path = string_opt "naming_sqlite_path" config in
   let enable_naming_table_fallback =
     match naming_sqlite_path with

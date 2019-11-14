@@ -74,16 +74,11 @@ let rec shrink_shape pos field_name env shape =
       match shape_kind with
       | Closed_shape -> ShapeMap.remove field_name fields
       | Open_shape ->
-        let printable_name =
-          TUtils.get_printable_shape_field_name field_name
-        in
+        let printable_name = TUtils.get_printable_shape_field_name field_name in
         let nothing =
           MakeType.nothing (Reason.Runset_field (pos, printable_name))
         in
-        ShapeMap.add
-          field_name
-          { sft_ty = nothing; sft_optional = true }
-          fields
+        ShapeMap.add field_name { sft_ty = nothing; sft_optional = true } fields
     in
     let result = (Reason.Rwitness pos, Tshape (shape_kind, fields)) in
     (env, result)
@@ -145,9 +140,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
     | _ -> (env, shape_ty))
 
 let experiment_enabled env experiment =
-  TypecheckerOptions.experimental_feature_enabled
-    (Env.get_tcopt env)
-    experiment
+  TypecheckerOptions.experimental_feature_enabled (Env.get_tcopt env) experiment
 
 let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
   ( Reason.Rshape (shape_pos, fun_name),
@@ -177,10 +170,7 @@ let is_shape_field_required env shape_pos fun_name field_name shape_ty =
     Typing_solver.expand_type_and_solve_eq env shape_ty Errors.unify_error
   in
   let (env, ty2) =
-    Typing_solver.expand_type_and_solve_eq
-      env
-      super_shape_ty
-      Errors.unify_error
+    Typing_solver.expand_type_and_solve_eq env super_shape_ty Errors.unify_error
   in
   Typing_subtype.is_sub_type_for_coercion env ty1 ty2
 

@@ -19,7 +19,7 @@ open Convert_longident
 let module_blacklist =
   [
     (* nast.ml opens Aast, but doesn't use it in type declarations. *)
-      "aast";
+    "aast";
     "aast_defs_visitors_ancestors";
     "ast_defs_visitors_ancestors";
     "core_kernel";
@@ -102,8 +102,8 @@ let structure_item si =
       mod_name
       rust_mod_name;
     add_alias rust_mod_name rust_mod_name
-  | Pstr_module
-      { pmb_name = { txt = name; _ }; pmb_expr = { pmod_desc; _ }; _ } ->
+  | Pstr_module { pmb_name = { txt = name; _ }; pmb_expr = { pmod_desc; _ }; _ }
+    ->
     let kind = string_of_module_desc pmod_desc in
     log "Not converting submodule %s: %s not supported" name kind
   | Pstr_include { pincl_mod = { pmod_desc; _ }; _ } ->

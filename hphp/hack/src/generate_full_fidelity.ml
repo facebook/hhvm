@@ -310,8 +310,7 @@ end
             aggregate_func = to_aggregate_validation;
           };
         ]
-      ~filename:
-        (full_fidelity_path_prefix ^ "full_fidelity_validated_syntax.ml")
+      ~filename:(full_fidelity_path_prefix ^ "full_fidelity_validated_syntax.ml")
       ~template:full_fidelity_validated_syntax_template
       ()
 end
@@ -1364,8 +1363,7 @@ CONSTRUCTOR_METHODS}
       ~transformations:
         [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
       ~filename:
-        ( full_fidelity_path_prefix
-        ^ "coroutine_smart_constructors_generated.rs" )
+        (full_fidelity_path_prefix ^ "coroutine_smart_constructors_generated.rs")
       ~template:coroutine_smart_constructors_template
       ()
 end
@@ -1722,8 +1720,7 @@ CONSTRUCTOR_METHODS}
       ~transformations:
         [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
       ~filename:
-        ( full_fidelity_path_prefix
-        ^ "decl_mode_smart_constructors_generated.rs" )
+        (full_fidelity_path_prefix ^ "decl_mode_smart_constructors_generated.rs")
       ~template:decl_mode_smart_constructors_template
       ()
 end
@@ -2769,10 +2766,7 @@ module GenerateFFTokenKind = struct
 
   let to_to_string x =
     let token_text = escape_token_text x.token_text in
-    sprintf
-      ("  | " ^^ token_kind_fmt ^^ " -> \"%s\"\n")
-      x.token_kind
-      token_text
+    sprintf ("  | " ^^ token_kind_fmt ^^ " -> \"%s\"\n") x.token_kind token_text
 
   let to_is_variable_text x = sprintf "  | %s -> true\n" x.token_kind
 

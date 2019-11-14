@@ -161,9 +161,11 @@ let handlers =
         S.on_method = collect_in_decl#on_method_;
         S.on_fun = collect_in_decl#on_fun_;
       };
-    S.get_state = begin
-                    fun fn -> Ast_provider.get_ast ~full:true fn
-                  end;
+    S.get_state =
+      begin
+        fun fn ->
+        Ast_provider.get_ast ~full:true fn
+      end;
     S.map_result =
       begin
         fun ast refs ->
@@ -181,5 +183,4 @@ let go :
     (string * int * int) list ->
     ServerEnv.env ->
     _ =
- fun workers pos_list env ->
-  ServerRxApiShared.go workers pos_list env handlers
+ (fun workers pos_list env -> ServerRxApiShared.go workers pos_list env handlers)

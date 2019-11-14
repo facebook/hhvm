@@ -63,7 +63,8 @@ let check_param : env -> Nast.fun_param -> unit =
     | (_, Tshape (_, fdm)) ->
       ShapeMap.iter
         begin
-          fun _ { sft_ty; _ } -> check_memoizable env sft_ty
+          fun _ { sft_ty; _ } ->
+          check_memoizable env sft_ty
         end
         fdm
     | (r, Tclass _) ->

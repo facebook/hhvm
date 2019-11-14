@@ -69,10 +69,4 @@ let enforce_is_disposable_type env has_await pos ty =
       SN.Classes.cIDisposable
   in
   let disposable_ty = MakeType.class_type (Reason.Rusing pos) class_name [] in
-  Typing_ops.sub_type
-    pos
-    Reason.URusing
-    env
-    ty
-    disposable_ty
-    Errors.unify_error
+  Typing_ops.sub_type pos Reason.URusing env ty disposable_ty Errors.unify_error

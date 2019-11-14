@@ -487,9 +487,7 @@ class local_finding_visitor =
       * The type name should never reasonably contain a local; we'll ignore it.
       *)
       let localmap = LocalMap.push localmap in
-      let localmap =
-        LocalMap.force_add (Local_id.get_name name) pos localmap
-      in
+      let localmap = LocalMap.force_add (Local_id.get_name name) pos localmap in
       let localmap = this#on_block localmap body in
       LocalMap.pop localmap
   end

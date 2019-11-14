@@ -45,9 +45,7 @@ let parse_root (args : string list) : Path.t =
   | [] -> Wwwroot.get None
   | [x] -> Wwwroot.get (Some x)
   | _ ->
-    Printf.fprintf
-      stderr
-      "Error: please provide at most one root directory\n%!";
+    Printf.fprintf stderr "Error: please provide at most one root directory\n%!";
     exit 1
 
 let parse_schedule_args () : command =

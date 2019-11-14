@@ -90,10 +90,7 @@ let incr_counter k (r, p, c) =
   let v = CLMap.find k c in
   CLMap.add
     k
-    {
-      count = v.count + 1;
-      reason_stats = incr_reason_stats r p v.reason_stats;
-    }
+    { count = v.count + 1; reason_stats = incr_reason_stats r p v.reason_stats }
     c
 
 let merge_pos_stats p1 p2 =

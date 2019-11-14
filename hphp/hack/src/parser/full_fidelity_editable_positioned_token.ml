@@ -140,8 +140,7 @@ let start_offset token =
 
 let leading token = SourceData.leading (original_source_data_or_default token)
 
-let trailing token =
-  SourceData.trailing (original_source_data_or_default token)
+let trailing token = SourceData.trailing (original_source_data_or_default token)
 
 let with_updated_original_source_data token update_original_source_data =
   let token_data =
@@ -171,8 +170,8 @@ let concatenate b e =
     | (Original b_source_data, Original e_source_data) ->
       Original (SourceData.spanning_between b_source_data e_source_data)
     | ( (SynthesizedFromOriginal (_, b_source_data) | Original b_source_data),
-        (SynthesizedFromOriginal (_, e_source_data) | Original e_source_data)
-      ) ->
+        (SynthesizedFromOriginal (_, e_source_data) | Original e_source_data) )
+      ->
       SynthesizedFromOriginal
         ( { text = text b ^ text e },
           SourceData.spanning_between b_source_data e_source_data )

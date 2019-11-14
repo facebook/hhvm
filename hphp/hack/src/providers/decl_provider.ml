@@ -121,8 +121,7 @@ let get_type_id_filename x expected_kind =
 
 let get_typedef (typedef_name : string) : typedef_decl option =
   match Provider_config.get_backend () with
-  | Provider_config.Lru_shared_memory ->
-    Decl_lru_cache.get_typedef typedef_name
+  | Provider_config.Lru_shared_memory -> Decl_lru_cache.get_typedef typedef_name
   | Provider_config.Shared_memory -> Typing_lazy_heap.get_typedef typedef_name
   | Provider_config.Local_memory { decl_cache } ->
     let result : Obj.t =
@@ -151,8 +150,7 @@ let get_record_def (record_name : string) : record_def_decl option =
   match Provider_config.get_backend () with
   | Provider_config.Lru_shared_memory ->
     Decl_lru_cache.get_record_def record_name
-  | Provider_config.Shared_memory ->
-    Typing_lazy_heap.get_record_def record_name
+  | Provider_config.Shared_memory -> Typing_lazy_heap.get_record_def record_name
   | Provider_config.Local_memory { decl_cache } ->
     let result : Obj.t =
       Memory_bounded_lru_cache.find_or_add

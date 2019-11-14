@@ -581,9 +581,7 @@ let fold_union env r tyl =
 let simplify_unions env ?on_tyvar ((r, _) as ty) =
   Log.log_simplify_unions r ty
   @@
-  let (env, r_null, r_union, r_dyn, tys) =
-    normalize_union env [ty] ?on_tyvar
-  in
+  let (env, r_null, r_union, r_dyn, tys) = normalize_union env [ty] ?on_tyvar in
   let (env, tyl) = union_list_2_by_2 env r (TySet.elements tys) in
   let r = Option.value r_union ~default:r in
   make_union env r tyl r_null r_dyn

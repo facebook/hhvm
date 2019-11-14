@@ -284,7 +284,8 @@ let mark_as_synthesized inh =
     ih_substs =
       SMap.map
         begin
-          fun sc -> { sc with sc_from_req_extends = true }
+          fun sc ->
+          { sc with sc_from_req_extends = true }
         end
         inh.ih_substs;
     ih_cstr = (Option.map (fst inh.ih_cstr) mark_elt, snd inh.ih_cstr);
@@ -293,9 +294,7 @@ let mark_as_synthesized inh =
     ih_methods = SMap.map mark_elt inh.ih_methods;
     ih_smethods = SMap.map mark_elt inh.ih_smethods;
     ih_consts =
-      SMap.map
-        (fun const -> { const with cc_synthesized = true })
-        inh.ih_consts;
+      SMap.map (fun const -> { const with cc_synthesized = true }) inh.ih_consts;
   }
 
 (*****************************************************************************)

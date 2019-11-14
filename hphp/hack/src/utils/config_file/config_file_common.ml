@@ -176,8 +176,7 @@ module Getters = struct
       let version_value =
         Config_file_version.parse_version (Some version_value)
       in
-      if
-        Config_file_version.compare_versions current_version version_value >= 0
+      if Config_file_version.compare_versions current_version version_value >= 0
       then
         true
       else

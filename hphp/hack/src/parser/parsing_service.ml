@@ -115,8 +115,7 @@ let parse ~quick ~show_all_errors popt acc fn =
     acc
   else
     let res =
-      Errors.do_with_context fn Errors.Parsing
-      @@ fun () ->
+      Errors.do_with_context fn Errors.Parsing @@ fun () ->
       Full_fidelity_ast.defensive_from_file ~quick ~show_all_errors popt fn
     in
     process_parse_result ~quick acc fn res popt

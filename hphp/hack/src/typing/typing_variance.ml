@@ -105,7 +105,8 @@ let reason_stack_to_string variance reason_stack =
        reason_stack
        ~f:
          begin
-           fun (_, _, pvariance) acc -> variance_to_sign pvariance ^ acc
+           fun (_, _, pvariance) acc ->
+           variance_to_sign pvariance ^ acc
          end
        ~init:"")
 
@@ -138,8 +139,7 @@ let reason_to_string ~sign (_, descr, variance) =
   | Rconstraint_eq -> "`=` constraints on method type parameters are invariant"
   | Rwhere_as ->
     "`where _ as _` constraints are covariant on the left, contravariant on the right"
-  | Rwhere_eq ->
-    "`where _ = _` constraints are invariant on the left and right"
+  | Rwhere_eq -> "`where _ = _` constraints are invariant on the left and right"
   | Rwhere_super ->
     "`where _ super _` constraints are contravariant on the left, covariant on the right"
   | Rfun_inout_parameter _ ->
@@ -382,14 +382,14 @@ and class_method tcopt root static env (_method_name, method_) =
         let env =
           List.fold_left
             tparams
-            ~f:begin
-                 fun env t -> SMap.remove (snd t.tp_name) env
-               end
+            ~f:
+              begin
+                fun env t ->
+                SMap.remove (snd t.tp_name) env
+              end
             ~init:env
         in
-        List.iter
-          ft_params
-          ~f:(fun_param tcopt root (Vcovariant []) static env);
+        List.iter ft_params ~f:(fun_param tcopt root (Vcovariant []) static env);
         fun_arity tcopt root (Vcovariant []) static env ft_arity;
         List.iter tparams ~f:(fun_tparam tcopt root env);
         List.iter ft_where_constraints ~f:(fun_where_constraint tcopt root env);
@@ -565,7 +565,8 @@ and type_ tcopt root variance env (reason, ty) =
   | Tshape (_, ty_map) ->
     Nast.ShapeMap.iter
       begin
-        fun _ { sft_ty; _ } -> type_ tcopt root variance env sft_ty
+        fun _ { sft_ty; _ } ->
+        type_ tcopt root variance env sft_ty
       end
       ty_map
   | Tpu_access (base, _) -> type_ tcopt root variance env base

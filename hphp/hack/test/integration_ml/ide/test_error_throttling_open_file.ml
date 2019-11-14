@@ -65,8 +65,7 @@ let test () =
   in
   let num_errors = SSet.cardinal files_with_errors in
   if num_errors <> 10 then
-    Test.fail
-      (Printf.sprintf "Expected errors in 10 files, got: %d" num_errors);
+    Test.fail (Printf.sprintf "Expected errors in 10 files, got: %d" num_errors);
 
   (* f123 will not be one of them *)
   let (f123_name, f123_contents) = create_foo 123 in

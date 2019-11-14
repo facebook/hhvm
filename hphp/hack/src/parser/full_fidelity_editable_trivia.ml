@@ -76,8 +76,7 @@ let make_after_halt_compiler source_text offset width =
 (* HackFormat is using this to create trivia. It's deeply manipulating strings
  * so it was easier to create this helper function to avoid ad-hoc
  * SourceText construction.*)
-let create_delimited_comment text =
-  { kind = TriviaKind.DelimitedComment; text }
+let create_delimited_comment text = { kind = TriviaKind.DelimitedComment; text }
 
 let width trivia = String.length trivia.text
 

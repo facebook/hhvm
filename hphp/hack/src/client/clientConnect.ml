@@ -85,8 +85,8 @@ let check_progress (root : Path.t) : unit =
 
 let delta_t : float = 3.0
 
-let print_wait_msg (progress_callback : string option -> unit) (root : Path.t)
-    : unit =
+let print_wait_msg (progress_callback : string option -> unit) (root : Path.t) :
+    unit =
   let had_warning = Option.is_some !progress_warning in
   check_progress root;
   if not had_warning then
@@ -232,8 +232,7 @@ let rec connect
     let start = Unix.gettimeofday () in
     let%lwt () =
       if env.do_post_handoff_handshake then
-        with_server_hung_up
-        @@ fun () ->
+        with_server_hung_up @@ fun () ->
         wait_for_server_hello
           ic
           env.deadline
@@ -398,9 +397,7 @@ let connect (env : env) : conn Lwt.t =
     in
     HackEventLogger.client_established_connection start_time;
     if env.do_post_handoff_handshake then
-      ServerCommandLwt.send_connection_type
-        oc
-        ServerCommandTypes.Non_persistent;
+      ServerCommandLwt.send_connection_type oc ServerCommandTypes.Non_persistent;
     Lwt.return conn
   with e ->
     (* we'll log this exception, then re-raise the exception, but using the *)
@@ -420,8 +417,7 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t =
      cmd ->
   Marshal.to_channel oc (ServerCommandTypes.Rpc cmd) [];
   Out_channel.flush oc;
-  with_server_hung_up
-  @@ fun () ->
+  with_server_hung_up @@ fun () ->
   let%lwt res =
     wait_for_server_message
       ~expected_message:None

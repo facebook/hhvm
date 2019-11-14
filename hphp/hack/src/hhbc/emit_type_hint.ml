@@ -78,9 +78,7 @@ and fmt_hint ~tparams ?(strip_tparams = false) (pos, h) =
     ^ ")"
   | Aast.Htuple hs -> "(" ^ fmt_hints ~tparams hs ^ ")"
   | Aast.Haccess ((_, Aast.Happly (id, _)), accesses) ->
-    fmt_name_or_prim id
-    ^ "::"
-    ^ String.concat ~sep:"::" (List.map accesses snd)
+    fmt_name_or_prim id ^ "::" ^ String.concat ~sep:"::" (List.map accesses snd)
   | Aast.Haccess _ -> failwith "ast_to_nast error. Should be Haccess(Happly())"
   (* Follow HHVM order: soft -> option *)
   (* Can we fix this eventually? *)
@@ -124,8 +122,7 @@ and fmt_hint ~tparams ?(strip_tparams = false) (pos, h) =
   | Aast.Hthis -> fmt_name_or_prim (pos, SN.Typehints.this)
   | Aast.Hdynamic -> fmt_name_or_prim (pos, SN.Typehints.dynamic)
   | Aast.Hnothing -> fmt_name_or_prim (pos, SN.Typehints.nothing)
-  | Aast.Hpu_access (h, sid) ->
-    "(" ^ fmt_hint ~tparams h ^ ":@" ^ snd sid ^ ")"
+  | Aast.Hpu_access (h, sid) -> "(" ^ fmt_hint ~tparams h ^ ":@" ^ snd sid ^ ")"
   | Aast.Hunion _ -> fmt_name_or_prim (pos, SN.Typehints.mixed)
   | Aast.Hintersection _ -> fmt_name_or_prim (pos, SN.Typehints.mixed)
 

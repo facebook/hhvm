@@ -228,10 +228,7 @@ let save_state
         SharedMem.save_dep_table_sqlite
     in
     let dep_table_edges_added =
-      dep_table_saver
-        db_name
-        Build_id.build_revision
-        replace_state_after_saving
+      dep_table_saver db_name Build_id.build_revision replace_state_after_saving
     in
     let (_ : float) = Hh_logger.log_duration "Saving saved state took" t in
     { dep_table_edges_added }
@@ -245,11 +242,7 @@ let save_state
     let (_ : float) =
       Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t
     in
-    update_save_state
-      ~save_decls
-      env
-      output_filename
-      replace_state_after_saving
+    update_save_state ~save_decls env output_filename replace_state_after_saving
 
 let get_in_memory_dep_table_entry_count () : (int, string) result =
   Utils.try_with_stack (fun () ->

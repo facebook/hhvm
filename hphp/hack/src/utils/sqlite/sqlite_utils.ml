@@ -97,8 +97,7 @@ let to_bool_exn (value : Sqlite3.Data.t) : bool =
   match value with
   | Sqlite3.Data.INT 0L -> false
   | Sqlite3.Data.INT 1L -> true
-  | _ ->
-    raise (Invalid_argument "Attempt to coerce sqlite value to ocaml bool")
+  | _ -> raise (Invalid_argument "Attempt to coerce sqlite value to ocaml bool")
 
 (* Convert a sqlite data value to an ocaml int, and ignore errors *)
 let to_bool (value : Sqlite3.Data.t) : bool =

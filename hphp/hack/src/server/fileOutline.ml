@@ -505,8 +505,8 @@ let outline popt content =
       Errors.ignore_ (fun () ->
           if Ide_parser_cache.is_enabled () then
             Ide_parser_cache.(
-              with_ide_cache
-              @@ (fun () -> get_ast popt Relative_path.default content))
+              with_ide_cache @@ fun () ->
+              get_ast popt Relative_path.default content)
           else
             let env =
               Parser.make_env

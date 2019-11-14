@@ -21,8 +21,7 @@ let get_target symbol =
       | SymbolOccurrence.Property (class_name, member_name) ->
         Some (IMember (Subclasses_of class_name, Types.Property member_name))
       | SymbolOccurrence.ClassConst (class_name, member_name) ->
-        Some
-          (IMember (Subclasses_of class_name, Types.Class_const member_name))
+        Some (IMember (Subclasses_of class_name, Types.Class_const member_name))
       | SymbolOccurrence.Typeconst (class_name, member_name) ->
         Some (IMember (Subclasses_of class_name, Types.Typeconst member_name))
       | SymbolOccurrence.GConst -> Some (IGConst symbol.name)

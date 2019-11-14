@@ -136,14 +136,14 @@ let parse_check_args cmd =
   let options =
     [
       (* Please keep these sorted in the alphabetical order *)
-        ( "--ai",
-          Arg.String
-            (fun s ->
-              ai_mode :=
-                Some
-                  ( ignore (Ai_options.prepare ~server:true s);
-                    s )),
-          " run AI module with provided options" );
+      ( "--ai",
+        Arg.String
+          (fun s ->
+            ai_mode :=
+              Some
+                ( ignore (Ai_options.prepare ~server:true s);
+                  s )),
+        " run AI module with provided options" );
       ( "--ai-query",
         Arg.String (fun x -> set_mode (MODE_AI_QUERY x) ()),
         (* Send an AI query *) "" );
@@ -192,9 +192,9 @@ let parse_check_args cmd =
         ^ " rather than all the files in the codebase." );
       (* Delete an existing checkpoint.
        * Exitcode will be non-zero if no checkpoint is found *)
-        ( "--delete-checkpoint",
-          Arg.String (fun x -> set_mode (MODE_DELETE_CHECKPOINT x) ()),
-          "" );
+      ( "--delete-checkpoint",
+        Arg.String (fun x -> set_mode (MODE_DELETE_CHECKPOINT x) ()),
+        "" );
       ( "--dump-full-fidelity-parse",
         Arg.String (fun x -> set_mode (MODE_FULL_FIDELITY_PARSE x) ()),
         "" );
@@ -344,9 +344,7 @@ let parse_check_args cmd =
                   | _ ->
                     raise
                       (Arg.Bad
-                         ( "No "
-                         ^ fn
-                         ^ " submode supported for global inference" ))
+                         ("No " ^ fn ^ " submode supported for global inference"))
                 in
                 Some (MODE_GLOBAL_INFERENCE (submode, []))
               | Some (MODE_GLOBAL_INFERENCE (submode, fnl)) ->
@@ -366,8 +364,7 @@ let parse_check_args cmd =
         ^ "[line:character] of the text on stdin" );
       ( "--ignore-hh-version",
         Arg.Set ignore_hh_version,
-        " ignore hh_version check when loading saved states (default: false)"
-      );
+        " ignore hh_version check when loading saved states (default: false)" );
       ( "--in-memory-dep-table-size",
         Arg.Unit (set_mode MODE_IN_MEMORY_DEP_TABLE_SIZE),
         " number of entries in the in-memory dependency table" );
@@ -531,9 +528,9 @@ let parse_check_args cmd =
       (* Retrieve changed files since input checkpoint.
        * Output is separated by newline.
        * Exit code will be non-zero if no checkpoint is found *)
-        ( "--retrieve-checkpoint",
-          Arg.String (fun x -> set_mode (MODE_RETRIEVE_CHECKPOINT x) ()),
-          "" );
+      ( "--retrieve-checkpoint",
+        Arg.String (fun x -> set_mode (MODE_RETRIEVE_CHECKPOINT x) ()),
+        "" );
       ("--retry-if-init", Arg.Bool (fun _ -> ()), " (deprecated and ignored)");
       ( "--rewrite-lambda-parameters",
         Arg.Rest
@@ -642,12 +639,10 @@ let parse_check_args cmd =
                 Some (MODE_TYPE_AT_POS_BATCH (position :: positions))
               | _ -> raise (Arg.Bad "only a single mode should be specified")
           end,
-        " (mode) show types at multiple positions [file:line:character list]"
-      );
+        " (mode) show types at multiple positions [file:line:character list]" );
       ("--version", Arg.Set version, " (mode) show version and exit");
       Common_argspecs.watchman_debug_logging watchman_debug_logging;
-        (* Please keep these sorted in the alphabetical order *)
-      
+      (* Please keep these sorted in the alphabetical order *)
     ]
   in
   let args = parse_without_command options usage "check" in
@@ -762,16 +757,13 @@ let parse_start_env command =
   let options =
     [
       (* Please keep these sorted in the alphabetical order *)
-        ( "--ai",
-          Arg.String (fun x -> ai_mode := Some x),
-          " run ai with options " );
+      ("--ai", Arg.String (fun x -> ai_mode := Some x), " run ai with options ");
       Common_argspecs.allow_non_opt_build allow_non_opt_build;
       Common_argspecs.config config;
       Common_argspecs.from from;
       ( "--ignore-hh-version",
         Arg.Set ignore_hh_version,
-        " ignore hh_version check when loading saved states (default: false)"
-      );
+        " ignore hh_version check when loading saved states (default: false)" );
       ( "--log-inference-constraints",
         Arg.Set log_inference_constraints,
         " (for hh debugging purpose only) log type"
@@ -787,8 +779,7 @@ let parse_start_env command =
         Arg.Unit wait_deprecation_msg,
         " this flag is deprecated and does nothing!" );
       Common_argspecs.watchman_debug_logging watchman_debug_logging;
-        (* Please keep these sorted in the alphabetical order *)
-      
+      (* Please keep these sorted in the alphabetical order *)
     ]
   in
   let args = parse_without_command options usage command in
@@ -859,7 +850,7 @@ let parse_lsp_args () =
   let options =
     [
       (* Please keep these sorted in the alphabetical order *)
-        ("--enhanced-hover", Arg.Unit (fun () -> ()), " [legacy] no-op");
+      ("--enhanced-hover", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ( "--ffp-autocomplete",
         Arg.Set use_ffp_autocomplete,
         " [experimental] use the full-fidelity parser based autocomplete " );
@@ -871,8 +862,7 @@ let parse_lsp_args () =
         Arg.Set use_serverless_ide,
         " [experimental] provide IDE services from hh_client instead of hh_server"
       );
-        (* Please keep these sorted in the alphabetical order *)
-      
+      (* Please keep these sorted in the alphabetical order *)
     ]
   in
   let args = parse_without_command options usage "lsp" in

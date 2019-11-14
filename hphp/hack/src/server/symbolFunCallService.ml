@@ -73,9 +73,7 @@ class visitor =
 
     method method_call env target_type class_name method_id =
       let (pos, method_name) = method_id in
-      let method_fullname =
-        combine_name (Some class_name) (Some method_name)
-      in
+      let method_fullname = combine_name (Some class_name) (Some method_name) in
       self#fun_call env target_type method_fullname pos
 
     method! on_fun_ env f =

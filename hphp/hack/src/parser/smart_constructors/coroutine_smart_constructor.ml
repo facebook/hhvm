@@ -68,8 +68,7 @@ module WithSyntax (Syntax : Positioned_syntax_sig.PositionedSyntax_S) = struct
 
   let make_closure_type_specifier r1 coroutine r3 r4 r5 r6 r7 r8 r9 state =
     let state = state || is_coroutine coroutine in
-    ( state,
-      Syntax.make_closure_type_specifier r1 coroutine r3 r4 r5 r6 r7 r8 r9 )
+    (state, Syntax.make_closure_type_specifier r1 coroutine r3 r4 r5 r6 r7 r8 r9)
 
   let make_anonymous_function
       r1 r2 r3 coroutine r5 r6 r7 r8 r9 r10 r11 r12 state =

@@ -52,9 +52,8 @@ let go_quarantined
   go_common tast ~line ~column
 
 let go
-    (env : ServerEnv.env)
-    (position : ServerCommandTypes.file_input * int * int) :
-    ServerCommandTypes.Go_to_type_definition.result =
+    (env : ServerEnv.env) (position : ServerCommandTypes.file_input * int * int)
+    : ServerCommandTypes.Go_to_type_definition.result =
   let (file, line, column) = position in
   let ServerEnv.{ tcopt; naming_table; _ } = env in
   let (_, tast) = ServerIdeUtils.check_file_input tcopt naming_table file in

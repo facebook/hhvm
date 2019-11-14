@@ -13,8 +13,7 @@ let rec wait_for_rpc_response stack fd state callback =
     | Push (ServerCommandTypes.FATAL_EXCEPTION remote_e_data) ->
       Lwt.return (Error (state, stack, Remote_fatal_exception remote_e_data))
     | Push (ServerCommandTypes.NONFATAL_EXCEPTION remote_e_data) ->
-      Lwt.return
-        (Error (state, stack, Remote_nonfatal_exception remote_e_data))
+      Lwt.return (Error (state, stack, Remote_nonfatal_exception remote_e_data))
     | Push m ->
       let state = callback state m in
       let%lwt response = wait_for_rpc_response stack fd state callback in
@@ -23,8 +22,7 @@ let rec wait_for_rpc_response stack fd state callback =
       Lwt.return (Error (state, stack, Failure "unexpected second hello"))
     | Ping ->
       Lwt.return
-        (Error
-           (state, stack, Failure "unexpected ping on persistent connection"))
+        (Error (state, stack, Failure "unexpected ping on persistent connection"))
   with e -> Lwt.return (Error (state, stack, e))
 
 (** Sends a message over the given `out_channel`, then listens for incoming

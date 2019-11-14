@@ -422,8 +422,7 @@ let check_const_override
         parent_class_const.cc_origin
         const_name
         (Cls.name class_)
-    else if (not parent_class_const.cc_abstract) && class_const.cc_abstract
-    then
+    else if (not parent_class_const.cc_abstract) && class_const.cc_abstract then
       let pos = Reason.to_pos (fst class_const.cc_type) in
       let parent_pos = Reason.to_pos (fst parent_class_const.cc_type) in
       Errors.abstract_concrete_override pos parent_pos `constant );
@@ -503,8 +502,7 @@ let check_members
                 Dep.Method (parent_class_elt.ce_origin, member_name)
               | `FromSMethod ->
                 Dep.SMethod (parent_class_elt.ce_origin, member_name)
-              | `FromSProp ->
-                Dep.SProp (parent_class_elt.ce_origin, member_name)
+              | `FromSProp -> Dep.SProp (parent_class_elt.ce_origin, member_name)
               | `FromProp -> Dep.Prop (parent_class_elt.ce_origin, member_name)
               | `FromConstructor -> Dep.Cstr parent_class_elt.ce_origin
             in
@@ -596,8 +594,7 @@ let check_constructors
     not (equal_consistent_kind (snd (Cls.construct parent_class)) Inconsistent)
   in
   if
-    Ast_defs.(equal_class_kind (Cls.kind parent_class) Cinterface)
-    || consistent
+    Ast_defs.(equal_class_kind (Cls.kind parent_class) Cinterface) || consistent
   then
     match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
     | (Some parent_cstr, _) when parent_cstr.ce_synthesized -> env
@@ -665,8 +662,7 @@ let tconst_subsumption env parent_typeconst child_typeconst =
   let parent_pos = fst parent_typeconst.ttc_name in
   let parent_is_concrete = Option.is_some parent_typeconst.ttc_type in
   let disable_partially_abstract =
-    TypecheckerOptions.disable_partially_abstract_typeconsts
-      (Env.get_tcopt env)
+    TypecheckerOptions.disable_partially_abstract_typeconsts (Env.get_tcopt env)
   in
   let is_final =
     match parent_typeconst.ttc_abstract with
@@ -856,9 +852,7 @@ let check_implements env removals parent_type type_ =
   | (_, None) ->
     env
   | (Some parent_class, Some class_) ->
-    let parent_class =
-      (Reason.to_pos parent_r, parent_class, parent_tparaml)
-    in
+    let parent_class = (Reason.to_pos parent_r, parent_class, parent_tparaml) in
     let class_ = (Reason.to_pos r, class_, tparaml) in
     if String.equal (snd parent_name) SN.Classes.cHH_BuiltinEnum then
       (* sadly, enum error reporting requires this to keep the error in the file

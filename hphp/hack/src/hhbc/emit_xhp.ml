@@ -122,9 +122,7 @@ let emit_xhp_attribute_array xal =
     let expo = cv.T.cv_expr in
     let enumo =
       (* TODO(T23734724): Properly deal with codegen for optional enums. *)
-      Option.map
-        ~f:(fun (p, _, e) -> (p, e))
-        (Hhas_xhp_attribute.maybe_enum xa)
+      Option.map ~f:(fun (p, _, e) -> (p, e)) (Hhas_xhp_attribute.maybe_enum xa)
     in
     let is_req = Hhas_xhp_attribute.is_required xa in
     let k = Tast_annotate.make (T.String (SU.Xhp.clean name)) in
@@ -222,8 +220,8 @@ let from_attribute_declaration class_ xal xual =
   in
   let set_cache =
     ( p,
-      T.Expr
-        (Tast_annotate.make (T.Binop (A.Eq None, cache, array_merge_call))) )
+      T.Expr (Tast_annotate.make (T.Binop (A.Eq None, cache, array_merge_call)))
+    )
   in
   let set_r =
     (p, T.Expr (Tast_annotate.make (T.Binop (A.Eq None, var_r, cache))))

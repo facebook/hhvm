@@ -25,5 +25,4 @@ let name hhas_constant = hhas_constant.constant_name
 
 let value hhas_constant = hhas_constant.constant_value
 
-let initializer_instrs hhas_constant =
-  hhas_constant.constant_initializer_instrs
+let initializer_instrs hhas_constant = hhas_constant.constant_initializer_instrs

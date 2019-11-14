@@ -15,8 +15,7 @@ class Baz {
 
 let test_parsing_error (expected_error : string) (bad_contents : string) () :
     unit =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   let foo_contents_with_error = foo_contents bad_contents in
   let disk_state =

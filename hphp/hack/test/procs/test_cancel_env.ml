@@ -93,8 +93,7 @@ let interrupt_handler fd env =
   (env, result)
 
 let test_cancel_env () =
-  Tempfile.with_tempdir
-  @@ fun tempdir ->
+  Tempfile.with_tempdir @@ fun tempdir ->
   (* must set this before spawning workers *)
   (pipe_path := Path.(concat tempdir "mypipe" |> to_string));
   let workers = make_workers num_workers_and_jobs in

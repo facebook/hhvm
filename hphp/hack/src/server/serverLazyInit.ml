@@ -33,8 +33,7 @@ module Dep = Typing_deps.Dep
 module SLC = ServerLocalConfig
 
 let lock_and_load_deptable
-    (fn : string) ~(ignore_hh_version : bool) ~(fail_if_missing : bool) : unit
-    =
+    (fn : string) ~(ignore_hh_version : bool) ~(fail_if_missing : bool) : unit =
   if String.length fn = 0 && not fail_if_missing then
     Hh_logger.log "The dependency file was not specified - ignoring"
   else
@@ -87,9 +86,7 @@ let download_and_load_state_exn
           }
     in
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
-    let ignore_hhconfig =
-      ServerArgs.saved_state_ignore_hhconfig genv.options
-    in
+    let ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig genv.options in
     let use_prechecked_files =
       ServerPrecheckedFiles.should_use genv.options genv.local_config
     in
@@ -176,9 +173,7 @@ let download_and_load_state_exn
         let list_to_set x =
           List.map x Relative_path.from_root |> Relative_path.set_of_list
         in
-        let dirty_naming_files =
-          Relative_path.Set.of_list dirty_naming_files
-        in
+        let dirty_naming_files = Relative_path.Set.of_list dirty_naming_files in
         let dirty_master_files = list_to_set dirty_master_files in
         let dirty_local_files = list_to_set dirty_local_files in
         Ok
@@ -209,9 +204,7 @@ let use_precomputed_state_exn
   } =
     info
   in
-  let ignore_hh_version =
-    ServerArgs.ignore_hh_version genv.ServerEnv.options
-  in
+  let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
   let fail_if_missing = not genv.local_config.SLC.can_skip_deptable in
   lock_and_load_deptable deptable_fn ~ignore_hh_version ~fail_if_missing;
   let changes = Relative_path.set_of_list changes in
@@ -601,8 +594,7 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
   in
   match State_loader_futures.wait_for_finish loader_future with
   | Ok (info, fnl) ->
-    let { Saved_state_loader.Naming_table_saved_state_info.naming_table_path }
-        =
+    let { Saved_state_loader.Naming_table_saved_state_info.naming_table_path } =
       info
     in
     let naming_table_path = Path.to_string naming_table_path in
@@ -728,8 +720,7 @@ let post_saved_state_initialization
   } =
     loaded_info
   in
-  if hg_aware then
-    Option.iter mergebase_rev ~f:ServerRevisionTracker.initialize;
+  if hg_aware then Option.iter mergebase_rev ~f:ServerRevisionTracker.initialize;
   Bad_files.check dirty_local_files;
   Bad_files.check changed_while_parsing;
 
@@ -771,9 +762,7 @@ let post_saved_state_initialization
       ]
   in
   let t = Unix.gettimeofday () in
-  let dirty_files =
-    Relative_path.Set.union dirty_files changed_while_parsing
-  in
+  let dirty_files = Relative_path.Set.union dirty_files changed_while_parsing in
   let parsing_files =
     Relative_path.Set.filter dirty_files ~f:FindUtils.path_filter
   in

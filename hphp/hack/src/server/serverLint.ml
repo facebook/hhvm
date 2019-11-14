@@ -62,8 +62,7 @@ let lint tcopt _acc (files_with_contents : lint_target list) =
                   let contents =
                     match contents with
                     | Some contents -> contents
-                    | None ->
-                      Sys_utils.cat (Relative_path.to_absolute filename)
+                    | None -> Sys_utils.cat (Relative_path.to_absolute filename)
                   in
                   Linting_service.lint tcopt filename contents))
         in
@@ -149,7 +148,7 @@ let go_xcontroller genv env (fnl : string list) =
       List.filter_map fnl ~f:(fun path ->
           Relative_path.create_detect_prefix path
           |> Naming_table.get_file_info env.naming_table
-          >>= (fun info -> Some (List.map info.FileInfo.classes ~f:snd)))
+          >>= fun info -> Some (List.map info.FileInfo.classes ~f:snd))
       |> List.concat
     in
     MultiWorker.call

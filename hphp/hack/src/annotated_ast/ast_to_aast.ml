@@ -651,8 +651,7 @@ let converter
     | ChildName id -> Aast.ChildName id
     | ChildList cl -> Aast.ChildList (on_list on_xhp_child cl)
     | ChildUnary (c, op) -> Aast.ChildUnary (on_xhp_child c, on_xhp_child_op op)
-    | ChildBinary (c1, c2) ->
-      Aast.ChildBinary (on_xhp_child c1, on_xhp_child c2)
+    | ChildBinary (c1, c2) -> Aast.ChildBinary (on_xhp_child c1, on_xhp_child c2)
   and on_xhp_child_op op : Aast.xhp_child_op =
     match op with
     | ChildStar -> Aast.ChildStar
@@ -675,9 +674,7 @@ let converter
       }
     in
     let acc = (false, false, false, None) in
-    let (final, abs, static, vis) =
-      List.fold_left ~f:kind ~init:acc m.m_kind
-    in
+    let (final, abs, static, vis) = List.fold_left ~f:kind ~init:acc m.m_kind in
     let vis =
       match vis with
       | None ->

@@ -61,12 +61,11 @@ let make_genv options config local_config workers lru_host_env =
   *)
   let ( >>= ) = Option.( >>= ) in
   let since_clockspec =
-    ServerArgs.with_saved_state options
-    >>= function
+    ServerArgs.with_saved_state options >>= function
     | ServerArgs.Saved_state_target_info _ -> None
     | ServerArgs.Informant_induced_saved_state_target target ->
-      target.ServerMonitorUtils.watchman_mergebase
-      >>= (fun mb -> Some mb.ServerMonitorUtils.watchman_clock)
+      target.ServerMonitorUtils.watchman_mergebase >>= fun mb ->
+      Some mb.ServerMonitorUtils.watchman_clock
   in
   let watchman_env =
     if check_mode then (

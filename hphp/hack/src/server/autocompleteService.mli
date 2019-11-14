@@ -17,5 +17,4 @@ val go :
   autocomplete_context:AutocompleteTypes.legacy_autocomplete_context ->
   sienv:SearchUtils.si_env ->
   Tast.program ->
-  AutocompleteTypes.complete_autocomplete_result list
-  Utils.With_complete_flag.t
+  AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t

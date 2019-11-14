@@ -104,8 +104,7 @@ class shallow_type_mapper : type_mapper_type =
 
     method on_tarraykind_akempty env r = (env, (r, Tarraykind AKempty))
 
-    method on_tarraykind_akvarray env r tv =
-      (env, (r, Tarraykind (AKvarray tv)))
+    method on_tarraykind_akvarray env r tv = (env, (r, Tarraykind (AKvarray tv)))
 
     method on_tarraykind_akdarray env r tk tv =
       (env, (r, Tarraykind (AKdarray (tk, tv))))

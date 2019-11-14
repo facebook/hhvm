@@ -71,9 +71,7 @@ let go_quarantined
           List.exists explicitly_defined ~f:is_result_constructor
         in
         let has_constructor = List.exists results ~f:is_result_constructor in
-        let has_class =
-          List.exists results ~f:(fun (occ, _) -> is_class occ)
-        in
+        let has_class = List.exists results ~f:(fun (occ, _) -> is_class occ) in
         (* If we have a constructor but it's derived, then we'd like to show both
          the class and the constructor. If the constructor is explicitly
          defined, though, we'd like to filter the class out and only show the

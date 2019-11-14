@@ -74,8 +74,8 @@ and expand_with_env_
     match
       ( root,
         id,
-        TR.condition_type_from_reactivity
-          (Typing_env_types.env_reactivity tenv) )
+        TR.condition_type_from_reactivity (Typing_env_types.env_reactivity tenv)
+      )
     with
     | ((_, Tabstract (AKdependent DTthis, _)), (_, tconst), Some cond_ty) ->
       begin
@@ -108,11 +108,10 @@ and referenced_typeconsts env ety_env (root, ids) =
                 let ( >>= ) = Option.( >>= ) in
                 Option.value
                   ~default:acc
-                  ( Typing_env.get_class env class_name
-                  >>= fun class_ ->
-                  Typing_env.get_typeconst env class_ tconst
-                  >>= fun typeconst ->
-                  Some ((typeconst.Typing_defs.ttc_origin, tconst, pos) :: acc)
+                  ( Typing_env.get_class env class_name >>= fun class_ ->
+                    Typing_env.get_typeconst env class_ tconst
+                    >>= fun typeconst ->
+                    Some ((typeconst.Typing_defs.ttc_origin, tconst, pos) :: acc)
                   )
               | _ -> acc)
         in
@@ -226,6 +225,7 @@ and expand env ~as_tyvar_with_cnstr root id ~allow_abstract_tconst =
       }
     in
     let upper_bounds = Env.get_upper_bounds env.tenv s in
+
     (* Ignore upper bounds that are equal to ones we've seen, to avoid
       an infinite loop
 
@@ -294,9 +294,7 @@ and expand env ~as_tyvar_with_cnstr root id ~allow_abstract_tconst =
     in
     ({ env with tenv }, ty)
   | Tvar n ->
-    let (tenv, ty) =
-      Typing_subtype_tconst.get_tyvar_type_const env.tenv n id
-    in
+    let (tenv, ty) = Typing_subtype_tconst.get_tyvar_type_const env.tenv n id in
     ({ env with tenv }, ty)
   (* TODO(T36532263): Pocket Universes *)
   | Tpu (base, _, _) ->

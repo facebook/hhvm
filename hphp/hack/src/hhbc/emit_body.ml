@@ -61,8 +61,7 @@ let emit_method_prolog
       let param_name = Param_named (Hhas_param.name param) in
       match has_type_constraint env param_type_info ast_param with
       | (RGH.NoConstraint, _) -> None
-      | (RGH.NotReified, _) ->
-        Some (instr (IMisc (VerifyParamType param_name)))
+      | (RGH.NotReified, _) -> Some (instr (IMisc (VerifyParamType param_name)))
       | (RGH.MaybeReified, Some h) ->
         Some
           (gather
@@ -120,11 +119,9 @@ and emit_defs env defs =
     | [A.Stmt s]
     (* emit statement as final if it is one before the last and last statement is
        empty markup (which will be no-op) *)
-    
     | [A.Stmt s; A.Stmt (_, A.Markup ((_, ""), None))] ->
       Emit_statement.emit_final_statement env s
-    | [d] ->
-      gather [emit_def env d; Emit_statement.emit_dropthrough_return env]
+    | [d] -> gather [emit_def env d; Emit_statement.emit_dropthrough_return env]
     | d :: defs ->
       let i1 = emit_def env d in
       let i2 = aux env defs in
@@ -363,8 +360,8 @@ let emit_body
             match scope with
             | Ast_scope.ScopeItem.Function fd :: _ ->
               ("function", Utils.strip_ns (snd fd.A.f_name))
-            | Ast_scope.ScopeItem.Method md
-              :: Ast_scope.ScopeItem.Class cd :: _ ->
+            | Ast_scope.ScopeItem.Method md :: Ast_scope.ScopeItem.Class cd :: _
+              ->
               ( "method",
                 Utils.strip_ns (snd cd.A.c_name) ^ "::" ^ snd md.A.m_name )
             | _ -> assert false
@@ -493,8 +490,7 @@ let emit_body
       match scope with
       | [] -> Emit_env.get_unique_id_for_main ()
       | ScopeItem.Method md :: ScopeItem.Class cls :: _
-      | ScopeItem.Lambda _ :: ScopeItem.Method md :: ScopeItem.Class cls :: _
-        ->
+      | ScopeItem.Lambda _ :: ScopeItem.Method md :: ScopeItem.Class cls :: _ ->
         Emit_env.get_unique_id_for_method cls md
       | ScopeItem.Function fd :: _ -> Emit_env.get_unique_id_for_function fd
       | _ ->
@@ -510,8 +506,7 @@ let emit_body
   in
   begin
     match
-      SMap.find_opt function_state_key
-      @@ Emit_env.get_function_to_labels_map ()
+      SMap.find_opt function_state_key @@ Emit_env.get_function_to_labels_map ()
     with
     | Some s ->
       Jump_targets.set_function_has_goto true;
@@ -580,8 +575,7 @@ let emit_body
         ]
     in
     if
-      first_instruction_is_label
-      && Instruction_sequence.is_empty header_content
+      first_instruction_is_label && Instruction_sequence.is_empty header_content
     then
       gather [begin_label; instr_entrynop]
     else

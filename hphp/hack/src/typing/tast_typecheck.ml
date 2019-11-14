@@ -48,8 +48,7 @@ let refine ((_p, (_r, cond_ty)), cond_expr) _cond_is_true gamma =
     | _ -> false
   in
   match cond_expr with
-  | Call (Aast.Cnormal, (_, Id (_, id)), [], _, []) when is_refinement_fun id
-    ->
+  | Call (Aast.Cnormal, (_, Id (_, id)), [], _, []) when is_refinement_fun id ->
     raise Not_implemented
   | Call
       ( _,
@@ -229,9 +228,7 @@ let localize env hint =
   | None -> failwith "There should be a hint in strict mode."
   | Some decl_ty ->
     let ty = Decl_hint.hint env.decl_env decl_ty in
-    let (_env, ty) =
-      Phase.localize ~ety_env:(Phase.env_with_self env) env ty
-    in
+    let (_env, ty) = Phase.localize ~ety_env:(Phase.env_with_self env) env ty in
     ty
 
 let gamma_from_params env (params : ETast.fun_param list) =

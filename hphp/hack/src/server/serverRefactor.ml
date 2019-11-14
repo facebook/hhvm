@@ -209,8 +209,7 @@ let get_call_signature_for_wrap (func_decl : Full_fidelity_positioned_syntax.t)
                 that outputs only the variadic params (and dropping the
                 non-variadic ones).
             *)
-                | ParameterDeclaration { parameter_name = name; _ } ->
-                  text name
+                | ParameterDeclaration { parameter_name = name; _ } -> text name
                 | VariadicParameter _ -> "...$args"
                 | _ -> failwith "Expected some parameter type")
           in
@@ -313,11 +312,10 @@ let get_deprecated_wrapper_patch ~filename ~definition new_name =
   SymbolDefinition.(
     Full_fidelity_positioned_syntax.(
       Option.Monad_infix.(
-        filename
-        >>= fun filename ->
-        definition
-        >>= fun definition ->
+        filename >>= fun filename ->
+        definition >>= fun definition ->
         let definition = SymbolDefinition.to_relative definition in
+
         (* We need the number of spaces that the function declaration is offsetted so that we can
       format our wrapper properly with the correct indent (i.e. we need 0-indexed columns).
 
@@ -335,8 +333,7 @@ let get_deprecated_wrapper_patch ~filename ~definition new_name =
             filename_server_type
             definition
         in
-        cst_node
-        >>= fun cst_node ->
+        cst_node >>= fun cst_node ->
         begin
           match syntax cst_node with
           | MethodishDeclaration
@@ -485,8 +482,7 @@ let go_ide (filename, line, char) new_name genv env =
         Ok (go command genv env)
       | (Const, [class_name; const_name]) ->
         let command =
-          ServerRefactorTypes.ClassConstRename
-            (class_name, const_name, new_name)
+          ServerRefactorTypes.ClassConstRename (class_name, const_name, new_name)
         in
         Ok (go command genv env)
       | (Method, [class_name; method_name]) ->

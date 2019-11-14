@@ -527,10 +527,7 @@ let test_update_range_due_to_replace () =
     "replace squiggle start";
 
   let remove_range =
-    {
-      start = { line = 2; character = 5 };
-      end_ = { line = 2; character = 12 };
-    }
+    { start = { line = 2; character = 5 }; end_ = { line = 2; character = 12 } }
   in
   let replace =
     { remove_range; insert_lines = 0; insert_chars_on_final_line = 4 }

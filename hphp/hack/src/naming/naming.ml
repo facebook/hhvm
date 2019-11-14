@@ -916,9 +916,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Hthis
     | Aast.Hdynamic
     | Aast.Hnothing ->
-      Errors.internal_error
-        Pos.none
-        "Unexpected hint not present on legacy AST";
+      Errors.internal_error Pos.none "Unexpected hint not present on legacy AST";
       N.Herr
     | Aast.Hpu_access (h, id) -> N.Hpu_access (hint ~allow_retonly env h, id)
 
@@ -1062,8 +1060,7 @@ module Make (GetLocals : GetLocals) = struct
           (match hl with
           | [] -> N.Harray (None, None)
           | [val_] -> N.Harray (Some (hint env val_), None)
-          | [key_; val_] ->
-            N.Harray (Some (hint env key_), Some (hint env val_))
+          | [key_; val_] -> N.Harray (Some (hint env key_), Some (hint env val_))
           | _ ->
             Errors.too_many_type_arguments p;
             N.Herr)
@@ -1119,13 +1116,8 @@ module Make (GetLocals : GetLocals) = struct
     opt_hint
 
   and hintl
-      ~forbid_this
-      ~allow_retonly
-      ~allow_typedef
-      ~allow_wildcard
-      ~tp_depth
-      env
-      l =
+      ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth env l
+      =
     List.map
       ~f:
         (hint
@@ -1192,11 +1184,7 @@ module Make (GetLocals : GetLocals) = struct
       type_where_constraints env c.Aast.c_where_constraints
     in
     let name =
-      Env.type_name
-        env
-        c.Aast.c_name
-        ~allow_typedef:false
-        ~allow_generics:false
+      Env.type_name env c.Aast.c_name ~allow_typedef:false ~allow_generics:false
     in
     let (constructor, smethods, methods) = Aast.split_methods c in
     let smethods = List.map ~f:(method_ (fst env)) smethods in
@@ -1740,9 +1728,7 @@ module Make (GetLocals : GetLocals) = struct
       type_where_constraints env mt.Aast.mt_where_constraints
     in
     let ret =
-      Aast.type_hint_option_map
-        ~f:(hint ~allow_retonly:true env)
-        mt.Aast.mt_ret
+      Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) mt.Aast.mt_ret
     in
     {
       N.mt_final = mt.Aast.mt_final;
@@ -2248,8 +2234,8 @@ module Make (GetLocals : GetLocals) = struct
     (* match *)
     | Aast.Lvar (_, x) when Local_id.to_string x = SN.SpecialIdents.this ->
       N.This
-    | Aast.Lvar (p, x)
-      when Local_id.to_string x = SN.SpecialIdents.dollardollar ->
+    | Aast.Lvar (p, x) when Local_id.to_string x = SN.SpecialIdents.dollardollar
+      ->
       N.Dollardollar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar)
     | Aast.Lvar (p, x) when Local_id.to_string x = SN.SpecialIdents.placeholder
       ->
@@ -2270,8 +2256,8 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
     | Aast.Class_get ((_, Aast.CIexpr (_, Aast.Id x1)), Aast.CGstring x2) ->
       N.Class_get (make_class_id env x1, N.CGstring x2)
-    | Aast.Class_get
-        ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), Aast.CGstring x2) ->
+    | Aast.Class_get ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), Aast.CGstring x2)
+      ->
       let x1 = (p, Local_id.to_string lid) in
       N.Class_get (make_class_id env x1, N.CGstring x2)
     | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGstring _) ->
@@ -2309,8 +2295,7 @@ module Make (GetLocals : GetLocals) = struct
         match c with
         | Aast.CIexpr (_, Aast.Id x1) ->
           N.PU_identifier (make_class_id env x1, s1, s2)
-        | _ ->
-          failwith "TODO(T35357243): Error during parsing of PU_identifier"
+        | _ -> failwith "TODO(T35357243): Error during parsing of PU_identifier"
       end
     | Aast.Call (_, (_, Aast.Id (p, pseudo_func)), tal, el, uel)
       when pseudo_func = SN.SpecialFunctions.echo ->
@@ -2342,8 +2327,8 @@ module Make (GetLocals : GetLocals) = struct
           Errors.naming_too_few_arguments p;
           N.Any
         | [(_, Aast.String s)] when String.contains s ':' -> N.Any
-        | [(_, Aast.String s)]
-          when genv.in_ppl && SN.PPLFunctions.is_reserved s ->
+        | [(_, Aast.String s)] when genv.in_ppl && SN.PPLFunctions.is_reserved s
+          ->
           Errors.ppl_meth_pointer p ("fun(" ^ s ^ ")");
           N.Any
         | [(p, Aast.String x)] -> N.Fun_id (p, x)
@@ -2395,11 +2380,7 @@ module Make (GetLocals : GetLocals) = struct
             | ((_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth))
               when mem = SN.Members.mClass ->
               N.Method_caller
-                ( Env.type_name
-                    env
-                    cl
-                    ~allow_typedef:false
-                    ~allow_generics:false,
+                ( Env.type_name env cl ~allow_typedef:false ~allow_generics:false,
                   (pm, meth) )
             | ((p, _), _) ->
               Errors.illegal_meth_caller p;
@@ -2445,11 +2426,7 @@ module Make (GetLocals : GetLocals) = struct
             | ((_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth))
               when mem = SN.Members.mClass ->
               N.Smethod_id
-                ( Env.type_name
-                    env
-                    cl
-                    ~allow_typedef:false
-                    ~allow_generics:false,
+                ( Env.type_name env cl ~allow_typedef:false ~allow_generics:false,
                   (pm, meth) )
             | ( (p, N.Class_const ((_, (N.CIself | N.CIstatic)), (_, mem))),
                 (pm, N.String meth) )
@@ -2611,9 +2588,7 @@ module Make (GetLocals : GetLocals) = struct
             ) else
               id :: acc)
       in
-      let idl =
-        List.map ~f:(fun (p, lid) -> (p, Local_id.to_string lid)) idl
-      in
+      let idl = List.map ~f:(fun (p, lid) -> (p, Local_id.to_string lid)) idl in
       let idl' = List.map idl (Env.lvar env) in
       let env = (fst env, Env.empty_local None) in
       List.iter2_exn idl idl' (Env.add_lvar env);
@@ -2839,10 +2814,10 @@ module Make (GetLocals : GetLocals) = struct
     in
     let pu_case_values =
       List.map
-        ~f:(fun (sid, h) ->
-          (sid, hint ~forbid_this:true env_with_case_types h))
+        ~f:(fun (sid, h) -> (sid, hint ~forbid_this:true env_with_case_types h))
         pu_enum.Aast.pu_case_values
     in
+
     (* Now when naming each member declaration, the environment can be
        updated more precisely:
        - type constraints (type t = foo) are available to have a more precise

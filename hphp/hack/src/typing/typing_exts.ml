@@ -57,19 +57,14 @@ let lookup_magic_type (env : env) (class_ : locl_ty) (fname : string) :
   | (_, Tclass ((_, className), _, [])) ->
     let ( >>= ) = Option.( >>= ) in
     let ce_type =
-      Env.get_class env className
-      >>= (fun c -> Env.get_member true env c fname)
+      (Env.get_class env className >>= fun c -> Env.get_member true env c fname)
       >>= fun { ce_type = (lazy ty); ce_pos = (lazy pos); _ } ->
       match ty with
       | (r, Tfun fty) ->
         let ety_env = Typing_phase.env_with_self env in
         let instantiation =
           Typing_phase.
-            {
-              use_pos = Reason.to_pos r;
-              use_name = fname;
-              explicit_targs = [];
-            }
+            { use_pos = Reason.to_pos r; use_name = fname; explicit_targs = [] }
         in
         Some
           (Typing_phase.localize_ft
@@ -186,8 +181,7 @@ let retype_magic_func (env : env) (ft : locl_fun_type) (el : Nast.expr list) :
     match (param_types, args) with
     | ( [
           {
-            fp_type =
-              { et_type = (_, Toption (_, Tclass ((_, fs), _, [_]))); _ };
+            fp_type = { et_type = (_, Toption (_, Tclass ((_, fs), _, [_]))); _ };
             _;
           };
         ],
@@ -219,8 +213,7 @@ let retype_magic_func (env : env) (ft : locl_fun_type) (el : Nast.expr list) :
                   et_type =
                     ( why,
                       Tunion
-                        [(_, Tdynamic); (_, Tclass ((_, fs), _, [type_arg]))]
-                    );
+                        [(_, Tdynamic); (_, Tclass ((_, fs), _, [type_arg]))] );
                   _;
                 };
               _;

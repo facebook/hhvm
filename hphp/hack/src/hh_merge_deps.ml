@@ -35,8 +35,8 @@ let merge_worker ((filename : string), (ignore_hh_version : bool)) : unit =
     Hh_logger.exc ~prefix:(Printf.sprintf "Error in '%s'" filename) ~stack e
 
 let merge_input
-    ~(filenames : string list) ~(ignore_hh_version : bool) ~(db_name : string)
-    : unit =
+    ~(filenames : string list) ~(ignore_hh_version : bool) ~(db_name : string) :
+    unit =
   let (input : (string * bool) list) =
     List.map (fun filename -> (filename, ignore_hh_version)) filenames
   in

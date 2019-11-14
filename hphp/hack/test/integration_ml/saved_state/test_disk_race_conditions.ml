@@ -17,8 +17,7 @@ function foo(): %s {
 
 let uses_foo_name = "uses_foo.php"
 
-let uses_foo_contents =
-  {|<?hh
+let uses_foo_contents = {|<?hh
 function uses_foo(): mixed {
   return foo();
 }
@@ -31,8 +30,7 @@ function test(): int {
 |}
 
 let test () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   let disk_state =
     [

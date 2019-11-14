@@ -27,9 +27,7 @@ let test_quantiles_equal_step2 () =
 
 let test_quantiles_equal_step4 () =
   let qs =
-    Perf_stats.quantiles
-      [0.; 0.5; 1.; 1.; 7.; 8.; 8.; 9.; 64.; 64.; 64.; 81.]
-      3
+    Perf_stats.quantiles [0.; 0.5; 1.; 1.; 7.; 8.; 8.; 9.; 64.; 64.; 64.; 81.] 3
   in
   compare_quantiles qs [1.; 9.; 81.]
 

@@ -104,8 +104,7 @@ module ExprDepTy = struct
             (env, (r_dep_ty, Tclass (c, Exact, tyl)))
           | _ -> apply env ty
         )
-      | (_, Tabstract (AKgeneric s, _)) when AbstractKind.is_generic_dep_ty s
-        ->
+      | (_, Tabstract (AKgeneric s, _)) when AbstractKind.is_generic_dep_ty s ->
         (env, ty)
       | (_, Tabstract (AKgeneric _, _)) ->
         let (env, tyl) = Typing_utils.get_concrete_supertypes env ty in

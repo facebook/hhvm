@@ -89,8 +89,8 @@ let handle_value_in_return
     | T.New _
     | T.Xml _ ->
       env
-    | T.Call (_, (_, T.Id (_, id)), _, _, _)
-      when String.equal id SN.Rx.mutable_ ->
+    | T.Call (_, (_, T.Id (_, id)), _, _, _) when String.equal id SN.Rx.mutable_
+      ->
       (* ok to return result of Rx\mutable - implicit Rx\move *)
       env
     | T.Pipe (_, _, r) ->
@@ -111,8 +111,7 @@ let handle_value_in_return
           (* attempt to return borrowed value as immutable
            unless function is marked with __ReturnsVoidToRx in which case caller
            will not be able to alias the value *)
-          if not function_returns_void_for_rx then
-            error_borrowed_as_immutable e;
+          if not function_returns_void_for_rx then error_borrowed_as_immutable e;
           env
         | Some (_, mut) when function_returns_mutable ->
           error_mutable e mut;
@@ -169,9 +168,8 @@ let freeze_or_move_local
     invalid_use p;
     env
 
-let freeze_local
-    (p : Pos.t) (env : Typing_env_types.env) (tel : Tast.expr list) :
-    Typing_env_types.env =
+let freeze_local (p : Pos.t) (env : Typing_env_types.env) (tel : Tast.expr list)
+    : Typing_env_types.env =
   freeze_or_move_local
     p
     env
@@ -179,8 +177,8 @@ let freeze_local
     Errors.invalid_freeze_target
     Errors.invalid_freeze_use
 
-let move_local (p : Pos.t) (env : Typing_env_types.env) (tel : Tast.expr list)
-    : Typing_env_types.env =
+let move_local (p : Pos.t) (env : Typing_env_types.env) (tel : Tast.expr list) :
+    Typing_env_types.env =
   freeze_or_move_local
     p
     env
@@ -209,12 +207,11 @@ let handle_assignment_mutability
              (Env.function_is_mutable env)
              (Some Param_borrowed_mutable) ->
       (* aliasing $this - bad for __Mutable and __MaybeMutable functions *)
-      ( Env.error_if_reactive_context env
-      @@ fun () ->
-      Errors.reassign_mutable_this
-        ~in_collection:false
-        ~is_maybe_mutable:false
-        (Tast.get_position te1) );
+      ( Env.error_if_reactive_context env @@ fun () ->
+        Errors.reassign_mutable_this
+          ~in_collection:false
+          ~is_maybe_mutable:false
+          (Tast.get_position te1) );
       mut_env
     | (_, Some T.This)
       when Option.equal
@@ -222,12 +219,11 @@ let handle_assignment_mutability
              (Env.function_is_mutable env)
              (Some Param_maybe_mutable) ->
       (* aliasing $this - bad for __Mutable and __MaybeMutable functions *)
-      ( Env.error_if_reactive_context env
-      @@ fun () ->
-      Errors.reassign_mutable_this
-        ~in_collection:false
-        ~is_maybe_mutable:true
-        (Tast.get_position te1) );
+      ( Env.error_if_reactive_context env @@ fun () ->
+        Errors.reassign_mutable_this
+          ~in_collection:false
+          ~is_maybe_mutable:true
+          (Tast.get_position te1) );
       mut_env
     (* var = mutable(v)/move(v) - add the var to the env since it points to a owned mutable value *)
     | (T.Lvar (p, id), Some e) when is_move_or_mutable_call e ->
@@ -245,12 +241,11 @@ let handle_assignment_mutability
              (LMap.find_opt id2 mut_env)
              ~default:false
              ~f:(fun (_, m) -> not (equal_mut_type m Immutable)) ->
-      ( Env.error_if_reactive_context env
-      @@ fun () ->
-      match LMap.find id2 mut_env with
-      | (_, MaybeMutable) ->
-        Errors.reassign_maybe_mutable_var ~in_collection:false p
-      | _ -> Errors.reassign_mutable_var ~in_collection:false p );
+      ( Env.error_if_reactive_context env @@ fun () ->
+        match LMap.find id2 mut_env with
+        | (_, MaybeMutable) ->
+          Errors.reassign_maybe_mutable_var ~in_collection:false p
+        | _ -> Errors.reassign_mutable_var ~in_collection:false p );
       mut_env
     (* If the Lvar gets reassigned and shadowed to something that
    isn't a mutable, it is now a regular immutable variable.

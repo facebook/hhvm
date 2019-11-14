@@ -22,8 +22,7 @@ val entry :
     unit )
   Daemon.entry
 
-val run_once :
-  ServerArgs.options -> ServerConfig.t -> ServerLocalConfig.t -> 'a
+val run_once : ServerArgs.options -> ServerConfig.t -> ServerLocalConfig.t -> 'a
 
 val serve_one_iteration :
   ServerEnv.genv -> ServerEnv.env -> ClientProvider.t -> ServerEnv.env

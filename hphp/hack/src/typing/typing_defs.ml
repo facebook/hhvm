@@ -157,8 +157,7 @@ type 'ty tparam = {
 }
 [@@deriving eq]
 
-type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty
-[@@deriving eq]
+type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty [@@deriving eq]
 
 type 'phase ty = Reason.t * 'phase ty_
 

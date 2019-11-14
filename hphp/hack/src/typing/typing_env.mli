@@ -323,8 +323,7 @@ val create_tyvar_info : ?variance:Ast_defs.variance -> Pos.t -> tyvar_info_
 
 val empty_tyvar_info : tyvar_info_
 
-val get_tyvar_type_const :
-  env -> int -> Aast.sid -> (Aast.sid * locl_ty) option
+val get_tyvar_type_const : env -> int -> Aast.sid -> (Aast.sid * locl_ty) option
 
 val set_tyvar_type_const : env -> int -> Aast.sid -> locl_ty -> env
 

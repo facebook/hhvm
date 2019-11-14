@@ -55,9 +55,9 @@ let final_keyword =
         || is_class_body_declaration_valid context
         || is_trait_body_declaration_valid context
         || (* Final after other modifiers *)
-           context.closest_parent_container = ClassBody
-           && ( context.predecessor = KeywordStatic
-              || context.predecessor = VisibilityModifier )
+        context.closest_parent_container = ClassBody
+        && ( context.predecessor = KeywordStatic
+           || context.predecessor = VisibilityModifier )
       end;
   }
 
@@ -70,11 +70,10 @@ let implements_keyword =
         (* Class implements interface *)
         ( context.closest_parent_container = ClassHeader
         || context.closest_parent_container = ClassBody )
-        && ( context.predecessor = ClassName
-           || context.predecessor = ExtendsList )
+        && (context.predecessor = ClassName || context.predecessor = ExtendsList)
         || (* "require implements" inside a trait *)
-           context.closest_parent_container = TraitBody
-           && context.predecessor = KeywordRequire
+        context.closest_parent_container = TraitBody
+        && context.predecessor = KeywordRequire
       end;
   }
 
@@ -90,9 +89,9 @@ let extends_keyword =
         || context.closest_parent_container = ClassBody )
         && context.predecessor = ClassName
         || (* Inside trait/interface body *)
-           ( context.closest_parent_container = TraitBody
-           || context.closest_parent_container = InterfaceBody )
-           && context.predecessor = KeywordRequire
+        ( context.closest_parent_container = TraitBody
+        || context.closest_parent_container = InterfaceBody )
+        && context.predecessor = KeywordRequire
       end;
   }
 
@@ -149,7 +148,7 @@ let async_keyword =
         (* Async top level function *)
         || is_top_level_statement_valid context
         || (* Async lambda *)
-           is_expression_valid context
+        is_expression_valid context
       end;
   }
 
@@ -173,7 +172,7 @@ let use_keyword =
         (* use <trait> inside body *)
         is_class_body_declaration_valid context
         || (* use <namespace> at top level *)
-           is_top_level_statement_valid context
+        is_top_level_statement_valid context
         (* TODO: "use" for closures *)
       end;
   }
@@ -202,8 +201,8 @@ let function_keyword =
         (* Top level function *)
         || is_top_level_statement_valid context
         || (* Top level async function *)
-           context.closest_parent_container = TopLevel
-           && context.predecessor = KeywordAsync
+        context.closest_parent_container = TopLevel
+        && context.predecessor = KeywordAsync
       end;
   }
 
@@ -225,7 +224,8 @@ let interface_keyword =
     keywords = ["interface"];
     is_valid_in_context =
       begin
-        fun context -> is_top_level_statement_valid context
+        fun context ->
+        is_top_level_statement_valid context
       end;
   }
 
@@ -259,7 +259,8 @@ let declaration_keywords =
       ];
     is_valid_in_context =
       begin
-        fun context -> is_top_level_statement_valid context
+        fun context ->
+        is_top_level_statement_valid context
       end;
   }
 
@@ -359,9 +360,11 @@ let async_func_body_keywords =
 let postfix_expressions =
   {
     keywords = ["clone"; "new"];
-    is_valid_in_context = begin
-                            fun context -> is_expression_valid context
-                          end;
+    is_valid_in_context =
+      begin
+        fun context ->
+        is_expression_valid context
+      end;
   }
 
 let general_statements =
@@ -382,7 +385,8 @@ let general_statements =
       ];
     is_valid_in_context =
       begin
-        fun context -> is_at_beginning_of_new_statement context
+        fun context ->
+        is_at_beginning_of_new_statement context
       end;
   }
 
@@ -423,17 +427,21 @@ let try_trailing_keywords =
 let primary_expressions =
   {
     keywords = ["tuple"; "shape"; "null"];
-    is_valid_in_context = begin
-                            fun context -> is_expression_valid context
-                          end;
+    is_valid_in_context =
+      begin
+        fun context ->
+        is_expression_valid context
+      end;
   }
 
 let scope_resolution_qualifiers =
   {
     keywords = ["self"; "parent"; "static"];
-    is_valid_in_context = begin
-                            fun context -> is_expression_valid context
-                          end;
+    is_valid_in_context =
+      begin
+        fun context ->
+        is_expression_valid context
+      end;
   }
 
 let keyword_matches : keyword_completion list =

@@ -123,8 +123,7 @@ let get_same_file_definitions (positioned_tree : PositionedSyntax.t) :
             (PositionedSyntax.text classish_name :: classes, interfaces, traits)
           | ClassishDeclaration
               {
-                classish_keyword =
-                  { syntax = Token { kind = Interface; _ }; _ };
+                classish_keyword = { syntax = Token { kind = Interface; _ }; _ };
                 classish_name;
                 _;
               } ->

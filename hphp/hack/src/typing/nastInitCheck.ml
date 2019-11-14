@@ -110,8 +110,7 @@ module Env = struct
          When shallow_class_decl is disabled, these are emitted by Decl. *)
       let (_ : SSet.t) = DeferredMembers.class_ tenv sc in
       () );
-    let (add_initialized_props, add_trait_props, add_parent_props, add_parent)
-        =
+    let (add_initialized_props, add_trait_props, add_parent_props, add_parent) =
       if shallow_decl_enabled () then
         ( DeferredMembers.initialized_props,
           DeferredMembers.trait_props tenv,
@@ -301,9 +300,7 @@ and stmt env acc st =
     else
       raise (InitReturn acc)
   | Awaitall (el, b) ->
-    let acc =
-      List.fold_left el ~init:acc ~f:(fun acc (_, e2) -> expr acc e2)
-    in
+    let acc = List.fold_left el ~init:acc ~f:(fun acc (_, e2) -> expr acc e2) in
     let acc = block acc b in
     acc
   | If (e1, b1, b2) ->
@@ -366,7 +363,8 @@ and are_all_init env set =
 and check_all_init p env acc =
   SSet.iter
     begin
-      fun cv -> if not (S.mem cv acc) then Errors.call_before_init p cv
+      fun cv ->
+      if not (S.mem cv acc) then Errors.call_before_init p cv
     end
     env.props
 
@@ -505,9 +503,14 @@ and expr_ env acc p e =
     exprl acc el
   | Callconv (_, e) -> expr acc e
   | Shape fdm ->
-    List.fold_left ~f:begin
-                        fun acc (_, v) -> expr acc v
-                      end ~init:acc fdm
+    List.fold_left
+      ~f:
+        begin
+          fun acc (_, v) ->
+          expr acc v
+        end
+      ~init:acc
+      fdm
   | Omitted -> acc
   | Import _ -> acc
   | Collection _ -> acc

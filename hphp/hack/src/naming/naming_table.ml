@@ -844,9 +844,8 @@ end = struct
         "SELECT last_insert_rowid()"
         ~cb:(fun row ->
           match row with
-          | [|row_id|] -> file_info_id := Some (Int64.of_string row_id)
-          | [||] ->
-            failwith "Got no columns when querying last inserted row ID"
+          | [| row_id |] -> file_info_id := Some (Int64.of_string row_id)
+          | [||] -> failwith "Got no columns when querying last inserted row ID"
           | _ ->
             failwith "Got too many columns when querying last inserted row ID")
       |> check_rc db;

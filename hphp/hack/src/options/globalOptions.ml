@@ -160,8 +160,7 @@ let tco_experimental_type_param_shadowing = "type_param_shadowing"
 (**
  * Enable trait method redeclarations, i.e. public function f(): void = T1::f;
  *)
-let tco_experimental_trait_method_redeclarations =
-  "trait_method_redeclarations"
+let tco_experimental_trait_method_redeclarations = "trait_method_redeclarations"
 
 (**
  * Enable abstract const type with default syntax, i.e.

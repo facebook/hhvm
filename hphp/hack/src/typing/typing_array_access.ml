@@ -129,9 +129,7 @@ let check_arraykey_index env pos container_ty index_ty =
       | (_, Tclass ((_, cn), _, _)) -> Reason.index_class cn
       | _ -> Reason.index_array
     in
-    let info_of_type ty =
-      (Reason.to_pos (fst ty), Typing_print.error env ty)
-    in
+    let info_of_type ty = (Reason.to_pos (fst ty), Typing_print.error env ty) in
     let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
     (* Wrap generic type mismatch error with special error code *)
     Errors.try_
@@ -233,10 +231,7 @@ let rec array_get
         | None ->
           (* if subtype of dynamic, allow it to be used *)
           if
-            Typing_solver.is_sub_type
-              env
-              ty_have
-              (MakeType.dynamic Reason.none)
+            Typing_solver.is_sub_type env ty_have (MakeType.dynamic Reason.none)
           then
             env
           (* fail with useful error *)
@@ -366,14 +361,10 @@ let rec array_get
              let nth = List.nth_exn tyl idx in
              (env, nth)
            with _ ->
-             Errors.typing_error
-               p
-               (Reason.string_of_ureason Reason.index_tuple);
+             Errors.typing_error p (Reason.string_of_ureason Reason.index_tuple);
              (env, err_witness env p))
         | (p, _) ->
-          Errors.typing_error
-            p
-            (Reason.string_of_ureason Reason.URtuple_access);
+          Errors.typing_error p (Reason.string_of_ureason Reason.URtuple_access);
           (env, err_witness env p))
       | Tclass (((_, cn) as id), _, argl)
         when String.equal cn SN.Collections.cPair ->
@@ -583,9 +574,8 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
           (env, ty1)
       | ( _,
           ( Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tvar _ | Tfun _
-          | Tclass _ | Ttuple _ | Tanon _ | Tshape _ | Tdestructure _
-          | Tunion _ | Tintersection _ | Tabstract _ | Tpu _ | Tpu_access _ )
-        ) ->
+          | Tclass _ | Ttuple _ | Tanon _ | Tshape _ | Tdestructure _ | Tunion _
+          | Tintersection _ | Tabstract _ | Tpu _ | Tpu_access _ ) ) ->
         error_assign_array_append env expr_pos ty1)
 
 let widen_for_assign_array_get ~expr_pos index_expr env ty =
@@ -665,10 +655,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
         | None ->
           (* if subtype of dynamic, allow it to be used *)
           if
-            Typing_solver.is_sub_type
-              env
-              ty_have
-              (MakeType.dynamic Reason.none)
+            Typing_solver.is_sub_type env ty_have (MakeType.dynamic Reason.none)
           then
             env
           (* fail with useful error *)
@@ -799,8 +786,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
             (try
                let idx = int_of_string n in
                match List.split_n tyl idx with
-               | (tyl', _ :: tyl'') ->
-                 (env, (r, Ttuple (tyl' @ (ty2 :: tyl''))))
+               | (tyl', _ :: tyl'') -> (env, (r, Ttuple (tyl' @ (ty2 :: tyl''))))
                | _ -> fail Reason.index_tuple
              with _ -> fail Reason.index_tuple)
           | _ -> fail Reason.URtuple_access

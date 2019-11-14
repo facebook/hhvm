@@ -19,10 +19,7 @@ let get_constant tc (seen, has_default) = function
   | Default _ -> (seen, true)
   | Case (((pos, _), Class_const ((_, CI (_, cls)), (_, const))), _) ->
     if String.( <> ) cls (Cls.name tc) then (
-      Errors.enum_switch_wrong_class
-        pos
-        (strip_ns (Cls.name tc))
-        (strip_ns cls);
+      Errors.enum_switch_wrong_class pos (strip_ns (Cls.name tc)) (strip_ns cls);
       (seen, has_default)
     ) else (
       match SMap.find_opt const seen with
@@ -52,8 +49,7 @@ let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
   match (all_cases_handled, has_default, coming_from_unresolved) with
   | (false, false, _) ->
     Errors.enum_switch_nonexhaustive pos unhandled (Cls.pos tc)
-  | (true, true, false) ->
-    Errors.enum_switch_redundant_default pos (Cls.pos tc)
+  | (true, true, false) -> Errors.enum_switch_redundant_default pos (Cls.pos tc)
   | _ -> ()
 
 let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =

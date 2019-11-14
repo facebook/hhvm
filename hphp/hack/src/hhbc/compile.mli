@@ -24,5 +24,4 @@ type env = {
 
 val from_ast : env:env -> is_hh_file:bool -> Tast.program -> result
 
-val fatal :
-  env:env -> is_runtime_error:bool -> Pos.t -> string option -> result
+val fatal : env:env -> is_runtime_error:bool -> Pos.t -> string option -> result

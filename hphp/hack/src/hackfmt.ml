@@ -120,9 +120,7 @@ module Env = struct
 end
 
 let usage =
-  sprintf
-    "Usage: %s [--range s e] [filename or read from stdin]\n"
-    Sys.argv.(0)
+  sprintf "Usage: %s [--range s e] [filename or read from stdin]\n" Sys.argv.(0)
 
 let parse_options () =
   let files = ref [] in

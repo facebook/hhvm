@@ -38,8 +38,7 @@ let handler =
       let ua = f.f_user_attributes in
       (* Functions can't be mutable, only methods can *)
       if is_mutable ua then Errors.mutable_attribute_on_function pos;
-      if is_maybe_mutable ua then
-        Errors.maybe_mutable_attribute_on_function pos;
+      if is_maybe_mutable ua then Errors.maybe_mutable_attribute_on_function pos;
       if is_mutable_return ua && not env.is_reactive then
         Errors.mutable_return_annotated_decls_must_be_reactive
           "function"
@@ -57,9 +56,6 @@ let handler =
 
       (* Methods annotated with MutableReturn attribute must be reactive *)
       if is_mutable_return ua && not is_reactive then
-        Errors.mutable_return_annotated_decls_must_be_reactive
-          "method"
-          pos
-          name;
+        Errors.mutable_return_annotated_decls_must_be_reactive "method" pos name;
       List.iter m.m_params (check_param is_reactive name)
   end

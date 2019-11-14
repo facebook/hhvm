@@ -59,8 +59,8 @@ let print_ty ?(is_return = false) ty =
     if is_not_acceptable ~is_return ty then
       None
     else
-      CodemodTypePrinter.print ~allow_nothing:is_return ty
-      >>= (fun str -> Option.some_if (not @@ String.contains str '#') str))
+      CodemodTypePrinter.print ~allow_nothing:is_return ty >>= fun str ->
+      Option.some_if (not @@ String.contains str '#') str)
 
 open Typing_env_types
 open ServerGlobalInferenceTypes
@@ -253,8 +253,7 @@ let log_ty log =
     | SNonacceptable -> "nonacceptable"
     | SCorrect -> "correct"
   in
-  EventLogger.log_if_initialized
-  @@ fun () ->
+  EventLogger.log_if_initialized @@ fun () ->
   Scuba.new_sample (Some scuba_table)
   |> Scuba.add_normal "file" log.file
   |> Scuba.add_int "start_line" (fst @@ Pos.line_column log.pos)
@@ -295,8 +294,7 @@ let log_ty log =
 
 let get_first_suggested_type_as_string ~syntax_type errors file type_map node =
   Option.Monad_infix.(
-    position file node
-    >>= fun pos ->
+    position file node >>= fun pos ->
     Tast_type_collector.get_from_pos_map (Pos.to_absolute pos) type_map
     >>= fun tys ->
     List.find_map tys ~f:(fun (env, phase_ty) ->
@@ -342,8 +340,7 @@ let get_patches errors type_map file =
                   type_map
                   function_name
                 >>= fun type_str ->
-                position_exclusive file function_type
-                >>| fun pos ->
+                position_exclusive file function_type >>| fun pos ->
                 ServerRefactorTypes.Insert
                   ServerRefactorTypes.
                     {
@@ -352,7 +349,8 @@ let get_patches errors type_map file =
                     }
               in
               Option.to_list patch
-            else []
+            else
+              []
           end
           @
           let lst =
@@ -380,8 +378,7 @@ let get_patches errors type_map file =
                     type_map
                     list_item
                   >>= fun type_str ->
-                  position file list_item
-                  >>| fun pos ->
+                  position file list_item >>| fun pos ->
                   ServerRefactorTypes.Insert
                     ServerRefactorTypes.
                       {
@@ -452,7 +449,7 @@ end
 (* Entry Point *)
 let execute mode files =
   match mode with
-  | MMerge -> Mode_merge.execute files >>| (fun x -> RMerge x)
-  | MSolve -> Mode_solve.execute files >>| (fun x -> RSolve x)
-  | MExport -> Mode_export_json.execute files >>| (fun x -> RExport x)
-  | MRewrite -> Mode_rewrite.execute files >>| (fun x -> RRewrite x)
+  | MMerge -> Mode_merge.execute files >>| fun x -> RMerge x
+  | MSolve -> Mode_solve.execute files >>| fun x -> RSolve x
+  | MExport -> Mode_export_json.execute files >>| fun x -> RExport x
+  | MRewrite -> Mode_rewrite.execute files >>| fun x -> RRewrite x

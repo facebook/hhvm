@@ -15,8 +15,7 @@ function test(A $a): int { return $a->foo(); }
 |}
 
 let test () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   Test.save_state
     [("A.php", a_contents "int"); ("test.php", test_contents)]

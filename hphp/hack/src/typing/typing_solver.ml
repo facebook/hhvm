@@ -516,10 +516,7 @@ let ty_equal_shallow env ty1 ty2 =
     && equal_locl_fun_arity fty1.ft_arity fty2.ft_arity
     && equal_reactivity fty1.ft_reactive fty2.ft_reactive
     && Bool.equal fty1.ft_return_disposable fty2.ft_return_disposable
-    && Option.equal
-         equal_param_mutability
-         fty1.ft_mutability
-         fty2.ft_mutability
+    && Option.equal equal_param_mutability fty1.ft_mutability fty2.ft_mutability
   | (Tshape (shape_kind1, fdm1), Tshape (shape_kind2, fdm2)) ->
     equal_shape_kind shape_kind1 shape_kind2
     && List.equal
@@ -570,9 +567,7 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
     let r = Reason.none in
     let any = LoclType (r, Typing_defs.make_tany ())
     and err = LoclType (r, Terr) in
-    let equal_bounds =
-      equal_bounds |> ITySet.remove any |> ITySet.remove err
-    in
+    let equal_bounds = equal_bounds |> ITySet.remove any |> ITySet.remove err in
     match ITySet.choose_opt equal_bounds with
     | Some (LoclType ty) ->
       let (env, ty) = union_any_if_any_in_lower_bounds env ty lower_bounds in
@@ -711,8 +706,7 @@ let solve_tyvar_wrt_variance env r var on_error =
     let env = solve_tyvar_wrt_variance env r v on_error in
     let (env, ety) = Env.expand_var env r v in
     match ety with
-    | (_, Tvar v') when not (Ident.equal v v') ->
-      solve_until_concrete_ty env v'
+    | (_, Tvar v') when not (Ident.equal v v') -> solve_until_concrete_ty env v'
     | _ -> env
   in
   solve_until_concrete_ty env var
@@ -969,8 +963,7 @@ let rec push_option_out pos env ty =
         let (env, ty') = push_option_out pos env ty' in
         let (env, ty') = Env.expand_type env ty' in
         (match ty' with
-        | (r', Toption ty') ->
-          (env, (r', Toption (r, Tabstract (ak, Some ty'))))
+        | (r', Toption ty') -> (env, (r', Toption (r, Tabstract (ak, Some ty'))))
         | _ -> (env, ty))
       | (env, _) -> (env, ty)
     end

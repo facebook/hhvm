@@ -88,7 +88,8 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
       begin
         if String.equal child_class mro.mro_name then
           ty
-        else Decl_instantiate.instantiate subst ty
+        else
+          Decl_instantiate.instantiate subst ty
       end
   in
   {
@@ -214,9 +215,7 @@ let typeconst_structure mro class_name stc =
   let pos = fst stc.stc_name in
   let r = Reason.Rwitness pos in
   let tsid = (pos, SN.FB.cTypeStructure) in
-  let ts_ty =
-    (r, Tapply (tsid, [(r, Taccess ((r, Tthis), [stc.stc_name]))]))
-  in
+  let ts_ty = (r, Tapply (tsid, [(r, Taccess ((r, Tthis), [stc.stc_name]))])) in
   let abstract =
     match stc.stc_abstract with
     | TCAbstract (Some _) when not mro.mro_passthrough_abstract_typeconst ->
@@ -298,21 +297,24 @@ let shallow_pu_enum_to_pu_enum_type spu =
       tpum_types =
         List.fold
           ~init:SMap.empty
-          ~f:begin
-               fun acc (k, t) -> SMap.add (snd k) (k, t) acc
-             end
+          ~f:
+            begin
+              fun acc (k, t) ->
+              SMap.add (snd k) (k, t) acc
+            end
           spum_types;
       tpum_exprs =
         List.fold
           ~init:SMap.empty
-          ~f:begin
-               fun acc k -> SMap.add (snd k) k acc
-             end
+          ~f:
+            begin
+              fun acc k ->
+              SMap.add (snd k) k acc
+            end
           spum_exprs;
     }
   in
-  let { spu_name; spu_is_final; spu_case_types; spu_case_values; spu_members }
-      =
+  let { spu_name; spu_is_final; spu_case_types; spu_case_values; spu_members } =
     spu
   in
   {
@@ -321,23 +323,28 @@ let shallow_pu_enum_to_pu_enum_type spu =
     tpu_case_types =
       List.fold
         ~init:SMap.empty
-        ~f:begin
-             fun acc k -> SMap.add (snd k) k acc
-           end
+        ~f:
+          begin
+            fun acc k ->
+            SMap.add (snd k) k acc
+          end
         spu_case_types;
     tpu_case_values =
       List.fold
         ~init:SMap.empty
-        ~f:begin
-             fun acc (k, t) -> SMap.add (snd k) (k, t) acc
-           end
+        ~f:
+          begin
+            fun acc (k, t) ->
+            SMap.add (snd k) (k, t) acc
+          end
         spu_case_values;
     tpu_members =
       List.fold
         ~init:SMap.empty
         ~f:
           begin
-            fun acc pum -> SMap.add (snd pum.spum_atom) (to_member pum) acc
+            fun acc pum ->
+            SMap.add (snd pum.spum_atom) (to_member pum) acc
           end
         spu_members;
   }

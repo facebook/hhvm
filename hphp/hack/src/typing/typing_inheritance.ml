@@ -69,8 +69,7 @@ let check_trait_override_annotations env cls ~static =
         match Env.get_class env meth.ce_origin with
         | None -> ()
         | Some parent_class ->
-          if not Ast_defs.(equal_class_kind (Cls.kind parent_class) Ctrait)
-          then
+          if not Ast_defs.(equal_class_kind (Cls.kind parent_class) Ctrait) then
             ()
           else (
             match meth with
@@ -114,9 +113,7 @@ let check_extend_kinds shallow_class =
   let class_pos = fst shallow_class.sc_name in
   let class_kind = shallow_class.sc_kind in
   List.iter shallow_class.sc_extends ~f:(fun ty ->
-      let (_, (parent_pos, parent_name), _) =
-        Decl_utils.unwrap_class_type ty
-      in
+      let (_, (parent_pos, parent_name), _) = Decl_utils.unwrap_class_type ty in
       match Shallow_classes_heap.get parent_name with
       | None -> ()
       | Some parent ->

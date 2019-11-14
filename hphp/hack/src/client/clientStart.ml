@@ -52,37 +52,37 @@ let start_server env =
   let serialize_config_overrides config =
     config
     |> List.map (fun (key, value) ->
-           [|"--config"; Printf.sprintf "%s=%s" key value|])
+           [| "--config"; Printf.sprintf "%s=%s" key value |])
     |> Array.concat
   in
   let ai_options =
     match env.ai_mode with
-    | Some ai -> [|"--ai"; ai|]
+    | Some ai -> [| "--ai"; ai |]
     | None -> [||]
   in
   let hh_server = get_hhserver () in
   let hh_server_args =
     Array.concat
       [
-        [|hh_server; "-d"; Path.to_string env.root|];
+        [| hh_server; "-d"; Path.to_string env.root |];
         ( if env.from = "" then
           [||]
         else
-          [|"--from"; env.from|] );
+          [| "--from"; env.from |] );
         ( if env.no_load then
-          [|"--no-load"|]
+          [| "--no-load" |]
         else
           [||] );
         ( if env.watchman_debug_logging then
-          [|"--watchman-debug-logging"|]
+          [| "--watchman-debug-logging" |]
         else
           [||] );
         ( if env.log_inference_constraints then
-          [|"--log-inference-constraints"|]
+          [| "--log-inference-constraints" |]
         else
           [||] );
         ( if env.profile_log then
-          [|"--profile-log"|]
+          [| "--profile-log" |]
         else
           [||] );
         ai_options;
@@ -92,25 +92,25 @@ let start_server env =
          *
          * Note: Yes, the FD is available in the monitor process as well, but
          * it doesn't, and shouldn't, use it. *)
-          [|"--waiting-client"; string_of_int (Handle.get_handle out_fd)|];
+        [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |];
         ( if env.ignore_hh_version then
-          [|"--ignore-hh-version"|]
+          [| "--ignore-hh-version" |]
         else
           [||] );
         ( if env.saved_state_ignore_hhconfig then
-          [|"--saved-state-ignore-hhconfig"|]
+          [| "--saved-state-ignore-hhconfig" |]
         else
           [||] );
         ( if env.dynamic_view then
-          [|"--dynamic-view"|]
+          [| "--dynamic-view" |]
         else
           [||] );
         ( if env.prechecked = Some true then
-          [|"--prechecked"|]
+          [| "--prechecked" |]
         else
           [||] );
         ( if env.prechecked = Some false then
-          [|"--no-prechecked"|]
+          [| "--no-prechecked" |]
         else
           [||] );
         ( if env.config <> [] then
@@ -118,13 +118,13 @@ let start_server env =
         else
           [||] );
         ( if env.allow_non_opt_build then
-          [|"--allow-non-opt-build"|]
+          [| "--allow-non-opt-build" |]
         else
           [||] );
         (match env.debug_port with
         | None -> [||]
         | Some fd ->
-          [|"--debug-client"; string_of_int @@ Handle.get_handle fd|]);
+          [| "--debug-client"; string_of_int @@ Handle.get_handle fd |]);
       ]
   in
   if not env.silent then

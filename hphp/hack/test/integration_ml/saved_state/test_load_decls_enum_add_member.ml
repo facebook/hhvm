@@ -17,8 +17,7 @@ let enum_contents_with_added_variant = make_enum_contents "B = 2;"
 let enum_user_name = Printf.sprintf "my_enum_user_%d.php"
 
 let enum_user_contents =
-  Printf.sprintf
-    "<?hh // strict
+  Printf.sprintf "<?hh // strict
 function enum_user_%d(): void {
   MyEnum::A;
 }"
@@ -178,8 +177,7 @@ let test_master_change_with_locally_changed_dependent saved_state_dir () =
   ^ "Enum declared here"
 
 let test () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   save_state temp_dir;
 

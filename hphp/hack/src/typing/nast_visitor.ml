@@ -37,8 +37,7 @@ class virtual iter =
     method! on_While env =
       super#on_While { env with control_context = LoopContext }
 
-    method! on_For env =
-      super#on_For { env with control_context = LoopContext }
+    method! on_For env = super#on_For { env with control_context = LoopContext }
 
     method! on_Foreach env =
       super#on_Foreach { env with control_context = LoopContext }

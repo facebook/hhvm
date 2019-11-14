@@ -86,8 +86,7 @@ let is_deep_init hhas_property = hhas_property.property_is_deep_init
 
 let initial_value hhas_property = hhas_property.property_initial_value
 
-let initializer_instrs hhas_property =
-  hhas_property.property_initializer_instrs
+let initializer_instrs hhas_property = hhas_property.property_initializer_instrs
 
 let is_const hhas_property = hhas_property.property_is_const
 
@@ -96,8 +95,7 @@ let is_lsb hhas_property = hhas_property.property_is_lsb
 let is_no_bad_redeclare hhas_property =
   hhas_property.property_is_no_bad_redeclare
 
-let has_system_initial hhas_property =
-  hhas_property.property_has_system_initial
+let has_system_initial hhas_property = hhas_property.property_has_system_initial
 
 let no_implicit_null hhas_property = hhas_property.property_no_implicit_null
 

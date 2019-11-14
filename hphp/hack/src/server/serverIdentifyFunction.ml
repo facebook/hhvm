@@ -74,8 +74,7 @@ let go content line char (tcopt : TypecheckerOptions.t) =
     located in the passed in content buffer. *)
 let go_absolute content line char tcopt =
   List.map (go content line char tcopt) (fun (x, y) ->
-      ( SymbolOccurrence.to_absolute x,
-        Option.map y SymbolDefinition.to_absolute ))
+      (SymbolOccurrence.to_absolute x, Option.map y SymbolDefinition.to_absolute))
 
 let go_quarantined
     ~(ctx : Provider_context.t)

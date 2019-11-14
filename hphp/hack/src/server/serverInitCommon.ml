@@ -101,8 +101,8 @@ let naming (env : ServerEnv.env) (t : float) : ServerEnv.env * float =
   HackEventLogger.global_naming_end t;
   (env, Hh_logger.log_duration "Naming" t)
 
-let is_path_in_range (path : string) (range : ServerArgs.files_to_check_range)
-    : bool =
+let is_path_in_range (path : string) (range : ServerArgs.files_to_check_range) :
+    bool =
   (* TODO: not sure how to include the prefix - should we just have these as strings? *)
   let is_from_prefix_incl =
     match range.ServerArgs.from_prefix_incl with
@@ -164,9 +164,7 @@ let type_check
     let logstring = Printf.sprintf "Filter %d files" count in
     Hh_logger.log "Begin %s" logstring;
 
-    let (files_to_check : Relative_path.t list) =
-      Relative_path.Map.keys fast
-    in
+    let (files_to_check : Relative_path.t list) = Relative_path.Map.keys fast in
     let (files_to_check : Relative_path.t list) =
       match ServerArgs.save_with_spec genv.options with
       | None -> files_to_check
@@ -184,8 +182,7 @@ let type_check
         files_to_check
         ~local:(fun () ->
           let memory_cap =
-            genv.local_config
-              .ServerLocalConfig.max_typechecker_worker_memory_mb
+            genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
           in
           match genv.lru_host_env with
           | Some lru_host_env ->

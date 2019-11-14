@@ -128,8 +128,7 @@ let enable_uniform_variable_syntax o = o.option_php7_uvs
 
 let php7_ltr_assign o = o.option_php7_ltr_assign
 
-let create_in_out_wrapper_functions o =
-  o.option_create_in_out_wrapper_functions
+let create_in_out_wrapper_functions o = o.option_create_in_out_wrapper_functions
 
 let hack_arr_compat_notices o = o.option_hack_arr_compat_notices
 
@@ -191,8 +190,7 @@ let disable_legacy_soft_typehints o = o.option_disable_legacy_soft_typehints
 
 let allow_new_attribute_syntax o = o.option_allow_new_attribute_syntax
 
-let disable_legacy_attribute_syntax o =
-  o.option_disable_legacy_attribute_syntax
+let disable_legacy_attribute_syntax o = o.option_disable_legacy_attribute_syntax
 
 let const_default_func_args o = o.option_const_default_func_args
 
@@ -202,8 +200,7 @@ let abstract_static_props o = o.option_abstract_static_props
 
 let disable_unset_class_const o = o.option_disable_unset_class_const
 
-let disallow_func_ptrs_in_constants o =
-  o.option_disallow_func_ptrs_in_constants
+let disallow_func_ptrs_in_constants o = o.option_disallow_func_ptrs_in_constants
 
 let enforce_generics_ub o = o.option_enforce_generics_ub
 
@@ -468,145 +465,141 @@ let set_value name get set config opts =
 let value_setters =
   [
     ( set_value "hhvm.aliased_namespaces" get_value_from_config_kv_list
-    @@ (fun opts v -> { opts with option_aliased_namespaces = v }) );
+    @@ fun opts v -> { opts with option_aliased_namespaces = v } );
     ( set_value "hack.compiler.constant_folding" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_constant_folding = v = 1 }) );
+    @@ fun opts v -> { opts with option_constant_folding = v = 1 } );
     ( set_value "hack.compiler.optimize_null_checks" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_optimize_null_checks = v = 1 }) );
+    @@ fun opts v -> { opts with option_optimize_null_checks = v = 1 } );
     ( set_value "eval.disassembler_source_mapping" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_source_mapping = v = 1 }) );
-    ( set_value "hhvm.php7.uvs" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_php7_uvs = v = 1 }) );
-    ( set_value "hhvm.php7.ltr_assign" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_php7_ltr_assign = v = 1 }) );
+    @@ fun opts v -> { opts with option_source_mapping = v = 1 } );
+    ( set_value "hhvm.php7.uvs" get_value_from_config_int @@ fun opts v ->
+      { opts with option_php7_uvs = v = 1 } );
+    ( set_value "hhvm.php7.ltr_assign" get_value_from_config_int @@ fun opts v ->
+      { opts with option_php7_ltr_assign = v = 1 } );
     ( set_value "hhvm.create_in_out_wrapper_functions" get_value_from_config_int
     @@ fun opts v ->
-    { opts with option_create_in_out_wrapper_functions = v = 1 } );
+      { opts with option_create_in_out_wrapper_functions = v = 1 } );
     ( set_value "hhvm.hack_arr_compat_notices" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_hack_arr_compat_notices = v = 1 }) );
+    @@ fun opts v -> { opts with option_hack_arr_compat_notices = v = 1 } );
     ( set_value "hhvm.hack_arr_dv_arrs" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_hack_arr_dv_arrs = v = 1 }) );
+    @@ fun opts v -> { opts with option_hack_arr_dv_arrs = v = 1 } );
     ( set_value
         "hhvm.dynamic_invoke_functions"
         get_value_from_config_string_array
     @@ fun opts v ->
-    {
-      opts with
-      option_dynamic_invoke_functions =
-        SSet.of_list (List.map v String.lowercase);
-    } );
+      {
+        opts with
+        option_dynamic_invoke_functions =
+          SSet.of_list (List.map v String.lowercase);
+      } );
     ( set_value "hhvm.repo.authoritative" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_repo_authoritative = v = 1 }) );
+    @@ fun opts v -> { opts with option_repo_authoritative = v = 1 } );
     ( set_value "hhvm.jit_enable_rename_function" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_jit_enable_rename_function = v = 1 })
-    );
+    @@ fun opts v -> { opts with option_jit_enable_rename_function = v = 1 } );
     ( set_value "hhvm.hack.lang.enable_coroutines" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_enable_coroutines = v = 1 }) );
+    @@ fun opts v -> { opts with option_enable_coroutines = v = 1 } );
     ( set_value "hhvm.hack.lang.hacksperimental" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_hacksperimental = v = 1 }) );
+    @@ fun opts v -> { opts with option_hacksperimental = v = 1 } );
     ( set_value
         "hhvm.hack.lang.disable_lval_as_an_expression"
         get_value_from_config_int
-    @@ fun opts v ->
-    { opts with option_disable_lval_as_an_expression = v = 1 } );
+    @@ fun opts v -> { opts with option_disable_lval_as_an_expression = v = 1 }
+    );
     ( set_value
         "hhvm.hack.lang.enable_pocket_universes"
         get_value_from_config_int
-    @@ (fun opts v -> { opts with option_enable_pocket_universes = v = 1 }) );
+    @@ fun opts v -> { opts with option_enable_pocket_universes = v = 1 } );
     ( set_value
         "hhvm.notice_on_by_ref_argument_typehint_violation"
         get_value_from_config_int
     @@ fun opts v ->
-    { opts with option_notice_on_by_ref_argument_typehint_violation = v = 1 }
+      { opts with option_notice_on_by_ref_argument_typehint_violation = v = 1 }
     );
-    ( set_value "doc_root" get_value_from_config_string
-    @@ (fun opts v -> { opts with option_doc_root = v }) );
+    ( set_value "doc_root" get_value_from_config_string @@ fun opts v ->
+      { opts with option_doc_root = v } );
     ( set_value
         "hhvm.server.include_search_paths"
         get_value_from_config_string_array
-    @@ (fun opts v -> { opts with option_include_search_paths = v }) );
+    @@ fun opts v -> { opts with option_include_search_paths = v } );
     ( set_value "hhvm.include_roots" get_value_from_config_string_to_string_map
-    @@ (fun opts v -> { opts with option_include_roots = v }) );
+    @@ fun opts v -> { opts with option_include_roots = v } );
     ( set_value "hhvm.log_extern_compiler_perf" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_log_extern_compiler_perf = v = 1 }) );
+    @@ fun opts v -> { opts with option_log_extern_compiler_perf = v = 1 } );
     ( set_value "hhvm.enable_intrinsics_extension" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_enable_intrinsics_extension = v = 1 })
-    );
+    @@ fun opts v -> { opts with option_enable_intrinsics_extension = v = 1 } );
     ( set_value
         "hhvm.hack.lang.phpism.disallow_execution_operator"
         get_value_from_config_int
     @@ fun opts v ->
-    { opts with option_phpism_disallow_execution_operator = v = 1 } );
+      { opts with option_phpism_disallow_execution_operator = v = 1 } );
     ( set_value
         "hhvm.hack.lang.phpism.disable_nontoplevel_declarations"
         get_value_from_config_int
     @@ fun opts v ->
-    { opts with option_phpism_disable_nontoplevel_declarations = v = 1 } );
+      { opts with option_phpism_disable_nontoplevel_declarations = v = 1 } );
     ( set_value
         "hhvm.hack.lang.phpism.disable_static_closures"
         get_value_from_config_int
-    @@ fun opts v ->
-    { opts with option_phpism_disable_static_closures = v = 1 } );
+    @@ fun opts v -> { opts with option_phpism_disable_static_closures = v = 1 }
+    );
     ( set_value
         "hhvm.hack.lang.phpism.disable_halt_compiler"
         get_value_from_config_int
-    @@ (fun opts v -> { opts with option_phpism_disable_halt_compiler = v = 1 })
+    @@ fun opts v -> { opts with option_phpism_disable_halt_compiler = v = 1 }
     );
     ( set_value "hhvm.emit_func_pointers" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_emit_func_pointers = v > 0 }) );
+    @@ fun opts v -> { opts with option_emit_func_pointers = v > 0 } );
     ( set_value "hhvm.emit_cls_meth_pointers" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_emit_cls_meth_pointers = v > 0 }) );
+    @@ fun opts v -> { opts with option_emit_cls_meth_pointers = v > 0 } );
     ( set_value "hhvm.emit_meth_caller_func_pointers" get_value_from_config_int
-    @@ fun opts v ->
-    { opts with option_emit_meth_caller_func_pointers = v > 0 } );
+    @@ fun opts v -> { opts with option_emit_meth_caller_func_pointers = v > 0 }
+    );
     ( set_value "hhvm.emit_inst_meth_pointers" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_emit_inst_meth_pointers = v > 0 }) );
-    ( set_value "hhvm.rx_is_enabled" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_rx_is_enabled = v > 0 }) );
+    @@ fun opts v -> { opts with option_emit_inst_meth_pointers = v > 0 } );
+    ( set_value "hhvm.rx_is_enabled" get_value_from_config_int @@ fun opts v ->
+      { opts with option_rx_is_enabled = v > 0 } );
     ( set_value "hhvm.array_provenance" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_array_provenance = v > 0 }) );
+    @@ fun opts v -> { opts with option_array_provenance = v > 0 } );
     ( set_value
         "hhvm.hack.lang.enable_class_level_where_clauses"
         get_value_from_config_int
     @@ fun opts v ->
-    { opts with option_enable_class_level_where_clauses = v = 1 } );
+      { opts with option_enable_class_level_where_clauses = v = 1 } );
     ( set_value
         "hhvm.hack.lang.disable_legacy_soft_typehints"
         get_value_from_config_int
-    @@ fun opts v ->
-    { opts with option_disable_legacy_soft_typehints = v = 1 } );
+    @@ fun opts v -> { opts with option_disable_legacy_soft_typehints = v = 1 }
+    );
     ( set_value
         "hhvm.hack.lang.allow_new_attribute_syntax"
         get_value_from_config_int
-    @@ (fun opts v -> { opts with option_allow_new_attribute_syntax = v = 1 })
-    );
+    @@ fun opts v -> { opts with option_allow_new_attribute_syntax = v = 1 } );
     ( set_value
         "hhvm.hack.lang.disable_legacy_attribute_syntax"
         get_value_from_config_int
     @@ fun opts v ->
-    { opts with option_disable_legacy_attribute_syntax = v = 1 } );
+      { opts with option_disable_legacy_attribute_syntax = v = 1 } );
     ( set_value
         "hhvm.hack.lang.const_default_func_args"
         get_value_from_config_int
-    @@ (fun opts v -> { opts with option_const_default_func_args = v = 1 }) );
+    @@ fun opts v -> { opts with option_const_default_func_args = v = 1 } );
     ( set_value "hhvm.hack.lang.const_static_props" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_const_static_props = v = 1 }) );
+    @@ fun opts v -> { opts with option_const_static_props = v = 1 } );
     ( set_value "hhvm.hack.lang.abstract_static_props" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_abstract_static_props = v = 1 }) );
+    @@ fun opts v -> { opts with option_abstract_static_props = v = 1 } );
     ( set_value
         "hhvm.hack.lang.disable_unset_class_const"
         get_value_from_config_int
-    @@ (fun opts v -> { opts with option_disable_unset_class_const = v = 1 })
-    );
+    @@ fun opts v -> { opts with option_disable_unset_class_const = v = 1 } );
     ( set_value
         "hhvm.hack.lang.disallow_func_ptrs_in_constants"
         get_value_from_config_int
     @@ fun opts v ->
-    { opts with option_disallow_func_ptrs_in_constants = v = 1 } );
+      { opts with option_disallow_func_ptrs_in_constants = v = 1 } );
     ( set_value "hhvm.enforce_generics_ub" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_enforce_generics_ub = v = 1 }) );
+    @@ fun opts v -> { opts with option_enforce_generics_ub = v = 1 } );
     ( set_value "hhvm.hack.lang.check_int_overflow" get_value_from_config_int
-    @@ (fun opts v -> { opts with option_check_int_overflow = v > 0 }) );
+    @@ fun opts v -> { opts with option_check_int_overflow = v > 0 } );
   ]
 
 let extract_config_options_from_json ~init config_json =

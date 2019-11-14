@@ -329,9 +329,7 @@ let trailing_end_offset token =
   leading_start_offset token + w
 
 let leading_start_position token =
-  SourceText.offset_to_position
-    (source_text token)
-    (leading_start_offset token)
+  SourceText.offset_to_position (source_text token) (leading_start_offset token)
 
 let leading_end_position token =
   SourceText.offset_to_position (source_text token) (leading_end_offset token)
@@ -358,8 +356,7 @@ let span token = (start_position token, end_position token)
 let trailing_span token =
   (trailing_start_position token, trailing_end_position token)
 
-let full_span token =
-  (leading_start_position token, trailing_end_position token)
+let full_span token = (leading_start_position token, trailing_end_position token)
 
 let full_text token =
   SourceText.sub

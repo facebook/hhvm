@@ -73,9 +73,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
       ()
     | ((r, Tprim N.Tnoreturn), _)
     | (_, (r, Tprim N.Tnoreturn)) ->
-      Errors.noreturn_usage
-        p
-        (Reason.to_string "This always throws or exits" r)
+      Errors.noreturn_usage p (Reason.to_string "This always throws or exits" r)
     | ((r, Tprim N.Tvoid), _)
     | (_, (r, Tprim N.Tvoid)) ->
       (* Ideally we shouldn't hit this case, but well... *)

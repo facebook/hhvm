@@ -144,9 +144,7 @@ let prop env cv =
   let cv_pos = fst cv.cv_id in
   let ty = Option.map cv.cv_type ~f:(Decl_hint.hint env) in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
-  let lateinit =
-    Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes
-  in
+  let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
   if cv.cv_final then Errors.final_property cv_pos;
   if lateinit && Option.is_some cv.cv_expr then
     Errors.lateinit_with_default cv_pos;
@@ -167,9 +165,7 @@ and static_prop env c cv =
   let (cv_pos, cv_name) = cv.cv_id in
   let ty = Option.map cv.cv_type ~f:(Decl_hint.hint env) in
   let id = "$" ^ cv_name in
-  let lateinit =
-    Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes
-  in
+  let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
   let abstract = cv.cv_abstract in
   let lsb = Attrs.mem SN.UserAttributes.uaLSB cv.cv_user_attributes in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
@@ -205,9 +201,7 @@ let method_type env m =
   let mut = get_param_mutability m.m_user_attributes in
   let returns_mutable = fun_returns_mutable m.m_user_attributes in
   let returns_void_to_rx = fun_returns_void_to_rx m.m_user_attributes in
-  let return_disposable =
-    has_return_disposable_attribute m.m_user_attributes
-  in
+  let return_disposable = has_return_disposable_attribute m.m_user_attributes in
   let arity_min = minimum_arity m.m_params in
   let params = make_params env m.m_params in
   let ret =
@@ -310,10 +304,7 @@ let method_ env c m =
     | _ -> None
   in
   let sm_deprecated =
-    Attributes_deprecated.deprecated
-      ~kind:"method"
-      m.m_name
-      m.m_user_attributes
+    Attributes_deprecated.deprecated ~kind:"method" m.m_name m.m_user_attributes
   in
   {
     sm_abstract = m.m_abstract;

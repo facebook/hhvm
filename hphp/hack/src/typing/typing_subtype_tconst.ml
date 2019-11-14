@@ -51,8 +51,8 @@ let add_tyvar_type_const env var tconstid ty =
     env
 
 (** For all type constants T of var, make its type equal to ty::T *)
-let make_all_type_consts_equal
-    env var (ty : internal_type) ~as_tyvar_with_cnstr =
+let make_all_type_consts_equal env var (ty : internal_type) ~as_tyvar_with_cnstr
+    =
   SMap.fold
     (fun _ (tconstid, tconstty) env ->
       make_type_const_equal env tconstty ty tconstid ~as_tyvar_with_cnstr)

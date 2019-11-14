@@ -106,8 +106,7 @@ let list_to_file_map =
 let apply_patches patches =
   let file_map = list_to_file_map patches in
   SMap.iter apply_patches_to_file file_map;
-  print_endline
-    ("Rewrote " ^ string_of_int (SMap.cardinal file_map) ^ " files.")
+  print_endline ("Rewrote " ^ string_of_int (SMap.cardinal file_map) ^ " files.")
 
 let patch_to_json res =
   let (type_, replacement) =
@@ -162,12 +161,7 @@ let go_ide
   let%lwt patches =
     ClientConnect.rpc_with_retry conn
     @@ ServerCommandTypes.IDE_REFACTOR
-         {
-           ServerCommandTypes.Ide_refactor_type.filename;
-           line;
-           char;
-           new_name;
-         }
+         { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name }
   in
   let patches =
     match patches with

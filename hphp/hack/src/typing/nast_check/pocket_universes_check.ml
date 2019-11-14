@@ -115,9 +115,7 @@ let handler =
               let err p ty =
                 dup_case_value p (build ~sep:"::" prefix ty) prefix
               in
-              let s =
-                check_enum err (List.map ~f:fst pu_enum.pu_case_values)
-              in
+              let s = check_enum err (List.map ~f:fst pu_enum.pu_case_values) in
               SMap.add enum_name s seen_values
             in
             (seen_types, seen_values))
@@ -171,8 +169,8 @@ let handler =
          * if they are correct *)
         Sequence.iter
           ~f:
-            (fun ( enum_name,
-                   { tpu_case_types; tpu_case_values; tpu_members; _ } ) ->
+            (fun (enum_name, { tpu_case_types; tpu_case_values; tpu_members; _ })
+                 ->
             match SMap.find_opt enum_name pos_map with
             (* This enum is not defined in the current file, skip it *)
             | None -> ()
@@ -195,16 +193,14 @@ let handler =
                     | Some p -> p
                   in
                   SSet.iter
-                    (fun ty ->
-                      Errors.pu_atom_missing p atom_name "type" loc ty)
+                    (fun ty -> Errors.pu_atom_missing p atom_name "type" loc ty)
                     diff_types;
                   SSet.iter
                     (fun expr ->
                       Errors.pu_atom_missing p atom_name "value" loc expr)
                     diff_exprs;
                   SSet.iter
-                    (fun ty ->
-                      Errors.pu_atom_unknown p atom_name "type" loc ty)
+                    (fun ty -> Errors.pu_atom_unknown p atom_name "type" loc ty)
                     diff_types2;
                   SSet.iter
                     (fun expr ->

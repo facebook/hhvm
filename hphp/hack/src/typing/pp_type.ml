@@ -37,8 +37,8 @@ let rec pp_ty : type a. Format.formatter -> a ty -> unit =
 
 and show_ty : type a. a ty -> string = (fun x -> Format.asprintf "%a" pp_ty x)
 
-and pp_shape_field_type :
-    type a. Format.formatter -> a shape_field_type -> unit =
+and pp_shape_field_type : type a. Format.formatter -> a shape_field_type -> unit
+    =
  fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
   Format.fprintf fmt "@[%s =@ " "sft_optional";
@@ -240,8 +240,7 @@ and pp_ty_list : type a. Format.formatter -> a ty list -> unit =
   Format.fprintf fmt "@,]@]";
   Format.fprintf fmt "@])"
 
-and show_ty_ : type a. a ty_ -> string =
- (fun x -> Format.asprintf "%a" pp_ty_ x)
+and show_ty_ : type a. a ty_ -> string = (fun x -> Format.asprintf "%a" pp_ty_ x)
 
 and pp_array_kind : Format.formatter -> array_kind -> unit =
  fun fmt ak ->

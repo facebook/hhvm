@@ -51,8 +51,7 @@ let rewrite_function_decl_header header_node =
       header_node.function_type
   in
   let function_modifiers =
-    remove_coroutine_modifier_from_modifiers_list
-      header_node.function_modifiers
+    remove_coroutine_modifier_from_modifiers_list header_node.function_modifiers
   in
   make_syntax
     {

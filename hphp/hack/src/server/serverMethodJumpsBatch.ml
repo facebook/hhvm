@@ -41,9 +41,7 @@ let go :
  fun workers classes filter ->
   (* Sort and dedup identical queries *)
   let deduped =
-    List.remove_consecutive_duplicates
-      ~equal:( = )
-      (List.sort ~compare classes)
+    List.remove_consecutive_duplicates ~equal:( = ) (List.sort ~compare classes)
   in
   let results =
     if List.length deduped < 10 then

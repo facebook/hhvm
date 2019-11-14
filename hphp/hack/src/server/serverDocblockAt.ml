@@ -35,14 +35,12 @@ let get_all_ancestors class_name =
 
 let get_docblock_for_member class_info member_name =
   Option.Monad_infix.(
-    Cls.get_method class_info member_name
-    >>= fun member ->
+    Cls.get_method class_info member_name >>= fun member ->
     match Lazy.force member.Typing_defs.ce_type with
     | (_, Typing_defs.Tfun _) ->
       let pos = Lazy.force member.Typing_defs.ce_pos in
       let filename = Pos.filename pos in
-      File_provider.get_contents filename
-      >>= fun contents ->
+      File_provider.get_contents filename >>= fun contents ->
       ServerSymbolDefinition.get_definition_cst_node_from_pos
         SymbolDefinition.Method
         (Full_fidelity_source_text.make filename contents)
@@ -72,7 +70,7 @@ let render_ancestor_docblocks docblocks =
            in
            Printf.sprintf "%s\n(from %s)" docblock ancestors_str)
     |> String.concat ~sep:"\n\n---\n\n"
-    |> (fun results -> Some results)
+    |> fun results -> Some results
 
 let fallback class_name member_name =
   let rec all_interfaces_or_first_class_docblock
@@ -118,10 +116,7 @@ let go_comments_from_source_text
   in
   let pos = Pos.make_from_lexing_pos filename lp lp in
   let ffps_opt =
-    ServerSymbolDefinition.get_definition_cst_node_from_pos
-      kind
-      source_text
-      pos
+    ServerSymbolDefinition.get_definition_cst_node_from_pos kind source_text pos
   in
   match ffps_opt with
   | None -> None

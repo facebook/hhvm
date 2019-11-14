@@ -58,9 +58,8 @@ let expect_equals_list key values expected_values =
   let len_values = List.length values in
   let len_exp_values = List.length expected_values in
   if len_values = len_exp_values then
-    List.iter
-      (List.zip_exn values expected_values)
-      ~f:(fun (value, expected) -> expect_equals key value expected)
+    List.iter (List.zip_exn values expected_values) ~f:(fun (value, expected) ->
+        expect_equals key value expected)
   else
     let msg =
       Printf.sprintf

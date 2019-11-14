@@ -2,7 +2,7 @@ open Asserter
 
 let test_exec_checked_basic () : bool Lwt.t =
   let%lwt process_status =
-    Lwt_utils.exec_checked "echo" [|"hello"; "world"|]
+    Lwt_utils.exec_checked "echo" [| "hello"; "world" |]
   in
   match process_status with
   | Ok { Lwt_utils.Process_success.command_line; stdout; stderr } ->
@@ -17,7 +17,7 @@ let test_exec_checked_basic () : bool Lwt.t =
 
 let test_exec_checked_failing () : bool Lwt.t =
   let%lwt process_status =
-    Lwt_utils.exec_checked "false" [|"ignored-argument"|]
+    Lwt_utils.exec_checked "false" [| "ignored-argument" |]
   in
   match process_status with
   | Ok _ -> failwith "command succeeded unexpectedly"
@@ -75,20 +75,14 @@ let test_lwt_message_queue_basic () : bool Lwt.t =
       match%lwt Lwt_message_queue.pop q with
       | None -> failwith "expected queue to still have messages"
       | Some result ->
-        String_asserter.assert_equals
-          result
-          "message1"
-          "wrong message in queue";
+        String_asserter.assert_equals result "message1" "wrong message in queue";
         Lwt.return_unit
     in
     let%lwt () =
       match%lwt Lwt_message_queue.pop q with
       | None -> failwith "expected queue to still have messages"
       | Some result ->
-        String_asserter.assert_equals
-          result
-          "message2"
-          "wrong message in queue";
+        String_asserter.assert_equals result "message2" "wrong message in queue";
         Lwt.return_unit
     in
     Lwt.return_unit
@@ -104,10 +98,7 @@ let test_lwt_message_queue_close () : bool Lwt.t =
     "should have pushed message successfully";
   Lwt_message_queue.close q;
   let success = Lwt_message_queue.push q "should be dropped now" in
-  Bool_asserter.assert_equals
-    success
-    false
-    "should have failed to push message";
+  Bool_asserter.assert_equals success false "should have failed to push message";
 
   match%lwt Lwt_message_queue.pop q with
   | Some _ -> failwith "popped a message despite the queue being closed"

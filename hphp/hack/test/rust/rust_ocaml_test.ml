@@ -84,8 +84,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
         (mode, root, errors, state)
 
       let to_json x =
-        Syntax.to_json ~with_value:true x
-        |> Hh_json.json_to_string ~pretty:true
+        Syntax.to_json ~with_value:true x |> Hh_json.json_to_string ~pretty:true
 
       let print_full_fidelity_error source_text error =
         let text =
@@ -322,8 +321,7 @@ let get_files_in_path ~args path =
         && (not @@ String_utils.string_ends_with f "ffp/yield_from_bad1.php")
         && (not @@ String_utils.string_ends_with f "let/let_closure.php")
         && (not @@ String_utils.string_ends_with f "let/let_lambda.php")
-        && not
-           @@ String_utils.string_ends_with f "test_variadic_type_hint.php"
+        && (not @@ String_utils.string_ends_with f "test_variadic_type_hint.php")
         && not
            @@ String_utils.string_ends_with f "namespace_group_use_decl.php"
         && (not @@ String_utils.string_ends_with f "parser_massive_add_exp.php")
@@ -358,9 +356,7 @@ let get_files_in_path ~args path =
                 f
                 "runs_out_of_retries_in_line_splitter.php"
         && not
-           @@ String_utils.string_ends_with
-                f
-                "ffp/tests/const_initializers.php"
+           @@ String_utils.string_ends_with f "ffp/tests/const_initializers.php"
       | _ -> true)
     files
 
@@ -389,9 +385,7 @@ let parse_args () =
       ("--ocaml", Arg.Unit (fun () -> mode := OCAML), "");
       ("--positioned", Arg.Unit (fun () -> parser := POSITIONED), "");
       ("--coroutine", Arg.Unit (fun () -> parser := COROUTINE), "");
-      ( "--coroutine-errors",
-        Arg.Unit (fun () -> parser := COROUTINE_ERRORS),
-        "" );
+      ("--coroutine-errors", Arg.Unit (fun () -> parser := COROUTINE_ERRORS), "");
       ( "--decl-mode",
         Arg.Unit
           (fun () ->
@@ -461,13 +455,7 @@ module CoroutineErrorsTest_ = CoroutineTest_.WithTreeBuilder (struct
       ParserErrors.(
         make_env ~parser_options ~codegen:false tree |> parse_errors)
     in
-    CoroutineTest_.SyntaxTree.build
-      source_text
-      fake_root
-      None
-      errors
-      None
-      false
+    CoroutineTest_.SyntaxTree.build source_text fake_root None errors None false
 end)
 
 module CoroutineErrorsTest = Runner (CoroutineErrorsTest_)
@@ -556,10 +544,7 @@ module LowererTest_ = struct
         ~elaborate_namespaces:false
         ~lower_coroutines:false
         ~parser_options:
-          {
-            ParserOptions.default with
-            GlobalOptions.po_rust_lowerer = is_rust;
-          }
+          { ParserOptions.default with GlobalOptions.po_rust_lowerer = is_rust }
     in
     let lower lower_env source_text =
       (Errors.is_hh_fixme := (fun _ _ -> false));

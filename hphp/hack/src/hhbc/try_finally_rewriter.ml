@@ -151,7 +151,7 @@ let emit_goto ~in_finally_epilogue env label =
             emit_jump_to_label rgf_finally_start_label rgf_iterators_to_release;
             (* emit goto as an indicator for try/finally rewriter to generate
             finally epilogue, try/finally rewriter will remove it. *)
-              instr_goto label;
+            instr_goto label;
           ]
       | JT.ResolvedGoto_goto_from_finally ->
         Emit_fatal.raise_fatal_runtime
@@ -178,9 +178,7 @@ let emit_return ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
       match verify_return with
       | None -> empty
       | Some h ->
-        let h =
-          RGH.convert_awaitable env h |> RGH.remove_erased_generics env
-        in
+        let h = RGH.convert_awaitable env h |> RGH.remove_erased_generics env in
         (match RGH.has_reified_type_constraint env h with
         | RGH.NoConstraint -> empty
         | RGH.NotReified -> instr_verifyRetTypeC
@@ -244,7 +242,7 @@ let emit_return ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
         emit_jump_to_label target_label iterators_to_release;
         (* emit ret instr as an indicator for try/finally rewriter to generate
         finally epilogue, try/finally rewriter will remove it. *)
-          instr_retc;
+        instr_retc;
       ]
 
 and emit_break_or_continue ~is_break ~in_finally_epilogue env pos level =
@@ -284,10 +282,10 @@ and emit_break_or_continue ~is_break ~in_finally_epilogue env pos level =
         Emit_pos.emit_pos pos;
         (* emit break/continue instr as an indicator for try/finally rewriter
          to generate finally epilogue - try/finally rewriter will remove it. *)
-          ( if is_break then
-            instr_break adjusted_level
-          else
-            instr_continue adjusted_level );
+        ( if is_break then
+          instr_break adjusted_level
+        else
+          instr_continue adjusted_level );
       ]
 
 let emit_finally_epilogue
@@ -312,12 +310,7 @@ let emit_finally_epilogue
     | ISpecialFlow (Break l) ->
       emit_break_or_continue ~is_break:true ~in_finally_epilogue:true env pos l
     | ISpecialFlow (Continue l) ->
-      emit_break_or_continue
-        ~is_break:false
-        ~in_finally_epilogue:true
-        env
-        pos
-        l
+      emit_break_or_continue ~is_break:false ~in_finally_epilogue:true env pos l
     | ISpecialFlow (Goto l) -> emit_goto ~in_finally_epilogue:true env l
     | _ ->
       failwith

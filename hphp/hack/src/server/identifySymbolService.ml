@@ -66,8 +66,7 @@ let process_lvar_id ?(is_declaration = false) id =
   Result_set.singleton
     { name = snd id; type_ = LocalVar; is_declaration; pos = fst id }
 
-let process_typeconst ?(is_declaration = false) (class_name, tconst_name, pos)
-    =
+let process_typeconst ?(is_declaration = false) (class_name, tconst_name, pos) =
   Result_set.singleton
     {
       name = class_name ^ "::" ^ tconst_name;
@@ -265,9 +264,7 @@ let visitor =
       self#plus acc (super#on_Lvar env (pos, id))
 
     method! on_fun_param env param =
-      let acc =
-        process_lvar_id (param.Aast.param_pos, param.Aast.param_name)
-      in
+      let acc = process_lvar_id (param.Aast.param_pos, param.Aast.param_name) in
       self#plus acc (super#on_fun_param env param)
 
     method! on_Happly env sid hl =
@@ -282,6 +279,7 @@ let visitor =
       Aast.(
         class_name := Some class_.c_name;
         let acc = process_class class_ in
+
         (*
       Enums implicitly extend BuiltinEnum. However, BuiltinEnums also extend
       the same Enum as a type parameter.

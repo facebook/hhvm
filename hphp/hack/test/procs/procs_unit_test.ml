@@ -131,9 +131,7 @@ let multi_worker_with_failure_handler _workers () =
         false
       with Coalesced_failures failures ->
         (* The first 5 buckets all failed; Last 5 buckets are still sleeping. *)
-        Printf.eprintf
-          "Got %d failed jobs. Expecting 5."
-          (List.length failures);
+        Printf.eprintf "Got %d failed jobs. Expecting 5." (List.length failures);
         assert (List.length failures = 5);
         let sum =
           List.fold_left

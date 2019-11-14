@@ -40,8 +40,7 @@ let check_interface c =
   (* make sure interfaces do not contain partially abstract type constants *)
   List.iter c.c_typeconsts (fun tc ->
       if
-        Option.is_some tc.c_tconst_constraint
-        && Option.is_some tc.c_tconst_type
+        Option.is_some tc.c_tconst_constraint && Option.is_some tc.c_tconst_type
       then
         Errors.interface_with_partial_typeconst (fst tc.c_tconst_name));
 

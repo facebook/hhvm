@@ -837,19 +837,19 @@ let doc_block_fallback_cases =
       ] );
     (* When falling back, if any class/trait ancestors have a doc block don't show
      any doc blocks from interface ancestors. *)
-      ( ("doc_block_fallback.php", 13, 7),
-        [
-          {
-            snippet = "public function docBlockInClass2(): void";
-            addendum =
-              [
-                "DBFBClass1.";
-                "Return type: `void`";
-                "Full name: `DBFBClass3::docBlockInClass2`";
-              ];
-            pos = pos_at (13, 7) (13, 22);
-          };
-        ] );
+    ( ("doc_block_fallback.php", 13, 7),
+      [
+        {
+          snippet = "public function docBlockInClass2(): void";
+          addendum =
+            [
+              "DBFBClass1.";
+              "Return type: `void`";
+              "Full name: `DBFBClass3::docBlockInClass2`";
+            ];
+          pos = pos_at (13, 7) (13, 22);
+        };
+      ] );
     ( ("doc_block_fallback.php", 15, 7),
       [
         {
@@ -907,11 +907,7 @@ let class_id_positions_cases =
   [
     ( ("class_id_positions.php", 3, 18),
       [
-        {
-          snippet = "class CIPos2";
-          addendum = [];
-          pos = pos_at (3, 18) (3, 23);
-        };
+        { snippet = "class CIPos2"; addendum = []; pos = pos_at (3, 18) (3, 23) };
       ] );
     ( ("class_id_positions.php", 3, 26),
       [
@@ -923,11 +919,7 @@ let class_id_positions_cases =
       ] );
     ( ("class_id_positions.php", 5, 18),
       [
-        {
-          snippet = "class CIPos2";
-          addendum = [];
-          pos = pos_at (5, 18) (5, 23);
-        };
+        { snippet = "class CIPos2"; addendum = []; pos = pos_at (5, 18) (5, 23) };
       ] );
     ( ("class_id_positions.php", 5, 26),
       [
@@ -939,11 +931,7 @@ let class_id_positions_cases =
       ] );
     ( ("class_id_positions.php", 7, 18),
       [
-        {
-          snippet = "class CIPos2";
-          addendum = [];
-          pos = pos_at (7, 18) (7, 23);
-        };
+        { snippet = "class CIPos2"; addendum = []; pos = pos_at (7, 18) (7, 23) };
       ] );
     ( ("class_id_positions.php", 7, 26),
       [

@@ -86,10 +86,7 @@ let convert_fileinfo_to_contents
       (kind : SearchUtils.si_kind)
       (acc : SearchUtils.si_capture)
       (sset : SSet.t) : SearchUtils.si_capture =
-    SSet.fold
-      (fun name inside_acc -> append_item kind inside_acc name)
-      sset
-      acc
+    SSet.fold (fun name inside_acc -> append_item kind inside_acc name) sset acc
   in
   match info with
   | Full f ->

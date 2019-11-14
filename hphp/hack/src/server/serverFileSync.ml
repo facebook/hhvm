@@ -51,13 +51,11 @@ let open_file ~predeclare env path content =
   let prev_content = get_file_content (ServerCommandTypes.FileName path) in
   let full_path = path in
   let new_env =
-    try_relativize_path path
-    >>= fun path ->
+    try_relativize_path path >>= fun path ->
     (* Before making any changes, pre-load (into Decl_heap) currently existing
      * declarations so there is always a previous version to compare against,
      * which makes incremental mode perform better. *)
-    if predeclare && not (Relative_path.Set.mem env.editor_open_files path)
-    then
+    if predeclare && not (Relative_path.Set.mem env.editor_open_files path) then
       Decl.make_env path;
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     File_provider.remove_batch (Relative_path.Set.singleton path);
@@ -106,9 +104,7 @@ let open_file ~predeclare env path content =
   Option.value new_env ~default:env
 
 let close_relative_path env path =
-  let editor_open_files =
-    Relative_path.Set.remove env.editor_open_files path
-  in
+  let editor_open_files = Relative_path.Set.remove env.editor_open_files path in
   let contents =
     match File_provider.get_unsafe path with
     | File_provider.Ide f -> f
@@ -138,11 +134,9 @@ let close_file env path =
 
 let edit_file ~predeclare env path (edits : File_content.text_edit list) =
   let new_env =
-    try_relativize_path path
-    >>= fun path ->
+    try_relativize_path path >>= fun path ->
     (* See similar predeclare in open_file function *)
-    if predeclare && not (Relative_path.Set.mem env.editor_open_files path)
-    then
+    if predeclare && not (Relative_path.Set.mem env.editor_open_files path) then
       Decl.make_env path;
     ServerBusyStatus.send env ServerCommandTypes.Needs_local_typecheck;
     let fc =

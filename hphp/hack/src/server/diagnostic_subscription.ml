@@ -114,11 +114,8 @@ let update
   (* Remove sources that no longer produce errors in files we care about *)
   let local_errors =
     filter_filter local_errors ~f:(fun source ->
-        Errors.fold_errors_in
-          global_errors
-          ~source
-          ~init:false
-          ~f:(fun e acc -> acc || RP.Map.mem local_errors (error_filename e)))
+        Errors.fold_errors_in global_errors ~source ~init:false ~f:(fun e acc ->
+            acc || RP.Map.mem local_errors (error_filename e)))
   in
   (* If we've done a full check, that it's safe to look through all of the
    * errors in global_errors, no only those that were just rechecked *)

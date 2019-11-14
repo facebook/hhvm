@@ -205,8 +205,7 @@ class type ['a] locl_type_visitor_type =
       locl_phase shape_field_type Nast.ShapeMap.t ->
       'a
 
-    method on_tclass :
-      'a -> Reason.t -> Aast.sid -> exact -> locl_ty list -> 'a
+    method on_tclass : 'a -> Reason.t -> Aast.sid -> exact -> locl_ty list -> 'a
 
     method on_tarraykind : 'a -> Reason.t -> array_kind -> 'a
 

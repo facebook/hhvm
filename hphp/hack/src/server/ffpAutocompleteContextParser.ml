@@ -117,7 +117,7 @@ module ContextPredicates = struct
           || context.predecessor = KeywordConst
           || context.predecessor = KeywordStatic )
     || (* Generic type *)
-       context.predecessor = TokenLessThan
+    context.predecessor = TokenLessThan
 
   let is_class_body_declaration_valid context =
     context.closest_parent_container = ClassBody
@@ -145,8 +145,8 @@ module ContextPredicates = struct
        || context.predecessor = IfWithoutElse
        || context.predecessor = TryWithoutFinally )
     || (* Cases in a switch body *)
-       context.closest_parent_container = CompoundStatement
-       && context.predecessor = TokenColon
+    context.closest_parent_container = CompoundStatement
+    && context.predecessor = TokenColon
 
   let is_rhs_of_assignment_expression context =
     context.closest_parent_container = AssignmentExpression
@@ -183,8 +183,8 @@ let initial_context =
     predecessor = Predecessor.NoPredecessor;
   }
 
-let validate_predecessor (predecessor : PositionedSyntax.t list) :
-    Predecessor.t =
+let validate_predecessor (predecessor : PositionedSyntax.t list) : Predecessor.t
+    =
   PositionedSyntax.(
     PositionedToken.(
       TokenKind.(
@@ -302,8 +302,7 @@ let validate_predecessor (predecessor : PositionedSyntax.t list) :
             | Token { kind = Trait; _ } -> Some KeywordTrait
             | Token { kind = Type; _ } -> Some KeywordType
             | Token { kind = Use; _ } -> Some KeywordUse
-            | Token { trailing_width = 0; _ } ->
-              Some TokenWithoutTrailingTrivia
+            | Token { trailing_width = 0; _ } -> Some TokenWithoutTrailingTrivia
             | _ -> None
           in
           predecessor
@@ -385,8 +384,8 @@ let make_context
               { acc with closest_parent_container = TraitHeader }
             | ClassishDeclaration _ ->
               { acc with closest_parent_container = ClassHeader }
-            | ClassishBody _
-              when acc.closest_parent_container = InterfaceHeader ->
+            | ClassishBody _ when acc.closest_parent_container = InterfaceHeader
+              ->
               { acc with closest_parent_container = InterfaceBody }
             | ClassishBody _ when acc.closest_parent_container = TraitHeader ->
               { acc with closest_parent_container = TraitBody }

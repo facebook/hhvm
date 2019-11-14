@@ -15,8 +15,7 @@ let foo_returns_int_name = "foo_returns_int.php"
 let foo_returns_string_name = "foo_returns_string_name.php"
 
 let foo_contents =
-  Printf.sprintf
-    "<?hh // strict
+  Printf.sprintf "<?hh // strict
 /* HH_FIXME[4336] */
 function foo() : %s {
 
@@ -104,10 +103,7 @@ let test () =
     Test.open_file env bar_expects_int_name ~contents:(bar_contents "int")
   in
   let env =
-    Test.open_file
-      env
-      bar_expects_string_name
-      ~contents:(bar_contents "string")
+    Test.open_file env bar_expects_string_name ~contents:(bar_contents "string")
   in
   let env = Test.wait env in
   let (env, loop_outputs) = Test.(run_loop_once env default_loop_input) in

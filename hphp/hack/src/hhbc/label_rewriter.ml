@@ -87,8 +87,7 @@ let relabel_instr instr relabel =
     IGenDelegation (YieldFromDelegate (i, relabel l))
   | ICall (FCall (fl, na, nr, br, Some l)) ->
     ICall (FCall (fl, na, nr, br, Some (relabel l)))
-  | ICall (FCallClsMethod ((fl, na, nr, br, Some l), is_log_as_dynamic_call))
-    ->
+  | ICall (FCallClsMethod ((fl, na, nr, br, Some l), is_log_as_dynamic_call)) ->
     ICall
       (FCallClsMethod
          ((fl, na, nr, br, Some (relabel l)), is_log_as_dynamic_call))

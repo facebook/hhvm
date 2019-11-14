@@ -130,8 +130,7 @@ let debug_print_fast_keys genv name fast =
                 v
               in
               let prepend_json_strings decls acc =
-                SSet.fold decls ~init:acc ~f:(fun n acc ->
-                    JSON_String n :: acc)
+                SSet.fold decls ~init:acc ~f:(fun n acc -> JSON_String n :: acc)
               in
               let acc = prepend_json_strings n_funs acc in
               let acc = prepend_json_strings n_classes acc in
@@ -318,17 +317,13 @@ let parsing genv env to_check ~stop_at_errors =
     synchronously *)
   let sie = env.local_symbol_table in
   if
-    SearchServiceRunner.should_run_completely
-      genv
-      !sie.SearchUtils.sie_provider
+    SearchServiceRunner.should_run_completely genv !sie.SearchUtils.sie_provider
   then
     SearchServiceRunner.run_completely env.local_symbol_table;
 
   if stop_at_errors then (
     (* Revert changes and ignore results for IDE files that failed parsing *)
-    let ide_failed_parsing =
-      Relative_path.Set.inter failed_parsing ide_files
-    in
+    let ide_failed_parsing = Relative_path.Set.inter failed_parsing ide_files in
     let fast =
       remove_failed_parsing_map fast stop_at_errors env ide_failed_parsing
     in
@@ -686,9 +681,11 @@ functor
     let get_defs fast =
       Relative_path.Map.fold
         fast
-        ~f:begin
-             fun _ names1 names2 -> FileInfo.merge_names names1 names2
-           end
+        ~f:
+          begin
+            fun _ names1 names2 ->
+            FileInfo.merge_names names1 names2
+          end
         ~init:FileInfo.empty_names
 
     let get_oldified_defs env =
@@ -707,10 +704,8 @@ functor
       match Naming_table.get_file_info naming_table path with
       | None -> SSet.empty
       | Some info ->
-        List.fold
-          info.FileInfo.classes
-          ~init:SSet.empty
-          ~f:(fun acc (_, cid) -> SSet.add acc cid)
+        List.fold info.FileInfo.classes ~init:SSet.empty ~f:(fun acc (_, cid) ->
+            SSet.add acc cid)
 
     let clear_failed_parsing errors failed_parsing =
       (* In most cases, set of files processed in a phase is a superset
@@ -767,9 +762,7 @@ functor
         ~(files_to_parse : Relative_path.Set.t)
         ~(stop_at_errors : bool) : naming_result =
       let (errorl', failed_naming, fast) = declare_names env fast_parsed in
-      let errors =
-        Errors.(incremental_update_map errors errorl' fast Naming)
-      in
+      let errors = Errors.(incremental_update_map errors errorl' fast Naming) in
       (* failed_naming can be a superset of keys in fast - see comment in
        * NamingGlobal.ndecl_file *)
       let fast = extend_fast genv fast naming_table failed_naming in
@@ -829,8 +822,7 @@ functor
         ~(naming_table : Naming_table.t)
         ~(lazy_decl_later : FileInfo.names Relative_path.Map.t)
         ~(oldified_defs : FileInfo.names)
-        ~(to_redecl_phase2_deps : Typing_deps.DepSet.t) : redecl_phase2_result
-        =
+        ~(to_redecl_phase2_deps : Typing_deps.DepSet.t) : redecl_phase2_result =
       let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
       let defs_to_oldify = get_defs lazy_decl_later in
       Decl_redecl_service.oldify_type_decl
@@ -954,9 +946,7 @@ functor
       in
       (* ... leaving only things that we actually checked, and which can be
        * removed from needs_recheck *)
-      let needs_recheck =
-        Relative_path.Set.diff needs_recheck files_to_check
-      in
+      let needs_recheck = Relative_path.Set.diff needs_recheck files_to_check in
       let errors =
         Errors.(incremental_update_set errors errorl' files_to_check Typing)
       in
@@ -1012,9 +1002,7 @@ functor
        * the old ones. We'll use oldified_defs sets to track what is in the old
        * heap as we progress with redeclaration *)
       let oldified_defs = get_oldified_defs env in
-      let (files_to_parse, stop_at_errors) =
-        CheckKind.get_files_to_parse env
-      in
+      let (files_to_parse, stop_at_errors) = CheckKind.get_files_to_parse env in
       let reparse_count = Relative_path.Set.cardinal files_to_parse in
       if reparse_count = 1 then
         files_to_parse
@@ -1025,9 +1013,7 @@ functor
         Hh_logger.log "Processing changes to %d files" reparse_count;
 
       if CheckKind.is_full then (
-        let redecl_count =
-          Relative_path.Set.cardinal env.needs_phase2_redecl
-        in
+        let redecl_count = Relative_path.Set.cardinal env.needs_phase2_redecl in
         let check_count = Relative_path.Set.cardinal env.needs_recheck in
         Hh_logger.log
           "Processing deferred type decl for %d file%s"
@@ -1385,8 +1371,7 @@ let type_check_unsafe genv env kind =
   | Lazy_check -> HackEventLogger.set_lazy_incremental ()
   | Full_check -> ());
   let check_kind = check_kind_to_string kind in
-  HackEventLogger.with_check_kind check_kind
-  @@ fun () ->
+  HackEventLogger.with_check_kind check_kind @@ fun () ->
   Printf.eprintf "******************************************\n";
   Hh_logger.log "Check kind: %s" check_kind;
   match kind with
@@ -1415,8 +1400,8 @@ let type_check_unsafe genv env kind =
     res
 
 let type_check genv env kind =
-  ServerUtils.with_exit_on_exception
-  @@ (fun () -> type_check_unsafe genv env kind)
+  ServerUtils.with_exit_on_exception @@ fun () ->
+  type_check_unsafe genv env kind
 
 (*****************************************************************************)
 (* Checks that the working directory is clean *)

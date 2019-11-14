@@ -218,8 +218,7 @@ let handle_connection_try return client env f =
 let handle_connection_ genv env client =
   ServerCommandTypes.(
     let t = Unix.gettimeofday () in
-    handle_connection_try (fun x -> ServerUtils.Done x) client env
-    @@ fun () ->
+    handle_connection_try (fun x -> ServerUtils.Done x) client env @@ fun () ->
     match ClientProvider.read_connection_type client with
     | Persistent ->
       let f env =
@@ -313,8 +312,7 @@ let handle_persistent_connection_ genv env client =
     | Some reason -> ServerUtils.Needs_writes (env, f, true, reason)
     | None -> ServerUtils.Done (f env)
   in
-  handle_persistent_connection_try return client env
-  @@ fun () ->
+  handle_persistent_connection_try return client env @@ fun () ->
   let env = { env with ide_idle = false } in
   ServerCommand.handle genv env client
 
@@ -399,8 +397,7 @@ let query_notifier genv env query_kind t =
  * The above doesn't apply in presence of interruptions / cancellations -
  * it's possible for client to request current recheck to be stopped.
  *)
-let rec recheck_loop acc genv env new_client has_persistent_connection_request
-    =
+let rec recheck_loop acc genv env new_client has_persistent_connection_request =
   let t = Unix.gettimeofday () in
   (* When a new client connects, we use the synchronous notifier.
    * This is to get synchronous file system changes when invoking
@@ -423,7 +420,7 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request
     (not has_persistent_connection_request)
     && (* "average person types [...] between 190 and 200 characters per minute"
         * 60/200 = 0.3 *)
-       t -. env.last_command_time > 0.3
+    t -. env.last_command_time > 0.3
   in
   (* saving any file is our trigger to start full recheck *)
   let env =
@@ -655,8 +652,7 @@ let serve_one_iteration genv env client_provider =
     else
       `Recheck
   in
-  HackEventLogger.with_id ~stage recheck_id
-  @@ fun () ->
+  HackEventLogger.with_id ~stage recheck_id @@ fun () ->
   (* We'll first do "recheck_loop" to handle all outstanding changes, so that *)
   (* after that we'll be able to give an up-to-date answer to the client. *)
   let env = recheck_loop genv env client has_persistent_connection_request in
@@ -689,9 +685,7 @@ let serve_one_iteration genv env client_provider =
           Hh_logger.log "Finished recheck_loop; has_pending_disk_changes";
         env
       ) else
-        let (sub, errors) =
-          Diagnostic_subscription.pop_errors sub env.errorl
-        in
+        let (sub, errors) = Diagnostic_subscription.pop_errors sub env.errorl in
         ( if SMap.is_empty errors then (
           if log_diagnostics then
             Hh_logger.log "Finished recheck_loop; is_empty errors"
@@ -770,10 +764,7 @@ let serve_one_iteration genv env client_provider =
   let env =
     match env.persistent_client_pending_command_needs_full_check with
     | Some (f, _reason) when env.full_check = Full_check_done ->
-      {
-        (f env) with
-        persistent_client_pending_command_needs_full_check = None;
-      }
+      { (f env) with persistent_client_pending_command_needs_full_check = None }
     | _ -> env
   in
   let env =
@@ -850,6 +841,7 @@ let priority_client_interrupt_handler genv client_provider env =
             ("unexpected command needing writes in priority channel: " ^ reason)
         | ServerUtils.Done env -> env)
     in
+
     (* Global rechecks in response to file changes can be paused.
       Here, we check if the user requested global rechecks to be paused during
       the current recheck (the one that we're in the middle of). The above call
@@ -889,8 +881,7 @@ let persistent_client_interrupt_handler genv env =
       (* This should not be possible, because persistent client will not send
        * the next command before receiving results from the previous one. *)
       assert (
-        Option.is_none env.persistent_client_pending_command_needs_full_check
-      );
+        Option.is_none env.persistent_client_pending_command_needs_full_check );
       ( {
           env with
           persistent_client_pending_command_needs_full_check = Some (f, reason);
@@ -1033,8 +1024,7 @@ let resolve_init_approach genv : ServerInit.init_approach * string =
         (* Use native loading only if the config specifies a load script,
          * and the local config prefers native. *)
         let use_canary = ServerArgs.load_state_canary genv.options in
-        ( ServerInit.Saved_state_init
-            (ServerInit.Load_state_natively use_canary),
+        ( ServerInit.Saved_state_init (ServerInit.Load_state_natively use_canary),
           "Load_state_natively" )
     )
 
@@ -1214,8 +1204,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   );
 
   ( if
-    ServerConfig.warn_on_non_opt_build config
-    && not Build_id.is_build_optimized
+    ServerConfig.warn_on_non_opt_build config && not Build_id.is_build_optimized
   then
     let msg =
       Printf.sprintf
@@ -1339,8 +1328,7 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
     Hh_logger.log "Invalid program args - can't run daemon in check mode.";
     Exit_status.(exit Input_error)
   );
-  HackEventLogger.with_id ~stage:`Init env.init_env.init_id
-  @@ fun () ->
+  HackEventLogger.with_id ~stage:`Init env.init_env.init_id @@ fun () ->
   let env = MainInit.go genv options (fun () -> program_init genv env) in
   serve genv env in_fds
 
@@ -1366,8 +1354,7 @@ let daemon_main
     in case the tmp folder changes *)
   ignore (Hhi.get_hhi_root ());
 
-  ServerUtils.with_exit_on_exception
-  @@ fun () ->
+  ServerUtils.with_exit_on_exception @@ fun () ->
   daemon_main_exn
     ~informant_managed
     options

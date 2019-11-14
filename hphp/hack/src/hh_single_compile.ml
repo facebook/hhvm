@@ -274,9 +274,7 @@ let parse_text ~hhbc_options popt fn text =
   let (ast, is_hh_file) =
     Full_fidelity_ast.from_text_to_empty_tast env source_text
   in
-  let elaborate_namespaces =
-    new Elaborate_namespaces_endo.generic_elaborator
-  in
+  let elaborate_namespaces = new Elaborate_namespaces_endo.generic_elaborator in
   let nsenv = Namespace_env.empty_from_popt popt in
   let ast =
     elaborate_namespaces#on_program
@@ -357,10 +355,8 @@ let handle_conversion_errors errors =
       (* Ignore these errors to match legacy AST behavior *)
       | 2086
       (* Naming.MethodNeedsVisibility *)
-      
       | 2102
       (* Naming.UnsupportedTraitUseAs *)
-      
       | 2103 (* Naming.UnsupportedInsteadOf *) ->
         false
       | _ (* Emit fatal parse otherwise *) -> true)
@@ -678,9 +674,7 @@ let decl_and_run_mode compiler_options =
                    else
                      body
                  in
-                 let path =
-                   Relative_path.create Relative_path.Dummy filename
-                 in
+                 let path = Relative_path.create Relative_path.Dummy filename in
                  let config_overrides =
                    get_field
                      (get_obj "config_overrides")

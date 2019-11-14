@@ -117,10 +117,7 @@ let print_pretty_entry = function
           print_counts counts)
         r;
       let total_counts =
-        SMap.fold
-          (fun _ counts acc -> merge_and_sum counts acc)
-          r
-          empty_counter
+        SMap.fold (fun _ counts acc -> merge_and_sum counts acc) r empty_counter
       in
       Printf.printf "== total ==\n";
       print_counts total_counts;

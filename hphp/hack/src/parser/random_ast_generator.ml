@@ -13,8 +13,7 @@ module type AstGenerator = sig
   val generate_with_exact_count : int -> Config.t -> string * int
 end
 
-module Make (G : Hack_grammar_descriptor_helper.Grammar) : AstGenerator =
-struct
+module Make (G : Hack_grammar_descriptor_helper.Grammar) : AstGenerator = struct
   module NontermCount = struct
     type t = string * int
 

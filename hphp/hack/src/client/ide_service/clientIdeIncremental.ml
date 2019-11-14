@@ -30,10 +30,7 @@ let log_file_info_change
         match symbols with
         | [] -> "<none>"
         | symbols when num_symbols <= max_num_symbols_to_show ->
-          symbols
-          |> strip_positions
-          |> SSet.elements
-          |> String.concat ~sep:", "
+          symbols |> strip_positions |> SSet.elements |> String.concat ~sep:", "
         | symbols ->
           let num_remaining_symbols = num_symbols - max_num_symbols_to_show in
           let symbols = List.take symbols max_num_symbols_to_show in
@@ -259,9 +256,7 @@ let invalidate_decls ~(old_file_info : FileInfo.t option) : unit =
     record_defs
     |> strip_positions
     |> SSet.iter ~f:Decl_provider.invalidate_record_def;
-    typedefs
-    |> strip_positions
-    |> SSet.iter ~f:Decl_provider.invalidate_typedef;
+    typedefs |> strip_positions |> SSet.iter ~f:Decl_provider.invalidate_typedef;
     consts |> strip_positions |> SSet.iter ~f:Decl_provider.invalidate_gconst;
     ()
 

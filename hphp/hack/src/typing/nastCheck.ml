@@ -130,9 +130,7 @@ and hint_ env p = function
       List.iter hl (hint env));
     ()
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
-    let compute_hint_for_shape_field_info { sfi_hint; _ } =
-      hint env sfi_hint
-    in
+    let compute_hint_for_shape_field_info { sfi_hint; _ } = hint env sfi_hint in
     List.iter ~f:compute_hint_for_shape_field_info nsi_field_map
   | Hpu_access (h, _) -> hint env h
 

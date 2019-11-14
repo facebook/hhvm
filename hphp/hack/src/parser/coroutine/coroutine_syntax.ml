@@ -308,10 +308,7 @@ let make_try_finally_statement_syntax try_compound_statement finally_body =
     (make_finally_clause finally_keyword_syntax finally_body)
 
 let make_return_statement_syntax expression_syntax =
-  make_return_statement
-    return_keyword_syntax
-    expression_syntax
-    semicolon_syntax
+  make_return_statement return_keyword_syntax expression_syntax semicolon_syntax
 
 let make_return_missing_statement_syntax =
   make_return_statement_syntax (make_missing ())
@@ -456,8 +453,8 @@ let make_type_specifier_syntax classname type_parameter_list =
   else
     make_generic_type_specifier classname_syntax type_arguments_syntax
 
-let make_typed_object_creation_expression_syntax
-    type_specifier_syntax arguments =
+let make_typed_object_creation_expression_syntax type_specifier_syntax arguments
+    =
   let arguments_syntax = make_comma_list arguments in
   let constructor_call_syntax =
     make_constructor_call
@@ -948,9 +945,7 @@ let current_name_syntax = make_name_syntax "current"
 let next_name_syntax = make_name_syntax "next"
 
 let make_new_coroutine_foreach_helper_object collection =
-  make_object_creation_expression_syntax
-    "\\CoroutineForeachHelper"
-    [collection]
+  make_object_creation_expression_syntax "\\CoroutineForeachHelper" [collection]
 
 (**
  * $saved_...

@@ -70,10 +70,7 @@ let test_early_revive () =
 
   expect_mem ();
   SharedMem.invalidate_caches ();
-  ServerIdeUtils.declare_and_check
-    content
-    ~f:(fun _ _ _ -> expect_mem ())
-    tcopt;
+  ServerIdeUtils.declare_and_check content ~f:(fun _ _ _ -> expect_mem ()) tcopt;
   SharedMem.invalidate_caches ();
   expect_mem ();
 

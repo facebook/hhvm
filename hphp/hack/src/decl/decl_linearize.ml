@@ -259,8 +259,7 @@ let rec ancestor_linearization
               List.map c.mro_type_args ~f:(Decl_instantiate.instantiate subst);
             (* Update positions of requirements in the remainder of the
            linearization to reflect their immediate provenance as well. *)
-            mro_required_at =
-              Option.map c.mro_required_at ~f:(fun _ -> use_pos);
+            mro_required_at = Option.map c.mro_required_at ~f:(fun _ -> use_pos);
           })
     in
     let rest =
@@ -313,9 +312,7 @@ and linearize (env : env) (c : shallow_class) : linearization =
     if String.equal mro_name SN.Classes.cStringish then
       []
     else
-      let is_to_string m =
-        String.equal (snd m.sm_name) SN.Members.__toString
-      in
+      let is_to_string m = String.equal (snd m.sm_name) SN.Members.__toString in
       match List.find c.sc_methods is_to_string with
       | None -> []
       | Some { sm_name = (pos, _); _ } ->
@@ -431,7 +428,6 @@ and next_state
                   | (_, Ast_defs.(Ctrait | Cinterface))
                   (* Otherwise, keep them only if they represent a requirement that
                  we will need to validate later. *)
-                  
                   | (Some _, Ast_defs.(Cnormal | Cabstract | Cenum)) ->
                     if List.exists synths ~f:(mro_elements_equal next) then
                       synths
@@ -441,9 +437,7 @@ and next_state
                 in
                 (None, synths)
               else
-                let next =
-                  skip_or_mark_trait_reuse (mro_elements_equal next)
-                in
+                let next = skip_or_mark_trait_reuse (mro_elements_equal next) in
                 (next, synths)
             | Ancestor_types ->
               (* For ancestor types, we don't care about require-extends or
@@ -465,8 +459,7 @@ and next_state
           (match next with
           | None -> Skip (Ancestor (name, rest), ancestors, acc, synths)
           | Some next ->
-            Yield
-              (next, (Ancestor (name, rest), ancestors, next :: acc, synths)))
+            Yield (next, (Ancestor (name, rest), ancestors, next :: acc, synths)))
       end
     | (Next_ancestor, []) ->
       let synths = List.rev synths in
@@ -517,8 +510,7 @@ and get_linearization (env : env) (class_name : string) : linearization =
             {
               empty_mro_element with
               mro_name = class_name;
-              mro_class_not_found =
-                true (* This class is not known to exist! *);
+              mro_class_not_found = true (* This class is not known to exist! *);
             }))
 
 let get_linearization ?(kind = Member_resolution) class_name =
@@ -529,7 +521,5 @@ let get_linearization ?(kind = Member_resolution) class_name =
       decl_tcopt = GlobalNamingOptions.get ();
     }
   in
-  let env =
-    { class_stack = SSet.empty; decl_env; linearization_kind = kind }
-  in
+  let env = { class_stack = SSet.empty; decl_env; linearization_kind = kind } in
   get_linearization env class_name

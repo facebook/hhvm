@@ -26,9 +26,7 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
     Emit_attribute.from_asts namespace ast_fun.T.f_user_attributes
   in
   let function_attributes =
-    Emit_attribute.add_reified_attribute
-      function_attributes
-      ast_fun.T.f_tparams
+    Emit_attribute.add_reified_attribute function_attributes ast_fun.T.f_tparams
   in
   let is_memoize = Hhas_attribute.has_memoized function_attributes in
   let is_native = Hhas_attribute.has_native function_attributes in
@@ -84,9 +82,7 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
       (T.hint_of_type_hint ast_fun.T.f_ret)
       [T.Stmt (Pos.none, T.Block ast_body)]
   in
-  let is_interceptable =
-    Interceptable.is_function_interceptable ast_fun
-  in
+  let is_interceptable = Interceptable.is_function_interceptable ast_fun in
   let normal_function =
     Hhas_function.make
       function_attributes

@@ -270,8 +270,7 @@ let c2 = Cseq (c1, Cseq (Cass ("y", Ev "x"), Cass ("x", Etrue)))
 let c3 = Cloop (Cseq (c1, Cbreak))
 
 (* skip=<x:bool> *)
-let c4 =
-  Cseq (c1, Cifistype ("x", inttype, Cass ("x", Etrue), Cass ("y", En 6)))
+let c4 = Cseq (c1, Cifistype ("x", inttype, Cass ("x", Etrue), Cass ("y", En 6)))
 
 (* this one ends up with skip:=<x:bool,y:int> *)
 let c5 =
@@ -304,8 +303,7 @@ let thebody =
     ( Egreater (En 4, Ev "i"),
       Cbreak,
       Cseq
-        ( Cseq
-            (Cseq (Cass ("x", Ev "y"), Cass ("y", Ev "z")), Cass ("z", Etrue)),
+        ( Cseq (Cseq (Cass ("x", Ev "y"), Cass ("y", Ev "z")), Cass ("z", Etrue)),
           Cass ("i", Eplus (Ev "i", En 1)) ) )
 
 let theloop = Cloop thebody

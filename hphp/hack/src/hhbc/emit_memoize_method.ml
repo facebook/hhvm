@@ -204,10 +204,8 @@ let make_memoize_instance_method_with_params_code
           ]
       else
         gather
-          [
-            instr_memoget notfound (Some (first_local, param_count));
-            instr_retc;
-          ] );
+          [instr_memoget notfound (Some (first_local, param_count)); instr_retc]
+      );
       instr_label notfound;
       instr_this;
       instr_nulluninit;
@@ -353,10 +351,8 @@ let make_memoize_static_method_with_params_code
           ]
       else
         gather
-          [
-            instr_memoget notfound (Some (first_local, param_count));
-            instr_retc;
-          ] );
+          [instr_memoget notfound (Some (first_local, param_count)); instr_retc]
+      );
       instr_label notfound;
       instr_nulluninit;
       instr_nulluninit;
@@ -561,10 +557,7 @@ let make_memoize_wrapper_method env info ast_class ast_method =
   in
   let method_id = Hhbc_id.Method.from_ast_name original_name in
   let scope =
-    [
-      Ast_scope.ScopeItem.Method ast_method;
-      Ast_scope.ScopeItem.Class ast_class;
-    ]
+    [Ast_scope.ScopeItem.Method ast_method; Ast_scope.ScopeItem.Class ast_class]
   in
   let namespace = ast_class.T.c_namespace in
   let method_is_interceptable =
@@ -589,8 +582,7 @@ let make_memoize_wrapper_method env info ast_class ast_method =
   let env = Emit_env.with_rx_body (method_rx_level <> Rx.NonRx) env in
   let is_reified =
     List.exists
-      ~f:(fun t ->
-        t.T.tp_reified = T.Reified || t.T.tp_reified = T.SoftReified)
+      ~f:(fun t -> t.T.tp_reified = T.Reified || t.T.tp_reified = T.SoftReified)
       ast_method.T.m_tparams
   in
   let method_body =
@@ -631,8 +623,7 @@ let emit_wrapper_methods env info ast_class ast_methods =
   Iterator.reset_iterator ();
   let hhas_methods =
     List.fold_left ast_methods ~init:[] ~f:(fun acc ast_method ->
-        if Emit_attribute.ast_any_is_memoize ast_method.T.m_user_attributes
-        then
+        if Emit_attribute.ast_any_is_memoize ast_method.T.m_user_attributes then
           let scope =
             Ast_scope.ScopeItem.Method ast_method :: Emit_env.get_scope env
           in

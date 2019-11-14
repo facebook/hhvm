@@ -92,7 +92,6 @@ let check_extend_kind parent_pos parent_kind child_pos child_kind =
       (Ast_defs.Cabstract | Ast_defs.Cnormal) )
   | (Ast_defs.Cabstract, Ast_defs.Cenum)
   (* enums extend BuiltinEnum under the hood *)
-  
   | (Ast_defs.Ctrait, Ast_defs.Ctrait)
   | (Ast_defs.Cinterface, Ast_defs.Cinterface) ->
     ()
@@ -136,8 +135,7 @@ let report_reused_trait parent_type shallow_class =
  * XHP attribute dependencies don't actually pull the trait into the class,
  * so we need to track them totally separately.
  *)
-let check_no_duplicate_traits parent_type shallow_class c_extends full_extends
-    =
+let check_no_duplicate_traits parent_type shallow_class c_extends full_extends =
   let class_size = SSet.cardinal c_extends in
   let parents_size = SSet.cardinal parent_type.dc_extends in
   let full_size = SSet.cardinal full_extends in
@@ -262,9 +260,7 @@ and fun_decl_in_env env f =
   let reactivity = fun_reactivity env f.f_user_attributes in
   let returns_mutable = fun_returns_mutable f.f_user_attributes in
   let returns_void_to_rx = fun_returns_void_to_rx f.f_user_attributes in
-  let return_disposable =
-    has_return_disposable_attribute f.f_user_attributes
-  in
+  let return_disposable = has_return_disposable_attribute f.f_user_attributes in
   let arity_min = minimum_arity f.f_params in
   let params = make_params env f.f_params in
   let ret_ty =
@@ -345,10 +341,7 @@ let pu_enum_fold acc spu =
             ~init:tpu.tpu_case_values
             ~f:(fun acc (((_, k), _) as item) -> SMap.add k item acc);
         tpu_members =
-          List.fold_left
-            spu.spu_members
-            ~init:tpu.tpu_members
-            ~f:(fun acc sm ->
+          List.fold_left spu.spu_members ~init:tpu.tpu_members ~f:(fun acc sm ->
               let tpum_types =
                 match SMap.find_opt (snd sm.spum_atom) acc with
                 | None -> SMap.empty
@@ -397,8 +390,7 @@ let rec class_decl_if_missing class_env (c : Nast.class_) =
     | None ->
       (* Class elements are in memory if and only if the class itself is there.
        * Exiting before class declaration is ready would break this invariant *)
-      WorkerCancel.with_no_cancellations
-      @@ fun () ->
+      WorkerCancel.with_no_cancellations @@ fun () ->
       let class_ = class_naming_and_decl class_env cid c in
       Some class_
 
@@ -524,9 +516,7 @@ and class_decl c =
   let consts =
     List.fold_left ~f:(class_const_fold c) ~init:consts c.sc_consts
   in
-  let consts =
-    SMap.add SN.Members.mClass (class_class_decl c.sc_name) consts
-  in
+  let consts = SMap.add SN.Members.mClass (class_class_decl c.sc_name) consts in
   let typeconsts = inherited.Decl_inherit.ih_typeconsts in
   let (typeconsts, consts) =
     List.fold_left
@@ -669,7 +659,8 @@ and class_decl c =
   in
   SMap.iter
     begin
-      fun x _ -> Typing_deps.add_idep class_dep (Dep.Class x)
+      fun x _ ->
+      Typing_deps.add_idep class_dep (Dep.Class x)
     end
     impl;
   tc
@@ -874,9 +865,7 @@ and typeconst_structure c stc =
   let pos = fst stc.stc_name in
   let r = Reason.Rwitness pos in
   let tsid = (pos, SN.FB.cTypeStructure) in
-  let ts_ty =
-    (r, Tapply (tsid, [(r, Taccess ((r, Tthis), [stc.stc_name]))]))
-  in
+  let ts_ty = (r, Tapply (tsid, [(r, Taccess ((r, Tthis), [stc.stc_name]))])) in
   let abstract =
     match stc.stc_abstract with
     | TCAbstract _ -> true
@@ -1000,8 +989,7 @@ and method_decl_acc ~is_static c (acc, condition_types) m =
   in
   let condition_types =
     match get_reactivity m.sm_type with
-    | Reactive (Some (_, Tapply ((_, cls), []))) ->
-      SSet.add cls condition_types
+    | Reactive (Some (_, Tapply ((_, cls), []))) -> SSet.add cls condition_types
     | Reactive None -> condition_types
     | Shallow (Some (_, Tapply ((_, cls), []))) -> SSet.add cls condition_types
     | Shallow None -> condition_types
@@ -1120,11 +1108,7 @@ and typedef_decl tdef =
   in
   let dep = Typing_deps.Dep.Class tid in
   let env =
-    {
-      Decl_env.mode;
-      droot = Some dep;
-      decl_tcopt = GlobalNamingOptions.get ();
-    }
+    { Decl_env.mode; droot = Some dep; decl_tcopt = GlobalNamingOptions.get () }
   in
   let td_tparams = List.map params (type_param env) in
   let td_type = Decl_hint.hint env concrete_type in

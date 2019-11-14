@@ -15,8 +15,7 @@ module Reason = Typing_reason
 module SN = Naming_special_names
 
 type ancestor_caches = {
-  ancestors: decl_ty LSTable.t;
-      (** Types of parents, interfaces, and traits *)
+  ancestors: decl_ty LSTable.t;  (** Types of parents, interfaces, and traits *)
   parents_and_traits: unit LSTable.t;  (** Names of parents and traits only *)
   members_fully_known: bool Lazy.t;
   req_ancestor_names: unit LSTable.t;
@@ -62,7 +61,7 @@ let make class_name =
   let lin =
     Decl_linearize.(get_linearization ~kind:Ancestor_types) class_name
     (* Drop the requested class; we only want its ancestors. *)
-    |> (fun lin -> Sequence.drop_eagerly lin 1)
+    |> fun lin -> Sequence.drop_eagerly lin 1
   in
   {
     ancestors = LSTable.make (all_ancestors lin) ~is_canonical ~merge;

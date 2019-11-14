@@ -202,10 +202,7 @@ let get_tyvar_info env var =
   Option.value (get_tyvar_info_opt env var) ~default:empty_tyvar_info
 
 let is_global_tyvar env var =
-  Option.equal
-    equal_tyvar_info
-    (IMap.find_opt var env.tvenv)
-    (Some GlobalTyvar)
+  Option.equal equal_tyvar_info (IMap.find_opt var env.tvenv) (Some GlobalTyvar)
 
 let update_tyvar_info env var tyvar_info =
   if
@@ -619,10 +616,7 @@ let set_condition_type env n ty =
   {
     env with
     genv =
-      {
-        env.genv with
-        condition_types = SMap.add n ty env.genv.condition_types;
-      };
+      { env.genv with condition_types = SMap.add n ty env.genv.condition_types };
   }
 
 let get_condition_type env n = SMap.find_opt n env.genv.condition_types
@@ -637,8 +631,7 @@ let set_fun_mutable env mut =
   { env with genv = { env.genv with fun_mutable = mut } }
 
 let error_if_reactive_context env f =
-  if
-    env_local_reactive env && not (TypecheckerOptions.unsafe_rx env.genv.tcopt)
+  if env_local_reactive env && not (TypecheckerOptions.unsafe_rx env.genv.tcopt)
   then
     f ()
 
@@ -1003,9 +996,7 @@ let unset_local env local =
   env
 
 let add_mutable_var env local mutability_type =
-  env_with_mut
-    env
-    (LID.Map.add local mutability_type env.lenv.local_mutability)
+  env_with_mut env (LID.Map.add local mutability_type env.lenv.local_mutability)
 
 let local_is_mutable ~include_borrowed env id =
   let module TME = Typing_mutability_env in
@@ -1177,8 +1168,7 @@ let update_lost_info name blame env ty =
     | LoclType ty ->
       let ((env, seen_tyvars), ty) = update_ty (env, seen_tyvars) ty in
       ((env, seen_tyvars), LoclType ty)
-    | ConstraintType (r, ty) ->
-      ((env, seen_tyvars), ConstraintType (info r, ty))
+    | ConstraintType (r, ty) -> ((env, seen_tyvars), ConstraintType (info r, ty))
   in
   let ((env, _seen_tyvars), ty) = update_ty (env, ISet.empty) ty in
   (env, ty)
@@ -1310,8 +1300,8 @@ and get_tyvars_i env (ty : internal_type) =
     let (env, positive, negative) = get_tyvars env ty in
     (env, ISet.union acc_positive positive, ISet.union acc_negative negative)
   in
-  let get_tyvars_param
-      (env, acc_positive, acc_negative) { fp_type; fp_kind; _ } =
+  let get_tyvars_param (env, acc_positive, acc_negative) { fp_type; fp_kind; _ }
+      =
     let (env, positive, negative) = get_tyvars env fp_type.et_type in
     match fp_kind with
     (* Parameters are treated contravariantly *)
@@ -1341,10 +1331,7 @@ and get_tyvars_i env (ty : internal_type) =
     | Tunion tyl
     | Tintersection tyl
     | Tdestructure tyl ->
-      List.fold_left
-        tyl
-        ~init:(env, ISet.empty, ISet.empty)
-        ~f:get_tyvars_union
+      List.fold_left tyl ~init:(env, ISet.empty, ISet.empty) ~f:get_tyvars_union
     | Tshape (_, m) ->
       Nast.ShapeMap.fold
         (fun _ { sft_ty; _ } res -> get_tyvars_union res sft_ty)
@@ -1356,8 +1343,7 @@ and get_tyvars_i env (ty : internal_type) =
         | Fstandard _
         | Fellipsis _ ->
           (env, ISet.empty, ISet.empty)
-        | Fvariadic (_, fp) ->
-          get_tyvars_param (env, ISet.empty, ISet.empty) fp
+        | Fvariadic (_, fp) -> get_tyvars_param (env, ISet.empty, ISet.empty) fp
       in
       let (env, params_positive, params_negative) =
         List.fold_left
@@ -1385,9 +1371,7 @@ and get_tyvars_i env (ty : internal_type) =
       begin
         match get_class env cid with
         | Some cls ->
-          let variancel =
-            List.map (Cls.tparams cls) (fun t -> t.tp_variance)
-          in
+          let variancel = List.map (Cls.tparams cls) (fun t -> t.tp_variance) in
           get_tyvars_variance_list (env, ISet.empty, ISet.empty) variancel tyl
         | None -> (env, ISet.empty, ISet.empty)
       end

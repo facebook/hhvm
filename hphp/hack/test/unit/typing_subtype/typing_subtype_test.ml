@@ -22,9 +22,7 @@ let r_none = Typing_reason.Rnone
 let no_r t = (r_none, t)
 
 let default_env () =
-  let env =
-    Typing_env.empty GlobalOptions.default Relative_path.default None
-  in
+  let env = Typing_env.empty GlobalOptions.default Relative_path.default None in
   let env = Env.set_log_level env "sub" 2 in
   let env = Env.set_log_level env "env" 2 in
   let env = Env.set_log_level env "inter" 2 in

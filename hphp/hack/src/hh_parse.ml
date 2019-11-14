@@ -195,9 +195,9 @@ module FullFidelityParseArgs = struct
     let options =
       [
         (* modes *)
-          ( "--full-fidelity-json",
-            Arg.Unit set_full_fidelity_json,
-            "Displays the full-fidelity parse tree in JSON format." );
+        ( "--full-fidelity-json",
+          Arg.Unit set_full_fidelity_json,
+          "Displays the full-fidelity parse tree in JSON format." );
         ( "--full-fidelity-text-json",
           Arg.Unit set_full_fidelity_text_json,
           "Displays the full-fidelity parse tree in JSON format with token text."
@@ -302,8 +302,7 @@ No errors are filtered out."
         );
         ( "--allow-new-attribute-syntax",
           Arg.Set allow_new_attribute_syntax,
-          "Allow the new @ attribute syntax (disables legacy soft typehints)"
-        );
+          "Allow the new @ attribute syntax (disables legacy soft typehints)" );
         ( "--disable-legacy-attribute-syntax",
           Arg.Set disable_legacy_attribute_syntax,
           "Disable the legacy <<...>> user attribute syntax" );
@@ -437,9 +436,7 @@ let handle_existing_file args filename =
       args.disable_legacy_attribute_syntax
   in
   let popt =
-    ParserOptions.with_const_default_func_args
-      popt
-      args.const_default_func_args
+    ParserOptions.with_const_default_func_args popt args.const_default_func_args
   in
   let popt =
     ParserOptions.with_const_static_props popt args.const_static_props

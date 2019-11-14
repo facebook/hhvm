@@ -207,10 +207,7 @@ module ValueBuilder = struct
       | (f, _) -> (f, value child)
     in
     let (first, last) =
-      Syntax.fold_over_children
-        folder
-        (Value.Synthetic, Value.Synthetic)
-        syntax
+      Syntax.fold_over_children folder (Value.Synthetic, Value.Synthetic) syntax
     in
     pr first last
 end

@@ -386,9 +386,11 @@ let make_pu_enum_cache lin =
   LSTable.make
     lin
     ~is_canonical:(fun _ -> false)
-    ~merge:begin
-             fun ~earlier:descendant_pu ~later:_ -> descendant_pu
-           end
+    ~merge:
+      begin
+        fun ~earlier:descendant_pu ~later:_ ->
+        descendant_pu
+      end
 
 let constructor_elt child_class_name (mro, cls, subst) =
   let consistent = Decl_utils.consistent_construct_kind cls in

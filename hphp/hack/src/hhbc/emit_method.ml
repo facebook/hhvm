@@ -18,8 +18,7 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
   let class_name = SU.Xhp.mangle @@ Utils.strip_ns @@ snd ast_class.T.c_name in
   (* TODO: use something that can't be faked in user code *)
   let method_is_closure_body =
-    original_name = "__invoke"
-    && String.is_prefix ~prefix:"Closure$" class_name
+    original_name = "__invoke" && String.is_prefix ~prefix:"Closure$" class_name
   in
   let namespace = ast_class.T.c_namespace in
   let method_attributes =
@@ -115,10 +114,7 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
       None
   in
   let scope =
-    [
-      Ast_scope.ScopeItem.Method ast_method;
-      Ast_scope.ScopeItem.Class ast_class;
-    ]
+    [Ast_scope.ScopeItem.Method ast_method; Ast_scope.ScopeItem.Class ast_class]
   in
   let scope =
     if method_is_closure_body then

@@ -26,8 +26,7 @@ module Funs : ReadOnly with type key = StringKey.t and type t = fun_elt
 module Classes :
   ReadOnly with type key = StringKey.t and type t = Typing_classes_heap.Api.t
 
-module Typedefs :
-  ReadOnly with type key = StringKey.t and type t = typedef_type
+module Typedefs : ReadOnly with type key = StringKey.t and type t = typedef_type
 
 module RecordDefs :
   ReadOnly with type key = StringKey.t and type t = record_def_type

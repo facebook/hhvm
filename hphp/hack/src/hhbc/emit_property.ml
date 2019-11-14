@@ -112,8 +112,7 @@ let from_ast
   let is_late_init = Hhas_attribute.has_late_init attributes in
   let visibility = cv_visibility in
   let is_private = cv_visibility = Aast.Private in
-  if
-    (not is_static) && class_.T.c_final && class_.T.c_kind = Ast_defs.Cabstract
+  if (not is_static) && class_.T.c_final && class_.T.c_kind = Ast_defs.Cabstract
   then
     Emit_fatal.raise_fatal_parse
       pos

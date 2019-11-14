@@ -248,10 +248,7 @@ let schema : schema_node list =
       prefix = "property";
       aggregates = [];
       fields =
-        [
-          ("name", Token);
-          ("initializer", ZeroOrOne (Just "SimpleInitializer"));
-        ];
+        [("name", Token); ("initializer", ZeroOrOne (Just "SimpleInitializer"))];
     };
     {
       kind_name = "NamespaceDeclaration";
@@ -565,10 +562,7 @@ let schema : schema_node list =
       prefix = "constant_declarator";
       aggregates = [];
       fields =
-        [
-          ("name", Token);
-          ("initializer", ZeroOrOne (Just "SimpleInitializer"));
-        ];
+        [("name", Token); ("initializer", ZeroOrOne (Just "SimpleInitializer"))];
     };
     {
       kind_name = "TypeConstDeclaration";
@@ -704,10 +698,7 @@ let schema : schema_node list =
       prefix = "expression_statement";
       aggregates = [TopLevelDeclaration; Statement];
       fields =
-        [
-          ("expression", ZeroOrOne (Aggregate Expression));
-          ("semicolon", Token);
-        ];
+        [("expression", ZeroOrOne (Aggregate Expression)); ("semicolon", Token)];
     };
     {
       kind_name = "MarkupSection";
@@ -1051,8 +1042,7 @@ let schema : schema_node list =
       description = "goto_statement";
       prefix = "goto_statement";
       aggregates = [TopLevelDeclaration; Statement];
-      fields =
-        [("keyword", Token); ("label_name", Token); ("semicolon", Token)];
+      fields = [("keyword", Token); ("label_name", Token); ("semicolon", Token)];
     };
     {
       kind_name = "ThrowStatement";
@@ -1246,11 +1236,7 @@ let schema : schema_node list =
       prefix = "member";
       aggregates = [Expression; ConstructorExpression; LambdaBody];
       fields =
-        [
-          ("object", Aggregate Expression);
-          ("operator", Token);
-          ("name", Token);
-        ];
+        [("object", Aggregate Expression); ("operator", Token); ("name", Token)];
     };
     {
       kind_name = "SafeMemberSelectionExpression";
@@ -1260,11 +1246,7 @@ let schema : schema_node list =
       prefix = "safe_member";
       aggregates = [Expression; ConstructorExpression; LambdaBody];
       fields =
-        [
-          ("object", Aggregate Expression);
-          ("operator", Token);
-          ("name", Token);
-        ];
+        [("object", Aggregate Expression); ("operator", Token); ("name", Token)];
     };
     {
       kind_name = "EmbeddedMemberSelectionExpression";
@@ -1874,9 +1856,7 @@ let schema : schema_node list =
       aggregates = [XHPAttribute];
       fields =
         [
-          ("name", Token);
-          ("equal", Token);
-          ("expression", Aggregate Expression);
+          ("name", Token); ("equal", Token); ("expression", Aggregate Expression);
         ];
     };
     {

@@ -28,7 +28,8 @@ let make_ts env ty =
       List.map
         ~f:
           begin
-            fun { tp_name = (p, x); _ } -> (Reason.Rwitness p, Tgeneric x)
+            fun { tp_name = (p, x); _ } ->
+            (Reason.Rwitness p, Tgeneric x)
           end
         td_tparams
     in
@@ -104,9 +105,7 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
               let (env, tyl) = List.map_env env tyl make_ts in
               (env, acc_field_with_type (r, Ttuple tyl))
             | (SFlit_str (_, "param_types"), _, (r, Tfun funty)) ->
-              let tyl =
-                List.map funty.ft_params (fun x -> x.fp_type.et_type)
-              in
+              let tyl = List.map funty.ft_params (fun x -> x.fp_type.et_type) in
               let (env, tyl) = List.map_env env tyl make_ts in
               (env, acc_field_with_type (r, Ttuple tyl))
             | (SFlit_str (_, "return_type"), _, (r, Tfun funty)) ->

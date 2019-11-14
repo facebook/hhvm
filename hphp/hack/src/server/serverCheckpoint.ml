@@ -18,9 +18,11 @@ let process_updates updates =
     SMap.map !checkpoints (fun cur_set ->
         Relative_path.Set.fold
           updates
-          ~f:begin
-               fun path acc -> Relative_path.Set.add acc path
-             end
+          ~f:
+            begin
+              fun path acc ->
+              Relative_path.Set.add acc path
+            end
           ~init:cur_set)
 
 let create_checkpoint x =
@@ -29,8 +31,7 @@ let create_checkpoint x =
 let retrieve_checkpoint x =
   match SMap.find_opt !checkpoints x with
   | Some files ->
-    Some
-      (List.map (Relative_path.Set.elements files) Relative_path.to_absolute)
+    Some (List.map (Relative_path.Set.elements files) Relative_path.to_absolute)
   | None -> None
 
 let delete_checkpoint x =

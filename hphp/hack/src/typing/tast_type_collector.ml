@@ -49,7 +49,6 @@ let collect_types tast = Errors.ignore_ (fun () -> type_collector#go tast)
   TODO: Fix this when the full fidelity parse tree becomes the parser for type checking.
 *)
 let get_from_pos_map
-    (position : Pos.absolute) (map : collected_type list Pos.AbsolutePosMap.t)
-    =
+    (position : Pos.absolute) (map : collected_type list Pos.AbsolutePosMap.t) =
   let position = Pos.advance_one position in
   Pos.AbsolutePosMap.find_opt position map

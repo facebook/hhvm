@@ -119,8 +119,7 @@ let default_loop_input =
 
 let run_loop_once :
     type a b.
-    ServerEnv.env -> (a, b) loop_inputs -> ServerEnv.env * (a, b) loop_outputs
-    =
+    ServerEnv.env -> (a, b) loop_inputs -> ServerEnv.env * (a, b) loop_outputs =
  fun env inputs ->
   TestClientProvider.clear ();
   Option.iter inputs.new_client ~f:(function
@@ -139,8 +138,7 @@ let run_loop_once :
   let disk_changes =
     List.map inputs.disk_changes ~f:(fun (x, y) -> (root ^ x, y))
   in
-  List.iter disk_changes ~f:(fun (path, contents) ->
-      TestDisk.set path contents);
+  List.iter disk_changes ~f:(fun (path, contents) -> TestDisk.set path contents);
 
   let did_read_disk_changes_ref = ref false in
   let notifier () =
@@ -488,8 +486,7 @@ let assert_errors errors expected =
   |> errors_to_string buf;
   assertEqual expected (Buffer.contents buf)
 
-let assert_env_errors env expected =
-  assert_errors env.ServerEnv.errorl expected
+let assert_env_errors env expected = assert_errors env.ServerEnv.errorl expected
 
 let assert_no_errors env = assert_env_errors env ""
 
@@ -516,8 +513,7 @@ let save_state
     ?(enable_naming_table_fallback = false)
     disk_changes
     temp_dir =
-  in_daemon
-  @@ fun () ->
+  in_daemon @@ fun () ->
   let hhi_files =
     if load_hhi_files then
       real_hhi_files ()
@@ -569,8 +565,7 @@ let save_state_incremental
   ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename)
 
 let save_state_with_errors disk_changes temp_dir expected_error : unit =
-  in_daemon
-  @@ fun () ->
+  in_daemon @@ fun () ->
   let env = setup_server () in
   let env = setup_disk env disk_changes in
   assert_env_errors env expected_error;
@@ -579,9 +574,7 @@ let save_state_with_errors disk_changes temp_dir expected_error : unit =
     {
       !genv with
       ServerEnv.options =
-        ServerArgs.set_gen_saved_ignore_type_errors
-          !genv.ServerEnv.options
-          true;
+        ServerArgs.set_gen_saved_ignore_type_errors !genv.ServerEnv.options true;
     }
   in
   let _edges_added =
@@ -635,8 +628,7 @@ let load_state
   test_init_common () ~hhi_files;
 
   let disk_changes = List.map disk_state ~f:(fun (x, y) -> (root ^ x, y)) in
-  List.iter disk_changes ~f:(fun (path, contents) ->
-      TestDisk.set path contents);
+  List.iter disk_changes ~f:(fun (path, contents) -> TestDisk.set path contents);
 
   let prechecked_changes =
     List.map master_changes ~f:(fun x ->

@@ -39,19 +39,14 @@ module Getters : sig
     string -> ?prefix:string option -> string SMap.t -> string option
 
   val string_ :
-    string ->
-    ?prefix:string option ->
-    default:string ->
-    string SMap.t ->
-    string
+    string -> ?prefix:string option -> default:string -> string SMap.t -> string
 
   val int_opt : string -> ?prefix:string option -> string SMap.t -> int option
 
   val int_ :
     string -> ?prefix:string option -> default:int -> string SMap.t -> int
 
-  val bool_opt :
-    string -> ?prefix:string option -> string SMap.t -> bool option
+  val bool_opt : string -> ?prefix:string option -> string SMap.t -> bool option
 
   val bool_ :
     string -> ?prefix:string option -> default:bool -> string SMap.t -> bool

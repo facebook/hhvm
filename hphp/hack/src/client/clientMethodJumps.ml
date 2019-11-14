@@ -16,7 +16,7 @@ let pos_to_json pos =
     [
       ("file", Hh_json.JSON_String (Pos.filename pos));
       (* we can't use Pos.json *)
-        ("line", Hh_json.int_ line);
+      ("line", Hh_json.int_ line);
       ("char_start", Hh_json.int_ start);
       ("char_end", Hh_json.int_ end_);
     ]
@@ -81,8 +81,7 @@ let print_readable res ~find_children =
         else
           "from"
       in
-      print_endline
-        (origin_readable ^ "\n    " ^ extended ^ " " ^ dest_readable));
+      print_endline (origin_readable ^ "\n    " ^ extended ^ " " ^ dest_readable));
   ()
 
 let go res find_children output_json =

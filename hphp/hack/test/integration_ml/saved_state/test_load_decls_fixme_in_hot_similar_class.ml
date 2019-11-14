@@ -29,12 +29,10 @@ let init_disk_state =
    oldified even though the decl AST hash has not changed. *)
 
 let test () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   Test.save_state init_disk_state temp_dir ~store_decls_in_saved_state:true;
-  Test.in_daemon
-  @@ fun () ->
+  Test.in_daemon @@ fun () ->
   let env =
     Test.load_state
       temp_dir

@@ -7,8 +7,8 @@ module SA = Asserter.String_asserter
 module IA = Asserter.Int_asserter
 
 let rec assert_docblock_markdown
-    (expected : DocblockService.result) (actual : DocblockService.result) :
-    unit =
+    (expected : DocblockService.result) (actual : DocblockService.result) : unit
+    =
   DocblockService.(
     match (expected, actual) with
     | ([], []) -> ()
@@ -27,8 +27,8 @@ let rec assert_docblock_markdown
       in
       assert_docblock_markdown exp_list act_list)
 
-let assert_ns_matches (expected_ns : string) (actual : SearchUtils.si_results)
-    : unit =
+let assert_ns_matches (expected_ns : string) (actual : SearchUtils.si_results) :
+    unit =
   let found =
     List.fold actual ~init:false ~f:(fun acc item ->
         item.si_name = expected_ns || acc)
@@ -123,11 +123,7 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
 
   (* Find one of each major type *)
   assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
-  assert_autocomplete
-    ~query_text:"NoBigTrait"
-    ~kind:SI_Trait
-    ~expected:1
-    ~sienv;
+  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~sienv;
   assert_autocomplete
     ~query_text:"some_long_function_name"
     ~kind:SI_Function
@@ -151,11 +147,7 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
 
   (* Two of these have been removed! *)
   assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
-  assert_autocomplete
-    ~query_text:"NoBigTrait"
-    ~kind:SI_Trait
-    ~expected:0
-    ~sienv;
+  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:0 ~sienv;
   assert_autocomplete
     ~query_text:"some_long_function_name"
     ~kind:SI_Function
@@ -211,11 +203,7 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
 
   (* Find one of each major type *)
   assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
-  assert_autocomplete
-    ~query_text:"NoBigTrait"
-    ~kind:SI_Trait
-    ~expected:1
-    ~sienv;
+  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~sienv;
   assert_autocomplete
     ~query_text:"some_long_function_name"
     ~kind:SI_Function
@@ -239,11 +227,7 @@ let test_builder_names (harness : Test_harness.t) : bool =
 
   (* Assert that we can capture all kinds of symbols *)
   assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~sienv;
-  assert_autocomplete
-    ~query_text:"NoBigTrait"
-    ~kind:SI_Trait
-    ~expected:1
-    ~sienv;
+  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~sienv;
   assert_autocomplete
     ~query_text:"some_long_function_name"
     ~kind:SI_Function

@@ -39,8 +39,7 @@ let print_ty ty =
 
 let get_first_suggested_type_as_string file type_map node =
   Option.Monad_infix.(
-    position file node
-    >>= fun pos ->
+    position file node >>= fun pos ->
     Tast_type_collector.get_from_pos_map (Pos.to_absolute pos) type_map
     >>= fun tys ->
     List.find_map tys ~f:(fun (env, phase_ty) ->
@@ -83,8 +82,7 @@ let get_patches tcopt file =
           | Token _ ->
             get_first_suggested_type_as_string file type_map node
             >>= fun type_str ->
-            position_exclusive file node
-            >>| fun pos ->
+            position_exclusive file node >>| fun pos ->
             ServerRefactorTypes.Replace
               ServerRefactorTypes.
                 {
@@ -97,8 +95,7 @@ let get_patches tcopt file =
               | ParameterDeclaration _ ->
                 get_first_suggested_type_as_string file type_map list_item
                 >>= fun type_str ->
-                position file list_item
-                >>| fun pos ->
+                position file list_item >>| fun pos ->
                 ServerRefactorTypes.Insert
                   ServerRefactorTypes.
                     { pos = Pos.to_absolute pos; text = type_str ^ " " }

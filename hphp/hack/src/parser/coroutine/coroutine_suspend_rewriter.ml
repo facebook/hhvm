@@ -79,8 +79,7 @@ let rec is_in_tail_position node parents =
   | [] -> true
   | ( {
         syntax =
-          ParenthesizedExpression
-            { parenthesized_expression_expression = e; _ };
+          ParenthesizedExpression { parenthesized_expression_expression = e; _ };
         _;
       } as n )
     :: xs
@@ -126,8 +125,7 @@ let rec is_in_tail_position_truncated node parents =
   | [] -> true
   | ( {
         syntax =
-          ParenthesizedExpression
-            { parenthesized_expression_expression = e; _ };
+          ParenthesizedExpression { parenthesized_expression_expression = e; _ };
         _;
       } as n )
     :: xs
@@ -442,8 +440,7 @@ let rec might_be_spilled node parent ~spill_subscript_expressions =
                     variable_expression =
                       {
                         syntax =
-                          Token
-                            ({ Token.kind = TokenKind.Variable; _ } as token);
+                          Token ({ Token.kind = TokenKind.Variable; _ } as token);
                         _;
                       };
                   };
@@ -566,6 +563,7 @@ let rewrite_short_circuit_operator
     make_assignment_expression_syntax temp_data_member_selection left
     |> make_parenthesized_expression_syntax
   in
+
   (* $_temp = right;
      or
      return right
@@ -821,18 +819,14 @@ let rewrite_suspends_in_statement node context next_label ~is_argument_to_unset
             in
             let not_missing syntax = not @@ is_missing syntax in
             let then_block =
-              consequence_extra_info.prefix
-              @ [consequence_assignment_or_return]
+              consequence_extra_info.prefix @ [consequence_assignment_or_return]
               |> List.filter ~f:not_missing
             in
             let else_block =
-              alternative_extra_info.prefix
-              @ [alternative_assignment_or_return]
+              alternative_extra_info.prefix @ [alternative_assignment_or_return]
               |> List.filter ~f:not_missing
             in
-            let if_statement =
-              make_if_else_syntax test then_block else_block
-            in
+            let if_statement = make_if_else_syntax test then_block else_block in
             let prefix = test_extra_info.prefix @ [if_statement] in
             let extra_info = no_tail_call_extra_info prefix in
             let (next_temp, new_node) =
@@ -985,9 +979,7 @@ let rewrite_suspends_in_statement node context next_label ~is_argument_to_unset
                NOTE: if left hand side is a variable it should not be spilled *)
               is_variable_expression left
             then
-              ( left_extra_info.prefix @ right_extra_info.prefix,
-                left,
-                next_temp )
+              (left_extra_info.prefix @ right_extra_info.prefix, left, next_temp)
             else
               let (next_temp, children) =
                 Syntax.children left
@@ -1107,6 +1099,7 @@ let rewrite_suspends_in_non_return_context
     ((next_label, temp_count), Rewriter.Result.Keep)
   else
     let { prefix; _ } = List.hd_exn extra_node_info_list in
+
     (* TODO: (t17335630) Generate unset call to release all intermediate data
        stored in $closure->temp_data_member*
        Result value should be stored in temporary local variable prior
@@ -1252,27 +1245,20 @@ let rewrite_suspends ?(only_tail_call_suspends = false) node =
       | WhileStatement _
       (* for constructs should have already been rewritten into
          while-true-with-if-condition constructs. *)
-      
       | ForStatement _
       (* do-while constructs should have already been rewritten into
          while-true-with-if-condition constructs. *)
-      
       | DoStatement _
       (* Suspends will be handled recursively by compound statement's children. *)
-      
       | CompoundStatement _
       (* Suspends will be handled recursively by try statements's children. *)
-      
       | TryStatement _
       | GotoStatement _
       (* Suspends are invalid in goto statements. *)
-      
       | BreakStatement _
       (* Suspends are impossible in break statements. *)
-      
       | ContinueStatement _
       (* Suspends are impossible in continue statements. *)
-      
       | _ ->
         (acc, Rewriter.Result.Keep)
   in

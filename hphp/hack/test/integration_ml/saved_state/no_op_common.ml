@@ -25,8 +25,7 @@ let foo_users =
   List.init 10 ~f:(fun n -> (foo_user_name n, foo_user_contents n))
 
 let go f =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   let disk_state = (foo_name, foo_contents) :: foo_users in
   (* No changes between saving and loading state *)

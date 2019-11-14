@@ -358,9 +358,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let is_rx name =
         name = SN.Rx.hRx || name = SN.Rx.hRxLocal || name = SN.Rx.hRxShallow
       in
-      let is_xhp_screwup name =
-        name = "Xhp" || name = ":Xhp" || name = "XHP"
-      in
+      let is_xhp_screwup name = name = "Xhp" || name = ":Xhp" || name = "XHP" in
       match h with
       | Happly ((_, name), _) when is_xhp_screwup name -> super#on_hint_ env h
       | Happly ((_, name), [(_, Hfun _)]) when is_rx name ->

@@ -116,10 +116,7 @@ let record_in_db (filename : string) (symbols : si_scan_result) : unit =
           4
           (Sqlite3.Data.INT (Int64.of_int (kind_to_int symbol.sif_kind)))
         |> check_rc db;
-        Sqlite3.bind
-          stmt
-          5
-          (bool_to_sqlite (SearchUtils.valid_for_acid symbol))
+        Sqlite3.bind stmt 5 (bool_to_sqlite (SearchUtils.valid_for_acid symbol))
         |> check_rc db;
         Sqlite3.bind
           stmt

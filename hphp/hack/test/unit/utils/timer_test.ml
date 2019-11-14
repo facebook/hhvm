@@ -101,12 +101,9 @@ let test_single_exception_in_async_callback () =
   with Failure msg -> msg = "Boom"
 
 let test_mult_exception_in_async_callback () =
-  Timer.set_timer ~interval:0.1 ~callback:(fun () -> failwith "BoomA")
-  |> ignore;
-  Timer.set_timer ~interval:0.1 ~callback:(fun () -> failwith "BoomB")
-  |> ignore;
-  Timer.set_timer ~interval:0.1 ~callback:(fun () -> failwith "BoomC")
-  |> ignore;
+  Timer.set_timer ~interval:0.1 ~callback:(fun () -> failwith "BoomA") |> ignore;
+  Timer.set_timer ~interval:0.1 ~callback:(fun () -> failwith "BoomB") |> ignore;
+  Timer.set_timer ~interval:0.1 ~callback:(fun () -> failwith "BoomC") |> ignore;
   try
     Unix.sleep 1;
     failwith "Expected the various timer callbacks to throw"

@@ -191,7 +191,7 @@ let utf_entity_maps =
   let ent_uni_338_402 =
     [
       (* 338 (0x0152) *)
-        "OElig";
+      "OElig";
       "oelig";
       "";
       "";
@@ -206,7 +206,7 @@ let utf_entity_maps =
       "";
       "";
       (* 352 (0x0160) *)
-        "Scaron";
+      "Scaron";
       "scaron";
       "";
       "";
@@ -231,7 +231,7 @@ let utf_entity_maps =
       "";
       "";
       (* 376 (0x0178) *)
-        "Yuml";
+      "Yuml";
       "";
       "";
       "";
@@ -256,7 +256,7 @@ let utf_entity_maps =
       "";
       "";
       (* 400 (0x0190) *)
-        "";
+      "";
       "";
       "fnof";
     ]
@@ -264,9 +264,9 @@ let utf_entity_maps =
   let ent_uni_spacing =
     [
       (* 710 *)
-        "circ";
+      "circ";
       (* 711 - 730 *)
-        "";
+      "";
       "";
       "";
       "";
@@ -287,14 +287,14 @@ let utf_entity_maps =
       "";
       "";
       (* 731 - 732 *)
-        "";
+      "";
       "tilde";
     ]
   in
   let ent_uni_greek =
     [
       (* 913 *)
-        "Alpha";
+      "Alpha";
       "Beta";
       "Gamma";
       "Delta";
@@ -320,7 +320,7 @@ let utf_entity_maps =
       "Psi";
       "Omega";
       (* 938 - 944 are not mapped *)
-        "";
+      "";
       "";
       "";
       "";
@@ -353,7 +353,7 @@ let utf_entity_maps =
       "psi";
       "omega";
       (* 970 - 976 are not mapped *)
-        "";
+      "";
       "";
       "";
       "";
@@ -371,7 +371,7 @@ let utf_entity_maps =
   let ent_uni_punct =
     [
       (* 8194 *)
-        "ensp";
+      "ensp";
       "emsp";
       "";
       "";
@@ -394,7 +394,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8216 *)
-        "lsquo";
+      "lsquo";
       "rsquo";
       "sbquo";
       "";
@@ -421,7 +421,7 @@ let utf_entity_maps =
       "permil";
       "";
       (* 8242 *)
-        "prime";
+      "prime";
       "Prime";
       "";
       "";
@@ -446,7 +446,7 @@ let utf_entity_maps =
   let ent_uni_8465_8501 =
     [
       (* 8465 *)
-        "image";
+      "image";
       "";
       "";
       "";
@@ -454,19 +454,19 @@ let utf_entity_maps =
       "";
       "";
       (* 8472 *)
-        "weierp";
+      "weierp";
       "";
       "";
       "";
       (* 8476 *)
-        "real";
+      "real";
       "";
       "";
       "";
       "";
       "";
       (* 8482 *)
-        "trade";
+      "trade";
       "";
       "";
       "";
@@ -486,13 +486,13 @@ let utf_entity_maps =
       "";
       "";
       (* 8501 *)
-        "alefsym";
+      "alefsym";
     ]
   in
   let ent_uni_8592_9002 =
     [
       (* 8592 (0x2190) *)
-        "larr";
+      "larr";
       "uarr";
       "rarr";
       "darr";
@@ -509,7 +509,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8608 (0x21a0) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -526,7 +526,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8624 (0x21b0) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -543,7 +543,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8640 (0x21c0) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -560,7 +560,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8656 (0x21d0) *)
-        "lArr";
+      "lArr";
       "uArr";
       "rArr";
       "dArr";
@@ -577,7 +577,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8672 (0x21e0) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -610,7 +610,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8704 (0x2200) *)
-        "forall";
+      "forall";
       "comp";
       "part";
       "exist";
@@ -627,7 +627,7 @@ let utf_entity_maps =
       "";
       "prod";
       (* 8720 (0x2210) *)
-        "coprod";
+      "coprod";
       "sum";
       "minus";
       "mnplus";
@@ -644,7 +644,7 @@ let utf_entity_maps =
       "infin";
       "ang90";
       (* 8736 (0x2220) *)
-        "ang";
+      "ang";
       "angmsd";
       "angsph";
       "mid";
@@ -661,7 +661,7 @@ let utf_entity_maps =
       "conint";
       "";
       (* 8752 (0x2230) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -678,7 +678,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8768 (0x2240) *)
-        "wreath";
+      "wreath";
       "nsim";
       "";
       "sime";
@@ -695,7 +695,7 @@ let utf_entity_maps =
       "bump";
       "bumpe";
       (* 8784 (0x2250) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -712,7 +712,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8800 (0x2260) *)
-        "ne";
+      "ne";
       "equiv";
       "";
       "";
@@ -729,7 +729,7 @@ let utf_entity_maps =
       "nlt";
       "ngt";
       (* 8816 (0x2270) *)
-        "nles";
+      "nles";
       "nges";
       "lsim";
       "gsim";
@@ -746,7 +746,7 @@ let utf_entity_maps =
       "prsim";
       "scsim";
       (* 8832 (0x2280) *)
-        "npr";
+      "npr";
       "nsc";
       "sub";
       "sup";
@@ -763,7 +763,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8848 (0x2290) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -780,7 +780,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8864 (0x22a0) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -797,7 +797,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8880 (0x22b0) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -814,7 +814,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8896 (0x22c0) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -831,7 +831,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8912 (0x22d0) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -848,7 +848,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8928 (0x22e0) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -865,7 +865,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8944 (0x22f0) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -882,7 +882,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8960 (0x2300) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -899,7 +899,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8976 (0x2310) *)
-        "";
+      "";
       "";
       "";
       "";
@@ -916,7 +916,7 @@ let utf_entity_maps =
       "";
       "";
       (* 8992 (0x2320) *)
-        "";
+      "";
       "";
       "";
       "";

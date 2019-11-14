@@ -133,8 +133,7 @@ let rec truthiness env ty =
   | Tprim Tnull -> Always_falsy
   | Tprim Tvoid -> Always_falsy
   | Tprim Tnoreturn -> Unknown
-  | Tprim (Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey) ->
-    Possibly_falsy
+  | Tprim (Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey) -> Possibly_falsy
   (* Tatom are string at runtine, but neither "0" nor "" are valid atom names *)
   | Tprim (Tatom _) -> Always_truthy
   | Tunion tyl ->
@@ -153,8 +152,7 @@ let rec truthiness env ty =
       | [] -> Unknown
       | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
     end
-  | Tshape (Closed_shape, fields) when Int.equal 0 (ShapeMap.cardinal fields)
-    ->
+  | Tshape (Closed_shape, fields) when Int.equal 0 (ShapeMap.cardinal fields) ->
     Always_falsy
   | Tshape (_, fields) ->
     let has_non_optional_fields =

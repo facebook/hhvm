@@ -101,9 +101,7 @@ let test_delayed_future () =
 let test_future_continue_with () =
   Tempfile.with_real_tempdir (fun dir_path ->
       let fn = Path.concat dir_path "test.txt" in
-      RealDisk.write_file
-        ~file:(Path.to_string fn)
-        ~contents:"my file contents";
+      RealDisk.write_file ~file:(Path.to_string fn) ~contents:"my file contents";
       let ls_proc = Process.exec "ls" [Path.to_string dir_path] in
       let future = Future.make ls_proc String.trim in
       let future = Future.continue_with future String.uppercase_ascii in
@@ -116,9 +114,7 @@ let test_future_continue_with () =
 let test_future_continue_with_future () =
   Tempfile.with_real_tempdir (fun dir_path ->
       let fn = Path.concat dir_path "test.txt" in
-      RealDisk.write_file
-        ~file:(Path.to_string fn)
-        ~contents:"my file contents";
+      RealDisk.write_file ~file:(Path.to_string fn) ~contents:"my file contents";
       let ls_proc = Process.exec "ls" [Path.to_string dir_path] in
       let future = Future.make ls_proc String.trim in
       let future =
@@ -137,9 +133,7 @@ let test_future_continue_with_future () =
 let test_future_continue_and_map_err_ok () =
   Tempfile.with_real_tempdir (fun dir_path ->
       let fn = Path.concat dir_path "test.txt" in
-      RealDisk.write_file
-        ~file:(Path.to_string fn)
-        ~contents:"my file contents";
+      RealDisk.write_file ~file:(Path.to_string fn) ~contents:"my file contents";
       let ls_proc = Process.exec "ls" [Path.to_string dir_path] in
       let future = Future.make ls_proc String.trim in
       let future =

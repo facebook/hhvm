@@ -131,12 +131,8 @@ let test_process_file_deferring () =
     will be used for look up of symbols in type checking. *)
   Disk.write_file ~file:"/fake/root/Foo.php" ~contents:foo_contents;
   Disk.write_file ~file:"/fake/root/Bar.php" ~contents:bar_contents;
-  let foo_path =
-    Relative_path.create Relative_path.Root "/fake/root/Foo.php"
-  in
-  let bar_path =
-    Relative_path.create Relative_path.Root "/fake/root/Bar.php"
-  in
+  let foo_path = Relative_path.create Relative_path.Root "/fake/root/Foo.php" in
+  let bar_path = Relative_path.create Relative_path.Root "/fake/root/Bar.php" in
   (* The parsing service needs shared memory to be set up *)
   let config =
     SharedMem.
@@ -250,8 +246,7 @@ let test_should_enable_deferring () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make "/fake/www");
 
   let opts =
-    GlobalOptions.
-      { default with tco_max_times_to_defer_type_checking = Some 2 }
+    GlobalOptions.{ default with tco_max_times_to_defer_type_checking = Some 2 }
   in
   let file =
     Typing_check_service.

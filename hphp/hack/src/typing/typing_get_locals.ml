@@ -290,9 +290,7 @@ let rec stmt (acc : Namespace_env.env * Pos.t SMap.t) st =
   | Aast.Noop ->
     acc
   | Aast.Awaitall (el, b) ->
-    let acc =
-      List.fold_left ~init:acc ~f:(fun acc (_, e2) -> expr acc e2) el
-    in
+    let acc = List.fold_left ~init:acc ~f:(fun acc (_, e2) -> expr acc e2) el in
     let acc = block acc b in
     acc
   | Aast.Let (_x, _h, e) ->

@@ -124,10 +124,7 @@ let load_saved_state
         Lwt.return_error message
     with e ->
       let stack = Printexc.get_backtrace () in
-      Hh_logger.exc
-        e
-        ~prefix:"Uncaught exception in client IDE services"
-        ~stack;
+      Hh_logger.exc e ~prefix:"Uncaught exception in client IDE services" ~stack;
       Lwt.return_error
         (Printf.sprintf "Uncaught exception in client IDE services: %s" stack)
   in
@@ -272,9 +269,7 @@ let make_context_from_file_input
         <> entry.Provider_context.source_text.Full_fidelity_source_text.text
     in
     if any_changes then
-      let (ctx, entry) =
-        Provider_utils.update_context ~ctx ~path ~file_input
-      in
+      let (ctx, entry) = Provider_utils.update_context ~ctx ~path ~file_input in
       (Initialized { initialized_state with ctx }, ctx, entry)
     else
       (Initialized initialized_state, ctx, entry)
@@ -286,9 +281,7 @@ let make_context_from_document_location
   let (file_path, file_input) =
     match document_location with
     | { ClientIdeMessage.file_contents = None; file_path; _ } ->
-      let file_input =
-        ServerCommandTypes.FileName (Path.to_string file_path)
-      in
+      let file_input = ServerCommandTypes.FileName (Path.to_string file_path) in
       (file_path, file_input)
     | { ClientIdeMessage.file_contents = Some file_contents; file_path; _ } ->
       let file_input = ServerCommandTypes.FileContent file_contents in
@@ -308,8 +301,7 @@ end
 
 let handle_message :
     type a.
-    state -> a ClientIdeMessage.t -> (state * a Handle_message_result.t) Lwt.t
-    =
+    state -> a ClientIdeMessage.t -> (state * a Handle_message_result.t) Lwt.t =
  fun state message ->
   ClientIdeMessage.(
     match (state, message) with
@@ -389,9 +381,7 @@ let handle_message :
         make_context_from_document_location initialized_state document_location
       in
       let result =
-        Provider_utils.respect_but_quarantine_unsaved_changes
-          ~ctx
-          ~f:(fun () ->
+        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
             ServerHover.go_quarantined
               ~ctx
               ~entry
@@ -402,10 +392,8 @@ let handle_message :
     (* Autocomplete *)
     | ( Initialized initialized_state,
         Completion
-          {
-            ClientIdeMessage.Completion.document_location;
-            is_manually_invoked;
-          } ) ->
+          { ClientIdeMessage.Completion.document_location; is_manually_invoked }
+      ) ->
       (* Update the state of the world with the document as it exists in the IDE *)
       let (state, _, entry) =
         make_context_from_document_location initialized_state document_location
@@ -502,9 +490,7 @@ let handle_message :
         make_context_from_document_location initialized_state document_location
       in
       let results =
-        Provider_utils.respect_but_quarantine_unsaved_changes
-          ~ctx
-          ~f:(fun () ->
+        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
             ServerHighlightRefs.go_quarantined
               ~ctx
               ~entry
@@ -519,9 +505,7 @@ let handle_message :
         make_context_from_document_location initialized_state document_location
       in
       let results =
-        Provider_utils.respect_but_quarantine_unsaved_changes
-          ~ctx
-          ~f:(fun () ->
+        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
             ServerSignatureHelp.go_quarantined
               ~env:initialized_state.server_env
               ~ctx
@@ -536,9 +520,7 @@ let handle_message :
         make_context_from_document_location initialized_state document_location
       in
       let result =
-        Provider_utils.respect_but_quarantine_unsaved_changes
-          ~ctx
-          ~f:(fun () ->
+        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
             ServerGoToDefinition.go_quarantined
               ~ctx
               ~entry
@@ -552,9 +534,7 @@ let handle_message :
         make_context_from_document_location initialized_state document_location
       in
       let result =
-        Provider_utils.respect_but_quarantine_unsaved_changes
-          ~ctx
-          ~f:(fun () ->
+        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
             ServerTypeDefinition.go_quarantined
               ~ctx
               ~entry
@@ -583,9 +563,8 @@ let handle_message :
         make_context_from_document_location initialized_state document_location
       in
       let result =
-        Provider_utils.respect_but_quarantine_unsaved_changes
-          ~ctx
-          ~f:(fun () -> ServerColorFile.go_quarantined ~ctx ~entry)
+        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+            ServerColorFile.go_quarantined ~ctx ~entry)
       in
       Lwt.return (state, Handle_message_result.Response result))
 
@@ -721,9 +700,7 @@ let serve
     Lwt.return_unit
   with e ->
     let e = Exception.wrap e in
-    log
-      "Exception occurred while handling RPC call: %s"
-      (Exception.to_string e);
+    log "Exception occurred while handling RPC call: %s" (Exception.to_string e);
     Lwt.return_unit
 
 let daemon_main () (channels : ('a, 'b) Daemon.channel_pair) : unit =

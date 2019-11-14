@@ -98,8 +98,7 @@ let string_to_int_opt ~allow_inf s =
   | None ->
     (try
        let s = float_of_string s in
-       if (not allow_inf) && (s = Float.infinity || s = Float.neg_infinity)
-       then
+       if (not allow_inf) && (s = Float.infinity || s = Float.neg_infinity) then
          None
        else
          Some (Int64.of_float s)

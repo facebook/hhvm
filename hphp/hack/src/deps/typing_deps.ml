@@ -248,7 +248,8 @@ let update_file filename info =
       funs
       ~f:
         begin
-          fun acc (_, fun_id) -> DepSet.add acc (Dep.make (Dep.Fun fun_id))
+          fun acc (_, fun_id) ->
+          DepSet.add acc (Dep.make (Dep.Fun fun_id))
         end
       ~init:DepSet.empty
   in
@@ -267,7 +268,8 @@ let update_file filename info =
       record_defs
       ~f:
         begin
-          fun acc (_, type_id) -> DepSet.add acc (Dep.make (Dep.Class type_id))
+          fun acc (_, type_id) ->
+          DepSet.add acc (Dep.make (Dep.Class type_id))
         end
       ~init:classes
   in
@@ -276,7 +278,8 @@ let update_file filename info =
       typedefs
       ~f:
         begin
-          fun acc (_, type_id) -> DepSet.add acc (Dep.make (Dep.Class type_id))
+          fun acc (_, type_id) ->
+          DepSet.add acc (Dep.make (Dep.Class type_id))
         end
       ~init:classes
   in

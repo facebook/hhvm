@@ -55,9 +55,7 @@ let go query_text type_ (sienv : SearchUtils.si_env) : SearchUtils.result =
       begin
         match class_ with
         | Some name ->
-          ClassMethodSearch.query_class_methods
-            (Utils.add_ns name)
-            method_query
+          ClassMethodSearch.query_class_methods (Utils.add_ns name) method_query
         | None ->
           (* When we can't find a class with a name similar to the given one,
            just return no search results. *)

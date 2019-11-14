@@ -384,9 +384,7 @@ let merge_hint_with_decl_hint env type_hint decl_hint =
  * A similar line of reasoning is applied for the static method create.
  *)
 let make_param_local_ty env decl_hint param =
-  let ety_env =
-    { (Phase.env_with_self env) with from_class = Some CIstatic }
-  in
+  let ety_env = { (Phase.env_with_self env) with from_class = Some CIstatic } in
   let r = Reason.Rwitness param.param_pos in
   let (env, ty) =
     match decl_hint with
@@ -556,10 +554,7 @@ let rec bind_param env (ty1, param) =
         id
         (param.param_pos, Typing_mutability_env.Borrowed)
     | Some Param_owned_mutable ->
-      Env.add_mutable_var
-        env
-        id
-        (param.param_pos, Typing_mutability_env.Mutable)
+      Env.add_mutable_var env id (param.param_pos, Typing_mutability_env.Mutable)
     | Some Param_maybe_mutable ->
       Env.add_mutable_var
         env
@@ -791,8 +786,8 @@ and fun_def tcopt f : (Tast.fun_def * Typing_env_types.global_tvenv) option =
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
 (*****************************************************************************)
-and fun_
-    ?(abstract = false) ?(disable = false) env return pos named_body f_kind =
+and fun_ ?(abstract = false) ?(disable = false) env return pos named_body f_kind
+    =
   Env.with_env env (fun env ->
       debug_last_pos := pos;
       let env = Env.set_return env return in
@@ -1337,8 +1332,8 @@ and stmt_ env pos st =
       "Unexpected nodes in AST. These nodes should have been removed in naming."
 
 and branch :
-    type res.
-    env -> (env -> env * res) -> (env -> env * res) -> env * res * res =
+    type res. env -> (env -> env * res) -> (env -> env * res) -> env * res * res
+    =
  fun env branch1 branch2 ->
   let parent_lenv = env.lenv in
   let (env, tbr1) = branch1 env in
@@ -1416,8 +1411,7 @@ and case_list parent_locals ty env switch_pos cl =
     let env = LEnv.update_next_from_conts env [C.Next; C.Fallthrough] in
     LEnv.drop_cont env C.Fallthrough
   in
-  let check_fallthrough env switch_pos case_pos block rest_of_list ~is_default
-      =
+  let check_fallthrough env switch_pos case_pos block rest_of_list ~is_default =
     if not @@ List.is_empty block then
       match rest_of_list with
       | []
@@ -2388,9 +2382,7 @@ and expr_
         (match ty with
         | (r, Tfun ft) ->
           let ft =
-            Typing_enforceability.compute_enforced_and_pessimize_fun_type
-              env
-              ft
+            Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
           in
           let def_pos = ce_pos in
           let (env, tal) =
@@ -2713,7 +2705,8 @@ and expr_
           List.map
             ~f:
               begin
-                fun { tp_name = (p, x); _ } -> (Reason.Rwitness p, Tgeneric x)
+                fun { tp_name = (p, x); _ } ->
+                (Reason.Rwitness p, Tgeneric x)
               end
             tparaml
         in
@@ -2767,9 +2760,7 @@ and expr_
         mid
         cid
     in
-    let (env, ty) =
-      Env.FakeMembers.check_static_invalid env cid (snd mid) ty
-    in
+    let (env, ty) = Env.FakeMembers.check_static_invalid env cid (snd mid) ty in
     make_result env p (Aast.Class_get (te, Aast.CGstring mid)) ty
   (* Fake member property access. For example:
    *   if ($x->f !== null) { ...$x->f... }
@@ -2843,11 +2834,7 @@ and expr_
     let te2 = Tast.make_typed_expr pos ty te2 in
     make_result env p (Aast.Obj_get (te1, te2, nullflavor)) ty
   | Yield_break ->
-    make_result
-      env
-      p
-      Aast.Yield_break
-      (Reason.Rwitness p, Typing_utils.tany env)
+    make_result env p Aast.Yield_break (Reason.Rwitness p, Typing_utils.tany env)
   | Yield af ->
     let (env, (taf, opt_key, value)) = array_field env af in
     let (env, send) = Env.fresh_type env p in
@@ -3262,8 +3249,7 @@ and expr_
         in
         let replace_non_declared_arity variadic declared_arity expected_arity =
           match variadic with
-          | FVvariadicArg { param_type_hint = (_, Some _); _ } ->
-            declared_arity
+          | FVvariadicArg { param_type_hint = (_, Some _); _ } -> declared_arity
           | FVvariadicArg _ ->
             begin
               match (declared_arity, expected_arity) with
@@ -3608,8 +3594,7 @@ and xhp_spread_attribute env c_onto valexpr =
   let (env, attr_ptys) =
     match c_onto with
     | None -> (env, [])
-    | Some class_info ->
-      Typing_xhp.get_spread_attributes env p class_info valty
+    | Some class_info -> Typing_xhp.get_spread_attributes env p class_info valty
   in
   (env, typed_attr, attr_ptys)
 
@@ -3741,9 +3726,7 @@ and anon_check_param env param =
   | None -> env
   | Some hty ->
     let (env, hty) = Phase.localize_hint_with_self env hty in
-    let paramty =
-      Env.get_local env (Local_id.make_unscoped param.param_name)
-    in
+    let paramty = Env.get_local env (Local_id.make_unscoped param.param_name) in
     let hint_pos = Reason.to_pos (fst hty) in
     let env =
       Typing_coercion.coerce_type
@@ -3839,9 +3822,7 @@ and anon_make tenv p f ft idl is_anon outer =
                   in
                   let r = Reason.Rvar_param varg.param_pos in
                   let union = Tunion (tyl @ remaining_types) in
-                  let (env, t_param) =
-                    anon_bind_variadic env varg (r, union)
-                  in
+                  let (env, t_param) = anon_bind_variadic env varg (r, union) in
                   (env, Aast.FVvariadicArg t_param)
                 in
                 let (env, t_variadic) =
@@ -4036,8 +4017,7 @@ and expand_expected env (expected : ExpectedTy.t option) =
     | _ -> (env, Some (p, ur, ty)))
 
 (* Do a subtype check of inferred type against expected type *)
-and check_expected_ty message env inferred_ty (expected : ExpectedTy.t option)
-    =
+and check_expected_ty message env inferred_ty (expected : ExpectedTy.t option) =
   match expected with
   | None -> env
   | Some ExpectedTy.{ pos = p; reason = ur; ty } ->
@@ -4635,8 +4615,7 @@ and check_class_get env p def_pos cid mid ce e =
       | _ -> ()
     end
   | CIparent when ce.ce_abstract -> Errors.parent_abstract_call mid p def_pos
-  | CI _ when ce.ce_abstract ->
-    Errors.classname_abstract_call cid mid p def_pos
+  | CI _ when ce.ce_abstract -> Errors.classname_abstract_call cid mid p def_pos
   | CI (_, classname) when ce.ce_synthesized ->
     Errors.static_synthetic_method classname mid p def_pos
   | _ -> ()
@@ -4656,8 +4635,7 @@ and call_parent_construct pos env el uel =
         | None ->
           Errors.parent_in_trait pos;
           default
-        | Some (_, parent_ty) ->
-          check_parent_construct pos env el uel parent_ty)
+        | Some (_, parent_ty) -> check_parent_construct pos env el uel parent_ty)
       | Some self_tc ->
         if not (Cls.members_fully_known self_tc) then
           ()
@@ -5067,8 +5045,8 @@ and dispatch_call
     make_call env (Tast.make_typed_expr fpos fty (Aast.Id x)) tal tel tuel ty
   (* Special function `Shapes::idx` *)
   | Class_const (((_, CI (_, shapes)) as class_id), ((_, idx) as method_id))
-    when String.equal shapes SN.Shapes.cShapes
-         && String.equal idx SN.Shapes.idx ->
+    when String.equal shapes SN.Shapes.cShapes && String.equal idx SN.Shapes.idx
+    ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.idx;
     overload_function p env class_id method_id el uel (fun env fty res el ->
         match el with
@@ -5103,12 +5081,7 @@ and dispatch_call
         match el with
         | [shape; field] ->
           let (env, _te, shape_ty) = expr env shape in
-          Typing_shapes.at
-            env
-            ~expr_pos:p
-            ~shape_pos:(fst shape)
-            shape_ty
-            field
+          Typing_shapes.at env ~expr_pos:p ~shape_pos:(fst shape) shape_ty field
         | _ -> (env, res))
   (* Special function `Shapes::keyExists` *)
   | Class_const
@@ -5160,8 +5133,7 @@ and dispatch_call
           end
         | _ -> (env, res))
   (* Special function `Shapes::toArray` *)
-  | Class_const
-      (((_, CI (_, shapes)) as class_id), ((_, to_array) as method_id))
+  | Class_const (((_, CI (_, shapes)) as class_id), ((_, to_array) as method_id))
     when String.equal shapes SN.Shapes.cShapes
          && String.equal to_array SN.Shapes.toArray ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.toArray;
@@ -5172,8 +5144,7 @@ and dispatch_call
           Typing_shapes.to_array env p shape_ty res
         | _ -> (env, res))
   (* Special function `Shapes::toDict` *)
-  | Class_const
-      (((_, CI (_, shapes)) as class_id), ((_, to_array) as method_id))
+  | Class_const (((_, CI (_, shapes)) as class_id), ((_, to_array) as method_id))
     when String.equal shapes SN.Shapes.cShapes
          && String.equal to_array SN.Shapes.toDict ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.toDict;
@@ -5950,8 +5921,8 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         (* parent is still technically the same object. *)
         make_result env [] Aast.CIparent (r, TUtils.this_of (r, snd parent)))
     | ( _,
-        ( Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _
-        | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic | Tdestructure _
+        ( Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _
+        | Ttuple _ | Tshape _ | Tvar _ | Tdynamic | Tdestructure _
         | Tanon (_, _)
         | Tunion _ | Tintersection _
         | Tabstract (_, _)
@@ -5996,11 +5967,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
       let class_ = Env.get_class env (snd c) in
       (match class_ with
       | None ->
-        make_result
-          env
-          []
-          (Aast.CI c)
-          (Reason.Rwitness p, Typing_utils.tany env)
+        make_result env [] (Aast.CI c) (Reason.Rwitness p, Typing_utils.tany env)
       | Some class_ ->
         let (env, ty, tal) =
           List.map ~f:snd tal
@@ -6081,11 +6048,7 @@ and call_construct p env class_ params el uel cid =
     }
   in
   let env =
-    Phase.check_tparams_constraints
-      ~use_pos:p
-      ~ety_env
-      env
-      (Cls.tparams class_)
+    Phase.check_tparams_constraints ~use_pos:p ~ety_env env (Cls.tparams class_)
   in
   let env =
     Phase.check_where_constraints
@@ -6515,10 +6478,7 @@ and call
             (* Variadic params cannot be inout so we can stop early *)
             let env = wfold_left2 inout_write_back env ft.ft_params el in
             let (env, ret_ty) =
-              TR.get_adjusted_return_type
-                env
-                method_call_info
-                ft.ft_ret.et_type
+              TR.get_adjusted_return_type env method_call_info ft.ft_ret.et_type
             in
             (env, (tel, tuel, ret_ty))
           | (r2, Tanon (arity, id)) ->
@@ -6834,8 +6794,7 @@ and unop p env uop te ty outer =
             if is_dynamic then
               MakeType.dynamic (Reason.Rincdec_dynamic p)
             else if is_float env ty then
-              MakeType.float
-                (Reason.Rarith_ret_float (p, fst ty, Reason.Aonly))
+              MakeType.float (Reason.Rarith_ret_float (p, fst ty, Reason.Aonly))
             else if is_int env ty then
               MakeType.int (Reason.Rarith_ret_int p)
             else
@@ -7131,8 +7090,8 @@ and condition_nullity ~nonnull (env : env) te =
           _,
           [shape; field],
           _ ) )
-    when String.equal shapes SN.Shapes.cShapes
-         && String.equal idx SN.Shapes.idx ->
+    when String.equal shapes SN.Shapes.cShapes && String.equal idx SN.Shapes.idx
+    ->
     let field = Tast.to_nast_expr field in
     let refine env shape_ty =
       if nonnull then
@@ -7160,10 +7119,8 @@ and condition_isset env = function
  * conditional statements.
  *)
 and condition
-    ?lhs_of_null_coalesce
-    env
-    tparamet
-    ((((p, ty) as pty), e) as te : Tast.expr) =
+    ?lhs_of_null_coalesce env tparamet ((((p, ty) as pty), e) as te : Tast.expr)
+    =
   let condition = condition ?lhs_of_null_coalesce in
   match e with
   | Aast.True
@@ -7199,8 +7156,8 @@ and condition
         | Tprim _ | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Tdestructure _
         | Ttuple _
         | Tanon (_, _)
-        | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tpu _
-        | Tpu_access _ ) ) ->
+        | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tpu _ | Tpu_access _
+          ) ) ->
       condition_nullity ~nonnull:tparamet env te)
   | Aast.Binop (((Ast_defs.Diff | Ast_defs.Diff2) as op), e1, e2) ->
     let op =
@@ -7369,8 +7326,7 @@ and generate_fresh_tparams env class_info reason hint_tyl =
           ~newable
       in
       ( env,
-        (Some (tp, new_name), (reason, Tabstract (AKgeneric new_name, None)))
-      )
+        (Some (tp, new_name), (reason, Tabstract (AKgeneric new_name, None))) )
   in
   let (env, tparams_and_tyl) =
     List.map2_env env hint_tyl (Cls.tparams class_info) ~f:replace_wildcard
@@ -7445,10 +7401,7 @@ and safely_refine_class_type
       reason
   in
   let tyl_fresh =
-    List.map2_exn
-      tyl_fresh
-      tparams_with_new_names
-      ~f:(fun orig_ty tparam_opt ->
+    List.map2_exn tyl_fresh tparams_with_new_names ~f:(fun orig_ty tparam_opt ->
         match tparam_opt with
         | None -> orig_ty
         | Some (_tp, name) -> SMap.find name tparam_substs)
@@ -7620,8 +7573,7 @@ and check_parent_sealed child_type parent_type =
     in
     begin
       match (Cls.kind parent_type, Cls.kind child_type) with
-      | (Ast_defs.Cinterface, Ast_defs.Cinterface) ->
-        check "interface" "extend"
+      | (Ast_defs.Cinterface, Ast_defs.Cinterface) -> check "interface" "extend"
       | (Ast_defs.Cinterface, _) -> check "interface" "implement"
       | (Ast_defs.Ctrait, _) -> check "trait" "use"
       | (Ast_defs.Cabstract, _)
@@ -7676,9 +7628,7 @@ and class_def tcopt c =
   header from the shared mem. Note that they only return a non None value if
   global inference is on *)
 and get_decl_method_header tcopt cls method_id =
-  let is_global_inference_on =
-    IM.global_inference @@ TCO.infer_missing tcopt
-  in
+  let is_global_inference_on = IM.global_inference @@ TCO.infer_missing tcopt in
   if is_global_inference_on then
     match Cls.get_method cls method_id with
     | Some { ce_type = (lazy (_, Tfun fun_type)); _ } -> Some fun_type
@@ -7687,9 +7637,7 @@ and get_decl_method_header tcopt cls method_id =
     None
 
 and get_decl_function_header tcopt function_id =
-  let is_global_inference_on =
-    IM.global_inference @@ TCO.infer_missing tcopt
-  in
+  let is_global_inference_on = IM.global_inference @@ TCO.infer_missing tcopt in
   if is_global_inference_on then
     match Decl_provider.get_fun function_id with
     | Some { fe_type = (_, Tfun fun_type); _ } -> Some fun_type
@@ -7862,9 +7810,7 @@ and class_def_ env c tc =
   let (typed_methods, typed_methods_global_tvenv) =
     List.filter_map methods (method_def env tc) |> List.unzip
   in
-  let (env, typed_typeconsts) =
-    List.map_env env c.c_typeconsts typeconst_def
-  in
+  let (env, typed_typeconsts) = List.map_env env c.c_typeconsts typeconst_def in
   let (env, consts) = List.map_env env c.c_consts class_const_def in
   let (typed_consts, const_types) = List.unzip consts in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
@@ -8010,9 +7956,7 @@ and typeconst_def
       c_tconst_span;
       c_tconst_doc_comment;
     } =
-  let (env, cstr) =
-    opt Phase.localize_hint_with_self env c_tconst_constraint
-  in
+  let (env, cstr) = opt Phase.localize_hint_with_self env c_tconst_constraint in
   let (env, ty) = opt Phase.localize_hint_with_self env hint in
   let check t c =
     Type.sub_type pos Reason.URtypeconst_cstr env t c Errors.unify_error
@@ -8304,8 +8248,8 @@ and supertype_redeclared_method tc env m =
   let (_, trait_method) = m.mt_method in
   Option.(
     let trait_member_opt =
-      Env.get_class env trait
-      >>= (fun trait_tc -> get_method true env trait_tc trait_method)
+      Env.get_class env trait >>= fun trait_tc ->
+      get_method true env trait_tc trait_method
     in
     map2 trait_member_opt class_member_opt ~f:(fun trait_member class_member ->
         match (trait_member.ce_type, class_member.ce_type) with

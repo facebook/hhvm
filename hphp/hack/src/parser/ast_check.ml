@@ -27,13 +27,12 @@ let rec check_lvalue errorf = function
     errorf pos "Tuple cannot be used as an lvalue. Maybe you meant list?"
   | (_, List el) -> List.iter (check_lvalue errorf) el
   | ( pos,
-      ( Array _ | Darray _ | Varray _ | Shape _ | Collection _ | Record _
-      | Null | True | False | Id _ | Clone _ | Class_const _ | Call _ | Int _
-      | Float _ | PrefixedString _ | String _ | String2 _ | Yield _
-      | Yield_break | Yield_from _ | Await _ | Suspend _ | Expr_list _ | Cast _
-      | Unop _ | Binop _ | Eif _ | New _ | Efun _ | Lfun _ | Xml _ | Import _
-      | Pipe _ | Callconv _ | Is _ | As _ | ParenthesizedExpr _
-      | PU_identifier _ ) ) ->
+      ( Array _ | Darray _ | Varray _ | Shape _ | Collection _ | Record _ | Null
+      | True | False | Id _ | Clone _ | Class_const _ | Call _ | Int _ | Float _
+      | PrefixedString _ | String _ | String2 _ | Yield _ | Yield_break
+      | Yield_from _ | Await _ | Suspend _ | Expr_list _ | Cast _ | Unop _
+      | Binop _ | Eif _ | New _ | Efun _ | Lfun _ | Xml _ | Import _ | Pipe _
+      | Callconv _ | Is _ | As _ | ParenthesizedExpr _ | PU_identifier _ ) ) ->
     errorf pos "Invalid lvalue"
 
 (** Syntax errors detected via a pass over AST (see: check_program)
@@ -151,9 +150,7 @@ let check_program program =
           fd
 
       method! on_expr ctx e =
-        this#plus
-          (super#on_expr ctx e)
-          (this#reduce (fun r -> r#at_expr ctx e))
+        this#plus (super#on_expr ctx e) (this#reduce (fun r -> r#at_expr ctx e))
 
       method! on_Lvar ctx lvar =
         this#plus

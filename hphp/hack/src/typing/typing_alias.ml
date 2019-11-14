@@ -117,9 +117,11 @@ end = struct
       method on_assign acc (_, e1) e2 =
         Option.value_map
           (local_to_string e1)
-          ~f:begin
-               fun s -> Dep.expr s acc e2
-             end
+          ~f:
+            begin
+              fun s ->
+              Dep.expr s acc e2
+            end
           ~default:acc
 
       method! on_efun acc _ _ = acc

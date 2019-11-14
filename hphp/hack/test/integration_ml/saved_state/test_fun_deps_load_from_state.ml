@@ -23,8 +23,7 @@ class Test {
   )
 
 let test () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   let disk_state = [file] in
   Test.save_state disk_state temp_dir;
@@ -59,10 +58,7 @@ let test () =
   in
   let h = ServerFunDepsBatch.handlers in
   let (pos_infos, errors) =
-    ServerRxApiShared.prepare_pos_infos
-      h
-      [("/" ^ fst file, 3, 19)]
-      naming_table
+    ServerRxApiShared.prepare_pos_infos h [("/" ^ fst file, 3, 19)] naming_table
   in
   if errors <> [] then
     Test.fail ("Unexpected errors:" ^ String.concat "," errors);

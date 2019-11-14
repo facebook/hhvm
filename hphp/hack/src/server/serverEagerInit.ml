@@ -50,9 +50,8 @@ let type_decl
   let env = { env with errorl = Errors.merge errorl env.errorl } in
   (env, t)
 
-let init
-    (genv : ServerEnv.genv) (lazy_level : lazy_level) (env : ServerEnv.env) :
-    ServerEnv.env * float =
+let init (genv : ServerEnv.genv) (lazy_level : lazy_level) (env : ServerEnv.env)
+    : ServerEnv.env * float =
   (* We don't support a saved state for eager init. *)
   let (get_next, t) = indexing genv in
   let lazy_parse = lazy_level = Parse in

@@ -14,8 +14,8 @@ type t = string SMap.t
 let file_path_relative_to_repo_root =
   Config_file_common.file_path_relative_to_repo_root
 
-let parse_hhconfig (fn : string) :
-    (string * string SMap.t, string) Lwt_result.t =
+let parse_hhconfig (fn : string) : (string * string SMap.t, string) Lwt_result.t
+    =
   let%lwt contents = Lwt_utils.read_all fn in
   match contents with
   | Ok contents ->

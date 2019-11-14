@@ -78,9 +78,11 @@ and instantiate_ subst x =
     let outer_subst = subst in
     let subst =
       List.fold_left
-        ~f:begin
-             fun subst t -> SMap.remove (snd t.tp_name) subst
-           end
+        ~f:
+          begin
+            fun subst t ->
+            SMap.remove (snd t.tp_name) subst
+          end
         ~init:subst
         tparams
     in

@@ -198,10 +198,7 @@ let rec read_and_wait_pid ~(retries : int) (process : Process_types.t) :
         (* Consume output to clear the buffers which might
          * be blocking the process from continuing. *)
         let () =
-          maybe_consume
-            ~max_time:(sleep_seconds_per_retry /. 2.0)
-            stdout_fd
-            acc
+          maybe_consume ~max_time:(sleep_seconds_per_retry /. 2.0) stdout_fd acc
         in
         let () =
           maybe_consume
@@ -226,10 +223,7 @@ let rec read_and_wait_pid ~(retries : int) (process : Process_types.t) :
           let () = maybe_consume stdout_fd acc in
           let () = maybe_consume stderr_fd acc_err in
           let () = lifecycle := Lifecycle_exited status in
-          make_result
-            status
-            (Stack.merge_bytes acc)
-            (Stack.merge_bytes acc_err)))
+          make_result status (Stack.merge_bytes acc) (Stack.merge_bytes acc_err)))
 
 let read_and_wait_pid ~(timeout : int) (process : Process_types.t) :
     Process_types.process_result =

@@ -244,9 +244,11 @@ let rec get_pos (error : error) = fst (List.hd_exn (snd error))
 
 and sort err =
   List.sort
-    ~compare:begin
-               fun x y -> Pos.compare (get_pos x) (get_pos y)
-             end
+    ~compare:
+      begin
+        fun x y ->
+        Pos.compare (get_pos x) (get_pos y)
+      end
     err
   |> List.remove_consecutive_duplicates ~equal:( = )
 
@@ -260,8 +262,8 @@ let get_current_file_t file_t_map =
 
 let get_current_list file_t_map =
   let current_phase = snd !current_context in
-  get_current_file_t file_t_map
-  |> (fun x -> PhaseMap.find_opt x current_phase |> Option.value ~default:[])
+  get_current_file_t file_t_map |> fun x ->
+  PhaseMap.find_opt x current_phase |> Option.value ~default:[]
 
 let set_current_list file_t_map new_list =
   let (current_file, current_phase) = !current_context in
@@ -410,8 +412,8 @@ let format_message (msg : string) (pos : Pos.absolute) ~is_first ~col_width :
 (** Sort messages such that messages in the same file are together.
     Do not reorder the files or messages within a file.
  *)
-let group_by_file (msgs : Pos.absolute message list) :
-    Pos.absolute message list =
+let group_by_file (msgs : Pos.absolute message list) : Pos.absolute message list
+    =
   let rec build_map msgs grouped filenames =
     match msgs with
     | msg :: msgs ->
@@ -433,8 +435,8 @@ let group_by_file (msgs : Pos.absolute message list) :
 
 (* Work out the column width needed for each file. Files with many
    lines need a wider column due to the higher line numbers. *)
-let col_widths (msgs : Pos.absolute message list) :
-    int Core_kernel.String.Map.t =
+let col_widths (msgs : Pos.absolute message list) : int Core_kernel.String.Map.t
+    =
   (* Find the longest line number for every file in msgs. *)
   let longest_lines =
     List.fold msgs ~init:String.Map.empty ~f:(fun acc msg ->
@@ -666,8 +668,7 @@ let ignored_fixme_codes = ref default_ignored_fixme_codes
 
 let set_allow_errors_in_default_path x = allow_errors_in_default_path := x
 
-let is_ignored_code code =
-  ISet.mem code !ignored_fixme_codes || code / 1000 = 5
+let is_ignored_code code = ISet.mem code !ignored_fixme_codes || code / 1000 = 5
 
 let is_ignored_fixme code = is_ignored_code code
 
@@ -834,9 +835,11 @@ and incremental_update :
 and incremental_update_set ~old ~new_ ~rechecked phase =
   let fold init g =
     Relative_path.Set.fold
-      ~f:begin
-           fun path acc -> g path acc
-         end
+      ~f:
+        begin
+          fun path acc ->
+          g path acc
+        end
       ~init
       rechecked
   in
@@ -846,9 +849,11 @@ and incremental_update_set ~old ~new_ ~rechecked phase =
 and incremental_update_map ~old ~new_ ~rechecked phase =
   let fold init g =
     Relative_path.Map.fold
-      ~f:begin
-           fun path _ acc -> g path acc
-         end
+      ~f:
+        begin
+          fun path _ acc ->
+          g path acc
+        end
       ~init
       rechecked
   in
@@ -895,10 +900,7 @@ let fold_errors_in ?phase err ~source ~init ~f =
            List.fold_right errors ~init:acc ~f)
 
 let get_failed_files err phase =
-  files_t_fold
-    (fst err)
-    ~init:Relative_path.Set.empty
-    ~f:(fun source p _ acc ->
+  files_t_fold (fst err) ~init:Relative_path.Set.empty ~f:(fun source p _ acc ->
       if phase <> p then
         acc
       else
@@ -910,8 +912,7 @@ let get_failed_files err phase =
 
 let internal_error pos msg = add 0 pos ("Internal error: " ^ msg)
 
-let unimplemented_feature pos msg =
-  add 0 pos ("Feature not implemented: " ^ msg)
+let unimplemented_feature pos msg = add 0 pos ("Feature not implemented: " ^ msg)
 
 let experimental_feature pos msg =
   add 0 pos ("Cannot use experimental feature: " ^ msg)
@@ -1113,10 +1114,7 @@ let unexpected_typedef pos def_pos =
     [(pos, "Unexpected typedef"); (def_pos, "Definition is here")]
 
 let fd_name_already_bound pos =
-  add
-    (Naming.err_code Naming.FdNameAlreadyBound)
-    pos
-    "Field name already bound"
+  add (Naming.err_code Naming.FdNameAlreadyBound) pos "Field name already bound"
 
 let repeated_record_field name pos prev_pos =
   let msg = Printf.sprintf "Duplicate record field `%s`" name in
@@ -1124,8 +1122,7 @@ let repeated_record_field name pos prev_pos =
     (NastCheck.err_code NastCheck.RepeatedRecordFieldName)
     [(pos, msg); (prev_pos, "Previous field is here")]
 
-let unexpected_record_field_name ~field_name ~field_pos ~record_name ~decl_pos
-    =
+let unexpected_record_field_name ~field_name ~field_pos ~record_name ~decl_pos =
   let msg =
     Printf.sprintf
       "Record `%s` has no field `%s`"
@@ -1377,8 +1374,7 @@ let uninstantiable_class usage_pos decl_pos name reason_msgl =
   let name = strip_ns name in
   let msgl =
     [
-      (usage_pos, name ^ " is uninstantiable");
-      (decl_pos, "Declaration is here");
+      (usage_pos, name ^ " is uninstantiable"); (decl_pos, "Declaration is here");
     ]
   in
   let msgl =
@@ -1461,8 +1457,7 @@ let goto_label_already_defined
   add_list
     (Naming.err_code Naming.GotoLabelAlreadyDefined)
     [
-      ( redeclaration_pos,
-        "Cannot redeclare the goto label '" ^ label_name ^ "'" );
+      (redeclaration_pos, "Cannot redeclare the goto label '" ^ label_name ^ "'");
       (original_delcaration_pos, "Declaration is here");
     ]
 
@@ -1529,10 +1524,7 @@ let wildcard_disallowed pos =
     "Wildcard typehints are not allowed in this position"
 
 let reference_in_strict_mode pos =
-  add
-    (Naming.err_code Naming.ReferenceInStrictMode)
-    pos
-    "Don't use references!"
+  add (Naming.err_code Naming.ReferenceInStrictMode) pos "Don't use references!"
 
 let misplaced_mutability_hint pos =
   add
@@ -1696,11 +1688,8 @@ let type_arity pos name nargs c_pos =
     (Typing.err_code Typing.TypeArityMismatch)
     [
       ( pos,
-        "The type "
-        ^ strip_ns name
-        ^ " expects "
-        ^ nargs
-        ^ " type parameter(s)" );
+        "The type " ^ strip_ns name ^ " expects " ^ nargs ^ " type parameter(s)"
+      );
       (c_pos, "Definition is here");
     ]
 
@@ -2233,8 +2222,7 @@ let invalid_shape_field_type pos ty_pos ty trail =
   add_with_trail
     (Typing.err_code Typing.InvalidShapeFieldType)
     [
-      (pos, "A shape field name must be an int or string");
-      (ty_pos, "Not " ^ ty);
+      (pos, "A shape field name must be an int or string"); (ty_pos, "Not " ^ ty);
     ]
     trail
 
@@ -2286,8 +2274,7 @@ let shape_fields_unknown pos1 pos2 =
         "This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration."
       );
       ( pos2,
-        "It is incompatible with a shape that does not allow unknown fields."
-      );
+        "It is incompatible with a shape that does not allow unknown fields." );
     ]
 
 let invalid_shape_remove_key p =
@@ -2828,8 +2815,7 @@ let unknown_type description pos r =
 
 let not_found_hint = function
   | `no_hint -> ""
-  | `closest (_pos, v) ->
-    Printf.sprintf " (did you mean static method '%s'?)" v
+  | `closest (_pos, v) -> Printf.sprintf " (did you mean static method '%s'?)" v
   | `did_you_mean (_pos, v) -> Printf.sprintf " (did you mean '%s'?)" v
 
 let snot_found_hint = function
@@ -3108,10 +3094,7 @@ let cyclic_typedef p =
 let type_arity_mismatch pos1 n1 pos2 n2 =
   add_list
     (Typing.err_code Typing.TypeArityMismatch)
-    [
-      (pos1, "This type has " ^ n1 ^ " arguments");
-      (pos2, "This one has " ^ n2);
-    ]
+    [(pos1, "This type has " ^ n1 ^ " arguments"); (pos2, "This one has " ^ n2)]
 
 let this_final id pos2 (error : error) =
   let n = strip_ns (snd id) in
@@ -3443,14 +3426,13 @@ let invalid_reified_argument (def_pos, def_name) hint_pos arg_pos arg_kind =
     [
       (hint_pos, "Invalid reified hint");
       ( arg_pos,
-        "This is "
-        ^ arg_kind
-        ^ ", it cannot be used as a reified type argument" );
+        "This is " ^ arg_kind ^ ", it cannot be used as a reified type argument"
+      );
       (def_pos, def_name ^ " is reified");
     ]
 
-let invalid_reified_argument_reifiable
-    (def_pos, def_name) arg_pos ty_pos ty_msg =
+let invalid_reified_argument_reifiable (def_pos, def_name) arg_pos ty_pos ty_msg
+    =
   add_list
     (Typing.err_code Typing.InvalidReifiedArgument)
     [
@@ -3760,8 +3742,7 @@ let static_property_type_generic_param ~class_pos ~var_type_pos ~generic_pos =
     (Typing.err_code Typing.ClassVarTypeGenericParam)
     [
       ( generic_pos,
-        "A generic parameter cannot be used in the type of a static property"
-      );
+        "A generic parameter cannot be used in the type of a static property" );
       ( var_type_pos,
         "This is where the type of the static property was declared" );
       (class_pos, "This is the class containing the static property");
@@ -3957,8 +3938,8 @@ let self_const_parent_not pos =
     pos
     "A __Const class may only extend other __Const classes"
 
-let overriding_prop_const_mismatch
-    parent_pos parent_const child_pos child_const =
+let overriding_prop_const_mismatch parent_pos parent_const child_pos child_const
+    =
   let m1 = "This property is __Const" in
   let m2 = "This property is not __Const" in
   add_list
@@ -4059,8 +4040,7 @@ let invalid_is_as_expression_hint op hint_pos ty_pos ty_str =
       (ty_pos, "The \"" ^ op ^ "\" operator cannot be used with " ^ ty_str);
     ]
 
-let invalid_enforceable_type kind_str (tp_pos, tp_name) targ_pos ty_pos ty_str
-    =
+let invalid_enforceable_type kind_str (tp_pos, tp_name) targ_pos ty_pos ty_str =
   add_list
     (Typing.err_code Typing.InvalidEnforceableTypeArgument)
     [
@@ -4106,10 +4086,7 @@ let invalid_newable_type_param_constraints
     ^ partial
     ^ " are valid newable classes"
   in
-  add
-    (Typing.err_code Typing.InvalidNewableTypeParamConstraints)
-    tparam_pos
-    msg
+  add (Typing.err_code Typing.InvalidNewableTypeParamConstraints) tparam_pos msg
 
 let override_final ~parent ~child =
   add_list
@@ -4207,9 +4184,7 @@ let xhp_required pos why_xhp ty_reason_msg =
 
 let illegal_xhp_child pos ty_reason_msg =
   let msg = "XHP children must be compatible with XHPChild" in
-  add_list
-    (Typing.err_code Typing.IllegalXhpChild)
-    ((pos, msg) :: ty_reason_msg)
+  add_list (Typing.err_code Typing.IllegalXhpChild) ((pos, msg) :: ty_reason_msg)
 
 let missing_xhp_required_attr pos attr ty_reason_msg =
   let msg = "Required attribute " ^ attr ^ " is missing." in
@@ -4371,10 +4346,7 @@ let assign_during_case p =
     "Don't assign to variables inside of case labels"
 
 let cyclic_enum_constraint pos =
-  add
-    (Typing.err_code Typing.CyclicEnumConstraint)
-    pos
-    "Cyclic enum constraint"
+  add (Typing.err_code Typing.CyclicEnumConstraint) pos "Cyclic enum constraint"
 
 let invalid_classname p =
   add (Typing.err_code Typing.InvalidClassname) p "Not a valid class name"
@@ -4484,8 +4456,7 @@ let nonreactive_function_call pos decl_pos callee_reactivity cause_pos_opt =
             );
           ]) )
 
-let nonreactive_call_from_shallow pos decl_pos callee_reactivity cause_pos_opt
-    =
+let nonreactive_call_from_shallow pos decl_pos callee_reactivity cause_pos_opt =
   add_list
     (Typing.err_code Typing.NonreactiveCallFromShallow)
     ( [
@@ -4838,8 +4809,8 @@ let to_json (error : Pos.absolute error_) =
   in
   Hh_json.JSON_Object [("message", Hh_json.JSON_Array elts)]
 
-let convert_errors_to_string ?(include_filename = false) (errors : error list)
-    : string list =
+let convert_errors_to_string ?(include_filename = false) (errors : error list) :
+    string list =
   List.fold_right
     ~init:[]
     ~f:(fun err acc_out ->

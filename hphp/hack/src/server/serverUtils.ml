@@ -99,9 +99,7 @@ let exit_on_exception (exn : exn) ~(stack : Utils.callstack) =
     Exit_status.(exit Watchman_failed)
   | MultiThreadedCall.Coalesced_failures failures as e ->
     Hh_logger.exc ~stack e;
-    let failure_msg =
-      MultiThreadedCall.coalesced_failures_to_string failures
-    in
+    let failure_msg = MultiThreadedCall.coalesced_failures_to_string failures in
     Hh_logger.log "%s" failure_msg;
     let is_oom_failure f =
       match f with

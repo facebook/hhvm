@@ -267,9 +267,7 @@ let add_generic env st var =
       else
         (Ast_scope.Scope.get_class_tparams env.scope).c_tparam_list
     in
-    List.find_mapi
-      tparams
-      ~f:(fun i { tp_name = (_, id); tp_reified = b; _ } ->
+    List.find_mapi tparams ~f:(fun i { tp_name = (_, id); tp_reified = b; _ } ->
         if b <> Erased && id = var then
           Some i
         else
@@ -301,10 +299,7 @@ let get_vars scope ~is_closure_body params body =
 let wrap_block b = [Stmt (Pos.none, Block b)]
 
 let get_parameter_names (params : fun_param list) =
-  List.fold_left
-    ~init:SSet.empty
-    ~f:(fun s p -> SSet.add p.param_name s)
-    params
+  List.fold_left ~init:SSet.empty ~f:(fun s p -> SSet.add p.param_name s) params
 
 let env_with_function_like_ env e ~is_closure_body params pos body =
   let scope = e :: env.scope in
@@ -428,8 +423,7 @@ let set_namespace st ns = { st with namespace = ns }
 
 let reset_function_counts st = { st with closure_cnt_per_fun = 0 }
 
-let record_function_state key { has_finally; has_goto; labels } rx_of_scope st
-    =
+let record_function_state key { has_finally; has_goto; labels } rx_of_scope st =
   if
     (not has_finally)
     && (not has_goto)
@@ -652,8 +646,7 @@ let convert_id (env : env) p ((pid, str) as id) =
       match env.scope with
       | ScopeItem.Function fd :: _ -> return (strip_id fd.f_name)
       | ScopeItem.Method md :: _ -> return (strip_id md.m_name)
-      | (ScopeItem.Lambda _ | ScopeItem.LongLambda _) :: _ ->
-        return "{closure}"
+      | (ScopeItem.Lambda _ | ScopeItem.LongLambda _) :: _ -> return "{closure}"
       | _ -> return ""
     end
   | _ when str = SN.PseudoConsts.g__LINE__ ->
@@ -780,8 +773,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
           {
             fb_ast =
               [
-                (p, Expr assert_invariant);
-                (p, Return (Some meth_caller_handle));
+                (p, Expr assert_invariant); (p, Return (Some meth_caller_handle));
               ];
             fb_annotation = Tast.NoUnsafeBlocks;
           };
@@ -1314,7 +1306,7 @@ and convert_lambda env st p fd use_vars_opt =
     (* we already know that $this is captured *)
     captured_this
     || (* lambda that was just processed was converted into non-static one *)
-       not is_static
+    not is_static
   in
   (* Restore capture and defined set *)
   let st =
@@ -1474,8 +1466,8 @@ and convert_block ?(scope = true) env st stmts =
   else
     List.map_env st stmts (convert_stmt env)
 
-and convert_function_like_body (env : env) (old_st : state) (body : func_body)
-    : state * func_body * 'c =
+and convert_function_like_body (env : env) (old_st : state) (body : func_body) :
+    state * func_body * 'c =
   (* reset has_finally/goto_state values on the state *)
   let st =
     if old_st.current_function_state = empty_per_function_state then
@@ -1486,9 +1478,7 @@ and convert_function_like_body (env : env) (old_st : state) (body : func_body)
   let (st, r) = convert_block env st body.fb_ast in
   let function_state = st.current_function_state in
   (* restore old has_finally/goto_state values *)
-  let st =
-    { st with current_function_state = old_st.current_function_state }
-  in
+  let st = { st with current_function_state = old_st.current_function_state } in
   (st, { body with fb_ast = r }, function_state)
 
 and convert_catch env st (ty, (p, catch_var), b) =
@@ -1756,9 +1746,8 @@ and convert_defs env class_count record_count typedef_count st dl =
       convert_defs env class_count (record_count + 1) typedef_count st dl
     in
     ( st,
-      (TopLevel, RecordDef { rd with rd_fields })
-      :: (TopLevel, stub_stmt)
-      :: dl )
+      (TopLevel, RecordDef { rd with rd_fields }) :: (TopLevel, stub_stmt) :: dl
+    )
   | Typedef td :: dl ->
     let (st, dl) =
       convert_defs env class_count record_count (typedef_count + 1) st dl

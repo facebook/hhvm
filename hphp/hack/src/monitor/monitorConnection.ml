@@ -13,9 +13,7 @@ open ServerMonitorUtils
 let server_exists lock_file = not (Lock.check lock_file)
 
 let from_channel_without_buffering ?timeout tic =
-  Marshal_tools.from_fd_with_preamble
-    ?timeout
-    (Timeout.descr_of_in_channel tic)
+  Marshal_tools.from_fd_with_preamble ?timeout (Timeout.descr_of_in_channel tic)
 
 let wait_on_server_restart ic =
   try
@@ -213,16 +211,14 @@ let connect_to_monitor ~timeout config =
       ~do_:
         begin
           fun timeout ->
-          establish_connection ~timeout config
-          >>= (fun (ic, oc) -> get_cstate config (ic, oc))
+          establish_connection ~timeout config >>= fun (ic, oc) ->
+          get_cstate config (ic, oc)
         end)
 
 let connect_and_shut_down config =
   Result.(
-    connect_to_monitor ~timeout:3 config
-    >>= fun (ic, oc, cstate) ->
-    verify_cstate ic cstate
-    >>= fun () ->
+    connect_to_monitor ~timeout:3 config >>= fun (ic, oc, cstate) ->
+    verify_cstate ic cstate >>= fun () ->
     send_shutdown_rpc oc;
     Timeout.with_timeout
       ~timeout:3
@@ -340,10 +336,8 @@ let connect_once ~timeout config handoff_options =
   (***************************************************************************)
   Result.(
     let start_t = Unix.gettimeofday () in
-    connect_to_monitor ~timeout config
-    >>= fun (ic, oc, cstate) ->
-    verify_cstate ic cstate
-    >>= fun () ->
+    connect_to_monitor ~timeout config >>= fun (ic, oc, cstate) ->
+    verify_cstate ic cstate >>= fun () ->
     send_server_handoff_rpc handoff_options oc;
     let elapsed_t = int_of_float (Unix.gettimeofday () -. start_t) in
     let timeout = max (timeout - elapsed_t) 1 in
@@ -351,10 +345,8 @@ let connect_once ~timeout config handoff_options =
 
 let connect_to_monitor_and_get_server_progress ~timeout config =
   Result.(
-    connect_to_monitor ~timeout config
-    >>= fun (ic, oc, cstate) ->
-    verify_cstate ic cstate
-    >>= fun () ->
+    connect_to_monitor ~timeout config >>= fun (ic, oc, cstate) ->
+    verify_cstate ic cstate >>= fun () ->
     (* This is similar to connect_once up to this point, where instead of
      * being handed off to server we just get our answer from monitor *)
     send_server_progress_rpc oc;

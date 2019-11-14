@@ -103,9 +103,7 @@ let ignore_unix_epipe f x =
  * what version of the Hack server is running.
  *)
 let is_enabled env =
-  let enabled_file =
-    Path.concat env.root ".hh_enable_watchman_event_watcher"
-  in
+  let enabled_file = Path.concat env.root ".hh_enable_watchman_event_watcher" in
   Sys.file_exists (Path.to_string enabled_file)
 
 let send_to_fd env v fd =
@@ -169,9 +167,8 @@ let process_changes changes env =
       let ( >>= ) = Option.( >>= ) in
       let ( >>| ) = Option.( >>| ) in
       ignore
-        ( json
-        >>= Watchman_utils.rev_in_state_change
-        >>| (fun hg_rev -> Hh_logger.log "Revision: %s" hg_rev) );
+        ( json >>= Watchman_utils.rev_in_state_change >>| fun hg_rev ->
+          Hh_logger.log "Revision: %s" hg_rev );
       { env with update_state = Entering }
     | Watchman_pushed (State_enter (name, _json)) when name = "hg.transaction"
       ->
@@ -184,9 +181,8 @@ let process_changes changes env =
       let ( >>= ) = Option.( >>= ) in
       let ( >>| ) = Option.( >>| ) in
       ignore
-        ( json
-        >>= Watchman_utils.rev_in_state_change
-        >>| (fun hg_rev -> Hh_logger.log "Revision: %s" hg_rev) );
+        ( json >>= Watchman_utils.rev_in_state_change >>| fun hg_rev ->
+          Hh_logger.log "Revision: %s" hg_rev );
       let env = { env with update_state = Left } in
       let () = notify_waiting_clients env in
       env

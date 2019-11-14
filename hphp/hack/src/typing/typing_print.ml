@@ -76,8 +76,7 @@ module Full = struct
     Span
       [
         text left_delimiter;
-        WithRule
-          (Rule.Parental, Concat [list_sep sep f l; text right_delimiter]);
+        WithRule (Rule.Parental, Concat [list_sep sep f l; text right_delimiter]);
       ]
 
   let list : type c. _ -> (c -> Doc.t) -> c list -> _ -> _ =
@@ -85,9 +84,7 @@ module Full = struct
 
   let shape_map fdm f_field =
     let compare (k1, _) (k2, _) =
-      String.compare
-        (Env.get_shape_field_name k1)
-        (Env.get_shape_field_name k2)
+      String.compare (Env.get_shape_field_name k1) (Env.get_shape_field_name k2)
     in
     let fields = List.sort ~compare (Nast.ShapeMap.bindings fdm) in
     List.map fields f_field
@@ -119,12 +116,12 @@ module Full = struct
       [
         (* only print tparams when they have been instantiated with targs
          * so that they correctly express reified parameterization *)
-          (match ft.ft_tparams with
-          | ([], _)
-          | (_, FTKtparams) ->
-            Nothing
-          | (l, FTKinstantiated_targs) ->
-            list "<" (tparam ~ty to_doc st env) l ">");
+        (match ft.ft_tparams with
+        | ([], _)
+        | (_, FTKtparams) ->
+          Nothing
+        | (l, FTKinstantiated_targs) ->
+          list "<" (tparam ~ty to_doc st env) l ">");
         list "(" id params "):";
         Space;
         possibly_enforced_ty ~ty to_doc st env ft.ft_ret;
@@ -588,9 +585,7 @@ module Full = struct
 
   let constraints_for_type to_doc env typ =
     let tparams = SSet.elements (Env.get_tparams env typ) in
-    let constraints =
-      List.concat_map tparams (get_constraints_on_tparam env)
-    in
+    let constraints = List.concat_map tparams (get_constraints_on_tparam env) in
     if List.is_empty constraints then
       None
     else
@@ -810,10 +805,7 @@ module ErrorString = struct
       "the expression dependent type " ^ s
     | (AKgeneric _, _) -> "a value of generic type " ^ x
     | (AKdependent (DTcls c), Some ty) ->
-      to_string env ty
-      ^ " (known to be exactly the class '"
-      ^ strip_ns c
-      ^ "')"
+      to_string env ty ^ " (known to be exactly the class '" ^ strip_ns c ^ "')"
     | (AKdependent (DTthis | DTexpr _), _) ->
       "the expression dependent type " ^ x
     | (AKdependent _, _) ->
@@ -825,8 +817,7 @@ module ErrorString = struct
 
   and union env l =
     let (null, nonnull) =
-      List.partition_tf l (fun ty ->
-          equal_locl_ty_ (snd ty) (Tprim Nast.Tnull))
+      List.partition_tf l (fun ty -> equal_locl_ty_ (snd ty) (Tprim Nast.Tnull))
     in
     let l = List.map nonnull (to_string env) in
     let s = List.fold_right l ~f:SSet.add ~init:SSet.empty in
@@ -958,8 +949,7 @@ module Json = struct
         | Toption (_, Tnonnull) -> obj @@ kind "mixed"
         | Toption ty -> obj @@ kind "nullable" @ args [ty]
         | Tprim tp -> obj @@ kind "primitive" @ name (prim tp)
-        | Tclass ((_, cid), _, tys) ->
-          obj @@ kind "class" @ name cid @ args tys
+        | Tclass ((_, cid), _, tys) -> obj @@ kind "class" @ name cid @ args tys
         | Tobject -> obj @@ kind "object"
         | Tshape (shape_kind, fl) ->
           let fields_known =
@@ -1011,10 +1001,7 @@ module Json = struct
           @ name (snd enum)
           @ [("pukind", pukind)]
         | Tpu_access (base, access) ->
-          obj
-          @@ kind "pocket universe access"
-          @ args [base]
-          @ name (snd access)))
+          obj @@ kind "pocket universe access" @ args [base] @ name (snd access)))
 
   type deserialized_result = (locl_ty, deserialization_error) result
 
@@ -1042,8 +1029,7 @@ module Json = struct
          (message ^ Hh_json.Access.keytrace_to_string keytrace))
 
   let not_supported ~message ~keytrace =
-    Error
-      (Not_supported (message ^ Hh_json.Access.keytrace_to_string keytrace))
+    Error (Not_supported (message ^ Hh_json.Access.keytrace_to_string keytrace))
 
   let wrong_phase ~message ~keytrace =
     Error (Wrong_phase (message ^ Hh_json.Access.keytrace_to_string keytrace))
@@ -1054,8 +1040,7 @@ module Json = struct
     let rec aux (json : Hh_json.json) ~(keytrace : Hh_json.Access.keytrace) :
         deserialized_result =
       Result.Monad_infix.(
-        get_string "kind" (json, keytrace)
-        >>= fun (kind, kind_keytrace) ->
+        get_string "kind" (json, keytrace) >>= fun (kind, kind_keytrace) ->
         match kind with
         | "this" ->
           not_supported ~message:"Cannot deserialize 'this' type." ~keytrace
@@ -1064,23 +1049,20 @@ module Json = struct
         | "nonnull" -> ty Tnonnull
         | "dynamic" -> ty Tdynamic
         | "generic" ->
-          get_string "name" (json, keytrace)
-          >>= fun (name, _name_keytrace) ->
+          get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
           get_bool "is_array" (json, keytrace)
           >>= fun (is_array, _is_array_keytrace) ->
           if is_array then
-            aux_as json ~keytrace
-            >>= (fun as_opt -> ty (Tabstract (AKgeneric name, as_opt)))
+            aux_as json ~keytrace >>= fun as_opt ->
+            ty (Tabstract (AKgeneric name, as_opt))
           else
             wrong_phase ~message:"Tgeneric is a decl-phase type." ~keytrace
         | "enum" ->
-          get_string "name" (json, keytrace)
-          >>= fun (name, _name_keytrace) ->
-          aux_as json ~keytrace
-          >>= (fun as_opt -> ty (Tabstract (AKnewtype (name, []), as_opt)))
+          get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
+          aux_as json ~keytrace >>= fun as_opt ->
+          ty (Tabstract (AKnewtype (name, []), as_opt))
         | "newtype" ->
-          get_string "name" (json, keytrace)
-          >>= fun (name, name_keytrace) ->
+          get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->
           begin
             match Decl_provider.get_typedef name with
             | Some _typedef ->
@@ -1097,20 +1079,15 @@ module Json = struct
                   ~keytrace:name_keytrace
           end
           >>= fun typedef_name ->
-          get_array "args" (json, keytrace)
-          >>= fun (args, args_keytrace) ->
-          aux_args args ~keytrace:args_keytrace
-          >>= fun args ->
-          aux_as json ~keytrace
-          >>= fun as_opt ->
+          get_array "args" (json, keytrace) >>= fun (args, args_keytrace) ->
+          aux_args args ~keytrace:args_keytrace >>= fun args ->
+          aux_as json ~keytrace >>= fun as_opt ->
           ty (Tabstract (AKnewtype (typedef_name, args), as_opt))
         | "path" ->
-          get_obj "type" (json, keytrace)
-          >>= fun (type_json, type_keytrace) ->
+          get_obj "type" (json, keytrace) >>= fun (type_json, type_keytrace) ->
           get_string "kind" (type_json, type_keytrace)
           >>= fun (path_kind, path_kind_keytrace) ->
-          get_array "path" (json, keytrace)
-          >>= fun (ids_array, ids_keytrace) ->
+          get_array "path" (json, keytrace) >>= fun (ids_array, ids_keytrace) ->
           let ids =
             map_array
               ids_array
@@ -1121,15 +1098,13 @@ module Json = struct
                 | _ ->
                   deserialization_error ~message:"Expected a string" ~keytrace)
           in
-          ids
-          >>= fun _ids ->
+          ids >>= fun _ids ->
           begin
             match path_kind with
             | "class" ->
               get_string "name" (type_json, type_keytrace)
               >>= fun (class_name, _class_name_keytrace) ->
-              aux_as json ~keytrace
-              >>= fun as_opt ->
+              aux_as json ~keytrace >>= fun as_opt ->
               ty (Tabstract (AKdependent (DTcls class_name), as_opt))
             | "expr" ->
               not_supported
@@ -1137,23 +1112,21 @@ module Json = struct
                   "Cannot deserialize path-dependent type involving an expression"
                 ~keytrace
             | "this" ->
-              aux_as json ~keytrace
-              >>= (fun as_opt -> ty (Tabstract (AKdependent DTthis, as_opt)))
+              aux_as json ~keytrace >>= fun as_opt ->
+              ty (Tabstract (AKdependent DTthis, as_opt))
             | path_kind ->
               deserialization_error
                 ~message:("Unknown path kind: " ^ path_kind)
                 ~keytrace:path_kind_keytrace
           end
         | "darray" ->
-          get_array "args" (json, keytrace)
-          >>= fun (args, keytrace) ->
+          get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
           begin
             match args with
             | [ty1; ty2] ->
-              aux ty1 ~keytrace:("0" :: keytrace)
-              >>= fun ty1 ->
-              aux ty2 ~keytrace:("1" :: keytrace)
-              >>= (fun ty2 -> ty (Tarraykind (AKdarray (ty1, ty2))))
+              aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
+              aux ty2 ~keytrace:("1" :: keytrace) >>= fun ty2 ->
+              ty (Tarraykind (AKdarray (ty1, ty2)))
             | _ ->
               deserialization_error
                 ~message:
@@ -1163,13 +1136,12 @@ module Json = struct
                 ~keytrace
           end
         | "varray" ->
-          get_array "args" (json, keytrace)
-          >>= fun (args, keytrace) ->
+          get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
           begin
             match args with
             | [ty1] ->
-              aux ty1 ~keytrace:("0" :: keytrace)
-              >>= (fun ty1 -> ty (Tarraykind (AKvarray ty1)))
+              aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
+              ty (Tarraykind (AKvarray ty1))
             | _ ->
               deserialization_error
                 ~message:
@@ -1179,15 +1151,13 @@ module Json = struct
                 ~keytrace
           end
         | "varray_or_darray" ->
-          get_array "args" (json, keytrace)
-          >>= fun (args, keytrace) ->
+          get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
           begin
             match args with
             | [ty1; ty2] ->
-              aux ty1 ~keytrace:("0" :: keytrace)
-              >>= fun ty1 ->
-              aux ty2 ~keytrace:("1" :: keytrace)
-              >>= (fun ty2 -> ty (Tarraykind (AKvarray_or_darray (ty1, ty2))))
+              aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
+              aux ty2 ~keytrace:("1" :: keytrace) >>= fun ty2 ->
+              ty (Tarraykind (AKvarray_or_darray (ty1, ty2)))
             | _ ->
               deserialization_error
                 ~message:
@@ -1197,10 +1167,8 @@ module Json = struct
                 ~keytrace
           end
         | "array" ->
-          get_bool "empty" (json, keytrace)
-          >>= fun (empty, _empty_keytrace) ->
-          get_array "args" (json, keytrace)
-          >>= fun (args, _args_keytrace) ->
+          get_bool "empty" (json, keytrace) >>= fun (empty, _empty_keytrace) ->
+          get_array "args" (json, keytrace) >>= fun (args, _args_keytrace) ->
           begin
             match args with
             | [] ->
@@ -1210,13 +1178,12 @@ module Json = struct
                 let tany = (Reason.Rnone, Typing_defs.make_tany ()) in
                 ty (Tarraykind (AKvarray_or_darray (tany, tany)))
             | [ty1] ->
-              aux ty1 ~keytrace:("0" :: keytrace)
-              >>= (fun ty1 -> ty (Tarraykind (AKvarray ty1)))
+              aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
+              ty (Tarraykind (AKvarray ty1))
             | [ty1; ty2] ->
-              aux ty1 ~keytrace:("0" :: keytrace)
-              >>= fun ty1 ->
-              aux ty2 ~keytrace:("1" :: keytrace)
-              >>= (fun ty2 -> ty (Tarraykind (AKdarray (ty1, ty2))))
+              aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
+              aux ty2 ~keytrace:("1" :: keytrace) >>= fun ty2 ->
+              ty (Tarraykind (AKdarray (ty1, ty2)))
             | _ ->
               deserialization_error
                 ~message:
@@ -1226,18 +1193,15 @@ module Json = struct
                 ~keytrace
           end
         | "tuple" ->
-          get_array "args" (json, keytrace)
-          >>= fun (args, args_keytrace) ->
-          aux_args args ~keytrace:args_keytrace
-          >>= (fun args -> ty (Ttuple args))
+          get_array "args" (json, keytrace) >>= fun (args, args_keytrace) ->
+          aux_args args ~keytrace:args_keytrace >>= fun args -> ty (Ttuple args)
         | "nullable" ->
-          get_array "args" (json, keytrace)
-          >>= fun (args, keytrace) ->
+          get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
           begin
             match args with
             | [nullable_ty] ->
-              aux nullable_ty ~keytrace:("0" :: keytrace)
-              >>= (fun nullable_ty -> ty (Toption nullable_ty))
+              aux nullable_ty ~keytrace:("0" :: keytrace) >>= fun nullable_ty ->
+              ty (Toption nullable_ty)
             | _ ->
               deserialization_error
                 ~message:
@@ -1247,8 +1211,7 @@ module Json = struct
                 ~keytrace
           end
         | "primitive" ->
-          get_string "name" (json, keytrace)
-          >>= fun (name, keytrace) ->
+          get_string "name" (json, keytrace) >>= fun (name, keytrace) ->
           begin
             match name with
             | "void" -> Ok Nast.Tvoid
@@ -1265,10 +1228,9 @@ module Json = struct
                 ~message:("Unknown primitive type: " ^ name)
                 ~keytrace
           end
-          >>= (fun prim_ty -> ty (Tprim prim_ty))
+          >>= fun prim_ty -> ty (Tprim prim_ty)
         | "class" ->
-          get_string "name" (json, keytrace)
-          >>= fun (name, _name_keytrace) ->
+          get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
           let class_pos =
             match Decl_provider.get_class name with
             | Some class_ty -> Cls.pos class_ty
@@ -1276,10 +1238,8 @@ module Json = struct
               (* Class may not exist (such as in non-strict modes). *)
               Pos.none
           in
-          get_array "args" (json, keytrace)
-          >>= fun (args, _args_keytrace) ->
-          aux_args args ~keytrace
-          >>= fun tyl ->
+          get_array "args" (json, keytrace) >>= fun (args, _args_keytrace) ->
+          aux_args args ~keytrace >>= fun tyl ->
           (* NB: "class" could have come from either a `Tapply` or a `Tclass`. Right
       now, we always return a `Tclass`. *)
           ty (Tclass ((class_pos, name), Nonexact, tyl))
@@ -1321,7 +1281,7 @@ module Json = struct
               match get_val "optional" (field_json, keytrace) with
               | Ok _ ->
                 get_bool "optional" (field_json, keytrace)
-                >>| (fun (optional, _optional_keytrace) -> optional)
+                >>| fun (optional, _optional_keytrace) -> optional
               | Error _ -> Ok false
             end
             >>= fun optional ->
@@ -1359,13 +1319,11 @@ module Json = struct
             in
             ty (Tshape (shape_kind, fields))
         | "union" ->
-          get_array "args" (json, keytrace)
-          >>= fun (args, keytrace) ->
-          aux_args args ~keytrace >>= (fun tyl -> ty (Tunion tyl))
+          get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
+          aux_args args ~keytrace >>= fun tyl -> ty (Tunion tyl)
         | "intersection" ->
-          get_array "args" (json, keytrace)
-          >>= fun (args, keytrace) ->
-          aux_args args ~keytrace >>= (fun tyl -> ty (Tintersection tyl))
+          get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
+          aux_args args ~keytrace >>= fun tyl -> ty (Tintersection tyl)
         | ("function" | "coroutine") as kind ->
           let ft_is_coroutine = String.equal kind "coroutine" in
           get_array "params" (json, keytrace)
@@ -1402,12 +1360,9 @@ module Json = struct
                     fp_rx_annotation = None;
                   })
           in
-          params
-          >>= fun ft_params ->
-          get_obj "result" (json, keytrace)
-          >>= fun (result, result_keytrace) ->
-          aux result ~keytrace:result_keytrace
-          >>= fun ft_ret ->
+          params >>= fun ft_params ->
+          get_obj "result" (json, keytrace) >>= fun (result, result_keytrace) ->
+          aux result ~keytrace:result_keytrace >>= fun ft_ret ->
           ty
             (Tfun
                {
@@ -1461,7 +1416,7 @@ module Json = struct
         (* as-constraint is optional, check to see if it exists. *)
         match Hh_json.Access.get_obj "as" (json, keytrace) with
         | Ok (as_json, as_keytrace) ->
-          aux as_json ~keytrace:as_keytrace >>= (fun as_ty -> Ok (Some as_ty))
+          aux as_json ~keytrace:as_keytrace >>= fun as_ty -> Ok (Some as_ty)
         | Error (Hh_json.Access.Missing_key_error _) -> Ok None
         | Error access_failure ->
           deserialization_error
@@ -1510,8 +1465,7 @@ module PrintClass = struct
   let constraint_ty tcopt = function
     | (Ast_defs.Constraint_as, ty) -> "as " ^ Full.to_string_decl tcopt ty
     | (Ast_defs.Constraint_eq, ty) -> "= " ^ Full.to_string_decl tcopt ty
-    | (Ast_defs.Constraint_super, ty) ->
-      "super " ^ Full.to_string_decl tcopt ty
+    | (Ast_defs.Constraint_super, ty) -> "super " ^ Full.to_string_decl tcopt ty
 
   let variance = function
     | Ast_defs.Covariant -> "+"

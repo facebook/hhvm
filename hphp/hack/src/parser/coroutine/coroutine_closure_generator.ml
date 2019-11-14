@@ -119,9 +119,7 @@ let generate_clone_body { CoroutineStateMachineData.parameters; properties } =
         property_name_string |> strip_dollar_sign |> make_name_syntax
       in
       let this_member_syntax =
-        make_member_selection_expression_syntax
-          this_syntax
-          property_member_name
+        make_member_selection_expression_syntax this_syntax property_member_name
       in
       let closure_member_syntax =
         make_member_selection_expression_syntax

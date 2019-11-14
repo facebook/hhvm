@@ -116,8 +116,7 @@ let check_only_rx_if_impl env ~is_receiver ~is_self pos reason ty cond_ty =
     (* TODO: move caller to be TAST check  *)
     match Env.expand_type env ty with
     | (env, (_, Tintersection tyl)) ->
-      fst
-        (TU.run_on_intersection env tyl ~f:(fun env ty -> (check env ty, ())))
+      fst (TU.run_on_intersection env tyl ~f:(fun env ty -> (check env ty, ())))
     | (env, ty) ->
       Errors.try_
         (fun () -> SubType.sub_type env ty cond_ty on_error)
@@ -264,9 +263,9 @@ let check_call env method_info pos reason ft arg_types =
         (* receiver is conditionally reactive *)
         Option.is_some (condition_type_from_reactivity ft.ft_reactive)
         || (* one of arguments is conditionally reactive *)
-           List.exists ft.ft_params ~f:(function
-               | { fp_rx_annotation = Some (Param_rx_if_impl _); _ } -> true
-               | _ -> false)
+        List.exists ft.ft_params ~f:(function
+            | { fp_rx_annotation = Some (Param_rx_if_impl _); _ } -> true
+            | _ -> false)
       in
       let env =
         if callee_is_conditionally_reactive then

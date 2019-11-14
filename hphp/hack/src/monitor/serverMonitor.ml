@@ -275,11 +275,7 @@ struct
     in
     match cmd with
     | MonitorRpc.HANDOFF_TO_SERVER handoff_options ->
-      client_prehandoff
-        ~is_purgatory_client:false
-        env
-        handoff_options
-        client_fd
+      client_prehandoff ~is_purgatory_client:false env handoff_options client_fd
     | MonitorRpc.SHUT_DOWN ->
       Hh_logger.log "Got shutdown RPC. Shutting down.";
       let kill_signal_time = Unix.gettimeofday () in
@@ -287,9 +283,7 @@ struct
       wait_for_server_exit_with_check env.server kill_signal_time;
       Exit_status.(exit No_error)
     | MonitorRpc.SERVER_PROGRESS ->
-      msg_to_channel
-        client_fd
-        (env.server_progress, env.server_progress_warning);
+      msg_to_channel client_fd (env.server_progress, env.server_progress_warning);
       Unix.close client_fd;
       env
 
@@ -364,9 +358,7 @@ struct
         @@ List.find_exn server.out_fds ~f:(fun x ->
                fst x = handoff_options.MonitorRpc.pipe_name)
       in
-      let since_last_request =
-        Unix.time () -. !(server.last_request_handoff)
-      in
+      let since_last_request = Unix.time () -. !(server.last_request_handoff) in
       (* TODO: Send this to client so it is visible. *)
       Hh_logger.log
         "Got %s request for typechecker. Prior request %.1f seconds ago"
@@ -437,8 +429,7 @@ struct
     try
       let client_version = read_version client_fd in
       if
-        (not env.ignore_hh_version)
-        && client_version <> Build_id.build_revision
+        (not env.ignore_hh_version) && client_version <> Build_id.build_revision
       then
         client_out_of_date env client_fd ServerMonitorUtils.current_build_info
       else (
@@ -533,8 +524,7 @@ struct
           SC.on_server_exit monitor_config;
           ServerProcessTools.check_exit_status proc_stat process monitor_config;
           { env with server = Died_unexpectedly (proc_stat, was_oom) })
-      | _ ->
-        { env with server_progress = None; server_progress_warning = None }
+      | _ -> { env with server_progress = None; server_progress_warning = None }
     in
     let (exit_status, server_state) =
       match env.server with

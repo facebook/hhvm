@@ -155,7 +155,8 @@ let maybe_relative_path fn =
     begin
       if Filename.is_relative fn then
         Relative_path.(to_absolute (from_root fn))
-      else fn
+      else
+        fn
     end
 
 let process_extra_paths config =
@@ -174,9 +175,9 @@ let process_untrusted_mode config =
       let blacklist =
         [
           (* out of tree file access*)
-            "extra_paths";
+          "extra_paths";
           (* potential resource abuse *)
-            "language_feature_logging";
+          "language_feature_logging";
         ]
       in
       let prefix_blacklist =
@@ -249,10 +250,7 @@ let load config_filename options =
       (Relative_path.to_absolute config_filename)
   in
   let config =
-    Config_file.apply_overrides
-      ~silent:true
-      ~config
-      ~overrides:config_overrides
+    Config_file.apply_overrides ~silent:true ~config ~overrides:config_overrides
   in
   process_untrusted_mode config;
   let version = Config_file.parse_version (SMap.find_opt config "version") in
@@ -313,8 +311,7 @@ let load config_filename options =
       ?so_remote_worker_vfs_checkout_threshold:
         (Some local_config.remote_type_check.worker_vfs_checkout_threshold)
       ?so_naming_sqlite_path:local_config.naming_sqlite_path
-      ?tco_language_feature_logging:
-        (bool_opt "language_feature_logging" config)
+      ?tco_language_feature_logging:(bool_opt "language_feature_logging" config)
       ?tco_unsafe_rx:(bool_opt "unsafe_rx" config)
       ?tco_disallow_scrutinee_case_value_type_mismatch:
         (bool_opt "disallow_scrutinee_case_value_type_mismatch" config)
@@ -357,8 +354,7 @@ let load config_filename options =
         (bool_opt "class_level_where_clauses" config)
       ?po_disable_legacy_soft_typehints:
         (bool_opt "disable_legacy_soft_typehints" config)
-      ?tco_use_lru_workers:
-        (Some local_config.ServerLocalConfig.use_lru_workers)
+      ?tco_use_lru_workers:(Some local_config.ServerLocalConfig.use_lru_workers)
       ?po_disallow_toplevel_requires:
         (bool_opt "disallow_toplevel_requires" config)
       ~po_disallowed_decl_fixmes:(prepare_disallowed_decl_fixmes config)
@@ -430,8 +426,7 @@ let set_parser_options config popt = { config with parser_options = popt }
 
 let set_tc_options config tcopt = { config with tc_options = tcopt }
 
-let set_glean_options config gleanopt =
-  { config with glean_options = gleanopt }
+let set_glean_options config gleanopt = { config with glean_options = gleanopt }
 
 let gc_control config = config.gc_control
 

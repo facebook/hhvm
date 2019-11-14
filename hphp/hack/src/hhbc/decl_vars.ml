@@ -130,8 +130,7 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
           self#on_expr () e1
         | _ -> super#on_expr_ () e)
       | Aast.Lvar (pos, id) ->
-        state :=
-          add_local ~barethis:Bare_this !state (pos, Local_id.get_name id)
+        state := add_local ~barethis:Bare_this !state (pos, Local_id.get_name id)
       | Aast.Class_get (cid, expr) ->
         on_class_get self cid expr ~is_call_target:false
       | Aast.Lfun _ ->
@@ -240,8 +239,7 @@ let uls_from_ast
   in
   let decl_vars = ULS.diff state.dvs_locals param_names in
   let decl_vars =
-    if needs_local_this || is_closure_body || (not has_this) || is_toplevel
-    then
+    if needs_local_this || is_closure_body || (not has_this) || is_toplevel then
       decl_vars
     else
       ULS.remove "$this" decl_vars

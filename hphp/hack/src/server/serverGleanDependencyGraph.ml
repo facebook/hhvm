@@ -15,8 +15,7 @@ type inheritanceInfo = {
   childName: string;
 }
 
-let create_predicate_json (predicate_name : string) (facts : json list) : json
-    =
+let create_predicate_json (predicate_name : string) (facts : json list) : json =
   JSON_Object
     [("predicate", JSON_String predicate_name); ("facts", JSON_Array facts)]
 
@@ -40,8 +39,7 @@ let convert_inheritance_to_json (inheritances : inheritanceInfo list) :
                       convert_single_class_to_json inheritance_info.parentName
                     );
                     ( "child",
-                      convert_single_class_to_json inheritance_info.childName
-                    );
+                      convert_single_class_to_json inheritance_info.childName );
                   ] );
             ])
         inheritances

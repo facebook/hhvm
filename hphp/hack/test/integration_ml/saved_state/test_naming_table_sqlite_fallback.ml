@@ -75,8 +75,7 @@ let qux = {|<?hh
 let base_disk_state = [("foo.php", foo); ("bar.php", bar); ("baz.php", baz)]
 
 let test () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   Test.save_state ~enable_naming_table_fallback:true base_disk_state temp_dir;
 
@@ -166,9 +165,7 @@ let test () =
              empty with
              hash = SMap.find_opt "baz.php" hashes;
              consts =
-               [
-                 (File (Const, Relative_path.from_root "baz.php"), "\\BAZCONST");
-               ];
+               [(File (Const, Relative_path.from_root "baz.php"), "\\BAZCONST")];
            })
         (Naming_table.get_file_info
            naming_table

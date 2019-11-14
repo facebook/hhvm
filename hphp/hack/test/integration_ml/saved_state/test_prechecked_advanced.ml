@@ -34,8 +34,7 @@ But got string
 |}
 
 let test () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   (* A and B are identical classes with a function named "bar" returning int *)
   Test.save_state
@@ -54,9 +53,9 @@ let test () =
         [
           ("A.php", x_contents "A" "int");
           (* changes B::foo return type to string *)
-            ("B.php", x_contents "B" "string");
+          ("B.php", x_contents "B" "string");
           (* changes foo() return type to B *)
-            ("foo.php", foo_contents "B");
+          ("foo.php", foo_contents "B");
           ("test.php", test_contents);
         ]
       ~master_changes:["foo.php"]

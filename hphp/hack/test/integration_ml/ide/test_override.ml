@@ -68,9 +68,7 @@ let test () =
     Test.setup_disk
       env
       [
-        (a_name, a_with_foo_contents);
-        (b_name, b_contents);
-        (c_name, c_contents);
+        (a_name, a_with_foo_contents); (b_name, b_contents); (c_name, c_contents);
       ]
   in
   Test.assert_no_errors env;

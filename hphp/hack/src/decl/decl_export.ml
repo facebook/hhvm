@@ -17,8 +17,7 @@ open Typing_defs
 module CEKMap = struct
   include Reordered_argument_map (WrappedMap.Make (ClassEltKey))
 
-  let pp ppd =
-    make_pp (fun fmt (c, m) -> Format.fprintf fmt "(%S, %S)" c m) ppd
+  let pp ppd = make_pp (fun fmt (c, m) -> Format.fprintf fmt "(%S, %S)" c m) ppd
 end
 
 type saved_decls = {
@@ -112,34 +111,28 @@ let rec collect_class
       in
       let collect_elts elts init f = SMap.fold elts ~init ~f:(collect_elt f) in
       let decls =
-        collect_elts data.dc_props decls
-        @@ fun decls cid mid ->
+        collect_elts data.dc_props decls @@ fun decls cid mid ->
         match Props.get (cid, mid) with
         | None -> failwith @@ "Missing property " ^ cid ^ "::" ^ mid
         | Some x -> { decls with props = CEKMap.add decls.props (cid, mid) x }
       in
       let decls =
-        collect_elts data.dc_sprops decls
-        @@ fun decls cid mid ->
+        collect_elts data.dc_sprops decls @@ fun decls cid mid ->
         match StaticProps.get (cid, mid) with
         | None -> failwith @@ "Missing static property " ^ cid ^ "::" ^ mid
-        | Some x ->
-          { decls with sprops = CEKMap.add decls.sprops (cid, mid) x }
+        | Some x -> { decls with sprops = CEKMap.add decls.sprops (cid, mid) x }
       in
       let decls =
-        collect_elts data.dc_methods decls
-        @@ fun decls cid mid ->
+        collect_elts data.dc_methods decls @@ fun decls cid mid ->
         match Methods.get (cid, mid) with
         | None -> failwith @@ "Missing method " ^ cid ^ "::" ^ mid
         | Some x -> { decls with meths = CEKMap.add decls.meths (cid, mid) x }
       in
       let decls =
-        collect_elts data.dc_smethods decls
-        @@ fun decls cid mid ->
+        collect_elts data.dc_smethods decls @@ fun decls cid mid ->
         match StaticMethods.get (cid, mid) with
         | None -> failwith @@ "Missing static method " ^ cid ^ "::" ^ mid
-        | Some x ->
-          { decls with smeths = CEKMap.add decls.smeths (cid, mid) x }
+        | Some x -> { decls with smeths = CEKMap.add decls.smeths (cid, mid) x }
       in
       let decls =
         fst data.dc_construct
@@ -154,11 +147,7 @@ let rec collect_class
       let filename =
         match get_class_filename cid with
         | None ->
-          failwith
-          @@ "Could not look up filename for "
-          ^ kind
-          ^ " class "
-          ^ cid
+          failwith @@ "Could not look up filename for " ^ kind ^ " class " ^ cid
         | Some f -> f
       in
       let decls =

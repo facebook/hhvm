@@ -297,8 +297,7 @@ let string_of_mutator x =
   | PopL id -> sep ["PopL"; string_of_local_id id]
   | SetG -> "SetG"
   | SetS -> "SetS"
-  | SetOpL (id, op) ->
-    sep ["SetOpL"; string_of_local_id id; string_of_eq_op op]
+  | SetOpL (id, op) -> sep ["SetOpL"; string_of_local_id id; string_of_eq_op op]
   | SetOpG op -> sep ["SetOpG"; string_of_eq_op op]
   | SetOpS op -> sep ["SetOpS"; string_of_eq_op op]
   | IncDecL (id, op) ->
@@ -451,15 +450,9 @@ let string_of_final instruction =
   match instruction with
   | QueryM (n, op, mk) ->
     sep
-      [
-        "QueryM";
-        string_of_int n;
-        QueryOp.to_string op;
-        string_of_member_key mk;
-      ]
+      ["QueryM"; string_of_int n; QueryOp.to_string op; string_of_member_key mk]
   | UnsetM (n, mk) -> sep ["UnsetM"; string_of_int n; string_of_member_key mk]
-  | SetM (i, mk) ->
-    sep ["SetM"; string_of_param_num i; string_of_member_key mk]
+  | SetM (i, mk) -> sep ["SetM"; string_of_param_num i; string_of_member_key mk]
   | SetOpM (i, op, mk) ->
     sep
       [
@@ -1270,9 +1263,7 @@ and string_of_param_default_value ~env expr =
     "new " ^ class_id ^ "(" ^ String.concat ~sep:", " es ^ ")"
   | A.New ((_, A.CIexpr e), _, es, ues, _)
   | A.Call (_, e, _, es, ues) ->
-    let e =
-      String_utils.lstrip (string_of_param_default_value ~env e) "\\\\"
-    in
+    let e = String_utils.lstrip (string_of_param_default_value ~env e) "\\\\" in
     let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in
     let prefix =
       match snd expr with
@@ -1356,10 +1347,7 @@ and string_of_param_default_value ~env expr =
   | A.Eif (cond, etrue, efalse) ->
     let cond = string_of_param_default_value ~env cond in
     let etrue =
-      Option.value_map
-        etrue
-        ~default:""
-        ~f:(string_of_param_default_value ~env)
+      Option.value_map etrue ~default:"" ~f:(string_of_param_default_value ~env)
     in
     let efalse = string_of_param_default_value ~env efalse in
     cond ^ " \\? " ^ etrue ^ " : " ^ efalse
@@ -1636,9 +1624,7 @@ let attributes_to_string attrs =
 let method_attributes (m : Hhas_method.t) =
   let user_attrs = Hhas_method.attributes m in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
-  let is_native_opcode_impl =
-    Hhas_attribute.is_native_opcode_impl user_attrs
-  in
+  let is_native_opcode_impl = Hhas_attribute.is_native_opcode_impl user_attrs in
   let is_native =
     (not is_native_opcode_impl) && Hhas_attribute.has_native user_attrs
   in

@@ -232,8 +232,7 @@ let test_access_object_type_invalid () =
       return json >>= get_obj "foo" >>= get_obj "bar" >>= get_string "baz"
     in
     match result with
-    | Error (Wrong_type_error (["baz"; "bar"; "foo"], Hh_json.String_t)) ->
-      true
+    | Error (Wrong_type_error (["baz"; "bar"; "foo"], Hh_json.String_t)) -> true
     | _ -> false)
 
 (** Hit an error when accessing the third key, in this JSON object
@@ -274,15 +273,10 @@ let test_access_3_keys_one_object () =
   Hh_json.Access.(
     let accessor = return json in
     let result =
-      accessor
-      >>= get_bool "foo"
-      >>= fun (foo, _) ->
-      accessor
-      >>= get_string "bar"
-      >>= fun (bar, _) ->
-      accessor
-      >>= get_number_int "baz"
-      >>= (fun (baz, _) -> return { foo; bar; baz })
+      accessor >>= get_bool "foo" >>= fun (foo, _) ->
+      accessor >>= get_string "bar" >>= fun (bar, _) ->
+      accessor >>= get_number_int "baz" >>= fun (baz, _) ->
+      return { foo; bar; baz }
     in
     match result with
     | Error access_failure ->
@@ -310,15 +304,10 @@ let test_access_3_keys_one_object_wrong_type_middle () =
   Hh_json.Access.(
     let accessor = return json in
     let result =
-      accessor
-      >>= get_bool "foo"
-      >>= fun (foo, _) ->
-      accessor
-      >>= get_string "bar"
-      >>= fun (bar, _) ->
-      accessor
-      >>= get_number_int "baz"
-      >>= (fun (baz, _) -> return { foo; bar; baz })
+      accessor >>= get_bool "foo" >>= fun (foo, _) ->
+      accessor >>= get_string "bar" >>= fun (bar, _) ->
+      accessor >>= get_number_int "baz" >>= fun (baz, _) ->
+      return { foo; bar; baz }
     in
     match result with
     | Error access_failure ->
@@ -340,10 +329,7 @@ let test_truncate () =
 
   let actual = Hh_json.json_truncate_string s ~max_string_length:1 in
   let exp = {|{"a":{"a1":{"a1x":"h...","a1y":42},"a2":true},"b":null}|} in
-  Asserter.String_asserter.assert_equals
-    exp
-    actual
-    "max_string_length truncate";
+  Asserter.String_asserter.assert_equals exp actual "max_string_length truncate";
 
   let actual = Hh_json.json_truncate_string s ~max_child_count:1 in
   let exp = {|{"a":{"a1":{"a1x":"hello"}}}|} in
@@ -355,17 +341,11 @@ let test_truncate () =
 
   let actual = Hh_json.json_truncate_string s ~max_total_count:1 in
   let exp = {|{"a":{}}|} in
-  Asserter.String_asserter.assert_equals
-    exp
-    actual
-    "max_total_count truncate 1";
+  Asserter.String_asserter.assert_equals exp actual "max_total_count truncate 1";
 
   let actual = Hh_json.json_truncate_string s ~max_total_count:2 in
   let exp = {|{"a":{"a1":{}}}|} in
-  Asserter.String_asserter.assert_equals
-    exp
-    actual
-    "max_total_count truncate 2";
+  Asserter.String_asserter.assert_equals exp actual "max_total_count truncate 2";
   true
 
 let test_hex_escape () =

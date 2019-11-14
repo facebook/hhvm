@@ -48,8 +48,7 @@ let make
     ?(rust = default.rust)
     ?(disable_legacy_soft_typehints = default.disable_legacy_soft_typehints)
     ?(allow_new_attribute_syntax = default.allow_new_attribute_syntax)
-    ?(disable_legacy_attribute_syntax =
-      default.disable_legacy_attribute_syntax)
+    ?(disable_legacy_attribute_syntax = default.disable_legacy_attribute_syntax)
     ?((* DANGER: if you leak the root tree into OCaml, it's on you to ensure that
   * it's eventually disposed to avoid memory leak. *)
     leak_rust_tree = default.leak_rust_tree)

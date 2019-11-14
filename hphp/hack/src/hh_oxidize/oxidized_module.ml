@@ -24,8 +24,7 @@ type t = {
   (* names of directly-included modules *)
   ty_uses: (string * string) list;
   (* (module_name, type_name) pairs *)
-  decls: (string * string) list;
-      (* (name, rust_syntax_for_entire_declaration) *)
+  decls: (string * string) list; (* (name, rust_syntax_for_entire_declaration) *)
 }
 
 let empty =

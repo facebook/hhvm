@@ -288,8 +288,7 @@ let is_overlapping s1 s2 =
   let s2_rules = get_rules_on_partially_bound_lines s2 in
   ISet.cardinal s1_rules = ISet.cardinal s2_rules
   && ISet.for_all
-       (fun s1_key ->
-         IMap.find_opt s1_key s1.rbm = IMap.find_opt s1_key s2.rbm)
+       (fun s1_key -> IMap.find_opt s1_key s1.rbm = IMap.find_opt s1_key s2.rbm)
        s1_rules
 
 let compare_rule_sets s1 s2 =

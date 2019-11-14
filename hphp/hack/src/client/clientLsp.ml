@@ -149,11 +149,7 @@ type state =
 type on_result = result:Hh_json.json option -> state -> state Lwt.t
 
 type on_error =
-  code:int ->
-  message:string ->
-  data:Hh_json.json option ->
-  state ->
-  state Lwt.t
+  code:int -> message:string -> data:Hh_json.json option -> state -> state Lwt.t
 
 (* Note: we assume that we won't ever initialize more than once, since this
 promise can only be resolved once. *)
@@ -165,8 +161,7 @@ let hhconfig_version : string ref = ref "[NotYetInitialized]"
 
 let can_autostart_after_mismatch : bool ref = ref true
 
-let callbacks_outstanding : (on_result * on_error) IdMap.t ref =
-  ref IdMap.empty
+let callbacks_outstanding : (on_result * on_error) IdMap.t ref = ref IdMap.empty
 
 (* head is newest *)
 let hh_server_state : (float * hh_server_state) list ref = ref []
@@ -186,8 +181,8 @@ let to_stdout (json : Hh_json.json) : unit =
   let s = Hh_json.json_to_string json ^ "\r\n\r\n" in
   Http_lite.write_message stdout s
 
-let get_editor_open_files (state : state) :
-    Lsp.TextDocumentItem.t SMap.t option =
+let get_editor_open_files (state : state) : Lsp.TextDocumentItem.t SMap.t option
+    =
   match state with
   | Main_loop menv -> Main_env.(Some menv.editor_open_files)
   | In_init ienv -> In_init_env.(Some ienv.editor_open_files)
@@ -218,8 +213,7 @@ exception
   Client_fatal_connection_exception of Marshal_tools.remote_exception_data
 
 exception
-  Client_recoverable_connection_exception of
-    Marshal_tools.remote_exception_data
+  Client_recoverable_connection_exception of Marshal_tools.remote_exception_data
 
 exception
   Server_fatal_connection_exception of Marshal_tools.remote_exception_data
@@ -481,8 +475,8 @@ let get_message_source (server : server_conn) (client : Jsonrpc.queue) :
     does not actually read anything from it (so we won't end up with a race
     condition where we've read data from both file descriptors but only process
     the data from either the client or the server). *)
-            (let%lwt () = Lwt_unix.wait_read server_read_fd in
-             Lwt.return `From_server);
+          (let%lwt () = Lwt_unix.wait_read server_read_fd in
+           Lwt.return `From_server);
           (let%lwt () = Lwt_unix.wait_read client_read_fd in
            Lwt.return `From_client);
         ]
@@ -540,8 +534,7 @@ let read_message_from_server (server : server_conn) : event Lwt.t =
     with e ->
       let message = Exn.to_string e in
       let stack = Printexc.get_backtrace () in
-      raise
-        (Server_fatal_connection_exception { Marshal_tools.message; stack }))
+      raise (Server_fatal_connection_exception { Marshal_tools.message; stack }))
 
 (* get_next_event: picks up the next available message from either client or
    server. The way it's implemented, at the first character of a message
@@ -593,9 +586,8 @@ type powered_by =
   | Serverless_ide
 
 let respond_jsonrpc
-    ~(powered_by : powered_by)
-    (message : Jsonrpc.message)
-    (json : Hh_json.json) : unit =
+    ~(powered_by : powered_by) (message : Jsonrpc.message) (json : Hh_json.json)
+    : unit =
   let powered_by =
     match powered_by with
     | Serverless_ide -> Some "serverless_ide"
@@ -606,8 +598,7 @@ let respond_jsonrpc
   Jsonrpc.respond to_stdout ?powered_by message json
 
 let notify_jsonrpc
-    ~(powered_by : powered_by) (method_ : string) (json : Hh_json.json) : unit
-    =
+    ~(powered_by : powered_by) (method_ : string) (json : Hh_json.json) : unit =
   let powered_by =
     match powered_by with
     | Serverless_ide -> Some "serverless_ide"
@@ -633,7 +624,7 @@ let respond_to_error (event : event option) (e : exn) (stack : string) : unit =
 let status_tick () : string =
   (* OCaml has pretty poor Unicode support.
    # @lint-ignore TXT5 The # sign is needed for the ignore to be respected. *)
-  let statusFrames = [|"□"; "■"|] in
+  let statusFrames = [| "□"; "■" |] in
   let time = Unix.time () in
   statusFrames.(int_of_float time mod 2)
 
@@ -723,9 +714,7 @@ let dismiss_ui (state : state) : state =
         {
           menv with
           uris_with_diagnostics =
-            Lsp_helpers.dismiss_diagnostics
-              to_stdout
-              menv.uris_with_diagnostics;
+            Lsp_helpers.dismiss_diagnostics to_stdout menv.uris_with_diagnostics;
         })
   | Lost_server lenv -> Lost_server lenv
   | Pre_init -> Pre_init
@@ -838,9 +827,7 @@ let hack_errors_to_lsp_diagnostic
       ({ Location.uri; range }, message)
     in
     let hack_error_to_lsp_diagnostic (error : Pos.absolute Errors.error_) =
-      let all_messages =
-        Errors.to_list error |> List.map ~f:location_message
-      in
+      let all_messages = Errors.to_list error |> List.map ~f:location_message in
       let (first_message, additional_messages) =
         match all_messages with
         | hd :: tl -> (hd, tl)
@@ -970,9 +957,7 @@ let state_to_rage (state : state) : string =
           "hh_server_status.message";
           menv.hh_server_status.ShowStatus.request.ShowMessageRequest.message;
           "hh_server_status.shortMessage";
-          Option.value
-            menv.hh_server_status.ShowStatus.shortMessage
-            ~default:"";
+          Option.value menv.hh_server_status.ShowStatus.shortMessage ~default:"";
         ]
     | In_init ienv ->
       In_init_env.
@@ -1009,8 +994,8 @@ let state_to_rage (state : state) : string =
   in
   state_to_string state ^ "\n" ^ String.concat ~sep:"\n" details ^ "\n"
 
-let do_rage (state : state) (ref_unblocked_time : float ref) :
-    Rage.result Lwt.t =
+let do_rage (state : state) (ref_unblocked_time : float ref) : Rage.result Lwt.t
+    =
   Rage.(
     let items : rageItem list ref = ref [] in
     let add item = items := item :: !items in
@@ -1025,7 +1010,7 @@ let do_rage (state : state) (ref_unblocked_time : float ref) :
         Lwt.return (Printf.sprintf "PSTACK %s (%s) - %s\n\n" pid reason msg)
       in
       Hh_logger.log "Getting pstack for %s" pid;
-      match%lwt Lwt_utils.exec_checked "pstack" [|pid|] with
+      match%lwt Lwt_utils.exec_checked "pstack" [| pid |] with
       | Ok result ->
         let stack = result.Lwt_utils.Process_success.stdout in
         format_data stack
@@ -1034,7 +1019,7 @@ let do_rage (state : state) (ref_unblocked_time : float ref) :
         Hh_logger.log
           "Failed to execute pstack for %s. Executing gstack instead"
           pid;
-        (match%lwt Lwt_utils.exec_checked "gstack" [|pid|] with
+        (match%lwt Lwt_utils.exec_checked "gstack" [| pid |] with
         | Ok result ->
           let stack = result.Lwt_utils.Process_success.stdout in
           format_data stack
@@ -1122,10 +1107,7 @@ let do_rage (state : state) (ref_unblocked_time : float ref) :
           in
           let add i =
             add
-              {
-                title = i.ServerRageTypes.title;
-                data = i.ServerRageTypes.data;
-              }
+              { title = i.ServerRageTypes.title; data = i.ServerRageTypes.data }
           in
           List.iter items ~f:add;
           Lwt.return (Ok ()))
@@ -1141,8 +1123,7 @@ let do_rage (state : state) (ref_unblocked_time : float ref) :
       with e ->
         let message = Exn.to_string e in
         let stack = Printexc.get_backtrace () in
-        Lwt.return
-          (Error (Printf.sprintf "server rage - %s\n%s" message stack))
+        Lwt.return (Error (Printf.sprintf "server rage - %s\n%s" message stack))
     in
     (* Don't start waiting on these until the end because we want all of our LWT requests to be in
      * flight simultaneously. *)
@@ -1368,8 +1349,7 @@ let make_ide_completion_response
           string option =
         (* TODO: we're using itemType (left column) for function return types, and *)
         (* the inlineDetail (right column) for variable/field types. Is that good? *)
-        Option.map completion.func_details ~f:(fun details ->
-            details.return_ty)
+        Option.map completion.func_details ~f:(fun details -> details.return_ty)
       in
       let hack_to_detail (completion : complete_autocomplete_result) : string =
         (* TODO: retrieve the actual signature including name+modifiers     *)
@@ -1465,11 +1445,11 @@ let make_ide_completion_response
                       * the results more readable, such as showing "ad__breaks" instead of
                       * "Thrift\Packages\cf\ad__breaks".
                       *)
-                       ("fullname", Hh_json.JSON_String completion.res_fullname);
+                     ("fullname", Hh_json.JSON_String completion.res_fullname);
                      (* Filename/line/char/base_class are used to handle class methods.
                       * We could unify this with fullname in the future.
                       *)
-                       ("filename", Hh_json.JSON_String filename);
+                     ("filename", Hh_json.JSON_String filename);
                      ("line", Hh_json.int_ line);
                      ("char", Hh_json.int_ start);
                    ]
@@ -1618,8 +1598,8 @@ let docblock_with_ranking_detail
 let do_completionItemResolve
     (conn : server_conn)
     (ref_unblocked_time : float ref)
-    (params : CompletionItemResolve.params) :
-    CompletionItemResolve.result Lwt.t =
+    (params : CompletionItemResolve.params) : CompletionItemResolve.result Lwt.t
+    =
   (* No matter what, we need the kind *)
   let raw_kind = params.Completion.kind in
   let kind = completion_kind_to_si_kind raw_kind in
@@ -1660,9 +1640,7 @@ let do_completionItemResolve
       (* If that failed, fetch docblock using just the symbol name *)
     with _ ->
       let symbolname = params.Completion.label in
-      let command =
-        ServerCommandTypes.DOCBLOCK_FOR_SYMBOL (symbolname, kind)
-      in
+      let command = ServerCommandTypes.DOCBLOCK_FOR_SYMBOL (symbolname, kind) in
       let%lwt raw_docblock = rpc conn ref_unblocked_time command in
       Lwt.return raw_docblock
   in
@@ -1683,8 +1661,8 @@ let do_completionItemResolve
 let do_resolve_local
     (ide_service : ClientIdeService.t)
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
-    (params : CompletionItemResolve.params) :
-    CompletionItemResolve.result Lwt.t =
+    (params : CompletionItemResolve.params) : CompletionItemResolve.result Lwt.t
+    =
   let raw_kind = params.Completion.kind in
   let kind = completion_kind_to_si_kind raw_kind in
   (* Some docblocks are for class methods.  Class methods need to know
@@ -1993,8 +1971,7 @@ let format_typeCoverage_result results counts =
     {
       coveredPercent;
       uncoveredRanges = List.filter_map results ~f:hack_coverage_to_lsp;
-      defaultMessage =
-        "Un-type checked code. Consider adding type annotations.";
+      defaultMessage = "Un-type checked code. Consider adding type annotations.";
     })
 
 let do_typeCoverage
@@ -2042,8 +2019,7 @@ let do_typeCoverage_local
         let formatted = format_typeCoverage_result results counts in
         Lwt.return formatted
       | Error error_message ->
-        failwith
-          (Printf.sprintf "Local type coverage failed: %s" error_message)))
+        failwith (Printf.sprintf "Local type coverage failed: %s" error_message)))
 
 let do_formatting_common
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
@@ -2072,8 +2048,7 @@ let do_formatting_common
 
 let do_documentRangeFormatting
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
-    (params : DocumentRangeFormatting.params) : DocumentRangeFormatting.result
-    =
+    (params : DocumentRangeFormatting.params) : DocumentRangeFormatting.result =
   DocumentRangeFormatting.(
     TextDocumentIdentifier.(
       let action =
@@ -2168,8 +2143,8 @@ let do_documentRename
 
 let do_documentOnTypeFormatting
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
-    (params : DocumentOnTypeFormatting.params) :
-    DocumentOnTypeFormatting.result =
+    (params : DocumentOnTypeFormatting.params) : DocumentOnTypeFormatting.result
+    =
   DocumentOnTypeFormatting.(
     TextDocumentIdentifier.(
       (*
@@ -2282,8 +2257,7 @@ let do_diagnostics
     match SMap.find_opt "" file_reports with
     | None -> file_reports
     | Some errors ->
-      SMap.remove "" file_reports
-      |> SMap.add ~combine:( @ ) default_path errors
+      SMap.remove "" file_reports |> SMap.add ~combine:( @ ) default_path errors
   in
   let per_file file errors =
     hack_errors_to_lsp_diagnostic file errors
@@ -2310,8 +2284,8 @@ let do_diagnostics
   (* this is "(uris_with_diagnostics \ uris_without) U uris_with" *)
   SSet.union (SSet.diff uris_with_diagnostics uris_without) uris_with
 
-let get_client_ide_status (ide_service : ClientIdeService.t) :
-    ShowStatus.params =
+let get_client_ide_status (ide_service : ClientIdeService.t) : ShowStatus.params
+    =
   match ClientIdeService.get_status ide_service with
   | ClientIdeService.Status.Not_started ->
     {
@@ -2418,8 +2392,8 @@ let merge_with_client_ide_status
     status
 
 let report_connect_progress
-    (env : env) (ienv : In_init_env.t) (ide_service : ClientIdeService.t) :
-    unit =
+    (env : env) (ienv : In_init_env.t) (ide_service : ClientIdeService.t) : unit
+    =
   In_init_env.(
     ShowStatus.(
       ShowMessageRequest.(
@@ -2493,8 +2467,8 @@ let report_connect_end (ienv : In_init_env.t) : state =
 
 (* After the server has sent 'hello', it means the persistent connection is   *)
 (* ready, so we can send our backlog of file-edits to the server.             *)
-let connect_after_hello (server_conn : server_conn) (state : state) :
-    unit Lwt.t =
+let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
+    =
   Hh_logger.log "connect_after_hello";
   let ignore = ref 0.0 in
   let%lwt () =
@@ -2502,9 +2476,7 @@ let connect_after_hello (server_conn : server_conn) (state : state) :
       (* tell server we want persistent connection *)
       let oc = server_conn.oc in
       ServerCommandLwt.send_connection_type oc ServerCommandTypes.Persistent;
-      let fd =
-        oc |> Unix.descr_of_out_channel |> Lwt_unix.of_unix_file_descr
-      in
+      let fd = oc |> Unix.descr_of_out_channel |> Lwt_unix.of_unix_file_descr in
       let%lwt (response : 'a ServerCommandTypes.message_type) =
         Marshal_tools_lwt.from_fd_with_preamble fd
       in
@@ -2547,13 +2519,11 @@ let connect_after_hello (server_conn : server_conn) (state : state) :
       let message = Exn.to_string e in
       let stack = Printexc.get_backtrace () in
       Hh_logger.log "connect_after_hello exception %s\n%s" message stack;
-      raise
-        (Server_fatal_connection_exception { Marshal_tools.message; stack })
+      raise (Server_fatal_connection_exception { Marshal_tools.message; stack })
   in
   Lwt.return_unit
 
-let rec connect_client (root : Path.t) ~(autostart : bool) : server_conn Lwt.t
-    =
+let rec connect_client (root : Path.t) ~(autostart : bool) : server_conn Lwt.t =
   Hh_logger.log "connect_client";
   Exit_status.(
     (* This basically does the same connection attempt as "hh_client check":  *)
@@ -2761,11 +2731,7 @@ let rec connect (state : state) : state Lwt.t =
     | In_init ienv ->
       Lwt.return
         (In_init
-           {
-             ienv with
-             In_init_env.conn;
-             most_recent_start_time = Unix.time ();
-           })
+           { ienv with In_init_env.conn; most_recent_start_time = Unix.time () })
     | _ ->
       let state = dismiss_ui state in
       Lwt.return
@@ -3380,8 +3346,7 @@ let handle_event
             | Main_loop { Main_env.editor_open_files; _ }
             | Lost_server { Lost_env.editor_open_files; _ } ),
             Client_message c )
-          when env.use_serverless_ide && c.method_ = "completionItem/resolve"
-          ->
+          when env.use_serverless_ide && c.method_ = "completionItem/resolve" ->
           let%lwt () = cancel_if_stale client c short_timeout in
           let%lwt result =
             parse_completionItem c.params
@@ -3410,8 +3375,8 @@ let handle_event
             | Main_loop { Main_env.editor_open_files; _ }
             | Lost_server { Lost_env.editor_open_files; _ } ),
             Client_message c )
-          when env.use_serverless_ide
-               && c.method_ = "textDocument/typeCoverage" ->
+          when env.use_serverless_ide && c.method_ = "textDocument/typeCoverage"
+          ->
           let%lwt () = cancel_if_stale client c short_timeout in
           let%lwt result =
             parse_typeCoverage c.params
@@ -3427,8 +3392,7 @@ let handle_event
           when env.use_serverless_ide && c.method_ = "textDocument/hover" ->
           let%lwt () = cancel_if_stale client c short_timeout in
           let%lwt result =
-            parse_hover c.params
-            |> do_hover_local ide_service editor_open_files
+            parse_hover c.params |> do_hover_local ide_service editor_open_files
           in
           result |> print_hover |> respond_jsonrpc ~powered_by:Serverless_ide c;
           Lwt.return_unit
@@ -3644,8 +3608,8 @@ let handle_event
           |> respond_jsonrpc ~powered_by:Hh_server c;
           Lwt.return_unit
         (* workspace/symbol request *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "workspace/symbol" ->
+        | (Main_loop menv, Client_message c) when c.method_ = "workspace/symbol"
+          ->
           let%lwt result =
             parse_workspaceSymbol c.params
             |> do_workspaceSymbol menv.conn ref_unblocked_time
@@ -3751,9 +3715,8 @@ let handle_event
           |> respond_jsonrpc ~powered_by:Hh_server c;
           Lwt.return_unit
         (* server busy status *)
-        | ( _,
-            Server_message { push = ServerCommandTypes.BUSY_STATUS status; _ }
-          ) ->
+        | (_, Server_message { push = ServerCommandTypes.BUSY_STATUS status; _ })
+          ->
           let should_send_status =
             match Lwt.poll initialize_params_promise with
             | None -> false
@@ -3828,8 +3791,8 @@ let handle_event
           raise (Error.InvalidRequest "already received shutdown request")
         (* server shut-down request *)
         | ( Main_loop _menv,
-            Server_message
-              { push = ServerCommandTypes.NEW_CLIENT_CONNECTED; _ } ) ->
+            Server_message { push = ServerCommandTypes.NEW_CLIENT_CONNECTED; _ }
+          ) ->
           let%lwt new_state =
             do_lost_server
               !state
@@ -3845,8 +3808,8 @@ let handle_event
           Lwt.return_unit
         (* server shut-down request, unexpected *)
         | ( _,
-            Server_message
-              { push = ServerCommandTypes.NEW_CLIENT_CONNECTED; _ } ) ->
+            Server_message { push = ServerCommandTypes.NEW_CLIENT_CONNECTED; _ }
+          ) ->
           let message = "unexpected close of absent server" in
           let stack = "" in
           raise
@@ -3857,8 +3820,8 @@ let handle_event
           raise (Server_fatal_connection_exception e)
         (* server non-fatal exception *)
         | ( _,
-            Server_message
-              { push = ServerCommandTypes.NONFATAL_EXCEPTION e; _ } ) ->
+            Server_message { push = ServerCommandTypes.NONFATAL_EXCEPTION e; _ }
+          ) ->
           raise (Server_nonfatal_exception e)
         (* idle tick. No-op. *)
         | (_, Tick) ->
@@ -4050,9 +4013,7 @@ let main (env : env) : Exit_status.t Lwt.t =
         "2:from_client"
         !ref_unblocked_time
         env;
-      Lsp_helpers.telemetry_error
-        to_stdout
-        (message ^ ", from_client\n" ^ stack);
+      Lsp_helpers.telemetry_error to_stdout (message ^ ", from_client\n" ^ stack);
       let () = exit_fail () in
       Lwt.return_unit
     | Client_recoverable_connection_exception { Marshal_tools.stack; message }
@@ -4065,9 +4026,7 @@ let main (env : env) : Exit_status.t Lwt.t =
         "3:from_client"
         !ref_unblocked_time
         env;
-      Lsp_helpers.telemetry_error
-        to_stdout
-        (message ^ ", from_client\n" ^ stack);
+      Lsp_helpers.telemetry_error to_stdout (message ^ ", from_client\n" ^ stack);
       Lwt.return_unit
     | Server_nonfatal_exception { Marshal_tools.stack; message } ->
       let stack = stack ^ "---\n" ^ Printexc.get_backtrace () in
@@ -4106,7 +4065,5 @@ let main (env : env) : Exit_status.t Lwt.t =
     main_loop ()
   in
   Lwt.async (fun () -> run_ide_service env !ide_service);
-  let%lwt () =
-    Lwt.pick [main_loop (); tick_showStatus env state ide_service]
-  in
+  let%lwt () = Lwt.pick [main_loop (); tick_showStatus env state ide_service] in
   Lwt.return Exit_status.No_error

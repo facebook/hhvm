@@ -68,10 +68,7 @@ let test () =
     Test.(
       run_loop_once
         env
-        {
-          default_loop_input with
-          disk_changes = [(foo_name, foo_with_errors)];
-        })
+        { default_loop_input with disk_changes = [(foo_name, foo_with_errors)] })
   in
   assert loop_output.did_read_disk_changes;
 
@@ -108,10 +105,7 @@ let test () =
     Test.(
       run_loop_once
         env
-        {
-          default_loop_input with
-          disk_changes = [(foo_name, foo_with_errors)];
-        })
+        { default_loop_input with disk_changes = [(foo_name, foo_with_errors)] })
   in
   assert loop_output.did_read_disk_changes;
 

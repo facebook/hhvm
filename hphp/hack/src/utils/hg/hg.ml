@@ -79,8 +79,7 @@ module Hg_actual = struct
     let process =
       exec_hg ~plain:false ["id"; "-i"; "--rev"; "bottom^"; "--cwd"; repo]
     in
-    Future.make process
-    @@ fun result ->
+    Future.make process @@ fun result ->
     let result = String.trim result in
     if String.length result < 1 then
       raise Malformed_result
@@ -92,8 +91,7 @@ module Hg_actual = struct
    * hg id -i --cwd <repo> *)
   let current_working_copy_hg_rev repo =
     let process = exec_hg ["id"; "-i"; "--cwd"; repo] in
-    Future.make process
-    @@ fun result ->
+    Future.make process @@ fun result ->
     let result = String.trim result in
     if String.length result < 1 then
       raise Malformed_result
@@ -227,8 +225,7 @@ module Hg_mock = struct
 
     let files_changed_since_rev_to_rev = Hashtbl.create 10
 
-    let current_working_copy_hg_rev_returns v =
-      current_working_copy_hg_rev := v
+    let current_working_copy_hg_rev_returns v = current_working_copy_hg_rev := v
 
     let current_working_copy_base_rev_returns v =
       current_working_copy_base_rev := v

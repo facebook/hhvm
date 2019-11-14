@@ -179,9 +179,7 @@ let serialize_tast tast tcopt =
 let go : ServerEnv.env -> string -> string =
  fun env filename ->
   let filepath = Path.make filename in
-  let path =
-    filepath |> Path.to_string |> Relative_path.create_detect_prefix
-  in
+  let path = filepath |> Path.to_string |> Relative_path.create_detect_prefix in
   let file_content = filepath |> Path.to_string |> Sys_utils.cat_no_fail in
   let (ctx, entry) =
     Provider_utils.update_context

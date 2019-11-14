@@ -34,8 +34,7 @@ let any_attr_is_rx_shallow ast_attrs =
   List.exists ast_attrs ~f:attr_is_rx_shallow
 
 let attr_is_rx_local ast_attr =
-  snd ast_attr.Ast.ua_name
-  = Naming_special_names.UserAttributes.uaLocalReactive
+  snd ast_attr.Ast.ua_name = Naming_special_names.UserAttributes.uaLocalReactive
 
 let any_attr_is_rx_local ast_attrs = List.exists ast_attrs ~f:attr_is_rx_local
 

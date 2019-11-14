@@ -25,8 +25,7 @@ let get_includes modules includes =
     in
     aux directly_included_mod []
     |> List.dedup_and_sort ~compare
-    |> List.fold ~init:acc ~f:(fun acc ty ->
-           (directly_included_mod, ty) :: acc)
+    |> List.fold ~init:acc ~f:(fun acc ty -> (directly_included_mod, ty) :: acc)
   in
   SSet.fold includes ~init:[] ~f:get_all_exported_types
 
@@ -36,15 +35,12 @@ let postprocess modules uses aliases includes =
   let uses =
     uses
     |> SSet.elements
-    |> List.filter ~f:(fun m ->
-           not (List.exists aliases (fun (_, a) -> m = a)))
+    |> List.filter ~f:(fun m -> not (List.exists aliases (fun (_, a) -> m = a)))
   in
   (uses, includes)
 
 let stringify modules m =
-  let { uses; extern_uses; glob_uses; aliases; includes; ty_uses; decls } =
-    m
-  in
+  let { uses; extern_uses; glob_uses; aliases; includes; ty_uses; decls } = m in
   let (uses, includes) = postprocess modules uses aliases includes in
   let extern_uses =
     extern_uses

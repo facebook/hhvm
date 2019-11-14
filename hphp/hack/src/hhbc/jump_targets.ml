@@ -314,8 +314,7 @@ let get_target_for_level ~is_break level t =
               }
           | _ -> failwith "impossible: TryFinally should be skipped"
         end
-    | Switch (end_label, _) :: _ when n = 1 ->
-      ResolvedRegular (end_label, iters)
+    | Switch (end_label, _) :: _ when n = 1 -> ResolvedRegular (end_label, iters)
     | Loop ({ label_break; label_continue; iterator }, _) :: _ when n = 1 ->
       let (label, iters) =
         if is_break then

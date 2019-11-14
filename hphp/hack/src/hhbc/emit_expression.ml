@@ -174,10 +174,7 @@ module InoutLocals = struct
   (* determines if value of a local 'name' that appear in parameter 'i'
      should be saved to local because it might be overwritten later *)
   let should_save_local_value name i aliases =
-    Option.value_map
-      ~default:false
-      ~f:(in_range i)
-      (SMap.find_opt name aliases)
+    Option.value_map ~default:false ~f:(in_range i) (SMap.find_opt name aliases)
 
   let should_move_local_value local aliases =
     match local with
@@ -701,8 +698,7 @@ and get_type_structure_for_hint ~targ_map ~tparams (h : Aast.hint) =
 
 (* NOTE: Make sure the type structure retrieval code is synced with emit_is. *)
 and emit_as env pos e h is_nullable =
-  Local.scope
-  @@ fun () ->
+  Local.scope @@ fun () ->
   let arg_local = Local.get_unnamed_local () in
   let type_struct_local = Local.get_unnamed_local () in
   let (ts_instrs, is_static) = emit_reified_arg env ~isas:true pos h in
@@ -732,12 +728,12 @@ and emit_as env pos e h is_nullable =
       emit_expr env e;
       instr_setl arg_local;
       (* Store type struct in a variable and reuse it. *)
-        ( if is_static then
-          main_block
-            (get_type_structure_for_hint ~targ_map:SMap.empty ~tparams:[] h)
-            Resolve
-        else
-          main_block ts_instrs DontResolve );
+      ( if is_static then
+        main_block
+          (get_type_structure_for_hint ~targ_map:SMap.empty ~tparams:[] h)
+          Resolve
+      else
+        main_block ts_instrs DontResolve );
       instr_label then_label;
       instr_pushl arg_local;
       instr_unsetl type_struct_local;
@@ -793,24 +789,27 @@ and emit_conditional_expression
       [
         r.instrs;
         (* only emit true branch if there is fallthrough from condition *)
-          begin
-            if r.is_fallthrough then
-              gather [emit_expr env etrue; emit_pos pos; instr_jmp end_label]
-            else empty
-          end;
+        begin
+          if r.is_fallthrough then
+            gather [emit_expr env etrue; emit_pos pos; instr_jmp end_label]
+          else
+            empty
+        end;
         (* only emit false branch if false_label is used *)
-          begin
-            if r.is_label_used then
-              gather [instr_label false_label; emit_expr env efalse]
-            else empty
-          end;
+        begin
+          if r.is_label_used then
+            gather [instr_label false_label; emit_expr env efalse]
+          else
+            empty
+        end;
         (* end_label is used to jump out of true branch so they should be emitted
          together *)
-          begin
-            if r.is_fallthrough then
-              instr_label end_label
-            else empty
-          end;
+        begin
+          if r.is_fallthrough then
+            instr_label end_label
+          else
+            empty
+        end;
       ]
   | None ->
     let end_label = Label.next_regular () in
@@ -913,8 +912,7 @@ and emit_new
       let cls = Ast_scope.Scope.get_class scope in
       Option.value_map cls ~default:true ~f:(fun cls ->
           match cls.A.c_extends with
-          | (_, Aast.Happly (_, l)) :: _ ->
-            not @@ has_non_tparam_generics env l
+          | (_, Aast.Happly (_, l)) :: _ -> not @@ has_non_tparam_generics env l
           | _ -> true)
     | _ -> true
   in
@@ -960,8 +958,7 @@ and emit_new
       gather [instrs; instr_classgetts; instr_newobjr]
     | _ -> gather [emit_load_class_ref env pos cexpr; instr_newobj]
   in
-  Scope.with_unnamed_locals
-  @@ fun () ->
+  Scope.with_unnamed_locals @@ fun () ->
   let (instr_args, _) = emit_args_and_inout_setters env args in
   let instr_uargs =
     match uargs with
@@ -1000,8 +997,7 @@ and emit_record env pos (_, rname) is_array es =
 and emit_clone env expr = gather [emit_expr env expr; instr_clone]
 
 and emit_shape
-    env (expr : Tast.expr) (fl : (Ast_defs.shape_field_name * Tast.expr) list)
-    =
+    env (expr : Tast.expr) (fl : (Ast_defs.shape_field_name * Tast.expr) list) =
   let p = fst expr in
   let fl =
     List.map fl ~f:(fun (fn, e) ->
@@ -1099,8 +1095,7 @@ and emit_class_expr
   | Class_expr
       ((_, (A.BracedExpr _ | A.Call _ | A.Binop _ | A.Class_get _)) as e) ->
     aux e
-  | Class_expr ((_, A.Lvar (_, id)) as e) when Local_id.get_name id = "$this"
-    ->
+  | Class_expr ((_, A.Lvar (_, id)) as e) when Local_id.get_name id = "$this" ->
     aux e
   | _ ->
     let pos =
@@ -1461,8 +1456,7 @@ and try_inline_gen_call env (e : Tast.expr) =
 (* emits iteration over the ~collection where loop body is
    produced by ~f *)
 and emit_iter ~collection f =
-  Scope.with_unnamed_locals_and_iterators
-  @@ fun () ->
+  Scope.with_unnamed_locals_and_iterators @@ fun () ->
   let iter_id = Iterator.get_iterator () in
   let val_id = Local.get_unnamed_local () in
   let key_id = Local.get_unnamed_local () in
@@ -1484,12 +1478,10 @@ and emit_iter ~collection f =
   (iter_init, iterate, iter_done)
 
 and inline_gena_call env (arg : Tast.expr) =
-  Local.scope
-  @@ fun () ->
+  Local.scope @@ fun () ->
   (* convert input to array *)
   let load_array = emit_expr env arg in
-  Scope.with_unnamed_local
-  @@ fun arr_local ->
+  Scope.with_unnamed_local @@ fun arr_local ->
   let async_eager_label = Label.next_regular () in
   (* before *)
   ( gather
@@ -1521,16 +1513,16 @@ and inline_gena_call env (arg : Tast.expr) =
         instr_popc;
         ( emit_iter ~collection:(instr_cgetl arr_local)
         @@ fun value_local key_local ->
-        gather
-          [
-            (* generate code for
+          gather
+            [
+              (* generate code for
            arr_local[key_local] = WHResult (value_local) *)
               instr_cgetl value_local;
-            instr_whresult;
-            instr_basel arr_local MemberOpMode.Define;
-            instr_setm 0 (MemberKey.EL key_local);
-            instr_popc;
-          ] );
+              instr_whresult;
+              instr_basel arr_local MemberOpMode.Define;
+              instr_setm 0 (MemberKey.EL key_local);
+              instr_popc;
+            ] );
       ],
     (* after *)
     instr_pushl arr_local )
@@ -2076,8 +2068,7 @@ and emit_collection ?transform_to_collection env (expr : Tast.expr) es =
 
 and emit_pipe env (e1 : Tast.expr) (e2 : Tast.expr) =
   let lhs_instrs = emit_expr env e1 in
-  Scope.with_unnamed_local
-  @@ fun temp ->
+  Scope.with_unnamed_local @@ fun temp ->
   let env = Emit_env.with_pipe_var temp env in
   let rhs_instrs = emit_expr env e2 in
   (gather [lhs_instrs; instr_popl temp], rhs_instrs, instr_unsetl temp)
@@ -2267,8 +2258,7 @@ and emit_jmpnz env annot (expr_ : Tast.expr_) label : emit_jmp_result =
       | _ ->
         {
           instrs =
-            with_pos
-            @@ gather [emit_expr env (annot, expr_); instr_jmpnz label];
+            with_pos @@ gather [emit_expr env (annot, expr_); instr_jmpnz label];
           is_fallthrough = true;
           is_label_used = true;
         }
@@ -2409,15 +2399,14 @@ and emit_store_for_simple_base
    - Some Value_kind_local - expression represents local that will be
      overwritten later
    - Some Value_kind_expression - spilled non-trivial expression *)
-and get_local_temp_kind
-    ~is_base inout_param_info env (e_opt : Tast.expr option) =
+and get_local_temp_kind ~is_base inout_param_info env (e_opt : Tast.expr option)
+    =
   match (e_opt, inout_param_info) with
   (* not inout case - no need to save *)
   | (_, None) -> None
   (* local that will later be overwritten *)
   | (Some (_, A.Lvar (_, id)), Some (i, aliases))
-    when InoutLocals.should_save_local_value (Local_id.get_name id) i aliases
-    ->
+    when InoutLocals.should_save_local_value (Local_id.get_name id) i aliases ->
     Some Value_kind_local
   (* non-trivial expression *)
   | (Some e, _) ->
@@ -2483,8 +2472,7 @@ and emit_array_get_worker
     Emit_fatal.raise_fatal_parse
       pos
       "Can't use array() as base in write context"
-  | (((pos, _), _), None) when not (Emit_env.does_env_allow_array_append env)
-    ->
+  | (((pos, _), _), None) when not (Emit_env.does_env_allow_array_append env) ->
     Emit_fatal.raise_fatal_runtime pos "Can't use [] for reading"
   | _ ->
     let local_temp_kind =
@@ -2564,20 +2552,20 @@ and emit_array_get_worker
         let load =
           [
             (* load base and indexer, value of indexer will be saved in local *)
-              ( gather [base.base_instrs; elem_expr_instrs],
-                Some (local, local_kind) );
+            ( gather [base.base_instrs; elem_expr_instrs],
+              Some (local, local_kind) );
             (* finish loading the value *)
-              ( gather
-                  [
-                    base.base_instrs;
-                    emit_pos outer_pos;
-                    base.setup_instrs;
-                    make_final
-                      ( base.base_stack_size
-                      + base.cls_stack_size
-                      + elem_stack_size );
-                  ],
-                None );
+            ( gather
+                [
+                  base.base_instrs;
+                  emit_pos outer_pos;
+                  base.setup_instrs;
+                  make_final
+                    ( base.base_stack_size
+                    + base.cls_stack_size
+                    + elem_stack_size );
+                ],
+              None );
           ]
         in
         let store =
@@ -2625,7 +2613,7 @@ and emit_array_get_worker
           base.load.base_instrs
           @ [
               (* load index, value will be saved in local *)
-                (elem_expr_instrs, Some (local, local_kind));
+              (elem_expr_instrs, Some (local, local_kind));
               ( gather
                   [
                     base.load.cls_instrs;
@@ -3012,8 +3000,7 @@ and emit_base_worker
       1
       0
   (* $a[] can not be used as the base of an array get unless as an lval *)
-  | A.Array_get (_, None) when not (Emit_env.does_env_allow_array_append env)
-    ->
+  | A.Array_get (_, None) when not (Emit_env.does_env_allow_array_append env) ->
     Emit_fatal.raise_fatal_runtime pos "Can't use [] for reading"
   (* base is in turn array_get - do a specific handling for inout params
       if necessary *)
@@ -3096,8 +3083,7 @@ and emit_base_worker
             load =
               {
                 (* concat index evaluation to base *)
-                base_instrs =
-                  base.load.base_instrs @ [(elem_expr_instrs, None)];
+                base_instrs = base.load.base_instrs @ [(elem_expr_instrs, None)];
                 cls_instrs = base.load.cls_instrs;
                 setup_instrs = make_setup_instrs base.load.setup_instrs;
                 base_stack_size = base.load.base_stack_size + elem_stack_size;
@@ -3116,7 +3102,7 @@ and emit_base_worker
                   base.load.base_instrs
                   @ [
                       (* evaluate index, result will be stored in local *)
-                        (elem_expr_instrs, Some (local, local_kind));
+                      (elem_expr_instrs, Some (local, local_kind));
                     ];
                 cls_instrs = base.load.cls_instrs;
                 setup_instrs = make_setup_instrs base.load.setup_instrs;
@@ -3125,10 +3111,7 @@ and emit_base_worker
               };
             store =
               gather
-                [
-                  base.store;
-                  instr_dim MemberOpMode.Define (MemberKey.EL local);
-                ];
+                [base.store; instr_dim MemberOpMode.Define (MemberKey.EL local)];
           }
     end
   | A.Obj_get (base_expr, prop_expr, null_flavor) ->
@@ -3354,8 +3337,7 @@ and emit_args_and_inout_setters env (args : Tast.expr list) =
       (gather [instr_cgetl local; move_instrs], instr_popl local)
     (* inout $arr[...][...] *)
     | A.Callconv
-        (Ast_defs.Pinout, ((pos, _), A.Array_get (base_expr, opt_elem_expr)))
-      ->
+        (Ast_defs.Pinout, ((pos, _), A.Array_get (base_expr, opt_elem_expr))) ->
       let array_get_result =
         fst
           (emit_array_get_worker
@@ -3726,7 +3708,7 @@ and emit_special_function
       (gather
          [
            (* Could use emit_jmpnz for better code *)
-             emit_expr env e;
+           emit_expr env e;
            instr_jmpnz l;
            emit_ignored_expr
              env
@@ -3789,8 +3771,7 @@ and emit_special_function
       | [(_, A.String func_name)] ->
         let func_name = SU.strip_global_ns func_name in
         if Hhbc_options.emit_func_pointers !Hhbc_options.compiler_options then
-          Some
-            (instr_resolve_func @@ Hhbc_id.Function.from_raw_string func_name)
+          Some (instr_resolve_func @@ Hhbc_id.Function.from_raw_string func_name)
         else
           Some (instr_string func_name)
       | _ ->
@@ -3842,10 +3823,7 @@ and emit_special_function
   | ("HH\\class_meth", _) ->
     begin
       match args with
-      | [
-          ((_, A.Class_const _) as class_name);
-          ((_, A.String _) as method_name);
-        ]
+      | [((_, A.Class_const _) as class_name); ((_, A.String _) as method_name)]
       | [((_, A.String _) as class_name); ((_, A.String _) as method_name)] ->
         Some
           (gather
@@ -3995,8 +3973,7 @@ and emit_call
   let (_flags, _args, num_ret, _inouts, _eager) = fcall_args in
   let num_uninit = num_ret - 1 in
   let default () =
-    Scope.with_unnamed_locals
-    @@ fun () ->
+    Scope.with_unnamed_locals @@ fun () ->
     let (instr_lhs, instr_fcall) =
       emit_call_lhs_and_fcall env expr fcall_args targs
     in
@@ -4292,8 +4269,7 @@ and emit_lval_op
     if not has_elements then
       instr_rhs
     else
-      Scope.with_unnamed_local
-      @@ fun local ->
+      Scope.with_unnamed_local @@ fun local ->
       let loc =
         if can_use_as_rhs_in_list_assignment (snd expr2) then
           Some local
@@ -4308,8 +4284,7 @@ and emit_lval_op
         (* after *)
         instr_pushl local )
   | _ ->
-    Local.scope
-    @@ fun () ->
+    Local.scope @@ fun () ->
     let (rhs_instrs, rhs_stack_size) =
       match opt_expr2 with
       | None -> (empty, 0)
@@ -4335,8 +4310,7 @@ and emit_lval_op
       rhs_stack_size
 
 and emit_lval_op_nonlist
-    ?(null_coalesce_assignment = false) env pos op e rhs_instrs rhs_stack_size
-    =
+    ?(null_coalesce_assignment = false) env pos op e rhs_instrs rhs_stack_size =
   let (lhs, rhs, setop) =
     emit_lval_op_nonlist_steps
       ~null_coalesce_assignment
@@ -4397,8 +4371,7 @@ and emit_lval_op_nonlist_steps
         (empty, gather [rhs_instrs; index_instrs], final_global_op_instrs)
       else
         (index_instrs, rhs_instrs, final_global_op_instrs)
-  | A.Array_get (_, None) when not (Emit_env.does_env_allow_array_append env)
-    ->
+  | A.Array_get (_, None) when not (Emit_env.does_env_allow_array_append env) ->
     Emit_fatal.raise_fatal_runtime pos "Can't use [] for reading"
   | A.Array_get (base_expr, opt_elem_expr) ->
     let mode =
@@ -4442,9 +4415,7 @@ and emit_lval_op_nonlist_steps
         (rhs_stack_size + cls_stack_size)
         opt_elem_expr
     in
-    let total_stack_size =
-      elem_stack_size + base_stack_size + cls_stack_size
-    in
+    let total_stack_size = elem_stack_size + base_stack_size + cls_stack_size in
     let final_instr =
       emit_pos_then pos @@ emit_final_member_op total_stack_size op mk
     in
@@ -4503,9 +4474,7 @@ and emit_lval_op_nonlist_steps
       else
         prop_expr_instrs
     in
-    let total_stack_size =
-      prop_stack_size + base_stack_size + cls_stack_size
-    in
+    let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size in
     let final_instr =
       emit_pos_then pos @@ emit_final_member_op total_stack_size op mk
     in
@@ -4570,8 +4539,7 @@ and emit_unop env pos op e =
   match op with
   | Ast_defs.Utild ->
     gather [emit_expr env e; emit_pos_then pos @@ from_unop op]
-  | Ast_defs.Unot ->
-    gather [emit_expr env e; emit_pos_then pos @@ from_unop op]
+  | Ast_defs.Unot -> gather [emit_expr env e; emit_pos_then pos @@ from_unop op]
   | Ast_defs.Uplus ->
     gather
       [
@@ -4594,8 +4562,7 @@ and emit_unop env pos op e =
   | Ast_defs.Updecr ->
     emit_lval_op env pos (LValOp.IncDec (unop_to_incdec_op op)) e None
   | Ast_defs.Usilence ->
-    Local.scope
-    @@ fun () ->
+    Local.scope @@ fun () ->
     let temp_local = Local.get_unnamed_local () in
     gather
       [

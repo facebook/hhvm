@@ -299,8 +299,7 @@ and afield_to_typed_value_pair ?(restrict_keys = false) ns afield =
   match afield with
   | A.AFvalue _value -> failwith "afield_to_typed_value_pair: unexpected value"
   | A.AFkvalue (key, value) ->
-    ( key_expr_to_typed_value ~restrict_keys ns key,
-      expr_to_typed_value ns value )
+    (key_expr_to_typed_value ~restrict_keys ns key, expr_to_typed_value ns value)
 
 and value_afield_to_typed_value ns afield =
   match afield with

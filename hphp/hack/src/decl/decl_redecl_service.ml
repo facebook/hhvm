@@ -176,9 +176,7 @@ let compute_deps ~conservative_redecl fast filel =
       n_record_defs
   in
   let old_consts = Decl_heap.GConsts.get_old_batch n_consts in
-  let acc =
-    compute_gconsts_deps ~conservative_redecl old_consts acc n_consts
-  in
+  let acc = compute_gconsts_deps ~conservative_redecl old_consts acc n_consts in
   let acc =
     if shallow_decl_enabled () then
       acc
@@ -401,12 +399,8 @@ let get_elems workers ~bucket_size ~old defs =
 (*****************************************************************************)
 
 let redo_type_decl
-    workers
-    ~bucket_size
-    ~conservative_redecl
-    get_classes
-    all_oldified_defs
-    fast =
+    workers ~bucket_size ~conservative_redecl get_classes all_oldified_defs fast
+    =
   let defs =
     Relative_path.Map.fold fast ~init:FileInfo.empty_names ~f:(fun _ ->
         FileInfo.merge_names)

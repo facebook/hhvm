@@ -18,8 +18,8 @@ external parse_mode : SourceText.t -> FileInfo.mode option = "rust_parse_mode"
 
 type ('a, 'b) result = 'a * 'b * SyntaxError.t list * Rust_pointer.t option
 
-external parse_minimal :
-  SourceText.t -> Env.t -> (unit, MinimalSyntax.t) result = "parse_minimal"
+external parse_minimal : SourceText.t -> Env.t -> (unit, MinimalSyntax.t) result
+  = "parse_minimal"
 
 let parse_minimal text env = parse_minimal text env
 

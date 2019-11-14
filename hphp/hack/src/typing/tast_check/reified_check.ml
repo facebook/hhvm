@@ -166,8 +166,7 @@ let handler =
         let (env, ty) = Env.expand_type env ty in
         (match ty with
         | (_, Tabstract (AKgeneric ci, None)) when String.equal ci class_id ->
-          if not (Env.get_newable env ci) then
-            Errors.new_without_newable pos ci;
+          if not (Env.get_newable env ci) then Errors.new_without_newable pos ci;
           if not (List.is_empty targs) then Errors.tparam_with_tparam pos ci
         | _ ->
           (match Env.get_class env class_id with

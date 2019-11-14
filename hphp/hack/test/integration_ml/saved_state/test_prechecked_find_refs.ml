@@ -90,8 +90,7 @@ let test saved_state_dir test_request assert_response () =
   ()
 
 let test () =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   save_state temp_dir;
 

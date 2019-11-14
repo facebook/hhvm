@@ -82,8 +82,7 @@ let process_class_id target_class cid mid_option =
 
 let process_taccess target_classes target_typeconst (class_name, tconst_name, p)
     =
-  if
-    is_target_class target_classes class_name && target_typeconst = tconst_name
+  if is_target_class target_classes class_name && target_typeconst = tconst_name
   then
     Pos.Map.singleton p (class_name ^ "::" ^ tconst_name)
   else
@@ -273,17 +272,16 @@ let get_definitions = function
   | IClass class_name ->
     Option.value
       ~default:[]
-      ( Naming_table.Types.get_kind class_name
-      >>= function
-      | Naming_table.TClass ->
-        Decl_provider.get_class class_name
-        >>= (fun class_ -> Some [(class_name, Cls.pos class_)])
-      | Naming_table.TTypedef ->
-        Decl_provider.get_typedef class_name
-        >>= (fun type_ -> Some [(class_name, type_.td_pos)])
-      | Naming_table.TRecordDef ->
-        Decl_provider.get_record_def class_name
-        >>= (fun rd -> Some [(class_name, rd.rdt_pos)]) )
+      (Naming_table.Types.get_kind class_name >>= function
+       | Naming_table.TClass ->
+         Decl_provider.get_class class_name >>= fun class_ ->
+         Some [(class_name, Cls.pos class_)]
+       | Naming_table.TTypedef ->
+         Decl_provider.get_typedef class_name >>= fun type_ ->
+         Some [(class_name, type_.td_pos)]
+       | Naming_table.TRecordDef ->
+         Decl_provider.get_record_def class_name >>= fun rd ->
+         Some [(class_name, rd.rdt_pos)])
   | IRecord record_name ->
     begin
       match Decl_provider.get_record_def record_name with
@@ -342,7 +340,5 @@ let get_dependent_files _workers input_set =
 
 let result_to_ide_message x =
   Option.map x ~f:(fun (symbol_name, references) ->
-      let references =
-        List.map references ~f:Ide_api_types.pos_to_file_range
-      in
+      let references = List.map references ~f:Ide_api_types.pos_to_file_range in
       (symbol_name, references))

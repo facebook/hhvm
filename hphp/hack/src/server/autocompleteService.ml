@@ -82,8 +82,7 @@ let get_replace_pos_exn () =
       let ed =
         {
           range.ed with
-          column =
-            range.ed.column - AutocompleteTypes.autocomplete_token_length;
+          column = range.ed.column - AutocompleteTypes.autocomplete_token_length;
         }
       in
       let st = { range.st with column = ed.column - String.length name } in
@@ -119,8 +118,7 @@ let autocomplete_result_to_json res =
       ("pos", Pos.json pos);
       ("func_details", func_details_to_json res.func_details);
       ("expected_ty", Hh_json.JSON_Bool false);
-        (* legacy field, left here in case clients need it *)
-      
+      (* legacy field, left here in case clients need it *)
     ]
 
 let get_partial_result name ty kind class_opt =
@@ -322,9 +320,8 @@ let resolve_ty
         { AutocompleteTypes.is_instance_member = false; _ },
         _ )
     | (SearchUtils.SI_XHP, { AutocompleteTypes.is_xhp_classname = true; _ }, _)
-    | ( SearchUtils.SI_Class,
-        { AutocompleteTypes.is_xhp_classname = true; _ },
-        _ ) ->
+    | (SearchUtils.SI_Class, { AutocompleteTypes.is_xhp_classname = true; _ }, _)
+      ->
       let newname = lstrip x.name ":" in
       (newname, x.name)
     | ( SearchUtils.SI_Literal,

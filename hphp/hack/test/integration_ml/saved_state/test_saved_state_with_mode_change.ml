@@ -12,8 +12,7 @@ let bar_error =
   ^ "Toplevel statements are not allowed. Use __EntryPoint attribute instead (Parsing[1002])\n\n"
 
 let test_parsing_error () : unit =
-  Tempfile.with_real_tempdir
-  @@ fun temp_dir ->
+  Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
   let disk_state = [("foo.php", "<?hh\nfunction foo(): void {}")] in
   let before_disk_state = ("bar.php", make_bar "partial") :: disk_state in

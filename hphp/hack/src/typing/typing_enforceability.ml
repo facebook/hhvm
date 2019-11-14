@@ -43,15 +43,10 @@ let rec is_enforceable (env : env) (ty : decl_ty) =
             List.Or_unequal_lengths.(
               begin
                 match
-                  List.fold2
-                    ~init:true
-                    targs
-                    tparams
-                    ~f:(fun acc targ tparam ->
+                  List.fold2 ~init:true targs tparams ~f:(fun acc targ tparam ->
                       match targ with
                       | (_, Tdynamic)
                       (* We accept the inner type being dynamic regardless of reification *)
-
                       | (_, Tlike _) ->
                         acc
                       | _ ->
@@ -109,9 +104,7 @@ let rec is_enforceable (env : env) (ty : decl_ty) =
 
 let make_locl_like_type env ty =
   if env.Typing_env_types.pessimize then
-    let dyn =
-      MakeType.dynamic (Reason.Renforceable (Reason.to_pos (fst ty)))
-    in
+    let dyn = MakeType.dynamic (Reason.Renforceable (Reason.to_pos (fst ty))) in
     Typing_union.union env dyn ty
   else
     (env, ty)
@@ -147,8 +140,8 @@ let compute_enforced_and_pessimize_ty
   let ety = compute_enforced_ty env ~explicitly_untrusted ty in
   pessimize_type env ety
 
-let handle_awaitable_return
-    env ft_fun_kind (ft_ret : decl_possibly_enforced_ty) =
+let handle_awaitable_return env ft_fun_kind (ft_ret : decl_possibly_enforced_ty)
+    =
   let { et_type = return_type; _ } = ft_ret in
   match (ft_fun_kind, return_type) with
   | (Ast_defs.FAsync, (_, Tapply ((_, name), [inner_ty])))

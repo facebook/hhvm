@@ -192,8 +192,7 @@ let parse_options () =
       ("--allow-non-opt-build", Arg.Set allow_non_opt_build, "");
       ("--check", Arg.Set check_mode, Messages.check);
       ( "--config",
-        Arg.String
-          (fun s -> config := String_utils.split2_exn '=' s :: !config),
+        Arg.String (fun s -> config := String_utils.split2_exn '=' s :: !config),
         Messages.config );
       ("--daemon", Arg.Set should_detach, Messages.daemon);
       ("--dynamic-view", Arg.Set dynamic_view, Messages.dynamic_view);

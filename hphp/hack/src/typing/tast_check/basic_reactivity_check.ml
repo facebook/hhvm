@@ -156,10 +156,8 @@ let with_mutable_value env e ~default ~f =
   | _ -> default
 
 let check_borrowing
-    (env : Tast_env.env)
-    (p : 'a fun_param)
-    (mut_args : args_mut_map)
-    (e : expr) : args_mut_map =
+    (env : Tast_env.env) (p : 'a fun_param) (mut_args : args_mut_map) (e : expr)
+    : args_mut_map =
   let mut_to_string m =
     match m with
     | None -> "immutable"
@@ -672,8 +670,7 @@ let check =
                 let (_env, fty) = Env.expand_type env (get_type f) in
                 match fty with
                 | (r, Tfun fty) when fty.ft_returns_void_to_rx ->
-                  Errors
-                  .returns_void_to_rx_function_as_non_expression_statement
+                  Errors.returns_void_to_rx_function_as_non_expression_statement
                     (get_position expr)
                     (Reason.to_pos r)
                 | _ -> () );

@@ -87,8 +87,7 @@ module Client_actual = struct
               Responses.Mid_update
             | Responses.Settled ->
               instance.state := Settled;
-              ignore_unix_error Unix.close
-              @@ Buffered_line_reader.get_fd reader;
+              ignore_unix_error Unix.close @@ Buffered_line_reader.get_fd reader;
               Responses.Settled
           in
           Some response

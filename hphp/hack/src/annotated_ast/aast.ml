@@ -61,8 +61,7 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
   | GotoLabel of pstring
   | Goto of pstring
   | Awaitall of
-      (lid option * ('ex, 'fb, 'en, 'hi) expr) list
-      * ('ex, 'fb, 'en, 'hi) block
+      (lid option * ('ex, 'fb, 'en, 'hi) expr) list * ('ex, 'fb, 'en, 'hi) block
   | If of
       ('ex, 'fb, 'en, 'hi) expr
       * ('ex, 'fb, 'en, 'hi) block

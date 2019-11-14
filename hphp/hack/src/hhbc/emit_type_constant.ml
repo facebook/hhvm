@@ -182,8 +182,7 @@ and get_generic_types ~tparams ~targ_map hl =
   | _ ->
     [(TV.String "generic_types", hints_to_type_constant ~tparams ~targ_map hl)]
 
-and get_kind ~tparams s =
-  [(TV.String "kind", TV.Int (get_kind_num ~tparams s))]
+and get_kind ~tparams s = [(TV.String "kind", TV.Int (get_kind_num ~tparams s))]
 
 and root_to_string s =
   if s = "this" then
@@ -211,8 +210,7 @@ and hint_to_type_constant_list ~tparams ~targ_map (h : Aast.hint) =
     let n = String.lowercase @@ snd s in
     let generic_types =
       let module SN = Naming_special_names.Classes in
-      if
-        n = String.lowercase SN.cClassname || n = String.lowercase SN.cTypename
+      if n = String.lowercase SN.cClassname || n = String.lowercase SN.cTypename
       then
         []
       else

@@ -32,9 +32,7 @@ let expand_state env state =
           in
           (env_rbm, next_rbm_opt))
   in
-  next_rbms
-  |> List.filter_opt
-  |> List.map ~f:(Solve_state.make env chunk_group)
+  next_rbms |> List.filter_opt |> List.map ~f:(Solve_state.make env chunk_group)
 
 let find_best_state env init_state =
   let queue = State_queue.make_empty 7 in
@@ -97,8 +95,7 @@ let solve_chunk_group env ?range ?source_text chunk_group =
            range which was broken in the original source, the output will look
            strange if we don't break all of that rule's associated splits inside
            the formatting range, too. *)
-        |> IMap.filter (fun id broke ->
-               broke && ISet.mem id rules_out_of_range)
+        |> IMap.filter (fun id broke -> broke && ISet.mem id rules_out_of_range)
         (* We should also break any rule which is configured to ALWAYS break
            (such as the rule governing the split after a single-line comment)
            and has a split inside the formatting range. *)

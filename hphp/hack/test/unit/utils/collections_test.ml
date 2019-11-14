@@ -70,8 +70,7 @@ let test_ImmQueue () =
     let acc = ref [] in
     ImmQueue.iter queue ~f:(fun i -> acc := !acc @ [i]);
     if !acc <> [2; 3; 4; 5] then failwith "expected 2345 iter order";
-    if ImmQueue.to_list queue <> [2; 3; 4; 5] then
-      failwith "expected 2345 list";
+    if ImmQueue.to_list queue <> [2; 3; 4; 5] then failwith "expected 2345 list";
 
     let queue2 = ImmQueue.from_list [6; 7; 8] in
     let (_, queue2) = ImmQueue.pop queue2 in

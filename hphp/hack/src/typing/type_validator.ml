@@ -70,24 +70,25 @@ class virtual type_validator =
               let ( >>= ) = Option.( >>= ) in
               Option.value
                 ~default:acc
-                ( Env.get_class env class_name
-                >>= fun class_ ->
-                Decl_provider.Class.get_typeconst class_ tconst
-                >>= fun typeconst ->
-                let is_concrete =
-                  match typeconst.ttc_abstract with
-                  | TCConcrete -> true
-                  (* This handles the case for partially abstract type constants. In this case
-                   * we know the assigned type will be chosen if the root is the same as the
-                   * concrete supertype of the root.
-                   *)
-                  | TCPartiallyAbstract when phys_equal root ty -> true
-                  | _ -> false
-                in
-                let ety_env = { acc.ety_env with this_ty = ty } in
-                Some
-                  (this#on_typeconst { acc with ety_env } is_concrete typeconst)
-                )
+                ( Env.get_class env class_name >>= fun class_ ->
+                  Decl_provider.Class.get_typeconst class_ tconst
+                  >>= fun typeconst ->
+                  let is_concrete =
+                    match typeconst.ttc_abstract with
+                    | TCConcrete -> true
+                    (* This handles the case for partially abstract type constants. In this case
+                     * we know the assigned type will be chosen if the root is the same as the
+                     * concrete supertype of the root.
+                     *)
+                    | TCPartiallyAbstract when phys_equal root ty -> true
+                    | _ -> false
+                  in
+                  let ety_env = { acc.ety_env with this_ty = ty } in
+                  Some
+                    (this#on_typeconst
+                       { acc with ety_env }
+                       is_concrete
+                       typeconst) )
             | _ -> acc)
 
     method! on_tapply acc r (pos, name) tyl =

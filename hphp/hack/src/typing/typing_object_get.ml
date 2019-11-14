@@ -324,8 +324,7 @@ and obj_get_concrete_ty
             let mem_pos = Reason.to_pos (fst member_) in
             ( if shadowed then
               match old_member_info with
-              | Some
-                  { ce_visibility = old_vis; ce_type = (lazy old_member); _ }
+              | Some { ce_visibility = old_vis; ce_type = (lazy old_member); _ }
                 ->
                 let old_mem_pos = Reason.to_pos (fst old_member) in
                 begin
@@ -343,10 +342,7 @@ and obj_get_concrete_ty
                 end
               | _ -> () );
             TVis.check_obj_access ~use_pos:id_pos ~def_pos:mem_pos env vis;
-            TVis.check_deprecated
-              ~use_pos:id_pos
-              ~def_pos:mem_pos
-              ce_deprecated;
+            TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos ce_deprecated;
             if Nast.equal_class_id_ class_id CIparent && ce_abstract then
               Errors.parent_abstract_call id_str id_pos mem_pos;
             let member_decl_ty = Typing_enum.member_type env member_ce in

@@ -28,8 +28,7 @@ let test_read_headers () =
   let (fd_in, fd_out) = Unix.pipe () in
   let reader = Buffered_line_reader.create fd_in in
   write fd_out "A\r\nB\r\n\r\n";
-  if Http_lite.read_headers reader <> ["A"; "B"] then
-    failwith "CRLF-terminated";
+  if Http_lite.read_headers reader <> ["A"; "B"] then failwith "CRLF-terminated";
   write fd_out "C\nD\n\n";
   if Http_lite.read_headers reader <> ["C"; "D"] then failwith "LF-terminated";
   write fd_out "E\r\n\n";

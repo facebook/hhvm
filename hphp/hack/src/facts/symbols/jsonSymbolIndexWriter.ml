@@ -70,8 +70,7 @@ let record_in_jsonfiles
                         ("actype", JSON_Bool (valid_for_actype symbol));
                       ] );
                   ( "kind_id",
-                    JSON_Number (string_of_int (kind_to_int symbol.sif_kind))
-                  );
+                    JSON_Number (string_of_int (kind_to_int symbol.sif_kind)) );
                   ("ns_id", JSON_Number (string_of_int nsid));
                   ("filehash_id", JSON_String (Int64.to_string hash));
                   ("is_abstract", JSON_Bool (valid_for_actype symbol));

@@ -49,8 +49,8 @@ let inproc_get_gconst
   Printf.printf "INPROC GOT GCONST... %s = %s\n%!" name s;
   Ok s
 
-let init_inproc ~(naming_table : Path.t) ~(root : Path.t) ~(hhi_root : Path.t)
-    : t =
+let init_inproc ~(naming_table : Path.t) ~(root : Path.t) ~(hhi_root : Path.t) :
+    t =
   let state =
     Decl_ipc_ffi_externs.inproc_init_ffi
       (Path.to_string naming_table)

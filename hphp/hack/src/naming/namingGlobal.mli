@@ -61,5 +61,4 @@ val ndecl_file_fast :
   consts:SSet.t ->
   unit
 
-val ndecl_file :
-  Relative_path.t -> FileInfo.t -> Errors.t * Relative_path.Set.t
+val ndecl_file : Relative_path.t -> FileInfo.t -> Errors.t * Relative_path.Set.t

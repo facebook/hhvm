@@ -27,8 +27,7 @@ let call_external_formatter
     end;
     match Timeout.close_process_in ic with
     | Unix.WEXITED 0 -> Ok (List.rev !lines)
-    | Unix.WEXITED v ->
-      Error (Hackfmt_error.get_error_string_from_exit_value v)
+    | Unix.WEXITED v -> Error (Hackfmt_error.get_error_string_from_exit_value v)
     | _ -> Error "Call to hackfmt was killed"
   in
   Timeout.read_process
@@ -65,10 +64,10 @@ let go_hackfmt ?filename ~content args =
       ~f:(fun x -> Path.make x |> Path.to_string)
       [
         (* if running from build tree *)
-          dirname ^ "/hackfmt";
+        dirname ^ "/hackfmt";
         dirname ^ "/../hackfmt/hackfmt";
         (* look for system installation *)
-          BuildOptions.default_hackfmt_path;
+        BuildOptions.default_hackfmt_path;
       ]
   in
   let path = List.find ~f:Sys.file_exists paths in
@@ -77,16 +76,15 @@ let go_hackfmt ?filename ~content args =
   | _ ->
     Hh_logger.log "Formatter not found";
     Error
-      ( "Could not locate formatter - looked in: "
-      ^ String.concat ~sep:" " paths )
+      ("Could not locate formatter - looked in: " ^ String.concat ~sep:" " paths)
 
 (* This function takes 1-based offsets, and 'to_' is exclusive. *)
 let go ?filename ~content from to_ options =
   let format_args = formatting_options_to_args options in
   let range_args = range_offsets_to_args from to_ in
   let args = format_args @ range_args in
-  go_hackfmt ?filename ~content args
-  >>| (fun lines -> String.concat ~sep:"\n" lines ^ "\n")
+  go_hackfmt ?filename ~content args >>| fun lines ->
+  String.concat ~sep:"\n" lines ^ "\n"
 
 (* Our formatting engine can only handle ranges that span entire rows.  *)
 (* This is signified by a range that starts at column 1 on one row,     *)
@@ -181,8 +179,7 @@ let go_ide
           let offset = get_offset content position in
           let args = ["--at-char"; string_of_int offset] in
           let args = args @ formatting_options_to_args options in
-          go_hackfmt ~filename ~content args
-          >>= fun lines ->
+          go_hackfmt ~filename ~content args >>= fun lines ->
           (* `hackfmt --at-char` returns the range that was formatted, as well as the
        contents of that range. For example, it might return
 

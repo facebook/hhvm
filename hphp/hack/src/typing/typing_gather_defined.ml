@@ -129,8 +129,7 @@ class gatherer env =
         self#might_throw delta
       | _ -> delta
 
-    method! on_stmt () (s : Nast.stmt) =
-      self#update_gamma (parent#on_stmt () s)
+    method! on_stmt () (s : Nast.stmt) = self#update_gamma (parent#on_stmt () s)
 
     method! on_Binop () bop e1 e2 =
       let delta = parent#on_Binop () bop e1 e2 in

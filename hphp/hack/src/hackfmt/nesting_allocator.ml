@@ -13,18 +13,11 @@ type t = {
 }
 
 let make () =
-  {
-    next_id = 1;
-    current_nesting = Nesting.make ~id:0 ~indent:false None false;
-  }
+  { next_id = 1; current_nesting = Nesting.make ~id:0 ~indent:false None false }
 
 let nest t conditional =
   let current_nesting =
-    Nesting.make
-      ~id:t.next_id
-      ~indent:true
-      (Some t.current_nesting)
-      conditional
+    Nesting.make ~id:t.next_id ~indent:true (Some t.current_nesting) conditional
   in
   { next_id = t.next_id + 1; current_nesting }
 

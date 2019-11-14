@@ -47,9 +47,7 @@ let mergebase_queries : (Hg.hg_rev, Hg.global_rev Future.t) Caml.Hashtbl.t =
 let pending_queries : Hg.hg_rev Queue.t = Queue.create ()
 
 let initialize mergebase =
-  Hh_logger.log
-    "ServerRevisionTracker: Initializing mergebase to r%d"
-    mergebase;
+  Hh_logger.log "ServerRevisionTracker: Initializing mergebase to r%d" mergebase;
   current_mergebase := Some mergebase
 
 let add_query ~hg_rev root =

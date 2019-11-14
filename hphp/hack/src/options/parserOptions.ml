@@ -136,8 +136,7 @@ let make
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
-type ffi_t =
-  bool * bool * bool * bool * bool * bool * bool * bool * bool * bool
+type ffi_t = bool * bool * bool * bool * bool * bool * bool * bool * bool * bool
 
 let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
   ( hhvm_compat_mode,

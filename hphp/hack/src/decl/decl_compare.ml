@@ -58,9 +58,7 @@ module ClassDiff = struct
     (* compare class constants *)
     let consts_diff = smap class1.dc_consts class2.dc_consts in
     let is_unchanged = is_unchanged && SSet.is_empty consts_diff in
-    let acc =
-      add_inverted_deps acc (fun x -> Dep.Const (cid, x)) consts_diff
-    in
+    let acc = add_inverted_deps acc (fun x -> Dep.Const (cid, x)) consts_diff in
     (* compare class members *)
     let props_diff = smap class1.dc_props class2.dc_props in
     let is_unchanged = is_unchanged && SSet.is_empty props_diff in
@@ -68,9 +66,7 @@ module ClassDiff = struct
     (* compare class static members *)
     let sprops_diff = smap class1.dc_sprops class2.dc_sprops in
     let is_unchanged = is_unchanged && SSet.is_empty sprops_diff in
-    let acc =
-      add_inverted_deps acc (fun x -> Dep.SProp (cid, x)) sprops_diff
-    in
+    let acc = add_inverted_deps acc (fun x -> Dep.SProp (cid, x)) sprops_diff in
     (* compare class methods *)
     let methods_diff = smap class1.dc_methods class2.dc_methods in
     let is_unchanged = is_unchanged && SSet.is_empty methods_diff in
@@ -569,8 +565,7 @@ let get_classes_deps ~conservative_redecl old_classes new_classes classes =
  *)
 (*****************************************************************************)
 let get_record_def_deps
-    ~conservative_redecl old_record_defs rdid (changed, to_redecl, to_recheck)
-    =
+    ~conservative_redecl old_record_defs rdid (changed, to_redecl, to_recheck) =
   let _ = conservative_redecl in
   match (SMap.find rdid old_record_defs, Decl_heap.RecordDefs.get rdid) with
   | (None, _)

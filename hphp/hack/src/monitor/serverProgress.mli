@@ -32,11 +32,7 @@ val send_progress_to_monitor :
 (* The message will look roughly like this:
   <operation> <done_count>/<total_count> <unit> <percent done>*)
 val make_percentage_progress_message :
-  operation:string ->
-  done_count:int ->
-  total_count:int ->
-  unit:string ->
-  string
+  operation:string -> done_count:int -> total_count:int -> unit:string -> string
 
 val send_percentage_progress_to_monitor :
   operation:string -> done_count:int -> total_count:int -> unit:string -> unit

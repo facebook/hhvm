@@ -81,9 +81,7 @@ let find_positions_of_methods
         | Some class_elt ->
           add_if_valid_origin class_elt child_class method_name result
         | None ->
-          let smethod_info =
-            Decl_provider.Class.get_smethod decl method_name
-          in
+          let smethod_info = Decl_provider.Class.get_smethod decl method_name in
           (match smethod_info with
           | Some class_elt ->
             add_if_valid_origin class_elt child_class method_name result

@@ -97,11 +97,11 @@ let range_test_suite =
                ~exp:", $y";
          (* When the formatter inserts a trailing comma, ensure that it is printed
           * only if the atom preceding it is printed. *)
-           "trailing_comma_inserted_at_start_of_range"
-           >:: assert_range_formats_to
-                 ~src:("<?hh\n" ^ String.make 95 'f' ^ "($x,$y)")
-                 ~rng:((106, 107), ")")
-                 ~exp:")\n";
+         "trailing_comma_inserted_at_start_of_range"
+         >:: assert_range_formats_to
+               ~src:("<?hh\n" ^ String.make 95 'f' ^ "($x,$y)")
+               ~rng:((106, 107), ")")
+               ~exp:")\n";
          "trailing_comma_inserted_at_end_of_range"
          >:: assert_range_formats_to
                ~src:("<?hh\n" ^ String.make 95 'f' ^ "($x,$y)")
@@ -109,11 +109,11 @@ let range_test_suite =
                ~exp:"  $y,\n";
          (* If a trailing comma was already present outside the range, don't include
           * it in the formatted output. *)
-           "trailing_comma_existed_at_start_of_range"
-           >:: assert_range_formats_to
-                 ~src:("<?hh\n" ^ String.make 95 'f' ^ "($x,$y,)")
-                 ~rng:((107, 108), ")")
-                 ~exp:")\n";
+         "trailing_comma_existed_at_start_of_range"
+         >:: assert_range_formats_to
+               ~src:("<?hh\n" ^ String.make 95 'f' ^ "($x,$y,)")
+               ~rng:((107, 108), ")")
+               ~exp:")\n";
          "trailing_comma_existed_at_end_of_range"
          >:: assert_range_formats_to
                ~src:("<?hh\n" ^ String.make 95 'f' ^ "($x,$y,)")
@@ -135,10 +135,7 @@ let range_test_suite =
                ~rng:((106, 107), ",")
                ~exp:",\n";
          "deleted_trailing_comma_is_entire_range"
-         >:: assert_range_formats_to
-               ~src:"f($x,$y,)"
-               ~rng:((7, 8), ",")
-               ~exp:"";
+         >:: assert_range_formats_to ~src:"f($x,$y,)" ~rng:((7, 8), ",") ~exp:"";
        ]
 
 let _ = run_test_tt_main range_test_suite

@@ -27,8 +27,8 @@ let add_parent_construct env c props parent_ty =
   | (_, Tapply ((_, parent), _)) ->
     begin
       match Env.get_class_dep env parent with
-      | Some class_
-        when Cls.need_init class_ && Option.is_some c.sc_constructor ->
+      | Some class_ when Cls.need_init class_ && Option.is_some c.sc_constructor
+        ->
         SSet.add parent_init_prop props
       | _ -> props
     end
@@ -133,8 +133,7 @@ and trait_props env c props =
               | Some cstr
                 when String.( <> ) cstr.ce_origin trait || cstr.ce_abstract ->
                 SSet.union members acc
-              | _ when Option.is_some c.sc_constructor ->
-                SSet.union members acc
+              | _ when Option.is_some c.sc_constructor -> SSet.union members acc
               | _ -> acc
             end
           | _ -> acc)

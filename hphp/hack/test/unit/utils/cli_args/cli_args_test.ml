@@ -49,16 +49,16 @@ let expected_spec_json =
   "filename":"/some/dir/some_filename"
 }|}
 
-let compare_paths (expected : Relative_path.t) (actual : Relative_path.t) :
-    unit =
+let compare_paths (expected : Relative_path.t) (actual : Relative_path.t) : unit
+    =
   String_asserter.assert_equals
     (Relative_path.suffix expected)
     (Relative_path.suffix actual)
     "Paths must be equal"
 
 let compare_optional_paths
-    (expected : Relative_path.t option) (actual : Relative_path.t option) :
-    unit =
+    (expected : Relative_path.t option) (actual : Relative_path.t option) : unit
+    =
   match (expected, actual) with
   | (None, None) -> ()
   | (Some expected, Some actual) -> compare_paths expected actual

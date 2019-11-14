@@ -16,8 +16,7 @@ module SN = Naming_special_names
 let check_conditionally_reactive_annotation_params p params ~is_method =
   match params with
   | [(_, Class_const (_, (_, "class")))] -> ()
-  | _ ->
-    Errors.conditionally_reactive_annotation_invalid_arguments ~is_method p
+  | _ -> Errors.conditionally_reactive_annotation_invalid_arguments ~is_method p
 
 let check_conditionally_reactive_annotations
     is_reactive p method_name user_attributes =
@@ -44,9 +43,7 @@ let check_maybe_rx_attributes_on_params is_reactive parent_attrs params =
   in
   let check_param seen_atmost_rx_as_rxfunc p =
     let only_rx_if_rxfunc_attr =
-      Attributes.find
-        SN.UserAttributes.uaAtMostRxAsFunc
-        p.param_user_attributes
+      Attributes.find SN.UserAttributes.uaAtMostRxAsFunc p.param_user_attributes
     in
     let only_rx_if_impl_attr =
       Attributes.find SN.UserAttributes.uaOnlyRxIfImpl p.param_user_attributes

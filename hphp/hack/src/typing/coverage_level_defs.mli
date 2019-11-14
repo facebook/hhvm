@@ -34,8 +34,7 @@ type checked_stats = {
  * the root cause of their poor typing, which would be some poorly
  * typed subexpression.
  *)
-type result =
-  (Pos.absolute * Ide_api_types.coverage_level) list * checked_stats
+type result = (Pos.absolute * Ide_api_types.coverage_level) list * checked_stats
 
 type pos_stats_entry = {
   (* How many times this reason position has occured. *)

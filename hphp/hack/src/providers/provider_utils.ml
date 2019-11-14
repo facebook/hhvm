@@ -50,29 +50,32 @@ let respect_but_quarantine_unsaved_changes
   in
   result
 
-let update_context
-    ~(ctx : Provider_context.t)
-    ~(path : Relative_path.t)
-    ~(file_input : ServerCommandTypes.file_input) :
-    Provider_context.t * Provider_context.entry =
+let internal_load_entry
+    ~(path : Relative_path.t) ~(file_input : ServerCommandTypes.file_input) :
+    Provider_context.entry =
   let (source_text, ast, comments) =
     Errors.ignore_ (fun () ->
         Ast_provider.parse_file_input ~full:true path file_input)
   in
   Ast_provider.provide_ast_hint path ast Ast_provider.Full;
-  let entry =
-    {
-      Provider_context.path;
-      file_input;
-      source_text;
-      ast;
-      comments;
-      cst = None;
-      tast = None;
-      errors = None;
-      symbols = None;
-    }
-  in
+  {
+    Provider_context.path;
+    file_input;
+    source_text;
+    ast;
+    comments;
+    cst = None;
+    tast = None;
+    errors = None;
+    symbols = None;
+  }
+
+let update_context
+    ~(ctx : Provider_context.t)
+    ~(path : Relative_path.t)
+    ~(file_input : ServerCommandTypes.file_input) :
+    Provider_context.t * Provider_context.entry =
+  let entry = internal_load_entry ~path ~file_input in
   let ctx =
     {
       ctx with
@@ -85,6 +88,16 @@ let update_context
 let find_entry ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
     Provider_context.entry option =
   Relative_path.Map.find_opt ctx.Provider_context.entries path
+
+let get_entry_VOLATILE ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
+    Provider_context.entry =
+  match find_entry ~ctx ~path with
+  | Some entry -> entry
+  | None ->
+    let file_input =
+      ServerCommandTypes.FileName (Relative_path.to_absolute path)
+    in
+    internal_load_entry ~path ~file_input
 
 let compute_tast_and_errors_unquarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :

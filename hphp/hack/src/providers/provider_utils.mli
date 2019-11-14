@@ -45,11 +45,25 @@ val compute_tast_and_errors_quarantined :
   entry:Provider_context.entry ->
   Tast.program * Errors.t
 
-(** Find an existing entry within the context *)
+(** Find an existing entry within the context.  Returns "None" if
+that entry has not yet been observed. *)
 val find_entry :
   ctx:Provider_context.t ->
   path:Relative_path.t ->
   Provider_context.entry option
+
+(** Retrieve an existing memoized entry from the context, or fetch the
+information from disk.  Does not modify the context.
+
+This function is marked VOLATILE because it has the potential to read
+data from disk.  Calling this function multiple times in a row may produce
+different results if the data on disk changes.
+
+Please only use this function to replace code that already reads data from
+disk.
+*)
+val get_entry_VOLATILE :
+  ctx:Provider_context.t -> path:Relative_path.t -> Provider_context.entry
 
 (** Compute the CST *)
 val compute_cst :

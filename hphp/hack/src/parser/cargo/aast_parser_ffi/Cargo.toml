@@ -12,3 +12,6 @@ aast_parser = { path = "../aast_parser", package = "aast_parser" }
 parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
 oxidized = {path = "../../../oxidized", package = "hack_oxidized" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool" }
+stack_limit = { path = "../../../utils/stack_limit", package = "hack_stack_limit" }
+ocamlrep = {path = "../../../ocamlrep", package = "hack_ocamlrep"}
+libc = "^0.2.60"

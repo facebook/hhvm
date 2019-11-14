@@ -18,6 +18,7 @@ use parser_rust::{
     parser_env::ParserEnv,
     smart_constructors::{NodeType, SmartConstructors},
 };
+use stack_limit::StackLimit;
 use std::borrow::Borrow;
 
 pub struct SyntaxTree<'a, Syntax, State> {
@@ -228,7 +229,8 @@ where
 pub fn make_syntax_tree<'a, S, T>(
     source: &'a SourceText<'a>,
     env: ParserEnv,
-) -> SyntaxTree<<S::R as NodeType>::R, T>
+    stack_limit: Option<&'a StackLimit>,
+) -> SyntaxTree<'a, <S::R as NodeType>::R, T>
 where
     T: Clone,
     S: SmartConstructors<'a, T>,
@@ -236,7 +238,7 @@ where
 {
     let mode = parse_mode(source);
     let mut parser = Parser::<S, T>::make(&source, env);
-    let root = parser.parse_script(None);
+    let root = parser.parse_script(stack_limit);
     let errors = parser.errors();
     let sc_state = parser.into_sc_state();
     SyntaxTree::create(source, root, errors, mode, sc_state, None)

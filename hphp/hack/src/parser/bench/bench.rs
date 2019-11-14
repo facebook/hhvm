@@ -102,6 +102,7 @@ mod tests {
                         hacksperimental: false,
                     },
                     &indexed_source_text,
+                    None,
                 )
             })
         });
@@ -130,6 +131,7 @@ mod tests {
                         hacksperimental: false,
                     },
                     &indexed_source_text,
+                    None,
                 )
             })
         });

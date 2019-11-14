@@ -12,3 +12,4 @@ oxidized = { path = "../../../oxidized", package = "hack_oxidized" }
 parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
 parser_rust = { path = "../..", package = "hack_parser" }
 minimal_parser = { path = "../minimal_parser", package = "minimal_parser" }
+stack_limit = { path = "../../../utils/stack_limit", package = "hack_stack_limit" }

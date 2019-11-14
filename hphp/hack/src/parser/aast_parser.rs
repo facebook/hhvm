@@ -22,6 +22,7 @@ use parser_rust::{parser_env::ParserEnv, smart_constructors_wrappers::WithKind};
 use regex::bytes::Regex;
 use rust_coroutine::coroutine_lowerer;
 use rust_parser_errors::ParserErrors;
+use stack_limit::StackLimit;
 use std::borrow::Borrow;
 use syntax_tree::{make_syntax_tree, mode_parser::parse_mode, SyntaxTree};
 
@@ -50,8 +51,12 @@ type Result<T> = std::result::Result<T, Error>;
 
 pub struct AastParser;
 impl<'a> AastParser {
-    pub fn from_text(env: &Env, source: &'a IndexedSourceText<'a>) -> Result<ParserResult> {
-        Self::from_text_(env, source, None)
+    pub fn from_text(
+        env: &Env,
+        source: &'a IndexedSourceText<'a>,
+        stack_limit: Option<&'a StackLimit>,
+    ) -> Result<ParserResult> {
+        Self::from_text_(env, source, None, stack_limit)
     }
 
     // Full_fidelity_ast.lower_tree_ is inlined
@@ -59,8 +64,9 @@ impl<'a> AastParser {
         env: &Env,
         indexed_source_text: &'a IndexedSourceText<'a>,
         rewritten_source: Option<&'a IndexedSourceText<'a>>,
+        stack_limit: Option<&'a StackLimit>,
     ) -> Result<ParserResult> {
-        let (mode, tree) = Self::parse_text(env, indexed_source_text)?;
+        let (mode, tree) = Self::parse_text(env, indexed_source_text, stack_limit)?;
         let mode = mode.unwrap_or(Mode::Mpartial);
         let scoured_comments =
             Self::scour_comments_and_add_fixmes(env, indexed_source_text, &tree.root())?;
@@ -74,12 +80,13 @@ impl<'a> AastParser {
                 env,
                 &indexed_source_text,
                 Some(&IndexedSourceText::new(rewritten_source)),
+                stack_limit,
             )
         } else {
             // TODO(shiqicao): we need to use rewritten source/tree when lowering, but original one when checking errors
             let indexed_source_text = rewritten_source.unwrap_or(indexed_source_text);
             let tree = if let Some(rewritten_source) = rewritten_source {
-                let (_, rewritten_tree) = Self::parse_text(env, rewritten_source)?;
+                let (_, rewritten_tree) = Self::parse_text(env, rewritten_source, stack_limit)?;
                 rewritten_tree
             } else {
                 tree
@@ -156,6 +163,7 @@ impl<'a> AastParser {
     fn parse_text(
         env: &Env,
         indexed_source_text: &'a IndexedSourceText<'a>,
+        stack_limit: Option<&'a StackLimit>,
     ) -> Result<(Option<Mode>, PositionedSyntaxTree<'a>)> {
         let source_text = indexed_source_text.source_text();
         let mode = parse_mode(indexed_source_text.source_text());
@@ -182,7 +190,7 @@ impl<'a> AastParser {
 
         let tree = if quick_mode {
             let mut decl_parser = DeclModeParser::make(source_text, parser_env);
-            let tree = decl_parser.parse_script(None);
+            let tree = decl_parser.parse_script(stack_limit);
             PositionedSyntaxTree::create(
                 source_text,
                 tree,
@@ -192,7 +200,11 @@ impl<'a> AastParser {
                 None,
             )
         } else {
-            make_syntax_tree::<SmartConstructor<'a>, State<'a>>(source_text, parser_env)
+            make_syntax_tree::<SmartConstructor<'a>, State<'a>>(
+                source_text,
+                parser_env,
+                stack_limit,
+            )
         };
         Ok((mode, tree))
     }

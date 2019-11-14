@@ -329,34 +329,13 @@ let get_files_in_path ~args path =
            @@ String_utils.string_ends_with f "parser_massive_concat_exp.php"
         && true
       | LOWERER ->
+        (* TODO(shiqicao): parser_massive_add_exp.php and parser_massive_concat_exp.php crashs
+          Ocaml with SYNTAX ERROR: Expression recursion limit reached. Rust doesn't crash,
+          but we still need to set a limit for Rust lowerer.
+         *)
         (not @@ String_utils.string_ends_with f "parser_massive_add_exp.php")
         && not
            @@ String_utils.string_ends_with f "parser_massive_concat_exp.php"
-        && not
-           @@ String_utils.string_ends_with
-                f
-                "parser_reasonable_nested_array.php"
-        && (not @@ String_utils.string_ends_with f "bug64555.php")
-        && (not @@ String_utils.string_ends_with f "bug64660.php")
-        && (not @@ String_utils.string_ends_with f "www_repro_2.php")
-        && not
-           @@ String_utils.string_ends_with
-                f
-                "test/quick/parser_reasonable_add_exp.php"
-        && not
-           @@ String_utils.string_ends_with
-                f
-                "test/quick/parser_reasonable_concat_exp.php"
-        && not
-           @@ String_utils.string_ends_with
-                f
-                "test/quick/parser_reasonable_nested_array.php"
-        && not
-           @@ String_utils.string_ends_with
-                f
-                "runs_out_of_retries_in_line_splitter.php"
-        && not
-           @@ String_utils.string_ends_with f "ffp/tests/const_initializers.php"
       | _ -> true)
     files
 

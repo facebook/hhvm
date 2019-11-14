@@ -20,7 +20,7 @@ use parser_rust::{
     token_kind::TokenKind,
 };
 use rust_to_ocaml::{SerializationContext, ToOcaml};
-use stack_limit::StackLimit;
+use stack_limit::{StackLimit, KI, MI};
 use syntax_tree::{mode_parser::parse_mode, SyntaxTree};
 
 pub fn parse<'a, Sc, ScState>(
@@ -106,8 +106,6 @@ where
         stack_size * 6 / 10
     }
 
-    const KI: usize = 1024;
-    const MI: usize = KI * KI;
     const MAX_STACK_SIZE: usize = 1024 * MI;
 
     let on_retry = &mut |stack_size_tried: usize| {

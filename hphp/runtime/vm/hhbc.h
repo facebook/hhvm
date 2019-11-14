@@ -64,7 +64,7 @@ struct LocalRange {
  */
 struct IterArgs {
   enum Flags : uint8_t {
-    None     = 0,
+    None      = 0,
     // The base is stored in a local, and that local is unmodified in the loop.
     BaseConst = (1 << 0),
   };
@@ -378,17 +378,6 @@ enum class BareThisOp : uint8_t {
 #define BARETHIS_OP(x) x,
   BARETHIS_OPS
 #undef BARETHIS_OP
-};
-
-#define ITERTYPE_OPS            \
-  ITERTYPE_OP(LocalBaseConst)   \
-  ITERTYPE_OP(LocalBaseMutable) \
-  ITERTYPE_OP(NonLocal)
-
-enum class IterTypeOp : uint8_t {
-#define ITERTYPE_OP(x) x,
-  ITERTYPE_OPS
-#undef ITERTYPE_OP
 };
 
 #define SILENCE_OPS \
@@ -963,7 +952,6 @@ const char* subopToName(CollectionType);
 const char* subopToName(SetOpOp);
 const char* subopToName(IncDecOp);
 const char* subopToName(BareThisOp);
-const char* subopToName(IterTypeOp);
 const char* subopToName(SilenceOp);
 const char* subopToName(OODeclExistsOp);
 const char* subopToName(ObjMethodOp);

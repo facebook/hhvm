@@ -65,13 +65,12 @@ void implIterNextJmp(IRGS& env, Offset loopOffset, SSATmp* result) {
 
 // If the iterator base is an empty array-like, this method will generate
 // trivial IR for the loop (just jump directly to done) and return true.
-bool iterInitEmptyBase(IRGS& env, Offset doneOffset,
-                       SSATmp* base, IterTypeOp type) {
+bool iterInitEmptyBase(IRGS& env, Offset doneOffset, SSATmp* base, bool local) {
   auto const empty = base->hasConstVal(TArrLike) && base->arrLikeVal()->empty();
   if (!empty) return false;
 
   // NOTE: `base` is static, so we can skip the dec-ref for non-local iters.
-  if (type == IterTypeOp::NonLocal) discard(env, 1);
+  if (!local) discard(env, 1);
   auto const targetOffset = bcOff(env) + doneOffset;
   auto const target = getBlock(env, targetOffset);
   assertx(target != nullptr);
@@ -87,25 +86,22 @@ bool iterInitEmptyBase(IRGS& env, Offset doneOffset,
 
 void emitIterInit(IRGS& env, IterArgs ita, Offset doneOffset) {
   auto const base = topC(env);
-  auto const type = IterTypeOp::NonLocal;
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
-  if (iterInitEmptyBase(env, doneOffset, base, type)) return;
-
-  auto const data = IterInitData(ita.iterId, ita.keyId, ita.valId, type);
-  specializeIterInit(env, doneOffset, data, kInvalidId);
+  if (iterInitEmptyBase(env, doneOffset, base, false)) return;
+  specializeIterInit(env, doneOffset, ita, kInvalidId);
 
   discard(env, 1);
   auto const op = ita.hasKey() ? IterInitK : IterInit;
+  auto const data = IterInitData(ita, IterInitData::Source::Stack);
   auto const result = gen(env, op, data, base, fp(env));
   implIterInitJmp(env, doneOffset, result);
 }
 
 void emitIterNext(IRGS& env, IterArgs ita, Offset loopOffset) {
-  auto const data = IterData(ita.iterId, ita.keyId, ita.valId);
-  if (specializeIterNext(env, loopOffset, data, kInvalidId)) return;
+  if (specializeIterNext(env, loopOffset, ita, kInvalidId)) return;
 
   auto const op = ita.hasKey() ? IterNextK : IterNext;
-  auto const result = gen(env, op, data, fp(env));
+  auto const result = gen(env, op, IterData(ita), fp(env));
   implIterNextJmp(env, loopOffset, result);
 }
 
@@ -113,19 +109,15 @@ void emitLIterInit(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset doneOffset) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterInit-pseudomain);
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
-  auto const type = ita.flags & IterArgs::Flags::BaseConst
-    ? IterTypeOp::LocalBaseConst
-    : IterTypeOp::LocalBaseMutable;
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
-  if (iterInitEmptyBase(env, doneOffset, base, type)) return;
-
-  auto const data = IterInitData(ita.iterId, ita.keyId, ita.valId, type);
-  specializeIterInit(env, doneOffset, data, baseLocalId);
+  if (iterInitEmptyBase(env, doneOffset, base, true)) return;
+  specializeIterInit(env, doneOffset, ita, baseLocalId);
 
   if (base->isA(TObj)) gen(env, IncRef, base);
   auto const op = base->isA(TArrLike)
     ? (ita.hasKey() ? LIterInitK : LIterInit)
     : (ita.hasKey() ? IterInitK : IterInit);
+  auto const data = IterInitData(ita, IterInitData::Source::Local);
   auto const result = gen(env, op, data, base, fp(env));
   implIterInitJmp(env, doneOffset, result);
 }
@@ -133,17 +125,16 @@ void emitLIterInit(IRGS& env, IterArgs ita,
 void emitLIterNext(IRGS& env, IterArgs ita,
                    int32_t baseLocalId, Offset loopOffset) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterNext-pseudomain);
-  auto const data = IterData(ita.iterId, ita.keyId, ita.valId);
-  if (specializeIterNext(env, loopOffset, data, baseLocalId)) return;
+  if (specializeIterNext(env, loopOffset, ita, baseLocalId)) return;
 
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   auto const result = [&]{
     if (base->isA(TArrLike)) {
       auto const op = ita.hasKey() ? LIterNextK : LIterNext;
-      return gen(env, op, data, base, fp(env));
+      return gen(env, op, IterData(ita), base, fp(env));
     }
     auto const op = ita.hasKey() ? IterNextK : IterNext;
-    return gen(env, op, data, fp(env));
+    return gen(env, op, IterData(ita), fp(env));
   }();
   implIterNextJmp(env, loopOffset, result);
 }

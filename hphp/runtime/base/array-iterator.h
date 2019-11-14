@@ -39,6 +39,8 @@ namespace HPHP {
 
 struct Iter;
 
+enum class IterTypeOp { NonLocal, LocalBaseConst, LocalBaseMutable };
+
 enum class IterNextIndex : uint8_t {
   ArrayPacked = 0,
   ArrayMixed,

@@ -427,51 +427,37 @@ struct IterId : IRExtraData {
 };
 
 /*
- * Iter instruction data.
- *
- * `iterId' is the iterator ID; `keyId' and `valId' are the IDs of the iterator
- * locals $key => $value.  For keyless iterators, we still use this class, with
- * `keyId` set to -1u.
+ * Iter instruction data, used for both key-value and value-only iterators.
+ * Check args.hasKey() to distinguish between the two.
  */
 struct IterData : IRExtraData {
-  IterData(uint32_t iter, uint32_t key, uint32_t val)
-    : iterId(iter)
-    , keyId(key)
-    , valId(val)
-  {}
+  explicit IterData(IterArgs args) : args(args) {}
 
   std::string show() const {
-    if (keyId == -1) return folly::format("{}::{}", iterId, valId).str();
-    return folly::format("{}::{}::{}", iterId, keyId, valId).str();
+    return HPHP::show(args, [&](int32_t id) {
+      return folly::to<std::string>(id);
+    });
   }
 
-  uint32_t iterId;
-  uint32_t keyId;
-  uint32_t valId;
+  IterArgs args;
 };
 
+/*
+ * When initializing an iterator, we need one more piece of info - whether the
+ * base came from the stack or from a local - to make the right native call.
+ */
 struct IterInitData : public IterData {
-  IterInitData(uint32_t iter, uint32_t key, uint32_t val, IterTypeOp op)
-    : IterData{iter, key, val}
-    , sourceOp(op)
-  {}
+  enum class Source { Stack, Local };
+
+  IterInitData(IterArgs args, Source source)
+    : IterData(args), source(source) {}
 
   std::string show() const {
-    auto const op_name = [&]{
-      switch (sourceOp) {
-        case IterTypeOp::LocalBaseConst:   return "LocalBaseConst";
-        case IterTypeOp::LocalBaseMutable: return "LocalBaseMutable";
-        case IterTypeOp::NonLocal:         return "NonLocal";
-      }
-      always_assert(false);
-    }();
-    return folly::format("{}::{}", IterData(*this).show(), op_name).str();
+    auto const prefix = source == Source::Stack ? "Stack " : "Local ";
+    return folly::to<std::string>(prefix, IterData(*this).show());
   }
 
-  // The IterTypeOp of the source bytecode for this IR op, which may not match
-  // the type of the op. For example, we sometimes generate non-local IterInit
-  // ops for an LIterInit bytecode, in which case sourceOp will still be local.
-  IterTypeOp sourceOp;
+  Source source;
 };
 
 struct IterTypeData : IRExtraData {

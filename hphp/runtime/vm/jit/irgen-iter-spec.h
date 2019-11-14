@@ -49,7 +49,7 @@ struct SpecializedIterator {
 // `doneOffset` is the relative offset to jump to if the base has no elements.
 // `baseLocalId` is the base ID for local iters, or kInvalidId for non-local.
 void specializeIterInit(IRGS& env, Offset doneOffset,
-                        const IterInitData& data, uint32_t baseLocalId);
+                        const IterArgs& data, uint32_t baseLocalId);
 
 // Returns true on specialization. If it returns true, then we no longer need
 // to emit generic code for this IterNext.
@@ -57,7 +57,7 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
 // `loopOffset` is the relative offset to jump to if the base has more elements.
 // `baseLocalId` is the base ID for local iters, or kInvalidId for non-local.
 bool specializeIterNext(IRGS& env, Offset loopOffset,
-                        const IterData& data, uint32_t baseLocalId);
+                        const IterArgs& data, uint32_t baseLocalId);
 
 //////////////////////////////////////////////////////////////////////
 

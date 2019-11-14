@@ -456,7 +456,7 @@ GeneralEffects may_load_store_move(AliasClass loads,
 GeneralEffects iter_effects(const IRInstruction& inst,
                             SSATmp* fp,
                             AliasClass locals) {
-  auto const iters = allIterFields(fp, inst.extra<IterData>()->iterId);
+  auto const iters = allIterFields(fp, inst.extra<IterData>()->args.iterId);
   return may_reenter(
     inst,
     may_load_store_kill(
@@ -1002,34 +1002,26 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case IterInit:
   case LIterInit:
-  case LIterNext:
-    return iter_effects(
-      inst,
-      inst.src(1),
-      AFrame { inst.src(1), inst.extra<IterData>()->valId }
-    );
   case IterNext:
-    return iter_effects(
-      inst,
-      inst.src(0),
-      AFrame { inst.src(0), inst.extra<IterData>()->valId }
-    );
+  case LIterNext: {
+    auto const& args = inst.extra<IterData>()->args;
+    assertx(!args.hasKey());
+    auto const fp = inst.src(inst.op() == IterNext ? 0 : 1);
+    AliasClass val = AFrame { fp, safe_cast<uint32_t>(args.valId) };
+    return iter_effects(inst, fp, val);
+  }
 
   case IterInitK:
   case LIterInitK:
-  case LIterNextK:
-    {
-      AliasClass key = AFrame { inst.src(1), inst.extra<IterData>()->keyId };
-      AliasClass val = AFrame { inst.src(1), inst.extra<IterData>()->valId };
-      return iter_effects(inst, inst.src(1), key | val);
-    }
-
   case IterNextK:
-    {
-      AliasClass key = AFrame { inst.src(0), inst.extra<IterData>()->keyId };
-      AliasClass val = AFrame { inst.src(0), inst.extra<IterData>()->valId };
-      return iter_effects(inst, inst.src(0), key | val);
-    }
+  case LIterNextK: {
+    auto const& args = inst.extra<IterData>()->args;
+    assertx(args.hasKey());
+    auto const fp = inst.src(inst.op() == IterNextK ? 0 : 1);
+    AliasClass key = AFrame { fp, safe_cast<uint32_t>(args.keyId) };
+    AliasClass val = AFrame { fp, safe_cast<uint32_t>(args.valId) };
+    return iter_effects(inst, fp, key | val);
+  }
 
   case IterFree: {
     auto const base = AIterBase { inst.src(0), iterId(inst) };

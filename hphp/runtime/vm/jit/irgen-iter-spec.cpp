@@ -206,7 +206,7 @@ namespace {
 
 auto const s_ArrayIterProfile = makeStaticString("ArrayIterProfile");
 
-void logArrayIterProfile(IRGS& env, const IterInitData& data,
+void logArrayIterProfile(IRGS& env, const IterArgs& data,
                          folly::Optional<IterSpecialization> iter_type) {
   // We generate code for thousands of loops each time we call retranslateAll.
   // We don't want production webservers to log when they do so.
@@ -252,7 +252,7 @@ void logArrayIterProfile(IRGS& env, const IterInitData& data,
   entry.setVec("inline_state", inline_state);
   entry.setInt("specialized", iter_type ? 1 : 0);
   entry.setStr("specialization", specialization);
-  entry.setStr("iter_init_data", data.show());
+  entry.setStr("iter_init_data", IterData(data).show());
 
   StructuredLog::log("hhvm_array_iterators", entry);
 }
@@ -451,7 +451,7 @@ std::unique_ptr<Accessor> getAccessor(IterSpecialization type) {
 // This method may only be called from one of the guarded specialized blocks,
 // so we can assert that the type of the base matches the iterator type.
 SSATmp* iterBase(IRGS& env, const Accessor& accessor,
-                 const IterData& data, uint32_t baseLocalId) {
+                 const IterArgs& data, uint32_t baseLocalId) {
   assertx(!curFunc(env)->isPseudoMain());
   auto const type = accessor.arr_type;
   auto const local = baseLocalId != kInvalidId;
@@ -512,16 +512,15 @@ void iterStore(IRGS& env, uint32_t local, SSATmp* cell) {
 // instead of recomputing it. We want to increment the position register in
 // place in the main flow, so we recompute the tmp here instead.
 void iterSurpriseCheck(IRGS& env, const Accessor& accessor,
-                       const IterData& data, SSATmp* pos) {
+                       const IterArgs& data, SSATmp* pos) {
   iterIfThen(env,
     [&](Block* taken) {
       auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
       gen(env, CheckSurpriseFlags, taken, ptr);
     },
     [&]{
-      auto const keyed = data.keyId != kInvalidId;
       iterStore(env, data.valId, cns(env, TInitNull));
-      if (keyed) iterStore(env, data.keyId, cns(env, TInitNull));
+      if (data.hasKey()) iterStore(env, data.keyId, cns(env, TInitNull));
       auto const old = accessor.advancePos(env, pos, -1);
       gen(env, StIterPos, IterId(data.iterId), fp(env), old);
       gen(env, Jmp, makeExitSlow(env));
@@ -532,7 +531,7 @@ void iterSurpriseCheck(IRGS& env, const Accessor& accessor,
 // In profiling mode, we profile the dec-ref of the iterator output locals
 // before calling the generic native helper, so that if we specialize we'll
 // produce good code for them. `init` is true for *IterInit*, not *IterNext*.
-void profileDecRefs(IRGS& env, const IterData& data, SSATmp* base,
+void profileDecRefs(IRGS& env, const IterArgs& data, SSATmp* base,
                     const bool local, const bool init) {
   if (env.context.kind != TransKind::Profile) return;
   if (curFunc(env)->isPseudoMain()) return;
@@ -547,7 +546,7 @@ void profileDecRefs(IRGS& env, const IterData& data, SSATmp* base,
 
   auto const val = gen(env, LdLoc, TCell, LocalId(data.valId), fp(env));
   gen(env, ProfileDecRef, DecRefData(data.valId), val);
-  if (data.keyId == kInvalidId) return;
+  if (!data.hasKey()) return;
 
   // If we haven't already guarded on the type of a string key, and it may or
   // may not be persistent, force a guard on it now. We'll lose the persistent-
@@ -578,7 +577,7 @@ SSATmp* phiIterPos(IRGS& env, const Accessor& accessor) {
 // Specialization implementations: init, header, next, and footer.
 
 void emitSpecializedInit(IRGS& env, const Accessor& accessor,
-                         const IterData& data, bool local, Block* header,
+                         const IterArgs& data, bool local, Block* header,
                          Block* done, SSATmp* base) {
   auto const arr = accessor.checkBase(env, base, makeExitSlow(env));
   auto const size = accessor.getSize(env, arr);
@@ -592,9 +591,8 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
     }
   );
 
-  auto const keyed = data.keyId != kInvalidId;
   iterClear(env, data.valId);
-  if (keyed) iterClear(env, data.keyId);
+  if (data.hasKey()) iterClear(env, data.keyId);
 
   auto const id = IterId(data.iterId);
   auto const ty = IterTypeData(data.iterId, accessor.iter_type);
@@ -605,7 +603,7 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
 }
 
 void emitSpecializedHeader(IRGS& env, const Accessor& accessor,
-                           const IterData& data, const Type& value_type,
+                           const IterArgs& data, const Type& value_type,
                            Block* body, uint32_t baseLocalId) {
   auto const pos = phiIterPos(env, accessor);
   auto const arr = accessor.pos_type <= TInt
@@ -613,7 +611,7 @@ void emitSpecializedHeader(IRGS& env, const Accessor& accessor,
     : nullptr;
 
   auto const finish = [&](SSATmp* elm, SSATmp* val) {
-    auto const keyed = data.keyId != kInvalidId;
+    auto const keyed = data.hasKey();
     auto const key = keyed ? accessor.getKey(env, arr, elm) : nullptr;
     iterStore(env, data.valId, val);
     if (keyed) iterStore(env, data.keyId, key);
@@ -642,7 +640,7 @@ void emitSpecializedHeader(IRGS& env, const Accessor& accessor,
 }
 
 void emitSpecializedNext(IRGS& env, const Accessor& accessor,
-                         const IterData& data, Block* footer,
+                         const IterArgs& data, Block* footer,
                          uint32_t baseLocalId) {
   auto const exit = makeExitSlow(env);
   auto const type = IterTypeData(data.iterId, accessor.iter_type);
@@ -679,11 +677,10 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
 }
 
 void emitSpecializedFooter(IRGS& env, const Accessor& accessor,
-                           const IterData& data, Block* header) {
+                           const IterArgs& data, Block* header) {
   auto const pos = phiIterPos(env, accessor);
-  auto const keyed = data.keyId != kInvalidId;
   iterClear(env, data.valId);
-  if (keyed) iterClear(env, data.keyId);
+  if (data.hasKey()) iterClear(env, data.keyId);
   iterSurpriseCheck(env, accessor, data, pos);
   gen(env, Jmp, header, pos);
 }
@@ -697,7 +694,7 @@ void emitSpecializedFooter(IRGS& env, const Accessor& accessor,
 
 // Speculatively generate specialized code for this IterInit.
 void specializeIterInit(IRGS& env, Offset doneOffset,
-                        const IterInitData& data, uint32_t baseLocalId) {
+                        const IterArgs& data, uint32_t baseLocalId) {
   auto const gc = DataTypeSpecific;
   auto const local = baseLocalId != kInvalidId;
   auto const base = local ? ldLoc(env, baseLocalId, nullptr, gc) : topC(env);
@@ -727,8 +724,8 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
   // However, we still need to call accessor.check to rule out tombstones.
   auto result = getProfileResult(env, base);
   auto& iter_type = result.top_specialization;
-  iter_type.output_key = data.keyId != kInvalidId;
-  iter_type.base_const = data.sourceOp != IterTypeOp::LocalBaseMutable;
+  iter_type.base_const = !local || (data.flags & IterArgs::Flags::BaseConst);
+  iter_type.output_key = data.hasKey();
 
   // Check that the profiled type is specialized, that we have key type info
   // (for key-value iters), and if the type agrees with any other IterInit.
@@ -779,7 +776,7 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
 
 // `baseLocalId` is only valid for local iters. Returns true on specialization.
 bool specializeIterNext(IRGS& env, Offset loopOffset,
-                        const IterData& data, uint32_t baseLocalId) {
+                        const IterArgs& data, uint32_t baseLocalId) {
   auto const local = baseLocalId != kInvalidId;
   profileDecRefs(env, data, nullptr, local, /*init=*/false);
   if (curFunc(env)->isPseudoMain()) return false;

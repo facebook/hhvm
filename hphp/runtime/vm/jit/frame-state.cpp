@@ -589,31 +589,26 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
   }
 
-  case IterInitK:
-  case LIterInitK:
-    // kill the locals to which this instruction stores iter's key and value
-    killIterLocals({inst->extra<IterInitData>()->keyId,
-                    inst->extra<IterInitData>()->valId});
-    break;
-
   case IterInit:
   case LIterInit:
-    // kill the local to which this instruction stores iter's value
-    killIterLocals({inst->extra<IterInitData>()->valId});
-    break;
-
-  case IterNextK:
-  case LIterNextK:
-    // kill the locals to which this instruction stores iter's key and value
-    killIterLocals({inst->extra<IterData>()->keyId,
-                    inst->extra<IterData>()->valId});
-    break;
-
   case IterNext:
-  case LIterNext:
-    // kill the local to which this instruction stores iter's value
-    killIterLocals({inst->extra<IterData>()->valId});
+  case LIterNext: {
+    auto const& args = inst->extra<IterData>()->args;
+    assertx(!args.hasKey());
+    killIterLocals({safe_cast<uint32_t>(args.valId)});
     break;
+  }
+
+  case IterInitK:
+  case LIterInitK:
+  case IterNextK:
+  case LIterNextK: {
+    auto const& args = inst->extra<IterData>()->args;
+    assertx(args.hasKey());
+    killIterLocals({safe_cast<uint32_t>(args.keyId),
+                    safe_cast<uint32_t>(args.valId)});
+    break;
+  }
 
   case LdMBase: {
     auto const mbr = inst->dst();

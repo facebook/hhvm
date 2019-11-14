@@ -79,10 +79,9 @@ int iterOffset(const BCMarker& marker, uint32_t id) {
 }
 
 void implIterInit(IRLS& env, const IRInstruction* inst) {
-  bool isInitK = inst->is(IterInitK, LIterInitK);
-  bool isLInit = inst->is(LIterInit, LIterInitK);
-
-  auto const extra = inst->extra<IterInitData>();
+  auto const isInitK = inst->is(IterInitK, LIterInitK);
+  auto const isLInit = inst->is(LIterInit, LIterInitK);
+  auto const extra = &inst->extra<IterData>()->args;
 
   auto const src = inst->src(0);
   auto const fp = srcLoc(env, inst, 1).reg();
@@ -102,13 +101,14 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
       args.addr(fp, localOffset(extra->keyId));
     }
 
-    // For array bases, the bytecode iter type must match the HHIR iter type.
-    auto const local = extra->sourceOp != IterTypeOp::NonLocal;
-    always_assert(local == isLInit);
-
+    auto const op = [&]{
+      if (!isLInit) return IterTypeOp::NonLocal;
+      auto const flag = extra->flags & IterArgs::Flags::BaseConst;
+      return flag ? IterTypeOp::LocalBaseConst : IterTypeOp::LocalBaseMutable;
+    }();
     auto const target = isInitK
-      ? CallSpec::direct(new_iter_array_key_helper(extra->sourceOp))
-      : CallSpec::direct(new_iter_array_helper(extra->sourceOp));
+      ? CallSpec::direct(new_iter_array_key_helper(op))
+      : CallSpec::direct(new_iter_array_helper(op));
     cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
     return;
   }
@@ -124,20 +124,23 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
     args.imm(0);
   }
 
-  // new_iter_object decrefs its src object if it propagates an exception
-  // out, so we use SyncAdjustOne, which adjusts the stack pointer by 1 stack
-  // element on an unwind, skipping over the src object.
-  auto const sync = extra->sourceOp == IterTypeOp::NonLocal
-    ? SyncOptions::SyncAdjustOne
-    : SyncOptions::Sync;
+  // new_iter_object decrefs the base object if it propagates an exception out,
+  // so if the base came from the stack, we adjust the stack pointer by 1 on
+  // an unwind, skipping over the base.
+  auto const sync = [&]{
+    switch (inst->extra<IterInitData>()->source) {
+      case IterInitData::Source::Stack: return SyncOptions::SyncAdjustOne;
+      case IterInitData::Source::Local: return SyncOptions::Sync;
+    }
+    always_assert(false);
+  }();
   auto const target = CallSpec::direct(new_iter_object);
   cgCallHelper(v, env, target, callDest(env, inst), sync, args);
 }
 
 void implIterNext(IRLS& env, const IRInstruction* inst) {
-  bool isNextK = inst->is(IterNextK);
-
-  auto const extra = inst->extra<IterData>();
+  auto const isNextK = inst->is(IterNextK);
+  auto const extra = &inst->extra<IterData>()->args;
 
   auto const args = [&] {
     auto const fp = srcLoc(env, inst, 0).reg();
@@ -159,8 +162,7 @@ void implIterNext(IRLS& env, const IRInstruction* inst) {
 void implLIterNext(IRLS& env, const IRInstruction* inst) {
   always_assert(inst->is(LIterNext, LIterNextK));
   auto const isKey = inst->is(LIterNextK);
-
-  auto const extra = inst->extra<IterData>();
+  auto const extra = &inst->extra<IterData>()->args;
 
   auto const args = [&] {
     auto const fp = srcLoc(env, inst, 1).reg();

@@ -23,7 +23,9 @@ use oxidized::{
     typing_reason::Reason,
 };
 use parser::{
-    indexed_source_text::IndexedSourceText, lexable_token::LexableToken, token_kind::TokenKind,
+    indexed_source_text::IndexedSourceText, lexable_token::LexableToken,
+    lexable_trivia::LexablePositionedTrivia, positioned_token::PositionedToken,
+    token_kind::TokenKind, trivia_kind::TriviaKind,
 };
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
@@ -209,11 +211,28 @@ impl NamespaceBuilder {
 }
 
 #[derive(Clone, Debug)]
+enum FileModeBuilder {
+    // We haven't seen any tokens yet.
+    None,
+
+    // We've seen <? and we're waiting for the next token, which has the trivia
+    // with the mode.
+    Pending,
+
+    // We either saw a <?, then `hh`, then a mode, or we didn't see that
+    // sequence and we're defaulting to Mstrict.
+    Set(Mode),
+}
+
+#[derive(Clone, Debug)]
 pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
     pub decls: Cow<'a, InProgressDecls>,
     namespace_builder: Cow<'a, NamespaceBuilder>,
     yields: Cow<'a, Vec<bool>>,
+
+    // We don't need to wrap this in a Cow because it's very small.
+    file_mode_builder: FileModeBuilder,
 }
 
 impl<'a> State<'a> {
@@ -223,6 +242,7 @@ impl<'a> State<'a> {
             decls: Cow::Owned(empty_decls()),
             namespace_builder: Cow::Owned(NamespaceBuilder::new()),
             yields: Cow::Owned(Vec::new()),
+            file_mode_builder: FileModeBuilder::None,
         }
     }
 }
@@ -338,6 +358,29 @@ impl Node_ {
 pub type Node = Result<Node_, String>;
 
 impl DirectDeclSmartConstructors<'_> {
+    fn set_mode(&mut self, token: &PositionedToken) {
+        for trivia in &token.trailing {
+            if trivia.kind == TriviaKind::SingleLineComment {
+                match &*String::from_utf8_lossy(
+                    trivia.text_raw(self.state.source_text.source_text()),
+                )
+                .trim_start_matches('/')
+                .trim()
+                {
+                    "decl" => self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mdecl),
+                    "experimental" => {
+                        self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mexperimental)
+                    }
+                    "partial" => {
+                        self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mpartial)
+                    }
+                    "strict" => self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mstrict),
+                    _ => self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mstrict),
+                }
+            }
+        }
+    }
+
     fn node_to_ty(&self, node: &Node_, type_variables: &HashSet<String>) -> Result<Ty, String> {
         match node {
             Node_::Hint(hv, pos) => {
@@ -474,19 +517,34 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'_> {
 
 impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors<'a> {
     fn make_token(&mut self, token: Self::Token) -> Self::R {
-        let token_text = || {
-            String::from_utf8_lossy(self.state.source_text.source_text().sub(
+        let token_text = |this: &Self| {
+            String::from_utf8_lossy(this.state.source_text.source_text().sub(
                 token.leading_start_offset().unwrap_or(0) + token.leading_width(),
                 token.width(),
             ))
             .to_string()
         };
-        let token_pos = || {
-            self.state
+        let token_pos = |this: &Self| {
+            this.state
                 .source_text
                 .relative_pos(token.start_offset(), token.end_offset() + 1)
         };
         let kind = token.kind();
+
+        // We only want to check the mode if <? is the very first token we see.
+        match (&self.state.file_mode_builder, &kind) {
+            (FileModeBuilder::None, TokenKind::Markup) => (),
+            (FileModeBuilder::None, TokenKind::LessThanQuestion) => {
+                self.state.file_mode_builder = FileModeBuilder::Pending
+            }
+            (FileModeBuilder::Pending, TokenKind::Name) if token_text(self) == "hh" => {
+                self.set_mode(&token);
+            }
+            (FileModeBuilder::None, _) | (FileModeBuilder::Pending, _) => {
+                self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mstrict)
+            }
+            (_, _) => (),
+        }
 
         // So... this part gets pretty disgusting. We're setting a lot of parser
         // state in here, and we're unsetting a lot of it down in the actual
@@ -543,7 +601,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // was a little elbow grease and a lot of dignity.
         Ok(match kind {
             TokenKind::Name | TokenKind::Variable => {
-                let name = token_text();
+                let name = token_text(self);
                 if self.state.namespace_builder.is_building_namespace {
                     self.state
                         .namespace_builder
@@ -552,24 +610,30 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         .push_str(&name.to_string());
                     Node_::Ignored
                 } else {
-                    Node_::Name(name, token_pos())
+                    Node_::Name(name, token_pos(self))
                 }
             }
-            TokenKind::XHPClassName => Node_::XhpName(token_text(), token_pos()),
-            TokenKind::String => Node_::Hint(HintValue::String, token_pos()),
-            TokenKind::Int => Node_::Hint(HintValue::Int, token_pos()),
-            TokenKind::Float => Node_::Hint(HintValue::Float, token_pos()),
+            TokenKind::XHPClassName => Node_::XhpName(token_text(self), token_pos(self)),
+            TokenKind::String => Node_::Hint(HintValue::String, token_pos(self)),
+            TokenKind::Int => Node_::Hint(HintValue::Int, token_pos(self)),
+            TokenKind::Float => Node_::Hint(HintValue::Float, token_pos(self)),
             TokenKind::Double => Node_::Hint(
-                HintValue::Apply(Box::new((Id(token_pos(), token_text()), Vec::new()))),
-                token_pos(),
+                HintValue::Apply(Box::new((
+                    Id(token_pos(self), token_text(self)),
+                    Vec::new(),
+                ))),
+                token_pos(self),
             ),
-            TokenKind::Num => Node_::Hint(HintValue::Num, token_pos()),
-            TokenKind::Bool => Node_::Hint(HintValue::Bool, token_pos()),
+            TokenKind::Num => Node_::Hint(HintValue::Num, token_pos(self)),
+            TokenKind::Bool => Node_::Hint(HintValue::Bool, token_pos(self)),
             TokenKind::Boolean => Node_::Hint(
-                HintValue::Apply(Box::new((Id(token_pos(), token_text()), Vec::new()))),
-                token_pos(),
+                HintValue::Apply(Box::new((
+                    Id(token_pos(self), token_text(self)),
+                    Vec::new(),
+                ))),
+                token_pos(self),
             ),
-            TokenKind::Void => Node_::Hint(HintValue::Void, token_pos()),
+            TokenKind::Void => Node_::Hint(HintValue::Void, token_pos(self)),
             TokenKind::Backslash => {
                 if self.state.namespace_builder.is_building_namespace {
                     self.state
@@ -579,11 +643,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         .push('\\');
                     Node_::Ignored
                 } else {
-                    Node_::Backslash(token_pos())
+                    Node_::Backslash(token_pos(self))
                 }
             }
-            TokenKind::LessThan => Node_::LessThan(token_pos()),
-            TokenKind::GreaterThan => Node_::GreaterThan(token_pos()),
+            TokenKind::LessThan => Node_::LessThan(token_pos(self)),
+            TokenKind::GreaterThan => Node_::GreaterThan(token_pos(self)),
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
             TokenKind::Async => Node_::Async,
@@ -1003,7 +1067,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         self.state.decls.to_mut().classes.insert(
             key,
             Rc::new(shallow_decl_defs::ShallowClass {
-                mode: Mode::Mstrict,
+                mode: match self.state.file_mode_builder {
+                    FileModeBuilder::None | FileModeBuilder::Pending => Mode::Mstrict,
+                    FileModeBuilder::Set(mode) => mode,
+                },
                 final_: false,
                 is_xhp: false,
                 kind: ClassKind::Cnormal,

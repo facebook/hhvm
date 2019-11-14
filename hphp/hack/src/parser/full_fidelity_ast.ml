@@ -57,6 +57,7 @@ type env = {
   file: Relative_path.t;
   hacksperimental: bool;
   top_level_statements: bool;
+  disable_lowering_parsing_error: bool;
   (* Whether we are (still) considering TLSs*)
   (* Changing parts; should disappear in future. `mutable` saves allocations. *)
   mutable ignore_pos: bool;
@@ -137,6 +138,7 @@ let make_env
     tmp_var_counter = 1;
     lowpri_errors = ref [];
     rust_compare_mode;
+    disable_lowering_parsing_error = false;
   }
 
 let should_surface_errors env =
@@ -425,7 +427,8 @@ if there already is one, since that one will likely be better than this one. *)
   let lowering_error env pos text syntax_kind =
     if not (is_typechecker env) then
       ()
-    else if not (Errors.currently_has_errors () || !(env.lowpri_errors) <> [])
+    else if
+      not (env.disable_lowering_parsing_error || !(env.lowpri_errors) <> [])
     then
       raise_parsing_error
         env
@@ -4032,7 +4035,6 @@ if there already is one, since that one will likely be better than this one. *)
                with
               | Not_found_s _
               | Caml.Not_found ->
-                Errors.fixme_format pos;
                 { acc with sc_error_pos = pos :: sc_error_pos }))
     in
     let rec aux (in_block : bool) (acc : accumulator) (node : node) :
@@ -4214,6 +4216,7 @@ let scour_comments_and_add_fixmes (env : env) source_text script =
     ~include_line_comments:env.include_line_comments
 
 let process_scour_comments (env : env) (sc : Scoured_comments.t) =
+  List.iter sc.sc_error_pos ~f:Errors.fixme_format;
   if (not env.rust_compare_mode) && env.keep_errors then (
     Fixme_provider.provide_disallowed_fixmes env.file sc.sc_misuses;
     if env.quick_mode then
@@ -4295,19 +4298,21 @@ let lower_tree
     (source_text : SourceText.t)
     (mode : FileInfo.mode option)
     (tree : PositionedSyntaxTree.t) : Rust_aast_parser_types.result =
+  let script = PositionedSyntaxTree.root tree in
+  let comments = scour_comments_and_add_fixmes env source_text script in
+  let mode = Option.value mode ~default:FileInfo.Mpartial in
   let env =
     {
       env with
+      fi_mode = mode;
+      is_hh_file = mode <> FileInfo.Mphp;
+      disable_lowering_parsing_error = comments.sc_error_pos <> [];
       lower_coroutines =
         env.lower_coroutines
         && PositionedSyntaxTree.sc_state tree
         && env.codegen;
     }
   in
-  let script = PositionedSyntaxTree.root tree in
-  let comments = scour_comments_and_add_fixmes env source_text script in
-  let mode = Option.value mode ~default:FileInfo.Mpartial in
-  let env = { env with fi_mode = mode; is_hh_file = mode <> FileInfo.Mphp } in
   let popt = env.parser_options in
   (* If we are generating code, then we want to inject auto import types into
    * HH namespace during namespace resolution.

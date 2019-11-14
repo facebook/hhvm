@@ -146,6 +146,7 @@ pub struct Env<'a> {
     pub show_all_errors: bool,
     fail_open: bool,
     file_mode: file_info::Mode,
+    disable_lowering_parsing_error: bool,
     pub top_level_statements: bool, /* Whether we are (still) considering TLSs*/
 
     // Cache none pos, lazy_static doesn't allow Rc.
@@ -169,6 +170,7 @@ impl<'a> Env<'a> {
         keep_errors: bool,
         show_all_errors: bool,
         fail_open: bool,
+        disable_lowering_parsing_error: bool,
         mode: file_info::Mode,
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
@@ -198,6 +200,7 @@ impl<'a> Env<'a> {
             quick_mode,
             show_all_errors,
             fail_open,
+            disable_lowering_parsing_error,
             file_mode: mode,
             top_level_statements: true,
             saw_yield: false,
@@ -419,8 +422,10 @@ where
     }
 
     fn lowering_error(env: &mut Env, pos: &Pos, text: &str, syntax_kind: &str) {
-        if env.is_typechecker() && env.lowpri_errors().is_empty() {
-            // TODO: Ocaml also checks Errors.currently_has_errors
+        if env.is_typechecker()
+            && !env.disable_lowering_parsing_error
+            && env.lowpri_errors().is_empty()
+        {
             Self::raise_parsing_error_pos(
                 pos,
                 env,

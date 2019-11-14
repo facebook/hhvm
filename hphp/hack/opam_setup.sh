@@ -85,6 +85,7 @@ opam install \
   ppx_deriving.4.2.1 \
   ppx_gen_rec.1.1.0 \
   sedlex.1.99.4 \
+  sexplib.v0.11.0 \
   sqlite3.4.4.1 \
   uchar.0.0.2 \
   visitors.20180513 \

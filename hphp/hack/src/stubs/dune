@@ -14,15 +14,6 @@
     buildMain))
 
 (library
-  (name debug_stubs)
-  (wrapped false)
-  (modules
-    debug
-    sof)
-  (libraries
-    full_fidelity))
-
-(library
   (name rust_ffi_stubs)
   (wrapped false)
   (modules ))

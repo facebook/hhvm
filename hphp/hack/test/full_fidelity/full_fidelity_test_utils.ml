@@ -22,6 +22,7 @@ module PositionedSyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (PositionedSyntax)
 module PositionedToken = Full_fidelity_positioned_token
 open Hh_core
+open Sexplib
 
 let identity x = x
 

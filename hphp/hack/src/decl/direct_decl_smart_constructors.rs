@@ -11,7 +11,9 @@ use parser_rust as parser;
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use oxidized::{
     aast,
-    ast_defs::{ConstraintKind, FunKind, Id, Variance},
+    ast_defs::{ClassKind, ConstraintKind, FunKind, Id, Variance},
+    errors::Errors,
+    file_info::Mode,
     pos::Pos,
     shallow_decl_defs, typing_defs,
     typing_defs::{
@@ -386,6 +388,17 @@ impl DirectDeclSmartConstructors<'_> {
             "\\".to_owned() + &name
         } else {
             "\\".to_owned() + self.state.namespace_builder.current_namespace() + "\\" + &name
+        }
+    }
+
+    // I'd really prefer that this function take a &str instead of a String, but
+    // I wanted to avoid having to unnecessarily copy it in the cases where it
+    // already starts with a backslash.
+    fn prefix_slash(&self, name: String) -> String {
+        if name.starts_with("\\") {
+            name
+        } else {
+            "\\".to_owned() + &name
         }
     }
 
@@ -967,6 +980,56 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _body: Self::R,
     ) -> Self::R {
         self.state.namespace_builder.to_mut().pop_namespace();
+        Ok(Node_::Ignored)
+    }
+
+    fn make_classish_declaration(
+        &mut self,
+        _arg0: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        name: Self::R,
+        _arg4: Self::R,
+        _arg5: Self::R,
+        _arg6: Self::R,
+        _arg7: Self::R,
+        _arg8: Self::R,
+        _arg9: Self::R,
+        _arg10: Self::R,
+    ) -> Self::R {
+        let (name, pos) = get_name(self.state.namespace_builder.current_namespace(), &name?)?;
+        let key = name.clone();
+        let name = self.prefix_slash(name);
+        self.state.decls.to_mut().classes.insert(
+            key,
+            Rc::new(shallow_decl_defs::ShallowClass {
+                mode: Mode::Mstrict,
+                final_: false,
+                is_xhp: false,
+                kind: ClassKind::Cnormal,
+                name: Id(pos, name),
+                tparams: Vec::new(),
+                where_constraints: Vec::new(),
+                extends: Vec::new(),
+                uses: Vec::new(),
+                method_redeclarations: Vec::new(),
+                xhp_attr_uses: Vec::new(),
+                req_extends: Vec::new(),
+                req_implements: Vec::new(),
+                implements: Vec::new(),
+                consts: Vec::new(),
+                typeconsts: Vec::new(),
+                pu_enums: Vec::new(),
+                props: Vec::new(),
+                sprops: Vec::new(),
+                constructor: None,
+                static_methods: Vec::new(),
+                methods: Vec::new(),
+                user_attributes: Vec::new(),
+                enum_type: None,
+                decl_errors: Errors::empty(),
+            }),
+        );
         Ok(Node_::Ignored)
     }
 }

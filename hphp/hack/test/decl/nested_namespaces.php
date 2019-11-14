@@ -17,6 +17,7 @@ namespace MyNamespace {
 
   namespace Very\Inner\Namespace {
     type MyVeryInnerNamespaceType = string;
+    class MyClass {}
   }
 
   type MyVeryInnerNamespaceType = Very\Inner\Namespace\MyVeryInnerNamespaceType;

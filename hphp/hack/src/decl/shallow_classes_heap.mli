@@ -31,6 +31,8 @@ val class_naming_and_decl : Nast.class_ -> shallow_class
     Raises [Failure] if [shallow_class_decl] is not enabled. *)
 val class_decl_if_missing : Nast.class_ -> shallow_class
 
+val declare_class_in_file : Relative_path.t -> string -> shallow_class
+
 val push_local_changes : unit -> unit
 
 val pop_local_changes : unit -> unit

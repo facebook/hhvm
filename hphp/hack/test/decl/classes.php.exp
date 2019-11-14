@@ -8,10 +8,36 @@ Parsed decls:
       sc_where_constraints = []; sc_extends = []; sc_uses = [];
       sc_method_redeclarations = []; sc_xhp_attr_uses = [];
       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
-      sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
-      sc_sprops = []; sc_constructor = None; sc_static_methods = [];
-      sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
-      sc_decl_errors = <opaque> } };
+      sc_consts = []; sc_typeconsts = []; sc_pu_enums = [];
+      sc_props =
+      [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
+         sp_lateinit = false; sp_lsb = false;
+         sp_name = ([5:19-36], "instanceProperty"); sp_needs_init = true;
+         sp_type =
+         (Some (Rhint (root|classes.php line 5, characters 12-17),
+                (Tprim Tstring)));
+         sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} };
+        { Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
+          sp_lateinit = false; sp_lsb = false;
+          sp_name = ([6:19-37], "protectedProperty"); sp_needs_init = true;
+          sp_type =
+          (Some (Rhint (root|classes.php line 6, characters 15-17),
+                 (Tprim Tint)));
+          sp_abstract = false; sp_visibility = Protected; sp_fixme_codes = {}
+          }
+        ];
+      sc_sprops =
+      [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
+         sp_lateinit = false; sp_lsb = false;
+         sp_name = ([4:27-42], "$staticProperty"); sp_needs_init = true;
+         sp_type =
+         (Some (Rhint (root|classes.php line 4, characters 20-25),
+                (Tprim Tstring)));
+         sp_abstract = false; sp_visibility = Private; sp_fixme_codes = {} }
+        ];
+      sc_constructor = None; sc_static_methods = []; sc_methods = [];
+      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
+      } };
   funs = {}; typedefs = {}; consts = {} }
 
 They matched!

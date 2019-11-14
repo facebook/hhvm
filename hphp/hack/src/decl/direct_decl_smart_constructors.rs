@@ -14,6 +14,7 @@ use oxidized::{
     ast_defs::{ClassKind, ConstraintKind, FunKind, Id, Variance},
     errors::Errors,
     file_info::Mode,
+    i_set::ISet,
     pos::Pos,
     shallow_decl_defs, typing_defs,
     typing_defs::{
@@ -138,6 +139,14 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> 
                 n
             ))
         }
+    }
+}
+
+fn strip_dollar_prefix(name: String) -> String {
+    if name.starts_with("$") {
+        name.trim_start_matches("$").to_owned()
+    } else {
+        name
     }
 }
 
@@ -277,6 +286,13 @@ pub struct FunctionDecl {
 }
 
 #[derive(Clone, Debug)]
+pub struct PropertyDecl {
+    modifiers: Node_,
+    hint: Node_,
+    name: Node_,
+}
+
+#[derive(Clone, Debug)]
 pub enum Node_ {
     List(Vec<Node_>),
     BracketedList(Box<(Pos, Vec<Node_>, Pos)>),
@@ -289,6 +305,8 @@ pub enum Node_ {
     ListItem(Box<(Node_, Node_)>),
     Variable(Box<VariableDecl>),
     FunctionHeader(Box<FunctionDecl>),
+    Property(Box<PropertyDecl>),
+    ClassishBody(Vec<Node_>),
     TypeConstraint(Box<(ConstraintKind, Node_)>),
     LessThan(Pos),    // This needs a pos since it shows up in generics.
     GreaterThan(Pos), // This needs a pos since it shows up in generics.
@@ -296,9 +314,15 @@ pub enum Node_ {
     // Box the insides of the vector so we don't need to reallocate them when
     // we pull them out of the TypeConstraint variant.
     TypeParameter(Box<(Node_, Vec<Box<(ConstraintKind, Node_)>>)>),
+
+    // Simple keywords.
     As,
-    Super,
     Async,
+    Private,
+    Protected,
+    Public,
+    Static,
+    Super,
 }
 
 impl Node_ {
@@ -351,6 +375,15 @@ impl Node_ {
             }
             Node_::Ignored => Vec::new(),
             n => vec![n],
+        }
+    }
+
+    fn as_visibility(&self) -> Result<aast::Visibility, String> {
+        match self {
+            Node_::Private => Ok(aast::Visibility::Private),
+            Node_::Protected => Ok(aast::Visibility::Protected),
+            Node_::Public => Ok(aast::Visibility::Public),
+            n => Err(format!("Expected a visibility modifier, but was {:?}", n)),
         }
     }
 }
@@ -683,6 +716,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 }
                 Node_::Ignored
             }
+            TokenKind::Private => Node_::Private,
+            TokenKind::Protected => Node_::Protected,
+            TokenKind::Public => Node_::Public,
+            TokenKind::Static => Node_::Static,
             _ => Node_::Ignored,
         })
     }
@@ -1059,44 +1096,121 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg7: Self::R,
         _arg8: Self::R,
         _arg9: Self::R,
-        _arg10: Self::R,
+        body: Self::R,
     ) -> Self::R {
         let (name, pos) = get_name(self.state.namespace_builder.current_namespace(), &name?)?;
         let key = name.clone();
         let name = self.prefix_slash(name);
-        self.state.decls.to_mut().classes.insert(
-            key,
-            Rc::new(shallow_decl_defs::ShallowClass {
-                mode: match self.state.file_mode_builder {
-                    FileModeBuilder::None | FileModeBuilder::Pending => Mode::Mstrict,
-                    FileModeBuilder::Set(mode) => mode,
-                },
-                final_: false,
-                is_xhp: false,
-                kind: ClassKind::Cnormal,
-                name: Id(pos, name),
-                tparams: Vec::new(),
-                where_constraints: Vec::new(),
-                extends: Vec::new(),
-                uses: Vec::new(),
-                method_redeclarations: Vec::new(),
-                xhp_attr_uses: Vec::new(),
-                req_extends: Vec::new(),
-                req_implements: Vec::new(),
-                implements: Vec::new(),
-                consts: Vec::new(),
-                typeconsts: Vec::new(),
-                pu_enums: Vec::new(),
-                props: Vec::new(),
-                sprops: Vec::new(),
-                constructor: None,
-                static_methods: Vec::new(),
-                methods: Vec::new(),
-                user_attributes: Vec::new(),
-                enum_type: None,
-                decl_errors: Errors::empty(),
-            }),
-        );
+        let mut cls = shallow_decl_defs::ShallowClass {
+            mode: match self.state.file_mode_builder {
+                FileModeBuilder::None | FileModeBuilder::Pending => Mode::Mstrict,
+                FileModeBuilder::Set(mode) => mode,
+            },
+            final_: false,
+            is_xhp: false,
+            kind: ClassKind::Cnormal,
+            name: Id(pos, name),
+            tparams: Vec::new(),
+            where_constraints: Vec::new(),
+            extends: Vec::new(),
+            uses: Vec::new(),
+            method_redeclarations: Vec::new(),
+            xhp_attr_uses: Vec::new(),
+            req_extends: Vec::new(),
+            req_implements: Vec::new(),
+            implements: Vec::new(),
+            consts: Vec::new(),
+            typeconsts: Vec::new(),
+            pu_enums: Vec::new(),
+            props: Vec::new(),
+            sprops: Vec::new(),
+            constructor: None,
+            static_methods: Vec::new(),
+            methods: Vec::new(),
+            user_attributes: Vec::new(),
+            enum_type: None,
+            decl_errors: Errors::empty(),
+        };
+
+        match body? {
+            Node_::ClassishBody(body) => {
+                for element in body {
+                    match element {
+                        Node_::Property(decl) => {
+                            let mut is_static = false;
+                            let mut visibility = aast::Visibility::Private;
+                            for modifier in decl.modifiers.into_vec() {
+                                if let Ok(vis) = modifier.as_visibility() {
+                                    visibility = vis;
+                                }
+                                if let Node_::Static = modifier {
+                                    is_static = true;
+                                }
+                            }
+
+                            let (name, pos) = get_name("", &decl.name)?;
+                            let name = if is_static {
+                                name
+                            } else {
+                                strip_dollar_prefix(name)
+                            };
+                            let ty = self.node_to_ty(&decl.hint, &HashSet::new())?;
+                            let prop = shallow_decl_defs::ShallowProp {
+                                const_: false,
+                                xhp_attr: None,
+                                lateinit: false,
+                                lsb: false,
+                                name: Id(pos, name),
+                                needs_init: true,
+                                type_: Some(ty),
+                                abstract_: false,
+                                visibility,
+                                fixme_codes: ISet::new(),
+                            };
+                            if is_static {
+                                cls.sprops.push(prop)
+                            } else {
+                                cls.props.push(prop)
+                            }
+                        }
+                        _ => (), // It's not our job to report errors here.
+                    }
+                }
+            }
+            body => return Err(format!("Expected a classish body, but was {:?}", body)),
+        }
+        self.state.decls.to_mut().classes.insert(key, Rc::new(cls));
         Ok(Node_::Ignored)
+    }
+
+    fn make_property_declaration(
+        &mut self,
+        _arg0: Self::R,
+        modifiers: Self::R,
+        hint: Self::R,
+        name: Self::R,
+        _arg4: Self::R,
+    ) -> Self::R {
+        // Sometimes the name is a single element list.
+        let name = match name? {
+            Node_::List(nodes) => nodes
+                .first()
+                .ok_or("Expected a name, but was given an empty list.".to_owned())?
+                .clone(),
+            name => name,
+        };
+        Ok(Node_::Property(Box::new(PropertyDecl {
+            modifiers: modifiers?,
+            hint: hint?,
+            name,
+        })))
+    }
+
+    fn make_property_declarator(&mut self, name: Self::R, _arg1: Self::R) -> Self::R {
+        name
+    }
+
+    fn make_classish_body(&mut self, _arg0: Self::R, body: Self::R, _arg2: Self::R) -> Self::R {
+        Ok(Node_::ClassishBody(body?.into_vec()))
     }
 }

@@ -4,6 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::aast_check;
 use crate::rust_aast_parser_types::{Env, Result as ParserResult};
 use coroutine_smart_constructors::{CoroutineSmartConstructors, State as CoroutineState};
 use decl_mode_parser::DeclModeParser;
@@ -110,11 +111,6 @@ impl<'a> AastParser {
         }
     }
 
-    fn _ast_check_check_program(_aast: &Program<Pos, (), (), ()>) -> Vec<SyntaxError> {
-        // TODO(hrust) Ast_check.check_program
-        vec![]
-    }
-
     fn check_synatx_error(
         env: &Env,
         indexed_source_text: &'a IndexedSourceText<'a>,
@@ -132,7 +128,7 @@ impl<'a> AastParser {
                 env.codegen,
             ));
             errors.sort_by(SyntaxError::compare_offset);
-            errors.extend(aast.map_or(vec![], Self::_ast_check_check_program));
+            errors.extend(aast.map_or(vec![], aast_check::check_program));
             errors
         };
         if env.codegen {

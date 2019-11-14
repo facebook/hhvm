@@ -92,6 +92,10 @@ impl Pos {
         (line_begin, line_end, start, end)
     }
 
+    pub fn info_raw(&self) -> (usize, usize) {
+        (self.start_cnum(), self.end_cnum())
+    }
+
     pub fn line(&self) -> usize {
         match &self.0 {
             Small { start, .. } => start.line(),

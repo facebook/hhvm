@@ -24,7 +24,11 @@ let init root =
     {
       TypecheckerOptions.default with
       GlobalOptions.tco_shallow_class_decl = true;
-    }
+    };
+
+  (* Push local stacks here so we don't include shared memory in our timing. *)
+  File_provider.local_changes_push_stack ();
+  Decl_provider.local_changes_push_stack ()
 
 let time verbosity msg f =
   let before = Unix.gettimeofday () in

@@ -51,6 +51,7 @@ static std::set<std::string> s_post_methods{
   "MKCALENDAR",
   "PUT",
   "DELETE",
+  "MOVE",
   "LOCK",
   "UNLOCK",
 };

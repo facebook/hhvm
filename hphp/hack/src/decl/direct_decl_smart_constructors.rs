@@ -368,20 +368,24 @@ impl DirectDeclSmartConstructors<'_> {
                 let ty_ = if type_variables.contains(&name) {
                     Ty_::Tgeneric(name)
                 } else {
-                    let name = if name.starts_with("\\") {
-                        name
-                    } else if self.state.namespace_builder.current_namespace().is_empty() {
-                        "\\".to_owned() + &name
-                    } else {
-                        "\\".to_owned()
-                            + self.state.namespace_builder.current_namespace()
-                            + "\\"
-                            + &name
-                    };
+                    let name = self.prefix_ns(name);
                     Ty_::Tapply(Id(pos, name), Vec::new())
                 };
                 Ok(Ty(reason, Box::new(ty_)))
             }
+        }
+    }
+
+    // I'd really prefer that this function take a &str instead of a String, but
+    // I wanted to avoid having to unnecessarily copy it in the cases where it
+    // already starts with a backslash.
+    fn prefix_ns(&self, name: String) -> String {
+        if name.starts_with("\\") {
+            name
+        } else if self.state.namespace_builder.current_namespace().is_empty() {
+            "\\".to_owned() + &name
+        } else {
+            "\\".to_owned() + self.state.namespace_builder.current_namespace() + "\\" + &name
         }
     }
 

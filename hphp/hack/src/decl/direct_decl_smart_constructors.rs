@@ -238,7 +238,6 @@ pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
     pub decls: Cow<'a, InProgressDecls>,
     namespace_builder: Cow<'a, NamespaceBuilder>,
-    yields: Cow<'a, Vec<bool>>,
 
     // We don't need to wrap this in a Cow because it's very small.
     file_mode_builder: FileModeBuilder,
@@ -250,7 +249,6 @@ impl<'a> State<'a> {
             source_text,
             decls: Cow::Owned(empty_decls()),
             namespace_builder: Cow::Owned(NamespaceBuilder::new()),
-            yields: Cow::Owned(Vec::new()),
             file_mode_builder: FileModeBuilder::None,
         }
     }
@@ -323,6 +321,7 @@ pub enum Node_ {
     Public,
     Static,
     Super,
+    Yield,
 }
 
 impl Node_ {
@@ -544,7 +543,18 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'_> {
     }
 
     fn is_zero(s: &Self::S) -> bool {
-        s.is_ok()
+        fn inner_is_zero(n: &Node_) -> bool {
+            match n {
+                Node_::Yield => false,
+                Node_::List(inner) => inner.iter().all(inner_is_zero),
+                _ => true,
+            }
+        }
+
+        match s {
+            Err(_) => false,
+            Ok(n) => inner_is_zero(n),
+        }
     }
 }
 
@@ -684,16 +694,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
             TokenKind::Async => Node_::Async,
-            TokenKind::Function => {
-                self.state.yields.to_mut().push(false);
-                Node_::Ignored
-            }
-            TokenKind::Yield => {
-                // First pop the one that we pushed when we saw the function keyword.
-                self.state.yields.to_mut().pop();
-                self.state.yields.to_mut().push(true);
-                Node_::Ignored
-            }
+            TokenKind::Yield => Node_::Yield,
             TokenKind::Namespace => {
                 self.state.namespace_builder.to_mut().is_building_namespace = true;
                 if !self.state.namespace_builder.current_namespace().is_empty() {
@@ -908,7 +909,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         &mut self,
         _attributes: Self::R,
         header: Self::R,
-        _body: Self::R,
+        body: Self::R,
     ) -> Self::R {
         Ok(match header? {
             Node_::FunctionHeader(decl) => {
@@ -949,13 +950,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Node_::Async => true,
                     _ => false,
                 });
-                let fun_kind = if self
-                    .state
-                    .yields
-                    .to_mut()
-                    .pop()
-                    .expect("Attempted to pop from an empty yield stack")
-                {
+                let fun_kind = if body?.into_vec().into_iter().any(|node| match node {
+                    Node_::Yield => true,
+                    _ => false,
+                }) {
                     if async_ {
                         FunKind::FAsyncGenerator
                     } else {
@@ -1028,6 +1026,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 ret_hint: ret_hint?,
             })),
         })
+    }
+
+    fn make_yield_expression(&mut self, _arg0: Self::R, _arg1: Self::R) -> Self::R {
+        Ok(Node_::Yield)
+    }
+
+    fn make_yield_from_expression(
+        &mut self,
+        _arg0: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+    ) -> Self::R {
+        Ok(Node_::Yield)
     }
 
     fn make_const_declaration(

@@ -20,7 +20,11 @@ let init root =
     SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config
   in
   Parser_options_provider.set ParserOptions.default;
-  GlobalNamingOptions.set TypecheckerOptions.default
+  GlobalNamingOptions.set
+    {
+      TypecheckerOptions.default with
+      GlobalOptions.tco_shallow_class_decl = true;
+    }
 
 let time verbosity msg f =
   let before = Unix.gettimeofday () in
@@ -151,6 +155,11 @@ let compare_decl verbosity fn =
         Decl.declare_fun_in_file
         Pp_type.show_fun_elt
         decls.funs;
+      compare
+        "class(es)"
+        Shallow_classes_heap.declare_class_in_file
+        Shallow_decl_defs.show_shallow_class
+        decls.classes;
     ]
     |> List.reduce_exn ~f:( && )
   in

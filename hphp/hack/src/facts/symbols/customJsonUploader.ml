@@ -9,12 +9,18 @@
 
 (* Export all files matching this prefix to a custom symbol service.
  * Parallelize the execution if workers are provided.
- * Print the status of uploading each file by default *)
+ * Print the status of uploading each file if desired *)
 let send_to_custom_writer
-    ?(_workers : MultiWorker.worker list option = None)
-    ?(_print_file_status = true)
-    (_files : string list)
-    (_service : string)
-    (_repo_name : string)
-    (_repo_folder : string) : unit =
+    ~(workers : MultiWorker.worker list option)
+    ~(print_file_status : bool)
+    ~(files : string list)
+    ~(service : string)
+    ~(repo_name : string)
+    ~(repo_folder : string) : unit =
+  let _ = workers in
+  let _ = print_file_status in
+  let _ = files in
+  let _ = service in
+  let _ = repo_name in
+  let _ = repo_folder in
   ()

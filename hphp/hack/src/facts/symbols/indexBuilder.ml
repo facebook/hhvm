@@ -237,10 +237,12 @@ let export_to_custom_writer
       ~silent:ctxt.silent
       ~f:(fun () ->
         CustomJsonUploader.send_to_custom_writer
-          json_exported_files
-          service
-          repo_name
-          ctxt.repo_folder)
+          ~workers:None
+          ~print_file_status:true
+          ~files:json_exported_files
+          ~service
+          ~repo_name
+          ~repo_folder:ctxt.repo_folder)
       ~name
 
 (* Run the index builder project *)

@@ -1102,12 +1102,28 @@ function hphp_cmd($options, $test, $program) {
     ));
   }
 
+  $hdf_suffix = ".use.for.ini.migration.testing.only.hdf";
+  $hdf = file_exists($test.$hdf_suffix)
+       ? '-c ' . $test . $hdf_suffix
+       : "";
+
+  if ($hdf !== "") {
+    $contents = file_get_contents($test.$hdf_suffix);
+    if (strpos($contents, '{PWD}') !== false) {
+      $test_hdf = tempnam('/tmp', $test).$hdf_suffix;
+      file_put_contents($test_hdf,
+                        str_replace('{PWD}', dirname($test), $contents));
+      $hdf = " -c $test_hdf";
+    }
+  }
+
   return implode(" ", array(
     hhvm_path(),
     '--hphp',
     '-vUseHHBBC='. (repo_separate($options, $test) ? 'false' : 'true'),
     '--config',
     find_test_ext($test, 'ini', 'hphp_config'),
+    $hdf,
     '-vRuntime.ResourceLimit.CoreFileSize=0',
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
     '-vRuntime.Eval.EnableArgsInBacktraces=true',

@@ -91,28 +91,10 @@ function(invoke_dune name target)
   add_custom_target(
       ${name}
       COMMAND
-        export "RUSTC=${RUSTC_EXECUTABLE}" &&
-        export "CARGO_HOME=${CMAKE_CURRENT_BINARY_DIR}/cargo_home" &&
-        export "HACK_NO_CARGO_VENDOR=true" &&
-        export OPAMROOT=${OPAMROOT} &&
-        export PYTHONPATH="${HPHP_HOME}" && # needed for verify.py for `hack_dune_test`
-        export HACK_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}" &&
-        export HACK_BUILD_ROOT="${HACK_BUILD_ROOT}" &&
-        PATH="${RUSTC_BIN_DIR}:${CARGO_BIN_DIR}:${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
+        . "${CMAKE_CURRENT_BINARY_DIR}/dev_env.sh" &&
         opam config exec --
         $(MAKE) --makefile=Makefile.dune ${target}
-        DUNE_BUILD_DIR="${DUNE_BUILD_DIR}"
-        CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}"
-        CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
-        CMAKE_INSTALL_FULL_SYSCONFDIR="${CMAKE_INSTALL_FULL_SYSCONFDIR}"
-        CMAKE_INSTALL_FULL_BINDIR="${CMAKE_INSTALL_FULL_BINDIR}"
-        EXTRA_INCLUDE_PATHS="${extra_include_paths}"
-        EXTRA_LINK_OPTS="${extra_link_opts}"
-        EXTRA_LIB_PATHS="${extra_lib_paths}"
-        EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
         BYTECODE="${EMIT_OCAML_BYTECODE}"
-        OCAML="${OCAML_EXECUTABLE}"
-        OCAMLC="${OCAMLC_EXECUTABLE}"
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 

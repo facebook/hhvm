@@ -4196,7 +4196,9 @@ and new_object
          * for generic and dependent types to be correctly carried
          * through the 'new $foo()' iff the constructed obj_ty is a
          * supertype of the variable-dictated c_ty *)
-        let env = SubType.sub_type env c_ty obj_ty Errors.unify_error in
+        let env =
+          Typing_ops.sub_type p Reason.URnone env c_ty obj_ty Errors.unify_error
+        in
         gather env tel tuel ((c_ty, ctor_fty) :: res) classes)
   in
   gather env [] [] [] classes

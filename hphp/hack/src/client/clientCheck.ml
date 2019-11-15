@@ -189,7 +189,9 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
           let file = expand_path file in
           ServerCommandTypes.FileName file
       in
-      let%lwt pos_level_l = rpc args @@ Rpc.COVERAGE_LEVELS file_input in
+      let%lwt pos_level_l =
+        rpc args @@ Rpc.COVERAGE_LEVELS (file, file_input)
+      in
       ClientColorFile.go file_input args.output_json pos_level_l;
       Lwt.return Exit_status.No_error
     | MODE_COVERAGE file ->

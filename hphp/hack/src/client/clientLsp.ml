@@ -1983,7 +1983,8 @@ let do_typeCoverage
       Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument
     in
     let command =
-      ServerCommandTypes.COVERAGE_LEVELS (ServerCommandTypes.FileName filename)
+      ServerCommandTypes.COVERAGE_LEVELS
+        (filename, ServerCommandTypes.FileName filename)
     in
     let%lwt (results, counts) : Coverage_level_defs.result =
       rpc conn ref_unblocked_time command

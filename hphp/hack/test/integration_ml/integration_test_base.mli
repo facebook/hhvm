@@ -81,7 +81,7 @@ val wait : ServerEnv.env -> ServerEnv.env
 
 val coverage_levels :
   ServerEnv.env ->
-  ServerCommandTypes.file_input ->
+  string ->
   ServerEnv.env * ('a, Coverage_level_defs.result) loop_outputs
 
 val coverage_counts :

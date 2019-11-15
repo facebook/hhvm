@@ -59,8 +59,15 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       } )
   | STATUS_SINGLE (fn, max_errors) ->
     (env, take_max_errors (ServerStatusSingle.go fn env.tcopt) max_errors)
-  | COVERAGE_LEVELS fn ->
-    (env, ServerColorFile.go env.ServerEnv.tcopt env.ServerEnv.naming_table fn)
+  | COVERAGE_LEVELS (path, file_input) ->
+    let path = Relative_path.create_detect_prefix path in
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~path
+        ~file_input
+    in
+    (env, ServerColorFile.go_quarantined ~ctx ~entry)
   | INFER_TYPE (fn, line, char, dynamic_view) ->
     (env, ServerInferType.go env (fn, line, char, dynamic_view))
   | INFER_TYPE_BATCH (positions, dynamic_view) ->

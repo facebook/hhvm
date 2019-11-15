@@ -32,9 +32,7 @@ let test () =
     Test.fail "Expected the server to process disk updates";
 
   (* what string goes after env? *)
-  let (_, loop_output) =
-    Test.coverage_levels env (ServerCommandTypes.FileName "/foo.php")
-  in
+  let (_, loop_output) = Test.coverage_levels env "/foo.php" in
   Test.assert_coverage_levels
     loop_output
     [

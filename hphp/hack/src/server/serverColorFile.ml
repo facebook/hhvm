@@ -7,10 +7,6 @@
  *
  *)
 
-let go tcopt naming_table f_in =
-  let (check, tast) = ServerIdeUtils.check_file_input tcopt naming_table f_in in
-  Coverage_level.get_levels tast check
-
 let go_quarantined ~(ctx : Provider_context.t) ~(entry : Provider_context.entry)
     =
   try

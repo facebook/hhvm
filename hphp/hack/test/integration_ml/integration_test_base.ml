@@ -364,12 +364,14 @@ let wait env =
    * counters. *)
   ServerEnv.{ env with last_command_time = env.last_command_time -. 1.0 }
 
-let coverage_levels env file_input =
+let coverage_levels env filename =
+  let file_input = ServerCommandTypes.FileName filename in
   run_loop_once
     env
     {
       default_loop_input with
-      persistent_client_request = Some (Request (COVERAGE_LEVELS file_input));
+      persistent_client_request =
+        Some (Request (COVERAGE_LEVELS (filename, file_input)));
     }
 
 let coverage_counts env contents =

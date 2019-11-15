@@ -101,11 +101,13 @@ let fallback class_name member_name =
 let clean_comments (raw_comments : string) : string = String.strip raw_comments
 
 let go_comments_from_source_text
-    ~(source_text : Full_fidelity_source_text.t)
-    ~(filename : string)
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int)
     ~(kind : SymbolDefinition.kind) : string option =
+  let _ = ctx in
+  let filename = Relative_path.to_absolute entry.Provider_context.path in
   let lp =
     {
       Lexing.pos_fname = filename;
@@ -116,7 +118,7 @@ let go_comments_from_source_text
   in
   let pos = Pos.make_from_lexing_pos filename lp lp in
   let ffps_opt =
-    ServerSymbolDefinition.get_definition_cst_node_from_pos kind source_text pos
+    ServerSymbolDefinition.get_definition_cst_node_ctx ~entry ~kind ~pos
   in
   match ffps_opt with
   | None -> None
@@ -124,18 +126,6 @@ let go_comments_from_source_text
     (match Docblock_finder.get_docblock ffps with
     | Some db -> Some (clean_comments db)
     | None -> None)
-
-(* This is a faster version of "go_comments_for_symbol" because it already knows
-   the position *)
-let go_comments_for_position
-    ~(filename : string)
-    ~(contents : string)
-    ~(line : int)
-    ~(column : int)
-    ~(path : Relative_path.t)
-    ~(kind : SymbolDefinition.kind) : string option =
-  let source_text = Full_fidelity_source_text.make path contents in
-  go_comments_from_source_text ~source_text ~filename ~line ~column ~kind
 
 (* Fetch a definition *)
 let go_comments_for_symbol_ctx
@@ -145,7 +135,12 @@ let go_comments_for_symbol_ctx
   match def.SymbolDefinition.docblock with
   | Some db -> Some (clean_comments db)
   | None ->
-    (match ServerSymbolDefinition.get_definition_cst_node_ctx ~entry ~def with
+    (match
+       ServerSymbolDefinition.get_definition_cst_node_ctx
+         ~entry
+         ~kind:def.SymbolDefinition.kind
+         ~pos:def.SymbolDefinition.pos
+     with
     | None -> None
     | Some ffps ->
       (match Docblock_finder.get_docblock ffps with
@@ -212,69 +207,15 @@ let symboldefinition_kind_from_si_kind (kind : SearchUtils.si_kind) :
   | SearchUtils.SI_Keyword -> failwith "Cannot look up a keyword"
   | SearchUtils.SI_Namespace -> failwith "Cannot look up a namespace"
 
-(* Given a location and file contents, find best doc block *)
-let rec go_docblock_at_contents
-    ~(filename : string)
-    ~(contents : string)
-    ~(line : int)
-    ~(column : int)
-    ~(kind : SearchUtils.si_kind) : DocblockService.result =
-  let def_kind = symboldefinition_kind_from_si_kind kind in
-  let path = Relative_path.create_detect_prefix filename in
-  match
-    go_comments_for_position
-      ~line
-      ~column
-      ~path
-      ~filename
-      ~contents
-      ~kind:def_kind
-  with
-  | None ->
-    (* Special case: Classes with an assumed default constructor *)
-    if kind = SearchUtils.SI_Constructor then
-      go_docblock_at_contents
-        ~filename
-        ~contents
-        ~line
-        ~column
-        ~kind:SearchUtils.SI_Class
-    else
-      []
-  | Some "" -> []
-  | Some comments -> [DocblockService.Markdown comments]
-
-(* Given a location and filename, find best doc block *)
-let go_docblock_at
-    ~(filename : string)
-    ~(line : int)
-    ~(column : int)
-    ~(kind : SearchUtils.si_kind) : DocblockService.result =
-  (* Convert relative path and kind *)
-  let path = Relative_path.create_detect_prefix filename in
-  (* Okay, now that we know its position, let's gather a docblock *)
-  let contents_opt = File_provider.get_contents path in
-  match contents_opt with
-  | None -> []
-  | Some contents ->
-    go_docblock_at_contents ~filename ~contents ~line ~column ~kind
-
 let rec go_docblock_ctx
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int)
     ~(kind : SearchUtils.si_kind) : DocblockService.result =
-  let filename = Relative_path.to_absolute entry.Provider_context.path in
-  let source_text = entry.Provider_context.source_text in
   let def_kind = symboldefinition_kind_from_si_kind kind in
   match
-    go_comments_from_source_text
-      ~source_text
-      ~filename
-      ~line
-      ~column
-      ~kind:def_kind
+    go_comments_from_source_text ~ctx ~entry ~line ~column ~kind:def_kind
   with
   | None ->
     (* Special case: Classes with an assumed default constructor *)
@@ -287,8 +228,10 @@ let rec go_docblock_ctx
 
 (* Locate a symbol and return its docblock, no extra steps *)
 let go_docblock_for_symbol
-    ~(env : ServerEnv.env) ~(symbol : string) ~(kind : SearchUtils.si_kind) :
-    DocblockService.result =
+    ~(env : ServerEnv.env)
+    ~(ctx : Provider_context.t)
+    ~(symbol : string)
+    ~(kind : SearchUtils.si_kind) : DocblockService.result =
   (* Shortcut for namespaces, since they don't have locations *)
   if kind = SearchUtils.SI_Namespace then
     let namespace_declaration = Printf.sprintf "namespace %s;" symbol in
@@ -308,8 +251,14 @@ let go_docblock_for_symbol
       [DocblockService.Markdown msg]
     | Some location ->
       DocblockService.(
-        go_docblock_at
-          ~filename:location.dbs_filename
+        let entry =
+          Provider_utils.get_entry_VOLATILE
+            ~ctx
+            ~path:(Relative_path.create_detect_prefix location.dbs_filename)
+        in
+        go_docblock_ctx
+          ~ctx
+          ~entry
           ~line:location.dbs_line
           ~column:location.dbs_column
           ~kind)

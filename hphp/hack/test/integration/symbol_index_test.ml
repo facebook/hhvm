@@ -360,18 +360,27 @@ let test_namespace_map (harness : Test_harness.t) : bool =
 
 (* Rapid unit tests to verify docblocks are found and correct *)
 let test_docblock_finder (harness : Test_harness.t) : bool =
+  let _ = harness in
   let env = ServerEnvBuild.make_env ServerConfig.default_config in
   let handle =
     SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config
   in
   ignore (handle : SharedMem.handle);
+  Parser_options_provider.set ParserOptions.default;
   GlobalNamingOptions.set env.ServerEnv.tcopt;
 
   (* Search for docblocks for various items *)
-  let root_prefix = Path.to_string harness.repo_dir in
+  let ctx = Provider_context.empty env.ServerEnv.tcopt in
+  Relative_path.set_path_prefix Relative_path.Root harness.repo_dir;
+  let path =
+    Relative_path.create_detect_prefix
+      (Path.to_string (Path.concat harness.repo_dir "/bar_1.php"))
+  in
+  let entry = Provider_utils.get_entry_VOLATILE ~ctx ~path in
   let docblock =
-    ServerDocblockAt.go_docblock_at
-      ~filename:(root_prefix ^ "/bar_1.php")
+    ServerDocblockAt.go_docblock_ctx
+      ~ctx
+      ~entry
       ~line:6
       ~column:7
       ~kind:SI_Trait

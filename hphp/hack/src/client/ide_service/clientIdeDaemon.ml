@@ -459,10 +459,12 @@ let handle_message :
         Lwt.return (state, Handle_message_result.Response result))
     (* Autocomplete docblock resolve *)
     | (Initialized initialized_state, Completion_resolve param) ->
+      let ctx = initialized_state.ctx in
       ClientIdeMessage.Completion_resolve.(
         let result =
           ServerDocblockAt.go_docblock_for_symbol
             ~env:initialized_state.server_env
+            ~ctx
             ~symbol:param.symbol
             ~kind:param.kind
         in

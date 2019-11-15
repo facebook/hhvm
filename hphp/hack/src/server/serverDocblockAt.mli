@@ -14,14 +14,6 @@ val go_comments_for_symbol_ctx :
   base_class_name:string option ->
   string option
 
-(** Returns the docblock most appropriate to this position *)
-val go_docblock_at :
-  filename:string ->
-  line:int ->
-  column:int ->
-  kind:SearchUtils.si_kind ->
-  DocblockService.result
-
 (** Returns the docblock from these file contents *)
 val go_docblock_ctx :
   ctx:Provider_context.t ->
@@ -34,6 +26,7 @@ val go_docblock_ctx :
 (** Simplified one-step symbol/docblock *)
 val go_docblock_for_symbol :
   env:ServerEnv.env ->
+  ctx:Provider_context.t ->
   symbol:string ->
   kind:SearchUtils.si_kind ->
   DocblockService.result

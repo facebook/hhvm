@@ -79,10 +79,17 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let result = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
     (env, result)
   | DOCBLOCK_AT (filename, line, column, _, kind) ->
-    let r = ServerDocblockAt.go_docblock_at ~filename ~line ~column ~kind in
+    let ctx = Provider_context.empty ~tcopt:env.ServerEnv.tcopt in
+    let entry =
+      Provider_utils.get_entry_VOLATILE
+        ~ctx
+        ~path:(Relative_path.create_detect_prefix filename)
+    in
+    let r = ServerDocblockAt.go_docblock_ctx ~ctx ~entry ~line ~column ~kind in
     (env, r)
   | DOCBLOCK_FOR_SYMBOL (symbol, kind) ->
-    let r = ServerDocblockAt.go_docblock_for_symbol ~env ~symbol ~kind in
+    let ctx = Provider_context.empty ~tcopt:env.ServerEnv.tcopt in
+    let r = ServerDocblockAt.go_docblock_for_symbol ~env ~ctx ~symbol ~kind in
     (env, r)
   | IDE_SIGNATURE_HELP (path, line, column) ->
     let file_input = ServerCommandTypes.FileName path in

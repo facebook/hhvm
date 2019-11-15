@@ -23,9 +23,7 @@ namespace HPHP {
 
 template<class Action>
 inline void exception_handler(Action action) {
-  ITRACE_MOD(Trace::unwind, 1, "unwind exception_handler\n");
   Trace::Indent _i;
-
   try {
     action();
     vmpc() = 0;

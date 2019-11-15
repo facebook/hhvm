@@ -50,8 +50,15 @@ struct c_StaticWaitHandle final : c_Awaitable {
   static c_StaticWaitHandle* CreateSucceeded(Cell result); // nothrow
   static c_StaticWaitHandle* CreateFailed(ObjectData* exception);
 
+  static rds::Link<Object, rds::Mode::Normal> NullHandle;
+  static rds::Link<Object, rds::Mode::Normal> TrueHandle;
+  static rds::Link<Object, rds::Mode::Normal> FalseHandle;
+
  private:
+  static c_StaticWaitHandle* CreateSucceededImpl(Cell result); // nothrow
   void setState(uint8_t state) { setKindState(Kind::Static, state); }
+
+  friend struct AsioExtension;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

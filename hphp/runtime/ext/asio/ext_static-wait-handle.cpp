@@ -17,10 +17,23 @@
 
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 
+#include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+rds::Link<Object, rds::Mode::Normal> c_StaticWaitHandle::NullHandle;
+rds::Link<Object, rds::Mode::Normal> c_StaticWaitHandle::TrueHandle;
+rds::Link<Object, rds::Mode::Normal> c_StaticWaitHandle::FalseHandle;
+
+c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceededImpl(const Cell result) {
+  auto waitHandle = req::make<c_StaticWaitHandle>();
+  waitHandle->setState(STATE_SUCCEEDED);
+  cellCopy(result, waitHandle->m_resultOrException);
+  return waitHandle.detach();
+}
 
 /**
  * Create succeeded StaticWaitHandle object.
@@ -32,10 +45,15 @@ namespace HPHP {
  * guarantee.
  */
 c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceeded(const Cell result) {
-  auto waitHandle = req::make<c_StaticWaitHandle>();
-  waitHandle->setState(STATE_SUCCEEDED);
-  cellCopy(result, waitHandle->m_resultOrException);
-  return waitHandle.detach();
+  if (isNullType(result.m_type)) {
+    Object ret = *NullHandle.get();
+    return static_cast<c_StaticWaitHandle*>(ret.detach());
+  }
+  if (isBoolType(result.m_type)) {
+    Object ret = result.m_data.num ? *TrueHandle.get() : *FalseHandle.get();
+    return static_cast<c_StaticWaitHandle*>(ret.detach());
+  }
+  return CreateSucceededImpl(result);
 }
 
 /**
@@ -52,6 +70,23 @@ c_StaticWaitHandle* c_StaticWaitHandle::CreateFailed(ObjectData* exception) {
   waitHandle->setState(STATE_FAILED);
   cellCopy(make_tv<KindOfObject>(exception), waitHandle->m_resultOrException);
   return waitHandle.detach();
+}
+
+void AsioExtension::initStaticWaitHandle() {
+  c_StaticWaitHandle::NullHandle.bind(rds::Mode::Normal);
+  c_StaticWaitHandle::TrueHandle.bind(rds::Mode::Normal);
+  c_StaticWaitHandle::FalseHandle.bind(rds::Mode::Normal);
+}
+
+void AsioExtension::requestInitSingletons() {
+  using SSWH = c_StaticWaitHandle;
+  Object nullObj{SSWH::CreateSucceededImpl(make_tv<KindOfNull>())};
+  Object trueObj{SSWH::CreateSucceededImpl(make_tv<KindOfBoolean>(true))};
+  Object falseObj{SSWH::CreateSucceededImpl(make_tv<KindOfBoolean>(false))};
+
+  SSWH::NullHandle.initWith(std::move(nullObj));
+  SSWH::TrueHandle.initWith(std::move(trueObj));
+  SSWH::FalseHandle.initWith(std::move(falseObj));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

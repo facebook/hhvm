@@ -39,6 +39,7 @@
 #include "hphp/runtime/base/object-iterator.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
@@ -161,6 +162,8 @@ bool isObjprofRoot(
   ObjprofFlags flags,
   const std::unordered_set<std::string>& exclude_classes
 ) {
+  using SSWH = c_StaticWaitHandle;
+
   Class* cls = obj->getVMClass();
   auto cls_name = cls->name()->toCppString();
   // Classes in exclude_classes not considered root
@@ -168,6 +171,11 @@ bool isObjprofRoot(
   // In USER_TYPES_ONLY mode, Classes with "HH\\" prefix not considered root
   if ((flags & ObjprofFlags::USER_TYPES_ONLY) != 0) {
     if (cls_name.compare(0, 3, "HH\\") == 0) return false;
+  }
+  if (SSWH::NullHandle.bound() && SSWH::NullHandle.isInit()) {
+    if (obj == SSWH::NullHandle->get())  return false;
+    if (obj == SSWH::TrueHandle->get())  return false;
+    if (obj == SSWH::FalseHandle->get()) return false;
   }
   return true;
 }

@@ -503,8 +503,6 @@ static CallMap s_callMap {
 #endif
     {CreateAGWH,         &c_AsyncGeneratorWaitHandle::Create, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
-    {CreateSSWH,         &c_StaticWaitHandle::CreateSucceeded, DSSA, SNone,
-                           {{TV, 0}}},
     {AFWHPrepareChild,   &c_AsyncFunctionWaitHandle::PrepareChild, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}}},
 

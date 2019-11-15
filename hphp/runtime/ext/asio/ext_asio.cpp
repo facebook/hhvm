@@ -174,11 +174,14 @@ void AsioExtension::moduleInit() {
   initSleepWaitHandle();
   initRescheduleWaitHandle();
   initExternalThreadEventWaitHandle();
+  initStaticWaitHandle();
 
   loadSystemlib();
 
   finishClasses();
 }
+
+void AsioExtension::requestInit() { requestInitSingletons(); }
 
 void AsioExtension::initFunctions() {
   HHVM_FALIAS(

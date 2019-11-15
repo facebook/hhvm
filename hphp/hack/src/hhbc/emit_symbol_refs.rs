@@ -7,6 +7,7 @@
 
 use env::emitter::Emitter;
 use hhas_symbol_refs_rust::*;
+use hhbc_id_rust::{class, function, r#const, Id};
 use std::collections::BTreeSet;
 
 struct State {
@@ -37,21 +38,21 @@ impl State {
         e.emit_state_mut().symbol_refs.includes.insert(inc);
     }
 
-    pub fn add_constant(e: &mut Emitter, s: String) {
-        if !s.is_empty() {
-            e.emit_state_mut().symbol_refs.constants.insert(s);
+    pub fn add_constant(e: &mut Emitter, s: r#const::Type) {
+        if !s.to_raw_string().is_empty() {
+            e.emit_state_mut().symbol_refs.constants.insert(s.into());
         }
     }
 
-    pub fn add_function(e: &mut Emitter, s: String) {
-        if !s.is_empty() {
-            e.emit_state_mut().symbol_refs.functions.insert(s);
+    pub fn add_function(e: &mut Emitter, s: function::Type) {
+        if !s.to_raw_string().is_empty() {
+            e.emit_state_mut().symbol_refs.functions.insert(s.into());
         }
     }
 
-    pub fn add_class(e: &mut Emitter, s: String) {
-        if !s.is_empty() {
-            e.emit_state_mut().symbol_refs.classes.insert(s);
+    pub fn add_class(e: &mut Emitter, s: class::Type) {
+        if !s.to_raw_string().is_empty() {
+            e.emit_state_mut().symbol_refs.classes.insert(s.into());
         }
     }
 

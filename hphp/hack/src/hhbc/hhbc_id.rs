@@ -84,6 +84,12 @@ macro_rules! impl_id {
             }
         }
 
+        // Note: more efficient than to_raw_string().to_owned() if Cow is owned
+        impl Into<String> for $type<'_> {
+            fn into(self) -> String {
+                self.0.into_owned()
+            }
+        }
     };
 }
 

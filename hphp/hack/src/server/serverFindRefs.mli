@@ -28,9 +28,11 @@ val go :
   ServerEnv.env ->
   ServerEnv.env * server_result_or_retry
 
-val go_from_file :
-  ServerCommandTypes.labelled_file * int * int ->
-  ServerEnv.env ->
+val go_from_file_ctx :
+  ctx:Provider_context.t ->
+  entry:Provider_context.entry ->
+  line:int ->
+  column:int ->
   (string * action) option
 
 val to_absolute : server_result -> result

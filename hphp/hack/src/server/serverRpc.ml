@@ -158,22 +158,49 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       let include_defs = false in
       ServerFindRefs.(
         go find_refs_action include_defs genv env |> map_env ~f:to_absolute))
-  | IDE_FIND_REFS (labelled_file, line, char, include_defs) ->
+  | IDE_FIND_REFS (labelled_file, line, column, include_defs) ->
     Done_or_retry.(
-      (match ServerFindRefs.go_from_file (labelled_file, line, char) env with
+      let (filename, file_input) =
+        match labelled_file with
+        | LabelledFileContent { filename; content } ->
+          (filename, ServerCommandTypes.FileContent content)
+        | LabelledFileName filename ->
+          (filename, ServerCommandTypes.FileName filename)
+      in
+      let (ctx, entry) =
+        Provider_utils.update_context
+          ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+          ~path:(Relative_path.create_detect_prefix filename)
+          ~file_input
+      in
+      (match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
       | None -> (env, Done None)
       | Some (name, action) ->
         map_env
           ~f:(ServerFindRefs.to_ide name)
           (ServerFindRefs.go action include_defs genv env)))
-  | IDE_GO_TO_IMPL (labelled_file, line, char) ->
+  | IDE_GO_TO_IMPL (labelled_file, line, column) ->
     Done_or_retry.(
-      (match ServerFindRefs.go_from_file (labelled_file, line, char) env with
-      | None -> (env, Done None)
-      | Some (name, action) ->
-        map_env
-          ~f:(ServerFindRefs.to_ide name)
-          (ServerGoToImpl.go action genv env)))
+      ServerCommandTypes.(
+        let (filename, file_input) =
+          match labelled_file with
+          | LabelledFileContent { filename; content } ->
+            (filename, ServerCommandTypes.FileContent content)
+          | LabelledFileName filename ->
+            (filename, ServerCommandTypes.FileName filename)
+        in
+        let (ctx, entry) =
+          Provider_utils.update_context
+            ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+            ~path:(Relative_path.create_detect_prefix filename)
+            ~file_input
+        in
+        (match ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column with
+        | None -> (env, Done None)
+        | Some (name, action) ->
+          map_env
+            ~f:(ServerFindRefs.to_ide name)
+            (ServerGoToImpl.go action genv env))))
   | IDE_HIGHLIGHT_REFS (path, file_input, line, column) ->
     let (ctx, entry) =
       Provider_utils.update_context

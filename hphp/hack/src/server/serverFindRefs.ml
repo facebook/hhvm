@@ -175,22 +175,22 @@ let get_action symbol (filename, file_content, line, char) =
     Some (LocalVar { filename; file_content; line; char })
   | SymbolOccurrence.Attribute _ -> None
 
-let go_from_file (labelled_file, line, char) env =
-  let (filename, content) =
-    ServerCommandTypes.(
-      match labelled_file with
-      | LabelledFileContent { filename; content } ->
-        (filename, ServerFileSync.get_file_content (FileContent content))
-      | LabelledFileName filename ->
-        (filename, ServerFileSync.get_file_content (FileName filename)))
-  in
-  let filename = Relative_path.create_detect_prefix filename in
+let go_from_file_ctx
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~(line : int)
+    ~(column : int) : (string * ServerCommandTypes.Find_refs.action) option =
   (* Find the symbol at given position *)
-  ServerIdentifyFunction.go content line char env.ServerEnv.tcopt
+  ServerIdentifyFunction.go_quarantined ~ctx ~entry ~line ~column
   |> (* If there are few, arbitrarily pick the first *)
   List.hd
   >>= fun (occurrence, definition) ->
   (* Ignore symbols that lack definitions *)
   definition >>= fun definition ->
-  get_action occurrence (filename, content, line, char) >>= fun action ->
-  Some (definition.SymbolDefinition.full_name, action)
+  get_action
+    occurrence
+    ( entry.Provider_context.path,
+      entry.Provider_context.source_text.Full_fidelity_source_text.text,
+      line,
+      column )
+  >>= fun action -> Some (definition.SymbolDefinition.full_name, action)

@@ -1316,15 +1316,17 @@ let handle_mode
     let filename = Relative_path.to_absolute filename in
     let content = cat filename in
     let include_defs = true in
-    let labelled_file =
-      ServerCommandTypes.LabelledFileContent { filename; content }
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~path:(Relative_path.create_detect_prefix filename)
+        ~file_input:(ServerCommandTypes.FileContent content)
     in
     Option.Monad_infix.(
       ServerCommandTypes.Done_or_retry.(
         let results =
           ServerFindRefs.(
-            go_from_file (labelled_file, line, column) env
-            >>= fun (name, action) ->
+            go_from_file_ctx ~ctx ~entry ~line ~column >>= fun (name, action) ->
             go action include_defs genv env |> map_env ~f:(to_ide name) |> snd
             |> function
             | Done r -> r
@@ -1348,13 +1350,16 @@ let handle_mode
     in
     let filename = Relative_path.to_absolute filename in
     let content = cat filename in
-    let labelled_file =
-      ServerCommandTypes.LabelledFileContent { filename; content }
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~path:(Relative_path.create_detect_prefix filename)
+        ~file_input:(ServerCommandTypes.FileContent content)
     in
     Option.Monad_infix.(
       ServerCommandTypes.Done_or_retry.(
         let results =
-          ServerFindRefs.go_from_file (labelled_file, line, column) env
+          ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column
           >>= fun (name, action) ->
           ServerGoToImpl.go action genv env
           |> map_env ~f:(ServerFindRefs.to_ide name)

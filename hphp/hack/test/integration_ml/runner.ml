@@ -6,10 +6,7 @@
  *
  *)
 
-let run (f : unit -> unit) : unit -> bool =
- fun () ->
-  f ();
-  true
+let run = Runner_base.run
 
 let tests =
   [
@@ -43,51 +40,6 @@ let tests =
     ("ide/remove_parent", run Test_remove_parent.test);
     ("ide/status_single", run Test_status_single.test);
     ("ide/unsaved_changes", run Test_unsaved_changes.test);
-    ( "saved_state/changed_type_in_base_class",
-      run Test_changed_type_in_base_class.test );
-    ("saved_state/deps_all_members", run Test_deps_all_members.test);
-    ( "saved_state/disable_conservative_redecl_class",
-      run Test_disable_conservative_redecl_class.test );
-    ("saved_state/disk_race_conditions", run Test_disk_race_conditions.test);
-    ( "saved_state/fun_deps_load_from_state",
-      run Test_fun_deps_load_from_state.test );
-    ("saved_state/ide_cache", run Test_ide_cache.test);
-    ("saved_state/ide_tast_cache", run Test_ide_tast_cache.test);
-    ( "saved_state/load_decls_cold_synthesized_ancestors",
-      run Test_load_decls_cold_synthesized_ancestors.test );
-    ( "saved_state/load_decls_enum_add_member",
-      run Test_load_decls_enum_add_member.test );
-    ( "saved_state/load_decls_fixme_in_hot_changed_class",
-      run Test_load_decls_fixme_in_hot_changed_class.test );
-    ( "saved_state/load_decls_fixme_in_hot_similar_class",
-      run Test_load_decls_fixme_in_hot_similar_class.test );
-    ( "saved_state/load_decls_fixme_in_hot_unchanged_interface",
-      run Test_load_decls_fixme_in_hot_unchanged_interface.test );
-    ( "saved_state/load_decls_stale_derived_class",
-      run Test_load_decls_stale_derived_class.test );
-    ( "saved_state/naming_table_sqlite_fallback",
-      run Test_naming_table_sqlite_fallback.test );
-    ("saved_state/no_op_close", run Test_no_op_close.test);
-    ("saved_state/no_op_edit", run Test_no_op_edit.test);
-    ("saved_state/no_op_open", run Test_no_op_open.test);
-    ("saved_state/prechecked_advanced", run Test_prechecked_advanced.test);
-    ("saved_state/prechecked_basic", run Test_prechecked_basic.test);
-    ("saved_state/prechecked_find_refs", run Test_prechecked_find_refs.test);
-    ( "saved_state/prechecked_incremental_after_init",
-      run Test_prechecked_incremental_after_init.test );
-    ("saved_state/prechecked_incremental", run Test_prechecked_incremental.test);
-    ("saved_state/predeclare_ide_deps", run Test_predeclare_ide_deps.test);
-    ("saved_state/recheck_stats", run Test_recheck_stats.test);
-    ("saved_state/saved_state", run Test_saved_state.test);
-    ( "saved_state/saved_state_with_decl_error",
-      run Test_saved_state_with_decl_error.test );
-    ( "saved_state/saved_state_with_mode_change",
-      run Test_saved_state_with_mode_change.test );
-    ( "saved_state/saved_state_with_naming_error",
-      run Test_saved_state_with_naming_error.test );
-    ( "saved_state/saved_state_with_parse_error",
-      run Test_saved_state_with_parse_error.test );
-    ("saved_state/similar_files", run Test_similar_files.test);
     ("added_parent", run Test_added_parent.test);
     ("capitalization", run Test_capitalization.test);
     ("coverage_counts", run Test_coverage_counts.test);
@@ -123,15 +75,4 @@ let tests =
     ("unbound_name_2", run Test_unbound_name_2.test);
   ]
 
-let () =
-  if Array.length Sys.argv != 2 then
-    failwith "Expecting exactly one test name"
-  else
-    let test_name = Sys.argv.(1) in
-    let tests = List.filter (fun (name, _test) -> test_name = name) tests in
-    match tests with
-    | [] -> failwith (Printf.sprintf "Test named '%s' was not found!" test_name)
-    | [test] -> Unit_test.run_all [test]
-    | _ :: _ :: _ ->
-      failwith
-        (Printf.sprintf "More than one test named '%s' was found!" test_name)
+let () = Runner_base.go tests

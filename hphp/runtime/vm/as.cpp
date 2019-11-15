@@ -3637,6 +3637,13 @@ std::unique_ptr<UnitEmitter> assemble_string(
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
 
+  FTRACE(
+    4,
+    "==================== Assembling {} ====================\n{}\n",
+    ue->m_filepath,
+    std::string(code, codeLen)
+  );
+
   try {
     auto const mode = std::istringstream::binary | std::istringstream::in;
     std::istringstream instr(std::string(code, codeLen), mode);

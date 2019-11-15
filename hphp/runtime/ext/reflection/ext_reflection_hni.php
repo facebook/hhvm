@@ -2048,7 +2048,7 @@ class ReflectionClass implements Reflector {
    */
   <<__Rx, __MaybeMutable>>
   public function isIterateable(): bool {
-    return $this->isSubclassOf(\Traversable::class);
+    return $this->isSubclassOf(\HH\Traversable::class);
   }
 
   /**

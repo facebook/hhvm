@@ -10,11 +10,11 @@ class CallbackFilterIterator extends FilterIterator {
    * Creates a filtered iterator using the callback to determine which
    * items are accepted or rejected.
    *
-   * @iterator \Iterator The iterator to be filtered
+   * @iterator \HH\Iterator The iterator to be filtered
    * @callback callable The callback, which should return TRUE to accept the
    * current item or FALSE otherwise.
    */
-  public function __construct(\Iterator $iterator, callable $callback) {
+  public function __construct(\HH\Iterator $iterator, callable $callback) {
     parent::__construct($iterator);
     $this->callback = $callback;
   }

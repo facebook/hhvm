@@ -23,7 +23,7 @@ class CachingIterator
   const CATCH_GET_CHILD = 16;
   const FULL_CACHE = 256;
 
-  public function __construct(\Iterator $iterator, $flags = CachingIterator::CALL_TOSTRING) {
+  public function __construct(\HH\Iterator $iterator, $flags = CachingIterator::CALL_TOSTRING) {
     $flags = $this->validateFlags($flags);
     if ($flags & self::FULL_CACHE) {
       $this->fullCacheIterator = new ArrayIterator();

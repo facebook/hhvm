@@ -33,7 +33,7 @@ class RecursiveCachingIterator
    * @return     mixed   The RecursiveCachingIterator.
    */
   public function __construct(
-    \Iterator $iterator,
+    \HH\Iterator $iterator,
     $flags = RecursiveCachingIterator::CALL_TOSTRING
   ) {
     if (!($iterator is RecursiveIterator)) {

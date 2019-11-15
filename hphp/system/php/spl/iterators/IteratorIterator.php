@@ -31,7 +31,7 @@ class IteratorIterator implements OuterIterator {
     while ($iterator is IteratorAggregate) {
       $iterator = $iterator->getIterator();
     }
-    if ($iterator is \Iterator) {
+    if ($iterator is \HH\Iterator) {
       $this->iterator = $iterator;
     } else if ($iterator is \SimpleXMLElement) {
       $this->iterator = $iterator->getIterator();

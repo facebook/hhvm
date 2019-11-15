@@ -34,7 +34,7 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
 
   private $postfix = "";
 
-  public function __construct(\Traversable $it, $flags = null, $cit_flags = null,
+  public function __construct(\HH\Traversable $it, $flags = null, $cit_flags = null,
                               $mode = null) {
     if ($flags === null) $flags = self::BYPASS_KEY;
     if ($mode === null) $mode = RecursiveIteratorIterator::SELF_FIRST;

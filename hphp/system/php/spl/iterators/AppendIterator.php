@@ -32,7 +32,7 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
    *
    * @return     mixed   No value is returned.
    */
-  public function append(\Iterator $it) {
+  public function append(\HH\Iterator $it) {
     $it->rewind();
     $this->iterators->append($it);
 

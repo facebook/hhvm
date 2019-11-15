@@ -180,85 +180,6 @@ Variant HHVM_FUNCTION(class_uses, const Variant& obj,
   return ret.toArray();
 }
 
-#define CHECK_TRAVERSABLE_IMPL(obj, ret) \
-  if (!obj.isObject() || \
-      !obj.getObjectData()->instanceof(SystemLib::s_TraversableClass)) { \
-    raise_recoverable_error("Argument must implement interface Traversable"); \
-    return ret; \
-  }
-
-Object get_traversable_object_iterator(const Variant& obj) {
-  bool isIteratorAggregate;
-  Object itObj = obj.getObjectData()
-    ->iterableObject(isIteratorAggregate, true);
-
-  if (!isIteratorAggregate) {
-    if (!obj.getObjectData()->instanceof(
-        SystemLib::s_IteratorAggregateClass)) {
-      raise_error("Objects returned by getIterator() must be traversable or "
-                  "implement interface Iterator");
-    } else {
-      raise_error(
-        "Class %s must implement interface Traversable as part of either "
-        "Iterator or IteratorAggregate",
-        obj.toObject()->getClassName().data()
-      );
-    }
-  }
-
-  return itObj;
-}
-
-
-Variant HHVM_FUNCTION(iterator_apply, const Variant& obj, const Variant& func,
-                         const Array& params /* = null_array */) {
-  VMRegAnchor _;
-  CHECK_TRAVERSABLE_IMPL(obj, 0);
-  Object pobj = get_traversable_object_iterator(obj);
-  pobj->o_invoke_few_args(s_rewind, 0);
-  int64_t count = 0;
-  while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
-    if (!same(vm_call_user_func(func, params), true)) {
-      break;
-    }
-    ++count;
-    pobj->o_invoke_few_args(s_next, 0);
-  }
-  return count;
-}
-
-Variant HHVM_FUNCTION(iterator_count, const Variant& obj) {
-  VMRegAnchor _;
-  CHECK_TRAVERSABLE_IMPL(obj, 0);
-  Object pobj = get_traversable_object_iterator(obj);
-  pobj->o_invoke_few_args(s_rewind, 0);
-  int64_t count = 0;
-  while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
-    ++count;
-    pobj->o_invoke_few_args(s_next, 0);
-  }
-  return count;
-}
-
-Array HHVM_FUNCTION(iterator_to_array, const Variant& obj,
-                                         bool use_keys /* = true */) {
-  VMRegAnchor _;
-  Array ret(Array::Create());
-  CHECK_TRAVERSABLE_IMPL(obj, ret);
-  Object pobj = get_traversable_object_iterator(obj);
-  pobj->o_invoke_few_args(s_rewind, 0);
-  while (same(pobj->o_invoke_few_args(s_valid, 0), true)) {
-    Variant val = pobj->o_invoke_few_args(s_current, 0);
-    if (use_keys) {
-      Variant key = pobj->o_invoke_few_args(s_key, 0);
-      ret.set(key, val);
-    } else {
-      ret.append(val);
-    }
-    pobj->o_invoke_few_args(s_next, 0);
-  }
-  return ret;
-}
 
 bool HHVM_FUNCTION(spl_autoload_register,
                    const Variant& autoload_function /* = uninit_variant */,
@@ -376,9 +297,6 @@ struct SPLExtension final : Extension {
     HHVM_FE(class_implements);
     HHVM_FE(class_parents);
     HHVM_FE(class_uses);
-    HHVM_FE(iterator_apply);
-    HHVM_FE(iterator_count);
-    HHVM_FE(iterator_to_array);
     HHVM_FE(spl_autoload_call);
     HHVM_FE(spl_autoload_extensions);
     HHVM_FE(spl_autoload_functions);

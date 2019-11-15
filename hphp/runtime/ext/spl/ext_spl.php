@@ -129,26 +129,59 @@ function class_uses(mixed $obj,
  * @param array $params - Arguments to pass to the callback function.
  * @return mixed - Returns the iteration count.
  */
-<<__Native>>
-function iterator_apply(mixed $obj,
-                        mixed $func,
-                        array $params = []): mixed;
+function iterator_apply(mixed $obj, mixed $func, array $params = []): mixed {
+  if (!is_object($obj) || !($obj is \HH\Traversable)) {
+    trigger_error("Argument must implement interface Traversable", E_RECOVERABLE_ERROR);
+    return 0;
+  }
+  $count = 0;
+  foreach ($obj as $v) {
+    if ($func(...$params) !== true) {
+      break;
+    }
+    ++$count;
+  }
+  return $count;
+}
 
 /** Count the elements in an iterator.
  * @param mixed $obj - The iterator being counted.
  * @return mixed - The number of elements in iterator.
  */
-<<__Native>>
-function iterator_count(mixed $obj): mixed;
+function iterator_count(mixed $obj): mixed {
+  if (!is_object($obj) || !($obj is \HH\Traversable)) {
+    trigger_error("Argument must implement interface Traversable", E_RECOVERABLE_ERROR);
+    return 0;
+  }
+  $count = 0;
+  foreach ($obj as $_) {
+    ++$count;
+  }
+  return $count;
+}
 
 /** Copy the elements of an iterator into an array.
  * @param mixed $obj - The iterator being copied.
  * @param bool $use_keys - Whether to use the iterator element keys as index.
  * @return mixed - An array containing the elements of the iterator.
  */
-<<__Native>>
-function iterator_to_array(mixed $obj,
-                           bool $use_keys = true): array;
+function iterator_to_array(mixed $obj, bool $use_keys = true): array {
+  if (!is_object($obj) || !($obj is \HH\Traversable)) {
+    trigger_error("Argument must implement interface Traversable", E_RECOVERABLE_ERROR);
+    return 0;
+  }
+  $ret = array();
+  if ($use_keys) {
+    foreach ($obj as $k => $v) {
+      $ret[$k] = $v;
+    }
+  } else {
+    foreach ($obj as $v) {
+      $ret[] = $v;
+    }
+  }
+  return $ret;
+}
 
 /** This function can be used to manually search for a class or interface using
  * the registered __autoload functions.

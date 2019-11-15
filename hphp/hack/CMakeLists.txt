@@ -71,7 +71,8 @@ else()
   # wrong version.  We can't just add the new path and a native_lib because we
   # can't control the order (and -l won't accept the raw path to the lib).  By
   # doing it this way we specify the path explicitly.
-  list(APPEND extra_link_opts "$<TARGET_LINKER_FILE:lz4>")
+  get_target_property(LZ4_DIR lz4 BINARY_DIR)
+  list(APPEND extra_link_opts "${LZ4_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}lz4${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endif()
 
 if(PC_SQLITE3_FOUND)
@@ -81,7 +82,8 @@ if(PC_SQLITE3_FOUND)
   list(APPEND extra_native_libraries "sqlite3")
 else()
   list(APPEND extra_include_paths "${TP_DIR}/libsqlite3")
-  list(APPEND extra_link_opts "$<TARGET_LINKER_FILE:sqlite3>")
+  get_target_property(SQLITE_DIR sqlite3 BINARY_DIR)
+  list(APPEND extra_link_opts "${SQLITE_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}sqlite3${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endif()
 
 get_filename_component(RUSTC_BIN_DIR "${RUSTC_EXECUTABLE}" DIRECTORY)

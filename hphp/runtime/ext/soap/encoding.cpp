@@ -2176,7 +2176,7 @@ xmlNodePtr to_xml_array(encodeType* type, const Variant& data_, int style,
   }
 
   if (data.isObject() &&
-      data.toObject().instanceof(SystemLib::s_IteratorClass)) {
+      data.toObject().instanceof(SystemLib::s_HH_IteratorClass)) {
     array_copy = Array::Create();
     for (ArrayIter iter(data.toObject().get()); iter; ++iter) {
       if (!iter.first().isNull() && iter.first().isString()) {

@@ -47,10 +47,18 @@ namespace HPHP {
 #define SYSTEM_CLASS_STRING(cls)                        \
   const StaticString s_##cls(STRINGIZE_CLASS_NAME(cls));
 SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
+#undef SYSTEM_CLASS_STRING
 
 #undef resource
 #undef pinitSentinel
 #undef STRINGIZE_CLASS_NAME
+
+#define STRINGIZE_HH_CLASS_NAME(cls) "HH\\" #cls
+#define SYSTEM_HH_CLASS_STRING(cls) \
+  const StaticString s_HH_##cls(STRINGIZE_HH_CLASS_NAME(cls));
+SYSTEMLIB_HH_CLASSES(SYSTEM_HH_CLASS_STRING)
+#undef SYSTEM_HH_CLASS_STRING
+#undef STRINGIZE_HH_CLASS_NAME
 
 namespace {
 const StaticString s_Throwable("Throwable");
@@ -159,6 +167,18 @@ void ProcessInit() {
   SYSTEMLIB_CLASSES(INIT_SYSTEMLIB_CLASS_FIELD)
 
 #undef INIT_SYSTEMLIB_CLASS_FIELD
+
+#define INIT_SYSTEMLIB_HH_CLASS_FIELD(cls)                              \
+  {                                                                     \
+    Class *cls = NamedEntity::get(s_HH_##cls.get())->clsList();         \
+    assert(cls);                                                        \
+    SystemLib::s_HH_##cls##Class = cls;                                 \
+  }
+
+  // Stash a pointer to the VM Classes for various HH namespace classes
+  SYSTEMLIB_HH_CLASSES(INIT_SYSTEMLIB_HH_CLASS_FIELD)
+
+#undef INIT_SYSTEMLIB_HH_CLASS_FIELD
 
   Stack::ValidateStackSize();
   SystemLib::s_inited = true;

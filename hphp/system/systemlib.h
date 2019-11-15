@@ -55,9 +55,7 @@ namespace HPHP { namespace SystemLib {
   x(ArrayAccess)                                \
   x(ArrayObject)                                \
   x(ArrayIterator)                              \
-  x(Iterator)                                   \
   x(IteratorAggregate)                          \
-  x(Traversable)                                \
   x(Countable)                                  \
   x(LazyKVZipIterable)                          \
   x(LazyIterableView)                           \
@@ -66,6 +64,11 @@ namespace HPHP { namespace SystemLib {
   x(__PHP_Incomplete_Class)                     \
   x(APCIterator)                                \
   x(DivisionByZeroException)
+
+#define SYSTEMLIB_HH_CLASSES(x) \
+  x(Traversable)                \
+  x(Iterator)                   \
+/* */
 
 extern bool s_inited;
 extern bool s_anyNonPersistentBuiltins;
@@ -79,6 +82,11 @@ extern Func* s_nullCtor;
 extern Class* s_ ## cls ## Class;
   SYSTEMLIB_CLASSES(DECLARE_SYSTEMLIB_CLASS)
 #undef DECLARE_SYSTEMLIB_CLASS
+
+#define DECLARE_SYSTEMLIB_HH_CLASS(cls) \
+extern Class* s_HH_ ## cls ## Class;
+  SYSTEMLIB_HH_CLASSES(DECLARE_SYSTEMLIB_HH_CLASS)
+#undef DECLARE_SYSTEMLIB_HH_CLASS
 
 extern Class* s_ThrowableClass;
 extern Class* s_BaseExceptionClass;

@@ -359,7 +359,7 @@ inline HeaderKind ObjectData::headerKind() const {
 }
 
 inline bool ObjectData::isIterator() const {
-  return instanceof(SystemLib::s_IteratorClass);
+  return instanceof(SystemLib::s_HH_IteratorClass);
 }
 
 inline bool ObjectData::getAttribute(Attribute attr) const {

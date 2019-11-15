@@ -124,11 +124,11 @@ TEST(Type, ToString) {
   EXPECT_EQ("Dict", TDict.toString());
   EXPECT_EQ("Keyset", TKeyset.toString());
 
-  auto const sub = Type::SubObj(SystemLib::s_IteratorClass);
-  auto const exact = Type::ExactObj(SystemLib::s_IteratorClass);
+  auto const sub = Type::SubObj(SystemLib::s_HH_IteratorClass);
+  auto const exact = Type::ExactObj(SystemLib::s_HH_IteratorClass);
 
-  EXPECT_EQ("Obj<=Iterator", sub.toString());
-  EXPECT_EQ("Obj=Iterator", exact.toString());
+  EXPECT_EQ("Obj<=HH\\Iterator", sub.toString());
+  EXPECT_EQ("Obj=HH\\Iterator", exact.toString());
   EXPECT_EQ("PtrToStr", TPtrToStr.toString());
   EXPECT_EQ("LvalToStr", TLvalToStr.toString());
 
@@ -146,12 +146,12 @@ TEST(Type, ToString) {
             (TInt | TPtrToStaticStr).toString());
   EXPECT_EQ("LvalTo{Int|StaticStr}|{Int|StaticStr}",
             (TInt | TLvalToStaticStr).toString());
-  EXPECT_EQ("{Obj<=Iterator|Int}", (TInt | sub).toString());
+  EXPECT_EQ("{Obj<=HH\\Iterator|Int}", (TInt | sub).toString());
 
-  EXPECT_EQ("Cls<=Iterator",
-            Type::SubCls(SystemLib::s_IteratorClass).toString());
-  EXPECT_EQ("Cls=Iterator",
-            Type::ExactCls(SystemLib::s_IteratorClass).toString());
+  EXPECT_EQ("Cls<=HH\\Iterator",
+            Type::SubCls(SystemLib::s_HH_IteratorClass).toString());
+  EXPECT_EQ("Cls=HH\\Iterator",
+            Type::ExactCls(SystemLib::s_HH_IteratorClass).toString());
 
   EXPECT_EQ("{ABC|Func}", (TABC | TFunc).toString());
 
@@ -214,17 +214,18 @@ TEST(Type, Ptr) {
   EXPECT_EQ(TPtrToArr, ptrToPackedArray.unspecialize());
   EXPECT_EQ(packedSpec, ptrToPackedArray.arrSpec());
 
-  auto ptrToExactObj = Type::ExactObj(SystemLib::s_IteratorClass).ptr(Ptr::Ptr);
+  auto ptrToExactObj =
+    Type::ExactObj(SystemLib::s_HH_IteratorClass).ptr(Ptr::Ptr);
   auto exactClassSpec =
-    ClassSpec(SystemLib::s_IteratorClass, ClassSpec::ExactTag{});
+    ClassSpec(SystemLib::s_HH_IteratorClass, ClassSpec::ExactTag{});
   EXPECT_FALSE(ptrToExactObj.hasConstVal());
   EXPECT_TRUE(ptrToExactObj.isSpecialized());
   EXPECT_EQ(TPtrToObj, ptrToExactObj.unspecialize());
   EXPECT_EQ(exactClassSpec, ptrToExactObj.clsSpec());
 
-  auto ptrToSubObj = Type::SubObj(SystemLib::s_IteratorClass).ptr(Ptr::Ptr);
+  auto ptrToSubObj = Type::SubObj(SystemLib::s_HH_IteratorClass).ptr(Ptr::Ptr);
   auto subClassSpec =
-    ClassSpec(SystemLib::s_IteratorClass, ClassSpec::SubTag{});
+    ClassSpec(SystemLib::s_HH_IteratorClass, ClassSpec::SubTag{});
   EXPECT_FALSE(ptrToSubObj.hasConstVal());
   EXPECT_TRUE(ptrToSubObj.isSpecialized());
   EXPECT_EQ(TPtrToObj, ptrToSubObj.unspecialize());
@@ -344,10 +345,10 @@ TEST(Type, GuardConstraints) {
 
 TEST(Type, RelaxType) {
   auto gc = GuardConstraint{DataTypeSpecialized};
-  gc.setDesiredClass(SystemLib::s_IteratorClass);
+  gc.setDesiredClass(SystemLib::s_HH_IteratorClass);
   gc.category = DataTypeSpecialized;
-  auto subIter = Type::SubObj(SystemLib::s_IteratorClass);
-  EXPECT_EQ("Obj<=Iterator", subIter.toString());
+  auto subIter = Type::SubObj(SystemLib::s_HH_IteratorClass);
+  EXPECT_EQ("Obj<=HH\\Iterator", subIter.toString());
   EXPECT_EQ(subIter, relaxType(subIter, gc.category));
 }
 
@@ -392,7 +393,7 @@ TEST(Type, Specialized) {
   EXPECT_EQ(constArrayMixed, constArrayMixed - spacked);
 
   // Checking specialization dropping.
-  auto subIter = Type::SubObj(SystemLib::s_IteratorClass);
+  auto subIter = Type::SubObj(SystemLib::s_HH_IteratorClass);
   EXPECT_EQ(TArr | TObj, packed | subIter);
 
   auto const packedOrInt = spacked | TInt;
@@ -408,13 +409,13 @@ TEST(Type, Specialized) {
   EXPECT_EQ(subIter, iterOrStr - TStr);
   EXPECT_EQ(TPtrToObj, TPtrToObj - subIter.ptr(Ptr::Ptr));
 
-  auto const subCls = Type::SubCls(SystemLib::s_IteratorClass);
+  auto const subCls = Type::SubCls(SystemLib::s_HH_IteratorClass);
   EXPECT_EQ(TCls, TCls - subCls);
 }
 
 TEST(Type, SpecializedObjects) {
-  auto const A = SystemLib::s_IteratorClass;
-  auto const B = SystemLib::s_TraversableClass;
+  auto const A = SystemLib::s_HH_IteratorClass;
+  auto const B = SystemLib::s_HH_TraversableClass;
   EXPECT_TRUE(A->classof(B));
 
   auto const obj = TObj;
@@ -456,8 +457,8 @@ TEST(Type, SpecializedObjects) {
 }
 
 TEST(Type, SpecializedClass) {
-  auto const A = SystemLib::s_IteratorClass;
-  auto const B = SystemLib::s_TraversableClass;
+  auto const A = SystemLib::s_HH_IteratorClass;
+  auto const B = SystemLib::s_HH_TraversableClass;
 
   EXPECT_TRUE(A->classof(B));
 

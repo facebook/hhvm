@@ -211,7 +211,7 @@ void ArrayIter::objInit(ObjectData* obj) {
     return;
   }
 
-  assertx(obj->instanceof(SystemLib::s_IteratorClass));
+  assertx(obj->instanceof(SystemLib::s_HH_IteratorClass));
   setObject(obj);
   if (incRef) obj->incRefCount();
   try {

@@ -3067,10 +3067,10 @@ void Class::setInitializers() {
   }
 }
 
-const StaticString s_Iterator("Iterator");
+const StaticString s_HH_Iterator("HH\\Iterator");
 const StaticString s_IteratorAggregate("IteratorAggregate");
 void Class::checkInterfaceConstraints() {
-  if (UNLIKELY(m_interfaces.contains(s_Iterator.get()) &&
+  if (UNLIKELY(m_interfaces.contains(s_HH_Iterator.get()) &&
       m_interfaces.contains(s_IteratorAggregate.get()))) {
     raise_error("Class %s cannot implement both IteratorAggregate and Iterator"
                 " at the same time", name()->data());

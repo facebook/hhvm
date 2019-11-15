@@ -106,6 +106,11 @@ Func* s_nullCtor = nullptr;
 SYSTEMLIB_CLASSES(DEFINE_SYSTEMLIB_CLASS)
 #undef DEFINE_SYSTEMLIB_CLASS
 
+#define DEFINE_SYSTEMLIB_HH_CLASS(cls)       \
+  Class* s_HH_ ## cls ## Class = nullptr;
+SYSTEMLIB_HH_CLASSES(DEFINE_SYSTEMLIB_HH_CLASS)
+#undef DEFINE_SYSTEMLIB_HH_CLASS
+
 Class* s_ThrowableClass;
 Class* s_BaseExceptionClass;
 Class* s_ErrorClass;

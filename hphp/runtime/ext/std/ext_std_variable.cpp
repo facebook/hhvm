@@ -301,11 +301,11 @@ void HHVM_FUNCTION(debug_zval_dump, const Variant& variable) {
 }
 
 /*
- * container intrinsic for HH\traversable, including
+ * Intrinsic for Containers, i.e. the subset of HH\Traversable including
  * 1. array:
  *   array, vec, dict, keyset
  * 2. collection: Vector, Map, Set
- * not including Objects that implement \HH\Iterable or \Iterator.
+ * but not including Objects that implement e.g. \HH\Iterable or \HH\Iterator.
  */
 Variant HHVM_FUNCTION(HH_first, const Variant& v) {
   // 1. array, vec, dict, keyset

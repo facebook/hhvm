@@ -120,7 +120,7 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
 
 (** Constructor for unions and options, taking a list of types and whether the
 result should be nullable. Simplify things like singleton unions or nullable nothing. *)
-let rec make_union env r tyl reason_nullable_opt reason_dyn_opt =
+let make_union env r tyl reason_nullable_opt reason_dyn_opt =
   let ty =
     match tyl with
     | [ty] -> ty
@@ -145,7 +145,7 @@ let rec make_union env r tyl reason_nullable_opt reason_dyn_opt =
         if List.exists tyl ~f:is_nonnull then
           (env, MakeType.nonnull r)
         else
-          make_union env r tyl None None
+          (env, MakeType.union r tyl)
       | (r, Tintersection tyl) ->
         let (env, tyl) = List.map_env env tyl ~f:simplify in
         let tyl = List.filter tyl ~f:(fun ty -> not (is_nonnull ty)) in
@@ -175,6 +175,7 @@ let rec make_union env r tyl reason_nullable_opt reason_dyn_opt =
     | (Some null_r, None, ty) -> (null_r, Toption ty)
     | (Some null_r, Some dyn_r, ty) -> like_ty dyn_r (null_r, Toption ty)
   in
+  let (env, ty) = Typing_utils.wrap_union_inter_ty_in_var env r ty in
   (env, ty)
 
 let exact_least_upper_bound e1 e2 =
@@ -535,8 +536,9 @@ let normalize_union env ?on_tyvar tyl =
           normalize_union env [] r_null r_union (orr r_dyn r)
         | ((_, Tintersection _), _) ->
           let (env, ty) = Utils.simplify_intersections env ty ?on_tyvar in
+          let (env, ety) = Env.expand_type env ty in
           begin
-            match ty with
+            match ety with
             | (_, Tintersection _) -> proceed env ty
             | _ -> normalize_union env [ty] r_null r_union r_dyn
           end

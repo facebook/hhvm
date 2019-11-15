@@ -514,6 +514,7 @@ and widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
  *)
 and make_nullable_member_type env ~is_method id_pos pos ty =
   if is_method then
+    let (env, ty) = Env.expand_type env ty in
     match ty with
     | (r, Tfun tf) ->
       let (env, ty) =

@@ -58,26 +58,33 @@ let decompose_atomic env ty =
 
 (** Number of '&' symbols in an intersection representation. E.g. for (A & B),
 returns 1, for A, returns 0. *)
-let number_of_inter_symbols ty =
-  let rec n_inter tyl n =
+let number_of_inter_symbols env ty =
+  let rec n_inter env tyl n =
     match tyl with
-    | [] -> n
+    | [] -> (env, n)
     | ty :: tyl ->
+      let (env, ty) = Env.expand_type env ty in
       begin
         match snd ty with
-        | Tintersection tyl' -> n_inter (tyl' @ tyl) (List.length tyl' - 1 + n)
-        | Tunion tyl' -> n_inter (tyl' @ tyl) n
-        | Toption ty -> n_inter (ty :: tyl) n
-        | _ -> n_inter tyl n
+        | Tintersection tyl' ->
+          n_inter env (tyl' @ tyl) (List.length tyl' - 1 + n)
+        | Tunion tyl' -> n_inter env (tyl' @ tyl) n
+        | Toption ty -> n_inter env (ty :: tyl) n
+        | _ -> n_inter env tyl n
       end
   in
-  n_inter [ty] 0
+  n_inter env [ty] 0
 
-let collapses ty1 ty2 ~inter_ty =
-  let n_inter_inter = number_of_inter_symbols inter_ty
-  and n_inter1 = number_of_inter_symbols ty1
-  and n_inter2 = number_of_inter_symbols ty2 in
-  n_inter_inter <= n_inter1 + n_inter2
+let collapses env ty1 ty2 ~inter_ty =
+  let (env, n_inter_inter) = number_of_inter_symbols env inter_ty in
+  let (env, n_inter1) = number_of_inter_symbols env ty1 in
+  let (env, n_inter2) = number_of_inter_symbols env ty2 in
+  (env, n_inter_inter <= n_inter1 + n_inter2)
+
+let make_intersection env r tyl =
+  let ty = MkType.intersection r tyl in
+  let (env, ty) = Typing_utils.wrap_union_inter_ty_in_var env r ty in
+  (env, ty)
 
 (** Computes the intersection (greatest lower bound) of two types.
 For the intersection of unions, attempt to simplify by using the distributivity
@@ -145,7 +152,7 @@ let rec intersect env ~r ty1 ty2 =
                 intersect_ty_union env r ty (r_union, tyl)
               in
               Utils.fold_union env r inter_tyl
-            | _ -> (env, (r, Tintersection [ty1; ty2]))
+            | _ -> make_intersection env r [ty1; ty2]
           with Nothing -> (env, MkType.nothing r)
         in
         Typing_log.log_intersection ~level:2 env r ty1 ty2 ~inter_ty;
@@ -190,7 +197,7 @@ and intersect_lists env r tyl1 tyl2 =
       intersect_lists env tyl1' missed_inter_tyl2 (inter_ty :: acc_tyl)
   in
   let (env, tyl) = intersect_lists env tyl1 tyl2 [] in
-  (env, MkType.intersection r tyl)
+  make_intersection env r tyl
 
 and intersect_ty_tyl env r ty tyl =
   let rec intersect_ty_tyl env ty tyl missed_inter_tyl =
@@ -208,6 +215,7 @@ and intersect_ty_tyl env r ty tyl =
 
 and try_intersect env r ty1 ty2 =
   let (env, ty) = intersect env r ty1 ty2 in
+  let (env, ty) = Env.expand_type env ty in
   match snd ty with
   | Tintersection _ -> (env, None)
   | _ -> (env, Some ty)
@@ -240,7 +248,7 @@ and intersect_ty_union env r ty1 (r_union, tyl2) =
   let zipped = List.zip_exn tyl2 inter_tyl in
   let (collapsed, not_collapsed) =
     List.partition_tf zipped ~f:(fun (ty2, inter_ty) ->
-        collapses ty1 ty2 ~inter_ty)
+        snd @@ collapses env ty1 ty2 ~inter_ty)
   in
   let collapsed = List.map collapsed ~f:snd in
   let not_collapsed =

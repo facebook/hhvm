@@ -124,7 +124,15 @@ type env = {
           we simplify the unions and intersections of the types bound to the 
           type variables associated to v in this map.
           So in our example, if #2 gets solved to int,
-          we simplify #1 to (int | int) = int. *)
+          we simplify #1 to (int | int) = int. 
+          There are only entries for variables that are unsolved or contain 
+          other unsolved type variables. Variables that are solved and contain 
+          no other unsolved type variables get removed from this map. *)
+  tyvars_in_tyvar: ISet.t IMap.t;
+      (** Mapping of type variables to the type variables contained in their 
+          types which are either unsolved or themselves contain unsolved type
+          variables.
+          This is the dual of tyvar_occurrences. *)
   fresh_typarams: SSet.t;
   lenv: local_env;
   genv: genv;

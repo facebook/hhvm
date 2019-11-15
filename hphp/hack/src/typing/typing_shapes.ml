@@ -286,7 +286,7 @@ let remove_key p env shape_ty field =
 
 let to_collection env shape_ty res return_type =
   let mapper =
-    object
+    object (self)
       inherit Type_mapper.shallow_type_mapper as super
 
       inherit! Type_mapper.tunion_type_mapper
@@ -324,6 +324,10 @@ let to_collection env shape_ty res return_type =
           return_type env (fst res) key value
         | Open_shape -> (env, res)
 
+      method! on_tunion env r tyl =
+        let (env, tyl) = List.fold_map tyl ~init:env ~f:self#on_type in
+        Typing_union.union_list env r tyl
+
       method! on_type env (r, ty) =
         match ty with
         | Tdynamic ->
@@ -332,7 +336,6 @@ let to_collection env shape_ty res return_type =
            * which would otherwise subsume any other inferred type due to covariance. *)
           (env, (r, ty))
         | Tvar _
-        | Tunion _
         | Tshape _ ->
           super#on_type env (r, ty)
         | _ -> (env, res)

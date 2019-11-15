@@ -67,6 +67,40 @@ let add_tyvar_occurrence env v ~occurs_in:v' =
   let env = set_tyvar_occurrences env v vars in
   env
 
+let add_tyvar_occurrences env vars ~occur_in:v =
+  ISet.fold (fun v' env -> add_tyvar_occurrence env v' ~occurs_in:v) vars env
+
+let get_tyvars_in_tyvar env v =
+  Option.value (IMap.find_opt v env.tyvars_in_tyvar) ~default:ISet.empty
+
+let set_tyvars_in_tyvar env v vars =
+  { env with tyvars_in_tyvar = IMap.add v vars env.tyvars_in_tyvar }
+
+let make_tyvars_occur_in_tyvar env vars ~occur_in:v =
+  let env = add_tyvar_occurrences env vars ~occur_in:v in
+  let env = set_tyvars_in_tyvar env v vars in
+  env
+
+let remove_tyvar_occurrence env v ~no_more_occurs_in:v' =
+  let vars = get_tyvar_occurrences env v in
+  let vars = ISet.remove v' vars in
+  let env = set_tyvar_occurrences env v vars in
+  env
+
+let remove_tyvar_from_tyvar env ~from:v v' =
+  let vars = get_tyvars_in_tyvar env v in
+  let vars = ISet.remove v' vars in
+  let env = set_tyvars_in_tyvar env v vars in
+  env
+
+let make_tyvar_no_more_occur_in_tyvar env v ~no_more_in:v' =
+  let env = remove_tyvar_occurrence env v ~no_more_occurs_in:v' in
+  let env = remove_tyvar_from_tyvar env ~from:v' v in
+  env
+
+let contains_unsolved_tyvars env v =
+  not @@ ISet.is_empty (get_tyvars_in_tyvar env v)
+
 let add_subst env x x' =
   if Int.( <> ) x x' then
     { env with subst = IMap.add x x' env.subst }
@@ -92,29 +126,6 @@ let rename env x x' =
   let (env, x') = get_var env x' in
   let env = add_subst env x x' in
   env
-
-let get_vars_in_ty ty =
-  let gatherer =
-    object
-      inherit [ISet.t] Type_visitor.locl_type_visitor
-
-      method! on_tvar vars _r v = ISet.add v vars
-    end
-  in
-  gatherer#on_type ISet.empty ty
-
-(** Binds type variable [x] to type [ty]. *)
-let add env x ty =
-  let (env, x) = get_var env x in
-  let env =
-    ISet.fold
-      (fun v env -> add_tyvar_occurrence env v ~occurs_in:x)
-      (get_vars_in_ty ty)
-      env
-  in
-  match ty with
-  | (_, Tvar x') -> add_subst env x x'
-  | _ -> { env with tenv = IMap.add x ty env.tenv }
 
 let empty_bounds = TySet.empty
 
@@ -246,6 +257,45 @@ let expand_internal_type env ty =
   | LoclType ty ->
     let (env, ty) = expand_type env ty in
     (env, LoclType ty)
+
+let tyvar_is_solved env var =
+  is_global_tyvar env var
+  ||
+  match snd @@ snd @@ expand_var env Reason.Rnone var with
+  | Tvar var' when Ident.equal var' var -> false
+  | _ -> true
+
+(** Get type variables in a type that are either unsolved or
+solved to a type that itself contains unsolved type variables. *)
+let get_unsolved_vars_in_ty env ty =
+  let gatherer =
+    object
+      inherit [ISet.t] Type_visitor.locl_type_visitor
+
+      method! on_tvar vars _r v =
+        (* Add it if it has unsolved type vars or if it is itself unsolved. *)
+        if (not (tyvar_is_solved env v)) || contains_unsolved_tyvars env v then
+          ISet.add v vars
+        else
+          vars
+    end
+  in
+  gatherer#on_type ISet.empty ty
+
+(** Binds type variable [x] to type [ty]. *)
+let add env x ty =
+  let (env, x) = get_var env x in
+  let env =
+    make_tyvars_occur_in_tyvar env (get_unsolved_vars_in_ty env ty) ~occur_in:x
+  in
+  match ty with
+  | (_, Tvar x') -> add_subst env x x'
+  | _ -> { env with tenv = IMap.add x ty env.tenv }
+
+let wrap_ty_in_var env r ty =
+  let v = Ident.tmp () in
+  let env = add env v ty in
+  (env, (r, Tvar v))
 
 let get_shape_field_name = function
   | Ast_defs.SFlit_int (_, s)
@@ -555,6 +605,7 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot =
     tenv = IMap.empty;
     subst = IMap.empty;
     tyvar_occurrences = IMap.empty;
+    tyvars_in_tyvar = IMap.empty;
     fresh_typarams = SSet.empty;
     lenv = initial_local TPEnv.empty Nonreactive;
     in_loop = false;

@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
 File "akempty_promotion_5.php", line 13, characters 12-14:
 Expected int
 File "akempty_promotion_5.php", line 9, characters 3-8:
-But got darray<(int | nothing), (string | nothing)> because it is used as map here
+But got darray<int, string> because it is used as map here

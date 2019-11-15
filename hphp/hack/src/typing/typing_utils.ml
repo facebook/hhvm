@@ -189,6 +189,36 @@ let is_nothing env ty =
   let nothing = MakeType.nothing Reason.Rnone in
   is_sub_type_for_union env ty nothing
 
+let contains_unresolved_tyvars env ty =
+  let finder =
+    object (this)
+      inherit [env * bool] Type_visitor.locl_type_visitor as super
+
+      method! on_tvar (env, occurs) r v =
+        let (env, ty) = Env.expand_var env r v in
+        match ty with
+        | (_, Tvar _) -> (env, true)
+        | ty -> this#on_type (env, occurs) ty
+
+      method! on_type (env, occurs) ty =
+        if occurs then
+          (env, occurs)
+        else
+          super#on_type (env, occurs) ty
+    end
+  in
+  finder#on_type (env, false) ty
+
+let wrap_union_inter_ty_in_var env r ty =
+  if is_union_or_inter_type ty then
+    let (env, contains_unresolved_tyvars) = contains_unresolved_tyvars env ty in
+    if contains_unresolved_tyvars then
+      Env.wrap_ty_in_var env r ty
+    else
+      (env, ty)
+  else
+    (env, ty)
+
 (* Grab all supertypes of a given type, recursively *)
 let get_all_supertypes env ty =
   let rec iter seen env acc tyl =

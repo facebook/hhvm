@@ -45,6 +45,7 @@ type env = {
   tenv: locl_ty IMap.t;
   subst: int IMap.t;
   tyvar_occurrences: ISet.t IMap.t;
+  tyvars_in_tyvar: ISet.t IMap.t;
   fresh_typarams: SSet.t;
   lenv: local_env;
   genv: genv;

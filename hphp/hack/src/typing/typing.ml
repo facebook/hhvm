@@ -1215,9 +1215,6 @@ and stmt_ env pos st =
     (env, Aast.For (te1, te2, te3, tb))
   | Switch (((pos, _) as e), cl) ->
     let (env, te, ty) = expr env e in
-    (* Exhaustiveness etc is sensitive to unions, so normalize to avoid
-     * most of the problems. TODO: make it insensitive *)
-    let (env, ty) = Union.simplify_unions env ty in
     (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.
      * See the note in
      * http://php.net/manual/en/control-structures.continue.php *)
@@ -1769,10 +1766,6 @@ and expr_
   let env = Env.open_tyvars env p in
   (fun (env, te, ty) ->
     let env = Typing_solver.close_tyvars_and_solve env Errors.unify_error in
-    (* Solving type variables may leave intersections and unions unsimplified. *)
-    (* TODO: possible improvement:
-    simplify all intersections in type, not just at top-level. *)
-    let (env, ty) = Inter.simplify_intersections env ty in
     (env, te, ty))
   @@
   let expr = expr ~check_defined in

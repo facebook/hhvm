@@ -423,12 +423,16 @@ let subst_as_value subst =
        subst
        SMap.empty)
 
-let tyvar_occurrences_as_value tyvar_occurrences =
+let iset_imap_as_value map =
   Map
     (IMap.fold
        (fun i vars m -> SMap.add (var_as_string i) (varset_as_value vars) m)
-       tyvar_occurrences
+       map
        SMap.empty)
+
+let tyvar_occurrences_as_value = iset_imap_as_value
+
+let tyvars_in_tyvar_as_value = iset_imap_as_value
 
 let global_tyvar_info_as_value = Atom "global"
 
@@ -604,6 +608,7 @@ let env_as_value env =
     tenv;
     subst;
     tyvar_occurrences;
+    tyvars_in_tyvar;
     fresh_typarams;
     lenv;
     genv;
@@ -633,6 +638,7 @@ let env_as_value env =
       ("tenv", tenv_as_value env tenv);
       ("subst", subst_as_value subst);
       ("tyvar_occurrences", tyvar_occurrences_as_value tyvar_occurrences);
+      ("tyvars_in_tyvar", tyvars_in_tyvar_as_value tyvars_in_tyvar);
       ("fresh_typarams", Set fresh_typarams);
       ("tyvars_stack", tyvars_stack_as_value tyvars_stack);
       ("lenv", lenv_as_value env lenv);

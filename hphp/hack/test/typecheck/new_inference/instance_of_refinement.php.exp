@@ -3,7 +3,7 @@ Invalid argument (Typing[4110])
 File "instance_of_refinement.php", line 15, characters 21-23:
 Expected int
 File "instance_of_refinement.php", line 20, characters 13-20:
-But got (arraykey & [unresolved]) from this is expression test
+But got ([unresolved] & arraykey) from this is expression test
 File "instance_of_refinement.php", line 41, characters 13-14:
 Invalid argument (Typing[4110])
 File "instance_of_refinement.php", line 40, characters 13-16:

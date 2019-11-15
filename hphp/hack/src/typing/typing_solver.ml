@@ -260,11 +260,10 @@ let bind env var ty =
     ) else
       Env.add env var ty
   in
+  let env = Typing_type_simplifier.simplify_occurrences env var in
   (* Remove the variable from the environment *)
   let env = Env.remove_tyvar env var in
   env
-
-let var_as_ty var = (Reason.Rnone, Tvar var)
 
 (** If a type variable appear in one of its own lower bounds under a combination
 of unions and intersections, it can be simplified away from this lower bound by
@@ -473,13 +472,6 @@ let bind_to_upper_bound env r var upper_bounds =
     in
     bind env var ty
 
-let tyvar_is_solved env var =
-  Env.is_global_tyvar env var
-  ||
-  match snd @@ snd @@ Env.expand_type env (var_as_ty var) with
-  | Tvar var' when Ident.equal var' var -> false
-  | _ -> true
-
 (* Is the outer skeleton of the types the same (everything that isn't a nested type)?
  * e.g. C<string> same as  C<int>,
  *      dict<string,bool> same as dict<int,string>
@@ -547,7 +539,7 @@ let union_any_if_any_in_lower_bounds env ty lower_bounds =
   (env, ty)
 
 let try_bind_to_equal_bound ~freshen env r var on_error =
-  if (not !use_bind_to_equal_bound) || tyvar_is_solved env var then
+  if (not !use_bind_to_equal_bound) || Env.tyvar_is_solved env var then
     env
   else
     Env.log_env_change "bind_to_equal_bound" env
@@ -581,7 +573,7 @@ let try_bind_to_equal_bound ~freshen env r var on_error =
           (fun upper_bound env ->
             ITySet.fold
               (fun lower_bound env ->
-                if tyvar_is_solved env var then
+                if Env.tyvar_is_solved env var then
                   let (env, ty) = Env.expand_var env r var in
                   let ty = LoclType ty in
                   let env =
@@ -624,7 +616,7 @@ the operation which we eagerly solved for in the first place.
 let rec always_solve_tyvar ~freshen env r var on_error =
   (* If there is a type that is both a lower and upper bound, force to that type *)
   let env = try_bind_to_equal_bound ~freshen env r var on_error in
-  if tyvar_is_solved env var then
+  if Env.tyvar_is_solved env var then
     env
   else
     let tyvar_info = Env.get_tyvar_info env var in
@@ -671,7 +663,7 @@ let solve_tyvar_wrt_variance env r var on_error =
 
   (* If there is a type that is both a lower and upper bound, force to that type *)
   let env = try_bind_to_equal_bound ~freshen:false env r var on_error in
-  if tyvar_is_solved env var then
+  if Env.tyvar_is_solved env var then
     env
   else
     let tyvar_info = Env.get_tyvar_info env var in
@@ -752,7 +744,7 @@ let expand_type_and_solve env ~description_of_expected p ty on_error =
   let (env', ety) = Env.expand_type env' ety in
   match (ty, ety) with
   | ((r, Tvar v), (_, Tunion []))
-    when (not (tyvar_is_solved env v))
+    when (not (Env.tyvar_is_solved env v))
          && ( Env.get_tyvar_appears_invariantly env v
             || TypecheckerOptions.new_inference_lambda (Env.get_tcopt env) ) ->
     Errors.unknown_type
@@ -853,7 +845,7 @@ let expand_type_and_narrow
           Typing_union.union_list env r lower_bounds)
   in
   if not !has_tyvar then
-    Typing_utils.simplify_unions env ty
+    (env, ty)
   else
     let (env, widened_ty) = widen env widen_concrete_type concretized_ty in
     let widened_ty =

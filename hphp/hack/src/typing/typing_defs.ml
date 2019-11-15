@@ -701,6 +701,32 @@ let is_constraint_type = function
   | ConstraintType _ -> true
   | LoclType _ -> false
 
+let is_union_or_inter_type ((_, ty) : locl_ty) =
+  (* do not expand type here! *)
+  match ty with
+  | Toption _
+  | Tunion _
+  | Tintersection _ ->
+    true
+  | Terr
+  | Tnonnull
+  | Tdynamic
+  | Tobject
+  | Tany _
+  | Tprim _
+  | Tfun _
+  | Ttuple _
+  | Tshape _
+  | Tpu_access _
+  | Tpu _
+  | Tvar _
+  | Tabstract _
+  | Tanon _
+  | Tclass _
+  | Tarraykind _
+  | Tdestructure _ ->
+    false
+
 (* The identifier for this *)
 let this = Local_id.make_scoped "$this"
 

@@ -59,7 +59,6 @@ let expand_ty ?var_hook ?pos env ty =
       | (p, Tpu (base, enum, kind)) -> (p, Tpu (exp_ty base, enum, kind))
       | (p, Tpu_access (base, sid)) -> (p, Tpu_access (exp_ty base, sid))
     in
-    let (_env, ety) = Tast_env.simplify_unions env ety in
     ety
   and exp_tys tyl = List.map ~f:exp_ty tyl
   and exp_fun_type

@@ -51,11 +51,11 @@ struct AutoloadMap {
   virtual ~AutoloadMap() = default;
 
   /**
-   * Block until the AutoloadMap is up-to-date. Return true on success and
-   * false on failure.
+   * Block until the AutoloadMap is up-to-date.
+   *
+   * May throw an exception if updating failed.
    */
-  virtual bool ensureUpdated() {
-    return true;
+  virtual void ensureUpdated() {
   }
 
   /**

@@ -352,13 +352,14 @@ void AutoloadHandler::setAutoloadMapFromFactory(
     return;
   }
 
-  if (map->ensureUpdated()) {
+  try {
+    map->ensureUpdated();
     m_map = map;
-  } else {
-    Logger::Warning(
-        "Failed to update native autoloader, not natively autoloading %s.\n",
-        repoRoot.generic().c_str()
-    );
+  } catch (const std::exception& e) {
+    Logger::Error(
+        "Failed to update native autoloader, not natively autoloading %s. %s\n",
+        repoRoot.generic().c_str(),
+        e.what());
   }
 }
 

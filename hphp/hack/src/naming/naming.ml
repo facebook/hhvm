@@ -589,15 +589,9 @@ let arg_unpack_unexpected = function
     ()
 
 module type GetLocals = sig
-  val lvalue :
-    Namespace_env.env * Pos.t SMap.t ->
-    Nast.expr ->
-    Namespace_env.env * Pos.t SMap.t
+  val lvalue : Pos.t SMap.t -> Nast.expr -> Pos.t SMap.t
 
-  val stmt :
-    Namespace_env.env * Pos.t SMap.t ->
-    Nast.stmt ->
-    Namespace_env.env * Pos.t SMap.t
+  val stmt : Namespace_env.env -> Pos.t SMap.t -> Nast.stmt -> Pos.t SMap.t
 end
 
 (* This was made a functor due to the awkward nature of how our naming
@@ -2036,8 +2030,7 @@ module Make (GetLocals : GetLocals) = struct
         Errors.expected_variable p;
         (p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")))
       | ev ->
-        let nsenv = (fst env).namespace in
-        let (_, vars) = GetLocals.lvalue (nsenv, SMap.empty) ev in
+        let vars = GetLocals.lvalue SMap.empty ev in
         SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
         expr env ev
     in
@@ -2132,8 +2125,7 @@ module Make (GetLocals : GetLocals) = struct
             match e1 with
             | Some lid ->
               let e = (Pos.none, Aast.Lvar lid) in
-              let nsenv = (fst env).namespace in
-              let (_, vars) = GetLocals.lvalue (nsenv, SMap.empty) e in
+              let vars = GetLocals.lvalue SMap.empty e in
               SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
               e1
             | None -> None
@@ -2525,8 +2517,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Unop (uop, e) -> N.Unop (uop, expr env e)
     | Aast.Binop ((Ast_defs.Eq None as op), lv, e2) ->
       let e2 = expr env e2 in
-      let nsenv = (fst env).namespace in
-      let (_, vars) = GetLocals.lvalue (nsenv, SMap.empty) lv in
+      let vars = GetLocals.lvalue SMap.empty lv in
       SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
       N.Binop (op, expr env lv, e2)
     | Aast.Binop ((Ast_defs.Eq _ as bop), e1, e2) ->
@@ -3097,7 +3088,7 @@ module Make (GetLocals : GetLocals) = struct
 end
 
 include Make (struct
-  let stmt acc _ = acc
+  let stmt _ acc _ = acc
 
   let lvalue acc _ = acc
 end)

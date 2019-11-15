@@ -23,15 +23,12 @@ module NS = Namespaces
  * }
  *)
 
-let smap_union
-    ((nsenv : Namespace_env.env), (m1 : Pos.t SMap.t)) (m2 : Pos.t SMap.t) =
-  let m_combined = SMap.fold SMap.add m1 m2 in
-  (nsenv, m_combined)
+type acc = Pos.t SMap.t
 
-let rec lvalue ((nsenv, m) as acc) (p, e) =
+let rec lvalue (acc : acc) (p, e) : acc =
   match e with
   | Aast.List lv -> List.fold_left ~init:acc ~f:lvalue lv
-  | Aast.Lvar (_, lid) -> (nsenv, SMap.add (Local_id.to_string lid) p m)
+  | Aast.Lvar (_, lid) -> SMap.add (Local_id.to_string lid) p acc
   | _ -> acc
 
 (* TODO It really sucks that this and Nast_terminality.Terminal are very
@@ -135,7 +132,7 @@ let is_terminal nsenv stl =
     false
   with Exit -> true
 
-let rec expr acc (_, e) =
+let rec expr (acc : acc) (_, e) : acc =
   let expr_expr acc e1 e2 =
     let acc = expr acc e1 in
     let acc = expr acc e2 in
@@ -206,9 +203,9 @@ let rec expr acc (_, e) =
   | Aast.Yield f -> field acc f
   | Aast.Eif (e1, oe2, e3) ->
     let acc = expr acc e1 in
-    let (_, acc2) = Option.value_map oe2 ~default:acc ~f:(expr acc) in
-    let (_, acc3) = expr acc e3 in
-    smap_union acc (smap_inter acc2 acc3)
+    let acc2 = Option.value_map oe2 ~default:acc ~f:(expr acc) in
+    let acc3 = expr acc e3 in
+    SMap.union acc (smap_inter acc2 acc3)
   | Aast.Xml (_, attribs, es) ->
     let attrib acc a =
       match a with
@@ -251,8 +248,7 @@ let rec expr acc (_, e) =
   | Aast.Typename _ ->
     failwith "Unexpected Expr: Typing_get_locals expr not found on legacy AST"
 
-let rec stmt (acc : Namespace_env.env * Pos.t SMap.t) st =
-  let nsenv = fst acc in
+let rec stmt (nsenv : Namespace_env.env) (acc : acc) st : acc =
   match snd st with
   | Aast.Expr e -> expr acc e
   | Aast.Fallthrough
@@ -262,7 +258,7 @@ let rec stmt (acc : Namespace_env.env * Pos.t SMap.t) st =
   | Aast.Throw _ ->
     acc
   | Aast.Do (b, e) ->
-    let acc = block acc b in
+    let acc = block nsenv acc b in
     let acc = expr acc e in
     acc
   | Aast.While (e, _b) -> expr acc e
@@ -291,14 +287,14 @@ let rec stmt (acc : Namespace_env.env * Pos.t SMap.t) st =
     acc
   | Aast.Awaitall (el, b) ->
     let acc = List.fold_left ~init:acc ~f:(fun acc (_, e2) -> expr acc e2) el in
-    let acc = block acc b in
+    let acc = block nsenv acc b in
     acc
   | Aast.Let (_x, _h, e) ->
     (* We would like to exclude scoped locals here, but gather the locals in
      * expression *)
     expr acc e
-  | Aast.Using u -> block acc u.Aast.us_block
-  | Aast.Block b -> block acc b
+  | Aast.Using u -> block nsenv acc u.Aast.us_block
+  | Aast.Block b -> block nsenv acc b
   | Aast.If (e, b1, b2) ->
     let acc = expr acc e in
     let term1 = is_terminal nsenv b1 in
@@ -306,16 +302,16 @@ let rec stmt (acc : Namespace_env.env * Pos.t SMap.t) st =
     if term1 && term2 then
       acc
     else if term1 then
-      let (_, m2) = block (nsenv, SMap.empty) b2 in
-      smap_union acc m2
+      let m2 = block nsenv SMap.empty b2 in
+      SMap.union acc m2
     else if term2 then
-      let (_, m1) = block (nsenv, SMap.empty) b1 in
-      smap_union acc m1
+      let m1 = block nsenv SMap.empty b1 in
+      SMap.union acc m1
     else
-      let (_, m1) = block (nsenv, SMap.empty) b1 in
-      let (_, m2) = block (nsenv, SMap.empty) b2 in
+      let m1 = block nsenv SMap.empty b1 in
+      let m2 = block nsenv SMap.empty b2 in
       let (m : Pos.t SMap.t) = smap_inter m1 m2 in
-      smap_union acc m
+      SMap.union acc m
   | Aast.Switch (e, cl) ->
     let acc = expr acc e in
     let cl =
@@ -326,15 +322,16 @@ let rec stmt (acc : Namespace_env.env * Pos.t SMap.t) st =
     in
     let cl = casel nsenv cl in
     let c = smap_inter_list cl in
-    smap_union acc c
+    SMap.union acc c
   | Aast.Try (b, cl, _fb) ->
-    let (_, c) = block (nsenv, SMap.empty) b in
+    let c = block nsenv SMap.empty b in
     let cl = List.filter cl ~f:(fun (_, _, b) -> not (is_terminal nsenv b)) in
     let lcl = List.map cl (catch nsenv) in
     let c = smap_inter_list (c :: lcl) in
-    smap_union acc c
+    SMap.union acc c
 
-and block acc l = List.fold_left ~init:acc ~f:(fun acc st -> stmt acc st) l
+and block nsenv acc l =
+  List.fold_left ~init:acc ~f:(fun acc st -> stmt nsenv acc st) l
 
 and casel nsenv cl =
   match cl with
@@ -342,7 +339,7 @@ and casel nsenv cl =
   | Aast.Case (_, []) :: rl -> casel nsenv rl
   | Aast.Default (_, b) :: rl
   | Aast.Case (_, b) :: rl ->
-    let (_, b) = block (nsenv, SMap.empty) b in
+    let b = block nsenv SMap.empty b in
     b :: casel nsenv rl
 
-and catch nsenv (_, _, b) = snd (block (nsenv, SMap.empty) b)
+and catch nsenv (_, _, b) : acc = block nsenv SMap.empty b

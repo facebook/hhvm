@@ -28,15 +28,9 @@ val typedef : Nast.typedef -> Nast.typedef
 val global_const : Nast.gconst -> Nast.gconst
 
 module type GetLocals = sig
-  val lvalue :
-    Namespace_env.env * Pos.t SMap.t ->
-    Nast.expr ->
-    Namespace_env.env * Pos.t SMap.t
+  val lvalue : Pos.t SMap.t -> Nast.expr -> Pos.t SMap.t
 
-  val stmt :
-    Namespace_env.env * Pos.t SMap.t ->
-    Nast.stmt ->
-    Namespace_env.env * Pos.t SMap.t
+  val stmt : Namespace_env.env -> Pos.t SMap.t -> Nast.stmt -> Pos.t SMap.t
 end
 
 module Make (GetLocals : GetLocals) : sig

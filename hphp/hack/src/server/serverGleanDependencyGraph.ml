@@ -10,7 +10,7 @@ open Core_kernel
 open Hh_json
 open Typing_deps
 
-type inheritanceInfo = {
+type inheritance_info = {
   parentName: string;
   childName: string;
 }
@@ -22,24 +22,22 @@ let create_predicate_json (predicate_name : string) (facts : json list) : json =
 let convert_single_class_to_json (class_name : string) : json =
   JSON_Object [("key", JSON_String class_name)]
 
-let convert_inheritance_to_json (inheritances : inheritanceInfo list) :
+let convert_inheritance_to_json (inheritances : inheritance_info list) :
     json option =
   match inheritances with
   | [] -> None
   | inheritances ->
     let facts =
       List.map
-        ~f:(fun inheritance_info ->
+        ~f:(fun inheritance ->
           JSON_Object
             [
               ( "key",
                 JSON_Object
                   [
                     ( "parent",
-                      convert_single_class_to_json inheritance_info.parentName
-                    );
-                    ( "child",
-                      convert_single_class_to_json inheritance_info.childName );
+                      convert_single_class_to_json inheritance.parentName );
+                    ("child", convert_single_class_to_json inheritance.childName);
                   ] );
             ])
         inheritances

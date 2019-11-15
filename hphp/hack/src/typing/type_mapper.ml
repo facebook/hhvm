@@ -300,15 +300,3 @@ class virtual tvar_substituting_type_mapper =
 
     method virtual on_type : env -> locl_ty -> result
   end
-
-(** Type mapper which only maps types under combinations of unions, options and intersections. *)
-class union_inter_type_mapper =
-  object
-    inherit shallow_type_mapper
-
-    inherit! tunion_type_mapper
-
-    inherit! tinter_type_mapper
-
-    inherit! tvar_expanding_type_mapper
-  end

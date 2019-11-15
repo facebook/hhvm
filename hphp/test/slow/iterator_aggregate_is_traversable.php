@@ -8,7 +8,6 @@ class MyIA implements IteratorAggregate {
 
 <<__EntryPoint>> function main() {
   $ia = new MyIA();
-  var_dump($ia is \Traversable);
   var_dump($ia is \HH\Traversable);
   var_dump($ia is Traversable); # same as \HH\Traversable due to auto-import
   foreach ($ia as $v) {

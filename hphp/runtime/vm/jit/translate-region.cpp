@@ -590,7 +590,9 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
   uint32_t tries = 0;
 
   while (true) {
-    int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
+    int32_t budgetBCInstrs = context.kind == TransKind::Live
+      ? RuntimeOption::EvalJitMaxLiveRegionInstrs
+      : RuntimeOption::EvalJitMaxRegionInstrs;
     unit = std::make_unique<IRUnit>(context,
                                     std::make_unique<AnnotationData>());
     unit->initLogEntry(context.initSrcKey.func());
@@ -748,7 +750,9 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
   auto const entryBID = region.entry()->id();
 
   while (true) {
-    int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
+    const int32_t budgetBCInstrs = ctx.kind == TransKind::Live
+      ? RuntimeOption::EvalJitMaxLiveRegionInstrs
+      : RuntimeOption::EvalJitMaxRegionInstrs;
     unit = std::make_unique<IRUnit>(ctx, std::make_unique<AnnotationData>());
     irgen::IRGS irgs{*unit, &region, budgetBCInstrs, &retryContext};
     irgs.inlineState.conjure = true;

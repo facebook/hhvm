@@ -820,6 +820,7 @@ struct RuntimeOption {
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(int64_t, JitMaxRequestTranslationTime, -1)                          \
   F(uint32_t, JitMaxRegionInstrs,      1347)                            \
+  F(uint32_t, JitMaxLiveRegionInstrs,  50)                              \
   F(uint32_t, JitMaxAwaitAllUnroll,    8)                               \
   F(bool, JitProfileWarmupRequests,    false)                           \
   F(uint32_t, JitProfileRequests,      profileRequestsDefault())        \

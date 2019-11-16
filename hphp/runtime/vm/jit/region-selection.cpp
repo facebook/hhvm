@@ -780,10 +780,12 @@ RegionDescPtr selectRegion(const RegionContext& context,
           return RegionDescPtr{nullptr};
         case RegionMode::Method:
           return selectMethod(context);
-        case RegionMode::Tracelet:
-          return selectTracelet(
-            context, kind, RuntimeOption::EvalJitMaxRegionInstrs
-          );
+        case RegionMode::Tracelet: {
+          auto const maxBCInstrs = kind == TransKind::Live
+            ? RuntimeOption::EvalJitMaxLiveRegionInstrs
+            : RuntimeOption::EvalJitMaxRegionInstrs;
+          return selectTracelet(context, kind, maxBCInstrs);
+        }
       }
       not_reached();
     } catch (const std::exception& e) {
@@ -794,7 +796,10 @@ RegionDescPtr selectRegion(const RegionContext& context,
 
   if (region) {
     FTRACE(3, "{}", show(*region));
-    always_assert(region->instrSize() <= RuntimeOption::EvalJitMaxRegionInstrs);
+    always_assert(
+      region->instrSize() <= std::max(RuntimeOption::EvalJitMaxRegionInstrs,
+                                      RuntimeOption::EvalJitMaxLiveRegionInstrs)
+    );
   } else {
     FTRACE(1, "no region selectable; using tracelet compiler\n");
   }

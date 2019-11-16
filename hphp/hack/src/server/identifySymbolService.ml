@@ -359,10 +359,6 @@ let all_symbols_ctx
     symbols
   | Some symbols -> symbols
 
-let go ~(tast : Tast.program) ~(line : int) ~(column : int) :
-    Relative_path.t SymbolOccurrence.t list =
-  all_symbols tast |> List.filter ~f:(is_target line column)
-
 let go_quarantined
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)

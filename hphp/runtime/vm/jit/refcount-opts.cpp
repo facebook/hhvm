@@ -508,8 +508,6 @@ them when we shouldn't.
 #include <folly/Conv.h>
 #include <folly/portability/Stdlib.h>
 
-#include <boost/dynamic_bitset.hpp>
-
 #include "hphp/util/bitset-array.h"
 #include "hphp/util/bitset-utils.h"
 #include "hphp/util/dataflow-worklist.h"
@@ -1169,11 +1167,6 @@ void populate_mrinfo(Env& env) {
 //////////////////////////////////////////////////////////////////////
 
 using HPHP::jit::show;
-DEBUG_ONLY std::string show(const boost::dynamic_bitset<>& bs) {
-  std::ostringstream out;
-  out << bs;
-  return out.str();
-}
 
 DEBUG_ONLY std::string show(const BitsetRef& bs) {
   std::string res;
@@ -1227,19 +1220,33 @@ void weaken_decrefs(Env& env) {
    * 0. Initialize block state structures and put all blocks in the worklist.
    */
   auto incompleteQ = dataflow_worklist<uint32_t>(poBlocks.size());
+  BitsetArray bits{env.unit.numBlocks() * 3, env.asets.size()};
   struct BlockInfo {
-    BlockInfo() {}
-    uint32_t poId;
-    boost::dynamic_bitset<> in_used;
-    boost::dynamic_bitset<> out_used;
-    boost::dynamic_bitset<> gen;
+    explicit BlockInfo(BitsetRef base) :
+        in_used{base}, out_used{in_used.next()}, gen{out_used.next()} {
+    }
+    BlockInfo(const BlockInfo&) = default;
+    BlockInfo& operator=(const BlockInfo& o) {
+      if (this != &o) {
+        this->~BlockInfo();
+        new (this) BlockInfo{o};
+      }
+      return *this;
+    }
+    uint32_t poId{};
+    BitsetRef in_used;
+    BitsetRef out_used;
+    BitsetRef gen;
   };
-  StateVector<Block,BlockInfo> blockInfos(env.unit, BlockInfo{});
+  StateVector<Block,BlockInfo> blockInfos{
+    env.unit,
+    [&] (size_t i) {
+      return bits.row(i * 3);
+    }
+  };
+
   for (auto poId = uint32_t{0}; poId < poBlocks.size(); ++poId) {
     auto const blk = poBlocks[poId];
-    blockInfos[blk].out_used.resize(env.asets.size());
-    blockInfos[blk].in_used.resize(env.asets.size());
-    blockInfos[blk].gen.resize(env.asets.size());
     blockInfos[blk].poId = poId;
     incompleteQ.push(poId);
   }
@@ -1278,8 +1285,6 @@ void weaken_decrefs(Env& env) {
    *
    * Note out_used is empty if there are no successors.
    */
-  auto old_in_buf = boost::dynamic_bitset<>{};
-  old_in_buf.resize(env.asets.size());
   do {
     auto const blk = poBlocks[incompleteQ.pop()];
     auto& binfo = blockInfos[blk];
@@ -1294,13 +1299,10 @@ void weaken_decrefs(Env& env) {
     }
 
     // Propagate it to the in set.
-    old_in_buf = binfo.in_used;
-    binfo.in_used = binfo.out_used;
-    binfo.in_used |= binfo.gen;
-    auto const changed = old_in_buf != binfo.in_used;
-
+    auto const in_used = binfo.out_used | binfo.gen;
     // Schedule each predecessor if the input set changed.
-    if (changed) {
+    if (binfo.in_used != in_used) {
+      binfo.in_used.assign(in_used);
       blk->forEachPred([&] (Block* pred) {
         incompleteQ.push(blockInfos[pred].poId);
       });
@@ -1322,12 +1324,13 @@ void weaken_decrefs(Env& env) {
 
   /*
    * 3. Convert DecRefs to DecRefNZ when we've proven the tmp must be used
-   * again.
+   *    again.
+   *
+   * Note that this step clobbers out_used
    */
-  auto will_be_used = boost::dynamic_bitset<>{};
   for (auto& blk : poBlocks) {
     FTRACE(4, "B{}:\n", blk->id());
-    will_be_used = blockInfos[blk].out_used;
+    auto& will_be_used = blockInfos[blk].out_used;
     for (auto it = blk->instrs().rbegin(); it != blk->instrs().rend(); ++it) {
       auto& inst = *it;
       FTRACE(4, "  {}\n", inst);

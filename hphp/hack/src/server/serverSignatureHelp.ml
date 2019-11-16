@@ -188,6 +188,7 @@ let go_quarantined
               let path = def.SymbolDefinition.pos |> Pos.filename in
               let entry = Provider_utils.get_entry_VOLATILE ~ctx ~path in
               ServerDocblockAt.go_comments_for_symbol_ctx
+                ~ctx
                 ~entry
                 ~def
                 ~base_class_name

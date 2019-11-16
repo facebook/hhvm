@@ -26,11 +26,15 @@ let filter_class_and_constructor results =
   else
     results
 
-let make_hover_doc_block entry occurrence def_opt =
+let make_hover_doc_block ctx entry occurrence def_opt =
   match def_opt with
   | Some def ->
     let base_class_name = SymbolOccurrence.enclosing_class occurrence in
-    ServerDocblockAt.go_comments_for_symbol_ctx ~entry ~def ~base_class_name
+    ServerDocblockAt.go_comments_for_symbol_ctx
+      ~ctx
+      ~entry
+      ~def
+      ~base_class_name
     |> Option.to_list
   | None -> []
 
@@ -325,7 +329,7 @@ let make_hover_attr_docs name =
     ]
   | _ -> []
 
-let make_hover_info env_and_ty entry occurrence def_opt =
+let make_hover_info ctx env_and_ty entry occurrence def_opt =
   SymbolOccurrence.(
     Typing_defs.(
       let snippet =
@@ -355,13 +359,13 @@ let make_hover_info env_and_ty entry occurrence def_opt =
         | { type_ = GConst; _ } ->
           List.concat
             [
-              make_hover_doc_block entry occurrence def_opt;
+              make_hover_doc_block ctx entry occurrence def_opt;
               make_hover_const_definition entry def_opt;
             ]
         | _ ->
           List.concat
             [
-              make_hover_doc_block entry occurrence def_opt;
+              make_hover_doc_block ctx entry occurrence def_opt;
               make_hover_return_type env_and_ty occurrence;
               make_hover_full_name env_and_ty occurrence def_opt;
             ]
@@ -405,5 +409,5 @@ let go_quarantined
              |> Option.value ~default:entry.Provider_context.path
            in
            let entry = Provider_utils.get_entry_VOLATILE ~ctx ~path in
-           make_hover_info env_and_ty entry occurrence def_opt)
+           make_hover_info ctx env_and_ty entry occurrence def_opt)
     |> List.remove_consecutive_duplicates ~equal:( = )

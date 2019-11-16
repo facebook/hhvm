@@ -9,6 +9,7 @@
 
 (** Returns the documentation comments for the given symbol or expression. *)
 val go_comments_for_symbol_ctx :
+  ctx:Provider_context.t ->
   entry:Provider_context.entry ->
   def:'a SymbolDefinition.t ->
   base_class_name:string option ->

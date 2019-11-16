@@ -33,18 +33,18 @@ let get_all_ancestors class_name =
   in
   helper [class_name] [] SSet.empty
 
-let get_docblock_for_member class_info member_name =
+let get_docblock_for_member ctx class_info member_name =
   Option.Monad_infix.(
     Cls.get_method class_info member_name >>= fun member ->
     match Lazy.force member.Typing_defs.ce_type with
     | (_, Typing_defs.Tfun _) ->
       let pos = Lazy.force member.Typing_defs.ce_pos in
-      let filename = Pos.filename pos in
-      File_provider.get_contents filename >>= fun contents ->
-      ServerSymbolDefinition.get_definition_cst_node_from_pos
-        SymbolDefinition.Method
-        (Full_fidelity_source_text.make filename contents)
-        pos
+      let path = Pos.filename pos in
+      let entry = Provider_utils.get_entry_VOLATILE ~ctx ~path in
+      ServerSymbolDefinition.get_definition_cst_node_ctx
+        ~entry
+        ~kind:SymbolDefinition.Method
+        ~pos
       >>= Docblock_finder.get_docblock
     | _ -> None)
 
@@ -72,14 +72,14 @@ let render_ancestor_docblocks docblocks =
     |> String.concat ~sep:"\n\n---\n\n"
     |> fun results -> Some results
 
-let fallback class_name member_name =
+let fallback ctx class_name member_name =
   let rec all_interfaces_or_first_class_docblock
       seen_interfaces ancestors_to_check =
     match ancestors_to_check with
     | [] -> seen_interfaces
     | ancestor :: ancestors ->
       begin
-        match get_docblock_for_member ancestor member_name with
+        match get_docblock_for_member ctx ancestor member_name with
         | None ->
           all_interfaces_or_first_class_docblock seen_interfaces ancestors
         | Some docblock ->
@@ -129,6 +129,7 @@ let go_comments_from_source_text
 
 (* Fetch a definition *)
 let go_comments_for_symbol_ctx
+    ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
     ~(def : 'a SymbolDefinition.t)
     ~(base_class_name : string option) : string option =
@@ -148,7 +149,7 @@ let go_comments_for_symbol_ctx
       | None ->
         (match (def.SymbolDefinition.kind, base_class_name) with
         | (SymbolDefinition.Method, Some base_class_name) ->
-          fallback base_class_name def.SymbolDefinition.name
+          fallback ctx base_class_name def.SymbolDefinition.name
         | _ -> None)))
 
 (* Locate a symbol and return file, line, column, and base_class *)

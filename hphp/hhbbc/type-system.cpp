@@ -2039,7 +2039,7 @@ size_t Type::hash() const {
         case DataTag::Int:
           return m_data.ival;
         case DataTag::Dbl:
-          return m_data.dval;
+          return std::hash<double>{}(m_data.dval);
         case DataTag::ArrLikeVal:
           return (uintptr_t)m_data.aval;
         case DataTag::ArrLikePacked:

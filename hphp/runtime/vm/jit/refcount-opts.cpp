@@ -510,6 +510,7 @@ them when we shouldn't.
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "hphp/util/bitset-array.h"
 #include "hphp/util/bitset-utils.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"
@@ -735,23 +736,47 @@ struct Env {
   jit::vector<MustAliasSet> asets;
 };
 
-using IncDecBits = boost::dynamic_bitset<>;
+using IncDecBits = BitsetRef;
 
 struct PreBlockInfo {
-  explicit PreBlockInfo(uint32_t sz) :
+  enum Bits {
+    AltLoc,
+    AvlLoc,
+    AntLoc,
+    AvlIn,
+    AvlOut,
+    PavlIn,
+    PavlOut,
+    AntIn,
+    AntOut,
+    PantIn,
+    PantOut,
+
+    NumBitsets
+  };
+  explicit PreBlockInfo(BitsetRef base) :
       rpoId(0),
-      altLoc(sz),
-      avlLoc(sz),
-      antLoc(sz),
-      avlIn(sz),
-      avlOut(sz),
-      pavlIn(sz),
-      pavlOut(sz),
-      antIn(sz),
-      antOut(sz),
-      pantIn(sz),
-      pantOut(sz)
+      altLoc{base.next(AltLoc)},
+      avlLoc{base.next(AvlLoc)},
+      antLoc{base.next(AntLoc)},
+      avlIn{base.next(AvlIn)},
+      avlOut{base.next(AvlOut)},
+      pavlIn{base.next(PavlIn)},
+      pavlOut{base.next(PavlOut)},
+      antIn{base.next(AntIn)},
+      antOut{base.next(AntOut)},
+      pantIn{base.next(PantIn)},
+      pantOut{base.next(PantOut)}
     {}
+
+  PreBlockInfo(const PreBlockInfo& o) = default;
+  PreBlockInfo& operator=(const PreBlockInfo& o) {
+    if (this != &o) {
+      this->~PreBlockInfo();
+      new (this) PreBlockInfo(o);
+    }
+    return *this;
+  }
 
   uint32_t   rpoId;
   uint32_t   genId{};
@@ -798,10 +823,16 @@ struct PreEnv {
   using InsertMap = jit::flat_map<IncDecKey, SSATmp*, IDKeyCmp>;
 
   explicit PreEnv(Env& env, RCAnalysis& rca) :
-      env(env),
-      rca(rca),
-      state(env.unit, PreBlockInfo(env.asets.size())),
-      curGen(0),
+      env{env},
+      rca{rca},
+      bits{env.unit.numBlocks() * PreBlockInfo::NumBitsets,
+           env.asets.size()},
+      state{env.unit,
+            [this] (size_t i) {
+              return bits.row(i * PreBlockInfo::NumBitsets);
+            }
+      },
+      curGen{0},
       avlQ(env.rpoBlocks.size()),
       antQ(env.rpoBlocks.size()) {
     uint32_t id = 0;
@@ -816,6 +847,7 @@ struct PreEnv {
 
   Env& env;
   RCAnalysis& rca;
+  BitsetArray bits;
   BlockState state;
   uint32_t  curGen;
   InsertMap insMap;
@@ -1141,6 +1173,15 @@ DEBUG_ONLY std::string show(const boost::dynamic_bitset<>& bs) {
   std::ostringstream out;
   out << bs;
   return out.str();
+}
+
+DEBUG_ONLY std::string show(const BitsetRef& bs) {
+  std::string res;
+  res.reserve(bs.size());
+  for (auto i = bs.size(); i--; ) {
+    res.push_back(bs[i] ? '1' : '0');
+  }
+  return res;
 }
 
 /*
@@ -2677,8 +2718,8 @@ void pre_compute_available(PreEnv& penv) {
       [&] (Block* pred) {
         auto &ps = penv.state[pred];
         if (first) {
-          s.avlIn = ps.avlOut;
-          s.pavlIn = ps.pavlOut;
+          s.avlIn.assign(ps.avlOut);
+          s.pavlIn.assign(ps.pavlOut);
         } else {
           s.avlIn &= ps.avlOut;
           s.pavlIn |= ps.pavlOut;
@@ -2712,11 +2753,11 @@ void pre_compute_available(PreEnv& penv) {
     auto pavlOut = (s.pavlIn - s.altLoc) | s.avlLoc;
     auto changed = false;
     if (s.avlOut != avlOut) {
-      s.avlOut = std::move(avlOut);
+      s.avlOut.assign(avlOut);
       changed = true;
     }
     if (s.pavlOut != pavlOut) {
-      s.pavlOut = std::move(pavlOut);
+      s.pavlOut.assign(pavlOut);
       changed = true;
     }
     if (changed) {
@@ -2744,8 +2785,8 @@ void pre_compute_anticipated(PreEnv& penv) {
           return;
         }
         first = false;
-        s.antOut = ss.antIn;
-        s.pantOut = ss.pantIn;
+        s.antOut.assign(ss.antIn);
+        s.pantOut.assign(ss.pantIn);
         if (!ss.phiPropagate.any()) return;
         bitset_for_each_set(
           ss.phiPropagate,
@@ -2765,11 +2806,11 @@ void pre_compute_anticipated(PreEnv& penv) {
     auto pantIn = (s.pantOut - s.altLoc) | s.antLoc;
     auto changed = false;
     if (s.antIn != antIn) {
-      s.antIn = std::move(antIn);
+      s.antIn.assign(antIn);
       changed = true;
     }
     if (s.pantIn != pantIn) {
-      s.pantIn = std::move(pantIn);
+      s.pantIn.assign(pantIn);
       changed = true;
     }
     if (changed) {

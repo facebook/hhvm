@@ -215,16 +215,6 @@ let get_definition_cst_node_from_pos kind source_text pos =
         | _ -> false)
   with _ -> None
 
-let get_definition_cst_node_from_file_input
-    (file_input : ServerCommandTypes.file_input)
-    (definition : 'a SymbolDefinition.t) :
-    Full_fidelity_positioned_syntax.t option =
-  SymbolDefinition.(
-    let source_text =
-      ServerCommandTypesUtils.source_tree_of_file_input file_input
-    in
-    get_definition_cst_node_from_pos definition.kind source_text definition.pos)
-
 let get_definition_cst_node fallback_fn definition =
   SymbolDefinition.(
     let source_text =

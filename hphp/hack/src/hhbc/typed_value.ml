@@ -110,7 +110,7 @@ let string_to_int_opt ~allow_inf s =
 let to_int v =
   match v with
   | Uninit -> None (* Should not happen *)
-  (* Unreachable - the only calliste of to_int is cast_to_arraykey, which never
+  (* Unreachable - the only callsite of to_int is cast_to_arraykey, which never
    * calls it with String *)
   | String _ -> None
   | Int i -> Some i

@@ -13,6 +13,7 @@ use std::borrow::Cow;
 use std::cell::Cell;
 
 lazy_static! {
+    static ref HH_NS_RE: Regex = Regex::new(r"^\\?HH\\").unwrap();
     static ref NS_RE: Regex = Regex::new(r".*\\").unwrap();
     static ref TYPE_RE: Regex = Regex::new(r"<.*>").unwrap();
 }
@@ -103,6 +104,11 @@ pub fn strip_global_ns(s: &str) -> &str {
 
 pub fn strip_ns(s: &str) -> Cow<str> {
     NS_RE.replace(&s, "")
+}
+
+// Remove \HH\ or HH\ preceding a string
+pub fn strip_hh_ns(s: &str) -> Cow<str> {
+    HH_NS_RE.replace(&s, "")
 }
 
 pub fn has_ns(s: &str) -> bool {
@@ -335,6 +341,22 @@ mod string_utils_tests {
     #[test]
     fn strip_ns_test() {
         let with_ns = "ns1\\test";
+        let without_ns = "test";
+        assert_eq!(super::strip_ns(&with_ns), "test");
+        assert_eq!(super::strip_ns(&without_ns), without_ns);
+    }
+
+    #[test]
+    fn strip_hh_ns() {
+        let with_ns = "HH\\test";
+        let without_ns = "test";
+        assert_eq!(super::strip_ns(&with_ns), "test");
+        assert_eq!(super::strip_ns(&without_ns), without_ns);
+    }
+
+    #[test]
+    fn strip_hh_ns_2() {
+        let with_ns = "\\HH\\test";
         let without_ns = "test";
         assert_eq!(super::strip_ns(&with_ns), "test");
         assert_eq!(super::strip_ns(&without_ns), without_ns);

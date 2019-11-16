@@ -3,17 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#[macro_use]
 extern crate lazy_static;
 
-use std::convert::{Into, TryInto};
+use oxidized::ast_defs;
+use std::{
+    convert::{Into, TryFrom, TryInto},
+    num::{FpCategory, Wrapping},
+};
 
 /// We introduce a type for Hack/PHP values, mimicking what happens at runtime.
 /// Currently this is used for constant folding. By defining a special type, we
 /// ensure independence from usage: for example, it can be used for optimization
 /// on ASTs, or on bytecode, or (in future) on a compiler intermediate language.
 /// HHVM takes a similar approach: see runtime/base/typed-value.h
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum TypedValue {
     /// Used for fields that are initialized in the 86pinit method
     Uninit,
@@ -30,18 +33,31 @@ pub enum TypedValue {
     VArray(Vec<Self>),
     DArray(Vec<(TypedValue, TypedValue)>),
     // Hack arrays: vectors, keysets, and dictionaries
-    // TODO(hrust) add after adding deps to oxidized & OCaml runtime
+    Vec((Vec<TypedValue>, ProvTag)),
+    Keyset(Vec<TypedValue>),
+    Dict((Vec<(TypedValue, TypedValue)>, ProvTag)),
 }
 
-lazy_static! {
-    static ref ZERO: TypedValue = TypedValue::Int(0);
-    pub static ref NULL: TypedValue = TypedValue::Null;
+type ProvTag = Option<ast_defs::Pos>;
+
+mod string_ops {
+    pub fn bitwise_not(s: &str) -> String {
+        let s = s.as_bytes();
+        let len = s.len();
+        let mut res = vec![0; len];
+        for i in 0..len {
+            // keep only last byte
+            res[i] = (!s[i]) & 0xFF;
+        }
+        // The "~" operator in Hack will create invalid utf-8 strings
+        unsafe { String::from_utf8_unchecked(res) }
+    }
 }
 
 /// Cast to a boolean: the (bool) operator in PHP
-impl Into<bool> for TypedValue {
-    fn into(self) -> bool {
-        match self {
+impl From<TypedValue> for bool {
+    fn from(x: TypedValue) -> bool {
+        match x {
             TypedValue::Uninit => false, // Should not happen
             TypedValue::Bool(b) => b,
             TypedValue::Null => false,
@@ -52,49 +68,317 @@ impl Into<bool> for TypedValue {
             TypedValue::Array(v) => !v.is_empty(),
             TypedValue::VArray(v) => !v.is_empty(),
             TypedValue::DArray(v) => !v.is_empty(),
+            TypedValue::Vec((v, _)) => !v.is_empty(),
+            TypedValue::Keyset(v) => !v.is_empty(),
+            TypedValue::Dict((v, _)) => !v.is_empty(),
             // Non-empty collections cast to true
             TypedValue::HhasAdata(_) => true,
         }
     }
 }
 
-pub type CastError = String;
+pub type CastError = ();
 
 /// Cast to an integer: the (int) operator in PHP. Return Err if we can't
 /// or won't produce the correct value
-impl TryInto<isize> for TypedValue {
+impl TryFrom<TypedValue> for i64 {
     type Error = CastError;
-    fn try_into(self) -> Result<isize, Self::Error> {
-        Err("not implemented".into()) // TODO(hrust)
+    fn try_from(x: TypedValue) -> Result<i64, Self::Error> {
+        match x {
+            TypedValue::Uninit => Err(()), // Should not happen
+            // Unreachable - the only calliste of to_int is cast_to_arraykey, which never
+            // calls it with String
+            TypedValue::String(_) => Err(()), // not worth it
+            TypedValue::Int(i) => Ok(i),
+            TypedValue::Float(f) => match f.classify() {
+                FpCategory::Nan | FpCategory::Infinite => {
+                    if f == std::f64::INFINITY {
+                        Ok(0)
+                    } else {
+                        Ok(std::i64::MIN)
+                    }
+                }
+                _ => panic!("TODO"),
+            },
+            v => Ok(if v.into() { 1 } else { 0 }),
+        }
     }
 }
 
 /// Cast to a float: the (float) operator in PHP. Return Err if we can't
 /// or won't produce the correct value
-impl TryInto<f64> for TypedValue {
+impl TryFrom<TypedValue> for f64 {
     type Error = CastError;
-    fn try_into(self) -> Result<f64, Self::Error> {
-        Err("not implemented".into()) // TODO(hrust)
+    fn try_from(v: TypedValue) -> Result<f64, Self::Error> {
+        match v {
+            TypedValue::Uninit => Err(()),    // Should not happen
+            TypedValue::String(_) => Err(()), // not worth it
+            TypedValue::Int(i) => Ok(i as f64),
+            TypedValue::Float(f) => Ok(f),
+            _ => Ok(if v.into() { 1.0 } else { 0.0 }),
+        }
     }
 }
 
 /// Cast to a string: the (string) operator in PHP. Return Err if we can't
 /// or won't produce the correct value *)
-impl TryInto<String> for TypedValue {
+impl TryFrom<TypedValue> for String {
     type Error = CastError;
-    fn try_into(self) -> Result<String, Self::Error> {
-        Err("not implemented".into()) // TODO(hrust) blocked by string_utils
+    fn try_from(x: TypedValue) -> Result<String, Self::Error> {
+        match x {
+            TypedValue::Uninit => Err(()), // Should not happen
+            TypedValue::Bool(false) => Ok("".into()),
+            TypedValue::Bool(true) => Ok("1".into()),
+            TypedValue::Null => Ok("".into()),
+            TypedValue::Int(i) => Ok(i.to_string()),
+            TypedValue::String(s) => Ok(s),
+            _ => Err(()),
+        }
     }
 }
 
-// TODO(hrust) group remaining funcs into modules: int_ops, string_ops, etc.
-#[allow(dead_code)]
 impl TypedValue {
-    fn as_string(&self) -> Result<TypedValue, CastError> {
-        Err("not implemented".into())
+    // Integer operations. For now, we don't attempt to implement the
+    // overflow-to-float semantics
+    fn add_int(i1: i64, i2: i64) -> Option<TypedValue> {
+        Some(Self::Int((Wrapping(i1) + Wrapping(i2)).0))
     }
 
-    fn as_int(&self) -> Result<TypedValue, CastError> {
-        Err("not implemented".into())
+    pub fn neg(&self) -> Option<TypedValue> {
+        match self {
+            Self::Int(i) => Some(Self::Int((-Wrapping(*i)).0)),
+            Self::Float(i) => Some(Self::Float(0.0 - i)),
+
+            _ => None,
+        }
+    }
+
+    fn sub_int(i1: i64, i2: i64) -> Option<TypedValue> {
+        Some(Self::Int((Wrapping(i1) - Wrapping(i2)).0))
+    }
+
+    // Arithmetic. For now, only on pure integer or float operands
+    pub fn sub(&self, v2: &TypedValue) -> Option<TypedValue> {
+        match (self, v2) {
+            (Self::Int(i1), Self::Int(i2)) => Self::sub_int(*i1, *i2),
+            (Self::Float(f1), Self::Float(f2)) => Some(Self::Float(f1 - f2)),
+            _ => None,
+        }
+    }
+
+    fn mul_int(i1: i64, i2: i64) -> Option<TypedValue> {
+        Some(Self::Int((Wrapping(i1) * Wrapping(i2)).0))
+    }
+
+    // Arithmetic. For now, only on pure integer or float operands
+    pub fn mul(&self, other: &TypedValue) -> Option<TypedValue> {
+        match (self, other) {
+            (Self::Int(i1), Self::Int(i2)) => Self::mul_int(*i1, *i2),
+            (Self::Float(i1), Self::Float(i2)) => Some(Self::Float(i1 * i2)),
+            (Self::Int(i1), Self::Float(i2)) => Some(Self::Float(*i1 as f64 * i2)),
+            (Self::Float(i1), Self::Int(i2)) => Some(Self::Float(i1 * *i2 as f64)),
+            _ => None,
+        }
+    }
+
+    // Arithmetic. For now, only on pure integer or float operands
+    pub fn div(&self, v2: &TypedValue) -> Option<TypedValue> {
+        match (self, v2) {
+            (Self::Int(i1), Self::Int(i2)) if *i2 != 0 => {
+                if i1 % i2 == 0 {
+                    Some(Self::Int(i1 / i2))
+                } else {
+                    Some(Self::Float(*i1 as f64 / *i2 as f64))
+                }
+            }
+            (Self::Float(f1), Self::Float(f2)) if *f2 != 0.0 => Some(Self::Float(f1 / f2)),
+            (Self::Int(i1), Self::Float(f2)) if *f2 != 0.0 => Some(Self::Float(*i1 as f64 / f2)),
+            (Self::Float(f1), Self::Int(i2)) if *i2 != 0 => Some(Self::Float(f1 / *i2 as f64)),
+            _ => None,
+        }
+    }
+
+    // Arithmetic. For now, only on pure integer or float operands
+    pub fn add(&self, other: &TypedValue) -> Option<TypedValue> {
+        match (self, other) {
+            (Self::Float(i1), Self::Float(i2)) => Some(Self::Float(i1 + i2)),
+            (Self::Int(i1), Self::Int(i2)) => Self::add_int(*i1, *i2),
+            (Self::Int(i1), Self::Float(i2)) => Some(Self::Float(*i1 as f64 + i2)),
+            (Self::Float(i1), Self::Int(i2)) => Some(Self::Float(i1 + *i2 as f64)),
+            _ => None,
+        }
+    }
+
+    pub fn shift_left(&self, v2: &TypedValue) -> Option<TypedValue> {
+        match (self, v2) {
+            (Self::Int(i1), Self::Int(i2)) => {
+                if *i2 < 0 {
+                    None
+                } else {
+                    i32::try_from(*i2)
+                        .ok()
+                        .map(|i2| Self::Int(i1 << (i2 % 64) as u32))
+                }
+            }
+            _ => None,
+        }
+    }
+
+    // Arithmetic. For now, only on pure integer operands
+    pub fn bitwise_or(&self, other: &TypedValue) -> Option<TypedValue> {
+        match (self, other) {
+            (Self::Int(i1), Self::Int(i2)) => Some(Self::Int(i1 | i2)),
+            _ => None,
+        }
+    }
+
+    // String concatenation
+    pub fn concat(self, v2: TypedValue) -> Option<TypedValue> {
+        let s1: Option<String> = self.try_into().ok();
+        let s2: Option<String> = v2.try_into().ok();
+        match (s1, s2) {
+            (Some(l), Some(r)) => Some(Self::String(l + &r)),
+            _ => None,
+        }
+    }
+
+    // Bitwise operations.
+    pub fn bitwise_not(&self) -> Option<TypedValue> {
+        match self {
+            Self::Int(i) => Some(Self::Int(!i)),
+            Self::String(s) => Some(Self::String(string_ops::bitwise_not(s))),
+            _ => None,
+        }
+    }
+
+    pub fn not(self) -> Option<TypedValue> {
+        let b: bool = self.into();
+        Some(Self::Bool(!b))
+    }
+
+    pub fn cast_to_string(self) -> Option<TypedValue> {
+        self.try_into().ok().map(|x| Self::String(x))
+    }
+
+    pub fn cast_to_int(self) -> Option<TypedValue> {
+        self.try_into().ok().map(|x| Self::Int(x))
+    }
+    pub fn cast_to_bool(self) -> Option<TypedValue> {
+        Some(Self::Bool(self.into()))
+    }
+
+    pub fn cast_to_float(self) -> Option<TypedValue> {
+        self.try_into().ok().map(|x| Self::Float(x))
+    }
+
+    pub fn cast_to_arraykey(self) -> Option<TypedValue> {
+        match self {
+            TypedValue::String(s) => Some(Self::String(s)),
+            TypedValue::Null => Some(Self::String("".into())),
+            TypedValue::Uninit
+            | TypedValue::Array(_)
+            | TypedValue::VArray(_)
+            | TypedValue::DArray(_)
+            | TypedValue::Vec(_)
+            | TypedValue::Keyset(_)
+            | TypedValue::Dict(_) => None,
+            _ => Self::cast_to_int(self),
+        }
+    }
+}
+
+#[cfg(test)]
+mod typed_value_tests {
+    use super::TypedValue;
+    use std::convert::TryInto;
+
+    #[test]
+    fn non_numeric_string_to_int() {
+        let res: Option<i64> = TypedValue::String("foo".to_string()).try_into().ok();
+        assert!(res.is_none());
+    }
+
+    #[test]
+    fn nan_to_int() {
+        let res: i64 = TypedValue::Float(std::f64::NAN).try_into().unwrap();
+        assert_eq!(res, std::i64::MIN);
+    }
+
+    #[test]
+    fn inf_to_int() {
+        let res: i64 = TypedValue::Float(std::f64::INFINITY).try_into().unwrap();
+        assert_eq!(res, 0);
+    }
+
+    #[test]
+    fn neg_inf_to_int() {
+        let res: i64 = TypedValue::Float(std::f64::NEG_INFINITY)
+            .try_into()
+            .unwrap();
+        assert_eq!(res, std::i64::MIN);
+    }
+
+    #[test]
+    fn false_to_int() {
+        let res: i64 = TypedValue::Bool(false).try_into().unwrap();
+        assert_eq!(res, 0);
+    }
+
+    #[test]
+    fn true_to_int() {
+        let res: i64 = TypedValue::Bool(true).try_into().unwrap();
+        assert_eq!(res, 1);
+    }
+
+    #[test]
+    fn non_numeric_string_to_float() {
+        let res: Option<f64> = TypedValue::String("foo".to_string()).try_into().ok();
+        assert!(res.is_none());
+    }
+
+    #[test]
+    fn int_wrapping_add() {
+        let res = TypedValue::Int(0x7FFFFFFFFFFFFFFF)
+            .add(&TypedValue::Int(1))
+            .unwrap();
+        assert_eq!(res, TypedValue::Int(-9223372036854775808));
+    }
+
+    #[test]
+    fn int_wrapping_neg() {
+        let res = TypedValue::Int(1 << 63).neg().unwrap();
+        assert_eq!(res, TypedValue::Int(-9223372036854775808));
+    }
+
+    #[test]
+    fn int_wrapping_sub() {
+        let res = TypedValue::Int(1 << 63).sub(&TypedValue::Int(1)).unwrap();
+        assert_eq!(res, TypedValue::Int(9223372036854775807));
+    }
+
+    #[test]
+    fn int_wrapping_mul() {
+        let res = TypedValue::Int(0x80000001)
+            .mul(&TypedValue::Int(-0xffffffff))
+            .unwrap();
+        assert_eq!(res, TypedValue::Int(9223372034707292161));
+    }
+
+    #[test]
+    fn negative_shift_left() {
+        let res = TypedValue::Int(3).shift_left(&TypedValue::Int(-1));
+        assert_eq!(res, None);
+    }
+
+    #[test]
+    fn big_shift_left() {
+        let res = TypedValue::Int(1).shift_left(&TypedValue::Int(70)).unwrap();
+        assert_eq!(res, TypedValue::Int(64));
+    }
+
+    #[test]
+    fn overflowing_shift_left() {
+        let res = TypedValue::Int(1).shift_left(&TypedValue::Int(0xffffffffffff));
+        assert_eq!(res, None);
     }
 }

@@ -26,7 +26,7 @@ function test() {
 
 let identify_foo_request =
   ServerCommandTypes.IDENTIFY_FUNCTION
-    (ServerCommandTypes.FileContent bar_contents, 4, 4)
+    ("", ServerCommandTypes.FileContent bar_contents, 4, 4)
 
 let check_identify_foo_response = function
   | Some [(_, Some def)] ->

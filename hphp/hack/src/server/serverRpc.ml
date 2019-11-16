@@ -140,9 +140,22 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         content
     in
     (env, result.With_complete_flag.value)
-  | IDENTIFY_FUNCTION (file_input, line, char) ->
-    let content = ServerFileSync.get_file_content file_input in
-    (env, ServerIdentifyFunction.go_absolute content line char env.tcopt)
+  | IDENTIFY_FUNCTION (filename, file_input, line, column) ->
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~path:(Relative_path.create_detect_prefix filename)
+        ~file_input
+    in
+    let result =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerIdentifyFunction.go_quarantined_absolute
+            ~ctx
+            ~entry
+            ~line
+            ~column)
+    in
+    (env, result)
   | METHOD_JUMP (class_, filter, find_children) ->
     ( env,
       MethodJumps.get_inheritance

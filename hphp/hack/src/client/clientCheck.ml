@@ -300,7 +300,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ())
       in
       let%lwt result =
-        rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char)
+        rpc args @@ Rpc.IDENTIFY_FUNCTION ("", content, line, char)
       in
       ClientGetDefinition.go result args.output_json;
       Lwt.return Exit_status.No_error

@@ -450,13 +450,19 @@ let go action genv env =
            ~default:changes
            ~f:(fun patch -> patch :: changes))
 
-let go_ide (filename, line, char) new_name genv env =
+let go_ide (filename, line, column) new_name genv env =
   SymbolDefinition.(
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~path:(Relative_path.create_detect_prefix filename)
+        ~file_input:(ServerCommandTypes.FileName filename)
+    in
     let file_content =
-      ServerFileSync.get_file_content (ServerCommandTypes.FileName filename)
+      entry.Provider_context.source_text.Full_fidelity_source_text.text
     in
     let definitions =
-      ServerIdentifyFunction.go_absolute file_content line char env.tcopt
+      ServerIdentifyFunction.go_quarantined_absolute ~ctx ~entry ~line ~column
     in
     match definitions with
     | [(_, Some definition)] ->
@@ -504,7 +510,7 @@ let go_ide (filename, line, char) new_name genv env =
               filename = Relative_path.create_detect_prefix filename;
               file_content;
               line;
-              char;
+              char = column;
               new_name = maybe_add_dollar new_name;
             }
         in

@@ -9,23 +9,6 @@
 
 open Core_kernel
 
-(* Identifying a symbol can be a first step to another operation. For example,
- * you can identify symbol and then highlight other "equal" symbols.
- * get_occurrence_and_map is useful for such application, because ~f function
- * will execute in the same environment that the symbol was identified -
- * content ASTs and defs will still be available in shared memory for the
- * subsequent operation. *)
-let get_occurrence_and_map tcopt content line char ~f =
-  ServerIdeUtils.declare_and_check
-    content
-    ~f:
-      begin
-        fun path file_info tast ->
-        let result = IdentifySymbolService.go ~tast ~line ~column:char in
-        f path file_info result
-      end
-    tcopt
-
 (* Order symbols from innermost to outermost *)
 let by_nesting x y =
   if Pos.contains x.SymbolOccurrence.pos y.SymbolOccurrence.pos then
@@ -54,27 +37,6 @@ let rec take_best_suggestions l =
     else
       first :: take_best_suggestions rest
   | [] -> []
-
-(** NOTE: the paths of any positions within any returned `SymbolOccurrence` or
-    `SymbolDefinition` objects will be the empty string (`""`) if the symbol is
-    located in the passed in content buffer. *)
-let go content line char (tcopt : TypecheckerOptions.t) =
-  get_occurrence_and_map tcopt content line char ~f:(fun path _ symbols ->
-      let symbols = take_best_suggestions (List.sort by_nesting symbols) in
-      let ast = Some (Ast_provider.get_ast path) in
-      let result =
-        List.map symbols ~f:(fun x ->
-            let symbol_definition = ServerSymbolDefinition.go ast x in
-            (x, symbol_definition))
-      in
-      result)
-
-(** NOTE: the paths of any positions within any returned `SymbolOccurrence` or
-    `SymbolDefinition` objects will be the empty string (`""`) if the symbol is
-    located in the passed in content buffer. *)
-let go_absolute content line char tcopt =
-  List.map (go content line char tcopt) (fun (x, y) ->
-      (SymbolOccurrence.to_absolute x, Option.map y SymbolDefinition.to_absolute))
 
 let go_quarantined
     ~(ctx : Provider_context.t)

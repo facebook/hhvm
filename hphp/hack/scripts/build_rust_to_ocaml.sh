@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
-HACK_SOURCE_ROOT=${HACK_SOURCE_ROOT:-$HACKDIR}
+HACK_SOURCE_ROOT="${HACK_SOURCE_ROOT:-$HACKDIR}"
+HACK_BUILD_ROOT="${HACK_BUILD_ROOT:-$HACKDIR}"
 
 if [ -z "$HACK_SOURCE_ROOT" ]; then
    echo >&2 "ERROR: must set HACK_SOURCE_ROOT to point to hphp/hack source dir"
@@ -21,6 +22,8 @@ else
   LOCK_FLAG="--locked"
 fi
 
+TARGET_DIR="${HACK_BUILD_ROOT}/target"
+
 profile=debug; profile_flags=
 if [ -z ${HACKDEBUG+1} ]; then
   profile=release; profile_flags="--release"
@@ -29,5 +32,10 @@ fi
   [[ -n "$CARGO_BIN" ]] && PATH="$CARGO_BIN:$PATH";
   # note: --manifest-path doesn't work with custom toolchain, so do cd
   cd "$HACK_SOURCE_ROOT" && \
-  cargo build $LOCK_FLAG --package "$pkg" $profile_flags "$@"
-) && cp "$HACK_SOURCE_ROOT/target/$profile/lib$lib.a" "lib${lib}_stubs.a"
+  cargo build \
+    $LOCK_FLAG \
+    --target-dir "${TARGET_DIR}" \
+    --package "$pkg" \
+    $profile_flags \
+    "$@"
+) && cp "${TARGET_DIR}/$profile/lib$lib.a" "lib${lib}_stubs.a"

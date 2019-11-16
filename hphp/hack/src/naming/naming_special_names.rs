@@ -751,6 +751,11 @@ pub mod regex {
     pub const T_PATTERN: &str = "\\HH\\Lib\\Regex\\Pattern";
 }
 
+pub mod math {
+    pub const NAN: &str = "NAN";
+    pub const INF: &str = "INF";
+}
+
 #[cfg(test)]
 mod test {
     use crate::members::is_special_xhp_attribute;

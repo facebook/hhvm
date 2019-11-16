@@ -823,8 +823,9 @@ struct PreEnv {
   explicit PreEnv(Env& env, RCAnalysis& rca) :
       env{env},
       rca{rca},
-      bits{env.unit.numBlocks() * PreBlockInfo::NumBitsets,
+      bits{env.unit.numBlocks() * PreBlockInfo::NumBitsets + 1,
            env.asets.size()},
+      scratchBits{bits.row(env.unit.numBlocks() * PreBlockInfo::NumBitsets)},
       state{env.unit,
             [this] (size_t i) {
               return bits.row(i * PreBlockInfo::NumBitsets);
@@ -846,6 +847,7 @@ struct PreEnv {
   Env& env;
   RCAnalysis& rca;
   BitsetArray bits;
+  BitsetRef scratchBits;
   BlockState state;
   uint32_t  curGen;
   InsertMap insMap;
@@ -2752,15 +2754,19 @@ void pre_compute_available(PreEnv& penv) {
         }
       );
     }
-    auto avlOut = (s.avlIn - s.altLoc) | s.avlLoc;
-    auto pavlOut = (s.pavlIn - s.altLoc) | s.avlLoc;
     auto changed = false;
-    if (s.avlOut != avlOut) {
-      s.avlOut.assign(avlOut);
+
+    penv.scratchBits.assign_sub(s.avlIn, s.altLoc);
+    penv.scratchBits |= s.avlLoc;
+    if (s.avlOut != penv.scratchBits) {
+      s.avlOut.assign(penv.scratchBits);
       changed = true;
     }
-    if (s.pavlOut != pavlOut) {
-      s.pavlOut.assign(pavlOut);
+
+    penv.scratchBits.assign_sub(s.pavlIn, s.altLoc);
+    penv.scratchBits |= s.avlLoc;
+    if (s.pavlOut != penv.scratchBits) {
+      s.pavlOut.assign(penv.scratchBits);
       changed = true;
     }
     if (changed) {
@@ -2805,15 +2811,17 @@ void pre_compute_anticipated(PreEnv& penv) {
         );
       }
     );
-    auto antIn = (s.antOut - s.altLoc) | s.antLoc;
-    auto pantIn = (s.pantOut - s.altLoc) | s.antLoc;
+    penv.scratchBits.assign_sub(s.antOut, s.altLoc);
+    penv.scratchBits |= s.antLoc;
     auto changed = false;
-    if (s.antIn != antIn) {
-      s.antIn.assign(antIn);
+    if (s.antIn != penv.scratchBits) {
+      s.antIn.assign(penv.scratchBits);
       changed = true;
     }
-    if (s.pantIn != pantIn) {
-      s.pantIn.assign(pantIn);
+    penv.scratchBits.assign_sub(s.pantOut, s.altLoc);
+    penv.scratchBits |= s.antLoc;
+    if (s.pantIn != penv.scratchBits) {
+      s.pantIn.assign(penv.scratchBits);
       changed = true;
     }
     if (changed) {
@@ -3119,8 +3127,6 @@ bool pre_apply(PreEnv& penv, bool incDec) {
   penv.insMap.clear();
   for (auto& blk : penv.env.rpoBlocks) {
     auto& s = penv.state[blk];
-    auto delBack = s.avlLoc & s.pantOut;
-    auto delFront = s.antLoc & s.pavlIn;
 
     auto remove = [&] (IncDecBits& del, IRInstruction& inst,
                        bool removeDec, bool insertAtFront) {
@@ -3146,6 +3152,8 @@ bool pre_apply(PreEnv& penv, bool incDec) {
       return false;
     };
 
+    auto& delFront = penv.scratchBits;
+    delFront.assign_and(s.antLoc, s.pavlIn);
     if (delFront.any()) {
       for (auto& inst : *blk) {
         if (remove(delFront, inst, incDec, false)) break;
@@ -3153,6 +3161,8 @@ bool pre_apply(PreEnv& penv, bool incDec) {
       always_assert(delFront.none());
     }
 
+    auto& delBack = penv.scratchBits;
+    delBack.assign_and(s.avlLoc, s.pantOut);
     if (delBack.any()) {
       for (auto it = blk->end(); it != blk->begin(); ) {
         if (remove(delBack, *--it, !incDec, true)) break;
@@ -3175,12 +3185,9 @@ bool pre_apply(PreEnv& penv, bool incDec) {
   // necessary.
   for (auto& blk : penv.env.rpoBlocks) {
     auto& s = penv.state[blk];
-    auto delBack = s.avlLoc & s.pantOut;
-    auto delFront = s.antLoc & s.pavlIn;
-
     s.phiPropagate.reset();
 
-    FTRACE(delBack.any() || delFront.any() ? 3 : 4,
+    FTRACE(4,
            "PREApply Blk(B{}) <-{}\n"
            "    antIn   : {}\n"
            "    pantIn  : {}\n"
@@ -3235,6 +3242,8 @@ bool pre_apply(PreEnv& penv, bool incDec) {
       return false;
     };
 
+    auto& delFront = penv.scratchBits;
+    delFront.assign_and(s.antLoc, s.pavlIn);
     if (delFront.any()) {
       for (auto& inst : *blk) {
         if (remove(delFront, inst, incDec, false)) break;
@@ -3243,6 +3252,8 @@ bool pre_apply(PreEnv& penv, bool incDec) {
       penv.reprocess.insert(penv.state[blk].rpoId);
     }
 
+    auto& delBack = penv.scratchBits;
+    delBack.assign_and(s.avlLoc, s.pantOut);
     if (delBack.any()) {
       for (auto it = blk->end(); it != blk->begin(); ) {
         if (remove(delBack, *--it, !incDec, true)) break;

@@ -215,18 +215,6 @@ let get_definition_cst_node_from_pos kind source_text pos =
         | _ -> false)
   with _ -> None
 
-let get_definition_cst_node fallback_fn definition =
-  SymbolDefinition.(
-    let source_text =
-      if Pos.filename definition.pos = ServerIdeUtils.path then
-        (* When the definition is in an IDE buffer with local changes, the filename
-         in the definition will be empty. *)
-        ServerCommandTypesUtils.source_tree_of_file_input fallback_fn
-      else
-        SourceText.from_file (Pos.filename definition.pos)
-    in
-    get_definition_cst_node_from_pos definition.kind source_text definition.pos)
-
 let get_definition_cst_node_ctx
     ~(entry : Provider_context.entry)
     ~(kind : SymbolDefinition.kind)

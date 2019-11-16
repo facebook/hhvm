@@ -12,11 +12,6 @@ val go :
   Relative_path.t SymbolOccurrence.t ->
   Relative_path.t SymbolDefinition.t option
 
-val get_definition_cst_node :
-  ServerCommandTypes.file_input ->
-  Relative_path.t SymbolDefinition.t ->
-  Full_fidelity_positioned_syntax.t option
-
 val get_definition_cst_node_ctx :
   entry:Provider_context.entry ->
   kind:SymbolDefinition.kind ->

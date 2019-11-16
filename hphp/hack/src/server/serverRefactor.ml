@@ -308,7 +308,7 @@ let get_call_signature_for_wrap (func_decl : Full_fidelity_positioned_syntax.t)
       })
 
 (* Produce a "deprecated" version of the old function so that calls to it can be rerouted *)
-let get_deprecated_wrapper_patch ~filename ~definition new_name =
+let get_deprecated_wrapper_patch ~filename ~definition ~tcopt new_name =
   SymbolDefinition.(
     Full_fidelity_positioned_syntax.(
       Option.Monad_infix.(
@@ -327,11 +327,16 @@ let get_deprecated_wrapper_patch ~filename ~definition new_name =
   *)
         let (_, col_start_plus1, _, _) = Pos.destruct_range definition.span in
         let col_start = col_start_plus1 - 1 in
-        let filename_server_type = ServerCommandTypes.FileName filename in
+        let entry =
+          Provider_utils.get_entry_VOLATILE
+            ~ctx:(Provider_context.empty tcopt)
+            ~path:(Relative_path.create_detect_prefix filename)
+        in
         let cst_node =
-          ServerSymbolDefinition.get_definition_cst_node
-            filename_server_type
-            definition
+          ServerSymbolDefinition.get_definition_cst_node_ctx
+            ~entry
+            ~kind:definition.kind
+            ~pos:definition.pos
         in
         cst_node >>= fun cst_node ->
         begin
@@ -439,7 +444,11 @@ let go action genv env =
            match action with
            | FunctionRename { filename; definition; _ }
            | MethodRename { filename; definition; _ } ->
-             get_deprecated_wrapper_patch ~filename ~definition new_name
+             get_deprecated_wrapper_patch
+               ~filename
+               ~definition
+               ~tcopt:env.tcopt
+               new_name
            | ClassRename _
            | ClassConstRename _
            | LocalVarRename _ ->

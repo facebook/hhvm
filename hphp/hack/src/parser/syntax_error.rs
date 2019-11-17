@@ -152,7 +152,7 @@ pub const error1055: Error = Cow::Borrowed(concat!(
 pub const error1056: Error =
     Cow::Borrowed("This token is not valid as part of a function declaration.");
 pub fn error1057(text: &str) -> Error {
-    // TODO (kasper): why does removing to_string() here segfaults
+    // TODO (kasper): T52404885: why does removing to_string() here segfaults
     Cow::Owned(format!(
         "Encountered unexpected token '{}'.",
         text.to_string()

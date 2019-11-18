@@ -289,6 +289,10 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
         // We use this flag at callsites as indication of TimeoutSoft callback
         flags -= TimedOutFlag;
       }
+    } else {
+      // Someone else is setting the flag and they're out of sync.
+      // This is an illegal state that needs to be fixed
+      flags -= TimedOutFlag;
     }
   }
 

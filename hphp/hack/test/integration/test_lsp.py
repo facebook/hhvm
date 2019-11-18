@@ -3421,6 +3421,36 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(
+                comment="hover over string literal outside call",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 25, "character": 12},  # 9 - 16
+                },
+                result={"contents": [{"language": "hack", "value": "string"}]},
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="hover over string literal inside call",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 26, "character": 20},  # 16 - 29
+                },
+                result={"contents": [{"language": "hack", "value": "string"}]},
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="hover over int literal inside call",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 26, "character": 32},  # 31 - 33
+                },
+                result={"contents": [{"language": "hack", "value": "int"}]},
+                powered_by="serverless_ide",
+            )
+            .request(
                 comment="hover over constant reference",
                 method="textDocument/hover",
                 params={

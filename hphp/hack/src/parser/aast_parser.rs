@@ -109,6 +109,8 @@ impl<'a> AastParser {
                 Err(_) => Self::check_synatx_error(env, indexed_source_text, tree, None),
             };
             let lowpri_errors = lowerer_env.lowpri_errors().borrow().to_vec();
+            let errors = lowerer_env.hh_errors().borrow().to_vec();
+            let lint_errors = lowerer_env.lint_errors().borrow().to_vec();
 
             Ok(ParserResult {
                 file_mode: mode,
@@ -116,8 +118,8 @@ impl<'a> AastParser {
                 aast: ret,
                 lowpri_errors,
                 syntax_errors,
-                errors: vec![],
-                lint_errors: vec![],
+                errors,
+                lint_errors,
             })
         }
     }

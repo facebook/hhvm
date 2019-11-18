@@ -335,6 +335,7 @@ version = "3.49.0"
 dependencies = [
  "hack_escaper 3.49.0",
  "hack_hh_autoimport 3.49.0",
+ "hack_lint 3.49.0",
  "hack_ocaml_helper 3.49.0",
  "hack_ocamlrep 3.49.0",
  "hack_oxidized 3.49.0",

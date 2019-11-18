@@ -22,3 +22,4 @@ regex = "^1.2.1"
 naming_special_names_rust = {path = "../../../naming/", package = "naming_special_names"}
 hh_autoimport_rust = { path = "../hh_autoimport", package = "hack_hh_autoimport"}
 ocamlrep = {path = "../../../ocamlrep", package = "hack_ocamlrep"}
+lint_rust = { path = "../../../utils/lint", package = "hack_lint" }

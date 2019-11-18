@@ -592,6 +592,12 @@ pub mod typehints {
     }
 }
 
+pub mod literal {
+    pub const TRUE: &str = "true";
+    pub const FALSE: &str = "false";
+    pub const NULL: &str = "null";
+}
+
 pub mod pseudo_consts {
     use lazy_static::lazy_static;
     use std::collections::HashSet;

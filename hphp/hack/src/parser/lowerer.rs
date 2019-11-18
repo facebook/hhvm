@@ -7,8 +7,10 @@
 use escaper::*;
 use hh_autoimport_rust as hh_autoimport;
 use itertools::{Either, Either::Left, Either::Right};
+use lint_rust::LintError;
 use naming_special_names_rust::{
-    classes as special_classes, special_functions, special_idents, typehints as special_typehints,
+    classes as special_classes, literal, special_functions, special_idents,
+    typehints as special_typehints,
 };
 use ocamlrep::rc::RcOc;
 use oxidized::{
@@ -17,6 +19,7 @@ use oxidized::{
     ast,
     ast::Expr_ as E_,
     doc_comment::DocComment,
+    errors::{Error as HHError, Naming, NastCheck},
     file_info,
     global_options::GlobalOptions,
     namespace_env::Env as NamespaceEnv,
@@ -112,24 +115,26 @@ impl FunHdr {
 
 #[derive(Debug)]
 pub struct State {
-    /* Whether we've seen COMPILER_HALT_OFFSET. The value of COMPILER_HALT_OFFSET
-      defaults to 0 if HALT_COMPILER isn't called.
-      None -> COMPILER_HALT_OFFSET isn't in the source file
-      Some 0 -> COMPILER_HALT_OFFSET is in the source file, but HALT_COMPILER isn't
-      Some x -> COMPILER_HALT_OFFSET is in the source file,
-                HALT_COMPILER is at x bytes offset in the file.
-    */
+    /// Whether we've seen COMPILER_HALT_OFFSET. The value of COMPILER_HALT_OFFSET
+    /// defaults to 0 if HALT_COMPILER isn't called.
+    /// None -> COMPILER_HALT_OFFSET isn't in the source file
+    /// Some 0 -> COMPILER_HALT_OFFSET is in the source file, but HALT_COMPILER isn't
+    /// Some x -> COMPILER_HALT_OFFSET is in the source file,
+    ///        HALT_COMPILER is at x bytes offset in the file.
     pub saw_compiler_halt_offset: Option<usize>,
     pub cls_reified_generics: HashSet<String>,
     pub in_static_method: bool,
     pub parent_maybe_reified: bool,
-    /* This provides a generic mechanism to delay raising parsing errors;
-     * since we're moving FFP errors away from CST to a stage after lowering
-     * _and_ want to prioritize errors before lowering, the lowering errors
-     * must be merely stored when the lowerer runs (until check for FFP runs (on AST)
-     * and raised _after_ FFP error checking (unless we run the lowerer twice,
-     * which would be expensive). */
+    /// This provides a generic mechanism to delay raising parsing errors;
+    /// since we're moving FFP errors away from CST to a stage after lowering
+    /// _and_ want to prioritize errors before lowering, the lowering errors
+    /// must be merely stored when the lowerer runs (until check for FFP runs (on AST)
+    /// and raised _after_ FFP error checking (unless we run the lowerer twice,
+    /// which would be expensive).
     pub lowpri_errors: Vec<(Pos, String)>,
+    /// hh_errors captures errors after parsing, naming, nast, etc.
+    pub hh_errors: Vec<(HHError)>,
+    pub lint_errors: Vec<LintError>,
     pub doc_comments: Vec<Option<DocComment>>,
 
     pub local_id_counter: isize,
@@ -140,9 +145,9 @@ pub struct Env<'a> {
     codegen: bool,
     pub keep_errors: bool,
     quick_mode: bool,
-    /* Show errors even in quick mode. Does not override keep_errors. Hotfix
-     * until we can properly set up saved states to surface parse errors during
-     * typechecking properly. */
+    /// Show errors even in quick mode. Does not override keep_errors. Hotfix
+    /// until we can properly set up saved states to surface parse errors during
+    /// typechecking properly.
     pub show_all_errors: bool,
     fail_open: bool,
     file_mode: file_info::Mode,
@@ -219,6 +224,8 @@ impl<'a> Env<'a> {
                 lowpri_errors: vec![],
                 doc_comments: vec![],
                 local_id_counter: 1,
+                hh_errors: vec![],
+                lint_errors: vec![],
             })),
         }
     }
@@ -265,6 +272,14 @@ impl<'a> Env<'a> {
 
     pub fn lowpri_errors(&mut self) -> RefMut<Vec<(Pos, String)>> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.lowpri_errors)
+    }
+
+    pub fn hh_errors(&mut self) -> RefMut<Vec<HHError>> {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.hh_errors)
+    }
+
+    pub fn lint_errors(&mut self) -> RefMut<Vec<LintError>> {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.lint_errors)
     }
 
     fn top_docblock(&self) -> Ref<Option<DocComment>> {
@@ -402,8 +417,12 @@ where
         }
     }
 
-    fn raise_nast_error(msg: &str) {
-        // A placehold for error raised in ast_to_aast.ml
+    fn raise_hh_error(env: &mut Env, err: HHError) {
+        env.hh_errors().push(err);
+    }
+
+    fn raise_lint_error(env: &mut Env, err: LintError) {
+        env.lint_errors().push(err);
     }
 
     #[inline]
@@ -835,6 +854,18 @@ where
                 }
 
                 let field_map = Self::could_map(Self::p_shape_field, &c.shape_type_fields, env)?;
+                // TODO:(shiqicao) improve perf
+                // 1. replace HashSet by fnv hash map or something faster,
+                // 2. move `set` to Env to avoid allocation,
+                let mut set: HashSet<&str> = HashSet::with_capacity(field_map.len());
+                for f in field_map.iter() {
+                    if !set.insert(f.name.get_name()) {
+                        Self::raise_hh_error(
+                            env,
+                            Naming::fd_name_already_bound(f.name.get_pos().clone()),
+                        );
+                    }
+                }
 
                 Ok(Hshape(ast::NastShapeInfo {
                     allows_unknown_fields,
@@ -1341,6 +1372,14 @@ where
         match &expr.syntax {
             Token(_) => {
                 let s = expr.text(env.indexed_source_text.source_text());
+                let check_lint_err = |e: &mut Env, s: &str, expected: &str| {
+                    if !e.codegen() && s != expected {
+                        Self::raise_lint_error(
+                            e,
+                            LintError::lowercase_constant(Self::p_pos(expr, e), s),
+                        );
+                    }
+                };
                 match (location, Self::token_kind(expr)) {
                     (ExprLocation::InDoubleQuotedString, _) if env.codegen() => {
                         Ok(E_::String(Self::mk_str(expr, env, Self::unesc_dbl, s)))
@@ -1376,14 +1415,15 @@ where
                         Ok(E_::String(Self::mk_str(expr, env, unescape_nowdoc, s)))
                     }
                     (_, Some(TK::NullLiteral)) => {
-                        // TODO: Handle Lint
+                        check_lint_err(env, s, literal::NULL);
                         Ok(E_::Null)
                     }
                     (_, Some(TK::BooleanLiteral)) => {
-                        // TODO: Handle Lint
-                        if s.eq_ignore_ascii_case("false") {
+                        if s.eq_ignore_ascii_case(literal::FALSE) {
+                            check_lint_err(env, s, literal::FALSE);
                             Ok(E_::False)
-                        } else if s.eq_ignore_ascii_case("true") {
+                        } else if s.eq_ignore_ascii_case(literal::TRUE) {
+                            check_lint_err(env, s, literal::TRUE);
                             Ok(E_::True)
                         } else {
                             Self::missing_syntax(None, &format!("boolean (not: {})", s), expr, env)
@@ -3855,10 +3895,13 @@ where
             }
             false
         };
-        let p_method_vis = |node: &Syntax<T, V>, env: &mut Env| -> Result<ast::Visibility> {
+        let p_method_vis = |node: &Syntax<T, V>,
+                            name_pos: &Pos,
+                            env: &mut Env|
+         -> Result<ast::Visibility> {
             match Self::p_visibility_last_win(node, env)? {
                 None => {
-                    Self::raise_nast_error("method_needs_visiblity");
+                    Self::raise_hh_error(env, Naming::method_needs_visibility(name_pos.clone()));
                     Ok(ast::Visibility::Public)
                 }
                 Some(v) => Ok(v),
@@ -3915,7 +3958,10 @@ where
                 let has_abstract = kinds.has(modifier::ABSTRACT);
                 let (type_, abstract_kind) = match (has_abstract, &constraint, &type__) {
                     (false, _, None) => {
-                        Self::raise_nast_error("not_abstract_without_typeconst");
+                        Self::raise_hh_error(
+                            env,
+                            NastCheck::not_abstract_without_typeconst(name.0.clone()),
+                        );
                         (constraint.clone(), ast::TypeconstAbstractKind::TCConcrete)
                     }
                     (false, None, Some(_)) => (type__, ast::TypeconstAbstractKind::TCConcrete),
@@ -4054,7 +4100,7 @@ where
                     .unzip();
 
                 let kinds = Self::p_kinds(&h.function_modifiers, env)?;
-                let visibility = p_method_vis(&h.function_modifiers, env)?;
+                let visibility = p_method_vis(&h.function_modifiers, &hdr.name.0, env)?;
                 let is_static = kinds.has(modifier::STATIC);
                 *env.in_static_method() = is_static;
                 let (mut body, body_has_yield) =
@@ -4109,7 +4155,7 @@ where
                     _ => Self::missing_syntax(None, "trait method redeclaration", node, env)?,
                 };
                 let user_attributes = Self::p_user_attributes(&c.methodish_trait_attribute, env)?;
-                let visibility = p_method_vis(&h.function_modifiers, env)?;
+                let visibility = p_method_vis(&h.function_modifiers, &hdr.name.0, env)?;
                 let mtr = ast::MethodRedeclaration {
                     final_: kind.has(modifier::FINAL),
                     abstract_: kind.has(modifier::ABSTRACT),
@@ -4143,7 +4189,7 @@ where
                                 _ => Self::missing_syntax(None, "trait use precedence item", n, e)?,
                             };
                             let removed_names = Self::could_map(Self::pos_name, removed_names, e)?;
-                            Self::raise_nast_error("unsupported_instead_of");
+                            Self::raise_hh_error(e, Naming::unsupported_instead_of(name.0.clone()));
                             Ok(Either::Left(ast::InsteadofAlias(
                                 qualifier,
                                 name,
@@ -4184,7 +4230,10 @@ where
                             } else {
                                 None
                             };
-                            Self::raise_nast_error("unsupported_trait_use_as");
+                            Self::raise_hh_error(
+                                e,
+                                Naming::unsupported_trait_use_as(name.0.clone()),
+                            );
                             Ok(Either::Right(ast::UseAsAlias(
                                 qualifier,
                                 name,
@@ -4317,8 +4366,11 @@ where
                     env,
                 )?;
                 if let Some((_, cs)) = &class.xhp_category {
-                    if cs.len() > 0 {
-                        Self::raise_nast_error("multiple_xhp_category")
+                    if let Some(category) = cs.first() {
+                        Self::raise_hh_error(
+                            env,
+                            NastCheck::multiple_xhp_category(category.0.clone()),
+                        )
                     }
                 }
                 Ok(class.xhp_category = Some((p, categories)))

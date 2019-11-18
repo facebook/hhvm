@@ -6,6 +6,7 @@
 pub mod aast_defs_impl;
 pub mod aast_impl;
 pub mod ast;
+pub mod ast_defs_impl;
 pub mod doc_comment;
 pub mod errors;
 pub mod file_info_impl;

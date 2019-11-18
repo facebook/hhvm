@@ -30,7 +30,8 @@ type result = {
   scoured_comments: Scoured_comments.t;
   aast: ((Pos.t, unit, unit, unit) Aast.program, string) Pervasives.result;
   lowpri_errors: (Pos.t * string) list;
-  errors: Full_fidelity_syntax_error.t list;
+  syntax_errors: Full_fidelity_syntax_error.t list;
+  errors: Errors.error list;
 }
 
 type error =

@@ -104,7 +104,7 @@ impl<'a> AastParser {
                 &env.parser_options,
             );
             let ret = PositionedSyntaxLowerer::lower(&mut lowerer_env, tree.root());
-            let errors = match &ret {
+            let syntax_errors = match &ret {
                 Ok(aast) => Self::check_synatx_error(&env, indexed_source_text, tree, Some(aast)),
                 Err(_) => Self::check_synatx_error(env, indexed_source_text, tree, None),
             };
@@ -115,7 +115,8 @@ impl<'a> AastParser {
                 scoured_comments,
                 aast: ret,
                 lowpri_errors,
-                errors,
+                syntax_errors,
+                errors: vec![],
             })
         }
     }

@@ -17,6 +17,10 @@ let next () =
   incr ctr;
   !ctr
 
+let errors : Errors.error list ref = ref []
+
+let add_error (e : Errors.error) : unit = errors := e :: !errors
+
 type ('ex, 'fb, 'en, 'hi) class_body = {
   c_uses: Aast.hint list;
   c_use_as_aliases: Aast.use_as_alias list;
@@ -107,7 +111,8 @@ let converter
       List.fold_left
         ~f:(fun (map_, list_) sf ->
           if ShapeMap.mem sf.sf_name map_ then
-            Errors.fd_name_already_bound (get_pos_shape_name sf.sf_name);
+            add_error
+              (Errors.mk_fd_name_already_bound (get_pos_shape_name sf.sf_name));
           let sfi = on_shape_field sf in
           let map_ = ShapeMap.add sf.sf_name sfi map_ in
           let list_ = sfi :: list_ in
@@ -162,7 +167,7 @@ let converter
       let hints = on_hint h :: body.c_uses in
       { body with c_uses = hints }
     | ClassUseAlias (ido1, (p, s), ido2, kl) ->
-      Errors.unsupported_trait_use_as p;
+      add_error (Errors.mk_unsupported_trait_use_as p);
       let visl =
         List.filter_map
           ~f:(fun k ->
@@ -172,7 +177,7 @@ let converter
             | Protected -> Some Aast.UseAsProtected
             | Final -> Some Aast.UseAsFinal
             | _ ->
-              Errors.invalid_trait_use_as_visibility p;
+              add_error (Errors.mk_invalid_trait_use_as_visibility p);
               None)
           kl
       in
@@ -181,7 +186,7 @@ let converter
       in
       { body with c_use_as_aliases = use_as_aliases }
     | ClassUsePrecedence (id1, (p, s), id2) ->
-      Errors.unsupported_instead_of p;
+      add_error (Errors.mk_unsupported_instead_of p);
       let insteadof_aliases = (id1, (p, s), id2) :: body.c_insteadof_aliases in
       { body with c_insteadof_aliases = insteadof_aliases }
     | MethodTraitResolution res ->
@@ -221,7 +226,7 @@ let converter
       { body with c_xhp_attrs = attrs }
     | XhpCategory (p, cs) ->
       if body.c_xhp_category <> None && cs <> [] then
-        Errors.multiple_xhp_category (fst (List.hd_exn cs));
+        add_error (Errors.mk_multiple_xhp_category (fst (List.hd_exn cs)));
       { body with c_xhp_category = Some (p, cs) }
     | XhpChild (p, c) ->
       let children = (p, on_xhp_child c) :: body.c_xhp_children in
@@ -522,7 +527,7 @@ let converter
       (* const type T;
        * const type T as int; *)
       | (false, _, None) ->
-        Errors.not_abstract_without_typeconst tc.tconst_name;
+        add_error (Errors.mk_not_abstract_without_typeconst tc.tconst_name);
         (tc.tconst_constraint, Aast.TCConcrete)
       (* this is a degenerate case, so safe to call it concrete *)
       (* const type T = int; *)
@@ -625,7 +630,7 @@ let converter
     let vis =
       match vis with
       | None ->
-        Errors.method_needs_visibility (fst res.mt_name);
+        add_error (Errors.mk_method_needs_visibility (fst res.mt_name));
         Aast.Public
       | Some v -> v
     in
@@ -678,7 +683,7 @@ let converter
     let vis =
       match vis with
       | None ->
-        Errors.method_needs_visibility (fst m.m_name);
+        add_error (Errors.mk_method_needs_visibility (fst m.m_name));
         Aast.Public
       | Some v -> v
     in
@@ -883,8 +888,13 @@ let convert_program
     (func_body_ann : 'fb)
     (env_annotation : 'en)
     (hint_annotation : 'hi)
-    (p : Ast.program) : ('ex, 'fb, 'en, 'hi) Aast.program =
+    (p : Ast.program) : ('ex, 'fb, 'en, 'hi) Aast.program * Errors.error list =
   ctr := 1;
-  (converter expr_annotation func_body_ann env_annotation hint_annotation)
-    #on_program
-    p
+  let r =
+    (converter expr_annotation func_body_ann env_annotation hint_annotation)
+      #on_program
+      p
+  in
+  let cur_errors = !errors in
+  errors := [];
+  (r, cur_errors)

@@ -510,7 +510,7 @@ module LowererTest_ = struct
         (print_aast_result result.aast)
         (Scoured_comments.show result.scoured_comments)
         (print_lowpri_errs result.lowpri_errors)
-        (print_errs result.errors))
+        (print_errs result.syntax_errors))
 
   let build_tree args _env is_rust file source_text =
     let lower_env =
@@ -568,7 +568,7 @@ module LowererTest_ = struct
         let tree = compare_aast_result r1.aast r2.aast in
         let file_mode = r1.file_mode = r2.file_mode in
         let lowpri_err = r1.lowpri_errors = r2.lowpri_errors in
-        let err = r1.errors = r2.errors in
+        let err = r1.syntax_errors = r2.syntax_errors in
         let comments =
           Scoured_comments.equal r1.scoured_comments r2.scoured_comments
         in

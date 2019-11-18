@@ -4236,6 +4236,9 @@ let process_lowpri_errors (env : env) (lowpri_errors : (Pos.t * string) list) =
       raise @@ SyntaxError.ParserFatal (e, p)
     | _ -> ()
 
+let process_non_syntax_errors (_ : env) (errors : Errors.error list) =
+  List.iter ~f:Errors.add_error_with_check errors
+
 let elaborate_top_level_defs env aast =
   if env.elaborate_namespaces then
     Namespaces.elaborate_toplevel_defs env.parser_options aast
@@ -4351,16 +4354,21 @@ let lower_tree
   in
   let aast_result =
     match ast_result with
-    | Ok ast -> Ok (Ast_to_aast.convert_program (fun x -> x) () () () ast)
-    | Error e -> Error e
+    | Ok ast ->
+      let (aast, errors) =
+        Ast_to_aast.convert_program (fun x -> x) () () () ast
+      in
+      (Ok aast, errors)
+    | Error e -> (Error e, [])
   in
   Rust_aast_parser_types.
     {
       file_mode = mode;
       scoured_comments = comments;
-      aast = aast_result;
+      aast = fst aast_result;
       lowpri_errors = List.rev !(env.lowpri_errors);
-      errors = syntax_errors;
+      syntax_errors;
+      errors = snd aast_result;
     }
 
 let process_syntax_errors
@@ -4418,12 +4426,12 @@ let process_lowerer_result
     : aast_result =
   Rust_aast_parser_types.(
     process_scour_comments env r.scoured_comments;
-    process_syntax_errors env source_text r.errors;
-    process_lowpri_errors env r.lowpri_errors);
-  match r.Rust_aast_parser_types.aast with
-  | Error msg -> failwith msg
-  | Ok aast ->
-    Rust_aast_parser_types.
+    process_syntax_errors env source_text r.syntax_errors;
+    process_lowpri_errors env r.lowpri_errors;
+    process_non_syntax_errors env r.errors;
+    match r.aast with
+    | Error msg -> failwith msg
+    | Ok aast ->
       {
         fi_mode = r.file_mode;
         is_hh_file = r.file_mode <> FileInfo.Mphp;
@@ -4436,7 +4444,7 @@ let process_lowerer_result
         comments = r.scoured_comments;
         file = env.file;
         lowpri_errors_ = ref r.lowpri_errors;
-      }
+      })
 
 let from_text (env : env) (source_text : SourceText.t) : aast_result =
   let result =

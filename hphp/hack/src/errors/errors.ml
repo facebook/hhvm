@@ -743,6 +743,9 @@ and add code pos msg =
     add_error_impl (make_error code pos_msg_l);
   add_ignored_fixme_code_error pos code
 
+and add_error_with_check (error : error) : unit =
+  add_list (fst error) (snd error)
+
 and add_list code pos_msg_l =
   let pos = fst (List.hd_exn pos_msg_l) in
   let pos_msg_l = check_pos_msg pos_msg_l in
@@ -935,23 +938,26 @@ let parsing_error (p, msg) = add (Parsing.err_code Parsing.ParsingError) p msg
 (* Legacy AST / AAST errors *)
 (*****************************************************************************)
 
+let mk_unsupported_trait_use_as pos =
+  ( Naming.err_code Naming.UnsupportedTraitUseAs,
+    [(pos, "Trait use as is a PHP feature that is unsupported in Hack")] )
+
 let unsupported_trait_use_as pos =
-  add
-    (Naming.err_code Naming.UnsupportedTraitUseAs)
-    pos
-    "Trait use as is a PHP feature that is unsupported in Hack"
+  add_error_with_check (mk_unsupported_trait_use_as pos)
+
+let mk_unsupported_instead_of pos =
+  ( Naming.err_code Naming.UnsupportedInsteadOf,
+    [(pos, "insteadof is a PHP feature that is unsupported in Hack")] )
 
 let unsupported_instead_of pos =
-  add
-    (Naming.err_code Naming.UnsupportedInsteadOf)
-    pos
-    "insteadof is a PHP feature that is unsupported in Hack"
+  add_error_with_check (mk_unsupported_instead_of pos)
+
+let mk_invalid_trait_use_as_visibility pos =
+  ( Naming.err_code Naming.InvalidTraitUseAsVisibility,
+    [(pos, "Cannot redeclare trait method's visibility in this manner")] )
 
 let invalid_trait_use_as_visibility pos =
-  add
-    (Naming.err_code Naming.InvalidTraitUseAsVisibility)
-    pos
-    "Cannot redeclare trait method's visibility in this manner"
+  add_error_with_check (mk_invalid_trait_use_as_visibility pos)
 
 (*****************************************************************************)
 (* Naming errors *)
@@ -1113,8 +1119,12 @@ let unexpected_typedef pos def_pos =
     (Naming.err_code Naming.UnexpectedTypedef)
     [(pos, "Unexpected typedef"); (def_pos, "Definition is here")]
 
+let mk_fd_name_already_bound pos =
+  ( Naming.err_code Naming.FdNameAlreadyBound,
+    [(pos, "Field name already bound")] )
+
 let fd_name_already_bound pos =
-  add (Naming.err_code Naming.FdNameAlreadyBound) pos "Field name already bound"
+  add_error_with_check (mk_fd_name_already_bound pos)
 
 let repeated_record_field name pos prev_pos =
   let msg = Printf.sprintf "Duplicate record field `%s`" name in
@@ -1479,11 +1489,12 @@ let goto_invoked_in_finally pos =
     pos
     "It is illegal to invoke goto within a finally block."
 
+let mk_method_needs_visibility pos =
+  ( Naming.err_code Naming.MethodNeedsVisibility,
+    [(pos, "Methods need to be marked public, private, or protected.")] )
+
 let method_needs_visibility pos =
-  add
-    (Naming.err_code Naming.MethodNeedsVisibility)
-    pos
-    "Methods need to be marked public, private, or protected."
+  add_error_with_check (mk_method_needs_visibility pos)
 
 let dynamic_class_name_in_strict_mode pos =
   add
@@ -1705,12 +1716,16 @@ let not_abstract_without_body (p, _) =
     p
     "This method is not declared as abstract, it must have a body"
 
-let not_abstract_without_typeconst (p, _) =
-  add
-    (NastCheck.err_code NastCheck.NotAbstractWithoutTypeconst)
-    p
-    ( "This type constant is not declared as abstract, it must have"
-    ^ " an assigned type" )
+let mk_not_abstract_without_typeconst (p, _) =
+  ( NastCheck.err_code NastCheck.NotAbstractWithoutTypeconst,
+    [
+      ( p,
+        "This type constant is not declared as abstract, it must have"
+        ^ " an assigned type" );
+    ] )
+
+let not_abstract_without_typeconst node =
+  add_error_with_check (mk_not_abstract_without_typeconst node)
 
 let typeconst_depends_on_external_tparam pos ext_pos ext_name =
   add_list
@@ -1728,11 +1743,12 @@ let interface_with_partial_typeconst tconst_pos =
     tconst_pos
     "An interface cannot contain a partially abstract type constant"
 
+let mk_multiple_xhp_category pos =
+  ( NastCheck.err_code NastCheck.MultipleXhpCategory,
+    [(pos, "XHP classes can only contain one category declaration")] )
+
 let multiple_xhp_category pos =
-  add
-    (NastCheck.err_code NastCheck.MultipleXhpCategory)
-    pos
-    "XHP classes can only contain one category declaration"
+  add_error_with_check (mk_multiple_xhp_category pos)
 
 let return_in_gen p =
   add

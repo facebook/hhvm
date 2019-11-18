@@ -9,6 +9,7 @@ pub use manual::aast_defs_impl;
 pub use manual::aast_impl;
 pub use manual::ast;
 pub use manual::doc_comment;
+pub use manual::errors;
 pub use manual::file_info_impl;
 pub use manual::file_pos_large;
 pub use manual::file_pos_small;
@@ -28,7 +29,6 @@ pub use manual::tany_sentinel;
 
 mod stubs;
 
-pub use stubs::errors;
 pub use stubs::lazy;
 pub use stubs::opaque_digest;
 pub use stubs::sequence;

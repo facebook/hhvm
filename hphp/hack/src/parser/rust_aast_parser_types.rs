@@ -5,7 +5,7 @@
 
 use ocamlrep_derive::OcamlRep;
 
-use oxidized::{aast, file_info, parser_options, pos, scoured_comments};
+use oxidized::{aast, errors::Error as HHError, file_info, parser_options, pos, scoured_comments};
 use parser_core_types::syntax_error::SyntaxError;
 
 #[derive(Clone, Debug, OcamlRep)]
@@ -30,5 +30,6 @@ pub struct Result {
     pub scoured_comments: scoured_comments::ScouredComments,
     pub aast: std::result::Result<aast::Program<pos::Pos, (), (), ()>, String>,
     pub lowpri_errors: Vec<(pos::Pos, String)>,
-    pub errors: Vec<SyntaxError>,
+    pub syntax_errors: Vec<SyntaxError>,
+    pub errors: Vec<HHError>,
 }

@@ -294,7 +294,11 @@ void retranslateAll() {
       }
     }
 
-    dispatcher().waitEmpty();
+    if (auto const dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
+      s_dispatcher.store(nullptr, std::memory_order_release);
+      dispatcher->waitEmpty(true);
+      delete dispatcher;
+    }
   }
 
   if (serverMode) {
@@ -332,7 +336,9 @@ void joinWorkerThreads() {
   if (s_dispatcher.load(std::memory_order_acquire)) {
     std::lock_guard<std::mutex> lock{s_dispatcherMutex};
     if (auto dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
+      s_dispatcher.store(nullptr, std::memory_order_release);
       dispatcher->stop();
+      delete dispatcher;
     }
   }
 

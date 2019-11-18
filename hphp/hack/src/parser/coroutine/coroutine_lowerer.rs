@@ -12,12 +12,13 @@ extern "C" {
     fn ocamlpool_leave();
 }
 
+/// `rewrite_coroutines` returns a pair of source text (old, new)
 pub fn rewrite_coroutines<'a>(
     source: &'a SourceText<'a>,
     root: &PositionedSyntax,
-) -> SourceText<'a> {
-    let rewrite_coroutines =
-        ocaml::named_value("rewrite_coroutines").expect("rewrite_coroutines not registered");
+) -> (SourceText<'a>, SourceText<'a>) {
+    let rewrite_coroutines = ocaml::named_value("rewrite_coroutines_for_rust")
+        .expect("rewrite_coroutines not registered");
     let ocaml_source_text = source.ocaml_source_text().unwrap().as_usize();
     let context = SerializationContext::new(ocaml_source_text);
     unsafe {
@@ -30,6 +31,6 @@ pub fn rewrite_coroutines<'a>(
                 ocaml::Value::new(ocaml_root),
             ])
             .unwrap();
-        SourceText::from_ocaml(rewritten_ocaml_source.0).unwrap()
+        <(SourceText, SourceText)>::from_ocaml(rewritten_ocaml_source.0).unwrap()
     }
 }

@@ -25,3 +25,4 @@ rust_coroutine = {path = "../../coroutine", package = "rust_coroutine" }
 naming_special_names_rust = { path = "../../../naming", package = "naming_special_names" }
 stack_limit = { path = "../../../utils/stack_limit", package = "hack_stack_limit" }
 lint_rust = { path = "../../../utils/lint", package = "hack_lint" }
+itertools = "^0.7"

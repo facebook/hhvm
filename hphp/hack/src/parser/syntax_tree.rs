@@ -19,7 +19,7 @@ use parser_rust::{
     smart_constructors::{NodeType, SmartConstructors},
 };
 use stack_limit::StackLimit;
-use std::borrow::Borrow;
+use std::{borrow::Borrow, convert::AsRef};
 
 pub struct SyntaxTree<'a, Syntax, State> {
     text: &'a SourceText<'a>,
@@ -224,6 +224,12 @@ where
 
     //TODO: to_json require some unimplemented methods in syntax.rs, particularly
     // Hh_json.to_json
+}
+
+impl<'a, Syntax, State> AsRef<SyntaxTree<'a, Syntax, State>> for SyntaxTree<'a, Syntax, State> {
+    fn as_ref(&self) -> &Self {
+        self
+    }
 }
 
 pub fn make_syntax_tree<'a, S, T>(

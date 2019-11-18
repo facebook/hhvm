@@ -4265,7 +4265,22 @@ let rewrite_coroutines source_text script =
   |> Full_fidelity_editable_positioned_syntax.text
   |> SourceText.make (SourceText.file_path source_text)
 
-let () = Callback.register "rewrite_coroutines" rewrite_coroutines
+(*
+rewrite_coroutines_for_rust is invoked from Rust. It takes `source_text` and `script` and
+returns original source and rewritten source.
+
+Why does it need to take `source_text`? It only requires `file_path`, why not just pass file_path
+from Rust side?
+
+`source_text` contains raw source string, the string won't be copied when Rust receives it for the sake of perf.
+This assumes Ocaml GC won't collect it during Rust call. `rewrite_coroutines_for_rust` will be called from Rust during
+a function call to Rust. Ocaml GC may collect/promote it. Passing it to Ocaml and return it(possiblely not smae ptr)
+back to Rust can avoid segfault.
+*)
+let rewrite_coroutines_for_rust source_text script =
+  (source_text, rewrite_coroutines source_text script)
+
+let () = Callback.register "rewrite_coroutines_for_rust" rewrite_coroutines_for_rust
 
 let check_syntax_error (env : env) tree ast_opt :
     Full_fidelity_syntax_error.t list =

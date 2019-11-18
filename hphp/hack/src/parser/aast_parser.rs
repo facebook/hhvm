@@ -8,6 +8,10 @@ use crate::aast_check;
 use crate::rust_aast_parser_types::{Env, Result as ParserResult};
 use coroutine_smart_constructors::{CoroutineSmartConstructors, State as CoroutineState};
 use decl_mode_parser::DeclModeParser;
+use itertools::{
+    Either,
+    Either::{Left, Right},
+};
 use lowerer::{Lowerer, ScourComment};
 use ocamlrep_derive::OcamlRep;
 use oxidized::{aast::Program, file_info::Mode, pos::Pos, scoured_comments::ScouredComments};
@@ -59,7 +63,13 @@ impl<'a> AastParser {
         Self::from_text_(env, source, None, stack_limit)
     }
 
-    // Full_fidelity_ast.lower_tree_ is inlined
+    /// `impl Trait` isn't allowed outside of fun signature, this function is to hint Rust type checker
+    fn to_as_ref<'b>(
+        tree: Either<PositionedSyntaxTree<'b>, &'b PositionedSyntaxTree<'b>>,
+    ) -> impl AsRef<PositionedSyntaxTree<'b>> + 'b {
+        tree
+    }
+
     fn from_text_(
         env: &Env,
         indexed_source_text: &'a IndexedSourceText<'a>,
@@ -72,26 +82,25 @@ impl<'a> AastParser {
             Self::scour_comments_and_add_fixmes(env, indexed_source_text, &tree.root())?;
         let lower_coroutines = env.lower_coroutines && env.codegen && tree.sc_state().seen_ppl();
         if lower_coroutines && rewritten_source.is_none() {
-            let rewritten_source = coroutine_lowerer::rewrite_coroutines(
+            let (source, rewritten_source) = coroutine_lowerer::rewrite_coroutines(
                 indexed_source_text.source_text(),
                 tree.root(),
             );
             Self::from_text_(
                 env,
-                &indexed_source_text,
+                &IndexedSourceText::new(source),
                 Some(&IndexedSourceText::new(rewritten_source)),
                 stack_limit,
             )
         } else {
-            // TODO(shiqicao): we need to use rewritten source/tree when lowering, but original one when checking errors
             let indexed_source_text = rewritten_source.unwrap_or(indexed_source_text);
+            let original_tree = &tree;
             let tree = if let Some(rewritten_source) = rewritten_source {
                 let (_, rewritten_tree) = Self::parse_text(env, rewritten_source, stack_limit)?;
-                rewritten_tree
+                Left(rewritten_tree)
             } else {
-                tree
+                Right(&tree)
             };
-
             let mut lowerer_env = lowerer::Env::make(
                 env.codegen,
                 env.quick_mode,
@@ -103,10 +112,15 @@ impl<'a> AastParser {
                 indexed_source_text,
                 &env.parser_options,
             );
-            let ret = PositionedSyntaxLowerer::lower(&mut lowerer_env, tree.root());
+            let ret = PositionedSyntaxLowerer::lower(
+                &mut lowerer_env,
+                Self::to_as_ref(tree).as_ref().root(),
+            );
             let syntax_errors = match &ret {
-                Ok(aast) => Self::check_synatx_error(&env, indexed_source_text, tree, Some(aast)),
-                Err(_) => Self::check_synatx_error(env, indexed_source_text, tree, None),
+                Ok(aast) => {
+                    Self::check_syntax_error(&env, indexed_source_text, original_tree, Some(aast))
+                }
+                Err(_) => Self::check_syntax_error(env, indexed_source_text, original_tree, None),
             };
             let lowpri_errors = lowerer_env.lowpri_errors().borrow().to_vec();
             let errors = lowerer_env.hh_errors().borrow().to_vec();
@@ -124,10 +138,10 @@ impl<'a> AastParser {
         }
     }
 
-    fn check_synatx_error(
+    fn check_syntax_error(
         env: &Env,
         indexed_source_text: &'a IndexedSourceText<'a>,
-        tree: PositionedSyntaxTree<'a>,
+        tree: &'a PositionedSyntaxTree<'a>,
         aast: Option<&Program<Pos, (), (), ()>>,
     ) -> Vec<SyntaxError> {
         let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {

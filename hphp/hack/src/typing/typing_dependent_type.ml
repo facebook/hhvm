@@ -130,7 +130,7 @@ module ExprDepTy = struct
           ( Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _
           | Tdynamic | Tarraykind _ | Tfun _
           | Tabstract (_, None)
-          | Tany _ | Tvar _ | Terr | Tdestructure _ | Tpu _ ) ) ->
+          | Tany _ | Tvar _ | Terr | Tpu _ ) ) ->
         (env, ty)
       | (r, Tpu_access (ty, x)) ->
         let (env, ty) = make env ty in

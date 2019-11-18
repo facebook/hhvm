@@ -137,9 +137,6 @@ let rec freshen_inside_ty env ty =
   | Ttuple tyl ->
     let (env, tyl) = List.map_env env tyl freshen_ty in
     (env, (r, Ttuple tyl))
-  | Tdestructure tyl ->
-    let (env, tyl) = List.map_env env tyl freshen_ty in
-    (env, (r, Tdestructure tyl))
   (* Shape data is covariant *)
   | Tshape (shape_kind, fdm) ->
     let (env, fdm) = ShapeFieldMap.map_env freshen_ty env fdm in
@@ -992,8 +989,8 @@ let rec push_option_out pos env ty =
       (env, ty)
   | ( _,
       ( Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Tclass _ | Ttuple _
-      | Tanon _ | Tfun _ | Tobject | Tshape _ | Tdynamic | Tdestructure _
-      | Tpu _ | Tpu_access _ ) ) ->
+      | Tanon _ | Tfun _ | Tobject | Tshape _ | Tdynamic | Tpu _ | Tpu_access _
+        ) ) ->
     (env, ty)
 
 (**

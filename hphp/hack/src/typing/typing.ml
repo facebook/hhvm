@@ -4369,7 +4369,11 @@ and assign_ p ur env e1 ty2 =
           Env.fresh_type env (Reason.to_pos (fst ty2)))
     in
     let destructure_ty =
-      (Reason.Rdestructure (fst e1, List.length tyl), Tdestructure tyl)
+      ConstraintType
+        (Reason.Rdestructure (fst e1, List.length tyl), Tdestructure tyl)
+    in
+    let (env, destructure_ty) =
+      SubType.cstr_ty_as_tyvar_with_upper_bound env destructure_ty
     in
     let env = Type.sub_type p ur env ty2 destructure_ty Errors.unify_error in
     let env = Env.set_tyvar_variance env destructure_ty in
@@ -4640,8 +4644,8 @@ and call_parent_construct pos env el uel =
         default
       | None -> assert false)
     | ( _,
-        ( Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tdestructure _
-        | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
+        ( Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _
+        | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
         | Tabstract (_, _)
         | Tanon (_, _)
         | Tunion _ | Tintersection _ | Tobject | Tpu _ | Tpu_access _ ) ) ->
@@ -5760,7 +5764,7 @@ and class_get_
       ( Tvar _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _
       | Ttuple _
       | Tanon (_, _)
-      | Tobject | Tshape _ | Tdestructure _ | Tpu _ | Tpu_access _ ) ) ->
+      | Tobject | Tshape _ | Tpu _ | Tpu_access _ ) ) ->
     (* should never happen; static_class_id takes care of these *)
     (env, ((Reason.Rnone, Typing_utils.tany env), []))
 
@@ -5806,8 +5810,8 @@ and class_id_for_new ~exact p env cid explicit_targs =
             | Tabstract (_, _)
             | Ttuple _
             | Tanon (_, _)
-            | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tdynamic
-            | Tdestructure _ | Tpu _ | Tpu_access _ ) ) ->
+            | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tdynamic | Tpu _
+            | Tpu_access _ ) ) ->
           get_info res tyl))
   in
   get_info [] [cid_ty]
@@ -5917,7 +5921,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         make_result env [] Aast.CIparent (r, TUtils.this_of (r, snd parent)))
     | ( _,
         ( Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _
-        | Ttuple _ | Tshape _ | Tvar _ | Tdynamic | Tdestructure _
+        | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
         | Tanon (_, _)
         | Tunion _ | Tintersection _
         | Tabstract (_, _)
@@ -6011,7 +6015,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         (env, (Reason.Rwitness p, Typing_utils.terr env))
       | ( _,
           ( Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _
-          | Ttuple _ | Tdestructure _
+          | Ttuple _
           | Tabstract ((AKdependent _ | AKnewtype _), _)
           | Tanon (_, _)
           | Tobject | Tshape _ | Tpu _ | Tpu_access _ ) ) as ty ->
@@ -7148,8 +7152,7 @@ and condition
       env
     | ( _,
         ( Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
-        | Tprim _ | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Tdestructure _
-        | Ttuple _
+        | Tprim _ | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Ttuple _
         | Tanon (_, _)
         | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tpu _ | Tpu_access _
           ) ) ->
@@ -7275,9 +7278,8 @@ and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
     (env, (reason, Ttuple tyl))
   | ( _,
       ( Tany _ | Tprim _ | Toption _ | Ttuple _ | Tnonnull | Tshape _ | Tvar _
-      | Tabstract _ | Tarraykind _ | Tanon _ | Tdestructure _ | Tunion _
-      | Tintersection _ | Tobject | Terr | Tfun _ | Tdynamic | Tpu _
-      | Tpu_access _ ) ) ->
+      | Tabstract _ | Tarraykind _ | Tanon _ | Tunion _ | Tintersection _
+      | Tobject | Terr | Tfun _ | Tdynamic | Tpu _ | Tpu_access _ ) ) ->
     (env, hint_ty)
 
 (** If we are dealing with a refinement like
@@ -8809,9 +8811,7 @@ and class_get_pu_ env cty name =
   | Tobject
   | Tshape _ ->
     (env, None)
-  | Tdestructure _
-  | Tintersection _ ->
-    (env, None)
+  | Tintersection _ -> (env, None)
   | Tpu_access _
   | Tpu _ ->
     (env, None)

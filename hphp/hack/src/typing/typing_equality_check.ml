@@ -87,8 +87,8 @@ let rec assert_nontrivial p bop env ty1 ty2 =
           ( Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Toption _
           | Tdynamic | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Ttuple _
           | Tanon (_, _)
-          | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tdestructure _
-          | Tpu _ | Tpu_access _ ) ),
+          | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tpu _
+          | Tpu_access _ ) ),
         _ ) ->
       ())
 

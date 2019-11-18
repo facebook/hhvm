@@ -77,8 +77,6 @@ class type type_mapper_type =
       locl_phase shape_field_type Nast.ShapeMap.t ->
       result
 
-    method on_tdestructure : env -> Reason.t -> locl_ty list -> result
-
     method on_type : env -> locl_ty -> result
   end
 
@@ -130,8 +128,6 @@ class shallow_type_mapper : type_mapper_type =
 
     method on_tshape env r shape_kind fdm = (env, (r, Tshape (shape_kind, fdm)))
 
-    method on_tdestructure env r tyl = (env, (r, Tdestructure tyl))
-
     method on_type env (r, ty) =
       match ty with
       | Tvar n -> this#on_tvar env r n
@@ -156,7 +152,6 @@ class shallow_type_mapper : type_mapper_type =
       | Tdynamic -> this#on_tdynamic env r
       | Tobject -> this#on_tobject env r
       | Tshape (shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
-      | Tdestructure tyl -> this#on_tdestructure env r tyl
       | Tpu (base, enum, kind) ->
         let (env, ty) = this#on_type env base in
         (env, (r, Tpu (ty, enum, kind)))

@@ -86,8 +86,7 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
   | Ttuple _
   | Tanon (_, _)
   | Tobject
-  | Tshape _
-  | Tdestructure _ ->
+  | Tshape _ ->
     (env, [], [cty])
   | Tpu_access _
   | Tpu _ ->

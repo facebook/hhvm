@@ -108,8 +108,7 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
   | Tanon (_, _)
   | Tobject
   | Tshape _
-  | Tdynamic
-  | Tdestructure _ ->
+  | Tdynamic ->
     env
 
 let check_exhaustiveness env pos ty caselist =

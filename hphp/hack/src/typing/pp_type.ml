@@ -205,9 +205,6 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
     Format.fprintf fmt "(@[<2>Tarraykind@ ";
     pp_array_kind fmt a0;
     Format.fprintf fmt "@])"
-  | Tdestructure tyl ->
-    Format.fprintf fmt "(@[<2>Tdestructure@ ";
-    pp_ty_list fmt tyl
   | Tpu (base, enum, kind) ->
     Format.fprintf
       fmt

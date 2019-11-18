@@ -316,8 +316,7 @@ and expand env ~as_tyvar_with_cnstr root id ~allow_abstract_tconst =
   | Tfun _
   | Tabstract (_, _)
   | Tdynamic
-  | Toption _
-  | Tdestructure _ ->
+  | Toption _ ->
     let (pos, tconst) = id in
     let ty = Typing_print.error env.tenv root in
     raise_error (fun () ->

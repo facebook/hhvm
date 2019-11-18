@@ -466,7 +466,6 @@ let rec array_get
       | Tnonnull
       | Tprim _
       | Tfun _
-      | Tdestructure _
       | Tclass _
       | Tanon _
       | Tabstract _
@@ -574,7 +573,7 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
           (env, ty1)
       | ( _,
           ( Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tvar _ | Tfun _
-          | Tclass _ | Ttuple _ | Tanon _ | Tshape _ | Tdestructure _ | Tunion _
+          | Tclass _ | Ttuple _ | Tanon _ | Tshape _ | Tunion _
           | Tintersection _ | Tabstract _ | Tpu _ | Tpu_access _ ) ) ->
         error_assign_array_append env expr_pos ty1)
 
@@ -813,7 +812,6 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       | Toption _
       | Tnonnull
       | Tprim _
-      | Tdestructure _
       | Tunion _
       | Tintersection _
       | Tabstract _

@@ -304,7 +304,6 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
       | Tclass (cls, exact, tyl) -> this#on_tclass acc r cls exact tyl
       | Tarraykind akind -> this#on_tarraykind acc r akind
-      | Tdestructure tyl -> this#on_tlist acc r tyl
       | Tpu (base, _, _) -> this#on_type acc base
       | Tpu_access (base, _) -> this#on_type acc base
   end

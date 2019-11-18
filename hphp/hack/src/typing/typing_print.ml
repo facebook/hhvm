@@ -416,7 +416,6 @@ module Full = struct
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
     | Ttuple tyl -> ttuple k tyl
-    | Tdestructure tyl -> list "list(" k tyl ")"
     | Tanon (_, id) ->
       begin
         match Env.get_anonymous env id with
@@ -551,6 +550,7 @@ module Full = struct
     let k x = locl_ty to_doc st env x in
     match x with
     | Thas_member hm -> thas_member k hm
+    | Tdestructure tyl -> list "list(" k tyl ")"
 
   let constraint_type to_doc st env (r, x) =
     let d = constraint_type_ to_doc st env x in
@@ -752,9 +752,6 @@ module ErrorString = struct
       "an object of type " ^ strip_ns x ^ inst env tyl
     | Tobject -> "an object"
     | Tshape _ -> "a shape"
-    | Tdestructure l ->
-      "a list destructuring assignment of length "
-      ^ string_of_int (List.length l)
     | Tpu ((_, ty), (_, enum), kind) ->
       let ty =
         match ty with
@@ -988,7 +985,6 @@ module Json = struct
           obj @@ kind "darray" @ args [ty1; ty2]
         | Tarraykind (AKvarray ty) -> obj @@ kind "varray" @ args [ty]
         | Tarraykind AKempty -> obj @@ kind "array" @ empty true @ args []
-        | Tdestructure tyl -> obj @@ kind "union" @ args tyl
         | Tpu (base, enum, pukind) ->
           let pukind =
             match pukind with

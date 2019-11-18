@@ -36,7 +36,6 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
   | Terr
   | Tvar _
   | Tabstract (AKdependent _, _)
-  | Tdestructure _
   | Tanon _
   | Tunion _
   | Tintersection _

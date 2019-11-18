@@ -54,7 +54,6 @@ let rec is_stringish env ty =
   | Tanon (_, _)
   | Tfun _
   | Tshape _
-  | Tdestructure _
   | Tpu_access _ ->
     false
 

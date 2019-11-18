@@ -1380,8 +1380,7 @@ and get_tyvars_i env (ty : internal_type) =
     | Toption ty -> get_tyvars env ty
     | Ttuple tyl
     | Tunion tyl
-    | Tintersection tyl
-    | Tdestructure tyl ->
+    | Tintersection tyl ->
       List.fold_left tyl ~init:(env, ISet.empty, ISet.empty) ~f:get_tyvars_union
     | Tshape (_, m) ->
       Nast.ShapeMap.fold
@@ -1441,6 +1440,8 @@ and get_tyvars_i env (ty : internal_type) =
     | Tpu_access (base, _) -> get_tyvars env base)
   | ConstraintType ty ->
     (match ty with
+    | (_, Tdestructure tyl) ->
+      List.fold_left tyl ~init:(env, ISet.empty, ISet.empty) ~f:get_tyvars_union
     | (_, Thas_member hm) ->
       let { hm_type; hm_name = _; hm_class_id = _ } = hm in
       get_tyvars env hm_type)

@@ -332,9 +332,6 @@ and _ ty_ =
   | Tclass : Nast.sid * exact * locl_ty list -> locl_phase ty_
   (* Localized version of Tarray *)
   | Tarraykind : array_kind -> locl_phase ty_
-  (* The type of a list destructructuring assignment.
-   * Implements valid destructuring operations via subtyping *)
-  | Tdestructure : locl_ty list -> locl_phase ty_
   (* Typing of Pocket Universe Expressions
    * - first parameter is the enclosing class
    * - second parameter is the name of the Pocket Universe Enumeration
@@ -343,7 +340,11 @@ and _ ty_ =
    *)
   | Tpu : locl_ty * Nast.sid * pu_kind -> locl_phase ty_
 
-and constraint_type_ = Thas_member of has_member
+and constraint_type_ =
+  | Thas_member of has_member
+  (* The type of a list destructructuring assignment.
+   * Implements valid destructuring operations via subtyping *)
+  | Tdestructure of locl_ty list
 
 and has_member = {
   hm_name: Nast.sid;
@@ -723,8 +724,7 @@ let is_union_or_inter_type ((_, ty) : locl_ty) =
   | Tabstract _
   | Tanon _
   | Tclass _
-  | Tarraykind _
-  | Tdestructure _ ->
+  | Tarraykind _ ->
     false
 
 (* The identifier for this *)
@@ -833,7 +833,6 @@ let ty_con_ordinal ty_ =
   | Tobject -> 14
   | Tclass _ -> 15
   | Tarraykind _ -> 16
-  | Tdestructure _ -> 17
   | Tpu _ -> 18
   | Tpu_access _ -> 19
 
@@ -896,8 +895,6 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
     | (Tprim ty1, Tprim ty2) -> compare ty1 ty2
     | (Toption ty, Toption ty2) -> ty_compare ty ty2
     | (Tfun fty, Tfun fty2) -> tfun_compare fty fty2
-    | (Tdestructure tyl1, Tdestructure tyl2) ->
-      tyl_compare ~sort:false tyl1 tyl2
     | (Tunion tyl1, Tunion tyl2)
     | (Tintersection tyl1, Tintersection tyl2)
     | (Ttuple tyl1, Ttuple tyl2) ->
@@ -1078,10 +1075,20 @@ let has_member_compare ~normalize_lists hm1 hm2 =
     | comp -> comp)
   | comp -> comp
 
+(* Ordinal value for type constructor, for constraint types *)
+let constraint_ty_con_ordinal ty_ =
+  match ty_ with
+  | Thas_member _ -> 0
+  | Tdestructure _ -> 1
+
 let constraint_ty_compare ?(normalize_lists = false) (_, ty1) (_, ty2) =
   match (ty1, ty2) with
   | (Thas_member hm1, Thas_member hm2) ->
     has_member_compare ~normalize_lists hm1 hm2
+  | (Tdestructure tyl1, Tdestructure tyl2) -> tyl_compare ~sort:false tyl1 tyl2
+  | (Thas_member _hm, Tdestructure _tyl)
+  | (Tdestructure _tyl, Thas_member _hm) ->
+    constraint_ty_con_ordinal ty1 - constraint_ty_con_ordinal ty2
 
 let ty_equal ?(normalize_lists = false) ty1 ty2 =
   Int.equal 0 (ty_compare ~normalize_lists ty1 ty2)

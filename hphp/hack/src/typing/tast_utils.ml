@@ -168,8 +168,7 @@ let rec truthiness env ty =
   | Tobject
   | Tfun _
   | Ttuple _
-  | Tanon _
-  | Tdestructure _ ->
+  | Tanon _ ->
     Always_truthy
   | Tpu _ ->
     (* TODO(T36532263) check if that's ok *)
@@ -242,8 +241,7 @@ let rec find_sketchy_types env acc ty =
   | Tshape _
   | Tvar _
   | Tanon _
-  | Tarraykind _
-  | Tdestructure _ ->
+  | Tarraykind _ ->
     acc
   | Tpu _ -> acc
   | Tpu_access _ -> acc

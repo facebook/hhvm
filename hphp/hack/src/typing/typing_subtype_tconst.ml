@@ -29,6 +29,7 @@ let make_type_const_equal
     in
     env
   | ConstraintType (_, Thas_member _) -> env
+  | ConstraintType (_, Tdestructure _) -> env
 
 (** Add a type constant with id `tyconstid` and type `ty` to a type variable,
 and propagate constraints to all type constants `tyconstid` of upper bounds and

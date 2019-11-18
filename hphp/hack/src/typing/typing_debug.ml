@@ -1,3 +1,4 @@
+open Core_kernel
 open Typing_env_types
 open Typing_defs
 module Env = Typing_env
@@ -15,6 +16,8 @@ let local_env_size env =
 
 let constraint_ty_size env ty =
   match ty with
+  | (_, Tdestructure tyl) ->
+    List.fold ~init:1 ~f:(fun size ty -> size + Typing_utils.ty_size env ty) tyl
   | (_, Thas_member hm) ->
     1
     +

@@ -2187,7 +2187,7 @@ where
                 let user_attributes = Self::p_user_attributes(&c.anonymous_attribute_spec, env)?;
                 let external = c.anonymous_body.is_external();
                 let params = Self::could_map(Self::p_fun_param, &c.anonymous_parameters, env)?;
-                let name_pos = Self::p_function(node, env);
+                let name_pos = Self::p_fun_pos(node, env);
                 let fun = ast::Fun_ {
                     span: Self::p_pos(node, env),
                     annotation: (),
@@ -2226,7 +2226,7 @@ where
                 )?;
                 let user_attributes = Self::p_user_attributes(&c.awaitable_attribute_spec, env)?;
                 let external = c.awaitable_compound_statement.is_external();
-                let name_pos = Self::p_function(node, env);
+                let name_pos = Self::p_fun_pos(node, env);
                 let body = ast::Fun_ {
                     span: pos.clone(),
                     annotation: (),
@@ -3557,12 +3557,11 @@ where
         }
     }
 
-    // TODO: change name to p_fun_pos after porting.
-    fn p_function(node: &Syntax<T, V>, env: &Env) -> Pos {
+    fn p_fun_pos(node: &Syntax<T, V>, env: &Env) -> Pos {
         let get_pos = |n: &Syntax<T, V>, p: Pos| -> Pos {
             if let FunctionDeclarationHeader(c1) = &n.syntax {
-                if !c1.function_keyword.value.is_missing() {
-                    return Pos::btw_nocheck(Self::p_pos(n, env), p);
+                if !c1.function_keyword.is_missing() {
+                    return Pos::btw_nocheck(Self::p_pos(&c1.function_keyword, env), p);
                 }
             }
             p
@@ -4115,7 +4114,7 @@ where
                 let is_external = !is_abstract && c.methodish_function_body.is_external();
                 let user_attributes = Self::p_user_attributes(&c.methodish_attribute, env)?;
                 let method = ast::Method_ {
-                    span: Self::p_function(node, env),
+                    span: Self::p_fun_pos(node, env),
                     annotation: (),
                     final_: kinds.has(modifier::FINAL),
                     abstract_: is_abstract,
@@ -4589,7 +4588,7 @@ where
                 let variadic = Self::determine_variadicity(&hdr.parameters);
                 let ret = ast::TypeHint((), hdr.return_type);
                 Ok(vec![ast::Def::mk_fun(ast::Fun_ {
-                    span: Self::p_function(node, env),
+                    span: Self::p_fun_pos(node, env),
                     annotation: (),
                     mode: Self::mode_annotation(env.file_mode()),
                     ret,

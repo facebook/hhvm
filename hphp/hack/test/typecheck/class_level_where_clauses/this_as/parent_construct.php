@@ -12,6 +12,7 @@
 abstract class D
   /* HH_FIXME[4010]*/ /* HH_FIXME[4101] */ extends C {
   public function __construct(): void {
+    /* HH_FIXME[4101] */
     parent::__construct();
   }
 }

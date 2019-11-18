@@ -130,9 +130,13 @@ let accumulate_errors = ref false
 (* Some filename when declaring *)
 let in_lazy_decl = ref None
 
+let (is_hh_fixme : (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
+
 let try_with_result f1 f2 =
   let error_map_copy = !error_map in
   let accumulate_errors_copy = !accumulate_errors in
+  let is_hh_fixme_copy = !is_hh_fixme in
+  (is_hh_fixme := (fun _ _ -> false));
   error_map := Relative_path.Map.empty;
   accumulate_errors := true;
   let (result, errors) =
@@ -147,7 +151,8 @@ let try_with_result f1 f2 =
         begin
           fun () ->
           error_map := error_map_copy;
-          accumulate_errors := accumulate_errors_copy
+          accumulate_errors := accumulate_errors_copy;
+          is_hh_fixme := is_hh_fixme_copy
         end
   in
   match get_last errors with
@@ -671,8 +676,6 @@ let set_allow_errors_in_default_path x = allow_errors_in_default_path := x
 let is_ignored_code code = ISet.mem code !ignored_fixme_codes || code / 1000 = 5
 
 let is_ignored_fixme code = is_ignored_code code
-
-let (is_hh_fixme : (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
 
 let (get_hh_fixme_pos : (Pos.t -> error_code -> Pos.t option) ref) =
   ref (fun _ _ -> None)
@@ -4855,7 +4858,8 @@ let try_ f1 f2 = try_with_result f1 (fun _ l -> f2 l)
 
 let try_with_error f1 f2 =
   try_ f1 (fun err ->
-      add_error_impl err;
+      let (error_code, l) = (get_code err, to_list err) in
+      add_list error_code l;
       f2 ())
 
 let try_add_err pos err f1 f2 =

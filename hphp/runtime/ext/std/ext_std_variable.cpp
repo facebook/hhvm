@@ -301,7 +301,7 @@ void HHVM_FUNCTION(debug_zval_dump, const Variant& variable) {
 }
 
 /*
- * Intrinsic for Containers, i.e. the subset of HH\Traversable including
+ * Intrinsic for Containers, i.e. the subset of \HH\Traversable including
  * 1. array:
  *   array, vec, dict, keyset
  * 2. collection: Vector, Map, Set

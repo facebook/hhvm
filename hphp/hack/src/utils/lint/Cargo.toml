@@ -1,0 +1,16 @@
+[package]
+name = "hack_lint"
+version = "3.49.0"
+edition = "2018"
+
+[lib]
+name = "lint_rust"
+path = "lint.rs"
+
+[dev-dependencies]
+pretty_assertions = "^0.6.1"
+
+[dependencies]
+ocamlrep = {path = "../../ocamlrep", package = "hack_ocamlrep"}
+ocamlrep_derive = {path = "../../ocamlrep_derive", package = "hack_ocamlrep_derive"}
+oxidized = {path = "../../oxidized", package = "hack_oxidized" }

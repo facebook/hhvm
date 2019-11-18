@@ -5,6 +5,7 @@
 
 use ocamlrep_derive::OcamlRep;
 
+use lint_rust::LintError;
 use oxidized::{aast, errors::Error as HHError, file_info, parser_options, pos, scoured_comments};
 use parser_core_types::syntax_error::SyntaxError;
 
@@ -32,4 +33,5 @@ pub struct Result {
     pub lowpri_errors: Vec<(pos::Pos, String)>,
     pub syntax_errors: Vec<SyntaxError>,
     pub errors: Vec<HHError>,
+    pub lint_errors: Vec<LintError>,
 }

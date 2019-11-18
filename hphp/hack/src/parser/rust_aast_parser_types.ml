@@ -32,6 +32,7 @@ type result = {
   lowpri_errors: (Pos.t * string) list;
   syntax_errors: Full_fidelity_syntax_error.t list;
   errors: Errors.error list;
+  lint_errors: Relative_path.t Lint.t list;
 }
 
 type error =

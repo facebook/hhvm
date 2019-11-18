@@ -7,15 +7,13 @@
  *
  *)
 
-let lowercase_constant = 5001 (* DONT MODIFY!!!! *)
+type t =
+  | LowercaseConstant [@value 5001]
+  | UseCollectionLiteral
+  | StaticString
+  | ShapeIdxRequiredField [@value 5005] (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+[@@deriving enum]
 
-let use_collection_literal = 5002 (* DONT MODIFY!!!! *)
-
-let static_string = 5003 (* DONT MODIFY!!!! *)
-
-(* DONT MODIFY!!!! *)
-let shape_idx_required_field = 5005
+let err_code = to_enum
 
 (* Values 5501 - 5999 are reserved for FB-internal use *)
-
-(* EXTEND HERE WITH NEW VALUES IF NEEDED *)

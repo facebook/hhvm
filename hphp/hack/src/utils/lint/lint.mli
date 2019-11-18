@@ -12,7 +12,7 @@ type severity =
   | Lint_warning
   | Lint_advice
 
-type 'a t
+type 'a t [@@deriving show]
 
 val get_code : 'a t -> int
 
@@ -39,6 +39,8 @@ val internal_error : Pos.t -> string -> unit
 
 val lowercase_constant : Pos.t -> string -> unit
 
+val mk_lowercase_constant : Pos.t -> string -> Relative_path.t t
+
 val use_collection_literal : Pos.t -> string -> unit
 
 val static_string : ?no_consts:bool -> Pos.t -> unit
@@ -46,3 +48,5 @@ val static_string : ?no_consts:bool -> Pos.t -> unit
 val shape_idx_access_required_field : Pos.t -> string -> unit
 
 val do_ : (unit -> 'a) -> Relative_path.t t list * 'a
+
+val add_lint : Relative_path.t t -> unit

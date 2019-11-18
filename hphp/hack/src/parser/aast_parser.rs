@@ -117,6 +117,7 @@ impl<'a> AastParser {
                 lowpri_errors,
                 syntax_errors,
                 errors: vec![],
+                lint_errors: vec![],
             })
         }
     }

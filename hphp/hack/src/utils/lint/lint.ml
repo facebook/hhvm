@@ -14,25 +14,40 @@ let spf = Printf.sprintf
 
 let internal_error pos msg = add 0 Lint_error pos ("Internal error: " ^ msg)
 
-let lowercase_constant pos cst =
-  let lower = String.lowercase_ascii cst in
+let add_lint lint =
   add
-    Codes.lowercase_constant
-    Lint_warning
-    pos
-    (spf "Please use '%s' instead of '%s'" lower cst)
+    ~bypass_changed_lines:lint.bypass_changed_lines
+    ~autofix:lint.autofix
+    lint.code
+    lint.severity
+    lint.pos
+    lint.message
+
+let mk_lowercase_constant pos cst =
+  let lower = String.lowercase_ascii cst in
+  Lint_core.
+    {
+      code = Codes.to_enum Codes.LowercaseConstant;
+      severity = Lint_warning;
+      pos;
+      message = spf "Please use '%s' instead of '%s'" lower cst;
+      bypass_changed_lines = false;
+      autofix = ("", "");
+    }
+
+let lowercase_constant pos cst = add_lint (mk_lowercase_constant pos cst)
 
 let use_collection_literal pos coll =
   let coll = Utils.strip_ns coll in
   add
-    Codes.use_collection_literal
+    (Codes.to_enum Codes.UseCollectionLiteral)
     Lint_warning
     pos
     (spf "Use `%s {...}` instead of `new %s(...)`" coll coll)
 
 let static_string ?(no_consts = false) pos =
   add
-    Codes.static_string
+    (Codes.to_enum Codes.StaticString)
     Lint_warning
     pos
     begin
@@ -45,7 +60,7 @@ let static_string ?(no_consts = false) pos =
 
 let shape_idx_access_required_field field_pos name =
   add
-    Codes.shape_idx_required_field
+    (Codes.to_enum Codes.ShapeIdxRequiredField)
     Lint_warning
     field_pos
     ( "The field '"

@@ -6,6 +6,7 @@ version = "3.49.0"
 dependencies = [
  "coroutine_smart_constructors 3.49.0",
  "decl_mode_parser 3.49.0",
+ "hack_lint 3.49.0",
  "hack_lowerer 3.49.0",
  "hack_ocamlrep 3.49.0",
  "hack_ocamlrep_derive 3.49.0",
@@ -317,6 +318,16 @@ dependencies = [
 [[package]]
 name = "hack_line_break_map"
 version = "3.49.0"
+
+[[package]]
+name = "hack_lint"
+version = "3.49.0"
+dependencies = [
+ "hack_ocamlrep 3.49.0",
+ "hack_ocamlrep_derive 3.49.0",
+ "hack_oxidized 3.49.0",
+ "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "hack_lowerer"

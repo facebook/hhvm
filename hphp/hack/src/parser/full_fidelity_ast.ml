@@ -86,6 +86,7 @@ type env = {
    * and raised _after_ FFP error checking (unless we run the lowerer twice,
    * which would be expensive). *)
   lowpri_errors: (Pos.t * string) list ref;
+  lint_errors: Relative_path.t Lint.t list ref;
   (*
     true if running Ocaml/Rust compare tests
   *)
@@ -137,6 +138,7 @@ let make_env
     lifted_awaits = None;
     tmp_var_counter = 1;
     lowpri_errors = ref [];
+    lint_errors = ref [];
     rust_compare_mode;
     disable_lowering_parsing_error = false;
   }
@@ -1955,11 +1957,13 @@ if there already is one, since that one will likely be better than this one. *)
               String (mkStr env expr Php_escaping.unescape_nowdoc s)
             | (_, Some TK.NullLiteral) ->
               if (not env.codegen) && s <> String.lowercase s then
-                Lint.lowercase_constant pos s;
+                env.lint_errors :=
+                  Lint.mk_lowercase_constant pos s :: !(env.lint_errors);
               Null
             | (_, Some TK.BooleanLiteral) ->
               if (not env.codegen) && s <> String.lowercase s then
-                Lint.lowercase_constant pos s;
+                env.lint_errors :=
+                  Lint.mk_lowercase_constant pos s :: !(env.lint_errors);
               (match String.lowercase s with
               | "false" -> False
               | "true" -> True
@@ -4239,6 +4243,9 @@ let process_lowpri_errors (env : env) (lowpri_errors : (Pos.t * string) list) =
 let process_non_syntax_errors (_ : env) (errors : Errors.error list) =
   List.iter ~f:Errors.add_error_with_check errors
 
+let process_lint_errors (_ : env) (errors : Relative_path.t Lint.t list) =
+  List.iter ~f:Lint.add_lint errors
+
 let elaborate_top_level_defs env aast =
   if env.elaborate_namespaces then
     Namespaces.elaborate_toplevel_defs env.parser_options aast
@@ -4369,6 +4376,7 @@ let lower_tree
       lowpri_errors = List.rev !(env.lowpri_errors);
       syntax_errors;
       errors = snd aast_result;
+      lint_errors = !(env.lint_errors);
     }
 
 let process_syntax_errors
@@ -4429,6 +4437,7 @@ let process_lowerer_result
     process_syntax_errors env source_text r.syntax_errors;
     process_lowpri_errors env r.lowpri_errors;
     process_non_syntax_errors env r.errors;
+    process_lint_errors env r.lint_errors;
     match r.aast with
     | Error msg -> failwith msg
     | Ok aast ->

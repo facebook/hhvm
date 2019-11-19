@@ -118,6 +118,7 @@ module Mode_merge = struct
       files
     >>= fun (input, output) ->
     let subgraphs = Disk.readdir input in
+    Hh_logger.log "GI: Merging %d files" (Array.length subgraphs);
     let env =
       Typing_env.empty
         GlobalOptions.default
@@ -126,10 +127,21 @@ module Mode_merge = struct
     in
     let genv = env.genv in
     let subtype_prop = env.subtype_prop in
+    let progress_i = ref 0 in
+    let log_progress fn =
+      Hh_logger.log
+        "GI: Merging %d/%d: %s"
+        (!progress_i + 1)
+        (Array.length subgraphs)
+        fn;
+      progress_i := !progress_i + 1;
+      fn
+    in
     let (env, errors) =
       Array.foldi
         ~f:(fun _ env_with_errors subgraph_file ->
           Filename.concat input subgraph_file
+          |> log_progress
           |> StateSubConstraintGraphs.load
           |> StateConstraintGraph.merge_subgraphs env_with_errors)
         ~init:(env, StateErrors.mk_empty ())
@@ -137,6 +149,7 @@ module Mode_merge = struct
     in
     (* Really needed to restore subtype prop? *)
     let env = { env with genv; subtype_prop } in
+    Hh_logger.log "GI: Saving to %s" output;
     StateConstraintGraph.save output (env, errors);
     Ok ()
 end

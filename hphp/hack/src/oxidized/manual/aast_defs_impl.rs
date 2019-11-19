@@ -22,3 +22,19 @@ impl Hint {
         Self(p, Box::new(h))
     }
 }
+
+impl Hint_ {
+    pub fn is_hfun(&self) -> bool {
+        match self {
+            Hint_::Hfun(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_happly(&self) -> bool {
+        match self {
+            Hint_::Happly(_, _) => true,
+            _ => false,
+        }
+    }
+}

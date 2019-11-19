@@ -9,7 +9,7 @@ use hh_autoimport_rust as hh_autoimport;
 use itertools::{Either, Either::Left, Either::Right};
 use lint_rust::LintError;
 use naming_special_names_rust::{
-    classes as special_classes, literal, special_functions, special_idents,
+    classes as special_classes, literal, rx, special_functions, special_idents,
     typehints as special_typehints,
 };
 use ocamlrep::rc::RcOc;
@@ -916,10 +916,22 @@ where
                     _ => Self::missing_syntax(None, "generic type arguments", args, env)?,
                 };
                 if env.codegen() {
-                    // aorenste: Not sure why the original code had this as
-                    // unimplemented!(), but returning the type is better than
-                    // nothing...
-                    Ok(Happly(name, type_args))
+                    let process = |name: ast::Sid, mut args: Vec<ast::Hint>| -> ast::Hint_ {
+                        if args.len() == 1 {
+                            let eq = |s| name.1.eq_ignore_ascii_case(s);
+                            if (args[0].1.is_hfun()
+                                && (eq(rx::RX) || eq(rx::RX_LOCAL) || eq(rx::RX_SHALLOW)))
+                                || (args[0].1.is_happly()
+                                    && (eq(rx::MUTABLE)
+                                        || eq(rx::MAYBE_MUTABLE)
+                                        || eq(rx::OWNED_MUTABLE)))
+                            {
+                                return *args.pop().unwrap().1;
+                            }
+                        }
+                        Happly(name, args)
+                    };
+                    Ok(process(name, type_args))
                 } else {
                     Ok(Happly(name, type_args))
                 }

@@ -687,6 +687,18 @@ pub mod rx {
     pub const ASYNC_ITERATOR: &str = "\\HH\\Rx\\AsyncIterator";
 
     pub const MOVE: &str = "\\HH\\Rx\\move";
+
+    pub const RX: &str = "Rx";
+
+    pub const RX_LOCAL: &str = "RxLocal";
+
+    pub const RX_SHALLOW: &str = "RxShallow";
+
+    pub const MUTABLE: &str = "Mutable";
+
+    pub const MAYBE_MUTABLE: &str = "MaybeMutable";
+
+    pub const OWNED_MUTABLE: &str = "OwnedMutable";
 }
 
 pub mod shapes {

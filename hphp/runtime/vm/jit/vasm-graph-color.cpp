@@ -5597,7 +5597,9 @@ void hoist_spills_in_loop(State& state,
       }
     }
 
-    assertx(in->checkInvariants(b, !!inPhi));
+    // Can't do liveness invariant checking here because
+    // rematerialization may have created dead Vregs.
+    assertx(in->checkInvariants(Vlabel{}, 0));
     assertx(out->checkInvariants(b, unit.blocks[b].code.size()));
   }
 }

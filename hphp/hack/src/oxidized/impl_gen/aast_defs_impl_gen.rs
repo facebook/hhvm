@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<06eee794a185593cd6cfaf20a8079c13>>
+// @generated SignedSource<<de222e66ab89963081683f3b692de836>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -72,8 +72,8 @@ impl Hint_ {
     pub fn mk_hvarray(p0: Hint) -> Self {
         Hint_::Hvarray(p0)
     }
-    pub fn mk_hvarray_or_darray(p0: Hint) -> Self {
-        Hint_::HvarrayOrDarray(p0)
+    pub fn mk_hvarray_or_darray(p0: Option<Hint>, p1: Hint) -> Self {
+        Hint_::HvarrayOrDarray(p0, p1)
     }
     pub fn mk_hprim(p0: Tprim) -> Self {
         Hint_::Hprim(p0)

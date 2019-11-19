@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0b5b00e8b608dfa64faa7d6583da2d2b>>
+// @generated SignedSource<<f63bf7b4f194c695c7325a96f6cf22ff>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -133,7 +133,7 @@ pub enum Ty_ {
     Tarray(Option<DeclTy>, Option<DeclTy>),
     Tdarray(DeclTy, DeclTy),
     Tvarray(DeclTy),
-    TvarrayOrDarray(DeclTy),
+    TvarrayOrDarray(Option<DeclTy>, DeclTy),
     Tmixed,
     Tnothing,
     Tlike(DeclTy),

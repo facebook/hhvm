@@ -13,27 +13,6 @@
   - so_<feature/flag/setting> - server option
 *)
 
-module InferMissing : sig
-  type t =
-    | Deactivated
-    | Infer_return
-    | Infer_params
-    | Infer_global
-  [@@deriving show]
-
-  val can_infer_return : t -> bool
-
-  val can_infer_params : t -> bool
-
-  val global_inference : t -> bool
-
-  val is_on : t -> bool
-
-  val from_string : string -> t
-
-  val from_string_opt : string option -> t
-end
-
 type t = {
   (* Set of experimental features, in lowercase. *)
   tco_experimental_features: SSet.t;

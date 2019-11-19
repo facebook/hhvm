@@ -28,6 +28,7 @@ buck run hphp/hack/src/hh_oxidize --                                          \
   hphp/hack/src/heap/ident.ml                                                 \
   hphp/hack/src/naming/nast.ml                                                \
   hphp/hack/src/options/globalOptions.ml                                      \
+  hphp/hack/src/options/inferMissing.ml                                       \
   hphp/hack/src/options/parserOptions.ml                                      \
   hphp/hack/src/options/typecheckerOptions.ml                                 \
   hphp/hack/src/parser/full_fidelity_parser_env.ml                            \

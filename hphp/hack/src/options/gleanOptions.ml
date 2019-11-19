@@ -8,7 +8,7 @@
 
 type t = GlobalOptions.t [@@deriving show]
 
-module InferMissing = GlobalOptions.InferMissing
+module InferMissing = InferMissing
 
 let service = GlobalOptions.glean_service
 

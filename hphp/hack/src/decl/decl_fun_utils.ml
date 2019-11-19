@@ -73,10 +73,7 @@ let get_param_mutability user_attributes =
   the global tvenv. Otherwise we return the default type given as parameter *)
 let global_inference_create_tyvar (reason, default_ty_) =
   let tco = GlobalNamingOptions.get () in
-  if
-    GlobalOptions.InferMissing.global_inference
-    @@ GlobalOptions.tco_infer_missing tco
-  then
+  if InferMissing.global_inference @@ GlobalOptions.tco_infer_missing tco then
     (reason, Tvar (Ident.tmp ()))
   else
     (reason, default_ty_)

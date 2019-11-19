@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dcfb9a1bd5dedc83ddbf107eea32f527>>
+// @generated SignedSource<<97ca1489a7f979d1ffa2e0fa25be0f4e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -25,8 +25,6 @@ pub use shape_map::ShapeMap;
 pub struct Lid(pub Pos, pub LocalId);
 
 pub type Sid = ast_defs::Id;
-
-pub type IsTerminal = bool;
 
 pub type IsReified = bool;
 
@@ -113,7 +111,7 @@ pub enum Hint_ {
     Harray(Option<Hint>, Option<Hint>),
     Hdarray(Hint, Hint),
     Hvarray(Hint),
-    HvarrayOrDarray(Hint),
+    HvarrayOrDarray(Option<Hint>, Hint),
     Hprim(Tprim),
     Hthis,
     Hdynamic,

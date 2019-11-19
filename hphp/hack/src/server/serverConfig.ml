@@ -366,8 +366,7 @@ let load config_filename options =
       ?po_const_default_func_args:(bool_opt "const_default_func_args" config)
       ?po_disallow_silence:(bool_opt "disallow_silence" config)
       ~tco_infer_missing:
-        ( GlobalOptions.InferMissing.from_string_opt
-        @@ string_opt "infer_missing" config )
+        (InferMissing.from_string_opt @@ string_opt "infer_missing" config)
       ?tco_const_static_props:(bool_opt "const_static_props" config)
       ?po_abstract_static_props:(bool_opt "abstract_static_props" config)
       ?po_disable_unset_class_const:

@@ -220,7 +220,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
       (env, (r, Tabstract (AKnewtype (x, []), Some cstr)))
   | (r, Tapply (((_, cid) as cls), tyl)) ->
     let can_infer_tparams =
-      GlobalOptions.InferMissing.can_infer_params
+      InferMissing.can_infer_params
       @@ TypecheckerOptions.infer_missing (Env.get_tcopt env)
     in
     let (env, tyl) =

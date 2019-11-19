@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cc07e24504b7622c2dd616dc00ef7032>>
+// @generated SignedSource<<b24d7993b451aac91aa5a2e9a35694f7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -11,10 +11,9 @@
 use ocamlrep_derive::OcamlRep;
 
 use crate::i_set;
+use crate::infer_missing;
 use crate::s_map;
 use crate::s_set;
-
-pub use crate::infer_missing;
 
 #[derive(Clone, Debug, OcamlRep)]
 pub struct GlobalOptions {

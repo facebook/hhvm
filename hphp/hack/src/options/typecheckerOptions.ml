@@ -9,7 +9,7 @@
 
 type t = GlobalOptions.t [@@deriving show]
 
-module InferMissing = GlobalOptions.InferMissing
+module InferMissing = InferMissing
 
 let disallow_ambiguous_lambda = GlobalOptions.tco_disallow_ambiguous_lambda
 

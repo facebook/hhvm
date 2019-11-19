@@ -2,6 +2,7 @@
   (name global_options)
   (wrapped false)
   (modules
+    inferMissing
     globalOptions)
   (libraries
     collections

@@ -202,9 +202,7 @@ let process_file
           List.map gconsts ~f:snd |> List.iter ~f:(ignore_check_const opts fn);
           fun_global_tvenvs @ class_global_tvenvs)
     in
-    if
-      GlobalOptions.InferMissing.global_inference
-      @@ GlobalOptions.tco_infer_missing opts
+    if InferMissing.global_inference @@ GlobalOptions.tco_infer_missing opts
     then
       Typing_global_inference.StateSubConstraintGraphs.save global_tvenvs;
     let deferred_files = Deferred_decl.get ~f:(fun d -> Declare d) in

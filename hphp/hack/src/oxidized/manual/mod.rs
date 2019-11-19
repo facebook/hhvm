@@ -16,7 +16,6 @@ pub mod full_fidelity_parser_env_impl;
 pub mod global_options_impl;
 pub mod i_map;
 pub mod i_set;
-pub mod infer_missing;
 pub mod local_id;
 pub mod namespace_env_impl;
 pub mod pos;

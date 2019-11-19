@@ -217,7 +217,7 @@ let parse_options () =
   let disable_legacy_soft_typehints = ref false in
   let allow_new_attribute_syntax = ref false in
   let allow_toplevel_requires = ref false in
-  let infer_missing = ref GlobalOptions.InferMissing.Deactivated in
+  let infer_missing = ref InferMissing.Deactivated in
   let const_static_props = ref false in
   let disable_legacy_attribute_syntax = ref false in
   let const_attribute = ref false in
@@ -470,8 +470,7 @@ let parse_options () =
         Arg.Set allow_toplevel_requires,
         " Allow `require()` and similar at the top-level" );
       ( "--infer-missing",
-        Arg.String
-          (fun s -> infer_missing := GlobalOptions.InferMissing.from_string s),
+        Arg.String (fun s -> infer_missing := InferMissing.from_string s),
         "<return|params|global> Deduce more information about unannotated types in the tast"
       );
       ( "--const-static-props",

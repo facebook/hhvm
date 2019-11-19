@@ -7,37 +7,6 @@
  *
  *)
 
-module InferMissing = struct
-  type t =
-    | Deactivated
-    | Infer_return
-    | Infer_params
-    | Infer_global
-  [@@deriving show]
-
-  let can_infer_return t = t = Infer_return
-
-  let can_infer_params t = t = Infer_params
-
-  let global_inference t = t = Infer_global
-
-  let is_on t = t <> Deactivated
-
-  let from_string str =
-    match str with
-    | "return" -> Infer_return
-    | "params" -> Infer_params
-    | "global" -> Infer_global
-    | _ -> Deactivated
-
-  let from_string_opt opt =
-    from_string
-    @@
-    match opt with
-    | None -> ""
-    | Some s -> s
-end
-
 type t = {
   tco_experimental_features: SSet.t;
   tco_migration_flags: SSet.t;

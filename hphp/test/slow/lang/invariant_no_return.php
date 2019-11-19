@@ -3,5 +3,5 @@
 
 <<__EntryPoint>>
 function main_invariant_no_return() {
-var_dump(HH\invariant(3));
+  var_dump(HH\invariant(3, ""));
 }

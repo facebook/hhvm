@@ -3696,7 +3696,7 @@ and emit_special_function
                ])
     in
     Some instrs
-  | ("HH\\invariant", e :: rest) ->
+  | ("HH\\invariant", e :: fmt :: rest) ->
     let l = Label.next_regular () in
     let annot = (pos, snd annot) in
     (* TODO: Can we capitalize hh to HH? *)
@@ -3709,7 +3709,7 @@ and emit_special_function
            instr_jmpnz l;
            emit_ignored_expr
              env
-             (annot, A.Call (Aast.Cnormal, expr_id, [], rest, uargs));
+             (annot, A.Call (Aast.Cnormal, expr_id, [], fmt :: rest, uargs));
            Emit_fatal.emit_fatal_runtime pos "invariant_violation";
            instr_label l;
            instr_null;

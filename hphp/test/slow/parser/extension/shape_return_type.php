@@ -42,7 +42,7 @@ while ($rd !== false) {
     break;
   }
 }
-invariant($description !== null);
+invariant($description !== null, "");
 var_dump($description);
 
 $a = HH\ExperimentalParserUtils\find_class_body($json, "F");

@@ -25,6 +25,6 @@ while ($rd !== false) {
     break;
   }
 }
-invariant($description !== null);
+invariant($description !== null, "");
 var_dump($description);
 }

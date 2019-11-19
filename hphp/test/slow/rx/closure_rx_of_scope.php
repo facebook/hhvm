@@ -51,7 +51,7 @@ async function check_async_block() {
 
 async function test_async_block() {
   $x = await check_async_block();
-  invariant($x === 1);
+  invariant($x === 1, "");
   echo "async block works in Rx function\n";
 }
 

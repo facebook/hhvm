@@ -1544,12 +1544,12 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Int _
     | Aast.Float _
     | Aast.String _ ->
-      ()
+      true
     | Aast.Class_const ((_, Aast.CIexpr (_, cls)), _)
       when match cls with
            | Aast.Id (_, "static") -> false
            | _ -> true ->
-      ()
+      true
     | Aast.Unop
         ((Ast_defs.Uplus | Ast_defs.Uminus | Ast_defs.Utild | Ast_defs.Unot), e)
       ->
@@ -1558,24 +1558,23 @@ module Make (GetLocals : GetLocals) = struct
       (* Only assignment is invalid *)
       begin
         match op with
-        | Ast_defs.Eq _ -> Errors.illegal_constant pos
-        | _ ->
-          check_constant_expr env e1;
-          check_constant_expr env e2
+        | Ast_defs.Eq _ ->
+          Errors.illegal_constant pos;
+          false
+        | _ -> check_constant_expr env e1 && check_constant_expr env e2
       end
     | Aast.Eif (e1, e2, e3) ->
-      check_constant_expr env e1;
-      Option.iter e2 (check_constant_expr env);
-      check_constant_expr env e3
-    | Aast.Array l -> List.iter l ~f:(check_afield_constant_expr env)
+      check_constant_expr env e1
+      && Option.for_all e2 (check_constant_expr env)
+      && check_constant_expr env e3
+    | Aast.Array l -> List.for_all l ~f:(check_afield_constant_expr env)
     | Aast.Darray (_, l) ->
-      List.iter l ~f:(fun (e1, e2) ->
-          check_constant_expr env e1;
-          check_constant_expr env e2)
-    | Aast.Varray (_, l) -> List.iter l ~f:(check_constant_expr env)
+      List.for_all l ~f:(fun (e1, e2) ->
+          check_constant_expr env e1 && check_constant_expr env e2)
+    | Aast.Varray (_, l) -> List.for_all l ~f:(check_constant_expr env)
     | Aast.Shape fdl ->
       (* Only check the values because shape field names are always legal *)
-      List.iter fdl ~f:(fun (_, e) -> check_constant_expr env e)
+      List.for_all fdl ~f:(fun (_, e) -> check_constant_expr env e)
     | Aast.Call (_, (_, Aast.Id (_, cn)), _, el, uel)
       when cn = SN.AutoimportedFunctions.fun_
            || cn = SN.AutoimportedFunctions.class_meth
@@ -1583,7 +1582,7 @@ module Make (GetLocals : GetLocals) = struct
            (* Tuples are not really function calls, they are just parsed that way*)
            || cn = SN.SpecialFunctions.tuple ->
       arg_unpack_unexpected uel;
-      List.iter el ~f:(check_constant_expr env)
+      List.for_all el ~f:(check_constant_expr env)
     | Aast.Collection (id, _, l) ->
       let (p, cn) = NS.elaborate_id (fst env).namespace NS.ElaborateClass id in
       (* Only vec/keyset/dict are allowed because they are value types *)
@@ -1592,33 +1591,32 @@ module Make (GetLocals : GetLocals) = struct
         || cn = SN.Collections.cKeyset
         || cn = SN.Collections.cDict
       then
-        List.iter l ~f:(check_afield_constant_expr env)
-      else
-        Errors.illegal_constant p
+        List.for_all l ~f:(check_afield_constant_expr env)
+      else (
+        Errors.illegal_constant p;
+        false
+      )
     | Aast.As (e, (_, Aast.Hlike _), _) -> check_constant_expr env e
     | Aast.As (e, (_, Aast.Happly (id, [_])), _) ->
       let (p, cn) = NS.elaborate_id (fst env).namespace NS.ElaborateClass id in
       if cn = SN.FB.cIncorrectType then
         check_constant_expr env e
-      else
-        Errors.illegal_constant p
-    | _ -> Errors.illegal_constant pos
+      else (
+        Errors.illegal_constant p;
+        false
+      )
+    | _ ->
+      Errors.illegal_constant pos;
+      false
 
   and check_afield_constant_expr env afield =
     match afield with
     | Aast.AFvalue e -> check_constant_expr env e
     | Aast.AFkvalue (e1, e2) ->
-      check_constant_expr env e1;
-      check_constant_expr env e2
+      check_constant_expr env e1 && check_constant_expr env e2
 
   and constant_expr env e =
-    let valid_constant_expression =
-      Errors.try_with_error
-        (fun () ->
-          check_constant_expr env e;
-          true)
-        (fun () -> false)
-    in
+    let valid_constant_expression = check_constant_expr env e in
     if valid_constant_expression then
       expr env e
     else

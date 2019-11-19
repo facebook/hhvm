@@ -1252,7 +1252,7 @@ let do_typeDefinition
     (params : Definition.params) : TypeDefinition.result Lwt.t =
   let (file, line, column) = lsp_file_position_to_hack params in
   let command =
-    ServerCommandTypes.(IDENTIFY_TYPES (FileName file, line, column))
+    ServerCommandTypes.(IDENTIFY_TYPES (LabelledFileName file, line, column))
   in
   let%lwt results = rpc conn ref_unblocked_time command in
   Lwt.return

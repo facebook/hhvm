@@ -12,8 +12,3 @@ val go_quarantined :
   line:int ->
   column:int ->
   ServerCommandTypes.Go_to_type_definition.result
-
-val go :
-  ServerEnv.env ->
-  ServerCommandTypes.file_input * int * int ->
-  ServerCommandTypes.Go_to_type_definition.result

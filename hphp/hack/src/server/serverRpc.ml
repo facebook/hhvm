@@ -420,8 +420,20 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | FILE_DEPENDENTS filenames ->
     let files = ServerFileDependents.go genv env filenames in
     (env, files)
-  | IDENTIFY_TYPES (filename, line, char) ->
-    (env, ServerTypeDefinition.go env (filename, line, char))
+  | IDENTIFY_TYPES (labelled_file, line, column) ->
+    let (path, file_input) =
+      ServerCommandTypesUtils.extract_labelled_file labelled_file
+    in
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~path
+        ~file_input
+    in
+    let result =
+      ServerTypeDefinition.go_quarantined ~ctx ~entry ~line ~column
+    in
+    (env, result)
   | EXTRACT_STANDALONE target ->
     (env, ServerExtractStandalone.go env.tcopt target)
   | CONCATENATE_ALL paths -> (env, ServerConcatenateAll.go genv env paths)

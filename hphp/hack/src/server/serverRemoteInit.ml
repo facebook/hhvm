@@ -20,13 +20,18 @@ let init
       let check_info =
         { init_id = Random_id.short_string (); recheck_id = None }
       in
-      go
-        workers
-        tcopt
-        Relative_path.Set.empty
-        files_to_check
-        ~memory_cap:None
-        ~check_info)
+      let delegate_state = Typing_service_delegate.create () in
+      let (errors, _delegate_state) =
+        go
+          workers
+          delegate_state
+          tcopt
+          Relative_path.Set.empty
+          files_to_check
+          ~memory_cap:None
+          ~check_info
+      in
+      errors)
   in
   (* Prepare the input for the remote worker *)
   let (worker_env : RemoteWorker.work_env) =

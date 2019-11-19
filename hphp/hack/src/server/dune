@@ -302,6 +302,7 @@
     remote_worker_stubs
     server
     state_loader
+    typing_service_api
     typing_symbol_info
     watchman_client)
   (preprocess (pps lwt_ppx ppx_deriving.std)))

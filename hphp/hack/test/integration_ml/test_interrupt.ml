@@ -57,9 +57,10 @@ let test () =
   let check_info =
     Typing_check_service.{ init_id = ""; recheck_id = Some "" }
   in
-  let (errors, (), cancelled) =
+  let (errors, _delegate_state, (), cancelled) =
     Typing_check_service.go_with_interrupt
       workers
+      (Typing_service_delegate.create ())
       options
       Relative_path.Set.empty
       fnl

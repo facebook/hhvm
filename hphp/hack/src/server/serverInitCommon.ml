@@ -175,7 +175,8 @@ let type_check
     let count = List.length files_to_check in
     let logstring = Printf.sprintf "Type-check %d files" count in
     Hh_logger.log "Begin %s" logstring;
-    let (errorl : Errors.t) =
+    let ((errorl : Errors.t), (delegate_state : Typing_service_delegate.state))
+        =
       ServerCheckUtils.maybe_remote_type_check_without_interrupt
         genv
         env
@@ -188,12 +189,14 @@ let type_check
           | Some lru_host_env ->
             Typing_lru_check_service.go
               lru_host_env
+              env.typing_service.delegate_state
               env.tcopt
               Relative_path.Set.empty
               files_to_check
           | None ->
             Typing_check_service.go
               genv.workers
+              env.typing_service.delegate_state
               env.tcopt
               Relative_path.Set.empty
               files_to_check
@@ -203,7 +206,13 @@ let type_check
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.type_check_end count count t;
-    let env = { env with errorl = Errors.merge errorl env.errorl } in
+    let env =
+      {
+        env with
+        typing_service = { env.typing_service with delegate_state };
+        errorl = Errors.merge errorl env.errorl;
+      }
+    in
     (env, Hh_logger.log_duration logstring t)
   ) else
     let needs_recheck =

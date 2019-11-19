@@ -10,6 +10,7 @@ module Hack_bucket = Bucket
 open Hh_prelude
 module Bucket = Hack_bucket
 open Typing_check_service
+module Delegate = Typing_service_delegate
 
 type job_state = {
   files_to_process: file_computation list;
@@ -149,22 +150,34 @@ let process_in_parallel
  * [typing_check_service] to easily call the new one in [serverTypeCheck] *)
 let go_with_interrupt
     (lru_host_env : Shared_lru.host_env)
+    (delegate_state : Delegate.state)
     (opts : TypecheckerOptions.t)
     (dynamic_view_files : Relative_path.Set.t)
     (fnl : Relative_path.t list)
-    ~(interrupt : 'a MultiWorker.interrupt_config) : (Errors.t, 'a) job_result =
+    ~(interrupt : 'a MultiWorker.interrupt_config) :
+    (Errors.t, Delegate.state, 'a) job_result =
   Hh_logger.log "Using shared_lru workers to typecheck!";
   let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
-  process_in_parallel dynamic_view_files lru_host_env opts fnl ~interrupt
+  let (errors, env, cancelled) =
+    process_in_parallel dynamic_view_files lru_host_env opts fnl ~interrupt
+  in
+  (errors, delegate_state, env, cancelled)
 
 let go
     (lru_host_env : Shared_lru.host_env)
+    (delegate_state : Delegate.state)
     (opts : TypecheckerOptions.t)
     (dynamic_view_files : Relative_path.Set.t)
-    (fnl : Relative_path.t list) : Errors.t =
+    (fnl : Relative_path.t list) : Errors.t * Delegate.state =
   let interrupt = MultiThreadedCall.no_interrupt () in
-  let (res, (), cancelled) =
-    go_with_interrupt lru_host_env opts dynamic_view_files fnl ~interrupt
+  let (res, delegate_state, (), cancelled) =
+    go_with_interrupt
+      lru_host_env
+      delegate_state
+      opts
+      dynamic_view_files
+      fnl
+      ~interrupt
   in
   assert (List.is_empty cancelled);
-  res
+  (res, delegate_state)

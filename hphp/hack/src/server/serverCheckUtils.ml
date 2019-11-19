@@ -141,21 +141,22 @@ let maybe_remote_type_check genv env (fnl : Relative_path.t list) =
         ~vfs_threshold
         fnl
     in
-    Some remote_errors
+    Some (remote_errors, env.typing_service.delegate_state)
   ) else
     None
 
 let maybe_remote_type_check_without_interrupt
     genv env (fnl : Relative_path.t list) ~local =
   match maybe_remote_type_check genv env fnl with
-  | Some remote_errors -> remote_errors
+  | Some result -> result
   | None -> local ()
 
 let maybe_remote_type_check_with_interrupt
     genv env (fnl : Relative_path.t list) ~local =
   (* TODO: remote type check should actually respond to interruption *)
   match maybe_remote_type_check genv env fnl with
-  | Some remote_errors -> (remote_errors, env, [])
+  | Some (remote_errors, delegate_state) ->
+    (remote_errors, delegate_state, env, [])
   | None -> local ()
 
 let get_check_info env =

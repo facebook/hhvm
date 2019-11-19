@@ -73,6 +73,8 @@ The paper refers to this approach as "restarting", and further suggests that rec
 the chain of jobs could be used to minimize the number of restarts.
  *)
 
+module Delegate = Typing_service_delegate
+
 (*****************************************************************************)
 (* The place where we store the shared data in cache *)
 (*****************************************************************************)
@@ -430,12 +432,15 @@ let on_cancelled
 let process_in_parallel
     (dynamic_view_files : Relative_path.Set.t)
     (workers : MultiWorker.worker list option)
+    (delegate_state : Delegate.state)
     (opts : TypecheckerOptions.t)
     (fnl : file_computation list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
-    ~(check_info : check_info) : Errors.t * 'a * Relative_path.t list =
+    ~(check_info : check_info) :
+    Errors.t * Delegate.state * 'a * Relative_path.t list =
   TypeCheckStore.store opts;
+  let delegate_state = ref delegate_state in
   let files_to_process = ref fnl in
   let files_in_progress = Hash_set.Poly.create () in
   let files_processed_count = ref 0 in
@@ -449,10 +454,11 @@ let process_in_parallel
   let should_prefetch_deferred_files =
     Vfs.is_vfs () && TypecheckerOptions.prefetch_deferred_files opts
   in
-  let (errors, env, cancelled) =
+  let job = load_and_process_files dynamic_view_files ~memory_cap ~check_info in
+  let (errors, env, cancelled_results) =
     MultiWorker.call_with_interrupt
       workers
-      ~job:(load_and_process_files dynamic_view_files ~memory_cap ~check_info)
+      ~job
       ~neutral
       ~merge:
         (merge
@@ -467,9 +473,10 @@ let process_in_parallel
   in
   TypeCheckStore.clear ();
   ( errors,
+    !delegate_state,
     env,
     List.concat
-      ( cancelled
+      ( cancelled_results
       |> List.map ~f:(fun progress ->
              progress.remaining
              |> List.fold ~init:[] ~f:(fun acc computation ->
@@ -477,7 +484,7 @@ let process_in_parallel
                     | Check { path; _ } -> path :: acc
                     | _ -> acc)) ) )
 
-type ('b, 'c) job_result = 'b * 'c * Relative_path.t list
+type ('b, 'c, 'd) job_result = 'b * 'c * 'd * Relative_path.t list
 
 module type Mocking_sig = sig
   val with_test_mocking :
@@ -485,9 +492,9 @@ module type Mocking_sig = sig
     file_computation list ->
     ((* ... before passing it to the real job executor... *)
      file_computation list ->
-    ('b, 'c) job_result) ->
+    ('b, 'c, 'd) job_result) ->
     (* ... which output we can also modify. *)
-    ('b, 'c) job_result
+    ('b, 'c, 'd) job_result
 end
 
 module NoMocking = struct
@@ -514,8 +521,8 @@ module TestMocking = struct
     in
     (* Only cancel once to avoid infinite loops *)
     cancelled := Relative_path.Set.empty;
-    let (res, env, cancelled) = f fnl in
-    (res, env, mock_cancelled @ cancelled)
+    let (res, delegate_state, env, cancelled) = f fnl in
+    (res, delegate_state, env, mock_cancelled @ cancelled)
 end
 
 module Mocking =
@@ -537,12 +544,13 @@ let should_process_sequentially
 
 let go_with_interrupt
     (workers : MultiWorker.worker list option)
+    (delegate_state : Delegate.state)
     (opts : TypecheckerOptions.t)
     (dynamic_view_files : Relative_path.Set.t)
     (fnl : Relative_path.t list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
-    ~(check_info : check_info) : (Errors.t, 'a) job_result =
+    ~(check_info : check_info) : (Errors.t, Delegate.state, 'a) job_result =
   let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
   Mocking.with_test_mocking fnl @@ fun fnl ->
   let result =
@@ -558,12 +566,13 @@ let go_with_interrupt
           ~memory_cap:None
           ~check_info
       in
-      (errors, interrupt.MultiThreadedCall.env, [])
+      (errors, delegate_state, interrupt.MultiThreadedCall.env, [])
     ) else (
       Hh_logger.log "Type checking service will process files in parallel";
       process_in_parallel
         dynamic_view_files
         workers
+        delegate_state
         opts
         fnl
         ~interrupt
@@ -579,15 +588,17 @@ let go_with_interrupt
 
 let go
     (workers : MultiWorker.worker list option)
+    (delegate_state : Delegate.state)
     (opts : TypecheckerOptions.t)
     (dynamic_view_files : Relative_path.Set.t)
     (fnl : Relative_path.t list)
     ~(memory_cap : int option)
-    ~(check_info : check_info) : Errors.t =
+    ~(check_info : check_info) : Errors.t * Delegate.state =
   let interrupt = MultiThreadedCall.no_interrupt () in
-  let (res, (), cancelled) =
+  let (res, delegate_state, (), cancelled) =
     go_with_interrupt
       workers
+      delegate_state
       opts
       dynamic_view_files
       fnl
@@ -596,4 +607,4 @@ let go
       ~check_info
   in
   assert (List.is_empty cancelled);
-  res
+  (res, delegate_state)

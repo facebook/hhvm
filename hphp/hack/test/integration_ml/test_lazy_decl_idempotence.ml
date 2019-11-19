@@ -59,21 +59,50 @@ let test () =
   let check_info =
     Typing_check_service.{ init_id = ""; recheck_id = Some "" }
   in
-  let errors =
-    Typing_check_service.go None tcopt empty [bar_path] ~memory_cap ~check_info
+  let delegate_state = Typing_service_delegate.create () in
+  let (errors, delegate_state) =
+    Typing_check_service.go
+      None
+      delegate_state
+      tcopt
+      empty
+      [bar_path]
+      ~memory_cap
+      ~check_info
   in
   Test.assert_errors errors "";
-  let errors =
-    Typing_check_service.go None tcopt empty [bar_path] ~memory_cap ~check_info
+  let (errors, delegate_state) =
+    Typing_check_service.go
+      None
+      delegate_state
+      tcopt
+      empty
+      [bar_path]
+      ~memory_cap
+      ~check_info
   in
   Test.assert_errors errors "";
 
-  let errors =
-    Typing_check_service.go None tcopt empty [foo_path] ~memory_cap ~check_info
+  let (errors, delegate_state) =
+    Typing_check_service.go
+      None
+      delegate_state
+      tcopt
+      empty
+      [foo_path]
+      ~memory_cap
+      ~check_info
   in
   Test.assert_errors errors expected_errors;
-  let errors =
-    Typing_check_service.go None tcopt empty [foo_path] ~memory_cap ~check_info
+  let (errors, _delegate_state) =
+    Typing_check_service.go
+      None
+      delegate_state
+      tcopt
+      empty
+      [foo_path]
+      ~memory_cap
+      ~check_info
   in
   Test.assert_errors errors expected_errors;
 

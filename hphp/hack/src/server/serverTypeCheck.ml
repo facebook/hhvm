@@ -906,12 +906,13 @@ functor
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
       in
       let fnl = Relative_path.Set.elements files_to_check in
-      let (errorl', env', cancelled) =
+      let (errorl', delegate_state, env', cancelled) =
         maybe_remote_type_check_with_interrupt genv env fnl ~local:(fun () ->
             match genv.lru_host_env with
             | Some lru_host_env ->
               Typing_lru_check_service.go_with_interrupt
                 lru_host_env
+                env.typing_service.delegate_state
                 env.tcopt
                 dynamic_view_files
                 fnl
@@ -919,6 +920,7 @@ functor
             | None ->
               Typing_check_service.go_with_interrupt
                 genv.workers
+                env.typing_service.delegate_state
                 env.tcopt
                 dynamic_view_files
                 fnl
@@ -930,7 +932,12 @@ functor
         "type_checking.go_with_interrupt"
         ~before:env.diag_subscribe
         ~after:env'.diag_subscribe;
-      let env = env' in
+      let env =
+        {
+          env' with
+          typing_service = { env'.typing_service with delegate_state };
+        }
+      in
       (* Add new things that need to be rechecked *)
       let needs_recheck =
         Relative_path.Set.union env.needs_recheck lazy_check_later

@@ -230,6 +230,7 @@
     typing
     typing_defs
     typing_service_api
+    typing_service_api_stubs
     vfs_stubs)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 

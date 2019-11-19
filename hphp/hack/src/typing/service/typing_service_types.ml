@@ -30,3 +30,7 @@ type check_info = {
 type files_to_process = file_computation list
 
 type files_in_progress = file_computation list
+
+type 'delegate_state job_progress =
+  | Progress of computation_progress
+  | DelegateProgress of 'delegate_state

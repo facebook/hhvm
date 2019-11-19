@@ -75,6 +75,8 @@ the chain of jobs could be used to minimize the number of restarts.
 
 module Delegate = Typing_service_delegate
 
+type progress = Delegate.state job_progress
+
 (*****************************************************************************)
 (* The place where we store the shared data in cache *)
 (*****************************************************************************)
@@ -340,12 +342,21 @@ let load_and_process_files
     empty list for the list of unchecked files. *)
 let merge
     ~(should_prefetch_deferred_files : bool)
+    (delegate_state : Delegate.state ref)
     (files_to_process : file_computation list ref)
     (files_initial_count : int)
     (files_in_progress : file_computation Hash_set.t)
     (files_checked_count : int ref)
-    ((errors : Errors.t), (results : computation_progress))
+    ((errors : Errors.t), (results : progress))
     (acc : Errors.t) : Errors.t =
+  let (errors, results) =
+    match results with
+    | Progress progress -> (errors, progress)
+    | DelegateProgress state ->
+      let ((errors, progress), state) = Delegate.merge state in
+      delegate_state := state;
+      (errors, progress)
+  in
   files_to_process := results.remaining @ !files_to_process;
 
   (* Let's also prepend the deferred files! *)
@@ -409,7 +420,8 @@ let next
          writing OCaml or anything. *)
       files_to_process := remaining_files;
       List.iter ~f:(Hash_set.Poly.add files_in_progress) current_bucket;
-      Bucket.Job { completed = []; remaining = current_bucket; deferred = [] }
+      Bucket.Job
+        (Progress { completed = []; remaining = current_bucket; deferred = [] })
 
 let on_cancelled
     (next : unit -> 'a Bucket.bucket)
@@ -455,6 +467,14 @@ let process_in_parallel
     Vfs.is_vfs () && TypecheckerOptions.prefetch_deferred_files opts
   in
   let job = load_and_process_files dynamic_view_files ~memory_cap ~check_info in
+  let job (errors : Errors.t) (progress : progress) =
+    match progress with
+    | Progress progress ->
+      let (errors, progress) = job errors progress in
+      (errors, Progress progress)
+    | DelegateProgress delegate_state ->
+      (errors, DelegateProgress (Delegate.process delegate_state))
+  in
   let (errors, env, cancelled_results) =
     MultiWorker.call_with_interrupt
       workers
@@ -463,6 +483,7 @@ let process_in_parallel
       ~merge:
         (merge
            ~should_prefetch_deferred_files
+           delegate_state
            files_to_process
            files_initial_count
            files_in_progress
@@ -472,17 +493,23 @@ let process_in_parallel
       ~interrupt
   in
   TypeCheckStore.clear ();
-  ( errors,
-    !delegate_state,
-    env,
-    List.concat
-      ( cancelled_results
-      |> List.map ~f:(fun progress ->
-             progress.remaining
-             |> List.fold ~init:[] ~f:(fun acc computation ->
-                    match computation with
-                    | Check { path; _ } -> path :: acc
-                    | _ -> acc)) ) )
+  let paths_of (cancelled_results : progress list) : Relative_path.t list =
+    let paths_of (cancelled_progress : progress) =
+      let cancelled_computations =
+        match cancelled_progress with
+        | Progress progress -> progress.remaining
+        | DelegateProgress _delegate_state -> failwith "TODO: not implemented"
+      in
+      let paths_of paths (cancelled_computation : file_computation) =
+        match cancelled_computation with
+        | Check { path; _ } -> path :: paths
+        | _ -> paths
+      in
+      List.fold cancelled_computations ~init:[] ~f:paths_of
+    in
+    List.concat (List.map cancelled_results ~f:paths_of)
+  in
+  (errors, !delegate_state, env, paths_of cancelled_results)
 
 type ('b, 'c, 'd) job_result = 'b * 'c * 'd * Relative_path.t list
 

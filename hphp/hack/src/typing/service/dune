@@ -1,0 +1,11 @@
+(library
+  (name typing_service_api)
+  (wrapped false)
+  (modules
+    typing_service_types
+  )
+  (libraries
+    core_kernel
+    relative_path
+  )
+  (preprocess (pps ppx_deriving.std))) ; See T41851208

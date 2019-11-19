@@ -9,6 +9,7 @@
 module Hack_bucket = Bucket
 open Hh_prelude
 module Bucket = Hack_bucket
+include Typing_service_types
 
 (*
 ####
@@ -71,27 +72,6 @@ the following paper (Make, Excel's calc engine, Shake, and Bazel):
 The paper refers to this approach as "restarting", and further suggests that recording and reusing
 the chain of jobs could be used to minimize the number of restarts.
  *)
-
-type check_file_computation = {
-  path: Relative_path.t;
-  deferred_count: int;
-}
-
-type file_computation =
-  | Check of check_file_computation
-  | Declare of Relative_path.t
-  | Prefetch of Relative_path.t list
-
-type progress = {
-  completed: file_computation list;
-  remaining: file_computation list;
-  deferred: file_computation list;
-}
-
-type check_info = {
-  init_id: string;
-  recheck_id: string option;
-}
 
 (*****************************************************************************)
 (* The place where we store the shared data in cache *)
@@ -270,9 +250,9 @@ let process_files
     (dynamic_view_files : Relative_path.Set.t)
     (opts : GlobalOptions.t)
     (errors : Errors.t)
-    (progress : progress)
+    (progress : computation_progress)
     ~(memory_cap : int option)
-    ~(check_info : check_info) : Errors.t * progress =
+    ~(check_info : check_info) : Errors.t * computation_progress =
   SharedMem.invalidate_caches ();
   File_provider.local_changes_push_stack ();
   Ast_provider.local_changes_push_stack ();
@@ -343,9 +323,9 @@ let process_files
 let load_and_process_files
     (dynamic_view_files : Relative_path.Set.t)
     (errors : Errors.t)
-    (progress : progress)
+    (progress : computation_progress)
     ~(memory_cap : int option)
-    ~(check_info : check_info) : Errors.t * progress =
+    ~(check_info : check_info) : Errors.t * computation_progress =
   let opts = TypeCheckStore.load () in
   process_files dynamic_view_files opts errors progress ~memory_cap ~check_info
 
@@ -364,7 +344,7 @@ let merge
     (files_initial_count : int)
     (files_in_progress : file_computation Hash_set.t)
     (files_checked_count : int ref)
-    ((errors : Errors.t), (results : progress))
+    ((errors : Errors.t), (results : computation_progress))
     (acc : Errors.t) : Errors.t =
   files_to_process := results.remaining @ !files_to_process;
 

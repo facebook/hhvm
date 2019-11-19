@@ -229,6 +229,7 @@
     shared_lru_stubs
     typing
     typing_defs
+    typing_service_api
     vfs_stubs)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 

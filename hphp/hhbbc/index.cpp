@@ -956,6 +956,30 @@ bool Func::mightBeBuiltin() const {
   );
 }
 
+uint32_t Func::minNonVariadicParams() const {
+  auto const count = [] (const php::Func& f) -> uint32_t {
+    for (size_t i = 0; i < f.params.size(); ++i) {
+      if (f.params[i].isVariadic) return i;
+    }
+    return f.params.size();
+  };
+
+  return match<uint32_t>(
+    val,
+    [&] (FuncName) { return 0; },
+    [&] (MethodName) { return 0; },
+    [&] (FuncInfo* fi) { return count(*fi->func); },
+    [&] (const MethTabEntryPair* mte) { return count(*mte->second.func); },
+    [&] (FuncFamily* fa) {
+      auto c = std::numeric_limits<uint32_t>::max();
+      for (auto const pf : fa->possibleFuncs()) {
+        c = std::min(c, count(*pf->second.func));
+      }
+      return c;
+    }
+  );
+}
+
 std::string show(const Func& f) {
   auto ret = f.name()->toCppString();
   match<void>(f.val,

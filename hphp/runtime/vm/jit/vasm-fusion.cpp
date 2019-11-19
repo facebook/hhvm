@@ -63,6 +63,7 @@ bool sets_flags(const Vunit& unit, const Vinstr& inst) {
   case Vinstr::callstub:
   case Vinstr::callfaststub:
   case Vinstr::callphp:
+  case Vinstr::callphpr:
   case Vinstr::callunpack:
   case Vinstr::contenter:
     return true;

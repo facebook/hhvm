@@ -3780,7 +3780,7 @@ bool fcallOptimizeChecks(
       // Optimize away the runtime inout-ness check.
       reduce(env, fcallWithFCA(FCallArgs(
         fca.flags, fca.numArgs, fca.numRets, nullptr, fca.asyncEagerTarget,
-        fca.lockWhileUnwinding)));
+        fca.lockWhileUnwinding, fca.skipNumArgsCheck)));
       return true;
     }
   }
@@ -3802,6 +3802,13 @@ bool fcallOptimizeChecks(
       reduce(env, fcallWithFCA(std::move(newFCA)));
       return true;
     }
+  }
+
+  if (!fca.skipNumArgsCheck && fca.numArgs <= func.minNonVariadicParams()) {
+    auto newFCA = fca;
+    newFCA.skipNumArgsCheck = true;
+    reduce(env, fcallWithFCA(std::move(newFCA)));
+    return true;
   }
 
   return false;

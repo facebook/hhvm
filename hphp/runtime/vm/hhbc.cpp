@@ -1233,6 +1233,7 @@ std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgsRaw,
   if (fca.hasGenerics()) flags.push_back("Generics");
   if (fca.supportsAsyncEagerReturn()) flags.push_back("SupportsAER");
   if (fca.lockWhileUnwinding) flags.push_back("LockWhileUnwinding");
+  if (fca.skipNumArgsCheck) flags.push_back("SkipNumArgsCheck");
   return folly::sformat(
     "<{}> {} {} {} {}",
     folly::join(' ', flags), fca.numArgs, fca.numRets, inoutArgs, asyncEagerLabel

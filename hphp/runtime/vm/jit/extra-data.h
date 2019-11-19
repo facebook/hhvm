@@ -800,7 +800,8 @@ struct CallData : IRExtraData {
                     bool hasUnpack,
                     bool dynamicCall,
                     bool asyncEagerReturn,
-                    bool formingRegion)
+                    bool formingRegion,
+                    bool skipNumArgsCheck)
     : spOffset(spOffset)
     , numArgs(numArgs)
     , numOut(numOut)
@@ -811,6 +812,7 @@ struct CallData : IRExtraData {
     , dynamicCall(dynamicCall)
     , asyncEagerReturn(asyncEagerReturn)
     , formingRegion(formingRegion)
+    , skipNumArgsCheck(skipNumArgsCheck)
   {}
 
   std::string show() const {
@@ -822,7 +824,8 @@ struct CallData : IRExtraData {
       hasUnpack ? ",unpack" : "",
       dynamicCall ? ",dynamicCall" : "",
       asyncEagerReturn ? ",asyncEagerReturn" : "",
-      formingRegion ? ",formingRegion" : ""
+      formingRegion ? ",formingRegion" : "",
+      skipNumArgsCheck ? ",skipNumArgsCheck" : ""
     );
   }
 
@@ -840,6 +843,7 @@ struct CallData : IRExtraData {
   bool dynamicCall;
   bool asyncEagerReturn;
   bool formingRegion;
+  bool skipNumArgsCheck;
 };
 
 struct CallUnpackData : IRExtraData {

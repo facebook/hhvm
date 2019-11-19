@@ -127,9 +127,13 @@ struct FCallArgsBase {
   static constexpr uint8_t kFirstNumArgsBit = 6;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets,
-                         bool lockWhileUnwinding)
-    : numArgs(numArgs), numRets(numRets), flags(flags)
-      , lockWhileUnwinding(lockWhileUnwinding) {
+                         bool lockWhileUnwinding, bool skipNumArgsCheck)
+    : numArgs(numArgs)
+    , numRets(numRets)
+    , flags(flags)
+    , lockWhileUnwinding(lockWhileUnwinding)
+    , skipNumArgsCheck(skipNumArgsCheck)
+  {
     assertx(!(flags & ~kInternalFlags));
     assertx(!(supportsAsyncEagerReturn() && lockWhileUnwinding));
   }
@@ -145,13 +149,15 @@ struct FCallArgsBase {
   uint32_t numRets;
   Flags flags;
   bool lockWhileUnwinding;
+  bool skipNumArgsCheck;
 };
 
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
                      const uint8_t* inoutArgs, Offset asyncEagerOffset,
-                     bool lockWhileUnwinding)
-    : FCallArgsBase(flags, numArgs, numRets, lockWhileUnwinding)
+                     bool lockWhileUnwinding, bool skipNumArgsCheck)
+    : FCallArgsBase(flags, numArgs, numRets,
+                    lockWhileUnwinding, skipNumArgsCheck)
     , asyncEagerOffset(asyncEagerOffset)
     , inoutArgs(inoutArgs) {
     assertx(IMPLIES(inoutArgs != nullptr, numArgs != 0));

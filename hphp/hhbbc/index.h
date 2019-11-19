@@ -347,6 +347,12 @@ struct Func {
    */
   bool mightBeBuiltin() const;
 
+  /*
+   * Minimum bound on the number of non-variadic parameters of the
+   * function.
+   */
+  uint32_t minNonVariadicParams() const;
+
   struct FuncInfo;
   struct MethTabEntryPair;
   struct FuncFamily;

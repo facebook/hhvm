@@ -126,6 +126,7 @@ struct Vunit;
   O(phplogue, Inone, U(fp), Dn)\
   O(phpret, Inone, U(fp) U(args), D(d))\
   O(callphp, I(stub), U(args), Dn)\
+  O(callphpr, Inone, U(target) U(args), Dn)\
   O(callunpack, I(target), U(args), Dn)\
   O(vcallunpack, I(target), U(args) U(extraArgs), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
@@ -860,6 +861,26 @@ struct callphp {
   Vlabel targets[2];
   const Func* func;
   uint32_t nargs;
+};
+
+/*
+ * Like callphp, but an indirect call through a register
+ */
+
+struct callphpr {
+  explicit callphpr(Vreg64 target,
+                    RegSet args,
+                    std::array<Vlabel, 2> edges)
+    : target{target}
+    , args{args}
+  {
+    this->edges[0] = edges[0];
+    this->edges[1] = edges[1];
+  }
+
+  Vreg64 target;
+  RegSet args;
+  Vlabel edges[2];
 };
 
 /*

@@ -192,7 +192,7 @@ void callUnpack(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     bcOff(env),
     fca.hasGenerics(),
     dynamicCall,
-    env.formingRegion,
+    env.formingRegion
   };
   push(env, gen(env, CallUnpack, data, sp(env), fp(env), callee, objOrClass));
   if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
@@ -231,6 +231,7 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     dynamicCall,
     asyncEagerReturn,
     env.formingRegion,
+    fca.skipNumArgsCheck
   };
   return gen(env, Call, data, sp(env), fp(env), callee, objOrClass);
 }
@@ -445,7 +446,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     fca.numRets,
     nullptr,  // inout-ness already checked
     fca.asyncEagerOffset,
-    fca.lockWhileUnwinding
+    fca.lockWhileUnwinding,
+    fca.skipNumArgsCheck
   ));
 }
 
@@ -857,7 +859,8 @@ void fcallObjMethodMagic(IRGS& env, const Func* callee, const FCallArgs& fca,
   env.irb->exceptionStackBoundary();
 
   assertx(!fca.supportsAsyncEagerReturn());
-  auto const fca2 = FCallArgs(fca.flags, 2, 1, nullptr, kInvalidOffset, false);
+  auto const fca2 =
+    FCallArgs(fca.flags, 2, 1, nullptr, kInvalidOffset, false, false);
   prepareAndCallKnown(env, callee, fca2, obj, dynamic);
 }
 
@@ -1659,7 +1662,7 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
   }
 
   auto const fca = FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr,
-                             kInvalidOffset, false);
+                             kInvalidOffset, false, false);
   prepareAndCallKnown(env, callee, fca, nullptr, false);
 }
 

@@ -349,11 +349,14 @@ bool analyze_phys_callseq(const Env& /*env*/, Vreg d, const Vinstr& inst,
    * rvmfp() arg to it, but the program is ill-formed if it's not doing
    * that so it's ok to just ignore that definition here.
    */
-  if (next && next->op == Vinstr::callphp) {
+  if (next &&
+      (next->op == Vinstr::callphp ||
+       next->op == Vinstr::callphpr)) {
     FTRACE(3, "      post-dominated by callphp---preserving frame ptr\n");
     return true;
   }
-  if (inst.op == Vinstr::callphp) return true;
+  if (inst.op == Vinstr::callphp ||
+      inst.op == Vinstr::callphpr) return true;
 
   return false;
 }

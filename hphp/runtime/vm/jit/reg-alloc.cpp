@@ -238,6 +238,7 @@ void getEffects(const Abi& abi, const Vinstr& i,
       break;
 
     case Vinstr::callphp:
+    case Vinstr::callphpr:
       defs = abi.all() - RegSet(rvmtl());
       break;
 

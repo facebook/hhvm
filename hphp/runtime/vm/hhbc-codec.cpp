@@ -102,7 +102,8 @@ IterArgs decodeIterArgs(PC& pc) {
 void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
                          const uint8_t* inoutArgs, bool hasAsyncEagerOffset) {
   auto constexpr kFirstNumArgsBit = FCallArgsBase::kFirstNumArgsBit;
-  bool smallNumArgs = ((fca.numArgs + 1) << kFirstNumArgsBit) <= 0xff;
+  bool smallNumArgs =
+    fca.skipNumArgsCheck && (((fca.numArgs + 1) << kFirstNumArgsBit) <= 0xff);
   auto flags = uint8_t{fca.flags};
   assertx(!(flags & ~FCallArgsBase::kInternalFlags));
   if (smallNumArgs) flags |= (fca.numArgs + 1) << kFirstNumArgsBit;
@@ -116,7 +117,9 @@ void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
   }
 
   ue.emitByte(flags);
-  if (!smallNumArgs) ue.emitIVA(fca.numArgs);
+  if (!smallNumArgs) {
+    ue.emitIVA((uint64_t)fca.numArgs * 2 + fca.skipNumArgsCheck);
+  }
   if (fca.numRets != 1) ue.emitIVA(fca.numRets);
 
   if (inoutArgs != nullptr) {
@@ -137,8 +140,17 @@ FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc) {
     }
     return rawFlags;
   }();
-  auto const numArgs = (flags >> FCallArgs::kFirstNumArgsBit)
-    ? (flags >> FCallArgs::kFirstNumArgsBit) - 1 : decode_iva(pc);
+
+  uint32_t numArgs;
+  bool skipNumArgsCheck;
+  if (flags >> FCallArgs::kFirstNumArgsBit) {
+    numArgs = (flags >> FCallArgs::kFirstNumArgsBit) - 1;
+    skipNumArgsCheck = true;
+  } else {
+    numArgs = decode_iva(pc);
+    skipNumArgsCheck = numArgs % 2;
+    numArgs /= 2;
+  }
   auto const numRets = (flags & FCallArgs::HasInOut) ? decode_iva(pc) : 1;
   auto const inoutArgs = (flags & FCallArgs::EnforceInOut) ? pc : nullptr;
   if (inoutArgs != nullptr) pc += (numArgs + 7) / 8;
@@ -146,7 +158,8 @@ FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc) {
     ? decode_ba(pc) : kInvalidOffset;
   return FCallArgs(
     static_cast<FCallArgs::Flags>(flags & FCallArgs::kInternalFlags),
-    numArgs, numRets, inoutArgs, asyncEagerOffset, lockWhileUnwinding
+    numArgs, numRets, inoutArgs, asyncEagerOffset, lockWhileUnwinding,
+    skipNumArgsCheck
   );
 }
 

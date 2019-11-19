@@ -4250,7 +4250,8 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
 
   auto const flags = static_cast<FCallArgs::Flags>(
     fca.flags & ~(FCallArgs::Flags::HasUnpack | FCallArgs::Flags::HasGenerics));
-  auto const fca2 = FCallArgs(flags, 2, 1, nullptr, kInvalidOffset, false);
+  auto const fca2 =
+    FCallArgs(flags, 2, 1, nullptr, kInvalidOffset, false, false);
   fcallImpl<dynamic>(origpc, pc, fca2, func, initActRec, logAsDynamicCall);
 }
 

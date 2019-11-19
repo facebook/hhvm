@@ -116,6 +116,17 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
             extra->numArgs == func->numNonVariadicParams());
     v << callphp{tc::ustubs().immutableBindCallStub, php_call_regs(withCtx),
                  {{done, catchBlock}}, func, numArgsInclUnpack};
+  } else if (extra->skipNumArgsCheck) {
+    // If we've statically determined the provided number of arguments
+    // doesn't exceed what the target expects, we can skip the stub
+    // and call the prologue directly.
+    assertx(!extra->hasUnpack);
+    auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
+    auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
+    auto const dest = v.makeReg();
+    emitLdLowPtr(v, r_php_call_func()[extra->numArgs * ptrSize + pTabOff],
+                 dest, sizeof(LowPtr<uint8_t>));
+    v << callphpr{dest, php_call_regs(withCtx), {{done, catchBlock}}};
   } else {
     // If the callee is not known statically, or it was determined later, but
     // we have too many arguments for prologue to handle, go to the redispatch

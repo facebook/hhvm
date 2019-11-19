@@ -110,11 +110,13 @@ inline bool operator!=(const LocalRange& a, const LocalRange& b) {
 
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(uint32_t numArgs)
-    : FCallArgs(Flags::None, numArgs, 1, nullptr, NoBlockId, false) {}
+    : FCallArgs(Flags::None, numArgs, 1, nullptr, NoBlockId, false, false) {}
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
                      std::unique_ptr<uint8_t[]> inoutArgs,
-                     BlockId asyncEagerTarget, bool lockWhileUnwinding)
-    : FCallArgsBase(flags, numArgs, numRets, lockWhileUnwinding)
+                     BlockId asyncEagerTarget, bool lockWhileUnwinding,
+                     bool skipNumArgsCheck)
+    : FCallArgsBase(flags, numArgs, numRets,
+                    lockWhileUnwinding, skipNumArgsCheck)
     , asyncEagerTarget(asyncEagerTarget)
     , inoutArgs(std::move(inoutArgs)) {
     assertx(IMPLIES(asyncEagerTarget == NoBlockId,
@@ -122,7 +124,7 @@ struct FCallArgs : FCallArgsBase {
   }
   FCallArgs(const FCallArgs& o)
     : FCallArgs(o.flags, o.numArgs, o.numRets, nullptr, o.asyncEagerTarget,
-                o.lockWhileUnwinding) {
+                o.lockWhileUnwinding, o.skipNumArgsCheck) {
     if (o.inoutArgs) {
       auto const numBytes = (numArgs + 7) / 8;
       inoutArgs = std::make_unique<uint8_t[]>(numBytes);
@@ -131,7 +133,8 @@ struct FCallArgs : FCallArgsBase {
   }
   FCallArgs(FCallArgs&& o)
     : FCallArgs(o.flags, o.numArgs, o.numRets, std::move(o.inoutArgs),
-                o.asyncEagerTarget, o.lockWhileUnwinding) {}
+                o.asyncEagerTarget, o.lockWhileUnwinding,
+                o.skipNumArgsCheck) {}
 
   bool enforceInOut() const { return inoutArgs.get() != nullptr; }
   bool isInOut(uint32_t i) const {
@@ -160,7 +163,8 @@ inline bool operator==(const FCallArgs& a, const FCallArgs& b) {
     a.flags == b.flags && a.numArgs == b.numArgs && a.numRets == b.numRets &&
     eq(a.inoutArgs.get(), b.inoutArgs.get(), (a.numArgs + 7) / 8) &&
     a.asyncEagerTarget == b.asyncEagerTarget &&
-    a.lockWhileUnwinding == b.lockWhileUnwinding;
+    a.lockWhileUnwinding == b.lockWhileUnwinding &&
+    a.skipNumArgsCheck == b.skipNumArgsCheck;
 }
 
 inline bool operator!=(const FCallArgs& a, const FCallArgs& b) {

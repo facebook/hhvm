@@ -116,14 +116,14 @@ let type_at_range
     (end_char : int) : (Tast_env.env * Tast.ty) option =
   (range_visitor start_line start_char end_line end_char)#go tast
 
-let go :
-    ServerEnv.env ->
-    ServerCommandTypes.file_input * int * int * bool ->
-    (string * string) option =
- fun env (file, line, char, dynamic_view) ->
-  let ServerEnv.{ tcopt; naming_table; _ } = env in
-  let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view } in
-  let (_, tast) = ServerIdeUtils.check_file_input tcopt naming_table file in
-  type_at_pos tast line char >>| fun (env, ty) ->
+let go_ctx
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~(line : int)
+    ~(column : int) : (string * string) option =
+  let (tast, _) =
+    Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
+  in
+  type_at_pos tast line column >>| fun (env, ty) ->
   ( Tast_env.print_ty env ty,
     Tast_env.ty_to_json env ty |> Hh_json.json_to_string )

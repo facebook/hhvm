@@ -68,8 +68,26 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         ~file_input
     in
     (env, ServerColorFile.go_quarantined ~ctx ~entry)
-  | INFER_TYPE (fn, line, char, dynamic_view) ->
-    (env, ServerInferType.go env (fn, line, char, dynamic_view))
+  | INFER_TYPE (file_input, line, column, dynamic_view) ->
+    let tcopt =
+      { env.ServerEnv.tcopt with GlobalOptions.tco_dynamic_view = dynamic_view }
+    in
+    let path =
+      match file_input with
+      | FileName fn -> Relative_path.create_detect_prefix fn
+      | FileContent _ -> Relative_path.create_detect_prefix ""
+    in
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt)
+        ~path
+        ~file_input
+    in
+    let result =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerInferType.go_ctx ~ctx ~entry ~line ~column)
+    in
+    (env, result)
   | INFER_TYPE_BATCH (positions, dynamic_view) ->
     let tcopt = env.ServerEnv.tcopt in
     let tcopt = { tcopt with GlobalOptions.tco_dynamic_view = dynamic_view } in

@@ -20,6 +20,11 @@ open Convert_type
 let derived_traits =
   [(None, "Clone"); (None, "Debug"); (Some "ocamlrep_derive", "OcamlRep")]
 
+let additional_derived_traits ty =
+  match (State.curr_module_name (), ty) with
+  | ("errors", "Phase") -> [(None, "PartialOrd"); (None, "Ord")]
+  | _ -> []
+
 (* HACK: ignore phases since we are only considering decl tys *)
 let blacklisted_types =
   [
@@ -49,7 +54,7 @@ let renamed_types = [(("typing_reason", "TypingReason"), "Reason")]
    adds some meaning, and generate a new tuple struct type named after the
    alias. In some cases, the alias adds no meaning and we should also use an
    alias in Rust. *)
-let tuple_aliases = [("ast_defs", "Pstring")]
+let tuple_aliases = [("ast_defs", "Pstring"); ("errors", "Message")]
 
 (*
 A list of (<module>, <ty1>) where ty1 is enum and all non-empty variant fields should
@@ -161,7 +166,32 @@ let constructor_arguments ?(box_fields = false) = function
 let variant_constructor_declaration ?(box_fields = false) cd =
   let name = convert_type_name cd.pcd_name.txt in
   let args = constructor_arguments ~box_fields cd.pcd_args in
-  sprintf "%s%s,\n" name args
+  let discriminant =
+    (* If we see the [@value 42] attribute, assume it's for ppx_deriving enum,
+       and that all the variants are zero-argument (i.e., assume this is a
+       C-like enum and provide custom discriminant values). *)
+    List.find_map cd.pcd_attributes (fun attr ->
+        match attr with
+        | ( { txt = "value"; _ },
+            PStr
+              [
+                {
+                  pstr_desc =
+                    Pstr_eval
+                      ( {
+                          pexp_desc =
+                            Pexp_constant (Pconst_integer (discriminant, None));
+                          _;
+                        },
+                        _ );
+                  _;
+                };
+              ] ) ->
+          Some (" = " ^ discriminant)
+        | _ -> None)
+    |> Option.value ~default:""
+  in
+  sprintf "%s%s%s,\n" name args discriminant
 
 let ctor_arg_len (ctor_args : constructor_arguments) : int =
   match ctor_args with
@@ -171,7 +201,7 @@ let ctor_arg_len (ctor_args : constructor_arguments) : int =
 let type_declaration name td =
   let attrs_and_vis init_derives =
     let derive_attr =
-      derived_traits @ init_derives
+      derived_traits @ init_derives @ additional_derived_traits name
       |> List.sort ~compare:(fun (_, t1) (_, t2) -> String.compare t1 t2)
       |> List.map ~f:(fun (m, trait) ->
              Option.iter m ~f:(fun m -> add_extern_use (m ^ "::" ^ trait));

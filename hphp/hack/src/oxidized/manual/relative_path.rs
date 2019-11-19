@@ -8,7 +8,7 @@ use std::convert::TryFrom;
 use std::fmt::{self, Display};
 use std::path::{Path, PathBuf};
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ord, PartialEq, PartialOrd)]
 pub enum Prefix {
     Root,
     Hhi,
@@ -42,7 +42,7 @@ impl Display for Prefix {
     }
 }
 
-#[derive(Clone, Debug, Eq, OcamlRep, PartialEq)]
+#[derive(Clone, Debug, Eq, OcamlRep, Ord, PartialEq, PartialOrd)]
 pub struct RelativePath {
     prefix: Prefix,
     path: PathBuf,
@@ -78,6 +78,12 @@ impl Display for RelativePath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} {}", self.prefix, self.path.display())
     }
+}
+
+pub type Map<T> = std::collections::BTreeMap<RelativePath, T>;
+
+pub mod map {
+    pub use super::Map;
 }
 
 #[cfg(test)]

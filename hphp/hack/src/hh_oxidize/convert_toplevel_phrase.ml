@@ -41,11 +41,39 @@ let nested_modules =
 
 let blacklisted = List.mem module_blacklist ~equal:String.equal
 
+(* HACK: These submodules are defined inline in another module solely to provide
+   scoping for the variant constructors. Since Rust enums define their own
+   namespace for their variants, there's no need to use submodules for this on
+   the Rust side. *)
+let enum_modules =
+  [
+    ("error_codes", "Parsing");
+    ("error_codes", "Naming");
+    ("error_codes", "NastCheck");
+    ("error_codes", "Typing");
+    ("error_codes", "Init");
+  ]
+
 let is_manually_converted_nested_module mod_name =
   List.mem
     nested_modules
     (State.curr_module_name (), mod_name)
     ~equal:(Tuple.T2.equal ~eq1:String.equal ~eq2:String.equal)
+
+let is_enum_module mod_name =
+  List.mem
+    enum_modules
+    (State.curr_module_name (), mod_name)
+    ~equal:(Tuple.T2.equal ~eq1:String.equal ~eq2:String.equal)
+
+let is_enum_module_import id =
+  match id with
+  | Longident.(Ldot (Lident mod_name, enum_type_name)) ->
+    List.mem
+      enum_modules
+      (convert_module_name mod_name, convert_type_name enum_type_name)
+      ~equal:(Tuple.T2.equal ~eq1:String.equal ~eq2:String.equal)
+  | _ -> false
 
 let string_of_module_desc = function
   | Pmod_structure _ -> "Pmod_structure"
@@ -76,11 +104,18 @@ let structure_item si =
         pmb_expr = { pmod_desc = Pmod_ident id; _ };
         _;
       } ->
-    let mod_name = longident_to_string id.txt ~for_open:true in
+    let mod_name =
+      longident_to_string id.txt ~for_open:(not (is_enum_module_import id.txt))
+    in
     if blacklisted mod_name then
       log "Not aliasing %s: it is blacklisted" mod_name
     else
-      add_alias mod_name (convert_module_name alias)
+      add_alias
+        mod_name
+        ( if is_enum_module_import id.txt then
+          alias
+        else
+          convert_module_name alias )
   (* Convert `include Foo` to explicit re-exports (`pub use`) for every type
      exported by Foo (see {!Stringify.get_includes}). *)
   | Pstr_include { pincl_mod = { pmod_desc = Pmod_ident id; _ }; _ } ->
@@ -102,6 +137,33 @@ let structure_item si =
       mod_name
       rust_mod_name;
     add_alias rust_mod_name rust_mod_name
+  | Pstr_module
+      {
+        pmb_name = { txt = mod_name; _ };
+        pmb_expr =
+          {
+            pmod_desc =
+              Pmod_structure
+                ({
+                   pstr_desc =
+                     Pstr_type
+                       (_, [({ ptype_name = { txt = "t"; _ }; _ } as enum_type)]);
+                   _;
+                 }
+                :: _);
+            _;
+          };
+        _;
+      }
+    when is_enum_module mod_name ->
+    log "Converting submodule %s to enum type" mod_name;
+    let enum_type =
+      {
+        enum_type with
+        ptype_name = { enum_type.ptype_name with txt = mod_name };
+      }
+    in
+    Convert_type_decl.type_declaration enum_type
   | Pstr_module { pmb_name = { txt = name; _ }; pmb_expr = { pmod_desc; _ }; _ }
     ->
     let kind = string_of_module_desc pmod_desc in

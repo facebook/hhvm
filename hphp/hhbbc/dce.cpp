@@ -566,6 +566,12 @@ void addLocGen(Env& env, uint32_t id) {
   env.dceState.liveLocals[id] = 1;
 }
 
+void addLocUse(Env& env, uint32_t id) {
+  FTRACE(2, "      loc-use: {}\n", id);
+  if (id >= kMaxTrackedLocals) return;
+  env.dceState.usedLocals[id] = 1;
+}
+
 /*
  * Indicate that this instruction will use the value of loc unless we
  * kill it. handle_push will take care of calling addLocGen if
@@ -1622,60 +1628,33 @@ void dce(Env& env, const bc::YieldK& op) { no_dce(env, op); }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-IterArgs drop_iter_key(const IterArgs& ita) {
-  return IterArgs(ita.flags, ita.iterId, IterArgs::kNoKey, ita.valId);
-}
-
-// This method attempts to convert key-value iters into value-only iters, which
-// is possible if the key local is dead (and a few other conditions are met).
+// Iterator ops don't really read their key and value output locals; they just
+// dec-ref the old value there before storing the new one (i.e. SetL semantics).
 //
-// `bc` is the new op to use if we can DCE away the key; it's generally the old
-// op with the "keyId" field of IterArgs set to NoKey (by drop_iter_key).
-template<class Op, class Bc>
-void iter_key_dce(Env& env, const Op& op, const Bc& bc, const Iter& iter,
-                  const IterArgs& ita, const LocalId base) {
-  auto const isIterEligible = match<bool>(
-    iter,
-    [] (DeadIter) { return false; },
-    [] (const LiveIter& it) { return it.baseCannotBeObject; }
-  );
-  if (!isIterEligible || !ita.hasKey() || ita.keyId == ita.valId ||
-      isLocLive(env, ita.keyId) || isLocVolatile(env, ita.keyId)) {
-    // If key and value are the same, the key gets written after the value.
-    // Let's be pessimistic about this case.
-    return no_dce(env, op);
-  }
-  CompactVector<Bytecode> bcs { bc };
-  env.dceState.replaceMap.emplace(env.id, std::move(bcs));
-  env.dceState.actionMap.emplace(env.id, DceAction::Replace);
-
-  addLocGen(env, ita.valId);
-  if (base != kInvalidId) addLocGen(env, base);
-  pop_inputs(env, op.numPop());
+// We have to mark these values as transiently being used (else they could be
+// completely killed - that is, loc->killed would get set to true and we would
+// try to delete the local), but we don't have to may-read them.
+void iter_dce(Env& env, const IterArgs& ita, LocalId baseId, int numPop) {
+  addLocUse(env, ita.valId);
+  if (ita.hasKey()) addLocUse(env, ita.keyId);
+  if (baseId != NoLocalId) addLocGen(env, baseId);
+  pop_inputs(env, numPop);
 }
 
 void dce(Env& env, const bc::IterInit& op) {
-  auto const bc = bc::IterInit{drop_iter_key(op.ita), op.target2};
-  auto const& iter = env.stateAfter.iters[op.ita.iterId];
-  iter_key_dce(env, op, bc, iter, op.ita, kInvalidId);
+  iter_dce(env, op.ita, NoLocalId, op.numPop());
 }
 
 void dce(Env& env, const bc::LIterInit& op) {
-  auto const bc = bc::LIterInit{drop_iter_key(op.ita), op.loc2, op.target3};
-  auto const& iter = env.stateAfter.iters[op.ita.iterId];
-  iter_key_dce(env, op, bc, iter, op.ita, op.loc2);
+  iter_dce(env, op.ita, op.loc2, op.numPop());
 }
 
 void dce(Env& env, const bc::IterNext& op) {
-  auto const bc = bc::IterNext{drop_iter_key(op.ita), op.target2};
-  auto const& iter = env.stateBefore.iters[op.ita.iterId];
-  iter_key_dce(env, op, bc, iter, op.ita, kInvalidId);
+  iter_dce(env, op.ita, NoLocalId, op.numPop());
 }
 
 void dce(Env& env, const bc::LIterNext& op) {
-  auto const bc = bc::LIterNext{drop_iter_key(op.ita), op.loc2, op.target3};
-  auto const& iter = env.stateBefore.iters[op.ita.iterId];
-  iter_key_dce(env, op, bc, iter, op.ita, op.loc2);
+  iter_dce(env, op.ita, op.loc2, op.numPop());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2416,6 +2395,45 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
 
     processForcedLive(result.forcedLiveLocations);
 
+    // If blk ends with an iterator block, and succId is the loop body for
+    // this iterator, this method returns the iterator's arguments so that
+    // we can kill its key and value output locals.
+    //
+    // We can't do this optimization if succId is also the loop end block.
+    // This case should never occur, because then the iter would have to
+    // be both live and dead at succId, but we guard against it anyway.
+    //
+    // It would be nice to move this logic to the iter_dce method itself,
+    // but this analysis pass only tracks a single out-state for each block,
+    // so we must do it here to apply it to the in-state of the body and not
+    // to the in-state of the done block. (Catch blocks are handled further
+    // down and this logic never applies to them.)
+    auto const killIterOutputs = [] (const php::Block* blk, BlockId succId)
+        -> folly::Optional<IterArgs> {
+      auto const& lastOpc = blk->hhbcs.back();
+      auto const next = blk->fallthrough == succId;
+      auto ita = folly::Optional<IterArgs>{};
+      auto const kill = [&]{
+        switch (lastOpc.op) {
+          case Op::IterInit:
+            ita = lastOpc.IterInit.ita;
+            return next && lastOpc.IterInit.target2 != succId;
+          case Op::LIterInit:
+            ita = lastOpc.LIterInit.ita;
+            return next && lastOpc.LIterInit.target3 != succId;
+          case Op::IterNext:
+            ita = lastOpc.IterNext.ita;
+            return !next && lastOpc.IterNext.target2 == succId;
+          case Op::LIterNext:
+            ita = lastOpc.LIterNext.ita;
+            return !next && lastOpc.LIterNext.target3 == succId;
+          default:
+            return false;
+        }
+      }();
+      return kill ? ita : folly::none;
+    };
+
     auto const isCFPushTaken = [] (const php::Block* blk, BlockId succId) {
       auto const& lastOpc = blk->hhbcs.back();
       switch (lastOpc.op) {
@@ -2434,11 +2452,22 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
       FTRACE(2, "  -> {}\n", pid);
       auto& pbs = blockStates[pid];
       auto const oldPredLocLive = pbs.locLive;
-      pbs.locLive |= result.locLiveIn;
+      auto const pred = ai.ctx.func->blocks[pid].get();
+      if (auto const ita = killIterOutputs(pred, bid)) {
+        auto const key = ita->hasKey();
+        FTRACE(3, "    Killing iterator output locals: {}\n",
+               key ? folly::to<std::string>(ita->valId, ", ", ita->keyId)
+                   : folly::to<std::string>(ita->valId));
+        auto liveIn = result.locLiveIn;
+        if (ita->valId < kMaxTrackedLocals) liveIn[ita->valId] = false;
+        if (key && ita->keyId < kMaxTrackedLocals) liveIn[ita->keyId] = false;
+        pbs.locLive |= liveIn;
+      } else {
+        pbs.locLive |= result.locLiveIn;
+      }
       auto changed = pbs.locLive != oldPredLocLive;
 
       changed |= [&] {
-        auto const pred = ai.ctx.func->blocks[pid].get();
         if (isCFPushTaken(pred, bid)) {
           auto stack = result.stack;
           stack.insert(stack.end(), pred->hhbcs.back().numPush(),

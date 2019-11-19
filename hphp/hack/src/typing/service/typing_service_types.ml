@@ -26,3 +26,7 @@ type check_info = {
   init_id: string;
   recheck_id: string option;
 }
+
+type files_to_process = file_computation list
+
+type files_in_progress = file_computation list

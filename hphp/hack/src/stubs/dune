@@ -53,6 +53,14 @@
     relative_path))
 
 (library
+  (name typing_service_api_stubs)
+  (wrapped false)
+  (modules
+    typing_service_delegate)
+  (libraries
+    typing_service_api))
+
+(library
   (name remote_scheduler_stubs)
   (wrapped false)
   (modules

@@ -92,21 +92,27 @@ fn enum_impl(s: &synstructure::Structure) -> (TokenStream, TokenStream) {
             block_variants.push((variant, block_variants.len() as isize));
         };
     }
-    let max_nullary_tag = nullary_variants.len().saturating_sub(1);
-    let max_block_tag = block_variants.len().saturating_sub(1);
     // Block tags larger than this value indicate specific OCaml types (and tags
     // larger than 255 wouldn't fit in a u8 anyway).
     // See https://github.com/ocaml/ocaml/blob/3.08/utils/config.mlp#L55
     assert!(
-        max_block_tag <= 245,
+        block_variants.len() <= 246,
         "Too many non-constant enum variants -- maximum is 246"
     );
-    let max_block_tag = max_block_tag as u8;
 
     let mut all_variants = nullary_variants.clone();
     all_variants.extend(block_variants.iter().cloned());
 
-    let to = s.each_variant(|v| {
+    let to = enum_to_ocamlrep(s, all_variants);
+    let from = enum_from_ocamlrep(nullary_variants, block_variants);
+    (to, from)
+}
+
+fn enum_to_ocamlrep(
+    s: &synstructure::Structure,
+    all_variants: Vec<(&synstructure::VariantInfo<'_>, isize)>,
+) -> TokenStream {
+    s.each_variant(|v| {
         let size = v.bindings().len();
         let tag = {
             all_variants
@@ -124,7 +130,15 @@ fn enum_impl(s: &synstructure::Structure) -> (TokenStream, TokenStream) {
                 Some(len) => boxed_tuple_variant_to_block(&v.bindings()[0], tag, len),
             }
         }
-    });
+    })
+}
+
+fn enum_from_ocamlrep(
+    nullary_variants: Vec<(&synstructure::VariantInfo<'_>, isize)>,
+    block_variants: Vec<(&synstructure::VariantInfo<'_>, isize)>,
+) -> TokenStream {
+    let max_nullary_tag = nullary_variants.len().saturating_sub(1);
+    let max_block_tag = block_variants.len().saturating_sub(1) as u8;
 
     let mut nullary_arms = TokenStream::new();
     for (variant, tag) in nullary_variants.iter() {
@@ -158,7 +172,7 @@ fn enum_impl(s: &synstructure::Structure) -> (TokenStream, TokenStream) {
         })
     });
 
-    let from = match (nullary_variants.is_empty(), block_variants.is_empty()) {
+    match (nullary_variants.is_empty(), block_variants.is_empty()) {
         // An enum with no variants is not instantiable.
         (true, true) => panic!("cannot derive OcamlRep for non-instantiable enum"),
         // Nullary variants only.
@@ -179,8 +193,7 @@ fn enum_impl(s: &synstructure::Structure) -> (TokenStream, TokenStream) {
                 match block.tag() { #block_arms }
             }
         },
-    };
-    (to, from)
+    }
 }
 
 fn allocate_block(variant: &VariantInfo, tag: u8) -> TokenStream {

@@ -446,7 +446,15 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         (env, ServerGoToDefinition.go_quarantined ~ctx ~entry ~line ~column))
-  | BIGCODE filename -> (env, ServerBigCode.go env filename)
+  | BIGCODE filename ->
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~path:(Relative_path.create_detect_prefix filename)
+        ~file_input:(ServerCommandTypes.FileName filename)
+    in
+    let result = ServerBigCode.go_ctx ~ctx ~entry in
+    (env, result)
   | PAUSE pause ->
     let env =
       if pause then

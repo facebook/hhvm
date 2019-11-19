@@ -176,23 +176,14 @@ let serialize_tast tast tcopt =
   in
   Aast.show_program pp_ex pp_fb pp_en pp_hi tast
 
-let go : ServerEnv.env -> string -> string =
- fun env filename ->
-  let filepath = Path.make filename in
-  let path = filepath |> Path.to_string |> Relative_path.create_detect_prefix in
-  let file_content = filepath |> Path.to_string |> Sys_utils.cat_no_fail in
-  let (ctx, entry) =
-    Provider_utils.update_context
-      ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
-      ~path
-      ~file_input:(ServerCommandTypes.FileContent file_content)
-  in
+let go_ctx ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    string =
   (* Extract TAST and convert to string *)
   (* TODO(ljw): surely this doesn't need quarantine? *)
   let (tast, _) =
     Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
   in
-  let serialized_tast = serialize_tast tast env.ServerEnv.tcopt in
+  let serialized_tast = serialize_tast tast ctx.Provider_context.tcopt in
   (* Visit the TAST and extract autocompleteion items for Acclass_get *)
   let data = (new visitor)#get_entries tast in
   let completions =

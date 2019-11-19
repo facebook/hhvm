@@ -294,6 +294,8 @@ let make_env ?init_id config =
     popt = ServerConfig.parser_options config;
     gleanopt = ServerConfig.glean_options config;
     naming_table = Naming_table.empty;
+    typing_service =
+      { delegate_state = Typing_service_delegate.create (); enabled = false };
     errorl = Errors.empty;
     failed_naming = Relative_path.Set.empty;
     persistent_client = None;

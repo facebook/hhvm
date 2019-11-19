@@ -26,6 +26,8 @@
     server_monitor
     shared_lru_stubs
     typechecker_options
+    typing_service_api
+    typing_service_api_stubs
     utils_core
     utils_www_root
     version)
@@ -258,6 +260,7 @@
     shared_lru_stubs
     sys_utils
     typing
+    typing_service_api
     utils_core
     version
     watchman_utils

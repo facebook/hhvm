@@ -96,6 +96,7 @@ type full_check_status =
  *)
 type env = {
   naming_table: Naming_table.t;
+  typing_service: typing_service;
   tcopt: TypecheckerOptions.t;
   popt: ParserOptions.t;
   gleanopt: GleanOptions.t;
@@ -261,6 +262,11 @@ and dirty_deps = {
   (* Those deps have already been checked against their interaction with
    * dirty_master_deps. Storing them here to avoid checking it over and over *)
   clean_local_deps: Typing_deps.DepSet.t;
+}
+
+and typing_service = {
+  delegate_state: Typing_service_delegate.state; [@opaque]
+  enabled: bool;
 }
 
 (* When using prechecked files we split initial typechecking in two phases

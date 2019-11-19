@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<86a2aa01f7dcd41efb855794a5f93cdd>>
+// @generated SignedSource<<a8ec0e3c546bf2ebe8d27700557d51f7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -655,9 +655,6 @@ impl<Context, Ex, Fb, En, Hi> NodeMut<Context, Ex, Fb, En, Hi> for Expr_<Ex, Fb,
                 a0.accept(c, v);
             }
             Expr_::Lvar(a0) => {
-                a0.accept(c, v);
-            }
-            Expr_::ImmutableVar(a0) => {
                 a0.accept(c, v);
             }
             Expr_::Dollardollar(a0) => {
@@ -1629,11 +1626,6 @@ impl<Context, Ex, Fb, En, Hi> NodeMut<Context, Ex, Fb, En, Hi> for Stmt_<Ex, Fb,
             }
             Stmt_::DefInline(a0) => {
                 a0.accept(c, v);
-            }
-            Stmt_::Let(a) => {
-                a.0.accept(c, v);
-                a.1.accept(c, v);
-                a.2.accept(c, v);
             }
             Stmt_::Noop => {}
             Stmt_::Block(a0) => {

@@ -2330,29 +2330,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           end;
           t env expr;
         ]
-    | Syntax.LetStatement
-        {
-          let_statement_keyword = kw;
-          let_statement_name = name;
-          let_statement_colon = colon;
-          let_statement_type = ty;
-          let_statement_initializer = init;
-          let_statement_semicolon = semi;
-        } ->
-      Concat
-        [
-          t env kw;
-          Space;
-          t env name;
-          when_present colon space;
-          t env colon;
-          when_present ty space;
-          t env ty;
-          Space;
-          t env init;
-          t env semi;
-          Newline;
-        ]
     | Syntax.ErrorSyntax _ -> raise Hackfmt_error.InvalidSyntax)
 
 and when_present node f =

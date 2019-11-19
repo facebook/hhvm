@@ -34,7 +34,6 @@ let rec collect_valid_target_labels_aux acc s =
   | T.If (_, then_block, else_block) ->
     let acc = collect_valid_target_labels_for_block_aux acc then_block in
     collect_valid_target_labels_for_block_aux acc else_block
-  | T.Let _
   | T.Fallthrough
   | T.Expr _
   | T.Break

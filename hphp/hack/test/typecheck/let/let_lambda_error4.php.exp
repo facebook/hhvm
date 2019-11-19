@@ -1,6 +1,0 @@
-File "let_lambda_error4.php", line 8, characters 5-5:
-Invalid argument (Typing[4110])
-File "let_lambda_error4.php", line 5, characters 21-26:
-Expected string
-File "let_lambda_error4.php", line 4, characters 11-12:
-But got int

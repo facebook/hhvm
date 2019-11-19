@@ -127,7 +127,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.MarkupSection _ -> tag validate_markup_section (fun x -> TLDMarkupSection x) x
     | Syntax.MarkupSuffix _ -> tag validate_markup_suffix (fun x -> TLDMarkupSuffix x) x
     | Syntax.UnsetStatement _ -> tag validate_unset_statement (fun x -> TLDUnset x) x
-    | Syntax.LetStatement _ -> tag validate_let_statement (fun x -> TLDLet x) x
     | Syntax.UsingStatementBlockScoped _ -> tag validate_using_statement_block_scoped (fun x -> TLDUsingStatementBlockScoped x) x
     | Syntax.UsingStatementFunctionScoped _ -> tag validate_using_statement_function_scoped (fun x -> TLDUsingStatementFunctionScoped x) x
     | Syntax.WhileStatement _ -> tag validate_while_statement (fun x -> TLDWhile x) x
@@ -164,7 +163,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | TLDMarkupSection                thing -> invalidate_markup_section                 (value, thing)
     | TLDMarkupSuffix                 thing -> invalidate_markup_suffix                  (value, thing)
     | TLDUnset                        thing -> invalidate_unset_statement                (value, thing)
-    | TLDLet                          thing -> invalidate_let_statement                  (value, thing)
     | TLDUsingStatementBlockScoped    thing -> invalidate_using_statement_block_scoped   (value, thing)
     | TLDUsingStatementFunctionScoped thing -> invalidate_using_statement_function_scoped (value, thing)
     | TLDWhile                        thing -> invalidate_while_statement                (value, thing)
@@ -381,7 +379,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.MarkupSection _ -> tag validate_markup_section (fun x -> StmtMarkupSection x) x
     | Syntax.MarkupSuffix _ -> tag validate_markup_suffix (fun x -> StmtMarkupSuffix x) x
     | Syntax.UnsetStatement _ -> tag validate_unset_statement (fun x -> StmtUnset x) x
-    | Syntax.LetStatement _ -> tag validate_let_statement (fun x -> StmtLet x) x
     | Syntax.UsingStatementBlockScoped _ -> tag validate_using_statement_block_scoped (fun x -> StmtUsingStatementBlockScoped x) x
     | Syntax.UsingStatementFunctionScoped _ -> tag validate_using_statement_function_scoped (fun x -> StmtUsingStatementFunctionScoped x) x
     | Syntax.WhileStatement _ -> tag validate_while_statement (fun x -> StmtWhile x) x
@@ -411,7 +408,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | StmtMarkupSection                thing -> invalidate_markup_section                 (value, thing)
     | StmtMarkupSuffix                 thing -> invalidate_markup_suffix                  (value, thing)
     | StmtUnset                        thing -> invalidate_unset_statement                (value, thing)
-    | StmtLet                          thing -> invalidate_let_statement                  (value, thing)
     | StmtUsingStatementBlockScoped    thing -> invalidate_using_statement_block_scoped   (value, thing)
     | StmtUsingStatementFunctionScoped thing -> invalidate_using_statement_function_scoped (value, thing)
     | StmtWhile                        thing -> invalidate_while_statement                (value, thing)
@@ -1604,28 +1600,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; unset_variables = invalidate_list_with (invalidate_expression) x.unset_variables
       ; unset_right_paren = invalidate_token x.unset_right_paren
       ; unset_semicolon = invalidate_token x.unset_semicolon
-      }
-    ; Syntax.value = v
-    }
-  and validate_let_statement : let_statement validator = function
-  | { Syntax.syntax = Syntax.LetStatement x; value = v } -> v,
-    { let_statement_semicolon = validate_token x.let_statement_semicolon
-    ; let_statement_initializer = validate_simple_initializer x.let_statement_initializer
-    ; let_statement_type = validate_option_with (validate_specifier) x.let_statement_type
-    ; let_statement_colon = validate_option_with (validate_token) x.let_statement_colon
-    ; let_statement_name = validate_token x.let_statement_name
-    ; let_statement_keyword = validate_token x.let_statement_keyword
-    }
-  | s -> validation_fail (Some SyntaxKind.LetStatement) s
-  and invalidate_let_statement : let_statement invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.LetStatement
-      { let_statement_keyword = invalidate_token x.let_statement_keyword
-      ; let_statement_name = invalidate_token x.let_statement_name
-      ; let_statement_colon = invalidate_option_with (invalidate_token) x.let_statement_colon
-      ; let_statement_type = invalidate_option_with (invalidate_specifier) x.let_statement_type
-      ; let_statement_initializer = invalidate_simple_initializer x.let_statement_initializer
-      ; let_statement_semicolon = invalidate_token x.let_statement_semicolon
       }
     ; Syntax.value = v
     }

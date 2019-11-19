@@ -1,6 +1,0 @@
-File "let_lambda_error3.php", line 5, characters 11-30:
-Wrong type hint (Typing[4110])
-File "let_lambda_error3.php", line 5, characters 24-29:
-Expected string
-File "let_lambda_error3.php", line 4, characters 11-12:
-But got int

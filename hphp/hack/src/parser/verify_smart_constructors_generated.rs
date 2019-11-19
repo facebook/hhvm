@@ -482,14 +482,6 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
         r
     }
 
-    fn make_let_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5);
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_let_statement(self, arg0, arg1, arg2, arg3, arg4, arg5);
-        self.state_mut().verify(&args);
-        self.state_mut().push(r.kind());
-        r
-    }
-
     fn make_using_statement_block_scoped(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
         let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5);
         let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_using_statement_block_scoped(self, arg0, arg1, arg2, arg3, arg4, arg5);

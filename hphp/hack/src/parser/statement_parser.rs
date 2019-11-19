@@ -203,7 +203,6 @@ where
             TokenKind::Foreach => self.parse_foreach_statement(),
             TokenKind::Do => self.parse_do_statement(),
             TokenKind::While => self.parse_while_statement(),
-            TokenKind::Let if self.env.is_experimental_mode => self.parse_let_statement(),
             TokenKind::Using => {
                 let missing = S!(make_missing, self, self.pos());
                 self.parse_using_statement(missing)
@@ -483,41 +482,6 @@ where
             expr_node,
             right_paren_token,
             statement_node,
-        )
-    }
-
-    // SPEC:
-    // let-statement:
-    //   let   name   =   expression   ;
-    //   let   name   :   type   =   expression   ;
-    fn parse_let_statement(&mut self) -> S::R {
-        let let_keyword_token = self.assert_token(TokenKind::Let);
-        let name_token = self.require_name();
-        let (colon_token, type_token) = match self.peek_token_kind() {
-            TokenKind::Colon => {
-                let colon_token = self.assert_token(TokenKind::Colon);
-                let type_token = self.parse_type_specifier();
-                (colon_token, type_token)
-            }
-            _ => {
-                let missing_colon = S!(make_missing, self, self.pos());
-                let missing_type = S!(make_missing, self, self.pos());
-                (missing_colon, missing_type)
-            }
-        };
-        let equal_token = self.require_equal();
-        let expr_node = self.parse_expression();
-        let init_node = S!(make_simple_initializer, self, equal_token, expr_node);
-        let semi_token = self.require_semicolon();
-        S!(
-            make_let_statement,
-            self,
-            let_keyword_token,
-            name_token,
-            colon_token,
-            type_token,
-            init_node,
-            semi_token,
         )
     }
 

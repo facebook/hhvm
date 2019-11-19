@@ -319,8 +319,6 @@ let get_files_in_path ~args path =
         (* Note: these crash in both OCaml and Rust version of positioned DeclMode parser *)
         (not @@ String_utils.string_ends_with f "ffp/yield_bad1.php")
         && (not @@ String_utils.string_ends_with f "ffp/yield_from_bad1.php")
-        && (not @@ String_utils.string_ends_with f "let/let_closure.php")
-        && (not @@ String_utils.string_ends_with f "let/let_lambda.php")
         && (not @@ String_utils.string_ends_with f "test_variadic_type_hint.php")
         && not
            @@ String_utils.string_ends_with f "namespace_group_use_decl.php"

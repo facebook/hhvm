@@ -338,9 +338,6 @@ and stmt env acc st =
   | Def_inline _
   | Noop ->
     acc
-  | Let (_, _, e) ->
-    (* Scoped local variable cannot escape the block *)
-    expr acc e
   | Block b -> block acc b
   | Markup (_, eopt) ->
     (match eopt with
@@ -397,7 +394,6 @@ and expr_ env acc p e =
   | Id _ ->
     acc
   | Lvar _
-  | ImmutableVar _
   | Lplaceholder _
   | Dollardollar _ ->
     acc

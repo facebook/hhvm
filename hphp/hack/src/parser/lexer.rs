@@ -160,10 +160,6 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         self.offset += i
     }
 
-    fn is_experimental_mode(&self) -> bool {
-        self.is_experimental_mode
-    }
-
     pub fn set_in_type(&mut self, in_type: bool) {
         self.in_type = in_type
     }
@@ -1976,7 +1972,6 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
                 None => original_text,
             };
             match TokenKind::from_string(&text.as_bytes(), only_reserved) {
-                Some(TokenKind::Let) if (!(self.is_experimental_mode())) => TokenKind::Name,
                 Some(keyword) => {
                     if self.lowercase_error(original_text, &text) {
                         let err = Errors::uppercase_kw(original_text);

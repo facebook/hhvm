@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2019-10-08-0001",
+  "version" : "2019-11-15-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -155,8 +155,6 @@
       "token_text" : "isset" },
     { "token_kind" : "Keyset",
       "token_text" : "keyset" },
-    { "token_kind" : "Let",
-      "token_text" : "let" },
     { "token_kind" : "List",
       "token_text" : "list" },
     { "token_kind" : "Mixed",
@@ -940,18 +938,6 @@
         { "field_name" : "left_paren" },
         { "field_name" : "variables" },
         { "field_name" : "right_paren" },
-        { "field_name" : "semicolon" }
-      ] },
-    { "kind_name" : "LetStatement",
-      "type_name" : "let_statement",
-      "description" : "let_statement",
-      "prefix" : "let_statement",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "name" },
-        { "field_name" : "colon" },
-        { "field_name" : "type" },
-        { "field_name" : "initializer" },
         { "field_name" : "semicolon" }
       ] },
     { "kind_name" : "UsingStatementBlockScoped",

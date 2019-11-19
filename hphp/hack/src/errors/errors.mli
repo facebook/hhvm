@@ -1052,8 +1052,6 @@ val cannot_return_borrowed_value_as_immutable : Pos.t -> Pos.t -> unit
 
 val decl_override_missing_hint : Pos.t -> unit
 
-val let_var_immutability_violation : Pos.t -> string -> unit
-
 val atmost_rx_as_rxfunc_invalid_location : Pos.t -> unit
 
 val no_atmost_rx_as_rxfunc_for_rx_if_args : Pos.t -> unit

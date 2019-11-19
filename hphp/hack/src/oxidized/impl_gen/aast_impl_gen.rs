@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3f7bbe1060ee65d902ccb7a0d33fde8a>>
+// @generated SignedSource<<7d01f1c391cc81be1e494cb3e4477edc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -84,9 +84,6 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     }
     pub fn mk_def_inline(p0: Def<Ex, Fb, En, Hi>) -> Self {
         Stmt_::DefInline(Box::new(p0))
-    }
-    pub fn mk_let(p0: Lid, p1: Option<Hint>, p2: Expr<Ex, Fb, En, Hi>) -> Self {
-        Stmt_::Let(Box::new((p0, p1, p2)))
     }
     pub fn mk_noop() -> Self {
         Stmt_::Noop
@@ -187,9 +184,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     }
     pub fn mk_lvar(p0: Lid) -> Self {
         Expr_::Lvar(Box::new(p0))
-    }
-    pub fn mk_immutable_var(p0: Lid) -> Self {
-        Expr_::ImmutableVar(Box::new(p0))
     }
     pub fn mk_dollardollar(p0: Lid) -> Self {
         Expr_::Dollardollar(Box::new(p0))

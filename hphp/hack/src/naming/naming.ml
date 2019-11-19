@@ -104,11 +104,7 @@ module Env : sig
 
   val new_lvar : genv * lenv -> Ast_defs.id -> positioned_ident
 
-  val new_let_local : genv * lenv -> Ast_defs.id -> positioned_ident
-
   val lvar : genv * lenv -> Ast_defs.id -> positioned_ident
-
-  val let_local : genv * lenv -> Ast_defs.id -> positioned_ident option
 
   val global_const : genv * lenv -> Ast_defs.id -> Ast_defs.id
 
@@ -130,11 +126,7 @@ module Env : sig
 
   val check_goto_references : genv * lenv -> unit
 
-  val copy_let_locals : genv * lenv -> genv * lenv -> unit
-
   val scope : genv * lenv -> (genv * lenv -> 'a) -> 'a
-
-  val scope_lexical : genv * lenv -> (genv * lenv -> 'a) -> 'a
 
   val remove_locals : genv * lenv -> Ast_defs.id list -> unit
 end = struct
@@ -144,10 +136,6 @@ end = struct
   type lenv = {
     (* The set of locals *)
     locals: map ref;
-    (* The set of lexically-scoped local `let` variables *)
-    (* TODO: Currently these locals live in a separate namespace, it is
-     * worthwhile considering unified namespace for all local variables T28712009 *)
-    let_locals: map ref;
     (* Handler called when we see an unbound name.
      * This is used to compute an approximation of the list of captured
      * variables for closures: when we see an undefined variable, we add it
@@ -170,7 +158,6 @@ end = struct
   let empty_local unbound_handler =
     {
       locals = ref SMap.empty;
-      let_locals = ref SMap.empty;
       unbound_handler;
       goto_labels = ref SMap.empty;
       goto_targets = ref SMap.empty;
@@ -385,17 +372,6 @@ end = struct
     in
     (p, ident)
 
-  (* Defines a new scoped local variable
-   * Side effects:
-   * Always add a new variable in the local environment.
-   * If the variable has been defined already, shadow the previously-defined
-   * variable *)
-  (* TODO: Emit warning if names are getting shadowed T28436131 *)
-  let new_let_local (_, lenv) (p, x) =
-    let ident = Local_id.make_scoped x in
-    lenv.let_locals := SMap.add x (p, ident) !(lenv.let_locals);
-    (p, ident)
-
   let handle_undefined_variable (_genv, env) (p, x) =
     match env.unbound_handler with
     | None -> (p, Local_id.make_unscoped x)
@@ -416,12 +392,6 @@ end = struct
         | None -> handle_undefined_variable (genv, env) (p, x)
     in
     (p, ident)
-
-  let let_local (_genv, env) (p, x) =
-    let lcl = SMap.find_opt x !(env.let_locals) in
-    match lcl with
-    | Some lcl -> Some (p, snd lcl)
-    | None -> None
 
   let global_const (genv, _env) x =
     match Provider_config.get_backend () with
@@ -523,10 +493,8 @@ end = struct
   let scope env f =
     let (_genv, lenv) = env in
     let lenv_copy = !(lenv.locals) in
-    let lenv_scoped_copy = !(lenv.let_locals) in
     let res = f env in
     lenv.locals := lenv_copy;
-    lenv.let_locals := lenv_scoped_copy;
     res
 
   let remove_locals env vars =
@@ -536,20 +504,6 @@ end = struct
         vars
         ~f:(fun l id -> SMap.remove (snd id) l)
         ~init:!(lenv.locals)
-
-  (* Add a new lexical scope for block-scoped `let` variables.
-     No other changes in the local environment *)
-  let scope_lexical env f =
-    let (_genv, lenv) = env in
-    let lenv_scoped_copy = !(lenv.let_locals) in
-    let res = f env in
-    lenv.let_locals := lenv_scoped_copy;
-    res
-
-  (* Copy the let locals from lenv1 to lenv2 *)
-  let copy_let_locals (_genv1, lenv1) (_genv2, lenv2) =
-    let let_locals_1 = !(lenv1.let_locals) in
-    lenv2.let_locals := let_locals_1
 end
 
 (*****************************************************************************)
@@ -1883,7 +1837,6 @@ module Make (GetLocals : GetLocals) = struct
   and stmt env (pos, st) =
     let stmt =
       match st with
-      | Aast.Let (x, h, e) -> let_stmt env x h e
       | Aast.Block _ -> failwith "stmt block error"
       | Aast.Fallthrough -> N.Fallthrough
       | Aast.Noop -> N.Noop
@@ -1955,13 +1908,6 @@ module Make (GetLocals : GetLocals) = struct
     in
     (pos, stmt)
 
-  and let_stmt env (p, lid) h e =
-    let name = Local_id.get_name lid in
-    let e = expr env e in
-    let h = Option.map h (hint env) in
-    let x = Env.new_let_local env (p, name) in
-    N.Let (x, h, e)
-
   and if_stmt env e b1 b2 =
     let e = expr env e in
     Env.scope env (fun env ->
@@ -1970,11 +1916,9 @@ module Make (GetLocals : GetLocals) = struct
         N.If (e, b1, b2))
 
   and do_stmt env b e =
-    (* lexical block of `do` is extended to the expr of loop termination *)
-    Env.scope_lexical env (fun env ->
-        let b = block ~new_scope:false env b in
-        let e = expr env e in
-        N.Do (b, e))
+    let b = block ~new_scope:false env b in
+    let e = expr env e in
+    N.Do (b, e)
 
   (* Scoping is essentially that of do: block is always executed *)
   and using_stmt env has_await e b =
@@ -2020,10 +1964,6 @@ module Make (GetLocals : GetLocals) = struct
   and as_expr env ae =
     let handle_v ev =
       match ev with
-      | (p, Aast.Id x) when (fst env).in_mode = FileInfo.Mexperimental ->
-        let x = Env.new_let_local env x in
-        let ev = (p, N.ImmutableVar x) in
-        ev
       | (p, Aast.Id _) ->
         Errors.expected_variable p;
         (p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")))
@@ -2037,8 +1977,6 @@ module Make (GetLocals : GetLocals) = struct
       | (_, Aast.Lvar (p, lid)) ->
         let x = (p, Local_id.get_name lid) in
         (p, N.Lvar (Env.new_lvar env x))
-      | (p, Aast.Id x) when (fst env).in_mode = FileInfo.Mexperimental ->
-        (p, N.ImmutableVar (Env.new_let_local env x))
       | (p, _) ->
         Errors.expected_variable p;
         (p, N.Lvar (Env.new_lvar env (p, "__internal_placeholder")))
@@ -2070,8 +2008,7 @@ module Make (GetLocals : GetLocals) = struct
     match stl with
     | [] -> []
     | (_, Aast.Block b) :: rest ->
-      (* Add lexical scope for block scoped let variables *)
-      let b = Env.scope_lexical env (stmt_list b) in
+      let b = stmt_list b env in
       let rest = stmt_list rest env in
       b @ rest
     | x :: rest ->
@@ -2213,15 +2150,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.String s -> N.String s
     | Aast.String2 idl -> N.String2 (string2 env idl)
     | Aast.PrefixedString (n, e) -> N.PrefixedString (n, expr env e)
-    | Aast.Id x ->
-      (* TODO: Emit proper error messages T28473207. Currently the error message
-        * emitted has reason Naming[2049] unbound name for global constant *)
-      begin
-        match Env.let_local env x with
-        | Some x -> N.ImmutableVar x
-        | None -> N.Id (Env.global_const env x)
-      end
-    (* match *)
+    | Aast.Id x -> N.Id (Env.global_const env x)
     | Aast.Lvar (_, x) when Local_id.to_string x = SN.SpecialIdents.this ->
       N.This
     | Aast.Lvar (p, x) when Local_id.to_string x = SN.SpecialIdents.dollardollar
@@ -2456,22 +2385,13 @@ module Make (GetLocals : GetLocals) = struct
       N.Call
         (N.Cnormal, (p1, n_expr), targl env p tal, exprl env el, exprl env uel)
     | Aast.Call (_, (p, Aast.Id f), tal, el, uel) ->
-      begin
-        match Env.let_local env f with
-        | Some x ->
-          (* Translate into local id *)
-          let f = (p, N.ImmutableVar x) in
-          N.Call (N.Cnormal, f, targl env p tal, exprl env el, exprl env uel)
-        | None ->
-          (* The name is not a local `let` binding *)
-          let qualified = Env.fun_id env f in
-          N.Call
-            ( N.Cnormal,
-              (p, N.Id qualified),
-              targl env p tal,
-              exprl env el,
-              exprl env uel )
-      end
+      let qualified = Env.fun_id env f in
+      N.Call
+        ( N.Cnormal,
+          (p, N.Id qualified),
+          targl env p tal,
+          exprl env el,
+          exprl env uel )
     (* match *)
     (* Handle nullsafe instance method calls here. Because Obj_get is used
        for both instance property access and instance method calls, we need
@@ -2594,12 +2514,8 @@ module Make (GetLocals : GetLocals) = struct
         cap
       in
       let lenv = Env.empty_local @@ Some handle_unbound in
-      (* Extend the current let binding into the scope of lambda *)
-      Env.copy_let_locals env (fst env, lenv);
       let env = (fst env, lenv) in
       let f = expr_lambda env f in
-      (* TODO T28711692: Compute the correct capture list for let variables,
-       * it does not seem to affect typechecking... *)
       N.Lfun (f, !to_capture)
     | Aast.Xml (x, al, el) ->
       N.Xml
@@ -2621,7 +2537,6 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.ValCollection _
     | Aast.KeyValCollection _
     | Aast.This
-    | Aast.ImmutableVar _
     | Aast.Dollardollar _
     | Aast.Lplaceholder _
     | Aast.Fun_id _
@@ -2728,16 +2643,7 @@ module Make (GetLocals : GetLocals) = struct
   and catch env ((p1, lid1), (p2, lid2), b) =
     Env.scope env (fun env ->
         let name2 = Local_id.get_name lid2 in
-        (* If the variable does not begin with $, it is an immutable binding *)
-        let x2 =
-          if
-            name2 <> "" && name2.[0] = '$'
-            (* This is always true if not in experimental mode *)
-          then
-            Env.new_lvar env (p2, name2)
-          else
-            Env.new_let_local env (p2, name2)
-        in
+        let x2 = Env.new_lvar env (p2, name2) in
         let b = branch env b in
         ( Env.type_name env (p1, lid1) ~allow_typedef:true ~allow_generics:false,
           x2,

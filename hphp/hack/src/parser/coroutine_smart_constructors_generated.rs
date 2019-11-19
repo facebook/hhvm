@@ -265,10 +265,6 @@ where
         <Self as SyntaxSmartConstructors<Self::R, T>>::make_unset_statement(self, arg0, arg1, arg2, arg3, arg4)
     }
 
-    fn make_let_statement(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<Self::R, T>>::make_let_statement(self, arg0, arg1, arg2, arg3, arg4, arg5)
-    }
-
     fn make_using_statement_block_scoped(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<Self::R, T>>::make_using_statement_block_scoped(self, arg0, arg1, arg2, arg3, arg4, arg5)
     }

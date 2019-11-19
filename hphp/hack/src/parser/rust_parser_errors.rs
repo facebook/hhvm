@@ -3123,8 +3123,7 @@ where
                 | ReturnStatement(_)
                 | UnsetStatement(_)
                 | EchoStatement(_)
-                | ThrowStatement(_)
-                | LetStatement(_) => break,
+                | ThrowStatement(_) => break,
                 IfStatement(x) if node as *const _ == &x.if_condition as *const _ => break,
                 ForStatement(x) if node as *const _ == &x.for_initializer as *const _ => break,
                 SwitchStatement(x) if node as *const _ == &x.switch_expression as *const _ => break,

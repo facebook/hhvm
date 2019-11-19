@@ -85,7 +85,6 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
       * ('ex, 'fb, 'en, 'hi) catch list
       * ('ex, 'fb, 'en, 'hi) block
   | Def_inline of ('ex, 'fb, 'en, 'hi) def
-  | Let of lid * hint option * ('ex, 'fb, 'en, 'hi) expr
   | Noop
   | Block of ('ex, 'fb, 'en, 'hi) block
   | Markup of pstring * ('ex, 'fb, 'en, 'hi) expr option
@@ -141,7 +140,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | Omitted
   | Id of sid
   | Lvar of lid
-  | ImmutableVar of lid
   | Dollardollar of lid
   | Clone of ('ex, 'fb, 'en, 'hi) expr
   | Obj_get of

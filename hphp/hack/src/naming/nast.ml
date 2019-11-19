@@ -430,8 +430,6 @@ module Visitor_DEPRECATED = struct
 
       method on_def_inline : 'a -> def -> 'a
 
-      method on_let : 'a -> id -> hint option -> expr -> 'a
-
       method on_while : 'a -> expr -> block -> 'a
 
       method on_using :
@@ -456,8 +454,6 @@ module Visitor_DEPRECATED = struct
       method on_id : 'a -> sid -> 'a
 
       method on_lvar : 'a -> id -> 'a
-
-      method on_immutablevar : 'a -> id -> 'a
 
       method on_dollardollar : 'a -> id -> 'a
 
@@ -705,16 +701,6 @@ module Visitor_DEPRECATED = struct
 
       method on_def_inline acc d = this#on_def acc d
 
-      method on_let acc x h e =
-        let acc = this#on_lvar acc x in
-        let acc =
-          match h with
-          | Some h -> this#on_hint acc h
-          | None -> acc
-        in
-        let acc = this#on_expr acc e in
-        acc
-
       method on_block acc b = List.fold_left b ~f:this#on_stmt ~init:acc
 
       method on_case acc =
@@ -764,7 +750,6 @@ module Visitor_DEPRECATED = struct
         | Fallthrough -> this#on_fallthrough acc
         | Awaitall (el, b) -> this#on_awaitall acc el b
         | Def_inline d -> this#on_def_inline acc d
-        | Let (x, h, e) -> this#on_let acc x h e
         | Block b -> this#on_block acc b
         | Markup (s, e) -> this#on_markup acc s e
 
@@ -788,7 +773,6 @@ module Visitor_DEPRECATED = struct
         | Lplaceholder _pos -> acc
         | Dollardollar id -> this#on_dollardollar acc id
         | Lvar id -> this#on_lvar acc id
-        | ImmutableVar id -> this#on_immutablevar acc id
         | Fun_id sid -> this#on_fun_id acc sid
         | Method_id (expr, pstr) -> this#on_method_id acc expr pstr
         | Method_caller (sid, pstr) -> this#on_method_caller acc sid pstr
@@ -902,8 +886,6 @@ module Visitor_DEPRECATED = struct
       method on_id acc _ = acc
 
       method on_lvar acc _ = acc
-
-      method on_immutablevar acc _ = acc
 
       method on_dollardollar acc id = this#on_lvar acc id
 

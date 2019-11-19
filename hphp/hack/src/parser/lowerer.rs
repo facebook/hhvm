@@ -2927,15 +2927,6 @@ where
                 };
                 Self::lift_awaits_in_statement(f, node, env)
             }
-            LetStatement(c) => {
-                let f = |e: &mut Env| -> Result<ast::Stmt> {
-                    let id = Self::lid_from_pos_name(pos.clone(), &c.let_statement_name, e)?;
-                    let ty = Self::mp_optional(Self::p_hint, &c.let_statement_type, e)?;
-                    let expr = Self::p_simple_initializer(&c.let_statement_initializer, e)?;
-                    Ok(S::new(pos, S_::mk_let(id, ty, expr)))
-                };
-                Self::lift_awaits_in_statement(f, node, env)
-            }
             ForStatement(c) => {
                 let f = |e: &mut Env| -> Result<ast::Stmt> {
                     let ini = Self::p_expr_l(&c.for_initializer, e)?;

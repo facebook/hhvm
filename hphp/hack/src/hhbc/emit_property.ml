@@ -51,7 +51,6 @@ let rec expr_requires_deep_init (_, expr_) =
   | T.Fun_id _
   | T.Dollardollar _
   | T.Lplaceholder _
-  | T.ImmutableVar _
   | T.This
   | T.KeyValCollection _
   | T.ValCollection _

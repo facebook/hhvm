@@ -374,12 +374,9 @@ let converter
   and on_catch (id1, id2, b) =
     let lid = Local_id.make_unscoped (snd id2) in
     (id1, (fst id2, lid), on_block b)
-  and on_stmt (p, st) = (p, on_stmt_ p st)
-  and on_stmt_ p st =
+  and on_stmt (p, st) = (p, on_stmt_ st)
+  and on_stmt_ st =
     match st with
-    | Let (id, h, e) ->
-      let lid = Local_id.make_unscoped (snd id) in
-      Aast.Let ((p, lid), optional on_hint h, on_expr e)
     | Block sl -> Aast.Block (on_block sl)
     | Fallthrough -> Aast.Fallthrough
     | Noop -> Aast.Noop

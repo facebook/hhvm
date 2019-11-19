@@ -30,18 +30,11 @@ module SN = Naming_special_names
 
 type env = {
   namespace: Namespace_env.env;
-  let_locals: SSet.t;
   type_params: SSet.t;
   in_ppl: bool;
 }
 
-let make_env namespace =
-  {
-    namespace;
-    let_locals = SSet.empty;
-    type_params = SSet.empty;
-    in_ppl = false;
-  }
+let make_env namespace = { namespace; type_params = SSet.empty; in_ppl = false }
 
 (* While elaboration for codegen and typing is similar, there are currently a
  *   couple differences between the two and are toggled by this flag (XHP).
@@ -203,21 +196,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
 
     (* Sets let local env correctly *)
     method on_block_helper env b =
-      let aux (env, stmts) stmt =
-        match stmt with
-        | (ann, Let (((_, lid) as x), h, e)) ->
-          let new_env =
-            {
-              env with
-              let_locals = SSet.add (Local_id.get_name lid) env.let_locals;
-            }
-          in
-          let new_stmt_ =
-            Let (x, Option.map h (super#on_hint env), super#on_expr env e)
-          in
-          (new_env, (ann, new_stmt_) :: stmts)
-        | _ -> (env, super#on_stmt env stmt :: stmts)
-      in
+      let aux (env, stmts) stmt = (env, super#on_stmt env stmt :: stmts) in
       let (env, rev_stmts) = List.fold b ~f:aux ~init:(env, []) in
       (env, List.rev rev_stmts)
 
@@ -225,39 +204,16 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let (_, stmts) = self#on_block_helper env b in
       stmts
 
-    method! on_catch env (x1, ((_, lid2) as x2), b) =
+    method! on_catch env (x1, x2, b) =
       let x1 = elaborate_type_name env x1 in
-      (* If the variable does not begin with $, it is an immutable binding *)
-      let name2 = Local_id.get_name lid2 in
-      let let_locals =
-        if name2 <> "" && name2.[0] <> '$' then
-          SSet.add name2 env.let_locals
-        else
-          env.let_locals
-      in
-      let b = self#on_block { env with let_locals } b in
+      let b = self#on_block env b in
       (x1, x2, b)
 
     method! on_stmt_ env stmt =
       match stmt with
       | Foreach (e, ae, b) ->
-        let add_local env e =
-          match snd e with
-          | Id x -> { env with let_locals = SSet.add (snd x) env.let_locals }
-          | _ -> env
-        in
-        let new_env =
-          match ae with
-          | As_v ve
-          | Await_as_v (_, ve) ->
-            add_local env ve
-          | As_kv (ke, ve)
-          | Await_as_kv (_, ke, ve) ->
-            let env = add_local env ke in
-            add_local env ve
-        in
         let e = self#on_expr env e in
-        let b = self#on_block new_env b in
+        let b = self#on_block env b in
         Foreach (e, ae, b)
       | For (e1, e2, e3, b) ->
         let e1 = self#on_expr env e1 in
@@ -293,12 +249,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
             List.map el ~f:(self#on_expr env),
             List.map uargs ~f:(self#on_expr env) )
       | Call (ct, (p, Aast.Id id), tal, el, uel) ->
-        let new_id =
-          if SSet.mem (snd id) env.let_locals then
-            id
-          else
-            NS.elaborate_id env.namespace NS.ElaborateFun id
-        in
+        let new_id = NS.elaborate_id env.namespace NS.ElaborateFun id in
         let renamed_call =
           Call
             ( ct,
@@ -311,9 +262,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | Obj_get (e1, (p, Id x), null_safe) ->
         Obj_get (self#on_expr env e1, (p, Id x), null_safe)
       | Id ((_, name) as sid) ->
-        if SSet.mem name env.let_locals then
-          expr
-        else if (name = "NAN" || name = "INF") && in_codegen env then
+        if (name = "NAN" || name = "INF") && in_codegen env then
           expr
         else
           Id (NS.elaborate_id env.namespace NS.ElaborateConst sid)
@@ -407,15 +356,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         | SetNamespaceEnv nsenv ->
           let env = { env with namespace = nsenv } in
           (env, def :: defs)
-        | Stmt (_, Let ((_, lid), _, _)) ->
-          let new_env =
-            {
-              env with
-              let_locals = SSet.add (Local_id.get_name lid) env.let_locals;
-            }
-          in
-          let new_stmt = super#on_def env def in
-          (new_env, new_stmt :: defs)
         | _ -> (env, super#on_def env def :: defs)
       in
       let (_, rev_defs) = List.fold p ~f:aux ~init:(env, []) in

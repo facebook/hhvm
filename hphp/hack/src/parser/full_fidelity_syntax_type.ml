@@ -438,14 +438,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; unset_right_paren                                  : t
     ; unset_semicolon                                    : t
     }
-  | LetStatement                      of
-    { let_statement_keyword                              : t
-    ; let_statement_name                                 : t
-    ; let_statement_colon                                : t
-    ; let_statement_type                                 : t
-    ; let_statement_initializer                          : t
-    ; let_statement_semicolon                            : t
-    }
   | UsingStatementBlockScoped         of
     { using_block_await_keyword                          : t
     ; using_block_using_keyword                          : t
@@ -1200,7 +1192,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TLDMarkupSection                of markup_section
   | TLDMarkupSuffix                 of markup_suffix
   | TLDUnset                        of unset_statement
-  | TLDLet                          of let_statement
   | TLDUsingStatementBlockScoped    of using_statement_block_scoped
   | TLDUsingStatementFunctionScoped of using_statement_function_scoped
   | TLDWhile                        of while_statement
@@ -1314,7 +1305,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtMarkupSection                of markup_section
   | StmtMarkupSuffix                 of markup_suffix
   | StmtUnset                        of unset_statement
-  | StmtLet                          of let_statement
   | StmtUsingStatementBlockScoped    of using_statement_block_scoped
   | StmtUsingStatementFunctionScoped of using_statement_function_scoped
   | StmtWhile                        of while_statement
@@ -1753,14 +1743,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; unset_variables: expression listesque value
     ; unset_right_paren: Token.t value
     ; unset_semicolon: Token.t value
-    }
-  and let_statement =
-    { let_statement_keyword: Token.t value
-    ; let_statement_name: Token.t value
-    ; let_statement_colon: Token.t option value
-    ; let_statement_type: specifier option value
-    ; let_statement_initializer: simple_initializer value
-    ; let_statement_semicolon: Token.t value
     }
   and using_statement_block_scoped =
     { using_block_await_keyword: Token.t option value

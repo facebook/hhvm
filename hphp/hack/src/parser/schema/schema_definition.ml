@@ -741,23 +741,6 @@ let schema : schema_node list =
         ];
     };
     {
-      kind_name = "LetStatement";
-      type_name = "let_statement";
-      func_name = "let_statement";
-      description = "let_statement";
-      prefix = "let_statement";
-      aggregates = [TopLevelDeclaration; Statement];
-      fields =
-        [
-          ("keyword", Token);
-          ("name", Token);
-          ("colon", ZeroOrOne Token);
-          ("type", ZeroOrOne (Aggregate Specifier));
-          ("initializer", Just "SimpleInitializer");
-          ("semicolon", Token);
-        ];
-    };
-    {
       kind_name = "UsingStatementBlockScoped";
       type_name = "using_statement_block_scoped";
       func_name = "using_statement_block_scoped";

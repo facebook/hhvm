@@ -1293,36 +1293,6 @@ and stmt_ env pos st =
   | Break ->
     let env = LEnv.move_and_merge_next_in_cont env C.Break in
     (env, Aast.Break)
-  | Let (((p, x) as id), h, rhs) ->
-    let (env, hint_ty, expected) =
-      match h with
-      | Some (p, h) ->
-        let ety_env =
-          { (Phase.env_with_self env) with from_class = Some CIstatic }
-        in
-        let hint_ty = Decl_hint.hint env.decl_env (p, h) in
-        let (env, hint_ty) = Phase.localize ~ety_env env hint_ty in
-        (env, Some hint_ty, Some (ExpectedTy.make p Reason.URhint hint_ty))
-      | None -> (env, None, None)
-    in
-    let (env, t_rhs, rhs_ty) = expr env rhs in
-    let env =
-      match hint_ty with
-      | Some ty ->
-        let env = check_expected_ty "Let" env rhs_ty expected in
-        set_valid_rvalue p env x ty
-      | None -> set_valid_rvalue p env x rhs_ty
-    in
-    (* Transfer expression ID with RHS to let varible if RHS is another variable *)
-    let env =
-      match rhs with
-      | (_, ImmutableVar (_, x_rhs))
-      | (_, Lvar (_, x_rhs)) ->
-        let eid_rhs = Env.get_local_expr_id env x_rhs in
-        Option.value_map eid_rhs ~default:env ~f:(Env.set_local_expr_id env x)
-      | _ -> env
-    in
-    (env, Aast.Let (id, h, t_rhs))
   | Block _
   | Markup _ ->
     failwith
@@ -1556,7 +1526,6 @@ and bind_as_expr env p ty1 ty2 aexpr =
     let (env, te, _) = assign p env ev ty2 in
     let env = check_reassigned_mutable env te in
     (env, Aast.Await_as_v (p, te))
-  | As_kv ((p, ImmutableVar ((_, k) as id)), ev)
   | As_kv ((p, Lvar ((_, k) as id)), ev) ->
     let env = set_valid_rvalue p env k ty1 in
     let (env, te, _) = assign p env ev ty2 in
@@ -1564,7 +1533,6 @@ and bind_as_expr env p ty1 ty2 aexpr =
     let env = check_reassigned_mutable env tk in
     let env = check_reassigned_mutable env te in
     (env, Aast.As_kv (tk, te))
-  | Await_as_kv (p, (p1, ImmutableVar ((_, k) as id)), ev)
   | Await_as_kv (p, (p1, Lvar ((_, k) as id)), ev) ->
     let env = set_valid_rvalue p env k ty1 in
     let (env, te, _) = assign p env ev ty2 in
@@ -2437,9 +2405,6 @@ and expr_
         Env.get_local env x
     in
     make_result env p (Aast.Lvar id) ty
-  | ImmutableVar ((_, x) as id) ->
-    let ty = Env.get_local env x in
-    make_result env p (Aast.ImmutableVar id) ty
   | List el ->
     let (env, tel, tyl) =
       match valkind with
@@ -2603,12 +2568,6 @@ and expr_
         end
     end
   | Binop (Ast_defs.Eq None, e1, e2) ->
-    begin
-      match e1 with
-      | (_, ImmutableVar (p, x)) ->
-        Errors.let_var_immutability_violation p (Local_id.get_name x)
-      | _ -> ()
-    end;
     let (env, te2, ty2) = raw_expr env e2 in
     let (env, te1, ty) = assign p env e1 ty2 in
     let env =
@@ -2621,7 +2580,6 @@ and expr_
      * the expression ID associated with e2 is transferred to e1
      *)
     (match (e1, e2) with
-    | ((_, Lvar (_, x1)), (_, ImmutableVar (_, x2)))
     | ((_, Lvar (_, x1)), (_, Lvar (_, x2))) ->
       let eid2 = Env.get_local_expr_id env x2 in
       let env =
@@ -2687,7 +2645,7 @@ and expr_
   | Unop (uop, e) ->
     let (env, te, ty) = raw_expr env e in
     let env = might_throw env in
-    unop p env uop te ty outer
+    unop p env uop te ty
   | Eif (c, e1, e2) -> eif env ~expected p c e1 e2
   | Typename sid ->
     begin
@@ -6733,7 +6691,7 @@ and is_num env t =
 and is_super_num env t =
   SubType.is_sub_type_for_union env (MakeType.num Reason.Rnone) t
 
-and unop p env uop te ty outer =
+and unop p env uop te ty =
   let make_result env te result_ty =
     (env, Tast.make_typed_expr p result_ty (Aast.Unop (uop, te)), result_ty)
   in
@@ -6767,40 +6725,30 @@ and unop p env uop te ty outer =
   | Ast_defs.Udecr ->
     (* increment and decrement operators modify the value,
      * check for immutability violation here *)
-    begin
-      match te with
-      | (_, Aast.ImmutableVar (p, x)) ->
-        Errors.let_var_immutability_violation p (Local_id.get_name x);
-        expr_error env (Reason.Rwitness p) outer
-      | _ ->
-        if is_any ty then
-          make_result env te ty
+    if is_any ty then
+      make_result env te ty
+    else
+      (* args isn't any or a variant thereof so can actually do stuff *)
+      let (env, is_dynamic) =
+        check_dynamic_or_enforce_num env p ty (Reason.Rarith p)
+      in
+      let env =
+        if Env.env_local_reactive env then
+          Typing_mutability.handle_assignment_mutability env te (Some (snd te))
         else
-          (* args isn't any or a variant thereof so can actually do stuff *)
-          let (env, is_dynamic) =
-            check_dynamic_or_enforce_num env p ty (Reason.Rarith p)
-          in
-          let env =
-            if Env.env_local_reactive env then
-              Typing_mutability.handle_assignment_mutability
-                env
-                te
-                (Some (snd te))
-            else
-              env
-          in
-          let result_ty =
-            if is_dynamic then
-              MakeType.dynamic (Reason.Rincdec_dynamic p)
-            else if is_float env ty then
-              MakeType.float (Reason.Rarith_ret_float (p, fst ty, Reason.Aonly))
-            else if is_int env ty then
-              MakeType.int (Reason.Rarith_ret_int p)
-            else
-              MakeType.num (Reason.Rarith_ret_num (p, fst ty, Reason.Aonly))
-          in
-          make_result env te result_ty
-    end
+          env
+      in
+      let result_ty =
+        if is_dynamic then
+          MakeType.dynamic (Reason.Rincdec_dynamic p)
+        else if is_float env ty then
+          MakeType.float (Reason.Rarith_ret_float (p, fst ty, Reason.Aonly))
+        else if is_int env ty then
+          MakeType.int (Reason.Rarith_ret_int p)
+        else
+          MakeType.num (Reason.Rarith_ret_num (p, fst ty, Reason.Aonly))
+      in
+      make_result env te result_ty
   | Ast_defs.Uplus
   | Ast_defs.Uminus ->
     if is_any ty then
@@ -7053,7 +7001,6 @@ and make_a_local_of env e =
     let (env, local) = Env.FakeMembers.make env obj member_name in
     (env, Some (p, local))
   | (_, Lvar x)
-  | (_, ImmutableVar x)
   | (_, Dollardollar x) ->
     (env, Some x)
   | _ -> (env, None)

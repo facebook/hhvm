@@ -438,7 +438,6 @@ and stmt_ =
   | Noop
   | Markup of pstring * expr option
   | Using of using_stmt
-  | Let of id * hint option * expr
   | Awaitall of (id option * expr) list * block
 
 and as_expr =

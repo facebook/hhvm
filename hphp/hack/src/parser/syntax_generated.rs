@@ -574,19 +574,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_let_statement(_: &C, let_statement_keyword: Self, let_statement_name: Self, let_statement_colon: Self, let_statement_type: Self, let_statement_initializer: Self, let_statement_semicolon: Self) -> Self {
-        let syntax = SyntaxVariant::LetStatement(Box::new(LetStatementChildren {
-            let_statement_keyword,
-            let_statement_name,
-            let_statement_colon,
-            let_statement_type,
-            let_statement_initializer,
-            let_statement_semicolon,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
     fn make_using_statement_block_scoped(_: &C, using_block_await_keyword: Self, using_block_using_keyword: Self, using_block_left_paren: Self, using_block_expressions: Self, using_block_right_paren: Self, using_block_body: Self) -> Self {
         let syntax = SyntaxVariant::UsingStatementBlockScoped(Box::new(UsingStatementBlockScopedChildren {
             using_block_await_keyword,
@@ -2347,16 +2334,6 @@ where
                 let acc = f(unset_semicolon, acc);
                 acc
             },
-            SyntaxVariant::LetStatement(x) => {
-                let LetStatementChildren { let_statement_keyword, let_statement_name, let_statement_colon, let_statement_type, let_statement_initializer, let_statement_semicolon } = *x;
-                let acc = f(let_statement_keyword, acc);
-                let acc = f(let_statement_name, acc);
-                let acc = f(let_statement_colon, acc);
-                let acc = f(let_statement_type, acc);
-                let acc = f(let_statement_initializer, acc);
-                let acc = f(let_statement_semicolon, acc);
-                acc
-            },
             SyntaxVariant::UsingStatementBlockScoped(x) => {
                 let UsingStatementBlockScopedChildren { using_block_await_keyword, using_block_using_keyword, using_block_left_paren, using_block_expressions, using_block_right_paren, using_block_body } = *x;
                 let acc = f(using_block_await_keyword, acc);
@@ -3388,7 +3365,6 @@ where
             SyntaxVariant::MarkupSection {..} => SyntaxKind::MarkupSection,
             SyntaxVariant::MarkupSuffix {..} => SyntaxKind::MarkupSuffix,
             SyntaxVariant::UnsetStatement {..} => SyntaxKind::UnsetStatement,
-            SyntaxVariant::LetStatement {..} => SyntaxKind::LetStatement,
             SyntaxVariant::UsingStatementBlockScoped {..} => SyntaxKind::UsingStatementBlockScoped,
             SyntaxVariant::UsingStatementFunctionScoped {..} => SyntaxKind::UsingStatementFunctionScoped,
             SyntaxVariant::WhileStatement {..} => SyntaxKind::WhileStatement,
@@ -3863,15 +3839,6 @@ where
                  unset_variables: ts.pop().unwrap(),
                  unset_left_paren: ts.pop().unwrap(),
                  unset_keyword: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::LetStatement, 6) => SyntaxVariant::LetStatement(Box::new(LetStatementChildren {
-                 let_statement_semicolon: ts.pop().unwrap(),
-                 let_statement_initializer: ts.pop().unwrap(),
-                 let_statement_type: ts.pop().unwrap(),
-                 let_statement_colon: ts.pop().unwrap(),
-                 let_statement_name: ts.pop().unwrap(),
-                 let_statement_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::UsingStatementBlockScoped, 6) => SyntaxVariant::UsingStatementBlockScoped(Box::new(UsingStatementBlockScopedChildren {
@@ -5123,16 +5090,6 @@ pub struct UnsetStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct LetStatementChildren<T, V> {
-    pub let_statement_keyword: Syntax<T, V>,
-    pub let_statement_name: Syntax<T, V>,
-    pub let_statement_colon: Syntax<T, V>,
-    pub let_statement_type: Syntax<T, V>,
-    pub let_statement_initializer: Syntax<T, V>,
-    pub let_statement_semicolon: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct UsingStatementBlockScopedChildren<T, V> {
     pub using_block_await_keyword: Syntax<T, V>,
     pub using_block_using_keyword: Syntax<T, V>,
@@ -6160,7 +6117,6 @@ pub enum SyntaxVariant<T, V> {
     MarkupSection(Box<MarkupSectionChildren<T, V>>),
     MarkupSuffix(Box<MarkupSuffixChildren<T, V>>),
     UnsetStatement(Box<UnsetStatementChildren<T, V>>),
-    LetStatement(Box<LetStatementChildren<T, V>>),
     UsingStatementBlockScoped(Box<UsingStatementBlockScopedChildren<T, V>>),
     UsingStatementFunctionScoped(Box<UsingStatementFunctionScopedChildren<T, V>>),
     WhileStatement(Box<WhileStatementChildren<T, V>>),
@@ -6801,18 +6757,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     2 => Some(&x.unset_variables),
                     3 => Some(&x.unset_right_paren),
                     4 => Some(&x.unset_semicolon),
-                        _ => None,
-                    }
-                })
-            },
-            LetStatement(x) => {
-                get_index(6).and_then(|index| { match index {
-                        0 => Some(&x.let_statement_keyword),
-                    1 => Some(&x.let_statement_name),
-                    2 => Some(&x.let_statement_colon),
-                    3 => Some(&x.let_statement_type),
-                    4 => Some(&x.let_statement_initializer),
-                    5 => Some(&x.let_statement_semicolon),
                         _ => None,
                     }
                 })

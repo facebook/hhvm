@@ -19,9 +19,6 @@ module SU = Hhbc_string_utils
 let constant_folding () =
   Hhbc_options.constant_folding !Hhbc_options.compiler_options
 
-let hacksperimental () =
-  Hhbc_options.hacksperimental !Hhbc_options.compiler_options
-
 type hoist_kind =
   (* Def that is already at top-level *)
   | TopLevel
@@ -106,8 +103,6 @@ type state = {
   (* maps name of function that has at least one goto statement
      to labels in function (bool value denotes whether label appear in using) *)
   function_to_labels_map: bool SMap.t SMap.t;
-  (* most recent definition of lexical-scoped `let` variables *)
-  let_vars: int SMap.t;
   (* maps unique name of lambda to Rx level of the declaring scope *)
   lambda_rx_of_scope: Rx.t SMap.t;
 }
@@ -159,7 +154,6 @@ let initial_state empty_namespace =
     current_function_state = empty_per_function_state;
     functions_with_finally = SSet.empty;
     function_to_labels_map = SMap.empty;
-    let_vars = SMap.empty;
     lambda_rx_of_scope = SMap.empty;
   }
 
@@ -203,44 +197,6 @@ let should_capture_var env var =
     - it exists in one of enclosing scopes *)
     (not (SSet.mem var parameter_names)) && aux xs vs
   | _ -> false
-
-let get_let_var st x =
-  let let_vars = st.let_vars in
-  SMap.find_opt x let_vars
-
-let next_let_var_id st x =
-  match get_let_var st x with
-  | Some id -> id + 1
-  | None -> 0
-
-let update_let_var_id st x =
-  let id = next_let_var_id st x in
-  (id, { st with let_vars = SMap.add x id st.let_vars })
-
-(* We prefix the let variable with "$LET_VAR", and add "$%d" suffix for
- * distinguishing shadowings
- * This by construction does not clash with other variables, note that dollar
- * is not allowed as part of variable name by parser, but HHVM is fine with it.
- *)
-let transform_let_var_name name id = Printf.sprintf "$LET_VAR_%s$%d" name id
-
-let append_let_vars env let_vars =
-  match env.variable_scopes with
-  | [] -> env
-  | outermost :: rest ->
-    let all_vars = outermost.all_vars in
-    let rec app var idx all_vars =
-      if idx < 0 then
-        all_vars
-      else
-        let var_name = transform_let_var_name var idx in
-        if SSet.mem var_name all_vars then
-          all_vars
-        else
-          app var (idx - 1) (SSet.add var_name all_vars)
-    in
-    let all_vars = SMap.fold app let_vars all_vars in
-    { env with variable_scopes = { outermost with all_vars } :: rest }
 
 (* Add a variable to the captured variables *)
 let add_var env st var =
@@ -1051,15 +1007,9 @@ let rec convert_expr env st ((p, expr_) as expr) =
       let st = add_var env st id in
       let st = add_generic env st id in
       (st, (p, ast_id))
-    | Id ((pos, var) as id) ->
-      (match get_let_var st var with
-      | Some idx ->
-        let lvar_name = transform_let_var_name var idx in
-        let st = add_var env st lvar_name in
-        (st, (p, Lvar (pos, Local_id.make_scoped lvar_name)))
-      | None ->
-        let st = add_generic env st var in
-        (st, convert_id env p id))
+    | Id ((_, id) as ast_id) ->
+      let st = add_generic env st id in
+      (st, convert_id env p ast_id)
     | Class_get (cid, n) ->
       let (st, cid) = convert_class_id env st cid in
       let (st, n) =
@@ -1095,7 +1045,6 @@ let rec convert_expr env st ((p, expr_) as expr) =
     | Lplaceholder _
     | Dollardollar _ ->
       failwith "TODO Codegen after naming pass on AAST"
-    | ImmutableVar _ -> failwith "Codegen for 'let' is not supported"
     | Fun_id _ -> failwith "TODO Unimplemented closure_convert Fun_id"
     | Method_id (_, _) ->
       failwith "TODO Unimplemented closure_convert Method_id"
@@ -1191,7 +1140,6 @@ and convert_lambda env st p fd use_vars_opt =
              Emit_fatal.raise_fatal_parse
                p
                "Cannot use $this as lexical variable"));
-  let env = append_let_vars env st.let_vars in
   let rx_of_scope = Scope.rx_of_scope env.scope in
   let env =
     if Option.is_some use_vars_opt then
@@ -1376,10 +1324,9 @@ and convert_stmt (env : env) (st : state) (p, stmt_) : _ * stmt =
       let (st, b2) = convert_block env st b2 in
       (st, If (e, b1, b2))
     | Do (b, e) ->
-      let let_vars_copy = st.let_vars in
-      let (st, b) = convert_block ~scope:false (reset_in_using env) st b in
+      let (st, b) = convert_block (reset_in_using env) st b in
       let (st, e) = convert_expr env st e in
-      ({ st with let_vars = let_vars_copy }, Do (b, e))
+      (st, Do (b, e))
     | While (e, b) ->
       let (st, e) = convert_expr env st e in
       let (st, b) = convert_block (reset_in_using env) st b in
@@ -1387,10 +1334,9 @@ and convert_stmt (env : env) (st : state) (p, stmt_) : _ * stmt =
     | For (e1, e2, e3, b) ->
       let (st, e1) = convert_expr env st e1 in
       let (st, e2) = convert_expr env st e2 in
-      let let_vars_copy = st.let_vars in
-      let (st, b) = convert_block ~scope:false (reset_in_using env) st b in
+      let (st, b) = convert_block (reset_in_using env) st b in
       let (st, e3) = convert_expr env st e3 in
-      ({ st with let_vars = let_vars_copy }, For (e1, e2, e3, b))
+      (st, For (e1, e2, e3, b))
     | Switch (e, cl) ->
       let (st, e) = convert_expr env st e in
       let (st, cl) = List.map_env st cl (convert_case (reset_in_using env)) in
@@ -1404,10 +1350,9 @@ and convert_stmt (env : env) (st : state) (p, stmt_) : _ * stmt =
       | Await_as_kv _ ->
         check_if_in_async_context env);
       let (st, e) = convert_expr env st e in
-      let let_vars_copy = st.let_vars in
       let (st, ae) = convert_as_expr env st ae in
       let (st, b) = convert_block env st b in
-      ({ st with let_vars = let_vars_copy }, Foreach (e, ae, b))
+      (st, Foreach (e, ae, b))
     | Try (b1, cl, b2) ->
       let (st, b1) = convert_block env st b1 in
       let (st, cl) = List.map_env st cl (convert_catch env) in
@@ -1436,19 +1381,6 @@ and convert_stmt (env : env) (st : state) (p, stmt_) : _ * stmt =
       (* record the fact that function has goto *)
       let st = set_has_goto st in
       (st, stmt_)
-    | Let ((_, var), _hint, e) ->
-      let an = Tast_annotate.with_pos p in
-      let (st, e) = convert_expr env st e in
-      let (id, st) = update_let_var_id st (Local_id.get_name var) in
-      let var_name = transform_let_var_name (Local_id.get_name var) id in
-      (* We convert let statement to a simple assignment expression for simplicity *)
-      ( st,
-        Expr
-          ( an
-          @@ Binop
-               ( Ast_defs.Eq None,
-                 an @@ Lvar (p, Local_id.make_scoped var_name),
-                 e ) ) )
     | Fallthrough
     | Noop
     | Break
@@ -1458,13 +1390,7 @@ and convert_stmt (env : env) (st : state) (p, stmt_) : _ * stmt =
   in
   (st, (p, stmt_))
 
-and convert_block ?(scope = true) env st stmts =
-  if scope then
-    let let_vars_copy = st.let_vars in
-    let (st, stmts) = List.map_env st stmts (convert_stmt env) in
-    ({ st with let_vars = let_vars_copy }, stmts)
-  else
-    List.map_env st stmts (convert_stmt env)
+and convert_block env st stmts = List.map_env st stmts (convert_stmt env)
 
 and convert_function_like_body (env : env) (old_st : state) (body : func_body) :
     state * func_body * 'c =
@@ -1481,21 +1407,9 @@ and convert_function_like_body (env : env) (old_st : state) (body : func_body) :
   let st = { st with current_function_state = old_st.current_function_state } in
   (st, { body with fb_ast = r }, function_state)
 
-and convert_catch env st (ty, (p, catch_var), b) =
-  let let_vars_copy = st.let_vars in
-  let catch_var_name = Local_id.get_name catch_var in
-  (* hacksperimental feature:
-     variables with name not beginning with dollar are treated as immutable *)
-  let (st, catch_var) =
-    if catch_var_name.[0] = '$' || not (hacksperimental ()) then
-      (st, catch_var)
-    else
-      let (id, st) = update_let_var_id st catch_var_name in
-      let var_name = transform_let_var_name catch_var_name id in
-      (st, Local_id.make_scoped var_name)
-  in
+and convert_catch env st (id1, id2, b) =
   let (st, b) = convert_block env st b in
-  ({ st with let_vars = let_vars_copy }, (ty, (p, catch_var), b))
+  (st, (id1, id2, b))
 
 and convert_case env st case =
   match case with
@@ -1508,14 +1422,6 @@ and convert_case env st case =
     (st, Case (e, b))
 
 and convert_as_expr env st aexpr =
-  let convert_expr env st e =
-    match e with
-    | (p1, Id (p2, var)) when hacksperimental () ->
-      let (id, st) = update_let_var_id st var in
-      let var_name = transform_let_var_name var id in
-      (st, (p1, Lvar (p2, Local_id.make_scoped var_name)))
-    | _ -> convert_expr env st e
-  in
   match aexpr with
   | As_v e ->
     let (st, e) = convert_expr env st e in
@@ -1711,24 +1617,20 @@ and convert_defs env class_count record_count typedef_count st dl =
   match dl with
   | [] -> (st, [])
   | Fun fd :: dl ->
-    let let_vars_copy = st.let_vars in
-    let st = { st with let_vars = SMap.empty } in
     let (st, fd) = convert_fun env st fd in
     let (st, dl) =
       convert_defs env class_count record_count typedef_count st dl
     in
-    ({ st with let_vars = let_vars_copy }, (TopLevel, Fun fd) :: dl)
+    (st, (TopLevel, Fun fd) :: dl)
   (* Convert a top-level class definition into a true class definition and
    * a stub class that just corresponds to the DefCls instruction *)
   | Class cd :: dl ->
-    let let_vars_copy = st.let_vars in
-    let st = { st with let_vars = SMap.empty } in
     let (st, cd) = convert_class env st cd in
     let stub_class = make_defcls cd class_count in
     let (st, dl) =
       convert_defs env (class_count + 1) record_count typedef_count st dl
     in
-    ( { st with let_vars = let_vars_copy },
+    ( st,
       (TopLevel, Class cd)
       :: (TopLevel, Stmt (Pos.none, Def_inline (Class stub_class)))
       :: dl )

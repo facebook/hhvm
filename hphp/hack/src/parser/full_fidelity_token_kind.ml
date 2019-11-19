@@ -88,7 +88,6 @@ type t =
   | Is
   | Isset
   | Keyset
-  | Let
   | List
   | Mixed
   | Namespace
@@ -305,7 +304,6 @@ let from_string keyword ~only_reserved =
   | "is"              when not only_reserved -> Some Is
   | "isset"                                  -> Some Isset
   | "keyset"          when not only_reserved -> Some Keyset
-  | "let"             when not only_reserved -> Some Let
   | "list"                                   -> Some List
   | "mixed"           when not only_reserved -> Some Mixed
   | "namespace"       when not only_reserved -> Some Namespace
@@ -496,7 +494,6 @@ let to_string kind =
   | Is                            -> "is"
   | Isset                         -> "isset"
   | Keyset                        -> "keyset"
-  | Let                           -> "let"
   | List                          -> "list"
   | Mixed                         -> "mixed"
   | Namespace                     -> "namespace"

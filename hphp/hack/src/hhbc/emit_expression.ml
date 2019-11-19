@@ -1728,7 +1728,6 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
   | A.Dollardollar _ ->
     failwith "TODO Codegen after naming pass on AAST"
   | A.Typename _ -> failwith "Typename should not occur in expressions"
-  | A.ImmutableVar _ -> failwith "Codegen for 'let' is not supported"
   | A.PU_atom _
   | A.PU_identifier _ ->
     failwith "TODO(T35357243): Pocket Universes syntax must be erased by now"
@@ -4111,7 +4110,6 @@ and can_use_as_rhs_in_list_assignment (expr : Tast.expr_) =
     | Any
     | ValCollection _
     | KeyValCollection _
-    | ImmutableVar _
     | Dollardollar _
     | Lplaceholder _
     | Fun_id _

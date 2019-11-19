@@ -2456,18 +2456,6 @@ if there already is one, since that one will likely be better than this one. *)
                           env;
                       us_block = [(Pos.none, Noop)];
                     } ))
-          | LetStatement
-              {
-                let_statement_name;
-                let_statement_type;
-                let_statement_initializer;
-                _;
-              } ->
-            lift_awaits_in_statement env pos (fun () ->
-                let id = pos_name let_statement_name env in
-                let ty = mpOptional pHint let_statement_type env in
-                let expr = pSimpleInitializer let_statement_initializer env in
-                (pos, Let (id, ty, expr)))
           | ForStatement
               { for_initializer; for_control; for_end_of_loop; for_body; _ } ->
             lift_awaits_in_statement env pos (fun () ->
@@ -4280,7 +4268,8 @@ back to Rust can avoid segfault.
 let rewrite_coroutines_for_rust source_text script =
   (source_text, rewrite_coroutines source_text script)
 
-let () = Callback.register "rewrite_coroutines_for_rust" rewrite_coroutines_for_rust
+let () =
+  Callback.register "rewrite_coroutines_for_rust" rewrite_coroutines_for_rust
 
 let check_syntax_error (env : env) tree ast_opt :
     Full_fidelity_syntax_error.t list =

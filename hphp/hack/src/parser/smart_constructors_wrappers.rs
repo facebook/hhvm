@@ -219,9 +219,6 @@ where S: SmartConstructors<'src, State> {
     fn make_unset_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
         compose(SyntaxKind::UnsetStatement, self.s.make_unset_statement(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }
-    fn make_let_statement(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> Self::R {
-        compose(SyntaxKind::LetStatement, self.s.make_let_statement(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
-    }
     fn make_using_statement_block_scoped(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> Self::R {
         compose(SyntaxKind::UsingStatementBlockScoped, self.s.make_using_statement_block_scoped(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
     }

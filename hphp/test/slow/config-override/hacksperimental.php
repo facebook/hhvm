@@ -3,9 +3,6 @@
 @World
 @Hello
 function foo() {
-  let x : int = 12;
-  let y : int = 30;
-  var_dump(x + y);
 }
 
 <<__EntryPoint>>

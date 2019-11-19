@@ -4595,14 +4595,6 @@ let decl_override_missing_hint pos =
     pos
     "When redeclaring class members, both declarations must have a typehint"
 
-let let_var_immutability_violation pos id =
-  add
-    (Typing.err_code Typing.LetVarImmutabilityViolation)
-    pos
-    ( "Let variables are immutable. Using let variable "
-    ^ id
-    ^ " in write context is not allowed." )
-
 let invalid_type_for_atmost_rx_as_rxfunc_parameter pos type_str =
   add
     (Typing.err_code Typing.InvalidTypeForOnlyrxIfRxfuncParameter)

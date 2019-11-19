@@ -143,7 +143,6 @@ let given_text_tokens =
     make_token_node "Is" "is" ~allowed_as_identifier:true ();
     make_token_node "Isset" "isset" ();
     make_token_node "Keyset" "keyset" ~allowed_as_identifier:true ();
-    make_token_node "Let" "let" ~allowed_as_identifier:true ();
     make_token_node "List" "list" ();
     make_token_node "Mixed" "mixed" ~allowed_as_identifier:true ();
     make_token_node "Namespace" "namespace" ~allowed_as_identifier:true ();

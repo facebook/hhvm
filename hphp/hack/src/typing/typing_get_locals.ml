@@ -81,7 +81,6 @@ and terminal_ nsenv ~in_try st =
   | Aast.Break
   | Aast.Expr _
   | Aast.Markup _
-  | Aast.Let _
   | Aast.Do _
   | Aast.While _
   | Aast.For _
@@ -236,7 +235,6 @@ let rec expr (acc : acc) (_, e) : acc =
   | Aast.Any
   | Aast.ValCollection _
   | Aast.KeyValCollection _
-  | Aast.ImmutableVar _
   | Aast.Dollardollar _
   | Aast.Lplaceholder _
   | Aast.Fun_id _
@@ -289,10 +287,6 @@ let rec stmt (nsenv : Namespace_env.env) (acc : acc) st : acc =
     let acc = List.fold_left ~init:acc ~f:(fun acc (_, e2) -> expr acc e2) el in
     let acc = block nsenv acc b in
     acc
-  | Aast.Let (_x, _h, e) ->
-    (* We would like to exclude scoped locals here, but gather the locals in
-     * expression *)
-    expr acc e
   | Aast.Using u -> block nsenv acc u.Aast.us_block
   | Aast.Block b -> block nsenv acc b
   | Aast.If (e, b1, b2) ->

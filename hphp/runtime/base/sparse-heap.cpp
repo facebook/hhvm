@@ -112,11 +112,22 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
   auto const flags = MALLOCX_ALIGN(kSlabAlign) |
     (RuntimeOption::EvalBigAllocUseLocalArena ? local_arena_flags : 0);
   auto slab = mallocx(kSlabSize, flags);
+#if JEMALLOC_VERSION_MAJOR < 5
+  // prior to
+  // https://github.com/jemalloc/jemalloc/commit/498856f44a30b31fe713a18eb2fc7c6ecf3a9f63 ,
+  // allocations are in chunks; this can mean we get a much bigger allocation than we
+  // asked for.
+  size_t usable = sallocx(slab, flags);
+#else // JEMALLOC 5
+  // calling sallocx doesn't hurt, but is unneeded
+  size_t usable = kSlabSize;
+#endif
 #else
   auto slab = safe_aligned_alloc(kSlabAlign, kSlabSize);
+  size_t usable = kSlabSize;
 #endif
   m_bigs.insert((HeapObject*)slab, kSlabSize);
-  stats.malloc_cap += kSlabSize;
+  stats.malloc_cap += usable;
   stats.peakCap = std::max(stats.peakCap, stats.capacity());
   return finish(slab);
 }

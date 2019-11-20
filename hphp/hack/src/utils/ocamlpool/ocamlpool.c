@@ -252,9 +252,13 @@ value ocamlpool_reserve_block(int tag, size_t words)
 
   if (pointer < ocamlpool_limit)
   {
-    abort_unless(size < ocamlpool_next_chunk_size);
+    size_t old_ocamlpool_next_chunk_size = ocamlpool_next_chunk_size;
+    if (size >= ocamlpool_next_chunk_size) {
+        ocamlpool_next_chunk_size = size;
+    }
     ocamlpool_chunk_truncate();
     ocamlpool_chunk_alloc();
+    ocamlpool_next_chunk_size = old_ocamlpool_next_chunk_size;
     pointer = ocamlpool_cursor - size;
     abort_unless(pointer >= ocamlpool_limit);
   }

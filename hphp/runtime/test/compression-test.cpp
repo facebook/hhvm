@@ -31,7 +31,6 @@
 #include "hphp/util/gzip.h"
 #include "hphp/util/zstd.h"
 
-using namespace brotli;
 using namespace testing;
 
 namespace HPHP {

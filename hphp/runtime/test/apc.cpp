@@ -18,7 +18,6 @@
 #include <memory>
 #include <cstring>
 
-#include <folly/Memory.h>
 #include <folly/Format.h>
 
 #include "hphp/runtime/base/tv-comparisons.h"

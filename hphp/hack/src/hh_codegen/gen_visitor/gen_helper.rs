@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use proc_macro2::TokenStream;
-use quote::quote;
+use quote::{format_ident, quote};
 
 pub fn gen_ty_param_bindings(tys: impl Iterator<Item = syn::Ident>) -> TokenStream {
     let bindings = tys.map(|ty| quote! {#ty = #ty, }).collect::<Vec<_>>();
@@ -31,5 +31,12 @@ pub fn gen_ty_params_with_self(tys: impl Iterator<Item = syn::Ident>) -> TokenSt
         quote! {}
     } else {
         quote! {<#(#ty_idents)*>}
+    }
+}
+
+pub fn gen_module_uses(ms: impl Iterator<Item = impl AsRef<str>>) -> TokenStream {
+    let mods = ms.map(|m| format_ident!("{}", m.as_ref()));
+    quote! {
+        use crate::{#(#mods::*,)*};
     }
 }

@@ -20,11 +20,12 @@ pub fn run(m: &ArgMatches) -> Result<Vec<(PathBuf, String)>> {
     let output_dir = Path::new(m.value_of("output").ok_or("missing output path")?);
     let root = m.value_of("root").ok_or("missing root")?;
     let files = inputs
-        .map(|file| -> Result<syn::File> {
+        .map(|file| -> Result<(syn::File, &Path)> {
+            let file_path = Path::new(file);
             let mut file = File::open(file)?;
             let mut src = String::new();
             file.read_to_string(&mut src)?;
-            Ok(syn::parse_file(&src)?)
+            Ok((syn::parse_file(&src)?, file_path))
         })
         .collect::<Result<Vec<_>>>()?;
 

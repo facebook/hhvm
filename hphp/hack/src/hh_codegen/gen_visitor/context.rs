@@ -9,10 +9,12 @@ use quote::format_ident;
 use std::{
     collections::{HashMap, HashSet, VecDeque},
     iter::once,
+    path::Path,
 };
 use syn::*;
 
 pub struct Context<'a> {
+    pub mods: HashSet<String>,
     pub defs: HashMap<String, &'a Item>,
     pub root: &'a str,
     pub root_ty_params: Vec<String>,
@@ -20,9 +22,11 @@ pub struct Context<'a> {
     pub context: String,
 }
 impl<'a> Context<'a> {
-    pub fn new(files: &'a [syn::File], root: &'a str) -> Result<Self> {
+    pub fn new(files: &'a [(syn::File, &'a Path)], root: &'a str) -> Result<Self> {
         let mut defs = HashMap::new();
-        for f in files {
+        let mut mods = HashSet::new();
+        for (f, fp) in files {
+            eprintln!("Processing {:?}", fp);
             for i in f.items.iter() {
                 if let Ok(name) = get_ty_def_name(i) {
                     if let Some(old) = defs.insert(name, i) {
@@ -30,6 +34,8 @@ impl<'a> Context<'a> {
                     }
                 }
             }
+            // assuming file name is the module name
+            mods.insert(fp.file_stem().and_then(|fs| fs.to_str()).unwrap().into());
         }
         let root_item = defs
             .get(root)
@@ -37,6 +43,7 @@ impl<'a> Context<'a> {
         let root_ty_params = get_ty_params(root_item)?;
         let types = Self::get_all_tys(&defs, root)?;
         Ok(Self {
+            mods,
             defs,
             root,
             root_ty_params,
@@ -68,6 +75,10 @@ impl<'a> Context<'a> {
     pub fn root_ty_params_with_context(&'a self) -> impl Iterator<Item = Ident> + 'a {
         self.root_ty_params_with_context_raw()
             .map(|t| format_ident!("{}", t))
+    }
+
+    pub fn modules(&'a self) -> impl Iterator<Item = impl AsRef<str> + 'a> {
+        self.mods.iter()
     }
 
     fn get_ty_names_<'b>(defs: &'b HashMap<String, &'b Item>) -> HashSet<&'b str> {

@@ -34,14 +34,13 @@ pub trait NodeImpl {
             .collect::<Result<Vec<_>>>()?;
         let use_node = Self::use_node();
         let use_visitor = Self::use_visitor();
+        let uses = gen_module_uses(ctx.modules());
         Ok(quote! {
             #![allow(unused_variables)]
 
             #use_node
             #use_visitor
-            use crate::aast::*;
-            use crate::aast_defs::*;
-            use crate::ast_defs::*;
+            #uses
 
             #(#impls)*
         })

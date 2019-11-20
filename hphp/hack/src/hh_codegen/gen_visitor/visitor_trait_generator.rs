@@ -29,12 +29,12 @@ pub trait VisitorTrait {
         let node_dispatcher_function = Self::gen_node_dispatcher_function(ctx)?;
         let visit_functions = Self::gen_visit_functions(ctx)?;
         let visit_ty_params = Self::gen_visit_ty_params(ctx)?;
+        let uses = gen_module_uses(ctx.modules());
 
-        // TODO: not hardcode `use crate::{aast::*, aast_defs::*};`
         Ok(quote! {
             #![allow(unused_variables)]
 
-            use crate::{aast::*, aast_defs::*, ast_defs::*};
+            #uses
             #use_node
 
             #node_dispatcher_function

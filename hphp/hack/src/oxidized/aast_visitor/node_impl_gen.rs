@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<518d15be6cfb6ea40f6716a6eb48c892>>
+// @generated SignedSource<<4904b41b1b69a00cc93d336cdd834cea>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -11,9 +11,7 @@
 #![allow(unused_variables)]
 use super::node::Node;
 use super::visitor::Visitor;
-use crate::aast::*;
-use crate::aast_defs::*;
-use crate::ast_defs::*;
+use crate::{aast::*, aast_defs::*, ast_defs::*};
 impl<Context, Ex, Fb, En, Hi> Node<Context, Ex, Fb, En, Hi> for Afield<Ex, Fb, En, Hi> {
     fn accept(
         &self,

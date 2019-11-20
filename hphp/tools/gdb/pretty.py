@@ -502,7 +502,6 @@ class SrcKeyPrinter(object):
 
         func = nameof(lookup_func(func_id))
         offset = self.val['m_offset']
-        this = 't' if self.val['m_hasThis'] else ''
 
         rmp = self.val['m_resumeModeAndPrologue']
         resume = prologue = ''
@@ -516,7 +515,7 @@ class SrcKeyPrinter(object):
         elif rmp == 3:
             prologue = 'p'
 
-        return '%s@%d%s%s%s' % (func, offset, resume, this, prologue)
+        return '%s@%d%s%s' % (func, offset, resume, prologue)
 
 #------------------------------------------------------------------------------
 # Lookup function.

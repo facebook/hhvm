@@ -114,3 +114,7 @@ val from_text_ocaml :
 
 val from_text_rust :
   env -> Full_fidelity_source_text.t -> Rust_aast_parser_types.result
+
+val aast_to_tast : (Pos.t, unit, unit, unit) Aast.program -> Tast.program
+
+val tast_to_aast : Tast.program -> (Pos.t, unit, unit, unit) Aast.program

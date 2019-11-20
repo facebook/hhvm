@@ -37,6 +37,7 @@ type parser =
   | PPL_REWRITER
   | LOWERER
   | COROUTINE_ERRORS
+  | CLOSURE_CONVERT
 
 type mode =
   | RUST
@@ -334,6 +335,18 @@ let get_files_in_path ~args path =
         (not @@ String_utils.string_ends_with f "parser_massive_add_exp.php")
         && not
            @@ String_utils.string_ends_with f "parser_massive_concat_exp.php"
+      | CLOSURE_CONVERT ->
+        (* Needs elastic stack support to pass *)
+        (not @@ String_utils.string_ends_with f "parser_massive_add_exp.php")
+        && (not @@ String_utils.string_ends_with f "massive_concat_exp.php")
+        && (not @@ String_utils.string_ends_with f "reasonable_nested_array.php")
+        && (not @@ String_utils.string_ends_with f "bug64660.php")
+        (* Bug in lowerer *)
+        && not
+           @@ String_utils.string_ends_with
+                f
+                "cases/await_as_an_expression/await_as_an_expression_simple.php"
+        && true
       | _ -> true)
     files
 
@@ -372,6 +385,7 @@ let parse_args () =
       ("--ppl-rewriter", Arg.Unit (fun () -> parser := PPL_REWRITER), "");
       ("--experimental", Arg.Set is_experimental, "");
       ("--lower", Arg.Unit (fun () -> parser := LOWERER), "");
+      ("--closure-convert", Arg.Unit (fun () -> parser := CLOSURE_CONVERT), "");
       ("--codegen", Arg.Set codegen, "");
       ("--hhvm-compat-mode", Arg.Set hhvm_compat_mode, "");
       ("--php5-compat-mode", Arg.Set php5_compat_mode, "");
@@ -477,16 +491,33 @@ module LowererTest_ = struct
     let oc = Pervasives.open_out path in
     Printf.fprintf oc "%s\n" s
 
-  let print_lid fmt lid =
+  let print_lid ~skip_lid fmt lid =
     Format.pp_print_string
       fmt
-      (Format.asprintf "(%d, %s)" (Local_id.to_int lid) (Local_id.get_name lid))
+      ( if skip_lid then
+        let name = Local_id.get_name lid in
+        let name =
+          if Naming_special_names.SpecialIdents.is_tmp_var name then
+            "[tmp_var]"
+          else
+            name
+        in
+        Format.asprintf "([id], %s)" name
+      else
+        Format.asprintf "(%d, %s)" (Local_id.to_int lid) (Local_id.get_name lid)
+      )
 
-  let print_result path result =
-    Local_id.pp_ref := print_lid;
-    let print_pos pos = Format.asprintf "(%a)" Pos.pp pos in
+  let print_pos pos = Format.asprintf "(%a)" Pos.pp pos
+
+  let print_aast_result ?(skip_lid = false) r =
+    Local_id.pp_ref := print_lid ~skip_lid;
     let pp_pos fmt pos = Format.pp_print_string fmt (print_pos pos) in
     let pp_unit fmt _ = Format.pp_print_string fmt "" in
+    match r with
+    | Ok aast -> Aast.show_program pp_pos pp_unit pp_unit pp_unit aast
+    | Error msg -> Printf.sprintf "SYNTAX ERROR: %s" msg
+
+  let print_result path result =
     let print_lowpri_err (p, e) = Printf.sprintf "[%s %s]" (print_pos p) e in
     let print_lowpri_errs errs =
       String.concat ~sep:"\n" @@ List.map ~f:print_lowpri_err errs
@@ -494,11 +525,6 @@ module LowererTest_ = struct
     let print_errs errs =
       String.concat ~sep:"\n"
       @@ List.map ~f:Full_fidelity_syntax_error.show errs
-    in
-    let print_aast_result r =
-      match r with
-      | Ok aast -> Aast.show_program pp_pos pp_unit pp_unit pp_unit aast
-      | Error msg -> Printf.sprintf "SYNTAX ERROR: %s" msg
     in
     let oc = Pervasives.open_out path in
     Rust_aast_parser_types.(
@@ -509,6 +535,19 @@ module LowererTest_ = struct
         (Scoured_comments.show result.scoured_comments)
         (print_lowpri_errs result.lowpri_errors)
         (print_errs result.syntax_errors))
+
+  let lower lower_env source_text is_rust =
+    (Errors.is_hh_fixme := (fun _ _ -> false));
+    (Errors.get_hh_fixme_pos := (fun _ _ -> None));
+    (Errors.is_hh_fixme_disallowed := (fun _ _ -> false));
+    let (_err, r) =
+      Errors.do_ (fun () ->
+          if is_rust then
+            Lowerer.from_text_rust lower_env source_text
+          else
+            Lowerer.from_text_ocaml lower_env source_text)
+    in
+    r
 
   let build_tree args _env is_rust file source_text =
     let lower_env =
@@ -523,20 +562,7 @@ module LowererTest_ = struct
         ~parser_options:
           { ParserOptions.default with GlobalOptions.po_rust_lowerer = is_rust }
     in
-    let lower lower_env source_text =
-      (Errors.is_hh_fixme := (fun _ _ -> false));
-      (Errors.get_hh_fixme_pos := (fun _ _ -> None));
-      (Errors.is_hh_fixme_disallowed := (fun _ _ -> false));
-      let (_err, r) =
-        Errors.do_ (fun () ->
-            if is_rust then
-              Lowerer.from_text_rust lower_env source_text
-            else
-              Lowerer.from_text_ocaml lower_env source_text)
-      in
-      r
-    in
-    try Tree (lower lower_env source_text)
+    try Tree (lower lower_env source_text is_rust)
     with e -> Crash (Caml.Printexc.to_string e)
 
   let test args ~ocaml_env ~rust_env file contents =
@@ -632,6 +658,74 @@ end
 
 module LowererTest = Runner (LowererTest_)
 
+external rust_closure_convert_from_text :
+  SourceText.t -> (Pos.t, unit, unit, unit) Aast.program
+  = "rust_closure_convert_from_text"
+
+module ClosureConvertTest_ = struct
+  module Lowerer = Full_fidelity_ast
+
+  let print_result path aast =
+    let res = LowererTest_.print_aast_result ~skip_lid:true (Ok aast) in
+    let oc = Pervasives.open_out path in
+    Printf.fprintf oc "%s" res;
+    Pervasives.close_out oc;
+    res
+
+  let test (args : args) file contents =
+    let source_text = SourceText.make file contents in
+    let path = Relative_path.to_absolute file in
+    let parser_options = ParserOptions.default in
+    let empty_namespace = Namespace_env.empty_from_popt parser_options in
+    Hhbc_options.(
+      set_compiler_options
+        { !compiler_options with option_emit_meth_caller_func_pointers = false });
+    Printf.printf "Start %s\n" path;
+    flush stdout;
+    let lower_env =
+      Lowerer.make_env
+        file
+        ~codegen:args.codegen
+        ~rust_compare_mode:true
+        ~show_all_errors:true
+        ~keep_errors:true
+        ~elaborate_namespaces:false
+        ~lower_coroutines:false
+        ~parser_options
+    in
+
+    let ocaml_tast =
+      let open Rust_aast_parser_types in
+      (match (LowererTest_.lower lower_env source_text false).aast with
+      | Ok x -> x
+      | Error x -> failwith x)
+      |> Full_fidelity_ast.aast_to_tast
+      |> Closure_convert.convert_toplevel_prog ~empty_namespace
+      |> fun x ->
+      x.Closure_convert.ast_defs
+      |> List.map ~f:snd
+      |> Full_fidelity_ast.tast_to_aast
+    in
+
+    let rust_tast = rust_closure_convert_from_text source_text in
+
+    let ocaml_tast = print_result "/tmp/ocaml.tast" ocaml_tast in
+    let rust_tast = print_result "/tmp/rust.tast" rust_tast in
+
+    if ocaml_tast <> rust_tast then begin
+      Printf.printf "FAILED: %s\n" path;
+      exit 0
+    end
+
+  let test args ~ocaml_env:_ ~rust_env:_ file contents =
+    try test args file contents with
+    (* We don't care about those *)
+    | Failure x when x = "Unexpected concurrent stmt structure" -> ()
+    | Emit_fatal.IncludeTimeFatalException _ -> ()
+end
+
+module ClosureConvertTest = Runner (ClosureConvertTest_)
+
 (*
 Tool comparing outputs of Rust and OCaml parsers. Example usage:
 
@@ -670,6 +764,7 @@ let () =
     | DECL_MODE -> DeclModeTest.test_batch args ~ocaml_env ~rust_env
     | PPL_REWRITER -> PPLRewriterTest.test_batch args ~ocaml_env ~rust_env
     | LOWERER -> LowererTest.test_batch args ~ocaml_env ~rust_env
+    | CLOSURE_CONVERT -> ClosureConvertTest.test_batch args ~ocaml_env ~rust_env
   in
   let (user, runs, _mem) =
     Profile.profile_longer_than (fun () -> f files) ~retry:false 0.

@@ -47,5 +47,6 @@ void caml_raise_with_arg(void) {}
 void caml_raise_zero_divide(void) {}
 void caml_named_value(void) {}
 void caml_callbackN(void) {}
+void caml_raise_with_string(void) {}
 
 int ocamlpool_generation = 0;

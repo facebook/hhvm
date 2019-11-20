@@ -9,7 +9,7 @@ use lint_rust::LintError;
 use oxidized::{aast, errors::Error as HHError, file_info, parser_options, pos, scoured_comments};
 use parser_core_types::syntax_error::SyntaxError;
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, OcamlRep, Default)]
 pub struct Env {
     pub is_hh_file: bool,
     pub codegen: bool,

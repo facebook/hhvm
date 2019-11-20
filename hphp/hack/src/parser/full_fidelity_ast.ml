@@ -4478,6 +4478,22 @@ let aast_to_tast aast =
   in
   endo#on_program () aast
 
+let tast_to_aast tast =
+  let endo =
+    object
+      inherit [_] Aast.map
+
+      method on_'ex _ (pos, _) = pos
+
+      method on_'fb _ _ = ()
+
+      method on_'en _ _ = ()
+
+      method on_'hi _ _ = ()
+    end
+  in
+  endo#on_program () tast
+
 let aast_to_nast aast =
   let i _ x = x in
   let endo =

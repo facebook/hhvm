@@ -1,0 +1,26 @@
+// Copyright (c) 2019, Facebook, Inc.
+// All rights reserved.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
+use aast_parser::{rust_aast_parser_types::Env, AastParser};
+use ocamlrep_ocamlpool::ocaml_ffi;
+use options::{CompilerFlags, Options};
+use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
+
+ocaml_ffi! {
+    fn rust_closure_convert_from_text(source_text: SourceText) -> oxidized::ast::Program {
+        let mut env = Env::default();
+        env.keep_errors = true;
+        env.show_all_errors = true;
+        env.fail_open = true;
+        let indexed_source_text = IndexedSourceText::new(source_text);
+        let res = AastParser::from_text(&env, &indexed_source_text, None).unwrap().aast.unwrap();
+
+        let mut options = Options::default();
+        options.hack_compiler_flags.set(CompilerFlags::CONSTANT_FOLDING, true);
+        // TODO
+        res
+    }
+}

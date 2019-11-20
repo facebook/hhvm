@@ -112,7 +112,8 @@ let make
     ~abstract_static_props
     ~disable_unset_class_const
     ~disable_halt_compiler
-    ~disallow_func_ptrs_in_constants =
+    ~disallow_func_ptrs_in_constants
+    ~rust_lowerer =
   GlobalOptions.
     {
       default with
@@ -133,6 +134,7 @@ let make
       po_disable_unset_class_const = disable_unset_class_const;
       po_disable_halt_compiler = disable_halt_compiler;
       po_disallow_func_ptrs_in_constants = disallow_func_ptrs_in_constants;
+      po_rust_lowerer = rust_lowerer;
     }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)

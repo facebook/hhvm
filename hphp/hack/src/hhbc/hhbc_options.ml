@@ -57,6 +57,7 @@ type t = {
   option_disallow_func_ptrs_in_constants: bool;
   option_enforce_generics_ub: bool;
   option_check_int_overflow: bool;
+  option_rust_lowerer: bool;
 }
 
 let default =
@@ -109,6 +110,7 @@ let default =
     option_disallow_func_ptrs_in_constants = false;
     option_enforce_generics_ub = false;
     option_check_int_overflow = false;
+    option_rust_lowerer = false;
   }
 
 let constant_folding o = o.option_constant_folding
@@ -206,6 +208,8 @@ let enforce_generics_ub o = o.option_enforce_generics_ub
 
 let check_int_overflow o = o.option_check_int_overflow
 
+let rust_lowerer o = o.option_rust_lowerer
+
 let to_string o =
   let aliased_namespaces_str =
     aliased_namespaces o
@@ -288,6 +292,7 @@ let to_string o =
       @@ disallow_func_ptrs_in_constants o;
       Printf.sprintf "enforce_generics_ub: %B" @@ enforce_generics_ub o;
       Printf.sprintf "check_int_overflow: %B" @@ check_int_overflow o;
+      Printf.sprintf "rust_lowerer: %B" @@ rust_lowerer o;
     ]
 
 let as_bool s =
@@ -392,6 +397,8 @@ let set_option options name value =
     { options with option_enforce_generics_ub = as_bool value }
   | "hhvm.hack.lang.check_int_overflow" ->
     { options with option_check_int_overflow = int_of_string value > 0 }
+  | "hhvm.hack.lang.rust_lowerer" ->
+    { options with option_rust_lowerer = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =

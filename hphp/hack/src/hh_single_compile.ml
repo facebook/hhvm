@@ -308,7 +308,8 @@ let parse_file ~config_list ~config_jsons filename text =
         ~const_static_props:(const_static_props co)
         ~abstract_static_props:(abstract_static_props co)
         ~disable_unset_class_const:(disable_unset_class_const co)
-        ~disallow_func_ptrs_in_constants:(disallow_func_ptrs_in_constants co))
+        ~disallow_func_ptrs_in_constants:(disallow_func_ptrs_in_constants co)
+        ~rust_lowerer:(rust_lowerer co))
   in
   ( (try
        `ParseResult

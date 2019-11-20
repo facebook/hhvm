@@ -41,10 +41,10 @@ ArrayData* addToReifiedGenericsTable(
     ne->setCachedReifiedGenerics(tsList);
     return tsList;
   }
-  // it already exists on the named entity table
-  if (debug && !tsList->equal(generics, true)) {
-    raise_error("Mismatched reified types");
-  }
+  // Same key should never result in different values.
+  // If this assertion fires, there's a high chance that two different type
+  // structure mangle to the same name and they should not.
+  assertx(tsList->equal(generics, true));
   decRefArr(tsList);
   return generics;
 }

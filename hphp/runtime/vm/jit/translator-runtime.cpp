@@ -541,7 +541,8 @@ void VerifyReifiedLocalTypeImpl(int32_t id, ArrayData* ts) {
       "Argument {} passed to {}() must be an instance of {}, {} given",
       id + 1,
       func->fullName()->data(),
-      TypeStructure::toStringForDisplay(ArrNR(ts)).c_str(),
+      TypeStructure::toString(ArrNR(ts),
+        TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
       describe_actual_type(param, true)
     ), warn
   );
@@ -560,7 +561,8 @@ void VerifyReifiedReturnTypeImpl(TypedValue cell, ArrayData* ts) {
     folly::sformat(
       "Value returned from function {}() must be of type {}, {} given",
       func->fullName()->data(),
-      TypeStructure::toStringForDisplay(ArrNR(ts)).c_str(),
+      TypeStructure::toString(ArrNR(ts),
+        TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
       describe_actual_type(&cell, true)
     ), warn
   );

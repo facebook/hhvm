@@ -5277,7 +5277,8 @@ OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
         "Argument {} passed to {}() must be an instance of {}, {} given",
         param.index + 1,
         vmfp()->m_func->fullName()->data(),
-        TypeStructure::toStringForDisplay(ArrNR(cell->m_data.parr)).c_str(),
+        TypeStructure::toString(ArrNR(cell->m_data.parr),
+          TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
         describe_actual_type(param.ptr, true)
       ), warn
     );
@@ -5325,7 +5326,8 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
       folly::sformat(
         "Value returned from function {}() must be of type {}, {} given",
         vmfp()->m_func->fullName()->data(),
-        TypeStructure::toStringForDisplay(ArrNR(ts->m_data.parr)).c_str(),
+        TypeStructure::toString(ArrNR(ts->m_data.parr),
+          TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
         describe_actual_type(cell, true)
       ), warn
     );

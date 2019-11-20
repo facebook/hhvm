@@ -1,0 +1,12 @@
+array(3) {
+  ["kind"]=>
+  int(1)
+  ["opaque"]=>
+  bool(true)
+  ["alias"]=>
+  string(4) "FBID"
+}
+array(1) {
+  ["kind"]=>
+  int(1)
+}

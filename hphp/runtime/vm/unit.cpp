@@ -2381,7 +2381,8 @@ std::string mangleReifiedGenericsName(const ArrayData* tsList) {
     [&](TypedValue v) {
       assertx(tvIsDictOrDArray(v));
       auto str =
-        TypeStructure::toStringForDisplay(ArrNR(v.m_data.parr)).toCppString();
+        TypeStructure::toString(ArrNR(v.m_data.parr),
+          TypeStructure::TSDisplayType::TSDisplayTypeInternal).toCppString();
       str.erase(remove_if(str.begin(), str.end(), isspace), str.end());
       l.emplace_back(str);
     }

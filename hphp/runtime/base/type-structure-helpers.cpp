@@ -993,7 +993,9 @@ bool checkTypeStructureMatchesCellImpl(
   if (gen_error && !result) {
     if (givenType.empty()) givenType = describe_actual_type(&c1, true);
     if (expectedType.empty()) {
-      expectedType = TypeStructure::toStringForDisplay(ts).toCppString();
+      expectedType =
+        TypeStructure::toString(ts,
+          TypeStructure::TSDisplayType::TSDisplayTypeUser).toCppString();
     }
   }
   return result;

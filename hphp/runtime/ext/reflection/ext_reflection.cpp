@@ -1700,7 +1700,8 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
     assertx(typeCns->isType());
     assertx(!typeCns->isAbstract());
     assertx(isArrayLikeType(typeCns->val().m_type));
-    return TypeStructure::toString(Array::attach(typeCns->val().m_data.parr));
+    return TypeStructure::toString(Array::attach(typeCns->val().m_data.parr),
+      TypeStructure::TSDisplayType::TSDisplayTypeReflection);
   }
 
   return String();
@@ -2022,7 +2023,8 @@ static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
   auto const typeStructure = req->typeStructure;
   assertx(!typeStructure.empty());
   assertx(typeStructure.isDictOrDArray());
-  return TypeStructure::toString(typeStructure);
+  return TypeStructure::toString(typeStructure,
+    TypeStructure::TSDisplayType::TSDisplayTypeReflection);
 }
 
 static Array HHVM_METHOD(ReflectionTypeAlias, getAttributesNamespaced) {

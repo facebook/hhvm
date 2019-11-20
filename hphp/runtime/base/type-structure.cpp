@@ -83,7 +83,8 @@ const StaticString
   s_typevars("typevars"),
   s_typevar_types("typevar_types"),
   s_id("id"),
-  s_soft("soft")
+  s_soft("soft"),
+  s_opaque("opaque")
 ;
 
 const std::string
@@ -114,9 +115,10 @@ const std::string
   s_hh("HH\\")
 ;
 
-std::string fullName(const Array& arr, bool forDisplay);
+std::string fullName(const Array& arr, TypeStructure::TSDisplayType type);
 
-void functionTypeName(const Array& arr, std::string& name, bool forDisplay) {
+void functionTypeName(const Array& arr, std::string& name,
+                      TypeStructure::TSDisplayType type) {
   name += "(function (";
 
   assertx(arr.exists(s_return_type));
@@ -129,16 +131,16 @@ void functionTypeName(const Array& arr, std::string& name, bool forDisplay) {
   auto const sz = params.size();
   for (auto i = 0; i < sz; i++) {
     auto const param = params[i].asCArrRef();
-    folly::toAppend(sep, fullName(param, forDisplay), &name);
+    folly::toAppend(sep, fullName(param, type), &name);
     sep = ", ";
   }
 
   if (arr.exists(s_variadic_type)) {
     auto const variadicType = arr[s_variadic_type].asCArrRef();
-    folly::toAppend(sep, fullName(variadicType, forDisplay), "...", &name);
+    folly::toAppend(sep, fullName(variadicType, type), "...", &name);
   }
 
-  folly::toAppend("): ", fullName(retType, forDisplay), ")", &name);
+  folly::toAppend("): ", fullName(retType, type), ")", &name);
 }
 
 void accessTypeName(const Array& arr, std::string& name) {
@@ -172,7 +174,8 @@ void xhpTypeName(const Array& arr, std::string& name) {
   replaceAll(name, "_", "-");
 }
 
-void tupleTypeName(const Array& arr, std::string& name, bool forDisplay) {
+void tupleTypeName(const Array& arr, std::string& name,
+                   TypeStructure::TSDisplayType type) {
   name += "(";
   assertx(arr.exists(s_elem_types));
   auto const elems = arr[s_elem_types].asCArrRef();
@@ -180,14 +183,15 @@ void tupleTypeName(const Array& arr, std::string& name, bool forDisplay) {
   auto sep = "";
   for (auto i = 0; i < sz; i++) {
     auto const elem = elems[i].asCArrRef();
-    folly::toAppend(sep, fullName(elem, forDisplay), &name);
+    folly::toAppend(sep, fullName(elem, type), &name);
     sep = ", ";
   }
 
   name += ")";
 }
 
-void genericTypeName(const Array& arr, std::string& name, bool forDisplay) {
+void genericTypeName(const Array& arr, std::string& name,
+                     TypeStructure::TSDisplayType type) {
   name += "<";
   assertx(arr.exists(s_generic_types));
   auto const args = arr[s_generic_types].asCArrRef();
@@ -195,13 +199,18 @@ void genericTypeName(const Array& arr, std::string& name, bool forDisplay) {
   auto sep = "";
   for (auto i = 0; i < sz; i++) {
     auto const arg = args[i].asCArrRef();
-    folly::toAppend(sep, fullName(arg, forDisplay), &name);
+    folly::toAppend(sep, fullName(arg, type), &name);
     sep = ", ";
   }
   name += ">";
 }
 
-void shapeTypeName(const Array& arr, std::string& name, bool forDisplay) {
+bool forDisplay(TypeStructure::TSDisplayType type) {
+  return type != TypeStructure::TSDisplayType::TSDisplayTypeReflection;
+}
+
+void shapeTypeName(const Array& arr, std::string& name,
+                   TypeStructure::TSDisplayType type) {
   // works for both resolved and unresolved TypeStructures
   name += "(";
   assertx(arr.exists(s_fields));
@@ -229,8 +238,8 @@ void shapeTypeName(const Array& arr, std::string& name, bool forDisplay) {
     }
 
     folly::toAppend(
-      forDisplay ? " => " : "=>",
-      fullName(value, forDisplay),
+      forDisplay(type) ? " => " : "=>",
+      fullName(value, type),
       &name
     );
     sep = ", ";
@@ -243,7 +252,7 @@ void shapeTypeName(const Array& arr, std::string& name, bool forDisplay) {
   name += ")";
 }
 
-std::string fullName(const Array& arr, bool forDisplay) {
+std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
   std::string name;
 
   if (arr.exists(s_like)) {
@@ -261,115 +270,127 @@ std::string fullName(const Array& arr, bool forDisplay) {
     name += '@';
   }
 
+  if (type == TypeStructure::TSDisplayType::TSDisplayTypeInternal) {
+    if (arr.exists(s_opaque)) {
+      assertx(arr[s_opaque].toBoolean());
+      name += "opaque:";
+    }
+
+    if (arr.exists(s_alias)) {
+      auto const alias = arr[s_alias].asCStrRef();
+      name += alias.toCppString() + ':';
+    }
+  }
+
   assertx(arr.exists(s_kind));
 
   TypeStructure::Kind kind =
     TypeStructure::Kind(arr[s_kind].toInt64Val());
   switch (kind) {
     case TypeStructure::Kind::T_null:
-      name += forDisplay ? s_null : s_hh + s_null;
+      name += forDisplay(type) ? s_null : s_hh + s_null;
       break;
     case TypeStructure::Kind::T_void:
-      name += forDisplay ? s_void : s_hh + s_void;
+      name += forDisplay(type) ? s_void : s_hh + s_void;
       break;
     case TypeStructure::Kind::T_int:
-      name += forDisplay ? s_int : s_hh + s_int;
+      name += forDisplay(type) ? s_int : s_hh + s_int;
       break;
     case TypeStructure::Kind::T_bool:
-      name += forDisplay ? s_bool : s_hh + s_bool;
+      name += forDisplay(type) ? s_bool : s_hh + s_bool;
       break;
     case TypeStructure::Kind::T_float:
-      name += forDisplay ? s_float : s_hh + s_float;
+      name += forDisplay(type) ? s_float : s_hh + s_float;
       break;
     case TypeStructure::Kind::T_string:
-      name += forDisplay ? s_string : s_hh + s_string;
+      name += forDisplay(type) ? s_string : s_hh + s_string;
       break;
     case TypeStructure::Kind::T_resource:
-      name += forDisplay ? s_resource : s_hh + s_resource;
+      name += forDisplay(type) ? s_resource : s_hh + s_resource;
       break;
     case TypeStructure::Kind::T_num:
-      name += forDisplay ? s_num : s_hh + s_num;
+      name += forDisplay(type) ? s_num : s_hh + s_num;
       break;
     case TypeStructure::Kind::T_arraykey:
-      name += forDisplay ? s_arraykey : s_hh + s_arraykey;
+      name += forDisplay(type) ? s_arraykey : s_hh + s_arraykey;
       break;
     case TypeStructure::Kind::T_nothing:
-      name += forDisplay ? s_nothing : s_hh + s_nothing;
+      name += forDisplay(type) ? s_nothing : s_hh + s_nothing;
       break;
     case TypeStructure::Kind::T_noreturn:
-      name += forDisplay ? s_noreturn : s_hh + s_noreturn;
+      name += forDisplay(type) ? s_noreturn : s_hh + s_noreturn;
       break;
     case TypeStructure::Kind::T_mixed:
-      name += forDisplay ? s_mixed : s_hh + s_mixed;
+      name += forDisplay(type) ? s_mixed : s_hh + s_mixed;
       break;
     case TypeStructure::Kind::T_dynamic:
-      name += forDisplay ? s_dynamic : s_hh + s_dynamic;
+      name += forDisplay(type) ? s_dynamic : s_hh + s_dynamic;
       break;
     case TypeStructure::Kind::T_nonnull:
-      name += forDisplay ? s_nonnull : s_hh + s_nonnull;
+      name += forDisplay(type) ? s_nonnull : s_hh + s_nonnull;
       break;
     case TypeStructure::Kind::T_tuple:
-      tupleTypeName(arr, name, forDisplay);
+      tupleTypeName(arr, name, type);
       break;
     case TypeStructure::Kind::T_fun:
-      functionTypeName(arr, name, forDisplay);
+      functionTypeName(arr, name, type);
       break;
     case TypeStructure::Kind::T_array:
       name += s_array;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, forDisplay);
+        genericTypeName(arr, name, type);
       }
       break;
     case TypeStructure::Kind::T_darray:
       name += s_darray;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, forDisplay);
+        genericTypeName(arr, name, type);
       }
       break;
     case TypeStructure::Kind::T_varray:
       name += s_varray;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, forDisplay);
+        genericTypeName(arr, name, type);
       }
       break;
     case TypeStructure::Kind::T_varray_or_darray:
       name += s_varray_or_darray;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, forDisplay);
+        genericTypeName(arr, name, type);
       }
       break;
     case TypeStructure::Kind::T_shape:
-      name += forDisplay ? s_shape : s_hh + s_shape;
-      shapeTypeName(arr, name, forDisplay);
+      name += forDisplay(type) ? s_shape : s_hh + s_shape;
+      shapeTypeName(arr, name, type);
       break;
     case TypeStructure::Kind::T_dict:
       name += s_hh_dict;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, forDisplay);
+        genericTypeName(arr, name, type);
       }
       break;
     case TypeStructure::Kind::T_vec:
       name += s_hh_vec;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, forDisplay);
+        genericTypeName(arr, name, type);
       }
       break;
     case TypeStructure::Kind::T_keyset:
       name += s_hh_keyset;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, forDisplay);
+        genericTypeName(arr, name, type);
       }
       break;
     case TypeStructure::Kind::T_vec_or_dict:
       name += s_hh_vec_or_dict;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, forDisplay);
+        genericTypeName(arr, name, type);
       }
       break;
     case TypeStructure::Kind::T_arraylike:
       name += s_hh_arraylike;
       if (arr.exists(s_generic_types)) {
-        genericTypeName(arr, name, forDisplay);
+        genericTypeName(arr, name, type);
       }
       break;
     case TypeStructure::Kind::T_typevar:
@@ -394,7 +415,7 @@ std::string fullName(const Array& arr, bool forDisplay) {
     case TypeStructure::Kind::T_unresolved:
       assertx(arr.exists(s_classname));
       name += arr[s_classname].asCStrRef().toCppString();
-      if (arr.exists(s_generic_types)) genericTypeName(arr, name, forDisplay);
+      if (arr.exists(s_generic_types)) genericTypeName(arr, name, type);
       break;
   }
 
@@ -857,16 +878,9 @@ Array resolveTS(TSEnv& env,
 
 } // anonymous namespace
 
-String TypeStructure::toString(const Array& arr) {
+String TypeStructure::toString(const Array& arr, TSDisplayType type) {
   if (arr.empty()) return String();
-
-  return String(fullName(arr, false));
-}
-
-String TypeStructure::toStringForDisplay(const Array& arr) {
-  if (arr.empty()) return String();
-
-  return String(fullName(arr, true));
+  return String(fullName(arr, type));
 }
 
 /*

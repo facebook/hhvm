@@ -86,8 +86,13 @@ enum class Kind : uint8_t {
   T_reifiedtype = 104,
 };
 
-String toString(const Array& arr);
-String toStringForDisplay(const Array& arr);
+enum class TSDisplayType : uint8_t {
+  TSDisplayTypeReflection = 0,
+  TSDisplayTypeUser       = 1,
+  TSDisplayTypeInternal   = 2,
+};
+
+String toString(const Array& arr, TSDisplayType type);
 
 /*
  * Checks whether the given type structure is a valid resolved type structure,

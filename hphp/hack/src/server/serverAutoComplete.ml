@@ -11,32 +11,6 @@
 (* Code for auto-completion *)
 (*****************************************************************************)
 
-let get_results
-    ~(tcopt : TypecheckerOptions.t)
-    ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
-    ~(sienv : SearchUtils.si_env)
-    (_ : Relative_path.t)
-    (_ : FileInfo.t)
-    (tast : Tast.program) :
-    AutocompleteTypes.complete_autocomplete_result list
-    Utils.With_complete_flag.t =
-  AutocompleteService.go tast ~tcopt ~autocomplete_context ~sienv
-
-let auto_complete
-    ~(tcopt : TypecheckerOptions.t)
-    ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
-    ~(sienv : SearchUtils.si_env)
-    (content : string) :
-    AutocompleteTypes.complete_autocomplete_result list
-    Utils.With_complete_flag.t =
-  let result =
-    ServerIdeUtils.declare_and_check
-      content
-      ~f:(get_results ~tcopt ~autocomplete_context ~sienv)
-      tcopt
-  in
-  result
-
 let context_xhp_classname_regex = Str.regexp ".*<[a-zA-Z_0-9:]*$"
 
 let context_xhp_member_regex = Str.regexp ".*->[a-zA-Z_0-9:]*$"
@@ -52,8 +26,8 @@ let context_after_double_right_angle_bracket_regex =
 let context_after_quote = Str.regexp ".*['\"]$"
 
 let get_autocomplete_context
-    (content : string)
-    (pos : File_content.position)
+    ~(file_content : string)
+    ~(pos : File_content.position)
     ~(is_manually_invoked : bool) :
     AutocompleteTypes.legacy_autocomplete_context =
   (* This function retrieves the current line of text up to the position,   *)
@@ -69,14 +43,15 @@ let get_autocomplete_context
       is_after_open_square_bracket = false;
       is_after_quote = false;
       is_before_apostrophe = false;
+      char_at_pos = ' ';
     }
   else
     let pos_start = { pos with File_content.column = 1 } in
     let (offset_start, offset) =
-      File_content.get_offsets content (pos_start, pos)
+      File_content.get_offsets file_content (pos_start, pos)
     in
     let leading_text =
-      String.sub content offset_start (offset - offset_start)
+      String.sub file_content offset_start (offset - offset_start)
     in
     (* text is the text from the start of the line up to the caret position *)
     let is_xhp_classname =
@@ -99,15 +74,11 @@ let get_autocomplete_context
     in
     let is_after_quote = Str.string_match context_after_quote leading_text 0 in
     (* Detect what comes next *)
-    let next_character =
-      try
-        String.sub
-          content
-          (offset + AutocompleteTypes.autocomplete_token_length)
-          1
-      with _ -> ""
+    let char_at_pos =
+      try file_content.[offset + AutocompleteTypes.autocomplete_token_length]
+      with _ -> ' '
     in
-    let is_before_apostrophe = next_character = "'" in
+    let is_before_apostrophe = char_at_pos = '\'' in
     {
       AutocompleteTypes.is_manually_invoked;
       is_xhp_classname;
@@ -117,28 +88,64 @@ let get_autocomplete_context
       is_after_open_square_bracket;
       is_after_quote;
       is_before_apostrophe;
+      char_at_pos;
     }
 
-let auto_complete_at_position
-    ~(is_manually_invoked : bool)
-    ~(file_content : string)
-    ~(pos : File_content.position)
-    ~(tcopt : TypecheckerOptions.t)
-    ~(sienv : SearchUtils.si_env) :
+(** Call this function if you have an edited text file that ALREADY INCLUDES "AUTO332" *)
+let go_at_auto332_ctx
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~(sienv : SearchUtils.si_env)
+    ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context) :
     AutocompleteTypes.complete_autocomplete_result list
     Utils.With_complete_flag.t =
-  File_content.(
-    (* TODO: Avoid doing the "AUTO332" thing by modifying autocomplete service to accept a position *)
-    let autocomplete_context =
-      get_autocomplete_context file_content pos ~is_manually_invoked
-    in
-    let edits =
-      [
-        {
-          range = Some { st = pos; ed = pos };
-          text = AutocompleteTypes.autocomplete_token;
-        };
-      ]
-    in
-    let content = File_content.edit_file_unsafe file_content edits in
-    auto_complete ~tcopt ~autocomplete_context ~sienv content)
+  AutocompleteService.go_ctx ~ctx ~entry ~sienv ~autocomplete_context
+
+(** Call this function if you have a raw text file that DOES NOT have "AUTO332" in it *)
+let go_ctx
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~(sienv : SearchUtils.si_env)
+    ~(is_manually_invoked : bool)
+    ~(line : int)
+    ~(column : int) : AutocompleteTypes.ide_result =
+  let open File_content in
+  (* We have to edit the file content to add the text AUTO332.
+    TODO: Switch to FFP Autocomplete to avoid doing this file edit *)
+  let file_content =
+    entry.Provider_context.source_text.Full_fidelity_source_text.text
+  in
+  let pos = { line; column } in
+  let edits =
+    [
+      {
+        range = Some { st = pos; ed = pos };
+        text = AutocompleteTypes.autocomplete_token;
+      };
+    ]
+  in
+  let auto332_content = File_content.edit_file_unsafe file_content edits in
+  let (modified_auto332_context, modified_auto332_entry) =
+    Provider_utils.update_context
+      ~ctx
+      ~path:entry.Provider_context.path
+      ~file_input:(ServerCommandTypes.FileContent auto332_content)
+  in
+  let autocomplete_context =
+    get_autocomplete_context
+      ~file_content:auto332_content
+      ~pos
+      ~is_manually_invoked
+  in
+  let result =
+    go_at_auto332_ctx
+      ~ctx:modified_auto332_context
+      ~entry:modified_auto332_entry
+      ~sienv
+      ~autocomplete_context
+  in
+  {
+    AutocompleteTypes.completions = result.Utils.With_complete_flag.value;
+    char_at_pos = autocomplete_context.AutocompleteTypes.char_at_pos;
+    is_complete = result.Utils.With_complete_flag.is_complete;
+  }

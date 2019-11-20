@@ -126,6 +126,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     (env, ServerSignatureHelp.go_quarantined ~env ~ctx ~entry ~line ~column)
   | COMMANDLINE_AUTOCOMPLETE content ->
+    (* For command line autocomplete, we assume the AUTO332 text has
+    already been inserted, and we fake the rest of this information. *)
     let autocomplete_context =
       {
         AutocompleteTypes.is_manually_invoked = false;
@@ -136,26 +138,51 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         is_after_open_square_bracket = false;
         is_after_quote = false;
         is_before_apostrophe = false;
+        char_at_pos = ' ';
       }
     in
     (* Since this is being executed from the command line,
      * let's turn on the flags that increase accuracy but slow it down *)
     let old_sienv = env.ServerEnv.local_symbol_table in
     let sienv =
-      {
-        !old_sienv with
-        SearchUtils.sie_resolve_signatures = true;
-        SearchUtils.sie_resolve_positions = true;
-        SearchUtils.sie_resolve_local_decl = true;
-      }
+      ref
+        {
+          !old_sienv with
+          SearchUtils.sie_resolve_signatures = true;
+          SearchUtils.sie_resolve_positions = true;
+          SearchUtils.sie_resolve_local_decl = true;
+        }
     in
     (* feature not implemented here; it only works for LSP *)
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~path:(Relative_path.create_detect_prefix "")
+        ~file_input:(ServerCommandTypes.FileContent content)
+    in
+    (* Update the symbol index from this file *)
+    Facts_parser.mangle_xhp_mode := false;
+    let facts_opt =
+      Facts_parser.from_text
+        ~php5_compat_mode:false
+        ~hhvm_compat_mode:true
+        ~disable_nontoplevel_declarations:false
+        ~disable_legacy_soft_typehints:false
+        ~allow_new_attribute_syntax:false
+        ~disable_legacy_attribute_syntax:false
+        ~filename:Relative_path.default
+        ~text:content
+    in
+    (match facts_opt with
+    | None -> ()
+    | Some facts ->
+      SymbolIndex.update_from_facts ~sienv ~path:Relative_path.default ~facts);
     let result =
-      ServerAutoComplete.auto_complete
-        ~tcopt:env.tcopt
+      ServerAutoComplete.go_at_auto332_ctx
+        ~ctx
+        ~entry
+        ~sienv:!sienv
         ~autocomplete_context
-        ~sienv
-        content
     in
     (env, result.With_complete_flag.value)
   | IDENTIFY_FUNCTION (filename, file_input, line, column) ->
@@ -309,26 +336,28 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let predeclare = genv.local_config.ServerLocalConfig.predeclare_ide in
     let edits = List.map edits ~f:Ide_api_types.ide_text_edit_to_fc in
     (ServerFileSync.edit_file ~predeclare env path edits, ())
-  | IDE_AUTOCOMPLETE (path, pos, is_manually_invoked) ->
-    With_complete_flag.(
-      let pos = pos |> Ide_api_types.ide_pos_to_fc in
-      let file_content =
-        ServerFileSync.get_file_content (ServerCommandTypes.FileName path)
-      in
-      let offset = File_content.get_offset file_content pos in
-      (* will raise if out of bounds *)
-      let char_at_pos = File_content.get_char file_content offset in
-      let results =
-        ServerAutoComplete.auto_complete_at_position
-          ~is_manually_invoked
-          ~file_content
-          ~pos
-          ~tcopt:env.tcopt
-          ~sienv:!(env.ServerEnv.local_symbol_table)
-      in
-      let completions = results.value in
-      let is_complete = results.is_complete in
-      (env, { AutocompleteTypes.completions; char_at_pos; is_complete }))
+  | IDE_AUTOCOMPLETE (filename, pos, is_manually_invoked) ->
+    let pos = pos |> Ide_api_types.ide_pos_to_fc in
+    let content =
+      ServerFileSync.get_file_content (ServerCommandTypes.FileName filename)
+    in
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty ~tcopt:env.ServerEnv.tcopt)
+        ~path:(Relative_path.create_detect_prefix filename)
+        ~file_input:(ServerCommandTypes.FileContent content)
+    in
+    let results =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerAutoComplete.go_ctx
+            ~ctx
+            ~entry
+            ~sienv:!(env.ServerEnv.local_symbol_table)
+            ~is_manually_invoked
+            ~line:pos.File_content.line
+            ~column:pos.File_content.column)
+    in
+    (env, results)
   | IDE_FFP_AUTOCOMPLETE (path, pos) ->
     let pos = pos |> Ide_api_types.ide_pos_to_fc in
     let content =

@@ -38,14 +38,22 @@ let run
     || should_complete_function context
     || is_complete_class_member context
   then
-    let ac_results =
-      ServerAutoComplete.auto_complete_at_position
-        ~is_manually_invoked:false
-        ~file_content
-        ~pos
-        ~tcopt
-        ~sienv
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty tcopt)
+        ~path:(Relative_path.create_detect_prefix "")
+        ~file_input:(ServerCommandTypes.FileContent file_content)
     in
-    Utils.With_complete_flag.(ac_results.value)
+    let ac_results =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerAutoComplete.go_ctx
+            ~ctx
+            ~entry
+            ~sienv
+            ~is_manually_invoked:false
+            ~line:pos.File_content.line
+            ~column:pos.File_content.column)
+    in
+    ac_results.AutocompleteTypes.completions
   else
     []

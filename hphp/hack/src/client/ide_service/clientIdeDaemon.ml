@@ -395,68 +395,22 @@ let handle_message :
           { ClientIdeMessage.Completion.document_location; is_manually_invoked }
       ) ->
       (* Update the state of the world with the document as it exists in the IDE *)
-      let (state, _, entry) =
+      let (state, ctx, entry) =
         make_context_from_document_location initialized_state document_location
       in
       let sienv =
         !(initialized_state.server_env.ServerEnv.local_symbol_table)
       in
-      File_content.(
-        (* TODO: We don't actually want to do this AUTO332 nonsense.
-        Ripe for a refactor and move to FFP autocomplete *)
-        let tcopt = initialized_state.server_env.ServerEnv.tcopt in
-        let pos =
-          { line = document_location.line; column = document_location.column }
-        in
-        let edits =
-          [
-            {
-              range = Some { st = pos; ed = pos };
-              text = AutocompleteTypes.autocomplete_token;
-            };
-          ]
-        in
-        let edited_content =
-          File_content.edit_file_unsafe
-            entry.Provider_context.source_text.Full_fidelity_source_text.text
-            edits
-        in
-        (* Assemble the autocomplete context. Since we're doing phony
-         * edits on this file, we don't want this to pollute the regular
-         * context. *)
-        let (auto332_context, entry) =
-          Provider_utils.update_context
-            ~ctx:(Provider_context.empty tcopt)
-            ~path:entry.Provider_context.path
-            ~file_input:(ServerCommandTypes.FileContent edited_content)
-        in
-        (* Use the server env and the param to contact autocomplete service *)
-        let autocomplete_context =
-          ServerAutoComplete.get_autocomplete_context
-            edited_content
-            pos
-            ~is_manually_invoked
-        in
-        let matches =
-          Provider_utils.respect_but_quarantine_unsaved_changes
-            ~ctx:auto332_context
-            ~f:(fun () ->
-              let (tast, _errors) =
-                Provider_utils.compute_tast_and_errors_quarantined
-                  ~ctx:auto332_context
-                  ~entry
-              in
-              AutocompleteService.go ~tcopt ~autocomplete_context ~sienv tast)
-        in
-        let result =
-          {
-            AutocompleteTypes.completions =
-              matches.Utils.With_complete_flag.value;
-            char_at_pos = ' ';
-            is_complete = matches.Utils.With_complete_flag.is_complete;
-          }
-        in
-        Lwt.return (state, Handle_message_result.Response result))
+      let result =
+        ServerAutoComplete.go_ctx
+          ~ctx
+          ~entry
+          ~sienv
+          ~is_manually_invoked
+          ~line:document_location.line
+          ~column:document_location.column
+      in
+      Lwt.return (state, Handle_message_result.Response result)
     (* Autocomplete docblock resolve *)
     | (Initialized initialized_state, Completion_resolve param) ->
       let ctx = initialized_state.ctx in

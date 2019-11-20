@@ -806,11 +806,14 @@ let find_global_results
   )
 
 (* Main entry point for autocomplete *)
-let go
-    ~(tcopt : TypecheckerOptions.t)
+let go_ctx
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
-    ~(sienv : SearchUtils.si_env)
-    tast =
+    ~(sienv : SearchUtils.si_env) =
+  let (tast, _) =
+    Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
+  in
   reset ();
   visitor#go tast;
   Errors.ignore_ (fun () ->
@@ -820,7 +823,7 @@ let go
       let tast_env =
         match !ac_env with
         | Some e -> e
-        | None -> Tast_env.empty tcopt
+        | None -> Tast_env.empty ctx.Provider_context.tcopt
       in
       let completion_type = !argument_global_type in
       let ( = ) = Option.equal equal_autocomplete_type in

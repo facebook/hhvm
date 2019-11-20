@@ -1033,32 +1033,37 @@ let handle_mode
   | Ai _ -> ()
   | Autocomplete
   | Autocomplete_manually_invoked ->
-    let filename = expect_single_file () in
-    let sienv = scan_files_for_symbol_index filename popt sienv in
-    let file = cat (Relative_path.to_absolute filename) in
+    let path = expect_single_file () in
+    let sienv = scan_files_for_symbol_index path popt sienv in
+    let content = cat (Relative_path.to_absolute path) in
     (* Search backwards: there should only be one /real/ case. If there's multiple, *)
     (* guess that the others are preceding explanation comments *)
     let offset =
       Str.search_backward
         (Str.regexp AutocompleteTypes.autocomplete_token)
-        file
-        (String.length file)
+        content
+        (String.length content)
     in
-    let pos = File_content.offset_to_position file offset in
-    let file =
-      Str.string_before file offset
-      ^ Str.string_after
-          file
-          (offset + AutocompleteTypes.autocomplete_token_length)
-    in
+    let pos = File_content.offset_to_position content offset in
     let is_manually_invoked = mode = Autocomplete_manually_invoked in
-    let result =
-      ServerAutoComplete.auto_complete_at_position
-        ~tcopt
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx:(Provider_context.empty tcopt)
+        ~path
+        ~file_input:(ServerCommandTypes.FileContent content)
+    in
+    let autocomplete_context =
+      ServerAutoComplete.get_autocomplete_context
+        ~file_content:content
         ~pos
         ~is_manually_invoked
-        ~file_content:file
+    in
+    let result =
+      ServerAutoComplete.go_at_auto332_ctx
+        ~ctx
+        ~entry
         ~sienv
+        ~autocomplete_context
     in
     List.iter
       ~f:

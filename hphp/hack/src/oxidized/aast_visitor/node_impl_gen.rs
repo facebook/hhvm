@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4904b41b1b69a00cc93d336cdd834cea>>
+// @generated SignedSource<<f74983caff4eb2429e776c58e63ffe85>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -11,7 +11,7 @@
 #![allow(unused_variables)]
 use super::node::Node;
 use super::visitor::Visitor;
-use crate::{aast::*, aast_defs::*, ast_defs::*};
+use crate::{aast::*, aast_defs::*, ast_defs::*, doc_comment::*};
 impl<Context, Ex, Fb, En, Hi> Node<Context, Ex, Fb, En, Hi> for Afield<Ex, Fb, En, Hi> {
     fn accept(
         &self,
@@ -570,6 +570,22 @@ impl<Context, Ex, Fb, En, Hi> Node<Context, Ex, Fb, En, Hi> for Def<Ex, Fb, En, 
                 a0.accept(c, v);
             }
         }
+    }
+}
+impl<Context, Ex, Fb, En, Hi> Node<Context, Ex, Fb, En, Hi> for DocComment {
+    fn accept(
+        &self,
+        c: &mut Context,
+        v: &mut dyn Visitor<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
+    ) {
+        v.visit_doc_comment(c, self);
+    }
+    fn recurse(
+        &self,
+        c: &mut Context,
+        v: &mut dyn Visitor<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
+    ) {
+        self.0.accept(c, v);
     }
 }
 impl<Context, Ex, Fb, En, Hi> Node<Context, Ex, Fb, En, Hi> for Enum_ {

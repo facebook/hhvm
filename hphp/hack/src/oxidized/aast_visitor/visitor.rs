@@ -3,14 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f139d20db508b7506d733c4b474b125c>>
+// @generated SignedSource<<1bc1f3bda76b117ee008682a047d89c9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 #![allow(unused_variables)]
 use super::node::Node;
-use crate::{aast::*, aast_defs::*, ast_defs::*};
+use crate::{aast::*, aast_defs::*, ast_defs::*, doc_comment::*};
 pub fn visit<Context, Ex, Fb, En, Hi>(
     v: &mut impl Visitor<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
     c: &mut Context,
@@ -172,6 +172,9 @@ pub trait Visitor {
         c: &mut Self::Context,
         p: &Def<Self::Ex, Self::Fb, Self::En, Self::Hi>,
     ) {
+        p.recurse(c, self.object())
+    }
+    fn visit_doc_comment(&mut self, c: &mut Self::Context, p: &DocComment) {
         p.recurse(c, self.object())
     }
     fn visit_enum_(&mut self, c: &mut Self::Context, p: &Enum_) {

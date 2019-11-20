@@ -3865,7 +3865,7 @@ where
             }
         }
         let str = node.leading_text(env.indexed_source_text.source_text());
-        parse(str, 0, Free, 0).map(Rc::new)
+        parse(str, 0, Free, 0).map(oxidized::doc_comment::DocComment::new)
     }
 
     fn p_xhp_child(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::XhpChild> {

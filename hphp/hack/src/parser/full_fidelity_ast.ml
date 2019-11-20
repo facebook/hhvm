@@ -61,7 +61,6 @@ type env = {
   (* Whether we are (still) considering TLSs*)
   (* Changing parts; should disappear in future. `mutable` saves allocations. *)
   mutable ignore_pos: bool;
-  mutable max_depth: int;
   (* Filthy hack around OCaml bug *)
   mutable saw_yield: bool;
   (* Information flowing back up *)
@@ -128,7 +127,6 @@ let make_env
     hacksperimental;
     top_level_statements = true;
     ignore_pos;
-    max_depth = 42;
     saw_yield = false;
     saw_compiler_halt_offset = ref None;
     recursion_depth = ref 0;
@@ -2653,29 +2651,17 @@ if there already is one, since that one will likely be better than this one. *)
             in
             (pos, Awaitall (lifted_awaits, [stmt]))
           | MarkupSection _ -> pMarkup node env
-          | _ when env.max_depth > 0 && env.codegen ->
-            (* OCaml optimisers; Forgive them, for they know not what they do!
-             *
-             * The max_depth is only there to stop the *optimised* version from an
-             * unbounded recursion. Sad times.
-             *
-             * As for the code gen check, we only want to have a blanket assumption that
-             * a statement we don't recognize is an inline definition when we're in
-             * code generation mode, since typechecking runs with env.codegen set to
-             * false, and typechecking needs to support ASTs with missing nodes to
-             * support IDE features, such as autocomplete.
-             *)
-            let outer_max_depth = env.max_depth in
-            let () = env.max_depth <- outer_max_depth - 1 in
-            let result =
-              match pDef node env with
-              | [def] -> (pos, Def_inline def)
-              | _ ->
-                failwith
-                  "This should be impossible; inline definition was list."
-            in
-            let () = env.max_depth <- outer_max_depth in
-            result
+          | _ when env.codegen ->
+            (match pDef_ true node env with
+            | [def] -> (pos, Def_inline def)
+            | [] ->
+              missing_syntax
+                ?fallback:(Some (Pos.none, Noop))
+                "statement"
+                node
+                env
+            | _ ->
+              failwith "This should be impossible; inline definition was list.")
           | _ ->
             missing_syntax
               ?fallback:(Some (Pos.none, Noop))
@@ -3515,8 +3501,8 @@ if there already is one, since that one will likely be better than this one. *)
       else
         missing_syntax "function header constraints" parent env
 
-  and pDef : def list parser =
-   fun node env ->
+  and pDef_ : bool -> def list parser =
+   fun is_def_inline node env ->
     let doc_comment_opt = extract_docblock node in
     match syntax node with
     | FunctionDeclaration
@@ -3810,10 +3796,13 @@ if there already is one, since that one will likely be better than this one. *)
           };
       ]
     | _
-      when env.fi_mode = FileInfo.Mdecl
+      when is_def_inline
+           || env.fi_mode = FileInfo.Mdecl
            || (env.fi_mode = FileInfo.Mphp && not env.codegen) ->
       []
     | _ -> [Stmt (pStmt node env)]
+
+  and pDef : def list parser = (fun node env -> pDef_ false node env)
 
   and pPUMapping : pumapping parser =
    fun node env ->

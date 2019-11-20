@@ -111,6 +111,7 @@ impl<'a> AastParser {
                 mode,
                 indexed_source_text,
                 &env.parser_options,
+                stack_limit,
             );
             let ret = PositionedSyntaxLowerer::lower(
                 &mut lowerer_env,

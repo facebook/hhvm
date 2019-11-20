@@ -342,6 +342,7 @@ dependencies = [
  "hack_oxidized 3.49.0",
  "hack_parser 3.49.0",
  "hack_parser_core_types 3.49.0",
+ "hack_stack_limit 3.49.0",
  "hack_utils_ocamlpool 3.49.0",
  "html_entities 3.49.0",
  "itertools 0.7.11 (registry+https://github.com/rust-lang/crates.io-index)",

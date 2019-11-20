@@ -1459,7 +1459,7 @@ where
         }
     }
 
-    fn check_stack_limit(&mut self) {
+    fn check_stack_limit(&self) {
         self.context()
             .stack_limit
             .as_ref()

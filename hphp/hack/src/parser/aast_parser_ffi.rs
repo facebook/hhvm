@@ -4,7 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use aast_parser::{rust_aast_parser_types::Env, AastParser};
+use aast_parser::{rust_aast_parser_types::Env, AastParser, Error as AastParserError};
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep_ocamlpool::{ocaml_ffi, to_ocaml};
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
@@ -61,11 +61,11 @@ ocaml_ffi! {
             stack_slack_for_traversal_and_parsing,
         ) {
             Ok(r) => r,
-            Err(failure) => {
-                panic!(
-                    "Rust aast parser FFI exceeded maximum allowed stack of {} KiB",
-                    failure.max_stack_size_tried / KI
+            Err(_) => {
+                let r: &Result<(), AastParserError> = &Err(
+                    "Expression recursion limit reached".into(),
                 );
+                unsafe { UnsafeOcamlPtr::new(to_ocaml(r)) }
             }
         }
     }

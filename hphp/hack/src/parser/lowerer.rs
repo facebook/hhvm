@@ -32,6 +32,7 @@ use parser_core_types::{
     syntax_kind, syntax_trait::SyntaxTrait, token_kind::TokenKind as TK,
 };
 use regex::bytes::Regex;
+use stack_limit::StackLimit;
 use std::{
     cell::{Ref, RefCell, RefMut},
     collections::HashSet,
@@ -164,6 +165,7 @@ pub struct Env<'a> {
 
     pub indexed_source_text: &'a IndexedSourceText<'a>,
     pub parser_options: &'a GlobalOptions,
+    pub stack_limit: Option<&'a StackLimit>,
 
     state: Rc<RefCell<State>>,
 }
@@ -179,6 +181,7 @@ impl<'a> Env<'a> {
         mode: file_info::Mode,
         indexed_source_text: &'a IndexedSourceText<'a>,
         parser_options: &'a GlobalOptions,
+        stack_limit: Option<&'a StackLimit>,
     ) -> Self {
         // (hrust) Ported from namespace_env.ml
         let mut ns_uses = hh_autoimport::NAMESPACES_MAP.clone();
@@ -215,6 +218,7 @@ impl<'a> Env<'a> {
             parser_options,
             pos_none: Pos::make_none(),
             empty_ns_env: RcOc::new(empty_ns_env),
+            stack_limit,
 
             state: Rc::new(RefCell::new(State {
                 saw_compiler_halt_offset: None,
@@ -322,6 +326,12 @@ impl<'a> Env<'a> {
         } else {
             Either::Right(e)
         }
+    }
+
+    fn check_stack_limit(&self) {
+        self.stack_limit
+            .as_ref()
+            .map(|limit| limit.panic_if_exceeded());
     }
 }
 
@@ -1463,6 +1473,7 @@ where
         env: &mut Env,
         parent_pos: Option<Pos>,
     ) -> Result<ast::Expr_> {
+        env.check_stack_limit();
         use ast::Expr as E;
         let split_args_varargs = |arg_list_node: &Syntax<T, V>,
                                   e: &mut Env|

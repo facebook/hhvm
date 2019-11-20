@@ -77,8 +77,6 @@ type state = {
   captured_generics: ULS.t;
   (* Closure classes and hoisted inline classes *)
   hoisted_classes: class_ list;
-  (* Hoisted inline functions *)
-  hoisted_functions: fun_ list;
   (* Hoisted meth_caller functions *)
   named_hoisted_functions: fun_ SMap.t;
   (* The current namespace environment *)
@@ -145,7 +143,6 @@ let initial_state empty_namespace =
     captured_this = false;
     captured_generics = ULS.empty;
     hoisted_classes = [];
-    hoisted_functions = [];
     named_hoisted_functions = SMap.empty;
     namespace = empty_namespace;
     explicit_use_set = SSet.empty;
@@ -359,12 +356,7 @@ let env_with_method (env : env) md =
     md.m_span
     md.m_body.fb_ast
 
-let env_with_class env cd =
-  {
-    env with
-    scope = [ScopeItem.Class cd];
-    variable_scopes = env.variable_scopes;
-  }
+let env_with_class env cd = { env with scope = [ScopeItem.Class cd] }
 
 (* Clear the variables, upon entering a lambda *)
 let enter_lambda (st : state) =
@@ -1015,7 +1007,9 @@ let rec convert_expr env st ((p, expr_) as expr) =
       let (st, n) =
         match n with
         | CGstring id ->
-          (* TODO: (thomasjiang) T43412864 This does not need to be added into the closure and can be removed *)
+          (* TODO: (thomasjiang) T43412864 This does not need to be added into the closure and can be removed
+           There are no relevant HHVM tests checking for it, but there are flib test failures when you try
+           to remove it. *)
           let st = add_var env st (snd id) in
           (st, n)
         | CGexpr e ->
@@ -1742,9 +1736,6 @@ let convert_toplevel_prog ~empty_namespace defs =
   (* Reorder the functions so that they appear first. This matches the
    * behaviour of HHVM. *)
   let original_defs = hoist_toplevel_functions original_defs in
-  let fun_defs =
-    List.rev_map st.hoisted_functions (fun fd -> (Hoisted, Fun fd))
-  in
   let named_hoisted_functions = SMap.values st.named_hoisted_functions in
   let named_fun_defs =
     List.rev_map named_hoisted_functions (fun fd -> (TopLevel, Fun fd))
@@ -1752,7 +1743,7 @@ let convert_toplevel_prog ~empty_namespace defs =
   let class_defs =
     List.rev_map st.hoisted_classes (fun cd -> (Hoisted, Class cd))
   in
-  let ast_defs = fun_defs @ named_fun_defs @ original_defs @ class_defs in
+  let ast_defs = named_fun_defs @ original_defs @ class_defs in
   let global_state =
     Emit_env.
       {

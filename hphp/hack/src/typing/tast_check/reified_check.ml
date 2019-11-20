@@ -140,13 +140,37 @@ let verify_targ_valid env tparam ((_, hint) as targ) =
   if Attributes.mem UA.uaNewable tparam.tp_user_attributes then
     valid_newable_hint env tparam.tp_name (snd targ)
 
-let verify_call_targs env expr_pos decl_pos tparams targs =
+let verify_targs env expr_pos decl_pos tparams targs =
   let all_wildcards = List.for_all ~f:is_wildcard targs in
   if all_wildcards && tparams_has_reified tparams then
     Errors.require_args_reify decl_pos expr_pos
   else
     (* Unequal_lengths case handled elsewhere *)
     List.iter2 tparams targs ~f:(verify_targ_valid env) |> ignore
+
+let verify_call_targs env expr_pos decl_pos tparams targs =
+  ( if tparams_has_reified tparams then
+    let check_targ_hints = function
+      | (_, (pos, Aast.Happly ((_, class_id), hints))) ->
+        let tc = Env.get_class env class_id in
+        Option.iter tc ~f:(fun tc ->
+            let tparams = Cls.tparams tc in
+            let tparams_length = List.length tparams in
+            let targs_length = List.length hints in
+            if Int.( <> ) tparams_length targs_length then
+              let c_pos = Cls.pos tc in
+              if Int.( <> ) targs_length 0 then
+                Errors.type_arity
+                  pos
+                  class_id
+                  (string_of_int tparams_length)
+                  c_pos
+              else
+                Errors.require_args_reify c_pos pos)
+      | _ -> ()
+    in
+    List.iter targs ~f:check_targ_hints );
+  verify_targs env expr_pos decl_pos tparams targs
 
 let handler =
   object

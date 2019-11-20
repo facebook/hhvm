@@ -1,1 +1,8 @@
-No errors
+File "box_keyword.php", line 16, characters 15-20:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "box_keyword.php", line 4, characters 7-12:
+Definition is here
+File "box_keyword.php", line 17, characters 15-20:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "box_keyword.php", line 4, characters 7-12:
+Definition is here

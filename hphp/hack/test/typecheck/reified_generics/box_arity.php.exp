@@ -10,6 +10,10 @@ File "box_arity.php", line 14, characters 14-33:
 The type Reified expects 1 type parameter(s) (Typing[4101])
 File "box_arity.php", line 5, characters 7-13:
 Definition is here
+File "box_arity.php", line 18, characters 15-20:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "box_arity.php", line 4, characters 7-12:
+Definition is here
 File "box_arity.php", line 20, characters 15-33:
 The type Erased expects 1 type parameter(s) (Typing[4101])
 File "box_arity.php", line 4, characters 7-12:

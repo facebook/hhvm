@@ -1381,11 +1381,9 @@ bool irrelevant_inst(const IRInstruction& inst) {
         return true;
       }
       if (inst.consumesReferences()) return false;
-      // IncRefs/DecRefs can only touch heap locations, so any other instruction
-      // that doesn't affect these locations is irrelevant.
-      if (!g.stores.maybe(AHeapAny) &&
-          !g.moves.maybe(AHeapAny)  &&
-          !g.kills.maybe(AHeapAny)) {
+
+      if (g.loads <= AEmpty &&
+          g.stores <= AEmpty) {
         return true;
       }
       return false;

@@ -111,13 +111,21 @@ val violated_constraint :
 val method_variance : Pos.t -> unit
 
 val explain_constraint :
-  use_pos:Pos.t -> definition_pos:Pos.t -> param_name:string -> error -> unit
+  use_pos:Pos.t ->
+  definition_pos:Pos.t ->
+  param_name:string ->
+  (Pos.t * string) list ->
+  unit
 
 val explain_where_constraint :
-  in_class:bool -> use_pos:Pos.t -> definition_pos:Pos.t -> error -> unit
+  in_class:bool ->
+  use_pos:Pos.t ->
+  definition_pos:Pos.t ->
+  (Pos.t * string) list ->
+  unit
 
 val explain_tconst_where_constraint :
-  use_pos:Pos.t -> definition_pos:Pos.t -> error -> unit
+  use_pos:Pos.t -> definition_pos:Pos.t -> (Pos.t * string) list -> unit
 
 val abstract_tconst_not_allowed : Pos.t -> Pos.t * string -> unit
 
@@ -515,7 +523,13 @@ val top_member :
   unit
 
 val non_object_member :
-  is_method:bool -> string -> Pos.t -> string -> Pos.t -> unit
+  is_method:bool ->
+  string ->
+  Pos.t ->
+  string ->
+  Pos.t ->
+  typing_error_callback ->
+  unit
 
 val unknown_object_member :
   is_method:bool -> string -> Pos.t -> (Pos.t * string) list -> unit

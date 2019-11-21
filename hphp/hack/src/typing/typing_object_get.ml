@@ -462,7 +462,8 @@ and obj_get_concrete_ty
       id_str
       id_pos
       (Typing_print.error env concrete_ty)
-      (Reason.to_pos (fst concrete_ty));
+      (Reason.to_pos (fst concrete_ty))
+      on_error;
     default ()
 
 and widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
@@ -732,7 +733,8 @@ and obj_get_
           id_str
           id_pos
           (Typing_print.error env ety1)
-          (Reason.to_pos (fst ety1));
+          (Reason.to_pos (fst ety1))
+          on_error;
         (env, (err_witness env id_pos, []))
       | ((_env, (ty, _)) as res) :: rest ->
         if List.exists rest (fun (_, (ty', _)) -> not @@ ty_equal ty' ty) then (

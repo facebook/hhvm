@@ -281,6 +281,7 @@ and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
                   (Reason.to_pos root_reason)
                   ty
                   pos
+                  on_error
           end
       | (choose_assigned_type, ty) :: _ ->
         ({ env with choose_assigned_type }, ty)
@@ -336,7 +337,8 @@ and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
           tconst
           pos
           ty
-          (Reason.to_pos root_reason))
+          (Reason.to_pos root_reason)
+          on_error)
 
 (* The function takes a "step" forward in the expansion. We look up the type
  * constant associated with the given class_name and create a new root type.

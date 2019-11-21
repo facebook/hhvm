@@ -3306,13 +3306,23 @@ let subtype_method
           let tgeneric =
             (Reason.Rwitness p, Tabstract (AKgeneric name, None))
           in
-          Typing_generic_constraint.check_constraint env ck tgeneric ~cstr_ty)
+          Typing_generic_constraint.check_constraint
+            env
+            ck
+            tgeneric
+            ~cstr_ty
+            on_error)
     in
     List.fold_left tparams ~init:env ~f:check_tparam_constraints
   in
   let check_where_constraints env cstrl =
     List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-        Typing_generic_constraint.check_constraint env ck ty1 ~cstr_ty:ty2)
+        Typing_generic_constraint.check_constraint
+          env
+          ck
+          ty1
+          ~cstr_ty:ty2
+          on_error)
   in
   (* We only do this if the ft_tparam lengths match. Currently we don't even
    * report this as an error, indeed different names for type parameters.

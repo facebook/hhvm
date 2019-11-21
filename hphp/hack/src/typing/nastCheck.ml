@@ -185,12 +185,13 @@ and check_happly unchecked_tparams env h =
                   let r = Reason.Rwitness p in
                   let (env, cstr_ty) = Phase.localize ~ety_env env cstr_ty in
                   ignore
-                  @@ Errors.try_
-                       (fun () ->
-                         TGenConstraint.check_constraint env ck ty ~cstr_ty)
-                       (fun l ->
-                         Reason.explain_generic_constraint (fst h) r x l;
-                         env))
+                  @@ TGenConstraint.check_constraint
+                       env
+                       ck
+                       ty
+                       ~cstr_ty
+                       (fun ?code:_ l ->
+                         Reason.explain_generic_constraint (fst h) r x l))
             end
             tc_tparams
             tyl

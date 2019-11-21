@@ -2328,9 +2328,8 @@ let method_variance pos =
     pos
     "Covariance or contravariance is not allowed in type parameter of method or function."
 
-let explain_constraint ~use_pos ~definition_pos ~param_name (error : error) =
+let explain_constraint ~use_pos ~definition_pos ~param_name msgl =
   let inst_msg = "Some type constraint(s) here are violated" in
-  let msgl = to_list error in
   (* There may be multiple constraints instantiated at one spot; avoid
    * duplicating the instantiation message *)
   let msgl =
@@ -2347,8 +2346,7 @@ let explain_constraint ~use_pos ~definition_pos ~param_name (error : error) =
       ]
     @ msgl )
 
-let explain_where_constraint ~in_class ~use_pos ~definition_pos (error : error)
-    =
+let explain_where_constraint ~in_class ~use_pos ~definition_pos msgl =
   let callsite_ty =
     if in_class then
       "class"
@@ -2359,14 +2357,12 @@ let explain_where_constraint ~in_class ~use_pos ~definition_pos (error : error)
     Printf.sprintf "This is the %s with 'where' type constraints" callsite_ty
   in
   let inst_msg = "A 'where' type constraint is violated here" in
-  let msgl = to_list error in
   add_list
     (Typing.err_code Typing.TypeConstraintViolation)
     ([(use_pos, inst_msg); (definition_pos, definition_head)] @ msgl)
 
-let explain_tconst_where_constraint ~use_pos ~definition_pos (error : error) =
+let explain_tconst_where_constraint ~use_pos ~definition_pos msgl =
   let inst_msg = "A 'where' type constraint is violated here" in
-  let msgl = to_list error in
   add_list
     (Typing.err_code Typing.TypeConstraintViolation)
     ( [
@@ -3676,7 +3672,8 @@ let top_member ~is_method ~is_nullable s pos1 ty pos2 =
          Typing.NonObjectMember ))
     [(pos1, msg); (pos2, "Definition is here")]
 
-let non_object_member ~is_method s pos1 ty pos2 =
+let non_object_member
+    ~is_method s pos1 ty pos2 (on_error : typing_error_callback) =
   let msg_start =
     Printf.sprintf
       "You are trying to access the %s '%s' but this is %s"
@@ -3693,8 +3690,8 @@ let non_object_member ~is_method s pos1 ty pos2 =
     else
       msg_start
   in
-  add_list
-    (Typing.err_code Typing.NonObjectMember)
+  on_error
+    ~code:(Typing.err_code Typing.NonObjectMember)
     [(pos1, msg); (pos2, "Definition is here")]
 
 let unknown_object_member ~is_method s pos r =

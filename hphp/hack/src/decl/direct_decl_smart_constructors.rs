@@ -51,7 +51,7 @@ pub fn empty_decls() -> InProgressDecls {
     }
 }
 
-fn mangle_xhp_id(mut name: String) -> String {
+fn mangle_xhp_id<'a>(name: Cow<'a, String>) -> Cow<'a, String> {
     fn ignore_id(name: &str) -> bool {
         name.starts_with("class@anonymous") || name.starts_with("Closure$")
     }
@@ -61,10 +61,11 @@ fn mangle_xhp_id(mut name: String) -> String {
     }
 
     if !ignore_id(&name) {
+        let mut name = name.into_owned();
         if is_xhp(&name) {
             name.replace_range(..1, "xhp_")
         }
-        name.replace(":", "__").replace("-", "_")
+        Cow::Owned(name.replace(":", "__").replace("-", "_"))
     } else {
         name
     }
@@ -129,8 +130,7 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> 
         }
         Node_::XhpName(name, pos) => {
             // xhp names are always unqualified
-            let name = name.to_string();
-            Ok((mangle_xhp_id(name), pos.clone()))
+            Ok((mangle_xhp_id(Cow::Borrowed(name)).into_owned(), pos.clone()))
         }
         Node_::QualifiedName(parts, pos) => qualified_name_from_parts(namespace, &parts, pos),
         n => {
@@ -142,9 +142,9 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> 
     }
 }
 
-fn strip_dollar_prefix(name: String) -> String {
+fn strip_dollar_prefix<'a>(name: Cow<'a, String>) -> Cow<'a, String> {
     if name.starts_with("$") {
-        name.trim_start_matches("$").to_owned()
+        Cow::Owned(name.trim_start_matches("$").to_owned())
     } else {
         name
     }
@@ -461,35 +461,31 @@ impl DirectDeclSmartConstructors<'_> {
                 let ty_ = if type_variables.contains(&name) {
                     Ty_::Tgeneric(name)
                 } else {
-                    let name = self.prefix_ns(name);
-                    Ty_::Tapply(Id(pos, name), Vec::new())
+                    let name = self.prefix_ns(Cow::Owned(name));
+                    Ty_::Tapply(Id(pos, name.into_owned()), Vec::new())
                 };
                 Ok(Ty(reason, Box::new(ty_)))
             }
         }
     }
 
-    // I'd really prefer that this function take a &str instead of a String, but
-    // I wanted to avoid having to unnecessarily copy it in the cases where it
-    // already starts with a backslash.
-    fn prefix_ns(&self, name: String) -> String {
+    fn prefix_ns<'a>(&self, name: Cow<'a, String>) -> Cow<'a, String> {
         if name.starts_with("\\") {
             name
         } else if self.state.namespace_builder.current_namespace().is_empty() {
-            "\\".to_owned() + &name
+            Cow::Owned("\\".to_owned() + &name)
         } else {
-            "\\".to_owned() + self.state.namespace_builder.current_namespace() + "\\" + &name
+            Cow::Owned(
+                "\\".to_owned() + self.state.namespace_builder.current_namespace() + "\\" + &name,
+            )
         }
     }
 
-    // I'd really prefer that this function take a &str instead of a String, but
-    // I wanted to avoid having to unnecessarily copy it in the cases where it
-    // already starts with a backslash.
-    fn prefix_slash(&self, name: String) -> String {
+    fn prefix_slash<'a>(&self, name: Cow<'a, String>) -> Cow<'a, String> {
         if name.starts_with("\\") {
             name
         } else {
-            "\\".to_owned() + &name
+            Cow::Owned("\\".to_owned() + &name)
         }
     }
 
@@ -1147,7 +1143,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let (name, pos) = get_name(self.state.namespace_builder.current_namespace(), &name?)?;
         let key = name.clone();
-        let name = self.prefix_slash(name);
+        let name = self.prefix_slash(Cow::Owned(name));
         let mut cls = shallow_decl_defs::ShallowClass {
             mode: match self.state.file_mode_builder {
                 FileModeBuilder::None | FileModeBuilder::Pending => Mode::Mstrict,
@@ -1156,7 +1152,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             final_: false,
             is_xhp: false,
             kind: ClassKind::Cnormal,
-            name: Id(pos, name),
+            name: Id(pos, name.into_owned()),
             tparams: Vec::new(),
             where_constraints: Vec::new(),
             extends: Vec::new(),
@@ -1199,7 +1195,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             let name = if is_static {
                                 name
                             } else {
-                                strip_dollar_prefix(name)
+                                strip_dollar_prefix(Cow::Owned(name)).into_owned()
                             };
                             let ty = self.node_to_ty(&decl.hint, &HashSet::new())?;
                             let prop = shallow_decl_defs::ShallowProp {

@@ -1714,9 +1714,9 @@ void handleStrTestResult(IRGS& env, uint32_t nDiscard, SSATmp* strTestResult) {
     [&] {
       hint(env, Block::Hint::Unlikely);
       auto const str = gen(env, AssertNonNull, strTestResult);
-      popDecRef(env, DataTypeSpecific);
+      popDecRef(env, DataTypeGeneric);
       for (int i = 0; i < nDiscard; ++i) {
-        popDecRef(env, DataTypeSpecific);
+        popDecRef(env);
       }
       cleanTvRefs(env);
       push(env, str);

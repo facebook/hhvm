@@ -84,7 +84,7 @@ let assert_condition_type_matches ~is_self env ty cond_ty fail =
     env
   | Some arg_cond_ty ->
     let arg_cond_ty = CT.localize_condition_type env arg_cond_ty in
-    SubType.sub_type env arg_cond_ty cond_ty (fun ?code:_ _ -> fail ())
+    SubType.sub_type_or_fail env arg_cond_ty cond_ty fail
 
 let condition_type_matches ~is_self env ty cond_ty =
   match get_associated_condition_type ~is_self env ty with
@@ -111,7 +111,6 @@ let check_only_rx_if_impl env ~is_receiver ~is_self pos reason ty cond_ty =
       condition_type_str
       arg_type_str
   in
-  let on_error ?code:_ _ = fail () in
   let rec check env ty =
     (* TODO: move caller to be TAST check  *)
     match Env.expand_type env ty with
@@ -119,7 +118,7 @@ let check_only_rx_if_impl env ~is_receiver ~is_self pos reason ty cond_ty =
       fst (TU.run_on_intersection env tyl ~f:(fun env ty -> (check env ty, ())))
     | (env, ty) ->
       Errors.try_
-        (fun () -> SubType.sub_type env ty cond_ty on_error)
+        (fun () -> SubType.sub_type_or_fail env ty cond_ty fail)
         (fun _ -> assert_condition_type_matches ~is_self env ty cond_ty fail)
   in
   check env ty

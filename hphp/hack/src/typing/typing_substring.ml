@@ -42,14 +42,10 @@ let sub_string (p : Pos.Map.key) (env : env) (ty : locl_ty) : env =
   let stringlike =
     (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunion tyl))
   in
-  Errors.try_
-    (fun () ->
-      Typing_subtype.sub_type env ty stringlike Errors.expected_stringlike)
-    (fun _ ->
+  Typing_subtype.sub_type_or_fail env ty stringlike (fun () ->
       if Typing_solver.is_sub_type env ty stringish then
         Errors.object_string_deprecated p
       else if is_object env ty then
         Errors.object_string p (Reason.to_pos (fst ty))
       else
-        Errors.invalid_sub_string p (Typing_print.error env ty);
-      env)
+        Errors.invalid_sub_string p (Typing_print.error env ty))

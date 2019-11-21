@@ -28,8 +28,6 @@ module Env = Typing_env
 module LEnv = Typing_lenv
 module Async = Typing_async
 module SubType = Typing_subtype
-
-(*module Unify = Typing_unify*)
 module Union = Typing_union
 module Inter = Typing_intersection
 module SN = Naming_special_names
@@ -3021,19 +3019,15 @@ and expr_
           TypecheckerOptions.experimental_forbid_nullable_cast
         && not (TUtils.is_mixed env ty2)
       then
-        Errors.try_
+        SubType.sub_type_or_fail
+          env
+          ty2
+          (MakeType.nonnull (fst ty2))
           (fun () ->
-            SubType.sub_type
-              env
-              ty2
-              (MakeType.nonnull (fst ty2))
-              Errors.unify_error)
-          (fun _ ->
             Errors.nullable_cast
               p
               (Typing_print.error env ty2)
-              (Reason.to_pos (fst ty2));
-            env)
+              (Reason.to_pos (fst ty2)))
       else
         env
     in
@@ -4819,15 +4813,12 @@ and dispatch_call
                 (r, Tarraykind (AKdarray (tmixed, tmixed)));
               ] )
         in
-        Errors.try_
-          (fun () -> SubType.sub_type env ty super Errors.unify_error)
-          (fun _ ->
+        SubType.sub_type_or_fail env ty super (fun () ->
             checked_unset_error
               p
               (Reason.to_string
                  ("This is " ^ Typing_print.error ~ignore_dynamic:true env ty)
-                 (fst ty));
-            env)
+                 (fst ty)))
       | _ ->
         checked_unset_error p [];
         env

@@ -132,21 +132,17 @@ let check_arraykey_index env pos container_ty index_ty =
     let info_of_type ty = (Reason.to_pos (fst ty), Typing_print.error env ty) in
     let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
     (* Wrap generic type mismatch error with special error code *)
-    Errors.try_
-      (fun () ->
-        Typing_coercion.coerce_type
-          pos
-          reason
-          env
-          index_ty
-          { et_type = ty_arraykey; et_enforced = true }
-          Errors.unify_error)
-      (fun _ ->
+    Typing_coercion.coerce_type
+      pos
+      reason
+      env
+      index_ty
+      { et_type = ty_arraykey; et_enforced = true }
+      (fun ?code:_ _ ->
         Errors.invalid_arraykey
           pos
           (info_of_type container_ty)
-          (info_of_type index_ty);
-        env)
+          (info_of_type index_ty))
   else
     env
 

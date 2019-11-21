@@ -115,15 +115,12 @@ let enum_check_const ty_exp env cc t =
     Errors.constant_does_not_match_enum_type
 
 (* Check that the `as` bound or the underlying type of an enum is a subtype of arraykey *)
-let enum_check_type env pos ur ty on_error =
+let enum_check_type env pos ur ty _on_error =
   let ty_arraykey =
     MakeType.arraykey (Reason.Rimplicit_upper_bound (pos, "arraykey"))
   in
-  Errors.try_
-    (fun () -> Typing_ops.sub_type pos ur env ty ty_arraykey on_error)
-    (fun _ ->
-      Errors.enum_type_bad pos (Typing_print.full_strip_ns env ty) [];
-      env)
+  Typing_ops.sub_type pos ur env ty ty_arraykey (fun ?code:_ _ ->
+      Errors.enum_type_bad pos (Typing_print.full_strip_ns env ty) [])
 
 (* Check an enum declaration of the form
  *    enum E : <ty_exp> as <ty_constraint>

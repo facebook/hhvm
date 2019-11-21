@@ -37,15 +37,22 @@ val is_sub_type_for_union : env -> locl_ty -> locl_ty -> bool
 val can_sub_type : env -> locl_ty -> locl_ty -> bool
 
 (**
-  Checks that ty_sub is a subtype of ty_super, and returns an env.
-
-  E.g.
-    sub_type env ?int int   => env
-    sub_type env int alpha  => env where alpha==int
-    sub_type env ?int alpha => env where alpha==?int
-    sub_type env int string => error
+ * [sub_type env t u on_error] asserts that [t] is a subtype of [u],
+ * adding constraints to [env.tvenv] that are necessary to ensure this, or
+ * calling [on_error ?code msgl] with (optional) error code and a list of
+ * (position, message) pairs if the assertion is unsatisfiable.
+ *
+ * Note that the [on_error] callback must prefix this list with a top-level
+ * position and message identifying the primary source of the error (e.g.
+ * an expression or statement).
  *)
 val sub_type : env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env
+
+(**
+ * As above, but with a simpler error handler that doesn't make use of the
+ * code and message list provided by subtyping.
+ *)
+val sub_type_or_fail : env -> locl_ty -> locl_ty -> (unit -> unit) -> env
 
 val sub_type_with_dynamic_as_bottom :
   env -> locl_ty -> locl_ty -> Errors.typing_error_callback -> env

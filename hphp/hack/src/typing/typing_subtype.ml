@@ -3408,3 +3408,6 @@ let () = Typing_utils.is_sub_type_for_union_ref := is_sub_type_for_union
 let () =
   Typing_utils.is_sub_type_ignore_generic_params_ref :=
     is_sub_type_ignore_generic_params
+
+let sub_type_or_fail env ty1 ty2 fail =
+  sub_type env ty1 ty2 (fun ?code:_ _ -> fail ())

@@ -1003,21 +1003,6 @@ struct DualDispatchIntersectionImpl {
     return packed_impl(bits, std::move(elems), tag);
   }
 
-  template <typename F>
-  Type intersect_map(MapElems map, F next, ProvTag tag) const {
-    for (auto it = map.begin(); it != map.end(); it++) {
-      auto other = next();
-      if (it->first.m_type == KindOfInt64 ?
-          !other.first.couldBe(BInt) : !other.first.couldBe(BStr)) {
-        return TBottom;
-      }
-      auto val = intersection_of(it->second, other.second);
-      if (val == TBottom) return TBottom;
-      map.update(it, std::move(val));
-    }
-    return map_impl(bits, std::move(map), tag);
-  }
-
   // The SArray is known to not be a subtype, so the intersection must be empty
   Type operator()(const DArrLikePacked& /*a*/, const SArray /*b*/) const {
     return TBottom;
@@ -1083,19 +1068,42 @@ struct DualDispatchIntersectionImpl {
     return mapn_impl(bits, k, v, folly::none);
   }
   Type operator()(const DArrLikeMapN& a, const DArrLikeMap& b) const {
-    return intersect_map(b.map,
-                         [&] { return std::make_pair(a.key, a.val); },
-                         b.provenance);
+    auto map = MapElems{};
+
+    for (auto const& kv : b.map) {
+      if (kv.first.m_type == KindOfInt64 ?
+          !a.key.couldBe(BInt) : !a.key.couldBe(BStr)) {
+        return TBottom;
+      }
+      auto val = intersection_of(kv.second, a.val);
+      if (val == TBottom) return TBottom;
+      map.emplace_back(kv.first, std::move(val));
+    }
+
+    return map_impl(
+      bits,
+      std::move(map),
+      b.provenance
+    );
   }
 
   Type operator()(const DArrLikeMap& a, const DArrLikeMap& b) const {
     if (a.map.size() != b.map.size()) return TBottom;
-    auto it = b.map.begin();
-    return intersect_map(a.map, [&] {
-      auto ret = std::make_pair(from_cell(it->first), it->second);
-      ++it;
-      return ret;
-    }, intersectProvTag(a.provenance, b.provenance));
+
+    auto map = MapElems{};
+    for (auto aIt = a.map.begin(), bIt = b.map.begin();
+         aIt != a.map.end();
+         ++aIt, ++bIt) {
+      if (!cellSame(aIt->first, bIt->first)) return TBottom;
+      auto val = intersection_of(aIt->second, bIt->second);
+      if (val == TBottom) return TBottom;
+      map.emplace_back(aIt->first, std::move(val));
+    }
+    return map_impl(
+      bits,
+      std::move(map),
+      intersectProvTag(a.provenance, b.provenance)
+    );
   }
 
   Type operator()(const SString /*a*/, const SString /*b*/) const {

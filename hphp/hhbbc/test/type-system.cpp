@@ -1957,13 +1957,37 @@ TEST(Type, ArrIntersections) {
   test_map_d[tv(s_test)]   = TDbl;
   auto const tstruct4      = sarr_map(test_map_d);
 
+  auto test_map_e          = MapElems{};
+  test_map_e[tv(s_A)]      = TInt;
+  test_map_e[tv(s_B)]      = TDbl;
+  auto const tstruct5      = sarr_map(test_map_e);
+
+  auto test_map_f          = MapElems{};
+  test_map_f[tv(s_A)]      = TArrKey;
+  test_map_f[tv(s_B)]      = TInt;
+  auto const tstruct6      = sarr_map(test_map_f);
+
+  auto test_map_g          = MapElems{};
+  test_map_g[tv(s_A)]      = TStr;
+  test_map_g[tv(s_B)]      = TArrKey;
+  auto const tstruct7      = sarr_map(test_map_g);
+
+  auto test_map_h          = MapElems{};
+  test_map_h[tv(s_A)]      = TStr;
+  test_map_h[tv(s_B)]      = TInt;
+  auto const tstruct8      = sarr_map(test_map_h);
+
   auto const mapn_str_int = arr_mapn(TStr, TInt);
 
   EXPECT_EQ(intersection_of(tstruct,  mapn_str_int), tstruct);
   EXPECT_EQ(intersection_of(tstruct2, mapn_str_int), tstruct2);
   EXPECT_EQ(intersection_of(tstruct3, mapn_str_int), tstruct3);
   EXPECT_EQ(intersection_of(tstruct4, mapn_str_int), TBottom);
-  EXPECT_EQ(intersection_of(tstruct, tstruct2),      tstruct);
+  EXPECT_EQ(intersection_of(tstruct,  tstruct2),     tstruct);
+  EXPECT_EQ(intersection_of(tstruct,  tstruct3),     TBottom);
+  EXPECT_EQ(intersection_of(tstruct4, tstruct5),     TBottom);
+  EXPECT_EQ(intersection_of(tstruct6, tstruct7),     tstruct8);
+  EXPECT_EQ(intersection_of(tstruct8, tstruct),      TBottom);
 
   EXPECT_EQ(intersection_of(sarr_packed({TNum, TDbl, TNum}),
                             sarr_packedn(TDbl)),

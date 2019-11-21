@@ -13,12 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/trace.h"
+
+#include "folly/portability/SysMman.h"
 
 namespace HPHP {
 
@@ -112,9 +115,24 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
   auto const flags = MALLOCX_ALIGN(kSlabAlign) |
     (RuntimeOption::EvalBigAllocUseLocalArena ? local_arena_flags : 0);
   auto slab = mallocx(kSlabSize, flags);
-#else
+#if JEMALLOC_VERSION_MAJOR < 5
+  // The chunk approach used prior to jemalloc 5 can lead to large
+  // over-allocations with large size and alignment; we still need
+  // fixed-sized slabs, so mark the over-allocation as unused
+  size_t usable = sallocx(slab, flags);
+  if (usable > kSlabSize) {
+    madvise(
+      reinterpret_cast<char*>(slab) + kSlabSize,
+      usable - kSlabSize,
+      MADV_DONTNEED
+    );
+  }
+#elif (!defined(NDEBUG)) // JEMALLOC_VERSION_MAJOR < 5
+  assertx(sallocx(slab, flags) == kSlabSize);
+#endif // JEMALLOC_VERSION_MAJOR < 5
+#else // USE_JEMALLOC
   auto slab = safe_aligned_alloc(kSlabAlign, kSlabSize);
-#endif
+#endif // USE_JEMALLOC
   m_bigs.insert((HeapObject*)slab, kSlabSize);
   stats.malloc_cap += kSlabSize;
   stats.peakCap = std::max(stats.peakCap, stats.capacity());

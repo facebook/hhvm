@@ -3,8 +3,7 @@
     (wrapped false)
     (modules full_fidelity_test_utils)
     (libraries
-      jdep
-      full_fidelity))
+      full_fidelity sexplib))
 
 (library
     (name call_order)

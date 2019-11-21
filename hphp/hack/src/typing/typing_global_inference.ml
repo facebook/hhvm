@@ -20,7 +20,7 @@ module StateErrors = struct
   let has_error t id = IdentMap.mem id !t
 end
 
-let make_error_callback errors var _l1 _l2 = StateErrors.add errors var
+let make_error_callback errors var ?code:_ _l = StateErrors.add errors var
 
 module type MarshalledData = sig
   type t

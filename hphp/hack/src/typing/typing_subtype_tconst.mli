@@ -4,7 +4,12 @@ module Env = Typing_env
 
 (** For all type constant T of type variable, make its type equal to `ty`::T *)
 val make_all_type_consts_equal :
-  env -> Ident.t -> internal_type -> as_tyvar_with_cnstr:bool -> env
+  env ->
+  Ident.t ->
+  internal_type ->
+  on_error:Errors.typing_error_callback ->
+  as_tyvar_with_cnstr:bool ->
+  env
 
 (** Get the type of a type constant of a type variable by looking it up in the
 environment.

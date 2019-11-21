@@ -141,7 +141,11 @@ let referenced_typeconsts env root ids =
       Typing_defs.from_class = Some CIstatic;
     }
   in
-  Typing_taccess.referenced_typeconsts env ety_env (root, ids)
+  Typing_taccess.referenced_typeconsts
+    env
+    ety_env
+    (root, ids)
+    ~on_error:Errors.unify_error
 
 let empty tcopt = Typing_env.empty tcopt Relative_path.default ~droot:None
 

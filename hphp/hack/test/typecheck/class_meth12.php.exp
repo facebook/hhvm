@@ -1,0 +1,4 @@
+File "class_meth12.php", line 16, characters 14-16:
+This argument should be annotated with 'inout' (Typing[4182])
+File "class_meth12.php", line 7, characters 51-52:
+Because this is an inout parameter

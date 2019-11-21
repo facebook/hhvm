@@ -261,7 +261,13 @@ let rec localize ~ety_env env (dty : decl_ty) =
     let (env, root_ty) = localize ~ety_env env root_ty in
     let (env, (expansion_reason, ty)) =
       List.fold ids ~init:(env, root_ty) ~f:(fun (env, root_ty) id ->
-          TUtils.expand_typeconst ety_env env root_ty id ~allow_abstract_tconst)
+          TUtils.expand_typeconst
+            ety_env
+            env
+            root_ty
+            id
+            ~on_error:Errors.unify_error
+            ~allow_abstract_tconst)
     in
     (* Elaborate reason with information about expression dependent types and
      * the original location of the Taccess type
@@ -367,7 +373,7 @@ and localize_targs ~is_method ~def_pos ~use_pos ~use_name env tparaml targl =
    * report an error *)
   if Int.( <> ) targ_count 0 && Int.( <> ) tparam_count targ_count then
     if is_method then
-      Errors.expected_tparam ~definition_pos:def_pos ~use_pos tparam_count
+      Errors.expected_tparam ~definition_pos:def_pos ~use_pos tparam_count None
     else
       Errors.type_arity use_pos use_name (string_of_int tparam_count) def_pos;
 
@@ -420,7 +426,8 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
         Errors.expected_tparam
           ~definition_pos:def_pos
           ~use_pos
-          (List.length tparams);
+          (List.length tparams)
+          None;
       let tvarl = List.map ~f:fst explicit_targs in
       let ft_subst = Subst.make_locl tparams tvarl in
       (env, SMap.union ft_subst ety_env.substs)

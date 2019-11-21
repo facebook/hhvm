@@ -64,11 +64,14 @@ let coerce_type_impl env ty_have ty_expect on_error =
 (* The Errors.try_ allows us to report a union ty_have in an error
  * instead of just elements in the union *)
 let coerce_type p ur env ty_have ty_expect on_error =
-  Errors.try_add_err
-    p
-    (Reason.string_of_ureason ur)
-    (fun () -> coerce_type_impl env ty_have ty_expect on_error)
-    (fun () -> env)
+  Errors.try_with_result
+    (fun () ->
+      coerce_type_impl env ty_have ty_expect (fun ?code errl ->
+          let errl = (p, Reason.string_of_ureason ur) :: errl in
+          on_error ?code errl))
+    (fun _ err ->
+      Errors.add_error err;
+      env)
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)

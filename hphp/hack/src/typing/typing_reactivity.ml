@@ -84,7 +84,7 @@ let assert_condition_type_matches ~is_self env ty cond_ty fail =
     env
   | Some arg_cond_ty ->
     let arg_cond_ty = CT.localize_condition_type env arg_cond_ty in
-    SubType.sub_type env arg_cond_ty cond_ty (fun _ _ -> fail ())
+    SubType.sub_type env arg_cond_ty cond_ty (fun ?code:_ _ -> fail ())
 
 let condition_type_matches ~is_self env ty cond_ty =
   match get_associated_condition_type ~is_self env ty with
@@ -111,7 +111,7 @@ let check_only_rx_if_impl env ~is_receiver ~is_self pos reason ty cond_ty =
       condition_type_str
       arg_type_str
   in
-  let on_error _ _ = fail () in
+  let on_error ?code:_ _ = fail () in
   let rec check env ty =
     (* TODO: move caller to be TAST check  *)
     match Env.expand_type env ty with
@@ -162,7 +162,7 @@ let check_reactivity_matches
     callee_reactivity
     pos
     caller_reactivity
-    (fun _ _ ->
+    (fun ?code:_ _ ->
       (* for better error reporting remove rxvar from caller reactivity *)
       let caller_reactivity =
         match caller_reactivity with

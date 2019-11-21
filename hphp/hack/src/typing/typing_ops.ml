@@ -29,11 +29,9 @@ let sub_type p ur env ty_sub ty_super on_error =
                 [Log_type ("ty_sub", ty_sub); Log_type ("ty_super", ty_super)]
               );
           ]));
-  Errors.try_add_err
-    p
-    (Reason.string_of_ureason ur)
-    (fun () -> Typing_utils.sub_type env ty_sub ty_super on_error)
-    (fun () -> env)
+  Typing_utils.sub_type env ty_sub ty_super (fun ?code errl ->
+      let errl = (p, Reason.string_of_ureason ur) :: errl in
+      on_error ?code errl)
 
 let sub_type_decl p ur env ty_sub ty_super =
   let localize_with_self = Typing_utils.localize_with_self ~quiet:true in

@@ -1,0 +1,6 @@
+File "hhfixme_bug4.php", line 12, characters 12-12:
+Invalid return type (Typing[4110])
+File "hhfixme_bug4.php", line 10, characters 5-11:
+Expected void
+File "hhfixme_bug4.php", line 12, characters 12-12:
+But got int

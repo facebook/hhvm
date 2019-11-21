@@ -43,8 +43,7 @@ type format =
   | Context
   | Raw
 
-type typing_error_callback =
-  (Pos.t * string) list -> (Pos.t * string) list -> unit
+type typing_error_callback = ?code:int -> (Pos.t * string) list -> unit
 
 module Parsing : Error_category
 
@@ -99,13 +98,14 @@ val experimental_feature : Pos.t -> string -> unit
 
 val fixme_format : Pos.t -> unit
 
-val missing_field : Pos.t -> Pos.t -> string -> unit
+val missing_field : Pos.t -> Pos.t -> string -> typing_error_callback -> unit
 
 val violated_constraint :
   Pos.t ->
   Pos.t * string ->
   (Pos.t * string) list ->
   (Pos.t * string) list ->
+  typing_error_callback ->
   unit
 
 val method_variance : Pos.t -> unit
@@ -374,6 +374,7 @@ val smember_not_found :
   Pos.t * string ->
   string ->
   [< `closest of Pos.t * string | `did_you_mean of Pos.t * string | `no_hint ] ->
+  typing_error_callback ->
   unit
 
 val member_not_found :
@@ -383,6 +384,7 @@ val member_not_found :
   string ->
   [< `closest of Pos.t * string | `did_you_mean of Pos.t * string | `no_hint ] ->
   (Pos.t * string) list ->
+  typing_error_callback ->
   unit
 
 val parent_in_trait : Pos.t -> unit
@@ -419,15 +421,21 @@ val implement_abstract :
 
 val generic_static : Pos.t -> string -> unit
 
-val fun_too_many_args : Pos.t -> Pos.t -> unit
+val fun_too_many_args : Pos.t -> Pos.t -> typing_error_callback -> unit
 
-val fun_too_few_args : Pos.t -> Pos.t -> unit
+val fun_too_few_args : Pos.t -> Pos.t -> typing_error_callback -> unit
 
-val fun_unexpected_nonvariadic : Pos.t -> Pos.t -> unit
+val fun_unexpected_nonvariadic : Pos.t -> Pos.t -> typing_error_callback -> unit
 
-val fun_variadicity_hh_vs_php56 : Pos.t -> Pos.t -> unit
+val fun_variadicity_hh_vs_php56 :
+  Pos.t -> Pos.t -> typing_error_callback -> unit
 
-val expected_tparam : use_pos:Pos.t -> definition_pos:Pos.t -> int -> unit
+val expected_tparam :
+  use_pos:Pos.t ->
+  definition_pos:Pos.t ->
+  int ->
+  typing_error_callback option ->
+  unit
 
 val object_string : Pos.t -> Pos.t -> unit
 
@@ -435,13 +443,14 @@ val object_string_deprecated : Pos.t -> unit
 
 val cyclic_typedef : Pos.t -> unit
 
-val type_arity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
+val type_arity_mismatch :
+  Pos.t -> string -> Pos.t -> string -> typing_error_callback -> unit
 
 val this_final : Pos.t * string -> Pos.t -> error -> unit
 
 val exact_class_final : Pos.t * string -> Pos.t -> error -> unit
 
-val fun_arity_mismatch : Pos.t -> Pos.t -> unit
+val fun_arity_mismatch : Pos.t -> Pos.t -> typing_error_callback -> unit
 
 val discarded_awaitable : Pos.t -> Pos.t -> unit
 
@@ -451,7 +460,7 @@ val index_type_mismatch : typing_error_callback
 
 val expected_stringlike : typing_error_callback
 
-val type_constant_mismatch : typing_error_callback
+val type_constant_mismatch : typing_error_callback -> typing_error_callback
 
 val class_constant_type_mismatch : typing_error_callback
 
@@ -678,7 +687,7 @@ val shape_field_class_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 
 val shape_field_type_mismatch : Pos.t -> Pos.t -> string -> string -> unit
 
-val shape_fields_unknown : Pos.t -> Pos.t -> unit
+val shape_fields_unknown : Pos.t -> Pos.t -> typing_error_callback -> unit
 
 val invalid_shape_remove_key : Pos.t -> unit
 
@@ -772,7 +781,8 @@ val final_property : Pos.t -> unit
 
 val pass_by_ref_annotation_missing : Pos.t -> Pos.t -> unit
 
-val reffiness_invariant : Pos.t -> Pos.t -> [< `normal | `inout ] -> unit
+val reffiness_invariant :
+  Pos.t -> Pos.t -> [< `normal | `inout ] -> typing_error_callback -> unit
 
 val pass_by_ref_annotation_unexpected : Pos.t -> Pos.t -> bool -> unit
 
@@ -885,7 +895,8 @@ val get_applied_fixmes : t -> applied_fixme list
 
 val too_few_type_arguments : Pos.t -> unit
 
-val required_field_is_optional : Pos.t -> Pos.t -> string -> unit
+val required_field_is_optional :
+  Pos.t -> Pos.t -> string -> typing_error_callback -> unit
 
 val array_get_with_optional_field : Pos.t -> Pos.t -> string -> unit
 
@@ -915,7 +926,8 @@ val coroutine_call_outside_of_suspend : Pos.t -> unit
 
 val function_is_not_coroutine : Pos.t -> string -> unit
 
-val coroutinness_mismatch : bool -> Pos.t -> Pos.t -> unit
+val coroutinness_mismatch :
+  bool -> Pos.t -> Pos.t -> typing_error_callback -> unit
 
 val invalid_ppl_call : Pos.t -> string -> unit
 
@@ -925,9 +937,11 @@ val ppl_meth_pointer : Pos.t -> string -> unit
 
 val coroutine_outside_experimental : Pos.t -> unit
 
-val return_disposable_mismatch : bool -> Pos.t -> Pos.t -> unit
+val return_disposable_mismatch :
+  bool -> Pos.t -> Pos.t -> typing_error_callback -> unit
 
-val fun_reactivity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
+val fun_reactivity_mismatch :
+  Pos.t -> string -> Pos.t -> string -> typing_error_callback -> unit
 
 val reassign_mutable_var : in_collection:bool -> Pos.t -> unit
 
@@ -937,7 +951,8 @@ val mutable_argument_mismatch : Pos.t -> Pos.t -> unit
 
 val invalid_mutable_return_result : Pos.t -> Pos.t -> string -> unit
 
-val mutable_return_result_mismatch : bool -> Pos.t -> Pos.t -> unit
+val mutable_return_result_mismatch :
+  bool -> Pos.t -> Pos.t -> typing_error_callback -> unit
 
 val mutable_attribute_on_function : Pos.t -> unit
 
@@ -978,7 +993,8 @@ val escaping_this : Pos.t -> unit
 
 val must_extend_disposable : Pos.t -> unit
 
-val accept_disposable_invariant : Pos.t -> Pos.t -> unit
+val accept_disposable_invariant :
+  Pos.t -> Pos.t -> typing_error_callback -> unit
 
 val inout_params_outside_of_sync : Pos.t -> unit
 
@@ -996,7 +1012,7 @@ val inout_annotation_missing : Pos.t -> Pos.t -> unit
 
 val inout_annotation_unexpected : Pos.t -> Pos.t -> bool -> unit
 
-val inoutness_mismatch : Pos.t -> Pos.t -> unit
+val inoutness_mismatch : Pos.t -> Pos.t -> typing_error_callback -> unit
 
 val xhp_required : Pos.t -> string -> (Pos.t * string) list -> unit
 
@@ -1083,7 +1099,7 @@ val mutable_in_nonreactive_context : Pos.t -> unit
 val invalid_argument_of_rx_mutable_function : Pos.t -> unit
 
 val return_void_to_rx_mismatch :
-  pos1_has_attribute:bool -> Pos.t -> Pos.t -> unit
+  pos1_has_attribute:bool -> Pos.t -> Pos.t -> typing_error_callback -> unit
 
 val returns_void_to_rx_function_as_non_expression_statement :
   Pos.t -> Pos.t -> unit
@@ -1129,7 +1145,8 @@ val invalid_argument_type_for_condition_in_rx :
 val callsite_reactivity_mismatch :
   Pos.t -> Pos.t -> string -> Pos.t option -> string -> unit
 
-val rx_parameter_condition_mismatch : string -> Pos.t -> Pos.t -> unit
+val rx_parameter_condition_mismatch :
+  string -> Pos.t -> Pos.t -> typing_error_callback -> unit
 
 val maybe_mutable_attribute_on_function : Pos.t -> unit
 
@@ -1149,7 +1166,13 @@ val invalid_call_on_maybe_mutable :
   fun_is_mutable:bool -> Pos.t -> Pos.t -> unit
 
 val mutability_mismatch :
-  is_receiver:bool -> Pos.t -> string -> Pos.t -> string -> unit
+  is_receiver:bool ->
+  Pos.t ->
+  string ->
+  Pos.t ->
+  string ->
+  typing_error_callback ->
+  unit
 
 val invalid_traversable_in_rx : Pos.t -> unit
 

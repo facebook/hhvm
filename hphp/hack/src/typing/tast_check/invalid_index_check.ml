@@ -48,18 +48,14 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
         let (_, ty_expect) = Env.expand_type env ty_expect in
         let ty_expect_str = Env.print_error_ty env ty_expect in
         let ty_have_str = Env.print_error_ty env ty_have in
-        Errors.try_add_err
-          expr_pos
-          (Reason.string_of_ureason reason)
-          (fun () ->
-            Errors.index_type_mismatch
-              (Typing_reason.to_string
+        Errors.index_type_mismatch
+          ( (expr_pos, Reason.string_of_ureason reason)
+            :: Typing_reason.to_string
                  ("This is " ^ ty_expect_str)
-                 (fst ty_expect))
-              (Typing_reason.to_string
-                 ("It is incompatible with " ^ ty_have_str)
-                 (fst ty_have)))
-          (fun () -> ())
+                 (fst ty_expect)
+          @ Typing_reason.to_string
+              ("It is incompatible with " ^ ty_have_str)
+              (fst ty_have) )
   in
   let (_, ety) = Env.expand_type env array_ty in
   match snd ety with

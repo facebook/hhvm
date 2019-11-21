@@ -8,7 +8,7 @@ module Utils = Typing_utils
 another type variable v) equal to ty::tconstid (where ty is usually a bound
 of v) *)
 let make_type_const_equal
-    env tconstty (ty : internal_type) tconstid ~as_tyvar_with_cnstr =
+    env tconstty (ty : internal_type) tconstid ~on_error ~as_tyvar_with_cnstr =
   let ety_env = Phase.env_with_self env in
   match ty with
   | LoclType ty ->
@@ -19,13 +19,22 @@ let make_type_const_equal
         ~as_tyvar_with_cnstr
         ty
         tconstid
+        ~on_error
         ~allow_abstract_tconst:true
     in
     let env =
-      Utils.sub_type env tytconst tconstty Errors.type_constant_mismatch
+      Utils.sub_type
+        env
+        tytconst
+        tconstty
+        (Errors.type_constant_mismatch on_error)
     in
     let env =
-      Utils.sub_type env tconstty tytconst Errors.type_constant_mismatch
+      Utils.sub_type
+        env
+        tconstty
+        tytconst
+        (Errors.type_constant_mismatch on_error)
     in
     env
   | ConstraintType (_, Thas_member _) -> env
@@ -34,29 +43,47 @@ let make_type_const_equal
 (** Add a type constant with id `tyconstid` and type `ty` to a type variable,
 and propagate constraints to all type constants `tyconstid` of upper bounds and
 lower bounds. *)
-let add_tyvar_type_const env var tconstid ty =
+let add_tyvar_type_const env var tconstid ty ~on_error =
   let env = Env.set_tyvar_type_const env var tconstid ty in
   let upper_bounds = Env.get_tyvar_upper_bounds env var in
   let env =
     ITySet.fold
       (fun bound env ->
-        make_type_const_equal env ty bound tconstid ~as_tyvar_with_cnstr:true)
+        make_type_const_equal
+          env
+          ty
+          bound
+          tconstid
+          ~on_error
+          ~as_tyvar_with_cnstr:true)
       upper_bounds
       env
   in
   let lower_bounds = Env.get_tyvar_lower_bounds env var in
   ITySet.fold
     (fun bound env ->
-      make_type_const_equal env ty bound tconstid ~as_tyvar_with_cnstr:false)
+      make_type_const_equal
+        env
+        ty
+        bound
+        tconstid
+        ~on_error
+        ~as_tyvar_with_cnstr:false)
     lower_bounds
     env
 
 (** For all type constants T of var, make its type equal to ty::T *)
-let make_all_type_consts_equal env var (ty : internal_type) ~as_tyvar_with_cnstr
-    =
+let make_all_type_consts_equal
+    env var (ty : internal_type) ~on_error ~as_tyvar_with_cnstr =
   SMap.fold
     (fun _ (tconstid, tconstty) env ->
-      make_type_const_equal env tconstty ty tconstid ~as_tyvar_with_cnstr)
+      make_type_const_equal
+        env
+        tconstty
+        ty
+        tconstid
+        ~on_error
+        ~as_tyvar_with_cnstr)
     (Env.get_tyvar_type_consts env var)
     env
 
@@ -67,5 +94,5 @@ let get_tyvar_type_const env var ((pos, tconstid_) as tconstid) =
   | None ->
     let (env, tvar) = Env.fresh_invariant_type_var env pos in
     Typing_log.log_new_tvar_for_tconst env pos var tconstid_ tvar;
-    let env = add_tyvar_type_const env var tconstid tvar in
+    let env = add_tyvar_type_const env var tconstid tvar Errors.unify_error in
     (env, tvar)

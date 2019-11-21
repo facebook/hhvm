@@ -32,8 +32,7 @@ type format =
   | Context
   | Raw
 
-type typing_error_callback =
-  (Pos.t * string) list -> (Pos.t * string) list -> unit
+type typing_error_callback = ?code:int -> (Pos.t * string) list -> unit
 
 (* The file and phase of analysis being currently performed *)
 let current_context : (Relative_path.t * phase) ref =
@@ -2277,17 +2276,17 @@ let shape_field_type_mismatch key_pos witness_pos key_ty witness_ty =
       (witness_pos, "But expected " ^ witness_ty);
     ]
 
-let missing_field pos1 pos2 name =
-  add_list
-    (Typing.err_code Typing.MissingField)
+let missing_field pos1 pos2 name (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.MissingField)
     [
       (pos1, "The field '" ^ name ^ "' is missing");
       (pos2, "The field '" ^ name ^ "' is defined");
     ]
 
-let shape_fields_unknown pos1 pos2 =
-  add_list
-    (Typing.err_code Typing.ShapeFieldsUnknown)
+let shape_fields_unknown pos1 pos2 (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.ShapeFieldsUnknown)
     [
       ( pos1,
         "This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration."
@@ -2312,9 +2311,10 @@ let unification_cycle pos ty =
         ^ ty );
     ]
 
-let violated_constraint p_cstr (p_tparam, tparam) left right =
-  add_list
-    (Typing.err_code Typing.TypeConstraintViolation)
+let violated_constraint
+    p_cstr (p_tparam, tparam) left right (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.TypeConstraintViolation)
     ( [
         (p_cstr, "Some type constraint(s) are violated here");
         (p_tparam, Printf.sprintf "%s is a constrained type parameter" tparam);
@@ -2514,10 +2514,10 @@ let must_extend_disposable pos =
     pos
     "A disposable type may not extend a class or use a trait that is not disposable"
 
-let accept_disposable_invariant pos1 pos2 =
+let accept_disposable_invariant pos1 pos2 (on_error : typing_error_callback) =
   let msg1 = (pos1, "This parameter is marked <<__AcceptDisposable>>") in
   let msg2 = (pos2, "This parameter is not marked <<__AcceptDisposable>>") in
-  add_list (Typing.err_code Typing.AcceptDisposableInvariant) [msg1; msg2]
+  on_error ~code:(Typing.err_code Typing.AcceptDisposableInvariant) [msg1; msg2]
 
 let field_kinds pos1 pos2 =
   add_list
@@ -2849,18 +2849,31 @@ let string_of_class_member_kind = function
   | `class_variable -> "class variable"
   | `class_typeconst -> "type constant"
 
-let smember_not_found kind pos (cpos, class_name) member_name hint =
+let smember_not_found
+    kind
+    pos
+    (cpos, class_name)
+    member_name
+    hint
+    (on_error : typing_error_callback) =
   let kind = string_of_class_member_kind kind in
   let class_name = strip_ns class_name in
   let msg = Printf.sprintf "No %s '%s' in %s" kind member_name class_name in
-  add_list
-    (Typing.err_code Typing.SmemberNotFound)
+  on_error
+    ~code:(Typing.err_code Typing.SmemberNotFound)
     [
       (pos, msg ^ snot_found_hint hint);
       (cpos, "Declaration of " ^ class_name ^ " is here");
     ]
 
-let member_not_found kind pos (cpos, type_name) member_name hint reason =
+let member_not_found
+    kind
+    pos
+    (cpos, type_name)
+    member_name
+    hint
+    reason
+    (on_error : typing_error_callback) =
   let type_name = strip_ns type_name in
   let kind =
     match kind with
@@ -2868,8 +2881,8 @@ let member_not_found kind pos (cpos, type_name) member_name hint reason =
     | `member -> "member"
   in
   let msg = Printf.sprintf "No %s '%s' in %s" kind member_name type_name in
-  add_list
-    (Typing.err_code Typing.MemberNotFound)
+  on_error
+    ~code:(Typing.err_code Typing.MemberNotFound)
     ( (pos, msg ^ not_found_hint hint)
     :: (reason @ [(cpos, "Declaration of " ^ type_name ^ " is here")]) )
 
@@ -3026,30 +3039,30 @@ let generic_static pos x =
     pos
     ("This static variable cannot use the type parameter " ^ x ^ ".")
 
-let fun_too_many_args pos1 pos2 =
-  add_list
-    (Typing.err_code Typing.FunTooManyArgs)
+let fun_too_many_args pos1 pos2 (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.FunTooManyArgs)
     [
       (pos1, "Too many mandatory arguments");
       (pos2, "Because of this definition");
     ]
 
-let fun_too_few_args pos1 pos2 =
-  add_list
-    (Typing.err_code Typing.FunTooFewArgs)
+let fun_too_few_args pos1 pos2 (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.FunTooFewArgs)
     [(pos1, "Too few arguments"); (pos2, "Because of this definition")]
 
-let fun_unexpected_nonvariadic pos1 pos2 =
-  add_list
-    (Typing.err_code Typing.FunUnexpectedNonvariadic)
+let fun_unexpected_nonvariadic pos1 pos2 (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.FunUnexpectedNonvariadic)
     [
       (pos1, "Should have a variadic argument");
       (pos2, "Because of this definition");
     ]
 
-let fun_variadicity_hh_vs_php56 pos1 pos2 =
-  add_list
-    (Typing.err_code Typing.FunVariadicityHhVsPhp56)
+let fun_variadicity_hh_vs_php56 pos1 pos2 (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.FunVariadicityHhVsPhp56)
     [
       (pos1, "Variadic arguments: ...-style is not a subtype of ...$args");
       (pos2, "Because of this definition");
@@ -3079,9 +3092,9 @@ let echo_in_reactive_context pos =
     pos
     "'echo' or 'print' are not allowed in reactive functions."
 
-let expected_tparam ~use_pos ~definition_pos n =
-  add_list
-    (Typing.err_code Typing.ExpectedTparam)
+let expected_tparam
+    ~use_pos ~definition_pos n (on_error : typing_error_callback option) =
+  let errl =
     [
       ( use_pos,
         "Expected "
@@ -3092,6 +3105,10 @@ let expected_tparam ~use_pos ~definition_pos n =
         | n -> string_of_int n ^ " type parameters" );
       (definition_pos, "Definition is here");
     ]
+  in
+  match on_error with
+  | None -> add_list (Typing.err_code Typing.ExpectedTparam) errl
+  | Some f -> f ~code:(Typing.err_code Typing.ExpectedTparam) errl
 
 let object_string pos1 pos2 =
   add_list
@@ -3110,9 +3127,9 @@ let object_string_deprecated pos =
 let cyclic_typedef p =
   add (Typing.err_code Typing.CyclicTypedef) p "Cyclic typedef"
 
-let type_arity_mismatch pos1 n1 pos2 n2 =
-  add_list
-    (Typing.err_code Typing.TypeArityMismatch)
+let type_arity_mismatch pos1 n1 pos2 n2 (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.TypeArityMismatch)
     [(pos1, "This type has " ^ n1 ^ " arguments"); (pos2, "This one has " ^ n2)]
 
 let this_final id pos2 (error : error) =
@@ -3131,18 +3148,19 @@ let exact_class_final id pos2 (error : error) =
   let (code, msgl) = (get_code error, to_list error) in
   add_list code (msgl @ [(fst id, message1); (pos2, message2)])
 
-let fun_arity_mismatch pos1 pos2 =
-  add_list
-    (Typing.err_code Typing.FunArityMismatch)
+let fun_arity_mismatch pos1 pos2 (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.FunArityMismatch)
     [
       (pos1, "Number of arguments doesn't match");
       (pos2, "Because of this definition");
     ]
 
-let fun_reactivity_mismatch pos1 kind1 pos2 kind2 =
+let fun_reactivity_mismatch
+    pos1 kind1 pos2 kind2 (on_error : typing_error_callback) =
   let f k = "This function is " ^ k ^ "." in
-  add_list
-    (Typing.err_code Typing.FunReactivityMismatch)
+  on_error
+    ~code:(Typing.err_code Typing.FunReactivityMismatch)
     [(pos1, f kind1); (pos2, f kind2)]
 
 let inconsistent_mutability pos1 mut1 p2_opt =
@@ -3257,7 +3275,8 @@ let immutable_call_on_mutable fpos pos1 =
       (fpos, "This function is not marked as <<__Mutable>>.");
     ]
 
-let mutability_mismatch ~is_receiver pos1 mut1 pos2 mut2 =
+let mutability_mismatch
+    ~is_receiver pos1 mut1 pos2 mut2 (on_error : typing_error_callback) =
   let msg mut =
     let msg =
       if is_receiver then
@@ -3267,8 +3286,8 @@ let mutability_mismatch ~is_receiver pos1 mut1 pos2 mut2 =
     in
     msg ^ " is " ^ mut
   in
-  add_list
-    (Typing.err_code Typing.MutabilityMismatch)
+  on_error
+    ~code:(Typing.err_code Typing.MutabilityMismatch)
     [(pos1, "Incompatible mutabilities:"); (pos1, msg mut1); (pos2, msg mut2)]
 
 let invalid_call_on_maybe_mutable ~fun_is_mutable pos fpos =
@@ -3513,17 +3532,21 @@ let discarded_awaitable pos1 pos2 =
       (pos2, "This is why I think it is Awaitable");
     ]
 
-let unify_error left right =
-  add_list (Typing.err_code Typing.UnifyError) (left @ right)
+let unify_error ?code errl =
+  add_list (Option.value code ~default:(Typing.err_code Typing.UnifyError)) errl
 
-let maybe_unify_error specific_code left right =
-  add_list (Typing.err_code specific_code) (left @ right)
+let maybe_unify_error specific_code ?code errl =
+  add_list (Option.value code ~default:(Typing.err_code specific_code)) errl
 
 let index_type_mismatch = maybe_unify_error Typing.IndexTypeMismatch
 
 let expected_stringlike = maybe_unify_error Typing.ExpectedStringlike
 
-let type_constant_mismatch = maybe_unify_error Typing.TypeConstantMismatch
+let type_constant_mismatch (on_error : typing_error_callback) ?code errl =
+  let code =
+    Option.value code ~default:(Typing.err_code Typing.TypeConstantMismatch)
+  in
+  on_error ~code errl
 
 let class_constant_type_mismatch =
   maybe_unify_error Typing.ClassConstantTypeMismatch
@@ -3801,9 +3824,10 @@ let abstract_concrete_override pos parent_pos kind =
       (parent_pos, "Previously defined here");
     ]
 
-let required_field_is_optional pos1 pos2 name =
-  add_list
-    (Typing.err_code Typing.RequiredFieldIsOptional)
+let required_field_is_optional pos1 pos2 name (on_error : typing_error_callback)
+    =
+  on_error
+    ~code:(Typing.err_code Typing.RequiredFieldIsOptional)
     [
       (pos1, "The field '" ^ name ^ "' is optional");
       (pos2, "The field '" ^ name ^ "' is defined as required");
@@ -3857,11 +3881,12 @@ let function_is_not_coroutine pos name =
       );
     ]
 
-let coroutinness_mismatch pos1_is_coroutine pos1 pos2 =
+let coroutinness_mismatch
+    pos1_is_coroutine pos1 pos2 (on_error : typing_error_callback) =
   let m1 = "This is a coroutine." in
   let m2 = "This is not a coroutine." in
-  add_list
-    (Typing.err_code Typing.CoroutinnessMismatch)
+  on_error
+    ~code:(Typing.err_code Typing.CoroutinnessMismatch)
     [
       ( pos1,
         if pos1_is_coroutine then
@@ -3897,11 +3922,12 @@ let coroutine_outside_experimental pos =
     pos
     Coroutine_errors.error_message
 
-let return_disposable_mismatch pos1_return_disposable pos1 pos2 =
+let return_disposable_mismatch
+    pos1_return_disposable pos1 pos2 (on_error : typing_error_callback) =
   let m1 = "This is marked <<__ReturnDisposable>>." in
   let m2 = "This is not marked <<__ReturnDisposable>>." in
-  add_list
-    (Typing.err_code Typing.ReturnDisposableMismatch)
+  on_error
+    ~code:(Typing.err_code Typing.ReturnDisposableMismatch)
     [
       ( pos1,
         if pos1_return_disposable then
@@ -3915,11 +3941,12 @@ let return_disposable_mismatch pos1_return_disposable pos1 pos2 =
           m1 );
     ]
 
-let return_void_to_rx_mismatch ~pos1_has_attribute pos1 pos2 =
+let return_void_to_rx_mismatch
+    ~pos1_has_attribute pos1 pos2 (on_error : typing_error_callback) =
   let m1 = "This is marked <<__ReturnsVoidToRx>>." in
   let m2 = "This is not marked <<__ReturnsVoidToRx>>." in
-  add_list
-    (Typing.err_code Typing.ReturnVoidToRxMismatch)
+  on_error
+    ~code:(Typing.err_code Typing.ReturnVoidToRxMismatch)
     [
       ( pos1,
         if pos1_has_attribute then
@@ -3976,11 +4003,12 @@ let overriding_prop_const_mismatch parent_pos parent_const child_pos child_const
           m2 );
     ]
 
-let mutable_return_result_mismatch pos1_has_mutable_return pos1 pos2 =
+let mutable_return_result_mismatch
+    pos1_has_mutable_return pos1 pos2 (on_error : typing_error_callback) =
   let m1 = "This is marked <<__MutableReturn>>." in
   let m2 = "This is not marked <<__MutableReturn>>." in
-  add_list
-    (Typing.err_code Typing.MutableReturnResultMismatch)
+  on_error
+    ~code:(Typing.err_code Typing.MutableReturnResultMismatch)
     [
       ( pos1,
         if pos1_has_mutable_return then
@@ -4418,7 +4446,7 @@ let pass_by_ref_annotation_unexpected pos1 pos2 pos2_is_variadic =
   let msg2 = (pos2, "Because " ^ param_str ^ " passed by value") in
   add_list (Typing.err_code Typing.PassByRefAnnotationUnexpected) [msg1; msg2]
 
-let reffiness_invariant pos1 pos2 mode2 =
+let reffiness_invariant pos1 pos2 mode2 (on_error : typing_error_callback) =
   let msg1 = (pos1, "This parameter is passed by reference") in
   let mode_str =
     match mode2 with
@@ -4426,7 +4454,7 @@ let reffiness_invariant pos1 pos2 mode2 =
     | `inout -> "an inout parameter"
   in
   let msg2 = (pos2, "It is incompatible with " ^ mode_str) in
-  add_list (Typing.err_code Typing.ReffinessInvariant) [msg1; msg2]
+  on_error ~code:(Typing.err_code Typing.ReffinessInvariant) [msg1; msg2]
 
 let inout_annotation_missing pos1 pos2 =
   let msg1 = (pos1, "This argument should be annotated with 'inout'") in
@@ -4444,10 +4472,10 @@ let inout_annotation_unexpected pos1 pos2 pos2_is_variadic =
   in
   add_list (Typing.err_code Typing.InoutAnnotationUnexpected) [msg1; msg2]
 
-let inoutness_mismatch pos1 pos2 =
+let inoutness_mismatch pos1 pos2 (on_error : typing_error_callback) =
   let msg1 = (pos1, "This is an inout parameter") in
   let msg2 = (pos2, "It is incompatible with a normal parameter") in
-  add_list (Typing.err_code Typing.InoutnessMismatch) [msg1; msg2]
+  on_error ~code:(Typing.err_code Typing.InoutnessMismatch) [msg1; msg2]
 
 let invalid_new_disposable pos =
   let msg =
@@ -4495,9 +4523,10 @@ let rx_enabled_in_non_rx_context pos =
     pos
     "\\HH\\Rx\\IS_ENABLED can only be used in reactive functions."
 
-let rx_parameter_condition_mismatch cond pos def_pos =
-  add_list
-    (Typing.err_code Typing.RxParameterConditionMismatch)
+let rx_parameter_condition_mismatch
+    cond pos def_pos (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.RxParameterConditionMismatch)
     [
       ( pos,
         "This parameter does not satisfy "

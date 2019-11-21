@@ -104,6 +104,7 @@ type expand_typeconst =
   ?as_tyvar_with_cnstr:bool ->
   locl_ty ->
   Aast.sid ->
+  on_error:Errors.typing_error_callback ->
   allow_abstract_tconst:bool ->
   env * locl_ty
 

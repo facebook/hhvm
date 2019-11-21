@@ -28,7 +28,7 @@ module Partial = Partial_provider
 
 let err_witness env p = (Reason.Rwitness p, Typing_utils.terr env)
 
-let smember_not_found pos ~is_const ~is_method class_ member_name =
+let smember_not_found pos ~is_const ~is_method class_ member_name on_error =
   let kind =
     if is_const then
       `class_constant
@@ -39,7 +39,7 @@ let smember_not_found pos ~is_const ~is_method class_ member_name =
   in
   let error hint =
     let cid = (Cls.pos class_, Cls.name class_) in
-    Errors.smember_not_found kind pos cid member_name hint
+    Errors.smember_not_found kind pos cid member_name hint on_error
   in
   let static_suggestion =
     Env.suggest_static_member is_method class_ member_name
@@ -58,7 +58,7 @@ let smember_not_found pos ~is_const ~is_method class_ member_name =
     ()
   | (None, None) -> error `no_hint
 
-let member_not_found pos ~is_method class_ member_name r =
+let member_not_found pos ~is_method class_ member_name r on_error =
   let kind =
     if is_method then
       `method_
@@ -73,7 +73,7 @@ let member_not_found pos ~is_method class_ member_name r =
       r
   in
   let error hint =
-    Errors.member_not_found kind pos cid member_name hint reason
+    Errors.member_not_found kind pos cid member_name hint reason on_error
   in
   let method_suggestion = Env.suggest_member is_method class_ member_name in
   let static_suggestion =
@@ -125,7 +125,8 @@ let rec obj_get
     env
     ty1
     cid
-    id =
+    id
+    on_error =
   obj_get_
     ~inst_meth:false
     ~is_method
@@ -139,6 +140,7 @@ let rec obj_get
     cid
     id
     (fun x -> x)
+    on_error
 
 (* We know that the receiver is a concrete class: not a generic with
  * bounds, or a Tunion. *)
@@ -151,7 +153,8 @@ and obj_get_concrete_ty
     concrete_ty
     class_id
     (id_pos, id_str)
-    k_lhs =
+    k_lhs
+    on_error =
   let default () =
     (env, ((Reason.Rwitness id_pos, Typing_utils.tany env), []))
   in
@@ -193,6 +196,7 @@ and obj_get_concrete_ty
         class_id
         (id_pos, id_str)
         k_lhs
+        on_error
     in
     begin
       match Env.get_class env (snd x) with
@@ -234,11 +238,11 @@ and obj_get_concrete_ty
             Errors.try_with_result
               (fun () -> get_member_from_constraints env class_info)
               (fun _ _ ->
-                member_not_found id_pos ~is_method class_info id_str r;
+                member_not_found id_pos ~is_method class_info id_str r on_error;
                 default ())
           | None when not is_method ->
             if not (SN.Members.is_special_xhp_attribute id_str) then
-              member_not_found id_pos ~is_method class_info id_str r;
+              member_not_found id_pos ~is_method class_info id_str r on_error;
             default ()
           | None ->
             begin
@@ -246,7 +250,7 @@ and obj_get_concrete_ty
                 Env.get_member is_method env class_info SN.Members.__call
               with
               | None ->
-                member_not_found id_pos ~is_method class_info id_str r;
+                member_not_found id_pos ~is_method class_info id_str r on_error;
                 default ()
               | Some
                   {
@@ -560,7 +564,8 @@ and obj_get_
     ty1
     cid
     ((id_pos, id_str) as id)
-    k_lhs =
+    k_lhs
+    on_error =
   let (env, ety1) =
     if is_method then
       Typing_solver.expand_type_and_solve
@@ -595,6 +600,7 @@ and obj_get_
           cid
           id
           k_lhs
+          on_error
       in
       let (env, ty) =
         make_nullable_member_type ~is_method env id_pos p1 method_
@@ -634,7 +640,8 @@ and obj_get_
             ty
             cid
             id
-            k_lhs)
+            k_lhs
+            on_error)
     in
     (* TODO: decide what to do about methods with differing generic arity.
      * See T55414751 *)
@@ -661,7 +668,8 @@ and obj_get_
             ty
             cid
             id
-            k_lhs)
+            k_lhs
+            on_error)
     in
     (* TODO: decide what to do about methods with differing generic arity.
      * See T55414751 *)
@@ -692,6 +700,7 @@ and obj_get_
       cid
       id
       k_lhs'
+      on_error
   | (p', Tabstract (ak, _)) ->
     let resl =
       TUtils.try_over_concrete_supertypes env ety1 (fun env ty ->
@@ -712,7 +721,8 @@ and obj_get_
             ty
             cid
             id
-            k_lhs')
+            k_lhs'
+            on_error)
     in
     begin
       match resl with
@@ -759,3 +769,4 @@ and obj_get_
       cid
       id
       k_lhs
+      on_error

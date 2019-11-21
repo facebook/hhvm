@@ -28,7 +28,8 @@ module Env = Typing_env
 module LEnv = Typing_lenv
 module Async = Typing_async
 module SubType = Typing_subtype
-module Unify = Typing_unify
+
+(*module Unify = Typing_unify*)
 module Union = Typing_union
 module Inter = Typing_intersection
 module SN = Naming_special_names
@@ -2191,6 +2192,7 @@ and expr_
         (CIexpr instance)
         meth
         (fun x -> x)
+        Errors.unify_error
     in
     let (env, result) =
       Env.FakeMembers.check_instance_invalid env instance (snd meth) result
@@ -2233,6 +2235,7 @@ and expr_
           local_obj_ty
           (CI (pos, class_name))
           meth_name
+          Errors.unify_error
       in
       let (env, fty) = Env.expand_type env fty in
       (match fty with
@@ -2311,7 +2314,8 @@ and expr_
           ~is_const:false
           ~is_method:true
           class_
-          (snd meth);
+          (snd meth)
+          Errors.unify_error;
         expr_error env Reason.Rnone outer
       | Some
           {
@@ -3442,6 +3446,7 @@ and expr_
                   obj
                   cid
                   namepstr
+                  Errors.unify_error
               in
               let ureason = Reason.URxhp (Cls.name class_info, snd namepstr) in
               Typing_coercion.coerce_type
@@ -3805,10 +3810,10 @@ and anon_make tenv p f ft idl is_anon outer =
                 let env =
                   match el with
                   | None ->
-                    iter2_shortest
+                    (*iter2_shortest
                       Unify.unify_param_modes
                       ft.ft_params
-                      supplied_params;
+                      supplied_params; *)
                     env
                   | Some x ->
                     let var_param =
@@ -4393,6 +4398,7 @@ and assign_ p ur env e1 ty2 =
         obj_ty
         (CIexpr e1)
         m
+        Errors.unify_error
     in
     let te1 =
       Tast.make_typed_expr
@@ -5268,6 +5274,7 @@ and dispatch_call
           e1
           m
           k_lhs
+          Errors.unify_error
     in
     let env = check_coroutine_call env fty in
     let ty =
@@ -5319,6 +5326,7 @@ and dispatch_call
         ty1
         infer_e
         m
+        Errors.unify_error
     in
     let (env, (tel, typed_unpack_element, ty)) =
       call
@@ -5363,6 +5371,7 @@ and dispatch_call
         ty1
         (CIexpr e1)
         m
+        Errors.unify_error
     in
     let env = check_coroutine_call env tfty in
     let (env, (tel, typed_unpack_element, ty)) =
@@ -5698,7 +5707,13 @@ and class_get_
         Errors.try_with_result
           (fun () -> get_smember_from_constraints env class_info)
           (fun _ _ ->
-            TOG.smember_not_found p ~is_const ~is_method class_info mid;
+            TOG.smember_not_found
+              p
+              ~is_const
+              ~is_method
+              class_info
+              mid
+              Errors.unify_error;
             (env, ((Reason.Rnone, Typing_utils.terr env), [])))
       in
       if is_const then (
@@ -5716,7 +5731,13 @@ and class_get_
         | None when Cls.has_upper_bounds_on_this_from_constraints class_ ->
           try_get_smember_from_constraints env class_
         | None ->
-          TOG.smember_not_found p ~is_const ~is_method class_ mid;
+          TOG.smember_not_found
+            p
+            ~is_const
+            ~is_method
+            class_
+            mid
+            Errors.unify_error;
           (env, ((Reason.Rnone, Typing_utils.terr env), []))
         | Some { cc_type; cc_abstract; cc_pos; _ } ->
           let (env, cc_locl_type) = Phase.localize ~ety_env env cc_type in
@@ -5737,7 +5758,13 @@ and class_get_
         | None when Cls.has_upper_bounds_on_this_from_constraints class_ ->
           try_get_smember_from_constraints env class_
         | None ->
-          TOG.smember_not_found p ~is_const ~is_method class_ mid;
+          TOG.smember_not_found
+            p
+            ~is_const
+            ~is_method
+            class_
+            mid
+            Errors.unify_error;
           (env, ((Reason.Rnone, Typing_utils.terr env), []))
         | Some
             ( {

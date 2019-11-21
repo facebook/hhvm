@@ -19,6 +19,7 @@ val obj_get :
   Typing_defs.locl_ty ->
   Nast.class_id_ ->
   Ast_defs.pos * string ->
+  Errors.typing_error_callback ->
   Typing_env_types.env * (Typing_defs.locl_ty * Tast.targ list)
 
 val obj_get_ :
@@ -35,6 +36,7 @@ val obj_get_ :
   Nast.class_id_ ->
   Ast_defs.pos * string ->
   (Typing_defs.locl_ty -> Typing_defs.locl_ty) ->
+  Errors.typing_error_callback ->
   Typing_env_types.env * (Typing_defs.locl_ty * Tast.targ list)
 
 val smember_not_found :
@@ -43,4 +45,5 @@ val smember_not_found :
   is_method:bool ->
   Decl_provider.Class.t ->
   string ->
+  Errors.typing_error_callback ->
   unit

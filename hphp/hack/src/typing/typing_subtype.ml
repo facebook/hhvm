@@ -14,7 +14,6 @@ open Typing_defs
 open Typing_env_types
 open Typing_logic_helpers
 module Reason = Typing_reason
-module Unify = Typing_unify
 module Env = Typing_env
 module Inter = Typing_intersection
 module Subst = Decl_subst
@@ -144,6 +143,7 @@ end
 (** Check that a mutability type is a subtype of another mutability type *)
 let check_mutability
     ~(is_receiver : bool)
+    ~subtype_env
     (p_sub : Pos.t)
     (mut_sub : param_mutability option)
     (p_super : Pos.t)
@@ -176,7 +176,8 @@ let check_mutability
           p_sub
           (str mut_sub)
           p_super
-          (str mut_super))
+          (str mut_super)
+          subtype_env.on_error)
       env
   | _ -> valid env
 
@@ -317,28 +318,28 @@ let rec process_simplify_subtype_result prop =
     failwith "unexpected coercions assertion"
   | TL.Conj props ->
     (* Evaluates list from left-to-right so preserves order of conjuncts *)
-    List.iter ~f:process_simplify_subtype_result props
-  | TL.Disj (f, []) -> f ()
+    List.for_all ~f:process_simplify_subtype_result props
+  | TL.Disj (f, []) ->
+    f ();
+    false
   | TL.Disj _ -> failwith "non-empty disjunction"
 
-and cstr_ty_as_tyvar_with_upper_bound env ty =
+and cstr_ty_as_tyvar_with_upper_bound ~subtype_env env ty =
   match ty with
   | LoclType ty -> (env, ty)
   | ConstraintType _ ->
     let (env, tyvar) = Env.fresh_type_reason env (reason ty) in
     let tyvar' = LoclType tyvar in
-    let on_error = Errors.unify_error in
-    let env = sub_type_i env tyvar' ty on_error in
+    let env = sub_type_i ~subtype_env env tyvar' ty in
     (env, tyvar)
 
-and cstr_ty_as_tyvar_with_lower_bound env ty =
+and cstr_ty_as_tyvar_with_lower_bound ~subtype_env env ty =
   match ty with
   | LoclType ty -> (env, ty)
   | ConstraintType _ ->
     let (env, tyvar) = Env.fresh_type_reason env (reason ty) in
     let tyvar' = LoclType tyvar in
-    let on_error = Errors.unify_error in
-    let env = sub_type_i env ty tyvar' on_error in
+    let env = sub_type_i ~subtype_env env ty tyvar' in
     (env, tyvar)
 
 and simplify_subtype
@@ -396,8 +397,8 @@ and simplify_subtype_i
     match (r_super, r_sub) with
     | (Reason.Rcstr_on_generics (p, tparam), _)
     | (_, Reason.Rcstr_on_generics (p, tparam)) ->
-      Errors.violated_constraint p tparam left right
-    | _ -> subtype_env.on_error left right
+      Errors.violated_constraint p tparam left right subtype_env.on_error
+    | _ -> subtype_env.on_error (left @ right)
   in
   let ( ||| ) = ( ||| ) ~fail in
   (* We *know* that the assertion is unsatisfiable *)
@@ -709,7 +710,9 @@ and simplify_subtype_i
     constraint type, and we can't union with constraint types,
     so if ty_super is a constraint type, we turn it into a type variable
     which has this constraint (i.e. which has it as upper bound). *)
-    let (env, ty_super) = cstr_ty_as_tyvar_with_upper_bound env ty_super in
+    let (env, ty_super) =
+      cstr_ty_as_tyvar_with_upper_bound ~subtype_env env ty_super
+    in
     let (env, ty_super') = TUtils.union env ty_super non_ty in
     let ty_sub' = MakeType.intersection r tyl' in
     simplify_subtype ~subtype_env ty_sub' ty_super' env
@@ -738,7 +741,9 @@ and simplify_subtype_i
     constraint type, and we can't intersect with constraint types,
     so if ty_sub is a constraint type, we turn it into a type variable
     with that constraint type as lower bound. *)
-    let (env, ty_sub) = cstr_ty_as_tyvar_with_lower_bound env ty_sub in
+    let (env, ty_sub) =
+      cstr_ty_as_tyvar_with_lower_bound ~subtype_env env ty_sub
+    in
     let (env, ty_sub') = Inter.intersect env r ty_sub (MakeType.nonnull r) in
     simplify_subtype ~subtype_env ty_sub' ty_super' env
   (* If subtype and supertype are the same generic parameter, we're done *)
@@ -815,6 +820,7 @@ and simplify_subtype_i
               ty
               class_id
               name
+              subtype_env.on_error
           in
           (obj_get_ty, valid_env env))
         (fun (obj_get_ty, _) error ->
@@ -886,7 +892,7 @@ and simplify_subtype_i
             res &&& simplify_subtype ~subtype_env ~this_ty ety_sub ty_dest)
       | (_, Tabstract (AKgeneric name_sub, opt_sub_cstr)) ->
         let (env, ety_super) =
-          cstr_ty_as_tyvar_with_upper_bound env ety_super
+          cstr_ty_as_tyvar_with_upper_bound ~subtype_env env ety_super
         in
         simplify_subtype_generic_sub name_sub opt_sub_cstr ety_sub ety_super env
       (* TODO: should remove these any cases *)
@@ -976,13 +982,18 @@ and simplify_subtype_i
           |> check_with
                (Aast.equal_is_coroutine is_coroutine ft.ft_is_coroutine)
                (fun () ->
-                 Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub)
+                 Errors.coroutinness_mismatch
+                   ft.ft_is_coroutine
+                   p_super
+                   p_sub
+                   subtype_env.on_error)
           |> check_with
-               (Unify.unify_arities
+               (check_anon_arity
                   ~ellipsis_is_variadic:true
                   anon_arity
                   ft.ft_arity)
-               (fun () -> Errors.fun_arity_mismatch p_super p_sub)
+               (fun () ->
+                 Errors.fun_arity_mismatch p_super p_sub subtype_env.on_error)
           |> fun (env, prop) ->
           let (env, _, ret) = anon env ft.ft_params ft.ft_arity in
           (env, prop)
@@ -1054,11 +1065,13 @@ and simplify_subtype_i
                      (Reason.to_pos r_sub)
                      (Reason.to_pos r_super)
                      printable_name
+                     subtype_env.on_error
                  | _ ->
                    Errors.required_field_is_optional
                      (Reason.to_pos r_sub)
                      (Reason.to_pos r_super)
-                     printable_name)
+                     printable_name
+                     subtype_env.on_error)
       in
       let lookup_shape_field_type name r shape_kind fdm =
         match ShapeMap.find_opt name fdm with
@@ -1082,7 +1095,8 @@ and simplify_subtype_i
           invalid_with (fun () ->
               Errors.shape_fields_unknown
                 (Reason.to_pos r_sub)
-                (Reason.to_pos r_super))
+                (Reason.to_pos r_super)
+                subtype_env.on_error)
         | (_, _) ->
           ShapeSet.fold
             (fun name res ->
@@ -1174,7 +1188,8 @@ and simplify_subtype_i
                       Errors.expected_tparam
                         ~definition_pos:(Cls.pos class_ty)
                         ~use_pos:(Reason.to_pos p_super)
-                        (List.length (Cls.tparams class_ty)))
+                        (List.length (Cls.tparams class_ty))
+                        (Some subtype_env.on_error))
                 else
                   let ety_env =
                     {
@@ -1331,7 +1346,8 @@ and simplify_subtype_i
                   (fst x_super)
                   n_super
                   (fst x_sub)
-                  n_sub)
+                  n_sub
+                  subtype_env.on_error)
           else if List.is_empty tyl_sub && List.is_empty tyl_super then
             valid ()
           else
@@ -1384,7 +1400,8 @@ and simplify_subtype_i
                 Errors.expected_tparam
                   ~definition_pos:(Cls.pos class_sub)
                   ~use_pos:(Reason.to_pos p_sub)
-                  (List.length (Cls.tparams class_sub)))
+                  (List.length (Cls.tparams class_sub))
+                  (Some subtype_env.on_error))
           else
             let ety_env =
               {
@@ -1711,6 +1728,22 @@ and simplify_subtype_variance
     end
     &&& simplify_subtype_variance cid variance_reifiedl childrenl superl
 
+and check_anon_arity ~ellipsis_is_variadic anon_arity func_arity : bool =
+  match (anon_arity, func_arity) with
+  | (Fellipsis (a_min, _), Fvariadic (f_min, _)) when ellipsis_is_variadic ->
+    (* we want to allow use the "..." syntax in the declaration of
+     * anonymous function types to match named variadic arguments
+     * of the "...$args" form as well as unnamed ones *)
+    Int.equal a_min f_min
+  | (Fvariadic (a_min, _), Fstandard (f_min, _))
+  | (Fvariadic (a_min, _), Fvariadic (f_min, _))
+  | (Fellipsis (a_min, _), Fstandard (f_min, _))
+  | (Fellipsis (a_min, _), Fellipsis (f_min, _)) ->
+    a_min <= f_min
+  | (Fstandard (a_min, a_max), Fstandard (f_min, f_max)) ->
+    Int.equal a_min f_min && Int.equal a_max f_max
+  | (_, _) -> false
+
 and simplify_subtype_params
     ~(subtype_env : subtype_env)
     ?(is_method : bool = false)
@@ -1777,6 +1810,7 @@ and simplify_subtype_params
     if check_params_mutability then
       check_mutability
         ~is_receiver:false
+        ~subtype_env
         sub.fp_pos
         sub.fp_mutability
         super.fp_pos
@@ -1784,22 +1818,24 @@ and simplify_subtype_params
     else
       valid )
     &&& fun env ->
-    begin
-      let { fp_type = ty_sub; _ } = sub in
-      let { fp_type = ty_super; _ } = super in
-      (* Check that the calling conventions of the params are compatible.
-       * We don't currently raise an error for reffiness because function
-       * hints don't support '&' annotations (enforce_ctpbr = false). *)
-      Unify.unify_param_modes ~enforce_ctpbr:is_method sub super;
-      Unify.unify_accept_disposable sub super;
-      match (sub.fp_kind, super.fp_kind) with
-      | (FPinout, FPinout) ->
-        (* Inout parameters are invariant wrt subtyping for function types. *)
-        env
-        |> simplify_subtype_possibly_enforced ty_super ty_sub
-        &&& simplify_subtype_possibly_enforced ty_sub ty_super
-      | _ -> env |> simplify_subtype_possibly_enforced ty_sub ty_super
-    end
+    let { fp_type = ty_sub; _ } = sub in
+    let { fp_type = ty_super; _ } = super in
+    (* Check that the calling conventions of the params are compatible.
+     * We don't currently raise an error for reffiness because function
+     * hints don't support '&' annotations (enforce_ctpbr = false). *)
+    env
+    |> simplify_param_modes ~enforce_ctpbr:is_method ~subtype_env sub super
+    &&& simplify_param_accept_disposable ~subtype_env sub super
+    &&& begin
+          fun env ->
+          match (sub.fp_kind, super.fp_kind) with
+          | (FPinout, FPinout) ->
+            (* Inout parameters are invariant wrt subtyping for function types. *)
+            env
+            |> simplify_subtype_possibly_enforced ty_super ty_sub
+            &&& simplify_subtype_possibly_enforced ty_sub ty_super
+          | _ -> env |> simplify_subtype_possibly_enforced ty_sub ty_super
+        end
     &&& simplify_subtype_params
           ~is_method
           subl
@@ -1859,7 +1895,7 @@ and simplify_subtype_reactivity
     let msg_sub =
       "This function is " ^ TUtils.reactivity_to_string env r_sub ^ "."
     in
-    subtype_env.on_error [(p_super, msg_super)] [(p_sub, msg_sub)]
+    subtype_env.on_error [(p_super, msg_super); (p_sub, msg_sub)]
   in
   let ( ||| ) = ( ||| ) ~fail in
   let invalid () = invalid ~fail env in
@@ -2066,7 +2102,8 @@ and simplify_subtype_param_rx_if_impl
           Errors.rx_parameter_condition_mismatch
             SN.UserAttributes.uaOnlyRxIfImpl
             p_sub
-            p_super) )
+            p_super
+            subtype_env.on_error) )
   in
   match (cond_type_sub, cond_type_super) with
   (* no condition types - do nothing *)
@@ -2210,7 +2247,8 @@ and simplify_subtype_fun_params_reactivity
               Errors.rx_parameter_condition_mismatch
                 SN.UserAttributes.uaAtMostRxAsFunc
                 p_sub.fp_pos
-                p_super.fp_pos) )
+                p_super.fp_pos
+                subtype_env.on_error) )
       (* parameter type is not function - error will be reported in different place *)
       | _ -> valid env
     end
@@ -2229,11 +2267,12 @@ and simplify_subtype_fun_params_reactivity
       {
         subtype_env with
         on_error =
-          (fun _ _ ->
+          (fun ?code:_ _ ->
             Errors.rx_parameter_condition_mismatch
               SN.UserAttributes.uaOnlyRxIfImpl
               p_sub.fp_pos
-              p_super.fp_pos);
+              p_super.fp_pos
+              subtype_env.on_error);
       }
     in
     simplify_subtype_param_rx_if_impl
@@ -2245,6 +2284,67 @@ and simplify_subtype_fun_params_reactivity
       p_super.fp_pos
       cond_type_super
       env
+
+and simplify_param_modes ?(enforce_ctpbr = true) ~subtype_env param1 param2 env
+    =
+  (* ctpbr = call-time pass-by-reference i.e. & annotation *)
+  let { fp_pos = pos1; fp_kind = mode1; _ } = param1 in
+  let { fp_pos = pos2; fp_kind = mode2; _ } = param2 in
+  match (mode1, mode2) with
+  | (FPnormal, FPnormal)
+  | (FPref, FPref)
+  | (FPinout, FPinout) ->
+    valid env
+  | (FPnormal, FPref) ->
+    if enforce_ctpbr then
+      invalid
+        ~fail:(fun () ->
+          Errors.reffiness_invariant pos2 pos1 `normal subtype_env.on_error)
+        env
+    else
+      valid env
+  | (FPref, FPnormal) ->
+    if enforce_ctpbr then
+      invalid
+        ~fail:(fun () ->
+          Errors.reffiness_invariant pos1 pos2 `normal subtype_env.on_error)
+        env
+    else
+      valid env
+  | (FPnormal, FPinout) ->
+    invalid
+      ~fail:(fun () -> Errors.inoutness_mismatch pos2 pos1 subtype_env.on_error)
+      env
+  | (FPinout, FPnormal) ->
+    invalid
+      ~fail:(fun () -> Errors.inoutness_mismatch pos1 pos2 subtype_env.on_error)
+      env
+  | (FPref, FPinout) ->
+    invalid
+      ~fail:(fun () ->
+        Errors.reffiness_invariant pos1 pos2 `inout subtype_env.on_error)
+      env
+  | (FPinout, FPref) ->
+    invalid
+      ~fail:(fun () ->
+        Errors.reffiness_invariant pos2 pos1 `inout subtype_env.on_error)
+      env
+
+and simplify_param_accept_disposable ~subtype_env param1 param2 env =
+  let { fp_pos = pos1; fp_accept_disposable = mode1; _ } = param1 in
+  let { fp_pos = pos2; fp_accept_disposable = mode2; _ } = param2 in
+  match (mode1, mode2) with
+  | (true, false) ->
+    invalid
+      ~fail:(fun () ->
+        Errors.accept_disposable_invariant pos1 pos2 subtype_env.on_error)
+      env
+  | (false, true) ->
+    invalid
+      ~fail:(fun () ->
+        Errors.accept_disposable_invariant pos2 pos1 subtype_env.on_error)
+      env
+  | (_, _) -> valid env
 
 (* Helper function for subtyping on function types: performs all checks that
  * don't involve actual types:
@@ -2265,12 +2365,13 @@ and simplify_subtype_funs_attributes
     env =
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
-  let on_error _ _ =
+  let on_error ?code:_ _ =
     Errors.fun_reactivity_mismatch
       p_super
       (TUtils.reactivity_to_string env ft_super.ft_reactive)
       p_sub
       (TUtils.reactivity_to_string env ft_sub.ft_reactive)
+      subtype_env.on_error
   in
   simplify_subtype_reactivity
     ~subtype_env:{ subtype_env with on_error }
@@ -2283,14 +2384,19 @@ and simplify_subtype_funs_attributes
   |> check_with
        (Bool.equal ft_sub.ft_is_coroutine ft_super.ft_is_coroutine)
        (fun () ->
-         Errors.coroutinness_mismatch ft_super.ft_is_coroutine p_super p_sub)
+         Errors.coroutinness_mismatch
+           ft_super.ft_is_coroutine
+           p_super
+           p_sub
+           subtype_env.on_error)
   |> check_with
        (Bool.equal ft_sub.ft_return_disposable ft_super.ft_return_disposable)
        (fun () ->
          Errors.return_disposable_mismatch
            ft_super.ft_return_disposable
            p_super
-           p_sub)
+           p_sub
+           subtype_env.on_error)
   |> (* it is ok for subclass to return mutably owned value and treat it as immutable -
   the fact that value is mutably owned guarantees it has only single reference so
   as a result this single reference will be immutable. However if super type
@@ -2305,7 +2411,8 @@ and simplify_subtype_funs_attributes
       Errors.mutable_return_result_mismatch
         ft_super.ft_returns_mutable
         p_super
-        p_sub)
+        p_sub
+        subtype_env.on_error)
   |> check_with
        ( equal_reactivity ft_super.ft_reactive Nonreactive
        || ft_super.ft_returns_void_to_rx
@@ -2330,7 +2437,8 @@ and simplify_subtype_funs_attributes
          Errors.return_void_to_rx_mismatch
            ~pos1_has_attribute:true
            p_sub
-           p_super)
+           p_super
+           subtype_env.on_error)
   |>
   (* check mutability only for reactive functions *)
   let check_params_mutability =
@@ -2342,6 +2450,7 @@ and simplify_subtype_funs_attributes
       (env, prop)
       &&& check_mutability
             ~is_receiver:true
+            ~subtype_env
             p_super
             ft_super.ft_mutability
             p_sub
@@ -2350,7 +2459,7 @@ and simplify_subtype_funs_attributes
       (env, prop) )
     |> check_with
          (arity_min ft_sub.ft_arity <= arity_min ft_super.ft_arity)
-         (fun () -> Errors.fun_too_many_args p_sub p_super)
+         (fun () -> Errors.fun_too_many_args p_sub p_super subtype_env.on_error)
     |> fun res ->
     match (ft_sub.ft_arity, ft_super.ft_arity) with
     | (Fellipsis _, Fvariadic _) ->
@@ -2360,15 +2469,21 @@ and simplify_subtype_funs_attributes
        * methods), letting "..." override "...$args" would result in method
        * compatibility errors at runtime. *)
       with_error
-        (fun () -> Errors.fun_variadicity_hh_vs_php56 p_sub p_super)
+        (fun () ->
+          Errors.fun_variadicity_hh_vs_php56 p_sub p_super subtype_env.on_error)
         res
     | (Fstandard (_, sub_max), Fstandard (_, super_max)) ->
       if sub_max < super_max then
-        with_error (fun () -> Errors.fun_too_few_args p_sub p_super) res
+        with_error
+          (fun () -> Errors.fun_too_few_args p_sub p_super subtype_env.on_error)
+          res
       else
         res
     | (Fstandard _, _) ->
-      with_error (fun () -> Errors.fun_unexpected_nonvariadic p_sub p_super) res
+      with_error
+        (fun () ->
+          Errors.fun_unexpected_nonvariadic p_sub p_super subtype_env.on_error)
+        res
     | (_, _) -> res
 
 and simplify_subtype_possibly_enforced
@@ -2448,20 +2563,25 @@ and simplify_subtype_funs
 
 (* One of the main entry points to this module *)
 and sub_type_i
-    (env : env)
-    (ty_sub : internal_type)
-    (ty_super : internal_type)
-    (on_error : Errors.typing_error_callback) : env =
+    ~subtype_env (env : env) (ty_sub : internal_type) (ty_super : internal_type)
+    : env =
   Env.log_env_change "sub_type" env
-  @@ sub_type_inner
-       ~subtype_env:(make_subtype_env on_error)
-       env
-       ~this_ty:None
-       ty_sub
-       ty_super
+  @@
+  let old_env = env in
+  let (env, success) =
+    sub_type_inner ~subtype_env env ~this_ty:None ty_sub ty_super
+  in
+  if success then
+    env
+  else
+    old_env
 
-and sub_type env (ty_sub : locl_ty) (ty_super : locl_ty) =
-  sub_type_i env (LoclType ty_sub) (LoclType ty_super)
+and sub_type env (ty_sub : locl_ty) (ty_super : locl_ty) on_error =
+  sub_type_i
+    ~subtype_env:(make_subtype_env ~treat_dynamic_as_bottom:false on_error)
+    env
+    (LoclType ty_sub)
+    (LoclType ty_super)
 
 (* Add a new upper bound ty on var.  Apply transitivity of sutyping,
  * so if we already have tyl <: var, then check that for each ty_sub
@@ -2484,6 +2604,7 @@ and add_tyvar_upper_bound_and_close
             env
             var
             upper_bound
+            ~on_error
             ~as_tyvar_with_cnstr:true
         in
         ITySet.fold
@@ -2523,6 +2644,7 @@ and add_tyvar_lower_bound_and_close
             env
             var
             lower_bound
+            ~on_error
             ~as_tyvar_with_cnstr:false
         in
         ITySet.fold
@@ -2660,7 +2782,7 @@ and sub_type_inner
     ~(subtype_env : subtype_env)
     ~(this_ty : locl_ty option)
     (ty_sub : internal_type)
-    (ty_super : internal_type) : env =
+    (ty_super : internal_type) : env * bool =
   log_subtype_i
     ~level:1
     ~this_ty
@@ -2673,8 +2795,8 @@ and sub_type_inner
   in
   let (env, prop) = prop_to_env env prop subtype_env.on_error in
   let env = Env.add_subtype_prop env prop in
-  process_simplify_subtype_result prop;
-  env
+  let succeeded = process_simplify_subtype_result prop in
+  (env, succeeded)
 
 and is_sub_type_alt_i
     ~ignore_generic_params ~no_top_bottom ~treat_dynamic_as_bottom env ty1 ty2 =
@@ -2892,7 +3014,7 @@ let subtype_reactivity
       env
   in
   let (env, prop) = prop_to_env env prop subtype_env.on_error in
-  process_simplify_subtype_result prop;
+  ignore (process_simplify_subtype_result prop);
   env
 
 let decompose_subtype_add_bound
@@ -3174,7 +3296,7 @@ let subtype_method
   in
   let (env, res) = prop_to_env env res on_error in
   let env = Env.add_subtype_prop env res in
-  process_simplify_subtype_result res;
+  ignore (process_simplify_subtype_result res);
 
   (* This is (3) above *)
   let check_tparams_constraints env tparams =
@@ -3222,6 +3344,7 @@ let sub_type_with_dynamic_as_bottom
     env
     ty_sub
     ty_super;
+  let old_env = env in
   let (env, prop) =
     simplify_subtype
       ~subtype_env:(make_subtype_env ~treat_dynamic_as_bottom:true on_error)
@@ -3232,14 +3355,33 @@ let sub_type_with_dynamic_as_bottom
   in
   let (env, prop) = prop_to_env env prop on_error in
   let env = Env.add_subtype_prop env prop in
-  process_simplify_subtype_result prop;
+  let succeeded = process_simplify_subtype_result prop in
+  let env =
+    if succeeded then
+      env
+    else
+      old_env
+  in
   env_change_log env
+
+let cstr_ty_as_tyvar_with_upper_bound env ty =
+  let subtype_env =
+    make_subtype_env ~treat_dynamic_as_bottom:false Errors.unify_error
+  in
+  cstr_ty_as_tyvar_with_upper_bound ~subtype_env env ty
 
 (*****************************************************************************)
 (* Exporting *)
 (*****************************************************************************)
 
 let () = Typing_utils.sub_type_ref := sub_type
+
+let sub_type_i env ty1 ty2 on_error =
+  sub_type_i
+    ~subtype_env:(make_subtype_env ~treat_dynamic_as_bottom:false on_error)
+    env
+    ty1
+    ty2
 
 let () = Typing_utils.sub_type_i_ref := sub_type_i
 

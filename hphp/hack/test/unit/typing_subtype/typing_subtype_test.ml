@@ -13,7 +13,8 @@ module ITySet = Internal_type_set
 
 let do_test_sub_type_expect_ok ?on_error env sub_ty super_ty =
   let on_error =
-    Option.value on_error ~default:(fun _ _ -> failwith "on error was called")
+    Option.value on_error ~default:(fun ?code:_ _ ->
+        failwith "on error was called")
   in
   Typing_subtype.sub_type_i env sub_ty super_ty on_error
 

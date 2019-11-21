@@ -29,7 +29,6 @@
 #include "hphp/util/rds-local.h"
 #include "hphp/util/trace.h"
 
-using namespace HPHP::Trace;
 
 ///////////////////////////////////////////////////////////////////////////////
 

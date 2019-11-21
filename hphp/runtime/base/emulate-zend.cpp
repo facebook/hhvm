@@ -16,7 +16,6 @@
 #include "hphp/runtime/base/emulate-zend.h"
 #include "hphp/runtime/base/ini-setting.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

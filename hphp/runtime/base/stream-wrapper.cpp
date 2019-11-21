@@ -15,7 +15,6 @@
 */
 #include "hphp/runtime/base/stream-wrapper.h"
 
-#include <sys/types.h>
 
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 

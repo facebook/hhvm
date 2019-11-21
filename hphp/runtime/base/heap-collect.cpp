@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/cycles.h"
-#include "hphp/util/process.h"
 #include "hphp/util/ptr-map.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/struct-log.h"

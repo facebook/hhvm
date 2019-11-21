@@ -18,7 +18,6 @@
 #include <folly/portability/Fcntl.h>
 #include <folly/portability/Sockets.h>
 
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"

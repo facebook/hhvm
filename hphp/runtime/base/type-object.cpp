@@ -19,7 +19,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/datetime/ext_datetime.h"

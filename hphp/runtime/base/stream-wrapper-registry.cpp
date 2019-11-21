@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/http-stream-wrapper.h"
 #include "hphp/runtime/base/php-stream-wrapper.h"
 #include "hphp/runtime/base/req-optional.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-hash-set.h"
 #include "hphp/runtime/base/string-hash-map.h"

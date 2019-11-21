@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/zend/zend-strtod.h"
 
 namespace HPHP {
 

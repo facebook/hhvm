@@ -52,8 +52,6 @@
 #include "hphp/util/gzip.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hdf.h"
-#include "hphp/util/hphp-config.h"
-#include "hphp/util/hugetlb.h"
 #include "hphp/util/log-file-flusher.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/network.h"
@@ -66,7 +64,6 @@
 #include "hphp/zend/zend-string.h"
 
 #include <cstdint>
-#include <libgen.h>
 #include <limits>
 #include <map>
 #include <memory>

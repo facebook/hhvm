@@ -33,7 +33,6 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/exception.h"
 #include "hphp/util/network.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/process.h"
@@ -42,7 +41,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 using std::string;
-using std::vector;
 namespace fs = boost::filesystem;
 
 bool FileUtil::mkdir(const std::string &path, int mode /* = 0777 */) {

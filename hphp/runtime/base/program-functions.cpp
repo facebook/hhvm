@@ -78,7 +78,6 @@
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
 
-#include "hphp/util/abi-cxx.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/arch.h"
 #include "hphp/util/boot-stats.h"
@@ -87,7 +86,6 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/hardware-counter.h"
-#include "hphp/util/hphp-config.h"
 #include "hphp/util/kernel-version.h"
 #ifndef _MSC_VER
 #include "hphp/util/light-process.h"

@@ -377,6 +377,22 @@ impl Node_ {
         }
     }
 
+    fn into_iter(self) -> std::vec::IntoIter<Self> {
+        self.into_vec().into_iter()
+    }
+
+    fn iter(&self) -> NodeIterHelper {
+        match self {
+            Node_::List(items) => NodeIterHelper::Vec(items.iter()),
+            Node_::BracketedList(innards) => {
+                let (_, items, _) = &**innards;
+                NodeIterHelper::Vec(items.iter())
+            }
+            Node_::Ignored => NodeIterHelper::Empty,
+            n => NodeIterHelper::Single(n),
+        }
+    }
+
     fn as_visibility(&self) -> Result<aast::Visibility, String> {
         match self {
             Node_::Private => Ok(aast::Visibility::Private),
@@ -431,8 +447,8 @@ impl DirectDeclSmartConstructors<'_> {
                         Ty_::Tapply(
                             id.clone(),
                             inner_types
-                                .into_iter()
-                                .map(|node| self.node_to_ty(&node, type_variables))
+                                .iter()
+                                .map(|node| self.node_to_ty(node, type_variables))
                                 .collect::<Result<Vec<_>, String>>()?,
                         )
                     }
@@ -509,6 +525,28 @@ impl DirectDeclSmartConstructors<'_> {
             }
             Node_::Ignored => Ok(Vec::new()),
             n => Err(format!("Expected a list of variables, but got {:?}", n)),
+        }
+    }
+}
+
+enum NodeIterHelper<'a> {
+    Empty,
+    Single(&'a Node_),
+    Vec(std::slice::Iter<'a, Node_>),
+}
+
+impl<'a> Iterator for NodeIterHelper<'a> {
+    type Item = &'a Node_;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            NodeIterHelper::Empty => None,
+            NodeIterHelper::Single(node) => {
+                let node = *node;
+                *self = NodeIterHelper::Empty;
+                Some(node)
+            }
+            NodeIterHelper::Vec(ref mut iter) => iter.next(),
         }
     }
 }
@@ -866,7 +904,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         name: Self::R,
         constraints: Self::R,
     ) -> Self::R {
-        let constraints = constraints?.into_vec().into_iter().fold(
+        let constraints = constraints?.into_iter().fold(
             Ok(Vec::new()),
             |acc: Result<Vec<_>, String>, node| match acc {
                 acc @ Err(_) => acc,
@@ -918,7 +956,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 let mut type_variables = HashSet::new();
                 let type_params = decl
                     .type_params
-                    .into_vec()
                     .into_iter()
                     .map(|node| {
                         let (name, constraints) = match node {
@@ -945,12 +982,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     .collect::<Result<Vec<_>, String>>()?;
                 let params = self.into_variables_list(decl.param_list, &type_variables)?;
                 let type_ = self.node_to_ty(&decl.ret_hint, &type_variables)?;
-                let modifiers = decl.modifiers.into_vec();
-                let async_ = modifiers.iter().any(|node| match node {
+                let async_ = decl.modifiers.iter().any(|node| match node {
                     Node_::Async => true,
                     _ => false,
                 });
-                let fun_kind = if body?.into_vec().into_iter().any(|node| match node {
+                let fun_kind = if body?.iter().any(|node| match node {
                     Node_::Yield => true,
                     _ => false,
                 }) {
@@ -1150,7 +1186,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         Node_::Property(decl) => {
                             let mut is_static = false;
                             let mut visibility = aast::Visibility::Private;
-                            for modifier in decl.modifiers.into_vec() {
+                            for modifier in decl.modifiers.iter() {
                                 if let Ok(vis) = modifier.as_visibility() {
                                     visibility = vis;
                                 }

@@ -1,4 +1,4 @@
-File "classes.php", line 4, characters 27-41:
+File "classes.php", line 4, characters 25-39:
 Please assign a value (Typing[4055])
 File "classes.php", line 3, characters 7-13:
 Class MyClass does not initialize all of its members; instanceProperty protectedProperty are not always initialized.

@@ -275,12 +275,18 @@ pub struct VariableDecl {
 }
 
 #[derive(Clone, Debug)]
-pub struct FunctionDecl {
+pub struct FunctionHeader {
     name: Node_,
     modifiers: Node_,
     type_params: Node_,
     param_list: Node_,
     ret_hint: Node_,
+}
+
+#[derive(Clone, Debug)]
+pub struct FunctionDecl {
+    header: FunctionHeader,
+    body: Node_,
 }
 
 #[derive(Clone, Debug)]
@@ -302,7 +308,8 @@ pub enum Node_ {
     Backslash(Pos), // This needs a pos since it shows up in names.
     ListItem(Box<(Node_, Node_)>),
     Variable(Box<VariableDecl>),
-    FunctionHeader(Box<FunctionDecl>),
+    FunctionHeader(Box<FunctionHeader>),
+    Function(Box<FunctionDecl>),
     Property(Box<PropertyDecl>),
     ClassishBody(Vec<Node_>),
     TypeConstraint(Box<(ConstraintKind, Node_)>),
@@ -467,6 +474,87 @@ impl DirectDeclSmartConstructors<'_> {
                 Ok(Ty(reason, Box::new(ty_)))
             }
         }
+    }
+
+    fn function_into_ty(
+        &self,
+        header: FunctionHeader,
+        body: Node_,
+    ) -> Result<(String, Pos, Ty), String> {
+        let (name, pos) = get_name(
+            self.state.namespace_builder.current_namespace(),
+            &header.name,
+        )?;
+        let mut type_variables = HashSet::new();
+        let type_params = header
+            .type_params
+            .into_iter()
+            .map(|node| {
+                let (name, constraints) = match node {
+                    Node_::TypeParameter(innards) => *innards,
+                    n => return Err(format!("Expected a type parameter, but got {:?}", n)),
+                };
+                let (name, pos) = get_name("", &name)?;
+                let constraints = constraints
+                    .into_iter()
+                    .map(|constraint| {
+                        let (kind, value) = *constraint;
+                        Ok((kind, self.node_to_ty(&value, &HashSet::new())?))
+                    })
+                    .collect::<Result<Vec<_>, String>>()?;
+                type_variables.insert(name.clone());
+                Ok(Tparam {
+                    variance: Variance::Invariant,
+                    name: Id(pos, name),
+                    constraints,
+                    reified: aast::ReifyKind::Erased,
+                    user_attributes: Vec::new(),
+                })
+            })
+            .collect::<Result<Vec<_>, String>>()?;
+        let params = self.into_variables_list(header.param_list, &type_variables)?;
+        let type_ = self.node_to_ty(&header.ret_hint, &type_variables)?;
+        let async_ = header.modifiers.iter().any(|node| match node {
+            Node_::Async => true,
+            _ => false,
+        });
+        let fun_kind = if body.iter().any(|node| match node {
+            Node_::Yield => true,
+            _ => false,
+        }) {
+            if async_ {
+                FunKind::FAsyncGenerator
+            } else {
+                FunKind::FGenerator
+            }
+        } else {
+            if async_ {
+                FunKind::FAsync
+            } else {
+                FunKind::FSync
+            }
+        };
+        let ty = Ty(
+            Reason::Rwitness(pos.clone()),
+            Box::new(Ty_::Tfun(FunType {
+                is_coroutine: false,
+                arity: FunArity::Fstandard(params.len() as isize, params.len() as isize),
+                tparams: (type_params, FunTparamsKind::FTKtparams),
+                where_constraints: Vec::new(),
+                params,
+                ret: PossiblyEnforcedTy {
+                    enforced: false,
+                    type_,
+                },
+                fun_kind,
+                reactive: Reactivity::Nonreactive,
+                return_disposable: false,
+                mutability: None,
+                returns_mutable: false,
+                returns_void_to_rx: false,
+            })),
+        );
+        Ok((name, pos, ty))
     }
 
     fn prefix_ns<'a>(&self, name: Cow<'a, String>) -> Cow<'a, String> {
@@ -947,84 +1035,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         Ok(match header? {
             Node_::FunctionHeader(decl) => {
-                let (name, pos) =
-                    get_name(self.state.namespace_builder.current_namespace(), &decl.name)?;
-                let mut type_variables = HashSet::new();
-                let type_params = decl
-                    .type_params
-                    .into_iter()
-                    .map(|node| {
-                        let (name, constraints) = match node {
-                            Node_::TypeParameter(innards) => *innards,
-                            n => return Err(format!("Expected a type parameter, but got {:?}", n)),
-                        };
-                        let (name, pos) = get_name("", &name)?;
-                        let constraints = constraints
-                            .into_iter()
-                            .map(|constraint| {
-                                let (kind, value) = *constraint;
-                                Ok((kind, self.node_to_ty(&value, &HashSet::new())?))
-                            })
-                            .collect::<Result<Vec<_>, String>>()?;
-                        type_variables.insert(name.clone());
-                        Ok(Tparam {
-                            variance: Variance::Invariant,
-                            name: Id(pos, name),
-                            constraints,
-                            reified: aast::ReifyKind::Erased,
-                            user_attributes: Vec::new(),
-                        })
-                    })
-                    .collect::<Result<Vec<_>, String>>()?;
-                let params = self.into_variables_list(decl.param_list, &type_variables)?;
-                let type_ = self.node_to_ty(&decl.ret_hint, &type_variables)?;
-                let async_ = decl.modifiers.iter().any(|node| match node {
-                    Node_::Async => true,
-                    _ => false,
-                });
-                let fun_kind = if body?.iter().any(|node| match node {
-                    Node_::Yield => true,
-                    _ => false,
-                }) {
-                    if async_ {
-                        FunKind::FAsyncGenerator
-                    } else {
-                        FunKind::FGenerator
-                    }
-                } else {
-                    if async_ {
-                        FunKind::FAsync
-                    } else {
-                        FunKind::FSync
-                    }
-                };
+                let (name, pos, type_) = self.function_into_ty(*decl, body?)?;
                 self.state.decls.to_mut().funs.insert(
                     name,
                     Rc::new(FunElt {
                         deprecated: None,
-                        type_: Ty(
-                            Reason::Rwitness(pos.clone()),
-                            Box::new(Ty_::Tfun(FunType {
-                                is_coroutine: false,
-                                arity: FunArity::Fstandard(
-                                    params.len() as isize,
-                                    params.len() as isize,
-                                ),
-                                tparams: (type_params, FunTparamsKind::FTKtparams),
-                                where_constraints: Vec::new(),
-                                params,
-                                ret: PossiblyEnforcedTy {
-                                    enforced: false,
-                                    type_,
-                                },
-                                fun_kind,
-                                reactive: Reactivity::Nonreactive,
-                                return_disposable: false,
-                                mutability: None,
-                                returns_mutable: false,
-                                returns_void_to_rx: false,
-                            })),
-                        ),
+                        type_,
                         decl_errors: None,
                         pos,
                     }),
@@ -1050,7 +1066,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         Ok(match name? {
             Node_::Ignored => Node_::Ignored,
-            name => Node_::FunctionHeader(Box::new(FunctionDecl {
+            name => Node_::FunctionHeader(Box::new(FunctionHeader {
                 name,
                 modifiers: modifiers?,
                 type_params: type_params?,
@@ -1141,6 +1157,23 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg9: Self::R,
         body: Self::R,
     ) -> Self::R {
+        fn read_member_modifiers<'a, I>(modifiers: I) -> (bool, aast::Visibility)
+        where
+            I: IntoIterator<Item = &'a Node_>,
+        {
+            let mut is_static = false;
+            let mut visibility = aast::Visibility::Private;
+            for modifier in modifiers {
+                if let Ok(vis) = modifier.as_visibility() {
+                    visibility = vis;
+                }
+                if let Node_::Static = modifier {
+                    is_static = true;
+                }
+            }
+            (is_static, visibility)
+        }
+
         let (name, pos) = get_name(self.state.namespace_builder.current_namespace(), &name?)?;
         let key = name.clone();
         let name = self.prefix_slash(Cow::Owned(name));
@@ -1180,17 +1213,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 for element in body {
                     match element {
                         Node_::Property(decl) => {
-                            let mut is_static = false;
-                            let mut visibility = aast::Visibility::Private;
-                            for modifier in decl.modifiers.iter() {
-                                if let Ok(vis) = modifier.as_visibility() {
-                                    visibility = vis;
-                                }
-                                if let Node_::Static = modifier {
-                                    is_static = true;
-                                }
-                            }
-
+                            let (is_static, visibility) =
+                                read_member_modifiers(decl.modifiers.iter());
                             let (name, pos) = get_name("", &decl.name)?;
                             let name = if is_static {
                                 name
@@ -1214,6 +1238,28 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 cls.sprops.push(prop)
                             } else {
                                 cls.props.push(prop)
+                            }
+                        }
+                        Node_::Function(decl) => {
+                            let (is_static, visibility) =
+                                read_member_modifiers(decl.header.modifiers.iter());
+                            let (name, pos, ty) = self.function_into_ty(decl.header, decl.body)?;
+                            let method = shallow_decl_defs::ShallowMethod {
+                                abstract_: false,
+                                final_: false,
+                                memoizelsb: false,
+                                name: Id(pos, name),
+                                override_: false,
+                                reactivity: None,
+                                type_: ty,
+                                visibility,
+                                fixme_codes: ISet::new(),
+                                deprecated: None,
+                            };
+                            if is_static {
+                                cls.static_methods.push(method);
+                            } else {
+                                cls.methods.push(method);
                             }
                         }
                         _ => (), // It's not our job to report errors here.
@@ -1251,6 +1297,22 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_property_declarator(&mut self, name: Self::R, _arg1: Self::R) -> Self::R {
         name
+    }
+
+    fn make_methodish_declaration(
+        &mut self,
+        _arg0: Self::R,
+        header: Self::R,
+        body: Self::R,
+        _arg3: Self::R,
+    ) -> Self::R {
+        match header? {
+            Node_::FunctionHeader(header) => Ok(Node_::Function(Box::new(FunctionDecl {
+                header: *header,
+                body: body?,
+            }))),
+            n => Err(format!("Expected a function header, but was {:?}", n)),
+        }
     }
 
     fn make_classish_body(&mut self, _arg0: Self::R, body: Self::R, _arg2: Self::R) -> Self::R {

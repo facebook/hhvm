@@ -16,7 +16,7 @@ let get_class id =
   | Some (fn, Naming_table.TClass) ->
     (match Ast_provider.find_class_in_file fn id with
     | None -> None
-    | Some class_ -> Some (Naming.class_ class_))
+    | Some class_ -> Some (Errors.ignore_ (fun () -> Naming.class_ class_)))
 
 let get_fun id =
   match Naming_table.Funs.get_filename id with

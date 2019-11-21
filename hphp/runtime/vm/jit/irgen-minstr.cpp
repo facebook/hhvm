@@ -1909,7 +1909,7 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
                               basePtr, key, value,
                               propStatePtrElem(env, basePtr));
       auto const t = result->type();
-      if (t == TNullptr) {
+      if (!baseType.maybe(TStr) || t == TNullptr) {
         // Base is not a string. Result is always value.
       } else if (t == TStaticStr) {
         // Base is a string. Stack result is a new string so we're responsible

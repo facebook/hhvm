@@ -786,10 +786,8 @@ inline void stLocMove(IRGS& env,
                       SSATmp* newVal) {
   auto const oldLoc = ldLoc(env, id, ldPMExit, DataTypeCountness);
 
-  if (curFunc(env)->isPseudoMain()) gen(env, IncRef, newVal);
   stLocRaw(env, id, fp(env), newVal);
   decRef(env, oldLoc);
-  if (curFunc(env)->isPseudoMain()) decRef(env, newVal);
 }
 
 inline SSATmp* pushStLoc(IRGS& env,

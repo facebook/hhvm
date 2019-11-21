@@ -1493,15 +1493,8 @@ OPTBLD_INLINE void iopPopFrame(uint32_t nout) {
 OPTBLD_INLINE void iopPopL(local_var to) {
   assertx(to.index < vmfp()->m_func->numLocals());
   Cell* fr = vmStack().topC();
-  if (vmfp()->m_func->isPseudoMain()) {
-    // Manipulate the ref-counts as if this was a SetL, PopC pair to preserve
-    // destructor ordering.
-    tvSet(*fr, *to);
-    vmStack().popC();
-  } else {
-    cellMove(*fr, *to);
-    vmStack().discard();
-  }
+  cellMove(*fr, *to);
+  vmStack().discard();
 }
 
 OPTBLD_INLINE void iopDup() {

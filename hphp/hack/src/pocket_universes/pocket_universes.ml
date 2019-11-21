@@ -95,7 +95,7 @@ let gen_pu_accessor
       let class_id = (annotation pos, CIexpr (id pos "parent")) in
       let parent_call = Class_const (class_id, (pos, fun_name)) in
       let call =
-        Call (Aast.Cnormal, (annotation pos, parent_call), [], [var_atom], [])
+        Call (Aast.Cnormal, (annotation pos, parent_call), [], [var_atom], None)
       in
       Default (pos, [(pos, Return (Some (annotation pos, call)))])
     else
@@ -107,7 +107,8 @@ let gen_pu_accessor
             ( pos,
               Throw
                 ( annotation pos,
-                  New (class_id, [], [(annotation pos, msg)], [], annotation pos)
+                  New
+                    (class_id, [], [(annotation pos, msg)], None, annotation pos)
                 ) );
           ] )
   in

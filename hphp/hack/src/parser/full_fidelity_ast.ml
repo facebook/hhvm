@@ -1375,7 +1375,7 @@ if there already is one, since that one will likely be better than this one. *)
 
   and pExpr ?(location = TopLevel) : expr parser =
    fun node env ->
-    let split_args_varargs arg_list =
+    let split_args_vararg arg_list =
       match List.rev (as_list arg_list) with
       | {
           syntax =
@@ -1390,10 +1390,10 @@ if there already is one, since that one will likely be better than this one. *)
         when Token.kind token = TK.DotDotDot ->
         let args = List.rev_map xs (fun x -> pExpr x env) in
         let vararg = pExpr e env in
-        (args, [vararg])
+        (args, Some vararg)
       | _ ->
         let args = couldMap ~f:pExpr arg_list env in
-        (args, [])
+        (args, None)
     in
     let rec pExpr_ : expr_ parser =
      fun node env ->
@@ -1555,8 +1555,8 @@ if there already is one, since that one will likely be better than this one. *)
             | ((Obj_get _ | Class_get _), Some p) -> (p, ParenthesizedExpr recv)
             | _ -> recv
           in
-          let (args, varargs) = split_args_varargs args in
-          Call (recv, [], args, varargs)
+          let (args, vararg) = split_args_vararg args in
+          Call (recv, [], args, vararg)
         | FunctionCallExpression
             {
               function_call_receiver = recv;
@@ -1596,7 +1596,7 @@ if there already is one, since that one will likely be better than this one. *)
                  ~start:(start_offset expr)
                  ~len:(width expr)
           in
-          Call (pExpr recv env, [], [(literal_expression_pos, String s)], [])
+          Call (pExpr recv env, [], [(literal_expression_pos, String s)], None)
         | FunctionCallExpression
             {
               function_call_receiver = recv;
@@ -1633,8 +1633,8 @@ if there already is one, since that one will likely be better than this one. *)
             | ((Obj_get _ | Class_get _), Some p) -> (p, ParenthesizedExpr recv)
             | _ -> recv
           in
-          let (args, varargs) = split_args_varargs args in
-          Call (recv, hints, args, varargs)
+          let (args, vararg) = split_args_vararg args in
+          Call (recv, hints, args, vararg)
         | QualifiedName _ ->
           if in_string location then
             let (_, n) = pos_qualified_name node env in
@@ -1711,7 +1711,7 @@ if there already is one, since that one will likely be better than this one. *)
           | Some TK.Await -> lift_await expr env location
           | Some TK.Suspend -> Suspend expr
           | Some TK.Clone -> Clone expr
-          | Some TK.Print -> Call ((pos, Id (pos, "echo")), [], [expr], [])
+          | Some TK.Print -> Call ((pos, Id (pos, "echo")), [], [expr], None)
           | Some TK.Dollar ->
             (match expr with
             | (p, String s)
@@ -1805,7 +1805,7 @@ if there already is one, since that one will likely be better than this one. *)
                (fst name, Id name)),
               [],
               List.map ~f:(fun x -> pExpr x env) (as_list define_argument_list),
-              [] )
+              None )
         | ScopeResolutionExpression
             { scope_resolution_qualifier; scope_resolution_name; _ } ->
           let qual =
@@ -1867,8 +1867,8 @@ if there already is one, since that one will likely be better than this one. *)
           pExpr_ obj env
         | ConstructorCall
             { constructor_call_argument_list; constructor_call_type; _ } ->
-          let (args, varargs) =
-            split_args_varargs constructor_call_argument_list
+          let (args, vararg) =
+            split_args_vararg constructor_call_argument_list
           in
           let (e, hl) =
             match syntax constructor_call_type with
@@ -1896,7 +1896,7 @@ if there already is one, since that one will likely be better than this one. *)
             fail_if_invalid_reified_generic env node name;
             fail_if_invalid_class_creation env node name
           | _ -> ());
-          New (e, hl, args, varargs)
+          New (e, hl, args, vararg)
         | GenericTypeSpecifier { generic_class_type; generic_argument_list } ->
           if not (is_missing generic_argument_list) then
             raise_parsing_error
@@ -2070,7 +2070,7 @@ if there already is one, since that one will likely be better than this one. *)
               f_external;
             }
           in
-          Call ((pPos node env, Lfun body), [], [], [])
+          Call ((pPos node env, Lfun body), [], [], None)
         | XHPExpression
             {
               xhp_open =
@@ -2555,7 +2555,7 @@ if there already is one, since that one will likely be better than this one. *)
                           | _ -> missing_syntax "id" kw env),
                           [],
                           couldMap ~f:pExpr exprs env,
-                          [] ) ) ))
+                          None ) ) ))
           | UnsetStatement { unset_keyword = kw; unset_variables = exprs; _ } ->
             lift_awaits_in_statement env pos @@ fun () ->
             let exprl = couldMap ~f:pExpr exprs env in
@@ -2583,7 +2583,7 @@ if there already is one, since that one will likely be better than this one. *)
                       | _ -> missing_syntax "id" kw env),
                       [],
                       exprl,
-                      [] ) ) )
+                      None ) ) )
           | BreakStatement _ -> (pos, Break)
           | ContinueStatement _ -> (pos, Continue)
           | ConcurrentStatement { concurrent_statement = concurrent_stmt; _ } ->

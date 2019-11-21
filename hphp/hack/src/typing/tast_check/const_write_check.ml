@@ -71,7 +71,7 @@ let rec check_expr env (_, e) =
         check_prop env c id ty
       | _ -> ()
     end
-  | Call (_, (_, Id (_, f)), _, el, [])
+  | Call (_, (_, Id (_, f)), _, el, None)
     when String.equal f SN.PseudoFunctions.unset ->
     let rec check_unset_exp e =
       match e with

@@ -95,7 +95,7 @@ let handle_special_calls env call =
         ((_, Id (_, cn)) as id),
         targs,
         [(p1, String cl); (p2, String meth)],
-        uel )
+        unpacked_element )
     when cn = SN.AutoimportedFunctions.meth_caller
          || cn = SN.AutoimportedFunctions.class_meth ->
     let cl =
@@ -104,7 +104,7 @@ let handle_special_calls env call =
       else
         cl
     in
-    Call (ct, id, targs, [(p1, String cl); (p2, String meth)], uel)
+    Call (ct, id, targs, [(p1, String cl); (p2, String meth)], unpacked_element)
   | _ -> call
 
 class ['a, 'b, 'c, 'd] generic_elaborator =
@@ -239,7 +239,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
     (* The function that actually rewrites names *)
     method! on_expr_ env expr =
       match expr with
-      | Call (ct, (p, Id (p2, cn)), targs, el, uargs)
+      | Call (ct, (p, Id (p2, cn)), targs, el, uarg)
         when SN.SpecialFunctions.is_special_function cn
              || (SN.PPLFunctions.is_reserved cn && env.in_ppl) ->
         Call
@@ -247,8 +247,8 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
             (p, Id (p2, cn)),
             List.map targs ~f:(self#on_targ env),
             List.map el ~f:(self#on_expr env),
-            List.map uargs ~f:(self#on_expr env) )
-      | Call (ct, (p, Aast.Id id), tal, el, uel) ->
+            Option.map uarg ~f:(self#on_expr env) )
+      | Call (ct, (p, Aast.Id id), tal, el, unpacked_element) ->
         let new_id = NS.elaborate_id env.namespace NS.ElaborateFun id in
         let renamed_call =
           Call
@@ -256,7 +256,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
               (p, Id new_id),
               List.map tal ~f:(self#on_targ env),
               List.map el ~f:(self#on_expr env),
-              List.map uel ~f:(self#on_expr env) )
+              Option.map unpacked_element ~f:(self#on_expr env) )
         in
         handle_special_calls env renamed_call
       | Obj_get (e1, (p, Id x), null_safe) ->
@@ -269,13 +269,13 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | PU_identifier ((p1, CIexpr (p2, Id x1)), s1, s2) ->
         let x1 = elaborate_type_name env x1 in
         PU_identifier ((p1, CIexpr (p2, Id x1)), s1, s2)
-      | New ((p1, CIexpr (p2, Id x)), tal, el, uel, ex) ->
+      | New ((p1, CIexpr (p2, Id x)), tal, el, unpacked_element, ex) ->
         let x = elaborate_type_name env x in
         New
           ( (p1, CIexpr (p2, Id x)),
             List.map tal ~f:(self#on_targ env),
             List.map el ~f:(self#on_expr env),
-            List.map uel ~f:(self#on_expr env),
+            Option.map unpacked_element ~f:(self#on_expr env),
             ex )
       | Record (id, is_array, l) ->
         let id = elaborate_type_name env id in

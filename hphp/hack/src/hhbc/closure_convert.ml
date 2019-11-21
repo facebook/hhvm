@@ -661,7 +661,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
            Tast_annotate.with_pos p (Id (p, "\\__systemlib\\fun")),
            [],
            [Tast_annotate.with_pos p (String mangle_name)],
-           [] )
+           None )
   in
   if SMap.mem mangle_name st.named_hoisted_functions then
     (st, fun_handle)
@@ -683,12 +683,12 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
                       Tast_annotate.with_pos p (Id (p, "\\is_a")),
                       [],
                       [obj_lvar; Tast_annotate.with_pos pc (String cls)],
-                      [] );
+                      None );
                Tast_annotate.with_pos
                  p
                  (String ("object must be an instance of (" ^ cls ^ ")"));
              ],
-             [] )
+             None )
     in
     (* return $o-><func>(...$args); *)
     let args_var = (p, Local_id.make_unscoped "$args") in
@@ -703,7 +703,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
                     Aast.OG_nullthrows ),
              [],
              [],
-             [Tast_annotate.with_pos p (Lvar args_var)] )
+             Some (Tast_annotate.with_pos p (Lvar args_var)) )
     in
     let variadic_param = make_fn_param args_var true in
     let fd =
@@ -859,7 +859,7 @@ let rec convert_expr env st ((p, expr_) as expr) =
           ((_, Id (_, meth_caller)) as e),
           targs,
           ([((pc, _), cls); ((pf, _), func)] as el2),
-          [] )
+          None )
       when let name = String.lowercase @@ SU.strip_global_ns meth_caller in
            (name = "hh\\meth_caller" || name = "meth_caller")
            && Hhbc_options.emit_meth_caller_func_pointers
@@ -889,29 +889,29 @@ let rec convert_expr env st ((p, expr_) as expr) =
         convert_meth_caller_to_func_ptr env st p pc cls pf fname
       | _ ->
         (* For other cases, fallback to create __SystemLib\MethCallerHelper *)
-        (st, (p, Call (ct, e, targs, el2, []))))
+        (st, (p, Call (ct, e, targs, el2, None))))
     | Call
         ( ct,
           ( ( (_, Class_get ((_, CIexpr (_, Id (_, cid))), _))
             | (_, Class_const ((_, CIexpr (_, Id (_, cid))), _)) ) as e ),
           targs,
           el2,
-          el3 )
+          e3 )
       when SU.is_parent cid ->
       let st = add_var env st "$this" in
       let (st, e) = convert_expr env st e in
       let (st, targs) = convert_tyargs env st targs in
       let (st, el2) = convert_exprs env st el2 in
-      let (st, el3) = convert_exprs env st el3 in
-      (st, (p, Call (ct, e, targs, el2, el3)))
+      let (st, e3) = convert_opt_expr env st e3 in
+      (st, (p, Call (ct, e, targs, el2, e3)))
     | Call (_, (_, Id (_, id)), _, es, _) when String.lowercase id = "tuple" ->
       convert_expr env st (p, Varray (None, es))
-    | Call (ct, e, targs, el2, el3) ->
+    | Call (ct, e, targs, el2, e3) ->
       let (st, e) = convert_expr env st e in
       let (st, targs) = convert_tyargs env st targs in
       let (st, el2) = convert_exprs env st el2 in
-      let (st, el3) = convert_exprs env st el3 in
-      (st, (p, Call (ct, e, targs, el2, el3)))
+      let (st, e3) = convert_opt_expr env st e3 in
+      (st, (p, Call (ct, e, targs, el2, e3)))
     | String2 el ->
       let (st, el) = convert_exprs env st el in
       (st, (p, String2 el))
@@ -962,12 +962,12 @@ let rec convert_expr env st ((p, expr_) as expr) =
       let (st, e) = convert_expr env st e in
       let (st, h) = convert_hint env st h in
       (st, (p, As (e, h, b)))
-    | New (cid, targs, el1, el2, annot) ->
+    | New (cid, targs, el1, e2, annot) ->
       let (st, cid) = convert_class_id env st cid in
       let (st, targs) = convert_tyargs env st targs in
       let (st, el1) = convert_exprs env st el1 in
-      let (st, el2) = convert_exprs env st el2 in
-      (st, (p, New (cid, targs, el1, el2, annot)))
+      let (st, e2) = convert_opt_expr env st e2 in
+      (st, (p, New (cid, targs, el1, e2, annot)))
     | Record (cid, is_array, es) ->
       let convert_pair st (e1, e2) =
         let (st, e1) = convert_expr env st e1 in

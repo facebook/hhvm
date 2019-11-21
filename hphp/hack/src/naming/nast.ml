@@ -477,7 +477,7 @@ module Visitor_DEPRECATED = struct
 
       method on_class_const : 'a -> class_id -> pstring -> 'a
 
-      method on_call : 'a -> call_type -> expr -> expr list -> expr list -> 'a
+      method on_call : 'a -> call_type -> expr -> expr list -> expr option -> 'a
 
       method on_true : 'a -> 'a
 
@@ -529,7 +529,7 @@ module Visitor_DEPRECATED = struct
 
       method on_class_id_ : 'a -> class_id_ -> 'a
 
-      method on_new : 'a -> class_id -> expr list -> expr list -> 'a
+      method on_new : 'a -> class_id -> expr list -> expr option -> 'a
 
       method on_record : 'a -> sid -> (expr * expr) list -> 'a
 
@@ -790,7 +790,8 @@ module Visitor_DEPRECATED = struct
         | Array_get (e1, e2) -> this#on_array_get acc e1 e2
         | Class_get (cid, e) -> this#on_class_get acc cid e
         | Class_const (cid, id) -> this#on_class_const acc cid id
-        | Call (ct, e, _, el, uel) -> this#on_call acc ct e el uel
+        | Call (ct, e, _, el, unpacked_element) ->
+          this#on_call acc ct e el unpacked_element
         | String2 el -> this#on_string2 acc el
         | PrefixedString (_, e) -> this#on_expr acc e
         | Pair (e1, e2) -> this#on_pair acc e1 e2
@@ -802,7 +803,8 @@ module Visitor_DEPRECATED = struct
         | Is (e, h) -> this#on_is acc e h
         | As (e, h, b) -> this#on_as acc e h b
         | Typename n -> this#on_typename acc n
-        | New (cid, _, el, uel, _) -> this#on_new acc cid el uel
+        | New (cid, _, el, unpacked_element, _) ->
+          this#on_new acc cid el unpacked_element
         | Efun (f, idl) -> this#on_efun acc f idl
         | Record (cid, _, fl) -> this#on_record acc cid fl
         | Xml (sid, attrl, el) -> this#on_xml acc sid attrl el
@@ -921,10 +923,12 @@ module Visitor_DEPRECATED = struct
 
       method on_class_const acc cid _ = this#on_class_id acc cid
 
-      method on_call acc _ e el uel =
+      method on_call acc _ e el unpacked_element =
         let acc = this#on_expr acc e in
         let acc = List.fold_left el ~f:this#on_expr ~init:acc in
-        let acc = List.fold_left uel ~f:this#on_expr ~init:acc in
+        let acc =
+          Option.value_map unpacked_element ~f:(this#on_expr acc) ~default:acc
+        in
         acc
 
       method on_true acc = acc
@@ -999,10 +1003,12 @@ module Visitor_DEPRECATED = struct
         | CIexpr e -> this#on_expr acc e
         | _ -> acc
 
-      method on_new acc cid el uel =
+      method on_new acc cid el unpacked_element =
         let acc = this#on_class_id acc cid in
         let acc = List.fold_left el ~f:this#on_expr ~init:acc in
-        let acc = List.fold_left uel ~f:this#on_expr ~init:acc in
+        let acc =
+          Option.value_map unpacked_element ~default:acc ~f:(this#on_expr acc)
+        in
         acc
 
       method on_efun acc f _ =

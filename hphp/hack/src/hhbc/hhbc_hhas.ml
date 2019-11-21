@@ -1248,23 +1248,38 @@ and string_of_param_default_value ~env expr =
     let e1 = string_of_param_default_value ~env e1 in
     let e2 = string_of_param_default_value ~env e2 in
     e1 ^ " " ^ bop ^ " " ^ e2
-  | A.Call (_, (_, A.Id (_, call_id)), _, es, ues) ->
+  | A.Call (_, (_, A.Id (_, call_id)), _, es, unpacked_element) ->
     let call_id = adjust_id call_id in
     let call_id = String_utils.lstrip call_id "\\\\" in
-    let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in
+    let es =
+      match unpacked_element with
+      | None -> es
+      | Some e -> es @ [e]
+    in
+    let es = List.map ~f:(string_of_param_default_value ~env) es in
     call_id ^ "(" ^ String.concat ~sep:", " es ^ ")"
-  | A.New ((_, A.CIexpr (_, A.Id (_, cname))), _, es, ues, _) ->
+  | A.New ((_, A.CIexpr (_, A.Id (_, cname))), _, es, unpacked_element, _) ->
     let class_id =
       adjust_id
         (Hhbc_id.Class.from_ast_name cname |> Hhbc_id.Class.to_raw_string)
     in
     let class_id = String_utils.lstrip class_id "\\\\" in
-    let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in
+    let es =
+      match unpacked_element with
+      | None -> es
+      | Some e -> es @ [e]
+    in
+    let es = List.map ~f:(string_of_param_default_value ~env) es in
     "new " ^ class_id ^ "(" ^ String.concat ~sep:", " es ^ ")"
-  | A.New ((_, A.CIexpr e), _, es, ues, _)
-  | A.Call (_, e, _, es, ues) ->
+  | A.New ((_, A.CIexpr e), _, es, unpacked_element, _)
+  | A.Call (_, e, _, es, unpacked_element) ->
     let e = String_utils.lstrip (string_of_param_default_value ~env e) "\\\\" in
-    let es = List.map ~f:(string_of_param_default_value ~env) (es @ ues) in
+    let es =
+      match unpacked_element with
+      | None -> es
+      | Some e -> es @ [e]
+    in
+    let es = List.map ~f:(string_of_param_default_value ~env) es in
     let prefix =
       match snd expr with
       | A.New (_, _, _, _, _) -> "new "

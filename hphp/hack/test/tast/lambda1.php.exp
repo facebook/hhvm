@@ -71,7 +71,7 @@
                    (Call (Cnormal,
                       (([5:8-10], (function((dynamic | ?(bool | float | resource | arraykey | FormatString<nothing>)) $n): string)),
                        (Lvar ([5:8-10], $f))),
-                      [], [(([5:11-12], int), (Int "4"))], [])))
+                      [], [(([5:11-12], int), (Int "4"))], None)))
                   )))));
           ([6:3-18],
            (Expr
@@ -81,7 +81,7 @@
                    (Call (Cnormal,
                       (([6:8-10], (function((dynamic | ?(bool | float | resource | arraykey | FormatString<nothing>)) $n): string)),
                        (Lvar ([6:8-10], $f))),
-                      [], [(([6:11-16], string), (String "bar"))], [])))
+                      [], [(([6:11-16], string), (String "bar"))], None)))
                   )))))
           ];
         fb_annotation = No unsafe blocks };

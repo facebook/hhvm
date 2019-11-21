@@ -88,7 +88,7 @@ let check_implements
             (Aast.CI attr_cid)
             []
             params (* list of attr parameter literals *)
-            []
+            None
           (* no variadic arguments *)
         in
         env

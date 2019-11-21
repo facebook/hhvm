@@ -92,7 +92,7 @@ Errors:
               (([5:5-18], nothing),
                (Call (Cnormal,
                   (([5:5-16], _), (Id ([5:5-16], "\\hh_show_env"))), 
-                  [], [], [])))))
+                  [], [], None)))))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

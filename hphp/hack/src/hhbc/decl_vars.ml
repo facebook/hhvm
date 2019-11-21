@@ -162,7 +162,7 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
                 add_local ~barethis:Bare_this !state (pos, Local_id.get_name id))
         else
           ()
-      | Aast.Call (_, func_e, _, pos_args, unpacked_args) ->
+      | Aast.Call (_, func_e, _, pos_args, unpacked_arg) ->
         (match func_e with
         | (_, Aast.Id (pos, call_name))
           when call_name = SN.EmitterSpecialFunctions.set_frame_metadata ->
@@ -189,8 +189,8 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
           on_class_get self id prop ~is_call_target:true
         | _ -> self#on_expr () func_e);
         List.iter pos_args on_arg;
-        List.iter unpacked_args on_arg
-      | Aast.New (_, _, exprs1, exprs2, _) ->
+        Option.iter unpacked_arg on_arg
+      | Aast.New (_, _, exprs1, expr2, _) ->
         let add_bare_expr expr =
           match expr with
           | (_, Aast.Lvar (_, id)) when Local_id.get_name id = "$this" ->
@@ -198,7 +198,7 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
           | _ -> self#on_expr () expr
         in
         List.iter exprs1 add_bare_expr;
-        List.iter exprs2 add_bare_expr
+        Option.iter expr2 add_bare_expr
       | _ -> super#on_expr_ () e
 
     method! on_class_ _ _ = ()

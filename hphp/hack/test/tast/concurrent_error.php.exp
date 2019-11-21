@@ -45,7 +45,7 @@ Errors:
                  (Call (Cnormal,
                     (([9:17-24], (function(): Awaitable<int>)),
                      (Id ([9:17-24], "\\gen_int"))),
-                    [], [], []))))
+                    [], [], None))))
                 ],
               [([10:5-21],
                 (Expr
@@ -56,7 +56,7 @@ Errors:
                         (Call (Cnormal,
                            (([10:11-18], (function(): Awaitable<int>)),
                             (Id ([10:11-18], "\\gen_int"))),
-                           [], [], [])))
+                           [], [], None)))
                        )))));
                 ([9:5-27],
                  (Expr

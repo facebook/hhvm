@@ -648,7 +648,7 @@ let check =
 
               (* dive into subnodes *)
               super#on_expr (env, ctx) expr
-            | (_, Call (_, (_, Id (_, f)), _, el, []))
+            | (_, Call (_, (_, Id (_, f)), _, el, None))
               when String.equal f SN.PseudoFunctions.unset ->
               List.iter
                 el
@@ -656,11 +656,11 @@ let check =
 
               (* dive into subnodes *)
               super#on_expr (env, ctx) expr
-            | (_, Call (_, (_, Id (_, f)), _, el, []))
+            | (_, Call (_, (_, Id (_, f)), _, el, None))
               when String.equal f SN.Rx.mutable_ ->
               check_rx_mutable_arguments (get_position expr) env el;
               super#on_expr (env, ctx) expr
-            | (_, Call (_, (_, Id (p, f)), _, _, []))
+            | (_, Call (_, (_, Id (p, f)), _, _, None))
               when String.equal f SN.SpecialFunctions.echo ->
               Errors.echo_in_reactive_context p;
               super#on_expr (env, ctx) expr

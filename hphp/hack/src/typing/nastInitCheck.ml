@@ -428,8 +428,7 @@ and expr_ env acc p e =
         method_ := Done;
         let fb = Nast.assert_named_body b in
         toplevel env acc fb.fb_ast))
-  | Call (_, e, _, el, uel) ->
-    let el = el @ uel in
+  | Call (_, e, _, el, unpacked_element) ->
     let el =
       match e with
       | (_, Id (_, fun_name)) when is_whitelisted fun_name ->
@@ -439,6 +438,7 @@ and expr_ env acc p e =
       | _ -> el
     in
     let acc = List.fold_left ~f:expr ~init:acc el in
+    let acc = Option.value_map ~f:(expr acc) ~default:acc unpacked_element in
     expr acc e
   | True
   | False
@@ -459,7 +459,10 @@ and expr_ env acc p e =
     (* List is always an lvalue *)
     acc
   | Expr_list el -> exprl acc el
-  | New (_, _, el, uel, _) -> exprl acc (el @ uel)
+  | New (_, _, el, unpacked_element, _) ->
+    let acc = exprl acc el in
+    let acc = Option.value_map ~default:acc ~f:(expr acc) unpacked_element in
+    acc
   | Record (_, _, fdl) -> List.fold_left ~f:field ~init:acc fdl
   | Pair (e1, e2) ->
     let acc = expr acc e1 in

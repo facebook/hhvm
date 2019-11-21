@@ -144,7 +144,7 @@
                   [(([15:13-15], (function(int): bool)),
                     (Lvar ([15:13-15], $f)));
                     (([15:17-20], Container<int>), (Lvar ([15:17-20], $ci)))],
-                  [])))));
+                  None)))));
           ([16:3-27],
            (Expr
               (([16:3-26], varray<bool>),
@@ -160,7 +160,7 @@
                     (([16:22-25], Container<string>),
                      (Lvar ([16:22-25], $cs)))
                     ],
-                  [])))));
+                  None)))));
           ([17:3-32],
            (Expr
               (([17:3-31], varray<Container<int>>),
@@ -181,7 +181,7 @@
                     (([17:27-30], KeyedContainer<int, num>),
                      (Lvar ([17:27-30], $cn)))
                     ],
-                  [])))));
+                  None)))));
           ([18:3-30],
            (Expr
               (([18:3-29], darray<arraykey, bool>),
@@ -195,7 +195,7 @@
                     (([18:17-28], (Container<int> | KeyedContainer<int, num>)),
                      (Lvar ([18:17-28], $unresolved)))
                     ],
-                  [])))))
+                  None)))))
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

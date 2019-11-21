@@ -1811,7 +1811,7 @@ and expr_
       e
       explicit_targs
       el
-      uel
+      unpacked_element
       ~in_suspend =
     let (env, te, result) =
       dispatch_call
@@ -1823,7 +1823,7 @@ and expr_
         e
         explicit_targs
         el
-        uel
+        unpacked_element
         ~in_suspend
     in
     let env = forget_fake_members env p e in
@@ -2466,7 +2466,7 @@ and expr_
         ty2
     in
     make_result env p (Aast.Array_get (te1, Some te2)) ty
-  | Call (Cnormal, (pos_id, Id ((_, s) as id)), [], el, [])
+  | Call (Cnormal, (pos_id, Id ((_, s) as id)), [], el, None)
     when is_pseudo_function s ->
     let (env, tel, tys) = exprs ~accept_using_var:true env el in
     let env =
@@ -2501,9 +2501,9 @@ and expr_
              (Aast.Id id),
            [],
            tel,
-           [] ))
+           None ))
       ty
-  | Call (call_type, e, explicit_targs, el, uel) ->
+  | Call (call_type, e, explicit_targs, el, unpacked_element) ->
     let env = might_throw env in
     let (env, te, ty) =
       check_call
@@ -2515,7 +2515,7 @@ and expr_
         e
         explicit_targs
         el
-        uel
+        unpacked_element
         ~in_suspend:false
     in
     (env, te, ty)
@@ -2911,7 +2911,7 @@ and expr_
   | Suspend e ->
     let (env, te, ty) =
       match e with
-      | (_, Call (call_type, e, explicit_targs, el, uel)) ->
+      | (_, Call (call_type, e, explicit_targs, el, unpacked_element)) ->
         let env = Env.open_tyvars env p in
         (fun (env, te, ty) ->
           (Typing_solver.close_tyvars_and_solve env Errors.unify_error, te, ty))
@@ -2924,7 +2924,7 @@ and expr_
              e
              explicit_targs
              el
-             uel
+             unpacked_element
              ~in_suspend:true
       | (epos, _) ->
         let (env, te, ty) = expr env e in
@@ -2935,9 +2935,9 @@ and expr_
         (env, te, ty)
     in
     make_result env p (Aast.Suspend te) ty
-  | New ((pos, c), explicit_targs, el, uel, p1) ->
+  | New ((pos, c), explicit_targs, el, unpacked_element, p1) ->
     let env = might_throw env in
-    let (env, tc, tal, tel, tuel, ty, ctor_fty) =
+    let (env, tc, tal, tel, typed_unpack_element, ty, ctor_fty) =
       new_object
         ~expected
         ~is_using_clause
@@ -2948,10 +2948,14 @@ and expr_
         c
         explicit_targs
         el
-        uel
+        unpacked_element
     in
     let env = Env.forget_members env (Fake.Blame_call p) in
-    make_result env p (Aast.New (tc, tal, tel, tuel, (p1, ctor_fty))) ty
+    make_result
+      env
+      p
+      (Aast.New (tc, tal, tel, typed_unpack_element, (p1, ctor_fty)))
+      ty
   | Record ((pos, id), _is_array, field_values) ->
     (match Decl_provider.get_record_def id with
     | Some rd ->
@@ -3406,7 +3410,7 @@ and expr_
       | (_, class_info, _) :: _ -> Some class_info
     in
     let (env, _te, obj) =
-      expr env (fst sid, New ((fst sid, cid), [], [], [], fst sid))
+      expr env (fst sid, New ((fst sid, cid), [], [], None, fst sid))
     in
     let (env, typed_attrs, attr_types) =
       xhp_attribute_exprs env class_info attrl
@@ -4000,7 +4004,7 @@ and new_object
     cid
     explicit_targs
     el
-    uel =
+    unpacked_element =
   (* Obtain class info from the cid expression. We get multiple
    * results with a CIexpr that has a union type *)
   let (env, tal, tcid, classes) =
@@ -4012,7 +4016,7 @@ and new_object
       String.equal tt tn
     | _ -> false
   in
-  let finish env tcid tel tuel ty ctor_fty =
+  let finish env tcid tel typed_unpack_element ty ctor_fty =
     let (env, new_ty) =
       let ((_, cid_ty), _) = tcid in
       let (env, cid_ty) = Env.expand_type env cid_ty in
@@ -4024,23 +4028,42 @@ and new_object
         else
           ExprDepTy.make env cid ty
     in
-    (env, tcid, tal, tel, tuel, new_ty, ctor_fty)
+    (env, tcid, tal, tel, typed_unpack_element, new_ty, ctor_fty)
   in
-  let rec gather env tel tuel res classes =
+  let rec gather env tel typed_unpack_element res classes =
     match classes with
     | [] ->
       begin
         match res with
         | [] ->
           let (env, tel, _) = exprs env el in
-          let (env, tuel, _) = exprs env uel in
+          let (env, typed_unpack_element, _) =
+            match unpacked_element with
+            | None -> (env, None, MakeType.nothing Reason.Rnone)
+            | Some unpacked_element ->
+              let (env, e, ty) = expr env unpacked_element in
+              (env, Some e, ty)
+          in
           let r = Reason.Runknown_class p in
-          finish env tcid tel tuel (r, Tobject) (r, TUtils.terr env)
-        | [(ty, ctor_fty)] -> finish env tcid tel tuel ty ctor_fty
+          finish
+            env
+            tcid
+            tel
+            typed_unpack_element
+            (r, Tobject)
+            (r, TUtils.terr env)
+        | [(ty, ctor_fty)] ->
+          finish env tcid tel typed_unpack_element ty ctor_fty
         | l ->
           let (tyl, ctyl) = List.unzip l in
           let r = Reason.Rwitness p in
-          finish env tcid tel tuel (r, Tunion tyl) (r, Tunion ctyl)
+          finish
+            env
+            tcid
+            tel
+            typed_unpack_element
+            (r, Tunion tyl)
+            (r, Tunion ctyl)
       end
     | (cname, class_info, c_ty) :: classes ->
       if
@@ -4110,9 +4133,9 @@ and new_object
        * to the constructor might depend on it, and `call_construct` only uses
        * `ctor_fty` to set the variance which has void return type *)
       let env = Env.set_tyvar_variance env new_ty in
-      let (env, _tcid, tel, tuel, ctor_fty) =
+      let (env, _tcid, tel, typed_unpack_element, ctor_fty) =
         let env = check_expected_ty "New" env new_ty expected in
-        call_construct p env class_info params el uel cid
+        call_construct p env class_info params el unpacked_element cid
       in
       ( if equal_consistent_kind (snd (Cls.construct class_info)) Inconsistent
       then
@@ -4143,11 +4166,11 @@ and new_object
             (env, ctor_fty)
           | None -> (env, ctor_fty)
         in
-        gather env tel tuel ((obj_ty, ctor_fty) :: res) classes
+        gather env tel typed_unpack_element ((obj_ty, ctor_fty) :: res) classes
       | CIstatic
       | CI _
       | CIself ->
-        gather env tel tuel ((c_ty, ctor_fty) :: res) classes
+        gather env tel typed_unpack_element ((c_ty, ctor_fty) :: res) classes
       | CIexpr _ ->
         (* When constructing from a (classname) variable, the variable
          * dictates what the constructed object is going to be. This allows
@@ -4157,9 +4180,9 @@ and new_object
         let env =
           Typing_ops.sub_type p Reason.URnone env c_ty obj_ty Errors.unify_error
         in
-        gather env tel tuel ((c_ty, ctor_fty) :: res) classes)
+        gather env tel typed_unpack_element ((c_ty, ctor_fty) :: res) classes)
   in
-  gather env [] [] [] classes
+  gather env [] None [] classes
 
 (* FIXME: we need to separate our instantiability into two parts. Currently,
  * all this function is doing is checking if a given type is inhabited --
@@ -4529,10 +4552,10 @@ and array_field_key ~(expected : ExpectedTy.t option) env = function
     (env, (with_type ty Tast.dummy_saved_env e, ty))
   | AFkvalue (x, _) -> array_value ~expected env x
 
-and check_parent_construct pos env el uel env_parent =
+and check_parent_construct pos env el unpacked_element env_parent =
   let check_not_abstract = false in
   let (env, env_parent) = Phase.localize_with_self env env_parent in
-  let (env, _tcid, _tal, tel, tuel, parent, fty) =
+  let (env, _tcid, _tal, tel, typed_unpack_element, parent, fty) =
     new_object
       ~expected:None
       ~check_parent:true
@@ -4543,7 +4566,7 @@ and check_parent_construct pos env el uel env_parent =
       CIparent
       []
       el
-      uel
+      unpacked_element
   in
   (* Not sure why we need to equate these types *)
   let env =
@@ -4552,7 +4575,12 @@ and check_parent_construct pos env el uel env_parent =
   let env =
     Type.sub_type pos Reason.URnone env parent env_parent Errors.unify_error
   in
-  (env, tel, tuel, MakeType.void (Reason.Rwitness pos), parent, fty)
+  ( env,
+    tel,
+    typed_unpack_element,
+    MakeType.void (Reason.Rwitness pos),
+    parent,
+    fty )
 
 and check_class_get env p def_pos cid mid ce e =
   match e with
@@ -4577,13 +4605,13 @@ and check_class_get env p def_pos cid mid ce e =
     Errors.static_synthetic_method classname mid p def_pos
   | _ -> ()
 
-and call_parent_construct pos env el uel =
+and call_parent_construct pos env el unpacked_element =
   match Env.get_parent_ty env with
-  | Some parent -> check_parent_construct pos env el uel parent
+  | Some parent -> check_parent_construct pos env el unpacked_element parent
   | None ->
     (* continue here *)
     let ty = (Reason.Rwitness pos, Typing_utils.tany env) in
-    let default = (env, [], [], ty, ty, ty) in
+    let default = (env, [], None, ty, ty, ty) in
     (match Env.get_self env with
     | (_, Tclass ((_, self), _, _)) ->
       (match Env.get_class env self with
@@ -4592,7 +4620,8 @@ and call_parent_construct pos env el uel =
         | None ->
           Errors.parent_in_trait pos;
           default
-        | Some (_, parent_ty) -> check_parent_construct pos env el uel parent_ty)
+        | Some (_, parent_ty) ->
+          check_parent_construct pos env el unpacked_element parent_ty)
       | Some self_tc ->
         if not (Cls.members_fully_known self_tc) then
           ()
@@ -4609,7 +4638,7 @@ and call_parent_construct pos env el uel =
         | Tunion _ | Tintersection _ | Tobject | Tpu _ | Tpu_access _ ) ) ->
       Errors.parent_outside_class pos;
       let ty = (Reason.Rwitness pos, Typing_utils.terr env) in
-      (env, [], [], ty, ty, ty))
+      (env, [], None, ty, ty, ty))
 
 (* Depending on the kind of expression we are dealing with
  * The typing of call is different.
@@ -4623,10 +4652,14 @@ and dispatch_call
     ((fpos, fun_expr) as e)
     explicit_targs
     el
-    uel
+    unpacked_element
     ~in_suspend =
-  let make_call env te tal tel tuel ty =
-    make_result env p (Aast.Call (call_type, te, tal, tel, tuel)) ty
+  let make_call env te tal tel typed_unpack_element ty =
+    make_result
+      env
+      p
+      (Aast.Call (call_type, te, tal, tel, typed_unpack_element))
+      ty
   in
   (* TODO: Avoid Tany annotations in TAST by eliminating `make_call_special` *)
   let make_call_special env id tel ty =
@@ -4635,7 +4668,7 @@ and dispatch_call
       (Tast.make_typed_expr fpos (Reason.Rnone, TUtils.tany env) (Aast.Id id))
       []
       tel
-      []
+      None
       ty
   in
   (* For special functions and pseudofunctions with a definition in hhi. *)
@@ -4646,7 +4679,7 @@ and dispatch_call
       | (_, Tfun ft) -> ft.ft_ret.et_type
       | _ -> (Reason.Rwitness p, ty_)
     in
-    make_call env (Tast.make_typed_expr fpos fty (Aast.Id id)) tal tel [] ty
+    make_call env (Tast.make_typed_expr fpos fty (Aast.Id id)) tal tel None ty
   in
   let overload_function = overload_function e make_call fpos in
   let check_coroutine_call env fty =
@@ -4743,7 +4776,7 @@ and dispatch_call
     let (env, tel, _) =
       exprs ~accept_using_var:true ~check_defined:false env el
     in
-    if not (List.is_empty uel) then
+    if Option.is_some unpacked_element then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
     make_call_special_from_def env id tel (Tprim Tbool)
   (* Special function `unset` *)
@@ -4751,7 +4784,7 @@ and dispatch_call
     when String.equal pseudo_func SN.PseudoFunctions.unset ->
     check_function_in_suspend SN.PseudoFunctions.unset;
     let (env, tel, _) = exprs env el in
-    if not (List.is_empty uel) then
+    if Option.is_some unpacked_element then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
     let checked_unset_error =
       if Partial.should_check_error (Env.get_mode env) 4135 then
@@ -4761,12 +4794,12 @@ and dispatch_call
       ()
     in
     let env =
-      match (el, uel) with
-      | ([(_, Array_get ((_, Class_const _), Some _))], [])
+      match (el, unpacked_element) with
+      | ([(_, Array_get ((_, Class_const _), Some _))], None)
         when Partial.should_check_error (Env.get_mode env) 4011 ->
         Errors.const_mutation p Pos.none "";
         env
-      | ([(_, Array_get (ea, Some _))], []) ->
+      | ([(_, Array_get (ea, Some _))], None) ->
         let (env, _te, ty) = expr env ea in
         let r = Reason.Rwitness p in
         let tmixed = MakeType.mixed r in
@@ -4802,12 +4835,14 @@ and dispatch_call
   | Id ((_, array_filter) as id)
     when String.equal array_filter SN.StdlibFunctions.array_filter
          && (not (List.is_empty el))
-         && List.is_empty uel ->
+         && Option.is_none unpacked_element ->
     check_function_in_suspend SN.StdlibFunctions.array_filter;
 
     (* dispatch the call to typecheck the arguments *)
     let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
-    let (env, (tel, tuel, res)) = call ~expected p env fty el uel in
+    let (env, (tel, typed_unpack_element, res)) =
+      call ~expected p env fty el unpacked_element
+    in
     (* but ignore the result and overwrite it with custom return type *)
     let x = List.hd_exn el in
     let (env, _tx, ty) = expr env x in
@@ -4870,12 +4905,18 @@ and dispatch_call
       | (r, Tfun ft) -> (r, Tfun { ft with ft_ret = MakeType.unenforced rty })
       | _ -> fty
     in
-    make_call env (Tast.make_typed_expr fpos fty (Aast.Id id)) tal tel tuel rty
+    make_call
+      env
+      (Tast.make_typed_expr fpos fty (Aast.Id id))
+      tal
+      tel
+      typed_unpack_element
+      rty
   (* Special function `type_structure` *)
   | Id (p, type_structure)
     when String.equal type_structure SN.StdlibFunctions.type_structure
          && Int.equal (List.length el) 2
-         && List.is_empty uel ->
+         && Option.is_none unpacked_element ->
     check_function_in_suspend SN.StdlibFunctions.type_structure;
     (match el with
     | [e1; e2] ->
@@ -4899,7 +4940,7 @@ and dispatch_call
   | Id ((_, array_map) as x)
     when String.equal array_map SN.StdlibFunctions.array_map
          && (not (List.is_empty el))
-         && List.is_empty uel ->
+         && Option.is_none unpacked_element ->
     check_function_in_suspend SN.StdlibFunctions.array_map;
 
     (* This uses the arity to determine a signature for array_map. But there
@@ -4998,14 +5039,29 @@ and dispatch_call
         end
       | _ -> (env, fty)
     in
-    let (env, (tel, tuel, ty)) = call ~expected p env fty el [] in
-    make_call env (Tast.make_typed_expr fpos fty (Aast.Id x)) tal tel tuel ty
+    let (env, (tel, typed_unpack_element, ty)) =
+      call ~expected p env fty el None
+    in
+    make_call
+      env
+      (Tast.make_typed_expr fpos fty (Aast.Id x))
+      tal
+      tel
+      typed_unpack_element
+      ty
   (* Special function `Shapes::idx` *)
   | Class_const (((_, CI (_, shapes)) as class_id), ((_, idx) as method_id))
     when String.equal shapes SN.Shapes.cShapes && String.equal idx SN.Shapes.idx
     ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.idx;
-    overload_function p env class_id method_id el uel (fun env fty res el ->
+    overload_function
+      p
+      env
+      class_id
+      method_id
+      el
+      unpacked_element
+      (fun env fty res el ->
         match el with
         | [shape; field] ->
           let (env, _ts, shape_ty) = expr env shape in
@@ -5034,7 +5090,14 @@ and dispatch_call
     when String.equal shapes SN.Shapes.cShapes && String.equal at SN.Shapes.at
     ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.at;
-    overload_function p env class_id method_id el uel (fun env _fty res el ->
+    overload_function
+      p
+      env
+      class_id
+      method_id
+      el
+      unpacked_element
+      (fun env _fty res el ->
         match el with
         | [shape; field] ->
           let (env, _te, shape_ty) = expr env shape in
@@ -5046,7 +5109,14 @@ and dispatch_call
     when String.equal shapes SN.Shapes.cShapes
          && String.equal key_exists SN.Shapes.keyExists ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.keyExists;
-    overload_function p env class_id method_id el uel (fun env fty res el ->
+    overload_function
+      p
+      env
+      class_id
+      method_id
+      el
+      unpacked_element
+      (fun env fty res el ->
         match el with
         | [shape; field] ->
           let (env, _te, shape_ty) = expr env shape in
@@ -5071,7 +5141,14 @@ and dispatch_call
     when String.equal shapes SN.Shapes.cShapes
          && String.equal remove_key SN.Shapes.removeKey ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.removeKey;
-    overload_function p env class_id method_id el uel (fun env _ res el ->
+    overload_function
+      p
+      env
+      class_id
+      method_id
+      el
+      unpacked_element
+      (fun env _ res el ->
         match el with
         | [shape; field] ->
           begin
@@ -5094,7 +5171,14 @@ and dispatch_call
     when String.equal shapes SN.Shapes.cShapes
          && String.equal to_array SN.Shapes.toArray ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.toArray;
-    overload_function p env class_id method_id el uel (fun env _ res el ->
+    overload_function
+      p
+      env
+      class_id
+      method_id
+      el
+      unpacked_element
+      (fun env _ res el ->
         match el with
         | [shape] ->
           let (env, _te, shape_ty) = expr env shape in
@@ -5105,7 +5189,14 @@ and dispatch_call
     when String.equal shapes SN.Shapes.cShapes
          && String.equal to_array SN.Shapes.toDict ->
     check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.toDict;
-    overload_function p env class_id method_id el uel (fun env _ res el ->
+    overload_function
+      p
+      env
+      class_id
+      method_id
+      el
+      unpacked_element
+      (fun env _ res el ->
         match el with
         | [shape] ->
           let (env, _te, shape_ty) = expr env shape in
@@ -5115,8 +5206,8 @@ and dispatch_call
   | Class_const ((pos, CIparent), ((_, construct) as id))
     when String.equal construct SN.Members.__construct ->
     check_class_function_in_suspend "parent" SN.Members.__construct;
-    let (env, tel, tuel, ty, pty, ctor_fty) =
-      call_parent_construct p env el uel
+    let (env, tel, typed_unpack_element, ty, pty, ctor_fty) =
+      call_parent_construct p env el unpacked_element
     in
     make_call
       env
@@ -5126,7 +5217,7 @@ and dispatch_call
          (Aast.Class_const (((pos, pty), Aast.CIparent), id)))
       [] (* tal: no type arguments to constructor *)
       tel
-      tuel
+      typed_unpack_element
       ty
   (* Calling parent / class method *)
   | Class_const ((pos, e1), m) ->
@@ -5185,7 +5276,7 @@ and dispatch_call
       else
         ty1
     in
-    let (env, (tel, tuel, ty)) =
+    let (env, (tel, typed_unpack_element, ty)) =
       call
         ~expected
         ~method_call_info:
@@ -5198,14 +5289,14 @@ and dispatch_call
         env
         fty
         el
-        uel
+        unpacked_element
     in
     make_call
       env
       (Tast.make_typed_expr fpos fty (Aast.Class_const (tcid, m)))
       tal
       tel
-      tuel
+      typed_unpack_element
       ty
   (* <<__PPL>>: sample, factor, observe, condition *)
   | Id (pos, id) when env.inside_ppl_class && SN.PPLFunctions.is_reserved id ->
@@ -5229,7 +5320,7 @@ and dispatch_call
         infer_e
         m
     in
-    let (env, (tel, tuel, ty)) =
+    let (env, (tel, typed_unpack_element, ty)) =
       call
         ~expected
         ~method_call_info:
@@ -5242,14 +5333,14 @@ and dispatch_call
         env
         tfty
         el
-        uel
+        unpacked_element
     in
     make_call
       env
       (Tast.make_typed_expr fpos tfty (Aast.Fun_id m))
       tal
       tel
-      tuel
+      typed_unpack_element
       ty
   (* Call instance method *)
   | Obj_get (e1, (pos_id, Id m), nullflavor) ->
@@ -5274,7 +5365,7 @@ and dispatch_call
         m
     in
     let env = check_coroutine_call env tfty in
-    let (env, (tel, tuel, ty)) =
+    let (env, (tel, typed_unpack_element, ty)) =
       call
         ~nullsafe
         ~expected
@@ -5288,7 +5379,7 @@ and dispatch_call
         env
         tfty
         el
-        uel
+        unpacked_element
     in
     make_call
       env
@@ -5299,24 +5390,28 @@ and dispatch_call
             (te1, Tast.make_typed_expr pos_id tfty (Aast.Id m), nullflavor)))
       tal
       tel
-      tuel
+      typed_unpack_element
       ty
   (* Function invocation *)
   | Fun_id x ->
     let (env, fty, tal) = fun_type_of_id env x explicit_targs el in
     let env = check_coroutine_call env fty in
-    let (env, (tel, tuel, ty)) = call ~expected p env fty el uel in
+    let (env, (tel, typed_unpack_element, ty)) =
+      call ~expected p env fty el unpacked_element
+    in
     make_call
       env
       (Tast.make_typed_expr fpos fty (Aast.Fun_id x))
       tal
       tel
-      tuel
+      typed_unpack_element
       ty
   | Id ((_, id) as x) ->
     let (env, fty, tal) = fun_type_of_id env x explicit_targs el in
     let env = check_coroutine_call env fty in
-    let (env, (tel, tuel, ty)) = call ~expected p env fty el uel in
+    let (env, (tel, typed_unpack_element, ty)) =
+      call ~expected p env fty el unpacked_element
+    in
     let is_mutable = String.equal id SN.Rx.mutable_ in
     let is_move = String.equal id SN.Rx.move in
     let is_freeze = String.equal id SN.Rx.freeze in
@@ -5330,7 +5425,8 @@ and dispatch_call
         Errors.freeze_in_nonreactive_context p;
 
     (* ban unpacking when calling builtings *)
-    if (is_mutable || is_move || is_freeze) && not (List.is_empty uel) then
+    if (is_mutable || is_move || is_freeze) && Option.is_some unpacked_element
+    then
       Errors.unpacking_disallowed_builtin_function p id;
 
     (* adjust env for Rx\freeze or Rx\move calls *)
@@ -5342,7 +5438,13 @@ and dispatch_call
       else
         env
     in
-    make_call env (Tast.make_typed_expr fpos fty (Aast.Id x)) tal tel tuel ty
+    make_call
+      env
+      (Tast.make_typed_expr fpos fty (Aast.Id x))
+      tal
+      tel
+      typed_unpack_element
+      ty
   | _ ->
     let (env, te, fty) = expr env e in
     let (env, fty) =
@@ -5354,14 +5456,16 @@ and dispatch_call
         Errors.unify_error
     in
     let env = check_coroutine_call env fty in
-    let (env, (tel, tuel, ty)) = call ~expected p env fty el uel in
+    let (env, (tel, typed_unpack_element, ty)) =
+      call ~expected p env fty el unpacked_element
+    in
     make_call
       env
       te
       (* tal: no type arguments to function values, as they are non-generic *)
       []
       tel
-      tuel
+      typed_unpack_element
       ty
 
 and fun_type_of_id env x tal el =
@@ -5985,7 +6089,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
     let (env, result_ty) = resolve_ety env ty in
     make_result env [] (Aast.CIexpr te) result_ty
 
-and call_construct p env class_ params el uel cid =
+and call_construct p env class_ params el unpacked_element cid =
   let cid =
     if Nast.equal_class_id_ cid CIparent then
       CIstatic
@@ -6017,7 +6121,7 @@ and call_construct p env class_ params el uel cid =
       (Cls.where_constraints class_)
   in
   if Cls.is_xhp class_ then
-    (env, tcid, [], [], (Reason.Rnone, TUtils.tany env))
+    (env, tcid, [], None, (Reason.Rnone, TUtils.tany env))
   else
     let cstr = Env.get_construct env class_ in
     let mode = Env.get_mode env in
@@ -6030,7 +6134,7 @@ and call_construct p env class_ params el uel cid =
       then
         Errors.constructor_no_args p;
       let (env, tel, _tyl) = exprs env el in
-      (env, tcid, tel, [], (Reason.Rnone, TUtils.terr env))
+      (env, tcid, tel, None, (Reason.Rnone, TUtils.terr env))
     | Some { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; _ } ->
       let def_pos = Reason.to_pos (fst m) in
       TVis.check_obj_access ~use_pos:p ~def_pos env vis;
@@ -6046,8 +6150,10 @@ and call_construct p env class_ params el uel cid =
         | _ -> m
       in
       let (env, m) = Phase.localize ~ety_env env m in
-      let (env, (tel, tuel, _ty)) = call ~expected:None p env m el uel in
-      (env, tcid, tel, tuel, m)
+      let (env, (tel, typed_unpack_element, _ty)) =
+        call ~expected:None p env m el unpacked_element
+      in
+      (env, tcid, tel, typed_unpack_element, m)
 
 and check_arity ?(did_unpack = false) pos pos_def (arity : int) exp_arity =
   let exp_min = Typing_defs.arity_min exp_arity in
@@ -6136,10 +6242,10 @@ and call
     env
     fty
     el
-    uel =
+    unpacked_element =
   (* Special case needed for invoking a method on the empty type *)
   if is_empty_type fty then
-    (env, ([], [], fty))
+    (env, ([], None, fty))
   else
     let make_unpacked_traversable_ty pos ty =
       MakeType.traversable (Reason.Runpack_param pos) ty
@@ -6158,7 +6264,12 @@ and call
           (* We allow nullsafe calls on a "null" function type, in order to type check nullsafe
            * method invocation *)
           | (_, Tprim Tnull) when Option.is_some nullsafe ->
-            let el = el @ uel in
+            let el =
+              Option.value_map
+                ~f:(fun u -> el @ [u])
+                ~default:el
+                unpacked_element
+            in
             let (env, tel) =
               List.map_env env el (fun env elt ->
                   let expected =
@@ -6170,10 +6281,15 @@ and call
                   let (env, te, _) = expr ~expected env elt in
                   (env, te))
             in
-            let env = call_untyped_unpack env uel in
-            (env, (tel, [], efty))
+            let env = call_untyped_unpack env unpacked_element in
+            (env, (tel, None, efty))
           | (_, (Terr | Tany _ | Tunion [] | Tdynamic)) ->
-            let el = el @ uel in
+            let el =
+              Option.value_map
+                ~f:(fun u -> el @ [u])
+                ~default:el
+                unpacked_element
+            in
             let (env, tel) =
               List.map_env env el (fun env elt ->
                   let (env, te, ty) =
@@ -6211,19 +6327,20 @@ and call
                   in
                   (env, te))
             in
-            let env = call_untyped_unpack env uel in
+            let env = call_untyped_unpack env unpacked_element in
             let ty =
               if equal_locl_ty_ (snd efty) Tdynamic then
                 MakeType.dynamic (Reason.Rdynamic_call pos)
               else
                 (Reason.Rnone, Typing_utils.tany env)
             in
-            (env, (tel, [], ty))
-          | (_, Tunion [ty]) -> call ~expected ?nullsafe pos env ty el uel
+            (env, (tel, None, ty))
+          | (_, Tunion [ty]) ->
+            call ~expected ?nullsafe pos env ty el unpacked_element
           | (r, Tunion tyl) ->
             let (env, resl) =
               List.map_env env tyl (fun env ty ->
-                  call ~expected ?nullsafe pos env ty el uel)
+                  call ~expected ?nullsafe pos env ty el unpacked_element)
             in
             let retl = List.map resl ~f:(fun (_, _, x) -> x) in
             let (env, ty) = Union.union_list env r retl in
@@ -6233,12 +6350,12 @@ and call
              * TODO: don't do this, instead use subtyping to push unions
              * through function types
              *)
-            let (tel, tuel, _) = List.hd_exn (List.rev resl) in
-            (env, (tel, tuel, ty))
+            let (tel, typed_unpack_element, _) = List.hd_exn (List.rev resl) in
+            (env, (tel, typed_unpack_element, ty))
           | (r, Tintersection tyl) ->
             let (env, resl) =
               TUtils.run_on_intersection env tyl ~f:(fun env ty ->
-                  call ~expected ?nullsafe pos env ty el uel)
+                  call ~expected ?nullsafe pos env ty el unpacked_element)
             in
             let retl = List.map resl ~f:(fun (_, _, x) -> x) in
             let (env, ty) = Inter.intersect_list env r retl in
@@ -6248,8 +6365,8 @@ and call
              * TODO: don't do this, instead use subtyping to push intersections
              * through function types
              *)
-            let (tel, tuel, _) = List.hd_exn (List.rev resl) in
-            (env, (tel, tuel, ty))
+            let (tel, typed_unpack_element, _) = List.hd_exn (List.rev resl) in
+            (env, (tel, typed_unpack_element, ty))
           | (r2, Tfun ft) ->
             (* Typing of format string functions. It is dependent on the arguments (el)
              * so it cannot be done earlier.
@@ -6369,10 +6486,10 @@ and call
               List.unzip l
             in
             let env = TR.check_call env method_call_info pos r2 ft tys in
-            let (env, tuel, arity, did_unpack) =
-              match uel with
-              | [] -> (env, [], List.length el, false)
-              | e :: _ ->
+            let (env, typed_unpack_element, arity, did_unpack) =
+              match unpacked_element with
+              | None -> (env, None, List.length el, false)
+              | Some e ->
                 (* Enforces that e is unpackable. If e is a tuple, check types against
                  * parameter types *)
                 let (env, te, ty) = expr env e in
@@ -6400,7 +6517,7 @@ and call
                         check_elements env tyl paraml)
                   in
                   let env = check_elements env tyl paraml in
-                  (env, [te], List.length el + List.length tyl, false)
+                  (env, Some te, List.length el + List.length tyl, false)
                 | _ ->
                   let param_tyl =
                     List.map paraml (fun param -> param.fp_type)
@@ -6425,7 +6542,7 @@ and call
                           { et_type = traversable_ty; et_enforced = false }
                           Errors.unify_error)
                   in
-                  (env, [te], List.length el, true))
+                  (env, Some te, List.length el, true))
             in
             (* If we unpacked an array, we don't check arity exactly. Since each
              * unpacked array consumes 1 or many parameters, it is nonsensical to say
@@ -6437,14 +6554,14 @@ and call
             let (env, ret_ty) =
               TR.get_adjusted_return_type env method_call_info ft.ft_ret.et_type
             in
-            (env, (tel, tuel, ret_ty))
+            (env, (tel, typed_unpack_element, ret_ty))
           | (r2, Tanon (arity, id)) ->
             let (env, tel, tyl) = exprs env el in
             let expr_for_unpacked_expr_list env = function
-              | [] -> (env, [], None, Pos.none)
-              | ((pos, _) as e) :: _ ->
+              | None -> (env, None, None, Pos.none)
+              | Some ((pos, _) as e) ->
                 let (env, te, ety) = expr env e in
-                (env, [te], Some ety, pos)
+                (env, Some te, Some ety, pos)
             in
             let append_tuple_types tyl = function
               | Some (_, Ttuple tuple_tyl) -> tyl @ tuple_tyl
@@ -6494,8 +6611,8 @@ and call
                 in
                 (env, Fvariadic (min_arity, param))
             in
-            let (env, tuel, uety_opt, uepos) =
-              expr_for_unpacked_expr_list env uel
+            let (env, typed_unpack_element, uety_opt, uepos) =
+              expr_for_unpacked_expr_list env unpacked_element
             in
             let tyl = append_tuple_types tyl uety_opt in
             let (env, call_arity) =
@@ -6506,7 +6623,7 @@ and call
             (match anon with
             | None ->
               Errors.anonymous_recursive_call pos;
-              (env, (tel, tuel, err_witness env pos))
+              (env, (tel, typed_unpack_element, err_witness env pos))
             | Some
                 {
                   rx = reactivity;
@@ -6540,18 +6657,18 @@ and call
                     } )
               in
               ftys := TUtils.add_function_type env fty !ftys;
-              (env, (tel, tuel, ty)))
+              (env, (tel, typed_unpack_element, ty)))
           | ty ->
             bad_call env pos ty;
-            let env = call_untyped_unpack env uel in
-            (env, ([], [], err_witness env pos)))
+            let env = call_untyped_unpack env unpacked_element in
+            (env, ([], None, err_witness env pos)))
     in
     match resl with
     | [res] -> res
     | _ ->
       bad_call env pos fty;
-      let env = call_untyped_unpack env uel in
-      (env, ([], [], err_witness env pos))
+      let env = call_untyped_unpack env unpacked_element in
+      (env, ([], None, err_witness env pos))
 
 and call_param env param (((pos, _) as e), arg_ty) ~is_variadic =
   param_modes ~is_variadic param e;
@@ -6573,13 +6690,13 @@ and call_param env param (((pos, _) as e), arg_ty) ~is_variadic =
     param.fp_type
     Errors.unify_error
 
-and call_untyped_unpack env uel =
-  match uel with
+and call_untyped_unpack env unpacked_element =
+  match unpacked_element with
   (* In the event that we don't have a known function call type, we can still
    * verify that any unpacked arguments (`...$args`) are something that can
    * be actually unpacked. *)
-  | [] -> env
-  | e :: _ ->
+  | None -> env
+  | Some e ->
     let (env, _, ety) = expr env e in
     (match ety with
     | (_, Ttuple _) -> env (* tuples are always fine *)
@@ -7077,12 +7194,12 @@ and condition
   | Aast.Expr_list [] -> env
   | Aast.Expr_list [x] -> condition env tparamet x
   | Aast.Expr_list (_ :: xs) -> condition env tparamet (pty, Aast.Expr_list xs)
-  | Aast.Call (Cnormal, (_, Aast.Id (_, func)), _, [param], [])
+  | Aast.Call (Cnormal, (_, Aast.Id (_, func)), _, [param], None)
     when String.equal SN.PseudoFunctions.isset func
          && tparamet
          && not (Env.is_strict env) ->
     condition_isset env param
-  | Aast.Call (Cnormal, (_, Aast.Id (_, func)), _, [te], [])
+  | Aast.Call (Cnormal, (_, Aast.Id (_, func)), _, [te], None)
     when String.equal SN.StdlibFunctions.is_null func ->
     condition_nullity ~nonnull:(not tparamet) env te
   | Aast.Binop ((Ast_defs.Eqeq | Ast_defs.Eqeqeq), (_, Aast.Null), e)
@@ -7155,7 +7272,7 @@ and condition
           (env, ()))
     in
     env
-  | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], [])
+  | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_array ->
     is_array env `PHPArray p f lv
   | Aast.Call
@@ -7163,7 +7280,7 @@ and condition
         (_, Aast.Class_const ((_, Aast.CI (_, class_name)), (_, method_name))),
         _,
         [shape; field],
-        [] )
+        None )
     when tparamet
          && String.equal class_name SN.Shapes.cShapes
          && String.equal method_name SN.Shapes.keyExists ->
@@ -8666,7 +8783,8 @@ and gconst_def tcopt cst =
 (* Calls the method of a class, but allows the f callback to override the
  * return value type *)
 and overload_function
-    outer make_call fpos p env (cpos, class_id) method_id el uel f =
+    outer make_call fpos p env (cpos, class_id) method_id el unpacked_element f
+    =
   let (env, _tal, tcid, ty) =
     static_class_id ~check_constraints:false cpos env [] class_id
   in
@@ -8683,12 +8801,12 @@ and overload_function
   in
   (* call the function as declared to validate arity and input types,
      but ignore the result and overwrite with custom one *)
-  let ((env, (tel, tuel, res)), has_error) =
+  let ((env, (tel, typed_unpack_element, res)), has_error) =
     Errors.try_with_error
       (* TODO: Should we be passing hints here *)
-        (fun () -> (call ~expected:None p env fty el uel, false))
+        (fun () -> (call ~expected:None p env fty el unpacked_element, false))
       (fun () ->
-        ((env, ([], [], (Reason.Rwitness p, Typing_utils.tany env))), true))
+        ((env, ([], None, (Reason.Rwitness p, Typing_utils.tany env))), true))
   in
   (* if there are errors already stop here - going forward would
    * report them twice *)
@@ -8705,7 +8823,7 @@ and overload_function
     let te =
       Tast.make_typed_expr fpos fty (Aast.Class_const (tcid, method_id))
     in
-    make_call env te tal tel tuel ty
+    make_call env te tal tel typed_unpack_element ty
 
 and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind =
   let type_mapper =

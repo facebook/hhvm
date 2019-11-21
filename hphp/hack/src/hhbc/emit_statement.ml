@@ -77,7 +77,7 @@ let emit_markup env s echo_expr_opt ~check_for_hashbang =
     let p = Pos.none in
     let call_expr =
       Tast_annotate.make
-        (A.Call (Aast.Cnormal, Tast_annotate.make (A.Id (p, f)), [], [e], []))
+        (A.Call (Aast.Cnormal, Tast_annotate.make (A.Id (p, f)), [], [e], None))
     in
     emit_ignored_expr env call_expr
   in
@@ -161,7 +161,7 @@ let rec set_bytes_kind name =
 and emit_stmt env (pos, stmt) =
   match stmt with
   | A.Expr (_, A.Yield_break) -> gather [instr_null; emit_return env]
-  | A.Expr (((pos, _), A.Call (_, (_, A.Id (_, s)), _, exprl, [])) as expr) ->
+  | A.Expr (((pos, _), A.Call (_, (_, A.Id (_, s)), _, exprl, None)) as expr) ->
     let s = Hhbc_id.Function.(from_ast_name s |> to_raw_string) in
     if String.lowercase s = "unset" then
       gather (List.map exprl (emit_unset_expr env))

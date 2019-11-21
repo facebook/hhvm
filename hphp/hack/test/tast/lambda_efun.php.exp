@@ -65,7 +65,7 @@ Errors:
                    (Call (Cnormal,
                       (([16:8-10], (function(int $z): int)),
                        (Lvar ([16:8-10], $x))),
-                      [], [(([16:11-12], int), (Int "2"))], [])))
+                      [], [(([16:11-12], int), (Int "2"))], None)))
                   )))));
           ([18:3-20:4],
            (Expr
@@ -120,7 +120,7 @@ Errors:
                    (Call (Cnormal,
                       (([21:8-10], (function(int $z): int)),
                        (Lvar ([21:8-10], $x))),
-                      [], [(([21:11-12], int), (Int "2"))], [])))
+                      [], [(([21:11-12], int), (Int "2"))], None)))
                   )))));
           ([23:3-29],
            (Expr
@@ -187,7 +187,7 @@ Errors:
                       [],
                       [(([24:11-12], int), (Int "2"));
                         (([24:14-16], int), (Lvar ([24:14-16], $y)))],
-                      [])))
+                      None)))
                   )))))
           ];
         fb_annotation = No unsafe blocks };

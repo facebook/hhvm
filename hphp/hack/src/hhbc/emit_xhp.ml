@@ -144,7 +144,7 @@ let emit_xhp_use_attributes xual =
              ( Tast_annotate.make (T.CIexpr (Tast_annotate.make (T.Id (p, s)))),
                (p, "__xhpAttributeDeclaration") ))
       in
-      Tast_annotate.make (T.Call (Aast.Cnormal, e, [], [], []))
+      Tast_annotate.make (T.Call (Aast.Cnormal, e, [], [], None))
     | _ -> failwith "Xhp use attribute - unexpected attribute"
   in
   List.map ~f:aux xual
@@ -203,7 +203,7 @@ let from_attribute_declaration class_ xal xual =
                   (p, "__xhpAttributeDeclaration") )),
            [],
            [],
-           [] ))
+           None ))
   in
   let args =
     (arg1 :: emit_xhp_use_attributes xual) @ [emit_xhp_attribute_array xal]
@@ -216,7 +216,7 @@ let from_attribute_declaration class_ xal xual =
              (T.Id (p, "__SystemLib\\merge_xhp_attr_declarations")),
            [],
            args,
-           [] ))
+           None ))
   in
   let set_cache =
     ( p,

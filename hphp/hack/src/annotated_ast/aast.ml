@@ -156,7 +156,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       (* explicit type annotations *)
       * ('ex, 'fb, 'en, 'hi) expr list
       (* positional args *)
-      * ('ex, 'fb, 'en, 'hi) expr list (* unpacked args *)
+      * ('ex, 'fb, 'en, 'hi) expr option (* unpacked arg *)
   | Int of string
   | Float of string
   | String of string
@@ -185,7 +185,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       ('ex, 'fb, 'en, 'hi) class_id
       * 'hi targ list
       * ('ex, 'fb, 'en, 'hi) expr list
-      * ('ex, 'fb, 'en, 'hi) expr list
+      * ('ex, 'fb, 'en, 'hi) expr option
       * 'ex (* constructor *)
   | Record of
       sid

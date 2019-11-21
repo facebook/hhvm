@@ -471,9 +471,9 @@ and expr_ =
   | Class_get of expr * expr
   | Class_const of expr * pstring
   (* Call expression:
-   *   callee * type arguments * normal arguments * unpack arguments
+   *   callee * type arguments * normal arguments * unpack argument
    *)
-  | Call of expr * targ list * expr list * expr list
+  | Call of expr * targ list * expr list * expr option
   | Int of string
   | Float of string
   | String of string
@@ -498,7 +498,7 @@ and expr_ =
    *)
   | BracedExpr of expr
   | ParenthesizedExpr of expr
-  | New of expr * targ list * expr list * expr list
+  | New of expr * targ list * expr list * expr option
   | Record of id * (* is array *) bool * (expr * expr) list
   (* Traditional PHP-style closure with a use list. Each use element is
     a variable name. *)
@@ -567,7 +567,7 @@ let string_of_kind = function
  *)
 class type ['a, 'b] reducer_type =
   object
-    method at_Call : 'b -> expr -> targ list -> expr list -> expr list -> 'a
+    method at_Call : 'b -> expr -> targ list -> expr list -> expr option -> 'a
 
     method at_expr : 'b -> expr -> 'a
 

@@ -160,10 +160,10 @@ module InoutLocals = struct
             super#on_Lvar () (_p, id)
 
           (* f(inout $v) or f(&$v) *)
-          method! on_Call _ _ _ _ args uargs =
+          method! on_Call _ _ _ _ args uarg =
             let f = handle_arg ~is_top:false i in
             List.iter args ~f:(fun arg -> state := f !state arg);
-            List.iter uargs ~f:(fun arg -> state := f !state arg)
+            Option.iter uarg ~f:(fun arg -> state := f !state arg)
         end
       in
       visitor#on_expr () expr;
@@ -897,7 +897,7 @@ and emit_new
     (cid : Tast.class_id)
     (targs : Tast.targ list)
     (args : Tast.expr list)
-    (uargs : Tast.expr list) =
+    (uarg : Tast.expr option) =
   if has_inout_args args then
     Emit_fatal.raise_fatal_parse pos "Unexpected inout arg in new expr";
   let scope = Emit_env.get_scope env in
@@ -961,9 +961,9 @@ and emit_new
   Scope.with_unnamed_locals @@ fun () ->
   let (instr_args, _) = emit_args_and_inout_setters env args in
   let instr_uargs =
-    match uargs with
-    | [] -> empty
-    | uargs :: _ -> emit_expr env uargs
+    match uarg with
+    | None -> empty
+    | Some uarg -> emit_expr env uarg
   in
   ( empty,
     gather
@@ -976,7 +976,7 @@ and emit_new
         instr_uargs;
         emit_pos pos;
         instr_fcallctor
-          (get_fcall_args ~lock_while_unwinding:true args uargs None);
+          (get_fcall_args ~lock_while_unwinding:true args uarg None);
         instr_popc;
         instr_lockobj;
       ],
@@ -1005,30 +1005,30 @@ and emit_shape
   in
   emit_expr env (p, A.Darray (None, fl))
 
-and emit_call_expr env pos e targs args uargs async_eager_label =
-  match (snd e, targs, args, uargs) with
-  | (A.Id (_, id), _, [(_, A.String data)], [])
+and emit_call_expr env pos e targs args uarg async_eager_label =
+  match (snd e, targs, args, uarg) with
+  | (A.Id (_, id), _, [(_, A.String data)], None)
     when id = SN.SpecialFunctions.hhas_adata ->
     let v = Typed_value.HhasAdata data in
     emit_pos_then pos @@ instr (ILitConst (TypedValue v))
-  | (A.Id (_, id), _, _, []) when id = SN.PseudoFunctions.isset ->
+  | (A.Id (_, id), _, _, None) when id = SN.PseudoFunctions.isset ->
     emit_call_isset_exprs env pos args
-  | (A.Id (_, id), _, [arg1], []) when id = SN.PseudoFunctions.empty ->
+  | (A.Id (_, id), _, [arg1], None) when id = SN.PseudoFunctions.empty ->
     emit_call_empty_expr env pos arg1
-  | (A.Id (_, id), _, ([_; _] | [_; _; _]), [])
+  | (A.Id (_, id), _, ([_; _] | [_; _; _]), None)
     when id = SN.FB.idx && not (jit_enable_rename_function ()) ->
     emit_idx env pos args
-  | (A.Id (_, id), _, [arg1], []) when id = SN.EmitterSpecialFunctions.eval ->
+  | (A.Id (_, id), _, [arg1], None) when id = SN.EmitterSpecialFunctions.eval ->
     emit_eval env pos arg1
-  | (A.Id (_, s), _, [(_, A.String c1); (_, A.String c2)], [])
+  | (A.Id (_, s), _, [(_, A.String c1); (_, A.String c2)], None)
     when is_global_namespace env && s = SN.EmitterSpecialFunctions.class_alias
     ->
     gather [emit_pos pos; instr_true; instr_alias_cls c1 c2]
-  | (A.Id (_, s), _, [(_, A.String c1); (_, A.String c2); arg3], [])
+  | (A.Id (_, s), _, [(_, A.String c1); (_, A.String c2); arg3], None)
     when is_global_namespace env && s = SN.EmitterSpecialFunctions.class_alias
     ->
     gather [emit_expr env arg3; emit_pos pos; instr_alias_cls c1 c2]
-  | (A.Id (_, id), _, [arg1], [])
+  | (A.Id (_, id), _, [arg1], None)
     when id = SN.EmitterSpecialFunctions.set_frame_metadata ->
     gather
       [
@@ -1037,14 +1037,14 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
         instr_popl (Local.Named "$86metadata");
         instr_null;
       ]
-  | (A.Id (_, s), _, [], [])
+  | (A.Id (_, s), _, [], None)
     when s = SN.PseudoFunctions.exit || s = SN.PseudoFunctions.die ->
     emit_pos_then pos @@ emit_exit env None
-  | (A.Id (_, s), _, [arg1], [])
+  | (A.Id (_, s), _, [arg1], None)
     when s = SN.PseudoFunctions.exit || s = SN.PseudoFunctions.die ->
     emit_pos_then pos @@ emit_exit env (Some arg1)
   | (_, _, _, _) ->
-    let instrs = emit_call env pos e targs args uargs async_eager_label in
+    let instrs = emit_call env pos e targs args uarg async_eager_label in
     emit_pos_then pos instrs
 
 and emit_known_class_id (_, cname) =
@@ -1261,7 +1261,7 @@ and emit_xhp
          ( (annot, A.CI (p, Hhbc_id.Class.to_raw_string renamed_id)),
            [],
            [attribute_map; children_vec; filename; line],
-           [],
+           None,
            annot ) )
 
 and emit_import env annot (flavor : Aast.import_flavor) (e : Tast.expr) =
@@ -1439,14 +1439,14 @@ and emit_xhp_obj_get env pos (_, ty) (e : Tast.expr) s nullflavor =
     (annot, A.Obj_get (e, (annot, A.Id (pos, "getAttribute")), nullflavor))
   in
   let args = [(annot, A.String (SU.Xhp.clean s))] in
-  emit_call env pos fn_name [] args [] None
+  emit_call env pos fn_name [] args None None
 
 and try_inline_gen_call env (e : Tast.expr) =
   if not (can_inline_gen_functions ()) then
     None
   else
     match snd e with
-    | A.Call (_, (_, A.Id (_, s)), _, [arg], [])
+    | A.Call (_, (_, A.Id (_, s)), _, [arg], None)
       when SU.strip_global_ns s = "gena" ->
       Some (inline_gena_call env arg)
     | _ -> None
@@ -1532,8 +1532,8 @@ and emit_await env pos (expr : Tast.expr) =
     let after_await = Label.next_regular () in
     let instrs =
       match snd expr with
-      | A.Call (_, e, targs, args, uargs) ->
-        emit_call_expr env pos e targs args uargs (Some after_await)
+      | A.Call (_, e, targs, args, uarg) ->
+        emit_call_expr env pos e targs args uarg (Some after_await)
       | _ -> emit_expr env expr
     in
     gather
@@ -1657,10 +1657,10 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
     fst (emit_array_get env pos QueryOp.CGet base_expr opt_elem_expr)
   | A.Obj_get (expr, prop, nullflavor) ->
     fst (emit_obj_get env pos QueryOp.CGet expr prop nullflavor)
-  | A.Call (_, e, targs, args, uargs) ->
-    emit_call_expr env pos e targs args uargs None
-  | A.New (cid, targs, args, uargs, _constructor_annot) ->
-    emit_new env pos cid targs args uargs
+  | A.Call (_, e, targs, args, uarg) ->
+    emit_call_expr env pos e targs args uarg None
+  | A.New (cid, targs, args, uarg, _constructor_annot) ->
+    emit_new env pos cid targs args uarg
   | A.Record (cid, is_array, es) ->
     let es2 = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
     emit_record env pos cid is_array es2
@@ -3392,8 +3392,7 @@ and emit_args_and_inout_setters env (args : Tast.expr list) =
     (instr_args, empty)
 
 (* Create fcall_args for a given call *)
-and get_fcall_args ?(lock_while_unwinding = false) args uargs async_eager_label
-    =
+and get_fcall_args ?(lock_while_unwinding = false) args uarg async_eager_label =
   let num_args = List.length args in
   let num_rets =
     List.fold_left args ~init:1 ~f:(fun acc arg ->
@@ -3403,7 +3402,11 @@ and get_fcall_args ?(lock_while_unwinding = false) args uargs async_eager_label
           acc)
   in
   let flags =
-    { default_fcall_flags with has_unpack = uargs <> []; lock_while_unwinding }
+    {
+      default_fcall_flags with
+      has_unpack = Option.is_some uarg;
+      lock_while_unwinding;
+    }
   in
   let inouts = List.map args is_inout_arg in
   make_fcall_args ~flags ~num_rets ~inouts ?async_eager_label num_args
@@ -3671,8 +3674,15 @@ and get_call_builtin_func_info id =
 and emit_name_string env e = emit_expr env e
 
 and emit_special_function
-    env pos annot id (args : Tast.expr list) (uargs : Tast.expr list) default =
-  let nargs = List.length args + List.length uargs in
+    env pos annot id (args : Tast.expr list) (uarg : Tast.expr option) default =
+  let nargs =
+    List.length args
+    +
+    if Option.is_some uarg then
+      1
+    else
+      0
+  in
   let lower_fq_name =
     Hhbc_id.Function.from_ast_name id |> Hhbc_id.Function.to_raw_string
   in
@@ -3708,7 +3718,7 @@ and emit_special_function
            instr_jmpnz l;
            emit_ignored_expr
              env
-             (annot, A.Call (Aast.Cnormal, expr_id, [], fmt :: rest, uargs));
+             (annot, A.Call (Aast.Cnormal, expr_id, [], fmt :: rest, uarg));
            Emit_fatal.emit_fatal_runtime pos "invariant_violation";
            instr_label l;
            instr_null;
@@ -3957,7 +3967,7 @@ and emit_call
     expr
     (targs : Tast.targ list)
     (args : Tast.expr list)
-    (uargs : Tast.expr list)
+    (uarg : Tast.expr option)
     async_eager_label =
   let (annot, expr_) = expr in
   (match expr_ with
@@ -3965,7 +3975,7 @@ and emit_call
     let fid = Hhbc_id.Function.from_ast_name s in
     Emit_symbol_refs.add_function fid
   | _ -> ());
-  let fcall_args = get_fcall_args args uargs async_eager_label in
+  let fcall_args = get_fcall_args args uarg async_eager_label in
   let (_flags, _args, num_ret, _inouts, _eager) = fcall_args in
   let num_uninit = num_ret - 1 in
   let default () =
@@ -3977,9 +3987,9 @@ and emit_call
       emit_args_and_inout_setters env args
     in
     let instr_uargs =
-      match uargs with
-      | [] -> empty
-      | uargs :: _ -> emit_expr env uargs
+      match uarg with
+      | None -> empty
+      | Some uarg -> emit_expr env uarg
     in
     ( empty,
       gather
@@ -3997,7 +4007,7 @@ and emit_call
   match (expr_, args) with
   | (A.Id (_, id), _) ->
     let special_fn_opt =
-      emit_special_function env pos annot id args uargs default
+      emit_special_function env pos annot id args uarg default
     in
     begin
       match special_fn_opt with

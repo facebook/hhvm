@@ -45,10 +45,13 @@ and terminal_ nsenv ~in_try st =
   | Aast.Continue
   | Aast.Expr
       ( _,
-        ( Aast.Call (_, (_, Aast.Id (_, "assert")), _, [(_, Aast.False)], [])
+        ( Aast.Call (_, (_, Aast.Id (_, "assert")), _, [(_, Aast.False)], None)
         | Aast.Call
-            (_, (_, Aast.Id (_, "invariant")), _, (_, Aast.False) :: _ :: _, [])
-          ) )
+            ( _,
+              (_, Aast.Id (_, "invariant")),
+              _,
+              (_, Aast.False) :: _ :: _,
+              None ) ) )
   | Aast.Return _ ->
     raise Exit
   | Aast.Expr (_, Aast.Call (_, (_, Aast.Id fun_id), _, _, _)) ->
@@ -192,7 +195,7 @@ let rec expr (acc : acc) (_, e) : acc =
   | Aast.Call (_, e1, _, es2, es3) ->
     let acc = expr acc e1 in
     let acc = exprs acc es2 in
-    let acc = exprs acc es3 in
+    let acc = Option.value_map es3 ~default:acc ~f:(expr acc) in
     acc
   | Aast.New _ ->
     failwith "Unexpected Expr: Typing_get_locals expected CIexpr in New"

@@ -35,7 +35,8 @@ Errors:
                           (ValCollection (<vc_kind>, None,
                              [(([4:34-35], int), (Int "3"))])))
                          ],
-                       [(([4:41-43], vec<string>), (Lvar ([4:41-43], $x)))],
+                       (Some (([4:41-43], vec<string>),
+                              (Lvar ([4:41-43], $x)))),
                        ([4:14-21], _)))))))
           ];
         fb_annotation = No unsafe blocks };

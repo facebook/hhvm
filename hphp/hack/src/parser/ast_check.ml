@@ -126,10 +126,10 @@ let check_program program =
       method private reduce map_fun =
         List.fold_left (this#to_fold_fun map_fun) this#zero reducers
 
-      method! on_Call ctx e targl argl uargl =
+      method! on_Call ctx e targl argl uarg =
         this#plus
-          (super#on_Call ctx e targl argl uargl)
-          (this#reduce (fun r -> r#at_Call ctx e targl argl uargl))
+          (super#on_Call ctx e targl argl uarg)
+          (this#reduce (fun r -> r#at_Call ctx e targl argl uarg))
 
       method! on_class_ ctx class_ =
         super#on_class_ { ctx with active_classish = Some class_ } class_

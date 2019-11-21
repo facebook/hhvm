@@ -112,7 +112,7 @@
                              (([18:14-17], (function(): (int | string))),
                               (Id ([18:14-17], "foo"))),
                              OG_nullthrows))),
-                         [], [], []))))))
+                         [], [], None))))))
            ];
          fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

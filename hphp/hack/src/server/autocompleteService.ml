@@ -371,9 +371,9 @@ let visitor =
       autocomplete_id id env;
       super#on_Fun_id env id
 
-    method! on_New env cid el uel =
+    method! on_New env cid el unpacked_element =
       autocomplete_new (to_nast_class_id_ (snd cid)) env;
-      super#on_New env cid el uel
+      super#on_New env cid el unpacked_element
 
     method! on_Happly env sid hl =
       autocomplete_hint sid;

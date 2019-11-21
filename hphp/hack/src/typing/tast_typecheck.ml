@@ -48,7 +48,8 @@ let refine ((_p, (_r, cond_ty)), cond_expr) _cond_is_true gamma =
     | _ -> false
   in
   match cond_expr with
-  | Call (Aast.Cnormal, (_, Id (_, id)), [], _, []) when is_refinement_fun id ->
+  | Call (Aast.Cnormal, (_, Id (_, id)), [], _, None) when is_refinement_fun id
+    ->
     raise Not_implemented
   | Call
       ( _,

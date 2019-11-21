@@ -537,8 +537,8 @@ let convert_shape_name env = function
     Ast_defs.SFclass_const (class_name, (pos, y))
 
 let arg_unpack_unexpected = function
-  | [] -> ()
-  | (pos, _) :: _ ->
+  | None -> ()
+  | Some (pos, _) ->
     Errors.naming_too_few_arguments pos;
     ()
 
@@ -1529,13 +1529,13 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Shape fdl ->
       (* Only check the values because shape field names are always legal *)
       List.for_all fdl ~f:(fun (_, e) -> check_constant_expr env e)
-    | Aast.Call (_, (_, Aast.Id (_, cn)), _, el, uel)
+    | Aast.Call (_, (_, Aast.Id (_, cn)), _, el, unpacked_element)
       when cn = SN.AutoimportedFunctions.fun_
            || cn = SN.AutoimportedFunctions.class_meth
            || cn = SN.StdlibFunctions.mark_legacy_hack_array
            (* Tuples are not really function calls, they are just parsed that way*)
            || cn = SN.SpecialFunctions.tuple ->
-      arg_unpack_unexpected uel;
+      arg_unpack_unexpected unpacked_element;
       List.for_all el ~f:(check_constant_expr env)
     | Aast.Collection (id, _, l) ->
       let (p, cn) = NS.elaborate_id (fst env).namespace NS.ElaborateClass id in
@@ -1862,7 +1862,8 @@ module Make (GetLocals : GetLocals) = struct
         (* No convenient pos information on Aast *)
         Errors.experimental_feature Pos.none "inlined definitions";
         N.Expr (Pos.none, N.Any)
-      | Aast.Expr (cp, Aast.Call (_, (p, Aast.Id (fp, fn)), hl, el, uel))
+      | Aast.Expr
+          (cp, Aast.Call (_, (p, Aast.Id (fp, fn)), hl, el, unpacked_element))
         when fn = SN.AutoimportedFunctions.invariant ->
         (* invariant is subject to a source-code transform in the HHVM
          * runtime: the arguments to invariant are lazily evaluated only in
@@ -1892,7 +1893,7 @@ module Make (GetLocals : GetLocals) = struct
                     ),
                     hl,
                     el,
-                    uel ) )
+                    unpacked_element ) )
             in
             if cond <> Aast.False then
               let (b1, b2) =
@@ -2216,29 +2217,29 @@ module Make (GetLocals : GetLocals) = struct
           N.PU_identifier (make_class_id env x1, s1, s2)
         | _ -> failwith "TODO(T35357243): Error during parsing of PU_identifier"
       end
-    | Aast.Call (_, (_, Aast.Id (p, pseudo_func)), tal, el, uel)
+    | Aast.Call (_, (_, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
       when pseudo_func = SN.SpecialFunctions.echo ->
-      arg_unpack_unexpected uel;
+      arg_unpack_unexpected unpacked_element;
       N.Call
         ( N.Cnormal,
           (p, N.Id (p, pseudo_func)),
           targl env p tal,
           exprl env el,
-          [] )
-    | Aast.Call (_, (p, Aast.Id (_, cn)), tal, el, uel)
+          None )
+    | Aast.Call (_, (p, Aast.Id (_, cn)), tal, el, unpacked_element)
       when cn = SN.StdlibFunctions.call_user_func ->
-      arg_unpack_unexpected uel;
+      arg_unpack_unexpected unpacked_element;
       begin
         match el with
         | [] ->
           Errors.naming_too_few_arguments p;
           N.Any
         | f :: el ->
-          N.Call (N.Cuser_func, expr env f, targl env p tal, exprl env el, [])
+          N.Call (N.Cuser_func, expr env f, targl env p tal, exprl env el, None)
       end
-    | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, uel)
+    | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
       when cn = SN.AutoimportedFunctions.fun_ ->
-      arg_unpack_unexpected uel;
+      arg_unpack_unexpected unpacked_element;
       let (genv, _) = env in
       begin
         match el with
@@ -2258,9 +2259,9 @@ module Make (GetLocals : GetLocals) = struct
           Errors.naming_too_many_arguments p;
           N.Any
       end
-    | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, uel)
+    | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
       when cn = SN.AutoimportedFunctions.inst_meth ->
-      arg_unpack_unexpected uel;
+      arg_unpack_unexpected unpacked_element;
       begin
         match el with
         | []
@@ -2276,9 +2277,9 @@ module Make (GetLocals : GetLocals) = struct
           Errors.naming_too_many_arguments p;
           N.Any
       end
-    | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, uel)
+    | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
       when cn = SN.AutoimportedFunctions.meth_caller ->
-      arg_unpack_unexpected uel;
+      arg_unpack_unexpected unpacked_element;
       begin
         match el with
         | []
@@ -2309,9 +2310,9 @@ module Make (GetLocals : GetLocals) = struct
           Errors.naming_too_many_arguments p;
           N.Any
       end
-    | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, uel)
+    | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
       when cn = SN.AutoimportedFunctions.class_meth ->
-      arg_unpack_unexpected uel;
+      arg_unpack_unexpected unpacked_element;
       begin
         match el with
         | []
@@ -2363,52 +2364,64 @@ module Make (GetLocals : GetLocals) = struct
           Errors.naming_too_many_arguments p;
           N.Any
       end
-    | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, uel)
+    | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
       when cn = SN.SpecialFunctions.assert_ ->
-      arg_unpack_unexpected uel;
+      arg_unpack_unexpected unpacked_element;
       if List.length el <> 1 then Errors.assert_arity p;
       N.Assert
         (N.AE_assert
            (Option.value_map (List.hd el) ~default:(p, N.Any) ~f:(expr env)))
-    | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, uel)
+    | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
       when cn = SN.SpecialFunctions.tuple ->
-      arg_unpack_unexpected uel;
+      arg_unpack_unexpected unpacked_element;
       (match el with
       | [] ->
         Errors.naming_too_few_arguments p;
         N.Any
       | el -> N.List (exprl env el))
     (* sample, factor, observe, condition *)
-    | Aast.Call (_, (p1, Aast.Id (p2, cn)), tal, el, uel)
+    | Aast.Call (_, (p1, Aast.Id (p2, cn)), tal, el, unpacked_element)
       when Env.in_ppl env && SN.PPLFunctions.is_reserved cn ->
       let n_expr = N.Id (p2, cn) in
       N.Call
-        (N.Cnormal, (p1, n_expr), targl env p tal, exprl env el, exprl env uel)
-    | Aast.Call (_, (p, Aast.Id f), tal, el, uel) ->
+        ( N.Cnormal,
+          (p1, n_expr),
+          targl env p tal,
+          exprl env el,
+          oexpr env unpacked_element )
+    | Aast.Call (_, (p, Aast.Id f), tal, el, unpacked_element) ->
       let qualified = Env.fun_id env f in
       N.Call
         ( N.Cnormal,
           (p, N.Id qualified),
           targl env p tal,
           exprl env el,
-          exprl env uel )
+          oexpr env unpacked_element )
     (* match *)
     (* Handle nullsafe instance method calls here. Because Obj_get is used
        for both instance property access and instance method calls, we need
        to match the entire "Call(Obj_get(..), ..)" pattern here so that we
        only match instance method calls *)
-    | Aast.Call (_, (p, Aast.Obj_get (e1, e2, Aast.OG_nullsafe)), tal, el, uel)
-      ->
+    | Aast.Call
+        ( _,
+          (p, Aast.Obj_get (e1, e2, Aast.OG_nullsafe)),
+          tal,
+          el,
+          unpacked_element ) ->
       N.Call
         ( N.Cnormal,
           (p, N.Obj_get (expr env e1, expr_obj_get_name env e2, N.OG_nullsafe)),
           targl env p tal,
           exprl env el,
-          exprl env uel )
+          oexpr env unpacked_element )
     (* Handle all kinds of calls that weren't handled by any of the cases above *)
-    | Aast.Call (_, e, tal, el, uel) ->
+    | Aast.Call (_, e, tal, el, unpacked_element) ->
       N.Call
-        (N.Cnormal, expr env e, targl env p tal, exprl env el, exprl env uel)
+        ( N.Cnormal,
+          expr env e,
+          targl env p tal,
+          exprl env el,
+          oexpr env unpacked_element )
     | Aast.Yield_break -> N.Yield_break
     | Aast.Yield e -> N.Yield (afield env e)
     | Aast.Await e -> N.Await (expr env e)
@@ -2462,24 +2475,31 @@ module Make (GetLocals : GetLocals) = struct
       N.Is (expr env e, hint ~allow_wildcard:true ~allow_like:true env h)
     | Aast.As (e, h, b) ->
       N.As (expr env e, hint ~allow_wildcard:true ~allow_like:true env h, b)
-    | Aast.New ((_, Aast.CIexpr (p, Aast.Id x)), tal, el, uel, _) ->
+    | Aast.New ((_, Aast.CIexpr (p, Aast.Id x)), tal, el, unpacked_element, _)
+      ->
       N.New
-        (make_class_id env x, targl env p tal, exprl env el, exprl env uel, p)
-    | Aast.New ((_, Aast.CIexpr (_, Aast.Lvar (pos, x))), tal, el, uel, p) ->
+        ( make_class_id env x,
+          targl env p tal,
+          exprl env el,
+          oexpr env unpacked_element,
+          p )
+    | Aast.New
+        ((_, Aast.CIexpr (_, Aast.Lvar (pos, x))), tal, el, unpacked_element, p)
+      ->
       N.New
         ( make_class_id env (pos, Local_id.to_string x),
           targl env p tal,
           exprl env el,
-          exprl env uel,
+          oexpr env unpacked_element,
           p )
-    | Aast.New ((_, Aast.CIexpr (p, _e)), tal, el, uel, _) ->
+    | Aast.New ((_, Aast.CIexpr (p, _e)), tal, el, unpacked_element, _) ->
       if Partial.should_check_error (fst env).in_mode 2060 then
         Errors.dynamic_new_in_strict_mode p;
       N.New
         ( make_class_id env (p, SN.Classes.cUnknown),
           targl env p tal,
           exprl env el,
-          exprl env uel,
+          oexpr env unpacked_element,
           p )
     | Aast.New _ -> failwith "ast_to_nast aast.new"
     | Aast.Record (id, is_array, l) ->

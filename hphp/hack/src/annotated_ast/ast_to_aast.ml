@@ -306,13 +306,13 @@ let converter
           ((annot, Aast.CIexpr (on_expr e1)), Aast.CGexpr (on_expr e2))
       | Class_const (e, s) ->
         Aast.Class_const ((annot, Aast.CIexpr (on_expr e)), s)
-      | Call (e, tl, el, uel) ->
+      | Call (e, tl, el, unpacked_element) ->
         Aast.Call
           ( Aast.Cnormal,
             on_expr e,
             on_list on_targ tl,
             on_list on_expr el,
-            on_list on_expr uel )
+            optional on_expr unpacked_element )
       | Int s -> Aast.Int s
       | Float s -> Aast.Float s
       | String s -> Aast.String s
@@ -337,12 +337,12 @@ let converter
         Aast.Eif (on_expr e1, optional on_expr opt_e, on_expr e2)
       | Is (e, h) -> Aast.Is (on_expr e, on_hint h)
       | As (e, h, b) -> Aast.As (on_expr e, on_hint h, b)
-      | New (e, tl, el1, el2) ->
+      | New (e, tl, el1, e2) ->
         Aast.New
           ( (annot, Aast.CIexpr (on_expr e)),
             on_list on_targ tl,
             on_list on_expr el1,
-            on_list on_expr el2,
+            optional on_expr e2,
             annot )
       | Efun (f, use_list) ->
         let ids =

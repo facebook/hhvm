@@ -13,7 +13,7 @@ Errors:
              (([4:3-17], _),
               (Call (Cnormal,
                  (([4:3-15], _), (Id ([4:3-15], "\\unbound_func"))), 
-                 [], [], [])))))
+                 [], [], None)))))
           ];
         fb_annotation = No unsafe blocks };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];

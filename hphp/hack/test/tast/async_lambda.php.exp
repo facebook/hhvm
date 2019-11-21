@@ -64,7 +64,7 @@
                                            [],
                                            [(([7:28-33], string),
                                              (String "foo"))],
-                                           [])))))
+                                           None)))))
                                    )))))
                             ];
                           fb_annotation = No unsafe blocks };
@@ -120,7 +120,7 @@
                                             [],
                                             [(([10:28-30], string),
                                               (Lvar ([10:28-30], $x)))],
-                                            [])))))
+                                            None)))))
                                     )))))
                              ];
                            fb_annotation = No unsafe blocks };

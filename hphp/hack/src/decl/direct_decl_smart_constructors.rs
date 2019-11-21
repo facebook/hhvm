@@ -236,7 +236,7 @@ enum FileModeBuilder {
 #[derive(Clone, Debug)]
 pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
-    pub decls: Cow<'a, InProgressDecls>,
+    pub decls: Rc<InProgressDecls>,
     namespace_builder: Cow<'a, NamespaceBuilder>,
 
     // We don't need to wrap this in a Cow because it's very small.
@@ -247,7 +247,7 @@ impl<'a> State<'a> {
     pub fn new(source_text: IndexedSourceText) -> State {
         State {
             source_text,
-            decls: Cow::Owned(empty_decls()),
+            decls: Rc::new(empty_decls()),
             namespace_builder: Cow::Owned(NamespaceBuilder::new()),
             file_mode_builder: FileModeBuilder::None,
         }
@@ -947,7 +947,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     get_name(self.state.namespace_builder.current_namespace(), &name)?;
                 match self.node_to_ty(&aliased_type, &HashSet::new()) {
                     Ok(ty) => {
-                        self.state.decls.to_mut().typedefs.insert(
+                        Rc::make_mut(&mut self.state.decls).typedefs.insert(
                             name,
                             Rc::new(TypedefType {
                                 pos,
@@ -1036,7 +1036,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         Ok(match header? {
             Node_::FunctionHeader(decl) => {
                 let (name, pos, type_) = self.function_into_ty(*decl, body?)?;
-                self.state.decls.to_mut().funs.insert(
+                Rc::make_mut(&mut self.state.decls).funs.insert(
                     name,
                     Rc::new(FunElt {
                         deprecated: None,
@@ -1107,7 +1107,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         let (name, _) =
                             get_name(self.state.namespace_builder.current_namespace(), name)?;
                         match self.node_to_ty(&hint, &HashSet::new()) {
-                            Ok(ty) => self.state.decls.to_mut().consts.insert(name, Rc::new(ty)),
+                            Ok(ty) => Rc::make_mut(&mut self.state.decls)
+                                .consts
+                                .insert(name, Rc::new(ty)),
                             Err(msg) => {
                                 return Err(format!(
                                     "Expected hint or name for constant {}, but was {:?} ({})",
@@ -1268,7 +1270,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
             body => return Err(format!("Expected a classish body, but was {:?}", body)),
         }
-        self.state.decls.to_mut().classes.insert(key, Rc::new(cls));
+        Rc::make_mut(&mut self.state.decls)
+            .classes
+            .insert(key, Rc::new(cls));
         Ok(Node_::Ignored)
     }
 

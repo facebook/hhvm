@@ -57,10 +57,20 @@ void cgInst(IRLS& env, const IRInstruction* inst){
   SCOPE_ASSERT_DETAIL("cgInst") { return inst->toString(); };
 
   switch (inst->op()) {
-#define O(name, dsts, srcs, flags)  \
-    case name:                      \
-      FTRACE(7, "cg" #name "\n");   \
-      cg##name(env, inst);          \
+#define O(name, dsts, srcs, flags)                                           \
+    case name:                                                               \
+      FTRACE(7, "cg" #name "\n");                                            \
+      try {                                                                  \
+        cg##name(env, inst);                                                 \
+      } catch (const Exception& e) {                                         \
+        always_assert_flog(0, "Exception escaped from cg" #name ": {}",      \
+                           e.getMessage());                                  \
+      } catch (const std::exception& e) {                                    \
+        always_assert_flog(0, "std::exception escaped from cg" #name ": {}", \
+                           e.what());                                        \
+      } catch (...) {                                                        \
+        always_assert_flog(0, "unknown exception escaped from cg" #name);    \
+      }                                                                      \
       break;
     IR_OPCODES
 #undef O

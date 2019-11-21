@@ -413,6 +413,7 @@ name = "hack_parser_bench"
 version = "3.49.0"
 dependencies = [
  "aast_parser 3.49.0",
+ "cc 1.0.45 (registry+https://github.com/rust-lang/crates.io-index)",
  "coroutine_smart_constructors 3.49.0",
  "decl_mode_parser 3.49.0",
  "hack_decl 3.49.0",

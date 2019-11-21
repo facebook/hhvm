@@ -2,6 +2,7 @@
 name = "hack_parser_bench"
 version = "3.49.0"
 edition = "2018"
+build = "../../bench/build.rs"
 
 [[bin]]
 name = "hack_parser_bench"
@@ -9,6 +10,9 @@ path = "../../bench/bench.rs"
 
 [profile.release]
 debug = true
+
+[build-dependencies]
+cc = "1.0"
 
 [dependencies]
 decl_rust = { path = "../../../decl", package = "hack_decl" }

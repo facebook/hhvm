@@ -9,7 +9,7 @@ use hhbc_id_rust::Id;
 use hhbc_string_utils_rust as string_utils;
 use naming_special_names_rust::{math, members, typehints};
 use oxidized::{
-    aast_visitor::{NodeMut, VisitorMut},
+    aast_visitor::{visit_mut, NodeMut, VisitorMut},
     ast as tast, ast_defs,
 };
 use runtime::TypedValue;
@@ -187,6 +187,5 @@ impl VisitorMut for FolderVisitor {
 }
 
 pub fn fold_program(p: &mut tast::Program) {
-    let mut visitor = FolderVisitor {};
-    visitor.visit_program(&mut (), p);
+    visit_mut(&mut FolderVisitor {}, &mut (), p);
 }

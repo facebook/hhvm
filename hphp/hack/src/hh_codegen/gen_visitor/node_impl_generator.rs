@@ -21,10 +21,9 @@ pub trait NodeImpl {
 
     fn gen(ctx: &Context) -> Result<TokenStream> {
         let impls = ctx
-            .types
-            .iter()
-            .filter(|ty| ctx.defs.get(*ty).map_or(false, |ty| !is_alias(*ty)))
+            .non_alias_types()
             .map(|ty| {
+                let ty = ty.as_ref();
                 let item = ctx
                     .defs
                     .get(ty)

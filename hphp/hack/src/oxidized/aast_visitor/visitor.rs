@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1bc1f3bda76b117ee008682a047d89c9>>
+// @generated SignedSource<<dda852ab2fa9f80b846d361cbd62bc13>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -55,13 +55,6 @@ pub trait Visitor {
         &mut self,
         c: &mut Self::Context,
         p: &AssertExpr<Self::Ex, Self::Fb, Self::En, Self::Hi>,
-    ) {
-        p.recurse(c, self.object())
-    }
-    fn visit_block(
-        &mut self,
-        c: &mut Self::Context,
-        p: &Block<Self::Ex, Self::Fb, Self::En, Self::Hi>,
     ) {
         p.recurse(c, self.object())
     }
@@ -208,13 +201,6 @@ pub trait Visitor {
     ) {
         p.recurse(c, self.object())
     }
-    fn visit_fun_def(
-        &mut self,
-        c: &mut Self::Context,
-        p: &FunDef<Self::Ex, Self::Fb, Self::En, Self::Hi>,
-    ) {
-        p.recurse(c, self.object())
-    }
     fn visit_fun_kind(&mut self, c: &mut Self::Context, p: &FunKind) {
         p.recurse(c, self.object())
     }
@@ -274,18 +260,6 @@ pub trait Visitor {
     fn visit_insteadof_alias(&mut self, c: &mut Self::Context, p: &InsteadofAlias) {
         p.recurse(c, self.object())
     }
-    fn visit_is_coroutine(&mut self, c: &mut Self::Context, p: &IsCoroutine) {
-        p.recurse(c, self.object())
-    }
-    fn visit_is_extends(&mut self, c: &mut Self::Context, p: &IsExtends) {
-        p.recurse(c, self.object())
-    }
-    fn visit_is_reference(&mut self, c: &mut Self::Context, p: &IsReference) {
-        p.recurse(c, self.object())
-    }
-    fn visit_is_variadic(&mut self, c: &mut Self::Context, p: &IsVariadic) {
-        p.recurse(c, self.object())
-    }
     fn visit_kvc_kind(&mut self, c: &mut Self::Context, p: &KvcKind) {
         p.recurse(c, self.object())
     }
@@ -306,16 +280,10 @@ pub trait Visitor {
     ) {
         p.recurse(c, self.object())
     }
-    fn visit_mutable_return(&mut self, c: &mut Self::Context, p: &MutableReturn) {
-        p.recurse(c, self.object())
-    }
     fn visit_nast_shape_info(&mut self, c: &mut Self::Context, p: &NastShapeInfo) {
         p.recurse(c, self.object())
     }
     fn visit_ns_kind(&mut self, c: &mut Self::Context, p: &NsKind) {
-        p.recurse(c, self.object())
-    }
-    fn visit_nsenv(&mut self, c: &mut Self::Context, p: &Nsenv) {
         p.recurse(c, self.object())
     }
     fn visit_og_null_flavor(&mut self, c: &mut Self::Context, p: &OgNullFlavor) {
@@ -325,16 +293,6 @@ pub trait Visitor {
         p.recurse(c, self.object())
     }
     fn visit_param_mutability(&mut self, c: &mut Self::Context, p: &ParamMutability) {
-        p.recurse(c, self.object())
-    }
-    fn visit_program(
-        &mut self,
-        c: &mut Self::Context,
-        p: &Program<Self::Ex, Self::Fb, Self::En, Self::Hi>,
-    ) {
-        p.recurse(c, self.object())
-    }
-    fn visit_pstring(&mut self, c: &mut Self::Context, p: &Pstring) {
         p.recurse(c, self.object())
     }
     fn visit_pu_enum(
@@ -367,9 +325,6 @@ pub trait Visitor {
     fn visit_shape_field_name(&mut self, c: &mut Self::Context, p: &ShapeFieldName) {
         p.recurse(c, self.object())
     }
-    fn visit_sid(&mut self, c: &mut Self::Context, p: &Sid) {
-        p.recurse(c, self.object())
-    }
     fn visit_stmt(
         &mut self,
         c: &mut Self::Context,
@@ -398,9 +353,6 @@ pub trait Visitor {
         p.recurse(c, self.object())
     }
     fn visit_type_hint(&mut self, c: &mut Self::Context, p: &TypeHint<Self::Hi>) {
-        p.recurse(c, self.object())
-    }
-    fn visit_type_hint_(&mut self, c: &mut Self::Context, p: &TypeHint_) {
         p.recurse(c, self.object())
     }
     fn visit_typeconst_abstract_kind(&mut self, c: &mut Self::Context, p: &TypeconstAbstractKind) {
@@ -437,9 +389,6 @@ pub trait Visitor {
         c: &mut Self::Context,
         p: &UsingStmt<Self::Ex, Self::Fb, Self::En, Self::Hi>,
     ) {
-        p.recurse(c, self.object())
-    }
-    fn visit_variadic_hint(&mut self, c: &mut Self::Context, p: &VariadicHint) {
         p.recurse(c, self.object())
     }
     fn visit_variance(&mut self, c: &mut Self::Context, p: &Variance) {

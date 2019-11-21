@@ -7,7 +7,7 @@
 use naming_special_names_rust::special_idents;
 use oxidized::{
     aast,
-    aast_visitor::{Node, Visitor},
+    aast_visitor::{visit, Node, Visitor},
     pos::Pos,
 };
 use parser_core_types::{
@@ -136,6 +136,6 @@ pub fn check_program(program: &aast::Program<Pos, (), (), ()>) -> Vec<SyntaxErro
         in_classish: false,
         in_static_methodish: false,
     };
-    checker.visit_program(&mut context, program);
+    visit(&mut checker, &mut context, program);
     checker.errors
 }

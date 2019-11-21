@@ -14,11 +14,19 @@ use std::{
 use syn::*;
 
 pub struct Context<'a> {
-    pub mods: HashSet<String>,
+    /// type declerations, no visit function will be generated for
+    /// any type *not* in this map.
     pub defs: HashMap<String, &'a Item>,
+    /// modules contain the `defs`.
+    pub mods: HashSet<String>,
+    /// root is a type from `defs`, a visit function will be generated
+    /// if a type is in `defs` and transitively depended by `root`.
     pub root: &'a str,
+    /// a set of types transitively depended by `root`.
+    types: Vec<String>,
+    /// a list of type parameters in the root type
     pub root_ty_params: Vec<String>,
-    pub types: Vec<String>,
+    /// the name of `Context` type in `Visitor`
     pub context: String,
 }
 impl<'a> Context<'a> {
@@ -79,6 +87,12 @@ impl<'a> Context<'a> {
 
     pub fn modules(&'a self) -> impl Iterator<Item = impl AsRef<str> + 'a> {
         self.mods.iter()
+    }
+
+    pub fn non_alias_types(&'a self) -> impl Iterator<Item = impl AsRef<str> + 'a> {
+        self.types
+            .iter()
+            .filter(move |ty| self.defs.get(*ty).map_or(false, |def| !is_alias(*def)))
     }
 
     fn get_ty_names_<'b>(defs: &'b HashMap<String, &'b Item>) -> HashSet<&'b str> {

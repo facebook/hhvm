@@ -70,7 +70,8 @@ pub trait VisitorTrait {
         let ref_kind = Self::node_ref_kind();
         let context = ctx.visitor_context();
         let mut visit_fn = vec![];
-        for ty in ctx.types.iter() {
+        for ty in ctx.non_alias_types() {
+            let ty = ty.as_ref();
             let def = ctx
                 .defs
                 .get(ty)

@@ -57,9 +57,7 @@ let make file_path content =
 let empty = make Relative_path.default ""
 
 let from_file file =
-  let content =
-    (try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "")
-  in
+  let content = Sys_utils.cat (Relative_path.to_absolute file) in
   make file content
 
 let file_path source_text = source_text.file_path

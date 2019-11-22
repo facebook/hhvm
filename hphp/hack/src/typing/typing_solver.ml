@@ -725,6 +725,33 @@ let solve_all_unsolved_tyvars_gi env make_on_error =
     env.tvenv
     env
 
+let unsolved_invariant_tyvars_under_union_and_intersection env ty =
+  let rec find_tyvars (env, tyvars) ty =
+    let (env, ty) = Env.expand_type env ty in
+    match ty with
+    | (r, Tvar v) ->
+      let tyvars =
+        if
+          Env.get_tyvar_appears_invariantly env v
+          || TypecheckerOptions.new_inference_lambda (Env.get_tcopt env)
+        then
+          (r, v) :: tyvars
+        else
+          tyvars
+      in
+      (env, tyvars)
+    | (_, Toption ty) -> find_tyvars (env, tyvars) ty
+    | (_, Tunion tyl)
+    | (_, Tintersection tyl) ->
+      List.fold tyl ~init:(env, tyvars) ~f:find_tyvars
+    | ( _,
+        ( Terr | Tany _ | Tdynamic | Tnonnull | Tprim _ | Tclass _ | Tobject
+        | Tabstract _ | Tarraykind _ | Ttuple _ | Tshape _ | Tfun _ | Tanon _
+        | Tpu _ | Tpu_access _ ) ) ->
+      (env, tyvars)
+  in
+  find_tyvars (env, []) ty
+
 (* Expand an already-solved type variable, and solve an unsolved type variable
  * by binding it to the union of its lower bounds, with covariant and contravariant
  * components of the type suitably "freshened". For example,
@@ -733,22 +760,25 @@ let solve_all_unsolved_tyvars_gi env make_on_error =
  *    #1 := vec<#2>  where C <: #2
  *)
 let expand_type_and_solve env ~description_of_expected p ty on_error =
+  let (env, unsolved_invariant_tyvars) =
+    unsolved_invariant_tyvars_under_union_and_intersection env ty
+  in
   let (env', ety) =
     Typing_utils.simplify_unions env ty ~on_tyvar:(fun env r v ->
         let env = always_solve_tyvar ~freshen:true env r v on_error in
         Env.expand_var env r v)
   in
   let (env', ety) = Env.expand_type env' ety in
-  match (ty, ety) with
-  | ((r, Tvar v), (_, Tunion []))
-    when (not (Env.tyvar_is_solved env v))
-         && ( Env.get_tyvar_appears_invariantly env v
-            || TypecheckerOptions.new_inference_lambda (Env.get_tcopt env) ) ->
-    Errors.unknown_type
-      description_of_expected
-      p
-      (Reason.to_string "It is unknown" r);
-    let env = Env.set_tyvar_eager_solve_fail env v in
+  match (unsolved_invariant_tyvars, ety) with
+  | (_ :: _, (_, Tunion [])) ->
+    let env =
+      List.fold unsolved_invariant_tyvars ~init:env ~f:(fun env (r, v) ->
+          Errors.unknown_type
+            description_of_expected
+            p
+            (Reason.to_string "It is unknown" r);
+          Env.set_tyvar_eager_solve_fail env v)
+    in
     (env, (Reason.Rsolve_fail p, TUtils.terr env))
   | _ -> (env', ety)
 

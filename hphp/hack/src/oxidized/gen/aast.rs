@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e2a1e4018605df2b1b10afa0f6a506f2>>
+// @generated SignedSource<<bee1dd1478470e0e55b44cd98ebf8ea4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -185,7 +185,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Expr<Ex, Fb, En, Hi>,
             Vec<Targ<Hi>>,
             Vec<Expr<Ex, Fb, En, Hi>>,
-            Vec<Expr<Ex, Fb, En, Hi>>,
+            Option<Expr<Ex, Fb, En, Hi>>,
         )>,
     ),
     Int(String),
@@ -218,7 +218,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             ClassId<Ex, Fb, En, Hi>,
             Vec<Targ<Hi>>,
             Vec<Expr<Ex, Fb, En, Hi>>,
-            Vec<Expr<Ex, Fb, En, Hi>>,
+            Option<Expr<Ex, Fb, En, Hi>>,
             Ex,
         )>,
     ),

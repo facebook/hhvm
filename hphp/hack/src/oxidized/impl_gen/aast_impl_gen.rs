@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7d01f1c391cc81be1e494cb3e4477edc>>
+// @generated SignedSource<<a94830c1a63c56387a30dc4374f03e64>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -212,7 +212,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         p1: Expr<Ex, Fb, En, Hi>,
         p2: Vec<Targ<Hi>>,
         p3: Vec<Expr<Ex, Fb, En, Hi>>,
-        p4: Vec<Expr<Ex, Fb, En, Hi>>,
+        p4: Option<Expr<Ex, Fb, En, Hi>>,
     ) -> Self {
         Expr_::Call(Box::new((p0, p1, p2, p3, p4)))
     }
@@ -281,7 +281,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         p0: ClassId<Ex, Fb, En, Hi>,
         p1: Vec<Targ<Hi>>,
         p2: Vec<Expr<Ex, Fb, En, Hi>>,
-        p3: Vec<Expr<Ex, Fb, En, Hi>>,
+        p3: Option<Expr<Ex, Fb, En, Hi>>,
         p4: Ex,
     ) -> Self {
         Expr_::New(Box::new((p0, p1, p2, p3, p4)))

@@ -1475,9 +1475,9 @@ where
     ) -> Result<ast::Expr_> {
         env.check_stack_limit();
         use ast::Expr as E;
-        let split_args_varargs = |arg_list_node: &Syntax<T, V>,
-                                  e: &mut Env|
-         -> Result<(Vec<ast::Expr>, Vec<ast::Expr>)> {
+        let split_args_vararg = |arg_list_node: &Syntax<T, V>,
+                                 e: &mut Env|
+         -> Result<(Vec<ast::Expr>, Option<ast::Expr>)> {
             let mut arg_list = Self::as_list(arg_list_node);
             if let Some(last_arg) = arg_list.last() {
                 if let DecoratedExpression(c) = &last_arg.syntax {
@@ -1487,11 +1487,11 @@ where
                             arg_list.iter().map(|a| Self::p_expr(a, e)).collect();
                         let args = args?;
                         let vararg = Self::p_expr(&c.decorated_expression_expression, e)?;
-                        return Ok((args, vec![vararg]));
+                        return Ok((args, Some(vararg)));
                     }
                 }
             }
-            Ok((Self::could_map(Self::p_expr, arg_list_node, e)?, vec![]))
+            Ok((Self::could_map(Self::p_expr, arg_list_node, e)?, None))
         };
         let mk_lid = |p: Pos, s: String| ast::Lid(p, (0, s));
         let mk_name_lid = |name: &Syntax<T, V>, env: &mut Env| {
@@ -1521,7 +1521,7 @@ where
                     (E_::ClassGet(_), Some(p)) => E::new(p, E_::mk_parenthesized_expr(recv)),
                     _ => recv,
                 };
-                let (args, varargs) = split_args_varargs(args, e)?;
+                let (args, varargs) = split_args_vararg(args, e)?;
                 Ok(E_::mk_call(
                     ast::CallType::Cnormal,
                     recv,
@@ -1756,7 +1756,7 @@ where
                             Self::p_expr(recv, env)?,
                             vec![],
                             vec![E::new(literal_expression_pos, E_::String(s))],
-                            vec![],
+                            None,
                         ))
                     }
                     None => {
@@ -1790,7 +1790,7 @@ where
                             }
                             _ => recv,
                         };
-                        let (args, varargs) = split_args_varargs(args, env)?;
+                        let (args, varargs) = split_args_vararg(args, env)?;
                         Ok(E_::mk_call(
                             ast::CallType::Cnormal,
                             recv,
@@ -1889,7 +1889,7 @@ where
                         E::new(pos.clone(), E_::mk_id(ast::Id(pos, String::from("echo")))),
                         vec![],
                         vec![expr],
-                        vec![],
+                        None,
                     )),
                     Some(TK::Dollar) => {
                         let E(p, expr_) = expr;
@@ -2007,7 +2007,7 @@ where
                         .iter()
                         .map(|x| Self::p_expr(x, env))
                         .collect::<std::result::Result<Vec<_>, _>>()?,
-                    vec![],
+                    None,
                 ))
             }
             ScopeResolutionExpression(c) => {
@@ -2093,7 +2093,7 @@ where
                 Self::p_expr_impl_(location, &c.object_creation_object, env, Some(pos))
             }
             ConstructorCall(c) => {
-                let (args, varargs) = split_args_varargs(&c.constructor_call_argument_list, env)?;
+                let (args, varargs) = split_args_vararg(&c.constructor_call_argument_list, env)?;
                 let (e, hl) = match &c.constructor_call_type.syntax {
                     GenericTypeSpecifier(c) => {
                         let name = Self::pos_name(&c.generic_class_type, env)?;
@@ -2282,7 +2282,7 @@ where
                     E::new(pos, E_::mk_lfun(body, vec![])),
                     vec![],
                     vec![],
-                    vec![],
+                    None,
                 ))
             }
             XHPExpression(c) if c.xhp_open.is_xhp_open() => {
@@ -3044,7 +3044,7 @@ where
                         pos.clone(),
                         S_::mk_expr(ast::Expr::new(
                             pos,
-                            E_::mk_call(ast::CallType::Cnormal, echo, vec![], args, vec![]),
+                            E_::mk_call(ast::CallType::Cnormal, echo, vec![], args, None),
                         )),
                     ))
                 };
@@ -3068,7 +3068,7 @@ where
                         pos.clone(),
                         S_::mk_expr(ast::Expr::new(
                             pos,
-                            E_::mk_call(ast::CallType::Cnormal, unset, vec![], args, vec![]),
+                            E_::mk_call(ast::CallType::Cnormal, unset, vec![], args, None),
                         )),
                     ))
                 };

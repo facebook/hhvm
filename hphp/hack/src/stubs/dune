@@ -120,4 +120,5 @@
   (modules
     glean_dependency_graph)
   (libraries
-    hh_json))
+    hh_json
+    collections))

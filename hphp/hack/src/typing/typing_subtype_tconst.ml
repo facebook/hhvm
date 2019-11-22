@@ -9,36 +9,39 @@ another type variable v) equal to ty::tconstid (where ty is usually a bound
 of v) *)
 let make_type_const_equal
     env tconstty (ty : internal_type) tconstid ~on_error ~as_tyvar_with_cnstr =
-  let ety_env = Phase.env_with_self env in
-  match ty with
-  | LoclType ty ->
-    let (env, tytconst) =
-      Utils.expand_typeconst
-        ety_env
+  let rec make_equal env ty =
+    match ty with
+    | LoclType ty ->
+      let ety_env = Phase.env_with_self env in
+      let (env, tytconst) =
+        Utils.expand_typeconst
+          ety_env
+          env
+          ~as_tyvar_with_cnstr
+          ty
+          tconstid
+          ~on_error
+          ~allow_abstract_tconst:true
+      in
+      let error = Errors.type_constant_mismatch on_error in
+      let env = Utils.sub_type env tytconst tconstty error in
+      let env = Utils.sub_type env tconstty tytconst error in
+      env
+    | ConstraintType ty ->
+      (match ty with
+      | (_, Thas_member _)
+      | (_, Tdestructure _) ->
         env
-        ~as_tyvar_with_cnstr
-        ty
-        tconstid
-        ~on_error
-        ~allow_abstract_tconst:true
-    in
-    let env =
-      Utils.sub_type
-        env
-        tytconst
-        tconstty
-        (Errors.type_constant_mismatch on_error)
-    in
-    let env =
-      Utils.sub_type
-        env
-        tconstty
-        tytconst
-        (Errors.type_constant_mismatch on_error)
-    in
-    env
-  | ConstraintType (_, Thas_member _) -> env
-  | ConstraintType (_, Tdestructure _) -> env
+      | (_, TCunion (lty, cty))
+      | (_, TCintersection (lty, cty)) ->
+        (* This not quite correct but works for now since no constraint type has any
+        type constant. The proper way to do it would be to have Utils.expand_typeconst
+        work on constraint types directly. *)
+        let env = make_equal env (LoclType lty) in
+        let env = make_equal env (ConstraintType cty) in
+        env)
+  in
+  make_equal env ty
 
 (** Add a type constant with id `tyconstid` and type `ty` to a type variable,
 and propagate constraints to all type constants `tyconstid` of upper bounds and

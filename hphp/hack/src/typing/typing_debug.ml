@@ -14,7 +14,7 @@ let local_env_size env =
       local_types
       0
 
-let constraint_ty_size env ty =
+let rec constraint_ty_size env ty =
   match ty with
   | (_, Tdestructure tyl) ->
     List.fold ~init:1 ~f:(fun size ty -> size + Typing_utils.ty_size env ty) tyl
@@ -23,6 +23,9 @@ let constraint_ty_size env ty =
     +
     let { hm_type = ty; hm_name = _; hm_class_id = _ } = hm in
     Typing_utils.ty_size env ty
+  | (_, TCunion (lty, cty))
+  | (_, TCintersection (lty, cty)) ->
+    1 + Typing_utils.ty_size env lty + constraint_ty_size env cty
 
 let ty_size env ty =
   match ty with

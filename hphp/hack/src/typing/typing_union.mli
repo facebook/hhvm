@@ -34,3 +34,6 @@ val simplify_unions :
   ?on_tyvar:(env -> Reason.t -> Ident.t -> env * locl_ty) ->
   locl_ty ->
   env * locl_ty
+
+val union_i :
+  env -> Typing_reason.t -> internal_type -> locl_ty -> env * internal_type

@@ -23,3 +23,6 @@ val simplify_intersections :
   ?on_tyvar:(env -> Reason.t -> int -> env * locl_ty) ->
   locl_ty ->
   env * locl_ty
+
+val intersect_i :
+  env -> Typing_reason.t -> internal_type -> locl_ty -> env * internal_type

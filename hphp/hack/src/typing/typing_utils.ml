@@ -74,6 +74,8 @@ let sub_type_with_dynamic_as_bottom x = !sub_type_with_dynamic_as_bottom_ref x
 
 type is_sub_type_type = env -> locl_ty -> locl_ty -> bool
 
+type is_sub_type_i_type = env -> internal_type -> internal_type -> bool
+
 let (is_sub_type_ref : is_sub_type_type ref) =
   ref (not_implemented "is_sub_type")
 
@@ -83,6 +85,11 @@ let (is_sub_type_for_union_ref : is_sub_type_type ref) =
   ref (not_implemented "is_sub_type_for_union")
 
 let is_sub_type_for_union x = !is_sub_type_for_union_ref x
+
+let (is_sub_type_for_union_i_ref : is_sub_type_i_type ref) =
+  ref (not_implemented "is_sub_type_for_union_i")
+
+let is_sub_type_for_union_i x = !is_sub_type_for_union_i_ref x
 
 let (is_sub_type_ignore_generic_params_ref : is_sub_type_type ref) =
   ref (not_implemented "is_sub_type_ignore_generic_params")
@@ -118,6 +125,13 @@ type union = env -> locl_ty -> locl_ty -> env * locl_ty
 let (union_ref : union ref) = ref (not_implemented "union")
 
 let union x = !union_ref x
+
+type union_i =
+  env -> Reason.t -> internal_type -> locl_ty -> env * internal_type
+
+let (union_i_ref : union_i ref) = ref (not_implemented "union")
+
+let union_i x = !union_i_ref x
 
 type union_list = env -> Reason.t -> locl_ty list -> env * locl_ty
 
@@ -189,6 +203,28 @@ let is_mixed env ty =
 let is_nothing env ty =
   let nothing = MakeType.nothing Reason.Rnone in
   is_sub_type_for_union env ty nothing
+
+(** Simplify unions and intersections of constraint
+types which involve mixed or nothing. *)
+let simplify_constraint_type env ty =
+  match ty with
+  | (_, TCunion (lty, cty)) ->
+    if is_nothing env lty then
+      (env, ConstraintType cty)
+    else if is_mixed env lty then
+      (env, LoclType lty)
+    else
+      (env, ConstraintType ty)
+  | (_, TCintersection (lty, cty)) ->
+    if is_nothing env lty then
+      (env, LoclType lty)
+    else if is_mixed env lty then
+      (env, ConstraintType cty)
+    else
+      (env, ConstraintType ty)
+  | (_, Thas_member _)
+  | (_, Tdestructure _) ->
+    (env, ConstraintType ty)
 
 let contains_unresolved_tyvars env ty =
   let finder =

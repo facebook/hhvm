@@ -588,7 +588,47 @@ let simplify_unions env ?on_tyvar ((r, _) as ty) =
   let r = Option.value r_union ~default:r in
   make_union env r tyl r_null r_dyn
 
+let rec union_i env r ty1 lty2 =
+  let ty2 = LoclType lty2 in
+  if Typing_utils.is_sub_type_for_union_i env ty1 ty2 then
+    (env, ty2)
+  else if Typing_utils.is_sub_type_for_union_i env ty2 ty1 then
+    (env, ty1)
+  else
+    let (env, ty) =
+      match ty1 with
+      | LoclType lty1 ->
+        let (env, ty) = union env lty1 lty2 in
+        (env, LoclType ty)
+      | ConstraintType cty1 ->
+        (match cty1 with
+        | (_, TCunion (lty1, cty1)) ->
+          let (env, lty) = union env lty1 lty2 in
+          (env, ConstraintType (r, TCunion (lty, cty1)))
+        | (r', TCintersection (lty1, cty1)) ->
+          (* Distribute union over intersection.
+          At the moment local types in TCintersection can only be
+          unions or intersections involving only null and nonnull,
+          so applying distributivity allows for simplifying the types. *)
+          let (env, lty) = union env lty1 lty2 in
+          let (env, ty) = union_i env r (ConstraintType cty1) lty2 in
+          (match ty with
+          | LoclType ty ->
+            let (env, ty) = Typing_intersection.intersect env r' lty ty in
+            (env, LoclType ty)
+          | ConstraintType cty ->
+            (env, ConstraintType (r', TCintersection (lty, cty))))
+        | (_, Thas_member _)
+        | (_, Tdestructure _) ->
+          (env, ConstraintType (r, TCunion (lty2, cty1))))
+    in
+    match ty with
+    | LoclType _ -> (env, ty)
+    | ConstraintType ty -> Utils.simplify_constraint_type env ty
+
 let () = Typing_utils.union_ref := union
+
+let () = Typing_utils.union_i_ref := union_i
 
 let () = Typing_utils.union_list_ref := union_list
 

@@ -1444,7 +1444,12 @@ and get_tyvars_i env (ty : internal_type) =
       List.fold_left tyl ~init:(env, ISet.empty, ISet.empty) ~f:get_tyvars_union
     | (_, Thas_member hm) ->
       let { hm_type; hm_name = _; hm_class_id = _ } = hm in
-      get_tyvars env hm_type)
+      get_tyvars env hm_type
+    | (_, TCunion (lty, cty))
+    | (_, TCintersection (lty, cty)) ->
+      let (env, positive1, negative1) = get_tyvars env lty in
+      let (env, positive2, negative2) = get_tyvars_i env (ConstraintType cty) in
+      (env, ISet.union positive1 positive2, ISet.union negative1 negative2))
 
 and get_tyvars_variance_list (env, acc_positive, acc_negative) variancel tyl =
   match (variancel, tyl) with
@@ -1583,11 +1588,11 @@ and update_variance_after_bind env var ty =
   in
   env
 
-let set_tyvar_variance env ?(flip = false) ty =
+let set_tyvar_variance_i env ?(flip = false) ty =
   log_env_change "set_tyvar_variance" env
   @@
   let tyvars = get_current_tyvars env in
-  let (env, positive, negative) = get_tyvars env ty in
+  let (env, positive, negative) = get_tyvars_i env ty in
   let (positive, negative) =
     if flip then
       (negative, positive)
@@ -1608,6 +1613,9 @@ let set_tyvar_variance env ?(flip = false) ty =
           env
       in
       env)
+
+let set_tyvar_variance env ?(flip = false) ty =
+  set_tyvar_variance_i env ~flip (LoclType ty)
 
 let fresh_invariant_type_var env p =
   let v = Ident.tmp () in

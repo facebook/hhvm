@@ -345,6 +345,8 @@ and constraint_type_ =
   (* The type of a list destructructuring assignment.
    * Implements valid destructuring operations via subtyping *)
   | Tdestructure of locl_ty list
+  | TCunion of locl_ty * constraint_type
+  | TCintersection of locl_ty * constraint_type
 
 and has_member = {
   hm_name: Nast.sid;
@@ -1075,20 +1077,27 @@ let has_member_compare ~normalize_lists hm1 hm2 =
     | comp -> comp)
   | comp -> comp
 
-(* Ordinal value for type constructor, for constraint types *)
-let constraint_ty_con_ordinal ty_ =
-  match ty_ with
+let constraint_ty_con_ordinal cty =
+  match cty with
   | Thas_member _ -> 0
   | Tdestructure _ -> 1
+  | TCunion _ -> 2
+  | TCintersection _ -> 3
 
-let constraint_ty_compare ?(normalize_lists = false) (_, ty1) (_, ty2) =
+let rec constraint_ty_compare ?(normalize_lists = false) (_, ty1) (_, ty2) =
   match (ty1, ty2) with
   | (Thas_member hm1, Thas_member hm2) ->
     has_member_compare ~normalize_lists hm1 hm2
   | (Tdestructure tyl1, Tdestructure tyl2) -> tyl_compare ~sort:false tyl1 tyl2
-  | (Thas_member _hm, Tdestructure _tyl)
-  | (Tdestructure _tyl, Thas_member _hm) ->
-    constraint_ty_con_ordinal ty1 - constraint_ty_con_ordinal ty2
+  | (TCunion (lty1, cty1), TCunion (lty2, cty2))
+  | (TCintersection (lty1, cty1), TCintersection (lty2, cty2)) ->
+    let comp1 = ty_compare ~normalize_lists lty1 lty2 in
+    if not @@ Int.equal comp1 0 then
+      comp1
+    else
+      constraint_ty_compare ~normalize_lists cty1 cty2
+  | (_, (Thas_member _ | Tdestructure _ | TCunion _ | TCintersection _)) ->
+    constraint_ty_con_ordinal ty2 - constraint_ty_con_ordinal ty1
 
 let ty_equal ?(normalize_lists = false) ty1 ty2 =
   Int.equal 0 (ty_compare ~normalize_lists ty1 ty2)

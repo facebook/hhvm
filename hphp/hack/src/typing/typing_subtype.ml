@@ -301,10 +301,23 @@ let rec describe_ty_super env ?(short = false) ty =
     | (_, Thas_member hm) ->
       let { hm_name = (_, name); hm_type = ty; hm_class_id = _ } = hm in
       let ty_descr = describe_ty_super env ~short:true (LoclType ty) in
-      Printf.sprintf "that has a member named %s of type %s" name ty_descr
+      Printf.sprintf
+        "something that has a member named %s of type %s"
+        name
+        ty_descr
     | (_, Tdestructure _) ->
       Typing_print.with_blank_tyvars (fun () ->
-          Typing_print.full_strip_ns_i env (ConstraintType ty)))
+          Typing_print.full_strip_ns_i env (ConstraintType ty))
+    | (_, TCunion (lty, cty)) ->
+      Printf.sprintf
+        "%s or %s"
+        (describe_ty_super env (LoclType lty))
+        (describe_ty_super env (ConstraintType cty))
+    | (_, TCintersection (lty, cty)) ->
+      Printf.sprintf
+        "%s and %s"
+        (describe_ty_super env (LoclType lty))
+        (describe_ty_super env (ConstraintType cty)))
 
 (* Process the constraint proposition. There should only be errors left now,
 i.e. empty disjunction with error functions we call here. *)
@@ -323,24 +336,6 @@ let rec process_simplify_subtype_result prop =
     f ();
     false
   | TL.Disj _ -> failwith "non-empty disjunction"
-
-and cstr_ty_as_tyvar_with_upper_bound ~subtype_env env ty =
-  match ty with
-  | LoclType ty -> (env, ty)
-  | ConstraintType _ ->
-    let (env, tyvar) = Env.fresh_type_reason env (reason ty) in
-    let tyvar' = LoclType tyvar in
-    let env = sub_type_i ~subtype_env env tyvar' ty in
-    (env, tyvar)
-
-and cstr_ty_as_tyvar_with_lower_bound ~subtype_env env ty =
-  match ty with
-  | LoclType ty -> (env, ty)
-  | ConstraintType _ ->
-    let (env, tyvar) = Env.fresh_type_reason env (reason ty) in
-    let tyvar' = LoclType tyvar in
-    let env = sub_type_i ~subtype_env env ty tyvar' in
-    (env, tyvar)
 
 and simplify_subtype
     ~(subtype_env : subtype_env)
@@ -410,7 +405,7 @@ and simplify_subtype_i
   let valid () = valid_env env in
   (* We don't know whether the assertion is valid or not *)
   let default () = (env, TL.IsSubtype (ety_sub, ety_super)) in
-  let simplify_subtype_generic_sub name_sub opt_sub_cstr ty_sub ty_super env =
+  let simplify_subtype_generic_sub_i name_sub opt_sub_cstr ty_sub ty_super env =
     match subtype_env.seen_generic_params with
     | None -> default ()
     | Some seen ->
@@ -448,13 +443,14 @@ and simplify_subtype_i
               Reason.Rimplicit_upper_bound
                 (Reason.to_pos (fst ty_sub), "?nonnull")
             in
-            let tmixed = MakeType.mixed r in
-            env |> simplify_subtype ~subtype_env ~this_ty tmixed ty_super
-          | [ty] -> env |> simplify_subtype ~subtype_env ~this_ty ty ty_super
+            let tmixed = LoclType (MakeType.mixed r) in
+            env |> simplify_subtype_i ~subtype_env ~this_ty tmixed ty_super
+          | [ty] ->
+            simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ty_super env
           | ty :: tyl ->
             env
             |> try_bounds tyl
-            ||| simplify_subtype ~subtype_env ~this_ty ty ty_super
+            ||| simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ty_super
         in
         env
         |> try_bounds
@@ -462,6 +458,9 @@ and simplify_subtype_i
              @ Typing_set.elements (Env.get_upper_bounds env name_sub) )
         |> (* Turn error into a generic error about the type parameter *)
         if_unsat invalid
+  in
+  let simplify_subtype_generic_sub x y ty_sub ty_super env =
+    simplify_subtype_generic_sub_i x y ty_sub (LoclType ty_super) env
   in
   let simplify_subtype_generic_super ty_sub name_super env =
     match subtype_env.seen_generic_params with
@@ -666,6 +665,10 @@ and simplify_subtype_i
   | (LoclType (_, Tunion tyl), _) ->
     List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
         res &&& simplify_subtype_i ~subtype_env (LoclType ty_sub) ety_super)
+  | (ConstraintType (_, TCunion (lty_sub, cty_sub)), ty_super) ->
+    env
+    |> simplify_subtype_i ~subtype_env (LoclType lty_sub) ty_super
+    &&& simplify_subtype_i ~subtype_env (ConstraintType cty_sub) ty_super
   (* t <: (t1 & ... & tn)
    *   if and only if
    * t <: t1 /\  ... /\ t <: tn
@@ -674,6 +677,10 @@ and simplify_subtype_i
     List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_super ->
         let ty_super = LoclType ty_super in
         res &&& simplify_subtype_i ~subtype_env ~this_ty ety_sub ty_super)
+  | (ty_sub, ConstraintType (_, TCintersection (lty_super, cty_super))) ->
+    env
+    |> simplify_subtype_i ~subtype_env ty_sub (LoclType lty_super)
+    &&& simplify_subtype_i ~subtype_env ty_sub (ConstraintType cty_super)
   (* We want to treat nullable as a union with the same rule as above.
    * This is only needed for Tvar on right; other cases are dealt with specially as
    * derived rules.
@@ -706,46 +713,21 @@ and simplify_subtype_i
          Option.is_some non_ty_opt ->
     let (env, non_ty_opt, tyl') = find_type_with_exact_negation env tyl in
     let non_ty = Option.value_exn non_ty_opt in
-    (* We want to union ty_super with non_ty, but ty_super might be a
-    constraint type, and we can't union with constraint types,
-    so if ty_super is a constraint type, we turn it into a type variable
-    which has this constraint (i.e. which has it as upper bound). *)
-    let (env, ty_super) =
-      cstr_ty_as_tyvar_with_upper_bound ~subtype_env env ty_super
-    in
-    let (env, ty_super') = TUtils.union env ty_super non_ty in
+    let (env, ty_super') = TUtils.union_i env (fst non_ty) ty_super non_ty in
     let ty_sub' = MakeType.intersection r tyl' in
-    simplify_subtype ~subtype_env ty_sub' ty_super' env
+    simplify_subtype_i ~subtype_env (LoclType ty_sub') ty_super' env
   (* A <: ?B iif A & nonnull <: B
     Only apply if B is a type variable or an intersection, to avoid oscillating
-    forever between this case and the previous one.
-    Also make sure, in the case of a single type variable, that the type
-    variable has no constraints in its upper bounds, to avoid the following
-    loop:
-      subtype           (nonnull & _ & #1) <: has_member(m, #2)
-      simplify          (nonnull & _ & #1) <: has_member(m, #2)
-      simplifies to     (#1 & _) <: ?#3 with upper bound has_member(m, #2)
-      simplifies to     (#1 & _ & nonnull) <: #3
-      into prop_to_env  (#1 & _ & nonnull) <: #3
-      calls simplify on (#1 & _ & nonnull) <: has_member(m, #2)
-      back to start *)
+    forever between this case and the previous one. *)
   | (ty_sub, LoclType (r, Toption ty_super'))
     when let (_, (_, ety_super')) = Env.expand_type env ty_super' in
          match ety_super' with
-         | Tintersection _ -> true
-         | Tvar var ->
-           let upper_bounds = Env.get_tyvar_upper_bounds env var in
-           not @@ Internal_type_set.exists is_constraint_type upper_bounds
+         | Tintersection _
+         | Tvar _ ->
+           true
          | _ -> false ->
-    (* We want to intersect ty_sub with nonnull, but ty_super might be a
-    constraint type, and we can't intersect with constraint types,
-    so if ty_sub is a constraint type, we turn it into a type variable
-    with that constraint type as lower bound. *)
-    let (env, ty_sub) =
-      cstr_ty_as_tyvar_with_lower_bound ~subtype_env env ty_sub
-    in
-    let (env, ty_sub') = Inter.intersect env r ty_sub (MakeType.nonnull r) in
-    simplify_subtype ~subtype_env ty_sub' ty_super' env
+    let (env, ty_sub') = Inter.intersect_i env r ty_sub (MakeType.nonnull r) in
+    simplify_subtype_i ~subtype_env ty_sub' (LoclType ty_super') env
   (* If subtype and supertype are the same generic parameter, we're done *)
   | ( LoclType (_, Tabstract (AKgeneric name_sub, _)),
       LoclType (_, Tabstract (AKgeneric name_super, _)) )
@@ -768,15 +750,19 @@ and simplify_subtype_i
     |> simplify_subtype ~subtype_env ~this_ty ty_float ty_super
     &&& simplify_subtype ~subtype_env ~this_ty ty_int ty_super
   (* Likewise, reduce nullable on left to a union *)
-  | (LoclType (r, Toption ty), LoclType ((_, Tunion _) as ty_super)) ->
+  | ( LoclType (r, Toption ty),
+      ((LoclType (_, Tunion _) | ConstraintType (_, TCunion _)) as ty_super) )
+    ->
     let ty_null = MakeType.null r in
     let (env, p1) =
-      simplify_subtype ~subtype_env ~this_ty ty_null ty_super env
+      simplify_subtype_i ~subtype_env ~this_ty (LoclType ty_null) ty_super env
     in
     if TL.is_unsat p1 then
       invalid ()
     else
-      let (env, p2) = simplify_subtype ~subtype_env ~this_ty ty ty_super env in
+      let (env, p2) =
+        simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ty_super env
+      in
       (env, TL.conj p1 p2)
   | ( LoclType (_, Tabstract ((AKnewtype _ | AKdependent _), Some ty)),
       LoclType ((_, Tunion []) as ty_super) ) ->
@@ -853,6 +839,14 @@ and simplify_subtype_i
     simplify_sub_union env ety_sub ty_super tyl
   | (LoclType (_, Tintersection tyl), _) ->
     simplify_super_intersection env tyl ety_super
+  | (ty_sub, ConstraintType (_, TCunion (lty_super, cty_super))) ->
+    env
+    |> simplify_subtype_i ~subtype_env ty_sub (LoclType lty_super)
+    ||| simplify_subtype_i ~subtype_env ty_sub (ConstraintType cty_super)
+  | (ConstraintType (_, TCintersection (lty_sub, cty_sub)), ty_super) ->
+    env
+    |> simplify_subtype_i ~subtype_env (LoclType lty_sub) ty_super
+    ||| simplify_subtype_i ~subtype_env (ConstraintType cty_sub) ty_super
   (* List destructuring *)
   | (LoclType ety_sub, ConstraintType (r, Tdestructure tyl_dest)) ->
     begin
@@ -890,11 +884,8 @@ and simplify_subtype_i
       | (_, Tdynamic) ->
         List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
             res &&& simplify_subtype ~subtype_env ~this_ty ety_sub ty_dest)
-      | (_, Tabstract (AKgeneric name_sub, opt_sub_cstr)) ->
-        let (env, ety_super) =
-          cstr_ty_as_tyvar_with_upper_bound ~subtype_env env ety_super
-        in
-        simplify_subtype_generic_sub name_sub opt_sub_cstr ety_sub ety_super env
+      | (_, Tabstract (AKgeneric name, opt_sub_cstr)) ->
+        simplify_subtype_generic_sub_i name opt_sub_cstr ety_sub ety_super env
       (* TODO: should remove these any cases *)
       | (_, Tarraykind AKempty)
       | (_, Tany _) ->
@@ -1661,13 +1652,26 @@ and simplify_subtype_i
         simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
       else
         invalid ()
+    | ((_, Tdestructure _), _) -> invalid ()
     | (_, (_, Tdestructure _))
-    | ((_, Tdestructure _), _) ->
-      invalid ())
+    | ((_, TCunion _), _)
+    | (_, (_, TCintersection _))
+    | (_, (_, TCunion _))
+    | ((_, TCintersection _), _) ->
+      failwith
+        "This subtyping case must have been handled by the external match wrapping this match.")
   | (ConstraintType ty_sub, LoclType ty_super) ->
     (match (ty_sub, ty_super) with
-    | ((_, Thas_member _), _ty_super) -> invalid ()
-    | ((_, Tdestructure _), _ty_super) -> invalid ())
+    | ((_, Thas_member _), (_, Tnonnull))
+    | ((_, Tdestructure _), (_, Tnonnull)) ->
+      valid ()
+    | ((_, Thas_member _), _ty_super)
+    | ((_, Tdestructure _), _ty_super) ->
+      invalid ()
+    | ((_, TCunion _), _)
+    | ((_, TCintersection _), _) ->
+      failwith
+        "This subtyping case must have been handled by the external match wrapping this match.")
 
 and simplify_subtype_variance
     ~(subtype_env : subtype_env)
@@ -3374,12 +3378,6 @@ let sub_type_with_dynamic_as_bottom
   in
   env_change_log env
 
-let cstr_ty_as_tyvar_with_upper_bound env ty =
-  let subtype_env =
-    make_subtype_env ~treat_dynamic_as_bottom:false Errors.unify_error
-  in
-  cstr_ty_as_tyvar_with_upper_bound ~subtype_env env ty
-
 (*****************************************************************************)
 (* Exporting *)
 (*****************************************************************************)
@@ -3404,6 +3402,8 @@ let () = Typing_utils.add_constraint_ref := add_constraint
 let () = Typing_utils.is_sub_type_ref := is_sub_type
 
 let () = Typing_utils.is_sub_type_for_union_ref := is_sub_type_for_union
+
+let () = Typing_utils.is_sub_type_for_union_i_ref := is_sub_type_for_union_i
 
 let () =
   Typing_utils.is_sub_type_ignore_generic_params_ref :=

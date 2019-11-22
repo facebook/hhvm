@@ -8,6 +8,7 @@
  *)
 
 open Hh_prelude
+open Typing_defs
 module Reason = Typing_reason
 module Env = Typing_env
 module MakeType = Typing_make_type
@@ -16,8 +17,7 @@ module MakeType = Typing_make_type
 (* Exporting. *)
 (*****************************************************************************)
 
-(* Tries to add constraint that ty_sub is subtype of ty_super in envs *)
-let sub_type p ur env ty_sub ty_super on_error =
+let log_sub_type env p ty_sub ty_super =
   Typing_log.(
     log_with_level env "sub" 1 (fun () ->
         log_types
@@ -26,12 +26,21 @@ let sub_type p ur env ty_sub ty_super on_error =
           [
             Log_head
               ( "Typing_ops.sub_type",
-                [Log_type ("ty_sub", ty_sub); Log_type ("ty_super", ty_super)]
-              );
-          ]));
-  Typing_utils.sub_type env ty_sub ty_super (fun ?code errl ->
+                [
+                  Log_type_i ("ty_sub", ty_sub);
+                  Log_type_i ("ty_super", ty_super);
+                ] );
+          ]))
+
+(* Tries to add constraint that ty_sub is subtype of ty_super in envs *)
+let sub_type_i p ur env ty_sub ty_super on_error =
+  log_sub_type env p ty_sub ty_super;
+  Typing_utils.sub_type_i env ty_sub ty_super (fun ?code errl ->
       let errl = (p, Reason.string_of_ureason ur) :: errl in
       on_error ?code errl)
+
+let sub_type p ur env ty_sub ty_super on_error =
+  sub_type_i p ur env (LoclType ty_sub) (LoclType ty_super) on_error
 
 let sub_type_decl p ur env ty_sub ty_super =
   let localize_with_self = Typing_utils.localize_with_self ~quiet:true in

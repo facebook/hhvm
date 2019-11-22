@@ -546,13 +546,17 @@ module Full = struct
       k ty' ^^ text (":@" ^ enum ^ suffix)
     | Tpu_access (ty', (_, access)) -> tpu_access k ty' access
 
-  let constraint_type_ to_doc st env x =
-    let k x = locl_ty to_doc st env x in
+  let rec constraint_type_ to_doc st env x =
+    let k lty = locl_ty to_doc st env lty in
+    let k' cty = constraint_type to_doc st env cty in
     match x with
     | Thas_member hm -> thas_member k hm
     | Tdestructure tyl -> list "list(" k tyl ")"
+    | TCunion (lty, cty) -> Concat [text "("; k lty; text "|"; k' cty; text ")"]
+    | TCintersection (lty, cty) ->
+      Concat [text "("; k lty; text "&"; k' cty; text ")"]
 
-  let constraint_type to_doc st env (r, x) =
+  and constraint_type to_doc st env (r, x) =
     let d = constraint_type_ to_doc st env x in
     match r with
     | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]

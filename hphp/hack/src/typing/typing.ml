@@ -2743,22 +2743,21 @@ and expr_
     let r = Reason.Rwitness (fst e1) in
     let has_member_ty = MakeType.has_member r m mem_ty (CIexpr e1) in
     let on_error = Errors.unify_error in
+    let lty1 = LoclType ty1 in
     let (env, result_ty) =
       match nullsafe with
       | None ->
-        let ty1 = LoclType ty1 in
-        let env = SubType.sub_type_i env ty1 has_member_ty on_error in
+        let env = SubType.sub_type_i env lty1 has_member_ty on_error in
         (env, mem_ty)
       | Some _ ->
         (* In that case ty1 is a subtype of ?Thas_member(m, #1)
         and the result is ?#1 if ty1 is nullable. *)
-        let (env, has_member_ty) =
-          SubType.cstr_ty_as_tyvar_with_upper_bound env has_member_ty
-        in
         let r = Reason.Rnullsafe_op p in
         let null_ty = MakeType.null r in
-        let (env, null_has_mem_ty) = Union.union env null_ty has_member_ty in
-        let env = SubType.sub_type env ty1 null_has_mem_ty on_error in
+        let (env, null_has_mem_ty) =
+          Union.union_i env r has_member_ty null_ty
+        in
+        let env = SubType.sub_type_i env lty1 null_has_mem_ty on_error in
         let (env, null_or_nothing_ty) = Inter.intersect env ~r null_ty ty1 in
         let (env, result_ty) = Union.union env null_or_nothing_ty mem_ty in
         (env, result_ty)
@@ -4352,11 +4351,9 @@ and assign_ p ur env e1 ty2 =
       ConstraintType
         (Reason.Rdestructure (fst e1, List.length tyl), Tdestructure tyl)
     in
-    let (env, destructure_ty) =
-      SubType.cstr_ty_as_tyvar_with_upper_bound env destructure_ty
-    in
-    let env = Type.sub_type p ur env ty2 destructure_ty Errors.unify_error in
-    let env = Env.set_tyvar_variance env destructure_ty in
+    let lty2 = LoclType ty2 in
+    let env = Type.sub_type_i p ur env lty2 destructure_ty Errors.unify_error in
+    let env = Env.set_tyvar_variance_i env destructure_ty in
     let (env, reversed_tel) =
       List.fold2_exn el tyl ~init:(env, []) ~f:(fun (env, tel) lvalue ty2 ->
           let (env, te, _) = assign p env lvalue ty2 in

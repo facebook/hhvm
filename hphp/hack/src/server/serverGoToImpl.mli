@@ -9,7 +9,7 @@
 open ServerCommandTypes.Find_refs
 
 val go :
-  action ->
-  ServerEnv.genv ->
-  ServerEnv.env ->
+  action:action ->
+  genv:ServerEnv.genv ->
+  env:ServerEnv.env ->
   ServerEnv.env * server_result_or_retry

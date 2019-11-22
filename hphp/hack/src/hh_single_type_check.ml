@@ -1363,7 +1363,7 @@ let handle_mode
         let results =
           ServerFindRefs.go_from_file_ctx ~ctx ~entry ~line ~column
           >>= fun (name, action) ->
-          ServerGoToImpl.go action genv env
+          ServerGoToImpl.go ~action ~genv ~env
           |> map_env ~f:(ServerFindRefs.to_ide name)
           |> snd
           |> function

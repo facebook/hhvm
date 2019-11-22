@@ -158,7 +158,8 @@ let search_member
   | Typeconst _ ->
     (env, Done [])
 
-let go action genv env =
+let go ~(action : action) ~(genv : ServerEnv.genv) ~(env : ServerEnv.env) :
+    ServerEnv.env * server_result_or_retry =
   match action with
   | Class class_name -> search_class class_name genv env
   | Member (class_name, member) -> search_member class_name member genv env

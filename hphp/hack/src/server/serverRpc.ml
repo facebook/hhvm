@@ -249,7 +249,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       | Some (name, action) ->
         map_env
           ~f:(ServerFindRefs.to_ide name)
-          (ServerGoToImpl.go action genv env)))
+          (ServerGoToImpl.go ~action ~genv ~env)))
   | IDE_HIGHLIGHT_REFS (path, file_input, line, column) ->
     let (ctx, entry) =
       Provider_utils.update_context

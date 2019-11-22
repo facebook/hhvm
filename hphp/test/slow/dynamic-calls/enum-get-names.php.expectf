@@ -1,0 +1,6 @@
+
+Fatal error: Uncaught exception 'HH\InvariantException' with message 'Enum has overlapping values' in %s/test/slow/dynamic-calls/enum-get-names.php:10
+Stack trace:
+#0 (): HH\invariant_violation()
+#1 %s/test/slow/dynamic-calls/enum-get-names.php(10): HH\BuiltinEnum::getNames()
+%a {main}

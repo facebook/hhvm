@@ -31,13 +31,15 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getValues) {
   return values->values;
 }
 
-const StaticString s_overlappingErrorMessage("Enum has overlapping values");
+const StaticString
+  s_invariant_violation("HH\\invariant_violation"),
+  s_overlappingErrorMessage("Enum has overlapping values");
 
 static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
   const EnumValues* values = EnumCache::getValuesBuiltin(self_);
   if (values->names.size() != values->values.size()) {
     vm_call_user_func(
-      "\\HH\\invariant_violation",
+      Unit::lookupFunc(s_invariant_violation.get()),
       make_vec_array(s_overlappingErrorMessage)
     );
   }

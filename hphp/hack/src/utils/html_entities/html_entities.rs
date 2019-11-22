@@ -8,9 +8,10 @@ extern crate lazy_static;
 
 pub mod decoder;
 
+use ocaml_helper::int_of_string_opt;
 use regex::bytes::{Captures, Regex};
 
-pub fn utf32_to_utf8(k: u32, r: &mut [u8; 6]) -> &[u8] {
+fn utf32_to_utf8(k: i64, r: &mut [u8; 6]) -> &[u8] {
     if k < 0x80 {
         r[0] = k as u8;
         &r[0..1]
@@ -47,23 +48,18 @@ pub fn utf32_to_utf8(k: u32, r: &mut [u8; 6]) -> &[u8] {
     }
 }
 
-pub fn utf32_to_utf8_alloc(k: u32) -> Vec<u8> {
+pub fn utf32_to_utf8_alloc(k: i64) -> Vec<u8> {
     Vec::from(utf32_to_utf8(k, &mut [0u8; 6]))
 }
 
 fn decode_u32(s: &[u8]) -> Vec<u8> {
-    // from_utf8 returns err on invalid utf8, which still
-    // matches Ocaml's behavior since invalid utf8 can't
-    // parsed to u32
-    let n = std::str::from_utf8(&s[2..s.len() - 1]);
-    let n = match n {
-        Err(_) => return vec![],
-        Ok(s) => s,
-    };
-    let n = u32::from_str_radix(n, 10);
+    let mut s1: Vec<u8> = Vec::with_capacity(s.len() - 1);
+    s1.push(b'0');
+    s1.extend_from_slice(&s[2..s.len() - 1]);
+    let n = int_of_string_opt(&s1[..]);
     match n {
-        Err(_) => vec![],
-        Ok(n) => utf32_to_utf8_alloc(n),
+        Some(n) => utf32_to_utf8_alloc(n),
+        None => vec![],
     }
 }
 
@@ -106,5 +102,6 @@ mod tests {
         assert_eq!(decode(b"&#352;"), Vec::from("Š"));
         assert_eq!(decode(b"&#352"), Vec::from("&#352"));
         assert_eq!(decode(b"abc&#352;efg"), Vec::from("abcŠefg"));
+        assert_eq!(decode(b"&#x0021;"), Vec::from("!"));
     }
 }

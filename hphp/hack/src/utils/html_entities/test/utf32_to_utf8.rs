@@ -21,7 +21,7 @@ mod tests {
     use html_entities::decoder::*;
     use pretty_assertions::assert_eq;
 
-    fn helper(x: u32) -> Vec<u8> {
+    fn helper(x: i64) -> Vec<u8> {
         html_entities::utf32_to_utf8_alloc(x)
     }
 

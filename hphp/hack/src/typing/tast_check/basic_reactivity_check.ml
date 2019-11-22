@@ -39,8 +39,9 @@ let expr_is_valid_borrowed_arg env (e : expr) : bool =
   X no static property accesses
   X no append calls *)
 let rec is_byval_collection_or_string_or_any_type env ty =
-  let check t =
-    match t with
+  let check ty =
+    let (env, ty) = Env.expand_type env ty in
+    match ty with
     | (_, Toption inner) -> is_byval_collection_or_string_or_any_type env inner
     | (_, Tclass ((_, x), _, _)) ->
       String.equal x SN.Collections.cVec
@@ -51,9 +52,17 @@ let rec is_byval_collection_or_string_or_any_type env ty =
     | (_, Tdynamic)
     | (_, Tany _) ->
       true
-    | (_, Tunion tl) ->
-      List.for_all tl ~f:(is_byval_collection_or_string_or_any_type env)
-    | _ -> false
+    | (_, Tunion tyl) ->
+      List.for_all tyl ~f:(is_byval_collection_or_string_or_any_type env)
+    | (_, Tintersection tyl) ->
+      List.exists tyl ~f:(is_byval_collection_or_string_or_any_type env)
+    | (_, Tabstract _) ->
+      (* FIXME we should probably look at the upper bounds here. *)
+      false
+    | ( _,
+        ( Terr | Tnonnull | Tprim _ | Tobject | Tfun _ | Tanon _ | Tvar _
+        | Tpu _ | Tpu_access _ ) ) ->
+      false
   in
   let (_, tl) = Tast_env.get_concrete_supertypes env ty in
   List.for_all tl ~f:check

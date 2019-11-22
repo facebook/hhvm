@@ -38,6 +38,7 @@
 #include <boost/filesystem.hpp>
 
 #include "hphp/util/text-color.h"
+#include "hphp/util/user-info.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -247,8 +248,10 @@ std::string Process::GetCurrentUser() {
   if (GetUserName(username, &username_len))
     return std::string(username, username_len);
 #else
-  passwd *pwd = getpwuid(geteuid());
-  if (pwd && pwd->pw_name) {
+  auto buf = PasswdBuffer{};
+  passwd *pwd;
+  if (!getpwuid_r(geteuid(), &buf.ent, buf.data.get(), buf.size, &pwd) &&
+      pwd && pwd->pw_name) {
     return pwd->pw_name;
   }
 #endif

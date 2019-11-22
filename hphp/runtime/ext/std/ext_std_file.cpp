@@ -49,6 +49,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/rds-local.h"
+#include "hphp/util/user-info.h"
 
 #include <folly/String.h>
 #include <folly/portability/Dirent.h>
@@ -1444,7 +1445,12 @@ static bool do_chown(const String& filename,
   int uid;
   if (user.isString()) {
     String suser = user.toString();
-    struct passwd *pw = getpwnam(suser.data());
+    auto buf = PasswdBuffer{};
+    struct passwd *pw;
+    if (getpwnam_r(suser.data(), &buf.ent, buf.data.get(), buf.size, &pw)) {
+      // failed to read user info
+      return false;
+    }
     if (!pw) {
       Logger::Verbose("%s/%d: Unable to find uid for %s",
         __FUNCTION__, __LINE__, suser.data());
@@ -1508,7 +1514,12 @@ static bool do_chgrp(const String& filename,
   int gid;
   if (group.isString()) {
     String sgroup = group.toString();
-    struct group *gr = getgrnam(sgroup.data());
+    auto buf = GroupBuffer{};
+    struct group *gr;
+    if (getgrnam_r(sgroup.data(), &buf.ent, buf.data.get(), buf.size, &gr)) {
+      // failed to read group info
+      return false;
+    }
     if (!gr) {
       Logger::Verbose("%s/%d: Unable to find gid for %s",
         __FUNCTION__, __LINE__, sgroup.data());

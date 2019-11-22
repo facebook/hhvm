@@ -240,35 +240,43 @@ bool SocketTransport::setSocketPermissions(const char* path) {
 
   if (!configGroup.empty()) {
     const char* groupName = configGroup.c_str();
-    struct group* grp = getgrnam(groupName);
-
+    auto buf = GroupBuffer{};
+    struct group* grp;
+    if (getgrnam_r(groupName, &buf.ent, buf.data.get(), buf.size, &grp)) {
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelError,
+        "Failed to call getgrnam_r for group %s: %s",
+        groupName,
+        folly::errnoStr(errno).c_str()
+      );
+      return false;
+    }
     if (grp == nullptr) {
       VSDebugLogger::Log(
         VSDebugLogger::LogLevelError,
-        "Failed to call getgrnam for group %s",
+        "Group %s does not exist",
         groupName
       );
       return false;
-    } else {
-      gid_t gid;
-      gid = grp->gr_gid;
-      if (chown(path, -1, gid) < 0) {
-        VSDebugLogger::Log(
-          VSDebugLogger::LogLevelError,
-          "Failed to call chown for socket %s to group id %d",
-          path,
-          gid
-        );
-        return false;
-      } else {
-        VSDebugLogger::Log(
-          VSDebugLogger::LogLevelInfo,
-          "Successfully called chown for socket %s to group id %d",
-          path,
-          gid
-        );
-      }
     }
+
+    auto gid = grp->gr_gid;
+    if (chown(path, static_cast<uid_t>(-1), gid) < 0) {
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelError,
+        "Failed to call chown for socket %s to group id %d",
+        path,
+        gid
+      );
+      return false;
+    }
+
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelInfo,
+      "Successfully called chown for socket %s to group id %d",
+      path,
+      gid
+    );
   } else {
     // If no security group is configured, fall back to the previous
     // behavior of allowing any local user to talk to the debugger.

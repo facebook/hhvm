@@ -45,6 +45,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/timer.h"
+#include "hphp/util/user-info.h"
 
 namespace HPHP {
 
@@ -396,17 +397,25 @@ void do_waitpid(int afdt_fd) {
 void do_change_user(int afdt_fd) {
   std::string uname;
   lwp_read(afdt_fd, uname);
-  if (uname.length() > 0) {
-    struct passwd *pw = getpwnam(uname.c_str());
-    if (pw) {
-      if (pw->pw_gid) {
-        initgroups(pw->pw_name, pw->pw_gid);
-        setgid(pw->pw_gid);
-      }
-      if (pw->pw_uid) {
-        setuid(pw->pw_uid);
-      }
-    }
+  if (!uname.length()) return;
+
+  auto buf = PasswdBuffer{};
+  struct passwd *pw;
+  if (getpwnam_r(uname.c_str(), &buf.ent, buf.data.get(), buf.size, &pw)) {
+    // TODO(alexeyt) should we log something and/or fail to start?
+    return;
+  }
+  if (!pw) {
+    // TODO(alexeyt) should we log something and/or fail to start?
+    return;
+  }
+
+  if (pw->pw_gid) {
+    initgroups(pw->pw_name, pw->pw_gid);
+    setgid(pw->pw_gid);
+  }
+  if (pw->pw_uid) {
+    setuid(pw->pw_uid);
   }
 }
 

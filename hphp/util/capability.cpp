@@ -18,6 +18,7 @@
 
 #include "hphp/util/capability.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/user-info.h"
 #include <folly/String.h>
 #include <linux/types.h>
 #include <sys/capability.h>
@@ -108,11 +109,16 @@ bool Capability::ChangeUnixUser(uid_t uid, bool allowRoot) {
   }
 
   if (setInitialCapabilities()) {
+    auto buf = PasswdBuffer{};
     struct passwd *pw;
 
-    if ((pw = getpwuid(uid)) == nullptr) {
+    if (getpwuid_r(uid, &buf.ent, buf.data.get(), buf.size, &pw)) {
       Logger::Error("unable to getpwuid(%d): %s", uid,
                     folly::errnoStr(errno).c_str());
+      return false;
+    }
+    if (pw == nullptr) {
+      Logger::Error("user id %d does not exist", uid);
       return false;
     }
 
@@ -145,11 +151,16 @@ bool Capability::ChangeUnixUser(uid_t uid, bool allowRoot) {
 
 bool Capability::ChangeUnixUser(const std::string &username, bool allowRoot) {
   if (!username.empty()) {
-    struct passwd *pw = getpwnam(username.c_str());
-    if (!pw) {
-      Logger::Error("unable to find user %s: %s",
+    auto buf = PasswdBuffer{};
+    struct passwd *pw;
+    if (getpwnam_r(username.c_str(), &buf.ent, buf.data.get(), buf.size, &pw)) {
+      Logger::Error("Call to getpwnam_r failed for %s: %s",
                     username.c_str(),
                     folly::errnoStr(errno).c_str());
+      return false;
+    }
+    if (!pw) {
+      Logger::Error("unable to find user %s", username.c_str());
       return false;
     }
     return ChangeUnixUser(pw->pw_uid, allowRoot);

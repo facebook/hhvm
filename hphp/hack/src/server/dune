@@ -264,10 +264,10 @@
     version
     watchman_utils
     (select serverHotClassesDescription.ml from
-    (facebook signed_source_fb -> facebook/serverHotClassesDescription.ml)
+    (facebook signed_source -> facebook/serverHotClassesDescription.ml)
     (-> ../stubs/serverHotClassesDescription.ml))
     (select serverInvalidateUnits.ml from
-    (facebook signed_source_fb -> facebook/serverInvalidateUnits.ml)
+    (facebook signed_source -> facebook/serverInvalidateUnits.ml)
     (-> ../stubs/serverInvalidateUnits.ml))
   )
   (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208

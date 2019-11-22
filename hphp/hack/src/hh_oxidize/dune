@@ -1,0 +1,6 @@
+
+(executable
+  (name hh_oxidize)
+  (modules convert_longident convert_toplevel_phrase convert_type convert_type_decl output hh_oxidize oxidized_module state stringify utils)
+  (libraries
+    signed_source collections ocaml-compiler-libs.common))

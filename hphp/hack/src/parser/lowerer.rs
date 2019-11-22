@@ -1850,7 +1850,6 @@ where
                     _ => Self::missing_syntax(None, "unary exppr", node, env)?,
                 };
 
-                let expr = Self::p_expr(operand, env)?;
                 /**
                  * FFP does not destinguish between ++$i and $i++ on the level of token
                  * kind annotation. Prevent duplication by switching on `postfix` for
@@ -1859,64 +1858,68 @@ where
                  */
                 use ast::Uop::*;
                 let mk_unop = |op, e| Ok(E_::mk_unop(op, e));
-                match Self::token_kind(op) {
-                    Some(TK::PlusPlus) if postfix => mk_unop(Upincr, expr),
-                    Some(TK::MinusMinus) if postfix => mk_unop(Updecr, expr),
-                    Some(TK::PlusPlus) => mk_unop(Uincr, expr),
-                    Some(TK::MinusMinus) => mk_unop(Udecr, expr),
-                    Some(TK::Exclamation) => mk_unop(Unot, expr),
-                    Some(TK::Tilde) => mk_unop(Utild, expr),
-                    Some(TK::Plus) => mk_unop(Uplus, expr),
-                    Some(TK::Minus) => mk_unop(Uminus, expr),
-                    Some(TK::At) => {
-                        if env.parser_options.po_disallow_silence {
-                            Self::raise_parsing_error(op, env, &syntax_error::no_silence);
-                        }
-                        if env.codegen() {
-                            mk_unop(Usilence, expr)
-                        } else {
-                            let expr =
-                                Self::p_expr_impl(ExprLocation::TopLevel, operand, env, Some(pos))?;
-                            Ok(expr.1)
-                        }
+                let op_kind = Self::token_kind(op);
+                if let Some(TK::At) = op_kind {
+                    if env.parser_options.po_disallow_silence {
+                        Self::raise_parsing_error(op, env, &syntax_error::no_silence);
                     }
-                    Some(TK::Inout) => Ok(E_::mk_callconv(ast::ParamKind::Pinout, expr)),
-                    Some(TK::Await) => Self::lift_await(pos, expr, env, location),
-                    Some(TK::Suspend) => Ok(E_::mk_suspend(expr)),
-                    Some(TK::Clone) => Ok(E_::mk_clone(expr)),
-                    Some(TK::Print) => Ok(E_::mk_call(
-                        ast::CallType::Cnormal,
-                        E::new(pos.clone(), E_::mk_id(ast::Id(pos, String::from("echo")))),
-                        vec![],
-                        vec![expr],
-                        None,
-                    )),
-                    Some(TK::Dollar) => {
-                        let E(p, expr_) = expr;
-                        match expr_ {
-                            E_::String(s) | E_::Int(s) | E_::Float(s) => {
-                                if !env.codegen() {
+                    if env.codegen() {
+                        let expr = Self::p_expr(operand, env)?;
+                        mk_unop(Usilence, expr)
+                    } else {
+                        let expr =
+                            Self::p_expr_impl(ExprLocation::TopLevel, operand, env, Some(pos))?;
+                        Ok(expr.1)
+                    }
+                } else {
+                    let expr = Self::p_expr(operand, env)?;
+                    match op_kind {
+                        Some(TK::PlusPlus) if postfix => mk_unop(Upincr, expr),
+                        Some(TK::MinusMinus) if postfix => mk_unop(Updecr, expr),
+                        Some(TK::PlusPlus) => mk_unop(Uincr, expr),
+                        Some(TK::MinusMinus) => mk_unop(Udecr, expr),
+                        Some(TK::Exclamation) => mk_unop(Unot, expr),
+                        Some(TK::Tilde) => mk_unop(Utild, expr),
+                        Some(TK::Plus) => mk_unop(Uplus, expr),
+                        Some(TK::Minus) => mk_unop(Uminus, expr),
+                        Some(TK::Inout) => Ok(E_::mk_callconv(ast::ParamKind::Pinout, expr)),
+                        Some(TK::Await) => Self::lift_await(pos, expr, env, location),
+                        Some(TK::Suspend) => Ok(E_::mk_suspend(expr)),
+                        Some(TK::Clone) => Ok(E_::mk_clone(expr)),
+                        Some(TK::Print) => Ok(E_::mk_call(
+                            ast::CallType::Cnormal,
+                            E::new(pos.clone(), E_::mk_id(ast::Id(pos, String::from("echo")))),
+                            vec![],
+                            vec![expr],
+                            None,
+                        )),
+                        Some(TK::Dollar) => {
+                            let E(p, expr_) = expr;
+                            match expr_ {
+                                E_::String(s) | E_::Int(s) | E_::Float(s) => {
+                                    if !env.codegen() {
+                                        Self::raise_parsing_error(
+                                            op,
+                                            env,
+                                            &syntax_error::invalid_variable_name,
+                                        )
+                                    }
+                                    let id = String::with_capacity(1 + s.len()) + "$" + &s;
+                                    let lid = ast::Lid(pos, (0, id));
+                                    Ok(E_::mk_lvar(lid))
+                                }
+                                _ => {
                                     Self::raise_parsing_error(
                                         op,
                                         env,
-                                        &syntax_error::invalid_variable_name,
-                                    )
+                                        &syntax_error::invalid_variable_variable,
+                                    );
+                                    Ok(E_::Omitted)
                                 }
-                                let id = String::with_capacity(1 + s.len()) + "$" + &s;
-                                let lid = ast::Lid(pos, (0, id));
-                                Ok(E_::mk_lvar(lid))
-                            }
-                            _ => {
-                                Self::raise_parsing_error(
-                                    op,
-                                    env,
-                                    &syntax_error::invalid_variable_variable,
-                                );
-                                Ok(E_::Omitted)
                             }
                         }
+                        _ => Self::missing_syntax(None, "unary operator", node, env),
                     }
-                    _ => Self::missing_syntax(None, "unary operator", node, env),
                 }
             }
             BinaryExpression(c) => {

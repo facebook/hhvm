@@ -252,7 +252,6 @@ let rec dispatch_loop handlers =
       dispatch_loop handlers))
 
 let parse_text ~hhbc_options popt fn text =
-  let ignore_pos = not (Hhbc_options.source_mapping hhbc_options) in
   let php5_compat_mode =
     not (Hhbc_options.enable_uniform_variable_syntax hhbc_options)
   in
@@ -261,7 +260,6 @@ let parse_text ~hhbc_options popt fn text =
   let env =
     Full_fidelity_ast.make_env
       ~parser_options:popt
-      ~ignore_pos
       ~codegen:true
       ~fail_open:false
       ~php5_compat_mode

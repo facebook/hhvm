@@ -25,7 +25,6 @@ val make_env (* Optional parts *) :
   ?elaborate_namespaces:bool ->
   ?include_line_comments:bool ->
   ?keep_errors:bool ->
-  ?ignore_pos:bool ->
   ?quick_mode:bool ->
   ?show_all_errors:bool ->
   ?lower_coroutines:bool ->

@@ -60,7 +60,6 @@ type env = {
   disable_lowering_parsing_error: bool;
   (* Whether we are (still) considering TLSs*)
   (* Changing parts; should disappear in future. `mutable` saves allocations. *)
-  mutable ignore_pos: bool;
   (* Filthy hack around OCaml bug *)
   mutable saw_yield: bool;
   (* Information flowing back up *)
@@ -99,7 +98,6 @@ let make_env
     ?(elaborate_namespaces = true)
     ?(include_line_comments = false)
     ?(keep_errors = true)
-    ?(ignore_pos = false)
     ?(quick_mode = false)
     ?(show_all_errors = false)
     ?(lower_coroutines = true)
@@ -126,7 +124,6 @@ let make_env
     file;
     hacksperimental;
     top_level_statements = true;
-    ignore_pos;
     saw_yield = false;
     saw_compiler_halt_offset = ref None;
     recursion_depth = ref 0;
@@ -339,10 +336,7 @@ struct
 
   let pPos : Pos.t parser =
    fun node env ->
-    if env.ignore_pos then
-      Pos.none
-    else
-      Option.value ~default:Pos.none (position_exclusive env.file node)
+    Option.value ~default:Pos.none (position_exclusive env.file node)
 
   let raise_parsing_error env node_or_pos msg =
     if should_surface_errors env then
@@ -515,13 +509,10 @@ if there already is one, since that one will likely be better than this one. *)
     | SimpleTypeSpecifier { simple_type_specifier = s } -> pos_name s env
     | _ ->
       let name = text node in
-      let local_ignore_pos = env.ignore_pos in
       (* Special case for __LINE__; never ignore position for that special name *)
-      if name = "__LINE__" then env.ignore_pos <- false;
       if name = "__COMPILER_HALT_OFFSET__" then
         env.saw_compiler_halt_offset := Some 0;
       let p = pPos node env in
-      env.ignore_pos <- local_ignore_pos;
       (p, name)
 
   let couldMap : 'a. f:'a parser -> 'a list parser =
@@ -2081,7 +2072,6 @@ if there already is one, since that one will likely be better than this one. *)
               xhp_body = body;
               _;
             } ->
-          env.ignore_pos <- false;
           let name =
             let (pos, name) = pos_name xhp_open_name env in
             (pos, ":" ^ name)
@@ -2217,16 +2207,8 @@ if there already is one, since that one will likely be better than this one. *)
         else
           inner
       | _ ->
-        (*
-         * Since we need positions in XHP, regardless of the ignore_pos flag, we
-         * parenthesise the call to pExpr_ so that the XHP expression case can
-         * flip the switch. The key part is that `pPos` happens before the old
-         * setting is restored.
-         *)
-        let local_ignore_pos = env.ignore_pos in
         let expr_ = pExpr_ node env in
         let p = pPos node env in
-        env.ignore_pos <- local_ignore_pos;
         (p, expr_)
     in
     result
@@ -3883,13 +3865,10 @@ if there already is one, since that one will likely be better than this one. *)
             SyntaxError.halt_compiler_is_disabled
         (* If we saw COMPILER_HALT_OFFSET, calculate the position of HALT_COMPILER *)
         else if !(env.saw_compiler_halt_offset) <> None then
-          let local_ignore_pos = env.ignore_pos in
-          let () = env.ignore_pos <- false in
           let pos = pPos cur_node env in
           (* __COMPILER_HALT_OFFSET__ takes value equal to halt_compiler's end position *)
           let s = Pos.end_cnum pos in
-          let () = env.saw_compiler_halt_offset := Some s in
-          env.ignore_pos <- local_ignore_pos );
+          env.saw_compiler_halt_offset := Some s );
         aux env acc nodel
       | node :: nodel ->
         let acc =

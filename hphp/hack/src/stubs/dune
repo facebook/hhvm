@@ -113,3 +113,11 @@
   (wrapped false)
   (modules
     experiments_config_file))
+
+(library
+  (name glean_dependency_graph_stubs)
+  (wrapped false)
+  (modules
+    glean_dependency_graph)
+  (libraries
+    hh_json))

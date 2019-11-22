@@ -980,13 +980,11 @@ let dump_debug_deps dbg_deps =
   dbg_deps |> sort_debug_deps |> show_debug_deps |> Printf.printf "%s\n"
 
 let dump_debug_glean_deps
-    (dbg_glean_deps :
+    (deps :
       ( Typing_deps.Dep.dependency Typing_deps.Dep.variant
       * Typing_deps.Dep.dependent Typing_deps.Dep.variant )
       HashSet.t) =
-  let json_opt =
-    ServerGleanDependencyGraph.convert_deps_to_json dbg_glean_deps
-  in
+  let json_opt = Glean_dependency_graph.convert_deps_to_json ~deps in
   match json_opt with
   | Some json_obj ->
     Printf.printf "%s\n" (Hh_json.json_to_string ~pretty:true json_obj)

@@ -59,6 +59,9 @@ let fold_truthiness acc truthiness =
 
 let intersect_truthiness tr1 tr2 =
   match (tr1, tr2) with
+  | (Unknown, Possibly_falsy)
+  | (Possibly_falsy, Unknown) ->
+    Unknown
   | (Unknown, tr)
   | (tr, Unknown) ->
     tr

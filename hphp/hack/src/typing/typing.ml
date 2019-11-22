@@ -1417,16 +1417,24 @@ and case_list parent_locals ty env switch_pos cl =
           ty
           Errors.unify_error
     in
-    let is_enum =
-      let (_env, ty) = Env.expand_type env ty in
-      match snd ty with
-      | Tunion tyl when Typing_utils.is_dynamic env ty ->
-        List.exists tyl ~f:(function
-            | (_, Tabstract (AKnewtype (cid, _), _)) -> Env.is_enum env cid
-            | _ -> false)
-      | Tabstract (AKnewtype (cid, _), _) -> Env.is_enum env cid
-      | _ -> false
+    let rec is_enum env ty =
+      let (env, ty) = Env.expand_type env ty in
+      let is_enum =
+        match snd ty with
+        | Tunion [ty; ty'] ->
+          let (env, ty_is_enum) = is_enum env ty in
+          let (env, ty'_is_enum) = is_enum env ty' in
+          let is_sub_dyn env ty =
+            SubType.is_sub_type_for_union env ty (MakeType.dynamic Reason.Rnone)
+          in
+          (ty_is_enum && is_sub_dyn env ty')
+          || (is_sub_dyn env ty && ty'_is_enum)
+        | Tabstract (AKnewtype (cid, _), _) -> Env.is_enum env cid
+        | _ -> false
+      in
+      (env, is_enum)
     in
+    let (env, is_enum) = is_enum env ty in
     (* If there is no default case and this is not a switch on enum (since
      * exhaustiveness is garanteed elsewhere on enums),
      * then add a default case for control flow correctness
@@ -1483,12 +1491,16 @@ and as_expr env ty1 pe e =
     let rec distribute_union env ty =
       let (env, ty) = Env.expand_type env ty in
       match ty with
-      | (_, Tdynamic) ->
-        let env = SubType.sub_type env ty tk Errors.unify_error in
-        SubType.sub_type env ty tv Errors.unify_error
       | (_, Tunion tyl) -> List.fold tyl ~init:env ~f:distribute_union
       | _ ->
-        Type.sub_type pe Reason.URforeach env ty expected_ty Errors.unify_error
+        if SubType.is_sub_type_for_union env ty (MakeType.dynamic Reason.Rnone)
+        then
+          let env = SubType.sub_type env ty tk Errors.unify_error in
+          let env = SubType.sub_type env ty tv Errors.unify_error in
+          env
+        else
+          let ur = Reason.URforeach in
+          Type.sub_type pe ur env ty expected_ty Errors.unify_error
     in
     let env = distribute_union env ty1 in
     let env = Env.set_tyvar_variance env expected_ty in

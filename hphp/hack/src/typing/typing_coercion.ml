@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open Typing_defs
+module MakeType = Typing_make_type
 
 (*
 * These are the main coercion functions.

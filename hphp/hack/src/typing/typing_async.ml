@@ -41,7 +41,7 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
       let (env, ty) = extract_inner env ty in
       TUtils.union env (MakeType.null r) ty
     | (_, Tintersection tyl) ->
-      let (env, rtyl) = List.fold_map ~init:env tyl ~f:extract_inner in
+      let (env, rtyl) = TUtils.run_on_intersection env tyl ~f:extract_inner in
       (env, (r, Tintersection rtyl))
     | (r, Tprim Aast.Tnull) -> (env, (r, Tprim Aast.Tnull))
     | (_, Tdynamic) ->

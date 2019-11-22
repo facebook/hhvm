@@ -924,116 +924,35 @@ let is_sub_type env ty1 ty2 =
   let (env, ty2) = expand_type_and_solve_eq env ty2 Errors.unify_error in
   Typing_utils.is_sub_type env ty1 ty2
 
-let rec push_option_out pos env ty =
-  let is_option env ty =
-    let (_env, ty) = Env.expand_type env ty in
-    match ty with
-    | (_, Toption _) -> true
-    | _ -> false
-  in
-  let (env, ty) = Env.expand_type env ty in
-  match ty with
-  | (r, Toption ty) ->
-    let (env, ty) = push_option_out pos env ty in
-    ( env,
-      if is_option env ty then
-        ty
-      else
-        (r, Toption ty) )
-  | (r, Tprim Aast.Tnull) ->
-    let ty = (r, Tunion []) in
-    (env, (r, Toption ty))
-  | (r, Tunion tyl) ->
-    let (env, tyl) = List.map_env env tyl (push_option_out pos) in
-    if List.exists tyl (is_option env) then
-      let ((env, r'), tyl) =
-        List.fold_map tyl ~init:(env, Reason.none) ~f:(fun (env, r) ty ->
-            let (env, ty) = Env.expand_type env ty in
-            let (r, ty) =
-              match ty with
-              | (r', Toption ty') -> (r', ty')
-              | _ -> (r, ty)
-            in
-            ((env, r), ty))
-      in
-      (env, (r', Toption (r, Tunion tyl)))
-    else
-      (env, (r, Tunion tyl))
-  | (r, Tintersection tyl) ->
-    let (env, tyl) = List.map_env env tyl (push_option_out pos) in
-    if List.for_all tyl (is_option env) then
-      let ((env, r'), tyl) =
-        List.fold_map tyl ~init:(env, Reason.none) ~f:(fun (env, r') ty ->
-            let (env, ty) = Env.expand_type env ty in
-            let (r, ty) =
-              match ty with
-              | (r, Toption ty) -> (r, ty)
-              | _ -> (r', ty)
-            in
-            ((env, r), ty))
-      in
-      (env, (r', Toption (r, Tintersection tyl)))
-    else
-      (env, (r, Tintersection tyl))
-  | (r, Tabstract (ak, _)) ->
-    begin
-      match TUtils.get_concrete_supertypes env ty with
-      | (env, [ty']) ->
-        let (env, ty') = push_option_out pos env ty' in
-        let (env, ty') = Env.expand_type env ty' in
-        (match ty' with
-        | (r', Toption ty') -> (env, (r', Toption (r, Tabstract (ak, Some ty'))))
-        | _ -> (env, ty))
-      | (env, _) -> (env, ty)
-    end
-  (* Solve type variable to lower bound if it's manifestly nullable *)
-  | (_, Tvar var) ->
-    let rec has_null env ty =
-      match snd (Env.expand_internal_type env ty) with
-      | ConstraintType _ -> false
-      | LoclType ty ->
-        (match ty with
-        | (_, Tprim Aast.Tnull) -> true
-        | (_, Toption _) -> true
-        | (_, Tabstract (_, Some ty)) -> has_null env (LoclType ty)
-        | _ -> false)
-    in
-    let lower_bounds =
-      ITySet.elements (Typing_env.get_tyvar_lower_bounds env var)
-    in
-    if List.exists lower_bounds (has_null env) then
-      let (env, ty') =
-        expand_type_and_solve
-          env
-          ~description_of_expected:"a value of known type"
-          pos
-          ty
-          Errors.unify_error
-      in
-      (* To avoid infinite loops *)
-      if not (equal_locl_ty ty ty') then
-        push_option_out pos env ty'
-      else
-        (env, ty)
-    else
-      (env, ty)
-  | ( _,
-      ( Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Tclass _ | Ttuple _
-      | Tanon _ | Tfun _ | Tobject | Tshape _ | Tdynamic | Tpu _ | Tpu_access _
-        ) ) ->
-    (env, ty)
-
 (**
  * Strips away all Toption that we possible can in a type, expanding type
  * variables along the way, turning ?T -> T. This exists to avoid ??T when
  * we wrap a type in Toption while typechecking.
  *)
-let non_null env pos ty =
-  let (env, ty) = push_option_out pos env ty in
-  let (env, ty) = Env.expand_type env ty in
-  match ty with
-  | (_, Toption ty') -> (env, ty')
-  | _ -> (env, ty)
+let rec non_null env pos ty =
+  (* This is to mimic the previous behaviour of non_null on Tabstract, but
+  is hacky. We basically non_nullify the concrete supertypes of abstract
+  types. *)
+  let make_concrete_super_types_nonnull =
+    object
+      inherit Type_mapper.union_inter_type_mapper as super
+
+      method! on_tabstract env r ak cstr =
+        let ty = (r, Tabstract (ak, cstr)) in
+        match TUtils.get_concrete_supertypes env ty with
+        | (env, [ty'])
+          when Typing_utils.is_sub_type_for_union
+                 env
+                 (MakeType.null Reason.none)
+                 ty' ->
+          let (env, ty') = non_null env pos ty' in
+          (env, (r, Tabstract (ak, Some ty')))
+        | (env, _) -> super#on_tabstract env r ak cstr
+    end
+  in
+  let (env, ty) = make_concrete_super_types_nonnull#on_type env ty in
+  let r = Reason.Rwitness pos in
+  Inter.intersect env r ty (MakeType.nonnull r)
 
 (**
  * During global inference we want to remove any reference to local tyvars in

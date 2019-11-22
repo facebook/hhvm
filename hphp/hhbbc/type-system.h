@@ -687,6 +687,7 @@ private:
   friend Type unctx(Type);
   friend std::string show(const Type&);
   friend ArrKey disect_array_key(const Type&);
+  friend ProvTag arr_like_update_prov_tag(const Type&, ProvTag);
   friend std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key);
   friend std::pair<Type,bool> arr_map_elem(const Type& map, const ArrKey& key);
   friend std::pair<Type,bool> arr_packed_elem(const Type& pack,

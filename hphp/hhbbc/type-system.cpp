@@ -4676,6 +4676,27 @@ bool arr_packedn_set(Type& pack,
 }
 
 /*
+ * Return the appropriate provenance tag to apply given the current type of the
+ * array-like base and the source location.
+ */
+ProvTag arr_like_update_prov_tag(const Type& base, ProvTag loc) {
+  assert(base.subtypeOrNull(BArrLike));
+  if (!RuntimeOption::EvalArrayProvenance) return folly::none;
+  if (!base.couldBe(BVec | BDict)) return folly::none;
+  // if we don't know whether or not the array is empty, we also don't know if
+  // we'll preserve the provenance tag that may be associated with the
+  // ArrLikeN bit(s) of arr
+  //
+  // OTOH, if we know the empty-ness of the array, it's safe to reason about
+  // the provenance of the resulting array
+  if (base.couldBe(BArrLikeN) && base.couldBe(BArrLikeE)) return folly::none;
+  // if the array already has a tag and we're allowed to propragate it, do so
+  if (auto const tag = base.getProvTag()) return tag;
+  // otherwise, use the src location
+  return loc;
+}
+
+/*
  * Apply the effects of map[key] = val, when map is known to have
  * DataTag::ArrLikeMap.
  *
@@ -4690,9 +4711,7 @@ bool arr_map_set(Type& map,
   assert(key.type.subtypeOf(BArrKey));
   assert(!map.subtypeOf(BVArr));
 
-  auto const tag = (map.m_bits & BDictN) ?
-    (map.m_data.map->provenance ? map.m_data.map->provenance : src) :
-    folly::none;
+  auto const tag = arr_like_update_prov_tag(map, src);
 
   if (auto const k = key.tv()) {
     auto r = map.m_data.map.mutate()->map.emplace_back(*k, val);
@@ -4726,9 +4745,7 @@ bool arr_packed_set(Type& pack,
                     ProvTag src) {
   assert(pack.m_dataTag == DataTag::ArrLikePacked);
   assert(key.type.subtypeOf(BArrKey));
-  auto const tag = pack.m_bits & (BVecN | BDictN) ?
-    (pack.m_data.packed->provenance ? pack.m_data.packed->provenance : src) :
-    folly::none;
+  auto const tag = arr_like_update_prov_tag(pack, src);
 
   auto const isVecArray = pack.subtypeOrNull(BVec);
   if (key.i) {
@@ -4797,9 +4814,7 @@ bool arr_mapn_set(Type& map,
 
 Type arr_map_newelem(Type& map, const Type& val, ProvTag src) {
   assert(map.m_dataTag == DataTag::ArrLikeMap);
-  auto const tag = map.m_bits & BDictN ?
-    (map.m_data.map->provenance ? map.m_data.map->provenance : src) :
-    folly::none;
+  auto const tag = arr_like_update_prov_tag(map, src);
   int64_t lastK = -1;
   for (auto const& kv : map.m_data.map->map) {
     if (kv.first.m_type == KindOfInt64 &&
@@ -4917,7 +4932,7 @@ array_elem(const Type& arr, const Type& undisectedKey, const Type& defaultTy) {
 std::pair<Type,ThrowMode> array_like_set(Type arr,
                                          const ArrKey& key,
                                          const Type& valIn,
-                                         ProvTag loc) {
+                                         ProvTag src) {
   const bool maybeEmpty = arr.couldBe(BArrLikeE);
   const bool isVector   = arr.couldBe(BVec);
   DEBUG_ONLY const bool isVArray   = arr.subtypeOrNull(BVArr);
@@ -4925,14 +4940,6 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
 
   trep bits = combine_dv_arr_like_bits(arr.m_bits, BArrLikeN);
   if (validKey) bits &= ~BArrLikeE;
-
-  auto const src = [&] () -> ProvTag {
-    if (auto const tag = arr.getProvTag()) {
-      return tag;
-    } else {
-      return loc;
-    }
-  }();
 
   auto const throwMode = validKey && !key.mayThrow ?
     ThrowMode::None : ThrowMode::BadOperation;
@@ -4946,11 +4953,13 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     : []{ ArrKey key; key.type = TArrKey; key.mayThrow = true; return key; }();
 
   if (!arr.couldBe(BArrLikeN)) {
+    auto const tag = arr_like_update_prov_tag(arr, src);
     assert(maybeEmpty);
     if (isVector) return { TBottom, ThrowMode::BadOperation };
     if (fixedKey.i) {
       if (!*fixedKey.i) {
-        return { packed_impl(bits, { val }, src), throwMode };
+        return { packed_impl(bits, { val }, tag),
+                 throwMode };
       }
       bits = promote_varray(bits);
     } else {
@@ -4961,9 +4970,9 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     if (auto const k = fixedKey.tv()) {
       MapElems m;
       m.emplace_back(*k, val);
-      return { map_impl(bits, std::move(m), src), throwMode };
+      return { map_impl(bits, std::move(m), tag), throwMode };
     }
-    return { mapn_impl_from_map(bits, fixedKey.type, val, src), throwMode };
+    return { mapn_impl_from_map(bits, fixedKey.type, val, tag), throwMode };
   }
 
   auto emptyHelper = [&] (const Type& inKey,
@@ -4971,10 +4980,15 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     bits = fixedKey.type.subtypeOf(BStr)
       ? promote_varray(bits)
       : maybe_promote_varray(bits);
-    return { mapn_impl_from_map(bits,
-                                union_of(inKey, fixedKey.type),
-                                union_of(inVal, val),
-                                src), throwMode };
+    return {
+      mapn_impl_from_map(
+        bits,
+        union_of(inKey, fixedKey.type),
+        union_of(inVal, val),
+        arr_like_update_prov_tag(arr, src)
+      ),
+      throwMode
+    };
   };
 
   arr.m_bits = bits;
@@ -5088,8 +5102,10 @@ std::pair<Type,Type> array_like_newelem(Type arr,
 
   if (!arr.couldBe(BArrLikeN)) {
     assert(maybeEmpty);
-    return { packed_impl(bits, { val }, src), ival(0) };
+    return { packed_impl(bits, { val }, arr_like_update_prov_tag(arr, src)),
+             ival(0) };
   }
+
 
   auto emptyHelper = [&] (const Type& inKey,
                           const Type& inVal) -> std::pair<Type,Type> {
@@ -5098,10 +5114,15 @@ std::pair<Type,Type> array_like_newelem(Type arr,
       return { packedn_impl(bits, union_of(inVal, val)), TInt };
     }
 
-    return { mapn_impl_from_map(bits,
-                                union_of(inKey, TInt),
-                                union_of(inVal, val),
-                                src), TInt };
+    return {
+      mapn_impl_from_map(
+        bits,
+        union_of(inKey, TInt),
+        union_of(inVal, val),
+        arr_like_update_prov_tag(arr, src)
+      ),
+      TInt
+    };
   };
 
   switch (arr.m_dataTag) {
@@ -5139,11 +5160,8 @@ std::pair<Type,Type> array_like_newelem(Type arr,
       arr.m_bits = bits;
       auto len = arr.m_data.packed->elems.size();
       arr.m_data.packed.mutate()->elems.push_back(val);
-      if (arr.m_bits & (BVecN | BDictN)) {
-        arr.m_data.packed.mutate()->provenance = arr.m_data.packed->provenance ?
-          arr.m_data.packed->provenance :
-          src;
-      }
+      arr.m_data.packed.mutate()->provenance =
+        arr_like_update_prov_tag(arr, src);
       return { std::move(arr), ival(len) };
     }
 
@@ -5175,11 +5193,15 @@ std::pair<Type,Type> array_like_newelem(Type arr,
     if (maybeEmpty) {
       return emptyHelper(arr.m_data.mapn->key, arr.m_data.mapn->val);
     }
-    return { mapn_impl_from_map(bits,
-                                union_of(arr.m_data.mapn->key, TInt),
-                                union_of(arr.m_data.mapn->val, val),
-                                src),
-             TInt };
+    return {
+      mapn_impl_from_map(
+        bits,
+        union_of(arr.m_data.mapn->key, TInt),
+        union_of(arr.m_data.mapn->val, val),
+        arr_like_update_prov_tag(arr, src)
+      ),
+      TInt
+    };
   }
 
   not_reached();

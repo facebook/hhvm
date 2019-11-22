@@ -876,7 +876,10 @@ function hhvm_cmd_impl($options, $config, $test, ...$extra_args) {
       hhvm_path(),
       '-c',
       $config,
-      '-vEval.EnableArgsInBacktraces=true',
+      // EnableArgsInBacktraces disables most of HHBBC's DCE optimizations.
+      // In order to test those optimizations (which are part of a normal prod
+      // configuration) we turn this flag off by default.
+      '-vEval.EnableArgsInBacktraces=false',
       '-vEval.EnableIntrinsicsExtension=true',
       '-vEval.HHIRInliningIgnoreHints=false',
       '-vAutoload.DBPath='.escapeshellarg("$test.$mode_num.autoloadDB"),

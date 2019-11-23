@@ -118,8 +118,6 @@ State entry_state(const Index& index, Context const ctx,
 
   auto locId = uint32_t{0};
   for (; locId < ctx.func->params.size(); ++locId) {
-    // Parameters may be Uninit (i.e. no InitCell).  Also note that if
-    // a function takes a param by ref, it might come in as a Cell.
     if (knownArgs) {
       if (locId < knownArgs->args.size()) {
         if (ctx.func->params[locId].isVariadic) {
@@ -149,9 +147,11 @@ State entry_state(const Index& index, Context const ctx,
         continue;
       }
     }
+    // Because we throw a non-recoverable error for having fewer than the
+    // required number of args, all function parameters must be initialized.
     ret.locals[locId] = ctx.func->params[locId].isVariadic
       ? (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)
-      : TCell;
+      : TInitCell;
   }
 
   // Closures have use vars, we need to look up their types from the index.

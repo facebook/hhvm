@@ -48,6 +48,7 @@
 #include "hphp/hhbbc/unit-util.h"
 
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -1958,9 +1959,8 @@ dce_visit(const Index& index,
       dispatch_dce(visit_env, op);
 
       /*
-       * When we see a PEI, liveness must take into account the fact
-       * that we could take an exception edge here (or'ing in the
-       * liveExn sets).
+       * When we see a PEI, liveness must take into account the fact that we
+       * could take an exception edge here by or-ing in the locLiveExn set.
        */
       if (states[idx].second.wasPEI) {
         FTRACE(2, "    <-- exceptions\n");
@@ -1970,6 +1970,8 @@ dce_visit(const Index& index,
       dceState.usedLocals |= dceState.liveLocals;
     }
 
+    FTRACE(4, "    dce frame: {}\n",
+           loc_bits_string(fa.ctx.func, dceState.liveLocals));
     FTRACE(4, "    dce stack: {}\n",
       [&] {
         using namespace folly::gen;
@@ -2217,6 +2219,26 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
    * States for each block, indexed by block id.
    */
   std::vector<DceOutState> blockStates(ai.ctx.func->blocks.size());
+
+  /*
+   * If EnableArgsInBacktraces is true, then argument locals (and the reified
+   * generics local) are included in the backtrace attached to exceptions, so
+   * they are live for any instruction that may throw. In order to converge
+   * quickly in this case, we update the locLiveExn sets early.
+   */
+  if (RuntimeOption::EnableArgsInBacktraces) {
+    auto const func = ai.ctx.func;
+    auto const args = func->params.size() + (int)func->isReified;
+    auto locLiveExn = std::bitset<kMaxTrackedLocals>();
+    if (args < kMaxTrackedLocals) {
+      for (auto i = 0; i < args; i++) locLiveExn.set(i);
+    } else {
+      locLiveExn.set();
+    }
+    for (auto& blockState : blockStates) {
+      blockState.locLiveExn |= locLiveExn;
+    }
+  }
 
   /*
    * Set of block reverse post order ids that still need to be

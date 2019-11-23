@@ -233,6 +233,7 @@ let parse_options () =
   let glean_reponame = ref (GleanOptions.reponame GlobalOptions.default) in
   let disallow_func_ptrs_in_constants = ref false in
   let error_php_lambdas = ref false in
+  let disallow_discarded_nullable_awaitables = ref false in
   let options =
     [
       ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
@@ -516,6 +517,9 @@ let parse_options () =
       ( "--disallow-php-lambdas",
         Arg.Set error_php_lambdas,
         "Disallow php style anonymous functions." );
+      ( "--disallow-discarded-nullable-awaitables",
+        Arg.Set disallow_discarded_nullable_awaitables,
+        "Error on using discarded nullable awaitables" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -572,6 +576,8 @@ let parse_options () =
       ~po_disallow_func_ptrs_in_constants:!disallow_func_ptrs_in_constants
       ~tco_check_attribute_locations:true
       ~tco_error_php_lambdas:!error_php_lambdas
+      ~tco_disallow_discarded_nullable_awaitables:
+        !disallow_discarded_nullable_awaitables
       ~glean_service:!glean_service
       ~glean_hostname:!glean_hostname
       ~glean_port:!glean_port

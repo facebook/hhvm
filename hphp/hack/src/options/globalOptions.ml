@@ -83,6 +83,7 @@ type t = {
   glean_reponame: string;
   po_disallow_func_ptrs_in_constants: bool;
   tco_error_php_lambdas: bool;
+  tco_disallow_discarded_nullable_awaitables: bool;
 }
 [@@deriving show]
 
@@ -236,6 +237,7 @@ let default =
     glean_reponame = "www.autocomplete";
     po_disallow_func_ptrs_in_constants = false;
     tco_error_php_lambdas = false;
+    tco_disallow_discarded_nullable_awaitables = false;
   }
 
 let make
@@ -327,6 +329,8 @@ let make
     ?(po_disallow_func_ptrs_in_constants =
       default.po_disallow_func_ptrs_in_constants)
     ?(tco_error_php_lambdas = default.tco_error_php_lambdas)
+    ?(tco_disallow_discarded_nullable_awaitables =
+      default.tco_disallow_discarded_nullable_awaitables)
     () =
   {
     tco_experimental_features;
@@ -404,6 +408,7 @@ let make
     glean_reponame;
     po_disallow_func_ptrs_in_constants;
     tco_error_php_lambdas;
+    tco_disallow_discarded_nullable_awaitables;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -568,3 +573,6 @@ let po_parser_errors_only t = t.po_parser_errors_only
 let po_disallow_func_ptrs_in_constants t = t.po_disallow_func_ptrs_in_constants
 
 let tco_error_php_lambdas t = t.tco_error_php_lambdas
+
+let tco_disallow_discarded_nullable_awaitables t =
+  t.tco_disallow_discarded_nullable_awaitables

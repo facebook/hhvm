@@ -139,3 +139,6 @@ let set_infer_missing = GlobalOptions.set_infer_missing
 let check_attribute_locations = GlobalOptions.tco_check_attribute_locations
 
 let error_php_lambdas = GlobalOptions.tco_error_php_lambdas
+
+let disallow_discarded_nullable_awaitables =
+  GlobalOptions.tco_disallow_discarded_nullable_awaitables

@@ -381,6 +381,8 @@ let load config_filename options =
       ?po_disallow_func_ptrs_in_constants:
         (bool_opt "disallow_func_ptrs_in_constants" config)
       ?tco_error_php_lambdas:(bool_opt "error_php_lambdas" config)
+      ?tco_disallow_discarded_nullable_awaitables:
+        (bool_opt "disallow_discarded_nullable_awaitables" config)
       ()
   in
   Errors.ignored_fixme_codes := GlobalOptions.ignored_fixme_codes global_opts;

@@ -22,6 +22,17 @@ type computation_progress = {
   deferred: file_computation list;
 }
 
+type delegate_job_sig = unit -> Errors.t * computation_progress
+
+type progress_kind =
+  | Progress
+  | DelegateProgress of delegate_job_sig
+
+type job_progress = {
+  kind: progress_kind;
+  progress: computation_progress;
+}
+
 type check_info = {
   init_id: string;
   recheck_id: string option;
@@ -31,6 +42,8 @@ type files_to_process = file_computation list
 
 type files_in_progress = file_computation list
 
-type 'delegate_state job_progress =
-  | Progress of computation_progress
-  | DelegateProgress of 'delegate_state
+type delegate_env = {
+  root: string;
+  init_id: string;
+  num_workers: int;
+}

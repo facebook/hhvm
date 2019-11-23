@@ -13,16 +13,18 @@ module type Delegate_sig = sig
 
   val create : unit -> state
 
-  val init : state -> state
+  val start : delegate_env -> state -> state
+
+  val stop : state -> state
 
   val next :
     files_to_process ->
     state ->
-    (files_in_progress * files_to_process * state) option
+    state * (files_in_progress * files_to_process * delegate_job_sig) option
 
-  val merge : state -> (Errors.t * computation_progress) * state
+  val merge : state -> state
 
   val on_cancelled : state -> file_computation list * state
 
-  val process : state -> state
+  val process : delegate_job_sig -> Errors.t * computation_progress
 end

@@ -7,21 +7,23 @@
  *)
 
 open Core_kernel
-open Typing_service_types
 
 type state = unit [@@deriving show]
 
 let create () = ()
 
-let init state = state
+let start delegate_env state =
+  ignore delegate_env;
+  state
+
+let stop state = state
 
 let next files_to_process state =
-  ignore (files_to_process, state);
-  None
+  ignore files_to_process;
+  (state, None)
 
-let merge state =
-  ((Errors.empty, { completed = []; remaining = []; deferred = [] }), state)
+let merge state = state
 
 let on_cancelled state = ([], state)
 
-let process state = state
+let process f = f ()

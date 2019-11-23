@@ -31,10 +31,18 @@ let rec enforce_not_awaitable env p ty =
   | (r, Tclass ((_, awaitable), _, _))
     when String.equal awaitable SN.Classes.cAwaitable ->
     Errors.discarded_awaitable p (Typing_reason.to_pos r)
+  | (_, Toption ty') ->
+    if
+      TypecheckerOptions.disallow_discarded_nullable_awaitables
+        (Env.get_tcopt env)
+    then
+      enforce_not_awaitable env p ty'
+    else
+      ()
   | ( _,
-      ( Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tvar _
-      | Tfun _ | Tabstract _ | Tclass _ | Ttuple _ | Tanon _ | Tobject
-      | Tshape _ | Tdynamic | Tpu _ | Tpu_access _ ) ) ->
+      ( Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Tvar _ | Tfun _
+      | Tabstract _ | Tclass _ | Ttuple _ | Tanon _ | Tobject | Tshape _
+      | Tdynamic | Tpu _ | Tpu_access _ ) ) ->
     ()
 
 let enforce_nullable_or_not_awaitable env p ty =
@@ -64,8 +72,15 @@ let allow_awaitable =
 
 let disallow_awaitable ctx = { ctx with awaitable_disallowed = true }
 
-let disallow_non_nullable_awaitable ctx =
-  { ctx with non_nullable_awaitable_disallowed = true }
+let disallow_non_nullable_awaitable ctx env =
+  if
+    not
+      (TypecheckerOptions.disallow_discarded_nullable_awaitables
+         (Env.get_tcopt env))
+  then
+    { ctx with non_nullable_awaitable_disallowed = true }
+  else
+    disallow_awaitable ctx
 
 let visitor =
   object (this)
@@ -75,23 +90,35 @@ let visitor =
       match e with
       | Unop (Ast_defs.Unot, e)
       | Assert (AE_assert e) ->
-        this#on_expr (env, disallow_non_nullable_awaitable ctx) e
+        this#on_expr (env, disallow_non_nullable_awaitable ctx env) e
+      | Binop (Ast_defs.Eqeqeq, e, (_, Null))
+      | Binop (Ast_defs.Eqeqeq, (_, Null), e)
+      | Binop (Ast_defs.Diff2, e, (_, Null))
+      | Binop (Ast_defs.Diff2, (_, Null), e)
+        when TypecheckerOptions.disallow_discarded_nullable_awaitables
+               (Env.get_tcopt env) ->
+        this#on_expr (env, allow_awaitable) e
       | Binop
           ( Ast_defs.(Eqeq | Eqeqeq | Diff | Diff2 | Barbar | Ampamp | LogXor),
             e1,
             e2 ) ->
-        this#on_expr (env, disallow_non_nullable_awaitable ctx) e1;
-        this#on_expr (env, disallow_non_nullable_awaitable ctx) e2
+        this#on_expr (env, disallow_non_nullable_awaitable ctx env) e1;
+        this#on_expr (env, disallow_non_nullable_awaitable ctx env) e2
       | Binop (Ast_defs.QuestionQuestion, e1, e2) ->
-        this#on_expr (env, disallow_non_nullable_awaitable ctx) e1;
+        this#on_expr (env, disallow_non_nullable_awaitable ctx env) e1;
         this#on_expr (env, ctx) e2
       | Eif (e1, e2, e3) ->
-        this#on_expr (env, disallow_non_nullable_awaitable ctx) e1;
+        this#on_expr (env, disallow_non_nullable_awaitable ctx env) e1;
         Option.iter e2 ~f:(this#on_expr (env, ctx));
         this#on_expr (env, ctx) e3
       | Cast (hint, e) ->
         this#on_hint (env, ctx) hint;
         this#on_expr (env, disallow_awaitable ctx) e
+      | Is (e, (_, Hnonnull))
+      | Is (e, (_, Hprim Tnull))
+        when TypecheckerOptions.disallow_discarded_nullable_awaitables
+               (Env.get_tcopt env) ->
+        this#on_expr (env, allow_awaitable) e
       | Is (e, hint)
       | As (e, hint, _) ->
         let hint_ty = Env.hint_to_ty env hint in
@@ -100,7 +127,7 @@ let visitor =
           if is_awaitable env hint_ty then
             allow_awaitable
           else
-            disallow_non_nullable_awaitable ctx
+            disallow_non_nullable_awaitable ctx env
         in
         this#on_expr (env, ctx') e
       | _ ->
@@ -116,18 +143,18 @@ let visitor =
         this#on_expr (env, allow_awaitable) e
       | Expr e -> this#on_expr (env, disallow_awaitable ctx) e
       | If (e, b1, b2) ->
-        this#on_expr (env, disallow_non_nullable_awaitable ctx) e;
+        this#on_expr (env, disallow_non_nullable_awaitable ctx env) e;
         this#on_block (env, ctx) b1;
         this#on_block (env, ctx) b2
       | Do (b, e) ->
         this#on_block (env, ctx) b;
-        this#on_expr (env, disallow_non_nullable_awaitable ctx) e
+        this#on_expr (env, disallow_non_nullable_awaitable ctx env) e
       | While (e, b) ->
-        this#on_expr (env, disallow_non_nullable_awaitable ctx) e;
+        this#on_expr (env, disallow_non_nullable_awaitable ctx env) e;
         this#on_block (env, ctx) b
       | For (e1, e2, e3, b) ->
         this#on_expr (env, ctx) e1;
-        this#on_expr (env, disallow_non_nullable_awaitable ctx) e2;
+        this#on_expr (env, disallow_non_nullable_awaitable ctx env) e2;
         this#on_expr (env, ctx) e3;
         this#on_block (env, ctx) b
       | Switch (e, casel) ->

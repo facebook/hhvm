@@ -23,7 +23,7 @@ const int PHP_QUERY_RFC3986 = 2;
 <<__PHPStdLib, __Rx>>
 function base64_decode(string $data, bool $strict = false);
 <<__PHPStdLib, __Rx>>
-function base64_encode(string $data);
+function base64_encode(string $data): string;
 <<__PHPStdLib>>
 function get_headers(string $url, int $format = 0);
 <<__PHPStdLib>>
@@ -33,10 +33,10 @@ function http_build_query($formdata, $numeric_prefix = null, string $arg_separat
 <<__PHPStdLib>>
 function parse_url(string $url, int $component = -1);
 <<__PHPStdLib, __Rx>>
-function rawurldecode(string $str);
+function rawurldecode(string $str): string;
 <<__PHPStdLib, __Rx>>
-function rawurlencode(string $str);
+function rawurlencode(string $str): string;
 <<__PHPStdLib, __Rx>>
-function urldecode(string $str);
+function urldecode(string $str): string;
 <<__PHPStdLib, __Rx>>
-function urlencode(string $str);
+function urlencode(string $str): string;

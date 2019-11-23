@@ -162,7 +162,7 @@ def create_php(idx, ar, rip='0x????????', pc=None):
     if not shared['m_isClosureBody']:
         func_name = nameof(func)
     else:
-        func_name = nameof(func['m_baseCls'])
+        func_name = nameof(func['m_baseCls'].cast(T('HPHP::Class').pointer()))
         func_name = func_name[:func_name.find(';')]
 
     if len(func_name) == 0:

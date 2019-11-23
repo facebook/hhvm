@@ -315,6 +315,9 @@ void RepoQuery::step() {
     throw RepoExc("RepoQuery::%s(repo=%p) error: Query done",
                   __func__, &m_stmt.repo());
   }
+  // Avoid changing errno, which is visible from php land via `posix_errno()`.
+  auto errno_bak = errno;
+  SCOPE_EXIT { errno = errno_bak; };
   int rc = sqlite3_step(m_stmt.get());
   switch (rc) {
   case SQLITE_DONE:

@@ -407,7 +407,19 @@ let next
   fun () ->
     match !files_to_process with
     | [] when Hash_set.Poly.is_empty files_in_progress -> Bucket.Done
-    | [] -> Bucket.Wait
+    | [] ->
+      (* NOTE: at this point, we could try taking some jobs from
+        the in-progress pile.
+        The rationale behind this is this:
+          if all we have left is files-in-progress, then we could try spreading
+          those to the idle workers anyway since we would have the benefit of
+          breaking them into different-size buckets from when they were
+          initially dispatched. It's even more relevant if the in-progress files
+          are being worked on by remote workers - we could simply race them!
+          If we finish before the original workers that were assigned
+          the files-in-progress come back, then we win.
+         *)
+      Bucket.Wait
     | jobs ->
       let (state, delegate_job) =
         Typing_service_delegate.next !files_to_process !delegate_state
@@ -458,6 +470,11 @@ let on_cancelled
   in
   add_next []
 
+(**
+  `next` and `merge` both run in the master process and update mutable
+  state in order to track work in progress and work remaining.
+  `job` runs in each worker and does not have access to this mutable state.
+ *)
 let process_in_parallel
     (dynamic_view_files : Relative_path.Set.t)
     (workers : MultiWorker.worker list option)

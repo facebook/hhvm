@@ -14,24 +14,12 @@
    +----------------------------------------------------------------------+
 */
 
-#include <sstream>
-
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/repo.h"
 
 namespace HPHP {
 
-LitstrRepoProxy::LitstrRepoProxy(Repo& repo)
-    : RepoProxy(repo)
-    , m_insertLitstrLocal(repo, RepoIdLocal)
-    , m_insertLitstrCentral(repo, RepoIdCentral)
-    , m_getLitstrsLocal(repo, RepoIdLocal)
-    , m_getLitstrsCentral(repo, RepoIdCentral) {
-  m_insertLitstr[RepoIdLocal] = &m_insertLitstrLocal;
-  m_insertLitstr[RepoIdCentral] = &m_insertLitstrCentral;
-  m_getLitstrs[RepoIdLocal] = &m_getLitstrsLocal;
-  m_getLitstrs[RepoIdCentral] = &m_getLitstrsCentral;
-}
+std::atomic_int LitstrRepoProxy::s_loadedRepoId{RepoIdInvalid};
 
 void LitstrRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   auto insertQuery = folly::sformat(
@@ -41,15 +29,32 @@ void LitstrRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 }
 
 void LitstrRepoProxy::load() {
+  assertx(s_loadedRepoId.load(std::memory_order_relaxed) == RepoIdInvalid);
   for (int repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
     // Return success on the first loaded repo.  In the case of an error we
     // continue on to the next repo.
-    if (getLitstrs(repoId).get() == RepoStatus::success) {
-      break;
-    }
-  }
+    GetLitstrCountStmt stmt{m_repo, repoId};
+    auto const maxId = stmt.get();
+    if (maxId <= 0) continue;
 
+    auto& table = LitstrTable::get();
+    assertx(table.numLitstrs() == 0);
+    NamedEntityPairTable namedInfo;
+    namedInfo.resize(maxId + 1, nullptr);
+    table.setNamedEntityPairTable(std::move(namedInfo));
+    s_loadedRepoId.store(repoId, std::memory_order_release);
+    loadAll();
+    break;
+  }
   // No repos were loadable.  This is normal for non-repo-authoritative repos.
+}
+
+void LitstrRepoProxy::loadAll() {
+  auto const repoId = s_loadedRepoId.load(std::memory_order_acquire);
+  assertx(repoId != RepoIdInvalid);
+  GetLitstrsStmt stmt{m_repo, repoId};
+  DEBUG_ONLY auto const ret = stmt.get();
+  assertx(ret == RepoStatus::success);
 }
 
 void LitstrRepoProxy::InsertLitstrStmt::insert(RepoTxn& txn,
@@ -65,6 +70,23 @@ void LitstrRepoProxy::InsertLitstrStmt::insert(RepoTxn& txn,
   query.bindInt64("@litstrId", litstrId);
   query.bindStaticString("@litstr", litstr);
   query.exec();
+}
+
+int LitstrRepoProxy::GetLitstrCountStmt::get() {
+  int count = -1;
+  try {
+    if (!prepared()) {
+      auto selectQuery = folly::sformat("SELECT max(litstrId) FROM {};",
+                                        m_repo.table(m_repoId, "Litstr"));
+      prepare(selectQuery);
+    }
+    RepoQuery query(*this);
+    query.step();
+    if (query.row()) query.getInt(0, count);
+  } catch (RepoExc& re) {
+    return -1;
+  }
+  return count;
 }
 
 RepoStatus LitstrRepoProxy::GetLitstrsStmt::get() {

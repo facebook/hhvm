@@ -24,11 +24,16 @@
 
 namespace HPHP {
 
+// Only one of the local/central repos can contain a global litstr table, and
+// the repo id is recorded as s_loadedRepoId.
 struct LitstrRepoProxy : RepoProxy {
-  explicit LitstrRepoProxy(Repo& repo);
   ~LitstrRepoProxy() {}
+  explicit LitstrRepoProxy(Repo& repo) : RepoProxy(repo) {}
+
   void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
-  void load();
+
+  void load();                          // only called during initialization
+  void loadAll();
 
   struct InsertLitstrStmt : RepoProxy::Stmt {
     InsertLitstrStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
@@ -36,23 +41,19 @@ struct LitstrRepoProxy : RepoProxy {
     // throws(RepoExc)
   };
 
+  struct GetLitstrCountStmt : RepoProxy::Stmt {
+    GetLitstrCountStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    // Return the max Id of all string literals, or -1 on error.
+    int get();
+  };
+
   struct GetLitstrsStmt : RepoProxy::Stmt {
     GetLitstrsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     RepoStatus get();
   };
 
-public:
-  InsertLitstrStmt& insertLitstr(int repoId) { return *m_insertLitstr[repoId]; }
-  GetLitstrsStmt& getLitstrs(int repoId) { return *m_getLitstrs[repoId]; }
-
 private:
-  InsertLitstrStmt m_insertLitstrLocal;
-  InsertLitstrStmt m_insertLitstrCentral;
-  InsertLitstrStmt* m_insertLitstr[RepoIdCount];
-
-  GetLitstrsStmt m_getLitstrsLocal;
-  GetLitstrsStmt m_getLitstrsCentral;
-  GetLitstrsStmt* m_getLitstrs[RepoIdCount];
+  static std::atomic_int s_loadedRepoId;
 };
 
 }

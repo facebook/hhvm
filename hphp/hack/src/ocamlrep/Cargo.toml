@@ -7,6 +7,7 @@ edition = "2018"
 name = "ocamlrep"
 path = "lib.rs"
 
-[dependencies]
+[dev-dependencies]
 ocaml = "^0.7"
 ocamlrep_derive = {path = "../ocamlrep_derive", package = "hack_ocamlrep_derive"}
+ocamlrep_ocamlpool = {path = "../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool"}

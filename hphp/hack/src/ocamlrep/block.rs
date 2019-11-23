@@ -13,6 +13,8 @@ pub const NO_SCAN_TAG: u8 = 251;
 pub const STRING_TAG: u8 = 252;
 pub const DOUBLE_TAG: u8 = 253;
 
+/// The contents of an OCaml block, consisting of a header and one or more
+/// fields of type [`Value`](struct.Value.html).
 #[repr(transparent)]
 #[derive(Clone, Copy)]
 pub struct Block<'arena>(pub(crate) &'arena [Value<'arena>]);

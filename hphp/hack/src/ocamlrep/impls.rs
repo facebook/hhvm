@@ -403,10 +403,14 @@ impl OcamlRep for Cow<'_, str> {
     }
 }
 
+/// Allocate an OCaml string using the given allocator and copy the given string
+/// slice into it.
 pub fn str_to_ocamlrep<'a, A: Allocator<'a>>(s: &str, alloc: &mut A) -> Value<'a> {
     bytes_to_ocamlrep(s.as_bytes(), alloc)
 }
 
+/// Given an OCaml string, return a string slice pointing to its contents, if
+/// they are valid UTF-8.
 pub fn str_from_ocamlrep<'a>(value: Value<'a>) -> Result<&'a str, FromError> {
     Ok(std::str::from_utf8(bytes_from_ocamlrep(value)?)?)
 }
@@ -421,6 +425,8 @@ impl OcamlRep for Vec<u8> {
     }
 }
 
+/// Allocate an OCaml string using the given allocator and copy the given byte
+/// slice into it.
 pub fn bytes_to_ocamlrep<'a, A: Allocator<'a>>(s: &[u8], alloc: &mut A) -> Value<'a> {
     let words = (s.len() + 1 /*null-ending*/ + (WORD_SIZE - 1)/*rounding*/) / WORD_SIZE;
     let length = words * WORD_SIZE;
@@ -435,6 +441,7 @@ pub fn bytes_to_ocamlrep<'a, A: Allocator<'a>>(s: &[u8], alloc: &mut A) -> Value
     }
 }
 
+/// Given an OCaml string, return a byte slice pointing to its contents.
 pub fn bytes_from_ocamlrep<'a>(value: Value<'a>) -> Result<&'a [u8], FromError> {
     let block = from::expect_block(value)?;
     from::expect_block_tag(block, block::STRING_TAG)?;

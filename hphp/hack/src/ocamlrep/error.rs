@@ -8,6 +8,10 @@ use std::fmt;
 use std::num::TryFromIntError;
 use std::str::Utf8Error;
 
+/// Returned by
+/// [`OcamlRep::from_ocamlrep`](trait.OcamlRep.html#tymethod.from_ocamlrep) when
+/// the given [`Value`](struct.Value.html) cannot be converted to a Rust value
+/// of the expected type.
 #[derive(Debug, PartialEq)]
 pub enum FromError {
     BadUtf8(Utf8Error),
@@ -99,6 +103,8 @@ impl Error for FromError {
     }
 }
 
+/// Returned by a failed integrity-check on a slab, indicating one way in which
+/// the given bytes form a corrupt or otherwise invalid slab.
 #[derive(Debug, PartialEq)]
 pub enum SlabIntegrityError {
     InvalidBasePointer(usize),

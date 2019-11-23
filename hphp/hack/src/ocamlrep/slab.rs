@@ -375,6 +375,7 @@ fn words_reachable<'a>(seen: &mut HashSet<Value<'a>>, value: Value<'a>) -> usize
     words
 }
 
+/// A contiguous memory region containing a tree of OCaml values.
 pub struct OwnedSlab(Box<Slab<'static>>);
 
 impl OwnedSlab {

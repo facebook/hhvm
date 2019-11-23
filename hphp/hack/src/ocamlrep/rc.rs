@@ -4,13 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-//! A single-threaded reference-counting pointer type, which, as a performance
-//! optimization, can cache the result of converting the pointed-to value to an
-//! OCaml value. `RcOc` stands for "reference counted with Ocaml-value cache".
-//!
-//! Internally uses `std::rc::Rc`, so restrictions on `Rc` also apply to `RcOc`.
-//! It is encouraged to follow `Rc` conventions (such as preferring the use of
-//! `RcOc::clone(x)` rather than `x.clone()`) when using `RcOc`.
+//! Provides `RcOc`, a single-threaded reference-counting pointer. `RcOc` stands
+//! for "reference counted with Ocaml-value cache".
 
 use std::cell::Cell;
 use std::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
@@ -85,6 +80,13 @@ impl<T: PartialEq> PartialEq for OcamlValueCache<T> {
 
 impl<T: Eq> Eq for OcamlValueCache<T> {}
 
+/// A single-threaded reference-counting pointer type, which, as a performance
+/// optimization, can cache the result of converting the pointed-to value to an
+/// OCaml value. `RcOc` stands for "reference counted with Ocaml-value cache".
+///
+/// Internally uses `std::rc::Rc`, so restrictions on `Rc` also apply to `RcOc`.
+/// It is encouraged to follow `Rc` conventions (such as preferring the use of
+/// `RcOc::clone(x)` rather than `x.clone()`) when using `RcOc`.
 pub struct RcOc<T> {
     ptr: Rc<OcamlValueCache<T>>,
 }

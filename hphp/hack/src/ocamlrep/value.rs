@@ -23,9 +23,14 @@ pub const fn ocaml_int_to_isize(value: usize) -> isize {
     (value as isize) >> 1
 }
 
+/// A value, as represented by OCaml. Valid, immutable, and immovable for
+/// lifetime `'a`.
+///
+/// Either an immediate value (i.e., an integer or a zero-argument variant) or a
+/// pointer to a [`Block`](struct.Block.html) containing fields or binary data.
 #[repr(transparent)]
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
-pub struct Value<'arena>(pub(crate) usize, PhantomData<&'arena ()>);
+pub struct Value<'a>(pub(crate) usize, PhantomData<&'a ()>);
 
 impl<'a> Value<'a> {
     #[inline(always)]
@@ -61,11 +66,17 @@ impl<'a> Value<'a> {
         Some(Block(block))
     }
 
+    /// Given a pointer to the first field of a [`Block`](struct.Block.html),
+    /// create a pointer `Value` referencing that `Block`.
+    ///
+    /// # Safety
+    ///
     /// This method is unsafe because it requires that the pointed-to Value is
     /// the first field of a block, which must be preceded by a valid Header
     /// correctly describing the block's size and tag (i.e., value.offset(1)
     /// should point to that Header). To be used only with pointers returned by
-    /// Arena allocation methods.
+    /// Arena allocation methods (e.g.,
+    /// [`Allocator::block_with_size_and_tag`](trait.Allocator.html#tymethod.block_with_size_and_tag).
     #[inline(always)]
     pub unsafe fn from_ptr(value: *const Value<'a>) -> Value<'a> {
         Value(value as usize, PhantomData)
@@ -76,6 +87,11 @@ impl<'a> Value<'a> {
         Value(value, PhantomData)
     }
 
+    /// Convert this value to a usize, which can be handed to the OCaml runtime
+    /// to be used as an OCaml value.
+    ///
+    /// # Safety
+    ///
     /// This method is unsafe because it decouples the value from the lifetime
     /// of its containing arena or slab. Take care that the returned value does
     /// not outlive the arena.
@@ -94,9 +110,12 @@ impl Debug for Value<'_> {
     }
 }
 
+/// A value, as represented by OCaml, except that pointer values may be some
+/// offset defined by an Allocator or container rather than an actual address
+/// (and therefore, no means of inspecting the value are exposed).
 #[repr(transparent)]
 #[derive(Clone, Copy)]
-pub struct OpaqueValue<'arena>(usize, PhantomData<&'arena ()>);
+pub struct OpaqueValue<'a>(usize, PhantomData<&'a ()>);
 
 impl<'a> OpaqueValue<'a> {
     #[inline(always)]

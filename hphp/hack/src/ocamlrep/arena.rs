@@ -54,6 +54,8 @@ impl<'a> Chunk<'a> {
 // If we add a third kind of allocator, we might want to rethink this strategy.
 static NEXT_GENERATION: AtomicUsize = AtomicUsize::new(usize::max_value() / 2);
 
+/// An [`Allocator`](trait.Allocator.html) which builds values in Rust-managed
+/// memory. The memory is freed when the Arena is dropped.
 pub struct Arena<'a> {
     generation: usize,
     current_chunk: Chunk<'a>,

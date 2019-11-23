@@ -3,6 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+//! FFI types for representing pointers-to-OCaml-managed-data in Rust
+//! (`UnsafeOcamlPtr`) and pointers-to-Rust-managed-data in OCaml (`NakedPtr`).
+
 use std::fmt;
 use std::num::NonZeroUsize;
 
@@ -58,8 +61,19 @@ impl OcamlRep for UnsafeOcamlPtr {
     }
 }
 
-/// Any kind of naked pointer. In OCaml these are represented as opaque types e.g.
-/// `type addr;`. They're serialized to ocaml purely as a usize-sized value.
+/// Any kind of foreign pointer (i.e., a pointer to any data at all--it need not
+/// look like a valid OCaml value).
+///
+/// On the OCaml side, these are represented as opaque types, e.g. `type addr;`.
+///
+/// The pointer must not be within a memory page currently in use by the OCaml
+/// runtime for the garbage-collected heap (i.e., it must in fact be a foreign
+/// pointer).
+///
+/// Can only be used when linking against a binary built with an OCaml compiler
+/// which was **not** configured with the `-no-naked-pointers` option (which
+/// forbids naked pointers, requiring foreign pointers to be wrapped in a block
+/// tagged with `Abstract_tag` instead).
 #[repr(transparent)]
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct NakedPtr<T>(*const T);

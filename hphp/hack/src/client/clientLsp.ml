@@ -873,12 +873,7 @@ let get_document_contents
     string option =
   match SMap.find_opt uri editor_open_files with
   | Some document -> Some document.TextDocumentItem.text
-  | None ->
-    let rawpath = String_utils.lstrip uri "file://" in
-    (try
-       let contents = Disk.cat rawpath in
-       Some contents
-     with _ -> None)
+  | None -> None
 
 let get_document_location
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t)

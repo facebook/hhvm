@@ -318,26 +318,30 @@ let handle_message :
             ^ "should have waited for the IDE services to become ready before "
             ^ "sending file-change notifications." ) )
     | (Initialized initialized_state, File_changed path) ->
-      let changed_files_to_process =
-        Path.Set.add initialized_state.changed_files_to_process path
-      in
-      let peak_changed_files_queue_size =
-        initialized_state.peak_changed_files_queue_size + 1
-      in
-      let ctx =
-        Provider_context.empty
-          ~tcopt:initialized_state.server_env.ServerEnv.tcopt
-      in
-      let state =
-        Initialized
-          {
-            initialized_state with
-            changed_files_to_process;
-            ctx;
-            peak_changed_files_queue_size;
-          }
-      in
-      Lwt.return (state, Handle_message_result.Notification)
+      (* Only invalidate when a hack file changes *)
+      if FindUtils.file_filter (Path.to_string path) then
+        let changed_files_to_process =
+          Path.Set.add initialized_state.changed_files_to_process path
+        in
+        let peak_changed_files_queue_size =
+          initialized_state.peak_changed_files_queue_size + 1
+        in
+        let ctx =
+          Provider_context.empty
+            ~tcopt:initialized_state.server_env.ServerEnv.tcopt
+        in
+        let state =
+          Initialized
+            {
+              initialized_state with
+              changed_files_to_process;
+              ctx;
+              peak_changed_files_queue_size;
+            }
+        in
+        Lwt.return (state, Handle_message_result.Notification)
+      else
+        Lwt.return (state, Handle_message_result.Notification)
     | (Initializing, Initialize_from_saved_state param) ->
       let%lwt result = initialize param in
       begin

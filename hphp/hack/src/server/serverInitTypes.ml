@@ -68,6 +68,7 @@ type loaded_info = {
   naming_table_fn: string option;
   corresponding_rev: Hg.rev;
   mergebase_rev: Hg.global_rev option;
+  mergebase: Hg.hg_rev option Future.t;
   (* Files changed between the loaded naming table saved state and current revision. *)
   dirty_naming_files: Relative_path.Set.t;
   (* Files changed between saved state revision and current public merge base *)

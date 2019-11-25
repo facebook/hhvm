@@ -2,6 +2,7 @@ type native_load_result = {
   saved_state_fn: string;
   corresponding_rev: Hg.rev;
   mergebase_rev: Hg.global_rev option;
+  mergebase: Hg.hg_rev option Future.t;
   is_cached: bool;
   state_distance: int;
   deptable_fn: string;

@@ -183,6 +183,7 @@ let download_and_load_state_exn
             naming_table_fn = naming_table_fallback_path;
             corresponding_rev = result.State_loader.corresponding_rev;
             mergebase_rev = result.State_loader.mergebase_rev;
+            mergebase = result.State_loader.mergebase;
             dirty_naming_files;
             dirty_master_files;
             dirty_local_files;
@@ -225,6 +226,7 @@ let use_precomputed_state_exn
     corresponding_rev =
       Hg.Global_rev (int_of_string corresponding_base_revision);
     mergebase_rev = None;
+    mergebase = Future.of_value None;
     dirty_naming_files = naming_changes;
     dirty_master_files = prechecked_changes;
     dirty_local_files = changes;
@@ -700,12 +702,30 @@ let parse_only_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
     ServerEnv.env * float =
   initialize_naming_table "parse-only initialization" genv env
 
+let get_mergebase (mergebase_future : Hg.hg_rev option Future.t) :
+    Hg.hg_rev option =
+  match Future.get mergebase_future with
+  | Ok mergebase ->
+    let () =
+      match mergebase with
+      | Some mergebase -> Hh_logger.log "Got mergebase hash: %s" mergebase
+      | None -> Hh_logger.log "No mergebase hash"
+    in
+    mergebase
+  | Error error ->
+    Hh_logger.log
+      "Getting mergebase hash failed: %s"
+      (Future.error_to_string error);
+    None
+
 let post_saved_state_initialization
     ~(genv : ServerEnv.genv)
     ~(env : ServerEnv.env)
     ~(state_result : loaded_info * Relative_path.Set.t) : ServerEnv.env * float
     =
-  let (loaded_info, changed_while_parsing) = state_result in
+  let ((loaded_info : ServerInitTypes.loaded_info), changed_while_parsing) =
+    state_result
+  in
   let trace = genv.local_config.SLC.trace_parsing in
   let hg_aware = genv.local_config.SLC.hg_aware in
   let {
@@ -715,12 +735,19 @@ let post_saved_state_initialization
     dirty_master_files;
     old_naming_table;
     mergebase_rev;
+    mergebase;
     old_errors;
     _;
   } =
     loaded_info
   in
   if hg_aware then Option.iter mergebase_rev ~f:ServerRevisionTracker.initialize;
+  let env =
+    {
+      env with
+      init_env = { env.init_env with mergebase = get_mergebase mergebase };
+    }
+  in
   Bad_files.check dirty_local_files;
   Bad_files.check changed_while_parsing;
 

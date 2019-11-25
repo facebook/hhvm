@@ -286,6 +286,7 @@ and init_env = {
   (* Additional data associated with init that we want to log when a first full
    * check completes. *)
   state_distance: int option;
+  mergebase: string option;
   approach_name: string;
   init_error: string option;
   init_type: string;

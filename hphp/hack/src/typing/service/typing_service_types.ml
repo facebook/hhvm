@@ -45,5 +45,6 @@ type files_in_progress = file_computation list
 type delegate_env = {
   root: string;
   init_id: string;
+  mergebase: Hg.hg_rev option;
   num_workers: int;
 }

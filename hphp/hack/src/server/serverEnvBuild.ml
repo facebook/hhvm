@@ -327,6 +327,7 @@ let make_env ?init_id config =
         needs_full_init = false;
         init_start_t = Unix.gettimeofday ();
         state_distance = None;
+        mergebase = None;
         init_error = None;
         approach_name = "";
         init_type = "";

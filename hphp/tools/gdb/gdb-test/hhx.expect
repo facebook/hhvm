@@ -1,0 +1,52 @@
+0: NullUninit
+1: NullUninit
+2: NullUninit
+3: FCallFuncD 0 0 1 main
+10: PopC
+11: Int 1
+20: RetC
+21: NewArray 3
+23: String hello
+28: String world
+33: AddElemC
+34: String this
+39: String is
+44: AddElemC
+45: String a
+50: String test
+55: AddElemC
+56: SetL 0
+58: PopC
+59: CGetL 0
+61: IterInit 0 k:1 v:2 88
+70: String
+
+75: CGetL2 2
+77: Concat
+78: Print
+79: PopC
+80: String
+
+85: CGetL2 1
+87: Concat
+88: Print
+89: PopC
+90: CGetL 0
+92: IterInit 1 k:3 v:4 48
+101: String
+
+106: CGetL2 4
+108: Concat
+109: Print
+110: PopC
+111: String
+
+116: CGetL2 3
+118: Concat
+119: Print
+120: PopC
+121: IterBreak 28 <vector>
+131: IterNext 1 k:3 v:4 -30
+140: IterNext 0 k:1 v:2 -70
+149: Int 1
+158: RetC

@@ -1,0 +1,9 @@
+b HPHP::ExecutionContext::invokeUnit
+run
+unit unit
+set logging on
+set pagination off
+hhx unit->m_bc unit->m_bc+unit->m_bclen
+set logging off
+kill
+quit

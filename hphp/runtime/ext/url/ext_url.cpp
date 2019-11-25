@@ -53,12 +53,8 @@ Variant HHVM_FUNCTION(base64_decode, const String& data,
   return decoded;
 }
 
-Variant HHVM_FUNCTION(base64_encode, const String& data) {
-  String encoded = StringUtil::Base64Encode(data);
-  if (encoded.isNull()) {
-    return false;
-  }
-  return encoded;
+String HHVM_FUNCTION(base64_encode, const String& data) {
+  return StringUtil::Base64Encode(data);
 }
 
 Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */) {

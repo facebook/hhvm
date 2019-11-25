@@ -234,12 +234,7 @@ Array BaseMap::toPHPArray() {
   return toPHPArrayImpl<IntishCast::None>();
 }
 
-template <bool raw>
-ALWAYS_INLINE
 void BaseMap::setImpl(int64_t k, TypedValue tv) {
-  if (!raw) {
-    mutate();
-  }
   assertx(canMutateBuffer());
   auto h = hash_int64(k);
 retry:
@@ -247,9 +242,7 @@ retry:
   assertx(MixedArray::isValidIns(p));
   if (MixedArray::isValidPos(*p)) {
     auto& e = data()[(int32_t)*p];
-    auto const old = e.data;
-    cellDup(tv, e.data);
-    tvDecRefGen(old);
+    cellMove(tv, e.data);
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -257,18 +250,13 @@ retry:
     goto retry;
   }
   auto& e = allocElm(p);
-  cellDup(tv, e.data);
+  cellCopy(tv, e.data);
   e.setIntKey(k, h);
   arrayData()->mutableKeyTypes()->recordInt();
   updateNextKI(k);
 }
 
-template <bool raw>
-ALWAYS_INLINE
 void BaseMap::setImpl(StringData* key, TypedValue tv) {
-  if (!raw) {
-    mutate();
-  }
   assertx(canMutateBuffer());
 retry:
   strhash_t h = key->hash();
@@ -276,9 +264,7 @@ retry:
   assertx(MixedArray::isValidIns(p));
   if (MixedArray::isValidPos(*p)) {
     auto& e = data()[(int32_t)*p];
-    auto const old = e.data;
-    cellDup(tv, e.data);
-    tvDecRefGen(old);
+    cellMove(tv, e.data);
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -286,15 +272,39 @@ retry:
     goto retry;
   }
   auto& e = allocElm(p);
-  cellDup(tv, e.data);
+  cellCopy(tv, e.data);
   e.setStrKey(key, h);
   arrayData()->mutableKeyTypes()->recordStr(key);
 }
 
-void BaseMap::setRaw(int64_t k, TypedValue val) { setImpl<true>(k, val); }
-void BaseMap::setRaw(StringData* k, TypedValue val) { setImpl<true>(k, val); }
-void BaseMap::set(int64_t k, TypedValue val) { setImpl<false>(k, val); }
-void BaseMap::set(StringData* k, TypedValue val) { setImpl<false>(k, val); }
+void BaseMap::set(int64_t k, TypedValue val) {
+  mutate();
+  tvIncRefGen(val);
+  setImpl(k, val);
+}
+void BaseMap::set(StringData* k, TypedValue val) {
+  mutate();
+  tvIncRefGen(val);
+  setImpl(k, val);
+}
+
+void BaseMap::setMove(int64_t k, TypedValue val) {
+  mutate();
+  setImpl(k, val);
+}
+void BaseMap::setMove(StringData* k, TypedValue val) {
+  mutate();
+  setImpl(k, val);
+}
+
+void BaseMap::setRaw(int64_t k, TypedValue val) {
+  tvIncRefGen(val);
+  setImpl(k, val);
+}
+void BaseMap::setRaw(StringData* k, TypedValue val) {
+  tvIncRefGen(val);
+  setImpl(k, val);
+}
 
 bool BaseMap::ToBool(const ObjectData* obj) {
   return static_cast<const BaseMap*>(obj)->toBoolImpl();

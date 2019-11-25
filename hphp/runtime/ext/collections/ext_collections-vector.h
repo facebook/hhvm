@@ -232,8 +232,8 @@ public:
    * Add `k' => `v' to the Vector, increffing `v' if it's refcounted.
    */
   void set(int64_t key, TypedValue val) {
-    mutate();
-    setRaw(key, val);
+    tvIncRefGen(val);
+    setMove(key, val);
   }
   void set(int64_t key, const TypedValue* val) {
     set(key, *val);
@@ -249,6 +249,18 @@ public:
   }
   void set(const Variant& key, const Variant& val) {
     set(key.toCell(), val.toCell());
+  }
+
+  /*
+   * Set a particular value in a vector without inc-ref-ing the value.
+   */
+  void setMove(int64_t key, TypedValue val) {
+    mutate();
+    // Cast to unsigned to check "0 <= key && key < m_size" in one comparison.
+    if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
+      collections::throwOOB(key);
+    }
+    tvMove(val, dataAt(key));
   }
 
   template<class TVector>
@@ -339,36 +351,6 @@ protected:
   // sure, use add() instead.
   void addRaw(TypedValue v) { addImpl<true>(v); }
   void addRaw(const Variant& v) { addRaw(*v.toCell()); }
-
-  // setRaw() assigns a value to the specified key in this Vector but doesn't
-  // check for an immutable buffer, so it's only safe to use in some cases.
-  // If you're not sure, use set() instead.
-  void setRaw(int64_t key, TypedValue val) {
-    assertx(canMutateBuffer());
-    if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
-      collections::throwOOB(key);
-      return;
-    }
-    auto lval = dataAt(key);
-    auto const oldTV = *lval;
-    cellDup(val, lval);
-    tvDecRefGen(oldTV);
-  }
-  void setRaw(int64_t key, const TypedValue* val) {
-    setRaw(key, *val);
-  }
-  void setRaw(int64_t key, const Variant& val) {
-    setRaw(key, val.toCell());
-  }
-  void setRaw(const TypedValue* key, const TypedValue* val) {
-    if (key->m_type != KindOfInt64) {
-      throwBadKeyType();
-    }
-    setRaw(key->m_data.num, val);
-  }
-  void setRaw(const Variant& key, const Variant& val) {
-    setRaw(key.toCell(), val.toCell());
-  }
 
   /**
    * Copy the buffer and reset the immutable copy.

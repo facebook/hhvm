@@ -80,6 +80,12 @@ public:
     set(*k.toCell(), *v.toCell());
   }
 
+  /*
+   * Add `k` => `v` to the Map without inc-ref-ing the value.
+   */
+  void setMove(int64_t k, TypedValue v);
+  void setMove(StringData* k, TypedValue v);
+
   Variant pop();
   Variant popFront();
 
@@ -186,8 +192,9 @@ protected:
   void addAllImpl(const Variant& iterable);
   void setAllImpl(const Variant& iterable);
 
-  template<bool raw> void setImpl(int64_t k, TypedValue v);
-  template<bool raw> void setImpl(StringData* k, TypedValue v);
+  // Set `k` to `v` in the Map. Do not inc-ref `v`. Do not check for mutation.
+  void setImpl(int64_t k, TypedValue v);
+  void setImpl(StringData* k, TypedValue v);
 
   // setRaw() assigns a value to the specified key in this Map, but doesn't
   // check for an immutable buffer, so it's only safe to use in some cases.

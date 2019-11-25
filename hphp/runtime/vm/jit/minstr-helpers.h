@@ -942,14 +942,12 @@ uint64_t mapIssetImpl(c_Map* map, key_type<keyType> key) {
 
 template<KeyType keyType>
 void mapSetImpl(c_Map* map, key_type<keyType> key, Cell value) {
-  map->set(key, value);
-  tvDecRefGen(value);
+  map->setMove(key, value);
 }
 
 inline
 void vectorSetImplI(c_Vector* vector, int64_t key, Cell value) {
-  vector->set(key, value);
-  tvDecRefGen(value);
+  vector->setMove(key, value);
 }
 
 [[noreturn]] inline

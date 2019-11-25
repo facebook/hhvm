@@ -1,4 +1,81 @@
-[submodule "third-party"]
-	path = third-party
+[submodule "__FORKS__"]
+	path = third-party/forks
 	url = https://github.com/hhvm/hhvm-third-party.git
-	ignore = dirty
+[submodule "boost"]
+	path = third-party/boost/boost
+	url = https://github.com/boostorg/boost
+[submodule "brotli"]
+	path = third-party/brotli/src
+	url = https://github.com/google/brotli
+[submodule "double-conversion"]
+	path = third-party/double-conversion
+	url = https://github.com/google/double-conversion
+[submodule "fastlz"]
+	path = third-party/fastlz/src
+	url = https://github.com/ariya/FastLZ
+[submodule "fatal"]
+	path = third-party/fatal
+	url = https://github.com/facebook/fatal
+[submodule "fb-mysql"]
+	path = third-party/fb-mysql/mysql-5.6
+	url = https://github.com/facebook/mysql-5.6.git
+[submodule "fb303"]
+	path = third-party/fb303/src
+	url = https://github.com/facebookincubator/fb303.git
+[submodule "fizz"]
+	path = third-party/fizz/src
+	url = https://github.com/facebookincubator/fizz
+[submodule "fmt"]
+	path = third-party/fmt/fmt
+	url = https://github.com/fmtlib/fmt
+[submodule "folly"]
+	path = third-party/folly/src
+	url = https://github.com/facebook/folly.git
+[submodule "libafdt"]
+	path = third-party/libafdt/src
+	url = https://github.com/facebook/libafdt
+[submodule "libsodium"]
+	path = third-party/libsodium/libsodium
+	url = https://github.com/jedisct1/libsodium.git
+[submodule "libzip"]
+	path = third-party/libzip/src
+	url = https://github.com/nih-at/libzip
+[submodule "lz4"]
+	path = third-party/lz4/src
+	url = https://github.com/Cyan4973/lz4
+[submodule "mcrouter"]
+	path = third-party/mcrouter/src
+	url = https://github.com/facebook/mcrouter
+[submodule "ocaml"]
+	path = third-party/ocaml/src
+	url = https://github.com/ocaml/ocaml.git
+[submodule "ocamlbuild"]
+	path = third-party/ocaml/ocamlbuild
+	url = https://github.com/ocaml/ocamlbuild
+[submodule "proxygen"]
+	path = third-party/proxygen/src
+	url = https://github.com/facebook/proxygen
+[submodule "re2"]
+	path = third-party/re2/src
+	url = https://github.com/google/re2.git
+[submodule "rsocket-cpp"]
+	path = third-party/rsocket-cpp/rsocket-cpp
+	url = https://github.com/rsocket/rsocket-cpp.git
+[submodule "squangle"]
+	path = third-party/squangle/src
+	url = https://github.com/facebook/squangle.git
+[submodule "thrift"]
+	path = third-party/thrift/src
+	url = https://github.com/facebook/fbthrift.git
+[submodule "wangle"]
+	path = third-party/wangle/src
+	url = https://github.com/facebook/wangle
+[submodule "xed-mbuild"]
+	path = third-party/xed/mbuild
+	url = https://github.com/intelxed/mbuild.git
+[submodule "xed-xed"]
+	path = third-party/xed/xed
+	url = https://github.com/intelxed/xed.git
+[submodule "zstd"]
+	path = third-party/zstd/src
+	url = https://github.com/facebook/zstd.git

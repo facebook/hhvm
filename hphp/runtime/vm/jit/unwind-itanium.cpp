@@ -100,7 +100,7 @@ void sync_regstate(TCA rip, _Unwind_Context* context) {
  * path out of a region, so throwing through jitted code without a catch block
  * is very bad---and we abort in this case.
  */
-TCA lookup_catch_trace(TCA rip, _Unwind_Exception* exn) {
+TCA lookup_catch_trace(TCA rip) {
   if (auto catchTraceOpt = getCatchTrace(rip)) {
     if (auto catchTrace = *catchTraceOpt) return catchTrace;
 
@@ -111,7 +111,9 @@ TCA lookup_catch_trace(TCA rip, _Unwind_Exception* exn) {
     always_assert_flog(
       false, "Translated call to {} threw '{}' without catch block; "
              "return address: {}\n",
-      getNativeFunctionName(target), typeinfoFromUE(exn).name(), rip
+      getNativeFunctionName(target),
+      __cxxabiv1::__cxa_current_exception_type()->name(),
+      rip
     );
   }
 
@@ -122,9 +124,9 @@ TCA lookup_catch_trace(TCA rip, _Unwind_Exception* exn) {
  * Look up the catch trace for the return address in `ctx', and install it by
  * updating the unwind RDS info, as well as the IP in `ctx'.
  */
-bool install_catch_trace(_Unwind_Context* ctx, TCA rip, _Unwind_Exception* exn,
+bool install_catch_trace(_Unwind_Context* ctx, TCA rip,
                          bool do_side_exit, TypedValue unwinder_tv) {
-  auto catchTrace = lookup_catch_trace(rip, exn);
+  auto catchTrace = lookup_catch_trace(rip);
   if (!catchTrace) {
     FTRACE(1, "no catch trace entry for ip {}; bailing\n", rip);
     return false;
@@ -134,9 +136,8 @@ bool install_catch_trace(_Unwind_Context* ctx, TCA rip, _Unwind_Exception* exn,
          "returning _URC_INSTALL_CONTEXT\n",
          catchTrace, rip, unwinder_tv.pretty());
 
-  // If the catch trace isn't going to finish by calling _Unwind_Resume, we
-  // consume the exception here. Otherwise, we leave a pointer to it in RDS so
-  // endCatchHelper can pass it to _Unwind_Resume when it's done.
+  // If the catch trace isn't going to finish by calling
+  // __cxxabiv1::__cxa_rethrow, we consume the exception here.
   //
   // In theory, the unwind API will let us set registers in the frame before
   // executing our landing pad. In practice, trying to use their recommended
@@ -146,14 +147,8 @@ bool install_catch_trace(_Unwind_Context* ctx, TCA rip, _Unwind_Exception* exn,
   // while executing the exit trace.
   assertx(g_unwind_rds.isInit());
   if (do_side_exit) {
-    g_unwind_rds->exn = nullptr;
-#ifndef _MSC_VER
-    __cxxabiv1::__cxa_begin_catch(exn);
     __cxxabiv1::__cxa_end_catch();
-#endif
     g_unwind_rds->tv = unwinder_tv;
-  } else {
-    g_unwind_rds->exn = exn;
   }
   g_unwind_rds->doSideExit = do_side_exit;
 
@@ -192,14 +187,10 @@ tc_unwind_personality(int version,
   if (Trace::moduleEnabled(TRACEMOD, 1)) {
     DEBUG_ONLY auto const* unwindType =
       (actions & _UA_SEARCH_PHASE) ? "search" : "cleanup";
-#ifndef _MSC_VER
     int status;
     auto* exnType = abi::__cxa_demangle(ti.name(), nullptr, nullptr, &status);
     SCOPE_EXIT { free(exnType); };
     assertx(status == 0);
-#else
-    auto* exnType = ti.name();
-#endif
     FTRACE(1, "unwind {} exn {}: regState {}, ip {}, type {}\n",
            unwindType, ue,
            tl_regState == VMRegState::DIRTY ? "dirty" :
@@ -207,26 +198,23 @@ tc_unwind_personality(int version,
            (TCA)_Unwind_GetIP(context), exnType);
   }
 
-  InvalidSetMException* ism = nullptr;
-  if (ti == typeid(InvalidSetMException)) {
-    ism = static_cast<InvalidSetMException*>(exceptionFromUE(ue));
-    if (actions & _UA_SEARCH_PHASE) {
-      FTRACE(1, "thrown value: {} returning _URC_HANDLER_FOUND\n ",
-              ism->tv().pretty());
-      return _URC_HANDLER_FOUND;
-    }
-  }
-
-  if (actions & _UA_SEARCH_PHASE) {
-    /*
-     * We don't do anything during the search phase---before attempting cleanup,
-     * we want all deeper frames to have run their object destructors (which can
-     * have side effects like setting tl_regState) and spilled any values they
-     * may have been holding in callee-saved regs.
-     */
-    FTRACE(1, "returning _URC_CONTINUE_UNWIND\n");
+  auto const& stubs = tc::ustubs();
+  auto ip = TCA(_Unwind_GetIP(context));
+  if (ip == stubs.endCatchHelperPast) {
+    FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
+    // Use search phase to indicate that this is the first time we enter the
+    // personality after running __cxa_rethrow()
+    if (actions & _UA_SEARCH_PHASE) __cxxabiv1::__cxa_end_catch();
     return _URC_CONTINUE_UNWIND;
   }
+
+  /*
+   * We don't do anything during the search phase---before attempting cleanup,
+   * we want all deeper frames to have run their object destructors (which can
+   * have side effects like setting tl_regState) and spilled any values they
+   * may have been holding in callee-saved regs.
+   */
+  if (actions & _UA_SEARCH_PHASE) return _URC_HANDLER_FOUND;
 
   /*
    * During the cleanup phase, we can either use a landing pad to perform
@@ -234,31 +222,24 @@ tc_unwind_personality(int version,
    * here. We sync the VM registers here, then optionally use a landing pad,
    * which is an exit trace from hhir with a few special instructions.
    */
-  assertx(actions & _UA_CLEANUP_PHASE);
-  auto const& stubs = tc::ustubs();
-  auto ip = TCA(_Unwind_GetIP(context));
+  assertx(actions & _UA_CLEANUP_PHASE && actions & _UA_HANDLER_FRAME);
+  auto const ism = ti != typeid(InvalidSetMException) ? nullptr :
+    static_cast<InvalidSetMException*>(exceptionFromUE(ue));
+  __cxxabiv1::__cxa_begin_catch(ue);
   if (tl_regState == VMRegState::DIRTY) sync_regstate(ip, context);
 
   auto const tv = ism ? ism->tv() : TypedValue{};
   // If we have a catch trace at the IP in the frame given by `context',
   // install it.
-  if (install_catch_trace(context, ip, ue, bool(ism), tv)) {
+  if (install_catch_trace(context, ip, bool(ism), tv)) {
     // Note that we should always have a catch trace for the special runtime
     // helper exceptions above.
-    always_assert(bool(ism) == bool(actions & _UA_HANDLER_FRAME));
     return _URC_INSTALL_CONTEXT;
   }
-  always_assert(!(actions & _UA_HANDLER_FRAME));
 
   assertx(g_unwind_rds.isInit());
 
-  if (ip == stubs.endCatchHelperPast) {
-    FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
-    return _URC_CONTINUE_UNWIND;
-  }
-
   FTRACE(1, "unwinder hit normal TC frame, going to tc_unwind_resume\n");
-  g_unwind_rds->exn = ue;
   _Unwind_SetIP(context, uint64_t(stubs.endCatchHelper));
   return _URC_INSTALL_CONTEXT;
 }
@@ -305,7 +286,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
     unwindPreventReturnToTC(fp);
 
     assertx(g_unwind_rds.isInit());
-    auto catchTrace = lookup_catch_trace(savedRip, g_unwind_rds->exn);
+    auto catchTrace = lookup_catch_trace(savedRip);
 
     if (fp->m_savedRip != reinterpret_cast<uint64_t>(savedRip)) {
       ITRACE(1, "Smashed m_savedRip of fp {} from {} to {:#x}\n",
@@ -335,7 +316,7 @@ TCUnwindInfo tc_unwind_resume_stublogue(ActRec* fp, TCA savedRip) {
   ITRACE(1, "tc_unwind_resume_stublogue: fp {}, saved rip {}\n",
          fp, savedRip);
   assertx(g_unwind_rds.isInit());
-  auto catchTrace = lookup_catch_trace(savedRip, g_unwind_rds->exn);
+  auto catchTrace = lookup_catch_trace(savedRip);
   if (catchTrace) {
     ITRACE(1,
            "tc_unwind_resume_stublogue returning catch trace {} with fp: {}\n",

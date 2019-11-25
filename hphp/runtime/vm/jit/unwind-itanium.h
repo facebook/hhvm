@@ -47,11 +47,6 @@ namespace jit {
  * Used to pass values between unwinder code and catch traces.
  */
 struct UnwindRDS {
-  /* When a cleanup (non-side-exiting) catch trace is executing, this will
-   * point to the currently propagating exception, to be passed to
-   * _Unwind_Resume at the end of cleanup. */
-  _Unwind_Exception* exn;
-
   /* Some helpers need to signal an error along with a TypedValue to be pushed
    * on the eval stack. When present, that value lives here. */
   TypedValue tv;
@@ -66,7 +61,6 @@ extern rds::Link<UnwindRDS, rds::Mode::Normal> g_unwind_rds;
   inline ptrdiff_t unwinder##Name##Off() {                      \
     return g_unwind_rds.handle() + offsetof(UnwindRDS, member); \
   }
-IMPLEMENT_OFF(Exn, exn)
 IMPLEMENT_OFF(TV, tv)
 IMPLEMENT_OFF(SideExit, doSideExit)
 #undef IMPLEMENT_OFF

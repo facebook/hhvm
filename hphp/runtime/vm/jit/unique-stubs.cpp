@@ -1013,9 +1013,11 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
                   "The following store must match the size of tl_regState.");
     auto const regstate = emitTLSAddr(v, tls_datum(tl_regState));
     v << storeqi{static_cast<int32_t>(VMRegState::CLEAN), regstate};
-
-    v << load{rvmtl()[unwinderExnOff()], rarg(0)};
-    v << call{TCA(_Unwind_Resume), arg_regs(1), &us.endCatchHelperPast};
+    v << call{
+      TCA(__cxxabiv1::__cxa_rethrow),
+      arg_regs(0),
+      &us.endCatchHelperPast
+    };
     v << trap{TRAP_REASON};
   });
   meta.process(nullptr);

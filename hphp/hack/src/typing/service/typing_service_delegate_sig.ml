@@ -9,7 +9,7 @@
 open Typing_service_types
 
 module type Delegate_sig = sig
-  type state
+  type state [@@deriving show]
 
   val create : unit -> state
 

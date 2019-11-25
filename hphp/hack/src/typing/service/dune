@@ -7,5 +7,6 @@
   (libraries
     core_kernel
     errors
+    hg
     relative_path
   ))

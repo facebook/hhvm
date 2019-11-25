@@ -412,6 +412,7 @@ let rpc
             server_conn.pending_messages
             { push; has_updated_server_state = true }
         in
+        let start_time = Unix.gettimeofday () in
         let%lwt result =
           ServerCommandLwt.rpc_persistent
             (server_conn.ic, server_conn.oc)
@@ -419,6 +420,10 @@ let rpc
             callback
             command
         in
+        let end_time = Unix.gettimeofday () in
+        let duration = end_time -. start_time in
+        let msg = ServerCommandTypesUtils.debug_describe_t command in
+        Hh_logger.log "hh_server rpc: [%s] [%0.3f]" msg duration;
         match result with
         | Ok ((), res, start_server_handle_time) ->
           ref_unblocked_time := start_server_handle_time;

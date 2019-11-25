@@ -38,7 +38,7 @@ let normalize_namespace_body node =
   | Syntax.Script s ->
     begin
       match Syntax.syntax s.script_declarations with
-      | Syntax.SyntaxList (_ :: declarations) ->
+      | Syntax.SyntaxList declarations ->
         begin
           match
             List.find_mapi declarations (fun i f ->
@@ -72,12 +72,32 @@ let normalize_namespace_body node =
                       Some
                         (Syntax.make_script
                            (Syntax.make_list SourceText.empty 0 (pre @ [ns])))
-                    | _ -> None
+                    | _ -> Some node
                   end
                 | _ -> None)
           with
           | Some replacement -> replacement
-          | _ -> node
+          | None ->
+            (* no namespace statement; add a namespace { ... }: if there are
+             * any namespace declarations in the concatenated file, all
+             * statements must be in namespace blocks *)
+            let open_brace =
+              Token.create TokenKind.LeftBrace "{" [] [] |> Syntax.make_token
+            in
+            let close_brace =
+              Token.create TokenKind.RightBrace "}" [] [] |> Syntax.make_token
+            in
+            let ns =
+              Syntax.make_namespace_declaration
+                (Syntax.make_token
+                   (Token.create TokenKind.Namespace "namespace" [] []))
+                (Syntax.make_missing SourceText.empty 0)
+                (Syntax.make_namespace_body
+                   open_brace
+                   (Syntax.make_list SourceText.empty 0 declarations)
+                   close_brace)
+            in
+            Syntax.make_script (Syntax.make_list SourceText.empty 0 [ns])
         end
       | _ -> node
     end

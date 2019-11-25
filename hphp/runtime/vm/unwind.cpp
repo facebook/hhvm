@@ -225,6 +225,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   assertx(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
           isResumed(prevFp));
   pc = prevFp->func()->unit()->at(callOff + prevFp->func()->base());
+  assertx(prevFp->func()->contains(pc));
   fp = prevFp;
   return phpException;
 }
@@ -307,9 +308,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
   tvMove(make_tv<KindOfObject>(prev), prevLval);
 }
 
-namespace {
-
-ALWAYS_INLINE void lockObjectWhileUnwinding(PC pc, Stack& stack) {
+void lockObjectWhileUnwinding(PC pc, Stack& stack) {
   auto const op = decode_op(pc);
   if (LIKELY(op != OpFCallCtor)) return;
   auto fca = decodeFCallArgs(op, pc);
@@ -320,19 +319,14 @@ ALWAYS_INLINE void lockObjectWhileUnwinding(PC pc, Stack& stack) {
   // constructed is on the top of the stack, and needs to be locked.
   auto const obj = stack.top();
   assertx(tvIsObject(obj));
+  ITRACE(2, "Locking object {}\n", obj);
   obj->m_data.pobj->lockObject();
-}
-
 }
 
 /*
  * Unwinding proceeds as follows:
  *
- *   - Discard all evaluation stack temporaries (including pre-live
- *     activation records).
- *
- *   - Check if the current PC is inside a protected region, if so,
- *     leave the exception on the stack and resume the VM at the handler.
+ *   - Discard all evaluation stack temporaries.
  *
  *   - Check if we are handling user exception in an eagerly executed
  *     async function. If so, pop its frame, wrap the exception into
@@ -344,14 +338,21 @@ ALWAYS_INLINE void lockObjectWhileUnwinding(PC pc, Stack& stack) {
  *     current VM nesting level, rethrow the exception, otherwise go
  *     to the first step and repeat this process in the caller's
  *     frame.
+ *
+ * If a non nullptr fpToUnwind is given, the unwinder will not unwind past
+ * fpToUnwind, instead return when vmfp() is equal to fpToUnwind.
+ *
+ * The return value UnwinderResult indicates whether we ended unwinding due to
+ * reaching fpToUnwind as well as whether we ended with putting a failed
+ * static wait handle on the stack.
  */
-void unwindPhp(ObjectData* phpException) {
+UnwinderResult
+unwindPhp(ObjectData* phpException, const ActRec* fpToUnwind /* = nullptr */) {
   phpException->incRefCount();
 
   auto& fp = vmfp();
   auto& stack = vmStack();
   auto& pc = vmpc();
-  bool fromTearDownFrame = false;
 
   ITRACE(1, "entering unwinder for exception: {}\n", describeEx(phpException));
   SCOPE_EXIT {
@@ -360,18 +361,13 @@ void unwindPhp(ObjectData* phpException) {
 
   discardMemberTVRefs(pc);
 
-  do {
+  while (true) {
     auto const func = fp->func();
 
     ITRACE(1, "unwindPhp: func {}, raiseOffset {} fp {}\n",
            func->name()->data(),
            func->unit()->offsetOf(pc),
            implicit_cast<void*>(fp));
-
-    if (fromTearDownFrame) {
-      fromTearDownFrame = false;
-      lockObjectWhileUnwinding(pc, stack);
-    }
 
     discardStackTemps(fp, stack);
 
@@ -396,19 +392,38 @@ void unwindPhp(ObjectData* phpException) {
         vmStack().pushObjectNoRc(phpException);
         pc = func->unit()->at(eh->m_handler);
         DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
-        return;
+        return UnwindNone;
       }
     }
 
     // We found no more handlers in this frame.
     phpException = tearDownFrame(fp, stack, pc, phpException);
+
+    // If we entered from the JIT and this is the last iteration, we can't
+    // trust the PC since catch traces for inlined frames may add more
+    // frames on vmfp()'s rbp chain which might have resulted in us incorrectly
+    // calculating the PC.
+
     if (phpException == nullptr) {
-      if (fp) pc = skipCall(pc);
-      return;
+      auto retCode = UnwindNone;
+      if (fp) {
+        if (!fpToUnwind) pc = skipCall(pc);
+        retCode = UnwindSkipCall;
+      }
+      ITRACE(1, "Returning with exception == null\n");
+      return retCode | UnwindFSWH;
     }
 
-    fromTearDownFrame = true;
-  } while (fp);
+    if (!fp || (fpToUnwind && fp == fpToUnwind)) break;
+    lockObjectWhileUnwinding(pc, stack);
+  }
+
+  if (fp) {
+    assertx(fpToUnwind && phpException);
+    ITRACE(1, "Reached {}\n", fpToUnwind);
+    phpException->decRefCount();
+    return UnwindReachedGoal;
+  }
 
   ITRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");
   throw_object(Object::attach(phpException));

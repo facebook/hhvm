@@ -29,6 +29,29 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+enum UnwinderResult {
+   UnwindNone        = 0,
+   // Unwound an async function and placed the exception inside a failed static
+   // wait handle
+   UnwindFSWH        = (1u << 0),
+   // Unwound until the given fp, i.e. did not reach the end of the vm nesting
+   UnwindReachedGoal = (1u << 1),
+   // Skip call
+   UnwindSkipCall    = (1u << 2),
+};
+
+constexpr UnwinderResult operator|(UnwinderResult a, UnwinderResult b) {
+   return UnwinderResult((int)a | (int)b);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Locks the object on the top of the stack if the PC points to a FCallCtor and
+ * the FCallArgs indicates the necessity to lock
+ */
+void lockObjectWhileUnwinding(PC pc, Stack& stack);
+
 /*
  * Find a catch exception handler for a given raise location if the handler was
  * found or InvalidAbsoluteOffset.
@@ -38,7 +61,8 @@ Offset findCatchHandler(const Func* func, Offset raiseOffset);
 /*
  * Unwind the PHP exception.
  */
-void unwindPhp(ObjectData* phpException);
+UnwinderResult
+unwindPhp(ObjectData* phpException, const ActRec* fpToUnwind = nullptr);
 
 /*
  * Unwind the C++ exception.

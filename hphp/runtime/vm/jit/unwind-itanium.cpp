@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
@@ -150,6 +151,7 @@ void install_catch_trace(_Unwind_Context* ctx, TCA rip,
   assertx(g_unwind_rds.isInit());
   if (do_side_exit) {
     __cxxabiv1::__cxa_end_catch();
+    g_unwind_rds->exn = nullptr;
     g_unwind_rds->tv = unwinder_tv;
   }
   g_unwind_rds->doSideExit = do_side_exit;
@@ -191,16 +193,18 @@ tc_unwind_personality(int version,
     auto* exnType = abi::__cxa_demangle(ti.name(), nullptr, nullptr, &status);
     SCOPE_EXIT { free(exnType); };
     assertx(status == 0);
-    FTRACE(1, "unwind {} exn {}: regState {}, ip {}, type {}\n",
+    DEBUG_ONLY auto const fp =
+      reinterpret_cast<ActRec*>(_Unwind_GetGR(context, dw_reg::FP));
+    FTRACE(1, "unwind {} exn {}: regState {}, ip {}, type {}, {} {}\n",
            unwindType, ue,
            tl_regState == VMRegState::DIRTY ? "dirty" :
            tl_regState == VMRegState::CLEAN ? "clean" : "guarded",
-           (TCA)_Unwind_GetIP(context), exnType);
+           (TCA)_Unwind_GetIP(context), exnType,
+           isVMFrame(fp) ? fp->func()->fullName()->data() : "non-vm", fp);
   }
 
-  auto const& stubs = tc::ustubs();
   auto ip = TCA(_Unwind_GetIP(context));
-  if (ip == stubs.endCatchHelperPast) {
+  if (ip == tc::ustubs().endCatchHelperPast) {
     FTRACE(1, "rip == endCatchHelperPast, continuing unwind\n");
     // Use search phase to indicate that this is the first time we enter the
     // personality after running __cxa_rethrow()
@@ -223,13 +227,23 @@ tc_unwind_personality(int version,
    * which is an exit trace from hhir with a few special instructions.
    */
   assertx(actions & _UA_CLEANUP_PHASE && actions & _UA_HANDLER_FRAME);
+  auto exn = exceptionFromUE(ue);
   auto const ism = ti != typeid(InvalidSetMException) ? nullptr :
-    static_cast<InvalidSetMException*>(exceptionFromUE(ue));
+    static_cast<InvalidSetMException*>(exn);
   __cxxabiv1::__cxa_begin_catch(ue);
   if (tl_regState == VMRegState::DIRTY) sync_regstate(ip, context);
+  assertx(g_unwind_rds.isInit());
+  g_unwind_rds->exn = [&] () -> ObjectData* {
+    if (ti == typeid(Object)) return static_cast<Object*>(exn)->get();
+    if (ti == typeid(req::root<Object>)) {
+      return static_cast<req::root<Object>*>(exn)->get();
+    }
+    return nullptr;
+  }();
+  assertx(!g_unwind_rds->exn || g_unwind_rds->exn->kindIsValid());
 
   auto const tv = ism ? ism->tv() : TypedValue{};
-  assertx(g_unwind_rds.isInit());
+
   // If we have a catch trace at the IP in the frame given by `context',
   // install it otherwise install the default catch trace.
   install_catch_trace(context, ip, bool(ism), tv);
@@ -237,6 +251,24 @@ tc_unwind_personality(int version,
 }
 
 TCUnwindInfo tc_unwind_resume(ActRec* fp) {
+  assertx(g_unwind_rds.isInit());
+  if (g_unwind_rds->shouldCallResume) {
+    ITRACE(3, "shouldCallResume is set\n");
+    g_unwind_rds->shouldCallResume = false;
+    if (g_unwind_rds->shouldSkipCall) {
+      auto& pc = vmRegsUnsafe().pc;
+      pc = skipCall(pc);
+      ITRACE(3, "vmpc is moved by skipping call\n");
+      g_unwind_rds->shouldSkipCall = false;
+    }
+    if (Trace::moduleEnabled(TRACEMOD, 1)) {
+      DEBUG_ONLY auto& regs = vmRegsUnsafe();
+      ITRACE(1, "Resuming at {} from offset {}\n",
+             regs.fp, regs.fp->func()->unit()->offsetOf(regs.pc));
+    }
+    return {tc::ustubs().resumeHelper, fp};
+  }
+
   while (true) {
     auto const sfp = fp->m_sfp;
 
@@ -248,7 +280,11 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
     always_assert_flog(isVMFrame(fp),
                        "Unwinder got non-VM frame {} with saved rip {:#x}\n",
                        fp, fp->m_savedRip);
+
     auto savedRip = reinterpret_cast<TCA>(fp->m_savedRip);
+
+    tl_regState = VMRegState::CLEAN;
+    if (g_unwind_rds->exn) lockObjectWhileUnwinding(vmpc(), vmStack());
 
     if (savedRip == tc::ustubs().callToExit) {
       // If we're the top VM frame, there's nothing we need to do; we can just
@@ -267,23 +303,45 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
       }
     }
 
-    // When we're unwinding through a TC frame (as opposed to stopping at a
-    // handler frame, or unwinding through a stub frame), we need to make sure
-    // that if we later return from this VM frame in translated code, we don't
-    // resume after the PHP call that may be expecting things to still live in
-    // its spill space.
-    //
-    // (Note that we can't do this if we're in the top VM frame, since it's not
-    // actually an ActRec, so it's actually required that we skip it above).
-    unwindPreventReturnToTC(fp);
+    if (isVMFrame(fp)) {
+      ITRACE(2, "fp {} {}, sfp {} {}\n",
+        fp, fp->func()->fullName(), sfp, sfp->func()->fullName());
 
-    assertx(g_unwind_rds.isInit());
-    auto catchTrace = lookup_catch_trace(savedRip);
+      // Unwind vm stack to sfp
+      if (g_unwind_rds->exn) {
+        auto const result = unwindPhp(g_unwind_rds->exn, sfp);
+        if (!(result & UnwindReachedGoal)) {
+          __cxxabiv1::__cxa_end_catch();
+          g_unwind_rds->doSideExit = true;
 
-    if (fp->m_savedRip != reinterpret_cast<uint64_t>(savedRip)) {
-      ITRACE(1, "Smashed m_savedRip of fp {} from {} to {:#x}\n",
-             fp, savedRip, fp->m_savedRip);
+          // If we have a failed static wait handle, we need to run the next
+          // catch trace as well to clean up the stack
+          if (result & UnwindFSWH) {
+            auto& regs = vmRegs();
+            if (regs.fp == sfp) {
+              if (auto catchTrace = lookup_catch_trace(savedRip)) {
+                g_unwind_rds->shouldCallResume = true;
+                if (result & UnwindSkipCall) {
+                  g_unwind_rds->shouldSkipCall = true;
+                }
+                ITRACE(1, "tc_unwind_resume returning catch trace {} "
+                          "with fp: {}\n",
+                          catchTrace, sfp);
+                tl_regState = VMRegState::DIRTY;
+                return {catchTrace, sfp};
+              }
+            }
+            // Either no catch trace or we haven't unwound enough yet
+            if (result & UnwindSkipCall) regs.pc = skipCall(regs.pc);
+          }
+          tl_regState = VMRegState::DIRTY;
+          FTRACE(1, "Resuming from resumeHelper with fp {}\n", fp);
+          return {tc::ustubs().resumeHelper, fp};
+        }
+      }
     }
+
+    auto catchTrace = lookup_catch_trace(savedRip);
 
     fp = sfp;
 

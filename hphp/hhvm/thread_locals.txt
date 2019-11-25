@@ -52,7 +52,6 @@ HPHP::s_misc_highlight_default_string
 HPHP::s_misc_highlight_default_comment
 HPHP::s_misc_highlight_default_default
 HPHP::s_misc_highlight_default_keyword
-HPHP::jit::(anonymous namespace)::cachedTypeInfo
 HPHP::jit::(anonymous namespace)::tl_active_prot
 HPHP::jit::(anonymous namespace)::threadCanAcquire
 HPHP::jit::(anonymous namespace)::threadCanAcquireConcurrent

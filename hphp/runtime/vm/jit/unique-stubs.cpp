@@ -1039,7 +1039,7 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << jcci{CC_Z, sf, done, us.resumeCPPUnwind};
     v = done;
 
-    v << jmpr{rret(0), vm_regs_no_sp()};
+    v << jmpr{rret(0), vm_regs_with_sp()};
   });
 }
 

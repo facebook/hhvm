@@ -156,14 +156,6 @@ struct VarEnv {
  */
 bool isVMFrame(const ActRec* ar, bool may_be_non_runtime = false);
 
-/*
- * If ar->m_savedRip points somewhere in the TC that is not a return helper,
- * change it to point to an appropriate return helper. The two different
- * versions are for the different needs of the C++ unwinder and debugger hooks,
- * respectively.
- */
-void unwindPreventReturnToTC(ActRec* ar);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void frame_free_locals_no_hook(ActRec* fp);

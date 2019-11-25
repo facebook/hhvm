@@ -1324,25 +1324,6 @@ void pushFrameSlots(const Func* func, int nparams /*= 0*/) {
   }
 }
 
-void unwindPreventReturnToTC(ActRec* ar) {
-  auto const savedRip = reinterpret_cast<jit::TCA>(ar->m_savedRip);
-  always_assert_flog(jit::tc::isValidCodeAddress(savedRip),
-                     "preventReturnToTC({}): {} isn't in TC",
-                     ar, savedRip);
-
-  if (isReturnHelper(savedRip)) return;
-
-  auto& ustubs = jit::tc::ustubs();
-  if (isResumed(ar)) {
-    // async functions use callToExit stub
-    assertx(ar->func()->isGenerator());
-    ar->setJitReturn(ar->func()->isAsync()
-      ? ustubs.asyncGenRetHelper : ustubs.genRetHelper);
-  } else {
-    ar->setJitReturn(ustubs.retHelper);
-  }
-}
-
 static inline StringData* lookup_name(TypedValue* key) {
   return prepareKey(*key);
 }

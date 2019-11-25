@@ -47,6 +47,9 @@ namespace jit {
  * Used to pass values between unwinder code and catch traces.
  */
 struct UnwindRDS {
+  /* PHP exception or nullptr if C++/SetM exception */
+  ObjectData* exn;
+
   /* Some helpers need to signal an error along with a TypedValue to be pushed
    * on the eval stack. When present, that value lives here. */
   TypedValue tv;
@@ -54,6 +57,14 @@ struct UnwindRDS {
   /* This will be true iff the currently executing catch trace should side exit
    * to somewhere else in the TC, rather than resuming the unwind process. */
   bool doSideExit;
+
+  /* Whether the tc_unwind_resume should resume from resumeHandler unique stub
+   */
+  bool shouldCallResume;
+
+  /* Whether tc_unwind_resume should increment the vmpc
+   */
+  bool shouldSkipCall;
 };
 extern rds::Link<UnwindRDS, rds::Mode::Normal> g_unwind_rds;
 

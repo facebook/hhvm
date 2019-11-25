@@ -124,12 +124,14 @@ TCA lookup_catch_trace(TCA rip) {
  * Look up the catch trace for the return address in `ctx', and install it by
  * updating the unwind RDS info, as well as the IP in `ctx'.
  */
-bool install_catch_trace(_Unwind_Context* ctx, TCA rip,
+void install_catch_trace(_Unwind_Context* ctx, TCA rip,
                          bool do_side_exit, TypedValue unwinder_tv) {
   auto catchTrace = lookup_catch_trace(rip);
   if (!catchTrace) {
-    FTRACE(1, "no catch trace entry for ip {}; bailing\n", rip);
-    return false;
+    FTRACE(1, "no catch trace entry for ip {}; installing default catch trace "
+              "and going to tc_unwind_resume\n", rip);
+    _Unwind_SetIP(ctx, uint64_t(tc::ustubs().endCatchHelper));
+    return;
   }
 
   FTRACE(1, "installing catch trace {} for call {} with tv {}, "
@@ -154,8 +156,6 @@ bool install_catch_trace(_Unwind_Context* ctx, TCA rip,
 
   _Unwind_SetIP(ctx, (uint64_t)catchTrace);
   tl_regState = VMRegState::DIRTY;
-
-  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -229,18 +229,10 @@ tc_unwind_personality(int version,
   if (tl_regState == VMRegState::DIRTY) sync_regstate(ip, context);
 
   auto const tv = ism ? ism->tv() : TypedValue{};
-  // If we have a catch trace at the IP in the frame given by `context',
-  // install it.
-  if (install_catch_trace(context, ip, bool(ism), tv)) {
-    // Note that we should always have a catch trace for the special runtime
-    // helper exceptions above.
-    return _URC_INSTALL_CONTEXT;
-  }
-
   assertx(g_unwind_rds.isInit());
-
-  FTRACE(1, "unwinder hit normal TC frame, going to tc_unwind_resume\n");
-  _Unwind_SetIP(context, uint64_t(stubs.endCatchHelper));
+  // If we have a catch trace at the IP in the frame given by `context',
+  // install it otherwise install the default catch trace.
+  install_catch_trace(context, ip, bool(ism), tv);
   return _URC_INSTALL_CONTEXT;
 }
 

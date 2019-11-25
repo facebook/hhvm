@@ -401,6 +401,13 @@ void store(Local& env, AliasClass acls, SSATmp* value) {
 Flags handle_general_effects(Local& env,
                              const IRInstruction& inst,
                              GeneralEffects m) {
+  if (inst.is(DecRef, DecRefNZ)) {
+    // DecRef can only free things, which means from load-elim's point
+    // of view it only has a kill set, which load-elim
+    // ignores. DecRefNZ is always a no-op.
+    return FNone{};
+  }
+
   auto handleCheck = [&](Type typeParam) -> folly::Optional<Flags> {
     auto const meta = env.global.ainfo.find(canonicalize(m.loads));
     if (!meta) return folly::none;

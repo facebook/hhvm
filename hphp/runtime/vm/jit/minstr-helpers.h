@@ -679,9 +679,7 @@ auto arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value) {
                 "KeyType::Any is not supported in arraySetMImpl");
   assertx(cellIsPlausible(value));
   assertx(a->isPHPArray());
-  auto const ret = a->set(key, value);
-  if (ret != a) decRefArr(a);
-  return ret;
+  return a->setMove(key, value);
 }
 
 #define ARRAYSET_HELPER_TABLE(m)  \
@@ -702,9 +700,7 @@ template<bool copyProv>
 auto vecSetImpl(ArrayData* a, int64_t key, Cell value) {
   assertx(cellIsPlausible(value));
   assertx(a->isVecArray());
-  auto const ret = PackedArray::SetIntVec(a, key, value);
-  if (ret != a) decRefArr(a);
-  return ret;
+  return PackedArray::SetIntMoveVec(a, key, value);
 }
 
 #define VECSET_HELPER_TABLE(m) \
@@ -722,19 +718,17 @@ VECSET_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 inline ArrayData* dictSetImplPre(ArrayData* a, int64_t i, Cell val) {
-  return MixedArray::SetIntDict(a, i, val);
+  return MixedArray::SetIntMoveDict(a, i, val);
 }
 inline ArrayData* dictSetImplPre(ArrayData* a, StringData* s, Cell val) {
-  return MixedArray::SetStrDict(a, s, val);
+  return MixedArray::SetStrMoveDict(a, s, val);
 }
 
 template<KeyType keyType, bool copyProv>
 auto dictSetImpl(ArrayData* a, key_type<keyType> key, Cell value) {
   assertx(cellIsPlausible(value));
   assertx(a->isDict());
-  auto ret = dictSetImplPre(a, key, value);
-  if (ret != a) decRefArr(a);
-  return ret;
+  return dictSetImplPre(a, key, value);
 }
 
 #define DICTSET_HELPER_TABLE(m) \
@@ -948,13 +942,14 @@ uint64_t mapIssetImpl(c_Map* map, key_type<keyType> key) {
 
 template<KeyType keyType>
 void mapSetImpl(c_Map* map, key_type<keyType> key, Cell value) {
-  // XXX: we should call this directly from the TC.
   map->set(key, value);
+  tvDecRefGen(value);
 }
 
 inline
 void vectorSetImplI(c_Vector* vector, int64_t key, Cell value) {
   vector->set(key, value);
+  tvDecRefGen(value);
 }
 
 [[noreturn]] inline

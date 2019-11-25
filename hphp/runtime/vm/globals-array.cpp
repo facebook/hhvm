@@ -178,15 +178,22 @@ arr_lval GlobalsArray::LvalForceNew(ArrayData* ad, bool /*copy*/) {
   return arr_lval { ad, lvalBlackHole().asTypedValue() };
 }
 
+ArrayData* GlobalsArray::SetIntMove(ArrayData* ad, int64_t k, Cell v) {
+  return SetStrMove(ad, String(k).get(), v);
+}
+
 ArrayData* GlobalsArray::SetIntInPlace(ArrayData* ad, int64_t k, Cell v) {
   return SetStrInPlace(ad, String(k).get(), v);
 }
 
-ArrayData*
-GlobalsArray::SetStrInPlace(ArrayData* ad, StringData* k, Cell v) {
-  auto a = asGlobals(ad);
-  cellSet(v, *a->m_tab->lookupAdd(k));
-  return a;
+ArrayData* GlobalsArray::SetStrMove(ArrayData* ad, StringData* k, Cell v) {
+  cellMove(v, *asGlobals(ad)->m_tab->lookupAdd(k));
+  return ad;
+}
+
+ArrayData* GlobalsArray::SetStrInPlace(ArrayData* ad, StringData* k, Cell v) {
+  cellSet(v, *asGlobals(ad)->m_tab->lookupAdd(k));
+  return ad;
 }
 
 ArrayData*

@@ -96,8 +96,10 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   }
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v);
+  static ArrayData* SetIntMove(ArrayData*, int64_t k, Cell v);
   static ArrayData* SetIntInPlace(ArrayData*, int64_t k, Cell v);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);
+  static ArrayData* SetStrMove(ArrayData*, StringData* k, Cell v);
   static ArrayData* SetStrInPlace(ArrayData*, StringData* k, Cell v);
   static size_t Vsize(const ArrayData*);
   static tv_rval GetValueRef(const ArrayData* ad, ssize_t pos);
@@ -153,8 +155,10 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static tv_rval NvTryGetIntVec(const ArrayData*, int64_t);
   static tv_rval NvTryGetStrVec(const ArrayData*, const StringData*);
   static ArrayData* SetIntVec(ArrayData*, int64_t, Cell);
+  static ArrayData* SetIntMoveVec(ArrayData*, int64_t, Cell);
   static ArrayData* SetIntInPlaceVec(ArrayData*, int64_t, Cell);
   static ArrayData* SetStrVec(ArrayData*, StringData*, Cell);
+  static constexpr auto SetStrMoveVec = &SetStrVec;
   static constexpr auto SetStrInPlaceVec = &SetStrVec;
   static ArrayData* RemoveIntVec(ArrayData*, int64_t);
   static ArrayData* RemoveIntInPlaceVec(ArrayData*, int64_t);
@@ -222,6 +226,9 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   // Vector / ImmVector collection types in ext/collections. This function
   // never copies the array, so we can return tv_lval instead of arr_lval.
   static tv_lval LvalUncheckedInt(ArrayData*, int64_t);
+
+  // Fast path for SetIntMove / SetIntMoveVec if the key is in bounds.
+  static ArrayData* SetIntMoveRaw(ArrayData*, int64_t, Cell);
 
   /////////////////////////////////////////////////////////////////////
 

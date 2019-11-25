@@ -3166,11 +3166,11 @@ fields of that struct for holding intermediate values.
   Set element with key S1 in S0 to S2. The dest will be a new Dict that should
   replace S0.
 
-| MapSet, ND, S(Obj) S(Int,Str) S(Cell), NF
+| MapSet, ND, S(Obj) S(Int,Str) S(Cell), CRc
 
   Set element with key S1 in S0 to S2.
 
-| VectorSet, ND, S(Obj) S(Int,Str) S(Cell), NF
+| VectorSet, ND, S(Obj) S(Int,Str) S(Cell), CRc
 
   Set element with key S1 in S0 to S2.
 

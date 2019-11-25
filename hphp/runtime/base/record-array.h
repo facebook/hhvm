@@ -60,8 +60,10 @@ struct RecordArray : ArrayData,
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t key, Cell v);
+  static ArrayData* SetIntMove(ArrayData*, int64_t key, Cell v);
   static constexpr auto SetIntInPlace = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData*, Cell v);
+  static ArrayData* SetStrMove(ArrayData*, StringData*, Cell v);
   static ArrayData* SetStrInPlace(ArrayData*, StringData*, Cell v);
   static size_t Vsize(const ArrayData*);
   static tv_rval GetValueRef(const ArrayData*, ssize_t pos);

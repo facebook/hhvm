@@ -189,16 +189,28 @@ arr_lval APCLocalArray::LvalForceNew(ArrayData* ad, bool /*copy*/) {
   return arr_lval { helper.release(lval.arr), lval };
 }
 
-ArrayData*
-APCLocalArray::SetInt(ArrayData* ad, int64_t k, Cell v) {
+ArrayData* APCLocalArray::SetInt(ArrayData* ad, int64_t k, Cell v) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->setInPlace(k, v));
 }
 
-ArrayData*
-APCLocalArray::SetStr(ArrayData* ad, StringData* k, Cell v) {
+ArrayData* APCLocalArray::SetIntMove(ArrayData* ad, int64_t k, Cell v) {
+  EscalateHelper helper{ad};
+  auto const result = helper.escalated->setMove(k, v);
+  helper.escalated = nullptr;
+  return result;
+}
+
+ArrayData* APCLocalArray::SetStr(ArrayData* ad, StringData* k, Cell v) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->setInPlace(k, v));
+}
+
+ArrayData* APCLocalArray::SetStrMove(ArrayData* ad, StringData* k, Cell v) {
+  EscalateHelper helper{ad};
+  auto const result = helper.escalated->setMove(k, v);
+  helper.escalated = nullptr;
+  return result;
 }
 
 ArrayData* APCLocalArray::RemoveInt(ArrayData* ad, int64_t k) {

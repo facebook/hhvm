@@ -183,6 +183,13 @@ ArrayData* RecordArray::SetStr(ArrayData* base, StringData* key, Cell val) {
   return ra;
 }
 
+ArrayData* RecordArray::SetStrMove(ArrayData* base, StringData* key, Cell val) {
+  auto const result = SetStr(base, key, val);
+  if (result != base && base->decReleaseCheck()) RecordArray::Release(base);
+  tvDecRefGen(val);
+  return result;
+}
+
 size_t RecordArray::Vsize(const ArrayData*) { always_assert(false); }
 
 MixedArray* RecordArray::ToMixedHeader(const RecordArray* old) {
@@ -268,6 +275,14 @@ ArrayData* RecordArray::SetInt(ArrayData* adIn, int64_t k, Cell v) {
     [&] (MixedArray* mixed) { return mixed->addVal(k, v); },
     "SetInt"
   );
+}
+
+ArrayData* RecordArray::SetIntMove(ArrayData* adIn, int64_t k, Cell v) {
+  auto const result = SetInt(adIn, k, v);
+  assertx(result != adIn);
+  if (adIn->decReleaseCheck()) RecordArray::Release(adIn);
+  tvDecRefGen(v);
+  return result;
 }
 
 ssize_t RecordArray::NvGetIntPos(const ArrayData* ad, int64_t) {

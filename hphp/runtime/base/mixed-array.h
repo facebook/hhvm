@@ -372,8 +372,10 @@ public:
   static arr_lval LvalStr(ArrayData* ad, StringData* k, bool copy);
   static arr_lval LvalForceNew(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v);
+  static ArrayData* SetIntMove(ArrayData*, int64_t k, Cell v);
   static ArrayData* SetIntInPlace(ArrayData*, int64_t k, Cell v);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);
+  static ArrayData* SetStrMove(ArrayData*, StringData* k, Cell v);
   static ArrayData* SetStrInPlace(ArrayData*, StringData* k, Cell v);
   static ArrayData* AddInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, Cell v, bool copy);
@@ -444,8 +446,10 @@ public:
   static constexpr auto ReleaseDict = &Release;
   static constexpr auto NvGetKeyDict = &NvGetKey;
   static constexpr auto SetIntDict = &SetInt;
+  static constexpr auto SetIntMoveDict = &SetIntMove;
   static constexpr auto SetIntInPlaceDict = &SetIntInPlace;
   static constexpr auto SetStrDict = &SetStr;
+  static constexpr auto SetStrMoveDict = &SetStrMove;
   static constexpr auto SetStrInPlaceDict = &SetStrInPlace;
   static constexpr auto AddIntDict = &AddInt;
   static constexpr auto AddStrDict = &AddStr;
@@ -680,7 +684,8 @@ private:
   ArrayData* addValNoAsserts(StringData* key, Cell data);
 
   template <bool warn, class K> arr_lval addLvalImpl(K k);
-  template <class K> ArrayData* update(K k, Cell data);
+  // If "move" is false, this method will inc-ref data.
+  template <class K, bool move = false> ArrayData* update(K k, Cell data);
 
   void eraseNoCompact(ssize_t pos);
   void erase(ssize_t pos) {

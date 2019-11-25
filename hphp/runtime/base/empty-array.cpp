@@ -221,18 +221,24 @@ arr_lval EmptyArray::LvalStrImpl(ArrayData*, StringData* k, bool) {
   return EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
 }
 
-ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, Cell v) {
-  // TODO(#3888164): we should make it so we don't need KindOfUninit checks
-  if (v.m_type == KindOfUninit) v.m_type = KindOfNull;
+ArrayData* EmptyArray::SetInt(ArrayData* ad, int64_t k, Cell v) {
   tvIncRefGen(v);
-  auto const lval = k == 0 ? EmptyArray::MakePacked(v)
-                           : EmptyArray::MakeMixed(k, v);
-  return lval.arr;
+  return SetIntMove(ad, k, v);
 }
 
-ArrayData*
-EmptyArray::SetStr(ArrayData*, StringData* k, Cell v) {
+ArrayData* EmptyArray::SetIntMove(ArrayData*, int64_t k, Cell v) {
+  // TODO(#3888164): we should make it so we don't need KindOfUninit checks
+  if (v.m_type == KindOfUninit) v.m_type = KindOfNull;
+  return k == 0 ? EmptyArray::MakePacked(v).arr
+                : EmptyArray::MakeMixed(k, v).arr;
+}
+
+ArrayData* EmptyArray::SetStr(ArrayData* ad, StringData* k, Cell v) {
   tvIncRefGen(v);
+  return SetStrMove(ad, k, v);
+}
+
+ArrayData* EmptyArray::SetStrMove(ArrayData*, StringData* k, Cell v) {
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (v.m_type == KindOfUninit) v.m_type = KindOfNull;
   return EmptyArray::MakeMixed(k, v).arr;

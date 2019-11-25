@@ -177,6 +177,12 @@ inline ArrayData* ArrayData::setInPlace(int64_t k, Cell v) {
   return g_array_funcs.setIntInPlace[kind()](this, k, v);
 }
 
+inline ArrayData* ArrayData::setMove(int64_t k, Cell v) {
+  assertx(cellIsPlausible(v));
+  assertx(cowCheck() || notCyclic(v));
+  return g_array_funcs.setIntMove[kind()](this, k, v);
+}
+
 inline ArrayData* ArrayData::set(StringData* k, Cell v) {
   assertx(cellIsPlausible(v));
   assertx(cowCheck() || notCyclic(v));
@@ -187,6 +193,12 @@ inline ArrayData* ArrayData::setInPlace(StringData* k, Cell v) {
   assertx(cellIsPlausible(v));
   assertx(notCyclic(v));
   return g_array_funcs.setStrInPlace[kind()](this, k, v);
+}
+
+inline ArrayData* ArrayData::setMove(StringData* k, Cell v) {
+  assertx(cellIsPlausible(v));
+  assertx(cowCheck() || notCyclic(v));
+  return g_array_funcs.setStrMove[kind()](this, k, v);
 }
 
 inline ArrayData* ArrayData::set(int64_t k, const Variant& v) {

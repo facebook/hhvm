@@ -817,7 +817,7 @@ arr_lval PackedArray::LvalSilentInt(ArrayData* adIn, int64_t k, bool copy) {
 tv_lval PackedArray::LvalUncheckedInt(ArrayData* ad, int64_t k) {
   // NOTE: We cannot check that k is less than the array's length here, because
   // the vector extension allocates the array and uses this method to fill it.
-  assertx(k < PackedArray::capacity(ad));
+  assertx(size_t(k) < PackedArray::capacity(ad));
   return &packedData(ad)[k];
 }
 
@@ -847,13 +847,35 @@ arr_lval PackedArray::LvalForceNew(ArrayData* adIn, bool copy) {
   return arr_lval { ad, lval };
 }
 
+ArrayData* PackedArray::SetIntMoveRaw(ArrayData* adIn, int64_t k, Cell v) {
+  assertx(adIn->hasPackedLayout());
+  assertx(size_t(k) < adIn->getSize());
+  auto const ad = [&]{
+    if (!adIn->cowCheck()) return adIn;
+    auto const result = PackedArray::Copy(adIn);
+    assertx(result != adIn);
+    if (adIn->decReleaseCheck()) PackedArray::Release(adIn);
+    return result;
+  }();
+  setElem(LvalUncheckedInt(ad, k), v, true);
+  return ad;
+}
+
 ArrayData* PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v) {
-  bool copy = adIn->cowCheck();
+  auto const copy = adIn->cowCheck();
   return MutableOpInt(adIn, k, copy,
     [&] (ArrayData* ad) { setElem(LvalUncheckedInt(ad, k), v); return ad; },
     [&] { return AppendImpl(adIn, v, copy); },
     [&] (MixedArray* mixed) { return mixed->addVal(k, v); }
   );
+}
+
+ArrayData* PackedArray::SetIntMove(ArrayData* adIn, int64_t k, Cell v) {
+  if (size_t(k) < adIn->getSize()) return SetIntMoveRaw(adIn, k, v);
+  auto const result = SetInt(adIn, k, v);
+  if (adIn != result && adIn->decReleaseCheck()) PackedArray::Release(adIn);
+  tvDecRefGen(v);
+  return result;
 }
 
 ArrayData* PackedArray::SetIntInPlace(ArrayData* adIn, int64_t k, Cell v) {
@@ -864,16 +886,19 @@ ArrayData* PackedArray::SetIntInPlace(ArrayData* adIn, int64_t k, Cell v) {
   );
 }
 
-ArrayData*
-PackedArray::SetIntVec(ArrayData* adIn, int64_t k, Cell v) {
+ArrayData* PackedArray::SetIntVec(ArrayData* adIn, int64_t k, Cell v) {
   assertx(adIn->cowCheck() || adIn->notCyclic(v));
   return MutableOpIntVec(adIn, k, adIn->cowCheck(),
     [&] (ArrayData* ad) { setElem(LvalUncheckedInt(ad, k), v); return ad; }
   );
 }
 
-ArrayData*
-PackedArray::SetIntInPlaceVec(ArrayData* adIn, int64_t k, Cell v) {
+ArrayData* PackedArray::SetIntMoveVec(ArrayData* adIn, int64_t k, Cell v) {
+  if (size_t(k) < adIn->getSize()) return SetIntMoveRaw(adIn, k, v);
+  throwOOBArrayKeyException(k, adIn);
+}
+
+ArrayData* PackedArray::SetIntInPlaceVec(ArrayData* adIn, int64_t k, Cell v) {
   assertx(adIn->notCyclic(v));
   return MutableOpIntVec(adIn, k, false,
     [&] (ArrayData* ad) { setElem(LvalUncheckedInt(ad, k), v); return ad; }
@@ -884,6 +909,14 @@ ArrayData* PackedArray::SetStr(ArrayData* adIn, StringData* k, Cell v) {
   return MutableOpStr(adIn, k, adIn->cowCheck(),
     [&] (MixedArray* mixed) { return mixed->addVal(k, v); }
   );
+}
+
+ArrayData* PackedArray::SetStrMove(ArrayData* adIn, StringData* k, Cell v) {
+  auto const result = SetStr(adIn, k, v);
+  assertx(result != adIn);
+  if (adIn->decReleaseCheck()) PackedArray::Release(adIn);
+  tvDecRefGen(v);
+  return result;
 }
 
 ArrayData* PackedArray::SetStrInPlace(ArrayData* adIn, StringData* k, Cell v) {

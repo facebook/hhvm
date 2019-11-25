@@ -374,20 +374,21 @@ const ArrayFunctions g_array_funcs = {
   /*
    * ArrayData* SetInt(ArrayData*, int64_t key, Cell v)
    *
-   *   Set a value in the array for an integer key. SetInt() has copy/grow
-   *   semantics; SetIntInPlace() may only escalate or grow.
+   *   Set a value in the array for an integer key. SetInt() and SetIntMove()
+   *   have copy/grow semantics; SetIntInPlace() may only escalate or grow.
    */
   DISPATCH(SetInt)
+  DISPATCH(SetIntMove)
   DISPATCH(SetIntInPlace)
 
   /*
    * ArrayData* SetStr(ArrayData*, StringData*, Cell v)
    *
-   *   Set a value in the array for a string key.  The string must not
-   *   be an integer-like string. SetStr() has copy/grow semantics;
-   *   SetStrInPlace() may only escalate or grow.
+   *   Set a value in the array for an string key. SetStr() and SetStrMove()
+   *   have copy/grow semantics; SetStrInPlace() may only escalate or grow.
    */
   DISPATCH(SetStr)
+  DISPATCH(SetStrMove)
   DISPATCH(SetStrInPlace)
 
   /*

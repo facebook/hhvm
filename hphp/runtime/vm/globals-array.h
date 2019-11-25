@@ -87,8 +87,10 @@ public:
   static arr_lval LvalSilentStr(ArrayData*, StringData* k, bool copy);
   static arr_lval LvalForceNew(ArrayData*, bool copy);
 
+  static ArrayData* SetIntMove(ArrayData*, int64_t k, Cell v);
   static ArrayData* SetIntInPlace(ArrayData*, int64_t k, Cell v);
   static constexpr auto SetInt = &SetIntInPlace;
+  static ArrayData* SetStrMove(ArrayData*, StringData* k, Cell v);
   static ArrayData* SetStrInPlace(ArrayData*, StringData* k, Cell v);
   static constexpr auto SetStr = &SetStrInPlace;
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);

@@ -85,8 +85,10 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
 
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v);
+  static ArrayData* SetIntMove(ArrayData*, int64_t k, Cell v);
   static constexpr auto SetIntInPlace = &SetInt;
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);
+  static ArrayData* SetStrMove(ArrayData*, StringData* k, Cell v);
   static constexpr auto SetStrInPlace = &SetStr;
   static ArrayData* RemoveInt(ArrayData* ad, int64_t);
   static constexpr auto RemoveIntInPlace = &RemoveInt;

@@ -1146,19 +1146,15 @@ void MixedArray::nextInsert(Cell v) {
   cellDup(v, e->data);
 }
 
-template <class K> ALWAYS_INLINE
+template <class K, bool move> ALWAYS_INLINE
 ArrayData* MixedArray::update(K k, Cell data) {
   assertx(!isFull());
   auto p = insert(k);
   if (p.found) {
-    // TODO(#3888164): we should restructure things so we don't have
-    // to check KindOfUninit here.
-    setElem(p.tv, data);
+    setElem(p.tv, data, move);
     return this;
   }
-  // TODO(#3888164): we should restructure things so we don't have to
-  // check KindOfUninit here.
-  initElem(p.tv, data);
+  initElem(p.tv, data, move);
   return this;
 }
 
@@ -1203,31 +1199,43 @@ ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v) {
   return asMixed(ad)->prepareForInsert(ad->cowCheck())->update(k, v);
 }
 
+ArrayData* MixedArray::SetIntMove(ArrayData* ad, int64_t k, Cell v) {
+  assertx(ad->cowCheck() || ad->notCyclic(v));
+  auto const preped = asMixed(ad)->prepareForInsert(ad->cowCheck());
+  auto const result = preped->update<int64_t, true>(k, v);
+  if (ad != result && ad->decReleaseCheck()) MixedArray::Release(ad);
+  return result;
+}
+
 ArrayData* MixedArray::SetIntInPlace(ArrayData* ad, int64_t k, Cell v) {
   assertx(ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(false/*copy*/)->update(k, v);
 }
 
-ArrayData*
-MixedArray::SetStr(ArrayData* ad, StringData* k, Cell v) {
+ArrayData* MixedArray::SetStr(ArrayData* ad, StringData* k, Cell v) {
   assertx(ad->cowCheck() || ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(ad->cowCheck())->update(k, v);
 }
 
-ArrayData*
-MixedArray::SetStrInPlace(ArrayData* ad, StringData* k, Cell v) {
+ArrayData* MixedArray::SetStrMove(ArrayData* ad, StringData* k, Cell v) {
+  assertx(ad->cowCheck() || ad->notCyclic(v));
+  auto const preped = asMixed(ad)->prepareForInsert(ad->cowCheck());
+  auto const result = preped->update<StringData*, true>(k, v);
+  if (ad != result && ad->decReleaseCheck()) MixedArray::Release(ad);
+  return result;
+}
+
+ArrayData* MixedArray::SetStrInPlace(ArrayData* ad, StringData* k, Cell v) {
   assertx(ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(false/*copy*/)->update(k, v);
 }
 
-ArrayData*
-MixedArray::AddInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
+ArrayData* MixedArray::AddInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
   assertx(!ad->exists(k));
   return asMixed(ad)->prepareForInsert(copy)->addVal(k, v);
 }
 
-ArrayData*
-MixedArray::AddStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
+ArrayData* MixedArray::AddStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
   assertx(!ad->exists(k));
   return asMixed(ad)->prepareForInsert(copy)->addVal(k, v);
 }

@@ -1771,9 +1771,8 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
   }();
   if (!baseLoc) return nullptr;
 
-  auto const newArr = gen(env,
-                          isVec ? VecSet : isDict ? DictSet : ArraySet,
-                          base, key, value);
+  auto const op = isVec ? VecSet : isDict ? DictSet : ArraySet;
+  auto const newArr = gen(env, op, base, key, value);
 
   // Update the base's location with the new array.
   switch (baseLoc->tag()) {
@@ -1788,6 +1787,7 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
     case LTag::MBase:
       always_assert(false);
   }
+  gen(env, IncRef, value);
   return value;
 }
 
@@ -1884,10 +1884,12 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
 
     case SimpleOp::Vector:
       gen(env, VectorSet, extractBase(env), key, value);
+      gen(env, IncRef, value);
       break;
 
     case SimpleOp::Map:
       gen(env, MapSet, extractBase(env), key, value);
+      gen(env, IncRef, value);
       break;
 
     case SimpleOp::Array:

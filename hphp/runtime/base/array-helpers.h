@@ -23,15 +23,22 @@
 
 namespace HPHP {
 
+// TODO(#3888164): These helpers only exist because we might try to set an
+// Uninit value in an array. We should restructure code-gen to guard against
+// this possibility so we can eliminate these checks.
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Initialize a new array element.
  */
-ALWAYS_INLINE void initElem(TypedValue& elem, Cell v) {
-  cellDup(v, elem);
-  if (UNLIKELY(elem.m_type == KindOfUninit)) {
+ALWAYS_INLINE void initElem(TypedValue& elem, Cell v, bool move = false) {
+  if (UNLIKELY(v.m_type == KindOfUninit)) {
     elem.m_type = KindOfNull;
+  } else if (move) {
+    cellCopy(v, elem);
+  } else {
+    cellDup(v, elem);
   }
 }
 
@@ -40,11 +47,15 @@ ALWAYS_INLINE void initElem(TypedValue& elem, Cell v) {
  * (i.e. promote uninit null values to init null values).
  */
 template<typename C> ALWAYS_INLINE
-enable_if_lval_t<C&&, void> setElem(C&& elem, Cell v) {
+enable_if_lval_t<C&&, void> setElem(C&& elem, Cell v, bool move = false) {
   if (UNLIKELY(v.m_type == KindOfUninit)) {
     v.m_type = KindOfNull;
   }
-  cellSet(v, elem);
+  if (move) {
+    cellMove(v, elem);
+  } else {
+    cellSet(v, elem);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -474,8 +474,13 @@ public:
    * calling cowCheck(), but may still return a new array for escalation
    * or reallocating to grow.
    *
-   * Return `this' if copy/escalation are not needed, or a copied/escalated
-   * array data.
+   * Semantically, setMove() methods 1) do a set, 2) dec-ref the value, and
+   * 3) if the operation required copy/escalation, dec-ref the old array. This
+   * sequence is needed for member ops and can be implemented more efficiently
+   * if done as a single unit.
+   *
+   * These methods return `this' if copy/escalation are not needed, or a
+   * copied/escalated array data if they are.
    */
   ArrayData* set(int64_t k, Cell v);
   ArrayData* set(StringData* k, Cell v);
@@ -485,6 +490,8 @@ public:
   ArrayData* setInPlace(StringData* k, Cell v);
   ArrayData* setInPlace(Cell k, Cell v);
   ArrayData* setInPlace(const String& k, Cell v);
+  ArrayData* setMove(int64_t k, Cell v);
+  ArrayData* setMove(StringData* k, Cell v);
 
   ArrayData* set(int64_t k, const Variant& v);
   ArrayData* set(StringData* k, const Variant& v);
@@ -887,8 +894,10 @@ struct ArrayFunctions {
   ssize_t (*nvGetStrPos[NK])(const ArrayData*, const StringData* k);
   Cell (*nvGetKey[NK])(const ArrayData*, ssize_t pos);
   ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v);
+  ArrayData* (*setIntMove[NK])(ArrayData*, int64_t k, Cell v);
   ArrayData* (*setIntInPlace[NK])(ArrayData*, int64_t k, Cell v);
   ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v);
+  ArrayData* (*setStrMove[NK])(ArrayData*, StringData* k, Cell v);
   ArrayData* (*setStrInPlace[NK])(ArrayData*, StringData* k, Cell v);
   size_t (*vsize[NK])(const ArrayData*);
   tv_rval (*nvGetPos[NK])(const ArrayData*, ssize_t pos);

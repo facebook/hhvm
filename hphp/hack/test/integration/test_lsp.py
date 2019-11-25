@@ -3520,6 +3520,44 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
                 powered_by="serverless_ide",
             )
+            .request(
+                comment="hover over class with copyright docblock",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 37, "character": 15},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "final class CopyrightClass"},
+                        "Testing copyright removal",
+                    ],
+                    "range": {
+                        "start": {"line": 37, "character": 2},
+                        "end": {"line": 37, "character": 16},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(
+                comment="hover over class with generated docblock",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 58, "character": 15},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "final class GeneratedClass"},
+                        "Testing generated text removal",
+                    ],
+                    "range": {
+                        "start": {"line": 58, "character": 2},
+                        "end": {"line": 58, "character": 16},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
             .request(method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)

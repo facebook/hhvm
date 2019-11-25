@@ -58,6 +58,7 @@ type args = {
   filter: string;
   dir: string option;
   no_tree_compare: bool;
+  ignore_lid: bool;
 }
 
 module type TreeBuilder_S = sig
@@ -309,9 +310,10 @@ let get_files_in_path ~args path =
   in
   List.filter
     ~f:(fun f ->
-      ( String_utils.string_ends_with f ".php"
-      || String_utils.string_ends_with f ".hhi"
-      || String_utils.string_ends_with f ".hack" )
+      (not (Sys.is_directory f))
+      && ( String_utils.string_ends_with f ".php"
+         || String_utils.string_ends_with f ".hhi"
+         || String_utils.string_ends_with f ".hack" )
       && matches_filter f
       &&
       match args.parser with
@@ -369,6 +371,7 @@ let parse_args () =
   let no_tree_compare = ref false in
   let filter = ref "" in
   let dir = ref None in
+  let ignore_lid = ref false in
   let options =
     [
       ("--rust", Arg.Unit (fun () -> mode := RUST), "");
@@ -399,6 +402,7 @@ let parse_args () =
       ( "--hhvm-tests",
         Arg.Unit (fun () -> dir := Some (fbcode ^ "hphp/test/")),
         "" );
+      ("--ignore-lid", Arg.Set ignore_lid, "");
     ]
   in
   Arg.parse options (fun _ -> ()) "";
@@ -416,6 +420,7 @@ let parse_args () =
     filter = !filter;
     dir = !dir;
     no_tree_compare = !no_tree_compare;
+    ignore_lid = !ignore_lid;
   }
 
 module MinimalTest = Runner (WithSyntax (MinimalSyntax))
@@ -517,7 +522,7 @@ module LowererTest_ = struct
     | Ok aast -> Aast.show_program pp_pos pp_unit pp_unit pp_unit aast
     | Error msg -> Printf.sprintf "SYNTAX ERROR: %s" msg
 
-  let print_result path result =
+  let print_result args path result =
     let print_lowpri_err (p, e) = Printf.sprintf "[%s %s]" (print_pos p) e in
     let print_lowpri_errs errs =
       String.concat ~sep:"\n" @@ List.map ~f:print_lowpri_err errs
@@ -531,7 +536,7 @@ module LowererTest_ = struct
       Printf.fprintf
         oc
         "%s\n%s\n%s\n%s"
-        (print_aast_result result.aast)
+        (print_aast_result ~skip_lid:args.ignore_lid result.aast)
         (Scoured_comments.show result.scoured_comments)
         (print_lowpri_errs result.lowpri_errors)
         (print_errs result.syntax_errors))
@@ -580,7 +585,10 @@ module LowererTest_ = struct
       | OCAML -> Skip
       | _ -> build_tree args rust_env true file source_text
     in
-    let aast_equal = Aast.equal_program ( = ) ( = ) ( = ) ( = ) in
+    let aast_equal =
+      (if args.ignore_lid then Local_id.equal_ref := (fun _ _ -> true));
+      Aast.equal_program ( = ) ( = ) ( = ) ( = )
+    in
     let compare_result r1 r2 =
       Rust_aast_parser_types.(
         let compare_aast_result a1 a2 =
@@ -646,11 +654,11 @@ module LowererTest_ = struct
     flush stdout;
     if args.check_printed_tree then (
       (match ocaml_tree with
-      | Tree r -> print_result "/tmp/ocaml.aast" r
+      | Tree r -> print_result args "/tmp/ocaml.aast" r
       | Crash e -> print_err "/tmp/ocaml.aast" e
       | _ -> ());
       match rust_tree with
-      | Tree r -> print_result "/tmp/rust.aast" r
+      | Tree r -> print_result args "/tmp/rust.aast" r
       | Crash e -> print_err "/tmp/rust.aast" e
       | _ -> ()
     )

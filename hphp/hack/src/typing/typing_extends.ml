@@ -709,7 +709,7 @@ let tconst_subsumption env parent_typeconst child_typeconst =
     @@ Option.map2
          child_typeconst.ttc_type
          parent_typeconst.ttc_constraint
-         ~f:(Typing_ops.sub_type_decl parent_pos Reason.URtypeconst_cstr env);
+         ~f:(Typing_ops.sub_type_decl pos Reason.URtypeconst_cstr env);
 
     begin
       match

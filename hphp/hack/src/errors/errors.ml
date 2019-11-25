@@ -1599,6 +1599,13 @@ let pu_atom_unknown pos name kind loc unk =
        kind
        unk)
 
+let pu_localize pos msg =
+  let msg = strip_ns msg in
+  add
+    (Naming.err_code Naming.PocketUniversesLocalization)
+    pos
+    (sprintf "Illegal Pocket Universe invocation %s\n" msg)
+
 let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
   add_list
     (Naming.err_code Naming.IllegalUseOfDynamicallyCallable)
@@ -4029,10 +4036,14 @@ let pu_typing pos kind msg =
   add
     (Typing.err_code Typing.PocketUniversesTyping)
     pos
-    (sprintf
-       "Unexpected Pocket Universes %s %s while typing expressions."
-       kind
-       msg)
+    (sprintf "Unexpected Pocket Universes %s %s during typing." kind msg)
+
+let pu_typing_not_supported pos typ =
+  let typ = strip_ns typ in
+  add
+    (Typing.err_code Typing.PocketUniversesTyping)
+    pos
+    (sprintf "Unexpected type %s instead of a Pocket Universes member." typ)
 
 let php_lambda_disallowed pos =
   add

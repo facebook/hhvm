@@ -34,7 +34,6 @@
   .method [public static] <"HH\\mixed" N  > Field##Members() {
     .declvars $mems;
     Vec @A_0
-    ColFromArray ImmVector
     SetL $mems
     PopC
     CGetL $mems

@@ -3515,9 +3515,7 @@ and expr_
       (Aast.Shape (List.map ~f:(fun (k, (te, _)) -> (k, te)) tfdm))
       (Reason.Rwitness p, Tshape (Closed_shape, fdm))
   | PU_atom s ->
-    (* TODO(T36532263): Pocket Universes *)
-    Errors.pu_typing p "atom" s;
-    expr_error env (Reason.Rwitness p) outer
+    make_result env p (Aast.PU_atom s) (Reason.Rwitness p, Tprim (Tatom s))
   | PU_identifier (_, (_, enum), (_, atom)) ->
     (* TODO(T36532263): Pocket Universes *)
     let s = enum ^ ":@" ^ atom in
@@ -4644,7 +4642,8 @@ and call_parent_construct pos env el unpacked_element =
         | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
         | Tabstract (_, _)
         | Tanon (_, _)
-        | Tunion _ | Tintersection _ | Tobject | Tpu _ | Tpu_access _ ) ) ->
+        | Tunion _ | Tintersection _ | Tobject | Tpu _ | Tpu_type_access _ ) )
+      ->
       Errors.parent_outside_class pos;
       let ty = (Reason.Rwitness pos, Typing_utils.terr env) in
       (env, [], None, ty, ty, ty))
@@ -5454,6 +5453,107 @@ and dispatch_call
       tel
       typed_unpack_element
       ty
+  | PU_identifier ((cpos, cid), ((_, enum) as enum'), ((_, case) as case')) ->
+    let (env, tal, te1, ty1) =
+      static_class_id ~check_constraints:false cpos env [] cid
+    in
+    let (env, fty) =
+      let (env, ety_env, et) =
+        match class_get_pu ~from_class:cid env ty1 enum with
+        | (_env, None) ->
+          failwithf "TODO(T36532263): class_get_pu: %s not found" enum ()
+        | (env, Some (ety_env, et)) -> (env, ety_env, et)
+      in
+      let make_fty params ft_ret =
+        let len = List.length params in
+        {
+          ft_is_coroutine = false;
+          ft_arity = Fstandard (len, len);
+          ft_tparams = ([], FTKtparams);
+          ft_where_constraints = [];
+          ft_params =
+            List.map params ~f:(fun et_type ->
+                {
+                  fp_pos = cpos;
+                  fp_name = None;
+                  fp_type = { et_enforced = false; et_type };
+                  fp_kind = FPnormal;
+                  fp_accept_disposable = true;
+                  fp_mutability = None;
+                  fp_rx_annotation = None;
+                });
+          ft_ret = { et_enforced = false; et_type = ft_ret };
+          ft_reactive = Nonreactive;
+          ft_return_disposable = false;
+          (* mutability of the receiver *)
+          ft_mutability = None;
+          ft_returns_mutable = false;
+          ft_returns_void_to_rx = false;
+          ft_fun_kind = Ast_defs.FSync;
+        }
+      in
+      let reason = Reason.Rwitness cpos in
+      let (env, fty) =
+        let pu_type = (reason, Tpu (ty1, enum')) in
+        if String.equal SN.PocketUniverses.members case then
+          ( env,
+            make_fty
+              []
+              (reason, Tclass ((fst et.tpu_name, "\\vec"), Nonexact, [pu_type]))
+          )
+        else
+          let case_ty =
+            match SMap.find_opt case et.tpu_case_values with
+            | Some (_, case) -> case
+            | None ->
+              failwithf
+                "TODO(T36532263): PU_identifier: %s has no case value %s"
+                enum
+                case
+                ()
+          in
+          (* Type variable to type the parameter of the Pu expression call.
+             We use a variable in case there is some dependency *)
+          (* let (env, fresh_ty) = Env.fresh_invariant_type_var env cpos in *)
+          let (env, fresh_ty) = Env.fresh_type env cpos in
+          (* It's original upper bound is the PU enum itself *)
+          let env =
+            SubType.sub_type
+              env
+              fresh_ty
+              (reason, Tpu (ty1, enum'))
+              Errors.pocket_universes_typing
+          in
+          let substs =
+            let f id = (reason, Tpu_type_access (ty1, enum', fresh_ty, id)) in
+            SMap.map f et.tpu_case_types
+          in
+          let ety_env =
+            let combine _ va vb =
+              if Option.is_some vb then
+                vb
+              else
+                va
+            in
+            let substs = SMap.merge combine ety_env.substs substs in
+            { ety_env with substs }
+          in
+          let (env, case_ty) = Phase.localize ~ety_env env case_ty in
+          (env, make_fty [fresh_ty] case_ty)
+      in
+      (env, (Reason.Rwitness p, Tfun fty))
+    in
+    let (env, (tel, tuel, ty)) = call ~expected p env fty el unpacked_element in
+    let (a, b, c) =
+      make_call
+        env
+        (Tast.make_typed_expr fpos fty (Aast.PU_identifier (te1, enum', case')))
+        tal
+        tel
+        tuel
+        ty
+    in
+    (a, b, c)
   | _ ->
     let (env, te, fty) = expr env e in
     let (env, fty) =
@@ -5853,7 +5953,7 @@ and class_get_
       ( Tvar _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _
       | Ttuple _
       | Tanon (_, _)
-      | Tobject | Tshape _ | Tpu _ | Tpu_access _ ) ) ->
+      | Tobject | Tshape _ | Tpu _ | Tpu_type_access _ ) ) ->
     (* should never happen; static_class_id takes care of these *)
     (env, ((Reason.Rnone, Typing_utils.tany env), []))
 
@@ -5900,7 +6000,7 @@ and class_id_for_new ~exact p env cid explicit_targs =
             | Ttuple _
             | Tanon (_, _)
             | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tdynamic | Tpu _
-            | Tpu_access _ ) ) ->
+            | Tpu_type_access _ ) ) ->
           get_info res tyl))
   in
   get_info [] [cid_ty]
@@ -6014,7 +6114,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         | Tanon (_, _)
         | Tunion _ | Tintersection _
         | Tabstract (_, _)
-        | Tobject | Tpu _ | Tpu_access _ ) ) ->
+        | Tobject | Tpu _ | Tpu_type_access _ ) ) ->
       let parent =
         match Env.get_parent_ty env with
         | None ->
@@ -6107,7 +6207,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           | Ttuple _
           | Tabstract ((AKdependent _ | AKnewtype _), _)
           | Tanon (_, _)
-          | Tobject | Tshape _ | Tpu _ | Tpu_access _ ) ) as ty ->
+          | Tobject | Tshape _ | Tpu _ | Tpu_type_access _ ) ) as ty ->
         Errors.expected_class
           ~suffix:(", but got " ^ Typing_print.error env ty)
           p;
@@ -7245,8 +7345,8 @@ and condition
         ( Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
         | Tprim _ | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Ttuple _
         | Tanon (_, _)
-        | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tpu _ | Tpu_access _
-          ) ) ->
+        | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tpu _
+        | Tpu_type_access _ ) ) ->
       condition_nullity ~nonnull:tparamet env te)
   | Aast.Binop (((Ast_defs.Diff | Ast_defs.Diff2) as op), e1, e2) ->
     let op =
@@ -7370,7 +7470,7 @@ and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
   | ( _,
       ( Tany _ | Tprim _ | Toption _ | Ttuple _ | Tnonnull | Tshape _ | Tvar _
       | Tabstract _ | Tarraykind _ | Tanon _ | Tunion _ | Tintersection _
-      | Tobject | Terr | Tfun _ | Tdynamic | Tpu _ | Tpu_access _ ) ) ->
+      | Tobject | Terr | Tfun _ | Tdynamic | Tpu _ | Tpu_type_access _ ) ) ->
     (env, hint_ty)
 
 (** If we are dealing with a refinement like
@@ -8904,7 +9004,7 @@ and class_get_pu_ env cty name =
   | Tshape _ ->
     (env, None)
   | Tintersection _ -> (env, None)
-  | Tpu_access _
+  | Tpu_type_access _
   | Tpu _ ->
     (env, None)
   | Tabstract (_, Some ty) -> class_get_pu_ env ty name
@@ -9035,5 +9135,3 @@ let nast_to_tast opts nast =
   let tast = List.map nast convert_def in
   Tast_check.program opts tast;
   tast
-
-let () = TUtils.class_get_pu_ref := class_get_pu

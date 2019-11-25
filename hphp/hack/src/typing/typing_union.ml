@@ -262,7 +262,7 @@ and simplify_union_ env ty1 ty2 r =
              * to say whether a given T can be null - e.g. opaque newtypes, dependent
              * types, etc. - so for now we leave it here.
              * TODO improve that. *)
-            | Tnonnull | Tany _ | Tintersection _ | Tpu _ | Tpu_access _
+            | Tnonnull | Tany _ | Tintersection _ | Tpu _ | Tpu_type_access _
             | Toption _ | Tunion _ ) as ty1_ ) ),
         (_, ty2_) ) ->
       (* Make sure to add a dependency on any classes referenced here, even if

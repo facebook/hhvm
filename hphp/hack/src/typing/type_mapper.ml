@@ -152,12 +152,13 @@ class shallow_type_mapper : type_mapper_type =
       | Tdynamic -> this#on_tdynamic env r
       | Tobject -> this#on_tobject env r
       | Tshape (shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
-      | Tpu (base, enum, kind) ->
-        let (env, ty) = this#on_type env base in
-        (env, (r, Tpu (ty, enum, kind)))
-      | Tpu_access (base, access) ->
-        let (env, ty) = this#on_type env base in
-        (env, (r, Tpu_access (ty, access)))
+      | Tpu (base, enum) ->
+        let (env, base) = this#on_type env base in
+        (env, (r, Tpu (base, enum)))
+      | Tpu_type_access (base, enum, member, tyname) ->
+        let (env, base) = this#on_type env base in
+        let (env, member) = this#on_type env member in
+        (env, (r, Tpu_type_access (base, enum, member, tyname)))
   end
 
 (* Mixin class - adding it to shallow type mapper creates a mapper that

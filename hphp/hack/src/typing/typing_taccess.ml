@@ -309,12 +309,8 @@ and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
     let (tenv, ty) = Typing_subtype_tconst.get_tyvar_type_const env.tenv n id in
     ({ env with tenv }, ty)
   (* TODO(T36532263): Pocket Universes *)
-  | Tpu (base, _, _) ->
-    let reason = fst base in
-    let pos = Reason.to_pos reason in
-    raise_error (fun _ -> Errors.pu_expansion pos)
-  (* TODO(T36532263): Pocket Universes *)
-  | Tpu_access (base, _) ->
+  | Tpu (base, _)
+  | Tpu_type_access (base, _, _, _) ->
     let reason = fst base in
     let pos = Reason.to_pos reason in
     raise_error (fun _ -> Errors.pu_expansion pos)

@@ -175,7 +175,7 @@ let gen_Members field pos (fields : pu_enum) =
                 Binop
                   ( Eq None,
                     (annot, Lvar (pos, Local_id.make_unscoped "$mems")),
-                    (annot, Collection ((pos, "ImmVector"), None, mems)) ) ) );
+                    (annot, Collection ((pos, "vec"), None, mems)) ) ) );
           ( pos,
             Return (Some (annot, Lvar (pos, Local_id.make_unscoped "$mems"))) );
         ];

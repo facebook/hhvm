@@ -19,6 +19,7 @@ File "type_hint_typeparameter_variance.php", line 8, characters 5-17:
       appears_covariantly true
       eager_solve_fail false
       lower_bounds {}
+      pu_acceses {}
       type_constants {}
       tyvar_pos File "type_hint_typeparameter_variance.php", line 7, characters 12-12:
       upper_bounds {}
@@ -27,6 +28,7 @@ File "type_hint_typeparameter_variance.php", line 8, characters 5-17:
       appears_covariantly false
       eager_solve_fail false
       lower_bounds {}
+      pu_acceses {}
       type_constants {}
       tyvar_pos File "type_hint_typeparameter_variance.php", line 7, characters 12-12:
       upper_bounds {}

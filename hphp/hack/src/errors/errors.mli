@@ -979,9 +979,13 @@ val pu_expansion : Pos.t -> unit
 
 val pu_typing : Pos.t -> string -> string -> unit
 
+val pu_typing_not_supported : Pos.t -> string -> unit
+
 val pu_atom_missing : Pos.t -> string -> string -> string -> string -> unit
 
 val pu_atom_unknown : Pos.t -> string -> string -> string -> string -> unit
+
+val pu_localize : Pos.t -> string -> unit
 
 val lvar_in_obj_get : Pos.t -> unit
 

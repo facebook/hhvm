@@ -176,6 +176,8 @@ let remove_erased_generics env h =
       | Aast.Hfun _
       | Aast.Haccess _ ->
         h
+      | Aast.Hpu_access (h, (pos, id)) ->
+        Aast.Hpu_access (aux h, (pos, modify id))
       | Aast.Herr
       | Aast.Hany
       | Aast.Hmixed
@@ -189,9 +191,6 @@ let remove_erased_generics env h =
       | Aast.Hthis
       | Aast.Hnothing
       | Aast.Hdynamic ->
-        failwith "TODO Unimplemented Did not exist on legacy AST"
-      | Aast.Hpu_access _ ->
-        failwith "TODO(T36532263) erased generics in pocket universe type hint"
-    )
+        failwith "TODO Unimplemented Did not exist on legacy AST" )
   in
   aux h

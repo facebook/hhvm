@@ -756,3 +756,7 @@ module EmitterSpecialFunctions = struct
 
   let set_frame_metadata = "\\HH\\set_frame_metadata"
 end
+
+module PocketUniverses = struct
+  let members = "Members"
+end

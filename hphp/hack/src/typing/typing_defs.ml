@@ -86,13 +86,6 @@ type param_mode =
   | FPinout
 [@@deriving eq]
 
-type pu_kind =
-  (* all atoms of an enumeration *)
-  | Pu_plain
-  (* single atom of an enumeration *)
-  | Pu_atom of string
-[@@deriving eq]
-
 type xhp_attr_tag =
   | Required
   | Lateinit
@@ -233,6 +226,12 @@ and _ ty_ =
   | Tmixed : decl_phase ty_
   | Tnothing : decl_phase ty_
   | Tlike : decl_ty -> decl_phase ty_
+  (* Access to a Pocket Universe Expression or Atom, denoted by
+   * Foo:@Bar or Foo:@Bar:@X.
+   * It might be unresolved at first (e.g. if Foo is a generic variable).
+   * Will be refined to Tpu once typechecking is successful
+   *)
+  | Tpu_access : decl_ty * Nast.sid -> decl_phase ty_
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany : TanySentinel.t -> 'phase ty_
   | Terr
@@ -266,11 +265,6 @@ and _ ty_ =
    * Foo:@Bar or Foo:@Bar:@X.
    * It might be unresolved at first (e.g. if Foo is a generic variable).
    * Will be refined to Tpu once typechecking is successful
-   *)
-  | Tpu_access : 'phase ty * Nast.sid -> 'phase ty_
-  (* A type variable (not to be confused with a type parameter).
-   * It represents a type that is "unknown" and must be inferred by Hack's
-   * constraint-based type inference engine.
    *)
   | Tvar : Ident.t -> 'phase ty_
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
@@ -338,7 +332,15 @@ and _ ty_ =
    * - third parameter is  either Pu_plain (the enumeration as the set of
    *   all its atoms) or Pu_atom (a specific atom in the enumeration)
    *)
-  | Tpu : locl_ty * Nast.sid * pu_kind -> locl_phase ty_
+  | Tpu : locl_ty * Nast.sid -> locl_phase ty_
+  (* Typing of Pocket Universes type projections
+   * - first parameter is the enclosing class
+   * - second parameter is the name of the Pocket Universe Enumeration
+   * - third parameter is the generic (tvar/tabstract) in place of the
+   *   member name
+   * - the fourth parameter is the name of the type to project
+   *)
+  | Tpu_type_access : locl_ty * Nast.sid * locl_ty * Nast.sid -> locl_phase ty_
 
 and constraint_type_ =
   | Thas_member of has_member
@@ -720,7 +722,7 @@ let is_union_or_inter_type ((_, ty) : locl_ty) =
   | Tfun _
   | Ttuple _
   | Tshape _
-  | Tpu_access _
+  | Tpu_type_access _
   | Tpu _
   | Tvar _
   | Tabstract _
@@ -835,8 +837,8 @@ let ty_con_ordinal ty_ =
   | Tobject -> 14
   | Tclass _ -> 15
   | Tarraykind _ -> 16
-  | Tpu _ -> 18
-  | Tpu_access _ -> 19
+  | Tpu _ -> 17
+  | Tpu_type_access _ -> 18
 
 (* Ordinal value for type constructor, for decl types *)
 let decl_ty_con_ordinal ty_ =

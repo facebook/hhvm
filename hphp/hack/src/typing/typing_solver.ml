@@ -187,7 +187,7 @@ let rec freshen_inside_ty env ty =
     end
   | Tvar _ -> default ()
   | Tpu _
-  | Tpu_access _ ->
+  | Tpu_type_access _ ->
     (* TODO(T36532263) suggested by Catherine, might be updated next *)
     default ()
 
@@ -747,7 +747,7 @@ let unsolved_invariant_tyvars_under_union_and_intersection env ty =
     | ( _,
         ( Terr | Tany _ | Tdynamic | Tnonnull | Tprim _ | Tclass _ | Tobject
         | Tabstract _ | Tarraykind _ | Ttuple _ | Tshape _ | Tfun _ | Tanon _
-        | Tpu _ | Tpu_access _ ) ) ->
+        | Tpu _ | Tpu_type_access _ ) ) ->
       (env, tyvars)
   in
   find_tyvars (env, []) ty

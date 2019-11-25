@@ -84,11 +84,14 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
       (print_ty_exn ty2)
   | Tarraykind (AKdarray (ty1, ty2)) ->
     Printf.sprintf "darray<%s, %s>" (print_ty_exn ty1) (print_ty_exn ty2)
-  | Tpu (ty, id, Pu_plain)
-  | Tpu_access (ty, id) ->
-    Printf.sprintf "%s:@%s)" (print_ty_exn ty) (snd id)
-  | Tpu (ty, id, Pu_atom s) ->
-    Printf.sprintf "%s:@%s:@%s)" (print_ty_exn ty) (snd id) s
+  | Tpu (ty, id) -> Printf.sprintf "(%s:@%s)" (print_ty_exn ty) (snd id)
+  | Tpu_type_access (ty, id, member, tyname) ->
+    Printf.sprintf
+      "(%s:@%s:@%s:@%s)"
+      (print_ty_exn ty)
+      (snd id)
+      (print_ty_exn member)
+      (snd tyname)
 
 and print_tyl_exn tyl = String.concat ~sep:", " (List.map tyl ~f:print_ty_exn)
 

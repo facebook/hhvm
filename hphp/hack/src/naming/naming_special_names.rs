@@ -774,6 +774,10 @@ pub mod math {
     pub const INF: &str = "INF";
 }
 
+pub mod pocket_universes {
+    pub const MEMBERS: &str = "Members";
+}
+
 #[cfg(test)]
 mod test {
     use crate::members::is_special_xhp_attribute;

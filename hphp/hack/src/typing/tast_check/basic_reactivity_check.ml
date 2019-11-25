@@ -61,7 +61,7 @@ let rec is_byval_collection_or_string_or_any_type env ty =
       false
     | ( _,
         ( Terr | Tnonnull | Tprim _ | Tobject | Tfun _ | Tanon _ | Tvar _
-        | Tpu _ | Tpu_access _ ) ) ->
+        | Tpu _ | Tpu_type_access _ ) ) ->
       false
   in
   let (_, tl) = Tast_env.get_concrete_supertypes env ty in

@@ -81,6 +81,14 @@ type tyvar_info_ = {
     ( Aast.sid (* id of the type constant "T", containing its position. *)
     * locl_ty )
     SMap.t;
+  (* Map associating PU information to each instance of
+     C:@E:@#v:@T
+     when the type variable #v is not resolved yet. We introduce a new type
+     variable to 'postpone' the checking of this expression until the end,
+     when #v will be known. *)
+  pu_accesses:
+    (* base * enum * new_var * typname *)
+    (locl_ty * Aast.sid * locl_ty * Aast.sid) SMap.t;
 }
 [@@deriving eq]
 
@@ -120,8 +128,8 @@ type env = {
             #2 -> { #1 }
             #3 -> { #2 }
           but we would record that #3 occurs in #1.
-          When a type variable v gets solved or the type bound to it gets simplified, 
-          we simplify the unions and intersections of the types bound to the 
+          When a type variable v gets solved or the type bound to it gets simplified,
+          we simplify the unions and intersections of the types bound to the
           type variables associated to v in this map.
           So in our example, if #2 gets solved to int,
           we simplify #1 to (int | int) = int. 

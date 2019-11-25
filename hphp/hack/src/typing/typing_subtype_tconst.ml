@@ -99,3 +99,29 @@ let get_tyvar_type_const env var ((pos, tconstid_) as tconstid) =
     Typing_log.log_new_tvar_for_tconst env pos var tconstid_ tvar;
     let env = add_tyvar_type_const env var tconstid tvar Errors.unify_error in
     (env, tvar)
+
+module Pu = struct
+  let add_tyvar_pu_access env var base enum name new_var =
+    let env = Env.set_tyvar_pu_access env var base enum new_var name in
+    env
+
+  let get_tyvar_pu_access env reason base enum var name =
+    let pos = Reason.to_pos @@ reason in
+    match Env.get_tyvar_pu_access env var name with
+    | Some (base', enum', ty, name') ->
+      (* Checking syntactic equality *)
+      if
+        Typing_defs.ty_equal base base'
+        && String.equal (snd enum) (snd enum')
+        && String.equal (snd name) (snd name')
+        (* this one should be useless *)
+      then
+        (env, ty)
+      else
+        failwith "TODO(T36532263) support multiple hiding"
+    | None ->
+      let (env, new_var) = Env.fresh_invariant_type_var env pos in
+      (* TODO log *)
+      let env = add_tyvar_pu_access env var base enum name new_var in
+      (env, new_var)
+end

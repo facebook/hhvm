@@ -282,7 +282,7 @@ module Full = struct
     in
     list "shape(" id fields ")"
 
-  let tpu_access k ty' access = k ty' ^^ text (":@" ^ access)
+  let pu_concat k ty access = k ty ^^ text (":@" ^ access)
 
   let thas_member k hm =
     let { hm_name = (_, name); hm_type; hm_class_id = _ } = hm in
@@ -331,7 +331,7 @@ module Full = struct
     | Tunion tyl -> Concat [text "|"; ttuple k tyl]
     | Tintersection tyl -> Concat [text "&"; ttuple k tyl]
     | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
-    | Tpu_access (ty', (_, access)) -> tpu_access k ty' access
+    | Tpu_access (ty', (_, access)) -> pu_concat k ty' access
 
   let rec locl_ty : _ -> _ -> _ -> locl_ty -> Doc.t =
    fun to_doc st env (r, x) ->
@@ -537,14 +537,9 @@ module Full = struct
       delimited_list (Space ^^ text "&" ^^ Space) "(" k tyl ")"
     | Tobject -> text "object"
     | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
-    | Tpu (ty', (_, enum), kind) ->
-      let suffix =
-        match kind with
-        | Pu_atom atom -> ":@" ^ atom
-        | Pu_plain -> ""
-      in
-      k ty' ^^ text (":@" ^ enum ^ suffix)
-    | Tpu_access (ty', (_, access)) -> tpu_access k ty' access
+    | Tpu (base, (_, enum)) -> pu_concat k base enum
+    | Tpu_type_access (base, (_, enum), member, (_, tyname)) ->
+      pu_concat k base enum ^^ text ":@" ^^ pu_concat k member tyname
 
   let rec constraint_type_ to_doc st env x =
     let k lty = locl_ty to_doc st env lty in
@@ -756,36 +751,25 @@ module ErrorString = struct
       "an object of type " ^ strip_ns x ^ inst env tyl
     | Tobject -> "an object"
     | Tshape _ -> "a shape"
-    | Tpu ((_, ty), (_, enum), kind) ->
+    | Tpu ((_, ty), (_, enum)) ->
       let ty =
         match ty with
         | Tclass ((_, x), _, tyl) -> strip_ns x ^ inst env tyl
         | _ -> "..."
       in
-      let prefix =
-        match kind with
-        | Pu_atom atom -> "member " ^ atom
-        | Pu_plain -> "a member"
-      in
-      prefix ^ " of pocket universe " ^ ty ^ ":@" ^ enum
-    | Tpu_access ((_, ty), (_, access)) ->
+      "the pocket universe " ^ ty ^ ":@" ^ enum
+    | Tpu_type_access ((_, ty), (_, enum), _, (_, tyname)) ->
       let ty =
         match ty with
-        | Tpu ((_, ty), (_, enum), kind) ->
-          let ty =
-            match ty with
-            | Tclass ((_, x), _, tyl) -> strip_ns x ^ inst env tyl
-            | _ -> "..."
-          in
-          let kind =
-            match kind with
-            | Pu_plain -> ""
-            | Pu_atom atom -> atom
-          in
-          ty ^ ":@" ^ enum ^ kind
+        | Tclass ((_, x), _, tyl) -> strip_ns x ^ inst env tyl
         | _ -> "..."
       in
-      "pocket universe dependent type " ^ ty ^ ":@" ^ access
+      "the type "
+      ^ tyname
+      ^ " associated with a member of the pocket universe "
+      ^ ty
+      ^ ":@"
+      ^ enum
 
   and inst env tyl =
     if List.is_empty tyl then
@@ -883,125 +867,116 @@ module Json = struct
     | "inout" -> Some FPinout
     | _ -> None
 
-  let rec from_type : env -> locl_ty -> json = function
-    | env ->
-      (function
-      | ty ->
-        (* Helpers to construct fields that appear in JSON rendering of type *)
-        let kind k = [("kind", JSON_String k)] in
-        let args tys = [("args", JSON_Array (List.map tys (from_type env)))] in
-        let typ ty = [("type", from_type env ty)] in
-        let result ty = [("result", from_type env ty)] in
-        let obj x = JSON_Object x in
-        let name x = [("name", JSON_String x)] in
-        let optional x = [("optional", JSON_Bool x)] in
-        let is_array x = [("is_array", JSON_Bool x)] in
-        let empty x = [("empty", JSON_Bool x)] in
-        let make_field (k, v) =
-          let shape_field_name_to_json shape_field =
-            (* TODO: need to update userland tooling? *)
-            match shape_field with
-            | Ast_defs.SFlit_int (_, s) -> Hh_json.JSON_Number s
-            | Ast_defs.SFlit_str (_, s) -> Hh_json.JSON_String s
-            | Ast_defs.SFclass_const ((_, s1), (_, s2)) ->
-              Hh_json.JSON_Array
-                [Hh_json.JSON_String s1; Hh_json.JSON_String s2]
-          in
-          obj
-          @@ [("name", shape_field_name_to_json k)]
-          @ optional v.sft_optional
-          @ typ v.sft_ty
-        in
-        let fields fl = [("fields", JSON_Array (List.map fl make_field))] in
-        let as_type opt_ty =
-          match opt_ty with
-          | None -> []
-          | Some ty -> [("as", from_type env ty)]
-        in
-        (match snd ty with
-        | Tvar n ->
-          let (_, ty) = Typing_env.expand_type env (fst ty, Tvar n) in
-          begin
-            match snd ty with
-            | Tvar _ -> obj @@ kind "var"
-            | _ -> from_type env ty
-          end
-        | Ttuple tys -> obj @@ kind "tuple" @ is_array false @ args tys
-        | Tany _
-        | Terr ->
-          obj @@ kind "any"
-        | Tnonnull -> obj @@ kind "nonnull"
-        | Tdynamic -> obj @@ kind "dynamic"
-        | Tabstract (AKgeneric s, opt_ty) ->
-          obj @@ kind "generic" @ is_array true @ name s @ as_type opt_ty
-        | Tabstract (AKnewtype (s, _), opt_ty) when Typing_env.is_enum env s ->
-          obj @@ kind "enum" @ name s @ as_type opt_ty
-        | Tabstract (AKnewtype (s, tys), opt_ty) ->
-          obj @@ kind "newtype" @ name s @ args tys @ as_type opt_ty
-        | Tabstract (AKdependent (DTcls c), opt_ty) ->
-          obj
-          @@ kind "path"
-          @ [("type", obj @@ kind "class" @ name c @ args [])]
-          @ as_type opt_ty
-        | Tabstract (AKdependent (DTexpr _), opt_ty) ->
-          obj @@ kind "path" @ [("type", obj @@ kind "expr")] @ as_type opt_ty
-        | Tabstract (AKdependent DTthis, opt_ty) ->
-          obj @@ kind "path" @ [("type", obj @@ kind "this")] @ as_type opt_ty
-        | Toption (_, Tnonnull) -> obj @@ kind "mixed"
-        | Toption ty -> obj @@ kind "nullable" @ args [ty]
-        | Tprim tp -> obj @@ kind "primitive" @ name (prim tp)
-        | Tclass ((_, cid), _, tys) -> obj @@ kind "class" @ name cid @ args tys
-        | Tobject -> obj @@ kind "object"
-        | Tshape (shape_kind, fl) ->
-          let fields_known =
-            match shape_kind with
-            | Closed_shape -> true
-            | Open_shape -> false
-          in
-          obj
-          @@ kind "shape"
-          @ is_array false
-          @ [("fields_known", JSON_Bool fields_known)]
-          @ fields (Nast.ShapeMap.bindings fl)
-        | Tunion [] -> obj @@ kind "nothing"
-        | Tunion [ty] -> from_type env ty
-        | Tunion tyl -> obj @@ kind "union" @ args tyl
-        | Tintersection [] -> obj @@ kind "mixed"
-        | Tintersection [ty] -> from_type env ty
-        | Tintersection tyl -> obj @@ kind "intersection" @ args tyl
-        | Tfun ft ->
-          let fun_kind =
-            if ft.ft_is_coroutine then
-              kind "coroutine"
-            else
-              kind "function"
-          in
-          let callconv cc =
-            [("callConvention", JSON_String (param_mode_to_string cc))]
-          in
-          let param fp = obj @@ callconv fp.fp_kind @ typ fp.fp_type.et_type in
-          let params fps = [("params", JSON_Array (List.map fps param))] in
-          obj @@ fun_kind @ params ft.ft_params @ result ft.ft_ret.et_type
-        | Tanon _ -> obj @@ kind "anon"
-        | Tarraykind (AKvarray_or_darray (ty1, ty2)) ->
-          obj @@ kind "varray_or_darray" @ args [ty1; ty2]
-        | Tarraykind (AKdarray (ty1, ty2)) ->
-          obj @@ kind "darray" @ args [ty1; ty2]
-        | Tarraykind (AKvarray ty) -> obj @@ kind "varray" @ args [ty]
-        | Tarraykind AKempty -> obj @@ kind "array" @ empty true @ args []
-        | Tpu (base, enum, pukind) ->
-          let pukind =
-            match pukind with
-            | Pu_plain -> string_ "plain"
-            | Pu_atom atom -> JSON_Array [string_ "atom"; string_ atom]
-          in
-          obj
-          @@ kind "pocket universe"
-          @ args [base]
-          @ name (snd enum)
-          @ [("pukind", pukind)]
-        | Tpu_access (base, access) ->
-          obj @@ kind "pocket universe access" @ args [base] @ name (snd access)))
+  let rec from_type : env -> locl_ty -> json =
+   fun env ty ->
+    (* Helpers to construct fields that appear in JSON rendering of type *)
+    let kind k = [("kind", JSON_String k)] in
+    let args tys = [("args", JSON_Array (List.map tys (from_type env)))] in
+    let typ ty = [("type", from_type env ty)] in
+    let result ty = [("result", from_type env ty)] in
+    let obj x = JSON_Object x in
+    let name x = [("name", JSON_String x)] in
+    let optional x = [("optional", JSON_Bool x)] in
+    let is_array x = [("is_array", JSON_Bool x)] in
+    let empty x = [("empty", JSON_Bool x)] in
+    let make_field (k, v) =
+      let shape_field_name_to_json shape_field =
+        (* TODO: need to update userland tooling? *)
+        match shape_field with
+        | Ast_defs.SFlit_int (_, s) -> Hh_json.JSON_Number s
+        | Ast_defs.SFlit_str (_, s) -> Hh_json.JSON_String s
+        | Ast_defs.SFclass_const ((_, s1), (_, s2)) ->
+          Hh_json.JSON_Array [Hh_json.JSON_String s1; Hh_json.JSON_String s2]
+      in
+      obj
+      @@ [("name", shape_field_name_to_json k)]
+      @ optional v.sft_optional
+      @ typ v.sft_ty
+    in
+    let fields fl = [("fields", JSON_Array (List.map fl make_field))] in
+    let as_type opt_ty =
+      match opt_ty with
+      | None -> []
+      | Some ty -> [("as", from_type env ty)]
+    in
+    match snd ty with
+    | Tvar n ->
+      let (_, ty) = Typing_env.expand_type env (fst ty, Tvar n) in
+      begin
+        match snd ty with
+        | Tvar _ -> obj @@ kind "var"
+        | _ -> from_type env ty
+      end
+    | Ttuple tys -> obj @@ kind "tuple" @ is_array false @ args tys
+    | Tany _
+    | Terr ->
+      obj @@ kind "any"
+    | Tnonnull -> obj @@ kind "nonnull"
+    | Tdynamic -> obj @@ kind "dynamic"
+    | Tabstract (AKgeneric s, opt_ty) ->
+      obj @@ kind "generic" @ is_array true @ name s @ as_type opt_ty
+    | Tabstract (AKnewtype (s, _), opt_ty) when Typing_env.is_enum env s ->
+      obj @@ kind "enum" @ name s @ as_type opt_ty
+    | Tabstract (AKnewtype (s, tys), opt_ty) ->
+      obj @@ kind "newtype" @ name s @ args tys @ as_type opt_ty
+    | Tabstract (AKdependent (DTcls c), opt_ty) ->
+      obj
+      @@ kind "path"
+      @ [("type", obj @@ kind "class" @ name c @ args [])]
+      @ as_type opt_ty
+    | Tabstract (AKdependent (DTexpr _), opt_ty) ->
+      obj @@ kind "path" @ [("type", obj @@ kind "expr")] @ as_type opt_ty
+    | Tabstract (AKdependent DTthis, opt_ty) ->
+      obj @@ kind "path" @ [("type", obj @@ kind "this")] @ as_type opt_ty
+    | Toption (_, Tnonnull) -> obj @@ kind "mixed"
+    | Toption ty -> obj @@ kind "nullable" @ args [ty]
+    | Tprim tp -> obj @@ kind "primitive" @ name (prim tp)
+    | Tclass ((_, cid), _, tys) -> obj @@ kind "class" @ name cid @ args tys
+    | Tobject -> obj @@ kind "object"
+    | Tshape (shape_kind, fl) ->
+      let fields_known =
+        match shape_kind with
+        | Closed_shape -> true
+        | Open_shape -> false
+      in
+      obj
+      @@ kind "shape"
+      @ is_array false
+      @ [("fields_known", JSON_Bool fields_known)]
+      @ fields (Nast.ShapeMap.bindings fl)
+    | Tunion [] -> obj @@ kind "nothing"
+    | Tunion [ty] -> from_type env ty
+    | Tunion tyl -> obj @@ kind "union" @ args tyl
+    | Tintersection [] -> obj @@ kind "mixed"
+    | Tintersection [ty] -> from_type env ty
+    | Tintersection tyl -> obj @@ kind "intersection" @ args tyl
+    | Tfun ft ->
+      let fun_kind =
+        if ft.ft_is_coroutine then
+          kind "coroutine"
+        else
+          kind "function"
+      in
+      let callconv cc =
+        [("callConvention", JSON_String (param_mode_to_string cc))]
+      in
+      let param fp = obj @@ callconv fp.fp_kind @ typ fp.fp_type.et_type in
+      let params fps = [("params", JSON_Array (List.map fps param))] in
+      obj @@ fun_kind @ params ft.ft_params @ result ft.ft_ret.et_type
+    | Tanon _ -> obj @@ kind "anon"
+    | Tarraykind (AKvarray_or_darray (ty1, ty2)) ->
+      obj @@ kind "varray_or_darray" @ args [ty1; ty2]
+    | Tarraykind (AKdarray (ty1, ty2)) -> obj @@ kind "darray" @ args [ty1; ty2]
+    | Tarraykind (AKvarray ty) -> obj @@ kind "varray" @ args [ty]
+    | Tarraykind AKempty -> obj @@ kind "array" @ empty true @ args []
+    | Tpu (base, enum) ->
+      obj @@ kind "pocket_universe" @ args [base] @ name (snd enum)
+    | Tpu_type_access (base, enum, member, typ) ->
+      obj
+      @@ kind "pocket_universe_type_access"
+      @ args [base; member]
+      @ name (snd enum)
+      @ name (snd typ)
 
   type deserialized_result = (locl_ty, deserialization_error) result
 
@@ -1034,6 +1009,7 @@ module Json = struct
   let wrong_phase ~message ~keytrace =
     Error (Wrong_phase (message ^ Hh_json.Access.keytrace_to_string keytrace))
 
+  (* TODO(T36532263) add PU stuff in here *)
   let to_locl_ty ?(keytrace = []) (json : Hh_json.json) : deserialized_result =
     let reason = Reason.none in
     let ty (ty : locl_phase ty_) : deserialized_result = Ok (reason, ty) in

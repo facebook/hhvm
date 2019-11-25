@@ -91,8 +91,8 @@ let check_param : env -> Nast.fun_param -> unit =
           ()
         else
           error ty
-    | (_, Tpu_access _)
-    | (_, Tpu (_, _, (Pu_plain | Pu_atom _))) ->
+    | (_, Tpu_type_access _)
+    | (_, Tpu (_, _)) ->
       ()
     | (_, Tfun _)
     | (_, Tvar _)

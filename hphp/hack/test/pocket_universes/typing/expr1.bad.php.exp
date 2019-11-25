@@ -1,0 +1,6 @@
+File "expr1.bad.php", line 11, characters 12-26:
+Invalid return type (Typing[4110])
+File "expr1.bad.php", line 10, characters 34-39:
+Expected string
+File "expr1.bad.php", line 5, characters 10-12:
+But got int

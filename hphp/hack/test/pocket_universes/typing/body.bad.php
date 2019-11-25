@@ -1,6 +1,7 @@
 <?hh // strict
 
 class C {}
+
 class CC {}
 
 class PU {

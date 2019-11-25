@@ -23,10 +23,6 @@ open Typing_defs
  * representations of types.
  *)
 
-let pp_pu_kind fmt = function
-  | Pu_plain -> Format.pp_print_string fmt "Pu_plain"
-  | Pu_atom id -> Format.fprintf fmt "(@[<2>Pu_atom@ %S@])" id
-
 let rec pp_ty : type a. Format.formatter -> a ty -> unit =
  fun fmt (a0, a1) ->
   Format.fprintf fmt "(@[";
@@ -205,16 +201,8 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
     Format.fprintf fmt "(@[<2>Tarraykind@ ";
     pp_array_kind fmt a0;
     Format.fprintf fmt "@])"
-  | Tpu (base, enum, kind) ->
-    Format.fprintf
-      fmt
-      "(@[<2>Tpu (%a@,,%a@,,%a)@])"
-      pp_ty
-      base
-      Aast.pp_sid
-      enum
-      pp_pu_kind
-      kind;
+  | Tpu (base, enum) ->
+    Format.fprintf fmt "(@[<2>Tpu (%a@,,%a)@])" pp_ty base Aast.pp_sid enum;
     Format.fprintf fmt "@])"
   | Tpu_access (base, sid) ->
     Format.fprintf fmt "(@[<2>Tpu_access (@,";
@@ -222,6 +210,19 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
     Format.fprintf fmt ",@ ";
     Aast.pp_sid fmt sid;
     Format.fprintf fmt "@,))@]"
+  | Tpu_type_access (base, enum, member, tyname) ->
+    Format.fprintf
+      fmt
+      "(@[<2>Tpu_type (%a@,,%a@,,%a@,,%a)@])"
+      pp_ty
+      base
+      Aast.pp_sid
+      enum
+      pp_ty
+      member
+      Aast.pp_sid
+      tyname;
+    Format.fprintf fmt "@])"
 
 and pp_ty_list : type a. Format.formatter -> a ty list -> unit =
  fun fmt tyl ->

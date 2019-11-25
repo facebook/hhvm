@@ -1,0 +1,6 @@
+File "decl3.bad.php", line 6, characters 10-10:
+Wrong type hint (Typing[4350])
+File "decl3.bad.php", line 5, characters 10-12:
+Expected int
+File "decl3.bad.php", line 6, characters 14-20:
+But got string

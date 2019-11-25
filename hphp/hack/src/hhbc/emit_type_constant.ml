@@ -272,7 +272,10 @@ and hint_to_type_constant_list ~tparams ~targ_map (h : Aast.hint) =
   | Aast.Hlike h ->
     [(TV.String "like", TV.Bool true)]
     @ hint_to_type_constant_list ~tparams ~targ_map h
-  | Aast.Hpu_access _ -> failwith "TODO(T36532263) hint_to_type_constant_list"
+  (* TODO(T36532263) hint_to_type_constant_list
+       TODO(T55819007) for plans of updating
+     *)
+  | Aast.Hpu_access _ -> []
   (* TAST hints not found on the legacy AST *)
   | Aast.Hany
   | Aast.Herr

@@ -1,0 +1,6 @@
+File "expr4.bad.php", line 11, characters 23-25:
+Invalid argument (Typing[4110])
+File "expr4.bad.php", line 11, characters 12-15:
+Expected PU:@E
+File "expr4.bad.php", line 11, characters 23-25:
+But got :@Z

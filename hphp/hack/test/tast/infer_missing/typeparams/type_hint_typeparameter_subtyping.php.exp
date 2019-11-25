@@ -19,6 +19,7 @@ File "type_hint_typeparameter_subtyping.php", line 5, characters 5-17:
       appears_covariantly true
       eager_solve_fail false
       lower_bounds {}
+      pu_acceses {}
       type_constants {}
       tyvar_pos File "type_hint_typeparameter_subtyping.php", line 4, characters 12-12:
       upper_bounds {int}
@@ -27,6 +28,7 @@ File "type_hint_typeparameter_subtyping.php", line 5, characters 5-17:
       appears_covariantly true
       eager_solve_fail false
       lower_bounds {string}
+      pu_acceses {}
       type_constants {}
       tyvar_pos File "type_hint_typeparameter_subtyping.php", line 4, characters 12-12:
       upper_bounds {}

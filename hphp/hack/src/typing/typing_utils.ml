@@ -633,15 +633,66 @@ let add_function_type env fty logged =
   else
     (untyped_ftys, try_intersect env fty ftys)
 
-type class_get_pu =
-  ?from_class:Nast.class_id_ ->
-  env ->
-  locl_ty ->
-  string ->
-  env * (expand_env * pu_enum_type) option
-
-let (class_get_pu_ref : class_get_pu ref) =
-  ref (fun ?from_class:_ -> not_implemented "Typing_utils.class_get_pu")
+let rec class_get_pu_ env cty name =
+  let (env, cty) = Env.expand_type env cty in
+  match snd cty with
+  | Tany _
+  | Terr
+  | Tdynamic
+  | Tunion _ ->
+    (env, None)
+  | Tabstract (_, None) ->
+    (* TODO(T36532263) check for PU in upper bounds (see D18395326) *)
+    (env, None)
+  | Tvar _
+  | Tnonnull
+  | Tarraykind _
+  | Toption _
+  | Tprim _
+  | Tfun _
+  | Ttuple _
+  | Tanon (_, _)
+  | Tobject
+  | Tshape _ ->
+    (env, None)
+  | Tintersection _ -> (env, None)
+  | Tpu_type_access _
+  | Tpu _ ->
+    (env, None)
+  | Tabstract (_, Some ty) -> class_get_pu_ env ty name
+  | Tclass ((_, c), _, paraml) ->
+    let class_ = Env.get_class env c in
+    begin
+      match class_ with
+      | None -> (env, None)
+      | Some class_ ->
+        (match Env.get_pu_enum env class_ name with
+        | Some et ->
+          (env, Some (cty, Decl_subst.make_locl (Cls.tparams class_) paraml, et))
+        | None -> (env, None))
+    end
 
 let class_get_pu ?from_class env ty name =
-  !class_get_pu_ref ?from_class env ty name
+  let open Option in
+  let (env, pu) = class_get_pu_ env ty name in
+  ( env,
+    pu >>= fun (this_ty, substs, et) ->
+    let ety_env =
+      { type_expansions = []; this_ty; substs; from_class; quiet = false }
+    in
+    Some (ety_env, et) )
+
+let class_get_pu_member ?from_class env ty enum name =
+  let open Option in
+  let (env, enum) = class_get_pu ?from_class env ty enum in
+  ( env,
+    enum >>= fun (ety_env, pu) ->
+    SMap.find_opt name pu.tpu_members >>= fun member -> Some (ety_env, member)
+  )
+
+let class_get_pu_member_type ?from_class env ty enum member name =
+  let open Option in
+  let (env, member) = class_get_pu_member ?from_class env ty enum member in
+  ( env,
+    member >>= fun (ety_env, member) ->
+    SMap.find_opt name member.tpum_types >>= fun dty -> Some (ety_env, dty) )

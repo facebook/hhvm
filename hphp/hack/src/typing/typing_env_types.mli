@@ -27,6 +27,7 @@ type tyvar_info_ = {
   lower_bounds: ITySet.t;
   upper_bounds: ITySet.t;
   type_constants: (Aast.sid * locl_ty) SMap.t;
+  pu_accesses: (locl_ty * Aast.sid * locl_ty * Aast.sid) SMap.t;
 }
 [@@deriving eq]
 

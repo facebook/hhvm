@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c9472b30f9c5bb97a4c3b5d92f154778>>
+// @generated SignedSource<<d94cbd13af606729e34c035e56e48b71>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -131,6 +131,7 @@ pub enum Naming {
     PocketUniversesNotInClass,
     PocketUniversesAtomMissing,
     PocketUniversesAtomUnknown,
+    PocketUniversesLocalization,
 }
 
 #[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]

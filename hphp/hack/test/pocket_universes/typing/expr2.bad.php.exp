@@ -1,0 +1,6 @@
+File "expr2.bad.php", line 14, characters 22-23:
+Invalid argument (Typing[4110])
+File "expr2.bad.php", line 13, characters 31-33:
+Expected PU2
+File "expr2.bad.php", line 14, characters 12-14:
+But got PU1

@@ -1,0 +1,120 @@
+# members.good.php starts here
+
+.filepath "members.good.php";
+
+.hh_file 1;
+.adata A_0 = """Y:2:{s:4:\"kind\";i:20;s:13:\"generic_types\";y:1:{Y:0:{}}}""";
+.adata A_1 = """v:4:{s:2:\"A0\";s:2:\"A1\";s:2:\"A2\";s:2:\"A3\";}""";
+
+.main {
+  DefCls 0
+  Int 1
+  RetC
+}
+
+.function <"HH\\void" N  > foo(<"HH\\vec<(C:@E)>" "HH\\vec" hh_type > $v) {
+  .numiters 1;
+  .declvars $x;
+  Array @A_0
+  VerifyParamTypeTS $v
+  CGetL $v
+  IterInit 0 NK V:$x L0
+  .try {
+  L1:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $x
+    FCallClsMethodD <> 1 1 "0" - "" "C" "E##val"
+    Print
+    PopC
+    String "\n"
+    Print
+    PopC
+    IterNext 0 NK V:$x L1
+    Jmp L0
+  } .catch {
+    IterFree 0
+    Throw
+  }
+L0:
+  Null
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] <"HH\\void" N  > main() {
+  .declvars $v;
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallClsMethodD <> 0 1 "" - "" "C" "E##Members"
+  SetL $v
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
+  CGetL $v
+  FCallFuncD <> 1 1 "0" - "foo"
+  PopC
+  Null
+  RetC
+}
+
+.class C {
+  .method [public static] <"HH\\mixed" N  > E##Members() {
+    .declvars $mems;
+    Vec @A_1
+    SetL $mems
+    PopC
+    CGetL $mems
+    RetC
+  }
+  .method [public static] <"HH\\mixed" N  > E##val(<"HH\\string" "HH\\string" hh_type > $atom) {
+    VerifyParamType $atom
+    String "A0"
+    CGetL2 $atom
+    Eq
+    JmpNZ L0
+    String "A1"
+    CGetL2 $atom
+    Eq
+    JmpNZ L1
+    String "A2"
+    CGetL2 $atom
+    Eq
+    JmpNZ L2
+    String "A3"
+    CGetL2 $atom
+    Eq
+    JmpNZ L3
+    Jmp L4
+  L0:
+    Int 42
+    RetC
+  L1:
+    Int 43
+    RetC
+  L2:
+    Int 44
+    RetC
+  L3:
+    Int 45
+    RetC
+  L4:
+    NewObjD "Exception"
+    Dup
+    NullUninit
+    NullUninit
+    String "\\C::E::val unknown atom access: "
+    CGetL $atom
+    Concat
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - ""
+    PopC
+    LockObj
+    Throw
+    Null
+    RetC
+  }
+}
+
+# members.good.php ends here

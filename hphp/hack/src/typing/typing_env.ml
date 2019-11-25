@@ -142,6 +142,7 @@ let empty_tyvar_info =
     appears_covariantly = false;
     appears_contravariantly = false;
     type_constants = SMap.empty;
+    pu_accesses = SMap.empty;
   }
 
 let create_tyvar_info ?variance pos =
@@ -490,8 +491,15 @@ let get_tyvar_type_consts env var =
   let tvinfo = get_tyvar_info env var in
   tvinfo.type_constants
 
+let get_tyvar_pu_accesses env var =
+  let tvinfo = get_tyvar_info env var in
+  tvinfo.pu_accesses
+
 let get_tyvar_type_const env var (_, tyconstid) =
   SMap.find_opt tyconstid (get_tyvar_type_consts env var)
+
+let get_tyvar_pu_access env var (_, typ_name) =
+  SMap.find_opt typ_name (get_tyvar_pu_accesses env var)
 
 let set_tyvar_type_const env var ((_, tyconstid_) as tyconstid) ty =
   let tvinfo = get_tyvar_info env var in
@@ -499,6 +507,13 @@ let set_tyvar_type_const env var ((_, tyconstid_) as tyconstid) ty =
     SMap.add tyconstid_ (tyconstid, ty) tvinfo.type_constants
   in
   update_tyvar_info env var { tvinfo with type_constants }
+
+let set_tyvar_pu_access env var base enum new_var name =
+  let tvinfo = get_tyvar_info env var in
+  let pu_accesses =
+    SMap.add (snd name) (base, enum, new_var, name) tvinfo.pu_accesses
+  in
+  update_tyvar_info env var { tvinfo with pu_accesses }
 
 (* Conjoin a subtype proposition onto the subtype_prop in the environment *)
 let add_subtype_prop env prop =
@@ -1436,8 +1451,10 @@ and get_tyvars_i env (ty : internal_type) =
           let (env, positive2, negative2) = get_tyvars env ty2 in
           (env, ISet.union positive1 positive2, ISet.union negative1 negative2)
       end
-    | Tpu (base, _, _) -> get_tyvars env base
-    | Tpu_access (base, _) -> get_tyvars env base)
+    | Tpu (base, _) -> get_tyvars env base
+    | Tpu_type_access (base, _, member, _) ->
+      let env = get_tyvars_union (env, ISet.empty, ISet.empty) base in
+      get_tyvars_union env member)
   | ConstraintType ty ->
     (match ty with
     | (_, Tdestructure tyl) ->

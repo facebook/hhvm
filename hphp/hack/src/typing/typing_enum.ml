@@ -93,7 +93,7 @@ let check_valid_array_key_type f_fail ~allow_any env p t =
     | Tobject
     | Tshape _
     | Tpu _
-    | Tpu_access _ ->
+    | Tpu_type_access _ ->
       ( env,
         Some
           (fun () ->

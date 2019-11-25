@@ -445,6 +445,7 @@ let local_tyvar_info_as_value env tvinfo =
     type_constants;
     lower_bounds;
     upper_bounds;
+    pu_accesses;
   } =
     tvinfo
   in
@@ -458,6 +459,8 @@ let local_tyvar_info_as_value env tvinfo =
       ("upper_bounds", ityset_as_value env upper_bounds);
       ( "type_constants",
         smap_as_value (fun (_, ty) -> type_as_value env ty) type_constants );
+      ( "pu_acceses",
+        smap_as_value (fun (_, _, ty, _) -> type_as_value env ty) pu_accesses );
     ]
 
 let tvenv_as_value env tvenv =

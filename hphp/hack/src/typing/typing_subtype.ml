@@ -29,6 +29,61 @@ module ShapeMap = Nast.ShapeMap
 module ShapeSet = Ast_defs.ShapeSet
 module Nast = Aast
 
+let class_get_pu_member_type ?from_class env ty enum member name =
+  let (env, dty) =
+    TUtils.class_get_pu_member_type ?from_class env ty enum member name
+  in
+  match dty with
+  | None -> (env, None)
+  | Some (ety_env, (_, dty)) ->
+    let (env, lty) = Typing_phase.localize ~ety_env env dty in
+    (env, Some lty)
+
+type pu_reduced_access =
+  | PTA_Reduced of env * locl_ty
+  | PTA_Rigid of env * locl_ty
+  | PTA_Not_found of env
+  | PTA_Unsupported of env
+
+let reduce_pu_type_access env reason base enum member name =
+  let (env, base) = Env.expand_type env base in
+  let (env, member) = Env.expand_type env member in
+  match snd member with
+  | Tprim (Aast_defs.Tatom atom_name) ->
+    (match
+       class_get_pu_member_type env base (snd enum) atom_name (snd name)
+     with
+    | (env, None) ->
+      Errors.pu_typing (Reason.to_pos reason) "member" atom_name;
+      PTA_Not_found env
+    | (env, Some lty) ->
+      (* Not sure if this expand is necessary, ask Catg *)
+      let (env, lty) = Env.expand_type env lty in
+      PTA_Reduced (env, lty))
+  | Tvar var ->
+    let (env, lty) =
+      Typing_subtype_tconst.Pu.get_tyvar_pu_access env reason base enum var name
+    in
+    PTA_Reduced (env, lty)
+  (* During localize, we could only detect atoms vs "something else"
+     which we treated as a generic. Now we can check if it was indeed a valid
+     generic *)
+  | Tabstract (AKgeneric s, _) ->
+    let tparam_names = Env.get_generic_parameters env in
+    if List.mem ~equal:String.equal tparam_names s then
+      PTA_Rigid (env, member)
+    else (
+      (* Not a real generic *)
+      Errors.pu_typing (Reason.to_pos reason) "generic parameter" s;
+      PTA_Not_found env
+    )
+  (* TODO(T36532263) deal with unions of Tatoms ! *)
+  | _ ->
+    Errors.pu_typing_not_supported
+      (Reason.to_pos reason)
+      (Typing_print.debug env member);
+    PTA_Unsupported env
+
 type subtype_env = {
   seen_generic_params: SSet.t option;
   no_top_bottom: bool;
@@ -594,7 +649,8 @@ and simplify_subtype_i
                   ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
                   | Tarraykey | Tnoreturn | Tatom _ ))
             | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject
-            | Tclass _ | Tarraykind _ | Tany _ | Tpu _ ) ) as ty_sub ),
+            | Tclass _ | Tarraykind _ | Tany _ | Tpu _ | Tpu_type_access _ ) )
+        as ty_sub ),
       LoclType (_, Toption ty_super') ) ->
     simplify_subtype ~subtype_env ~this_ty ty_sub ty_super' env
   | ( LoclType ((_, Tabstract (AKnewtype (name_sub, _), _)) as ty_sub),
@@ -901,7 +957,7 @@ and simplify_subtype_i
               ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
               | Tnoreturn | Tatom _ ))
         | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject | Tclass _
-        | Tarraykind _ | Tpu _ ),
+        | Tarraykind _ | Tpu _ | Tpu_type_access _ ),
         Tnonnull ) ->
       valid ()
     | ((Tdynamic | Toption _ | Tprim Nast.(Tnull | Tvoid)), Tnonnull) ->
@@ -1280,7 +1336,8 @@ and simplify_subtype_i
         invalid ()
     | ( ( Tnonnull | Tdynamic
         | Tprim Nast.(Tnull | Tvoid | Tbool | Tresource | Tnoreturn | Tatom _)
-        | Toption _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tpu _ ),
+        | Toption _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tpu _
+        | Tpu_type_access _ ),
         Tclass _ ) ->
       invalid ()
     (* Match what's done in unify for non-strict code *)
@@ -1527,7 +1584,8 @@ and simplify_subtype_i
               ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
               | Tnoreturn | Tatom _ | Tnull | Tvoid ))
         | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject | Tclass _
-        | Tarraykind _ | Tany _ | Tpu _ | Tdynamic | Toption _
+        | Tarraykind _ | Tany _ | Tpu _ | Tpu_type_access _ | Tdynamic
+        | Toption _
         | Tabstract ((AKnewtype _ | AKdependent _), Some _) ),
         Toption _ )
     | (Tabstract (AKdependent _, Some _), Tabstract (AKdependent _, Some _))
@@ -1631,11 +1689,78 @@ and simplify_subtype_i
       simplify_subtype_generic_sub name_sub opt_sub_cstr ety_sub ety_super env
     | (_, Tabstract (AKgeneric name_super, _)) ->
       simplify_subtype_generic_super ety_sub name_super env
+    | (Tpu (base_sub, (_, enum_sub)), Tpu (base_super, (_, enum_super))) ->
+      (* TODO: document contravariance *)
+      if String.equal enum_sub enum_super then
+        simplify_subtype ~subtype_env ~this_ty base_super base_sub env
+      else
+        invalid ()
+    | ( Tpu_type_access (bsub, esub, msub, nsub),
+        Tpu_type_access (bsuper, esuper, msuper, nsuper) ) ->
+      (* Is the lhs known and can be reduced ? *)
+      let rsub = reduce_pu_type_access env (fst ety_sub) bsub esub msub nsub in
+      (match rsub with
+      | PTA_Reduced (env, ety_sub) ->
+        (* Yes, let's continue the problem with its definition *)
+        simplify_subtype ~subtype_env ~this_ty ety_sub ety_super env
+      (* No, and it's a rigid definition, so it can only unify with
+             itself *)
+      | PTA_Rigid (env, msub) ->
+        (* So let's look at the rhs *)
+        let rsuper =
+          reduce_pu_type_access env (fst ety_super) bsuper esuper msuper nsuper
+        in
+        (match rsuper with
+        (* It reduces, so let's continue with its definition *)
+        | PTA_Reduced (env, ety_super) ->
+          simplify_subtype ~subtype_env ~this_ty ety_sub ety_super env
+        (* It is rigid too, so let's test for reflexivity *)
+        | PTA_Rigid (env, msuper) ->
+          if
+            String.equal (snd esub) (snd esuper)
+            && String.equal (snd nsub) (snd nsuper)
+          then
+            env
+            |> simplify_subtype ~subtype_env ~this_ty bsuper bsub
+            &&& simplify_subtype ~subtype_env ~this_ty msub msuper
+            &&& simplify_subtype ~subtype_env ~this_ty msuper msub
+          else
+            invalid_env env
+        (* Missing atom, unknown generic or internal failure. *)
+        | PTA_Not_found env -> invalid_env env
+        | PTA_Unsupported env -> invalid_env env)
+      (* Missing atom, unknown generic or internal failure. *)
+      | PTA_Not_found env -> invalid_env env
+      | PTA_Unsupported env -> invalid_env env)
+    | (Tpu_type_access (base, enum, member, name), _) ->
+      (* If the lhs can be resolved, continue. Otherwise abort (because the
+         only possible rigid case has been handled by the previous case) *)
+      (match reduce_pu_type_access env (fst ety_sub) base enum member name with
+      | PTA_Reduced (env, ety_sub) ->
+        simplify_subtype ~subtype_env ~this_ty ety_sub ety_super env
+      | PTA_Rigid (env, _ety_sub) -> invalid_env env
+      (* Missing atom, unknown generic or internal failure. *)
+      | PTA_Not_found env -> invalid_env env
+      | PTA_Unsupported env -> invalid_env env)
+    | (_, Tpu_type_access (base, enum, member, name)) ->
+      (* If the rhs can be resolved, continue. Otherwise abort (because the
+         only possible rigid case has been handled by the previous case) *)
+      (match
+         reduce_pu_type_access env (fst ety_super) base enum member name
+       with
+      | PTA_Reduced (env, ety_super) ->
+        simplify_subtype ~subtype_env ~this_ty ety_sub ety_super env
+      | PTA_Rigid (_env, _ety_super) -> invalid_env env
+      (* Missing atom, unknown generic or internal failure. *)
+      | PTA_Not_found env -> invalid_env env
+      | PTA_Unsupported _env -> invalid_env env)
+    (* Atom vs Tpu: check for membership *)
+    | (Tprim (Aast_defs.Tatom atom), Tpu (base, (_, name))) ->
+      (match TUtils.class_get_pu_member env base name atom with
+      | (_, None) -> invalid ()
+      | (_, Some _) -> valid ())
     | (Tpu _, _)
-    | (_, Tpu _)
-    | (Tpu_access _, _)
-    | (_, Tpu_access _) ->
-      (* TODO(T36532263) implement subtyping *)
+    | (_, Tpu _) ->
       invalid ())
   | (ConstraintType ty_sub, ConstraintType ty_super) ->
     (match (ty_sub, ty_super) with

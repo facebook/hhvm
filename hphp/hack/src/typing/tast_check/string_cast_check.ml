@@ -46,7 +46,7 @@ let rec is_stringish env ty =
   | Tobject
   | Tnonnull
   | Tprim _
-  | Tpu (_, _, (Pu_plain | Pu_atom _)) ->
+  | Tpu _ ->
     true
   | Tarraykind _
   | Tvar _
@@ -54,7 +54,7 @@ let rec is_stringish env ty =
   | Tanon (_, _)
   | Tfun _
   | Tshape _
-  | Tpu_access _ ->
+  | Tpu_type_access _ ->
     false
 
 let handler =

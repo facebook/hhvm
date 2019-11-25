@@ -1,0 +1,10 @@
+File "reg1.bad.php", line 10, characters 37-37:
+Unbound name: E (an object type) (Naming[2049])
+File "reg1.bad.php", line 11, characters 25-26:
+Invalid argument (Typing[4110])
+File "reg1.bad.php", line 11, characters 12-17:
+Expected this:@E
+File "reg1.bad.php", line 10, characters 40-41:
+But got <expr#1>
+File "reg1.bad.php", line 11, characters 25-26:
+  where '<expr#1>' is a reference to this expression

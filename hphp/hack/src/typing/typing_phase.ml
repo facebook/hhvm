@@ -294,9 +294,36 @@ let rec localize ~ety_env env (dty : decl_ty) =
   | (r, Tshape (shape_kind, tym)) ->
     let (env, tym) = ShapeFieldMap.map_env (localize ~ety_env) env tym in
     (env, (r, Tshape (shape_kind, tym)))
-  | (r, Tpu_access (base, sid)) ->
+  | (r, Tpu_access _) ->
+    (* We explicitly forbid the syntax C:@E:X in here, since it brings
+       more complexity to the type checker and do not allow anything
+       interesting at the moment. If one need a variable ranging over PU
+       member, one should use "C:@E" instead *)
+    let rec build_access dty =
+      match snd dty with
+      | Tpu_access (base, sid) ->
+        let (base, trailing) = build_access base in
+        (base, sid :: trailing)
+      | _ -> (dty, [])
+    in
+    let (base, trailing) = build_access dty in
     let (env, base) = localize ~ety_env env base in
-    (env, (r, Tpu_access (base, sid)))
+    (match trailing with
+    | [enum] -> (env, (r, Tpu (base, enum)))
+    | [typ; (_, member); enum] ->
+      let (env, res) = TUtils.class_get_pu_member env base (snd enum) member in
+      let (env, member) =
+        if Option.is_some res then
+          localize ~ety_env env (r, Tprim (Aast_defs.Tatom member))
+        else
+          localize ~ety_env env (r, Tgeneric member)
+      in
+      (env, (r, Tpu_type_access (base, enum, member, typ)))
+    | _ ->
+      Errors.pu_localize
+        (Reason.to_pos r)
+        (Typing_print.full_decl env.genv.tcopt dty);
+      (env, (r, Typing_utils.terr env)))
 
 and localize_tparams ~ety_env env pos tyl tparams =
   let length = min (List.length tyl) (List.length tparams) in

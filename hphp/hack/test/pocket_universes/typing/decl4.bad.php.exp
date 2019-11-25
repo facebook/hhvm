@@ -1,0 +1,8 @@
+File "decl4.bad.php", line 7, characters 7-7:
+In Pocket Universe PU11:@X, atom X is missing type T (Naming[2108])
+File "decl4.bad.php", line 7, characters 10-10:
+Wrong type hint (Typing[4350])
+File "decl4.bad.php", line 6, characters 10-18:
+Expected Vector<T>
+File "decl4.bad.php", line 7, characters 14-14:
+But got int

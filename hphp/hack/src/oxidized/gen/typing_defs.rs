@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f63bf7b4f194c695c7325a96f6cf22ff>>
+// @generated SignedSource<<60f007ae57aa4be81c129cdb8f46fde8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -69,12 +69,6 @@ pub enum ParamMode {
     FPinout,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
-pub enum PuKind {
-    PuPlain,
-    PuAtom(String),
-}
-
 #[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
 pub enum XhpAttrTag {
     Required,
@@ -137,6 +131,7 @@ pub enum Ty_ {
     Tmixed,
     Tnothing,
     Tlike(DeclTy),
+    TpuAccess(DeclTy, nast::Sid),
     Tany(tany_sentinel::TanySentinel),
     Terr,
     Tnonnull,
@@ -146,7 +141,6 @@ pub enum Ty_ {
     Tfun(FunType<Ty>),
     Ttuple(Vec<Ty>),
     Tshape(ShapeKind, nast::shape_map::ShapeMap<ShapeFieldType>),
-    TpuAccess(Ty, nast::Sid),
     Tvar(ident::Ident),
     Tunion(Vec<Ty>),
     Tintersection(Vec<Ty>),

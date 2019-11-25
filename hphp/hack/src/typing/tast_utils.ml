@@ -173,10 +173,9 @@ let rec truthiness env ty =
   | Ttuple _
   | Tanon _ ->
     Always_truthy
-  | Tpu _ ->
-    (* TODO(T36532263) check if that's ok *)
-    Always_truthy
-  | Tpu_access (_, _) -> (* TODO(T36532263) check if that's ok *) Unknown
+  | Tpu _
+  | Tpu_type_access _ ->
+    (* TODO(T36532263) check if that's ok *) Unknown
 
 (** When a type represented by one of these variants is used in a truthiness
     test, it indicates a potential logic error, since the truthiness of some
@@ -247,7 +246,7 @@ let rec find_sketchy_types env acc ty =
   | Tarraykind _ ->
     acc
   | Tpu _ -> acc
-  | Tpu_access _ -> acc
+  | Tpu_type_access _ -> acc
 
 let find_sketchy_types env ty = find_sketchy_types env [] ty
 

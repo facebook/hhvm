@@ -55,8 +55,11 @@ let expand_ty ?var_hook ?pos env ty =
       | (p, Tanon (x, y)) -> (p, Tanon (x, y))
       | (p, Terr) -> (p, Terr)
       (* TODO(T36532263) see if that needs updating *)
-      | (p, Tpu (base, enum, kind)) -> (p, Tpu (exp_ty base, enum, kind))
-      | (p, Tpu_access (base, sid)) -> (p, Tpu_access (exp_ty base, sid))
+      | (p, Tpu (base, enum)) -> (p, Tpu (exp_ty base, enum))
+      | (p, Tpu_type_access (base, enum, member, tyname)) ->
+        let base = exp_ty base in
+        let member = exp_ty member in
+        (p, Tpu_type_access (base, enum, member, tyname))
     in
     ety
   and exp_tys tyl = List.map ~f:exp_ty tyl

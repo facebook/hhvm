@@ -134,7 +134,7 @@
   (name generate_full_fidelity)
   (modules
     generate_full_fidelity
-    generate_full_fidelity_lib)
+    generate_full_fidelity_data)
   (ocamlc_flags (:standard -custom))
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries

@@ -9,5 +9,5 @@ open Core_kernel
 
 let () =
   List.iter
-    Generate_full_fidelity_lib.templates
+    Generate_full_fidelity_data.templates
     ~f:Full_fidelity_schema.generate_file

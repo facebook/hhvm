@@ -4170,9 +4170,19 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
 
 namespace {
 
-template<bool dynamic, class InitActRec>
+enum class NoCtx {};
+
+void* takeCtx(Class* cls) { return cls; }
+void* takeCtx(Object& obj) = delete;
+void* takeCtx(Object&& obj) { return obj.detach(); }
+void* takeCtx(NoCtx) {
+  if (debug) return reinterpret_cast<void*>(ActRec::kTrashedThisSlot);
+  return nullptr;
+}
+
+template<bool dynamic, typename Ctx>
 void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
-               InitActRec initActRec, bool logAsDynamicCall = true) {
+               Ctx&& ctx, bool logAsDynamicCall = true) {
   if (fca.enforceInOut()) callerInOutChecks(func, fca);
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   callerRxChecks(vmfp(), func);
@@ -4186,8 +4196,7 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
     fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn();
   ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper, asyncEagerReturn);
   ar->trashVarEnv();
-
-  initActRec(ar);
+  ar->setThisOrClassAllowNull(takeCtx(std::forward<Ctx>(ctx)));
 
   auto const callFlags = CallFlags(
     fca.hasGenerics(),
@@ -4201,12 +4210,12 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   pc = vmpc();
 }
 
-template<bool dynamic, class InitActRec>
+template<bool dynamic, typename Ctx>
 void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
-               String&& invName, InitActRec initActRec,
-               bool logAsDynamicCall = true) {
+               Ctx&& ctx, String&& invName, bool logAsDynamicCall = true) {
   if (LIKELY(invName.isNull())) {
-    fcallImpl<dynamic>(origpc, pc, fca, func, initActRec, logAsDynamicCall);
+    fcallImpl<dynamic>(origpc, pc, fca, func, std::forward<Ctx>(ctx),
+                       logAsDynamicCall);
     return;
   }
 
@@ -4226,7 +4235,8 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
     fca.flags & ~(FCallArgs::Flags::HasUnpack | FCallArgs::Flags::HasGenerics));
   auto const fca2 =
     FCallArgs(flags, 2, 1, nullptr, kInvalidOffset, false, false);
-  fcallImpl<dynamic>(origpc, pc, fca2, func, initActRec, logAsDynamicCall);
+  fcallImpl<dynamic>(origpc, pc, fca2, func, std::forward<Ctx>(ctx),
+                     logAsDynamicCall);
 }
 
 const StaticString s___invoke("__invoke");
@@ -4244,15 +4254,12 @@ OPTBLD_INLINE void fcallFuncObj(PC origpc, PC& pc, const FCallArgs& fca) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
 
-  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
-    if (func->isStaticInPrologue()) {
-      ar->setClass(cls);
-    } else {
-      // Teleport the reference from the destroyed stack cell to the
-      // ActRec. Don't try this at home.
-      ar->setThis(obj.detach());
-    }
-  });
+  if (func->isStaticInPrologue()) {
+    obj.reset();
+    fcallImpl<false>(origpc, pc, fca, func, cls);
+  } else {
+    fcallImpl<false>(origpc, pc, fca, func, std::move(obj));
+  }
 }
 
 /*
@@ -4284,19 +4291,17 @@ OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca) {
     raise_error("Invalid callable (array)");
   }
 
-  fcallImpl<true>(origpc, pc, fca, func, String::attach(invName),
-                  [&] (ActRec* ar) {
-    if (thiz) {
-      thiz->incRefCount();
-      ar->setThis(thiz);
-    } else if (cls) {
-      ar->setClass(cls);
-    } else {
-      ar->trashThis();
-    }
+  Object thisRC(thiz);
+  arr.reset();
 
-    arr.reset();
-  });
+  if (thisRC) {
+    fcallImpl<true>(origpc, pc, fca, func, std::move(thisRC),
+                    String::attach(invName));
+  } else if (cls) {
+    fcallImpl<true>(origpc, pc, fca, func, cls, String::attach(invName));
+  } else {
+    fcallImpl<true>(origpc, pc, fca, func, NoCtx{}, String::attach(invName));
+  }
 }
 
 /*
@@ -4322,19 +4327,17 @@ OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca) {
     raise_call_to_undefined(str.get());
   }
 
-  fcallImpl<true>(origpc, pc, fca, func, String::attach(invName),
-                  [&] (ActRec* ar) {
-    if (thiz) {
-      thiz->incRefCount();
-      ar->setThis(thiz);
-    } else if (cls) {
-      ar->setClass(cls);
-    } else {
-      ar->trashThis();
-    }
+  Object thisRC(thiz);
+  str.reset();
 
-    str.reset();
-  });
+  if (thisRC) {
+    fcallImpl<true>(origpc, pc, fca, func, std::move(thisRC),
+                    String::attach(invName));
+  } else if (cls) {
+    fcallImpl<true>(origpc, pc, fca, func, cls, String::attach(invName));
+  } else {
+    fcallImpl<true>(origpc, pc, fca, func, NoCtx{}, String::attach(invName));
+  }
 }
 
 OPTBLD_INLINE void fcallFuncFunc(PC origpc, PC& pc, const FCallArgs& fca) {
@@ -4346,9 +4349,7 @@ OPTBLD_INLINE void fcallFuncFunc(PC origpc, PC& pc, const FCallArgs& fca) {
     raise_error(Strings::CALL_ILLFORMED_FUNC);
   }
 
-  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
-    ar->trashThis();
-  });
+  fcallImpl<false>(origpc, pc, fca, func, NoCtx{});
 }
 
 OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
@@ -4360,9 +4361,7 @@ OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
   auto const cls = clsMeth->getCls();
   assertx(func && cls);
 
-  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
-    ar->setClass(cls);
-  });
+  fcallImpl<false>(origpc, pc, fca, func, cls);
 }
 
 } // namespace
@@ -4393,9 +4392,7 @@ OPTBLD_INLINE void iopFCallFuncD(PC origpc, PC& pc, FCallArgs fca, Id id) {
     raise_call_to_undefined(vmfp()->unit()->lookupLitstrId(id));
   }
 
-  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
-    ar->trashThis();
-  });
+  fcallImpl<false>(origpc, pc, fca, func, NoCtx{});
 }
 
 namespace {
@@ -4426,11 +4423,11 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
     throw_call_reified_func_without_generics(func);
   }
 
-  fcallImpl<dynamic>(origpc, pc, fca, func, std::move(invName),
-                     [&] (ActRec* ar) {
-    /* Transfer ownership of obj to the ActRec*/
-    ar->setThis(obj);
-  });
+  // fcallImpl() will do further checks before spilling the ActRec. If any
+  // of these checks fail, make sure it gets decref'd only via ctx.
+  tvWriteNull(*vmStack().indC(fca.numInputs() + 2));
+  fcallImpl<dynamic>(origpc, pc, fca, func, Object::attach(obj),
+                     std::move(invName));
 }
 
 static void raise_resolve_non_object(const char* methodName,
@@ -4636,25 +4633,22 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
     throw_call_reified_func_without_generics(func);
   }
 
-  fcallImpl<dynamic>(origpc, pc, fca, func, std::move(invName),
-                     [&] (ActRec* ar) {
-    if (obj) {
-      obj->incRefCount();
-      ar->setThis(obj);
-    } else {
-      if (forwarding && ctx) {
-        /* Propagate the current late bound class if there is one, */
-        /* otherwise use the class given by this instruction's input */
-        if (vmfp()->hasThis()) {
-          cls = vmfp()->getThis()->getVMClass();
-        } else {
-          cls = vmfp()->getClass();
-        }
+  if (obj) {
+    fcallImpl<dynamic>(origpc, pc, fca, func, Object(obj), std::move(invName),
+                       logAsDynamicCall);
+  } else {
+    if (forwarding && ctx) {
+      /* Propagate the current late bound class if there is one, */
+      /* otherwise use the class given by this instruction's input */
+      if (vmfp()->hasThis()) {
+        cls = vmfp()->getThis()->getVMClass();
+      } else {
+        cls = vmfp()->getClass();
       }
-      ar->setClass(cls);
     }
-  },
-  logAsDynamicCall);
+    fcallImpl<dynamic>(origpc, pc, fca, func, cls, std::move(invName),
+                       logAsDynamicCall);
+  }
 }
 
 Class* specialClsRefToCls(SpecialClsRef ref) {
@@ -4844,10 +4838,10 @@ OPTBLD_INLINE void iopFCallCtor(PC origpc, PC& pc, FCallArgs fca,
   auto const res UNUSED = lookupCtorMethod(func, obj->getVMClass(), ctx, true);
   assertx(res == LookupResult::MethodFoundWithThis);
 
-  fcallImpl<false>(origpc, pc, fca, func, [&] (ActRec* ar) {
-    /* Transfer ownership of obj to the ActRec*/
-    ar->setThis(obj);
-  });
+  // fcallImpl() will do further checks before spilling the ActRec. If any
+  // of these checks fail, make sure it gets decref'd only via ctx.
+  tvWriteNull(*vmStack().indC(fca.numInputs() + 2));
+  fcallImpl<false>(origpc, pc, fca, func, Object::attach(obj));
 }
 
 OPTBLD_INLINE void iopLockObj() {

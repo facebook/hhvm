@@ -18,10 +18,10 @@ function base64_decode(string $data, bool $strict = false): mixed;
  *
  * @param string $data - The data to encode.
  *
- * @return string - The encoded data, as a string or FALSE on failure.
+ * @return string - The encoded data, as a string or FALSE on failure (when does this happen?).
  */
 <<__Native, __IsFoldable, __Rx>>
-function base64_encode(string $data): mixed;
+function base64_encode(string $data): string;
 
 /**
  * Fetches all the headers sent by the server in response to a HTTP request

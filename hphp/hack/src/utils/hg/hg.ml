@@ -28,16 +28,16 @@ module Hg_actual = struct
     Process.exec "hg" ~env args
 
   (** Given a list of files and their revisions, saves the files to the output
- * directory. For example,
- * get_old_version_of_files ~rev:"X" ~files:["file1.php"]
- * ~out:"/tmp/hh_server/%s" ~repo:"~/www"
- * runs the command
- *
- * hg cat -r X file1.php -o "/tmp/hh_server/%s" --cwd ~/www
- *
- * which saves the version of file1.php at revision X in directory
- * /tmp/hh_server/file1.php
- *)
+   * directory. For example,
+   * get_old_version_of_files ~rev:"X" ~files:["file1.php"]
+   * ~out:"/tmp/hh_server/%s" ~repo:"~/www"
+   * runs the command
+   *
+   * hg cat -r X file1.php -o "/tmp/hh_server/%s" --cwd ~/www
+   *
+   * which saves the version of file1.php at revision X in directory
+   * /tmp/hh_server/file1.php
+   *)
   let get_old_version_of_files ~rev ~files ~out ~repo =
     let process =
       exec_hg
@@ -46,9 +46,9 @@ module Hg_actual = struct
     Future.make process ignore
 
   (** Returns the closest global ancestor in master to the given rev.
- *
- * hg log -r 'ancestor(master,rev)' -T '{globalrev}\n'
- *)
+   *
+   * hg log -r 'ancestor(master,rev)' -T '{globalrev}\n'
+   *)
   let get_closest_global_ancestor rev repo =
     let global_rev_query rev =
       exec_hg ["log"; "-r"; rev; "-T"; "{globalrev}\n"; "--cwd"; repo]

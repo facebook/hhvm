@@ -132,85 +132,82 @@ let go_ide
     (action : ServerFormatTypes.ide_action)
     (options : Lsp.DocumentFormatting.formattingOptions) :
     ServerFormatTypes.ide_result =
-  File_content.(
-    ServerFormatTypes.(
-      Lsp.TextDocumentItem.(
-        let filename =
-          match action with
-          | Document filename -> filename
-          | Range range -> range.Ide_api_types.range_filename
-          | Position position -> position.Ide_api_types.filename
-        in
-        let uri = path_to_lsp_uri ~default_path:"" filename in
-        let lsp_doc = SMap.find_opt uri editor_open_files in
-        let content =
-          Option.value_map ~default:"" ~f:(fun item -> item.text) lsp_doc
-        in
-        let convert_to_ide_result
-            (old_format_result : ServerFormatTypes.result)
-            ~(range : File_content.range) : ServerFormatTypes.ide_result =
-          let range = Ide_api_types.ide_range_from_fc range in
-          old_format_result
-          |> Result.map ~f:(fun new_text -> { new_text; range })
-        in
-        match action with
-        | Document _filename ->
-          (* `from0` and `to0` are zero-indexed, hence the name. *)
-          let from0 = 0 in
-          let to0 = String.length content in
-          let ed = offset_to_position content to0 in
-          let range = { st = { line = 1; column = 1 }; ed } in
-          (* hackfmt currently takes one-indexed integers for range formatting. *)
-          go ~filename ~content (from0 + 1) (to0 + 1) options
-          |> convert_to_ide_result ~range
-        | Range range ->
-          let file_range =
-            range.Ide_api_types.file_range |> Ide_api_types.ide_range_to_fc
-          in
-          let (range, from0, to0) =
-            expand_range_to_whole_rows content file_range
-          in
-          go ~filename ~content (from0 + 1) (to0 + 1) options
-          |> convert_to_ide_result ~range
-        | Position { Ide_api_types.position; _ } ->
-          (* `get_offset` returns a zero-based index, and `--at-char` takes a
-       zero-based index. *)
-          let position = position |> Ide_api_types.ide_pos_to_fc in
-          let offset = get_offset content position in
-          let args = ["--at-char"; string_of_int offset] in
-          let args = args @ formatting_options_to_args options in
-          go_hackfmt ~filename ~content args >>= fun lines ->
-          (* `hackfmt --at-char` returns the range that was formatted, as well as the
-       contents of that range. For example, it might return
+  let open File_content in
+  let open ServerFormatTypes in
+  let open Lsp.TextDocumentItem in
+  let filename =
+    match action with
+    | Document filename -> filename
+    | Range range -> range.Ide_api_types.range_filename
+    | Position position -> position.Ide_api_types.filename
+  in
+  let uri = path_to_lsp_uri ~default_path:"" filename in
+  let lsp_doc = SMap.find_opt uri editor_open_files in
+  let content =
+    Option.value_map ~default:"" ~f:(fun item -> item.text) lsp_doc
+  in
+  let convert_to_ide_result
+      (old_format_result : ServerFormatTypes.result)
+      ~(range : File_content.range) : ServerFormatTypes.ide_result =
+    let range = Ide_api_types.ide_range_from_fc range in
+    old_format_result |> Result.map ~f:(fun new_text -> { new_text; range })
+  in
+  match action with
+  | Document _filename ->
+    (* `from0` and `to0` are zero-indexed, hence the name. *)
+    let from0 = 0 in
+    let to0 = String.length content in
+    let ed = offset_to_position content to0 in
+    let range = { st = { line = 1; column = 1 }; ed } in
+    (* hackfmt currently takes one-indexed integers for range formatting. *)
+    go ~filename ~content (from0 + 1) (to0 + 1) options
+    |> convert_to_ide_result ~range
+  | Range range ->
+    let file_range =
+      range.Ide_api_types.file_range |> Ide_api_types.ide_range_to_fc
+    in
+    let (range, from0, to0) = expand_range_to_whole_rows content file_range in
+    go ~filename ~content (from0 + 1) (to0 + 1) options
+    |> convert_to_ide_result ~range
+  | Position { Ide_api_types.position; _ } ->
+    (* `get_offset` returns a zero-based index, and `--at-char` takes a
+ zero-based index. *)
+    let position = position |> Ide_api_types.ide_pos_to_fc in
+    let offset = get_offset content position in
+    let args = ["--at-char"; string_of_int offset] in
+    let args = args @ formatting_options_to_args options in
+    go_hackfmt ~filename ~content args >>= fun lines ->
+    (* `hackfmt --at-char` returns the range that was formatted, as well as the
+ contents of that range. For example, it might return
 
-           10 12
-           }
+     10 12
+     }
 
-       signifying that we should replace the character under the cursor with the
-       following content, starting at index 10. We need to extract the range
-       from the first line and forward it to the client so that it knows where
-       to apply the edit. *)
-          begin
-            match lines with
-            | range_line :: lines -> Ok (range_line, lines)
-            | _ -> Error "Got no lines in at-position formatting"
-          end
-          >>= fun (range_line, lines) ->
-          (* Extract the offsets in the first line that form the range.
-       NOTE: `Str.string_match` sets global state to be consumed immediately
-       afterwards by `Str.matched_group`. *)
-          let does_range_match = Str.string_match range_regexp range_line 0 in
-          if not does_range_match then
-            Error "Range not found on first line of --at-char output"
-          else
-            let from0 = int_of_string (Str.matched_group 1 range_line) in
-            let to0 = int_of_string (Str.matched_group 2 range_line) in
-            let range =
-              {
-                st = offset_to_position content from0;
-                ed = offset_to_position content to0;
-              }
-              |> Ide_api_types.ide_range_from_fc
-            in
-            let new_text = String.concat ~sep:"\n" lines in
-            Ok { new_text; range })))
+ signifying that we should replace the character under the cursor with the
+ following content, starting at index 10. We need to extract the range
+ from the first line and forward it to the client so that it knows where
+ to apply the edit. *)
+    begin
+      match lines with
+      | range_line :: lines -> Ok (range_line, lines)
+      | _ -> Error "Got no lines in at-position formatting"
+    end
+    >>= fun (range_line, lines) ->
+    (* Extract the offsets in the first line that form the range.
+ NOTE: `Str.string_match` sets global state to be consumed immediately
+ afterwards by `Str.matched_group`. *)
+    let does_range_match = Str.string_match range_regexp range_line 0 in
+    if not does_range_match then
+      Error "Range not found on first line of --at-char output"
+    else
+      let from0 = int_of_string (Str.matched_group 1 range_line) in
+      let to0 = int_of_string (Str.matched_group 2 range_line) in
+      let range =
+        {
+          st = offset_to_position content from0;
+          ed = offset_to_position content to0;
+        }
+        |> Ide_api_types.ide_range_from_fc
+      in
+      let new_text = String.concat ~sep:"\n" lines in
+      Ok { new_text; range }

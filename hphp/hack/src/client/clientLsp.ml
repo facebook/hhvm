@@ -1996,71 +1996,117 @@ let do_typeCoverage_local
     (ide_service : ClientIdeService.t)
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
     (params : TypeCoverage.params) : TypeCoverage.result Lwt.t =
-  TypeCoverage.(
-    let document_contents =
-      get_document_contents
-        editor_open_files
-        params.textDocument.TextDocumentIdentifier.uri
+  let open TypeCoverage in
+  let document_contents =
+    get_document_contents
+      editor_open_files
+      params.textDocument.TextDocumentIdentifier.uri
+  in
+  match document_contents with
+  | None -> failwith "Local type coverage failed, file could not be found."
+  | Some file_contents ->
+    let file_path =
+      params.textDocument.TextDocumentIdentifier.uri
+      |> lsp_uri_to_path
+      |> Path.make
     in
-    match document_contents with
-    | None -> failwith "Local type coverage failed, file could not be found."
-    | Some file_contents ->
-      let file_path =
-        params.textDocument.TextDocumentIdentifier.uri
-        |> lsp_uri_to_path
-        |> Path.make
-      in
-      let request =
-        ClientIdeMessage.Type_coverage
-          { ClientIdeMessage.file_path; ClientIdeMessage.file_contents }
-      in
-      let%lwt result = ClientIdeService.rpc ide_service request in
-      (match result with
-      | Ok (results, counts) ->
-        let formatted = format_typeCoverage_result results counts in
-        Lwt.return formatted
-      | Error error_message ->
-        failwith (Printf.sprintf "Local type coverage failed: %s" error_message)))
+    let request =
+      ClientIdeMessage.Type_coverage
+        { ClientIdeMessage.file_path; ClientIdeMessage.file_contents }
+    in
+    let%lwt result = ClientIdeService.rpc ide_service request in
+    (match result with
+    | Ok (results, counts) ->
+      let formatted = format_typeCoverage_result results counts in
+      Lwt.return formatted
+    | Error error_message ->
+      failwith (Printf.sprintf "Local type coverage failed: %s" error_message))
 
 let do_formatting_common
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
     (action : ServerFormatTypes.ide_action)
     (options : DocumentFormatting.formattingOptions) : TextEdit.t list =
-  ServerFormatTypes.(
-    let response : ServerFormatTypes.ide_result =
-      ServerFormat.go_ide editor_open_files action options
-    in
-    match response with
-    | Error "File failed to parse without errors" ->
-      (* If LSP issues a formatting request at a given line+char, but we can't *)
-      (* calculate a better format for the file due to syntax errors in it,    *)
-      (* then we should return "success and there are no edits to apply"       *)
-      (* rather than "error".                                                  *)
-      (* TODO: let's eliminate hh_format, and incorporate hackfmt into the     *)
-      (* hh_client binary itself, and make make "hackfmt" just a wrapper for   *)
-      (* "hh_client format", and then make it return proper error that we can  *)
-      (* pattern-match upon, rather than hard-coding the string...             *)
-      []
-    | Error message -> raise (Error.InternalError message)
-    | Ok r ->
-      let range = ide_range_to_lsp r.range in
-      let newText = r.new_text in
-      [{ TextEdit.range; newText }])
+  let open ServerFormatTypes in
+  let response : ServerFormatTypes.ide_result =
+    ServerFormat.go_ide editor_open_files action options
+  in
+  match response with
+  | Error "File failed to parse without errors" ->
+    (* If LSP issues a formatting request at a given line+char, but we can't *)
+    (* calculate a better format for the file due to syntax errors in it,    *)
+    (* then we should return "success and there are no edits to apply"       *)
+    (* rather than "error".                                                  *)
+    (* TODO: let's eliminate hh_format, and incorporate hackfmt into the     *)
+    (* hh_client binary itself, and make make "hackfmt" just a wrapper for   *)
+    (* "hh_client format", and then make it return proper error that we can  *)
+    (* pattern-match upon, rather than hard-coding the string...             *)
+    []
+  | Error message -> raise (Error.InternalError message)
+  | Ok r ->
+    let range = ide_range_to_lsp r.range in
+    let newText = r.new_text in
+    [{ TextEdit.range; newText }]
 
 let do_documentRangeFormatting
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
     (params : DocumentRangeFormatting.params) : DocumentRangeFormatting.result =
-  DocumentRangeFormatting.(
-    TextDocumentIdentifier.(
-      let action =
-        ServerFormatTypes.Range
-          {
-            Ide_api_types.range_filename =
-              lsp_uri_to_path params.textDocument.uri;
-            file_range = lsp_range_to_ide params.range;
-          }
-      in
-      do_formatting_common editor_open_files action params.options))
+  let open DocumentRangeFormatting in
+  let open TextDocumentIdentifier in
+  let action =
+    ServerFormatTypes.Range
+      {
+        Ide_api_types.range_filename = lsp_uri_to_path params.textDocument.uri;
+        file_range = lsp_range_to_ide params.range;
+      }
+  in
+  do_formatting_common editor_open_files action params.options
+
+let do_documentOnTypeFormatting
+    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (params : DocumentOnTypeFormatting.params) : DocumentOnTypeFormatting.result
+    =
+  let open DocumentOnTypeFormatting in
+  let open TextDocumentIdentifier in
+  (*
+In LSP, positions do not point directly to characters, but to spaces in between characters.
+Thus, the LSP position that the cursor points to after typing a character is the space
+immediately after the character.
+
+For example:
+      Character positions:      0 1 2 3 4 5 6
+                                f o o ( ) { }
+      LSP positions:           0 1 2 3 4 5 6 7
+
+      The cursor is at LSP position 7 after typing the "}" of "foo(){}"
+      But the character position of "}" is 6.
+
+Nuclide currently sends positions according to LSP, but everything else in the server
+and in hack formatting assumes that positions point directly to characters.
+
+Thus, to send the position of the character itself for formatting,
+  we must subtract one.
+*)
+  let fixup_position position =
+    { position with character = position.character - 1 }
+  in
+  let action =
+    ServerFormatTypes.Position
+      {
+        Ide_api_types.filename = lsp_uri_to_path params.textDocument.uri;
+        position = lsp_position_to_ide (fixup_position params.position);
+      }
+  in
+  do_formatting_common editor_open_files action params.options
+
+let do_documentFormatting
+    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (params : DocumentFormatting.params) : DocumentFormatting.result =
+  let open DocumentFormatting in
+  let open TextDocumentIdentifier in
+  let action =
+    ServerFormatTypes.Document (lsp_uri_to_path params.textDocument.uri)
+  in
+  do_formatting_common editor_open_files action params.options
 
 let do_signatureHelp
     (conn : server_conn)
@@ -2141,53 +2187,6 @@ let do_documentRename
       | Error message -> raise (Error.InvalidRequest message)
     in
     Lwt.return (patches_to_workspace_edit patches))
-
-let do_documentOnTypeFormatting
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
-    (params : DocumentOnTypeFormatting.params) : DocumentOnTypeFormatting.result
-    =
-  DocumentOnTypeFormatting.(
-    TextDocumentIdentifier.(
-      (*
-    In LSP, positions do not point directly to characters, but to spaces in between characters.
-    Thus, the LSP position that the cursor points to after typing a character is the space
-    immediately after the character.
-
-    For example:
-          Character positions:      0 1 2 3 4 5 6
-                                    f o o ( ) { }
-          LSP positions:           0 1 2 3 4 5 6 7
-
-          The cursor is at LSP position 7 after typing the "}" of "foo(){}"
-          But the character position of "}" is 6.
-
-    Nuclide currently sends positions according to LSP, but everything else in the server
-    and in hack formatting assumes that positions point directly to characters.
-
-    Thus, to send the position of the character itself for formatting,
-      we must subtract one.
-  *)
-      let fixup_position position =
-        { position with character = position.character - 1 }
-      in
-      let action =
-        ServerFormatTypes.Position
-          {
-            Ide_api_types.filename = lsp_uri_to_path params.textDocument.uri;
-            position = lsp_position_to_ide (fixup_position params.position);
-          }
-      in
-      do_formatting_common editor_open_files action params.options))
-
-let do_documentFormatting
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
-    (params : DocumentFormatting.params) : DocumentFormatting.result =
-  DocumentFormatting.(
-    TextDocumentIdentifier.(
-      let action =
-        ServerFormatTypes.Document (lsp_uri_to_path params.textDocument.uri)
-      in
-      do_formatting_common editor_open_files action params.options))
 
 let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
     state =

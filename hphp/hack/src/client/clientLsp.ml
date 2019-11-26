@@ -2512,8 +2512,7 @@ let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
       let%lwt () =
         Lwt_list.iter_s
           (fun (uri, textDocument) ->
-            (* TODO(ljw): map uri to filename *)
-            let filename = Lsp.string_of_uri uri in
+            let filename = lsp_uri_to_path uri in
             let command =
               ServerCommandTypes.OPEN_FILE
                 (filename, textDocument.TextDocumentItem.text)

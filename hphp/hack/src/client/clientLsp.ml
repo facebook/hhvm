@@ -2023,12 +2023,19 @@ let do_typeCoverage_local
       failwith (Printf.sprintf "Local type coverage failed: %s" error_message))
 
 let do_formatting_common
+    (uri : Lsp.documentUri)
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
     (action : ServerFormatTypes.ide_action)
     (options : DocumentFormatting.formattingOptions) : TextEdit.t list =
   let open ServerFormatTypes in
-  let response : ServerFormatTypes.ide_result =
-    ServerFormat.go_ide editor_open_files action options
+  let filename_for_logging = lsp_uri_to_path uri in
+  (* Following line will throw if the document isn't already open, so we'll *)
+  (* return an error code to the LSP client. The spec doesn't spell out if we *)
+  (* should be expected to handle formatting requests on unopened files. *)
+  let lsp_doc = SMap.find uri editor_open_files in
+  let content = lsp_doc.Lsp.TextDocumentItem.text in
+  let response =
+    ServerFormat.go_ide ~filename_for_logging ~content ~action ~options
   in
   match response with
   | Error "File failed to parse without errors" ->
@@ -2052,14 +2059,12 @@ let do_documentRangeFormatting
     (params : DocumentRangeFormatting.params) : DocumentRangeFormatting.result =
   let open DocumentRangeFormatting in
   let open TextDocumentIdentifier in
-  let action =
-    ServerFormatTypes.Range
-      {
-        Ide_api_types.range_filename = lsp_uri_to_path params.textDocument.uri;
-        file_range = lsp_range_to_ide params.range;
-      }
-  in
-  do_formatting_common editor_open_files action params.options
+  let action = ServerFormatTypes.Range (lsp_range_to_ide params.range) in
+  do_formatting_common
+    params.textDocument.uri
+    editor_open_files
+    action
+    params.options
 
 let do_documentOnTypeFormatting
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
@@ -2086,27 +2091,27 @@ and in hack formatting assumes that positions point directly to characters.
 Thus, to send the position of the character itself for formatting,
   we must subtract one.
 *)
-  let fixup_position position =
-    { position with character = position.character - 1 }
+  let position =
+    { params.position with character = params.position.character - 1 }
   in
-  let action =
-    ServerFormatTypes.Position
-      {
-        Ide_api_types.filename = lsp_uri_to_path params.textDocument.uri;
-        position = lsp_position_to_ide (fixup_position params.position);
-      }
-  in
-  do_formatting_common editor_open_files action params.options
+  let action = ServerFormatTypes.Position (lsp_position_to_ide position) in
+  do_formatting_common
+    params.textDocument.uri
+    editor_open_files
+    action
+    params.options
 
 let do_documentFormatting
     (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
     (params : DocumentFormatting.params) : DocumentFormatting.result =
   let open DocumentFormatting in
   let open TextDocumentIdentifier in
-  let action =
-    ServerFormatTypes.Document (lsp_uri_to_path params.textDocument.uri)
-  in
-  do_formatting_common editor_open_files action params.options
+  let action = ServerFormatTypes.Document in
+  do_formatting_common
+    params.textDocument.uri
+    editor_open_files
+    action
+    params.options
 
 let do_signatureHelp
     (conn : server_conn)

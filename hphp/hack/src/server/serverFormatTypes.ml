@@ -12,9 +12,9 @@ type action = string * int * int (* file contents, offset start, offset end *)
 type result = (string, string) Pervasives.result
 
 type ide_action =
-  | Document of string (* filename *)
-  | Range of Ide_api_types.file_range
-  | Position of Ide_api_types.file_position
+  | Document
+  | Range of Ide_api_types.range
+  | Position of Ide_api_types.position
 
 type ide_response = {
   new_text: string;

@@ -51,9 +51,9 @@ let formatting_options_to_args
 let range_offsets_to_args from to_ =
   ["--range"; string_of_int from; string_of_int to_]
 
-let go_hackfmt ?filename ~content args =
+let go_hackfmt ?filename_for_logging ~content args =
   let args =
-    match filename with
+    match filename_for_logging with
     | Some filename -> args @ ["--filename-for-logging"; filename]
     | None -> args
   in
@@ -79,11 +79,11 @@ let go_hackfmt ?filename ~content args =
       ("Could not locate formatter - looked in: " ^ String.concat ~sep:" " paths)
 
 (* This function takes 1-based offsets, and 'to_' is exclusive. *)
-let go ?filename ~content from to_ options =
+let go ?filename_for_logging ~content from to_ options =
   let format_args = formatting_options_to_args options in
   let range_args = range_offsets_to_args from to_ in
   let args = format_args @ range_args in
-  go_hackfmt ?filename ~content args >>| fun lines ->
+  go_hackfmt ?filename_for_logging ~content args >>| fun lines ->
   String.concat ~sep:"\n" lines ^ "\n"
 
 (* Our formatting engine can only handle ranges that span entire rows.  *)
@@ -121,31 +121,14 @@ let expand_range_to_whole_rows content (range : File_content.range) :
 (* Two integers separated by a space. *)
 let range_regexp = Str.regexp "^\\([0-9]+\\) \\([0-9]+\\)$"
 
-let path_to_lsp_uri (path : string) ~(default_path : string) : string =
-  if path = "" then
-    File_url.create default_path
-  else
-    File_url.create path
-
 let go_ide
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
-    (action : ServerFormatTypes.ide_action)
-    (options : Lsp.DocumentFormatting.formattingOptions) :
+    ~(filename_for_logging : string)
+    ~(content : string)
+    ~(action : ServerFormatTypes.ide_action)
+    ~(options : Lsp.DocumentFormatting.formattingOptions) :
     ServerFormatTypes.ide_result =
   let open File_content in
   let open ServerFormatTypes in
-  let open Lsp.TextDocumentItem in
-  let filename =
-    match action with
-    | Document filename -> filename
-    | Range range -> range.Ide_api_types.range_filename
-    | Position position -> position.Ide_api_types.filename
-  in
-  let uri = path_to_lsp_uri ~default_path:"" filename in
-  let lsp_doc = SMap.find_opt uri editor_open_files in
-  let content =
-    Option.value_map ~default:"" ~f:(fun item -> item.text) lsp_doc
-  in
   let convert_to_ide_result
       (old_format_result : ServerFormatTypes.result)
       ~(range : File_content.range) : ServerFormatTypes.ide_result =
@@ -153,30 +136,28 @@ let go_ide
     old_format_result |> Result.map ~f:(fun new_text -> { new_text; range })
   in
   match action with
-  | Document _filename ->
+  | Document ->
     (* `from0` and `to0` are zero-indexed, hence the name. *)
     let from0 = 0 in
     let to0 = String.length content in
     let ed = offset_to_position content to0 in
     let range = { st = { line = 1; column = 1 }; ed } in
     (* hackfmt currently takes one-indexed integers for range formatting. *)
-    go ~filename ~content (from0 + 1) (to0 + 1) options
+    go ~filename_for_logging ~content (from0 + 1) (to0 + 1) options
     |> convert_to_ide_result ~range
   | Range range ->
-    let file_range =
-      range.Ide_api_types.file_range |> Ide_api_types.ide_range_to_fc
-    in
-    let (range, from0, to0) = expand_range_to_whole_rows content file_range in
-    go ~filename ~content (from0 + 1) (to0 + 1) options
+    let fc_range = Ide_api_types.ide_range_to_fc range in
+    let (range, from0, to0) = expand_range_to_whole_rows content fc_range in
+    go ~filename_for_logging ~content (from0 + 1) (to0 + 1) options
     |> convert_to_ide_result ~range
-  | Position { Ide_api_types.position; _ } ->
+  | Position position ->
     (* `get_offset` returns a zero-based index, and `--at-char` takes a
  zero-based index. *)
-    let position = position |> Ide_api_types.ide_pos_to_fc in
-    let offset = get_offset content position in
+    let fc_position = Ide_api_types.ide_pos_to_fc position in
+    let offset = get_offset content fc_position in
     let args = ["--at-char"; string_of_int offset] in
     let args = args @ formatting_options_to_args options in
-    go_hackfmt ~filename ~content args >>= fun lines ->
+    go_hackfmt ~filename_for_logging ~content args >>= fun lines ->
     (* `hackfmt --at-char` returns the range that was formatted, as well as the
  contents of that range. For example, it might return
 

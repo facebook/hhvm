@@ -13,12 +13,12 @@ pub enum Error {
     IncludeTimeFatalException(FatalOp, Pos, String),
 }
 
-pub fn raise_fatal_runtime(pos: Pos, msg: String) -> Result<(), Error> {
-    Err(Error::IncludeTimeFatalException(FatalOp::Runtime, pos, msg))
+pub fn raise_fatal_runtime(pos: Pos, msg: String) -> Error {
+    Error::IncludeTimeFatalException(FatalOp::Runtime, pos, msg)
 }
 
-pub fn raise_fatal_parse(pos: Pos, msg: String) -> Result<(), Error> {
-    Err(Error::IncludeTimeFatalException(FatalOp::Parse, pos, msg))
+pub fn raise_fatal_parse(pos: Pos, msg: String) -> Error {
+    Error::IncludeTimeFatalException(FatalOp::Parse, pos, msg)
 }
 
 pub fn emit_fatal(emitter: &Emitter, op: FatalOp, pos: &Pos, msg: String) -> Instr {

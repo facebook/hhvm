@@ -39,16 +39,17 @@ let get_class_exn name =
   value_or_not_found not_found_msg @@ Decl_provider.get_class name
 
 let get_class_name : type a. a Typing_deps.Dep.variant -> string option =
+ (* the OCaml compiler is not smart enough to let us use an or-pattern for all of these
+  * because of how it's matching on a GADT *)
  fun dep ->
   Typing_deps.Dep.(
     match dep with
-    | Const (cls, _)
-    | Method (cls, _)
-    | SMethod (cls, _)
-    | Prop (cls, _)
-    | SProp (cls, _)
-    | Class cls ->
-      Some cls
+    | Const (cls, _) -> Some cls
+    | Method (cls, _) -> Some cls
+    | SMethod (cls, _) -> Some cls
+    | Prop (cls, _) -> Some cls
+    | SProp (cls, _) -> Some cls
+    | Class cls -> Some cls
     | Cstr cls -> Some cls
     | AllMembers cls -> Some cls
     | Extends cls -> Some cls

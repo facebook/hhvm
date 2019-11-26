@@ -31,7 +31,7 @@ module Dep : sig
     | GConstName : string -> 'a variant
         (** Like [GConst], but used only in conservative redecl. May not be
         necessary anymore. *)
-    | Const : (string * string) -> 'a variant
+    | Const : (string * string) -> dependency variant
         (** Represents either a class constant depending on something, or
         something depending on a class constant. *)
     | AllMembers : string -> dependency variant
@@ -50,16 +50,16 @@ module Dep : sig
     | FunName : string -> 'a variant
         (** Like [Fun], but used only in conservative redecl. May not be
         necessary anymore. *)
-    | Prop : (string * string) -> 'a variant
+    | Prop : (string * string) -> dependency variant
         (** Represents either a class's instance property depending on
         something, or something depending on that property. *)
-    | SProp : (string * string) -> 'a variant
+    | SProp : (string * string) -> dependency variant
         (** Represents either a class's static property depending on
         something, or something depending on that property. *)
-    | Method : (string * string) -> 'a variant
+    | Method : (string * string) -> dependency variant
         (** Represents either a class's instance method depending on
         something, or something depending on that method. *)
-    | SMethod : (string * string) -> 'a variant
+    | SMethod : (string * string) -> dependency variant
         (** Represents either a class's static method depending on
         something, or something depending on that method. *)
     | Cstr : string -> dependency variant

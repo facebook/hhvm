@@ -21,16 +21,16 @@ module Dep = struct
   type _ variant =
     | GConst : string -> 'a variant
     | GConstName : string -> 'a variant
-    | Const : (string * string) -> 'a variant
+    | Const : (string * string) -> dependency variant
     | AllMembers : string -> dependency variant
     | Class : string -> 'a variant
     | RecordDef : string -> 'a variant
     | Fun : string -> 'a variant
     | FunName : string -> 'a variant
-    | Prop : (string * string) -> 'a variant
-    | SProp : (string * string) -> 'a variant
-    | Method : (string * string) -> 'a variant
-    | SMethod : (string * string) -> 'a variant
+    | Prop : (string * string) -> dependency variant
+    | SProp : (string * string) -> dependency variant
+    | Method : (string * string) -> dependency variant
+    | SMethod : (string * string) -> dependency variant
     | Cstr : string -> dependency variant
     | Extends : string -> dependency variant
 

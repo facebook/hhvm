@@ -1,0 +1,18 @@
+///// no_ns_a.hack /////
+namespace{use type TypeA as MyType;
+
+function do_stuff_a(): void {
+  new MyType();
+}
+}
+///// no_ns_b.hack /////
+namespace{use type TypeB as MyType;
+
+function do_stuff_b(): void {
+  new MyType();
+}
+}
+///// no_ns_decls.hack /////
+namespace{class TypeA {}
+class TypeB {}
+}

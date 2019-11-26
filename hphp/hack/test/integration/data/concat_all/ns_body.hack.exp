@@ -1,0 +1,16 @@
+///// ns_body_a.hack /////
+namespace NSBodyA {
+  use type TypeA as MyType;
+  function do_stuff(): void {
+    new MyType();
+  }
+}
+
+///// ns_body_b.hack /////
+namespace NSBodyB {
+  use type TypeB as MyType;
+  function do_stuff(): void {
+    new MyType();
+  }
+}
+

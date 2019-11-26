@@ -1,0 +1,16 @@
+///// ns_empty_body_a.hack /////
+namespace EmptyBody\A{
+function do_stuff(): void {
+}
+}
+///// ns_empty_body_a.php /////
+namespace EmptyBodyA\WithHeader{function do_stuff(): void {}
+}
+///// ns_empty_body_b.hack /////
+namespace EmptyBody\B{
+function do_stuff(): void {
+}
+}
+///// ns_empty_body_b.php /////
+namespace EmptyBodyB\WithHeader{function do_stuff(): void {}
+}

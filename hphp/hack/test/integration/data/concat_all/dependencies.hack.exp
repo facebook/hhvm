@@ -1,0 +1,12 @@
+///// 03_grandparent.hack /////
+namespace{abstract class GrandparentClass {}
+}
+///// 02_parent.hack /////
+namespace{abstract class ParentClass extends GrandparentClass {}
+}
+///// 01_child.hack /////
+namespace{final class ChildClass extends ParentClass {}
+}
+///// 04_sibling.hack /////
+namespace{final class SiblingClass extends ParentClass {}
+}

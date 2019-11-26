@@ -70,25 +70,16 @@ namespace {
  */
 void sync_regstate(TCA rip, _Unwind_Context* context) {
   assertx(tl_regState == VMRegState::DIRTY);
-
-  auto const fp = _Unwind_GetGR(context, dw_reg::FP);
-  auto const ip = uintptr_t(rip);
-  FTRACE(2, "syncing regstate for: fp {:#x}, ip {:#x}\n", fp, ip);
-
-  // fixupWork() takes an `ar' argument and syncs VM regs for the first TC
-  // frame it finds in the call chain for `ar'.  We can make it sync for the fp
-  // and rip in `context' by putting them in a fake ActRec here on the native
-  // stack, and passing a pointer to it.
-  //
-  // NB: This doesn't work for IndirectFixup situations.  However, currently
-  // IndirectFixup is only used for destructors, which aren't allowed to throw,
-  // so this is ok.
-  ActRec fakeAR;
-  fakeAR.m_sfp = reinterpret_cast<ActRec*>(fp);
-  fakeAR.m_savedRip = ip;
-
   Stats::inc(Stats::TC_SyncUnwind);
-  FixupMap::fixupWork(&fakeAR);
+
+  // `fp` points to the native frame immediately called from the TC. The address
+  // of this frame is needed by fixupWork() to properly process IndirectFixups.
+  auto const fp = reinterpret_cast<ActRec*>(
+    _Unwind_GetCFA(context) - kNativeFrameSize);
+  assertx(reinterpret_cast<TCA>(fp->m_savedRip) == rip);
+  FTRACE(2, "syncing regstate for: fp {}, sfp {}, ip {}\n",
+         fp, fp->m_sfp, (void*)fp->m_savedRip);
+  FixupMap::fixupWork(fp);
   tl_regState = VMRegState::CLEAN;
   FTRACE(2, "synced vmfp {}, vmsp {}, vmpc {}\n", vmfp(), vmsp(), vmpc());
 }

@@ -21,7 +21,7 @@ ARGS=(${ARGS[@]:2})
 
 function dune_build() {
   # OCaml
-  if [ -e "${HACK_SUBDIR}/${TARGET}.ml" ]; then
+  if [ -e "${HACK_ROOT}/${HACK_SUBDIR}/${TARGET}.ml" ]; then
     (
       cd "${HACK_ROOT}"
       "${DUNE}" build "${HACK_SUBDIR}/${TARGET}.exe"

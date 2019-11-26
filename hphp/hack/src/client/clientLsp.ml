@@ -86,9 +86,9 @@ module Main_env = struct
   type t = {
     conn: server_conn;
     needs_idle: bool;
-    editor_open_files: Lsp.TextDocumentItem.t SMap.t;
-    uris_with_diagnostics: SSet.t;
-    uris_with_unsaved_changes: SSet.t;
+    editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
+    uris_with_diagnostics: UriSet.t;
+    uris_with_unsaved_changes: UriSet.t;
     (* see comment in get_uris_with_unsaved_changes *)
     hh_server_status: ShowStatus.params;
   }
@@ -101,8 +101,8 @@ module In_init_env = struct
     (* our first attempt to connect *)
     most_recent_start_time: float;
     (* for subsequent retries *)
-    editor_open_files: Lsp.TextDocumentItem.t SMap.t;
-    uris_with_unsaved_changes: SSet.t;
+    editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
+    uris_with_unsaved_changes: UriSet.t;
         (* see comment in get_uris_with_unsaved_changes *)
   }
 end
@@ -110,8 +110,8 @@ end
 module Lost_env = struct
   type t = {
     p: params;
-    editor_open_files: Lsp.TextDocumentItem.t SMap.t;
-    uris_with_unsaved_changes: SSet.t;
+    editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
+    uris_with_unsaved_changes: UriSet.t;
     (* see comment in get_uris_with_unsaved_changes *)
     lock_file: string;
   }
@@ -181,8 +181,8 @@ let to_stdout (json : Hh_json.json) : unit =
   let s = Hh_json.json_to_string json ^ "\r\n\r\n" in
   Http_lite.write_message stdout s
 
-let get_editor_open_files (state : state) : Lsp.TextDocumentItem.t SMap.t option
-    =
+let get_editor_open_files (state : state) :
+    Lsp.TextDocumentItem.t UriMap.t option =
   match state with
   | Main_loop menv -> Main_env.(Some menv.editor_open_files)
   | In_init ienv -> In_init_env.(Some ienv.editor_open_files)
@@ -364,12 +364,12 @@ let read_hhconfig_version () : string Lwt.t =
 (* Lost_server state they're not even queued up, and if ever we see hh_server *)
 (* ready then we'll terminate the LSP server and trust the client to relaunch *)
 (* us and resend a load of didOpen/didChange events.                          *)
-let get_uris_with_unsaved_changes (state : state) : SSet.t =
+let get_uris_with_unsaved_changes (state : state) : UriSet.t =
   match state with
   | Main_loop menv -> menv.Main_env.uris_with_unsaved_changes
   | In_init ienv -> ienv.In_init_env.uris_with_unsaved_changes
   | Lost_server lenv -> lenv.Lost_env.uris_with_unsaved_changes
-  | _ -> SSet.empty
+  | _ -> UriSet.empty
 
 let update_hh_server_state_if_necessary (event : event) : unit =
   ServerCommandTypes.(
@@ -767,7 +767,7 @@ let hack_pos_to_lsp_range (pos : 'a Pos.pos) : Lsp.range =
       end_ = { line = line2 - 1; character = col2 - 1 };
     }
 
-let hack_pos_to_lsp_location (pos : string Pos.pos) ~(default_path : string) :
+let hack_pos_to_lsp_location (pos : Pos.absolute) ~(default_path : string) :
     Lsp.Location.t =
   Lsp.Location.
     {
@@ -874,14 +874,14 @@ let hack_errors_to_lsp_diagnostic
 (* Protocol                                                             *)
 (************************************************************************)
 let get_document_contents
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t) (uri : string) :
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t) (uri : documentUri) :
     string option =
-  match SMap.find_opt uri editor_open_files with
+  match UriMap.find_opt uri editor_open_files with
   | Some document -> Some document.TextDocumentItem.text
   | None -> None
 
 let get_document_location
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Lsp.TextDocumentPositionParams.t) :
     ClientIdeMessage.document_location =
   let (file_path, line, column) = lsp_file_position_to_hack params in
@@ -949,11 +949,11 @@ let state_to_rage (state : state) : string =
           "needs_idle";
           menv.needs_idle |> string_of_bool;
           "editor_open_files";
-          menv.editor_open_files |> SMap.keys |> List.length |> string_of_int;
+          menv.editor_open_files |> UriMap.keys |> List.length |> string_of_int;
           "uris_with_diagnostics";
-          menv.uris_with_diagnostics |> SSet.cardinal |> string_of_int;
+          menv.uris_with_diagnostics |> UriSet.cardinal |> string_of_int;
           "uris_with_unsaved_changes";
-          menv.uris_with_unsaved_changes |> SSet.cardinal |> string_of_int;
+          menv.uris_with_unsaved_changes |> UriSet.cardinal |> string_of_int;
           "hh_server_status.message";
           menv.hh_server_status.ShowStatus.request.ShowMessageRequest.message;
           "hh_server_status.shortMessage";
@@ -967,17 +967,17 @@ let state_to_rage (state : state) : string =
           "most_recent_start_time";
           ienv.most_recent_start_time |> string_of_float;
           "editor_open_files";
-          ienv.editor_open_files |> SMap.keys |> List.length |> string_of_int;
+          ienv.editor_open_files |> UriMap.keys |> List.length |> string_of_int;
           "uris_with_unsaved_changes";
-          ienv.uris_with_unsaved_changes |> SSet.cardinal |> string_of_int;
+          ienv.uris_with_unsaved_changes |> UriSet.cardinal |> string_of_int;
         ]
     | Lost_server lenv ->
       Lost_env.
         [
           "editor_open_files";
-          lenv.editor_open_files |> SMap.keys |> List.length |> string_of_int;
+          lenv.editor_open_files |> UriMap.keys |> List.length |> string_of_int;
           "uris_with_unsaved_changes";
-          lenv.uris_with_unsaved_changes |> SSet.cardinal |> string_of_int;
+          lenv.uris_with_unsaved_changes |> UriSet.cardinal |> string_of_int;
           "lock_file";
           lenv.lock_file;
           "explanation";
@@ -1233,7 +1233,7 @@ let do_hover
 
 let do_hover_local
     (ide_service : ClientIdeService.t)
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Hover.params) : Hover.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
   let%lwt infos =
@@ -1263,7 +1263,7 @@ let do_typeDefinition
 
 let do_typeDefinition_local
     (ide_service : ClientIdeService.t)
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Definition.params) : TypeDefinition.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
   let%lwt results =
@@ -1288,14 +1288,14 @@ let do_typeDefinition_local
 let do_definition
     (conn : server_conn)
     (ref_unblocked_time : float ref)
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Definition.params) : Definition.result Lwt.t =
   let (filename, line, column) = lsp_file_position_to_hack params in
   let uri =
     params.TextDocumentPositionParams.textDocument.TextDocumentIdentifier.uri
   in
   let labelled_file =
-    match SMap.find_opt uri editor_open_files with
+    match UriMap.find_opt uri editor_open_files with
     | Some document ->
       ServerCommandTypes.(
         LabelledFileContent
@@ -1314,7 +1314,7 @@ let do_definition
 
 let do_definition_local
     (ide_service : ClientIdeService.t)
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Definition.params) : Definition.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
   let%lwt results =
@@ -1546,7 +1546,7 @@ let do_completion_legacy
 
 let do_completion_local
     (ide_service : ClientIdeService.t)
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Completion.params) : Completion.result Lwt.t =
   Completion.(
     let document_location =
@@ -1660,7 +1660,7 @@ let do_completionItemResolve
  *)
 let do_resolve_local
     (ide_service : ClientIdeService.t)
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : CompletionItemResolve.params) : CompletionItemResolve.result Lwt.t
     =
   let raw_kind = params.Completion.kind in
@@ -1673,7 +1673,7 @@ let do_resolve_local
       | None -> raise NoLocationFound
       | Some _ as data ->
         let filename = Jget.string_exn data "filename" in
-        let uri = "file://" ^ filename in
+        let uri = File_url.create filename |> Lsp.uri_of_string in
         let file_path = Path.make filename in
         let line = Jget.int_exn data "line" in
         let column = Jget.int_exn data "char" in
@@ -1845,7 +1845,7 @@ let do_documentSymbol
 (* for serverless ide *)
 let do_documentSymbol_local
     (ide_service : ClientIdeService.t)
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : DocumentSymbol.params) : DocumentSymbol.result Lwt.t =
   DocumentSymbol.(
     TextDocumentIdentifier.(
@@ -1943,7 +1943,7 @@ let do_documentHighlight
 (* Serverless IDE implementation of highlight *)
 let do_highlight_local
     (ide_service : ClientIdeService.t)
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : DocumentHighlight.params) : DocumentHighlight.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
   let%lwt result =
@@ -1994,7 +1994,7 @@ let do_typeCoverage
 
 let do_typeCoverage_local
     (ide_service : ClientIdeService.t)
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : TypeCoverage.params) : TypeCoverage.result Lwt.t =
   let open TypeCoverage in
   let document_contents =
@@ -2024,7 +2024,7 @@ let do_typeCoverage_local
 
 let do_formatting_common
     (uri : Lsp.documentUri)
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (action : ServerFormatTypes.ide_action)
     (options : DocumentFormatting.formattingOptions) : TextEdit.t list =
   let open ServerFormatTypes in
@@ -2032,7 +2032,7 @@ let do_formatting_common
   (* Following line will throw if the document isn't already open, so we'll *)
   (* return an error code to the LSP client. The spec doesn't spell out if we *)
   (* should be expected to handle formatting requests on unopened files. *)
-  let lsp_doc = SMap.find uri editor_open_files in
+  let lsp_doc = UriMap.find uri editor_open_files in
   let content = lsp_doc.Lsp.TextDocumentItem.text in
   let response =
     ServerFormat.go_ide ~filename_for_logging ~content ~action ~options
@@ -2055,7 +2055,7 @@ let do_formatting_common
     [{ TextEdit.range; newText }]
 
 let do_documentRangeFormatting
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : DocumentRangeFormatting.params) : DocumentRangeFormatting.result =
   let open DocumentRangeFormatting in
   let open TextDocumentIdentifier in
@@ -2067,7 +2067,7 @@ let do_documentRangeFormatting
     params.options
 
 let do_documentOnTypeFormatting
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : DocumentOnTypeFormatting.params) : DocumentOnTypeFormatting.result
     =
   let open DocumentOnTypeFormatting in
@@ -2102,7 +2102,7 @@ Thus, to send the position of the character itself for formatting,
     params.options
 
 let do_documentFormatting
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : DocumentFormatting.params) : DocumentFormatting.result =
   let open DocumentFormatting in
   let open TextDocumentIdentifier in
@@ -2124,7 +2124,7 @@ let do_signatureHelp
 (* Serverless IDE version of signature help *)
 let do_signatureHelp_local
     (ide_service : ClientIdeService.t)
-    (editor_open_files : Lsp.TextDocumentItem.t SMap.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : SignatureHelp.params) : SignatureHelp.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
   let%lwt result =
@@ -2244,11 +2244,11 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
       | _ -> state))
 
 (* do_diagnostics: sends notifications for all reported diagnostics; also     *)
-(* returns an updated "files_with_diagnostics" set of all files for which     *)
+(* returns an updated "uris_with_diagnostics" set of all files for which     *)
 (* our client currently has non-empty diagnostic reports.                     *)
 let do_diagnostics
-    (uris_with_diagnostics : SSet.t)
-    (file_reports : Pos.absolute Errors.error_ list SMap.t) : SSet.t =
+    (uris_with_diagnostics : UriSet.t)
+    (file_reports : Pos.absolute Errors.error_ list SMap.t) : UriSet.t =
   (* Hack sometimes reports a diagnostic on an empty file when it can't       *)
   (* figure out which file to report. In this case we'll report on the root.  *)
   (* Nuclide and VSCode both display this fine, though they obviously don't   *)
@@ -2281,13 +2281,13 @@ let do_diagnostics
   let files_with = SMap.bindings reports_with |> List.map ~f:fst in
   (* uris_without/uris_with are sets of uris *)
   let uris_without =
-    List.map files_without ~f:(path_to_lsp_uri ~default_path) |> SSet.of_list
+    List.map files_without ~f:(path_to_lsp_uri ~default_path) |> UriSet.of_list
   in
   let uris_with =
-    List.map files_with ~f:(path_to_lsp_uri ~default_path) |> SSet.of_list
+    List.map files_with ~f:(path_to_lsp_uri ~default_path) |> UriSet.of_list
   in
   (* this is "(uris_with_diagnostics \ uris_without) U uris_with" *)
-  SSet.union (SSet.diff uris_with_diagnostics uris_without) uris_with
+  UriSet.union (UriSet.diff uris_with_diagnostics uris_without) uris_with
 
 let get_client_ide_status (ide_service : ClientIdeService.t) : ShowStatus.params
     =
@@ -2452,7 +2452,7 @@ let report_connect_end (ienv : In_init_env.t) : state =
         Main_env.conn = ienv.In_init_env.conn;
         needs_idle = true;
         editor_open_files = ienv.editor_open_files;
-        uris_with_diagnostics = SSet.empty;
+        uris_with_diagnostics = UriSet.empty;
         uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
         hh_server_status =
           {
@@ -2499,19 +2499,21 @@ let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
       in
       (* Extract the list of file changes we're tracking *)
       let editor_open_files =
-        SMap.elements
+        UriMap.elements
           (match state with
           | Main_loop menv -> Main_env.(menv.editor_open_files)
           | In_init ienv -> In_init_env.(ienv.editor_open_files)
           | Lost_server lenv -> Lost_env.(lenv.editor_open_files)
-          | _ -> SMap.empty)
+          | _ -> UriMap.empty)
       in
       (* send open files and unsaved buffers to server *)
       let float_unblocked_time = ref 0.0 in
       (* Note: do serially since these involve RPC calls. *)
       let%lwt () =
         Lwt_list.iter_s
-          (fun (filename, textDocument) ->
+          (fun (uri, textDocument) ->
+            (* TODO(ljw): map uri to filename *)
+            let filename = Lsp.string_of_uri uri in
             let command =
               ServerCommandTypes.OPEN_FILE
                 (filename, textDocument.TextDocumentItem.text)
@@ -2746,7 +2748,7 @@ let rec connect (state : state) : state Lwt.t =
              first_start_time = Unix.time ();
              most_recent_start_time = Unix.time ();
              editor_open_files =
-               Option.value (get_editor_open_files state) ~default:SMap.empty;
+               Option.value (get_editor_open_files state) ~default:UriMap.empty;
              (* uris_with_unsaved_changes should always be empty here: *)
              (* Pre_init will of course be empty; *)
              (* Lost_server will exit rather than reconnect with unsaved changes. *)
@@ -2827,12 +2829,12 @@ and reconnect_from_lost_if_necessary
         (* In these cases we have to terminate our LSP server, and trust the    *)
         (* client to restart us. Note that we can't do clientStart because that *)
         (* would start our (old) version of hh_server, not the new one!         *)
-        let unsaved = get_uris_with_unsaved_changes state |> SSet.elements in
+        let unsaved = get_uris_with_unsaved_changes state |> UriSet.elements in
         let unsaved_str =
           if unsaved = [] then
             "[None]"
           else
-            String.concat ~sep:"\n" unsaved
+            unsaved |> List.map ~f:string_of_uri |> String.concat ~sep:"\n"
         in
         let message =
           "Unsaved files:\n"
@@ -2863,7 +2865,7 @@ and do_lost_server
     let state = dismiss_ui state in
     let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
     let editor_open_files =
-      Option.value (get_editor_open_files state) ~default:SMap.empty
+      Option.value (get_editor_open_files state) ~default:UriMap.empty
     in
     let lock_file =
       match get_root_opt () with
@@ -2912,7 +2914,7 @@ let track_open_files (state : state) (event : event) : state =
   Jsonrpc.(
     (* We'll keep track of which files are opened by the editor. *)
     let prev_opened_files =
-      Option.value (get_editor_open_files state) ~default:SMap.empty
+      Option.value (get_editor_open_files state) ~default:UriMap.empty
     in
     let editor_open_files =
       match event with
@@ -2920,13 +2922,13 @@ let track_open_files (state : state) (event : event) : state =
         let params = parse_didOpen c.params in
         let doc = params.DidOpen.textDocument in
         let uri = params.DidOpen.textDocument.TextDocumentItem.uri in
-        SMap.add uri doc prev_opened_files
+        UriMap.add uri doc prev_opened_files
       | Client_message c when c.method_ = "textDocument/didChange" ->
         let params = parse_didChange c.params in
         let uri =
           params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
         in
-        let doc = SMap.find_opt uri prev_opened_files in
+        let doc = UriMap.find_opt uri prev_opened_files in
         Lsp.TextDocumentItem.(
           (match doc with
           | Some doc ->
@@ -2942,12 +2944,12 @@ let track_open_files (state : state) (event : event) : state =
                     params.DidChange.contentChanges;
               }
             in
-            SMap.add uri doc' prev_opened_files
+            UriMap.add uri doc' prev_opened_files
           | None -> prev_opened_files))
       | Client_message c when c.method_ = "textDocument/didClose" ->
         let params = parse_didClose c.params in
         let uri = params.DidClose.textDocument.TextDocumentIdentifier.uri in
-        SMap.remove uri prev_opened_files
+        UriMap.remove uri prev_opened_files
       | _ -> prev_opened_files
     in
     match state with
@@ -2968,15 +2970,15 @@ let track_edits_if_necessary (state : state) (event : event) : state =
         let uri =
           params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
         in
-        SSet.add uri previous
+        UriSet.add uri previous
       | Client_message ({ method_ = "textDocument/didClose"; _ } as c) ->
         let params = parse_didClose c.params in
         let uri = params.DidClose.textDocument.TextDocumentIdentifier.uri in
-        SSet.remove uri previous
+        UriSet.remove uri previous
       | Client_message ({ method_ = "textDocument/didSave"; _ } as c) ->
         let params = parse_didSave c.params in
         let uri = params.DidSave.textDocument.TextDocumentIdentifier.uri in
-        SSet.remove uri previous
+        UriSet.remove uri previous
       | _ -> previous
     in
     match state with

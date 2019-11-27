@@ -283,6 +283,17 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
     predeclare_ide_deps genv declared_names;
     let (major_gc_time, minor_gc_time) = Sys_utils.get_gc_time () in
+    let lvl =
+      if ClientProvider.is_persistent client then
+        Hh_logger.Level.Debug
+      else
+        Hh_logger.Level.Info
+    in
+    Hh_logger.log
+      ~lvl
+      "Handled %s [%f ms]"
+      cmd_string
+      (Unix.gettimeofday () -. t);
     HackEventLogger.handled_command
       cmd_string
       ~start_t:t

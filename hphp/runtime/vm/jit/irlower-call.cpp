@@ -75,7 +75,6 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const numArgsInclUnpack = extra->numArgs + (extra->hasUnpack ? 1 : 0);
 
   auto& v = vmain(env);
-  auto const catchBlock = label(env, inst->taken());
 
   auto const callFlags = CallFlags(
     extra->hasGenerics,
@@ -115,7 +114,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     assertx(!extra->hasUnpack ||
             extra->numArgs == func->numNonVariadicParams());
     v << callphp{tc::ustubs().immutableBindCallStub, php_call_regs(withCtx),
-                 {{done, catchBlock}}, func, numArgsInclUnpack};
+                 func, numArgsInclUnpack};
   } else if (extra->skipNumArgsCheck) {
     // If we've statically determined the provided number of arguments
     // doesn't exceed what the target expects, we can skip the stub
@@ -126,7 +125,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     auto const dest = v.makeReg();
     emitLdLowPtr(v, r_php_call_func()[extra->numArgs * ptrSize + pTabOff],
                  dest, sizeof(LowPtr<uint8_t>));
-    v << callphpr{dest, php_call_regs(withCtx), {{done, catchBlock}}};
+    v << callphpr{dest, php_call_regs(withCtx)};
   } else {
     // If the callee is not known statically, or it was determined later, but
     // we have too many arguments for prologue to handle, go to the redispatch
@@ -134,8 +133,17 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     // appropriate prologue.
     assertx(!extra->hasUnpack);
     v << callphp{tc::ustubs().funcPrologueRedispatch, php_call_regs(withCtx),
-                 {{done, catchBlock}}, nullptr, extra->numArgs};
+                 nullptr, extra->numArgs};
   }
+
+  // The prologue is responsible for unwinding all inputs. We could have
+  // optimized away Uninit stores for ActRec and inouts, so skip them as well.
+  auto const marker = inst->marker();
+  auto const fixupBcOff = marker.fixupBcOff() - marker.fixupFunc()->base();
+  auto const fixupSpOff =
+    marker.spOff() - extra->numInputs() - kNumActRecCells - extra->numOut;
+  v << syncpoint{Fixup{fixupBcOff, fixupSpOff.offset}};
+  v << unwind{done, label(env, inst->taken())};
   v = done;
 
   auto const dst = dstLoc(env, inst, 0);

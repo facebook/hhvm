@@ -121,7 +121,7 @@ struct Fixup {
 
   Fixup() {}
 
-  bool isValid() const { return pcOffset >= 0 && spOffset >= 0; }
+  bool isValid() const { return spOffset >= 0; }
 
   bool operator==(const Fixup& o) const {
     return pcOffset == o.pcOffset && spOffset == o.spOffset;

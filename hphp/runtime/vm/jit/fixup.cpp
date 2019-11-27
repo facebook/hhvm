@@ -141,7 +141,8 @@ bool getFrameRegs(const ActRec* ar, VMRegs* outVMRegs) {
                         ent->indirect.returnIpDisp;
     tca = *reinterpret_cast<TCA*>(savedRIPAddr);
     ent = s_fixups.find(tc::addrToOffset(tca));
-    assertx(ent && !ent->isIndirect());
+    assertx(ent && "Missing fixup for indirect fixup");
+    assertx(!ent->isIndirect() && "Invalid doubly indirect fixup");
   }
 
   // Non-obvious off-by-one fun: if the *return address* points into the TC,

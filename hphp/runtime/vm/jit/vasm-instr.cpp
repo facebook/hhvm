@@ -52,8 +52,6 @@ bool isBlockEnd(const Vinstr& inst) {
     // terminal calls
     case Vinstr::tailcallstub:
     case Vinstr::tailcallstubr:
-    case Vinstr::callphp:
-    case Vinstr::callphpr:
     case Vinstr::resumetc:
     // exception edges
     case Vinstr::unwind:

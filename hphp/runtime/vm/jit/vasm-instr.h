@@ -841,47 +841,12 @@ struct phpret { Vreg fp; Vreg d; RegSet args; bool noframe; };
  * callee, and winds up as a direct call to the callee's func guard or
  * prologue.
  */
-struct callphp {
-  explicit callphp(TCA stub,
-                   RegSet args,
-                   std::array<Vlabel,2> targets,
-                   const Func* func,
-                   uint32_t nargs)
-    : stub{stub}
-    , args{args}
-    , func{func}
-    , nargs{nargs}
-  {
-    this->targets[0] = targets[0];
-    this->targets[1] = targets[1];
-  }
-
-  TCA stub;
-  RegSet args;
-  Vlabel targets[2];
-  const Func* func;
-  uint32_t nargs;
-};
+struct callphp { TCA stub; RegSet args; const Func* func; uint32_t nargs; };
 
 /*
  * Like callphp, but an indirect call through a register
  */
-
-struct callphpr {
-  explicit callphpr(Vreg64 target,
-                    RegSet args,
-                    std::array<Vlabel, 2> edges)
-    : target{target}
-    , args{args}
-  {
-    this->edges[0] = edges[0];
-    this->edges[1] = edges[1];
-  }
-
-  Vreg64 target;
-  RegSet args;
-  Vlabel edges[2];
-};
+struct callphpr { Vreg64 target; RegSet args; };
 
 /*
  * Non-smashable PHP function call with (almost) the same ABI as callphp{}.

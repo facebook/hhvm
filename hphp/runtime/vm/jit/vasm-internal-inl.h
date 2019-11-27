@@ -204,26 +204,6 @@ void check_nop_interval(Venv& env, const Vinstr& inst,
   }
 }
 
-/*
- * Perform miscellaneous postprocessing for architecture-independent emitters.
- */
-template<class Vemit>
-void postprocess(Venv& env, const Vinstr& inst) {
-  if (inst.op == Vinstr::callphp || inst.op == Vinstr::callphpr) {
-    auto const target1 = inst.op == Vinstr::callphp
-      ? inst.callphp_.targets[0]
-      : inst.callphpr_.edges[0];
-    auto const target2 = inst.op == Vinstr::callphp
-      ? inst.callphp_.targets[1]
-      : inst.callphpr_.edges[1];
-    // The body of callphp{} is arch-independent, but the unwind information is
-    // not.  We could do this in the emitter for callphp{}, but then we'd have
-    // to thread Vemit through all the emitters and implement them all in the
-    // header... so instead we have this.
-    Vemit(env).emit(unwind{target1, target2});
-  }
-}
-
 void computeFrames(Vunit& unit);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -320,7 +300,6 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
         VASM_OPCODES
 #undef O
       }
-      postprocess<Vemit>(env, inst);
     }
 
     if (block.frame != -1) record_frame(env);

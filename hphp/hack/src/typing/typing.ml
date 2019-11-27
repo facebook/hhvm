@@ -4601,8 +4601,21 @@ and check_class_get env p def_pos cid mid ce e =
         begin
           match Env.get_class env self with
           | Some cls when Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) ->
-            ()
-          | _ -> Errors.self_abstract_call mid p def_pos
+            (* Ban self::some_abstract_method() in a trait, if the
+             * method is also defined in a trait.
+             *
+             * Abstract methods from interfaces are fine: we'll check
+             * in the child class that we actually have an
+             * implementation. *)
+            (match Decl_provider.get_class ce.ce_origin with
+            | Some meth_cls
+              when Ast_defs.(equal_class_kind (Cls.kind meth_cls) Ctrait) ->
+              Errors.self_abstract_call mid p def_pos
+            | _ -> ())
+          | _ ->
+            (* Ban self::some_abstract_method() in a class. This will
+             *  always error. *)
+            Errors.self_abstract_call mid p def_pos
         end
       | _ -> ()
     end

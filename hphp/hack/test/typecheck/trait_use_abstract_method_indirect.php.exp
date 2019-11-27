@@ -1,0 +1,4 @@
+File "trait_use_abstract_method_indirect.php", line 11, characters 11-13:
+Cannot call self::foo(); it is abstract. Did you mean static::foo()? (Typing[4073])
+File "trait_use_abstract_method_indirect.php", line 4, characters 35-37:
+Declaration is here

@@ -120,15 +120,10 @@ let force_awaitable env p ty =
   | _ when Ast_defs.(equal_fun_kind fun_kind FAsync) ->
     let (env, underlying_ty) = Env.fresh_type env p in
     let wrapped_ty = wrap_awaitable env p underlying_ty in
-    Errors.try_add_err
-      p
-      (Reason.string_of_ureason Reason.URnone)
-      (fun () ->
-        let env =
-          Typing_subtype.sub_type env wrapped_ty ty Errors.unify_error
-        in
-        (env, wrapped_ty))
-      (fun () -> (env, (Reason.Rwitness p, TUtils.terr env)))
+    let env =
+      Typing_ops.sub_type p Reason.URnone env wrapped_ty ty Errors.unify_error
+    in
+    (env, wrapped_ty)
   | _ -> (env, ty)
 
 let make_default_return ~is_method ~is_infer_missing_on env name =

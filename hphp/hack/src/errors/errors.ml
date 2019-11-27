@@ -4891,12 +4891,6 @@ let try_with_error f1 f2 =
       add_list error_code l;
       f2 ())
 
-let try_add_err pos err f1 f2 =
-  try_ f1 (fun error ->
-      let (error_code, l) = (get_code error, to_list error) in
-      add_list error_code ((pos, err) :: l);
-      f2 ())
-
 let has_no_errors f =
   try_
     (fun () ->

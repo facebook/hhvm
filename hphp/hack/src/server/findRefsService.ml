@@ -213,17 +213,37 @@ let fold_one_tast target acc symbol =
   | (IGConst cst_name, SO.GConst) -> process_gconst_id cst_name (pos, name)
   | _ -> Pos.Map.empty
 
-let find_refs tcopt target acc fileinfo_l =
-  let tasts = ServerIdeUtils.recheck tcopt fileinfo_l in
-  let results =
-    List.fold tasts ~init:Pos.Map.empty ~f:(fun acc (_, tast) ->
-        IdentifySymbolService.all_symbols tast
-        |> List.filter ~f:(fun symbol ->
-               not symbol.SymbolOccurrence.is_declaration)
-        |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast target)
-        |> Pos.Map.union acc)
+let find_refs
+    (tcopt : TypecheckerOptions.t)
+    (target : action_internal)
+    (acc : (string * Pos.t) list)
+    (fileinfo_l : (Relative_path.t * FileInfo.t) list) : (string * Pos.t) list =
+  (* The helper function 'results_from_tast' takes a tast, looks at all *)
+  (* use-sites in the tast e.g. "foo(1)" is a use-site of symbol foo,   *)
+  (* and returns a map from use-site-position to name of the symbol.    *)
+  let results_from_tast (_file, tast) : string Pos.Map.t =
+    IdentifySymbolService.all_symbols tast
+    |> List.filter ~f:(fun symbol -> not symbol.SymbolOccurrence.is_declaration)
+    |> List.fold ~init:Pos.Map.empty ~f:(fold_one_tast target)
   in
-  Pos.Map.fold (fun p str acc -> (str, p) :: acc) results acc
+  (* These are the tasts for all the 'fileinfo_l' passed in *)
+  let tasts_of_files : (Relative_path.t * Tast.program) list =
+    ServerIdeUtils.recheck tcopt fileinfo_l
+  in
+  (* A list of all use-sites with their string-name of target *)
+  let results : string Pos.Map.t list =
+    List.map ~f:results_from_tast tasts_of_files
+  in
+  (* Turn that list into a map from use-sites to string-name-of-target *)
+  let results : string Pos.Map.t =
+    List.fold results ~init:Pos.Map.empty ~f:Pos.Map.union
+  in
+  (* We actually just want a list of string-name-of-target, use-site-position *)
+  (* Some callers e.g. LSP will simply discard the string-name-of-target.     *)
+  let acc_results : (string * Pos.t) list =
+    Pos.Map.fold (fun p str acc -> (str, p) :: acc) results acc
+  in
+  acc_results
 
 let find_refs_ctx
     ~(ctx : Provider_context.t)

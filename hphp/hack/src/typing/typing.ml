@@ -446,20 +446,30 @@ let make_param_local_ty env decl_hint param =
 
 (* Return a map describing all the fields in this record, including
    inherited fields, and whether they have a default value. *)
-let rec all_record_fields (rd : Decl_provider.record_def_decl) :
+let all_record_fields (rd : Decl_provider.record_def_decl) :
     (sid * Typing_defs.record_field_req) SMap.t =
-  let fields =
+  let record_fields rd =
     List.fold
       rd.rdt_fields
       ~init:SMap.empty
       ~f:(fun acc (((_, name), _) as f) -> SMap.add name f acc)
   in
-  match rd.rdt_extends with
-  | Some (_, parent) ->
-    (match Decl_provider.get_record_def parent with
-    | Some parent_rd -> SMap.union fields (all_record_fields parent_rd)
-    | None -> fields)
-  | _ -> fields
+  let rec loop rd fields decls_seen =
+    match rd.rdt_extends with
+    | Some (_, parent_name) when SSet.mem parent_name decls_seen ->
+      (* Inheritance loop, so we've seen all the records. *)
+      fields
+    | Some (_, parent_name) ->
+      (match Decl_provider.get_record_def parent_name with
+      | Some rd ->
+        loop
+          rd
+          (SMap.union fields (record_fields rd))
+          (SSet.add (snd rd.rdt_name) decls_seen)
+      | None -> fields)
+    | None -> fields
+  in
+  loop rd (record_fields rd) (SSet.singleton (snd rd.rdt_name))
 
 (* Given a localized parameter type and parameter information, infer
  * a type for the parameter default expression (if present) and check that
@@ -9085,11 +9095,32 @@ let record_def_parent rd parent_hint =
     failwith
       "Record parent was not an Happly. This should have been a syntax error."
 
+(* Report an error if we have inheritance cycles in record declarations. *)
+let check_record_inheritance_cycle ((rd_pos, rd_name) : Aast.sid) : unit =
+  let rec worker name trace seen =
+    match Decl_provider.get_record_def name with
+    | Some rd ->
+      (match rd.rdt_extends with
+      | Some (_, parent_name) when String.equal parent_name rd_name ->
+        (* This record is in an inheritance cycle.*)
+        Errors.cyclic_record_def trace rd_pos
+      | Some (_, parent_name) when SSet.mem parent_name seen ->
+        (* There's an inheritance cycle higher in the chain. *)
+        ()
+      | Some (_, parent_name) ->
+        worker parent_name (parent_name :: trace) (SSet.add parent_name seen)
+      | None -> ())
+    | None -> ()
+  in
+  worker rd_name [rd_name] (SSet.singleton rd_name)
+
 let record_def_def tcopt rd =
   let env = EnvFromDef.record_def_env tcopt rd in
   (match rd.rd_extends with
   | Some parent -> record_def_parent rd parent
   | None -> ());
+
+  check_record_inheritance_cycle rd.rd_name;
 
   let (env, attributes) =
     List.map_env env rd.rd_user_attributes user_attribute

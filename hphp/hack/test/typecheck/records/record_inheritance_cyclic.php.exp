@@ -1,0 +1,6 @@
+File "record_inheritance_cyclic.php", line 3, characters 17-17:
+Record inheritance cycle: B A (Typing[4356])
+File "record_inheritance_cyclic.php", line 5, characters 17-17:
+Record inheritance cycle: A B (Typing[4356])
+File "record_inheritance_cyclic.php", line 11, characters 17-17:
+Record inheritance cycle: D (Typing[4356])

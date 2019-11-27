@@ -605,4 +605,5 @@ AbstractTconstNotAllowed = 4352
 NewAbstractRecord = 4353
 RecordMissingRequiredField = 4354
 RecordUnknownField = 4355
+CyclicRecordDef = 4356
   |}]

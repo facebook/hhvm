@@ -4075,6 +4075,15 @@ let cyclic_class_def stack pos =
     pos
     ("Cyclic class definition : " ^ stack)
 
+let cyclic_record_def names pos =
+  let names = List.map ~f:strip_ns names in
+  add
+    (Typing.err_code Typing.CyclicRecordDef)
+    pos
+    (Printf.sprintf
+       "Record inheritance cycle: %s"
+       (String.concat ~sep:" " names))
+
 let trait_reuse p_pos p_name class_name trait =
   let (c_pos, c_name) = class_name in
   let c_name = strip_ns c_name in

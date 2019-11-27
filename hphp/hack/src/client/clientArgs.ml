@@ -129,7 +129,7 @@ let parse_check_args cmd =
         Sys.argv.(0)
     | CKNone ->
       Printf.sprintf
-        "Usage: %s [COMMAND] [OPTION]... [WWW-ROOT]\n\nValid values for COMMAND:\n\tcheck\t\tShows current Hack errors\n\tstart\t\tStarts a Hack server\n\tstop\t\tStops a Hack server\n\trestart\t\tRestarts a Hack server\n\tlsp\t\t[experimental] runs a persistent language service\n\tdebug\t\tDebug mode\n\nDefault values if unspecified:\n\tCOMMAND\t\tcheck\n\tWWW-ROOT\tCurrent directory\n\nCheck command options:\n"
+        "Usage: %s [COMMAND] [OPTION]... [WWW-ROOT]\n\nValid values for COMMAND:\n\tcheck\t\tShows current Hack errors\n\tstart\t\tStarts a Hack server\n\tstop\t\tStops a Hack server\n\trestart\t\tRestarts a Hack server\n\tlsp\t\tRuns a persistent language service\n\tdebug\t\tDebug mode\n\nDefault values if unspecified:\n\tCOMMAND\t\tcheck\n\tWWW-ROOT\tCurrent directory\n\nCheck command options:\n"
         Sys.argv.(0)
     | _ -> failwith "No other keywords should make it here"
   in
@@ -845,7 +845,7 @@ let parse_stop_args () =
 let parse_lsp_args () =
   let usage =
     Printf.sprintf
-      "Usage: %s lsp [OPTION]...\n[experimental] runs a persistent language service\n"
+      "Usage: %s lsp [OPTION]...\nRuns a persistent language service\n"
       Sys.argv.(0)
   in
   let from = ref "" in

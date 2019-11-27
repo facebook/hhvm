@@ -237,6 +237,14 @@ StringData* lookupStaticString(const StringData *str) {
   return nullptr;
 }
 
+StringData* lookupStaticString(folly::StringPiece slice) {
+  auto const it = s_stringDataMap->find(slice);
+  if (it != s_stringDataMap->end()) {
+    return const_cast<StringData*>(to_sdata(it->first));
+  }
+  return nullptr;
+}
+
 StringData* makeStaticString(const String& str) {
   assertx(!str.isNull());
   return makeStaticString(str.get());

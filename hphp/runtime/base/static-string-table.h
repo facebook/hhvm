@@ -92,6 +92,7 @@ StringData* makeStaticString(char c);
  * Returns: a string that isStatic(), or nullptr if there was none.
  */
 StringData* lookupStaticString(const StringData* str);
+StringData* lookupStaticString(folly::StringPiece);
 
 /*
  * Return the number of static strings in the process.

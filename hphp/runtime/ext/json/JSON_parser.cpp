@@ -482,22 +482,47 @@ struct SimpleParser {
     }
   }
 
-  bool parseString() {
-    int len = 0;
-    auto const charTop = reinterpret_cast<signed char*>(top);
+  bool parseRawString(int* len) {
     assertx(p[-1] == '"'); // SimpleParser only handles "-quoted strings
+    *len = 0;
+    auto const charTop = reinterpret_cast<signed char*>(top);
     for (signed char ch = *p++; ch != '\"'; ch = *p++) {
-      charTop[len++] = ch; // overwritten later if `ch == '\\'`
+      charTop[(*len)++] = ch; // overwritten later if `ch == '\\'`
       if (ch < ' ') {
         // `ch < ' '` catches null and also non-ASCII (since signed char)
         return false;
-      }
-      if (ch == '\\') {
-        if (!handleBackslash(charTop[len - 1])) return false;
+      } else if (ch == '\\') {
+        if (!handleBackslash(charTop[*len - 1])) return false;
       }
     }
-    pushStringData(StringData::Make(
-      reinterpret_cast<char*>(charTop), len, CopyString));
+    return true;
+  }
+
+  bool parseString() {
+    int len;
+    if (!parseRawString(&len)) return false;
+    auto const start = reinterpret_cast<char*>(top);
+    pushStringData(StringData::Make(start, len, CopyString));
+    return true;
+  }
+
+  bool parseMixedKey() {
+    int len;
+    int64_t num;
+    if (!parseRawString(&len)) return false;
+    auto const start = reinterpret_cast<char*>(top);
+    auto const slice = folly::StringPiece(start, len);
+    start[len] = '\0';
+    if (container_type != JSONContainerType::HACK_ARRAYS &&
+        is_strictly_integer(start, len, num)) {
+      pushInt64(num);
+    } else if (auto const str = lookupStaticString(slice)) {
+      auto const tv = top++;
+      tv->m_type = KindOfPersistentString;
+      tv->m_data.pstr = str;
+    } else {
+      pushStringData(StringData::Make(start, len, CopyString));
+    }
     return true;
   }
 
@@ -551,21 +576,7 @@ struct SimpleParser {
       if (++array_depth >= 0) return false;
       do {
         if (!matchSeparator('\"')) return false;  // Only support string keys.
-        if (!parseString()) return false;
-        TypedValue& tv = top[-1];
-
-        // PHP array semantics: integer-like keys are converted.
-        int64_t num;
-        if (container_type != JSONContainerType::HACK_ARRAYS &&
-            tv.m_data.pstr->isStrictlyInteger(num)) {
-          tv.m_type = KindOfInt64;
-          tv.m_data.pstr->release();
-          tv.m_data.num = num;
-        } else if (auto sstr = lookupStaticString(tv.m_data.pstr)){
-          tv.m_type = KindOfPersistentString;
-          tv.m_data.pstr->release();
-          tv.m_data.pstr = sstr;
-        }
+        if (!parseMixedKey()) return false;
         // TODO(14491721): Precompute and save hash to avoid deref in MakeMixed.
         if (!matchSeparator(':')) return false;
         if (!parseValue(true)) return false;

@@ -31,9 +31,11 @@
 #include <sys/types.h>
 
 #include <dwarf.h>
+#include <thread>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/job-queue.h"
+#include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/tools/debug-parser/debug-parser.h"
@@ -2119,6 +2121,536 @@ private:
   std::string m_filename;
 };
 
+
+struct GDBIndexerImpl : GDBIndexer {
+  explicit GDBIndexerImpl(const std::string& filename): m_filename{filename} {}
+
+  struct SymbolAndConstantPool {
+    std::vector<uint32_t> symbol_pool;
+    std::vector<uint32_t> cu_vector_offsets;
+    std::vector<std::string> strings;
+  };
+
+  void operator()(const std::string& output_file) const override {
+    auto begin_time = ::HPHP::Timer::GetCurrentTimeMicros();
+    DwarfState dwarf{m_filename};
+    log_time(begin_time, "Parsing dwarf file");
+
+    std::FILE* fd = std::fopen(output_file.c_str(), "wb");
+
+    if (!fd) {
+      throw Exception{folly::sformat("Cannot open file: {}", output_file)};
+    }
+
+    auto const gdb_index_version = 8;
+    std::vector<uint32_t> header{gdb_index_version, 0, 0, 0, 0, 0};
+
+    SymbolAndConstantPool symbol_and_constants;
+    std::thread thread([&]() {
+      auto thread_time = ::HPHP::Timer::GetCurrentTimeMicros();
+      symbol_and_constants = get_symbol_and_constants(dwarf);
+      log_time(thread_time, "Get_symbol_and_constants");
+    });
+
+    auto time_index_begin = ::HPHP::Timer::GetCurrentTimeMicros();
+    auto const cu = get_cu(dwarf);
+    auto time = log_time(time_index_begin, "Get_cu");
+    auto const tu = get_tu(dwarf);
+    time = log_time(time, "Get_tu");
+    auto const address = get_address(dwarf);
+    log_time(time, "Get_address");
+
+    thread.join();
+
+    time = log_time(time_index_begin, "Index generation");
+
+    // The offset, from the start of the file, of the CU list.
+    header[1] = sizeof header[0] * header.size();
+    // The offset, from the start of the file, of the types CU list.
+    header[2] = header[1] + sizeof cu[0] * cu.size();
+    // The offset, from the start of the file, of the address area.
+    header[3] = header[2] + sizeof tu[0] * tu.size();
+    // The offset, from the start of the file, of the symbol table.
+    header[4] = header[3] + sizeof address[0] * address.size();
+    // The offset, from the start of the file, of the constant pool.
+    header[5] = header[4] + sizeof symbol_and_constants.symbol_pool[0] *
+                            symbol_and_constants.symbol_pool.size();
+
+    print_section(fd, header);
+    print_section(fd, cu);
+    print_section(fd, tu);
+    print_section(fd, address);
+    print_section(fd, symbol_and_constants.symbol_pool);
+    print_section(fd, symbol_and_constants.cu_vector_offsets);
+    print_section(fd, symbol_and_constants.strings);
+
+    log_time(time, "Print");
+
+    log_time(begin_time, "Full index creation");
+
+    std::fclose(fd);
+  }
+
+private:
+  int32_t log_time(int32_t time, const char* msg) const {
+    int32_t now = ::HPHP::Timer::GetCurrentTimeMicros();
+    std::cout << msg << " took " << (now - time) / 1000 << " ms" << std::endl;
+    return now;
+  }
+
+  void print_section(std::FILE* fd,
+                     const std::vector<std::string>& data) const {
+    if (!data.size()) return;
+    assertx(fd);
+    for (auto s : data) {
+      std::fwrite(s.c_str(), sizeof(char), s.length() + 1, fd);
+    }
+  }
+
+  template <typename T>
+  void print_section(std::FILE* fd, const std::vector<T>& data) const {
+    if (!data.size()) return;
+    assertx(fd);
+    std::fwrite(data.data(), sizeof data[0], data.size(), fd);
+  }
+
+  std::vector<uint64_t> get_cu(const DwarfState& dwarf) const {
+    std::vector<uint64_t> result = {};
+    dwarf.forEachCompilationUnit(
+      [&](Dwarf_Die cu) {
+        result.push_back(cu->context->offset);
+        result.push_back(cu->context->size);
+      }
+    );
+    return result;
+  }
+
+  std::vector<uint64_t> get_tu(const DwarfState& dwarf) const {
+    std::vector<uint64_t> result = {};
+    dwarf.forEachTopLevelUnit(
+      [&](Dwarf_Die cu) {
+        result.push_back(cu->context->offset);
+        result.push_back(cu->context->typeOffset - cu->context->offset);
+        result.push_back(cu->context->typeSignature);
+      }, false
+    );
+    return result;
+  }
+
+  struct AddressTableEntry {
+    union {
+      uint64_t low;
+      struct {
+        uint32_t low_bottom;
+        uint32_t low_top;
+      };
+    };
+    union {
+      uint64_t high;
+      struct {
+        uint32_t high_bottom;
+        uint32_t high_top;
+      };
+    };
+    uint32_t index;
+  };
+
+  void visit_die_for_address(const DwarfState& dwarf, const Dwarf_Die die,
+                             std::vector<AddressTableEntry>& entries,
+                             uint32_t cu_index) const {
+    uint64_t low = 0, high = 0;
+    bool found = false;
+    dwarf.forEachAttribute(
+      die,
+      [&](Dwarf_Attribute attr) {
+        switch (dwarf.getAttributeType(attr)) {
+          case DW_AT_low_pc:
+            low = dwarf.getAttributeValueAddr(attr);
+            found = true;
+            break;
+          case DW_AT_high_pc:
+            high = attr->form == DW_FORM_addr
+              ? dwarf.getAttributeValueAddr(attr)
+              : dwarf.getAttributeValueUData(attr);
+            return false; // short circuit
+          default:
+            break;
+        }
+        return true;
+      }
+    );
+
+    if (found && high != 0) {
+      entries.push_back(AddressTableEntry{low, low + high, cu_index});
+      return;
+    }
+
+    dwarf.forEachChild(
+      die,
+      [&](Dwarf_Die child) {
+        visit_die_for_address(dwarf, child, entries, cu_index);
+        return true;
+      }
+    );
+  }
+
+  std::vector<uint32_t> get_address(const DwarfState& dwarf) const {
+    std::vector<AddressTableEntry> entries = {};
+    uint32_t cu_index = 0;
+    dwarf.forEachCompilationUnit(
+      [&](Dwarf_Die die) {
+        visit_die_for_address(dwarf, die, entries, cu_index);
+        cu_index++;
+      }
+    );
+    auto const sortFn = [](AddressTableEntry a, AddressTableEntry b) {
+      return a.low < b.low;
+    };
+    // Sort by low addresses
+    sort(entries.begin(), entries.end(), sortFn);
+    std::vector<AddressTableEntry> merged = {};
+
+    // Merge adjacent addresses
+    auto count = 0;
+    for (auto& e : entries) {
+      if (count != 0) {
+        auto& prev = merged[count - 1];
+        if (e.low == prev.high && e.index == prev.index) {
+          prev = AddressTableEntry{prev.low, e.high, e.index};
+          continue;
+        }
+      }
+      merged.push_back(e);
+      count++;
+    }
+
+    // Split into little-endian formatting
+    std::vector<uint32_t> result = {};
+    for (auto& e : merged) {
+      result.push_back(e.low_bottom);
+      result.push_back(e.low_top);
+      result.push_back(e.high_bottom);
+      result.push_back(e.high_top);
+      result.push_back(e.index);
+    }
+    return result;
+  }
+
+  struct GDBSymbol {
+    std::string name;
+    uint32_t hash;
+    uint32_t cu_vector_offset;
+    uint32_t name_offset;
+    bool valid;
+
+    bool operator==(const GDBSymbol& other) {
+      return name == other.name && valid == other.valid;
+    }
+  };
+
+  struct GDBHashtable {
+    GDBHashtable() : m_size(0), m_capacity(0), m_hashtable({}) {}
+    size_t m_size;
+    size_t m_capacity;
+    std::vector<GDBSymbol> m_hashtable;
+
+    void init(size_t size) {
+      assertx(m_size == 0 && m_capacity == 0);
+
+      auto const nextPowerOfTwo = [](size_t n) -> size_t {
+        if (n == 0) return 1;
+        n--;
+        n |= n >> 1;
+        n |= n >> 2;
+        n |= n >> 4;
+        n |= n >> 8;
+        n |= n >> 16;
+        n++;
+        return n;
+      };
+
+      auto initial_size = nextPowerOfTwo(size);
+      if (((initial_size / 4) * 3) < size) initial_size <<= 1;
+
+      m_hashtable =
+        std::vector<GDBSymbol>(initial_size, GDBSymbol{"", 0, 0, 0, false});
+      m_capacity = initial_size;
+    }
+
+    GDBSymbol* findSlot(GDBSymbol s) {
+      uint32_t index = s.hash & (m_capacity - 1);
+      uint32_t step = ((s.hash * 17) & (m_capacity - 1)) | 1;
+
+      while (true) {
+        if (!m_hashtable[index].valid || m_hashtable[index] == s) {
+          return &m_hashtable[index];
+        }
+        index = (index + step) & (m_capacity - 1);
+      }
+    }
+
+    bool add(GDBSymbol s) {
+      auto* loc = this->findSlot(s);
+      if (loc->valid) return false;
+      *loc = s;
+      m_size++;
+      return true;
+    }
+  };
+
+  using SymbolMap = folly::F14FastMap<std::string, std::vector<uint32_t>>;
+
+  void visit_die_for_symbols(const DwarfState& dwarf,
+                             const Dwarf_Die die,
+                             SymbolMap& symbols,
+                             std::string parent_name,
+                             uint32_t cu_index) const {
+
+    bool is_declaration = false;
+    bool is_external = false;
+    std::string name;
+    uint32_t language = 0;
+    folly::Optional<GlobalOff> declarationOffset;
+
+    dwarf.forEachAttribute(
+      die,
+      [&](Dwarf_Attribute attr) {
+        switch (dwarf.getAttributeType(attr)) {
+          case DW_AT_declaration:
+            is_declaration = dwarf.getAttributeValueFlag(attr);
+            break;
+          case DW_AT_external:
+            is_external = dwarf.getAttributeValueFlag(attr);
+            break;
+          case DW_AT_name:
+            name = dwarf.getAttributeValueString(attr);
+            break;
+          case DW_AT_language:
+            language = dwarf.getAttributeValueUData(attr);
+            break;
+          case DW_AT_signature:
+            declarationOffset = dwarf.getAttributeValueRef(attr);
+            break;
+          default:
+            return true;
+        }
+        return true;
+      }
+    );
+
+    auto const index_and_flags = [&] {
+      auto const TYPE = 1;
+      auto const VARIABLE = 2;
+      //auto const ENUM = 2;
+      auto const FUNCTION = 3;
+      auto const OTHER = 4;
+
+      uint32_t kind = OTHER;
+      auto is_static = false;
+      switch (dwarf.getTag(die)) {
+        case DW_TAG_typedef:
+        case DW_TAG_base_type:
+        case DW_TAG_subrange_type:
+          kind = TYPE;
+          is_static = 1;
+          break;
+        case DW_TAG_enumerator:
+          kind = VARIABLE;
+          is_static = language != DW_LANG_C_plus_plus;
+          break;
+        case DW_TAG_subprogram:
+          kind = FUNCTION;
+          is_static = !(is_external || language == DW_LANG_Ada83 ||
+                        language == DW_LANG_Ada95);
+          break;
+        case DW_TAG_constant:
+          kind = VARIABLE;
+          is_static = !is_external;
+          break;
+        case DW_TAG_variable:
+          kind = VARIABLE;
+          is_static = !is_external;
+          break;
+        case DW_TAG_namespace:
+          kind = TYPE;
+          is_static = 0;
+          break;
+        case DW_TAG_class_type:
+        case DW_TAG_interface_type:
+        case DW_TAG_structure_type:
+        case DW_TAG_union_type:
+        case DW_TAG_enumeration_type:
+          kind = TYPE;
+          is_static = language != DW_LANG_C_plus_plus;
+          break;
+        default:
+          assertx(false && "invalid tag");
+      }
+
+      // Bits 0-23 is CU index
+      assertx((cu_index & (1u << 24)) == 0);
+      uint32_t result = cu_index;
+      // Bits 24-27 are reserved and must be 0
+      // Bits 28-30 The kind of the symbol in the CU.
+      result |= (kind << 28);
+      // Bit 31 is zero if the value is global and one if it is static.
+      result |= ((uint32_t)is_static) << 31;
+      return result;
+    };
+
+    auto const addSymbol = [&] (std::string name) {
+      auto value = index_and_flags();
+      auto found = symbols.find(name);
+      if (found == symbols.end()) {
+        symbols.insert({name, {value}});
+      } else if (found->second.back() != value) {
+        found->second.push_back(value);
+      }
+    };
+
+    auto const addParent = [&](std::string name) {
+      if (!name.empty() && !parent_name.empty()) {
+        name = folly::sformat("{}::{}", parent_name, name);
+      }
+      return name;
+    };
+
+    auto const visitChildren = [&](std::string name) {
+      dwarf.forEachChild(
+        die,
+        [&](Dwarf_Die child) {
+          visit_die_for_symbols(dwarf, child, symbols, name, cu_index);
+          return true;
+        }
+      );
+    };
+
+    auto const tag = dwarf.getTag(die);
+    switch (tag) {
+      case DW_TAG_subprogram:
+      case DW_TAG_constant:
+      case DW_TAG_enumerator:
+        if (is_declaration) break;
+        // fallthrough
+      case DW_TAG_variable:
+        if (name.empty()) break;
+        name = addParent(name);
+        addSymbol(name);
+        break;
+      case DW_TAG_namespace:
+        if (name.empty()) name = "(anonymous namespace)";
+        name = addParent(name);
+        visitChildren(name);
+        break;
+      case DW_TAG_typedef:
+      case DW_TAG_union_type:
+      case DW_TAG_class_type:
+      case DW_TAG_interface_type:
+      case DW_TAG_structure_type:
+      case DW_TAG_enumeration_type:
+      case DW_TAG_subrange_type:
+        if (is_declaration || name.empty()) break;
+        name = addParent(name);
+        addSymbol(name);
+        if (tag == DW_TAG_enumeration_type) visitChildren(name);
+        break;
+      case DW_TAG_compile_unit:
+      case DW_TAG_type_unit:
+        visitChildren(parent_name);
+        break;
+      default:
+        break;;
+    }
+  }
+
+  SymbolAndConstantPool
+  get_symbol_and_constants(const DwarfState& dwarf) const {
+    auto time = ::HPHP::Timer::GetCurrentTimeMicros();
+    // First collect all the symbols
+    SymbolMap symbols;
+    uint32_t cu_index = 0;
+    dwarf.forEachTopLevelUnit(
+      [&](Dwarf_Die cu) {
+        visit_die_for_symbols(dwarf, cu, symbols, "", cu_index);
+        cu_index++;
+      }, true // Compilation Unit
+    );
+
+    time = log_time(time, "Get_symbol_and_constants: Visit CUs");
+
+    dwarf.forEachTopLevelUnit(
+      [&](Dwarf_Die cu) {
+        visit_die_for_symbols(dwarf, cu, symbols, "", cu_index);
+        cu_index++;
+      }, false // Type Unit
+    );
+
+    time = log_time(time, "Get_symbol_and_constants: Visit TUs");
+
+    GDBHashtable symbol_hash_table;
+    symbol_hash_table.init(symbols.size());
+
+    auto const getHashVal = [](std::string name) {
+      uint32_t r = 0;
+      for (char& c : name) {
+        c = tolower(c);
+        r = r * 67 + c - 113;
+      }
+      return r;
+    };
+
+    // The first value is the number of CU indices in the vector
+    std::vector<uint32_t> cu_vector_values;
+    std::vector<std::string> strings;
+
+    uint32_t name_off = 0;
+    for (auto& entry : symbols) {
+      uint32_t cu_vector_offset = cu_vector_values.size() * 4;
+      cu_vector_values.push_back(entry.second.size());
+      for (auto& elem : entry.second) {
+        cu_vector_values.push_back(elem);
+      }
+      strings.push_back(entry.first);
+      symbol_hash_table.add(GDBSymbol{entry.first, getHashVal(entry.first),
+                                      cu_vector_offset, name_off, true});
+      name_off += entry.first.length() + 1;
+    }
+
+    time = log_time(time, "Get_symbol_and_constants: Populate hash table");
+
+    std::vector<uint32_t> symbol_pool;
+    auto const num_cu_vector_elems = cu_vector_values.size() * 4;
+    for (auto i = 0; i < symbol_hash_table.m_capacity; ++i) {
+      auto& e = symbol_hash_table.m_hashtable[i];
+      // offset of the symbol name in the constant pool
+      uint32_t name_offset = 0;
+      // offset of the CU vector in the constant pool
+      uint32_t cu_vector_offset = 0;
+
+      if (e.valid) {
+        name_offset = e.name_offset + num_cu_vector_elems;
+        cu_vector_offset = e.cu_vector_offset;
+      }
+
+      symbol_pool.push_back(name_offset);
+      symbol_pool.push_back(cu_vector_offset);
+    }
+
+    log_time(time, "Get_symbol_and_constants: Populate symbol pool");
+
+    std::cout << "Hash Table Size: " << symbol_hash_table.m_size <<
+      " Capacity: " << symbol_hash_table.m_capacity << std::endl;
+    std::cout << "Symbol Pool Size: " << symbol_pool.size() << std::endl;
+    std::cout << "Strings Size: " << strings.size() << std::endl;
+    std::cout << "CU Vector Values Size: " <<
+      cu_vector_values.size() << std::endl;
+
+    return {symbol_pool, cu_vector_values, strings};
+  }
+
+  std::string m_filename;
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -2130,6 +2662,11 @@ make_dwarf_type_parser(const std::string& filename, int num_threads) {
 
 std::unique_ptr<Printer> make_dwarf_printer(const std::string& filename) {
   return std::make_unique<PrinterImpl>(filename);
+}
+
+std::unique_ptr<GDBIndexer>
+make_dwarf_gdb_indexer(const std::string& filename) {
+  return std::make_unique<GDBIndexerImpl>(filename);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

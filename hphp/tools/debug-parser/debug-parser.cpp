@@ -138,6 +138,15 @@ std::unique_ptr<Printer> Printer::make(const std::string& filename) {
 #endif
 }
 
+std::unique_ptr<GDBIndexer> GDBIndexer::make(const std::string& filename) {
+#if defined(__linux__) || defined(__FreeBSD__)
+  std::unique_ptr<GDBIndexer> make_dwarf_gdb_indexer(const std::string&);
+  return make_dwarf_gdb_indexer(filename);
+#else
+  return nullptr;
+#endif
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 }

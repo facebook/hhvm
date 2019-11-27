@@ -321,18 +321,17 @@ mod arena;
 mod block;
 mod error;
 mod impls;
-mod slab;
 mod value;
 
 pub mod from;
 pub mod ptr;
 pub mod rc;
+pub mod slab;
 
 pub use arena::Arena;
 pub use block::Block;
 pub use error::{FromError, SlabIntegrityError};
 pub use impls::{bytes_from_ocamlrep, bytes_to_ocamlrep, str_from_ocamlrep, str_to_ocamlrep};
-pub use slab::OwnedSlab;
 pub use value::{OpaqueValue, Value};
 
 /// A data structure that can be converted to an equivalent OCaml value and

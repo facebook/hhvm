@@ -19,8 +19,8 @@ fn val<T: OcamlRep>(value: T) -> usize {
 
 #[no_mangle]
 pub unsafe extern "C" fn convert_to_ocamlrep(value: usize) -> usize {
-    match ocamlrep::OwnedSlab::from_ocaml(value) {
-        Some(slab) => ocamlrep::OwnedSlab::leak(slab).to_bits(),
+    match ocamlrep::slab::OwnedSlab::from_ocaml(value) {
+        Some(slab) => slab.leak().to_bits(),
         None => value,
     }
 }

@@ -31,6 +31,23 @@ type action_internal =
   | IFunction of string
   | IGConst of string
 
+let member_class_to_string (mc : member_class) : string =
+  match mc with
+  | Subclasses_of s -> "Subclasses_of " ^ s
+  | Class_set ss -> "Class_set " ^ (SSet.elements ss |> String.concat ~sep:",")
+
+let action_internal_to_string (action : action_internal) : string =
+  match action with
+  | IClass s -> "IClass " ^ s
+  | IRecord s -> "IRecord " ^ s
+  | IFunction s -> "IFunction " ^ s
+  | IGConst s -> "IGConst " ^ s
+  | IMember (member_class, member) ->
+    Printf.sprintf
+      "IMember(%s,%s)"
+      (member_class_to_string member_class)
+      (ServerCommandTypes.Find_refs.member_to_string member)
+
 let process_fun_id target_fun id =
   if target_fun = snd id then
     Pos.Map.singleton (fst id) (snd id)
@@ -230,6 +247,14 @@ let find_refs
   let tasts_of_files : (Relative_path.t * Tast.program) list =
     ServerIdeUtils.recheck tcopt fileinfo_l
   in
+  Hh_logger.debug "find_refs.target: %s" (action_internal_to_string target);
+  if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
+    List.iter tasts_of_files (fun (file, tast) ->
+        let fn = Relative_path.to_absolute file in
+        let tast = Tast.show_program tast in
+        let len = String.length tast in
+        let tast = String_utils.truncate 2048 tast in
+        Hh_logger.debug "find_refs.tast: %s\nlen=%d\n%s\n\n\n\n" fn len tast);
   (* A list of all use-sites with their string-name of target *)
   let results : string Pos.Map.t list =
     List.map ~f:results_from_tast tasts_of_files
@@ -340,14 +365,20 @@ let find_references tcopt workers target include_defs naming_table files =
         end
       ~init:[]
   in
+  let len = List.length fileinfo_l in
+  Hh_logger.debug "find_references: %d files" len;
   let results =
-    if List.length fileinfo_l < 10 then
+    if len < 10 then
       find_refs tcopt target [] fileinfo_l
     else
       parallel_find_refs workers fileinfo_l target tcopt
   in
+  let () =
+    Hh_logger.debug "find_references: %d results" (List.length results)
+  in
   if include_defs then
     let defs = get_definitions target in
+    let () = Hh_logger.debug "find_references: +%d defs" (List.length defs) in
     List.rev_append defs results
   else
     results

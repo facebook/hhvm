@@ -135,6 +135,13 @@ module Find_refs = struct
   type result_or_retry = result Done_or_retry.t
 
   type ide_result_or_retry = ide_result Done_or_retry.t
+
+  let member_to_string member =
+    match member with
+    | Method s -> "Method " ^ s
+    | Property s -> "Property " ^ s
+    | Class_const s -> "Class_consts " ^ s
+    | Typeconst s -> "Typeconst " ^ s
 end
 
 module Refactor = struct

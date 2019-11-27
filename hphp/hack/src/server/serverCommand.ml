@@ -252,6 +252,7 @@ let with_decl_tracking f =
  * to be completed later (when full recheck is completed, when workers are
  * available, when current recheck is cancelled... *)
 let actually_handle genv client msg full_recheck_needed ~is_stale env =
+  Hh_logger.debug "SeverCommand.actually_handle preamble";
   with_dependency_table_reads full_recheck_needed @@ fun () ->
   Errors.ignore_ @@ fun () ->
   assert (
@@ -263,6 +264,8 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
   let env = full_recheck_if_needed genv env msg in
   match msg with
   | Rpc cmd ->
+    let cmd_string = ServerCommandTypesUtils.debug_describe_t cmd in
+    Hh_logger.debug "ServerCommand.actually_handle rpc %s" cmd_string;
     ClientProvider.ping client;
     let t = Unix.gettimeofday () in
     Sys_utils.start_gc_profiling ();
@@ -279,7 +282,6 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
             (Nonfatal_rpc_exception
                (e, Caml.Printexc.raw_backtrace_to_string stack, env))
     in
-    let cmd_string = ServerCommandTypesUtils.debug_describe_t cmd in
     let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
     predeclare_ide_deps genv declared_names;
     let (major_gc_time, minor_gc_time) = Sys_utils.get_gc_time () in

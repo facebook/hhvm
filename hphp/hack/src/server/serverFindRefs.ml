@@ -39,6 +39,11 @@ let add_ns name =
 let strip_ns results = List.map results (fun (s, p) -> (Utils.strip_ns s, p))
 
 let search target include_defs files genv env =
+  if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
+    Relative_path.Set.iter files ~f:(fun file ->
+        Hh_logger.debug
+          "ServerFindRefs.search file %s"
+          (Relative_path.to_absolute file));
   (* Get all the references to the provided target in the files *)
   let res =
     FindRefsService.find_references
@@ -60,14 +65,17 @@ let handle_prechecked_files genv env dep f =
   let env = ServerPrecheckedFiles.update_after_local_changes genv env dep in
   (* If we added more things to recheck, we can't handle this command now, and
    * tell the client to retry instead. *)
-  ( env,
-    if env.full_check <> Full_check_done then
-      Retry
-    else
-      Done (f ()) )
+  if env.full_check = Full_check_done then
+    let () = Hh_logger.debug "ServerFindRefs.handle_prechecked_files: Done" in
+    let callback_result = f () in
+    (env, Done callback_result)
+  else
+    let () = Hh_logger.debug "ServerFindRefs.handle_prechecked_files: Retry" in
+    (env, Retry)
 
 let search_function function_name include_defs genv env =
   let function_name = add_ns function_name in
+  Hh_logger.debug "ServerFindRefs.search_function: %s" function_name;
   handle_prechecked_files genv env Typing_deps.Dep.(make (Fun function_name))
   @@ fun () ->
   let files =

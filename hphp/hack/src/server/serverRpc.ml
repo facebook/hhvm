@@ -487,6 +487,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     let result = ServerBigCode.go_ctx ~ctx ~entry in
     (env, result)
+  | VERBOSE verbose ->
+    if verbose then
+      Hh_logger.Level.set_min_level Hh_logger.Level.Debug
+    else
+      Hh_logger.Level.set_min_level
+        genv.local_config.ServerLocalConfig.min_log_level;
+    (env, ())
   | PAUSE pause ->
     let env =
       if pause then

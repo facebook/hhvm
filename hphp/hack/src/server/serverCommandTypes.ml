@@ -338,6 +338,7 @@ type _ t =
   | GLOBAL_INFERENCE :
       ServerGlobalInferenceTypes.mode * string list
       -> ServerGlobalInferenceTypes.result t
+  | VERBOSE : bool -> unit t
 
 let is_disconnect_rpc : type a. a t -> bool = function
   | DISCONNECT -> true

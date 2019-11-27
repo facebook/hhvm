@@ -97,6 +97,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   (* when you unpause, then it will catch up *)
   | PAUSE false -> true
   | GLOBAL_INFERENCE _ -> true
+  | VERBOSE _ -> false
 
 let command_needs_full_check = function
   | Rpc x -> rpc_command_needs_full_check x

@@ -644,6 +644,12 @@ let parse_check_args cmd =
               | _ -> raise (Arg.Bad "only a single mode should be specified")
           end,
         " (mode) show types at multiple positions [file:line:character list]" );
+      ( "--verbose-on",
+        Arg.Unit (fun () -> set_mode (MODE_VERBOSE true) ()),
+        " (mode) turn on verbose server log" );
+      ( "--verbose-off",
+        Arg.Unit (fun () -> set_mode (MODE_VERBOSE false) ()),
+        " (mode) turn off verbose server log" );
       ("--version", Arg.Set version, " (mode) show version and exit");
       Common_argspecs.watchman_debug_logging watchman_debug_logging;
       (* Please keep these sorted in the alphabetical order *)

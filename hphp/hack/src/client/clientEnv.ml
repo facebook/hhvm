@@ -63,6 +63,7 @@ type client_mode =
   | MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH of string list
   | MODE_FILE_DEPENDENTS
   | MODE_GLOBAL_INFERENCE of ServerGlobalInferenceTypes.mode * string list
+  | MODE_VERBOSE of bool
 
 type client_check_env = {
   ai_mode: string option;
@@ -148,3 +149,4 @@ let mode_to_string = function
     "MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH"
   | MODE_FILE_DEPENDENTS -> "MODE_FILE_LEVEL_DEPENDENCIES"
   | MODE_GLOBAL_INFERENCE _ -> "MODE_GLOBAL_INFERENCE"
+  | MODE_VERBOSE _ -> "MODE_VERBOSE"

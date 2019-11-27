@@ -454,9 +454,9 @@ val cyclic_typedef : Pos.t -> unit
 val type_arity_mismatch :
   Pos.t -> string -> Pos.t -> string -> typing_error_callback -> unit
 
-val this_final : Pos.t * string -> Pos.t -> error -> unit
+val this_final : Pos.t * string -> Pos.t -> (Pos.t * string) list
 
-val exact_class_final : Pos.t * string -> Pos.t -> error -> unit
+val exact_class_final : Pos.t * string -> Pos.t -> (Pos.t * string) list
 
 val fun_arity_mismatch : Pos.t -> Pos.t -> typing_error_callback -> unit
 

@@ -3135,21 +3135,19 @@ let type_arity_mismatch pos1 n1 pos2 n2 (on_error : typing_error_callback) =
     ~code:(Typing.err_code Typing.TypeArityMismatch)
     [(pos1, "This type has " ^ n1 ^ " arguments"); (pos2, "This one has " ^ n2)]
 
-let this_final id pos2 (error : error) =
+let this_final id pos2 =
   let n = strip_ns (snd id) in
   let message1 = "Since " ^ n ^ " is not final" in
   let message2 = "this might not be a " ^ n in
-  let (code, msgl) = (get_code error, to_list error) in
-  add_list code (msgl @ [(fst id, message1); (pos2, message2)])
+  [(fst id, message1); (pos2, message2)]
 
-let exact_class_final id pos2 (error : error) =
+let exact_class_final id pos2 =
   let n = strip_ns (snd id) in
   let message1 = "This requires the late-bound type to be exactly " ^ n in
   let message2 =
     "Since " ^ n ^ " is not final this might be an instance of a child class"
   in
-  let (code, msgl) = (get_code error, to_list error) in
-  add_list code (msgl @ [(fst id, message1); (pos2, message2)])
+  [(fst id, message1); (pos2, message2)]
 
 let fun_arity_mismatch pos1 pos2 (on_error : typing_error_callback) =
   on_error

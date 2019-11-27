@@ -427,7 +427,7 @@ and simplify_subtype_i
     ty_super;
   let (env, ety_super) = Env.expand_internal_type env ty_super in
   let (env, ety_sub) = Env.expand_internal_type env ty_sub in
-  let fail () =
+  let fail_with_suffix suffix =
     let r_super = reason ety_super in
     let r_sub = reason ety_sub in
     let ty_super_descr = describe_ty_super env ety_super in
@@ -443,13 +443,14 @@ and simplify_subtype_i
         (ty_super_descr, ty_sub_descr)
     in
     let left = Reason.to_string ("Expected " ^ ty_super_descr) r_super in
-    let right = Reason.to_string ("But got " ^ ty_sub_descr) r_sub in
+    let right = Reason.to_string ("But got " ^ ty_sub_descr) r_sub @ suffix in
     match (r_super, r_sub) with
     | (Reason.Rcstr_on_generics (p, tparam), _)
     | (_, Reason.Rcstr_on_generics (p, tparam)) ->
       Errors.violated_constraint p tparam left right subtype_env.on_error
     | _ -> subtype_env.on_error (left @ right)
   in
+  let fail () = fail_with_suffix [] in
   let ( ||| ) = ( ||| ) ~fail in
   (* We *know* that the assertion is unsatisfiable *)
   let invalid_with f = invalid ~fail:f env in
@@ -1265,12 +1266,12 @@ and simplify_subtype_i
           | (Tclass ((_, y), _, _), _, Tclass (((_, x) as id), _, _))
             when String.equal y x ->
             invalid_with (fun () ->
-                Errors.try_ fail (fun error ->
-                    let p = Reason.to_pos (fst ety_sub) in
-                    if equal_dependent_type expr_dep (DTcls x) then
-                      Errors.exact_class_final id p error
-                    else
-                      Errors.this_final id p error))
+                let p = Reason.to_pos (fst ety_sub) in
+                fail_with_suffix
+                  ( if equal_dependent_type expr_dep (DTcls x) then
+                    Errors.exact_class_final id p
+                  else
+                    Errors.this_final id p ))
           | _ -> invalid ())
       end
     | (Tabstract (AKnewtype _, Some ty), Tabstract (AKdependent _, _)) ->

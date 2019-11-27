@@ -17,13 +17,10 @@ module Hg_actual = struct
     | Hg_rev hash -> hash
     | Global_rev rev -> Printf.sprintf "r%d" rev
 
-  let exec_hg ?(plain = true) args =
+  let exec_hg args =
     let env =
-      match plain with
-      | true ->
-        (* Disable user aliases or configs. *)
-        Process_types.Augment ["HGPLAIN=1"]
-      | false -> Process_types.Default
+      (* Disable user aliases or configs. *)
+      Process_types.Augment ["HGPLAIN=1"]
     in
     Process.exec "hg" ~env args
 
@@ -75,9 +72,9 @@ module Hg_actual = struct
     Future.(merge q1 (merge q2 q3 take_first) take_first)
 
   let current_mergebase_hg_rev repo =
-    (* "bottom^" does not work in plain mode *)
     let process =
-      exec_hg ~plain:false ["id"; "-i"; "--rev"; "bottom^"; "--cwd"; repo]
+      exec_hg
+        ["log"; "--rev"; "ancestor(master,.)"; "-T"; "{node}"; "--cwd"; repo]
     in
     Future.make process @@ fun result ->
     let result = String.trim result in

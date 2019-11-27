@@ -183,7 +183,7 @@ let schema : schema_node list =
           ("keyword", Token);
           ("name", Token);
           ("extends_keyword", ZeroOrOne Token);
-          ("extends_list", ZeroOrOne (Aggregate Specifier));
+          ("extends_opt", ZeroOrOne (Just "TypeConstraint"));
           ("left_brace", Token);
           ("fields", ZeroOrMore (Just "RecordField"));
           ("right_brace", Token);

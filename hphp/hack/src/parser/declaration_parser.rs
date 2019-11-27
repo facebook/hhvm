@@ -282,13 +282,27 @@ where
         self.parse_terminated_list(|x| x.parse_record_field(), TokenKind::RightBrace)
     }
 
+    fn parse_single_extends_opt(&mut self) -> (S::R, S::R) {
+        let token_kind = self.peek_token_kind();
+        if token_kind != TokenKind::Extends {
+            let missing1 = S!(make_missing, self, self.pos());
+            let missing2 = S!(make_missing, self, self.pos());
+            (missing1, missing2)
+        } else {
+            let token = self.next_token();
+            let extends_token = S!(make_token, self, token);
+            let extends_type = self.parse_type_specifier(false, false);
+            (extends_token, extends_type)
+        }
+    }
+
     fn parse_record_declaration(&mut self, attrs: S::R) -> S::R {
         // record-declaration:
-        //   abstract? record name { record-list }
+        //   abstract? record name extends-single? { record-list }
         let abstract_ = self.optional_token(TokenKind::Abstract);
         let record = self.require_token(TokenKind::RecordDec, Errors::error1037);
         let name = self.require_name();
-        let (record_extends, record_extends_list) = self.parse_extends_opt();
+        let (record_extends, record_extends_type) = self.parse_single_extends_opt();
         let (left_brace, record_fields, right_brace) =
             self.parse_braced_list(|x| x.parse_record_fields());
         S!(
@@ -299,7 +313,7 @@ where
             record,
             name,
             record_extends,
-            record_extends_list,
+            record_extends_type,
             left_brace,
             record_fields,
             right_brace

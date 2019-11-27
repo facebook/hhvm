@@ -3703,7 +3703,7 @@ if there already is one, since that one will likely be better than this one. *)
           record_attribute_spec = attrs;
           record_modifier = modifier;
           record_name = name;
-          record_extends_list = exts;
+          record_extends_opt = exts;
           record_fields = fields;
           _;
         } ->

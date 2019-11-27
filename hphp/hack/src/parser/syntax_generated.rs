@@ -129,14 +129,14 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_record_declaration(_: &C, record_attribute_spec: Self, record_modifier: Self, record_keyword: Self, record_name: Self, record_extends_keyword: Self, record_extends_list: Self, record_left_brace: Self, record_fields: Self, record_right_brace: Self) -> Self {
+    fn make_record_declaration(_: &C, record_attribute_spec: Self, record_modifier: Self, record_keyword: Self, record_name: Self, record_extends_keyword: Self, record_extends_opt: Self, record_left_brace: Self, record_fields: Self, record_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::RecordDeclaration(Box::new(RecordDeclarationChildren {
             record_attribute_spec,
             record_modifier,
             record_keyword,
             record_name,
             record_extends_keyword,
-            record_extends_list,
+            record_extends_opt,
             record_left_brace,
             record_fields,
             record_right_brace,
@@ -2010,13 +2010,13 @@ where
                 acc
             },
             SyntaxVariant::RecordDeclaration(x) => {
-                let RecordDeclarationChildren { record_attribute_spec, record_modifier, record_keyword, record_name, record_extends_keyword, record_extends_list, record_left_brace, record_fields, record_right_brace } = *x;
+                let RecordDeclarationChildren { record_attribute_spec, record_modifier, record_keyword, record_name, record_extends_keyword, record_extends_opt, record_left_brace, record_fields, record_right_brace } = *x;
                 let acc = f(record_attribute_spec, acc);
                 let acc = f(record_modifier, acc);
                 let acc = f(record_keyword, acc);
                 let acc = f(record_name, acc);
                 let acc = f(record_extends_keyword, acc);
-                let acc = f(record_extends_list, acc);
+                let acc = f(record_extends_opt, acc);
                 let acc = f(record_left_brace, acc);
                 let acc = f(record_fields, acc);
                 let acc = f(record_right_brace, acc);
@@ -3560,7 +3560,7 @@ where
                  record_right_brace: ts.pop().unwrap(),
                  record_fields: ts.pop().unwrap(),
                  record_left_brace: ts.pop().unwrap(),
-                 record_extends_list: ts.pop().unwrap(),
+                 record_extends_opt: ts.pop().unwrap(),
                  record_extends_keyword: ts.pop().unwrap(),
                  record_name: ts.pop().unwrap(),
                  record_keyword: ts.pop().unwrap(),
@@ -4771,7 +4771,7 @@ pub struct RecordDeclarationChildren<T, V> {
     pub record_keyword: Syntax<T, V>,
     pub record_name: Syntax<T, V>,
     pub record_extends_keyword: Syntax<T, V>,
-    pub record_extends_list: Syntax<T, V>,
+    pub record_extends_opt: Syntax<T, V>,
     pub record_left_brace: Syntax<T, V>,
     pub record_fields: Syntax<T, V>,
     pub record_right_brace: Syntax<T, V>,
@@ -6363,7 +6363,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     2 => Some(&x.record_keyword),
                     3 => Some(&x.record_name),
                     4 => Some(&x.record_extends_keyword),
-                    5 => Some(&x.record_extends_list),
+                    5 => Some(&x.record_extends_opt),
                     6 => Some(&x.record_left_brace),
                     7 => Some(&x.record_fields),
                     8 => Some(&x.record_right_brace),

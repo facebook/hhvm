@@ -86,7 +86,7 @@ module type Syntax_S = sig
     ; record_keyword                                     : t
     ; record_name                                        : t
     ; record_extends_keyword                             : t
-    ; record_extends_list                                : t
+    ; record_extends_opt                                 : t
     ; record_left_brace                                  : t
     ; record_fields                                      : t
     ; record_right_brace                                 : t

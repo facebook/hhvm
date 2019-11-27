@@ -595,7 +595,7 @@ module WithToken(Token: TokenType) = struct
         record_keyword;
         record_name;
         record_extends_keyword;
-        record_extends_list;
+        record_extends_opt;
         record_left_brace;
         record_fields;
         record_right_brace;
@@ -605,7 +605,7 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc record_keyword in
          let acc = f acc record_name in
          let acc = f acc record_extends_keyword in
-         let acc = f acc record_extends_list in
+         let acc = f acc record_extends_opt in
          let acc = f acc record_left_brace in
          let acc = f acc record_fields in
          let acc = f acc record_right_brace in
@@ -2463,7 +2463,7 @@ module WithToken(Token: TokenType) = struct
         record_keyword;
         record_name;
         record_extends_keyword;
-        record_extends_list;
+        record_extends_opt;
         record_left_brace;
         record_fields;
         record_right_brace;
@@ -2473,7 +2473,7 @@ module WithToken(Token: TokenType) = struct
         record_keyword;
         record_name;
         record_extends_keyword;
-        record_extends_list;
+        record_extends_opt;
         record_left_brace;
         record_fields;
         record_right_brace;
@@ -4332,7 +4332,7 @@ module WithToken(Token: TokenType) = struct
         record_keyword;
         record_name;
         record_extends_keyword;
-        record_extends_list;
+        record_extends_opt;
         record_left_brace;
         record_fields;
         record_right_brace;
@@ -4342,7 +4342,7 @@ module WithToken(Token: TokenType) = struct
         "record_keyword";
         "record_name";
         "record_extends_keyword";
-        "record_extends_list";
+        "record_extends_opt";
         "record_left_brace";
         "record_fields";
         "record_right_brace";
@@ -6267,7 +6267,7 @@ module WithToken(Token: TokenType) = struct
           record_keyword;
           record_name;
           record_extends_keyword;
-          record_extends_list;
+          record_extends_opt;
           record_left_brace;
           record_fields;
           record_right_brace;
@@ -6278,7 +6278,7 @@ module WithToken(Token: TokenType) = struct
           record_keyword;
           record_name;
           record_extends_keyword;
-          record_extends_list;
+          record_extends_opt;
           record_left_brace;
           record_fields;
           record_right_brace;
@@ -8383,7 +8383,7 @@ module WithToken(Token: TokenType) = struct
         record_keyword
         record_name
         record_extends_keyword
-        record_extends_list
+        record_extends_opt
         record_left_brace
         record_fields
         record_right_brace
@@ -8394,7 +8394,7 @@ module WithToken(Token: TokenType) = struct
           record_keyword;
           record_name;
           record_extends_keyword;
-          record_extends_list;
+          record_extends_opt;
           record_left_brace;
           record_fields;
           record_right_brace;

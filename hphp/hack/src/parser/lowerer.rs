@@ -4846,7 +4846,7 @@ where
                 Ok(vec![ast::Def::mk_record_def(ast::RecordDef {
                     annotation: (),
                     name: Self::pos_name(&c.record_name, env)?,
-                    extends: Self::could_map(Self::p_hint, &c.record_extends_list, env)?
+                    extends: Self::could_map(Self::p_hint, &c.record_extends_opt, env)?
                         .into_iter()
                         .next(),
                     abstract_: Self::token_kind(&c.record_modifier) == Some(TK::Abstract),

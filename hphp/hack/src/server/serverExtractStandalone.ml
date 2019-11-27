@@ -1094,15 +1094,11 @@ let get_dependencies tcopt target =
     Typing_deps.Dep.(
       match target with
       | Function func ->
-        let (_ : (Tast.def * Typing_env_types.global_tvenv) option) =
-          Typing_check_service.type_fun tcopt filename func
-        in
+        let _ = Typing_check_service.type_fun tcopt filename func in
         HashSet.remove dependencies (Fun func);
         HashSet.remove dependencies (FunName func)
       | Method (cls, m) ->
-        let (_ : (Tast.def * Typing_env_types.global_tvenv list) option) =
-          Typing_check_service.type_class tcopt filename cls
-        in
+        let _ = Typing_check_service.type_class tcopt filename cls in
         HashSet.remove dependencies (Method (cls, m));
         HashSet.remove dependencies (SMethod (cls, m)))
   in

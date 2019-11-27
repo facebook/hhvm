@@ -26,6 +26,9 @@ val log_with_level :
 
 val log_types : Pos.t -> Typing_env_types.env -> log_structure list -> unit
 
+val log_global_tvenv :
+  Pos.t -> Typing_env_types.env -> Typing_env_types.global_tvenv -> unit
+
 val log_prop :
   int ->
   Pos.t ->

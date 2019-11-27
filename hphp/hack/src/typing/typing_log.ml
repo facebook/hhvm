@@ -719,6 +719,9 @@ let log_types p env items =
       in
       go items)
 
+let log_global_tvenv p env global_tvenv =
+  log_position p (fun () -> log_value @@ global_tvenv_as_value env global_tvenv)
+
 let log_prop level p message env prop =
   log_with_level env "prop" level (fun () ->
       log_position p (fun () -> log_subtype_prop env message prop))

@@ -40,6 +40,8 @@ type tvenv = tyvar_info IMap.t
 
 type global_tvenv = tyvar_info_ IMap.t
 
+type global_tvenv_with_pos = Pos.t * global_tvenv
+
 type env = {
   (* position of the function/method being checked *)
   function_pos: Pos.t;

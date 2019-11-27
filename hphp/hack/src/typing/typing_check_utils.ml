@@ -9,17 +9,17 @@
 
 open Hh_prelude
 
-let type_file
+let type_file_with_global_tvenvs
     tcopt fn { FileInfo.funs; classes; record_defs; typedefs; consts; _ } =
-  let (errors, tast) =
+  let (errors, (tast, global_tvenvs)) =
     Errors.do_with_context fn Errors.Typing (fun () ->
-        let (fs, _) =
+        let (fs, f_global_tvenvs) =
           List.map funs ~f:snd
           |> List.filter_map ~f:(fun x ->
                  Typing_check_service.type_fun tcopt fn x)
           |> List.unzip
         in
-        let (cs, _) =
+        let (cs, c_global_tvenvs) =
           List.map classes ~f:snd
           |> List.filter_map ~f:(fun x ->
                  Typing_check_service.type_class tcopt fn x)
@@ -40,8 +40,13 @@ let type_file
           |> List.filter_map ~f:(fun x ->
                  Typing_check_service.check_const tcopt fn x)
         in
-        fs @ cs @ rs @ ts @ gcs)
+        ( fs @ cs @ rs @ ts @ gcs,
+          lazy (List.concat (f_global_tvenvs :: c_global_tvenvs)) ))
   in
+  (tast, global_tvenvs, errors)
+
+let type_file tcopt fn fi =
+  let (tast, _, errors) = type_file_with_global_tvenvs tcopt fn fi in
   (tast, errors)
 
 (*****************************************************************************)

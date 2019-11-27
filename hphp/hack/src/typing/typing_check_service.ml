@@ -92,7 +92,7 @@ let neutral = Errors.empty
 (*****************************************************************************)
 
 let type_fun (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
-    (Tast.def * Typing_env_types.global_tvenv) option =
+    (Tast.def * Typing_env_types.global_tvenv_with_pos) option =
   match Ast_provider.find_fun_in_file ~full:true fn x with
   | Some f ->
     let fun_ = Naming.fun_ f in
@@ -106,7 +106,7 @@ let type_fun (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
   | None -> None
 
 let type_class (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string)
-    : (Tast.def * Typing_env_types.global_tvenv list) option =
+    : (Tast.def * Typing_env_types.global_tvenv_with_pos list) option =
   match Ast_provider.find_class_in_file ~full:true fn x with
   | Some cls ->
     let class_ = Naming.class_ cls in
@@ -208,7 +208,8 @@ let process_file
     in
     if InferMissing.global_inference @@ GlobalOptions.tco_infer_missing opts
     then
-      Typing_global_inference.StateSubConstraintGraphs.save global_tvenvs;
+      Typing_global_inference.StateSubConstraintGraphs.save
+        (List.map global_tvenvs snd);
     let deferred_files = Deferred_decl.get ~f:(fun d -> Declare d) in
     let result =
       match deferred_files with

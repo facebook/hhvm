@@ -641,7 +641,8 @@ and get_callable_variadicity
 (*****************************************************************************)
 (* Now we are actually checking stuff! *)
 (*****************************************************************************)
-and fun_def tcopt f : (Tast.fun_def * Typing_env_types.global_tvenv) option =
+and fun_def tcopt f :
+    (Tast.fun_def * Typing_env_types.global_tvenv_with_pos) option =
   let env = EnvFromDef.fun_env tcopt f in
   with_timeout env f.f_name ~do_:(fun env ->
       (* reset the expression dependent display ids for each function body *)
@@ -790,7 +791,8 @@ and fun_def tcopt f : (Tast.fun_def * Typing_env_types.global_tvenv) option =
           Aast.f_static = f.f_static;
         }
       in
-      (Typing_lambda_ambiguous.suggest_fun_def env fundef, env.global_tvenv))
+      ( Typing_lambda_ambiguous.suggest_fun_def env fundef,
+        (pos, env.global_tvenv) ))
 
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
@@ -8809,7 +8811,7 @@ and method_def env cls m =
         }
       in
       ( Typing_lambda_ambiguous.suggest_method_def env method_def,
-        env.global_tvenv ))
+        (pos, env.global_tvenv) ))
 
 and typedef_def tcopt typedef =
   let env = EnvFromDef.typedef_env tcopt typedef in

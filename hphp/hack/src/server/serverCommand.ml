@@ -106,76 +106,6 @@ let is_edit : type a. a command -> bool = function
   | Rpc (EDIT_FILE _) -> true
   | _ -> false
 
-let get_description : type a. a command -> string = function
-  | Debug -> "Debug"
-  | Rpc (STATUS _) -> "STATUS"
-  | Rpc LIST_FILES_WITH_ERRORS -> "LIST_FILES_WITH_ERRORS"
-  | Rpc (REMOVE_DEAD_FIXMES _) -> "REMOVE_DEAD_FIXMES"
-  | Rpc (REWRITE_LAMBDA_PARAMETERS _) -> "REWRITE_LAMBDA_PARAMETERS"
-  | Rpc (REWRITE_RETURN_TYPE _) -> "REWRITE_RETURN_TYPE"
-  | Rpc (REWRITE_PARAMETER_TYPES _) -> "REWRITE_PARAMETER_TYPES"
-  | Rpc (REWRITE_TYPE_PARAMS_TYPE _) -> "REWRITE_TYPE_PARAMS_TYPE"
-  | Rpc (AI_QUERY _) -> "AI_QUERY"
-  | Rpc (FIND_REFS _) -> "FIND_REFS"
-  | Rpc (IDE_FIND_REFS _) -> "IDE_FIND_REFS"
-  | Rpc (IDE_GO_TO_IMPL _) -> "IDE_GO_TO_IMPL"
-  | Rpc (METHOD_JUMP _) -> "METHOD_JUMP"
-  | Rpc (SAVE_NAMING _) -> "SAVE_NAMING"
-  | Rpc (SAVE_STATE _) -> "SAVE_STATE"
-  | Rpc (COVERAGE_COUNTS _) -> "COVERAGE_COUNTS"
-  | Rpc (REFACTOR _) -> "REFACTOR"
-  | Rpc (IDE_REFACTOR _) -> "IDE_REFACTOR"
-  | Rpc (CREATE_CHECKPOINT _) -> "CREATE_CHECKPOINT"
-  | Rpc (RETRIEVE_CHECKPOINT _) -> "RETRIEVE_CHECKPOINT"
-  | Rpc (DELETE_CHECKPOINT _) -> "DELETE_CHECKPOINT"
-  | Rpc IN_MEMORY_DEP_TABLE_SIZE -> "IN_MEMORY_DEP_TABLE_SIZE"
-  | Rpc NO_PRECHECKED_FILES -> "NO_PRECHECKED_FILES"
-  | Rpc (GEN_HOT_CLASSES _) -> "GEN_HOT_CLASSES"
-  | Rpc STATS -> "STATS"
-  | Rpc DISCONNECT -> "DISCONNECT"
-  | Rpc (STATUS_SINGLE _) -> "STATUS_SINGLE"
-  | Rpc (INFER_TYPE _) -> "INFER_TYPE"
-  | Rpc (INFER_TYPE_BATCH _) -> "INFER_TYPE_BATCH"
-  | Rpc (IDE_HOVER _) -> "IDE_HOVER"
-  | Rpc (DOCBLOCK_AT _) -> "DOCBLOCK_AT"
-  | Rpc (DOCBLOCK_FOR_SYMBOL _) -> "DOCBLOCK_FOR_SYMBOL"
-  | Rpc (IDE_SIGNATURE_HELP _) -> "IDE_SIGNATURE_HELP"
-  | Rpc (COVERAGE_LEVELS _) -> "COVERAGE_LEVELS"
-  | Rpc (COMMANDLINE_AUTOCOMPLETE _) -> "COMMANDLINE_AUTOCOMPLETE"
-  | Rpc (IDENTIFY_FUNCTION _) -> "IDENTIFY_FUNCTION"
-  | Rpc (METHOD_JUMP_BATCH _) -> "METHOD_JUMP_BATCH"
-  | Rpc (IDE_HIGHLIGHT_REFS _) -> "IDE_HIGHLIGHT_REFS"
-  | Rpc (DUMP_SYMBOL_INFO _) -> "DUMP_SYMBOL_INFO"
-  | Rpc (LINT _) -> "LINT"
-  | Rpc (LINT_STDIN _) -> "LINT_STDIN"
-  | Rpc (LINT_ALL _) -> "LINT_ALL"
-  | Rpc (LINT_XCONTROLLER _) -> "LINT_XCONTROLLER"
-  | Rpc (FORMAT _) -> "FORMAT"
-  | Rpc (DUMP_FULL_FIDELITY_PARSE _) -> "DUMP_FULL_FIDELITY_PARSE"
-  | Rpc (IDE_AUTOCOMPLETE _) -> "IDE_AUTOCOMPLETE"
-  | Rpc (IDE_FFP_AUTOCOMPLETE _) -> "IDE_FFP_AUTOCOMPLETE"
-  | Rpc (SUBSCRIBE_DIAGNOSTIC _) -> "SUBSCRIBE_DIAGNOSTIC"
-  | Rpc (UNSUBSCRIBE_DIAGNOSTIC _) -> "UNSUBSCRIBE_DIAGNOSTIC"
-  | Rpc (OUTLINE _) -> "OUTLINE"
-  | Rpc IDE_IDLE -> "IDE_IDLE"
-  | Rpc RAGE -> "RAGE"
-  | Rpc (DYNAMIC_VIEW _) -> "DYNAMIC_VIEW"
-  | Rpc (CST_SEARCH _) -> "CST_SEARCH"
-  | Rpc (SEARCH _) -> "SEARCH"
-  | Rpc (OPEN_FILE _) -> "OPEN_FILE"
-  | Rpc (CLOSE_FILE _) -> "CLOSE_FILE"
-  | Rpc (EDIT_FILE _) -> "EDIT_FILE"
-  | Rpc (FUN_DEPS_BATCH _) -> "FUN_DEPS_BATCH"
-  | Rpc (FUN_IS_LOCALLABLE_BATCH _) -> "FUN_IS_LOCALLABLE_BATCH"
-  | Rpc (FILE_DEPENDENTS _) -> "FILE_DEPENDENTS"
-  | Rpc (IDENTIFY_TYPES _) -> "IDENTIFY_TYPES"
-  | Rpc (EXTRACT_STANDALONE _) -> "EXTRACT_STANDALONE"
-  | Rpc (CONCATENATE_ALL _) -> "CONCATENATE_ALL"
-  | Rpc (GO_TO_DEFINITION _) -> "GO_TO_DEFINITION"
-  | Rpc (BIGCODE _) -> "BIGCODE"
-  | Rpc (PAUSE _) -> "PAUSE"
-  | Rpc (GLOBAL_INFERENCE _) -> "GLOBAL_INFERENCE"
-
 let rpc_command_needs_writes : type a. a t -> bool = function
   | OPEN_FILE _ -> true
   | EDIT_FILE _ -> true
@@ -390,7 +320,10 @@ let handle
      * flaky experience. To avoid this, we don't restart the global rechecking
      * after IDE edits - you need to save the file againg to restart it. *)
     ServerUtils.Needs_writes
-      (env, continuation, not (is_edit msg), get_description msg)
+      ( env,
+        continuation,
+        not (is_edit msg),
+        ServerCommandTypesUtils.debug_describe_cmd msg )
   else if full_recheck_needed then
     ServerUtils.Needs_full_recheck (env, continuation, reason msg)
   else

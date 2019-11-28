@@ -298,42 +298,6 @@ let naming_from_saved_state
     in
     naming_with_fast (Naming_table.to_fast old_hack_names) t
 
-(*
- * In eager initialization, this is done at the parsing step with
- * parsing hooks. During lazy init, need to do it manually from the fast
- * instead since we aren't parsing the codebase.
- *)
-let update_search
-    (genv : ServerEnv.genv) (naming_table : Naming_table.t) (t : float) : float
-    =
-  (* Don't update search index when in check mode (type check once and exit) *)
-  let provider_name =
-    genv.local_config.ServerLocalConfig.symbolindex_search_provider
-  in
-  let check_mode = ServerArgs.check_mode genv.options in
-  if not check_mode then (
-    Hh_logger.log "Load search indices...";
-
-    (* Filter out non php files *)
-    let naming_table =
-      Naming_table.filter naming_table ~f:(fun s _ -> FindUtils.path_filter s)
-    in
-    Naming_table.iter naming_table ~f:(fun fn fi ->
-        let names = FileInfo.simplify fi in
-        SearchServiceRunner.internal_ssr_update
-          fn
-          (SearchUtils.Fast names)
-          SearchUtils.Init);
-    HackEventLogger.update_search_end t;
-    Hh_logger.log_duration "Loaded search indices" t
-  ) else (
-    Hh_logger.log
-      "Skipped loading search indices (check mode: %B, index provider: %s)"
-      check_mode
-      provider_name;
-    t
-  )
-
 (* Prechecked files are gated with a flag and not supported in AI/check/saving
  * of saved state modes. *)
 let use_prechecked_files (genv : ServerEnv.genv) : bool =
@@ -874,7 +838,6 @@ let post_saved_state_initialization
   in
   (* Update the fileinfo object's dependencies now that we have full fast *)
   let t = update_files genv env.naming_table t in
-  let t = update_search genv old_naming_table t in
   type_check_dirty
     genv
     env

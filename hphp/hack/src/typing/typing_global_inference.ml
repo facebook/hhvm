@@ -48,7 +48,7 @@ module StateConstraintGraph = struct
     type t = env * StateErrors.t
   end)
 
-  let merge_subgraph (env, errors) subgraph =
+  let merge_subgraph (env, errors) (_pos, subgraph) =
     let env =
       IMap.fold
         (fun var tyvar_info env ->
@@ -104,12 +104,12 @@ end
 
 module StateSubConstraintGraphs = struct
   include StateFunctor (struct
-    type t = global_tvenv list
+    type t = global_tvenv_with_pos list
   end)
 
   let save subcontraints =
     let subcontraints =
-      List.filter ~f:(fun e -> not @@ IMap.is_empty e) subcontraints
+      List.filter ~f:(fun (_, e) -> not @@ IMap.is_empty e) subcontraints
     in
     if List.is_empty subcontraints then
       ()

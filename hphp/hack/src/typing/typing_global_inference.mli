@@ -19,7 +19,7 @@ module StateErrors : sig
 end
 
 module StateSubConstraintGraphs : sig
-  type t = global_tvenv list
+  type t = global_tvenv_with_pos list
 
   val load : string -> t
 

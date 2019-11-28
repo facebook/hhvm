@@ -49,3 +49,27 @@ function with_type_const_from_required_interface(
 ): int {
   return $w->getFoo();
 }
+
+abstract class HasBar {
+  abstract const type TBar;
+  public function getDefaultBar(): ?this::TBar {
+    return null;
+  }
+}
+
+interface IHasBar {
+  const type TBar = string;
+}
+
+class StringBarWrapper extends HasBar implements IHasBar {
+  public function getBar(): this::TBar {
+    $bar = $this->getDefaultBar();
+    return $bar ?? 'bar';
+  }
+}
+
+function with_type_const_from_implemented_interface(
+  StringBarWrapper $w,
+): string {
+  return $w->getBar();
+}

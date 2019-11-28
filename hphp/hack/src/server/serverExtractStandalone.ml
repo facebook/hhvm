@@ -991,10 +991,7 @@ and add_signature_dependencies deps obj =
       | Const (_, name) ->
         (match Class.get_typeconst cls name with
         | Some tc ->
-          (* Type constants cannot be declared in traits but can be
-             inherited through `require extends` and `require
-             implements` mechanisms. *)
-          if Class.kind cls = Ast_defs.Ctrait then
+          if cls_name <> tc.ttc_origin then
             do_add_dep deps (Const (tc.ttc_origin, name));
           Option.iter tc.ttc_type ~f:add_dep;
           Option.iter tc.ttc_constraint ~f:add_dep

@@ -145,6 +145,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_shape_type_alias",
             "\\with_enum_type_alias",
             "\\with_enum_class_name",
+            "\\with_type_const_from_implemented_interface",
         ]
 
         for path in paths:

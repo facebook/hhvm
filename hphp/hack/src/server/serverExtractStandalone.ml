@@ -937,8 +937,9 @@ and add_dep deps ?cls:(this_cls = None) ty : unit =
           | Some typeconst ->
             Option.fold ~f:this#on_type ~init:() typeconst.ttc_type;
             if not (List.is_empty tconsts) then (
-              match typeconst.ttc_type with
-              | Some tc_type ->
+              match (typeconst.ttc_type, typeconst.ttc_constraint) with
+              | (Some tc_type, _)
+              | (None, Some tc_type) ->
                 (* What 'this' refers to inside of T? *)
                 let tc_this =
                   match snd tc_type with
@@ -947,7 +948,7 @@ and add_dep deps ?cls:(this_cls = None) ty : unit =
                 in
                 let taccess = Typing_defs.Taccess (tc_type, tconsts) in
                 add_dep ~cls:tc_this deps (Typing_reason.Rnone, taccess)
-              | None -> ()
+              | (None, None) -> ()
             )
           | None -> ())
     end

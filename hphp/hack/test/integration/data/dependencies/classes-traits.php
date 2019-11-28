@@ -73,3 +73,25 @@ function with_type_const_from_implemented_interface(
 ): string {
   return $w->getBar();
 }
+
+interface IHasBaz {
+  abstract const type TBaz as IHasQuux;
+  const type TQuux = this::TBaz::TQuux;
+  public function takeQuux(this::TQuux $_): void;
+}
+
+interface IHasQuux {
+  abstract const type TQuux;
+}
+
+interface IntBazWrapper extends IHasBaz {
+  const type TBaz = IntQuuxWrapper;
+}
+
+class IntQuuxWrapper implements IHasQuux {
+  const type TQuux = int;
+}
+
+function with_nested_type_const(IntBazWrapper $x): void {
+  $x->takeQuux(42);
+}

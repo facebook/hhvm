@@ -131,7 +131,7 @@ mod tests {
 
     #[test]
     fn test_is_hh_autoimport() {
-        assert_eq!(is_hh_autoimport("float"), true);
+        assert_eq!(is_hh_autoimport("vec"), true);
         assert_eq!(is_hh_autoimport("KeyedIterable"), true);
         assert_eq!(is_hh_autoimport("non-exisit"), false);
     }

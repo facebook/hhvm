@@ -14,6 +14,7 @@ type command =
   | CRestart of ClientStart.env
   | CLsp of ClientLsp.env
   | CDebug of ClientDebug.env
+  | CDownloadSavedState of ClientDownloadSavedState.env
 
 type command_keyword =
   | CKCheck
@@ -23,3 +24,4 @@ type command_keyword =
   | CKNone
   | CKLsp
   | CKDebug
+  | CKDownloadSavedState

@@ -62,6 +62,7 @@ let () =
     | ClientCommand.CRestart _ -> "Restart"
     | ClientCommand.CLsp _ -> "Lsp"
     | ClientCommand.CDebug _ -> "Debug"
+    | ClientCommand.CDownloadSavedState _ -> "DownloadSavedState"
   in
   let exit_status =
     try
@@ -73,6 +74,8 @@ let () =
       | ClientCommand.CRestart env -> Lwt_main.run (ClientRestart.main env)
       | ClientCommand.CLsp env -> Lwt_main.run (ClientLsp.main env)
       | ClientCommand.CDebug env -> Lwt_main.run (ClientDebug.main env)
+      | ClientCommand.CDownloadSavedState env ->
+        Lwt_main.run (ClientDownloadSavedState.main env)
     with Exit_status.Exit_with es ->
       HackEventLogger.client_bad_exit ~command:(command_name command) es;
       es

@@ -64,6 +64,7 @@ let parse_command () =
     | "restart" -> CKRestart
     | "lsp" -> CKLsp
     | "debug" -> CKDebug
+    | "download-saved-state" -> CKDownloadSavedState
     | _ -> CKNone
 
 let parse_without_command options usage command =
@@ -907,6 +908,60 @@ let parse_debug_args () =
   in
   CDebug { ClientDebug.root; from = !from }
 
+let parse_download_saved_state_args () =
+  let usage =
+    Printf.sprintf
+      {|Usage: %s download-saved-state [OPTION]... [WWW-ROOT]
+
+Download a saved-state to disk for the given repository, to make future
+invocations of `hh` faster.|}
+      Sys.argv.(0)
+  in
+  let valid_types_message = "Valid values are: naming-table" in
+
+  let from = ref "" in
+  let saved_state_type = ref None in
+  let options =
+    Arg.align
+      [
+        Common_argspecs.from from;
+        ( "--type",
+          Arg.String (fun arg -> saved_state_type := Some arg),
+          Printf.sprintf
+            "The type of saved-state to download. %s"
+            valid_types_message );
+      ]
+  in
+  let args = parse_without_command options usage "download-saved-state" in
+  let root =
+    match args with
+    | [x] -> Wwwroot.get (Some x)
+    | _ ->
+      print_endline usage;
+      exit 2
+  in
+  let from =
+    match !from with
+    | "" ->
+      print_endline "The '--from' option is required.";
+      exit 2
+    | from -> from
+  in
+  let saved_state_type =
+    match !saved_state_type with
+    | None ->
+      Printf.printf "The '--type' option is required. %s\n" valid_types_message;
+      exit 2
+    | Some "naming-table" -> ClientDownloadSavedState.Naming_table
+    | Some saved_state_type ->
+      Printf.printf
+        "Unrecognized value '%s' for '--type'. %s\n"
+        saved_state_type
+        valid_types_message;
+      exit 2
+  in
+  CDownloadSavedState { ClientDownloadSavedState.root; from; saved_state_type }
+
 let parse_args () =
   match parse_command () with
   | (CKNone | CKCheck) as cmd -> parse_check_args cmd
@@ -915,12 +970,14 @@ let parse_args () =
   | CKRestart -> parse_restart_args ()
   | CKDebug -> parse_debug_args ()
   | CKLsp -> parse_lsp_args ()
+  | CKDownloadSavedState -> parse_download_saved_state_args ()
 
 let root = function
   | CCheck { ClientEnv.root; _ }
   | CStart { ClientStart.root; _ }
   | CRestart { ClientStart.root; _ }
   | CStop { ClientStop.root; _ }
-  | CDebug { ClientDebug.root; _ } ->
+  | CDebug { ClientDebug.root; _ }
+  | CDownloadSavedState { ClientDownloadSavedState.root; _ } ->
     root
   | CLsp _ -> Path.dummy_path

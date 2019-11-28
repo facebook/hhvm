@@ -470,7 +470,8 @@ val expected_stringlike : typing_error_callback
 
 val type_constant_mismatch : typing_error_callback -> typing_error_callback
 
-val class_constant_type_mismatch : typing_error_callback
+val class_constant_type_mismatch :
+  typing_error_callback -> typing_error_callback
 
 val constant_does_not_match_enum_type : typing_error_callback
 
@@ -661,17 +662,20 @@ val case_fallthrough : Pos.t -> Pos.t -> unit
 
 val default_fallthrough : Pos.t -> unit
 
-val visibility_extends : string -> Pos.t -> Pos.t -> string -> unit
+val visibility_extends :
+  string -> Pos.t -> Pos.t -> string -> typing_error_callback -> unit
 
 val member_not_implemented : string -> Pos.t -> Pos.t -> Pos.t -> unit
 
-val bad_decl_override : Pos.t -> string -> Pos.t -> string -> error -> unit
+val bad_decl_override :
+  Pos.t -> string -> Pos.t -> string -> (Pos.t * string) list -> unit
 
-val bad_method_override : Pos.t -> string -> error -> unit
+val bad_method_override :
+  Pos.t -> string -> (Pos.t * string) list -> typing_error_callback -> unit
 
-val bad_enum_decl : Pos.t -> error -> unit
+val bad_enum_decl : Pos.t -> (Pos.t * string) list -> unit
 
-val missing_constructor : Pos.t -> unit
+val missing_constructor : Pos.t -> typing_error_callback -> unit
 
 val enum_constant_type_bad : Pos.t -> Pos.t -> string -> Pos.t list -> unit
 
@@ -760,7 +764,8 @@ val deprecated_use : Pos.t -> Pos.t -> string -> unit
 val cannot_declare_constant :
   [< `enum | `trait | `record ] -> Pos.t -> Pos.t * string -> unit
 
-val ambiguous_inheritance : Pos.t -> string -> string -> error -> unit
+val ambiguous_inheritance :
+  Pos.t -> string -> string -> error -> typing_error_callback -> unit
 
 val cyclic_typeconst : Pos.t -> string list -> unit
 
@@ -838,9 +843,6 @@ val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 val try_with_result : (unit -> 'a) -> ('a -> error -> 'a) -> 'a
 
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
-
-val try_unless_error_in_different_file :
-  Relative_path.t -> (unit -> 'a) -> (error -> unit) -> 'a
 
 (* The type of collections of errors *)
 type t [@@deriving eq]
@@ -1084,7 +1086,7 @@ val wrong_expression_kind_builtin_attribute : string -> Pos.t -> string -> unit
 
 val cannot_return_borrowed_value_as_immutable : Pos.t -> Pos.t -> unit
 
-val decl_override_missing_hint : Pos.t -> unit
+val decl_override_missing_hint : Pos.t -> typing_error_callback -> unit
 
 val atmost_rx_as_rxfunc_invalid_location : Pos.t -> unit
 
@@ -1208,7 +1210,8 @@ val lateinit_with_default : Pos.t -> unit
 
 val bad_lateinit_override : bool -> Pos.t -> Pos.t -> unit
 
-val bad_xhp_attr_required_override : string -> string -> Pos.t -> Pos.t -> unit
+val bad_xhp_attr_required_override :
+  string -> string -> Pos.t -> Pos.t -> typing_error_callback -> unit
 
 val interface_use_trait : Pos.t -> unit
 
@@ -1217,7 +1220,14 @@ val nonstatic_method_in_abstract_final_class : Pos.t -> unit
 val escaping_mutable_object : Pos.t -> unit
 
 val multiple_concrete_defs :
-  Pos.t -> Pos.t -> string -> string -> string -> string -> unit
+  Pos.t ->
+  Pos.t ->
+  string ->
+  string ->
+  string ->
+  string ->
+  typing_error_callback ->
+  unit
 
 val move_in_nonreactive_context : Pos.t -> unit
 

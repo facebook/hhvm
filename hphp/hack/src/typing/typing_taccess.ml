@@ -383,10 +383,7 @@ and create_root_from_type_constant
   (match typeconst with
   | { ttc_type = None; ttc_name; _ } ->
     if (not env.ety_env.quiet) && not allow_abstract_tconst then
-      Errors.try_unless_error_in_different_file
-        (Env.get_file env.tenv)
-        (fun () -> Errors.abstract_tconst_not_allowed tconst_pos ttc_name)
-        (fun _ -> ())
+      Errors.abstract_tconst_not_allowed tconst_pos ttc_name
   | _ -> ());
   match typeconst with
   (* Concrete type constants *)

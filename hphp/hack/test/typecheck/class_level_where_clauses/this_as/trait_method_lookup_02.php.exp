@@ -1,5 +1,17 @@
+File "trait_method_lookup_02.php", line 29, characters 16-16:
+Class D does not correctly implement all required members  (Typing[4340])
+File "trait_method_lookup_02.php", line 29, characters 26-26:
+Some members are incompatible with those declared in type C
+Read the following to see why:
 File "trait_method_lookup_02.php", line 18, characters 26-28:
-Member foo has the wrong type (Typing[4341])
+Member foo has the wrong type
+File "trait_method_lookup_02.php", line 29, characters 16-16:
+Class D does not correctly implement all required members 
+File "trait_method_lookup_02.php", line 29, characters 26-26:
+Some members are incompatible with those declared in type C
+Read the following to see why:
+File "trait_method_lookup_02.php", line 18, characters 26-28:
+Member foo has the wrong type
 File "trait_method_lookup_02.php", line 14, characters 42-44:
 Expected num
 File "trait_method_lookup_02.php", line 18, characters 33-37:

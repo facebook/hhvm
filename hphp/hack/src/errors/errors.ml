@@ -2112,10 +2112,11 @@ let default_fallthrough pos =
 (* Typing errors *)
 (*****************************************************************************)
 
-let visibility_extends vis pos parent_pos parent_vis =
+let visibility_extends
+    vis pos parent_pos parent_vis (on_error : typing_error_callback) =
   let msg1 = (pos, "This member visibility is: " ^ vis) in
   let msg2 = (parent_pos, parent_vis ^ " was expected") in
-  add_list (Typing.err_code Typing.VisibilityExtends) [msg1; msg2]
+  on_error ~code:(Typing.err_code Typing.VisibilityExtends) [msg1; msg2]
 
 let member_not_implemented member_name parent_pos pos defn_pos =
   let msg1 = (pos, "This type doesn't implement the method " ^ member_name) in
@@ -2123,7 +2124,7 @@ let member_not_implemented member_name parent_pos pos defn_pos =
   let msg3 = (defn_pos, "As defined here") in
   add_list (Typing.err_code Typing.MemberNotImplemented) [msg1; msg2; msg3]
 
-let bad_decl_override parent_pos parent_name pos name (error : error) =
+let bad_decl_override parent_pos parent_name pos name msgl =
   let msg1 =
     ( pos,
       "Class "
@@ -2137,28 +2138,25 @@ let bad_decl_override parent_pos parent_name pos name (error : error) =
       ^ "\nRead the following to see why:" )
   in
   (* This is a cascading error message *)
-  let msgl = to_list error in
   add_list (Typing.err_code Typing.BadDeclOverride) (msg1 :: msg2 :: msgl)
 
-let bad_method_override pos member_name (error : error) =
+let bad_method_override pos member_name msgl (on_error : typing_error_callback)
+    =
   let msg = (pos, "Member " ^ strip_ns member_name ^ " has the wrong type") in
   (* This is a cascading error message *)
-  let msgl = to_list error in
-  add_list (Typing.err_code Typing.BadMethodOverride) (msg :: msgl)
+  on_error ~code:(Typing.err_code Typing.BadMethodOverride) (msg :: msgl)
 
-let bad_enum_decl pos (error : error) =
+let bad_enum_decl pos msgl =
   let msg =
     (pos, "This enum declaration is invalid.\nRead the following to see why:")
   in
   (* This is a cascading error message *)
-  let msgl = to_list error in
   add_list (Typing.err_code Typing.BadEnumExtends) (msg :: msgl)
 
-let missing_constructor pos =
-  add
-    (Typing.err_code Typing.MissingConstructor)
-    pos
-    "The constructor is not implemented"
+let missing_constructor pos (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.MissingConstructor)
+    [(pos, "The constructor is not implemented")]
 
 let typedef_trail_entry pos = (pos, "Typedef definition comes from here")
 
@@ -3549,8 +3547,13 @@ let type_constant_mismatch (on_error : typing_error_callback) ?code errl =
   in
   on_error ~code errl
 
-let class_constant_type_mismatch =
-  maybe_unify_error Typing.ClassConstantTypeMismatch
+let class_constant_type_mismatch (on_error : typing_error_callback) ?code errl =
+  let code =
+    Option.value
+      code
+      ~default:(Typing.err_code Typing.ClassConstantTypeMismatch)
+  in
+  on_error ~code errl
 
 let constant_does_not_match_enum_type =
   maybe_unify_error Typing.ConstantDoesNotMatchEnumType
@@ -4349,7 +4352,8 @@ let cannot_declare_constant kind pos (class_pos, class_name) =
       (class_pos, strip_ns class_name ^ " was defined as " ^ kind_str ^ " here");
     ]
 
-let ambiguous_inheritance pos class_ origin (error : error) =
+let ambiguous_inheritance
+    pos class_ origin (error : error) (on_error : typing_error_callback) =
   let origin = strip_ns origin in
   let class_ = strip_ns class_ in
   let message =
@@ -4360,15 +4364,21 @@ let ambiguous_inheritance pos class_ origin (error : error) =
     ^ " with a compatible signature."
   in
   let (code, msgl) = (get_code error, to_list error) in
-  add_list code (msgl @ [(pos, message)])
+  on_error ~code (msgl @ [(pos, message)])
 
 let multiple_concrete_defs
-    child_pos parent_pos child_origin parent_origin name class_ =
+    child_pos
+    parent_pos
+    child_origin
+    parent_origin
+    name
+    class_
+    (on_error : typing_error_callback) =
   let child_origin = strip_ns child_origin in
   let parent_origin = strip_ns parent_origin in
   let class_ = strip_ns class_ in
-  add_list
-    (Typing.err_code Typing.MultipleConcreteDefs)
+  on_error
+    ~code:(Typing.err_code Typing.MultipleConcreteDefs)
     [
       ( child_pos,
         child_origin
@@ -4633,11 +4643,14 @@ let cannot_return_borrowed_value_as_immutable fun_pos value_pos =
         "This value is mutably borrowed and cannot be returned as immutable" );
     ]
 
-let decl_override_missing_hint pos =
-  add
-    (Typing.err_code Typing.DeclOverrideMissingHint)
-    pos
-    "When redeclaring class members, both declarations must have a typehint"
+let decl_override_missing_hint pos (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.DeclOverrideMissingHint)
+    [
+      ( pos,
+        "When redeclaring class members, both declarations must have a typehint"
+      );
+    ]
 
 let invalid_type_for_atmost_rx_as_rxfunc_parameter pos type_str =
   add
@@ -4774,9 +4787,11 @@ let bad_lateinit_override parent_is_lateinit parent_pos child_pos =
       (parent_pos, "The property " ^ verb ^ " declared __LateInit here");
     ]
 
-let bad_xhp_attr_required_override parent_tag child_tag parent_pos child_pos =
-  add_list
-    (Typing.err_code Typing.BadXhpAttrRequiredOverride)
+let bad_xhp_attr_required_override
+    parent_tag child_tag parent_pos child_pos (on_error : typing_error_callback)
+    =
+  on_error
+    ~code:(Typing.err_code Typing.BadXhpAttrRequiredOverride)
     [
       (child_pos, "Redeclared attribute must not be less strict");
       ( parent_pos,
@@ -4904,20 +4919,6 @@ let has_no_errors f =
       let _ = f () in
       true)
     (fun _ -> false)
-
-let try_unless_error_in_different_file file f error_file_mismatch_handler =
-  try_with_result f (fun r err ->
-      (match err with
-      | (_, first :: _) ->
-        let (err_pos, _) = first in
-        if Pos.filename err_pos <> file then
-          error_file_mismatch_handler err
-        else
-          add_error err
-      | _ ->
-        (* No errors? This fun shouldn't even get called... *)
-        ());
-      r)
 
 (*****************************************************************************)
 (* Do. *)

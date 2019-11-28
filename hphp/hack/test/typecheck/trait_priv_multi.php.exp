@@ -1,0 +1,9 @@
+File "trait_priv_multi.php--file3.php", line 2, characters 7-7:
+Class C does not correctly implement all required members  (Typing[4340])
+File "trait_priv_multi.php--file3.php", line 2, characters 17-17:
+Some members are incompatible with those declared in type B
+Read the following to see why:
+File "trait_priv_multi.php--file1.php", line 5, characters 20-20:
+This member visibility is: private
+File "trait_priv_multi.php--file2.php", line 3, characters 19-19:
+public was expected

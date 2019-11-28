@@ -8468,41 +8468,33 @@ and supertype_redeclared_method tc env m =
         match (trait_member.ce_type, class_member.ce_type) with
         | ((lazy (r_child, Tfun ft_child)), (lazy (r_parent, Tfun ft_parent)))
           ->
-          Errors.try_
-            (fun () ->
-              let ety_env = Phase.env_with_self env ~quiet:true in
-              let (env, ft_child) =
-                Phase.localize_ft
-                  ~ety_env
-                  ~def_pos:(Reason.to_pos r_child)
-                  env
-                  ft_child
-              in
-              let (env, ft_parent) =
-                Phase.localize_ft
-                  ~ety_env
-                  ~def_pos:(Reason.to_pos r_parent)
-                  env
-                  ft_parent
-              in
-              Typing_subtype.(
-                subtype_method
-                  ~check_return:true
-                  ~extra_info:
-                    {
-                      method_info = None;
-                      class_ty = None;
-                      parent_class_ty = None;
-                    }
-                  env
-                  r_child
-                  ft_child
-                  r_parent
-                  ft_parent
-                  Errors.unify_error))
-            (fun errorl ->
-              Errors.bad_method_override pos name errorl;
-              env)
+          let ety_env = Phase.env_with_self env ~quiet:true in
+          let (env, ft_child) =
+            Phase.localize_ft
+              ~ety_env
+              ~def_pos:(Reason.to_pos r_child)
+              env
+              ft_child
+          in
+          let (env, ft_parent) =
+            Phase.localize_ft
+              ~ety_env
+              ~def_pos:(Reason.to_pos r_parent)
+              env
+              ft_parent
+          in
+          Typing_subtype.(
+            subtype_method
+              ~check_return:true
+              ~extra_info:
+                { method_info = None; class_ty = None; parent_class_ty = None }
+              env
+              r_child
+              ft_child
+              r_parent
+              ft_parent)
+            (fun ?code:_ errorl ->
+              Errors.bad_method_override pos name errorl Errors.unify_error)
         | _ -> env)
     |> Option.value ~default:env)
 

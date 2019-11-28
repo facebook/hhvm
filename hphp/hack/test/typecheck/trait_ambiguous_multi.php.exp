@@ -1,0 +1,15 @@
+File "trait_ambiguous_multi.php--file3.php", line 2, characters 7-7:
+Class C does not correctly implement all required members  (Typing[4340])
+File "trait_ambiguous_multi.php--file3.php", line 3, characters 7-8:
+Some members are incompatible with those declared in type T1
+Read the following to see why:
+File "trait_ambiguous_multi.php--file2.php", line 3, characters 19-19:
+Member f has the wrong type
+File "trait_ambiguous_multi.php--file2.php", line 3, characters 19-19:
+T2 and T1 both declare ambiguous implementations of f.
+File "trait_ambiguous_multi.php--file2.php", line 3, characters 19-19:
+T2's definition is here.
+File "trait_ambiguous_multi.php--file1.php", line 5, characters 20-20:
+T1's definition is here.
+File "trait_ambiguous_multi.php--file2.php", line 3, characters 19-19:
+Redeclare f in C with a compatible signature.

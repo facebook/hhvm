@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<60f007ae57aa4be81c129cdb8f46fde8>>
+// @generated SignedSource<<4ea6cd9d6acbeb24d3a29a371db69541>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -313,7 +313,7 @@ pub struct TypeconstType {
 pub struct PuEnumType {
     pub name: nast::Sid,
     pub is_final: bool,
-    pub case_types: s_map::SMap<nast::Sid>,
+    pub case_types: s_map::SMap<(nast::Sid, aast::ReifyKind)>,
     pub case_values: s_map::SMap<(nast::Sid, DeclTy)>,
     pub members: s_map::SMap<PuMemberType>,
 }

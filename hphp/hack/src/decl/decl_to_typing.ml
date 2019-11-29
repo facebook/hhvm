@@ -325,8 +325,8 @@ let shallow_pu_enum_to_pu_enum_type spu =
         ~init:SMap.empty
         ~f:
           begin
-            fun acc k ->
-            SMap.add (snd k) k acc
+            fun acc (sid, k) ->
+            SMap.add (snd sid) (sid, k) acc
           end
         spu_case_types;
     tpu_case_values =

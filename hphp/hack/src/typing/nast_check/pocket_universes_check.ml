@@ -50,7 +50,7 @@ let check_parent
               | None -> (* does not exist locally, skip it *) ()
               | Some seen ->
                 SMap.iter
-                  (fun _ (_, ty) ->
+                  (fun _ ((_, ty), _) ->
                     match SMap.find_opt ty seen with
                     | Some p -> err_types p c_name enum_name ty
                     | None -> ())
@@ -108,7 +108,7 @@ let handler =
               Errors.pu_duplication p "enumeration" prefix c_name;
             let seen_types =
               let err p ty = dup_case_type p (build prefix ty) prefix in
-              let s = check_enum err pu_enum.pu_case_types in
+              let s = check_enum err (List.map ~f:fst pu_enum.pu_case_types) in
               SMap.add enum_name s seen_types
             in
             let seen_values =

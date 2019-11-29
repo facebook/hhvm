@@ -267,7 +267,8 @@ struct
     {
       tpu_name = string_id pu.tpu_name;
       tpu_is_final = pu.tpu_is_final;
-      tpu_case_types = SMap.map string_id pu.tpu_case_types;
+      tpu_case_types =
+        SMap.map (fun (sid, k) -> (string_id sid, k)) pu.tpu_case_types;
       tpu_case_values =
         SMap.map
           begin
@@ -407,7 +408,8 @@ struct
     {
       spu_name = string_id spu.spu_name;
       spu_is_final = spu.spu_is_final;
-      spu_case_types = List.map spu.spu_case_types string_id;
+      spu_case_types =
+        List.map ~f:(fun (sid, k) -> (string_id sid, k)) spu.spu_case_types;
       spu_case_values =
         List.map spu.spu_case_values (fun (s, t) -> (string_id s, ty t));
       spu_members = List.map spu.spu_members shallow_pu_member;

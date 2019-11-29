@@ -2703,7 +2703,7 @@ module Make (GetLocals : GetLocals) = struct
   and string2 env idl = List.map idl (expr env)
 
   and class_pu_enum env pu_enum =
-    let make_tparam sid def =
+    let make_tparam (sid, reified) def =
       Aast.
         {
           tp_variance = Ast_defs.Invariant;
@@ -2712,7 +2712,7 @@ module Make (GetLocals : GetLocals) = struct
             (match def with
             | None -> []
             | Some hint -> [(Ast_defs.Constraint_eq, hint)]);
-          tp_reified = Erased;
+          tp_reified = reified;
           tp_user_attributes = [];
         }
     in
@@ -2724,7 +2724,7 @@ module Make (GetLocals : GetLocals) = struct
     *)
     let env_with_case_types =
       let (genv, lenv) = env in
-      let make_tparam sid = make_tparam sid None in
+      let make_tparam tp = make_tparam tp None in
       (extend_params genv (List.map ~f:make_tparam pu_case_types), lenv)
     in
     let pu_case_values =
@@ -2794,7 +2794,7 @@ module Make (GetLocals : GetLocals) = struct
         *)
         let env_with_mapped_types =
           let (genv, lenv) = env in
-          let make_tparam (sid, h) = make_tparam sid (Some h) in
+          let make_tparam (tp, h) = make_tparam (tp, Aast.Erased) (Some h) in
           (extend_params genv (List.map ~f:make_tparam pum_types), lenv)
         in
         let pum_types =

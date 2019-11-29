@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<260ec1943facd577e2c1f6ba6334711c>>
+// @generated SignedSource<<c543374136752642ec1d093f91cd63f9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -50,7 +50,7 @@ pub struct ShallowPuMember {
 pub struct ShallowPuEnum {
     pub name: aast::Sid,
     pub is_final: bool,
-    pub case_types: Vec<aast::Sid>,
+    pub case_types: Vec<(aast::Sid, aast::ReifyKind)>,
     pub case_values: Vec<(aast::Sid, DeclTy)>,
     pub members: Vec<ShallowPuMember>,
 }

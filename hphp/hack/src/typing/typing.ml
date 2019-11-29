@@ -5550,7 +5550,9 @@ and dispatch_call
               Errors.pocket_universes_typing
           in
           let substs =
-            let f id = (reason, Tpu_type_access (ty1, enum', fresh_ty, id)) in
+            let f (id, _reified) =
+              (reason, Tpu_type_access (ty1, enum', fresh_ty, id))
+            in
             SMap.map f et.tpu_case_types
           in
           let ety_env =
@@ -8230,12 +8232,12 @@ and pu_enum_def
   let pu_enum =
     Option.bind cls ~f:(fun cls -> Cls.get_pu_enum cls (snd pu_name))
   in
-  let make_ty_tparam sid =
+  let make_ty_tparam (sid, reified) =
     {
       tp_variance = Ast_defs.Invariant;
       tp_name = sid;
       tp_constraints = [];
-      tp_reified = Aast.Erased;
+      tp_reified = reified;
       tp_user_attributes = [];
     }
   in

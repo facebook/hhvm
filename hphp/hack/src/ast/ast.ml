@@ -194,7 +194,7 @@ and class_elt =
 
 and pufield =
   | PUAtomDecl of id * pumapping list
-  | PUCaseType of id
+  | PUCaseType of (id * reified)
   | PUCaseTypeExpr of hint * id
 
 and pumapping =

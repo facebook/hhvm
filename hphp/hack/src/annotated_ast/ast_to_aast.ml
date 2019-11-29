@@ -716,7 +716,15 @@ let converter
     Aast.{ pum_atom; pum_types; pum_exprs }
   and on_pu pu_name pu_is_final fields =
     let rec aux case_types case_values members = function
-      | PUCaseType id :: tl -> aux (id :: case_types) case_values members tl
+      | PUCaseType (id, reified) :: tl ->
+        (* TODO(T36532263) see if we need to add/support soft ones *)
+        let reified =
+          if reified then
+            Aast.Reified
+          else
+            Aast.Erased
+        in
+        aux ((id, reified) :: case_types) case_values members tl
       | PUCaseTypeExpr (h, id) :: tl ->
         aux case_types ((id, on_hint h) :: case_values) members tl
       | PUAtomDecl (id, maps) :: tl ->

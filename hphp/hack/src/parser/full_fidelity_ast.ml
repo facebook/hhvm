@@ -3385,9 +3385,15 @@ if there already is one, since that one will likely be better than this one. *)
       let typ = pHint ty env in
       let id = pos_name name env in
       PUCaseTypeExpr (typ, id)
-    | PocketFieldTypeDeclaration { pocket_field_type_name = name; _ } ->
+    | PocketFieldTypeDeclaration
+        {
+          pocket_field_type_name = name;
+          pocket_field_type_reified = reified;
+          _;
+        } ->
       let id = pos_name name env in
-      PUCaseType id
+      let is_reified = not @@ is_missing reified in
+      PUCaseType (id, is_reified)
     | _ -> missing_syntax "pufield" node env
 
   (*****************************************************************************(

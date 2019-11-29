@@ -562,7 +562,7 @@ and ('ex, 'fb, 'en, 'hi) record_def = {
 and ('ex, 'fb, 'en, 'hi) pu_enum = {
   pu_name: sid;
   pu_is_final: bool;
-  pu_case_types: sid list;
+  pu_case_types: (sid * reify_kind) list;
   pu_case_values: (sid * hint) list;
   pu_members: ('ex, 'fb, 'en, 'hi) pu_member list;
 }

@@ -6,6 +6,7 @@
 # LICENSE file in the "hack" directory of this source tree.
 
 set -e
+set -x
 
 SCRIPT_DIR="$(dirname "$0")"
 FBCODE_ROOT="$(realpath "${SCRIPT_DIR}/../../../")"
@@ -21,7 +22,7 @@ ARGS=(${ARGS[@]:2})
 
 function dune_build() {
   # OCaml
-  if [ -e "${HACK_SUBDIR}/${TARGET}.ml" ]; then
+  if [ -e "${HACK_ROOT}/${HACK_SUBDIR}/${TARGET}.ml" ]; then
     (
       cd "${HACK_ROOT}"
       "${DUNE}" build "${HACK_SUBDIR}/${TARGET}.exe"
@@ -43,7 +44,7 @@ function dune_build() {
 cd "${FBCODE_ROOT}"
 if [ -e "${HACK_ROOT}/facebook/dune.sh" ] && [ -e "${FB_DUNE_BUILD_DIR}" ]; then
   # FB Dune
-  DUNE="${HACK_ROOT}facebook/dune.sh" \
+  DUNE="${HACK_ROOT}/facebook/dune.sh" \
   CARGO="${HACK_ROOT}/scripts/facebook/cargo.sh" \
   DUNE_BUILD_DIR="${FB_DUNE_BUILD_DIR}"
   dune_build

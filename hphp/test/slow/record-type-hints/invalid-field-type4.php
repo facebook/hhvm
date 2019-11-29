@@ -1,5 +1,5 @@
 <?hh
 record A {
-  x: noreturn,
+  noreturn x;
 }
 

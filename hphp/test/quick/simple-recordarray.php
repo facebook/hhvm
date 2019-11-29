@@ -1,7 +1,7 @@
 <?hh
 
 record Foo {
-  x: int,
+  int x;
 }
 
 class Bar {
@@ -9,7 +9,7 @@ class Bar {
 }
 
 record FooBar {
-  z: Bar,
+  Bar z;
 }
 
 function foo(array $a) : array {

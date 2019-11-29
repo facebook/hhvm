@@ -6,7 +6,7 @@ class A {
 }
 
 record B {
-  x: int,
+  int x;
 }
 
 function foo() {}

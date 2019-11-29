@@ -5,7 +5,7 @@ class Bar {
 }
 
 record FooBar {
-  z : Bar,
+  Bar z;
 }
 
 <<__EntryPoint>>

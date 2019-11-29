@@ -5,8 +5,8 @@ class Bar {
 }
 
 record Foo {
-  x: int,
-  z: Bar,
+  int x;
+  Bar z;
 }
 
 <<__EntryPoint>>

@@ -1,7 +1,7 @@
 <?hh
 
 record Foo {
-  x: vec,
+  vec x;
 }
 
 class A {
@@ -9,11 +9,11 @@ class A {
 }
 
 record Bar {
-  y: A,
+  A y;
 }
 
 record Baz {
-  z: int,
+  int z;
 }
 <<__EntryPoint>> function main(): void {
 $a = vec[Foo['x' => vec[10]], Foo['x' => vec[42]]];

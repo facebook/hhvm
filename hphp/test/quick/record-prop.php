@@ -5,11 +5,11 @@ class Foo {
 }
 
 record A {
-  x: int,
+  int x;
 }
 
 record B {
-  x: int,
+  int x;
 }
 <<__EntryPoint>> function main(): void {
 $a = A['x' => 1];

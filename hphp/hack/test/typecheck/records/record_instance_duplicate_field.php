@@ -1,8 +1,8 @@
 <?hh
 
 record A {
-  x: int,
-  y: string,
+  int x;
+  string y;
 }
 
 function new_a(): A {

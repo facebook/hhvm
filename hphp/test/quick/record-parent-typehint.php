@@ -1,11 +1,11 @@
 <?hh
 
 abstract record A {
-  x: int,
+  int x;
 }
 
 record B extends A {
-  y: int,
+  int y;
 }
 
 class Foo {

@@ -1,10 +1,10 @@
 <?hh
 record Foo {
-  y: int,
+  int y;
 }
 
 record Bar {
-  x:Foo,
+  Foo x;
 }
 <<__EntryPoint>> function main(): void {
 $z = Foo['y'=>42];

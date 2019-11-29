@@ -145,13 +145,12 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_record_field(_: &C, record_field_name: Self, record_field_colon: Self, record_field_type: Self, record_field_init: Self, record_field_comma: Self) -> Self {
+    fn make_record_field(_: &C, record_field_type: Self, record_field_name: Self, record_field_init: Self, record_field_semi: Self) -> Self {
         let syntax = SyntaxVariant::RecordField(Box::new(RecordFieldChildren {
-            record_field_name,
-            record_field_colon,
             record_field_type,
+            record_field_name,
             record_field_init,
-            record_field_comma,
+            record_field_semi,
         }));
         let value = V::from_syntax(&syntax);
         Self::make(syntax, value)
@@ -2023,12 +2022,11 @@ where
                 acc
             },
             SyntaxVariant::RecordField(x) => {
-                let RecordFieldChildren { record_field_name, record_field_colon, record_field_type, record_field_init, record_field_comma } = *x;
-                let acc = f(record_field_name, acc);
-                let acc = f(record_field_colon, acc);
+                let RecordFieldChildren { record_field_type, record_field_name, record_field_init, record_field_semi } = *x;
                 let acc = f(record_field_type, acc);
+                let acc = f(record_field_name, acc);
                 let acc = f(record_field_init, acc);
-                let acc = f(record_field_comma, acc);
+                let acc = f(record_field_semi, acc);
                 acc
             },
             SyntaxVariant::AliasDeclaration(x) => {
@@ -3568,12 +3566,11 @@ where
                  record_attribute_spec: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::RecordField, 5) => SyntaxVariant::RecordField(Box::new(RecordFieldChildren {
-                 record_field_comma: ts.pop().unwrap(),
+             (SyntaxKind::RecordField, 4) => SyntaxVariant::RecordField(Box::new(RecordFieldChildren {
+                 record_field_semi: ts.pop().unwrap(),
                  record_field_init: ts.pop().unwrap(),
-                 record_field_type: ts.pop().unwrap(),
-                 record_field_colon: ts.pop().unwrap(),
                  record_field_name: ts.pop().unwrap(),
+                 record_field_type: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::AliasDeclaration, 8) => SyntaxVariant::AliasDeclaration(Box::new(AliasDeclarationChildren {
@@ -4779,11 +4776,10 @@ pub struct RecordDeclarationChildren<T, V> {
 
 #[derive(Debug, Clone)]
 pub struct RecordFieldChildren<T, V> {
-    pub record_field_name: Syntax<T, V>,
-    pub record_field_colon: Syntax<T, V>,
     pub record_field_type: Syntax<T, V>,
+    pub record_field_name: Syntax<T, V>,
     pub record_field_init: Syntax<T, V>,
-    pub record_field_comma: Syntax<T, V>,
+    pub record_field_semi: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -6372,12 +6368,11 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             RecordField(x) => {
-                get_index(5).and_then(|index| { match index {
-                        0 => Some(&x.record_field_name),
-                    1 => Some(&x.record_field_colon),
-                    2 => Some(&x.record_field_type),
-                    3 => Some(&x.record_field_init),
-                    4 => Some(&x.record_field_comma),
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.record_field_type),
+                    1 => Some(&x.record_field_name),
+                    2 => Some(&x.record_field_init),
+                    3 => Some(&x.record_field_semi),
                         _ => None,
                     }
                 })

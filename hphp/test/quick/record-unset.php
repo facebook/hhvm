@@ -1,7 +1,7 @@
 <?hh
 
 record Foo {
-  x: int,
+  int x;
 }
 <<__EntryPoint>> function main(): void {
 $foo = Foo['x' => 42];

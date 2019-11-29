@@ -1,5 +1,5 @@
 <?hh
 
 record A {
-  x: int = null,
+  int x = null;
 }

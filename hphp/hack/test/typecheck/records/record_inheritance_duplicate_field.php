@@ -1,18 +1,18 @@
 <?hh
 
 abstract record A {
-  x: int,
+  int x;
 }
 
 // Direct inheritance should give an error on duplicate fields
 record B extends A {
-  y: string,
-  x: int,
+  string y;
+  int x;
 }
 
 // Duplicate fields may occur higher in the inheritance chain.
 abstract record BB extends A {}
 
 record CC extends BB {
-  x: int,
+  int x;
 }

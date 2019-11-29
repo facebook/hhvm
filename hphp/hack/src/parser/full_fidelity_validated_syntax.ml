@@ -903,21 +903,19 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and validate_record_field : record_field validator = function
   | { Syntax.syntax = Syntax.RecordField x; value = v } -> v,
-    { record_field_comma = validate_token x.record_field_comma
+    { record_field_semi = validate_token x.record_field_semi
     ; record_field_init = validate_option_with (validate_simple_initializer) x.record_field_init
-    ; record_field_type = validate_type_constraint x.record_field_type
-    ; record_field_colon = validate_token x.record_field_colon
     ; record_field_name = validate_token x.record_field_name
+    ; record_field_type = validate_type_constraint x.record_field_type
     }
   | s -> validation_fail (Some SyntaxKind.RecordField) s
   and invalidate_record_field : record_field invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.RecordField
-      { record_field_name = invalidate_token x.record_field_name
-      ; record_field_colon = invalidate_token x.record_field_colon
-      ; record_field_type = invalidate_type_constraint x.record_field_type
+      { record_field_type = invalidate_type_constraint x.record_field_type
+      ; record_field_name = invalidate_token x.record_field_name
       ; record_field_init = invalidate_option_with (invalidate_simple_initializer) x.record_field_init
-      ; record_field_comma = invalidate_token x.record_field_comma
+      ; record_field_semi = invalidate_token x.record_field_semi
       }
     ; Syntax.value = v
     }

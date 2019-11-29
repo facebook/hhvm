@@ -1,5 +1,5 @@
 <?hh
 record Foo {
-  x:int,
+  int x;
 }
 

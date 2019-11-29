@@ -32,7 +32,7 @@ pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
     fn make_enum_declaration(ctx: &C, enum_attribute_spec: Self, enum_keyword: Self, enum_name: Self, enum_colon: Self, enum_base: Self, enum_type: Self, enum_left_brace: Self, enum_enumerators: Self, enum_right_brace: Self) -> Self;
     fn make_enumerator(ctx: &C, enumerator_name: Self, enumerator_equal: Self, enumerator_value: Self, enumerator_semicolon: Self) -> Self;
     fn make_record_declaration(ctx: &C, record_attribute_spec: Self, record_modifier: Self, record_keyword: Self, record_name: Self, record_extends_keyword: Self, record_extends_opt: Self, record_left_brace: Self, record_fields: Self, record_right_brace: Self) -> Self;
-    fn make_record_field(ctx: &C, record_field_name: Self, record_field_colon: Self, record_field_type: Self, record_field_init: Self, record_field_comma: Self) -> Self;
+    fn make_record_field(ctx: &C, record_field_type: Self, record_field_name: Self, record_field_init: Self, record_field_semi: Self) -> Self;
     fn make_alias_declaration(ctx: &C, alias_attribute_spec: Self, alias_keyword: Self, alias_name: Self, alias_generic_parameter: Self, alias_constraint: Self, alias_equal: Self, alias_type: Self, alias_semicolon: Self) -> Self;
     fn make_property_declaration(ctx: &C, property_attribute_spec: Self, property_modifiers: Self, property_type: Self, property_declarators: Self, property_semicolon: Self) -> Self;
     fn make_property_declarator(ctx: &C, property_name: Self, property_initializer: Self) -> Self;

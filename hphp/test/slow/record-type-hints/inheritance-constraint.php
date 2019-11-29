@@ -13,7 +13,7 @@ class C {
 }
 
 record A {
-  f: Base,
+  Base f;
 }
 <<__EntryPoint>> function main(): void {
 $a = A['f'=>new Derived()];

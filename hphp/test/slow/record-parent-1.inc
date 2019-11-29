@@ -1,5 +1,5 @@
 <?hh
 
 abstract record I {
-  x: int = 10,
+  int x = 10;
 }

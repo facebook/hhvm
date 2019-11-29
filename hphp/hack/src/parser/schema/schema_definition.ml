@@ -198,11 +198,10 @@ let schema : schema_node list =
       aggregates = [];
       fields =
         [
-          ("name", Token);
-          ("colon", Token);
           ("type", Just "TypeConstraint");
+          ("name", Token);
           ("init", ZeroOrOne (Just "SimpleInitializer"));
-          ("comma", Token);
+          ("semi", Token);
         ];
     };
     {

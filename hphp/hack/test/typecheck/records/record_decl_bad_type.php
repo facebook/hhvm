@@ -1,9 +1,9 @@
 <?hh
 
 record A {
-  x: self,
+  self x;
 }
 
 record B {
-  x: this,
+  this x;
 }

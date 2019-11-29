@@ -1,7 +1,7 @@
 <?hh
 
 abstract record Foo {
-  x: int,
+  int x;
 }
 
 type Bar = Foo;

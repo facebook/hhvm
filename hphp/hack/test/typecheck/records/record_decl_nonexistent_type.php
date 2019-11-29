@@ -1,5 +1,5 @@
 <?hh
 
 record A {
-  x: NoSuchClass,
+  NoSuchClass x;
 }

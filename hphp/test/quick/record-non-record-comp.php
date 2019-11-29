@@ -1,7 +1,7 @@
 <?hh
 
 record A {
-  x: int,
+  int x;
 }
 <<__EntryPoint>> function main(): void {
 $a = A['x' => 10];

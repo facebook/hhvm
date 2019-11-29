@@ -1,5 +1,5 @@
 <?hh
 
 abstract record I {
-  x: string = 'abc',
+  string x = 'abc';
 }

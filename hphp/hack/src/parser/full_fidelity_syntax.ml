@@ -611,17 +611,15 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc record_right_brace in
          acc
       | RecordField {
-        record_field_name;
-        record_field_colon;
         record_field_type;
+        record_field_name;
         record_field_init;
-        record_field_comma;
+        record_field_semi;
       } ->
-         let acc = f acc record_field_name in
-         let acc = f acc record_field_colon in
          let acc = f acc record_field_type in
+         let acc = f acc record_field_name in
          let acc = f acc record_field_init in
-         let acc = f acc record_field_comma in
+         let acc = f acc record_field_semi in
          acc
       | AliasDeclaration {
         alias_attribute_spec;
@@ -2479,17 +2477,15 @@ module WithToken(Token: TokenType) = struct
         record_right_brace;
       ]
       | RecordField {
-        record_field_name;
-        record_field_colon;
         record_field_type;
+        record_field_name;
         record_field_init;
-        record_field_comma;
+        record_field_semi;
       } -> [
-        record_field_name;
-        record_field_colon;
         record_field_type;
+        record_field_name;
         record_field_init;
-        record_field_comma;
+        record_field_semi;
       ]
       | AliasDeclaration {
         alias_attribute_spec;
@@ -4348,17 +4344,15 @@ module WithToken(Token: TokenType) = struct
         "record_right_brace";
       ]
       | RecordField {
-        record_field_name;
-        record_field_colon;
         record_field_type;
+        record_field_name;
         record_field_init;
-        record_field_comma;
+        record_field_semi;
       } -> [
-        "record_field_name";
-        "record_field_colon";
         "record_field_type";
+        "record_field_name";
         "record_field_init";
-        "record_field_comma";
+        "record_field_semi";
       ]
       | AliasDeclaration {
         alias_attribute_spec;
@@ -6284,18 +6278,16 @@ module WithToken(Token: TokenType) = struct
           record_right_brace;
         }
       | (SyntaxKind.RecordField, [
-          record_field_name;
-          record_field_colon;
           record_field_type;
+          record_field_name;
           record_field_init;
-          record_field_comma;
+          record_field_semi;
         ]) ->
         RecordField {
-          record_field_name;
-          record_field_colon;
           record_field_type;
+          record_field_name;
           record_field_init;
-          record_field_comma;
+          record_field_semi;
         }
       | (SyntaxKind.AliasDeclaration, [
           alias_attribute_spec;
@@ -8403,18 +8395,16 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_record_field
-        record_field_name
-        record_field_colon
         record_field_type
+        record_field_name
         record_field_init
-        record_field_comma
+        record_field_semi
       =
         let syntax = RecordField {
-          record_field_name;
-          record_field_colon;
           record_field_type;
+          record_field_name;
           record_field_init;
-          record_field_comma;
+          record_field_semi;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

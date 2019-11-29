@@ -8,7 +8,7 @@ HH\autoload_set_paths(
 );
 
 record Foo {
-  x: int,
+  int x;
 }
 
 function foo(Bar $r): Bar {

@@ -253,25 +253,12 @@ where
     fn parse_record_field(&mut self) -> S::R {
         // SPEC
         //  record_field:
-        //    record-constant : type field-initializer-opt,
-        //  record-constant:
-        //    name
-        //  field-initializer:
-        //    = expression
-        let name = self.require_name_allow_non_reserved();
-        let colon = self.require_colon();
+        //    type-specifier name (= expression)? ;
         let field_type = self.parse_type_specifier(false, true);
+        let name = self.require_name_allow_non_reserved();
         let init = self.parse_simple_initializer_opt();
-        let comma = self.require_comma();
-        S!(
-            make_record_field,
-            self,
-            name,
-            colon,
-            field_type,
-            init,
-            comma
-        )
+        let semi = self.require_semicolon();
+        S!(make_record_field, self, field_type, name, init, semi)
     }
 
     fn parse_record_fields(&mut self) -> S::R {

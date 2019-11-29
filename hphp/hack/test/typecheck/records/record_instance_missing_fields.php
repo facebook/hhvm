@@ -1,12 +1,12 @@
 <?hh
 
 abstract record A {
-  x: int,
+  int x;
 }
 
 record B extends A {
-  y: int,
-  z: int = 1,
+  int y;
+  int z = 1;
 }
 
 function foo(): void {

@@ -1,7 +1,7 @@
 <?hh
 record Foo {
-  x: int,
-  y: mixed,
+  int x;
+  mixed y;
 }
 <<__EntryPoint>> function main(): void {
 $r1 = Foo['x' => 1, 'y' => true];

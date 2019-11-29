@@ -1,7 +1,7 @@
 <?hh
 
 record A {
-  x: int,
-  y: string,
-  x: int,
+  int x;
+  string y;
+  int x;
 }

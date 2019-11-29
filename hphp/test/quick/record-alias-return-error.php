@@ -1,11 +1,11 @@
 <?hh
 
 record Foo {
-  x: int,
+  int x;
 }
 
 record Bar {
-  x: int,
+  int x;
 }
 
 type Baz = Bar;

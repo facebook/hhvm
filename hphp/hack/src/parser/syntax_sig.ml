@@ -92,11 +92,10 @@ module type Syntax_S = sig
     ; record_right_brace                                 : t
     }
   | RecordField                       of
-    { record_field_name                                  : t
-    ; record_field_colon                                 : t
-    ; record_field_type                                  : t
+    { record_field_type                                  : t
+    ; record_field_name                                  : t
     ; record_field_init                                  : t
-    ; record_field_comma                                 : t
+    ; record_field_semi                                  : t
     }
   | AliasDeclaration                  of
     { alias_attribute_spec                               : t
@@ -1104,7 +1103,7 @@ module type Syntax_S = sig
   val make_enum_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_enumerator : t -> t -> t -> t -> t
   val make_record_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
-  val make_record_field : t -> t -> t -> t -> t -> t
+  val make_record_field : t -> t -> t -> t -> t
   val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_property_declaration : t -> t -> t -> t -> t -> t
   val make_property_declarator : t -> t -> t

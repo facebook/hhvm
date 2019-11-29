@@ -4,7 +4,7 @@ record A {
 }
 
 record B extends A {
-  x: int,
+  int x;
 }
 <<__EntryPoint>> function main(): void {
 $b = B['x' => 10];

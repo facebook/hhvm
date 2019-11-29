@@ -9,7 +9,7 @@ enum Enum : string {
 type Alias = Enum;
 
 record A {
-  x: Alias,
+  Alias x;
 }
 <<__EntryPoint>> function main(): void {
 $a = A['x' => Enum::V2];

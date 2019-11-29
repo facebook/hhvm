@@ -1,7 +1,7 @@
 <?hh
 
 abstract record A {
-  x: int,
+  int x;
 }
 
 function new_a(): A {

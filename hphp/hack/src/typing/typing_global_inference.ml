@@ -107,11 +107,11 @@ module StateSubConstraintGraphs = struct
     type t = global_tvenv_with_pos list
   end)
 
-  let save subcontraints =
-    let subcontraints =
-      List.filter ~f:(fun (_, e) -> not @@ IMap.is_empty e) subcontraints
+  let save subconstraints =
+    let subconstraints =
+      List.filter ~f:(fun (_, e) -> not @@ IMap.is_empty e) subconstraints
     in
-    if List.is_empty subcontraints then
+    if List.is_empty subconstraints then
       ()
     else
       let path =
@@ -119,7 +119,7 @@ module StateSubConstraintGraphs = struct
           !artifacts_path
           ("subgraph_" ^ string_of_int (Ident.tmp ()))
       in
-      save path subcontraints
+      save path subconstraints
 end
 
 module StateSolvedGraph = struct

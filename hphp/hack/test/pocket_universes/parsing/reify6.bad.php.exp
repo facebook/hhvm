@@ -1,0 +1,14 @@
+(6,10)-(6,10) Invalid pocket universe field syntax.
+(6,10)-(6,10) A right parenthesis (')') is expected here.
+(6,10)-(6,10) A semicolon (';') is expected here.
+(6,10)-(6,10) Invalid pocket universe field syntax.
+(6,10)-(6,10) A right brace ('}') is expected here.
+(6,16)-(6,16) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(6,21)-(6,21) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(6,23)-(6,23) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(6,25)-(6,25) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(6,28)-(6,28) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(6,29)-(6,29) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(6,30)-(7,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(8,2)-(9,1) An expression is expected here.
+(8,2)-(9,1) A semicolon (';') is expected here.

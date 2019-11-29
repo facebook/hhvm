@@ -2333,11 +2333,13 @@ module WithToken(Token: TokenType) = struct
       | PocketFieldTypeDeclaration {
         pocket_field_type_case;
         pocket_field_type_type;
+        pocket_field_type_reified;
         pocket_field_type_name;
         pocket_field_type_semicolon;
       } ->
          let acc = f acc pocket_field_type_case in
          let acc = f acc pocket_field_type_type in
+         let acc = f acc pocket_field_type_reified in
          let acc = f acc pocket_field_type_name in
          let acc = f acc pocket_field_type_semicolon in
          acc
@@ -4199,11 +4201,13 @@ module WithToken(Token: TokenType) = struct
       | PocketFieldTypeDeclaration {
         pocket_field_type_case;
         pocket_field_type_type;
+        pocket_field_type_reified;
         pocket_field_type_name;
         pocket_field_type_semicolon;
       } -> [
         pocket_field_type_case;
         pocket_field_type_type;
+        pocket_field_type_reified;
         pocket_field_type_name;
         pocket_field_type_semicolon;
       ]
@@ -6066,11 +6070,13 @@ module WithToken(Token: TokenType) = struct
       | PocketFieldTypeDeclaration {
         pocket_field_type_case;
         pocket_field_type_type;
+        pocket_field_type_reified;
         pocket_field_type_name;
         pocket_field_type_semicolon;
       } -> [
         "pocket_field_type_case";
         "pocket_field_type_type";
+        "pocket_field_type_reified";
         "pocket_field_type_name";
         "pocket_field_type_semicolon";
       ]
@@ -8160,12 +8166,14 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.PocketFieldTypeDeclaration, [
           pocket_field_type_case;
           pocket_field_type_type;
+          pocket_field_type_reified;
           pocket_field_type_name;
           pocket_field_type_semicolon;
         ]) ->
         PocketFieldTypeDeclaration {
           pocket_field_type_case;
           pocket_field_type_type;
+          pocket_field_type_reified;
           pocket_field_type_name;
           pocket_field_type_semicolon;
         }
@@ -10757,12 +10765,14 @@ module WithToken(Token: TokenType) = struct
       let make_pocket_field_type_declaration
         pocket_field_type_case
         pocket_field_type_type
+        pocket_field_type_reified
         pocket_field_type_name
         pocket_field_type_semicolon
       =
         let syntax = PocketFieldTypeDeclaration {
           pocket_field_type_case;
           pocket_field_type_type;
+          pocket_field_type_reified;
           pocket_field_type_name;
           pocket_field_type_semicolon;
         } in

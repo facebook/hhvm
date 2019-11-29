@@ -2424,51 +2424,44 @@ where
         //   | enum-member '(' (pocket-mapping ',')')' ;
         //   | 'case' type-expression identifier ;
         //   | 'case' 'type' identifier ;
+        //   | 'case' 'type' 'reify' identifier ;
         //
         // enum-member ::= ':@' name
         match self.peek_token_kind() {
             TokenKind::ColonAt => {
                 let glyph = self.assert_token(TokenKind::ColonAt);
                 let enum_name = self.require_name();
-                match self.peek_token_kind() {
+                let (left_paren, mappings, right_paren) = match self.peek_token_kind() {
                     TokenKind::LeftParen => {
-                        let (left_paren, mappings, right_paren) =
-                            self.parse_parenthesized_comma_list(|x| x.parse_pocket_mapping());
-                        let semi = self.require_semicolon();
-                        S!(
-                            make_pocket_atom_mapping_declaration,
-                            self,
-                            glyph,
-                            enum_name,
-                            left_paren,
-                            mappings,
-                            right_paren,
-                            semi,
-                        )
+                        self.parse_parenthesized_comma_list(|x| x.parse_pocket_mapping())
                     }
-                    _ => {
-                        let missing_left = S!(make_missing, self, self.pos());
-                        let missing_mappings = S!(make_missing, self, self.pos());
-                        let missing_right = S!(make_missing, self, self.pos());
-                        let semi = self.require_semicolon();
-                        S!(
-                            make_pocket_atom_mapping_declaration,
-                            self,
-                            glyph,
-                            enum_name,
-                            missing_left,
-                            missing_mappings,
-                            missing_right,
-                            semi,
-                        )
-                    }
-                }
+                    _ => (
+                        S!(make_missing, self, self.pos()),
+                        S!(make_missing, self, self.pos()),
+                        S!(make_missing, self, self.pos()),
+                    ),
+                };
+                let semi = self.require_semicolon();
+                S!(
+                    make_pocket_atom_mapping_declaration,
+                    self,
+                    glyph,
+                    enum_name,
+                    left_paren,
+                    mappings,
+                    right_paren,
+                    semi,
+                )
             }
             TokenKind::Case => {
                 let case_tok = self.assert_token(TokenKind::Case);
                 match self.peek_token_kind() {
                     TokenKind::Type => {
                         let type_tok = self.assert_token(TokenKind::Type);
+                        let reify_tok = match self.peek_token_kind() {
+                            TokenKind::Reify => self.assert_token(TokenKind::Reify),
+                            _ => S!(make_missing, self, self.pos()),
+                        };
                         let name = self.require_name();
                         let semi = self.require_semicolon();
                         S!(
@@ -2476,6 +2469,7 @@ where
                             self,
                             case_tok,
                             type_tok,
+                            reify_tok,
                             name,
                             semi
                         )

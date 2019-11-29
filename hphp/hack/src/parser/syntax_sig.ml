@@ -1034,6 +1034,7 @@ module type Syntax_S = sig
   | PocketFieldTypeDeclaration        of
     { pocket_field_type_case                             : t
     ; pocket_field_type_type                             : t
+    ; pocket_field_type_reified                          : t
     ; pocket_field_type_name                             : t
     ; pocket_field_type_semicolon                        : t
     }
@@ -1263,7 +1264,7 @@ module type Syntax_S = sig
   val make_pocket_atom_mapping_declaration : t -> t -> t -> t -> t -> t -> t
   val make_pocket_enum_declaration : t -> t -> t -> t -> t -> t -> t
   val make_pocket_field_type_expr_declaration : t -> t -> t -> t -> t
-  val make_pocket_field_type_declaration : t -> t -> t -> t -> t
+  val make_pocket_field_type_declaration : t -> t -> t -> t -> t -> t
   val make_pocket_mapping_id_declaration : t -> t -> t
   val make_pocket_mapping_type_declaration : t -> t -> t -> t -> t
 

@@ -2379,7 +2379,7 @@ let schema : schema_node list =
         ];
     }
     (* PocketUniverse: because of the trailing ';' I didn't want to
-   add the aggragte PUField to PocketAtomExpression, so I made the ( .. )
+   add the aggragte PUField to PocketAtomExpression, so I made the ( ... )
    part optional. It will be up to the parser to only parse the two
    possible syntax:
    :@A;
@@ -2445,6 +2445,7 @@ let schema : schema_node list =
         [
           ("case", Token);
           ("type", Token);
+          ("reified", ZeroOrOne (Aggregate Specifier));
           ("name", Aggregate Expression);
           ("semicolon", Token);
         ];

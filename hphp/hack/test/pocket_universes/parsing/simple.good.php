@@ -41,3 +41,13 @@ class Bar extends Foo
     return $this->get(:@toto);
   }
 }
+
+class TestReify
+{
+  enum XXX {
+   case type reify S;
+   case S expr;
+
+   :@A( type S = int, S = 42);
+  }
+}

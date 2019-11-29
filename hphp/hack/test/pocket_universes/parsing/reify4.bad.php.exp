@@ -1,0 +1,2 @@
+(5,10)-(5,15) A type specifier is expected here.
+(5,16)-(5,19) Encountered unexpected token 'int'.

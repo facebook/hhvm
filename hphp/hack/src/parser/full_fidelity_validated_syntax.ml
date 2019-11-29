@@ -3719,6 +3719,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.PocketFieldTypeDeclaration x; value = v } -> v,
     { pocket_field_type_semicolon = validate_token x.pocket_field_type_semicolon
     ; pocket_field_type_name = validate_expression x.pocket_field_type_name
+    ; pocket_field_type_reified = validate_option_with (validate_specifier) x.pocket_field_type_reified
     ; pocket_field_type_type = validate_token x.pocket_field_type_type
     ; pocket_field_type_case = validate_token x.pocket_field_type_case
     }
@@ -3728,6 +3729,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.PocketFieldTypeDeclaration
       { pocket_field_type_case = invalidate_token x.pocket_field_type_case
       ; pocket_field_type_type = invalidate_token x.pocket_field_type_type
+      ; pocket_field_type_reified = invalidate_option_with (invalidate_specifier) x.pocket_field_type_reified
       ; pocket_field_type_name = invalidate_expression x.pocket_field_type_name
       ; pocket_field_type_semicolon = invalidate_token x.pocket_field_type_semicolon
       }

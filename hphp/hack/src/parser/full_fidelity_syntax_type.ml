@@ -1147,6 +1147,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | PocketFieldTypeDeclaration        of
     { pocket_field_type_case                             : t
     ; pocket_field_type_type                             : t
+    ; pocket_field_type_reified                          : t
     ; pocket_field_type_name                             : t
     ; pocket_field_type_semicolon                        : t
     }
@@ -2445,6 +2446,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and pocket_field_type_declaration =
     { pocket_field_type_case: Token.t value
     ; pocket_field_type_type: Token.t value
+    ; pocket_field_type_reified: specifier option value
     ; pocket_field_type_name: expression value
     ; pocket_field_type_semicolon: Token.t value
     }

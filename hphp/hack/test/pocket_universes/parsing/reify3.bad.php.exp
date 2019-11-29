@@ -1,0 +1,9 @@
+(4,11)-(5,1) Invalid pocket universe field syntax.
+(4,11)-(5,1) A right brace ('}') is expected here.
+(5,11)-(5,11) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(5,16)-(5,16) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(5,20)-(5,20) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(5,23)-(5,23) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(5,24)-(6,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(7,2)-(8,1) An expression is expected here.
+(7,2)-(8,1) A semicolon (';') is expected here.

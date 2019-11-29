@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f74983caff4eb2429e776c58e63ffe85>>
+// @generated SignedSource<<055ade412c520293a2240671d00ab82a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1435,6 +1435,7 @@ impl<Context, Ex, Fb, En, Hi> Node<Context, Ex, Fb, En, Hi> for PuEnum<Ex, Fb, E
         c: &mut Context,
         v: &mut dyn Visitor<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
     ) {
+        v.visit_en(c, &self.annotation);
         self.name.accept(c, v);
         self.is_final.accept(c, v);
         self.case_types.accept(c, v);

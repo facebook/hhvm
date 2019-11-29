@@ -45,6 +45,9 @@ class virtual iter =
       in
       super#on_class_var env cv
 
+    method! on_pu_enum env x =
+      super#on_pu_enum (Env.restore_pu_enum_env env x) x
+
     method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
 
     method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
@@ -94,6 +97,9 @@ class virtual ['state] iter_with_state =
       in
       super#on_class_var (env, state) cv
 
+    method! on_pu_enum (env, state) x =
+      super#on_pu_enum (Env.restore_pu_enum_env env x, state) x
+
     method! on_Efun (env, state) x =
       super#on_Efun (Env.set_ppl_lambda env, state) x
 
@@ -135,6 +141,9 @@ class virtual ['a] reduce =
           env
       in
       super#on_class_var env cv
+
+    method! on_pu_enum env x =
+      super#on_pu_enum (Env.restore_pu_enum_env env x) x
 
     method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
 
@@ -185,6 +194,9 @@ class virtual map =
       in
       super#on_class_var env cv
 
+    method! on_pu_enum env x =
+      super#on_pu_enum (Env.restore_pu_enum_env env x) x
+
     method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
 
     method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
@@ -232,6 +244,9 @@ class virtual endo =
           env
       in
       super#on_class_var env cv
+
+    method! on_pu_enum env x =
+      super#on_pu_enum (Env.restore_pu_enum_env env x) x
 
     method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
 

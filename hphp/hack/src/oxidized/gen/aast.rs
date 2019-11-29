@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a79ec4cb29992dbffe96cefa599f72f1>>
+// @generated SignedSource<<6d06d6256368108361a30a7f922227a0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -581,6 +581,7 @@ pub struct RecordDef<Ex, Fb, En, Hi> {
 
 #[derive(Clone, Debug, OcamlRep)]
 pub struct PuEnum<Ex, Fb, En, Hi> {
+    pub annotation: En,
     pub name: Sid,
     pub is_final: bool,
     pub case_types: Vec<(Sid, ReifyKind)>,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7e22ee970542bc18941403e3a80396e1>>
+// @generated SignedSource<<e57dc13a9e940958e525151ea160ecf5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1435,6 +1435,7 @@ impl<Context, Ex, Fb, En, Hi> NodeMut<Context, Ex, Fb, En, Hi> for PuEnum<Ex, Fb
         c: &mut Context,
         v: &mut dyn VisitorMut<Context = Context, Ex = Ex, Fb = Fb, En = En, Hi = Hi>,
     ) {
+        v.visit_en(c, &mut self.annotation);
         self.name.accept(c, v);
         self.is_final.accept(c, v);
         self.case_types.accept(c, v);

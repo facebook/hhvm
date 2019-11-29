@@ -2812,6 +2812,7 @@ module Make (GetLocals : GetLocals) = struct
       List.map ~f:compute_mapping pu_members
     in
     {
+      Aast.pu_annotation = ();
       Aast.pu_name = pu_enum.Aast.pu_name;
       Aast.pu_is_final = pu_enum.Aast.pu_is_final;
       Aast.pu_case_types = pu_enum.Aast.pu_case_types;

@@ -733,7 +733,15 @@ let converter
       | [] -> (List.rev case_types, List.rev case_values, List.rev members)
     in
     let (pu_case_types, pu_case_values, pu_members) = aux [] [] [] fields in
-    Aast.{ pu_name; pu_is_final; pu_case_types; pu_case_values; pu_members }
+    Aast.
+      {
+        pu_annotation = env_annotation;
+        pu_name;
+        pu_is_final;
+        pu_case_types;
+        pu_case_values;
+        pu_members;
+      }
   and on_class_body cb =
     let reversed_body =
       List.fold_left ~f:on_class_elt ~init:make_empty_class_body cb

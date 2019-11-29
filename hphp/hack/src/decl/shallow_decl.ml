@@ -107,7 +107,7 @@ let typeconst env c tc =
       }
 
 let pu_enum
-    env { pu_name; pu_is_final; pu_case_types; pu_case_values; pu_members } =
+    env { pu_name; pu_is_final; pu_case_types; pu_case_values; pu_members; _ } =
   let spu_case_types = pu_case_types in
   let hint_assoc (k, hint) = (k, Decl_hint.hint env hint) in
   let spu_case_values = List.map ~f:hint_assoc pu_case_values in

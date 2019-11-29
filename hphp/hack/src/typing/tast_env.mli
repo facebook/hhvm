@@ -232,6 +232,10 @@ val restore_method_env : env -> Tast.method_ -> env
     it appears in. *)
 val restore_fun_env : env -> Tast.fun_ -> env
 
+(** Construct an {!env} from a pocket universe definition and the {!env} of the context
+    it appears in. *)
+val restore_pu_enum_env : env -> Tast.pu_enum -> env
+
 (** Construct an {!env} where inside_ppl_class is {false}. Due to rewriting
     limitations, we are unable to rewrite lambdas inside <<__PPL>> classes.
     If you are using {!Tast_visitor}, you should have no need of this. *)

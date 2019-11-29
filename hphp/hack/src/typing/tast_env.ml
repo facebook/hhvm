@@ -178,6 +178,8 @@ let restore_method_env env m = restore_saved_env env m.m_annotation
 
 let restore_fun_env env f = restore_saved_env env f.f_annotation
 
+let restore_pu_enum_env env pu = restore_saved_env env pu.pu_annotation
+
 let fun_env f =
   let env = EnvFromDef.fun_env f.f_annotation.tcopt f in
   restore_fun_env env f

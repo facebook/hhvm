@@ -4466,6 +4466,7 @@ where
                     }
                 }
                 Ok(class.pu_enums.push(ast::PuEnum {
+                    annotation: (),
                     name: id,
                     is_final,
                     case_types,

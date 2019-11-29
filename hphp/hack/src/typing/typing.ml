@@ -8208,7 +8208,7 @@ and typeconst_def
 and pu_enum_def
     env
     c_name
-    { pu_name; pu_is_final; pu_case_types; pu_case_values; pu_members } =
+    { pu_name; pu_is_final; pu_case_types; pu_case_values; pu_members; _ } =
   (* What is a well-formed pocket universe?
     - pu_name is unique
     - pu_case_types are well-formed if all names are unique
@@ -8228,6 +8228,7 @@ and pu_enum_def
 
     Here we check that all definitions are well-typed.
  *)
+  let pos = fst pu_name in
   let cls = Decl_provider.get_class c_name in
   let pu_enum =
     Option.bind cls ~f:(fun cls -> Cls.get_pu_enum cls (snd pu_name))
@@ -8251,14 +8252,18 @@ and pu_enum_def
       tp_user_attributes = [];
     }
   in
-  let case_types =
-    let env =
-      Env.add_generic_parameters env (List.map ~f:make_ty_tparam pu_case_types)
+  let (env, constraints) =
+    let (env, constraints) =
+      Phase.localize_generic_parameters_with_bounds
+        env
+        ~ety_env:(Phase.env_with_self env)
+        (List.map ~f:make_ty_tparam pu_case_types)
     in
     List.iter pu_case_values ~f:(fun (_sid, hint) ->
         ignore (Phase.localize_hint_with_self env hint : _ * _));
-    pu_case_types
+    (env, constraints)
   in
+  let env = add_constraints pos env constraints in
   let members =
     let process_member pum =
       let (env, cstrs) =
@@ -8305,10 +8310,12 @@ and pu_enum_def
     in
     List.map ~f:process_member pu_members
   in
+  let local_tpenv = Env.get_tpenv env in
   {
+    Aast.pu_annotation = Env.save local_tpenv env;
     Aast.pu_name;
     Aast.pu_is_final;
-    Aast.pu_case_types = case_types;
+    Aast.pu_case_types;
     Aast.pu_case_values;
     Aast.pu_members = members;
   }

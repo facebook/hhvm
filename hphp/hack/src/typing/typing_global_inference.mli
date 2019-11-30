@@ -13,9 +13,13 @@ module StateErrors : sig
 
   val mk_empty : unit -> t
 
-  val add : t -> Ident.t -> unit
+  val add : t -> Ident.t -> Errors.error -> unit
 
   val has_error : t -> Ident.t -> bool
+
+  val get_errors : t -> Ident.t -> Errors.error list
+
+  val elements : t -> (Ident.t * Errors.error list) list
 end
 
 module StateSubConstraintGraphs : sig

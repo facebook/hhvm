@@ -11,16 +11,24 @@ open Typing_env_types
 module StateErrors = struct
   module IdentMap = WrappedMap.Make (Ident)
 
-  type t = unit IdentMap.t ref
+  type t = Errors.error list IdentMap.t ref
 
   let mk_empty () = ref IdentMap.empty
 
-  let add t id = t := IdentMap.add id () !t
+  let get_errors t id = Option.value (IdentMap.find_opt id !t) ~default:[]
 
-  let has_error t id = IdentMap.mem id !t
+  let add t id err = t := IdentMap.add id (err :: get_errors t id) !t
+
+  let has_error t id = not @@ List.is_empty @@ get_errors t id
+
+  let elements t = IdentMap.elements !t
 end
 
-let make_error_callback errors var ?code:_ _l = StateErrors.add errors var
+let make_error_callback errors var ?code msgl =
+  let code =
+    Option.value code ~default:Error_codes.Typing.(err_code UnifyError)
+  in
+  StateErrors.add errors var (Errors.make_error code msgl)
 
 module type MarshalledData = sig
   type t

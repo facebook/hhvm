@@ -59,6 +59,5 @@ const string __FUNCTION__ = '';
 const string __METHOD__ = '';
 const string __NAMESPACE__ = '';
 const string __COMPILER_FRONTEND__ = '';
-/*HH_IGNORE_ERROR[1002] The `new` operator can not make a constant*/
-/*HH_IGNORE_ERROR[2023] Illegal constant value (object type)*/
-const FunctionCredential __FUNCTION_CREDENTIAL__ = new FunctionCredential();
+/*HH_FIXME[4110] It is not possible to declare a constant of this type*/
+const FunctionCredential __FUNCTION_CREDENTIAL__ = 0;

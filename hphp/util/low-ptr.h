@@ -167,7 +167,7 @@ private:
   }
 
 protected:
-  typename S::storage_type m_s;
+  typename S::storage_type m_s{0};
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -236,6 +236,18 @@ using AtomicLowPtr =
   detail::LowPtrImpl<T, detail::AtomicStorage<detail::low_storage_t,
                                               read_order,
                                               write_order>>;
+
+template<class T> struct lowptr_traits : std::false_type {};
+template<class T> struct lowptr_traits<LowPtr<T>> : std::true_type {
+  using element_type = T;
+  using pointer = T*;
+};
+template<class T, std::memory_order R, std::memory_order W>
+struct lowptr_traits<AtomicLowPtr<T, R, W>> : std::true_type {
+  using element_type = T;
+  using pointer = T*;
+};
+template<class T> constexpr bool is_lowptr_v = lowptr_traits<T>::value;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

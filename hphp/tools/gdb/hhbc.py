@@ -451,6 +451,10 @@ remains where it left off after the previous call.
         bcstart = self.bcpos - self.bcoff
 
         for _i in xrange(0, self.count):
+            if self.end is not None and self.bcpos >= self.end:
+                self.bcpos = None
+                break
+
             instr = HHBC.instr_info(self.bcpos)
             if instr is None:
                 print('hhx: Bytecode dump failed')
@@ -459,9 +463,6 @@ remains where it left off after the previous call.
             name = HHBC.op_name(instr['op']).string()
 
             start_addr = bcstart.cast(T('void').pointer())
-            if self.end is not None and self.bcpos >= self.end:
-                self.bcpos = None
-                break
 
             out = "%s+%d: %s" % (str(start_addr), self.bcoff, name)
             for imm in instr['imms']:

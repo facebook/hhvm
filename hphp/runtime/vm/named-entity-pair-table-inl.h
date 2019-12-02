@@ -22,13 +22,20 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern StringData* loadLitstrById(Id id);
+
+///////////////////////////////////////////////////////////////////////////////
+
 inline bool NamedEntityPairTable::contains(Id id) const {
   return id >= 0 && id < Id(size());
 }
 
 inline StringData* NamedEntityPairTable::lookupLitstr(Id id) const {
   assertx(contains(id));
-  return const_cast<StringData*>((*this)[id].get());
+  if (auto const ret = (*this)[id].get()) {
+    return const_cast<StringData*>(ret);
+  }
+  return loadLitstrById(id);
 }
 
 inline const NamedEntity*
@@ -39,7 +46,7 @@ NamedEntityPairTable::lookupNamedEntity(Id id) const {
 inline NamedEntityPair
 NamedEntityPairTable::lookupNamedEntityPair(Id id) const {
   assertx(contains(id));
-  auto const name = (*this)[id];
+  auto const name = lookupLitstr(id);
 
   assertx(name);
   assertx(name->data()[0] != '\\');

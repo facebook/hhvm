@@ -17,22 +17,14 @@
 #ifndef incl_HPHP_LITSTR_TABLE_H_
 #define incl_HPHP_LITSTR_TABLE_H_
 
-#include "hphp/runtime/base/string-hash-map.h"
+#include "hphp/runtime/base/string-functors.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-pair-table.h"
 #include "hphp/util/alloc.h"
-#include "hphp/util/functional.h"
-#include "hphp/util/hash-map.h"
-#include "hphp/util/mutex.h"
 
 #include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-
-struct StringData;
-
-///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Unit litstr Id's are all above this mark.
@@ -100,6 +92,11 @@ struct LitstrTable {
   void setNamedEntityPairTable(NamedEntityPairTable&& namedInfo);
 
   /*
+   * Set an entry, used for lazy loading.
+   */
+  void setLitstr(Id id, const StringData* str);
+
+  /*
    * Add an entry for `litstr' to the table.
    *
    * The "merge" terminology is inherited from Unit.
@@ -151,6 +148,11 @@ private:
   std::atomic<Id> m_nextId{1};
   std::atomic<bool> m_safeToRead{true};
 };
+
+/*
+ * Lazy load helper that is safe to call concurrently.
+ */
+StringData* loadLitstrById(Id id);
 
 ///////////////////////////////////////////////////////////////////////////////
 // ID helpers.

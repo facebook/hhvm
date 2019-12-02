@@ -17,23 +17,20 @@
 #ifndef incl_HPHP_NAMED_ENTITY_PAIR_TABLE_H_
 #define incl_HPHP_NAMED_ENTITY_PAIR_TABLE_H_
 
-#include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/containers.h"
-#include "hphp/util/compact-vector.h"
+#include "hphp/runtime/vm/named-entity.h"
 
-#include <vector>
+#include "hphp/util/lock-free-ptr-wrapper.h"
+#include "hphp/util/low-ptr.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-
-struct StringData;
-
-///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Vector of NamedEntityPairs, used as a map from Id to NEP.
  */
-struct NamedEntityPairTable : VMCompactVector<LowStringPtr> {
+struct NamedEntityPairTable
+    : VMCompactVector<UnsafeLockFreePtrWrapper<LowStringPtr>> {
   /*
    * Is `id' valid in this table?
    */

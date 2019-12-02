@@ -21,6 +21,11 @@ namespace HPHP {
 
 std::atomic_int LitstrRepoProxy::s_loadedRepoId{RepoIdInvalid};
 
+LitstrRepoProxy::~LitstrRepoProxy() {
+  if (!m_inited) return;
+  m_litstrLoader.~GetOneLitstrStmt();
+}
+
 void LitstrRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   auto insertQuery = folly::sformat(
     "CREATE TABLE {} (litstrId INTEGER PRIMARY KEY, litstr TEXT);",
@@ -28,7 +33,7 @@ void LitstrRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   txn.exec(insertQuery);
 }
 
-void LitstrRepoProxy::load() {
+void LitstrRepoProxy::load(bool lazy) {
   assertx(s_loadedRepoId.load(std::memory_order_relaxed) == RepoIdInvalid);
   for (int repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
     // Return success on the first loaded repo.  In the case of an error we
@@ -40,10 +45,10 @@ void LitstrRepoProxy::load() {
     auto& table = LitstrTable::get();
     assertx(table.numLitstrs() == 0);
     NamedEntityPairTable namedInfo;
-    namedInfo.resize(maxId + 1, nullptr);
+    namedInfo.resize(maxId + 1, LowStringPtr{nullptr});
     table.setNamedEntityPairTable(std::move(namedInfo));
     s_loadedRepoId.store(repoId, std::memory_order_release);
-    loadAll();
+    if (!lazy) loadAll();
     break;
   }
   // No repos were loadable.  This is normal for non-repo-authoritative repos.
@@ -55,6 +60,18 @@ void LitstrRepoProxy::loadAll() {
   GetLitstrsStmt stmt{m_repo, repoId};
   DEBUG_ONLY auto const ret = stmt.get();
   assertx(ret == RepoStatus::success);
+}
+
+StringData* LitstrRepoProxy::loadOne(Id id) {
+  if (!m_inited) {
+    auto const repoId = s_loadedRepoId.load(std::memory_order_acquire);
+    assertx(repoId != RepoIdInvalid);
+    new (&m_litstrLoader) GetOneLitstrStmt(m_repo, repoId);
+    m_inited = true;
+  }
+  auto const ret = m_litstrLoader.getOne(id);
+  LitstrTable::get().setLitstr(id, ret);
+  return ret;
 }
 
 void LitstrRepoProxy::InsertLitstrStmt::insert(RepoTxn& txn,
@@ -90,6 +107,11 @@ int LitstrRepoProxy::GetLitstrCountStmt::get() {
 }
 
 RepoStatus LitstrRepoProxy::GetLitstrsStmt::get() {
+  // load all literals in the repo, after lazy loading.
+  assertx(s_loadedRepoId.load(std::memory_order_acquire) == m_repoId);
+
+  auto& table = LitstrTable::get();
+
   try {
     auto txn = RepoTxn{m_repo.begin()};
     if (!prepared()) {
@@ -99,8 +121,6 @@ RepoStatus LitstrRepoProxy::GetLitstrsStmt::get() {
       txn.prepare(*this, selectQuery);
     }
     RepoTxnQuery query(txn, *this);
-    NamedEntityPairTable namedInfo;
-    namedInfo.emplace_back(nullptr);
     int index = 1;
     do {
       query.step();
@@ -111,16 +131,38 @@ RepoStatus LitstrRepoProxy::GetLitstrsStmt::get() {
           litstrId == index++ && "LitstrId needs to be from 1 to N"
         );
         StringData* litstr; /**/ query.getStaticString(1, litstr);
-        namedInfo.emplace_back(litstr);
+        table.setLitstr(index, litstr);
       }
     } while (!query.done());
-    namedInfo.shrink_to_fit();
-    LitstrTable::get().setNamedEntityPairTable(std::move(namedInfo));
     txn.commit();
   } catch (RepoExc& re) {
     return RepoStatus::error;
   }
   return RepoStatus::success;
+}
+
+StringData* LitstrRepoProxy::GetOneLitstrStmt::getOne(int litstrId) {
+  try {
+    if (!prepared()) {
+      auto selectQuery = folly::sformat(
+        "SELECT litstrid,litstr FROM {} WHERE litstrId = @litstrId;",
+         m_repo.table(m_repoId, "Litstr"));
+      prepare(selectQuery);
+    }
+    RepoQuery query(*this);
+    query.bindInt("@litstrId", litstrId);
+    query.step();
+    StringData* litstr = nullptr;
+    if (query.row()) {
+      int index = 0;
+      query.getInt(0, index);
+      assert(litstrId == index);
+      query.getStaticString(1, litstr);
+      return litstr;
+    }
+  } catch (RepoExc& re) {
+  }
+  return nullptr;
 }
 
 }

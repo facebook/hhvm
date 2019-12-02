@@ -55,7 +55,10 @@ inline bool LitstrTable::contains(Id id) const {
 
 inline StringData* LitstrTable::lookupLitstrId(Id id) const {
   assertx(m_safeToRead);
-  return m_namedInfo.lookupLitstr(id);
+  if (auto ret = m_namedInfo.lookupLitstr(id)) {
+    return ret;
+  }
+  return loadLitstrById(id);
 }
 
 inline const NamedEntity* LitstrTable::lookupNamedEntityId(Id id) const {
@@ -70,7 +73,21 @@ inline NamedEntityPair LitstrTable::lookupNamedEntityPairId(Id id) const {
 
 inline
 void LitstrTable::setNamedEntityPairTable(NamedEntityPairTable&& namedInfo) {
+  assertx(m_namedInfo.empty());
   m_namedInfo = std::move(namedInfo);
+}
+
+inline
+void LitstrTable::setLitstr(Id id, const StringData* str) {
+  assertx(contains(id));
+  auto& elem = m_namedInfo[id];
+  elem.lock_for_update();
+  if (DEBUG_ONLY auto const curr = elem.get()) {
+    assertx(str == curr);
+    elem.unlock();
+  } else {
+    elem.update_and_unlock(LowStringPtr{str});
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

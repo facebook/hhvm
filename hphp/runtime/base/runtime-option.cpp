@@ -1092,15 +1092,16 @@ std::string RuntimeOption::RepoCentralPath;
 int32_t RuntimeOption::RepoCentralFileMode;
 std::string RuntimeOption::RepoCentralFileUser;
 std::string RuntimeOption::RepoCentralFileGroup;
-bool RuntimeOption::RepoAllowFallbackPath = true;
 std::string RuntimeOption::RepoEvalMode;
 std::string RuntimeOption::RepoJournal = "delete";
+bool RuntimeOption::RepoAllowFallbackPath = true;
 bool RuntimeOption::RepoCommit = true;
 bool RuntimeOption::RepoDebugInfo = true;
+bool RuntimeOption::RepoLitstrLazyLoad = true;
 // Missing: RuntimeOption::RepoAuthoritative's physical location is
 // perf-sensitive.
-int64_t RuntimeOption::RepoLocalReadaheadRate = 0;
 bool RuntimeOption::RepoLocalReadaheadConcurrent = false;
+int64_t RuntimeOption::RepoLocalReadaheadRate = 0;
 uint32_t RuntimeOption::RepoBusyTimeoutMS = 15000;
 
 bool RuntimeOption::HHProfEnabled = false;
@@ -1765,6 +1766,8 @@ void RuntimeOption::Load(
     Config::Bind(RepoCommit, ini, config, "Repo.Commit",
                  RepoCommit);
     Config::Bind(RepoDebugInfo, ini, config, "Repo.DebugInfo", RepoDebugInfo);
+    Config::Bind(RepoLitstrLazyLoad, ini, config, "Repo.LitstrLazyLoad",
+                 RepoLitstrLazyLoad);
     Config::Bind(RepoAuthoritative, ini, config, "Repo.Authoritative",
                  RepoAuthoritative);
     Config::Bind(RepoLocalReadaheadRate, ini, config,

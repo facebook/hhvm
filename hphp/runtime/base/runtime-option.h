@@ -1286,6 +1286,7 @@ public:
   static bool RepoDebugInfo;
   static bool RepoAuthoritative;
   static int64_t RepoLocalReadaheadRate;
+  static bool RepoLitstrLazyLoad;
   static bool RepoLocalReadaheadConcurrent;
   static uint32_t RepoBusyTimeoutMS;
 

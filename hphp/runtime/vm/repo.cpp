@@ -168,7 +168,7 @@ bool Repo::hasGlobalData() {
 }
 
 void Repo::loadGlobalData(bool readArrayTable /* = true */) {
-  if (readArrayTable) m_lsrp.load();
+  if (readArrayTable) m_lsrp.load(RuntimeOption::RepoLitstrLazyLoad);
 
   if (!RuntimeOption::RepoAuthoritative) return;
 

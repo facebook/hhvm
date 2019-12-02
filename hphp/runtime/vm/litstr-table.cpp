@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/litstr-table.h"
 
+#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
@@ -52,9 +53,8 @@ void LitstrTable::setReading() {
 
   m_namedInfo.resize(m_litstr2id.size() + 1);
   m_namedInfo.shrink_to_fit();
-  m_namedInfo[0] = nullptr;
   for (auto const& strId : m_litstr2id) {
-    m_namedInfo[strId.second] = strId.first;
+    m_namedInfo[strId.second] = LowStringPtr{strId.first};
   }
 
   m_safeToRead = true;
@@ -64,12 +64,22 @@ void LitstrTable::forEachLitstr(
   std::function<void (int, const StringData*)> onItem) {
   assertx(m_safeToRead);
   auto i = 0;
-  for (auto s : m_namedInfo) {
+  for (auto& s : m_namedInfo) {
     if (i != 0) {
-      onItem(i, s);
+      onItem(i, s.get());
     }
     i++;
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Lazy loading.
+
+StringData* loadLitstrById(Id id) {
+  if (RuntimeOption::RepoAuthoritative) {
+    return Repo::get().lsrp().loadOne(id);
+  }
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

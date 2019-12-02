@@ -19,4 +19,4 @@ let verify_file template =
     exit 1
   )
 
-let () = List.iter verify_file Generate_full_fidelity.templates
+let () = List.iter verify_file Generate_full_fidelity_data.templates

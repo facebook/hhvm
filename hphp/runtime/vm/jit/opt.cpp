@@ -192,7 +192,17 @@ void optimize(IRUnit& unit, TransKind kind) {
   }
 
   auto inline_returns = count_inline_returns(unit);
+  auto iterate = RuntimeOption::EvalHHIRIterateOpts;
   while (true) {
+    SCOPE_SUCCESS {
+      if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts) {
+        rqtrace::EventGuard trace{"OPT_REFS"};
+        doPass(unit, optimizeRefcounts, DCE::Full);
+        printUnit(6, unit, " after optimizeRefCounts ");
+      }
+      iterate = false;
+    };
+
     if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
       rqtrace::EventGuard trace{"OPT_LOAD"};
       doPass(unit, optimizeLoads, DCE::Full);
@@ -216,17 +226,11 @@ void optimize(IRUnit& unit, TransKind kind) {
 
     rqtrace::EventGuard trace{"OPT_PHI"};
     if (!doPass(unit, optimizePhis, DCE::Full)) {
-      if (prev_inline_returns != inline_returns) continue;
+      if (iterate || prev_inline_returns != inline_returns) continue;
       break;
     }
     doPass(unit, cleanCfg, DCE::None);
     printUnit(6, unit, " after optimizePhis ");
-  }
-
-  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts) {
-    rqtrace::EventGuard trace{"OPT_REFS"};
-    doPass(unit, optimizeRefcounts, DCE::Full);
-    printUnit(6, unit, " after optimizeRefCounts ");
   }
 
   doPass(unit, simplifyOrdStrIdx, DCE::Minimal);

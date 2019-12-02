@@ -1751,41 +1751,45 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
     return cns(env, TBottom);
   }
 
-  auto const baseLoc = [&]() -> folly::Optional<Location> {
-    auto const basePtr = ldMBase(env);
-    auto const ptrInst = canonical(basePtr)->inst();
-
-    switch (ptrInst->op()) {
-      case LdLocAddr: {
-        auto const locID = ptrInst->extra<LocalId>()->locId;
-        return folly::make_optional<Location>(Location::Local { locID });
+  auto const baseLoc = ldMBase(env);
+  auto const canonicalBaseLoc = canonical(baseLoc);
+  assertx(canonicalBaseLoc);
+  switch (canonicalBaseLoc->inst()->op()) {
+    case LdLocAddr:
+    case LdStkAddr:
+      break;
+    default: {
+      auto const t = baseLoc->type();
+      if (t.maybe(TMemToFrameCell) ||
+          t.maybe(TMemToStkCell)) {
+        // We don't handle these, as anything simple would require killing all
+        // frame and stack info in frame state (currently framestate asserts we
+        // don't stmem to ptrs of this type for this reason).
+        return nullptr;
       }
-      case LdStkAddr: {
-        auto const irSPRel = ptrInst->extra<IRSPRelOffsetData>()->offset;
-        auto const fpRel = irSPRel.to<FPInvOffset>(env.irb->fs().irSPOff());
-        return folly::make_optional<Location>(Location::Stack { fpRel });
-      }
-      default:
-        return folly::none;
+      break;
     }
-  }();
-  if (!baseLoc) return nullptr;
+  }
 
   auto const op = isVec ? VecSet : isDict ? DictSet : ArraySet;
   auto const newArr = gen(env, op, base, key, value);
 
   // Update the base's location with the new array.
-  switch (baseLoc->tag()) {
-    case LTag::Local:
-      gen(env, StLoc, LocalId { baseLoc->localId() }, fp(env), newArr);
+  switch (canonicalBaseLoc->inst()->op()) {
+    case LdLocAddr: {
+      auto const locID = canonicalBaseLoc->inst()->extra<LocalId>()->locId;
+      gen(env, StLoc, LocalId { locID }, fp(env), newArr);
       break;
-    case LTag::Stack:
-      gen(env, StStk,
-          IRSPRelOffsetData { offsetFromIRSP(env, baseLoc->stackIdx()) },
-          sp(env), newArr);
+    }
+    case LdStkAddr: {
+      auto const irSPRel =
+        canonicalBaseLoc->inst()->extra<IRSPRelOffsetData>()->offset;
+      gen(env, StStk, IRSPRelOffsetData{irSPRel}, sp(env), newArr);
       break;
-    case LTag::MBase:
-      always_assert(false);
+    }
+    default:
+      gen(env, StMem, baseLoc, newArr);
+      break;
   }
   gen(env, IncRef, value);
   return value;

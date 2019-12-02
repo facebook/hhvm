@@ -437,8 +437,8 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case StMem:
     // If we ever start using StMem to store to pointers that might be
     // stack/locals, we have to update tracked state here.
-    always_assert(!inst->src(0)->type().maybe(TPtrToFrameCell));
-    always_assert(!inst->src(0)->type().maybe(TPtrToStkCell));
+    always_assert(!inst->src(0)->type().maybe(TMemToFrameCell));
+    always_assert(!inst->src(0)->type().maybe(TMemToStkCell));
     break;
 
   case LdStk:

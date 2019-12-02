@@ -2500,12 +2500,8 @@ private:
 
     auto const addSymbol = [&] (std::string name) {
       auto value = index_and_flags();
-      auto found = symbols.find(name);
-      if (found == symbols.end()) {
-        symbols.insert({name, {value}});
-      } else if (found->second.back() != value) {
-        found->second.push_back(value);
-      }
+      auto& vec = symbols[name];
+      if (vec.empty() || vec.back() != value) vec.push_back(value);
     };
 
     auto const addParent = [&](std::string name) {

@@ -58,13 +58,17 @@ def str_imm_mcodes():
 
 @memoized
 def rata_arrs():
-    return [V('HPHP::RepoAuthType::Tag::' + t) for t in
-            ['SArr', 'Arr', 'OptSArr', 'OptArr']]
+    return [V('HPHP::RepoAuthType::Tag::' + o + s + t)
+            for o in ['', 'Opt']
+            for s in ['', 'S']
+            for t in ['Arr', 'VArr', 'DArr', 'Vec', 'Dict', 'Keyset']]
 
 @memoized
 def rata_objs():
-    return [V('HPHP::RepoAuthType::Tag::' + t) for t in
-            ['ExactObj', 'SubObj', 'OptExactObj', 'OptSubObj']]
+    return [V('HPHP::RepoAuthType::Tag::' + o + s + t)
+            for o in ['', 'Opt']
+            for s in ['Exact', 'Sub']
+            for t in ['Obj', 'Cls']]
 
 @memoized
 def uints_by_size():
@@ -251,19 +255,25 @@ class HHBC(object):
 
         elif immtype == V('HPHP::RATA'):
             imm = ptr.cast(T('unsigned char').pointer()).dereference()
+            imm = imm.cast(T('unsigned short'))
+            size = 1
+            if imm == 0xff:
+                imm += (ptr + size).cast(T('unsigned char').pointer()).dereference()
+                size += 1
 
+            imm = (imm >> 2) | (imm << 14)
             radb = V('HPHP::kRATArrayDataBit')
 
             tag = (imm & ~radb).cast(T('HPHP::RepoAuthType::Tag'))
             high_bit = (imm & radb)
 
             if tag in rata_arrs():
-                info['size'] = 5 if high_bit else 1
+                if high_bit:
+                    size += HHBC.decode_iva(ptr + size)['size']
             elif tag in rata_objs():
-                info['size'] = 5
-            else:
-                info['size'] = 1
+                size += HHBC.decode_iva(ptr + size)['size']
 
+            info['size'] = size
             info['value'] = str(tag)[len('HPHP::RepoAuthType::Tag::'):]
 
         elif immtype == V('HPHP::LAR'):

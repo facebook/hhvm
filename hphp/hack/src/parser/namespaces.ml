@@ -154,6 +154,7 @@ module ElaborateDefs = struct
               c with
               c_name = name;
               c_extends = List.map c.c_extends (hint nsenv);
+              c_reqs = List.map c.c_reqs (fun (h, e) -> (hint nsenv h, e));
               c_implements = List.map c.c_implements (hint nsenv);
               c_uses = List.map c.c_uses (hint nsenv);
               c_xhp_attr_uses = List.map c.c_xhp_attr_uses (hint nsenv);

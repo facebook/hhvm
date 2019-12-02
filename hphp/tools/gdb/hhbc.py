@@ -120,6 +120,8 @@ class HHBC(object):
         """Decode the BA immediate at `pc', returning a dict with 'value' and
         'size' keys."""
 
+        info = {}
+
         v = pc.cast(T('uint32_t').pointer()).dereference()
         info['value'] = v
         info['size'] = 4

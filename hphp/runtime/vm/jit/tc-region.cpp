@@ -364,7 +364,7 @@ void relocateOptFunc(FuncMetaInfo& info, SrcKeyTransMap& srcKeyTrans,
         assertx(prologueIdx < info.prologues.size());
         auto& prologueInfo = info.prologues[prologueIdx];
         assertx(func == prologueInfo.transRec->func());
-        emitFuncPrologueOptInternal(prologueInfo);
+        emitFuncPrologueOptInternal(prologueInfo, nullptr);
         if (prologueTCAs != nullptr && prologueInfo.start != nullptr) {
           const auto nargs = prologueInfo.transRec->prologueArgs();
           const auto pid = PrologueID(func, nargs);

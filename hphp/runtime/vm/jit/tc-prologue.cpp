@@ -40,7 +40,8 @@ namespace HPHP { namespace jit { namespace tc {
 namespace {
 
 void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
-                          PrologueMetaInfo& info) {
+                          PrologueMetaInfo& info,
+                          CodeMetaLock* locker) {
   assertx(isPrologue(kind));
 
   if (!newTranslation()) {
@@ -57,21 +58,6 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
   auto const funcBody =
     SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}};
 
-  auto codeView = code().view(kind);
-  TCA mainOrig = codeView.main().frontier();
-
-  // If we're close to a cache line boundary, just burn some space to
-  // try to keep the func and its body on fewer total lines.
-  align(codeView.main(), &fixups, Alignment::CacheLineRoundUp,
-        AlignContext::Dead);
-
-  TransLocMaker maker(codeView);
-  maker.markStart();
-
-  // Careful: this isn't necessarily the real entry point. For funcIsMagic
-  // prologues, this is just a possible prologue.
-  TCA aStart = codeView.main().frontier();
-
   // Give the prologue a TransID if we have profiling data.
   transID = [&]{
     if (kind == TransKind::ProfPrologue) {
@@ -87,9 +73,11 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
     return kInvalidTransID;
   }();
 
-  info.start = genFuncPrologue(transID, kind, func, argc, codeView, fixups);
-
-  loc = maker.markEnd().loc();
+  auto res = genFuncPrologue(transID, kind, func, argc, code(), fixups, locker);
+  auto mainOrig = std::get<1>(res);
+  loc = std::get<0>(res);
+  info.start = loc.mainStart();
+  auto codeView = std::get<2>(res);
 
   if (kind == TransKind::ProfPrologue) {
     // Update the profiling prologue size now that we generated it.
@@ -97,10 +85,17 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
   }
 
   if (RuntimeOption::EvalEnableReusableTC) {
-    TCA UNUSED ms = loc.mainStart(), me = loc.mainEnd(),
-               cs = loc.coldStart(), ce = loc.coldEnd(),
-               fs = loc.frozenStart(), fe = loc.frozenEnd(),
-               oldStart = info.start;
+    if (locker) locker->lock();
+    SCOPE_EXIT { if (locker) locker->unlock(); };
+
+    assertOwnsCodeLock();
+    assertOwnsMetadataLock();
+
+    auto const ms = loc.mainStart();
+    auto const DEBUG_ONLY me = loc.mainEnd(),
+                          cs = loc.coldStart(), ce = loc.coldEnd(),
+                          fs = loc.frozenStart(), fe = loc.frozenEnd(),
+                          oldStart = info.start;
 
     auto const did_relocate = relocateNewTranslation(loc, codeView, fixups,
                                                      &info.start);
@@ -122,7 +117,7 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
                  ms, me, cs, ce, fs, fe, oldStart);
     }
 
-    if (loc.mainStart() != aStart) {
+    if (loc.mainStart() != ms) {
       codeView.main().setFrontier(mainOrig); // we may have shifted to align
     }
   }
@@ -133,9 +128,10 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
 }
 
 void emitFuncPrologueInternal(Func* func, int argc, TransKind kind,
-                              PrologueMetaInfo& info) {
+                              PrologueMetaInfo& info,
+                              CodeMetaLock* locker) {
   try {
-    emitFuncPrologueImpl(func, argc, kind, info);
+    emitFuncPrologueImpl(func, argc, kind, info, locker);
   } catch (const DataBlockFull& dbFull) {
 
     // Fail hard if the block isn't code.hot.
@@ -147,7 +143,7 @@ void emitFuncPrologueInternal(Func* func, int argc, TransKind kind,
     code().disableHot();
     info.meta.clear();
     try {
-      emitFuncPrologueImpl(func, argc, kind, info);
+      emitFuncPrologueImpl(func, argc, kind, info, locker);
     } catch (const DataBlockFull& dbStillFull) {
       always_assert_flog(0, "data block = {}\nmessage: {}\n",
                          dbStillFull.name, dbStillFull.what());
@@ -238,12 +234,15 @@ void smashFuncCallers(TCA start, ProfTransRec* rec) {
 /*
  * Emit an OptPrologue for the given `info', updating it accordingly.
  */
-void emitFuncPrologueOptInternal(PrologueMetaInfo& info) {
-  assertOwnsCodeLock();
-  assertOwnsMetadataLock();
+void emitFuncPrologueOptInternal(PrologueMetaInfo& info,
+                                 CodeMetaLock* locker) {
+  if (!locker) {
+    assertOwnsCodeLock();
+    assertOwnsMetadataLock();
+  }
 
   emitFuncPrologueInternal(info.transRec->func(), info.transRec->prologueArgs(),
-                           TransKind::OptPrologue, info);
+                           TransKind::OptPrologue, info, locker);
 }
 
 TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
@@ -253,7 +252,7 @@ TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
   auto metaLock = lockMetadata();
 
   PrologueMetaInfo info{nullptr};
-  emitFuncPrologueInternal(func, argc, kind, info);
+  emitFuncPrologueInternal(func, argc, kind, info, nullptr);
   publishFuncPrologueMeta(func, argc, kind, info);
   publishFuncPrologueCode(func, argc, info);
   return info.start;
@@ -269,7 +268,7 @@ void emitFuncPrologueOpt(ProfTransRec* rec) {
   auto metaLock = lockMetadata();
 
   PrologueMetaInfo info(rec);
-  emitFuncPrologueOptInternal(info);
+  emitFuncPrologueOptInternal(info, nullptr);
   if (info.start) {
     publishFuncPrologueMeta(rec->func(), rec->prologueArgs(),
                             TransKind::OptPrologue, info);

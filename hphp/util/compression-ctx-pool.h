@@ -74,7 +74,7 @@ class CompressionContextPool {
  private:
   void add(InternalRef ptr) {
     DCHECK(ptr);
-    stack_->push_back(std::move(ptr));
+    stack_.wlock()->push_back(std::move(ptr));
   }
 
   folly::Synchronized<std::vector<InternalRef>> stack_;

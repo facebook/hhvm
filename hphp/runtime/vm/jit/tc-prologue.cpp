@@ -277,9 +277,9 @@ void emitFuncPrologueOpt(ProfTransRec* rec) {
   }
 }
 
-TCA emitFuncBodyDispatchInternal(Func* func, const DVFuncletsVec& dvs,
-                                 TransKind kind, CodeCache::View view) {
-  return genFuncBodyDispatch(func, dvs, kind, view);
+TransLoc emitFuncBodyDispatchInternal(Func* func, const DVFuncletsVec& dvs,
+                                      TransKind kind, CodeMetaLock* locker) {
+  return genFuncBodyDispatch(func, dvs, kind, code(), locker);
 }
 
 namespace {
@@ -305,36 +305,28 @@ void publishFuncBodyDispatchImpl(const Func* func, Address start, Address end) {
   }
 }
 
-}
-
-void publishFuncBodyDispatch(Func* func,
-                             TCA start,
-                             CodeCache::View view,
-                             TransLoc loc) {
-  func->setFuncBody(start);
-  auto const& codeCache = code();
-
-  // We may have inserted padding at the beginning, so adjust past it (using the
-  // start address).
-  auto const& startBlock = codeCache.blockFor(start);
+void publishFuncBodyDispatch(Func* func, TransLoc loc) {
+  func->setFuncBody(loc.mainStart());
 
   publishFuncBodyDispatchImpl(
     func,
-    &view.main() == &startBlock ? start : loc.mainStart(),
+    loc.mainStart(),
     loc.mainEnd()
   );
   publishFuncBodyDispatchImpl(
     func,
-    &view.cold() == &startBlock ? start : loc.coldCodeStart(),
+    loc.coldCodeStart(),
     loc.coldEnd()
   );
-  if (&view.cold() != &view.frozen()) {
+  if (loc.coldCodeStart() != loc.frozenCodeStart()) {
     publishFuncBodyDispatchImpl(
       func,
-      &view.frozen() == &startBlock ? start : loc.frozenCodeStart(),
+      loc.frozenCodeStart(),
       loc.frozenEnd()
     );
   }
+}
+
 }
 
 void publishFuncBodyDispatch(Func* func, TCA start, TCA end) {
@@ -348,14 +340,9 @@ TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind) {
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
 
-  auto& codeCache = code();
-  const auto& view = codeCache.view(kind);
-
-  TransLocMaker maker{view};
-  maker.markStart();
-  const auto tca = emitFuncBodyDispatchInternal(func, dvs, kind, view);
-  publishFuncBodyDispatch(func, tca, view, maker.markEnd().loc());
-  return tca;
+  auto const loc = emitFuncBodyDispatchInternal(func, dvs, kind, nullptr);
+  publishFuncBodyDispatch(func, loc);
+  return loc.mainStart();
 }
 
 }}}

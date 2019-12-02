@@ -108,8 +108,9 @@ genFuncPrologue(TransID transID, TransKind kind,
   return std::make_tuple(maker.markEnd().loc(), mainOrig, codeView);
 }
 
-TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
-                        TransKind kind, CodeCache::View code) {
+TransLoc genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
+                             TransKind kind, CodeCache& code,
+                             tc::CodeMetaLock* locker) {
   auto context = prologue_context(kInvalidTransID, kind, func,
                                   func->numSlotsInFrame(), func->base());
   IRUnit unit{context, std::make_unique<AnnotationData>()};
@@ -121,21 +122,26 @@ TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
   CGMeta fixups;
   auto vunit = irlower::lowerUnit(env.unit, CodeKind::Prologue);
 
-  auto& main = code.main();
-  auto const start = main.frontier();
+  if (locker) locker->lock();
+  SCOPE_EXIT { if (locker) locker->unlock(); };
 
-  emitVunit(*vunit, env.unit, code, fixups);
+  auto const& codeView = code.view(kind);
+  tc::TransLocMaker maker{codeView};
+  maker.markStart();
+
+  emitVunit(*vunit, env.unit, codeView, fixups);
+
+  auto const loc = maker.markEnd().loc();
 
   if (RuntimeOption::EvalPerfRelocate) {
     GrowableVector<IncomingBranch> ibs;
-    auto& frozen = code.frozen();
-    tc::recordPerfRelocMap(start, main.frontier(),
-                           frozen.frontier(), frozen.frontier(),
+    tc::recordPerfRelocMap(loc.mainStart(), loc.mainEnd(),
+                           loc.frozenCodeStart(), loc.frozenEnd(),
                            context.initSrcKey, 0, ibs, fixups);
   }
   fixups.process(nullptr);
 
-  return start;
+  return loc;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

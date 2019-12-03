@@ -201,7 +201,7 @@ let type_check
               Relative_path.Set.empty
               files_to_check
               ~memory_cap
-              ~check_info:(ServerCheckUtils.get_check_info env))
+              ~check_info:(ServerCheckUtils.get_check_info genv env))
     in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;

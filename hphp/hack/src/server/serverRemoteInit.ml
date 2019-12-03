@@ -18,7 +18,11 @@ let init
   let type_check files_to_check =
     Typing_check_service.(
       let check_info =
-        { init_id = Random_id.short_string (); recheck_id = None }
+        {
+          init_id = Random_id.short_string ();
+          recheck_id = None;
+          profile_log = false;
+        }
       in
       let delegate_state = Typing_service_delegate.create () in
       let (errors, _delegate_state) =

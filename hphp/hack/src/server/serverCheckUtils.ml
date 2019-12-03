@@ -159,8 +159,9 @@ let maybe_remote_type_check_with_interrupt
     (remote_errors, delegate_state, env, [])
   | None -> local ()
 
-let get_check_info env =
+let get_check_info genv env =
   ServerEnv.(
     let init_id = env.init_env.init_id in
     let recheck_id = env.init_env.recheck_id in
-    { Typing_check_service.init_id; recheck_id })
+    let profile_log = ServerArgs.profile_log genv.options in
+    { Typing_check_service.init_id; recheck_id; profile_log })

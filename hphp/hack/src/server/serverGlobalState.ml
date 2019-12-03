@@ -13,7 +13,6 @@ type t = {
   saved_tmp: Path.t;
   saved_gi_tmp: string;
   trace: bool;
-  profile_log: bool;
   fixme_codes: ISet.t;
   strict_codes: ISet.t;
   paths_to_ignore: Str.regexp list;
@@ -28,7 +27,6 @@ let save ~logging_init =
     saved_tmp = Path.make Relative_path.(path_of_prefix Tmp);
     saved_gi_tmp = Typing_global_inference.get_path ();
     trace = !Typing_deps.trace;
-    profile_log = !Utils.profile_log;
     fixme_codes = !Errors.ignored_fixme_codes;
     strict_codes = !Errors.error_codes_treated_strictly;
     paths_to_ignore = FilesToIgnore.get_paths_to_ignore ();
@@ -49,7 +47,6 @@ let restore state ~(worker_id : int) =
   Relative_path.(set_path_prefix Tmp state.saved_tmp);
   Typing_global_inference.restore_path state.saved_gi_tmp;
   Typing_deps.trace := state.trace;
-  Utils.profile_log := state.profile_log;
   Errors.ignored_fixme_codes := state.fixme_codes;
   Errors.error_codes_treated_strictly := state.strict_codes;
   FilesToIgnore.set_paths_to_ignore state.paths_to_ignore;
@@ -67,12 +64,6 @@ let to_string state =
     else
       "false"
   in
-  let profile_log =
-    if state.profile_log then
-      "true"
-    else
-      "false"
-  in
   let fixme_codes = ISet.to_string state.fixme_codes in
   let strict_codes = ISet.to_string state.strict_codes in
   (* OCaml regexps cannot be re-serialized to strings *)
@@ -83,7 +74,6 @@ let to_string state =
     ("saved_tmp", saved_tmp);
     ("saved_gi_tmp", state.saved_gi_tmp);
     ("trace", trace);
-    ("profile_log", profile_log);
     ("fixme_codes", fixme_codes);
     ("strict_codes", strict_codes);
     ("paths_to_ignore", paths_to_ignore);

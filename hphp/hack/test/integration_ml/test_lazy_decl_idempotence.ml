@@ -57,7 +57,11 @@ let test () =
   let empty = Relative_path.Set.empty in
   let memory_cap = None in
   let check_info =
-    Typing_check_service.{ init_id = ""; recheck_id = Some "" }
+    {
+      Typing_check_service.init_id = "";
+      recheck_id = Some "";
+      profile_log = false;
+    }
   in
   let delegate_state = Typing_service_delegate.create () in
   let (errors, delegate_state) =

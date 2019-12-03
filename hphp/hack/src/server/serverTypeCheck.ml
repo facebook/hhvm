@@ -925,7 +925,7 @@ functor
                 fnl
                 ~interrupt
                 ~memory_cap
-                ~check_info:(get_check_info env))
+                ~check_info:(get_check_info genv env))
       in
       log_if_diag_subscribe_changed
         "type_checking.go_with_interrupt"

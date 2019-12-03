@@ -286,7 +286,7 @@ let process_files
         | Check file ->
           let start_time = Unix.gettimeofday () in
           let result = process_file dynamic_view_files opts errors file in
-          if !Utils.profile_log then profile_log start_time file result;
+          if check_info.profile_log then profile_log start_time file result;
           result
         | Declare path ->
           let errors = Decl_service.decl_file errors path in
@@ -629,7 +629,7 @@ let go_with_interrupt
         ~check_info
     )
   in
-  if !Utils.profile_log then
+  if check_info.profile_log then
     TypingLogger.ProfileTypeCheck.print_path
       ~init_id:check_info.init_id
       ~recheck_id:check_info.recheck_id;

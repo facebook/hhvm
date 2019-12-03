@@ -36,6 +36,7 @@ type job_progress = {
 type check_info = {
   init_id: string;
   recheck_id: string option;
+  profile_log: bool;
 }
 
 type files_to_process = file_computation list

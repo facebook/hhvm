@@ -55,7 +55,11 @@ let test () =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let fnl = Relative_path.Map.keys fast in
   let check_info =
-    Typing_check_service.{ init_id = ""; recheck_id = Some "" }
+    {
+      Typing_check_service.init_id = "";
+      recheck_id = Some "";
+      profile_log = false;
+    }
   in
   let (errors, _delegate_state, (), cancelled) =
     Typing_check_service.go_with_interrupt

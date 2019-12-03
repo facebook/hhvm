@@ -59,7 +59,6 @@ let monitor_daemon_main
       init_id
       (Unix.gettimeofday ())
       false );
-  Utils.profile_log := ServerArgs.profile_log options;
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
 
   ( if not (ServerArgs.check_mode options) then

@@ -48,7 +48,7 @@ void log_native_stack(const char* msg) {
   symbolizer.symbolize(addresses, frames.data(), nframes);
 
   StringSymbolizePrinter printer;
-  printer.println(addresses, frames.data(), nframes);
+  printer.println(frames.data(), nframes);
   Logger::Error("%s\n\nC++ stack:\n%s",
                 msg,
                 printer.str().c_str());

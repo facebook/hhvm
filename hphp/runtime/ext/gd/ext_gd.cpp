@@ -781,8 +781,14 @@ static int php_read_APP(const req::ptr<File>& stream,
   }
   length -= 2;                /* length includes itself */
 
-  String buffer = stream->read(length);
-  if (buffer.empty()) {
+  String buffer;
+  if (length == 0) {
+    // avoid stream reads of length 0, they trigger a notice
+    buffer = empty_string();
+  } else {
+    buffer = stream->read(length);
+  }
+  if (buffer.length() != length) {
     return 0;
   }
 

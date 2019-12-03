@@ -1,0 +1,21 @@
+array(7) {
+  [0]=>
+  int(550)
+  [1]=>
+  int(351)
+  [2]=>
+  int(2)
+  [3]=>
+  string(24) "width="550" height="351""
+  ["bits"]=>
+  int(8)
+  ["channels"]=>
+  int(3)
+  ["mime"]=>
+  string(10) "image/jpeg"
+}
+APP0 length 14
+APP2 length 0
+APP3 length 0
+APP4 length 0
+APP5 length 0

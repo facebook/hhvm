@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/parser:aast_parser
-# Signature<<75ac98d172197b09e1162afb04a2bcb9d7a5bbe8>>
+# Signature<<a500be6f243ca3adef7fbed2c587ad34240a1e78>>
 [package]
 name = "aast_parser"
 edition = "2018"
@@ -10,6 +10,7 @@ include = ["../../aast_check.rs", "../../aast_parser.rs", "../../aast_parser_lib
 path = "../../aast_parser_lib.rs"
 
 [dependencies]
+coroutine_lowerer = { path = "../../coroutine/cargo/coroutine_lowerer" }
 coroutine_smart_constructors = { path = "../coroutine_smart_constructors" }
 decl_mode_parser = { path = "../decl_mode_parser" }
 lint_rust = { path = "../../../utils/lint" }
@@ -21,10 +22,9 @@ oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
 parser_rust = { path = "../.." }
 positioned_parser = { path = "../positioned_parser" }
-rust_coroutine = { path = "../../coroutine/cargo/rust_coroutine" }
 rust_parser_errors = { path = "../errors" }
 stack_limit = { path = "../../../utils/stack_limit" }
 syntax_tree = { path = "../syntax_tree" }
 itertools = "*"
 regex = "*"
-# @end of Signature<<75ac98d172197b09e1162afb04a2bcb9d7a5bbe8>>
+# @end of Signature<<a500be6f243ca3adef7fbed2c587ad34240a1e78>>

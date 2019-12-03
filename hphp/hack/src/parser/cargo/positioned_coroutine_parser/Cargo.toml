@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/parser:positioned_coroutine_parser
-# Signature<<965242b28233df73f5b9379234ea4d4634dc1118>>
+# Signature<<230b6f36a75b8e6799e4b2483bbe28a741996153>>
 [package]
 name = "positioned_coroutine_parser"
 edition = "2018"
@@ -16,4 +16,4 @@ parser_rust = { path = "../.." }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 syntax_smart_constructors = { path = "../syntax_smart_constructors" }
 ocaml = "*"
-# @end of Signature<<965242b28233df73f5b9379234ea4d4634dc1118>>
+# @end of Signature<<230b6f36a75b8e6799e4b2483bbe28a741996153>>

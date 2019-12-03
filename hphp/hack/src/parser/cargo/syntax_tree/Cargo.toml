@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/parser:syntax_tree
-# Signature<<b51dba9a4b2eb992db06c1fbef9b186d168f05d7>>
+# Signature<<b18dea9f9af83c76e2f47d2b38ca600bd3467027>>
 [package]
 name = "syntax_tree"
 edition = "2018"
@@ -15,4 +15,4 @@ oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
 parser_rust = { path = "../.." }
 stack_limit = { path = "../../../utils/stack_limit" }
-# @end of Signature<<b51dba9a4b2eb992db06c1fbef9b186d168f05d7>>
+# @end of Signature<<b18dea9f9af83c76e2f47d2b38ca600bd3467027>>

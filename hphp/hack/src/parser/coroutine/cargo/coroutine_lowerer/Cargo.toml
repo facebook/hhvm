@@ -1,0 +1,17 @@
+# @autocargo from //hphp/hack/src/parser/coroutine:coroutine_lowerer
+# Signature<<1ff27462fda10b1ccc615db358effe2a40f70548>>
+[package]
+name = "coroutine_lowerer"
+edition = "2018"
+version = "0.0.0"
+include = ["../../coroutine_lowerer.rs"]
+
+[lib]
+path = "../../coroutine_lowerer.rs"
+
+[dependencies]
+ocamlrep = { path = "../../../../ocamlrep" }
+parser_core_types = { path = "../../../cargo/core_types" }
+rust_to_ocaml = { path = "../../../cargo/rust_to_ocaml" }
+ocaml = "*"
+# @end of Signature<<1ff27462fda10b1ccc615db358effe2a40f70548>>

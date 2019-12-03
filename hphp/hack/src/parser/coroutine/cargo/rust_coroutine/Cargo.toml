@@ -1,18 +1,16 @@
 # @autocargo from //hphp/hack/src/parser/coroutine:rust_coroutine
-# Signature<<64ad0f48085fcc76f7db1d4deec0c7a3a3948345>>
+# Signature<<31e555c84430ef53d4c399b0200d4bb544eec318>>
 [package]
 name = "rust_coroutine"
 edition = "2018"
 version = "0.0.0"
-include = ["../../coroutine_lowerer.rs", "../../coroutine_syntax.rs"]
+include = ["../../coroutine_syntax.rs"]
 
 [lib]
 path = "../../coroutine_syntax.rs"
 
 [dependencies]
-ocamlrep = { path = "../../../../ocamlrep" }
 parser_core_types = { path = "../../../cargo/core_types" }
 rust_editable_positioned_syntax = { path = "../../../cargo/editable_positioned_syntax" }
-rust_to_ocaml = { path = "../../../cargo/rust_to_ocaml" }
 ocaml = "*"
-# @end of Signature<<64ad0f48085fcc76f7db1d4deec0c7a3a3948345>>
+# @end of Signature<<31e555c84430ef53d4c399b0200d4bb544eec318>>

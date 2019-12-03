@@ -24,7 +24,6 @@ use parser_core_types::{
 };
 use parser_rust::{parser_env::ParserEnv, smart_constructors_wrappers::WithKind};
 use regex::bytes::Regex;
-use rust_coroutine::coroutine_lowerer;
 use rust_parser_errors::ParserErrors;
 use stack_limit::StackLimit;
 use std::borrow::Borrow;

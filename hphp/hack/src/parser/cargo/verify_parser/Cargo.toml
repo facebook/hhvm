@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/parser:verify_parser
-# Signature<<938e15494ca8b81e472dfd4202004b9c3614061d>>
+# Signature<<8b8b7a2fb48f9945d391a888c9b4a0ace5c6a525>>
 [package]
 name = "verify_parser"
 edition = "2018"
@@ -15,4 +15,4 @@ parser_rust = { path = "../.." }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 syntax_smart_constructors = { path = "../syntax_smart_constructors" }
 ocaml = "*"
-# @end of Signature<<938e15494ca8b81e472dfd4202004b9c3614061d>>
+# @end of Signature<<8b8b7a2fb48f9945d391a888c9b4a0ace5c6a525>>

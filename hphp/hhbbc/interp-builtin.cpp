@@ -342,7 +342,7 @@ ArrayData* impl_type_structure_opts(ISS& env, const bc::FCallBuiltin& op,
     if (check_lsb && !cnst->isNoOverride) return nullptr;
     auto const typeCns = cnst->val;
     if (!tvIsDictOrDArray(&*typeCns)) return nullptr;
-    return resolveTSStatically(env, typeCns->m_data.parr, env.ctx.cls, true);
+    return resolveTSStatically(env, typeCns->m_data.parr, env.ctx.cls);
   };
   if (op.arg1 != 2) return nullptr;
   auto const cns_name = tv(topT(env));

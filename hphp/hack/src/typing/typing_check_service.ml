@@ -238,12 +238,9 @@ let should_exit ~(memory_cap : int option) =
        heap is a) small and b) fixed size. *)
     let heap_size_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in
     if heap_size_mb > max_heap_mb then (
-      let error_msg =
-        Printf.sprintf
-          "Exiting worker due to memory pressure: %d MB"
-          heap_size_mb
-      in
-      !Utils.log error_msg;
+      Hh_logger.debug
+        "Exiting worker due to memory pressure: %d MB"
+        heap_size_mb;
       true
     ) else
       false

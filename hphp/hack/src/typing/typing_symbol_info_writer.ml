@@ -100,5 +100,5 @@ let go
     workers
     ~job:(recheck_job tcopt out_dir)
     ~merge:(fun () () -> ())
-    ~next:(Bucket.make ~num_workers file_tuples)
+    ~next:(Bucket.make ~num_workers ~max_size:150 file_tuples)
     ~neutral:()

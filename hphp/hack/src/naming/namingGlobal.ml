@@ -323,7 +323,7 @@ let ndecl_file
     } =
   let (errors, _) =
     Errors.do_with_context fn Errors.Naming (fun () ->
-        dn ("Naming decl: " ^ Relative_path.to_absolute fn);
+        Hh_logger.debug "Naming decl: %s" (Relative_path.to_absolute fn);
         make_env ~funs ~classes ~record_defs ~typedefs ~consts)
   in
   if Errors.is_empty errors then

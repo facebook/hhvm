@@ -583,7 +583,7 @@ let rec main args files =
 
 let () =
   let args = parse_args () in
-  EventLogger.init EventLogger.Event_logger_fake 0.0;
+  EventLogger.init_fake ();
   let handle =
     SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config
   in

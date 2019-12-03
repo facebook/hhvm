@@ -320,7 +320,7 @@ let test_server_restart_suppressed_on_hhconfig_version_change
   true
 
 let setup_global_test_state () =
-  EventLogger.init EventLogger.Event_logger_fake 0.0;
+  EventLogger.init_fake ();
   Relative_path.(set_path_prefix Root (Path.make "/tmp"));
   Relative_path.(set_path_prefix Root (Path.make Sys_utils.temp_dir_name));
   let hhconfig_path = Relative_path.(create Root "/tmp/.hhconfig") in

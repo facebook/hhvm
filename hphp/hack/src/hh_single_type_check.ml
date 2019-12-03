@@ -96,8 +96,6 @@ let magic_builtins =
 (* Helpers *)
 (*****************************************************************************)
 
-let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
-
 let die str =
   let oc = stderr in
   Out_channel.output_string oc str;
@@ -1748,7 +1746,7 @@ let main_hack ({ files; mode; tcopt; _ } as opts) (sienv : SearchUtils.si_env) :
     unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
-  EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0;
+  EventLogger.init_fake ();
 
   let (_handle : SharedMem.handle) =
     SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config

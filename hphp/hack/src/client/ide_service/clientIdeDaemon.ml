@@ -45,7 +45,7 @@ let set_up_hh_logger_for_client_ide_service ~(root : Path.t) : unit =
   Hh_logger.set_log
     client_ide_log_fn
     (Out_channel.create client_ide_log_fn ~append:true);
-  EventLogger.init EventLogger.Event_logger_fake 0.0;
+  EventLogger.init_fake ();
   log "Starting client IDE service at %s" client_ide_log_fn
 
 let load_naming_table_from_saved_state_info

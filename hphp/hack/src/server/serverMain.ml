@@ -1169,7 +1169,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       ~max_times_to_defer
       ~root:(Path.to_string root);
     if Sys_utils.is_test_mode () then
-      EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
+      EventLogger.init_fake ()
     else if is_worker then
       HackEventLogger.init_worker
         ~exit_on_parent_exit

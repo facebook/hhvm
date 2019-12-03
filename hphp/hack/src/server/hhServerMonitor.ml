@@ -42,7 +42,7 @@ let monitor_daemon_main
   let init_id = Random_id.short_string () in
   let (config, local_config) = ServerConfig.(load filename options) in
   ( if Sys_utils.is_test_mode () then
-    EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
+    EventLogger.init_fake ()
   else
     let max_typechecker_worker_memory_mb =
       local_config.ServerLocalConfig.max_typechecker_worker_memory_mb

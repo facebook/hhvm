@@ -9,9 +9,6 @@
 
 open Core_kernel
 include HhMonitorInformant_sig.Types
-
-let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
-
 module WEWClient = WatchmanEventWatcherClient
 module WEWConfig = WatchmanEventWatcherConfig
 
@@ -26,7 +23,7 @@ end
 module State_loader_prefetcher_real = struct
   (* Main entry point for a new package fetcher process. Exits with 0 on success. *)
   let main (hhconfig_hash, handle, cache_limit) =
-    EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0;
+    EventLogger.init_fake ();
     let cached =
       State_loader.cached_state
         ~saved_state_handle:handle

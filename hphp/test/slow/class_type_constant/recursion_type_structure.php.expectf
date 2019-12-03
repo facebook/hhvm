@@ -1,0 +1,1 @@
+Fatal error: Cannot declare self-referencing type constant 'A::B' in %s/recursion_type_structure.php on line 9

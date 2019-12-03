@@ -1,0 +1,1 @@
+Catchable fatal error: Value returned from function f() must be of type D<C::A>, D<int> given in %s/recursion_return_type.php on line 15

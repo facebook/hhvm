@@ -1,0 +1,1 @@
+Fatal error: Cannot declare self-referencing type constant 'C::A' in %s/recursion_generic_param.php on line 13

@@ -24,6 +24,7 @@
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
 
+#include "hphp/util/hash-set.h"
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
@@ -558,22 +559,29 @@ SString getNameFromType(const Type& t) {
 namespace {
 
 ArrayData*
-resolveTSListStatically(ISS& env, SArray tsList,
-                        const php::Class* declaringCls) {
+resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
+                        const php::Class* declaringCls);
+
+ArrayData*
+resolveTSListStatically(ISS& env, hphp_fast_set<SArray>& seenTs,
+                        SArray tsList, const php::Class* declaringCls) {
   auto arr = Array::attach(const_cast<ArrayData*>(tsList));
   for (auto i = 0; i < arr.size(); i++) {
     auto elemArr = arr[i].getArrayData();
-    auto elem = resolveTSStatically(env, elemArr, declaringCls);
+    auto elem = resolveTSStaticallyImpl(env, seenTs, elemArr, declaringCls);
     if (!elem) return nullptr;
     arr.set(i, Variant(elem));
   }
   return arr.detach();
 }
 
-} // namespace
-
 ArrayData*
-resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls) {
+resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
+                        const php::Class* declaringCls) {
+  if (seenTs.contains(ts)) return nullptr;
+  seenTs.emplace(ts);
+  SCOPE_EXIT { seenTs.erase(ts); };
+
   auto const addModifiers = [&](ArrayData* result) {
     auto a = Array::attach(result);
     if (is_ts_like(ts) && !is_ts_like(a.get())) {
@@ -621,7 +629,8 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls) {
     case TypeStructure::Kind::T_arraylike: {
       if (!ts->exists(s_generic_types)) return finish(ts);
       auto const generics = get_ts_generic_types(ts);
-      auto rgenerics = resolveTSListStatically(env, generics, declaringCls);
+      auto rgenerics =
+        resolveTSListStatically(env, seenTs, generics, declaringCls);
       if (!rgenerics) return nullptr;
       auto result = const_cast<ArrayData*>(ts);
       return finish(result->set(s_generic_types.get(), Variant(rgenerics)));
@@ -635,7 +644,7 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls) {
       return finish(ts);
     case TypeStructure::Kind::T_tuple: {
       auto const elems = get_ts_elem_types(ts);
-      auto relems = resolveTSListStatically(env, elems, declaringCls);
+      auto relems = resolveTSListStatically(env, seenTs, elems, declaringCls);
       if (!relems) return nullptr;
       auto result = const_cast<ArrayData*>(ts);
       return finish(result->set(s_elem_types.get(), Variant(relems)));
@@ -650,7 +659,8 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls) {
       auto result = const_cast<ArrayData*>(ts);
       if (ts->exists(s_generic_types)) {
         auto const generics = get_ts_generic_types(ts);
-        auto rgenerics = resolveTSListStatically(env, generics, declaringCls);
+        auto rgenerics =
+          resolveTSListStatically(env, seenTs, generics, declaringCls);
         if (!rgenerics) return nullptr;
         result = result->set(s_generic_types.get(), Variant(rgenerics));
       }
@@ -697,8 +707,8 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls) {
         if (checkNoOverrideOnFirst && i == 0 && !cnst->isNoOverride) {
           return nullptr;
         }
-        typeCnsVal = resolveTSStatically(env, cnst->val->m_data.parr,
-                                         cnst->cls);
+        typeCnsVal = resolveTSStaticallyImpl(env, seenTs,
+                                             cnst->val->m_data.parr, cnst->cls);
         if (!typeCnsVal) return nullptr;
         if (i == size - 1) break;
         auto const kind = get_ts_kind(typeCnsVal);
@@ -712,10 +722,12 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls) {
       return finish(addModifiers(typeCnsVal));
     }
     case TypeStructure::Kind::T_fun: {
-      auto rreturn = resolveTSStatically(env, get_ts_return_type(ts),
-                                         declaringCls);
+      auto rreturn = resolveTSStaticallyImpl(env, seenTs,
+                                             get_ts_return_type(ts),
+                                             declaringCls);
       if (!rreturn) return nullptr;
-      auto rparams = resolveTSListStatically(env, get_ts_param_types(ts),
+      auto rparams = resolveTSListStatically(env, seenTs,
+                                             get_ts_param_types(ts),
                                              declaringCls);
       if (!rparams) return nullptr;
       auto result = const_cast<ArrayData*>(ts)
@@ -723,7 +735,8 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls) {
         ->set(s_param_types.get(), Variant(rparams));
       auto const variadic = get_ts_variadic_type_opt(ts);
       if (variadic) {
-        auto rvariadic = resolveTSStatically(env, variadic, declaringCls);
+        auto rvariadic =
+          resolveTSStaticallyImpl(env, seenTs, variadic, declaringCls);
         if (!rvariadic) return nullptr;
         result = result->set(s_variadic_type.get(), Variant(rvariadic));
       }
@@ -738,6 +751,14 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls) {
       return nullptr;
   }
   not_reached();
+}
+
+} // namespace
+
+ArrayData*
+resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls) {
+  hphp_fast_set<SArray> seenTs;
+  return resolveTSStaticallyImpl(env, seenTs, ts, declaringCls);
 }
 
 //////////////////////////////////////////////////////////////////////

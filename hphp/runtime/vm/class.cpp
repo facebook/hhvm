@@ -1288,32 +1288,31 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
     }
   }
 
-  // This constant has a non-scalar initializer, meaning it will be potentially
-  // different in different requests, which we store separately in an array
-  // living off in RDS.
+  /*
+   * We have either a constant with a non-scalar initializer or an unresolved
+   * type constant, meaning it will be potentially different in different
+   * requests, which we store separately in an array in RDS.
+   *
+   * We need a special marker value in the non-scalar constant cache to indicate
+   * that we're currently evaluating the value of a (type) constant. If we
+   * attempt to evaluate the value of a (type) constant, and the special marker
+   * is present, that means the (type) constant is recursively defined and
+   * we'll raise an error. The globals array is never a valid value of a (type)
+   * constant, so we use it as the marker.
+   */
   m_nonScalarConstantCache.bind(rds::Mode::Normal);
   auto& clsCnsData = *m_nonScalarConstantCache;
-
-  /*
-   * We need a special marker value in the non-scalar constant cache to indicate
-   * that we're currently evaluating the value of a constant. If we attempt to
-   * evaluate the value of a constant, and the marker for that constant is
-   * present, that means the constant is recursively defined and we'll raise an
-   * error. We want to only store valid values in the cache to avoid breaking
-   * invariants, so we'll use the globals array for this purpose. We don't allow
-   * storing the globals array in a class constant, so this is unambiguous.
-   */
-
   if (m_nonScalarConstantCache.isInit()) {
     if (auto cCns = clsCnsData->rval(clsCnsName)) {
-      // There's an entry in the cache for this constant. If its the globals
-      // array, this constant is recursively defined, so raise an
-      // error. Otherwise just return it.
+      // There's an entry in the cache for this (type) constant. If its the
+      // globals array, this (type) constant is recursively defined, so raise
+      // an error. Otherwise just return it.
       if (UNLIKELY(isArrayType(cCns.type()) &&
                    cCns.val().parr == get_global_variables())) {
         raise_error(
           folly::sformat(
-            "Cannot declare self-referencing constant '{}::{}'",
+            "Cannot declare self-referencing {} '{}::{}'",
+            cns.isType() ? "type constant" : "constant",
             name(),
             clsCnsName
           )
@@ -1321,20 +1320,26 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
       }
       return cCns.tv();
     }
+  } else {
+    // Because RDS uses a generation number scheme, when isInit was false we
+    // may have a pointer to a (no-longer extant) ArrayData in our RDS entry.
+    // Use detach to clear our Array so we don't attempt to decref the stale
+    // ArrayData.
+    clsCnsData.detach();
+    clsCnsData = Array::attach(
+      MixedArray::MakeReserveDict(m_constants.size())
+    );
+    m_nonScalarConstantCache.markInit();
   }
 
-  auto makeCache = [&] {
-    if (!m_nonScalarConstantCache.isInit()) {
-      clsCnsData.detach();
-      clsCnsData = Array::attach(
-        MixedArray::MakeReserveDict(m_constants.size())
-      );
-      m_nonScalarConstantCache.markInit();
-    }
-  };
+  // We're going to run the 86cinit to get the constant's value, or try to
+  // resolve the type constant. Store the globals array in the (type)
+  // constant's cache entry to prevent recursion.
+  auto marker = make_array_like_tv(get_global_variables());
+  clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(&marker), true /* isKey */);
 
-  // Resolve type constant, if needed.
   if (cns.isType()) {
+    // Resolve type constant, if needed
     if (what == ClsCnsLookup::IncludeTypesPartial) {
       return make_tv<KindOfUninit>();
     }
@@ -1369,16 +1374,9 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
     }
 
     auto tv = make_persistent_array_like_tv(ad);
-    makeCache();
     clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(&tv), true /* isKey */);
     return tv;
   }
-
-  // We're going to run the 86cinit to get the constant's value. Store the
-  // globals array in the constant's cache entry to prevent recursion.
-  makeCache();
-  auto marker = make_array_like_tv(get_global_variables());
-  clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(&marker), true /* isKey */);
 
   // The class constant has not been initialized yet; do so.
   auto const meth86cinit = cns.cls->lookupMethod(s_86cinit.get());

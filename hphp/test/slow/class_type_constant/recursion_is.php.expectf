@@ -1,0 +1,2 @@
+Warning: Cannot declare self-referencing type constant 'A::B' in %s/recursion_is.php on line 9
+bool(false)

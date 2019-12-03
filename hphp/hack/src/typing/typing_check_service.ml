@@ -259,9 +259,7 @@ let process_files
   File_provider.local_changes_push_stack ();
   Ast_provider.local_changes_push_stack ();
 
-  let process_file_profiled dynamic_view_files opts acc file =
-    let start_time = Unix.gettimeofday () in
-    let result = process_file dynamic_view_files opts acc file in
+  let profile_log start_time file result =
     let files_to_declare =
       List.count (snd result) ~f:(fun f ->
           match f with
@@ -277,25 +275,23 @@ let process_files
       ~files_to_declare
       ~absolute:(Relative_path.to_absolute file.path)
       ~relative:filepath;
-    let _t =
+    let _t : float =
       Hh_logger.log_duration
         (Printf.sprintf "%s [type-check]" filepath)
         start_time
     in
-    result
-  in
-  let process_file_wrapper =
-    if !Utils.profile_log then
-      process_file_profiled
-    else
-      process_file
+    ()
   in
   let rec process_or_exit errors progress =
     match progress.remaining with
     | fn :: fns ->
       let (errors, deferred) =
         match fn with
-        | Check file -> process_file_wrapper dynamic_view_files opts errors file
+        | Check file ->
+          let start_time = Unix.gettimeofday () in
+          let result = process_file dynamic_view_files opts errors file in
+          if !Utils.profile_log then profile_log start_time file result;
+          result
         | Declare path ->
           let errors = Decl_service.decl_file errors path in
           (errors, [])

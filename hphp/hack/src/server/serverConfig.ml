@@ -335,6 +335,8 @@ let load config_filename options =
       ~tco_shallow_class_decl:local_config.ServerLocalConfig.shallow_class_decl
       ~profile_type_check_duration_threshold:
         local_config.ServerLocalConfig.profile_type_check_duration_threshold
+      ~profile_type_check_twice:
+        local_config.ServerLocalConfig.profile_type_check_twice
       ~profile_owner:local_config.ServerLocalConfig.profile_owner
       ~profile_desc:local_config.ServerLocalConfig.profile_desc
       ?tco_like_type_hints:(bool_opt "like_type_hints" config)

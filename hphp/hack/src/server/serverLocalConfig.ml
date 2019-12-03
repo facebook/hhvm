@@ -116,8 +116,10 @@ type t = {
   tico_invalidate_files: bool;
   (* Use finer grain hh_server dependencies *)
   tico_invalidate_smart: bool;
-  (* If --profile-log, we'll record telemetry on typechecks that took longer than the threshold *)
+  (* If --profile-log, we'll record telemetry on typechecks that took longer than the threshold. In case of profile_type_check_twice we judge by the second type check. *)
   profile_type_check_duration_threshold: float;
+  (* The flag "--config profile_type_check_twice=true" causes each file to be typechecked twice in succession. If --profile-log then both times are logged. *)
+  profile_type_check_twice: bool;
   (* If --profile-log, we can use "--config profile_owner=<str>" to send an arbitrary "owner" along with the telemetry *)
   profile_owner: string;
   (* If --profile-log, we can use "--config profile_desc=<str>" to send an arbitrary "desc" along with telemetry *)
@@ -214,6 +216,7 @@ let default =
     tico_invalidate_files = false;
     tico_invalidate_smart = false;
     profile_type_check_duration_threshold = 0.05;
+    profile_type_check_twice = false;
     profile_owner = "";
     profile_desc = "";
     (* seconds *)
@@ -634,6 +637,12 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.profile_type_check_duration_threshold
       config
   in
+  let profile_type_check_twice =
+    bool_if_version
+      "profile_type_check_twice"
+      ~default:default.profile_type_check_twice
+      config
+  in
   let profile_owner =
     string_ "profile_owner" ~default:default.profile_owner config
   in
@@ -714,6 +723,7 @@ let load_ fn ~silent ~current_version overrides =
     tico_invalidate_files;
     tico_invalidate_smart;
     profile_type_check_duration_threshold;
+    profile_type_check_twice;
     profile_owner;
     profile_desc;
     use_lru_workers;

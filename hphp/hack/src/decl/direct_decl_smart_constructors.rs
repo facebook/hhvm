@@ -265,6 +265,7 @@ pub enum HintValue {
     ArrayKey,
     NoReturn,
     Apply(Box<(Id, Vec<Node_>)>),
+    Tuple(Vec<Node_>),
 }
 
 #[derive(Clone, Debug)]
@@ -315,6 +316,8 @@ pub enum Node_ {
     TypeConstraint(Box<(ConstraintKind, Node_)>),
     LessThan(Pos),    // This needs a pos since it shows up in generics.
     GreaterThan(Pos), // This needs a pos since it shows up in generics.
+    LeftParen(Pos),   // This needs a pos since it shows up in tuples.
+    RightParen(Pos),  // This needs a pos since it shows up in tuples.
 
     // Box the insides of the vector so we don't need to reallocate them when
     // we pull them out of the TypeConstraint variant.
@@ -336,9 +339,11 @@ impl Node_ {
         match self {
             Node_::Name(_, pos) => Ok(pos.clone()),
             Node_::Hint(_, pos) => Ok(pos.clone()),
-            Node_::Backslash(pos) | Node_::LessThan(pos) | Node_::GreaterThan(pos) => {
-                Ok(pos.clone())
-            }
+            Node_::Backslash(pos)
+            | Node_::LessThan(pos)
+            | Node_::GreaterThan(pos)
+            | Node_::LeftParen(pos)
+            | Node_::RightParen(pos) => Ok(pos.clone()),
             Node_::ListItem(items) => {
                 let fst = &items.0;
                 let snd = &items.1;
@@ -459,6 +464,12 @@ impl DirectDeclSmartConstructors<'_> {
                                 .collect::<Result<Vec<_>, String>>()?,
                         )
                     }
+                    HintValue::Tuple(items) => Ty_::Ttuple(
+                        items
+                            .iter()
+                            .map(|node| self.node_to_ty(node, type_variables))
+                            .collect::<Result<Vec<_>, String>>()?,
+                    ),
                 };
                 Ok(Ty(reason, Box::new(ty_)))
             }
@@ -813,6 +824,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
             TokenKind::LessThan => Node_::LessThan(token_pos(self)),
             TokenKind::GreaterThan => Node_::GreaterThan(token_pos(self)),
+            TokenKind::LeftParen => Node_::LeftParen(token_pos(self)),
+            TokenKind::RightParen => Node_::RightParen(token_pos(self)),
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
             TokenKind::Async => Node_::Async,
@@ -1321,5 +1334,17 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_classish_body(&mut self, _arg0: Self::R, body: Self::R, _arg2: Self::R) -> Self::R {
         Ok(Node_::ClassishBody(body?.into_vec()))
+    }
+
+    fn make_tuple_type_specifier(
+        &mut self,
+        left_paren: Self::R,
+        inner: Self::R,
+        right_paren: Self::R,
+    ) -> Self::R {
+        // We don't need to include the inner list in this position merging
+        // because by definition it's already contained by the two brackets.
+        let pos = Pos::merge(&left_paren?.get_pos()?, &right_paren?.get_pos()?)?;
+        Ok(Node_::Hint(HintValue::Tuple(inner?.into_vec()), pos))
     }
 }

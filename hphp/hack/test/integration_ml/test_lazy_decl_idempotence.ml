@@ -61,6 +61,7 @@ let test () =
       Typing_check_service.init_id = "";
       recheck_id = Some "";
       profile_log = false;
+      profile_type_check_twice = false;
     }
   in
   let delegate_state = Typing_service_delegate.create () in

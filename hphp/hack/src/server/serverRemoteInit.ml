@@ -22,6 +22,7 @@ let init
           init_id = Random_id.short_string ();
           recheck_id = None;
           profile_log = false;
+          profile_type_check_twice = false;
         }
       in
       let delegate_state = Typing_service_delegate.create () in

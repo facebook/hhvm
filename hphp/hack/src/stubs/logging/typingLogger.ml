@@ -15,6 +15,7 @@ module ProfileTypeCheck = struct
   let log
       ~recheck_id:_
       ~start_time:_
+      ~second_start_time_opt:_
       ~times_checked:_
       ~files_to_declare:_
       ~absolute:_

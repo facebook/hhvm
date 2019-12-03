@@ -37,6 +37,7 @@ type check_info = {
   init_id: string;
   recheck_id: string option;
   profile_log: bool;
+  profile_type_check_twice: bool;
 }
 
 type files_to_process = file_computation list

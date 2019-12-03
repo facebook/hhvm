@@ -256,7 +256,7 @@ let process_files
   File_provider.local_changes_push_stack ();
   Ast_provider.local_changes_push_stack ();
 
-  let profile_log start_time file result =
+  let profile_log start_time second_start_time_opt file result =
     let files_to_declare =
       List.count (snd result) ~f:(fun f ->
           match f with
@@ -267,6 +267,7 @@ let process_files
     TypingLogger.ProfileTypeCheck.log
       ~recheck_id:check_info.recheck_id
       ~start_time
+      ~second_start_time_opt
       ~times_checked:(file.deferred_count + 1)
       ~files_to_declare
       ~absolute:(Relative_path.to_absolute file.path)
@@ -286,7 +287,18 @@ let process_files
         | Check file ->
           let start_time = Unix.gettimeofday () in
           let result = process_file dynamic_view_files opts errors file in
-          if check_info.profile_log then profile_log start_time file result;
+          let second_start_time =
+            if check_info.profile_type_check_twice then
+              let t = Unix.gettimeofday () in
+              (* we're running this routine solely for the side effect *)
+              (* of seeing how long it takes to run. *)
+              let _ignored = process_file dynamic_view_files opts errors file in
+              Some t
+            else
+              None
+          in
+          if check_info.profile_log then
+            profile_log start_time second_start_time file result;
           result
         | Declare path ->
           let errors = Decl_service.decl_file errors path in

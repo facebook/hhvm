@@ -164,4 +164,12 @@ let get_check_info genv env =
     let init_id = env.init_env.init_id in
     let recheck_id = env.init_env.recheck_id in
     let profile_log = ServerArgs.profile_log genv.options in
-    { Typing_check_service.init_id; recheck_id; profile_log })
+    let profile_type_check_twice =
+      genv.local_config.ServerLocalConfig.profile_type_check_twice
+    in
+    {
+      Typing_check_service.init_id;
+      recheck_id;
+      profile_log;
+      profile_type_check_twice;
+    })

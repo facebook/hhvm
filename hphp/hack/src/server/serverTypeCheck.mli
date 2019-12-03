@@ -21,10 +21,6 @@ type check_results = {
 val type_check :
   ServerEnv.genv -> ServerEnv.env -> check_kind -> ServerEnv.env * check_results
 
-(* just add also some debugging information on stdout *)
-val check :
-  ServerEnv.genv -> ServerEnv.env -> check_kind -> ServerEnv.env * check_results
-
 (****************************************************************************)
 (* Debugging: Declared here to stop ocamlc yelling at us for unused defs *)
 (****************************************************************************)

@@ -11,7 +11,6 @@
 (* Error module                                                              *)
 (*****************************************************************************)
 open Core_kernel
-open Utils
 
 let get_save_state_result_props_json
     (save_state_result : SaveStateServiceTypes.save_state_result) :
@@ -98,10 +97,6 @@ let print_error_list
       ~f:
         begin
           fun s ->
-          if !debug then (
-            Out_channel.output_string stdout s;
-            Out_channel.flush stdout
-          );
           Out_channel.output_string oc s;
           Out_channel.output_string oc "\n"
         end

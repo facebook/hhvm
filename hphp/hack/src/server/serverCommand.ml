@@ -128,7 +128,7 @@ let full_recheck_if_needed' genv env reason =
   else
     let () = Hh_logger.log "Starting a blocking type-check due to %s" reason in
     let env = { env with ServerEnv.can_interrupt = false } in
-    let (env, _) = ServerTypeCheck.(check genv env Full_check) in
+    let (env, _) = ServerTypeCheck.(type_check genv env Full_check) in
     let env = { env with ServerEnv.can_interrupt = true } in
     assert (ServerEnv.(env.full_check = Full_check_done));
     env

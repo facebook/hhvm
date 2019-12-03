@@ -334,7 +334,7 @@ let handle_connection genv env client client_kind =
 let recheck genv old_env check_kind =
   let can_interrupt = check_kind = ServerTypeCheck.Full_check in
   let old_env = { old_env with can_interrupt } in
-  let (new_env, res) = ServerTypeCheck.check genv old_env check_kind in
+  let (new_env, res) = ServerTypeCheck.type_check genv old_env check_kind in
   let new_env = { new_env with can_interrupt = true } in
   if old_env.init_env.needs_full_init && not new_env.init_env.needs_full_init
   then

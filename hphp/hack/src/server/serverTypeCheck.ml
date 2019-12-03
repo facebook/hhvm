@@ -12,7 +12,6 @@ open ServerCheckUtils
 open SearchServiceRunner
 open ServerEnv
 open Reordered_argument_collections
-open Utils
 module SLC = ServerLocalConfig
 
 type check_kind =
@@ -1409,15 +1408,3 @@ let type_check_unsafe genv env kind =
 let type_check genv env kind =
   ServerUtils.with_exit_on_exception @@ fun () ->
   type_check_unsafe genv env kind
-
-(*****************************************************************************)
-(* Checks that the working directory is clean *)
-(*****************************************************************************)
-
-let check genv env =
-  if !debug then (
-    Printf.printf "****************************************\n";
-    Printf.printf "Start Check\n";
-    Out_channel.flush stdout
-  );
-  type_check genv env

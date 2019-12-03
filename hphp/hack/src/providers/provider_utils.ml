@@ -57,7 +57,6 @@ let internal_load_entry
     Errors.ignore_ (fun () ->
         Ast_provider.parse_file_input ~full:true path file_input)
   in
-  Ast_provider.provide_ast_hint path ast Ast_provider.Full;
   {
     Provider_context.path;
     file_input;

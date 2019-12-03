@@ -746,12 +746,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         //
         // The facts parser, meanwhile, solves this problem by keeping track of
         // a micro-AST, and only inserting names into the returned facts struct
-        // at the very end. This would be convenient for us, but it would
-        // require going back to allocating and returning a micro-AST, then
-        // walking over that again, instead of building up the decls struct as
-        // we go, which is what we do now. Unfortunately, since decls are much
-        // more complex than facts (which are just lists of toplevel symbols),
-        // the cost of doing things that way is too high for our purposes.
+        // at the very end. This would be convenient for us, but I have concerns
+        // about the future-proofing of ensuring that 100% of all decls bubble
+        // up properly in the face of changing code and behavior.
         //
         // So we can't allocate sub-trees for each namespace, and we can't just
         // wait until we hit make_namespace_XXXX then rewrite all the names, so
@@ -772,9 +769,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // a namespace" state and push the newly created namespace onto our
         // namespace stack. Then, in all of the various make_namespace_XXXX
         // methods, we pop the namespace (since we know we've just exited it).
-        //
-        // So there we have it. Fully inline namespace tracking, and all it cost
-        // was a little elbow grease and a lot of dignity.
         Ok(match kind {
             TokenKind::Name | TokenKind::Variable => {
                 let name = token_text(self);

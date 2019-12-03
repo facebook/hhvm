@@ -127,21 +127,7 @@ let merge_parse (acc1, status1, files1) (acc2, status2, files2) =
     Relative_path.Set.union files1 files2 )
 
 let parse_files ?(quick = false) ?(show_all_errors = false) popt acc fnl =
-  let parse =
-    if !Utils.profile_log then (
-      fun acc fn ->
-    let t = Unix.gettimeofday () in
-    let result = parse ~quick ~show_all_errors popt acc fn in
-    let t' = Unix.gettimeofday () in
-    let msg =
-      Printf.sprintf "%f %s [parsing]" (t' -. t) (Relative_path.suffix fn)
-    in
-    !Utils.log msg;
-    result
-    ) else
-      parse ~quick ~show_all_errors popt
-  in
-  List.fold_left fnl ~init:acc ~f:parse
+  List.fold_left fnl ~init:acc ~f:(parse ~quick ~show_all_errors popt)
 
 let parse_parallel
     ?(quick = false) ?(show_all_errors = false) workers get_next popt =

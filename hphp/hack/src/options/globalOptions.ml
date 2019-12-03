@@ -52,6 +52,8 @@ type t = {
   po_rust_parser_errors: bool;
   po_rust_lowerer: bool;
   profile_type_check_duration_threshold: float;
+  profile_owner: string;
+  profile_desc: string;
   tco_like_type_hints: bool;
   tco_union_intersection_type_hints: bool;
   tco_like_casts: bool;
@@ -206,6 +208,8 @@ let default =
     po_rust_parser_errors = false;
     po_rust_lowerer = false;
     profile_type_check_duration_threshold = 0.05;
+    profile_owner = "";
+    profile_desc = "";
     tco_like_type_hints = false;
     tco_union_intersection_type_hints = false;
     tco_like_casts = false;
@@ -290,6 +294,8 @@ let make
     ?(po_rust_lowerer = default.po_rust_lowerer)
     ?(profile_type_check_duration_threshold =
       default.profile_type_check_duration_threshold)
+    ?(profile_owner = default.profile_owner)
+    ?(profile_desc = default.profile_desc)
     ?(tco_like_type_hints = default.tco_like_type_hints)
     ?(tco_union_intersection_type_hints =
       default.tco_union_intersection_type_hints)
@@ -377,6 +383,8 @@ let make
     po_rust_parser_errors;
     po_rust_lowerer;
     profile_type_check_duration_threshold;
+    profile_owner;
+    profile_desc;
     tco_like_type_hints;
     tco_union_intersection_type_hints;
     tco_like_casts;
@@ -508,6 +516,10 @@ let po_rust_lowerer t = t.po_rust_lowerer
 
 let profile_type_check_duration_threshold t =
   t.profile_type_check_duration_threshold
+
+let profile_owner t = t.profile_owner
+
+let profile_desc t = t.profile_desc
 
 let tco_like_type_hints t = t.tco_like_type_hints
 

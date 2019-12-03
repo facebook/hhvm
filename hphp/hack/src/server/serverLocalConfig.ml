@@ -116,7 +116,12 @@ type t = {
   tico_invalidate_files: bool;
   (* Use finer grain hh_server dependencies *)
   tico_invalidate_smart: bool;
+  (* If --profile-log, we'll record telemetry on typechecks that took longer than the threshold *)
   profile_type_check_duration_threshold: float;
+  (* If --profile-log, we can use "--config profile_owner=<str>" to send an arbitrary "owner" along with the telemetry *)
+  profile_owner: string;
+  (* If --profile-log, we can use "--config profile_desc=<str>" to send an arbitrary "desc" along with telemetry *)
+  profile_desc: string;
   (* Use shared_lru workers *)
   use_lru_workers: bool;
   (* Allows the IDE to show the 'find all implementations' button *)
@@ -209,6 +214,8 @@ let default =
     tico_invalidate_files = false;
     tico_invalidate_smart = false;
     profile_type_check_duration_threshold = 0.05;
+    profile_owner = "";
+    profile_desc = "";
     (* seconds *)
     use_lru_workers = false;
     go_to_implementation = true;
@@ -627,6 +634,12 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.profile_type_check_duration_threshold
       config
   in
+  let profile_owner =
+    string_ "profile_owner" ~default:default.profile_owner config
+  in
+  let profile_desc =
+    string_ "profile_desc" ~default:default.profile_desc config
+  in
   let use_lru_workers =
     bool_if_version "use_lru_workers" ~default:default.use_lru_workers config
   in
@@ -701,6 +714,8 @@ let load_ fn ~silent ~current_version overrides =
     tico_invalidate_files;
     tico_invalidate_smart;
     profile_type_check_duration_threshold;
+    profile_owner;
+    profile_desc;
     use_lru_workers;
     go_to_implementation;
   }

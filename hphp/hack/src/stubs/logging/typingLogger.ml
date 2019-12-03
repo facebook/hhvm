@@ -8,7 +8,7 @@
  *)
 
 module ProfileTypeCheck = struct
-  let init ~threshold:_ ~max_times_to_defer:_ ~root:_ = ()
+  let init ~threshold:_ ~owner:_ ~desc:_ ~max_times_to_defer:_ ~root:_ = ()
 
   let log
       ~init_id:_

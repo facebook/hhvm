@@ -1156,15 +1156,15 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   let logging_init init_id ~is_worker =
     (* It's OK to unconditionally initialize profile logging; actual logging to
         Scuba will only occur if we were started with --profile-log *)
-    let profile_threshold =
-      local_config.ServerLocalConfig.profile_type_check_duration_threshold
-    in
     let max_times_to_defer =
       local_config.ServerLocalConfig.max_times_to_defer_type_checking
     in
     Hh_logger.Level.set_min_level local_config.ServerLocalConfig.min_log_level;
     TypingLogger.ProfileTypeCheck.init
-      ~threshold:profile_threshold
+      ~threshold:
+        local_config.ServerLocalConfig.profile_type_check_duration_threshold
+      ~owner:local_config.ServerLocalConfig.profile_owner
+      ~desc:local_config.ServerLocalConfig.profile_desc
       ~max_times_to_defer
       ~root:(Path.to_string root);
     if Sys_utils.is_test_mode () then

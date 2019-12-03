@@ -146,6 +146,11 @@ type t = {
       should be logged. It's only in effect if we're profiling type checking to begin
       with. To profile, pass --profile-log to hh_server. *)
   profile_type_check_duration_threshold: float;
+  (* Two more profile options, used solely to send to logging backend. These allow
+      the person who launches hack, to provide unique identifying keys that get
+      sent to logging, so they can correlate/sort/filter their logs as they want. *)
+  profile_owner: string;
+  profile_desc: string;
   (* Enables like type hints *)
   tco_like_type_hints: bool;
   (* Enables union and intersection type hints *)
@@ -262,6 +267,8 @@ val make :
   ?po_rust_parser_errors:bool ->
   ?po_rust_lowerer:bool ->
   ?profile_type_check_duration_threshold:float ->
+  ?profile_owner:string ->
+  ?profile_desc:string ->
   ?tco_like_type_hints:bool ->
   ?tco_union_intersection_type_hints:bool ->
   ?tco_like_casts:bool ->
@@ -410,6 +417,10 @@ val po_rust_parser_errors : t -> bool
 val po_rust_lowerer : t -> bool
 
 val profile_type_check_duration_threshold : t -> float
+
+val profile_owner : t -> string
+
+val profile_desc : t -> string
 
 val tco_like_type_hints : t -> bool
 

@@ -295,7 +295,6 @@ let parse_file ~config_list ~config_jsons filename text =
         ~disable_nontoplevel_declarations:
           (phpism_disable_nontoplevel_declarations co)
         ~disable_static_closures:(phpism_disable_static_closures co)
-        ~disable_halt_compiler:(phpism_disable_halt_compiler co)
         ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
         ~enable_class_level_where_clauses:(enable_class_level_where_clauses co)
         ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)

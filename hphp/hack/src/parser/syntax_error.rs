@@ -951,3 +951,5 @@ pub fn invalid_typehint_alias(alias: &str, hint: &str) -> Error {
         hint.to_string(),
     ))
 }
+pub const halt_compiler_is_disabled: Error =
+    Cow::Borrowed("__halt_compiler() is not supported in Hack");

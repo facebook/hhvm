@@ -65,14 +65,6 @@ type env = {
   (* Information flowing back up *)
   mutable lifted_awaits: lifted_awaits option;
   mutable tmp_var_counter: int;
-  (* Whether we've seen COMPILER_HALT_OFFSET. The value of COMPILER_HALT_OFFSET
-    defaults to 0 if HALT_COMPILER isn't called.
-    None -> COMPILER_HALT_OFFSET isn't in the source file
-    Some 0 -> COMPILER_HALT_OFFSET is in the source file, but HALT_COMPILER isn't
-    Some x -> COMPILER_HALT_OFFSET is in the source file,
-              HALT_COMPILER is at x bytes offset in the file.
-  *)
-  saw_compiler_halt_offset: int option ref;
   recursion_depth: int ref;
   cls_reified_generics: SSet.t ref;
   in_static_method: bool ref;
@@ -125,7 +117,6 @@ let make_env
     hacksperimental;
     top_level_statements = true;
     saw_yield = false;
-    saw_compiler_halt_offset = ref None;
     recursion_depth = ref 0;
     cls_reified_generics = ref SSet.empty;
     in_static_method = ref false;
@@ -510,8 +501,6 @@ if there already is one, since that one will likely be better than this one. *)
     | _ ->
       let name = text node in
       (* Special case for __LINE__; never ignore position for that special name *)
-      if name = "__COMPILER_HALT_OFFSET__" then
-        env.saw_compiler_halt_offset := Some 0;
       let p = pPos node env in
       (p, name)
 
@@ -3864,17 +3853,10 @@ if there already is one, since that one will likely be better than this one. *)
             _;
           } as cur_node )
         :: nodel ->
-        ( if ParserOptions.disable_halt_compiler env.parser_options then
-          raise_parsing_error
-            env
-            (`Node cur_node)
-            SyntaxError.halt_compiler_is_disabled
-        (* If we saw COMPILER_HALT_OFFSET, calculate the position of HALT_COMPILER *)
-        else if !(env.saw_compiler_halt_offset) <> None then
-          let pos = pPos cur_node env in
-          (* __COMPILER_HALT_OFFSET__ takes value equal to halt_compiler's end position *)
-          let s = Pos.end_cnum pos in
-          env.saw_compiler_halt_offset := Some s );
+        raise_parsing_error
+          env
+          (`Node cur_node)
+          SyntaxError.halt_compiler_is_disabled;
         aux env acc nodel
       | node :: nodel ->
         let acc =
@@ -4042,41 +4024,7 @@ if there already is one, since that one will likely be better than this one. *)
    * Front-end matter
 )*****************************************************************************)
 
-  let elaborate_halt_compiler ast env source_text =
-    match !(env.saw_compiler_halt_offset) with
-    | Some x ->
-      let elaborate_halt_compiler_const defs =
-        let visitor =
-          object
-            inherit [_] endo as super
-
-            method! on_expr env expr =
-              match expr with
-              | (p, Id (_, "__COMPILER_HALT_OFFSET__")) ->
-                let start_offset = Pos.start_cnum p in
-                (* Construct a new position and id *)
-                let id = string_of_int x in
-                let end_offset = start_offset + String.length id in
-                let pos_file = Pos.filename p in
-                let pos =
-                  SourceText.relative_pos
-                    pos_file
-                    source_text
-                    start_offset
-                    end_offset
-                in
-                (pos, Ast.Int id)
-              | _ -> super#on_expr env expr
-          end
-        in
-        visitor#on_program () defs
-      in
-      elaborate_halt_compiler_const ast
-    | None -> ast
-
-  let lower env ~source_text ~script : program =
-    let ast = runP pScript script env in
-    elaborate_halt_compiler ast env source_text
+  let lower env ~script : program = runP pScript script env
 end
 
 (* TODO: Make these not default to positioned_syntax *)
@@ -4326,7 +4274,6 @@ let lower_tree
       Ok
         (FromPositionedSyntax.lower
            env
-           ~source_text
            ~script:(PositionedSyntaxTree.root tree_to_lower))
     with
     | Failure msg -> Error msg

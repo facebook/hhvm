@@ -38,7 +38,6 @@ E_DEPRECATED: int(8192)
 E_USER_DEPRECATED: int(16384)
 E_ALL: int(32767)
 E_STRICT: int(2048)
-%a
 TRUE: bool(true)
 FALSE: bool(false)
 NULL: NULL

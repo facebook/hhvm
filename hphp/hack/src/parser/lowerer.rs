@@ -5022,8 +5022,11 @@ where
             match &nodes[i].syntax {
                 EndOfFile(_) => break,
                 n if is_halt(n) => {
-                    let pos = Self::p_pos(nodes[i], env);
-                    *env.saw_compiler_halt_offset() = Some(pos.end_cnum());
+                    Self::raise_parsing_error(
+                        nodes[i],
+                        env,
+                        &syntax_error::halt_compiler_is_disabled,
+                    );
                 }
                 _ => match Self::p_def(nodes[i], env) {
                     Err(Error::APIMissingSyntax { .. }) if env.fail_open => {}
@@ -5044,38 +5047,24 @@ where
         }
     }
 
-    fn elaborate_halt_compiler(ast: ast::Program, env: &mut Env) -> ast::Program {
-        match *env.saw_compiler_halt_offset() {
-            Some(_) => unimplemented!(),
-            _ => ast,
-        }
-    }
-
     fn lower(
         env: &mut Env<'a>,
         script: &Syntax<T, V>,
     ) -> std::result::Result<ast::Program, String> {
-        let aast_result = Self::p_script(script, env);
-        let aast = match aast_result {
-            Ok(ast) => ast,
-            Err(err) => {
-                return match err {
-                    Error::APIMissingSyntax {
-                        expecting,
-                        pos,
-                        node_name,
-                        kind,
-                    } => Err(format!(
-                    "missing case in {:?}.\n - pos: {:?}\n - unexpected: '{:?}'\n - kind: {:?}\n",
-                    expecting.to_string(),
-                    pos,
-                    node_name.to_string(),
-                    kind,
-                )),
-                    Error::Failwith(msg) => Err(msg),
-                }
-            }
-        };
-        Ok(Self::elaborate_halt_compiler(aast, env))
+        Self::p_script(script, env).map_err(|e| match e {
+            Error::APIMissingSyntax {
+                expecting,
+                pos,
+                node_name,
+                kind,
+            } => format!(
+                "missing case in {:?}.\n - pos: {:?}\n - unexpected: '{:?}'\n - kind: {:?}\n",
+                expecting.to_string(),
+                pos,
+                node_name.to_string(),
+                kind,
+            ),
+            Error::Failwith(msg) => msg,
+        })
     }
 }

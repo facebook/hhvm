@@ -29,7 +29,6 @@ type t = {
   po_disallow_toplevel_requires: bool;
   po_disable_nontoplevel_declarations: bool;
   po_disable_static_closures: bool;
-  po_disable_halt_compiler: bool;
   po_allow_goto: bool;
   tco_log_inference_constraints: bool;
   tco_disallow_ambiguous_lambda: bool;
@@ -186,7 +185,6 @@ let default =
     po_deregister_php_stdlib = false;
     po_disable_nontoplevel_declarations = false;
     po_disable_static_closures = false;
-    po_disable_halt_compiler = false;
     po_allow_goto = true;
     tco_log_inference_constraints = false;
     tco_disallow_ambiguous_lambda = false;
@@ -253,7 +251,6 @@ let make
     ?(po_disable_nontoplevel_declarations =
       default.po_disable_nontoplevel_declarations)
     ?(po_disable_static_closures = default.po_disable_static_closures)
-    ?(po_disable_halt_compiler = default.po_disable_halt_compiler)
     ?(po_allow_goto = default.po_allow_goto)
     ?(tco_log_inference_constraints = default.tco_log_inference_constraints)
     ?(tco_experimental_features = default.tco_experimental_features)
@@ -365,7 +362,6 @@ let make
     po_disallow_toplevel_requires;
     po_disable_nontoplevel_declarations;
     po_disable_static_closures;
-    po_disable_halt_compiler;
     po_allow_goto;
     tco_log_inference_constraints;
     tco_disallow_ambiguous_lambda;
@@ -463,8 +459,6 @@ let po_disable_nontoplevel_declarations t =
   t.po_disable_nontoplevel_declarations
 
 let po_disable_static_closures t = t.po_disable_static_closures
-
-let po_disable_halt_compiler t = t.po_disable_halt_compiler
 
 let po_allow_goto t = t.po_allow_goto
 

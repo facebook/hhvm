@@ -591,7 +591,6 @@ let parse_options () =
       ~po_disallow_silence:!disallow_silence
       ~po_abstract_static_props:!abstract_static_props
       ~po_disable_unset_class_const:!disable_unset_class_const
-      ~po_disable_halt_compiler:!disable_halt_compiler
       ~po_disallow_func_ptrs_in_constants:!disallow_func_ptrs_in_constants
       ~tco_check_attribute_locations:true
       ~tco_error_php_lambdas:!error_php_lambdas

@@ -57,8 +57,6 @@ trace("E_DEPRECATED", E_DEPRECATED);
 trace("E_USER_DEPRECATED", E_USER_DEPRECATED);
 trace("E_ALL", E_ALL);
 trace("E_STRICT", E_STRICT);
-trace("__COMPILER_HALT_OFFSET__", __COMPILER_HALT_OFFSET__);
 trace("TRUE", TRUE);
 trace("FALSE", FALSE);
 trace("NULL", NULL);
-__halt_compiler();

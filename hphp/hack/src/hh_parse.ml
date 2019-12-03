@@ -453,9 +453,6 @@ let handle_existing_file args filename =
     ParserOptions.with_abstract_static_props popt args.abstract_static_props
   in
   let popt =
-    ParserOptions.with_disable_halt_compiler popt args.disable_halt_compiler
-  in
-  let popt =
     ParserOptions.with_disallow_func_ptrs_in_constants
       popt
       args.disallow_func_ptrs_in_constants

@@ -114,7 +114,7 @@ void readSymbolCntData(CallGraph& cg, std::ifstream& file) {
   std::string line;
   while (std::getline(file, line)) {
     std::string caller, top;
-    uint32_t count;
+    uint64_t count;
     folly::split(" ", line, caller, top, count);
     TargetId idTop = cg.funcToTargetId(top);
     if (idTop == InvalidId) continue;

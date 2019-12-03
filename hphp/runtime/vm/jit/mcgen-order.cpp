@@ -80,7 +80,7 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
   auto addCallerCount = [&] (TCA callAddr,
                              TargetId calleeTargetId,
                              TransID callerTransId,
-                             uint32_t& totalCalls) {
+                             uint64_t& totalCalls) {
     assertx(callerTransId != kInvalidTransID);
     auto const callerFuncId = pd->transRec(callerTransId)->funcId();
     if (!Func::isFuncIdValid(callerFuncId)) return;
@@ -97,7 +97,7 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
 
   auto addCallersCount = [&] (TargetId calleeTargetId,
                               const auto& callerAddrs,
-                              uint32_t& totalCalls) {
+                              uint64_t& totalCalls) {
     for (auto callAddr : callerAddrs) {
       if (!tc::isProfileCodeAddress(callAddr)) continue;
       auto const callerTransId = pd->jmpTransID(callAddr);
@@ -111,7 +111,7 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
     auto func = Func::fromFuncId(fid);
     const auto calleeTargetId = targetID[fid];
     const auto transIds = pd->funcProfTransIDs(fid);
-    uint32_t totalCalls = 0;
+    uint64_t totalCalls = 0;
     for (int nargs = 0; nargs <= func->numNonVariadicParams() + 1; nargs++) {
       auto transId = pd->proflogueTransId(func, nargs);
       if (transId == kInvalidTransID) continue;

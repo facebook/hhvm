@@ -1341,19 +1341,12 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
     Array resolvedTS;
     bool persistent = true;
     try {
-      // We must give TypeStructure::resolve() the same ArrayData* we tested up
-      // above, to avoid reading an already-resolved (by another thread)
-      // ArrayData* from cns. Since resolve() takes a Class::Const and no other
-      // fields of the Const can change, just copy cns and give the copy our
-      // local version of the ArrayData*.
-      auto cnsCopy = cns;
-      cnsCopy.val.m_data.parr = typeCns;
-
-      resolvedTS = TypeStructure::resolve(cnsCopy, this, persistent);
-      assertx(resolvedTS.isDictOrDArray());
+      resolvedTS = TypeStructure::resolve(typeCns, cns.name, cns.cls, this,
+                                          persistent);
     } catch (const Exception& e) {
       raise_error(e.getMessage());
     }
+    assertx(resolvedTS.isDictOrDArray());
 
     auto const ad = ArrayData::GetScalarArray(std::move(resolvedTS));
     if (persistent) {

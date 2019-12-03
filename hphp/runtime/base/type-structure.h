@@ -107,7 +107,9 @@ bool isValidResolvedTypeStructureList(const Array& arr, bool isShape = false);
  * persistent flag
  */
 
-Array resolve(const Class::Const& typeCns,
+Array resolve(const ArrayData* ts,
+              const StringData* clsName,
+              const Class* declCls,
               const Class* typeCnsCls,
               bool& persistent);
 

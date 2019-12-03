@@ -1161,6 +1161,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     in
     Hh_logger.Level.set_min_level local_config.ServerLocalConfig.min_log_level;
     TypingLogger.ProfileTypeCheck.init
+      ~init_id
       ~threshold:
         local_config.ServerLocalConfig.profile_type_check_duration_threshold
       ~owner:local_config.ServerLocalConfig.profile_owner

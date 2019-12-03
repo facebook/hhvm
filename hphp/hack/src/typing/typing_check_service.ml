@@ -265,7 +265,6 @@ let process_files
     in
     let filepath = Relative_path.suffix file.path in
     TypingLogger.ProfileTypeCheck.log
-      ~init_id:check_info.init_id
       ~recheck_id:check_info.recheck_id
       ~start_time
       ~times_checked:(file.deferred_count + 1)

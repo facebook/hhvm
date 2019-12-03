@@ -64,19 +64,22 @@ let write_json
     (tcopt : TypecheckerOptions.t)
     (file_dir : string)
     (tast_lst : (Relative_path.t * Tast.program) list) : unit =
-  let symbol_occurrences = get_decls tast_lst in
-  let json_chunks =
-    Typing_symbol_json_builder.build_json tcopt symbol_occurrences
-  in
-  let (_, channel) =
-    Filename.open_temp_file
-      ~temp_dir:file_dir
-      "glean_symbol_info_chunk_"
-      ".json"
-  in
-  let json = JSON_Array json_chunks in
-  Out_channel.output_string channel (json_to_string ~pretty:true json);
-  Out_channel.close channel
+  try
+    let symbol_occurrences = get_decls tast_lst in
+    let json_chunks =
+      Typing_symbol_json_builder.build_json tcopt symbol_occurrences
+    in
+    let (_, channel) =
+      Filename.open_temp_file
+        ~temp_dir:file_dir
+        "glean_symbol_info_chunk_"
+        ".json"
+    in
+    let json = JSON_Array json_chunks in
+    Out_channel.output_string channel (json_to_string ~pretty:true json);
+    Out_channel.close channel
+  with e ->
+    Printf.eprintf "WARNING: symbol write failure: \n%s" (Exn.to_string e)
 
 let recheck_job
     (tcopt : TypecheckerOptions.t)

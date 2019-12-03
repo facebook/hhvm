@@ -1,0 +1,15 @@
+# @autocargo from //hphp/hack/src/hhbc:rx_rust
+# Signature<<fe1f80cbbb01bdfdf15c71189fcc467aeb479465>>
+[package]
+name = "rx_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../rx.rs"]
+
+[lib]
+path = "../../rx.rs"
+
+[dependencies]
+naming_special_names_rust = { path = "../../../naming" }
+oxidized = { path = "../../../oxidized" }
+# @end of Signature<<fe1f80cbbb01bdfdf15c71189fcc467aeb479465>>

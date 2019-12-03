@@ -1,17 +1,19 @@
+# @autocargo from //hphp/hack/src/parser:positioned_coroutine_parser
+# Signature<<965242b28233df73f5b9379234ea4d4634dc1118>>
 [package]
 name = "positioned_coroutine_parser"
-version = "3.49.0"
 edition = "2018"
+version = "0.0.0"
+include = ["../../ocaml_coroutine_state.rs", "../../ocaml_syntax.rs", "../../ocaml_syntax_generated.rs", "../../positioned_coroutine_parser.rs"]
 
 [lib]
-name = "positioned_coroutine_parser"
 path = "../../positioned_coroutine_parser.rs"
 
 [dependencies]
-parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
-parser_rust = { path = "../..", package = "hack_parser" }
-syntax_smart_constructors = { path = "../syntax_smart_constructors", package = "syntax_smart_constructors" }
-rust_to_ocaml = { path = "../rust_to_ocaml", package = "rust_to_ocaml" }
-ocaml = "^0.7"
-ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
-coroutine_smart_constructors = { path = "../coroutine_smart_constructors", package = "coroutine_smart_constructors" }
+coroutine_smart_constructors = { path = "../coroutine_smart_constructors" }
+ocamlpool_rust = { path = "../../../utils/ocamlpool_rust" }
+parser_rust = { path = "../.." }
+rust_to_ocaml = { path = "../rust_to_ocaml" }
+syntax_smart_constructors = { path = "../syntax_smart_constructors" }
+ocaml = "*"
+# @end of Signature<<965242b28233df73f5b9379234ea4d4634dc1118>>

@@ -26,7 +26,7 @@ let rust =
   (locks /cargo)
   (action
     (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
-      hack_facts_ffi
+      rust_facts_ffi
       rust_facts_ffi
     )
   )

@@ -1,0 +1,18 @@
+# @autocargo from //hphp/hack/src/parser/ppl:rust_ppl_class_rewriter
+# Signature<<7d3640c9bffc8ca49516c9f0ea84fe6340b53fe8>>
+[package]
+name = "rust_ppl_class_rewriter"
+edition = "2018"
+version = "0.0.0"
+include = ["../../rust_ppl_class_rewriter.rs"]
+
+[lib]
+path = "../../rust_ppl_class_rewriter.rs"
+
+[dependencies]
+parser_core_types = { path = "../../../cargo/core_types" }
+parser_rust = { path = "../../.." }
+rust_coroutine = { path = "../../../coroutine/cargo/rust_coroutine" }
+rust_editable_positioned_syntax = { path = "../../../cargo/editable_positioned_syntax" }
+lazy_static = "*"
+# @end of Signature<<7d3640c9bffc8ca49516c9f0ea84fe6340b53fe8>>

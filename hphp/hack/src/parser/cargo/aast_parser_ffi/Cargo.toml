@@ -1,17 +1,20 @@
+# @autocargo from //hphp/hack/src/parser:aast_parser_ffi
+# Signature<<94119adae0d454f9c0a39f697afb7096597cd6a1>>
 [package]
 name = "aast_parser_ffi"
-version = "3.49.0"
 edition = "2018"
+version = "0.0.0"
+include = ["../../aast_parser_ffi.rs"]
 
 [lib]
-name = "aast_parser_ffi"
 path = "../../aast_parser_ffi.rs"
 
 [dependencies]
-aast_parser = { path = "../aast_parser", package = "aast_parser" }
-parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
-oxidized = {path = "../../../oxidized", package = "hack_oxidized" }
-ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool" }
-stack_limit = { path = "../../../utils/stack_limit", package = "hack_stack_limit" }
-ocamlrep = {path = "../../../ocamlrep", package = "hack_ocamlrep"}
-libc = "^0.2.60"
+aast_parser = { path = "../aast_parser" }
+ocamlrep = { path = "../../../ocamlrep" }
+ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
+parser_core_types = { path = "../core_types" }
+stack_limit = { path = "../../../utils/stack_limit" }
+libc = "*"
+ocaml = "*"
+# @end of Signature<<94119adae0d454f9c0a39f697afb7096597cd6a1>>

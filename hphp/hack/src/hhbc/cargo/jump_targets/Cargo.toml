@@ -1,0 +1,16 @@
+# @autocargo from //hphp/hack/src/hhbc:jump_targets_rust
+# Signature<<40e63d117db3cf72f2d907b6cb9ef8739b76d578>>
+[package]
+name = "jump_targets_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../jump_targets.rs"]
+
+[lib]
+path = "../../jump_targets.rs"
+
+[dependencies]
+env = { path = "../env" }
+label_rust = { path = "../label" }
+oxidized = { path = "../../../oxidized" }
+# @end of Signature<<40e63d117db3cf72f2d907b6cb9ef8739b76d578>>

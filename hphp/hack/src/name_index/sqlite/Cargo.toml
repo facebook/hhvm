@@ -1,12 +1,17 @@
+# @autocargo from //hphp/hack/src/name_index/sqlite:names
+# Signature<<6e0d49e20c3339fa59ecd884dd97b2c384486a28>>
 [package]
-name = "name_index_sqlite"
-version = "1.0.0"
+name = "names"
 edition = "2018"
+version = "0.0.0"
+include = ["consts.rs", "datatypes.rs", "file_infos.rs", "lib.rs", "names.rs"]
 
 [lib]
-name = "name_index_sqlite"
 path = "lib.rs"
 
 [dependencies]
+ocamlrep = { path = "../../ocamlrep" }
+oxidized = { path = "../../oxidized" }
+rusqlite = "*"
 rust-crypto = "*"
-rusqlite = { version = "*", features = ["bundled"] }
+# @end of Signature<<6e0d49e20c3339fa59ecd884dd97b2c384486a28>>

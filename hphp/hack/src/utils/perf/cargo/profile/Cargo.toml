@@ -1,0 +1,14 @@
+# @autocargo from //hphp/hack/src/utils/perf:profile_rust
+# Signature<<fc5f221be2519eac08251eff9bd8387a0a5b0bce>>
+[package]
+name = "profile_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../profile.rs"]
+
+[lib]
+path = "../../profile.rs"
+
+[dependencies]
+libc = "*"
+# @end of Signature<<fc5f221be2519eac08251eff9bd8387a0a5b0bce>>

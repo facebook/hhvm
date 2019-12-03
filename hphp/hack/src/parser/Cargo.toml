@@ -1,16 +1,21 @@
+# @autocargo from //hphp/hack/src/parser:parser_rust
+# Signature<<8ec9c965225cf817d9d8f115e58f15869d2d3d75>>
 [package]
-name = "hack_parser"
-version = "3.49.0"
+name = "parser_rust"
 edition = "2018"
+version = "0.0.0"
+include = ["declaration_parser.rs", "expression_parser.rs", "lexer.rs", "lib.rs", "operator.rs", "operator_generated.rs", "parser.rs", "parser_env.rs", "parser_trait.rs", "rewriter.rs", "smart_constructors.rs", "smart_constructors_generated.rs", "smart_constructors_wrappers.rs", "statement_parser.rs", "type_parser.rs"]
 
 [lib]
-name = "parser_rust"
 path = "lib.rs"
 
 [dependencies]
-lazy_static = "^1.3.0"
-parser_core_types = { path = "cargo/core_types", package = "hack_parser_core_types" }
-oxidized = { path = "../oxidized", package = "hack_oxidized" }
-ocamlrep = { path = "../ocamlrep", package = "hack_ocamlrep" }
-ocamlrep_derive = { path = "../ocamlrep_derive", package = "hack_ocamlrep_derive" }
-stack_limit = { path = "../utils/stack_limit", package = "hack_stack_limit" }
+hh_autoimport_rust = { path = "cargo/hh_autoimport" }
+ocamlrep = { path = "../ocamlrep" }
+ocamlrep_derive = { path = "../ocamlrep_derive" }
+oxidized = { path = "../oxidized" }
+parser_core_types = { path = "cargo/core_types" }
+stack_limit = { path = "../utils/stack_limit" }
+lazy_static = "*"
+ocaml = "*"
+# @end of Signature<<8ec9c965225cf817d9d8f115e58f15869d2d3d75>>

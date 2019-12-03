@@ -1,0 +1,18 @@
+# @autocargo from //hphp/hack/src/hhbc:options_ffi
+# Signature<<3a97661f8180424c23ebffad6040a1615ece6c7e>>
+[package]
+name = "options_ffi"
+edition = "2018"
+version = "0.0.0"
+include = ["../../options_ffi.rs"]
+
+[lib]
+path = "../../options_ffi.rs"
+
+[dependencies]
+hhbc_string_utils_rust = { path = "../string_utils" }
+ocamlrep = { path = "../../../ocamlrep" }
+ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
+options = { path = "../options" }
+ocaml = "*"
+# @end of Signature<<3a97661f8180424c23ebffad6040a1615ece6c7e>>

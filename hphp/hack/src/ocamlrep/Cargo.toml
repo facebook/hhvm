@@ -1,13 +1,11 @@
+# @autocargo from //hphp/hack/src/ocamlrep:ocamlrep
+# Signature<<697c0d2aeffc13ca22a4648bc4b772b40bed2048>>
 [package]
-name = "hack_ocamlrep"
-version = "3.49.0"
+name = "ocamlrep"
 edition = "2018"
+version = "0.0.0"
+include = ["*.rs"]
 
 [lib]
-name = "ocamlrep"
 path = "lib.rs"
-
-[dev-dependencies]
-ocaml = "^0.7"
-ocamlrep_derive = {path = "../ocamlrep_derive", package = "hack_ocamlrep_derive"}
-ocamlrep_ocamlpool = {path = "../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool"}
+# @end of Signature<<697c0d2aeffc13ca22a4648bc4b772b40bed2048>>

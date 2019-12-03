@@ -1,21 +1,21 @@
+# @autocargo from //hphp/hack/src/hh_codegen:hh_codegen
+# Signature<<5dd4d1b935e85a3fdce384e2d42083853deb9999>>
 [package]
-name = "hack_hh_codegen"
-version = "3.49.0"
+name = "hh_codegen"
 edition = "2018"
-autobins = false
+version = "0.0.0"
+include = ["**/*.rs"]
 
 [[bin]]
 name = "hh_codegen"
-path = "./hh_codegen.rs"
-
-[dependencies.syn]
-version = "^1.0.5"
-features = ["full", "extra-traits", "visit-mut", "visit"]
+path = "hh_codegen.rs"
 
 [dependencies]
-proc-macro2 = "^1.0.4"
-quote ="^1.0.2"
-rust-crypto = "^0.2"
-synstructure = "^0.12.0"
-itertools = "^0.7"
-clap = "^2.33.0"
+clap = "*"
+itertools = "*"
+proc-macro2 = "*"
+quote = "*"
+rust-crypto = "*"
+syn = { version = "*", features = ["full", "visit", "visit-mut", "fold", "extra-traits"] }
+synstructure = "*"
+# @end of Signature<<5dd4d1b935e85a3fdce384e2d42083853deb9999>>

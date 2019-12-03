@@ -1,16 +1,16 @@
+# @autocargo from //hphp/hack/src/decl:decl_rust_ffi
+# Signature<<d1be0f45e3a34d330ccd0bbdd30f4012a99950e7>>
 [package]
-name = "hack_decl_ffi"
-version = "3.49.0"
+name = "decl_rust_ffi"
 edition = "2018"
-
-[dependencies]
-decl_rust = { path = "..", package = "hack_decl" }
-lazy_static = "^1.3.0"
-ocaml = "^0.7"
-ocamlrep = {path = "../../ocamlrep", package = "hack_ocamlrep"}
-oxidized = {path = "../../oxidized", package = "hack_oxidized" }
+version = "0.0.0"
+include = ["../rust_decl_ffi.rs"]
 
 [lib]
-name = "rust_decl_ffi"
 path = "../rust_decl_ffi.rs"
-crate-type = ["lib", "staticlib"]
+
+[dependencies]
+decl_rust = { path = ".." }
+ocamlrep_ocamlpool = { path = "../../ocamlrep_ocamlpool" }
+oxidized = { path = "../../oxidized" }
+# @end of Signature<<d1be0f45e3a34d330ccd0bbdd30f4012a99950e7>>

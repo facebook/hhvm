@@ -1,8 +1,14 @@
+# @autocargo from //hphp/hack/src/utils:line_break_map
+# Signature<<f558f250e766446379fe095865d4398b5f51d1ee>>
 [package]
-name = "hack_line_break_map"
-version = "3.49.0"
+name = "line_break_map"
 edition = "2018"
+version = "0.0.0"
+include = ["../line_break_map.rs"]
 
 [lib]
-name = "line_break_map"
 path = "../line_break_map.rs"
+
+[dev-dependencies]
+pretty_assertions = "*"
+# @end of Signature<<f558f250e766446379fe095865d4398b5f51d1ee>>

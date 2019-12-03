@@ -1,16 +1,16 @@
+# @autocargo from //hphp/hack/src/utils/lint:lint_rust
+# Signature<<e316138011ee42849ff0807332d6b679fa931d5a>>
 [package]
-name = "hack_lint"
-version = "3.49.0"
+name = "lint_rust"
 edition = "2018"
+version = "0.0.0"
+include = ["lint.rs"]
 
 [lib]
-name = "lint_rust"
 path = "lint.rs"
 
-[dev-dependencies]
-pretty_assertions = "^0.6.1"
-
 [dependencies]
-ocamlrep = {path = "../../ocamlrep", package = "hack_ocamlrep"}
-ocamlrep_derive = {path = "../../ocamlrep_derive", package = "hack_ocamlrep_derive"}
-oxidized = {path = "../../oxidized", package = "hack_oxidized" }
+ocamlrep = { path = "../../ocamlrep" }
+ocamlrep_derive = { path = "../../ocamlrep_derive" }
+oxidized = { path = "../../oxidized" }
+# @end of Signature<<e316138011ee42849ff0807332d6b679fa931d5a>>

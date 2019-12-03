@@ -1,15 +1,21 @@
+# @autocargo from //hphp/hack/src/ocamlrep_derive:ocamlrep_derive
+# Signature<<3d5365200537424b4c1f6abda0556e891f46b09b>>
 [package]
-name = "hack_ocamlrep_derive"
-version = "3.49.0"
+name = "ocamlrep_derive"
 edition = "2018"
+version = "0.0.0"
+include = ["lib.rs"]
 
 [lib]
-proc-macro = true
-name = "ocamlrep_derive"
 path = "lib.rs"
+proc-macro = true
+test = false
+doctest = false
 
 [dependencies]
-proc-macro2 = "^1.0.4"
-quote ="^1.0.2"
-syn ="^1.0.5"
-synstructure = "^0.12.0"
+ocamlrep = { path = "../ocamlrep" }
+proc-macro2 = "*"
+quote = "*"
+syn = { version = "*", features = ["full", "visit", "visit-mut", "fold", "extra-traits"] }
+synstructure = "*"
+# @end of Signature<<3d5365200537424b4c1f6abda0556e891f46b09b>>

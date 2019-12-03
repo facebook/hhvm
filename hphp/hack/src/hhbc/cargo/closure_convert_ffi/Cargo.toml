@@ -1,0 +1,19 @@
+# @autocargo from //hphp/hack/src/hhbc:closure_convert_rust_ffi
+# Signature<<08e1135be8a4e1215ba64f9bf438e8d9d0ee5632>>
+[package]
+name = "closure_convert_rust_ffi"
+edition = "2018"
+version = "0.0.0"
+include = ["../../closure_convert_ffi.rs"]
+
+[lib]
+path = "../../closure_convert_ffi.rs"
+
+[dependencies]
+aast_parser = { path = "../../../parser/cargo/aast_parser" }
+lowerer = { path = "../../../parser/cargo/lowerer" }
+ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
+options = { path = "../options" }
+oxidized = { path = "../../../oxidized" }
+parser_core_types = { path = "../../../parser/cargo/core_types" }
+# @end of Signature<<08e1135be8a4e1215ba64f9bf438e8d9d0ee5632>>

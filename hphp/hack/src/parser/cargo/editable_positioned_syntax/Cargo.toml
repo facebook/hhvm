@@ -1,16 +1,19 @@
+# @autocargo from //hphp/hack/src/parser:rust_editable_positioned_syntax
+# Signature<<8ed345be57f413b9c26954ed287d801b54814466>>
 [package]
-name = "editable_positioned_syntax"
-version = "1.0.0"
+name = "rust_editable_positioned_syntax"
 edition = "2018"
+version = "0.0.0"
+include = ["../../editable_positioned_original_source_data.rs", "../../editable_positioned_syntax.rs", "../../editable_positioned_syntax_to_ocaml.rs", "../../editable_positioned_token.rs"]
 
 [lib]
-name = "editable_positioned_syntax"
 path = "../../editable_positioned_syntax.rs"
 
 [dependencies]
-parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
-parser_rust = { path = "../..", package = "hack_parser" }
-rust_to_ocaml = { path = "../rust_to_ocaml", package = "rust_to_ocaml" }
-ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool" }
-ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
-ocaml = "^0.7"
+ocamlpool_rust = { path = "../../../utils/ocamlpool_rust" }
+ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
+parser_core_types = { path = "../core_types" }
+parser_rust = { path = "../.." }
+rust_to_ocaml = { path = "../rust_to_ocaml" }
+ocaml = "*"
+# @end of Signature<<8ed345be57f413b9c26954ed287d801b54814466>>

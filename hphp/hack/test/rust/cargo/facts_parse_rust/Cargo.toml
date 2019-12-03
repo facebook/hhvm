@@ -1,0 +1,18 @@
+# @autocargo from //hphp/hack/test/rust:facts_parse_rust
+# Signature<<10cd3585b121b74f12d711fb9b7e65e1811fd692>>
+[package]
+name = "facts_parse_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../facts_parse.rs"]
+
+[[bin]]
+name = "facts_parse_rust"
+path = "../../facts_parse.rs"
+
+[dependencies]
+facts_rust = { path = "../../../../src/facts" }
+oxidized = { path = "../../../../src/oxidized" }
+clap = "*"
+ocaml = "*"
+# @end of Signature<<10cd3585b121b74f12d711fb9b7e65e1811fd692>>

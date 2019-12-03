@@ -1,0 +1,17 @@
+# @autocargo from //hphp/hack/src/hhbc:hhas_param_rust
+# Signature<<900c9e7b7b8c5b0c6e0f50b66e3f2e6b4546c886>>
+[package]
+name = "hhas_param_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../hhas_param.rs"]
+
+[lib]
+path = "../../hhas_param.rs"
+
+[dependencies]
+hhas_attribute_rust = { path = "../hhas_attribute" }
+hhas_type = { path = "../hhas_type" }
+label_rust = { path = "../label" }
+oxidized = { path = "../../../oxidized" }
+# @end of Signature<<900c9e7b7b8c5b0c6e0f50b66e3f2e6b4546c886>>

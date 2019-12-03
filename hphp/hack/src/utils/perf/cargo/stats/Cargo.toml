@@ -1,0 +1,11 @@
+# @autocargo from //hphp/hack/src/utils/perf:stats_rust
+# Signature<<a4b4b823d9952b55a2942ba09fd28f268978ac8a>>
+[package]
+name = "stats_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../perf_stats.rs"]
+
+[lib]
+path = "../../perf_stats.rs"
+# @end of Signature<<a4b4b823d9952b55a2942ba09fd28f268978ac8a>>

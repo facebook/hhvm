@@ -1,0 +1,23 @@
+# @autocargo from //hphp/hack/src/parser/ppl:rust_ppl_class_rewriter_ffi
+# Signature<<061c7c5870e1c020be3d218c90050c359b571212>>
+[package]
+name = "rust_ppl_class_rewriter_ffi"
+edition = "2018"
+version = "0.0.0"
+include = ["../../rust_ppl_class_rewriter_ffi.rs"]
+
+[lib]
+path = "../../rust_ppl_class_rewriter_ffi.rs"
+
+[dependencies]
+ocamlpool_rust = { path = "../../../../utils/ocamlpool_rust" }
+ocamlrep = { path = "../../../../ocamlrep" }
+oxidized = { path = "../../../../oxidized" }
+parser_rust = { path = "../../.." }
+positioned_parser = { path = "../../../cargo/positioned_parser" }
+rust_editable_positioned_syntax = { path = "../../../cargo/editable_positioned_syntax" }
+rust_ppl_class_rewriter = { path = "../ppl_class_rewriter" }
+rust_to_ocaml = { path = "../../../cargo/rust_to_ocaml" }
+libc = "*"
+ocaml = "*"
+# @end of Signature<<061c7c5870e1c020be3d218c90050c359b571212>>

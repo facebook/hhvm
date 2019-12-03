@@ -1,0 +1,15 @@
+# @autocargo from //hphp/hack/src/hhbc:unique_list_bench
+# Signature<<2d1e41ec4a1b4471c72ffbd5344d8dfd9ada4d2e>>
+[package]
+name = "unique_list_bench"
+edition = "2018"
+version = "0.0.0"
+include = ["../../unique_list_bench.rs"]
+
+[[bin]]
+name = "unique_list_bench"
+path = "../../unique_list_bench.rs"
+
+[dependencies]
+unique_list_rust = { path = "../unique_list" }
+# @end of Signature<<2d1e41ec4a1b4471c72ffbd5344d8dfd9ada4d2e>>

@@ -1,13 +1,16 @@
+# @autocargo from //hphp/hack/src/parser:positioned_parser
+# Signature<<2d1be971e913f9072ffda8e884e106fcf7740f4d>>
 [package]
 name = "positioned_parser"
-version = "3.49.0"
 edition = "2018"
+version = "0.0.0"
+include = ["../../positioned_parser.rs", "../../positioned_smart_constructors.rs"]
 
 [lib]
-name = "positioned_parser"
 path = "../../positioned_parser.rs"
 
 [dependencies]
-parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
-parser_rust = { path = "../..", package = "hack_parser" }
-syntax_smart_constructors = { path = "../syntax_smart_constructors", package = "syntax_smart_constructors" }
+parser_core_types = { path = "../core_types" }
+parser_rust = { path = "../.." }
+syntax_smart_constructors = { path = "../syntax_smart_constructors" }
+# @end of Signature<<2d1be971e913f9072ffda8e884e106fcf7740f4d>>

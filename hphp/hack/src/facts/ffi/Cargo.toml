@@ -1,17 +1,20 @@
+# @autocargo from //hphp/hack/src/facts:rust_facts_ffi
+# Signature<<e9048af148d92a5f0373793bbafff03aee48a94f>>
 [package]
-name = "hack_facts_ffi"
-version = "3.49.0"
+name = "rust_facts_ffi"
 edition = "2018"
-
-[dependencies]
-facts_rust = { path = "..", package = "hack_facts" }
-ocaml = "^0.7"
-hhbc_string_utils_rust = {path = "../../hhbc/cargo/string_utils", package = "hack_hhbc_string_utils" }
-ocamlrep = {path = "../../ocamlrep", package = "hack_ocamlrep" }
-ocamlrep_ocamlpool = {path = "../../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool" }
-oxidized = {path = "../../oxidized", package = "hack_oxidized" }
+version = "0.0.0"
+include = ["../rust_facts_ffi.rs"]
 
 [lib]
-name = "rust_facts_ffi"
 path = "../rust_facts_ffi.rs"
 crate-type = ["lib", "staticlib"]
+
+[dependencies]
+facts_rust = { path = ".." }
+hhbc_string_utils_rust = { path = "../../hhbc/cargo/string_utils" }
+ocamlrep = { path = "../../ocamlrep" }
+ocamlrep_ocamlpool = { path = "../../ocamlrep_ocamlpool" }
+oxidized = { path = "../../oxidized" }
+ocaml = "*"
+# @end of Signature<<e9048af148d92a5f0373793bbafff03aee48a94f>>

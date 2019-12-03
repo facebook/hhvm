@@ -1,16 +1,19 @@
+# @autocargo from //hphp/hack/src/parser:parser_core_types
+# Signature<<512a9a1c31398b3f755e3db838c2ab68a71407df>>
 [package]
-name = "hack_parser_core_types"
-version = "3.49.0"
+name = "parser_core_types"
 edition = "2018"
+version = "0.0.0"
+include = ["../../indexed_source_text.rs", "../../lexable_token.rs", "../../lexable_trivia.rs", "../../minimal_syntax.rs", "../../minimal_token.rs", "../../minimal_trivia.rs", "../../parser_core_types_lib.rs", "../../positioned_syntax.rs", "../../positioned_token.rs", "../../positioned_trivia.rs", "../../source_text.rs", "../../syntax.rs", "../../syntax_error.rs", "../../syntax_generated.rs", "../../syntax_kind.rs", "../../syntax_trait.rs", "../../syntax_type.rs", "../../token_kind.rs", "../../trivia_kind.rs"]
 
 [lib]
-name = "parser_core_types"
 path = "../../parser_core_types_lib.rs"
 
 [dependencies]
-line_break_map = {path = "../../../utils/line_break_map", package = "hack_line_break_map"}
-ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
-ocamlrep = {path = "../../../ocamlrep", package = "hack_ocamlrep"}
-ocamlrep_derive = {path = "../../../ocamlrep_derive", package = "hack_ocamlrep_derive"}
-oxidized = {path = "../../../oxidized", package = "hack_oxidized"}
-itertools = "^0.7"
+line_break_map = { path = "../../../utils/line_break_map" }
+ocamlrep = { path = "../../../ocamlrep" }
+ocamlrep_derive = { path = "../../../ocamlrep_derive" }
+oxidized = { path = "../../../oxidized" }
+itertools = "*"
+ocaml = "*"
+# @end of Signature<<512a9a1c31398b3f755e3db838c2ab68a71407df>>

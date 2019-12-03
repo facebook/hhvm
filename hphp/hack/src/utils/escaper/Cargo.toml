@@ -1,11 +1,14 @@
+# @autocargo from //hphp/hack/src/utils:escaper
+# Signature<<bd74b9fdb06dc70b952ab2e9940aa93c47a816d2>>
 [package]
-name = "hack_escaper"
-version = "3.49.0"
+name = "escaper"
 edition = "2018"
+version = "0.0.0"
+include = ["../escaper.rs"]
 
 [lib]
-name = "escaper"
 path = "../escaper.rs"
 
 [dev-dependencies]
-pretty_assertions = "^0.6.1"
+pretty_assertions = "*"
+# @end of Signature<<bd74b9fdb06dc70b952ab2e9940aa93c47a816d2>>

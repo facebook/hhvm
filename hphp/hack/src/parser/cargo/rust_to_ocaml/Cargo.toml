@@ -1,16 +1,19 @@
+# @autocargo from //hphp/hack/src/parser:rust_to_ocaml
+# Signature<<47485716a52370a72bde4e7f1d70140b78dcf0a0>>
 [package]
 name = "rust_to_ocaml"
-version = "3.49.0"
 edition = "2018"
+version = "0.0.0"
+include = ["../../rust_to_ocaml.rs"]
 
 [lib]
-name = "rust_to_ocaml"
 path = "../../rust_to_ocaml.rs"
 
 [dependencies]
-parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
-parser_rust = { path = "../..", package = "hack_parser" }
-ocamlrep = { path = "../../../ocamlrep", package = "hack_ocamlrep" }
-ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool" }
-ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
-ocaml = "^0.7"
+ocamlpool_rust = { path = "../../../utils/ocamlpool_rust" }
+ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
+parser_core_types = { path = "../core_types" }
+parser_rust = { path = "../.." }
+libc = "*"
+ocaml = "*"
+# @end of Signature<<47485716a52370a72bde4e7f1d70140b78dcf0a0>>

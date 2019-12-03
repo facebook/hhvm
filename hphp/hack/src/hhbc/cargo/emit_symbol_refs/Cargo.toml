@@ -1,0 +1,16 @@
+# @autocargo from //hphp/hack/src/hhbc:emit_symbol_refs_rust
+# Signature<<6c8f7afb41c9ecf4cf0a74f2c9bec84616f4cbe3>>
+[package]
+name = "emit_symbol_refs_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../emit_symbol_refs.rs"]
+
+[lib]
+path = "../../emit_symbol_refs.rs"
+
+[dependencies]
+env = { path = "../env" }
+hhas_symbol_refs_rust = { path = "../hhas_symbol_refs" }
+hhbc_id_rust = { path = "../hhbc_id" }
+# @end of Signature<<6c8f7afb41c9ecf4cf0a74f2c9bec84616f4cbe3>>

@@ -10,6 +10,6 @@ path = "rust/facts_parse.rs"
 # TODO: add more tests as [[bin]]s here
 
 [dependencies]
-facts_rust = { path = "../src/facts", package = "hack_facts" }
-oxidized = { path = "../src/oxidized", package = "hack_oxidized" }
+facts_rust = { path = "../src/facts", package = "facts_rust" }
+oxidized = { path = "../src/oxidized", package = "oxidized" }
 clap = "^2.33.0"

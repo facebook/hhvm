@@ -1,15 +1,18 @@
+# @autocargo from //hphp/hack/src/parser:verify_parser
+# Signature<<938e15494ca8b81e472dfd4202004b9c3614061d>>
 [package]
 name = "verify_parser"
-version = "3.49.0"
 edition = "2018"
+version = "0.0.0"
+include = ["../../verify_parser.rs", "../../verify_smart_constructors.rs", "../../verify_smart_constructors_generated.rs"]
 
 [lib]
-name = "verify_parser"
 path = "../../verify_parser.rs"
 
 [dependencies]
-parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
-parser_rust = { path = "../..", package = "hack_parser" }
-ocaml = "^0.7"
-syntax_smart_constructors = { path = "../syntax_smart_constructors", package = "syntax_smart_constructors" }
-rust_to_ocaml = { path = "../rust_to_ocaml", package = "rust_to_ocaml" }
+parser_core_types = { path = "../core_types" }
+parser_rust = { path = "../.." }
+rust_to_ocaml = { path = "../rust_to_ocaml" }
+syntax_smart_constructors = { path = "../syntax_smart_constructors" }
+ocaml = "*"
+# @end of Signature<<938e15494ca8b81e472dfd4202004b9c3614061d>>

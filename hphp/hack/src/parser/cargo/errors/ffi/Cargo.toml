@@ -1,20 +1,23 @@
+# @autocargo from //hphp/hack/src/parser:rust_parser_errors_ffi
+# Signature<<93c7e875a2b1ef6e5e08bd79c783132387819c67>>
 [package]
-name = "hack_parser_errors_ffi"
-version = "3.49.0"
+name = "rust_parser_errors_ffi"
 edition = "2018"
-
-[dependencies]
-rust_parser_errors = { path = "..", package = "hack_parser_errors" }
-parser_core_types = { path = "../../core_types", package = "hack_parser_core_types" }
-parser_ffi_rust = { path = "../../../ffi", package = "hack_parser_ffi" }
-parser_rust = { path = "../../..", package = "hack_parser" }
-ocaml = "^0.7"
-ocamlrep = { path = "../../../../ocamlrep", package = "hack_ocamlrep" }
-ocamlrep_ocamlpool = { path = "../../../../ocamlrep_ocamlpool", package = "hack_ocamlrep_ocamlpool" }
-oxidized = { path = "../../../../oxidized", package = "hack_oxidized" }
-syntax_tree = { path = "../../syntax_tree", package = "syntax_tree" }
+version = "0.0.0"
+include = ["../../../rust_parser_errors_ffi.rs"]
 
 [lib]
-name = "rust_parser_errors_ffi"
 path = "../../../rust_parser_errors_ffi.rs"
 crate-type = ["lib", "staticlib"]
+
+[dependencies]
+ocamlrep = { path = "../../../../ocamlrep" }
+ocamlrep_ocamlpool = { path = "../../../../ocamlrep_ocamlpool" }
+oxidized = { path = "../../../../oxidized" }
+parser_core_types = { path = "../../core_types" }
+parser_rust = { path = "../../.." }
+rust_parser_errors = { path = ".." }
+rust_to_ocaml = { path = "../../rust_to_ocaml" }
+syntax_tree = { path = "../../syntax_tree" }
+ocaml = "*"
+# @end of Signature<<93c7e875a2b1ef6e5e08bd79c783132387819c67>>

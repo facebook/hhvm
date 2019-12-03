@@ -1,18 +1,21 @@
+# @autocargo from //hphp/hack/src/hhbc:hhbc_string_utils_rust
+# Signature<<439e0e5a2dd9a179ffb5ef0ecc9667ddc3d7fdeb>>
 [package]
-name = "hack_hhbc_string_utils"
-version = "3.49.0"
+name = "hhbc_string_utils_rust"
 edition = "2018"
+version = "0.0.0"
+include = ["../../string_utils.rs"]
 
 [lib]
-name = "hhbc_string_utils_rust"
 path = "../../string_utils.rs"
 
 [dependencies]
-escaper = { path = "../../../utils/escaper", package = "hack_escaper" }
-naming_special_names_rust = { path = "../../../naming", package = "naming_special_names" }
-lazy_static = "^1.3.0"
-regex = "^1.2.1"
-libc = "^0.2.60"
+escaper = { path = "../../../utils/escaper" }
+naming_special_names_rust = { path = "../../../naming" }
+lazy_static = "*"
+libc = "*"
+regex = "*"
 
 [dev-dependencies]
-pretty_assertions = "^0.6.1"
+pretty_assertions = "*"
+# @end of Signature<<439e0e5a2dd9a179ffb5ef0ecc9667ddc3d7fdeb>>

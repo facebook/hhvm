@@ -1,0 +1,18 @@
+# @autocargo from //hphp/hack/src/hhbc:env
+# Signature<<d07f2dfc4614d7fd53945dcf7f517a01b09c7773>>
+[package]
+name = "env"
+edition = "2018"
+version = "0.0.0"
+include = ["../../emitter.rs", "../../env.rs", "../../iterator.rs"]
+
+[lib]
+path = "../../env.rs"
+
+[dependencies]
+label_rust = { path = "../label" }
+local_rust = { path = "../local" }
+options = { path = "../options" }
+rx_rust = { path = "../rx" }
+bitflags = "*"
+# @end of Signature<<d07f2dfc4614d7fd53945dcf7f517a01b09c7773>>

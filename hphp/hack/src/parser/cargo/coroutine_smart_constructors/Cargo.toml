@@ -1,15 +1,18 @@
+# @autocargo from //hphp/hack/src/parser:coroutine_smart_constructors
+# Signature<<f90a930393d34a73ac9999d3d6959065752b8924>>
 [package]
 name = "coroutine_smart_constructors"
-version = "3.49.0"
 edition = "2018"
+version = "0.0.0"
+include = ["../../coroutine_smart_constructors.rs", "../../coroutine_smart_constructors_generated.rs"]
 
 [lib]
-name = "coroutine_smart_constructors"
 path = "../../coroutine_smart_constructors.rs"
 
 [dependencies]
-parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
-parser_rust = { path = "../..", package = "hack_parser" }
-syntax_smart_constructors = { path = "../syntax_smart_constructors", package = "syntax_smart_constructors" }
-ocaml = "^0.7"
-rust_to_ocaml = { path = "../rust_to_ocaml", package = "rust_to_ocaml" }
+parser_core_types = { path = "../core_types" }
+parser_rust = { path = "../.." }
+rust_to_ocaml = { path = "../rust_to_ocaml" }
+syntax_smart_constructors = { path = "../syntax_smart_constructors" }
+ocaml = "*"
+# @end of Signature<<f90a930393d34a73ac9999d3d6959065752b8924>>

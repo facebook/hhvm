@@ -1,31 +1,25 @@
+# @autocargo from //hphp/hack/src/parser/bench:bench
+# Signature<<1a727195f5703cd0d5c65587cc524501bc111e67>>
 [package]
-name = "hack_parser_bench"
-version = "3.49.0"
+name = "bench"
 edition = "2018"
-build = "../../bench/build.rs"
+version = "0.0.0"
+include = ["../../bench/bench.rs"]
 
 [[bin]]
-name = "hack_parser_bench"
+name = "bench"
 path = "../../bench/bench.rs"
 
-[profile.release]
-debug = true
-
-[build-dependencies]
-cc = "1.0"
-
 [dependencies]
-decl_rust = { path = "../../../decl", package = "hack_decl" }
-facts_rust = { path = "../../../facts", package = "hack_facts" }
-parser_rust = { path = "../..", package = "hack_parser" }
-aast_parser = { path = "../aast_parser", package = "aast_parser" }
-parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
-lowerer = { path = "../lowerer", package = "hack_lowerer" }
-decl_mode_parser = { path = "../decl_mode_parser", package = "decl_mode_parser" }
-coroutine_smart_constructors = { path = "../coroutine_smart_constructors", package = "coroutine_smart_constructors" }
-positioned_parser = { path = "../positioned_parser", package = "positioned_parser" }
-syntax_tree = { path = "../syntax_tree", package = "syntax_tree" }
-oxidized = {path = "../../../oxidized", package = "hack_oxidized" }
-ocamlrep = {path = "../../../ocamlrep", package = "hack_ocamlrep" }
-regex = "^1.2.1"
-lazy_static = "^1.3.0"
+aast_parser = { path = "../aast_parser" }
+decl_mode_parser = { path = "../decl_mode_parser" }
+decl_rust = { path = "../../../decl" }
+facts_rust = { path = "../../../facts" }
+ocamlrep = { path = "../../../ocamlrep" }
+oxidized = { path = "../../../oxidized" }
+parser_rust = { path = "../.." }
+positioned_parser = { path = "../positioned_parser" }
+
+[dev-dependencies]
+pretty_assertions = "*"
+# @end of Signature<<1a727195f5703cd0d5c65587cc524501bc111e67>>

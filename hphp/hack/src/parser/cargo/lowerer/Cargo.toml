@@ -1,26 +1,27 @@
+# @autocargo from //hphp/hack/src/parser:lowerer
+# Signature<<e759e70d4cdaf3c1cb11554e4abb12800769c78d>>
 [package]
-name = "hack_lowerer"
-version = "3.49.0"
+name = "lowerer"
 edition = "2018"
+version = "0.0.0"
+include = ["../../lowerer.rs", "../../lowerer_lib.rs", "../../lowerer_modifier.rs", "../../scour_comment.rs"]
 
 [lib]
-name = "lowerer"
 path = "../../lowerer_lib.rs"
 
 [dependencies]
-ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "hack_utils_ocamlpool" }
-oxidized = {path = "../../../oxidized", package = "hack_oxidized" }
-escaper = {path = "../../../utils/escaper", package = "hack_escaper" }
-ocaml_helper = {path = "../../../utils/ocaml_helper", package = "hack_ocaml_helper" }
-html_entities = {path = "../../../utils/html_entities", package = "html_entities" }
-parser_core_types = { path = "../core_types", package = "hack_parser_core_types" }
-parser_rust = { path = "../..", package = "hack_parser" }
-itertools = "^0.7"
-lazy_static = "^1.3.0"
-ocaml = "^0.7"
-regex = "^1.2.1"
-naming_special_names_rust = {path = "../../../naming/", package = "naming_special_names"}
-hh_autoimport_rust = { path = "../hh_autoimport", package = "hack_hh_autoimport"}
-ocamlrep = {path = "../../../ocamlrep", package = "hack_ocamlrep"}
-lint_rust = { path = "../../../utils/lint", package = "hack_lint" }
-stack_limit = { path = "../../../utils/stack_limit", package = "hack_stack_limit" }
+escaper = { path = "../../../utils/escaper" }
+hh_autoimport_rust = { path = "../hh_autoimport" }
+html_entities = { path = "../../../utils/html_entities" }
+lint_rust = { path = "../../../utils/lint" }
+naming_special_names_rust = { path = "../../../naming" }
+ocaml_helper = { path = "../../../utils/ocaml_helper" }
+ocamlrep = { path = "../../../ocamlrep" }
+oxidized = { path = "../../../oxidized" }
+parser_core_types = { path = "../core_types" }
+stack_limit = { path = "../../../utils/stack_limit" }
+itertools = "*"
+lazy_static = "*"
+ocaml = "*"
+regex = "*"
+# @end of Signature<<e759e70d4cdaf3c1cb11554e4abb12800769c78d>>

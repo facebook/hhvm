@@ -344,7 +344,7 @@ and _ ty_ =
 
 and constraint_type_ =
   | Thas_member of has_member
-  (* The type of a list destructructuring assignment.
+  (* The type of a list destructuring assignment.
    * Implements valid destructuring operations via subtyping *)
   | Tdestructure of locl_ty list
   | TCunion of locl_ty * constraint_type

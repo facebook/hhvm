@@ -132,37 +132,31 @@ class virtual type_validator =
             | _ -> this#on_alias acc r (pos, name) tyl td_type)
 
     method validate_type env root_ty emit_error =
-      let should_suppress = ref false in
-      let validate env ty =
-        let state =
-          this#on_type
-            {
-              env;
-              ety_env =
-                {
-                  type_expansions = [];
-                  substs = SMap.empty;
-                  this_ty =
-                    Option.value
-                      (Env.get_self_ty env)
-                      ~default:(MakeType.nothing Reason.none);
-                  from_class = Some Aast.CIstatic;
-                  quiet = true;
-                };
-              expanded_typedefs = SSet.empty;
-              validity = Valid;
-              like_context = false;
-            }
-            ty
-        in
-        match state.validity with
-        | Invalid (r, msg) ->
-          if not !should_suppress then
-            emit_error (Reason.to_pos (fst root_ty)) (Reason.to_pos r) msg;
-          should_suppress := true
-        | Valid -> ()
+      let state =
+        this#on_type
+          {
+            env;
+            ety_env =
+              {
+                type_expansions = [];
+                substs = SMap.empty;
+                this_ty =
+                  Option.value
+                    (Env.get_self_ty env)
+                    ~default:(MakeType.nothing Reason.none);
+                from_class = Some Aast.CIstatic;
+                quiet = true;
+              };
+            expanded_typedefs = SSet.empty;
+            validity = Valid;
+            like_context = false;
+          }
+          root_ty
       in
-      validate env root_ty
+      match state.validity with
+      | Invalid (r, msg) ->
+        emit_error (Reason.to_pos (fst root_ty)) (Reason.to_pos r) msg
+      | Valid -> ()
 
     method validate_hint env hint emit_error =
       let hint_ty = Env.hint_to_ty env hint in

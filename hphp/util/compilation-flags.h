@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_COMPILATION_FLAGS_H_
 #define incl_HPHP_COMPILATION_FLAGS_H_
 
+#include "hphp/util/wide-tv-val-def.h"
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////

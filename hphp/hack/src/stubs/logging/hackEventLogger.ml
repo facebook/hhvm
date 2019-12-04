@@ -87,7 +87,11 @@ let lock_stolen _ = ()
 
 let client_init ?exit_on_parent_exit:_ _ = ()
 
+let serverless_ide_init () = ()
+
 let client_set_mode _ = ()
+
+let serverless_ide_set_root _ = ()
 
 let client_check () = ()
 

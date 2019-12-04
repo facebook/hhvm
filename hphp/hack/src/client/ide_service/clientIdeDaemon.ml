@@ -45,7 +45,6 @@ let set_up_hh_logger_for_client_ide_service ~(root : Path.t) : unit =
   Hh_logger.set_log
     client_ide_log_fn
     (Out_channel.create client_ide_log_fn ~append:true);
-  EventLogger.init_fake ();
   log "Starting client IDE service at %s" client_ide_log_fn
 
 let load_naming_table_from_saved_state_info
@@ -144,6 +143,7 @@ let initialize
       ClientIdeMessage.Initialize_from_saved_state.t) :
     (state, string) Lwt_result.t =
   let start_time = Unix.gettimeofday () in
+  HackEventLogger.serverless_ide_set_root root;
   set_up_hh_logger_for_client_ide_service ~root;
 
   Relative_path.set_path_prefix Relative_path.Root root;
@@ -567,6 +567,11 @@ let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
 let serve
     (type a) ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     unit Lwt.t =
+  let rec flush_event_logger () : unit Lwt.t =
+    let%lwt () = Lwt_unix.sleep 0.5 in
+    Lwt.async EventLoggerLwt.flush;
+    flush_event_logger ()
+  in
   let rec pump_message_queue (message_queue : message_queue) : unit Lwt.t =
     try%lwt
       let%lwt (message : a ClientIdeMessage.t) =
@@ -657,8 +662,10 @@ let serve
   in
   try%lwt
     let message_queue = Lwt_message_queue.create () in
+    let flusher_promise = flush_event_logger () in
     let%lwt () = handle_messages { message_queue; state = Initializing }
     and () = pump_message_queue message_queue in
+    Lwt.cancel flusher_promise;
     Lwt.return_unit
   with e ->
     let e = Exception.wrap e in
@@ -670,6 +677,7 @@ let daemon_main () (channels : ('a, 'b) Daemon.channel_pair) : unit =
   let (ic, oc) = channels in
   let in_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_in_channel ic) in
   let out_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_out_channel oc) in
+  HackEventLogger.serverless_ide_init ();
   Lwt_main.run (serve ~in_fd ~out_fd)
 
 let daemon_entry_point : (unit, unit, unit) Daemon.entry =

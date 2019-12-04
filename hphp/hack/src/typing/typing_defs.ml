@@ -1312,3 +1312,15 @@ let equal_decl_tparam tp1 tp2 =
        ~equal:Nast.equal_user_attribute
        tp1.tp_user_attributes
        tp2.tp_user_attributes
+
+let equal_typedef_type tt1 tt2 =
+  Pos.equal tt1.td_pos tt2.td_pos
+  && Aast.equal_typedef_visibility tt1.td_vis tt2.td_vis
+  && List.equal ~equal:equal_decl_tparam tt1.td_tparams tt2.td_tparams
+  && Option.equal equal_decl_ty tt1.td_constraint tt2.td_constraint
+  && equal_decl_ty tt1.td_type tt2.td_type
+
+let equal_fun_elt fe1 fe2 =
+  Option.equal String.equal fe1.fe_deprecated fe2.fe_deprecated
+  && equal_decl_ty fe1.fe_type fe2.fe_type
+  && Pos.equal fe1.fe_pos fe2.fe_pos

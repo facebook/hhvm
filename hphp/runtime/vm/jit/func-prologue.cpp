@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 
-#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
@@ -29,7 +28,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/tc-internal.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
@@ -72,10 +71,8 @@ TransContext prologue_context(TransID transID,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::tuple<TransLoc, TCA, CodeCache::View>
-genFuncPrologue(TransID transID, TransKind kind,
-                Func* func, int argc, CodeCache& code, CGMeta& fixups,
-                tc::CodeMetaLock* locker) {
+TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
+                    CodeCache::View code, CGMeta& fixups) {
   auto context = prologue_context(transID, kind, func, argc,
                                   func->getEntryForNumArgs(argc));
   IRUnit unit{context, std::make_unique<AnnotationData>()};
@@ -87,30 +84,13 @@ genFuncPrologue(TransID transID, TransKind kind,
   printUnit(2, unit, "After initial prologue generation");
 
   auto vunit = irlower::lowerUnit(env.unit, CodeKind::Prologue);
-
-  if (locker) locker->lock();
-  SCOPE_EXIT { if (locker) locker->unlock(); };
-  tc::assertOwnsCodeLock();
-  tc::assertOwnsMetadataLock();
-
-  auto codeView = code.view(kind);
-  TCA mainOrig = codeView.main().frontier();
-
-  // If we're close to a cache line boundary, just burn some space to
-  // try to keep the func and its body on fewer total lines.
-  align(codeView.main(), &fixups, Alignment::CacheLineRoundUp,
-        AlignContext::Dead);
-
-  tc::TransLocMaker maker(codeView);
-  maker.markStart();
-
-  emitVunit(*vunit, env.unit, codeView, fixups);
-  return std::make_tuple(maker.markEnd().loc(), mainOrig, codeView);
+  auto const start = code.main().frontier();
+  emitVunit(*vunit, env.unit, code, fixups);
+  return start;
 }
 
-TransLoc genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
-                             TransKind kind, CodeCache& code,
-                             tc::CodeMetaLock* locker) {
+TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
+                        TransKind kind, CodeCache::View code) {
   auto context = prologue_context(kInvalidTransID, kind, func,
                                   func->numSlotsInFrame(), func->base());
   IRUnit unit{context, std::make_unique<AnnotationData>()};
@@ -122,26 +102,21 @@ TransLoc genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
   CGMeta fixups;
   auto vunit = irlower::lowerUnit(env.unit, CodeKind::Prologue);
 
-  if (locker) locker->lock();
-  SCOPE_EXIT { if (locker) locker->unlock(); };
+  auto& main = code.main();
+  auto const start = main.frontier();
 
-  auto const& codeView = code.view(kind);
-  tc::TransLocMaker maker{codeView};
-  maker.markStart();
-
-  emitVunit(*vunit, env.unit, codeView, fixups);
-
-  auto const loc = maker.markEnd().loc();
+  emitVunit(*vunit, env.unit, code, fixups);
 
   if (RuntimeOption::EvalPerfRelocate) {
     GrowableVector<IncomingBranch> ibs;
-    tc::recordPerfRelocMap(loc.mainStart(), loc.mainEnd(),
-                           loc.frozenCodeStart(), loc.frozenEnd(),
+    auto& frozen = code.frozen();
+    tc::recordPerfRelocMap(start, main.frontier(),
+                           frozen.frontier(), frozen.frontier(),
                            context.initSrcKey, 0, ibs, fixups);
   }
   fixups.process(nullptr);
 
-  return loc;
+  return start;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

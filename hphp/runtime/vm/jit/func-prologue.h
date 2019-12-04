@@ -36,12 +36,6 @@ namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct TransLoc;
-
-namespace tc { struct CodeMetaLock; }
-
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * Emit a func prologue, preceded by its func guard, to the TC, and return the
  * prologue's start address.
@@ -55,10 +49,8 @@ namespace tc { struct CodeMetaLock; }
  * A func prologue does a large portion of the work of an interpreted FCall;
  * the rest of it is handled by the Call instruction.
  */
-std::tuple<TransLoc, TCA, CodeCache::View>
-genFuncPrologue(TransID transID, TransKind kind,
-                Func* func, int argc, CodeCache& code, CGMeta& fixups,
-                tc::CodeMetaLock* locker);
+TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
+                    CodeCache::View code, CGMeta& fixups);
 
 /*
  * Emit a func body dispatch entry point to the TC.
@@ -66,9 +58,8 @@ genFuncPrologue(TransID transID, TransKind kind,
  * This entry point calls DV init funclets for any un-passed parameters, and
  * then performs a bindjmp to the function's actual entry point translation.
  */
-TransLoc genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
-                             TransKind kind, CodeCache& code,
-                             tc::CodeMetaLock* locker);
+TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind,
+                        CodeCache::View code);
 
 ///////////////////////////////////////////////////////////////////////////////
 

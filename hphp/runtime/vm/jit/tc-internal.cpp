@@ -244,29 +244,12 @@ bool newTranslation() {
   return true;
 }
 
-std::unique_lock<SimpleMutex> lockCode(bool lock) {
-  if (lock) return std::unique_lock<SimpleMutex>{ s_codeLock };
-  return std::unique_lock<SimpleMutex>{s_codeLock, std::defer_lock};
+std::unique_lock<SimpleMutex> lockCode() {
+  return std::unique_lock<SimpleMutex>{s_codeLock};
 }
 
-std::unique_lock<SimpleMutex> lockMetadata(bool lock) {
-  if (lock) return std::unique_lock<SimpleMutex>{s_metadataLock};
-  return std::unique_lock<SimpleMutex>{s_metadataLock, std::defer_lock};
-}
-
-CodeMetaLock::CodeMetaLock(bool f) :
-    m_code(lockCode(f)),
-    m_meta(lockMetadata(f)) {
-}
-
-void CodeMetaLock::lock() {
-  m_code.lock();
-  m_meta.lock();
-}
-
-void CodeMetaLock::unlock() {
-  m_meta.unlock();
-  m_code.unlock();
+std::unique_lock<SimpleMutex> lockMetadata() {
+  return std::unique_lock<SimpleMutex>{s_metadataLock};
 }
 
 void assertOwnsCodeLock(OptView v) {

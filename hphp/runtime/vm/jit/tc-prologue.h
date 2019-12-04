@@ -25,15 +25,12 @@ struct ProfTransRec;
 
 namespace tc {
 
-struct CodeMetaLock;
-
 /*
  * Emit a function prologue from rec.
  *
  * Precondition: calling thread owns both code and metadata locks
  */
-void emitFuncPrologueOptInternal(PrologueMetaInfo& info,
-                                 CodeMetaLock* locker);
+void emitFuncPrologueOptInternal(PrologueMetaInfo& info);
 
 /*
  * Publish the metadata for the given func prologue.  Returns whether or not it
@@ -59,13 +56,14 @@ void smashFuncCallers(TCA start, ProfTransRec* rec);
  * return its start address.  The `kind' of translation argument is used to
  * decide what area of the code cache will be used (hot, main, or prof).
  *
- * Precondition: calling thread owns both code and metadata locks, or
- *               passes a non-null locker param
+ * Precondition: calling thread owns both code and metadata locks
  */
-TransLoc emitFuncBodyDispatchInternal(Func* func, const DVFuncletsVec& dvs,
-                                      TransKind kind, CodeMetaLock* locker);
+TCA emitFuncBodyDispatchInternal(Func* func, const DVFuncletsVec& dvs,
+                                 TransKind kind, CodeCache::View view);
 
 void publishFuncBodyDispatch(Func* func, TCA start, TCA end);
+void publishFuncBodyDispatch(Func* func, TCA start,
+                             CodeCache::View view, TransLoc loc);
 
 }
 

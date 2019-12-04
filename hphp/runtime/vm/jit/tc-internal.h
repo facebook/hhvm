@@ -169,29 +169,18 @@ private:
  */
 
 /*
- * Acquire a lock on this object's code cache (the lock is deferred if
- * lock is false).
+ * Acquire a lock on this object's code cache.
  *
  * Must be held even if the current thread owns the global write lease.
  */
-std::unique_lock<SimpleMutex> lockCode(bool lock = true);
+std::unique_lock<SimpleMutex> lockCode();
 
 /*
- * Acquire a lock on this object's metadata tables (the lock is
- * deferred if lock is false).
+ * Acquire a lock on this object's metadata tables.
  *
  * Must be held even if the current thread owns the global write lease.
  */
-std::unique_lock<SimpleMutex> lockMetadata(bool lock = true);
-
-struct CodeMetaLock {
-  explicit CodeMetaLock(bool f);
-  void lock();
-  void unlock();
-private:
-  std::unique_lock<SimpleMutex> m_code;
-  std::unique_lock<SimpleMutex> m_meta;
-};
+std::unique_lock<SimpleMutex> lockMetadata();
 
 /*
  * Atomically bumps the translation counter and returns true iff emitting a new

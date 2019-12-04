@@ -33,12 +33,7 @@ namespace jit {
 struct IRUnit;
 struct Vunit;
 
-namespace tc {
-
-struct LocalTCBuffer;
-struct FuncMetaInfo;
-
-}
+namespace tc { struct LocalTCBuffer; }
 
 /*
  * Arguments for the translate() entry points in Translator.
@@ -137,12 +132,6 @@ void processInit();
  * worker threads.
  */
 void joinWorkerThreads();
-
-/*
- * Wait until the specified function has been optimized by the
- * retranslateAll workers.
- */
-void waitForTranslate(const tc::FuncMetaInfo&);
 
 /*
  * True iff mcgen::processInit() has been called

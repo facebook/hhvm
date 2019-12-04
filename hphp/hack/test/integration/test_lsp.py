@@ -347,11 +347,6 @@ class TestLsp(TestCase[LspTestDriver]):
             "initialize_shutdown", {"root_path": self.test_driver.repo_dir}
         )
 
-    def test_completion(self) -> None:
-        self.prepare_server_environment()
-        variables = self.setup_php_file("completion.php")
-        self.load_and_run("completion", variables)
-
     def test_serverless_ide_completion(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("completion.php"))

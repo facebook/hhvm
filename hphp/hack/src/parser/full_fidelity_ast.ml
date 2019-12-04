@@ -1788,11 +1788,7 @@ if there already is one, since that one will likely be better than this one. *)
               None )
         | ScopeResolutionExpression
             { scope_resolution_qualifier; scope_resolution_name; _ } ->
-          let qual =
-            match pExpr scope_resolution_qualifier env with
-            | (p, Lvar v) when not env.codegen -> (p, Id v)
-            | qual -> qual
-          in
+          let qual = pExpr scope_resolution_qualifier env in
           begin
             match qual with
             | (_, Id x) -> fail_if_invalid_reified_generic env node x

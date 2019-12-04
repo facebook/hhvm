@@ -347,14 +347,18 @@ pub enum Node_ {
     Abstract,
     As,
     Async,
+    Class,
     DotDotDot,
     Final,
+    Interface,
     Private,
     Protected,
     Public,
     Question,
+    Semicolon,
     Static,
     Super,
+    Trait,
     Yield,
 }
 
@@ -907,8 +911,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
             TokenKind::Async => Node_::Async,
+            TokenKind::Class => Node_::Class,
             TokenKind::DotDotDot => Node_::DotDotDot,
             TokenKind::Final => Node_::Final,
+            TokenKind::Interface => Node_::Interface,
             TokenKind::Yield => Node_::Yield,
             TokenKind::Namespace => {
                 self.state.namespace_builder.to_mut().is_building_namespace = true;
@@ -930,13 +936,16 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     }
                     self.state.namespace_builder.to_mut().is_building_namespace = false;
                 }
-                Node_::Ignored
+                // It's not necessary to track left braces, so just always
+                // return a semicolon.
+                Node_::Semicolon
             }
             TokenKind::Private => Node_::Private,
             TokenKind::Protected => Node_::Protected,
             TokenKind::Public => Node_::Public,
             TokenKind::Question => Node_::Question,
             TokenKind::Static => Node_::Static,
+            TokenKind::Trait => Node_::Trait,
             _ => Node_::Ignored,
         })
     }
@@ -1243,7 +1252,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         &mut self,
         _arg0: Self::R,
         modifiers: Self::R,
-        _arg2: Self::R,
+        class_keyword: Self::R,
         name: Self::R,
         _arg4: Self::R,
         _arg5: Self::R,
@@ -1280,7 +1289,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             },
             final_: false,
             is_xhp: false,
-            kind: ClassKind::Cnormal,
+            kind: match class_keyword? {
+                Node_::Interface => ClassKind::Cinterface,
+                Node_::Trait => ClassKind::Ctrait,
+                _ => ClassKind::Cnormal,
+            },
             name: Id(pos, name.into_owned()),
             tparams: Vec::new(),
             where_constraints: Vec::new(),
@@ -1347,9 +1360,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         Node_::Function(decl) => {
                             let (is_static, visibility) =
                                 read_member_modifiers(decl.header.modifiers.iter());
+                            let abstract_ = match decl.body {
+                                Node_::Semicolon => true,
+                                _ => false,
+                            };
                             let (name, pos, ty) = self.function_into_ty(decl.header, decl.body)?;
                             let method = shallow_decl_defs::ShallowMethod {
-                                abstract_: false,
+                                abstract_,
                                 final_: false,
                                 memoizelsb: false,
                                 name: Id(pos, name),
@@ -1410,12 +1427,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg0: Self::R,
         header: Self::R,
         body: Self::R,
-        _arg3: Self::R,
+        closer: Self::R,
     ) -> Self::R {
         match header? {
             Node_::FunctionHeader(header) => Ok(Node_::Function(Box::new(FunctionDecl {
                 header: *header,
-                body: body?,
+                body: match body? {
+                    // If we don't have a function body, use the closing token.
+                    // A closing token of '}' indicates a regular function,
+                    // while a closing token of ';' indicates an abstract
+                    // function.
+                    Node_::Ignored => closer?,
+                    body => body,
+                },
             }))),
             n => Err(format!("Expected a function header, but was {:?}", n)),
         }

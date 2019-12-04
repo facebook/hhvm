@@ -66,7 +66,7 @@ struct TSCtx {
   const Class* typeCnsCls = nullptr;
   const Class* declCls = nullptr;
 
-  // Reified generics for the context we're resolving in, if available.
+  // Generics for the context we're resolving in, if available.
   const ArrayData* generics = nullptr;
 };
 

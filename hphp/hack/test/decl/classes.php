@@ -5,6 +5,8 @@ class MyClass {
   public string $instanceProperty;
   protected int $protectedProperty;
 
+  public function __construct(): void {}
+
   private function privateMethod(): void {}
   public function publicMethod(): void {}
   protected function protectedMethod(): void {}

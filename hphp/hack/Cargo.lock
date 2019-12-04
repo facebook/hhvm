@@ -187,6 +187,8 @@ version = "0.0.0"
 dependencies = [
  "flatten_smart_constructors 0.0.0",
  "hh_autoimport_rust 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
+ "naming_special_names_rust 0.0.0",
  "ocamlrep 0.0.0",
  "oxidized 0.0.0",
  "parser_rust 0.0.0",

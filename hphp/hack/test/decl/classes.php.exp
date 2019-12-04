@@ -4,7 +4,7 @@ Parsed decls:
   { "MyAbstractClass" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_kind = Cabstract;
-      sc_name = ([20:16-31], "\\MyAbstractClass"); sc_tparams = [];
+      sc_name = ([22:16-31], "\\MyAbstractClass"); sc_tparams = [];
       sc_where_constraints = []; sc_extends = []; sc_uses = [];
       sc_method_redeclarations = []; sc_xhp_attr_uses = [];
       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
@@ -46,20 +46,41 @@ Parsed decls:
                 (Tprim Tstring)));
          sp_abstract = false; sp_visibility = Private; sp_fixme_codes = {} }
         ];
-      sc_constructor = None; sc_static_methods = [];
+      sc_constructor =
+      (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
+              sm_memoizelsb = false; sm_name = ([8:19-30], "__construct");
+              sm_override = false; sm_reactivity = None;
+              sm_type =
+              (Rwitness (root|classes.php line 8, characters 19-29),
+               (Tfun
+                  { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
+                    ft_tparams = []; ft_where_constraints = [];
+                    ft_params = [];
+                    ft_ret =
+                    { et_enforced = false;
+                      et_type =
+                      (Rhint (root|classes.php line 8, characters 34-37),
+                       (Tprim Tvoid))
+                      };
+                    ft_fun_kind = sync; ft_reactive = Nonreactive;
+                    ft_return_disposable = false; ft_mutable = none;
+                    ft_returns_mutable = false }));
+              sm_visibility = Public; sm_fixme_codes = {};
+              sm_deprecated = None });
+      sc_static_methods = [];
       sc_methods =
       [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
-         sm_memoizelsb = false; sm_name = ([8:20-33], "privateMethod");
+         sm_memoizelsb = false; sm_name = ([10:20-33], "privateMethod");
          sm_override = false; sm_reactivity = None;
          sm_type =
-         (Rwitness (root|classes.php line 8, characters 20-32),
+         (Rwitness (root|classes.php line 10, characters 20-32),
           (Tfun
              { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
                ft_tparams = []; ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;
                  et_type =
-                 (Rhint (root|classes.php line 8, characters 37-40),
+                 (Rhint (root|classes.php line 10, characters 37-40),
                   (Tprim Tvoid))
                  };
                ft_fun_kind = sync; ft_reactive = Nonreactive;
@@ -67,17 +88,17 @@ Parsed decls:
                ft_returns_mutable = false }));
          sm_visibility = Private; sm_fixme_codes = {}; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([9:19-31], "publicMethod");
+          sm_memoizelsb = false; sm_name = ([11:19-31], "publicMethod");
           sm_override = false; sm_reactivity = None;
           sm_type =
-          (Rwitness (root|classes.php line 9, characters 19-30),
+          (Rwitness (root|classes.php line 11, characters 19-30),
            (Tfun
               { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
                 ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_ret =
                 { et_enforced = false;
                   et_type =
-                  (Rhint (root|classes.php line 9, characters 35-38),
+                  (Rhint (root|classes.php line 11, characters 35-38),
                    (Tprim Tvoid))
                   };
                 ft_fun_kind = sync; ft_reactive = Nonreactive;
@@ -85,17 +106,17 @@ Parsed decls:
                 ft_returns_mutable = false }));
           sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([10:22-37], "protectedMethod");
+          sm_memoizelsb = false; sm_name = ([12:22-37], "protectedMethod");
           sm_override = false; sm_reactivity = None;
           sm_type =
-          (Rwitness (root|classes.php line 10, characters 22-36),
+          (Rwitness (root|classes.php line 12, characters 22-36),
            (Tfun
               { ft_is_coroutine = false; ft_arity = (Fstandard (0, 0));
                 ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_ret =
                 { et_enforced = false;
                   et_type =
-                  (Rhint (root|classes.php line 10, characters 41-44),
+                  (Rhint (root|classes.php line 12, characters 41-44),
                    (Tprim Tvoid))
                   };
                 ft_fun_kind = sync; ft_reactive = Nonreactive;
@@ -104,28 +125,28 @@ Parsed decls:
           sm_visibility = Protected; sm_fixme_codes = {};
           sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([11:25-40], "async_generator");
+          sm_memoizelsb = false; sm_name = ([13:25-40], "async_generator");
           sm_override = false; sm_reactivity = None;
           sm_type =
-          (Rwitness (root|classes.php line 11, characters 25-39),
+          (Rwitness (root|classes.php line 13, characters 25-39),
            (Tfun
               { ft_is_coroutine = false; ft_arity = (Fstandard (2, 2));
                 ft_tparams = []; ft_where_constraints = [];
                 ft_params =
-                [{ fp_pos = [12:12-17]; fp_name = (Some "$arg1");
+                [{ fp_pos = [14:12-17]; fp_name = (Some "$arg1");
                    fp_type =
                    { et_enforced = false;
                      et_type =
-                     (Rhint (root|classes.php line 12, characters 5-10),
+                     (Rhint (root|classes.php line 14, characters 5-10),
                       (Tprim Tstring))
                      };
                    fp_kind = FPnormal; fp_accept_disposable = false;
                    fp_mutable = none };
-                  { fp_pos = [13:9-14]; fp_name = (Some "$arg2");
+                  { fp_pos = [15:9-14]; fp_name = (Some "$arg2");
                     fp_type =
                     { et_enforced = false;
                       et_type =
-                      (Rhint (root|classes.php line 13, characters 5-7),
+                      (Rhint (root|classes.php line 15, characters 5-7),
                        (Tprim Tint))
                       };
                     fp_kind = FPnormal; fp_accept_disposable = false;
@@ -134,13 +155,13 @@ Parsed decls:
                 ft_ret =
                 { et_enforced = false;
                   et_type =
-                  (Rhint (root|classes.php line 14, characters 6-41),
-                   (Tapply (([14:6-23], "\\HH\\AsyncGenerator"),
-                      [(Rhint (root|classes.php line 14, characters 24-26),
+                  (Rhint (root|classes.php line 16, characters 6-41),
+                   (Tapply (([16:6-23], "\\HH\\AsyncGenerator"),
+                      [(Rhint (root|classes.php line 16, characters 24-26),
                         (Tprim Tint));
-                        (Rhint (root|classes.php line 14, characters 29-34),
+                        (Rhint (root|classes.php line 16, characters 29-34),
                          (Tprim Tstring));
-                        (Rhint (root|classes.php line 14, characters 37-40),
+                        (Rhint (root|classes.php line 16, characters 37-40),
                          (Tprim Tvoid))
                         ]
                       )))
@@ -155,7 +176,7 @@ Parsed decls:
     "MyFinalClass" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
       sc_is_xhp = false; sc_kind = Cnormal;
-      sc_name = ([21:13-25], "\\MyFinalClass"); sc_tparams = [];
+      sc_name = ([23:13-25], "\\MyFinalClass"); sc_tparams = [];
       sc_where_constraints = []; sc_extends = []; sc_uses = [];
       sc_method_redeclarations = []; sc_xhp_attr_uses = [];
       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
@@ -166,7 +187,7 @@ Parsed decls:
     "MyStaticClass" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
       sc_is_xhp = false; sc_kind = Cabstract;
-      sc_name = ([22:22-35], "\\MyStaticClass"); sc_tparams = [];
+      sc_name = ([24:22-35], "\\MyStaticClass"); sc_tparams = [];
       sc_where_constraints = []; sc_extends = []; sc_uses = [];
       sc_method_redeclarations = []; sc_xhp_attr_uses = [];
       sc_req_extends = []; sc_req_implements = []; sc_implements = [];

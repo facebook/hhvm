@@ -7,6 +7,7 @@
  *
 */
 use hh_autoimport_rust as hh_autoimport;
+use naming_special_names_rust as naming_special_names;
 use parser_rust as parser;
 
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
@@ -136,6 +137,10 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<(String, Pos), String> 
             Ok((mangle_xhp_id(Cow::Borrowed(name)).into_owned(), pos.clone()))
         }
         Node_::QualifiedName(parts, pos) => qualified_name_from_parts(namespace, &parts, pos),
+        Node_::Construct(pos) => Ok((
+            naming_special_names::members::__CONSTRUCT.to_string(),
+            pos.clone(),
+        )),
         n => {
             return Err(format!(
                 "Expected a name, XHP name, or qualified name, but got {:?}",
@@ -333,6 +338,7 @@ pub enum Node_ {
     ClassishBody(Vec<Node_>),
     TypeConstraint(Box<(ConstraintKind, Node_)>),
     ShapeFieldSpecifier(Box<ShapeFieldDecl>),
+    Construct(Pos),
     LessThan(Pos),    // This needs a pos since it shows up in generics.
     GreaterThan(Pos), // This needs a pos since it shows up in generics.
     LeftParen(Pos),   // This needs a pos since it shows up in tuples and shapes.
@@ -368,6 +374,7 @@ impl Node_ {
             Node_::Name(_, pos) => Ok(pos.clone()),
             Node_::Hint(_, pos) => Ok(pos.clone()),
             Node_::Backslash(pos)
+            | Node_::Construct(pos)
             | Node_::LessThan(pos)
             | Node_::GreaterThan(pos)
             | Node_::LeftParen(pos)
@@ -902,6 +909,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Node_::Backslash(token_pos(self))
                 }
             }
+            TokenKind::Construct => Node_::Construct(token_pos(self)),
             TokenKind::LessThan => Node_::LessThan(token_pos(self)),
             TokenKind::GreaterThan => Node_::GreaterThan(token_pos(self)),
             TokenKind::LeftParen => Node_::LeftParen(token_pos(self)),
@@ -1364,6 +1372,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 Node_::Semicolon => true,
                                 _ => false,
                             };
+                            let is_constructor = match decl.header.name {
+                                Node_::Construct(_) => true,
+                                _ => false,
+                            };
                             let (name, pos, ty) = self.function_into_ty(decl.header, decl.body)?;
                             let method = shallow_decl_defs::ShallowMethod {
                                 abstract_,
@@ -1377,7 +1389,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 fixme_codes: ISet::new(),
                                 deprecated: None,
                             };
-                            if is_static {
+                            if is_constructor {
+                                cls.constructor = Some(method);
+                            } else if is_static {
                                 cls.static_methods.push(method);
                             } else {
                                 cls.methods.push(method);

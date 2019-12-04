@@ -317,7 +317,8 @@ let parse_check_args cmd =
         (* alias for --identify-function *) "" );
       ( "--go-to-impl-class",
         Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_CLASS x) ()),
-        " (mode) goes to implementation of the provided class name" );
+        " (mode) goes to implementation of the provided class/trait/interface/etc. with the given name"
+      );
       ( "--go-to-impl-class-remote",
         Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_CLASS_REMOTE x) ()),
         " (mode) similar to go-to-class-impl, but uses a glean database for faster but potentially out-of-date results"

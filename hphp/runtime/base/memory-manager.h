@@ -18,11 +18,9 @@
 #define incl_HPHP_MEMORY_MANAGER_H_
 
 #include <array>
-#include <vector>
+#include <string>
 #include <utility>
-#include <set>
-#include <unordered_map>
-#include <bitset>
+#include <vector>
 
 #include <folly/Memory.h>
 
@@ -1006,6 +1004,9 @@ private:
   void resetEagerGC();
   void checkGC();
 
+  // Allocation sampling
+  void checkSampling(size_t bytes);
+
   /////////////////////////////////////////////////////////////////////////////
 
 private:
@@ -1041,6 +1042,9 @@ private:
   // Peak memory threshold callback (installed via setMemThresholdCallback)
   size_t m_memThresholdCallbackPeakUsage{SIZE_MAX};
 
+  // Allocation sampling.
+  int64_t m_nextSample{std::numeric_limits<int64_t>::max()};
+
   // pointers to jemalloc-maintained allocation counters
   uint64_t* m_allocated;
   uint64_t* m_deallocated;
@@ -1075,6 +1079,10 @@ struct RequestLocalGCData {
 
 extern RDS_LOCAL_NO_CHECK(RequestLocalGCData, rl_gcdata);
 extern DECLARE_RDS_LOCAL_HOTVALUE(bool, t_eager_gc);
+
+void gather_alloc_stack(bool skipTop = false);
+void reset_alloc_sampling();
+
 //////////////////////////////////////////////////////////////////////
 
 }

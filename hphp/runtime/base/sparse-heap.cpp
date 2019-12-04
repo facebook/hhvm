@@ -44,7 +44,7 @@ void SparseHeap::reset() {
   auto const do_free =
     [this] (void* ptr, size_t size) {
       if (RuntimeOption::EvalBigAllocUseLocalArena) {
-        local_sized_free(ptr, size);
+        if (size) local_sized_free(ptr, size);
       } else {
 #ifdef USE_JEMALLOC
 #if JEMALLOC_VERSION_MAJOR >= 4

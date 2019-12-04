@@ -984,6 +984,8 @@ struct RuntimeOption {
   F(bool, FilterGCPoints,              true)                            \
   F(bool, Quarantine,                  eagerGcDefault())                \
   F(uint32_t, GCSampleRate,            0)                               \
+  F(uint32_t, HeapAllocSampleRequests, 0)                               \
+  F(uint32_t, HeapAllocSampleBytes,    256 * 1024)                      \
   F(int64_t, GCMinTrigger,             64L<<20)                         \
   F(double, GCTriggerPct,              0.5)                             \
   F(bool, GCForAPC,                    false)                           \

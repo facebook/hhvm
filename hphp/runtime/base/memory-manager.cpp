@@ -864,6 +864,7 @@ void* MemoryManager::mallocBigSize(size_t bytes, bool zero) {
   if (debug) tl_heap->requestEagerGC();
   auto ptr = m_heap.allocBig(bytes, zero, m_stats);
   updateBigStats();
+  checkSampling(bytes);
   checkGC();
   FTRACE(3, "mallocBigSize: {} ({} requested)\n", ptr, bytes);
   return ptr;
@@ -1077,6 +1078,15 @@ bool MemoryManager::triggerProfiling(const std::string& filename) {
 void MemoryManager::requestInit() {
   tl_heap->m_req_start_micros = HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
 
+  if (RuntimeOption::DisableSmallAllocator &&
+      RuntimeOption::EvalHeapAllocSampleRequests &&
+      RuntimeOption::EvalHeapAllocSampleBytes > 0) {
+    if (!folly::Random::rand32(RuntimeOption::EvalHeapAllocSampleRequests)) {
+      tl_heap->m_nextSample =
+        folly::Random::rand32(RuntimeOption::EvalHeapAllocSampleBytes);
+    }
+  }
+
   // If the trigger has already been claimed, do nothing.
   auto trigger = s_trigger.exchange(nullptr);
   if (trigger == nullptr) return;
@@ -1114,8 +1124,13 @@ void MemoryManager::requestInit() {
 }
 
 void MemoryManager::requestShutdown() {
-  auto& profctx = tl_heap->m_profctx;
+  if (tl_heap->m_nextSample != std::numeric_limits<int64_t>::max()) {
+    assertx(tl_heap->m_bypassSlabAlloc);
+    reset_alloc_sampling();
+    tl_heap->m_nextSample = std::numeric_limits<int64_t>::max();
+  }
 
+  auto& profctx = tl_heap->m_profctx;
   if (!profctx.flag) return;
 
 #ifdef USE_JEMALLOC

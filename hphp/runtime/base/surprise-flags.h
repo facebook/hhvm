@@ -50,7 +50,8 @@ enum SurpriseFlag : size_t {
   /* Set by the debugger hook handler to force function entry/exit events. */
   DebuggerHookFlag     = 1ull << 57,
 
-  UnusedSurpriseFlag58 = 1ull << 58,
+  HeapSamplingFlag     = 1ull << 58,
+
   IntervalTimerFlag    = 1ull << 59,
 
   /* Set if a GC should be run at the next safe point. */
@@ -84,6 +85,7 @@ enum SurpriseFlag : size_t {
     EventHookFlag |
     InterceptFlag |
     XenonSignalFlag |
+    HeapSamplingFlag |
     IntervalTimerFlag |
     MemThresholdFlag |
     CLIClientTerminated |

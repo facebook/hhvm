@@ -548,6 +548,10 @@ void logCommon(StructuredLogEntry sample, const ActRec* ar, ssize_t flags) {
 
 void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
                                 ssize_t flags, bool isResume) {
+  if (flags & HeapSamplingFlag) {
+    gather_alloc_stack(/* skipTop */ true);
+  }
+
   // User profiler
   if (flags & EventHookFlag) {
     if (shouldRunUserProfiler(ar->func())) {
@@ -587,6 +591,9 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   // Xenon
   if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::ExitSample);
+  }
+  if (flags & HeapSamplingFlag) {
+    gather_alloc_stack();
   }
 
   // Run callbacks only if it's safe to do so, i.e., not when

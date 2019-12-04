@@ -2015,14 +2015,6 @@ where
             }
             ScopeResolutionExpression(c) => {
                 let qual = Self::p_expr(&c.scope_resolution_qualifier, env)?;
-                let qual = if env.codegen() {
-                    qual
-                } else if let E_::Lvar(a) = qual.1 {
-                    let pos = qual.0;
-                    E::new(pos.clone(), E_::mk_id(ast::Id(pos, (a.1).1)))
-                } else {
-                    qual
-                };
                 if let E_::Id(id) = &qual.1 {
                     Self::fail_if_invalid_reified_generic(node, env, &id.1);
                 }

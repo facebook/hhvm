@@ -429,18 +429,9 @@ bool instrInfoInited;
 
 void initInstrInfo() {
   if (!instrInfoInited) {
+    instrInfo.reserve(sizeof(instrInfoSparse)/sizeof(*instrInfoSparse));
     for (auto& info : instrInfoSparse) {
       instrInfo[info.op] = info.info;
-    }
-    if (!RuntimeOption::EvalCheckReturnTypeHints) {
-      auto& ii = instrInfo[OpVerifyRetTypeC];
-      ii.in = ii.out = None;
-      ii.type = OutNone;
-
-      auto& ii2 = instrInfo[OpVerifyRetTypeTS];
-      ii2.in = Stack1;
-      ii2.out = None;
-      ii2.type = OutNone;
     }
     instrInfoInited = true;
   }
@@ -572,8 +563,6 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
   case Op::UGetCUNop:
   case Op::EntryNop:
     return true;
-  case Op::VerifyRetTypeC:
-    return !RuntimeOption::EvalCheckReturnTypeHints;
   default:
     return false;
   }

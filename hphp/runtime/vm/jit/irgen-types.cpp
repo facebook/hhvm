@@ -1510,15 +1510,10 @@ void verifyPropType(IRGS& env,
 }
 
 void emitVerifyRetTypeC(IRGS& env) {
-  if (!RuntimeOption::EvalCheckReturnTypeHints) return;
   verifyRetTypeImpl(env, TypeConstraint::ReturnId, 0, false);
 }
 
 void emitVerifyRetTypeTS(IRGS& env) {
-  if (!RuntimeOption::EvalCheckReturnTypeHints) {
-    popC(env);
-    return;
-  }
   verifyRetTypeImpl(env, TypeConstraint::ReturnId, 1, false);
   auto const ts = popC(env);
   auto const cell = topC(env);
@@ -1535,12 +1530,10 @@ void emitVerifyRetNonNullC(IRGS& env) {
   auto const func = curFunc(env);
   auto const& tc = func->returnTypeConstraint();
   always_assert(!tc.isNullable());
-  if (!RuntimeOption::EvalCheckReturnTypeHints) return;
   verifyRetTypeImpl(env, TypeConstraint::ReturnId, 0, true);
 }
 
 void emitVerifyOutType(IRGS& env, uint32_t paramId) {
-  if (!RuntimeOption::EvalCheckReturnTypeHints) return;
   verifyRetTypeImpl(env, paramId, 0, false);
 }
 

@@ -5273,15 +5273,10 @@ OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
 } // namespace
 
 OPTBLD_INLINE void iopVerifyRetTypeC() {
-  if (UNLIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) return;
   verifyRetTypeImpl(0); // Cell is on the top of the stack
 }
 
 OPTBLD_INLINE void iopVerifyRetTypeTS() {
-  if (UNLIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) {
-    vmStack().popC();
-    return;
-  }
   verifyRetTypeImpl(1); // Cell is the second element on the stack
   auto const ts = vmStack().topC();
   assertx(tvIsDictOrDArray(ts));
@@ -5304,7 +5299,6 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
 }
 
 OPTBLD_INLINE void iopVerifyRetNonNullC() {
-  if (UNLIKELY(!RuntimeOption::EvalCheckReturnTypeHints)) return;
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
   tc.verifyReturnNonNull(vmStack().topC(), func);

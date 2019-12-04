@@ -743,8 +743,7 @@ struct RuntimeOption {
    */                                                                   \
   F(int32_t, WarnOnUncalledPseudomain, 0)                               \
   /* CheckReturnTypeHints:
-     0 - No checks or enforcement for return type hints.
-     1 - Raises E_WARNING if a return type hint fails.
+     <2 - Raises E_WARNING if a return type hint fails.
      2 - Raises E_RECOVERABLE_ERROR if regular return type hint fails,
          raises E_WARNING if soft return type hint fails. If a regular
          return type hint fails, it's possible for execution to resume

@@ -1,7 +1,18 @@
 Parsed decls:
 
 { Direct_decl_parser.classes =
-  { "MyClass" ->
+  { "MyAbstractClass" ->
+    { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+      sc_is_xhp = false; sc_kind = Cabstract;
+      sc_name = ([20:16-31], "\\MyAbstractClass"); sc_tparams = [];
+      sc_where_constraints = []; sc_extends = []; sc_uses = [];
+      sc_method_redeclarations = []; sc_xhp_attr_uses = [];
+      sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+      sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
+      sc_sprops = []; sc_constructor = None; sc_static_methods = [];
+      sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
+      sc_decl_errors = <opaque> };
+    "MyClass" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_kind = Cnormal;
       sc_name = ([3:7-14], "\\MyClass"); sc_tparams = [];
@@ -140,7 +151,29 @@ Parsed decls:
           sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      } };
+      };
+    "MyFinalClass" ->
+    { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
+      sc_is_xhp = false; sc_kind = Cnormal;
+      sc_name = ([21:13-25], "\\MyFinalClass"); sc_tparams = [];
+      sc_where_constraints = []; sc_extends = []; sc_uses = [];
+      sc_method_redeclarations = []; sc_xhp_attr_uses = [];
+      sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+      sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
+      sc_sprops = []; sc_constructor = None; sc_static_methods = [];
+      sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
+      sc_decl_errors = <opaque> };
+    "MyStaticClass" ->
+    { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
+      sc_is_xhp = false; sc_kind = Cabstract;
+      sc_name = ([22:22-35], "\\MyStaticClass"); sc_tparams = [];
+      sc_where_constraints = []; sc_extends = []; sc_uses = [];
+      sc_method_redeclarations = []; sc_xhp_attr_uses = [];
+      sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+      sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
+      sc_sprops = []; sc_constructor = None; sc_static_methods = [];
+      sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
+      sc_decl_errors = <opaque> } };
   funs = {}; typedefs = {}; consts = {} }
 
 They matched!

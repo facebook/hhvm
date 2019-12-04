@@ -344,9 +344,11 @@ pub enum Node_ {
     TypeParameter(Box<(Node_, Vec<Box<(ConstraintKind, Node_)>>)>),
 
     // Simple keywords and tokens.
+    Abstract,
     As,
     Async,
     DotDotDot,
+    Final,
     Private,
     Protected,
     Public,
@@ -901,10 +903,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::LeftParen => Node_::LeftParen(token_pos(self)),
             TokenKind::RightParen => Node_::RightParen(token_pos(self)),
             TokenKind::Shape => Node_::Shape(token_pos(self)),
+            TokenKind::Abstract => Node_::Abstract,
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
             TokenKind::Async => Node_::Async,
             TokenKind::DotDotDot => Node_::DotDotDot,
+            TokenKind::Final => Node_::Final,
             TokenKind::Yield => Node_::Yield,
             TokenKind::Namespace => {
                 self.state.namespace_builder.to_mut().is_building_namespace = true;
@@ -1238,7 +1242,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_classish_declaration(
         &mut self,
         _arg0: Self::R,
-        _arg1: Self::R,
+        modifiers: Self::R,
         _arg2: Self::R,
         name: Self::R,
         _arg4: Self::R,
@@ -1299,6 +1303,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             enum_type: None,
             decl_errors: Errors::empty(),
         };
+
+        for modifier in modifiers?.into_iter() {
+            match modifier {
+                Node_::Abstract => cls.kind = ClassKind::Cabstract,
+                Node_::Final => cls.final_ = true,
+                _ => (),
+            }
+        }
 
         match body? {
             Node_::ClassishBody(body) => {

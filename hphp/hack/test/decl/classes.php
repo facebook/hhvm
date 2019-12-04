@@ -16,3 +16,7 @@ class MyClass {
     yield 0 => "test";
   }
 }
+
+abstract class MyAbstractClass {}
+final class MyFinalClass {}
+abstract final class MyStaticClass {}

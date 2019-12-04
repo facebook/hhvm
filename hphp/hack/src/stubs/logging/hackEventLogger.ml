@@ -139,6 +139,20 @@ let serverless_ide_local_files ~local_file_count:_ = ()
 
 let client_bad_exit ~command _ = ()
 
+let glean_globalrev_supplied ~globalrev:_ = ()
+
+let glean_globalrev_from_hg ~globalrev:_ ~start_time:_ = ()
+
+let glean_globalrev_error _ = ()
+
+let glean_init _ ~start_time:_ = ()
+
+let glean_init_failure _ ~stack:_ = ()
+
+let glean_fetch_namespaces ~count:_ ~start_time:_ = ()
+
+let glean_fetch_namespaces_error _ = ()
+
 let monitor_dead_but_typechecker_alive () = ()
 
 let client_connect_to_monitor_timeout () = ()

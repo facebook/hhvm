@@ -11,15 +11,17 @@ use parser_rust as parser;
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use oxidized::{
     aast,
-    ast_defs::{ClassKind, ConstraintKind, FunKind, Id, Variance},
+    ast_defs::{ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Variance},
     errors::Errors,
     file_info::Mode,
     i_set::ISet,
     pos::Pos,
-    shallow_decl_defs, typing_defs,
+    shallow_decl_defs,
+    shape_map::{ShapeField, ShapeMap},
+    typing_defs,
     typing_defs::{
         DeclTy, FunArity, FunElt, FunParam, FunParams, FunTparamsKind, FunType, ParamMode,
-        PossiblyEnforcedTy, Reactivity, Tparam, Ty, Ty_, TypedefType,
+        PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind, Tparam, Ty, Ty_, TypedefType,
     },
     typing_reason::Reason,
 };
@@ -266,6 +268,7 @@ pub enum HintValue {
     NoReturn,
     Apply(Box<(Id, Vec<Node_>)>),
     Tuple(Vec<Node_>),
+    Shape(Box<ShapeDecl>),
 }
 
 #[derive(Clone, Debug)]
@@ -298,6 +301,19 @@ pub struct PropertyDecl {
 }
 
 #[derive(Clone, Debug)]
+pub struct ShapeFieldDecl {
+    is_optional: bool,
+    name: Node_,
+    type_: Node_,
+}
+
+#[derive(Clone, Debug)]
+pub struct ShapeDecl {
+    kind: ShapeKind,
+    fields: Vec<ShapeFieldDecl>,
+}
+
+#[derive(Clone, Debug)]
 pub enum Node_ {
     List(Vec<Node_>),
     BracketedList(Box<(Pos, Vec<Node_>, Pos)>),
@@ -305,6 +321,7 @@ pub enum Node_ {
     Name(String, Pos),
     XhpName(String, Pos),
     QualifiedName(Vec<Node_>, Pos),
+    StringLiteral(String, Pos), // For shape keys.
     Hint(HintValue, Pos),
     Backslash(Pos), // This needs a pos since it shows up in names.
     ListItem(Box<(Node_, Node_)>),
@@ -314,21 +331,25 @@ pub enum Node_ {
     Property(Box<PropertyDecl>),
     ClassishBody(Vec<Node_>),
     TypeConstraint(Box<(ConstraintKind, Node_)>),
+    ShapeFieldSpecifier(Box<ShapeFieldDecl>),
     LessThan(Pos),    // This needs a pos since it shows up in generics.
     GreaterThan(Pos), // This needs a pos since it shows up in generics.
-    LeftParen(Pos),   // This needs a pos since it shows up in tuples.
-    RightParen(Pos),  // This needs a pos since it shows up in tuples.
+    LeftParen(Pos),   // This needs a pos since it shows up in tuples and shapes.
+    RightParen(Pos),  // This needs a pos since it shows up in tuples and shapes.
+    Shape(Pos),       // This needs a pos since it shows up in shapes.
 
     // Box the insides of the vector so we don't need to reallocate them when
     // we pull them out of the TypeConstraint variant.
     TypeParameter(Box<(Node_, Vec<Box<(ConstraintKind, Node_)>>)>),
 
-    // Simple keywords.
+    // Simple keywords and tokens.
     As,
     Async,
+    DotDotDot,
     Private,
     Protected,
     Public,
+    Question,
     Static,
     Super,
     Yield,
@@ -343,7 +364,9 @@ impl Node_ {
             | Node_::LessThan(pos)
             | Node_::GreaterThan(pos)
             | Node_::LeftParen(pos)
-            | Node_::RightParen(pos) => Ok(pos.clone()),
+            | Node_::RightParen(pos)
+            | Node_::Shape(pos)
+            | Node_::StringLiteral(_, pos) => Ok(pos.clone()),
             Node_::ListItem(items) => {
                 let fst = &items.0;
                 let snd = &items.1;
@@ -470,6 +493,28 @@ impl DirectDeclSmartConstructors<'_> {
                             .map(|node| self.node_to_ty(node, type_variables))
                             .collect::<Result<Vec<_>, String>>()?,
                     ),
+                    HintValue::Shape(innards) => {
+                        let shape_decl = &**innards;
+                        Ty_::Tshape(
+                        shape_decl.kind,
+                        shape_decl.fields
+                            .iter()
+                            .map(|field_decl| {
+                                let name = match &field_decl.name {
+                                    Node_::StringLiteral(s, pos) => Ok(ShapeFieldName::SFlitStr((pos.clone(), s.to_string()))),
+                                    n => Err(format!("Expected a string literal for shape key name, but was {:?}", n))
+                                }?;
+                                Ok((
+                                    ShapeField(name),
+                                    ShapeFieldType {
+                                        optional: field_decl.is_optional,
+                                        ty: self.node_to_ty(&field_decl.type_, type_variables)?,
+                                    },
+                                ))
+                            })
+                            .collect::<Result<ShapeMap<_>, String>>()?,
+                    )
+                    }
                 };
                 Ok(Ty(reason, Box::new(ty_)))
             }
@@ -784,6 +829,20 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 }
             }
             TokenKind::XHPClassName => Node_::XhpName(token_text(self), token_pos(self)),
+            TokenKind::SingleQuotedStringLiteral => Node_::StringLiteral(
+                token_text(self)
+                    .trim_start_matches("'")
+                    .trim_end_matches("'")
+                    .to_string(),
+                token_pos(self),
+            ),
+            TokenKind::DoubleQuotedStringLiteral => Node_::StringLiteral(
+                token_text(self)
+                    .trim_start_matches('"')
+                    .trim_end_matches('"')
+                    .to_string(),
+                token_pos(self),
+            ),
             TokenKind::String => Node_::Hint(HintValue::String, token_pos(self)),
             TokenKind::Int => Node_::Hint(HintValue::Int, token_pos(self)),
             TokenKind::Float => Node_::Hint(HintValue::Float, token_pos(self)),
@@ -820,9 +879,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::GreaterThan => Node_::GreaterThan(token_pos(self)),
             TokenKind::LeftParen => Node_::LeftParen(token_pos(self)),
             TokenKind::RightParen => Node_::RightParen(token_pos(self)),
+            TokenKind::Shape => Node_::Shape(token_pos(self)),
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
             TokenKind::Async => Node_::Async,
+            TokenKind::DotDotDot => Node_::DotDotDot,
             TokenKind::Yield => Node_::Yield,
             TokenKind::Namespace => {
                 self.state.namespace_builder.to_mut().is_building_namespace = true;
@@ -849,6 +910,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Private => Node_::Private,
             TokenKind::Protected => Node_::Protected,
             TokenKind::Public => Node_::Public,
+            TokenKind::Question => Node_::Question,
             TokenKind::Static => Node_::Static,
             _ => Node_::Ignored,
         })
@@ -883,7 +945,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_simple_type_specifier(&mut self, arg0: Self::R) -> Self::R {
-        // Return this explicitly because flatten filters out non-error nodes.
+        // Return this explicitly because flatten filters out zero nodes, and
+        // we treat most non-error nodes as zeroes.
+        arg0
+    }
+
+    fn make_literal_expression(&mut self, arg0: Self::R) -> Self::R {
         arg0
     }
 
@@ -966,12 +1033,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             }),
                         );
                     }
-                    Err(msg) => {
-                        return Err(format!(
-                            "Expected hint or name for type alias {}, but was {:?} ({})",
-                            name, aliased_type, msg
-                        ))
-                    }
+                    Err(msg) => return Err(msg),
                 }
             }
         };
@@ -1340,5 +1402,48 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // because by definition it's already contained by the two brackets.
         let pos = Pos::merge(&left_paren?.get_pos()?, &right_paren?.get_pos()?)?;
         Ok(Node_::Hint(HintValue::Tuple(inner?.into_vec()), pos))
+    }
+
+    fn make_shape_type_specifier(
+        &mut self,
+        shape: Self::R,
+        _arg1: Self::R,
+        fields: Self::R,
+        open: Self::R,
+        rparen: Self::R,
+    ) -> Self::R {
+        let fields = fields?
+            .into_iter()
+            .map(|node| match node {
+                Node_::ShapeFieldSpecifier(decl) => Ok(*decl),
+                n => Err(format!("Expected a shape field specifier, but was {:?}", n)),
+            })
+            .collect::<Result<Vec<_>, String>>()?;
+        let kind = match open? {
+            Node_::DotDotDot => ShapeKind::OpenShape,
+            _ => ShapeKind::ClosedShape,
+        };
+        Ok(Node_::Hint(
+            HintValue::Shape(Box::new(ShapeDecl { kind, fields })),
+            Pos::merge(&shape?.get_pos()?, &rparen?.get_pos()?)?,
+        ))
+    }
+
+    fn make_field_specifier(
+        &mut self,
+        is_optional: Self::R,
+        name: Self::R,
+        _arg2: Self::R,
+        type_: Self::R,
+    ) -> Self::R {
+        let is_optional = match is_optional? {
+            Node_::Question => true,
+            _ => false,
+        };
+        Ok(Node_::ShapeFieldSpecifier(Box::new(ShapeFieldDecl {
+            is_optional,
+            name: name?,
+            type_: type_?,
+        })))
     }
 }

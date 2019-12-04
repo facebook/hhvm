@@ -10,7 +10,7 @@ use ocamlrep_derive::OcamlRep;
 use crate::ast_defs::{Id, ShapeFieldName};
 
 #[derive(Clone, Debug, OcamlRep)]
-pub struct ShapeField(ShapeFieldName);
+pub struct ShapeField(pub ShapeFieldName);
 
 impl Ord for ShapeField {
     fn cmp(&self, other: &Self) -> Ordering {

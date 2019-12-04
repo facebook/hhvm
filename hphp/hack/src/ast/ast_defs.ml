@@ -181,7 +181,11 @@ module ShapeMap = struct
   let map_and_rekey m f1 f2 =
     fold (fun k v acc -> add (f1 k) (f2 v) acc) m empty
 
-  let pp _ fmt _ = Format.pp_print_string fmt "[ShapeMap]"
+  let pp
+      (pp_val : Format.formatter -> 'a -> unit)
+      (fmt : Format.formatter)
+      (map : 'a t) : unit =
+    make_pp pp_shape_field_name pp_val fmt map
 end
 
 module ShapeSet = Set.Make (ShapeField)

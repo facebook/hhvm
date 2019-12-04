@@ -229,6 +229,38 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
          @@ Exn.to_string exn;
          Printexc.print_backtrace stderr;
          Lwt.return Exit_status.Uncaught_exception)
+    | MODE_GO_TO_IMPL_CLASS class_name ->
+      let%lwt results =
+        rpc_with_retry args
+        @@ Rpc.GO_TO_IMPL (ServerCommandTypes.Find_refs.Class class_name)
+      in
+      ClientFindRefs.go results args.output_json;
+      Lwt.return Exit_status.No_error
+    | MODE_GO_TO_IMPL_CLASS_REMOTE class_name ->
+      let results =
+        Glean_dependency_graph.go_to_implementation ~class_name ~globalrev:""
+      in
+      HashSet.iter (fun cls -> Printf.printf "%s\n" cls) results;
+      Printf.printf "%d total results\n" (HashSet.length results);
+      Lwt.return Exit_status.No_error
+    | MODE_GO_TO_IMPL_METHOD name ->
+      let action =
+        parse_function_or_method_id
+          ~meth_action:(fun class_name method_name ->
+            ServerCommandTypes.Find_refs.Member
+              (class_name, ServerCommandTypes.Find_refs.Method method_name))
+          ~func_action:(fun fun_name ->
+            ServerCommandTypes.Find_refs.Function fun_name)
+          name
+      in
+      (match action with
+      | ServerCommandTypes.Find_refs.Member _ ->
+        let%lwt results = rpc_with_retry args @@ Rpc.GO_TO_IMPL action in
+        ClientFindRefs.go results args.output_json;
+        Lwt.return Exit_status.No_error
+      | _ ->
+        Printf.eprintf "Invalid input\n";
+        Lwt.return Exit_status.Input_error)
     | MODE_IDE_FIND_REFS arg ->
       let (line, char) = parse_position_string arg in
       let include_defs = false in

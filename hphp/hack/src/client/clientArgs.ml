@@ -315,6 +315,16 @@ let parse_check_args cmd =
       ( "--get-method-name",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL3 x) ()),
         (* alias for --identify-function *) "" );
+      ( "--go-to-impl-class",
+        Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_CLASS x) ()),
+        " (mode) goes to implementation of the provided class name" );
+      ( "--go-to-impl-class-remote",
+        Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_CLASS_REMOTE x) ()),
+        " (mode) similar to go-to-class-impl, but uses a glean database for faster but potentially out-of-date results"
+      );
+      ( "--go-to-impl-method",
+        Arg.String (fun x -> set_mode (MODE_GO_TO_IMPL_METHOD x) ()),
+        " (mode) goes to implementation of the provided method name" );
       ( "--ide-find-refs",
         Arg.String (fun x -> set_mode (MODE_IDE_FIND_REFS x) ()),
         "" );

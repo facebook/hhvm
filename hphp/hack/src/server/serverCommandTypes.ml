@@ -276,6 +276,7 @@ type _ t =
       (string list * Method_jumps.filter)
       -> Method_jumps.result list t
   | FIND_REFS : Find_refs.action -> Find_refs.result_or_retry t
+  | GO_TO_IMPL : Find_refs.action -> Find_refs.result_or_retry t
   | IDE_FIND_REFS :
       labelled_file * int * int * bool
       -> Find_refs.ide_result_or_retry t

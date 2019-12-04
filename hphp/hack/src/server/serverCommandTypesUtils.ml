@@ -15,6 +15,7 @@ let debug_describe_t : type a. a t -> string = function
   | METHOD_JUMP _ -> "METHOD_JUMP"
   | METHOD_JUMP_BATCH _ -> "METHOD_JUMP_BATCH"
   | FIND_REFS _ -> "FIND_REFS"
+  | GO_TO_IMPL _ -> "GO_TO_IMPL"
   | IDE_FIND_REFS _ -> "IDE_FIND_REFS"
   | IDE_GO_TO_IMPL _ -> "IDE_GO_TO_IMPL"
   | IDE_HIGHLIGHT_REFS _ -> "IDE_HIGHLIGHT_REFS"

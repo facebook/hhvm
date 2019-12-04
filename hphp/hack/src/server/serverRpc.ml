@@ -216,6 +216,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       let include_defs = false in
       ServerFindRefs.(
         go find_refs_action include_defs genv env |> map_env ~f:to_absolute))
+  | GO_TO_IMPL go_to_impl_action ->
+    Done_or_retry.(
+      ServerGoToImpl.go go_to_impl_action genv env
+      |> map_env ~f:ServerFindRefs.to_absolute)
   | IDE_FIND_REFS (labelled_file, line, column, include_defs) ->
     Done_or_retry.(
       let (path, file_input) =

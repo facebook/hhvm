@@ -1215,7 +1215,6 @@ void in(ISS& env, const bc::ColFromArray& op) {
 }
 
 void in(ISS& env, const bc::CnsE& op) {
-  if (!options.HardConstProp) return push(env, TInitCell);
   auto t = env.index.lookup_constant(env.ctx, op.str1);
   if (!t) {
     // There's no entry for this constant in the index. It must be
@@ -1255,7 +1254,7 @@ void in(ISS& env, const bc::ClsCns& op) {
 void in(ISS& env, const bc::ClsCnsD& op) {
   if (auto const rcls = env.index.resolve_class(env.ctx, op.str2)) {
     auto t = env.index.lookup_class_constant(env.ctx, *rcls, op.str1, false);
-    if (options.HardConstProp) constprop(env);
+    constprop(env);
     push(env, std::move(t));
     return;
   }
@@ -2488,15 +2487,14 @@ void in(ISS& env, const bc::CGetS& op) {
   auto indexTy = env.index.lookup_public_static(env.ctx, tcls, tname);
   if (indexTy.subtypeOf(BInitCell)) {
     /*
-     * Constant propagation here can change when we invoke autoload, so it's
-     * considered HardConstProp.  It's safe not to check anything about private
-     * or protected static properties, because you can't override a public
-     * static property with a private or protected one---if the index gave us
-     * back a constant type, it's because it found a public static and it must
-     * be the property this would have read dynamically.
+     * Constant propagation here can change when we invoke autoload.
+     * It's safe not to check anything about private or protected static
+     * properties, because you can't override a public static property with
+     * a private or protected one---if the index gave us back a constant type,
+     * it's because it found a public static and it must be the property this
+     * would have read dynamically.
      */
-    if (options.HardConstProp &&
-        !classInitMightRaise(env, tcls) &&
+    if (!classInitMightRaise(env, tcls) &&
         !env.index.lookup_public_static_maybe_late_init(tcls, tname)) {
       constprop(env);
     }
@@ -2906,7 +2904,7 @@ void in(ISS& env, const bc::IssetS& op) {
   auto const indexTy = env.index.lookup_public_static(env.ctx, tcls, tname);
   if (indexTy.subtypeOf(BInitCell)) {
     // See the comments in CGetS about constprop for public statics.
-    if (options.HardConstProp && !classInitMightRaise(env, tcls)) {
+    if (!classInitMightRaise(env, tcls)) {
       constprop(env);
     }
     if (env.index.lookup_public_static_maybe_late_init(tcls, tname)) {
@@ -3984,8 +3982,7 @@ void fcallKnownImpl(
   }
 
   if (func.name()->isame(s_defined.get()) &&
-      fca.numArgs == 1 && !fca.hasUnpack() && !fca.hasGenerics() &&
-      options.HardConstProp) {
+      fca.numArgs == 1 && !fca.hasUnpack() && !fca.hasGenerics()) {
     // If someone calls defined('foo') they probably want foo to be
     // defined normally; ie not a persistent constant.
     if (auto const v = tv(topCV(env, numExtraInputs))) {
@@ -4850,19 +4847,17 @@ void in(ISS& env, const bc::AliasCls&) {
 
 void in(ISS& env, const bc::DefCns& op) {
   auto const t = popC(env);
-  if (options.HardConstProp) {
-    auto const v = tv(t);
-    auto const val = v && tvAsCVarRef(&*v).isAllowedAsConstantValue() ?
-      *v : make_tv<KindOfUninit>();
-    auto const res = env.collect.cnsMap.emplace(op.str1, val);
-    if (!res.second) {
-      if (res.first->second.m_type == kReadOnlyConstant) {
-        // we only saw a read of this constant
-        res.first->second = val;
-      } else {
-        // more than one definition in this function
-        res.first->second.m_type = kDynamicConstant;
-      }
+  auto const v = tv(t);
+  auto const val = v && tvAsCVarRef(&*v).isAllowedAsConstantValue() ?
+    *v : make_tv<KindOfUninit>();
+  auto const res = env.collect.cnsMap.emplace(op.str1, val);
+  if (!res.second) {
+    if (res.first->second.m_type == kReadOnlyConstant) {
+      // we only saw a read of this constant
+      res.first->second = val;
+    } else {
+      // more than one definition in this function
+      res.first->second.m_type = kDynamicConstant;
     }
   }
   push(env, TBool);

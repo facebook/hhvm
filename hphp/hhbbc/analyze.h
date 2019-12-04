@@ -66,8 +66,7 @@ struct FuncAnalysisResult {
   ClosureUseVarMap closureUseTypes;
 
   /*
-   * With HardConstProp enabled, the set of constants that this
-   * function could define.
+   * The set of constants that this function could define.
    */
   ConstantMap cnsMap;
 

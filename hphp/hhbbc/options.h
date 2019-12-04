@@ -187,14 +187,6 @@ struct Options {
   //////////////////////////////////////////////////////////////////////
 
   /*
-   * If true, we'll propagate global defined constants, class constants, and
-   * constant static class properties "unsoundly".  I.e., it is visible to the
-   * user that we may not invoke autoload at places where we would have without
-   * this optimization.
-   */
-  bool HardConstProp = true;
-
-  /*
    * If true, we'll try to infer the types of declared private class
    * properties.
    *

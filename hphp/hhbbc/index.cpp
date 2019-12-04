@@ -5181,8 +5181,7 @@ folly::Optional<Type> Index::lookup_constant(Context ctx,
   ConstInfoConcurrentMap::const_accessor acc;
   if (!m_data->constants.find(acc, cnsName)) {
     // flag to indicate that the constant isn't in the index yet.
-    if (options.HardConstProp) return folly::none;
-    return TInitCell;
+    return folly::none;
   }
 
   if (acc->second.func &&
@@ -5197,7 +5196,6 @@ folly::Optional<Type> Index::lookup_constant(Context ctx,
 }
 
 folly::Optional<Cell> Index::lookup_persistent_constant(SString cnsName) const {
-  if (!options.HardConstProp) return folly::none;
   ConstInfoConcurrentMap::const_accessor acc;
   if (!m_data->constants.find(acc, cnsName)) return folly::none;
   return tv(acc->second.type);

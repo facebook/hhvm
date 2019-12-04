@@ -153,7 +153,7 @@ bool builtin_strlen(ISS& env, const bc::FCallBuiltin& op) {
 }
 
 bool builtin_defined(ISS& env, const bc::FCallBuiltin& op) {
-  if (!options.HardConstProp || op.arg1 != 2) return false;
+  if (op.arg1 != 2) return false;
   if (auto const v = tv(topT(env, 1))) {
     if (isStringType(v->m_type) &&
         !env.index.lookup_constant(env.ctx, v->m_data.pstr)) {

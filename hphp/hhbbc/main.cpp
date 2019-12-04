@@ -183,7 +183,6 @@ void parse_options(int argc, char** argv) {
     ("filter-assertions",       po::value(&options.FilterAssertions))
     ("strength-reduce",         po::value(&options.StrengthReduce))
     ("func-families",           po::value(&options.FuncFamilies))
-    ("hard-const-prop",         po::value(&options.HardConstProp))
     ("hard-private-prop",       po::value(&options.HardPrivatePropInference))
     ("analyze-pseudomains",     po::value(&options.AnalyzePseudomains))
     ("analyze-public-statics",  po::value(&options.AnalyzePublicStatics))

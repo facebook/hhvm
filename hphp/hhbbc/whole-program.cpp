@@ -415,12 +415,6 @@ void analyze_iteratively(Index& index, php::Program& program,
   }
 }
 
-void constant_pass(Index& index, php::Program& program) {
-  if (!options.HardConstProp) return;
-  index.use_class_dependencies(false);
-  analyze_iteratively(index, program, AnalyzeMode::ConstPass);
-}
-
 void prop_type_hint_pass(Index& index, php::Program& program) {
   trace_time tracer("optimize prop type-hints");
 
@@ -533,10 +527,6 @@ void UnitEmitterQueue::reset() {
   m_done.store(false, std::memory_order_relaxed);
 }
 
-void hard_constprop(bool f) {
-  options.HardConstProp = f;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 namespace php {
@@ -603,7 +593,8 @@ void whole_program(php::ProgramPtr program,
         assert(check(*program));
         prop_type_hint_pass(*index, *program);
         index->rewrite_default_initial_values(*program);
-        constant_pass(*index, *program);
+        index->use_class_dependencies(false);
+        analyze_iteratively(*index, *program, AnalyzeMode::ConstPass);
         // Defer initializing public static property types until after the
         // constant pass, to try to get better initial values.
         index->init_public_static_prop_types();

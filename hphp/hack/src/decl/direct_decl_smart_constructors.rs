@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 */
+use hh_autoimport_rust as hh_autoimport;
 use parser_rust as parser;
 
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
@@ -479,8 +480,12 @@ impl DirectDeclSmartConstructors<'_> {
                     HintValue::NoReturn => Ty_::Tprim(aast::Tprim::Tnoreturn),
                     HintValue::Apply(innards) => {
                         let (id, inner_types) = &**innards;
+                        let id = Id(
+                            id.0.clone(),
+                            self.rename_autoimport(Cow::Borrowed(&id.1)).into_owned(),
+                        );
                         Ty_::Tapply(
-                            id.clone(),
+                            id,
                             inner_types
                                 .iter()
                                 .map(|node| self.node_to_ty(node, type_variables))
@@ -524,7 +529,7 @@ impl DirectDeclSmartConstructors<'_> {
                 let ty_ = if type_variables.contains(&name) {
                     Ty_::Tgeneric(name)
                 } else {
-                    let name = self.prefix_ns(Cow::Owned(name));
+                    let name = self.rename_autoimport(self.prefix_ns(Cow::Owned(name)));
                     Ty_::Tapply(Id(pos, name.into_owned()), Vec::new())
                 };
                 Ok(Ty(reason, Box::new(ty_)))
@@ -631,6 +636,22 @@ impl DirectDeclSmartConstructors<'_> {
         } else {
             Cow::Owned("\\".to_owned() + &name)
         }
+    }
+
+    fn rename_autoimport<'a>(&self, name: Cow<'a, String>) -> Cow<'a, String> {
+        let should_prepend_slash = name.starts_with("\\");
+        hh_autoimport::TYPES_MAP
+            .get(name.trim_start_matches("\\"))
+            .map_or_else(
+                || name,
+                |renamed| {
+                    if should_prepend_slash {
+                        Cow::Owned("\\".to_string() + &renamed)
+                    } else {
+                        Cow::Borrowed(renamed)
+                    }
+                },
+            )
     }
 
     fn into_variables_list(

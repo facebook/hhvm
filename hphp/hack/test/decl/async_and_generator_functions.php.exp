@@ -12,9 +12,9 @@ Parsed decls:
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|async_and_generator_functions.php line 5, characters 34-53),
-               (Tapply (([5:34-46], "\\HH\\Awaitable"),
-                  [(Rhint (root|async_and_generator_functions.php line 5, characters 47-52),
+              (Rhint (root|async_and_generator_functions.php line 5, characters 34-50),
+               (Tapply (([5:34-43], "\\HH\\Awaitable"),
+                  [(Rhint (root|async_and_generator_functions.php line 5, characters 44-49),
                     (Tprim Tstring))]
                   )))
               };
@@ -32,13 +32,13 @@ Parsed decls:
             ft_ret =
             { et_enforced = false;
               et_type =
-              (Rhint (root|async_and_generator_functions.php line 18, characters 35-70),
-               (Tapply (([18:35-52], "\\HH\\AsyncGenerator"),
-                  [(Rhint (root|async_and_generator_functions.php line 18, characters 53-55),
+              (Rhint (root|async_and_generator_functions.php line 18, characters 35-67),
+               (Tapply (([18:35-49], "\\HH\\AsyncGenerator"),
+                  [(Rhint (root|async_and_generator_functions.php line 18, characters 50-52),
                     (Tprim Tint));
-                    (Rhint (root|async_and_generator_functions.php line 18, characters 58-63),
+                    (Rhint (root|async_and_generator_functions.php line 18, characters 55-60),
                      (Tprim Tstring));
-                    (Rhint (root|async_and_generator_functions.php line 18, characters 66-69),
+                    (Rhint (root|async_and_generator_functions.php line 18, characters 63-66),
                      (Tprim Tvoid))
                     ]
                   )))

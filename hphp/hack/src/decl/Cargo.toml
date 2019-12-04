@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/decl:decl_rust
-# Signature<<aa2386c085adce15cb386d66b8ade12da59ebe3f>>
+# Signature<<9bb86c8a09eb37cf6c14583e4806e17b74f5a60c>>
 [package]
 name = "decl_rust"
 edition = "2018"
@@ -11,6 +11,7 @@ path = "lib.rs"
 
 [dependencies]
 flatten_smart_constructors = { path = "../parser/cargo/flatten_smart_constructors" }
+hh_autoimport_rust = { path = "../parser/cargo/hh_autoimport" }
 ocamlrep = { path = "../ocamlrep" }
 oxidized = { path = "../oxidized" }
 parser_rust = { path = "../parser" }
@@ -19,4 +20,4 @@ rust-crypto = "*"
 
 [dev-dependencies]
 pretty_assertions = "*"
-# @end of Signature<<aa2386c085adce15cb386d66b8ade12da59ebe3f>>
+# @end of Signature<<9bb86c8a09eb37cf6c14583e4806e17b74f5a60c>>

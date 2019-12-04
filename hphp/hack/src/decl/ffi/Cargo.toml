@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/decl:decl_rust_ffi
-# Signature<<d1be0f45e3a34d330ccd0bbdd30f4012a99950e7>>
+# Signature<<34f94555d7673f5a9e460fc4dbdb49d547f709fa>>
 [package]
 name = "decl_rust_ffi"
 edition = "2018"
@@ -13,4 +13,4 @@ path = "../rust_decl_ffi.rs"
 decl_rust = { path = ".." }
 ocamlrep_ocamlpool = { path = "../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../oxidized" }
-# @end of Signature<<d1be0f45e3a34d330ccd0bbdd30f4012a99950e7>>
+# @end of Signature<<34f94555d7673f5a9e460fc4dbdb49d547f709fa>>

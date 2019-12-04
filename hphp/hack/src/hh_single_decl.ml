@@ -101,14 +101,14 @@ let compare_decl verbosity fn =
           File_provider.provide_file fn (File_provider.Disk text);
           Decl.make_env fn)
     in
-    let compare name get_decl show_decl parsed_decls =
+    let compare name get_decl eq_decl show_decl parsed_decls =
       let different_decls =
         SMap.fold
           (fun key parsed_decl acc ->
             let legacy_decl = get_decl fn ("\\" ^ key) in
             let legacy_decl_str = show_decl legacy_decl in
             let parsed_decl_str = show_decl parsed_decl in
-            if legacy_decl_str <> parsed_decl_str then
+            if not @@ eq_decl legacy_decl parsed_decl then
               (key, legacy_decl_str, parsed_decl_str) :: acc
             else
               acc)
@@ -147,21 +147,28 @@ let compare_decl verbosity fn =
       compare
         "typedef(s)"
         Decl.declare_typedef_in_file
+        Typing_defs.equal_typedef_type
         Pp_type.show_typedef_type
         decls.typedefs;
       compare
         "constant(s)"
         (fun a b -> Decl.declare_const_in_file a b |> fst)
+        Typing_defs.equal_decl_ty
         (Pp_type.show_decl_ty ())
         decls.consts;
       compare
         "function(s)"
         Decl.declare_fun_in_file
+        Typing_defs.equal_fun_elt
         Pp_type.show_fun_elt
         decls.funs;
       compare
         "class(es)"
-        Shallow_classes_heap.declare_class_in_file
+        Shallow_decl_defs.(
+          fun fn name ->
+            let class_ = Shallow_classes_heap.declare_class_in_file fn name in
+            { class_ with sc_decl_errors = Errors.empty })
+        Shallow_decl_defs.equal_shallow_class
         Shallow_decl_defs.show_shallow_class
         decls.classes;
     ]

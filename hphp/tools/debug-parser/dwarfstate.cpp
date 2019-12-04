@@ -39,7 +39,7 @@ ElfFileOpenResult doElfFileOpenNoThrow(
     EF& ef,
     char const* name,
     bool readonly) {
-  auto res = ef.openNoThrow(name, readonly);
+  auto res = ef.openNoThrow(name, typename EF::Options().writable(!readonly));
   return {res.code, res.msg};
 }
 template <typename EF>

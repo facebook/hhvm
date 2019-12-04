@@ -372,7 +372,7 @@ std::unique_ptr<ProfTransRec> read_prof_trans_rec(ProfDataDeserializer& ser) {
   return ret;
 }
 
-bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td);
+bool write_type_alias(ProfDataSerializer&, const TypeAliasReq*);
 
 bool write_type_alias_or_class(ProfDataSerializer& ser, const NamedEntity* ne) {
   if (!ne) return false;
@@ -482,18 +482,6 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
                    assertx(ne->m_cachedClass.bound());
                    if (ne->m_cachedClass.isNormal()) {
                      ne->setCachedClass(dep);
-                   }
-                   auto const depName = read_string(ser);
-                   if (!dep->name()->isame(depName)) {
-                     // this dependent was referred to via a
-                     // class_alias, so we need to make sure
-                     // *that* points to the class too
-                     auto const aliasNe = NamedEntity::get(depName);
-                     aliasNe->m_cachedClass.bind(rds::Mode::Normal);
-                     if (aliasNe->m_cachedClass.isNormal()) {
-                       aliasNe->m_cachedClass.markUninit();
-                     }
-                     aliasNe->setCachedClass(dep);
                    }
                  });
 
@@ -1090,16 +1078,6 @@ Unit* read_unit(ProfDataDeserializer& ser) {
   );
 }
 
-template<typename C1, typename C2, typename F>
-void visit_deps(const C1& c1, const C2& c2, F& f) {
-  auto it = c2.begin();
-  auto const DEBUG_ONLY end = c2.end();
-  for (auto const& dep : c1) {
-    assertx(it != end);
-    f(dep.get(), *it++);
-  }
-}
-
 void write_class(ProfDataSerializer& ser, const Class* cls) {
   SCOPE_EXIT {
     ITRACE(2, "Class: {}\n", cls ? cls->name() : staticEmptyString());
@@ -1113,44 +1091,35 @@ void write_class(ProfDataSerializer& ser, const Class* cls) {
   write_raw(ser, cls->preClass()->id());
   write_unit(ser, cls->preClass()->unit());
 
-  jit::vector<std::pair<const Class*, const StringData*>> dependents;
-  auto record_dep = [&] (const Class* dep, const StringData* depName) {
+  jit::vector<const Class*> dependents;
+  auto record_dep = [&] (const Class* dep) {
     if (!dep) return;
-    if (!dep->wasSerialized() ||
-        !classHasPersistentRDS(dep) ||
-        !dep->name()->isame(depName)) {
-      dependents.emplace_back(dep, depName);
+    if (!dep->wasSerialized() || !classHasPersistentRDS(dep)) {
+      dependents.emplace_back(dep);
     }
   };
-  record_dep(cls->parent(), cls->preClass()->parent());
-
-  visit_deps(cls->declInterfaces(), cls->preClass()->interfaces(), record_dep);
+  record_dep(cls->parent());
+  for (auto const& iface : cls->declInterfaces()) {
+    record_dep(iface.get());
+  }
 
   if (cls->preClass()->attrs() & AttrNoExpandTrait) {
     for (auto const tName : cls->preClass()->usedTraits()) {
       auto const trait = Unit::lookupUniqueClassInContext(tName, nullptr);
       assertx(trait);
-      record_dep(trait, tName);
+      record_dep(trait);
     }
   } else {
-    visit_deps(cls->usedTraitClasses(),
-               cls->preClass()->usedTraits(),
-               record_dep);
+    for (auto const& trait : cls->usedTraitClasses()) {
+      record_dep(trait.get());
+    }
   }
 
-  write_container(ser, dependents,
-                  [&] (const std::pair<const Class*, const StringData*> &dep) {
-                    write_class(ser, dep.first);
-                    write_string(ser, dep.second);
-                  });
+  write_container(ser, dependents, write_class);
 
   if (cls->attrs() & AttrEnum &&
       cls->preClass()->enumBaseTy().isObject()) {
-    if (cls->enumBaseTy()) {
-      write_raw(ser, *cls->enumBaseTy());
-    } else {
-      write_raw(ser, KindOfUninit);
-    }
+    write_raw(ser, cls->enumBaseTy().value_or(KindOfUninit));
   }
 
   if (cls->parent() == c_Closure::classof()) {

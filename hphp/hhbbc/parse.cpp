@@ -62,7 +62,6 @@ const StaticString s_toString("__toString");
 const StaticString s_Stringish("Stringish");
 const StaticString s_XHPChild("XHPChild");
 const StaticString s_attr_Deprecated("__Deprecated");
-const StaticString s_class_alias("class_alias");
 const StaticString s___NoContextSensitiveAnalysis(
     "__NoContextSensitiveAnalysis");
 
@@ -119,10 +118,6 @@ struct ParseUnitState {
    */
   hphp_fast_set<php::Func*> constPassFuncs;
 
-  /*
-   * List of class aliases defined by this unit
-   */
-  CompactVector<std::pair<SString,SString>> classAliases;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -349,16 +344,8 @@ void populate_block(ParseUnitState& puState,
   auto defclsnop = [&] (const Bytecode& b) {
     puState.defClsMap[b.DefClsNop.arg1] = &func;
   };
-  auto aliascls = [&] (const Bytecode& b) {
-    puState.classAliases.emplace_back(b.AliasCls.str1, b.AliasCls.str2);
-  };
   auto createcl = [&] (const Bytecode& b) {
     puState.createClMap[b.CreateCl.arg2].insert(&func);
-  };
-  auto fcallfuncd = [&] (const Bytecode& b) {
-    if (b.FCallFuncD.str2 == s_class_alias.get()) {
-      puState.constPassFuncs.insert(&func);
-    }
   };
 
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
@@ -464,9 +451,7 @@ void populate_block(ParseUnitState& puState,
       if (Op::opcode == Op::DefCns)      defcns();                 \
       if (Op::opcode == Op::DefCls)      defcls(b);                \
       if (Op::opcode == Op::DefClsNop)   defclsnop(b);             \
-      if (Op::opcode == Op::AliasCls)    aliascls(b);              \
       if (Op::opcode == Op::CreateCl)    createcl(b);              \
-      if (Op::opcode == Op::FCallFuncD)  fcallfuncd(b);            \
       blk.hhbcs.push_back(std::move(b));                           \
       assert(pc == next);                                          \
     }                                                              \
@@ -1128,8 +1113,6 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
       std::make_unique<php::TypeAlias>(ta)
     );
   }
-
-  ret->classAliases = std::move(puState.classAliases);
 
   find_additional_metadata(puState, ret.get());
 

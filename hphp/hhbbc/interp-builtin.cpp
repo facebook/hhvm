@@ -211,29 +211,6 @@ bool builtin_trait_exists(ISS& env, const bc::FCallBuiltin& op) {
   return handle_oodecl_exists(env, op, OODeclExistsOp::Trait);
 }
 
-bool builtin_class_alias(ISS& env, const bc::FCallBuiltin& op) {
-  if (op.arg1 != 3) return false;
-  auto const& alias = topT(env, 1);
-  auto const& orig  = topT(env, 2);
-  auto const alias_tv = tv(alias);
-  auto const orig_tv = tv(orig);
-  if (!alias_tv || !orig_tv ||
-      !isStringType(alias_tv->m_type) ||
-      !isStringType(orig_tv->m_type) ||
-      !env.index.register_class_alias(orig_tv->m_data.pstr,
-                                      alias_tv->m_data.pstr)) {
-    return false;
-  }
-
-  auto const aload = topT(env);
-  if (aload != TTrue && aload != TFalse) return false;
-
-  reduce(env, bc::PopC {}, bc::PopC {}, bc::PopC {},
-         gen_constant(make_tv<KindOfBoolean>(aload == TTrue)),
-         bc::AliasCls { orig_tv->m_data.pstr, alias_tv->m_data.pstr });
-  return true;
-}
-
 bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 1) return false;
   auto const ty = topC(env);
@@ -429,7 +406,6 @@ bool builtin_type_structure_classname(ISS& env, const bc::FCallBuiltin& op) {
   X(class_exists, class_exists)                                         \
   X(interface_exists, interface_exists)                                 \
   X(trait_exists, trait_exists)                                         \
-  X(class_alias, class_alias)                                           \
   X(array_key_cast, HH\\array_key_cast)                                 \
   X(is_list_like, HH\\is_list_like)                                     \
   X(type_structure, HH\\type_structure)                                 \

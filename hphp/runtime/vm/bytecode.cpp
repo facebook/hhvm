@@ -5147,17 +5147,6 @@ OPTBLD_INLINE void iopDefRecord(uint32_t cid) {
   Unit::defRecordDesc(r);
 }
 
-OPTBLD_INLINE void iopAliasCls(const StringData* original,
-                               const StringData* alias) {
-  TypedValue* aloadTV = vmStack().topTV();
-  tvCastToBooleanInPlace(aloadTV);
-  assertx(aloadTV->m_type == KindOfBoolean);
-  bool autoload = aloadTV->m_data.num;
-  vmStack().popX();
-
-  vmStack().pushBool(Unit::aliasClass(original, alias, autoload));
-}
-
 OPTBLD_INLINE void iopDefClsNop(uint32_t /*cid*/) {}
 
 OPTBLD_INLINE void iopDefTypeAlias(uint32_t tid) {

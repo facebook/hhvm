@@ -752,8 +752,6 @@ end
 module EmitterSpecialFunctions = struct
   let eval = "\\eval"
 
-  let class_alias = "\\class_alias"
-
   let set_frame_metadata = "\\HH\\set_frame_metadata"
 end
 

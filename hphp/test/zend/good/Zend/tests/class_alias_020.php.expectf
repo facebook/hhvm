@@ -1,6 +1,0 @@
-object(foo\foo) (0) {
-}
-object(foo\bar\foo) (0) {
-}
-
-Fatal error: Class undefined: foo\bar in %s/class_alias_020.php on line 21

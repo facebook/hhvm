@@ -519,7 +519,6 @@ pub enum InstructIncludeEvalDefine {
     ReqOnce,
     ReqDoc,
     Eval,
-    AliasCls(String, String),
     DefCls(ClassNum),
     DefClsNop(ClassNum),
     DefRecord(RecordNum),

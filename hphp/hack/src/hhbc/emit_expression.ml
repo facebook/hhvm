@@ -1020,14 +1020,6 @@ and emit_call_expr env pos e targs args uarg async_eager_label =
     emit_idx env pos args
   | (A.Id (_, id), _, [arg1], None) when id = SN.EmitterSpecialFunctions.eval ->
     emit_eval env pos arg1
-  | (A.Id (_, s), _, [(_, A.String c1); (_, A.String c2)], None)
-    when is_global_namespace env && s = SN.EmitterSpecialFunctions.class_alias
-    ->
-    gather [emit_pos pos; instr_true; instr_alias_cls c1 c2]
-  | (A.Id (_, s), _, [(_, A.String c1); (_, A.String c2); arg3], None)
-    when is_global_namespace env && s = SN.EmitterSpecialFunctions.class_alias
-    ->
-    gather [emit_expr env arg3; emit_pos pos; instr_alias_cls c1 c2]
   | (A.Id (_, id), _, [arg1], None)
     when id = SN.EmitterSpecialFunctions.set_frame_metadata ->
     gather

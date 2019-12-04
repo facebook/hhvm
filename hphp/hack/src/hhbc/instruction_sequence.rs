@@ -765,12 +765,6 @@ impl Instr {
         ))
     }
 
-    pub fn make_instr_alias_cls(c1: String, c2: String) -> Self {
-        Self::make_instr(Instruct::IIncludeEvalDefine(
-            InstructIncludeEvalDefine::AliasCls(c1, c2),
-        ))
-    }
-
     pub fn make_instr_silence_start(local: local::Type) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::Silence(
             local,

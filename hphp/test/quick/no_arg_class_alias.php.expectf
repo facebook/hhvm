@@ -1,3 +1,0 @@
-Fatal error: Uncaught exception 'RuntimeException' with message 'class_alias() expects at least 2 parameters, 0 given' in %s/no_arg_class_alias.php:4
-Stack trace:
-%A

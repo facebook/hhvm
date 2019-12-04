@@ -21,7 +21,7 @@ class DerivedTwo extends Base {
 
 <<__EntryPoint>>
 function main_attr_unique() {
-class_alias( 'Base', 'AliasForBase' );
+
 
 $inst = new DerivedOne();
 printf($inst->wrapper());

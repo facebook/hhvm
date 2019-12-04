@@ -317,7 +317,6 @@ static const struct {
   { OpDefCls,      {None,             None,         OutNone         }},
   { OpDefRecord,   {None,             None,         OutNone         }},
   { OpDefCns,      {Stack1,           Stack1,       OutBoolean      }},
-  { OpAliasCls,    {Stack1,           Stack1,       OutBoolean      }},
 
   /*** 13. Miscellaneous instructions ***/
 
@@ -852,7 +851,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::IncDecL:
   case Op::DefCls:
   case Op::DefRecord:
-  case Op::AliasCls:
   case Op::Eq:
   case Op::Neq:
   case Op::AssertRATL:

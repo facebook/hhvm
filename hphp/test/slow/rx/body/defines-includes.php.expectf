@@ -1,5 +1,3 @@
-Verification Error (unit %s/test/slow/rx/body/defines-includes.php func test): defines/includes are forbidden in Rx functions: AliasCls
-
 Verification Error (unit %s/test/slow/rx/body/defines-includes.php func test): defines/includes are forbidden in Rx functions: InclOnce
 
 Verification Error (unit %s/test/slow/rx/body/defines-includes.php func test): defines/includes are forbidden in Rx functions: Incl

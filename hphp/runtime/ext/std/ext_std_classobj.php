@@ -3,21 +3,6 @@
 namespace {
 
 /**
- * Creates an alias for a class
- *
- * @param string $original - The original class.
- * @param string $alias - The alias name for the class.
- * @param bool $autoload - Whether do autoload if the original class is
- *   not found.
- *
- * @return bool -
- */
-<<__Native>>
-function class_alias(string $original,
-                     string $alias,
-                     bool $autoload = true): bool;
-
-/**
  * Checks if the class has been defined
  *
  * @param string $class_name - The class name. The name is matched in a

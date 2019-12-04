@@ -724,7 +724,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(DefCls,          ONE(IVA),         NOV,             NOV,        NF) \
   O(DefClsNop,       ONE(IVA),         NOV,             NOV,        NF) \
   O(DefRecord,       ONE(IVA),         NOV,             NOV,        NF) \
-  O(AliasCls,        TWO(SA,SA),       ONE(CV),         ONE(CV),    NF) \
   O(DefCns,          ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(DefTypeAlias,    ONE(IVA),         NOV,             NOV,        NF) \
   O(This,            NA,               NOV,             ONE(CV),    NF) \

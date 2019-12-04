@@ -472,7 +472,6 @@ type instruct_include_eval_define =
   | ReqOnce
   | ReqDoc
   | Eval
-  | AliasCls of string * string
   | DefCls of class_num
   | DefClsNop of class_num
   | DefRecord of record_num

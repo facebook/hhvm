@@ -4,7 +4,6 @@ class C {}
 
 <<__Rx>>
 function test() {
-  class_alias('C', 'D'); // AliasCls
   // we don't emit DefTypeAlias outside of pseudo-mains
 
   include_once 'defines-includes.inc';

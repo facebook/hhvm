@@ -362,9 +362,6 @@ void emitDefTypeAlias(IRGS& env, uint32_t)    { interpOne(env); }
 void emitDefCns(IRGS& env, const StringData*) { interpOne(env); }
 void emitDefCls(IRGS& env, uint32_t)          { interpOne(env); }
 void emitDefRecord(IRGS& env, uint32_t)       { interpOne(env); }
-void emitAliasCls(IRGS& env,
-                  const StringData*,
-                  const StringData*)          { interpOne(env); }
 void emitChainFaults(IRGS& env)               { interpOne(env); }
 void emitContGetReturn(IRGS& env)             { interpOne(env); }
 void emitContAssignDelegate(IRGS& env, int32_t)

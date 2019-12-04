@@ -1503,7 +1503,6 @@ void no_dce(Env& env, const Op& op) {
   pop_inputs(env, op.numPop());
 }
 
-void dce(Env& env, const bc::AliasCls& op) { no_dce(env, op); }
 void dce(Env& env, const bc::AssertRATL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::AssertRATStk& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Await& op) { no_dce(env, op); }

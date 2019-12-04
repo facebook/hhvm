@@ -4840,10 +4840,6 @@ void in(ISS& env, const bc::Eval&)      { inclOpImpl(env); }
 void in(ISS& /*env*/, const bc::DefCls&) {}
 void in(ISS& /*env*/, const bc::DefRecord&) {}
 void in(ISS& /*env*/, const bc::DefClsNop&) {}
-void in(ISS& env, const bc::AliasCls&) {
-  popC(env);
-  push(env, TBool);
-}
 
 void in(ISS& env, const bc::DefCns& op) {
   auto const t = popC(env);

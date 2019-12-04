@@ -1015,33 +1015,6 @@ Class* Unit::defClosure(const PreClass* preClass) {
   return newClass.get();
 }
 
-bool Unit::aliasClass(const StringData* original, const StringData* alias,
-                      bool autoload) {
-  auto const origClass =
-    autoload ? Unit::loadClass(original)
-             : Unit::lookupClass(original);
-  if (!origClass) {
-    raise_warning("Class %s not found", original->data());
-    return false;
-  }
-  if (origClass->isBuiltin()) {
-    raise_warning("First argument of class_alias() must be "
-                  "the name of a user defined class");
-    return false;
-  }
-
-  auto const aliasNe = NamedEntity::get(alias);
-  aliasNe->m_cachedClass.bind(rds::Mode::Normal);
-
-  auto const aliasClass = aliasNe->getCachedClass();
-  if (aliasClass) {
-    raise_warning("Cannot redeclare class %s", alias->data());
-    return false;
-  }
-  aliasNe->setCachedClass(origClass);
-  return true;
-}
-
 Class* Unit::loadClass(const NamedEntity* ne,
                        const StringData* name) {
   Class* cls;

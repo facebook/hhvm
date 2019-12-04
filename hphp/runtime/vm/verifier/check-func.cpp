@@ -1811,7 +1811,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::DefCls:
     case Op::DefClsNop:
     case Op::DefRecord:
-    case Op::AliasCls:
     case Op::DefCns:
     case Op::DefTypeAlias:
     case Op::Incl:

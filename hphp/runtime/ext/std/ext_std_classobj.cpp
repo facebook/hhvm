@@ -75,16 +75,6 @@ Array HHVM_FUNCTION(get_declared_traits) {
   return Unit::getTraitsInfo();
 }
 
-bool HHVM_FUNCTION(class_alias, const String& original, const String& alias,
-                                bool autoload /* = true */) {
-  if (RuntimeOption::EvalAuthoritativeMode) {
-    raise_warning("Cannot call class_alias dynamically "
-                  "in repo-authoritative mode");
-    return false;
-  }
-  return Unit::aliasClass(original.get(), alias.get(), autoload);
-}
-
 bool HHVM_FUNCTION(class_exists, const String& class_name,
                                  bool autoload /* = true */) {
   return Unit::classExists(class_name.get(), autoload, ClassKind::Class);
@@ -430,7 +420,6 @@ void StandardExtension::initClassobj() {
   HHVM_FE(get_declared_classes);
   HHVM_FE(get_declared_interfaces);
   HHVM_FE(get_declared_traits);
-  HHVM_FE(class_alias);
   HHVM_FE(class_exists);
   HHVM_FE(interface_exists);
   HHVM_FE(trait_exists);

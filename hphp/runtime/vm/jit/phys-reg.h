@@ -236,6 +236,7 @@ public:
 private:
   friend struct RegSet;
   friend struct Vreg;
+  friend struct VregSet;
   explicit constexpr PhysReg(int n) : n(n) {}
 
   uint8_t n;

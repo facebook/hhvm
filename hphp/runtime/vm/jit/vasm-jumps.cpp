@@ -59,10 +59,18 @@ WidthAnalysis::WidthAnalysis(Vunit& unit)
   for (size_t i = 0; i < m_def_widths.size(); ++i) {
     Vreg r{i};
     if (r.isPhys()) {
-      if (r.isGP()) m_def_widths[i] &= Width::QuadN;
-      if (r.isSIMD()) m_def_widths[i] &= Width::Octa;
-      if (r.isSF()) m_def_widths[i] &= Width::Flags;
-      ignore.add(r);
+      if (r.isGP()) {
+        m_def_widths[i] &= Width::QuadN;
+        ignore.add(r);
+      }
+      if (r.isSIMD()) {
+        m_def_widths[i] &= Width::Octa;
+        ignore.add(r);
+      }
+      if (r.isSF()) {
+        m_def_widths[i] &= Width::Flags;
+        ignore.add(r);
+      }
     }
   }
 

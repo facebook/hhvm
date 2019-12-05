@@ -474,12 +474,20 @@ InlineFrame implInlineReturn(IRGS& env, bool suspend) {
 void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
   auto const rt = env.inlineState.returnTarget.back();
 
-  // The IR instructions should be associated with one of the return bytecodes,
-  // which should be one of the predecessors of this block.
+  // The IR instructions should be associated with one of the return bytecodes;
+  // all predecessors of this block should be valid options. Choose the hottest
+  // predecessor in order to get the most-likely DecRefProfiles.
   auto const curBlock = env.irb->curBlock();
   always_assert(curBlock && !curBlock->preds().empty());
-  auto const bcContext = curBlock->preds().front().inst()->bcctx();
+  auto best = curBlock->preds().front().inst();
+  for (auto const& pred : curBlock->preds()) {
+    if (pred.inst()->block()->profCount() > best->block()->profCount()) {
+      best = pred.inst();
+    }
+  }
+  auto const bcContext = best->bcctx();
   env.bcState.setOffset(bcContext.marker.sk().offset());
+  env.irb->setCurMarker(bcContext.marker);
 
   // At this point, env.profTransID and env.region are already set with the
   // caller's information.  We temporarily reset both of these with the callee's

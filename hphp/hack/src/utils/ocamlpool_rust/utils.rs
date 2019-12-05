@@ -23,7 +23,7 @@ extern "C" {
 
 pub unsafe fn reserve_block(tag: Tag, size: Size) -> Value {
     let result = ocamlpool_cursor.offset(-(size as isize) - 1);
-    if result < ocamlpool_limit {
+    if result < ocamlpool_limit || result >= ocamlpool_bound {
         return ocamlpool_reserve_block(tag, size);
     }
     ocamlpool_cursor = result;

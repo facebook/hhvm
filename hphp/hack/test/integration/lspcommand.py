@@ -195,7 +195,7 @@ class LspCommandProcessor:
         request = transcript[transcript_id].sent
 
         while transcript[transcript_id].received is None:
-            message = self._try_read_logged(timeout_seconds=5.0)
+            message = self._try_read_logged(timeout_seconds=120.0)
             assert message is not None, (
                 f"Timed out while waiting for the response to request {transcript_id}. "
                 + f"Here is the request: {request}. "

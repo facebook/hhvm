@@ -2277,7 +2277,6 @@ private:
         switch (dwarf.getAttributeType(attr)) {
           case DW_AT_ranges:
             ranges = dwarf.getRanges(attr);
-            assertx(ranges.size() != 0);
             break;
           case DW_AT_low_pc:
             low = dwarf.getAttributeValueAddr(attr);
@@ -2299,6 +2298,7 @@ private:
 
     if (!ranges.empty()) {
       uint64_t base = low ? *low : 0;
+      bool added = false;
       for (auto range : ranges) {
         if (range.dwr_addr1 == DwarfState::Dwarf_Ranges::kSelection) {
           base = range.dwr_addr2;
@@ -2307,6 +2307,7 @@ private:
         if (base + range.dwr_addr1 == 0) continue;
         // Drop all the addresses under 2M
         if (base + range.dwr_addr2 < 2000000) continue;
+        added = true;
         entries.push_back(
           AddressTableEntry {
             base + range.dwr_addr1,
@@ -2315,7 +2316,7 @@ private:
           }
         );
       }
-      return;
+      if (added) return;
     }
 
     if (low && high) {
@@ -2326,6 +2327,14 @@ private:
         return;
       }
     }
+
+    dwarf.forEachChild(
+      die,
+      [&](Dwarf_Die child) {
+        visit_die_for_address(dwarf, child, entries, cu_index);
+        return true;
+      }
+    );
   }
 
   std::vector<uint32_t>

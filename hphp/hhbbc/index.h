@@ -408,25 +408,12 @@ std::string show(const Class&);
  * "update" step in between whole program analysis rounds).
  */
 struct Index {
-  /*
-   * Throwing a rebuild exception indicates that the index needs to
-   * be rebuilt.
-   *
-   * The exception should be passed to the Index constructor.
-   */
-  struct rebuild : std::exception {
-    explicit rebuild(std::vector<std::pair<SString, SString>> ca) :
-        class_aliases(std::move(ca)) {}
-  private:
-    friend struct Index;
-    std::vector<std::pair<SString, SString>> class_aliases;
-  };
 
   /*
    * Create an Index for a php::Program.  Performs some initial
    * analysis of the program.
    */
-  explicit Index(php::Program*, rebuild* = nullptr);
+  explicit Index(php::Program*);
 
   /*
    * This class must not be destructed after its associated
@@ -497,21 +484,6 @@ struct Index {
    */
   const hphp_fast_set<php::Func*>*
     lookup_extra_methods(const php::Class*) const;
-
-  /*
-   * Attempt to record a new alias in the index. May be called from
-   * multi-threaded contexts, so doesn't actually update the index
-   * (call update_class_aliases to do that). Returns false if it would
-   * violate any current uniqueness assumptions.
-   */
-  bool register_class_alias(SString orig, SString alias) const;
-
-  /*
-   * Add any aliases that have been registered since the last call to
-   * update_class_aliases to the index. Must be called from a single
-   * threaded context.
-   */
-  void update_class_aliases();
 
   /*
    * Try to find a res::Class for a given php::Class.

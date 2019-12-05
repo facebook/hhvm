@@ -408,7 +408,6 @@ void analyze_iteratively(Index& index, php::Program& program,
       index.refine_public_statics(deps);
     }
 
-    index.update_class_aliases();
     work.clear();
     work.reserve(deps.size());
     for (auto& d : deps) work.push_back(work_item_for(d, mode));
@@ -557,14 +556,13 @@ void whole_program(php::ProgramPtr program,
 
   state_after("parse", *program);
 
-  folly::Optional<Index> index;
-  index.emplace(program.get());
+  Index index(program.get());
   auto stats = allocate_stats();
   auto freeFuncMem = [&] (php::Func* fun) {
     fun->blocks = {};
   };
   auto emitUnit = [&] (php::Unit& unit) {
-    auto ue = emit_unit(*index, unit);
+    auto ue = emit_unit(index, unit);
     if (RuntimeOption::EvalAbortBuildOnVerifyError && !ue->check(false)) {
       fprintf(
         stderr,
@@ -588,39 +586,30 @@ void whole_program(php::ProgramPtr program,
 
   std::thread cleanup_pre;
   if (!options.NoOptimizations) {
-    while (true) {
-      try {
-        assert(check(*program));
-        prop_type_hint_pass(*index, *program);
-        index->rewrite_default_initial_values(*program);
-        index->use_class_dependencies(false);
-        analyze_iteratively(*index, *program, AnalyzeMode::ConstPass);
-        // Defer initializing public static property types until after the
-        // constant pass, to try to get better initial values.
-        index->init_public_static_prop_types();
-        index->use_class_dependencies(options.HardPrivatePropInference);
-        analyze_iteratively(*index, *program, AnalyzeMode::NormalPass);
-        break;
-      } catch (Index::rebuild& rebuild) {
-        FTRACE(1, "whole_program: rebuilding index\n");
-        index.emplace(program.get(), &rebuild);
-        continue;
-      }
-    }
-    cleanup_pre = std::thread([&] { index->cleanup_for_final(); });
-    index->mark_persistent_types_and_functions(*program);
-    index->join_iface_vtable_thread();
+    assert(check(*program));
+    prop_type_hint_pass(index, *program);
+    index.rewrite_default_initial_values(*program);
+    index.use_class_dependencies(false);
+    analyze_iteratively(index, *program, AnalyzeMode::ConstPass);
+    // Defer initializing public static property types until after the
+    // constant pass, to try to get better initial values.
+    index.init_public_static_prop_types();
+    index.use_class_dependencies(options.HardPrivatePropInference);
+    analyze_iteratively(index, *program, AnalyzeMode::NormalPass);
+    cleanup_pre = std::thread([&] { index.cleanup_for_final(); });
+    index.mark_persistent_types_and_functions(*program);
+    index.join_iface_vtable_thread();
     if (parallel::num_threads > parallel::final_threads) {
       parallel::num_threads = parallel::final_threads;
     }
-    final_pass(*index, *program, stats, emitUnit);
+    final_pass(index, *program, stats, emitUnit);
   } else {
-    debug_dump_program(*index, *program);
-    index->join_iface_vtable_thread();
+    debug_dump_program(index, *program);
+    index.join_iface_vtable_thread();
     parallel::for_each(
       program->units,
       [&] (const std::unique_ptr<php::Unit>& unit) {
-        collect_stats(stats, *index, unit.get());
+        collect_stats(stats, index, unit.get());
         emitUnit(*unit);
       }
     );
@@ -633,13 +622,13 @@ void whole_program(php::ProgramPtr program,
       auto const enable =
         logging && !Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
       Trace::BumpRelease bumper(Trace::hhbbc_time, -1, enable);
-      index->cleanup_post_emit();
+      index.cleanup_post_emit();
     }
   );
 
   print_stats(stats);
 
-  arrTable = std::move(index->array_table_builder());
+  arrTable = std::move(index.array_table_builder());
   ueq.push(nullptr);
   cleanup_pre.join();
   cleanup_post.join();

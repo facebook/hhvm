@@ -443,7 +443,7 @@ struct RecordInfo {
 /*
  * Known information about a particular possible instantiation of a
  * PHP class.  The php::Class will be marked AttrUnique if there is a
- * unique ClassInfo with the same name, and no interfering class_aliases.
+ * unique ClassInfo with the same name.
  */
 struct ClassInfo {
   /*
@@ -1025,7 +1025,6 @@ struct Index::IndexData {
   ISStringToMany<const php::Class>       enums;
   ConstInfoConcurrentMap                 constants;
   ISStringToMany<const php::Record>      records;
-  hphp_fast_set<SString, string_data_hash, string_data_isame> classAliases;
 
   // Map from each class to all the closures that are allocated in
   // functions of that class.
@@ -1157,13 +1156,6 @@ struct Index::IndexData {
    * that so we can return it again.
    */
   ContextRetTyMap contextualReturnTypes{};
-
-  /*
-   * Vector of class aliases that need to be added to the index when
-   * its safe to do so (see update_class_aliases).
-   */
-  std::vector<std::pair<SString, SString>> pending_class_aliases;
-  std::mutex pending_class_aliases_mutex;
 
   std::thread compute_iface_vtables;
 };
@@ -2019,10 +2011,6 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
     index.records.insert({rec->name, rec.get()});
   }
 
-  for (auto& ca : unit.classAliases) {
-    index.classAliases.insert(ca.first);
-    index.classAliases.insert(ca.second);
-  }
 }
 
 template<class T>
@@ -3814,8 +3802,7 @@ void preresolveTypes(NamingEnv<T>& env,
 }
 } //namespace
 
-Index::Index(php::Program* program,
-             rebuild* rebuild_exception)
+Index::Index(php::Program* program)
   : m_data(std::make_unique<IndexData>(this))
 {
   trace_time tracer("create index");
@@ -3823,14 +3810,6 @@ Index::Index(php::Program* program,
   m_data->arrTableBuilder.reset(new ArrayTypeTable::Builder());
 
   add_system_constants_to_index(*m_data);
-
-  if (rebuild_exception) {
-    for (auto& ca : rebuild_exception->class_aliases) {
-      m_data->classAliases.insert(ca.first);
-      m_data->classAliases.insert(ca.second);
-    }
-    rebuild_exception->class_aliases.clear();
-  }
 
   {
     trace_time trace_add_units("add units to index");
@@ -3869,8 +3848,7 @@ Index::Index(php::Program* program,
                            ta->attrs,
                            flag &&
                            !m_data->classInfo.count(ta->name) &&
-                           !m_data->records.count(ta->name) &&
-                           !m_data->classAliases.count(ta->name),
+                           !m_data->records.count(ta->name),
                            AttrUnique);
                        });
 
@@ -3879,8 +3857,7 @@ Index::Index(php::Program* program,
       auto const recname = rinfo->rec->name;
       if (m_data->recordInfo.count(recname) != 1 ||
           m_data->typeAliases.count(recname) ||
-          m_data->classes.count(recname) ||
-          m_data->classAliases.count(recname)) {
+          m_data->classes.count(recname)) {
         return false;
       }
       if (rinfo->parent && !(rinfo->parent->rec->attrs & AttrUnique)) {
@@ -3898,8 +3875,7 @@ Index::Index(php::Program* program,
     auto const set = [&] {
       if (m_data->classInfo.count(cinfo->cls->name) != 1 ||
           m_data->typeAliases.count(cinfo->cls->name) ||
-          m_data->records.count(cinfo->cls->name) ||
-          m_data->classAliases.count(cinfo->cls->name)) {
+          m_data->records.count(cinfo->cls->name)) {
         return false;
       }
       if (cinfo->parent && !(cinfo->parent->cls->attrs & AttrUnique)) {
@@ -4294,32 +4270,6 @@ void Index::rewrite_default_initial_values(php::Program& program) const {
       }
     }
   }
-}
-
-bool Index::register_class_alias(SString orig, SString alias) const {
-  auto check = [&] (SString name) {
-    if (m_data->classAliases.count(name)) return true;
-
-    auto const classes = find_range(m_data->classInfo, name);
-    if (begin(classes) != end(classes)) {
-      return !(begin(classes)->second->cls->attrs & AttrUnique);
-    }
-    auto const tas = find_range(m_data->typeAliases, name);
-    if (begin(tas) == end(tas)) return true;
-    return !(begin(tas)->second->attrs & AttrUnique);
-  };
-  if (check(orig) && check(alias)) return true;
-  if (m_data->ever_frozen) return false;
-  std::lock_guard<std::mutex> lock{m_data->pending_class_aliases_mutex};
-  m_data->pending_class_aliases.emplace_back(orig, alias);
-  return true;
-}
-
-void Index::update_class_aliases() {
-  if (m_data->pending_class_aliases.empty()) return;
-  FTRACE(1, "Index needs rebuilding due to {} class aliases\n",
-         m_data->pending_class_aliases.size());
-  throw rebuild { std::move(m_data->pending_class_aliases) };
 }
 
 const CompactVector<const php::Class*>*
@@ -6302,7 +6252,6 @@ void Index::cleanup_post_emit() {
   CLEAR_PARALLEL(m_data->enums);
   CLEAR_PARALLEL(m_data->constants);
   CLEAR_PARALLEL(m_data->records);
-  CLEAR_PARALLEL(m_data->classAliases);
 
   CLEAR_PARALLEL(m_data->classClosureMap);
   CLEAR_PARALLEL(m_data->classExtraMethodMap);

@@ -31,9 +31,9 @@
 #include <sys/types.h>
 
 #include <dwarf.h>
-#include <thread>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/functional.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
@@ -2123,7 +2123,15 @@ private:
 
 
 struct GDBIndexerImpl : GDBIndexer {
-  explicit GDBIndexerImpl(const std::string& filename): m_filename{filename} {}
+explicit GDBIndexerImpl(const std::string& filename, int num_threads)
+  : m_filename{filename}
+  , m_numThreads{num_threads}
+  {
+    if (num_threads < 1) {
+      throw Exception{folly::sformat("Invalid number of threads: {}",
+                                     num_threads)};
+    }
+  }
 
   struct SymbolAndConstantPool {
     std::vector<uint32_t> symbol_pool;
@@ -2145,22 +2153,19 @@ struct GDBIndexerImpl : GDBIndexer {
     auto const gdb_index_version = 8;
     std::vector<uint32_t> header{gdb_index_version, 0, 0, 0, 0, 0};
 
-    SymbolAndConstantPool symbol_and_constants;
-    std::thread thread([&]() {
-      auto thread_time = ::HPHP::Timer::GetCurrentTimeMicros();
-      symbol_and_constants = get_symbol_and_constants(dwarf);
-      log_time(thread_time, "Get_symbol_and_constants");
-    });
-
     auto time_index_begin = ::HPHP::Timer::GetCurrentTimeMicros();
+
+    auto addresses_and_symbols = collect_addresses_and_symbols(dwarf);
+    auto time = log_time(time_index_begin, "collect_addresses_and_symbols");
     auto const cu = get_cu(dwarf);
-    auto time = log_time(time_index_begin, "Get_cu");
+    time = log_time(time, "Get_cu");
     auto const tu = get_tu(dwarf);
     time = log_time(time, "Get_tu");
-    auto const address = get_address(dwarf);
-    log_time(time, "Get_address");
-
-    thread.join();
+    auto const address = get_address(addresses_and_symbols.first);
+    time = log_time(time, "Get_address");
+    auto const  symbol_and_constants =
+      get_symbol_and_constants(addresses_and_symbols.second);
+    log_time(time, "Get_symbol_and_constants");
 
     time = log_time(time_index_begin, "Index generation");
 
@@ -2255,6 +2260,11 @@ private:
     uint32_t index;
   };
 
+  static bool compareAddressTableEntry(AddressTableEntry a,
+                                       AddressTableEntry b) {
+    return a.low == b.low ? a.high < b.high : a.low < b.low;
+  }
+
   void visit_die_for_address(const DwarfState& dwarf, const Dwarf_Die die,
                              std::vector<AddressTableEntry>& entries,
                              uint32_t cu_index) const {
@@ -2318,39 +2328,13 @@ private:
     }
   }
 
-  std::vector<uint32_t> get_address(const DwarfState& dwarf) const {
-    std::vector<AddressTableEntry> entries = {};
-    uint32_t cu_index = 0;
-    dwarf.forEachCompilationUnit(
-      [&](Dwarf_Die die) {
-        visit_die_for_address(dwarf, die, entries, cu_index);
-        cu_index++;
-      }
-    );
-    auto const sortFn = [](AddressTableEntry a, AddressTableEntry b) {
-      return a.low < b.low;
-    };
-    // Sort by low addresses
-    sort(entries.begin(), entries.end(), sortFn);
-    std::vector<AddressTableEntry> merged = {};
-
-    // Merge adjacent addresses
-    auto count = 0;
-    for (auto& e : entries) {
-      if (count != 0) {
-        auto& prev = merged[count - 1];
-        if (e.low == prev.high && e.index == prev.index) {
-          prev = AddressTableEntry{prev.low, e.high, e.index};
-          continue;
-        }
-      }
-      merged.push_back(e);
-      count++;
-    }
+  std::vector<uint32_t>
+  get_address(std::vector<AddressTableEntry>& entries) const {
+    sort(entries.begin(), entries.end(), compareAddressTableEntry);
 
     // Split into little-endian formatting
     std::vector<uint32_t> result = {};
-    for (auto& e : merged) {
+    for (auto& e : entries) {
       result.push_back(e.low_bottom);
       result.push_back(e.low_top);
       result.push_back(e.high_bottom);
@@ -2422,7 +2406,9 @@ private:
     }
   };
 
-  using SymbolMap = folly::F14FastMap<std::string, std::vector<uint32_t>>;
+  using SymbolMap = tbb::concurrent_hash_map<std::string,
+                                             std::vector<uint32_t>,
+                                             ::HPHP::stringHashCompare>;
 
   void visit_die_for_symbols(const DwarfState& dwarf,
                              const Dwarf_Die die,
@@ -2524,8 +2510,10 @@ private:
 
     auto const addSymbol = [&] (std::string name) {
       auto value = index_and_flags();
-      auto& vec = symbols[name];
-      if (vec.empty() || vec.back() != value) vec.push_back(value);
+      SymbolMap::accessor acc;
+      if (symbols.insert(acc, name) || acc->second.back() != value) {
+        acc->second.push_back(value);
+      }
     };
 
     auto const addParent = [&](std::string name) {
@@ -2583,29 +2571,85 @@ private:
     }
   }
 
-  SymbolAndConstantPool
-  get_symbol_and_constants(const DwarfState& dwarf) const {
+  std::pair<std::vector<AddressTableEntry>, SymbolMap>
+  collect_addresses_and_symbols(const DwarfState& dwarf) const {
     auto time = ::HPHP::Timer::GetCurrentTimeMicros();
-    // First collect all the symbols
+
+    folly::F14FastMap<uint32_t, uint32_t> unit_indices_cu;
+    folly::F14FastMap<uint32_t, uint32_t> unit_indices_tu;
+
+    uint32_t count = 0;
+    dwarf.forEachTopLevelUnit(
+      [&](Dwarf_Die die) {
+        unit_indices_cu.insert({die->context->offset, count});
+        count++;
+      }, true /* Compilation Unit */
+    );
+    size_t numCUs = count;
+    dwarf.forEachTopLevelUnit(
+      [&](Dwarf_Die die) {
+        unit_indices_tu[die->context->offset] = count;
+        count++;
+      }, false /* Type Unit */
+    );
+
+
+    std::vector<std::vector<AddressTableEntry>>
+      entryList(numCUs, std::vector<AddressTableEntry>{});
     SymbolMap symbols;
-    uint32_t cu_index = 0;
-    dwarf.forEachTopLevelUnit(
-      [&](Dwarf_Die cu) {
-        visit_die_for_symbols(dwarf, cu, symbols, "", cu_index);
-        cu_index++;
-      }, true // Compilation Unit
+
+    dwarf.forEachTopLevelUnitParallel(
+      [&](Dwarf_Die die) {
+        uint32_t index = unit_indices_cu[die->context->offset];
+        assertx(index < entryList.size());
+        std::vector<AddressTableEntry> entry;
+        visit_die_for_address(dwarf, die, entry, index);
+
+        sort(entry.begin(), entry.end(), compareAddressTableEntry);
+
+        std::vector<AddressTableEntry> merged;
+        for (auto& e : entry) {
+          if (!merged.empty()) {
+            auto& prev = merged.back();
+            if (e.low <= prev.high) {
+              if (e.high <= prev.high) continue;
+              assertx(prev.index == e.index);
+              prev.high = e.high;
+              continue;
+            }
+          }
+          merged.push_back(e);
+        }
+
+        entryList[index] = std::move(merged);
+        visit_die_for_symbols(dwarf, die, symbols, "", index);
+      }, true /* Compilation Unit */, m_numThreads
     );
 
-    time = log_time(time, "Get_symbol_and_constants: Visit CUs");
+    std::vector<AddressTableEntry> entries;
+    for (auto& list : entryList) {
+      for (auto &e : list) {
+        entries.push_back(e);
+      }
+    }
 
-    dwarf.forEachTopLevelUnit(
-      [&](Dwarf_Die cu) {
-        visit_die_for_symbols(dwarf, cu, symbols, "", cu_index);
-        cu_index++;
-      }, false // Type Unit
+    time = log_time(time, "collect_addresses_and_symbols: Visit CUs");
+
+    dwarf.forEachTopLevelUnitParallel(
+      [&](Dwarf_Die die) {
+        uint32_t index = unit_indices_tu[die->context->offset];
+        visit_die_for_symbols(dwarf, die, symbols, "", index);
+      }, false /* Type Unit */, m_numThreads
     );
 
-    time = log_time(time, "Get_symbol_and_constants: Visit TUs");
+    log_time(time, "collect_addresses_and_symbols: Visit TUs");
+
+    return {entries, symbols};
+  }
+
+  SymbolAndConstantPool
+  get_symbol_and_constants(const SymbolMap& symbols) const {
+    auto time = ::HPHP::Timer::GetCurrentTimeMicros();
 
     GDBHashtable symbol_hash_table;
     symbol_hash_table.init(symbols.size());
@@ -2669,6 +2713,7 @@ private:
   }
 
   std::string m_filename;
+  int m_numThreads;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2685,8 +2730,8 @@ std::unique_ptr<Printer> make_dwarf_printer(const std::string& filename) {
 }
 
 std::unique_ptr<GDBIndexer>
-make_dwarf_gdb_indexer(const std::string& filename) {
-  return std::make_unique<GDBIndexerImpl>(filename);
+make_dwarf_gdb_indexer(const std::string& filename, int num_threads) {
+  return std::make_unique<GDBIndexerImpl>(filename, num_threads);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

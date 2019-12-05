@@ -554,7 +554,9 @@ struct GDBIndexer {
   // of the indexer. Run the indexer on the given filename, which may be an
   // executable or some form of object file. If the platform doesn't have a
   // supported debug info parser, this function will return null.
-  static std::unique_ptr<GDBIndexer> make(const std::string& filename);
+  // The number of threads controls parallelism when building up the index.
+  static std::unique_ptr<GDBIndexer> make(const std::string& filename,
+                                          int num_threads);
 
   // Output to file
   virtual void operator()(const std::string& output_file) const = 0;

@@ -27,10 +27,12 @@
 #include <folly/portability/Unistd.h>
 #include <folly/experimental/symbolizer/Elf.h>
 
+#include <atomic>
+#include <functional>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <vector>
-#include <functional>
 
 #include <dwarf.h>
 
@@ -212,10 +214,14 @@ struct DwarfState {
   folly::StringPiece getStringFromStringSection(uint64_t offset) const;
 
   template <typename F> void forEachContext(F&& f, bool isInfo) const;
+  template <typename F> void forEachContextParallel(F&& f, bool isInfo,
+                                                    int num_threads) const;
   template <typename F> void forEachChild(Die* die, F&& f) const;
   template <typename F> void forEachAttribute(Die* die, F&& f) const;
   template <typename F> void forEachCompilationUnit(F&& f) const;
   template <typename F> void forEachTopLevelUnit(F&& f, bool isInfo) const;
+  template <typename F> void forEachTopLevelUnitParallel(F&& f, bool isInfo,
+                                                         int num_threads) const;
   template <typename F> auto onDIEAtOffset(GlobalOff offset, F&& f) const ->
     decltype(f(std::declval<Die*>()));
   template <typename F> auto onDIEAtContextOffset(
@@ -350,18 +356,61 @@ void DwarfState::forEachContext(F&& f, bool isInfo) const {
 }
 
 /*
+ * Iterate over all the contexts in the file, calling the given
+ * callable for each in parellel. The function f must be thread safe.
+ */
+template <typename F>
+void DwarfState::forEachContextParallel(F&& f, bool isInfo,
+                                        int num_threads) const {
+  if (num_threads <= 1) return forEachContext(f, isInfo);
+
+  std::vector<GlobalOff> offsets;
+
+  forEachContext([&] (Dwarf_Context context) {
+    offsets.push_back({ context->offset, isInfo });
+  }, isInfo);
+
+  std::atomic<size_t> index{0};
+
+  std::vector<std::thread> workers;
+  for (auto worker = size_t{0}; worker < num_threads; ++worker) {
+    workers.push_back(std::thread([&] {
+      while (true) {
+        const size_t kChunkSize = 50;
+        auto start = index.fetch_add(kChunkSize, std::memory_order_relaxed);
+        if (start >= offsets.size()) break;
+        for (auto i = start;
+             i < start + kChunkSize && i < offsets.size();
+             ++i) {
+          auto context = getContextAtOffset(offsets[i]);
+          f(&context);
+        }
+      }
+    }));
+  }
+  for (auto& t : workers) t.join();
+}
+
+/*
  * Iterate over all the compilation-units in the file, calling the given
  * callable for each.
  */
 template <typename F>
-void DwarfState::forEachTopLevelUnit(F&& f, bool isInfo) const {
-  forEachContext(
-      [&] (Dwarf_Context context) {
-        auto die = getDieAtOffset(context, { context->firstDie, isInfo });
-        f(&die);
-      },
-      isInfo
+void DwarfState::forEachTopLevelUnitParallel(F&& f, bool isInfo,
+                                             int num_threads) const {
+  forEachContextParallel(
+    [&] (Dwarf_Context context) {
+      auto die = getDieAtOffset(context, { context->firstDie, isInfo });
+      f(&die);
+    },
+    isInfo,
+    num_threads
   );
+}
+
+template <typename F>
+void DwarfState::forEachTopLevelUnit(F&& f, bool isInfo) const {
+  forEachTopLevelUnitParallel(f, isInfo, 1);
 }
 
 template <typename F> void DwarfState::forEachCompilationUnit(F&& f) const {

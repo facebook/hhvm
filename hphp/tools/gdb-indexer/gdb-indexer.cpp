@@ -20,6 +20,7 @@
 #include <boost/program_options.hpp>
 
 #include "hphp/tools/debug-parser/debug-parser.h"
+#include "hphp/util/process.h"
 
 namespace {
 
@@ -31,10 +32,15 @@ int main(int argc, char** argv) {
   namespace po = boost::program_options;
 
   std::string output_file;
+  int num_threads;
 
   po::options_description desc{"Allowed options"};
   desc.add_options()
     ("help", "produce help message")
+    ("threads,j",
+      po::value<int>(&num_threads)->
+        default_value(std::max(1, ::HPHP::Process::GetCPUCount())),
+      "number of threads")
     ("output,o",
      po::value<std::string>(&output_file)->required(),
      "output file");
@@ -64,7 +70,7 @@ int main(int argc, char** argv) {
     }
 
     try {
-      const auto indexer = GDBIndexer::make(filenames[0]);
+      const auto indexer = GDBIndexer::make(filenames[0], num_threads);
       if (!indexer) {
         std::cerr << "ERROR: Platform doesn't have a debug-info parser"
                   << std::endl;

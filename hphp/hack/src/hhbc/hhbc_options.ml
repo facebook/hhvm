@@ -607,6 +607,8 @@ let value_setters =
     @@ fun opts v -> { opts with option_enforce_generics_ub = v = 1 } );
     ( set_value "hhvm.hack.lang.check_int_overflow" get_value_from_config_int
     @@ fun opts v -> { opts with option_check_int_overflow = v > 0 } );
+    ( set_value "hhvm.hack.lang.rust_lowerer" get_value_from_config_int
+    @@ fun opts v -> { opts with option_rust_lowerer = v = 1 } );
   ]
 
 let extract_config_options_from_json ~init config_json =

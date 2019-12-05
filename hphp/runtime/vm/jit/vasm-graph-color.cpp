@@ -6834,13 +6834,13 @@ void calculate_penalties(State& state) {
     if (use == def) return;
     if (use.isPhys() || is_ignored(state, def)) return;
 
-    // Hints with incompatible reg-classes can never be satisfies, so
+    // Hints with incompatible reg-classes can never be satisfied, so
     // ignore them.
     auto const cls1 = reg_class(state, use);
     auto const cls2 = reg_class(state, def);
     if (!compatible_reg_classes(cls1, cls2)) return;
 
-    // Specialize case, the hint def is a physical register. We don't
+    // Special case, the hint def is a physical register. We don't
     // unify with physical registers (they don't have penalty
     // vectors), but we can modify the use's penalty vector to bias
     // toward this physical register.
@@ -6956,10 +6956,14 @@ void calculate_penalties(State& state) {
       // vectors can't change. We only have to update the liveness
       // information.
       if (state.spilled || defs.containsPhys()) {
-        // Add defs and acrosses to the live set, since we need to
-        // know which Vregs interfer.
-        live |= defs;
+        // Add acrosses to the live set, since they interfer with the
+        // defs. The defs will be checked directly when needed rather
+        // than being added to the live set.
         live |= acrosses_set_cached(state, inst);
+        // Keep physical registers out of the live set since we don't
+        // care about them below and don't want to waste time
+        // iterating over them.
+        live.removePhys();
 
         for (auto const defReg : defs) {
           // If a physical register is defined, assess a penalty for
@@ -6967,7 +6971,9 @@ void calculate_penalties(State& state) {
           if (defReg.isPhys()) {
             auto const phys = defReg.physReg();
             for (auto const liveReg : live) {
-              if (liveReg.isPhys() || defs[liveReg]) continue;
+              // Physical registers should have been removed above.
+              assertx(!liveReg.isPhys());
+              if (defs[liveReg]) continue;
               if (!is_colorable_reg(reg_class(state, liveReg))) continue;
 
               // Assess a penalty for the def physical register since
@@ -6997,6 +7003,13 @@ void calculate_penalties(State& state) {
             spillInterferences[defReg].add(liveReg);
             spillInterferences[liveReg].add(defReg);
           }
+          for (auto const liveReg : defs) {
+            if (defReg == liveReg) continue;
+            auto const cls = reg_class(state, liveReg);
+            if (info.regClass != cls) continue;
+            spillInterferences[defReg].add(liveReg);
+            spillInterferences[liveReg].add(defReg);
+          }
         }
       }
 
@@ -7007,10 +7020,12 @@ void calculate_penalties(State& state) {
     }
 
     // Assert that our liveness information matches what liveness
-    // analysis calculated originally.
+    // analysis calculated originally (modulo physical registers).
     assertx(
       [&] {
-        for (auto const r : state.liveIn[b]) always_assert(live[r]);
+        for (auto const r : state.liveIn[b]) {
+          always_assert(r.isPhys() || live[r]);
+        }
         for (auto const r : live) {
           if (state.liveIn[b][r]) continue;
           always_assert(!r.isPhys());

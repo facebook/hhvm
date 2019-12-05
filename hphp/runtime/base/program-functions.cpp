@@ -773,10 +773,6 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
-  if (jit::tc::dumpEnabled()) {
-    jit::mcgen::joinWorkerThreads();
-    jit::tc::dump();
-  }
   if (xhprof) {
     Variant profileData = HHVM_FN(xhprof_disable)();
     if (!profileData.isNull()) {
@@ -2113,6 +2109,11 @@ static int execute_program_impl(int argc, char** argv) {
         ret = 255;
         if (hphp_invoke_simple(file, false /* warmup only */)) {
           ret = *rl_exit_code;
+        }
+        const bool last = i == po.count - 1;
+        if (last && jit::tc::dumpEnabled()) {
+          jit::mcgen::joinWorkerThreads();
+          jit::tc::dump();
         }
         execute_command_line_end(po.xhprofFlags, true, file.c_str());
       }

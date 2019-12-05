@@ -66,7 +66,7 @@ class LspCommandProcessor:
             [hh_client, "lsp"] + args,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=None,  # so hh_client inherits (=> writes to) our own stderr
             env=env,
         )
 
@@ -75,7 +75,6 @@ class LspCommandProcessor:
         # threads.
         stdin = proc.stdin.detach()  # pyre-ignore
         stdout = proc.stdout.detach()
-        stderr = proc.stderr.detach()
         try:
             reader = JsonRpcStreamReader(stdout)
             writer = JsonRpcStreamWriter(stdin)
@@ -83,7 +82,6 @@ class LspCommandProcessor:
         finally:
             stdin.close()
             stdout.close()
-            stderr.close()
 
     # request_timeout is the number of seconds to wait for responses
     # that we expect the server to send back.  this timeout can

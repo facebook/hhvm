@@ -2423,13 +2423,12 @@ private:
                              const Dwarf_Die die,
                              SymbolMap& symbols,
                              std::string parent_name,
+                             uint32_t language,
                              uint32_t cu_index) const {
 
     bool is_declaration = false;
     bool is_external = false;
     std::string name;
-    uint32_t language = 0;
-    folly::Optional<GlobalOff> declarationOffset;
 
     dwarf.forEachAttribute(
       die,
@@ -2446,9 +2445,6 @@ private:
             break;
           case DW_AT_language:
             language = dwarf.getAttributeValueUData(attr);
-            break;
-          case DW_AT_signature:
-            declarationOffset = dwarf.getAttributeValueRef(attr);
             break;
           default:
             return true;
@@ -2536,7 +2532,8 @@ private:
       dwarf.forEachChild(
         die,
         [&](Dwarf_Die child) {
-          visit_die_for_symbols(dwarf, child, symbols, name, cu_index);
+          visit_die_for_symbols(dwarf, child, symbols, name,
+                                language, cu_index);
           return true;
         }
       );
@@ -2631,7 +2628,7 @@ private:
         }
 
         entryList[index] = std::move(merged);
-        visit_die_for_symbols(dwarf, die, symbols, "", index);
+        visit_die_for_symbols(dwarf, die, symbols, "", 0, index);
       }, true /* Compilation Unit */, m_numThreads
     );
 
@@ -2647,7 +2644,7 @@ private:
     dwarf.forEachTopLevelUnitParallel(
       [&](Dwarf_Die die) {
         uint32_t index = unit_indices_tu[die->context->offset];
-        visit_die_for_symbols(dwarf, die, symbols, "", index);
+        visit_die_for_symbols(dwarf, die, symbols, "", 0, index);
       }, false /* Type Unit */, m_numThreads
     );
 

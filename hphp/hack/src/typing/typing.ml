@@ -4714,7 +4714,7 @@ and dispatch_call
     in
     make_call env (Tast.make_typed_expr fpos fty (Aast.Id id)) tal tel None ty
   in
-  let overload_function = overload_function e make_call fpos in
+  let overload_function = overload_function make_call fpos in
   let check_coroutine_call env fty =
     let () =
       if is_return_disposable_fun_type env fty && not is_using_clause then
@@ -8936,8 +8936,7 @@ and gconst_def tcopt cst =
 (* Calls the method of a class, but allows the f callback to override the
  * return value type *)
 and overload_function
-    outer make_call fpos p env (cpos, class_id) method_id el unpacked_element f
-    =
+    make_call fpos p env (cpos, class_id) method_id el unpacked_element f =
   let (env, _tal, tcid, ty) =
     static_class_id ~check_constraints:false cpos env [] class_id
   in
@@ -8952,31 +8951,18 @@ and overload_function
       method_id
       class_id
   in
-  (* call the function as declared to validate arity and input types,
-     but ignore the result and overwrite with custom one *)
-  let ((env, (tel, typed_unpack_element, res)), has_error) =
-    Errors.try_with_error
-      (* TODO: Should we be passing hints here *)
-        (fun () -> (call ~expected:None p env fty el unpacked_element, false))
-      (fun () ->
-        ((env, ([], None, (Reason.Rwitness p, Typing_utils.tany env))), true))
+  let (env, (tel, typed_unpack_element, res)) =
+    call ~expected:None p env fty el unpacked_element
   in
-  (* if there are errors already stop here - going forward would
-   * report them twice *)
-  if has_error then
-    (env, with_type res Tast.dummy_saved_env outer, res)
-  else
-    let (env, ty) = f env fty res el in
-    let (env, fty) = Env.expand_type env fty in
-    let fty =
-      match fty with
-      | (r, Tfun ft) -> (r, Tfun { ft with ft_ret = MakeType.unenforced ty })
-      | _ -> fty
-    in
-    let te =
-      Tast.make_typed_expr fpos fty (Aast.Class_const (tcid, method_id))
-    in
-    make_call env te tal tel typed_unpack_element ty
+  let (env, ty) = f env fty res el in
+  let (env, fty) = Env.expand_type env fty in
+  let fty =
+    match fty with
+    | (r, Tfun ft) -> (r, Tfun { ft with ft_ret = MakeType.unenforced ty })
+    | _ -> fty
+  in
+  let te = Tast.make_typed_expr fpos fty (Aast.Class_const (tcid, method_id)) in
+  make_call env te tal tel typed_unpack_element ty
 
 and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind =
   let type_mapper =

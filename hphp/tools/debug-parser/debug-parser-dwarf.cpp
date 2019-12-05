@@ -2258,21 +2258,28 @@ private:
   void visit_die_for_address(const DwarfState& dwarf, const Dwarf_Die die,
                              std::vector<AddressTableEntry>& entries,
                              uint32_t cu_index) const {
-    uint64_t low = 0, high = 0;
-    bool found = false;
+    folly::Optional<uint64_t> low, high;
+    std::vector<DwarfState::Dwarf_Ranges> ranges;
+    bool is_high_udata = false;
     dwarf.forEachAttribute(
       die,
       [&](Dwarf_Attribute attr) {
         switch (dwarf.getAttributeType(attr)) {
+          case DW_AT_ranges:
+            ranges = dwarf.getRanges(attr);
+            assertx(ranges.size() != 0);
+            break;
           case DW_AT_low_pc:
             low = dwarf.getAttributeValueAddr(attr);
-            found = true;
             break;
           case DW_AT_high_pc:
-            high = attr->form == DW_FORM_addr
-              ? dwarf.getAttributeValueAddr(attr)
-              : dwarf.getAttributeValueUData(attr);
-            return false; // short circuit
+            if (attr->form != DW_FORM_addr) {
+              is_high_udata = true;
+              high = dwarf.getAttributeValueUData(attr);
+            } else {
+              high = dwarf.getAttributeValueAddr(attr);
+            }
+            break;
           default:
             break;
         }
@@ -2280,18 +2287,35 @@ private:
       }
     );
 
-    if (found && high != 0) {
-      entries.push_back(AddressTableEntry{low, low + high, cu_index});
+    if (!ranges.empty()) {
+      uint64_t base = low ? *low : 0;
+      for (auto range : ranges) {
+        if (range.dwr_addr1 == DwarfState::Dwarf_Ranges::kSelection) {
+          base = range.dwr_addr2;
+          continue;
+        }
+        if (base + range.dwr_addr1 == 0) continue;
+        // Drop all the addresses under 2M
+        if (base + range.dwr_addr2 < 2000000) continue;
+        entries.push_back(
+          AddressTableEntry {
+            base + range.dwr_addr1,
+            base + range.dwr_addr2,
+            cu_index
+          }
+        );
+      }
       return;
     }
 
-    dwarf.forEachChild(
-      die,
-      [&](Dwarf_Die child) {
-        visit_die_for_address(dwarf, child, entries, cu_index);
-        return true;
+    if (low && high) {
+      high = is_high_udata ? *low + *high : *high;
+      // Drop all the addresses under 2M
+      if (*low != 0 && *high >= 2000000) {
+        entries.push_back(AddressTableEntry{*low, *high, cu_index});
+        return;
       }
-    );
+    }
   }
 
   std::vector<uint32_t> get_address(const DwarfState& dwarf) const {

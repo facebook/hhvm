@@ -27,6 +27,7 @@
 #include "hphp/util/copy-ptr.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"
+#include "hphp/util/non-invalidating-vector.h"
 
 #include <boost/range/adaptor/reversed.hpp>
 
@@ -164,10 +165,17 @@ struct LoopInfo {
 
 // Cached def/use/across operands for an instruction.
 struct CachedOperands {
+  CachedOperands() = default;
+  CachedOperands(VregSet&& defs, VregSet&& uses, VregSet&& acrosses) noexcept:
+    defs{std::move(defs)},
+    uses{std::move(uses)},
+    acrosses{std::move(acrosses)} {}
   VregSet defs;
   VregSet uses;
   VregSet acrosses;
 };
+
+using CachedOperandsTable = NonInvalidatingVector<CachedOperands>;
 
 // Global allocator state.
 struct State {
@@ -202,9 +210,8 @@ struct State {
 
   // Cached operands. The "id" field in a Vinstr is an index into this
   // table. Since 0 means no cached information, the first entry is
-  // never used. We use a deque to guarantee that references will
-  // never be invalidated.
-  jit::deque<CachedOperands> cachedOperands;
+  // never used.
+  CachedOperandsTable cachedOperands;
 
   // Calculate penalty vectors. Different Vregs may share the same
   // penalty vector.
@@ -710,11 +717,9 @@ void cache_operands(State& state, Vinstr& inst) {
   inst.id = state.cachedOperands.size();
   assertx(inst.id > 0);
   state.cachedOperands.emplace_back(
-    CachedOperands{
-      std::move(defs),
-      std::move(uses),
-      std::move(acrosses)
-    }
+    std::move(defs),
+    std::move(uses),
+    std::move(acrosses)
   );
 }
 
@@ -1101,10 +1106,18 @@ State make_state(Vunit& unit, const Abi& abi) {
 
   // Pre-size the table to avoid excessive resizing.
   state.regInfo.reserve(unit.next_vr * 2);
+
+  compute_rpo(state);
+
+  size_t instrCount = 0;
+  for (auto const b : state.rpo) {
+    instrCount += state.unit.blocks[b].code.size();
+  }
+  state.cachedOperands.reserve(instrCount * 2);
+
   // Insert dummy cached operand entry since 0 is not a valid index.
   state.cachedOperands.emplace_back();
 
-  compute_rpo(state);
   return state;
 }
 

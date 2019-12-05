@@ -34,11 +34,7 @@ std::vector<TransRec> s_translations;
 }
 
 bool enabled() {
-  return debug ||
-         RuntimeOption::EvalDumpTC ||
-         RuntimeOption::EvalDumpIR ||
-         RuntimeOption::EvalDumpInlDecision ||
-         RuntimeOption::EvalDumpRegion;
+  return debug || tc::dumpEnabled();
 }
 
 const TransRec* getTransRec(TCA tca) {

@@ -125,6 +125,14 @@ bool dumpTCData() {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
+bool dumpEnabled() {
+  return RuntimeOption::EvalDumpTC ||
+         RuntimeOption::EvalDumpIR ||
+         RuntimeOption::EvalDumpRegion ||
+         RuntimeOption::EvalDumpInlDecision ||
+         RuntimeOption::EvalDumpCallTargets;
+}
+
 bool dump(bool ignoreLease /* = false */) {
   if (!mcgen::initialized()) return false;
 

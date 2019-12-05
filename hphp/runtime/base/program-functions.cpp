@@ -773,10 +773,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
-  if (RuntimeOption::EvalDumpTC ||
-      RuntimeOption::EvalDumpIR ||
-      RuntimeOption::EvalDumpInlDecision ||
-      RuntimeOption::EvalDumpRegion) {
+  if (jit::tc::dumpEnabled()) {
     jit::mcgen::joinWorkerThreads();
     jit::tc::dump();
   }
@@ -2460,10 +2457,7 @@ void hphp_process_init() {
           if (RuntimeOption::ServerExecutionMode()) {
             Logger::Info("JitDeserialize finished; exiting");
           }
-          if (RuntimeOption::EvalDumpTC ||
-              RuntimeOption::EvalDumpIR ||
-              RuntimeOption::EvalDumpRegion ||
-              RuntimeOption::EvalDumpInlDecision) {
+          if (jit::tc::dumpEnabled()) {
             jit::mcgen::joinWorkerThreads();
             jit::tc::dump();
           }

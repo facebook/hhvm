@@ -409,6 +409,11 @@ std::string getTCSpace();
 std::string getTCAddrs();
 
 /*
+ * Return whether or not TC dumping is enabled.
+ */
+bool dumpEnabled();
+
+/*
  * Dump the translation cache to files in RuntimeOption::EvalDumpTCPath
  * (default: /tmp), returning success.
  */

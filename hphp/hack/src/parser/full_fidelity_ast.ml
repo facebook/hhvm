@@ -4422,22 +4422,44 @@ let tast_to_aast tast =
   in
   endo#on_program () tast
 
-let aast_to_nast aast =
+type aast_to_nast_env = { mutable last_pos: pos }
+
+let aast_to_nast (consolidate_pos : bool) aast =
   let i _ x = x in
   let endo =
-    object
+    object (self)
       inherit [_] Aast.map
+
+      method check_pos env pos =
+        if Pos.equal pos Pos.none then
+          Pos.none
+        else if Pos.equal pos env.last_pos then
+          env.last_pos
+        else (
+          env.last_pos <- pos;
+          pos
+        )
+
+      method! on_pos =
+        if consolidate_pos then
+          self#check_pos
+        else
+          i
 
       method on_'fb _ _ = Nast.NamedWithUnsafeBlocks
 
-      method on_'ex = i
+      method on_'ex =
+        if consolidate_pos then
+          self#check_pos
+        else
+          i
 
       method on_'hi = i
 
       method on_'en = i
     end
   in
-  endo#on_program () aast
+  endo#on_program { last_pos = Pos.none } aast
 
 (**
  * Converts a legacy ast (ast.ml) into a typed ast (tast.ml / aast.ml)
@@ -4455,28 +4477,29 @@ let from_text_to_empty_tast env source_text =
  * Backward compatibility matter (should be short-lived)
 )*****************************************************************************)
 
-let legacy (x : aast_result) : Parser_return.t =
+let legacy (env : env) (x : aast_result) : Parser_return.t =
   {
     Parser_return.file_mode =
       Option.some_if (x.fi_mode <> FileInfo.Mphp) x.fi_mode;
     Parser_return.is_hh_file = x.is_hh_file;
     Parser_return.comments = x.comments.sc_comments;
-    Parser_return.ast = aast_to_nast x.ast;
+    Parser_return.ast =
+      aast_to_nast (ParserOptions.rust_lowerer env.parser_options) x.ast;
     Parser_return.content = x.content;
   }
 
 let from_text_with_legacy (env : env) (content : string) : Parser_return.t =
   let source_text = SourceText.make env.file content in
-  legacy @@ from_text env source_text
+  legacy env @@ from_text env source_text
 
-let from_file_with_legacy env = legacy (from_file env)
+let from_file_with_legacy env = legacy env (from_file env)
 
 let from_text_with_legacy_and_cst (env : env) (source_text : SourceText.t) :
     PositionedSyntaxTree.t * Parser_return.t =
   let (mode, tree) = parse_text env source_text in
   let aast_result = lower_tree env source_text mode tree in
   let aast_result = process_lowerer_result env source_text aast_result in
-  (tree, legacy aast_result)
+  (tree, legacy env aast_result)
 
 (******************************************************************************(
  * For cut-over purposes only; this should be removed as soon as Parser_hack
@@ -4509,7 +4532,7 @@ let defensive_program
         ~include_line_comments
         fn
     in
-    legacy @@ from_text env source
+    legacy env @@ from_text env source
   with e ->
     Rust_pointer.free_leaked_pointer ();
 

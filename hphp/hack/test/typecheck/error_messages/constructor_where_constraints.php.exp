@@ -1,0 +1,10 @@
+File "constructor_where_constraints.php", line 6, characters 19-29:
+A 'where' type constraint is violated here (Typing[4323])
+File "constructor_where_constraints.php", line 6, characters 19-29:
+This is the method with 'where' type constraints
+File "constructor_where_constraints.php", line 6, characters 58-64:
+Expected nothing
+File "constructor_where_constraints.php", line 11, characters 9-9:
+But got X
+File "constructor_where_constraints.php", line 6, characters 54-54:
+  via this generic T

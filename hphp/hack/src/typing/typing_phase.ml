@@ -181,16 +181,13 @@ let rec localize ~ety_env env (dty : decl_ty) =
     let (env, lty) = TUtils.union env (MakeType.dynamic r) ty in
     (env, lty)
   | (r, Tfun ft) ->
+    let pos = Reason.to_pos r in
     let (env, ft) =
       localize_ft
-        ~ety_env (* def_pos just used for targs errors, which won't occur *)
-        ~def_pos:Pos.none
+        ~ety_env
+        ~def_pos:pos
         ~instantiation:
-          {
-            use_pos = Reason.to_pos r;
-            use_name = "function";
-            explicit_targs = [];
-          }
+          { use_pos = pos; use_name = "function"; explicit_targs = [] }
         env
         ft
     in

@@ -2765,6 +2765,15 @@ let unpacking_disallowed_builtin_function pos name =
     pos
     ("Arg unpacking is disallowed for " ^ name)
 
+let invalid_destructure pos1 pos2 ty =
+  add_list
+    (Typing.err_code Typing.InvalidDestructure)
+    [
+      ( pos1,
+        "This expression cannot be destructured with a list(...) expression" );
+      (pos2, "This is " ^ ty);
+    ]
+
 let array_get_arity pos1 name pos2 =
   add_list
     (Typing.err_code Typing.ArrayGetArity)

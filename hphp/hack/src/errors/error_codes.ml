@@ -615,6 +615,7 @@ module Typing = struct
     | RecordMissingRequiredField
     | RecordUnknownField
     | CyclicRecordDef (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | InvalidDestructure (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

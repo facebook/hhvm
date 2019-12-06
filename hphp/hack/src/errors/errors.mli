@@ -357,6 +357,8 @@ val unset_nonidx_in_strict : Pos.t -> (Pos.t * string) list -> unit
 
 val unpacking_disallowed_builtin_function : Pos.t -> string -> unit
 
+val invalid_destructure : Pos.t -> Pos.t -> string -> unit
+
 val array_get_arity : Pos.t -> string -> Pos.t -> unit
 
 val typing_error : Pos.t -> string -> unit

@@ -1,6 +1,4 @@
-File "list_array.php", line 18, characters 3-19:
-Invalid assignment (Typing[4110])
 File "list_array.php", line 18, characters 3-14:
-Expected list([unresolved], [unresolved]) resulting from a list destructuring assignment of length 2
+This expression cannot be destructured with a list(...) expression (Typing[4357])
 File "list_array.php", line 17, characters 16-20:
-But got varray_or_darray<arraykey, _>
+This is varray_or_darray<arraykey, _>

@@ -906,50 +906,70 @@ and simplify_subtype_i
     ||| simplify_subtype_i ~subtype_env (ConstraintType cty_sub) ty_super
   (* List destructuring *)
   | (LoclType ety_sub, ConstraintType (r, Tdestructure tyl_dest)) ->
-    begin
-      match ety_sub with
-      | (_, Ttuple tyl) ->
-        if Int.( <> ) (List.length tyl) (List.length tyl_dest) then
-          invalid ()
-        else
+    let destructure_list t =
+      List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+          res &&& simplify_subtype ~subtype_env ~this_ty t ty_dest)
+    in
+    let destructure_tuple ts =
+      let len = List.length ts in
+      let len_required = List.length tyl_dest in
+      if len < len_required then
+        invalid_with (fun () ->
+            Errors.typing_too_few_args
+              len_required
+              len
+              (Reason.to_pos r)
+              (Reason.to_pos (fst ety_sub)))
+      else
+        let (ts_required, ts_remaining) = List.split_n ts len_required in
+        let (env, prop) =
           List.fold2_exn
-            tyl
+            ts_required
             tyl_dest
             ~init:(env, TL.valid)
             ~f:(fun res ty ty_dest ->
               res &&& simplify_subtype ~subtype_env ~this_ty ty ty_dest)
+        in
+        if List.is_empty ts_remaining then
+          (env, prop)
+        else
+          invalid_with (fun () ->
+              Errors.typing_too_many_args
+                len_required
+                len
+                (Reason.to_pos r)
+                (Reason.to_pos (fst ety_sub)))
+    in
+    begin
+      match ety_sub with
+      | (_, Ttuple tyl) -> destructure_tuple tyl
+      | (_, Tclass ((_, x), _, tyl)) when String.equal x SN.Collections.cPair ->
+        destructure_tuple tyl
       | (_, Tclass ((_, x), _, [elt_type]))
         when String.equal x SN.Collections.cVector
              || String.equal x SN.Collections.cImmVector
              || String.equal x SN.Collections.cVec
              || String.equal x SN.Collections.cConstVector ->
-        List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-            res &&& simplify_subtype ~subtype_env ~this_ty elt_type ty_dest)
-      | (_, Tclass ((_, x), _, tyl)) when String.equal x SN.Collections.cPair ->
-        if Int.( <> ) (List.length tyl) (List.length tyl_dest) then
-          invalid ()
-        else
-          List.fold2_exn
-            tyl
-            tyl_dest
-            ~init:(env, TL.valid)
-            ~f:(fun res ty ty_dest ->
-              res &&& simplify_subtype ~subtype_env ~this_ty ty ty_dest)
-      | (_, Tarraykind (AKvarray elt_type)) ->
-        List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-            res &&& simplify_subtype ~subtype_env ~this_ty elt_type ty_dest)
-      | (_, Tdynamic) ->
-        List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-            res &&& simplify_subtype ~subtype_env ~this_ty ety_sub ty_dest)
+        destructure_list elt_type
+      | (_, Tarraykind (AKvarray elt_type)) -> destructure_list elt_type
+      | (_, Tdynamic) -> destructure_list ety_sub
       | (_, Tabstract (AKgeneric name, opt_sub_cstr)) ->
         simplify_subtype_generic_sub_i name opt_sub_cstr ety_sub ety_super env
       (* TODO: should remove these any cases *)
       | (_, Tarraykind AKempty)
       | (_, Tany _) ->
         let any = (r, Typing_defs.make_tany ()) in
-        List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-            res &&& simplify_subtype ~subtype_env ~this_ty any ty_dest)
-      | _ -> invalid ()
+        destructure_list any
+      | _ ->
+        let ty_sub_descr =
+          Typing_print.with_blank_tyvars (fun () ->
+              Typing_print.full_strip_ns env ety_sub)
+        in
+        invalid_with (fun () ->
+            Errors.invalid_destructure
+              (Reason.to_pos r)
+              (Reason.to_pos (fst ety_sub))
+              ty_sub_descr)
     end
   | (LoclType ety_sub, LoclType ety_super) ->
     (match (snd ety_sub, snd ety_super) with

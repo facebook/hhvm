@@ -1,0 +1,4 @@
+File "list_destructuring_too_many.php", line 4, characters 3-14:
+Too many arguments (expected 2 but got 3) (Typing[4105])
+File "list_destructuring_too_many.php", line 3, characters 12-30:
+Definition is here

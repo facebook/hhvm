@@ -702,8 +702,8 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   , m_isPhpLeafFn(isPhpLeafFn)
   , m_hasReifiedGenerics(false)
   , m_isRxDisabled(false)
-  , m_hasMultiParamUBs(false)
-  , m_hasMultiReturnUBs(false)
+  , m_hasParamsWithMultiUBs(false)
+  , m_hasReturnWithMultiUBs(false)
   , m_originalFilename(nullptr)
   , m_cti_base(0)
 {

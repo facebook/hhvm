@@ -5219,7 +5219,7 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
   assertx(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[param.index].typeConstraint;
   if (tc.isCheckable()) tc.verifyParam(param.ptr, func, param.index);
-  if (func->hasParamWithMultiUBs()) {
+  if (func->hasParamsWithMultiUBs()) {
     auto const& ubs = func->paramUBs();
     auto it = ubs.find(param.index);
     if (it != ubs.end()) {
@@ -5258,7 +5258,7 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
   assertx(func->numParams() == int(func->params().size()));
   auto const& tc = func->params()[paramId].typeConstraint;
   if (tc.isCheckable()) tc.verifyOutParam(vmStack().topTV(), func, paramId);
-  if (func->hasParamWithMultiUBs()) {
+  if (func->hasParamsWithMultiUBs()) {
     auto const& ubs = func->paramUBs();
     auto it = ubs.find(paramId);
     if (it != ubs.end()) {

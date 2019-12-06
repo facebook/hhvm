@@ -181,8 +181,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     line2 - line1 >= Func::kSmallDeltaLimit ||
     past - base >= Func::kSmallDeltaLimit ||
     hasReifiedGenerics ||
-    hasParamMultiUBs ||
-    hasReturnMultiUBs;
+    hasParamsWithMultiUBs ||
+    hasReturnWithMultiUBs;
 
   f->m_shared.reset(
     needsExtendedSharedData
@@ -213,10 +213,12 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
         ? KindOfVec : KindOfArray;
     }
     f->appendParam(params[i].inout, pi, fParams);
-    if (!params[i].upperBounds.empty()) {
+    auto const& fromUBs = params[i].upperBounds;
+    if (!fromUBs.empty()) {
       auto& ub = f->extShared()->m_paramUBs[i];
-      ub.assign(params[i].upperBounds.begin(), params[i].upperBounds.end());
-      f->shared()->m_hasMultiParamUBs = true;
+      ub.resize(fromUBs.size());
+      std::copy(fromUBs.begin(), fromUBs.end(), ub.begin());
+      f->shared()->m_hasParamsWithMultiUBs = true;
     }
   }
 
@@ -241,9 +243,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_retTypeConstraint = retTypeConstraint;
   f->shared()->m_retUserType = retUserType;
   if (!retUpperBounds.empty()) {
-    f->extShared()->m_returnUBs.assign(retUpperBounds.begin(),
-                                       retUpperBounds.end());
-    f->shared()->m_hasMultiReturnUBs = true;
+    f->extShared()->m_returnUBs.resize(retUpperBounds.size());
+    std::copy(retUpperBounds.begin(), retUpperBounds.end(),
+              f->extShared()->m_returnUBs.begin());
+    f->shared()->m_hasReturnWithMultiUBs = true;
   }
   f->shared()->m_originalFilename = originalFullName;
   f->shared()->m_isGenerated = isGenerated;

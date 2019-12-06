@@ -672,6 +672,7 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
         NoBlockId,
         param.typeConstraint,
         param.userType,
+        param.upperBounds,
         param.phpCode,
         param.userAttributes,
         param.builtinType,
@@ -711,6 +712,9 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->userAttributes     = fe.userAttributes;
   ret->returnUserType     = fe.retUserType;
   ret->retTypeConstraint  = fe.retTypeConstraint;
+  ret->hasParamsWithMultiUBs = fe.hasParamsWithMultiUBs;
+  ret->hasReturnWithMultiUBs = fe.hasReturnWithMultiUBs;
+  ret->returnUBs          = fe.retUpperBounds;
   ret->originalFilename   = fe.originalFilename;
 
   ret->top                 = fe.top;

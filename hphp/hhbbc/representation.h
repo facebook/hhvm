@@ -166,6 +166,8 @@ struct Param {
    */
   LSString userTypeConstraint;
 
+  CompactVector<TypeConstraint> upperBounds;
+
   /*
    * Evalable php code that will give the default argument.  This is
    * redundant with the dv initializer, but gets propagated through
@@ -330,6 +332,10 @@ struct Func : FuncBase {
    * passed through to expose it to reflection.
    */
   LSString returnUserType;
+
+  bool hasParamsWithMultiUBs : 1;
+  bool hasReturnWithMultiUBs : 1;
+  CompactVector<TypeConstraint> returnUBs;
 
   /*
    * If traits are being flattened by hphpc, we keep the original

@@ -55,7 +55,7 @@ struct FuncEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 
-  using UpperBoundVec = std::vector<TypeConstraint>;
+  using UpperBoundVec = CompactVector<TypeConstraint>;
   struct ParamInfo : public Func::ParamInfo {
     ParamInfo()
       : inout(false)
@@ -287,8 +287,8 @@ public:
       bool isGenerator         : 1;
       bool isPairGenerator     : 1;
       bool isRxDisabled        : 1;
-      bool hasParamMultiUBs    : 1;
-      bool hasReturnMultiUBs   : 1;
+      bool hasParamsWithMultiUBs : 1;
+      bool hasReturnWithMultiUBs : 1;
     };
   };
 

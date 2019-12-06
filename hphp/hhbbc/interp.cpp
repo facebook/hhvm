@@ -4974,6 +4974,8 @@ bool couldBeMocked(const Type& t) {
 }
 }
 
+using TCVec = std::vector<const TypeConstraint*>;
+
 void in(ISS& env, const bc::VerifyParamType& op) {
   IgnoreUsedParams _{env};
 
@@ -4982,12 +4984,17 @@ void in(ISS& env, const bc::VerifyParamType& op) {
     return reduce(env);
   }
 
+  auto const& pinfo = env.ctx.func->params[op.loc1];
   // Generally we won't know anything about the params, but
   // analyze_func_inline does - and this can help with effect-free analysis
-  auto const constraint = env.ctx.func->params[op.loc1].typeConstraint;
-  if (env.index.satisfies_constraint(env.ctx,
-                                     locAsCell(env, op.loc1),
-                                     constraint)) {
+  TCVec tcs = {&pinfo.typeConstraint};
+  for (auto const& t : pinfo.upperBounds) tcs.push_back(&t);
+  if (std::all_of(std::begin(tcs), std::end(tcs),
+        [&](const TypeConstraint* tc) {
+          return env.index.satisfies_constraint(env.ctx,
+                                                locAsCell(env, op.loc1),
+                                                *tc);
+          })) {
     if (!locAsCell(env, op.loc1).couldBe(BFunc | BCls)) {
       return reduce(env);
     }
@@ -4997,17 +5004,21 @@ void in(ISS& env, const bc::VerifyParamType& op) {
    * We assume that if this opcode doesn't throw, the parameter was of the
    * specified type.
    */
-  if (constraint.hasConstraint() && !constraint.isTypeVar() &&
-      !constraint.isTypeConstant()) {
-    auto t =
-      loosen_dvarrayness(env.index.lookup_constraint(env.ctx, constraint));
-    if (constraint.isThis() && couldBeMocked(t)) {
-      t = unctx(std::move(t));
+  Type tcT;
+  for (auto const& constraint : tcs) {
+    if (constraint->hasConstraint() && !constraint->isTypeVar() &&
+      !constraint->isTypeConstant()) {
+      auto t =
+        loosen_dvarrayness(env.index.lookup_constraint(env.ctx, *constraint));
+      if (constraint->isThis() && couldBeMocked(t)) {
+        t = unctx(std::move(t));
+      }
+      FTRACE(2, "     {} ({})\n", constraint->fullName(), show(t));
+      tcT = intersection_of(std::move(tcT), std::move(t));
+      if (tcT.subtypeOf(BBottom)) unreachable(env);
     }
-    if (t.subtypeOf(BBottom)) unreachable(env);
-    FTRACE(2, "     {} ({})\n", constraint.fullName(), show(t));
-    setLoc(env, op.loc1, std::move(t));
   }
+  if (tcT != TTop) setLoc(env, op.loc1, std::move(tcT));
 }
 
 void in(ISS& env, const bc::VerifyParamTypeTS& op) {
@@ -5045,7 +5056,7 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
   popC(env);
 }
 
-void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
+void verifyRetImpl(ISS& env, const TCVec& tcs,
                    bool reduce_this, bool ts_flavor) {
   // If it is the ts flavor, then second thing on the stack, otherwise first
   auto stackT = topC(env, (int)ts_flavor);
@@ -5055,7 +5066,10 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
   // constraint is a typevar, or if the top of stack is the same or a
   // subtype of the type constraint, then this is a no-op, unless
   // reified types could be involved.
-  if (env.index.satisfies_constraint(env.ctx, stackT, constraint)) {
+  if (std::all_of(std::begin(tcs), std::end(tcs),
+                  [&](const TypeConstraint* tc) {
+                    return env.index.satisfies_constraint(env.ctx, stackT, *tc);
+                  })) {
     if (ts_flavor) {
       // we wouldn't get here if reified types were definitely not
       // involved, so just bail.
@@ -5067,63 +5081,70 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
     return reduce(env);
   }
 
-  // For CheckReturnTypeHints >= 3 AND the constraint is not soft.
-  // We can safely assume that either VerifyRetTypeC will
-  // throw or it will produce a value whose type is compatible with the
-  // return type constraint.
-  auto tcT = remove_uninit(
-    loosen_dvarrayness(env.index.lookup_constraint(env.ctx, constraint)));
-
-  // If tcT could be an interface or trait, we upcast it to TObj/TOptObj.
-  // Why?  Because we want uphold the invariant that we only refine return
-  // types and never widen them, and if we allow tcT to be an interface then
-  // it's possible for violations of this invariant to arise.  For an example,
-  // see "hphp/test/slow/hhbbc/return-type-opt-bug.php".
-  // Note: It's safe to use TObj/TOptObj because lookup_constraint() only
-  // returns classes or interfaces or traits (it never returns something that
-  // could be an enum or type alias) and it never returns anything that could
-  // be a "magic" interface that supports non-objects.  (For traits the return
-  // typehint will always throw at run time, so it's safe to use TObj/TOptObj.)
-  if (is_specialized_obj(tcT) && dobj_of(tcT).cls.couldBeInterfaceOrTrait()) {
-    tcT = is_opt(tcT) ? TOptObj : TObj;
-  }
-
-  // In some circumstances, verifyRetType can modify the type. If it
-  // does that we can't reduce even when we know it succeeds.
+  std::vector<Type> constraintTypes;
   auto dont_reduce = false;
-  // VerifyRetType will convert a TFunc to a TStr implicitly
-  // (and possibly warn)
-  if (tcT.couldBe(BStr) && stackT.couldBe(BFunc | BCls)) {
-    stackT |= TStr;
-    dont_reduce = true;
-  }
 
-  // VerifyRetType will convert TClsMeth to TVec/TVArr/TArr implicitly
-  if (stackT.couldBe(BClsMeth)) {
-    if (tcT.couldBe(BVec)) {
-      stackT |= TVec;
-      dont_reduce = true;
-    }
-    if (tcT.couldBe(BVArr)) {
-      stackT |= TVArr;
-      dont_reduce = true;
-    }
-    if (tcT.couldBe(TArr)) {
-      stackT |= TArr;
-      dont_reduce = true;
-    }
-  }
+  for (auto const& constraint : tcs) {
+    // For CheckReturnTypeHints >= 3 AND the constraint is not soft.
+    // We can safely assume that either VerifyRetTypeC will
+    // throw or it will produce a value whose type is compatible with the
+    // return type constraint.
+    auto tcT = remove_uninit(
+      loosen_dvarrayness(env.index.lookup_constraint(env.ctx, *constraint)));
 
-  // If CheckReturnTypeHints < 3 OR if the constraint is soft,
-  // then there are no optimizations we can safely do here, so
-  // just leave the top of stack as is.
-  if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft() ||
-      (RuntimeOption::EvalEnforceGenericsUB != 2 && constraint.isUpperBound()))
-  {
-    if (ts_flavor) popC(env);
-    popC(env);
-    push(env, std::move(stackT), stackEquiv);
-    return;
+    // If tcT could be an interface or trait, we upcast it to TObj/TOptObj.
+    // Why?  Because we want uphold the invariant that we only refine return
+    // types and never widen them, and if we allow tcT to be an interface then
+    // it's possible for violations of this invariant to arise.  For an example,
+    // see "hphp/test/slow/hhbbc/return-type-opt-bug.php".
+    // Note: It's safe to use TObj/TOptObj because lookup_constraint() only
+    // returns classes or interfaces or traits (it never returns something that
+    // could be an enum or type alias) and it never returns anything that could
+    // be a "magic" interface that supports non-objects.  (For traits the return
+    // typehint will always throw at run time, so it's safe to use TObj/TOptObj.)
+    if (is_specialized_obj(tcT) && dobj_of(tcT).cls.couldBeInterfaceOrTrait()) {
+      tcT = is_opt(tcT) ? TOptObj : TObj;
+    }
+
+    constraintTypes.push_back(tcT);
+
+    // In some circumstances, verifyRetType can modify the type. If it
+    // does that we can't reduce even when we know it succeeds.
+    // VerifyRetType will convert a TFunc to a TStr implicitly
+    // (and possibly warn)
+    if (tcT.couldBe(BStr) && stackT.couldBe(BFunc | BCls)) {
+      stackT |= TStr;
+      dont_reduce = true;
+    }
+
+    // VerifyRetType will convert TClsMeth to TVec/TVArr/TArr implicitly
+    if (stackT.couldBe(BClsMeth)) {
+      if (tcT.couldBe(BVec)) {
+        stackT |= TVec;
+        dont_reduce = true;
+      }
+      if (tcT.couldBe(BVArr)) {
+        stackT |= TVArr;
+        dont_reduce = true;
+      }
+      if (tcT.couldBe(TArr)) {
+        stackT |= TArr;
+        dont_reduce = true;
+      }
+    }
+
+    // If CheckReturnTypeHints < 3 OR if the constraint is soft,
+    // then there are no optimizations we can safely do here, so
+    // just leave the top of stack as is.
+    if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint->isSoft() ||
+        (RuntimeOption::EvalEnforceGenericsUB != 2 &&
+         constraint->isUpperBound()))
+    {
+      if (ts_flavor) popC(env);
+      popC(env);
+      push(env, std::move(stackT), stackEquiv);
+      return;
+    }
   }
 
   // In cases where we have a `this` hint where stackT is an TOptObj known to
@@ -5132,21 +5153,30 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
   // split these translations, it will rarely in practice return null.
   if (reduce_this &&
       !dont_reduce &&
-      constraint.isThis() &&
-      !constraint.isNullable() &&
       is_opt(stackT) &&
-      env.index.satisfies_constraint(env.ctx, unopt(stackT), constraint)) {
+      std::all_of(std::begin(tcs), std::end(tcs),
+                  [&](const TypeConstraint* constraint) {
+                    return constraint->isThis() &&
+                           !constraint->isNullable() &&
+                           env.index.satisfies_constraint(
+                               env.ctx, unopt(stackT), *constraint);
+                    }
+                  )
+  ) {
     if (ts_flavor) {
       return reduce(env, bc::PopC {}, bc::VerifyRetNonNullC {});
     }
     return reduce(env, bc::VerifyRetNonNullC {});
   }
 
-  auto retT = intersection_of(std::move(tcT), std::move(stackT));
-  if (retT.subtypeOf(BBottom)) {
-    unreachable(env);
-    if (ts_flavor) popC(env); // the type structure
-    return;
+  auto retT = std::move(stackT);
+  for (auto& tcT : constraintTypes) {
+    retT = intersection_of(std::move(tcT), std::move(retT));
+    if (retT.subtypeOf(BBottom)) {
+      unreachable(env);
+      if (ts_flavor) popC(env); // the type structure
+      return;
+    }
   }
 
   if (ts_flavor) popC(env); // the type structure
@@ -5155,12 +5185,18 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
 }
 
 void in(ISS& env, const bc::VerifyOutType& op) {
-  verifyRetImpl(env, env.ctx.func->params[op.arg1].typeConstraint,
-                false, false);
+  TCVec tcs;
+  auto const& pinfo = env.ctx.func->params[op.arg1];
+  tcs.push_back(&pinfo.typeConstraint);
+  for (auto const& t : pinfo.upperBounds) tcs.push_back(&t);
+  verifyRetImpl(env, tcs, false, false);
 }
 
 void in(ISS& env, const bc::VerifyRetTypeC& /*op*/) {
-  verifyRetImpl(env, env.ctx.func->retTypeConstraint, true, false);
+  TCVec tcs;
+  tcs.push_back(&env.ctx.func->retTypeConstraint);
+  for (auto const& t : env.ctx.func->returnUBs) tcs.push_back(&t);
+  verifyRetImpl(env, tcs, true, false);
 }
 
 void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
@@ -5194,7 +5230,9 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
       return;
     }
   }
-  verifyRetImpl(env, constraint, true, true);
+  TCVec tcs {&constraint};
+  for (auto const& t : env.ctx.func->returnUBs) tcs.push_back(&t);
+  verifyRetImpl(env, tcs, true, true);
 }
 
 void in(ISS& env, const bc::VerifyRetNonNullC& /*op*/) {

@@ -210,7 +210,7 @@ FuncInfo find_func_info(const Func* func) {
   };
 
   auto find_upper_bounds = [&] {
-    if (func->hasParamWithMultiUBs()) {
+    if (func->hasParamsWithMultiUBs()) {
       auto const& params = func->params();
       for (auto const& p : func->paramUBs()) {
         auto const& userType = params[p.first].userType;

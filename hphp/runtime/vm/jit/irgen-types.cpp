@@ -1342,7 +1342,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
   verifyFunc(tc);
   if (id == TypeConstraint::ReturnId && func->hasReturnWithMultiUBs()) {
     for (auto const& ub : func->returnUBs()) verifyFunc(ub);
-  } else if (func->hasParamWithMultiUBs()) {
+  } else if (func->hasParamsWithMultiUBs()) {
     auto const& ubs = func->paramUBs();
     auto it = ubs.find(id);
     if (it != ubs.end()) {
@@ -1437,7 +1437,7 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
   };
 
   verifyFunc(func->params()[id].typeConstraint);
-  if (func->hasParamWithMultiUBs()) {
+  if (func->hasParamsWithMultiUBs()) {
     auto const& ubs = func->paramUBs();
     auto it = ubs.find(id);
     if (it != ubs.end()) {

@@ -805,6 +805,7 @@ void emit_locals_and_params(FuncEmitter& fe,
       pinfo.defaultValue = param.defaultValue;
       pinfo.typeConstraint = param.typeConstraint;
       pinfo.userType = param.userTypeConstraint;
+      pinfo.upperBounds = param.upperBounds;
       pinfo.phpCode = param.phpCode;
       pinfo.userAttributes = param.userAttributes;
       pinfo.builtinType = param.builtinType;
@@ -1165,6 +1166,7 @@ void emit_finish_func(EmitUnitState& state,
 
   fe.userAttributes = func.userAttributes;
   fe.retUserType = func.returnUserType;
+  fe.retUpperBounds = func.returnUBs;
   fe.originalFilename =
     func.originalFilename ? func.originalFilename :
     func.originalUnit ? func.originalUnit->filename : nullptr;
@@ -1176,6 +1178,8 @@ void emit_finish_func(EmitUnitState& state,
   fe.isMemoizeWrapper = func.isMemoizeWrapper;
   fe.isMemoizeWrapperLSB = func.isMemoizeWrapperLSB;
   fe.isRxDisabled = func.isRxDisabled;
+  fe.hasParamsWithMultiUBs = func.hasParamsWithMultiUBs;
+  fe.hasReturnWithMultiUBs = func.hasReturnWithMultiUBs;
 
   auto const retTy = state.index.lookup_return_type_raw(&func);
   if (!retTy.subtypeOf(BBottom)) {

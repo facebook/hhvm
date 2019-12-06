@@ -2306,8 +2306,8 @@ TypeConstraint parse_type_constraint(AsmState& as) {
   return parse_type_info(as, true).second;
 }
 
-using UpperBoundMap =
-  std::unordered_map<const StringData*, std::vector<TypeConstraint>>;
+using UpperBoundVec = CompactVector<TypeConstraint>;
+using UpperBoundMap = std::unordered_map<const StringData*, UpperBoundVec>;
 
 void parse_ub(AsmState& as, UpperBoundMap& ubs) {
   as.in.skipWhitespace();
@@ -2356,11 +2356,10 @@ UpperBoundMap parse_ubs(AsmState& as) {
   return ret;
 }
 
-std::vector<TypeConstraint> getUpperBounds(const StringData* typeName,
-                                           const UpperBoundMap& ubs,
-                                           const UpperBoundMap& class_ubs) {
-  std::vector<TypeConstraint> res;
-  if (!typeName) return res;
+UpperBoundVec getUpperBounds(const StringData* typeName,
+                             const UpperBoundMap& ubs,
+                             const UpperBoundMap& class_ubs) {
+  if (!typeName) return {};
   assertx(typeName->isStatic());
   auto it = ubs.find(typeName);
   if (it != ubs.end()) return it->second;
@@ -2442,7 +2441,7 @@ void parse_parameter_list(AsmState& as,
       param.typeConstraint = ub[0];
     } else if (!ub.empty()) {
       param.upperBounds = ub;
-      as.fe->hasParamMultiUBs = true;
+      as.fe->hasParamsWithMultiUBs = true;
     }
 
     as.in.skipWhitespace();
@@ -2711,7 +2710,7 @@ void parse_function(AsmState& as) {
     retTypeInfo.second = ub[0];
   } else if (!ub.empty()) {
     as.fe->retUpperBounds = ub;
-    as.fe->hasReturnMultiUBs = true;
+    as.fe->hasReturnWithMultiUBs = true;
   }
 
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = retTypeInfo;
@@ -2773,7 +2772,7 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
     retTypeInfo.second = ub[0];
   } else if (!ub.empty()) {
     as.fe->retUpperBounds = ub;
-    as.fe->hasReturnMultiUBs = true;
+    as.fe->hasReturnWithMultiUBs = true;
   }
 
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = retTypeInfo;

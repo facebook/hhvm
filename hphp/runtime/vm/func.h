@@ -168,7 +168,7 @@ struct Func final {
   using ParamInfoVec = VMFixedVector<ParamInfo>;
   using SVInfoVec = VMFixedVector<SVInfo>;
   using EHEntVec = VMFixedVector<EHEnt>;
-  using UpperBoundVec = vm_vector<TypeConstraint>;
+  using UpperBoundVec = VMCompactVector<TypeConstraint>;
   using ParamUBMap = vm_flat_map<uint32_t, UpperBoundVec>;
 
   /////////////////////////////////////////////////////////////////////////////
@@ -533,7 +533,7 @@ struct Func final {
    */
   uint32_t numInOutParams() const;
 
-  bool hasParamWithMultiUBs() const;
+  bool hasParamsWithMultiUBs() const;
 
   const ParamUBMap& paramUBs() const;
 
@@ -1145,8 +1145,8 @@ private:
     bool m_isPhpLeafFn : 1;
     bool m_hasReifiedGenerics : 1;
     bool m_isRxDisabled : 1;
-    bool m_hasMultiParamUBs : 1;
-    bool m_hasMultiReturnUBs : 1;
+    bool m_hasParamsWithMultiUBs : 1;
+    bool m_hasReturnWithMultiUBs : 1;
 
     // 16 bits of padding here in LOWPTR builds
 

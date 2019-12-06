@@ -167,6 +167,8 @@ ObjectData* nativeDataInstanceCopyCtor(ObjectData* src, Class* cls,
       HeaderKind::NativeObject);
   assertx(obj->hasExactlyOneRef());
 
+  obj->props()->init(cls->numDeclProperties());
+
   if (UNLIKELY(cls->hasMemoSlots())) {
     std::memset(node + 1, 0, nativeDataSize - sizeof(NativeNode));
   }

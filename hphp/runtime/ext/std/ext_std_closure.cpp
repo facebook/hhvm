@@ -176,8 +176,9 @@ ObjectData* createClosureRepoAuth(Class* cls) {
   auto const size = sizeof(ClosureHdr) + ObjectData::sizeForNProps(nProps);
   auto hdr = new (tl_heap->objMalloc(size)) ClosureHdr(size);
   auto obj = new (hdr + 1) c_Closure(cls);
-  assertx(obj->hasExactlyOneRef());
+  obj->props()->init(nProps);
   assertx(obj->props()->checkInvariants(nProps));
+  assertx(obj->hasExactlyOneRef());
   return obj;
 }
 
@@ -232,12 +233,7 @@ static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
   auto closure = c_Closure::fromObject(obj);
   if (auto t = closure->getThis()) decRefObj(t);
 
-  // We're destructing, not constructing, but we're unconditionally allowed to
-  // write just the same.
-  assertx(closure->props()->checkInvariants(cls->numDeclProperties()));
-  closure->props()->foreach(cls->numDeclProperties(), [&](tv_lval lval) {
-    tvDecRefGen(lval);
-  });
+  closure->props()->release(cls->countablePropsEnd());
 
   auto hdr = closure->hdr();
   tl_heap->objFree(hdr, hdr->size());

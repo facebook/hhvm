@@ -24,7 +24,12 @@
 
 #include <type_traits>
 
-namespace HPHP { namespace tv_layout {
+namespace HPHP {
+
+void tvDecRefGen(TypedValue);
+void tvDecRefCountable(TypedValue);
+
+namespace tv_layout {
 
 /* A TV layout represents a integer-indexed aggregate of TypedValues.
  *
@@ -58,6 +63,9 @@ namespace HPHP { namespace tv_layout {
  * Produce the quick index corresponding to the given index
  *
  * Member functions:
+ * void init(index_t size); Establishes any invariants the container needs to
+ * operatate, for a container of the given size
+ *
  * tv_val_offset offsetOf(index_t idx) const;
  * tv_val_offset offsetOf(quick_index idx) const; (optional)
  * Produces a tv_val_offset to the given index's typed value.
@@ -65,8 +73,11 @@ namespace HPHP { namespace tv_layout {
  * void checkInvariants(index_t size) const;
  * Asserts if any invariant of the container is not met
  *
- * void scan(index_t size, type_scan::Scanner&) const;
+ * void scan(quick_index size, type_scan::Scanner&) const;
  * Scans the countable values in the container
+ *
+ * void release(quick_index size);
+ * Decrefs the countable values in the container
  *
  * iterator iteratorAt(index_t);
  * const_iterator iteratorAt(index_t);
@@ -173,6 +184,8 @@ private:
   }
 
 public:
+  void init(index_t size) {}
+
   iterator iteratorAt(index_t offset) {
     return &rep()[offset];
   }
@@ -189,6 +202,12 @@ public:
     scanner.scan(*rep(), count * sizeof(TypedValue));
   }
 
+  void release(index_t count) {
+    for (auto lval : range(0, count)) {
+      tvDecRefGen(lval);
+    }
+  }
+
   bool checkInvariants(index_t /*len*/) const {
     return true;
   }
@@ -202,7 +221,7 @@ public:
  * This implements a flavor of an array layout but instead of wasting space on
  * padding for the type byte (out to a whole quardowrd), we aggregate 7 of these
  * types together (and then aggregate 7 values together) resulting in a
- * repeating layout (a "chunk") like:
+ * repeating layout (a "chunk") of 64 bytes. The layout is like:
  *
  *  ______________________ 8 bytes _______________________
  * /                                                      \
@@ -211,13 +230,26 @@ public:
  * +------+------+------+------+------+------+------+------+  |
  * |                           v1                          |  |
  * +-------------------------------------------------------+  | 64 bytes
- * |                           ...                         |  |
+ * |                           ...                         |  | (a "chunk")
  * +-------------------------------------------------------+  |
  * |                           v7                          |  |
- * +-------------------------------------------------------+ /
+ * +------+------+------+------+------+------+------+------+ /
+ * |  t8  |  t9  |  t10 | 0x00 | 0x00 | 0x00 | 0x00 |      |
+ * +------+------+------+------+------+------+------+------+
+ *                         ^
+ *                         |
+ *                          \ trailing type bytes are required to be zero
+ *                            except for the last which is always unconstrained
  *
  * Iterating over the 7-up layout efficiently requires that the container be
  * aligned to a 16-byte boundary, and checkInvariants ensures this is the case
+ *
+ * Yet another invariant of the 7-up layout is that any additional types in the
+ * **last** chunk (which might have 1-7 valid types) must be initialized to
+ * KindOfUninit. The 8th byte of the type word is always allowed to contain any
+ * value. This allows us to unroll both type scanning and release in a way that
+ * prevents having treat the last, possibly incomplete, type word in a special
+ * way.
  */
 
 namespace detail_7up {
@@ -289,7 +321,6 @@ struct quick_index {
   }
 };
 
-
 } // namespace detail_7up
 
 struct Tv7Up : public LayoutBase<Tv7Up,
@@ -300,8 +331,47 @@ struct Tv7Up : public LayoutBase<Tv7Up,
   /* see quick_index above for why this is the maximum index */
   static size_t constexpr max_index = ((1 << 13) - 1) * 7;
 
+  void init(index_t size) {
+    if (size == 0) return;
+    auto const lastTypeWord =
+      reinterpret_cast<uint64_t*>(this) + sizeof(Value) * ((size - 1) / 7);
+    *lastTypeWord = uint64_t{0};
+  }
+
   bool checkInvariants(index_t size) const {
     assertx(reinterpret_cast<uintptr_t>(this) % 16 == 0);
+    /* we require any of the first bytes in the type word that do not correspond
+     * to types in the container (i.e. if the last type word only has 4 types,
+     * the next 3 bytes are required to be zero.) */
+    DEBUG_ONLY auto const checkTypeByte = [&]{
+      auto const chunks = size / 7;
+      auto const rem = size % 7;
+      auto type = reinterpret_cast<const char*>(this) +
+        8 * sizeof(Value) * chunks;
+
+      auto const last_type_byte = reinterpret_cast<const uint64_t*>(type);
+
+      type += rem;
+      SCOPE_ASSERT_DETAIL("type bytes") {
+        return folly::sformat("{:08x}", *last_type_byte);
+      };
+
+      switch (rem) {
+      case 1: assertx(*type++ == 0);
+      case 2: assertx(*type++ == 0);
+      case 3: assertx(*type++ == 0);
+      case 4: assertx(*type++ == 0);
+      case 5: assertx(*type++ == 0);
+      case 6: assertx(*type++ == 0);
+      case 0:
+        break;
+      default:
+        assertx(false);
+      };
+
+      return true;
+    };
+    assertx(checkTypeByte());
     return true;
   }
 
@@ -376,8 +446,64 @@ struct Tv7Up : public LayoutBase<Tv7Up,
     return const_iterator{&rval.type(), &rval.val()};
   }
 
-  void scan(index_t count, type_scan::Scanner& scanner) const {
-    scanner.conservative(this, sizeFor(count));
+  void scan(index_t count, type_scan::Scanner& scanner) const = delete;
+  void scan(quick_index qi, type_scan::Scanner& scanner) const {
+    // round the bottom 3 bits up-- qidx is now (size + 6 / 7) * 8
+    auto const off = ((qi.quot << 3) + qi.rem + 0x07) & ~0x07;
+    auto const last_type_word = reinterpret_cast<const uint64_t*>(this) + off;
+
+    for (auto types = reinterpret_cast<const uint64_t*>(this);
+         types != last_type_word;
+         types += 8) {
+      auto ts = *types;
+      const Value* val = reinterpret_cast<const Value*>(types) + 1;
+
+      if (ts & kRefCountedBit) scanner.scan(val->pcnt);
+      ts = ts >> 8; val++;
+      if (ts & kRefCountedBit) scanner.scan(val->pcnt);
+      ts = ts >> 8; val++;
+      if (ts & kRefCountedBit) scanner.scan(val->pcnt);
+      ts = ts >> 8; val++;
+      if (ts & kRefCountedBit) scanner.scan(val->pcnt);
+      ts = ts >> 8; val++;
+      if (ts & kRefCountedBit) scanner.scan(val->pcnt);
+      ts = ts >> 8; val++;
+      if (ts & kRefCountedBit) scanner.scan(val->pcnt);
+      ts = ts >> 8; val++;
+      if (ts & kRefCountedBit) scanner.scan(val->pcnt);
+    }
+  }
+
+  void release(index_t count) = delete;
+  void release(quick_index count) {
+    // round the bottom 3 bits up-- qidx is now (size + 6 / 7) * 8
+    auto const qidx = ((count.quot << 3) + count.rem + 0x07) & ~0x07;
+    auto const last_type_word = reinterpret_cast<uint64_t*>(this) + qidx;
+
+    for (auto types = reinterpret_cast<uint64_t*>(this);
+         types != last_type_word;
+         types += 8) {
+      auto ts = *types;
+      Value* val = reinterpret_cast<Value*>(types) + 1;
+
+      auto const decRef = [](uint64_t ts, Value* val) {
+        tvDecRefCountable(TypedValue{*val, static_cast<DataType>(ts)});
+      };
+
+      if (ts & kRefCountedBit) decRef(ts, val);
+      ts = ts >> 8; val++;
+      if (ts & kRefCountedBit) decRef(ts, val);
+      ts = ts >> 8; val++;
+      if (ts & kRefCountedBit) decRef(ts, val);
+      ts = ts >> 8; val++;
+      if (ts & kRefCountedBit) decRef(ts, val);
+      ts = ts >> 8; val++;
+      if (ts & kRefCountedBit) decRef(ts, val);
+      ts = ts >> 8; val++;
+      if (ts & kRefCountedBit) decRef(ts, val);
+      ts = ts >> 8; val++;
+      if (ts & kRefCountedBit) decRef(ts, val);
+    }
   }
 };
 

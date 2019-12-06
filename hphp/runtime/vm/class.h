@@ -346,7 +346,7 @@ struct Class : AtomicCountable {
       // heap and we shouldn't be type-scanned under those circumstances
       assertx(reqAllocated());
       assertx(m_data == static_cast<const void*>(this + 1));
-      m_data->scan(m_size, scanner);
+      m_data->scan(ObjectProps::quickIndex(m_size), scanner);
     }
 
   private:
@@ -744,7 +744,9 @@ public:
    * An exclusive upper limit on the post-sort indices of properties of this
    * class that may be countable. See m_countablePropsEnd for more details.
    */
-  uint32_t countablePropsEnd() const { return m_countablePropsEnd; }
+  ObjectProps::quick_index countablePropsEnd() const {
+    return m_countablePropsEnd;
+  }
 
   /*
    * Number of declared instance properties that are actually accessible from
@@ -1749,7 +1751,7 @@ private:
    * (Note that there may still be uncounted properties with indices less than
    * this bound; in particular, we can't sort parent class properties freely.)
    */
-  uint32_t m_countablePropsEnd;
+  ObjectProps::quick_index m_countablePropsEnd;
 
   /*
    * Vector of Class pointers that encodes the inheritance hierarchy, including

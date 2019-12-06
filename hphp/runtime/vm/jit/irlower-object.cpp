@@ -58,7 +58,32 @@ void cgLdObjClass(IRLS& env, const IRInstruction* inst) {
 IMPL_OPCODE_CALL(AllocObj)
 IMPL_OPCODE_CALL(AllocObjReified)
 
+namespace {
+
+template <typename T> void
+objectPropsRawInitImpl(Vout& v, Vreg base, size_t props);
+
+template <> void
+objectPropsRawInitImpl<tv_layout::TvArray>(Vout& v, Vreg base, size_t props) {}
+
+template <> void
+objectPropsRawInitImpl<tv_layout::Tv7Up>(Vout& v, Vreg base, size_t props) {
+  if (props == 0) return;
+
+  auto const last_type_word_offset =
+    sizeof(ObjectData) +
+    8 * sizeof(uint64_t) * ((props - 1) / 7);
+
+  v << storeqi{0, base[last_type_word_offset]};
+}
+
+static auto constexpr objectPropsRawInit = &objectPropsRawInitImpl<ObjectProps>;
+
+}
+
+
 void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const cls = inst->extra<NewInstanceRaw>()->cls;
 
@@ -89,13 +114,15 @@ void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
   if (memoSize > 0) args.imm(memoSize);
 
   cgCallHelper(
-    vmain(env),
+    v,
     env,
     target,
     callDest(dst),
     SyncOptions::Sync,
     args
   );
+  objectPropsRawInit(v, dst, cls->numDeclProperties());
+
 }
 
 void cgConstructInstance(IRLS& env, const IRInstruction* inst) {
@@ -139,6 +166,8 @@ void cgConstructClosure(IRLS& env, const IRInstruction* inst) {
 
     cgCallHelper(vmain(env), env, target,
                  callDest(dst), SyncOptions::None, args);
+
+    objectPropsRawInit(v, dst, cls->numDeclProperties());
   }
 
   if (inst->src(0)->isA(TNullptr)) {

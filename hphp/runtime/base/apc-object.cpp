@@ -267,6 +267,7 @@ Object APCObject::createObject() const {
   // not yet exposed to PHP.
   auto i = 0;
 
+  objProp->init(numProps);
   auto range = objProp->range(0, numProps);
   auto it = range.begin();
 

@@ -38,6 +38,7 @@ inline ObjectData::ObjectData(Class* cls, uint8_t flags, HeaderKind kind)
   assertx(!cls->needInitialization() || cls->initialized());
   assertx(!isCollection()); // collections use NoInit{}
   instanceInit(cls);
+  assertx(props()->checkInvariants(cls->numDeclProperties()));
 }
 
 inline ObjectData::ObjectData(Class* cls, InitRaw, uint8_t flags,

@@ -191,11 +191,7 @@ void ObjectData::release(ObjectData* obj, const Class* cls) noexcept {
   // `obj' is being torn down now---be careful about where/how you dereference
   // it from here on.
 
-  auto const countableProps = cls->countablePropsEnd();
-  auto props = obj->props();
-  props->foreach(countableProps, [&](tv_lval lval) {
-    tvDecRefGen(lval);
-  });
+  obj->props()->release(cls->countablePropsEnd());
 
   if (UNLIKELY(obj->slowDestroyCheck())) {
     obj->slowDestroyCases();
@@ -830,7 +826,7 @@ ObjectData* ObjectData::clone() {
   }
 
   auto const cloneProps = clone->props();
-  // TODO(jgriego): can we use storage order here instead of logical order?
+  cloneProps->init(m_cls->numDeclProperties());
   for (auto slot = Slot{0}; slot < nProps; slot++) {
     auto index = m_cls->propSlotToIndex(slot);
     tvDup(*props()->at(index), cloneProps->at(index));
@@ -1032,6 +1028,7 @@ void deepInitHelper(ObjectProps* props,
                     const Class::PropInitVec* initVec,
                     size_t nProps) {
   auto initIter = initVec->cbegin();
+  props->init(nProps);
   props->foreach(nProps, [&](tv_lval lval){
     auto entry = *initIter++;
     tvCopy(entry.val.tv(), lval);

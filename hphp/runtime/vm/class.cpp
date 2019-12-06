@@ -152,6 +152,11 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
 
     auto const oldSize = ObjectProps::sizeFor(m_size);
 
+    // TODO(jgriego) this is a kludge to preserve invariants of
+    // ObjectProps (when using 7up layouts) and should be replaced
+    // with some kind of `grow` fn on the layout class
+    memset(newData + oldSize, 0, props_size - oldSize);
+
     if (m_data) {
       // these two memcpys are separate because we're going from
       // contiguous memory (since the size == capacity) to noncontiguous memory
@@ -162,6 +167,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
              (m_size + 7) / 8);
       lower_free(m_data);
     }
+
     m_data = reinterpret_cast<ObjectProps*>(newData);
     m_capacity = static_cast<int32_t>(newCap);
 
@@ -2681,17 +2687,21 @@ void Class::setProperties() {
   // To speed up ObjectData::release, we only iterate over property indices
   // up to the last countable property index. Here, "index" refers to the
   // position of the property in memory, and "slot" to its logical slot.
-  m_countablePropsEnd = 0;
+  uint16_t countablePropsEnd = 0;
   for (Slot slot = 0; slot < m_declProperties.size(); ++slot) {
     if (jit::irgen::propertyMayBeCountable(m_declProperties[slot])) {
-      auto const index = propSlotToIndex(slot) + uint32_t{1};
-      m_countablePropsEnd = std::max(m_countablePropsEnd, index);
+      auto const index =
+        safe_cast<uint16_t>(propSlotToIndex(slot) + uint16_t{1});
+      countablePropsEnd = std::max(countablePropsEnd, index);
     }
   }
 
   assertx(m_declProperties.size() <= ObjectProps::max_index + 1);
+  assertx(countablePropsEnd <= ObjectProps::max_index);
+
+  m_countablePropsEnd = ObjectProps::quickIndex(countablePropsEnd);
   FTRACE(3, "numDeclProperties = {}\n", m_declProperties.size());
-  FTRACE(3, "countablePropsEnd = {}\n", m_countablePropsEnd);
+  FTRACE(3, "countablePropsEnd = {}\n", countablePropsEnd);
 }
 
 bool Class::compatibleTraitPropInit(const TypedValue& tv1,

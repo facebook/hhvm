@@ -2453,14 +2453,33 @@ private:
       }
     );
 
-    auto const index_and_flags = [&] {
-      auto const TYPE = 1;
-      auto const VARIABLE = 2;
-      //auto const ENUM = 2;
-      auto const FUNCTION = 3;
-      auto const OTHER = 4;
+    struct IndexAndFlags {
+      IndexAndFlags(uint32_t index, uint32_t kind, uint32_t is_static) {
+        assertx((index >> 24) == 0);
+        // Bits 0-23 is CU index
+        // Bits 24-27 are reserved and must be 0
+        // Bits 28-30 The kind of the symbol in the CU.
+        // Bit 31 is zero if the value is global and one if it is static.
+        m_data = (is_static << 31) | (kind << 28) | index;
+      }
 
-      uint32_t kind = OTHER;
+      explicit IndexAndFlags(uint32_t data) : m_data(data) {}
+
+      uint32_t m_data;
+
+      uint32_t get_kind()      const { return (m_data >> 28) & 7; }
+      uint32_t get_is_static() const { return m_data >> 31; }
+    };
+
+
+    constexpr int TYPE = 1;
+    constexpr int VARIABLE = 2;
+    //constexpr int ENUM = 2;
+    constexpr int FUNCTION = 3;
+    // constexpr int OTHER = 4;
+
+    auto const index_and_flags = [&] {
+      uint32_t kind = 0;
       auto is_static = false;
       switch (dwarf.getTag(die)) {
         case DW_TAG_typedef:
@@ -2499,24 +2518,30 @@ private:
           is_static = language != DW_LANG_C_plus_plus;
           break;
         default:
-          assertx(false && "invalid tag");
+          throw Exception{"Invalid tag"};
       }
-
-      // Bits 0-23 is CU index
-      assertx((cu_index & (1u << 24)) == 0);
-      uint32_t result = cu_index;
-      // Bits 24-27 are reserved and must be 0
-      // Bits 28-30 The kind of the symbol in the CU.
-      result |= (kind << 28);
-      // Bit 31 is zero if the value is global and one if it is static.
-      result |= ((uint32_t)is_static) << 31;
-      return result;
+      return IndexAndFlags{cu_index, kind, is_static}.m_data;
     };
 
-    auto const addSymbol = [&] (std::string name) {
+    auto const hasSameFlags = [&](std::vector<uint32_t> v, uint32_t input) {
+      auto const flags = IndexAndFlags{input};
+      for (auto const e : v) {
+        auto const f = IndexAndFlags{e};
+        if (f.get_kind() == flags.get_kind()) {
+          if ((f.get_kind() == TYPE &&
+               f.get_is_static() == flags.get_is_static()) ||
+              (!f.get_is_static() && !flags.get_is_static())) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+
+    auto const addSymbol = [&](std::string name) {
       auto value = index_and_flags();
       SymbolMap::accessor acc;
-      if (symbols.insert(acc, name) || acc->second.back() != value) {
+      if (symbols.insert(acc, name) || !hasSameFlags(acc->second, value)) {
         acc->second.push_back(value);
       }
     };

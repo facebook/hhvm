@@ -59,7 +59,7 @@ struct TypedValue;
   INVOKE_FEW_ARGS_HELPER(INVOKE_FEW_ARGS_##kind,num)
 #define INVOKE_FEW_ARGS_DECL_ARGS INVOKE_FEW_ARGS(DECL,INVOKE_FEW_ARGS_COUNT)
 
-void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
+void deepInitHelper(ObjectProps* dst, const TypedValueAux* propData,
                     size_t nProps);
 
 namespace Native {
@@ -438,8 +438,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // to these properties, they are responsible for validating the values with
   // any type-hints on the properties. Likewise the caller is responsible for
   // enforcing AttrLateInit.
-  TypedValue* propVecForConstruct();
-  const TypedValue* propVec() const;
+  ObjectProps* props();
+  const ObjectProps* props() const;
 
   void verifyPropTypeHints() const;
   void verifyPropTypeHints(size_t end) const;

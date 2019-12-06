@@ -48,10 +48,10 @@ static Array HHVM_METHOD(Closure, __debugInfo) {
     DArrayInit useVars(nProps);
 
     auto propsInfos = cls->declProperties();
-    auto props = closure->propVec();
-    for (size_t i = 0; i < nProps; ++i) {
-      useVars.set(StrNR(propsInfos[i].name), props[i]);
-    }
+    auto idx = 0;
+    closure->props()->foreach(nProps, [&](tv_rval rval){
+      useVars.set(StrNR(propsInfos[idx++].name), *rval);
+    });
 
     ret.set(s_static, make_array_like_tv(useVars.toArray().get()));
   }
@@ -116,8 +116,12 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   }
 
   auto beforeCurUseVar = sp + numArgs;
-  auto curProperty = propVecForConstruct();
-  while (beforeCurUseVar != sp) cellCopy(*--beforeCurUseVar, *curProperty++);
+
+  assertx(props()->checkInvariants(numArgs));
+  props()->foreach(numArgs, [&](tv_lval lval) {
+    assert(beforeCurUseVar != sp);
+    cellCopy(*--beforeCurUseVar, lval);
+  });
 }
 
 int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
@@ -141,11 +145,11 @@ int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
   }
 
   // Copy in all the use vars
-  auto prop = closure->propVec();
   int n = closure->getNumUseVars();
-  for (int i = 0; i < n; i++) {
-    cellDup(*prop++, *--sp);
-  }
+  assertx(closure->props()->checkInvariants(n));
+  closure->props()->foreach(n, [&](tv_rval rval) {
+    cellDup(*rval, *--sp);
+  });
 
   return n;
 }
@@ -173,6 +177,7 @@ ObjectData* createClosureRepoAuth(Class* cls) {
   auto hdr = new (tl_heap->objMalloc(size)) ClosureHdr(size);
   auto obj = new (hdr + 1) c_Closure(cls);
   assertx(obj->hasExactlyOneRef());
+  assertx(obj->props()->checkInvariants(nProps));
   return obj;
 }
 
@@ -209,10 +214,12 @@ ObjectData* c_Closure::clone() {
     t->incRefCount();
   }
 
-  auto src  = propVec();
-  auto dest = ret->propVecForConstruct();
-  auto const stop = src + cls->numDeclProperties();
-  while (src != stop) cellDup(*src++, *dest++);
+  auto const nprops = cls->numDeclProperties();
+  auto dst = ret->props()->iteratorAt(0);
+  for (auto src : props()->range(0, nprops)) {
+    cellDup(src, tv_lval{dst});
+    ++dst;
+  }
 
   return ret;
 }
@@ -227,9 +234,10 @@ static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
 
   // We're destructing, not constructing, but we're unconditionally allowed to
   // write just the same.
-  auto prop = closure->propVecForConstruct();
-  auto const stop = prop + cls->numDeclProperties();
-  while (prop != stop) tvDecRefGen(prop++);
+  assertx(closure->props()->checkInvariants(cls->numDeclProperties()));
+  closure->props()->foreach(cls->numDeclProperties(), [&](tv_lval lval) {
+    tvDecRefGen(lval);
+  });
 
   auto hdr = closure->hdr();
   tl_heap->objFree(hdr, hdr->size());

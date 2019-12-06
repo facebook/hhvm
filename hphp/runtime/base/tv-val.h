@@ -284,6 +284,80 @@ using tv_rval = tv_val<true>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace detail {
+
+/* representation of a tv_val_offset when wide mode is on */
+struct tv_val_offset_wide {
+  tv_val_offset_wide(ptrdiff_t tv_offset)
+    : type_offset(tv_offset + offsetof(TypedValue, m_type))
+    , data_offset(tv_offset + offsetof(TypedValue, m_data)) {}
+  tv_val_offset_wide(ptrdiff_t type_offset, ptrdiff_t data_offset)
+    : type_offset(type_offset)
+    , data_offset(data_offset) {}
+
+  ptrdiff_t typeOffset() const { return type_offset; }
+  ptrdiff_t dataOffset() const { return data_offset; }
+
+  tv_val_offset_wide shift(ptrdiff_t off) const {
+    return {
+      type_offset + off,
+      data_offset + off
+    };
+  }
+
+  /* extract a tv_val from a given base address */
+  tv_lval apply(char* base) const {
+    return tv_lval {
+      reinterpret_cast<DataType*>(base + typeOffset()),
+      reinterpret_cast<Value*>(base + dataOffset())
+    };
+  }
+
+  tv_rval apply(const char* base) const {
+    return tv_rval {
+      reinterpret_cast<const DataType*>(base + typeOffset()),
+      reinterpret_cast<const Value*>(base + dataOffset())
+     };
+  }
+
+  ptrdiff_t type_offset;
+  ptrdiff_t data_offset;
+};
+
+/* representation of a tv_val_offset when wide mode is off */
+struct tv_val_offset_nonwide {
+  tv_val_offset_nonwide(ptrdiff_t offset) : offset(offset) {}
+  tv_val_offset_nonwide(ptrdiff_t type_offset, ptrdiff_t data_offset)
+    : offset(data_offset) {
+    static_assert(offsetof(TypedValue, m_data) == 0, "");
+    assertx(type_offset == data_offset + offsetof(TypedValue, m_type));
+  }
+
+  ptrdiff_t typeOffset() const { return offset + offsetof(TypedValue, m_type); }
+  ptrdiff_t dataOffset() const { return offset + offsetof(TypedValue, m_data); }
+
+  /* extract a tv_val from a given base address */
+  tv_lval apply(char* base) {
+    return reinterpret_cast<TypedValue*>(base + dataOffset());
+  }
+
+  tv_rval apply(const char* base) {
+    return reinterpret_cast<const TypedValue*>(base + dataOffset());
+  }
+
+  tv_val_offset_nonwide shift(ptrdiff_t off) const {
+    return {offset + off};
+  }
+
+  ptrdiff_t offset;
+};
+
+} // namespace detail
+
+using tv_val_offset = std::conditional<wide_tv_val,
+                                       detail::tv_val_offset_wide,
+                                       detail::tv_val_offset_nonwide>::type;
+
 }
 
 #include "hphp/runtime/base/tv-val-inl.h"

@@ -173,6 +173,7 @@ void ObjectData::release(ObjectData* obj, const Class* cls) noexcept {
   assertx(!obj->hasNativeData());
   assertx(obj->getVMClass() == cls);
   assertx(cls->releaseFunc() == &ObjectData::release);
+  assertx(obj->props()->checkInvariants(cls->numDeclProperties()));
 
   // Note: cleanups done in this function are only run for classes without an
   // instanceDtor. Some of these cleanups are duplicated in ~ObjectData, and
@@ -190,11 +191,11 @@ void ObjectData::release(ObjectData* obj, const Class* cls) noexcept {
   // `obj' is being torn down now---be careful about where/how you dereference
   // it from here on.
 
-  auto prop = reinterpret_cast<TypedValue*>(obj + 1);
-  auto const stop = prop + cls->countablePropsEnd();
-  for (; prop != stop; ++prop) {
-    tvDecRefGen(prop);
-  }
+  auto const countableProps = cls->countablePropsEnd();
+  auto props = obj->props();
+  props->foreach(countableProps, [&](tv_lval lval) {
+    tvDecRefGen(lval);
+  });
 
   if (UNLIKELY(obj->slowDestroyCheck())) {
     obj->slowDestroyCases();
@@ -828,11 +829,12 @@ ObjectData* ObjectData::clone() {
     assertx(!clone->hasInstanceDtor());
   }
 
-  auto const clonePropVec = clone->propVecForConstruct();
+  auto const cloneProps = clone->props();
+  // TODO(jgriego): can we use storage order here instead of logical order?
   for (auto slot = Slot{0}; slot < nProps; slot++) {
     auto index = m_cls->propSlotToIndex(slot);
-    tvDup(propVec()[index], clonePropVec[index]);
-    assertx(assertTypeHint(&clonePropVec[index], slot));
+    tvDup(*props()->at(index), cloneProps->at(index));
+    assertx(assertTypeHint(cloneProps->at(index), slot));
   }
 
   if (UNLIKELY(getAttribute(HasDynPropArr))) {
@@ -1026,18 +1028,20 @@ const StaticString
   s___wakeup("__wakeup"),
   s___debugInfo("__debugInfo");
 
-void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
+void deepInitHelper(ObjectProps* dst, const TypedValueAux* propData,
                     size_t nProps) {
-  auto dst = propVec;
+  // TODO(jgriego) this could (and should) be more intelligent
+  // but will require us to adjust the layout of the propinitvec
   auto src = propData;
-  for (; src != propData + nProps; ++src, ++dst) {
-    *dst = *src;
+  dst->foreach(nProps, [&](tv_lval dst) {
+    tvCopy(*src, dst);
     // m_aux.u_deepInit is true for properties that need "deep" initialization
     if (src->deepInit()) {
       tvIncRefGen(*dst);
       collections::deepCopy(dst);
     }
-  }
+    src++;
+  });
 }
 
 void ObjectData::setReifiedGenerics(Class* cls, ArrayData* reifiedTypes) {
@@ -1139,12 +1143,12 @@ ObjectData::PropLookup ObjectData::getPropImpl(
     // We found a visible property, but it might not be accessible.  No need to
     // check if there is a dynamic property with this name.
     auto const propIndex = m_cls->propSlotToIndex(propSlot);
-    auto const prop = const_cast<TypedValue*>(&propVec()[propIndex]);
+    auto prop = props()->at(propIndex);
     assertx(assertTypeHint(prop, propSlot));
 
     auto const& declProp = m_cls->declProperties()[propSlot];
     if (!ignoreLateInit && lookup.accessible) {
-      if (UNLIKELY(prop->m_type == KindOfUninit) &&
+      if (UNLIKELY(type(prop) == KindOfUninit) &&
           (declProp.attrs & AttrLateInit)) {
         throw_late_init_prop(declProp.cls, key, false);
       }

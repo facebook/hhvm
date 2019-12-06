@@ -56,7 +56,7 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {
   auto const slot = cls->lookupReifiedInitProp();
   assertx(slot != kInvalidSlot);
   auto index = cls->propSlotToIndex(slot);
-  auto tv = obj->propVec()[index];
+  auto tv = obj->props()->at(index).tv();
   assertx(tvIsVecOrVArray(tv));
   return tv.m_data.parr;
 }

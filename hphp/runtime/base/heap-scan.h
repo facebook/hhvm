@@ -232,8 +232,7 @@ inline void RecordArray::scan(type_scan::Scanner& scanner) const {
 }
 
 inline void ObjectData::scan(type_scan::Scanner& scanner) const {
-  auto props = propVec();
-  scanner.scan(*props, m_cls->numDeclProperties() * sizeof(*props));
+  props()->scan(m_cls->numDeclProperties(), scanner);
   if (getAttribute(HasDynPropArr)) {
     // nb: dynamic property arrays are in ExecutionContext::dynPropTable,
     // which is not marked as a root. Scan the entry pair, so both the key

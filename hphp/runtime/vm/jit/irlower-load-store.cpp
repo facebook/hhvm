@@ -335,14 +335,15 @@ void cgLdPropAddr(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const dstLoc = irlower::dstLoc(env, inst, 0);
   auto const valReg = dstLoc.reg(tv_lval::val_idx);
-  auto const idx = inst->extra<LdPropAddr>()->index;
-  auto const propPtr =
-    srcLoc(env, inst, 0).reg()[sizeof(ObjectData) + sizeof(TypedValue) * idx];
 
-  v << lea{propPtr, valReg};
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const offs = ObjectProps::offsetOf(inst->extra<LdPropAddr>()->index)
+    .shift(sizeof(ObjectData));
+
+  v << lea{src[offs.dataOffset()], valReg};
   if (wide_tv_val) {
     static_assert(TVOFF(m_data) == 0, "");
-    v << lea{propPtr + TVOFF(m_type), dstLoc.reg(tv_lval::type_idx)};
+    v << lea{src[offs.typeOffset()], dstLoc.reg(tv_lval::type_idx)};
   }
 }
 
@@ -351,19 +352,19 @@ void cgLdInitPropAddr(IRLS& env, const IRInstruction* inst) {
   auto const obj = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  auto const idx = inst->extra<LdInitPropAddr>()->index;
-  auto const propPtr = obj[sizeof(ObjectData) + sizeof(TypedValue) * idx];
+  auto const offs = ObjectProps::offsetOf(inst->extra<LdInitPropAddr>()->index)
+    .shift(sizeof(ObjectData));
 
   if (dstLoc.hasReg(tv_lval::val_idx)) {
-    v << lea{propPtr, dstLoc.reg(tv_lval::val_idx)};
+    v << lea{obj[offs.dataOffset()], dstLoc.reg(tv_lval::val_idx)};
   }
   if (wide_tv_val && dstLoc.hasReg(tv_lval::type_idx)) {
     static_assert(TVOFF(m_data) == 0, "");
-    v << lea{propPtr + TVOFF(m_type), dstLoc.reg(tv_lval::type_idx)};
+    v << lea{obj[offs.typeOffset()], dstLoc.reg(tv_lval::type_idx)};
   }
 
   auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfUninit, propPtr + TVOFF(m_type));
+  emitCmpTVType(v, sf, KindOfUninit, obj[offs.typeOffset()]);
   v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 

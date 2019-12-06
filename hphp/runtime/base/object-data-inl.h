@@ -219,16 +219,19 @@ inline void ObjectData::instanceInit(Class* cls) {
       const Class::PropInitVec* propInitVec = m_cls->getPropData();
       assertx(propInitVec != nullptr);
       assertx(nProps == propInitVec->size());
-      if (!cls->hasDeepInitProps()) {
-        memcpy16_inline(propVecForConstruct(),
-                        &(*propInitVec)[0], nProps * sizeof(TypedValue));
-      } else {
-        deepInitHelper(propVecForConstruct(), &(*propInitVec)[0], nProps);
-      }
+      // TODO(jgriego): we unconditionally call deepInitHelper which is
+      // a bad idea, but we haven't adjusted the layout of PropInitVec yet
+      // so we're just doing the quick and dirty thing at first
+      deepInitHelper(props(), &(*propInitVec)[0], nProps);
     } else {
       assertx(nProps == cls->declPropInit().size());
-      memcpy16_inline(propVecForConstruct(),
-                      &cls->declPropInit()[0], nProps * sizeof(TypedValue));
+      // TODO(jgriego): this could (and should) be memcpy
+      auto propInit = &cls->declPropInit()[0];
+      props()->foreach(nProps, [&](tv_lval lval) {
+        val(lval) = propInit->m_data;
+        type(lval) = propInit->m_type;
+        propInit++;
+      });
     }
   }
 }
@@ -268,10 +271,9 @@ inline void ObjectData::verifyPropTypeHints(size_t end) const {
   if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
 
   auto const declProps = m_cls->declProperties();
-  auto const props = propVec();
   for (size_t slot = 0; slot < end; ++slot) {
     auto index = m_cls->propSlotToIndex(slot);
-    verifyPropTypeHintImpl(&props[index], declProps[slot]);
+    verifyPropTypeHintImpl(props()->at(index), declProps[slot]);
   }
 }
 
@@ -283,15 +285,14 @@ inline void ObjectData::verifyPropTypeHint(Slot slot) const {
   assertx(slot < m_cls->declProperties().size());
   if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
   auto index = m_cls->propSlotToIndex(slot);
-  verifyPropTypeHintImpl(&propVec()[index], m_cls->declProperties()[slot]);
+  verifyPropTypeHintImpl(props()->at(index), m_cls->declProperties()[slot]);
 }
 
 inline bool ObjectData::assertPropTypeHints() const {
-  auto const props = propVec();
   auto const end = m_cls->declProperties().size();
   for (size_t slot = 0; slot < end; ++slot) {
     auto index = m_cls->propSlotToIndex(slot);
-    if (!assertTypeHint(&props[index], slot)) return false;
+    if (!assertTypeHint(props()->at(index), slot)) return false;
   }
   return true;
 }
@@ -407,25 +408,25 @@ inline const Func* ObjectData::methodNamed(const StringData* sd) const {
 
 [[noreturn]] void throw_cannot_modify_const_object(const char* className);
 
-inline TypedValue* ObjectData::propVecForConstruct() {
-  return const_cast<TypedValue*>(propVec());
+inline ObjectProps* ObjectData::props() {
+  return reinterpret_cast<ObjectProps*>(this + 1);
 }
 
-inline const TypedValue* ObjectData::propVec() const {
-  return reinterpret_cast<const TypedValue*>(uintptr_t(this + 1));
+inline const ObjectProps* ObjectData::props() const {
+  return const_cast<ObjectData*>(this)->props();
 }
 
 inline tv_lval ObjectData::propLvalAtOffset(Slot slot) {
   assertx(slot < m_cls->numDeclProperties());
   assertx(!(m_cls->declProperties()[slot].attrs & AttrIsConst));
   auto index = m_cls->propSlotToIndex(slot);
-  return tv_lval { const_cast<TypedValue*>(&propVec()[index]) };
+  return props()->at(index);
 }
 
 inline tv_rval ObjectData::propRvalAtOffset(Slot slot) const {
   assertx(slot < m_cls->numDeclProperties());
   auto index = m_cls->propSlotToIndex(slot);
-  return tv_rval { &propVec()[index] };
+  return props()->at(index);
 }
 
 inline bool ObjectData::hasDynProps() const {
@@ -462,7 +463,7 @@ inline const MemoSlot* ObjectData::memoSlotNativeData(
 }
 
 inline size_t ObjectData::sizeForNProps(Slot nProps) {
-  return sizeof(ObjectData) + sizeof(TypedValue) * nProps;
+  return alignTypedValue(sizeof(ObjectData) + ObjectProps::sizeFor(nProps));
 }
 
 inline size_t ObjectData::objOffFromMemoNode(const Class* cls) {

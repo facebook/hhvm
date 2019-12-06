@@ -1067,7 +1067,7 @@ void VariableUnserializer::unserializeVariant(
           if (remainingProps >= objCls->numDeclProperties() -
                                 (objCls->hasReifiedGenerics() ? 1 : 0)) {
             auto mismatch = false;
-            auto const objProps = obj->propVecForConstruct();
+            auto const objProps = obj->props();
 
             auto const declProps = objCls->declProperties();
             for (auto const& p : declProps) {
@@ -1083,12 +1083,11 @@ void VariableUnserializer::unserializeVariant(
               // don't need to worry about overwritten list, because
               // this is definitely the first time we're setting this
               // property.
-              TypedValue* tv = objProps + index;
-              auto const t = tv_lval{tv};
+              auto const t = objProps->at(index);
               unserializePropertyValue(t, remainingProps--);
 
               if (UNLIKELY(checkRepoAuthType &&
-                           !tvMatchesRepoAuthType(*tv, prop.repoAuthType))) {
+                           !tvMatchesRepoAuthType(*t, prop.repoAuthType))) {
                 throwUnexpectedType(prop.name, obj.get(), *t);
               }
             }

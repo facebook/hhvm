@@ -266,14 +266,16 @@ struct CompactWriter {
       SpecHolder specHolder;
       const auto& fields = specHolder.getSpec(spec, obj, false);
       auto prop = cls->declProperties().begin();
-      auto objProp = obj->propVec();
+      auto objProps = obj->props();
       const size_t numProps = cls->numDeclProperties();
       const size_t numFields = fields.size();
       // Write each member
       for (int slot = 0; slot < numFields; ++slot) {
         if (slot < numProps && fields[slot].name == prop[slot].name) {
           auto index = cls->propSlotToIndex(slot);
-          auto const& fieldVal = tvAsCVarRef(&objProp[index]);
+
+          VarNR fieldWrapper(objProps->at(index).tv());
+          const Variant& fieldVal = fieldWrapper;
           if (!fieldVal.isNull()) {
             TType fieldType = fields[slot].type;
             ArrNR fieldSpec(fields[slot].spec);
@@ -708,7 +710,7 @@ struct CompactReader {
       if (cls->numDeclProperties() < numFields) {
         return readStructSlow(dest, spec, fieldNum, fieldType);
       }
-      auto objProp = dest->propVecForConstruct();
+      auto objProp = dest->props();
       auto prop = cls->declProperties().begin();
       int slot = -1;
       while (fieldType != T_STOP) {
@@ -723,15 +725,15 @@ struct CompactReader {
         if (fields[slot].isUnion) {
           if (s__type.equal(prop[numFields].name)) {
             auto index = cls->propSlotToIndex(numFields);
-            tvAsVariant(&objProp[index]) = Variant(fieldNum);
+            tvSetInt(fieldNum, objProp->at(index));
           } else {
             return readStructSlow(dest, spec, fieldNum, fieldType);
           }
         }
         ArrNR fieldSpec(fields[slot].spec);
         auto index = cls->propSlotToIndex(slot);
-        tvAsVariant(&objProp[index]) = readField(fieldSpec.asArray(),
-                                                 fieldType);
+        tvSet(*readField(fieldSpec.asArray(), fieldType).asTypedValue(),
+              objProp->at(index));
         if (!fields[slot].noTypeCheck) {
           dest->verifyPropTypeHint(slot);
           if (fields[slot].isUnion) dest->verifyPropTypeHint(numFields);

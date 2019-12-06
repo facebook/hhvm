@@ -51,9 +51,13 @@ void cgLdClosureThis(IRLS& env, const IRInstruction* inst) {
 
 void cgStClosureArg(IRLS& env, const IRInstruction* inst) {
   auto const obj = srcLoc(env, inst, 0).reg();
-  auto const off = sizeof(ObjectData) +
-    sizeof(TypedValue) * inst->extra<StClosureArg>()->index;
-  storeTV(vmain(env), obj[off], srcLoc(env, inst, 1), inst->src(1));
+  auto const offsets = ObjectProps::offsetOf(inst->extra<StClosureArg>()->index)
+    .shift(sizeof(ObjectData));
+  storeTV(vmain(env),
+          inst->src(1)->type(),
+          srcLoc(env, inst, 1),
+          obj[offsets.typeOffset()],
+          obj[offsets.dataOffset()]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

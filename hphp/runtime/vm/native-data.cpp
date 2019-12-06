@@ -185,11 +185,9 @@ void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
   obj->~ObjectData();
 
   auto const nProps = size_t{cls->numDeclProperties()};
-  auto prop = reinterpret_cast<TypedValue*>(obj + 1);
-  auto const stop = prop + nProps;
-  for (; prop != stop; ++prop) {
-    tvDecRefGen(prop);
-  }
+  obj->props()->foreach(nProps, [&](tv_lval lval) {
+    tvDecRefGen(lval);
+  });
 
   auto ndi = cls->getNativeDataInfo();
 

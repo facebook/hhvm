@@ -475,7 +475,7 @@ void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
     int16_t fieldNum = transport.readI16();
     return binary_deserialize_slow(dest, spec, fieldNum, fieldType, transport);
   }
-  auto objProp = dest->propVecForConstruct();
+  auto objProps = dest->props();
   auto prop = cls->declProperties().begin();
   int i = -1;
   TType fieldType = static_cast<TType>(transport.readI8());
@@ -495,7 +495,7 @@ void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
     if (fields[i].isUnion) {
       if (s__type.equal(prop[numFields].name)) {
         auto index = cls->propSlotToIndex(numFields);
-        tvAsVariant(&objProp[index]) = Variant(fieldNum);
+        tvSetInt(fieldNum, objProps->at(index));
       } else {
         return binary_deserialize_slow(
           dest, spec, fieldNum, fieldType, transport);
@@ -503,8 +503,10 @@ void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
     }
     ArrNR fieldSpec(fields[i].spec);
     auto index = cls->propSlotToIndex(i);
-    tvAsVariant(&objProp[index]) =
-      binary_deserialize(fieldType, transport, fieldSpec.asArray());
+    tvSet(*binary_deserialize(fieldType, transport, fieldSpec.asArray())
+            .asTypedValue(),
+          objProps->at(index));
+
     if (!fields[i].noTypeCheck) {
       dest->verifyPropTypeHint(i);
       if (fields[i].isUnion) dest->verifyPropTypeHint(numFields);
@@ -645,14 +647,15 @@ void binary_serialize_spec(const Object& obj, PHPOutputTransport& transport,
   const auto& fields = specHolder.getSpec(spec, obj, true);
   Class* cls = obj->getVMClass();
   auto prop = cls->declProperties().begin();
-  auto objProp = obj->propVec();
+  auto objProps = obj->props();
   const size_t numProps = cls->numDeclProperties();
   const size_t numFields = fields.size();
   // Write each member
   for (int slot = 0; slot < numFields; ++slot) {
     if (slot < numProps && fields[slot].name == prop[slot].name) {
       auto index = cls->propSlotToIndex(slot);
-      auto const& fieldVal = tvAsCVarRef(&objProp[index]);
+      VarNR fieldWrapper(objProps->at(index).tv());
+      const Variant& fieldVal = fieldWrapper;
       if (!fieldVal.isNull()) {
         TType fieldType = fields[slot].type;
         ArrNR fieldSpec(fields[slot].spec);

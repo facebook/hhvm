@@ -18,6 +18,7 @@
 #define incl_HPHP_UTIL_TYPE_TRAITS_H_
 
 #include <type_traits>
+#include <functional>
 
 namespace HPHP {
 
@@ -149,6 +150,11 @@ using maybe_const = std::enable_if<
   detail::maybe_const_pred<T, K, Tail...>::value,
   typename detail::maybe_const_result<T, K, Tail...>::type
 >;
+
+template <typename Fn, typename ... Args>
+struct is_invocable : public std::is_constructible<
+  std::function<void(Args ...)>, Fn&&
+  > {};
 
 ///////////////////////////////////////////////////////////////////////////////
 

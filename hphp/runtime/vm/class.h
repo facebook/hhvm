@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/base/tv-layout.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -98,6 +99,8 @@ using ClassPtr = AtomicSharedLowPtr<Class>;
 // Since native instance dtors can be release functions, they have to have
 // compatible signatures.
 using ObjReleaseFunc = BuiltinDtorFunction;
+
+using ObjectProps = tv_layout::TvArray;
 
 /*
  * Class represents the full definition of a user class in a given request

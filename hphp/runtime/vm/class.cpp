@@ -74,18 +74,38 @@ Mutex g_classesMutex;
 
 Class::PropInitVec::~PropInitVec() {
   if (m_capacity > 0) {
+    // allocated in low heap
     lower_free(m_data);
   }
 }
 
 Class::PropInitVec*
 Class::PropInitVec::allocWithReqAllocator(const PropInitVec& src) {
-  PropInitVec* p = req::make_raw<PropInitVec>();
-  uint32_t sz = src.m_size;
-  p->m_size = sz;
-  p->m_capacity = ~sz;
-  p->m_data = req::make_raw_array<TypedValueAux>(sz);
-  memcpy(p->m_data, src.m_data, sz * sizeof(*p->m_data));
+  uint32_t size = src.m_size;
+  auto const props_size = ObjectProps::sizeFor(size);
+  auto const bits_size = BitsetView<true>::sizeFor(size);
+
+  PropInitVec* p = reinterpret_cast<PropInitVec*>(req::malloc(
+    sizeof(PropInitVec) + props_size + bits_size,
+    type_scan::getIndexForMalloc<
+      PropInitVec,
+      type_scan::Action::WithSuffix<char>
+    >()
+  ));
+
+  p->m_size = size;
+  p->m_capacity = ~size;
+  p->m_data = reinterpret_cast<ObjectProps*>(p + 1);
+
+  // these are two distinct memcpys because the props and deep init bits
+  // aren't necessarily contiguous in src (because capacity >= size)
+  // but will be in the destination (which is exactly sized)
+  memcpy16_inline(p->m_data, src.m_data, props_size);
+  memcpy(reinterpret_cast<char*>(p->m_data) +
+         ObjectProps::sizeFor(size),
+         src.deepInitBits().buffer(),
+         bits_size);
+
   return p;
 }
 
@@ -97,11 +117,24 @@ Class::PropInitVec::operator=(const PropInitVec& piv) {
       vm_free(m_data);
       m_data = nullptr;
     }
-    unsigned sz = m_size = m_capacity = piv.size();
-    if (sz == 0) return *this;
-    m_data = (TypedValueAux*)lower_malloc(sz * sizeof(*m_data));
+    m_size = m_capacity = piv.size();
+    auto const props_size = ObjectProps::sizeFor(m_size);
+    auto const bits_size = BitsetView<true>::sizeFor(m_size);
+    if (m_size == 0) return *this;
+
+    m_data = reinterpret_cast<ObjectProps*>(
+      lower_malloc(props_size + bits_size)
+    );
+    // these are two distinct memcpys because the props and deep init bits
+    // aren't necessarily contiguous in src (because capacity >= size)
+    // but will be in the destination (which is exactly sized)
+    memcpy16_inline(m_data, piv.m_data, props_size);
+    memcpy(deepInitBits().buffer(),
+           piv.deepInitBits().buffer(),
+           bits_size);
+
     assertx(m_data);
-    memcpy(m_data, piv.m_data, sz * sizeof(*m_data));
+    assertx(m_data->checkInvariants(m_capacity));
   }
   return *this;
 }
@@ -110,18 +143,34 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
   assertx(!reqAllocated());
   if (m_size == m_capacity) {
     unsigned newCap = folly::nextPowTwo(m_size + 1);
-    m_capacity = static_cast<int32_t>(newCap);
-    auto newData = lower_malloc(newCap * sizeof(TypedValue));
+    auto const props_size = ObjectProps::sizeFor(newCap);
+    auto const bits_size = BitsetView<true>::sizeFor(newCap);
+
+    auto newData = reinterpret_cast<char*>(
+      lower_malloc(props_size + bits_size)
+    );
+
+    auto const oldSize = ObjectProps::sizeFor(m_size);
+
     if (m_data) {
-      auto const oldSize = m_size * sizeof(*m_data);
-      memcpy(newData, m_data, oldSize);
+      // these two memcpys are separate because we're going from
+      // contiguous memory (since the size == capacity) to noncontiguous memory
+      // (because the structure has grown)
+      memcpy16_inline(newData, m_data, oldSize);
+      memcpy(newData + props_size,
+             deepInitBits().buffer(),
+             (m_size + 7) / 8);
       lower_free(m_data);
     }
-    m_data = reinterpret_cast<TypedValueAux*>(newData);
+    m_data = reinterpret_cast<ObjectProps*>(newData);
+    m_capacity = static_cast<int32_t>(newCap);
+
     assertx(m_data);
+    assertx(m_data->checkInvariants(m_capacity));
   }
-  cellDup(v, m_data[m_size]);
-  m_data[m_size++].deepInit() = false;
+  auto const idx = m_size++;
+  cellDup(v, m_data->at(idx));
+  deepInitBits()[idx] = false;
 }
 
 
@@ -756,7 +805,6 @@ void Class::initProps() const {
     }
   } catch (...) {
     // Undo the allocation of propVec
-    req::destroy_raw_array(propVec->begin(), propVec->size());
     req::destroy_raw(propVec);
     *m_propDataCache = nullptr;
     m_propDataCache.markUninit();
@@ -771,13 +819,15 @@ void Class::initProps() const {
   // more work at object creation time.
   for (Slot slot = 0; slot < propVec->size(); slot++) {
     auto index = propSlotToIndex(slot);
-    TypedValueAux* tv = &(*propVec)[index];
-    assertx(!tv->deepInit());
+    auto piv_entry = (*propVec)[index];
+    assertx(!piv_entry.deepInit);
     // Set deepInit if the property requires "deep" initialization.
     if (m_declProperties[slot].attrs & AttrDeepInit) {
-      tv->deepInit() = true;
+      piv_entry.deepInit = true;
     } else {
-      tvAsVariant(tv).setEvalScalar();
+      TypedValue tv = piv_entry.val.tv();
+      tvAsVariant(&tv).setEvalScalar();
+      tvCopy(tv, piv_entry.val);
     }
   }
 }
@@ -877,9 +927,9 @@ void Class::checkPropInitialValues() const {
     auto const& tc = prop.typeConstraint;
     if (!tc.isCheckable()) continue;
     auto index = propSlotToIndex(slot);
-    auto const& tv = m_declPropInit[index];
-    if (tv.m_type == KindOfUninit) continue;
-    tc.verifyProperty(&tv, this, prop.cls, prop.name);
+    auto rval = m_declPropInit[index].val;
+    if (type(rval) == KindOfUninit) continue;
+    tc.verifyProperty(rval, this, prop.cls, prop.name);
   }
 
   extra->m_checkedPropInitialValues.initWith(true);
@@ -1023,8 +1073,9 @@ Class::PropInitVec* Class::getPropData() const {
 
 TypedValue* Class::getSPropData(Slot index) const {
   assertx(numStaticProperties() > index);
-  return m_sPropCache[index].bound() ? &m_sPropCache[index].get()->val :
-         nullptr;
+  return m_sPropCache[index].bound()
+    ? &m_sPropCache[index].get()->val
+    : nullptr;
 }
 
 
@@ -2464,10 +2515,8 @@ void Class::setProperties() {
 
         checkPrePropVal(prop, preProp);
         auto index = slotIndex[slot];
-        TypedValueAux& tvaux = m_declPropInit[index];
-        auto const& tv = preProp->val();
-        tvaux.m_data = tv.m_data;
-        tvaux.m_type = tv.m_type;
+
+        tvCopy(preProp->val(), m_declPropInit[index].val);
         copyDeepInitAttr(preProp, &prop);
       };
 
@@ -2686,7 +2735,7 @@ const constexpr Attr kRedeclarePropAttrMask =
 }
 
 void Class::importTraitInstanceProp(Prop& traitProp,
-                                    const TypedValue& traitPropVal,
+                                    TypedValue traitPropVal,
                                     PropMap::Builder& curPropMap,
                                     SPropMap::Builder& curSPropMap,
                                     std::vector<uint16_t>& slotIndex,
@@ -2740,7 +2789,7 @@ void Class::importTraitInstanceProp(Prop& traitProp,
     // Redeclared prop, make sure it matches previous declarations
     auto& prevProp    = curPropMap[prevIt->second];
     auto  prevPropIndex = slotIndex[prevIt->second];
-    auto& prevPropVal = m_declPropInit[prevPropIndex];
+    auto const prevPropVal = m_declPropInit[prevPropIndex].val.tv();
     if (((prevProp.attrs ^ traitProp.attrs) & kRedeclarePropAttrMask) ||
         (!(prevProp.attrs & AttrSystemInitialValue) &&
          !(traitProp.attrs & AttrSystemInitialValue) &&
@@ -2911,7 +2960,7 @@ void Class::importTraitProps(int traitIdx,
     for (Slot p = 0; p < trait->m_declProperties.size(); p++) {
       auto& traitProp    = trait->m_declProperties[p];
       auto  traitPropIndex = trait->propSlotToIndex(p);
-      auto& traitPropVal = trait->m_declPropInit[traitPropIndex];
+      auto traitPropVal = trait->m_declPropInit[traitPropIndex].val.tv();
       importTraitInstanceProp(traitProp, traitPropVal,
                               curPropMap, curSPropMap, slotIndex,
                               serializationIdx, serializationVisited);

@@ -1028,19 +1028,18 @@ const StaticString
   s___wakeup("__wakeup"),
   s___debugInfo("__debugInfo");
 
-void deepInitHelper(ObjectProps* dst, const TypedValueAux* propData,
+void deepInitHelper(ObjectProps* props,
+                    const Class::PropInitVec* initVec,
                     size_t nProps) {
-  // TODO(jgriego) this could (and should) be more intelligent
-  // but will require us to adjust the layout of the propinitvec
-  auto src = propData;
-  dst->foreach(nProps, [&](tv_lval dst) {
-    tvCopy(*src, dst);
-    // m_aux.u_deepInit is true for properties that need "deep" initialization
-    if (src->deepInit()) {
-      tvIncRefGen(*dst);
-      collections::deepCopy(dst);
+  size_t idx = 0;
+  props->foreach(nProps, [&](tv_lval lval){
+    assertx(idx < nProps);
+    auto entry = (*initVec)[idx++];
+    tvCopy(entry.val.tv(), lval);
+    if (entry.deepInit) {
+      tvIncRefGen(*lval);
+      collections::deepCopy(lval);
     }
-    src++;
   });
 }
 

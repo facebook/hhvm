@@ -59,7 +59,8 @@ struct TypedValue;
   INVOKE_FEW_ARGS_HELPER(INVOKE_FEW_ARGS_##kind,num)
 #define INVOKE_FEW_ARGS_DECL_ARGS INVOKE_FEW_ARGS(DECL,INVOKE_FEW_ARGS_COUNT)
 
-void deepInitHelper(ObjectProps* dst, const TypedValueAux* propData,
+void deepInitHelper(ObjectProps* propVec,
+                    const Class::PropInitVec* propInitVec,
                     size_t nProps);
 
 namespace Native {

@@ -83,8 +83,8 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
   if (!cls->lookupMethod(s___wakeup.get())) apcObj->m_no_wakeup = 1;
 
   auto const apcPropVec = apcObj->persistentProps();
-  const TypedValueAux* propInit = nullptr;
   auto const objProps = objectData->props();
+  const ObjectProps* propInit = nullptr;
 
   auto propsDontNeedCheck = RuntimeOption::EvalCheckPropTypeHints > 0;
   for (unsigned slot = 0; slot < numRealProps; ++slot) {
@@ -97,11 +97,12 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
       // Special properties like the Memoize cache should be set to their
       // default value, not the current value.
       if (propInit == nullptr) {
-        propInit = cls->pinitVec().empty() ? &cls->declPropInit()[0]
-                                           : &(*cls->getPropData())[0];
+        propInit = cls->pinitVec().empty()
+          ? cls->declPropInit().data()
+          : cls->getPropData()->data();
       }
 
-      objProp = propInit + index;
+      objProp = propInit->at(index);
     } else {
       objProp = objProps->at(index);
     }

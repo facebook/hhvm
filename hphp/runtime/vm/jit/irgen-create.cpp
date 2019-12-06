@@ -211,7 +211,7 @@ void checkPropInitialValues(IRGS& env, const Class* cls) {
         auto const& tc = prop.typeConstraint;
         if (!tc.isCheckable()) continue;
         auto index = cls->propSlotToIndex(slot);
-        const TypedValue& tv = cls->declPropInit()[index];
+        auto const tv = cls->declPropInit()[index].val.tv();
         if (tv.m_type == KindOfUninit) continue;
         verifyPropType(
           env,
@@ -243,7 +243,7 @@ void initObjProps(IRGS& env, const Class* cls, SSATmp* obj) {
     }
     for (int slot = 0; slot < nprops; ++slot) {
       auto index = cls->propSlotToIndex(slot);
-      const TypedValue& tv = cls->declPropInit()[index];
+      auto const tv = cls->declPropInit()[index].val.tv();
       auto const val = cns(env, tv);
       auto const addr = gen(
         env,
@@ -255,12 +255,6 @@ void initObjProps(IRGS& env, const Class* cls, SSATmp* obj) {
       gen(env, StMem, addr, val);
     }
   } else {
-    // TODO(jgriego) We can't use the usual codegen for InitObjProps yet since
-    // it relies on the propinitvec and the object-data having the same props
-    // layout
-    if (!std::is_same<ObjectProps, tv_layout::TvArray>::value) {
-      PUNT(objprops_layout);
-    }
     gen(env, InitObjProps, ClassData(cls), obj);
   }
 }

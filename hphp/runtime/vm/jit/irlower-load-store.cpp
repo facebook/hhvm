@@ -226,7 +226,11 @@ void cgLdClsInitElem(IRLS& env, const IRInstruction* inst) {
   auto const idx = inst->extra<IndexData>()->index;
   auto& v = vmain(env);
 
-  loadTV(v, inst->dst(), dstLoc(env, inst, 0), base[idx * sizeof(TypedValue)]);
+  auto const lval_offset = ObjectProps::offsetOf(idx);
+
+  loadTV(v, inst->dst()->type(), dstLoc(env, inst, 0),
+         base[lval_offset.typeOffset()],
+         base[lval_offset.dataOffset()]);
 }
 
 void cgStClsInitElem(IRLS& env, const IRInstruction* inst) {
@@ -234,9 +238,12 @@ void cgStClsInitElem(IRLS& env, const IRInstruction* inst) {
   auto const idx = inst->extra<IndexData>()->index;
   auto& v = vmain(env);
 
-  storeTV(v, base[idx * sizeof(TypedValue)],
+  auto const lval_offset = ObjectProps::offsetOf(idx);
+
+  storeTV(v, inst->src(1)->type(),
           srcLoc(env, inst, 1),
-          inst->src(1));
+          base[lval_offset.typeOffset()],
+          base[lval_offset.dataOffset()]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

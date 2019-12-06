@@ -271,7 +271,7 @@ static void set_doc_comment(Array& ret,
 
 static void set_instance_prop_info(Array& ret,
                                    const Class::Prop* prop,
-                                   const Variant& default_val) {
+                                   TypedValue default_val) {
   ret.set(s_name, make_tv<KindOfPersistentString>(prop->name));
   ret.set(s_default, make_tv<KindOfBoolean>(true));
   ret.set(s_defaultValue, default_val);
@@ -1542,7 +1542,7 @@ static Array HHVM_STATIC_METHOD(
     auto slot = declProp.serializationIdx;
     auto index = cls->propSlotToIndex(slot);
     auto const& prop = properties[slot];
-    auto const& default_val = tvAsCVarRef(&propInitVec[index]);
+    auto const default_val = propInitVec[index].val.tv();
     if (((prop.attrs & AttrPrivate) == AttrPrivate) && (prop.cls != cls)) {
       continue;
     }
@@ -1951,7 +1951,8 @@ static TypedValue HHVM_METHOD(ReflectionProperty, getDefaultValue) {
       auto const& propInitVec = cls->getPropData()
         ? *cls->getPropData()
         : cls->declPropInit();
-      return tvReturn(tvAsCVarRef(&propInitVec[propIndex]));
+      auto val = VarNR{propInitVec[propIndex].val.tv()};
+      return tvReturn(val);
     }
     case ReflectionPropHandle::Type::Static: {
       auto const prop = data->getSProp();
@@ -2424,7 +2425,7 @@ Array get_class_info(const String& name) {
     for (Slot slot = 0; slot < nProps; ++slot) {
       auto index = cls->propSlotToIndex(slot);
       auto const& prop = properties[slot];
-      auto const& default_val = tvAsCVarRef(&propInitVec[index]);
+      auto const default_val = propInitVec[index].val.tv();
       auto info = Array::Create();
       if ((prop.attrs & AttrPrivate) == AttrPrivate) {
         if (prop.cls == cls) {

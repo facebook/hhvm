@@ -172,8 +172,8 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
     // Empty names are used for invisible/private parent properties; skip them.
     assertx(name->size() != 0);
     if (Class::IsPropAccessible(propInfo[slot], ctx)) {
-      auto const value = &((*propVals)[index]);
-      arr.set(name, tvAsCVarRef(value));
+      auto const tv = (*propVals)[index].val.tv();
+      arr.set(name, tv);
     }
   }
 

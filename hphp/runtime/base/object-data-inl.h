@@ -219,19 +219,18 @@ inline void ObjectData::instanceInit(Class* cls) {
       const Class::PropInitVec* propInitVec = m_cls->getPropData();
       assertx(propInitVec != nullptr);
       assertx(nProps == propInitVec->size());
-      // TODO(jgriego): we unconditionally call deepInitHelper which is
-      // a bad idea, but we haven't adjusted the layout of PropInitVec yet
-      // so we're just doing the quick and dirty thing at first
-      deepInitHelper(props(), &(*propInitVec)[0], nProps);
+      if (!cls->hasDeepInitProps()) {
+        memcpy16_inline(props(),
+                        propInitVec->data(),
+                        ObjectProps::sizeFor(nProps));
+      } else {
+        deepInitHelper(props(), propInitVec, nProps);
+      }
     } else {
       assertx(nProps == cls->declPropInit().size());
-      // TODO(jgriego): this could (and should) be memcpy
-      auto propInit = &cls->declPropInit()[0];
-      props()->foreach(nProps, [&](tv_lval lval) {
-        val(lval) = propInit->m_data;
-        type(lval) = propInit->m_type;
-        propInit++;
-      });
+      memcpy16_inline(props(),
+                      cls->declPropInit().data(),
+                      ObjectProps::sizeFor(nProps));
     }
   }
 }

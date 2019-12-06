@@ -162,8 +162,8 @@ void implInitObjPropsFast(Vout& v, IRLS& env, const IRInstruction* inst,
   // memcpy the values from the class property init vec.
   auto args = argGroup(env, inst)
     .addr(dst, safe_cast<int32_t>(sizeof(ObjectData)))
-    .imm(reinterpret_cast<uintptr_t>(&cls->declPropInit()[0]))
-    .imm(cellsToBytes(nprops));
+    .imm(reinterpret_cast<uintptr_t>(cls->declPropInit().data()))
+    .imm(ObjectProps::sizeFor(nprops));
 
   cgCallHelper(v, env, CallSpec::direct(memcpy),
                kVoidDest, SyncOptions::None, args);
@@ -226,18 +226,21 @@ void cgInitObjProps(IRLS& env, const IRInstruction* inst) {
       auto const propInitVec = v.makeReg();
       auto const propData = v.makeReg();
       v << load{Vreg(rvmtl())[propHandle], propInitVec};
-      v << load{propInitVec[Class::PropInitVec::dataOff()], propData};
 
       auto args = argGroup(env, inst)
-        .addr(obj, safe_cast<int32_t>(sizeof(ObjectData)))
-        .reg(propData);
+        .addr(obj, safe_cast<int32_t>(sizeof(ObjectData)));
 
       if (!cls->hasDeepInitProps()) {
+        v << load{propInitVec[Class::PropInitVec::dataOff()], propData};
         cgCallHelper(v, env, CallSpec::direct(memcpy), kVoidDest,
-                     SyncOptions::None, args.imm(cellsToBytes(nprops)));
+                     SyncOptions::None,
+                     args
+                     .reg(propData)
+                     .imm(ObjectProps::sizeFor(nprops)));
       } else {
         cgCallHelper(v, env, CallSpec::direct(deepInitHelper),
-                     kVoidDest, SyncOptions::None, args.imm(nprops));
+                     kVoidDest, SyncOptions::None,
+                     args.reg(propInitVec).imm(nprops));
       }
     }
   }

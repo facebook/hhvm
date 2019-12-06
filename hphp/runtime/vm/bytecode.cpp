@@ -5945,48 +5945,51 @@ OPTBLD_INLINE void iopCheckProp(const StringData* propName) {
   auto slot = ctx->lookupDeclProp(propName);
   auto index = cls->propSlotToIndex(slot);
 
-  auto& tv = (*propVec)[index];
-  vmStack().pushBool(tv.m_type != KindOfUninit);
+  auto const val = (*propVec)[index].val;
+  vmStack().pushBool(type(val) != KindOfUninit);
 }
 
 OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
   auto* cls = vmfp()->getClass();
-  TypedValue* tv;
 
   auto* ctx = arGetContextClass(vmfp());
   auto* fr = vmStack().topC();
 
-  switch (propOp) {
-    case InitPropOp::Static: {
-      auto const slot = ctx->lookupSProp(propName);
-      assertx(slot != kInvalidSlot);
-      tv = cls->getSPropData(slot);
-      if (RuntimeOption::EvalCheckPropTypeHints > 0) {
-        auto const& sprop = cls->staticProperties()[slot];
-        auto const& tc = sprop.typeConstraint;
-        if (tc.isCheckable()) {
-          tc.verifyStaticProperty(fr, cls, sprop.cls, sprop.name);
+  auto lval = [&] () -> tv_lval {
+    switch (propOp) {
+      case InitPropOp::Static: {
+        auto const slot = ctx->lookupSProp(propName);
+        assertx(slot != kInvalidSlot);
+        auto ret = cls->getSPropData(slot);
+        if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+          auto const& sprop = cls->staticProperties()[slot];
+          auto const& tc = sprop.typeConstraint;
+          if (tc.isCheckable()) {
+            tc.verifyStaticProperty(fr, cls, sprop.cls, sprop.name);
+          }
         }
+        return ret;
       }
-      break;
+
+      case InitPropOp::NonStatic: {
+        auto* propVec = cls->getPropData();
+        always_assert(propVec);
+        auto const slot = ctx->lookupDeclProp(propName);
+        auto const index = cls->propSlotToIndex(slot);
+        assertx(slot != kInvalidSlot);
+        auto ret = (*propVec)[index].val;
+        if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+          auto const& prop = cls->declProperties()[slot];
+          auto const& tc = prop.typeConstraint;
+          if (tc.isCheckable()) tc.verifyProperty(fr, cls, prop.cls, prop.name);
+        }
+        return ret;
+      }
     }
+    always_assert(false);
+  }();
 
-    case InitPropOp::NonStatic: {
-      auto* propVec = cls->getPropData();
-      always_assert(propVec);
-      auto const slot = ctx->lookupDeclProp(propName);
-      auto const index = cls->propSlotToIndex(slot);
-      assertx(slot != kInvalidSlot);
-      tv = &(*propVec)[index];
-      if (RuntimeOption::EvalCheckPropTypeHints > 0) {
-        auto const& prop = cls->declProperties()[slot];
-        auto const& tc = prop.typeConstraint;
-        if (tc.isCheckable()) tc.verifyProperty(fr, cls, prop.cls, prop.name);
-      }
-    } break;
-  }
-
-  cellDup(*fr, *tv);
+  cellDup(*fr, lval);
   vmStack().popC();
 }
 

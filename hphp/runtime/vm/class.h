@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/reified-generics-info.h"
 
+#include "hphp/util/bitset-view.h"
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/default-ptr.h"
@@ -258,24 +259,51 @@ struct Class : AtomicCountable {
 
     const PropInitVec& operator=(const PropInitVec&);
 
-    using iterator = TypedValueAux*;
+    template <bool is_const>
+    struct Entry {
+      template <typename Dummy = void,
+                typename = std::enable_if_t<!is_const, Dummy>>
+      Entry& operator=(TypedValueAux);
 
-    iterator begin();
-    iterator end();
+      operator TypedValueAux() const;
+
+      tv_val<is_const> val;
+      typename BitsetView<is_const>::bit_reference deepInit;
+    };
+
     size_t size() const;
 
-    TypedValueAux& operator[](size_t i);
-    const TypedValueAux& operator[](size_t i) const;
+    Entry<false> operator[](size_t i);
+    Entry<true> operator[](size_t i) const;
 
     void push_back(const TypedValue& v);
+
+    const ObjectProps* data() const;
+
+    static constexpr size_t dataOff() {
+      return offsetof(PropInitVec, m_data);
+    }
+
+    size_t dataSize() const {
+      auto const cap = m_capacity < 0 ? ~m_capacity : m_capacity;
+      return ObjectProps::sizeFor(cap) +
+             BitsetView<true>::sizeFor(cap);
+    }
 
     /*
      * Make a request-allocated copy of `src'.
      */
     static PropInitVec* allocWithReqAllocator(const PropInitVec& src);
 
-    static constexpr size_t dataOff() {
-      return offsetof(PropInitVec, m_data);
+    TYPE_SCAN_CUSTOM() {
+      // We don't need to worry about scanning the pointer m_data itself because
+      // when we're heap-allocated, it always points inside of this allocation.
+      //
+      // The only time that's not the case is when we're allocated in general
+      // heap and we shouldn't be type-scanned under those circumstances
+      assertx(reqAllocated());
+      assertx(m_data == static_cast<const void*>(this + 1));
+      m_data->scan(m_size, scanner);
     }
 
   private:
@@ -283,7 +311,10 @@ struct Class : AtomicCountable {
 
     bool reqAllocated() const;
 
-    TypedValueAux* m_data;
+    BitsetView<false> deepInitBits();
+    BitsetView<true> deepInitBits() const;
+
+    ObjectProps* m_data;
     uint32_t m_size;
     // m_capacity > 0, allocated on global huge heap
     // m_capacity = 0, not request allocated, m_data is nullptr
@@ -1430,7 +1461,7 @@ private:
                         Slot& staticSerializationIdx,
                         std::vector<bool>& staticSerializationVisited);
   void importTraitInstanceProp(Prop& traitProp,
-                               const TypedValue& traitPropVal,
+                               TypedValue traitPropVal,
                                PropMap::Builder& curPropMap,
                                SPropMap::Builder& curSPropMap,
                                std::vector<uint16_t>& slotIndex,

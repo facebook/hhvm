@@ -142,15 +142,14 @@ void init_use_vars(IRGS& env, const Func* func, SSATmp* closure) {
 
   // Closure object properties are the use vars.
   auto const nuse = cls->numDeclProperties();
-  ptrdiff_t use_var_off = sizeof(ObjectData);
 
-  for (auto i = 0; i < nuse; ++i, use_var_off += sizeof(Cell)) {
+  for (auto i = 0; i < nuse; ++i) {
     auto const ty =
       typeFromRAT(cls->declPropRepoAuthType(i), func->cls()) & TCell;
     auto const addr = gen(
       env,
       LdPropAddr,
-      ByteOffsetData { use_var_off },
+      IndexData { cls->propSlotToIndex(i) },
       ty.lval(Ptr::Prop),
       closure
     );

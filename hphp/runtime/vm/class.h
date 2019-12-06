@@ -1032,12 +1032,6 @@ public:
   // Objects.                                                           [const]
 
   /*
-   * Offset of the declared instance property at `slot' on an ObjectData
-   * instantiated from this class.
-   */
-  size_t declPropOffset(Slot slot) const;
-
-  /*
    * Whether instances of this class implement Throwable interface, which
    * requires additional initialization on construction.
    */

@@ -335,8 +335,9 @@ void cgLdPropAddr(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const dstLoc = irlower::dstLoc(env, inst, 0);
   auto const valReg = dstLoc.reg(tv_lval::val_idx);
+  auto const idx = inst->extra<LdPropAddr>()->index;
   auto const propPtr =
-    srcLoc(env, inst, 0).reg()[inst->extra<LdPropAddr>()->offsetBytes];
+    srcLoc(env, inst, 0).reg()[sizeof(ObjectData) + sizeof(TypedValue) * idx];
 
   v << lea{propPtr, valReg};
   if (wide_tv_val) {
@@ -350,7 +351,8 @@ void cgLdInitPropAddr(IRLS& env, const IRInstruction* inst) {
   auto const obj = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  auto const propPtr = obj[inst->extra<LdInitPropAddr>()->offsetBytes];
+  auto const idx = inst->extra<LdInitPropAddr>()->index;
+  auto const propPtr = obj[sizeof(ObjectData) + sizeof(TypedValue) * idx];
 
   if (dstLoc.hasReg(tv_lval::val_idx)) {
     v << lea{propPtr, dstLoc.reg(tv_lval::val_idx)};

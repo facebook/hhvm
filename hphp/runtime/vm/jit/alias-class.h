@@ -125,10 +125,10 @@ FRAME_RELATIVE(AIterPos, uint32_t, id);
 FRAME_RELATIVE(AIterEnd, uint32_t, id);
 
 /*
- * A location inside of an object property, with base `obj' and byte offset
- * `offset' from the ObjectData*.
+ * A location inside of an object property, with base `obj' at physical index
+ * `index' from the ObjectData*.
  */
-struct AProp  { SSATmp* obj; uint32_t offset; };
+struct AProp  { SSATmp* obj; uint16_t offset; };
 
 /*
  * A integer index inside of an array, with base `arr'.  The `arr' tmp is any

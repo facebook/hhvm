@@ -1241,7 +1241,7 @@ void emitNewObjS(IRGS& env, SpecialClsRef ref) {
   auto const addr = gen(
     env,
     LdPropAddr,
-    ByteOffsetData { (ptrdiff_t)curClass(env)->declPropOffset(*slot) },
+    IndexData { curClass(env)->propSlotToIndex(*slot) },
     ty.lval(Ptr::Prop),
     this_
   );

@@ -67,7 +67,7 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
     return gen(
       env,
       LdPropAddr,
-      ByteOffsetData { (ptrdiff_t)rootCls->declPropOffset(slot) },
+      IndexData { rootCls->propSlotToIndex(slot) },
       TUncounted.lval(Ptr::Prop),
       throwable
     );
@@ -248,7 +248,7 @@ void initObjProps(IRGS& env, const Class* cls, SSATmp* obj) {
       auto const addr = gen(
         env,
         LdPropAddr,
-        ByteOffsetData { (ptrdiff_t)(cls->declPropOffset(slot)) },
+        IndexData { cls->propSlotToIndex(slot) },
         TLvalToPropCell,
         obj
       );
@@ -370,7 +370,7 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
     gen(
       env,
       StClosureArg,
-      ByteOffsetData { safe_cast<ptrdiff_t>(cls->declPropOffset(propId)) },
+      IndexData { cls->propSlotToIndex(propId) },
       closure,
       args[propId]
     );

@@ -1290,16 +1290,15 @@ To string conversions:
   method. Returns nullptr if it is an instance method defined in S2's class
   hierarchy, indicating that this legacy call should be handled by interpreter.
 
-| LdPropAddr<T,offset>, DParam(LvalToPropCell), S(Obj), NF
+| LdPropAddr<T,index>, DParam(LvalToPropCell), S(Obj), NF
 
-  Load the address of the object property for S0 + `offset' (in bytes).  T must
-  be a subtype of PtrToPropCell.
+  Load the address of the object property at physical index `index`. T must be a
+  subtype of PtrToPropInitCell.
 
-| LdInitPropAddr<T,offset>, DParam(LvalToPropCell), S(Obj), B
+| LdInitPropAddr<T,index>, DParam(LvalToPropCell), S(Obj), B
 
-  Load the address of the object property for S0 + `offset' (in bytes). Branch
-  if the value at that address is Uninit.  T must be a subtype of
-  PtrToPropInitCell.
+  Load the address of the object property at physical index `index`. Branch if
+  the value at that address is Uninit. T must be a subtype of PtrToPropInitCell.
 
 | LdGblAddr, D(PtrToGblCell), S(Str), B
 
@@ -2456,7 +2455,7 @@ To string conversions:
   Load the context from the closure object S0 into D, assuming `func' is
   S0's closure Func.
 
-| StClosureArg<offsetBytes>, ND, S(Obj) S(Cell), CRc
+| StClosureArg<index>, ND, S(Obj) S(Cell), CRc
 
   Store one of the closure environment arguments (i.e. from the closure's use
   clause) from S1 into the closure object S0.

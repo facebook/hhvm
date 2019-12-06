@@ -121,7 +121,7 @@ AliasClass pointee(
         return AliasClass {
           AProp {
             sinst->src(0),
-            safe_cast<uint32_t>(sinst->extra<ByteOffsetData>()->offsetBytes)
+            safe_cast<uint16_t>(sinst->extra<IndexData>()->index)
           }
         };
       }
@@ -1542,7 +1542,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(
       AProp {
         inst.src(0),
-        safe_cast<uint32_t>(inst.extra<LdInitPropAddr>()->offsetBytes)
+        safe_cast<uint16_t>(inst.extra<LdInitPropAddr>()->index)
       },
       AEmpty
     );
@@ -1776,7 +1776,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureStore {
       AProp {
         inst.src(0),
-        safe_cast<uint32_t>(inst.extra<StClosureArg>()->offsetBytes)
+        safe_cast<uint16_t>(inst.extra<StClosureArg>()->index)
       },
       inst.src(1),
       inst.src(0)

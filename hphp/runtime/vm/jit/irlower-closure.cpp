@@ -51,7 +51,8 @@ void cgLdClosureThis(IRLS& env, const IRInstruction* inst) {
 
 void cgStClosureArg(IRLS& env, const IRInstruction* inst) {
   auto const obj = srcLoc(env, inst, 0).reg();
-  auto const off = inst->extra<StClosureArg>()->offsetBytes;
+  auto const off = sizeof(ObjectData) +
+    sizeof(TypedValue) * inst->extra<StClosureArg>()->index;
   storeTV(vmain(env), obj[off], srcLoc(env, inst, 1), inst->src(1));
 }
 

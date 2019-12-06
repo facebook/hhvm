@@ -1439,18 +1439,6 @@ DataType Class::clsCnsType(const StringData* cnsName) const {
   return cns->m_type;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Objects.
-
-size_t Class::declPropOffset(Slot slot) const {
-  static_assert(std::is_unsigned<Slot>::value,
-                "Slot is supposed to be unsigned");
-  auto index = m_slotIndex[slot];
-  return sizeof(ObjectData) + index * sizeof(TypedValue);
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 

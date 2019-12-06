@@ -913,11 +913,11 @@ SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
       );
   }
   if (value->isA(TObj)) {
-    auto loadProp = [&] (bool isGetCls, SSATmp* obj) {
-      ptrdiff_t off = ObjectData::sizeForNProps(
-        isGetCls ? s_cls_idx : s_meth_idx);
+    auto loadProp = [&] (Class* cls, bool isGetCls, SSATmp* obj) {
+      auto const slot = isGetCls ? s_cls_idx : s_meth_idx;
+      auto const idx = cls->propSlotToIndex(slot);
       auto const prop = gen(
-        env, LdPropAddr, ByteOffsetData{off}, TStr.lval(Ptr::Prop), obj);
+        env, LdPropAddr, IndexData{idx}, TStr.lval(Ptr::Prop), obj);
       auto const ret = gen(env, LdMem, TStr, prop);
       gen(env, IncRef, ret);
       return ret;
@@ -941,7 +941,7 @@ SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
             s_MCHELPER_ON_GET_CLS.get() : s_MCHELPER_ON_GET_METH.get());
           gen(env, RaiseNotice, msg);
         }
-        return loadProp(isCls, value);
+        return loadProp(mcCls, isCls, value);
       },
       [&] { // Taken: src is not a meth_caller
         hint(env, Block::Hint::Unlikely);

@@ -98,21 +98,6 @@ struct IRExtraData {};
  */
 
 /*
- * Offset in bytes from a base pointer---e.g., to a object property from an
- * ObjectData*.
- */
-struct ByteOffsetData : IRExtraData {
-  explicit ByteOffsetData(ptrdiff_t offset) : offsetBytes(offset) {}
-
-  std::string show() const { return folly::to<std::string>(offsetBytes); }
-
-  bool equals(ByteOffsetData o) const { return offsetBytes == o.offsetBytes; }
-  size_t hash() const { return std::hash<ptrdiff_t>()(offsetBytes); }
-
-  ptrdiff_t offsetBytes;
-};
-
-/*
  * Class pointer.
  *
  * Required to be non-null.
@@ -364,6 +349,11 @@ struct IndexData : IRExtraData {
   explicit IndexData(uint32_t index) : index(index) {}
 
   std::string show() const { return folly::format("{}", index).str(); }
+  size_t hash() const { return std::hash<uint32_t>()(index); }
+
+  bool equals(const IndexData& o) const {
+    return index == o.index;
+  }
 
   uint32_t index;
 };
@@ -1734,7 +1724,7 @@ X(CheckFunReifiedGenericMismatch,
 X(IsFunReifiedGenericsMatched,  FuncData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
-X(StClosureArg,                 ByteOffsetData);
+X(StClosureArg,                 IndexData);
 X(RBTraceEntry,                 RBEntryData);
 X(RBTraceMsg,                   RBMsgData);
 X(OODeclExists,                 ClassKindData);
@@ -1813,8 +1803,8 @@ X(JmpSSwitchDest,               IRSPRelOffsetData);
 X(DbgTrashStk,                  IRSPRelOffsetData);
 X(DbgTrashFrame,                IRSPRelOffsetData);
 X(DbgTraceCall,                 IRSPRelOffsetData);
-X(LdPropAddr,                   ByteOffsetData);
-X(LdInitPropAddr,               ByteOffsetData);
+X(LdPropAddr,                   IndexData);
+X(LdInitPropAddr,               IndexData);
 X(NewCol,                       NewColData);
 X(NewColFromArray,              NewColData);
 X(CheckSurpriseFlagsEnter,      FuncEntryData);

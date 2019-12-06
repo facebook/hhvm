@@ -84,9 +84,8 @@ enum class SimpleOp {
 // Property information.
 
 struct PropInfo {
-  PropInfo() = default;
-  explicit PropInfo(int offset,
-                    Slot slot,
+  explicit PropInfo(Slot slot,
+                    uint16_t index,
                     bool isConst,
                     bool lateInit,
                     bool lateInitCheck,
@@ -94,8 +93,8 @@ struct PropInfo {
                     const HPHP::TypeConstraint* typeConstraint,
                     const Class* objClass,
                     const Class* propClass)
-    : offset{offset}
-    , slot{slot}
+    : slot{slot}
+    , index{index}
     , isConst{isConst}
     , lateInit{lateInit}
     , lateInitCheck{lateInitCheck}
@@ -105,8 +104,8 @@ struct PropInfo {
     , propClass{propClass}
   {}
 
-  int offset{-1};
   Slot slot{kInvalidSlot};
+  uint16_t index{0};
   bool isConst{false};
   bool lateInit{false};
   bool lateInitCheck{false};
@@ -141,25 +140,25 @@ Type knownTypeForProp(const Class::Prop& prop,
 }
 
 /*
- * Try to find a property offset for the given key in baseClass. Will return a
- * PropInfo with an offset of -1 if the mapping from baseClass's name to the
- * Class* can change (which happens in sandbox mode when the ctx class is
- * unrelated to baseClass).
+ * Try to find a property offset for the given key in baseClass. Will return
+ * folly::none if the mapping from baseClass's name to the Class* can change
+ * (which happens in sandbox mode when the ctx class is unrelated to baseClass).
  */
-PropInfo getPropertyOffset(IRGS& env,
-                           const Class* baseClass,
-                           Type keyType,
-                           bool ignoreLateInit) {
-  if (!baseClass) return PropInfo();
+folly::Optional<PropInfo>
+getPropertyOffset(IRGS& env,
+                  const Class* baseClass,
+                  Type keyType,
+                  bool ignoreLateInit) {
+  if (!baseClass) return folly::none;
 
-  if (!keyType.hasConstVal(TStr)) return PropInfo();
+  if (!keyType.hasConstVal(TStr)) return folly::none;
   auto const name = keyType.strVal();
 
   auto const ctx = curClass(env);
 
   // We need to check that baseClass cannot change between requests.
   if (!(baseClass->preClass()->attrs() & AttrUnique)) {
-    if (!ctx) return PropInfo();
+    if (!ctx) return folly::none;
     if (!ctx->classof(baseClass)) {
       if (baseClass->classof(ctx)) {
         // baseClass can change on us in between requests, but since
@@ -169,24 +168,24 @@ PropInfo getPropertyOffset(IRGS& env,
       } else {
         // baseClass can change on us in between requests and it is
         // not related to ctx, so bail out
-        return PropInfo();
+        return folly::none;
       }
     }
   }
 
   // Lookup the index of the property based on ctx and baseClass
   auto const lookup = baseClass->getDeclPropSlot(ctx, name);
-  auto const idx = lookup.slot;
+  auto const slot = lookup.slot;
 
   // If we couldn't find a property that is accessible in the current context,
   // bail out
-  if (idx == kInvalidSlot || !lookup.accessible) return PropInfo();
+  if (slot == kInvalidSlot || !lookup.accessible) return folly::none;
 
   // If it's a declared property we're good to go: even if a subclass redefines
   // an accessible property with the same name it's guaranteed to be at the same
   // offset.
 
-  auto const& prop = baseClass->declProperties()[idx];
+  auto const& prop = baseClass->declProperties()[slot];
 
   // If we're going to serialize the profile data, we emit a ProfileProp here to
   // profile property accesses.  We only do this here, when we can resolve the
@@ -197,8 +196,8 @@ PropInfo getPropertyOffset(IRGS& env,
   }
 
   return PropInfo(
-    baseClass->declPropOffset(idx),
-    idx,
+    slot,
+    baseClass->propSlotToIndex(slot),
     prop.attrs & AttrIsConst,
     prop.attrs & AttrLateInit,
     (prop.attrs & AttrLateInit) && !ignoreLateInit,
@@ -396,17 +395,20 @@ void specializeObjBase(IRGS& env, SSATmp* base) {
 //////////////////////////////////////////////////////////////////////
 // Intermediate ops
 
-PropInfo getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
-                                  bool ignoreLateInit) {
+folly::Optional<PropInfo>
+getCurrentPropertyOffset(IRGS& env, SSATmp* base, Type keyType,
+                         bool ignoreLateInit) {
   // We allow the use of clases from nullable objects because
   // emitPropSpecialized() explicitly checks for null (when needed) before
   // doing the property access.
   auto const baseType = base->type().derefIfPtr();
-  if (!(baseType < (TObj | TInitNull) && baseType.clsSpec())) return PropInfo{};
+  if (!(baseType < (TObj | TInitNull) && baseType.clsSpec())) {
+    return folly::none;
+  }
 
   auto const baseCls = baseType.clsSpec().cls();
   auto const info = getPropertyOffset(env, baseCls, keyType, ignoreLateInit);
-  if (info.offset == -1) return info;
+  if (!info) return info;
   specializeObjBase(env, base);
   return info;
 }
@@ -477,7 +479,7 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
       auto const addr = gen(
         env,
         LdPropAddr,
-        ByteOffsetData { propInfo.offset },
+        IndexData { propInfo.index },
         propInfo.knownType.lval(Ptr::Prop),
         obj
       );
@@ -493,7 +495,7 @@ std::pair<SSATmp*, SSATmp*> emitPropSpecialized(
         return gen(
           env,
           LdInitPropAddr,
-          ByteOffsetData { propInfo.offset },
+          IndexData { propInfo.index },
           taken,
           propInfo.knownType.lval(Ptr::Prop),
           obj
@@ -960,15 +962,15 @@ SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
     getCurrentPropertyOffset(env, base, key->type(), false);
 
   if (RuntimeOption::RepoAuthoritative &&
-      propInfo.offset != -1 &&
-      !propInfo.isConst &&
-      !mightCallMagicPropMethod(MOpMode::None, propInfo) &&
-      !mightCallMagicPropMethod(MOpMode::Define, propInfo)) {
+      propInfo &&
+      !propInfo->isConst &&
+      !mightCallMagicPropMethod(MOpMode::None, *propInfo) &&
+      !mightCallMagicPropMethod(MOpMode::Define, *propInfo)) {
 
     // Special case for when the property is known to be an int.
-    if (base->isA(TObj) && propInfo.knownType <= TInt) {
+    if (base->isA(TObj) && propInfo->knownType <= TInt) {
       base = emitPropSpecialized(env, base, key, false,
-                                 MOpMode::Define, propInfo).first;
+                                 MOpMode::Define, *propInfo).first;
       auto const prop = gen(env, LdMem, TInt, base);
       auto const result = incDec(env, op, prop);
       // No need for a property type-check because the input is an Int and the
@@ -1335,10 +1337,10 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
 
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
-  if (propInfo.offset == -1 ||
-      propInfo.isConst ||
+  if (!propInfo ||
+      propInfo->isConst ||
       mode == MOpMode::Unset ||
-      mightCallMagicPropMethod(mode, propInfo)) {
+      mightCallMagicPropMethod(mode, *propInfo)) {
     return propGenericImpl(env, mode, base, key, nullsafe);
   }
 
@@ -1350,11 +1352,11 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
     key,
     nullsafe,
     mode,
-    propInfo
+    *propInfo
   );
   if (mode == MOpMode::Define) {
     assertx(obj != nullptr);
-    setObjMIPropState(env, propPtr, mode, obj, propInfo.slot);
+    setObjMIPropState(env, propPtr, mode, obj, propInfo->slot);
   }
   return propPtr;
 }
@@ -1582,11 +1584,11 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
 
-  if (propInfo.offset != -1 &&
-      !mightCallMagicPropMethod(MOpMode::None, propInfo)) {
+  if (propInfo &&
+      !mightCallMagicPropMethod(MOpMode::None, *propInfo)) {
 
     auto propAddr =
-      emitPropSpecialized(env, base, key, nullsafe, mode, propInfo).first;
+      emitPropSpecialized(env, base, key, nullsafe, mode, *propInfo).first;
     auto const ty = propAddr->type().deref();
     auto const result = gen(env, LdMem, ty, propAddr);
     auto const profres = profiledType(env, result, [&] {
@@ -1654,9 +1656,9 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), true);
 
-  if (propInfo.offset != -1 &&
-      !propInfo.isConst &&
-      !mightCallMagicPropMethod(mode, propInfo)) {
+  if (propInfo &&
+      !propInfo->isConst &&
+      !mightCallMagicPropMethod(mode, *propInfo)) {
 
     SSATmp* propPtr;
     SSATmp* obj;
@@ -1666,15 +1668,15 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
       key,
       false,
       mode,
-      propInfo
+      *propInfo
     );
 
     assertx(obj != nullptr);
     verifyPropType(
       env,
       gen(env, LdObjClass, obj),
-      propInfo.typeConstraint,
-      propInfo.slot,
+      propInfo->typeConstraint,
+      propInfo->slot,
       value,
       key,
       false
@@ -2242,9 +2244,9 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
 
-  if (propInfo.offset != -1 &&
-      !propInfo.isConst &&
-      !mightCallMagicPropMethod(MOpMode::Define, propInfo)) {
+  if (propInfo &&
+      !propInfo->isConst &&
+      !mightCallMagicPropMethod(MOpMode::Define, *propInfo)) {
 
     SSATmp* propPtr;
     SSATmp* obj;
@@ -2254,7 +2256,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
       key,
       false,
       MOpMode::Define,
-      propInfo
+      *propInfo
     );
     assertx(obj != nullptr);
 
@@ -2263,8 +2265,8 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
       verifyPropType(
         env,
         gen(env, LdObjClass, obj),
-        propInfo.typeConstraint,
-        propInfo.slot,
+        propInfo->typeConstraint,
+        propInfo->slot,
         result,
         key,
         false
@@ -2297,12 +2299,13 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
      */
     auto const fast = [&]{
       if (RuntimeOption::EvalCheckPropTypeHints <= 0) return true;
-      if (!propInfo.typeConstraint || !propInfo.typeConstraint->isCheckable()) {
+      if (!propInfo->typeConstraint ||
+          !propInfo->typeConstraint->isCheckable()) {
         return true;
       }
       if (op != SetOpOp::ConcatEqual) return false;
       if (propPtr->type().deref() <= TStr) return true;
-      return propInfo.typeConstraint->alwaysPasses(KindOfString);
+      return propInfo->typeConstraint->alwaysPasses(KindOfString);
     }();
 
     if (!fast) {
@@ -2313,7 +2316,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
         propPtr,
         rhs,
         gen(env, LdObjClass, obj),
-        cns(env, propInfo.slot)
+        cns(env, propInfo->slot)
       );
     } else {
       gen(env, SetOpCell, SetOpData{op}, propPtr, rhs);

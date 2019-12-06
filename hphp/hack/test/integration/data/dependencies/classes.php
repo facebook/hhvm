@@ -113,3 +113,21 @@ function with_parent_constructor_call(): void {
   $_ = new SimpleClass('frob', 1337);
   $_ = new SimpleDerived(3.14, true, null);
 }
+
+class WithReactiveMethods {
+  <<__Rx>>
+  public function reactive(): void {}
+
+  <<__Rx>>
+  public function call_reactive(): void {
+    $this->reactive();
+  }
+
+  <<__RxShallow>>
+  public function shallow_reactive(): void {}
+
+  <<__RxShallow>>
+  public function call_shallow_reactive(): void {
+    $this->shallow_reactive();
+  }
+}

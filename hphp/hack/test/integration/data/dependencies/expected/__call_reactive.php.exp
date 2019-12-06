@@ -1,0 +1,12 @@
+<?hh
+<<__Rx>>
+function call_reactive(): void {
+  reactive();
+}
+<<__Rx>>
+function reactive(): void {
+  throw new \Exception();
+}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

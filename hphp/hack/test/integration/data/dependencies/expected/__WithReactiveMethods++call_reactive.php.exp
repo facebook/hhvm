@@ -1,0 +1,18 @@
+<?hh
+class WithReactiveMethods {
+  <<__RxShallow>>
+  public function shallow_reactive(): void {
+    throw new Exception();
+  }
+  <<__Rx>>
+  public function reactive(): void {
+    throw new Exception();
+  }
+  <<__Rx>>
+  public function call_reactive(): void {
+    $this->reactive();
+  }
+}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

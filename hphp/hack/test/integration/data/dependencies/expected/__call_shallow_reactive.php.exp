@@ -1,0 +1,12 @@
+<?hh
+<<__RxShallow>>
+function call_shallow_reactive(): void {
+  shallow_reactive();
+}
+<<__RxShallow>>
+function shallow_reactive(): void {
+  throw new \Exception();
+}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

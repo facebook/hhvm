@@ -148,6 +148,10 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_type_const_from_implemented_interface",
             "\\with_nested_type_const",
             "\\with_indirect_require_extends",
+            "\\call_reactive",
+            "\\call_shallow_reactive",
+            "\\WithReactiveMethods::call_reactive",
+            "\\WithReactiveMethods::call_shallow_reactive",
         ]
 
         for path in paths:

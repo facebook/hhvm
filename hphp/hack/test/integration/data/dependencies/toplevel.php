@@ -91,3 +91,19 @@ function with_mapped_namespace(): void {
 function with_built_in_constant(): int {
   return PHP_INT_MAX;
 }
+
+<<__Rx>>
+function reactive(): void {}
+
+<<__Rx>>
+function call_reactive(): void {
+  reactive();
+}
+
+<<__RxShallow>>
+function shallow_reactive(): void {}
+
+<<__RxShallow>>
+function call_shallow_reactive(): void {
+  shallow_reactive();
+}

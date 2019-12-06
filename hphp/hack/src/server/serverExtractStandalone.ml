@@ -323,6 +323,16 @@ let print_tparam tcopt { tp_name = (_, name); tp_constraints = cstrl; _ } =
     ~sep:" "
     (name :: List.map cstrl ~f:(print_tparam_constraint tcopt))
 
+let rec get_reactivity_attr r =
+  match r with
+  | Nonreactive -> ""
+  | Local _ -> "<<__RxLocal>> "
+  | Shallow _ -> "<<__RxShallow>> "
+  | Reactive _ -> "<<__Rx>> "
+  | MaybeReactive r' -> get_reactivity_attr r'
+  | RxVar (Some r') -> get_reactivity_attr r'
+  | RxVar None -> ""
+
 let get_function_declaration tcopt fun_name fun_type =
   let tparams =
     match fun_type.ft_tparams with
@@ -470,8 +480,10 @@ let get_global_object_declaration tcopt obj =
       begin
         match fun_type with
         | { fe_type = (_, Tfun fun_type); _ } ->
-          let declaration = get_function_declaration tcopt f fun_type in
-          declaration ^ "{throw new \\Exception();}"
+          Printf.sprintf
+            "%s%s{throw new \\Exception();}"
+            (get_reactivity_attr fun_type.ft_reactive)
+            (get_function_declaration tcopt f fun_type)
         | _ -> failwith "Expected function type"
       end
     | GConst c
@@ -627,7 +639,8 @@ let get_method_declaration
     | _ -> raise UnexpectedDependency
   in
   Printf.sprintf
-    "%s%s %s%s"
+    "%s%s%s %s%s"
+    (get_reactivity_attr method_type.ft_reactive)
     abstract
     visibility
     static

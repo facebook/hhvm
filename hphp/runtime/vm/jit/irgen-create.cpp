@@ -255,6 +255,12 @@ void initObjProps(IRGS& env, const Class* cls, SSATmp* obj) {
       gen(env, StMem, addr, val);
     }
   } else {
+    // TODO(jgriego) We can't use the usual codegen for InitObjProps yet since
+    // it relies on the propinitvec and the object-data having the same props
+    // layout
+    if (!std::is_same<ObjectProps, tv_layout::TvArray>::value) {
+      PUNT(objprops_layout);
+    }
     gen(env, InitObjProps, ClassData(cls), obj);
   }
 }

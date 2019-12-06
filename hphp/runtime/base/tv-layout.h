@@ -170,6 +170,162 @@ public:
   }
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * 7-up packed layout
+ *
+ * This implements a flavor of an array layout but instead of wasting space on
+ * padding for the type byte (out to a whole quardowrd), we aggregate 7 of these
+ * types together (and then aggregate 7 values together) resulting in a
+ * repeating layout (a "chunk") like:
+ *
+ *  ______________________ 8 bytes _______________________
+ * /                                                      \
+ * +------+------+------+------+------+------+------+------+ \
+ * |  t1  |  t2  |  t3  |  t4  |  t5  |  t6  |  t7  |      |  |
+ * +------+------+------+------+------+------+------+------+  |
+ * |                           v1                          |  |
+ * +-------------------------------------------------------+  | 64 bytes
+ * |                           ...                         |  |
+ * +-------------------------------------------------------+  |
+ * |                           v7                          |  |
+ * +-------------------------------------------------------+ /
+ *
+ * Iterating over the 7-up layout efficiently requires that the container be
+ * aligned to a 16-byte boundary, and checkInvariants ensures this is the case
+ */
+
+namespace detail_7up {
+
+template <bool is_const>
+struct iterator_impl {
+  using tv_val_t = tv_val<is_const>;
+
+  using char_t = typename std::conditional<is_const, const char, char>::type;
+  using datatype_t = typename tv_val_t::type_t;
+  using value_t = typename tv_val_t::value_t;
+
+  using value_type = TypedValue;
+  using reference = TypedValue&;
+  using pointer = void;
+  using difference_type = ptrdiff_t;
+  using iterator_category = std::forward_iterator_tag;
+
+  iterator_impl(datatype_t* type, value_t* value)
+    : m_type(type)
+    , m_value(value) {}
+
+  TypedValue operator*() const {
+    return TypedValue{*m_value, *m_type};
+  }
+
+  operator tv_val_t() const {
+    return {m_type, m_value};
+  }
+
+  iterator_impl& operator++() {
+    /* This is the nasty trick alluded to above--we rely on the alignment of
+     * the entire container to detect if we're at the end of a chunk by
+     * inspecting the least significant 3 bits of the type pointer. */
+    auto const carry = ((reinterpret_cast<uintptr_t>(m_type) + 2) >> 3) & 1;
+
+    m_type += 1 + (carry * (sizeof(Value) * 7 + sizeof(DataType)));
+    m_value += 1 + carry;
+    return *this;
+  }
+
+  iterator_impl operator++(int) {
+    auto const ret = *this;
+    ++(*this);
+    return ret;
+  }
+
+  bool operator==(const iterator_impl& other) const {
+    assertx(IMPLIES(m_type == other.m_type,
+                    m_value == other.m_value));
+    return m_type == other.m_type;
+  }
+
+  bool operator!=(const iterator_impl& other) const {
+    return !(*this == other);
+  }
+
+private:
+  datatype_t* m_type;
+  value_t* m_value;
+};
+
+} // namespace detail_7up
+
+struct Tv7Up : public LayoutBase<Tv7Up,
+                                 detail_7up::iterator_impl<false>,
+                                 detail_7up::iterator_impl<true>,
+                                 uint16_t> {
+  bool checkInvariants(index_t size) const {
+    assertx(reinterpret_cast<uintptr_t>(this) % 16 == 0);
+    return true;
+  }
+
+  static size_t constexpr sizeFor(index_t len) {
+    /* We need these sizes fixed here since we underestimate * the size required
+     * for the 0-6 elements in the last (incomplete) chunk and rely on alignment
+     * to make the buffer big enough.
+     *
+     * This works in this case since:
+     *
+     * extra |  size estimate: extra * 9  | aligned estimate | ground truth
+     *   0   |             0              |        0         |     0
+     *   1   |             9              |        16        |     16
+     *   2   |             18             |        32        |     24
+     *   3   |             27             |        32        |     32
+     *   4   |             36             |        48        |     40
+     *   5   |             45             |        48        |     48
+     *   6   |             54             |        64        |     56
+     *   7   |             63             |        64        |     64       */
+    static_assert(sizeof(DataType) == 1, "");
+    static_assert(sizeof(Value) == 8, "");
+
+    auto const chunks = len / 7;
+    auto const extra = len % 7;
+
+    auto const chunkSize = 8 * sizeof(Value);
+
+    auto const ret = chunks * chunkSize +
+      extra * (sizeof(DataType) + sizeof(Value)); // <- the underestimate
+
+    constexpr auto const mask = 16 - 1;
+    return (ret + mask) & ~mask;
+  }
+
+  static tv_val_offset offsetOf(index_t idx) {
+    auto const chunk = idx / 7;
+    auto const slot = idx % 7;
+
+    static_assert(8 * sizeof(DataType) == sizeof(Value), "");
+    auto const chunkStart = 8 * sizeof(Value) * chunk;
+
+    return {
+      static_cast<ptrdiff_t>(chunkStart + slot),
+      static_cast<ptrdiff_t>(chunkStart + sizeof(Value) * (1 + slot))
+    };
+  }
+
+  iterator iteratorAt(index_t pos) {
+    auto const lval = at(pos);
+    return iterator{&lval.type(), &lval.val()};
+  }
+
+  const_iterator iteratorAt(index_t pos) const {
+    auto const rval = at(pos);
+    return const_iterator{&rval.type(), &rval.val()};
+  }
+
+  void scan(index_t count, type_scan::Scanner& scanner) const {
+    scanner.conservative(this, sizeFor(count));
+  }
+};
+
 } // namespace tv_layout
 } // namespace HPHP
 

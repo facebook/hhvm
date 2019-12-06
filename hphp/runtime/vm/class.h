@@ -34,6 +34,7 @@
 #include "hphp/runtime/vm/reified-generics-info.h"
 
 #include "hphp/util/compact-vector.h"
+#include "hphp/util/compilation-flags.h"
 #include "hphp/util/default-ptr.h"
 #include "hphp/util/hash-map.h"
 
@@ -100,7 +101,11 @@ using ClassPtr = AtomicSharedLowPtr<Class>;
 // compatible signatures.
 using ObjReleaseFunc = BuiltinDtorFunction;
 
-using ObjectProps = tv_layout::TvArray;
+using ObjectProps = std::conditional_t<
+  wide_tv_val,
+  tv_layout::Tv7Up,
+  tv_layout::TvArray
+>;
 
 /*
  * Class represents the full definition of a user class in a given request

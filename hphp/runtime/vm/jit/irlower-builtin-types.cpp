@@ -85,10 +85,6 @@ void implVerifyType(IRLS& env, const IRInstruction* inst) {
 
 IMPL_OPCODE_CALL(VerifyParamCallable)
 IMPL_OPCODE_CALL(VerifyRetCallable)
-IMPL_OPCODE_CALL(VerifyParamFail)
-IMPL_OPCODE_CALL(VerifyParamFailHard)
-IMPL_OPCODE_CALL(VerifyRetFail)
-IMPL_OPCODE_CALL(VerifyRetFailHard)
 IMPL_OPCODE_CALL(VerifyReifiedLocalType)
 IMPL_OPCODE_CALL(VerifyReifiedReturnType)
 
@@ -296,6 +292,43 @@ void cgVerifyProp(IRLS& env, const IRInstruction* inst) {
       .ssa(1)
       .typedValue(2)
   );
+}
+
+void cgVerifyRetFail(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<ParamWithTCData>();
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(VerifyRetTypeFail),
+    kVoidDest,
+    SyncOptions::Sync,
+    argGroup(env, inst)
+      .imm(extra->paramId)
+      .ssa(0)
+      .immPtr(extra->tc)
+  );
+}
+
+void cgVerifyRetFailHard(IRLS& env, const IRInstruction* inst) {
+  cgVerifyRetFail(env, inst);
+}
+
+void cgVerifyParamFail(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<ParamWithTCData>();
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(VerifyParamTypeFail),
+    kVoidDest,
+    SyncOptions::Sync,
+    argGroup(env, inst)
+      .imm(extra->paramId)
+      .immPtr(extra->tc)
+  );
+}
+
+void cgVerifyParamFailHard(IRLS& env, const IRInstruction* inst) {
+  cgVerifyParamFail(env, inst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

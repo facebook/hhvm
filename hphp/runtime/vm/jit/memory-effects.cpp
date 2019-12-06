@@ -797,17 +797,19 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // VerifyParamFail might coerce the parameter to the desired type rather than
   // throwing.
   case VerifyParamFail: {
-    auto const localId = inst.src(0)->intVal();
-    assertx(localId >= 0);
+    auto const extra = inst.extra<ParamWithTCData>();
+    assertx(extra->paramId >= 0);
     auto const stores =
-      AHeapAny | AFrame{inst.marker().fp(), safe_cast<uint32_t>(localId)};
+      AHeapAny |
+      AFrame{inst.marker().fp(), safe_cast<uint32_t>(extra->paramId)};
     return may_load_store(AUnknown, stores);
   }
   case VerifyReifiedLocalType: {
     auto const extra = inst.extra<ParamData>();
     assertx(extra->paramId >= 0);
     auto const stores =
-      AHeapAny | AFrame{inst.marker().fp(),safe_cast<uint32_t>(extra->paramId)};
+      AHeapAny |
+      AFrame{inst.marker().fp(), safe_cast<uint32_t>(extra->paramId)};
     return may_load_store(AUnknown, stores);
   }
   // However the following ones can't read locals from our frame on the way

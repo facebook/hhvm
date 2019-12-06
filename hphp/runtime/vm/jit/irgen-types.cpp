@@ -1285,9 +1285,8 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         gen(
           env,
           failHard ? VerifyRetFailHard : VerifyRetFail,
-          ParamData { id },
-          ldStkAddr(env, BCSPRelOffset { ind }),
-          cns(env, uintptr_t(&tc))
+          ParamWithTCData { id, &tc },
+          ldStkAddr(env, BCSPRelOffset { ind })
         );
       },
       [&] (SSATmp* val) { // dvarray mismatch notice
@@ -1389,8 +1388,7 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
         gen(
           env,
           failHard ? VerifyParamFailHard : VerifyParamFail,
-          cns(env, id),
-          cns(env, uintptr_t(&tc))
+          ParamWithTCData { id, &tc }
         );
       },
       [&] (SSATmp* val) { // dvarray mismatch

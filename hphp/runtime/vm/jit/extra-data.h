@@ -1504,6 +1504,19 @@ struct ParamData : IRExtraData {
   int32_t paramId;
 };
 
+struct ParamWithTCData : IRExtraData {
+  explicit ParamWithTCData(int32_t paramId, const TypeConstraint* tc)
+    : paramId(paramId)
+    , tc(tc) {}
+
+  std::string show() const {
+    return folly::to<std::string>(paramId, ":", tc->displayName());
+  }
+
+  int32_t paramId;
+  const TypeConstraint* tc;
+};
+
 struct RaiseHackArrTypehintNoticeData : IRExtraData {
   explicit RaiseHackArrTypehintNoticeData(const TypeConstraint& tc) : tc{tc} {}
 
@@ -1824,8 +1837,10 @@ X(EndBlock,                     AssertReason);
 X(VerifyRetCallable,            ParamData);
 X(VerifyRetCls,                 ParamData);
 X(VerifyRetRecDesc,             ParamData);
-X(VerifyRetFail,                ParamData);
-X(VerifyRetFailHard,            ParamData);
+X(VerifyParamFail,              ParamWithTCData);
+X(VerifyParamFailHard,          ParamWithTCData);
+X(VerifyRetFail,                ParamWithTCData);
+X(VerifyRetFailHard,            ParamWithTCData);
 X(VerifyReifiedLocalType,       ParamData);
 X(EndCatch,                     EndCatchData);
 X(FuncHasAttr,                  AttrData);

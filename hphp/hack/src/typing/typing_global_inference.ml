@@ -116,6 +116,23 @@ module StateSubConstraintGraphs = struct
   end)
 
   let save subconstraints =
+    (* Some ty vars in the map will carry no additional information, e.g.
+     * some ty vars belong to methods declared in parent classes, even
+     * when these methods are not used in the subclass itself. In those cases,
+     * the ty var will be registered, but the accompagnying ty var info
+     * will contain nothing useful. It will in essence be an identity element
+     * under the merge operation.
+     *)
+    let carries_information tyvar_info =
+      tyvar_info.appears_contravariantly
+      || tyvar_info.appears_covariantly
+      || (not (ITySet.is_empty tyvar_info.upper_bounds))
+      || not (ITySet.is_empty tyvar_info.lower_bounds)
+    in
+    let subconstraints =
+      List.map subconstraints ~f:(fun (p, env) ->
+          (p, IMap.filter (fun _ -> carries_information) env))
+    in
     let subconstraints =
       List.filter ~f:(fun (_, e) -> not @@ IMap.is_empty e) subconstraints
     in

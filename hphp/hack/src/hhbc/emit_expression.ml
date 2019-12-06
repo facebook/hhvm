@@ -2048,7 +2048,6 @@ and emit_collection ?transform_to_collection env (expr : Tast.expr) es =
   match
     Ast_constant_folder.expr_to_opt_typed_value
       ~allow_maps:true
-      ~restrict_keys:(not @@ is_php_array expr)
       (Emit_env.get_namespace env)
       expr
   with

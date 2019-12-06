@@ -19,9 +19,6 @@ exception NotLiteral
 
 exception UserDefinedConstant
 
-let hack_arr_compat_notices () =
-  Hhbc_options.hack_arr_compat_notices !Hhbc_options.compiler_options
-
 let radix (s : string) : [ `Oct | `Hex | `Dec | `Bin ] =
   if String.length s > 1 && s.[0] = '0' then
     match s.[1] with
@@ -100,8 +97,7 @@ let try_type_intlike (s : string) : TV.t option =
 
 (* Literal expressions can be converted into values *)
 (* Restrict_keys flag forces keys to be only ints or strings *)
-let rec expr_to_typed_value
-    ?(allow_maps = false) ?(restrict_keys = false) ns ((_, expr_) as expr) =
+let rec expr_to_typed_value ?(allow_maps = false) ns ((_, expr_) as expr) =
   let pos = Tast_annotate.get_pos expr in
   match expr_ with
   | A.Int s ->
@@ -152,18 +148,14 @@ let rec expr_to_typed_value
             && ( SU.cmp ~case_sensitive:false ~ignore_ns:true kind "Map"
                || SU.cmp ~case_sensitive:false ~ignore_ns:true kind "ImmMap" )
     ->
-    let values =
-      List.map fields ~f:(afield_to_typed_value_pair ~restrict_keys ns)
-    in
+    let values = List.map fields ~f:(afield_to_typed_value_pair ns) in
     let d = update_duplicates_in_map values in
     TV.Dict (d, Some pos)
   | A.KeyValCollection (A.Dict, _, fields)
   | A.KeyValCollection (A.Map, _, fields)
   | A.KeyValCollection (A.ImmMap, _, fields) ->
     let fields = List.map fields ~f:(fun (e1, e2) -> Aast.AFkvalue (e1, e2)) in
-    let values =
-      List.map fields ~f:(afield_to_typed_value_pair ~restrict_keys ns)
-    in
+    let values = List.map fields ~f:(afield_to_typed_value_pair ns) in
     let d = update_duplicates_in_map values in
     TV.Dict (d, Some pos)
   | A.Collection ((_, kind), _, fields)
@@ -181,12 +173,11 @@ let rec expr_to_typed_value
     TV.Dict (d, Some pos)
   | A.Shape fields -> shape_to_typed_value ns fields
   | A.Class_const (cid, id) -> class_const_to_typed_value cid id
-  | A.BracedExpr e -> expr_to_typed_value ~allow_maps ~restrict_keys ns e
+  | A.BracedExpr e -> expr_to_typed_value ~allow_maps ns e
   | A.Id _
   | A.Class_get _ ->
     raise UserDefinedConstant
-  | A.As (e, (_, A.Hlike _), _nullable) ->
-    expr_to_typed_value ~allow_maps ~restrict_keys ns e
+  | A.As (e, (_, A.Hlike _), _nullable) -> expr_to_typed_value ~allow_maps ns e
   | _ -> raise NotLiteral
 
 and update_duplicates_in_map kvs =
@@ -283,23 +274,19 @@ and shape_to_typed_value ns fields =
   let a = List.map fields ~f:aux in
   TV.DArray a
 
-and key_expr_to_typed_value ?(restrict_keys = false) ns expr =
+and key_expr_to_typed_value ns expr =
   let tv = expr_to_typed_value ns expr in
   match tv with
   | TV.Int _
   | TV.String _ ->
     tv
-  | _ when restrict_keys || hack_arr_compat_notices () -> raise NotLiteral
-  | _ ->
-    (match TV.cast_to_arraykey tv with
-    | Some tv -> tv
-    | None -> raise NotLiteral)
+  | _ -> raise NotLiteral
 
-and afield_to_typed_value_pair ?(restrict_keys = false) ns afield =
+and afield_to_typed_value_pair ns afield =
   match afield with
   | A.AFvalue _value -> failwith "afield_to_typed_value_pair: unexpected value"
   | A.AFkvalue (key, value) ->
-    (key_expr_to_typed_value ~restrict_keys ns key, expr_to_typed_value ns value)
+    (key_expr_to_typed_value ns key, expr_to_typed_value ns value)
 
 and value_afield_to_typed_value ns afield =
   match afield with
@@ -321,14 +308,13 @@ and keyset_value_afield_to_typed_value ns afield =
 and set_afield_to_typed_value_pair ns afield =
   match afield with
   | A.AFvalue value ->
-    let tv = key_expr_to_typed_value ~restrict_keys:true ns value in
+    let tv = key_expr_to_typed_value ns value in
     (tv, tv)
   | A.AFkvalue (_, _) ->
     failwith "set_afield_to_typed_value_pair: unexpected key=>value"
 
-let expr_to_opt_typed_value ?(restrict_keys = false) ?(allow_maps = false) ns e
-    =
-  match expr_to_typed_value ~restrict_keys ~allow_maps ns e with
+let expr_to_opt_typed_value ?(allow_maps = false) ns e =
+  match expr_to_typed_value ~allow_maps ns e with
   | x -> Some x
   | exception (NotLiteral | UserDefinedConstant) -> None
 

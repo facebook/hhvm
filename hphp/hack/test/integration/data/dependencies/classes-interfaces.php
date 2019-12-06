@@ -40,3 +40,17 @@ class ImplementsBuiltin implements Stringish {
 }
 
 function does_not_use_class_methods(ImplementsBuiltin $arg): void {}
+
+abstract class Bee {
+  public function f(): void {}
+}
+
+interface Eye {
+  require extends Bee;
+}
+
+interface Jay extends Eye {}
+
+function with_indirect_require_extends(Jay $x): void {
+  $x->f();
+}

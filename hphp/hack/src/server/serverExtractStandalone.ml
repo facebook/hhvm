@@ -496,21 +496,32 @@ let get_direct_ancestors cls =
     let set_of_sequence seq =
       Sequence.fold seq ~f:(fun set x -> SSet.add x set) ~init:SSet.empty
     in
-    let get_direct (get_ancestors : Class.t -> string Sequence.t) =
+    let get_direct ~get_ancestors ~get_ancestor_ancestors =
       let ancestors = get_ancestors cls in
       let ancestors_ancestors =
         Sequence.concat_map ancestors ~f:(fun ancestor_name ->
             Option.value_map
               (get_class ancestor_name)
               ~default:Sequence.empty
-              ~f:get_ancestors)
+              ~f:get_ancestor_ancestors)
         |> set_of_sequence
       in
       Sequence.filter ancestors ~f:(fun x ->
           not (SSet.mem x ancestors_ancestors))
     in
-    let direct_ancestors = get_direct Class.all_ancestor_names in
-    let direct_reqs = get_direct Class.all_ancestor_req_names in
+    let direct_ancestors =
+      get_direct
+        ~get_ancestors:Class.all_ancestor_names
+        ~get_ancestor_ancestors:Class.all_ancestor_names
+    in
+    let direct_reqs =
+      get_direct
+        ~get_ancestors:(fun cls ->
+          Sequence.append
+            (Class.all_ancestor_names cls)
+            (Class.all_ancestor_req_names cls))
+        ~get_ancestor_ancestors:Class.all_ancestor_req_names
+    in
     let cls_kind = Class.kind cls in
     let filter_by_kind seq kind_condition =
       Sequence.to_list

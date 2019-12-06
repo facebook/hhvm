@@ -148,6 +148,7 @@
     nastInitCheck
     typing
     typing_alias
+    typing_arithmetic
     typing_array_access
     typing_attributes
     typing_debug

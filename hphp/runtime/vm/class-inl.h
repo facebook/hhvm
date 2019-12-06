@@ -58,6 +58,76 @@ Class::PropInitVec::operator[](size_t i) const {
   return Entry<true>{lval, deepInit};
 }
 
+template <bool is_const>
+Class::PropInitVec::iterator_impl<is_const>::iterator_impl(
+  tv_iter_t tv,
+  bit_iter_t bit
+  ) : m_val(tv), m_bit(bit) {}
+
+template <bool is_const>
+bool Class::PropInitVec::iterator_impl<is_const>::operator==(
+  const Class::PropInitVec::iterator_impl<is_const>& o
+) const {
+  return m_val == o.m_val;
+}
+
+template <bool is_const>
+bool Class::PropInitVec::iterator_impl<is_const>::operator!=(
+  const Class::PropInitVec::iterator_impl<is_const>& o
+  ) const {
+  return !(*this == o);
+}
+
+template <bool is_const>
+Class::PropInitVec::iterator_impl<is_const>&
+Class::PropInitVec::iterator_impl<is_const>::operator++() {
+  ++m_bit;
+  ++m_val;
+  return *this;
+}
+
+template <bool is_const>
+Class::PropInitVec::iterator_impl<is_const>
+Class::PropInitVec::iterator_impl<is_const>::operator++(int) {
+  auto const ret = *this;
+  ++(*this);
+  return ret;
+}
+
+template <bool is_const>
+Class::PropInitVec::Entry<is_const>
+Class::PropInitVec::iterator_impl<is_const>::operator*() const {
+  return Entry<is_const>{m_val, *m_bit};
+}
+
+template <bool is_const>
+Class::PropInitVec::Entry<is_const>
+Class::PropInitVec::iterator_impl<is_const>::operator->() const {
+  return *(*this);
+}
+
+inline Class::PropInitVec::iterator Class::PropInitVec::begin() {
+  return iterator{m_data->iteratorAt(0),
+                  deepInitBits().iteratorAt(0)};
+}
+
+inline Class::PropInitVec::iterator Class::PropInitVec::end() {
+  return iterator{m_data->iteratorAt(m_size),
+                  deepInitBits().iteratorAt(m_size)};
+}
+
+inline Class::PropInitVec::const_iterator Class::PropInitVec::cbegin() const {
+  return const_iterator{
+    const_cast<const ObjectProps*>(m_data)->iteratorAt(0),
+      deepInitBits().iteratorAt(0)};
+}
+
+inline Class::PropInitVec::const_iterator Class::PropInitVec::cend() const {
+  return const_iterator{
+    const_cast<const ObjectProps*>(m_data)->iteratorAt(m_size),
+      deepInitBits().iteratorAt(m_size)};
+}
+
 inline size_t Class::PropInitVec::size() const {
   return m_size;
 }

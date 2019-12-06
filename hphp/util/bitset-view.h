@@ -68,6 +68,58 @@ struct BitsetView {
   };
 
   /*
+   * A forward iterator for the bits in a view
+   *
+   * As with the view itself, no bounds-checking is performed--it's the callers
+   * responsibility to make sure that every iterator that is dereferenced
+   * points to valid memory
+   */
+  struct iterator {
+    iterator(char_t* ptr, char_t mask)
+      : m_ptr(ptr)
+      , m_mask(mask) {}
+
+    using value_type = bit_reference;
+    using reference = bit_reference;
+    using pointer = void;
+    using difference_type = void;
+    using iterator_category = std::forward_iterator_tag;
+
+    bool operator==(const iterator& o) {
+      return m_ptr == o.m_ptr && m_mask == o.m_mask;
+    }
+
+    bool operator!=(const iterator& o) {
+      return !(*this == o);
+    }
+
+    bit_reference operator*() const {
+      return bit_reference{m_ptr, m_mask};
+    }
+
+    bit_reference operator->() const {
+      return *(*this);
+    }
+
+    iterator& operator++() {
+      const auto carry = m_mask >> (sizeof(char_t) * 8 - 1);
+      m_ptr += carry;
+      m_mask = (m_mask << 1) | carry;
+      return *this;
+    }
+
+    iterator operator++(int) {
+      auto const ret = *this;
+      ++(*this);
+      return ret;
+    }
+
+  private:
+    char_t* m_ptr;
+    typename std::remove_const<char_t>::type m_mask;
+  };
+
+  /*
    * Construct a BitsetView starting at the given byte
    */
   explicit BitsetView(char_t* buf) : m_buf(buf) {}
@@ -86,6 +138,11 @@ struct BitsetView {
     auto const chunk = idx / CHAR_BIT;
     auto const mask = static_cast<char_t>(1 << (idx % CHAR_BIT));
     return bit_reference{m_buf + chunk, mask};
+  }
+
+  iterator iteratorAt(size_t off) {
+    return iterator{m_buf + off / CHAR_BIT,
+                    static_cast<char_t>(1 << (off %  CHAR_BIT))};
   }
 
   /*

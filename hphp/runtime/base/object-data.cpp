@@ -1031,10 +1031,9 @@ const StaticString
 void deepInitHelper(ObjectProps* props,
                     const Class::PropInitVec* initVec,
                     size_t nProps) {
-  size_t idx = 0;
+  auto initIter = initVec->cbegin();
   props->foreach(nProps, [&](tv_lval lval){
-    assertx(idx < nProps);
-    auto entry = (*initVec)[idx++];
+    auto entry = *initIter++;
     tvCopy(entry.val.tv(), lval);
     if (entry.deepInit) {
       tvIncRefGen(*lval);

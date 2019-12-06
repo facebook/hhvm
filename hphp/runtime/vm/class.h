@@ -271,10 +271,50 @@ struct Class : AtomicCountable {
       typename BitsetView<is_const>::bit_reference deepInit;
     };
 
+    template <bool is_const>
+    struct iterator_impl {
+
+      using char_t = typename std::conditional_t<is_const,
+                                                 const unsigned char,
+                                                 unsigned char>;
+      using tv_iter_t = typename std::conditional_t<is_const,
+                                                    ObjectProps::const_iterator,
+                                                    ObjectProps::iterator>;
+      using bit_iter_t = typename BitsetView<is_const>::iterator;
+
+      iterator_impl(tv_iter_t tv, bit_iter_t bit);
+
+      bool operator==(const iterator_impl& o) const;
+      bool operator!=(const iterator_impl& o) const;
+
+      iterator_impl& operator++();
+      iterator_impl operator++(int);
+
+      Entry<is_const> operator*() const;
+      Entry<is_const> operator->() const;
+
+      using value_type = Entry<is_const>;
+      using reference = Entry<is_const>&;
+      using pointer = void;
+      using difference_type = void;
+      using iterator_category = std::forward_iterator_tag;
+
+      tv_iter_t m_val;
+      bit_iter_t m_bit;
+    };
+
+    using iterator = iterator_impl<false>;
+    using const_iterator = iterator_impl<true>;
+
     size_t size() const;
 
     Entry<false> operator[](size_t i);
     Entry<true> operator[](size_t i) const;
+
+    iterator begin();
+    iterator end();
+    const_iterator cbegin() const;
+    const_iterator cend() const;
 
     void push_back(const TypedValue& v);
 

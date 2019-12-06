@@ -269,7 +269,7 @@ Type awaitedTypeFromSSATmp(const SSATmp* awaitable) {
     return inst->src(2)->hasConstVal(TFunc)
       ? awaitedCallReturnType(inst->src(2)->funcVal()) : TInitCell;
   }
-  if (inst->is(CreateAFWH)) {
+  if (inst->is(CreateAFWH) || inst->is(CreateAFWHNoVV)) {
     return awaitedCallReturnType(inst->func());
   }
   if (inst->is(DefLabel)) {
@@ -296,7 +296,7 @@ bool likelySuspended(const SSATmp* awaitable) {
   awaitable = canonical(awaitable);
   auto const inst = awaitable->inst();
   if (inst->is(Call) && inst->extra<Call>()->asyncEagerReturn) return true;
-  if (inst->is(CreateAFWH)) return true;
+  if (inst->is(CreateAFWH) || inst->is(CreateAFWHNoVV)) return true;
   if (inst->is(DefLabel)) {
     auto likely = true;
     auto const dsts = inst->dsts();

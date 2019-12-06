@@ -186,6 +186,20 @@ bool vmodify(Vunit& unit, Vlabel b, size_t i, Modify modify) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Determine whether any VregSF is live at the beginning of each block.
+ */
+std::vector<Vreg> compute_sf_livein(const Vunit& unit,
+                                    const jit::vector<Vlabel>& rpo,
+                                    const PredVector& preds);
+
+/*
+ * Rename all VregSFs in unit to the physical flags reg.
+ */
+void rename_sf_regs(Vunit& unit, const jit::fast_set<unsigned>& sf_renames);
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}
 
 #endif

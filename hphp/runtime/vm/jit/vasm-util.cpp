@@ -16,12 +16,15 @@
 
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/util/dataflow-worklist.h"
+
+#include <boost/range/adaptor/reversed.hpp>
 
 namespace HPHP { namespace jit {
 
@@ -729,5 +732,134 @@ jit::fast_map<Vreg, Vreg> restoreSSA(Vunit& unit,
   converter();
   return std::move(converter.newVregs);
 }
+
+//////////////////////////////////////////////////////////////////////
+
+static const Abi sf_abi {
+  RegSet{}, RegSet{}, RegSet{}, RegSet{}, RegSet{},
+  RegSet{RegSF{0}}
+};
+
+
+std::vector<Vreg> compute_sf_livein(const Vunit& unit,
+                                    const jit::vector<Vlabel>& rpo,
+                                    const PredVector& preds) {
+  auto livein = std::vector<Vreg>(unit.blocks.size());
+
+  auto workQ = dataflow_worklist<uint32_t>(unit.blocks.size());
+
+  auto const po_to_block = [&] {
+    auto blocks = rpo;
+    std::reverse(blocks.begin(), blocks.end());
+    return blocks;
+  }();
+  auto const block_to_po = [&] {
+    auto order = std::vector<uint32_t>(unit.blocks.size());
+
+    for (size_t po = 0; po < po_to_block.size(); ++po) {
+      workQ.push(po);
+      order[po_to_block[po]] = po;
+    }
+    return order;
+  }();
+
+  while (!workQ.empty()) {
+    auto const b = po_to_block[workQ.pop()];
+    auto const& block = unit.blocks[b];
+
+    auto live = Vreg{};
+    for (auto const s : succs(block)) {
+      auto const other = livein[s];
+      if (!other.isValid()) continue;
+
+      assertx(!live.isValid() || live == other);
+      live = other;
+    }
+
+    for (auto const& inst : boost::adaptors::reverse(block.code)) {
+      if (inst.op == Vinstr::phidef) {
+        // Skip phidef{}---if the def-tuple includes a VregSF, then it's
+        // actually live on the incoming edge.
+        continue;
+      }
+
+      RegSet implicit_uses, implicit_across, implicit_defs;
+      if (inst.op == Vinstr::vcall ||
+          inst.op == Vinstr::vinvoke ||
+          inst.op == Vinstr::vcallunpack) {
+        // getEffects() would assert since these haven't been lowered yet.
+        implicit_defs |= RegSF{0};
+      } else {
+        getEffects(sf_abi, inst, implicit_uses, implicit_across, implicit_defs);
+      }
+
+      auto const visit_def = [&] (Vreg, Width w) {
+        if (w == Width::Flags) live = Vreg{};
+      };
+      auto const visit_use = [&] (Vreg r, Width w) {
+        if (w == Width::Flags) live = r;
+      };
+
+      // Determine liveness at `inst'.  We rely on the assumption that VregSF
+      // lifetimes can never overlap, which the checkSF() pass provides.
+      visitDefs(unit, inst, visit_def);
+      visit(unit, implicit_defs, visit_def);
+      visitUses(unit, inst, visit_use);
+      visit(unit, implicit_uses, visit_use);
+    }
+
+    if (live.isValid()) {
+      if (livein[b].isValid()) {
+        assertx(live == livein[b]);
+      } else {
+        livein[b] = live;
+        for (auto p : preds[b]) workQ.push(block_to_po[p]);
+      }
+    }
+  }
+
+  return livein;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+/*
+ * VregSF-renaming visitor.
+ */
+struct FlagsVisitor {
+  explicit FlagsVisitor(const jit::fast_set<unsigned>& sf_renames)
+    : m_sf_renames(sf_renames) {}
+
+  template<class F> void imm(const F&) {}
+  template<class R> void across(R&) {}
+  void across(VregSF&) = delete;
+
+  template<class R> void def(R&) {}
+  template<class R, class H> void defHint(R& r, H) { def(r); }
+  template<class R> void use(R&) {}
+  template<class R, class H> void useHint(R& r, H) { use(r); }
+
+  void use(VregSF& r) { if (m_sf_renames.count(r)) r = RegSF{0}; }
+  void def(VregSF& r) { use(r); }
+
+ private:
+  jit::fast_set<unsigned> m_sf_renames;
+};
+
+}
+
+void rename_sf_regs(Vunit& unit, const jit::fast_set<unsigned>& sf_renames) {
+  auto visitor = FlagsVisitor(sf_renames);
+
+  for (auto& blk : unit.blocks) {
+    for (auto& inst : blk.code) {
+      visitOperands(inst, visitor);
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
 
 }}

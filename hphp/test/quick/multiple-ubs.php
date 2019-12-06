@@ -1,23 +1,23 @@
 <?hh
 
-function foo1<T as num>(T $x): T {
+interface Fooable {}
+interface Barable {}
+
+class Meh {}
+
+function foo1<T as Fooable as Barable>(T $x): T {
   return $x;
 }
 
-function foo2<T as int>(): T {
-  return 'a';
+function foo2<T as Fooable as Barable>(): T {
+  return new Meh;
 }
 
-class Bar<T as string> {
-  function foo3<T as num>(T $x): T {
-    return $x;
-  }
-  function foo4(T $x): T {
-    return strlen($x);
-  }
+function foo3<T as num as int>(T $x): T {
+  return $x;
 }
 
-function foo5<T super string as int>(T $x): T {
+function foo4<T as int as num>(T $x): T {
   return $x;
 }
 
@@ -29,7 +29,7 @@ function main() {
     }
   );
   try {
-    foo1('a');
+    foo1(new Meh);
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }
@@ -38,21 +38,26 @@ function main() {
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }
-  $o = new Bar;
   try {
-    $o->foo3('a');
+    foo3(3.14);
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
+  foo3(3);
+  try {
+    foo3('a');
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   try {
-    $o->foo4('a');
+    foo4(3.14);
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }
+  foo4(3);
   try {
-    foo5('a');
+    foo4('a');
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }
-  foo5(1); // super constraints are not checked
 }

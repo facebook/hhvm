@@ -168,6 +168,8 @@ struct Func final {
   using ParamInfoVec = VMFixedVector<ParamInfo>;
   using SVInfoVec = VMFixedVector<SVInfo>;
   using EHEntVec = VMFixedVector<EHEnt>;
+  using UpperBoundVec = vm_vector<TypeConstraint>;
+  using ParamUBMap = vm_flat_map<uint32_t, UpperBoundVec>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -482,6 +484,9 @@ struct Func final {
    */
   const StringData* returnUserType() const;
 
+  bool hasReturnWithMultiUBs() const;
+  const UpperBoundVec& returnUBs() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Parameters.                                                        [const]
 
@@ -527,6 +532,10 @@ struct Func final {
    * Returns the number of inout parameters taken by func.
    */
   uint32_t numInOutParams() const;
+
+  bool hasParamWithMultiUBs() const;
+
+  const ParamUBMap& paramUBs() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and stack.                                      [const]
@@ -1136,6 +1145,8 @@ private:
     bool m_isPhpLeafFn : 1;
     bool m_hasReifiedGenerics : 1;
     bool m_isRxDisabled : 1;
+    bool m_hasMultiParamUBs : 1;
+    bool m_hasMultiReturnUBs : 1;
 
     // 16 bits of padding here in LOWPTR builds
 
@@ -1184,6 +1195,8 @@ private:
     ArFunction m_arFuncPtr;
     NativeFunction m_nativeFuncPtr;
     ReifiedGenericsInfo m_reifiedGenericsInfo;
+    ParamUBMap m_paramUBs;
+    UpperBoundVec m_returnUBs;
     Offset m_past;  // Only read if SharedData::m_pastDelta is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
   };

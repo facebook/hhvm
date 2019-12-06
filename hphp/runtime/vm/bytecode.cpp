@@ -5219,6 +5219,15 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
   assertx(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[param.index].typeConstraint;
   if (tc.isCheckable()) tc.verifyParam(param.ptr, func, param.index);
+  if (func->hasParamWithMultiUBs()) {
+    auto const& ubs = func->paramUBs();
+    auto it = ubs.find(param.index);
+    if (it != ubs.end()) {
+      for (auto const& ub : it->second) {
+        ub.verifyParam(param.ptr, func, param.index);
+      }
+    }
+  }
 }
 
 OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
@@ -5249,6 +5258,15 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
   assertx(func->numParams() == int(func->params().size()));
   auto const& tc = func->params()[paramId].typeConstraint;
   if (tc.isCheckable()) tc.verifyOutParam(vmStack().topTV(), func, paramId);
+  if (func->hasParamWithMultiUBs()) {
+    auto const& ubs = func->paramUBs();
+    auto it = ubs.find(paramId);
+    if (it != ubs.end()) {
+      for (auto const& ub : it->second) {
+        ub.verifyOutParam(vmStack().topTV(), func, paramId);
+      }
+    }
+  }
 }
 
 namespace {
@@ -5257,6 +5275,11 @@ OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
   const auto func = vmfp()->m_func;
   const auto tc = func->returnTypeConstraint();
   if (tc.isCheckable()) tc.verifyReturn(vmStack().indC(ind), func);
+  if (func->hasReturnWithMultiUBs()) {
+    for (auto const& ub : func->returnUBs()) {
+      ub.verifyReturn(vmStack().indC(ind), func);
+    }
+  }
 }
 
 } // namespace

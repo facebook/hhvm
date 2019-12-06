@@ -2054,14 +2054,14 @@ To string conversions:
   instruction will raise a recoverable fatal error describing the type
   mismatch.
 
-| VerifyParamFail, ND, C(Int), NF
+| VerifyParamFail, ND, C(Int) C(Int), NF
 
   Assumes that parameter number S0 in the current function has failed a its
   type check. Depending on the typehint being verified and a number of runtime
   options, may coerce the parameter to the correct type or raise a recoverable
   fatal error describing the type mismatch.
 
-| VerifyParamFailHard, ND, C(Int), T
+| VerifyParamFailHard, ND, C(Int) C(Int), T
 
   A terminal version of VerifyParamFail, to be used when the compiler can
   statically prove that this failure will result in a fatal error rather than a
@@ -2079,11 +2079,11 @@ To string conversions:
 
   Verify a return type hint for a record.
 
-| VerifyRetFail, ND, S(PtrToCell), NF
+| VerifyRetFail, ND, S(PtrToCell) C(Int), NF
 
   Failure to verify a return type hint.
 
-| VerifyRetFailHard, ND, S(PtrToCell), T
+| VerifyRetFailHard, ND, S(PtrToCell) C(Int), T
 
   Terminal version of VerifyRetFail, to be used when the compiler can prove
   that this failure will result in a fatal error.

@@ -18,6 +18,7 @@
 #include <sstream>
 #include <map>
 #include <queue>
+#include <functional>
 
 #include <boost/variant.hpp>
 
@@ -33,6 +34,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/util/match.h"
 
@@ -153,6 +155,9 @@ struct FuncInfo {
 
   // Try/catch protected region starts in order.
   std::vector<std::pair<Offset,const EHEnt*>> ehStarts;
+
+  // Upper-bounds for params and return types
+  std::unordered_map<std::string, std::vector<TypeConstraint>> ubs;
 };
 
 FuncInfo find_func_info(const Func* func) {
@@ -204,9 +209,27 @@ FuncInfo find_func_info(const Func* func) {
     }
   };
 
+  auto find_upper_bounds = [&] {
+    if (func->hasParamWithMultiUBs()) {
+      auto const& params = func->params();
+      for (auto const& p : func->paramUBs()) {
+        auto const& userType = params[p.first].userType;
+        auto& v = finfo.ubs[userType->data()];
+        if (v.empty()) v.assign(std::begin(p.second), std::end(p.second));
+      }
+    }
+    if (func->hasReturnWithMultiUBs()) {
+      auto& v = finfo.ubs[func->returnUserType()->data()];
+      if (v.empty()) {
+        v.assign(std::begin(func->returnUBs()), std::end(func->returnUBs()));
+      }
+    }
+  };
+
   find_jump_targets();
   find_eh_entries();
   find_dv_entries();
+  find_upper_bounds();
   return finfo;
 }
 
@@ -594,13 +617,34 @@ std::string func_flag_list(const FuncInfo& finfo) {
   return " ";
 }
 
+std::string opt_ubs(const FuncInfo& finfo) {
+  std::string ret = {};
+  if (finfo.ubs.empty()) return ret;
+  ret += "{";
+  for (auto const& p : finfo.ubs) {
+    ret += "(";
+    ret += p.first;
+    ret += " as ";
+    bool first = true;
+    for (auto const& ub : p.second) {
+      if (!first) ret += ", ";
+      ret += opt_type_info(nullptr, ub);
+      first = false;
+    }
+    ret += ")";
+  }
+  ret += "}";
+  return ret;
+}
+
 void print_func(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
 
   if (func->isPseudoMain()) {
     out.fmtln(".main{} {{", format_line_pair(func));
   } else {
-    out.fmtln(".function{}{} {}{}({}){}{{",
+    out.fmtln(".function{}{}{} {}{}({}){}{{",
+      opt_ubs(finfo),
       opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes(),
                 func->top()),
       format_line_pair(func),
@@ -659,7 +703,8 @@ void print_property(Output& out, const PreClass::Prop* prop) {
 
 void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
-  out.fmtln(".method{}{} {}{}({}){}{{",
+  out.fmtln(".method{}{}{} {}{}({}){}{{",
+    opt_ubs(finfo),
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
     format_line_pair(func),
     opt_type_info(func->returnUserType(), func->returnTypeConstraint()),

@@ -55,6 +55,7 @@ struct FuncEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 
+  using UpperBoundVec = std::vector<TypeConstraint>;
   struct ParamInfo : public Func::ParamInfo {
     ParamInfo()
       : inout(false)
@@ -65,17 +66,18 @@ struct FuncEmitter {
       Func::ParamInfo* parent = this;
       parent->serde(sd);
       sd(inout);
+      sd(upperBounds);
     }
 
     // Whether the parameter is passed as an inout.  This field is absent from
     // Func::ParamInfo because we store it in a bitfield on Func.
     bool inout;
+    UpperBoundVec upperBounds;
   };
 
   typedef std::vector<ParamInfo> ParamInfoVec;
   typedef std::vector<Func::SVInfo> SVInfoVec;
   typedef std::vector<EHEnt> EHEntVec;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
@@ -269,6 +271,7 @@ public:
   MaybeDataType hniReturnType;
   TypeConstraint retTypeConstraint;
   LowStringPtr retUserType;
+  UpperBoundVec retUpperBounds;
 
   EHEntVec ehtab;
 
@@ -284,6 +287,8 @@ public:
       bool isGenerator         : 1;
       bool isPairGenerator     : 1;
       bool isRxDisabled        : 1;
+      bool hasParamMultiUBs    : 1;
+      bool hasReturnMultiUBs   : 1;
     };
   };
 

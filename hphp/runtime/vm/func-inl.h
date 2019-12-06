@@ -299,6 +299,15 @@ inline const StringData* Func::returnUserType() const {
   return shared()->m_retUserType;
 }
 
+inline bool Func::hasReturnWithMultiUBs() const {
+  return shared()->m_hasMultiReturnUBs;
+}
+
+inline const Func::UpperBoundVec& Func::returnUBs() const {
+  assertx(hasReturnWithMultiUBs());
+  return extShared()->m_returnUBs;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Parameters.
 
@@ -331,6 +340,15 @@ inline bool Func::hasVariadicCaptureParam() const {
          (numParams() && params()[numParams() - 1].variadic));
 #endif
   return m_attrs & AttrVariadicParam;
+}
+
+inline bool Func::hasParamWithMultiUBs() const {
+  return shared()->m_hasMultiParamUBs;
+}
+
+inline const Func::ParamUBMap& Func::paramUBs() const {
+  assertx(hasParamWithMultiUBs());
+  return extShared()->m_paramUBs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

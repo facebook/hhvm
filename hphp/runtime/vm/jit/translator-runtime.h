@@ -101,14 +101,14 @@ void VerifyParamTypeSlow(const Class* cls,
                          const TypeConstraint* expected,
                          int param);
 void VerifyParamTypeCallable(TypedValue value, int param);
-void VerifyParamTypeFail(int param);
+void VerifyParamTypeFail(int param, const TypeConstraint*);
 void VerifyRetTypeSlow(int32_t id,
                        const Class* cls,
                        const Class* constraint,
                        const TypeConstraint* expected,
                        const TypedValue value);
 void VerifyRetTypeCallable(int32_t id, TypedValue value);
-void VerifyRetTypeFail(int32_t id, TypedValue* value);
+void VerifyRetTypeFail(int32_t id, TypedValue* value, const TypeConstraint* tc);
 
 void VerifyReifiedLocalTypeImpl(int32_t, ArrayData*);
 void VerifyReifiedReturnTypeImpl(TypedValue, ArrayData*);

@@ -2307,7 +2307,7 @@ TypeConstraint parse_type_constraint(AsmState& as) {
 }
 
 using UpperBoundMap =
-  std::unordered_multimap<const StringData*, TypeConstraint>;
+  std::unordered_map<const StringData*, std::vector<TypeConstraint>>;
 
 void parse_ub(AsmState& as, UpperBoundMap& ubs) {
   as.in.skipWhitespace();
@@ -2323,7 +2323,8 @@ void parse_ub(AsmState& as, UpperBoundMap& ubs) {
   }
   for (;;) {
     const auto& tc = parse_type_info(as).second;
-    ubs.insert({nameStr, tc});
+    auto& v = ubs[nameStr];
+    v.push_back(tc);
     as.in.skipWhitespace();
     if (as.in.peek() != ',') break;
     as.in.getc();
@@ -2355,28 +2356,17 @@ UpperBoundMap parse_ubs(AsmState& as) {
   return ret;
 }
 
-// If ubs has a single upper-bound for typeName, return it.
-// If ubs does not contain any upper-bound for typeName, but class_ubs
-// contains a single upper-bound, return it.
-// Return nullptr otherwise.
-const TypeConstraint* getSingleUB(const StringData* typeName,
-                                  const UpperBoundMap& ubs,
-                                  const UpperBoundMap& class_ubs) {
-  if (!typeName) return nullptr;
+std::vector<TypeConstraint> getUpperBounds(const StringData* typeName,
+                                           const UpperBoundMap& ubs,
+                                           const UpperBoundMap& class_ubs) {
+  std::vector<TypeConstraint> res;
+  if (!typeName) return res;
   assertx(typeName->isStatic());
-  auto count = ubs.count(typeName);
-  if (count == 1) {
-    auto const it = ubs.find(typeName);
-    return &(it->second);
-  }
-  if (count == 0) {
-    count = class_ubs.count(typeName);
-    if (count == 1) {
-      auto const it = class_ubs.find(typeName);
-      return &it->second;
-    }
-  }
-  return nullptr;
+  auto it = ubs.find(typeName);
+  if (it != ubs.end()) return it->second;
+  it = class_ubs.find(typeName);
+  if (it != class_ubs.end()) return it->second;
+  return {};
 }
 
 /*
@@ -2401,7 +2391,8 @@ const TypeConstraint* getSingleUB(const StringData* typeName,
  */
 void parse_parameter_list(AsmState& as,
                           const UpperBoundMap& ubs,
-                          const UpperBoundMap& class_ubs) {
+                          const UpperBoundMap& class_ubs,
+                          bool hasReifiedGenerics) {
   as.in.skipWhitespace();
   if (as.in.peek() != '(') return;
   as.in.getc();
@@ -2446,8 +2437,13 @@ void parse_parameter_list(AsmState& as,
     }
 
     std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
-    auto const ub = getSingleUB(param.userType, ubs, class_ubs);
-    if (ub) param.typeConstraint = *ub;
+    auto const& ub = getUpperBounds(param.userType, ubs, class_ubs);
+    if (ub.size() == 1 && !hasReifiedGenerics) {
+      param.typeConstraint = ub[0];
+    } else if (!ub.empty()) {
+      param.upperBounds = ub;
+      as.fe->hasParamMultiUBs = true;
+    }
 
     as.in.skipWhitespace();
     ch = as.in.getc();
@@ -2708,13 +2704,20 @@ void parse_function(AsmState& as) {
   as.fe = as.ue->newFuncEmitter(makeStaticString(name));
   as.fe->init(line0, line1, as.ue->bcPos(), attrs, isTop, 0);
 
-  auto const ub = getSingleUB(retTypeInfo.first, ubs, {});
-  if (ub) retTypeInfo.second = *ub;
+  auto const& ub = getUpperBounds(retTypeInfo.first, ubs, {});
+  auto const hasReifiedGenerics =
+    userAttrs.find(s___Reified.get()) != userAttrs.end();
+  if (ub.size() == 1 && !hasReifiedGenerics) {
+    retTypeInfo.second = ub[0];
+  } else if (!ub.empty()) {
+    as.fe->retUpperBounds = ub;
+    as.fe->hasReturnMultiUBs = true;
+  }
 
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = retTypeInfo;
   as.fe->userAttributes = userAttrs;
 
-  parse_parameter_list(as, ubs, {});
+  parse_parameter_list(as, ubs, {}, hasReifiedGenerics);
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 
@@ -2761,13 +2764,22 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
   as.fe->init(line0, line1,
               as.ue->bcPos(), attrs, false, 0);
 
-  auto const ub = getSingleUB(retTypeInfo.first, ubs, class_ubs);
-  if (ub) retTypeInfo.second = *ub;
+  auto const hasReifiedGenerics =
+    userAttrs.find(s___Reified.get()) != userAttrs.end() ||
+    as.pce->userAttributes().find(s___Reified.get()) !=
+    as.pce->userAttributes().end();
+  auto const& ub = getUpperBounds(retTypeInfo.first, ubs, class_ubs);
+  if (ub.size() == 1 && !hasReifiedGenerics) {
+    retTypeInfo.second = ub[0];
+  } else if (!ub.empty()) {
+    as.fe->retUpperBounds = ub;
+    as.fe->hasReturnMultiUBs = true;
+  }
 
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = retTypeInfo;
   as.fe->userAttributes = userAttrs;
 
-  parse_parameter_list(as, ubs, class_ubs);
+  parse_parameter_list(as, ubs, class_ubs, hasReifiedGenerics);
   // parse_function_flabs relies on as.fe already having valid attrs
   parse_function_flags(as);
 

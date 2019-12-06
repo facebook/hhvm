@@ -456,7 +456,7 @@ void VerifyParamRecDescImpl(const RecordDesc* rec,
                             const TypeConstraint* tc,
                             int param) {
   if (UNLIKELY(!verifyRecDescImpl(rec, constraint, tc))) {
-    VerifyParamTypeFail(param);
+    VerifyParamTypeFail(param, tc);
   }
 }
 
@@ -466,7 +466,7 @@ void VerifyRetRecDescImpl(int32_t id,
                           const TypeConstraint* tc,
                           TypedValue tv) {
   if (UNLIKELY(!verifyRecDescImpl(rec, constraint, tc))) {
-    VerifyRetTypeFail(id, &tv);
+    VerifyRetTypeFail(id, &tv, tc);
   }
 }
 
@@ -475,25 +475,27 @@ void VerifyParamTypeSlow(const Class* cls,
                          const TypeConstraint* expected,
                          int param) {
   if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
-    VerifyParamTypeFail(param);
+    VerifyParamTypeFail(param, expected);
   }
 }
 
 void VerifyParamTypeCallable(TypedValue value, int param) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
-    VerifyParamTypeFail(param);
+    VerifyParamTypeFail(param, nullptr);
   }
 }
 
 
-void VerifyParamTypeFail(int paramNum) {
+void VerifyParamTypeFail(int paramNum, const TypeConstraint* tc) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
-  auto const& tc = func->params()[paramNum].typeConstraint;
+  if (!tc) {
+    tc = &func->params()[paramNum].typeConstraint;
+  }
   TypedValue* tv = frame_local(ar, paramNum);
-  assertx(!tc.check(tv, func->cls()));
-  tc.verifyParamFail(func, tv, paramNum);
+  assertx(!tc->check(tv, func->cls()));
+  tc->verifyParamFail(func, tv, paramNum);
 }
 
 void VerifyRetTypeSlow(int32_t id,
@@ -502,28 +504,28 @@ void VerifyRetTypeSlow(int32_t id,
                        const TypeConstraint* expected,
                        TypedValue tv) {
   if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
-    VerifyRetTypeFail(id, &tv);
+    VerifyRetTypeFail(id, &tv, expected);
   }
 }
 
 void VerifyRetTypeCallable(int32_t id, TypedValue value) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
-    VerifyRetTypeFail(id, &value);
+    VerifyRetTypeFail(id, &value, nullptr);
   }
 }
 
-void VerifyRetTypeFail(int32_t id, TypedValue* tv) {
+void VerifyRetTypeFail(int32_t id, TypedValue* tv, const TypeConstraint* tc) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
   if (id == TypeConstraint::ReturnId) {
-    auto const& tc = func->returnTypeConstraint();
-    assertx(!tc.check(tv, func->cls()));
-    tc.verifyReturnFail(func, tv);
+    if (!tc) tc = &func->returnTypeConstraint();
+    assertx(!tc->check(tv, func->cls()));
+    tc->verifyReturnFail(func, tv);
   } else {
-    auto const& tc = func->params()[id].typeConstraint;
-    assertx(!tc.check(tv, func->cls()));
-    tc.verifyOutParamFail(func, tv, id);
+    if (!tc) tc = &func->params()[id].typeConstraint;
+    assertx(!tc->check(tv, func->cls()));
+    tc->verifyOutParamFail(func, tv, id);
   }
 }
 

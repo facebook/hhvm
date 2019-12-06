@@ -1244,185 +1244,208 @@ namespace {
 void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
                        bool onlyCheckNullability) {
   auto const func = curFunc(env);
+  auto const verifyFunc = [&] (const TypeConstraint& tc) {
+    verifyTypeImpl(
+      env,
+      tc,
+      onlyCheckNullability,
+      nullptr,
+      [&] { // Get value to test
+        return topC(env, BCSPRelOffset { ind });
+      },
+      [&] (SSATmp* val) { // func to string conversions
+        auto const str = gen(env, LdFuncName, val);
+        auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
+        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), str);
+        env.irb->exceptionStackBoundary();
+        return true;
+      },
+      [&] (SSATmp* val) { // class to string conversions
+        auto const str = gen(env, LdClsName, val);
+        auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
+        gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), str);
+        env.irb->exceptionStackBoundary();
+        return true;
+      },
+      [&] (SSATmp* val) { // clsmeth to varray/vec conversions
+        if (RuntimeOption::EvalVecHintNotices) {
+          raiseClsmethCompatTypeHint(env, id, func, tc);
+        }
+        auto clsMethArr = convertClsMethToVec(env, val);
+        discard(env, 1);
+        push(env, clsMethArr);
+        decRef(env, val);
+        return true;
+      },
+      [&] (Type, bool hard) { // Check failure
+        updateMarker(env);
+        env.irb->exceptionStackBoundary();
+        auto const failHard =
+          hard && RuntimeOption::EvalCheckReturnTypeHints >= 3;
+        gen(
+          env,
+          failHard ? VerifyRetFailHard : VerifyRetFail,
+          ParamData { id },
+          ldStkAddr(env, BCSPRelOffset { ind }),
+          cns(env, uintptr_t(&tc))
+        );
+      },
+      [&] (SSATmp* val) { // dvarray mismatch notice
+        gen(
+          env,
+          RaiseHackArrParamNotice,
+          RaiseHackArrParamNoticeData { tc, id, true },
+          val,
+          cns(env, func)
+        );
+      },
+      [&] (SSATmp* val) { // Callable check
+        gen(
+          env,
+          VerifyRetCallable,
+          ParamData { id },
+          val
+        );
+      },
+      [&] (SSATmp* val, SSATmp* objClass, SSATmp* checkCls) {
+        // Class/type-alias check
+        gen(
+          env,
+          VerifyRetCls,
+          ParamData { id },
+          objClass,
+          checkCls,
+          cns(env, uintptr_t(&tc)),
+          val
+        );
+      },
+      [&] (SSATmp* valRecDesc, SSATmp* checkRec, SSATmp* val) {
+        // Record/type-alias check
+        gen(
+          env,
+          VerifyRetRecDesc,
+          ParamData { id },
+          valRecDesc,
+          checkRec,
+          cns(env, uintptr_t(&tc)),
+          val
+        );
+      },
+      [] { // Giveup
+        PUNT(VerifyReturnType);
+      }
+    );
+  };
   auto const& tc = (id == TypeConstraint::ReturnId)
     ? func->returnTypeConstraint()
     : func->params()[id].typeConstraint;
   assertx(ind >= 0);
-
-  verifyTypeImpl(
-    env,
-    tc,
-    onlyCheckNullability,
-    nullptr,
-    [&] { // Get value to test
-      return topC(env, BCSPRelOffset { ind });
-    },
-    [&] (SSATmp* val) { // func to string conversions
-      auto const str = gen(env, LdFuncName, val);
-      auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
-      gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), str);
-      env.irb->exceptionStackBoundary();
-      return true;
-    },
-    [&] (SSATmp* val) { // class to string conversions
-      auto const str = gen(env, LdClsName, val);
-      auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
-      gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), str);
-      env.irb->exceptionStackBoundary();
-      return true;
-    },
-    [&] (SSATmp* val) { // clsmeth to varray/vec conversions
-      if (RuntimeOption::EvalVecHintNotices) {
-        raiseClsmethCompatTypeHint(env, id, func, tc);
-      }
-      auto clsMethArr = convertClsMethToVec(env, val);
-      discard(env, 1);
-      push(env, clsMethArr);
-      decRef(env, val);
-      return true;
-    },
-    [&] (Type, bool hard) { // Check failure
-      updateMarker(env);
-      env.irb->exceptionStackBoundary();
-      auto const failHard =
-        hard && RuntimeOption::EvalCheckReturnTypeHints >= 3;
-      gen(
-        env,
-        failHard ? VerifyRetFailHard : VerifyRetFail,
-        ParamData { id },
-        ldStkAddr(env, BCSPRelOffset { ind })
-      );
-    },
-    [&] (SSATmp* val) { // dvarray mismatch notice
-      gen(
-        env,
-        RaiseHackArrParamNotice,
-        RaiseHackArrParamNoticeData { tc, id, true },
-        val,
-        cns(env, func)
-      );
-    },
-    [&] (SSATmp* val) { // Callable check
-      gen(
-        env,
-        VerifyRetCallable,
-        ParamData { id },
-        val
-      );
-    },
-    [&] (SSATmp* val, SSATmp* objClass, SSATmp* checkCls) {
-      // Class/type-alias check
-      gen(
-        env,
-        VerifyRetCls,
-        ParamData { id },
-        objClass,
-        checkCls,
-        cns(env, uintptr_t(&tc)),
-        val
-      );
-    },
-    [&] (SSATmp* valRecDesc, SSATmp* checkRec, SSATmp* val) {
-      // Record/type-alias check
-      gen(
-        env,
-        VerifyRetRecDesc,
-        ParamData { id },
-        valRecDesc,
-        checkRec,
-        cns(env, uintptr_t(&tc)),
-        val
-      );
-    },
-    [] { // Giveup
-      PUNT(VerifyReturnType);
+  verifyFunc(tc);
+  if (id == TypeConstraint::ReturnId && func->hasReturnWithMultiUBs()) {
+    for (auto const& ub : func->returnUBs()) verifyFunc(ub);
+  } else if (func->hasParamWithMultiUBs()) {
+    auto const& ubs = func->paramUBs();
+    auto it = ubs.find(id);
+    if (it != ubs.end()) {
+      for (auto const& ub : it->second) verifyFunc(ub);
     }
-  );
+  }
 }
 
 void verifyParamTypeImpl(IRGS& env, int32_t id) {
   auto const func = curFunc(env);
-  auto const& tc = func->params()[id].typeConstraint;
-  verifyTypeImpl(
-    env,
-    tc,
-    false,
-    nullptr,
-    [&] { // Get value to test
-      auto const ldPMExit = makePseudoMainExit(env);
-      return ldLoc(env, id, ldPMExit, DataTypeSpecific);
-    },
-    [&] (SSATmp* val) { // func to string conversions
-      auto const str = gen(env, LdFuncName, val);
-      stLocRaw(env, id, fp(env), str);
-      return true;
-    },
-    [&] (SSATmp* val) { // class to string conversions
-      auto const str = gen(env, LdClsName, val);
-      stLocRaw(env, id, fp(env), str);
-      return true;
-    },
-    [&] (SSATmp* val) { // clsmeth to varray/vec conversions
-      if (RuntimeOption::EvalVecHintNotices) {
-        raiseClsmethCompatTypeHint(env, id, func, tc);
+  auto const verifyFunc = [&](const TypeConstraint& tc) {
+    verifyTypeImpl(
+      env,
+      tc,
+      false,
+      nullptr,
+      [&] { // Get value to test
+        auto const ldPMExit = makePseudoMainExit(env);
+        return ldLoc(env, id, ldPMExit, DataTypeSpecific);
+      },
+      [&] (SSATmp* val) { // func to string conversions
+        auto const str = gen(env, LdFuncName, val);
+        stLocRaw(env, id, fp(env), str);
+        return true;
+      },
+      [&] (SSATmp* val) { // class to string conversions
+        auto const str = gen(env, LdClsName, val);
+        stLocRaw(env, id, fp(env), str);
+        return true;
+      },
+      [&] (SSATmp* val) { // clsmeth to varray/vec conversions
+        if (RuntimeOption::EvalVecHintNotices) {
+          raiseClsmethCompatTypeHint(env, id, func, tc);
+        }
+        auto clsMethArr = convertClsMethToVec(env, val);
+        stLocRaw(env, id, fp(env), clsMethArr);
+        decRef(env, val);
+        return true;
+      },
+      [&] (Type valType, bool hard) { // Check failure
+        auto const failHard = hard &&
+          !(tc.isArray() && valType.maybe(TObj));
+        gen(
+          env,
+          failHard ? VerifyParamFailHard : VerifyParamFail,
+          cns(env, id),
+          cns(env, uintptr_t(&tc))
+        );
+      },
+      [&] (SSATmp* val) { // dvarray mismatch
+        gen(
+          env,
+          RaiseHackArrParamNotice,
+          RaiseHackArrParamNoticeData { tc, id, false },
+          val,
+          cns(env, func)
+        );
+      },
+      [&] (SSATmp* val) { // Callable check
+        gen(
+          env,
+          VerifyParamCallable,
+          val,
+          cns(env, id)
+        );
+      },
+      [&] (SSATmp*, SSATmp* objClass, SSATmp* checkCls) {
+        // Class/type-alias check
+        gen(
+          env,
+          VerifyParamCls,
+          objClass,
+          checkCls,
+          cns(env, uintptr_t(&tc)),
+          cns(env, id)
+        );
+      },
+      [&] (SSATmp* valRecDesc, SSATmp* checkRec, SSATmp*) {
+        // Record/type-alias check
+        gen(
+          env,
+          VerifyParamRecDesc,
+          valRecDesc,
+          checkRec,
+          cns(env, uintptr_t(&tc)),
+          cns(env, id)
+        );
+      },
+      [] { // Giveup
+        PUNT(VerifyParamType);
       }
-      auto clsMethArr = convertClsMethToVec(env, val);
-      stLocRaw(env, id, fp(env), clsMethArr);
-      decRef(env, val);
-      return true;
-    },
-    [&] (Type valType, bool hard) { // Check failure
-      auto const failHard = hard &&
-        !(tc.isArray() && valType.maybe(TObj));
-      gen(
-        env,
-        failHard ? VerifyParamFailHard : VerifyParamFail,
-        cns(env, id)
-      );
-    },
-    [&] (SSATmp* val) { // dvarray mismatch
-      gen(
-        env,
-        RaiseHackArrParamNotice,
-        RaiseHackArrParamNoticeData { tc, id, false },
-        val,
-        cns(env, func)
-      );
-    },
-    [&] (SSATmp* val) { // Callable check
-      gen(
-        env,
-        VerifyParamCallable,
-        val,
-        cns(env, id)
-      );
-    },
-    [&] (SSATmp*, SSATmp* objClass, SSATmp* checkCls) {
-      // Class/type-alias check
-      gen(
-        env,
-        VerifyParamCls,
-        objClass,
-        checkCls,
-        cns(env, uintptr_t(&tc)),
-        cns(env, id)
-      );
-    },
-    [&] (SSATmp* valRecDesc, SSATmp* checkRec, SSATmp*) {
-      // Record/type-alias check
-      gen(
-        env,
-        VerifyParamRecDesc,
-        valRecDesc,
-        checkRec,
-        cns(env, uintptr_t(&tc)),
-        cns(env, id)
-      );
-    },
-    [] { // Giveup
-      PUNT(VerifyParamType);
+    );
+  };
+
+  verifyFunc(func->params()[id].typeConstraint);
+  if (func->hasParamWithMultiUBs()) {
+    auto const& ubs = func->paramUBs();
+    auto it = ubs.find(id);
+    if (it != ubs.end()) {
+      for (auto const& ub : it->second) verifyFunc(ub);
     }
-  );
+  }
 }
 
 }

@@ -11,6 +11,8 @@ option(ENABLE_SSE4_2 "Enable SSE4.2 supported code." OFF)
 option(EXECUTION_PROFILER "Enable the execution profiler" OFF)
 
 option(USE_JEMALLOC "Use jemalloc" ON)
+option(FORCE_TP_JEMALLOC "Always build and statically link jemalloc instead of using system version" OFF)
+
 option(ENABLE_HHPROF "Enable HHProf" OFF)
 
 option(CLANG_FORCE_LIBSTDCXX "Force libstdc++ when building against Clang/LLVM" OFF)

@@ -20,7 +20,7 @@ type visibility =
 type exact =
   | Exact
   | Nonexact
-[@@deriving eq]
+[@@deriving eq, ord]
 
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
@@ -78,7 +78,7 @@ type fun_tparams_kind =
 type shape_kind =
   | Closed_shape
   | Open_shape
-[@@deriving eq]
+[@@deriving eq, ord]
 
 type param_mode =
   | FPnormal
@@ -358,8 +358,6 @@ and has_member = {
   HHVM would access the private member of a parent class instead of the
   one from the current class. *)
 }
-
-and nullsafe = Pos.t option
 
 and constraint_type = Reason.t * constraint_type_
 
@@ -906,7 +904,7 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
     | (Tabstract (ak1, opt_cstr1), Tabstract (ak2, opt_cstr2)) ->
       begin
         match abstract_kind_compare ak1 ak2 with
-        | 0 -> opt_ty_compare opt_cstr1 opt_cstr2
+        | 0 -> Option.compare ty_compare opt_cstr1 opt_cstr2
         | n -> n
       end
     (* An instance of a class or interface, ty list are the arguments *)
@@ -916,14 +914,7 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
         | 0 ->
           begin
             match tyl_compare ~sort:false tyl tyl2 with
-            | 0 ->
-              begin
-                match (exact, exact2) with
-                | (Exact, Exact) -> 0
-                | (Nonexact, Nonexact) -> 0
-                | (Nonexact, Exact) -> -1
-                | (Exact, Nonexact) -> 1
-              end
+            | 0 -> compare_exact exact exact2
             | n -> n
           end
         | n -> n
@@ -931,7 +922,7 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
     | (Tarraykind ak1, Tarraykind ak2) -> array_kind_compare ak1 ak2
     | (Tshape (shape_kind1, fields1), Tshape (shape_kind2, fields2)) ->
       begin
-        match shape_kind_compare shape_kind1 shape_kind2 with
+        match compare_shape_kind shape_kind1 shape_kind2 with
         | 0 ->
           List.compare
             (fun (k1, v1) (k2, v2) ->
@@ -945,13 +936,6 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
     | (Tvar v1, Tvar v2) -> compare v1 v2
     | (Tanon (_, id1), Tanon (_, id2)) -> compare id1 id2
     | _ -> ty_con_ordinal ty_1 - ty_con_ordinal ty_2
-  and shape_kind_compare sk1 sk2 =
-    match (sk1, sk2) with
-    | (Closed_shape, Closed_shape)
-    | (Open_shape, Open_shape) ->
-      0
-    | (Closed_shape, Open_shape) -> -1
-    | (Open_shape, Closed_shape) -> 1
   and shape_field_type_compare sft1 sft2 =
     match ty_compare sft1.sft_ty sft2.sft_ty with
     | 0 -> compare sft1.sft_optional sft2.sft_optional
@@ -978,12 +962,6 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
         | n -> n
       end
     | n -> n
-  and opt_ty_compare opt_ty1 opt_ty2 =
-    match (opt_ty1, opt_ty2) with
-    | (None, None) -> 0
-    | (Some _, None) -> 1
-    | (None, Some _) -> -1
-    | (Some ty1, Some ty2) -> ty_compare ty1 ty2
   and array_kind_compare ak1 ak2 =
     match (ak1, ak2) with
     | (AKdarray (ty1, ty2), AKdarray (ty3, ty4))
@@ -1044,14 +1022,6 @@ and abstract_kind_compare ?(normalize_lists = false) t1 t2 =
 
 let tyl_equal tyl1 tyl2 = Int.equal 0 @@ tyl_compare ~sort:false tyl1 tyl2
 
-let nullsafe_compare nullsafe1 nullsafe2 =
-  match (nullsafe1, nullsafe2) with
-  | (Some _, Some _)
-  | (None, None) ->
-    0
-  | (None, Some _) -> 1
-  | (Some _, None) -> -1
-
 let class_id_con_ordinal cid =
   match cid with
   | Aast.CIparent -> 0
@@ -1063,7 +1033,7 @@ let class_id_con_ordinal cid =
 let class_id_compare cid1 cid2 =
   match (cid1, cid2) with
   | (Aast.CIexpr _e1, Aast.CIexpr _e2) -> 0
-  | (Aast.CI (_, id1), Aast.CI (_, id2)) -> compare id1 id2
+  | (Aast.CI (_, id1), Aast.CI (_, id2)) -> String.compare id1 id2
   | _ -> class_id_con_ordinal cid2 - class_id_con_ordinal cid1
 
 let class_id_equal cid1 cid2 = Int.equal (class_id_compare cid1 cid2) 0

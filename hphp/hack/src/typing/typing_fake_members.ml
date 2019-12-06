@@ -63,6 +63,18 @@ let join fake1 fake2 =
         blame;
       }
 
+(* Does fake1 entail fake2? *)
+let sub fake1 fake2 =
+  match (fake1, fake2) with
+  | (Valid ids1, Valid ids2) -> Local_id.Set.subset ids2 ids1
+  | (Invalidated { valid = v2; invalid; _ }, Valid v1) ->
+    Local_id.Set.subset v1 v2
+    && Local_id.Set.is_empty (Local_id.Set.diff invalid v2)
+  | (Valid v1, Invalidated { valid = v2; _ }) -> Local_id.Set.subset v2 v1
+  | ( Invalidated { valid = v1; invalid = i1; _ },
+      Invalidated { valid = v2; invalid = i2; _ } ) ->
+    Local_id.Set.subset v2 v1 && Local_id.Set.subset i1 i2
+
 let is_valid fake lid =
   match fake with
   | Invalidated { valid; _ }

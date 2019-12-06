@@ -966,6 +966,42 @@ and stmt env (pos, st) =
   (env, (pos, st))
 
 and stmt_ env pos st =
+  (* Type check a loop. f env = (env, result) checks the body of the loop.
+   * We iterate over the loop until the "next" continuation environment is
+   * stable. alias_depth is supposed to be an upper bound on this; but in
+   * certain cases this fails (e.g. a generic type grows unboundedly). TODO:
+   * fix this.
+   *)
+  let infer_loop env f =
+    let in_loop_outer = env.in_loop in
+    let alias_depth =
+      if in_loop_outer then
+        1
+      else
+        Typing_alias.get_depth (pos, st)
+    in
+    let env = { env with in_loop = true } in
+    let rec loop env n =
+      (* Remember the old environment *)
+      let old_next_entry = Env.next_cont_opt env in
+      let (env, result) = f env in
+      let new_next_entry = Env.next_cont_opt env in
+      (* Finish if we reach the bound, or if the environments match *)
+      if
+        Int.equal n alias_depth
+        || Typing_per_cont_ops.is_sub_opt_entry
+             Typing_subtype.is_sub_type
+             env
+             new_next_entry
+             old_next_entry
+      then
+        let env = { env with in_loop = in_loop_outer } in
+        (env, result)
+      else
+        loop env (n + 1)
+    in
+    loop env 1
+  in
   let env = Env.open_tyvars env pos in
   (fun (env, tb) ->
     (Typing_solver.close_tyvars_and_solve env Errors.unify_error, tb))
@@ -1092,7 +1128,7 @@ and stmt_ env pos st =
     in
     let env = LEnv.move_and_merge_next_in_cont env C.Exit in
     (env, Aast.Return (Some te))
-  | Do (b, e) as st ->
+  | Do (b, e) ->
     (* NOTE: leaks scope as currently implemented; this matches
        the behavior in naming (cf. `do_stmt` in naming/naming.ml).
      *)
@@ -1104,26 +1140,18 @@ and stmt_ env pos st =
            * statement because they must be merged at the end of the loop, in
            * case there is no iteration *)
           let env = LEnv.save_and_merge_next_in_cont env C.Continue in
-          let alias_depth =
-            if env.in_loop then
-              1
-            else
-              Typing_alias.get_depth (pos, st)
-          in
           let (env, tb) =
-            Env.in_loop
-              env
-              (iter_n_acc alias_depth (fun env ->
-                   let env =
-                     LEnv.update_next_from_conts env [C.Continue; C.Next]
-                   in
-                   (* The following is necessary in case there is an assignment in the
-                    * expression *)
-                   let (env, te, _) = expr env e in
-                   let env = condition env true te in
-                   let env = LEnv.update_next_from_conts env [C.Do; C.Next] in
-                   let (env, tb) = block env b in
-                   (env, tb)))
+            infer_loop env (fun env ->
+                let env =
+                  LEnv.update_next_from_conts env [C.Continue; C.Next]
+                in
+                (* The following is necessary in case there is an assignment in the
+                 * expression *)
+                let (env, te, _) = expr env e in
+                let env = condition env true te in
+                let env = LEnv.update_next_from_conts env [C.Do; C.Next] in
+                let (env, tb) = block env b in
+                (env, tb))
           in
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
           let (env, te, _) = expr env e in
@@ -1132,30 +1160,22 @@ and stmt_ env pos st =
           (env, (tb, te)))
     in
     (env, Aast.Do (tb, te))
-  | While (e, b) as st ->
+  | While (e, b) ->
     let (env, (te, tb)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
           let env = LEnv.save_and_merge_next_in_cont env C.Continue in
-          let alias_depth =
-            if env.in_loop then
-              1
-            else
-              Typing_alias.get_depth (pos, st)
-          in
           let (env, tb) =
-            Env.in_loop
-              env
-              (iter_n_acc alias_depth (fun env ->
-                   let env =
-                     LEnv.update_next_from_conts env [C.Continue; C.Next]
-                   in
-                   (* The following is necessary in case there is an assignment in the
-                    * expression *)
-                   let (env, te, _) = expr env e in
-                   let env = condition env true te in
-                   (* TODO TAST: avoid repeated generation of block *)
-                   let (env, tb) = block env b in
-                   (env, tb)))
+            infer_loop env (fun env ->
+                let env =
+                  LEnv.update_next_from_conts env [C.Continue; C.Next]
+                in
+                (* The following is necessary in case there is an assignment in the
+                 * expression *)
+                let (env, te, _) = expr env e in
+                let env = condition env true te in
+                (* TODO TAST: avoid repeated generation of block *)
+                let (env, tb) = block env b in
+                (env, tb))
           in
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
           let (env, te, _) = expr env e in
@@ -1187,7 +1207,7 @@ and stmt_ env pos st =
             us_block = typed_using_block;
             us_is_block_scoped;
           } )
-  | For (e1, e2, e3, b) as st ->
+  | For (e1, e2, e3, b) ->
     let (env, (te1, te2, te3, tb)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
           (* For loops leak their initalizer, but nothing that's defined in the
@@ -1196,26 +1216,18 @@ and stmt_ env pos st =
           let (env, te1, _) = expr env e1 in
           (* initializer *)
           let env = LEnv.save_and_merge_next_in_cont env C.Continue in
-          let alias_depth =
-            if env.in_loop then
-              1
-            else
-              Typing_alias.get_depth (pos, st)
-          in
           let (env, (tb, te3)) =
-            Env.in_loop
-              env
-              (iter_n_acc alias_depth (fun env ->
-                   (* The following is necessary in case there is an assignment in the
-                    * expression *)
-                   let (env, te2, _) = expr env e2 in
-                   let env = condition env true te2 in
-                   let (env, tb) = block env b in
-                   let env =
-                     LEnv.update_next_from_conts env [C.Continue; C.Next]
-                   in
-                   let (env, te3, _) = expr env e3 in
-                   (env, (tb, te3))))
+            infer_loop env (fun env ->
+                (* The following is necessary in case there is an assignment in the
+                 * expression *)
+                let (env, te2, _) = expr env e2 in
+                let env = condition env true te2 in
+                let (env, tb) = block env b in
+                let env =
+                  LEnv.update_next_from_conts env [C.Continue; C.Next]
+                in
+                let (env, te3, _) = expr env e3 in
+                (env, (tb, te3)))
           in
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
           let (env, te2, _) = expr env e2 in
@@ -1240,29 +1252,21 @@ and stmt_ env pos st =
           (env, (te, tcl)))
     in
     (env, Aast.Switch (te, tcl))
-  | Foreach (e1, e2, b) as st ->
+  | Foreach (e1, e2, b) ->
     (* It's safe to do foreach over a disposable, as no leaking is possible *)
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let (env, (te1, te2, tb)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
           let env = LEnv.save_and_merge_next_in_cont env C.Continue in
           let (env, tk, tv) = as_expr env ty1 (fst e1) e2 in
-          let alias_depth =
-            if env.in_loop then
-              1
-            else
-              Typing_alias.get_depth (pos, st)
-          in
           let (env, (te2, tb)) =
-            Env.in_loop
-              env
-              (iter_n_acc alias_depth (fun env ->
-                   let env =
-                     LEnv.update_next_from_conts env [C.Continue; C.Next]
-                   in
-                   let (env, te2) = bind_as_expr env (fst e1) tk tv e2 in
-                   let (env, tb) = block env b in
-                   (env, (te2, tb))))
+            infer_loop env (fun env ->
+                let env =
+                  LEnv.update_next_from_conts env [C.Continue; C.Next]
+                in
+                let (env, te2) = bind_as_expr env (fst e1) tk tv e2 in
+                let (env, tb) = block env b in
+                (env, (te2, tb)))
           in
           let env =
             LEnv.update_next_from_conts env [C.Continue; C.Break; C.Next]

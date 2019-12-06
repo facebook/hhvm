@@ -1323,12 +1323,6 @@ let anon anon_lenv env f =
   let env = set_fn_kind env outer_fun_kind in
   (env, tfun, result)
 
-let in_loop env f =
-  let old_in_loop = env.in_loop in
-  let env = { env with in_loop = true } in
-  let (env, result) = f env in
-  ({ env with in_loop = old_in_loop }, result)
-
 let in_try env f =
   let old_in_try = env.in_try in
   let env = { env with in_try = true } in

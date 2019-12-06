@@ -100,6 +100,13 @@ val union_opts :
   LEnvC.per_cont_entry option ->
   env * LEnvC.per_cont_entry option
 
+val is_sub_opt_entry :
+  (env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool) ->
+  env ->
+  LEnvC.per_cont_entry option ->
+  LEnvC.per_cont_entry option ->
+  bool
+
 (* union all continuations pairwise from two continuation maps.
  * This is used at certain merge points in the control flow,
  * typically after an `if` or a `switch` statement.

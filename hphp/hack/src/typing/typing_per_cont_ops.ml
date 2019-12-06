@@ -55,6 +55,29 @@ let union_opts union_types env ctxopt1 ctxopt2 =
     let (env, ctx) = union union_types env ctx1 ctx2 in
     (env, Some ctx)
 
+(* Does per-cont entry ctx1 entail ctx2?
+ *   For locals, for each x:t2 in ctx2 we require x:t1 in ctx1 with t1 <: t2
+ *   For fake member info, we delegate to Typing_fake_members.sub
+ *   TODO: tpenv. Not clear what to do here, as we generate fresh type parameter names
+ *     and so use of is_sub_entry for loop iteration would return false even if safe
+ *)
+let is_sub_entry is_subtype env ctx1 ctx2 =
+  LMap.for_all2
+    (fun _k tyopt1 tyopt2 ->
+      match (tyopt1, tyopt2) with
+      | (_, None) -> true
+      | (None, Some _) -> false
+      | (Some (ty1, _id1), Some (ty2, _id2)) -> is_subtype env ty1 ty2)
+    ctx1.local_types
+    ctx2.local_types
+  && Typing_fake_members.sub ctx1.fake_members ctx2.fake_members
+
+let is_sub_opt_entry is_subtype env ctxopt1 ctxopt2 =
+  match (ctxopt1, ctxopt2) with
+  | (_, None) -> true
+  | (None, _) -> false
+  | (Some ctx1, Some ctx2) -> is_sub_entry is_subtype env ctx1 ctx2
+
 (* Union a list of continuations *)
 let union_conts env union_types local_types cont_list =
   let union_two env locals cont =

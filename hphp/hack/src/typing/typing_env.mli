@@ -394,8 +394,6 @@ val anon :
   (env -> env * Tast.expr * locl_ty) ->
   env * Tast.expr * locl_ty
 
-val in_loop : env -> (env -> env * 'a) -> env * 'a
-
 val in_try : env -> (env -> env * 'a) -> env * 'a
 
 val in_case : env -> (env -> env * 'a) -> env * 'a

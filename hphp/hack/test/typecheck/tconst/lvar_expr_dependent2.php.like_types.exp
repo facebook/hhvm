@@ -37,15 +37,9 @@ File "lvar_expr_dependent2.php", line 61, characters 7-24:
 File "lvar_expr_dependent2.php", line 63, characters 7-24:
   ~<expr#7>::T
   where <expr#7>::T as \C::T
-File "lvar_expr_dependent2.php", line 61, characters 7-24:[2]
-  ~<expr#8>::T
-  where <expr#8>::T as \C::T
-File "lvar_expr_dependent2.php", line 63, characters 7-24:[2]
-  ~<expr#8>::T
-  where <expr#8>::T as \C::T
 File "lvar_expr_dependent2.php", line 67, characters 5-22:
-  ~<expr#9>::T
-  where <expr#9>::T as \C::T
+  ~<expr#8>::T
+  where <expr#8>::T as \C::T
 File "lvar_expr_dependent2.php", line 22, characters 9-17:
 This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed (Typing[4240])
 File "lvar_expr_dependent2.php", line 16, characters 24-32:

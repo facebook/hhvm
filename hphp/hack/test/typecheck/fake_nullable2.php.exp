@@ -1,0 +1,7 @@
+File "fake_nullable2.php", line 11, characters 14-16:
+You are trying to access the method 'add' but this object can be null. (Typing[4064])
+File "fake_nullable2.php", line 5, characters 38-49:
+This can be null
+File "fake_nullable2.php", line 11, characters 5-20:
+All the local information about $x->vec has been invalidated during this call.
+This is a limitation of the type-checker, use a local if that's the problem.

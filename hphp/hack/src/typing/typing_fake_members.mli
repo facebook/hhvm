@@ -18,7 +18,13 @@ type blame =
 (* Initial validation *)
 val empty : t
 
-(* Merge validation information at a join point *)
+(* Does one validation information entail another? *)
+val sub : t -> t -> bool
+
+(* Merge validation information at a join point.
+ * If join x y = z
+ * then sub x z = true and sub y z = true
+ *)
 val join : t -> t -> t
 
 (* Is this identifier a fake member that is valid? *)

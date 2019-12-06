@@ -39,13 +39,13 @@ TRACE_SET_MOD(pgo);
 namespace {
 
 struct BlockData {
-  RegionDesc::BlockId              blockId;
-  RegionDesc::Block::GuardedLocVec guards;
-  jit::vector<Type>                origTypes;
-  bool                             relaxed; // block had some type guard relaxed
-  bool                             deleted; // block became unnecessary
-  bool                             merged; // another block was merged into this
-  int64_t                          weight;
+  RegionDesc::BlockId blockId;
+  GuardedLocations    guards;
+  jit::vector<Type>   origTypes;
+  bool                relaxed; // block had some type guard relaxed
+  bool                deleted; // block became unnecessary
+  bool                merged; // another block was merged into this
+  int64_t             weight;
 };
 
 using BlockDataVec = jit::vector<BlockData>;
@@ -562,7 +562,7 @@ void optimizeProfiledGuards(RegionDesc& region, const ProfData& profData) {
 void optimizeGuards(RegionDesc& region, bool simple) {
   for (auto block : region.blocks()) {
     bool relaxed = false;
-    RegionDesc::Block::GuardedLocVec newPreConds;
+    GuardedLocations newPreConds;
     auto& oldPreConds = block->typePreConditions();
 
     for (auto& preCond : oldPreConds) {

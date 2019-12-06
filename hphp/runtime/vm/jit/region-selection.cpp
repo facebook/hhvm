@@ -729,7 +729,8 @@ void RegionDesc::Block::checkInstruction(Op op) const {
  * 3. (Unchecked) each stack offset in the type prediction list is valid.
 */
 void RegionDesc::Block::checkMetadata() const {
-  auto checkTypedLocations = [&](const char* /*msg*/, const TypedLocVec& vec) {
+  auto checkTypedLocations = [&](const char* /*msg*/,
+                                 const TypedLocations& vec) {
     for (auto& typedLoc : vec) {
       auto& loc = typedLoc.location;
       switch (loc.tag()) {
@@ -744,7 +745,7 @@ void RegionDesc::Block::checkMetadata() const {
   };
 
   auto checkGuardedLocations = [&](const char* /*msg*/,
-                                   const GuardedLocVec& vec) {
+                                   const GuardedLocations& vec) {
     for (auto& guardedLoc : vec) {
       assertx(guardedLoc.type.isSpecialized() ||
               typeFitsConstraint(guardedLoc.type, guardedLoc.category));
@@ -1131,7 +1132,7 @@ std::string show(const RegionDesc::GuardedLocation& guardedLoc) {
   ).str();
 }
 
-std::string show(const RegionDesc::Block::GuardedLocVec& guardedLocVec) {
+std::string show(const GuardedLocations& guardedLocVec) {
   std::string ret;
   for (auto& guardedLoc : guardedLocVec) {
     folly::format(&ret, "{} ; ", show(guardedLoc));

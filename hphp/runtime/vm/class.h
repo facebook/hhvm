@@ -308,8 +308,11 @@ struct Class : AtomicCountable {
 
     size_t size() const;
 
-    Entry<false> operator[](size_t i);
-    Entry<true> operator[](size_t i) const;
+    template <typename T>
+    Entry<false> operator[](T i);
+
+    template <typename T>
+    Entry<true> operator[](T i) const;
 
     iterator begin();
     iterator end();
@@ -927,7 +930,9 @@ public:
    * Map the logical slot of a property to its physical index within the object
    * in memory.
    */
-  uint16_t propSlotToIndex(Slot slot) const { return m_slotIndex[slot]; }
+  ObjectProps::quick_index propSlotToIndex(Slot slot) const {
+    return m_slotIndex[slot];
+  }
 
   /*
    * Map the physical index of a property within the object to its logical slot.
@@ -1723,7 +1728,7 @@ private:
 
   /* Indexed by logical Slot number, gives the corresponding index within the
    * objects in memory. */
-  VMFixedVector<uint16_t> m_slotIndex;
+  VMFixedVector<ObjectProps::quick_index> m_slotIndex;
 
   /*
    * Cache of m_preClass->attrs().

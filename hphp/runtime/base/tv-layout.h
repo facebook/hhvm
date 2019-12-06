@@ -39,6 +39,14 @@ namespace HPHP { namespace tv_layout {
  *                             producing TypedValues with the additional
  *                             constraint that tv_lval{iter} is well-formed as
  *                             long as the iterator is derefenecable
+ * - quick_index: some type, implicitly coercible to index_t, designed to allow
+ *                faster access to the collection. This may be the same as
+ *                index_t
+ *
+ * Static members:
+ * size_t max_index
+ * The maximum index in the container accessible both by index_t and
+ * quick_index
  *
  * Static functions:
  * size_t size_for(index_t size);
@@ -46,8 +54,12 @@ namespace HPHP { namespace tv_layout {
  * This must be aligned to a multiple of 16 as there's several optimizations
  * that rely on this fact.
  *
+ * quick_index quickIndex(index_t idx);
+ * Produce the quick index corresponding to the given index
+ *
  * Member functions:
  * tv_val_offset offsetOf(index_t idx) const;
+ * tv_val_offset offsetOf(quick_index idx) const; (optional)
  * Produces a tv_val_offset to the given index's typed value.
  *
  * void checkInvariants(index_t size) const;
@@ -64,11 +76,14 @@ namespace HPHP { namespace tv_layout {
 template <typename Impl,
           typename Iterator,
           typename ConstIterator,
-          typename Index>
+          typename Index,
+          typename QuickIndex>
 struct LayoutBase {
   using iterator = Iterator;
   using const_iterator = ConstIterator;
+
   using index_t = Index;
+  using quick_index = QuickIndex;
   static_assert(std::is_integral<index_t>::value, "");
 
   Impl& impl() { return *static_cast<Impl*>(this); }
@@ -116,11 +131,13 @@ struct LayoutBase {
     }
   }
 
-  tv_lval at(index_t idx) {
+  template <typename T>
+  tv_lval at(T idx) {
     return impl().offsetOf(idx).apply(reinterpret_cast<char*>(this));
   }
 
-  tv_rval at(index_t idx) const {
+  template <typename T>
+  tv_rval at(T idx) const {
     return impl().offsetOf(idx).apply(reinterpret_cast<const char*>(this));
   }
 };
@@ -129,7 +146,10 @@ struct LayoutBase {
 struct TvArray : public LayoutBase<TvArray,
                                    TypedValue*,
                                    const TypedValue*,
+                                   uint16_t,
                                    uint16_t> {
+  static size_t constexpr max_index = std::numeric_limits<index_t>::max();
+
   static size_t sizeFor(index_t len) {
     return len * sizeof(TypedValue);
   }
@@ -159,6 +179,10 @@ public:
 
   const_iterator iteratorAt(index_t offset) const {
     return &rep()[offset];
+  }
+
+  static quick_index quickIndex(index_t idx) {
+    return idx;
   }
 
   void scan(index_t count, type_scan::Scanner& scanner) const {
@@ -256,12 +280,26 @@ private:
   value_t* m_value;
 };
 
+struct quick_index {
+  uint8_t rem : 3;
+  uint16_t quot : 13;
+
+  operator uint16_t() const {
+    return quot * 7 + rem;
+  }
+};
+
+
 } // namespace detail_7up
 
 struct Tv7Up : public LayoutBase<Tv7Up,
                                  detail_7up::iterator_impl<false>,
                                  detail_7up::iterator_impl<true>,
-                                 uint16_t> {
+                                 uint16_t,
+                                 detail_7up::quick_index> {
+  /* see quick_index above for why this is the maximum index */
+  static size_t constexpr max_index = ((1 << 13) - 1) * 7;
+
   bool checkInvariants(index_t size) const {
     assertx(reinterpret_cast<uintptr_t>(this) % 16 == 0);
     return true;
@@ -309,6 +347,23 @@ struct Tv7Up : public LayoutBase<Tv7Up,
       static_cast<ptrdiff_t>(chunkStart + slot),
       static_cast<ptrdiff_t>(chunkStart + sizeof(Value) * (1 + slot))
     };
+  }
+
+  static tv_val_offset offsetOf(quick_index idx) {
+    static_assert(8 * sizeof(DataType) == sizeof(Value), "");
+    auto const chunkStart = 8 * sizeof(Value) * idx.quot;
+
+    return {
+      static_cast<ptrdiff_t>(chunkStart + idx.rem),
+      static_cast<ptrdiff_t>(chunkStart + sizeof(Value) * (1 + idx.rem))
+    };
+  }
+
+  static quick_index quickIndex(size_t idx) {
+    quick_index ret;
+    ret.quot = idx / 7;
+    ret.rem = idx % 7;
+    return ret;
   }
 
   iterator iteratorAt(index_t pos) {

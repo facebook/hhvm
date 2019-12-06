@@ -40,24 +40,6 @@ inline bool Class::validate() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Class::PropInitVec.
 
-inline Class::PropInitVec::PropInitVec() : m_data(nullptr),
-                                           m_size(0),
-                                           m_capacity(0) {}
-
-inline Class::PropInitVec::Entry<false>
-Class::PropInitVec::operator[](size_t i) {
-  auto lval = m_data->at(i);
-  auto deepInit = deepInitBits()[i];
-  return Entry<false>{lval, deepInit};
-}
-
-inline Class::PropInitVec::Entry<true>
-Class::PropInitVec::operator[](size_t i) const {
-  auto lval = m_data->at(i);
-  auto deepInit = deepInitBits()[i];
-  return Entry<true>{lval, deepInit};
-}
-
 template <bool is_const>
 Class::PropInitVec::iterator_impl<is_const>::iterator_impl(
   tv_iter_t tv,
@@ -104,6 +86,26 @@ template <bool is_const>
 Class::PropInitVec::Entry<is_const>
 Class::PropInitVec::iterator_impl<is_const>::operator->() const {
   return *(*this);
+}
+
+inline Class::PropInitVec::PropInitVec() : m_data(nullptr),
+                                           m_size(0),
+                                           m_capacity(0) {}
+
+template <typename T>
+inline Class::PropInitVec::Entry<false>
+Class::PropInitVec::operator[](T i) {
+  auto lval = m_data->at(i);
+  auto deepInit = deepInitBits()[i];
+  return Entry<false>{lval, deepInit};
+}
+
+template <typename T>
+inline Class::PropInitVec::Entry<true>
+Class::PropInitVec::operator[](T i) const {
+  auto lval = m_data->at(i);
+  auto deepInit = deepInitBits()[i];
+  return Entry<true>{lval, deepInit};
 }
 
 inline Class::PropInitVec::iterator Class::PropInitVec::begin() {

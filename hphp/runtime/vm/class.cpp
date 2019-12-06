@@ -2660,7 +2660,13 @@ void Class::setProperties() {
 
   m_declProperties.create(curPropMap);
   m_staticProperties.create(curSPropMap);
-  m_slotIndex = slotIndex;
+
+  std::vector<ObjectProps::quick_index> slotQuickIndex;
+  slotQuickIndex.reserve(slotIndex.size());
+  for (auto i : slotIndex) {
+    slotQuickIndex.push_back(ObjectProps::quickIndex(i));
+  }
+  m_slotIndex = slotQuickIndex;
 
   if (unsigned n = numStaticProperties()) {
     using LinkT = std::remove_pointer<decltype(m_sPropCache)>::type;
@@ -2682,6 +2688,8 @@ void Class::setProperties() {
       m_countablePropsEnd = std::max(m_countablePropsEnd, index);
     }
   }
+
+  assertx(m_declProperties.size() <= ObjectProps::max_index + 1);
   FTRACE(3, "numDeclProperties = {}\n", m_declProperties.size());
   FTRACE(3, "countablePropsEnd = {}\n", m_countablePropsEnd);
 }

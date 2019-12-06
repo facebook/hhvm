@@ -56,6 +56,16 @@ struct Repo::GlobalData {
   int32_t CheckPropTypeHints = 0;
 
   /*
+   * Indicates whether a repo was compiled assumming that UpperBound type-hints
+   * will be verified by VerifyParamType and VerifyReturnType instructions
+   * at runtime.
+   *
+   * This changes program behavior because this type hints that are checked
+   * at runtime will enable additional HHBBC optimizations.
+   */
+  int32_t EnforceGenericsUB = 0;
+
+  /*
    * Indicates whether a repo was compiled with HardPrivatePropInference.
    */
   bool HardPrivatePropInference = false;
@@ -186,6 +196,7 @@ struct Repo::GlobalData {
   template<class SerDe> void serde(SerDe& sd) {
     sd(InitialNamedEntityTableSize)
       (InitialStaticStringTableSize)
+      (EnforceGenericsUB)
       (HardReturnTypeHints)
       (CheckPropTypeHints)
       (HardPrivatePropInference)

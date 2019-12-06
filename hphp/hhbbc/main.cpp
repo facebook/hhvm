@@ -370,6 +370,7 @@ void write_global_data(
 
   auto gd                        = Repo::GlobalData{};
   gd.Signature                   = nanos.count();
+  gd.EnforceGenericsUB           = RuntimeOption::EvalEnforceGenericsUB;
   gd.HardReturnTypeHints         = RuntimeOption::EvalCheckReturnTypeHints >= 3;
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
   gd.HardPrivatePropInference    = options.HardPrivatePropInference;
@@ -537,6 +538,8 @@ int main(int argc, char** argv) try {
   if (!hack_compiler_extract_path.empty()) {
     RuntimeOption::EvalHackCompilerExtractPath = hack_compiler_extract_path;
   }
+
+  RuntimeOption::EvalEnforceGenericsUB = gd.EnforceGenericsUB;
 
   register_process_init();
 

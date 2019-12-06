@@ -211,6 +211,7 @@ void verifyTypeImpl(IRGS& env,
                     Giveup giveup) {
 
   if (!tc.isCheckable()) return;
+  assertx(!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB != 0);
 
   auto val = getVal();
   assertx(val->type() <= TCell);
@@ -229,7 +230,8 @@ void verifyTypeImpl(IRGS& env,
 
     auto const failHard = RuntimeOption::RepoAuthoritative
       && !tc.isSoft()
-      && (!tc.isThis() || thisFailsHard);
+      && (!tc.isThis() || thisFailsHard)
+      && (!tc.isUpperBound() || RuntimeOption::EvalEnforceGenericsUB == 2);
     return fail(valType, failHard);
   };
 

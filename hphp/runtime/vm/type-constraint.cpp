@@ -1040,6 +1040,7 @@ void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
     (RuntimeOption::EvalHackArrCompatTypeHintNotices &&
      (RuntimeOption::EvalHackArrCompatTypeHintPolymorphism ||
       isArrayType(tv->m_type))) ||
+    (RuntimeOption::EvalEnforceGenericsUB != 2 && isUpperBound()) ||
     check(tv, func->cls())
   );
 }
@@ -1094,15 +1095,17 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
   }
 
   std::string msg = folly::sformat(
-      "Argument {} returned from {}() as an inout parameter must be of type "
+      "Argument {} returned from {}() as an inout parameter must be {} "
       "{}, {} given",
       paramNum + 1,
       func->fullName(),
+      isUpperBound() ? "upper-bounded by" : "of type",
       displayName(func->cls()),
       describe_actual_type(c, isHHType())
   );
 
-  if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()) {
+  if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()
+      && (!isUpperBound() || RuntimeOption::EvalEnforceGenericsUB != 1)) {
     raise_return_typehint_error(msg);
   } else {
     raise_warning_unsampled(msg);
@@ -1287,7 +1290,8 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
           givenType
         ).str();
     }
-    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()) {
+    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()
+        && (!isUpperBound() || RuntimeOption::EvalEnforceGenericsUB == 2)) {
       raise_return_typehint_error(msg);
     } else {
       raise_warning_unsampled(msg);
@@ -1296,7 +1300,9 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
   }
 
   // Handle parameter type constraint failures
-  if (isExtended() && isSoft()) {
+  if (isExtended() &&
+      (isSoft() ||
+      (isUpperBound() && RuntimeOption::EvalEnforceGenericsUB == 1))) {
     // Soft extended type hints raise warnings instead of recoverable
     // errors, to ease migration.
     raise_warning_unsampled(
@@ -1315,21 +1321,29 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
   } else {
     auto cls = Unit::lookupClass(m_typeName);
     if (cls && isInterface(cls)) {
-      raise_typehint_error(
+      auto const msg =
         folly::format(
           "Argument {} passed to {}() must implement interface {}, {} given",
           id + 1, func->fullName(), name, givenType
-        ).str()
-      );
+        ).str();
+      if (isUpperBound() && RuntimeOption::EvalEnforceGenericsUB == 1) {
+        raise_warning_unsampled(msg);
+      } else {
+        raise_typehint_error(msg);
+      }
     } else {
-      raise_typehint_error(
+      auto const msg =
         folly::format(
           "Argument {} passed to {}() must be {} {}, {} given",
           id + 1, func->fullName(),
           isUpperBound() ? "upper-bounded by" : "an instance of",
           name, givenType
-        ).str()
-      );
+        ).str();
+      if (isUpperBound() && RuntimeOption::EvalEnforceGenericsUB == 1) {
+        raise_warning_unsampled(msg);
+      } else {
+        raise_typehint_error(msg);
+      }
     }
   }
 }

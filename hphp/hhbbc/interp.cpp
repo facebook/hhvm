@@ -5117,7 +5117,9 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
   // If CheckReturnTypeHints < 3 OR if the constraint is soft,
   // then there are no optimizations we can safely do here, so
   // just leave the top of stack as is.
-  if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft()) {
+  if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft() ||
+      (RuntimeOption::EvalEnforceGenericsUB != 2 && constraint.isUpperBound()))
+  {
     if (ts_flavor) popC(env);
     popC(env);
     push(env, std::move(stackT), stackEquiv);

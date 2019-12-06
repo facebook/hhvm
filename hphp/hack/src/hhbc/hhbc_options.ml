@@ -394,7 +394,7 @@ let set_option options name value =
   | "hhvm.lang.disallow_func_ptrs_in_constants" ->
     { options with option_disallow_func_ptrs_in_constants = as_bool value }
   | "eval.enforcegenericsub" ->
-    { options with option_enforce_generics_ub = as_bool value }
+    { options with option_enforce_generics_ub = int_of_string value > 0 }
   | "hhvm.hack.lang.check_int_overflow" ->
     { options with option_check_int_overflow = int_of_string value > 0 }
   | "hhvm.hack.lang.rust_lowerer" ->
@@ -604,7 +604,7 @@ let value_setters =
     @@ fun opts v ->
       { opts with option_disallow_func_ptrs_in_constants = v = 1 } );
     ( set_value "hhvm.enforce_generics_ub" get_value_from_config_int
-    @@ fun opts v -> { opts with option_enforce_generics_ub = v = 1 } );
+    @@ fun opts v -> { opts with option_enforce_generics_ub = v > 0 } );
     ( set_value "hhvm.hack.lang.check_int_overflow" get_value_from_config_int
     @@ fun opts v -> { opts with option_check_int_overflow = v > 0 } );
     ( set_value "hhvm.hack.lang.rust_lowerer" get_value_from_config_int

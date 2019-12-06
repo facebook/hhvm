@@ -90,7 +90,6 @@ struct RepoOptions {
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
   E(bool,           EnforceGenericsUB,              false)            \
-  H(bool,           RustLowerer,                    true)            \
   /**/
 
   /**/
@@ -770,6 +769,10 @@ struct RuntimeOption {
         fatal error.
   */                                                                    \
   F(int32_t, CheckPropTypeHints,       0)                               \
+  /* Enables enforcing upper-bounds for generic types
+     1 => warning, 2 => error
+  */                                                                    \
+  F(int32_t, EnforceGenericsUB,        0)                               \
   /* WarnOnTooManyArguments:
    * 0 -> no warning, 1 -> warning, 2 -> exception
    */                                                                   \

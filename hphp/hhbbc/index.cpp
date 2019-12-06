@@ -4848,8 +4848,12 @@ Type Index::get_type_for_constraint(Context ctx,
   if (getSuperType) {
     /*
      * Soft hints (@Foo) are not checked.
+     * Also upper-bound type hints are not checked when they do not error.
      */
-    if (tc.isSoft()) return TCell;
+    if (tc.isSoft() ||
+        (RuntimeOption::EvalEnforceGenericsUB != 2 && tc.isUpperBound())) {
+      return TCell;
+    }
   }
 
   auto const res = get_type_for_annotated_type(
@@ -5775,7 +5779,10 @@ void Index::init_return_type(const php::Func* func) {
   }
 
   auto make_type = [&] (const TypeConstraint& tc) {
-    if (tc.isSoft()) return TBottom;
+    if (tc.isSoft() ||
+        (RuntimeOption::EvalEnforceGenericsUB != 2 && tc.isUpperBound())) {
+      return TBottom;
+    }
     return loosen_dvarrayness(
       lookup_constraint(
         Context {

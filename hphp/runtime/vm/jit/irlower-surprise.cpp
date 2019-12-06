@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -107,25 +108,25 @@ void cgHandleRequestSurprise(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCheckStackOverflow(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const func = inst->marker().func();
+  auto const calleeFP = srcLoc(env, inst, 0).reg();
+  auto const callee = inst->marker().func();
   auto& v = vmain(env);
 
   auto const stackMask = int32_t{
     cellsToBytes(RuntimeOption::EvalVMStackElms) - 1
   };
-  auto const depth = cellsToBytes(func->maxStackCells()) +
+  auto const depth = cellsToBytes(callee->maxStackCells()) +
                      cellsToBytes(kStackCheckPadding) +
                      Stack::sSurprisePageSize;
 
   auto const r = v.makeReg();
   auto const sf = v.makeReg();
-  v << andqi{stackMask, fp, r, v.makeReg()};
+  v << andqi{stackMask, calleeFP, r, v.makeReg()};
   v << subqi{safe_cast<int32_t>(depth), r, v.makeReg(), sf};
 
   unlikelyIfThen(v, vcold(env), CC_L, sf, [&] (Vout& v) {
-    cgCallHelper(v, env, CallSpec::direct(handleStackOverflow), kVoidDest,
-                 SyncOptions::Sync, argGroup(env, inst).reg(fp));
+    cgCallHelper(v, env, CallSpec::direct(throw_stack_overflow), kVoidDest,
+                 SyncOptions::SyncStublogue, argGroup(env, inst));
   });
 }
 

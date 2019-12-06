@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/stack-overflow.h"
 
-#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
@@ -34,13 +34,9 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool checkCalleeStackOverflow(const ActRec* calleeAR) {
-  auto const func = calleeAR->func();
-  auto const limit = func->maxStackCells() + kStackCheckPadding;
-
-  const void* const needed_top =
-    reinterpret_cast<const TypedValue*>(calleeAR) - limit;
-
+bool checkCalleeStackOverflow(const TypedValue* calleeFP, const Func* callee) {
+  auto const limit = callee->maxStackCells() + kStackCheckPadding;
+  const void* const needed_top = calleeFP - limit;
   const void* const lower_limit =
     static_cast<char*>(vmRegsUnsafe().stack.getStackLowAddress()) +
     Stack::sSurprisePageSize;
@@ -65,7 +61,7 @@ void handleStackOverflow(ActRec* calleeAR) {
   unsafeRegs.jitReturnAddr = nullptr;
   tl_regState = VMRegState::CLEAN;
 
-  throw FatalErrorException("Stack overflow");
+  throw_stack_overflow();
 }
 
 void handlePossibleStackOverflow(ActRec* calleeAR) {
@@ -74,7 +70,8 @@ void handlePossibleStackOverflow(ActRec* calleeAR) {
   // If it's not an overflow, it was probably a surprise flag trip.  But we
   // can't assert that it is because background threads are allowed to clear
   // surprise bits concurrently, so it could be cleared again by now.
-  if (!checkCalleeStackOverflow(calleeAR)) return;
+  auto const calleeFP = reinterpret_cast<const TypedValue*>(calleeAR);
+  if (!checkCalleeStackOverflow(calleeFP, calleeAR->func())) return;
 
   /*
    * Stack overflows in this situation are a slightly different case than

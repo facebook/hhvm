@@ -40,6 +40,7 @@ enum class SyncOptions {
   None,
   Sync,
   SyncAdjustOne,
+  SyncStublogue,
 };
 
 /*

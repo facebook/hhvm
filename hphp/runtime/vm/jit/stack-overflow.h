@@ -14,23 +14,23 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_STACK_OVERFLOW_H_
-#define incl_HPHP_JIT_STACK_OVERFLOW_H_
+#pragma once
 
 namespace HPHP {
 
 struct ActRec;
+struct Func;
+struct TypedValue;
 
 namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Return whether the `calleeAR' frame overflows the stack.
- *
- * Expects `calleeAR' and its arguments to be on the VM stack.
+ * Return whether the call to the `callee` could overflow the stack, assuming
+ * `calleeFP` points to the address of the possibly uninitialized callee frame.
  */
-bool checkCalleeStackOverflow(const ActRec* calleeAR);
+bool checkCalleeStackOverflow(const TypedValue* calleeFP, const Func* callee);
 
 /*
  * Handle a VM stack overflow condition by throwing an appropriate exception.
@@ -48,5 +48,3 @@ void handlePossibleStackOverflow(ActRec* calleeAR);
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
-
-#endif

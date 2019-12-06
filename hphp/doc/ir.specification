@@ -3465,7 +3465,7 @@ fields of that struct for holding intermediate values.
   Enter prologue context, which operates in the same mode as unique stubs.
   Makes sure the native stack is properly aligned.
 
-| CheckStackOverflow, ND, S(FramePtr), NF
+| CheckStackOverflow, ND, S(StkPtr), NF
 
   Check if the stack depth has exceeded its limit.  If it has, jump to the
   stack overflow helper stub, which will throw.

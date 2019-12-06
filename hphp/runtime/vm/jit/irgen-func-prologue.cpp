@@ -284,6 +284,12 @@ void emitPrologueEntry(IRGS& env, uint32_t argc) {
   }
 
   gen(env, EnterPrologue);
+
+  // Emit early stack overflow check if necessary.
+  if (stack_check_kind(func, argc) == StackCheck::Early) {
+    env.irb->exceptionStackBoundary();
+    gen(env, CheckStackOverflow, sp(env));
+  }
 }
 
 void emitSpillFrame(IRGS& env, uint32_t argc, SSATmp* callFlags,
@@ -319,12 +325,6 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID,
   if (isProfiling(env.context.kind)) {
     gen(env, IncProfCounter, TransIDData{transID});
     profData()->setProfiling(func->getFuncId());
-  }
-
-  // Emit early stack overflow check if necessary.
-  if (stack_check_kind(func, argc) == StackCheck::Early) {
-    env.irb->exceptionStackBoundary();
-    gen(env, CheckStackOverflow, fp(env));
   }
 
   auto const unpackArgsForTooManyArgs = [&]() -> SSATmp* {

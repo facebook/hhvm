@@ -18,6 +18,7 @@
 #define incl_HPHP_VM_INTERP_HELPERS_H_
 
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/request-info.h"
@@ -147,7 +148,7 @@ inline void checkNativeStack() {
   // Check whether we're going out of bounds of our native stack.
   if (LIKELY(stack_in_bounds())) return;
   TRACE_MOD(Trace::gc, 1, "Maximum stack depth exceeded.\n");
-  raise_error("Stack overflow");
+  throw_stack_overflow();
 }
 
 /*
@@ -172,7 +173,7 @@ void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
   auto limit = f->maxStackCells() + kStackCheckPadding + extraCells;
   if (LIKELY(stack_in_bounds() && !stk.wouldOverflow(limit))) return;
   TRACE_MOD(Trace::gc, 1, "Maximum stack depth exceeded.\n");
-  raise_error("Stack overflow");
+  throw_stack_overflow();
 }
 
 }

@@ -113,6 +113,11 @@ void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
 
 Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
   assertx(marker.valid());
+
+  // Stublogue code operates on behalf of the caller, so it needs an indirect
+  // fixup to obtain the real savedRip from the native frame.
+  if (sync == SyncOptions::SyncStublogue) return makeIndirectFixup(0);
+
   auto const stackOff = [&] {
     switch (sync) {
       case SyncOptions::SyncAdjustOne:
@@ -126,6 +131,9 @@ Fixup makeFixup(const BCMarker& marker, SyncOptions sync) {
         // fallthru
       case SyncOptions::Sync:
         return marker.spOff();
+
+      case SyncOptions::SyncStublogue:
+        not_reached();
     }
     not_reached();
   }();

@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -179,16 +180,33 @@ bool fcallHelper(CallFlags callFlags, Func* func, int32_t numArgs, void* ctx,
   assert_native_stack_aligned();
   assertx(numArgs <= func->numNonVariadicParams() + 1);
 
-  // The stub already synced the registers, but the vmsp() is pointing to
-  // the space reserved for the ActRec, so let's adjust it first.
+  // The stub already synced the vmfp() and vmsp() registers, but the vmsp() is
+  // pointing to the space reserved for the ActRec. This space together with
+  // the space reserved for output args may contain random garbage, as the Call
+  // opcode promises to kill/write this space, so store-elim is allowed to
+  // optimize away these writes. So, write NullUninits over this space, adjust
+  // vmsp() and set vmpc()/vmJitReturnAddr().
   assertx(tl_regState == VMRegState::DIRTY);
+  auto& unsafeRegs = vmRegsUnsafe();
+  auto const calleeFP = unsafeRegs.stack.top();
+  for (auto i = kNumActRecCells + func->numInOutParams(); i--;) {
+    tvWriteUninit(calleeFP[i]);
+  }
+
+  unsafeRegs.stack.nalloc(numArgs + (callFlags.hasGenerics() ? 1 : 0));
+  unsafeRegs.pc = unsafeRegs.fp->unit()->at(
+    unsafeRegs.fp->func()->base() + callFlags.callOffset());
+  unsafeRegs.jitReturnAddr = savedRip;
   tl_regState = VMRegState::CLEAN;
-  ActRec* ar = vmStack().indA(0);
-  vmStack().nalloc(numArgs + (callFlags.hasGenerics() ? 1 : 0));
-  vmRegs().pc = vmfp()->unit()->at(
-    vmfp()->func()->base() + callFlags.callOffset());
+
+  // Check for stack overflow in the same place func prologues make their
+  // StackCheck::Early check (see irgen-func-prologue.cpp).
+  if (checkCalleeStackOverflow(calleeFP, func)) {
+    throw_stack_overflow();
+  }
 
   // Write ActRec.
+  ActRec* ar = reinterpret_cast<ActRec*>(calleeFP);
   ar->m_sfp = vmfp();
   ar->setJitReturn(savedRip);
   ar->m_func = func;
@@ -199,11 +217,6 @@ bool fcallHelper(CallFlags callFlags, Func* func, int32_t numArgs, void* ctx,
   ar->setNumArgs(numArgs);
   ar->m_thisUnsafe = reinterpret_cast<ObjectData*>(ctx);
   ar->trashVarEnv();
-
-  // Check for stack overflow in the same place func prologues make their
-  // StackCheck::Early check (see irgen-func-prologue.cpp).  This handler also
-  // cleans and syncs vmRegs for us.
-  if (checkCalleeStackOverflow(ar)) handleStackOverflow(ar);
 
   // If doFCall() returns false, we've been asked to skip the function body due
   // to fb_intercept, so indicate that via the return value. If we did not

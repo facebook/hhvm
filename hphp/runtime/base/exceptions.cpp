@@ -168,6 +168,10 @@ void throw_not_supported(const char* feature, const char* reason) {
   throw ExtendedException("%s is not supported: %s", feature, reason);
 }
 
+void throw_stack_overflow() {
+  throw FatalErrorException("Stack overflow");
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 [[noreturn]]

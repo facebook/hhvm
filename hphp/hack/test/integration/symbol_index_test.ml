@@ -429,5 +429,5 @@ let tests args =
 let () =
   Daemon.check_entry_point ();
   let args = Args.parse () in
-  let () = HackEventLogger.client_init args.Args.template_repo in
+  EventLogger.init_fake ();
   Unit_test.run_all (tests args)

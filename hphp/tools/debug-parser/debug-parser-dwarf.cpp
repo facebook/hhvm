@@ -2279,7 +2279,11 @@ private:
             ranges = dwarf.getRanges(attr);
             break;
           case DW_AT_low_pc:
-            low = dwarf.getAttributeValueAddr(attr);
+            // Some times GCC/Clang emits very low numbers for addresses in
+            // the form of UData. Let's drop them.
+            if (attr->form == DW_FORM_addr) {
+              low = dwarf.getAttributeValueAddr(attr);
+            }
             break;
           case DW_AT_high_pc:
             if (attr->form != DW_FORM_addr) {

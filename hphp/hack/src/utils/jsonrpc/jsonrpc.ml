@@ -28,6 +28,8 @@ type message = {
   method_: string;
   (* mandatory for request+notification; empty otherwise *)
   id: Hh_json.json option;
+  (* a unique random string, used for logging *)
+  tracking_id: string;
   (* mandatory for request+response *)
   params: Hh_json.json option;
   (* optional for request+notification *)
@@ -78,7 +80,15 @@ let parse_message ~(json : Hh_json.json) ~(timestamp : float) : message =
     | (_, _, _, Some _error) -> Response
     | _ -> raise (Hh_json.Syntax_error "Not JsonRPC")
   in
-  { json; timestamp; id; method_; params; result; error; kind }
+  let tracking_id = Random_id.short_string () in
+  let tracking_id =
+    match id with
+    | Some (Hh_json.JSON_Number s)
+    | Some (Hh_json.JSON_String s) ->
+      Printf.sprintf "%s.%s" tracking_id s
+    | _ -> tracking_id
+  in
+  { json; timestamp; id; tracking_id; method_; params; result; error; kind }
 
 (***************************************************************)
 (* Internal queue functions that run in the daemon process.    *)

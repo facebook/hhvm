@@ -26,6 +26,8 @@ type message = {
   method_: string;
   (* mandatory for request+notification; empty otherwise *)
   id: Hh_json.json option;
+  (* a unique random string of our own creation, which we can use for logging *)
+  tracking_id: string;
   (* mandatory for request+response *)
   params: Hh_json.json option;
   (* optional for request+notification *)

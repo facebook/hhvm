@@ -203,11 +203,34 @@ if (USE_GOOGLE_HEAP_PROFILER AND GOOGLE_PROFILER_LIB)
   endif()
 endif()
 
-if(USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
-  add_definitions(-DUSE_JEMALLOC=1)
-  set(JEMALLOC_ENABLED 1)
-else()
-  add_definitions(-DNO_JEMALLOC=1)
+if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED)
+  FIND_LIBRARY(JEMALLOC_LIB NAMES jemalloc)
+  FIND_PATH(JEMALLOC_INCLUDE_DIR NAMES jemalloc/jemalloc.h)
+
+  if (JEMALLOC_INCLUDE_DIR AND JEMALLOC_LIB)
+    include_directories(${JEMALLOC_INCLUDE_DIR})
+
+    set (CMAKE_REQUIRED_INCLUDES ${JEMALLOC_INCLUDE_DIR})
+    INCLUDE(CheckCXXSourceCompiles)
+    CHECK_CXX_SOURCE_COMPILES("
+#include <jemalloc/jemalloc.h>
+
+#define JEMALLOC_VERSION_NUMERIC ((JEMALLOC_VERSION_MAJOR << 24) | (JEMALLOC_VERSION_MINOR << 16) | (JEMALLOC_VERSION_BUGFIX << 8) | JEMALLOC_VERSION_NDEV)
+
+#if JEMALLOC_VERSION_NUMERIC < 0x03050100
+# error jemalloc version >= 3.5.1 required
+#endif
+
+int main(void) { return 0; }" JEMALLOC_VERSION_MINIMUM)
+    set (CMAKE_REQUIRED_INCLUDES)
+
+    if (JEMALLOC_VERSION_MINIMUM)
+      message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
+      set(JEMALLOC_ENABLED 1)
+    else()
+      message(STATUS "Found jemalloc, but it was too old")
+    endif()
+  endif()
 endif()
 
 if (USE_TCMALLOC AND NOT JEMALLOC_ENABLED AND NOT GOOGLE_TCMALLOC_ENABLED)
@@ -220,6 +243,11 @@ if (USE_TCMALLOC AND NOT JEMALLOC_ENABLED AND NOT GOOGLE_TCMALLOC_ENABLED)
   endif()
 endif()
 
+if (JEMALLOC_ENABLED)
+  add_definitions(-DUSE_JEMALLOC=1)
+else()
+  add_definitions(-DNO_JEMALLOC=1)
+endif()
 if (GOOGLE_TCMALLOC_ENABLED)
   add_definitions(-DGOOGLE_TCMALLOC=1)
 else()
@@ -397,13 +425,12 @@ macro(hphp_link target)
     target_link_libraries(${target} ${LIBDL_LIBRARIES})
   endif ()
 
-  if (JEMALLOC_ENABLED)
-    target_link_libraries(${target} jemalloc)
-    add_dependencies(${target} jemalloc)
-  endif ()
-
   if (GOOGLE_HEAP_PROFILER_ENABLED OR GOOGLE_CPU_PROFILER_ENABLED)
     target_link_libraries(${target} ${GOOGLE_PROFILER_LIB})
+  endif()
+
+  if (JEMALLOC_ENABLED)
+    target_link_libraries(${target} ${JEMALLOC_LIB})
   endif()
 
   if (GOOGLE_HEAP_PROFILER_ENABLED)

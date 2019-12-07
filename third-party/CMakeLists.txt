@@ -14,28 +14,10 @@
 #   +----------------------------------------------------------------------+
 #
 
-##### --- header --- #####
 set(EXTRA_INCLUDE_PATHS)
 set(THIRD_PARTY_MODULES)
 set(THIRD_PARTY_HEADERS)
 
-function(TP_INSTALL_HEADERS TARGET SRCDIR DEST)
-  file(GLOB_RECURSE files "${SRCDIR}/*.h")
-  install(
-    CODE "INCLUDE(\"${HPHP_HOME}/CMake/HPHPFunctions.cmake\")
-      HHVM_INSTALL_HEADERS(${TARGET}
-        \"${CMAKE_CURRENT_BINARY_DIR}/${SRCDIR}\"
-      \"\${CMAKE_INSTALL_PREFIX}/include/hphp/third-party/${DEST}\"
-      ${files})"
-    COMPONENT dev)
-endfunction()
-
-
-##### easy stuff #####
-
-if(JEMALLOC_ENABLED)
-  list(APPEND THIRD_PARTY_MODULES jemalloc)
-endif()
 
 list(APPEND THIRD_PARTY_MODULES forks/libmbfl)
 list(APPEND EXTRA_INCLUDE_PATHS
@@ -156,14 +138,34 @@ if(ENABLE_XED AND NOT LibXed_FOUND)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/xed/xed/build/include/xed")
 endif()
 
+function(TP_INSTALL_HEADERS TARGET SRCDIR DEST)
+  file(GLOB_RECURSE files "${SRCDIR}/*.h")
+  install(
+    CODE "INCLUDE(\"${HPHP_HOME}/CMake/HPHPFunctions.cmake\")
+      HHVM_INSTALL_HEADERS(${TARGET}
+      \"${CMAKE_CURRENT_SOURCE_DIR}/${SRCDIR}\"
+      \"\${CMAKE_INSTALL_PREFIX}/include/hphp/third-party/${DEST}\"
+      ${files})"
+    COMPONENT dev)
+endfunction()
+
+foreach(MODULE ${THIRD_PARTY_MODULES})
+  add_subdirectory(${MODULE})
+  # Install headers here, rather than in the individual submodules, so that we
+  # can easily control the destination. Put them in include/hphp/third-party.
+  if(MODULE STREQUAL folly)
+    TP_INSTALL_HEADERS(folly folly/src/folly folly)
+  else()
+    TP_INSTALL_HEADERS(${MODULE} ${MODULE} ${MODULE})
+  endif()
+endforeach()
+
 if(NOT PCRE_LIBRARY)
   target_include_directories(pcre PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/forks/pcre")
   target_compile_definitions(pcre PUBLIC "PCRE_STATIC=1")
 endif()
 
-##### boost #####
-
-# boost checks     
+# boost checks                                                                        
 find_package(Boost 1.62.0 COMPONENTS context fiber filesystem iostreams program_options regex system thread)
 if ("${Boost_VERSION}" EQUAL "107000")
   # https://github.com/boostorg/variant/issues/69
@@ -171,7 +173,7 @@ if ("${Boost_VERSION}" EQUAL "107000")
 
   set(Boost_FOUND false)
 endif()
-
+                                                                                      
 add_library(boost INTERFACE)
 add_custom_target(boostMaybeBuild)
 if(NOT Boost_FOUND)
@@ -180,10 +182,10 @@ if(NOT Boost_FOUND)
   # Instead we add the dependency to the target being linked with hphp_link
   add_dependencies(boostMaybeBuild boostBuild)
   message(STATUS "Using third-party bundled boost")
-  add_subdirectory(boost)
+  add_subdirectory(boost)                                                             
   # These are the archive names prefixed with lib so that cmake does not
   # find these to be system archive instead of these third party ones.
-  set(Boost_LIBRARIES
+  set(Boost_LIBRARIES 
       "libboost_fiber"
       "libboost_context"
       "libboost_filesystem"
@@ -203,11 +205,9 @@ if(NOT Boost_FOUND)
   set(Boost_LIBRARY_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/boost/build/lib" CACHE STRING "" FORCE)
   TP_INSTALL_HEADERS(boost boost/build/include/boost boost)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/boost/build/include")
-endif()
+endif()                                                                               
 target_include_directories(boost BEFORE INTERFACE ${Boost_INCLUDE_DIRS})
 target_link_libraries(boost INTERFACE ${Boost_LIBRARIES})
-
-##### libsodium #####
 
 add_library(libsodium INTERFACE)
 add_custom_target(libsodiumMaybeBuild)
@@ -225,20 +225,6 @@ add_definitions("-DHAVE_LIBSODIUM")
 list(APPEND EXTRA_INCLUDE_PATHS "${LIBSODIUM_INCLUDE_DIRS}")
 list(APPEND THIRD_PARTY_DEFINITIONS "-DHAVE_LIBSODIUM")
 
-##### rustc #####
+set(THIRD_PARTY_INCLUDE_PATHS ${EXTRA_INCLUDE_PATHS} CACHE INTERNAL "" FORCE)
 
 add_subdirectory("rustc")
-
-##### --- footer --- #####
-
-foreach(MODULE ${THIRD_PARTY_MODULES})
-  add_subdirectory(${MODULE})
-  # Install headers here, rather than in the individual submodules, so that we
-  # can easily control the destination. Put them in include/hphp/third-party.
-  if(MODULE STREQUAL folly)
-    TP_INSTALL_HEADERS(folly folly/src/folly folly)
-  else()
-    TP_INSTALL_HEADERS(${MODULE} ${MODULE} ${MODULE})
-  endif()
-endforeach()
-set(THIRD_PARTY_INCLUDE_PATHS ${EXTRA_INCLUDE_PATHS} CACHE INTERNAL "" FORCE)

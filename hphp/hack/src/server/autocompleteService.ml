@@ -576,7 +576,7 @@ let class_get_cursor_finder =
       | _ -> false
   end
 
-class ranking_context_extract =
+class _ranking_context_extract =
   object (self)
     inherit Tast_visitor.iter as super
 
@@ -862,17 +862,15 @@ let go_ctx
           value =
             ( if sienv.use_ranked_autocomplete then (
               let ranking_start_time = Unix.gettimeofday () in
-              let ranking_context =
-                (new ranking_context_extract)#get_context tast
-              in
               let ranked_results =
                 AutocompleteRankService.rank_autocomplete_result
-                  ~query_text:""
+                  ~ctx
+                  ~entry
+                  ~query_text:!auto_complete_for_global
                   ~results:complete_autocomplete_results
                   ~max_results:3
                   ~context:completion_type
                   ~kind_filter:!kind_filter
-                  ~ranking_context
               in
               AutocompleteRankService.log_ranked_autocomplete
                 ~sienv

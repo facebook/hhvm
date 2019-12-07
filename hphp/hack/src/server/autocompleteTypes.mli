@@ -80,9 +80,6 @@ type legacy_autocomplete_context = {
   char_at_pos: char;
 }
 
-(* Ranked autocomplete context: prev tokens, prev token types *)
-type autocomplete_ranking_context = string * string
-
 (* The standard autocomplete token, which is currently "AUTO332" *)
 val autocomplete_token : string
 

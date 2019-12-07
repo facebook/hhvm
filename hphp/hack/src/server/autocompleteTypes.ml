@@ -74,9 +74,6 @@ type legacy_autocomplete_context = {
   char_at_pos: char;
 }
 
-(* Ranked autocomplete context: prev tokens, prev token types *)
-type autocomplete_ranking_context = string * string
-
 (* Autocomplete token *)
 let autocomplete_token = "AUTO332"
 

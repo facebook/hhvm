@@ -672,13 +672,17 @@ let serve
     log "Exception occurred while handling RPC call: %s" (Exception.to_string e);
     Lwt.return_unit
 
-let daemon_main () (channels : ('a, 'b) Daemon.channel_pair) : unit =
+let daemon_main
+    (parent_init_id : string) (channels : ('a, 'b) Daemon.channel_pair) : unit =
   Printexc.record_backtrace true;
   let (ic, oc) = channels in
   let in_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_in_channel ic) in
   let out_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_out_channel oc) in
-  HackEventLogger.serverless_ide_init ();
+  let daemon_init_id =
+    Printf.sprintf "%s.%s" parent_init_id (Random_id.short_string ())
+  in
+  HackEventLogger.serverless_ide_init ~init_id:daemon_init_id;
   Lwt_main.run (serve ~in_fd ~out_fd)
 
-let daemon_entry_point : (unit, unit, unit) Daemon.entry =
+let daemon_entry_point : (string, unit, unit) Daemon.entry =
   Daemon.register_entry_point "ClientIdeService" daemon_main

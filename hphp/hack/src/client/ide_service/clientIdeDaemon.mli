@@ -7,4 +7,4 @@
  *
  *)
 
-val daemon_entry_point : (unit, unit, unit) Daemon.entry
+val daemon_entry_point : (string, unit, unit) Daemon.entry

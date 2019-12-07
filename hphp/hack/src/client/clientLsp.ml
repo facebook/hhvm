@@ -3134,8 +3134,10 @@ let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
     Lwt.return_unit
 
 let tick_showStatus
-    (env : env) ~(state : state ref) ~(ide_service : ClientIdeService.t ref) :
-    unit Lwt.t =
+    (env : env)
+    ~(state : state ref)
+    ~(ide_service : ClientIdeService.t ref)
+    ~(init_id : string) : unit Lwt.t =
   let show_status () : unit Lwt.t =
     begin
       let on_result ~result state =
@@ -3166,7 +3168,7 @@ let tick_showStatus
           sure to assign the new IDE service to the [ref] before attempting
           to do an asynchronous operation with the old one. *)
           let old_ide_service = !ide_service in
-          let new_ide_service = ClientIdeService.make () in
+          let new_ide_service = ClientIdeService.make ~init_id in
           ide_service := new_ide_service;
           Lwt.async (fun () -> run_ide_service env new_ide_service);
           let%lwt () =
@@ -3850,13 +3852,13 @@ let handle_event
 
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. Never returns. *)
-let main (env : env) : Exit_status.t Lwt.t =
+let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
   ref_from := env.from;
 
   HackEventLogger.set_from env.from;
   let client = Jsonrpc.make_queue () in
-  let ide_service = ref (ClientIdeService.make ()) in
+  let ide_service = ref (ClientIdeService.make init_id) in
   let deferred_action : (unit -> unit Lwt.t) option ref = ref None in
   let state = ref Pre_init in
   let ref_event = ref None in
@@ -4071,5 +4073,7 @@ let main (env : env) : Exit_status.t Lwt.t =
     main_loop ()
   in
   Lwt.async (fun () -> run_ide_service env !ide_service);
-  let%lwt () = Lwt.pick [main_loop (); tick_showStatus env state ide_service] in
+  let%lwt () =
+    Lwt.pick [main_loop (); tick_showStatus env ~state ~ide_service ~init_id]
+  in
   Lwt.return Exit_status.No_error

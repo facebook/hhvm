@@ -83,9 +83,9 @@ let out_of_date _ = ()
 
 let lock_stolen _ = ()
 
-let client_init _ = ()
+let client_init ~init_id:_ _ = ()
 
-let serverless_ide_init () = ()
+let serverless_ide_init ~init_id:_ = ()
 
 let client_set_mode _ = ()
 

@@ -123,13 +123,14 @@ let do_rpc
     in
     Lwt.return_error message
 
-let make () : t =
+let make ~(init_id : string) : t =
+  let args = init_id in
   let daemon_handle =
     Daemon.spawn
       ~channel_mode:`pipe
       (Unix.stdin, Unix.stdout, Unix.stderr)
       ClientIdeDaemon.daemon_entry_point
-      ()
+      args
   in
   let (ic, oc) = daemon_handle.Daemon.channels in
   let in_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_in_channel ic) in

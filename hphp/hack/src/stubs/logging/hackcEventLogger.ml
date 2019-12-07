@@ -7,7 +7,7 @@
  *
  *)
 
-let init ?exit_on_parent_exit:_ _ = ()
+let init ~exit_on_parent_exit:_ _ = ()
 
 let success ~filename ~parsing_t ~codegen_t ~printing_t ~mode = ()
 

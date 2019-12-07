@@ -7,7 +7,7 @@
  *
  *)
 
-let init ?exit_on_parent_exit:_ _ = ()
+let init ~exit_on_parent_exit:_ _ = ()
 
 let exit ~time_taken:_ ~error:_ ~exit_code:_ ~mode:_ ~file:_ ~root:_ = ()
 

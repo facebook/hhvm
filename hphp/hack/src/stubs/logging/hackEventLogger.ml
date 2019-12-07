@@ -38,10 +38,10 @@ let init
     ~max_typechecker_worker_memory_mb:_ =
   ()
 
-let init_worker ?exit_on_parent_exit:_ ~root:_ ~init_id:_ ~time:_ = ()
+let init_worker ~exit_on_parent_exit:_ ~root:_ ~init_id:_ ~time:_ = ()
 
 let init_monitor
-    ?exit_on_parent_exit:_
+    ~exit_on_parent_exit:_
     ~from:_
     ~proc_stack:_
     ~search_chunk_size:_
@@ -85,9 +85,9 @@ let out_of_date _ = ()
 
 let lock_stolen _ = ()
 
-let client_init ?exit_on_parent_exit:_ _ = ()
+let client_init ~exit_on_parent_exit:_ _ = ()
 
-let serverless_ide_init () = ()
+let serverless_ide_init ~exit_on_parent_exit:_ = ()
 
 let client_set_mode _ = ()
 
@@ -244,7 +244,7 @@ let watchman_success ~duration:_ ~query:_ ~response:_ = ()
 let watchman_failure ~duration:_ ~query:_ ~response:_ ~error:_ ~stack:_ = ()
 
 (** Informant events *)
-let init_informant_prefetcher_runner ?exit_on_parent_exit _ = ()
+let init_informant_prefetcher_runner ~exit_on_parent_exit:_ _ = ()
 
 let informant_decision_on_saved_state
     ~start_t:_ ~state_distance:_ ~incremental_distance:_ =

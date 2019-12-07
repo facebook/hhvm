@@ -677,7 +677,9 @@ let daemon_main () (channels : ('a, 'b) Daemon.channel_pair) : unit =
   let (ic, oc) = channels in
   let in_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_in_channel ic) in
   let out_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_out_channel oc) in
-  HackEventLogger.serverless_ide_init ();
+  let exit_on_parent_exit () = () in
+  (* no-op: logger daemon will NOT exit when we do *)
+  HackEventLogger.serverless_ide_init ~exit_on_parent_exit;
   Lwt_main.run (serve ~in_fd ~out_fd)
 
 let daemon_entry_point : (unit, unit, unit) Daemon.entry =

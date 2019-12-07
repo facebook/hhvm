@@ -105,6 +105,7 @@ let client_lsp_method_handled
     ~root:_
     ~method_:_
     ~kind:_
+    ~tracking_id:_
     ~start_queue_time:_
     ~start_hh_server_state:_
     ~start_handle_time:_
@@ -117,6 +118,7 @@ let client_lsp_method_exception
     ~root:_
     ~method_:_
     ~kind:_
+    ~tracking_id:_
     ~start_queue_time:_
     ~start_hh_server_state:_
     ~start_handle_time:_

@@ -3035,6 +3035,7 @@ let log_response_if_necessary
           else
             c.method_ )
         ~kind:(kind_to_string c.kind)
+        ~tracking_id:c.tracking_id
         ~start_queue_time:c.timestamp
         ~start_hh_server_state:
           (get_older_hh_server_state c.timestamp |> hh_server_state_to_string)
@@ -3061,6 +3062,7 @@ let hack_log_error
         ~root
         ~method_:c.method_
         ~kind:(kind_to_string c.kind)
+        ~tracking_id:c.tracking_id
         ~start_queue_time:c.timestamp
         ~start_hh_server_state:
           (get_older_hh_server_state c.timestamp |> hh_server_state_to_string)

@@ -18,8 +18,6 @@
       hh_server (detached mode).
 *)
 
-let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
-
 let () = Random.self_init ()
 
 module SM =
@@ -48,7 +46,6 @@ let monitor_daemon_main
       local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
     in
     HackEventLogger.init_monitor
-      ~exit_on_parent_exit
       ~from:(ServerArgs.from options)
       ~proc_stack
       ~search_chunk_size:local_config.ServerLocalConfig.search_chunk_size

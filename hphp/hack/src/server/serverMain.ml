@@ -17,8 +17,6 @@ open Option.Monad_infix
 (* Main initialization *)
 (*****************************************************************************)
 
-let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
-
 let () = Printexc.record_backtrace true
 
 let force_break_recheck_loop_for_test_ref = ref false
@@ -1171,14 +1169,9 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     if Sys_utils.is_test_mode () then
       EventLogger.init_fake ()
     else if is_worker then
-      HackEventLogger.init_worker
-        ~exit_on_parent_exit
-        ~root
-        ~init_id
-        ~time:(Unix.gettimeofday ())
+      HackEventLogger.init_worker ~root ~init_id ~time:(Unix.gettimeofday ())
     else
       HackEventLogger.init
-        ~exit_on_parent_exit
         ~root
         ~init_id
         ~informant_managed

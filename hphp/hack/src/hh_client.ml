@@ -36,8 +36,6 @@
  *  Use --help or see clientArgs.ml for more options
  *)
 
-let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
-
 let () = Random.self_init ()
 
 let () =
@@ -54,7 +52,7 @@ let () =
     (Sys.Signal_handle (fun _ -> raise Exit_status.(Exit_with Interrupted)));
   let command = ClientArgs.parse_args () in
   let root = ClientArgs.root command in
-  HackEventLogger.client_init ~exit_on_parent_exit root;
+  HackEventLogger.client_init root;
   let command_name = function
     | ClientCommand.CCheck _ -> "Check"
     | ClientCommand.CStart _ -> "Start"

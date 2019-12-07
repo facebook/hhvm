@@ -64,15 +64,19 @@ val serve : t -> unit Lwt.t
 (** Clean up any resources held by the IDE service (such as the message loop
 and background processes). Mark the service's status as "shut down" for the
 given [reason]. *)
-val stop : t -> reason:Stop_reason.t -> unit Lwt.t
+val stop : t -> tracking_id:string -> reason:Stop_reason.t -> unit Lwt.t
 
 (** The caller is expected to call this function to notify the IDE service
 whenever a Hack file changes on disk, so that it can update its indexes
 appropriately. *)
-val notify_file_changed : t -> Path.t -> unit
+val notify_file_changed : t -> tracking_id:string -> Path.t -> unit
 
 (** Make an RPC call to the IDE service. *)
-val rpc : t -> 'response ClientIdeMessage.t -> ('response, string) Lwt_result.t
+val rpc :
+  t ->
+  tracking_id:string ->
+  'response ClientIdeMessage.t ->
+  ('response, string) Lwt_result.t
 
 (** Get a handle to the stream of notifications sent by the IDE service. These
 notifications may be sent even during RPC requests, and so should be processed

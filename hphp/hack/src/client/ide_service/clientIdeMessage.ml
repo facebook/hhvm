@@ -135,6 +135,11 @@ type _ t =
   | Type_coverage : Type_coverage.request -> Type_coverage.result t
   | Signature_help : Signature_help.request -> Signature_help.result t
 
+type 'a tracked_t = {
+  tracking_id: string;
+  message: 'a t;
+}
+
 module Processing_files = struct
   type t = {
     processed: int;

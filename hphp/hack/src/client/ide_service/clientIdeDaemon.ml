@@ -9,7 +9,7 @@
 
 open Core_kernel
 
-type message = Message : 'a ClientIdeMessage.t -> message
+type message = Message : 'a ClientIdeMessage.tracked_t -> message
 
 type message_queue = message Lwt_message_queue.t
 
@@ -301,8 +301,11 @@ end
 
 let handle_message :
     type a.
-    state -> a ClientIdeMessage.t -> (state * a Handle_message_result.t) Lwt.t =
- fun state message ->
+    state ->
+    string ->
+    a ClientIdeMessage.t ->
+    (state * a Handle_message_result.t) Lwt.t =
+ fun state _tracking_id message ->
   ClientIdeMessage.(
     match (state, message) with
     | (state, Shutdown ()) ->
@@ -564,8 +567,7 @@ let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
       in
       Lwt.return_unit
 
-let serve
-    (type a) ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
+let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     unit Lwt.t =
   let rec flush_event_logger () : unit Lwt.t =
     let%lwt () = Lwt_unix.sleep 0.5 in
@@ -574,11 +576,13 @@ let serve
   in
   let rec pump_message_queue (message_queue : message_queue) : unit Lwt.t =
     try%lwt
-      let%lwt (message : a ClientIdeMessage.t) =
+      let%lwt { ClientIdeMessage.tracking_id; message } =
         Marshal_tools_lwt.from_fd_with_preamble in_fd
       in
       let is_queue_open =
-        Lwt_message_queue.push message_queue (Message message)
+        Lwt_message_queue.push
+          message_queue
+          (Message { ClientIdeMessage.tracking_id; message })
       in
       match message with
       | ClientIdeMessage.Shutdown () -> Lwt.return_unit
@@ -631,10 +635,12 @@ let serve
       let%lwt message = Lwt_message_queue.pop t.message_queue in
       (match message with
       | None -> Lwt.return_unit
-      | Some (Message message) ->
+      | Some (Message { ClientIdeMessage.tracking_id; message }) ->
         let%lwt state =
           try%lwt
-            let%lwt (state, response) = handle_message t.state message in
+            let%lwt (state, response) =
+              handle_message t.state tracking_id message
+            in
             match response with
             | Handle_message_result.Notification ->
               (* No response needed for notifications. *)

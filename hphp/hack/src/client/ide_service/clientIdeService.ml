@@ -40,7 +40,7 @@ type state =
   | Stopped of Stop_reason.t
 
 type message_wrapper =
-  | Message_wrapper : 'a ClientIdeMessage.t -> message_wrapper
+  | Message_wrapper : 'a ClientIdeMessage.tracked_t -> message_wrapper
       (** Existential type wrapper for `ClientIdeMessage.t`s, so that we can put
       them in a queue without the typechecker trying to infer a concrete type for
       `'a` based on its first use. *)
@@ -87,12 +87,12 @@ let set_state (t : t) (new_state : state) : unit =
 let log s = Hh_logger.log ("[ide-service] " ^^ s)
 
 let do_rpc
-    ~(message : 'a ClientIdeMessage.t)
+    ~(tracked_message : 'a ClientIdeMessage.tracked_t)
     ~(messages_to_send : message_queue)
     ~(response_emitter : response_emitter) : ('a, string) Lwt_result.t =
   try%lwt
     let success =
-      Lwt_message_queue.push messages_to_send (Message_wrapper message)
+      Lwt_message_queue.push messages_to_send (Message_wrapper tracked_message)
     in
     if not success then failwith "Could not send message (queue was closed)";
 
@@ -176,10 +176,10 @@ let initialize_from_saved_state
   (* Do not use `do_rpc` here, as that depends on a running event loop in
   `serve`. But `serve` should only be called once the IDE service is
   initialized, after this function has completed. *)
+  let message = ClientIdeMessage.Initialize_from_saved_state param in
+  let tracked_message = { ClientIdeMessage.tracking_id = "init"; message } in
   let%lwt (_ : int) =
-    Marshal_tools_lwt.to_fd_with_preamble
-      t.out_fd
-      (ClientIdeMessage.Initialize_from_saved_state param)
+    Marshal_tools_lwt.to_fd_with_preamble t.out_fd tracked_message
   in
   let%lwt (response : ClientIdeMessage.message_from_daemon) =
     Marshal_tools_lwt.from_fd_with_preamble t.in_fd
@@ -223,7 +223,7 @@ let process_status_notification
     | ClientIdeMessage.Done_processing ->
       set_state t (Initialized { status = Status.Ready }))
 
-let destroy (t : t) : unit Lwt.t =
+let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
   let {
     daemon_handle;
     messages_to_send;
@@ -241,14 +241,13 @@ let destroy (t : t) : unit Lwt.t =
       Lwt.return_unit
     | Initialized _ ->
       (try%lwt
+         let message = ClientIdeMessage.Shutdown () in
+         let tracked_message = { ClientIdeMessage.tracking_id; message } in
          let%lwt () =
            Lwt.pick
              [
                (let%lwt (_result : (unit, string) result) =
-                  do_rpc
-                    ~message:(ClientIdeMessage.Shutdown ())
-                    ~messages_to_send
-                    ~response_emitter
+                  do_rpc ~tracked_message ~messages_to_send ~response_emitter
                 in
                 Daemon.kill daemon_handle;
                 Lwt.return_unit);
@@ -265,8 +264,9 @@ let destroy (t : t) : unit Lwt.t =
   Lwt_message_queue.close response_emitter;
   Lwt.return_unit
 
-let stop (t : t) ~(reason : Stop_reason.t) : unit Lwt.t =
-  let%lwt () = destroy t in
+let stop (t : t) ~(tracking_id : string) ~(reason : Stop_reason.t) : unit Lwt.t
+    =
+  let%lwt () = destroy t ~tracking_id in
   set_state t (Stopped reason);
   Lwt.return_unit
 
@@ -331,7 +331,9 @@ let rec serve (t : t) : unit Lwt.t =
       (* Already stopped, don't do anything. *)
       Lwt.return_unit
     | _ ->
-      let%lwt () = stop t ~reason:Stop_reason.Crashed in
+      let%lwt () =
+        stop t ~tracking_id:"exception" ~reason:Stop_reason.Crashed
+      in
       Lwt.return_unit
   )
 
@@ -347,13 +349,15 @@ let push_message (t : t) (message : message_wrapper) : unit =
     can never be sent. *)
     ()
 
-let notify_file_changed (t : t) (path : Path.t) : unit =
-  push_message t (Message_wrapper (ClientIdeMessage.File_changed path))
+let notify_file_changed (t : t) ~(tracking_id : string) (path : Path.t) : unit =
+  let message = ClientIdeMessage.File_changed path in
+  push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
 
 (* Simplified function for handling initialization cases *)
-let rpc (t : t) (rpc_message : 'a ClientIdeMessage.t) :
+let rpc (t : t) ~(tracking_id : string) (message : 'a ClientIdeMessage.t) :
     ('a, string) Lwt_result.t =
   let { messages_to_send; response_emitter; _ } = t in
+  let tracked_message = { ClientIdeMessage.tracking_id; message } in
   match t.state with
   | Uninitialized { wait_for_initialization = false } ->
     Lwt.return_error "IDE service has not yet been initialized"
@@ -368,12 +372,12 @@ let rpc (t : t) (rpc_message : 'a ClientIdeMessage.t) :
   | Uninitialized { wait_for_initialization = true } ->
     let%lwt () = wait_for_initialization t in
     let%lwt result =
-      do_rpc ~message:rpc_message ~messages_to_send ~response_emitter
+      do_rpc ~tracked_message ~messages_to_send ~response_emitter
     in
     Lwt.return result
   | Initialized _ ->
     let%lwt result =
-      do_rpc ~message:rpc_message ~messages_to_send ~response_emitter
+      do_rpc ~tracked_message ~messages_to_send ~response_emitter
     in
     Lwt.return result
 

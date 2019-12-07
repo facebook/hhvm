@@ -574,7 +574,9 @@ let () =
     }
   in
   let start_time = Unix.gettimeofday () in
-  if not env.Env.test then Logger.init start_time;
+  let exit_on_parent_exit () = () in
+  (* no-op: logger daemon will NOT exit when we do *)
+  if not env.Env.test then Logger.init ~exit_on_parent_exit start_time;
 
   let (err_msg, exit_code) =
     try

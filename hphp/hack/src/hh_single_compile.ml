@@ -840,7 +840,9 @@ let decl_and_run_mode compiler_options =
 
 let main_hack opts =
   let start_time = Unix.gettimeofday () in
-  if opts.log_stats then Logger.init start_time;
+  let exit_on_parent_exit () = () in
+  (* no-op: logger daemon will NOT exit when we do *)
+  if opts.log_stats then Logger.init ~exit_on_parent_exit start_time;
   decl_and_run_mode opts
 
 (* command line driver *)

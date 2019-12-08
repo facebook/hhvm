@@ -317,15 +317,5 @@ Offset c_AsyncFunctionWaitHandle::getNextExecutionOffset() {
   return resumable()->resumeOffset();
 }
 
-// Get the line number on which execution will proceed when execution resumes.
-int c_AsyncFunctionWaitHandle::getLineNumber() {
-  if (isFinished()) {
-    return -1;
-  }
-
-  always_assert(!isRunning());
-  return actRec()->func()->unit()->getLineNumber(resumable()->resumeOffset());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -821,6 +821,7 @@ void createSrcRec(SrcKey sk, FPInvOffset spOff) {
   // We put retranslate requests at the end of our slab to more frequently
   // allow conditional jump fall-throughs
   auto codeLock = lockCode();
+  if (srcDB().find(sk)) return;
   auto codeView = code().view();
   TCA astart = codeView.main().frontier();
   TCA coldStart = codeView.cold().frontier();

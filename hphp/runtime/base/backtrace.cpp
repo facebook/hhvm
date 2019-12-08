@@ -398,14 +398,6 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     DArrayInit frame(8);
 
     auto const curUnit = fp->func()->unit();
-    auto const curOp = curUnit->getOp(frm.pc);
-    auto const isReturning =
-      curOp == Op::RetC ||
-      curOp == Op::RetCSuspended ||
-      curOp == Op::RetM ||
-      curOp == Op::CreateCont ||
-      curOp == Op::Await ||
-      fp->localsDecRefd();
 
     // Builtins and generators don't have a file and line number.
     if (prev.fp && !prev.fp->func()->isBuiltin()) {
@@ -462,7 +454,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
           clsname += mangleReifiedGenericsName(reified_generics);
         }
         frame.set(s_class, clsname);
-        if (!isReturning && fp->hasThis() && btArgs.m_withThis) {
+        if (!fp->localsDecRefd() && fp->hasThis() && btArgs.m_withThis) {
           frame.set(s_object, Object(fp->getThis()));
         }
         frame.set(s_type, fp->func()->isStatic() ? s_double_colon : s_arrow);
@@ -479,7 +471,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     } else if (funcname.same(s_include)) {
       auto filepath = const_cast<StringData*>(curUnit->filepath());
       frame.set(s_args, make_varray(filepath));
-    } else if (isReturning) {
+    } else if (fp->localsDecRefd()) {
       frame.set(s_args, empty_varray());
     } else {
       auto args = Array::CreateVArray();
@@ -522,7 +514,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       frame.set(s_args, args);
     }
 
-    if (btArgs.m_withMetadata && !isReturning) {
+    if (btArgs.m_withMetadata && !fp->localsDecRefd()) {
       if (UNLIKELY(mayUseVV) && UNLIKELY(fp->hasVarEnv())) {
         auto tv = fp->getVarEnv()->lookup(s_86metadata.get());
         if (tv != nullptr && tv->m_type != KindOfUninit) {
@@ -730,15 +722,10 @@ uint64_t CompactTraceData::hash() const {
 void CompactTraceData::insert(const ActRec* fp, int32_t prevPc) {
   m_hash = 0;                           // invalidate
 
-  auto const curUnit = fp->func()->unit();
-  auto const curOp = curUnit->getOp(prevPc);
-  auto const isReturning =
-    curOp == Op::RetC || curOp == Op::RetCSuspended || curOp == Op::RetM ||
-    curOp == Op::CreateCont || curOp == Op::Await || fp->localsDecRefd();
   m_frames.emplace_back(
     fp->func(),
     prevPc,
-    !isReturning && arGetContextClass(fp) && fp->hasThis()
+    !fp->localsDecRefd() && arGetContextClass(fp) && fp->hasThis()
   );
 }
 

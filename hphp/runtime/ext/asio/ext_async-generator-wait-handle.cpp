@@ -45,7 +45,7 @@ c_AsyncGeneratorWaitHandle::~c_AsyncGeneratorWaitHandle() {
 c_AsyncGeneratorWaitHandle*
 c_AsyncGeneratorWaitHandle::Create(const ActRec* fp,
                                    jit::TCA resumeAddr,
-                                   Offset resumeOffset,
+                                   Offset suspendOffset,
                                    c_WaitableWaitHandle* child) {
   assertx(fp);
   assertx(isResumed(fp));
@@ -64,7 +64,7 @@ c_AsyncGeneratorWaitHandle::Create(const ActRec* fp,
   wh->incRefCount();
 
   // Set resume address and link the AGWH to the async generator.
-  gen->resumable()->setResumeAddr(resumeAddr, resumeOffset);
+  gen->resumable()->setResumeAddr(resumeAddr, suspendOffset);
   gen->attachWaitHandle(req::ptr<c_AsyncGeneratorWaitHandle>(wh));
 
   return wh.detach();

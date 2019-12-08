@@ -123,8 +123,8 @@ struct alignas(16) Resumable {
   static constexpr ptrdiff_t resumeAddrOff() {
     return offsetof(Resumable, m_resumeAddr);
   }
-  static constexpr ptrdiff_t resumeOffsetOff() {
-    return offsetof(Resumable, m_resumeOffset);
+  static constexpr ptrdiff_t suspendOffsetOff() {
+    return offsetof(Resumable, m_suspendOffset);
   }
   static constexpr ptrdiff_t dataOff() {
     return sizeof(Resumable);
@@ -147,13 +147,13 @@ struct alignas(16) Resumable {
   template<bool clone,
            bool mayUseVV = true>
   void initialize(const ActRec* fp, jit::TCA resumeAddr,
-                  Offset resumeOffset, size_t frameSize, size_t totalSize) {
+                  Offset suspendOffset, size_t frameSize, size_t totalSize) {
     assertx(fp);
     assertx(isResumed(fp) == clone);
     auto const func = fp->func();
     assertx(func);
     assertx(func->isResumable());
-    assertx(func->contains(resumeOffset));
+    assertx(func->contains(suspendOffset));
     // Check memory alignment
     assertx((((uintptr_t) actRec()) & (sizeof(Cell) - 1)) == 0);
 
@@ -183,7 +183,7 @@ struct alignas(16) Resumable {
 
     // Populate Resumable.
     m_resumeAddr = resumeAddr;
-    m_offsetAndSize = (totalSize << 32 | resumeOffset);
+    m_offsetAndSize = (totalSize << 32 | suspendOffset);
   }
 
   template<class T> static void Destroy(size_t size, T* obj) {
@@ -195,16 +195,43 @@ struct alignas(16) Resumable {
   ActRec* actRec() { return &m_actRec; }
   const ActRec* actRec() const { return &m_actRec; }
   jit::TCA resumeAddr() const { return m_resumeAddr; }
-  Offset resumeOffset() const {
-    assertx(m_actRec.func()->contains(m_resumeOffset));
-    return m_resumeOffset;
+  Offset suspendOffset() const {
+    assertx(m_actRec.func()->contains(m_suspendOffset));
+    return m_suspendOffset;
+  }
+  Offset resumeFromAwaitOffset() const {
+    assertx(m_actRec.func()->contains(m_suspendOffset));
+    auto const suspendPC = m_actRec.func()->unit()->at(m_suspendOffset);
+    assertx(peek_op(suspendPC) == OpAwait || peek_op(suspendPC) == OpAwaitAll);
+    auto const resumeOffset = m_suspendOffset + instrLen(suspendPC);
+    assertx(m_actRec.func()->contains(resumeOffset));
+    return resumeOffset;
+  }
+  Offset resumeFromYieldOffset() const {
+    assertx(m_actRec.func()->contains(m_suspendOffset));
+    // TODO(alexeyt) remove `yield from` and the need for this complexity
+    auto const pc = m_actRec.func()->unit()->at(m_suspendOffset);
+    auto pc2 = pc;
+    auto const suspendedOp = decode_op(pc2);
+    Offset resumeOffset = kInvalidOffset;
+    if (suspendedOp == OpYieldFromDelegate) {
+      decode_iva(pc2);
+      resumeOffset = m_suspendOffset + decode_ba(pc2);
+    } else {
+      assertx(suspendedOp == OpCreateCont ||
+              suspendedOp == OpYield ||
+              suspendedOp == OpYieldK);
+      resumeOffset = m_suspendOffset + instrLen(pc);
+    }
+    assertx(m_actRec.func()->contains(resumeOffset));
+    return resumeOffset;
   }
   size_t size() const { return m_size; }
 
-  void setResumeAddr(jit::TCA resumeAddr, Offset resumeOffset) {
-    assertx(m_actRec.func()->contains(resumeOffset));
+  void setResumeAddr(jit::TCA resumeAddr, Offset suspendOffset) {
+    assertx(m_actRec.func()->contains(suspendOffset));
     m_resumeAddr = resumeAddr;
-    m_resumeOffset = resumeOffset;
+    m_suspendOffset = suspendOffset;
   }
 
 private:
@@ -217,7 +244,7 @@ private:
   // Resume offset: bytecode offset from start of Unit's bytecode.
   union {
     struct {
-      Offset m_resumeOffset;
+      Offset m_suspendOffset;
 
       // Size of the memory block that includes this resumable.
       int32_t m_size;

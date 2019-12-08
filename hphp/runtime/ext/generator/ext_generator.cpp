@@ -67,7 +67,7 @@ Generator& Generator::operator=(const Generator& other) {
   node->arOff() = arOff;
   resumable()->initialize<true>(fp,
                                 other.resumable()->resumeAddr(),
-                                other.resumable()->resumeOffset(),
+                                other.resumable()->suspendOffset(),
                                 frameSz,
                                 genSz);
   copyVars(fp);
@@ -80,7 +80,7 @@ Generator& Generator::operator=(const Generator& other) {
 }
 
 ObjectData* Generator::Create(const ActRec* fp, size_t numSlots,
-                              jit::TCA resumeAddr, Offset resumeOffset) {
+                              jit::TCA resumeAddr, Offset suspendOffset) {
   assertx(fp);
   assertx(!isResumed(fp));
   assertx(fp->func()->isNonAsyncGenerator());
@@ -90,7 +90,7 @@ ObjectData* Generator::Create(const ActRec* fp, size_t numSlots,
   auto const genData = new (Native::data<Generator>(obj)) Generator();
   genData->resumable()->initialize<false>(fp,
                                           resumeAddr,
-                                          resumeOffset,
+                                          suspendOffset,
                                           frameSz,
                                           genSz);
   genData->setState(State::Created);
@@ -117,10 +117,10 @@ void Generator::copyVars(const ActRec* srcFp) {
   dstFp->setVarEnv(srcFp->getVarEnv()->clone(dstFp));
 }
 
-void Generator::yield(Offset resumeOffset,
+void Generator::yield(Offset suspendOffset,
                       const Cell* key, const Cell value) {
   assertx(isRunning());
-  resumable()->setResumeAddr(nullptr, resumeOffset);
+  resumable()->setResumeAddr(nullptr, suspendOffset);
 
   if (key) {
     cellSet(*key, m_key);

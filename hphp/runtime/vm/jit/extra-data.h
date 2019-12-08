@@ -1363,8 +1363,8 @@ struct IncDecData : IRExtraData {
   IncDecOp op;
 };
 
-struct ResumeOffset : IRExtraData {
-  explicit ResumeOffset(Offset off) : off(off) {}
+struct SuspendOffset : IRExtraData {
+  explicit SuspendOffset(Offset off) : off(off) {}
   std::string show() const { return folly::to<std::string>(off); }
   Offset off;
 };
@@ -1795,7 +1795,7 @@ X(SetOpCellVerify,              SetOpData);
 X(IncDecProp,                   IncDecData);
 X(SetOpElem,                    SetOpData);
 X(IncDecElem,                   IncDecData);
-X(StArResumeAddr,               ResumeOffset);
+X(StArResumeAddr,               SuspendOffset);
 X(StContArState,                GeneratorState);
 X(ContEnter,                    ContEnterData);
 X(EagerSyncVMRegs,              IRSPRelOffsetData);

@@ -50,7 +50,7 @@ AsyncGenerator::~AsyncGenerator() {
 
 ObjectData*
 AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
-                       jit::TCA resumeAddr, Offset resumeOffset) {
+                       jit::TCA resumeAddr, Offset suspendOffset) {
   assertx(fp);
   assertx(!isResumed(fp));
   assertx(fp->func()->isAsyncGenerator());
@@ -60,7 +60,7 @@ AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
   auto const genData = new (Native::data<AsyncGenerator>(obj)) AsyncGenerator();
   genData->resumable()->initialize<false>(fp,
                                           resumeAddr,
-                                          resumeOffset,
+                                          suspendOffset,
                                           frameSz,
                                           genSz);
   genData->setState(State::Created);
@@ -68,10 +68,10 @@ AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
 }
 
 c_StaticWaitHandle*
-AsyncGenerator::yield(Offset resumeOffset,
+AsyncGenerator::yield(Offset suspendOffset,
                       const Cell* key, const Cell value) {
   assertx(isRunning());
-  resumable()->setResumeAddr(nullptr, resumeOffset);
+  resumable()->setResumeAddr(nullptr, suspendOffset);
   setState(State::Started);
 
   auto keyValueTuple = make_varray(

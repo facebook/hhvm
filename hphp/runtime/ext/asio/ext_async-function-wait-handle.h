@@ -81,13 +81,13 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
     const ActRec* origFp,
     size_t numSlots,
     jit::TCA resumeAddr,
-    Offset resumeOffset,
+    Offset suspendOffset,
     c_WaitableWaitHandle* child
   ); // nothrow
   static void PrepareChild(const ActRec* fp, c_WaitableWaitHandle* child);
   void onUnblocked();
   void resume();
-  void await(Offset resumeOffset, req::ptr<c_WaitableWaitHandle>&& child);
+  void await(Offset suspendOffset, req::ptr<c_WaitableWaitHandle>&& child);
   void ret(Cell& result);
   void fail(ObjectData* exception);
   void failCpp();

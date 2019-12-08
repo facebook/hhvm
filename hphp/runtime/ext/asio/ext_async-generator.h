@@ -40,7 +40,7 @@ struct AsyncGenerator final : BaseGenerator {
   ~AsyncGenerator();
 
   static ObjectData* Create(const ActRec* fp, size_t numSlots,
-                            jit::TCA resumeAddr, Offset resumeOffset);
+                            jit::TCA resumeAddr, Offset suspendOffset);
   static Class* getClass() {
     assertx(s_class);
     return s_class;
@@ -52,7 +52,7 @@ struct AsyncGenerator final : BaseGenerator {
     return Native::data<AsyncGenerator>(obj);
   }
 
-  c_StaticWaitHandle* yield(Offset resumeOffset,
+  c_StaticWaitHandle* yield(Offset suspendOffset,
                             const Cell* key, Cell value);
   c_StaticWaitHandle* ret();
   c_StaticWaitHandle* fail(ObjectData* exception);

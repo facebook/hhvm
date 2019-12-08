@@ -5395,21 +5395,21 @@ static inline Generator* this_generator(const ActRec* fp) {
 
 const StaticString s_this("this");
 
-OPTBLD_INLINE TCA iopCreateCont(PC& pc) {
+OPTBLD_INLINE TCA iopCreateCont(PC origpc, PC& pc) {
   auto const jitReturn = jitReturnPre(vmfp());
 
   auto const fp = vmfp();
   auto const func = fp->func();
   auto const numSlots = func->numSlotsInFrame();
-  auto const resumeOffset = func->unit()->offsetOf(pc);
+  auto const suspendOffset = func->unit()->offsetOf(origpc);
   assertx(!isResumed(fp));
   assertx(func->isGenerator());
 
   // Create the {Async,}Generator object. Create takes care of copying local
   // variables and iterators.
   auto const obj = func->isAsync()
-    ? AsyncGenerator::Create(fp, numSlots, nullptr, resumeOffset)
-    : Generator::Create(fp, numSlots, nullptr, resumeOffset);
+    ? AsyncGenerator::Create(fp, numSlots, nullptr, suspendOffset)
+    : Generator::Create(fp, numSlots, nullptr, suspendOffset);
 
   auto const genData = func->isAsync() ?
     static_cast<BaseGenerator*>(AsyncGenerator::fromObject(obj)) :
@@ -5442,9 +5442,7 @@ OPTBLD_INLINE void movePCIntoGenerator(PC origpc, BaseGenerator* gen) {
   genAR->setReturn(vmfp(), origpc, retHelper, false);
 
   vmfp() = genAR;
-
-  assertx(genAR->func()->contains(gen->resumable()->resumeOffset()));
-  vmpc() = genAR->func()->unit()->at(gen->resumable()->resumeOffset());
+  vmpc() = genAR->func()->unit()->at(gen->resumable()->resumeFromYieldOffset());
 }
 
 OPTBLD_INLINE bool tvIsGenerator(TypedValue tv) {
@@ -5492,12 +5490,12 @@ OPTBLD_INLINE void iopContRaise(PC origpc, PC& pc) {
   iopThrow(pc);
 }
 
-OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
+OPTBLD_INLINE TCA yield(PC origpc, PC& pc, const Cell* key, const Cell value) {
   auto const jitReturn = jitReturnPre(vmfp());
 
   auto const fp = vmfp();
   auto const func = fp->func();
-  auto const resumeOffset = func->unit()->offsetOf(pc);
+  auto const suspendOffset = func->unit()->offsetOf(origpc);
   assertx(isResumed(fp));
   assertx(func->isGenerator());
 
@@ -5509,14 +5507,14 @@ OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
   if (!func->isAsync()) {
     // Non-async generator.
     assertx(fp->sfp());
-    frame_generator(fp)->yield(resumeOffset, key, value);
+    frame_generator(fp)->yield(suspendOffset, key, value);
 
     // Push return value of next()/send()/raise().
     vmStack().pushNull();
   } else {
     // Async generator.
     auto const gen = frame_async_generator(fp);
-    auto const eagerResult = gen->yield(resumeOffset, key, value);
+    auto const eagerResult = gen->yield(suspendOffset, key, value);
     if (eagerResult) {
       // Eager execution => return StaticWaitHandle.
       assertx(sfp);
@@ -5532,17 +5530,17 @@ OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE TCA iopYield(PC& pc) {
+OPTBLD_INLINE TCA iopYield(PC origpc, PC& pc) {
   auto const value = *vmStack().topC();
   vmStack().discard();
-  return yield(pc, nullptr, value);
+  return yield(origpc, pc, nullptr, value);
 }
 
-OPTBLD_INLINE TCA iopYieldK(PC& pc) {
+OPTBLD_INLINE TCA iopYieldK(PC origpc, PC& pc) {
   auto const key = *vmStack().indC(1);
   auto const value = *vmStack().topC();
   vmStack().ndiscard(2);
-  return yield(pc, &key, value);
+  return yield(origpc, pc, &key, value);
 }
 
 OPTBLD_INLINE bool typeIsValidGeneratorDelegate(DataType type) {
@@ -5622,7 +5620,7 @@ OPTBLD_INLINE void iopContEnterDelegate(PC origpc, PC& pc) {
 }
 
 OPTBLD_INLINE
-TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset) {
+TCA yieldFromGenerator(PC& pc, Generator* gen, Offset suspendOffset) {
   auto fp = vmfp();
 
   assertx(tvIsGenerator(gen->m_delegate));
@@ -5645,7 +5643,7 @@ TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset) {
   // really what we want to do is clean up all of the generator metadata
   // (state, ressume address, etc) and continue on.
   assertx(gen->isRunning());
-  gen->resumable()->setResumeAddr(nullptr, resumeOffset);
+  gen->resumable()->setResumeAddr(nullptr, suspendOffset);
   gen->setState(BaseGenerator::State::Started);
 
   returnToCaller(pc, sfp, callOff);
@@ -5654,7 +5652,7 @@ TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset) {
 }
 
 OPTBLD_INLINE
-TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
+TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset suspendOffset) {
   auto fp = vmfp();
 
   // For the most part this should never happen, the emitter assigns our
@@ -5681,7 +5679,7 @@ TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
 
   auto key = *it->key().asTypedValue();
   auto val = *it->val().asTypedValue();
-  gen->yield(resumeOffset, &key, val);
+  gen->yield(suspendOffset, &key, val);
 
   returnToCaller(pc, sfp, callOff);
 
@@ -5690,14 +5688,14 @@ TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE TCA iopYieldFromDelegate(PC& pc, Iter* it, PC resumePc) {
+OPTBLD_INLINE TCA iopYieldFromDelegate(PC origpc, PC& pc, Iter* it, PC) {
   auto gen = frame_generator(vmfp());
   auto func = vmfp()->func();
-  auto resumeOffset = func->unit()->offsetOf(resumePc);
+  auto suspendOffset = func->unit()->offsetOf(origpc);
   if (tvIsGenerator(gen->m_delegate)) {
-    return yieldFromGenerator(pc, gen, resumeOffset);
+    return yieldFromGenerator(pc, gen, suspendOffset);
   }
-  return yieldFromIterator(pc, gen, it, resumeOffset);
+  return yieldFromIterator(pc, gen, it, suspendOffset);
 }
 
 OPTBLD_INLINE void iopContUnsetDelegate(CudOp subop, Iter* iter) {
@@ -5767,10 +5765,10 @@ OPTBLD_INLINE void iopContGetReturn() {
   cellDup(cont->m_value, *vmStack().allocC());
 }
 
-OPTBLD_INLINE void asyncSuspendE(PC& pc) {
+OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
   auto const fp = vmfp();
   auto const func = fp->func();
-  auto const resumeOffset = func->unit()->offsetOf(pc);
+  auto const suspendOffset = func->unit()->offsetOf(origpc);
   assertx(func->isAsync());
   assertx(resumeModeFromActRec(fp) != ResumeMode::Async);
 
@@ -5783,7 +5781,7 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
     // Create the AsyncFunctionWaitHandle object. Create takes care of
     // copying local variables and itertors.
     auto waitHandle = c_AsyncFunctionWaitHandle::Create<true>(
-      fp, func->numSlotsInFrame(), nullptr, resumeOffset, child);
+      fp, func->numSlotsInFrame(), nullptr, suspendOffset, child);
 
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
@@ -5806,7 +5804,7 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
   } else {  // Async generator.
     // Create new AsyncGeneratorWaitHandle.
     auto waitHandle = c_AsyncGeneratorWaitHandle::Create(
-      fp, nullptr, resumeOffset, child);
+      fp, nullptr, suspendOffset, child);
 
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
@@ -5821,10 +5819,10 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
   }
 }
 
-OPTBLD_INLINE void asyncSuspendR(PC& pc) {
+OPTBLD_INLINE void asyncSuspendR(PC origpc, PC& pc) {
   auto const fp = vmfp();
   auto const func = fp->func();
-  auto const resumeOffset = func->unit()->offsetOf(pc);
+  auto const suspendOffset = func->unit()->offsetOf(origpc);
   assertx(!fp->sfp());
   assertx(func->isAsync());
   assertx(resumeModeFromActRec(fp) == ResumeMode::Async);
@@ -5841,10 +5839,10 @@ OPTBLD_INLINE void asyncSuspendR(PC& pc) {
 
   // Await child and suspend the async function/generator. May throw.
   if (!func->isGenerator()) {  // Async function.
-    frame_afwh(fp)->await(resumeOffset, std::move(child));
+    frame_afwh(fp)->await(suspendOffset, std::move(child));
   } else {  // Async generator.
     auto const gen = frame_async_generator(fp);
-    gen->resumable()->setResumeAddr(nullptr, resumeOffset);
+    gen->resumable()->setResumeAddr(nullptr, suspendOffset);
     gen->getWaitHandle()->await(std::move(child));
   }
 
@@ -5855,21 +5853,21 @@ OPTBLD_INLINE void asyncSuspendR(PC& pc) {
 
 namespace {
 
-TCA suspendStack(PC &pc) {
+TCA suspendStack(PC origpc, PC &pc) {
   auto const jitReturn = jitReturnPre(vmfp());
   if (resumeModeFromActRec(vmfp()) == ResumeMode::Async) {
     // suspend resumed execution
-    asyncSuspendR(pc);
+    asyncSuspendR(origpc, pc);
   } else {
     // suspend eager execution
-    asyncSuspendE(pc);
+    asyncSuspendE(origpc, pc);
   }
   return jitReturnPost(jitReturn);
 }
 
 }
 
-OPTBLD_INLINE TCA iopAwait(PC& pc) {
+OPTBLD_INLINE TCA iopAwait(PC origpc, PC& pc) {
   auto const awaitable = vmStack().topC();
   auto wh = c_Awaitable::fromCell(*awaitable);
   if (UNLIKELY(wh == nullptr)) {
@@ -5882,10 +5880,10 @@ OPTBLD_INLINE TCA iopAwait(PC& pc) {
     cellSet(wh->getResult(), *vmStack().topC());
     return nullptr;
   }
-  return suspendStack(pc);
+  return suspendStack(origpc, pc);
 }
 
-OPTBLD_INLINE TCA iopAwaitAll(PC& pc, LocalRange locals) {
+OPTBLD_INLINE TCA iopAwaitAll(PC origpc, PC& pc, LocalRange locals) {
   uint32_t cnt = 0;
   for (auto i = locals.first; i < locals.first + locals.count; ++i) {
     auto const local = *frame_local(vmfp(), i);
@@ -5911,7 +5909,7 @@ OPTBLD_INLINE TCA iopAwaitAll(PC& pc, LocalRange locals) {
   assertx(!static_cast<c_Awaitable*>(obj.get())->isFinished());
 
   vmStack().pushObjectNoRc(obj.detach());
-  return suspendStack(pc);
+  return suspendStack(origpc, pc);
 }
 
 OPTBLD_INLINE void iopWHResult() {
@@ -6133,6 +6131,8 @@ namespace {
 /*
  * iopWrapReturn() calls a function pointer and forwards its return value if it
  * returns TCA, or nullptr if returns void.
+ * Some opcodes need the original PC by value, and some do not. We have wrappers
+ * for both flavors.
  */
 template<typename... Params, typename... Args>
 OPTBLD_INLINE TCA iopWrapReturn(void(fn)(Params...), PC, Args&&... args) {
@@ -6145,16 +6145,17 @@ OPTBLD_INLINE TCA iopWrapReturn(TCA(fn)(Params...), PC, Args&&... args) {
   return fn(std::forward<Args>(args)...);
 }
 
-/*
- * iopSwitch and iopSSwitch take vectors containing Offset and need origpc to
- * translate those to PC. Special-case that here rather than creating a new
- * flag in hhbc.h just for this one case.
- */
 template<typename... Params, typename... Args>
 OPTBLD_INLINE TCA iopWrapReturn(void(fn)(PC, Params...), PC origpc,
                                 Args&&... args) {
   fn(origpc, std::forward<Args>(args)...);
   return nullptr;
+}
+
+template<typename... Params, typename... Args>
+OPTBLD_INLINE TCA iopWrapReturn(TCA(fn)(PC, Params...), PC origpc,
+                                Args&&... args) {
+  return fn(origpc, std::forward<Args>(args)...);
 }
 
 /*

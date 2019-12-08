@@ -1,0 +1,7 @@
+backtrace:
+  suspends
+    called from line 27
+  consumes
+    called from line 36
+  main
+string(7) "default"

@@ -50,7 +50,7 @@ c_AsyncFunctionWaitHandle*
 c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                   size_t numSlots,
                                   jit::TCA resumeAddr,
-                                  Offset resumeOffset,
+                                  Offset suspendOffset,
                                   c_WaitableWaitHandle* child) {
   assertx(fp);
   assertx(!isResumed(fp));
@@ -65,7 +65,7 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   auto const resumable = Resumable::Create(frameSize, totalSize);
   resumable->initialize<false, mayUseVV>(fp,
                                          resumeAddr,
-                                         resumeOffset,
+                                         suspendOffset,
                                          frameSize,
                                          totalSize);
   auto const waitHandle = new (resumable + 1) c_AsyncFunctionWaitHandle();
@@ -79,14 +79,14 @@ template c_AsyncFunctionWaitHandle*
 c_AsyncFunctionWaitHandle::Create<true>(const ActRec* fp,
                                         size_t numSlots,
                                         jit::TCA resumeAddr,
-                                        Offset resumeOffset,
+                                        Offset suspendOffset,
                                         c_WaitableWaitHandle* child);
 
 template c_AsyncFunctionWaitHandle*
 c_AsyncFunctionWaitHandle::Create<false>(const ActRec* fp,
                                         size_t numSlots,
                                         jit::TCA resumeAddr,
-                                        Offset resumeOffset,
+                                        Offset suspendOffset,
                                         c_WaitableWaitHandle* child);
 
 void c_AsyncFunctionWaitHandle::PrepareChild(const ActRec* fp,
@@ -140,13 +140,13 @@ void c_AsyncFunctionWaitHandle::onUnblocked() {
   }
 }
 
-void c_AsyncFunctionWaitHandle::await(Offset resumeOffset,
+void c_AsyncFunctionWaitHandle::await(Offset suspendOffset,
                                       req::ptr<c_WaitableWaitHandle>&& child) {
   // Prepare child for establishing dependency. May throw.
   prepareChild(child.get());
 
   // Suspend the async function.
-  resumable()->setResumeAddr(nullptr, resumeOffset);
+  resumable()->setResumeAddr(nullptr, suspendOffset);
 
   // Set up the dependency.
   setState(STATE_BLOCKED);
@@ -309,12 +309,9 @@ String c_AsyncFunctionWaitHandle::getFileName() {
 
 // Get the next execution offset
 Offset c_AsyncFunctionWaitHandle::getNextExecutionOffset() {
-  if (isFinished()) {
-    return InvalidAbsoluteOffset;
-  }
-
+  assertx(!isFinished());
   always_assert(!isRunning());
-  return resumable()->resumeOffset();
+  return resumable()->resumeFromAwaitOffset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

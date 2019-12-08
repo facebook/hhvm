@@ -122,11 +122,11 @@ BTFrame getARFromWHImpl(
 
     if (currentWaitHandle->getKind() == c_Awaitable::Kind::AsyncFunction) {
       auto const resumable = currentWaitHandle->asAsyncFunction()->resumable();
-      return BTFrame { resumable->actRec(), resumable->resumeOffset() };
+      return BTFrame { resumable->actRec(), resumable->suspendOffset() };
     }
     if (currentWaitHandle->getKind() == c_Awaitable::Kind::AsyncGenerator) {
       auto const resumable = currentWaitHandle->asAsyncGenerator()->resumable();
-      return BTFrame { resumable->actRec(), resumable->resumeOffset() };
+      return BTFrame { resumable->actRec(), resumable->suspendOffset() };
     }
     currentWaitHandle = getParentWH(currentWaitHandle, contextIdx, visitedWHs);
   }

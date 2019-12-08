@@ -57,9 +57,9 @@ void cgStArResumeAddr(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const addrOff = Resumable::resumeAddrOff() - Resumable::arOff();
-  auto const offsetOff = Resumable::resumeOffsetOff() - Resumable::arOff();
+  auto const offsetOff = Resumable::suspendOffsetOff() - Resumable::arOff();
   v << store{srcLoc(env, inst, 1).reg(), ar[addrOff]};
-  v << storeli{inst->extra<ResumeOffset>()->off, ar[offsetOff]};
+  v << storeli{inst->extra<SuspendOffset>()->off, ar[offsetOff]};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

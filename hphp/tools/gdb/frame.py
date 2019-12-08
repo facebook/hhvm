@@ -196,7 +196,7 @@ def create_resumable(idx, resumable):
         idx=idx,
         ar=resumable['m_actRec'].address,
         rip='{suspended}',
-        pc=resumable['m_resumeOffset'])
+        pc=resumable['m_suspendOffset'])
 
 
 #------------------------------------------------------------------------------

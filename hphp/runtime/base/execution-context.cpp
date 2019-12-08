@@ -1797,8 +1797,7 @@ static void prepareAsyncFuncEntry(ActRec* enterFnAr, Resumable* resumable) {
   assertx(resumable);
 
   vmfp() = enterFnAr;
-  vmpc() = vmfp()->func()->unit()->at(resumable->resumeOffset());
-  assertx(vmfp()->func()->contains(vmpc()));
+  vmpc() = enterFnAr->func()->unit()->at(resumable->resumeFromAwaitOffset());
   EventHook::FunctionResumeAwait(enterFnAr);
 }
 

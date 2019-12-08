@@ -290,7 +290,6 @@ void CmdNext::stepIntoSuspendedFrame() {
   auto wh = static_cast<c_AsyncFunctionWaitHandle*>(topObj);
   auto func = wh->actRec()->func();
   Offset nextInst = wh->getNextExecutionOffset();
-  assertx(nextInst != InvalidAbsoluteOffset);
   m_stepResumableId = wh->actRec();
   TRACE(2,
         "CmdNext: patch for cont step after Await at '%s' offset %d\n",

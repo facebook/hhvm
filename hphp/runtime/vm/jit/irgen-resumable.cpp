@@ -62,7 +62,8 @@ void suspendHook(IRGS& env, Hook hook) {
   );
 }
 
-void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
+void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
+                Offset resumeOffset) {
   assertx(curFunc(env)->isAsync());
   assertx(resumeMode(env) != ResumeMode::Async);
   assertx(child->type() <= TObj);
@@ -82,7 +83,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
           fp(env),
           cns(env, func->numSlotsInFrame()),
           resumeAddr,
-          cns(env, resumeOffset),
+          cns(env, suspendOffset),
           child);
 
     auto const asyncAR = gen(env, LdAFWHActRec, waitHandle);
@@ -110,7 +111,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
 
     // Create the AsyncGeneratorWaitHandle object.
     auto const waitHandle =
-      gen(env, CreateAGWH, fp(env), resumeAddr, cns(env, resumeOffset), child);
+      gen(env, CreateAGWH, fp(env), resumeAddr, cns(env, suspendOffset), child);
 
     // Call the suspend hook.
     suspendHook(env, [&] {
@@ -124,7 +125,8 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
   }
 }
 
-void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
+void implAwaitR(IRGS& env, SSATmp* child, Offset suspendOffset,
+                Offset resumeOffset) {
   assertx(curFunc(env)->isAsync());
   assertx(resumeMode(env) == ResumeMode::Async);
   assertx(child->isA(TObj));
@@ -144,7 +146,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, ResumeMode::Async);
   auto const data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, data);
-  gen(env, StArResumeAddr, ResumeOffset { resumeOffset }, fp(env),
+  gen(env, StArResumeAddr, SuspendOffset { suspendOffset }, fp(env),
       resumeAddr);
 
   // Set up the dependency.
@@ -212,12 +214,17 @@ void implYield(IRGS& env, bool withKey) {
     gen(env, SuspendHookYield, fp(env));
   });
 
-  // Resumable::setResumeAddr(resumeAddr, resumeOffset)
+  // Resumable::setResumeAddr(resumeAddr, suspendOffset)
+  auto const suspendOffset = bcOff(env);
   auto const resumeOffset = nextBcOff(env);
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, ResumeMode::GenIter);
   auto const data = LdBindAddrData { resumeSk, spOffBCFromFP(env) };
   auto const resumeAddr = gen(env, LdBindAddr, data);
-  gen(env, StArResumeAddr, ResumeOffset { resumeOffset }, fp(env), resumeAddr);
+  gen(env,
+      StArResumeAddr,
+      SuspendOffset { suspendOffset },
+      fp(env),
+      resumeAddr);
 
   // No inc/dec-ref as keys and values are teleported.
   auto const value = popC(env, DataTypeGeneric);
@@ -337,6 +344,7 @@ void emitWHResult(IRGS& env) {
 }
 
 void emitAwait(IRGS& env) {
+  auto const suspendOffset = bcOff(env);
   auto const resumeOffset = nextBcOff(env);
   assertx(curFunc(env)->isAsync());
   assertx(spOffBCFromFP(env) == spOffEmpty(env) + 1);
@@ -378,9 +386,9 @@ void emitAwait(IRGS& env) {
     if (childIsSWH) {
       gen(env, Unreachable, ASSERT_REASON);
     } else if (resumeMode(env) == ResumeMode::Async) {
-      implAwaitR(env, child, resumeOffset);
+      implAwaitR(env, child, suspendOffset, resumeOffset);
     } else {
-      implAwaitE(env, child, resumeOffset);
+      implAwaitE(env, child, suspendOffset, resumeOffset);
     }
   };
 
@@ -429,6 +437,7 @@ void emitAwait(IRGS& env) {
 }
 
 void emitAwaitAll(IRGS& env, LocalRange locals) {
+  auto const suspendOffset = bcOff(env);
   auto const resumeOffset = nextBcOff(env);
   assertx(curFunc(env)->isAsync());
   assertx(spOffBCFromFP(env) == spOffEmpty(env));
@@ -483,9 +492,9 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
       );
 
       if (resumeMode(env) == ResumeMode::Async) {
-        implAwaitR(env, wh, resumeOffset);
+        implAwaitR(env, wh, suspendOffset, resumeOffset);
       } else {
-        implAwaitE(env, wh, resumeOffset);
+        implAwaitE(env, wh, suspendOffset, resumeOffset);
       }
     }
   );
@@ -494,6 +503,7 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
 //////////////////////////////////////////////////////////////////////
 
 void emitCreateCont(IRGS& env) {
+  auto const suspendOffset = bcOff(env);
   auto const resumeOffset = nextBcOff(env);
   assertx(resumeMode(env) == ResumeMode::None);
   assertx(curFunc(env)->isGenerator());
@@ -510,7 +520,7 @@ void emitCreateCont(IRGS& env) {
         fp(env),
         cns(env, func->numSlotsInFrame()),
         resumeAddr,
-        cns(env, resumeOffset));
+        cns(env, suspendOffset));
 
   // The suspend hook will decref the newly created generator if it throws.
   auto const contAR =

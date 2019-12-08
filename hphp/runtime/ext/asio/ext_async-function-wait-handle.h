@@ -73,9 +73,6 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   static constexpr ptrdiff_t resumeAddrOff() {
     return resumableOff() + Resumable::resumeAddrOff();
   }
-  static constexpr ptrdiff_t resumeOffsetOff() {
-    return resumableOff() + Resumable::resumeOffsetOff();
-  }
   static constexpr ptrdiff_t childrenOff() {
     return offsetof(c_AsyncFunctionWaitHandle, m_children);
   }

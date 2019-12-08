@@ -49,9 +49,6 @@ struct BaseGenerator {
   static constexpr ptrdiff_t resumeAddrOff() {
     return resumableOff() + Resumable::resumeAddrOff();
   }
-  static constexpr ptrdiff_t resumeOffsetOff() {
-    return resumableOff() + Resumable::resumeOffsetOff();
-  }
   static constexpr ptrdiff_t stateOff() {
     return offsetof(BaseGenerator, m_state);
   }

@@ -32,7 +32,7 @@ struct CmdNext : CmdFlowControl {
 
 private:
   void stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc);
-  void stepAfterAwait();
+  void stepIntoSuspendedFrame();
   bool hasStepResumable();
   bool atStepResumableOffset(Unit* unit, Offset o);
   void setupStepSuspend(ActRec* fp, PC pc);
@@ -44,7 +44,9 @@ private:
   // Unique id for the resumable we're stepping.
   ActRec* m_stepResumableId{nullptr};
 
-  bool m_skippingAwait{false};
+  // We're trying to step over an await, but that await will cause the eagerly
+  // executed frame we're in to be suspended.
+  bool m_steppingWhileSuspendingFrame{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -167,9 +167,9 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
     return;
   }
 
-  if (m_skippingAwait) {
-    m_skippingAwait = false;
-    stepAfterAwait();
+  if (m_steppingWhileSuspendingFrame) {
+    m_steppingWhileSuspendingFrame = false;
+    stepIntoSuspendedFrame();
     return;
   }
 
@@ -221,11 +221,13 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
         removeLocationFilter();
       } else {
         // Eager execution in non-resumed mode is supported only by async
-        // functions. We need to step over this opcode, then grab the created
-        // AsyncFunctionWaitHandle and setup stepping like we do for
-        // OpAwait.
+        // functions. We need to step over this opcode, but that will cause this
+        // frame to be moved off of the stack onto the heap, and will put us
+        // in the caller with a new AsyncFunctionWaitHandle on the stack. We
+        // will inspect that AsyncFunctionWaitHandle and run until the moved
+        // frame it refers to resumes.
         assertx(fp->func()->isAsyncFunction());
-        m_skippingAwait = true;
+        m_steppingWhileSuspendingFrame = true;
         m_needsVMInterrupt = true;
         removeLocationFilter();
       }
@@ -277,13 +279,12 @@ void CmdNext::setupStepSuspend(ActRec* fp, PC pc) {
   m_stepResumable = StepDestination(fp->m_func->unit(), nextInst);
 }
 
-// An Await opcode is used in the codegen for an async function to suspend
-// execution until the given wait handle is finished. In eager execution,
-// the state is suspended into a new AsyncFunctionWaitHandle object so that
-// the execution can continue later. We have just completed an Await, so
-// the new AsyncFunctionWaitHandle is now available, and it can predict
-// where execution will resume.
-void CmdNext::stepAfterAwait() {
+// We were trying to step over an Await in an eagerly executed frame, and the
+// frame we were in was moved from the stack to the heap. We are now in the
+// callee with the AsyncFunctionWaitHandle for the frame we were in on top of
+// the stack. Run until the now suspended frame resumes after the Await we were
+// stepping over.
+void CmdNext::stepIntoSuspendedFrame() {
   auto topObj = vmsp()->m_data.pobj;
   assertx(topObj->instanceof(c_AsyncFunctionWaitHandle::classof()));
   auto wh = static_cast<c_AsyncFunctionWaitHandle*>(topObj);

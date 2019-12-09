@@ -1,4 +1,0 @@
-File "trait_bug3.php", line 6, characters 7-9:
-The type Foo expects 1 type parameter(s) (Typing[4101])
-File "trait_bug3.php", line 3, characters 7-9:
-Definition is here

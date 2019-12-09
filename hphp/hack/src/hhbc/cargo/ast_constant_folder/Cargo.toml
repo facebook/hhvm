@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/hhbc:ast_constant_folder_rust
-# Signature<<8154384e53cd02887988a5dc97cc67112730d2e6>>
+# Signature<<3c64c4ebce125c71fae6cfe5c6166dc426fcfc9a>>
 [package]
 name = "ast_constant_folder_rust"
 edition = "2018"
@@ -17,4 +17,4 @@ hhbc_string_utils_rust = { path = "../string_utils" }
 naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }
-# @end of Signature<<8154384e53cd02887988a5dc97cc67112730d2e6>>
+# @end of Signature<<3c64c4ebce125c71fae6cfe5c6166dc426fcfc9a>>

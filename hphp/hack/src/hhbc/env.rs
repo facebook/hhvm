@@ -6,7 +6,12 @@
 pub mod emitter; // emitter is public API for mutating state
 pub mod iterator;
 
+use iterator::Iter;
+use label_rust::Label;
+use oxidized::ast as tast;
 use rx_rust as rx;
+
+mod jump_targets;
 
 extern crate bitflags;
 use bitflags::bitflags;
@@ -22,10 +27,77 @@ bitflags! {
 
 pub struct Env {
     pub flags: Flags,
+    pub jump_targets_gen: jump_targets::Gen,
     // TODO(hrust)
     // - pipe_var after porting Local
     // - namespace after porting Namespace_env
-    // - jump_targets after porting Jump_targets
+}
+
+impl Env {
+    pub fn do_in_loop_body<R, F>(
+        &mut self,
+        label_break: Label,
+        label_continue: Label,
+        iterator: Option<Iter>,
+        s: &tast::Stmt,
+        f: F,
+    ) -> R
+    where
+        F: FnOnce(&mut Self, &tast::Stmt) -> R,
+    {
+        self.jump_targets_gen
+            .with_loop(label_break, label_continue, iterator, s);
+        self.run_and_release_ids(s, f)
+    }
+
+    pub fn do_in_switch_body<R, F>(&mut self, end_label: Label, cases: &Vec<tast::Case>, f: F) -> R
+    where
+        F: FnOnce(&mut Self, &Vec<tast::Case>) -> R,
+    {
+        self.jump_targets_gen.with_switch(end_label, cases);
+        self.run_and_release_ids(cases, f)
+    }
+
+    pub fn do_in_try_body<R, F>(&mut self, finally_label: Label, stmt: &tast::Stmt, f: F) -> R
+    where
+        F: FnOnce(&mut Self, &tast::Stmt) -> R,
+    {
+        self.jump_targets_gen.with_try(finally_label, stmt);
+        self.run_and_release_ids(stmt, f)
+    }
+
+    pub fn do_in_finally_body<R, F>(&mut self, stmt: &tast::Stmt, f: F) -> R
+    where
+        F: FnOnce(&mut Self, &tast::Stmt) -> R,
+    {
+        self.jump_targets_gen.with_finally(stmt);
+        self.run_and_release_ids(stmt, f)
+    }
+
+    pub fn do_in_using_body<R, F>(&mut self, finally_label: Label, stmt: &tast::Stmt, f: F) -> R
+    where
+        F: FnOnce(&mut Self, &tast::Stmt) -> R,
+    {
+        self.jump_targets_gen.with_using(finally_label, stmt);
+        self.run_and_release_ids(stmt, f)
+    }
+
+    pub fn do_function<R, F>(&mut self, defs: &tast::Program, f: F) -> R
+    where
+        F: FnOnce(&mut Self, &tast::Program) -> R,
+    {
+        self.jump_targets_gen.with_function(defs);
+        self.run_and_release_ids(defs, f)
+    }
+
+    fn run_and_release_ids<X, R, F>(&mut self, x: X, f: F) -> R
+    where
+        F: FnOnce(&mut Self, X) -> R,
+    {
+        let res = f(self, x);
+        self.jump_targets_gen.release_ids();
+        res
+    }
 }
 
 /// Builder for creating unique ids; e.g.

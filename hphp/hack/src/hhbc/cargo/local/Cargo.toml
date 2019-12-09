@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/hhbc:local_rust
-# Signature<<5744fcb1d56172461b1bf155edad0f62a4aea17b>>
+# Signature<<6070e9ac291316b985cb7288e870c6bd2b41f6cd>>
 [package]
 name = "local_rust"
 edition = "2018"
@@ -12,4 +12,4 @@ path = "../../local.rs"
 [dependencies]
 naming_special_names_rust = { path = "../../../naming" }
 lazy_static = "*"
-# @end of Signature<<5744fcb1d56172461b1bf155edad0f62a4aea17b>>
+# @end of Signature<<6070e9ac291316b985cb7288e870c6bd2b41f6cd>>

@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/hhbc:hhbc_id_rust
-# Signature<<1c25692cd916a7c3353305672caba029c220d2e6>>
+# Signature<<ca2516c595bbf3938bc2eb3fcc2c5ac5362e7c1f>>
 [package]
 name = "hhbc_id_rust"
 edition = "2018"
@@ -11,4 +11,4 @@ path = "../../hhbc_id.rs"
 
 [dependencies]
 hhbc_string_utils_rust = { path = "../string_utils" }
-# @end of Signature<<1c25692cd916a7c3353305672caba029c220d2e6>>
+# @end of Signature<<ca2516c595bbf3938bc2eb3fcc2c5ac5362e7c1f>>

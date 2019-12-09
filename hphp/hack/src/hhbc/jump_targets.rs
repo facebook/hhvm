@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use env::iterator::Iter;
+use crate::iterator::Iter;
 use label_rust::Label;
 use oxidized::aast::*;
 use std::collections::{HashMap, HashSet};
@@ -25,16 +25,20 @@ pub enum Region {
     Using(Label, LabelSet),
 }
 
+pub type JumpTargets = Vec<Region>;
+
 #[derive(PartialEq, Eq, Hash)]
 pub enum IdKey {
     IdReturn,
     IdLabel(Label),
 }
 
+#[derive(Default)]
 pub struct Gen {
     label_id_map: HashMap<IdKey, Id>,
     labels_in_function: HashMap<Label, bool>,
     function_has_goto: bool,
+    jump_targets: JumpTargets,
 }
 
 impl Gen {
@@ -80,107 +84,62 @@ impl Gen {
         self.new_id(IdKey::IdLabel(l))
     }
 
-    pub fn with_loop<Ex, Fb, En, Hi, R, F>(
+    pub fn with_loop<Ex, Fb, En, Hi>(
         &mut self,
         label_break: Label,
         label_continue: Label,
         iterator: Option<Iter>,
-        t: &mut Vec<Region>,
-        s: &Stmt<Ex, Fb, En, Hi>,
-        f: F,
-    ) -> R
-    where
-        F: FnOnce(&mut Vec<Region>, &Stmt<Ex, Fb, En, Hi>) -> R,
-    {
-        let labels = self.collect_valid_target_labels_for_stmt(s);
-        t.push(Region::Loop(
+        stmt: &Stmt<Ex, Fb, En, Hi>,
+    ) {
+        let labels = self.collect_valid_target_labels_for_stmt(stmt);
+        self.jump_targets.push(Region::Loop(
             LoopLabels {
                 label_break,
                 label_continue,
                 iterator,
             },
             labels,
-        ));
-        self.run_and_release_ids(t, s, f)
+        ))
     }
 
-    pub fn with_switch<Ex, Fb, En, Hi, R, F>(
+    pub fn with_switch<Ex, Fb, En, Hi>(
         &mut self,
         end_label: Label,
-        t: &mut Vec<Region>,
         cases: &Vec<Case<Ex, Fb, En, Hi>>,
-        f: F,
-    ) -> R
-    where
-        F: FnOnce(&mut Vec<Region>, ()) -> R,
-    {
+    ) {
         let labels = self.collect_valid_target_labels_for_switch_cases(cases);
         // CONSIDER: now HHVM eagerly reserves state id for the switch end label
         // which does not seem to be necessary - do it for now for HHVM compatibility
         let _ = self.get_id_for_label(end_label.clone());
-        t.push(Region::Switch(end_label, labels));
-        self.run_and_release_ids(t, (), f)
+        self.jump_targets.push(Region::Switch(end_label, labels));
     }
 
-    pub fn with_try<Ex, Fb, En, Hi, R, F>(
+    pub fn with_try<Ex, Fb, En, Hi>(&mut self, finally_label: Label, stmt: &Stmt<Ex, Fb, En, Hi>) {
+        let labels = self.collect_valid_target_labels_for_stmt(stmt);
+        self.jump_targets
+            .push(Region::TryFinally(finally_label, labels));
+    }
+
+    pub fn with_finally<Ex, Fb, En, Hi>(&mut self, stmt: &Stmt<Ex, Fb, En, Hi>) {
+        let labels = self.collect_valid_target_labels_for_stmt(stmt);
+        self.jump_targets.push(Region::Finally(labels));
+    }
+
+    pub fn with_function<Ex, Fb, En, Hi>(&mut self, defs: &Program<Ex, Fb, En, Hi>) {
+        let labels = self.collect_valid_target_labels_for_defs(defs);
+        self.jump_targets.push(Region::Function(labels));
+    }
+
+    pub fn with_using<Ex, Fb, En, Hi>(
         &mut self,
         finally_label: Label,
-        t: &mut Vec<Region>,
-        s: &Stmt<Ex, Fb, En, Hi>,
-        f: F,
-    ) -> R
-    where
-        F: FnOnce(&mut Vec<Region>, &Stmt<Ex, Fb, En, Hi>) -> R,
-    {
-        let labels = self.collect_valid_target_labels_for_stmt(s);
-        t.push(Region::TryFinally(finally_label, labels));
-        self.run_and_release_ids(t, s, f)
+        stmt: &Stmt<Ex, Fb, En, Hi>,
+    ) {
+        let labels = self.collect_valid_target_labels_for_stmt(stmt);
+        self.jump_targets.push(Region::Using(finally_label, labels));
     }
 
-    pub fn with_finally<Ex, Fb, En, Hi, R, F>(
-        &mut self,
-        t: &mut Vec<Region>,
-        s: &Stmt<Ex, Fb, En, Hi>,
-        f: F,
-    ) -> R
-    where
-        F: FnOnce(&mut Vec<Region>, &Stmt<Ex, Fb, En, Hi>) -> R,
-    {
-        let labels = self.collect_valid_target_labels_for_stmt(s);
-        t.push(Region::Finally(labels));
-        self.run_and_release_ids(t, s, f)
-    }
-
-    pub fn with_function<Ex, Fb, En, Hi, R, F>(
-        &mut self,
-        t: &mut Vec<Region>,
-        s: &Program<Ex, Fb, En, Hi>,
-        f: F,
-    ) -> R
-    where
-        F: FnOnce(&mut Vec<Region>, &Program<Ex, Fb, En, Hi>) -> R,
-    {
-        let labels = self.collect_valid_target_labels_for_defs(s);
-        t.push(Region::Function(labels));
-        self.run_and_release_ids(t, s, f)
-    }
-
-    pub fn with_using<Ex, Fb, En, Hi, R, F>(
-        &mut self,
-        finally_label: Label,
-        t: &mut Vec<Region>,
-        s: &Stmt<Ex, Fb, En, Hi>,
-        f: F,
-    ) -> R
-    where
-        F: FnOnce(&mut Vec<Region>, &Stmt<Ex, Fb, En, Hi>) -> R,
-    {
-        let labels = self.collect_valid_target_labels_for_stmt(s);
-        t.push(Region::Using(finally_label, labels));
-        self.run_and_release_ids(t, s, f)
-    }
-
-    pub fn get_closest_enclosing_finally_label(t: Vec<Region>) -> Option<(Label, Vec<Iter>)> {
+    pub fn get_closest_enclosing_finally_label(t: JumpTargets) -> Option<(Label, Vec<Iter>)> {
         let mut iters = vec![];
         for r in t.into_iter().rev() {
             match r {
@@ -196,7 +155,7 @@ impl Gen {
         None
     }
 
-    pub fn collect_iterators(t: Vec<Region>) -> Vec<Iter> {
+    pub fn collect_iterators(t: JumpTargets) -> Vec<Iter> {
         let mut iters = vec![];
         for r in t.into_iter().rev() {
             if let Region::Loop(LoopLabels { iterator, .. }, _) = r {
@@ -222,7 +181,7 @@ pub enum ResolvedJumpTarget {
 
 impl ResolvedJumpTarget {
     /// Tries to find a target label given a level and a jump kind (break or continue)
-    pub fn get_target_for_level(is_break: bool, mut level: usize, t: Vec<Region>) -> Self {
+    pub fn get_target_for_level(is_break: bool, mut level: usize, t: JumpTargets) -> Self {
         let mut iters = vec![];
         let mut acc = vec![];
         let mut label = None;
@@ -310,7 +269,7 @@ pub enum ResolvedGotoTarget {
 }
 
 impl ResolvedGotoTarget {
-    pub fn find_goto_target(t: Vec<Region>, label: String) -> Self {
+    pub fn find_goto_target(t: JumpTargets, label: String) -> Self {
         assert_eq!(t.is_empty(), false);
 
         let mut iters = vec![];
@@ -476,20 +435,11 @@ impl Gen {
         )
     }
 
-    fn release_id(&mut self, l: Label) {
-        self.label_id_map.remove(&IdKey::IdLabel(l));
-    }
-
-    /// runs a given function and then released label ids that were possibly assigned
-    /// to labels at the head of the list
-    fn run_and_release_ids<S, R, F>(&mut self, t: &mut Vec<Region>, s: S, f: F) -> R
-    where
-        F: FnOnce(&mut Vec<Region>, S) -> R,
-    {
+    pub fn release_ids(&mut self) {
         use Region::*;
-        let res = f(t, s);
-        let _labels = match t
-            .last()
+        let _labels = match self
+            .jump_targets
+            .last_mut()
             .expect("empty region after executing run_and_release")
         {
             Loop(
@@ -500,12 +450,14 @@ impl Gen {
                 },
                 labels,
             ) => {
-                self.release_id(label_break.clone());
-                self.release_id(label_continue.clone());
+                self.label_id_map
+                    .remove(&IdKey::IdLabel(label_break.clone()));
+                self.label_id_map
+                    .remove(&IdKey::IdLabel(label_continue.clone()));
                 labels
             }
             Switch(l, labels) | TryFinally(l, labels) | Using(l, labels) => {
-                self.release_id(l.clone());
+                self.label_id_map.remove(&IdKey::IdLabel(l.clone()));
                 labels
             }
             Finally(labels) | Function(labels) => labels,
@@ -515,8 +467,7 @@ impl Gen {
         // Do the same for now for compatibility reasons
         // labels
         //     .iter()
-        //     .for_each(|l| self.release_id(Label::Named(l.to_string())));
-        res
+        //     .for_each(|l| self.label_id_map.remove(&IdKey::IdLabel(Label::Named(l.to_string()))));
     }
 }
 

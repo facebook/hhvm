@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/hhbc:emit_env_rust
-# Signature<<71fee261442b7a5e14da87dcff01e08788da3422>>
+# Signature<<423e29cb224f13b089714d1bf37ef43ee82a92a2>>
 [package]
 name = "emit_env_rust"
 edition = "2018"
@@ -11,4 +11,4 @@ path = "../../emit_env.rs"
 
 [dependencies]
 oxidized = { path = "../../../oxidized" }
-# @end of Signature<<71fee261442b7a5e14da87dcff01e08788da3422>>
+# @end of Signature<<423e29cb224f13b089714d1bf37ef43ee82a92a2>>

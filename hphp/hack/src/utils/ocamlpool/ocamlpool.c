@@ -250,7 +250,7 @@ value ocamlpool_reserve_block(int tag, size_t words)
   size_t size = words + 1;
   value *pointer = ocamlpool_cursor - size;
 
-  if (pointer < ocamlpool_limit)
+  if (pointer < ocamlpool_limit || pointer >= ocamlpool_bound)
   {
     size_t old_ocamlpool_next_chunk_size = ocamlpool_next_chunk_size;
     if (size >= ocamlpool_next_chunk_size) {

@@ -344,14 +344,12 @@ void relocateOptFunc(FuncMetaInfo& info, SrcKeyTransMap& srcKeyTrans,
   // again right before the optimized prologues.
   if (func->getFuncBody() != tc::ustubs().funcBodyHelperThunk &&
       func->getDVFunclets().size() > 0) {
-    const auto& view = code().view(TransKind::OptPrologue);
-    const auto tca = emitFuncBodyDispatchInternal(func, func->getDVFunclets(),
-                                                  TransKind::OptPrologue, view);
-    if (tca != nullptr) {
-      info.bodyDispatch = std::make_unique<BodyDispatchMetaInfo>(
-        tca, view.main().frontier()
-      );
-    }
+    auto const loc = emitFuncBodyDispatchInternal(
+      func, func->getDVFunclets(), TransKind::OptPrologue, nullptr
+    );
+    info.bodyDispatch = std::make_unique<BodyDispatchMetaInfo>(
+      loc.mainStart(), loc.mainEnd()
+    );
   }
 
   // Relocate/emit all prologues and translations for func in order.

@@ -229,21 +229,26 @@ let update_naming_table
     match new_file_info with
     | None -> naming_table
     | Some new_file_info ->
-      (* Update reverse naming table *)
-      FileInfo.(
-        (* TODO: when we start typechecking files, we'll have to keep track of
+      (try
+         (* Update reverse naming table *)
+         FileInfo.(
+           (* TODO: when we start typechecking files, we'll have to keep track of
       which files have naming errors, so that we can re-typecheck them
        - Also note that [_fast] means that this function call ignores errors *)
-        NamingGlobal.ndecl_file_fast
-          path
-          ~funs:(strip_positions new_file_info.funs)
-          ~classes:(strip_positions new_file_info.classes)
-          ~record_defs:(strip_positions new_file_info.record_defs)
-          ~typedefs:(strip_positions new_file_info.typedefs)
-          ~consts:(strip_positions new_file_info.consts);
+           NamingGlobal.ndecl_file_fast
+             path
+             ~funs:(strip_positions new_file_info.funs)
+             ~classes:(strip_positions new_file_info.classes)
+             ~record_defs:(strip_positions new_file_info.record_defs)
+             ~typedefs:(strip_positions new_file_info.typedefs)
+             ~consts:(strip_positions new_file_info.consts);
 
-        (* Update and return the forward naming table *)
-        Naming_table.update naming_table path new_file_info)
+           (* Update and return the forward naming table *)
+           Naming_table.update naming_table path new_file_info)
+         (* If a disk read failure occurs, log it but don't crash sIDE *)
+       with exn ->
+         HackEventLogger.uncaught_exception exn;
+         naming_table)
   in
   { env with ServerEnv.naming_table }
 

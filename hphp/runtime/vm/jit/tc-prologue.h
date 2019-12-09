@@ -25,12 +25,15 @@ struct ProfTransRec;
 
 namespace tc {
 
+struct CodeMetaLock;
+
 /*
  * Emit a function prologue from rec.
  *
  * Precondition: calling thread owns both code and metadata locks
  */
-void emitFuncPrologueOptInternal(PrologueMetaInfo& info);
+void emitFuncPrologueOptInternal(PrologueMetaInfo& info,
+                                 CodeMetaLock* locker);
 
 /*
  * Publish the metadata for the given func prologue.  Returns whether or not it

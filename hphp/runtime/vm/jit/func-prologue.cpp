@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 
+#include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
@@ -28,7 +29,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
-#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
@@ -71,8 +72,10 @@ TransContext prologue_context(TransID transID,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
-                    CodeCache::View code, CGMeta& fixups) {
+std::tuple<TransLoc, TCA, CodeCache::View>
+genFuncPrologue(TransID transID, TransKind kind,
+                Func* func, int argc, CodeCache& code, CGMeta& fixups,
+                tc::CodeMetaLock* locker) {
   auto context = prologue_context(transID, kind, func, argc,
                                   func->getEntryForNumArgs(argc));
   IRUnit unit{context, std::make_unique<AnnotationData>()};
@@ -84,9 +87,25 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
   printUnit(2, unit, "After initial prologue generation");
 
   auto vunit = irlower::lowerUnit(env.unit, CodeKind::Prologue);
-  auto const start = code.main().frontier();
-  emitVunit(*vunit, env.unit, code, fixups);
-  return start;
+
+  if (locker) locker->lock();
+  SCOPE_EXIT { if (locker) locker->unlock(); };
+  tc::assertOwnsCodeLock();
+  tc::assertOwnsMetadataLock();
+
+  auto codeView = code.view(kind);
+  TCA mainOrig = codeView.main().frontier();
+
+  // If we're close to a cache line boundary, just burn some space to
+  // try to keep the func and its body on fewer total lines.
+  align(codeView.main(), &fixups, Alignment::CacheLineRoundUp,
+        AlignContext::Dead);
+
+  tc::TransLocMaker maker(codeView);
+  maker.markStart();
+
+  emitVunit(*vunit, env.unit, codeView, fixups);
+  return std::make_tuple(maker.markEnd().loc(), mainOrig, codeView);
 }
 
 TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,

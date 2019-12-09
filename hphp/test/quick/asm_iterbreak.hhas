@@ -31,41 +31,52 @@
 
   CGetL $0
   IterInit 0 K:$2 V:$1 endOuter
-startOuter:
+  .try {
+  startOuter:
 
-  String "\n"
-  CGetL2 $1
-  Concat
-  Print
-  PopC
+    String "\n"
+    CGetL2 $1
+    Concat
+    Print
+    PopC
 
-  String "\n"
-  CGetL2 $2
-  Concat
-  Print
-  PopC
+    String "\n"
+    CGetL2 $2
+    Concat
+    Print
+    PopC
 
-  CGetL $0
-  IterInit 1 K:$4 V:$3 endInner
-startInner:
-  String "\n"
-  CGetL2 $3
-  Concat
-  Print
-  PopC
+    CGetL $0
+    IterInit 1 K:$4 V:$3 endInner
+    .try {
+    startInner:
+      String "\n"
+      CGetL2 $3
+      Concat
+      Print
+      PopC
 
-  String "\n"
-  CGetL2 $4
-  Concat
-  Print
-  PopC
+      String "\n"
+      CGetL2 $4
+      Concat
+      Print
+      PopC
 
-  IterBreak endOuter <(Iter) 1, (Iter) 0>
-  IterNext 1 K:$4 V:$3 startInner
-endInner:
-  IterNext 0 K:$2 V:$1 startOuter
+      IterBreak endOuter <(Iter) 1, (Iter) 0>
+      IterNext 1 K:$4 V:$3 startInner
+      Jmp endInner
+    } .catch {
+      IterFree 1
+      Throw
+    }
+  endInner:
+    IterNext 0 K:$2 V:$1 startOuter
+    Jmp endOuter
+  } .catch {
+    IterFree 0
+    Throw
+  }
 endOuter:
-
   Int 1
   RetC
 }

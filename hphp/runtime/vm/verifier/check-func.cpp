@@ -110,12 +110,13 @@ struct FuncChecker {
   bool checkOutputs(State* cur, PC, Block* b);
   bool checkRxOp(State* cur, PC, Op);
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
-  bool checkTerminal(State* cur, PC pc);
+  bool checkTerminal(State* cur, Op op, Block* b);
   bool checkIter(State* cur, PC pc);
   bool checkIterBreak(State* cur, PC pc);
   bool checkLocal(PC pc, int val);
   bool checkString(PC pc, Id id);
-  bool checkExnEdge(State cur, Block* b);
+  bool checkExnEdge(State cur, Op op, Block* b);
+  bool checkItersDead(const State& cur, Op op, Block* b, const char* info);
   void reportStkUnderflow(Block*, const State& cur, PC);
   void reportStkOverflow(Block*, const State& cur, PC);
   void reportStkMismatch(Block* b, Block* target, const State& cur);
@@ -221,6 +222,52 @@ bool checkFunc(const FuncEmitter* func, ErrorMode mode) {
   return v.checkDef() &&
          v.checkOffsets() &&
          v.checkFlow();
+}
+
+bool isInitialized(const State& state) {
+  return state.stk;
+}
+
+// This fn returns false for a subset of ops that are guaranteed not to take
+// the exn edge for the block they appear in. For other ops, it pessimistically
+// assumes that this edge may get taken.
+//
+// This list should include instructions that are emitted for gotos or for iter
+// or local scope cleanup blocks. "IterFree", "LIterFree", "UnsetL", "Jmp", and
+// "Silence" are all used in these blocks. The "Ret*" ops are used for returns
+// inside loop bodies, as well. If HHBBC determines that a block is unreachable,
+// it will replace its contents with "String ...; Fatal", which we also include.
+//
+// Some of the ops here require justification:
+//  - Fatal: this op throws, but not in a way that can be caught by exn
+//  - Jmp: this op may check suprise flags and reenter, but reentry for suprise
+//    checks is guarded by try-catch blocks, so we won't take the exn edge
+//  - Ret*: these ops check surprise flags and the return hook may throw, but
+//    before we run it, we set localsDecRefd, so we won't run the exn edge
+//
+// TODO(#57576776): Modify emitter + HHBBC to use JmpNS, then drop Jmp here.
+// TODO(#57576993): Modify emitter to jump out of loops before returning,
+//                  then drop the Ret* instructions here.
+bool mayTakeExnEdges(Op op) {
+  switch (op) {
+    case Op::AssertRATL:
+    case Op::AssertRATStk:
+    case Op::Jmp:
+    case Op::JmpNS:
+    case Op::Fatal:
+    case Op::IterFree:
+    case Op::IterBreak:
+    case Op::LIterFree:
+    case Op::RetC:
+    case Op::RetCSuspended:
+    case Op::RetM:
+    case Op::Silence:
+    case Op::String:
+    case Op::UnsetL:
+      return false;
+    default:
+      return true;
+  }
 }
 
 FuncChecker::FuncChecker(const FuncEmitter* f, ErrorMode mode)
@@ -926,15 +973,31 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
   return ok;
 }
 
-bool FuncChecker::checkTerminal(State* cur, PC pc) {
-  if (isRet(pc)) {
-    if (cur->stklen != 0) {
-      error("stack depth must equal 0 after Ret*; got %d\n",
-             cur->stklen);
-      return false;
-    }
+bool FuncChecker::checkItersDead(const State& cur, Op op,
+                                 Block* b, const char* info) {
+  auto ok = true;
+  for (auto i = 0; i < numIters(); i++) {
+    ok &= !cur.iters[i];
   }
-  return true;
+  if (ok) return true;
+
+  auto liveIters = std::vector<int>{};
+  for (auto i = 0; i < numIters(); i++) {
+    if (cur.iters[i]) liveIters.push_back(i);
+  }
+  error("Block B%d %s at op %s with live iterators: [%s]\n",
+        b->id, info, opcodeToName(op), folly::join(", ", liveIters).data());
+  return false;
+}
+
+bool FuncChecker::checkTerminal(State* cur, Op op, Block* b) {
+  if (!isRet(op)) return true;
+  auto ok = checkItersDead(*cur, op, b, "terminates");
+  if (cur->stklen != 0) {
+    error("stack depth must equal 0 after Ret*; got %d\n", cur->stklen);
+    ok = false;
+  }
+  return ok;
 }
 
 // Check that the initialization state of the iterator referenced by the current
@@ -1906,7 +1969,7 @@ void FuncChecker::initState(State* s) {
 }
 
 void FuncChecker::copyState(State* to, const State* from) {
-  assertx(from->stk);
+  assertx(isInitialized(*from));
   if (!to->stk) initState(to);
   memcpy(to->stk, from->stk, from->stklen * sizeof(*to->stk));
   memcpy(to->iters, from->iters, numIters() * sizeof(*to->iters));
@@ -1919,7 +1982,11 @@ void FuncChecker::copyState(State* to, const State* from) {
   to->afterDim = from->afterDim;
 }
 
-bool FuncChecker::checkExnEdge(State cur, Block* b) {
+bool FuncChecker::checkExnEdge(State cur, Op op, Block* b) {
+  // Any live iterators must be guarded by exception edges. So, if there
+  // isn't an exception edge for a given block, all iters must be dead.
+  if (!b->exn) return checkItersDead(cur, op, b, "is unguarded");
+
   // Reachable catch blocks have just the exception on the
   // stack. Checking an edge to the catch block right before every
   // instruction is unnecessary since not every instruction can throw;
@@ -1937,7 +2004,6 @@ bool FuncChecker::checkExnEdge(State cur, Block* b) {
 
 bool FuncChecker::checkBlock(State& cur, Block* b) {
   bool ok = true;
-  bool exnVisited = false;
   auto const verify_rx = (RuntimeOption::EvalRxVerifyBody > 0) &&
     funcAttrIsAnyRx(m_func->attrs) && !m_func->isRxDisabled;
   if (m_errmode == kVerbose) {
@@ -1952,33 +2018,18 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
                    instrToString(pc, unit()) << std::endl;
     }
     auto const op = peek_op(pc);
-    auto const skipExnEdge = [&] {
-      if (op != Op::Silence) return false;
-      auto npc = pc;
-      decode_op(npc);
-      decode_iva(npc);
-      // Do not propagate silence state before processing Silence End.
-      return decode_oa<SilenceOp>(npc) == SilenceOp::End;
-    }();
-    if (b->exn && !skipExnEdge) {
-      ok &= checkExnEdge(cur, b);
-      exnVisited = true;
-    }
+    if (mayTakeExnEdges(op)) ok &= checkExnEdge(cur, op, b);
     if (isMemberFinalOp(op)) ok &= checkMemberKey(&cur, pc, op);
     ok &= checkOp(&cur, pc, op, b, prev_pc);
     ok &= checkInputs(&cur, pc, b);
     auto const flags = instrFlags(op);
-    if (flags & TF) ok &= checkTerminal(&cur, pc);
+    if (flags & TF) ok &= checkTerminal(&cur, op, b);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
     if (op == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
     ok &= checkOutputs(&cur, pc, b);
     if (verify_rx) ok &= checkRxOp(&cur, pc, op);
     prev_pc = pc;
   }
-  // If we did not visit the exn edge yet because the block contained only
-  // Silence End opcodes, visit the edge to initialize its state. The silence
-  // state is now correct as Silence End was processed.
-  if (b->exn && !exnVisited) ok &= checkExnEdge(cur, b);
   ok &= checkSuccEdges(b, &cur);
   return ok;
 }
@@ -2001,8 +2052,11 @@ bool FuncChecker::checkFlow() {
   }
   for (Block* b = m_graph->first_rpo; b; b = b->next_rpo) {
     m_last_rpo_id = b->rpo_id;
-    copyState(&cur, &m_info[b->id].state_in);
-    ok &= checkBlock(cur, b);
+    auto const& state = m_info[b->id].state_in;
+    if (isInitialized(state)) {
+      copyState(&cur, &state);
+      ok &= checkBlock(cur, b);
+    }
   }
 
   return ok;
@@ -2095,18 +2149,33 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
  */
 bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
   State& state = m_info[t->id].state_in;
-  bool stateChange = false;
-  if (!state.stk) {
+
+  // If we already passed this block in RPO order, but we just modified its in
+  // state, we must revisit it. This pass terminates because each block's state
+  // can change at most twice:
+  //
+  //  - Uninitialized -> initialized
+  //  - Initialized, guaranteedThis -> Initialized, !guaranteedThis
+  //
+  auto const maybe_revisit = [&]{
+    if (m_last_rpo_id < t->rpo_id) return true;
+    State tmp;
+    copyState(&tmp, &state);
+    return checkBlock(tmp, t);
+  };
+
+  // We call checkEdge with a null block b to initialize entry blocks;
+  // don't visit these states initially because we'll get them in RPO order.
+  if (!isInitialized(state)) {
     copyState(&state, &cur);
-    return true;
+    return b == nullptr || maybe_revisit();
   }
 
-  // An empty bitset should be considered equivalent to a bitset of all 0s
+  // Check that silence states match. An empty bitset is equivalent to a bitset
+  // of 0s; since most funcs don't use Silence ops, we can avoid allocations.
   if (cur.silences.size() != state.silences.size()) {
     state.silences.resize(cur.silences.size());
   }
-
-  // Check silence state
   if (cur.silences != state.silences) {
     std::string current, target;
     boost::to_string(cur.silences, current);
@@ -2117,13 +2186,7 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
     return false;
   }
 
-  // Conservatively propagate guarantees about $this
-  if (state.guaranteedThis && !cur.guaranteedThis) {
-    stateChange = true;
-    state.guaranteedThis = false;
-  }
-
-  // Check stack.
+  // Check that the stacks agree on depth and flavor.
   if (state.stklen != cur.stklen) {
     reportStkMismatch(b, t, cur);
     return false;
@@ -2136,27 +2199,22 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
       return false;
     }
   }
-  // Check iterator variable state.
-  if (false /* TODO(#1097182): Iterator verification disabled */) {
-    for (int i = 0, n = numIters(); i < n; i++) {
-      if (state.iters[i] != cur.iters[i]) {
-        error("mismatched iterator state on edge B%d->B%d, "
-               "current %s target %s\n", b->id, t->id,
-               iterToString(cur).c_str(), iterToString(state).c_str());
-        return false;
-      }
+
+  // Check that iterator initialization state matches.
+  for (int i = 0, n = numIters(); i < n; i++) {
+    if (state.iters[i] != cur.iters[i]) {
+      error("mismatched iterator state on edge B%d->B%d, "
+             "current %s target %s\n", b->id, t->id,
+             iterToString(cur).c_str(), iterToString(state).c_str());
+      return false;
     }
   }
 
-  // t's state has changed, but we've already visited it, so we need to visit
-  // it again. This is guaranteed to terminate because we only allow monotonic
-  // state changes
-  if (m_last_rpo_id > t->rpo_id && stateChange) {
-    State tmp;
-    copyState(&tmp, &state);
-    return checkBlock(tmp, t);
+  // Conservatively propagate guarantees about $this.
+  if (state.guaranteedThis && !cur.guaranteedThis) {
+    state.guaranteedThis = false;
+    return maybe_revisit();
   }
-
   return true;
 }
 

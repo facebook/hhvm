@@ -26,23 +26,28 @@
          # Loop over array and jump to each label.
          CGetL $arr
          IterInit 0 NK V:$foo endfor
-loop:    CGetL $foo
-         Switch Unbounded 0 <label_0 label_1 label_2 label_3 label_4>
+         .try {
+loop:      CGetL $foo
+           Switch Unbounded 0 <label_0 label_1 label_2 label_3 label_4>
 
-label_0: String "label_0\n"
-         Jmp printer
-label_1: String "label_1\n"
-         Jmp printer
-label_2: String "label_2\n"
-         Jmp printer
-label_3: String "label_3\n"
-         Jmp printer
-label_4: String "label_4\n"
+label_0:   String "label_0\n"
+           Jmp printer
+label_1:   String "label_1\n"
+           Jmp printer
+label_2:   String "label_2\n"
+           Jmp printer
+label_3:   String "label_3\n"
+           Jmp printer
+label_4:   String "label_4\n"
 
-printer: Print
-         PopC
-         IterNext 0 NK V:$foo loop
-
+printer:   Print
+           PopC
+           IterNext 0 NK V:$foo loop
+           Jmp endfor
+         } .catch {
+           IterFree 0
+           Throw
+         }
 endfor:  Int 1
          RetC
 }

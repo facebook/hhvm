@@ -1,6 +1,5 @@
 (library
   (name provider_config)
-  (wrapped false)
   (modules provider_config)
   (libraries
     decl_service_client
@@ -10,7 +9,6 @@
 
 (library
   (name provider_context)
-  (wrapped false)
   (modules provider_context)
   (libraries
     ast
@@ -25,7 +23,6 @@
 
 (library
   (name memory_bounded_lru_cache)
-  (wrapped false)
   (modules memory_bounded_lru_cache)
   (libraries
     core_kernel)
@@ -33,7 +30,6 @@
 
 (library
   (name decl_service_client)
-  (wrapped false)
   (modules decl_service_client)
   (libraries
     core_kernel
@@ -45,7 +41,6 @@
 
 (library
   (name file_provider)
-  (wrapped false)
   (modules file_provider)
   (libraries
     ast
@@ -57,7 +52,6 @@
 
 (library
   (name ast_provider)
-  (wrapped false)
   (modules ast_provider)
   (libraries
     ast
@@ -74,7 +68,6 @@
 
 (library
   (name decl_provider)
-  (wrapped false)
   (modules
     decl_lru_cache
     decl_provider)
@@ -88,7 +81,6 @@
 
 (library
   (name fixme_provider)
-  (wrapped false)
   (modules fixme_provider)
   (libraries
     collections
@@ -100,7 +92,6 @@
 
 (library
   (name partial_provider)
-  (wrapped false)
   (modules partial_provider)
   (libraries
     errors
@@ -109,7 +100,6 @@
 
 (library
   (name parser_options_provider)
-  (wrapped false)
   (modules parser_options_provider)
   (libraries
     heap_shared_mem
@@ -120,7 +110,6 @@
 
 (library
   (name provider_utils)
-  (wrapped false)
   (modules provider_utils)
   (libraries
     ast_provider

@@ -130,10 +130,9 @@ BTFrame getARFromWHImpl(
     }
     currentWaitHandle = getParentWH(currentWaitHandle, contextIdx, visitedWHs);
   }
-  return BTFrame {
-    AsioSession::Get()->getContext(contextIdx)->getSavedFP(),
-    0
-  };
+  auto const fp = AsioSession::Get()->getContext(contextIdx)->getSavedFP();
+  assertx(fp != nullptr && fp->func() != nullptr);
+  return BTFrame { fp, fp->func()->base() };
 }
 
 }

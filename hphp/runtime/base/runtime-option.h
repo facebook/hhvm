@@ -90,6 +90,7 @@ struct RepoOptions {
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
   E(bool,           EnforceGenericsUB,              false)            \
+  H(bool,           RustLowerer,                    true)             \
   /**/
 
   /**/

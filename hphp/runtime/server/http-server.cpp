@@ -264,6 +264,8 @@ void HttpServer::playShutdownRequest(const std::string& fileName) {
     } else {
       Logger::Error("request unsuccessful: %s", rt.getUrl());
     }
+    Logger::FlushAll();
+    HttpRequestHandler::GetAccessLog().flushAllWriters();
   } catch (...) {
     Logger::Error("got exception when playing request: %s",
                   fileName.c_str());

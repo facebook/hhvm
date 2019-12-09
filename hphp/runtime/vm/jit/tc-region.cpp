@@ -91,50 +91,57 @@ bool mcGenUnit(TransEnv& env, CodeCache::View codeView, CGMeta& fixups) {
 
 TransLocMaker relocateLocalTranslation(TransRange range, TransKind kind,
                                        CodeCache::View srcView,
-                                       CGMeta& fixups) {
+                                       CGMeta& fixups,
+                                       CodeMetaLock* locker) {
   auto reloc = [&] () -> folly::Optional<TransLocMaker> {
+    if (locker) locker->lock();
+
     auto view = code().view(kind);
     TransLocMaker tlm(view);
     tlm.markStart();
 
-    try {
-      RelocationInfo rel;
+    RelocationInfo rel;
+    {
+      SCOPE_EXIT { if (locker) locker->unlock(); };
+      try {
+        auto origin = range.data;
+        if (!origin.empty()) {
+          view.data().bytes(origin.size(),
+                            srcView.data().toDestAddress(origin.begin()));
 
-      auto origin = range.data;
-      if (!origin.empty()) {
-        view.data().bytes(origin.size(),
-                          srcView.data().toDestAddress(origin.begin()));
-
-        auto dest = tlm.dataRange();
-        auto oAddr = origin.begin();
-        auto dAddr = dest.begin();
-        while (oAddr != origin.end()) {
-          assertx(dAddr != dest.end());
-          rel.recordAddress(oAddr++, dAddr++, 0);
+          auto dest = tlm.dataRange();
+          auto oAddr = origin.begin();
+          auto dAddr = dest.begin();
+          while (oAddr != origin.end()) {
+            assertx(dAddr != dest.end());
+            rel.recordAddress(oAddr++, dAddr++, 0);
+          }
         }
-      }
 
-      relocate(rel, view.main(), range.main.begin(), range.main.end(),
-               srcView.main(), fixups, nullptr, AreaIndex::Main);
-      relocate(rel, view.cold(), range.cold.begin(), range.cold.end(),
-               srcView.cold(), fixups, nullptr, AreaIndex::Cold);
-      if (&srcView.cold() != &srcView.frozen()) {
-        relocate(rel, view.frozen(), range.frozen.begin(),
-                 range.frozen.end(), srcView.frozen(), fixups, nullptr,
-                 AreaIndex::Frozen);
-      }
+        relocate(rel, view.main(), range.main.begin(), range.main.end(),
+                 srcView.main(), fixups, nullptr, AreaIndex::Main);
+        relocate(rel, view.cold(), range.cold.begin(), range.cold.end(),
+                 srcView.cold(), fixups, nullptr, AreaIndex::Cold);
+        if (&srcView.cold() != &srcView.frozen()) {
+          relocate(rel, view.frozen(), range.frozen.begin(),
+                   range.frozen.end(), srcView.frozen(), fixups, nullptr,
+                   AreaIndex::Frozen);
+        }
 
-      adjustForRelocation(rel);
-      adjustMetaDataForRelocation(rel, nullptr, fixups);
-      adjustCodeForRelocation(rel, fixups);
-    } catch (const DataBlockFull& dbFull) {
-      tlm.rollback();
-      if (dbFull.name == "hot") {
-        code().disableHot();
-        return folly::none;
+        tlm.markEnd();
+      } catch (const DataBlockFull& dbFull) {
+        tlm.rollback();
+        if (dbFull.name == "hot") {
+          code().disableHot();
+          return folly::none;
+        }
+        throw;
       }
-      throw;
     }
+
+    adjustForRelocation(rel);
+    adjustMetaDataForRelocation(rel, nullptr, fixups);
+    adjustCodeForRelocation(rel, fixups);
     return tlm;
   };
 
@@ -160,7 +167,7 @@ bool checkLimit(const TransMetaInfo& info, const size_t numTrans) {
 }
 
 folly::Optional<TransLoc>
-relocateTranslation(TransMetaInfo& info, OptView optSrcView) {
+relocateTranslation(TransMetaInfo& info, OptView optSrcView, CodeMetaLock* locker) {
   auto const sk = info.sk;
   auto range = info.range;
   auto& fixups = info.meta;
@@ -186,8 +193,8 @@ relocateTranslation(TransMetaInfo& info, OptView optSrcView) {
     if (!needsRelocate) return info.emitView;
     try {
       auto tlm = relocateLocalTranslation(range, info.viewKind, *optSrcView,
-                                          fixups);
-      range = tlm.markEnd();
+                                          fixups, locker);
+      range = tlm.range();
       return tlm.view();
     } catch (const DataBlockFull& dbFull) {
       return folly::none;
@@ -198,7 +205,7 @@ relocateTranslation(TransMetaInfo& info, OptView optSrcView) {
   info.finalView = std::make_unique<CodeCache::View>(*optDstView);
 
   auto loc = range.loc();
-  tryRelocateNewTranslation(sk, loc, *optDstView, fixups);
+  if (!locker) tryRelocateNewTranslation(sk, loc, *optDstView, fixups);
   info.loc = loc;
 
   // Update the machine-code addresses in the `tr' TransRec, which may have
@@ -337,7 +344,7 @@ bool checkTCLimits() {
 
 void relocateOptFunc(FuncMetaInfo& info, SrcKeyTransMap& srcKeyTrans,
                      PrologueTCAMap* prologueTCAs = nullptr,
-                     size_t* failedBytes = nullptr) {
+                     size_t* failedBytes = nullptr, CodeMetaLock* locker = nullptr) {
   auto const func = info.func;
 
   // If the function had a body dispatch emitted during profiling, then emit it
@@ -345,7 +352,7 @@ void relocateOptFunc(FuncMetaInfo& info, SrcKeyTransMap& srcKeyTrans,
   if (func->getFuncBody() != tc::ustubs().funcBodyHelperThunk &&
       func->getDVFunclets().size() > 0) {
     auto const loc = emitFuncBodyDispatchInternal(
-      func, func->getDVFunclets(), TransKind::OptPrologue, nullptr
+      func, func->getDVFunclets(), TransKind::OptPrologue, locker
     );
     info.bodyDispatch = std::make_unique<BodyDispatchMetaInfo>(
       loc.mainStart(), loc.mainEnd()
@@ -362,7 +369,7 @@ void relocateOptFunc(FuncMetaInfo& info, SrcKeyTransMap& srcKeyTrans,
         assertx(prologueIdx < info.prologues.size());
         auto& prologueInfo = info.prologues[prologueIdx];
         assertx(func == prologueInfo.transRec->func());
-        emitFuncPrologueOptInternal(prologueInfo, nullptr);
+        emitFuncPrologueOptInternal(prologueInfo, locker);
         if (prologueTCAs != nullptr && prologueInfo.start != nullptr) {
           const auto nargs = prologueInfo.transRec->prologueArgs();
           const auto pid = PrologueID(func, nargs);
@@ -392,7 +399,7 @@ void relocateOptFunc(FuncMetaInfo& info, SrcKeyTransMap& srcKeyTrans,
         auto& range = transInfo.range;
         auto bytes = range.main.size() + range.cold.size() +
                      range.frozen.size();
-        auto loc = relocateTranslation(transInfo, info.tcBuf.view());
+        auto loc = relocateTranslation(transInfo, info.tcBuf.view(), locker);
         FTRACE(3, "relocateOptFunc: relocated to start loc {}\n",
                loc ? loc->mainStart() : 0x0);
         if (loc) {
@@ -496,24 +503,31 @@ void publishOptFuncCode(FuncMetaInfo& info,
 void relocateSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
                             PrologueTCAMap& prologueTCAs,
                             SrcKeyTransMap& srcKeyTrans) {
-  BootStats::Block timer("RTA_relocate",
-                         RuntimeOption::ServerExecutionMode());
   size_t failedBytes = 0;
-  bool hasSpace = checkTCLimits();
 
+  CodeMetaLock locker{false};
+
+  bool shouldLog = RuntimeOption::ServerExecutionMode();
   for (auto& finfo : infos) {
     if (!Func::isFuncIdValid(finfo.fid)) {
       continue;
     }
-    if (!hasSpace) {
+
+    // make sure we don't get ahead of the translation threads
+    mcgen::waitForTranslate(finfo);
+
+    if (!checkTCLimits()) {
       FTRACE(1, "relocateSortedOptFuncs: ran out of space in the TC. "
              "Skipping function {} {}\n", finfo.func->getFuncId(),
              finfo.func->fullName());
       failedBytes += infoSize(finfo);
       continue;
     }
-    relocateOptFunc(finfo, srcKeyTrans, &prologueTCAs, &failedBytes);
-    hasSpace = checkTCLimits();
+    if (shouldLog) {
+      shouldLog = false;
+      Logger::Info("retranslateAll: starting to relocate functions");
+    }
+    relocateOptFunc(finfo, srcKeyTrans, &prologueTCAs, &failedBytes, &locker);
   }
 
   if (failedBytes) {
@@ -979,7 +993,7 @@ publishTranslation(TransMetaInfo info, OptView optSrcView) {
   // Recheck after acquiring the lock.
   if (!checkLimit(info, srcRec->numTrans())) return folly::none;
 
-  auto loc = relocateTranslation(info, optSrcView);
+  auto loc = relocateTranslation(info, optSrcView, nullptr);
   if (loc) {
     publishTranslationMeta(info);
     publishTranslationCode(std::move(info));
@@ -999,22 +1013,24 @@ void publishOptFunc(FuncMetaInfo info) {
 }
 
 void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos) {
-  // Do this first to ensure that the code and metadata locks have been dropped
-  // before running the treadmill
+  // Grab the session now (which includes a Treadmill::Session) so
+  // that no Func's get destroyed during this step
   ProfData::Session pds;
   const bool serverMode = RuntimeOption::ServerExecutionMode();
-
-  auto codeLock = lockCode();
-  auto metaLock = lockMetadata();
-
-  if (serverMode) {
-    Logger::Info("retranslateAll: starting to relocate functions");
-  }
 
   PrologueTCAMap prologueTCAs;
   SrcKeyTransMap srcKeyTrans;
 
   relocateSortedOptFuncs(infos, prologueTCAs, srcKeyTrans);
+
+  if (serverMode) {
+    Logger::Info(
+      "retranslateAll: finished optimizing and relocating functions"
+    );
+  }
+
+  auto codeLock = lockCode();
+  auto metaLock = lockMetadata();
 
   FTRACE(3,
          "relocatePublishSortedOptFuncs: after relocateSortedOptFuncs:\n{}\n",

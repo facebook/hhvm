@@ -148,24 +148,28 @@ void optimize(tc::FuncMetaInfo& info) {
   }
 }
 
+std::condition_variable s_condVar;
+std::mutex s_condVarMutex;
+
 struct TranslateWorker : JobQueueWorker<tc::FuncMetaInfo*, void*, true, true> {
   void doJob(tc::FuncMetaInfo* info) override {
     ProfileNonVMThread nonVM;
-
-    hphp_session_init(Treadmill::SessionKind::TranslateWorker);
-    SCOPE_EXIT {
-      hphp_context_exit();
-      hphp_session_exit();
-    };
+    HphpSession hps{Treadmill::SessionKind::TranslateWorker};
 
     // Check if the func was treadmilled before the job started
     if (!Func::isFuncIdValid(info->fid)) return;
 
-    if (profData()->optimized(info->fid)) return;
-    profData()->setOptimized(info->fid);
+    always_assert(!profData()->optimized(info->fid));
 
     VMProtect _;
     optimize(*info);
+
+    {
+      std::unique_lock<std::mutex> lock{s_condVarMutex};
+      always_assert(!profData()->optimized(info->fid));
+      profData()->setOptimized(info->fid);
+    }
+    s_condVar.notify_one();
   }
 
 #if USE_JEMALLOC_EXTENT_HOOKS
@@ -195,6 +199,24 @@ WorkerDispatcher& dispatcher() {
 
 void enqueueRetranslateOptRequest(tc::FuncMetaInfo* info) {
   dispatcher().enqueue(info);
+}
+
+void createSrcRecs(const Func* func) {
+  auto spOff = FPInvOffset { func->numSlotsInFrame() };
+  auto const profData = globalProfData();
+
+  auto create_one = [&] (Offset off) {
+    auto const sk = SrcKey { func, off, ResumeMode::None };
+    if (off == func->base() ||
+        profData->dvFuncletTransId(sk) != kInvalidTransID) {
+      tc::createSrcRec(sk, spOff);
+    }
+  };
+
+  create_one(func->base());
+  for (auto const& pi : func->params()) {
+    if (pi.hasDefaultValue()) create_one(pi.funcletOff);
+  }
 }
 
 /*
@@ -272,7 +294,7 @@ void retranslateAll() {
 
   {
     std::lock_guard<std::mutex> lock{s_dispatcherMutex};
-    BootStats::Block timer("RTA_translate",
+    BootStats::Block timer("RTA_translate_and_relocate",
                            RuntimeOption::ServerExecutionMode());
     {
       Treadmill::Session session(Treadmill::SessionKind::Retranslate);
@@ -287,12 +309,19 @@ void retranslateAll() {
             continue;
           }
         }
+
         jobs.emplace_back(
           tc::FuncMetaInfo(func, tc::LocalTCBuffer(bufp, initialSize))
         );
+
+        createSrcRecs(func);
         enqueueRetranslateOptRequest(&jobs.back());
       }
     }
+
+    // 4) Relocate the machine code into code.hot in the desired order
+
+    tc::relocatePublishSortedOptFuncs(std::move(jobs));
 
     if (auto const dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
       s_dispatcher.store(nullptr, std::memory_order_release);
@@ -300,14 +329,6 @@ void retranslateAll() {
       delete dispatcher;
     }
   }
-
-  if (serverMode) {
-    Logger::Info("retranslateAll: finished optimizing functions");
-  }
-
-  // 4) Relocate the machine code into code.hot in the desired order
-
-  tc::relocatePublishSortedOptFuncs(std::move(jobs));
 
   if (serverMode) {
     Logger::Info("retranslateAll: finished retranslating all optimized "
@@ -330,6 +351,18 @@ void retranslateAll() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+}
+
+void waitForTranslate(const tc::FuncMetaInfo& info) {
+  if (profData()->optimized(info.fid)) return;
+
+  std::unique_lock<std::mutex> lock{s_condVarMutex};
+  s_condVar.wait(
+    lock,
+    [&] {
+      return profData()->optimized(info.fid);
+    }
+  );
 }
 
 void joinWorkerThreads() {

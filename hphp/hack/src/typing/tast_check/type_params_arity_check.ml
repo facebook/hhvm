@@ -133,7 +133,9 @@ let handler =
       List.iter c.c_vars check_var;
       Option.iter c.c_enum (fun e ->
           check_hint env e.e_base;
-          Option.iter e.e_constraint (check_hint env))
+          Option.iter e.e_constraint (check_hint env));
+      List.iter c.c_consts (fun const ->
+          Option.iter const.cc_type (check_hint env))
 
     method! at_method_ env m =
       Option.iter (hint_of_type_hint m.m_ret) (check_hint env);

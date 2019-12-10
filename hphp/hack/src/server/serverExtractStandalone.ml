@@ -1087,6 +1087,18 @@ let get_implementation_dependencies deps cls_name =
         Method (cls_name, method_name) :: acc
       | _ -> acc
     in
+    let add_typeconst_impl acc typeconst_name =
+      match Class.get_typeconst cls typeconst_name with
+      | Some tc when tc.ttc_origin = cls_name ->
+        Const (cls_name, typeconst_name) :: acc
+      | _ -> acc
+    in
+    let add_const_impl acc const_name =
+      match Class.get_const cls const_name with
+      | Some c when c.cc_origin = cls_name ->
+        Const (cls_name, const_name) :: acc
+      | _ -> acc
+    in
     let add_impls acc ancestor_name =
       let ancestor = get_class_exn ancestor_name in
       if is_builtin_dep (Class ancestor_name) then
@@ -1102,6 +1114,19 @@ let get_implementation_dependencies deps cls_name =
             ~init:acc
             ~f:(fun acc (method_name, _) -> add_method_impl acc method_name)
         in
+        let acc =
+          Sequence.fold
+            (Class.typeconsts ancestor)
+            ~init:acc
+            ~f:(fun acc (typeconst_name, _) ->
+              add_typeconst_impl acc typeconst_name)
+        in
+        let acc =
+          Sequence.fold
+            (Class.consts ancestor)
+            ~init:acc
+            ~f:(fun acc (const_name, _) -> add_const_impl acc const_name)
+        in
         acc
       else
         HashSet.fold
@@ -1113,6 +1138,13 @@ let get_implementation_dependencies deps cls_name =
             | Method (class_name, method_name) when class_name = ancestor_name
               ->
               add_method_impl acc method_name
+            | Const (class_name, name) when class_name = ancestor_name ->
+              if Option.is_some (Class.get_typeconst ancestor name) then
+                add_typeconst_impl acc name
+              else if Option.is_some (Class.get_const ancestor name) then
+                add_const_impl acc name
+              else
+                acc
             | _ -> acc)
           deps
           acc

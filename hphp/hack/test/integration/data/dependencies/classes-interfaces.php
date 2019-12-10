@@ -60,17 +60,21 @@ abstract class BB {
 }
 
 interface II {
-  public function g(): void;
+  abstract const type T;
+  public function g(): this::T;
   public function h(): void;
 }
 
-class CC extends BB implements II {
+final class CC extends BB implements II {
+  const type T = int;
   public function f(): void {}
-  public function g(): void {}
+  public function g(): int {
+    return 42;
+  }
   public function h(): void {}
 }
 
 function with_implementations(BB $b, II $i, CC $c): void {
   $b->f();
-  $i->g();
+  $_ = $i->g();
 }

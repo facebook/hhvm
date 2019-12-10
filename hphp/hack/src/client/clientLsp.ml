@@ -2889,11 +2889,14 @@ and reconnect_from_lost_if_necessary
     let should_reconnect =
       match (state, reason) with
       | (Lost_server _, `Force_regain) -> true
-      | (Lost_server lenv, `Event (Client_message (c, _)))
-        when lenv.p.trigger_on_lsp && c.Jsonrpc.kind <> Jsonrpc.Response ->
+      | ( Lost_server { p = { trigger_on_lsp = true; _ }; _ },
+          `Event
+            (Client_message (_, (RequestMessage _ | NotificationMessage _))) )
+        ->
         true
-      | (Lost_server lenv, `Event Tick) when lenv.p.trigger_on_lock_file ->
-        MonitorConnection.server_exists lenv.lock_file
+      | ( Lost_server { p = { trigger_on_lock_file = true; _ }; lock_file; _ },
+          `Event Tick ) ->
+        MonitorConnection.server_exists lock_file
       | (_, _) -> false
     in
     if should_reconnect then
@@ -2985,110 +2988,98 @@ let handle_idle_if_necessary (state : state) (event : event) : state =
   | _ -> state
 
 let track_open_files (state : state) (event : event) : state =
-  Jsonrpc.(
-    (* We'll keep track of which files are opened by the editor. *)
-    let prev_opened_files =
-      Option.value (get_editor_open_files state) ~default:UriMap.empty
-    in
-    let editor_open_files =
-      match event with
-      | Client_message (c, _) when c.method_ = "textDocument/didOpen" ->
-        let params = parse_didOpen c.params in
-        let doc = params.DidOpen.textDocument in
-        let uri = params.DidOpen.textDocument.TextDocumentItem.uri in
-        UriMap.add uri doc prev_opened_files
-      | Client_message (c, _) when c.method_ = "textDocument/didChange" ->
-        let params = parse_didChange c.params in
-        let uri =
-          params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
-        in
-        let doc = UriMap.find_opt uri prev_opened_files in
-        Lsp.TextDocumentItem.(
-          (match doc with
-          | Some doc ->
-            let doc' =
-              {
-                doc with
-                version =
-                  params.DidChange.textDocument
-                    .VersionedTextDocumentIdentifier.version;
-                text =
-                  Lsp_helpers.apply_changes_unsafe
-                    doc.text
-                    params.DidChange.contentChanges;
-              }
-            in
-            UriMap.add uri doc' prev_opened_files
-          | None -> prev_opened_files))
-      | Client_message (c, _) when c.method_ = "textDocument/didClose" ->
-        let params = parse_didClose c.params in
-        let uri = params.DidClose.textDocument.TextDocumentIdentifier.uri in
-        UriMap.remove uri prev_opened_files
-      | _ -> prev_opened_files
-    in
-    match state with
-    | Main_loop menv -> Main_loop { menv with Main_env.editor_open_files }
-    | In_init ienv -> In_init { ienv with In_init_env.editor_open_files }
-    | Lost_server lenv -> Lost_server { lenv with Lost_env.editor_open_files }
-    | _ -> state)
+  (* We'll keep track of which files are opened by the editor. *)
+  let prev_opened_files =
+    Option.value (get_editor_open_files state) ~default:UriMap.empty
+  in
+  let editor_open_files =
+    match event with
+    | Client_message (_, NotificationMessage (DidOpenNotification params)) ->
+      let doc = params.DidOpen.textDocument in
+      let uri = params.DidOpen.textDocument.TextDocumentItem.uri in
+      UriMap.add uri doc prev_opened_files
+    | Client_message (_, NotificationMessage (DidChangeNotification params)) ->
+      let uri =
+        params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
+      in
+      let doc = UriMap.find_opt uri prev_opened_files in
+      Lsp.TextDocumentItem.(
+        (match doc with
+        | Some doc ->
+          let doc' =
+            {
+              doc with
+              version =
+                params.DidChange.textDocument
+                  .VersionedTextDocumentIdentifier.version;
+              text =
+                Lsp_helpers.apply_changes_unsafe
+                  doc.text
+                  params.DidChange.contentChanges;
+            }
+          in
+          UriMap.add uri doc' prev_opened_files
+        | None -> prev_opened_files))
+    | Client_message (_, NotificationMessage (DidCloseNotification params)) ->
+      let uri = params.DidClose.textDocument.TextDocumentIdentifier.uri in
+      UriMap.remove uri prev_opened_files
+    | _ -> prev_opened_files
+  in
+  match state with
+  | Main_loop menv -> Main_loop { menv with Main_env.editor_open_files }
+  | In_init ienv -> In_init { ienv with In_init_env.editor_open_files }
+  | Lost_server lenv -> Lost_server { lenv with Lost_env.editor_open_files }
+  | _ -> state
 
 let track_edits_if_necessary (state : state) (event : event) : state =
-  Jsonrpc.(
-    (* We'll keep track of which files have unsaved edits. Note that not all    *)
-    (* clients send didSave messages; for those we only rely on didClose.       *)
-    let previous = get_uris_with_unsaved_changes state in
-    let uris_with_unsaved_changes =
-      match event with
-      | Client_message (({ method_ = "textDocument/didChange"; _ } as c), _) ->
-        let params = parse_didChange c.params in
-        let uri =
-          params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
-        in
-        UriSet.add uri previous
-      | Client_message (({ method_ = "textDocument/didClose"; _ } as c), _) ->
-        let params = parse_didClose c.params in
-        let uri = params.DidClose.textDocument.TextDocumentIdentifier.uri in
-        UriSet.remove uri previous
-      | Client_message (({ method_ = "textDocument/didSave"; _ } as c), _) ->
-        let params = parse_didSave c.params in
-        let uri = params.DidSave.textDocument.TextDocumentIdentifier.uri in
-        UriSet.remove uri previous
-      | _ -> previous
-    in
-    match state with
-    | Main_loop menv ->
-      Main_loop { menv with Main_env.uris_with_unsaved_changes }
-    | In_init ienv ->
-      In_init { ienv with In_init_env.uris_with_unsaved_changes }
-    | Lost_server lenv ->
-      Lost_server { lenv with Lost_env.uris_with_unsaved_changes }
-    | _ -> state)
+  (* We'll keep track of which files have unsaved edits. Note that not all    *)
+  (* clients send didSave messages; for those we only rely on didClose.       *)
+  let previous = get_uris_with_unsaved_changes state in
+  let uris_with_unsaved_changes =
+    match event with
+    | Client_message (_, NotificationMessage (DidChangeNotification params)) ->
+      let uri =
+        params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
+      in
+      UriSet.add uri previous
+    | Client_message (_, NotificationMessage (DidCloseNotification params)) ->
+      let uri = params.DidClose.textDocument.TextDocumentIdentifier.uri in
+      UriSet.remove uri previous
+    | Client_message (_, NotificationMessage (DidSaveNotification params)) ->
+      let uri = params.DidSave.textDocument.TextDocumentIdentifier.uri in
+      UriSet.remove uri previous
+    | _ -> previous
+  in
+  match state with
+  | Main_loop menv -> Main_loop { menv with Main_env.uris_with_unsaved_changes }
+  | In_init ienv -> In_init { ienv with In_init_env.uris_with_unsaved_changes }
+  | Lost_server lenv ->
+    Lost_server { lenv with Lost_env.uris_with_unsaved_changes }
+  | _ -> state
 
 let track_ide_service_open_files
     (ide_service : ClientIdeService.t) (event : event) : unit Lwt.t =
-  Jsonrpc.(
-    match event with
-    | Client_message
-        ({ method_ = "textDocument/didOpen"; params; tracking_id; _ }, _) ->
-      let params = parse_didOpen params in
-      let file_path =
-        params.DidOpen.textDocument.TextDocumentItem.uri
-        |> lsp_uri_to_path
-        |> Path.make
-      in
-      let file_contents = params.DidOpen.textDocument.TextDocumentItem.text in
-      let%lwt (_ : (unit, string) result) =
-        ClientIdeService.rpc
-          ide_service
-          ~tracking_id
-          (ClientIdeMessage.File_opened
-             { ClientIdeMessage.file_path; file_contents })
-      in
-      Lwt.return_unit
-    | _ ->
-      (* Don't handle other events for now. When we show typechecking errors for
+  match event with
+  | Client_message (metadata, NotificationMessage (DidOpenNotification params))
+    ->
+    let file_path =
+      params.DidOpen.textDocument.TextDocumentItem.uri
+      |> lsp_uri_to_path
+      |> Path.make
+    in
+    let file_contents = params.DidOpen.textDocument.TextDocumentItem.text in
+    let%lwt (_ : (unit, string) result) =
+      ClientIdeService.rpc
+        ide_service
+        ~tracking_id:metadata.Jsonrpc.tracking_id
+        (ClientIdeMessage.File_opened
+           { ClientIdeMessage.file_path; file_contents })
+    in
+    Lwt.return_unit
+  | _ ->
+    (* Don't handle other events for now. When we show typechecking errors for
     the open file, we'll start handling them. *)
-      Lwt.return_unit)
+    Lwt.return_unit
 
 let log_response_if_necessary
     (event : event) (unblocked_time : float) (env : env) : unit =

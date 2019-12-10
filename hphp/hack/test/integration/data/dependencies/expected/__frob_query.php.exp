@@ -6,7 +6,7 @@ abstract class Query extends \BaseQuery<this::TContext> {
   const type TContext = this::TCreation::TContext;
   abstract const type TCreation as \ICreation;
 }
-class FrobQuery extends \Query {
+final class FrobQuery extends \Query {
   use \TFrobQuery;
   const type TCreation = \Frob;
 }

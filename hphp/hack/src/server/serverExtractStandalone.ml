@@ -577,6 +577,12 @@ let get_direct_ancestors cls =
 
 let get_class_declaration tcopt (cls : Decl_provider.class_decl) =
   Decl_provider.(
+    let final =
+      if Class.final cls then
+        "final "
+      else
+        ""
+    in
     let kind =
       match Class.kind cls with
       | Ast_defs.Cabstract -> "abstract class"
@@ -612,7 +618,7 @@ let get_class_declaration tcopt (cls : Decl_provider.class_decl) =
       @@ List.map ~f:(Typing_print.full_decl tcopt) implements
     in
     (* TODO: traits, records *)
-    Printf.sprintf "%s %s%s%s%s" kind name tparams extends implements)
+    Printf.sprintf "%s%s %s%s%s%s" final kind name tparams extends implements)
 
 let get_method_declaration
     tcopt

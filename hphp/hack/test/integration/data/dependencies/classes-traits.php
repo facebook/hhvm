@@ -134,3 +134,20 @@ final class FrobQuery extends Query {
 function frob_query(): FrobQuery {
   return new FrobQuery();
 }
+
+interface ICorge {
+  abstract const type Tthis as this;
+  public function get(): this::Tthis;
+}
+
+final class Corge implements ICorge {
+  const type Tthis = Corge;
+  public function get(): this::Tthis {
+    return $this;
+  }
+}
+
+function corge(Corge $x, ICorge $y): void {
+  $_ = $x->get();
+  $_ = $y->get();
+}

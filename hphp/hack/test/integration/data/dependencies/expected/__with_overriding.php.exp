@@ -9,7 +9,7 @@ function with_overriding(Derived $arg): int {
   $arg->inherited();
   return $arg->overridden();
 }
-class Derived extends \ImplementingBase {
+final class Derived extends \ImplementingBase {
   public function overridden(): int {
     throw new Exception();
   }

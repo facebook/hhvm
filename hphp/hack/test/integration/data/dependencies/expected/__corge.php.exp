@@ -1,0 +1,18 @@
+<?hh
+interface ICorge {
+  public function get(): this::Tthis;
+  abstract const type Tthis as this;
+}
+function corge(Corge $x, ICorge $y): void {
+  $_ = $x->get();
+  $_ = $y->get();
+}
+final class Corge implements \ICorge {
+  public function get(): this::Tthis {
+    throw new Exception();
+  }
+  const type Tthis = \Corge;
+}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

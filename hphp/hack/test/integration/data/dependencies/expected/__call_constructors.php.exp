@@ -5,7 +5,7 @@ function call_constructors(): void {
 }
 class ImplementingBase extends \AbstractBase {}
 abstract class AbstractBase {}
-class Derived extends \ImplementingBase {
+final class Derived extends \ImplementingBase {
   public function __construct(int $num) {
     throw new \Exception();
   }

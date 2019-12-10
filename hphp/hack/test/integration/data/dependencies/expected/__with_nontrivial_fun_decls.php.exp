@@ -13,7 +13,7 @@ function with_nontrivial_fun_decls(): void {
 function variadic(inout int $arg, int ...$args): void {
   throw new \Exception();
 }
-class Derived extends \ImplementingBase {
+final class Derived extends \ImplementingBase {
   public function __construct(int $num) {
     throw new \Exception();
   }

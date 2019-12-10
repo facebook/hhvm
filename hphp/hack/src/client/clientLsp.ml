@@ -161,7 +161,13 @@ let hhconfig_version : string ref = ref "[NotYetInitialized]"
 
 let can_autostart_after_mismatch : bool ref = ref true
 
-let callbacks_outstanding : (on_result * on_error) IdMap.t ref = ref IdMap.empty
+let requests_outstanding : (lsp_request * on_result * on_error) IdMap.t ref =
+  ref IdMap.empty
+
+let get_outstanding_request_exn (id : lsp_id) : lsp_request =
+  match IdMap.find_opt id !requests_outstanding with
+  | Some (request, _, _) -> request
+  | None -> failwith "response id doesn't correspond to an outstanding request"
 
 (* head is newest *)
 let hh_server_state : (float * hh_server_state) list ref = ref []
@@ -652,10 +658,8 @@ let request_showStatus
     else (
       showStatus_outstanding := msg;
       let id = NumberId (Jsonrpc.get_next_request_id ()) in
-      let json =
-        Lsp_fmt.print_lsp (RequestMessage (id, ShowStatusRequest params))
-      in
-      to_stdout json;
+      let request = ShowStatusRequest params in
+      to_stdout (print_lsp_request id request);
 
       (* save the callback-handlers *)
       let on_result2 ~result state =
@@ -666,8 +670,8 @@ let request_showStatus
         if msg = !showStatus_outstanding then showStatus_outstanding := "";
         on_error code message data state
       in
-      callbacks_outstanding :=
-        IdMap.add id (on_result2, on_error2) !callbacks_outstanding
+      requests_outstanding :=
+        IdMap.add id (request, on_result2, on_error2) !requests_outstanding
     )
 
 (* request_showMessage: pops up a dialog *)
@@ -685,12 +689,11 @@ let request_showMessage
   let request =
     ShowMessageRequestRequest { ShowMessageRequest.type_; message; actions }
   in
-  let json = Lsp_fmt.print_lsp (RequestMessage (id, request)) in
-  to_stdout json;
+  to_stdout (print_lsp_request id request);
 
   (* save the callback-handlers *)
-  callbacks_outstanding :=
-    IdMap.add id (on_result, on_error) !callbacks_outstanding;
+  requests_outstanding :=
+    IdMap.add id (request, on_result, on_error) !requests_outstanding;
 
   (* return a token *)
   ShowMessageRequest.Present { id }
@@ -3307,8 +3310,8 @@ let handle_client_message
         | Some (Hh_json.JSON_String id) -> StringId id
         | _ -> failwith "malformed response id"
       in
-      let (on_result, on_error) =
-        match IdMap.find_opt id !callbacks_outstanding with
+      let (_request, on_result, on_error) =
+        match IdMap.find_opt id !requests_outstanding with
         | Some callbacks -> callbacks
         | None ->
           failwith "response id doesn't correspond to an outstanding request"
@@ -3378,12 +3381,12 @@ let handle_client_message
 
       if env.use_serverless_ide then (
         let id = NumberId (Jsonrpc.get_next_request_id ()) in
-        let message = do_didChangeWatchedFiles_registerCapability () in
-        to_stdout (print_lsp_request id message);
+        let request = do_didChangeWatchedFiles_registerCapability () in
+        to_stdout (print_lsp_request id request);
         let on_result ~result:_ state = Lwt.return state in
         let on_error ~code:_ ~message:_ ~data:_ state = Lwt.return state in
-        callbacks_outstanding :=
-          IdMap.add id (on_result, on_error) !callbacks_outstanding
+        requests_outstanding :=
+          IdMap.add id (request, on_result, on_error) !requests_outstanding
       );
 
       if not @@ Sys_utils.is_test_mode () then

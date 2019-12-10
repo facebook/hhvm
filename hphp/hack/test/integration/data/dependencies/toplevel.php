@@ -93,7 +93,7 @@ function with_built_in_constant(): int {
 }
 
 <<__Rx>>
-function reactive(): void {}
+function reactive(mixed $x = null): void {}
 
 <<__Rx>>
 function call_reactive(): void {

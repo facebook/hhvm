@@ -11,6 +11,7 @@ interface Eye {
   require extends \Bee;
 }
 interface Jay extends \Eye {}
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

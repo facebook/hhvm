@@ -9,6 +9,7 @@ function with_defaults(
 ): void {
   throw new \Exception();
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

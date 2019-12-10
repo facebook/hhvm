@@ -6,6 +6,7 @@ enum SomeEnum: int {
   SECOND = 0;
   FIRST = 0;
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

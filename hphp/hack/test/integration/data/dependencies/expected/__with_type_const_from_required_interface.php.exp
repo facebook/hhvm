@@ -15,6 +15,7 @@ class IntFooWrapper implements \IHasFoo {
 function with_type_const_from_required_interface(IntFooWrapper $w): int {
   return $w->getFoo();
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

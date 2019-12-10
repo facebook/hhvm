@@ -7,6 +7,7 @@ class WithRecursiveMethods {
     $this->recursive_instance();
   }
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

@@ -9,6 +9,7 @@ function with_bounded_generic_class_tparam(
 ): keyset<int> {
   return $x->emptyKeyset();
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

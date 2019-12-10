@@ -13,6 +13,7 @@ function with_parent_constructor_call(): void {
   $_ = new SimpleClass('frob', 1337);
   $_ = new SimpleDerived(3.14, true, null);
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

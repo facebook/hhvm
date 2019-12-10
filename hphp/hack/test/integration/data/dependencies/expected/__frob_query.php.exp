@@ -28,6 +28,7 @@ interface ICreation {
   const type TContext = this::TUniverse::TContext;
 }
 interface IContext {}
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

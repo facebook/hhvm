@@ -1288,7 +1288,7 @@ let get_code strict_declarations partial_declarations =
   let (partial_toplevel, partial_namespaces) = get_code partial_declarations in
   let helper =
     Printf.sprintf
-      "function %s(): nothing {throw new Exception();}"
+      "<<__Rx>> function %s(): nothing {throw new Exception();}"
       function_make_default
   in
   let strict_hh_prefix = "<?hh" in

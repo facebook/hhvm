@@ -6,6 +6,7 @@ interface IWithRequirement {
 class A extends \A0 implements \I1 {}
 function with_requiring_interface(IWithRequirement $arg): void {}
 interface I1 {}
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

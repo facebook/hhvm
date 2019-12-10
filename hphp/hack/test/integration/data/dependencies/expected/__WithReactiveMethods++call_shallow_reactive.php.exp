@@ -13,6 +13,7 @@ class WithReactiveMethods {
     $this->shallow_reactive();
   }
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

@@ -10,6 +10,7 @@ class WithProperties {
 function use_properties(WithProperties $arg): int {
   return $arg->first + $arg->second + WithProperties::$third;
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

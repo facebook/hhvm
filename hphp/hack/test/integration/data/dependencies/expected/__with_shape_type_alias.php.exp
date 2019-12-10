@@ -4,6 +4,7 @@ class WithConst {
 }
 type SomeShape = shape(\WithConst::CSTRING => mixed);
 function with_shape_type_alias(SomeShape $_): void {}
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

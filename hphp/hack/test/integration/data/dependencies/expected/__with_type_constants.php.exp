@@ -13,6 +13,7 @@ class A0 {}
 abstract class WithAbstractConst {
   const type NESTED = \WithConst;
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

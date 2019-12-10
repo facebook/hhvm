@@ -15,6 +15,7 @@ function with_generics<Tfirst, Tsecond>(
   return generic<C>();
 }
 interface I1 {}
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

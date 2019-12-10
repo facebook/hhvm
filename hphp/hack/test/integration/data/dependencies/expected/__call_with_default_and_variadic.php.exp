@@ -11,6 +11,7 @@ function with_default_and_variadic(
 ): void {
   throw new \Exception();
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

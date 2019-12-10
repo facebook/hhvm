@@ -14,6 +14,7 @@ trait RequiringTrait {
 interface BaseInterface {}
 class Implementing extends \AbstractBase implements \DerivedInterface {}
 function with_requiring_trait(DerivedImplementing $arg): void {}
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

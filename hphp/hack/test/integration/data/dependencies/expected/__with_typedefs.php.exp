@@ -9,6 +9,7 @@ type Complex = shape('first' => int, 'second' => \B);
 class A extends \A0 implements \I1 {}
 class B implements \I1 {}
 interface I1 {}
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

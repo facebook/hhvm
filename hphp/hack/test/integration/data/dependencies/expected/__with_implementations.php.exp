@@ -17,6 +17,7 @@ abstract class BB {
 interface II {
   public function g(): void;
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

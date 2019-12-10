@@ -5,8 +5,7 @@ function recursive_function(int $n): int {
   }
   return $n + recursive_function($n - 1);
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }
-
-

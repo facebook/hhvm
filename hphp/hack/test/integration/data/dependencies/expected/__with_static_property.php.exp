@@ -14,6 +14,7 @@ enum SomeEnum: int {
   FIRST = 0;
 }
 interface I1 {}
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

@@ -9,6 +9,7 @@ enum Mode: int as int {
   Two = 0;
   One = 0;
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

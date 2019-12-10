@@ -6,6 +6,7 @@ interface DerivedInterface extends \BaseInterface {
   public function routine(): void;
 }
 interface BaseInterface {}
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

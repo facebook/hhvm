@@ -13,6 +13,7 @@ function with_type_const_from_implemented_interface(
 ): string {
   return $w->getBar();
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

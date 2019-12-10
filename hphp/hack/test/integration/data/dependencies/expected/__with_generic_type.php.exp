@@ -3,6 +3,7 @@ type GenericType<T> = \GenericBase<T, int>;
 function with_generic_type<T>(GenericType<T> $arg): void {
 }
 class GenericBase<Tfirst, Tsecond> {}
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

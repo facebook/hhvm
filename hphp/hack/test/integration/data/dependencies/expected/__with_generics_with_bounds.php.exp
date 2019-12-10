@@ -5,6 +5,7 @@ function with_generics_with_bounds(int $x): keyset<int> {
 function generic_with_bound<T as arraykey>(T $x): \HH\keyset<T> {
   throw new \Exception();
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

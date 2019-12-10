@@ -8,6 +8,7 @@ enum SomeEnum: int {
 enum ThirdEnum: \SomeEnumType {
   MUMBLE = \SomeEnum::FIRST;
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

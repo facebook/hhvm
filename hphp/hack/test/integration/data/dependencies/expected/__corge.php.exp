@@ -13,6 +13,7 @@ final class Corge implements \ICorge {
   }
   const type Tthis = \Corge;
 }
+<<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();
 }

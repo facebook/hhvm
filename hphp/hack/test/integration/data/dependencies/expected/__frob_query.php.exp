@@ -1,0 +1,33 @@
+<?hh
+interface IUniverse {
+  abstract const type TContext as \IContext;
+}
+abstract class Query extends \BaseQuery<this::TContext> {
+  const type TContext = this::TCreation::TContext;
+  abstract const type TCreation as \ICreation;
+}
+class FrobQuery extends \Query {
+  use \TFrobQuery;
+  const type TCreation = \Frob;
+}
+function frob_query(): FrobQuery {
+  return new FrobQuery();
+}
+abstract class BaseQuery<TContext> {}
+trait TFrobQuery {
+  require extends \BaseQuery<\Frob::TContext>;
+}
+class Universe implements \IUniverse {
+  const type TContext = \IContext;
+}
+class Frob implements \ICreation {
+  const type TUniverse = \Universe;
+}
+interface ICreation {
+  abstract const type TUniverse as \IUniverse;
+  const type TContext = this::TUniverse::TContext;
+}
+interface IContext {}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

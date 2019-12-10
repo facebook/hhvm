@@ -152,6 +152,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\call_shallow_reactive",
             "\\WithReactiveMethods::call_reactive",
             "\\WithReactiveMethods::call_shallow_reactive",
+            "\\frob_query",
         ]
 
         for path in paths:

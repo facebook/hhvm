@@ -906,7 +906,7 @@ let rec do_add_dep deps dep =
 
 and add_dep deps ?cls:(this_cls = None) ty : unit =
   let visitor =
-    object (this)
+    object
       inherit [unit] Type_visitor.decl_type_visitor
 
       method! on_tapply _ _ (_, name) tyl =
@@ -959,7 +959,10 @@ and add_dep deps ?cls:(this_cls = None) ty : unit =
           do_add_dep deps (Typing_deps.Dep.Const (class_name, tconst));
           (match Decl_provider.Class.get_typeconst cls tconst with
           | Some typeconst ->
-            Option.fold ~f:this#on_type ~init:() typeconst.ttc_type;
+            Option.fold
+              ~f:(fun () ty -> add_dep ~cls:(Some class_name) deps ty)
+              ~init:()
+              typeconst.ttc_type;
             if not (List.is_empty tconsts) then (
               match (typeconst.ttc_type, typeconst.ttc_constraint) with
               | (Some tc_type, _)

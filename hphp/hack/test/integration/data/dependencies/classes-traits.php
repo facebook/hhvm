@@ -95,3 +95,42 @@ class IntQuuxWrapper implements IHasQuux {
 function with_nested_type_const(IntBazWrapper $x): void {
   $x->takeQuux(42);
 }
+
+interface IContext {}
+
+interface IUniverse {
+  abstract const type TContext as IContext;
+}
+
+class Universe implements IUniverse {
+  const type TContext = IContext;
+}
+
+interface ICreation {
+  abstract const type TUniverse as IUniverse;
+  const type TContext = this::TUniverse::TContext;
+}
+
+abstract class BaseQuery<TContext> {}
+
+abstract class Query extends BaseQuery<this::TContext> {
+  abstract const type TCreation as ICreation;
+  const type TContext = this::TCreation::TContext;
+}
+
+class Frob implements ICreation {
+  const type TUniverse = Universe;
+}
+
+trait TFrobQuery {
+  require extends BaseQuery<Frob::TContext>;
+}
+
+final class FrobQuery extends Query {
+  use TFrobQuery;
+  const type TCreation = Frob;
+}
+
+function frob_query(): FrobQuery {
+  return new FrobQuery();
+}

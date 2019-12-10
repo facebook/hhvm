@@ -240,6 +240,7 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
     | Stopped _ ->
       Lwt.return_unit
     | Initialized _ ->
+      let t = Unix.gettimeofday () in
       (try%lwt
          let message = ClientIdeMessage.Shutdown () in
          let tracked_message = { ClientIdeMessage.tracking_id; message } in
@@ -250,14 +251,24 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
                   do_rpc ~tracked_message ~messages_to_send ~response_emitter
                 in
                 Daemon.kill daemon_handle;
+                HackEventLogger.serverless_ide_destroy_ok t;
                 Lwt.return_unit);
                (let%lwt () = Lwt_unix.sleep 5.0 in
                 Daemon.kill daemon_handle;
+                let stack = Exception.get_current_callstack_string 100 in
+                HackEventLogger.serverless_ide_destroy_error
+                  t
+                  ("Timeout\n" ^ stack);
+                log "ClientIdeService.destroy timeout";
                 Lwt.return_unit);
              ]
          in
          Lwt.return_unit
-       with _ -> Lwt.return_unit)
+       with e ->
+         let e = Exception.wrap e in
+         HackEventLogger.serverless_ide_destroy_error t (Exception.to_string e);
+         log "ClientIdeService.destroy error\n%s" (Exception.to_string e);
+         Lwt.return_unit)
   in
   Lwt_message_queue.close messages_to_send;
   Lwt_message_queue.close notification_emitter;

@@ -136,6 +136,10 @@ let serverless_ide_startup ~component:_ ~start_time:_ = ()
 
 let serverless_ide_local_files ~local_file_count:_ = ()
 
+let serverless_ide_destroy_ok _ = ()
+
+let serverless_ide_destroy_error _ _ = ()
+
 let client_bad_exit ~command _ = ()
 
 let glean_globalrev_supplied ~globalrev:_ = ()

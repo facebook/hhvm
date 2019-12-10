@@ -105,6 +105,7 @@ let client_lsp_method_handled
     ~root:_
     ~method_:_
     ~kind:_
+    ~filename:_
     ~tracking_id:_
     ~start_queue_time:_
     ~start_hh_server_state:_
@@ -116,20 +117,21 @@ let client_lsp_method_exception
     ~root:_
     ~method_:_
     ~kind:_
+    ~filename:_
     ~tracking_id:_
     ~start_queue_time:_
     ~start_hh_server_state:_
     ~start_handle_time:_
     ~serverless_ide_flag
     ~json:_
-    ~message:_
+    ~reason:_
     ~stack:_
     ~source:_ =
   ()
 
 let serverless_ide_crash ~message:_ ~stack:_ = ()
 
-let client_lsp_exception ~root:_ ~message:_ ~stack:_ ~source:_ = ()
+let client_lsp_exception ~root:_ ~reason:_ ~stack:_ ~source:_ = ()
 
 let serverless_ide_startup ~component:_ ~start_time:_ = ()
 

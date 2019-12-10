@@ -3099,11 +3099,23 @@ let track_ide_service_open_files
     the open file, we'll start handling them. *)
     Lwt.return_unit
 
+let get_filename_in_message (message : lsp_message) : string option =
+  let uri_opt = Lsp_helpers.get_uri_opt message in
+  match uri_opt with
+  | None -> None
+  | Some uri ->
+    (try
+       let path = Lsp_helpers.lsp_uri_to_path uri in
+       match Relative_path.strip_root_if_possible path with
+       | None -> Some path
+       | Some relative_path -> Some relative_path
+     with _ -> Some (Lsp.string_of_uri uri))
+
 let log_response_if_necessary
     (event : event) (unblocked_time : float) (env : env) : unit =
   let open Jsonrpc in
   match event with
-  | Client_message (metadata, _) ->
+  | Client_message (metadata, message) ->
     HackEventLogger.client_lsp_method_handled
       ~root:(get_root_opt ())
       ~method_:
@@ -3112,6 +3124,7 @@ let log_response_if_necessary
         else
           metadata.method_ )
       ~kind:(kind_to_string metadata.kind)
+      ~filename:(get_filename_in_message message)
       ~tracking_id:metadata.tracking_id
       ~start_queue_time:metadata.timestamp
       ~start_hh_server_state:
@@ -3123,15 +3136,15 @@ let log_response_if_necessary
 
 let hack_log_error
     (event : event option)
-    (message : string)
+    (reason : string)
     (stack : string)
     (source : string)
     (unblocked_time : float)
     (env : env) : unit =
   let root = get_root_opt () in
-  log "Exception %s: message: %s, stack trace: %s" source message stack;
+  log "Exception %s: reason: %s, stack trace: %s" source reason stack;
   match event with
-  | Some (Client_message (metadata, _)) ->
+  | Some (Client_message (metadata, message)) ->
     let open Jsonrpc in
     let json =
       metadata.json |> Hh_json.json_truncate |> Hh_json.json_to_string
@@ -3143,16 +3156,17 @@ let hack_log_error
       ~root
       ~method_:metadata.method_
       ~kind:(kind_to_string metadata.kind)
+      ~filename:(get_filename_in_message message)
       ~tracking_id:metadata.tracking_id
       ~start_queue_time:metadata.timestamp
       ~start_hh_server_state
       ~start_handle_time:unblocked_time
       ~serverless_ide_flag:env.use_serverless_ide
       ~json
-      ~message
+      ~reason
       ~stack
       ~source
-  | _ -> HackEventLogger.client_lsp_exception ~root ~message ~stack ~source
+  | _ -> HackEventLogger.client_lsp_exception ~root ~reason ~stack ~source
 
 (* cancel_if_stale: If a message is stale, throw the necessary exception to
    cancel it. A message is considered stale if it's sufficiently old and there

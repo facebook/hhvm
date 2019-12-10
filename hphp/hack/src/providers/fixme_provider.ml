@@ -165,17 +165,17 @@ let get_unused_fixmes ~codes ~applied_fixmes ~fold ~files_info =
  *)
 (*****************************************************************************)
 let get_fixmes_for_pos pos =
-  match Provider_config.get_backend () with
-  | Provider_config.Lru_shared_memory
-  | Provider_config.Shared_memory
-  | Provider_config.Local_memory _ ->
+  match Provider_backend.get () with
+  | Provider_backend.Lru_shared_memory
+  | Provider_backend.Shared_memory
+  | Provider_backend.Local_memory _ ->
     let filename = Pos.filename pos in
     let (line, _, _) = Pos.info_pos pos in
     get_fixmes filename
     |> Option.value ~default:IMap.empty
     |> IMap.find_opt line
     |> Option.value ~default:IMap.empty
-  | Provider_config.Decl_service _ ->
+  | Provider_backend.Decl_service _ ->
     (* TODO: implement this! *)
     IMap.empty
 
@@ -183,10 +183,10 @@ let get_fixme_codes_for_pos pos =
   get_fixmes_for_pos pos |> IMap.keys |> ISet.of_list
 
 let is_disallowed pos code =
-  match Provider_config.get_backend () with
-  | Provider_config.Lru_shared_memory
-  | Provider_config.Shared_memory
-  | Provider_config.Local_memory _ ->
+  match Provider_backend.get () with
+  | Provider_backend.Lru_shared_memory
+  | Provider_backend.Shared_memory
+  | Provider_backend.Local_memory _ ->
     let filename = Pos.filename pos in
     let (line, _, _) = Pos.info_pos pos in
     DISALLOWED_FIXMES.get filename
@@ -194,7 +194,7 @@ let is_disallowed pos code =
     |> IMap.find_opt line
     |> Option.value ~default:IMap.empty
     |> IMap.find_opt code
-  | Provider_config.Decl_service _ -> None
+  | Provider_backend.Decl_service _ -> None
 
 let () =
   (Errors.get_hh_fixme_pos :=

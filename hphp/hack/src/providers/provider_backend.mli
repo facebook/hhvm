@@ -17,7 +17,7 @@ type decl_cache_key =
 (** Maps decl names to types. *)
 type decl_cache = (decl_cache_key, Obj.t) Memory_bounded_lru_cache.t
 
-type backend = private
+type t = private
   | Lru_shared_memory
   | Shared_memory
   | Local_memory of { decl_cache: decl_cache }
@@ -32,4 +32,4 @@ val set_local_memory_backend : max_size_in_words:int -> unit
 
 val set_decl_service_backend : Decl_service_client.t -> unit
 
-val get_backend : unit -> backend
+val get : unit -> t

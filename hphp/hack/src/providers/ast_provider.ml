@@ -244,10 +244,10 @@ let get_ast ?(full = false) file_name =
     | Some ctx ->
       Relative_path.Map.find_opt ctx.Provider_context.entries file_name
   in
-  match (entry_opt, Provider_config.get_backend ()) with
+  match (entry_opt, Provider_backend.get ()) with
   | (Some entry, _) -> entry.Provider_context.ast
-  | (None, Provider_config.Lru_shared_memory)
-  | (None, Provider_config.Shared_memory) ->
+  | (None, Provider_backend.Lru_shared_memory)
+  | (None, Provider_backend.Shared_memory) ->
     begin
       (* Note that we might be looking up the shared ParserHeap directly, *)
       (* or maybe into a local-change-stack due to quarantine. *)
@@ -266,7 +266,7 @@ let get_ast ?(full = false) file_name =
         (* It's in the parser-heap! hurrah! *)
         ast
     end
-  | (None, Provider_config.Local_memory _) ->
+  | (None, Provider_backend.Local_memory _) ->
     (* We never cache ASTs for this provider. There'd be no use. *)
     (* The only valuable caching is to cache decls. *)
     let (_, ast, _) =
@@ -276,7 +276,7 @@ let get_ast ?(full = false) file_name =
         (ServerCommandTypes.FileName (Relative_path.to_absolute file_name))
     in
     ast
-  | (None, Provider_config.Decl_service _) ->
+  | (None, Provider_backend.Decl_service _) ->
     failwith "Ast_provider.get_ast not supported with decl memory provider"
 
 let find_class_in_file
@@ -311,12 +311,12 @@ let local_changes_revert_batch paths =
 let provide_ast_hint
     (path : Relative_path.t) (program : Nast.program) (parse_type : parse_type)
     : unit =
-  match Provider_config.get_backend () with
-  | Provider_config.Lru_shared_memory
-  | Provider_config.Shared_memory ->
+  match Provider_backend.get () with
+  | Provider_backend.Lru_shared_memory
+  | Provider_backend.Shared_memory ->
     ParserHeap.write_around path (program, parse_type)
-  | Provider_config.Local_memory _
-  | Provider_config.Decl_service _ ->
+  | Provider_backend.Local_memory _
+  | Provider_backend.Decl_service _ ->
     ()
 
 let remove_batch paths = ParserHeap.remove_batch paths

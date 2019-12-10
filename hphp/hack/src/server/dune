@@ -297,7 +297,7 @@
     bad_files
     lwt
     parent
-    provider_config
+    provider_backend
     remote_worker_stubs
     server
     state_loader

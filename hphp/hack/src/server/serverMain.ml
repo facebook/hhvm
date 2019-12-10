@@ -1245,7 +1245,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   let lru_host_env =
     match lru_cache_directory with
     | Some cache_dir_path ->
-      Provider_config.set_lru_shared_memory_backend ();
+      Provider_backend.set_lru_shared_memory_backend ();
       let host_env =
         Shared_lru.init
           ~cache_name:"hack_server_lru"

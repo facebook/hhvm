@@ -79,7 +79,7 @@
     global_naming_options)
   (libraries
     heap_shared_mem
-    provider_config
+    provider_backend
     typechecker_options)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
@@ -119,7 +119,7 @@
     naming_global
     nast
     partial_provider
-    provider_config
+    provider_backend
     typing_deps
     typechecker_options)
   (preprocess (pps ppx_deriving.std)))

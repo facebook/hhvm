@@ -13,7 +13,7 @@ and then later try to withdraw a class named 'foo' whose value is another type.
 
 The problem can be solved with a GADT, but making a GADT with references to
 types like `Typing_defs.ty` causes dependency cycles, since `typing` ends up
-depending on `Provider_config` transitively.
+depending on `Provider_backend` transitively.
 *)
 type decl_cache_key =
   | Fun_decl of string
@@ -24,7 +24,7 @@ type decl_cache_key =
 
 type decl_cache = (decl_cache_key, Obj.t) Memory_bounded_lru_cache.t
 
-type backend =
+type t =
   | Lru_shared_memory
   | Shared_memory
   | Local_memory of { decl_cache: decl_cache }
@@ -44,4 +44,4 @@ let set_local_memory_backend ~(max_size_in_words : int) : unit =
 let set_decl_service_backend (decl : Decl_service_client.t) : unit =
   backend_ref := Decl_service decl
 
-let get_backend () : backend = !backend_ref
+let get () : t = !backend_ref

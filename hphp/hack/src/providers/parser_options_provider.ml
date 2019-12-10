@@ -27,12 +27,12 @@ module Store =
 let local_memory_popt : ParserOptions.t option ref = ref None
 
 let get_opt () : ParserOptions.t option =
-  match Provider_config.get_backend () with
-  | Provider_config.Lru_shared_memory
-  | Provider_config.Shared_memory ->
+  match Provider_backend.get () with
+  | Provider_backend.Lru_shared_memory
+  | Provider_backend.Shared_memory ->
     Store.get ()
-  | Provider_config.Local_memory _
-  | Provider_config.Decl_service _ ->
+  | Provider_backend.Local_memory _
+  | Provider_backend.Decl_service _ ->
     !local_memory_popt
 
 let get () : ParserOptions.t =
@@ -48,12 +48,12 @@ let set (popt : ParserOptions.t) : unit =
   match get_opt () with
   | None ->
     begin
-      match Provider_config.get_backend () with
-      | Provider_config.Lru_shared_memory
-      | Provider_config.Shared_memory ->
+      match Provider_backend.get () with
+      | Provider_backend.Lru_shared_memory
+      | Provider_backend.Shared_memory ->
         Store.add () popt
-      | Provider_config.Local_memory _
-      | Provider_config.Decl_service _ ->
+      | Provider_backend.Local_memory _
+      | Provider_backend.Decl_service _ ->
         local_memory_popt := Some popt
     end
   | Some _ ->

@@ -166,7 +166,7 @@ let initialize
   let bytes_per_word = Sys.word_size / 8 in
   let words_per_mb = 1_000_000 / bytes_per_word in
   let max_size_in_words = 250 * words_per_mb in
-  Provider_config.set_local_memory_backend ~max_size_in_words;
+  Provider_backend.set_local_memory_backend ~max_size_in_words;
 
   let genv =
     ServerEnvBuild.make_genv

@@ -34,7 +34,7 @@ let get_fun (fun_name : fun_key) : fun_decl option =
   match Funs.get fun_name with
   | Some s -> Some s
   | None ->
-    let fun_name_key = Provider_config.Fun_decl fun_name in
+    let fun_name_key = Provider_backend.Fun_decl fun_name in
     (match Lru_worker.get_with_offset fun_name_key with
     | Some s -> Some s
     | None ->
@@ -52,7 +52,7 @@ let get_fun (fun_name : fun_key) : fun_decl option =
       | None -> None))
 
 let get_gconst gconst_name =
-  let gconst_name_key = Provider_config.Gconst_decl gconst_name in
+  let gconst_name_key = Provider_backend.Gconst_decl gconst_name in
   match GConsts.get gconst_name with
   | Some s -> Some s
   | None ->
@@ -78,7 +78,7 @@ let get_record_def (record_name : string) : record_def_decl option =
   match RecordDef.get record_name with
   | Some s -> Some s
   | None ->
-    let record_name_key = Provider_config.Record_decl record_name in
+    let record_name_key = Provider_backend.Record_decl record_name in
     (match Lru_worker.get_with_offset record_name_key with
     | Some s -> Some s
     | None ->
@@ -99,7 +99,7 @@ let get_typedef (typedef_name : string) : typedef_decl option =
   match Typedefs.get typedef_name with
   | Some s -> Some s
   | None ->
-    let typedef_name_key = Provider_config.Typedef_decl typedef_name in
+    let typedef_name_key = Provider_backend.Typedef_decl typedef_name in
     (match Lru_worker.get_with_offset typedef_name_key with
     | Some s -> Some s
     | None ->

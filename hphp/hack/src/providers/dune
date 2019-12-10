@@ -1,6 +1,6 @@
 (library
-  (name provider_config)
-  (modules provider_config)
+  (name provider_backend)
+  (modules provider_backend)
   (libraries
     decl_service_client
     heap_shared_mem
@@ -15,6 +15,7 @@
     collections
     nast
     parser
+    provider_backend
     server_command_types
     typing_ast
     typing_deps
@@ -44,8 +45,7 @@
   (modules file_provider)
   (libraries
     ast
-    heap_shared_mem
-    provider_config
+    provider_backend
     relative_path
     sys_utils)
   (preprocess (pps ppx_deriving.std)))
@@ -74,8 +74,7 @@
   (libraries
     decl_service_client
     lru_worker_stubs
-    marshal_tools
-    provider_config
+    provider_backend
     typing_heap)
   (preprocess (pps ppx_deriving.std)))
 
@@ -86,8 +85,7 @@
     collections
     errors
     heap_shared_mem
-    pos
-    provider_config)
+    provider_backend)
   (preprocess (pps ppx_deriving.std)))
 
 (library
@@ -104,7 +102,7 @@
   (libraries
     heap_shared_mem
     parser_options
-    provider_config
+    provider_backend
     utils_core)
   (preprocess (pps ppx_deriving.std)))
 

@@ -394,13 +394,13 @@ end = struct
     (p, ident)
 
   let global_const (genv, _env) x =
-    match Provider_config.get_backend () with
-    | Provider_config.Lru_shared_memory
-    | Provider_config.Shared_memory
-    | Provider_config.Local_memory _ ->
+    match Provider_backend.get () with
+    | Provider_backend.Lru_shared_memory
+    | Provider_backend.Shared_memory
+    | Provider_backend.Local_memory _ ->
       if_unbound_then_dep_edge_and_report genv Naming_table.Consts.is_defined x;
       x
-    | Provider_config.Decl_service _ ->
+    | Provider_backend.Decl_service _ ->
       (* TODO: we need to refactor this so naming phase doesn't report *)
       (* unbound name errors; that should come later, during typchecking, *)
       (* which is when we look up the decl service. The decl service *)

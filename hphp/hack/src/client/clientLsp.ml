@@ -1438,7 +1438,10 @@ let make_ide_completion_response
           let ranking_detail =
             match completion.ranking_details with
             | Some details ->
-              [("ranking_detail", Hh_json.JSON_String details.detail)]
+              [
+                ("ranking_detail", Hh_json.JSON_String details.detail);
+                ("ranking_source", Hh_json.JSON_Number details.kind);
+              ]
             | None -> []
           in
           (* If we do not have a correct file position, skip sending that data *)
@@ -1607,6 +1610,13 @@ let docblock_with_ranking_detail
   | Some detail -> raw_docblock @ [DocblockService.Markdown detail]
   | None -> raw_docblock
 
+let resolve_ranking_source
+    (kind : SearchUtils.si_kind) (ranking_source : int option) :
+    SearchUtils.si_kind =
+  match ranking_source with
+  | Some x -> SearchUtils.int_to_kind x
+  | None -> kind
+
 let do_completionItemResolve
     (conn : server_conn)
     (ref_unblocked_time : float ref)
@@ -1628,6 +1638,7 @@ let do_completionItemResolve
         let column = Jget.int_exn data "char" in
         let base_class = Jget.string_opt data "base_class" in
         let ranking_detail = Jget.string_opt data "ranking_detail" in
+        let ranking_source = Jget.int_opt data "ranking_source" in
         (* If not found ... *)
         if line = 0 && column = 0 then (
           (* For global symbols such as functions, classes, enums, etc, we
@@ -1637,7 +1648,8 @@ let do_completionItemResolve
           if fullname = "" then raise NoLocationFound;
           let fullname = Utils.add_ns fullname in
           let command =
-            ServerCommandTypes.DOCBLOCK_FOR_SYMBOL (fullname, kind)
+            ServerCommandTypes.DOCBLOCK_FOR_SYMBOL
+              (fullname, resolve_ranking_source kind ranking_source)
           in
           let%lwt raw_docblock = rpc conn ref_unblocked_time command in
           Lwt.return (docblock_with_ranking_detail raw_docblock ranking_detail)
@@ -1645,14 +1657,25 @@ let do_completionItemResolve
           (* Okay let's get a docblock for this specific location *)
           let command =
             ServerCommandTypes.DOCBLOCK_AT
-              (filename, line, column, base_class, kind)
+              ( filename,
+                line,
+                column,
+                base_class,
+                resolve_ranking_source kind ranking_source )
           in
           let%lwt raw_docblock = rpc conn ref_unblocked_time command in
           Lwt.return (docblock_with_ranking_detail raw_docblock ranking_detail)
       (* If that failed, fetch docblock using just the symbol name *)
     with _ ->
       let symbolname = params.Completion.label in
-      let command = ServerCommandTypes.DOCBLOCK_FOR_SYMBOL (symbolname, kind) in
+      let ranking_source =
+        try Jget.int_opt params.Completion.data "ranking_source"
+        with _ -> None
+      in
+      let command =
+        ServerCommandTypes.DOCBLOCK_FOR_SYMBOL
+          (symbolname, resolve_ranking_source kind ranking_source)
+      in
       let%lwt raw_docblock = rpc conn ref_unblocked_time command in
       Lwt.return raw_docblock
   in
@@ -1692,6 +1715,7 @@ let do_resolve_local
         let column = Jget.int_exn data "char" in
         let file_contents = get_document_contents editor_open_files uri in
         let ranking_detail = Jget.string_opt data "ranking_detail" in
+        let ranking_source = Jget.int_opt data "ranking_source" in
         if line = 0 && column = 0 then failwith "NoFileLineColumnData";
         let request =
           ClientIdeMessage.Completion_resolve_location
@@ -1703,7 +1727,7 @@ let do_resolve_local
                   ClientIdeMessage.line;
                   ClientIdeMessage.column;
                 };
-              kind;
+              kind = resolve_ranking_source kind ranking_source;
             }
         in
         let%lwt location_result =
@@ -1728,9 +1752,16 @@ let do_resolve_local
         try Jget.string_exn params.Completion.data "fullname"
         with _ -> params.Completion.label
       in
+      let ranking_source =
+        try Jget.int_opt params.Completion.data "ranking_source"
+        with _ -> None
+      in
       let request =
         ClientIdeMessage.Completion_resolve
-          { ClientIdeMessage.Completion_resolve.symbol = symbolname; kind }
+          {
+            ClientIdeMessage.Completion_resolve.symbol = symbolname;
+            kind = resolve_ranking_source kind ranking_source;
+          }
       in
       let%lwt resolve_result =
         ClientIdeService.rpc ide_service ~tracking_id request

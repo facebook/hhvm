@@ -871,6 +871,7 @@ let go_ctx
                   ~max_results:3
                   ~context:completion_type
                   ~kind_filter:!kind_filter
+                  ~replace_pos
               in
               AutocompleteRankService.log_ranked_autocomplete
                 ~sienv

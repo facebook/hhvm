@@ -14,7 +14,8 @@ let rank_autocomplete_result
     ~(results : AutocompleteTypes.complete_autocomplete_result list)
     ~(max_results : int)
     ~(context : SearchUtils.autocomplete_type option)
-    ~(kind_filter : SearchUtils.si_kind option) :
+    ~(kind_filter : SearchUtils.si_kind option)
+    ~(replace_pos : Ide_api_types.range) :
     AutocompleteTypes.complete_autocomplete_result list =
   let _ = ctx in
   let _ = entry in
@@ -22,6 +23,7 @@ let rank_autocomplete_result
   let _ = max_results in
   let _ = context in
   let _ = kind_filter in
+  let _ = replace_pos in
   results
 
 let log_ranked_autocomplete

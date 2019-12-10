@@ -25,6 +25,7 @@ type func_details_result = {
 type ranking_details_result = {
   detail: string;
   sort_text: string;
+  kind: string;
 }
 
 (* Results ready to be displayed to the user *)

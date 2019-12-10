@@ -272,7 +272,7 @@ void CmdNext::setupStepSuspend(ActRec* fp, PC pc) {
     decode_iva(pc);
   }
   Offset nextInst = fp->func()->unit()->offsetOf(pc);
-  assertx(nextInst != InvalidAbsoluteOffset);
+  assertx(nextInst != kInvalidOffset);
   m_stepResumableId = fp;
   TRACE(2, "CmdNext: patch for resumable step at '%s' offset %d\n",
         fp->m_func->fullName()->data(), nextInst);

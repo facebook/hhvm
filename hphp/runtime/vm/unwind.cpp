@@ -269,7 +269,7 @@ const StaticString s_hphpd_break("hphpd_break");
 
 Offset findCatchHandler(const Func* func, Offset raiseOffset) {
   auto const eh = func->findEH(raiseOffset);
-  if (eh == nullptr) return InvalidAbsoluteOffset;
+  if (eh == nullptr) return kInvalidOffset;
   return eh->m_handler;
 }
 

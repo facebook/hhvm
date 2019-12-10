@@ -234,8 +234,6 @@ union ArgUnion {
 #undef ARGTYPEVEC
 };
 
-const Offset InvalidAbsoluteOffset = -1;
-
 enum FlavorDesc {
   NOV,  // None
   CV,   // Cell

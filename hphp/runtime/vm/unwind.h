@@ -54,7 +54,7 @@ void lockObjectWhileUnwinding(PC pc, Stack& stack);
 
 /*
  * Find a catch exception handler for a given raise location if the handler was
- * found or InvalidAbsoluteOffset.
+ * found or kInvalidOffset.
  */
 Offset findCatchHandler(const Func* func, Offset raiseOffset);
 

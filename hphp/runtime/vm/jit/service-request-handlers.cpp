@@ -220,16 +220,16 @@ void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
   auto const nparams = fp->func()->numNonVariadicParams();
   auto const& paramInfo = fp->func()->params();
 
-  auto firstDVI = InvalidAbsoluteOffset;
+  auto firstDVI = kInvalidOffset;
 
   for (auto i = nargs; i < nparams; ++i) {
     auto const dvi = paramInfo[i].funcletOff;
-    if (dvi != InvalidAbsoluteOffset) {
+    if (dvi != kInvalidOffset) {
       firstDVI = dvi;
       break;
     }
   }
-  if (firstDVI != InvalidAbsoluteOffset) {
+  if (firstDVI != kInvalidOffset) {
     regs.pc = fp->m_func->unit()->entry() + firstDVI;
   } else {
     regs.pc = fp->m_func->getEntry();

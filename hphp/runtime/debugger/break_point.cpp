@@ -85,7 +85,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, const Variant& error)
       m_callingSite(nullptr), m_class(nullptr),
       m_file((StringData*)nullptr),
       m_line0(0), m_char0(0), m_line1(0), m_char1(0),
-      m_offset(InvalidAbsoluteOffset), m_unit(nullptr), m_valid(false),
+      m_offset(kInvalidOffset), m_unit(nullptr), m_valid(false),
       m_funcEntry(false) {
   TRACE(2, "InterruptSite::InterruptSite\n");
 #define bail_on(c) if (c) { return; }

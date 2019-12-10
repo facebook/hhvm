@@ -61,7 +61,7 @@ void pretty_print(const FuncEmitter* fe, std::ostream& out) {
     if (param.userType) {
       out << " (" << param.userType->data() << ")";
     }
-    if (param.funcletOff != InvalidAbsoluteOffset) {
+    if (param.funcletOff != kInvalidOffset) {
       out << " DV" << " at " << param.funcletOff;
       if (param.phpCode) {
         out << " = " << param.phpCode->data();

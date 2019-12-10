@@ -143,7 +143,7 @@ struct Func final {
     // Does this use a NativeArg?
     bool nativeArg{false};
     // DV initializer funclet offset.
-    Offset funcletOff{InvalidAbsoluteOffset};
+    Offset funcletOff{kInvalidOffset};
     // Set to Uninit if there is no DV, or if there's a nonscalar DV.
     TypedValue defaultValue;
     // Eval-able PHP code.
@@ -151,7 +151,7 @@ struct Func final {
     // User-annotated type.
     LowStringPtr userType{nullptr};
     // offset of dvi funclet from cti section base.
-    Offset ctiFunclet{InvalidAbsoluteOffset};
+    Offset ctiFunclet{kInvalidOffset};
     TypeConstraint typeConstraint;
     UserAttributeMap userAttributes;
   };

@@ -228,7 +228,7 @@ void CmdFlowControl::cleanupStepOuts() {
 // flow control command.
 
 CmdFlowControl::StepDestination::StepDestination() :
-    m_unit(nullptr), m_offset(InvalidAbsoluteOffset),
+    m_unit(nullptr), m_offset(kInvalidOffset),
     m_ownsInternalBreakpoint(false)
 {
 }
@@ -253,7 +253,7 @@ CmdFlowControl::StepDestination::operator=(StepDestination&& other) {
     m_offset = other.m_offset;
     m_ownsInternalBreakpoint = other.m_ownsInternalBreakpoint;
     other.m_unit = nullptr;
-    other.m_offset = InvalidAbsoluteOffset;
+    other.m_offset = kInvalidOffset;
     other.m_ownsInternalBreakpoint = false;
   }
   return *this;

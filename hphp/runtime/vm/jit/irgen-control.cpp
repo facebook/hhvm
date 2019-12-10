@@ -317,7 +317,7 @@ void emitThrow(IRGS& env) {
   auto const maybeThrowable =
     srcTy.maybe(Type::SubObj(SystemLib::s_ExceptionClass)) ||
     srcTy.maybe(Type::SubObj(SystemLib::s_ErrorClass));
-  if (!stackEmpty || offset == InvalidAbsoluteOffset || !maybeThrowable ||
+  if (!stackEmpty || offset == kInvalidOffset || !maybeThrowable ||
       !(srcTy <= TObj)) {
     return interpOne(env);
   }

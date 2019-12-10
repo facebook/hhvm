@@ -1125,7 +1125,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
 static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
   assertx(!isResumed(ar));
   const Func* func = ar->m_func;
-  Offset firstDVInitializer = InvalidAbsoluteOffset;
+  Offset firstDVInitializer = kInvalidOffset;
   folly::Optional<uint32_t> raiseTooManyArgumentsWarnings;
   const int nparams = func->numNonVariadicParams();
   auto& stack = vmStack();
@@ -1202,7 +1202,7 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk, Array&& generics) {
   pushFrameSlots(func, nlocals);
 
   vmfp() = ar;
-  vmpc() = firstDVInitializer != InvalidAbsoluteOffset
+  vmpc() = firstDVInitializer != kInvalidOffset
     ? func->unit()->entry() + firstDVInitializer
     : func->getEntry();
   vmJitReturnAddr() = nullptr;

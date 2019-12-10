@@ -372,7 +372,7 @@ void emitAwait(IRGS& env) {
   };
   auto const handleFailed = [&] {
     auto const offset = findCatchHandler(curFunc(env), bcOff(env));
-    if (offset != InvalidAbsoluteOffset) {
+    if (offset != kInvalidOffset) {
       auto const exception = gen(env, LdWHResult, TObj, child);
       gen(env, IncRef, exception);
       decRef(env, child);

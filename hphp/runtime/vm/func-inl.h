@@ -65,7 +65,7 @@ inline void Func::ParamInfo::serde(SerDe& sd) {
 }
 
 inline bool Func::ParamInfo::hasDefaultValue() const {
-  return funcletOff != InvalidAbsoluteOffset;
+  return funcletOff != kInvalidOffset;
 }
 
 inline bool Func::ParamInfo::hasScalarDefaultValue() const {

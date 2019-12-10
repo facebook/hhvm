@@ -231,8 +231,7 @@ void AsyncFlowStepper::setResumeInternalBreakpoint(PC pc) {
   assertx(decode_op(pc) == Op::Await);
 
   auto resumeInstPc = pc + instrLen(pc);
-  assertx(vmfp()->func()->unit()->offsetOf(resumeInstPc)
-    != InvalidAbsoluteOffset);
+  assertx(vmfp()->func()->unit()->offsetOf(resumeInstPc) != kInvalidOffset);
 
   TRACE(2, "Setup internal breakpoint after await at '%s' offset %d\n",
     vmfp()->func()->fullName()->data(),

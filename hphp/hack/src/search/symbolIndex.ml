@@ -289,7 +289,7 @@ let get_position_for_symbol (symbol : string) (kind : si_kind) :
   match pos_opt with
   | None -> None
   | Some fi ->
-    let (pos, _) = NamingGlobal.GEnv.get_full_pos (fi, name_with_ns) in
+    let (pos, _) = Naming_global.GEnv.get_full_pos (fi, name_with_ns) in
     let relpath = FileInfo.get_pos_filename fi in
     let (line, col, _) = Pos.info_pos pos in
     Some (relpath, line, col)

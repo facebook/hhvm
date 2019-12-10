@@ -12,7 +12,7 @@ module SN = Naming_special_names
 (* TODO: generalize the arity check / argument check here to handle attributes
  * in general, not just __Deprecated *)
 let deprecated ~kind (_, name) attrs =
-  let attr = Attributes.find SN.UserAttributes.uaDeprecated attrs in
+  let attr = Naming_attributes.find SN.UserAttributes.uaDeprecated attrs in
   let open Aast in
   match attr with
   | Some { ua_name = _; ua_params = [msg] }

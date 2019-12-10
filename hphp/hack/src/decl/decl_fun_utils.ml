@@ -26,11 +26,11 @@ let conditionally_reactive_attribute_to_hint env { ua_params = l; _ } =
     (Reason.none, Typing_defs.make_tany ())
 
 let condition_type_from_attributes env user_attributes =
-  Attributes.find SN.UserAttributes.uaOnlyRxIfImpl user_attributes
+  Naming_attributes.find SN.UserAttributes.uaOnlyRxIfImpl user_attributes
   |> Option.map ~f:(conditionally_reactive_attribute_to_hint env)
 
 let fun_reactivity_opt env user_attributes =
-  let has attr = Attributes.mem attr user_attributes in
+  let has attr = Naming_attributes.mem attr user_attributes in
   let module UA = SN.UserAttributes in
   let rx_condition = condition_type_from_attributes env user_attributes in
   if has UA.uaReactive then
@@ -48,23 +48,24 @@ let fun_reactivity env user_attributes =
   fun_reactivity_opt env user_attributes |> Option.value ~default:Nonreactive
 
 let has_accept_disposable_attribute user_attributes =
-  Attributes.mem SN.UserAttributes.uaAcceptDisposable user_attributes
+  Naming_attributes.mem SN.UserAttributes.uaAcceptDisposable user_attributes
 
 let has_return_disposable_attribute user_attributes =
-  Attributes.mem SN.UserAttributes.uaReturnDisposable user_attributes
+  Naming_attributes.mem SN.UserAttributes.uaReturnDisposable user_attributes
 
 let fun_returns_mutable user_attributes =
-  Attributes.mem SN.UserAttributes.uaMutableReturn user_attributes
+  Naming_attributes.mem SN.UserAttributes.uaMutableReturn user_attributes
 
 let fun_returns_void_to_rx user_attributes =
-  Attributes.mem SN.UserAttributes.uaReturnsVoidToRx user_attributes
+  Naming_attributes.mem SN.UserAttributes.uaReturnsVoidToRx user_attributes
 
 let get_param_mutability user_attributes =
-  if Attributes.mem SN.UserAttributes.uaOwnedMutable user_attributes then
+  if Naming_attributes.mem SN.UserAttributes.uaOwnedMutable user_attributes then
     Some Param_owned_mutable
-  else if Attributes.mem SN.UserAttributes.uaMutable user_attributes then
+  else if Naming_attributes.mem SN.UserAttributes.uaMutable user_attributes then
     Some Param_borrowed_mutable
-  else if Attributes.mem SN.UserAttributes.uaMaybeMutable user_attributes then
+  else if Naming_attributes.mem SN.UserAttributes.uaMaybeMutable user_attributes
+  then
     Some Param_maybe_mutable
   else
     None
@@ -72,7 +73,7 @@ let get_param_mutability user_attributes =
 (* If global inference is on this will create a new type variable and store it in
   the global tvenv. Otherwise we return the default type given as parameter *)
 let global_inference_create_tyvar (reason, default_ty_) =
-  let tco = GlobalNamingOptions.get () in
+  let tco = Global_naming_options.get () in
   if InferMissing.global_inference @@ GlobalOptions.tco_infer_missing tco then
     (reason, Tvar (Ident.tmp ()))
   else
@@ -97,7 +98,7 @@ let make_param_ty env param =
   in
   let module UA = SN.UserAttributes in
   let has_at_most_rx_as_func =
-    Attributes.mem UA.uaAtMostRxAsFunc param.param_user_attributes
+    Naming_attributes.mem UA.uaAtMostRxAsFunc param.param_user_attributes
   in
   let ty =
     if has_at_most_rx_as_func then
@@ -110,7 +111,7 @@ let make_param_ty env param =
     if has_at_most_rx_as_func then
       Some Param_rx_var
     else
-      Attributes.find UA.uaOnlyRxIfImpl param.param_user_attributes
+      Naming_attributes.find UA.uaOnlyRxIfImpl param.param_user_attributes
       |> Option.map ~f:(fun v ->
              Param_rx_if_impl (conditionally_reactive_attribute_to_hint env v))
   in

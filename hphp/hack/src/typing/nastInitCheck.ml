@@ -18,7 +18,7 @@ module DeferredMembers = Typing_deferred_members
 module SN = Naming_special_names
 
 let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
+  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
 
 module SSetWTop = struct
   type t =

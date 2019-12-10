@@ -22,7 +22,7 @@ open Typing_defs
 open Typing_deps
 module Reason = Typing_reason
 module Inst = Decl_instantiate
-module Attrs = Attributes
+module Attrs = Naming_attributes
 module Partial = Partial_provider
 module SN = Naming_special_names
 
@@ -245,7 +245,7 @@ and fun_decl f =
           {
             Decl_env.mode = f.f_mode;
             droot = Some dep;
-            decl_tcopt = GlobalNamingOptions.get ();
+            decl_tcopt = Global_naming_options.get ();
           }
         in
         fun_decl_in_env env f)
@@ -281,7 +281,7 @@ and fun_decl_in_env env f =
     List.map f.f_where_constraints (where_constraint env)
   in
   let fe_deprecated =
-    Attributes_deprecated.deprecated
+    Naming_attributes_deprecated.deprecated
       ~kind:"function"
       f.f_name
       f.f_user_attributes
@@ -320,7 +320,7 @@ let check_if_cyclic class_env (pos, cid) =
   is_cyclic
 
 let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
+  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
 
 let pu_enum_fold acc spu =
   let tpu =
@@ -495,7 +495,7 @@ and class_decl c =
     {
       Decl_env.mode = c.sc_mode;
       droot = Some class_dep;
-      decl_tcopt = GlobalNamingOptions.get ();
+      decl_tcopt = Global_naming_options.get ();
     }
   in
   let inherited = Decl_inherit.make env c in
@@ -1108,7 +1108,11 @@ and typedef_decl tdef =
   in
   let dep = Typing_deps.Dep.Class tid in
   let env =
-    { Decl_env.mode; droot = Some dep; decl_tcopt = GlobalNamingOptions.get () }
+    {
+      Decl_env.mode;
+      droot = Some dep;
+      decl_tcopt = Global_naming_options.get ();
+    }
   in
   let td_tparams = List.map params (type_param env) in
   let td_type = Decl_hint.hint env concrete_type in
@@ -1135,7 +1139,7 @@ let const_decl cst =
     {
       Decl_env.mode = cst.cst_mode;
       droot = Some dep;
-      decl_tcopt = GlobalNamingOptions.get ();
+      decl_tcopt = Global_naming_options.get ();
     }
   in
   match cst.cst_type with

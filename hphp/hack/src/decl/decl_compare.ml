@@ -451,7 +451,7 @@ let get_gconsts_deps ~conservative_redecl old_gconsts gconsts =
     (DepSet.empty, DepSet.empty, DepSet.empty)
 
 let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
+  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing

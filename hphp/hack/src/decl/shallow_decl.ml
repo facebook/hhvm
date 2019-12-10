@@ -14,7 +14,7 @@ open Shallow_decl_defs
 open Aast
 open Typing_deps
 open Typing_defs
-module Attrs = Attributes
+module Attrs = Naming_attributes
 module Partial = Partial_provider
 
 let class_const env c cc =
@@ -304,7 +304,10 @@ let method_ env c m =
     | _ -> None
   in
   let sm_deprecated =
-    Attributes_deprecated.deprecated ~kind:"method" m.m_name m.m_user_attributes
+    Naming_attributes_deprecated.deprecated
+      ~kind:"method"
+      m.m_name
+      m.m_user_attributes
   in
   {
     sm_abstract = m.m_abstract;
@@ -402,7 +405,7 @@ let class_ c =
     {
       Decl_env.mode = c.c_mode;
       droot = Some class_dep;
-      decl_tcopt = GlobalNamingOptions.get ();
+      decl_tcopt = Global_naming_options.get ();
     }
   in
   let (errors, sc) =

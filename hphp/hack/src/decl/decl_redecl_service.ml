@@ -18,7 +18,7 @@ open Reordered_argument_collections
 open Typing_deps
 
 let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
+  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
 
 (*****************************************************************************)
 (* The neutral element of declaration (cf procs/multiWorker.mli) *)

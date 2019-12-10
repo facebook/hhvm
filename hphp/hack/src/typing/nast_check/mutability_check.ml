@@ -12,13 +12,14 @@ open Aast
 open Nast_check_env
 module UA = Naming_special_names.UserAttributes
 
-let is_mutable user_attributes = Attributes.mem UA.uaMutable user_attributes
+let is_mutable user_attributes =
+  Naming_attributes.mem UA.uaMutable user_attributes
 
 let is_maybe_mutable user_attributes =
-  Attributes.mem UA.uaMaybeMutable user_attributes
+  Naming_attributes.mem UA.uaMaybeMutable user_attributes
 
 let is_mutable_return user_attributes =
-  Attributes.mem UA.uaMutableReturn user_attributes
+  Naming_attributes.mem UA.uaMutableReturn user_attributes
 
 let check_mutability pos ua name =
   if is_mutable ua then Errors.mutable_methods_must_be_reactive pos name;

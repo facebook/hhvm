@@ -22,7 +22,7 @@ module Store =
 
       let prefix = Prefix.make ()
 
-      let description = "GlobalNamingOptions"
+      let description = "Global_naming_options"
     end)
 
 let local_memory_tcopt : TypecheckerOptions.t option ref = ref None
@@ -40,9 +40,9 @@ let get () : TypecheckerOptions.t =
   | Some tcopt -> tcopt
   | None ->
     Hh_logger.fatal "%s"
-    @@ "GlobalNamingOptions: Attempt to read global naming options "
+    @@ "Global_naming_options: Attempt to read global naming options "
     ^ "before they were set";
-    failwith "GlobalNamingOptions: global naming options not set"
+    failwith "Global_naming_options: global naming options not set"
 
 let set (tcopt : TypecheckerOptions.t) : unit =
   let was_already_set =

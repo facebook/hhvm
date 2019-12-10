@@ -93,7 +93,7 @@ let setup_server ?custom_config ?(hhi_files = []) () =
   in
   let hhi_set = Relative_path.Set.of_list hhi_file_list in
   Parser_options_provider.set result.ServerEnv.popt;
-  GlobalNamingOptions.set result.ServerEnv.tcopt;
+  Global_naming_options.set result.ServerEnv.tcopt;
 
   (* Initialize symbol index *)
   let sienv =

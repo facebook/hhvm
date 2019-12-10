@@ -20,7 +20,7 @@ let init root =
     SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config
   in
   Parser_options_provider.set ParserOptions.default;
-  GlobalNamingOptions.set
+  Global_naming_options.set
     {
       TypecheckerOptions.default with
       GlobalOptions.tco_shallow_class_decl = true;

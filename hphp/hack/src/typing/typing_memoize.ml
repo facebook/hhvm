@@ -114,8 +114,8 @@ let check :
     unit =
  fun env user_attributes params variadic ->
   if
-    Attributes.mem SN.UserAttributes.uaMemoize user_attributes
-    || Attributes.mem SN.UserAttributes.uaMemoizeLSB user_attributes
+    Naming_attributes.mem SN.UserAttributes.uaMemoize user_attributes
+    || Naming_attributes.mem SN.UserAttributes.uaMemoizeLSB user_attributes
   then (
     List.iter ~f:(check_param env) params;
     match variadic with

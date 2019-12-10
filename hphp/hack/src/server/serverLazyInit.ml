@@ -251,7 +251,7 @@ let naming_with_fast (fast : FileInfo.names Relative_path.Map.t) (t : float) :
       } =
         info
       in
-      NamingGlobal.ndecl_file_fast
+      Naming_global.ndecl_file_fast
         k
         ~funs
         ~classes

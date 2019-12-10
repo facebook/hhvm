@@ -361,7 +361,8 @@ let check_call env method_info pos reason ft arg_types =
 
 let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
   let module UA = Naming_special_names.UserAttributes in
-  if Attributes.mem UA.uaAtMostRxAsFunc param.Aast.param_user_attributes then
+  if Naming_attributes.mem UA.uaAtMostRxAsFunc param.Aast.param_user_attributes
+  then
     if Option.is_none (Aast.hint_of_type_hint param.Aast.param_type_hint) then
       Errors.missing_annotation_for_atmost_rx_as_rxfunc_parameter
         param.Aast.param_pos

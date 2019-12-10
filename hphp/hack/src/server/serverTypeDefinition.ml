@@ -20,7 +20,7 @@ let go_common (tast : Tast.program) ~(line : int) ~(column : int) :
       match ty with
       | Tclass ((_, str), _, _) ->
         begin
-          match NamingGlobal.GEnv.type_pos str with
+          match Naming_global.GEnv.type_pos str with
           | None -> acc
           | Some pos -> (pos, str) :: acc
         end

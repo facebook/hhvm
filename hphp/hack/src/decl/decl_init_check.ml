@@ -12,7 +12,7 @@ open Decl_defs
 open Aast
 open Shallow_decl_defs
 open Typing_defs
-module Attrs = Attributes
+module Attrs = Naming_attributes
 module SN = Naming_special_names
 
 let parent_init_prop = "parent::" ^ SN.Members.__construct

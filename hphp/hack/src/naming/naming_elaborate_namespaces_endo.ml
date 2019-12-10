@@ -124,7 +124,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
      *)
     method! on_class_ env c =
       let in_ppl =
-        Attributes.mem
+        Naming_attributes.mem
           SN.UserAttributes.uaProbabilisticModel
           c.c_user_attributes
       in

@@ -86,7 +86,7 @@ let naming (env : ServerEnv.env) (t : float) : ServerEnv.env * float =
       ~f:
         begin
           fun k v env ->
-          let (errorl, failed_naming) = NamingGlobal.ndecl_file k v in
+          let (errorl, failed_naming) = Naming_global.ndecl_file k v in
           {
             env with
             errorl = Errors.merge errorl env.errorl;

@@ -11,7 +11,7 @@ open Hh_prelude
 open Aast
 open Shallow_decl_defs
 open Typing_defs
-module Attrs = Attributes
+module Attrs = Naming_attributes
 module Cls = Decl_provider.Class
 module Env = Typing_env
 module SN = Naming_special_names

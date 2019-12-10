@@ -10,9 +10,7 @@
 
 (library
   (name nast)
-  (wrapped false)
   (modules
-    ast_to_nast
     nast)
   (libraries
     annotated_ast
@@ -20,10 +18,17 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name naming_attributes)
-  (wrapped false)
+  (name ast_to_nast)
   (modules
-    attributes)
+    ast_to_nast)
+  (libraries
+    nast)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name naming_attributes)
+  (modules
+    naming_attributes)
   (libraries
     annotated_ast
     core_kernel)
@@ -31,9 +36,8 @@
 
 (library
   (name naming_attributes_deprecated)
-  (wrapped false)
   (modules
-    attributes_deprecated
+    naming_attributes_deprecated
     nast_eval)
   (libraries
     annotated_ast
@@ -46,24 +50,61 @@
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
+  (name naming_table)
+  (modules
+    naming_table)
+  (libraries
+    ast_provider
+    file_info
+    fileutils
+    heap_shared_mem
+    relative_path
+    sqlite3
+    sqlite_utils)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
   (name naming_heap_api)
-  (wrapped false)
   (modules
     naming_heap_api)
   (libraries
     ast_provider
-    naming)
+    naming
+    naming_table)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
-  (name naming)
-  (wrapped false)
+  (name global_naming_options)
   (modules
-    elaborate_namespaces_endo
-    globalNamingOptions
-    naming
-    naming_table
-    namingGlobal)
+    global_naming_options)
+  (libraries
+    heap_shared_mem
+    provider_config
+    typechecker_options)
+  (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name naming_global)
+  (modules
+    naming_global)
+  (libraries
+    file_info
+    naming_table)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name naming_elaborate_namespaces_endo)
+  (modules
+    naming_elaborate_namespaces_endo)
+  (libraries
+    annotated_ast
+    parser)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name naming)
+  (modules
+    naming)
   (libraries
     ast
     ast_provider
@@ -71,12 +112,14 @@
     file_provider
     fileutils
     full_fidelity
+    global_naming_options
     naming_attributes
+    naming_elaborate_namespaces_endo
+    naming_table
+    naming_global
     nast
     partial_provider
     provider_config
-    sqlite3
-    sqlite_utils
     typing_deps
     typechecker_options)
   (preprocess (pps ppx_deriving.std)))

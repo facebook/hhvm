@@ -738,7 +738,7 @@ let parse_and_name popt files_contents =
           let { FileInfo.funs; classes; record_defs; typedefs; consts; _ } =
             fileinfo
           in
-          NamingGlobal.make_env ~funs ~classes ~record_defs ~typedefs ~consts));
+          Naming_global.make_env ~funs ~classes ~record_defs ~typedefs ~consts));
   (parsed_files, files_info)
 
 let parse_name_and_decl popt files_contents =
@@ -1757,7 +1757,7 @@ let main_hack ({ files; mode; tcopt; _ } as opts) (sienv : SearchUtils.si_env) :
       Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
       Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
       Parser_options_provider.set tcopt;
-      GlobalNamingOptions.set tcopt;
+      Global_naming_options.set tcopt;
       match mode with
       | Ai ai_options ->
         begin

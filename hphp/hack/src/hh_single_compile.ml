@@ -272,11 +272,13 @@ let parse_text ~hhbc_options popt fn text =
   let (ast, is_hh_file) =
     Full_fidelity_ast.from_text_to_empty_tast env source_text
   in
-  let elaborate_namespaces = new Elaborate_namespaces_endo.generic_elaborator in
+  let elaborate_namespaces =
+    new Naming_elaborate_namespaces_endo.generic_elaborator
+  in
   let nsenv = Namespace_env.empty_from_popt popt in
   let ast =
     elaborate_namespaces#on_program
-      (Elaborate_namespaces_endo.make_env nsenv)
+      (Naming_elaborate_namespaces_endo.make_env nsenv)
       ast
   in
   (ast, is_hh_file)

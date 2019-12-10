@@ -4,6 +4,7 @@
   (libraries
     ast_provider
     full_fidelity
+    global_naming_options
     heap_global_storage
     naming
     naming_attributes

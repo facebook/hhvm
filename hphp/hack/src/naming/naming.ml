@@ -22,7 +22,7 @@ module N = Aast
 module SN = Naming_special_names
 module NS = Namespaces
 module Partial = Partial_provider
-module GEnv = NamingGlobal.GEnv
+module GEnv = Naming_global.GEnv
 
 (*****************************************************************************)
 (* The types *)
@@ -166,7 +166,7 @@ end = struct
   let make_class_genv tparams mode (cid, ckind) namespace is_ppl =
     {
       in_mode = mode;
-      tcopt = GlobalNamingOptions.get ();
+      tcopt = Global_naming_options.get ();
       in_ppl = is_ppl;
       type_params = tparams;
       current_cls = Some (cid, ckind);
@@ -214,7 +214,7 @@ end = struct
   let make_typedef_genv cstrs tdef_name tdef_namespace =
     {
       in_mode = FileInfo.Mstrict;
-      tcopt = GlobalNamingOptions.get ();
+      tcopt = Global_naming_options.get ();
       in_ppl = false;
       type_params = cstrs;
       current_cls = None;
@@ -232,7 +232,7 @@ end = struct
   let make_fun_genv params f_mode f_name f_namespace =
     {
       in_mode = f_mode;
-      tcopt = GlobalNamingOptions.get ();
+      tcopt = Global_naming_options.get ();
       in_ppl = false;
       type_params = params;
       current_cls = None;
@@ -246,7 +246,7 @@ end = struct
   let make_const_genv cst =
     {
       in_mode = cst.Aast.cst_mode;
-      tcopt = GlobalNamingOptions.get ();
+      tcopt = Global_naming_options.get ();
       in_ppl = false;
       type_params = SMap.empty;
       current_cls = None;
@@ -257,7 +257,7 @@ end = struct
   let make_top_level_genv () =
     {
       in_mode = FileInfo.Mpartial;
-      tcopt = GlobalNamingOptions.get ();
+      tcopt = Global_naming_options.get ();
       in_ppl = false;
       type_params = SMap.empty;
       current_cls = None;
@@ -274,7 +274,7 @@ end = struct
   let make_file_attributes_genv mode namespace =
     {
       in_mode = mode;
-      tcopt = GlobalNamingOptions.get ();
+      tcopt = Global_naming_options.get ();
       in_ppl = false;
       type_params = SMap.empty;
       current_cls = None;
@@ -510,7 +510,8 @@ end
 (* Helpers *)
 (*****************************************************************************)
 
-let elaborate_namespaces = new Elaborate_namespaces_endo.generic_elaborator
+let elaborate_namespaces =
+  new Naming_elaborate_namespaces_endo.generic_elaborator
 
 let check_repetition s param =
   let name = param.Aast.param_name in
@@ -1125,7 +1126,7 @@ module Make (GetLocals : GetLocals) = struct
     let env = Env.make_class_env constraints c in
     let c =
       elaborate_namespaces#on_class_
-        (Elaborate_namespaces_endo.make_env (fst env).namespace)
+        (Naming_elaborate_namespaces_endo.make_env (fst env).namespace)
         c
     in
     let where_constraints =
@@ -1139,7 +1140,7 @@ module Make (GetLocals : GetLocals) = struct
     let (sprops, props) = Aast.split_vars c in
     let sprops = List.map ~f:(class_prop_static env) sprops in
     let attrs = user_attributes env c.Aast.c_user_attributes in
-    let const = Attributes.find SN.UserAttributes.uaConst attrs in
+    let const = Naming_attributes.find SN.UserAttributes.uaConst attrs in
     let props = List.map ~f:(class_prop_non_static ~const env) props in
     let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in
     (* These would be out of order with the old attributes, but that shouldn't matter? *)
@@ -1439,7 +1440,7 @@ module Make (GetLocals : GetLocals) = struct
 
   and class_prop_static env cv =
     let attrs = user_attributes env cv.Aast.cv_user_attributes in
-    let lsb = Attributes.mem SN.UserAttributes.uaLSB attrs in
+    let lsb = Naming_attributes.mem SN.UserAttributes.uaLSB attrs in
     let forbid_this = not lsb in
     let h = Option.map cv.Aast.cv_type (hint ~forbid_this env) in
     let (expr, is_xhp) = class_prop_expr_is_xhp env cv in
@@ -1466,7 +1467,7 @@ module Make (GetLocals : GetLocals) = struct
     let attrs =
       match const with
       | Some c ->
-        if not (Attributes.mem SN.UserAttributes.uaConst attrs) then
+        if not (Naming_attributes.mem SN.UserAttributes.uaConst attrs) then
           c :: attrs
         else
           attrs
@@ -1771,7 +1772,7 @@ module Make (GetLocals : GetLocals) = struct
     let env = (genv, lenv) in
     let f =
       elaborate_namespaces#on_fun_def
-        (Elaborate_namespaces_endo.make_env (fst env).namespace)
+        (Naming_elaborate_namespaces_endo.make_env (fst env).namespace)
         f
     in
     let name = Env.fun_id env f.Aast.f_name in
@@ -2884,7 +2885,7 @@ module Make (GetLocals : GetLocals) = struct
         nc.N.c_mode
         (nc.N.c_name, nc.N.c_kind)
         Namespace_env.empty_with_default
-        (Attributes.mem
+        (Naming_attributes.mem
            SN.UserAttributes.uaProbabilisticModel
            nc.N.c_user_attributes)
     in
@@ -2901,7 +2902,7 @@ module Make (GetLocals : GetLocals) = struct
     let env = Env.make_top_level_env () in
     let rd =
       elaborate_namespaces#on_record_def
-        (Elaborate_namespaces_endo.make_env (fst env).namespace)
+        (Naming_elaborate_namespaces_endo.make_env (fst env).namespace)
         rd
     in
     let attrs = user_attributes env rd.Aast.rd_user_attributes in
@@ -2933,7 +2934,7 @@ module Make (GetLocals : GetLocals) = struct
     let env = Env.make_typedef_env cstrs tdef in
     let tdef =
       elaborate_namespaces#on_typedef
-        (Elaborate_namespaces_endo.make_env (fst env).namespace)
+        (Naming_elaborate_namespaces_endo.make_env (fst env).namespace)
         tdef
     in
     let tconstraint = Option.map tdef.Aast.t_constraint (hint env) in
@@ -2959,7 +2960,7 @@ module Make (GetLocals : GetLocals) = struct
     let env = Env.make_const_env cst in
     let cst =
       elaborate_namespaces#on_gconst
-        (Elaborate_namespaces_endo.make_env (fst env).namespace)
+        (Naming_elaborate_namespaces_endo.make_env (fst env).namespace)
         cst
     in
     let hint = Option.map cst.Aast.cst_type (hint env) in
@@ -2981,7 +2982,8 @@ module Make (GetLocals : GetLocals) = struct
   let program ast =
     let ast =
       elaborate_namespaces#on_program
-        (Elaborate_namespaces_endo.make_env Namespace_env.empty_with_default)
+        (Naming_elaborate_namespaces_endo.make_env
+           Namespace_env.empty_with_default)
         ast
     in
     let top_level_env = ref (Env.make_top_level_env ()) in

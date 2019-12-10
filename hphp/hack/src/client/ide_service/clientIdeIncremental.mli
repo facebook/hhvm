@@ -12,5 +12,5 @@ given path and installing their declarations. If the file could not be read,
 it's assumed to be deleted.
 
 Returns an updated [ServerEnv.env], but also
-modifies the global naming table state in [NamingGlobal]. *)
+modifies the global naming table state in [Naming_global]. *)
 val process_changed_file : ServerEnv.env -> Path.t -> ServerEnv.env Lwt.t

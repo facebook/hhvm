@@ -33,7 +33,7 @@ let check_param _env params p user_attributes f_type name =
   match inout with
   | Some param ->
     if
-      Attributes.mem2
+      Naming_attributes.mem2
         SN.UserAttributes.uaMemoize
         SN.UserAttributes.uaMemoizeLSB
         user_attributes

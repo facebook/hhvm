@@ -308,7 +308,7 @@ let enforce_param_not_disposable env param ty =
 
 let param_has_at_most_rx_as_func p =
   let module UA = SN.UserAttributes in
-  Attributes.mem UA.uaAtMostRxAsFunc p.param_user_attributes
+  Naming_attributes.mem UA.uaAtMostRxAsFunc p.param_user_attributes
 
 let fun_reactivity env attrs params =
   let r = Decl_fun_utils.fun_reactivity env attrs in
@@ -328,7 +328,7 @@ let fun_reactivity env attrs params =
       treat function reactivity as conditional that is determined at the callsite *)
     if
       List.exists params ~f:(fun { param_user_attributes = p; _ } ->
-          Attributes.mem UA.uaOnlyRxIfImpl p)
+          Naming_attributes.mem UA.uaOnlyRxIfImpl p)
     then
       MaybeReactive r
     else
@@ -416,7 +416,7 @@ let make_param_local_ty env decl_hint param =
             | None -> (env, ty)
           end
         | _
-          when Attributes.mem
+          when Naming_attributes.mem
                  SN.UserAttributes.uaAtMostRxAsFunc
                  param.param_user_attributes ->
           let (env, ty) = Phase.localize ~ety_env env ty in
@@ -741,7 +741,7 @@ and fun_def tcopt f :
       let env = set_tyvars_variance_in_callable env locl_ty param_tys in
       let local_tpenv = Env.get_tpenv env in
       let disable =
-        Attributes.mem
+        Naming_attributes.mem
           SN.UserAttributes.uaDisableTypecheckerInternal
           f.f_user_attributes
       in
@@ -7135,10 +7135,10 @@ and generate_fresh_tparams env class_info reason hint_tyl =
       tp
     in
     let enforceable =
-      Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
+      Naming_attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
     in
     let newable =
-      Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
+      Naming_attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
     in
     match hint_ty with
     | Some (_, Tabstract (AKgeneric name, _))
@@ -7433,7 +7433,7 @@ and check_const_trait_members pos env use_list =
   | _ -> ()
 
 and shallow_decl_enabled () =
-  TCO.shallow_class_decl (GlobalNamingOptions.get ())
+  TCO.shallow_class_decl (Global_naming_options.get ())
 
 and class_def tcopt c =
   let env = EnvFromDef.class_env tcopt c in
@@ -7516,7 +7516,7 @@ and class_def_ env c tc =
     {
       env with
       inside_ppl_class =
-        Attributes.mem
+        Naming_attributes.mem
           SN.UserAttributes.uaProbabilisticModel
           c.c_user_attributes;
     }
@@ -8366,7 +8366,7 @@ and method_def env cls m =
       let nb = Nast.assert_named_body m.m_body in
       let local_tpenv = Env.get_tpenv env in
       let disable =
-        Attributes.mem
+        Naming_attributes.mem
           SN.UserAttributes.uaDisableTypecheckerInternal
           m.m_user_attributes
       in

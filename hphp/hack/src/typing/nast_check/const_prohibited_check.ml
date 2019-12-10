@@ -12,7 +12,7 @@ open Aast
 open Nast_check_env
 module SN = Naming_special_names
 
-let has_const attrs = Attributes.mem SN.UserAttributes.uaConst attrs
+let has_const attrs = Naming_attributes.mem SN.UserAttributes.uaConst attrs
 
 let error_if_const pos attrs =
   if has_const attrs then

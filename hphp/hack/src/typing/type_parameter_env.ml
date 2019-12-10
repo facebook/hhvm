@@ -251,10 +251,10 @@ let add_generic_parameters tpenv tparaml =
       tpenv { tp_name = (_, name); tp_reified = reified; tp_user_attributes; _ }
       =
     let enforceable =
-      Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
+      Naming_attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
     in
     let newable =
-      Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
+      Naming_attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
     in
     let tpinfo =
       {

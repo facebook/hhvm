@@ -16,7 +16,7 @@ let error_if_static_prop_is_const env cv =
   if
     cv.cv_is_static
     && (not (TypecheckerOptions.const_static_props env.tcopt))
-    && Attributes.mem SN.UserAttributes.uaConst cv.cv_user_attributes
+    && Naming_attributes.mem SN.UserAttributes.uaConst cv.cv_user_attributes
   then
     let pos = fst cv.cv_id in
     Errors.experimental_feature pos "Const properties cannot be static."
@@ -25,7 +25,7 @@ let error_if_static_prop_is_const env cv =
 let error_if_nonstatic_prop_with_lsb cv =
   if not cv.cv_is_static then
     let lsb_pos =
-      Attributes.mem_pos SN.UserAttributes.uaLSB cv.cv_user_attributes
+      Naming_attributes.mem_pos SN.UserAttributes.uaLSB cv.cv_user_attributes
     in
     Option.iter lsb_pos Errors.nonstatic_property_with_lsb
 

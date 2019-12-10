@@ -518,7 +518,7 @@ let get_linearization ?(kind = Member_resolution) class_name =
     {
       Decl_env.mode = FileInfo.Mstrict;
       droot = Some (Typing_deps.Dep.Class class_name);
-      decl_tcopt = GlobalNamingOptions.get ();
+      decl_tcopt = Global_naming_options.get ();
     }
   in
   let env = { class_stack = SSet.empty; decl_env; linearization_kind = kind } in

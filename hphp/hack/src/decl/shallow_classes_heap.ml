@@ -29,7 +29,7 @@ let class_naming_and_decl c =
   Shallow_decl.class_ c
 
 let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
+  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
 
 let get_from_store cid =
   if shallow_decl_enabled () then

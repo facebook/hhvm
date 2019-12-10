@@ -343,10 +343,10 @@ and localize_tparam pos (env, ety_env) ty tparam =
       tparam
     in
     let enforceable =
-      Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
+      Naming_attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
     in
     let newable =
-      Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
+      Naming_attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
     in
     let (env, new_name) =
       Env.add_fresh_generic_parameter env name ~reified ~enforceable ~newable

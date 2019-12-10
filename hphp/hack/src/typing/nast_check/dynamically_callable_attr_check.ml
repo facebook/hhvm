@@ -19,7 +19,9 @@ let handler =
       let (pos, _) = m.m_name in
       let vis = m.m_visibility in
       let attr = m.m_user_attributes in
-      match Attributes.mem_pos SN.UserAttributes.uaDynamicallyCallable attr with
+      match
+        Naming_attributes.mem_pos SN.UserAttributes.uaDynamicallyCallable attr
+      with
       | Some p when not (Aast.equal_visibility vis Public) ->
         Errors.illegal_use_of_dynamically_callable
           p

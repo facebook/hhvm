@@ -39,14 +39,18 @@ let check_conditionally_reactive_annotations
 
 let check_maybe_rx_attributes_on_params is_reactive parent_attrs params =
   let parent_only_rx_if_args =
-    Attributes.find SN.UserAttributes.uaAtMostRxAsArgs parent_attrs
+    Naming_attributes.find SN.UserAttributes.uaAtMostRxAsArgs parent_attrs
   in
   let check_param seen_atmost_rx_as_rxfunc p =
     let only_rx_if_rxfunc_attr =
-      Attributes.find SN.UserAttributes.uaAtMostRxAsFunc p.param_user_attributes
+      Naming_attributes.find
+        SN.UserAttributes.uaAtMostRxAsFunc
+        p.param_user_attributes
     in
     let only_rx_if_impl_attr =
-      Attributes.find SN.UserAttributes.uaOnlyRxIfImpl p.param_user_attributes
+      Naming_attributes.find
+        SN.UserAttributes.uaOnlyRxIfImpl
+        p.param_user_attributes
     in
     match (only_rx_if_rxfunc_attr, only_rx_if_impl_attr) with
     | (Some { ua_name = (p, _); _ }, _) ->

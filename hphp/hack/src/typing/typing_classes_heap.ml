@@ -11,7 +11,7 @@ open Hh_prelude
 open Decl_inheritance
 open Shallow_decl_defs
 open Typing_defs
-module Attrs = Attributes
+module Attrs = Naming_attributes
 module LSTable = Lazy_string_table
 module SN = Naming_special_names
 
@@ -53,11 +53,11 @@ let make_lazy_class_type class_name sc =
   }
 
 let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
+  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
 
 let defer_threshold () =
   TypecheckerOptions.defer_class_declaration_threshold
-    (GlobalNamingOptions.get ())
+    (Global_naming_options.get ())
 
 module Classes = struct
   module Cache =

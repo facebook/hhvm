@@ -77,13 +77,13 @@ let declare_and_check_ast ?(path = path) ?content ~make_ast ~f tcopt =
            FileInfo.simplify file_info
          in
          Ast_provider.provide_ast_hint path ast Ast_provider.Full;
-         NamingGlobal.remove_decls
+         Naming_global.remove_decls
            ~funs:n_funs
            ~classes:n_classes
            ~record_defs:n_record_defs
            ~typedefs:n_types
            ~consts:n_consts;
-         NamingGlobal.make_env ~funs ~classes ~record_defs ~typedefs ~consts;
+         Naming_global.make_env ~funs ~classes ~record_defs ~typedefs ~consts;
 
          (* Decl is not necessary to run typing, since typing would get
           * whatever it needs using lazy decl, but we run it anyway in order to

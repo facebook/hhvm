@@ -33,13 +33,13 @@ let respect_but_quarantine_unsaved_changes
         naming table if they've disappeared since the last time we updated the
         naming table. *)
                let get_names ids = List.map ~f:snd ids |> SSet.of_list in
-               NamingGlobal.remove_decls
+               Naming_global.remove_decls
                  ~funs:(get_names funs)
                  ~classes:(get_names classes)
                  ~record_defs:(get_names record_defs)
                  ~typedefs:(get_names typedefs)
                  ~consts:(get_names consts);
-               NamingGlobal.make_env
+               Naming_global.make_env
                  ~funs
                  ~classes
                  ~record_defs

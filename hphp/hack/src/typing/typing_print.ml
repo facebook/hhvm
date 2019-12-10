@@ -24,7 +24,7 @@ module Nast = Aast
 let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
 
 let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
+  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
 
 (*****************************************************************************)
 (* Pretty-printer of the "full" type.                                        *)

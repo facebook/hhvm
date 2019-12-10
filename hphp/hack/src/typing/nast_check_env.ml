@@ -69,7 +69,7 @@ let typedef_env env t = { env with file_mode = t.t_mode }
 
 let get_empty_env () =
   {
-    tcopt = GlobalNamingOptions.get ();
+    tcopt = Global_naming_options.get ();
     is_reactive = false;
     class_kind = None;
     class_name = None;

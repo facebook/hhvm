@@ -48,7 +48,7 @@ type check_results = {
 }
 
 let shallow_decl_enabled () =
-  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
+  TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
 
 (*****************************************************************************)
 (* Debugging *)
@@ -210,7 +210,7 @@ let remove_decls env fast_parsed =
         let record_defs = set_of_idl record_defsl in
         let typedefs = set_of_idl typel in
         let consts = set_of_idl constl in
-        NamingGlobal.remove_decls ~funs ~classes ~record_defs ~typedefs ~consts)
+        Naming_global.remove_decls ~funs ~classes ~record_defs ~typedefs ~consts)
 
 (* If the only things that would change about file analysis are positions,
  * we're not going to recheck it, and positions in its error list might
@@ -389,7 +389,7 @@ let declare_names env fast_parsed =
       ~f:
         begin
           fun k v (errorl, failed) ->
-          let (errorl', failed') = NamingGlobal.ndecl_file k v in
+          let (errorl', failed') = Naming_global.ndecl_file k v in
           let errorl = Errors.merge errorl' errorl in
           let failed = Relative_path.Set.union failed' failed in
           (errorl, failed)
@@ -763,7 +763,7 @@ functor
       let (errorl', failed_naming, fast) = declare_names env fast_parsed in
       let errors = Errors.(incremental_update_map errors errorl' fast Naming) in
       (* failed_naming can be a superset of keys in fast - see comment in
-       * NamingGlobal.ndecl_file *)
+       * Naming_global.ndecl_file *)
       let fast = extend_fast genv fast naming_table failed_naming in
       (* COMPUTES WHAT MUST BE REDECLARED  *)
       let failed_decl = CheckKind.get_defs_to_redecl files_to_parse env in
@@ -1076,7 +1076,7 @@ functor
       Hh_logger.log "Begin %s" logstring;
 
       let deptable_unlocked = Typing_deps.allow_dependency_table_reads true in
-      (* Run NamingGlobal, updating the reverse naming table (which maps the names
+      (* Run Naming_global, updating the reverse naming table (which maps the names
        of toplevel symbols to the files in which they were declared) in shared
        memory. Does not run Naming itself (which converts an AST to a NAST by
        assigning unique identifiers to locals, among other things). The Naming

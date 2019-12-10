@@ -102,7 +102,7 @@ let init
   (* Save the global settings for parsing, naming, and declaration.
      These settings cannot be changed during the lifetime of the server. *)
   Parser_options_provider.set env.popt;
-  GlobalNamingOptions.set env.tcopt;
+  Global_naming_options.set env.tcopt;
   let root = ServerArgs.root genv.options in
   let (lazy_lev, init_approach) =
     if

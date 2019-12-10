@@ -213,7 +213,7 @@ let update_naming_table
     | Some old_file_info ->
       (* Update reverse naming table *)
       FileInfo.(
-        NamingGlobal.remove_decls
+        Naming_global.remove_decls
           ~funs:(strip_positions old_file_info.funs)
           ~classes:(strip_positions old_file_info.classes)
           ~record_defs:(strip_positions old_file_info.record_defs)
@@ -235,7 +235,7 @@ let update_naming_table
            (* TODO: when we start typechecking files, we'll have to keep track of
       which files have naming errors, so that we can re-typecheck them
        - Also note that [_fast] means that this function call ignores errors *)
-           NamingGlobal.ndecl_file_fast
+           Naming_global.ndecl_file_fast
              path
              ~funs:(strip_positions new_file_info.funs)
              ~classes:(strip_positions new_file_info.classes)

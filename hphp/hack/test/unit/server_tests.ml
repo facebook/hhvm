@@ -171,7 +171,7 @@ let test_process_file_deferring () =
       } =
         info
       in
-      NamingGlobal.ndecl_file_fast
+      Naming_global.ndecl_file_fast
         name
         ~funs
         ~classes
@@ -186,10 +186,10 @@ let test_process_file_deferring () =
       - a (deferred) type check of \Foo *)
   let dynamic_view_files = Relative_path.Set.empty in
   let opts =
-    GlobalNamingOptions.set
+    Global_naming_options.set
       GlobalOptions.
         { default with tco_defer_class_declaration_threshold = Some 1 };
-    GlobalNamingOptions.get ()
+    Global_naming_options.get ()
   in
   let errors = Errors.empty in
   let file = Typing_check_service.{ path = foo_path; deferred_count = 0 } in

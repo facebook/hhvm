@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/decl:decl_rust
-# Signature<<87f27355321a95e86dc052ee8813fb2b6b91015f>>
+# Signature<<6241e21c04458be7ca1f5f9da40fda78f7d2cb4d>>
 [package]
 name = "decl_rust"
 edition = "2018"
@@ -22,4 +22,4 @@ rust-crypto = "*"
 
 [dev-dependencies]
 pretty_assertions = "*"
-# @end of Signature<<87f27355321a95e86dc052ee8813fb2b6b91015f>>
+# @end of Signature<<6241e21c04458be7ca1f5f9da40fda78f7d2cb4d>>

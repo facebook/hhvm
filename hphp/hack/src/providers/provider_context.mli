@@ -28,6 +28,7 @@ To load this state of the world for use in a given operation, use
 [ServerIdeUtils.with_context]. *)
 type t = {
   tcopt: TypecheckerOptions.t;
+  backend: Provider_backend.t;
   entries: entry Relative_path.Map.t;
 }
 

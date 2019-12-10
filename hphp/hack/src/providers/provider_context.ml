@@ -22,10 +22,15 @@ type entry = {
 
 type t = {
   tcopt: TypecheckerOptions.t;
+  backend: Provider_backend.t;
   entries: entry Relative_path.Map.t;
 }
 
-let empty ~tcopt = { tcopt; entries = Relative_path.Map.empty }
+let empty ~tcopt =
+  (* TODO: [backend] should be provided as a parameter. The backend should likely
+  live in the [ServerEnv.env], along with the [tcopt]. *)
+  let backend = Provider_backend.get () in
+  { tcopt; backend; entries = Relative_path.Map.empty }
 
 let global_context : t option ref = ref None
 

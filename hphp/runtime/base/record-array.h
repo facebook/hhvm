@@ -66,7 +66,7 @@ struct RecordArray : ArrayData,
   static ArrayData* SetStrMove(ArrayData*, StringData*, Cell v);
   static ArrayData* SetStrInPlace(ArrayData*, StringData*, Cell v);
   static size_t Vsize(const ArrayData*);
-  static tv_rval GetValueRef(const ArrayData*, ssize_t pos);
+  static tv_rval RvalPos(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
   static bool ExistsInt(const ArrayData*, int64_t key);
   static bool ExistsStr(const ArrayData*, const StringData*);

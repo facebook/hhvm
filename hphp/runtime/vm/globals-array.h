@@ -68,7 +68,7 @@ public:
   }
   static size_t Vsize(const ArrayData*);
   static Cell NvGetKey(const ArrayData* ad, ssize_t pos);
-  static tv_rval GetValueRef(const ArrayData*, ssize_t pos);
+  static tv_rval RvalPos(const ArrayData*, ssize_t pos);
 
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);

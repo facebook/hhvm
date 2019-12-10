@@ -405,12 +405,12 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Vsize)
 
   /*
-   * tv_rval GetValueRef(const ArrayData*, ssize_t pos)
+   * tv_rval RvalPos(const ArrayData*, ssize_t pos)
    *
    *   Return a reference to the value at an iterator position.  `pos' must be
    *   a valid position for this array.
    */
-  DISPATCH(GetValueRef)
+  DISPATCH(RvalPos)
 
   /*
    * bool IsVectorData(const ArrayData*)

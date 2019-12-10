@@ -117,7 +117,7 @@ Cell GlobalsArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   return make_tv<KindOfUninit>();
 }
 
-tv_rval GlobalsArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+tv_rval GlobalsArray::RvalPos(const ArrayData* ad, ssize_t pos) {
   auto a = asGlobals(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);
   return iter.valid() ? iter.curVal() : uninit_variant.asTypedValue();

@@ -347,7 +347,7 @@ private:
 
 public:
   static size_t Vsize(const ArrayData*);
-  static tv_rval GetValueRef(const ArrayData*, ssize_t pos);
+  static tv_rval RvalPos(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
   static bool IsStrictVector(const ArrayData* ad) {
     return ad->m_size == asMixed(ad)->m_nextKI && IsVectorData(ad);
@@ -361,10 +361,6 @@ public:
   static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
     assertx(ad->isMixed());
     return NvTryGetStr(ad, k);
-  }
-  static tv_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
-    assertx(ad->isMixed());
-    return GetValueRef(ad, pos);
   }
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
@@ -454,7 +450,7 @@ public:
   static constexpr auto AddIntDict = &AddInt;
   static constexpr auto AddStrDict = &AddStr;
   static constexpr auto VsizeDict = &Vsize;
-  static constexpr auto GetValueRefDict = &GetValueRef;
+  static constexpr auto RvalPosDict = &RvalPos;
   static constexpr auto IsVectorDataDict = &IsVectorData;
   static constexpr auto ExistsIntDict = &ExistsInt;
   static constexpr auto ExistsStrDict = &ExistsStr;

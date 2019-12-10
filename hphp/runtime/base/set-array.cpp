@@ -602,7 +602,7 @@ tv_rval SetArray::NvTryGetStr(const ArrayData* ad,
 
 size_t SetArray::Vsize(const ArrayData*) { not_reached(); }
 
-tv_rval SetArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+tv_rval SetArray::RvalPos(const ArrayData* ad, ssize_t pos) {
   auto a = asSet(ad);
   assertx(0 <= pos && pos < a->m_used);
   return a->tvOfPos(pos);

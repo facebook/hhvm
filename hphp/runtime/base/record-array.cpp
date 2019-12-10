@@ -424,8 +424,8 @@ ssize_t RecordArray::IterRewind(const ArrayData* ad, ssize_t pos) {
   return (pos > 0) ? pos - 1  : pos;
 }
 
-tv_rval RecordArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
-  raise_recordarray_unsupported_op_notice("GetValueRef");
+tv_rval RecordArray::RvalPos(const ArrayData* ad, ssize_t pos) {
+  raise_recordarray_unsupported_op_notice("RvalPos");
   assertx(pos < ad->m_size);
   assertx(pos >= 0);
   auto const ra = asRecordArray(ad);
@@ -433,7 +433,7 @@ tv_rval RecordArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   if (pos < rec->numFields()) {
     return ra->rvalAt(pos);
   }
-  return MixedArray::GetValueRef(ra->extraFieldMap(), pos - rec->numFields());
+  return MixedArray::RvalPos(ra->extraFieldMap(), pos - rec->numFields());
 }
 
 ArrayData* RecordArray::EscalateForSort(ArrayData* ad, SortFunction) {

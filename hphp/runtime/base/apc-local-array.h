@@ -45,7 +45,7 @@ struct APCLocalArray final : ArrayData,
   static APCLocalArray* Make(const APCArray*);
 
   static size_t Vsize(const ArrayData*);
-  static tv_rval GetValueRef(const ArrayData* ad, ssize_t pos);
+  static tv_rval RvalPos(const ArrayData* ad, ssize_t pos);
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
   static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
@@ -75,21 +75,6 @@ struct APCLocalArray final : ArrayData,
   static constexpr auto NvTryGetStr = &NvGetStr;
   static ssize_t NvGetIntPos(const ArrayData* ad, int64_t k);
   static ssize_t NvGetStrPos(const ArrayData* ad, const StringData* k);
-  static tv_rval RvalInt(const ArrayData* ad, int64_t k) {
-    return NvGetInt(ad, k);
-  }
-  static tv_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
-    return NvTryGetInt(ad, k);
-  }
-  static tv_rval RvalStr(const ArrayData* ad, const StringData* k) {
-    return NvGetStr(ad, k);
-  }
-  static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
-    return NvTryGetStr(ad, k);
-  }
-  static tv_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
-    return GetValueRef(ad, pos);
-  }
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData* ad);
   static ssize_t IterBegin(const ArrayData*);

@@ -835,7 +835,7 @@ bool MixedArray::checkInvariants() const {
 
 size_t MixedArray::Vsize(const ArrayData*) { not_reached(); }
 
-tv_rval MixedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+tv_rval MixedArray::RvalPos(const ArrayData* ad, ssize_t pos) {
   auto a = asMixed(ad);
   assertx(a->checkInvariants());
   assertx(pos != a->m_used);

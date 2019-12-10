@@ -105,7 +105,7 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
   // packed arrays.
   if (false) {
     for (uint32_t i = 0; i < arr->m_size; ++i) {
-      auto const DEBUG_ONLY rval = GetValueRef(arr, i);
+      auto const DEBUG_ONLY rval = RvalPos(arr, i);
       assertx(type(rval) != KindOfUninit);
       assertx(tvIsPlausible(*rval));
     }
@@ -185,7 +185,7 @@ MixedArray* PackedArray::ToMixed(ArrayData* old) {
     auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
-    tvCopy(*GetValueRef(old, i), dstData->data);
+    tvCopy(*RvalPos(old, i), dstData->data);
     ++dstData;
   }
   old->m_sizeAndPos = 0;
@@ -226,7 +226,7 @@ MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
     auto const h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
-    tvDup(*GetValueRef(old, i), dstData->data);
+    tvDup(*RvalPos(old, i), dstData->data);
     ++dstData;
   }
 
@@ -661,7 +661,7 @@ void PackedArray::ReleaseUncounted(ArrayData* ad) {
 
 tv_rval PackedArray::NvGetInt(const ArrayData* ad, int64_t k) {
   assertx(checkInvariants(ad));
-  return LIKELY(size_t(k) < ad->m_size) ? GetValueRef(ad, k) : nullptr;
+  return LIKELY(size_t(k) < ad->m_size) ? RvalPos(ad, k) : nullptr;
 }
 
 tv_rval
@@ -683,7 +683,7 @@ ssize_t PackedArray::NvGetStrPos(const ArrayData* ad, const StringData* k) {
 tv_rval PackedArray::NvTryGetIntVec(const ArrayData* ad, int64_t k) {
   assertx(checkInvariants(ad));
   assertx(ad->isVecArray());
-  if (LIKELY(size_t(k) < ad->m_size)) return GetValueRef(ad, k);
+  if (LIKELY(size_t(k) < ad->m_size)) return RvalPos(ad, k);
   throwOOBArrayKeyException(k, ad);
 }
 
@@ -704,7 +704,7 @@ size_t PackedArray::Vsize(const ArrayData*) {
   always_assert(false);
 }
 
-tv_rval PackedArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+tv_rval PackedArray::RvalPos(const ArrayData* ad, ssize_t pos) {
   assertx(checkInvariants(ad));
   assertx(pos < ad->m_size);
   return LvalUncheckedInt(const_cast<ArrayData*>(ad), pos);
@@ -1153,7 +1153,7 @@ ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
   if (size == 0) return ArrayData::CreateDArray();
 
   DArrayInit init{size};
-  for (int64_t i = 0; i < size; ++i) init.add(i, *GetValueRef(adIn, i));
+  for (int64_t i = 0; i < size; ++i) init.add(i, *RvalPos(adIn, i));
   return init.create();
 }
 
@@ -1354,8 +1354,8 @@ bool PackedArray::VecEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
 
   auto const size = ad1->m_size;
   for (uint32_t i = 0; i < size; ++i) {
-    auto const elm1 = *GetValueRef(ad1, i);
-    auto const elm2 = *GetValueRef(ad2, i);
+    auto const elm1 = *RvalPos(ad1, i);
+    auto const elm2 = *RvalPos(ad2, i);
     auto const cmp = strict ? cellSame(elm1, elm2) : cellEqual(elm1, elm2);
     if (!cmp) return false;
   }
@@ -1380,7 +1380,7 @@ int64_t PackedArray::VecCmpHelper(const ArrayData* ad1, const ArrayData* ad2) {
   check_recursion_error();
 
   for (uint32_t i = 0; i < size1; ++i) {
-    auto const cmp = cellCompare(*GetValueRef(ad1, i), *GetValueRef(ad2, i));
+    auto const cmp = cellCompare(*RvalPos(ad1, i), *RvalPos(ad2, i));
     if (cmp != 0) return cmp;
   }
 

@@ -60,7 +60,7 @@ Cell EmptyArray::NvGetKey(const ArrayData*, ssize_t /*pos*/) {
 
 size_t EmptyArray::Vsize(const ArrayData*) { not_reached(); }
 
-tv_rval EmptyArray::GetValueRef(const ArrayData* /*ad*/, ssize_t /*pos*/) {
+tv_rval EmptyArray::RvalPos(const ArrayData* /*ad*/, ssize_t /*pos*/) {
   // We have no valid positions---no one should call this function.
   not_reached();
 }

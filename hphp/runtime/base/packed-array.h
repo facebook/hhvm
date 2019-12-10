@@ -82,18 +82,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
     assertx(ad->isPacked());
     return NvTryGetInt(ad, k);
   }
-  static tv_rval RvalStr(const ArrayData* ad, const StringData* k) {
-    assertx(ad->isPacked());
-    return NvGetStr(ad, k);
-  }
-  static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
-    assertx(ad->isPacked());
-    return NvTryGetStr(ad, k);
-  }
-  static tv_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
-    assertx(ad->isPacked());
-    return GetValueRef(ad, pos);
-  }
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, Cell v);
@@ -102,7 +90,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* SetStrMove(ArrayData*, StringData* k, Cell v);
   static ArrayData* SetStrInPlace(ArrayData*, StringData* k, Cell v);
   static size_t Vsize(const ArrayData*);
-  static tv_rval GetValueRef(const ArrayData* ad, ssize_t pos);
+  static tv_rval RvalPos(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) {
     return true;
   }
@@ -179,7 +167,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto NvGetStrVec = &NvGetStr;
   static constexpr auto NvGetKeyVec = &NvGetKey;
   static constexpr auto VsizeVec = &Vsize;
-  static constexpr auto GetValueRefVec = &GetValueRef;
+  static constexpr auto RvalPosVec = &RvalPos;
   static constexpr auto IsVectorDataVec = &IsVectorData;
   static constexpr auto ExistsIntVec = &ExistsInt;
   static constexpr auto ExistsStrVec = &ExistsStr;

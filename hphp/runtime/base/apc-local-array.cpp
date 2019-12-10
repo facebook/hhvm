@@ -80,8 +80,7 @@ void APCLocalArray::sweep() {
   m_arr = nullptr;
 }
 
-tv_rval APCLocalArray::GetValueRef(const ArrayData* adIn,
-                                              ssize_t pos) {
+tv_rval APCLocalArray::RvalPos(const ArrayData* adIn, ssize_t pos) {
   auto const ad = asApcArray(adIn);
   assertx(unsigned(pos) < ad->getSize());
   auto const elms = ad->localCache();
@@ -141,13 +140,13 @@ ArrayData* APCLocalArray::loadElems() const {
   if (m_arr->isPacked()) {
     PackedArrayInit ai(count);
     for (uint32_t i = 0; i < count; i++) {
-      ai.append(RvalAtPos(this, i).tv());
+      ai.append(RvalPos(this, i).tv());
     }
     elems = ai.create();
   } else {
     ArrayInit ai(count, ArrayInit::Mixed{});
     for (uint32_t i = 0; i < count; i++) {
-      ai.add(getKey(i), RvalAtPos(this, i).tv(), true);
+      ai.add(getKey(i), RvalPos(this, i).tv(), true);
     }
     elems = ai.create();
   }
@@ -260,7 +259,7 @@ tv_rval APCLocalArray::NvGetInt(const ArrayData* ad, int64_t k) {
   auto a = asApcArray(ad);
   auto index = a->getIndex(k);
   if (index == -1) return nullptr;
-  return GetValueRef(a, index);
+  return RvalPos(a, index);
 }
 
 tv_rval APCLocalArray::NvGetStr(const ArrayData* ad,
@@ -268,7 +267,7 @@ tv_rval APCLocalArray::NvGetStr(const ArrayData* ad,
   auto a = asApcArray(ad);
   auto index = a->getIndex(key);
   if (index == -1) return nullptr;
-  return GetValueRef(a, index);
+  return RvalPos(a, index);
 }
 
 ssize_t APCLocalArray::NvGetIntPos(const ArrayData* ad, int64_t k) {

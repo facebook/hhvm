@@ -411,11 +411,8 @@ public:
   static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
     return NvTryGetStr(ad, k);
   }
-  static tv_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
-    return GetValueRef(ad, pos);
-  }
   static size_t Vsize(const ArrayData*);
-  static tv_rval GetValueRef(const ArrayData*, ssize_t);
+  static tv_rval RvalPos(const ArrayData*, ssize_t);
   static bool IsVectorData(const ArrayData*);
   static bool ExistsInt(const ArrayData*, int64_t);
   static bool ExistsStr(const ArrayData*, const StringData*);

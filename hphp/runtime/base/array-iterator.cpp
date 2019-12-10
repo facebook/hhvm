@@ -595,7 +595,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       aiter.m_end = size;
       aiter.setArrayNext(IterNextIndex::ArrayPacked);
     }
-    cellDup(*PackedArray::GetValueRef(ad, 0), *valOut);
+    cellDup(*PackedArray::RvalPos(ad, 0), *valOut);
     return 1;
   }
 
@@ -671,7 +671,7 @@ int64_t new_iter_array_key(Iter*       dest,
     aiter.m_pos = 0;
     aiter.m_end = size;
     aiter.setArrayNext(IterNextIndex::ArrayPacked);
-    cellDup(*PackedArray::GetValueRef(ad, 0), *valOut);
+    cellDup(*PackedArray::RvalPos(ad, 0), *valOut);
     keyOut->m_type = KindOfInt64;
     keyOut->m_data.num = 0;
     return 1;
@@ -892,7 +892,7 @@ static int64_t iter_next_apc_array(Iter* iter,
   }
   arrIter->setPos(pos);
 
-  auto const rval = APCLocalArray::RvalAtPos(arr->asArrayData(), pos);
+  auto const rval = APCLocalArray::RvalPos(arr->asArrayData(), pos);
   cellSet(rval.tv(), *valOut);
   if (LIKELY(!keyOut)) return 1;
 
@@ -1175,7 +1175,7 @@ int64_t iter_next_packed_impl(Iter* it,
       keyOut->m_data.pcnt->decRefCount();
     }
     iter.setPos(pos);
-    cellDup(*PackedArray::GetValueRef(ad, pos), *valOut);
+    cellDup(*PackedArray::RvalPos(ad, pos), *valOut);
     if (HasKey) {
       keyOut->m_data.num = pos;
       keyOut->m_type = KindOfInt64;

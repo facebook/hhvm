@@ -135,7 +135,7 @@ void PackedArray::IterateV(const ArrayData* arr, F fn) {
   SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };
   auto const size = arr->m_size;
   for (uint32_t i = 0; i < size; ++i) {
-    if (ArrayData::call_helper(fn, *GetValueRef(arr, i))) break;
+    if (ArrayData::call_helper(fn, *RvalPos(arr, i))) break;
   }
 }
 
@@ -146,7 +146,7 @@ void PackedArray::IterateKV(const ArrayData* arr, F fn) {
   SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };
   auto const size = arr->m_size;
   for (auto k = make_tv<KindOfInt64>(0); val(k).num < size; ++val(k).num) {
-    if (ArrayData::call_helper(fn, k, *GetValueRef(arr, val(k).num))) break;
+    if (ArrayData::call_helper(fn, k, *RvalPos(arr, val(k).num))) break;
   }
 }
 

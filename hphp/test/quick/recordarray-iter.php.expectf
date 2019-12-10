@@ -2,7 +2,7 @@ Notice: Opertation not supported for records: IterBegin in %s/recordarray-iter.p
 
 Notice: Opertation not supported for records: IterEnd in %s/recordarray-iter.php on line 17
 
-Notice: Opertation not supported for records: GetValueRef in %s/recordarray-iter.php on line 17
+Notice: Opertation not supported for records: RvalPos in %s/recordarray-iter.php on line 17
 
 Notice: Opertation not supported for records: NvGetKey in %s/recordarray-iter.php on line 17
 string(1) "x"
@@ -10,7 +10,7 @@ int(10)
 
 Notice: Opertation not supported for records: IterAdvance in %s/recordarray-iter.php on line 20
 
-Notice: Opertation not supported for records: GetValueRef in %s/recordarray-iter.php on line 20
+Notice: Opertation not supported for records: RvalPos in %s/recordarray-iter.php on line 20
 
 Notice: Opertation not supported for records: NvGetKey in %s/recordarray-iter.php on line 20
 string(1) "z"
@@ -21,11 +21,10 @@ object(Bar) (1) {
 
 Notice: Opertation not supported for records: IterAdvance in %s/recordarray-iter.php on line 20
 
-Notice: Opertation not supported for records: GetValueRef in %s/recordarray-iter.php on line 20
+Notice: Opertation not supported for records: RvalPos in %s/recordarray-iter.php on line 20
 
 Notice: Opertation not supported for records: NvGetKey in %s/recordarray-iter.php on line 20
 string(1) "y"
 string(3) "abc"
 
 Notice: Opertation not supported for records: IterAdvance in %s/recordarray-iter.php on line 20
-

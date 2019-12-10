@@ -67,22 +67,6 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
     return ArrayCommon::ReturnInvalidIndex(ad);
   }
 
-  static tv_rval RvalInt(const ArrayData* ad, int64_t k) {
-    return NvGetInt(ad, k);
-  }
-  static tv_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
-    return NvTryGetInt(ad, k);
-  }
-  static tv_rval RvalStr(const ArrayData* ad, const StringData* k) {
-    return NvGetStr(ad, k);
-  }
-  static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
-    return NvTryGetStr(ad, k);
-  }
-  static tv_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
-    return GetValueRef(ad, pos);
-  }
-
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, Cell v);
@@ -95,7 +79,7 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static ArrayData* RemoveStr(ArrayData* ad, const StringData*);
   static constexpr auto RemoveStrInPlace = &RemoveStr;
   static size_t Vsize(const ArrayData*);
-  static tv_rval GetValueRef(const ArrayData* ad, ssize_t pos);
+  static tv_rval RvalPos(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) {
     return true;
   }

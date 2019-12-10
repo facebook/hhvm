@@ -1381,6 +1381,8 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
   | "textDocument/codeAction" ->
     CodeActionRequest (parse_codeActionRequest params)
   | "textDocument/completion" -> CompletionRequest (parse_completion params)
+  | "completionItem/resolve" ->
+    CompletionItemResolveRequest (parse_completionItem params)
   | "textDocument/definition" -> DefinitionRequest (parse_definition params)
   | "workspace/symbol" -> WorkspaceSymbolRequest (parse_workspaceSymbol params)
   | "textDocument/documentSymbol" ->
@@ -1405,7 +1407,6 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
   | "textDocument/codeLens" ->
     DocumentCodeLensRequest (parse_documentCodeLens params)
   | "telemetry/rage" -> RageRequest
-  | "completionItem/resolve"
   | "window/showMessageRequest"
   | "window/showStatus"
   | _ ->

@@ -107,3 +107,16 @@ function shallow_reactive(): void {}
 function call_shallow_reactive(): void {
   shallow_reactive();
 }
+
+class Fred {}
+
+class Thud {
+  public int $n;
+  public function __construct(Fred $_) {
+    $this->n = 42;
+  }
+}
+
+function with_constructor_dependency(Thud $x): int {
+  return $x->n;
+}

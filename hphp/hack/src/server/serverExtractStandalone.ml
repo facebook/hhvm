@@ -1006,7 +1006,7 @@ and add_signature_dependencies deps obj =
         add_dep @@ Lazy.force p.ce_type;
 
         (* We need to initialize properties in the constructor, add a dependency on it *)
-        HashSet.add deps (Cstr cls_name)
+        do_add_dep deps (Cstr cls_name)
       | SProp (_, name) ->
         let sp = value_or_not_found description @@ Class.get_sprop cls name in
         add_dep @@ Lazy.force sp.ce_type

@@ -155,6 +155,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\frob_query",
             "\\corge",
             "\\with_implementations",
+            "\\with_constructor_dependency",
         ]
 
         for path in paths:

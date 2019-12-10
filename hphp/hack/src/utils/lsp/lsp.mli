@@ -932,6 +932,7 @@ type lsp_request =
   | WorkspaceSymbolRequest of WorkspaceSymbol.params
   | DocumentSymbolRequest of DocumentSymbol.params
   | FindReferencesRequest of FindReferences.params
+  | GoToImplementationRequest of GoToImplementation.params
   | DocumentHighlightRequest of DocumentHighlight.params
   | TypeCoverageRequest of TypeCoverage.params
   | DocumentFormattingRequest of DocumentFormatting.params

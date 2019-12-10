@@ -1294,6 +1294,7 @@ let request_name_to_string (request : lsp_request) : string =
   | WorkspaceSymbolRequest _ -> "workspace/symbol"
   | DocumentSymbolRequest _ -> "textDocument/documentSymbol"
   | FindReferencesRequest _ -> "textDocument/references"
+  | GoToImplementationRequest _ -> "textDocument/implementation"
   | DocumentHighlightRequest _ -> "textDocument/documentHighlight"
   | TypeCoverageRequest _ -> "textDocument/typeCoverage"
   | DocumentFormattingRequest _ -> "textDocument/formatting"
@@ -1386,6 +1387,8 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
     DocumentSymbolRequest (parse_documentSymbol params)
   | "textDocument/references" ->
     FindReferencesRequest (parse_findReferences params)
+  | "textDocument/implementation" ->
+    GoToImplementationRequest (parse_goToImplementation params)
   | "textDocument/rename" -> RenameRequest (parse_documentRename params)
   | "textDocument/documentHighlight" ->
     DocumentHighlightRequest (parse_documentHighlight params)
@@ -1452,6 +1455,7 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   | WorkspaceSymbolRequest _
   | DocumentSymbolRequest _
   | FindReferencesRequest _
+  | GoToImplementationRequest _
   | DocumentHighlightRequest _
   | TypeCoverageRequest _
   | DocumentFormattingRequest _
@@ -1508,6 +1512,7 @@ let print_lsp_request (id : lsp_id) (request : lsp_request) : json =
     | WorkspaceSymbolRequest _
     | DocumentSymbolRequest _
     | FindReferencesRequest _
+    | GoToImplementationRequest _
     | DocumentHighlightRequest _
     | TypeCoverageRequest _
     | DocumentFormattingRequest _

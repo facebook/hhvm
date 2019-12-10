@@ -16,7 +16,10 @@ exception Client_went_away
 type t = Unix.file_descr * Unix.file_descr * Unix.file_descr
 
 type client =
-  | Non_persistent_client of Timeout.in_channel * Out_channel.t
+  | Non_persistent_client of {
+      ic: Timeout.in_channel;
+      oc: Out_channel.t;
+    }
   | Persistent_client of Unix.file_descr
 
 let provider_from_file_descriptors x = x
@@ -27,7 +30,10 @@ let provider_for_test () = failwith "for use in tests only"
 let accept_client parent_in_fd =
   let socket = Libancillary.ancil_recv_fd parent_in_fd in
   Non_persistent_client
-    (Timeout.in_channel_of_descr socket, Unix.out_channel_of_descr socket)
+    {
+      ic = Timeout.in_channel_of_descr socket;
+      oc = Unix.out_channel_of_descr socket;
+    }
 
 let accept_client_opt parent_in_fd =
   try Some (accept_client parent_in_fd)
@@ -115,7 +121,7 @@ let read_connection_type ic =
 (* we have no alternative but to depend on Sys_error strings *)
 
 let read_connection_type = function
-  | Non_persistent_client (ic, oc) ->
+  | Non_persistent_client { ic; oc; _ } ->
     begin
       try
         say_hello oc;
@@ -138,7 +144,7 @@ let read_connection_type = function
 let send_response_to_client client response t =
   let fd =
     match client with
-    | Non_persistent_client (_, oc) -> Unix.descr_of_out_channel oc
+    | Non_persistent_client { oc; _ } -> Unix.descr_of_out_channel oc
     | Persistent_client fd -> fd
   in
   let (_ : int) =
@@ -175,7 +181,7 @@ let client_has_message = function
     ready <> []
 
 let read_client_msg = function
-  | Non_persistent_client (ic, _) -> read_client_msg ic
+  | Non_persistent_client { ic; _ } -> read_client_msg ic
   | Persistent_client fd ->
     (* TODO: this is probably wrong, since for persistent client we'll
      * construct a new input channel for each message, while the old one
@@ -184,7 +190,7 @@ let read_client_msg = function
     read_client_msg ic
 
 let get_channels = function
-  | Non_persistent_client (ic, oc) -> (ic, oc)
+  | Non_persistent_client { ic; oc; _ } -> (ic, oc)
   | Persistent_client _ ->
     (* This function is used to "break" the module abstraction for some things
      * we don't have mocking for yet, like STREAM and DEBUG request types. We
@@ -193,7 +199,7 @@ let get_channels = function
     assert false
 
 let make_persistent = function
-  | Non_persistent_client (ic, _) ->
+  | Non_persistent_client { ic; _ } ->
     Persistent_client (Timeout.descr_of_in_channel ic)
   | Persistent_client _ ->
     (* See comment on read_connection_type. Non_persistent_client can be
@@ -207,14 +213,14 @@ let is_persistent = function
 let shutdown_client client =
   let (ic, oc) =
     match client with
-    | Non_persistent_client (ic, oc) -> (ic, oc)
+    | Non_persistent_client { ic; oc; _ } -> (ic, oc)
     | Persistent_client fd ->
       (Timeout.in_channel_of_descr fd, Unix.out_channel_of_descr fd)
   in
   ServerUtils.shutdown_client (ic, oc)
 
 let ping = function
-  | Non_persistent_client (_, oc) ->
+  | Non_persistent_client { oc; _ } ->
     let fd = Unix.descr_of_out_channel oc in
     let (_ : int) =
       try Marshal_tools.to_fd_with_preamble fd ServerCommandTypes.Ping

@@ -944,6 +944,9 @@ type lsp_request =
   | RenameRequest of Rename.params
   | DocumentCodeLensRequest of DocumentCodeLens.params
   | SignatureHelpRequest of SignatureHelp.params
+  | HackTestStartServerRequest
+  | HackTestStopServerRequest
+  | HackTestShutdownServerlessRequest
   | UnknownRequest of string * Hh_json.json option
 
 type lsp_result =
@@ -971,6 +974,9 @@ type lsp_result =
   | RenameResult of Rename.result
   | DocumentCodeLensResult of DocumentCodeLens.result
   | SignatureHelpResult of SignatureHelp.result
+  | HackTestStartServerResult
+  | HackTestStopServerResult
+  | HackTestShutdownServerlessResult
   (* the string is a stacktrace *)
   | ErrorResult of Error.t * string
 

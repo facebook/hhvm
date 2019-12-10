@@ -1304,6 +1304,9 @@ let request_name_to_string (request : lsp_request) : string =
   | RenameRequest _ -> "textDocument/rename"
   | DocumentCodeLensRequest _ -> "textDocument/codeLens"
   | SignatureHelpRequest _ -> "textDocument/signatureHelp"
+  | HackTestStartServerRequest -> "$test/startHhServer"
+  | HackTestStopServerRequest -> "$test/stopHhServer"
+  | HackTestShutdownServerlessRequest -> "$test/shutdownServerlessIde"
   | UnknownRequest (method_, _params) -> method_
 
 let result_name_to_string (result : lsp_result) : string =
@@ -1332,6 +1335,9 @@ let result_name_to_string (result : lsp_result) : string =
   | RenameResult _ -> "textDocument/rename"
   | DocumentCodeLensResult _ -> "textDocument/codeLens"
   | SignatureHelpResult _ -> "textDocument/signatureHelp"
+  | HackTestStartServerResult -> "$test/startHhServer"
+  | HackTestStopServerResult -> "$test/stopHhServer"
+  | HackTestShutdownServerlessResult -> "$test/shutdownServerlessIde"
   | ErrorResult (e, _stack) -> "ERROR/" ^ e.Error.message
 
 let notification_name_to_string (notification : lsp_notification) : string =
@@ -1408,6 +1414,9 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
   | "textDocument/codeLens" ->
     DocumentCodeLensRequest (parse_documentCodeLens params)
   | "telemetry/rage" -> RageRequest
+  | "$test/startHhServer" -> HackTestStartServerRequest
+  | "$test/stopHhServer" -> HackTestStopServerRequest
+  | "$test/shutdownServerlessIde" -> HackTestShutdownServerlessRequest
   | "window/showMessageRequest"
   | "window/showStatus"
   | _ ->
@@ -1469,6 +1478,9 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   | RenameRequest _
   | DocumentCodeLensRequest _
   | SignatureHelpRequest _
+  | HackTestStartServerRequest
+  | HackTestStopServerRequest
+  | HackTestShutdownServerlessRequest
   | UnknownRequest _ ->
     raise (Error.Parse ("Don't know how to parse LSP response " ^ method_))
 
@@ -1526,6 +1538,9 @@ let print_lsp_request (id : lsp_id) (request : lsp_request) : json =
     | RenameRequest _
     | DocumentCodeLensRequest _
     | SignatureHelpRequest _
+    | HackTestStartServerRequest
+    | HackTestStopServerRequest
+    | HackTestShutdownServerlessRequest
     | UnknownRequest _ ->
       failwith ("Don't know how to print request " ^ method_)
   in
@@ -1564,6 +1579,9 @@ let print_lsp_response
     | RenameResult r -> print_documentRename r
     | DocumentCodeLensResult r -> print_documentCodeLens r
     | SignatureHelpResult r -> print_signatureHelp r
+    | HackTestStartServerResult -> JSON_Null
+    | HackTestStopServerResult -> JSON_Null
+    | HackTestShutdownServerlessResult -> JSON_Null
     | ShowMessageRequestResult _
     | ShowStatusResult _ ->
       failwith ("Don't know how to print result " ^ method_)

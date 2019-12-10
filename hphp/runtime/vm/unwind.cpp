@@ -447,13 +447,9 @@ void unwindCpp(Exception* exception) {
   auto& stack = vmStack();
   auto& pc = vmpc();
 
-  assertx(!g_context->m_unwindingCppException);
-  g_context->m_unwindingCppException = true;
   ITRACE(1, "entering unwinder for C++ exception: {}\n",
          implicit_cast<void*>(exception));
   SCOPE_EXIT {
-    assertx(g_context->m_unwindingCppException);
-    g_context->m_unwindingCppException = false;
     ITRACE(1, "leaving unwinder for C++ exception: {}\n",
            implicit_cast<void*>(exception));
   };

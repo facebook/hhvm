@@ -605,7 +605,6 @@ public:
   TYPE_SCAN_IGNORE_FIELD(m_nestedVMs); // handled explicitly in heap-scan.h
   int m_nesting;
   bool m_dbgNoBreak;
-  bool m_unwindingCppException;
 private:
   Array m_evaledArgs;
   String m_lastErrorPath;

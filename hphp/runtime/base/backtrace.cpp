@@ -636,7 +636,7 @@ int64_t createBacktraceHash(bool consider_metadata) {
 }
 
 void fillCompactBacktrace(CompactTraceData* trace, bool skipTop) {
-  walkStack([trace, skipTop] (ActRec* fp, Offset prevPc) {
+  walkStack([trace] (ActRec* fp, Offset prevPc) {
     // Do not capture frame for HPHP only functions.
     if (fp->func()->isNoInjection()) return;
     trace->insert(fp, prevPc);

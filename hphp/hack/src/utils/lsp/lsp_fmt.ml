@@ -667,7 +667,7 @@ let print_hover (r : Hover.result) : json =
         ])
 
 (************************************************************************)
-(* textDocument/definition request                                      *)
+(* textDocument/definition and /typeDefinition requests                 *)
 (************************************************************************)
 
 let parse_definition (params : json option) : Definition.params =
@@ -1391,6 +1391,8 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
   | "completionItem/resolve" ->
     CompletionItemResolveRequest (parse_completionItem params)
   | "textDocument/definition" -> DefinitionRequest (parse_definition params)
+  | "textDocument/typeDefinition" ->
+    TypeDefinitionRequest (parse_definition params)
   | "workspace/symbol" -> WorkspaceSymbolRequest (parse_workspaceSymbol params)
   | "textDocument/documentSymbol" ->
     DocumentSymbolRequest (parse_documentSymbol params)

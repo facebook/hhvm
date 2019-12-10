@@ -146,10 +146,7 @@ type state =
   (* notifies us that we can exit.                                       *)
   | Post_shutdown
 
-type on_result = result:Hh_json.json option -> state -> state Lwt.t
-
-type on_error =
-  code:int -> message:string -> data:Hh_json.json option -> state -> state Lwt.t
+type result_handler = lsp_result -> state -> state Lwt.t
 
 (* Note: we assume that we won't ever initialize more than once, since this
 promise can only be resolved once. *)
@@ -161,12 +158,12 @@ let hhconfig_version : string ref = ref "[NotYetInitialized]"
 
 let can_autostart_after_mismatch : bool ref = ref true
 
-let requests_outstanding : (lsp_request * on_result * on_error) IdMap.t ref =
+let requests_outstanding : (lsp_request * result_handler) IdMap.t ref =
   ref IdMap.empty
 
 let get_outstanding_request_exn (id : lsp_id) : lsp_request =
   match IdMap.find_opt id !requests_outstanding with
-  | Some (request, _, _) -> request
+  | Some (request, _) -> request
   | None -> failwith "response id doesn't correspond to an outstanding request"
 
 (* head is newest *)
@@ -659,9 +656,10 @@ let status_tick () : string =
 
 (* request_showStatus: pops up a dialog *)
 let request_showStatus
-    ?(on_result : on_result = (fun ~result:_ state -> Lwt.return state))
-    ?(on_error : on_error =
-      (fun ~code:_ ~message:_ ~data:_ state -> Lwt.return state))
+    ?(on_result : ShowStatus.result -> state -> state Lwt.t =
+      (fun _ state -> Lwt.return state))
+    ?(on_error : Error.t -> state -> state Lwt.t =
+      (fun _ state -> Lwt.return state))
     (params : ShowStatus.params) : unit =
   let initialize_params = initialize_params_exc () in
   if not (Lsp_helpers.supports_status initialize_params) then
@@ -679,23 +677,29 @@ let request_showStatus
       let request = ShowStatusRequest params in
       to_stdout (print_lsp_request id request);
 
-      (* save the callback-handlers *)
-      let on_result2 ~result state =
+      let handler (result : lsp_result) (state : state) : state Lwt.t =
         if msg = !showStatus_outstanding then showStatus_outstanding := "";
-        on_result result state
-      in
-      let on_error2 ~code ~message ~data state =
-        if msg = !showStatus_outstanding then showStatus_outstanding := "";
-        on_error code message data state
+        match result with
+        | ShowStatusResult result -> on_result result state
+        | ErrorResult (error, _stack) -> on_error error state
+        | _ ->
+          let error =
+            {
+              Error.code = Error.Code.parseError;
+              message = "expected ShowStatusResult";
+              data = None;
+            }
+          in
+          on_error error state
       in
       requests_outstanding :=
-        IdMap.add id (request, on_result2, on_error2) !requests_outstanding
+        IdMap.add id (request, handler) !requests_outstanding
     )
 
 (* request_showMessage: pops up a dialog *)
 let request_showMessage
-    (on_result : on_result)
-    (on_error : on_error)
+    (on_result : ShowMessageRequest.result -> state -> state Lwt.t)
+    (on_error : Error.t -> state -> state Lwt.t)
     (type_ : MessageType.t)
     (message : string)
     (titles : string list) : ShowMessageRequest.t =
@@ -709,9 +713,21 @@ let request_showMessage
   in
   to_stdout (print_lsp_request id request);
 
-  (* save the callback-handlers *)
-  requests_outstanding :=
-    IdMap.add id (request, on_result, on_error) !requests_outstanding;
+  let handler (result : lsp_result) (state : state) : state Lwt.t =
+    match result with
+    | ShowMessageRequestResult result -> on_result result state
+    | ErrorResult (error, _stack) -> on_error error state
+    | _ ->
+      let error =
+        {
+          Error.code = Error.Code.parseError;
+          message = "expected ShowMessageRequestResult";
+          data = None;
+        }
+      in
+      on_error error state
+  in
+  requests_outstanding := IdMap.add id (request, handler) !requests_outstanding;
 
   (* return a token *)
   ShowMessageRequest.Present { id }
@@ -3199,11 +3215,11 @@ let tick_showStatus
     ~(init_id : string) : unit Lwt.t =
   let show_status () : unit Lwt.t =
     begin
-      let on_result ~result state =
-        let result = Jget.string_d result "title" ~default:"" in
+      let on_result (result : ShowStatus.result) (state : state) : state Lwt.t =
+        let open ShowMessageRequest in
         match (result, state) with
-        | (command, Lost_server _) when command = hh_server_restart_button_text
-          ->
+        | (Some { title }, Lost_server _)
+          when title = hh_server_restart_button_text ->
           let root =
             match get_root_opt () with
             | None -> failwith "we should have root by now"
@@ -3220,7 +3236,7 @@ let tick_showStatus
             reconnect_from_lost_if_necessary state `Force_regain
           in
           Lwt.return state
-        | (command, _) when command = client_ide_restart_button_text ->
+        | (Some { title }, _) when title = client_ide_restart_button_text ->
           Hh_logger.log "Restarting IDE service";
 
           (* It's possible that [destroy] takes a while to finish, so make
@@ -3308,19 +3324,11 @@ let handle_client_message
     in
     match (!state, parsed) with
     (* response *)
-    | (_, ResponseMessage (id, _)) ->
-      let (_, on_result, on_error) = IdMap.find id !requests_outstanding in
-      if Option.is_some c.error then (
-        let code = Jget.int_exn c.error "code" in
-        let message = Jget.string_exn c.error "message" in
-        let data = Jget.val_opt c.error "data" in
-        let%lwt new_state = on_error code message data !state in
-        state := new_state;
-        Lwt.return_unit
-      ) else
-        let%lwt new_state = on_result c.result !state in
-        state := new_state;
-        Lwt.return_unit
+    | (_, ResponseMessage (id, response)) ->
+      let (_, handler) = IdMap.find id !requests_outstanding in
+      let%lwt new_state = handler response !state in
+      state := new_state;
+      Lwt.return_unit
     (* shutdown request *)
     | (_, RequestMessage (id, ShutdownRequest)) ->
       let%lwt new_state =
@@ -3357,10 +3365,9 @@ let handle_client_message
         let id = NumberId (Jsonrpc.get_next_request_id ()) in
         let request = do_didChangeWatchedFiles_registerCapability () in
         to_stdout (print_lsp_request id request);
-        let on_result ~result:_ state = Lwt.return state in
-        let on_error ~code:_ ~message:_ ~data:_ state = Lwt.return state in
+        let handler _response state = Lwt.return state in
         requests_outstanding :=
-          IdMap.add id (request, on_result, on_error) !requests_outstanding
+          IdMap.add id (request, handler) !requests_outstanding
       );
 
       if not @@ Sys_utils.is_test_mode () then

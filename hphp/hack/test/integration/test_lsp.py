@@ -5009,6 +5009,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                         }
                     }
                 ],
+                powered_by="serverless_ide",
             )
             .request(
                 comment="shutdown, id 3", method="shutdown", params={}, result=None
@@ -5046,6 +5047,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "defaultMessage": "Un-type checked code. Consider adding "
                     "type annotations.",
                 },
+                powered_by="serverless_ide",
             )
             .request(comment="Shutdown", method="shutdown", params={}, result=None)
         )

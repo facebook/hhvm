@@ -323,7 +323,6 @@ let load config_filename options =
       ?tco_disallow_byref_calls:(bool_opt "disallow_byref_calls" config)
       ?po_disable_lval_as_an_expression:
         (bool_opt "disable_lval_as_an_expression" config)
-      ?tco_typecheck_xhp_cvars:(bool_opt "typecheck_xhp_cvars" config)
       ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)
       ?ignored_fixme_regex:(string_opt "ignored_fixme_regex" config)
       ~po_auto_namespace_map:(prepare_auto_namespace_map config)

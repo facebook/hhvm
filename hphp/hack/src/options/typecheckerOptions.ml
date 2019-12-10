@@ -98,8 +98,6 @@ let disallow_byref_calls = GlobalOptions.tco_disallow_byref_calls
 
 let log_levels = GlobalOptions.log_levels
 
-let typecheck_xhp_cvars = GlobalOptions.tco_typecheck_xhp_cvars
-
 let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
 
 let like_type_hints = GlobalOptions.tco_like_type_hints

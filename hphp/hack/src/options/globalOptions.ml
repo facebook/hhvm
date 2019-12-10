@@ -46,7 +46,6 @@ type t = {
   ignored_fixme_regex: string option;
   log_levels: int SMap.t;
   po_disable_lval_as_an_expression: bool;
-  tco_typecheck_xhp_cvars: bool;
   tco_shallow_class_decl: bool;
   po_rust_parser_errors: bool;
   po_rust_lowerer: bool;
@@ -202,7 +201,6 @@ let default =
     ignored_fixme_regex = None;
     log_levels = SMap.empty;
     po_disable_lval_as_an_expression = false;
-    tco_typecheck_xhp_cvars = false;
     tco_shallow_class_decl = false;
     po_rust_parser_errors = false;
     po_rust_lowerer = true;
@@ -287,7 +285,6 @@ let make
     ?(log_levels = default.log_levels)
     ?(po_disable_lval_as_an_expression =
       default.po_disable_lval_as_an_expression)
-    ?(tco_typecheck_xhp_cvars = default.tco_typecheck_xhp_cvars)
     ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
     ?(po_rust_parser_errors = default.po_rust_parser_errors)
     ?(po_rust_lowerer = default.po_rust_lowerer)
@@ -377,7 +374,6 @@ let make
     tco_disallow_byref_calls;
     log_levels;
     po_disable_lval_as_an_expression;
-    tco_typecheck_xhp_cvars;
     tco_shallow_class_decl;
     po_rust_parser_errors;
     po_rust_lowerer;
@@ -503,8 +499,6 @@ let ignored_fixme_regex t = t.ignored_fixme_regex
 let log_levels t = t.log_levels
 
 let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
-
-let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
 
 let tco_shallow_class_decl t = t.tco_shallow_class_decl
 

@@ -123,14 +123,7 @@ let handler =
       List.iter c.c_typeconsts (fun t ->
           Option.iter t.c_tconst_type (check_hint env);
           Option.iter t.c_tconst_constraint (check_hint env));
-      let check_var v =
-        if
-          (not c.c_is_xhp)
-          || TypecheckerOptions.typecheck_xhp_cvars (Env.get_tcopt env)
-        then
-          Option.iter v.cv_type (check_hint env)
-      in
-      List.iter c.c_vars check_var;
+      List.iter c.c_vars (fun v -> Option.iter v.cv_type (check_hint env));
       Option.iter c.c_enum (fun e ->
           check_hint env e.e_base;
           Option.iter e.e_constraint (check_hint env));

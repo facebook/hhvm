@@ -194,7 +194,6 @@ let parse_options () =
   let new_inference_lambda = ref (Some false) in
   let timeout = ref None in
   let disallow_invalid_arraykey = ref None in
-  let typecheck_xhp_cvars = ref (Some false) in
   let allow_ref_param_on_constructor = ref (Some false) in
   let disallow_byref_dynamic_calls = ref (Some false) in
   let disallow_byref_calls = ref (Some false) in
@@ -417,9 +416,6 @@ let parse_options () =
       ( "--disallow-invalid-arraykey-constraint",
         Arg.Unit (set_bool disallow_invalid_arraykey_constraint),
         " Disallow using non-string, non-int types as array key constraints" );
-      ( "--check-xhp-cvar-arity",
-        Arg.Unit (set_bool typecheck_xhp_cvars),
-        " Typechecks xhp cvar arity" );
       ( "--check-xhp-attribute",
         Arg.Set check_xhp_attribute,
         " Typechecks xhp required attributes" );
@@ -559,7 +555,6 @@ let parse_options () =
       ?tco_timeout:!timeout
       ?tco_disallow_invalid_arraykey:!disallow_invalid_arraykey
       ?po_auto_namespace_map:!auto_namespace_map
-      ?tco_typecheck_xhp_cvars:!typecheck_xhp_cvars
       ?tco_disallow_byref_dynamic_calls:!disallow_byref_dynamic_calls
       ?tco_disallow_byref_calls:!disallow_byref_calls
       ?tco_disallow_invalid_arraykey_constraint:

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8143ec23d5b0b741f3c4a7e9f06b94f3>>
+// @generated SignedSource<<84ef17eff7d6ed66bee8660ab9cdb010>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -55,7 +55,6 @@ pub struct GlobalOptions {
     pub ignored_fixme_regex: Option<String>,
     pub log_levels: s_map::SMap<isize>,
     pub po_disable_lval_as_an_expression: bool,
-    pub tco_typecheck_xhp_cvars: bool,
     pub tco_shallow_class_decl: bool,
     pub po_rust_parser_errors: bool,
     pub po_rust_lowerer: bool,

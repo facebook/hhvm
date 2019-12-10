@@ -942,6 +942,7 @@ type lsp_request =
   | RageRequest
   | RenameRequest of Rename.params
   | DocumentCodeLensRequest of DocumentCodeLens.params
+  | SignatureHelpRequest of SignatureHelp.params
   | UnknownRequest of string * Hh_json.json option
 
 type lsp_result =
@@ -968,6 +969,7 @@ type lsp_result =
   | RageResult of Rage.result
   | RenameResult of Rename.result
   | DocumentCodeLensResult of DocumentCodeLens.result
+  | SignatureHelpResult of SignatureHelp.result
   (* the string is a stacktrace *)
   | ErrorResult of Error.t * string
 

@@ -1302,6 +1302,7 @@ let request_name_to_string (request : lsp_request) : string =
   | RageRequest -> "telemetry/rage"
   | RenameRequest _ -> "textDocument/rename"
   | DocumentCodeLensRequest _ -> "textDocument/codeLens"
+  | SignatureHelpRequest _ -> "textDocument/signatureHelp"
   | UnknownRequest (method_, _params) -> method_
 
 let result_name_to_string (result : lsp_result) : string =
@@ -1329,6 +1330,7 @@ let result_name_to_string (result : lsp_result) : string =
   | RageResult _ -> "telemetry/rage"
   | RenameResult _ -> "textDocument/rename"
   | DocumentCodeLensResult _ -> "textDocument/codeLens"
+  | SignatureHelpResult _ -> "textDocument/signatureHelp"
   | ErrorResult (e, _stack) -> "ERROR/" ^ e.Error.message
 
 let notification_name_to_string (notification : lsp_notification) : string =
@@ -1395,6 +1397,8 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
     DocumentRangeFormattingRequest (parse_documentRangeFormatting params)
   | "textDocument/onTypeFormatting" ->
     DocumentOnTypeFormattingRequest (parse_documentOnTypeFormatting params)
+  | "textDocument/signatureHelp" ->
+    SignatureHelpRequest (parse_signatureHelp params)
   | "textDocument/codeLens" ->
     DocumentCodeLensRequest (parse_documentCodeLens params)
   | "telemetry/rage" -> RageRequest
@@ -1456,6 +1460,7 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   | RageRequest
   | RenameRequest _
   | DocumentCodeLensRequest _
+  | SignatureHelpRequest _
   | UnknownRequest _ ->
     raise (Error.Parse ("Don't know how to parse LSP response " ^ method_))
 
@@ -1511,6 +1516,7 @@ let print_lsp_request (id : lsp_id) (request : lsp_request) : json =
     | RageRequest
     | RenameRequest _
     | DocumentCodeLensRequest _
+    | SignatureHelpRequest _
     | UnknownRequest _ ->
       failwith ("Don't know how to print request " ^ method_)
   in
@@ -1533,6 +1539,7 @@ let print_lsp_response
     | HoverResult r -> print_hover r
     | CodeActionResult r -> print_codeActionResult r
     | CompletionResult r -> print_completion r
+    | CompletionItemResolveResult r -> print_completionItem r
     | DefinitionResult r -> print_definition r
     | TypeDefinitionResult r -> print_definition r
     | WorkspaceSymbolResult r -> print_workspaceSymbol r
@@ -1547,9 +1554,9 @@ let print_lsp_response
     | RageResult r -> print_rage r
     | RenameResult r -> print_documentRename r
     | DocumentCodeLensResult r -> print_documentCodeLens r
+    | SignatureHelpResult r -> print_signatureHelp r
     | ShowMessageRequestResult _
-    | ShowStatusResult _
-    | CompletionItemResolveResult _ ->
+    | ShowStatusResult _ ->
       failwith ("Don't know how to print result " ^ method_)
     | ErrorResult (e, stack) -> print_error ?include_error_stack_trace e stack
   in

@@ -8,4 +8,4 @@ name = "hh_name_index"
 path = "../main.rs"
 
 [dependencies]
-failure_ext = "*"
+anyhow = "*"

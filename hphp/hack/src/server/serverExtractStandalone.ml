@@ -1011,7 +1011,8 @@ and add_signature_dependencies deps obj =
     (match get_class cls_name with
     | None ->
       let td = value_or_not_found description @@ get_typedef cls_name in
-      add_dep deps td.td_type
+      add_dep deps td.td_type;
+      Option.iter td.td_constraint ~f:(add_dep deps)
     | Some cls ->
       let add_dep = add_dep deps ~cls:(Some cls_name) in
       (match obj with

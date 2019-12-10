@@ -122,3 +122,7 @@ function with_constructor_dependency(Thud $x): int {
 }
 
 function with_newtype_with_bound(dict<N, mixed> $_): void {}
+
+newtype M as N = nothing;
+
+function with_newtype_with_newtype_bound(M $_): void {}

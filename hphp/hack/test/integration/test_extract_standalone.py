@@ -158,6 +158,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_constructor_dependency",
             "\\kwery",
             "\\with_newtype_with_bound",
+            "\\with_newtype_with_newtype_bound",
         ]
 
         for path in paths:

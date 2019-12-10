@@ -1119,7 +1119,7 @@ module ConnectionStatus = struct
   and connectionStatusParams = { isConnected: bool }
 end
 
-(* Module for dynamic view, method="workspace/toggleTypeCoverage" *)
+(* ToggleTypeCoverage notification, method="workspace/toggleTypeCoverage" *)
 module ToggleTypeCoverage = struct
   type params = toggleTypeCoverageParams
 
@@ -1290,6 +1290,7 @@ type lsp_notification =
   | InitializedNotification
   | SetTraceNotification (* $/setTraceNotification *)
   | LogTraceNotification (* $/logTraceNotification *)
+  | ToggleTypeCoverageNotification of ToggleTypeCoverage.params
   | UnknownNotification of string * Hh_json.json option
 
 type lsp_message =

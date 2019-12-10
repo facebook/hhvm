@@ -1353,6 +1353,7 @@ let notification_name_to_string (notification : lsp_notification) : string =
   | InitializedNotification -> "initialized"
   | SetTraceNotification -> "$/setTraceNotification"
   | LogTraceNotification -> "$/logTraceNotification"
+  | ToggleTypeCoverageNotification _ -> "workspace/toggleTypeCoverage"
   | UnknownNotification (method_, _params) -> method_
 
 let message_name_to_string (message : lsp_message) : string =
@@ -1426,6 +1427,8 @@ let parse_lsp_notification (method_ : string) (params : json option) :
   | "textDocument/didChange" -> DidChangeNotification (parse_didChange params)
   | "workspace/didChangeWatchedFiles" ->
     DidChangeWatchedFilesNotification (parse_didChangeWatchedFiles params)
+  | "workspace/toggleTypeCoverage" ->
+    ToggleTypeCoverageNotification (parse_toggleTypeCoverage params)
   | "textDocument/publishDiagnostics"
   | "window/logMessage"
   | "window/showMessage"
@@ -1599,6 +1602,7 @@ let print_lsp_notification (notification : lsp_notification) : json =
     | DidSaveNotification _
     | DidChangeNotification _
     | DidChangeWatchedFilesNotification _
+    | ToggleTypeCoverageNotification _
     | UnknownNotification _ ->
       failwith ("Don't know how to print notification " ^ method_)
   in

@@ -992,6 +992,7 @@ type lsp_notification =
   | InitializedNotification
   | SetTraceNotification (* $/setTraceNotification *)
   | LogTraceNotification (* $/logTraceNotification *)
+  | ToggleTypeCoverageNotification of ToggleTypeCoverage.params
   | UnknownNotification of string * Hh_json.json option
 
 type lsp_message =

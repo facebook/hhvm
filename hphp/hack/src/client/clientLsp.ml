@@ -3090,36 +3090,25 @@ let track_ide_service_open_files
       Lwt.return_unit)
 
 let log_response_if_necessary
-    (event : event)
-    (response : Hh_json.json option)
-    (unblocked_time : float)
-    (env : env) : unit =
-  Jsonrpc.(
-    match event with
-    | Client_message (c, _) ->
-      let json = c.json |> Hh_json.json_truncate |> Hh_json.json_to_string in
-      let json_response =
-        match response with
-        | None -> ""
-        | Some json -> json |> Hh_json.json_truncate |> Hh_json.json_to_string
-      in
-      HackEventLogger.client_lsp_method_handled
-        ~root:(get_root_opt ())
-        ~method_:
-          ( if c.kind = Response then
-            "[response]"
-          else
-            c.method_ )
-        ~kind:(kind_to_string c.kind)
-        ~tracking_id:c.tracking_id
-        ~start_queue_time:c.timestamp
-        ~start_hh_server_state:
-          (get_older_hh_server_state c.timestamp |> hh_server_state_to_string)
-        ~start_handle_time:unblocked_time
-        ~serverless_ide_flag:env.use_serverless_ide
-        ~json
-        ~json_response
-    | _ -> ())
+    (event : event) (unblocked_time : float) (env : env) : unit =
+  let open Jsonrpc in
+  match event with
+  | Client_message (c, _) ->
+    HackEventLogger.client_lsp_method_handled
+      ~root:(get_root_opt ())
+      ~method_:
+        ( if c.kind = Response then
+          "[response]"
+        else
+          c.method_ )
+      ~kind:(kind_to_string c.kind)
+      ~tracking_id:c.tracking_id
+      ~start_queue_time:c.timestamp
+      ~start_hh_server_state:
+        (get_older_hh_server_state c.timestamp |> hh_server_state_to_string)
+      ~start_handle_time:unblocked_time
+      ~serverless_ide_flag:env.use_serverless_ide
+  | _ -> ()
 
 let hack_log_error
     (event : event option)
@@ -3966,7 +3955,6 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
           Lwt.return_unit
       in
       (* this is the main handler for each message*)
-      Jsonrpc.clear_last_sent ();
       let%lwt () =
         match event with
         | Client_message (message, _) ->
@@ -3984,9 +3972,8 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
         | Tick ->
           handle_tick ~env ~state ~ide_service:!ide_service ~ref_unblocked_time
       in
-      let response = Jsonrpc.last_sent () in
       (* for LSP requests and notifications, we keep a log of what+when we responded *)
-      log_response_if_necessary event response !ref_unblocked_time env;
+      log_response_if_necessary event !ref_unblocked_time env;
       Lwt.return_unit
     with
     | Server_fatal_connection_exception { Marshal_tools.stack; message } ->

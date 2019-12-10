@@ -62,6 +62,13 @@ let hh_server_restart_button_text = "Restart Hack Server"
 
 let client_ide_restart_button_text = "Restart Hack IDE Services"
 
+type incoming_metadata = {
+  (* time this message arrived at stdin *)
+  timestamp: float;
+  (* a unique random string of our own creation, which we can use for logging *)
+  tracking_id: string;
+}
+
 (** A push message from the server might come while we're waiting for a server-rpc
    response, or while we're free. The current architecture allows us to have
    arbitrary responses to push messages while we're free, but only a limited set
@@ -196,7 +203,7 @@ type event =
   | Server_hello
   | Server_message of server_message
   (* Client_message stores raw json, and the parsed form of it *)
-  | Client_message of Jsonrpc.message * lsp_message
+  | Client_message of incoming_metadata * lsp_message
   | Client_ide_notification of ClientIdeMessage.notification
   (* once per second, on idle *)
   | Tick
@@ -562,15 +569,12 @@ let get_next_event
   let from_client (client : Jsonrpc.queue) : event Lwt.t =
     let%lwt message = Jsonrpc.get_message client in
     match message with
-    | `Message raw_message ->
+    | `Message { Jsonrpc.json; timestamp } ->
       begin
         try
-          let message =
-            Lsp_fmt.parse_lsp
-              raw_message.Jsonrpc.json
-              get_outstanding_request_exn
-          in
-          Lwt.return (Client_message (raw_message, message))
+          let message = Lsp_fmt.parse_lsp json get_outstanding_request_exn in
+          let tracking_id = Random_id.short_string () in
+          Lwt.return (Client_message ({ tracking_id; timestamp }, message))
         with e ->
           let e = Exception.wrap e in
           let edata =
@@ -3089,7 +3093,7 @@ let track_ide_service_open_files
     let%lwt (_ : (unit, string) result) =
       ClientIdeService.rpc
         ide_service
-        ~tracking_id:metadata.Jsonrpc.tracking_id
+        ~tracking_id:metadata.tracking_id
         (ClientIdeMessage.File_opened
            { ClientIdeMessage.file_path; file_contents })
     in
@@ -3099,7 +3103,8 @@ let track_ide_service_open_files
     the open file, we'll start handling them. *)
     Lwt.return_unit
 
-let get_filename_in_message (message : lsp_message) : string option =
+let get_filename_in_message_for_logging (message : lsp_message) : string option
+    =
   let uri_opt = Lsp_helpers.get_uri_opt message in
   match uri_opt with
   | None -> None
@@ -3111,20 +3116,25 @@ let get_filename_in_message (message : lsp_message) : string option =
        | Some relative_path -> Some relative_path
      with _ -> Some (Lsp.string_of_uri uri))
 
+(* Historical quirk: we log kind and method-name a bit idiosyncratically... *)
+let get_message_kind_and_method_for_logging (message : lsp_message) :
+    string * string =
+  match message with
+  | ResponseMessage (_, _) -> ("Response", "[response]")
+  | RequestMessage (_, r) -> ("Request", Lsp_fmt.request_name_to_string r)
+  | NotificationMessage n ->
+    ("Notification", Lsp_fmt.notification_name_to_string n)
+
 let log_response_if_necessary
     (event : event) (unblocked_time : float) (env : env) : unit =
-  let open Jsonrpc in
   match event with
   | Client_message (metadata, message) ->
+    let (kind, method_) = get_message_kind_and_method_for_logging message in
     HackEventLogger.client_lsp_method_handled
       ~root:(get_root_opt ())
-      ~method_:
-        ( if metadata.kind = Response then
-          "[response]"
-        else
-          metadata.method_ )
-      ~kind:(kind_to_string metadata.kind)
-      ~filename:(get_filename_in_message message)
+      ~method_
+      ~kind
+      ~filename:(get_filename_in_message_for_logging message)
       ~tracking_id:metadata.tracking_id
       ~start_queue_time:metadata.timestamp
       ~start_hh_server_state:
@@ -3145,24 +3155,20 @@ let hack_log_error
   log "Exception %s: reason: %s, stack trace: %s" source reason stack;
   match event with
   | Some (Client_message (metadata, message)) ->
-    let open Jsonrpc in
-    let json =
-      metadata.json |> Hh_json.json_truncate |> Hh_json.json_to_string
-    in
     let start_hh_server_state =
       get_older_hh_server_state metadata.timestamp |> hh_server_state_to_string
     in
+    let (kind, method_) = get_message_kind_and_method_for_logging message in
     HackEventLogger.client_lsp_method_exception
       ~root
-      ~method_:metadata.method_
-      ~kind:(kind_to_string metadata.kind)
-      ~filename:(get_filename_in_message message)
+      ~method_
+      ~kind
+      ~filename:(get_filename_in_message_for_logging message)
       ~tracking_id:metadata.tracking_id
       ~start_queue_time:metadata.timestamp
       ~start_hh_server_state
       ~start_handle_time:unblocked_time
       ~serverless_ide_flag:env.use_serverless_ide
-      ~json
       ~reason
       ~stack
       ~source
@@ -3329,10 +3335,9 @@ let handle_client_message
     ~(state : state ref)
     ~(client : Jsonrpc.queue)
     ~(ide_service : ClientIdeService.t)
-    ~(metadata : Jsonrpc.message)
+    ~(metadata : incoming_metadata)
     ~(message : lsp_message)
     ~(ref_unblocked_time : float ref) : unit Lwt.t =
-  let open Jsonrpc in
   let open Main_env in
   let%lwt () =
     (* make sure to wrap any exceptions below in the promise *)

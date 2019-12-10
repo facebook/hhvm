@@ -3,92 +3,13 @@
 (* Practical readbable guide: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#base-protocol-json-structures *)
 
 open Hh_core
-module J = Hh_json_helpers.AdhocJsonHelpers
 
 type writer = Hh_json.json -> unit
 
-type kind =
-  | Request
-  | Notification
-  | Response
-
-let kind_to_string (kind : kind) : string =
-  match kind with
-  | Request -> "Request"
-  | Notification -> "Notification"
-  | Response -> "Response"
-
-type message = {
+type timestamped_json = {
   json: Hh_json.json;
-  (* the json payload *)
   timestamp: float;
-  (* time this message arrived at stdin *)
-  (* Following fields are decompositions of 'json'... *)
-  kind: kind;
-  method_: string;
-  (* mandatory for request+notification; empty otherwise *)
-  id: Hh_json.json option;
-  (* a unique random string, used for logging *)
-  tracking_id: string;
-  (* mandatory for request+response *)
-  params: Hh_json.json option;
-  (* optional for request+notification *)
-  result: Hh_json.json option;
-  (* optional for response *)
-  error: Hh_json.json option; (* optional for response *)
 }
-
-let message_to_short_string (c : message) : string =
-  Hh_json.(
-    let disposition =
-      match (c.kind, c.result, c.error) with
-      | (Response, Some _, None) -> "[result]"
-      | (Response, None, Some _) -> "[error]"
-      | (_, _, _) -> ""
-    in
-    let method_ =
-      match c.method_ with
-      | "" -> ""
-      | s -> Printf.sprintf "method=%s," s
-    in
-    let id =
-      match c.id with
-      | Some (JSON_String s) -> Printf.sprintf "id=\"%s\"" s
-      | Some (JSON_Number n) -> Printf.sprintf "id=#%s" n
-      | Some json -> Printf.sprintf "id=%s" (json_to_string json)
-      | None -> "id=[None]"
-    in
-    Printf.sprintf "{%s%s,%s%s}" (kind_to_string c.kind) disposition method_ id)
-
-let parse_message ~(json : Hh_json.json) ~(timestamp : float) : message =
-  let id = J.try_get_val "id" json in
-  let method_opt =
-    J.try_get_val "method" json |> Option.map ~f:Hh_json.get_string_exn
-  in
-  let method_ = Option.value method_opt ~default:"" in
-  (* is easier to consume *)
-  let params = J.try_get_val "params" json in
-  let result = J.try_get_val "result" json in
-  let error = J.try_get_val "error" json in
-  (* Following categorization mostly mirrors that of VSCode except that     *)
-  (* VSCode allows number+string+null ID for response, but we allow any ID. *)
-  let kind =
-    match (id, method_opt, result, error) with
-    | (Some _id, Some _method, _, _) -> Request
-    | (None, Some _method, _, _) -> Notification
-    | (_, _, Some _result, _) -> Response
-    | (_, _, _, Some _error) -> Response
-    | _ -> raise (Hh_json.Syntax_error "Not JsonRPC")
-  in
-  let tracking_id = Random_id.short_string () in
-  let tracking_id =
-    match id with
-    | Some (Hh_json.JSON_Number s)
-    | Some (Hh_json.JSON_String s) ->
-      Printf.sprintf "%s.%s" tracking_id s
-    | _ -> tracking_id
-  in
-  { json; timestamp; id; tracking_id; method_; params; result; error; kind }
 
 (***************************************************************)
 (* Internal queue functions that run in the daemon process.    *)
@@ -98,11 +19,6 @@ type queue = {
   daemon_in_fd: Unix.file_descr;
   (* fd used by main process to read messages from queue *)
   messages: queue_message Queue.t;
-}
-
-and timestamped_json = {
-  tj_json: Hh_json.json;
-  tj_timestamp: float;
 }
 
 and queue_message =
@@ -118,9 +34,9 @@ and daemon_operation =
    editor messages can be read from. May throw if the message is malformed. *)
 let internal_read_message (reader : Buffered_line_reader.t) : timestamped_json =
   let message = reader |> Http_lite.read_message_utf8 in
-  let tj_json = Hh_json.json_of_string message in
-  let tj_timestamp = Unix.gettimeofday () in
-  { tj_json; tj_timestamp }
+  let json = Hh_json.json_of_string message in
+  let timestamp = Unix.gettimeofday () in
+  { json; timestamp }
 
 (* Reads messages from the editor on stdin, parses them, and sends them to the
    main process.
@@ -300,63 +216,9 @@ let get_message (queue : queue) =
   let%lwt () = read_messages_into_queue_no_wait queue in
   let item = Queue.pop queue.messages in
   match item with
-  | Timestamped_json { tj_json; tj_timestamp } ->
-    Lwt.return (`Message (parse_message tj_json tj_timestamp))
+  | Timestamped_json timestamped_json -> Lwt.return (`Message timestamped_json)
   | Fatal_exception data -> Lwt.return (`Fatal_exception data)
   | Recoverable_exception data -> Lwt.return (`Recoverable_exception data)
-
-(************************************************)
-(* Output functions for respond+notify          *)
-(************************************************)
-
-(* respond: sends either a Response or an Error message, according
-   to whether the json has an error-code or not. *)
-let respond
-    (writer : writer)
-    ?(powered_by : string option)
-    (in_response_to : message)
-    (result_or_error : Hh_json.json) : unit =
-  Hh_json.(
-    let is_error =
-      match result_or_error with
-      | JSON_Object _ -> J.try_get_val "code" result_or_error |> Option.is_some
-      | _ -> false
-    in
-    let response =
-      JSON_Object
-        ( [("jsonrpc", JSON_String "2.0")]
-        @ [("id", Option.value in_response_to.id ~default:JSON_Null)]
-        @ ( if is_error then
-            [("error", result_or_error)]
-          else
-            [("result", result_or_error)] )
-        @
-        match powered_by with
-        | Some powered_by -> [("powered_by", JSON_String powered_by)]
-        | None -> [] )
-    in
-    writer response)
-
-(* notify: sends a Notify message *)
-let notify
-    (writer : writer)
-    ?(powered_by : string option)
-    (method_ : string)
-    (params : Hh_json.json) : unit =
-  Hh_json.(
-    let message =
-      JSON_Object
-        ( [
-            ("jsonrpc", JSON_String "2.0");
-            ("method", JSON_String method_);
-            ("params", params);
-          ]
-        @
-        match powered_by with
-        | Some powered_by -> [("powered_by", JSON_String powered_by)]
-        | None -> [] )
-    in
-    writer message)
 
 (************************************************)
 (* Output functions for request                 *)

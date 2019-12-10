@@ -9,36 +9,10 @@
 
 type writer = Hh_json.json -> unit
 
-type kind =
-  | Request
-  | Notification
-  | Response
-
-val kind_to_string : kind -> string
-
-type message = {
+type timestamped_json = {
   json: Hh_json.json;
-  (* the json payload *)
   timestamp: float;
-  (* time this message arrived at stdin *)
-  (* Following fields are decompositions of 'json'... *)
-  kind: kind;
-  method_: string;
-  (* mandatory for request+notification; empty otherwise *)
-  id: Hh_json.json option;
-  (* a unique random string of our own creation, which we can use for logging *)
-  tracking_id: string;
-  (* mandatory for request+response *)
-  params: Hh_json.json option;
-  (* optional for request+notification *)
-  result: Hh_json.json option;
-  (* optional for response *)
-  error: Hh_json.json option; (* optional for response *)
 }
-
-val parse_message : json:Hh_json.json -> timestamp:float -> message
-
-val message_to_short_string : message -> string
 
 type queue
 
@@ -51,19 +25,10 @@ val has_message : queue -> bool
 
 val get_message :
   queue ->
-  [> `Message of message
+  [> `Message of timestamped_json
   | `Fatal_exception of Marshal_tools.remote_exception_data
   | `Recoverable_exception of Marshal_tools.remote_exception_data
   ]
   Lwt.t
-
-(* 'respond to_this with_that' is for replying to a JsonRPC request. It will send either *)
-(* a response or an error depending on whether 'with_that' has an error id in it.        *)
-(* [powered_by] is our own non-standard extension to JsonRPC, which lets the
-client know which back-end served the request. *)
-val respond : writer -> ?powered_by:string -> message -> Hh_json.json -> unit
-
-(* notify/request are for initiating JsonRPC messages *)
-val notify : writer -> ?powered_by:string -> string -> Hh_json.json -> unit
 
 val get_next_request_id : unit -> int

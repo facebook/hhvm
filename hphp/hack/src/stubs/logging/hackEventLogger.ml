@@ -122,8 +122,7 @@ let client_lsp_method_exception
     ~start_queue_time:_
     ~start_hh_server_state:_
     ~start_handle_time:_
-    ~serverless_ide_flag
-    ~json:_
+    ~serverless_ide_flag:_
     ~reason:_
     ~stack:_
     ~source:_ =

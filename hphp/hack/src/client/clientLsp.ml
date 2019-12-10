@@ -198,7 +198,8 @@ let get_editor_open_files (state : state) :
 type event =
   | Server_hello
   | Server_message of server_message
-  | Client_message of Jsonrpc.message
+  (* Client_message stores raw json, and the parsed form of it *)
+  | Client_message of Jsonrpc.message * lsp_message
   | Client_ide_notification of ClientIdeMessage.notification
   (* once per second, on idle *)
   | Tick
@@ -564,7 +565,23 @@ let get_next_event
   let from_client (client : Jsonrpc.queue) : event Lwt.t =
     let%lwt message = Jsonrpc.get_message client in
     match message with
-    | `Message message -> Lwt.return (Client_message message)
+    | `Message message ->
+      begin
+        try
+          let parsed =
+            Lsp_fmt.parse_lsp message.Jsonrpc.json get_outstanding_request_exn
+          in
+          Lwt.return (Client_message (message, parsed))
+        with e ->
+          let e = Exception.wrap e in
+          let edata =
+            {
+              Marshal_tools.stack = Exception.get_backtrace_string e;
+              message = Exception.get_ctor_string e;
+            }
+          in
+          raise (Client_recoverable_connection_exception edata)
+      end
     | `Fatal_exception edata -> raise (Client_fatal_connection_exception edata)
     | `Recoverable_exception edata ->
       raise (Client_recoverable_connection_exception edata)
@@ -625,7 +642,7 @@ let respond_to_error (event : event option) (e : exn) (stack : string) : unit =
   Error.(
     let e = error_of_exn e in
     match event with
-    | Some (Client_message c) when c.Jsonrpc.kind = Jsonrpc.Request ->
+    | Some (Client_message (c, _)) when c.Jsonrpc.kind = Jsonrpc.Request ->
       print_error e stack |> respond_jsonrpc ~powered_by:Language_server c
     | _ ->
       Lsp_helpers.telemetry_error
@@ -2871,7 +2888,7 @@ and reconnect_from_lost_if_necessary
     let should_reconnect =
       match (state, reason) with
       | (Lost_server _, `Force_regain) -> true
-      | (Lost_server lenv, `Event (Client_message c))
+      | (Lost_server lenv, `Event (Client_message (c, _)))
         when lenv.p.trigger_on_lsp && c.Jsonrpc.kind <> Jsonrpc.Response ->
         true
       | (Lost_server lenv, `Event Tick) when lenv.p.trigger_on_lock_file ->
@@ -2974,12 +2991,12 @@ let track_open_files (state : state) (event : event) : state =
     in
     let editor_open_files =
       match event with
-      | Client_message c when c.method_ = "textDocument/didOpen" ->
+      | Client_message (c, _) when c.method_ = "textDocument/didOpen" ->
         let params = parse_didOpen c.params in
         let doc = params.DidOpen.textDocument in
         let uri = params.DidOpen.textDocument.TextDocumentItem.uri in
         UriMap.add uri doc prev_opened_files
-      | Client_message c when c.method_ = "textDocument/didChange" ->
+      | Client_message (c, _) when c.method_ = "textDocument/didChange" ->
         let params = parse_didChange c.params in
         let uri =
           params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
@@ -3002,7 +3019,7 @@ let track_open_files (state : state) (event : event) : state =
             in
             UriMap.add uri doc' prev_opened_files
           | None -> prev_opened_files))
-      | Client_message c when c.method_ = "textDocument/didClose" ->
+      | Client_message (c, _) when c.method_ = "textDocument/didClose" ->
         let params = parse_didClose c.params in
         let uri = params.DidClose.textDocument.TextDocumentIdentifier.uri in
         UriMap.remove uri prev_opened_files
@@ -3021,17 +3038,17 @@ let track_edits_if_necessary (state : state) (event : event) : state =
     let previous = get_uris_with_unsaved_changes state in
     let uris_with_unsaved_changes =
       match event with
-      | Client_message ({ method_ = "textDocument/didChange"; _ } as c) ->
+      | Client_message (({ method_ = "textDocument/didChange"; _ } as c), _) ->
         let params = parse_didChange c.params in
         let uri =
           params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
         in
         UriSet.add uri previous
-      | Client_message ({ method_ = "textDocument/didClose"; _ } as c) ->
+      | Client_message (({ method_ = "textDocument/didClose"; _ } as c), _) ->
         let params = parse_didClose c.params in
         let uri = params.DidClose.textDocument.TextDocumentIdentifier.uri in
         UriSet.remove uri previous
-      | Client_message ({ method_ = "textDocument/didSave"; _ } as c) ->
+      | Client_message (({ method_ = "textDocument/didSave"; _ } as c), _) ->
         let params = parse_didSave c.params in
         let uri = params.DidSave.textDocument.TextDocumentIdentifier.uri in
         UriSet.remove uri previous
@@ -3051,7 +3068,7 @@ let track_ide_service_open_files
   Jsonrpc.(
     match event with
     | Client_message
-        { method_ = "textDocument/didOpen"; params; tracking_id; _ } ->
+        ({ method_ = "textDocument/didOpen"; params; tracking_id; _ }, _) ->
       let params = parse_didOpen params in
       let file_path =
         params.DidOpen.textDocument.TextDocumentItem.uri
@@ -3079,7 +3096,7 @@ let log_response_if_necessary
     (env : env) : unit =
   Jsonrpc.(
     match event with
-    | Client_message c ->
+    | Client_message (c, _) ->
       let json = c.json |> Hh_json.json_truncate |> Hh_json.json_to_string in
       let json_response =
         match response with
@@ -3114,7 +3131,7 @@ let hack_log_error
   let root = get_root_opt () in
   log "Exception %s: message: %s, stack trace: %s" source message stack;
   match event with
-  | Some (Client_message c) ->
+  | Some (Client_message (c, _)) ->
     Jsonrpc.(
       let json = c.json |> Hh_json.json_truncate |> Hh_json.json_to_string in
       HackEventLogger.client_lsp_method_exception
@@ -3952,7 +3969,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
       Jsonrpc.clear_last_sent ();
       let%lwt () =
         match event with
-        | Client_message message ->
+        | Client_message (message, _) ->
           handle_client_message
             ~env
             ~state

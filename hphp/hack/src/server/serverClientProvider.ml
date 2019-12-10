@@ -15,32 +15,38 @@ exception Client_went_away
 (* default pipe, priority pipe, force formant start only pipe *)
 type t = Unix.file_descr * Unix.file_descr * Unix.file_descr
 
+type priority =
+  | Priority_high
+  | Priority_default
+  | Priority_dormant
+
 type client =
   | Non_persistent_client of {
       ic: Timeout.in_channel;
       oc: Out_channel.t;
+      priority: priority;
     }
   | Persistent_client of Unix.file_descr
+
+type select_outcome =
+  | Select_persistent
+  | Select_new of client
+  | Select_nothing
 
 let provider_from_file_descriptors x = x
 
 let provider_for_test () = failwith "for use in tests only"
 
 (** Retrieve channels to client from monitor process. *)
-let accept_client parent_in_fd =
+let accept_client (priority : priority) (parent_in_fd : Unix.file_descr) :
+    client =
   let socket = Libancillary.ancil_recv_fd parent_in_fd in
   Non_persistent_client
     {
       ic = Timeout.in_channel_of_descr socket;
       oc = Unix.out_channel_of_descr socket;
+      priority;
     }
-
-let accept_client_opt parent_in_fd =
-  try Some (accept_client parent_in_fd)
-  with e ->
-    HackEventLogger.get_client_channels_exception e;
-    Hh_logger.log "Getting Client FDs failed. Ignoring.";
-    None
 
 let select ~idle_gc_slice fd_list timeout =
   let deadline = Unix.gettimeofday () +. timeout in
@@ -51,22 +57,16 @@ let select ~idle_gc_slice fd_list timeout =
     ready_fds
   | ready_fds -> ready_fds
 
-(* sleep_and_check: waits up to 0.1 seconds and then returns either:        *)
-(* - If we should read from persistent_client, then (None, true)            *)
-(* - If we should read from in_fd, then (Some (Non_persist in_fd)), false)  *)
-(* - If there's nothing to read, then (None, false)                         *)
+(* sleep_and_check: waits up to 0.1 seconds and returns what to read from. *)
 let sleep_and_check
-    (default_in_fd, priority_in_fd, force_dormant_start_only)
-    persistent_client_opt
-    ~ide_idle
-    ~idle_gc_slice
-    kind =
+    ((default_in_fd, priority_in_fd, force_dormant_start_only) :
+      Unix.file_descr * Unix.file_descr * Unix.file_descr)
+    (persistent_client_opt : client option)
+    ~(ide_idle : bool)
+    ~(idle_gc_slice : int)
+    (kind : [< `Any | `Force_dormant_start_only | `Priority ]) : select_outcome
+    =
   let in_fds = [default_in_fd; priority_in_fd; force_dormant_start_only] in
-  let is_persistent x =
-    match persistent_client_opt with
-    | Some (Persistent_client fd) when fd = x -> true
-    | _ -> false
-  in
   let l =
     match (kind, persistent_client_opt) with
     | (`Force_dormant_start_only, _) -> [force_dormant_start_only]
@@ -87,12 +87,24 @@ let sleep_and_check
   in
   let ready_fd_l = select ~idle_gc_slice l 0.1 in
   (* Prioritize existing persistent client requests over command line ones *)
-  if List.exists ready_fd_l ~f:is_persistent then
-    (None, true)
-  else
-    match List.hd ready_fd_l with
-    | Some fd -> (accept_client_opt fd, false)
-    | None -> (None, false)
+  let is_persistent fd = Some (Persistent_client fd) = persistent_client_opt in
+  try
+    if List.exists ready_fd_l ~f:is_persistent then
+      Select_persistent
+    else if List.mem ~equal:( = ) ready_fd_l priority_in_fd then
+      Select_new (accept_client Priority_high priority_in_fd)
+    else if List.mem ~equal:( = ) ready_fd_l default_in_fd then
+      Select_new (accept_client Priority_default default_in_fd)
+    else if List.mem ~equal:( = ) ready_fd_l force_dormant_start_only then
+      Select_new (accept_client Priority_dormant force_dormant_start_only)
+    else if List.is_empty ready_fd_l then
+      Select_nothing
+    else
+      failwith "sleep_and_check got impossible fd"
+  with e ->
+    HackEventLogger.get_client_channels_exception e;
+    Hh_logger.log "Getting Client FDs failed. Ignoring.";
+    Select_nothing
 
 let has_persistent_connection_request = function
   | Persistent_client fd ->
@@ -209,6 +221,13 @@ let make_persistent = function
 let is_persistent = function
   | Non_persistent_client _ -> false
   | Persistent_client _ -> true
+
+let priority_to_string (client : client) : string =
+  match client with
+  | Persistent_client _ -> "persistent"
+  | Non_persistent_client { priority = Priority_high; _ } -> "high"
+  | Non_persistent_client { priority = Priority_default; _ } -> "default"
+  | Non_persistent_client { priority = Priority_dormant; _ } -> "dormant"
 
 let shutdown_client client =
   let (ic, oc) =

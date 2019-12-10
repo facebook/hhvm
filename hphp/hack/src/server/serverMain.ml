@@ -395,7 +395,7 @@ let query_notifier genv env query_kind t =
  * The above doesn't apply in presence of interruptions / cancellations -
  * it's possible for client to request current recheck to be stopped.
  *)
-let rec recheck_loop acc genv env new_client has_persistent_connection_request =
+let rec recheck_loop acc genv env select_outcome =
   let t = Unix.gettimeofday () in
   (* When a new client connects, we use the synchronous notifier.
    * This is to get synchronous file system changes when invoking
@@ -404,18 +404,22 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
    * NB: This also uses synchronous notify on establishing a persistent
    * connection. This is harmless, but could maybe be filtered away. *)
   let query_kind =
-    match (new_client, has_persistent_connection_request) with
-    | (Some _, false) -> `Sync
-    | (None, false) when t -. env.last_notifier_check_time > 0.5 -> `Async
+    match select_outcome with
+    | ClientProvider.Select_new _ -> `Sync
+    | ClientProvider.Select_nothing ->
+      if t -. env.last_notifier_check_time > 0.5 then
+        `Async
+      else
+        `Skip
     (* Do not process any disk changes when there are pending persistent
     * client requests - some of them might be edits, and we don't want to
     * do analysis on mid-edit state of the world *)
-    | _ -> `Skip
+    | ClientProvider.Select_persistent -> `Skip
   in
   let (env, updates, updates_stale) = query_notifier genv env query_kind t in
   let acc = { acc with updates_stale } in
   let is_idle =
-    (not has_persistent_connection_request)
+    select_outcome <> ClientProvider.Select_persistent
     && (* "average person types [...] between 190 and 200 characters per minute"
         * 60/200 = 0.3 *)
     t -. env.last_command_time > 0.3
@@ -513,16 +517,11 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
     then
       (acc, env)
     else
-      recheck_loop acc genv env new_client has_persistent_connection_request
+      recheck_loop acc genv env select_outcome
 
-let recheck_loop genv env client has_persistent_connection_request =
+let recheck_loop genv env select_outcome =
   let (stats, env) =
-    recheck_loop
-      empty_recheck_loop_stats
-      genv
-      env
-      client
-      has_persistent_connection_request
+    recheck_loop empty_recheck_loop_stats genv env select_outcome
   in
   { env with recent_recheck_loop_stats = stats }
 
@@ -606,9 +605,9 @@ let serve_one_iteration genv env client_provider =
     | (false, true) -> None
     | (false, false) -> Some `Force_dormant_start_only
   in
-  let (client, has_persistent_connection_request) =
+  let select_outcome =
     match client_kind with
-    | None -> (None, false)
+    | None -> ClientProvider.Select_nothing
     | Some client_kind ->
       ClientProvider.sleep_and_check
         client_provider
@@ -617,12 +616,8 @@ let serve_one_iteration genv env client_provider =
         ~idle_gc_slice
         client_kind
   in
-  (* client here is "None" if we should either handle from our existing  *)
-  (* persistent client (i.e. has_persistent_connection_request), or if   *)
-  (* there's nothing to handle. It's "Some ..." if we should handle from *)
-  (* a new client.                                                       *)
   let env =
-    if (not has_persistent_connection_request) && client = None then (
+    if select_outcome = ClientProvider.Select_nothing then (
       let last_stats = env.recent_recheck_loop_stats in
       (* Ugly hack: We want GC_SHAREDMEM_RAN to record the last rechecked
        * count so that we can figure out if the largest reclamations
@@ -653,7 +648,7 @@ let serve_one_iteration genv env client_provider =
   HackEventLogger.with_id ~stage recheck_id @@ fun () ->
   (* We'll first do "recheck_loop" to handle all outstanding changes, so that *)
   (* after that we'll be able to give an up-to-date answer to the client. *)
-  let env = recheck_loop genv env client has_persistent_connection_request in
+  let env = recheck_loop genv env select_outcome in
   let env = update_recheck_values env start_t recheck_id in
   (* if actual work was done, log whether anything got communicated to client *)
   let log_diagnostics =
@@ -699,9 +694,10 @@ let serve_one_iteration genv env client_provider =
         { env with diag_subscribe = Some sub }
   in
   let env =
-    match client with
-    | None -> env
-    | Some client ->
+    match select_outcome with
+    | ClientProvider.Select_persistent -> env
+    | ClientProvider.Select_nothing -> env
+    | ClientProvider.Select_new client ->
       begin
         try
           (* client here is the new client (not the existing persistent client) *)
@@ -809,9 +805,9 @@ let priority_client_interrupt_handler genv client_provider env =
       MultiThreadedCall.Cancel )
   ) else
     let idle_gc_slice = genv.local_config.ServerLocalConfig.idle_gc_slice in
-    let (client, has_persistent_connection_request) =
+    let select_outcome =
       if ServerRevisionTracker.is_hg_updating () then
-        (None, false)
+        ClientProvider.Select_nothing
       else
         ClientProvider.sleep_and_check
           client_provider
@@ -820,15 +816,15 @@ let priority_client_interrupt_handler genv client_provider env =
           ~idle_gc_slice
           `Priority
     in
-    (* we should only be looking at new priority clients, not existing persistent
-     * connection *)
-    assert (not has_persistent_connection_request);
     let env =
-      match client with
-      (* This is possible because client might have went away during
-       * sleep_and_check. *)
-      | None -> env
-      | Some client ->
+      match select_outcome with
+      | ClientProvider.Select_persistent ->
+        failwith "should only be looking at new priority clients"
+      | ClientProvider.Select_nothing ->
+        (* This is possible because client might have went away during
+         * sleep_and_check. *)
+        env
+      | ClientProvider.Select_new client ->
         (match handle_connection genv env client `Non_persistent with
         | ServerUtils.Needs_full_recheck (_, _, reason) ->
           failwith

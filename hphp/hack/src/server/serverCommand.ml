@@ -294,7 +294,8 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     in
     Hh_logger.log
       ~lvl
-      "Handled %s [%f ms]"
+      "Handled %s priority: %s [%f ms]"
+      (ClientProvider.priority_to_string client)
       cmd_string
       (Unix.gettimeofday () -. t);
     HackEventLogger.handled_command

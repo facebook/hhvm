@@ -12,6 +12,11 @@ module type S = sig
 
   type client
 
+  type select_outcome =
+    | Select_persistent
+    | Select_new of client
+    | Select_nothing
+
   exception Client_went_away
 
   val provider_from_file_descriptors :
@@ -29,9 +34,7 @@ module type S = sig
       bool ->
     idle_gc_slice:int ->
     [ `Any | `Priority | `Force_dormant_start_only ] ->
-    (* Returns an optional new client, and a boolean for whether there is
-     * a request on the persistent client. *)
-    client option * bool
+    select_outcome
 
   val has_persistent_connection_request : client -> bool
 
@@ -52,6 +55,8 @@ module type S = sig
   val make_persistent : client -> client
 
   val is_persistent : client -> bool
+
+  val priority_to_string : client -> string
 
   val shutdown_client : client -> unit
 

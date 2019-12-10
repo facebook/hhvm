@@ -135,6 +135,11 @@ type t = unit
 
 type client = connection_type
 
+type select_outcome =
+  | Select_persistent
+  | Select_new of client
+  | Select_nothing
+
 exception Client_went_away
 
 let provider_from_file_descriptors _ = ()
@@ -142,8 +147,12 @@ let provider_from_file_descriptors _ = ()
 let provider_for_test _ = ()
 
 let sleep_and_check _ _ ~ide_idle:_ ~idle_gc_slice:_ _ =
-  ( get_mocked_new_client_type (),
-    Option.is_some (get_mocked_client_request Persistent) )
+  let client_opt = get_mocked_new_client_type () in
+  let is_persistent = Option.is_some (get_mocked_client_request Persistent) in
+  match (is_persistent, client_opt) with
+  | (true, _) -> Select_persistent
+  | (false, Some client) -> Select_new client
+  | (false, None) -> Select_nothing
 
 let has_persistent_connection_request _ =
   Option.is_some (get_mocked_client_request Persistent)
@@ -175,6 +184,8 @@ let get_channels _ = not_implemented ()
 let is_persistent = function
   | Persistent -> true
   | Non_persistent -> false
+
+let priority_to_string (_client : client) : string = "mock"
 
 let make_persistent _ = ServerCommandTypes.Persistent
 

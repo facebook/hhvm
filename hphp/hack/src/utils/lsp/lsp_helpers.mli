@@ -81,6 +81,8 @@ val supports_snippets : Lsp.Initialize.params -> bool
 
 val supports_connectionStatus : Lsp.Initialize.params -> bool
 
+val get_uri_opt : Lsp.lsp_message -> Lsp.documentUri option
+
 val telemetry : Jsonrpc.writer -> Lsp.MessageType.t -> string -> unit
 
 val telemetry_error : Jsonrpc.writer -> string -> unit

@@ -288,6 +288,85 @@ let supports_snippets (p : Lsp.Initialize.params) : bool =
 let supports_connectionStatus (p : Lsp.Initialize.params) : bool =
   Lsp.Initialize.(p.client_capabilities.telemetry.connectionStatus)
 
+let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
+  let open TextDocumentIdentifier in
+  match m with
+  | RequestMessage (_, DocumentCodeLensRequest p) ->
+    Some p.DocumentCodeLens.textDocument.uri
+  | RequestMessage (_, HoverRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, DefinitionRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, TypeDefinitionRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, CodeActionRequest p) ->
+    Some p.CodeActionRequest.textDocument.uri
+  | RequestMessage (_, CompletionRequest p) ->
+    Some p.Completion.loc.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, DocumentSymbolRequest p) ->
+    Some p.DocumentSymbol.textDocument.uri
+  | RequestMessage (_, FindReferencesRequest p) ->
+    Some p.FindReferences.loc.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, GoToImplementationRequest p) ->
+    Some p.GoToImplementation.loc.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, DocumentHighlightRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, TypeCoverageRequest p) ->
+    Some p.TypeCoverage.textDocument.uri
+  | RequestMessage (_, DocumentFormattingRequest p) ->
+    Some p.DocumentFormatting.textDocument.uri
+  | RequestMessage (_, DocumentRangeFormattingRequest p) ->
+    Some p.DocumentRangeFormatting.textDocument.uri
+  | RequestMessage (_, DocumentOnTypeFormattingRequest p) ->
+    Some p.DocumentOnTypeFormatting.textDocument.uri
+  | RequestMessage (_, RenameRequest p) -> Some p.Rename.textDocument.uri
+  | RequestMessage (_, SignatureHelpRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
+  | NotificationMessage (PublishDiagnosticsNotification p) ->
+    Some p.PublishDiagnostics.uri
+  | NotificationMessage (DidOpenNotification p) ->
+    Some p.DidOpen.textDocument.TextDocumentItem.uri
+  | NotificationMessage (DidCloseNotification p) ->
+    Some p.DidClose.textDocument.uri
+  | NotificationMessage (DidSaveNotification p) ->
+    Some p.DidSave.textDocument.uri
+  | NotificationMessage (DidChangeNotification p) ->
+    Some p.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
+  | NotificationMessage (DidChangeWatchedFilesNotification p) ->
+    begin
+      match p.DidChangeWatchedFiles.changes with
+      | [] -> None
+      | { DidChangeWatchedFiles.uri; _ } :: _ -> Some uri
+    end
+  | RequestMessage (_, HackTestStartServerRequest)
+  | RequestMessage (_, HackTestStopServerRequest)
+  | RequestMessage (_, HackTestShutdownServerlessRequest)
+  | RequestMessage (_, UnknownRequest _)
+  | RequestMessage (_, InitializeRequest _)
+  | RequestMessage (_, RegisterCapabilityRequest _)
+  | RequestMessage (_, ShutdownRequest)
+  | RequestMessage (_, CodeLensResolveRequest _)
+  | RequestMessage (_, CompletionItemResolveRequest _)
+  | RequestMessage (_, WorkspaceSymbolRequest _)
+  | RequestMessage (_, ShowMessageRequestRequest _)
+  | RequestMessage (_, ShowStatusRequest _)
+  | RequestMessage (_, RageRequest)
+  | NotificationMessage ExitNotification
+  | NotificationMessage (CancelRequestNotification _)
+  | NotificationMessage (LogMessageNotification _)
+  | NotificationMessage (TelemetryNotification _)
+  | NotificationMessage (ShowMessageNotification _)
+  | NotificationMessage (ProgressNotification _)
+  | NotificationMessage (ActionRequiredNotification _)
+  | NotificationMessage (ConnectionStatusNotification _)
+  | NotificationMessage InitializedNotification
+  | NotificationMessage SetTraceNotification
+  | NotificationMessage LogTraceNotification
+  | NotificationMessage (ToggleTypeCoverageNotification _)
+  | NotificationMessage (UnknownNotification _)
+  | ResponseMessage _ ->
+    None
+
 (************************************************************************)
 (* Wrappers for some LSP methods                                        *)
 (************************************************************************)

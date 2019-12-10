@@ -3287,641 +3287,607 @@ let tick_showStatus
 (* handle_event: Process and respond to a message, and update the LSP state
    machine accordingly. In case the message was a request, it returns the
    json it responded with, so the caller can log it. *)
-let handle_event
+let handle_client_message
     ~(env : env)
     ~(state : state ref)
     ~(client : Jsonrpc.queue)
     ~(ide_service : ClientIdeService.t)
-    ~(event : event)
+    ~(message : Jsonrpc.message)
     ~(ref_unblocked_time : float ref) : unit Lwt.t =
-  Jsonrpc.(
-    Main_env.(
-      let%lwt () =
-        (* make sure to wrap any exceptions below in the promise *)
-        match (!state, event) with
-        (* response *)
-        | (_, Client_message c) when c.kind = Jsonrpc.Response ->
-          let id =
-            match c.id with
-            | Some (Hh_json.JSON_Number id) -> NumberId (int_of_string id)
-            | Some (Hh_json.JSON_String id) -> StringId id
-            | _ -> failwith "malformed response id"
-          in
-          let (on_result, on_error) =
-            match IdMap.find_opt id !callbacks_outstanding with
-            | Some callbacks -> callbacks
-            | None ->
-              failwith
-                "response id doesn't correspond to an outstanding request"
-          in
-          if Option.is_some c.error then (
-            let code = Jget.int_exn c.error "code" in
-            let message = Jget.string_exn c.error "message" in
-            let data = Jget.val_opt c.error "data" in
-            let%lwt new_state = on_error code message data !state in
-            state := new_state;
-            Lwt.return_unit
-          ) else
-            let%lwt new_state = on_result c.result !state in
-            state := new_state;
-            Lwt.return_unit
-        (* shutdown request *)
-        | (_, Client_message c) when c.method_ = "shutdown" ->
-          let%lwt new_state =
-            do_shutdown !state ide_service c.tracking_id ref_unblocked_time
-          in
-          state := new_state;
-          print_shutdown () |> respond_jsonrpc ~powered_by:Language_server c;
-          Lwt.return_unit
-        (* cancel notification *)
-        | (_, Client_message c) when c.method_ = "$/cancelRequest" ->
-          (* For now, we'll ignore it. *)
-          Lwt.return_unit
-        (* exit notification *)
-        | (_, Client_message c) when c.method_ = "exit" ->
-          if !state = Post_shutdown then
-            exit_ok ()
-          else
-            exit_fail ()
-        (* rage request *)
-        | (_, Client_message c) when c.method_ = "telemetry/rage" ->
-          let%lwt result = do_rage !state ref_unblocked_time in
-          result |> print_rage |> respond_jsonrpc ~powered_by:Language_server c;
-          Lwt.return_unit
-        | (_, Client_message c)
-          when env.use_serverless_ide
-               && c.method_ = "workspace/didChangeWatchedFiles" ->
-          DidChangeWatchedFiles.(
-            let notification = parse_didChangeWatchedFiles c.params in
-            List.iter notification.changes ~f:(fun change ->
-                let path = lsp_uri_to_path change.uri in
-                let path = Path.make path in
-                ClientIdeService.notify_file_changed
-                  ide_service
-                  ~tracking_id:c.tracking_id
-                  path);
-            Lwt.return_unit)
-        (* initialize request *)
-        | (Pre_init, Client_message c) when c.method_ = "initialize" ->
-          let initialize_params = c.params |> parse_initialize in
-          Lwt.wakeup_later initialize_params_resolver initialize_params;
-          set_up_hh_logger_for_client_lsp ();
-
-          let%lwt version = read_hhconfig_version () in
-          hhconfig_version := version;
-          let%lwt new_state = connect !state in
-          state := new_state;
-          let root = Path.make (Lsp_helpers.get_root initialize_params) in
-          Relative_path.set_path_prefix Relative_path.Root root;
-          do_initialize root
-          |> print_initialize
-          |> respond_jsonrpc ~powered_by:Language_server c;
-
-          if env.use_serverless_ide then (
-            let id = NumberId (Jsonrpc.get_next_request_id ()) in
-            let message = do_didChangeWatchedFiles_registerCapability () in
-            to_stdout (print_lsp_request id message);
-            let on_result ~result:_ state = Lwt.return state in
-            let on_error ~code:_ ~message:_ ~data:_ state = Lwt.return state in
-            callbacks_outstanding :=
-              IdMap.add id (on_result, on_error) !callbacks_outstanding
-          );
-
-          if not @@ Sys_utils.is_test_mode () then
-            Lsp_helpers.telemetry_log
-              to_stdout
-              ("Version in hhconfig=" ^ !hhconfig_version);
-          Lwt.return_unit
-        (* any request/notification if we haven't yet initialized *)
-        | (Pre_init, Client_message _c) ->
-          raise (Error.ServerNotInitialized "Server not yet initialized")
-        (* Text document completion: "AutoComplete!" *)
-        | ( ( In_init { In_init_env.editor_open_files; _ }
-            | Main_loop { Main_env.editor_open_files; _ }
-            | Lost_server { Lost_env.editor_open_files; _ } ),
-            Client_message c )
-          when env.use_serverless_ide && c.method_ = "textDocument/completion"
-          ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_completion c.params
-            |> do_completion_local ide_service c.tracking_id editor_open_files
-          in
-          result
-          |> print_completion
-          |> respond_jsonrpc ~powered_by:Serverless_ide c;
-          Lwt.return_unit
-        (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
-        | ( ( In_init { In_init_env.editor_open_files; _ }
-            | Main_loop { Main_env.editor_open_files; _ }
-            | Lost_server { Lost_env.editor_open_files; _ } ),
-            Client_message c )
-          when env.use_serverless_ide && c.method_ = "completionItem/resolve" ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_completionItem c.params
-            |> do_resolve_local ide_service c.tracking_id editor_open_files
-          in
-          result
-          |> print_completionItem
-          |> respond_jsonrpc ~powered_by:Serverless_ide c;
-          Lwt.return_unit
-        (* Document highlighting in serverless IDE *)
-        | ( ( In_init { In_init_env.editor_open_files; _ }
-            | Main_loop { Main_env.editor_open_files; _ }
-            | Lost_server { Lost_env.editor_open_files; _ } ),
-            Client_message c )
-          when env.use_serverless_ide
-               && c.method_ = "textDocument/documentHighlight" ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_documentHighlight c.params
-            |> do_highlight_local ide_service c.tracking_id editor_open_files
-          in
-          result |> print_documentHighlight |> Jsonrpc.respond to_stdout c;
-          Lwt.return_unit
-        (* Type coverage in serverless IDE *)
-        | ( ( In_init { In_init_env.editor_open_files; _ }
-            | Main_loop { Main_env.editor_open_files; _ }
-            | Lost_server { Lost_env.editor_open_files; _ } ),
-            Client_message c )
-          when env.use_serverless_ide && c.method_ = "textDocument/typeCoverage"
-          ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_typeCoverage c.params
-            |> do_typeCoverage_local ide_service c.tracking_id editor_open_files
-          in
-          result |> print_typeCoverage |> Jsonrpc.respond to_stdout c;
-          Lwt.return_unit
-        (* Hover docblocks in serverless IDE *)
-        | ( ( In_init { In_init_env.editor_open_files; _ }
-            | Main_loop { Main_env.editor_open_files; _ }
-            | Lost_server { Lost_env.editor_open_files; _ } ),
-            Client_message c )
-          when env.use_serverless_ide && c.method_ = "textDocument/hover" ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_hover c.params
-            |> do_hover_local ide_service c.tracking_id editor_open_files
-          in
-          result |> print_hover |> respond_jsonrpc ~powered_by:Serverless_ide c;
-          Lwt.return_unit
-        | ( ( In_init { In_init_env.editor_open_files; _ }
-            | Main_loop { Main_env.editor_open_files; _ }
-            | Lost_server { Lost_env.editor_open_files; _ } ),
-            Client_message c )
-          when env.use_serverless_ide
-               && c.method_ = "textDocument/documentSymbol" ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_documentSymbol c.params
-            |> do_documentSymbol_local
-                 ide_service
-                 c.tracking_id
-                 editor_open_files
-          in
-          result
-          |> print_documentSymbol
-          |> respond_jsonrpc ~powered_by:Serverless_ide c;
-          Lwt.return_unit
-        | ( ( In_init { In_init_env.editor_open_files; _ }
-            | Main_loop { Main_env.editor_open_files; _ }
-            | Lost_server { Lost_env.editor_open_files; _ } ),
-            Client_message c )
-          when env.use_serverless_ide && c.method_ = "textDocument/definition"
-          ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_definition c.params
-            |> do_definition_local ide_service c.tracking_id editor_open_files
-          in
-          result
-          |> print_definition
-          |> respond_jsonrpc ~powered_by:Serverless_ide c;
-          Lwt.return_unit
-        | ( ( In_init { In_init_env.editor_open_files; _ }
-            | Main_loop { Main_env.editor_open_files; _ }
-            | Lost_server { Lost_env.editor_open_files; _ } ),
-            Client_message c )
-          when env.use_serverless_ide
-               && c.method_ = "textDocument/typeDefinition" ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_definition c.params
-            |> do_typeDefinition_local
-                 ide_service
-                 c.tracking_id
-                 editor_open_files
-          in
-          result
-          |> print_definition
-          |> respond_jsonrpc ~powered_by:Serverless_ide c;
-          Lwt.return_unit
-        (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
-        | ( ( In_init { In_init_env.editor_open_files; _ }
-            | Main_loop { Main_env.editor_open_files; _ }
-            | Lost_server { Lost_env.editor_open_files; _ } ),
-            Client_message c )
-          when env.use_serverless_ide
-               && c.method_ = "textDocument/signatureHelp" ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_textDocumentPositionParams c.params
-            |> do_signatureHelp_local
-                 ide_service
-                 c.tracking_id
-                 editor_open_files
-          in
-          result
-          |> print_signatureHelp
-          |> respond_jsonrpc ~powered_by:Serverless_ide c;
-          Lwt.return_unit
-        (* textDocument/formatting *)
-        | ( ( In_init { In_init_env.editor_open_files; _ }
-            | Main_loop { Main_env.editor_open_files; _ }
-            | Lost_server { Lost_env.editor_open_files; _ } ),
-            Client_message c )
-          when c.method_ = "textDocument/formatting" ->
-          parse_documentFormatting c.params
-          |> do_documentFormatting editor_open_files
-          |> print_documentFormatting
-          |> respond_jsonrpc ~powered_by:Language_server c;
-          Lwt.return_unit
-        (* textDocument/formatting *)
-        | ( ( In_init { In_init_env.editor_open_files; _ }
-            | Main_loop { Main_env.editor_open_files; _ }
-            | Lost_server { Lost_env.editor_open_files; _ } ),
-            Client_message c )
-          when c.method_ = "textDocument/rangeFormatting" ->
-          parse_documentRangeFormatting c.params
-          |> do_documentRangeFormatting editor_open_files
-          |> print_documentRangeFormatting
-          |> respond_jsonrpc ~powered_by:Language_server c;
-          Lwt.return_unit
-        (* textDocument/onTypeFormatting *)
-        | ( ( In_init { In_init_env.editor_open_files; _ }
-            | Main_loop { Main_env.editor_open_files; _ }
-            | Lost_server { Lost_env.editor_open_files; _ } ),
-            Client_message c )
-          when c.method_ = "textDocument/onTypeFormatting" ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          parse_documentOnTypeFormatting c.params
-          |> do_documentOnTypeFormatting editor_open_files
-          |> print_documentOnTypeFormatting
-          |> respond_jsonrpc ~powered_by:Language_server c;
-          Lwt.return_unit
-        (* any request/notification if we're not yet ready *)
-        | (In_init _, Client_message c) ->
-          begin
-            match c.method_ with
-            | "textDocument/didOpen"
-            | "textDocument/didChange"
-            | "textDocument/didClose" ->
-              (* Already handled by [track_open_files]. *)
-              Lwt.return_unit
-            | _ ->
-              raise
-                (Error.RequestCancelled
-                   (Hh_server_initializing |> hh_server_state_to_string))
-              (* We deny all other requests. Operation_cancelled is the only *)
-              (* error-response that won't produce logs/warnings on most clients. *)
-          end
-        (* idle tick while waiting for server to complete initialization *)
-        | (In_init ienv, Tick) ->
-          In_init_env.(
-            let time = Unix.time () in
-            let delay_in_secs =
-              int_of_float (time -. ienv.most_recent_start_time)
-            in
-            let%lwt () =
-              if delay_in_secs <= 10 then (
-                report_connect_progress env ienv ide_service;
-                Lwt.return_unit
-              ) else
-                (* terminate + retry the connection *)
-                  let%lwt new_state = connect !state in
-                  state := new_state;
-                  Lwt.return_unit
-            in
-            Lwt.return_unit)
-        (* server completes initialization *)
-        | (In_init ienv, Server_hello) ->
-          let%lwt () = connect_after_hello ienv.In_init_env.conn !state in
-          state := report_connect_end ienv;
-          Lwt.return_unit
-        (* any "hello" from the server when we weren't expecting it. This is so *)
-        (* egregious that we can't trust anything more from the server.         *)
-        | (_, Server_hello) ->
-          let message = "Unexpected hello" in
-          let stack = "" in
-          raise
-            (Server_fatal_connection_exception { Marshal_tools.message; stack })
-        (* Tick when we're connected to the server *)
-        | (Main_loop menv, Tick) ->
-          if menv.needs_idle then (
-            (* If we're connected to a server and have no more messages in the queue, *)
-            (* then we must let the server know we're idle, so it will be free to     *)
-            (* handle command-line requests.                                          *)
-            state := Main_loop { menv with needs_idle = false };
-            rpc menv.conn ref_unblocked_time ServerCommandTypes.IDE_IDLE
-          ) else
-            Lwt.return_unit
-        | (Main_loop _menv, Client_message c) when c.method_ = "initialized" ->
-          (* Currently, we don't do anything in response to this notification. *)
-          Lwt.return_unit
-        (* textDocument/hover request *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/hover" ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_hover c.params |> do_hover menv.conn ref_unblocked_time
-          in
-          result |> print_hover |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* textDocument/typeDefinition request *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/typeDefinition" ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_definition c.params
-            |> do_typeDefinition menv.conn ref_unblocked_time
-          in
-          result |> print_definition |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* textDocument/definition request *)
-        | (Main_loop { conn; editor_open_files; _ }, Client_message c)
-          when c.method_ = "textDocument/definition" ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_definition c.params
-            |> do_definition conn ref_unblocked_time editor_open_files
-          in
-          result |> print_definition |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* textDocument/completion request *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/completion" ->
-          let do_completion =
-            if env.use_ffp_autocomplete then
-              do_completion_ffp
-            else
-              do_completion_legacy
-          in
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_completion c.params
-            |> do_completion menv.conn ref_unblocked_time
-          in
-          result |> print_completion |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* completionItem/resolve request *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "completionItem/resolve" ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_completionItem c.params
-            |> do_completionItemResolve menv.conn ref_unblocked_time
-          in
-          result
-          |> print_completionItem
-          |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* workspace/symbol request *)
-        | (Main_loop menv, Client_message c) when c.method_ = "workspace/symbol"
-          ->
-          let%lwt result =
-            parse_workspaceSymbol c.params
-            |> do_workspaceSymbol menv.conn ref_unblocked_time
-          in
-          result
-          |> print_workspaceSymbol
-          |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* textDocument/documentSymbol request *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/documentSymbol" ->
-          let%lwt result =
-            parse_documentSymbol c.params
-            |> do_documentSymbol menv.conn ref_unblocked_time
-          in
-          result
-          |> print_documentSymbol
-          |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* textDocument/references request *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/references" ->
-          let%lwt () = cancel_if_stale client c long_timeout in
-          let%lwt result =
-            parse_findReferences c.params
-            |> do_findReferences menv.conn ref_unblocked_time
-          in
-          result |> print_Locations |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* textDocument/implementation request *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/implementation" ->
-          let%lwt () = cancel_if_stale client c long_timeout in
-          let%lwt result =
-            parse_goToImplementation c.params
-            |> do_goToImplementation menv.conn ref_unblocked_time
-          in
-          result |> print_Locations |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* textDocument/rename *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/rename" ->
-          let%lwt result =
-            parse_documentRename c.params
-            |> do_documentRename menv.conn ref_unblocked_time
-          in
-          result
-          |> print_documentRename
-          |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* textDocument/documentHighlight *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/documentHighlight" ->
-          let%lwt () = cancel_if_stale client c short_timeout in
-          let%lwt result =
-            parse_documentHighlight c.params
-            |> do_documentHighlight menv.conn ref_unblocked_time
-          in
-          result
-          |> print_documentHighlight
-          |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* textDocument/typeCoverage *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/typeCoverage" ->
-          let%lwt result =
-            parse_typeCoverage c.params
-            |> do_typeCoverage menv.conn ref_unblocked_time
-          in
-          result
-          |> print_typeCoverage
-          |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* textDocument/didOpen notification *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/didOpen" ->
-          parse_didOpen c.params |> do_didOpen menv.conn ref_unblocked_time
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "workspace/toggleTypeCoverage" ->
-          parse_toggleTypeCoverage c.params
-          |> do_toggleTypeCoverage menv.conn ref_unblocked_time
-        (* textDocument/didClose notification *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/didClose" ->
-          parse_didClose c.params |> do_didClose menv.conn ref_unblocked_time
-        (* textDocument/didChange notification *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/didChange" ->
-          parse_didChange c.params |> do_didChange menv.conn ref_unblocked_time
-        (* textDocument/didSave notification *)
-        | (Main_loop _menv, Client_message c)
-          when c.method_ = "textDocument/didSave" ->
-          Lwt.return_unit
-        (* textDocument/signatureHelp notification *)
-        | (Main_loop menv, Client_message c)
-          when c.method_ = "textDocument/signatureHelp" ->
-          let%lwt result =
-            parse_textDocumentPositionParams c.params
-            |> do_signatureHelp menv.conn ref_unblocked_time
-          in
-          result
-          |> print_signatureHelp
-          |> respond_jsonrpc ~powered_by:Hh_server c;
-          Lwt.return_unit
-        (* server busy status *)
-        | (_, Server_message { push = ServerCommandTypes.BUSY_STATUS status; _ })
-          ->
-          let should_send_status =
-            match Lwt.poll initialize_params_promise with
-            | None -> false
-            | Some p ->
-              Lsp.Initialize.(p.initializationOptions.sendServerStatusEvents)
-          in
-          ( if should_send_status then
-            let status_message =
-              ServerCommandTypes.(
-                match status with
-                | Needs_local_typecheck -> "needs_local_typecheck"
-                | Doing_local_typecheck -> "doing_local_typecheck"
-                | Done_local_typecheck -> "done_local_typecheck"
-                | Doing_global_typecheck _ -> "doing_global_typecheck"
-                | Done_global_typecheck _ -> "done_global_typecheck")
-            in
-            Lsp_helpers.telemetry_log to_stdout status_message );
-          state := do_server_busy !state status;
-          Lwt.return_unit
-        (* textDocument/publishDiagnostics notification *)
-        | ( Main_loop menv,
-            Server_message
-              { push = ServerCommandTypes.DIAGNOSTIC (_, errors); _ } ) ->
-          let uris_with_diagnostics =
-            do_diagnostics menv.uris_with_diagnostics errors
-          in
-          state := Main_loop { menv with uris_with_diagnostics };
-          Lwt.return_unit
-        (* any server diagnostics that come after we've shut down *)
-        | (_, Server_message { push = ServerCommandTypes.DIAGNOSTIC _; _ }) ->
-          Lwt.return_unit
-        | ( _,
-            Client_ide_notification
-              ( ClientIdeMessage.Initializing
-              | ClientIdeMessage.Processing_files _ ) ) ->
-          (* Do nothing; these are handled by `ClientIdeService`. *)
-          Lwt.return_unit
-        | (_, Client_ide_notification ClientIdeMessage.Done_processing) ->
-          Lsp_helpers.telemetry_log
-            to_stdout
-            "[client-ide] Done processing file changes";
-          Lwt.return_unit
-        | (_, Client_message c) when c.method_ = "$test/shutdownServerlessIde"
-          ->
-          let%lwt () =
-            stop_ide_service
+  let open Jsonrpc in
+  let open Main_env in
+  let%lwt () =
+    (* make sure to wrap any exceptions below in the promise *)
+    match (!state, message) with
+    (* response *)
+    | (_, c) when c.kind = Jsonrpc.Response ->
+      let id =
+        match c.id with
+        | Some (Hh_json.JSON_Number id) -> NumberId (int_of_string id)
+        | Some (Hh_json.JSON_String id) -> StringId id
+        | _ -> failwith "malformed response id"
+      in
+      let (on_result, on_error) =
+        match IdMap.find_opt id !callbacks_outstanding with
+        | Some callbacks -> callbacks
+        | None ->
+          failwith "response id doesn't correspond to an outstanding request"
+      in
+      if Option.is_some c.error then (
+        let code = Jget.int_exn c.error "code" in
+        let message = Jget.string_exn c.error "message" in
+        let data = Jget.val_opt c.error "data" in
+        let%lwt new_state = on_error code message data !state in
+        state := new_state;
+        Lwt.return_unit
+      ) else
+        let%lwt new_state = on_result c.result !state in
+        state := new_state;
+        Lwt.return_unit
+    (* shutdown request *)
+    | (_, c) when c.method_ = "shutdown" ->
+      let%lwt new_state =
+        do_shutdown !state ide_service c.tracking_id ref_unblocked_time
+      in
+      state := new_state;
+      print_shutdown () |> respond_jsonrpc ~powered_by:Language_server c;
+      Lwt.return_unit
+    (* cancel notification *)
+    | (_, c) when c.method_ = "$/cancelRequest" ->
+      (* For now, we'll ignore it. *)
+      Lwt.return_unit
+    (* exit notification *)
+    | (_, c) when c.method_ = "exit" ->
+      if !state = Post_shutdown then
+        exit_ok ()
+      else
+        exit_fail ()
+    (* rage request *)
+    | (_, c) when c.method_ = "telemetry/rage" ->
+      let%lwt result = do_rage !state ref_unblocked_time in
+      result |> print_rage |> respond_jsonrpc ~powered_by:Language_server c;
+      Lwt.return_unit
+    | (_, c)
+      when env.use_serverless_ide
+           && c.method_ = "workspace/didChangeWatchedFiles" ->
+      DidChangeWatchedFiles.(
+        let notification = parse_didChangeWatchedFiles c.params in
+        List.iter notification.changes ~f:(fun change ->
+            let path = lsp_uri_to_path change.uri in
+            let path = Path.make path in
+            ClientIdeService.notify_file_changed
               ide_service
               ~tracking_id:c.tracking_id
-              ~reason:ClientIdeService.Stop_reason.Testing
-          in
-          respond_jsonrpc ~powered_by:Serverless_ide c Hh_json.JSON_Null;
-          Lwt.return_unit
-        | (_, Client_message c) when c.method_ = "$test/stopHhServer" ->
-          let root_folder =
-            Path.make (Relative_path.path_of_prefix Relative_path.Root)
-          in
-          ClientStop.kill_server root_folder env.from;
-          respond_jsonrpc ~powered_by:Serverless_ide c Hh_json.JSON_Null;
-          Lwt.return_unit
-        | (_, Client_message c) when c.method_ = "$test/startHhServer" ->
-          let root_folder =
-            Path.make (Relative_path.path_of_prefix Relative_path.Root)
-          in
-          start_server root_folder;
-          respond_jsonrpc ~powered_by:Serverless_ide c Hh_json.JSON_Null;
-          Lwt.return_unit
-        (* catch-all for client reqs/notifications we haven't yet implemented *)
-        | (Main_loop _menv, Client_message c) ->
-          let message = Printf.sprintf "not implemented: %s" c.method_ in
-          raise (Error.MethodNotFound message)
-        (* catch-all for requests/notifications after shutdown request *)
-        | (Post_shutdown, Client_message _c) ->
-          raise (Error.InvalidRequest "already received shutdown request")
-        (* server shut-down request *)
-        | ( Main_loop _menv,
-            Server_message { push = ServerCommandTypes.NEW_CLIENT_CONNECTED; _ }
-          ) ->
-          let%lwt new_state =
-            do_lost_server
-              !state
-              {
-                Lost_env.explanation = "hh_server is active in another window.";
-                new_hh_server_state = Hh_server_stolen;
-                start_on_click = false;
-                trigger_on_lock_file = false;
-                trigger_on_lsp = true;
-              }
-          in
-          state := new_state;
-          Lwt.return_unit
-        (* server shut-down request, unexpected *)
-        | ( _,
-            Server_message { push = ServerCommandTypes.NEW_CLIENT_CONNECTED; _ }
-          ) ->
-          let message = "unexpected close of absent server" in
-          let stack = "" in
-          raise
-            (Server_fatal_connection_exception { Marshal_tools.message; stack })
-        (* server fatal shutdown *)
-        | (_, Server_message { push = ServerCommandTypes.FATAL_EXCEPTION e; _ })
-          ->
-          raise (Server_fatal_connection_exception e)
-        (* server non-fatal exception *)
-        | ( _,
-            Server_message { push = ServerCommandTypes.NONFATAL_EXCEPTION e; _ }
-          ) ->
-          raise (Server_nonfatal_exception e)
-        (* idle tick. No-op. *)
-        | (_, Tick) ->
-          EventLogger.flush ();
-          Lwt.return_unit
-        (* client message when we've lost the server *)
-        | (Lost_server lenv, Client_message _c) ->
-          Lost_env.(
-            (* if trigger_on_lsp_method is set, our caller should already have        *)
-            (* transitioned away from this state.                                     *)
-            assert (not lenv.p.trigger_on_lsp);
+              path);
+        Lwt.return_unit)
+    (* initialize request *)
+    | (Pre_init, c) when c.method_ = "initialize" ->
+      let initialize_params = c.params |> parse_initialize in
+      Lwt.wakeup_later initialize_params_resolver initialize_params;
+      set_up_hh_logger_for_client_lsp ();
 
-            (* We deny all other requests. This is the only response that won't       *)
-            (* produce logs/warnings on most clients...                               *)
-            raise
-              (Error.RequestCancelled
-                 (lenv.p.new_hh_server_state |> hh_server_state_to_string)))
+      let%lwt version = read_hhconfig_version () in
+      hhconfig_version := version;
+      let%lwt new_state = connect !state in
+      state := new_state;
+      let root = Path.make (Lsp_helpers.get_root initialize_params) in
+      Relative_path.set_path_prefix Relative_path.Root root;
+      do_initialize root
+      |> print_initialize
+      |> respond_jsonrpc ~powered_by:Language_server c;
+
+      if env.use_serverless_ide then (
+        let id = NumberId (Jsonrpc.get_next_request_id ()) in
+        let message = do_didChangeWatchedFiles_registerCapability () in
+        to_stdout (print_lsp_request id message);
+        let on_result ~result:_ state = Lwt.return state in
+        let on_error ~code:_ ~message:_ ~data:_ state = Lwt.return state in
+        callbacks_outstanding :=
+          IdMap.add id (on_result, on_error) !callbacks_outstanding
+      );
+
+      if not @@ Sys_utils.is_test_mode () then
+        Lsp_helpers.telemetry_log
+          to_stdout
+          ("Version in hhconfig=" ^ !hhconfig_version);
+      Lwt.return_unit
+    (* any request/notification if we haven't yet initialized *)
+    | (Pre_init, _c) ->
+      raise (Error.ServerNotInitialized "Server not yet initialized")
+    (* Text document completion: "AutoComplete!" *)
+    | ( ( In_init { In_init_env.editor_open_files; _ }
+        | Main_loop { Main_env.editor_open_files; _ }
+        | Lost_server { Lost_env.editor_open_files; _ } ),
+        c )
+      when env.use_serverless_ide && c.method_ = "textDocument/completion" ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_completion c.params
+        |> do_completion_local ide_service c.tracking_id editor_open_files
       in
-      Lwt.return_unit))
+      result |> print_completion |> respond_jsonrpc ~powered_by:Serverless_ide c;
+      Lwt.return_unit
+    (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
+    | ( ( In_init { In_init_env.editor_open_files; _ }
+        | Main_loop { Main_env.editor_open_files; _ }
+        | Lost_server { Lost_env.editor_open_files; _ } ),
+        c )
+      when env.use_serverless_ide && c.method_ = "completionItem/resolve" ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_completionItem c.params
+        |> do_resolve_local ide_service c.tracking_id editor_open_files
+      in
+      result
+      |> print_completionItem
+      |> respond_jsonrpc ~powered_by:Serverless_ide c;
+      Lwt.return_unit
+    (* Document highlighting in serverless IDE *)
+    | ( ( In_init { In_init_env.editor_open_files; _ }
+        | Main_loop { Main_env.editor_open_files; _ }
+        | Lost_server { Lost_env.editor_open_files; _ } ),
+        c )
+      when env.use_serverless_ide
+           && c.method_ = "textDocument/documentHighlight" ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_documentHighlight c.params
+        |> do_highlight_local ide_service c.tracking_id editor_open_files
+      in
+      result |> print_documentHighlight |> Jsonrpc.respond to_stdout c;
+      Lwt.return_unit
+    (* Type coverage in serverless IDE *)
+    | ( ( In_init { In_init_env.editor_open_files; _ }
+        | Main_loop { Main_env.editor_open_files; _ }
+        | Lost_server { Lost_env.editor_open_files; _ } ),
+        c )
+      when env.use_serverless_ide && c.method_ = "textDocument/typeCoverage" ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_typeCoverage c.params
+        |> do_typeCoverage_local ide_service c.tracking_id editor_open_files
+      in
+      result |> print_typeCoverage |> Jsonrpc.respond to_stdout c;
+      Lwt.return_unit
+    (* Hover docblocks in serverless IDE *)
+    | ( ( In_init { In_init_env.editor_open_files; _ }
+        | Main_loop { Main_env.editor_open_files; _ }
+        | Lost_server { Lost_env.editor_open_files; _ } ),
+        c )
+      when env.use_serverless_ide && c.method_ = "textDocument/hover" ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_hover c.params
+        |> do_hover_local ide_service c.tracking_id editor_open_files
+      in
+      result |> print_hover |> respond_jsonrpc ~powered_by:Serverless_ide c;
+      Lwt.return_unit
+    | ( ( In_init { In_init_env.editor_open_files; _ }
+        | Main_loop { Main_env.editor_open_files; _ }
+        | Lost_server { Lost_env.editor_open_files; _ } ),
+        c )
+      when env.use_serverless_ide && c.method_ = "textDocument/documentSymbol"
+      ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_documentSymbol c.params
+        |> do_documentSymbol_local ide_service c.tracking_id editor_open_files
+      in
+      result
+      |> print_documentSymbol
+      |> respond_jsonrpc ~powered_by:Serverless_ide c;
+      Lwt.return_unit
+    | ( ( In_init { In_init_env.editor_open_files; _ }
+        | Main_loop { Main_env.editor_open_files; _ }
+        | Lost_server { Lost_env.editor_open_files; _ } ),
+        c )
+      when env.use_serverless_ide && c.method_ = "textDocument/definition" ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_definition c.params
+        |> do_definition_local ide_service c.tracking_id editor_open_files
+      in
+      result |> print_definition |> respond_jsonrpc ~powered_by:Serverless_ide c;
+      Lwt.return_unit
+    | ( ( In_init { In_init_env.editor_open_files; _ }
+        | Main_loop { Main_env.editor_open_files; _ }
+        | Lost_server { Lost_env.editor_open_files; _ } ),
+        c )
+      when env.use_serverless_ide && c.method_ = "textDocument/typeDefinition"
+      ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_definition c.params
+        |> do_typeDefinition_local ide_service c.tracking_id editor_open_files
+      in
+      result |> print_definition |> respond_jsonrpc ~powered_by:Serverless_ide c;
+      Lwt.return_unit
+    (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
+    | ( ( In_init { In_init_env.editor_open_files; _ }
+        | Main_loop { Main_env.editor_open_files; _ }
+        | Lost_server { Lost_env.editor_open_files; _ } ),
+        c )
+      when env.use_serverless_ide && c.method_ = "textDocument/signatureHelp" ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_textDocumentPositionParams c.params
+        |> do_signatureHelp_local ide_service c.tracking_id editor_open_files
+      in
+      result
+      |> print_signatureHelp
+      |> respond_jsonrpc ~powered_by:Serverless_ide c;
+      Lwt.return_unit
+    (* textDocument/formatting *)
+    | ( ( In_init { In_init_env.editor_open_files; _ }
+        | Main_loop { Main_env.editor_open_files; _ }
+        | Lost_server { Lost_env.editor_open_files; _ } ),
+        c )
+      when c.method_ = "textDocument/formatting" ->
+      parse_documentFormatting c.params
+      |> do_documentFormatting editor_open_files
+      |> print_documentFormatting
+      |> respond_jsonrpc ~powered_by:Language_server c;
+      Lwt.return_unit
+    (* textDocument/formatting *)
+    | ( ( In_init { In_init_env.editor_open_files; _ }
+        | Main_loop { Main_env.editor_open_files; _ }
+        | Lost_server { Lost_env.editor_open_files; _ } ),
+        c )
+      when c.method_ = "textDocument/rangeFormatting" ->
+      parse_documentRangeFormatting c.params
+      |> do_documentRangeFormatting editor_open_files
+      |> print_documentRangeFormatting
+      |> respond_jsonrpc ~powered_by:Language_server c;
+      Lwt.return_unit
+    (* textDocument/onTypeFormatting *)
+    | ( ( In_init { In_init_env.editor_open_files; _ }
+        | Main_loop { Main_env.editor_open_files; _ }
+        | Lost_server { Lost_env.editor_open_files; _ } ),
+        c )
+      when c.method_ = "textDocument/onTypeFormatting" ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      parse_documentOnTypeFormatting c.params
+      |> do_documentOnTypeFormatting editor_open_files
+      |> print_documentOnTypeFormatting
+      |> respond_jsonrpc ~powered_by:Language_server c;
+      Lwt.return_unit
+    (* any request/notification if we're not yet ready *)
+    | (In_init _, c) ->
+      begin
+        match c.method_ with
+        | "textDocument/didOpen"
+        | "textDocument/didChange"
+        | "textDocument/didClose" ->
+          (* Already handled by [track_open_files]. *)
+          Lwt.return_unit
+        | _ ->
+          raise
+            (Error.RequestCancelled
+               (Hh_server_initializing |> hh_server_state_to_string))
+          (* We deny all other requests. Operation_cancelled is the only *)
+          (* error-response that won't produce logs/warnings on most clients. *)
+      end
+    | (Main_loop _menv, c) when c.method_ = "initialized" ->
+      (* Currently, we don't do anything in response to this notification. *)
+      Lwt.return_unit
+    (* textDocument/hover request *)
+    | (Main_loop menv, c) when c.method_ = "textDocument/hover" ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_hover c.params |> do_hover menv.conn ref_unblocked_time
+      in
+      result |> print_hover |> respond_jsonrpc ~powered_by:Hh_server c;
+      Lwt.return_unit
+    (* textDocument/typeDefinition request *)
+    | (Main_loop menv, c) when c.method_ = "textDocument/typeDefinition" ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_definition c.params
+        |> do_typeDefinition menv.conn ref_unblocked_time
+      in
+      result |> print_definition |> respond_jsonrpc ~powered_by:Hh_server c;
+      Lwt.return_unit
+    (* textDocument/definition request *)
+    | (Main_loop { conn; editor_open_files; _ }, c)
+      when c.method_ = "textDocument/definition" ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_definition c.params
+        |> do_definition conn ref_unblocked_time editor_open_files
+      in
+      result |> print_definition |> respond_jsonrpc ~powered_by:Hh_server c;
+      Lwt.return_unit
+    (* textDocument/completion request *)
+    | (Main_loop menv, c) when c.method_ = "textDocument/completion" ->
+      let do_completion =
+        if env.use_ffp_autocomplete then
+          do_completion_ffp
+        else
+          do_completion_legacy
+      in
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_completion c.params |> do_completion menv.conn ref_unblocked_time
+      in
+      result |> print_completion |> respond_jsonrpc ~powered_by:Hh_server c;
+      Lwt.return_unit
+    (* completionItem/resolve request *)
+    | (Main_loop menv, c) when c.method_ = "completionItem/resolve" ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_completionItem c.params
+        |> do_completionItemResolve menv.conn ref_unblocked_time
+      in
+      result |> print_completionItem |> respond_jsonrpc ~powered_by:Hh_server c;
+      Lwt.return_unit
+    (* workspace/symbol request *)
+    | (Main_loop menv, c) when c.method_ = "workspace/symbol" ->
+      let%lwt result =
+        parse_workspaceSymbol c.params
+        |> do_workspaceSymbol menv.conn ref_unblocked_time
+      in
+      result |> print_workspaceSymbol |> respond_jsonrpc ~powered_by:Hh_server c;
+      Lwt.return_unit
+    (* textDocument/documentSymbol request *)
+    | (Main_loop menv, c) when c.method_ = "textDocument/documentSymbol" ->
+      let%lwt result =
+        parse_documentSymbol c.params
+        |> do_documentSymbol menv.conn ref_unblocked_time
+      in
+      result |> print_documentSymbol |> respond_jsonrpc ~powered_by:Hh_server c;
+      Lwt.return_unit
+    (* textDocument/references request *)
+    | (Main_loop menv, c) when c.method_ = "textDocument/references" ->
+      let%lwt () = cancel_if_stale client c long_timeout in
+      let%lwt result =
+        parse_findReferences c.params
+        |> do_findReferences menv.conn ref_unblocked_time
+      in
+      result |> print_Locations |> respond_jsonrpc ~powered_by:Hh_server c;
+      Lwt.return_unit
+    (* textDocument/implementation request *)
+    | (Main_loop menv, c) when c.method_ = "textDocument/implementation" ->
+      let%lwt () = cancel_if_stale client c long_timeout in
+      let%lwt result =
+        parse_goToImplementation c.params
+        |> do_goToImplementation menv.conn ref_unblocked_time
+      in
+      result |> print_Locations |> respond_jsonrpc ~powered_by:Hh_server c;
+      Lwt.return_unit
+    (* textDocument/rename *)
+    | (Main_loop menv, c) when c.method_ = "textDocument/rename" ->
+      let%lwt result =
+        parse_documentRename c.params
+        |> do_documentRename menv.conn ref_unblocked_time
+      in
+      result |> print_documentRename |> respond_jsonrpc ~powered_by:Hh_server c;
+      Lwt.return_unit
+    (* textDocument/documentHighlight *)
+    | (Main_loop menv, c) when c.method_ = "textDocument/documentHighlight" ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        parse_documentHighlight c.params
+        |> do_documentHighlight menv.conn ref_unblocked_time
+      in
+      result
+      |> print_documentHighlight
+      |> respond_jsonrpc ~powered_by:Hh_server c;
+      Lwt.return_unit
+    (* textDocument/typeCoverage *)
+    | (Main_loop menv, c) when c.method_ = "textDocument/typeCoverage" ->
+      let%lwt result =
+        parse_typeCoverage c.params
+        |> do_typeCoverage menv.conn ref_unblocked_time
+      in
+      result |> print_typeCoverage |> respond_jsonrpc ~powered_by:Hh_server c;
+      Lwt.return_unit
+    (* textDocument/didOpen notification *)
+    | (Main_loop menv, c) when c.method_ = "textDocument/didOpen" ->
+      parse_didOpen c.params |> do_didOpen menv.conn ref_unblocked_time
+    | (Main_loop menv, c) when c.method_ = "workspace/toggleTypeCoverage" ->
+      parse_toggleTypeCoverage c.params
+      |> do_toggleTypeCoverage menv.conn ref_unblocked_time
+    (* textDocument/didClose notification *)
+    | (Main_loop menv, c) when c.method_ = "textDocument/didClose" ->
+      parse_didClose c.params |> do_didClose menv.conn ref_unblocked_time
+    (* textDocument/didChange notification *)
+    | (Main_loop menv, c) when c.method_ = "textDocument/didChange" ->
+      parse_didChange c.params |> do_didChange menv.conn ref_unblocked_time
+    (* textDocument/didSave notification *)
+    | (Main_loop _menv, c) when c.method_ = "textDocument/didSave" ->
+      Lwt.return_unit
+    (* textDocument/signatureHelp notification *)
+    | (Main_loop menv, c) when c.method_ = "textDocument/signatureHelp" ->
+      let%lwt result =
+        parse_textDocumentPositionParams c.params
+        |> do_signatureHelp menv.conn ref_unblocked_time
+      in
+      result |> print_signatureHelp |> respond_jsonrpc ~powered_by:Hh_server c;
+      Lwt.return_unit
+    | (_, c) when c.method_ = "$test/shutdownServerlessIde" ->
+      let%lwt () =
+        stop_ide_service
+          ide_service
+          ~tracking_id:c.tracking_id
+          ~reason:ClientIdeService.Stop_reason.Testing
+      in
+      respond_jsonrpc ~powered_by:Serverless_ide c Hh_json.JSON_Null;
+      Lwt.return_unit
+    | (_, c) when c.method_ = "$test/stopHhServer" ->
+      let root_folder =
+        Path.make (Relative_path.path_of_prefix Relative_path.Root)
+      in
+      ClientStop.kill_server root_folder env.from;
+      respond_jsonrpc ~powered_by:Serverless_ide c Hh_json.JSON_Null;
+      Lwt.return_unit
+    | (_, c) when c.method_ = "$test/startHhServer" ->
+      let root_folder =
+        Path.make (Relative_path.path_of_prefix Relative_path.Root)
+      in
+      start_server root_folder;
+      respond_jsonrpc ~powered_by:Serverless_ide c Hh_json.JSON_Null;
+      Lwt.return_unit
+    (* catch-all for client reqs/notifications we haven't yet implemented *)
+    | (Main_loop _menv, c) ->
+      let message = Printf.sprintf "not implemented: %s" c.method_ in
+      raise (Error.MethodNotFound message)
+    (* catch-all for requests/notifications after shutdown request *)
+    | (Post_shutdown, _c) ->
+      raise (Error.InvalidRequest "already received shutdown request")
+    (* client message when we've lost the server *)
+    | (Lost_server lenv, _c) ->
+      Lost_env.(
+        (* if trigger_on_lsp_method is set, our caller should already have        *)
+        (* transitioned away from this state.                                     *)
+        assert (not lenv.p.trigger_on_lsp);
+
+        (* We deny all other requests. This is the only response that won't       *)
+        (* produce logs/warnings on most clients...                               *)
+        raise
+          (Error.RequestCancelled
+             (lenv.p.new_hh_server_state |> hh_server_state_to_string)))
+  in
+  Lwt.return_unit
+
+let handle_server_message ~(message : server_message) ~(state : state ref) :
+    unit Lwt.t =
+  let open Main_env in
+  let%lwt () =
+    match (!state, message) with
+    (* server busy status *)
+    | (_, { push = ServerCommandTypes.BUSY_STATUS status; _ }) ->
+      let should_send_status =
+        match Lwt.poll initialize_params_promise with
+        | None -> false
+        | Some p ->
+          Lsp.Initialize.(p.initializationOptions.sendServerStatusEvents)
+      in
+      ( if should_send_status then
+        let status_message =
+          ServerCommandTypes.(
+            match status with
+            | Needs_local_typecheck -> "needs_local_typecheck"
+            | Doing_local_typecheck -> "doing_local_typecheck"
+            | Done_local_typecheck -> "done_local_typecheck"
+            | Doing_global_typecheck _ -> "doing_global_typecheck"
+            | Done_global_typecheck _ -> "done_global_typecheck")
+        in
+        Lsp_helpers.telemetry_log to_stdout status_message );
+      state := do_server_busy !state status;
+      Lwt.return_unit
+    (* textDocument/publishDiagnostics notification *)
+    | (Main_loop menv, { push = ServerCommandTypes.DIAGNOSTIC (_, errors); _ })
+      ->
+      let uris_with_diagnostics =
+        do_diagnostics menv.uris_with_diagnostics errors
+      in
+      state := Main_loop { menv with uris_with_diagnostics };
+      Lwt.return_unit
+    (* any server diagnostics that come after we've shut down *)
+    | (_, { push = ServerCommandTypes.DIAGNOSTIC _; _ }) -> Lwt.return_unit
+    (* server shut-down request *)
+    | (Main_loop _menv, { push = ServerCommandTypes.NEW_CLIENT_CONNECTED; _ })
+      ->
+      let%lwt new_state =
+        do_lost_server
+          !state
+          {
+            Lost_env.explanation = "hh_server is active in another window.";
+            new_hh_server_state = Hh_server_stolen;
+            start_on_click = false;
+            trigger_on_lock_file = false;
+            trigger_on_lsp = true;
+          }
+      in
+      state := new_state;
+      Lwt.return_unit
+    (* server shut-down request, unexpected *)
+    | (_, { push = ServerCommandTypes.NEW_CLIENT_CONNECTED; _ }) ->
+      let message = "unexpected close of absent server" in
+      let stack = "" in
+      raise (Server_fatal_connection_exception { Marshal_tools.message; stack })
+    (* server fatal shutdown *)
+    | (_, { push = ServerCommandTypes.FATAL_EXCEPTION e; _ }) ->
+      raise (Server_fatal_connection_exception e)
+    (* server non-fatal exception *)
+    | (_, { push = ServerCommandTypes.NONFATAL_EXCEPTION e; _ }) ->
+      raise (Server_nonfatal_exception e)
+  in
+  Lwt.return_unit
+
+let handle_server_hello ~(state : state ref) : unit Lwt.t =
+  let%lwt () =
+    match !state with
+    (* server completes initialization *)
+    | In_init ienv ->
+      let%lwt () = connect_after_hello ienv.In_init_env.conn !state in
+      state := report_connect_end ienv;
+      Lwt.return_unit
+    (* any "hello" from the server when we weren't expecting it. This is so *)
+    (* egregious that we can't trust anything more from the server.         *)
+    | _ ->
+      let message = "Unexpected hello" in
+      let stack = "" in
+      raise (Server_fatal_connection_exception { Marshal_tools.message; stack })
+  in
+  Lwt.return_unit
+
+let handle_client_ide_notification
+    ~(notification : ClientIdeMessage.notification) : unit Lwt.t =
+  let%lwt () =
+    match notification with
+    | ClientIdeMessage.Initializing
+    | ClientIdeMessage.Processing_files _ ->
+      (* Do nothing; these are handled by `ClientIdeService`. *)
+      Lwt.return_unit
+    | ClientIdeMessage.Done_processing ->
+      Lsp_helpers.telemetry_log
+        to_stdout
+        "[client-ide] Done processing file changes";
+      Lwt.return_unit
+  in
+  Lwt.return_unit
+
+let handle_tick
+    ~(env : env)
+    ~(state : state ref)
+    ~(ide_service : ClientIdeService.t)
+    ~(ref_unblocked_time : float ref) : unit Lwt.t =
+  let%lwt () =
+    match !state with
+    (* idle tick while waiting for server to complete initialization *)
+    | In_init ienv ->
+      let open In_init_env in
+      let time = Unix.time () in
+      let delay_in_secs = int_of_float (time -. ienv.most_recent_start_time) in
+      let%lwt () =
+        if delay_in_secs <= 10 then (
+          report_connect_progress env ienv ide_service;
+          Lwt.return_unit
+        ) else
+          (* terminate + retry the connection *)
+            let%lwt new_state = connect !state in
+            state := new_state;
+            Lwt.return_unit
+      in
+      Lwt.return_unit
+    (* Tick when we're connected to the server *)
+    | Main_loop menv ->
+      let open Main_env in
+      if menv.needs_idle then (
+        (* If we're connected to a server and have no more messages in the queue, *)
+        (* then we must let the server know we're idle, so it will be free to     *)
+        (* handle command-line requests.                                          *)
+        state := Main_loop { menv with needs_idle = false };
+        rpc menv.conn ref_unblocked_time ServerCommandTypes.IDE_IDLE
+      ) else
+        Lwt.return_unit
+    (* idle tick. No-op. *)
+    | _ ->
+      EventLogger.flush ();
+      Lwt.return_unit
+  in
+  Lwt.return_unit
 
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. Never returns. *)
@@ -3982,13 +3948,21 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
       (* this is the main handler for each message*)
       Jsonrpc.clear_last_sent ();
       let%lwt () =
-        handle_event
-          ~env
-          ~state
-          ~client
-          ~ide_service:!ide_service
-          ~event
-          ~ref_unblocked_time
+        match event with
+        | Client_message message ->
+          handle_client_message
+            ~env
+            ~state
+            ~client
+            ~ide_service:!ide_service
+            ~message
+            ~ref_unblocked_time
+        | Client_ide_notification notification ->
+          handle_client_ide_notification ~notification
+        | Server_message message -> handle_server_message ~message ~state
+        | Server_hello -> handle_server_hello ~state
+        | Tick ->
+          handle_tick ~env ~state ~ide_service:!ide_service ~ref_unblocked_time
       in
       let response = Jsonrpc.last_sent () in
       (* for LSP requests and notifications, we keep a log of what+when we responded *)

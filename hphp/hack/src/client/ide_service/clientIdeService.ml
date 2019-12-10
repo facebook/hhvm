@@ -278,6 +278,23 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
 let stop (t : t) ~(tracking_id : string) ~(reason : Stop_reason.t) : unit Lwt.t
     =
   let%lwt () = destroy t ~tracking_id in
+  (* Correctness here is very subtle... During the course of that call to
+  'destroy', we do let%lwt on an rpc call to shutdown the daemon.
+  Either that will return in 5s, or it won't; either way, we will
+  synchronously kill the daemon handle and close the message queus.
+  The interleaving we have to worry about is: what will other code
+  do while the state is still "Initialized", after we've sent the shutdown
+  message to the daemon, and we're let%lwt awaiting for a responnse?
+  Will anything go wrong?
+  Well, the daemon has responded to 'shutdown' by deleting its hhi dir
+  but leaving itself in its "Initialized" state.
+  Meantime, some of our code uses the state "Stopped" as a signal to not
+  do work, and some uses a closed message-queue as a signal to not do work
+  and neither is met. We might indeed receive further requests from
+  clientLsp and dutifully pass them on to the daemon and have it fail
+  weirdly because of the lack of hhi.
+  Luckily we're saved from that because clientLsp never makes rpc requests
+  to us after it has called 'stop'. *)
   set_state t (Stopped reason);
   Lwt.return_unit
 

@@ -3302,26 +3302,22 @@ let handle_client_message
     ~(client : Jsonrpc.queue)
     ~(ide_service : ClientIdeService.t)
     ~(message : Jsonrpc.message)
+    ~(parsed : lsp_message)
     ~(ref_unblocked_time : float ref) : unit Lwt.t =
   let open Jsonrpc in
   let open Main_env in
   let%lwt () =
     (* make sure to wrap any exceptions below in the promise *)
-    match (!state, message) with
+    let c = message in
+    let editor_open_files =
+      match get_editor_open_files !state with
+      | Some files -> files
+      | None -> UriMap.empty
+    in
+    match (!state, parsed) with
     (* response *)
-    | (_, c) when c.kind = Jsonrpc.Response ->
-      let id =
-        match c.id with
-        | Some (Hh_json.JSON_Number id) -> NumberId (int_of_string id)
-        | Some (Hh_json.JSON_String id) -> StringId id
-        | _ -> failwith "malformed response id"
-      in
-      let (_request, on_result, on_error) =
-        match IdMap.find_opt id !requests_outstanding with
-        | Some callbacks -> callbacks
-        | None ->
-          failwith "response id doesn't correspond to an outstanding request"
-      in
+    | (_, ResponseMessage (id, _)) ->
+      let (_, on_result, on_error) = IdMap.find id !requests_outstanding in
       if Option.is_some c.error then (
         let code = Jget.int_exn c.error "code" in
         let message = Jget.string_exn c.error "message" in
@@ -3334,7 +3330,7 @@ let handle_client_message
         state := new_state;
         Lwt.return_unit
     (* shutdown request *)
-    | (_, c) when c.method_ = "shutdown" ->
+    | (_, RequestMessage (_id, ShutdownRequest)) ->
       let%lwt new_state =
         do_shutdown !state ide_service c.tracking_id ref_unblocked_time
       in
@@ -3342,36 +3338,17 @@ let handle_client_message
       print_shutdown () |> respond_jsonrpc ~powered_by:Language_server c;
       Lwt.return_unit
     (* cancel notification *)
-    | (_, c) when c.method_ = "$/cancelRequest" ->
+    | (_, NotificationMessage (CancelRequestNotification _)) ->
       (* For now, we'll ignore it. *)
       Lwt.return_unit
     (* exit notification *)
-    | (_, c) when c.method_ = "exit" ->
+    | (_, NotificationMessage ExitNotification) ->
       if !state = Post_shutdown then
         exit_ok ()
       else
         exit_fail ()
-    (* rage request *)
-    | (_, c) when c.method_ = "telemetry/rage" ->
-      let%lwt result = do_rage !state ref_unblocked_time in
-      result |> print_rage |> respond_jsonrpc ~powered_by:Language_server c;
-      Lwt.return_unit
-    | (_, c)
-      when env.use_serverless_ide
-           && c.method_ = "workspace/didChangeWatchedFiles" ->
-      DidChangeWatchedFiles.(
-        let notification = parse_didChangeWatchedFiles c.params in
-        List.iter notification.changes ~f:(fun change ->
-            let path = lsp_uri_to_path change.uri in
-            let path = Path.make path in
-            ClientIdeService.notify_file_changed
-              ide_service
-              ~tracking_id:c.tracking_id
-              path);
-        Lwt.return_unit)
     (* initialize request *)
-    | (Pre_init, c) when c.method_ = "initialize" ->
-      let initialize_params = c.params |> parse_initialize in
+    | (Pre_init, RequestMessage (_id, InitializeRequest initialize_params)) ->
       Lwt.wakeup_later initialize_params_resolver initialize_params;
       set_up_hh_logger_for_client_lsp ();
 
@@ -3401,213 +3378,178 @@ let handle_client_message
           ("Version in hhconfig=" ^ !hhconfig_version);
       Lwt.return_unit
     (* any request/notification if we haven't yet initialized *)
-    | (Pre_init, _c) ->
+    | (Pre_init, _) ->
       raise (Error.ServerNotInitialized "Server not yet initialized")
+    | (Post_shutdown, _c) ->
+      raise (Error.InvalidRequest "already received shutdown request")
+    (* rage request *)
+    | (_, RequestMessage (_id, RageRequest)) ->
+      let%lwt result = do_rage !state ref_unblocked_time in
+      result |> print_rage |> respond_jsonrpc ~powered_by:Language_server c;
+      Lwt.return_unit
+    | (_, NotificationMessage (DidChangeWatchedFilesNotification notification))
+      when env.use_serverless_ide ->
+      let open DidChangeWatchedFiles in
+      List.iter notification.changes ~f:(fun change ->
+          let path = lsp_uri_to_path change.uri in
+          let path = Path.make path in
+          ClientIdeService.notify_file_changed
+            ide_service
+            ~tracking_id:c.tracking_id
+            path);
+      Lwt.return_unit
     (* Text document completion: "AutoComplete!" *)
-    | ( ( In_init { In_init_env.editor_open_files; _ }
-        | Main_loop { Main_env.editor_open_files; _ }
-        | Lost_server { Lost_env.editor_open_files; _ } ),
-        c )
-      when env.use_serverless_ide && c.method_ = "textDocument/completion" ->
+    | (_, RequestMessage (_id, CompletionRequest params))
+      when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client c short_timeout in
       let%lwt result =
-        parse_completion c.params
-        |> do_completion_local ide_service c.tracking_id editor_open_files
+        do_completion_local ide_service c.tracking_id editor_open_files params
       in
       result |> print_completion |> respond_jsonrpc ~powered_by:Serverless_ide c;
       Lwt.return_unit
     (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
-    | ( ( In_init { In_init_env.editor_open_files; _ }
-        | Main_loop { Main_env.editor_open_files; _ }
-        | Lost_server { Lost_env.editor_open_files; _ } ),
-        c )
-      when env.use_serverless_ide && c.method_ = "completionItem/resolve" ->
+    | (_, RequestMessage (_id, CompletionItemResolveRequest params))
+      when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client c short_timeout in
       let%lwt result =
-        parse_completionItem c.params
-        |> do_resolve_local ide_service c.tracking_id editor_open_files
+        do_resolve_local ide_service c.tracking_id editor_open_files params
       in
       result
       |> print_completionItem
       |> respond_jsonrpc ~powered_by:Serverless_ide c;
       Lwt.return_unit
     (* Document highlighting in serverless IDE *)
-    | ( ( In_init { In_init_env.editor_open_files; _ }
-        | Main_loop { Main_env.editor_open_files; _ }
-        | Lost_server { Lost_env.editor_open_files; _ } ),
-        c )
-      when env.use_serverless_ide
-           && c.method_ = "textDocument/documentHighlight" ->
+    | (_, RequestMessage (_id, DocumentHighlightRequest params))
+      when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client c short_timeout in
       let%lwt result =
-        parse_documentHighlight c.params
-        |> do_highlight_local ide_service c.tracking_id editor_open_files
+        do_highlight_local ide_service c.tracking_id editor_open_files params
       in
       result |> print_documentHighlight |> Jsonrpc.respond to_stdout c;
       Lwt.return_unit
     (* Type coverage in serverless IDE *)
-    | ( ( In_init { In_init_env.editor_open_files; _ }
-        | Main_loop { Main_env.editor_open_files; _ }
-        | Lost_server { Lost_env.editor_open_files; _ } ),
-        c )
-      when env.use_serverless_ide && c.method_ = "textDocument/typeCoverage" ->
+    | (_, RequestMessage (_id, TypeCoverageRequest params))
+      when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client c short_timeout in
       let%lwt result =
-        parse_typeCoverage c.params
-        |> do_typeCoverage_local ide_service c.tracking_id editor_open_files
+        do_typeCoverage_local ide_service c.tracking_id editor_open_files params
       in
       result |> print_typeCoverage |> Jsonrpc.respond to_stdout c;
       Lwt.return_unit
     (* Hover docblocks in serverless IDE *)
-    | ( ( In_init { In_init_env.editor_open_files; _ }
-        | Main_loop { Main_env.editor_open_files; _ }
-        | Lost_server { Lost_env.editor_open_files; _ } ),
-        c )
-      when env.use_serverless_ide && c.method_ = "textDocument/hover" ->
-      let%lwt () = cancel_if_stale client c short_timeout in
-      let%lwt result =
-        parse_hover c.params
-        |> do_hover_local ide_service c.tracking_id editor_open_files
-      in
-      result |> print_hover |> respond_jsonrpc ~powered_by:Serverless_ide c;
-      Lwt.return_unit
-    | ( ( In_init { In_init_env.editor_open_files; _ }
-        | Main_loop { Main_env.editor_open_files; _ }
-        | Lost_server { Lost_env.editor_open_files; _ } ),
-        c )
-      when env.use_serverless_ide && c.method_ = "textDocument/documentSymbol"
+    | (_, RequestMessage (_id, HoverRequest params)) when env.use_serverless_ide
       ->
       let%lwt () = cancel_if_stale client c short_timeout in
       let%lwt result =
-        parse_documentSymbol c.params
-        |> do_documentSymbol_local ide_service c.tracking_id editor_open_files
+        do_hover_local ide_service c.tracking_id editor_open_files params
+      in
+      result |> print_hover |> respond_jsonrpc ~powered_by:Serverless_ide c;
+      Lwt.return_unit
+    | (_, RequestMessage (_id, DocumentSymbolRequest params))
+      when env.use_serverless_ide ->
+      let%lwt () = cancel_if_stale client c short_timeout in
+      let%lwt result =
+        do_documentSymbol_local
+          ide_service
+          c.tracking_id
+          editor_open_files
+          params
       in
       result
       |> print_documentSymbol
       |> respond_jsonrpc ~powered_by:Serverless_ide c;
       Lwt.return_unit
-    | ( ( In_init { In_init_env.editor_open_files; _ }
-        | Main_loop { Main_env.editor_open_files; _ }
-        | Lost_server { Lost_env.editor_open_files; _ } ),
-        c )
-      when env.use_serverless_ide && c.method_ = "textDocument/definition" ->
+    | (_, RequestMessage (_id, DefinitionRequest params))
+      when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client c short_timeout in
       let%lwt result =
-        parse_definition c.params
-        |> do_definition_local ide_service c.tracking_id editor_open_files
+        do_definition_local ide_service c.tracking_id editor_open_files params
       in
       result |> print_definition |> respond_jsonrpc ~powered_by:Serverless_ide c;
       Lwt.return_unit
-    | ( ( In_init { In_init_env.editor_open_files; _ }
-        | Main_loop { Main_env.editor_open_files; _ }
-        | Lost_server { Lost_env.editor_open_files; _ } ),
-        c )
-      when env.use_serverless_ide && c.method_ = "textDocument/typeDefinition"
-      ->
+    | (_, RequestMessage (_id, TypeDefinitionRequest params))
+      when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client c short_timeout in
       let%lwt result =
-        parse_definition c.params
-        |> do_typeDefinition_local ide_service c.tracking_id editor_open_files
+        do_typeDefinition_local
+          ide_service
+          c.tracking_id
+          editor_open_files
+          params
       in
       result |> print_definition |> respond_jsonrpc ~powered_by:Serverless_ide c;
       Lwt.return_unit
     (* Resolve documentation for a symbol: "Autocomplete Docblock!" *)
-    | ( ( In_init { In_init_env.editor_open_files; _ }
-        | Main_loop { Main_env.editor_open_files; _ }
-        | Lost_server { Lost_env.editor_open_files; _ } ),
-        c )
-      when env.use_serverless_ide && c.method_ = "textDocument/signatureHelp" ->
+    | (_, RequestMessage (_id, SignatureHelpRequest params))
+      when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client c short_timeout in
       let%lwt result =
-        parse_textDocumentPositionParams c.params
-        |> do_signatureHelp_local ide_service c.tracking_id editor_open_files
+        do_signatureHelp_local
+          ide_service
+          c.tracking_id
+          editor_open_files
+          params
       in
       result
       |> print_signatureHelp
       |> respond_jsonrpc ~powered_by:Serverless_ide c;
       Lwt.return_unit
     (* textDocument/formatting *)
-    | ( ( In_init { In_init_env.editor_open_files; _ }
-        | Main_loop { Main_env.editor_open_files; _ }
-        | Lost_server { Lost_env.editor_open_files; _ } ),
-        c )
-      when c.method_ = "textDocument/formatting" ->
-      parse_documentFormatting c.params
-      |> do_documentFormatting editor_open_files
+    | (_, RequestMessage (_id, DocumentFormattingRequest params)) ->
+      do_documentFormatting editor_open_files params
       |> print_documentFormatting
       |> respond_jsonrpc ~powered_by:Language_server c;
       Lwt.return_unit
-    (* textDocument/formatting *)
-    | ( ( In_init { In_init_env.editor_open_files; _ }
-        | Main_loop { Main_env.editor_open_files; _ }
-        | Lost_server { Lost_env.editor_open_files; _ } ),
-        c )
-      when c.method_ = "textDocument/rangeFormatting" ->
-      parse_documentRangeFormatting c.params
-      |> do_documentRangeFormatting editor_open_files
+    (* textDocument/rangeFormatting *)
+    | (_, RequestMessage (_id, DocumentRangeFormattingRequest params)) ->
+      do_documentRangeFormatting editor_open_files params
       |> print_documentRangeFormatting
       |> respond_jsonrpc ~powered_by:Language_server c;
       Lwt.return_unit
     (* textDocument/onTypeFormatting *)
-    | ( ( In_init { In_init_env.editor_open_files; _ }
-        | Main_loop { Main_env.editor_open_files; _ }
-        | Lost_server { Lost_env.editor_open_files; _ } ),
-        c )
-      when c.method_ = "textDocument/onTypeFormatting" ->
+    | (_, RequestMessage (_id, DocumentOnTypeFormattingRequest params)) ->
       let%lwt () = cancel_if_stale client c short_timeout in
-      parse_documentOnTypeFormatting c.params
-      |> do_documentOnTypeFormatting editor_open_files
+      do_documentOnTypeFormatting editor_open_files params
       |> print_documentOnTypeFormatting
       |> respond_jsonrpc ~powered_by:Language_server c;
       Lwt.return_unit
-    (* any request/notification if we're not yet ready *)
-    | (In_init _, c) ->
-      begin
-        match c.method_ with
-        | "textDocument/didOpen"
-        | "textDocument/didChange"
-        | "textDocument/didClose" ->
-          (* Already handled by [track_open_files]. *)
-          Lwt.return_unit
-        | _ ->
-          raise
-            (Error.RequestCancelled
-               (Hh_server_initializing |> hh_server_state_to_string))
-          (* We deny all other requests. Operation_cancelled is the only *)
-          (* error-response that won't produce logs/warnings on most clients. *)
-      end
-    | (Main_loop _menv, c) when c.method_ = "initialized" ->
-      (* Currently, we don't do anything in response to this notification. *)
+    (* any request/notification that we already handled in [track_open_files] *)
+    | (In_init _, NotificationMessage (DidOpenNotification _))
+    | (In_init _, NotificationMessage (DidChangeNotification _))
+    | (In_init _, NotificationMessage (DidCloseNotification _))
+    | (In_init _, NotificationMessage (DidSaveNotification _)) ->
+      Lwt.return_unit
+    (* any request/notification that we can't handle yet *)
+    | (In_init _, _) ->
+      (* we respond with Operation_cancelled so that clients don't produce *)
+      (* user-visible logs/warnings. *)
+      raise
+        (Error.RequestCancelled
+           (Hh_server_initializing |> hh_server_state_to_string))
+    | (Main_loop _menv, NotificationMessage InitializedNotification) ->
       Lwt.return_unit
     (* textDocument/hover request *)
-    | (Main_loop menv, c) when c.method_ = "textDocument/hover" ->
+    | (Main_loop menv, RequestMessage (_id, HoverRequest params)) ->
       let%lwt () = cancel_if_stale client c short_timeout in
-      let%lwt result =
-        parse_hover c.params |> do_hover menv.conn ref_unblocked_time
-      in
+      let%lwt result = do_hover menv.conn ref_unblocked_time params in
       result |> print_hover |> respond_jsonrpc ~powered_by:Hh_server c;
       Lwt.return_unit
     (* textDocument/typeDefinition request *)
-    | (Main_loop menv, c) when c.method_ = "textDocument/typeDefinition" ->
+    | (Main_loop menv, RequestMessage (_id, TypeDefinitionRequest params)) ->
       let%lwt () = cancel_if_stale client c short_timeout in
-      let%lwt result =
-        parse_definition c.params
-        |> do_typeDefinition menv.conn ref_unblocked_time
-      in
+      let%lwt result = do_typeDefinition menv.conn ref_unblocked_time params in
       result |> print_definition |> respond_jsonrpc ~powered_by:Hh_server c;
       Lwt.return_unit
     (* textDocument/definition request *)
-    | (Main_loop { conn; editor_open_files; _ }, c)
-      when c.method_ = "textDocument/definition" ->
+    | (Main_loop menv, RequestMessage (_id, DefinitionRequest params)) ->
       let%lwt () = cancel_if_stale client c short_timeout in
       let%lwt result =
-        parse_definition c.params
-        |> do_definition conn ref_unblocked_time editor_open_files
+        do_definition menv.conn ref_unblocked_time editor_open_files params
       in
       result |> print_definition |> respond_jsonrpc ~powered_by:Hh_server c;
       Lwt.return_unit
     (* textDocument/completion request *)
-    | (Main_loop menv, c) when c.method_ = "textDocument/completion" ->
+    | (Main_loop menv, RequestMessage (_id, CompletionRequest params)) ->
       let do_completion =
         if env.use_ffp_autocomplete then
           do_completion_ffp
@@ -3615,105 +3557,86 @@ let handle_client_message
           do_completion_legacy
       in
       let%lwt () = cancel_if_stale client c short_timeout in
-      let%lwt result =
-        parse_completion c.params |> do_completion menv.conn ref_unblocked_time
-      in
+      let%lwt result = do_completion menv.conn ref_unblocked_time params in
       result |> print_completion |> respond_jsonrpc ~powered_by:Hh_server c;
       Lwt.return_unit
     (* completionItem/resolve request *)
-    | (Main_loop menv, c) when c.method_ = "completionItem/resolve" ->
+    | (Main_loop menv, RequestMessage (_id, CompletionItemResolveRequest params))
+      ->
       let%lwt () = cancel_if_stale client c short_timeout in
       let%lwt result =
-        parse_completionItem c.params
-        |> do_completionItemResolve menv.conn ref_unblocked_time
+        do_completionItemResolve menv.conn ref_unblocked_time params
       in
       result |> print_completionItem |> respond_jsonrpc ~powered_by:Hh_server c;
       Lwt.return_unit
     (* workspace/symbol request *)
-    | (Main_loop menv, c) when c.method_ = "workspace/symbol" ->
-      let%lwt result =
-        parse_workspaceSymbol c.params
-        |> do_workspaceSymbol menv.conn ref_unblocked_time
-      in
+    | (Main_loop menv, RequestMessage (_id, WorkspaceSymbolRequest params)) ->
+      let%lwt result = do_workspaceSymbol menv.conn ref_unblocked_time params in
       result |> print_workspaceSymbol |> respond_jsonrpc ~powered_by:Hh_server c;
       Lwt.return_unit
     (* textDocument/documentSymbol request *)
-    | (Main_loop menv, c) when c.method_ = "textDocument/documentSymbol" ->
-      let%lwt result =
-        parse_documentSymbol c.params
-        |> do_documentSymbol menv.conn ref_unblocked_time
-      in
+    | (Main_loop menv, RequestMessage (_id, DocumentSymbolRequest params)) ->
+      let%lwt result = do_documentSymbol menv.conn ref_unblocked_time params in
       result |> print_documentSymbol |> respond_jsonrpc ~powered_by:Hh_server c;
       Lwt.return_unit
     (* textDocument/references request *)
-    | (Main_loop menv, c) when c.method_ = "textDocument/references" ->
+    | (Main_loop menv, RequestMessage (_id, FindReferencesRequest params)) ->
       let%lwt () = cancel_if_stale client c long_timeout in
-      let%lwt result =
-        parse_findReferences c.params
-        |> do_findReferences menv.conn ref_unblocked_time
-      in
+      let%lwt result = do_findReferences menv.conn ref_unblocked_time params in
       result |> print_Locations |> respond_jsonrpc ~powered_by:Hh_server c;
       Lwt.return_unit
     (* textDocument/implementation request *)
-    | (Main_loop menv, c) when c.method_ = "textDocument/implementation" ->
+    | (Main_loop menv, RequestMessage (_id, GoToImplementationRequest params))
+      ->
       let%lwt () = cancel_if_stale client c long_timeout in
       let%lwt result =
-        parse_goToImplementation c.params
-        |> do_goToImplementation menv.conn ref_unblocked_time
+        do_goToImplementation menv.conn ref_unblocked_time params
       in
       result |> print_Locations |> respond_jsonrpc ~powered_by:Hh_server c;
       Lwt.return_unit
     (* textDocument/rename *)
-    | (Main_loop menv, c) when c.method_ = "textDocument/rename" ->
-      let%lwt result =
-        parse_documentRename c.params
-        |> do_documentRename menv.conn ref_unblocked_time
-      in
+    | (Main_loop menv, RequestMessage (_id, RenameRequest params)) ->
+      let%lwt result = do_documentRename menv.conn ref_unblocked_time params in
       result |> print_documentRename |> respond_jsonrpc ~powered_by:Hh_server c;
       Lwt.return_unit
     (* textDocument/documentHighlight *)
-    | (Main_loop menv, c) when c.method_ = "textDocument/documentHighlight" ->
+    | (Main_loop menv, RequestMessage (_id, DocumentHighlightRequest params)) ->
       let%lwt () = cancel_if_stale client c short_timeout in
       let%lwt result =
-        parse_documentHighlight c.params
-        |> do_documentHighlight menv.conn ref_unblocked_time
+        do_documentHighlight menv.conn ref_unblocked_time params
       in
       result
       |> print_documentHighlight
       |> respond_jsonrpc ~powered_by:Hh_server c;
       Lwt.return_unit
     (* textDocument/typeCoverage *)
-    | (Main_loop menv, c) when c.method_ = "textDocument/typeCoverage" ->
-      let%lwt result =
-        parse_typeCoverage c.params
-        |> do_typeCoverage menv.conn ref_unblocked_time
-      in
+    | (Main_loop menv, RequestMessage (_id, TypeCoverageRequest params)) ->
+      let%lwt result = do_typeCoverage menv.conn ref_unblocked_time params in
       result |> print_typeCoverage |> respond_jsonrpc ~powered_by:Hh_server c;
       Lwt.return_unit
+    (* textDocument/toggleTypeCoverage *)
+    | ( Main_loop menv,
+        NotificationMessage (ToggleTypeCoverageNotification params) ) ->
+      do_toggleTypeCoverage menv.conn ref_unblocked_time params
     (* textDocument/didOpen notification *)
-    | (Main_loop menv, c) when c.method_ = "textDocument/didOpen" ->
-      parse_didOpen c.params |> do_didOpen menv.conn ref_unblocked_time
-    | (Main_loop menv, c) when c.method_ = "workspace/toggleTypeCoverage" ->
-      parse_toggleTypeCoverage c.params
-      |> do_toggleTypeCoverage menv.conn ref_unblocked_time
+    | (Main_loop menv, NotificationMessage (DidOpenNotification params)) ->
+      do_didOpen menv.conn ref_unblocked_time params
     (* textDocument/didClose notification *)
-    | (Main_loop menv, c) when c.method_ = "textDocument/didClose" ->
-      parse_didClose c.params |> do_didClose menv.conn ref_unblocked_time
+    | (Main_loop menv, NotificationMessage (DidCloseNotification params)) ->
+      do_didClose menv.conn ref_unblocked_time params
     (* textDocument/didChange notification *)
-    | (Main_loop menv, c) when c.method_ = "textDocument/didChange" ->
-      parse_didChange c.params |> do_didChange menv.conn ref_unblocked_time
+    | (Main_loop menv, NotificationMessage (DidChangeNotification params)) ->
+      do_didChange menv.conn ref_unblocked_time params
     (* textDocument/didSave notification *)
-    | (Main_loop _menv, c) when c.method_ = "textDocument/didSave" ->
+    | (Main_loop _menv, NotificationMessage (DidSaveNotification _params)) ->
       Lwt.return_unit
     (* textDocument/signatureHelp notification *)
-    | (Main_loop menv, c) when c.method_ = "textDocument/signatureHelp" ->
-      let%lwt result =
-        parse_textDocumentPositionParams c.params
-        |> do_signatureHelp menv.conn ref_unblocked_time
-      in
+    | (Main_loop menv, RequestMessage (_id, SignatureHelpRequest params)) ->
+      let%lwt result = do_signatureHelp menv.conn ref_unblocked_time params in
       result |> print_signatureHelp |> respond_jsonrpc ~powered_by:Hh_server c;
       Lwt.return_unit
-    | (_, c) when c.method_ = "$test/shutdownServerlessIde" ->
+    | (_, RequestMessage (_id, HackTestShutdownServerlessRequest))
+      when env.use_serverless_ide ->
       let%lwt () =
         stop_ide_service
           ide_service
@@ -3722,14 +3645,14 @@ let handle_client_message
       in
       respond_jsonrpc ~powered_by:Serverless_ide c Hh_json.JSON_Null;
       Lwt.return_unit
-    | (_, c) when c.method_ = "$test/stopHhServer" ->
+    | (_, RequestMessage (_id, HackTestStopServerRequest)) ->
       let root_folder =
         Path.make (Relative_path.path_of_prefix Relative_path.Root)
       in
       ClientStop.kill_server root_folder env.from;
       respond_jsonrpc ~powered_by:Serverless_ide c Hh_json.JSON_Null;
       Lwt.return_unit
-    | (_, c) when c.method_ = "$test/startHhServer" ->
+    | (_, RequestMessage (_id, HackTestStartServerRequest)) ->
       let root_folder =
         Path.make (Relative_path.path_of_prefix Relative_path.Root)
       in
@@ -3737,14 +3660,12 @@ let handle_client_message
       respond_jsonrpc ~powered_by:Serverless_ide c Hh_json.JSON_Null;
       Lwt.return_unit
     (* catch-all for client reqs/notifications we haven't yet implemented *)
-    | (Main_loop _menv, c) ->
+    | (Main_loop _menv, _) ->
       let message = Printf.sprintf "not implemented: %s" c.method_ in
       raise (Error.MethodNotFound message)
     (* catch-all for requests/notifications after shutdown request *)
-    | (Post_shutdown, _c) ->
-      raise (Error.InvalidRequest "already received shutdown request")
     (* client message when we've lost the server *)
-    | (Lost_server lenv, _c) ->
+    | (Lost_server lenv, _) ->
       Lost_env.(
         (* if trigger_on_lsp_method is set, our caller should already have        *)
         (* transitioned away from this state.                                     *)
@@ -3957,13 +3878,14 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
       (* this is the main handler for each message*)
       let%lwt () =
         match event with
-        | Client_message (message, _) ->
+        | Client_message (message, parsed) ->
           handle_client_message
             ~env
             ~state
             ~client
             ~ide_service:!ide_service
             ~message
+            ~parsed
             ~ref_unblocked_time
         | Client_ide_notification notification ->
           handle_client_ide_notification ~notification

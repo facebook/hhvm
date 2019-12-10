@@ -82,3 +82,15 @@ class BoundedGeneric<T as arraykey> {
 function with_bounded_generic_class_tparam(BoundedGeneric<int> $x): keyset<int> {
   return $x->emptyKeyset();
 }
+
+interface IResult<+T> {}
+
+class Result<+T> implements IResult<T> {}
+
+interface IKwery<TResult as Result<mixed>> {}
+
+class Kwery<TValue, TResult as Result<TValue>> implements IKwery<TResult> {}
+
+function kwery(): Kwery<int, Result<int>> {
+  return new Kwery();
+}

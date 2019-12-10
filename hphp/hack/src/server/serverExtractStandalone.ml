@@ -318,10 +318,18 @@ let print_constraint_kind = function
 let print_tparam_constraint tcopt (ck, cty) =
   print_constraint_kind ck ^ " " ^ Typing_print.full_decl tcopt cty
 
-let print_tparam tcopt { tp_name = (_, name); tp_constraints = cstrl; _ } =
+let print_tparam_variance = function
+  | Ast_defs.Covariant -> "+"
+  | Ast_defs.Contravariant -> "-"
+  | Ast_defs.Invariant -> ""
+
+let print_tparam
+    tcopt
+    { tp_name = (_, name); tp_constraints = cstrl; tp_variance = variance; _ } =
   String.concat
     ~sep:" "
-    (name :: List.map cstrl ~f:(print_tparam_constraint tcopt))
+    ( (print_tparam_variance variance ^ name)
+    :: List.map cstrl ~f:(print_tparam_constraint tcopt) )
 
 let rec get_reactivity_attr r =
   match r with

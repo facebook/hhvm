@@ -1,0 +1,12 @@
+<?hh
+class Result<+T> implements \IResult<T> {}
+interface IKwery<TResult as \Result<mixed>> {}
+function kwery(): Kwery<int, Result<int>> {
+  return new Kwery();
+}
+class Kwery<TValue, TResult as \Result<TValue>> implements \IKwery<TResult> {}
+interface IResult<+T> {}
+<<__Rx>>
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

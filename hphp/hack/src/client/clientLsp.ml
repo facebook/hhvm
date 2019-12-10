@@ -3824,17 +3824,24 @@ let handle_tick
     (* Tick when we're connected to the server *)
     | Main_loop menv ->
       let open Main_env in
-      if menv.needs_idle then (
-        (* If we're connected to a server and have no more messages in the queue, *)
-        (* then we must let the server know we're idle, so it will be free to     *)
-        (* handle command-line requests.                                          *)
-        state := Main_loop { menv with needs_idle = false };
-        rpc menv.conn ref_unblocked_time ServerCommandTypes.IDE_IDLE
-      ) else
-        Lwt.return_unit
+      let%lwt () =
+        if menv.needs_idle then begin
+          (* If we're connected to a server and have no more messages in the queue, *)
+          (* then we must let the server know we're idle, so it will be free to     *)
+          (* handle command-line requests.                                          *)
+          state := Main_loop { menv with needs_idle = false };
+          let%lwt () =
+            rpc menv.conn ref_unblocked_time ServerCommandTypes.IDE_IDLE
+          in
+          Lwt.return_unit
+        end else
+          Lwt.return_unit
+      in
+      Lwt.async EventLoggerLwt.flush;
+      Lwt.return_unit
     (* idle tick. No-op. *)
     | _ ->
-      EventLogger.flush ();
+      Lwt.async EventLoggerLwt.flush;
       Lwt.return_unit
   in
   Lwt.return_unit

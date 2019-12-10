@@ -1,0 +1,22 @@
+<?hh
+function with_implementations(BB $b, II $i, CC $c): void {
+  $b->f();
+  $i->g();
+}
+class CC extends \BB implements \II {
+  public function g(): void {
+    throw new Exception();
+  }
+  public function f(): void {
+    throw new Exception();
+  }
+}
+abstract class BB {
+  abstract public function f(): void;
+}
+interface II {
+  public function g(): void;
+}
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

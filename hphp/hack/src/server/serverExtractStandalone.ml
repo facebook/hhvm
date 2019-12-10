@@ -1039,29 +1039,6 @@ and add_signature_dependencies deps obj =
       | Class _ ->
         Sequence.iter (Class.all_ancestors cls) (fun (_, ty) -> add_dep ty);
         Sequence.iter (Class.all_ancestor_reqs cls) (fun (_, ty) -> add_dep ty);
-        let add_implementations interface_name =
-          let interf = get_class_exn interface_name in
-          if
-            is_builtin_dep (Class interface_name)
-            && Class.kind interf = Ast_defs.Cinterface
-          then (
-            let add_smethod_impl (method_name, _) =
-              Class.get_smethod cls method_name
-              |> Option.iter ~f:(fun elt ->
-                     if elt.ce_origin = cls_name then
-                       do_add_dep deps (SMethod (cls_name, method_name)))
-            in
-            let add_method_impl (method_name, _) =
-              Class.get_method cls method_name
-              |> Option.iter ~f:(fun elt ->
-                     if elt.ce_origin = cls_name then
-                       do_add_dep deps (Method (cls_name, method_name)))
-            in
-            Sequence.iter (Class.methods interf) ~f:add_method_impl;
-            Sequence.iter (Class.smethods interf) ~f:add_smethod_impl
-          )
-        in
-        Sequence.iter (Class.all_ancestor_names cls) add_implementations;
         Option.iter (Class.enum_type cls) ~f:(fun { te_base; te_constraint } ->
             add_dep te_base;
             Option.iter te_constraint ~f:add_dep)
@@ -1083,6 +1060,70 @@ and add_signature_dependencies deps obj =
       let (ty, _) = value_or_not_found description @@ get_gconst c in
       add_dep deps ty
     | _ -> raise UnexpectedDependency)
+
+let get_implementation_dependencies deps cls_name =
+  let open Decl_provider in
+  match get_class cls_name with
+  | None -> []
+  | Some cls ->
+    let open Typing_deps.Dep in
+    let add_smethod_impl acc smethod_name =
+      match Class.get_smethod cls smethod_name with
+      | Some elt when elt.ce_origin = cls_name ->
+        SMethod (cls_name, smethod_name) :: acc
+      | _ -> acc
+    in
+    let add_method_impl acc method_name =
+      match Class.get_method cls method_name with
+      | Some elt when elt.ce_origin = cls_name ->
+        Method (cls_name, method_name) :: acc
+      | _ -> acc
+    in
+    let add_impls acc ancestor_name =
+      let ancestor = get_class_exn ancestor_name in
+      if is_builtin_dep (Class ancestor_name) then
+        let acc =
+          Sequence.fold
+            (Class.smethods ancestor)
+            ~init:acc
+            ~f:(fun acc (smethod_name, _) -> add_smethod_impl acc smethod_name)
+        in
+        let acc =
+          Sequence.fold
+            (Class.methods ancestor)
+            ~init:acc
+            ~f:(fun acc (method_name, _) -> add_method_impl acc method_name)
+        in
+        acc
+      else
+        HashSet.fold
+          (fun dep acc ->
+            match dep with
+            | SMethod (class_name, method_name) when class_name = ancestor_name
+              ->
+              add_smethod_impl acc method_name
+            | Method (class_name, method_name) when class_name = ancestor_name
+              ->
+              add_method_impl acc method_name
+            | _ -> acc)
+          deps
+          acc
+    in
+    Sequence.fold (Class.all_ancestor_names cls) ~init:[] ~f:add_impls
+
+let rec add_implementation_dependencies deps =
+  let open Typing_deps.Dep in
+  let size = HashSet.length deps in
+  HashSet.fold
+    (fun dep acc ->
+      match dep with
+      | Class cls_name -> cls_name :: acc
+      | _ -> acc)
+    deps
+    []
+  |> List.concat_map ~f:(get_implementation_dependencies deps)
+  |> List.iter ~f:(do_add_dep deps);
+  if HashSet.length deps <> size then add_implementation_dependencies deps
 
 let get_dependency_origin cls (dep : 'a Typing_deps.Dep.variant) =
   Decl_provider.(
@@ -1133,6 +1174,7 @@ let get_dependencies tcopt target =
         HashSet.remove dependencies (Method (cls, m));
         HashSet.remove dependencies (SMethod (cls, m)))
   in
+  add_implementation_dependencies dependencies;
   HashSet.fold List.cons dependencies []
 
 let group_class_dependencies_by_class dependencies =

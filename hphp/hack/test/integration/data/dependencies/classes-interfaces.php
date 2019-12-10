@@ -54,3 +54,23 @@ interface Jay extends Eye {}
 function with_indirect_require_extends(Jay $x): void {
   $x->f();
 }
+
+abstract class BB {
+  abstract public function f(): void;
+}
+
+interface II {
+  public function g(): void;
+  public function h(): void;
+}
+
+class CC extends BB implements II {
+  public function f(): void {}
+  public function g(): void {}
+  public function h(): void {}
+}
+
+function with_implementations(BB $b, II $i, CC $c): void {
+  $b->f();
+  $i->g();
+}

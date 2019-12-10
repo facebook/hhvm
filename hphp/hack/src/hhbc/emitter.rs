@@ -57,6 +57,10 @@ impl Emitter {
         self.opts
     }
 
+    pub fn state(&self) -> &GlobalState {
+        &self.state
+    }
+
     pub fn context(&self) -> &dyn Context {
         self
     }

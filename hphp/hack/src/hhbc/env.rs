@@ -136,7 +136,7 @@ pub type SSet = std::collections::BTreeSet<String>;
 pub struct GlobalState {
     pub explicit_use_set: SSet,
     // closure_namespaces: SMap<NamespaceEnv>, // TODO(hrust) use oxidized
-    // closure_enclosing_classes // TODO(hrust) need Tast
+    pub closure_enclosing_classes: SMap<tast::Class_>, // TODO(hrust) need Tast
     pub function_to_labels_map: SMap<SMap<bool>>,
     pub lambda_rx_of_scope: SMap<rx::Level>,
 }
@@ -148,5 +148,9 @@ impl GlobalState {
             .lambda_rx_of_scope
             .get(&key)
             .unwrap_or(&rx::Level::NonRx)
+    }
+
+    pub fn get_closure_enclosing_class(&self, class_name: &str) -> Option<&tast::Class_> {
+        self.closure_enclosing_classes.get(class_name)
     }
 }

@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ast_scope_rust::Scope;
-use emit_env_rust as emit_env;
+use env::emitter::Emitter;
 use hhbc_ast_rust::SpecialClsRef;
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::Instr;
@@ -20,6 +20,7 @@ pub enum ClassExpr {
 
 impl ClassExpr {
     fn get_original_class_name(
+        emitter: &Emitter,
         resolve_self: bool,
         check_traits: bool,
         scope: &Scope,
@@ -29,7 +30,7 @@ impl ClassExpr {
                 let class_name = &cd.name.1;
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return Some(class_name.to_string());
-                } else if let Some(c) = emit_env::get_closure_enclosing_classes().get(class_name) {
+                } else if let Some(c) = emitter.state().get_closure_enclosing_class(class_name) {
                     if c.kind != ast_defs::ClassKind::Ctrait {
                         return Some(c.name.1.clone());
                     }
@@ -49,6 +50,7 @@ impl ClassExpr {
     }
 
     fn get_original_parent_class_name(
+        emitter: &Emitter,
         check_traits: bool,
         resolve_self: bool,
         scope: &Scope,
@@ -61,7 +63,7 @@ impl ClassExpr {
                 let class_name = &cd.name.1;
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return Self::get_parent_class_name(cd);
-                } else if let Some(c) = emit_env::get_closure_enclosing_classes().get(class_name) {
+                } else if let Some(c) = emitter.state().get_closure_enclosing_class(class_name) {
                     return Self::get_parent_class_name(c);
                 }
             }
@@ -70,6 +72,7 @@ impl ClassExpr {
     }
 
     fn expr_to_class_expr(
+        emitter: &Emitter,
         check_traits: bool,
         resolve_self: bool,
         scope: &Scope,
@@ -81,12 +84,18 @@ impl ClassExpr {
                 if string_utils::is_static(&id) {
                     Self::Special(SpecialClsRef::Static)
                 } else if string_utils::is_parent(&id) {
-                    match Self::get_original_parent_class_name(check_traits, resolve_self, scope) {
+                    match Self::get_original_parent_class_name(
+                        emitter,
+                        check_traits,
+                        resolve_self,
+                        scope,
+                    ) {
                         Some(name) => Self::Id(ast_defs::Id(pos, name)),
                         None => Self::Special(SpecialClsRef::Parent),
                     }
                 } else if string_utils::is_self(&id) {
-                    match Self::get_original_class_name(check_traits, resolve_self, scope) {
+                    match Self::get_original_class_name(emitter, check_traits, resolve_self, scope)
+                    {
                         Some(name) => Self::Id(ast_defs::Id(pos, name)),
                         None => Self::Special(SpecialClsRef::Self_),
                     }
@@ -99,6 +108,7 @@ impl ClassExpr {
     }
 
     pub fn class_id_to_class_expr(
+        emitter: &Emitter,
         check_traits: bool,
         resolve_self: bool,
         scope: &Scope,
@@ -112,6 +122,6 @@ impl ClassExpr {
             ClassId_::CIstatic => return Self::Special(SpecialClsRef::Static),
             ClassId_::CIself => return Self::Special(SpecialClsRef::Self_),
         };
-        Self::expr_to_class_expr(check_traits, resolve_self, scope, expr)
+        Self::expr_to_class_expr(emitter, check_traits, resolve_self, scope, expr)
     }
 }

@@ -894,11 +894,17 @@ let construct_typedef tcopt t =
     else
       Printf.sprintf "<%s>" (list_items @@ List.map td.td_tparams tparam_name)
   in
+  let constraint_ =
+    match td.td_constraint with
+    | Some ty -> " as " ^ Typing_print.full_decl tcopt ty
+    | None -> ""
+  in
   Printf.sprintf
-    "%s %s%s = %s;"
+    "%s %s%s%s = %s;"
     typ
     (strip_ns t)
     tparams
+    constraint_
     (Typing_print.full_decl tcopt td.td_type)
 
 let construct_type_declaration tcopt t ?(full_method = None) fields =

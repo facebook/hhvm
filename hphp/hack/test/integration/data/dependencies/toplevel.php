@@ -120,3 +120,5 @@ class Thud {
 function with_constructor_dependency(Thud $x): int {
   return $x->n;
 }
+
+function with_newtype_with_bound(dict<N, mixed> $_): void {}

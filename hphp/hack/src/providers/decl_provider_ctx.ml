@@ -39,7 +39,7 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
         decl_cache
         ~key:(Provider_backend.Fun_decl fun_name)
         ~default:(fun () ->
-          Deferred_decl.count fun_name;
+          Deferred_decl.count_decl_cache_miss fun_name;
           let result : fun_decl option =
             match Naming_table.Funs.get_filename fun_name with
             | Some filename ->
@@ -69,7 +69,7 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
         decl_cache
         ~key:(Provider_backend.Class_decl class_name)
         ~default:(fun () ->
-          Deferred_decl.count class_name;
+          Deferred_decl.count_decl_cache_miss class_name;
           let result : class_decl option =
             Typing_classes_heap.compute_class_decl_no_cache class_name
           in
@@ -136,7 +136,7 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
         decl_cache
         ~key:(Provider_backend.Typedef_decl typedef_name)
         ~default:(fun () ->
-          Deferred_decl.count typedef_name;
+          Deferred_decl.count_decl_cache_miss typedef_name;
           let result : typedef_decl option =
             match get_type_id_filename typedef_name Naming_table.TTypedef with
             | Some filename ->
@@ -167,7 +167,7 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
         decl_cache
         ~key:(Provider_backend.Record_decl record_name)
         ~default:(fun () ->
-          Deferred_decl.count record_name;
+          Deferred_decl.count_decl_cache_miss record_name;
           let result : record_def_decl option =
             match Naming_table.Consts.get_filename record_name with
             | Some filename ->
@@ -197,7 +197,7 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
         decl_cache
         ~key:(Provider_backend.Gconst_decl gconst_name)
         ~default:(fun () ->
-          Deferred_decl.count gconst_name;
+          Deferred_decl.count_decl_cache_miss gconst_name;
           let result : gconst_decl option =
             match Naming_table.Consts.get_filename gconst_name with
             | Some filename ->

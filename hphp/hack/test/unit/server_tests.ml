@@ -43,13 +43,13 @@ let test_deferred_decl_add () =
   let _old_state = Deferred_decl.reset ~enable:true ~threshold_opt:None in
   ensure_count 0;
 
-  Deferred_decl.add (Relative_path.create Relative_path.Dummy "foo");
+  Deferred_decl.add_deferment (Relative_path.create Relative_path.Dummy "foo");
   ensure_count 1;
 
-  Deferred_decl.add (Relative_path.create Relative_path.Dummy "foo");
+  Deferred_decl.add_deferment (Relative_path.create Relative_path.Dummy "foo");
   ensure_count 1;
 
-  Deferred_decl.add (Relative_path.create Relative_path.Dummy "bar");
+  Deferred_decl.add_deferment (Relative_path.create Relative_path.Dummy "bar");
   ensure_count 2;
 
   let _old_state = Deferred_decl.reset ~enable:true ~threshold_opt:None in
@@ -68,7 +68,7 @@ let ensure_threshold ~(threshold : int) ~(limit : int) ~(expected : int) : unit
   for i = 1 to limit do
     let path = Printf.sprintf "foo-%d" i in
     let relative_path = Relative_path.create Relative_path.Dummy path in
-    try Deferred_decl.count_and_raise_if_defer ~d:relative_path
+    try Deferred_decl.count_decl_cache_miss_and_raise_if_defer ~d:relative_path
     with Deferred_decl.Defer d ->
       Asserter.Bool_asserter.assert_equals
         (i >= threshold)
@@ -179,13 +179,18 @@ let test_process_file_deferring () =
   let errors = Errors.empty in
 
   (* Finally, this is what all the setup was for: process this file *)
-  let { Typing_check_service.computation; _ } =
+  let { Typing_check_service.computation; decl_cache_misses; _ } =
     Typing_check_service.process_file dynamic_view_files opts errors file
   in
   Asserter.Int_asserter.assert_equals
     2
     (List.length computation)
     "Should be two file computations";
+  (* this test doesn't write back to cache, so num of decl_fetches isn't solid *)
+  Asserter.Bool_asserter.assert_equals
+    true
+    (decl_cache_misses > 0)
+    "Should be at least one decl fetched";
 
   (* Validate the deferred type check computation *)
   let found_check =
@@ -237,13 +242,13 @@ let test_compute_tast_counting () =
   let ctx = Provider_context.empty ~tcopt in
   let file_input = ServerCommandTypes.FileContent content in
   let (ctx, entry) = Provider_utils.update_context ctx path file_input in
-  let { Provider_utils.decls_fetched; _ } =
+  let { Provider_utils.decl_cache_misses; _ } =
     Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
   Asserter.Int_asserter.assert_equals
     1
-    decls_fetched
-    "There should be 1 decls_fetched for shared_mem provider";
+    decl_cache_misses
+    "There should be 1 decl_cache_misses for shared_mem provider";
 
   (* Now try the same with local_memory backend *)
   let bytes_per_word = Sys.word_size / 8 in
@@ -252,13 +257,13 @@ let test_compute_tast_counting () =
   Provider_backend.set_local_memory_backend ~max_size_in_words;
   Parser_options_provider.set ParserOptions.default;
   let (ctx, entry) = Provider_utils.update_context ctx path file_input in
-  let { Provider_utils.decls_fetched; _ } =
+  let { Provider_utils.decl_cache_misses; _ } =
     Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
   Asserter.Int_asserter.assert_equals
     4
-    decls_fetched
-    "There should be 4 decls_fetched for local_memory provider";
+    decl_cache_misses
+    "There should be 4 decl_cache_misses for local_memory provider";
 
   (* restore it back to shared_mem for the rest of the tests *)
   Provider_backend.set_shared_memory_backend ();

@@ -3103,18 +3103,17 @@ let track_ide_service_open_files
     the open file, we'll start handling them. *)
     Lwt.return_unit
 
-let get_filename_in_message_for_logging (message : lsp_message) : string option
-    =
+let get_filename_in_message_for_logging (message : lsp_message) :
+    Relative_path.t option =
   let uri_opt = Lsp_helpers.get_uri_opt message in
   match uri_opt with
   | None -> None
   | Some uri ->
     (try
        let path = Lsp_helpers.lsp_uri_to_path uri in
-       match Relative_path.strip_root_if_possible path with
-       | None -> Some path
-       | Some relative_path -> Some relative_path
-     with _ -> Some (Lsp.string_of_uri uri))
+       Some (Relative_path.create_detect_prefix path)
+     with _ ->
+       Some (Relative_path.create Relative_path.Dummy (Lsp.string_of_uri uri)))
 
 (* Historical quirk: we log kind and method-name a bit idiosyncratically... *)
 let get_message_kind_and_method_for_logging (message : lsp_message) :
@@ -3134,7 +3133,7 @@ let log_response_if_necessary
       ~root:(get_root_opt ())
       ~method_
       ~kind
-      ~filename:(get_filename_in_message_for_logging message)
+      ~path_opt:(get_filename_in_message_for_logging message)
       ~tracking_id:metadata.tracking_id
       ~start_queue_time:metadata.timestamp
       ~start_hh_server_state:
@@ -3163,7 +3162,7 @@ let hack_log_error
       ~root
       ~method_
       ~kind
-      ~filename:(get_filename_in_message_for_logging message)
+      ~path_opt:(get_filename_in_message_for_logging message)
       ~tracking_id:metadata.tracking_id
       ~start_queue_time:metadata.timestamp
       ~start_hh_server_state

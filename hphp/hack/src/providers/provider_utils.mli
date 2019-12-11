@@ -9,7 +9,7 @@
 type compute_tast_result = {
   tast: Tast.program;
   errors: Errors.t;
-  decls_fetched: int;
+  decl_cache_misses: int;
 }
 
 (** Compute the given AST for the given path, and return an updated [t]

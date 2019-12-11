@@ -91,7 +91,7 @@ module Classes = struct
           | None ->
             raise Exit
           | Some (file, Naming_table.TClass) ->
-            Deferred_decl.count_and_raise_if_defer ~d:file;
+            Deferred_decl.count_decl_cache_miss_and_raise_if_defer ~d:file;
             let class_type =
               Errors.run_in_decl_mode file (fun () ->
                   Decl.declare_class_in_file file class_name)
@@ -122,7 +122,7 @@ module Classes = struct
       (* If we raise Exit, then the class does not exist. *)
     with
     | Deferred_decl.Defer d ->
-      Deferred_decl.add ~d;
+      Deferred_decl.add_deferment ~d;
       None
     | Exit -> None
 

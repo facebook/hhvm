@@ -117,7 +117,7 @@ let client_lsp_method_handled
     ~root:_
     ~method_:_
     ~kind:_
-    ~filename:_
+    ~path_opt:_
     ~tracking_id:_
     ~start_queue_time:_
     ~start_hh_server_state:_
@@ -129,7 +129,7 @@ let client_lsp_method_exception
     ~root:_
     ~method_:_
     ~kind:_
-    ~filename:_
+    ~path_opt:_
     ~tracking_id:_
     ~start_queue_time:_
     ~start_hh_server_state:_
@@ -352,16 +352,16 @@ module ProfileTypeCheck = struct
       ~time_typecheck_opt:_
       ~times_checked:_
       ~files_to_declare:_
-      ~absolute:_
-      ~relative:_ =
+      ~decl_cache_misses:_
+      ~path:_ =
     ()
 
   let compute_tast
       ~provider_backend:_
       ~time_decl_and_typecheck:_
-      ~decls_fetched:_
+      ~decl_cache_misses:_
       ~filesize_opt:_
-      ~relative:_ =
+      ~path:_ =
     ()
 
   let get_telemetry_url_opt ~profile_log:_ ~init_id:_ ~recheck_id:_ = None

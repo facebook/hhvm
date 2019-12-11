@@ -200,6 +200,9 @@ struct State {
   // Liveness information
   jit::vector<VregSet> liveIn;
   jit::vector<VregSet> liveOut;
+  jit::vector<VregSet> defs;
+  jit::vector<VregSet> uses;
+  jit::vector<VregSet> gens;
 
   // Loop information. A loop is represented by its header block.
   jit::fast_map<Vlabel, LoopInfo> loopInfo;
@@ -357,6 +360,9 @@ std::string show(const State& state) {
     "Reg Info:\n{}"
     "Live In:\n{}"
     "Live Out:\n{}"
+    "Uses:\n{}"
+    "Defs:\n{}"
+    "Gens:\n{}"
     "Loop Info:\n{}"
     "Penalties:\n{}",
     show(state.gpUnreserved),
@@ -395,6 +401,9 @@ std::string show(const State& state) {
     }(),
     dumpBlockInfo(state.liveIn),
     dumpBlockInfo(state.liveOut),
+    dumpBlockInfo(state.uses),
+    dumpBlockInfo(state.defs),
+    dumpBlockInfo(state.gens),
     [&]{
       using namespace folly::gen;
       return from(state.loopInfo)
@@ -793,21 +802,28 @@ bool live_in_at(State& state, Vreg reg, Vlabel b, size_t i) {
 // Calculate liveness in the traditional dataflow way. There's more efficient
 // algorithms leveraging SSA but they require tracking use and def positions and
 // it doesn't seem worth it (this is fast enough in practice).
-void calculate_liveness(State& state) {
+void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
   auto& unit = state.unit;
 
-  state.liveIn.resize(unit.blocks.size());
-  state.liveOut.resize(unit.blocks.size());
+  if (changed) {
+    assertx(state.liveIn.size() == unit.blocks.size());
+    assertx(state.liveOut.size() == unit.blocks.size());
+    assertx(state.uses.size() == unit.blocks.size());
+    assertx(state.defs.size() == unit.blocks.size());
+    assertx(state.gens.size() == unit.blocks.size());
+    assertx(changed->size() == unit.blocks.size());
+  } else {
+    state.liveIn.resize(unit.blocks.size());
+    state.liveOut.resize(unit.blocks.size());
+    state.uses.resize(unit.blocks.size());
+    state.defs.resize(unit.blocks.size());
+    state.gens.resize(unit.blocks.size());
+  }
 
-  jit::vector<VregSet> gen(unit.blocks.size());
-  jit::vector<VregSet> kill(unit.blocks.size());
-
-  dataflow_worklist<size_t, std::less<size_t>> worklist(state.rpo.size());
-  for (size_t i = 0; i < state.rpo.size(); ++i) {
-    auto const b = state.rpo[i];
-    auto& block = unit.blocks[b];
-    auto& g = gen[b];
-    auto& k = kill[b];
+  auto const processBlock = [&] (Vblock& block,
+                                 VregSet& g,
+                                 VregSet& k,
+                                 VregSet& u) {
     for (auto& inst : boost::adaptors::reverse(block.code)) {
       for (auto const r : defs_set_cached(state, inst)) {
         if (reg_class(state, r) == RegClass::SF) continue;
@@ -817,10 +833,36 @@ void calculate_liveness(State& state) {
       for (auto const r : uses_set_cached(state, inst)) {
         if (reg_class(state, r) == RegClass::SF) continue;
         g.add(r);
+        u.add(r);
       }
     }
+  };
+
+  dataflow_worklist<size_t, std::less<size_t>> worklist(state.rpo.size());
+  for (size_t i = 0; i < state.rpo.size(); ++i) {
+    auto const b = state.rpo[i];
+
+    if (!changed || (*changed)[b]) {
+      auto& g = state.gens[b];
+      auto& k = state.defs[b];
+      auto& u = state.uses[b];
+      g.reset();
+      k.reset();
+      u.reset();
+      processBlock(unit.blocks[b], g, k, u);
+    } else if (debug) {
+      VregSet g;
+      VregSet k;
+      VregSet u;
+      processBlock(unit.blocks[b], g, k, u);
+      always_assert(g == state.gens[b]);
+      always_assert(k == state.defs[b]);
+      always_assert(u == state.uses[b]);
+    }
+
     state.liveIn[b].reset();
     state.liveOut[b].reset();
+
     worklist.push(i);
   }
 
@@ -832,8 +874,8 @@ void calculate_liveness(State& state) {
     out.reset();
     for (auto const s : succs(block)) out |= state.liveIn[s];
     auto transfer = out;
-    transfer -= kill[b];
-    transfer |= gen[b];
+    transfer -= state.defs[b];
+    transfer |= state.gens[b];
 
     if (transfer != state.liveIn[b]) {
       for (auto const pred : state.preds[b]) {

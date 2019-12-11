@@ -156,11 +156,6 @@ if(ENABLE_XED AND NOT LibXed_FOUND)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/xed/xed/build/include/xed")
 endif()
 
-if(NOT PCRE_LIBRARY)
-  target_include_directories(pcre PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/forks/pcre")
-  target_compile_definitions(pcre PUBLIC "PCRE_STATIC=1")
-endif()
-
 ##### boost #####
 
 # boost checks     
@@ -242,3 +237,9 @@ foreach(MODULE ${THIRD_PARTY_MODULES})
   endif()
 endforeach()
 set(THIRD_PARTY_INCLUDE_PATHS ${EXTRA_INCLUDE_PATHS} CACHE INTERNAL "" FORCE)
+
+if(NOT PCRE_LIBRARY)
+  target_include_directories(pcre PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/forks/pcre")
+  target_compile_definitions(pcre PUBLIC "PCRE_STATIC=1")
+endif()
+

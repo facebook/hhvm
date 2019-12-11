@@ -332,14 +332,20 @@ namespace {
 struct SSAConverter {
   SSAConverter(Vunit& unit,
                const VregSet& targets,
+               boost::dynamic_bitset<>& blocksWithTargets,
                const jit::vector<Vlabel>& rpo,
+               const PredVector& preds,
                MaybeVinstrId clobber)
     : doneBlocks{unit.blocks.size()}
-    , predecessors{computePreds(unit)}
+    , blocksWithTargets{blocksWithTargets}
+    , predecessors{preds}
     , targets{targets}
     , rpo{rpo}
     , unit{unit}
-    , clobber{clobber} {}
+    , clobber{clobber}
+  {
+    assertx(blocksWithTargets.size() == unit.blocks.size());
+  }
 
   // Create a new Vreg, recording that it replaced the original specified Vreg.
   Vreg makeVreg(Vreg pre) {
@@ -352,15 +358,38 @@ struct SSAConverter {
   // Record that the Vreg 'post' now represents the original Vreg 'pre' at
   // 'label'.
   void write(Vlabel label, Vreg pre, Vreg post) {
+    assertx(post.isValid());
     defAtBlock.insert_or_assign({label, pre}, post);
+  }
+
+  // Record that we're recursing through 'label' for the purposes of
+  // processing 'pre'. We use an invalid Vreg for this purpose.
+  void writeRecursionMarker(Vlabel label, Vreg pre) {
+    defAtBlock.insert_or_assign({label, pre}, Vreg{});
   }
 
   // Lookup what Vreg represents 'pre' at 'label'. If there's no information for
   // it at this label, chase backwards until we find a definition.
   Vreg read(Vlabel label, Vreg pre) {
-    auto const it = defAtBlock.find({label, pre});
-    if (it != defAtBlock.end()) return it->second;
-    return chaseDefinition(label, pre);
+    while (true) {
+      // Look for a defintiion at this point
+      auto const it = defAtBlock.find({label, pre});
+      if (it != defAtBlock.end()) {
+        // We found a definition. If it's valid, we can use it,
+        // otherwise it's a recursion marker and we need to chase the
+        // definition.
+        if (it->second.isValid()) return it->second;
+        return chaseDefinition(label, pre, true);
+      }
+
+      // No definition. If there's multiple predecessors we need to
+      // chase the definition. Otherwise just move onto the (single)
+      // predecessor.
+      auto const& preds = predecessors[label];
+      assertx(!preds.empty());
+      if (preds.size() > 1) return chaseDefinition(label, pre, false);
+      label = preds[0];
+    }
   }
 
   // Follow a rewrite chain, returning the Vreg that 'r' should be substituted
@@ -380,21 +409,43 @@ struct SSAConverter {
   }
 
   void addRewrite(Vreg src, Vreg dst) {
+    assertx(dst.isValid());
     auto const DEBUG_ONLY result = rewrites.emplace(src, dst);
     assertx(result.second);
+    // Resolving rewrites requires the second pass
+    needsSecondPass = true;
+  }
+
+  VregList getInputsForPhi(const PredVector::value_type& preds, Vreg pre) {
+    VregList phiInputs;
+    phiInputs.reserve(preds.size());
+    // Lookup the proper Vreg for 'pre' at each predecessor. These will be the
+    // phi inputs.
+    for (auto const& pred : preds) phiInputs.emplace_back(read(pred, pre));
+    return phiInputs;
+  }
+
+  Vreg phiIsTrivial(const VregList& phiInputs, Vreg phi = Vreg{}) {
+    // If all the inputs of the phi are the same (or the phi Vreg
+    // itself if present), then it is trivial and does not have to exist.
+    Vreg unique;
+    for (auto input : phiInputs) {
+      input = rewrite(input);
+      assertx(input.isValid());
+      if (input == phi || input == unique) continue;
+      if (unique.isValid()) return Vreg{};
+      unique = input;
+    }
+    assertx(unique.isValid());
+    return unique;
   }
 
   // Turn an incomplete phi into a real phi.
   void fillPhi(Vlabel block,
                Vreg phi,
                Vreg pre,
-               const PredVector::value_type& preds) {
+               const VregList& phiInputs) {
     assertx(block != unit.entry);
-    VregList phiInputs;
-    phiInputs.reserve(preds.size());
-    // Lookup the proper Vreg for 'pre' at each predecessor. These will be the
-    // phi inputs.
-    for (auto const& pred : preds) phiInputs.push_back(read(pred, pre));
     // Try to optimize away the phi. If successful, we're done.
     if (optimizePhi(phi, phiInputs)) return;
     // Otherwise we need a real one.
@@ -406,20 +457,13 @@ struct SSAConverter {
   // Return true if the Vreg representing a phi (along with the list of inputs
   // to that phi) can be optimized away to just one of the inputs.
   bool optimizePhi(Vreg phi, const VregList& inputs) {
-    // If all the inputs of the phi are the same (or the phi Vreg itself), then
-    // it can be eliminated.
-    folly::Optional<Vreg> unique;
-    for (auto input : inputs) {
-      input = rewrite(input);
-      if (input == phi || input == unique) continue;
-      if (unique) return false;
-      unique = input;
-    }
-    assertx(unique);
+    // If the phi is trivial, then it can be eliminated.
+    auto const unique = phiIsTrivial(inputs, phi);
+    if (!unique.isValid()) return false;
     // Erase this phi (if it already exists) and record that any existing users
     // of this phi Vreg should instead use the unique Vreg.
     phis.erase(phi);
-    addRewrite(phi, *unique);
+    addRewrite(phi, unique);
     return true;
   }
 
@@ -434,46 +478,75 @@ struct SSAConverter {
     );
   }
 
-  // Starting at 'label', recursively look backwards through predecessors to
-  // find a definition of 'pre' to a new Vreg.
-  Vreg chaseDefinition(Vlabel label, Vreg pre) {
-    auto const post = [&]{
-      always_assert_flog(
-        label != unit.entry,
-        "Unable to find def for {}",
-        show(pre)
+  // Starting at 'label', recursively look backwards through
+  // predecessors to find a definition of 'pre' to a new Vreg. This
+  // should only be used if 'label' has multiple predecessors
+  // (otherwise just walk up to the predecessor).
+  Vreg chaseDefinition(Vlabel label, Vreg pre, bool recursion) {
+    always_assert_flog(
+      label != unit.entry,
+      "Unable to find def for {}",
+      show(pre)
+    );
+
+    auto const& preds = predecessors[label];
+    assertx(preds.size() > 1);
+
+    // If this block isn't ready to be processed (there's an unvisited
+    // predecessor), then we can't go any further. Create an provisional phi
+    // and use its Vreg (the phi might get optimized away later).
+    if (!blockIsReady(label)) {
+      assertx(!recursion);
+      assertx(preds.size() > 1);
+      auto const phi = makeVreg(pre);
+      incompletePhis[label].emplace_back(
+        IncompletePhi{ phi, pre }
       );
+      write(label, pre, phi);
+      return phi;
+    }
 
-      auto const& preds = predecessors[label];
-      assertx(!preds.empty());
+    // There's multiple preds and they've all been processed.
 
-      // If this block isn't ready to be processed (there's an unvisited
-      // predecessor), then we can't go any further. Create an provisional phi
-      // and use its Vreg (the phi might get optimized away later).
-      if (!blockIsReady(label)) {
-        assertx(preds.size() > 1);
-        auto const phi = makeVreg(pre);
-        incompletePhis[label].emplace_back(
-          IncompletePhi{ phi, pre }
-        );
-        return phi;
+    if (!recursion) {
+      // We haven't seen this label already. Record that we're
+      // visiting it (in case we loop back to it), then try to resolve
+      // all of the predecessors (which will serve as inputs to the
+      // phi).
+      writeRecursionMarker(label, pre);
+      auto const phiInputs = getInputsForPhi(preds, pre);
+
+      // Check if there's a definition at this block. Normally there
+      // shouldn't be (we wouldn't have called chaseDefinition in that
+      // case), but we might have resolved it as part of getting the
+      // phi inputs above. If there's a valid definition, just use
+      // that.
+      auto const it = defAtBlock.find({label, pre});
+      assertx(it != defAtBlock.end());
+      if (it->second.isValid()) return it->second;
+
+      // Attempt to optimize away the phi
+      auto const unique = phiIsTrivial(phiInputs);
+      if (unique.isValid()) {
+        write(label, pre, unique);
+        return unique;
       }
 
-      // Otherwise if there's only one pred, just recursively check it.
-      if (preds.size() == 1) return read(preds[0], pre);
-
-      // There's multiple preds and they've all been processed. We definitely
-      // need a phi here, so create one and use its Vreg.
+      // Otherwise create the phi
+      auto const phi = makeVreg(pre);
+      fillPhi(label, phi, pre, phiInputs);
+      write(label, pre, phi);
+      return phi;
+    } else {
+      // We've recursed back into a label we've already
+      // visited. There's no point in continuing any further (since
+      // we'll just loop infinitely). Instead just create a phi.
       auto const phi = makeVreg(pre);
       write(label, pre, phi);
-      fillPhi(label, phi, pre, preds);
+      auto const phiInputs = getInputsForPhi(preds, pre);
+      fillPhi(label, phi, pre, phiInputs);
       return phi;
-    }();
-
-    // Record the Vreg we found so that later lookups will just hit it
-    // immediately.
-    write(label, pre, post);
-    return post;
+    }
   }
 
   // Actually generate phijmp/phidef instructions for the phis.
@@ -504,8 +577,14 @@ struct SSAConverter {
         foundExistingPhi = true;
       }
 
+      // We've modified this block
+      blocksWithTargets[phi.second.block] = true;
+
       // Now insert phijmps at all the predecessors
       for (size_t i = 0; i < phi.second.inputs.size(); ++i) {
+        // Also modified this block
+        blocksWithTargets[preds[i]] = true;
+
         auto const input = rewrite(phi.second.inputs[i]);
         auto& pred = unit.blocks[preds[i]];
         assertx(!pred.code.empty());
@@ -537,66 +616,91 @@ struct SSAConverter {
   void firstPass() {
     for (auto const label : rpo) {
       auto& block = unit.blocks[label];
-      for (auto& inst : block.code) {
-        if (inst.op == Vinstr::ssaalias) {
-          // ssaalias override. Any usage of the dest after this point will use
-          // the source instead (which may have been rewritten).
-          assertx(targets[inst.ssaalias_.s]);
-          assertx(targets[inst.ssaalias_.d]);
-          inst.ssaalias_.s = read(label, inst.ssaalias_.s);
-          if (clobber) inst.id = *clobber;
-          write(label, inst.ssaalias_.d, inst.ssaalias_.s);
-          continue;
-        }
 
-        auto changed = false;
-        visitRegsMutable(
-          unit, inst,
-          [&](Vreg r) {
-            if (!targets[r]) return r;
-            // Lookup what this Vreg should be rewritten to
-            auto const r2 = read(label, r);
-            if (r != r2) changed = true;
-            return r2;
-          },
-          [&](Vreg r) {
-            if (!targets[r]) return r;
-            // Create a new Vreg and record that any usage of 'r' after this
-            // point should instead use 'r2'.
-            auto const r2 = makeVreg(r);
-            changed = true;
-            write(label, r, r2);
-            return r2;
-          },
-          // We can't rewrite RegSets, so you'd better not have asked us to.
-          [&](RegSet s) {
-            if (debug) s.forEach([&](Vreg r) { always_assert(!targets[r]); });
-            return s;
-          },
-          [&](RegSet s) {
-            if (debug) s.forEach([&](Vreg r) { always_assert(!targets[r]); });
-            return s;
+      // Only process blocks which we've been told can contain target
+      // Vregs. In debug builds we'll examine every block, but assert
+      // if we find a target Vreg in a non-marked block.
+      if (debug || blocksWithTargets[label]) {
+        for (auto& inst : block.code) {
+          if (inst.op == Vinstr::ssaalias) {
+            // ssaalias override. Any usage of the dest after this
+            // point will use the source instead (which may have been
+            // rewritten).
+            assertx(targets[inst.ssaalias_.s]);
+            assertx(targets[inst.ssaalias_.d]);
+            assertx(blocksWithTargets[label]);
+            inst.ssaalias_.s = read(label, inst.ssaalias_.s);
+            if (clobber) inst.id = *clobber;
+            write(label, inst.ssaalias_.d, inst.ssaalias_.s);
+            // ssaalias instructions need the second pass
+            needsSecondPass = true;
+            continue;
           }
-        );
-        if (changed && clobber) inst.id = *clobber;
+
+          auto changed = false;
+          visitRegsMutable(
+            unit, inst,
+            [&](Vreg r) {
+              if (!targets[r]) return r;
+              assertx(blocksWithTargets[label]);
+              // Lookup what this Vreg should be rewritten to
+              auto const r2 = read(label, r);
+              if (r != r2) changed = true;
+              return r2;
+            },
+            [&](Vreg r) {
+              if (!targets[r]) return r;
+              assertx(blocksWithTargets[label]);
+              // Create a new Vreg and record that any usage of 'r'
+              // after this point should instead use 'r2'. If 'r'
+              // hasn't already been used, re-use it (keeps total
+              // number of Vregs down).
+              if (!reused[r]) {
+                reused.add(r);
+                write(label, r, r);
+                return r;
+              } else {
+                auto const r2 = makeVreg(r);
+                changed = true;
+                write(label, r, r2);
+                return r2;
+              }
+            },
+            // We can't rewrite RegSets, so you'd better not have asked us to.
+            [&](RegSet s) {
+              if (debug) s.forEach([&](Vreg r) { always_assert(!targets[r]); });
+              return s;
+            },
+            [&](RegSet s) {
+              if (debug) s.forEach([&](Vreg r) { always_assert(!targets[r]); });
+              return s;
+            }
+          );
+          if (changed && clobber) inst.id = *clobber;
+        }
       }
 
       // Mark this block as processed and check if this has made any successor
       // blocks now ready. If so, convert any incomplete phis for the successor
       // block into a real phi.
       doneBlocks[label] = true;
-      for (auto const succ : succs(block)) {
-        if (!blockIsReady(succ)) continue;
-        auto const it = incompletePhis.find(succ);
-        if (it == incompletePhis.end()) continue;
+      [&] {
+        auto const& successors = succs(block);
+        if (successors.size() != 1) return;
+        auto const succ = successors[0];
         auto const& preds = predecessors[succ];
-        assertx(preds.size() > 1);
+        assertx(!preds.empty());
+        if (preds.size() < 2) return;
+        if (!blockIsReady(succ)) return;
+        auto const it = incompletePhis.find(succ);
+        if (it == incompletePhis.end()) return;
         auto const incompletes = std::move(it->second);
         incompletePhis.erase(it);
         for (auto const& incomplete : incompletes) {
-          fillPhi(succ, incomplete.phi, incomplete.variable, preds);
+          auto const phiInputs = getInputsForPhi(preds, incomplete.variable);
+          fillPhi(succ, incomplete.phi, incomplete.variable, phiInputs);
         }
-      }
+      }();
     }
   }
 
@@ -606,36 +710,49 @@ struct SSAConverter {
   void secondPass() {
     assertx(incompletePhis.empty());
 
+    // We only need to run the second pass if we have ssaalias
+    // instructions (which must be removed), or if we had any rewrites
+    // which now need to materialized.
+    if (!needsSecondPass) return;
+
     for (auto const label : rpo) {
-      size_t i = 0;
-      while (i < unit.blocks[label].code.size()) {
-        if (unit.blocks[label].code[i].op == Vinstr::ssaalias) {
-          vmodify(unit, label, i, [] (Vout&) { return 1; });
-          continue;
-        }
-
-        auto& inst = unit.blocks[label].code[i];
-        auto changed = false;
-        visitRegsMutable(
-          unit, inst,
-          [&](Vreg r) {
-            auto const r2 = rewrite(r);
-            if (r != r2) changed = true;
-            return r2;
-          },
-          [&](Vreg r) { return r; },
-          [&](RegSet s) {
-            if (debug) s.forEach([&](Vreg r) { always_assert(!targets[r]); });
-            return s;
-          },
-          [&](RegSet s) {
-            if (debug) s.forEach([&](Vreg r) { always_assert(!targets[r]); });
-            return s;
+      // Any block with ssaalias instructions or rewrites should have
+      // been set in blocksWithTargets, so only process those. Similar
+      // to firstPass(), process every block in debug builds and
+      // assert the block was marked.
+      if (debug || blocksWithTargets[label]) {
+        size_t i = 0;
+        while (i < unit.blocks[label].code.size()) {
+          if (unit.blocks[label].code[i].op == Vinstr::ssaalias) {
+            assertx(blocksWithTargets[label]);
+            vmodify(unit, label, i, [] (Vout&) { return 1; });
+            continue;
           }
-        );
-        if (changed && clobber) inst.id = *clobber;
 
-        ++i;
+          auto& inst = unit.blocks[label].code[i];
+          auto changed = false;
+          visitRegsMutable(
+            unit, inst,
+            [&](Vreg r) {
+              auto const r2 = rewrite(r);
+              if (r != r2) changed = true;
+              return r2;
+            },
+            [&](Vreg r) { return r; },
+            [&](RegSet s) {
+              if (debug) s.forEach([&](Vreg r) { always_assert(!targets[r]); });
+              return s;
+            },
+            [&](RegSet s) {
+              if (debug) s.forEach([&](Vreg r) { always_assert(!targets[r]); });
+              return s;
+            }
+          );
+          assertx(!changed || blocksWithTargets[label]);
+          if (changed && clobber) inst.id = *clobber;
+
+          ++i;
+        }
       }
     }
   }
@@ -647,7 +764,6 @@ struct SSAConverter {
     secondPass();
     materializePhis();
     assertx(check(unit));
-    assertx(!checkForTargets());
   }
 
   // Sanity check that no critical edges exist in the unit.
@@ -663,21 +779,14 @@ struct SSAConverter {
     return false;
   }
 
-  // Sanity check that none of the "target" Vregs exist anymore after we've
-  // rewritten the unit.
-  bool checkForTargets() const {
-    for (auto const label : rpo) {
-      auto const& block = unit.blocks[label];
-      for (auto const& inst : block.code) {
-        auto hasTarget = false;
-        auto const check = [&] (Vreg r) { if (targets[r]) hasTarget = true; };
-        visitUses(unit, inst, check);
-        visitDefs(unit, inst, check);
-        if (hasTarget) return true;
-      }
-    }
-    return false;
-  }
+  // We only need to run the second pass under certain
+  // circumstances. This is set to true if we've detected we need to.
+  bool needsSecondPass = false;
+  // Record which target Vregs have already been used when rewriting
+  // instructions. In many cases, there's only one rewrite for that
+  // target, and re-using the original Vreg keeps the total number of
+  // Vregs down.
+  VregSet reused;
 
   // Represents a phi being built (we haven't visited all of the predecessors of
   // a node). Once we've visited all the blocks, any incomplete phis will be
@@ -694,7 +803,7 @@ struct SSAConverter {
     Vlabel block;
     VregList inputs;
   };
-  // need stable iteration order.
+  // Need stable iteration order.
   jit::flat_map<Vreg, Phi> phis;
 
   /*
@@ -714,8 +823,9 @@ struct SSAConverter {
   // Map of new Vregs to the ones they replaced
   jit::fast_map<Vreg, Vreg> newVregs;
 
-  const PredVector predecessors;
+  boost::dynamic_bitset<>& blocksWithTargets;
 
+  const PredVector& predecessors;
   const VregSet& targets;
   const jit::vector<Vlabel>& rpo;
   Vunit& unit;
@@ -724,11 +834,14 @@ struct SSAConverter {
 
 }
 
-jit::fast_map<Vreg, Vreg> restoreSSA(Vunit& unit,
-                                     const VregSet& targets,
-                                     const jit::vector<Vlabel>& rpo,
-                                     MaybeVinstrId clobber) {
-  SSAConverter converter{unit, targets, rpo, clobber};
+jit::fast_map<Vreg, Vreg> restoreSSA(
+    Vunit& unit,
+    const VregSet& targets,
+    boost::dynamic_bitset<>& blocksWithTargets,
+    const jit::vector<Vlabel>& rpo,
+    const PredVector& preds,
+    MaybeVinstrId clobber) {
+  SSAConverter converter{unit, targets, blocksWithTargets, rpo, preds, clobber};
   converter();
   return std::move(converter.newVregs);
 }

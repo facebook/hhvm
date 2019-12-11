@@ -1826,7 +1826,10 @@ void prepare_unit(State& state) {
   // Restore SSA if necessary and create RegInfo for the new Vregs,
   // mirroring the info of the original Vregs (which have been
   // rewritten).
-  auto const mappings = restoreSSA(state.unit, toSSA, state.rpo, 0);
+  boost::dynamic_bitset<> dummy;
+  dummy.resize(state.unit.blocks.size(), true);
+  auto const mappings =
+    restoreSSA(state.unit, toSSA, dummy, state.rpo, state.preds, 0);
   for (auto const& map : mappings) {
     if (!map.second.isPhys()) continue;
     reg_info_create(state, map.first);
@@ -6483,7 +6486,16 @@ void insert_spills(State& state) {
   // Spilling may break SSA form because we use the same Vreg when
   // both spilled and reloaded, so fix that here.
   auto const mappings = [&] {
-    auto const mappings = restoreSSA(state.unit, results.ssaize, state.rpo, 0);
+    boost::dynamic_bitset<> dummy;
+    dummy.resize(state.unit.blocks.size(), true);
+    auto const mappings = restoreSSA(
+      state.unit,
+      results.ssaize,
+      dummy,
+      state.rpo,
+      state.preds,
+      0
+    );
     for (auto const& map : mappings) {
       reg_info_insert(
         state,

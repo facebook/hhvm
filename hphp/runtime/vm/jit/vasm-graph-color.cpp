@@ -150,6 +150,7 @@ struct RegInfo {
 };
 
 using BlockVector = jit::vector<Vlabel>;
+using BlockSet = boost::dynamic_bitset<>;
 using WeightMap = jit::fast_map<Vreg, uint64_t>;
 using PhiWeightVector = jit::vector<folly::Optional<uint64_t>>;
 using PenaltyVector = PhysReg::Map<int64_t>;
@@ -1179,19 +1180,26 @@ struct PlaceConstantsBlockInfo {
   VregSet liveIn;
 };
 
-// Calculate sink stop and liveness information for each constant for every
-// block, returning an empty vector if there's no constants.
-std::pair<
-  jit::vector<PlaceConstantsBlockInfo>,
-  jit::vector<VregSet>
->
+// Calculate sink stop and liveness information for each constant for
+// every block, returning an empty vector if there's no
+// constants. Also return the set of trivial constants in each block
+// (if any), and a set of blocks which have non-trivial constant uses.
+
+struct ComputePlaceConstantsBlockInfoRet {
+  jit::vector<PlaceConstantsBlockInfo> blockInfo;
+  jit::vector<VregSet> trivial;
+  BlockSet withConsts;
+};
+
+ComputePlaceConstantsBlockInfoRet
 compute_place_constants_block_info(State& state) {
   auto& unit = state.unit;
   auto const& rpo = state.rpo;
   auto const& rpoOrder = state.rpoOrder;
   auto const& preds = state.preds;
 
-  if (unit.regToConst.empty()) return {};
+  using Ret = ComputePlaceConstantsBlockInfoRet;
+  if (unit.regToConst.empty()) return Ret{{}, {}, BlockSet{}};
 
   /* Per-block dataflow state:
    *
@@ -1228,7 +1236,7 @@ compute_place_constants_block_info(State& state) {
 
   dataflow_worklist<size_t, std::less<size_t>> worklist(rpo.size());
 
-  boost::dynamic_bitset<> visited(unit.blocks.size());
+  BlockSet visited(unit.blocks.size());
   visited.flip();
 
   // All constants with a use
@@ -1318,9 +1326,11 @@ compute_place_constants_block_info(State& state) {
   if (nonTrivial.none()) {
     // Either the unit has no usages at all, or all usages are
     // trivial.
-    if (allUsed.none()) return {};
-    return {{}, std::move(trivialUses)};
+    if (allUsed.none()) return Ret{{}, {}, BlockSet{}};
+    return Ret{{}, std::move(trivialUses), BlockSet{}};
   }
+
+  BlockSet blocksWithUses(unit.blocks.size());
 
   while (!worklist.empty()) {
     auto const b = rpo[worklist.pop()];
@@ -1382,6 +1392,7 @@ compute_place_constants_block_info(State& state) {
         auto mutated = newState.mutate();
         mutated->definitelyUsed |= uses;
         for (auto const r : uses) mutated->nearestUse.insert_or_assign(r, b);
+        blocksWithUses[b] = true;
       }
       // Update this block's state and schedule any predecessors
       if (schedulePreds(newState.get())) blockIn[b] = newState;
@@ -1428,6 +1439,7 @@ compute_place_constants_block_info(State& state) {
       // point.
       newState.definitelyUsed |= uses;
       for (auto const r : uses) newState.nearestUse.insert_or_assign(r, b);
+      if (uses.any()) blocksWithUses[b] = true;
 
       // Update this block's state and schedule any predecessors
       if (schedulePreds(&newState)) blockIn[b].emplace(std::move(newState));
@@ -1459,7 +1471,11 @@ compute_place_constants_block_info(State& state) {
     }
   }
 
-  return {std::move(outInfo), std::move(trivialUses)};
+  return Ret{
+    std::move(outInfo),
+    std::move(trivialUses),
+    std::move(blocksWithUses)
+  };
 }
 
 // Find the last index in the block where it's not legal to insert the
@@ -1482,7 +1498,7 @@ size_t find_first_invalid_block_index(const Vblock& block) {
 // end of the block. Constant materialization can sometimes cause such
 // definitions, and it's difficult to modify the dataflow to not do
 // so. Instead just fix it up after the fact.
-void hoist_constants(State& state) {
+void hoist_constants(State& state, BlockSet& changed) {
   auto& unit = state.unit;
 
   // NB: Be careful with references to things inside the unit here,
@@ -1492,10 +1508,10 @@ void hoist_constants(State& state) {
     // Can only happen if we have more than one successor
     if (successors.size() < 2) continue;
 
-    // Avoid self-loops
+    // Avoid self-loops or blocks without all successors changed
     if (std::any_of(successors.begin(),
                     successors.end(),
-                    [&] (Vlabel s) { return s == b; })) {
+                    [&] (Vlabel s) { return !changed[s] || s == b; })) {
       continue;
     }
 
@@ -1546,6 +1562,7 @@ void hoist_constants(State& state) {
       // (which is a pointer).
       successors = succs(unit.blocks[b]);
       hoisted.add(r);
+      changed[b] = true;
     };
 
     // For every constant defined in the first successor (an arbitrary
@@ -1593,14 +1610,16 @@ void hoist_constants(State& state) {
 
 // Materialize constants by placing instructions to create them at the
 // appropriate points. The set of constants placed multiple times
-// (thus needing SSA restoration) is returned.
-VregSet place_constants(State& state) {
+// (thus needing SSA restoration) is returned, along with a block set
+// containing the blocks containing those constants.
+std::pair<VregSet, BlockSet> place_constants(State& state) {
   auto& unit = state.unit;
 
   auto info = compute_place_constants_block_info(state);
-  auto const& blockInfo = info.first;
-  auto const& trivial = info.second;
-  if (blockInfo.empty() && trivial.empty()) return {};
+  auto const& blockInfo = info.blockInfo;
+  auto const& trivial = info.trivial;
+  auto& withConsts = info.withConsts;
+  if (blockInfo.empty() && trivial.empty()) return {{}, BlockSet{}};
 
   assertx(trivial.size() == unit.blocks.size());
 
@@ -1622,7 +1641,7 @@ VregSet place_constants(State& state) {
 
     inStates.resize(unit.blocks.size());
     outStates.resize(unit.blocks.size());
-    boost::dynamic_bitset<> visited(unit.blocks.size());
+    BlockSet visited(unit.blocks.size());
 
     dataflow_worklist<size_t> worklist(rpo.size());
 
@@ -1744,8 +1763,16 @@ VregSet place_constants(State& state) {
       }
       return place | trivial[b];
     }();
+    if (place.none()) continue;
+
     multiplePlaced |= (allPlaced & place);
     allPlaced |= place;
+    // We can ignore trivial constants because those are automatically
+    // in SSA form
+    if ((place - trivial[b]).any()) {
+      assertx(withConsts.size() == unit.blocks.size());
+      withConsts[b] = true;
+    }
 
     auto block = &unit.blocks[b];
     assertx(!block->code.empty());
@@ -1755,8 +1782,6 @@ VregSet place_constants(State& state) {
     // Walk through this block, inserting ldimms immediately before a constant's
     // use for the constants we decided to materialize here.
     for (size_t i = 0; i < stopIdx; ++i) {
-      if (place.none()) break;
-
       placeThisInst.reset();
       if (i == stopIdx - 1) {
         // We reached the end of the block. Any constants remaining are ones we
@@ -1798,6 +1823,7 @@ VregSet place_constants(State& state) {
       );
       block = &unit.blocks[b];
       place -= placeThisInst;
+      if (place.none()) break;
     }
 
     assertx(place.none());
@@ -1808,9 +1834,9 @@ VregSet place_constants(State& state) {
   unit.constToReg.clear();
 
   // Attempt to hoist constants
-  hoist_constants(state);
+  if (withConsts.any()) hoist_constants(state, withConsts);
 
-  return multiplePlaced;
+  return {std::move(multiplePlaced), std::move(withConsts)};
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1820,16 +1846,18 @@ void prepare_unit(State& state) {
   find_loops(state);
 
   // Materialize constants, which might result in a non-SSA unit.
-  auto const toSSA = place_constants(state);
+  auto results = place_constants(state);
+  auto const& toSSA = results.first;
+  auto& withConsts = results.second;
+
   if (toSSA.none()) return;
+  assertx(withConsts.size() == state.unit.blocks.size());
 
   // Restore SSA if necessary and create RegInfo for the new Vregs,
   // mirroring the info of the original Vregs (which have been
   // rewritten).
-  boost::dynamic_bitset<> dummy;
-  dummy.resize(state.unit.blocks.size(), true);
   auto const mappings =
-    restoreSSA(state.unit, toSSA, dummy, state.rpo, state.preds, 0);
+    restoreSSA(state.unit, toSSA, withConsts, state.rpo, state.preds, 0);
   for (auto const& map : mappings) {
     if (!map.second.isPhys()) continue;
     reg_info_create(state, map.first);

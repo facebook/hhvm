@@ -25,7 +25,7 @@ This acts as an "overlay" or "delta" on the state of the world, relative to the
 files that exist in the repo on disk.
 
 To load this state of the world for use in a given operation, use
-[ServerIdeUtils.with_context]. *)
+[Provider_utils.respect_but_quarantine_unsaved_changes]. *)
 type t = {
   tcopt: TypecheckerOptions.t;
   backend: Provider_backend.t;
@@ -47,16 +47,20 @@ val get_file_input :
 val get_fileinfo : entry:entry -> FileInfo.t
 
 (** Get the current global context (which is set with
-[ServerIdeUtils.with_context]), if any. Only one global context can be set at a
-time. *)
+[Provider_utils.respect_but_quarantine_unsaved_changes]), if any. Only one
+global context can be set at a time. *)
 val get_global_context : unit -> t option
+
+(** Like [get_global_context], but returns the empty context if no global
+context was set. *)
+val get_global_context_or_empty_FOR_MIGRATION : unit -> t
 
 (** Internal functions **)
 
 (** Set the current global context. Should not be used directly; use
-[ServerIdeUtils.with_context] instead. *)
+[Provider_utils.respect_but_quarantine_unsaved_changes] instead. *)
 val set_global_context_internal : t -> unit
 
 (** Unset the current global context. Should not be used directly; use
-[ServerIdeUtils.with_context] instead. *)
+[Provider_utils.respect_but_quarantine_unsaved_changes] instead. *)
 val unset_global_context_internal : unit -> unit

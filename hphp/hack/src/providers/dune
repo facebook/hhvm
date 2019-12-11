@@ -13,6 +13,7 @@
   (libraries
     ast
     collections
+    global_naming_options
     nast
     parser
     provider_backend

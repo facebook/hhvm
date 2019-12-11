@@ -68,6 +68,13 @@ module StateConstraintGraph = struct
             | (p, t) when Pos.equal t Pos.none -> p
             | (_, p) -> p
           in
+          let try_sub_type_i env ty_sub ty_super on_error =
+            try Typing_subtype.sub_type_i env ty_sub ty_super on_error
+            with e ->
+              let e = Printf.sprintf "Exception: %s" (Exn.to_string e) in
+              on_error [(pos, e)];
+              env
+          in
           let current_tyvar_info =
             {
               current_tyvar_info with
@@ -85,7 +92,7 @@ module StateConstraintGraph = struct
           (* Add the missing upper and lower bounds - and do the transitive closure *)
           |> ITySet.fold
                (fun bound env ->
-                 Typing_subtype.sub_type_i
+                 try_sub_type_i
                    env
                    (Typing_defs.LoclType
                       (Typing_reason.Rwitness pos, Typing_defs.Tvar var))
@@ -94,7 +101,7 @@ module StateConstraintGraph = struct
                tyvar_info.upper_bounds
           |> ITySet.fold
                (fun bound env ->
-                 Typing_subtype.sub_type_i
+                 try_sub_type_i
                    env
                    bound
                    (Typing_defs.LoclType

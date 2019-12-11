@@ -66,7 +66,7 @@ function get_current_user(): string;
  * includes those created by extensions.
  */
 <<__Native>>
-function get_defined_constants(bool $categorize = false): array;
+function get_defined_constants(bool $categorize = false): darray;
 
 <<__Native>>
 function get_include_path(): string;

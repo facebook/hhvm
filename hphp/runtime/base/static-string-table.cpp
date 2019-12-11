@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/base/static-string-table.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -349,7 +350,7 @@ const StaticString s_Core("Core");
 Array lookupDefinedConstants(bool categorize /*= false */) {
   assertx(s_stringDataMap);
   Array usr(rds::s_constants());
-  Array sys;
+  Array sys = Array::CreateDArray();
 
   for (auto it = s_stringDataMap->begin();
        it != s_stringDataMap->end(); ++it) {
@@ -376,12 +377,12 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
   }
 
   if (categorize) {
-    Array ret;
-    ret.set(s_user, usr);
-    ret.set(s_Core, sys);
-    return ret;
+    return make_darray(
+      s_user, usr.toDArray(),
+      s_Core, sys
+    );
   } else {
-    return usr;
+    return usr.toDArray();
   }
 }
 

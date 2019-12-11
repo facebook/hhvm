@@ -86,8 +86,10 @@ else()
   list(APPEND extra_link_opts "${SQLITE_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}sqlite3${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endif()
 
-get_filename_component(RUSTC_BIN_DIR "${RUSTC_EXECUTABLE}" DIRECTORY)
-get_filename_component(CARGO_BIN_DIR "${CARGO_EXECUTABLE}" DIRECTORY)
+get_target_property(RUSTC_EXE rustc LOCATION)
+get_target_property(CARGO_EXE cargo LOCATION)
+get_filename_component(RUSTC_BIN_DIR "${RUSTC_EXE}" DIRECTORY)
+get_filename_component(CARGO_BIN_DIR "${CARGO_EXE}" DIRECTORY)
 
 function(invoke_dune name target)
   add_custom_target(
@@ -100,7 +102,7 @@ function(invoke_dune name target)
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 
-  add_dependencies(${name} ocaml)
+  add_dependencies(${name} ocaml rustc cargo)
   if (NOT SKIP_OPAM)
     add_dependencies(${name} opam_setup)
   endif()

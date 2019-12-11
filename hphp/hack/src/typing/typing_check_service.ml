@@ -257,24 +257,42 @@ let process_files
   Ast_provider.local_changes_push_stack ();
 
   let profile_log start_time second_start_time_opt file result =
+    let end_time = Unix.gettimeofday () in
+    let times_checked = file.deferred_count + 1 in
     let files_to_declare =
       List.count (snd result) ~f:(fun f ->
           match f with
           | Declare _ -> true
           | _ -> false)
     in
-    let filepath = Relative_path.suffix file.path in
-    TypingLogger.ProfileTypeCheck.log
-      ~recheck_id:check_info.recheck_id
-      ~start_time
-      ~second_start_time_opt
-      ~times_checked:(file.deferred_count + 1)
-      ~files_to_declare
-      ~absolute:(Relative_path.to_absolute file.path)
-      ~relative:filepath;
+    let (time_decl_and_typecheck, time_typecheck_opt) =
+      match second_start_time_opt with
+      | None -> (end_time -. start_time, None)
+      | Some second_start_time ->
+        (second_start_time -. start_time, Some (end_time -. second_start_time))
+    in
+    (* "deciding_time" is what we compare against the threshold, *)
+    (* to see if we should log. *)
+    let deciding_time =
+      Option.value time_typecheck_opt ~default:time_decl_and_typecheck
+    in
+    let should_log =
+      deciding_time >= check_info.profile_type_check_duration_threshold
+      || times_checked > 1
+      || files_to_declare > 0
+    in
+    if should_log then
+      TypingLogger.ProfileTypeCheck.log
+        ~recheck_id:check_info.recheck_id
+        ~time_decl_and_typecheck
+        ~time_typecheck_opt
+        ~times_checked
+        ~files_to_declare
+        ~absolute:(Relative_path.to_absolute file.path)
+        ~relative:(Relative_path.suffix file.path);
     let _t : float =
       Hh_logger.log_duration
-        (Printf.sprintf "%s [type-check]" filepath)
+        (Printf.sprintf "%s [type-check]" (Relative_path.suffix file.path))
         start_time
     in
     ()

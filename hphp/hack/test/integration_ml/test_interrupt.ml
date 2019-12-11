@@ -60,6 +60,7 @@ let test () =
       recheck_id = Some "";
       profile_log = false;
       profile_type_check_twice = false;
+      profile_type_check_duration_threshold = 0.;
     }
   in
   let (errors, _delegate_state, (), cancelled) =

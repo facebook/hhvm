@@ -38,6 +38,7 @@ type check_info = {
   recheck_id: string option;
   profile_log: bool;
   profile_type_check_twice: bool;
+  profile_type_check_duration_threshold: float;
 }
 
 type files_to_process = file_computation list

@@ -23,6 +23,7 @@ let init
           recheck_id = None;
           profile_log = false;
           profile_type_check_twice = false;
+          profile_type_check_duration_threshold = 0.;
         }
       in
       let delegate_state = Typing_service_delegate.create () in

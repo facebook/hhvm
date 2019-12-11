@@ -167,9 +167,13 @@ let get_check_info genv env =
     let profile_type_check_twice =
       genv.local_config.ServerLocalConfig.profile_type_check_twice
     in
+    let profile_type_check_duration_threshold =
+      genv.local_config.ServerLocalConfig.profile_type_check_duration_threshold
+    in
     {
       Typing_check_service.init_id;
       recheck_id;
       profile_log;
       profile_type_check_twice;
+      profile_type_check_duration_threshold;
     })

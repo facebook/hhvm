@@ -27,7 +27,9 @@ let process_file_computation
     ~(errors : Errors.t) : Errors.t * file_computation list =
   let process_file_wrapper = process_file dynamic_view_files opts in
   match fc with
-  | Check file -> process_file_wrapper errors file
+  | Check file ->
+    let result = process_file_wrapper errors file in
+    (result.errors, result.computation)
   | Declare path ->
     let errors = Decl_service.decl_file errors path in
     (errors, [])

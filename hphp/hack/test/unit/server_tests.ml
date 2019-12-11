@@ -179,17 +179,17 @@ let test_process_file_deferring () =
   let errors = Errors.empty in
 
   (* Finally, this is what all the setup was for: process this file *)
-  let (_errors, file_computations) =
+  let { Typing_check_service.computation; _ } =
     Typing_check_service.process_file dynamic_view_files opts errors file
   in
   Asserter.Int_asserter.assert_equals
     2
-    (List.length file_computations)
+    (List.length computation)
     "Should be two file computations";
 
   (* Validate the deferred type check computation *)
   let found_check =
-    List.exists file_computations ~f:(fun file_computation ->
+    List.exists computation ~f:(fun file_computation ->
         match file_computation with
         | Typing_check_service.(Check { path; deferred_count }) ->
           Asserter.String_asserter.assert_equals
@@ -210,7 +210,7 @@ let test_process_file_deferring () =
 
   (* Validate the declare file computation *)
   let found_declare =
-    List.exists file_computations ~f:(fun file_computation ->
+    List.exists computation ~f:(fun file_computation ->
         match file_computation with
         | Typing_check_service.Declare path ->
           Asserter.String_asserter.assert_equals

@@ -164,11 +164,16 @@ let should_enable_deferring
   | Some max_times when file.deferred_count >= max_times -> false
   | _ -> true
 
+type process_file_results = {
+  errors: Errors.t;
+  computation: file_computation list;
+}
+
 let process_file
     (dynamic_view_files : Relative_path.Set.t)
     (opts : GlobalOptions.t)
     (errors : Errors.t)
-    (file : check_file_computation) : Errors.t * file_computation list =
+    (file : check_file_computation) : process_file_results =
   let (_old_state : Deferred_decl.deferred_decl_state) =
     Deferred_decl.reset
       ~enable:(should_enable_deferring opts file)
@@ -214,18 +219,17 @@ let process_file
     then
       Typing_global_inference.StateSubConstraintGraphs.save global_tvenvs;
     let deferred_files = Deferred_decl.get_deferments ~f:(fun d -> Declare d) in
-    let result =
-      match deferred_files with
-      | [] -> (Errors.merge errors' errors, [])
-      | _ ->
-        ( errors,
-          List.concat
-            [
-              deferred_files;
-              [Check { file with deferred_count = file.deferred_count + 1 }];
-            ] )
-    in
-    result
+    match deferred_files with
+    | [] -> { errors = Errors.merge errors' errors; computation = [] }
+    | _ ->
+      let computation =
+        List.concat
+          [
+            deferred_files;
+            [Check { file with deferred_count = file.deferred_count + 1 }];
+          ]
+      in
+      { errors; computation }
   with e ->
     let stack = Caml.Printexc.get_raw_backtrace () in
     let () =
@@ -261,10 +265,11 @@ let process_files
   Ast_provider.local_changes_push_stack ();
 
   let profile_log start_time second_start_time_opt file result =
+    let { computation; _ } = result in
     let end_time = Unix.gettimeofday () in
     let times_checked = file.deferred_count + 1 in
     let files_to_declare =
-      List.count (snd result) ~f:(fun f ->
+      List.count computation ~f:(fun f ->
           match f with
           | Declare _ -> true
           | _ -> false)
@@ -321,7 +326,7 @@ let process_files
           in
           if check_info.profile_log then
             profile_log start_time second_start_time file result;
-          result
+          (result.errors, result.computation)
         | Declare path ->
           let errors = Decl_service.decl_file errors path in
           (errors, [])

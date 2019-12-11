@@ -22,6 +22,7 @@ use oxidized::{
 };
 
 use std::{
+    fs::File,
     io::{self, Read, Write},
     iter::Iterator,
     path::{Path, PathBuf},
@@ -43,6 +44,14 @@ struct Opts {
     #[structopt(short = "o")]
     output_file: Option<PathBuf>,
 
+    /// Run a daemon which processes Hack source from standard input
+    #[structopt(long)]
+    daemon: bool,
+
+    /// read a list of files (one per line) from the file `input-file-list'"
+    #[structopt(long)]
+    input_file_list: Option<PathBuf>,
+
     /// Dump configuration settings
     #[structopt(long)]
     dump_config: bool,
@@ -56,9 +65,12 @@ struct Opts {
     #[structopt(long = "verbose", parse(from_occurrences))]
     verbosity: isize,
 
-    #[structopt(name = "FILENAME")]
-    filename: PathBuf,
+    /// The path to an input Hack file (omit if --daemon or --input-file-list)
+    #[structopt(name = "FILENAME", required_unless_one = &["daemon", "input-file-list"])]
+    filename: Option<PathBuf>,
 }
+
+const NEED_FILENAME: &'static str = "Missing FILENAME";
 
 type OutputHandler = dyn Fn(&Path, Output);
 
@@ -86,7 +98,7 @@ fn process_single_file(opts: &Opts, filepath: &Path, handle_output: &OutputHandl
         flags: EnvFlags::empty(),
     };
     let mut text: Vec<u8> = Vec::new();
-    std::fs::File::open(filepath)
+    File::open(filepath)
         .expect(&format!("cannot open input file: {}", filepath.display()))
         .read_to_end(&mut text)
         .expect("TODO(hrust) error handling");
@@ -134,6 +146,23 @@ fn expand_files(file_or_dir: &Path) -> impl Iterator<Item = PathBuf> {
     )
 }
 
+fn read_file_list(input_path: &Path) -> impl Iterator<Item = PathBuf> {
+    use io::BufRead;
+    if let Ok(input_file) = File::open(input_path) {
+        io::BufReader::new(input_file).lines().map(|line| {
+            PathBuf::from(
+                line.expect("could not read line from input file list")
+                    .trim(),
+            )
+        })
+    } else {
+        panic!(format!(
+            "Could not open input file: {}",
+            input_path.display()
+        ));
+    }
+}
+
 fn assert_regular_file(filepath: impl AsRef<Path>) {
     let filepath = filepath.as_ref();
     if !filepath.is_file() {
@@ -151,7 +180,7 @@ impl Config {
         if let Some(config_path) = opts.config_file.as_ref() {
             assert_regular_file(config_path);
             let mut config_json = String::new();
-            std::fs::File::open(config_path)
+            File::open(config_path)
                 .map(|mut f| {
                     f.read_to_string(&mut config_json)
                         .expect("failed to read config file")
@@ -196,15 +225,15 @@ fn main() {
     if opts.verbosity > 1 {
         eprintln!("hh_compile options/flags: {:#?}", opts);
     }
-
-    // let opts0: &Opts = &opts;
     let config = Rc::new(Config::new(&opts));
 
-    // TODO(hrust) implement handlers for daemon (HHVM) mode
+    if opts.daemon {
+        unimplemented!("TODO(hrust) handlers for daemon (HHVM) mode");
+    }
     let handle_output: Box<OutputHandler> = {
         let config = Rc::clone(&config);
         let opts = Rc::clone(&opts);
-        if opts.filename.is_dir() {
+        if opts.filename.as_ref().map_or(false, |p| p.is_dir()) {
             Box::new(move |input_path: &Path, output: Output| {
                 if let Ok(mut filepath_buf) = input_path.canonicalize() {
                     let extension = filepath_buf.extension().and_then(|os| os.to_str());
@@ -227,7 +256,7 @@ fn main() {
                 }
             })
         } else {
-            // single file mode
+            // single file mode (FILENAME) or --input-file-list
             Box::new(move |_: &Path, output: Output| {
                 if let None = opts.output_file {
                     config.dump_if_needed(&opts);
@@ -240,8 +269,14 @@ fn main() {
         }
     };
 
+    // Generate the appropriate filepath iterator
+    let filepaths = opts.input_file_list.as_ref().map_or_else(
+        || Left(expand_files(opts.filename.as_ref().expect(NEED_FILENAME))),
+        |filename_list_file| Right(read_file_list(filename_list_file)),
+    );
+
     // Actually execute the compilation(s)
-    for filepath in expand_files(&opts.filename) {
+    for filepath in filepaths {
         process_single_file(&opts, &filepath, &*handle_output);
     }
 }

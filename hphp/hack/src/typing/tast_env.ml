@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open Aast
+module Decl_provider = Decl_provider_ctx
 
 (** {!Tast_env.env} is just an alias to {!Typing_env.env}, and the functions we
     provide for it are largely just aliases to functions that take a

@@ -20,6 +20,7 @@ module SG = SN.Superglobals
 module LEnvC = Typing_per_cont_env
 module C = Typing_continuations
 module TL = Typing_logic
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Fake = Typing_fake_members
 module ITySet = Internal_type_set
@@ -31,6 +32,8 @@ let show_env _ = "<env>"
 let pp_env _ _ = Printf.printf "%s\n" "<env>"
 
 let get_tcopt env = env.genv.tcopt
+
+let get_ctx env = env.decl_env.Decl_env.ctx
 
 let set_log_level env key log_level =
   { env with log_levels = SMap.add key log_level env.log_levels }
@@ -716,7 +719,7 @@ let add_wclass env x =
 
 let get_typedef env x =
   add_wclass env x;
-  Decl_provider.get_typedef x
+  Decl_provider.get_typedef (get_ctx env) x
 
 let is_typedef x =
   match Naming_table.Types.get_kind x with
@@ -725,7 +728,7 @@ let is_typedef x =
 
 let get_class env x =
   add_wclass env x;
-  Decl_provider.get_class x
+  Decl_provider.get_class (get_ctx env) x
 
 let get_class_dep env x =
   Decl_env.add_extends_dependency env.decl_env x;
@@ -735,7 +738,7 @@ let get_fun env x =
   let dep = Typing_deps.Dep.Fun x in
   Option.iter env.decl_env.Decl_env.droot (fun root ->
       Typing_deps.add_idep root dep);
-  Decl_provider.get_fun x
+  Decl_provider.get_fun (get_ctx env) x
 
 let get_enum_constraint env x =
   match get_class env x with
@@ -752,7 +755,7 @@ let get_env_mutability env = env.lenv.local_mutability
 
 let get_enum env x =
   add_wclass env x;
-  match Decl_provider.get_class x with
+  match Decl_provider.get_class (get_ctx env) x with
   | Some tc when Option.is_some (Cls.enum_type tc) -> Some tc
   | _ -> None
 
@@ -783,7 +786,7 @@ let get_const env class_ mid =
 let get_gconst env cst_name =
   let dep = Dep.GConst cst_name in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
-  Decl_provider.get_gconst cst_name
+  Decl_provider.get_gconst (get_ctx env) cst_name
 
 let get_static_member is_method env class_ mid =
   add_wclass env (Cls.name class_);

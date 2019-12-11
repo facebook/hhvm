@@ -7,6 +7,7 @@
  *
  *)
 open Typing_env_types
+module Decl_provider = Decl_provider_ctx
 open Decl_provider
 open Typing_defs
 module TPEnv = Type_parameter_env
@@ -16,6 +17,8 @@ val show_env : env -> string
 val pp_env : Format.formatter -> env -> unit
 
 val get_tcopt : env -> TypecheckerOptions.t
+
+val get_ctx : env -> Provider_context.t
 
 val fresh_type : env -> Pos.t -> env * locl_ty
 

@@ -29,6 +29,8 @@ module Status : sig
         processing files. *)
     | Ready  (** The IDE services are available. *)
     | Stopped of string  (** The IDE services are not available. *)
+
+  val to_string : t -> string
 end
 
 module Stop_reason : sig

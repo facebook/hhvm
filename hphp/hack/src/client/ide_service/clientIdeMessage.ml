@@ -135,16 +135,51 @@ type _ t =
   | Type_coverage : Type_coverage.request -> Type_coverage.result t
   | Signature_help : Signature_help.request -> Signature_help.result t
 
+let t_to_string : type a. a t -> string = function
+  | Initialize_from_saved_state _ -> "Initialize_from_saved_state"
+  | Shutdown () -> "Shutdown"
+  | File_changed file_path ->
+    Printf.sprintf "File_changed(%s)" (Path.to_string file_path)
+  | File_opened { file_path; _ } ->
+    Printf.sprintf "File_opened(%s)" (Path.to_string file_path)
+  | Hover { file_path; _ } ->
+    Printf.sprintf "Hover(%s)" (Path.to_string file_path)
+  | Definition { file_path; _ } ->
+    Printf.sprintf "Definition(%s)" (Path.to_string file_path)
+  | Completion { Completion.document_location = { file_path; _ }; _ } ->
+    Printf.sprintf "Completion(%s)" (Path.to_string file_path)
+  | Completion_resolve { Completion_resolve.symbol; _ } ->
+    Printf.sprintf "Completion_resolve(%s)" symbol
+  | Completion_resolve_location
+      { Completion_resolve_location.document_location = { file_path; _ }; _ } ->
+    Printf.sprintf "Completion_resolve_location(%s)" (Path.to_string file_path)
+  | Document_highlight { file_path; _ } ->
+    Printf.sprintf "Document_highlight(%s)" (Path.to_string file_path)
+  | Document_symbol { file_path; _ } ->
+    Printf.sprintf "Document_symbol(%s)" (Path.to_string file_path)
+  | Type_definition { file_path; _ } ->
+    Printf.sprintf "Type_definition(%s)" (Path.to_string file_path)
+  | Type_coverage { file_path; _ } ->
+    Printf.sprintf "Type_coverage(%s)" (Path.to_string file_path)
+  | Signature_help { file_path; _ } ->
+    Printf.sprintf "Signature_help(%s)" (Path.to_string file_path)
+
 type 'a tracked_t = {
   tracking_id: string;
   message: 'a t;
 }
+
+let tracked_t_to_string : type a. a tracked_t -> string =
+ fun { tracking_id; message } ->
+  Printf.sprintf "#%s: %s" tracking_id (t_to_string message)
 
 module Processing_files = struct
   type t = {
     processed: int;
     total: int;
   }
+
+  let to_string (t : t) : string = Printf.sprintf "%d/%d" t.processed t.total
 end
 
 type notification =
@@ -152,6 +187,19 @@ type notification =
   | Processing_files of Processing_files.t
   | Done_processing
 
+let notification_to_string (n : notification) : string =
+  match n with
+  | Initializing -> "Initializing"
+  | Processing_files p ->
+    Printf.sprintf "Processing_file(%s)" (Processing_files.to_string p)
+  | Done_processing -> "Done_processing"
+
 type message_from_daemon =
   | Notification of notification
   | Response : ('a, string) result -> message_from_daemon
+
+let message_from_daemon_to_string (m : message_from_daemon) : string =
+  match m with
+  | Notification n -> notification_to_string n
+  | Response (Error e) -> Printf.sprintf "Response_error(%s)" e
+  | Response (Ok _) -> Printf.sprintf "Response_ok"

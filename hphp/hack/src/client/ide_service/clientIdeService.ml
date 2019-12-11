@@ -16,6 +16,17 @@ module Status = struct
     | Processing_files of ClientIdeMessage.Processing_files.t
     | Ready
     | Stopped of string
+
+  let to_string (t : t) : string =
+    match t with
+    | Not_started -> "Not_started"
+    | Initializing -> "Initializing"
+    | Processing_files p ->
+      Printf.sprintf
+        "Processing_files(%s)"
+        (ClientIdeMessage.Processing_files.to_string p)
+    | Ready -> "Ready"
+    | Stopped reason -> Printf.sprintf "Stopped(%s)" reason
 end
 
 module Stop_reason = struct
@@ -25,7 +36,7 @@ module Stop_reason = struct
     | Restarting
     | Testing
 
-  let to_string (t : t) =
+  let to_string (t : t) : string =
     match t with
     | Crashed -> "crashed"
     | Editor_exited -> "editor exited"
@@ -38,6 +49,18 @@ type state =
   | Failed_to_initialize of string
   | Initialized of { status: Status.t }
   | Stopped of Stop_reason.t
+
+let state_to_string (state : state) : string =
+  match state with
+  | Uninitialized { wait_for_initialization = true } ->
+    "Uninitialized(will_wait_for_init)"
+  | Uninitialized _ -> "Uninitialized"
+  | Failed_to_initialize reason ->
+    Printf.sprintf "Failed_to_initialize(%s)" reason
+  | Initialized env ->
+    Printf.sprintf "Initialized(%s)" (Status.to_string env.status)
+  | Stopped reason ->
+    Printf.sprintf "Stopped(%s)" (Stop_reason.to_string reason)
 
 type message_wrapper =
   | Message_wrapper : 'a ClientIdeMessage.tracked_t -> message_wrapper
@@ -80,11 +103,17 @@ type t = {
       emitted at any time, not just in response to an RPC call. *)
 }
 
+let log s = Hh_logger.log ("[ide-service] " ^^ s)
+
+let log_debug s = Hh_logger.debug ("[ide-service] " ^^ s)
+
 let set_state (t : t) (new_state : state) : unit =
+  log
+    "ClientIdeService.set_state %s -> %s"
+    (state_to_string t.state)
+    (state_to_string new_state);
   t.state <- new_state;
   Lwt_condition.broadcast t.state_changed_cv ()
-
-let log s = Hh_logger.log ("[ide-service] " ^^ s)
 
 let do_rpc
     ~(tracked_message : 'a ClientIdeMessage.tracked_t)
@@ -178,12 +207,18 @@ let initialize_from_saved_state
   initialized, after this function has completed. *)
   let message = ClientIdeMessage.Initialize_from_saved_state param in
   let tracked_message = { ClientIdeMessage.tracking_id = "init"; message } in
+  log_debug
+    "-> %s [initialize_from_saved_state]"
+    (ClientIdeMessage.tracked_t_to_string tracked_message);
   let%lwt (_ : int) =
     Marshal_tools_lwt.to_fd_with_preamble t.out_fd tracked_message
   in
   let%lwt (response : ClientIdeMessage.message_from_daemon) =
     Marshal_tools_lwt.from_fd_with_preamble t.in_fd
   in
+  log_debug
+    "<- %s [initialize_from_saved_state]"
+    (ClientIdeMessage.message_from_daemon_to_string response);
   match response with
   | ClientIdeMessage.Response (Ok _)
   (* expected to be `Ok ()`, but not statically-checkable *) ->
@@ -304,6 +339,7 @@ let rec serve (t : t) : unit Lwt.t =
     match next_message with
     | None -> Lwt.return false
     | Some (Message_wrapper next_message) ->
+      log_debug "-> %s" (ClientIdeMessage.tracked_t_to_string next_message);
       let%lwt (_ : int) =
         Marshal_tools_lwt.to_fd_with_preamble out_fd next_message
       in
@@ -314,6 +350,7 @@ let rec serve (t : t) : unit Lwt.t =
     let%lwt (message : ClientIdeMessage.message_from_daemon) =
       Marshal_tools_lwt.from_fd_with_preamble in_fd
     in
+    log_debug "<- %s" (ClientIdeMessage.message_from_daemon_to_string message);
     match message with
     | ClientIdeMessage.Notification notification ->
       process_status_notification t notification;

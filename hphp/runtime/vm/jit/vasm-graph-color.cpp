@@ -2937,8 +2937,8 @@ Vinstr reload_with_remat(State& state,
   visitRegsMutable(
     state.unit,
     copy,
-    [] (Vreg r) { return r; },
-    [&] (Vreg)  { return dst; }
+    []  (Vreg r) { return r; },
+    [&] (Vreg)   { return dst; }
   );
   invalidate_cached_operands(copy);
   return copy;
@@ -3425,7 +3425,8 @@ struct SpillerState {
 // restoration.
 struct SpillerResults {
   explicit SpillerResults(const State& state)
-    : perBlock(state.unit.blocks.size()) {}
+    : perBlock(state.unit.blocks.size())
+    , changed{state.unit.blocks.size()} {}
 
   struct PerBlock {
     folly::Optional<SpillerState> in;
@@ -3437,11 +3438,17 @@ struct SpillerResults {
   };
   jit::vector<PerBlock> perBlock;
   VregSet ssaize;
-  // Did we rematerialize anything?
-  bool rematerialized = false;
+  // Which Vregs were rematerialized (they may also have been
+  // reloaded).
+  VregSet rematerialized;
+  BlockSet changed;
 
   std::string toString(const State& state) const {
-    std::string ret;
+    auto ret = folly::sformat(
+      "SSAize: {}\nRematerialized: {}\n",
+      show(ssaize),
+      show(rematerialized)
+    );
     for (auto const b : state.rpo) {
       auto const& per = perBlock[b];
       std::string inPhi;
@@ -3468,12 +3475,13 @@ struct SpillerResults {
         outPhi = "*";
       }
       ret += folly::sformat(
-        "  {:5}:\n"
+        "  {:5}:{}\n"
         "    In      -> {}\n"
         "    Out     -> {}\n"
         "    In-Phi  -> {}\n"
         "    Out-Phi -> {}\n",
         b,
+        changed[b] ? " (Changed)" : "",
         per.in ? per.in->toString() : "*",
         per.out ? per.out->toString() : "*",
         inPhi,
@@ -3488,7 +3496,7 @@ struct SpillerResults {
 SpillWeightAt
 spill_weight_at_impl(State& state,
                      const SpillerResults& spillerResults,
-                     boost::dynamic_bitset<>& processed,
+                     BlockSet& processed,
                      VregSet regs,
                      Vlabel startBlock,
                      size_t startRpo,
@@ -3798,7 +3806,7 @@ spill_weight_at(State& state,
   auto const startRpo = state.rpoOrder[startBlock];
 
   // Avoid infinite loops
-  boost::dynamic_bitset<> processed(state.unit.blocks.size());
+  BlockSet processed(state.unit.blocks.size());
   return spill_weight_at_impl(
     state,
     spillerResults,
@@ -4245,7 +4253,7 @@ size_t process_phijmp_spills(State& state,
             p.second,
             true // Src is spilled, so don't emit a spill instruction
           );
-          results.rematerialized |= spillResults.rematerialized;
+          if (spillResults.rematerialized) results.rematerialized.add(p.first);
           assertx(state.spilled);
           if (spillResults.added > 0) {
             // Success, record the added instruction
@@ -4269,7 +4277,7 @@ size_t process_phijmp_spills(State& state,
             r
           );
           added += spillResults.added;
-          results.rematerialized |= spillResults.rematerialized;
+          if (spillResults.rematerialized) results.rematerialized.add(r);
           // No longer available for rematerialization
           rematAvail.remove(r);
           state.spilled = true;
@@ -4286,7 +4294,7 @@ size_t process_phijmp_spills(State& state,
             p.first,
             p.second
           );
-          if (inst.op != Vinstr::reload) results.rematerialized = true;
+          if (inst.op != Vinstr::reload) results.rematerialized.add(p.first);
           v << inst;
           ++added;
           // The destination is now available for rematerialization.
@@ -4295,6 +4303,8 @@ size_t process_phijmp_spills(State& state,
         return 0;
       }
     );
+
+    results.changed[b] = true;
   }
   // NB: Can't access phijmp anymore, since the vmodify may have
   // invalidated it.
@@ -4342,6 +4352,7 @@ size_t process_phijmp_spills(State& state,
         assertx(uses[i] == r);
         uses[i] = d;
         invalidate_cached_operands(unit.blocks[b].code[instIdx + added]);
+        results.changed[b] = true;
       } else {
         // Otherwise we didn't do anything with the target. The phi
         // will be untouched at this index.
@@ -4452,7 +4463,7 @@ ProcessCopyResults process_copy_spills(State& state,
    * initially assuming the dst is non-spilled, we have to chance to
    * load it into a register (avoiding the store), or possibly
    * rematerialize it directly into the destination spill slot
-   * (avoiding the load). At worst, the spiller was decide it needs to
+   * (avoiding the load). At worst, the spiller will decide it needs to
    * be in memory anyways, and we'll be no worse off.
    */
   for (size_t i = 0; i < defs.size(); ++i) {
@@ -4755,7 +4766,7 @@ ProcessCopyResults process_copy_spills(State& state,
             p.second
           );
           addedBefore += spillResults.added;
-          results.rematerialized |= spillResults.rematerialized;
+          if (spillResults.rematerialized) results.rematerialized.add(p.first);
           // The dest of the spill is no longer available for
           // rematerialization.
           rematAvail.remove(p.second);
@@ -4777,7 +4788,7 @@ ProcessCopyResults process_copy_spills(State& state,
             dst,
             true // src is spilled, so don't emit a spill instruction
           );
-          results.rematerialized |= spillResults.rematerialized;
+          if (spillResults.rematerialized) results.rematerialized.add(src);
           assertx(state.spilled);
           assertx(!rematAvail[src]);
           assertx(!rematAvail[dst]);
@@ -4803,7 +4814,7 @@ ProcessCopyResults process_copy_spills(State& state,
             r
           );
           addedBefore += spillResults.added;
-          results.rematerialized |= spillResults.rematerialized;
+          if (spillResults.rematerialized) results.rematerialized.add(r);
           // Spilled Vregs are no longer available for
           // rematerialization.
           rematAvail.remove(r);
@@ -4812,6 +4823,8 @@ ProcessCopyResults process_copy_spills(State& state,
         return 0;
       }
     );
+
+    results.changed[b] = true;
   }
 
   // Then the reloads which must come after the copy (because of
@@ -4830,7 +4843,7 @@ ProcessCopyResults process_copy_spills(State& state,
             p.first,
             p.second
           );
-          if (inst.op != Vinstr::reload) results.rematerialized = true;
+          if (inst.op != Vinstr::reload) results.rematerialized.add(p.first);
           v << inst;
           ++addedAfter;
           // Anything reloaded is now available for rematerialization.
@@ -4839,6 +4852,8 @@ ProcessCopyResults process_copy_spills(State& state,
         return 0;
       }
     );
+
+    results.changed[b] = true;
   }
 
   // Now that all instructions have been rewritten, update the uses
@@ -4856,6 +4871,7 @@ ProcessCopyResults process_copy_spills(State& state,
       defs[p.first] = p.second;
     }
     invalidate_cached_operands(unit.blocks[b].code[instIdx + addedBefore]);
+    results.changed[b] = true;
   }
 
   // Remove any Vregs which the copy defined and are immediately dead.
@@ -5001,7 +5017,7 @@ size_t process_inst_spills(State& state,
           r
         );
         added += spillResults.added;
-        results.rematerialized |= spillResults.rematerialized;
+        if (spillResults.rematerialized) results.rematerialized.add(r);
         rematAvail.remove(r);
         state.spilled = true;
       }
@@ -5018,7 +5034,7 @@ size_t process_inst_spills(State& state,
           r,
           r
         );
-        if (inst.op != Vinstr::reload) results.rematerialized = true;
+        if (inst.op != Vinstr::reload) results.rematerialized.add(r);
         v << inst;
         ++added;
         rematAvail.add(r);
@@ -5027,6 +5043,7 @@ size_t process_inst_spills(State& state,
       return 0;
     }
   );
+  results.changed[b] = true;
 
   return added;
 }
@@ -5074,7 +5091,7 @@ void process_spills_skip(State& state,
 // determined a block cannot cause a spill, we can process it more
 // efficiently.
 SpillerResults process_spills(State& state,
-                              const boost::dynamic_bitset<>& needsSpilling) {
+                              const BlockSet& needsSpilling) {
   auto& unit = state.unit;
 
   // We're going to need Vreg use information about loops, so actually
@@ -5652,6 +5669,7 @@ void hoist_spills_in_loop(State& state,
           if (candidates[canonicalize(inst.spill_.s)]) {
             inst.copy_ = copy{inst.spill_.s, inst.spill_.d};
             inst.op = Vinstr::copy;
+            results.changed[b] = true;
             invalidate_cached_operands(inst);
           }
           break;
@@ -5661,6 +5679,7 @@ void hoist_spills_in_loop(State& state,
             assertx(candidates[canonicalize(inst.reload_.d)]);
             inst.copy_ = copy{inst.reload_.s, inst.reload_.d};
             inst.op = Vinstr::copy;
+            results.changed[b] = true;
             invalidate_cached_operands(inst);
           }
           break;
@@ -5673,10 +5692,11 @@ void hoist_spills_in_loop(State& state,
           // Hoisted Vregs should only be written by single def,
           // pure instructions.
           if (candidates[canonicalize(r)]) {
-            assertx(results.rematerialized);
+            assertx(results.rematerialized[r]);
             assertx(isPure(inst));
             inst.nop_ = nop{};
             inst.op = Vinstr::nop;
+            results.changed[b] = true;
             invalidate_cached_operands(inst);
           }
           break;
@@ -6126,7 +6146,7 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
               r,
               r2
             );
-            results.rematerialized |= spillResults.rematerialized;
+            if (spillResults.rematerialized) results.rematerialized.add(r);
             state.spilled = true;
             availForRemat.remove(r2);
           }
@@ -6145,7 +6165,7 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
               r,
               r2
             );
-            if (inst.op != Vinstr::reload) results.rematerialized = true;
+            if (inst.op != Vinstr::reload) results.rematerialized.add(r);
             v << inst;
             availForRemat.add(r2);
           }
@@ -6153,6 +6173,7 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
           return 0;
         }
       );
+      results.changed[b] = true;
 
       // Now actually change any of the uses of the phijmp. We defer
       // this until the end because the rematerialization logic may
@@ -6454,7 +6475,7 @@ void set_spill_reg_classes(State& state,
 // Calculate a bitset indicating which blocks may actually generate
 // spills. Such blocks can be processed more efficiently. If the
 // bitset has no bits set, spilling can be skipped entirely.
-boost::dynamic_bitset<> determine_spilling_needed(State& state) {
+BlockSet determine_spilling_needed(State& state) {
   auto& unit = state.unit;
   auto const gpLimit = state.gpUnreserved.size();
   auto const simdLimit = state.simdUnreserved.size();
@@ -6467,8 +6488,7 @@ boost::dynamic_bitset<> determine_spilling_needed(State& state) {
   // spilled). Thus, at worst, we overestimate the register pressure,
   // thinking we might have a spill when we won't.
 
-  boost::dynamic_bitset<> needsSpilling;
-  needsSpilling.resize(unit.blocks.size());
+  BlockSet needsSpilling(unit.blocks.size());
 
   for (auto const b : state.rpo) {
     VregSet gpLive;
@@ -6553,15 +6573,23 @@ void insert_spills(State& state) {
   hoist_loop_spills(state, results);
   fixup_spill_mismatches(state, results);
 
+  // Account for Vregs we marked as needing re-SSAization. Any block
+  // which uses or defines them requires attention from restoreSSA().
+  for (auto const b : state.rpo) {
+    if (!results.changed[b] &&
+        (state.defs[b].intersects(results.ssaize) ||
+         state.uses[b].intersects(results.ssaize))) {
+      results.changed[b] = true;
+    }
+  }
+
   // Spilling may break SSA form because we use the same Vreg when
   // both spilled and reloaded, so fix that here.
   auto const mappings = [&] {
-    boost::dynamic_bitset<> dummy;
-    dummy.resize(state.unit.blocks.size(), true);
     auto const mappings = restoreSSA(
       state.unit,
       results.ssaize,
-      dummy,
+      results.changed,
       state.rpo,
       state.preds,
       0
@@ -6572,6 +6600,9 @@ void insert_spills(State& state) {
         map.first,
         reg_info(state, map.second)
       );
+      if (results.rematerialized[map.second]) {
+        results.rematerialized.add(map.first);
+      }
     }
     return mappings;
   }();
@@ -6583,12 +6614,20 @@ void insert_spills(State& state) {
 
   // If we rematerialized anything, we may have created dead spills,
   // so remove them.
-  if (results.rematerialized) removeDeadCode(state.unit, 0);
+  if (results.rematerialized.any()) {
+    removeDeadCode(state.unit, 0);
+    // Temporarily mark everything as changed since we don't know what
+    // removeDeadCode touched.
+    results.changed.set();
+  }
+
+  // Do this check before re-calculating liveness. If we've broken SSA
+  // form, this will report a better diagnostic rather than having
+  // liveness calculation fail.
+  assertx(check(state.unit));
 
   // Re-calculate liveness since we changed Vregs
-  calculate_liveness(state);
-
-  assertx(check(state.unit));
+  calculate_liveness(state, &results.changed);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -7203,9 +7242,8 @@ BlockVector calculate_block_color_order(const State& state) {
    * for this ordering.
    */
   BlockVector order;
-  boost::dynamic_bitset<> processed;
+  BlockSet processed(state.unit.blocks.size());
   order.reserve(blocks.size());
-  processed.resize(state.unit.blocks.size());
 
   auto const addTrace = [&] (Vlabel b, auto const& self) {
     if (processed[b]) return;
@@ -7687,8 +7725,8 @@ size_t color_inst(State& state,
                   Vinstr& inst,
                   Vlabel block,
                   size_t instIdx,
-                  const boost::dynamic_bitset<>& processed,
-                  const jit::vector<boost::dynamic_bitset<>>& phiAdjustments) {
+                  BlockSet& processed,
+                  const jit::vector<BlockSet>& phiAdjustments) {
   auto const& acrosses = acrosses_set_cached(state, inst);
   auto const& uses = uses_set_cached(state, inst) - acrosses;
   auto const& defs = defs_set_cached(state, inst);
@@ -8147,7 +8185,7 @@ size_t color_block_initialize(
     FreeRegs& free,
     Vlabel b,
     const jit::vector<AssignmentVector>& assignments,
-    const boost::dynamic_bitset<>& processed,
+    const BlockSet& processed,
     jit::vector<boost::dynamic_bitset<>>& phiAdjustments
 ) {
   auto const reserve = [&] (Vreg r, PhysReg phys) {
@@ -8545,7 +8583,7 @@ void assign_colors(State& state) {
     }
   };
 
-  boost::dynamic_bitset<> processed(state.unit.blocks.size());
+  BlockSet processed(state.unit.blocks.size());
 
   // Since the block order is dominance preserving, we'll always encouter a
   // Vreg's def before any of its usages. This means we can color in a single

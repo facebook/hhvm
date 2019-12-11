@@ -6557,6 +6557,343 @@ BlockSet determine_spilling_needed(State& state) {
   return needsSpilling;
 }
 
+// Remove dead spills (and any other Vregs made dead by removing
+// spills). This logically does the same thing as removeDeadCode(),
+// but is optimized to take advantage of the fact we only want to
+// remove spills, and can leverage our block changed set.
+void remove_dead_spills(State& state, SpillerResults& results) {
+  auto& unit = state.unit;
+
+  // The set of Vregs which are being considered by DCE. Initially
+  // this is any Vregs which have been rematerialized (which implies
+  // we may have created dead spills). We'll extend it with any Vregs
+  // which are used by those spills, and other interesting Vregs
+  // transitively. Only instructions using interesting Vregs are
+  // eligible for removal.
+  VregSet interesting{results.rematerialized};
+  // The set of Vregs which are maybe used. Instructions defining used
+  // Vregs cannot be removed.
+  VregSet used;
+
+  // Check if an instruction is removable (modulo any of its
+  // defs/uses). An instruction is removable if it doesn't have
+  // side-effects and doesn't write to a physical register.
+  auto const removable = [&] (const Vinstr& inst) {
+    if (effectful(inst)) return false;
+    auto hasPhys = false;
+    visitDefs(unit, inst, [&] (Vreg r) { hasPhys |= r.isPhys(); });
+    return !hasPhys;
+  };
+
+  /*
+   * Analysis loop:
+   *
+   * The analysis is done in two passes. For the first pass, we
+   * calculate which Vregs are interesting and which Vregs are
+   * used. For the second pass, we only calculate which Vregs are
+   * used. This needs to be done because which Vregs are used is
+   * influenced by which are interesting. Each pass processes the unit
+   * until we reach a fixed-point. So, we calculate the interesting
+   * Vregs first, then calculate the used in the second pass. Since we
+   * should have picked up most of the used Vregs in the first pass,
+   * the second pass should be quick.
+   */
+
+  auto const analyze = [&] (bool secondPass) {
+    auto again = true;
+    while (again) {
+      again = false;
+
+      // Check if r is used. A physical register is always considered
+      // used. If we're in the second pass, a non-interesting register
+      // is considered used (because we won't remove it).
+      auto const isUsed = [&] (Vreg r) {
+        return used[r] ||
+          r.isPhys() ||
+          (secondPass && !interesting[r]);
+      };
+
+      // If r is interesting, mark it as used.
+      auto const use = [&] (Vreg r) {
+        if (!interesting[r] || used[r]) return;
+        again = true;
+        used.add(r);
+      };
+
+      // If d is interesting, mark s as interesting as well. We'll
+      // only do this during the first pass.
+      auto const link = [&] (Vreg s, Vreg d) {
+        if (!secondPass) {
+          if (interesting[d] && !s.isPhys() && !interesting[s]) {
+            again = true;
+            interesting.add(s);
+          }
+        }
+        if (isUsed(d)) use(s);
+      };
+
+      for (auto const b : boost::adaptors::reverse(state.rpo)) {
+        // If this block doesn't contain anything interesting, skip
+        // it.
+        if (!results.changed[b] &&
+            !state.uses[b].intersects(interesting) &&
+            !state.defs[b].intersects(interesting)) {
+          continue;
+        }
+
+        auto& block = unit.blocks[b];
+        for (auto& inst : boost::adaptors::reverse(block.code)) {
+          switch (inst.op) {
+            case Vinstr::copy:
+              // For the copy-ish instructions, link the src and dest
+              // pairs. The src is used if the dest is.
+              link(inst.copy_.s, inst.copy_.d);
+              break;
+            case Vinstr::copyargs: {
+              auto const& srcs = unit.tuples[inst.copyargs_.s];
+              auto const& dsts = unit.tuples[inst.copyargs_.d];
+              assertx(srcs.size() == dsts.size());
+              for (size_t i = 0; i < srcs.size(); ++i) link(srcs[i], dsts[i]);
+              break;
+            }
+            case Vinstr::phidef: {
+              auto const& defs = unit.tuples[inst.phidef_.defs];
+              for (auto const p : state.preds[b]) {
+                auto const& pred = unit.blocks[p];
+                assertx(pred.code.back().op == Vinstr::phijmp);
+                auto const& uses = unit.tuples[pred.code.back().phijmp_.uses];
+                assertx(uses.size() == defs.size());
+                for (size_t i = 0; i < defs.size(); ++i) link(uses[i], defs[i]);
+              }
+              break;
+            }
+            case Vinstr::phijmp: {
+              if (!secondPass) break;
+              auto const& uses = unit.tuples[inst.phijmp_.uses];
+              for (auto const s : succs(unit.blocks[b])) {
+                auto const& succ = unit.blocks[s];
+                assertx(succ.code.front().op == Vinstr::phidef);
+                auto const& defs = unit.tuples[succ.code.front().phidef_.defs];
+                assertx(uses.size() == defs.size());
+                for (size_t i = 0; i < uses.size(); ++i) {
+                  if (isUsed(defs[i])) use(uses[i]);
+                }
+              }
+              break;
+            }
+            case Vinstr::spill:
+              // Spill/reloads are treated like copies.
+              link(inst.spill_.s, inst.spill_.d);
+              break;
+            case Vinstr::reload:
+              link(inst.reload_.s, inst.reload_.d);
+              break;
+            default: {
+              if (removable(inst)) {
+                auto const& defs = defs_set_cached(state, inst);
+                if (!secondPass) {
+                  // In the first pass, if all of the defs are
+                  // interesting, then any src is interesting.
+                  auto const allInteresting = std::all_of(
+                    defs.begin(),
+                    defs.end(),
+                    [&] (Vreg r) { return interesting[r]; }
+                  );
+                  if (allInteresting) {
+                    for (auto const r : uses_set_cached(state, inst)) {
+                      if (r.isPhys() || interesting[r]) continue;
+                      again = true;
+                      interesting.add(r);
+                    }
+                  }
+                }
+
+                // For generic instructions, if any def is used, then
+                // any interesting srcs are used.
+                auto const anyUsed =
+                  std::any_of(defs.begin(), defs.end(), isUsed);
+                if (anyUsed) {
+                  auto const& uses = uses_set_cached(state, inst);
+                  if (uses.intersects(interesting)) {
+                    for (auto const r : uses) use(r);
+                  }
+                }
+              } else if (!secondPass) {
+                // The instruction isn't removable. Any interesting
+                // srcs are unconditionally used.
+                auto const& uses = uses_set_cached(state, inst);
+                if (uses.intersects(interesting)) {
+                  for (auto const r : uses) use(r);
+                }
+              }
+
+              break;
+            }
+          }
+        }
+      }
+    }
+  };
+
+  // Run the analysis passes
+  analyze(false);
+  analyze(true);
+
+  // If there are not any interesting non-used Vregs, nothing to do.
+  auto const toRemove = interesting - used;
+  if (toRemove.none()) return;
+
+  // Removal pass
+  for (auto const b : state.rpo) {
+    // If this block does not have any interesting Vregs, we can skip
+    // it.
+    if (!results.changed[b] &&
+        !state.uses[b].intersects(toRemove) &&
+        !state.defs[b].intersects(toRemove)) {
+      continue;
+    }
+
+    size_t instIdx = 0;
+
+    // Check if a Vreg is interesting and unused
+    auto const unused = [&] (Vreg r) {
+      return interesting[r] && !used[r];
+    };
+
+    // If the given Vreg is unused, remove the current instruction
+    // (and mark that we've changed this block). Return true if we
+    // removed the instruction, false otherwise.
+    auto const removeIfUnused = [&] (Vreg r) {
+      if (!unused(r)) return false;
+      vmodify(unit, b, instIdx, [] (Vout&) { return 1; });
+      results.changed[b] = true;
+      return true;
+    };
+
+    while (instIdx < unit.blocks[b].code.size()) {
+      auto& inst = unit.blocks[b].code[instIdx];
+      switch (inst.op) {
+        case Vinstr::copy:
+          if (removeIfUnused(inst.copy_.d)) continue;
+          break;
+        case Vinstr::copyargs: {
+          auto const& s = unit.tuples[inst.copyargs_.s];
+          auto const& d = unit.tuples[inst.copyargs_.d];
+          assertx(s.size() == d.size());
+
+          // If none of the defs are used, don't change anything. If
+          // all are, remove the copy entirely. If only some are,
+          // shrink the copyargs list.
+          if (std::none_of(d.begin(), d.end(), unused)) break;
+          if (std::all_of(d.begin(), d.end(), unused)) {
+            vmodify(unit, b, instIdx, [] (Vout& v) { return 1; });
+            results.changed[b] = true;
+            continue;
+          }
+
+          VregList newSrcs;
+          VregList newDsts;
+          for (size_t i = 0; i < s.size(); ++i) {
+            if (unused(d[i])) continue;
+            newSrcs.emplace_back(s[i]);
+            newDsts.emplace_back(d[i]);
+          }
+
+          assertx(!newSrcs.empty());
+          assertx(newSrcs.size() < s.size());
+
+          if (newSrcs.size() == 1) {
+            inst.op = Vinstr::copy;
+            inst.copy_ = copy{newSrcs[0], newDsts[0]};
+          } else {
+            inst.copyargs_.s = unit.makeTuple(std::move(newSrcs));
+            inst.copyargs_.d = unit.makeTuple(std::move(newDsts));
+          }
+          invalidate_cached_operands(inst);
+          results.changed[b] = true;
+          break;
+        }
+        case Vinstr::phidef: {
+          auto d = &unit.tuples[inst.phidef_.defs];
+          // Treat phidef similarily to copyargs
+          if (std::none_of(d->begin(), d->end(), unused)) break;
+
+          // One extra complication is that if we remove the phidef,
+          // we need to turn the phijmps in the predecessors to jmps.
+          if (std::all_of(d->begin(), d->end(), unused)) {
+            for (auto const pred : state.preds[b]) {
+              auto& phijmp = unit.blocks[pred].code.back();
+              assertx(phijmp.op == Vinstr::phijmp);
+              assertx(phijmp.phijmp_.target == b);
+              phijmp.op = Vinstr::jmp;
+              phijmp.jmp_.target = b;
+              invalidate_cached_operands(phijmp);
+              results.changed[pred] = true;
+            }
+            vmodify(unit, b, instIdx, [] (Vout& v) { return 1; });
+            results.changed[b] = true;
+            continue;
+          }
+
+          // Otherwise selectively remove Vregs in the predecessor
+          // phijmps.
+          for (auto const pred : state.preds[b]) {
+            auto& phijmp = unit.blocks[pred].code.back();
+            assertx(phijmp.op == Vinstr::phijmp);
+            auto const& s = unit.tuples[phijmp.phijmp_.uses];
+            assertx(s.size() == d->size());
+
+            VregList newSrcs;
+            for (size_t i = 0; i < d->size(); ++i) {
+              if (unused((*d)[i])) continue;
+              newSrcs.emplace_back(s[i]);
+            }
+            assertx(!newSrcs.empty());
+            assertx(newSrcs.size() < s.size());
+
+            phijmp.phijmp_.uses = unit.makeTuple(std::move(newSrcs));
+            d = &unit.tuples[inst.phidef_.defs];
+            invalidate_cached_operands(phijmp);
+            results.changed[pred] = true;
+          }
+
+          VregList newDsts;
+          for (size_t i = 0; i < d->size(); ++i) {
+            if (unused((*d)[i])) continue;
+            newDsts.emplace_back((*d)[i]);
+          }
+          assertx(!newDsts.empty());
+          assertx(newDsts.size() < d->size());
+
+          inst.phidef_.defs = unit.makeTuple(std::move(newDsts));
+          invalidate_cached_operands(inst);
+          results.changed[b] = true;
+          break;
+        }
+        case Vinstr::phijmp:
+          // Should be dealt with when processing phidefs.
+          break;
+        case Vinstr::spill:
+          if (removeIfUnused(inst.spill_.d)) continue;
+          break;
+        case Vinstr::reload:
+          if (removeIfUnused(inst.reload_.d)) continue;
+          break;
+        default: {
+          if (!removable(inst)) break;
+          auto const& d = defs_set_cached(state, inst);
+          if (!std::all_of(d.begin(), d.end(), unused)) break;
+          vmodify(unit, b, instIdx, [] (Vout& v) { return 1; });
+          results.changed[b] = true;
+          continue;
+        }
+      }
+
+      ++instIdx;
+    }
+  }
+}
+
 void insert_spills(State& state) {
   // Calculate liveness. This is needed to determine if spilling is
   // necessary.
@@ -6614,12 +6951,7 @@ void insert_spills(State& state) {
 
   // If we rematerialized anything, we may have created dead spills,
   // so remove them.
-  if (results.rematerialized.any()) {
-    removeDeadCode(state.unit, 0);
-    // Temporarily mark everything as changed since we don't know what
-    // removeDeadCode touched.
-    results.changed.set();
-  }
+  if (results.rematerialized.any()) remove_dead_spills(state, results);
 
   // Do this check before re-calculating liveness. If we've broken SSA
   // form, this will report a better diagnostic rather than having

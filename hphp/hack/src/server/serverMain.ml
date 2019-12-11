@@ -1154,7 +1154,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       local_config.ServerLocalConfig.max_times_to_defer_type_checking
     in
     Hh_logger.Level.set_min_level local_config.ServerLocalConfig.min_log_level;
-    TypingLogger.ProfileTypeCheck.init
+    TypingLogger.ProfileTypeCheck.set_base_sample
       ~init_id
       ~threshold:
         local_config.ServerLocalConfig.profile_type_check_duration_threshold

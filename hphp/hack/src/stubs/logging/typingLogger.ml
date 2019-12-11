@@ -8,7 +8,7 @@
  *)
 
 module ProfileTypeCheck = struct
-  let init
+  let set_base_sample
       ~init_id:_ ~threshold:_ ~owner:_ ~desc:_ ~max_times_to_defer:_ ~root:_ =
     ()
 

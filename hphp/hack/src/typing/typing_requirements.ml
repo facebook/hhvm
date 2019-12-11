@@ -10,6 +10,7 @@
 open Hh_prelude
 module Reason = Typing_reason
 module TUtils = Typing_utils
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 (* Only applied to classes. Checks that all the requirements of the traits

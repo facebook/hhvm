@@ -6495,6 +6495,7 @@ BlockSet determine_spilling_needed(State& state) {
   auto& unit = state.unit;
   auto const gpLimit = state.gpUnreserved.size();
   auto const simdLimit = state.simdUnreserved.size();
+  auto const commonLimit = std::min(gpLimit, simdLimit);
 
   // We can determine if a block might trigger a spill by calculating
   // the maximum register pressure within the block. If it exceeds the
@@ -6507,6 +6508,12 @@ BlockSet determine_spilling_needed(State& state) {
   BlockSet needsSpilling(unit.blocks.size());
 
   for (auto const b : state.rpo) {
+    // Extra coarse and quick check. If the sum of live-in Vregs and
+    // Vregs defined with the block is still below the limit of both
+    // reg classes, we know no spills can happen here, so skip the
+    // block.
+    if ((state.liveIn[b] | state.defs[b]).size() <= commonLimit) continue;
+
     VregSet gpLive;
     VregSet simdLive;
 
@@ -6534,15 +6541,23 @@ BlockSet determine_spilling_needed(State& state) {
     auto const remove = [&] (Vreg r) {
       if (auto l = liveSet(r)) l->remove(r);
     };
+    // Check if the live Vregs exceed any of our limits. If false is
+    // returned, we can stop processing the block.
     auto const update = [&] {
       if (gpLive.size() > gpLimit || simdLive.size() > simdLimit) {
         needsSpilling[b] = true;
+        // In debug builds, always process the entire block, so we get
+        // the benefits of asserting our liveness calculation was
+        // correct.
+        return debug;
       }
+      return true;
     };
 
     // Start with the already stored liveness information
     for (auto const r : state.liveOut[b]) add(r);
-    update();
+
+    if (!update()) continue;
 
     // And then walk backwards modifying it on the fly.
     for (auto instIdx = unit.blocks[b].code.size(); instIdx > 0; --instIdx) {
@@ -6559,10 +6574,10 @@ BlockSet determine_spilling_needed(State& state) {
       if (defs.containsPhys() && uses.containsPhys()) {
         for (auto const r : uses) if (r.isPhys()) add(r);
       }
-      update();
+      if (!update()) break;
       for (auto const r : defs) remove(r);
       for (auto const r : uses) add(r);
-      update();
+      if (!update()) break;
     }
 
     // What we've calculated for liveness should match the already stored

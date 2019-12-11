@@ -10,6 +10,7 @@ open Core_kernel
 type compute_tast_result = {
   tast: Tast.program;
   errors: Errors.t;
+  decls_fetched: int;
 }
 
 let respect_but_quarantine_unsaved_changes
@@ -107,8 +108,12 @@ let compute_tast_and_errors_unquarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     compute_tast_result =
   match (entry.Provider_context.tast, entry.Provider_context.errors) with
-  | (Some tast, Some errors) -> { tast; errors }
+  | (Some tast, Some errors) -> { tast; errors; decls_fetched = 0 }
   | _ ->
+    let prev_deferral_state =
+      Deferred_decl.reset ~enable:true ~threshold_opt:None
+    in
+    let t = Unix.gettimeofday () in
     let (nast_errors, nast) =
       Errors.do_with_context
         entry.Provider_context.path
@@ -122,16 +127,34 @@ let compute_tast_and_errors_unquarantined
         (fun () -> Typing.nast_to_tast ctx.Provider_context.tcopt nast)
     in
     let errors = Errors.merge nast_errors tast_errors in
+
+    (* Logging... *)
+    let decls_fetched = Deferred_decl.get_counter () in
+    Deferred_decl.restore_state prev_deferral_state;
+    (* Sometimes we're called with a FileName that doesn't exist on disk. *)
+    let filesize_opt =
+      match entry.Provider_context.file_input with
+      | ServerCommandTypes.FileName _ -> None
+      | ServerCommandTypes.FileContent s -> Some (String.length s)
+    in
+    HackEventLogger.ProfileTypeCheck.compute_tast
+      ~provider_backend:(Provider_backend.get () |> Provider_backend.t_to_string)
+      ~time_decl_and_typecheck:(Unix.gettimeofday () -. t)
+      ~decls_fetched
+      ~filesize_opt
+      ~relative:(Relative_path.suffix entry.Provider_context.path);
+
+    (* Update the cache *)
     entry.Provider_context.tast <- Some tast;
     entry.Provider_context.errors <- Some errors;
-    { tast; errors }
+    { tast; errors; decls_fetched }
 
 let compute_tast_and_errors_quarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     compute_tast_result =
   (* If results have already been memoized, don't bother quarantining anything *)
   match (entry.Provider_context.tast, entry.Provider_context.errors) with
-  | (Some tast, Some errors) -> { tast; errors }
+  | (Some tast, Some errors) -> { tast; errors; decls_fetched = 0 }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | _ ->
     let f () = compute_tast_and_errors_unquarantined ~ctx ~entry in

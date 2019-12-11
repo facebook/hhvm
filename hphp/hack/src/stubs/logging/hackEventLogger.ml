@@ -356,5 +356,13 @@ module ProfileTypeCheck = struct
       ~relative:_ =
     ()
 
+  let compute_tast
+      ~provider_backend:_
+      ~time_decl_and_typecheck:_
+      ~decls_fetched:_
+      ~filesize_opt:_
+      ~relative:_ =
+    ()
+
   let get_telemetry_url_opt ~profile_log:_ ~init_id:_ ~recheck_id:_ = None
 end

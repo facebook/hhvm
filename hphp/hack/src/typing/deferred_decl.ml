@@ -34,7 +34,10 @@ let state : deferred_decl_state ref =
       threshold_opt = None;
     }
 
-let should_defer ~(d : Relative_path.t) : unit =
+let count (_name : string) : unit =
+  if !state.enabled then state := { !state with counter = !state.counter + 1 }
+
+let count_and_raise_if_defer ~(d : Relative_path.t) : unit =
   if !state.enabled then (
     state := { !state with counter = !state.counter + 1 };
     match !state.threshold_opt with

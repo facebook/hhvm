@@ -24,6 +24,8 @@ type t = private
   (* In Decl_service, 'unit' left for further expansion *)
   | Decl_service of Decl_service_client.t
 
+val t_to_string : t -> string
+
 val set_lru_shared_memory_backend : unit -> unit
 
 val set_shared_memory_backend : unit -> unit

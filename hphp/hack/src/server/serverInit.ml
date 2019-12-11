@@ -65,17 +65,11 @@ let save_state
     let save_decls =
       genv.local_config.ServerLocalConfig.store_decls_in_saved_state
     in
-    let dep_table_as_blob =
-      match ServerArgs.save_with_spec genv.ServerEnv.options with
-      | None -> false
-      | Some _ -> true
-    in
     let replace_state_after_saving =
       ServerArgs.replace_state_after_saving genv.ServerEnv.options
     in
     let result =
       SaveStateService.save_state
-        ~dep_table_as_blob
         ~save_decls
         env
         output_filename

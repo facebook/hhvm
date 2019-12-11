@@ -165,7 +165,7 @@ let loaded_dep_table_filename () =
   else
     Some fn
 
-external save_dep_table_blob_c : string -> string -> int
+external save_dep_table_blob_c : string -> string -> bool -> int
   = "hh_save_dep_table_blob"
 
 (* Returns number of dependency edges added. *)
@@ -176,23 +176,20 @@ external save_dep_table_sqlite_c : string -> string -> bool -> int
 external update_dep_table_sqlite_c : string -> string -> bool -> int
   = "hh_update_dep_table_sqlite"
 
-let save_dep_table_sqlite : string -> string -> bool -> int =
- fun fn build_revision replace_state_after_saving ->
+let save_dep_table_sqlite fn build_revision ~replace_state_after_saving =
   if loaded_dep_table_filename () <> None then
     failwith
       "save_dep_table_sqlite not supported when server is loaded from a saved state; use update_dep_table_sqlite";
   Hh_logger.log "Dumping a saved state deptable into a SQLite DB.";
   save_dep_table_sqlite_c fn build_revision replace_state_after_saving
 
-let save_dep_table_blob : string -> string -> bool -> int =
- fun fn build_revision _replace_state_after_saving ->
+let save_dep_table_blob fn build_revision ~reset_state_after_saving =
   if loaded_dep_table_filename () <> None then
     failwith
       "save_dep_table_blob not supported when the server is loaded from a saved state; use update_dep_table_sqlite";
   Hh_logger.log "Dumping a saved state deptable as a blob.";
 
-  (* TODO: use replace_state_after_saving? *)
-  save_dep_table_blob_c fn build_revision
+  save_dep_table_blob_c fn build_revision reset_state_after_saving
 
 let update_dep_table_sqlite : string -> string -> bool -> int =
  fun fn build_revision replace_state_after_saving ->

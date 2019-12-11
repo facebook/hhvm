@@ -1482,6 +1482,7 @@ void hh_add_dep(value ocaml_dep) {
 
 void kill_dep_used_slots(void) {
   CAMLparam0();
+  *dcounter = 0;
   memset(deptbl, 0, dep_size_b);
   memset(deptbl_bindings, 0, bindings_size_b);
 }
@@ -2113,7 +2114,9 @@ size_t deptbl_entry_count_for_slot(size_t slot) {
 // use the same format as what's in the hashtable, but compact
 // Question: is it better to deserialize into hashtbl or an OCaml Hashtable or
 // into SQLite?
-size_t hh_save_dep_table_blob_helper(const char* const out_filename) {
+size_t hh_save_dep_table_blob_helper(
+      const char* const out_filename,
+      const size_t reset_state_after_saving) {
   struct timeval start_t = { 0 };
   gettimeofday(&start_t, NULL);
 
@@ -2181,6 +2184,10 @@ size_t hh_save_dep_table_blob_helper(const char* const out_filename) {
 
   fprintf(stderr, "Wrote %lu new rows\n", new_rows_count);
   fclose(dep_table_blob_file);
+
+  if (reset_state_after_saving) {
+    kill_dep_used_slots();
+  }
 
   log_duration("Finished writing the file", start_t);
 
@@ -2271,14 +2278,18 @@ void hh_load_dep_table_blob_helper(const char* const in_filename) {
  */
 CAMLprim value hh_save_dep_table_blob(
     value out_filename,
-    value build_revision
+    value build_revision,
+    value reset_state_after_saving
 ) {
-  CAMLparam2(out_filename, build_revision);
+  CAMLparam3(out_filename, build_revision, reset_state_after_saving);
   char *out_filename_raw = String_val(out_filename);
+  size_t reset_state_after_saving_raw = Bool_val(reset_state_after_saving);
 
   // TODO: use build_revision
-  size_t edges_added =
-    hh_save_dep_table_blob_helper(out_filename_raw);
+  size_t edges_added = hh_save_dep_table_blob_helper(
+    out_filename_raw,
+    reset_state_after_saving_raw);
+
   CAMLreturn(Val_long(edges_added));
 }
 

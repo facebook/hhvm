@@ -194,7 +194,6 @@ let update_save_state
 (** Saves the saved state to the given path. Returns number of dependency
 * edges dumped into the database. *)
 let save_state
-    ~(dep_table_as_blob : bool)
     ~(save_decls : bool)
     (env : ServerEnv.env)
     (output_filename : string)
@@ -221,14 +220,11 @@ let save_state
     let t = Unix.gettimeofday () in
     dump_saved_state ~save_decls output_filename naming_table errors;
 
-    let dep_table_saver =
-      if dep_table_as_blob then
-        SharedMem.save_dep_table_blob
-      else
-        SharedMem.save_dep_table_sqlite
-    in
     let dep_table_edges_added =
-      dep_table_saver db_name Build_id.build_revision replace_state_after_saving
+      SharedMem.save_dep_table_sqlite
+        db_name
+        Build_id.build_revision
+        ~replace_state_after_saving
     in
     let (_ : float) = Hh_logger.log_duration "Saving saved state took" t in
     { dep_table_edges_added }
@@ -262,16 +258,10 @@ let go_naming (naming_table : Naming_table.t) (output_filename : string) :
 (* If successful, returns the # of edges from the dependency table that were written. *)
 (* TODO: write some other stats, e.g., the number of names, the number of errors, etc. *)
 let go
-    ~(dep_table_as_blob : bool)
     ~(save_decls : bool)
     (env : ServerEnv.env)
     (output_filename : string)
     ~(replace_state_after_saving : bool) : (save_state_result, string) result =
   Utils.try_with_stack (fun () ->
-      save_state
-        ~dep_table_as_blob
-        ~save_decls
-        env
-        output_filename
-        ~replace_state_after_saving)
+      save_state ~save_decls env output_filename ~replace_state_after_saving)
   |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)

@@ -224,6 +224,9 @@ struct State {
   // Vreg state
   jit::vector<folly::Optional<RegInfo>> regInfo;
 
+  // All Vregs which are RegClass::SF
+  VregSet flags;
+
   // Pre-calculated mapping of spill Vregs to spill slots
   jit::fast_map<Vreg, Color> spillColors;
 
@@ -825,17 +828,16 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
                                  VregSet& k,
                                  VregSet& u) {
     for (auto& inst : boost::adaptors::reverse(block.code)) {
-      for (auto const r : defs_set_cached(state, inst)) {
-        if (reg_class(state, r) == RegClass::SF) continue;
-        k.add(r);
-        g.remove(r);
-      }
-      for (auto const r : uses_set_cached(state, inst)) {
-        if (reg_class(state, r) == RegClass::SF) continue;
-        g.add(r);
-        u.add(r);
-      }
+      auto const& defs = defs_set_cached(state, inst);
+      auto const& uses = uses_set_cached(state, inst);
+      k |= defs;
+      g -= defs;
+      g |= uses;
+      u |= uses;
     }
+    g -= state.flags;
+    k -= state.flags;
+    u -= state.flags;
   };
 
   dataflow_worklist<size_t, std::less<size_t>> worklist(state.rpo.size());
@@ -1146,6 +1148,8 @@ State make_state(Vunit& unit, const Abi& abi) {
     (abi.all() - (abi.gpUnreserved | abi.simdUnreserved)) | scratch,
     scratch
   };
+
+  state.flags.add(state.abi.sf);
 
   // Pre-size the table to avoid excessive resizing.
   state.regInfo.reserve(unit.next_vr * 2);
@@ -2012,6 +2016,7 @@ void infer_register_classes(State& state) {
     auto& info = reg_info_create(state, r);
     assertx(info.regClass == RegClass::Any);
     info.regClass = detail::reg_class(r);
+    if (info.regClass == RegClass::SF) state.flags.add(r);
     haveWide |= (info.regClass == RegClass::SIMDWide);
   };
 
@@ -2021,6 +2026,7 @@ void infer_register_classes(State& state) {
     auto const newClass = detail::reg_class(r);
     if (auto const c = merge(info.regClass, newClass)) {
       info.regClass = *c;
+      if (info.regClass == RegClass::SF) state.flags.add(r);
       haveWide |= (info.regClass == RegClass::SIMDWide);
     } else {
       incompatible.add(r);
@@ -2319,7 +2325,9 @@ void infer_register_classes(State& state) {
         if (is_ignored(state, d[i])) continue;
         if (!d[i].isPhys()) continue;
         auto const newReg = unit.makeReg();
-        reg_info_insert(state, newReg, RegInfo{reg_class(state, d[i])});
+        auto const dCls = reg_class(state, d[i]);
+        assertx(dCls != RegClass::SF);
+        reg_info_insert(state, newReg, RegInfo{dCls});
         copies.emplace_back(newReg, d[i]);
         d[i] = newReg;
         invalidate_cached_operands(firstInst);
@@ -2356,6 +2364,7 @@ void infer_register_classes(State& state) {
         auto const sCls = reg_class(state, s[i]);
         auto const dCls = reg_class(state, d[i]);
         if (sCls == dCls && !s[i].isPhys()) continue;
+        assertx(sCls != RegClass::SF && dCls != RegClass::SF);
 
         // Create a new Vreg in the same RegClass as the dest and use that in
         // the phi instead. Add a copy between the old src and the new
@@ -6466,6 +6475,7 @@ void set_spill_reg_classes(State& state,
             always_assert(
               is_ignored(state, uses[i]) == is_ignored(state, defs[i])
             );
+            if (is_ignored(state, uses[i])) break;
             auto const dCls = reg_class(state, defs[i]);
             auto const uCls = reg_class(state, uses[i]);
             always_assert(is_spill(dCls) == is_spill(uCls));

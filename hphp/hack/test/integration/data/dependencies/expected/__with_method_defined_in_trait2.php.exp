@@ -1,0 +1,20 @@
+<?hh
+abstract class WobbleBase {
+  abstract public function f(): void;
+}
+function with_method_defined_in_trait2(WobbleBase $w, Wobble $_): void {
+  $w->f();
+}
+class Wobble extends \WobbleBase {
+  use \TWobble;
+}
+trait TWobble {
+  require extends \WobbleBase;
+  public function f(): void {
+    throw new Exception();
+  }
+}
+<<__Rx>>
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

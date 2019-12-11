@@ -151,3 +151,37 @@ function corge(Corge $x, ICorge $y): void {
   $_ = $x->get();
   $_ = $y->get();
 }
+
+interface IWibble {
+  public function f(): void;
+}
+
+trait TWibble {
+  require implements IWibble;
+  public function f(): void {}
+}
+
+class Wibble implements IWibble {
+  use TWibble;
+}
+
+function with_method_defined_in_trait(IWibble $w, Wibble $_): void {
+  $w->f();
+}
+
+abstract class WobbleBase {
+  abstract function f(): void;
+}
+
+trait TWobble {
+  require extends WobbleBase;
+  public function f(): void {}
+}
+
+class Wobble extends WobbleBase {
+  use TWobble;
+}
+
+function with_method_defined_in_trait2(WobbleBase $w, Wobble $_): void {
+  $w->f();
+}

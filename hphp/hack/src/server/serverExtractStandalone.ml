@@ -1156,7 +1156,12 @@ let get_implementation_dependencies deps cls_name =
           deps
           acc
     in
-    Sequence.fold (Class.all_ancestor_names cls) ~init:[] ~f:add_impls
+    Sequence.fold
+      (Sequence.append
+         (Class.all_ancestor_names cls)
+         (Class.all_ancestor_req_names cls))
+      ~init:[]
+      ~f:add_impls
 
 let rec add_implementation_dependencies deps =
   let open Typing_deps.Dep in

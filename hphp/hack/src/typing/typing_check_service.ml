@@ -282,7 +282,7 @@ let process_files
       || files_to_declare > 0
     in
     if should_log then
-      TypingLogger.ProfileTypeCheck.log
+      HackEventLogger.ProfileTypeCheck.process_file
         ~recheck_id:check_info.recheck_id
         ~time_decl_and_typecheck
         ~time_typecheck_opt
@@ -659,10 +659,13 @@ let go_with_interrupt
         ~check_info
     )
   in
-  if check_info.profile_log then
-    TypingLogger.ProfileTypeCheck.print_path
+  let url_opt =
+    HackEventLogger.ProfileTypeCheck.get_telemetry_url_opt
+      ~profile_log:check_info.profile_log
       ~init_id:check_info.init_id
-      ~recheck_id:check_info.recheck_id;
+      ~recheck_id:check_info.recheck_id
+  in
+  Option.iter url_opt ~f:(fun s -> Hh_logger.log "%s" s);
   result
 
 let go

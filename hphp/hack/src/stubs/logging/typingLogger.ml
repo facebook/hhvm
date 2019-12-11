@@ -7,24 +7,6 @@
  *
  *)
 
-module ProfileTypeCheck = struct
-  let set_base_sample
-      ~init_id:_ ~threshold:_ ~owner:_ ~desc:_ ~max_times_to_defer:_ ~root:_ =
-    ()
-
-  let log
-      ~recheck_id:_
-      ~time_decl_and_typecheck:_
-      ~time_typecheck_opt:_
-      ~times_checked:_
-      ~files_to_declare:_
-      ~absolute:_
-      ~relative:_ =
-    ()
-
-  let print_path ~init_id:_ ~recheck_id:_ = ()
-end
-
 let log_lambda_counts _ = ()
 
 module InferenceCnstr = struct

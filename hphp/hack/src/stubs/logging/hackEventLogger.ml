@@ -34,10 +34,22 @@ let init
     ~interrupt_on_client:_
     ~prechecked_files:_
     ~predeclare_ide:_
-    ~max_typechecker_worker_memory_mb:_ =
+    ~max_typechecker_worker_memory_mb:_
+    ~profile_type_check_duration_threshold:_
+    ~profile_owner:_
+    ~profile_desc:_
+    ~max_times_to_defer:_ =
   ()
 
-let init_worker ~root:_ ~init_id:_ ~time:_ = ()
+let init_worker
+    ~root:_
+    ~init_id:_
+    ~time:_
+    ~profile_type_check_duration_threshold:_
+    ~profile_owner:_
+    ~profile_desc:_
+    ~max_times_to_defer:_ =
+  ()
 
 let init_monitor
     ~from:_
@@ -332,3 +344,17 @@ let search_symbol_index
     ~(caller : string)
     ~(search_provider : string) =
   ()
+
+module ProfileTypeCheck = struct
+  let process_file
+      ~recheck_id:_
+      ~time_decl_and_typecheck:_
+      ~time_typecheck_opt:_
+      ~times_checked:_
+      ~files_to_declare:_
+      ~absolute:_
+      ~relative:_ =
+    ()
+
+  let get_telemetry_url_opt ~profile_log:_ ~init_id:_ ~recheck_id:_ = None
+end

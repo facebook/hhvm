@@ -1148,24 +1148,26 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     ServerPrecheckedFiles.should_use options local_config
   in
   let logging_init init_id ~is_worker =
-    (* It's OK to unconditionally initialize profile logging; actual logging to
-        Scuba will only occur if we were started with --profile-log *)
     let max_times_to_defer =
       local_config.ServerLocalConfig.max_times_to_defer_type_checking
     in
+    let profile_type_check_duration_threshold =
+      local_config.ServerLocalConfig.profile_type_check_duration_threshold
+    in
+    let profile_owner = local_config.ServerLocalConfig.profile_owner in
+    let profile_desc = local_config.ServerLocalConfig.profile_desc in
     Hh_logger.Level.set_min_level local_config.ServerLocalConfig.min_log_level;
-    TypingLogger.ProfileTypeCheck.set_base_sample
-      ~init_id
-      ~threshold:
-        local_config.ServerLocalConfig.profile_type_check_duration_threshold
-      ~owner:local_config.ServerLocalConfig.profile_owner
-      ~desc:local_config.ServerLocalConfig.profile_desc
-      ~max_times_to_defer
-      ~root:(Path.to_string root);
     if Sys_utils.is_test_mode () then
       EventLogger.init_fake ()
     else if is_worker then
-      HackEventLogger.init_worker ~root ~init_id ~time:(Unix.gettimeofday ())
+      HackEventLogger.init_worker
+        ~root
+        ~init_id
+        ~time:(Unix.gettimeofday ())
+        ~profile_type_check_duration_threshold
+        ~profile_owner
+        ~profile_desc
+        ~max_times_to_defer
     else
       HackEventLogger.init
         ~root
@@ -1181,6 +1183,10 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         ~prechecked_files
         ~predeclare_ide
         ~max_typechecker_worker_memory_mb
+        ~profile_type_check_duration_threshold
+        ~profile_owner
+        ~profile_desc
+        ~max_times_to_defer
   in
   logging_init init_id ~is_worker:false;
   HackEventLogger.init_start

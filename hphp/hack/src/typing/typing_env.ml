@@ -628,7 +628,7 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot =
     in_case = false;
     inside_constructor = false;
     inside_ppl_class = false;
-    decl_env = { mode; droot; decl_tcopt = tcopt };
+    decl_env = { mode; droot; ctx = Provider_context.empty ~tcopt };
     genv =
       {
         tcopt;

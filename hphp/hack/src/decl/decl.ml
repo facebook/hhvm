@@ -113,7 +113,7 @@ let check_extend_kind parent_pos parent_kind child_pos child_kind =
 
 let experimental_no_trait_reuse_enabled env =
   TypecheckerOptions.experimental_feature_enabled
-    env.Decl_env.decl_tcopt
+    (Decl_env.tcopt env)
     TypecheckerOptions.experimental_no_trait_reuse
 
 let report_reused_trait parent_type shallow_class =
@@ -245,7 +245,7 @@ and fun_decl f =
           {
             Decl_env.mode = f.f_mode;
             droot = Some dep;
-            decl_tcopt = Global_naming_options.get ();
+            ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
           }
         in
         fun_decl_in_env env f)
@@ -495,7 +495,7 @@ and class_decl c =
     {
       Decl_env.mode = c.sc_mode;
       droot = Some class_dep;
-      decl_tcopt = Global_naming_options.get ();
+      ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
     }
   in
   let inherited = Decl_inherit.make env c in
@@ -1111,7 +1111,7 @@ and typedef_decl tdef =
     {
       Decl_env.mode;
       droot = Some dep;
-      decl_tcopt = Global_naming_options.get ();
+      ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
     }
   in
   let td_tparams = List.map params (type_param env) in
@@ -1139,7 +1139,7 @@ let const_decl cst =
     {
       Decl_env.mode = cst.cst_mode;
       droot = Some dep;
-      decl_tcopt = Global_naming_options.get ();
+      ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
     }
   in
   match cst.cst_type with

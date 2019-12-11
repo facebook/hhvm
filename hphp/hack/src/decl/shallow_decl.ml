@@ -405,7 +405,7 @@ let class_ c =
     {
       Decl_env.mode = c.c_mode;
       droot = Some class_dep;
-      decl_tcopt = Global_naming_options.get ();
+      ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
     }
   in
   let (errors, sc) =

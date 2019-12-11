@@ -159,7 +159,7 @@ let empty_mro_element =
 
 let no_trait_reuse_enabled env =
   TypecheckerOptions.experimental_feature_enabled
-    env.decl_env.Decl_env.decl_tcopt
+    (Decl_env.tcopt env.decl_env)
     TypecheckerOptions.experimental_no_trait_reuse
 
 let is_requirement (source : source_type) =
@@ -518,7 +518,7 @@ let get_linearization ?(kind = Member_resolution) class_name =
     {
       Decl_env.mode = FileInfo.Mstrict;
       droot = Some (Typing_deps.Dep.Class class_name);
-      decl_tcopt = Global_naming_options.get ();
+      ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
     }
   in
   let env = { class_stack = SSet.empty; decl_env; linearization_kind = kind } in

@@ -61,7 +61,7 @@ let default_json =
 
 let hint tcopt h =
   let mode = FileInfo.Mdecl in
-  let decl_env = { mode; droot = None; decl_tcopt = tcopt } in
+  let decl_env = { mode; droot = None; ctx = Provider_context.empty ~tcopt } in
   Decl_hint.hint decl_env h
 
 let get_next_elem_id () =

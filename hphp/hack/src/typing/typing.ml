@@ -46,6 +46,7 @@ module Try = Typing_try
 module TR = Typing_reactivity
 module FL = FeatureLogging
 module MakeType = Typing_make_type
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Partial = Partial_provider
 module Fake = Typing_fake_members
@@ -446,7 +447,7 @@ let make_param_local_ty env decl_hint param =
 
 (* Return a map describing all the fields in this record, including
    inherited fields, and whether they have a default value. *)
-let all_record_fields (rd : Decl_provider.record_def_decl) :
+let all_record_fields (env : env) (rd : Decl_provider.record_def_decl) :
     (sid * Typing_defs.record_field_req) SMap.t =
   let record_fields rd =
     List.fold
@@ -460,7 +461,7 @@ let all_record_fields (rd : Decl_provider.record_def_decl) :
       (* Inheritance loop, so we've seen all the records. *)
       fields
     | Some (_, parent_name) ->
-      (match Decl_provider.get_record_def parent_name with
+      (match Decl_provider.get_record_def (Env.get_ctx env) parent_name with
       | Some rd ->
         loop
           rd
@@ -648,9 +649,7 @@ and fun_def tcopt f :
       (* reset the expression dependent display ids for each function body *)
       Reason.expr_display_id_map := IMap.empty;
       let pos = fst f.f_name in
-      let decl_header =
-        get_decl_function_header (Env.get_tcopt env) (snd f.f_name)
-      in
+      let decl_header = get_decl_function_header env (snd f.f_name) in
       let nb = TNBody.func_body f in
       add_decl_errors
         (Option.map
@@ -2988,7 +2987,7 @@ and expr_
       (Aast.New (tc, tal, tel, typed_unpack_element, (p1, ctor_fty)))
       ty
   | Record ((pos, id), _is_array, field_values) ->
-    (match Decl_provider.get_record_def id with
+    (match Decl_provider.get_record_def (Env.get_ctx env) id with
     | Some rd ->
       if rd.rdt_abstract then Errors.new_abstract_record (pos, id);
 
@@ -2999,7 +2998,7 @@ and expr_
           (* TODO T44306013: Ensure that other values for field names are banned. *)
           None
       in
-      let fields_declared = all_record_fields rd in
+      let fields_declared = all_record_fields env rd in
       let fields_present =
         List.map field_values ~f:(fun (name, _value) -> field_name name)
         |> List.filter_opt
@@ -4625,7 +4624,7 @@ and check_class_get env p def_pos cid mid ce e =
              * Abstract methods from interfaces are fine: we'll check
              * in the child class that we actually have an
              * implementation. *)
-            (match Decl_provider.get_class ce.ce_origin with
+            (match Decl_provider.get_class (Env.get_ctx env) ce.ce_origin with
             | Some meth_cls
               when Ast_defs.(equal_class_kind (Cls.kind meth_cls) Ctrait) ->
               Errors.self_abstract_call mid p def_pos
@@ -7465,10 +7464,12 @@ and get_decl_method_header tcopt cls method_id =
   else
     None
 
-and get_decl_function_header tcopt function_id =
-  let is_global_inference_on = IM.global_inference @@ TCO.infer_missing tcopt in
+and get_decl_function_header env function_id =
+  let is_global_inference_on =
+    IM.global_inference @@ TCO.infer_missing (Env.get_tcopt env)
+  in
   if is_global_inference_on then
-    match Decl_provider.get_fun function_id with
+    match Decl_provider.get_fun (Env.get_ctx env) function_id with
     | Some { fe_type = (_, Tfun fun_type); _ } -> Some fun_type
     | _ -> None
   else
@@ -7843,7 +7844,7 @@ and pu_enum_def
     Here we check that all definitions are well-typed.
  *)
   let pos = fst pu_name in
-  let cls = Decl_provider.get_class c_name in
+  let cls = Decl_provider.get_class (Env.get_ctx env) c_name in
   let pu_enum =
     Option.bind cls ~f:(fun cls -> Cls.get_pu_enum cls (snd pu_name))
   in
@@ -8669,10 +8670,10 @@ let record_field env f =
     (env, (id, hint, Some te))
   | None -> (env, (id, hint, None))
 
-let record_def_parent rd parent_hint =
+let record_def_parent env rd parent_hint =
   match snd parent_hint with
   | Aast.Happly ((parent_pos, parent_name), []) ->
-    (match Decl_provider.get_record_def parent_name with
+    (match Decl_provider.get_record_def (Env.get_ctx env) parent_name with
     | Some parent_rd ->
       (* We can only inherit from abstract records. *)
       ( if not parent_rd.rdt_abstract then
@@ -8684,7 +8685,7 @@ let record_def_parent rd parent_hint =
 
       (* Ensure we aren't defining fields that overlap with
          inherited fields. *)
-      let inherited_fields = all_record_fields parent_rd in
+      let inherited_fields = all_record_fields env parent_rd in
       List.iter rd.rd_fields ~f:(fun ((pos, name), _, _) ->
           match SMap.find_opt name inherited_fields with
           | Some ((prev_pos, _), _) ->
@@ -8699,9 +8700,9 @@ let record_def_parent rd parent_hint =
       "Record parent was not an Happly. This should have been a syntax error."
 
 (* Report an error if we have inheritance cycles in record declarations. *)
-let check_record_inheritance_cycle ((rd_pos, rd_name) : Aast.sid) : unit =
+let check_record_inheritance_cycle env ((rd_pos, rd_name) : Aast.sid) : unit =
   let rec worker name trace seen =
-    match Decl_provider.get_record_def name with
+    match Decl_provider.get_record_def (Env.get_ctx env) name with
     | Some rd ->
       (match rd.rdt_extends with
       | Some (_, parent_name) when String.equal parent_name rd_name ->
@@ -8720,10 +8721,10 @@ let check_record_inheritance_cycle ((rd_pos, rd_name) : Aast.sid) : unit =
 let record_def_def tcopt rd =
   let env = EnvFromDef.record_def_env tcopt rd in
   (match rd.rd_extends with
-  | Some parent -> record_def_parent rd parent
+  | Some parent -> record_def_parent env rd parent
   | None -> ());
 
-  check_record_inheritance_cycle rd.rd_name;
+  check_record_inheritance_cycle env rd.rd_name;
 
   let (env, attributes) =
     List.map_env env rd.rd_user_attributes user_attribute

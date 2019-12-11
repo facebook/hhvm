@@ -9,6 +9,7 @@
 
 open Typing_defs
 open Typing_env_types
+module Decl_provider = Decl_provider_ctx
 
 val check_class_access :
   use_pos:Pos.t ->

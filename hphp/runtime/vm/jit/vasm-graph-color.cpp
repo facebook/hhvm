@@ -3374,6 +3374,9 @@ struct SpillerState {
     simd.inMem.reset();
   }
 
+  // Return all Vregs in memory
+  VregSet inMem() const { return gp.inMem | simd.inMem; }
+
   // Whether nothing is currently spilled
   bool allRegs() const {
     return
@@ -5049,17 +5052,19 @@ size_t process_inst_spills(State& state,
 }
 
 // Run the spiller logic for an entire block which we've
-// pre-determined will not contain a spill. There must not be any
-// spilled registers in the spiller state.
-void process_spills_skip(State& state,
+// pre-determined will not contain a spill. The block must not have
+// any uses of spilled registers.
+void process_spills_skip(const State& state,
                          Vlabel b,
                          SpillerState& spiller,
                          SpillerResults& results) {
-  assertx(spiller.allRegs());
+  auto const inMem = spiller.inMem();
 
-  // There's no spilled registers alive and we know no instruction
-  // within the block can cause a spill. The state after processing
-  // this block should just be all the live-out Vregs in registers.
+  // We know this block will not use any spilled registers and we know
+  // no instruction within the block can cause a spill. The state
+  // after processing this block should just be all the live-out
+  // Vregs. If the Vreg was live-in in memory, it stays in memory,
+  // otherwise its in a register.
   auto const& unit = state.unit;
   auto const& block = unit.blocks[b];
   auto const& lastInst = block.code.back();
@@ -5071,13 +5076,22 @@ void process_spills_skip(State& state,
     outPhi.resize(uses.size());
     for (size_t i = 0; i < uses.size(); ++i) {
       auto const r = uses[i];
-      if (spiller.forReg(r)) outPhi[i] = true;
+      if (!spiller.forReg(r)) continue;
+      outPhi[i] = !inMem[r];
     }
   }
 
   spiller.reset();
   for (auto const r : state.liveOut[b]) {
-    if (auto s = spiller.forReg(r)) s->inReg.add(r);
+    auto s = spiller.forReg(r);
+    if (!s) continue;
+    // If it was in memory (which can only happen if it was live-in in
+    // memory), it stays in memory. In register otherwise.
+    if (inMem[r]) {
+      s->inMem.add(r);
+    } else {
+      s->inReg.add(r);
+    }
   }
 }
 
@@ -5112,7 +5126,7 @@ SpillerResults process_spills(State& state,
       );
     };
 
-    if (!needsSpilling[b] && spiller.allRegs()) {
+    if (!needsSpilling[b] && !state.uses[b].intersects(spiller.inMem())) {
       // Be efficient if there's no potential spills to worry about.
       process_spills_skip(state, b, spiller, results);
     } else {

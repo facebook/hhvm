@@ -20,10 +20,12 @@ let (counter : int ref) = ref 0
 
 let (enabled : bool ref) = ref true
 
-let should_defer ~(d : Relative_path.t) ~(threshold : int) : unit =
+let should_defer ~(d : Relative_path.t) ~(threshold_opt : int option) : unit =
   if !enabled then (
     counter := !counter + 1;
-    if threshold < !counter then raise (Defer d)
+    match threshold_opt with
+    | Some threshold when threshold < !counter -> raise (Defer d)
+    | _ -> ()
   )
 
 let add ~(d : deferment) : unit =
@@ -34,5 +36,7 @@ let reset ~enable =
   counter := 0;
   enabled := enable
 
-let get ~(f : deferment -> 'a) : 'a list =
+let get_deferments ~(f : deferment -> 'a) : 'a list =
   Relative_path.Set.fold !deferments ~init:[] ~f:(fun d l -> f d :: l)
+
+let get_counter () : int = !counter

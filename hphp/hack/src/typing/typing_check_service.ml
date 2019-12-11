@@ -209,7 +209,7 @@ let process_file
     if InferMissing.global_inference @@ GlobalOptions.tco_infer_missing opts
     then
       Typing_global_inference.StateSubConstraintGraphs.save global_tvenvs;
-    let deferred_files = Deferred_decl.get ~f:(fun d -> Declare d) in
+    let deferred_files = Deferred_decl.get_deferments ~f:(fun d -> Declare d) in
     let result =
       match deferred_files with
       | [] -> (Errors.merge errors' errors, [])

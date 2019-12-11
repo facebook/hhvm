@@ -33,7 +33,7 @@ let test_dmesg_parser () =
     input
 
 let ensure_count (count : int) : unit =
-  let deferred = Deferred_decl.get ~f:(fun d -> d) in
+  let deferred = Deferred_decl.get_deferments ~f:(fun d -> d) in
   Asserter.Int_asserter.assert_equals
     count
     (List.length deferred)
@@ -66,7 +66,10 @@ let ensure_threshold ~(threshold : int) ~(limit : int) ~(expected : int) : unit
   for i = 1 to limit do
     let path = Printf.sprintf "foo-%d" i in
     let relative_path = Relative_path.create Relative_path.Dummy path in
-    try Deferred_decl.should_defer ~d:relative_path ~threshold
+    try
+      Deferred_decl.should_defer
+        ~d:relative_path
+        ~threshold_opt:(Some threshold)
     with Deferred_decl.Defer d ->
       Asserter.Bool_asserter.assert_equals
         (i >= threshold)

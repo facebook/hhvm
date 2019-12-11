@@ -95,8 +95,9 @@ module Classes = struct
           | None ->
             raise Exit
           | Some (file, Naming_table.TClass) ->
-            Option.iter (defer_threshold ()) ~f:(fun threshold ->
-                Deferred_decl.should_defer ~d:file ~threshold);
+            Deferred_decl.should_defer
+              ~d:file
+              ~threshold_opt:(defer_threshold ());
             let class_type =
               Errors.run_in_decl_mode file (fun () ->
                   Decl.declare_class_in_file file class_name)

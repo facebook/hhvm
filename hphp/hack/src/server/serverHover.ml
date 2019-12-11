@@ -381,7 +381,7 @@ let go_quarantined
   let identities =
     ServerIdentifyFunction.go_quarantined ~ctx ~entry ~line ~column
   in
-  let (tast, _errors) =
+  let { Provider_utils.tast; _ } =
     Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
   in
   let env_and_ty =

@@ -7,6 +7,11 @@
  *)
 open Core_kernel
 
+type compute_tast_result = {
+  tast: Tast.program;
+  errors: Errors.t;
+}
+
 let respect_but_quarantine_unsaved_changes
     ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =
   let make_then_revert_local_changes f () =
@@ -100,9 +105,9 @@ let get_entry_VOLATILE ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
 
 let compute_tast_and_errors_unquarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    Tast.program * Errors.t =
+    compute_tast_result =
   match (entry.Provider_context.tast, entry.Provider_context.errors) with
-  | (Some tast, Some errors) -> (tast, errors)
+  | (Some tast, Some errors) -> { tast; errors }
   | _ ->
     let (nast_errors, nast) =
       Errors.do_with_context
@@ -119,14 +124,14 @@ let compute_tast_and_errors_unquarantined
     let errors = Errors.merge nast_errors tast_errors in
     entry.Provider_context.tast <- Some tast;
     entry.Provider_context.errors <- Some errors;
-    (tast, errors)
+    { tast; errors }
 
 let compute_tast_and_errors_quarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    Tast.program * Errors.t =
+    compute_tast_result =
   (* If results have already been memoized, don't bother quarantining anything *)
   match (entry.Provider_context.tast, entry.Provider_context.errors) with
-  | (Some tast, Some errors) -> (tast, errors)
+  | (Some tast, Some errors) -> { tast; errors }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | _ ->
     let f () = compute_tast_and_errors_unquarantined ~ctx ~entry in

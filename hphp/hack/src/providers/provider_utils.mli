@@ -6,6 +6,11 @@
  *
  *)
 
+type compute_tast_result = {
+  tast: Tast.program;
+  errors: Errors.t;
+}
+
 (** Compute the given AST for the given path, and return an updated [t]
 containing that entry. *)
 val update_context :
@@ -31,9 +36,7 @@ and typechecking it, and memoizing the result (caching the results in the
 context entry). CAUTION: this function doesn't use a quarantine, and so
 is inappropriate for IDE scenarios. *)
 val compute_tast_and_errors_unquarantined :
-  ctx:Provider_context.t ->
-  entry:Provider_context.entry ->
-  Tast.program * Errors.t
+  ctx:Provider_context.t -> entry:Provider_context.entry -> compute_tast_result
 
 (** This function computes TAST and error-list. At the moment,
 the suffix "quarantined" means that this function enforces a quarantine
@@ -41,9 +44,7 @@ in case one isn't yet in force. In future, it might mean that we assert
 that a quarantine is already in force. CAUTION: this function is only
 appropriate for IDE scenarios. *)
 val compute_tast_and_errors_quarantined :
-  ctx:Provider_context.t ->
-  entry:Provider_context.entry ->
-  Tast.program * Errors.t
+  ctx:Provider_context.t -> entry:Provider_context.entry -> compute_tast_result
 
 (** Find an existing entry within the context.  Returns "None" if
 that entry has not yet been observed. *)

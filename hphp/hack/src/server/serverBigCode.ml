@@ -180,7 +180,7 @@ let go_ctx ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     string =
   (* Extract TAST and convert to string *)
   (* TODO(ljw): surely this doesn't need quarantine? *)
-  let (tast, _) =
+  let { Provider_utils.tast; _ } =
     Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
   in
   let serialized_tast = serialize_tast tast ctx.Provider_context.tcopt in

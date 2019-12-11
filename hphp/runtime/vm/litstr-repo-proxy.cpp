@@ -113,14 +113,13 @@ RepoStatus LitstrRepoProxy::GetLitstrsStmt::get() {
   auto& table = LitstrTable::get();
 
   try {
-    auto txn = RepoTxn{m_repo.begin()};
     if (!prepared()) {
       auto selectQuery = folly::sformat(
         "SELECT litstrId,litstr FROM {} ORDER BY litstrId;",
         m_repo.table(m_repoId, "Litstr"));
-      txn.prepare(*this, selectQuery);
+      prepare(selectQuery);
     }
-    RepoTxnQuery query(txn, *this);
+    RepoQuery query(*this);
     int index = 1;
     do {
       query.step();
@@ -134,7 +133,6 @@ RepoStatus LitstrRepoProxy::GetLitstrsStmt::get() {
         table.setLitstr(index, litstr);
       }
     } while (!query.done());
-    txn.commit();
   } catch (RepoExc& re) {
     return RepoStatus::error;
   }

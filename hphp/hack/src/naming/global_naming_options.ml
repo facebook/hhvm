@@ -30,7 +30,6 @@ let local_memory_tcopt : TypecheckerOptions.t option ref = ref None
 let get () : TypecheckerOptions.t =
   let tcopt_opt =
     match Provider_backend.get () with
-    | Provider_backend.Lru_shared_memory
     | Provider_backend.Shared_memory
     | Provider_backend.Local_memory _ ->
       Store.get ()
@@ -47,7 +46,6 @@ let get () : TypecheckerOptions.t =
 let set (tcopt : TypecheckerOptions.t) : unit =
   let was_already_set =
     match Provider_backend.get () with
-    | Provider_backend.Lru_shared_memory
     | Provider_backend.Shared_memory
     | Provider_backend.Local_memory _ ->
       let was_already_set = Store.get () <> None in

@@ -50,8 +50,6 @@ type genv = {
   (* Early-initialized workers to be used in MultiWorker jobs
    * They are initialized early to keep their heaps as empty as possible. *)
   workers: MultiWorker.worker list option;
-  (* Env used to access an early-init worker prototype, and to start jobs. *)
-  lru_host_env: Shared_lru.host_env option;
   (* Returns the list of files under .hhconfig, subject to a filter *)
   indexer: (string -> bool) -> unit -> string list;
   (* Each time this is called, it should return the files that have changed

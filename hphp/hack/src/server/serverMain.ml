@@ -1247,25 +1247,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       handle
       ~logging_init:worker_logging_init
   in
-  let lru_cache_directory = ServerArgs.lru_cache_directory options in
-  let lru_host_env =
-    match lru_cache_directory with
-    | Some cache_dir_path ->
-      Provider_backend.set_lru_shared_memory_backend ();
-      let host_env =
-        Shared_lru.init
-          ~cache_name:"hack_server_lru"
-          ~cache_size_in_bytes:(15 * 1024 * 1024) (* 15 MBs *)
-          ~cache_dir_path
-          ~num_workers
-          ~shm_handle:(Some handle)
-      in
-      Some host_env
-    | None -> None
-  in
-  let genv =
-    ServerEnvBuild.make_genv options config local_config workers lru_host_env
-  in
+  let genv = ServerEnvBuild.make_genv options config local_config workers in
   (genv, ServerEnvBuild.make_env genv.config ~init_id)
 
 let run_once options config local_config =

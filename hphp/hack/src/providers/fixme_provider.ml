@@ -166,7 +166,6 @@ let get_unused_fixmes ~codes ~applied_fixmes ~fold ~files_info =
 (*****************************************************************************)
 let get_fixmes_for_pos pos =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
   | Provider_backend.Shared_memory
   | Provider_backend.Local_memory _ ->
     let filename = Pos.filename pos in
@@ -184,7 +183,6 @@ let get_fixme_codes_for_pos pos =
 
 let is_disallowed pos code =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
   | Provider_backend.Shared_memory
   | Provider_backend.Local_memory _ ->
     let filename = Pos.filename pos in

@@ -70,12 +70,10 @@
 (library
   (name decl_provider_ctx)
   (modules
-    decl_lru_cache
     decl_provider_ctx)
   (libraries
     decl_service_client
     global_naming_options
-    lru_worker_stubs
     provider_backend
     typing_heap)
   (preprocess (pps ppx_deriving.std)))

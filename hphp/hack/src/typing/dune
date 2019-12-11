@@ -215,7 +215,6 @@
   (modules
     typing_check_service
     typing_check_utils
-    typing_lru_check_service
     typing_remote_check_service)
   (libraries
     core_kernel
@@ -228,7 +227,6 @@
     procs_bucket
     remote_scheduler_stubs
     server_monitor
-    shared_lru_stubs
     typing
     typing_defs
     typing_service_api

@@ -39,16 +39,13 @@ let read_file_contents_from_disk (fn : Relative_path.t) : string option =
 
 let get fn =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
-  | Provider_backend.Shared_memory ->
-    FileHeap.get fn
+  | Provider_backend.Shared_memory -> FileHeap.get fn
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith "File_provider.get not supported with local/decl memory provider"
 
 let get_unsafe fn =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
   | Provider_backend.Shared_memory ->
     begin
       match get fn with
@@ -62,7 +59,6 @@ let get_unsafe fn =
 
 let get_contents fn =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
   | Provider_backend.Shared_memory ->
     begin
       match FileHeap.get fn with
@@ -81,7 +77,6 @@ let get_contents fn =
 
 let get_ide_contents_unsafe fn =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
   | Provider_backend.Shared_memory ->
     begin
       match FileHeap.get fn with
@@ -96,9 +91,7 @@ let get_ide_contents_unsafe fn =
 
 let provide_file fn contents =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
-  | Provider_backend.Shared_memory ->
-    FileHeap.add fn contents
+  | Provider_backend.Shared_memory -> FileHeap.add fn contents
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
@@ -106,9 +99,7 @@ let provide_file fn contents =
 
 let provide_file_hint fn contents =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
-  | Provider_backend.Shared_memory ->
-    FileHeap.write_around fn contents
+  | Provider_backend.Shared_memory -> FileHeap.write_around fn contents
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
@@ -116,9 +107,7 @@ let provide_file_hint fn contents =
 
 let remove_batch paths =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
-  | Provider_backend.Shared_memory ->
-    FileHeap.remove_batch paths
+  | Provider_backend.Shared_memory -> FileHeap.remove_batch paths
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
@@ -126,27 +115,21 @@ let remove_batch paths =
 
 let local_changes_push_stack () =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
-  | Provider_backend.Shared_memory ->
-    FileHeap.LocalChanges.push_stack ()
+  | Provider_backend.Shared_memory -> FileHeap.LocalChanges.push_stack ()
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     ()
 
 let local_changes_pop_stack () =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
-  | Provider_backend.Shared_memory ->
-    FileHeap.LocalChanges.pop_stack ()
+  | Provider_backend.Shared_memory -> FileHeap.LocalChanges.pop_stack ()
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     ()
 
 let local_changes_commit_batch paths =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
-  | Provider_backend.Shared_memory ->
-    FileHeap.LocalChanges.commit_batch paths
+  | Provider_backend.Shared_memory -> FileHeap.LocalChanges.commit_batch paths
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith
@@ -155,9 +138,7 @@ let local_changes_commit_batch paths =
 
 let local_changes_revert_batch paths =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
-  | Provider_backend.Shared_memory ->
-    FileHeap.LocalChanges.revert_batch paths
+  | Provider_backend.Shared_memory -> FileHeap.LocalChanges.revert_batch paths
   | Provider_backend.Local_memory _
   | Provider_backend.Decl_service _ ->
     failwith

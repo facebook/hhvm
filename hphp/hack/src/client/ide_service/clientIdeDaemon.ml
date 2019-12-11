@@ -169,13 +169,7 @@ let initialize
   Provider_backend.set_local_memory_backend ~max_size_in_words;
 
   let genv =
-    ServerEnvBuild.make_genv
-      server_args
-      server_config
-      server_local_config
-      [] (* no workers *)
-      None
-    (* no lru_workers *)
+    ServerEnvBuild.make_genv server_args server_config server_local_config []
   in
   let server_env = ServerEnvBuild.make_env genv.ServerEnv.config in
   (* We need shallow class declarations so that we can invalidate individual

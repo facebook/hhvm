@@ -124,8 +124,6 @@ let disallow_invalid_arraykey_constraint =
 
 let const_static_props = GlobalOptions.tco_const_static_props
 
-let use_lru_workers = GlobalOptions.tco_use_lru_workers
-
 let infer_missing = GlobalOptions.tco_infer_missing
 
 let const_attribute = GlobalOptions.tco_const_attribute

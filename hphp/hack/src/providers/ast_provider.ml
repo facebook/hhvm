@@ -246,7 +246,6 @@ let get_ast ?(full = false) file_name =
   in
   match (entry_opt, Provider_backend.get ()) with
   | (Some entry, _) -> entry.Provider_context.ast
-  | (None, Provider_backend.Lru_shared_memory)
   | (None, Provider_backend.Shared_memory) ->
     begin
       (* Note that we might be looking up the shared ParserHeap directly, *)
@@ -312,7 +311,6 @@ let provide_ast_hint
     (path : Relative_path.t) (program : Nast.program) (parse_type : parse_type)
     : unit =
   match Provider_backend.get () with
-  | Provider_backend.Lru_shared_memory
   | Provider_backend.Shared_memory ->
     ParserHeap.write_around path (program, parse_type)
   | Provider_backend.Local_memory _

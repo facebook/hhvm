@@ -31,7 +31,6 @@ type gconst_decl = Typing_defs.decl_ty * Errors.t
 
 let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
   match ctx.Provider_context.backend with
-  | Provider_backend.Lru_shared_memory -> Decl_lru_cache.get_fun fun_name
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_fun fun_name
   | Provider_backend.Local_memory { decl_cache } ->
     let result : Obj.t =
@@ -60,9 +59,7 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
 let get_class (ctx : Provider_context.t) (class_name : class_key) :
     class_decl option =
   match ctx.Provider_context.backend with
-  | Provider_backend.Lru_shared_memory
-  | Provider_backend.Shared_memory ->
-    Typing_lazy_heap.get_class class_name
+  | Provider_backend.Shared_memory -> Typing_lazy_heap.get_class class_name
   | Provider_backend.Local_memory { decl_cache } ->
     let result : Obj.t =
       Memory_bounded_lru_cache.find_or_add
@@ -127,8 +124,6 @@ let get_type_id_filename x expected_kind =
 let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
     typedef_decl option =
   match ctx.Provider_context.backend with
-  | Provider_backend.Lru_shared_memory ->
-    Decl_lru_cache.get_typedef typedef_name
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_typedef typedef_name
   | Provider_backend.Local_memory { decl_cache } ->
     let result : Obj.t =
@@ -157,8 +152,6 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
 let get_record_def (ctx : Provider_context.t) (record_name : string) :
     record_def_decl option =
   match ctx.Provider_context.backend with
-  | Provider_backend.Lru_shared_memory ->
-    Decl_lru_cache.get_record_def record_name
   | Provider_backend.Shared_memory ->
     Typing_lazy_heap.get_record_def record_name
   | Provider_backend.Local_memory { decl_cache } ->
@@ -189,7 +182,6 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
 let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
     gconst_decl option =
   match ctx.Provider_context.backend with
-  | Provider_backend.Lru_shared_memory -> Decl_lru_cache.get_gconst gconst_name
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_gconst gconst_name
   | Provider_backend.Local_memory { decl_cache } ->
     let result : Obj.t =
@@ -221,9 +213,6 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
 
 let invalidate_fun (ctx : Provider_context.t) (fun_name : fun_key) : unit =
   match ctx.Provider_context.backend with
-  | Provider_backend.Lru_shared_memory ->
-    failwith
-      "Function decl invalidation not yet supported with LRU shared memory"
   | Provider_backend.Shared_memory ->
     Decl_heap.Funs.remove_batch (SSet.singleton fun_name)
   | Provider_backend.Local_memory { decl_cache } ->
@@ -237,8 +226,6 @@ let invalidate_fun (ctx : Provider_context.t) (fun_name : fun_key) : unit =
 let invalidate_class (ctx : Provider_context.t) (class_name : class_key) : unit
     =
   match ctx.Provider_context.backend with
-  | Provider_backend.Lru_shared_memory ->
-    failwith "Class decl invalidation not yet supported with LRU shared memory"
   | Provider_backend.Shared_memory ->
     Decl_heap.Classes.remove_batch (SSet.singleton class_name)
   | Provider_backend.Local_memory { decl_cache } ->
@@ -252,9 +239,6 @@ let invalidate_class (ctx : Provider_context.t) (class_name : class_key) : unit
 let invalidate_record_def
     (ctx : Provider_context.t) (record_name : record_def_key) : unit =
   match ctx.Provider_context.backend with
-  | Provider_backend.Lru_shared_memory ->
-    failwith
-      "Record def decl invalidation not yet supported with LRU shared memory"
   | Provider_backend.Shared_memory ->
     Decl_heap.RecordDefs.remove_batch (SSet.singleton record_name)
   | Provider_backend.Local_memory { decl_cache } ->
@@ -268,9 +252,6 @@ let invalidate_record_def
 let invalidate_typedef (ctx : Provider_context.t) (typedef_name : typedef_key) :
     unit =
   match ctx.Provider_context.backend with
-  | Provider_backend.Lru_shared_memory ->
-    failwith
-      "Typedef decl invalidation not yet supported with LRU shared memory"
   | Provider_backend.Shared_memory ->
     Decl_heap.Typedefs.remove_batch (SSet.singleton typedef_name)
   | Provider_backend.Local_memory { decl_cache } ->
@@ -284,9 +265,6 @@ let invalidate_typedef (ctx : Provider_context.t) (typedef_name : typedef_key) :
 let invalidate_gconst (ctx : Provider_context.t) (gconst_name : gconst_key) :
     unit =
   match ctx.Provider_context.backend with
-  | Provider_backend.Lru_shared_memory ->
-    failwith
-      "Constant decl invalidation not yet supported with LRU shared memory"
   | Provider_backend.Shared_memory ->
     Decl_heap.GConsts.remove_batch (SSet.singleton gconst_name)
   | Provider_backend.Local_memory { decl_cache } ->
@@ -313,8 +291,7 @@ let invalidate_context_decls ~(ctx : Provider_context.t) =
             invalidate_typedef ctx typedef_name);
         List.iter gconsts ~f:(fun (_, gconst_name) ->
             invalidate_gconst ctx gconst_name))
-  | Provider_backend.Shared_memory
-  | Provider_backend.Lru_shared_memory ->
+  | Provider_backend.Shared_memory ->
     (* Don't attempt to invalidate decls with shared memory, as we may not be
     running in the master process where that's allowed. *)
     ()

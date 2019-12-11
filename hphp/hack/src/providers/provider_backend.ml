@@ -25,21 +25,17 @@ type decl_cache_key =
 type decl_cache = (decl_cache_key, Obj.t) Memory_bounded_lru_cache.t
 
 type t =
-  | Lru_shared_memory
   | Shared_memory
   | Local_memory of { decl_cache: decl_cache }
   | Decl_service of Decl_service_client.t
 
 let t_to_string (t : t) : string =
   match t with
-  | Lru_shared_memory -> "Lru_shared_memory"
   | Shared_memory -> "Shared_memory"
   | Local_memory _ -> "Local_memory"
   | Decl_service _ -> "Decl_service"
 
 let backend_ref = ref Shared_memory
-
-let set_lru_shared_memory_backend () : unit = backend_ref := Lru_shared_memory
 
 let set_shared_memory_backend () : unit = backend_ref := Shared_memory
 

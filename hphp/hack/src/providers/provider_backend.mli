@@ -18,15 +18,12 @@ type decl_cache_key =
 type decl_cache = (decl_cache_key, Obj.t) Memory_bounded_lru_cache.t
 
 type t = private
-  | Lru_shared_memory
   | Shared_memory
   | Local_memory of { decl_cache: decl_cache }
   (* In Decl_service, 'unit' left for further expansion *)
   | Decl_service of Decl_service_client.t
 
 val t_to_string : t -> string
-
-val set_lru_shared_memory_backend : unit -> unit
 
 val set_shared_memory_backend : unit -> unit
 

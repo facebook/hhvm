@@ -177,8 +177,6 @@ type t = {
   po_enable_class_level_where_clauses: bool;
   (* Disable legacy soft typehint syntax (@int) and only allow the __Soft attribute. *)
   po_disable_legacy_soft_typehints: bool;
-  (* Use shared_lru workers instead of MultiWorker workers *)
-  tco_use_lru_workers: bool;
   (* Set of error codes disallowed in decl positions *)
   po_disallowed_decl_fixmes: ISet.t;
   (* Enable @ attribute syntax *)
@@ -278,7 +276,6 @@ val make :
   ?tco_disallow_invalid_arraykey_constraint:bool ->
   ?po_enable_class_level_where_clauses:bool ->
   ?po_disable_legacy_soft_typehints:bool ->
-  ?tco_use_lru_workers:bool ->
   ?po_disallowed_decl_fixmes:ISet.t ->
   ?po_allow_new_attribute_syntax:bool ->
   ?tco_infer_missing:InferMissing.t ->
@@ -440,8 +437,6 @@ val tco_disallow_invalid_arraykey_constraint : t -> bool
 val po_enable_class_level_where_clauses : t -> bool
 
 val po_disable_legacy_soft_typehints : t -> bool
-
-val tco_use_lru_workers : t -> bool
 
 val po_disallowed_decl_fixmes : t -> ISet.t
 

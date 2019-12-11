@@ -356,7 +356,6 @@ let load config_filename options =
         (bool_opt "class_level_where_clauses" config)
       ?po_disable_legacy_soft_typehints:
         (bool_opt "disable_legacy_soft_typehints" config)
-      ?tco_use_lru_workers:(Some local_config.ServerLocalConfig.use_lru_workers)
       ?po_disallow_toplevel_requires:
         (bool_opt "disallow_toplevel_requires" config)
       ~po_disallowed_decl_fixmes:(prepare_disallowed_decl_fixmes config)

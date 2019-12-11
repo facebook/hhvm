@@ -54,8 +54,6 @@ module type S = sig
 
   val log_inference_constraints : options -> bool
 
-  val lru_cache_directory : options -> string option
-
   val max_procs : options -> int option
 
   val no_load : options -> bool

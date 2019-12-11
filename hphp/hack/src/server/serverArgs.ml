@@ -30,7 +30,6 @@ type options = {
   json_mode: bool;
   load_state_canary: bool;
   log_inference_constraints: bool;
-  lru_cache_directory: string option;
   max_procs: int option;
   no_load: bool;
   prechecked: bool option;
@@ -96,9 +95,6 @@ module Messages = struct
     " (for hh debugging purpose only) log type"
     ^ " inference constraints into external logger (e.g. Scuba)"
 
-  let lru_cache_directory =
-    " Specify a cache directory for a cache" ^ " only if using lru_workers."
-
   let max_procs = " max numbers of workers"
 
   let no_load = " don't load from a saved state"
@@ -158,7 +154,6 @@ let parse_options () =
   let json_mode = ref false in
   let load_state_canary = ref false in
   let log_inference_constraints = ref false in
-  let lru_cache_directory = ref None in
   let max_procs = ref None in
   let no_load = ref false in
   let prechecked = ref None in
@@ -185,7 +180,6 @@ let parse_options () =
   let set_with_saved_state s = with_saved_state := Some s in
   let set_write_symbol_info s = write_symbol_info := Some s in
   let set_from s = from := s in
-  let set_lru_cache_directory s = lru_cache_directory := Some s in
   let options =
     [
       ("--ai", Arg.String set_ai, Messages.ai);
@@ -211,9 +205,6 @@ let parse_options () =
       ( "--log-inference-constraints",
         Arg.Set log_inference_constraints,
         Messages.log_inference_constraints );
-      ( "--lru-cache-directory",
-        Arg.String set_lru_cache_directory,
-        Messages.lru_cache_directory );
       ("--max-procs", Arg.Int set_max_procs, Messages.max_procs);
       ("--no-load", Arg.Set no_load, Messages.no_load);
       ( "--no-prechecked",
@@ -319,7 +310,6 @@ let parse_options () =
     json_mode = !json_mode;
     load_state_canary = !load_state_canary;
     log_inference_constraints = !log_inference_constraints;
-    lru_cache_directory = !lru_cache_directory;
     max_procs = !max_procs;
     no_load = !no_load;
     prechecked = !prechecked;
@@ -352,7 +342,6 @@ let default_options ~root =
     json_mode = false;
     load_state_canary = false;
     log_inference_constraints = false;
-    lru_cache_directory = None;
     max_procs = None;
     no_load = true;
     prechecked = None;
@@ -396,8 +385,6 @@ let json_mode options = options.json_mode
 let load_state_canary options = options.load_state_canary
 
 let log_inference_constraints options = options.log_inference_constraints
-
-let lru_cache_directory options = options.lru_cache_directory
 
 let max_procs options = options.max_procs
 
@@ -469,7 +456,6 @@ let to_string
       json_mode;
       load_state_canary;
       log_inference_constraints;
-      lru_cache_directory;
       max_procs;
       no_load;
       prechecked;
@@ -491,11 +477,6 @@ let to_string
     match ai_mode with
     | None -> "<>"
     | Some _ -> "Some(...)"
-  in
-  let lru_cache_directory_str =
-    match lru_cache_directory with
-    | None -> "<>"
-    | Some dir -> dir
   in
   let saved_state_str =
     match with_saved_state with
@@ -578,9 +559,6 @@ let to_string
     ", ";
     "log_inference_constraints: ";
     string_of_bool log_inference_constraints;
-    ", ";
-    "lru_cache_directory: ";
-    lru_cache_directory_str;
     ", ";
     "maxprocs: ";
     max_procs_str;

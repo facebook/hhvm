@@ -12,7 +12,6 @@ val make_genv :
   ServerConfig.t ->
   ServerLocalConfig.t ->
   MultiWorker.worker list ->
-  Shared_lru.host_env option ->
   ServerEnv.genv
 
 val default_genv : ServerEnv.genv

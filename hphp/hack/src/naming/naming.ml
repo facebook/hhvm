@@ -395,7 +395,6 @@ end = struct
 
   let global_const (genv, _env) x =
     match Provider_backend.get () with
-    | Provider_backend.Lru_shared_memory
     | Provider_backend.Shared_memory
     | Provider_backend.Local_memory _ ->
       if_unbound_then_dep_edge_and_report genv Naming_table.Consts.is_defined x;

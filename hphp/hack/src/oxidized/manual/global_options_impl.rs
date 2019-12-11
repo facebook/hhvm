@@ -65,7 +65,6 @@ impl Default for GlobalOptions {
             tco_disallow_invalid_arraykey_constraint: false,
             po_enable_class_level_where_clauses: false,
             po_disable_legacy_soft_typehints: false,
-            tco_use_lru_workers: false,
             po_disallowed_decl_fixmes: i_set::ISet::new(),
             po_allow_new_attribute_syntax: false,
             tco_infer_missing: infer_missing::InferMissing::Deactivated,

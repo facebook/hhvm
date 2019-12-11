@@ -24,7 +24,6 @@
     server_client_provider
     server_command_types
     server_monitor
-    shared_lru_stubs
     typechecker_options
     typing_service_api
     typing_service_api_stubs
@@ -257,7 +256,6 @@
     search
     server_env
     server_services
-    shared_lru_stubs
     sys_utils
     typing
     typing_service_api

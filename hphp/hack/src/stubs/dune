@@ -33,12 +33,6 @@
     loadScriptUtils))
 
 (library
-  (name lru_worker_stubs)
-  (wrapped false)
-  (modules
-    lru_worker))
-
-(library
   (name messages_stubs)
   (wrapped false)
   (modules
@@ -95,12 +89,6 @@
   (libraries
     hg
     server_monitor))
-
-(library
-  (name shared_lru_stubs)
-  (wrapped false)
-  (modules
-    shared_lru))
 
 (library
   (name decl_ipc_ffi_externs)

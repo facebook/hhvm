@@ -124,8 +124,6 @@ type t = {
   profile_owner: string;
   (* If --profile-log, we can use "--config profile_desc=<str>" to send an arbitrary "desc" along with telemetry *)
   profile_desc: string;
-  (* Use shared_lru workers *)
-  use_lru_workers: bool;
   (* Allows the IDE to show the 'find all implementations' button *)
   go_to_implementation: bool;
 }
@@ -220,7 +218,6 @@ let default =
     profile_owner = "";
     profile_desc = "";
     (* seconds *)
-    use_lru_workers = false;
     go_to_implementation = true;
   }
 
@@ -649,9 +646,6 @@ let load_ fn ~silent ~current_version overrides =
   let profile_desc =
     string_ "profile_desc" ~default:default.profile_desc config
   in
-  let use_lru_workers =
-    bool_if_version "use_lru_workers" ~default:default.use_lru_workers config
-  in
   let go_to_implementation =
     bool_if_version
       "go_to_implementation"
@@ -726,7 +720,6 @@ let load_ fn ~silent ~current_version overrides =
     profile_type_check_twice;
     profile_owner;
     profile_desc;
-    use_lru_workers;
     go_to_implementation;
   }
 

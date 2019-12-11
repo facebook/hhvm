@@ -119,10 +119,7 @@ let bar_contents =
   }
 |}
 
-(* In this test, we wish to establish that we enable deferring type checking
-  for files that have undeclared dependencies, UNLESS we've already deferred
-  those files a certain number of times. *)
-let test_process_file_deferring () =
+let server_setup_for_deferral_tests () =
   (* Set up a simple fake repo *)
   Disk.mkdir_p "/fake/root/";
   Relative_path.set_path_prefix Relative_path.Root (Path.make "/fake/root/");
@@ -133,21 +130,6 @@ let test_process_file_deferring () =
   Disk.write_file ~file:"/fake/root/Bar.php" ~contents:bar_contents;
   let foo_path = Relative_path.create Relative_path.Root "/fake/root/Foo.php" in
   let bar_path = Relative_path.create Relative_path.Root "/fake/root/Bar.php" in
-  (* The parsing service needs shared memory to be set up *)
-  let config =
-    SharedMem.
-      {
-        global_size = 1024;
-        heap_size = 1024 * 8;
-        dep_table_pow = 16;
-        hash_table_pow = 10;
-        shm_dirs = [];
-        shm_min_avail = 0;
-        log_level = 0;
-        sample_rate = 0.0;
-      }
-  in
-  let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
   (* Parsing produces the file infos that the naming table module can use
     to construct the forward naming table (files-to-symbols) *)
   let (file_infos, _errors, _failed_parsing) =
@@ -184,15 +166,18 @@ let test_process_file_deferring () =
     two computations:
       - a declaration of \Bar
       - a (deferred) type check of \Foo *)
+  let opts = Global_naming_options.get () in
+  (opts, foo_path, foo_contents)
+
+(* In this test, we wish to establish that we enable deferring type checking
+  for files that have undeclared dependencies, UNLESS we've already deferred
+  those files a certain number of times. *)
+let test_process_file_deferring () =
+  let (opts, path, _contents) = server_setup_for_deferral_tests () in
+  let file = Typing_check_service.{ path; deferred_count = 0 } in
   let dynamic_view_files = Relative_path.Set.empty in
-  let opts =
-    Global_naming_options.set
-      GlobalOptions.
-        { default with tco_defer_class_declaration_threshold = Some 1 };
-    Global_naming_options.get ()
-  in
   let errors = Errors.empty in
-  let file = Typing_check_service.{ path = foo_path; deferred_count = 0 } in
+
   (* Finally, this is what all the setup was for: process this file *)
   let (_errors, file_computations) =
     Typing_check_service.process_file dynamic_view_files opts errors file
@@ -242,6 +227,44 @@ let test_process_file_deferring () =
 
   true
 
+(* This test verifies that the deferral/counting machinery works for
+   ProviderUtils.compute_tast_and_errors_unquarantined. *)
+let test_compute_tast_counting () =
+  let (tcopt, path, content) = server_setup_for_deferral_tests () in
+  Parser_options_provider.set ParserOptions.default;
+  EventLogger.init_fake ();
+
+  let ctx = Provider_context.empty ~tcopt in
+  let file_input = ServerCommandTypes.FileContent content in
+  let (ctx, entry) = Provider_utils.update_context ctx path file_input in
+  let { Provider_utils.decls_fetched; _ } =
+    Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry
+  in
+  Asserter.Int_asserter.assert_equals
+    1
+    decls_fetched
+    "There should be 1 decls_fetched for shared_mem provider";
+
+  (* Now try the same with local_memory backend *)
+  let bytes_per_word = Sys.word_size / 8 in
+  let words_per_mb = 1_000_000 / bytes_per_word in
+  let max_size_in_words = 250 * words_per_mb in
+  Provider_backend.set_local_memory_backend ~max_size_in_words;
+  Parser_options_provider.set ParserOptions.default;
+  let (ctx, entry) = Provider_utils.update_context ctx path file_input in
+  let { Provider_utils.decls_fetched; _ } =
+    Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry
+  in
+  Asserter.Int_asserter.assert_equals
+    4
+    decls_fetched
+    "There should be 4 decls_fetched for local_memory provider";
+
+  (* restore it back to shared_mem for the rest of the tests *)
+  Provider_backend.set_shared_memory_backend ();
+
+  true
+
 let test_should_enable_deferring () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make "/fake/www");
 
@@ -287,8 +310,31 @@ let tests =
     ("test_deferred_decl_add", test_deferred_decl_add);
     ("test_deferred_decl_should_defer", test_deferred_decl_should_defer);
     ("test_process_file_deferring", test_process_file_deferring);
+    ("test_compute_tast_counting", test_compute_tast_counting);
     ("test_dmesg_parser", test_dmesg_parser);
     ("test_should_enable_deferring", test_should_enable_deferring);
   ]
 
-let () = Unit_test.run_all tests
+let () =
+  (* The parsing service needs shared memory to be set up *)
+  let config =
+    SharedMem.
+      {
+        global_size = 1024;
+        heap_size = 1024 * 8;
+        dep_table_pow = 16;
+        hash_table_pow = 10;
+        shm_dirs = [];
+        shm_min_avail = 0;
+        log_level = 0;
+        sample_rate = 0.0;
+      }
+  in
+  let (_ : SharedMem.handle) = SharedMem.init config ~num_workers:0 in
+  (* GlobalNamingOptions.set updates a global mutable variable, *)
+  (* one which is only allowed to be set once in the lifetime *)
+  (* of a process. So we'll set it here! *)
+  Global_naming_options.set
+    GlobalOptions.
+      { default with tco_defer_class_declaration_threshold = Some 1 };
+  Unit_test.run_all tests

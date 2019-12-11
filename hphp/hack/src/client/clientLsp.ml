@@ -16,13 +16,16 @@ open Hh_json_helpers
 
 (* The environment for hh_client with LSP *)
 type env = {
-  from: string;
   (* The source where the client was spawned from, i.e. nuclide, vim, emacs, etc. *)
-  use_ffp_autocomplete: bool;
+  from: string;
   (* Flag to turn on the (experimental) FFP based autocomplete *)
-  use_ranked_autocomplete: bool;
+  use_ffp_autocomplete: bool;
   (* Flag to turn on ranked autocompletion results *)
-  use_serverless_ide: bool; (* Flag to provide IDE services from `hh_client` *)
+  use_ranked_autocomplete: bool;
+  (* Flag to provide IDE services from `hh_client` *)
+  use_serverless_ide: bool;
+  (* Extra logging, including logs per LSP message (voluminous!) *)
+  verbose: bool;
 }
 
 (* We cache the state of the typecoverageToggle button, so that when Hack restarts,
@@ -181,6 +184,8 @@ let ref_from : string ref = ref ""
 let showStatus_outstanding : string ref = ref ""
 
 let log s = Hh_logger.log ("[client-lsp] " ^^ s)
+
+let log_debug s = Hh_logger.debug ("[client-lsp] " ^^ s)
 
 let initialize_params_exc () : Lsp.Initialize.params =
   match Lwt.poll initialize_params_promise with
@@ -434,7 +439,7 @@ let rpc
         let end_time = Unix.gettimeofday () in
         let duration = end_time -. start_time in
         let msg = ServerCommandTypesUtils.debug_describe_t command in
-        Hh_logger.log "hh_server rpc: [%s] [%0.3f]" msg duration;
+        log_debug "hh_server rpc: [%s] [%0.3f]" msg duration;
         match result with
         | Ok ((), res, start_server_handle_time) ->
           ref_unblocked_time := start_server_handle_time;
@@ -958,8 +963,7 @@ let do_shutdown
       (* In Main_loop state, we're expected to unsubscribe diagnostics and tell *)
       (* server to disconnect so it can revert the state of its unsaved files.  *)
       Main_env.(
-        Hh_logger.log
-          "Diag_subscribe: clientLsp do_shutdown unsubscribing diagnostic 0 ";
+        log "Diag_subscribe: clientLsp do_shutdown unsubscribing diagnostic 0 ";
         let%lwt () =
           rpc
             menv.conn
@@ -1055,16 +1059,14 @@ let do_rage (state : state) (ref_unblocked_time : float ref) : Rage.result Lwt.t
       let format_data msg : string Lwt.t =
         Lwt.return (Printf.sprintf "PSTACK %s (%s) - %s\n\n" pid reason msg)
       in
-      Hh_logger.log "Getting pstack for %s" pid;
+      log "Getting pstack for %s" pid;
       match%lwt Lwt_utils.exec_checked "pstack" [| pid |] with
       | Ok result ->
         let stack = result.Lwt_utils.Process_success.stdout in
         format_data stack
       | Error _ ->
         (* pstack is just an alias for gstack, but it's not present on all systems. *)
-        Hh_logger.log
-          "Failed to execute pstack for %s. Executing gstack instead"
-          pid;
+        log "Failed to execute pstack for %s. Executing gstack instead" pid;
         (match%lwt Lwt_utils.exec_checked "gstack" [| pid |] with
         | Ok result ->
           let stack = result.Lwt_utils.Process_success.stdout in
@@ -2541,7 +2543,7 @@ let report_connect_progress
           (merge_with_client_ide_status env ide_service hh_server_status))))
 
 let report_connect_end (ienv : In_init_env.t) : state =
-  Hh_logger.log "report_connect_end";
+  log "report_connect_end";
   In_init_env.(
     let _state = dismiss_ui (In_init ienv) in
     let menv =
@@ -2571,7 +2573,7 @@ let report_connect_end (ienv : In_init_env.t) : state =
 (* ready, so we can send our backlog of file-edits to the server.             *)
 let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
     =
-  Hh_logger.log "connect_after_hello";
+  log "connect_after_hello";
   let ignore = ref 0.0 in
   let%lwt () =
     try%lwt
@@ -2590,7 +2592,7 @@ let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
       end;
 
       (* tell server we want diagnostics *)
-      Hh_logger.log "Diag_subscribe: clientLsp subscribing diagnostic 0";
+      log "Diag_subscribe: clientLsp subscribing diagnostic 0";
       let%lwt () =
         rpc server_conn ignore (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0)
       in
@@ -2621,13 +2623,13 @@ let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
     with e ->
       let message = Exn.to_string e in
       let stack = Printexc.get_backtrace () in
-      Hh_logger.log "connect_after_hello exception %s\n%s" message stack;
+      log "connect_after_hello exception %s\n%s" message stack;
       raise (Server_fatal_connection_exception { Marshal_tools.message; stack })
   in
   Lwt.return_unit
 
 let rec connect_client (root : Path.t) ~(autostart : bool) : server_conn Lwt.t =
-  Hh_logger.log "connect_client";
+  log "connect_client";
   Exit_status.(
     (* This basically does the same connection attempt as "hh_client check":  *)
     (* it makes repeated attempts to connect; it prints useful messages to    *)
@@ -2675,7 +2677,7 @@ let rec connect_client (root : Path.t) ~(autostart : bool) : server_conn Lwt.t =
       Lwt.return { ic; oc; pending_messages; server_finale_file }
     with Exit_with Build_id_mismatch when !can_autostart_after_mismatch ->
       (* Raised when the server was running an old version. We'll retry once.   *)
-      Hh_logger.log "connect_client: build_id_mismatch";
+      log "connect_client: build_id_mismatch";
       can_autostart_after_mismatch := false;
       connect_client root ~autostart:true)
 
@@ -2750,17 +2752,9 @@ let do_didChangeWatchedFiles_registerCapability () : Lsp.lsp_request =
   Lsp.RegisterCapabilityRequest
     { RegisterCapability.registrations = [registration] }
 
-let set_up_hh_logger_for_client_lsp () : unit =
+let set_up_hh_logger_for_client_lsp (root : Path.t) : unit =
   (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
   `stderr`; this is in addition to that. *)
-  let root =
-    match get_root_opt () with
-    | Some root -> root
-    | None ->
-      failwith
-        ( "set_up_hh_logger_for_client_lsp should only be called "
-        ^ "after having been initialized with a root" )
-  in
   let client_lsp_log_fn = ServerFiles.client_lsp_log root in
   begin
     try Sys.rename client_lsp_log_fn (client_lsp_log_fn ^ ".old")
@@ -3129,6 +3123,12 @@ let log_response_if_necessary
   match event with
   | Client_message (metadata, message) ->
     let (kind, method_) = get_message_kind_and_method_for_logging message in
+    let t = Unix.gettimeofday () in
+    log_debug
+      "lsp-message [%s] queue time [%0.3f] execution time [%0.3f"
+      method_
+      (unblocked_time -. metadata.timestamp)
+      (t -. unblocked_time);
     HackEventLogger.client_lsp_method_handled
       ~root:(get_root_opt ())
       ~method_
@@ -3262,7 +3262,7 @@ let tick_showStatus
           in
           Lwt.return state
         | (Some { title }, _) when title = client_ide_restart_button_text ->
-          Hh_logger.log "Restarting IDE service";
+          log "Restarting IDE service";
 
           (* It's possible that [destroy] takes a while to finish, so make
           sure to assign the new IDE service to the [ref] before attempting
@@ -3375,13 +3375,13 @@ let handle_client_message
     (* initialize request *)
     | (Pre_init, RequestMessage (id, InitializeRequest initialize_params)) ->
       Lwt.wakeup_later initialize_params_resolver initialize_params;
-      set_up_hh_logger_for_client_lsp ();
+      let root = Path.make (Lsp_helpers.get_root initialize_params) in
+      set_up_hh_logger_for_client_lsp root;
 
       let%lwt version = read_hhconfig_version () in
       hhconfig_version := version;
       let%lwt new_state = connect !state in
       state := new_state;
-      let root = Path.make (Lsp_helpers.get_root initialize_params) in
       Relative_path.set_path_prefix Relative_path.Root root;
       let result = do_initialize root in
       respond_jsonrpc ~powered_by:Language_server id (InitializeResult result);
@@ -3854,9 +3854,10 @@ let handle_tick
    and incoming server notifications. Never returns. *)
 let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
+  if env.verbose then Hh_logger.Level.set_min_level Hh_logger.Level.Debug;
   ref_from := env.from;
-
   HackEventLogger.set_from env.from;
+
   let client = Jsonrpc.make_queue () in
   let ide_service = ref (ClientIdeService.make init_id) in
   let deferred_action : (unit -> unit Lwt.t) option ref = ref None in

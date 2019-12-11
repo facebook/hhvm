@@ -870,6 +870,7 @@ let parse_lsp_args () =
   let use_ffp_autocomplete = ref false in
   let use_ranked_autocomplete = ref false in
   let use_serverless_ide = ref false in
+  let verbose = ref false in
   let options =
     [
       (* Please keep these sorted in the alphabetical order *)
@@ -885,6 +886,9 @@ let parse_lsp_args () =
         Arg.Set use_serverless_ide,
         " [experimental] provide IDE services from hh_client instead of hh_server"
       );
+      ( "--verbose",
+        Arg.Set verbose,
+        " verbose logs to stderr and `hh --ide-logname` and `--lsp-logname`" );
       (* Please keep these sorted in the alphabetical order *)
     ]
   in
@@ -897,6 +901,7 @@ let parse_lsp_args () =
         use_ffp_autocomplete = !use_ffp_autocomplete;
         use_ranked_autocomplete = !use_ranked_autocomplete;
         use_serverless_ide = !use_serverless_ide;
+        verbose = !verbose;
       }
   | _ ->
     Printf.printf "%s\n" usage;

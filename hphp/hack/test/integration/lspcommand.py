@@ -59,7 +59,7 @@ class LspCommandProcessor:
     def create(
         cls: Type[U], env: Mapping[str, str], use_serverless_ide: bool
     ) -> Iterator[U]:
-        args = ["--enhanced-hover"]
+        args = ["--enhanced-hover", "--verbose"]
         if use_serverless_ide:
             args.append("--serverless-ide")
         proc = subprocess.Popen(

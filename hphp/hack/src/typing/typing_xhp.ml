@@ -16,6 +16,7 @@ module Reason = Typing_reason
 module Subst = Decl_subst
 module TUtils = Typing_utils
 module MakeType = Typing_make_type
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 let raise_xhp_required env pos ureason ty =

@@ -8,6 +8,7 @@
  *)
 
 open Typing_env_types
+module Decl_provider = Decl_provider_ctx
 
 (**
  * This is used in computing all possible attributes for XHP spreads.

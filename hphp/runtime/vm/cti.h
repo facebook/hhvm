@@ -53,11 +53,6 @@ constexpr inline bool isBranch(Op opcode) {
          opcode == OpIterNext || opcode == OpLIterNext;
 }
 
-// these bytecodes always jump to a known pc target
-constexpr inline bool isGoto(Op opcode) {
-  return isUnconditionalJmp(opcode) || opcode == OpIterBreak;
-}
-
 // simple bytecodes always move pc to the next bytecode.
 constexpr inline bool isSimple(Op opcode) {
   return !instrIsControlFlow(opcode) && !instrCanHalt(opcode);

@@ -289,32 +289,6 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     out.fmt(">");
   };
 
-  auto print_itertab = [&] {
-    auto const vecLen = decode_iva(pc);
-    out.fmt(" <");
-    for (auto i = int32_t{0}; i < vecLen; ++i) {
-      auto const kind = static_cast<IterKind>(decode_iva(pc));
-      auto const id   = decode_iva(pc);
-      auto const kindStr = [&]() -> const char* {
-        switch (kind) {
-        case KindOfIter:   return "(Iter)";
-        case KindOfLIter:  return "(LIter)";
-        }
-        not_reached();
-      }();
-      if (kind == KindOfLIter) {
-        out.fmt(
-          "{}{} {} {}",
-          i != 0 ? ", " : " ",
-          kindStr, id, loc_name(finfo, decode_iva(pc))
-        );
-      } else {
-        out.fmt("{}{} {}", i != 0 ? ", " : " ", kindStr, id);
-      }
-    }
-    out.fmt(">");
-  };
-
   auto print_stringvec = [&] {
     auto const vecLen = decode_iva(pc);
     out.fmt(" <");
@@ -348,7 +322,6 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 
 #define IMM_BLA    print_switch();
 #define IMM_SLA    print_sswitch();
-#define IMM_ILA    print_itertab();
 #define IMM_IVA    out.fmt(" {}", decode_iva(pc));
 #define IMM_I64A   out.fmt(" {}", decode<int64_t>(pc));
 #define IMM_LA     out.fmt(" {}", loc_name(finfo, decode_iva(pc)));
@@ -399,7 +372,6 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 
 #undef IMM_BLA
 #undef IMM_SLA
-#undef IMM_ILA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

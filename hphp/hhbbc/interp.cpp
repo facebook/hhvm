@@ -4798,26 +4798,6 @@ void in(ISS& env, const bc::LIterFree& op) {
   freeIter(env, op.iter1);
 }
 
-void in(ISS& env, const bc::IterBreak& op) {
-  nothrow(env);
-
-  for (auto const& it : op.iterTab) {
-    if (it.kind == KindOfIter || it.kind == KindOfLIter) {
-      match<void>(
-        env.state.iters[it.id],
-        []  (DeadIter) {},
-        [&] (const LiveIter& ti) {
-          if (ti.baseLocal != NoLocalId) hasInvariantIterBase(env);
-        }
-      );
-    }
-    if (it.kind == KindOfLIter) mayReadLocal(env, it.local);
-    freeIter(env, it.id);
-  }
-
-  env.propagate(op.target1, &env.state);
-}
-
 /*
  * Any include/require (or eval) op kills all locals, and private properties.
  */

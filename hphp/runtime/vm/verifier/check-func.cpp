@@ -66,13 +66,6 @@ struct BlockInfo {
   State state_in;  // state at the start of the block
 };
 
-struct IterKindId {
-  IterKind kind;
-  Id id;
-  int local;
-};
-using IterKindIdTable = std::vector<IterKindId>;
-
 struct FuncChecker {
   FuncChecker(const FuncEmitter* func, ErrorMode mode);
   ~FuncChecker();
@@ -112,7 +105,6 @@ struct FuncChecker {
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
   bool checkTerminal(State* cur, Op op, Block* b);
   bool checkIter(State* cur, PC pc);
-  bool checkIterBreak(State* cur, PC pc);
   bool checkLocal(PC pc, int val);
   bool checkString(PC pc, Id id);
   bool checkExnEdge(State cur, Op op, Block* b);
@@ -136,7 +128,6 @@ struct FuncChecker {
   int numLocals() const { return m_func->numLocals(); }
   int numParams() const { return m_func->params.size(); }
   const UnitEmitter* unit() const { return &m_func->ue(); }
-  IterKindIdTable iterBreakIds(PC& pc) const;
 
  private:
   template<class... Args>
@@ -256,7 +247,6 @@ bool mayTakeExnEdges(Op op) {
     case Op::JmpNS:
     case Op::Fatal:
     case Op::IterFree:
-    case Op::IterBreak:
     case Op::LIterFree:
     case Op::RetC:
     case Op::RetCSuspended:
@@ -452,35 +442,6 @@ bool FuncChecker::checkImmSLA(PC& pc, PC const /*instr*/) {
   return checkImmVec(pc, sizeof(Id) + sizeof(Offset));
 }
 
-bool FuncChecker::checkImmILA(PC& pc, PC const /*instr*/) {
-  auto const ids = iterBreakIds(pc);
-  if (ids.size() < 1) {
-    error("invalid length of iterator table %lu at Offset %d\n",
-          ids.size(), offset(pc));
-    return false;
-  }
-  auto ok = true;
-  for (auto const& iter : ids) {
-    if (iter.kind < KindOfIter || iter.kind > KindOfLIter) {
-      error("invalid iterator kind %d in iter-vec at offset %d\n",
-      iter.kind, offset(pc));
-      ok = false;
-    }
-    if (iter.id < 0 || iter.id >= numIters()) {
-      error("invalid iterator variable id %d at %d\n",
-      iter.id, offset(pc));
-      ok = false;
-    }
-    if (iter.kind == KindOfLIter) {
-      ok &= checkLocal(pc, iter.local);
-    } else if (iter.local != kInvalidId) {
-      error("invalid iterator local for non-LIter at %d\n", offset(pc));
-      ok = false;
-    }
-  }
-  return ok;
-}
-
 bool FuncChecker::checkImmIVA(PC& pc, PC const instr) {
   auto const k = decode_iva(pc);
   switch (peek_op(instr)) {
@@ -646,20 +607,6 @@ bool FuncChecker::checkImmFCA(PC& pc, PC const instr) {
     return false;
   }
   return true;
-}
-
-IterKindIdTable FuncChecker::iterBreakIds(PC& pc) const {
-  IterKindIdTable ret;
-  auto const length = decode_iva(pc);
-  for (int i = 0; i < length; ++i) {
-    auto const kind = static_cast<IterKind>(decode_iva(pc));
-    auto const id = static_cast<Id>(decode_iva(pc));
-    auto const local = (kind == KindOfLIter)
-      ? static_cast<int32_t>(decode_iva(pc))
-      : kInvalidId;
-    ret.push_back(IterKindId{kind, id, local});
-  }
-  return ret;
 }
 
 /**
@@ -1039,7 +986,6 @@ std::set<int> localIds(Op op, PC pc) {
 #define MA(n)
 #define BLA(n)
 #define SLA(n)
-#define ILA(n)
 #define IVA(n)
 #define I64A(n)
 #define IA(n)
@@ -1072,7 +1018,6 @@ std::set<int> localIds(Op op, PC pc) {
 #undef MA
 #undef BLA
 #undef SLA
-#undef ILA
 #undef IVA
 #undef I64A
 #undef IA
@@ -1429,22 +1374,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
   return true;
 }
 
-// Check that each of the iterators provided as arguments to IterBreak
-// are currently initialized.
-bool FuncChecker::checkIterBreak(State* cur, PC pc) {
-  pc += encoded_op_size(Op::IterBreak); // skip opcode
-  decode_raw<Offset>(pc); // skip target offset
-  for (auto const& iter : iterBreakIds(pc)) {
-    if (!cur->iters[iter.id]) {
-      error("Cannot access un-initialized iter %d\n", iter.id);
-      return false;
-    }
-    // IterBreak has no fall-through path, so don't change iter.id's current
-    // state; instead it will be done in checkSuccEdges.
-  }
-  return true;
-}
-
 bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   static const FlavorDesc outputSigs[][kMaxHhbcImms] = {
   #define NOV { },
@@ -1688,7 +1617,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::LIterNext:
     case Op::IterFree:
     case Op::LIterFree:
-    case Op::IterBreak:
       return true;
 
     // function calling and object construction
@@ -2025,7 +1953,6 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     auto const flags = instrFlags(op);
     if (flags & TF) ok &= checkTerminal(&cur, op, b);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
-    if (op == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
     ok &= checkOutputs(&cur, pc, b);
     if (verify_rx) ok &= checkRxOp(&cur, pc, op);
     prev_pc = pc;
@@ -2087,13 +2014,6 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     }
     ok &= checkEdge(b, *cur, b->succs[0]);
     cur->iters[id] = save;
-  } else if (Op(*b->last) == Op::IterBreak) {
-    auto pc = b->last + encoded_op_size(Op::IterBreak);
-    decode_raw<Offset>(pc);
-    for (auto const& iter : iterBreakIds(pc)) {
-      cur->iters[iter.id] = false;
-    }
-    ok &= checkEdge(b, *cur, b->succs[0]);
   } else if (peek_op(b->last) == OpMemoGet && numSuccBlocks(b) == 2) {
     ok &= checkEdge(b, *cur, b->succs[0]);
     --cur->stklen;

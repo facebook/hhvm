@@ -189,8 +189,8 @@ std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
  * and the byte is the value. Otherwise, it's 4 bytes, and bits 8..31 must be
  * logical-shifted to the right by one to get rid of the flag bit.
  *
- * The types in this macro for BLA, SLA, ILA, and VSA are meaningless
- * since they are never read out of ArgUnion (they use ImmVector).
+ * The types in this macro for BLA, SLA, and VSA are meaningless since they
+ * are never read out of ArgUnion (they use ImmVector).
  *
  * ArgTypes and their various decoding helpers should be kept in sync with the
  * `hhx' bytecode inspection GDB command.
@@ -199,7 +199,6 @@ std::string show(const FCallArgsBase&, const uint8_t* inoutArgs,
   ARGTYPE(NA,     void*)         /* unused */                                  \
   ARGTYPEVEC(BLA, Offset)        /* Bytecode offset vector immediate */        \
   ARGTYPEVEC(SLA, Id)            /* String id/offset pair vector */            \
-  ARGTYPEVEC(ILA, Id)            /* IterKind/IterId pair vector */             \
   ARGTYPE(IVA,    uint32_t)      /* Variable size: 8 or 32-bit uint */         \
   ARGTYPE(I64A,   int64_t)       /* 64-bit Integer */                          \
   ARGTYPE(LA,     int32_t)       /* Local variable ID: 8 or 32-bit int */      \
@@ -329,11 +328,6 @@ enum class InitPropOp : uint8_t {
 #define INITPROP_OP(op) op,
   INITPROP_OPS
 #undef INITPROP_OP
-};
-
-enum IterKind {
-  KindOfIter  = 0,
-  KindOfLIter = 1,
 };
 
 #define FATAL_OPS                               \
@@ -712,7 +706,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(LIterNext,       THREE(ITA,LA,BA), NOV,             NOV,        CF) \
   O(IterFree,        ONE(IA),          NOV,             NOV,        NF) \
   O(LIterFree,       TWO(IA,LA),       NOV,             NOV,        NF) \
-  O(IterBreak,       TWO(BA,ILA),      NOV,             NOV,        CF_TF) \
   O(Incl,            NA,               ONE(CV),         ONE(CV),    CF) \
   O(InclOnce,        NA,               ONE(CV),         ONE(CV),    CF) \
   O(Req,             NA,               ONE(CV),         ONE(CV),    CF) \
@@ -904,29 +897,17 @@ private:
   const uint8_t* m_start;
 };
 
-struct IterTableEnt {
-  IterKind kind;
-  int32_t id;
-  int32_t local;
-};
-using IterTable = CompactVector<IterTableEnt>;
-
 // Must be an opcode that actually has an ImmVector.
 ImmVector getImmVector(PC opcode);
-
-// Must be an opcode that actually has an IterTable.
-IterTable getIterTable(PC opcode);
 
 // Some decoding helper functions.
 int numImmediates(Op opcode);
 ArgType immType(Op opcode, int idx);
 bool hasImmVector(Op opcode);
-bool hasIterTable(Op opcode);
 int instrLen(PC opcode);
 int numSuccs(PC opcode);
 
 PC skipCall(PC pc);
-IterTable iterTableFromStream(PC&);
 
 /*
  * The returned struct has normalized variable-sized immediates. u must be

@@ -318,23 +318,6 @@ void populate_block(ParseUnitState& puState,
     return ret;
   };
 
-  auto decode_itertab = [&] {
-    IterTab ret;
-    auto const vecLen = decode_iva(pc);
-    for (int32_t i = 0; i < vecLen; ++i) {
-      auto const kind = static_cast<IterKind>(decode_iva(pc));
-      auto const id = decode_iva(pc);
-      auto const local = [&]{
-        if (kind != KindOfLIter) return NoLocalId;
-        auto const loc = decode_iva(pc);
-        always_assert(loc < func.locals.size());
-        return loc;
-      }();
-      ret.push_back(IterTabEnt{kind, static_cast<IterId>(id), local});
-    }
-    return ret;
-  };
-
   auto defcns = [&] () {
     puState.constPassFuncs.insert(&func);
   };
@@ -350,7 +333,6 @@ void populate_block(ParseUnitState& puState,
 
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
 #define IMM_SLA(n)     auto targets = decode_sswitch(opPC);
-#define IMM_ILA(n)     auto iterTab = decode_itertab();
 #define IMM_IVA(n)     auto arg##n = decode_iva(pc);
 #define IMM_I64A(n)    auto arg##n = decode<int64_t>(pc);
 #define IMM_LA(n)      auto loc##n = [&] {                       \
@@ -522,7 +504,6 @@ void populate_block(ParseUnitState& puState,
 
 #undef IMM_BLA
 #undef IMM_SLA
-#undef IMM_ILA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

@@ -303,7 +303,6 @@ static const struct {
   { OpLIterNext,   {Local,            Local,        OutUnknown      }},
   { OpIterFree,    {None,             None,         OutNone         }},
   { OpLIterFree,   {Local,            None,         OutNone         }},
-  { OpIterBreak,   {Local,            None,         OutNone         }},
 
   /*** 12. Include, eval, and define instructions ***/
 
@@ -579,7 +578,6 @@ bool isAlwaysNop(const NormalizedInstruction& ni) {
 #define MA(n)
 #define BLA(n)
 #define SLA(n)
-#define ILA(n)
 #define IVA(n)
 #define I64A(n)
 #define IA(n)
@@ -637,7 +635,6 @@ size_t memberKeyImmIdx(Op op) {
 #undef MA
 #undef BLA
 #undef SLA
-#undef ILA
 #undef IVA
 #undef I64A
 #undef IA
@@ -756,19 +753,9 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   }
 
   if (flags & Local) {
-    // (Almost) all instructions that take a Local have its index at their
-    // first immediate.
-    if (ni.op() == Op::IterBreak) {
-      for (auto const& it : ni.immIters) {
-        if (it.kind != KindOfLIter) continue;
-        SKTRACE(1, sk, "getInputs: local %d\n", it.local);
-        inputs.emplace_back(Location::Local { uint32_t(it.local) });
-      }
-    } else {
-      auto const loc = ni.imm[localImmIdx(ni.op())].u_IVA;
-      SKTRACE(1, sk, "getInputs: local %d\n", loc);
-      inputs.emplace_back(Location::Local { uint32_t(loc) });
-    }
+    auto const loc = ni.imm[localImmIdx(ni.op())].u_IVA;
+    SKTRACE(1, sk, "getInputs: local %d\n", loc);
+    inputs.emplace_back(Location::Local { uint32_t(loc) });
   }
 
   if (flags & LocalRange) {
@@ -822,7 +809,6 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
 
 bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   switch (ni.op()) {
-  case Op::IterBreak:
   case Op::IterNext:
   case Op::LIterNext:
   case Op::IterInit:
@@ -1092,7 +1078,6 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 
 #define IMM_BLA(n)     ni.immVec
 #define IMM_SLA(n)     ni.immVec
-#define IMM_ILA(n)     ni.immIters
 #define IMM_VSA(n)     ni.immVec
 #define IMM_IVA(n)     ni.imm[n].u_IVA
 #define IMM_I64A(n)    ni.imm[n].u_I64A
@@ -1135,7 +1120,6 @@ static void translateDispatch(irgen::IRGS& irgs,
 
 #undef IMM_BLA
 #undef IMM_SLA
-#undef IMM_ILA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

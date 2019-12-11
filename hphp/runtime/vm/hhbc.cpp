@@ -161,16 +161,6 @@ int immSize(Op op, ArgType type, PC immPC) {
     return pc - immPC + vecElemSz * size;
   }
 
-  if (type == ILA) {
-    auto const size = decode_iva(pc);
-    for (int i = 0; i < size; ++i) {
-      auto const kind = static_cast<IterKind>(decode_iva(pc));
-      decode_iva(pc);
-      if (kind == KindOfLIter) decode_iva(pc);
-    }
-    return pc - immPC;
-  }
-
   return (type >= 0) ? argTypeToSizes[type] : 0;
 }
 
@@ -180,14 +170,6 @@ bool hasImmVector(Op opcode) {
   const int num = numImmediates(opcode);
   for (int i = 0; i < num; ++i) {
     if (argTypeIsVector(immType(opcode, i))) return true;
-  }
-  return false;
-}
-
-bool hasIterTable(Op opcode) {
-  auto const num = numImmediates(opcode);
-  for (int i = 0; i < num; ++i) {
-    if (immType(opcode, i) == ILA) return true;
   }
   return false;
 }
@@ -267,7 +249,6 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #define IMM_RATA 0
 #define IMM_BA 1
 #define IMM_BLA 2
-#define IMM_ILA 0
 #define IMM_SLA 3
 #define IMM_LA 0
 #define IMM_IA 0
@@ -298,7 +279,6 @@ OffsetList instrJumpOffsets(const PC origPC) {
 #undef IMM_IA
 #undef IMM_BA
 #undef IMM_BLA
-#undef IMM_ILA
 #undef IMM_SLA
 #undef IMM_OA
 #undef IMM_VSA
@@ -778,26 +758,6 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
   out += ">";                                           \
 } while (false)
 
-#define READITERTAB() do {                              \
-  auto const sz = decode_iva(it);                       \
-  out += " <";                                          \
-  const char* sep = "";                                 \
-  for (int i = 0; i < sz; ++i) {                        \
-    out += sep;                                         \
-    auto const k = (IterKind)decode_iva(it);            \
-    switch (k) {                                        \
-      case KindOfIter:  out += "(Iter) ";  break;       \
-      case KindOfLIter: out += "(LIter) "; break;       \
-    }                                                   \
-    folly::format(&out, "{}", decode_iva(it));           \
-    if (k == KindOfLIter) {                             \
-      folly::format(&out, " L:{}", decode_iva(it));     \
-    }                                                   \
-    sep = ", ";                                         \
-  }                                                     \
-  out += ">";                                           \
-} while (false)
-
 #define ONE(a) H_##a
 #define TWO(a, b) H_##a; H_##b
 #define THREE(a, b, c) H_##a; H_##b; H_##c;
@@ -807,7 +767,6 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define NA
 #define H_BLA READSVEC()
 #define H_SLA READSVEC()
-#define H_ILA READITERTAB()
 #define H_IVA READIVA()
 #define H_I64A READ(int64_t)
 #define H_LA READLA()
@@ -863,7 +822,6 @@ OPCODES
 #undef NA
 #undef H_BLA
 #undef H_SLA
-#undef H_ILA
 #undef H_IVA
 #undef H_I64A
 #undef H_LA
@@ -1162,32 +1120,6 @@ ImmVector getImmVector(PC opcode) {
     }
   }
 
-  not_reached();
-}
-
-IterTable iterTableFromStream(PC& pc) {
-  IterTable ret;
-  auto const length = decode_iva(pc);
-  for (int32_t i = 0; i < length; ++i) {
-    auto const kind = static_cast<IterKind>(decode_iva(pc));
-    auto const id = decode_iva(pc);
-    auto const local = (kind == KindOfLIter)
-      ? static_cast<int32_t>(decode_iva(pc))
-      : kInvalidId;
-    ret.push_back(IterTableEnt{kind, static_cast<int32_t>(id), local});
-  }
-  return ret;
-}
-
-IterTable getIterTable(PC opcode) {
-  auto const op = peek_op(opcode);
-  auto const numImm = numImmediates(op);
-  for (int k = 0; k < numImm; ++k) {
-    auto const type = immType(op, k);
-    if (type != ILA) continue;
-    auto ptr = reinterpret_cast<PC>(getImmPtr(opcode, k));
-    return iterTableFromStream(ptr);
-  }
   not_reached();
 }
 

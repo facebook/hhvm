@@ -1161,56 +1161,6 @@ std::vector<uint32_t> read_argv32(AsmState& as) {
   return result;
 }
 
-// Read in a vector of iterators the format for this vector is:
-// <(TYPE) ID LOCAL?, (TYPE) ID LOCAL?, ...>
-// Where TYPE := Iter | LIter
-// and   ID   := Integer
-// and   LOCAL := String (only valid when TYPE = LIter)
-IterTable read_iter_table(AsmState& as) {
-  IterTable ret;
-
-  as.in.skipSpaceTab();
-  as.in.expect('<');
-
-  std::string word;
-
-  for (;;) {
-    IterTableEnt ent;
-    as.in.expectWs('(');
-    if (!as.in.readword(word)) as.error("Was expecting Iterator type.");
-    if (!word.compare("Iter")) ent.kind = KindOfIter;
-    else if (!word.compare("LIter")) ent.kind = KindOfLIter;
-    else as.error("Unknown iterator type `" + word + "'");
-    as.in.expectWs(')');
-
-    as.in.skipSpaceTab();
-
-    if (!as.in.readword(word)) as.error("Was expecting iterator id.");
-    ent.id = as.getIterId(folly::to<uint32_t>(word));
-
-    if (ent.kind == KindOfLIter) {
-      as.in.skipSpaceTab();
-      if (!as.in.readword(word)) as.error("Was expecting local.");
-      ent.local = as.getLocalId(word);
-    } else {
-      ent.local = kInvalidId;
-    }
-
-    ret.push_back(std::move(ent));
-
-    if (!isdigit(word.back())) {
-      if (word.back() == '>') break;
-      if (word.back() != ',') as.error("Was expecting `,'.");
-    } else {
-      as.in.skipSpaceTab();
-      if (as.in.peek() == '>') { as.in.getc(); break; }
-      as.in.expect(',');
-    }
-  }
-
-  return ret;
-}
-
 // Jump tables are lists of labels.
 std::vector<std::string> read_jmpvector(AsmState& as) {
   std::vector<std::string> ret;
@@ -1487,24 +1437,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
   as.adataUses[pos] = std::move(p.second);      \
 } while (0)
 
-/*
- * There can currently be no more than one immvector per instruction,
- * and we need access to the size of the immediate vector for
- * NUM_POP_*, so the member vector guy exposes a vecImmStackValues
- * integer.
- */
-#define IMM_ILA do {                               \
-  auto const immTable = read_iter_table(as);       \
-  as.ue->emitIVA(immTable.size());                 \
-  for (auto const& it : immTable) {                \
-    as.ue->emitIVA(it.kind);                       \
-    as.ue->emitIVA(it.id);                         \
-    if (it.kind == KindOfLIter) {                  \
-      as.ue->emitIVA(it.local);                    \
-    }                                              \
-  }                                                \
-} while (0)
-
 #define IMM_BLA do {                                    \
   std::vector<std::string> vecImm = read_jmpvector(as); \
   as.ue->emitIVA(vecImm.size());                        \
@@ -1651,7 +1583,6 @@ OPCODES
 #undef IMM_IVA
 #undef IMM_LA
 #undef IMM_BA
-#undef IMM_ILA
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_OA

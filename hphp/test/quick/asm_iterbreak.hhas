@@ -62,7 +62,9 @@
       Print
       PopC
 
-      IterBreak endOuter <(Iter) 1, (Iter) 0>
+      IterFree 1
+      IterFree 0
+      Jmp endOuter
       IterNext 1 K:$4 V:$3 startInner
       Jmp endInner
     } .catch {

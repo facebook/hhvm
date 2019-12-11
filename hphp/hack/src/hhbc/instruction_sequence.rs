@@ -123,9 +123,13 @@ impl Instr {
     }
 
     pub fn make_instr_iter_break(label: Label, itrs: Vec<Iter>) -> Self {
-        Self::make_instr(Instruct::IIterator(InstructIterator::IterBreak(
-            label, itrs,
-        )))
+        let mut instrs = itrs
+            .into_iter()
+            .rev()
+            .map(|id| Instruct::IIterator(InstructIterator::IterFree(id)))
+            .collect::<Vec<_>>();
+        instrs.push(Instruct::IContFlow(InstructControlFlow::Jmp(label)));
+        Self::make_instrs(instrs)
     }
 
     pub fn make_instr_false() -> Self {
@@ -917,13 +921,6 @@ impl Instr {
                 let (label, name_label_map) = get_result(name.to_string());
                 (
                     Instruct::IContFlow(InstructControlFlow::Jmp(label)),
-                    name_label_map,
-                )
-            }
-            IIterator(InstructIterator::IterBreak(Label::Named(name), iters)) => {
-                let (label, name_label_map) = get_result(name.to_string());
-                (
-                    IIterator(InstructIterator::IterBreak(label, iters.to_vec())),
                     name_label_map,
                 )
             }

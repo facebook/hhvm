@@ -463,7 +463,6 @@ type instruct_iterator =
   | IterInit of iter_args * Label.t
   | IterNext of iter_args * Label.t
   | IterFree of Iterator.t
-  | IterBreak of Label.t * Iterator.t list
 
 type instruct_include_eval_define =
   | Incl

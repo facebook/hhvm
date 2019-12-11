@@ -38,8 +38,7 @@ let collect_jump_instructions instrseq env =
   in
   InstrSeq.fold_left instrseq ~init:IMap.empty ~f:folder
 
-(* Delete Ret*, Break/Continue/Jmp(Named)/IterBreak(Named)
-   instructions from the try body *)
+(* Delete Ret*, Break/Continue/Jmp(Named) instructions from the try body *)
 let cleanup_try_body instrseq =
   let rewriter i =
     match i with
@@ -224,7 +223,7 @@ let emit_return ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
             instr_retc );
         ]
   (* ret is in finally block and there might be iterators to release -
-    jump to finally block via Jmp/IterBreak *)
+    jump to finally block via Jmp *)
   | Some (target_label, iterators_to_release) ->
     let preamble =
       if in_finally_epilogue then
@@ -315,7 +314,7 @@ let emit_finally_epilogue
     | _ ->
       failwith
       @@ "unexpected instruction: "
-      ^ "only Ret* or Break/Continue/Jmp(Named)/IterBreak(Named) are expected"
+      ^ "only Ret* or Break/Continue/Jmp(Named) are expected"
   in
   match IMap.elements jump_instructions with
   | [] -> empty

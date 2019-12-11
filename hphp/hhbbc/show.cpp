@@ -131,27 +131,6 @@ std::string show(const Func& func, const Bytecode& bc) {
     ret += ">";
   };
 
-  auto append_itertab = [&] (const IterTab& tab) {
-    ret += "<";
-    auto const kindStr = [&] (IterKind kind) -> const char* {
-      switch (kind) {
-      case KindOfIter:   return "Iter";
-      case KindOfLIter:  return "LIter";
-      }
-      not_reached();
-    };
-
-    const char* sep = "";
-    for (auto const& kv : tab) {
-      folly::toAppend(sep, kindStr(kv.kind), ",iter:", kv.id, &ret);
-      if (kv.kind == KindOfLIter) {
-        folly::toAppend(",", local_string(func, kv.local), &ret);
-      }
-      sep = " ";
-    }
-    ret += ">";
-  };
-
   auto append_mkey = [&](MKey mkey) {
     ret += memberCodeString(mkey.mcode);
 
@@ -192,7 +171,6 @@ std::string show(const Func& func, const Bytecode& bc) {
 
 #define IMM_BLA(n)     ret += " "; append_switch(data.targets);
 #define IMM_SLA(n)     ret += " "; append_sswitch(data.targets);
-#define IMM_ILA(n)     ret += " "; append_itertab(data.iterTab);
 #define IMM_IVA(n)     folly::toAppend(" ", data.arg##n, &ret);
 #define IMM_I64A(n)    folly::toAppend(" ", data.arg##n, &ret);
 #define IMM_LA(n)      ret += " " + local_string(func, data.loc##n);
@@ -240,7 +218,6 @@ std::string show(const Func& func, const Bytecode& bc) {
 
 #undef IMM_BLA
 #undef IMM_SLA
-#undef IMM_ILA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA

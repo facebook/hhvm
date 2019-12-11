@@ -96,8 +96,7 @@ inline bool isRet(PC pc) {
 }
 
 // Return true if pc points to an Iter instruction which takes either an
-// iterator ID or an IterArgs struct as its first immediate. This method
-// excludes IterBreak, because it has a variable-length list of iter IDs.
+// iterator ID or an IterArgs struct as its first immediate.
 inline bool isIter(PC pc) {
   switch (peek_op(pc)) {
   case Op::IterInit:

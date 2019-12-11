@@ -29,7 +29,6 @@ let get_regular_labels instr =
   match instr with
   | IIterator (IterInit (_, l))
   | IIterator (IterNext (_, l))
-  | IIterator (IterBreak (l, _))
   | ICall (FCall (_, _, _, _, Some l))
   | ICall (FCallClsMethod ((_, _, _, _, Some l), _))
   | ICall (FCallClsMethodD ((_, _, _, _, Some l), _, _))
@@ -82,7 +81,6 @@ let relabel_instr instr relabel =
   match instr with
   | IIterator (IterInit (id, l)) -> IIterator (IterInit (id, relabel l))
   | IIterator (IterNext (id, l)) -> IIterator (IterNext (id, relabel l))
-  | IIterator (IterBreak (l, x)) -> IIterator (IterBreak (relabel l, x))
   | IGenDelegation (YieldFromDelegate (i, l)) ->
     IGenDelegation (YieldFromDelegate (i, relabel l))
   | ICall (FCall (fl, na, nr, br, Some l)) ->

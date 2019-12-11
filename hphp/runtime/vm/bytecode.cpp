@@ -269,10 +269,6 @@ OPTBLD_INLINE imm_array<T> decode_imm_array(PC& pc) {
   return imm_array<T>{size, arr_pc};
 }
 
-OPTBLD_INLINE IterTable decode_iter_table(PC& pc) {
-  return iterTableFromStream(pc);
-}
-
 OPTBLD_INLINE RepoAuthType decode_rat(PC& pc) {
   if (debug) return decodeRAT(liveUnit(), pc);
 
@@ -2362,18 +2358,6 @@ OPTBLD_INLINE void iopSelect() {
   } else {
     vmStack().popC();
   }
-}
-
-OPTBLD_INLINE
-void iopIterBreak(PC& pc, PC targetpc, const IterTable& iterTab) {
-  for (auto const& ent : iterTab) {
-    auto iter = frame_iter(vmfp(), ent.id);
-    switch (ent.kind) {
-      case KindOfIter:  iter->free();  break;
-      case KindOfLIter: iter->free();  break;
-    }
-  }
-  pc = targetpc;
 }
 
 enum class SwitchMatch {
@@ -6201,7 +6185,6 @@ struct litstr_id {
 #define DECODE_FCA decodeFCallArgs(op, pc)
 #define DECODE_BLA decode_imm_array<Offset>(pc)
 #define DECODE_SLA decode_imm_array<StrVecItem>(pc)
-#define DECODE_ILA decode_iter_table(pc)
 #define DECODE_VSA decode_imm_array<Id>(pc)
 
 #define DECODE_NA
@@ -6252,7 +6235,6 @@ OPCODES
 #undef DECODE_FCA
 #undef DECODE_BLA
 #undef DECODE_SLA
-#undef DECODE_ILA
 #undef DECODE_VSA
 
 #undef DECODE_NA
@@ -6586,7 +6568,7 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
     // caller ignores rax return value, invokes next bytecode
     return {nullptr, pc};
   }
-  if (isBranch(opcode) || isGoto(opcode)) {
+  if (isBranch(opcode) || isUnconditionalJmp(opcode)) {
     // callsites have no ability to indirect-jump out of bytecode.
     // so smash the return address to &g_exitCti
     // if we need to exit because of dispatchBB() mode.

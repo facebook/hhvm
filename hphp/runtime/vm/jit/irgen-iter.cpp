@@ -150,16 +150,6 @@ void emitLIterFree(IRGS& env, int32_t iterId, int32_t baseLocalId) {
   gen(env, KillIter, IterId(iterId), fp(env));
 }
 
-void emitIterBreak(IRGS& env, Offset doneOffset, const IterTable& it) {
-  for (auto const& ent : it) {
-    switch (ent.kind) {
-    case KindOfIter:  emitIterFree(env, ent.id);  break;
-    case KindOfLIter: emitLIterFree(env, ent.id, ent.local); break;
-    }
-  }
-  jmpImpl(env, bcOff(env) + doneOffset);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 }}}

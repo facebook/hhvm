@@ -172,7 +172,7 @@ Offset compile_cti(Func* func, PC unitpc) {
       a.  cmpq  (pc_arg, next_reg);
       a.  jne   (cti_base);
       patches.addPatch(pc, a.frontier());
-    } else if (isGoto(op)) {
+    } else if (isUnconditionalJmp(op)) {
       a.  call  (cti);
       a.  jmp   (cti_base);
       patches.addPatch(pc, a.frontier());

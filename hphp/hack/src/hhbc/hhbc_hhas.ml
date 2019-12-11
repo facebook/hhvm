@@ -636,7 +636,6 @@ let iterator_instruction_name_prefix instruction =
     | IterInit _ -> "IterInit"
     | IterNext _ -> "IterNext"
     | IterFree _ -> "IterFree"
-    | IterBreak _ -> "IterBreak"
   in
   iterator_instruction_name ^ " "
 
@@ -650,11 +649,6 @@ let string_of_iterator instruction =
     ^ string_of_label label
   | IterFree id ->
     iterator_instruction_name_prefix instruction ^ string_of_iterator_id id
-  | IterBreak (label, iterlist) ->
-    let print_id id = "(Iter) " ^ string_of_iterator_id id in
-    let prefix = iterator_instruction_name_prefix instruction in
-    let values = String.concat ~sep:", " (List.rev_map ~f:print_id iterlist) in
-    prefix ^ string_of_label label ^ " <" ^ values ^ ">"
 
 let string_of_try instruction =
   match instruction with

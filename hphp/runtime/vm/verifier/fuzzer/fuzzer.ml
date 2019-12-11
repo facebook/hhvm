@@ -400,8 +400,6 @@ let mut_imms (is : IS.t) : IS.t =
         IterInit   (mutate_iter_args a, mutate_label data l)
     | IterNext   (a, l)          ->
         IterNext   (mutate_iter_args a, mutate_label data l)
-    | IterBreak  (l, lst)        ->
-        IterBreak  (mutate_label data l, lst)
     | _ -> s in
   let mutate_misc s =
     let mutate_bare op = if should_mutate() then random_bare_op    () else op in

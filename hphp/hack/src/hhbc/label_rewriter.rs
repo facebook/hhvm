@@ -50,7 +50,6 @@ mod label_rewriter {
         match instr {
             IIterator(IterInit(_, l))
             | IIterator(IterNext(_, l))
-            | IIterator(IterBreak(l, _))
             | IGenDelegation(YieldFromDelegate(_, l))
             | IMisc(MemoGet(l, _))
             | IContFlow(Jmp(l))
@@ -131,7 +130,6 @@ mod label_rewriter {
         match instr {
             IIterator(IterInit(_, l))
             | IIterator(IterNext(_, l))
-            | IIterator(IterBreak(l, _))
             | IGenDelegation(YieldFromDelegate(_, l))
             | ICall(FCall(FcallArgs(_, _, _, _, Some(l))))
             | ICall(FCallClsMethod(FcallArgs(_, _, _, _, Some(l)), _, _))

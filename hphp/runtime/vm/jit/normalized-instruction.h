@@ -41,7 +41,6 @@ struct NormalizedInstruction {
   ArgUnion imm[kMaxHhbcImms];
   ImmVector immVec; // vector immediate; will have !isValid() if the
                     // instruction has no vector immediate
-  IterTable immIters;
 
   bool endsRegion:1;
 

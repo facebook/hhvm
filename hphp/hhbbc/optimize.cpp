@@ -674,11 +674,6 @@ struct OptimizeIterState {
         case Op::IterFree:
           fixupFromState(op.IterFree.iter1);
           break;
-        case Op::IterBreak:
-          for (auto const& it : op.IterBreak.iterTab) {
-            if (it.kind == KindOfIter) fixupFromState(it.id);
-          }
-          break;
         default:
           break;
       }
@@ -779,18 +774,6 @@ void optimize_iterators(const Index& index,
           )
         };
         break;
-      case Op::IterBreak: {
-        auto const iter = iterFromInit(*func, fixup.init);
-        newOps = { op };
-        for (auto& it : newOps.back().IterBreak.iterTab) {
-          if (it.id == iter) {
-            assertx(it.kind == KindOfIter);
-            it.kind = KindOfLIter;
-            it.local = fixup.base;
-          }
-        }
-        break;
-      }
       default:
         always_assert(false);
     }

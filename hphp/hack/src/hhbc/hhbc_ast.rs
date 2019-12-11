@@ -508,7 +508,6 @@ pub enum InstructIterator {
     IterInit(IterArgs, label::Label),
     IterNext(IterArgs, label::Label),
     IterFree(Iter),
-    IterBreak(label::Label, Vec<Iter>),
 }
 
 #[derive(Clone, Debug)]

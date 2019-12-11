@@ -3091,11 +3091,6 @@ LIterFree <iterator id> <local id>   []  ->  []
   Iterator free with local. This instruction frees the iterator with ID %1,
   which must have been initialized by LIterInit with base %2.
 
-IterBreak <rel offset> <iter-vec>    []  ->  []
-
-  Iterator break. Frees iterators in %2 in left to right order, then transfers
-  control to the target %1.
-
 
 12. Include, eval, and define instructions
 ------------------------------------------

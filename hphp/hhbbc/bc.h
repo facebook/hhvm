@@ -171,22 +171,6 @@ inline bool operator!=(const FCallArgs& a, const FCallArgs& b) {
   return !(a == b);
 }
 
-struct IterTabEnt {
-  IterKind kind;
-  IterId id;
-  LocalId local;
-};
-
-inline bool operator==(const IterTabEnt& a, const IterTabEnt& b) {
-  return std::tie(a.kind, a.id, a.local) == std::tie(b.kind, b.id, b.local);
-}
-
-inline bool operator!=(const IterTabEnt& a, const IterTabEnt& b) {
-  return !(a == b);
-}
-
-using IterTab       = CompactVector<IterTabEnt>;
-
 using SwitchTab     = CompactVector<BlockId>;
 
 // The final entry in the SSwitchTab is the default case, it will
@@ -215,15 +199,6 @@ struct hasher_impl {
   static size_t hash(SString s)  { return s->hash(); }
   static size_t hash(LSString s) { return s->hash(); }
   static size_t hash(RepoAuthType rat) { return rat.hash(); }
-
-  static size_t hash(const IterTabEnt& iterTab) {
-    auto const partial = folly::hash::hash_128_to_64(
-      iterTab.kind, iterTab.id
-    );
-    return static_cast<size_t>(
-      folly::hash::hash_128_to_64(iterTab.local, partial)
-    );
-  }
 
   static size_t hash(MKey mkey) {
     return HPHP::hash_int64_pair(mkey.mcode, mkey.int64);
@@ -386,7 +361,6 @@ namespace imm {
 
 #define IMM_ID_BLA      BLA
 #define IMM_ID_SLA      SLA
-#define IMM_ID_ILA      ILA
 #define IMM_ID_IVA      IVA
 #define IMM_ID_I64A     I64A
 #define IMM_ID_LA       LA
@@ -405,7 +379,6 @@ namespace imm {
 
 #define IMM_TY_BLA      SwitchTab
 #define IMM_TY_SLA      SSwitchTab
-#define IMM_TY_ILA      IterTab
 #define IMM_TY_IVA      uint32_t
 #define IMM_TY_I64A     int64_t
 #define IMM_TY_LA       LocalId
@@ -424,7 +397,6 @@ namespace imm {
 
 #define IMM_NAME_BLA(n)     targets
 #define IMM_NAME_SLA(n)     targets
-#define IMM_NAME_ILA(n)     iterTab
 #define IMM_NAME_IVA(n)     arg##n
 #define IMM_NAME_I64A(n)    arg##n
 #define IMM_NAME_LA(n)      loc##n
@@ -444,7 +416,6 @@ namespace imm {
 
 #define IMM_TARGETS_BLA(n)  for (auto& t : targets) f(t);
 #define IMM_TARGETS_SLA(n)  for (auto& kv : targets) f(kv.second);
-#define IMM_TARGETS_ILA(n)
 #define IMM_TARGETS_IVA(n)
 #define IMM_TARGETS_I64A(n)
 #define IMM_TARGETS_LA(n)
@@ -466,7 +437,6 @@ namespace imm {
 
 #define IMM_EXTRA_BLA
 #define IMM_EXTRA_SLA
-#define IMM_EXTRA_ILA
 #define IMM_EXTRA_IVA
 #define IMM_EXTRA_I64A
 #define IMM_EXTRA_LA
@@ -784,7 +754,6 @@ OPCODES
 #undef IMM_TY_MA
 #undef IMM_TY_BLA
 #undef IMM_TY_SLA
-#undef IMM_TY_ILA
 #undef IMM_TY_IVA
 #undef IMM_TY_I64A
 #undef IMM_TY_LA
@@ -805,7 +774,6 @@ OPCODES
 // places.
 // #undef IMM_NAME_BLA
 // #undef IMM_NAME_SLA
-// #undef IMM_NAME_ILA
 // #undef IMM_NAME_IVA
 // #undef IMM_NAME_I64A
 // #undef IMM_NAME_LA
@@ -822,7 +790,6 @@ OPCODES
 
 #undef IMM_TARGETS_BLA
 #undef IMM_TARGETS_SLA
-#undef IMM_TARGETS_ILA
 #undef IMM_TARGETS_IVA
 #undef IMM_TARGETS_I64A
 #undef IMM_TARGETS_LA
@@ -848,7 +815,6 @@ OPCODES
 
 #undef IMM_EXTRA_BLA
 #undef IMM_EXTRA_SLA
-#undef IMM_EXTRA_ILA
 #undef IMM_EXTRA_IVA
 #undef IMM_EXTRA_I64A
 #undef IMM_EXTRA_LA

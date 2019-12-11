@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
 
@@ -312,14 +313,9 @@ rds::Handle lookupCnsHandle(const StringData* cnsName) {
 }
 
 rds::Handle makeCnsHandle(const StringData* cnsName) {
+  assertx(cnsName->isStatic());
   auto const val = lookupCnsHandle(cnsName);
   if (rds::isHandleBound(val)) return val;
-  if (!cnsName->isStatic()) {
-    // Its a dynamic constant, that doesn't correspond to
-    // an already allocated handle. We'll allocate it in
-    // the request local rds::s_constants instead.
-    return rds::kUninitHandle;
-  }
   auto const it = s_stringDataMap->find(cnsName);
   assertx(it != s_stringDataMap->end());
   if (!it->second.bound()) {
@@ -349,7 +345,7 @@ const StaticString s_Core("Core");
 
 Array lookupDefinedConstants(bool categorize /*= false */) {
   assertx(s_stringDataMap);
-  Array usr(rds::s_constants());
+  Array usr = Array::CreateDArray();
   Array sys = Array::CreateDArray();
 
   for (auto it = s_stringDataMap->begin();
@@ -382,7 +378,7 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
       s_Core, sys
     );
   } else {
-    return usr.toDArray();
+    return usr;
   }
 }
 

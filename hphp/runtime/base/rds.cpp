@@ -578,8 +578,6 @@ void visitSymbols(std::function<void(const Symbol&,Handle,uint32_t)> fun) {
 
 __thread void* tl_base = nullptr;
 
-RDS_LOCAL_NO_CHECK(ArrayData*, s_constantsStorage)(nullptr);
-
 rds::Link<bool, Mode::Persistent> s_persistentTrue;
 
 // All threads tl_bases are kept in a set, to allow iterating Local
@@ -619,8 +617,6 @@ void processInit() {
 
 void requestInit() {
   assertx(tl_base);
-  *s_constantsStorage = nullptr;
-  assertx(!s_constants().get());
 
   auto gen = header()->currentGen;
   memset(tl_base, 0, sizeof(Header));
@@ -648,7 +644,6 @@ void requestInit() {
 }
 
 void requestExit() {
-  *s_constantsStorage = nullptr; // it will be swept
   // Don't bother running the dtor ...
 }
 
@@ -716,10 +711,6 @@ folly::Range<const char*> normalSection() {
 
 folly::Range<const char*> localSection() {
   return {(const char*)tl_base + s_local_frontier, usedLocalBytes()};
-}
-
-Array& s_constants() {
-  return *reinterpret_cast<Array*>(s_constantsStorage.get());
 }
 
 GenNumber currentGenNumber() {

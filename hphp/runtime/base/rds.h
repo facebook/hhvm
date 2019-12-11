@@ -640,12 +640,6 @@ void visitSymbols(std::function<void(const Symbol&,Handle,uint32_t)> fun);
  */
 std::vector<void*> allTLBases();
 
-/*
- * Values for dynamically defined constants are stored as key value
- * pairs in an array, accessible here.
- */
-Array& s_constants();
-
 //////////////////////////////////////////////////////////////////////
 
 extern rds::Link<bool, Mode::Persistent> s_persistentTrue;

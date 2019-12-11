@@ -136,21 +136,8 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE
-tv_rval lookupCnsImpl(StringData* nm) {
-  tv_rval cns;
-
-  if (UNLIKELY(rds::s_constants().get() != nullptr)) {
-    cns = rds::s_constants()->rval(nm);
-  }
-  if (!cns) {
-    cns = Unit::loadCns(const_cast<StringData*>(nm));
-  }
-  return cns;
-}
-
 Cell lookupCnsEHelper(StringData* nm) {
-  auto const cns = lookupCnsImpl(nm);
+  auto const cns = Unit::loadCns(nm);
   if (LIKELY(cns != nullptr)) {
     Cell c1;
     cellDup(*cns, c1);
@@ -165,7 +152,8 @@ Cell lookupCnsEHelperNormal(rds::Handle tv_handle,
   if (UNLIKELY(rds::isHandleInit(tv_handle))) {
     auto const tv = rds::handleToPtr<TypedValue, rds::Mode::Normal>(tv_handle);
     if (tv->m_data.pcnt != nullptr) {
-      auto callback = (Native::ConstantCallback)(tv->m_data.pcnt);
+      auto callback =
+        reinterpret_cast<Native::ConstantCallback>(tv->m_data.pcnt);
       const Cell* cns = callback().asTypedValue();
       if (LIKELY(cns->m_type != KindOfUninit)) {
         Cell c1;
@@ -187,7 +175,7 @@ Cell lookupCnsEHelperPersistent(rds::Handle tv_handle,
 
   // Deferred system constants.
   if (UNLIKELY(tv->m_data.pcnt != nullptr)) {
-    auto callback = (Native::ConstantCallback)(tv->m_data.pcnt);
+    auto callback = reinterpret_cast<Native::ConstantCallback>(tv->m_data.pcnt);
     const Cell* cns = callback().asTypedValue();
     if (LIKELY(cns->m_type != KindOfUninit)) {
       Cell c1;

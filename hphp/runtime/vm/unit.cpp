@@ -1188,10 +1188,6 @@ tv_rval Unit::lookupCns(const StringData* cnsName) {
     if (LIKELY(tvRet->m_type != KindOfUninit)) {
       return tvRet;
     }
-    return nullptr;
-  }
-  if (UNLIKELY(rds::s_constants().get() != nullptr)) {
-    return rds::s_constants()->rval(cnsName);
   }
   return nullptr;
 }
@@ -1221,9 +1217,9 @@ tv_rval Unit::loadCns(const StringData* cnsName) {
   return lookupCns(cnsName);
 }
 
-static bool defCnsHelper(rds::Handle ch,
-                         const TypedValue *value,
-                         const StringData *cnsName) {
+bool Unit::defCns(const StringData* cnsName, const TypedValue* value) {
+  auto const ch = makeCnsHandle(cnsName);
+  assertx(rds::isHandleBound(ch));
   auto cns = rds::handleToPtr<TypedValue, rds::Mode::NonLocal>(ch);
 
   if (!rds::isHandleInit(ch)) {
@@ -1246,31 +1242,6 @@ static bool defCnsHelper(rds::Handle ch,
   cellDup(*value, *cns);
   rds::initHandle(ch);
   return true;
-}
-
-bool Unit::defCns(const StringData* cnsName, const TypedValue* value) {
-  auto const handle = makeCnsHandle(cnsName);
-
-  if (UNLIKELY(!rds::isHandleBound(handle))) {
-    if (UNLIKELY(!rds::s_constants().get())) {
-      /*
-       * This only happens when we call define on a non
-       * static string. Not worth presizing or otherwise
-       * optimizing for.
-       */
-      rds::s_constants() =
-        Array::attach(PackedArray::MakeReserve(PackedArray::SmallSize));
-    }
-    auto const existed = !!rds::s_constants()->rval(cnsName);
-    if (!existed) {
-      rds::s_constants().set(StrNR(cnsName),
-        tvAsCVarRef(value), true /* isKey */);
-      return true;
-    }
-    raise_notice(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
-    return false;
-  }
-  return defCnsHelper(handle, value, cnsName);
 }
 
 bool Unit::defNativeConstantCallback(const StringData* cnsName,

@@ -6,29 +6,30 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-type fun_key = string
 
-type class_key = string
+type fun_key = Decl_provider_ctx.fun_key
 
-type record_def_key = string
+type class_key = Decl_provider_ctx.class_key
 
-type typedef_key = string
+type record_def_key = Decl_provider_ctx.record_def_key
 
-type gconst_key = string
+type typedef_key = Decl_provider_ctx.typedef_key
+
+type gconst_key = Decl_provider_ctx.gconst_key
 
 module Class : sig
-  include module type of Typing_classes_heap.Api
+  include module type of Decl_provider_ctx.Class
 end
 
-type fun_decl = Typing_defs.fun_elt
+type fun_decl = Decl_provider_ctx.fun_decl
 
-type class_decl = Class.t
+type class_decl = Decl_provider_ctx.class_decl
 
-type record_def_decl = Typing_defs.record_def_type
+type record_def_decl = Decl_provider_ctx.record_def_decl
 
-type typedef_decl = Typing_defs.typedef_type
+type typedef_decl = Decl_provider_ctx.typedef_decl
 
-type gconst_decl = Typing_defs.decl_ty * Errors.t
+type gconst_decl = Decl_provider_ctx.gconst_decl
 
 val get_fun : fun_key -> fun_decl option
 

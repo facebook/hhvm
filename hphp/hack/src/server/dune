@@ -58,6 +58,7 @@
     ast_provider
     decl
     decl_provider
+    decl_provider_ctx
     errors
     typing_check
     file_provider

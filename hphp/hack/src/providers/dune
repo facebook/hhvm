@@ -68,15 +68,24 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name decl_provider)
+  (name decl_provider_ctx)
   (modules
     decl_lru_cache
-    decl_provider)
+    decl_provider_ctx)
   (libraries
     decl_service_client
+    global_naming_options
     lru_worker_stubs
     provider_backend
     typing_heap)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name decl_provider)
+  (modules
+    decl_provider)
+  (libraries
+    decl_provider_ctx)
   (preprocess (pps ppx_deriving.std)))
 
 (library

@@ -300,7 +300,7 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
 
       // Unwind vm stack to sfp
       if (g_unwind_rds->exn) {
-        auto const result = unwindPhp(g_unwind_rds->exn, sfp);
+        auto const result = unwindVM(g_unwind_rds->exn, sfp);
         if (!(result & UnwindReachedGoal)) {
           __cxxabiv1::__cxa_end_catch();
           g_unwind_rds->doSideExit = true;

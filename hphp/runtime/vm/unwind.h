@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/either.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
@@ -59,15 +60,10 @@ void lockObjectWhileUnwinding(PC pc, Stack& stack);
 Offset findCatchHandler(const Func* func, Offset raiseOffset);
 
 /*
- * Unwind the PHP exception.
+ * Unwind the exception.
  */
-UnwinderResult
-unwindPhp(ObjectData* phpException, const ActRec* fpToUnwind = nullptr);
-
-/*
- * Unwind the C++ exception.
- */
-void unwindCpp(Exception* cppException);
+UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
+                        const ActRec* fpToUnwind = nullptr);
 
 /*
  * The main entry point to the unwinder.

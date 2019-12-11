@@ -1853,8 +1853,7 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
 
   enterVMCustomHandler(fp, [&] {
     prepareAsyncFuncEntry(fp, resumable);
-
-    unwindPhp(exception);
+    unwindVM(exception);
   });
 }
 

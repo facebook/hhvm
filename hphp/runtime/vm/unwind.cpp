@@ -48,9 +48,13 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 #if (!defined(NDEBUG) || defined(USE_TRACE))
-std::string describeEx(ObjectData* phpException) {
-  return folly::format("[user exception] {}",
-                       implicit_cast<void*>(phpException)).str();
+std::string describeEx(Either<ObjectData*, Exception*> exception) {
+  if (exception.left()) {
+    return folly::format("[user exception] {}",
+                         implicit_cast<void*>(exception.left())).str();
+  }
+  return folly::format("[C++ exception] {}",
+                       implicit_cast<void*>(exception.right())).str();
 }
 #endif
 
@@ -346,17 +350,19 @@ void lockObjectWhileUnwinding(PC pc, Stack& stack) {
  * reaching fpToUnwind as well as whether we ended with putting a failed
  * static wait handle on the stack.
  */
-UnwinderResult
-unwindPhp(ObjectData* phpException, const ActRec* fpToUnwind /* = nullptr */) {
-  phpException->incRefCount();
+UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
+                        const ActRec* fpToUnwind /* = nullptr */) {
+  assertx(!exception.isNull());
+  auto phpException = exception.left();
+  if (phpException) phpException->incRefCount();
 
   auto& fp = vmfp();
   auto& stack = vmStack();
   auto& pc = vmpc();
 
-  ITRACE(1, "entering unwinder for exception: {}\n", describeEx(phpException));
+  ITRACE(1, "entering unwinder for exception: {}\n", describeEx(exception));
   SCOPE_EXIT {
-    ITRACE(1, "leaving unwinder for exception: {}\n", describeEx(phpException));
+    ITRACE(1, "leaving unwinder for exception: {}\n", describeEx(exception));
   };
 
   discardMemberTVRefs(pc);
@@ -364,7 +370,7 @@ unwindPhp(ObjectData* phpException, const ActRec* fpToUnwind /* = nullptr */) {
   while (true) {
     auto const func = fp->func();
 
-    ITRACE(1, "unwindPhp: func {}, raiseOffset {} fp {}\n",
+    ITRACE(1, "unwind: func {}, raiseOffset {} fp {}\n",
            func->name()->data(),
            func->unit()->offsetOf(pc),
            implicit_cast<void*>(fp));
@@ -378,13 +384,13 @@ unwindPhp(ObjectData* phpException, const ActRec* fpToUnwind /* = nullptr */) {
     // profiler on function exit), we can't execute any handlers in
     // *this* frame.
     if (RequestInfo::s_requestInfo->m_pendingException == nullptr &&
-        !UNLIKELY(fp->localsDecRefd())) {
+        phpException && !UNLIKELY(fp->localsDecRefd())) {
 
       const EHEnt* eh = func->findEH(func->unit()->offsetOf(pc));
       if (eh != nullptr) {
         // Found exception handler. Push the exception on top of the
         // stack and resume VM.
-        ITRACE(1, "unwindPhp: entering catch at {} func {} ({})\n",
+        ITRACE(1, "unwind: entering catch at {} func {} ({})\n",
                eh->m_handler,
                func->fullName()->data(),
                func->unit()->filepath()->data());
@@ -404,7 +410,8 @@ unwindPhp(ObjectData* phpException, const ActRec* fpToUnwind /* = nullptr */) {
     // frames on vmfp()'s rbp chain which might have resulted in us incorrectly
     // calculating the PC.
 
-    if (phpException == nullptr) {
+    if (exception.left() != phpException) {
+      assertx(phpException == nullptr);
       auto retCode = UnwindNone;
       if (fp) {
         if (!fpToUnwind) pc = skipCall(pc);
@@ -426,56 +433,11 @@ unwindPhp(ObjectData* phpException, const ActRec* fpToUnwind /* = nullptr */) {
   }
 
   ITRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");
+  if (exception.right()) {
+    exception.right()->throwException();
+  }
+  assertx(phpException);
   throw_object(Object::attach(phpException));
-}
-
-/*
- * Unwinding of C++ exceptions proceeds as follows:
- *
- *   - Discard all PHP exceptions pending for this frame.
- *
- *   - Discard all evaluation stack temporaries (including pre-live
- *     activation records).
- *
- *   - Pop the frame for the current function.  If the current function
- *     was the last frame in the current VM nesting level, re-throw
- *     the C++ exception, otherwise go to the first step and repeat
- *     this process in the caller's frame.
- */
-void unwindCpp(Exception* exception) {
-  auto& fp = vmfp();
-  auto& stack = vmStack();
-  auto& pc = vmpc();
-
-  ITRACE(1, "entering unwinder for C++ exception: {}\n",
-         implicit_cast<void*>(exception));
-  SCOPE_EXIT {
-    ITRACE(1, "leaving unwinder for C++ exception: {}\n",
-           implicit_cast<void*>(exception));
-  };
-
-  discardMemberTVRefs(pc);
-
-  do {
-    ITRACE(1, "unwindCpp: func {}, raiseOffset {} fp {}\n",
-           fp->func()->name()->data(),
-           fp->func()->unit()->offsetOf(pc),
-           implicit_cast<void*>(fp));
-
-    // Discard stack temporaries
-    discardStackTemps(fp, stack);
-
-    // Discard the frame
-    DEBUG_ONLY auto const phpException = tearDownFrame(fp, stack, pc, nullptr);
-    assertx(phpException == nullptr);
-    if (fp) {
-      lockObjectWhileUnwinding(pc, stack);
-      pc = skipCall(pc);
-    }
-  } while (fp);
-
-  // Propagate the C++ exception to the outer VM nesting
-  exception->throwException();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -3595,79 +3595,81 @@ spill_weight_at_impl(State& state,
     // a physical register, treat that as a use. Once used, remove
     // it from the interesting set.
     auto& block = unit.blocks[b];
-    for (size_t i = instIdx; i < block.code.size(); ++i) {
-      auto& inst = block.code[i];
+    if (regs.intersects(state.uses[b])) {
+      for (size_t i = instIdx; i < block.code.size(); ++i) {
+        auto& inst = block.code[i];
 
-      if (inst.op == Vinstr::copy) {
-        if (!regs[inst.copy_.s]) continue;
-        recordCopyUse(inst.copy_.s, inst.copy_.d, i);
-      } else if (inst.op == Vinstr::copyargs) {
-        auto const& srcs = unit.tuples[inst.copyargs_.s];
-        auto const& dsts = unit.tuples[inst.copyargs_.d];
-        assertx(srcs.size() == dsts.size());
-        for (size_t j = 0; j < srcs.size(); ++j) {
-          if (!regs[srcs[j]]) continue;
-          recordCopyUse(srcs[j], dsts[j], i);
-        }
-      } else if (inst.op == Vinstr::phijmp) {
-        auto const successors = succs(block);
-        assertx(successors.size() == 1);
-        auto const succ = successors[0];
-        auto const& phidef = unit.blocks[succ].code.front();
-        assertx(phidef.op == Vinstr::phidef);
-        auto const& srcs = unit.tuples[inst.phijmp_.uses];
-        auto const& dsts = unit.tuples[phidef.phidef_.defs];
-        assertx(srcs.size() == dsts.size());
-
-        if (state.rpoOrder[succ] < startRpo) {
-          // Special case: if this jump is a back edge to a block
-          // which the spiller has already processed. We don't want to
-          // examine this block like the others, but we can use the
-          // already calculated spiller state. If the spiller has
-          // determined that the phi def is non-spilled, we treat that
-          // as a use as we'll have to insert a reload on the back
-          // edge if the Vreg is spilled. If the spiller has
-          // determined that the phi def is spilled, we remove some of
-          // the spill weight corresponding to the weight at that
-          // block. This is because by spilling this Vreg, we'll avoid
-          // a spill on the back edge (so it removes some of the
-          // penalty).
-          auto const& spillerState = spillerResults.perBlock[succ].inPhi;
-          assertx(spillerState.hasValue());
-          assertx(spillerState->size() == srcs.size());
-
-          for (size_t j = 0; j < srcs.size(); ++j) {
-            if (!regs[srcs[j]]) continue;
-            if (dsts[j].isPhys()) {
-              recordUse(srcs[j], i);
-            } else if ((*spillerState)[j]) {
-              if (!ignoreBackEdge(srcs[j], succ)) recordUse(srcs[j], i);
-            } else {
-              totalUsage -= (block_weight(state, b) * kSpillReloadMultiplier);
-              regs.remove(srcs[j]);
-            }
-          }
-        } else {
-          // Otherwise treat it like a copyargs
+        if (inst.op == Vinstr::copy) {
+          if (!regs[inst.copy_.s]) continue;
+          recordCopyUse(inst.copy_.s, inst.copy_.d, i);
+        } else if (inst.op == Vinstr::copyargs) {
+          auto const& srcs = unit.tuples[inst.copyargs_.s];
+          auto const& dsts = unit.tuples[inst.copyargs_.d];
+          assertx(srcs.size() == dsts.size());
           for (size_t j = 0; j < srcs.size(); ++j) {
             if (!regs[srcs[j]]) continue;
             recordCopyUse(srcs[j], dsts[j], i);
           }
+        } else if (inst.op == Vinstr::phijmp) {
+          auto const successors = succs(block);
+          assertx(successors.size() == 1);
+          auto const succ = successors[0];
+          auto const& phidef = unit.blocks[succ].code.front();
+          assertx(phidef.op == Vinstr::phidef);
+          auto const& srcs = unit.tuples[inst.phijmp_.uses];
+          auto const& dsts = unit.tuples[phidef.phidef_.defs];
+          assertx(srcs.size() == dsts.size());
+
+          if (state.rpoOrder[succ] < startRpo) {
+            // Special case: if this jump is a back edge to a block
+            // which the spiller has already processed. We don't want to
+            // examine this block like the others, but we can use the
+            // already calculated spiller state. If the spiller has
+            // determined that the phi def is non-spilled, we treat that
+            // as a use as we'll have to insert a reload on the back
+            // edge if the Vreg is spilled. If the spiller has
+            // determined that the phi def is spilled, we remove some of
+            // the spill weight corresponding to the weight at that
+            // block. This is because by spilling this Vreg, we'll avoid
+            // a spill on the back edge (so it removes some of the
+            // penalty).
+            auto const& spillerState = spillerResults.perBlock[succ].inPhi;
+            assertx(spillerState.hasValue());
+            assertx(spillerState->size() == srcs.size());
+
+            for (size_t j = 0; j < srcs.size(); ++j) {
+              if (!regs[srcs[j]]) continue;
+              if (dsts[j].isPhys()) {
+                recordUse(srcs[j], i);
+              } else if ((*spillerState)[j]) {
+                if (!ignoreBackEdge(srcs[j], succ)) recordUse(srcs[j], i);
+              } else {
+                totalUsage -= (block_weight(state, b) * kSpillReloadMultiplier);
+                regs.remove(srcs[j]);
+              }
+            }
+          } else {
+            // Otherwise treat it like a copyargs
+            for (size_t j = 0; j < srcs.size(); ++j) {
+              if (!regs[srcs[j]]) continue;
+              recordCopyUse(srcs[j], dsts[j], i);
+            }
+          }
+        } else {
+          // A normal instruction. Shouldn't be a spill, reload, or
+          // ssaalias because we should only examine blocks that the
+          // spiller hasn't visited yet.
+          assertx(!is_spill_inst(inst) &&
+                  inst.op != Vinstr::reload &&
+                  inst.op != Vinstr::ssaalias);
+          // Remove any Vregs which have been used.
+          auto const uses = uses_set_cached(state, inst) & regs;
+          for (auto const r : uses) recordUse(r, i);
+          regs -= uses;
         }
-      } else {
-        // A normal instruction. Shouldn't be a spill, reload, or
-        // ssaalias because we should only examine blocks that the
-        // spiller hasn't visited yet.
-        assertx(!is_spill_inst(inst) &&
-                inst.op != Vinstr::reload &&
-                inst.op != Vinstr::ssaalias);
-        // Remove any Vregs which have been used.
-        auto const uses = uses_set_cached(state, inst) & regs;
-        for (auto const r : uses) recordUse(r, i);
-        regs -= uses;
-        ++instructionCount;
       }
     }
+    instructionCount += (block.code.size() - instIdx);
 
     // We didn't find any actual uses in this block. We need to now
     // process the successors.

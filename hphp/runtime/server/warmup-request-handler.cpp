@@ -24,6 +24,7 @@
 #include "hphp/runtime/server/replay-transport.h"
 
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
 #include <boost/filesystem.hpp>
@@ -145,6 +146,15 @@ runAfterDelay(const std::vector<std::string>& files,
       }
     }
   } while (--nTimes);
+  // Log what was replayed.
+  if (StructuredLog::enabled()) {
+    for (const auto& row : seen) {
+      StructuredLogEntry cols;
+      cols.setStr("file", row.first);
+      cols.setInt("times", row.second);
+      StructuredLog::log("hhvm_replay", cols);
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,7 +25,7 @@ type autocomplete_type =
   | Acprop
   | Acshape_key
   | Actrait_only
-  | Ac_no_namespace (* used for symbol search *)
+  | Ac_workspace_symbol (* Excludes namespaces; used for symbol search *)
 [@@deriving eq, show]
 
 (* Convert a string to a provider *)
@@ -328,6 +328,7 @@ type si_env = {
   sql_select_acnew_stmt: Sqlite3.stmt option ref;
   sql_select_actype_stmt: Sqlite3.stmt option ref;
   sql_select_namespaces_stmt: Sqlite3.stmt option ref;
+  sql_select_namespaced_symbols_stmt: Sqlite3.stmt option ref;
   (* NamespaceSearchService *)
   nss_root_namespace: nss_node;
   (* AutocomleteRankService *)
@@ -355,6 +356,7 @@ let default_si_env =
     sql_select_acnew_stmt = ref None;
     sql_select_actype_stmt = ref None;
     sql_select_namespaces_stmt = ref None;
+    sql_select_namespaced_symbols_stmt = ref None;
     (* NamespaceSearchService *)
     nss_root_namespace =
       {

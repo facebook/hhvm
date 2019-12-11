@@ -5250,6 +5250,35 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     }
                 ],
             )
+            .request(
+                comment="Look up symbols starting with 'test_f' within multiple namespaces",
+                method="workspace/symbol",
+                params={"query": "test_f"},
+                result=[
+                    {
+                        "name": "test_function",
+                        "kind": 12,
+                        "location": {
+                            "uri": "file://${root_path}/completion.php",
+                            "range": {
+                                "start": {"line": 7, "character": 9},
+                                "end": {"line": 7, "character": 22},
+                            },
+                        },
+                    },
+                    {
+                        "name": "TestNS\\test_func",
+                        "kind": 12,
+                        "location": {
+                            "uri": "file://${root_path}/completion_extras_namespace.php",
+                            "range": {
+                                "start": {"line": 4, "character": 9},
+                                "end": {"line": 4, "character": 25},
+                            },
+                        },
+                    },
+                ],
+            )
             .request(method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)

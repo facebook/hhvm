@@ -34,7 +34,7 @@ let go query_text type_ (sienv : SearchUtils.si_env) : SearchUtils.result =
   let max_results = 100 in
   let start_time = Unix.gettimeofday () in
   let kind_filter = SearchUtils.string_to_kind type_ in
-  let context = Some SearchUtils.Ac_no_namespace in
+  let context = Some SearchUtils.Ac_workspace_symbol in
   let results =
     (* If query contains "::", search class methods instead of top level definitions *)
     match Str.split_delim re_colon_colon query_text with

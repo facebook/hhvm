@@ -27,6 +27,14 @@ let sql_select_actype =
 let sql_select_all_symbols =
   "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? ESCAPE '\\' LIMIT ?"
 
+(* This syntax means that we add back in the root namespace prefix.
+ * It allows us to use LIKE "%\Foo%" to find both "\FooClass" and "\HH\Lib\FooTrait".
+ * This feature should be removed if we decide to add back in the original backslash when generating
+ * symbol indexes.
+ *)
+let sql_select_namespaced_symbols =
+  "SELECT name, kind, filename_hash FROM symbols WHERE '\\' || name LIKE ? ESCAPE '\\' LIMIT ?"
+
 let sql_check_alive = "SELECT name FROM symbols LIMIT 1"
 
 let sql_select_namespaces = "SELECT namespace FROM namespaces"
@@ -187,6 +195,21 @@ let search_all_symbols
   |> check_rc sienv;
   read_si_results stmt
 
+(* Symbol search for symbols containing a string. *)
+let search_namespaced_symbols
+    ~(sienv : si_env) ~(query_text : string) ~(max_results : int) : si_results =
+  let stmt =
+    prepare_or_reset_statement
+      sienv.sql_symbolindex_db
+      sienv.sql_select_namespaced_symbols_stmt
+      sql_select_namespaced_symbols
+  in
+  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT ("%\\\\" ^ query_text ^ "%"))
+  |> check_rc sienv;
+  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results))
+  |> check_rc sienv;
+  read_si_results stmt
+
 (* Symbol search for symbols valid in ACID context *)
 let search_acid ~(sienv : si_env) ~(query_text : string) ~(max_results : int) :
     si_results =
@@ -245,6 +268,8 @@ let sqlite_search
     search_symbols_by_kind ~sienv ~query_text ~max_results ~kind_filter:SI_Trait
   | (None, Some kind) ->
     search_symbols_by_kind ~sienv ~query_text ~max_results ~kind_filter:kind
+  | (Some Ac_workspace_symbol, _) ->
+    search_namespaced_symbols ~sienv ~query_text ~max_results
   | _ -> search_all_symbols ~sienv ~query_text ~max_results
 
 (* Fetch all known namespaces from the database *)

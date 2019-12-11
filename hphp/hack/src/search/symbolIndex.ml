@@ -145,7 +145,7 @@ let find_matching_symbols
   else
     (* Potential namespace matches always show up first *)
     let namespace_results =
-      if context <> Some Ac_no_namespace then
+      if context <> Some Ac_workspace_symbol then
         NamespaceSearchService.find_matching_namespaces ~sienv ~query_text
       else
         []

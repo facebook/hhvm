@@ -55,10 +55,6 @@ let make_lazy_class_type class_name sc =
 let shallow_decl_enabled () =
   TypecheckerOptions.shallow_class_decl (Global_naming_options.get ())
 
-let defer_threshold () =
-  TypecheckerOptions.defer_class_declaration_threshold
-    (Global_naming_options.get ())
-
 module Classes = struct
   module Cache =
     SharedMem.LocalCache
@@ -95,9 +91,7 @@ module Classes = struct
           | None ->
             raise Exit
           | Some (file, Naming_table.TClass) ->
-            Deferred_decl.should_defer
-              ~d:file
-              ~threshold_opt:(defer_threshold ());
+            Deferred_decl.should_defer ~d:file;
             let class_type =
               Errors.run_in_decl_mode file (fun () ->
                   Decl.declare_class_in_file file class_name)

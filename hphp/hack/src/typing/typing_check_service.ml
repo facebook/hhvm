@@ -169,7 +169,11 @@ let process_file
     (opts : GlobalOptions.t)
     (errors : Errors.t)
     (file : check_file_computation) : Errors.t * file_computation list =
-  Deferred_decl.reset ~enable:(should_enable_deferring opts file);
+  let (_old_state : Deferred_decl.deferred_decl_state) =
+    Deferred_decl.reset
+      ~enable:(should_enable_deferring opts file)
+      ~threshold_opt:(GlobalOptions.tco_defer_class_declaration_threshold opts)
+  in
   let fn = file.path in
   let ast = Ast_provider.get_ast ~full:true fn in
   let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in

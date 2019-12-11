@@ -40,7 +40,7 @@ let ensure_count (count : int) : unit =
     "The number of deferred items should match the expected value"
 
 let test_deferred_decl_add () =
-  Deferred_decl.reset ~enable:true;
+  let _old_state = Deferred_decl.reset ~enable:true ~threshold_opt:None in
   ensure_count 0;
 
   Deferred_decl.add (Relative_path.create Relative_path.Dummy "foo");
@@ -52,24 +52,23 @@ let test_deferred_decl_add () =
   Deferred_decl.add (Relative_path.create Relative_path.Dummy "bar");
   ensure_count 2;
 
-  Deferred_decl.reset ~enable:true;
+  let _old_state = Deferred_decl.reset ~enable:true ~threshold_opt:None in
   ensure_count 0;
 
   true
 
 let ensure_threshold ~(threshold : int) ~(limit : int) ~(expected : int) : unit
     =
-  Deferred_decl.reset ~enable:true;
+  let _old_state =
+    Deferred_decl.reset ~enable:true ~threshold_opt:(Some threshold)
+  in
   ensure_count 0;
 
   let deferred_count = ref 0 in
   for i = 1 to limit do
     let path = Printf.sprintf "foo-%d" i in
     let relative_path = Relative_path.create Relative_path.Dummy path in
-    try
-      Deferred_decl.should_defer
-        ~d:relative_path
-        ~threshold_opt:(Some threshold)
+    try Deferred_decl.should_defer ~d:relative_path
     with Deferred_decl.Defer d ->
       Asserter.Bool_asserter.assert_equals
         (i >= threshold)
@@ -124,8 +123,6 @@ let bar_contents =
   for files that have undeclared dependencies, UNLESS we've already deferred
   those files a certain number of times. *)
 let test_process_file_deferring () =
-  Deferred_decl.reset ~enable:true;
-
   (* Set up a simple fake repo *)
   Disk.mkdir_p "/fake/root/";
   Relative_path.set_path_prefix Relative_path.Root (Path.make "/fake/root/");

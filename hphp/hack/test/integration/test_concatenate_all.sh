@@ -46,24 +46,36 @@ if [ "${HH_SERVER}" != "${HH_SERVER_DIR}/hh_server" ]; then
 fi
 export PATH="${HH_SERVER_DIR}:$PATH"
 
+NEW_DATA_DIR="$(mktemp -d)"
+cp -Ra "${DATA_DIR}"/{*.hack,*.php,.hhconfig} "${NEW_DATA_DIR}/"
+OUTPUT_DIR="${DATA_DIR}"
+DATA_DIR="${NEW_DATA_DIR}"
+
+function cleanup() {
+  cd "${DATA_DIR}"
+  "${HH_CLIENT}" stop
+  cd /
+  rm -rf --preserve-root "${DATA_DIR}"
+}
+trap cleanup exit
+
 cd "${DATA_DIR}"
-"${HH_CLIENT}" restart
+"${HH_CLIENT}" stop || true
+"${HH_CLIENT}"
 
 # syntax tests
-"${HH_CLIENT}" --concatenate-all no_ns*.hack > no_ns.hack.out
-"${HH_CLIENT}" --concatenate-all ns_body*.hack > ns_body.hack.out
-"${HH_CLIENT}" --concatenate-all ns_empty_body*.{hack,php} > ns_empty_body.hack.out
+"${HH_CLIENT}" --concatenate-all no_ns*.hack > "${OUTPUT_DIR}/no_ns.hack.out"
+"${HH_CLIENT}" --concatenate-all ns_body*.hack > "${OUTPUT_DIR}/ns_body.hack.out"
+"${HH_CLIENT}" --concatenate-all ns_empty_body*.{hack,php} > "${OUTPUT_DIR}/ns_empty_body.hack.out"
 
 # 01-child, 02-parent, 03-grandparent are intentionally in the wrong order; we
 # need to check that concatenate-all reorders them
 # 04-sibling is present to make sure the dep table is actually used instead of
 # merely reversing the import order
-"${HH_CLIENT}" --concatenate-all 0{1,2,3,4}*.hack > dependencies.hack.out
+"${HH_CLIENT}" --concatenate-all 0{1,2,3,4}*.hack > "${OUTPUT_DIR}/dependencies.hack.out"
 
-
-"${HH_CLIENT}" stop
-
-DATA_DIR_RELATIVE="$(realpath --relative-to="${WORKING_DIR}" "${DATA_DIR}")"
+cd "${OUTPUT_DIR}"
+OUTPUT_DIR_RELATIVE="$(realpath --relative-to="${WORKING_DIR}" "${OUTPUT_DIR}")"
 EXIT_CODE=0
 for OUT in *.out; do
   EXPECT="$(basename "$OUT" .out).exp"
@@ -81,8 +93,8 @@ for OUT in *.out; do
     # diff exits with 0 if files are the same, 1 if there are differences
     echo ">>> Error: ${OUT} does not match ${EXPECT}:"
     git diff --no-index --color=always --word-diff=color \
-      --src-prefix="${DATA_DIR_RELATIVE}/" \
-      --dst-prefix="${DATA_DIR_RELATIVE}/" \
+      --src-prefix="${OUTPUT_DIR_RELATIVE}/" \
+      --dst-prefix="${OUTPUT_DIR_RELATIVE}/" \
       "$EXPECT" "$OUT"
     EXIT_CODE=1
   fi

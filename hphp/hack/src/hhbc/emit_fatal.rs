@@ -9,16 +9,17 @@ use hhbc_ast_rust::FatalOp;
 use instruction_sequence_rust::Instr;
 use oxidized::pos::Pos;
 
+#[derive(Debug)]
 pub enum Error {
-    IncludeTimeFatalException(FatalOp, Pos, String),
+    IncludeTimeFatalException(FatalOp, String),
 }
 
-pub fn raise_fatal_runtime(pos: Pos, msg: String) -> Error {
-    Error::IncludeTimeFatalException(FatalOp::Runtime, pos, msg)
+pub fn raise_fatal_runtime(pos: &Pos, msg: String) -> Error {
+    Error::IncludeTimeFatalException(FatalOp::Runtime, format!("{:?}: {}", pos, msg))
 }
 
-pub fn raise_fatal_parse(pos: Pos, msg: String) -> Error {
-    Error::IncludeTimeFatalException(FatalOp::Parse, pos, msg)
+pub fn raise_fatal_parse(pos: &Pos, msg: String) -> Error {
+    Error::IncludeTimeFatalException(FatalOp::Parse, format!("{:?}: {}", pos, msg))
 }
 
 pub fn emit_fatal(emitter: &Emitter, op: FatalOp, pos: &Pos, msg: String) -> Instr {

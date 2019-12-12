@@ -38,7 +38,7 @@ pub mod emit_memoize_helpers {
     }
 
     pub fn check_memoize_possible<Ex, Fb, En, Hi>(
-        pos: Pos,
+        pos: &Pos,
         params: &[&FunParam<Ex, Fb, En, Hi>],
         is_method: bool,
     ) -> Result<(), emit_fatal::Error> {

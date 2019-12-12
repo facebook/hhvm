@@ -1,0 +1,17 @@
+<?hh
+abstract class BBB {
+  abstract const type TA as \AAA;
+}
+abstract class CCC {
+  const type T = this::TA::T;
+  abstract const type TB as \BBB;
+  const type TA = this::TB::TA;
+  public function with_nested_type_access(this::T $_): void {}
+}
+abstract class AAA {
+  abstract const type T;
+}
+<<__Rx>>
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

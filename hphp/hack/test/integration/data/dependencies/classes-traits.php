@@ -185,3 +185,19 @@ class Wobble extends WobbleBase {
 function with_method_defined_in_trait2(WobbleBase $w, Wobble $_): void {
   $w->f();
 }
+
+abstract class AAA {
+  abstract const type T;
+}
+
+abstract class BBB {
+  abstract const type TA as AAA;
+}
+
+abstract class CCC {
+  abstract const type TB as BBB;
+  const type TA = this::TB::TA;
+  const type T = this::TA::T;
+
+  public function with_nested_type_access(this::T $_): void {}
+}

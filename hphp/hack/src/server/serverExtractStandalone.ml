@@ -938,7 +938,7 @@ let rec do_add_dep deps dep =
         do_add_dep deps (Typing_deps.Dep.Class name))
   )
 
-and add_dep deps ?cls:(this_cls = None) ty : unit =
+and add_dep deps ~this ty : unit =
   let visitor =
     object
       inherit [unit] Type_visitor.decl_type_visitor
@@ -950,7 +950,7 @@ and add_dep deps ?cls:(this_cls = None) ty : unit =
         (* If we have a constant of a generic type, it can only be an
            array type, e.g., vec<A>, for which don't need values of A
            to generate an initializer. *)
-        List.iter tyl ~f:(add_dep deps ~cls:this_cls);
+        List.iter tyl ~f:(add_dep deps ~this);
 
         (* When adding a dependency on an enum, also add dependencies
            on all its values.  We need all the values and not only the
@@ -974,44 +974,46 @@ and add_dep deps ?cls:(this_cls = None) ty : unit =
             | Ast_defs.SFclass_const ((_, c), (_, s)) ->
               do_add_dep deps (Typing_deps.Dep.Class c);
               do_add_dep deps (Typing_deps.Dep.Const (c, s)));
-            add_dep deps ~cls:this_cls sft_ty)
+            add_dep deps ~this sft_ty)
           fdm
 
-      method! on_taccess _ _ ((_, cls_type), tconsts) =
-        let class_name =
-          match cls_type with
-          | Tapply ((_, name), _) -> name
-          | Tthis -> Option.value_exn this_cls
-          | _ -> raise UnexpectedDependency
+      method! on_taccess () r ((_, root), tconsts) =
+        let expand_type_access class_name tconsts =
+          match tconsts with
+          | [] -> raise UnexpectedDependency
+          (* Expand Class::TConst1::TConst2[::...]: get TConst1 in
+             Class, get its type or upper bound T, continue adding
+             dependencies of T::TConst2[::...] *)
+          | (_, tconst) :: tconsts ->
+            do_add_dep deps (Typing_deps.Dep.Const (class_name, tconst));
+            let cls = get_class_exn class_name in
+            (match Decl_provider.Class.get_typeconst cls tconst with
+            | Some typeconst ->
+              Option.iter
+                typeconst.ttc_type
+                ~f:(add_dep ~this:(Some class_name) deps);
+              if not (List.is_empty tconsts) then (
+                match (typeconst.ttc_type, typeconst.ttc_constraint) with
+                | (Some tc_type, _)
+                | (None, Some tc_type) ->
+                  (* What does 'this' refer to inside of T? *)
+                  let this =
+                    match snd tc_type with
+                    | Tapply ((_, name), _) -> Some name
+                    | _ -> this
+                  in
+                  let taccess = Typing_defs.Taccess (tc_type, tconsts) in
+                  add_dep ~this deps (Typing_reason.Rnone, taccess)
+                | (None, None) -> ()
+              )
+            | None -> ())
         in
-        let cls = get_class_exn class_name in
-        match tconsts with
-        | [] -> raise UnexpectedDependency
-        (* Unfold Class::TConst1::TConst2[::...]: get TConst1 in Class, get its type T,
-           continue adding dependencies of T::TConst2[::...] *)
-        | (_, tconst) :: tconsts ->
-          do_add_dep deps (Typing_deps.Dep.Const (class_name, tconst));
-          (match Decl_provider.Class.get_typeconst cls tconst with
-          | Some typeconst ->
-            Option.fold
-              ~f:(fun () ty -> add_dep ~cls:(Some class_name) deps ty)
-              ~init:()
-              typeconst.ttc_type;
-            if not (List.is_empty tconsts) then (
-              match (typeconst.ttc_type, typeconst.ttc_constraint) with
-              | (Some tc_type, _)
-              | (None, Some tc_type) ->
-                (* What 'this' refers to inside of T? *)
-                let tc_this =
-                  match snd tc_type with
-                  | Tapply ((_, name), _) -> Some name
-                  | _ -> None
-                in
-                let taccess = Typing_defs.Taccess (tc_type, tconsts) in
-                add_dep ~cls:tc_this deps (Typing_reason.Rnone, taccess)
-              | (None, None) -> ()
-            )
-          | None -> ())
+        match root with
+        | Taccess (root', tconsts') ->
+          add_dep ~this deps (r, Taccess (root', tconsts' @ tconsts))
+        | Tapply ((_, name), _) -> expand_type_access name tconsts
+        | Tthis -> expand_type_access (Option.value_exn this) tconsts
+        | _ -> raise UnexpectedDependency
     end
   in
   visitor#on_type () ty
@@ -1025,10 +1027,10 @@ and add_signature_dependencies deps obj =
     (match get_class cls_name with
     | None ->
       let td = value_or_not_found description @@ get_typedef cls_name in
-      add_dep deps td.td_type;
-      Option.iter td.td_constraint ~f:(add_dep deps)
+      add_dep ~this:None deps td.td_type;
+      Option.iter td.td_constraint ~f:(add_dep ~this:None deps)
     | Some cls ->
-      let add_dep = add_dep deps ~cls:(Some cls_name) in
+      let add_dep = add_dep deps ~this:(Some cls_name) in
       (match obj with
       | Prop (_, name) ->
         let p = value_or_not_found description @@ Class.get_prop cls name in
@@ -1083,11 +1085,11 @@ and add_signature_dependencies deps obj =
     | Fun f
     | FunName f ->
       let func = value_or_not_found description @@ get_fun f in
-      add_dep deps @@ func.fe_type
+      add_dep ~this:None deps @@ func.fe_type
     | GConst c
     | GConstName c ->
       let (ty, _) = value_or_not_found description @@ get_gconst c in
-      add_dep deps ty
+      add_dep ~this:None deps ty
     | _ -> raise UnexpectedDependency)
 
 let get_implementation_dependencies deps cls_name =

@@ -162,6 +162,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_method_defined_in_trait",
             "\\with_method_defined_in_trait2",
             "\\ImplementingBase::must_implement",
+            "\\CCC::with_nested_type_access",
         ]
 
         for path in paths:

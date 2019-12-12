@@ -353,6 +353,7 @@ module ProfileTypeCheck = struct
       ~times_checked:_
       ~files_to_declare:_
       ~decl_cache_misses:_
+      ~decl_cache_misses_time:_
       ~path:_ =
     ()
 
@@ -360,6 +361,7 @@ module ProfileTypeCheck = struct
       ~provider_backend:_
       ~time_decl_and_typecheck:_
       ~decl_cache_misses:_
+      ~decl_cache_misses_time:_
       ~filesize_opt:_
       ~path:_ =
     ()

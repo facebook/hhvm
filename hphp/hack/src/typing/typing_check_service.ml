@@ -168,6 +168,7 @@ type process_file_results = {
   errors: Errors.t;
   computation: file_computation list;
   decl_cache_misses: int;
+  decl_cache_misses_time: float;
 }
 
 let process_file
@@ -220,13 +221,15 @@ let process_file
     then
       Typing_global_inference.StateSubConstraintGraphs.save global_tvenvs;
     let deferred_files = Deferred_decl.get_deferments ~f:(fun d -> Declare d) in
-    let decl_cache_misses = Deferred_decl.get_decl_cache_miss_counter () in
+    let decl_cache_misses = Deferred_decl.get_decl_cache_misses_counter () in
+    let decl_cache_misses_time = Deferred_decl.get_decl_cache_misses_time () in
     match deferred_files with
     | [] ->
       {
         errors = Errors.merge errors' errors;
         computation = [];
         decl_cache_misses;
+        decl_cache_misses_time;
       }
     | _ ->
       let computation =
@@ -236,7 +239,7 @@ let process_file
             [Check { file with deferred_count = file.deferred_count + 1 }];
           ]
       in
-      { errors; computation; decl_cache_misses }
+      { errors; computation; decl_cache_misses; decl_cache_misses_time }
   with e ->
     let stack = Caml.Printexc.get_raw_backtrace () in
     let () =
@@ -305,6 +308,7 @@ let process_files
         ~times_checked
         ~files_to_declare
         ~decl_cache_misses:result.decl_cache_misses
+        ~decl_cache_misses_time:result.decl_cache_misses_time
         ~path:file.path;
     let _t : float =
       Hh_logger.log_duration

@@ -129,7 +129,8 @@ let compute_tast_and_errors_unquarantined
     let errors = Errors.merge nast_errors tast_errors in
 
     (* Logging... *)
-    let decl_cache_misses = Deferred_decl.get_decl_cache_miss_counter () in
+    let decl_cache_misses = Deferred_decl.get_decl_cache_misses_counter () in
+    let decl_cache_misses_time = Deferred_decl.get_decl_cache_misses_time () in
     Deferred_decl.restore_state prev_deferral_state;
     (* Sometimes we're called with a FileName that doesn't exist on disk. *)
     let filesize_opt =
@@ -141,6 +142,7 @@ let compute_tast_and_errors_unquarantined
       ~provider_backend:(Provider_backend.get () |> Provider_backend.t_to_string)
       ~time_decl_and_typecheck:(Unix.gettimeofday () -. t)
       ~decl_cache_misses
+      ~decl_cache_misses_time
       ~filesize_opt
       ~path:entry.Provider_context.path;
 

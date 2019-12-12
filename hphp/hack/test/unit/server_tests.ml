@@ -68,7 +68,9 @@ let ensure_threshold ~(threshold : int) ~(limit : int) ~(expected : int) : unit
   for i = 1 to limit do
     let path = Printf.sprintf "foo-%d" i in
     let relative_path = Relative_path.create Relative_path.Dummy path in
-    try Deferred_decl.count_decl_cache_miss_and_raise_if_defer ~d:relative_path
+    try
+      Deferred_decl.raise_if_should_defer ~d:relative_path;
+      Deferred_decl.count_decl_cache_miss "test_symbol" 0.1
     with Deferred_decl.Defer d ->
       Asserter.Bool_asserter.assert_equals
         (i >= threshold)

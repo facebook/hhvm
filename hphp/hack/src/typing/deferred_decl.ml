@@ -19,8 +19,10 @@ type deferred_decl_state = {
   enabled: bool;
   (* deferments is grown by 'add' *)
   deferments: deferments_t;
-  (* counter is incremented by 'should_defer', if enabled *)
+  (* counts decl cache misses, if enabled *)
   decl_cache_misses_counter: int;
+  (* counts time spent fetching missing decls, if ennabled *)
+  decl_cache_misses_time: float;
   (* threshold is checked against counter by 'should_defer', if enabled *)
   threshold_opt: int option;
 }
@@ -31,29 +33,27 @@ let state : deferred_decl_state ref =
       enabled = true;
       deferments = Relative_path.Set.empty;
       decl_cache_misses_counter = 0;
+      decl_cache_misses_time = 0.;
       threshold_opt = None;
     }
 
-let count_decl_cache_miss (_name : string) : unit =
+let count_decl_cache_miss (name : string) ~(start_time : float) : unit =
   if !state.enabled then
+    let () = Hh_logger.debug "Decl cache miss: %s" name in
+    let t = Unix.gettimeofday () -. start_time in
     state :=
       {
         !state with
         decl_cache_misses_counter = !state.decl_cache_misses_counter + 1;
+        decl_cache_misses_time = !state.decl_cache_misses_time +. t;
       }
 
-let count_decl_cache_miss_and_raise_if_defer ~(d : Relative_path.t) : unit =
-  if !state.enabled then (
-    state :=
-      {
-        !state with
-        decl_cache_misses_counter = !state.decl_cache_misses_counter + 1;
-      };
+let raise_if_should_defer ~(d : Relative_path.t) : unit =
+  if !state.enabled then
     match !state.threshold_opt with
-    | Some threshold when threshold < !state.decl_cache_misses_counter ->
+    | Some threshold when !state.decl_cache_misses_counter >= threshold ->
       raise (Defer d)
     | _ -> ()
-  )
 
 let add_deferment ~(d : deferment) : unit =
   state :=
@@ -67,6 +67,7 @@ let reset ~(enable : bool) ~(threshold_opt : int option) : deferred_decl_state =
     {
       enabled = enable;
       decl_cache_misses_counter = 0;
+      decl_cache_misses_time = 0.;
       deferments = Relative_path.Set.empty;
       threshold_opt;
     };
@@ -75,4 +76,6 @@ let reset ~(enable : bool) ~(threshold_opt : int option) : deferred_decl_state =
 let get_deferments ~(f : deferment -> 'a) : 'a list =
   Relative_path.Set.fold !state.deferments ~init:[] ~f:(fun d l -> f d :: l)
 
-let get_decl_cache_miss_counter () : int = !state.decl_cache_misses_counter
+let get_decl_cache_misses_counter () : int = !state.decl_cache_misses_counter
+
+let get_decl_cache_misses_time () : float = !state.decl_cache_misses_time

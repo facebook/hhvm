@@ -85,17 +85,19 @@ module Classes = struct
         match cached with
         | Some dc -> dc
         | None ->
+          let start_time = Unix.gettimeofday () in
           (match Naming_table.Types.get_filename_and_kind class_name with
           | Some (_, Naming_table.TTypedef)
           | Some (_, Naming_table.TRecordDef)
           | None ->
             raise Exit
           | Some (file, Naming_table.TClass) ->
-            Deferred_decl.count_decl_cache_miss_and_raise_if_defer ~d:file;
+            Deferred_decl.raise_if_should_defer ~d:file;
             let class_type =
               Errors.run_in_decl_mode file (fun () ->
                   Decl.declare_class_in_file file class_name)
             in
+            Deferred_decl.count_decl_cache_miss class_name ~start_time;
             (match class_type with
             | Some class_type -> class_type
             | None ->

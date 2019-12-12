@@ -214,11 +214,15 @@ Array SourceRootInfo::setServerVariables(Array server) const {
     server.set(arrkey, make_tv<KindOfString>(str.get()), true);
   }
 
-  {
-    SuppressHACArrayPlusNotices shacn;
-    if (!m_serverVars.empty()) {
-      server += m_serverVars;
-    }
+  if (!m_serverVars.empty()) {
+    IterateKVNoInc(
+      m_serverVars.get(),
+      [&](TypedValue key, TypedValue val) {
+        if (!server.exists(key)) {
+          server.set(key, val);
+        }
+      }
+    );
   }
 
   return server;

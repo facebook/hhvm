@@ -3858,218 +3858,320 @@ void record_phi_spill_state_helper(Vlabel b,
   );
 }
 
-// Initialize the spiller state for entry into a block (populating the block's
-// in state). This decides which Vregs should be considered spilled or
-// non-spilled upon entry to the block. We take into account which Vregs have
-// been spilled in predecessors, but we're not required to, since we'll fix up
-// any mismatches later. The starting instruction index is returned (to skip
-// over any phi).
+// Initialize the spiller state for entry into a block (populating the
+// block's in state). This decides which Vregs should be considered
+// spilled or non-spilled upon entry to the block. We take into
+// account which Vregs have been spilled in predecessors, but we're
+// not required to, since we'll fix up any mismatches later. If
+// needsSpilling is false (which means we won't have to spill anything
+// inside the block), we can attempt a faster initialization. The
+// starting instruction index is returned (to skip over any phi).
 size_t setup_initial_spiller_state(State& state,
                                    Vlabel b,
-                                   SpillerResults& results) {
+                                   SpillerResults& results,
+                                   bool needsSpilling) {
   auto& unit = state.unit;
   SpillerState initial{state};
 
-  // Remember if this block is a loop header
-  auto const loopInfo = is_loop_header(state, b)
-    ? &loop_info(state, b)
-    : nullptr;
+  const VregList* phiDefs = nullptr;
+  if (unit.blocks[b].code.front().op == Vinstr::phidef) {
+    auto const& phidef = unit.blocks[b].code.front().phidef_;
+    phiDefs = &unit.tuples[phidef.defs];
+  }
 
-  // First iterate over all (already processed) predecessors. For each
-  // Vreg which is live-in to this block, we'll examine its state in
-  // the predecessors, and sum the total block weights of the
-  // predecessors where it's spilled and where it's not spilled. We'll
-  // initially consider the Vreg to be whatever has the higher total
-  // weight. We'll record the weight of the non-spilled preds so we
-  // can bias the spilling decision below.
-  jit::vector<std::pair<Vreg, int64_t>> spillCosts;
-  if (b == state.unit.entry) {
+  // If all of the predecessors have the same state for every Vreg
+  // live into the block, we can perform a faster initialization,
+  // since we can skip calculating spill weights to decide what to
+  // spill. The initial state will just be what all the predecessors
+  // have agreed upon.
+  auto const fastInit = [&] {
+    if (needsSpilling || state.preds[b].size() == 0) return false;
+    // A single predecessor trivially agrees
+    if (state.preds[b].size() == 1) return true;
+
+    // There's multiple predecessors. For every live-in Vreg, check if
+    // it's always in registers, or always in memory for all
+    // predecessors.
     for (auto const r : state.liveIn[b]) {
-      // Only physical registers should be live-in for the entry
-      // block. They'll always be non-spilled.
-      assertx(r.isPhys() && !is_ignored(state, r));
-      auto const s = initial.forReg(r);
-      if (!s) continue;
-      s->inReg.add(r);
-    }
-  } else {
-    auto const hasPhi =
-      unit.blocks[b].code.front().op == Vinstr::phidef;
-
-    for (auto const r : state.liveIn[b]) {
-      auto initialState = initial.forReg(r);
-      if (!initialState) continue;
-
-      // The penalty for assuming this Vreg is in a physical register
-      // versus the penalty for assuming it is spilled.
-      int64_t inRegPenalty = 0;
-      int64_t inMemPenalty = 0;
-      // The cost of spilling this Vreg. It is similar to inMemPenalty
-      // except it does not take into account rematerialization (for
-      // spill cost calculation we assume the spill will have to be
-      // materialized).
-      int64_t spillCost = 0;
+      folly::Optional<bool> inReg;
       for (auto const pred : state.preds[b]) {
         auto const& out = results.perBlock[pred].out;
         if (!out) continue;
+        auto const inRegInPred = out->gp.inReg[r] || out->simd.inReg[r];
+        if (!inReg) {
+          inReg = inRegInPred;
+        } else if (*inReg != inRegInPred) {
+          return false;
+        }
+      }
+    }
 
-        // There shouldn't be anything live which isn't tracked.
-        assertx(
-          (state.liveIn[b] -
-           (out->gp.inReg | out->simd.inReg | out->gp.inMem | out->simd.inMem)
-          ).none()
-        );
+    if (!phiDefs) return true;
 
-        // Sum up the block weights for each case
-        auto const s = out->forReg(r);
-        assertx(s);
+    // Same for Vregs defined by a phidef
+    auto const size = phiDefs->size();
+    for (size_t i = 0; i < size; ++i) {
+      folly::Optional<bool> inReg;
+      for (auto const pred : state.preds[b]) {
+        auto const& outPhi = results.perBlock[pred].outPhi;
+        if (!outPhi) continue;
+        if (!inReg) {
+          inReg = (*outPhi)[i];
+        } else if (*inReg != (*outPhi)[i]) {
+          return false;
+        }
+      }
+    }
 
-        if (s->inReg[r]) {
-          // If the Vreg is trivially rematerializable, there's no
-          // penalty for considering it spilled, as we assume all
-          // spills will be dead.
-          //
-          // Note that we're checking in b, not pred here. If r is
-          // trivially rematerializable in b, then any uses should be
-          // rematerialized, and thus the spills should become
-          // dead. This isn't the case if it's trivially
-          // rematerializable in pred.
-          auto const trivial =
-            !r.isPhys() && is_trivial_remat(state, r, b, !!hasPhi);
-          auto const cost = block_weight(state, pred) * kSpillReloadMultiplier;
-          if (!trivial) inMemPenalty += cost;
-          spillCost += cost;
+    return true;
+  }();
+
+  if (fastInit) {
+    // We can use the fast initialization. Since all the predecessors
+    // agree about all Vregs, there's no decisions we have to make. We
+    // can just copy their state as our initial state.
+
+    // We can use any arbitrary pred to copy the state from (they're
+    // all the same). We only have to skip over ones without any out
+    // state, which means they were not processed yet (we ignored
+    // those above when deciding to use fast init).
+    size_t predIdx = 0;
+    auto const& preds = state.preds[b];
+    while (predIdx < preds.size() && !results.perBlock[preds[predIdx]].out) {
+      ++predIdx;
+    }
+    assertx(predIdx < preds.size());
+    // Copy the out state, removing any Vregs which aren't live-in.
+    auto const& out = results.perBlock[preds[predIdx]].out;
+    initial.gp.inReg = out->gp.inReg & state.liveIn[b];
+    initial.simd.inReg = out->simd.inReg & state.liveIn[b];
+    initial.gp.inMem = out->gp.inMem & state.liveIn[b];
+    initial.simd.inMem = out->simd.inMem & state.liveIn[b];
+
+    if (phiDefs) {
+      // Do the same for any Vregs defined by a phidef
+      auto const& outPhi = results.perBlock[preds[predIdx]].outPhi;
+      assertx(outPhi);
+      assertx(outPhi->size() == phiDefs->size());
+      auto const& defs = *phiDefs;
+      for (size_t i = 0; i < outPhi->size(); ++i) {
+        auto s = initial.forReg(defs[i]);
+        if (!s) continue;
+        if ((*outPhi)[i]) {
+          s->inReg.add(defs[i]);
+        } else {
+          s->inMem.add(defs[i]);
+        }
+      }
+    }
+
+    // And we're done. No calculating spill weights or invoking the
+    // spiller.
+  } else {
+    // Otherwise we need to use the normal init since there might be a
+    // disagreement among the predecessors.
+
+    // Remember if this block is a loop header
+    auto const loopInfo = is_loop_header(state, b)
+      ? &loop_info(state, b)
+      : nullptr;
+
+    // First iterate over all (already processed) predecessors. For each
+    // Vreg which is live-in to this block, we'll examine its state in
+    // the predecessors, and sum the total block weights of the
+    // predecessors where it's spilled and where it's not spilled. We'll
+    // initially consider the Vreg to be whatever has the higher total
+    // weight. We'll record the weight of the non-spilled preds so we
+    // can bias the spilling decision below.
+    jit::vector<std::pair<Vreg, int64_t>> spillCosts;
+    if (b == state.unit.entry) {
+      for (auto const r : state.liveIn[b]) {
+        // Only physical registers should be live-in for the entry
+        // block. They'll always be non-spilled.
+        assertx(r.isPhys() && !is_ignored(state, r));
+        auto const s = initial.forReg(r);
+        if (!s) continue;
+        s->inReg.add(r);
+      }
+    } else {
+      for (auto const r : state.liveIn[b]) {
+        auto initialState = initial.forReg(r);
+        if (!initialState) continue;
+
+        // The penalty for assuming this Vreg is in a physical register
+        // versus the penalty for assuming it is spilled.
+        int64_t inRegPenalty = 0;
+        int64_t inMemPenalty = 0;
+        // The cost of spilling this Vreg. It is similar to inMemPenalty
+        // except it does not take into account rematerialization (for
+        // spill cost calculation we assume the spill will have to be
+        // materialized).
+        int64_t spillCost = 0;
+        for (auto const pred : state.preds[b]) {
+          auto const& out = results.perBlock[pred].out;
+          if (!out) continue;
+
+          // There shouldn't be anything live which isn't tracked.
+          assertx(
+            (state.liveIn[b] -
+             (out->gp.inReg | out->simd.inReg | out->gp.inMem | out->simd.inMem)
+            ).none()
+          );
+
+          // Sum up the block weights for each case
+          auto const s = out->forReg(r);
+          assertx(s);
+
+          if (s->inReg[r]) {
+            // If the Vreg is trivially rematerializable, there's no
+            // penalty for considering it spilled, as we assume all
+            // spills will be dead.
+            //
+            // Note that we're checking in b, not pred here. If r is
+            // trivially rematerializable in b, then any uses should be
+            // rematerialized, and thus the spills should become
+            // dead. This isn't the case if it's trivially
+            // rematerializable in pred.
+            auto const trivial =
+              !r.isPhys() && is_trivial_remat(state, r, b, !!phiDefs);
+            auto const cost =
+              block_weight(state, pred) * kSpillReloadMultiplier;
+            if (!trivial) inMemPenalty += cost;
+            spillCost += cost;
+          } else {
+            assertx(!r.isPhys());
+            assertx(s->inMem[r]);
+            // If the Vreg is spilled in the predecessor, then we'll
+            // have to reload it if we want it to be non-spilled in this
+            // block. The cost of the reload depends if it's trivially
+            // rematerializable or not.
+            auto const trivial =
+              is_trivial_remat(state, r, pred, unit.blocks[pred].code.size());
+            inRegPenalty +=
+              block_weight(state, pred) *
+              (trivial ? 1 : kSpillReloadMultiplier);
+          }
+        }
+
+        // Special case: If this is a loop header, and the Vreg is used
+        // within the loop, bias the spill penalty taking into account
+        // future usages. For example, if a Vreg is spilled on all
+        // predecessors coming into the loop header, we might still want
+        // to reload it.
+        if (loopInfo && loopInfo->uses[r]) {
+          inMemPenalty +=
+            spill_weight_at(state, results, r, b, !!phiDefs).weight.usage;
+        }
+
+        // Pick the majority case
+        if (inMemPenalty >= inRegPenalty) {
+          initialState->inReg.add(r);
+          // We might have to spill this anyways below, so record the
+          // penalty of doing so (the weight of all the predecessors
+          // where it's not spilled).
+          if (!r.isPhys()) spillCosts.emplace_back(r, spillCost);
         } else {
           assertx(!r.isPhys());
-          assertx(s->inMem[r]);
-          // If the Vreg is spilled in the predecessor, then we'll
-          // have to reload it if we want it to be non-spilled in this
-          // block. The cost of the reload depends if it's trivially
-          // rematerializable or not.
-          auto const trivial =
-            is_trivial_remat(state, r, pred, unit.blocks[pred].code.size());
-          inRegPenalty +=
-            block_weight(state, pred) * (trivial ? 1 : kSpillReloadMultiplier);
+          initialState->inMem.add(r);
         }
       }
-
-      // Special case: If this is a loop header, and the Vreg is used
-      // within the loop, bias the spill penalty taking into account
-      // future usages. For example, if a Vreg is spilled on all
-      // predecessors coming into the loop header, we might still want
-      // to reload it.
-      if (loopInfo && loopInfo->uses[r]) {
-        inMemPenalty +=
-          spill_weight_at(state, results, r, b, !!hasPhi).weight.usage;
-      }
-
-      // Pick the majority case
-      if (inMemPenalty >= inRegPenalty) {
-        initialState->inReg.add(r);
-        // We might have to spill this anyways below, so record the
-        // penalty of doing so (the weight of all the predecessors
-        // where it's not spilled).
-        if (!r.isPhys()) spillCosts.emplace_back(r, spillCost);
-      } else {
-        assertx(!r.isPhys());
-        initialState->inMem.add(r);
-      }
     }
-  }
 
-  // Now that we've processed Vregs which were live-in to the block, we need to
-  // consider phidef outputs. We can use similar logic to the live-in Vregs,
-  // except examining the phi state of the predecessors.
-  const VregList* defs = nullptr;
-  if (unit.blocks[b].code.front().op == Vinstr::phidef) {
-    auto const& phidef = unit.blocks[b].code.front().phidef_;
-    defs = &unit.tuples[phidef.defs];
+    // Now that we've processed Vregs which were live-in to the block,
+    // we need to consider phidef outputs. We can use similar logic to
+    // the live-in Vregs, except examining the phi state of the
+    // predecessors.
+    if (phiDefs) {
+      assertx(b != unit.entry);
+      assertx(
+        !defs_set_cached(state, unit.blocks[b].code.front()).containsPhys()
+      );
+      assertx(uses_set_cached(state, unit.blocks[b].code.front()).none());
 
-    assertx(b != unit.entry);
-    assertx(
-      !defs_set_cached(state, unit.blocks[b].code.front()).containsPhys()
-    );
-    assertx(uses_set_cached(state, unit.blocks[b].code.front()).none());
+      auto const size = phiDefs->size();
+      for (size_t i = 0; i < size; ++i) {
+        auto const def = (*phiDefs)[i];
 
-    for (size_t i = 0; i < defs->size(); ++i) {
-      auto const def = (*defs)[i];
+        auto initialState = initial.forReg(def);
+        if (!initialState) continue;
 
-      auto initialState = initial.forReg(def);
-      if (!initialState) continue;
+        int64_t inRegPenalty = 0;
+        int64_t inMemPenalty = 0;
+        int64_t spillCost = 0;
+        for (auto const pred : state.preds[b]) {
+          auto const& out = results.perBlock[pred].outPhi;
+          if (!out) continue;
 
-      int64_t inRegPenalty = 0;
-      int64_t inMemPenalty = 0;
-      int64_t spillCost = 0;
-      for (auto const pred : state.preds[b]) {
-        auto const& out = results.perBlock[pred].outPhi;
-        if (!out) continue;
+          assertx(out->size() == size);
 
-        assertx(out->size() == defs->size());
+          assertx(unit.blocks[pred].code.back().op == Vinstr::phijmp);
+          auto const& phijmp = unit.blocks[pred].code.back().phijmp_;
+          auto const& uses = unit.tuples[phijmp.uses];
+          assertx(uses.size() == size);
 
-        assertx(unit.blocks[pred].code.back().op == Vinstr::phijmp);
-        auto const& phijmp = unit.blocks[pred].code.back().phijmp_;
-        auto const& uses = unit.tuples[phijmp.uses];
-        assertx(uses.size() == defs->size());
+          if ((*out)[i]) {
+            // Note that for the same reasons as above, we're checking
+            // in b, not in pred. We can only save on the penalty if it's
+            // trivially rematerializable at this point.
+            auto const trivial =
+              !def.isPhys() && is_trivial_remat(state, def, b, 1);
+            auto const cost =
+              block_weight(state, pred) * kSpillReloadMultiplier;
+            if (!trivial) inMemPenalty += cost;
+            spillCost += cost;
+          } else {
+            assertx(!def.isPhys());
+            auto const trivial = is_trivial_remat(
+              state,
+              uses[i],
+              pred,
+              unit.blocks[pred].code.size()
+            );
+            inRegPenalty +=
+              block_weight(state, pred) *
+              (trivial ? 1 : kSpillReloadMultiplier);
+          }
+        }
 
-        if ((*out)[i]) {
-          // Note that for the same reasons as above, we're checking
-          // in b, not in pred. We can only save on the penalty if it's
-          // trivially rematerializable at this point.
-          auto const trivial =
-            !def.isPhys() && is_trivial_remat(state, def, b, 1);
-          auto const cost = block_weight(state, pred) * kSpillReloadMultiplier;
-          if (!trivial) inMemPenalty += cost;
-          spillCost += cost;
+        // Same special case as above. Bias Vregs used within the loop
+        // towards being in registers.
+        if (loopInfo && loopInfo->uses[def]) {
+          inMemPenalty +=
+            spill_weight_at(state, results, def, b, 1).weight.usage;
+        }
+
+        if (inMemPenalty >= inRegPenalty) {
+          initialState->inReg.add(def);
+          if (!def.isPhys()) spillCosts.emplace_back(def, spillCost);
         } else {
           assertx(!def.isPhys());
-          auto const trivial = is_trivial_remat(
-            state,
-            uses[i],
-            pred,
-            unit.blocks[pred].code.size()
-          );
-          inRegPenalty +=
-            block_weight(state, pred) * (trivial ? 1 : kSpillReloadMultiplier);
+          initialState->inMem.add(def);
         }
       }
-
-      // Same special case as above. Bias Vregs used within the loop
-      // towards being in registers.
-      if (loopInfo && loopInfo->uses[def]) {
-        inMemPenalty += spill_weight_at(state, results, def, b, 1).weight.usage;
-      }
-
-      if (inMemPenalty >= inRegPenalty) {
-        initialState->inReg.add(def);
-        if (!def.isPhys()) spillCosts.emplace_back(def, spillCost);
-      } else {
-        assertx(!def.isPhys());
-        initialState->inMem.add(def);
-      }
     }
+
+    // We might have more non-spilled Vregs than we can fit into
+    // registers. Spill as necessary. Use the recorded weights above to
+    // bias the decision appropriately.
+    initial.spill(
+      b, !!phiDefs, results,
+      [&] (Vreg r) {
+        auto const it = std::find_if(
+          spillCosts.begin(), spillCosts.end(),
+          [&] (const std::pair<Vreg, int64_t>& p) { return p.first == r; }
+        );
+        return (it != spillCosts.end()) ? it->second : 0;
+      }
+    );
   }
-
-  // We might have more non-spilled Vregs than we can fit into
-  // registers. Spill as necessary. Use the recorded weights above to
-  // bias the decision appropriately.
-  initial.spill(
-    b, !!defs, results,
-    [&] (Vreg r) {
-      auto const it = std::find_if(
-        spillCosts.begin(), spillCosts.end(),
-        [&] (const std::pair<Vreg, int64_t>& p) { return p.first == r; }
-      );
-      return (it != spillCosts.end()) ? it->second : 0;
-    }
-  );
 
   // If this block has a phidef, we need to record which outputs of the phi were
   // considered to be spilled or not.
   assertx(!results.perBlock[b].inPhi);
-  if (defs) {
+  if (phiDefs) {
     record_phi_spill_state_helper(
       b,
-      *defs,
+      *phiDefs,
       initial,
       results
     );
@@ -4077,10 +4179,10 @@ size_t setup_initial_spiller_state(State& state,
 
   // Record block state
   assertx(!results.perBlock[b].in);
-  assertx(initial.checkInvariants(b, !!defs));
+  assertx(initial.checkInvariants(b, !!phiDefs));
   results.perBlock[b].in = std::move(initial);
 
-  return !!defs;
+  return !!phiDefs;
 }
 
 // Run spiller logic for a phijmp instruction at the given block and
@@ -5126,7 +5228,8 @@ SpillerResults process_spills(State& state,
 
   for (auto const b : state.rpo) {
     // Initialize the state for this block and get the initial (in) state.
-    auto instIdx = setup_initial_spiller_state(state, b, results);
+    auto const spilling = needsSpilling[b];
+    auto instIdx = setup_initial_spiller_state(state, b, results, spilling);
     auto spiller = *results.perBlock[b].in;
     SCOPE_ASSERT_DETAIL("Current Spiller") {
       return folly::sformat(
@@ -5135,7 +5238,7 @@ SpillerResults process_spills(State& state,
       );
     };
 
-    if (!needsSpilling[b] && !state.uses[b].intersects(spiller.inMem())) {
+    if (!spilling && !state.uses[b].intersects(spiller.inMem())) {
       // Be efficient if there's no potential spills to worry about.
       process_spills_skip(state, b, spiller, results);
     } else {

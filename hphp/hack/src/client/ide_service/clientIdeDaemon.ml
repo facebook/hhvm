@@ -630,6 +630,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       (match message with
       | None -> Lwt.return_unit
       | Some (Message { ClientIdeMessage.tracking_id; message }) ->
+        let unblocked_time = Unix.gettimeofday () in
         let%lwt state =
           try%lwt
             let%lwt (state, response) =
@@ -640,12 +641,18 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
               (* No response needed for notifications. *)
               Lwt.return state
             | Handle_message_result.Response response ->
-              let response = ClientIdeMessage.Response (Ok response) in
-              let%lwt () = write_message ~out_fd ~message:response in
+              let message =
+                ClientIdeMessage.Response
+                  { ClientIdeMessage.response = Ok response; unblocked_time }
+              in
+              let%lwt () = write_message ~out_fd ~message in
               Lwt.return state
-            | Handle_message_result.Error message ->
-              let response = ClientIdeMessage.Response (Error message) in
-              let%lwt () = write_message ~out_fd ~message:response in
+            | Handle_message_result.Error e ->
+              let message =
+                ClientIdeMessage.Response
+                  { ClientIdeMessage.response = Error e; unblocked_time }
+              in
+              let%lwt () = write_message ~out_fd ~message in
               Lwt.return state
           with e ->
             let e = Exception.wrap e in
@@ -654,8 +661,11 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
 
             (* If we were responding to a message, but threw an exception, write
             that exception as a response. *)
-            let response = ClientIdeMessage.Response (Error message) in
-            let%lwt () = write_message ~out_fd ~message:response in
+            let message =
+              ClientIdeMessage.Response
+                { ClientIdeMessage.response = Error message; unblocked_time }
+            in
+            let%lwt () = write_message ~out_fd ~message in
             Lwt.return t.state
         in
         handle_messages { t with state })

@@ -1282,6 +1282,7 @@ let do_hover
 let do_hover_local
     (ide_service : ClientIdeService.t)
     (tracking_id : string)
+    (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Hover.params) : Hover.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
@@ -1289,6 +1290,7 @@ let do_hover_local
     ClientIdeService.rpc
       ide_service
       ~tracking_id
+      ~ref_unblocked_time
       (ClientIdeMessage.Hover document_location)
   in
   match infos with
@@ -1316,6 +1318,7 @@ let do_typeDefinition
 let do_typeDefinition_local
     (ide_service : ClientIdeService.t)
     (tracking_id : string)
+    (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Definition.params) : TypeDefinition.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
@@ -1323,6 +1326,7 @@ let do_typeDefinition_local
     ClientIdeService.rpc
       ide_service
       ~tracking_id
+      ~ref_unblocked_time
       (ClientIdeMessage.Type_definition document_location)
   in
   match results with
@@ -1369,6 +1373,7 @@ let do_definition
 let do_definition_local
     (ide_service : ClientIdeService.t)
     (tracking_id : string)
+    (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Definition.params) : Definition.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
@@ -1376,6 +1381,7 @@ let do_definition_local
     ClientIdeService.rpc
       ide_service
       ~tracking_id
+      ~ref_unblocked_time
       (ClientIdeMessage.Definition document_location)
   in
   match results with
@@ -1606,6 +1612,7 @@ let do_completion_legacy
 let do_completion_local
     (ide_service : ClientIdeService.t)
     (tracking_id : string)
+    (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Completion.params) : Completion.result Lwt.t =
   Completion.(
@@ -1623,7 +1630,9 @@ let do_completion_local
       ClientIdeMessage.Completion
         { ClientIdeMessage.Completion.document_location; is_manually_invoked }
     in
-    let%lwt result = ClientIdeService.rpc ide_service ~tracking_id request in
+    let%lwt result =
+      ClientIdeService.rpc ide_service ~tracking_id ~ref_unblocked_time request
+    in
     match result with
     | Ok infos ->
       let filename =
@@ -1741,6 +1750,7 @@ let do_completionItemResolve
 let do_resolve_local
     (ide_service : ClientIdeService.t)
     (tracking_id : string)
+    (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : CompletionItemResolve.params) : CompletionItemResolve.result Lwt.t
     =
@@ -1776,7 +1786,11 @@ let do_resolve_local
             }
         in
         let%lwt location_result =
-          ClientIdeService.rpc ide_service ~tracking_id request
+          ClientIdeService.rpc
+            ide_service
+            ~tracking_id
+            ~ref_unblocked_time
+            request
         in
         (match location_result with
         | Ok raw_docblock ->
@@ -1809,7 +1823,11 @@ let do_resolve_local
           }
       in
       let%lwt resolve_result =
-        ClientIdeService.rpc ide_service ~tracking_id request
+        ClientIdeService.rpc
+          ide_service
+          ~tracking_id
+          ~ref_unblocked_time
+          request
       in
       (match resolve_result with
       | Ok raw_docblock ->
@@ -1939,6 +1957,7 @@ let do_documentSymbol
 let do_documentSymbol_local
     (ide_service : ClientIdeService.t)
     (tracking_id : string)
+    (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : DocumentSymbol.params) : DocumentSymbol.result Lwt.t =
   DocumentSymbol.(
@@ -1954,7 +1973,13 @@ let do_documentSymbol_local
         }
       in
       let request = ClientIdeMessage.Document_symbol document_location in
-      let%lwt results = ClientIdeService.rpc ide_service ~tracking_id request in
+      let%lwt results =
+        ClientIdeService.rpc
+          ide_service
+          ~tracking_id
+          ~ref_unblocked_time
+          request
+      in
       match results with
       | Ok outline ->
         let converted =
@@ -2038,6 +2063,7 @@ let do_documentHighlight
 let do_highlight_local
     (ide_service : ClientIdeService.t)
     (tracking_id : string)
+    (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : DocumentHighlight.params) : DocumentHighlight.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
@@ -2045,6 +2071,7 @@ let do_highlight_local
     ClientIdeService.rpc
       ide_service
       ~tracking_id
+      ~ref_unblocked_time
       (ClientIdeMessage.Document_highlight document_location)
   in
   match result with
@@ -2091,6 +2118,7 @@ let do_typeCoverage
 let do_typeCoverage_local
     (ide_service : ClientIdeService.t)
     (tracking_id : string)
+    (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : TypeCoverage.params) : TypeCoverage.result Lwt.t =
   let open TypeCoverage in
@@ -2111,7 +2139,9 @@ let do_typeCoverage_local
       ClientIdeMessage.Type_coverage
         { ClientIdeMessage.file_path; ClientIdeMessage.file_contents }
     in
-    let%lwt result = ClientIdeService.rpc ide_service ~tracking_id request in
+    let%lwt result =
+      ClientIdeService.rpc ide_service ~tracking_id ~ref_unblocked_time request
+    in
     (match result with
     | Ok (results, counts) ->
       let formatted = format_typeCoverage_result results counts in
@@ -2222,6 +2252,7 @@ let do_signatureHelp
 let do_signatureHelp_local
     (ide_service : ClientIdeService.t)
     (tracking_id : string)
+    (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : SignatureHelp.params) : SignatureHelp.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
@@ -2229,6 +2260,7 @@ let do_signatureHelp_local
     ClientIdeService.rpc
       ide_service
       ~tracking_id
+      ~ref_unblocked_time
       (ClientIdeMessage.Signature_help document_location)
   in
   match result with
@@ -3084,10 +3116,12 @@ let track_ide_service_open_files
       |> Path.make
     in
     let file_contents = params.DidOpen.textDocument.TextDocumentItem.text in
+    let ref_unblocked_time = ref 0. in
     let%lwt (_ : (unit, string) result) =
       ClientIdeService.rpc
         ide_service
         ~tracking_id:metadata.tracking_id
+        ~ref_unblocked_time
         (ClientIdeMessage.File_opened
            { ClientIdeMessage.file_path; file_contents })
     in
@@ -3424,7 +3458,12 @@ let handle_client_message
       when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_completion_local ide_service tracking_id editor_open_files params
+        do_completion_local
+          ide_service
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (CompletionResult result);
       Lwt.return_unit
@@ -3433,7 +3472,12 @@ let handle_client_message
       when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_resolve_local ide_service tracking_id editor_open_files params
+        do_resolve_local
+          ide_service
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
       in
       respond_jsonrpc
         ~powered_by:Serverless_ide
@@ -3445,7 +3489,12 @@ let handle_client_message
       when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_highlight_local ide_service tracking_id editor_open_files params
+        do_highlight_local
+          ide_service
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
       in
       respond_jsonrpc
         ~powered_by:Serverless_ide
@@ -3457,7 +3506,12 @@ let handle_client_message
       when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_typeCoverage_local ide_service tracking_id editor_open_files params
+        do_typeCoverage_local
+          ide_service
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (TypeCoverageResult result);
       Lwt.return_unit
@@ -3466,7 +3520,12 @@ let handle_client_message
       ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_hover_local ide_service tracking_id editor_open_files params
+        do_hover_local
+          ide_service
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (HoverResult result);
       Lwt.return_unit
@@ -3474,7 +3533,12 @@ let handle_client_message
       when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_documentSymbol_local ide_service tracking_id editor_open_files params
+        do_documentSymbol_local
+          ide_service
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
       in
       respond_jsonrpc
         ~powered_by:Serverless_ide
@@ -3485,7 +3549,12 @@ let handle_client_message
       when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_definition_local ide_service tracking_id editor_open_files params
+        do_definition_local
+          ide_service
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (DefinitionResult result);
       Lwt.return_unit
@@ -3493,7 +3562,12 @@ let handle_client_message
       when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_typeDefinition_local ide_service tracking_id editor_open_files params
+        do_typeDefinition_local
+          ide_service
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
       in
       respond_jsonrpc
         ~powered_by:Serverless_ide
@@ -3505,7 +3579,12 @@ let handle_client_message
       when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_signatureHelp_local ide_service tracking_id editor_open_files params
+        do_signatureHelp_local
+          ide_service
+          tracking_id
+          ref_unblocked_time
+          editor_open_files
+          params
       in
       respond_jsonrpc ~powered_by:Serverless_ide id (SignatureHelpResult result);
       Lwt.return_unit

@@ -71,7 +71,7 @@ type message_wrapper =
 type message_queue = message_wrapper Lwt_message_queue.t
 
 type response_wrapper =
-  | Response_wrapper : ('a, string) result -> response_wrapper
+  | Response_wrapper : 'a ClientIdeMessage.timed_response -> response_wrapper
       (** Similar to [Message_wrapper] above. *)
 
 type response_emitter = response_wrapper Lwt_message_queue.t
@@ -117,6 +117,7 @@ let set_state (t : t) (new_state : state) : unit =
 
 let do_rpc
     ~(tracked_message : 'a ClientIdeMessage.tracked_t)
+    ~(ref_unblocked_time : float ref)
     ~(messages_to_send : message_queue)
     ~(response_emitter : response_emitter) : ('a, string) Lwt_result.t =
   try%lwt
@@ -130,7 +131,7 @@ let do_rpc
     in
     match response with
     | None -> failwith "Could not read response: queue was closed"
-    | Some (Response_wrapper response) ->
+    | Some (Response_wrapper { ClientIdeMessage.response; unblocked_time }) ->
       (* We don't carry around the tag at runtime that tells us what type of
       message the response was for. We're relying here on the invariant that
       responses are provided in the order that requests are sent, and that we're
@@ -139,6 +140,7 @@ let do_rpc
       `Marshal_tools_lwt.from_fd_with_preamble`, which is inherently unsafe
       (returns `'a`), and we've just happened to pass around that `'a` rather
       than coercing its type immediately. *)
+      ref_unblocked_time := unblocked_time;
       let response = Result.map ~f:Obj.magic response in
       Lwt.return response
   with e ->
@@ -219,7 +221,7 @@ let initialize_from_saved_state
     "<- %s [initialize_from_saved_state]"
     (ClientIdeMessage.message_from_daemon_to_string response);
   match response with
-  | ClientIdeMessage.Response (Ok _)
+  | ClientIdeMessage.Response { ClientIdeMessage.response = Ok _; _ }
   (* expected to be `Ok ()`, but not statically-checkable *) ->
     log
       "Initialized IDE service process (log file at %s)"
@@ -234,7 +236,8 @@ let initialize_from_saved_state
     log "%s" error_message;
     set_state t (Failed_to_initialize error_message);
     Lwt.return_error error_message
-  | ClientIdeMessage.Response (Error error_message) ->
+  | ClientIdeMessage.Response
+      { ClientIdeMessage.response = Error error_message; _ } ->
     log "Failed to initialize IDE service process: %s" error_message;
     set_state t (Failed_to_initialize "could not load saved-state");
     Lwt.return_error error_message
@@ -278,11 +281,16 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
       (try%lwt
          let message = ClientIdeMessage.Shutdown () in
          let tracked_message = { ClientIdeMessage.tracking_id; message } in
+         let ref_unblocked_time = ref 0. in
          let%lwt () =
            Lwt.pick
              [
                (let%lwt (_result : (unit, string) result) =
-                  do_rpc ~tracked_message ~messages_to_send ~response_emitter
+                  do_rpc
+                    ~tracked_message
+                    ~ref_unblocked_time
+                    ~messages_to_send
+                    ~response_emitter
                 in
                 Daemon.kill daemon_handle;
                 HackEventLogger.serverless_ide_destroy_ok t;
@@ -425,8 +433,11 @@ let notify_file_changed (t : t) ~(tracking_id : string) (path : Path.t) : unit =
   push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
 
 (* Simplified function for handling initialization cases *)
-let rpc (t : t) ~(tracking_id : string) (message : 'a ClientIdeMessage.t) :
-    ('a, string) Lwt_result.t =
+let rpc
+    (t : t)
+    ~(tracking_id : string)
+    ~(ref_unblocked_time : float ref)
+    (message : 'a ClientIdeMessage.t) : ('a, string) Lwt_result.t =
   let { messages_to_send; response_emitter; _ } = t in
   let tracked_message = { ClientIdeMessage.tracking_id; message } in
   match t.state with
@@ -443,12 +454,20 @@ let rpc (t : t) ~(tracking_id : string) (message : 'a ClientIdeMessage.t) :
   | Uninitialized { wait_for_initialization = true } ->
     let%lwt () = wait_for_initialization t in
     let%lwt result =
-      do_rpc ~tracked_message ~messages_to_send ~response_emitter
+      do_rpc
+        ~tracked_message
+        ~ref_unblocked_time
+        ~messages_to_send
+        ~response_emitter
     in
     Lwt.return result
   | Initialized _ ->
     let%lwt result =
-      do_rpc ~tracked_message ~messages_to_send ~response_emitter
+      do_rpc
+        ~tracked_message
+        ~ref_unblocked_time
+        ~messages_to_send
+        ~response_emitter
     in
     Lwt.return result
 

@@ -77,6 +77,7 @@ val notify_file_changed : t -> tracking_id:string -> Path.t -> unit
 val rpc :
   t ->
   tracking_id:string ->
+  ref_unblocked_time:float ref ->
   'response ClientIdeMessage.t ->
   ('response, string) Lwt_result.t
 

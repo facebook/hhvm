@@ -194,15 +194,20 @@ let notification_to_string (n : notification) : string =
     Printf.sprintf "Processing_file(%s)" (Processing_files.to_string p)
   | Done_processing -> "Done_processing"
 
+type 'a timed_response = {
+  unblocked_time: float;
+  response: ('a, string) result;
+}
+
 type message_from_daemon =
   | Notification of notification
-  | Response : ('a, string) result -> message_from_daemon
+  | Response : 'a timed_response -> message_from_daemon
 
 let message_from_daemon_to_string (m : message_from_daemon) : string =
   match m with
   | Notification n -> notification_to_string n
-  | Response (Error e) -> Printf.sprintf "Response_error(%s)" e
-  | Response (Ok _) -> Printf.sprintf "Response_ok"
+  | Response { response = Error e; _ } -> Printf.sprintf "Response_error(%s)" e
+  | Response { response = Ok _; _ } -> Printf.sprintf "Response_ok"
 
 type daemon_args = {
   init_id: string;

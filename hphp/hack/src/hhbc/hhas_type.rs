@@ -13,6 +13,11 @@ pub struct Info {
     pub type_constraint: constraint::Type,
 }
 
+pub struct Constant {
+    pub name: String,
+    pub initializer: constraint::Type,
+}
+
 #[allow(dead_code)]
 pub mod constraint {
 
@@ -34,6 +39,7 @@ pub mod constraint {
             const SOFT =             0b0001_0000;
             const TYPE_CONSTANT =    0b0010_0000;
             const DISPLAY_NULLABLE = 0b0100_0000;
+            const UPPERBOUND =       0b1000_0000;
         }
     }
 
@@ -54,6 +60,10 @@ pub mod constraint {
         pub fn make(name: Option<String>, flags: Flags) -> Type {
             Type { name, flags }
         }
+
+        pub fn make_with_raw_str(name: &str, flags: Flags) -> Type {
+            Self::make(Some(String::from(name)), flags)
+        }
     }
 }
 
@@ -63,6 +73,12 @@ impl Info {
             user_type,
             type_constraint,
         }
+    }
+}
+
+impl Constant {
+    pub fn make(name: String, initializer: constraint::Type) -> Constant {
+        Constant { name, initializer }
     }
 }
 

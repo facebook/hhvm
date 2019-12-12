@@ -5916,7 +5916,13 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
   }
 
   while (pops--) {
-    interpStep(env, bc::PopC {});
+    auto const& popped = topT(env);
+    if (popped.subtypeOf(BInitCell)) {
+      interpStep(env, bc::PopC {});
+    } else {
+      assertx(popped.subtypeOf(BUninit));
+      interpStep(env, bc::PopU {});
+    }
   }
 
   return target;

@@ -362,6 +362,8 @@ module ProfileTypeCheck = struct
       ~time_decl_and_typecheck:_
       ~decl_cache_misses:_
       ~decl_cache_misses_time:_
+      ~cache_overhead_time_opt:_
+      ~cache_peak_bytes_opt:_
       ~filesize_opt:_
       ~path:_ =
     ()

@@ -20,6 +20,12 @@ don't count toward eviction.
 *)
 type ('k, 'v) t
 
+(** The cache keeps a mutable record of its performance. You can reset it. *)
+type telemetry = {
+  time_spent: float;
+  peak_size_in_words: int;
+}
+
 (** Construct a new cache which can store up to [max_size_in_words] words of
 values. *)
 val make : max_size_in_words:int -> ('k, 'v) t
@@ -47,3 +53,9 @@ val find_or_add : ('k, 'v) t -> key:'k -> default:(unit -> 'v) -> 'v
 (** Remove the entry with the given key from the cache. If the key is not
 present, does nothing. *)
 val remove : ('k, 'v) t -> key:'k -> unit
+
+(** The cache keeps track of how long it's spent doing cache overhead *)
+val get_telemetry : ('k, 'v) t -> telemetry
+
+(** You can reset the timer. *)
+val reset_telemetry : ('k, 'v) t -> unit

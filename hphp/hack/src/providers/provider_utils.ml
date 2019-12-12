@@ -110,10 +110,19 @@ let compute_tast_and_errors_unquarantined
   match (entry.Provider_context.tast, entry.Provider_context.errors) with
   | (Some tast, Some errors) -> { tast; errors; decl_cache_misses = 0 }
   | _ ->
+    (* prepare logging *)
     let prev_deferral_state =
       Deferred_decl.reset ~enable:true ~threshold_opt:None
     in
+    begin
+      match ctx.Provider_context.backend with
+      | Provider_backend.Local_memory { decl_cache; _ } ->
+        Memory_bounded_lru_cache.reset_telemetry decl_cache
+      | _ -> ()
+    end;
     let t = Unix.gettimeofday () in
+
+    (* do the work *)
     let (nast_errors, nast) =
       Errors.do_with_context
         entry.Provider_context.path
@@ -131,6 +140,7 @@ let compute_tast_and_errors_unquarantined
     (* Logging... *)
     let decl_cache_misses = Deferred_decl.get_decl_cache_misses_counter () in
     let decl_cache_misses_time = Deferred_decl.get_decl_cache_misses_time () in
+    let time_decl_and_typecheck = Unix.gettimeofday () -. t in
     Deferred_decl.restore_state prev_deferral_state;
     (* Sometimes we're called with a FileName that doesn't exist on disk. *)
     let filesize_opt =
@@ -138,11 +148,36 @@ let compute_tast_and_errors_unquarantined
       | ServerCommandTypes.FileName _ -> None
       | ServerCommandTypes.FileContent s -> Some (String.length s)
     in
+    let (cache_overhead_time_opt, cache_peak_bytes_opt) =
+      match ctx.Provider_context.backend with
+      | Provider_backend.Local_memory { decl_cache; _ } ->
+        let { Memory_bounded_lru_cache.time_spent; peak_size_in_words; _ } =
+          Memory_bounded_lru_cache.get_telemetry decl_cache
+        in
+        let bytes_per_word = Sys.word_size / 8 in
+        (Some time_spent, Some (peak_size_in_words * bytes_per_word))
+      | _ -> (None, None)
+    in
+
+    let seconds_to_ms s = 1000. *. s |> int_of_float |> string_of_int in
+    let bytes_to_k b = b / 1024 |> string_of_int in
+    Hh_logger.debug
+      "compute_tast: %s (%s ms / %s k), decl-fetch (%d / %s ms), cache (%s ms, %s k)"
+      (Relative_path.suffix entry.Provider_context.path)
+      (time_decl_and_typecheck |> seconds_to_ms)
+      (Option.value_map filesize_opt ~default:"?" ~f:bytes_to_k)
+      decl_cache_misses
+      (decl_cache_misses_time |> seconds_to_ms)
+      (Option.value_map cache_overhead_time_opt ~default:"?" ~f:seconds_to_ms)
+      (Option.value_map cache_peak_bytes_opt ~default:"?" ~f:bytes_to_k);
     HackEventLogger.ProfileTypeCheck.compute_tast
-      ~provider_backend:(Provider_backend.get () |> Provider_backend.t_to_string)
-      ~time_decl_and_typecheck:(Unix.gettimeofday () -. t)
+      ~provider_backend:
+        (ctx.Provider_context.backend |> Provider_backend.t_to_string)
+      ~time_decl_and_typecheck
       ~decl_cache_misses
       ~decl_cache_misses_time
+      ~cache_overhead_time_opt
+      ~cache_peak_bytes_opt
       ~filesize_opt
       ~path:entry.Provider_context.path;
 

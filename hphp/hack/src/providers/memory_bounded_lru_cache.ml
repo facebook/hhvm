@@ -17,14 +17,26 @@ type 'v entry = {
 type ('k, 'v) t = {
   mutable timestamp: int;
   mutable total_size_in_words: int;
+  mutable peak_size_in_words: int;
+  mutable time_spent: float;
   max_size_in_words: int;
   entries: ('k, 'v entry) Hashtbl.t;
 }
+
+type telemetry = {
+  time_spent: float;
+  peak_size_in_words: int;
+}
+
+let time_internal (t : ('k, 'v) t) (start_time : float) : unit =
+  t.time_spent <- t.time_spent +. (Unix.gettimeofday () -. start_time)
 
 let make ~(max_size_in_words : int) : ('k, 'v) t =
   {
     timestamp = 0;
     total_size_in_words = 0;
+    peak_size_in_words = 0;
+    time_spent = 0.;
     max_size_in_words;
     entries = Hashtbl.Poly.create ();
   }
@@ -82,22 +94,43 @@ let add_internal (t : ('k, 'v) t) (key : 'k) (value : 'v) : 'v entry =
   in
   Hashtbl.add_exn t.entries key entry;
   t.total_size_in_words <- t.total_size_in_words + entry.size_in_words;
+  t.peak_size_in_words <- max t.peak_size_in_words t.total_size_in_words;
   trim_to_memory_limit t;
   entry
 
 let add (t : ('k, 'v) t) ~(key : 'k) ~(value : 'v) : unit =
+  let start_time = Unix.gettimeofday () in
   let (_ : 'a entry) = add_internal t key value in
+  time_internal t start_time;
   ()
 
 let find_or_add (t : ('k, 'v) t) ~(key : 'k) ~(default : unit -> 'v) : 'v =
+  let start_time = ref (Unix.gettimeofday ()) in
   let entry =
     Hashtbl.find_and_call
       t.entries
       key
       ~if_found:(fun entry -> entry)
-      ~if_not_found:(fun key -> add_internal t key (default ()))
+      ~if_not_found:(fun key ->
+        time_internal t !start_time;
+        let value = default () in
+        start_time := Unix.gettimeofday ();
+        add_internal t key value)
   in
   trim_to_memory_limit t;
+  time_internal t !start_time;
   entry.value
 
-let remove (t : ('k, 'v) t) ~(key : 'k) : unit = Hashtbl.remove t.entries key
+let remove (t : ('k, 'v) t) ~(key : 'k) : unit =
+  let start_time = Unix.gettimeofday () in
+  Hashtbl.remove t.entries key;
+  time_internal t start_time;
+  ()
+
+let reset_telemetry (t : ('k, 'v) t) : unit =
+  t.time_spent <- 0.;
+  t.peak_size_in_words <- 0;
+  ()
+
+let get_telemetry (t : ('k, 'v) t) : telemetry =
+  { time_spent = t.time_spent; peak_size_in_words = t.peak_size_in_words }

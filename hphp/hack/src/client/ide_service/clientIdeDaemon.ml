@@ -607,7 +607,21 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
         Path.Set.remove changed_files_to_process next_file
       in
       let%lwt server_env =
-        ClientIdeIncremental.process_changed_file server_env next_file
+        try%lwt
+          let%lwt server_env =
+            ClientIdeIncremental.process_changed_file server_env next_file
+          in
+          Lwt.return server_env
+        with exn ->
+          let e = Exception.wrap exn in
+          HackEventLogger.uncaught_exception exn;
+          Hh_logger.exception_
+            e
+            ~prefix:
+              (Printf.sprintf
+                 "Uncaught exception when processing changed file: %s"
+                 (Path.to_string next_file));
+          Lwt.return server_env
       in
       let%lwt state =
         if Path.Set.is_empty changed_files_to_process then

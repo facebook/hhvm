@@ -5,8 +5,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use aast_parser::{rust_aast_parser_types::Env, AastParser, Error as AastParserError};
-use ocamlrep::ptr::UnsafeOcamlPtr;
-use ocamlrep_ocamlpool::{ocaml_ffi, to_ocaml};
+use ocamlrep::OcamlRep;
+use ocamlrep_ocamlpool::to_ocaml;
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
 use stack_limit::{StackLimit, KI, MI};
 
@@ -19,19 +19,18 @@ fn stack_slack_for_traversal_and_parsing(stack_size: usize) -> usize {
     stack_size * 6 / 10
 }
 
-ocaml_ffi! {
-    fn from_text(env: UnsafeOcamlPtr, source_text: UnsafeOcamlPtr) -> UnsafeOcamlPtr {
-        let source_text = source_text.as_usize();
-        let env = env.as_usize();
+#[no_mangle]
+extern "C" fn from_text(env: usize, source_text: usize) -> usize {
+    ocamlrep_ocamlpool::catch_unwind(|| {
         let make_retryable = move || {
             Box::new(
                 move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
-                    let env = unsafe {Env::from_ocaml(env).unwrap()};
+                    let env = unsafe { Env::from_ocaml(env).unwrap() };
                     let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
                     let indexed_source_text = IndexedSourceText::new(source_text);
                     let res = AastParser::from_text(&env, &indexed_source_text, Some(stack_limit));
-                    unsafe{ UnsafeOcamlPtr::new(to_ocaml(&res)) }
-                }
+                    to_ocaml(&res)
+                },
             )
         };
 
@@ -43,7 +42,8 @@ ocaml_ffi! {
                 let file_path = source_text.file_path().path_str();
                 eprintln!(
                     "[hrust] warning: aast_parser exceeded stack of {} KiB on: {}",
-                    (stack_size_tried - stack_slack_for_traversal_and_parsing(stack_size_tried)) / KI,
+                    (stack_size_tried - stack_slack_for_traversal_and_parsing(stack_size_tried))
+                        / KI,
                     file_path,
                 );
             }
@@ -62,11 +62,10 @@ ocaml_ffi! {
         ) {
             Ok(r) => r,
             Err(_) => {
-                let r: &Result<(), AastParserError> = &Err(
-                    "Expression recursion limit reached".into(),
-                );
-                unsafe { UnsafeOcamlPtr::new(to_ocaml(r)) }
+                let r: &Result<(), AastParserError> =
+                    &Err("Expression recursion limit reached".into());
+                to_ocaml(r)
             }
         }
-    }
+    })
 }

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Hash functions for use with container accessors.
 """

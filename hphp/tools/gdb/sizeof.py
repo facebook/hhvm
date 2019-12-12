@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 GDB command for printing the sizes of various containers.
 """

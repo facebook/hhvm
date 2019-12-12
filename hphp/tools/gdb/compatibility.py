@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 I don't understand Python's version incompatibilities and also Python sucks.
 """

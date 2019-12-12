@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Assorted utilities for HHVM GDB bindings.
 """

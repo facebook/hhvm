@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Set the target Unit; used implicitly by some other commands.
 """

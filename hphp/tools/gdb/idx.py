@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Helpers for accessing C++ STL containers in GDB.
 """

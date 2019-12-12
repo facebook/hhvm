@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Helpers for collecting and printing frame data.
 """

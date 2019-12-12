@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 GDB commands for asio information and stacktraces.
 """
@@ -281,7 +283,7 @@ class InfoAsioCommand(gdb.Command):
         wh_ptype = T('HPHP::c_WaitableWaitHandle').pointer()
 
         # Find the most recent join().
-        for i, fp in izip(count(), frame.gen_php(vmfp)):
+        for _i, fp in izip(count(), frame.gen_php(vmfp)):
             if nameof(fp['m_func']) == 'HH\WaitHandle::join':
                 break
 

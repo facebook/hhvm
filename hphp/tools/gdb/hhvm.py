@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Toplevel include for all HHVM GDB Python bindings.
 

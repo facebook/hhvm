@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 GDB commands related to the HHVM stack.
 """

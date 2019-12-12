@@ -229,21 +229,27 @@ let update_naming_table
     match new_file_info with
     | None -> naming_table
     | Some new_file_info ->
-      (* Update reverse naming table *)
-      FileInfo.(
-        (* TODO: when we start typechecking files, we'll have to keep track of
-      which files have naming errors, so that we can re-typecheck them
-       - Also note that [_fast] means that this function call ignores errors *)
-        Naming_global.ndecl_file_fast
-          path
-          ~funs:(strip_positions new_file_info.funs)
-          ~classes:(strip_positions new_file_info.classes)
-          ~record_defs:(strip_positions new_file_info.record_defs)
-          ~typedefs:(strip_positions new_file_info.typedefs)
-          ~consts:(strip_positions new_file_info.consts);
+      (* Update reverse naming table.
+      TODO: this doesn't handle name collisions in erroneous programs.
+      NOTE: We don't use [Naming_global.ndecl_file_fast] here because it
+      attempts to look up the symbol by doing a file parse, but the file may not
+      exist on disk anymore. We also don't need to do the file parse in this
+      case anyways, since we just did one and know for a fact where the symbol
+      is. *)
+      let open FileInfo in
+      List.iter new_file_info.funs ~f:(fun (pos, fun_name) ->
+          Naming_table.Funs.add fun_name pos);
+      List.iter new_file_info.classes ~f:(fun (pos, class_name) ->
+          Naming_table.Types.add class_name (pos, Naming_table.TClass));
+      List.iter new_file_info.record_defs ~f:(fun (pos, record_def_name) ->
+          Naming_table.Types.add record_def_name (pos, Naming_table.TRecordDef));
+      List.iter new_file_info.typedefs ~f:(fun (pos, typedef_name) ->
+          Naming_table.Types.add typedef_name (pos, Naming_table.TTypedef));
+      List.iter new_file_info.consts ~f:(fun (pos, const_name) ->
+          Naming_table.Consts.add const_name pos);
 
-        (* Update and return the forward naming table *)
-        Naming_table.update naming_table path new_file_info)
+      (* Update and return the forward naming table *)
+      Naming_table.update naming_table path new_file_info
   in
   { env with ServerEnv.naming_table }
 

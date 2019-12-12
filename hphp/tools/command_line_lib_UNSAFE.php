@@ -10,5 +10,8 @@ function error_UNSAFE($message) {
 }
 
 function parse_options_UNSAFE($optmap) {
-  return parse_options_impl($optmap, &$GLOBALS['argv']);
+  $argv = new Vector($GLOBALS['argv']);
+  $result = parse_options_impl($optmap, $argv);
+  $GLOBALS['argv'] = varray($argv);
+  return $result;
 }

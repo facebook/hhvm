@@ -702,6 +702,7 @@ let get_typeconst_declaration tcopt tconst name =
 let get_class_elt_declaration
     tcopt
     (cls : Decl_provider.class_decl)
+    target
     (class_elt : 'a Typing_deps.Dep.variant) =
   Typing_deps.Dep.(
     Decl_provider.(
@@ -713,68 +714,80 @@ let get_class_elt_declaration
           let tconst =
             value_or_not_found description @@ Class.get_typeconst cls const_name
           in
-          get_typeconst_declaration tcopt tconst const_name
+          Some (get_typeconst_declaration tcopt tconst const_name)
         else
           let cons =
             value_or_not_found description @@ Class.get_const cls const_name
           in
-          get_const_declaration
-            tcopt
-            ~abstract:cons.cc_abstract
-            cons.cc_type
-            const_name
+          Some
+            (get_const_declaration
+               tcopt
+               ~abstract:cons.cc_abstract
+               cons.cc_type
+               const_name)
       | Method (_, method_name) ->
-        let m =
-          value_or_not_found description @@ Class.get_method cls method_name
-        in
-        let decl =
-          get_method_declaration
-            tcopt
-            m
-            ~from_interface
-            ~is_static:false
-            method_name
-        in
-        let body =
-          if m.ce_abstract then
-            ";"
-          else
-            "{throw new Exception();}"
-        in
-        decl ^ body
+        (match target with
+        | ServerCommandTypes.Extract_standalone.Method (_, target_name)
+          when method_name = target_name ->
+          None
+        | _ ->
+          let m =
+            value_or_not_found description @@ Class.get_method cls method_name
+          in
+          let decl =
+            get_method_declaration
+              tcopt
+              m
+              ~from_interface
+              ~is_static:false
+              method_name
+          in
+          let body =
+            if m.ce_abstract then
+              ";"
+            else
+              "{throw new Exception();}"
+          in
+          Some (decl ^ body))
       | SMethod (_, smethod_name) ->
-        let m =
-          value_or_not_found description @@ Class.get_smethod cls smethod_name
-        in
-        let decl =
-          get_method_declaration
-            tcopt
-            m
-            ~from_interface
-            ~is_static:true
-            smethod_name
-        in
-        let body =
-          if m.ce_abstract then
-            ";"
-          else
-            "{throw new Exception();}"
-        in
-        decl ^ body
+        (match target with
+        | ServerCommandTypes.Extract_standalone.Method (_, target_name)
+          when smethod_name = target_name ->
+          None
+        | _ ->
+          let m =
+            value_or_not_found description @@ Class.get_smethod cls smethod_name
+          in
+          let decl =
+            get_method_declaration
+              tcopt
+              m
+              ~from_interface
+              ~is_static:true
+              smethod_name
+          in
+          let body =
+            if m.ce_abstract then
+              ";"
+            else
+              "{throw new Exception();}"
+          in
+          Some (decl ^ body))
       | Prop (_, prop_name) ->
         let p =
           value_or_not_found description @@ Class.get_prop cls prop_name
         in
-        get_property_declaration tcopt p ~is_static:false prop_name
+        Some (get_property_declaration tcopt p ~is_static:false prop_name)
       | SProp (_, sprop_name) ->
         let sp =
           value_or_not_found description @@ Class.get_sprop cls sprop_name
         in
-        get_property_declaration
-          tcopt
-          sp
-          ~is_static:true
-          (String.lstrip ~drop:(fun c -> c = '$') sprop_name)
+        Some
+          (get_property_declaration
+             tcopt
+             sp
+             ~is_static:true
+             (String.lstrip ~drop:(fun c -> c = '$') sprop_name))
       (* Constructor should've been tackled earlier, and all other dependencies aren't class elements *)
       | Cstr _
       | Extends _
@@ -827,7 +840,7 @@ let get_constructor_declaration tcopt cls prop_names =
     in
     Some (decl ^ " {throw new \\Exception();}")
 
-let get_class_body tcopt cls meth class_elts =
+let get_class_body tcopt cls target class_elts =
   let { uses; req_extends; req_implements; _ } = get_direct_ancestors cls in
   let uses =
     List.map uses ~f:(fun s ->
@@ -856,27 +869,28 @@ let get_class_body tcopt cls meth class_elts =
            information about properties. *)
         | Dep.Cstr _ -> get_constructor_declaration tcopt cls prop_names
         | Dep.Const (_, "class") -> None
-        | class_elt -> Some (get_class_elt_declaration tcopt cls class_elt))
+        | class_elt -> get_class_elt_declaration tcopt cls target class_elt)
   in
   (* If we are extracting a method of this class, we should declare it
      here, with stubs of other class elements. *)
   let extracted_method =
-    match meth with
-    | Some (Method _ as m) -> [extract_body m]
+    match target with
+    | Method (cls_name, _) when cls_name = Decl_provider.Class.name cls ->
+      [extract_body target]
     | _ -> []
   in
   String.concat
     ~sep:"\n"
     (req_extends @ req_implements @ uses @ body @ extracted_method)
 
-let construct_class tcopt cls ?(full_method = None) fields =
+let construct_class tcopt cls target fields =
   (* Enum declaration have a very different format: for example, no 'const' keyword
      for values, which are actually just class constants *)
   if Decl_provider.Class.kind cls = Ast_defs.Cenum then
     construct_enum tcopt cls fields
   else
     let decl = get_class_declaration tcopt cls in
-    let body = get_class_body tcopt cls full_method fields in
+    let body = get_class_body tcopt cls target fields in
     Printf.sprintf "%s {%s}" decl body
 
 let construct_typedef tcopt t =
@@ -907,9 +921,9 @@ let construct_typedef tcopt t =
     constraint_
     (Typing_print.full_decl tcopt td.td_type)
 
-let construct_type_declaration tcopt t ?(full_method = None) fields =
+let construct_type_declaration tcopt t target fields =
   match Decl_provider.get_class t with
-  | Some cls -> construct_class tcopt cls ~full_method fields
+  | Some cls -> construct_class tcopt cls target fields
   | None -> construct_typedef tcopt t
 
 let rec do_add_dep deps dep =
@@ -1384,19 +1398,10 @@ let get_declarations tcopt target class_dependencies global_dependencies =
       (get_global_object_declaration tcopt dep)
   in
   let add_class_declaration cls fields declarations =
-    let full_method =
-      match target with
-      | Function _ -> None
-      | Method (c, _) ->
-        if c = cls then
-          Some target
-        else
-          None
-    in
     add_declaration
       declarations
       cls
-      (construct_type_declaration tcopt cls ~full_method fields)
+      (construct_type_declaration tcopt cls target fields)
   in
   let strict_declarations =
     List.fold_left

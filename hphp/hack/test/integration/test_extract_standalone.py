@@ -161,6 +161,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_newtype_with_newtype_bound",
             "\\with_method_defined_in_trait",
             "\\with_method_defined_in_trait2",
+            "\\ImplementingBase::must_implement",
         ]
 
         for path in paths:

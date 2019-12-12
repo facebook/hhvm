@@ -32,10 +32,13 @@ fi
   [[ -n "$CARGO_BIN" ]] && PATH="$CARGO_BIN:$PATH";
   # note: --manifest-path doesn't work with custom toolchain, so do cd
   cd "$HACK_SOURCE_ROOT" && \
+  cp ./.cargo/Cargo.toml.ocaml_build ./Cargo.toml && \
   cargo build \
     $LOCK_FLAG \
     --target-dir "${TARGET_DIR}" \
     --package "$pkg" \
     $profile_flags \
-    "$@"
+    "$@";
+  [ -e ./Cargo.toml ] && rm ./Cargo.toml;
 ) && cp "${TARGET_DIR}/$profile/lib$lib.a" "lib${lib}_stubs.a"
+

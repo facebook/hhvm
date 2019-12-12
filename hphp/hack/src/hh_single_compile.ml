@@ -251,80 +251,6 @@ let rec dispatch_loop handlers =
       | _ -> fail_daemon None ("Unhandled message type '" ^ msg_type ^ "'"));
       dispatch_loop handlers))
 
-let parse_text ~hhbc_options popt fn text =
-  let php5_compat_mode =
-    not (Hhbc_options.enable_uniform_variable_syntax hhbc_options)
-  in
-  let hacksperimental = Hhbc_options.hacksperimental hhbc_options in
-  let lower_coroutines = Hhbc_options.enable_coroutines hhbc_options in
-  let env =
-    Full_fidelity_ast.make_env
-      ~parser_options:popt
-      ~codegen:true
-      ~fail_open:false
-      ~php5_compat_mode
-      ~hacksperimental
-      ~keep_errors:false
-      ~lower_coroutines
-      fn
-  in
-  let source_text = SourceText.make fn text in
-  let (ast, is_hh_file) =
-    Full_fidelity_ast.from_text_to_empty_tast env source_text
-  in
-  let elaborate_namespaces =
-    new Naming_elaborate_namespaces_endo.generic_elaborator
-  in
-  let nsenv = Namespace_env.empty_from_popt popt in
-  let ast =
-    elaborate_namespaces#on_program
-      (Naming_elaborate_namespaces_endo.make_env nsenv)
-      ast
-  in
-  (ast, is_hh_file)
-
-let parse_file ~config_list ~config_jsons filename text =
-  let hhbc_options =
-    Hhbc_options.apply_config_overrides_statelessly config_list config_jsons
-  in
-  let popt =
-    Hhbc_options.(
-      let co = hhbc_options in
-      ParserOptions.make
-        ~auto_namespace_map:(aliased_namespaces co)
-        ~codegen:true
-        ~disallow_execution_operator:(phpism_disallow_execution_operator co)
-        ~disable_nontoplevel_declarations:
-          (phpism_disable_nontoplevel_declarations co)
-        ~disable_static_closures:(phpism_disable_static_closures co)
-        ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
-        ~enable_class_level_where_clauses:(enable_class_level_where_clauses co)
-        ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
-        ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
-        ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
-        ~const_default_func_args:(const_default_func_args co)
-        ~disallow_silence:false
-        ~const_static_props:(const_static_props co)
-        ~abstract_static_props:(abstract_static_props co)
-        ~disable_unset_class_const:(disable_unset_class_const co)
-        ~disallow_func_ptrs_in_constants:(disallow_func_ptrs_in_constants co)
-        ~rust_lowerer:(rust_lowerer co))
-  in
-  ( (try
-       `ParseResult
-         (Errors.do_ (fun () -> parse_text popt filename text ~hhbc_options))
-     with
-    (* FFP failed to parse *)
-    | Failure s -> `ParseFailure (SyntaxError.make 0 0 s, Pos.none)
-    (* FFP generated an error *)
-    | SyntaxError.ParserFatal (e, p) -> `ParseFailure (e, p)),
-    popt )
-
-let add_to_time_ref r t0 =
-  let t = Unix.gettimeofday () in
-  r := !r +. (t -. t0);
-  t
-
 let print_debug_time_info filename debug_time =
   let stat = Caml.Gc.stat () in
   P.eprintf "File %s:\n" (Relative_path.to_absolute filename);
@@ -352,18 +278,6 @@ let log_fail compiler_options filename exc ~stack =
     ~mode:(mode_to_string compiler_options.mode)
     ~exc:(Caml.Printexc.to_string exc ^ "\n" ^ stack)
 
-let handle_conversion_errors errors =
-  List.filter errors ~f:(fun error ->
-      match Errors.get_code error with
-      (* Ignore these errors to match legacy AST behavior *)
-      | 2086
-      (* Naming.MethodNeedsVisibility *)
-      | 2102
-      (* Naming.UnsupportedTraitUseAs *)
-      | 2103 (* Naming.UnsupportedInsteadOf *) ->
-        false
-      | _ (* Emit fatal parse otherwise *) -> true)
-
 let do_compile
     ~is_systemlib
     ~config_jsons
@@ -371,15 +285,6 @@ let do_compile
     filename
     source_text
     debug_time =
-  let t = Unix.gettimeofday () in
-  let (fail_or_tast, popt) =
-    parse_file
-      filename
-      source_text
-      ~config_list:compiler_options.config_list
-      ~config_jsons
-  in
-  ignore @@ add_to_time_ref debug_time.parsing_t t;
   let env =
     Compile.
       {
@@ -388,36 +293,12 @@ let do_compile
         is_evaled = is_file_path_for_evaled_code filename;
         for_debugger_eval = compiler_options.for_debugger_eval;
         dump_symbol_refs = compiler_options.dump_symbol_refs;
-        empty_namespace = Namespace_env.empty_from_popt popt;
         config_list = compiler_options.config_list;
         config_jsons;
       }
   in
-  let (tast_hh, is_runtime_error, error) =
-    match fail_or_tast with
-    | `ParseFailure (e, pos) ->
-      let is_runtime_error =
-        match SyntaxError.error_type e with
-        | SyntaxError.ParseError -> false
-        | SyntaxError.RuntimeError -> true
-      in
-      (None, is_runtime_error, Some (pos, Some (SyntaxError.message e)))
-    | `ParseResult (errors, (tast, is_hh_file)) ->
-      let error_list = Errors.get_error_list errors in
-      let error_list = handle_conversion_errors error_list in
-      List.iter error_list (fun e ->
-          P.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
-      if List.is_empty error_list then
-        (Some (tast, is_hh_file), false, None)
-      else
-        (None, false, Some (Pos.none, None))
-  in
-  let ret =
-    match (tast_hh, error) with
-    | (Some (tast, is_hh_file), _) -> Compile.from_ast ~env ~is_hh_file tast
-    | (_, Some (pos, msg)) -> Compile.fatal ~env ~is_runtime_error pos msg
-    | _ -> failwith "Impossible case: emits program or fatals"
-  in
+  let ret = Compile.from_text source_text env in
+  (debug_time.parsing_t := Compile.(ret.parsing_t));
   (debug_time.codegen_t := Compile.(ret.codegen_t));
   (debug_time.printing_t := Compile.(ret.printing_t));
   if compiler_options.debug_time then print_debug_time_info filename debug_time;

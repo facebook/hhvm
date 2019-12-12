@@ -8,6 +8,7 @@
 
 type result = {
   bytecode_segments: string list;
+  parsing_t: float;
   codegen_t: float;
   printing_t: float;
 }
@@ -18,11 +19,10 @@ type env = {
   is_evaled: bool;
   for_debugger_eval: bool;
   dump_symbol_refs: bool;
-  empty_namespace: Namespace_env.env;
   config_jsons: Hh_json.json option list;
   config_list: string list;
 }
 
-val from_ast : env:env -> is_hh_file:bool -> Tast.program -> result
+val from_text : string -> env -> result
 
 val fatal : env:env -> is_runtime_error:bool -> Pos.t -> string option -> result

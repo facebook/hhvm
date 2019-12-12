@@ -231,23 +231,53 @@ def compact_vector_at(vec, idx, hasher=None):
 #------------------------------------------------------------------------------
 # PHP value accessors.
 
-def _object_data_prop_vec(obj):
-    prop_vec = (obj.address + 1).cast(T('uintptr_t'))
-    return prop_vec.cast(T('HPHP::TypedValue').pointer())
+def _un_quick_index(qi):
+    repr_type = qi.type.strip_typedefs()
 
-
-def object_data_at(obj, prop_name_or_idx, hasher=None):
-    sinfo = strinfo(prop_name_or_idx)
-    if sinfo is None:
-        prop_ind = prop_name_or_idx
+    if repr_type == T("uint16_t"):
+        return qi
+    elif repr_type == T("HPHP::tv_layout::detail_7up::quick_index"):
+        return qi["quot"] * 7 + qi["rem"]
     else:
-        prop_ind = _ism_index(cls['m_declProperties'], prop_name_or_idx)
-
-    if prop_ind is None:
         return None
 
-    prop_vec = _object_data_prop_vec(obj)
-    return prop_vec[prop_ind]
+
+def tv_layout_at(layout_type, props_base, idx):
+    layout_type = layout_type.strip_typedefs()
+    if layout_type == T("HPHP::tv_layout::TvArray"):
+        prop_vec = props_base.cast(T("HPHP::TypedValue").pointer())
+        return prop_vec[idx]
+    elif layout_type == T("HPHP::tv_layout::Tv7Up"):
+        idx = int(idx)
+        quot = idx // 7
+        rem = idx % 7
+        chunk = props_base + T("HPHP::Value").sizeof * 8 * quot
+        ty = (chunk + rem).cast(T("HPHP::DataType").pointer()).dereference()
+        valaddr = chunk + T("HPHP::Value").sizeof * (1 + rem)
+        val = valaddr.cast(T("HPHP::Value").pointer()).dereference()
+        return hallucinate_tv(ty, val)
+    else:
+        print("No such tv layout: {}" % layout_type.name)
+
+
+def object_data_at(obj, cls, prop_name_or_slot, hasher=None):
+    sinfo = strinfo(prop_name_or_slot)
+    if sinfo is None:
+        slot = prop_name_or_slot
+    else:
+        slot = _ism_index(cls['m_declProperties'], prop_name_or_slot)
+
+    if slot is None:
+        return None
+
+    idx = _un_quick_index(fixed_vector_at(cls['m_slotIndex']['m_impl'], slot))
+
+    if idx is None:
+        return None
+
+    props_base = (obj.address + 1).cast(T('char').pointer())
+
+    return tv_layout_at(T("HPHP::ObjectProps"), props_base, idx)
 
 
 #------------------------------------------------------------------------------

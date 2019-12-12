@@ -401,7 +401,7 @@ class ObjectDataPrinter(object):
                 name = '<invalid>'
 
             try:
-                val = idx.object_data_at(self.obj, self.cur)
+                val = idx.object_data_at(self.obj, self.cls, self.cur)
             except gdb.MemoryError:
                 val = '<unknown>'
 

@@ -283,20 +283,20 @@ struct DceAction {
     Replace,
     PopAndReplace,
     MinstrStackFinal,
-    MinstrStackFixup
+    MinstrStackFixup,
+    AdjustPop,
   } action;
-  using MaskType = uint32_t;
+  using MaskOrCountType = uint32_t;
   static constexpr size_t kMaskSize = 32;
-  MaskType mask{0};
-
+  MaskOrCountType maskOrCount{0};
 
   DceAction() = default;
   /* implicit */ DceAction(Action a) : action{a} {}
-  DceAction(Action a, MaskType m) : action{a}, mask{m} {}
+  DceAction(Action a, MaskOrCountType m) : action{a}, maskOrCount{m} {}
 };
 
 bool operator==(const DceAction& a, const DceAction& b) {
-  return a.action == b.action && a.mask == b.mask;
+  return a.action == b.action && a.maskOrCount == b.maskOrCount;
 }
 
 using DceActionMap = std::map<InstrId, DceAction>;
@@ -404,6 +404,7 @@ const char* show(DceAction action) {
     case DceAction::PopAndReplace:    return "PopAndReplace";
     case DceAction::MinstrStackFinal: return "MinstrStackFinal";
     case DceAction::MinstrStackFixup: return "MinstrStackFixup";
+    case DceAction::AdjustPop:        return "AdjustPop";
   };
   not_reached();
 }
@@ -659,7 +660,15 @@ void combineActions(DceActionMap& dst, const DceActionMap& src) {
       if (i.second.action == DceAction::MinstrStackFixup ||
           i.second.action == DceAction::MinstrStackFinal) {
         assertx(i.second.action == ret.first->second.action);
-        ret.first->second.mask |= i.second.mask;
+        ret.first->second.maskOrCount |= i.second.maskOrCount;
+        continue;
+      }
+
+      if (i.second.action == DceAction::AdjustPop &&
+          ret.first->second.action == DceAction::AdjustPop) {
+        assertx(ret.first->second.maskOrCount > 0);
+        assertx(i.second.maskOrCount > 0);
+        ret.first->second.maskOrCount += i.second.maskOrCount;
         continue;
       }
 
@@ -685,6 +694,13 @@ void combineActions(DceActionMap& dst, const DceActionMap& src) {
         ret.first->second.action = DceAction::Kill;
         continue;
       }
+      if (ret.first->second.action == DceAction::AdjustPop ||
+          i.second.action == DceAction::AdjustPop) {
+        ret.first->second.action = DceAction::Kill;
+        ret.first->second.maskOrCount = 0;
+        continue;
+      }
+
       always_assert(false);
     }
   }
@@ -964,6 +980,8 @@ void dce(Env& env, const bc::PopU2&)         {
     // it.
     markUisLive(env, true, ui);
     ui = UseInfo { Use::Used };
+  } else {
+    ui.actions.emplace(env.id, DceAction { DceAction::AdjustPop, 1 });
   }
   discard(env);
   env.dceState.stack.push_back(std::move(ui));
@@ -978,6 +996,8 @@ void dce(Env& env, const bc::PopFrame& op) {
     if (isLinked(uis.back())) {
       markUisLive(env, true, uis.back());
       uis.back() = UseInfo { Use::Used };
+    } else {
+      uis.back().actions.emplace(env.id, DceAction { DceAction::AdjustPop, 1 });
     }
   }
 
@@ -1765,7 +1785,7 @@ void dispatch_dce(Env& env, const Bytecode& op) {
   not_reached();
 }
 
-using MaskType = DceAction::MaskType;
+using MaskType = DceAction::MaskOrCountType;
 
 void m_adj(uint32_t& depth, MaskType mask) {
   auto i = depth;
@@ -2104,7 +2124,36 @@ void dce_perform(php::Func& func,
       case DceAction::MinstrStackFinal:
       case DceAction::MinstrStackFixup:
       {
-        adjustMinstr(b->hhbcs[id.idx], elm.second.mask);
+        adjustMinstr(b->hhbcs[id.idx], elm.second.maskOrCount);
+        break;
+      }
+      case DceAction::AdjustPop:
+      {
+        auto const op = b->hhbcs[id.idx].op;
+        always_assert(op == Op::PopU2 || op == Op::PopFrame);
+        if (op == Op::PopU2) {
+          assertx(elm.second.maskOrCount == 1);
+          b->hhbcs[id.idx].PopU = bc::PopU {};
+          b->hhbcs[id.idx].op = Op::PopU;
+        } else {
+          assertx(elm.second.maskOrCount > 0);
+          auto& popFrame = b->hhbcs[id.idx].PopFrame;
+          assertx(elm.second.maskOrCount <= popFrame.arg1);
+          popFrame.arg1 -= elm.second.maskOrCount;
+          if (popFrame.arg1 <= 1) {
+            auto const remaining = popFrame.arg1;
+            auto const srcLoc = b->hhbcs[id.idx].srcLoc;
+            b->hhbcs.erase(b->hhbcs.begin() + id.idx);
+            b->hhbcs.insert(
+              b->hhbcs.begin() + id.idx,
+              3,
+              remaining == 0
+                ? Bytecode{ bc::PopU {} }
+                : Bytecode{ bc::PopU2 {} }
+            );
+            setloc(srcLoc, b->hhbcs.begin() + id.idx, 3);
+          }
+        }
         break;
       }
     }

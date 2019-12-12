@@ -3162,8 +3162,8 @@ SpillWithRematResult spill_with_remat(State& state,
  */
 
 struct SpillWeight {
-  int64_t usage;
-  int64_t distance;
+  int64_t usage = 0;
+  int64_t distance = std::numeric_limits<int32_t>::max();
 
   bool operator==(const SpillWeight& o) const {
     return usage == o.usage && distance == o.distance;
@@ -3206,7 +3206,7 @@ struct SpillWeightAt {
   SpillWeight weight;
   // Whether all immediate uses from this point are trivially
   // rematerializable.
-  bool allTrivial;
+  bool allTrivial = true;
 };
 
 SpillWeightAt spill_weight_at(State&,
@@ -3509,117 +3509,114 @@ SpillWeightAt
 spill_weight_at_impl(State& state,
                      const SpillerResults& spillerResults,
                      BlockSet& processed,
-                     VregSet regs,
+                     Vreg reg,
                      Vlabel startBlock,
                      size_t startRpo,
                      Vlabel b,
                      size_t instIdx) {
-  // The total block weights of all the usages seen so far, scaled by
-  // spill/reload weight as appropriate.
-  int64_t totalUsage = 0;
-  // The instruction count of the first usage, initially set to
-  // infinity to designate no usage. We use the max of int32_t instead
-  // of int64_t to allow for easy addition.
-  int64_t firstDistance = std::numeric_limits<int32_t>::max();
-  // The number of instructions seen so far on this linear chain of
-  // blocks (not counting copyish instructions).
-  int64_t instructionCount = 0;
-  // Whether all immediate uses are trivially
-  // rematerializable. Ideally we would want to see if it's
-  // conditionally rematerializable, not trivially, but this would
-  // require tracking what Vregs are currently live, which would be
-  // expensive and complicated.
-  bool allTrivial = true;
-
   auto& unit = state.unit;
 
-  while (true) {
-    // We should never get here with a block that is before the
-    // start block (such blocks have already been processed by the
-    // spiller, thus they don't matter to future decisions).
-    assertx(state.rpoOrder[b] >= startRpo);
+  // We should never get here with a block that is before the
+  // start block (such blocks have already been processed by the
+  // spiller, thus they don't matter to future decisions).
+  assertx(state.rpoOrder[b] >= startRpo);
 
-    if (processed[b]) break;
-    processed[b] = true;
+  if (processed[b]) return SpillWeightAt{};
+  processed[b] = true;
 
-    // Remove any interesting Vregs which are no longer live. If
-    // there's none left, we're done and can report our
-    // results. Don't do this for the start block because the
-    // Vreg(s) may not be live in to that block (they may be defined
-    // in it).
-    if (b != startBlock) {
-      assertx(instIdx == 0);
-      auto& firstInst = unit.blocks[b].code[0];
-      if (firstInst.op == Vinstr::phidef) {
-        regs &= (state.liveIn[b] | defs_set_cached(state, firstInst));
-      } else {
-        regs &= state.liveIn[b];
+  // Check if the Vreg is no longer live. Don't do this for the start
+  // block because the Vreg may not be live in to that block (it may
+  // be defined within it).
+  if (b != startBlock) {
+    assertx(instIdx == 0);
+    auto& firstInst = unit.blocks[b].code[0];
+    if (firstInst.op == Vinstr::phidef) {
+      // If the block begins with a phidef, it may define the current
+      // Vreg.
+      if (!state.liveIn[b][reg] && !defs_set_cached(state, firstInst)[reg]) {
+        return SpillWeightAt{};
       }
+    } else if (!state.liveIn[b][reg]) {
+      return SpillWeightAt{};
     }
-    if (regs.none()) break;
+  }
 
-    auto const recordUse = [&] (Vreg r, size_t idx) {
-      auto weight = block_weight(state, b);
-      if (!is_trivial_remat(state, r, b, idx)) {
-        // If this Vreg isn't trivially rematerializable, scale this
-        // weight by the relative cost of a reload.
-        weight *= kSpillReloadMultiplier;
-        allTrivial = false;
-      }
-      totalUsage += weight;
-      firstDistance = std::min(firstDistance, instructionCount);
-      regs.remove(r);
+  // Record a use of the current Vreg at the given instruction
+  // index. Returns the spill weight resulting from that usage.
+  auto const recordUse = [&] (size_t idx) {
+    auto weight = block_weight(state, b);
+    auto allTrivial = true;
+    if (!is_trivial_remat(state, reg, b, idx)) {
+      // If this Vreg isn't trivially rematerializable, scale this
+      // weight by the relative cost of a reload.
+      weight *= kSpillReloadMultiplier;
+      allTrivial = false;
+    }
+    assertx(idx >= instIdx);
+    return SpillWeightAt{
+      SpillWeight{weight, int64_t(idx - instIdx)},
+      allTrivial
     };
+  };
 
-    auto const recordCopyUse = [&] (Vreg src, Vreg dst, size_t idx) {
-      // Copies are special. A copy to a physical register is
-      // treated like a use. Otherwise we just add the destination
-      // to the set of Vregs we're tracking.
-      if (dst.isPhys()) {
-        recordUse(src, idx);
-      } else {
-        regs.add(dst);
-      }
-    };
+  // Record a use of the current Vreg by a copy instruction. These may
+  // or may not result in an actual usage. If it does, return the
+  // spill weight. Otherwise return folly::none.
+  auto const recordCopyUse =
+    [&] (Vreg dst, size_t idx) -> folly::Optional<SpillWeightAt> {
+    // Copies are special. A copy to a physical register is treated
+    // like a use. If the src is live after the copy, treat it like a
+    // use as well. Otherwise we just start tracking the destination.
+    if (dst.isPhys() || live_in_at(state, reg, b, idx + 1)) {
+      return recordUse(idx);
+    } else {
+      reg = dst;
+      return folly::none;
+    }
+  };
 
-    // Special case when dealing with loop headers for a loop that the
-    // current block belongs to. Such blocks will always be already
-    // processed (because it's a back edge). If the Vreg in question is
-    // not used within the loop, we ignore this edge for the sake of
-    // spill weight. Why? We assume that if we spill such Vregs (not
-    // used within the loop), we'll later hoist the spill out of the
-    // loop, meaning we won't have to do anything on the back
-    // edge. This helps bias the spilling heuristic towards selecting
-    // non-used within the loop Vregs to help facilitate this.
-    auto const ignoreBackEdge = [&] (Vreg r, Vlabel succ) {
-      if (!is_loop_header(state, succ)) return false;
-      if (!block_in_loop(state, b, succ)) return false;
-      auto const& loopInfo = loop_info(state, succ);
-      return !loopInfo.uses[r];
-    };
+  // Special case when dealing with loop headers for a loop that the
+  // current block belongs to. Such blocks will always be already
+  // processed (because it's a back edge). If the Vreg in question is
+  // not used within the loop, we ignore this edge for the sake of
+  // spill weight. Why? We assume that if we spill such Vregs (not
+  // used within the loop), we'll later hoist the spill out of the
+  // loop, meaning we won't have to do anything on the back
+  // edge. This helps bias the spilling heuristic towards selecting
+  // non-used within the loop Vregs to help facilitate this.
+  auto const ignoreBackEdge = [&] (Vreg r, Vlabel succ) {
+    if (!is_loop_header(state, succ)) return false;
+    if (!block_in_loop(state, b, succ)) return false;
+    auto const& loopInfo = loop_info(state, succ);
+    return !loopInfo.uses[r];
+  };
 
-    // Examine each instruction in the current block, looking for
-    // uses. For copyish instructions, add the destination Vreg to
-    // the set of interesting Vregs. However, if the destination is
-    // a physical register, treat that as a use. Once used, remove
-    // it from the interesting set.
-    auto& block = unit.blocks[b];
-    if (regs.intersects(state.uses[b])) {
-      for (size_t i = instIdx; i < block.code.size(); ++i) {
-        auto& inst = block.code[i];
+  // Examine each instruction in the current block, looking for
+  // uses. For copyish instructions, start tracking the destination
+  // Vreg. However, if the destination is a physical register, or if
+  // the source is live after the copy, treat that as a use.
+  auto& block = unit.blocks[b];
+  if (state.uses[b][reg]) {
+    for (size_t i = instIdx; i < block.code.size(); ++i) {
+      auto& inst = block.code[i];
 
-        if (inst.op == Vinstr::copy) {
-          if (!regs[inst.copy_.s]) continue;
-          recordCopyUse(inst.copy_.s, inst.copy_.d, i);
-        } else if (inst.op == Vinstr::copyargs) {
+      switch (inst.op) {
+        case Vinstr::copy:
+          if (inst.copy_.s != reg) continue;
+          if (auto const w = recordCopyUse(inst.copy_.d, i)) return *w;
+          break;
+        case Vinstr::copyargs: {
           auto const& srcs = unit.tuples[inst.copyargs_.s];
           auto const& dsts = unit.tuples[inst.copyargs_.d];
           assertx(srcs.size() == dsts.size());
           for (size_t j = 0; j < srcs.size(); ++j) {
-            if (!regs[srcs[j]]) continue;
-            recordCopyUse(srcs[j], dsts[j], i);
+            if (srcs[j] != reg) continue;
+            if (auto const w = recordCopyUse(dsts[j], i)) return *w;
+            break;
           }
-        } else if (inst.op == Vinstr::phijmp) {
+          break;
+        }
+        case Vinstr::phijmp: {
           auto const successors = succs(block);
           assertx(successors.size() == 1);
           auto const succ = successors[0];
@@ -3647,112 +3644,118 @@ spill_weight_at_impl(State& state,
             assertx(spillerState->size() == srcs.size());
 
             for (size_t j = 0; j < srcs.size(); ++j) {
-              if (!regs[srcs[j]]) continue;
+              if (srcs[j] != reg) continue;
               if (dsts[j].isPhys()) {
-                recordUse(srcs[j], i);
+                return recordUse(i);
               } else if ((*spillerState)[j]) {
-                if (!ignoreBackEdge(srcs[j], succ)) recordUse(srcs[j], i);
+                if (!ignoreBackEdge(srcs[j], succ)) return recordUse(i);
               } else {
-                totalUsage -= (block_weight(state, b) * kSpillReloadMultiplier);
-                regs.remove(srcs[j]);
+                SpillWeightAt weight;
+                weight.weight.usage -=
+                  block_weight(state, b) * kSpillReloadMultiplier;
+                return weight;
               }
             }
           } else {
             // Otherwise treat it like a copyargs
             for (size_t j = 0; j < srcs.size(); ++j) {
-              if (!regs[srcs[j]]) continue;
-              recordCopyUse(srcs[j], dsts[j], i);
+              if (srcs[j] != reg) continue;
+              if (auto const w = recordCopyUse(dsts[j], i)) return *w;
+              break;
             }
           }
-        } else {
+          break;
+        }
+        default:
           // A normal instruction. Shouldn't be a spill, reload, or
           // ssaalias because we should only examine blocks that the
           // spiller hasn't visited yet.
           assertx(!is_spill_inst(inst) &&
                   inst.op != Vinstr::reload &&
                   inst.op != Vinstr::ssaalias);
-          // Remove any Vregs which have been used.
-          auto const uses = uses_set_cached(state, inst) & regs;
-          for (auto const r : uses) recordUse(r, i);
-          regs -= uses;
-        }
+          if (!uses_set_cached(state, inst)[reg]) continue;
+          return recordUse(i);
       }
     }
-    instructionCount += (block.code.size() - instIdx);
-
-    // We didn't find any actual uses in this block. We need to now
-    // process the successors.
-    auto const successors = succs(block);
-    if (successors.empty()) break;
-
-    // If there's more than one successor we can't do this
-    // iteratively. Instead recurse and combine the results among
-    // the successors.
-    if (successors.size() > 1) {
-      for (auto const succ : successors) {
-        // Since critical edges are split, we cannot have any
-        // back-edges here.
-        assertx(state.rpoOrder[succ] >= state.rpoOrder[b]);
-        auto const result = spill_weight_at_impl(
-          state,
-          spillerResults,
-          processed,
-          regs,
-          startBlock,
-          startRpo,
-          succ,
-          0
-        );
-        allTrivial &= result.allTrivial;
-        firstDistance = std::min(
-          firstDistance,
-          result.weight.distance + instructionCount
-        );
-        totalUsage += result.weight.usage;
-      }
-      break;
-    }
-
-    // Otherwise just advance to the next block (and start from the
-    // beginning of that block).
-
-    auto const succ = successors[0];
-    if (state.rpoOrder[succ] < startRpo) {
-      // Special case: if the successor is a jump backwards to a block
-      // which the spiller has already processed, we can examine the
-      // spiller state to see what it has already decided there. If it
-      // has decided the Vreg is not-spilled, that counts as a use
-      // (we'll have to reload it on the back-edge). If it has decided
-      // the Vreg is spilled, we remove some of the spill weight
-      // corresponding to the weight at that block. This is because by
-      // spilling this Vreg, we avoid a spill at the back edge. This
-      // can all only happen (jumping to an already processed block)
-      // if there's a single successor because we've split critical
-      // edges.
-      auto const& spillerState = spillerResults.perBlock[succ].in;
-      assertx(spillerState.hasValue());
-
-      for (auto const r : regs) {
-        auto const s = spillerState->forReg(r);
-        assertx(s);
-        if (s->inReg[r]) {
-          if (!ignoreBackEdge(r, succ)) recordUse(r, block.code.size());
-        } else if (s->inMem[r]) {
-          totalUsage -= (block_weight(state, b) * kSpillReloadMultiplier);
-        }
-      }
-
-      // We don't actually examine the successor in this case so
-      // we're done.
-      break;
-    }
-
-    // Otherwise proceed normally
-    b = succ;
-    instIdx = 0;
   }
 
-  return { SpillWeight{totalUsage, firstDistance}, allTrivial };
+  // We didn't find any actual uses in this block. We need to now
+  // process the successors.
+  auto const successors = succs(block);
+  if (successors.empty()) return SpillWeightAt{};
+
+  // If there's more than one successor we have to recurse and combine
+  // the results among the successors.
+  if (successors.size() > 1) {
+    SpillWeightAt weight;
+    for (auto const succ : successors) {
+      // Since critical edges are split, we cannot have any
+      // back-edges here.
+      assertx(state.rpoOrder[succ] >= state.rpoOrder[b]);
+      auto const result = spill_weight_at_impl(
+        state,
+        spillerResults,
+        processed,
+        reg,
+        startBlock,
+        startRpo,
+        succ,
+        0
+      );
+      weight.allTrivial &= result.allTrivial;
+      weight.weight.distance = std::min<int64_t>(
+        weight.weight.distance,
+        result.weight.distance + (unit.blocks[b].code.size() - instIdx)
+      );
+      weight.weight.usage += result.weight.usage;
+    }
+    return weight;
+  }
+
+  // Otherwise there's a single successor.
+
+  auto const succ = successors[0];
+  if (state.rpoOrder[succ] < startRpo) {
+    // Special case: if the successor is a jump backwards to a block
+    // which the spiller has already processed, we can examine the
+    // spiller state to see what it has already decided there. If it
+    // has decided the Vreg is not-spilled, that counts as a use
+    // (we'll have to reload it on the back-edge). If it has decided
+    // the Vreg is spilled, we remove some of the spill weight
+    // corresponding to the weight at that block. This is because by
+    // spilling this Vreg, we avoid a spill at the back edge. This
+    // can all only happen (jumping to an already processed block)
+    // if there's a single successor because we've split critical
+    // edges.
+    auto const& spillerState = spillerResults.perBlock[succ].in;
+    assertx(spillerState.hasValue());
+
+    auto const s = spillerState->forReg(reg);
+    assertx(s);
+    if (s->inReg[reg]) {
+      if (!ignoreBackEdge(reg, succ)) return recordUse(block.code.size());
+    } else if (s->inMem[reg]) {
+      SpillWeightAt weight;
+      weight.weight.usage -= block_weight(state, b) * kSpillReloadMultiplier;
+      return weight;
+    }
+
+    // We don't actually examine the successor in this case so
+    // we're done.
+    return SpillWeightAt{};
+  }
+
+  // Otherwise tail call to process the single successor.
+  return spill_weight_at_impl(
+    state,
+    spillerResults,
+    processed,
+    reg,
+    startBlock,
+    startRpo,
+    succ,
+    0
+  );
 }
 
 // Calculate the spill weight for the given Vreg at the given block
@@ -3772,29 +3775,30 @@ spill_weight_at(State& state,
   assertx(reg_info(state, reg).regClass != RegClass::SF);
 
   /*
-   * From the specified starting block, we walk the CFG. We keep a set
-   * of "interesting" Vregs (initially just the provided Vreg). For
-   * each instruction in the block we check if any of the interesting
-   * Vregs are used. If they are, we increment the usage counter by
-   * the block's weight (and set the distance if this is the first
-   * use). We then remove the Vreg from the interesting set. If the
-   * interesting set is ever empty, we are done and return the usage
-   * counter and distance as the block weight.
-   *
-   * If the block has a single successor, we simply loop and then
-   * repeat on that successor. Thus runs of blocks with single
-   * successors are treated like one super block. If the block has
-   * multiple successors, we recursively calculate the spill weight
-   * for the successors and then combine the results (along with the
-   * already gathered results).
+   * From the specified starting block, we walk the CFG. We look for a
+   * usage of the specified Vreg. If found, we calculate the spill
+   * weight as follows: The weight usage is set to the block weight
+   * where the use happens. The weight distance is set to the number
+   * of instructions between the starting point and the usage. The
+   * "all trivial" flag is set to true if the Vreg is trivially
+   * rematerializable at the point of the usage, false otherwise.
    *
    * Copyish instructions have some special treatment. Since they
    * generally preserve spill-ness, they are not usually considered as
-   * uses. Instead their dest Vregs are added to the interesting set
-   * (and the uses are untouched). This is how the interesting set can
-   * grow beyond its initial single Vreg. The exception is when the
-   * copy writes to a physical register. That is treated like a normal
-   * use (since we'll be forced to emit a reload for that case).
+   * uses. Instead we switch to looking for usages of their dest Vreg
+   * instead. There are two exceptions. The first is when the copy
+   * writes to a physical register. That is treated like a normal use
+   * (since we'll be forced to emit a reload for that case). The
+   * second is if the src Vreg is live after the copy. In that case,
+   * we treat it like a normal use as well. The reasoning is that
+   * we'll most likely emit a reload for that case (to avoid an
+   * expensive memory to memory copy).
+   *
+   * If we reach the end of the block without a use, we continue into
+   * the successor blocks. If the block has a single successor, we
+   * tail call into processing it. If the block has multiple
+   * successors, we recursively calculate the spill weights for each
+   * successor, and then combine the results.
    *
    * We only examine blocks which the spiller hasn't processed
    * yet. This is because the choice of whether a Vreg is spilled or
@@ -3808,13 +3812,7 @@ spill_weight_at(State& state,
    * the blocks (is it before our first block?).
    *
    * Each block is only processed once (we keep a set of processed
-   * blocks). This isn't *quite* correct for two reasons. One, the
-   * distance calculation is path sensitive and thus you might get a
-   * different result depending how you got there (and thus processing
-   * a block multiple times will give different results). Second, the
-   * interesting Vreg set might be different depending on the path you
-   * took to the block (because of phis). However this doesn't seem to
-   * matter in practice and simplifies things a lot.
+   * blocks).
    */
 
   auto const startRpo = state.rpoOrder[startBlock];
@@ -3825,7 +3823,7 @@ spill_weight_at(State& state,
     state,
     spillerResults,
     processed,
-    VregSet{reg},
+    reg,
     startBlock,
     startRpo,
     startBlock,

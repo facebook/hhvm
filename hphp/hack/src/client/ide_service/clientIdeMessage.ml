@@ -203,3 +203,8 @@ let message_from_daemon_to_string (m : message_from_daemon) : string =
   | Notification n -> notification_to_string n
   | Response (Error e) -> Printf.sprintf "Response_error(%s)" e
   | Response (Ok _) -> Printf.sprintf "Response_ok"
+
+type daemon_args = {
+  init_id: string;
+  verbose: bool;
+}

@@ -673,16 +673,23 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     Lwt.return_unit
 
 let daemon_main
-    (parent_init_id : string) (channels : ('a, 'b) Daemon.channel_pair) : unit =
+    (args : ClientIdeMessage.daemon_args)
+    (channels : ('a, 'b) Daemon.channel_pair) : unit =
   Printexc.record_backtrace true;
   let (ic, oc) = channels in
   let in_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_in_channel ic) in
   let out_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_out_channel oc) in
   let daemon_init_id =
-    Printf.sprintf "%s.%s" parent_init_id (Random_id.short_string ())
+    Printf.sprintf
+      "%s.%s"
+      args.ClientIdeMessage.init_id
+      (Random_id.short_string ())
   in
   HackEventLogger.serverless_ide_init ~init_id:daemon_init_id;
+  if args.ClientIdeMessage.verbose then
+    Hh_logger.Level.set_min_level Hh_logger.Level.Debug;
   Lwt_main.run (serve ~in_fd ~out_fd)
 
-let daemon_entry_point : (string, unit, unit) Daemon.entry =
+let daemon_entry_point : (ClientIdeMessage.daemon_args, unit, unit) Daemon.entry
+    =
   Daemon.register_entry_point "ClientIdeService" daemon_main

@@ -45,7 +45,7 @@ end
 
 (** Create an uninitialized IDE service. All queries made to this service will
 fail immediately, unless otherwise requested in the initialization procedure. *)
-val make : init_id:string -> t
+val make : ClientIdeMessage.daemon_args -> t
 
 (** Request that the IDE service initialize from the saved state. Queries made
 to the service will fail until it is done initializing, unless

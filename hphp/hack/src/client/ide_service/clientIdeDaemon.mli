@@ -7,4 +7,4 @@
  *
  *)
 
-val daemon_entry_point : (string, unit, unit) Daemon.entry
+val daemon_entry_point : (ClientIdeMessage.daemon_args, unit, unit) Daemon.entry

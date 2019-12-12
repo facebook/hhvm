@@ -3268,7 +3268,8 @@ let tick_showStatus
           sure to assign the new IDE service to the [ref] before attempting
           to do an asynchronous operation with the old one. *)
           let old_ide_service = !ide_service in
-          let new_ide_service = ClientIdeService.make ~init_id in
+          let ide_args = { ClientIdeMessage.init_id; verbose = env.verbose } in
+          let new_ide_service = ClientIdeService.make ide_args in
           ide_service := new_ide_service;
           Lwt.async (fun () -> run_ide_service env new_ide_service);
           let%lwt () =
@@ -3859,7 +3860,8 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
   HackEventLogger.set_from env.from;
 
   let client = Jsonrpc.make_queue () in
-  let ide_service = ref (ClientIdeService.make init_id) in
+  let ide_args = { ClientIdeMessage.init_id; verbose = env.verbose } in
+  let ide_service = ref (ClientIdeService.make ide_args) in
   let deferred_action : (unit -> unit Lwt.t) option ref = ref None in
   let state = ref Pre_init in
   let ref_event = ref None in

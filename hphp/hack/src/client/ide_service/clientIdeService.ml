@@ -152,8 +152,7 @@ let do_rpc
     in
     Lwt.return_error message
 
-let make ~(init_id : string) : t =
-  let args = init_id in
+let make (args : ClientIdeMessage.daemon_args) : t =
   let daemon_handle =
     Daemon.spawn
       ~channel_mode:`pipe

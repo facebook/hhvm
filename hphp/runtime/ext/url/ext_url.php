@@ -18,7 +18,7 @@ function base64_decode(string $data, bool $strict = false): mixed;
  *
  * @param string $data - The data to encode.
  *
- * @return string - The encoded data, as a string or FALSE on failure (when does this happen?).
+ * @return string - The encoded data, as a string.
  */
 <<__Native, __IsFoldable, __Rx>>
 function base64_encode(string $data): string;

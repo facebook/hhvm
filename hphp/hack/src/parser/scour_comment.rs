@@ -27,7 +27,7 @@ use regex::bytes::Regex;
 pub struct ScourComment<'a, T, V> {
     pub indexed_source_text: &'a IndexedSourceText<'a>,
     pub collect_fixmes: bool,
-    pub incldue_line_comments: bool,
+    pub include_line_comments: bool,
     pub ignored_fixme: Option<&'a Regex>,
     pub disallowed_decl_fixmes: &'a ISet,
     pub phantom: std::marker::PhantomData<(*const T, *const V)>,
@@ -60,7 +60,7 @@ where
             CompoundStatement(_) => on_children(true, acc),
             Token(t) => {
                 if t.has_trivia_kind(TriviaKind::DelimitedComment)
-                    || (self.incldue_line_comments
+                    || (self.include_line_comments
                         && t.has_trivia_kind(TriviaKind::SingleLineComment))
                     || (self.collect_fixmes
                         && (t.has_trivia_kind(TriviaKind::FixMe)
@@ -98,7 +98,7 @@ where
                 acc
             }
             SingleLineComment => {
-                if !self.incldue_line_comments {
+                if !self.include_line_comments {
                     acc
                 } else {
                     let text = self.source_text().text();

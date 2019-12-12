@@ -242,7 +242,7 @@ impl<'a> AastParser {
             phantom: std::marker::PhantomData,
             indexed_source_text,
             collect_fixmes: env.keep_errors,
-            incldue_line_comments: env.include_line_comments,
+            include_line_comments: env.include_line_comments,
             disallowed_decl_fixmes: &env.parser_options.po_disallowed_decl_fixmes,
             ignored_fixme: ignored_fixme_regex.as_ref(),
         };

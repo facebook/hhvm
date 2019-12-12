@@ -5738,10 +5738,21 @@ void interpStep(ISS& env, const Bytecode& bc) {
 
     auto const numPop = bc.numPop();
     for (auto j = 0; j < numPop; j++) {
-      DEBUG_ONLY auto flavor = bc.popFlavor(j);
-      assertx(flavor != Flavor::U);
-      // Even for CU we only support C's.
-      interpStep(env, bc::PopC {});
+      auto const flavor = bc.popFlavor(j);
+      if (flavor == Flavor::C) {
+        interpStep(env, bc::PopC {});
+      } else if (flavor == Flavor::U) {
+        interpStep(env, bc::PopU {});
+      } else {
+        assertx(flavor == Flavor::CU);
+        auto const& popped = topT(env);
+        if (popped.subtypeOf(BUninit)) {
+          interpStep(env, bc::PopU {});
+        } else {
+          assertx(popped.subtypeOf(BInitCell));
+          interpStep(env, bc::PopC {});
+        }
+      }
     }
 
     while (i--) {

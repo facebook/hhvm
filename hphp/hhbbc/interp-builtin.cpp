@@ -460,7 +460,15 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
       BytecodeVec repl;
       // Pop the arguments
       for (uint32_t i = 0; i < op.arg1; ++i) {
-        repl.push_back(bc::PopC {});
+        // FCallBuiltin has CU flavored args, so we need to check the
+        // type to know how to pop them.
+        auto const& popped = topT(env, i);
+        if (popped.subtypeOf(BUninit)) {
+          repl.push_back(bc::PopU {});
+        } else {
+          assertx(popped.subtypeOf(BInitCell));
+          repl.push_back(bc::PopC {});
+        }
       }
       // Pop the placeholder uninit values
       for (uint32_t i = 0; i < op.arg3; ++i) {

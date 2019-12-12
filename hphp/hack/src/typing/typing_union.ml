@@ -227,16 +227,24 @@ and simplify_union_ env ty1 ty2 r =
       let e = exact_least_upper_bound e1 e2 in
       let (env, tyl) = union_class env id1 tyl1 tyl2 in
       (env, Some (r, Tclass ((p, id1), e, tyl)))
+    | ((_, Tgeneric name1), (_, Tgeneric name2)) when String.equal name1 name2
+      ->
+      (env, Some (r, Tgeneric name1))
     | ((_, Tarraykind ak1), (_, Tarraykind ak2)) ->
       let (env, ak) = union_arraykind env ak1 ak2 in
       (env, Some (r, Tarraykind ak))
-    | ((_, Tabstract (ak1, tcstr1)), (_, Tabstract (ak2, tcstr2))) ->
-      let (env, ak) = union_ak env ak1 ak2 in
-      let (env, tcstr) = union_tconstraints env tcstr1 tcstr2 in
-      (env, Some (r, Tabstract (ak, tcstr)))
-    | ((_, Tabstract (AKdependent _, Some ((_, Tclass _) as ty1))), ty2)
-    | (ty2, (_, Tabstract (AKdependent _, Some ((_, Tclass _) as ty1)))) ->
+    | ((_, Tdependent (dep1, tcstr1)), (_, Tdependent (dep2, tcstr2)))
+      when equal_dependent_type dep1 dep2 ->
+      let (env, tcstr) = union env tcstr1 tcstr2 in
+      (env, Some (r, Tdependent (dep1, tcstr)))
+    | ((_, Tdependent (_, ((_, Tclass _) as ty1))), ty2)
+    | (ty2, (_, Tdependent (_, ((_, Tclass _) as ty1)))) ->
       ty_equiv env ty1 ty2 ~are_ty_param:false
+    | ((_, Tnewtype (id1, tyl1, tcstr1)), (_, Tnewtype (id2, tyl2, tcstr2)))
+      when String.equal id1 id2 ->
+      let (env, tyl) = union_newtype env id1 tyl1 tyl2 in
+      let (env, tcstr) = union env tcstr1 tcstr2 in
+      (env, Some (r, Tnewtype (id1, tyl, tcstr)))
     | ((_, Ttuple tyl1), (_, Ttuple tyl2)) ->
       if Int.equal (List.length tyl1) (List.length tyl2) then
         let (env, tyl) = List.map2_env env tyl1 tyl2 ~f:union in
@@ -255,8 +263,9 @@ and simplify_union_ env ty1 ty2 r =
       (env, Some ty1)
     (* TODO with Tclass, union type arguments if covariant *)
     | ( ( _,
-          ( ( Tarraykind _ | Tprim _ | Tdynamic | Tabstract _ | Tclass _
-            | Ttuple _ | Tanon _ | Tfun _ | Tobject | Tshape _ | Terr
+          ( ( Tarraykind _ | Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _
+            | Tdependent _ | Tclass _ | Ttuple _ | Tanon _ | Tfun _ | Tobject
+            | Tshape _ | Terr
             | Tvar _
             (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
              * to say whether a given T can be null - e.g. opaque newtypes, dependent
@@ -407,17 +416,6 @@ and union_class env name tyl1 tyl2 =
   in
   union_tylists_w_variances env tparams tyl1 tyl2
 
-and union_ak env ak1 ak2 =
-  match (ak1, ak2) with
-  | (AKnewtype (id1, tyl1), AKnewtype (id2, tyl2)) when String.equal id1 id2 ->
-    let (env, tyl) = union_newtype env id1 tyl1 tyl2 in
-    (env, AKnewtype (id1, tyl))
-  | _ ->
-    if Int.equal 0 (abstract_kind_compare ak1 ak2) then
-      (env, ak1)
-    else
-      raise Dont_simplify
-
 and union_newtype env typename tyl1 tyl2 =
   let tparams =
     match Env.get_typedef env typename with
@@ -452,13 +450,6 @@ and union_tylists_w_variances env tparams tyl1 tyl2 =
     with Invalid_argument _ -> raise Dont_simplify
   in
   (env, tyl)
-
-and union_tconstraints env tcstr1 tcstr2 =
-  match (tcstr1, tcstr2) with
-  | (Some ty1, Some ty2) ->
-    let (env, ty) = union env ty1 ty2 in
-    (env, Some ty)
-  | _ -> (env, None)
 
 and union_shapes env (shape_kind1, fdm1, r1) (shape_kind2, fdm2, r2) =
   let shape_kind = union_shape_kind shape_kind1 shape_kind2 in

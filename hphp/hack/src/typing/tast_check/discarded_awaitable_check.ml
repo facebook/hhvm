@@ -41,8 +41,8 @@ let rec enforce_not_awaitable env p ty =
       ()
   | ( _,
       ( Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Tvar _ | Tfun _
-      | Tabstract _ | Tclass _ | Ttuple _ | Tanon _ | Tobject | Tshape _
-      | Tdynamic | Tpu _ | Tpu_type_access _ ) ) ->
+      | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _ | Ttuple _ | Tanon _
+      | Tobject | Tshape _ | Tdynamic | Tpu _ | Tpu_type_access _ ) ) ->
     ()
 
 let enforce_nullable_or_not_awaitable env p ty =

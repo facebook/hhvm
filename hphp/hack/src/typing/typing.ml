@@ -1444,7 +1444,7 @@ and case_list parent_locals ty env switch_pos cl =
           in
           (ty_is_enum && is_sub_dyn env ty')
           || (is_sub_dyn env ty && ty'_is_enum)
-        | Tabstract (AKnewtype (cid, _), _) -> Env.is_enum env cid
+        | Tnewtype (cid, _, _) -> Env.is_enum env cid
         | _ -> false
       in
       (env, is_enum)
@@ -2212,6 +2212,7 @@ and expr_
         ~nullsafe:None
         ~coerce_from_ty:None
         ~pos_params:None
+        ~is_nonnull:false
         env
         ty1
         (CIexpr instance)
@@ -4037,8 +4038,7 @@ and new_object
   in
   let allow_abstract_bound_generic =
     match tcid with
-    | ((_, (_, Tabstract (AKgeneric tt, _))), Aast.CI (_, tn)) ->
-      String.equal tt tn
+    | ((_, (_, Tgeneric tt)), Aast.CI (_, tn)) -> String.equal tt tn
     | _ -> false
   in
   let finish env tcid tel typed_unpack_element ty ctor_fty =
@@ -4046,7 +4046,7 @@ and new_object
       let ((_, cid_ty), _) = tcid in
       let (env, cid_ty) = Env.expand_type env cid_ty in
       match cid_ty with
-      | (_, Tabstract (AKgeneric _, _)) -> (env, cid_ty)
+      | (_, Tgeneric _) -> (env, cid_ty)
       | _ ->
         if check_parent then
           (env, ty)
@@ -4147,7 +4147,7 @@ and new_object
         let ((_, cid_ty), _) = tcid in
         let (env, cid_ty) = Env.expand_type env cid_ty in
         match cid_ty with
-        | (_, Tabstract (AKgeneric _, _)) -> (env, cid_ty)
+        | (_, Tgeneric _) -> (env, cid_ty)
         | _ ->
           if check_parent then
             (env, c_ty)
@@ -4669,8 +4669,8 @@ and call_parent_construct pos env el unpacked_element =
       | None -> assert false)
     | ( _,
         ( Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _
-        | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
-        | Tabstract (_, _)
+        | Ttuple _ | Tshape _ | Tvar _ | Tdynamic | Tgeneric _ | Tnewtype _
+        | Tdependent (_, _)
         | Tanon (_, _)
         | Tunion _ | Tintersection _ | Tobject | Tpu _ | Tpu_type_access _ ) )
       ->
@@ -5298,6 +5298,7 @@ and dispatch_call
           ~obj_pos:pos
           ~coerce_from_ty:None
           ~pos_params:(Some el)
+          ~is_nonnull:false
           env
           ty1
           e1
@@ -5747,7 +5748,8 @@ and class_get_
       Inter.intersect_list env (fst cty) (List.map ~f:fst pairs)
     in
     (env, (ty, []))
-  | (_, Tabstract (_, Some ty)) ->
+  | (_, Tnewtype (_, _, ty))
+  | (_, Tdependent (_, ty)) ->
     class_get_
       ~is_method
       ~is_const
@@ -5759,7 +5761,7 @@ and class_get_
       cid
       ty
       (p, mid)
-  | (_, Tabstract (_, None)) ->
+  | (_, Tgeneric _) ->
     let resl =
       TUtils.try_over_concrete_supertypes env cty (fun env ty ->
           class_get_
@@ -6016,8 +6018,7 @@ and class_id_for_new ~exact p env cid explicit_targs =
             (* When computing the classes for a new T() where T is a generic,
              * the class must be consistent (final, final constructor, or
              * <<__ConsistentConstruct>>) for its constructor to be considered *)
-            | ((_, Aast.CI (_, c)), (_, Tabstract (AKgeneric cg, _)))
-              when String.equal c cg ->
+            | ((_, Aast.CI (_, c)), (_, Tgeneric cg)) when String.equal c cg ->
               (* Only have this choosing behavior for new T(), not all generic types
                * i.e. new classname<T>, TODO: T41190512 *)
               if Tast_utils.valid_newable_class class_info then
@@ -6027,8 +6028,8 @@ and class_id_for_new ~exact p env cid explicit_targs =
             | _ -> get_info ((sid, class_info, ty) :: res) tyl))
         | ( _,
             ( Tany _ | Terr | Tnonnull | Tarraykind _ | Toption _ | Tprim _
-            | Tvar _ | Tfun _
-            | Tabstract (_, _)
+            | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _
+            | Tdependent (_, _)
             | Ttuple _
             | Tanon (_, _)
             | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tdynamic | Tpu _
@@ -6144,8 +6145,8 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         ( Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _
         | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
         | Tanon (_, _)
-        | Tunion _ | Tintersection _
-        | Tabstract (_, _)
+        | Tunion _ | Tintersection _ | Tgeneric _ | Tnewtype _
+        | Tdependent (_, _)
         | Tobject | Tpu _ | Tpu_type_access _ ) ) ->
       let parent =
         match Env.get_parent_ty env with
@@ -6181,7 +6182,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           (List.map ~f:snd tal)
       in
       let r = Reason.Rhint p in
-      let tgeneric = (r, Tabstract (AKgeneric id, None)) in
+      let tgeneric = (r, Tgeneric id) in
       make_result env tal (Aast.CI c) tgeneric
     else
       let class_ = Env.get_class env (snd c) in
@@ -6214,10 +6215,10 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           Errors.unify_error
       in
       match TUtils.get_base_type env ty with
-      | (_, Tabstract (AKnewtype (classname, [the_cls]), _))
+      | (_, Tnewtype (classname, [the_cls], _))
         when String.equal classname SN.Classes.cClassname ->
         resolve_ety env the_cls
-      | (_, Tabstract (AKgeneric _, _))
+      | (_, Tgeneric _)
       | (_, Tclass _) ->
         (env, ty)
       | (r, Tunion tyl) ->
@@ -6227,8 +6228,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         let (env, tyl) = TUtils.run_on_intersection env tyl ~f:resolve_ety in
         Inter.intersect_list env r tyl
       | (_, Tdynamic) as ty -> (env, ty)
-      | (_, (Tany _ | Tprim Tstring | Tabstract (_, None) | Tobject))
-        when not (Env.is_strict env) ->
+      | (_, (Tany _ | Tprim Tstring | Tobject)) when not (Env.is_strict env) ->
         (env, (Reason.Rwitness p, Typing_utils.tany env))
       | (_, Terr) -> (env, (Reason.Rwitness p, Typing_utils.terr env))
       | (r, Tvar _) ->
@@ -6236,8 +6236,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         (env, (Reason.Rwitness p, Typing_utils.terr env))
       | ( _,
           ( Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _
-          | Ttuple _
-          | Tabstract ((AKdependent _ | AKnewtype _), _)
+          | Ttuple _ | Tnewtype _ | Tdependent _
           | Tanon (_, _)
           | Tobject | Tshape _ | Tpu _ | Tpu_type_access _ ) ) as ty ->
         Errors.expected_class
@@ -6983,7 +6982,8 @@ and condition
       env
     | ( _,
         ( Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
-        | Tprim _ | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Ttuple _
+        | Tprim _ | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _
+        | Tclass _ | Ttuple _
         | Tanon (_, _)
         | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tpu _
         | Tpu_type_access _ ) ) ->
@@ -7109,8 +7109,9 @@ and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
     (env, (reason, Ttuple tyl))
   | ( _,
       ( Tany _ | Tprim _ | Toption _ | Ttuple _ | Tnonnull | Tshape _ | Tvar _
-      | Tabstract _ | Tarraykind _ | Tanon _ | Tunion _ | Tintersection _
-      | Tobject | Terr | Tfun _ | Tdynamic | Tpu _ | Tpu_type_access _ ) ) ->
+      | Tgeneric _ | Tnewtype _ | Tdependent _ | Tarraykind _ | Tanon _
+      | Tunion _ | Tintersection _ | Tobject | Terr | Tfun _ | Tdynamic | Tpu _
+      | Tpu_type_access _ ) ) ->
     (env, hint_ty)
 
 (** If we are dealing with a refinement like
@@ -7140,9 +7141,8 @@ and generate_fresh_tparams env class_info reason hint_tyl =
       Naming_attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
     in
     match hint_ty with
-    | Some (_, Tabstract (AKgeneric name, _))
-      when Env.is_fresh_generic_parameter name ->
-      (env, (Some (tp, name), (reason, Tabstract (AKgeneric name, None))))
+    | Some (_, Tgeneric name) when Env.is_fresh_generic_parameter name ->
+      (env, (Some (tp, name), (reason, Tgeneric name)))
     | Some ty -> (env, (None, ty))
     | None ->
       let (env, new_name) =
@@ -7153,8 +7153,7 @@ and generate_fresh_tparams env class_info reason hint_tyl =
           ~enforceable
           ~newable
       in
-      ( env,
-        (Some (tp, new_name), (reason, Tabstract (AKgeneric new_name, None))) )
+      (env, (Some (tp, new_name), (reason, Tgeneric new_name)))
   in
   let (env, tparams_and_tyl) =
     List.map2_env env hint_tyl (Cls.tparams class_info) ~f:replace_wildcard
@@ -7277,7 +7276,7 @@ and is_array env ty p pred_name arg_expr =
           ~enforceable:false
           ~newable:false
       in
-      let tarrkey = (r, Tabstract (AKgeneric tarrkey_name, None)) in
+      let tarrkey = (r, Tgeneric tarrkey_name) in
       let env =
         SubType.add_constraint
           p
@@ -7294,7 +7293,7 @@ and is_array env ty p pred_name arg_expr =
           ~enforceable:false
           ~newable:false
       in
-      let tfresh = (r, Tabstract (AKgeneric tfresh_name, None)) in
+      let tfresh = (r, Tgeneric tfresh_name) in
       (* This is the refined type of e inside the branch *)
       let refined_ty =
         match ty with
@@ -8617,7 +8616,7 @@ and class_get_pu_ env cty name =
   | Terr
   | Tdynamic
   | Tunion _
-  | Tabstract (_, None) ->
+  | Tgeneric _ ->
     (env, None)
   | Tvar _
   | Tnonnull
@@ -8634,7 +8633,9 @@ and class_get_pu_ env cty name =
   | Tpu_type_access _
   | Tpu _ ->
     (env, None)
-  | Tabstract (_, Some ty) -> class_get_pu_ env ty name
+  | Tnewtype (_, _, ty)
+  | Tdependent (_, ty) ->
+    class_get_pu_ env ty name
   | Tclass ((_, c), _, paraml) ->
     let class_ = Env.get_class env c in
     begin

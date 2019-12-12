@@ -21,8 +21,7 @@ let get_transitive_upper_bounds env ty =
     | ty :: tyl ->
       let (env, ty) = Env.expand_type env ty in
       (match snd ty with
-      | Tabstract (AKgeneric _, Some ty) -> iter seen env acc (ty :: tyl)
-      | Tabstract (AKgeneric n, _) ->
+      | Tgeneric n ->
         if SSet.mem n seen then
           iter seen env acc tyl
         else
@@ -53,7 +52,7 @@ let get_transitive_upper_bounds env ty =
  * We iterate the rule through intersections, unions, and bounds.
  *)
 let apply_rules ?(ignore_type_structure = false) env ty f =
-  let rec iter env ty =
+  let rec iter ~is_nonnull env ty =
     let (env, ty) = Env.expand_type env ty in
     (* This is the base case: not a union or intersection or bounded abstract type *)
     let default () = f env ty in
@@ -62,32 +61,42 @@ let apply_rules ?(ignore_type_structure = false) env ty f =
      * the intersection of the types.
      *)
     | (r, Tintersection tyl) ->
-      let (env, resl) = Typing_utils.run_on_intersection env iter tyl in
+      let is_nonnull =
+        Typing_solver.is_sub_type env ty (Typing_make_type.nonnull Reason.none)
+      in
+      let (env, resl) =
+        Typing_utils.run_on_intersection env (iter ~is_nonnull) tyl
+      in
       Typing_intersection.intersect_list env r resl
     (* For unions, just apply rule of components and compute union of result *)
     | (r, Tunion tyl) ->
-      let (env, resl) = List.map_env env tyl iter in
+      let (env, resl) = List.map_env env tyl (iter ~is_nonnull) in
       Typing_union.union_list env r resl
     (* Special case for `TypeStructure<_> as shape { ... }`, because some clients care about the
      * fact that we have the special type TypeStructure *)
-    | (_, Tabstract (AKnewtype (cid, _), Some (_, Tshape _)))
+    | (_, Tnewtype (cid, _, (_, Tshape _)))
       when String.equal cid SN.FB.cTypeStructure && ignore_type_structure ->
       default ()
     (* Enums with arraykey upper bound are treated as "abstract" *)
-    | (_, Tabstract (AKnewtype (cid, _), Some (_, Tprim Aast.Tarraykey)))
-      when Env.is_enum env cid ->
+    | (_, Tnewtype (cid, _, (_, Tprim Aast.Tarraykey))) when Env.is_enum env cid
+      ->
       default ()
     (* If there is an explicit upper bound, delegate to it *)
-    | (_, Tabstract ((AKgeneric _ | AKnewtype _ | AKdependent _), Some ty)) ->
-      iter env ty
+    | (_, (Tnewtype (_, _, ty) | Tdependent (_, ty))) -> iter ~is_nonnull env ty
     (* For type parameters with upper bounds, delegate to intersection of the upper bounds *)
-    | (r, Tabstract (AKgeneric _, _)) ->
+    | (r, Tgeneric _) ->
       let (env, tyl) = get_transitive_upper_bounds env ty in
       if List.is_empty tyl then
         default ()
       else
         let (env, ty) = Typing_intersection.intersect_list env r tyl in
-        iter env ty
+        let (env, ty) =
+          if is_nonnull then
+            Typing_solver.non_null env (Reason.to_pos @@ fst ty) ty
+          else
+            (env, ty)
+        in
+        iter ~is_nonnull env ty
     | _ -> default ()
   in
-  iter env ty
+  iter ~is_nonnull:false env ty

@@ -186,7 +186,7 @@ let (localize_with_self_ref : localize_with_self ref) =
 let localize_with_self x = !localize_with_self_ref x
 
 (* Convenience function for creating `this` types *)
-let this_of ty = Tabstract (AKdependent DTthis, Some ty)
+let this_of ty = Tdependent (DTthis, ty)
 
 (*****************************************************************************)
 (* Returns true if a type is optional *)
@@ -264,8 +264,10 @@ let get_all_supertypes env ty =
     | ty :: tyl ->
       let (env, ty) = Env.expand_type env ty in
       (match snd ty with
-      | Tabstract (_, Some ty) -> iter seen env (TySet.add ty acc) (ty :: tyl)
-      | Tabstract (AKgeneric n, _) ->
+      | Tnewtype (_, _, ty)
+      | Tdependent (_, ty) ->
+        iter seen env (TySet.add ty acc) tyl
+      | Tgeneric n ->
         if SSet.mem n seen then
           iter seen env acc tyl
         else
@@ -295,14 +297,13 @@ let get_concrete_supertypes env ty =
       let (env, ty) = Env.expand_type env ty in
       (match snd ty with
       (* Enums with arraykey upper bound are treated as "abstract" *)
-      | Tabstract (AKnewtype (cid, _), Some (_, Tprim Aast.Tarraykey))
-        when Env.is_enum env cid ->
+      | Tnewtype (cid, _, (_, Tprim Aast.Tarraykey)) when Env.is_enum env cid ->
         iter seen env acc tyl
       (* Don't expand enums or newtype; just return the type itself *)
-      | Tabstract ((AKnewtype _ | AKdependent _), Some ty) ->
+      | Tnewtype (_, _, ty)
+      | Tdependent (_, ty) ->
         iter seen env (TySet.add ty acc) tyl
-      | Tabstract (_, Some ty) -> iter seen env acc (ty :: tyl)
-      | Tabstract (AKgeneric n, _) ->
+      | Tgeneric n ->
         if SSet.mem n seen then
           iter seen env acc tyl
         else
@@ -311,7 +312,6 @@ let get_concrete_supertypes env ty =
             env
             acc
             (TySet.elements (Env.get_upper_bounds env n) @ tyl)
-      | Tabstract (_, None) -> iter seen env acc tyl
       | Tunion tyl' ->
         let tys = TySet.of_list tyl' in
         begin
@@ -411,12 +411,12 @@ let is_tintersection env ty =
 let rec get_base_type env ty =
   let (env, ty) = Env.expand_type env ty in
   match snd ty with
-  | Tabstract (AKnewtype (classname, _), _)
-    when String.equal classname SN.Classes.cClassname ->
+  | Tnewtype (classname, _, _) when String.equal classname SN.Classes.cClassname
+    ->
     ty
   (* If we have an expression dependent type and it only has one super
     type, we can treat it similarly to AKdependent _, Some ty  *)
-  | Tabstract (AKgeneric n, _) when AbstractKind.is_generic_dep_ty n ->
+  | Tgeneric n when DependentKind.is_generic_dep_ty n ->
     begin
       match TySet.elements (Env.get_upper_bounds env n) with
       | ty2 :: _ when ty_equal ty ty2 -> ty
@@ -428,10 +428,10 @@ let rec get_base_type env ty =
           get_base_type env ty
       | [] -> ty
     end
-  | Tabstract (AKnewtype (cid, _), Some (_, Tprim Aast.Tarraykey))
-    when Env.is_enum env cid ->
-    ty
-  | Tabstract _ ->
+  | Tnewtype (cid, _, (_, Tprim Aast.Tarraykey)) when Env.is_enum env cid -> ty
+  | Tgeneric _
+  | Tnewtype _
+  | Tdependent _ ->
     begin
       match get_concrete_supertypes env ty with
       (* If the type is exactly equal, we don't want to recurse *)
@@ -452,12 +452,12 @@ let rec get_base_type env ty =
 let get_class_ids env ty =
   let rec aux seen acc = function
     | (_, Tclass ((_, cid), _, _)) -> cid :: acc
-    | (_, (Toption ty | Tabstract (_, Some ty))) -> aux seen acc ty
+    | (_, (Toption ty | Tdependent (_, ty) | Tnewtype (_, _, ty))) ->
+      aux seen acc ty
     | (_, Tunion tys)
     | (_, Tintersection tys) ->
       List.fold tys ~init:acc ~f:(aux seen)
-    | (_, Tabstract (AKgeneric name, None))
-      when not (List.mem ~equal:String.equal seen name) ->
+    | (_, Tgeneric name) when not (List.mem ~equal:String.equal seen name) ->
       let seen = name :: seen in
       let upper_bounds = Env.get_upper_bounds env name in
       TySet.fold (fun ty acc -> aux seen acc ty) upper_bounds acc
@@ -641,7 +641,7 @@ let rec class_get_pu_ env cty name =
   | Tdynamic
   | Tunion _ ->
     (env, None)
-  | Tabstract (_, None) ->
+  | Tgeneric _ ->
     (* TODO(T36532263) check for PU in upper bounds (see D18395326) *)
     (env, None)
   | Tvar _
@@ -659,7 +659,9 @@ let rec class_get_pu_ env cty name =
   | Tpu_type_access _
   | Tpu _ ->
     (env, None)
-  | Tabstract (_, Some ty) -> class_get_pu_ env ty name
+  | Tnewtype (_, _, ty)
+  | Tdependent (_, ty) ->
+    class_get_pu_ env ty name
   | Tclass ((_, c), _, paraml) ->
     let class_ = Env.get_class env c in
     begin

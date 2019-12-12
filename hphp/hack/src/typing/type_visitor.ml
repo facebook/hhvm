@@ -181,8 +181,12 @@ class type ['a] locl_type_visitor_type =
 
     method on_tfun : 'a -> Reason.t -> locl_fun_type -> 'a
 
-    method on_tabstract :
-      'a -> Reason.t -> abstract_kind -> locl_ty option -> 'a
+    method on_tgeneric : 'a -> Reason.t -> string -> 'a
+
+    method on_tnewtype :
+      'a -> Reason.t -> string -> locl_ty list -> locl_ty -> 'a
+
+    method on_tdependent : 'a -> Reason.t -> dependent_type -> locl_ty -> 'a
 
     method on_ttuple : 'a -> Reason.t -> locl_ty list -> 'a
 
@@ -246,14 +250,15 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       in
       this#on_type acc ft_ret.et_type
 
-    method on_tabstract acc _ ak ty_opt =
-      let acc =
-        match ak with
-        | AKnewtype (_, tyl) -> List.fold_left tyl ~f:this#on_type ~init:acc
-        | AKgeneric _ -> acc
-        | AKdependent _ -> acc
-      in
-      let acc = Option.fold ~f:this#on_type ~init:acc ty_opt in
+    method on_tgeneric acc _ _ = acc
+
+    method on_tnewtype acc _ _ tyl ty =
+      let acc = List.fold_left tyl ~f:this#on_type ~init:acc in
+      let acc = this#on_type acc ty in
+      acc
+
+    method on_tdependent acc _ _ ty =
+      let acc = this#on_type acc ty in
       acc
 
     method on_ttuple acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
@@ -295,7 +300,9 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tprim prim -> this#on_tprim acc r prim
       | Tvar id -> this#on_tvar acc r id
       | Tfun fty -> this#on_tfun acc r fty
-      | Tabstract (ak, ty_opt) -> this#on_tabstract acc r ak ty_opt
+      | Tgeneric x -> this#on_tgeneric acc r x
+      | Tnewtype (x, tyl, ty) -> this#on_tnewtype acc r x tyl ty
+      | Tdependent (x, ty) -> this#on_tdependent acc r x ty
       | Ttuple tyl -> this#on_ttuple acc r tyl
       | Tanon (arity, id) -> this#on_tanon acc r arity id
       | Tunion tyl -> this#on_tunion acc r tyl

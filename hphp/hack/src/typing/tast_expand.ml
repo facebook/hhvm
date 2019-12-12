@@ -29,15 +29,16 @@ let expand_ty ?var_hook ?pos env ty =
     let (_, ety) = Tast_env.expand_type env ty in
     let ety =
       match ety with
-      | (_, (Tany _ | Tnonnull | Tprim _ | Tobject | Tdynamic)) -> ety
+      | (_, (Tany _ | Tnonnull | Tprim _ | Tobject | Tdynamic | Tgeneric _)) ->
+        ety
       | (p, Tclass (n, e, tyl)) -> (p, Tclass (n, e, exp_tys tyl))
       | (p, Tunion tyl) -> (p, Tunion (exp_tys tyl))
       | (p, Tintersection tyl) -> (p, Tintersection (exp_tys tyl))
       | (p, Toption ty) -> (p, Toption (exp_ty ty))
       | (p, Ttuple tyl) -> (p, Ttuple (exp_tys tyl))
       | (p, Tfun ft) -> (p, Tfun (exp_fun_type ft))
-      | (p, Tabstract (ak, tyopt)) ->
-        (p, Tabstract (exp_abstract_kind ak, Option.map tyopt exp_ty))
+      | (p, Tnewtype (n, tyl, ty)) -> (p, Tnewtype (n, exp_tys tyl, exp_ty ty))
+      | (p, Tdependent (n, ty)) -> (p, Tdependent (n, exp_ty ty))
       | (p, Tshape (shape_kind, fields)) ->
         (p, Tshape (shape_kind, Nast.ShapeMap.map exp_sft fields))
       | (p, Tarraykind ak) -> (p, Tarraykind (exp_array_kind ak))
@@ -123,12 +124,6 @@ let expand_ty ?var_hook ?pos env ty =
     | AKvarray_or_darray (ty1, ty2) ->
       AKvarray_or_darray (exp_ty ty1, exp_ty ty2)
     | AKempty -> AKempty
-  and exp_abstract_kind ak =
-    match ak with
-    | AKnewtype (n, tyl) -> AKnewtype (n, exp_tys tyl)
-    | AKgeneric _
-    | AKdependent _ ->
-      ak
   and exp_tparam t =
     {
       t with

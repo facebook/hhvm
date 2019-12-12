@@ -84,7 +84,7 @@ and expand_with_env_
         TR.condition_type_from_reactivity (Typing_env_types.env_reactivity tenv)
       )
     with
-    | ((_, Tabstract (AKdependent DTthis, _)), (_, tconst), Some cond_ty) ->
+    | ((_, Tdependent (DTthis, _)), (_, tconst), Some cond_ty) ->
       begin
         match CT.try_get_class_for_condition_type tenv cond_ty with
         | Some (_, cls) when Cls.has_typeconst cls tconst ->
@@ -180,21 +180,22 @@ and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
       But T1::T is exactly equal to int, so $x->get() no longer needs
       to be expression dependent. Thus, $x->get() typechecks.
     *)
-    | (_, Tabstract (AKgeneric s, _)) as ty
+    | (_, Tgeneric s) as ty
       when not (Typing_set.is_empty (Env.get_equal_bounds env.tenv s)) ->
       (env, ty)
     | ty ->
       let ty_name = name ^ "::" ^ snd id in
-      let new_ty =
-        (make_reason env.tenv Reason.Rnone, Tabstract (AKgeneric ty_name, None))
-      in
+      let new_ty = (make_reason env.tenv Reason.Rnone, Tgeneric ty_name) in
       let tenv = Env.add_upper_bound_global env.tenv ty_name ty in
       ({ env with tenv }, new_ty)
   in
   let env = { env with tenv } in
   let allow_abstract_tconst =
     match root_ty with
-    | Tabstract _ -> true
+    | Tgeneric _
+    | Tnewtype _
+    | Tdependent _ ->
+      true
     (* Hack: `self` in a trait is mistakenly replaced by the trait instead of
     the class using the trait, so if a trait is the root, it is likely because
     originally there was `self::T` written.
@@ -212,8 +213,8 @@ and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
   | Tany _
   | Terr ->
     (env, root)
-  | Tabstract (AKdependent (DTcls _), Some ty)
-  | Tabstract (AKnewtype (_, _), Some ty) ->
+  | Tdependent (DTcls _, ty)
+  | Tnewtype (_, _, ty) ->
     expand env ~on_error ~as_tyvar_with_cnstr ty id
   | Tclass ((class_pos, class_name), _, _) ->
     create_root_from_type_constant
@@ -225,7 +226,7 @@ and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
       ~on_error
       ~as_tyvar_with_cnstr
       ~allow_abstract_tconst
-  | Tabstract (AKgeneric s, _) ->
+  | Tgeneric s ->
     let env =
       {
         env with
@@ -286,10 +287,10 @@ and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
       | (choose_assigned_type, ty) :: _ ->
         ({ env with choose_assigned_type }, ty)
     end
-  | Tabstract (AKdependent dep_ty, Some ty) ->
+  | Tdependent (dep_ty, ty) ->
     let env = { env with choose_assigned_type = false } in
     let (env, ty) = expand env ~on_error ~as_tyvar_with_cnstr:false ty id in
-    make_ty env (AbstractKind.to_string (AKdependent dep_ty)) ty
+    make_ty env (DependentKind.to_string dep_ty) ty
   | Tunion tyl ->
     let (env, tyl) =
       List.map_env env tyl ~f:(fun env ty ->
@@ -322,7 +323,6 @@ and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
   | Ttuple _
   | Tarraykind _
   | Tfun _
-  | Tabstract (_, _)
   | Tdynamic
   | Toption _ ->
     let (pos, tconst) = id in
@@ -408,7 +408,7 @@ and create_root_from_type_constant
         let tenv = Typing_utils.sub_type tenv tvar cstr Errors.unify_error in
         (tenv, tvar)
       ) else
-        let ty = (reason, Tabstract (AKgeneric ty_name, None)) in
+        let ty = (reason, Tgeneric ty_name) in
         let tenv = Env.add_upper_bound_global tenv ty_name cstr in
         (tenv, ty)
     in
@@ -427,7 +427,7 @@ and create_root_from_type_constant
         (tenv, tvar)
       ) else
         let reason = Reason.Rwitness (fst typeconst.ttc_name) in
-        let ty = (reason, Tabstract (AKgeneric ty_name, None)) in
+        let ty = (reason, Tgeneric ty_name) in
         (env.tenv, ty)
     in
     ({ env with tenv }, (make_reason tenv r, ty))

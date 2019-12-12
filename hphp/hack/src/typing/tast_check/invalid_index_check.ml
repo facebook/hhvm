@@ -87,7 +87,8 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   | Tdynamic
   | Tany _
   | Tarraykind _
-  | Tabstract _
+  | Tnewtype _
+  | Tdependent _
   | _ ->
     ()
 

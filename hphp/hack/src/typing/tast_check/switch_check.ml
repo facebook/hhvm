@@ -66,7 +66,7 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
          && List.exists tyl ~f:(fun cur_ty ->
                 let (_, (_, cur_ty)) = Env.expand_type env cur_ty in
                 match cur_ty with
-                | Tabstract (AKnewtype (cid, _), _) -> Env.is_enum env cid
+                | Tnewtype (cid, _, _) -> Env.is_enum env cid
                 | _ -> false)
     in
     List.fold_left tyl ~init:env ~f:(fun env ty ->
@@ -81,7 +81,7 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
                caselist
                enum_coming_from_unresolved,
              () ))
-  | Tabstract (AKnewtype (id, _), _) when Env.is_enum env id ->
+  | Tnewtype (id, _, _) when Env.is_enum env id ->
     let dep = Typing_deps.Dep.AllMembers id in
     let decl_env = Env.get_decl_env env in
     Option.iter decl_env.Decl_env.droot (fun root ->
@@ -103,7 +103,9 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
   | Tprim _
   | Tvar _
   | Tfun _
-  | Tabstract (_, _)
+  | Tgeneric _
+  | Tnewtype _
+  | Tdependent _
   | Ttuple _
   | Tanon (_, _)
   | Tobject

@@ -177,12 +177,6 @@ and _ ty_ =
   | Tthis : decl_phase ty_
   (* Either an object type or a type alias, ty list are the arguments *)
   | Tapply : Nast.sid * decl_ty list -> decl_phase ty_
-  (* The type of a generic parameter. The constraints on a generic parameter
-   * are accessed through the lenv.tpenv component of the environment, which
-   * is set up when checking the body of a function or method. See uses of
-   * Typing_phase.localize_generic_parameters_with_bounds.
-   *)
-  | Tgeneric : string -> decl_phase ty_
   (* Name of class, name of type const, remaining names of type consts *)
   | Taccess : taccess_type -> decl_phase ty_
   (* The type of the various forms of "array":
@@ -267,10 +261,16 @@ and _ ty_ =
    * Will be refined to Tpu once typechecking is successful
    *)
   | Tvar : Ident.t -> 'phase ty_
+  (* The type of a generic parameter. The constraints on a generic parameter
+   * are accessed through the lenv.tpenv component of the environment, which
+   * is set up when checking the body of a function or method. See uses of
+   * Typing_phase.localize_generic_parameters_with_bounds.
+   *)
+  | Tgeneric : string -> 'phase ty_
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
 
   (* The type of an opaque type (e.g. a "newtype" outside of the file where it
-   * was defined). They are "opaque", which means that they only unify with
+   * was defined) or enum. They are "opaque", which means that they only unify with
    * themselves. However, it is possible to have a constraint that allows us to
    * relax this. For example:
    *
@@ -278,23 +278,13 @@ and _ ty_ =
    *
    * Outside of the file where the type was defined, this translates to:
    *
-   *   Tabstract (AKnewtype (pos, "my_type", []), Some (Tprim Tint))
+   *   Tnewtype ((pos, "my_type"), [], Tprim Tint)
    *
    * Which means that my_type is abstract, but is subtype of int as well.
-   *
-   * We also create abstract types for generic parameters of a function, i.e.
-   *
-   *   function foo<T>(T $x): void {
-   *     // Body
-   *   }
-   *
-   * The type 'T' will be represented as an abstract type when type checking
-   * the body of 'foo'.
-   *
-   * Finally abstract types are also derived from the 'this' type and
-   * accessing type constants on it, resulting in a dependent type.
    *)
-  | Tabstract : abstract_kind * locl_ty option -> locl_phase ty_
+  | Tnewtype : string * locl_ty list * locl_ty -> locl_phase ty_
+  (* see dependent_type *)
+  | Tdependent : dependent_type * locl_ty -> locl_phase ty_
   (* An anonymous function, including the fun arity, and the identifier to
    * type the body of the function. (The actual closure is stored in
    * Typing_env.env.genv.anons) *)
@@ -374,19 +364,6 @@ and array_kind =
   | AKvarray_or_darray of locl_ty * locl_ty
   (* This is a type created when we see array() literal *)
   | AKempty
-
-(* An abstract type derived from either a newtype, a type parameter, or some
- * dependent type
- *)
-and abstract_kind =
-  (* newtype foo<T1, T2> ...
-   * or
-   * enum foo ... *)
-  | AKnewtype of string * locl_ty list
-  (* <T super C> ; None if 'as' constrained *)
-  | AKgeneric of string
-  (* see dependent_type *)
-  | AKdependent of dependent_type
 
 and taccess_type = decl_ty * Nast.sid list
 
@@ -723,7 +700,9 @@ let is_union_or_inter_type ((_, ty) : locl_ty) =
   | Tpu_type_access _
   | Tpu _
   | Tvar _
-  | Tabstract _
+  | Tnewtype _
+  | Tdependent _
+  | Tgeneric _
   | Tanon _
   | Tclass _
   | Tarraykind _ ->
@@ -750,20 +729,13 @@ let get_param_mode ~is_ref callconv =
   | None when is_ref -> FPref
   | None -> FPnormal
 
-module AbstractKind = struct
+module DependentKind = struct
   let to_string = function
-    | AKnewtype (name, _) -> name
-    | AKgeneric name -> name
-    | AKdependent dt ->
-      let dt =
-        match dt with
-        | DTthis -> SN.Typehints.this
-        | DTcls c -> c
-        | DTexpr i ->
-          let display_id = Reason.get_expr_display_id i in
-          "<expr#" ^ string_of_int display_id ^ ">"
-      in
-      dt
+    | DTthis -> SN.Typehints.this
+    | DTcls c -> c
+    | DTexpr i ->
+      let display_id = Reason.get_expr_display_id i in
+      "<expr#" ^ string_of_int display_id ^ ">"
 
   let is_generic_dep_ty s = String_utils.is_substring "::" s
 end
@@ -828,15 +800,17 @@ let ty_con_ordinal ty_ =
   | Ttuple _ -> 7
   | Tshape _ -> 8
   | Tvar _ -> 9
-  | Tabstract _ -> 10
-  | Tanon _ -> 11
-  | Tunion _ -> 12
-  | Tintersection _ -> 13
-  | Tobject -> 14
-  | Tclass _ -> 15
-  | Tarraykind _ -> 16
-  | Tpu _ -> 17
-  | Tpu_type_access _ -> 18
+  | Tnewtype _ -> 10
+  | Tgeneric _ -> 11
+  | Tdependent _ -> 12
+  | Tanon _ -> 13
+  | Tunion _ -> 14
+  | Tintersection _ -> 15
+  | Tobject -> 16
+  | Tclass _ -> 17
+  | Tarraykind _ -> 18
+  | Tpu _ -> 19
+  | Tpu_type_access _ -> 20
 
 (* Ordinal value for type constructor, for decl types *)
 let decl_ty_con_ordinal ty_ =
@@ -874,12 +848,6 @@ let array_kind_con_ordinal ak =
   | AKvarray_or_darray _ -> 4
   | AKempty -> 6
 
-let abstract_kind_con_ordinal ak =
-  match ak with
-  | AKnewtype _ -> 0
-  | AKgeneric _ -> 1
-  | AKdependent _ -> 2
-
 (* Compare two types syntactically, ignoring reason information and other
  * small differences that do not affect type inference behaviour. This
  * comparison function can be used to construct tree-based sets of types,
@@ -901,10 +869,20 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
     | (Tintersection tyl1, Tintersection tyl2)
     | (Ttuple tyl1, Ttuple tyl2) ->
       tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
-    | (Tabstract (ak1, opt_cstr1), Tabstract (ak2, opt_cstr2)) ->
+    | (Tgeneric n1, Tgeneric n2) -> String.compare n1 n2
+    | (Tnewtype (id, tyl, cstr1), Tnewtype (id2, tyl2, cstr2)) ->
       begin
-        match abstract_kind_compare ak1 ak2 with
-        | 0 -> Option.compare ty_compare opt_cstr1 opt_cstr2
+        match String.compare id id2 with
+        | 0 ->
+          (match tyl_compare ~sort:false tyl tyl2 with
+          | 0 -> ty_compare cstr1 cstr2
+          | n -> n)
+        | n -> n
+      end
+    | (Tdependent (d1, cstr1), Tdependent (d2, cstr2)) ->
+      begin
+        match compare d1 d2 with
+        | 0 -> ty_compare cstr1 cstr2
         | n -> n
       end
     (* An instance of a class or interface, ty list are the arguments *)
@@ -1007,19 +985,6 @@ and ft_params_compare ?(normalize_lists = false) params1 params2 =
   in
   ft_params_compare params1 params2
 
-and abstract_kind_compare ?(normalize_lists = false) t1 t2 =
-  let tyl_compare = tyl_compare ~normalize_lists in
-  match (t1, t2) with
-  | (AKnewtype (id, tyl), AKnewtype (id2, tyl2)) ->
-    begin
-      match String.compare id id2 with
-      | 0 -> tyl_compare ~sort:false tyl tyl2
-      | n -> n
-    end
-  | (AKgeneric id1, AKgeneric id2) -> String.compare id1 id2
-  | (AKdependent d1, AKdependent d2) -> compare d1 d2
-  | _ -> abstract_kind_con_ordinal t1 - abstract_kind_con_ordinal t2
-
 let tyl_equal tyl1 tyl2 = Int.equal 0 @@ tyl_compare ~sort:false tyl1 tyl2
 
 let class_id_con_ordinal cid =
@@ -1089,17 +1054,6 @@ let equal_locl_fun_arity a1 a2 =
   | (Fstandard _, (Fvariadic _ | Fellipsis _))
   | (Fvariadic _, (Fstandard _ | Fellipsis _))
   | (Fellipsis _, (Fstandard _ | Fvariadic _)) ->
-    false
-
-let equal_abstract_kind ak1 ak2 =
-  match (ak1, ak2) with
-  | (AKnewtype (id1, tyl1), AKnewtype (id2, tyl2)) ->
-    String.equal id1 id2 && List.equal tyl1 tyl2 equal_locl_ty
-  | (AKgeneric id1, AKgeneric id2) -> String.equal id1 id2
-  | (AKdependent dt1, AKdependent dt2) -> equal_dependent_type dt1 dt2
-  | (AKnewtype _, (AKgeneric _ | AKdependent _))
-  | (AKgeneric _, (AKnewtype _ | AKdependent _))
-  | (AKdependent _, (AKnewtype _ | AKgeneric _)) ->
     false
 
 let is_type_no_return = equal_locl_ty_ (Tprim Aast.Tnoreturn)

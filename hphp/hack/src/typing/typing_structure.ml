@@ -68,8 +68,8 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
       let is_unbound =
         match ty |> TUtils.get_base_type env |> snd with
         (* An enum is considered a valid bound *)
-        | Tabstract (AKnewtype (s, _), _) when Env.is_enum env s -> false
-        | Tabstract (_, None) -> true
+        | Tnewtype (s, _, _) when Env.is_enum env s -> false
+        | Tgeneric _ -> true
         | _ -> false
       in
       if is_unbound then
@@ -77,7 +77,7 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
       else
         let is_generic =
           match snd ty with
-          | Tabstract (AKgeneric _, _) -> true
+          | Tgeneric _ -> true
           | _ -> false
         in
         let transform_shape_field field { sft_ty; _ } (env, shape) =
@@ -98,7 +98,7 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
               (env, acc_field_with_type fty)
             | ( SFlit_str (_, "classname"),
                 (_, Toption fty),
-                (_, Tabstract (AKnewtype (cid, _), _)) )
+                (_, Tnewtype (cid, _, _)) )
               when Env.is_enum env cid ->
               (env, acc_field_with_type fty)
             | (SFlit_str (_, "elem_types"), _, (r, Ttuple tyl)) ->

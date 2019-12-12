@@ -384,11 +384,8 @@ let add_upper_bound_global env name ty =
   let tpenv =
     let (env, ty) = expand_type env ty in
     match ty with
-    | (r, Tabstract (AKgeneric formal_super, _)) ->
-      TPEnv.add_lower_bound
-        env.global_tpenv
-        formal_super
-        (r, Tabstract (AKgeneric name, None))
+    | (r, Tgeneric formal_super) ->
+      TPEnv.add_lower_bound env.global_tpenv formal_super (r, Tgeneric name)
     | _ -> env.global_tpenv
   in
   { env with global_tpenv = TPEnv.add_upper_bound tpenv name ty }
@@ -553,16 +550,20 @@ let add_fresh_generic_parameter env prefix ~reified ~enforceable ~newable =
   (env, name)
 
 let is_fresh_generic_parameter name =
-  String.contains name '#' && not (AbstractKind.is_generic_dep_ty name)
+  String.contains name '#' && not (DependentKind.is_generic_dep_ty name)
 
 let tparams_visitor env =
   object (this)
     inherit [SSet.t] Type_visitor.locl_type_visitor
 
-    method! on_tabstract acc _ ak _ty_opt =
-      match ak with
-      | AKgeneric s -> SSet.add s acc
-      | _ -> acc
+    method! on_tgeneric acc _ s = SSet.add s acc
+
+    (* Perserving behavior but this seems incorrect to me since a newtype may
+     * contain type arguments with generics
+     *)
+    method! on_tdependent acc _ _ _ = acc
+
+    method! on_tnewtype acc _ _ _ _ = acc
 
     method! on_tvar acc r ix =
       let (_env, ty) = get_type env r ix in
@@ -591,7 +592,7 @@ let get_tpenv_tparams env =
       let folder ty acc =
         let (_env, ty) = expand_type env ty in
         match ty with
-        | (_, Tabstract (AKgeneric _, _)) -> acc
+        | (_, Tgeneric _) -> acc
         | _ -> get_tparams_aux env acc ty
       in
       TySet.fold folder lower_bounds @@ TySet.fold folder upper_bounds acc
@@ -1419,7 +1420,7 @@ and get_tyvars_i env (ty : internal_type) =
       ( env,
         ISet.union ret_positive params_positive,
         ISet.union ret_negative params_negative )
-    | Tabstract (AKnewtype (name, tyl), _) ->
+    | Tnewtype (name, tyl, _) ->
       begin
         match get_typedef env name with
         | Some { td_tparams; _ } ->
@@ -1427,8 +1428,8 @@ and get_tyvars_i env (ty : internal_type) =
           get_tyvars_variance_list (env, ISet.empty, ISet.empty) variancel tyl
         | None -> (env, ISet.empty, ISet.empty)
       end
-    | Tabstract (_, Some ty) -> get_tyvars env ty
-    | Tabstract (_, None) -> (env, ISet.empty, ISet.empty)
+    | Tdependent (_, ty) -> get_tyvars env ty
+    | Tgeneric _ -> (env, ISet.empty, ISet.empty)
     | Tclass ((_, cid), _, tyl) ->
       begin
         match get_class env cid with

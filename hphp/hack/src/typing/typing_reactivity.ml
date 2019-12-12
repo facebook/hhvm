@@ -31,7 +31,7 @@ let make_call_info ~receiver_is_self ~is_static receiver_type method_name =
 let type_to_str env ty =
   (* strip expression dependent types to make error message clearer *)
   let rec unwrap = function
-    | (_, Tabstract (AKdependent DTthis, Some ty)) -> unwrap ty
+    | (_, Tdependent (DTthis, ty)) -> unwrap ty
     | ty -> ty
   in
   Typing_print.full env (unwrap ty)
@@ -59,8 +59,8 @@ let rec condition_type_from_reactivity r =
 let get_associated_condition_type env ~is_self ty =
   let (env, ty) = Env.expand_type env ty in
   match ty with
-  | (_, Tabstract (AKgeneric n, _)) -> Env.get_condition_type env n
-  | (_, Tabstract (AKdependent DTthis, _)) ->
+  | (_, Tgeneric n) -> Env.get_condition_type env n
+  | (_, Tdependent (DTthis, _)) ->
     condition_type_from_reactivity (env_reactivity env)
   | _ when is_self -> condition_type_from_reactivity (env_reactivity env)
   | _ -> None
@@ -402,7 +402,7 @@ let try_substitute_type_with_condition env cond_ty ty =
   |> Option.map ~f:(fun fresh_type_argument_name ->
          let param_ty =
            ( Reason.Rwitness (Reason.to_pos (fst ty)),
-             Tabstract (AKgeneric fresh_type_argument_name, None) )
+             Tgeneric fresh_type_argument_name )
          in
          (* if generic type is already registered this means we already saw
        parameter with the same pair (declared type * condition type) so there
@@ -447,8 +447,7 @@ let strip_condition_type_in_return env ty =
   else
     let (env, ty) = Env.expand_type env ty in
     match ty with
-    | (_, Tabstract (AKgeneric n, _))
-      when Option.is_some (Env.get_condition_type env n) ->
+    | (_, Tgeneric n) when Option.is_some (Env.get_condition_type env n) ->
       let upper_bounds = Env.get_upper_bounds env n in
       begin
         match Typing_set.elements upper_bounds with

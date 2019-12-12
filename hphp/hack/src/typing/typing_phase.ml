@@ -171,7 +171,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
       | Some x_ty ->
         let (env, x_ty) = Env.expand_type env x_ty in
         (env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
-      | None -> (env, (r, Tabstract (AKgeneric x, None)))
+      | None -> (env, (r, Tgeneric x))
     end
   | (r, Toption ty) ->
     let (env, ty) = localize ~ety_env env ty in
@@ -214,7 +214,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
           (env, MakeType.arraykey (Reason.Rimplicit_upper_bound (p, "arraykey")))
         | Some ty -> localize ~ety_env env ty
       in
-      (env, (r, Tabstract (AKnewtype (x, []), Some cstr)))
+      (env, (r, Tnewtype (x, [], cstr)))
   | (r, Tapply (((_, cid) as cls), tyl)) ->
     let can_infer_tparams =
       InferMissing.can_infer_params
@@ -351,7 +351,7 @@ and localize_tparam pos (env, ety_env) ty tparam =
     let (env, new_name) =
       Env.add_fresh_generic_parameter env name ~reified ~enforceable ~newable
     in
-    let ty_fresh = (r, Tabstract (AKgeneric new_name, None)) in
+    let ty_fresh = (r, Tgeneric new_name) in
     (* Substitute fresh type parameters for original formals in constraint *)
     let substs = SMap.add name ty_fresh ety_env.substs in
     let ety_env = { ety_env with substs } in
@@ -738,7 +738,7 @@ let localize_generic_parameters_with_bounds
   let env = Env.add_generic_parameters env tparams in
   let localize_bound
       env ({ tp_name = (pos, name); tp_constraints = cstrl; _ } : decl_tparam) =
-    let tparam_ty = (Reason.Rwitness pos, Tabstract (AKgeneric name, None)) in
+    let tparam_ty = (Reason.Rwitness pos, Tgeneric name) in
     List.map_env env cstrl (fun env (ck, cstr) ->
         let (env, ty) = localize env cstr ~ety_env in
         (env, (tparam_ty, ck, ty)))

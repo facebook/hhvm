@@ -32,8 +32,7 @@ class update_array_type_mapper : type_mapper_type =
  * to just an array.*)
 class virtual downcast_tabstract_to_array_type_mapper =
   object (this)
-    method on_tabstract env r ak cstr =
-      let ty = (r, Tabstract (ak, cstr)) in
+    method private try_super_types env ty =
       match TUtils.get_all_supertypes env ty with
       | (_, []) -> (env, ty)
       | (env, tyl) ->
@@ -45,10 +44,22 @@ class virtual downcast_tabstract_to_array_type_mapper =
         | [] -> (env, ty)
         | x :: _ ->
           (* If the abstract type has multiple concrete supertypes
-        which are arrays, just take the first one.
-        TODO(jjwu): Try all of them and find one that works
-        *)
+    which are arrays, just take the first one.
+    TODO(jjwu): Try all of them and find one that works
+    *)
           this#on_type env x)
+
+    method on_tgeneric env r x =
+      let ty = (r, Tgeneric x) in
+      this#try_super_types env ty
+
+    method on_tdependent env r x ty =
+      let ty = (r, Tdependent (x, ty)) in
+      this#try_super_types env ty
+
+    method on_tnewtype env r x tyl ty =
+      let ty = (r, Tnewtype (x, tyl, ty)) in
+      this#try_super_types env ty
 
     method virtual on_type : env -> locl_ty -> result
   end

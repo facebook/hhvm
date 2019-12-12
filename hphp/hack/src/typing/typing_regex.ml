@@ -167,7 +167,8 @@ let type_pattern (p, e_) =
     let (s, flags) = check_and_strip_delimiters s in
     let match_type = type_match p s ~flags in
     ( Reason.Rregex p,
-      Tabstract
-        ( AKnewtype (Naming_special_names.Regex.tPattern, [match_type]),
-          Some (Reason.Rregex p, Tprim Tstring) ) )
+      Tnewtype
+        ( Naming_special_names.Regex.tPattern,
+          [match_type],
+          (Reason.Rregex p, Tprim Tstring) ) )
   | _ -> failwith "Should have caught non-Ast_defs.String prefixed expression!"

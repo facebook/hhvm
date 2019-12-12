@@ -80,9 +80,7 @@ module ExprDepTy = struct
   (****************************************************************************)
   let make env ~cid ty =
     let (r_dep_ty, dep_ty) = from_cid env (fst ty) cid in
-    let apply env ty =
-      (env, (r_dep_ty, Tabstract (AKdependent dep_ty, Some ty)))
-    in
+    let apply env ty = (env, (r_dep_ty, Tdependent (dep_ty, ty))) in
     let rec make env ty =
       let (env, ty) = Env.expand_type env ty in
       match ty with
@@ -104,9 +102,8 @@ module ExprDepTy = struct
             (env, (r_dep_ty, Tclass (c, Exact, tyl)))
           | _ -> apply env ty
         )
-      | (_, Tabstract (AKgeneric s, _)) when AbstractKind.is_generic_dep_ty s ->
-        (env, ty)
-      | (_, Tabstract (AKgeneric _, _)) ->
+      | (_, Tgeneric s) when DependentKind.is_generic_dep_ty s -> (env, ty)
+      | (_, Tgeneric _) ->
         let (env, tyl) = Typing_utils.get_concrete_supertypes env ty in
         let (env, tyl') = List.fold_map tyl ~init:env ~f:make in
         if tyl_equal tyl tyl' then
@@ -116,10 +113,10 @@ module ExprDepTy = struct
       | (r, Toption ty) ->
         let (env, ty) = make env ty in
         (env, (r, Toption ty))
-      | (r, Tabstract (AKnewtype (n, p), Some ty)) ->
+      | (r, Tnewtype (n, p, ty)) ->
         let (env, ty) = make env ty in
-        (env, (r, Tabstract (AKnewtype (n, p), Some ty)))
-      | (_, Tabstract (AKdependent _, Some _)) -> (env, ty)
+        (env, (r, Tnewtype (n, p, ty)))
+      | (_, Tdependent (_, _)) -> (env, ty)
       | (r, Tunion tyl) ->
         let (env, tyl) = List.fold_map tyl ~init:env ~f:make in
         (env, (r, Tunion tyl))
@@ -129,9 +126,8 @@ module ExprDepTy = struct
       (* TODO(T36532263) check if this is legal *)
       | ( _,
           ( Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _
-          | Tdynamic | Tarraykind _ | Tfun _
-          | Tabstract (_, None)
-          | Tany _ | Tvar _ | Terr | Tpu _ | Tpu_type_access _ ) ) ->
+          | Tdynamic | Tarraykind _ | Tfun _ | Tany _ | Tvar _ | Terr | Tpu _
+          | Tpu_type_access _ ) ) ->
         (env, ty)
     in
     make env ty

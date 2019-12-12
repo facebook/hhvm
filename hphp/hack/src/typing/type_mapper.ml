@@ -60,8 +60,13 @@ class type type_mapper_type =
 
     method on_tfun : env -> Reason.t -> locl_fun_type -> result
 
-    method on_tabstract :
-      env -> Reason.t -> abstract_kind -> locl_ty option -> result
+    method on_tgeneric : env -> Reason.t -> string -> result
+
+    method on_tnewtype :
+      env -> Reason.t -> string -> locl_ty list -> locl_ty -> result
+
+    method on_tdependent :
+      env -> Reason.t -> dependent_type -> locl_ty -> result
 
     method on_tclass :
       env -> Reason.t -> Aast.sid -> exact -> locl_ty list -> result
@@ -116,7 +121,11 @@ class shallow_type_mapper : type_mapper_type =
 
     method on_tfun env r fun_type = (env, (r, Tfun fun_type))
 
-    method on_tabstract env r ak opt_ty = (env, (r, Tabstract (ak, opt_ty)))
+    method on_tgeneric env r name = (env, (r, Tgeneric name))
+
+    method on_tnewtype env r name tyl ty = (env, (r, Tnewtype (name, tyl, ty)))
+
+    method on_tdependent env r dep ty = (env, (r, Tdependent (dep, ty)))
 
     method on_tclass env r x e tyl = (env, (r, Tclass (x, e, tyl)))
 
@@ -143,7 +152,9 @@ class shallow_type_mapper : type_mapper_type =
       | Tintersection tyl -> this#on_tintersection env r tyl
       | Toption ty -> this#on_toption env r ty
       | Tfun fun_type -> this#on_tfun env r fun_type
-      | Tabstract (ak, opt_ty) -> this#on_tabstract env r ak opt_ty
+      | Tgeneric x -> this#on_tgeneric env r x
+      | Tnewtype (x, tyl, ty) -> this#on_tnewtype env r x tyl ty
+      | Tdependent (x, ty) -> this#on_tdependent env r x ty
       | Tclass (x, e, tyl) -> this#on_tclass env r x e tyl
       | Tdynamic -> this#on_tdynamic env r
       | Tobject -> this#on_tobject env r
@@ -229,18 +240,14 @@ class deep_type_mapper =
         (r, Tfun { ft with ft_params = params; ft_arity = arity; ft_ret = ret })
       )
 
-    method! on_tabstract env r ak cstr =
-      match ak with
-      | AKgeneric x ->
-        let (env, cstr) = this#on_opt_type env cstr in
-        (env, (r, Tabstract (AKgeneric x, cstr)))
-      | AKnewtype (x, tyl) ->
-        let (env, tyl) = List.map_env env tyl this#on_type in
-        let (env, cstr) = this#on_opt_type env cstr in
-        (env, (r, Tabstract (AKnewtype (x, tyl), cstr)))
-      | _ ->
-        let (env, cstr) = this#on_opt_type env cstr in
-        (env, (r, Tabstract (ak, cstr)))
+    method! on_tnewtype env r x tyl cstr =
+      let (env, tyl) = List.map_env env tyl this#on_type in
+      let (env, cstr) = this#on_type env cstr in
+      (env, (r, Tnewtype (x, tyl, cstr)))
+
+    method! on_tdependent env r x cstr =
+      let (env, cstr) = this#on_type env cstr in
+      (env, (r, Tdependent (x, cstr)))
 
     method! on_tclass env r x e tyl =
       let (env, tyl) = List.map_env env tyl this#on_type in

@@ -62,13 +62,15 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
       | _ -> non_xhp
     in
     (env, xhp, non_xhp)
-  | Tabstract (AKdependent DTthis, _) ->
+  | Tdependent (DTthis, _) ->
     (* This is unsound, but we want to do best-effort checking
      * of attribute spreads even on XHP classes not marked `final`. We should
      * implement <<__ConsistentAttributes>> as a way to make this hacky
      * inference sound and check it before doing this conversion. *)
     walk_and_gather_xhp_ ~env ~pos (Env.get_self env)
-  | Tabstract _ ->
+  | Tgeneric _
+  | Tdependent _
+  | Tnewtype _ ->
     let (env, tyl) = TUtils.get_concrete_supertypes env cty in
     walk_list_and_gather_xhp env pos tyl
   | Tclass ((_, c), _, tyl) ->

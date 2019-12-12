@@ -61,8 +61,7 @@ let check_valid_array_key_type f_fail ~allow_any env p t =
     match t' with
     | Tprim (Tint | Tstring) -> (env, None)
     (* Enums have to be valid array keys *)
-    | Tabstract (AKnewtype (id, _), _) when Typing_env.is_enum env id ->
-      (env, None)
+    | Tnewtype (id, _, _) when Typing_env.is_enum env id -> (env, None)
     | Terr
     | Tany _
       when allow_any ->
@@ -84,7 +83,9 @@ let check_valid_array_key_type f_fail ~allow_any env p t =
     | Toption _
     | Tdynamic
     | Tvar _
-    | Tabstract _
+    | Tgeneric _
+    | Tnewtype _
+    | Tdependent _
     | Tclass _
     | Ttuple _
     | Tanon _

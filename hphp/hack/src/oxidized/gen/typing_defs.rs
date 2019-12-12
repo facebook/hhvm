@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9557dcc3492fa22316067bdcf9f79b50>>
+// @generated SignedSource<<70cf91b7fa8668145da0559bd27c3acc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -122,7 +122,6 @@ pub struct ShapeFieldType {
 pub enum Ty_ {
     Tthis,
     Tapply(nast::Sid, Vec<DeclTy>),
-    Tgeneric(String),
     Taccess(TaccessType),
     Tarray(Option<DeclTy>, Option<DeclTy>),
     Tdarray(DeclTy, DeclTy),
@@ -142,6 +141,7 @@ pub enum Ty_ {
     Ttuple(Vec<Ty>),
     Tshape(ShapeKind, nast::shape_map::ShapeMap<ShapeFieldType>),
     Tvar(ident::Ident),
+    Tgeneric(String),
     Tunion(Vec<Ty>),
     Tintersection(Vec<Ty>),
 }

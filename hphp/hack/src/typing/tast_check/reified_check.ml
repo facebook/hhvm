@@ -191,7 +191,7 @@ let handler =
       | ((pos, _), New (((_, ty), CI (_, class_id)), targs, _, _, _)) ->
         let (env, ty) = Env.expand_type env ty in
         (match ty with
-        | (_, Tabstract (AKgeneric ci, None)) when String.equal ci class_id ->
+        | (_, Tgeneric ci) when String.equal ci class_id ->
           if not (Env.get_newable env ci) then Errors.new_without_newable pos ci;
           if not (List.is_empty targs) then Errors.tparam_with_tparam pos ci
         | _ ->

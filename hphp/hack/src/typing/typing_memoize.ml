@@ -38,15 +38,11 @@ let check_param : env -> Nast.fun_param -> unit =
     | (_, Toption ty) -> check_memoizable env ty
     | (_, Ttuple tyl) -> List.iter tyl (check_memoizable env)
     (* Just accept all generic types for now. Stricter check_memoizables to come later. *)
-    | (_, Tabstract (AKgeneric _, _)) -> ()
+    | (_, Tgeneric _) -> ()
     (* For parameter type 'this::TID' defined by 'type const TID as Bar' check_memoizables
      * Bar recursively. Also enums represented using AKnewtype.
      *)
-    | (_, Tabstract ((AKnewtype _ | AKdependent _), Some ty)) ->
-      check_memoizable env ty
-    (* Allow unconstrained dependent type `abstract type const TID` just as we
-     * allow unconstrained generics. *)
-    | (_, Tabstract (_, None)) -> ()
+    | (_, (Tnewtype (_, _, ty) | Tdependent (_, ty))) -> check_memoizable env ty
     (* Handling Tunion and Tintersection case here for completeness, even though it
      * shouldn't be possible to have an unresolved type when check_memoizableing
      * the method declaration. No corresponding test case for this.

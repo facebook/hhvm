@@ -36,7 +36,9 @@ let rec is_stringish env ty =
   | Toption ty' -> is_stringish env ty'
   | Tunion tyl -> List.for_all ~f:(is_stringish env) tyl
   | Tintersection tyl -> List.exists ~f:(is_stringish env) tyl
-  | Tabstract _ ->
+  | Tgeneric _
+  | Tnewtype _
+  | Tdependent _ ->
     let (env, tyl) = Env.get_concrete_supertypes env ty in
     List.for_all ~f:(is_stringish env) tyl
   | Tclass (x, _, _) -> Option.is_none (Env.get_class env (snd x))

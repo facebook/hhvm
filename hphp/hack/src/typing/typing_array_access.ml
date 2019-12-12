@@ -444,7 +444,7 @@ let rec array_get
           error_array env expr_pos ety1
         else
           (env, (Reason.Rwitness expr_pos, TUtils.tany env))
-      | Tabstract (AKnewtype (ts, [ty]), Some (r, Tshape (shape_kind, fields)))
+      | Tnewtype (ts, [ty], (r, Tshape (shape_kind, fields)))
         when String.equal ts SN.FB.cTypeStructure ->
         let (env, fields) =
           Typing_structure.transform_shapemap env array_pos ty fields
@@ -464,7 +464,9 @@ let rec array_get
       | Tfun _
       | Tclass _
       | Tanon _
-      | Tabstract _
+      | Tgeneric _
+      | Tnewtype _
+      | Tdependent _
       | Tunion _
       | Tintersection _
       | Tpu _
@@ -570,7 +572,8 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
       | ( _,
           ( Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tvar _ | Tfun _
           | Tclass _ | Ttuple _ | Tanon _ | Tshape _ | Tunion _
-          | Tintersection _ | Tabstract _ | Tpu _ | Tpu_type_access _ ) ) ->
+          | Tintersection _ | Tgeneric _ | Tnewtype _ | Tdependent _ | Tpu _
+          | Tpu_type_access _ ) ) ->
         error_assign_array_append env expr_pos ty1)
 
 let widen_for_assign_array_get ~expr_pos index_expr env ty =
@@ -810,7 +813,9 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       | Tprim _
       | Tunion _
       | Tintersection _
-      | Tabstract _
+      | Tgeneric _
+      | Tnewtype _
+      | Tdependent _
       | Tvar _
       | Tfun _
       | Tclass _

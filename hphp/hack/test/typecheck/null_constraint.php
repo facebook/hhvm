@@ -10,11 +10,19 @@
  */
 
 class MyClass {
+  public ?int $field = 0;
   public function doStuff() {}
 }
 
 function test<T as ?MyClass>(T $arg): void {
   if ($arg !== null) {
     $arg->doStuff();
+    $arg->field;
+  }
+}
+
+function test2<T as ?string>(T $arg): void {
+  if ($arg) {
+    $arg[0];
   }
 }

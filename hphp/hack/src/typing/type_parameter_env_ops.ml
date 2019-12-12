@@ -133,7 +133,7 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
             let substs = SMap.add tparam_name lower_bound substs in
             (tpenv, substs)
           | _ ->
-            let tparam_ty = (r, Tabstract (AKgeneric tparam_name, None)) in
+            let tparam_ty = (r, Tgeneric tparam_name) in
             let substs = SMap.add tparam_name tparam_ty substs in
             (tpenv, substs)))
   in
@@ -148,8 +148,7 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
   let rec reduce substs tparam =
     match SMap.find_opt tparam substs with
     | None -> (substs, None)
-    | Some ((_, Tabstract (AKgeneric tparam', _)) as subst)
-      when String.( <> ) tparam' tparam ->
+    | Some ((_, Tgeneric tparam') as subst) when String.( <> ) tparam' tparam ->
       let (substs, new_subst_opt) = reduce substs tparam' in
       begin
         match new_subst_opt with

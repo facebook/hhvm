@@ -50,9 +50,8 @@ let rec check_expr env (_, e) =
     begin
       match snd cty with
       | Tclass ((_, c), _, _) -> check_prop env c pid None
-      | Tabstract (AKdependent _, Some (_, Tclass ((_, c), _, _))) ->
-        check_prop env c pid None
-      | Tabstract (AKgeneric name, None) ->
+      | Tdependent (_, (_, Tclass ((_, c), _, _))) -> check_prop env c pid None
+      | Tgeneric name ->
         let upper_bounds = Env.get_upper_bounds env name in
         let check_class bound =
           match snd bound with
@@ -67,8 +66,9 @@ let rec check_expr env (_, e) =
     begin
       match snd cty with
       | Tclass ((_, c), _, _) -> check_prop env c id (Some cty)
-      | Tabstract (_, (Some (_, Tclass ((_, c), _, _)) as ty)) ->
-        check_prop env c id ty
+      | Tnewtype (_, _, ((_, Tclass ((_, c), _, _)) as ty))
+      | Tdependent (_, ((_, Tclass ((_, c), _, _)) as ty)) ->
+        check_prop env c id (Some ty)
       | _ -> ()
     end
   | Call (_, (_, Id (_, f)), _, el, None)

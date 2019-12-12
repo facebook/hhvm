@@ -401,18 +401,17 @@ module Full = struct
         | Exact when !debug_mode -> Concat [text "exact"; Space; d]
         | _ -> d
       end
-    | Tabstract (AKnewtype (s, []), _) -> to_doc s
-    | Tabstract (AKnewtype (s, tyl), _) -> to_doc s ^^ list "<" k tyl ">"
-    | Tabstract (ak, cstr) ->
+    | Tgeneric s -> to_doc s
+    | Tnewtype (s, [], _) -> to_doc s
+    | Tnewtype (s, tyl, _) -> to_doc s ^^ list "<" k tyl ">"
+    | Tdependent (dep, cstr) ->
       let cstr_info =
         if !debug_mode then
-          match cstr with
-          | None -> Nothing
-          | Some ty -> Concat [Space; text "as"; Space; k ty]
+          Concat [Space; text "as"; Space; k cstr]
         else
           Nothing
       in
-      Concat [to_doc @@ AbstractKind.to_string ak; cstr_info]
+      Concat [to_doc @@ DependentKind.to_string dep; cstr_info]
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
     | Ttuple tyl -> ttuple k tyl
@@ -738,13 +737,15 @@ module ErrorString = struct
     | Tvar _ -> "some value"
     | Tanon _ -> "a function"
     | Tfun _ -> "a function"
-    | Tabstract (AKnewtype (x, _), _) when String.equal x SN.Classes.cClassname
-      ->
+    | Tgeneric s when DependentKind.is_generic_dep_ty s ->
+      "the expression dependent type " ^ s
+    | Tgeneric x -> "a value of generic type " ^ x
+    | Tnewtype (x, _, _) when String.equal x SN.Classes.cClassname ->
       "a classname string"
-    | Tabstract (AKnewtype (x, _), _) when String.equal x SN.Classes.cTypename
-      ->
+    | Tnewtype (x, _, _) when String.equal x SN.Classes.cTypename ->
       "a typename string"
-    | Tabstract (ak, cstr) -> abstract env ak cstr
+    | Tnewtype (x, tyl, _) -> "a value of type " ^ strip_ns x ^ inst env tyl
+    | Tdependent (dep, cstr) -> dependent env dep cstr
     | Tclass ((_, x), Exact, tyl) ->
       "an object of exactly the class " ^ strip_ns x ^ inst env tyl
     | Tclass ((_, x), Nonexact, tyl) ->
@@ -782,23 +783,17 @@ module ErrorString = struct
               (List.map tyl ~f:(Full.to_string_strip_ns ~ty:Full.locl_ty env))
           ^ ">")
 
-  and abstract env ak cstr =
-    let x = strip_ns @@ AbstractKind.to_string ak in
-    match (ak, cstr) with
-    | (AKnewtype (_, tyl), _) -> "a value of type " ^ x ^ inst env tyl
-    | (AKgeneric s, _) when AbstractKind.is_generic_dep_ty s ->
-      "the expression dependent type " ^ s
-    | (AKgeneric _, _) -> "a value of generic type " ^ x
-    | (AKdependent (DTcls c), Some ty) ->
-      to_string env ty ^ " (known to be exactly the class '" ^ strip_ns c ^ "')"
-    | (AKdependent (DTthis | DTexpr _), _) ->
+  and dependent env dep cstr =
+    let x = strip_ns @@ DependentKind.to_string dep in
+    match dep with
+    | DTcls c ->
+      to_string env cstr
+      ^ " (known to be exactly the class '"
+      ^ strip_ns c
+      ^ "')"
+    | DTthis
+    | DTexpr _ ->
       "the expression dependent type " ^ x
-    | (AKdependent _, _) ->
-      "the type '"
-      ^ x
-      ^ "'"
-      ^ Option.value_map cstr ~default:"" ~f:(fun ty ->
-            "\n  that is compatible with " ^ to_string env ty)
 
   and union env l =
     let (null, nonnull) =
@@ -894,11 +889,7 @@ module Json = struct
       @ typ v.sft_ty
     in
     let fields fl = [("fields", JSON_Array (List.map fl make_field))] in
-    let as_type opt_ty =
-      match opt_ty with
-      | None -> []
-      | Some ty -> [("as", from_type env ty)]
-    in
+    let as_type ty = [("as", from_type env ty)] in
     match snd ty with
     | Tvar n ->
       let (_, ty) = Typing_env.expand_type env (fst ty, Tvar n) in
@@ -913,21 +904,20 @@ module Json = struct
       obj @@ kind "any"
     | Tnonnull -> obj @@ kind "nonnull"
     | Tdynamic -> obj @@ kind "dynamic"
-    | Tabstract (AKgeneric s, opt_ty) ->
-      obj @@ kind "generic" @ is_array true @ name s @ as_type opt_ty
-    | Tabstract (AKnewtype (s, _), opt_ty) when Typing_env.is_enum env s ->
-      obj @@ kind "enum" @ name s @ as_type opt_ty
-    | Tabstract (AKnewtype (s, tys), opt_ty) ->
-      obj @@ kind "newtype" @ name s @ args tys @ as_type opt_ty
-    | Tabstract (AKdependent (DTcls c), opt_ty) ->
+    | Tgeneric s -> obj @@ kind "generic" @ is_array true @ name s
+    | Tnewtype (s, _, ty) when Typing_env.is_enum env s ->
+      obj @@ kind "enum" @ name s @ as_type ty
+    | Tnewtype (s, tys, ty) ->
+      obj @@ kind "newtype" @ name s @ args tys @ as_type ty
+    | Tdependent (DTcls c, ty) ->
       obj
       @@ kind "path"
       @ [("type", obj @@ kind "class" @ name c @ args [])]
-      @ as_type opt_ty
-    | Tabstract (AKdependent (DTexpr _), opt_ty) ->
-      obj @@ kind "path" @ [("type", obj @@ kind "expr")] @ as_type opt_ty
-    | Tabstract (AKdependent DTthis, opt_ty) ->
-      obj @@ kind "path" @ [("type", obj @@ kind "this")] @ as_type opt_ty
+      @ as_type ty
+    | Tdependent (DTexpr _, ty) ->
+      obj @@ kind "path" @ [("type", obj @@ kind "expr")] @ as_type ty
+    | Tdependent (DTthis, ty) ->
+      obj @@ kind "path" @ [("type", obj @@ kind "this")] @ as_type ty
     | Toption (_, Tnonnull) -> obj @@ kind "mixed"
     | Toption ty -> obj @@ kind "nullable" @ args [ty]
     | Tprim tp -> obj @@ kind "primitive" @ name (prim tp)
@@ -1029,14 +1019,12 @@ module Json = struct
           get_bool "is_array" (json, keytrace)
           >>= fun (is_array, _is_array_keytrace) ->
           if is_array then
-            aux_as json ~keytrace >>= fun as_opt ->
-            ty (Tabstract (AKgeneric name, as_opt))
+            ty (Tgeneric name)
           else
             wrong_phase ~message:"Tgeneric is a decl-phase type." ~keytrace
         | "enum" ->
           get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
-          aux_as json ~keytrace >>= fun as_opt ->
-          ty (Tabstract (AKnewtype (name, []), as_opt))
+          aux_as json ~keytrace >>= fun as_ty -> ty (Tnewtype (name, [], as_ty))
         | "newtype" ->
           get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->
           begin
@@ -1057,8 +1045,8 @@ module Json = struct
           >>= fun typedef_name ->
           get_array "args" (json, keytrace) >>= fun (args, args_keytrace) ->
           aux_args args ~keytrace:args_keytrace >>= fun args ->
-          aux_as json ~keytrace >>= fun as_opt ->
-          ty (Tabstract (AKnewtype (typedef_name, args), as_opt))
+          aux_as json ~keytrace >>= fun as_ty ->
+          ty (Tnewtype (typedef_name, args, as_ty))
         | "path" ->
           get_obj "type" (json, keytrace) >>= fun (type_json, type_keytrace) ->
           get_string "kind" (type_json, type_keytrace)
@@ -1080,16 +1068,16 @@ module Json = struct
             | "class" ->
               get_string "name" (type_json, type_keytrace)
               >>= fun (class_name, _class_name_keytrace) ->
-              aux_as json ~keytrace >>= fun as_opt ->
-              ty (Tabstract (AKdependent (DTcls class_name), as_opt))
+              aux_as json ~keytrace >>= fun as_ty ->
+              ty (Tdependent (DTcls class_name, as_ty))
             | "expr" ->
               not_supported
                 ~message:
                   "Cannot deserialize path-dependent type involving an expression"
                 ~keytrace
             | "this" ->
-              aux_as json ~keytrace >>= fun as_opt ->
-              ty (Tabstract (AKdependent DTthis, as_opt))
+              aux_as json ~keytrace >>= fun as_ty ->
+              ty (Tdependent (DTthis, as_ty))
             | path_kind ->
               deserialization_error
                 ~message:("Unknown path kind: " ^ path_kind)
@@ -1387,13 +1375,14 @@ module Json = struct
         (locl_ty list, deserialization_error) result =
       map_array args ~keytrace ~f:aux
     and aux_as (json : Hh_json.json) ~(keytrace : Hh_json.Access.keytrace) :
-        (locl_ty option, deserialization_error) result =
+        (locl_ty, deserialization_error) result =
       Result.Monad_infix.(
         (* as-constraint is optional, check to see if it exists. *)
         match Hh_json.Access.get_obj "as" (json, keytrace) with
         | Ok (as_json, as_keytrace) ->
-          aux as_json ~keytrace:as_keytrace >>= fun as_ty -> Ok (Some as_ty)
-        | Error (Hh_json.Access.Missing_key_error _) -> Ok None
+          aux as_json ~keytrace:as_keytrace >>= fun as_ty -> Ok as_ty
+        | Error (Hh_json.Access.Missing_key_error _) ->
+          Ok (Reason.none, Toption (Reason.none, Tnonnull))
         | Error access_failure ->
           deserialization_error
             ~message:

@@ -29,7 +29,10 @@ let rec type_non_nullable env ty =
       | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject | Tclass _
       | Tarraykind _ ) ) ->
     true
-  | (_, Tabstract (_, Some ty)) when type_non_nullable env ty -> true
+  | (_, Tnewtype (_, _, ty))
+  | (_, Tdependent (_, ty))
+    when type_non_nullable env ty ->
+    true
   | (_, Tunion tyl) when not (List.is_empty tyl) ->
     List.for_all tyl (type_non_nullable env)
   | _ -> false
@@ -105,7 +108,7 @@ let rec truthiness env ty =
   | Tarraykind _
   | Toption _ ->
     Possibly_falsy
-  | Tabstract (AKnewtype (id, _), _) when Env.is_enum env id -> Possibly_falsy
+  | Tnewtype (id, _, _) when Env.is_enum env id -> Possibly_falsy
   | Tclass ((_, cid), _, _) ->
     if String.equal cid SN.Classes.cStringish then
       Possibly_falsy
@@ -147,7 +150,9 @@ let rec truthiness env ty =
   | Tintersection tyl ->
     List.map tyl (truthiness env)
     |> List.fold ~init:Possibly_falsy ~f:intersect_truthiness
-  | Tabstract _ ->
+  | Tgeneric _
+  | Tnewtype _
+  | Tdependent _ ->
     let (env, tyl) = Env.get_concrete_supertypes env ty in
     begin
       match List.map tyl (truthiness env) with
@@ -229,7 +234,9 @@ let rec find_sketchy_types env acc ty =
         List.fold sketchy_tys ~init:[] ~f:( @ )
     in
     sketchy_tys @ acc
-  | Tabstract _ ->
+  | Tgeneric _
+  | Tnewtype _
+  | Tdependent _ ->
     let (env, tyl) = Env.get_concrete_supertypes env ty in
     List.fold tyl ~init:acc ~f:(find_sketchy_types env)
   | Tany _

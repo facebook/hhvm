@@ -158,17 +158,29 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
     Format.fprintf fmt "(@[<2>Tvar@ ";
     Ident.pp fmt a0;
     Format.fprintf fmt "@])"
-  | Tabstract (a0, a1) ->
-    Format.fprintf fmt "(@[<2>Tabstract (@,";
-    pp_abstract_kind fmt a0;
+  | Tnewtype (a0, a1, a2) ->
+    Format.fprintf fmt "(@[<2>Tnewtype (@,";
+    Format.fprintf fmt "%S" a0;
     Format.fprintf fmt ",@ ";
-    (match a1 with
-    | None -> Format.pp_print_string fmt "None"
-    | Some x ->
-      Format.pp_print_string fmt "(Some ";
-      pp_ty fmt x;
-      Format.pp_print_string fmt ")");
+    Format.fprintf fmt "@[<2>[";
+    ignore
+      (List.fold_left
+         ~f:(fun sep x ->
+           if sep then Format.fprintf fmt ";@ ";
+           pp_ty fmt x;
+           true)
+         ~init:false
+         a1);
+    Format.fprintf fmt "@,]@]";
+    Format.fprintf fmt ",@ ";
+    pp_ty fmt a2;
     Format.fprintf fmt "@,))@]"
+  | Tdependent (a0, a1) ->
+    Format.fprintf fmt "(@[<2>Tdependent@ ";
+    pp_dependent_type fmt a0;
+    Format.fprintf fmt ",@ ";
+    pp_ty fmt a1;
+    Format.fprintf fmt "@])"
   | Tanon (a0, a1) ->
     Format.fprintf fmt "(@[<2>Tanon (@,";
     pp_fun_arity fmt a0;
@@ -263,36 +275,6 @@ and pp_array_kind : Format.formatter -> array_kind -> unit =
 
 and show_array_kind : array_kind -> string =
  (fun x -> Format.asprintf "%a" pp_array_kind x)
-
-and pp_abstract_kind : Format.formatter -> abstract_kind -> unit =
- fun fmt ak ->
-  match ak with
-  | AKnewtype (a0, a1) ->
-    Format.fprintf fmt "(@[<2>AKnewtype (@,";
-    Format.fprintf fmt "%S" a0;
-    Format.fprintf fmt ",@ ";
-    Format.fprintf fmt "@[<2>[";
-    ignore
-      (List.fold_left
-         ~f:(fun sep x ->
-           if sep then Format.fprintf fmt ";@ ";
-           pp_ty fmt x;
-           true)
-         ~init:false
-         a1);
-    Format.fprintf fmt "@,]@]";
-    Format.fprintf fmt "@,))@]"
-  | AKgeneric a0 ->
-    Format.fprintf fmt "(@[<2>AKgeneric@ ";
-    Format.fprintf fmt "%S" a0;
-    Format.fprintf fmt "@])"
-  | AKdependent a0 ->
-    Format.fprintf fmt "(@[<2>AKdependent@ ";
-    pp_dependent_type fmt a0;
-    Format.fprintf fmt "@])"
-
-and show_abstract_kind : abstract_kind -> string =
- (fun x -> Format.asprintf "%a" pp_abstract_kind x)
 
 and pp_dependent_type : Format.formatter -> dependent_type -> unit =
  fun fmt a0 ->

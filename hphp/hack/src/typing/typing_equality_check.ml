@@ -53,8 +53,8 @@ let rec assert_nontrivial p bop env ty1 ty2 =
   match (ty1, ty2) with
   (* Disallow `===` on distinct abstract enum types. *)
   (* Future: consider putting this in typed lint not type checking *)
-  | ( (_, Tabstract (AKnewtype (e1, _), Some (_, Tprim N.Tarraykey))),
-      (_, Tabstract (AKnewtype (e2, _), Some (_, Tprim N.Tarraykey))) )
+  | ( (_, Tnewtype (e1, _, (_, Tprim N.Tarraykey))),
+      (_, Tnewtype (e2, _, (_, Tprim N.Tarraykey))) )
     when Env.is_enum env e1 && Env.is_enum env e2 ->
     if String.equal e1 e2 then
       ()
@@ -85,7 +85,8 @@ let rec assert_nontrivial p bop env ty1 ty2 =
       assert_nontrivial p bop env ty1 ty2
     | ( ( _,
           ( Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Toption _
-          | Tdynamic | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Ttuple _
+          | Tdynamic | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _
+          | Tclass _ | Ttuple _
           | Tanon (_, _)
           | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tpu _
           | Tpu_type_access _ ) ),

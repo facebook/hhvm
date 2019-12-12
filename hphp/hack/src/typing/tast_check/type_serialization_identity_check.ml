@@ -16,7 +16,6 @@ the input type to set it to a default arity value. *)
 let rec strip_ty ty =
   let (reason, ty) = ty in
   let strip_tyl tyl = List.map tyl ~f:strip_ty in
-  let strip_opt ty_opt = Option.map ty_opt ~f:strip_ty in
   let strip_possibly_enforced_ty et =
     { et with et_type = strip_ty et.et_type }
   in
@@ -31,6 +30,7 @@ let rec strip_ty ty =
     | Tprim _ -> ty
     | Tvar _ -> ty
     | Tanon _ -> ty
+    | Tgeneric _ -> ty
     | Tarraykind AKempty -> ty
     | Tarraykind (AKdarray (ty1, ty2)) ->
       Tarraykind (AKdarray (strip_ty ty1, strip_ty ty2))
@@ -39,15 +39,9 @@ let rec strip_ty ty =
       Tarraykind (AKvarray_or_darray (strip_ty ty1, strip_ty ty2))
     | Ttuple tyl -> Ttuple (strip_tyl tyl)
     | Toption ty -> Toption (strip_ty ty)
-    | Tabstract (abstract_kind, ty_opt) ->
-      let abstract_kind =
-        match abstract_kind with
-        | AKnewtype (name, tparams) -> AKnewtype (name, strip_tyl tparams)
-        | AKgeneric _
-        | AKdependent _ ->
-          abstract_kind
-      in
-      Tabstract (abstract_kind, strip_opt ty_opt)
+    | Tnewtype (name, tparams, ty) ->
+      Tnewtype (name, strip_tyl tparams, strip_ty ty)
+    | Tdependent (dep, ty) -> Tdependent (dep, strip_ty ty)
     | Tunion tyl -> Tunion (strip_tyl tyl)
     | Tintersection tyl -> Tintersection (strip_tyl tyl)
     | Tclass (sid, exact, tyl) -> Tclass (sid, exact, strip_tyl tyl)

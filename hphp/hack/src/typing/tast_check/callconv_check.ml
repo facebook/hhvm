@@ -29,7 +29,7 @@ let check_types env ((p, _), te) =
                || String.equal cn SN.Collections.cVec ->
           true
         | (_, Tunion tyl) -> List.for_all ~f:iter tyl
-        | (_, Tabstract _) ->
+        | (_, (Tgeneric _ | Tnewtype _ | Tdependent _)) ->
           let (_, tyl) = Env.get_concrete_supertypes env ety1 in
           List.exists ~f:iter tyl
         | _ -> false

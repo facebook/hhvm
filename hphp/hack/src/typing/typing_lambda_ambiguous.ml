@@ -34,7 +34,8 @@ let log_anonymous env =
   !found
 
 let make_suggest_ty tys =
-  (Reason.Rnone, Tabstract (AKnewtype ("HackSuggest", tys), None))
+  ( Reason.Rnone,
+    Tnewtype ("HackSuggest", tys, Typing_make_type.mixed Reason.none) )
 
 let visitor =
   object

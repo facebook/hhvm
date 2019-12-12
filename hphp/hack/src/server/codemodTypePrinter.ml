@@ -35,7 +35,7 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
   | Tany _
   | Terr
   | Tvar _
-  | Tabstract (AKdependent _, _)
+  | Tdependent _
   | Tanon _
   | Tunion _
   | Tintersection _
@@ -44,7 +44,7 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
     raise Non_denotable
   | Tnonnull -> "nonnull"
   | Tdynamic -> "dynamic"
-  | Tabstract (AKgeneric s, _) -> s
+  | Tgeneric s -> s
   | Toption (_, Tnonnull) -> "mixed"
   | Toption ty -> "?" ^ print_ty_exn ty
   | Tfun ft ->
@@ -70,8 +70,8 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
       | Open_shape -> fields @ ["..."]
     in
     Printf.sprintf "shape(%s)" (String.concat ~sep:", " fields)
-  | Tabstract (AKnewtype (name, []), _) -> Utils.strip_ns name
-  | Tabstract (AKnewtype (name, tyl), _) ->
+  | Tnewtype (name, [], _) -> Utils.strip_ns name
+  | Tnewtype (name, tyl, _) ->
     Utils.strip_ns name ^ "<" ^ print_tyl_exn tyl ^ ">"
   | Tclass ((_, name), _, []) -> strip_ns name
   | Tclass ((_, name), _, tyl) ->

@@ -121,7 +121,8 @@ let rec freshen_inside_ty env ty =
   | Tobject
   | Tprim _
   | Tanon _
-  | Tabstract (_, None) ->
+  | Tgeneric _
+  | Tdependent _ ->
     default ()
   (* Nullable is covariant *)
   | Toption ty ->
@@ -150,16 +151,15 @@ let rec freshen_inside_ty env ty =
           (env, { p with fp_type }))
     in
     (env, (r, Tfun { ft with ft_ret; ft_params }))
-  | Tabstract (AKnewtype (name, tyl), tyopt) ->
+  | Tnewtype (name, tyl, ty) ->
     begin
       match Env.get_typedef env name with
       | None -> default ()
       | Some td ->
         let variancel = List.map td.td_tparams (fun t -> t.tp_variance) in
         let (env, tyl) = freshen_tparams env variancel tyl in
-        (env, (r, Tabstract (AKnewtype (name, tyl), tyopt)))
+        (env, (r, Tnewtype (name, tyl, ty)))
     end
-  | Tabstract _ -> default ()
   | Tclass ((p, cid), e, tyl) ->
     begin
       match Env.get_class env cid with
@@ -514,9 +514,9 @@ let ty_equal_shallow env ty1 ty2 =
            && Bool.equal v1.sft_optional v2.sft_optional)
          (ShapeFieldMap.elements fdm1)
          (ShapeFieldMap.elements fdm2)
-  | (Tabstract (AKnewtype (n1, _), _), Tabstract (AKnewtype (n2, _), _)) ->
-    String.equal n1 n2
-  | (Tabstract (ak1, _), Tabstract (ak2, _)) -> equal_abstract_kind ak1 ak2
+  | (Tnewtype (n1, _, _), Tnewtype (n2, _, _)) -> String.equal n1 n2
+  | (Tdependent (dep1, _), Tdependent (dep2, _)) ->
+    equal_dependent_type dep1 dep2
   | _ -> false
 
 let union_any_if_any_in_lower_bounds env ty lower_bounds =
@@ -746,8 +746,8 @@ let unsolved_invariant_tyvars_under_union_and_intersection env ty =
       List.fold tyl ~init:(env, tyvars) ~f:find_tyvars
     | ( _,
         ( Terr | Tany _ | Tdynamic | Tnonnull | Tprim _ | Tclass _ | Tobject
-        | Tabstract _ | Tarraykind _ | Ttuple _ | Tshape _ | Tfun _ | Tanon _
-        | Tpu _ | Tpu_type_access _ ) ) ->
+        | Tgeneric _ | Tnewtype _ | Tdependent _ | Tarraykind _ | Ttuple _
+        | Tshape _ | Tfun _ | Tanon _ | Tpu _ | Tpu_type_access _ ) ) ->
       (env, tyvars)
   in
   find_tyvars (env, []) ty
@@ -806,9 +806,11 @@ let widen env widen_concrete_type ty =
     (* Don't widen the `this` type, because the field type changes up the hierarchy
      * so we lose precision
      *)
-    | (_, Tabstract (AKdependent DTthis, _)) -> (env, ty)
+    | (_, Tdependent (DTthis, _)) -> (env, ty)
     (* For other abstract types, just widen to the bound, if possible *)
-    | (_, Tabstract (_, Some ty)) -> widen env ty
+    | (_, Tdependent (_, ty))
+    | (_, Tnewtype (_, _, ty)) ->
+      widen env ty
     | _ ->
       begin
         match widen_concrete_type env ty with
@@ -937,8 +939,8 @@ let rec non_null env pos ty =
     object
       inherit Type_mapper.union_inter_type_mapper as super
 
-      method! on_tabstract env r ak cstr =
-        let ty = (r, Tabstract (ak, cstr)) in
+      method! on_tdependent env r dep cstr =
+        let ty = (r, Tdependent (dep, cstr)) in
         match TUtils.get_concrete_supertypes env ty with
         | (env, [ty'])
           when Typing_utils.is_sub_type_for_union
@@ -946,8 +948,20 @@ let rec non_null env pos ty =
                  (MakeType.null Reason.none)
                  ty' ->
           let (env, ty') = non_null env pos ty' in
-          (env, (r, Tabstract (ak, Some ty')))
-        | (env, _) -> super#on_tabstract env r ak cstr
+          (env, (r, Tdependent (dep, ty')))
+        | (env, _) -> super#on_tdependent env r dep cstr
+
+      method! on_tnewtype env r x tyl cstr =
+        let ty = (r, Tnewtype (x, tyl, cstr)) in
+        match TUtils.get_concrete_supertypes env ty with
+        | (env, [ty'])
+          when Typing_utils.is_sub_type_for_union
+                 env
+                 (MakeType.null Reason.none)
+                 ty' ->
+          let (env, ty') = non_null env pos ty' in
+          (env, (r, Tnewtype (x, tyl, ty')))
+        | (env, _) -> super#on_tnewtype env r x tyl cstr
     end
   in
   let (env, ty) = make_concrete_super_types_nonnull#on_type env ty in

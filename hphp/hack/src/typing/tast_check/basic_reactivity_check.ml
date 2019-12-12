@@ -56,7 +56,9 @@ let rec is_byval_collection_or_string_or_any_type env ty =
       List.for_all tyl ~f:(is_byval_collection_or_string_or_any_type env)
     | (_, Tintersection tyl) ->
       List.exists tyl ~f:(is_byval_collection_or_string_or_any_type env)
-    | (_, Tabstract _) ->
+    | (_, Tgeneric _)
+    | (_, Tnewtype _)
+    | (_, Tdependent _) ->
       (* FIXME we should probably look at the upper bounds here. *)
       false
     | ( _,

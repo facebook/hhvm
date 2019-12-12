@@ -63,12 +63,12 @@ let expand_typedef_ ?(force_expand = false) ety_env env r x argl =
               Reason.Rimplicit_upper_bound (Reason.to_pos r, "?nonnull")
             in
             let cstr = (r_cstr, Toption (r_cstr, Tnonnull)) in
-            (env, Some cstr)
+            (env, cstr)
           | Some cstr ->
             let (env, cstr) = Phase.localize ~ety_env env cstr in
-            (env, Some cstr)
+            (env, cstr)
         in
-        (env, (r, Tabstract (AKnewtype (x, argl), td_constraint)))
+        (env, (r, Tnewtype (x, argl, td_constraint)))
     in
     if Naming_special_names.Classes.is_format_string x then
       (env, (ety_env, MakeType.class_type r x argl))
@@ -83,7 +83,7 @@ let expand_typedef ety_env env r x argl =
  * of where the typedefs come from. *)
 let rec force_expand_typedef ~ety_env env (t : locl_ty) =
   match t with
-  | (r, Tabstract (AKnewtype (x, argl), _)) when not (Env.is_enum env x) ->
+  | (r, Tnewtype (x, argl, _)) when not (Env.is_enum env x) ->
     let (env, (ety_env, ty)) =
       expand_typedef_ ~force_expand:true ety_env env r x argl
     in

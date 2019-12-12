@@ -135,6 +135,7 @@ let rec obj_get
     ~pos_params
     ~explicit_targs
     ~coerce_from_ty
+    ~is_nonnull:false
     env
     ty1
     cid
@@ -191,6 +192,7 @@ and obj_get_concrete_ty
         ~pos_params:None
         ~explicit_targs
         ~coerce_from_ty
+        ~is_nonnull:true
         env
         inter_ty
         class_id
@@ -560,6 +562,7 @@ and obj_get_
     ~obj_pos
     ~pos_params
     ~coerce_from_ty
+    ~is_nonnull
     ?(explicit_targs = [])
     env
     ty1
@@ -596,6 +599,7 @@ and obj_get_
           ~pos_params
           ~explicit_targs
           ~coerce_from_ty
+          ~is_nonnull
           env
           ty
           cid
@@ -637,6 +641,7 @@ and obj_get_
             ~pos_params
             ~explicit_targs
             ~coerce_from_ty
+            ~is_nonnull
             env
             ty
             cid
@@ -655,6 +660,13 @@ and obj_get_
     let (env, ty) = Union.union_list env (fst ety1) tyl in
     (env, (ty, tal))
   | (_, Tintersection tyl) ->
+    let is_nonnull =
+      is_nonnull
+      || Typing_solver.is_sub_type
+           env
+           ty1
+           (Typing_make_type.nonnull Reason.none)
+    in
     let (env, resultl) =
       TUtils.run_on_intersection env tyl ~f:(fun env ty ->
           obj_get_
@@ -665,6 +677,7 @@ and obj_get_
             ~pos_params
             ~explicit_targs
             ~coerce_from_ty
+            ~is_nonnull
             env
             ty
             cid
@@ -682,12 +695,8 @@ and obj_get_
     let tyl = List.map ~f:fst resultl in
     let (env, ty) = Inter.intersect_list env (fst ety1) tyl in
     (env, (ty, tal))
-  | (p', Tabstract (ak, Some ty)) ->
-    let k_lhs' ty =
-      match ak with
-      | AKnewtype (_, _) -> k_lhs ty
-      | _ -> k_lhs (p', Tabstract (ak, Some ty))
-    in
+  | (p', Tdependent (dep, ty)) ->
+    let k_lhs' ty = k_lhs (p', Tdependent (dep, ty)) in
     obj_get_
       ~inst_meth
       ~obj_pos
@@ -696,28 +705,51 @@ and obj_get_
       ~pos_params
       ~explicit_targs
       ~coerce_from_ty
+      ~is_nonnull
       env
       ty
       cid
       id
       k_lhs'
       on_error
-  | (p', Tabstract (ak, _)) ->
+  | (_, Tnewtype (_, _, ty)) ->
+    obj_get_
+      ~inst_meth
+      ~obj_pos
+      ~is_method
+      ~nullsafe
+      ~pos_params
+      ~explicit_targs
+      ~coerce_from_ty
+      ~is_nonnull
+      env
+      ty
+      cid
+      id
+      k_lhs
+      on_error
+  | (_, Tgeneric _) ->
     let resl =
       TUtils.try_over_concrete_supertypes env ety1 (fun env ty ->
           (* We probably don't want to rewrap new types for the 'this' closure *)
           (* TODO AKENN: we shouldn't refine constraints by changing
            * the type like this *)
-          let k_lhs' ty =
-            match ak with
-            | AKnewtype (_, _) -> k_lhs ty
-            | _ -> k_lhs (p', Tabstract (ak, Some ty))
+          let k_lhs' _ty = ety1 in
+          let (env, ty) =
+            if is_nonnull then
+              Typing_solver.non_null env obj_pos ty
+            else
+              (env, ty)
           in
-          obj_get_concrete_ty
+          obj_get_
             ~inst_meth
+            ~obj_pos
             ~is_method
+            ~nullsafe
+            ~pos_params
             ~explicit_targs
             ~coerce_from_ty
+            ~is_nonnull
             env
             ty
             cid

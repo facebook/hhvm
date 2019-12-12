@@ -23,7 +23,9 @@ let has_ppl_attribute c =
 let rec base_type env ty =
   let (env, ty) = Env.expand_type env ty in
   match snd ty with
-  | Tabstract (_, Some ty) -> base_type env ty
+  | Tnewtype (_, _, ty)
+  | Tdependent (_, ty) ->
+    base_type env ty
   | _ -> (env, ty)
 
 (**

@@ -224,7 +224,10 @@ struct State {
   // Vreg state
   jit::vector<folly::Optional<RegInfo>> regInfo;
 
-  // All Vregs which are RegClass::SF
+  // All Vregs belonging to particular RegClasses. Used to quickly
+  // filter VregSets.
+  VregSet gps;
+  VregSet simds;
   VregSet flags;
 
   // Pre-calculated mapping of spill Vregs to spill slots
@@ -569,6 +572,27 @@ bool compatible_reg_classes(RegClass cls1, RegClass cls2) {
       break;
   }
   always_assert(false);
+}
+
+// Populate the reg-class VregSets in state as appropriate.
+void set_reg_class_bits(State& state, Vreg r, RegClass cls) {
+  switch (cls) {
+    case RegClass::AnyNarrow:
+    case RegClass::GP:
+      state.gps.add(r);
+      break;
+    case RegClass::SIMD:
+    case RegClass::SIMDWide:
+      state.simds.add(r);
+      break;
+    case RegClass::SF:
+      state.flags.add(r);
+      break;
+    case RegClass::Any:
+    case RegClass::Spill:
+    case RegClass::SpillWide:
+      break;
+  }
 }
 
 // Wrappers around boost::get<>. Will assert if you try to retrieve a value from
@@ -1148,8 +1172,6 @@ State make_state(Vunit& unit, const Abi& abi) {
     (abi.all() - (abi.gpUnreserved | abi.simdUnreserved)) | scratch,
     scratch
   };
-
-  state.flags.add(state.abi.sf);
 
   // Pre-size the table to avoid excessive resizing.
   state.regInfo.reserve(unit.next_vr * 2);
@@ -2016,7 +2038,6 @@ void infer_register_classes(State& state) {
     auto& info = reg_info_create(state, r);
     assertx(info.regClass == RegClass::Any);
     info.regClass = detail::reg_class(r);
-    if (info.regClass == RegClass::SF) state.flags.add(r);
     haveWide |= (info.regClass == RegClass::SIMDWide);
   };
 
@@ -2026,7 +2047,6 @@ void infer_register_classes(State& state) {
     auto const newClass = detail::reg_class(r);
     if (auto const c = merge(info.regClass, newClass)) {
       info.regClass = *c;
-      if (info.regClass == RegClass::SF) state.flags.add(r);
       haveWide |= (info.regClass == RegClass::SIMDWide);
     } else {
       incompatible.add(r);
@@ -2382,6 +2402,17 @@ void infer_register_classes(State& state) {
         addCopies(copies, b, unit.blocks[b].code.size() - 1);
       }
     }
+  }
+
+  // Now that we've inferred reg-classes, populate the VregSets in
+  // state as necessary.
+  state.gps.add(state.gpUnreserved);
+  state.simds.add(state.simdUnreserved);
+  state.flags.add(state.abi.sf);
+  for (size_t i = 0; i < state.regInfo.size(); ++i) {
+    auto const& info = state.regInfo[i];
+    if (!info) continue;
+    set_reg_class_bits(state, Vreg{i}, info->regClass);
   }
 }
 
@@ -3302,6 +3333,35 @@ struct SpillerState {
       // common case).
       if (per.inReg.size() <= per.numRegs) return VregSet{};
 
+      // We know we have to spill. If the set of Vregs we can't spill
+      // (that aren't spilled) is equal to, or larger, than the
+      // register limit, we know we have to spill all of them. There's
+      // no need to invoke any of the heuristics below. This can
+      // happen if any Vregs are live across calls which clobber
+      // everything.
+      if ((forbidden & per.inReg).size() >= per.numRegs) {
+        auto spilled = per.inReg - forbidden;
+        spilled.removePhys();
+
+        // Make sure that spilling everything that we can is
+        // sufficient.
+        auto const toRemove = per.inReg.size() - per.numRegs;
+        always_assert_flog(
+          toRemove <= spilled.size(),
+          "Need to spill {} Vregs, but only {} are available at location {} {}",
+          toRemove,
+          spilled.size(),
+          b,
+          instIdx
+        );
+
+        // We know we have to spill everything, so just move
+        // everything into memory.
+        per.inReg -= spilled;
+        per.inMem |= spilled;
+        return spilled;
+      }
+
       // Otherwise we really have to spill. Gather up the candidates with their
       // spill weights at this point.
       jit::vector<std::pair<Vreg, SpillWeight>> candidates;
@@ -3361,7 +3421,6 @@ struct SpillerState {
                 const VregSet* kills,
                 Vlabel b,
                 size_t instIdx) {
-    assertx(checkInvariants(Vlabel{}, 0));
     for (auto const r : candidates) {
       auto s = forReg(r);
       if (!s) continue;
@@ -3831,6 +3890,121 @@ spill_weight_at(State& state,
   );
 }
 
+// Calculate information indicating which instructions within a block
+// may actually generate spills. Such instructions can be processed
+// more efficiently. If none of a block's instructions can spill, we
+// can process the block more efficiently without processing
+// individual instructions. If no blocks can spill, the spiller logic
+// can be skipped entirely.
+
+// Information about spilling needed on a per-instruction basis
+struct SpillingNeededPerBlock {
+  // We store per-instruction for the first 128 instructions. Beyond
+  // that, we just use the block information.
+  std::bitset<128> perInst;
+  // True if any instruction in the block can spill. For instructions
+  // beyond 128, this is all we know.
+  bool any = false;
+
+  bool operator()(size_t idx) const {
+    if (idx < perInst.size()) return perInst[idx];
+    return any;
+  }
+};
+// Per-block spilling information
+struct SpillingNeeded {
+  jit::vector<SpillingNeededPerBlock> perBlock;
+  // True if spilling is possible in any block
+  bool any = false;
+};
+
+SpillingNeeded determine_spilling_needed(State& state) {
+  auto& unit = state.unit;
+  auto const gpLimit = state.gpUnreserved.size();
+  auto const simdLimit = state.simdUnreserved.size();
+  auto const commonLimit = std::min(gpLimit, simdLimit);
+
+  auto const validRegs = state.gps | state.simds;
+
+  // We can determine if a instruction might trigger a spill by
+  // calculating the maximum register pressure within the
+  // instruction. If it exceeds the number of physical registers, we
+  // might need a spill. This calculation is conservative because we
+  // assume all live Vregs will be in registers (in reality, some
+  // might already be spilled). Thus, at worst, we overestimate the
+  // register pressure, thinking we might have a spill when we won't.
+
+  SpillingNeeded needsSpilling;
+  needsSpilling.perBlock.resize(unit.blocks.size());
+
+  for (auto const b : state.rpo) {
+    // Extra coarse and quick check. If the sum of live-in Vregs and
+    // Vregs defined with the block is still below the limit of both
+    // reg classes, we know no spills can happen here, so skip the
+    // block.
+    if (((state.liveIn[b] | state.defs[b]) & validRegs).size() <= commonLimit) {
+      continue;
+    }
+
+    // Start with the already stored liveness information. We track
+    // GPs and SIMDs together in the same set, as this is more
+    // efficient. If necessary we'll break them out into different
+    // reg-classes.
+    auto live = state.liveOut[b] & validRegs;
+
+    // Check if the live Vregs exceed any of our limits
+    auto const update = [&] (size_t idx) {
+      // If the aggregate Vregs are all below the common limit, we
+      // know it can't spill, even without splitting them out into
+      // their reg-classes.
+      if (live.size() <= commonLimit) return;
+
+      // Quick check failed. Do per reg-class checks and mark this
+      // instruction as potentially spilling.
+      if ((live & state.gps).size() > gpLimit ||
+          (live & state.simds).size() > simdLimit) {
+        needsSpilling.any = true;
+        auto& perBlock = needsSpilling.perBlock[b];
+        perBlock.any = true;
+        if (idx < perBlock.perInst.size()) perBlock.perInst[idx] = true;
+      }
+    };
+
+    // Walk backwards modifying the liveness information on the fly.
+    for (auto instIdx = unit.blocks[b].code.size(); instIdx > 0; --instIdx) {
+      auto& inst = unit.blocks[b].code[instIdx - 1];
+
+      auto const& defs = defs_set_cached(state, inst);
+      auto const& uses = uses_set_cached(state, inst);
+      auto const& acrosses = acrosses_set_cached(state, inst);
+
+      live |= defs;
+      live |= acrosses;
+
+      // Deal with register pressure unfaithful instructions like the
+      // spiller.
+      if (defs.containsPhys() && uses.containsPhys()) {
+        live.add(uses.physRegs());
+      }
+
+      live &= validRegs;
+      update(instIdx - 1);
+
+      live -= defs;
+      live |= uses;
+
+      live &= validRegs;
+      update(instIdx - 1);
+    }
+
+    // What we've calculated for liveness should match the already stored
+    // per-block liveness information at this point.
+    assertx(live == state.liveIn[b]);
+  }
+
+  return needsSpilling;
+}
+
 // Update the phi spiller state for block b to account for which Vregs have been
 // spilled or not.
 void record_phi_spill_state_helper(Vlabel b,
@@ -3838,7 +4012,7 @@ void record_phi_spill_state_helper(Vlabel b,
                                    SpillerState& spillerState,
                                    SpillerResults& results) {
   auto& in = results.perBlock[b].inPhi.emplace();
-  in.resize(defs.size());
+  in.resize(defs.size(), true);
   for (size_t i = 0; i < defs.size(); ++i) {
     auto const r = defs[i];
     auto const s = spillerState.forReg(r);
@@ -3862,14 +4036,14 @@ void record_phi_spill_state_helper(Vlabel b,
 // block's in state). This decides which Vregs should be considered
 // spilled or non-spilled upon entry to the block. We take into
 // account which Vregs have been spilled in predecessors, but we're
-// not required to, since we'll fix up any mismatches later. If
-// needsSpilling is false (which means we won't have to spill anything
-// inside the block), we can attempt a faster initialization. The
-// starting instruction index is returned (to skip over any phi).
+// not required to, since we'll fix up any mismatches later. If the
+// spilling parameter indicates the first instruction doesn't need
+// spilling, we can attempt a faster initialization. The starting
+// instruction index is returned (to skip over any phi).
 size_t setup_initial_spiller_state(State& state,
                                    Vlabel b,
                                    SpillerResults& results,
-                                   bool needsSpilling) {
+                                   const SpillingNeededPerBlock& spilling) {
   auto& unit = state.unit;
   SpillerState initial{state};
 
@@ -3885,7 +4059,7 @@ size_t setup_initial_spiller_state(State& state,
   // spill. The initial state will just be what all the predecessors
   // have agreed upon.
   auto const fastInit = [&] {
-    if (needsSpilling || state.preds[b].size() == 0) return false;
+    if (spilling(0) || state.preds[b].size() == 0) return false;
     // A single predecessor trivially agrees
     if (state.preds[b].size() == 1) return true;
 
@@ -4264,7 +4438,9 @@ size_t process_phijmp_spills(State& state,
     auto const it = promotions.find(r);
     if (it != promotions.end()) continue;
     auto const d = unit.makeReg();
-    reg_info_insert(state, d, reg_info(state, r));
+    auto const& info = reg_info(state, r);
+    set_reg_class_bits(state, d, info.regClass);
+    reg_info_insert(state, d, info);
     promotions.emplace(r, d);
     s->inReg.add(d);
   }
@@ -4428,7 +4604,7 @@ size_t process_phijmp_spills(State& state,
   // promotions.
   assertx(!results.perBlock[b].outPhi);
   auto& outPhi = results.perBlock[b].outPhi.emplace();
-  outPhi.resize(uses.size());
+  outPhi.resize(uses.size(), true);
   for (size_t i = 0; i < uses.size(); ++i) {
     auto const r = uses[i];
     auto const s = spiller.forReg(r);
@@ -5184,7 +5360,7 @@ void process_spills_skip(const State& state,
     auto const& uses = unit.tuples[lastInst.phijmp_.uses];
     assertx(!results.perBlock[b].outPhi);
     auto& outPhi = results.perBlock[b].outPhi.emplace();
-    outPhi.resize(uses.size());
+    outPhi.resize(uses.size(), true);
     for (size_t i = 0; i < uses.size(); ++i) {
       auto const r = uses[i];
       if (!spiller.forReg(r)) continue;
@@ -5206,17 +5382,47 @@ void process_spills_skip(const State& state,
   }
 }
 
+// Run the spiller logic on an instruction which we've determined
+// cannot cause a spill and which does not use a spilled register. For
+// such an instruction, we simply add its defs to the spiller state
+// and remove any dead Vregs.
+void process_inst_spills_fast(State& state,
+                              Vinstr& inst,
+                              Vlabel b,
+                              size_t instIdx,
+                              SpillerState& spiller,
+                              SpillerResults& results) {
+  if (inst.op == Vinstr::phijmp) {
+    // For phijmps, just mark all of its inputs as being non-spilled
+    // in the spiller out state. Since we already know this
+    // instruction does not use any spilled Vregs, they must all be
+    // non-spilled.
+    auto const& uses = state.unit.tuples[inst.phijmp_.uses];
+    assertx(!results.perBlock[b].outPhi);
+    auto& outPhi = results.perBlock[b].outPhi.emplace();
+    outPhi.resize(uses.size(), true);
+  }
+
+  // Add any defs to the inReg state (since we know this instruction
+  // cannot cause a spill, we don't have to touch inMem). Then remove
+  // any dead Vregs.
+  auto const& uses = uses_set_cached(state, inst);
+  auto const& defs = defs_set_cached(state, inst);
+  spiller.gp.inReg |= defs & state.gps;
+  spiller.simd.inReg |= defs & state.simds;
+  spiller.dropDead(uses | defs, nullptr, b, instIdx);
+}
+
 // Run the spiller logic over the entire unit. Returning the spiller
 // state at block boundaries (and Vregs which need SSA
 // conversion). Each block is allowed to determine which of its in/out
 // Vregs should be spilled or not, independently of all others. We'll
 // later pass over all the state and insert spills/reloads as needed
-// to make each block compatible. The bitset determines which blocks
-// actually need spilling. If register pressure calculation has
-// determined a block cannot cause a spill, we can process it more
-// efficiently.
+// to make each block compatible. The spilling information lets us
+// process blocks/instructions more efficiently if we know they cannot
+// cause a spill.
 SpillerResults process_spills(State& state,
-                              const BlockSet& needsSpilling) {
+                              const SpillingNeeded& needsSpilling) {
   auto& unit = state.unit;
 
   // We're going to need Vreg use information about loops, so actually
@@ -5228,8 +5434,8 @@ SpillerResults process_spills(State& state,
 
   for (auto const b : state.rpo) {
     // Initialize the state for this block and get the initial (in) state.
-    auto const spilling = needsSpilling[b];
-    auto instIdx = setup_initial_spiller_state(state, b, results, spilling);
+    auto instIdx =
+      setup_initial_spiller_state(state, b, results, needsSpilling.perBlock[b]);
     auto spiller = *results.perBlock[b].in;
     SCOPE_ASSERT_DETAIL("Current Spiller") {
       return folly::sformat(
@@ -5238,26 +5444,45 @@ SpillerResults process_spills(State& state,
       );
     };
 
-    if (!spilling && !state.uses[b].intersects(spiller.inMem())) {
+    if (!needsSpilling.perBlock[b].any &&
+        !state.uses[b].intersects(spiller.inMem())) {
       // Be efficient if there's no potential spills to worry about.
       process_spills_skip(state, b, spiller, results);
     } else {
       // Iterate over each instruction and run the logic for each one. We need
       // to use indices because we'll modify the unit as part of processing it
       // (which means we need to shift the indices).
+
+      // The spilling information uses the original instruction
+      // indices, so we need to subtract out the number of
+      // instructions we've inserted.
+      size_t addedInsts = 0;
       for (; instIdx < unit.blocks[b].code.size(); ++instIdx) {
         assertx(spiller.checkInvariants(b, instIdx));
 
         auto& inst = unit.blocks[b].code[instIdx];
+
+        // If this instruction cannot cause any spills, and it does
+        // not use any spilled registers, we can process it more
+        // efficiently.
+        if (!needsSpilling.perBlock[b](instIdx - addedInsts) &&
+            !uses_set_cached(state, inst).intersects(spiller.inMem())) {
+          process_inst_spills_fast(state, inst, b, instIdx, spiller, results);
+          continue;
+        }
+
         switch (inst.op) {
-          case Vinstr::phijmp:
-            instIdx +=
+          case Vinstr::phijmp: {
+            auto const added =
               process_phijmp_spills(state, b, instIdx, inst, spiller, results);
+            addedInsts += added;
+            instIdx += added;
             break;
+          }
           case Vinstr::copyargs:
             assertx(acrosses_set_cached(state, inst).none());
             if (defs_set_cached(state, inst).allPhys()) {
-              instIdx += process_inst_spills(
+              auto const added = process_inst_spills(
                 state,
                 b,
                 instIdx,
@@ -5265,9 +5490,11 @@ SpillerResults process_spills(State& state,
                 spiller,
                 results
               );
+              addedInsts += added;
+              instIdx += added;
             } else {
               assertx(!defs_set_cached(state, inst).containsPhys());
-              instIdx += process_copy_spills(
+              auto const added = process_copy_spills(
                 state,
                 unit.tuples[inst.copyargs_.s],
                 unit.tuples[inst.copyargs_.d],
@@ -5276,6 +5503,8 @@ SpillerResults process_spills(State& state,
                 spiller,
                 results
               ).added;
+              addedInsts += added;
+              instIdx += added;
             }
             break;
           case Vinstr::copy: {
@@ -5284,7 +5513,7 @@ SpillerResults process_spills(State& state,
             // Copies which have physical sources or dests are treated like
             // normal instructions.
             if (is_ignored(state, inst.copy_.s) || inst.copy_.d.isPhys()) {
-              instIdx += process_inst_spills(
+              auto const added = process_inst_spills(
                 state,
                 b,
                 instIdx,
@@ -5292,6 +5521,8 @@ SpillerResults process_spills(State& state,
                 spiller,
                 results
               );
+              addedInsts += added;
+              instIdx += added;
               break;
             }
 
@@ -5312,6 +5543,7 @@ SpillerResults process_spills(State& state,
             assertx(copy.op == Vinstr::copy);
             copy.copy_.s = uses[0];
             copy.copy_.d = defs[0];
+            addedInsts += copyResults.added;
             instIdx += copyResults.added;
             break;
           }
@@ -5319,8 +5551,8 @@ SpillerResults process_spills(State& state,
             // Should be handled as part of setting up the initial block state.
             always_assert(false);
             break;
-          default:
-            instIdx += process_inst_spills(
+          default: {
+            auto const added = process_inst_spills(
               state,
               b,
               instIdx,
@@ -5328,7 +5560,10 @@ SpillerResults process_spills(State& state,
               spiller,
               results
             );
+            addedInsts += added;
+            instIdx += added;
             break;
+          }
         }
       }
     }
@@ -6196,7 +6431,9 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
         for (auto const& p : m) {
           results.ssaize.add(p.first);
           results.ssaize.add(p.second);
-          reg_info_insert(state, p.second, reg_info(state, p.first));
+          auto const& info = reg_info(state, p.first);
+          set_reg_class_bits(state, p.second, info.regClass);
+          reg_info_insert(state, p.second, info);
         }
       };
       processMap(mismatch.spillDests);
@@ -6599,106 +6836,6 @@ void set_spill_reg_classes(State& state,
   }
 }
 
-// Calculate a bitset indicating which blocks may actually generate
-// spills. Such blocks can be processed more efficiently. If the
-// bitset has no bits set, spilling can be skipped entirely.
-BlockSet determine_spilling_needed(State& state) {
-  auto& unit = state.unit;
-  auto const gpLimit = state.gpUnreserved.size();
-  auto const simdLimit = state.simdUnreserved.size();
-  auto const commonLimit = std::min(gpLimit, simdLimit);
-
-  // We can determine if a block might trigger a spill by calculating
-  // the maximum register pressure within the block. If it exceeds the
-  // number of physical registers, we might need a spill. This
-  // calculation is conservative because we assume all live Vregs will
-  // be in registers (in reality, some might already be
-  // spilled). Thus, at worst, we overestimate the register pressure,
-  // thinking we might have a spill when we won't.
-
-  BlockSet needsSpilling(unit.blocks.size());
-
-  for (auto const b : state.rpo) {
-    // Extra coarse and quick check. If the sum of live-in Vregs and
-    // Vregs defined with the block is still below the limit of both
-    // reg classes, we know no spills can happen here, so skip the
-    // block.
-    if ((state.liveIn[b] | state.defs[b]).size() <= commonLimit) continue;
-
-    VregSet gpLive;
-    VregSet simdLive;
-
-    auto const liveSet = [&] (Vreg r) -> VregSet* {
-      switch (reg_class(state, r)) {
-        case RegClass::AnyNarrow:
-        case RegClass::GP:
-          return &gpLive;
-        case RegClass::SIMD:
-        case RegClass::SIMDWide:
-          return &simdLive;
-        case RegClass::SF:
-          return nullptr;
-        case RegClass::Any:
-        case RegClass::Spill:
-        case RegClass::SpillWide:
-          break;
-      }
-      always_assert(false);
-    };
-
-    auto const add = [&] (Vreg r) {
-      if (auto l = liveSet(r)) l->add(r);
-    };
-    auto const remove = [&] (Vreg r) {
-      if (auto l = liveSet(r)) l->remove(r);
-    };
-    // Check if the live Vregs exceed any of our limits. If false is
-    // returned, we can stop processing the block.
-    auto const update = [&] {
-      if (gpLive.size() > gpLimit || simdLive.size() > simdLimit) {
-        needsSpilling[b] = true;
-        // In debug builds, always process the entire block, so we get
-        // the benefits of asserting our liveness calculation was
-        // correct.
-        return debug;
-      }
-      return true;
-    };
-
-    // Start with the already stored liveness information
-    for (auto const r : state.liveOut[b]) add(r);
-
-    if (!update()) continue;
-
-    // And then walk backwards modifying it on the fly.
-    for (auto instIdx = unit.blocks[b].code.size(); instIdx > 0; --instIdx) {
-      auto& inst = unit.blocks[b].code[instIdx-1];
-
-      auto const& defs = defs_set_cached(state, inst);
-      auto const& uses = uses_set_cached(state, inst);
-      auto const& acrosses = acrosses_set_cached(state, inst);
-
-      for (auto const r : defs)     add(r);
-      for (auto const r : acrosses) add(r);
-      // Deal with register pressure unfaithful instructions like the
-      // spiller.
-      if (defs.containsPhys() && uses.containsPhys()) {
-        for (auto const r : uses) if (r.isPhys()) add(r);
-      }
-      if (!update()) break;
-      for (auto const r : defs) remove(r);
-      for (auto const r : uses) add(r);
-      if (!update()) break;
-    }
-
-    // What we've calculated for liveness should match the already stored
-    // per-block liveness information at this point.
-    assertx((gpLive | simdLive) == state.liveIn[b]);
-  }
-
-  return needsSpilling;
-}
-
 // Remove dead spills (and any other Vregs made dead by removing
 // spills). This logically does the same thing as removeDeadCode(),
 // but is optimized to take advantage of the fact we only want to
@@ -7044,7 +7181,7 @@ void insert_spills(State& state) {
   auto const needsSpilling = determine_spilling_needed(state);
   // If no block can possibly spill, the spiller can be skipped
   // entirely.
-  if (needsSpilling.none()) return;
+  if (!needsSpilling.any) return;
 
   // Generate spills and fixup mismatches between blocks.
   auto results = process_spills(state, needsSpilling);
@@ -7074,11 +7211,9 @@ void insert_spills(State& state) {
       0
     );
     for (auto const& map : mappings) {
-      reg_info_insert(
-        state,
-        map.first,
-        reg_info(state, map.second)
-      );
+      auto const& info = reg_info(state, map.second);
+      set_reg_class_bits(state, map.first, info.regClass);
+      reg_info_insert(state, map.first, info);
       if (results.rematerialized[map.second]) {
         results.rematerialized.add(map.first);
       }

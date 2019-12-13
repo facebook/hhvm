@@ -1,0 +1,60 @@
+0xXX+0: NullUninit
+0xXX+1: NullUninit
+0xXX+2: NullUninit
+0xXX+3: FCallFuncD 0 0 1 main
+0xXX+10: PopC
+0xXX+11: Int 1
+0xXX+20: RetC
+0xXX+21: NewArray 3
+0xXX+23: String hello
+0xXX+28: String world
+0xXX+33: AddElemC
+0xXX+34: String this
+0xXX+39: String is
+0xXX+44: AddElemC
+0xXX+45: String a
+0xXX+50: String test
+0xXX+55: AddElemC
+0xXX+56: SetL 0
+0xXX+58: PopC
+0xXX+59: CGetL 0
+0xXX+61: IterInit 0 k:1 v:2 103
+0xXX+70: String
+
+0xXX+75: CGetL2 2
+0xXX+77: Concat
+0xXX+78: Print
+0xXX+79: PopC
+0xXX+80: String
+
+0xXX+85: CGetL2 1
+0xXX+87: Concat
+0xXX+88: Print
+0xXX+89: PopC
+0xXX+90: CGetL 0
+0xXX+92: IterInit 1 k:3 v:4 55
+0xXX+101: String
+
+0xXX+106: CGetL2 4
+0xXX+108: Concat
+0xXX+109: Print
+0xXX+110: PopC
+0xXX+111: String
+
+0xXX+116: CGetL2 3
+0xXX+118: Concat
+0xXX+119: Print
+0xXX+120: PopC
+0xXX+121: IterFree 1
+0xXX+123: IterFree 0
+0xXX+125: Jmp 39
+0xXX+130: IterNext 1 k:3 v:4 -29
+0xXX+139: Jmp 8
+0xXX+144: IterFree 1
+0xXX+146: Throw
+0xXX+147: IterNext 0 k:1 v:2 -77
+0xXX+156: Jmp 8
+0xXX+161: IterFree 0
+0xXX+163: Throw
+0xXX+164: Int 1
+0xXX+173: RetC

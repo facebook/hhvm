@@ -1,0 +1,1 @@
+$1 = Object of class "A" @ 0xXX = {"foo" = { HPHP::DataType::Int64, 42 }, "foo2" = { HPHP::DataType::Int64, 44 }, "foo3" = { HPHP::DataType::Int64, 45 }, "foo4" = { HPHP::DataType::Int64, 46 }, "foo5" = { HPHP::DataType::Int64, 47 }, "foo6" = { HPHP::DataType::Int64, 49 }, "foo7" = { HPHP::DataType::Null }, "foo8" = { HPHP::DataType::PersistentString, "foo" }}

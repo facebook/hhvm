@@ -1,0 +1,9 @@
+break HPHP::f_var_dump
+source tools/gdb/hhvm.py
+run
+set logging on
+set pagination off
+print *expression.m_data.pobj
+set logging off
+kill
+quit

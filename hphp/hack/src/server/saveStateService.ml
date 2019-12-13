@@ -37,7 +37,9 @@ let partition_error_files_tf
   in
   (fold_error_files errors_in_phases_t, fold_error_files errors_in_phases_f)
 
-let load_contents_exn (input_filename : string) : 'a =
+(* If the contents doesn't contain the value of the expected type, the result
+  is undefined behavior. We may crash, or we may continue with a bogus value. *)
+let load_contents_unsafe (input_filename : string) : 'a =
   let ic = Pervasives.open_in_bin input_filename in
   let contents = Marshal.from_channel ic in
   Pervasives.close_in ic;
@@ -48,7 +50,7 @@ let load_class_decls (input_filename : string) : unit =
   Hh_logger.log "Begin loading class declarations";
   try
     Hh_logger.log "Unmarshalling class declarations from %s" input_filename;
-    let decls = load_contents_exn input_filename in
+    let decls = load_contents_unsafe input_filename in
     Hh_logger.log "Importing class declarations...";
     let classes = Decl_export.import_class_decls decls in
     let num_classes = SSet.cardinal classes in

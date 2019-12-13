@@ -288,6 +288,49 @@ pub mod closures {
     }
 }
 
+pub mod reified {
+    pub static PROP_NAME: &'static str = "86reified_prop";
+    pub static INIT_METH_NAME: &'static str = "86reifiedinit";
+    pub static INIT_METH_PARAM_NAME: &'static str = "$__typestructures";
+    pub static GENERICS_LOCAL_NAME: &'static str = "$0ReifiedGenerics";
+    pub static CAPTURED_PREFIX: &'static str = "$__captured$reifiedgeneric$";
+
+    pub fn mangle_reified_param(no_dollar: bool, s: &str) -> String {
+        format!("{}__reified${}", if no_dollar { "" } else { "$" }, s)
+    }
+
+    pub fn captured_name(is_fun: bool, i: u32) -> String {
+        format!(
+            "{}{}${}",
+            CAPTURED_PREFIX,
+            if is_fun { "function" } else { "class" },
+            i
+        )
+    }
+
+    pub fn is_captured_generic(id: &str) -> Option<(bool, u32)> {
+        if id.starts_with(CAPTURED_PREFIX) {
+            if let [name, i] = id
+                .trim_start_matches(CAPTURED_PREFIX)
+                .splitn(2, "$")
+                .collect::<Vec<_>>()
+                .as_slice()
+            {
+                let is_captured = match *name {
+                    "function" => true,
+                    "class" => false,
+                    _ => return None,
+                };
+                let captured_id = i.parse();
+                if captured_id.is_ok() {
+                    return Some((is_captured, captured_id.unwrap()));
+                };
+            }
+        };
+        None
+    }
+}
+
 #[cfg(test)]
 mod string_utils_tests {
     use pretty_assertions::assert_eq;
@@ -753,6 +796,45 @@ mod string_utils_tests {
                 assert_eq!(is_closure_name("SomePrefix$foo"), false);
                 assert_eq!(is_closure_name("SomePrefix$foo#2"), false)
             }
+        }
+    }
+
+    mod reified {
+        use crate::reified::*;
+
+        #[test]
+        fn test_mangle_reified_param() {
+            assert_eq!(mangle_reified_param(false, "x"), "$__reified$x");
+            assert_eq!(mangle_reified_param(true, "x"), "__reified$x")
+        }
+
+        #[test]
+        fn test_is_captured_generic() {
+            assert_eq!(
+                is_captured_generic("$__captured$reifiedgeneric$function$1"),
+                Some((true, 1))
+            );
+            assert_eq!(
+                is_captured_generic("$__captured$reifiedgeneric$class$1"),
+                Some((false, 1))
+            );
+            assert_eq!(is_captured_generic("function$1"), None);
+            assert_eq!(
+                is_captured_generic("$__captured$reifiedgeneric$function1"),
+                None
+            );
+        }
+
+        #[test]
+        fn test_captured_name() {
+            assert_eq!(
+                captured_name(true, 1),
+                "$__captured$reifiedgeneric$function$1"
+            );
+            assert_eq!(
+                captured_name(false, 1),
+                "$__captured$reifiedgeneric$class$1"
+            );
         }
     }
 }

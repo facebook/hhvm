@@ -451,7 +451,7 @@ where
         }
     }
 
-    fn missing_syntax<N>(
+    fn missing_syntax_<N>(
         fallback: Option<N>,
         expecting: &str,
         node: &Syntax<T, V>,
@@ -471,6 +471,10 @@ where
             node_name: text,
             kind: node.kind(),
         })
+    }
+
+    fn missing_syntax<N>(expecting: &str, node: &Syntax<T, V>, env: &mut Env) -> Result<N> {
+        Self::missing_syntax_(None, expecting, node, env)
     }
 
     fn is_num_octal_lit(s: &str) -> bool {
@@ -504,7 +508,7 @@ where
                 return Ok(ast::Id(p, s));
             }
         }
-        Self::missing_syntax(None, "qualified name", node, env)
+        Self::missing_syntax("qualified name", node, env)
     }
 
     #[inline]
@@ -709,7 +713,7 @@ where
                 let hint = Self::p_hint(&c.closure_parameter_type, env)?;
                 Ok((hint, kind))
             }
-            _ => Self::missing_syntax(None, "closure parameter", node, env),
+            _ => Self::missing_syntax("closure parameter", node, env),
         }
     }
 
@@ -727,7 +731,7 @@ where
                 let value = f(&c.field_initializer_value, env)?;
                 Ok((name, value))
             }
-            _ => Self::missing_syntax(None, "shape field", node, env),
+            _ => Self::missing_syntax("shape field", node, env),
         }
     }
 
@@ -907,7 +911,7 @@ where
                     TypeArguments(c) => {
                         Self::could_map(Self::p_hint, &c.type_arguments_types, env)?
                     }
-                    _ => Self::missing_syntax(None, "generic type arguments", args, env)?,
+                    _ => Self::missing_syntax("generic type arguments", args, env)?,
                 };
                 if env.codegen() {
                     let process = |name: ast::Sid, mut args: Vec<ast::Hint>| -> ast::Hint_ {
@@ -1001,10 +1005,10 @@ where
                             let root = ast::Hint::new(ty.0.clone(), Happly(ty, param));
                             Ok(Haccess(root, vec![child]))
                         } else {
-                            Self::missing_syntax(None, "type constant base", node, env)
+                            Self::missing_syntax("type constant base", node, env)
                         }
                     }
-                    _ => Self::missing_syntax(None, "type constant base", node, env),
+                    _ => Self::missing_syntax("type constant base", node, env),
                 }
             }
             PUAccess(c) => {
@@ -1016,17 +1020,17 @@ where
                         if hints.is_empty() {
                             Ok(HpuAccess(ast::Hint::new(pos, Happly(id, hints)), child))
                         } else {
-                            Self::missing_syntax(None, "pocket universe access base", node, env)
+                            Self::missing_syntax("pocket universe access base", node, env)
                         }
                     }
-                    _ => Self::missing_syntax(None, "pocket universe access base", node, env),
+                    _ => Self::missing_syntax("pocket universe access base", node, env),
                 }
             }
             ReifiedTypeArgument(_) => {
                 Self::raise_parsing_error(node, env, &syntax_error::invalid_reified);
-                Self::missing_syntax(None, "refied type", node, env)
+                Self::missing_syntax("refied type", node, env)
             }
-            _ => Self::missing_syntax(None, "type hint", node, env),
+            _ => Self::missing_syntax("type hint", node, env),
         }
     }
 
@@ -1041,7 +1045,7 @@ where
     fn p_simple_initializer(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Expr> {
         match &node.syntax {
             SimpleInitializer(c) => Self::p_expr(&c.simple_initializer_value, env),
-            _ => Self::missing_syntax(None, "simple initializer", node, env),
+            _ => Self::missing_syntax("simple initializer", node, env),
         }
     }
 
@@ -1051,7 +1055,7 @@ where
                 Self::p_expr(&c.element_key, env)?,
                 Self::p_expr(&c.element_value, env)?,
             )),
-            _ => Self::missing_syntax(None, "darray intrinsic expression element", node, env),
+            _ => Self::missing_syntax("darray intrinsic expression element", node, env),
         }
     }
 
@@ -1107,7 +1111,7 @@ where
             Some(TK::Require) => Ok(Require),
             Some(TK::Include_once) => Ok(IncludeOnce),
             Some(TK::Require_once) => Ok(RequireOnce),
-            _ => Self::missing_syntax(None, "import flavor", node, env),
+            _ => Self::missing_syntax("import flavor", node, env),
         }
     }
 
@@ -1116,7 +1120,7 @@ where
         match Self::token_kind(node) {
             Some(TK::QuestionMinusGreaterThan) => Ok(OGNullsafe),
             Some(TK::MinusGreaterThan) => Ok(OGNullthrows),
-            _ => Self::missing_syntax(None, "null flavor", node, env),
+            _ => Self::missing_syntax("null flavor", node, env),
         }
     }
 
@@ -1401,7 +1405,7 @@ where
                             env,
                             &syntax_error::invalid_octal_integer,
                         );
-                        Self::missing_syntax(None, "octal", expr, env)
+                        Self::missing_syntax("octal", expr, env)
                     }
                     (_, Some(TK::DecimalLiteral))
                     | (_, Some(TK::OctalLiteral))
@@ -1432,14 +1436,14 @@ where
                             check_lint_err(env, s, literal::TRUE);
                             Ok(E_::True)
                         } else {
-                            Self::missing_syntax(None, &format!("boolean (not: {})", s), expr, env)
+                            Self::missing_syntax(&format!("boolean (not: {})", s), expr, env)
                         }
                     }
-                    _ => Self::missing_syntax(None, "literal", expr, env),
+                    _ => Self::missing_syntax("literal", expr, env),
                 }
             }
             SyntaxList(ts) => Ok(E_::String2(Self::p_string2(ts.as_slice(), env)?)),
-            _ => Self::missing_syntax(None, "literal expressoin", expr, env),
+            _ => Self::missing_syntax("literal expressoin", expr, env),
         }
     }
 
@@ -1558,7 +1562,7 @@ where
                             None,
                         )
                     }
-                    _ => Self::missing_syntax(None, "lambda signature", &c.lambda_signature, env)?,
+                    _ => Self::missing_syntax("lambda signature", &c.lambda_signature, env)?,
                 };
                 let (body, yield_) = if !c.lambda_body.is_compound_statement() {
                     Self::mp_yielding(Self::p_function_body, &c.lambda_body, env)?
@@ -1646,12 +1650,7 @@ where
                 let targ = match hints {
                     Some(ast::CollectionTarg::CollectionTV(ty)) => Some(ty),
                     None => None,
-                    _ => Self::missing_syntax(
-                        None,
-                        "VarrayIntrinsicExpression type args",
-                        node,
-                        env,
-                    )?,
+                    _ => Self::missing_syntax("VarrayIntrinsicExpression type args", node, env)?,
                 };
                 Ok(E_::mk_varray(
                     targ,
@@ -1670,9 +1669,7 @@ where
                         None,
                         Self::could_map(Self::p_member, &c.darray_intrinsic_members, env)?,
                     )),
-                    _ => {
-                        Self::missing_syntax(None, "DarrayIntrinsicExpression type args", node, env)
-                    }
+                    _ => Self::missing_syntax("DarrayIntrinsicExpression type args", node, env),
                 }
             }
             ArrayIntrinsicExpression(c) => {
@@ -1831,7 +1828,7 @@ where
                         &c.decorated_expression_decorator,
                         false,
                     ),
-                    _ => Self::missing_syntax(None, "unary exppr", node, env)?,
+                    _ => Self::missing_syntax("unary exppr", node, env)?,
                 };
 
                 /**
@@ -1902,7 +1899,7 @@ where
                                 }
                             }
                         }
-                        _ => Self::missing_syntax(None, "unary operator", node, env),
+                        _ => Self::missing_syntax("unary operator", node, env),
                     }
                 }
             }
@@ -2081,7 +2078,6 @@ where
                                 Self::could_map(Self::p_targ, &c.type_arguments_types, env)?
                             }
                             _ => Self::missing_syntax(
-                                None,
                                 "generic type arguments",
                                 &c.generic_argument_list,
                                 env,
@@ -2166,7 +2162,7 @@ where
                 }
                 let p_arg = |n: &Syntax<T, V>, e: &mut Env| match &n.syntax {
                     Token(_) => mk_name_lid(n, e),
-                    _ => Self::missing_syntax(None, "use variable", n, e),
+                    _ => Self::missing_syntax("use variable", n, e),
                 };
                 let p_use = |n: &Syntax<T, V>, e: &mut Env| match &n.syntax {
                     AnonymousFunctionUseClause(c) => {
@@ -2308,7 +2304,7 @@ where
                         let ast::Id(p, n) = *id;
                         (p, n)
                     }
-                    _ => Self::missing_syntax(None, "PocketIdentifierExpression field", node, env)?,
+                    _ => Self::missing_syntax("PocketIdentifierExpression field", node, env)?,
                 };
                 let E(p, expr_) = Self::p_expr(&c.pocket_identifier_name, env)?;
                 let name = match expr_ {
@@ -2317,11 +2313,11 @@ where
                         let ast::Id(p, n) = *id;
                         (p, n)
                     }
-                    _ => Self::missing_syntax(None, "PocketIdentifierExpression name", node, env)?,
+                    _ => Self::missing_syntax("PocketIdentifierExpression name", node, env)?,
                 };
                 Ok(E_::mk_puidentifier(qual, field, name))
             }
-            _ => Self::missing_syntax(Some(E_::Null), "expression", node, env),
+            _ => Self::missing_syntax_(Some(E_::Null), "expression", node, env),
         }
     }
 
@@ -2417,7 +2413,7 @@ where
                     Self::p_xhp_embedded(Self::unesc_xhp, &c.xhp_spread_attribute_expression, env)?;
                 Ok(ast::XhpAttribute::XhpSpread(expr))
             }
-            _ => Self::missing_syntax(None, "XHP attribute", node, env),
+            _ => Self::missing_syntax("XHP attribute", node, env),
         }
     }
 
@@ -2529,7 +2525,7 @@ where
                 Ok(E_::mk_pipe(lid, lhs, rhs))
             }
             Some(TK::QuestionColon) => Ok(E_::mk_eif(lhs, None, rhs)),
-            _ => Self::missing_syntax(None, "binary operator", node, env),
+            _ => Self::missing_syntax("binary operator", node, env),
         }
     }
 
@@ -2771,7 +2767,7 @@ where
                             vec![],
                         )),
                         DefaultLabel(_) => Ok(ast::Case::Default(Self::p_pos(n, e), vec![])),
-                        _ => Self::missing_syntax(None, "switch label", n, e),
+                        _ => Self::missing_syntax("switch label", n, e),
                     }
                 };
                 let p_section = |n: &Syntax<T, V>, e: &mut Env| -> Result<Vec<ast::Case>> {
@@ -2790,7 +2786,7 @@ where
                             }
                             Ok(labels)
                         }
-                        _ => Self::missing_syntax(None, "switch section", n, e),
+                        _ => Self::missing_syntax("switch section", n, e),
                     }
                 };
                 let f = |env: &mut Env| -> Result<ast::Stmt> {
@@ -2812,7 +2808,7 @@ where
                                 Self::p_expr(&c.elseif_condition, e)?,
                                 Self::p_block(true, &c.elseif_statement, e)?,
                             )),
-                            _ => Self::missing_syntax(None, "elseif clause", n, e),
+                            _ => Self::missing_syntax("elseif clause", n, e),
                         }
                     };
                 let f = |env: &mut Env| -> Result<ast::Stmt> {
@@ -2822,7 +2818,7 @@ where
                     let else_ = match &c.if_else_clause.syntax {
                         ElseClause(c) => Self::p_block(true, &c.else_statement, env)?,
                         Missing => vec![Self::mk_noop(env)],
-                        _ => Self::missing_syntax(None, "else clause", &c.if_else_clause, env)?,
+                        _ => Self::missing_syntax("else clause", &c.if_else_clause, env)?,
                     };
                     let else_ifs = Self::could_map(p_else_if, &c.if_elseif_clauses, env)?;
                     let else_if = else_ifs
@@ -2959,7 +2955,7 @@ where
                                 Self::lid_from_name(&c.catch_variable, e)?,
                                 Self::p_block(true, &c.catch_body, e)?,
                             )),
-                            _ => Self::missing_syntax(None, "catch clause", n, e),
+                            _ => Self::missing_syntax("catch clause", n, e),
                         },
                         &c.try_catch_clauses,
                         env,
@@ -3016,7 +3012,7 @@ where
                             let name = Self::pos_name(&c.echo_keyword, e)?;
                             ast::Expr::new(name.0.clone(), E_::mk_id(name))
                         }
-                        _ => Self::missing_syntax(None, "id", &c.echo_keyword, e)?,
+                        _ => Self::missing_syntax("id", &c.echo_keyword, e)?,
                     };
                     let args = Self::could_map(Self::p_expr, &c.echo_expressions, e)?;
                     Ok(S::new(
@@ -3041,7 +3037,7 @@ where
                             let name = Self::pos_name(&c.unset_keyword, e)?;
                             ast::Expr::new(name.0.clone(), E_::mk_id(name))
                         }
-                        _ => Self::missing_syntax(None, "id", &c.unset_keyword, e)?,
+                        _ => Self::missing_syntax("id", &c.unset_keyword, e)?,
                     };
                     Ok(S::new(
                         pos.clone(),
@@ -3130,7 +3126,7 @@ where
             _ if env.codegen() => {
                 let mut defs = Self::p_def_(true, node, env)?;
                 if defs.is_empty() {
-                    Self::missing_syntax(
+                    Self::missing_syntax_(
                         Some(S::new(env.mk_none_pos(), S_::Noop)),
                         "statement",
                         node,
@@ -3142,7 +3138,7 @@ where
                     Self::failwith("This should be impossible; inline definition was list.")
                 }
             }
-            _ => Self::missing_syntax(
+            _ => Self::missing_syntax_(
                 Some(S::new(env.mk_none_pos(), S_::Noop)),
                 "statement",
                 node,
@@ -3216,7 +3212,7 @@ where
                     kind_set.add(kind);
                     init = on_kind(init, kind);
                 }
-                _ => Self::missing_syntax(None, "kind", n, env)?,
+                _ => Self::missing_syntax("kind", n, env)?,
             }
         }
         Ok((kind_set, init))
@@ -3320,7 +3316,7 @@ where
     fn p_param_kind(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::ParamKind> {
         match Self::token_kind(node) {
             Some(TK::Inout) => Ok(ast::ParamKind::Pinout),
-            _ => Self::missing_syntax(None, "param kind", node, env),
+            _ => Self::missing_syntax("param kind", node, env),
         }
     }
 
@@ -3416,14 +3412,14 @@ where
                 param.is_variadic = true;
                 Ok(param)
             }
-            _ => Self::missing_syntax(None, "function parameter", node, env),
+            _ => Self::missing_syntax("function parameter", node, env),
         }
     }
 
     fn p_tconstraint_ty(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Hint> {
         match &node.syntax {
             TypeConstraint(c) => Self::p_hint(&c.constraint_type, env),
-            _ => Self::missing_syntax(None, "type constraint", node, env),
+            _ => Self::missing_syntax("type constraint", node, env),
         }
     }
 
@@ -3437,16 +3433,11 @@ where
                     Some(TK::As) => ast::ConstraintKind::ConstraintAs,
                     Some(TK::Super) => ast::ConstraintKind::ConstraintSuper,
                     Some(TK::Equal) => ast::ConstraintKind::ConstraintEq,
-                    _ => Self::missing_syntax(
-                        None,
-                        "constraint operator",
-                        &c.constraint_keyword,
-                        env,
-                    )?,
+                    _ => Self::missing_syntax("constraint operator", &c.constraint_keyword, env)?,
                 },
                 Self::p_hint(&c.constraint_type, env)?,
             )),
-            _ => Self::missing_syntax(None, "type constraint", node, env),
+            _ => Self::missing_syntax("type constraint", node, env),
         }
     }
 
@@ -3484,7 +3475,7 @@ where
                     user_attributes,
                 })
             }
-            _ => Self::missing_syntax(None, "type parameter", node, env),
+            _ => Self::missing_syntax("type parameter", node, env),
         }
     }
 
@@ -3496,7 +3487,7 @@ where
                 &c.type_parameters_parameters,
                 env,
             ),
-            _ => Self::missing_syntax(None, "type parameter", node, env),
+            _ => Self::missing_syntax("type parameter", node, env),
         }
     }
 
@@ -3548,7 +3539,7 @@ where
                 Ok(header)
             }
             Token(_) => Ok(FunHdr::make_empty(env)),
-            _ => Self::missing_syntax(None, "function header", node, env),
+            _ => Self::missing_syntax("function header", node, env),
         }
     }
 
@@ -3737,7 +3728,7 @@ where
                     &c.constructor_call_type,
                     e,
                 ),
-                _ => Self::missing_syntax(None, "attribute", node, e),
+                _ => Self::missing_syntax("attribute", node, e),
             }
         };
         match &node.syntax {
@@ -3751,13 +3742,13 @@ where
                 |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::UserAttribute> {
                     match &n.syntax {
                         Attribute(c) => p_attr(&c.attribute_attribute_name, e),
-                        _ => Self::missing_syntax(None, "attribute", node, e),
+                        _ => Self::missing_syntax("attribute", node, e),
                     }
                 },
                 &c.attribute_specification_attributes,
                 env,
             ),
-            _ => Self::missing_syntax(None, "attribute specification", node, env),
+            _ => Self::missing_syntax("attribute specification", node, env),
         }
     }
 
@@ -3869,7 +3860,7 @@ where
                     Some(TK::Question) => ChildQuestion,
                     Some(TK::Plus) => ChildPlus,
                     Some(TK::Star) => ChildStar,
-                    _ => Self::missing_syntax(None, "xhp children operator", node, env)?,
+                    _ => Self::missing_syntax("xhp children operator", node, env)?,
                 };
                 Ok(ChildUnary(Box::new(operand), operator))
             }
@@ -3884,7 +3875,7 @@ where
                     children.iter().map(|c| Self::p_xhp_child(c, env)).collect();
                 Ok(ChildList(children?))
             }
-            _ => Self::missing_syntax(None, "xhp children", node, env),
+            _ => Self::missing_syntax("xhp children", node, env),
         }
     }
 
@@ -3942,7 +3933,7 @@ where
                                     doc_comment: doc_comment_opt.clone(),
                                 })
                             }
-                            _ => Self::missing_syntax(None, "constant declarator", n, e),
+                            _ => Self::missing_syntax("constant declarator", n, e),
                         }
                     },
                     &c.const_declarators,
@@ -4019,7 +4010,7 @@ where
                                 )?;
                                 Ok((pos, name, expr))
                             }
-                            _ => Self::missing_syntax(None, "property declarator", n, e),
+                            _ => Self::missing_syntax("property declarator", n, e),
                         }
                     },
                     &c.property_declarators,
@@ -4159,7 +4150,7 @@ where
                         Self::p_hint(&c.scope_resolution_qualifier, env)?,
                         Self::p_pstring(&c.scope_resolution_name, env)?,
                     ),
-                    _ => Self::missing_syntax(None, "trait method redeclaration", node, env)?,
+                    _ => Self::missing_syntax("trait method redeclaration", node, env)?,
                 };
                 let user_attributes = Self::p_user_attributes(&c.methodish_trait_attribute, env)?;
                 let visibility = p_method_vis(&h.function_modifiers, &hdr.name.0, env)?;
@@ -4193,7 +4184,7 @@ where
                                     Self::pos_name(&c.scope_resolution_qualifier, e)?,
                                     Self::p_pstring(&c.scope_resolution_name, e)?,
                                 ),
-                                _ => Self::missing_syntax(None, "trait use precedence item", n, e)?,
+                                _ => Self::missing_syntax("trait use precedence item", n, e)?,
                             };
                             let removed_names = Self::could_map(Self::pos_name, removed_names, e)?;
                             Self::raise_hh_error(e, Naming::unsupported_instead_of(name.0.clone()));
@@ -4248,7 +4239,7 @@ where
                                 vis,
                             )))
                         }
-                        _ => Self::missing_syntax(None, "trait use conflict resolution item", n, e),
+                        _ => Self::missing_syntax("trait use conflict resolution item", n, e),
                     }
                 };
                 let mut uses =
@@ -4272,7 +4263,7 @@ where
                 let is_extends = match Self::token_kind(&c.require_kind) {
                     Some(TK::Implements) => false,
                     Some(TK::Extends) => true,
-                    _ => Self::missing_syntax(None, "trait require kind", &c.require_kind, env)?,
+                    _ => Self::missing_syntax("trait require kind", &c.require_kind, env)?,
                 };
                 Ok(class.reqs.push((hint, is_extends)))
             }
@@ -4347,7 +4338,7 @@ where
                             mk_attr_use(&c.xhp_simple_class_attribute_type)
                         }
                         Token(_) => mk_attr_use(node),
-                        _ => Self::missing_syntax(None, "XHP attribute", node, env),
+                        _ => Self::missing_syntax("XHP attribute", node, env),
                     }
                 };
                 let attrs = Self::could_map(p_attr, &c.xhp_attribute_attributes, env)?;
@@ -4412,7 +4403,7 @@ where
                                         types.push((id, hint));
                                     }
                                     _ => {
-                                        Self::missing_syntax(None, "pumapping", map, env)?;
+                                        Self::missing_syntax("pumapping", map, env)?;
                                     }
                                 }
                             }
@@ -4437,7 +4428,7 @@ where
                             case_types.push((id, is_reified));
                         }
                         _ => {
-                            Self::missing_syntax(None, "pufield", fld, env)?;
+                            Self::missing_syntax("pufield", fld, env)?;
                         }
                     }
                 }
@@ -4450,7 +4441,7 @@ where
                     members,
                 }))
             }
-            _ => Self::missing_syntax(None, "class element", node, env),
+            _ => Self::missing_syntax("class element", node, env),
         }
     }
 
@@ -4496,12 +4487,12 @@ where
                                 Some(TK::Equal) => ConstraintEq,
                                 Some(TK::As) => ConstraintAs,
                                 Some(TK::Super) => ConstraintSuper,
-                                _ => Self::missing_syntax(None, "constraint operator", o, e)?,
+                                _ => Self::missing_syntax("constraint operator", o, e)?,
                             };
                             let r = Self::p_hint(&c.where_constraint_right_type, e)?;
                             Ok(ast::WhereConstraint(l, o, r))
                         }
-                        _ => Self::missing_syntax(None, "where constraint", n, e),
+                        _ => Self::missing_syntax("where constraint", n, e),
                     }
                 };
                 Self::as_list(&c.where_clause_constraints)
@@ -4511,9 +4502,9 @@ where
             }
             _ => {
                 if is_class {
-                    Self::missing_syntax(None, "classish declaration constraints", parent, env)
+                    Self::missing_syntax("classish declaration constraints", parent, env)
                 } else {
-                    Self::missing_syntax(None, "function header constraints", parent, env)
+                    Self::missing_syntax("function header constraints", parent, env)
                 }
             }
         }
@@ -4528,7 +4519,7 @@ where
                 Some(TK::Type) => Ok(NSClass),
                 Some(TK::Function) => Ok(NSFun),
                 Some(TK::Const) => Ok(NSConst),
-                _ => Self::missing_syntax(None, "namespace use kind", kind, env),
+                _ => Self::missing_syntax("namespace use kind", kind, env),
             },
         }
     }
@@ -4578,7 +4569,7 @@ where
                     alias,
                 ))
             }
-            _ => Self::missing_syntax(None, "namespace use clause", node, env),
+            _ => Self::missing_syntax("namespace use clause", node, env),
         }
     }
 
@@ -4662,7 +4653,7 @@ where
                     Some(TK::Interface) => ast::ClassKind::Cinterface,
                     Some(TK::Trait) => ast::ClassKind::Ctrait,
                     Some(TK::Enum) => ast::ClassKind::Cenum,
-                    _ => Self::missing_syntax(None, "class kind", &c.classish_keyword, env)?,
+                    _ => Self::missing_syntax("class kind", &c.classish_keyword, env)?,
                 };
                 let mut class_ = ast::Class_ {
                     span,
@@ -4704,7 +4695,7 @@ where
                             Self::p_class_elt(&mut class_, elt, env)?;
                         }
                     }
-                    _ => Self::missing_syntax(None, "classish body", &c.classish_body, env)?,
+                    _ => Self::missing_syntax("classish body", &c.classish_body, env)?,
                 }
                 Ok(vec![ast::Def::mk_class(class_)])
             }
@@ -4728,7 +4719,7 @@ where
                             };
                             ast::Def::mk_constant(gconst)
                         }
-                        _ => Self::missing_syntax(None, "constant declaration", decl, env)?,
+                        _ => Self::missing_syntax("constant declaration", decl, env)?,
                     };
                     defs.push(def);
                 }
@@ -4758,7 +4749,7 @@ where
                     vis: match Self::token_kind(&c.alias_keyword) {
                         Some(TK::Type) => ast::TypedefVisibility::Transparent,
                         Some(TK::Newtype) => ast::TypedefVisibility::Opaque,
-                        _ => Self::missing_syntax(None, "kind", &c.alias_keyword, env)?,
+                        _ => Self::missing_syntax("kind", &c.alias_keyword, env)?,
                     },
                     kind: Self::p_hint(&c.alias_type, env)?,
                 })])
@@ -4772,7 +4763,7 @@ where
                             expr: Some(Self::p_expr(&c.enumerator_value, e)?),
                             doc_comment: None,
                         }),
-                        _ => Self::missing_syntax(None, "enumerator", n, e),
+                        _ => Self::missing_syntax("enumerator", n, e),
                     }
                 };
                 Ok(vec![ast::Def::mk_class(ast::Class_ {
@@ -4823,7 +4814,7 @@ where
                         Self::p_hint(&c.record_field_type, e)?,
                         Self::mp_optional(Self::p_simple_initializer, &c.record_field_init, e)?,
                     )),
-                    _ => Self::missing_syntax(None, "record_field", n, e),
+                    _ => Self::missing_syntax("record_field", n, e),
                 };
                 Ok(vec![ast::Def::mk_record_def(ast::RecordDef {
                     annotation: (),
@@ -5019,7 +5010,7 @@ where
     fn p_script(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Program> {
         match &node.syntax {
             Script(children) => Self::p_program(&children.script_declarations, env),
-            _ => Self::missing_syntax(None, "script", node, env),
+            _ => Self::missing_syntax("script", node, env),
         }
     }
 

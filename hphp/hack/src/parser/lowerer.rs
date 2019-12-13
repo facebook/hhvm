@@ -116,13 +116,6 @@ impl FunHdr {
 
 #[derive(Debug)]
 pub struct State {
-    /// Whether we've seen COMPILER_HALT_OFFSET. The value of COMPILER_HALT_OFFSET
-    /// defaults to 0 if HALT_COMPILER isn't called.
-    /// None -> COMPILER_HALT_OFFSET isn't in the source file
-    /// Some 0 -> COMPILER_HALT_OFFSET is in the source file, but HALT_COMPILER isn't
-    /// Some x -> COMPILER_HALT_OFFSET is in the source file,
-    ///        HALT_COMPILER is at x bytes offset in the file.
-    pub saw_compiler_halt_offset: Option<usize>,
     pub cls_reified_generics: HashSet<String>,
     pub in_static_method: bool,
     pub parent_maybe_reified: bool,
@@ -221,7 +214,6 @@ impl<'a> Env<'a> {
             stack_limit,
 
             state: Rc::new(RefCell::new(State {
-                saw_compiler_halt_offset: None,
                 cls_reified_generics: HashSet::new(),
                 in_static_method: false,
                 parent_maybe_reified: false,
@@ -256,10 +248,6 @@ impl<'a> Env<'a> {
 
     fn fail_open(&self) -> bool {
         self.fail_open
-    }
-
-    fn saw_compiler_halt_offset(&mut self) -> RefMut<Option<usize>> {
-        RefMut::map(self.state.borrow_mut(), |s| &mut s.saw_compiler_halt_offset)
     }
 
     fn cls_reified_generics(&mut self) -> RefMut<HashSet<String>> {
@@ -569,9 +557,6 @@ where
             SimpleTypeSpecifier(c) => Self::pos_name_(&c.simple_type_specifier, env, drop_prefix),
             _ => {
                 let mut name = node.text(env.indexed_source_text.source_text());
-                if name == "__COMPILER_HALT_OFFSET__" {
-                    *env.saw_compiler_halt_offset() = Some(0);
-                }
                 if let Some(prefix) = drop_prefix {
                     name = Self::drop_prefix(name, prefix);
                 }

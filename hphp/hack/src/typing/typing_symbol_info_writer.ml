@@ -61,13 +61,13 @@ let get_decls (tast : (Relative_path.t * Tast.program) list) :
   { decls = all_decls; occurrences = symbols; localvars = all_lvs }
 
 let write_json
-    (tcopt : TypecheckerOptions.t)
+    (ctx : Provider_context.t)
     (file_dir : string)
     (tast_lst : (Relative_path.t * Tast.program) list) : unit =
   try
     let symbol_occurrences = get_decls tast_lst in
     let json_chunks =
-      Typing_symbol_json_builder.build_json tcopt symbol_occurrences
+      Typing_symbol_json_builder.build_json ctx symbol_occurrences
     in
     let (_, channel) =
       Filename.open_temp_file
@@ -82,16 +82,16 @@ let write_json
     Printf.eprintf "WARNING: symbol write failure: \n%s" (Exn.to_string e)
 
 let recheck_job
-    (tcopt : TypecheckerOptions.t)
+    (ctx : Provider_context.t)
     (out_dir : string)
     ()
     (progress : (Relative_path.t * FileInfo.t) list) : unit =
-  let results = ServerIdeUtils.recheck tcopt progress in
-  write_json tcopt out_dir results
+  let results = ServerIdeUtils.recheck ctx.Provider_context.tcopt progress in
+  write_json ctx out_dir results
 
 let go
     (workers : MultiWorker.worker list option)
-    (tcopt : TypecheckerOptions.t)
+    (ctx : Provider_context.t)
     (out_dir : string)
     (file_tuples : (Relative_path.t * FileInfo.t) list) : unit =
   let num_workers =
@@ -101,7 +101,7 @@ let go
   in
   MultiWorker.call
     workers
-    ~job:(recheck_job tcopt out_dir)
+    ~job:(recheck_job ctx out_dir)
     ~merge:(fun () () -> ())
     ~next:(Bucket.make ~num_workers ~max_size:150 file_tuples)
     ~neutral:()

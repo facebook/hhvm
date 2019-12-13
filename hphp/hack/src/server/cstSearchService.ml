@@ -344,214 +344,209 @@ and search_or ~(env : env) ~(patterns : (Syntax.t * pattern) list) :
         (env, result)
       | None -> search_node ~env ~pattern ~node)
 
-let compile_pattern (json : Hh_json.json) : (pattern, string) Result.t =
-  Result.(
-    Result.Monad_infix.(
-      let wrap_json_accessor f x =
-        Result.map_error (f x) ~f:Hh_json.Access.access_failure_to_string
+let compile_pattern (ctx : Provider_context.t) (json : Hh_json.json) :
+    (pattern, string) Result.t =
+  let open Result in
+  let open Result.Monad_infix in
+  let wrap_json_accessor f x =
+    Result.map_error (f x) ~f:Hh_json.Access.access_failure_to_string
+  in
+  let get_string x = wrap_json_accessor (Hh_json.Access.get_string x) in
+  let get_obj x = wrap_json_accessor (Hh_json.Access.get_obj x) in
+  let get_array x = wrap_json_accessor (Hh_json.Access.get_array x) in
+  let keytrace_to_string = Hh_json.Access.keytrace_to_string in
+  let error_at_keytrace ~keytrace error_message =
+    Error (error_message ^ keytrace_to_string keytrace)
+  in
+  let rec compile_pattern ~json ~keytrace : (pattern, string) Result.t =
+    get_string "pattern_type" (json, keytrace)
+    >>= fun (pattern_type, pattern_type_keytrace) ->
+    match pattern_type with
+    | "node_pattern" -> compile_node_pattern ~json ~keytrace
+    | "missing_node_pattern" -> compile_missing_node_pattern ~json ~keytrace
+    | "match_pattern" -> compile_match_pattern ~json ~keytrace
+    | "descendant_pattern" -> compile_descendant_pattern ~json ~keytrace
+    | "list_pattern" -> compile_list_pattern ~json ~keytrace
+    | "raw_text_pattern" -> compile_raw_text_pattern ~json ~keytrace
+    | "type_pattern" -> compile_type_pattern ~json ~keytrace
+    | "and_pattern" -> compile_and_pattern ~json ~keytrace
+    | "or_pattern" -> compile_or_pattern ~json ~keytrace
+    | "not_pattern" -> compile_not_pattern ~json ~keytrace
+    | pattern_type ->
+      error_at_keytrace
+        ~keytrace:pattern_type_keytrace
+        (Printf.sprintf "Unknown pattern type '%s'" pattern_type)
+  and compile_node_pattern ~json ~keytrace : (pattern, string) Result.t =
+    get_string "kind" (json, keytrace) >>= fun (kind, kind_keytrace) ->
+    Schema_definition.(
+      let kind_info =
+        List.find schema ~f:(fun schema_node -> schema_node.description = kind)
       in
-      let get_string x = wrap_json_accessor (Hh_json.Access.get_string x) in
-      let get_obj x = wrap_json_accessor (Hh_json.Access.get_obj x) in
-      let get_array x = wrap_json_accessor (Hh_json.Access.get_array x) in
-      let keytrace_to_string = Hh_json.Access.keytrace_to_string in
-      let error_at_keytrace ~keytrace error_message =
-        Error (error_message ^ keytrace_to_string keytrace)
-      in
-      let rec compile_pattern ~json ~keytrace : (pattern, string) Result.t =
-        get_string "pattern_type" (json, keytrace)
-        >>= fun (pattern_type, pattern_type_keytrace) ->
-        match pattern_type with
-        | "node_pattern" -> compile_node_pattern ~json ~keytrace
-        | "missing_node_pattern" -> compile_missing_node_pattern ~json ~keytrace
-        | "match_pattern" -> compile_match_pattern ~json ~keytrace
-        | "descendant_pattern" -> compile_descendant_pattern ~json ~keytrace
-        | "list_pattern" -> compile_list_pattern ~json ~keytrace
-        | "raw_text_pattern" -> compile_raw_text_pattern ~json ~keytrace
-        | "type_pattern" -> compile_type_pattern ~json ~keytrace
-        | "and_pattern" -> compile_and_pattern ~json ~keytrace
-        | "or_pattern" -> compile_or_pattern ~json ~keytrace
-        | "not_pattern" -> compile_not_pattern ~json ~keytrace
-        | pattern_type ->
-          error_at_keytrace
-            ~keytrace:pattern_type_keytrace
-            (Printf.sprintf "Unknown pattern type '%s'" pattern_type)
-      and compile_node_pattern ~json ~keytrace : (pattern, string) Result.t =
-        get_string "kind" (json, keytrace) >>= fun (kind, kind_keytrace) ->
-        Schema_definition.(
-          let kind_info =
-            List.find schema ~f:(fun schema_node ->
-                schema_node.description = kind)
-          in
-          match kind_info with
-          | None ->
-            error_at_keytrace
-              ~keytrace:kind_keytrace
-              (Printf.sprintf "Kind '%s' doesn't exist" kind)
-          | Some kind_info ->
-            Ok kind_info >>= fun kind_info ->
-            get_obj "children" (json, keytrace)
-            >>= fun (children_json, children_keytrace) ->
-            (* This has already been verified to be an object above. *)
-            let children = Hh_json.get_object_exn children_json in
-            let get_child_type
-                (child_keytrace : Hh_json.Access.keytrace) (child_name : string)
-                : (child_type, string) Result.t =
-              (* We're given a field name like `binary_right_operand`, but the field
-      names in the schema are things like `right_operand`, and you have to
-      affix the prefix yourself. For consistency with other tooling, we want
-      to use `binary_right_operand` instead of just `right_operand`. *)
-              let get_prefixed_field_name field_name =
-                kind_info.prefix ^ "_" ^ field_name
-              in
-              let field =
-                List.find kind_info.fields ~f:(fun (field_name, _) ->
-                    get_prefixed_field_name field_name = child_name)
-              in
-              match field with
-              | None ->
-                let valid_types =
-                  List.map kind_info.fields ~f:(fun (field_name, _) ->
-                      get_prefixed_field_name field_name)
-                in
-                error_at_keytrace
-                  ~keytrace:child_keytrace
-                  (Printf.sprintf
-                     ( "Unknown child type '%s'; "
-                     ^^ "valid child types for a node of kind '%s' are: %s" )
-                     child_name
-                     kind
-                     (String.concat ~sep:", " valid_types))
-              | Some _ -> Ok (ChildType child_name)
-            in
-            let children_patterns =
-              List.mapi children ~f:(fun index (child_name, pattern_json) ->
-                  let child_keytrace =
-                    string_of_int index :: children_keytrace
-                  in
-                  get_child_type child_keytrace child_name >>= fun child_name ->
-                  compile_pattern ~json:pattern_json ~keytrace:child_keytrace
-                  >>| fun pattern -> (child_name, pattern))
-            in
-            all children_patterns >>| fun children ->
-            NodePattern { kind = NodeKind kind; children })
-      and compile_missing_node_pattern ~json:_json ~keytrace:_keytrace =
-        Ok MissingNodePattern
-      and compile_match_pattern ~json ~keytrace =
-        get_string "match_name" (json, keytrace)
-        >>| fun (match_name, _match_name_keytrace) ->
-        MatchPattern { match_name = MatchName match_name }
-      and compile_descendant_pattern ~json ~keytrace =
-        get_obj "pattern" (json, keytrace)
-        >>= fun (pattern, pattern_keytrace) ->
-        compile_pattern ~json:pattern ~keytrace:pattern_keytrace
-        >>| fun pattern -> DescendantPattern { pattern }
-      and compile_list_pattern ~json ~keytrace =
-        let max_length =
-          Hh_json.get_field_opt
-            (Hh_json.Access.get_number_int "max_length")
-            json
-        in
+      match kind_info with
+      | None ->
+        error_at_keytrace
+          ~keytrace:kind_keytrace
+          (Printf.sprintf "Kind '%s' doesn't exist" kind)
+      | Some kind_info ->
+        Ok kind_info >>= fun kind_info ->
         get_obj "children" (json, keytrace)
         >>= fun (children_json, children_keytrace) ->
         (* This has already been verified to be an object above. *)
         let children = Hh_json.get_object_exn children_json in
+        let get_child_type
+            (child_keytrace : Hh_json.Access.keytrace) (child_name : string) :
+            (child_type, string) Result.t =
+          (* We're given a field name like `binary_right_operand`, but the field
+      names in the schema are things like `right_operand`, and you have to
+      affix the prefix yourself. For consistency with other tooling, we want
+      to use `binary_right_operand` instead of just `right_operand`. *)
+          let get_prefixed_field_name field_name =
+            kind_info.prefix ^ "_" ^ field_name
+          in
+          let field =
+            List.find kind_info.fields ~f:(fun (field_name, _) ->
+                get_prefixed_field_name field_name = child_name)
+          in
+          match field with
+          | None ->
+            let valid_types =
+              List.map kind_info.fields ~f:(fun (field_name, _) ->
+                  get_prefixed_field_name field_name)
+            in
+            error_at_keytrace
+              ~keytrace:child_keytrace
+              (Printf.sprintf
+                 ( "Unknown child type '%s'; "
+                 ^^ "valid child types for a node of kind '%s' are: %s" )
+                 child_name
+                 kind
+                 (String.concat ~sep:", " valid_types))
+          | Some _ -> Ok (ChildType child_name)
+        in
         let children_patterns =
-          List.map children ~f:(fun (index_str, pattern_json) ->
-              let child_keytrace = index_str :: children_keytrace in
-              begin
-                match int_of_string_opt index_str with
-                | Some index -> Ok index
-                | None ->
-                  error_at_keytrace
-                    (Printf.sprintf "Invalid integer key: %s" index_str)
-                    ~keytrace:child_keytrace
-              end
-              >>= fun index ->
-              begin
-                if index >= 0 then
-                  Ok index
-                else
-                  error_at_keytrace
-                    "Integer key must be non-negative"
-                    ~keytrace:child_keytrace
-              end
-              >>= fun index ->
+          List.mapi children ~f:(fun index (child_name, pattern_json) ->
+              let child_keytrace = string_of_int index :: children_keytrace in
+              get_child_type child_keytrace child_name >>= fun child_name ->
               compile_pattern ~json:pattern_json ~keytrace:child_keytrace
-              >>| fun pattern -> (index, pattern))
+              >>| fun pattern -> (child_name, pattern))
         in
-        Result.all children_patterns >>| fun children ->
-        ListPattern { children; max_length }
-      and compile_raw_text_pattern ~json ~keytrace =
-        get_string "raw_text" (json, keytrace)
-        >>| fun (raw_text, _raw_text_keytrace) -> RawTextPattern { raw_text }
-      and compile_type_pattern ~json ~keytrace =
-        get_obj "subtype_of" (json, keytrace)
-        >>= fun (subtype_of_json, subtype_of_keytrace) ->
-        let locl_ty =
-          Typing_print.json_to_locl_ty
-            ~keytrace:subtype_of_keytrace
-            subtype_of_json
-        in
-        match locl_ty with
-        | Ok locl_ty -> Ok (TypePattern { subtype_of = locl_ty })
-        | Error (Typing_defs.Wrong_phase message)
-        | Error (Typing_defs.Not_supported message)
-        | Error (Typing_defs.Deserialization_error message) ->
-          Error message
-      and compile_child_patterns_helper ~json ~keytrace =
-        get_array "patterns" (json, keytrace)
-        >>= fun (pattern_list, pattern_list_keytrace) ->
-        let compiled_patterns =
-          List.mapi pattern_list (fun i json ->
-              let keytrace = string_of_int i :: pattern_list_keytrace in
-              compile_pattern ~json ~keytrace)
-        in
-        Result.all compiled_patterns
-      and compile_and_pattern ~json ~keytrace =
-        compile_child_patterns_helper ~json ~keytrace >>| fun patterns ->
-        AndPattern { patterns }
-      and compile_or_pattern ~json ~keytrace =
-        compile_child_patterns_helper ~json ~keytrace >>| fun patterns ->
-        OrPattern { patterns }
-      and compile_not_pattern ~json ~keytrace =
-        get_obj "pattern" (json, keytrace) >>= fun (json, keytrace) ->
-        compile_pattern ~json ~keytrace >>| fun pattern ->
-        NotPattern { pattern }
-      in
-      compile_pattern ~json ~keytrace:[]))
+        all children_patterns >>| fun children ->
+        NodePattern { kind = NodeKind kind; children })
+  and compile_missing_node_pattern ~json:_json ~keytrace:_keytrace =
+    Ok MissingNodePattern
+  and compile_match_pattern ~json ~keytrace =
+    get_string "match_name" (json, keytrace)
+    >>| fun (match_name, _match_name_keytrace) ->
+    MatchPattern { match_name = MatchName match_name }
+  and compile_descendant_pattern ~json ~keytrace =
+    get_obj "pattern" (json, keytrace) >>= fun (pattern, pattern_keytrace) ->
+    compile_pattern ~json:pattern ~keytrace:pattern_keytrace >>| fun pattern ->
+    DescendantPattern { pattern }
+  and compile_list_pattern ~json ~keytrace =
+    let max_length =
+      Hh_json.get_field_opt (Hh_json.Access.get_number_int "max_length") json
+    in
+    get_obj "children" (json, keytrace)
+    >>= fun (children_json, children_keytrace) ->
+    (* This has already been verified to be an object above. *)
+    let children = Hh_json.get_object_exn children_json in
+    let children_patterns =
+      List.map children ~f:(fun (index_str, pattern_json) ->
+          let child_keytrace = index_str :: children_keytrace in
+          begin
+            match int_of_string_opt index_str with
+            | Some index -> Ok index
+            | None ->
+              error_at_keytrace
+                (Printf.sprintf "Invalid integer key: %s" index_str)
+                ~keytrace:child_keytrace
+          end
+          >>= fun index ->
+          begin
+            if index >= 0 then
+              Ok index
+            else
+              error_at_keytrace
+                "Integer key must be non-negative"
+                ~keytrace:child_keytrace
+          end
+          >>= fun index ->
+          compile_pattern ~json:pattern_json ~keytrace:child_keytrace
+          >>| fun pattern -> (index, pattern))
+    in
+    Result.all children_patterns >>| fun children ->
+    ListPattern { children; max_length }
+  and compile_raw_text_pattern ~json ~keytrace =
+    get_string "raw_text" (json, keytrace)
+    >>| fun (raw_text, _raw_text_keytrace) -> RawTextPattern { raw_text }
+  and compile_type_pattern ~json ~keytrace =
+    get_obj "subtype_of" (json, keytrace)
+    >>= fun (subtype_of_json, subtype_of_keytrace) ->
+    let locl_ty =
+      Typing_print.json_to_locl_ty
+        ~keytrace:subtype_of_keytrace
+        ctx
+        subtype_of_json
+    in
+    match locl_ty with
+    | Ok locl_ty -> Ok (TypePattern { subtype_of = locl_ty })
+    | Error (Typing_defs.Wrong_phase message)
+    | Error (Typing_defs.Not_supported message)
+    | Error (Typing_defs.Deserialization_error message) ->
+      Error message
+  and compile_child_patterns_helper ~json ~keytrace =
+    get_array "patterns" (json, keytrace)
+    >>= fun (pattern_list, pattern_list_keytrace) ->
+    let compiled_patterns =
+      List.mapi pattern_list (fun i json ->
+          let keytrace = string_of_int i :: pattern_list_keytrace in
+          compile_pattern ~json ~keytrace)
+    in
+    Result.all compiled_patterns
+  and compile_and_pattern ~json ~keytrace =
+    compile_child_patterns_helper ~json ~keytrace >>| fun patterns ->
+    AndPattern { patterns }
+  and compile_or_pattern ~json ~keytrace =
+    compile_child_patterns_helper ~json ~keytrace >>| fun patterns ->
+    OrPattern { patterns }
+  and compile_not_pattern ~json ~keytrace =
+    get_obj "pattern" (json, keytrace) >>= fun (json, keytrace) ->
+    compile_pattern ~json ~keytrace >>| fun pattern -> NotPattern { pattern }
+  in
+  compile_pattern ~json ~keytrace:[]
 
 let result_to_json ~(sort_results : bool) (result : result option) :
     Hh_json.json =
-  Hh_json.(
-    match result with
-    | None -> JSON_Null
-    | Some result ->
-      let matched_nodes = result.matched_nodes in
-      let matched_nodes =
-        if sort_results then
-          List.sort matched_nodes ~compare:Pervasives.compare
-        else
-          matched_nodes
-      in
-      let matched_nodes =
-        List.map matched_nodes ~f:(fun matched_node ->
-            let match_name =
-              match matched_node.match_name with
-              | MatchName match_name -> match_name
-            in
-            let kind =
-              match matched_node.kind with
-              | NodeKind kind -> kind
-            in
-            JSON_Object
-              [
-                ("match_name", JSON_String match_name);
-                ("kind", JSON_String kind);
-                ("start_offset", Hh_json.int_ matched_node.start_offset);
-                ("end_offset", Hh_json.int_ matched_node.end_offset);
-              ])
-      in
-      JSON_Object [("matched_nodes", JSON_Array matched_nodes)])
+  let open Hh_json in
+  match result with
+  | None -> JSON_Null
+  | Some result ->
+    let matched_nodes = result.matched_nodes in
+    let matched_nodes =
+      if sort_results then
+        List.sort matched_nodes ~compare:Pervasives.compare
+      else
+        matched_nodes
+    in
+    let matched_nodes =
+      List.map matched_nodes ~f:(fun matched_node ->
+          let match_name =
+            match matched_node.match_name with
+            | MatchName match_name -> match_name
+          in
+          let kind =
+            match matched_node.kind with
+            | NodeKind kind -> kind
+          in
+          JSON_Object
+            [
+              ("match_name", JSON_String match_name);
+              ("kind", JSON_String kind);
+              ("start_offset", Hh_json.int_ matched_node.start_offset);
+              ("end_offset", Hh_json.int_ matched_node.end_offset);
+            ])
+    in
+    JSON_Object [("matched_nodes", JSON_Array matched_nodes)]
 
 let search
     (tcopt : TypecheckerOptions.t)
@@ -572,88 +567,89 @@ let go
     ~(sort_results : bool)
     ~(files_to_search : string list option)
     (input : Hh_json.json) : (Hh_json.json, string) Result.t =
-  Result.Monad_infix.(
-    compile_pattern input >>| fun pattern ->
-    let num_files_searched = ref 0 in
-    let last_printed_num_files_searched = ref 0 in
-    let done_searching = ref false in
-    let progress_fn ~total:_total ~start:_start ~(length : int) : unit =
-      let is_bucket_empty = length = 0 in
-      if not !done_searching then (
-        num_files_searched := !num_files_searched + length;
-        if
-          !num_files_searched - !last_printed_num_files_searched >= 10000
-          || is_bucket_empty
-        then (
-          ServerProgress.send_progress_to_monitor
-            "CST search: searched %d files..."
-            !num_files_searched;
-          last_printed_num_files_searched := !num_files_searched
-        )
-      );
-      if is_bucket_empty then done_searching := true
-    in
-    let next_files :
-        (Relative_path.t * FileInfo.t * pattern) list Hh_bucket.next =
-      let with_file_data path =
-        let path = Relative_path.create_detect_prefix path in
-        match Naming_table.get_file_info env.ServerEnv.naming_table path with
-        | Some fileinfo -> Some (path, fileinfo, pattern)
-        | None ->
-          (* We may not have the file information for a file such as one that we
-        ignore in `.hhconfig`. *)
-          None
-      in
-      match files_to_search with
-      | Some files_to_search ->
-        let files_to_search =
-          Sys_utils.parse_path_list files_to_search
-          |> List.filter_map ~f:with_file_data
-        in
-        MultiWorker.next genv.ServerEnv.workers files_to_search ~progress_fn
+  let open Result.Monad_infix in
+  let ctx = Provider_context.empty ~tcopt:env.ServerEnv.tcopt in
+  compile_pattern ctx input >>| fun pattern ->
+  let num_files_searched = ref 0 in
+  let last_printed_num_files_searched = ref 0 in
+  let done_searching = ref false in
+  let progress_fn ~total:_total ~start:_start ~(length : int) : unit =
+    let is_bucket_empty = length = 0 in
+    if not !done_searching then (
+      num_files_searched := !num_files_searched + length;
+      if
+        !num_files_searched - !last_printed_num_files_searched >= 10000
+        || is_bucket_empty
+      then (
+        ServerProgress.send_progress_to_monitor
+          "CST search: searched %d files..."
+          !num_files_searched;
+        last_printed_num_files_searched := !num_files_searched
+      )
+    );
+    if is_bucket_empty then done_searching := true
+  in
+  let next_files : (Relative_path.t * FileInfo.t * pattern) list Hh_bucket.next
+      =
+    let with_file_data path =
+      let path = Relative_path.create_detect_prefix path in
+      match Naming_table.get_file_info env.ServerEnv.naming_table path with
+      | Some fileinfo -> Some (path, fileinfo, pattern)
       | None ->
-        let indexer = genv.ServerEnv.indexer FindUtils.is_hack in
-        fun () ->
-          let files = indexer () |> List.filter_map ~f:with_file_data in
-          progress_fn ~total:0 ~start:0 ~length:(List.length files);
-          Hh_bucket.of_list files
+        (* We may not have the file information for a file such as one that we
+        ignore in `.hhconfig`. *)
+        None
     in
-    (* Extract the `tcopt` so that we don't close over the entire `env`. *)
-    let tcopt = env.ServerEnv.tcopt in
-    let job
-        (acc : (Relative_path.t * result) list)
-        (inputs : (Relative_path.t * FileInfo.t * pattern) list) :
-        (Relative_path.t * result) list =
-      List.fold inputs ~init:acc ~f:(fun acc (path, fileinfo, pattern) ->
-          try
-            match search tcopt path fileinfo pattern with
-            | Some result -> (path, result) :: acc
-            | None -> acc
-          with e ->
-            let stack = Printexc.get_backtrace () in
-            let prefix =
-              Printf.sprintf
-                "Error while running CST search on path %s:\n"
-                (Relative_path.to_absolute path)
-            in
-            Hh_logger.exc e ~prefix ~stack;
-            raise e)
-    in
-    let results =
-      MultiWorker.call
-        genv.ServerEnv.workers
-        ~job
-        ~neutral:[]
-        ~merge:List.rev_append
-        ~next:next_files
-    in
-    let results =
-      if sort_results then
-        List.sort results ~compare:Pervasives.compare
-      else
-        results
-    in
-    Hh_json.JSON_Object
-      (List.map results ~f:(fun (path, result) ->
-           ( Relative_path.to_absolute path,
-             result_to_json ~sort_results (Some result) ))))
+    match files_to_search with
+    | Some files_to_search ->
+      let files_to_search =
+        Sys_utils.parse_path_list files_to_search
+        |> List.filter_map ~f:with_file_data
+      in
+      MultiWorker.next genv.ServerEnv.workers files_to_search ~progress_fn
+    | None ->
+      let indexer = genv.ServerEnv.indexer FindUtils.is_hack in
+      fun () ->
+        let files = indexer () |> List.filter_map ~f:with_file_data in
+        progress_fn ~total:0 ~start:0 ~length:(List.length files);
+        Hh_bucket.of_list files
+  in
+  (* Extract the `tcopt` so that we don't close over the entire `env`. *)
+  let tcopt = env.ServerEnv.tcopt in
+  let job
+      (acc : (Relative_path.t * result) list)
+      (inputs : (Relative_path.t * FileInfo.t * pattern) list) :
+      (Relative_path.t * result) list =
+    List.fold inputs ~init:acc ~f:(fun acc (path, fileinfo, pattern) ->
+        try
+          match search tcopt path fileinfo pattern with
+          | Some result -> (path, result) :: acc
+          | None -> acc
+        with e ->
+          let stack = Printexc.get_backtrace () in
+          let prefix =
+            Printf.sprintf
+              "Error while running CST search on path %s:\n"
+              (Relative_path.to_absolute path)
+          in
+          Hh_logger.exc e ~prefix ~stack;
+          raise e)
+  in
+  let results =
+    MultiWorker.call
+      genv.ServerEnv.workers
+      ~job
+      ~neutral:[]
+      ~merge:List.rev_append
+      ~next:next_files
+  in
+  let results =
+    if sort_results then
+      List.sort results ~compare:Pervasives.compare
+    else
+      results
+  in
+  Hh_json.JSON_Object
+    (List.map results ~f:(fun (path, result) ->
+         ( Relative_path.to_absolute path,
+           result_to_json ~sort_results (Some result) )))

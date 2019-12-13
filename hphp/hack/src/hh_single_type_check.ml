@@ -1156,22 +1156,23 @@ let handle_mode
              "Missing fileinfo for path %s"
              (Relative_path.to_absolute filename))
     in
-    Result.Monad_infix.(
-      let result =
-        Sys_utils.read_stdin_to_string ()
-        |> Hh_json.json_of_string
-        |> CstSearchService.compile_pattern
-        >>| CstSearchService.search tcopt filename fileinfo
-        >>| CstSearchService.result_to_json ~sort_results:true
-        >>| Hh_json.json_to_string ~pretty:true
-      in
-      begin
-        match result with
-        | Ok result -> Printf.printf "%s\n" result
-        | Error message ->
-          Printf.printf "%s\n" message;
-          exit 1
-      end)
+    let ctx = Provider_context.empty ~tcopt in
+    let result =
+      let open Result.Monad_infix in
+      Sys_utils.read_stdin_to_string ()
+      |> Hh_json.json_of_string
+      |> CstSearchService.compile_pattern ctx
+      >>| CstSearchService.search tcopt filename fileinfo
+      >>| CstSearchService.result_to_json ~sort_results:true
+      >>| Hh_json.json_to_string ~pretty:true
+    in
+    begin
+      match result with
+      | Ok result -> Printf.printf "%s\n" result
+      | Error message ->
+        Printf.printf "%s\n" message;
+        exit 1
+    end
   | Dump_symbol_info ->
     iter_over_files (fun filename ->
         match Relative_path.Map.find_opt files_info filename with
@@ -1559,6 +1560,7 @@ let handle_mode
           end
         ~init:files_info
     in
+    let ctx = Provider_context.empty ~tcopt in
     Relative_path.Map.iter files_info ~f:(fun _file info ->
         let { FileInfo.classes; _ } = info in
         List.iter classes ~f:(fun (_, classname) ->
@@ -1570,7 +1572,7 @@ let handle_mode
                   let targs =
                     List.map
                       mro.Decl_defs.mro_type_args
-                      (Typing_print.full_decl tcopt)
+                      (Typing_print.full_decl ctx)
                   in
                   let targs =
                     if targs = [] then

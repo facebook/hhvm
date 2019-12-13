@@ -59,9 +59,9 @@ let default_json =
     symbolOccurrence = [];
   }
 
-let hint tcopt h =
+let hint ctx h =
   let mode = FileInfo.Mdecl in
-  let decl_env = { mode; droot = None; ctx = Provider_context.empty ~tcopt } in
+  let decl_env = { mode; droot = None; ctx } in
   Decl_hint.hint decl_env h
 
 let get_next_elem_id () =
@@ -117,18 +117,18 @@ let glean_json predicate json json_data_progress =
   in
   (json_facts, update_json_data predicate json_facts json_data_progress)
 
-let json_of_gconst tcopt gc_id gc json_data_progress =
+let json_of_gconst ctx gc_id gc json_data_progress =
   let (pos, _) = gc.cst_name in
   let ty =
     match gc.cst_type with
     | None -> (Typing_reason.Rhint pos, Typing_defs.Tnothing)
-    | Some t -> hint tcopt t
+    | Some t -> hint ctx t
   in
   let json =
     JSON_Object
       [
         ("name", JSON_Object [("key", JSON_String gc_id)]);
-        ("type", JSON_Object [("key", JSON_String (type_ tcopt ty))]);
+        ("type", JSON_Object [("key", JSON_String (type_ ctx ty))]);
       ]
   in
   glean_json GconstDeclaration json json_data_progress
@@ -148,11 +148,11 @@ let json_of_typedef _ td_id td json_data_progress =
   in
   glean_json TypedefDeclaration json json_data_progress
 
-let json_of_fun tcopt fn_id fn json_data_progress =
+let json_of_fun ctx fn_id fn json_data_progress =
   let ret_type =
     match hint_of_type_hint fn.f_ret with
     | None -> (Typing_reason.Rnone, Typing_defs.Tnothing)
-    | Some h -> hint tcopt h
+    | Some h -> hint ctx h
   in
   let (params, progress) =
     List.fold
@@ -162,13 +162,13 @@ let json_of_fun tcopt fn_id fn json_data_progress =
         let ty =
           match hint_of_type_hint f_param.param_type_hint with
           | None -> (Typing_reason.Rhint f_param.param_pos, Typing_defs.Tnothing)
-          | Some h -> hint tcopt h
+          | Some h -> hint ctx h
         in
         let json =
           JSON_Object
             [
               ("name", JSON_Object [("key", JSON_String f_param.param_name)]);
-              ("type", JSON_Object [("key", JSON_String (type_ tcopt ty))]);
+              ("type", JSON_Object [("key", JSON_String (type_ ctx ty))]);
             ]
         in
         let (json_facts, progress) = glean_json Parameter json progress_acc in
@@ -179,8 +179,7 @@ let json_of_fun tcopt fn_id fn json_data_progress =
       [
         ("name", JSON_Object [("key", JSON_String fn_id)]);
         ("params", JSON_Array params);
-        ( "return_type",
-          JSON_Object [("key", JSON_String (type_ tcopt ret_type))] );
+        ("return_type", JSON_Object [("key", JSON_String (type_ ctx ret_type))]);
       ]
   in
   glean_json FunctionDeclaration json_facts progress

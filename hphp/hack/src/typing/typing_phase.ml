@@ -319,7 +319,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
     | _ ->
       Errors.pu_localize
         (Reason.to_pos r)
-        (Typing_print.full_decl env.genv.tcopt dty);
+        (Typing_print.full_decl (Typing_env.get_ctx env) dty);
       (env, (r, Typing_utils.terr env)))
 
 and localize_tparams ~ety_env env pos tyl tparams =

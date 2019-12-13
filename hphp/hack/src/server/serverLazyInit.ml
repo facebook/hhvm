@@ -630,7 +630,8 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
   else
     Sys_utils.mkdir_p out_dir;
 
-  Typing_symbol_info_writer.go genv.workers env.tcopt out_dir file_tuples;
+  let ctx = Provider_context.empty ~tcopt:env.tcopt in
+  Typing_symbol_info_writer.go genv.workers ctx out_dir file_tuples;
 
   (env, t)
 

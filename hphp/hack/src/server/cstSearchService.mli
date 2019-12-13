@@ -14,7 +14,8 @@ type pattern
 type result
 
 (** Compile JSON input into a pattern that can be searched for. *)
-val compile_pattern : Hh_json.json -> (pattern, string) Result.t
+val compile_pattern :
+  Provider_context.t -> Hh_json.json -> (pattern, string) Result.t
 
 (** Convert the result of a search into JSON output that can be sent back to the
     user. *)

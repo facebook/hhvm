@@ -394,7 +394,7 @@ let generate_fresh_name_for_target_of_condition_type
     Some
       ( Typing_print.full env target_type
       ^ "#"
-      ^ Typing_print.full_decl (Env.get_tcopt env) condition_type )
+      ^ Typing_print.full_decl (Env.get_ctx env) condition_type )
   | _ -> None
 
 let try_substitute_type_with_condition env cond_ty ty =

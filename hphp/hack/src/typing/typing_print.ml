@@ -18,6 +18,7 @@ open Typing_logic
 module SN = Naming_special_names
 module Reason = Typing_reason
 module TySet = Typing_set
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Nast = Aast
 
@@ -619,14 +620,24 @@ module Full = struct
 
   let to_string_strip_ns ~ty env x = to_string ~ty text_strip_ns env x
 
-  let to_string_decl tcopt (x : decl_ty) =
+  let to_string_decl ctx (x : decl_ty) =
     let ty = decl_ty in
-    let env = Typing_env.empty tcopt Relative_path.default ~droot:None in
+    let env =
+      Typing_env.empty
+        ctx.Provider_context.tcopt
+        Relative_path.default
+        ~droot:None
+    in
     to_string ~ty Doc.text env x
 
-  let fun_to_string tcopt (x : decl_fun_type) =
+  let fun_to_string ctx (x : decl_fun_type) =
     let ty = decl_ty in
-    let env = Typing_env.empty tcopt Relative_path.default ~droot:None in
+    let env =
+      Typing_env.empty
+        ctx.Provider_context.tcopt
+        Relative_path.default
+        ~droot:None
+    in
     fun_type ~ty Doc.text ISet.empty env x
     |> Libhackfmt.format_doc_unbroken format_env
     |> String.strip
@@ -1000,7 +1011,9 @@ module Json = struct
     Error (Wrong_phase (message ^ Hh_json.Access.keytrace_to_string keytrace))
 
   (* TODO(T36532263) add PU stuff in here *)
-  let to_locl_ty ?(keytrace = []) (json : Hh_json.json) : deserialized_result =
+  let to_locl_ty
+      ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json) :
+      deserialized_result =
     let reason = Reason.none in
     let ty (ty : locl_phase ty_) : deserialized_result = Ok (reason, ty) in
     let rec aux (json : Hh_json.json) ~(keytrace : Hh_json.Access.keytrace) :
@@ -1028,7 +1041,7 @@ module Json = struct
         | "newtype" ->
           get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->
           begin
-            match Decl_provider.get_typedef name with
+            match Decl_provider.get_typedef ctx name with
             | Some _typedef ->
               (* We end up only needing the name of the typedef. *)
               Ok name
@@ -1196,7 +1209,7 @@ module Json = struct
         | "class" ->
           get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
           let class_pos =
-            match Decl_provider.get_class name with
+            match Decl_provider.get_class ctx name with
             | Some class_ty -> Cls.pos class_ty
             | None ->
               (* Class may not exist (such as in non-strict modes). *)
@@ -1461,11 +1474,10 @@ module PrintClass = struct
     | Nast.SoftReified -> " soft reified"
     | Nast.Reified -> " reified"
 
-  let tparam_list tcopt l =
-    List.fold_right l ~f:(fun x acc -> tparam tcopt x ^ ", " ^ acc) ~init:""
+  let tparam_list ctx l =
+    List.fold_right l ~f:(fun x acc -> tparam ctx x ^ ", " ^ acc) ~init:""
 
-  let class_elt tcopt { ce_visibility; ce_synthesized; ce_type = (lazy ty); _ }
-      =
+  let class_elt ctx { ce_visibility; ce_synthesized; ce_type = (lazy ty); _ } =
     let vis =
       match ce_visibility with
       | Vpublic -> "public"
@@ -1478,7 +1490,7 @@ module PrintClass = struct
       else
         ""
     in
-    let type_ = Full.to_string_decl tcopt ty in
+    let type_ = Full.to_string_decl ctx ty in
     synth ^ vis ^ " " ^ type_
 
   let class_elts tcopt m =
@@ -1548,7 +1560,7 @@ module PrintClass = struct
     Sequence.fold m ~init:"" ~f:(fun acc (_, v) ->
         "\n(" ^ typeconst tcopt v ^ ")" ^ acc)
 
-  let ancestors tcopt m =
+  let ancestors ctx m =
     (* Format is as follows:
      *    ParentKnownToHack
      *  ! ParentCompletelyUnknown
@@ -1558,7 +1570,7 @@ module PrintClass = struct
      * sigil could be omitted *)
     Sequence.fold m ~init:"" ~f:(fun acc (field, v) ->
         let (sigil, kind) =
-          match Decl_provider.get_class field with
+          match Decl_provider.get_class ctx field with
           | None -> ("!", "")
           | Some cls ->
             ( ( if Cls.members_fully_known cls then
@@ -1567,7 +1579,7 @@ module PrintClass = struct
                 "~" ),
               " (" ^ class_kind (Cls.kind cls) ^ ")" )
         in
-        let ty_str = Full.to_string_decl tcopt v in
+        let ty_str = Full.to_string_decl ctx v in
         "\n" ^ indent ^ sigil ^ " " ^ ty_str ^ kind ^ acc)
 
   let constructor tcopt (ce_opt, consist) =
@@ -1585,8 +1597,13 @@ module PrintClass = struct
     Sequence.fold xs ~init:"" ~f:(fun acc (_p, x) ->
         acc ^ Full.to_string_decl tcopt x ^ ", ")
 
-  let class_type tcopt c =
-    let tenv = Typing_env.empty tcopt (Pos.filename (Cls.pos c)) None in
+  let class_type ctx c =
+    let tenv =
+      Typing_env.empty
+        ctx.Provider_context.tcopt
+        (Pos.filename (Cls.pos c))
+        None
+    in
     let tc_need_init = bool (Cls.need_init c) in
     let tc_members_fully_known = bool (Cls.members_fully_known c) in
     let tc_abstract = bool (Cls.abstract c) in
@@ -1602,16 +1619,16 @@ module PrintClass = struct
     in
     let tc_kind = class_kind (Cls.kind c) in
     let tc_name = Cls.name c in
-    let tc_tparams = tparam_list tcopt (Cls.tparams c) in
-    let tc_consts = class_consts tcopt (Cls.consts c) in
-    let tc_typeconsts = typeconsts tcopt (Cls.typeconsts c) in
-    let tc_props = class_elts tcopt (Cls.props c) in
-    let tc_sprops = class_elts tcopt (Cls.sprops c) in
-    let tc_methods = class_elts_with_breaks tcopt (Cls.methods c) in
-    let tc_smethods = class_elts_with_breaks tcopt (Cls.smethods c) in
-    let tc_construct = constructor tcopt (Cls.construct c) in
-    let tc_ancestors = ancestors tcopt (Cls.all_ancestors c) in
-    let tc_req_ancestors = req_ancestors tcopt (Cls.all_ancestor_reqs c) in
+    let tc_tparams = tparam_list ctx (Cls.tparams c) in
+    let tc_consts = class_consts ctx (Cls.consts c) in
+    let tc_typeconsts = typeconsts ctx (Cls.typeconsts c) in
+    let tc_props = class_elts ctx (Cls.props c) in
+    let tc_sprops = class_elts ctx (Cls.sprops c) in
+    let tc_methods = class_elts_with_breaks ctx (Cls.methods c) in
+    let tc_smethods = class_elts_with_breaks ctx (Cls.smethods c) in
+    let tc_construct = constructor ctx (Cls.construct c) in
+    let tc_ancestors = ancestors ctx (Cls.all_ancestors c) in
+    let tc_req_ancestors = req_ancestors ctx (Cls.all_ancestor_reqs c) in
     let tc_req_ancestors_extends = sseq (Cls.all_ancestor_req_names c) in
     let tc_extends = sseq (Cls.all_extends_ancestors c) in
     "tc_need_init: "
@@ -1746,15 +1763,15 @@ let debug_i env ty =
   Full.debug_mode := false;
   f_str
 
-let class_ tcopt c = PrintClass.class_type tcopt c
+let class_ ctx c = PrintClass.class_type ctx c
 
-let gconst tcopt gc = Full.to_string_decl tcopt (fst gc)
+let gconst ctx gc = Full.to_string_decl ctx (fst gc)
 
-let fun_ tcopt { fe_type; _ } = Full.to_string_decl tcopt fe_type
+let fun_ ctx { fe_type; _ } = Full.to_string_decl ctx fe_type
 
-let fun_type tcopt f = Full.fun_to_string tcopt f
+let fun_type ctx f = Full.fun_to_string ctx f
 
-let typedef tcopt td = PrintTypedef.typedef tcopt td
+let typedef ctx td = PrintTypedef.typedef ctx td
 
 let constraints_for_type env ty =
   Full.constraints_for_type Doc.text env ty

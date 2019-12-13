@@ -40,6 +40,7 @@ val ty_to_json : env -> Typing_defs.locl_ty -> Hh_json.json
 (** Convert a JSON representation of a type back into a locl-phase type. *)
 val json_to_locl_ty :
   ?keytrace:Hh_json.Access.keytrace ->
+  Provider_context.t ->
   Hh_json.json ->
   (Typing_defs.locl_ty, Typing_defs.deserialization_error) result
 
@@ -70,6 +71,9 @@ val get_mode : env -> FileInfo.mode
 
 (** Return the {!TypecheckerOptions.t} with which this TAST was checked. *)
 val get_tcopt : env -> TypecheckerOptions.t
+
+(** Return the {!Provider_context.t} with which this TAST was checked. *)
+val get_ctx : env -> Provider_context.t
 
 val get_file : env -> Relative_path.t
 

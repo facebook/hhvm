@@ -275,7 +275,7 @@ let function_make_default = "extract_standalone_make_default"
 
 let call_make_default = Printf.sprintf "\\%s()" function_make_default
 
-let print_fun_args tcopt fun_type =
+let print_fun_args ctx fun_type =
   let print_arg (pos : [ `standard of int | `variadic ]) arg =
     let name =
       match arg.fp_name with
@@ -286,7 +286,7 @@ let print_fun_args tcopt fun_type =
       match snd arg.fp_type.et_type with
       | Typing_defs.Tany _ -> ""
       | _ ->
-        Printf.sprintf "%s " @@ Typing_print.full_decl tcopt arg.fp_type.et_type
+        Printf.sprintf "%s " @@ Typing_print.full_decl ctx arg.fp_type.et_type
     in
     match pos with
     | `standard index ->
@@ -321,8 +321,8 @@ let print_constraint_kind = function
   | Ast_defs.Constraint_super -> "super"
   | Ast_defs.Constraint_eq -> "="
 
-let print_tparam_constraint tcopt (ck, cty) =
-  print_constraint_kind ck ^ " " ^ Typing_print.full_decl tcopt cty
+let print_tparam_constraint ctx (ck, cty) =
+  print_constraint_kind ck ^ " " ^ Typing_print.full_decl ctx cty
 
 let print_tparam_variance = function
   | Ast_defs.Covariant -> "+"
@@ -330,12 +330,12 @@ let print_tparam_variance = function
   | Ast_defs.Invariant -> ""
 
 let print_tparam
-    tcopt
+    ctx
     { tp_name = (_, name); tp_constraints = cstrl; tp_variance = variance; _ } =
   String.concat
     ~sep:" "
     ( (print_tparam_variance variance ^ name)
-    :: List.map cstrl ~f:(print_tparam_constraint tcopt) )
+    :: List.map cstrl ~f:(print_tparam_constraint ctx) )
 
 let rec get_reactivity_attr r =
   match r with
@@ -354,17 +354,15 @@ let get_function_declaration ctx fun_name fun_type =
     | (tparams, _) ->
       Printf.sprintf "<%s>"
       @@ list_items
-      @@ List.map tparams ~f:(print_tparam ctx.Provider_context.tcopt)
+      @@ List.map tparams ~f:(print_tparam ctx)
   in
-  let args = print_fun_args ctx.Provider_context.tcopt fun_type in
+  let args = print_fun_args ctx fun_type in
   let rtype =
     match snd fun_type.ft_ret.et_type with
     | Typing_defs.Tany _ -> ""
     | _ ->
       Printf.sprintf ": %s"
-      @@ Typing_print.full_decl
-           ctx.Provider_context.tcopt
-           fun_type.ft_ret.et_type
+      @@ Typing_print.full_decl ctx fun_type.ft_ret.et_type
   in
   Printf.sprintf "function %s%s(%s)%s" (strip_ns fun_name) tparams args rtype
 
@@ -433,10 +431,7 @@ let get_init_from_type ctx ty =
         | _ -> raise UnexpectedDependency)
       | x when x = SN.Classes.cClassname ->
         (match targs with
-        | [cls] ->
-          Printf.sprintf
-            "%s::class"
-            (Typing_print.full_decl ctx.Provider_context.tcopt cls)
+        | [cls] -> Printf.sprintf "%s::class" (Typing_print.full_decl ctx cls)
         | _ -> raise Unsupported)
       | _ ->
         (match Decl_provider.get_class ctx name with
@@ -482,7 +477,7 @@ let get_const_declaration ctx ?abstract:(is_abstract = false) ty name =
     else
       ""
   in
-  let typ = Typing_print.full_decl ctx.Provider_context.tcopt ty in
+  let typ = Typing_print.full_decl ctx ty in
   let init = get_init_from_type ctx ty in
   Printf.sprintf "%sconst %s %s = %s;" abstract typ name init
 
@@ -616,10 +611,7 @@ let get_class_declaration ctx (cls : Decl_provider.class_decl) =
       else
         Printf.sprintf
           "<%s>"
-          ( list_items
-          @@ List.map
-               (Class.tparams cls)
-               ~f:(print_tparam ctx.Provider_context.tcopt) )
+          (list_items @@ List.map (Class.tparams cls) ~f:(print_tparam ctx))
     in
     let { extends; implements; _ } = get_direct_ancestors ctx cls in
     let prefix_if_nonempty prefix s =
@@ -631,20 +623,18 @@ let get_class_declaration ctx (cls : Decl_provider.class_decl) =
     let extends =
       prefix_if_nonempty " extends "
       @@ list_items
-      @@ List.map ~f:(Typing_print.full_decl ctx.Provider_context.tcopt) extends
+      @@ List.map ~f:(Typing_print.full_decl ctx) extends
     in
     let implements =
       prefix_if_nonempty " implements "
       @@ list_items
-      @@ List.map
-           ~f:(Typing_print.full_decl ctx.Provider_context.tcopt)
-           implements
+      @@ List.map ~f:(Typing_print.full_decl ctx) implements
     in
     (* TODO: traits, records *)
     Printf.sprintf "%s%s %s%s%s%s" final kind name tparams extends implements)
 
 let get_method_declaration
-    tcopt
+    ctx
     (meth : Typing_defs.class_elt)
     ?from_interface:(no_declare_abstract = false)
     ~is_static
@@ -673,7 +663,7 @@ let get_method_declaration
     abstract
     visibility
     static
-    (get_function_declaration tcopt method_name method_type)
+    (get_function_declaration ctx method_name method_type)
 
 let get_property_declaration ctx (prop : Typing_defs.class_elt) ~is_static name
     =
@@ -685,7 +675,7 @@ let get_property_declaration ctx (prop : Typing_defs.class_elt) ~is_static name
       ""
   in
   let ty = Lazy.force prop.ce_type in
-  let prop_type = Typing_print.full_decl ctx.Provider_context.tcopt ty in
+  let prop_type = Typing_print.full_decl ctx ty in
   let init =
     if is_static && not prop.ce_abstract then
       Printf.sprintf " = %s" (get_init_from_type ctx ty)
@@ -704,18 +694,12 @@ let get_typeconst_declaration ctx tconst name =
   in
   let typ =
     match tconst.ttc_type with
-    | Some t ->
-      Printf.sprintf
-        " = %s"
-        (Typing_print.full_decl ctx.Provider_context.tcopt t)
+    | Some t -> Printf.sprintf " = %s" (Typing_print.full_decl ctx t)
     | None -> ""
   in
   let constr =
     match tconst.ttc_constraint with
-    | Some t ->
-      Printf.sprintf
-        " as %s"
-        (Typing_print.full_decl ctx.Provider_context.tcopt t)
+    | Some t -> Printf.sprintf " as %s" (Typing_print.full_decl ctx t)
     | None -> ""
   in
   Printf.sprintf "%s const type %s%s%s;" abstract name constr typ
@@ -835,12 +819,10 @@ let construct_enum ctx enum fields =
            (get_init_from_type ctx enum_type.te_base))
     | _ -> None
   in
-  let base =
-    Typing_print.full_decl ctx.Provider_context.tcopt enum_type.te_base
-  in
+  let base = Typing_print.full_decl ctx enum_type.te_base in
   let cons =
     match enum_type.te_constraint with
-    | Some c -> " as " ^ Typing_print.full_decl ctx.Provider_context.tcopt c
+    | Some c -> " as " ^ Typing_print.full_decl ctx c
     | None -> ""
   in
   let enum_decl =
@@ -867,21 +849,15 @@ let get_class_body ctx cls target class_elts =
   let { uses; req_extends; req_implements; _ } = get_direct_ancestors ctx cls in
   let uses =
     List.map uses ~f:(fun s ->
-        Printf.sprintf
-          "use %s;"
-          (Typing_print.full_decl ctx.Provider_context.tcopt s))
+        Printf.sprintf "use %s;" (Typing_print.full_decl ctx s))
   in
   let req_extends =
     List.map req_extends (fun s ->
-        Printf.sprintf
-          "require extends %s;"
-          (Typing_print.full_decl ctx.Provider_context.tcopt s))
+        Printf.sprintf "require extends %s;" (Typing_print.full_decl ctx s))
   in
   let req_implements =
     List.map req_implements (fun s ->
-        Printf.sprintf
-          "require implements %s;"
-          (Typing_print.full_decl ctx.Provider_context.tcopt s))
+        Printf.sprintf "require implements %s;" (Typing_print.full_decl ctx s))
   in
   let open Typing_deps in
   let prop_names =
@@ -941,7 +917,7 @@ let construct_typedef ctx t =
   in
   let constraint_ =
     match td.td_constraint with
-    | Some ty -> " as " ^ Typing_print.full_decl ctx.Provider_context.tcopt ty
+    | Some ty -> " as " ^ Typing_print.full_decl ctx ty
     | None -> ""
   in
   Printf.sprintf
@@ -950,7 +926,7 @@ let construct_typedef ctx t =
     (strip_ns t)
     tparams
     constraint_
-    (Typing_print.full_decl ctx.Provider_context.tcopt td.td_type)
+    (Typing_print.full_decl ctx td.td_type)
 
 let construct_type_declaration ctx t target fields =
   match Decl_provider.get_class ctx t with

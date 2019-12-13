@@ -8,6 +8,7 @@
  *)
 
 open Typing_env_types
+module Decl_provider = Decl_provider_ctx
 
 (*****************************************************************************)
 (* Pretty printing of types *)
@@ -27,9 +28,9 @@ val full_strip_ns_i : env -> Typing_defs.internal_type -> string
 
 val full_strip_ns_decl : env -> Typing_defs.decl_ty -> string
 
-val full_decl : TypecheckerOptions.t -> Typing_defs.decl_ty -> string
+val full_decl : Provider_context.t -> Typing_defs.decl_ty -> string
 
-val fun_type : TypecheckerOptions.t -> Typing_defs.decl_fun_type -> string
+val fun_type : Provider_context.t -> Typing_defs.decl_fun_type -> string
 
 (** Pretty print a type and all of its associated declaration information. *)
 val full_with_identity :
@@ -47,13 +48,13 @@ val debug_i : env -> Typing_defs.internal_type -> string
 
 val with_blank_tyvars : (unit -> 'a) -> 'a
 
-val class_ : TypecheckerOptions.t -> Decl_provider.class_decl -> string
+val class_ : Provider_context.t -> Decl_provider.class_decl -> string
 
-val gconst : TypecheckerOptions.t -> Decl_provider.gconst_decl -> string
+val gconst : Provider_context.t -> Decl_provider.gconst_decl -> string
 
-val fun_ : TypecheckerOptions.t -> Decl_provider.fun_decl -> string
+val fun_ : Provider_context.t -> Decl_provider.fun_decl -> string
 
-val typedef : TypecheckerOptions.t -> Decl_provider.typedef_decl -> string
+val typedef : Provider_context.t -> Decl_provider.typedef_decl -> string
 
 val constraints_for_type : env -> Typing_defs.locl_ty -> string option
 
@@ -113,5 +114,6 @@ manipulate. Note that this function accesses the global state in
 `Decl_provider` to verify that certain type names exist. *)
 val json_to_locl_ty :
   ?keytrace:Hh_json.Access.keytrace ->
+  Provider_context.t ->
   Hh_json.json ->
   (Typing_defs.locl_ty, Typing_defs.deserialization_error) result

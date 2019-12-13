@@ -69,6 +69,8 @@ let get_mode = Typing_env.get_mode
 
 let get_tcopt = Typing_env.get_tcopt
 
+let get_ctx = Typing_env.get_ctx
+
 let expand_type = Typing_env.expand_type
 
 let set_static = Typing_env.set_static

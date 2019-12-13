@@ -107,7 +107,9 @@ let handler =
       try
         let ty = Tast_expand.expand_ty env ~pos:p ty in
         let serialized_ty = Tast_env.ty_to_json env ty in
-        let deserialized_ty = Tast_env.json_to_locl_ty serialized_ty in
+        let deserialized_ty =
+          Tast_env.json_to_locl_ty (Tast_env.get_ctx env) serialized_ty
+        in
         match deserialized_ty with
         | Ok deserialized_ty ->
           let ty = strip_ty ty in

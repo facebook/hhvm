@@ -7,7 +7,9 @@
     src/hackfmt.exe
     src/hh_parse.exe
     src/hh_single_compile.exe
-    src/facebook/hh_fanout/hh_fanout.exe))
+    src/facebook/hh_fanout/hh_fanout.exe
+    src/facebook/hh_lite/hh_lite.exe
+    ))
 
 (alias
   (name hh)

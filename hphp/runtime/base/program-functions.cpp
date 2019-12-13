@@ -51,6 +51,8 @@
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/ext/strobelight/ext_strobelight.h"
+#include "hphp/runtime/ext/strobelight/tracing_types.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 #include "hphp/runtime/ext/xhprof/ext_xhprof.h"
 #include "hphp/runtime/server/admin-request-handler.h"
@@ -2209,13 +2211,17 @@ std::string get_systemlib(std::string* hhas,
 // C++ ffi
 
 #ifndef _MSC_VER
-static void on_timeout(int sig, siginfo_t* info, void* /*context*/) {
+namespace {
+
+void on_timeout(int sig, siginfo_t* info, void* /*context*/) {
   if (sig == SIGVTALRM && info && info->si_code == SI_TIMER) {
     auto data = (RequestTimer*)info->si_value.sival_ptr;
     if (data) {
       data->onTimeout();
     }
   }
+}
+
 }
 #endif
 
@@ -2334,6 +2340,10 @@ void hphp_process_init() {
   // start takes milliseconds, Period is a double in seconds
   Xenon::getInstance().start(1000 * RuntimeOption::XenonPeriodSeconds);
   BootStats::mark("xenon");
+
+  // set up strobelight signal handling
+  Strobelight::getInstance().init();
+  BootStats::mark("strobelight");
 
   // reinitialize pcre table
   pcre_reinit();

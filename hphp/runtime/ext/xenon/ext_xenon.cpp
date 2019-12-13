@@ -29,6 +29,7 @@
 #include "hphp/util/rds-local.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/sync-signal.h"
+#include "hphp/util/timer.h"
 
 #include <signal.h>
 #include <time.h>
@@ -226,6 +227,7 @@ void Xenon::onTimer() {
 // passed to ExecutePerThread.
 void Xenon::surpriseAll() {
   TRACE(1, "Xenon::surpriseAll\n");
+  m_lastSurprise = time(NULL);
   RequestInfo::ExecutePerRequest(
     [] (RequestInfo* t) { t->m_reqInjectionData.setFlag(XenonSignalFlag); }
   );
@@ -233,6 +235,10 @@ void Xenon::surpriseAll() {
 
 bool Xenon::getIsProfiledRequest() {
   return s_xenonData->getIsProfiledRequest();
+}
+
+uint64_t Xenon::getLastSurpriseTime() {
+  return m_lastSurprise;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

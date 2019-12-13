@@ -177,6 +177,7 @@ namespace Trace {
       TM(stat)          \
       TM(statgroups)    \
       TM(stats)         \
+      TM(strobelight)   \
       TM(targetcache)   \
       TM(tcspace)       \
       TM(trans)         \

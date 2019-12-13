@@ -28,6 +28,7 @@
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle-defs.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/intervaltimer/ext_intervaltimer.h"
+#include "hphp/runtime/ext/strobelight/ext_strobelight.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/system/systemlib.h"
@@ -74,7 +75,11 @@ namespace {
 
       auto const flags = handle_request_surprise(wait_handle);
       if (flags & XenonSignalFlag) {
-        Xenon::getInstance().log(Xenon::IOWaitSample, wait_handle);
+        if (Strobelight::active()) {
+          Strobelight::getInstance().log(wait_handle);
+        } else {
+          Xenon::getInstance().log(Xenon::IOWaitSample, wait_handle);
+        }
       }
       if (flags & IntervalTimerFlag) {
         IntervalTimer::RunCallbacks(IntervalTimer::IOWaitSample, wait_handle);

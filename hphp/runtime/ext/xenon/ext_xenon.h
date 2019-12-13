@@ -127,9 +127,11 @@ struct Xenon final {
   void surpriseAll();
   void onTimer();
   bool getIsProfiledRequest();
+  uint64_t getLastSurpriseTime();
 
   bool      m_stopping;
  private:
+  std::atomic<int64_t> m_lastSurprise;
   std::atomic<int64_t> m_missedSampleCount;
 #if !defined(__APPLE__) && !defined(_MSC_VER)
   timer_t   m_timerid;

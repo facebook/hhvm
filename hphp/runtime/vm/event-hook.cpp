@@ -29,6 +29,7 @@
 #include "hphp/runtime/ext/intervaltimer/ext_intervaltimer.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/ext/strobelight/ext_strobelight.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
 #include "hphp/runtime/server/server-stats.h"
@@ -590,8 +591,13 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   // Xenon
   if (flags & XenonSignalFlag) {
-    Xenon::getInstance().log(Xenon::ExitSample);
+    if (Strobelight::active()) {
+      Strobelight::getInstance().log();
+    } else {
+      Xenon::getInstance().log(Xenon::ExitSample);
+    }
   }
+
   if (flags & HeapSamplingFlag) {
     gather_alloc_stack();
   }
@@ -664,7 +670,11 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
 
   // Xenon
   if (flags & XenonSignalFlag) {
-    Xenon::getInstance().log(Xenon::EnterSample);
+    if (Strobelight::active()) {
+      Strobelight::getInstance().log();
+    } else {
+      Xenon::getInstance().log(Xenon::EnterSample);
+    }
   }
 
   // Memory Threhsold
@@ -689,7 +699,11 @@ void EventHook::onFunctionResumeAwait(const ActRec* ar) {
 
   // Xenon
   if (flags & XenonSignalFlag) {
-    Xenon::getInstance().log(Xenon::ResumeAwaitSample);
+    if (Strobelight::active()) {
+      Strobelight::getInstance().log();
+    } else {
+      Xenon::getInstance().log(Xenon::ResumeAwaitSample);
+    }
   }
 
   // Memory Threhsold
@@ -713,7 +727,11 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
 
   // Xenon
   if (flags & XenonSignalFlag) {
-    Xenon::getInstance().log(Xenon::EnterSample);
+    if (Strobelight::active()) {
+      Strobelight::getInstance().log();
+    } else {
+      Xenon::getInstance().log(Xenon::EnterSample);
+    }
   }
 
   // Memory Threhsold

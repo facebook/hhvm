@@ -9,8 +9,8 @@ use hh_autoimport_rust as hh_autoimport;
 use itertools::{Either, Either::Left, Either::Right};
 use lint_rust::LintError;
 use naming_special_names_rust::{
-    classes as special_classes, literal, rx, special_functions, special_idents,
-    typehints as special_typehints,
+    classes as special_classes, literal, members as special_members, rx, special_functions,
+    special_idents, typehints as special_typehints, user_attributes as special_attrs,
 };
 use ocamlrep::rc::RcOc;
 use oxidized::{
@@ -127,7 +127,7 @@ pub struct State {
     /// which would be expensive).
     pub lowpri_errors: Vec<(Pos, String)>,
     /// hh_errors captures errors after parsing, naming, nast, etc.
-    pub hh_errors: Vec<(HHError)>,
+    pub hh_errors: Vec<HHError>,
     pub lint_errors: Vec<LintError>,
     pub doc_comments: Vec<Option<DocComment>>,
 
@@ -988,7 +988,7 @@ where
             AttributizedSpecifier(c) => {
                 let attrs = Self::p_user_attribute(&c.attributized_specifier_attribute_spec, env)?;
                 let hint = Self::p_hint(&c.attributized_specifier_type, env)?;
-                if attrs.iter().any(|attr| attr.name.1 != "__Soft") {
+                if attrs.iter().any(|attr| attr.name.1 != special_attrs::SOFT) {
                     Self::raise_parsing_error(node, env, &syntax_error::only_soft_allowed);
                 }
                 Ok(*Self::soften_hint(&attrs, hint).1)
@@ -1795,7 +1795,10 @@ where
                 &c.variable_expression,
                 env,
             )?)),
-            PipeVariableExpression(_) => Ok(E_::mk_lvar(mk_lid(pos, String::from("$$")))),
+            PipeVariableExpression(_) => Ok(E_::mk_lvar(mk_lid(
+                pos,
+                special_idents::DOLLAR_DOLLAR.into(),
+            ))),
             InclusionExpression(c) => Ok(E_::mk_import(
                 Self::p_import_flavor(&c.inclusion_require, env)?,
                 Self::p_expr(&c.inclusion_filename, env)?,
@@ -1869,7 +1872,10 @@ where
                         Some(TK::Clone) => Ok(E_::mk_clone(expr)),
                         Some(TK::Print) => Ok(E_::mk_call(
                             ast::CallType::Cnormal,
-                            E::new(pos.clone(), E_::mk_id(ast::Id(pos, String::from("echo")))),
+                            E::new(
+                                pos.clone(),
+                                E_::mk_id(ast::Id(pos, special_functions::ECHO.into())),
+                            ),
                             vec![],
                             vec![expr],
                             None,
@@ -3293,7 +3299,7 @@ where
     }
 
     fn has_soft(attrs: &[ast::UserAttribute]) -> bool {
-        attrs.iter().any(|attr| attr.name.1 == "__Soft")
+        attrs.iter().any(|attr| attr.name.1 == special_attrs::SOFT)
     }
 
     fn soften_hint(attrs: &[ast::UserAttribute], hint: ast::Hint) -> ast::Hint {
@@ -3689,7 +3695,7 @@ where
             || name.1.eq_ignore_ascii_case("__hasreifiedparent")
         {
             Self::raise_parsing_error(node, env, &syntax_error::reified_attribute);
-        } else if name.1.eq_ignore_ascii_case("__soft")
+        } else if name.1.eq_ignore_ascii_case(special_attrs::SOFT)
             && Self::as_list(constructor_call_argument_list).len() > 0
         {
             Self::raise_parsing_error(node, env, &syntax_error::soft_no_arguments);
@@ -4055,7 +4061,7 @@ where
                             ast::Stmt_::mk_expr(e(E_::mk_binop(
                                 ast::Bop::Eq(None),
                                 e(E_::mk_obj_get(
-                                    e(E_::mk_lvar(lid("$this"))),
+                                    e(E_::mk_lvar(lid(special_idents::THIS))),
                                     e(E_::mk_id(ast::Id(p.clone(), cvname.to_string()))),
                                     ast::OgNullFlavor::OGNullthrows,
                                 )),
@@ -4084,7 +4090,7 @@ where
                     _ => panic!(),
                 };
                 let hdr = Self::p_fun_hdr(header, env)?;
-                if hdr.name.1 == "__construct" && !hdr.type_parameters.is_empty() {
+                if hdr.name.1 == special_members::__CONSTRUCT && !hdr.type_parameters.is_empty() {
                     Self::raise_parsing_error(
                         header,
                         env,

@@ -964,9 +964,7 @@ let rec do_add_dep ctx deps dep =
     && not (is_builtin_dep ctx dep)
   then (
     HashSet.add deps dep;
-    add_signature_dependencies ctx deps dep;
-    Option.iter (get_class_name dep) ~f:(fun name ->
-        do_add_dep ctx deps (Typing_deps.Dep.Class name))
+    add_signature_dependencies ctx deps dep
   )
 
 and add_dep ctx deps ~this ty : unit =
@@ -1057,6 +1055,7 @@ and add_signature_dependencies ctx deps obj =
   let description = to_string obj in
   match get_class_name obj with
   | Some cls_name ->
+    do_add_dep ctx deps (Typing_deps.Dep.Class cls_name);
     (match Decl_provider.get_class ctx cls_name with
     | None ->
       let td =

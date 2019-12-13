@@ -190,7 +190,12 @@ class LspTestSpec:
         )
 
     def write_to_disk(
-        self, *, comment: Optional[str] = None, uri: str, contents: str, notify: bool
+        self,
+        *,
+        comment: Optional[str] = None,
+        uri: str,
+        contents: Optional[str],
+        notify: bool,
     ) -> "LspTestSpec":
         """Write a file to disk in the middle of the LSP test.
 
@@ -199,6 +204,8 @@ class LspTestSpec:
         request will be sent and the file will be written to disk almost
         simultaneously, and the language server may read the new file from disk
         by the time it processes the request, rather than the old file.
+
+        If `contents` is `None`, delete the file from disk.
 
         If `notify` is `True`, also send a `workspace/didChangeWatchedFiles`
         notification to the language server corresponding to the file you just

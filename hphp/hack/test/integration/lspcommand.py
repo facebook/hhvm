@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import contextlib
+import os
 import pprint
 import subprocess
 import urllib
@@ -297,8 +298,11 @@ Transcript of all the messages we saw:
         params = command["params"]
         path = urllib.parse.urlparse(params["uri"]).path
         contents = params["contents"]
-        with open(path, "w") as f:
-            f.write(contents)
+        if contents is not None:
+            with open(path, "w") as f:
+                f.write(contents)
+        else:
+            os.remove(path)
 
     def _read_request_responses(
         self, transcript: Transcript, commands: Sequence[Json], timeout_seconds: float

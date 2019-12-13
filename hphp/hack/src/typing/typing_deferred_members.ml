@@ -12,6 +12,7 @@ open Aast
 open Shallow_decl_defs
 open Typing_defs
 module Attrs = Naming_attributes
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Env = Typing_env
 module SN = Naming_special_names
@@ -163,7 +164,7 @@ and get_deferred_init_props env c =
   (priv_props, props)
 
 and class_ env c =
-  match Decl_provider.get_class (snd c.sc_name) with
+  match Decl_provider.get_class (Typing_env.get_ctx env) (snd c.sc_name) with
   | None -> SSet.empty
   | Some cls ->
     let has_concrete_cstr = Cls.need_init cls in

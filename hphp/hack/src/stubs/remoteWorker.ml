@@ -14,7 +14,7 @@ type work_env = {
   key: string;
   root: Path.t;
   timeout: int;
-  type_check: (type_check_input -> Errors.t) option;
+  type_check: (Relative_path.t list -> Errors.t) option;
 }
 
 let go _ = failwith "not implemented"

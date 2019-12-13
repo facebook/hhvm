@@ -200,6 +200,8 @@ let handle_persistent_connection_exception _ _ = ()
 
 let handled_command _ ~start_t ~major_gc_time ~minor_gc_time ~parsed_files = ()
 
+let remote_scheduler_save_naming_end _ = ()
+
 let recheck_end _ _ _ _ = ()
 
 let indexing_end _ = ()

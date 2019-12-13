@@ -195,6 +195,7 @@
     colorFile
     fullFidelityParseService
     searchServiceRunner
+    serverApi
     serverBigCode
     serverBusyStatus
     serverCheckUtils
@@ -247,12 +248,15 @@
     buffered_line_reader
     coverage_level
     dfind
+    fileutils
     hg
     hhi
     ide_rpc_api_types
     linting
+    logging_stubs
     lsp
     parsing_service
+    remote_worker_stubs
     search
     server_env
     server_services
@@ -302,5 +306,6 @@
     state_loader
     typing_service_api
     typing_symbol_info
+    vfs_stubs
     watchman_client)
   (preprocess (pps lwt_ppx ppx_deriving.std)))

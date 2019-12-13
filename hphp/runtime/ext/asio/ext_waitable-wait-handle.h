@@ -56,13 +56,6 @@ struct c_WaitableWaitHandle : c_Awaitable {
   AsioBlockableChain& getParentChain();
   void join();
   String getName();
-  Array getParents() {
-    // no parent data available if finished
-    if (isFinished()) {
-      return empty_varray();
-    }
-    return getParentChain().toArray();
-  }
   Array getDependencyStack();
 
  protected:

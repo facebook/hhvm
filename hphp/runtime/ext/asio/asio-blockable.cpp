@@ -195,17 +195,6 @@ void AsioBlockableChain::removeFromChain(AsioBlockable* ab) {
   assertx(false);
 }
 
-Array AsioBlockableChain::toArray() {
-  auto result = Array::CreateVArray();
-  for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
-    auto const wh = cur->getWaitHandle();
-    if (!wh->isFinished()) {
-      result.append(make_tv<KindOfObject>(wh));
-    }
-  }
-  return result;
-}
-
 c_WaitableWaitHandle*
 AsioBlockableChain::firstInContext(context_idx_t ctx_idx) {
   for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {

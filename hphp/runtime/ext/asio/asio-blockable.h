@@ -111,7 +111,6 @@ struct AsioBlockableChain final {
   void unblock();
   void exitContext(context_idx_t ctx_idx);
   void removeFromChain(AsioBlockable* parent);
-  Array toArray();
   c_WaitableWaitHandle* firstInContext(context_idx_t ctx_idx);
 
 private:

@@ -7,4 +7,4 @@
  *)
 
 val go :
-  TypecheckerOptions.t -> ServerCommandTypes.Extract_standalone.target -> string
+  Provider_context.t -> ServerCommandTypes.Extract_standalone.target -> string

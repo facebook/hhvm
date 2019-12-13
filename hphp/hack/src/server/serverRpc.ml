@@ -464,7 +464,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     (env, result)
   | EXTRACT_STANDALONE target ->
-    (env, ServerExtractStandalone.go env.tcopt target)
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
+    (env, ServerExtractStandalone.go ctx target)
   | CONCATENATE_ALL paths -> (env, ServerConcatenateAll.go genv env paths)
   | GO_TO_DEFINITION (labelled_file, line, column) ->
     let (path, file_input) =

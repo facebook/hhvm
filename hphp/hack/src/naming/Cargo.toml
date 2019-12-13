@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/naming:naming_special_names_rust
-# Signature<<ed1f6ad038a2436f8bc51022c4188eed0129e6a1>>
+# Signature<<010aef98010a47b15eb924f0ab5898768e7c5450>>
 [package]
 name = "naming_special_names_rust"
 edition = "2018"
@@ -11,4 +11,4 @@ path = "naming_special_names.rs"
 
 [dependencies]
 lazy_static = "*"
-# @end of Signature<<ed1f6ad038a2436f8bc51022c4188eed0129e6a1>>
+# @end of Signature<<010aef98010a47b15eb924f0ab5898768e7c5450>>

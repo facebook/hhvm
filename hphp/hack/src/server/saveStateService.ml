@@ -76,7 +76,7 @@ let load_saved_state
           (Printf.sprintf
              "Naming table file does not exist on disk: '%s'"
              nt_path);
-      Naming_table.load_from_sqlite ~update_reverse_entries:true nt_path
+      Naming_table.load_from_sqlite nt_path
     | None ->
       let chan = In_channel.create ~binary:true saved_state_filename in
       let (old_saved : Naming_table.saved_state_info) =

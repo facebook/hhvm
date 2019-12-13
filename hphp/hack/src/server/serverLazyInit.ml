@@ -564,11 +564,7 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
       info
     in
     let naming_table_path = Path.to_string naming_table_path in
-    let naming_table =
-      Naming_table.load_from_sqlite
-        ~update_reverse_entries:true
-        naming_table_path
-    in
+    let naming_table = Naming_table.load_from_sqlite naming_table_path in
     let fnl =
       List.map fnl ~f:(fun path ->
           Relative_path.from_root (Path.to_string path))

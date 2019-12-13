@@ -74,6 +74,7 @@
   (libraries
     errors
     file_info
+    naming
     relative_path
     sys_utils))
 

@@ -107,9 +107,7 @@ let run_naming_table_test f =
         8
         Naming_table.(save_results.files_added + save_results.symbols_added)
         "Expected to add eight rows (four files and four symbols)";
-      let backed_naming_table =
-        Naming_table.load_from_sqlite ~update_reverse_entries:false db_name
-      in
+      let backed_naming_table = Naming_table.load_from_sqlite db_name in
       f ~unbacked_naming_table ~backed_naming_table ~db_name;
       true)
 
@@ -194,6 +192,50 @@ let test_get_sqlite_paths () =
         (Naming_table.get_forward_naming_fallback_path backed_naming_table)
         "get_forward_naming_fallback_path should return the expected value")
 
+let test_local_changes () =
+  run_naming_table_test
+    (fun ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
+      let a_name = "CONST_IN_A" in
+
+      let a_file = Relative_path.from_root "a.php" in
+      let a_pos = FileInfo.File (FileInfo.Const, a_file) in
+      let a_file_info =
+        FileInfo.{ FileInfo.empty_t with consts = [(a_pos, a_name)] }
+      in
+      let backed_naming_table =
+        Naming_table.update backed_naming_table a_file a_file_info
+      in
+      let changes_since_baseline_path = "/tmp/base_plus_changes" in
+      Naming_table.save_changes_since_baseline
+        backed_naming_table
+        changes_since_baseline_path;
+      let changes_since_baseline =
+        Marshal.from_string (Disk.cat changes_since_baseline_path) 0
+      in
+      Asserter.Relative_path_asserter.assert_list_equals
+        [a_file]
+        (Naming_table.get_files_changed_since_baseline changes_since_baseline)
+        "Expected files changed since baseline to be correct";
+      let backed_naming_table' =
+        Naming_table.load_from_sqlite_with_changes_since_baseline
+          changes_since_baseline
+          db_name
+      in
+      let a_file_info' =
+        Option.value_exn
+          (Naming_table.get_file_info backed_naming_table' a_file)
+      in
+      Asserter.Bool_asserter.assert_equals
+        true
+        (a_file_info = a_file_info')
+        "Expected file info to be found in the naming table";
+
+      let a_pos' = Option.value_exn (Naming_table.Consts.get_pos a_name) in
+      Asserter.Bool_asserter.assert_equals
+        true
+        (a_pos = a_pos')
+        "Expected position of constant to be found in the naming table")
+
 let () =
   Unit_test.run_all
     [
@@ -201,4 +243,5 @@ let () =
       ("test_get_canon_name", test_get_canon_name);
       ("test_remove", test_remove);
       ("test_get_sqlite_paths", test_get_sqlite_paths);
+      ("test_local_changes", test_local_changes);
     ]

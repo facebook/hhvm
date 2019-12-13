@@ -55,9 +55,7 @@ let load_naming_table_from_saved_state_info
     Saved_state_loader.Naming_table_saved_state_info.(
       Path.to_string saved_state_info.naming_table_path)
   in
-  let naming_table =
-    Naming_table.load_from_sqlite ~update_reverse_entries:false path
-  in
+  let naming_table = Naming_table.load_from_sqlite path in
   log "Loaded naming table from SQLite database at %s" path;
   let server_env = { server_env with ServerEnv.naming_table } in
   Lwt.return server_env

@@ -144,14 +144,24 @@ type 'a forward_naming_table_delta =
   | Deleted
 [@@deriving show]
 
-let _ = show_forward_naming_table_delta
+type file_deltas = FileInfo.t forward_naming_table_delta Relative_path.Map.t
 
-type local_changes = FileInfo.t forward_naming_table_delta Relative_path.Map.t
-
-let pp_local_changes =
+let pp_file_deltas =
   Relative_path.Map.make_pp
     Relative_path.pp
     (pp_forward_naming_table_delta FileInfo.pp)
+
+type local_changes = {
+  file_deltas: file_deltas;
+  base_content_version: string;
+}
+[@@deriving show]
+
+let _ = show_forward_naming_table_delta
+
+let _ = show_local_changes
+
+type changes_since_baseline = local_changes
 
 type t =
   | Unbacked of FileInfo.t Relative_path.Map.t
@@ -190,7 +200,11 @@ module Sqlite : sig
 
   val is_connected : unit -> bool
 
-  val save_file_infos : string -> FileInfo.t Relative_path.Map.t -> save_result
+  val save_file_infos :
+    string ->
+    FileInfo.t Relative_path.Map.t ->
+    base_content_version:string ->
+    save_result
 
   val update_file_infos : string -> local_changes -> unit
 
@@ -199,7 +213,7 @@ module Sqlite : sig
   val fold :
     init:'a ->
     f:(Relative_path.t -> FileInfo.t -> 'a -> 'a) ->
-    local_changes:local_changes ->
+    file_deltas:file_deltas ->
     'a
 
   val get_file_info : Relative_path.t -> FileInfo.t option
@@ -247,44 +261,49 @@ end = struct
     let create_table_sqlite =
       Printf.sprintf
         "
-        CREATE TABLE IF NOT EXISTS %s(
-          ID INTEGER PRIMARY KEY,
-          LOCAL_CHANGES BLOB NOT NULL
-        );
-      "
+          CREATE TABLE IF NOT EXISTS %s(
+            ID INTEGER PRIMARY KEY,
+            LOCAL_CHANGES BLOB NOT NULL,
+            BASE_CONTENT_VERSION TEXT
+          );
+        "
         table_name
 
     let insert_sqlite =
       Printf.sprintf
         "
-        INSERT INTO %s (ID, LOCAL_CHANGES) VALUES (0, ?);
-      "
+          INSERT INTO %s (ID, LOCAL_CHANGES, BASE_CONTENT_VERSION) VALUES (0, ?, ?);
+        "
         table_name
 
     let update_sqlite =
       Printf.sprintf
         "
-        UPDATE %s SET LOCAL_CHANGES = ? WHERE ID = 0;
-      "
+          UPDATE %s SET LOCAL_CHANGES = ? WHERE ID = 0;
+        "
         table_name
 
     let get_sqlite =
-      Printf.sprintf "
-        SELECT LOCAL_CHANGES FROM %s;
-      " table_name
+      Printf.sprintf
+        "
+          SELECT LOCAL_CHANGES, BASE_CONTENT_VERSION FROM %s;
+        "
+        table_name
 
-    let prime db =
+    let prime db base_content_version =
       let insert_stmt = Sqlite3.prepare db insert_sqlite in
       let empty =
         Marshal.to_string Relative_path.Map.empty [Marshal.No_sharing]
       in
       Sqlite3.bind insert_stmt 1 (Sqlite3.Data.BLOB empty) |> check_rc db;
+      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.TEXT base_content_version)
+      |> check_rc db;
       Sqlite3.step insert_stmt |> check_rc db;
       Sqlite3.finalize insert_stmt |> check_rc db
 
     let update db (local_changes : local_changes) =
       let local_changes_saved =
-        Relative_path.Map.map local_changes ~f:(fun delta ->
+        Relative_path.Map.map local_changes.file_deltas ~f:(fun delta ->
             match delta with
             | Modified fi -> Modified (FileInfo.to_saved fi)
             | Deleted -> Deleted)
@@ -306,13 +325,14 @@ end = struct
       | Sqlite3.Rc.ROW ->
         let local_changes_blob = column_blob get_stmt 0 in
         let local_changes_saved = Marshal.from_string local_changes_blob 0 in
-        let local_changes =
+        let base_content_version = column_str get_stmt 1 in
+        let file_deltas =
           Relative_path.Map.mapi local_changes_saved ~f:(fun path delta ->
               match delta with
               | Modified saved -> Modified (FileInfo.from_saved path saved)
               | Deleted -> Deleted)
         in
-        local_changes
+        { base_content_version; file_deltas }
       | rc ->
         failwith
           (Printf.sprintf
@@ -895,7 +915,7 @@ end = struct
 
   let is_connected = Database_handle.is_connected
 
-  let save_file_infos db_name file_info_map =
+  let save_file_infos db_name file_info_map ~base_content_version =
     let db = Sqlite3.db_open db_name in
     Sqlite3.exec db "BEGIN TRANSACTION;" |> check_rc db;
     try
@@ -907,7 +927,7 @@ end = struct
 
       (* Incremental updates only update the single row in this table, so we need
        * to write in some dummy data to start. *)
-      LocalChanges.prime db;
+      LocalChanges.prime db base_content_version;
       let save_result =
         Relative_path.Map.fold
           file_info_map
@@ -948,10 +968,10 @@ end = struct
     in
     LocalChanges.get db
 
-  let fold ~init ~f ~local_changes =
+  let fold ~init ~f ~file_deltas =
     (* We depend on [Relative_path.Map.bindings] returning results in increasing
      * order here. *)
-    let sorted_changes = Relative_path.Map.bindings local_changes in
+    let sorted_changes = Relative_path.Map.bindings file_deltas in
     (* This function looks kind of funky, but it's not too terrible when
      * explained. We essentially have two major inputs:
      *   1. a path and file info that we got from SQLite. In order for this
@@ -1038,37 +1058,50 @@ let filter a ~f =
   match a with
   | Unbacked a -> Unbacked (Relative_path.Map.filter a f)
   | Backed local_changes ->
+    let file_deltas = local_changes.file_deltas in
     Backed
-      (Sqlite.fold
-         ~init:local_changes
-         ~f:
-           begin
-             fun path fi acc ->
-             if f path fi then
-               acc
-             else
-               Relative_path.Map.add acc ~key:path ~data:Deleted
-           end
-         ~local_changes)
+      {
+        local_changes with
+        file_deltas =
+          Sqlite.fold
+            ~init:file_deltas
+            ~f:
+              begin
+                fun path fi acc ->
+                if f path fi then
+                  acc
+                else
+                  Relative_path.Map.add acc ~key:path ~data:Deleted
+              end
+            ~file_deltas;
+      }
 
 let fold a ~init ~f =
   match a with
   | Unbacked a -> Relative_path.Map.fold a ~init ~f
-  | Backed local_changes -> Sqlite.fold ~init ~f ~local_changes
+  | Backed local_changes ->
+    Sqlite.fold ~init ~f ~file_deltas:local_changes.file_deltas
 
 let get_files a =
   match a with
   | Unbacked a -> Relative_path.Map.keys a
   | Backed local_changes ->
     (* Reverse at the end to preserve ascending sort order. *)
-    Sqlite.fold ~init:[] ~f:(fun path _ acc -> path :: acc) ~local_changes
+    Sqlite.fold
+      ~init:[]
+      ~f:(fun path _ acc -> path :: acc)
+      ~file_deltas:local_changes.file_deltas
     |> List.rev
+
+let get_files_changed_since_baseline
+    (changes_since_baseline : changes_since_baseline) : Relative_path.t list =
+  Relative_path.Map.keys changes_since_baseline.file_deltas
 
 let get_file_info a key =
   match a with
   | Unbacked a -> Relative_path.Map.find_opt a key
   | Backed local_changes ->
-    (match Relative_path.Map.find_opt local_changes key with
+    (match Relative_path.Map.find_opt local_changes.file_deltas key with
     | Some (Modified fi) -> Some fi
     | Some Deleted -> None
     | None -> Sqlite.get_file_info key)
@@ -1085,19 +1118,35 @@ let iter a ~f =
   match a with
   | Unbacked a -> Relative_path.Map.iter a ~f
   | Backed local_changes ->
-    Sqlite.fold ~init:() ~f:(fun path fi () -> f path fi) ~local_changes
+    Sqlite.fold
+      ~init:()
+      ~f:(fun path fi () -> f path fi)
+      ~file_deltas:local_changes.file_deltas
 
 let remove a key =
   match a with
   | Unbacked a -> Unbacked (Relative_path.Map.remove a key)
   | Backed local_changes ->
-    Backed (Relative_path.Map.add local_changes ~key ~data:Deleted)
+    Backed
+      {
+        local_changes with
+        file_deltas =
+          Relative_path.Map.add local_changes.file_deltas ~key ~data:Deleted;
+      }
 
 let update a key data =
   match a with
   | Unbacked a -> Unbacked (Relative_path.Map.add a ~key ~data)
   | Backed local_changes ->
-    Backed (Relative_path.Map.add local_changes ~key ~data:(Modified data))
+    Backed
+      {
+        local_changes with
+        file_deltas =
+          Relative_path.Map.add
+            local_changes.file_deltas
+            ~key
+            ~data:(Modified data);
+      }
 
 let update_many a updates =
   match a with
@@ -1108,7 +1157,12 @@ let update_many a updates =
     let local_updates =
       Relative_path.Map.map updates ~f:(fun data -> Modified data)
     in
-    Backed (Relative_path.Map.union local_updates local_changes)
+    Backed
+      {
+        local_changes with
+        file_deltas =
+          Relative_path.Map.union local_updates local_changes.file_deltas;
+      }
 
 let combine a b =
   match b with
@@ -1117,11 +1171,41 @@ let combine a b =
     failwith
       "SQLite-backed naming tables cannot be the second argument to combine."
 
+(**
+  This function saves the local changes structure as a binary blob.
+  Local changes represents the (forward) naming table changes since
+  the SQLite naming table baseline. Therefore, this function is most meaningful
+  when the naming table is backed by SQLite. If the naming table is NOT backed
+  by SQLite, meaning that it was computed from scratch by parsing the whole
+  repo, then this baseline-to-current difference is an empty set.
+  The resulting snapshot can be applied when loading a SQLite naming table.
+ *)
+let save_changes_since_baseline naming_table ~destination_path =
+  let snapshot =
+    match naming_table with
+    | Unbacked _ ->
+      { file_deltas = Relative_path.Map.empty; base_content_version = "" }
+    | Backed local_changes -> local_changes
+  in
+  let contents = Marshal.to_string snapshot [Marshal.No_sharing] in
+  Disk.write_file ~file:destination_path ~contents
+
 let save naming_table db_name =
   match naming_table with
   | Unbacked naming_table ->
     let t = Unix.gettimeofday () in
-    let save_result = Sqlite.save_file_infos db_name naming_table in
+    (* Ideally, we would have a commit hash, which would result in the same
+      content version given the same version of source files. However,
+      using a unique version every time we save the naming table from scratch
+      is good enough to enable us to check that the local changes diff
+      provided as an argument to load_from_sqlite_with_changes_since_baseline
+      is compatible with the underlying SQLite table. *)
+    let base_content_version =
+      Printf.sprintf "%d-%s" (int_of_float t) (Random_id.short_string ())
+    in
+    let save_result =
+      Sqlite.save_file_infos db_name naming_table ~base_content_version
+    in
     let (_ : float) =
       Hh_logger.log_duration
         (Printf.sprintf
@@ -1145,7 +1229,7 @@ let save naming_table db_name =
       Hh_logger.log_duration
         (Printf.sprintf
            "Updated a blob with %d entries"
-           (Relative_path.Map.cardinal local_changes))
+           (Relative_path.Map.cardinal local_changes.file_deltas))
         t
     in
     Sqlite.set_db_path old_path;
@@ -1596,41 +1680,101 @@ let has_local_changes () =
 
 let create a = Unbacked a
 
-let load_from_sqlite ~update_reverse_entries db_path =
+let update_reverse_entries file_deltas =
+  Relative_path.Map.iter file_deltas ~f:(fun path delta ->
+      begin
+        match Sqlite.get_file_info path with
+        | Some fi ->
+          Types.remove_batch
+            (fi.FileInfo.classes |> List.map snd |> SSet.of_list);
+          Types.remove_batch
+            (fi.FileInfo.typedefs |> List.map snd |> SSet.of_list);
+          Funs.remove_batch (fi.FileInfo.funs |> List.map snd |> SSet.of_list);
+          Consts.remove_batch
+            (fi.FileInfo.consts |> List.map snd |> SSet.of_list)
+        | None -> ()
+      end;
+      match delta with
+      | Modified fi ->
+        List.iter
+          (fun (pos, name) -> Types.add name (pos, TClass))
+          fi.FileInfo.classes;
+        List.iter
+          (fun (pos, name) -> Types.add name (pos, TTypedef))
+          fi.FileInfo.typedefs;
+        List.iter (fun (pos, name) -> Funs.add name pos) fi.FileInfo.funs;
+        List.iter (fun (pos, name) -> Consts.add name pos) fi.FileInfo.consts
+      | Deleted -> ())
+
+let choose_local_changes ~local_changes ~custom_local_changes =
+  match custom_local_changes with
+  | None -> local_changes
+  | Some custom_local_changes ->
+    if
+      custom_local_changes.base_content_version
+      = local_changes.base_content_version
+    then
+      custom_local_changes
+    else
+      failwith
+        (Printf.sprintf
+           "%s\nSQLite content version: %s\nLocal changes content version: %s"
+           "Incompatible local changes diff supplied."
+           local_changes.base_content_version
+           custom_local_changes.base_content_version)
+
+(**
+  Loads the naming table from a SQLite database. The optional custom local
+  changes represents the naming table changes that occurred since the original
+  SQLite database was created.
+  To recap, the SQLite-based naming table, once loaded, is not mutated. All the
+  forward naming table changes are kept in an in-memory map. When we save an
+  update to a naming table that is backed by SQLite, we store the changes
+  since the baseline as a blob is a separate table and we rehydrate those
+  changes into an in-memory map when we load the updated naming table later.
+  The custom local changes is an alternative to the changes serialized as a
+  blob into the SQLite table. This enables scenarios that require repeatedly
+  loading the same base SQLite naming table with different versions of
+  the local changes.
+ *)
+let load_from_sqlite_for_type_checking
+    ~(should_update_reverse_entries : bool)
+    ~(custom_local_changes : local_changes option)
+    (db_path : string) : t =
   Hh_logger.log "Loading naming table from SQLite...";
   let t = Unix.gettimeofday () in
   Sqlite.set_db_path (Some db_path);
-  let local_changes = Sqlite.get_local_changes () in
+  let local_changes =
+    choose_local_changes
+      ~local_changes:(Sqlite.get_local_changes ())
+      ~custom_local_changes
+  in
   let t = Hh_logger.log_duration "Loaded local naming table changes" t in
-  if update_reverse_entries then (
-    Relative_path.Map.iter local_changes ~f:(fun path delta ->
-        begin
-          match Sqlite.get_file_info path with
-          | Some fi ->
-            Types.remove_batch
-              (fi.FileInfo.classes |> List.map snd |> SSet.of_list);
-            Types.remove_batch
-              (fi.FileInfo.typedefs |> List.map snd |> SSet.of_list);
-            Funs.remove_batch (fi.FileInfo.funs |> List.map snd |> SSet.of_list);
-            Consts.remove_batch
-              (fi.FileInfo.consts |> List.map snd |> SSet.of_list)
-          | None -> ()
-        end;
-        match delta with
-        | Modified fi ->
-          List.iter
-            (fun (pos, name) -> Types.add name (pos, TClass))
-            fi.FileInfo.classes;
-          List.iter
-            (fun (pos, name) -> Types.add name (pos, TTypedef))
-            fi.FileInfo.typedefs;
-          List.iter (fun (pos, name) -> Funs.add name pos) fi.FileInfo.funs;
-          List.iter (fun (pos, name) -> Consts.add name pos) fi.FileInfo.consts
-        | Deleted -> ());
+  if should_update_reverse_entries then begin
+    update_reverse_entries local_changes.file_deltas;
     let _t = Hh_logger.log_duration "Updated reverse naming table entries" t in
     ()
-  );
+  end;
   Backed local_changes
+
+let load_from_sqlite_with_changes_since_baseline
+    (changes_since_baseline : local_changes) (db_path : string) : t =
+  load_from_sqlite_for_type_checking
+    ~should_update_reverse_entries:true
+    ~custom_local_changes:(Some changes_since_baseline)
+    db_path
+
+let load_from_sqlite_for_batch_update (db_path : string) : t =
+  load_from_sqlite_for_type_checking
+    ~should_update_reverse_entries:false
+    ~custom_local_changes:None
+    db_path
+
+let load_from_sqlite (db_path : string) : t =
+  load_from_sqlite_for_type_checking
+    ~should_update_reverse_entries:true
+    ~custom_local_changes:None
+    db_path
 
 let get_reverse_naming_fallback_path () : string option = Sqlite.get_db_path ()
 

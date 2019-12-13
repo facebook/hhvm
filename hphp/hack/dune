@@ -6,7 +6,8 @@
     src/hh_single_type_check.exe
     src/hackfmt.exe
     src/hh_parse.exe
-    src/hh_single_compile.exe))
+    src/hh_single_compile.exe
+    src/facebook/hh_fanout/hh_fanout.exe))
 
 (alias
   (name hh)

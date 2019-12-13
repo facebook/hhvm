@@ -1217,7 +1217,7 @@ tv_rval Unit::loadCns(const StringData* cnsName) {
   return lookupCns(cnsName);
 }
 
-bool Unit::defCns(const StringData* cnsName, const TypedValue* value) {
+void Unit::defCns(const StringData* cnsName, const TypedValue* value) {
   auto const ch = makeCnsHandle(cnsName);
   assertx(rds::isHandleBound(ch));
   auto cns = rds::handleToPtr<TypedValue, rds::Mode::NonLocal>(ch);
@@ -1229,19 +1229,16 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value) {
 
   if (UNLIKELY(cns->m_type != KindOfUninit ||
                cns->m_data.pcnt != nullptr)) {
-    raise_notice(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
-    return false;
+    raise_error(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
   }
 
   if (UNLIKELY(!tvAsCVarRef(value).isAllowedAsConstantValue())) {
-    raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
-    return false;
+    raise_error(Strings::CONSTANTS_MUST_BE_SCALAR);
   }
 
   assertx(rds::isNormalHandle(ch));
   cellDup(*value, *cns);
   rds::initHandle(ch);
-  return true;
 }
 
 bool Unit::defNativeConstantCallback(const StringData* cnsName,
@@ -2021,7 +2018,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
           auto const handle = v->rdsHandle();
           assertx(rds::isNormalHandle(handle));
           if (UNLIKELY(rds::isHandleInit(handle, rds::NormalTag{}))) {
-            raise_notice(Strings::CONSTANT_ALREADY_DEFINED, name->data());
+            raise_error(Strings::CONSTANT_ALREADY_DEFINED, name->data());
           } else {
             rds::handleToRef<TypedValue, rds::Mode::Normal>(handle) = *v;
             rds::initHandle(handle);

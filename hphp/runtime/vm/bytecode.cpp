@@ -1798,8 +1798,8 @@ OPTBLD_INLINE void iopCnsE(const StringData* s) {
 }
 
 OPTBLD_INLINE void iopDefCns(const StringData* s) {
-  bool result = Unit::defCns(s, vmStack().topTV());
-  vmStack().replaceTV<KindOfBoolean>(result);
+  Unit::defCns(s, vmStack().topTV());
+  vmStack().replaceTV<KindOfBoolean>(true);
 }
 
 OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName) {

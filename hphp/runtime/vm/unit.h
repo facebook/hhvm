@@ -700,10 +700,10 @@ public:
    * Define a constant (either request-local or persistent) with name `cnsName'
    * and value `value'.
    *
-   * May raise notices or warnings if a constant with the given name is already
-   * defined or if value is invalid.
+   * Raise an error if a constant with the given name is already defined or if
+   * value is invalid.
    */
-  static bool defCns(const StringData* cnsName, const TypedValue* value);
+  static void defCns(const StringData* cnsName, const TypedValue* value);
 
   /*
    * Define a constant with name `cnsName' with a magic callback. The

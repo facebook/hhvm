@@ -138,13 +138,13 @@ c_WaitableWaitHandle::throwCycleException(c_WaitableWaitHandle* child) const {
 
 
 Array c_WaitableWaitHandle::getDependencyStack() {
-  if (isFinished()) return empty_array();
-  Array result = Array::Create();
+  if (isFinished()) return empty_varray();
+  auto result = Array::CreateVArray();
   hphp_hash_set<c_WaitableWaitHandle*> visited;
   auto current_handle = this;
   auto session = AsioSession::Get();
   while (current_handle != nullptr) {
-    result.append(Variant{current_handle});
+    result.append(make_tv<KindOfObject>(current_handle));
     visited.insert(current_handle);
     auto context_idx = current_handle->getContextIdx();
 

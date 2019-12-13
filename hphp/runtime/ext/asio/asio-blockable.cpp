@@ -196,11 +196,11 @@ void AsioBlockableChain::removeFromChain(AsioBlockable* ab) {
 }
 
 Array AsioBlockableChain::toArray() {
-  Array result = Array::Create();
+  auto result = Array::CreateVArray();
   for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
     auto const wh = cur->getWaitHandle();
     if (!wh->isFinished()) {
-      result.append(Variant{wh});
+      result.append(make_tv<KindOfObject>(wh));
     }
   }
   return result;

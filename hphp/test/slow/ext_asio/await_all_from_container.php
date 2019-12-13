@@ -29,19 +29,15 @@ async function await_all(
   return $c;
 }
 
+<<__EntryPoint>>
 async function good_tests(): Awaitable<void> {
   foreach (get_good_cases() as $case) {
     $result = vec(await await_all($case));
     invariant(
-       $result === EXPECTED,
+      $result === EXPECTED,
       'Got unexpected result: %s',
       print_r($result, true),
     );
     printf("Passed for: %s\n", gettype($case));
   }
-}
-
-<<__EntryPoint>>
-async function test(): Awaitable<void> {
-  await good_tests();
 }

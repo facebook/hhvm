@@ -121,11 +121,11 @@ void AsioSession::setOnJoin(const Variant& callback) {
 }
 
 void AsioSession::onIOWaitEnter() {
-  runCallback(m_onIOWaitEnter, empty_array(), "Awaitable::onIOWaitEnter");
+  runCallback(m_onIOWaitEnter, empty_vec_array(), "Awaitable::onIOWaitEnter");
 }
 
 void AsioSession::onIOWaitExit() {
-  runCallback(m_onIOWaitExit, empty_array(), "Awaitable::onIOWaitExit");
+  runCallback(m_onIOWaitExit, empty_vec_array(), "Awaitable::onIOWaitExit");
 }
 
 void AsioSession::onJoin(c_Awaitable* waitHandle) {

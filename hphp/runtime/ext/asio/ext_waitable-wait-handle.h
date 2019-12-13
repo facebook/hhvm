@@ -59,7 +59,7 @@ struct c_WaitableWaitHandle : c_Awaitable {
   Array getParents() {
     // no parent data available if finished
     if (isFinished()) {
-      return empty_array();
+      return empty_varray();
     }
     return getParentChain().toArray();
   }

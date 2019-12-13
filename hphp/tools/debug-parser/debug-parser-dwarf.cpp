@@ -2422,10 +2422,12 @@ private:
   using SymbolMap = tbb::concurrent_hash_map<std::string,
                                              std::vector<uint32_t>,
                                              ::HPHP::stringHashCompare>;
+  using SpecMap = folly::F14FastMap<GlobalOff, std::string>;
 
   void visit_die_for_symbols(const DwarfState& dwarf,
                              const Dwarf_Die die,
                              SymbolMap& symbols,
+                             SpecMap& spec_names,
                              std::string parent_name,
                              uint32_t language,
                              uint32_t cu_index) const {
@@ -2433,6 +2435,7 @@ private:
     bool is_declaration = false;
     bool is_external = false;
     std::string name;
+    bool full_name = false;
 
     dwarf.forEachAttribute(
       die,
@@ -2445,11 +2448,25 @@ private:
             is_external = dwarf.getAttributeValueFlag(attr);
             break;
           case DW_AT_name:
-            name = dwarf.getAttributeValueString(attr);
+            if (!full_name) {
+              name = dwarf.getAttributeValueString(attr);
+            }
             break;
           case DW_AT_language:
             language = dwarf.getAttributeValueUData(attr);
             break;
+          case DW_AT_specification: {
+            auto const it = spec_names.find(dwarf.getAttributeValueRef(attr));
+            if (it != spec_names.end()) {
+              name = it->second;
+              auto const pos = name.rfind("::");
+              if (pos != std::string::npos) {
+                parent_name = name.substr(0, pos);
+              }
+              full_name = true;
+            }
+            break;
+          }
           default:
             return true;
         }
@@ -2551,8 +2568,12 @@ private:
     };
 
     auto const addParent = [&](std::string name) {
+      if (full_name) return name;
       if (!name.empty() && !parent_name.empty()) {
         name = folly::sformat("{}::{}", parent_name, name);
+        if (is_declaration) {
+          spec_names.emplace(dwarf.getDIEOffset(die), name);
+        }
       }
       return name;
     };
@@ -2561,7 +2582,7 @@ private:
       dwarf.forEachChild(
         die,
         [&](Dwarf_Die child) {
-          visit_die_for_symbols(dwarf, child, symbols, name,
+          visit_die_for_symbols(dwarf, child, symbols, spec_names, name,
                                 language, cu_index);
           return true;
         }
@@ -2573,11 +2594,11 @@ private:
       case DW_TAG_subprogram:
       case DW_TAG_constant:
       case DW_TAG_enumerator:
-        if (is_declaration) break;
         // fallthrough
       case DW_TAG_variable:
         if (name.empty()) break;
         name = addParent(name);
+        if (is_declaration) break;
         addSymbol(name);
         break;
       case DW_TAG_namespace:
@@ -2592,10 +2613,10 @@ private:
       case DW_TAG_structure_type:
       case DW_TAG_enumeration_type:
       case DW_TAG_subrange_type:
-        if (is_declaration || name.empty()) break;
         name = addParent(name);
+        if (is_declaration || name.empty()) break;
         addSymbol(name);
-        if (tag == DW_TAG_enumeration_type) visitChildren(name);
+        if (tag == DW_TAG_enumeration_type) visitChildren(parent_name);
         break;
       case DW_TAG_compile_unit:
       case DW_TAG_type_unit:
@@ -2657,7 +2678,8 @@ private:
         }
 
         entryList[index] = std::move(merged);
-        visit_die_for_symbols(dwarf, die, symbols, "", 0, index);
+        SpecMap spec_names;
+        visit_die_for_symbols(dwarf, die, symbols, spec_names, "", 0, index);
       }, true /* Compilation Unit */, m_numThreads
     );
 
@@ -2673,7 +2695,8 @@ private:
     dwarf.forEachTopLevelUnitParallel(
       [&](Dwarf_Die die) {
         uint32_t index = unit_indices_tu[die->context->offset];
-        visit_die_for_symbols(dwarf, die, symbols, "", 0, index);
+        SpecMap spec_names;
+        visit_die_for_symbols(dwarf, die, symbols, spec_names, "", 0, index);
       }, false /* Type Unit */, m_numThreads
     );
 

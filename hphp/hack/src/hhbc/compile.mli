@@ -24,5 +24,3 @@ type env = {
 }
 
 val from_text : string -> env -> result
-
-val fatal : env:env -> is_runtime_error:bool -> Pos.t -> string option -> result

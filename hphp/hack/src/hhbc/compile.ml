@@ -44,11 +44,15 @@ let with_global_state env f =
   in
   Hhbc_options.set_compiler_options hhbc_options;
   Emit_env.set_is_systemlib env.is_systemlib;
-  let t = Unix.gettimeofday () in
-  let hhas_prog = f hhbc_options in
-  let (t, codegen_t) = add_to_time t in
+  let ret = f hhbc_options in
   (* TODO(hrust) investigate if we can revert it here, or some parts of
   global state carry over across multiple emit requests  *)
+  ret
+
+let with_compilation_times env f =
+  let t = Unix.gettimeofday () in
+  let hhas_prog = f () in
+  let (t, codegen_t) = add_to_time t in
   let bytecode_segments =
     Hhbc_hhas.to_segments
       ~path:env.filepath
@@ -90,10 +94,7 @@ let parse_text ~hhbc_options popt filename text =
   in
   (ast, is_hh_file)
 
-let parse_file ~config_list ~config_jsons filename text =
-  let hhbc_options =
-    Hhbc_options.apply_config_overrides_statelessly config_list config_jsons
-  in
+let parse_file ~hhbc_options filename text =
   let popt =
     Hhbc_options.(
       let co = hhbc_options in
@@ -127,8 +128,8 @@ let parse_file ~config_list ~config_jsons filename text =
     | SyntaxError.ParserFatal (e, p) -> `ParseFailure (e, p)),
     popt )
 
-let from_ast ~env ~is_hh_file ~empty_namespace tast =
-  with_global_state env (fun hhbc_options ->
+let from_ast ~env ~is_hh_file ~empty_namespace ~hhbc_options tast =
+  with_compilation_times env (fun _ ->
       let tast =
         if Hhbc_options.enable_pocket_universes hhbc_options then
           Pocket_universes.translate tast
@@ -155,7 +156,7 @@ let handle_conversion_errors errors =
       | _ (* Emit fatal parse otherwise *) -> true)
 
 let fatal ~env ~is_runtime_error pos message =
-  with_global_state env (fun _ ->
+  with_compilation_times env (fun _ ->
       let error_t =
         if is_runtime_error then
           Hhbc_ast.FatalOp.Runtime
@@ -170,40 +171,37 @@ let fatal ~env ~is_runtime_error pos message =
       Emit_program.emit_fatal_program ~ignore_message error_t pos message)
 
 let from_text (source_text : string) (env : env) : result =
-  let t = Unix.gettimeofday () in
-  let (fail_or_tast, popt) =
-    parse_file
-      env.filepath
-      source_text
-      ~config_list:env.config_list
-      ~config_jsons:env.config_jsons
-  in
-  let (_, parsing_t) = add_to_time t in
-  let empty_namespace = Namespace_env.empty_from_popt popt in
-  let (tast_hh, is_runtime_error, error) =
-    match fail_or_tast with
-    | `ParseFailure (e, pos) ->
-      let is_runtime_error =
-        match SyntaxError.error_type e with
-        | SyntaxError.ParseError -> false
-        | SyntaxError.RuntimeError -> true
+  with_global_state env (fun hhbc_options ->
+      let t = Unix.gettimeofday () in
+      let (fail_or_tast, popt) =
+        parse_file env.filepath source_text ~hhbc_options
       in
-      (None, is_runtime_error, Some (pos, Some (SyntaxError.message e)))
-    | `ParseResult (errors, (tast, is_hh_file)) ->
-      let error_list = Errors.get_error_list errors in
-      let error_list = handle_conversion_errors error_list in
-      List.iter error_list (fun e ->
-          Printf.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
-      if List.is_empty error_list then
-        (Some (tast, is_hh_file), false, None)
-      else
-        (None, false, Some (Pos.none, None))
-  in
-  let ret =
-    match (tast_hh, error) with
-    | (Some (tast, is_hh_file), _) ->
-      from_ast ~env ~is_hh_file ~empty_namespace tast
-    | (_, Some (pos, msg)) -> fatal ~env ~is_runtime_error pos msg
-    | _ -> failwith "Impossible case: emits program or fatals"
-  in
-  { ret with parsing_t }
+      let (_, parsing_t) = add_to_time t in
+      let empty_namespace = Namespace_env.empty_from_popt popt in
+      let (tast_hh, is_runtime_error, error) =
+        match fail_or_tast with
+        | `ParseFailure (e, pos) ->
+          let is_runtime_error =
+            match SyntaxError.error_type e with
+            | SyntaxError.ParseError -> false
+            | SyntaxError.RuntimeError -> true
+          in
+          (None, is_runtime_error, Some (pos, Some (SyntaxError.message e)))
+        | `ParseResult (errors, (tast, is_hh_file)) ->
+          let error_list = Errors.get_error_list errors in
+          let error_list = handle_conversion_errors error_list in
+          List.iter error_list (fun e ->
+              Printf.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
+          if List.is_empty error_list then
+            (Some (tast, is_hh_file), false, None)
+          else
+            (None, false, Some (Pos.none, None))
+      in
+      let ret =
+        match (tast_hh, error) with
+        | (Some (tast, is_hh_file), _) ->
+          from_ast ~env ~is_hh_file ~empty_namespace ~hhbc_options tast
+        | (_, Some (pos, msg)) -> fatal ~env ~is_runtime_error pos msg
+        | _ -> failwith "Impossible case: emits program or fatals"
+      in
+      { ret with parsing_t })

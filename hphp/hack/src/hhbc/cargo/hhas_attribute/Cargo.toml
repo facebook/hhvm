@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/hhbc:hhas_attribute_rust
-# Signature<<d453633c0eff0a5f07a148e05e018ecbc1df196b>>
+# Signature<<3d81fc926211e9c9db014cd489888190ca60faee>>
 [package]
 name = "hhas_attribute_rust"
 edition = "2018"
@@ -12,4 +12,4 @@ path = "../../hhas_attribute.rs"
 [dependencies]
 naming_special_names_rust = { path = "../../../naming" }
 runtime = { path = "../runtime" }
-# @end of Signature<<d453633c0eff0a5f07a148e05e018ecbc1df196b>>
+# @end of Signature<<3d81fc926211e9c9db014cd489888190ca60faee>>

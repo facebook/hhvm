@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/hhbc:scope_rust
-# Signature<<83f92208d10c08f43fc2c9999670ff33cfb52ccf>>
+# Signature<<c33442b731f4b587b188874b3d17fc38a21597d3>>
 [package]
 name = "scope_rust"
 edition = "2018"
@@ -14,4 +14,4 @@ env = { path = "../env" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
 label_rust = { path = "../label" }
 local_rust = { path = "../local" }
-# @end of Signature<<83f92208d10c08f43fc2c9999670ff33cfb52ccf>>
+# @end of Signature<<c33442b731f4b587b188874b3d17fc38a21597d3>>

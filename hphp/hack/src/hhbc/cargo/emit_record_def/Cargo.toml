@@ -1,0 +1,23 @@
+# @autocargo from //hphp/hack/src/hhbc:emit_record_def_rust
+# Signature<<508ceb046939ba0f35bc6853003a3e54a1473cf5>>
+[package]
+name = "emit_record_def_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../emit_record_def.rs"]
+
+[lib]
+path = "../../emit_record_def.rs"
+
+[dependencies]
+ast_constant_folder_rust = { path = "../ast_constant_folder" }
+emit_fatal_rust = { path = "../emit_fatal" }
+emit_type_hint_rust = { path = "../emit_type_hint" }
+env = { path = "../env" }
+hhas_record_def_rust = { path = "../hhas_record_def" }
+hhas_type = { path = "../hhas_type" }
+hhbc_id_rust = { path = "../hhbc_id" }
+hhbc_string_utils_rust = { path = "../string_utils" }
+oxidized = { path = "../../../oxidized" }
+runtime = { path = "../runtime" }
+# @end of Signature<<508ceb046939ba0f35bc6853003a3e54a1473cf5>>

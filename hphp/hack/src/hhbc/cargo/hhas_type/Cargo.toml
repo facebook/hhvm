@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/hhbc:hhas_type
-# Signature<<48543b7048908b7ffc450de143c9a2bf2e06c315>>
+# Signature<<3dfa77bc8db2e19db8807166427705b80ddde8ed>>
 [package]
 name = "hhas_type"
 edition = "2018"
@@ -10,5 +10,6 @@ include = ["../../hhas_type.rs"]
 path = "../../hhas_type.rs"
 
 [dependencies]
+emit_fatal_rust = { path = "../emit_fatal" }
 bitflags = "*"
-# @end of Signature<<48543b7048908b7ffc450de143c9a2bf2e06c315>>
+# @end of Signature<<3dfa77bc8db2e19db8807166427705b80ddde8ed>>

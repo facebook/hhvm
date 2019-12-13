@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src:hh_compile
-# Signature<<c191439cee1c126601dfc11795dc4cb0572e86f6>>
+# Signature<<57b6040129c75d23a0e20e46321abbb083fbc7bd>>
 [package]
 name = "hh_compile"
 edition = "2018"
@@ -11,10 +11,10 @@ name = "hh_compile"
 path = "hh_compile.rs"
 
 [dependencies]
-compile_rust = { path = "hhbc" }
+compile_rust = { path = "hhbc/cargo/compile" }
 options = { path = "hhbc/cargo/options" }
 oxidized = { path = "oxidized" }
 itertools = "*"
 structopt = "*"
 walkdir = "*"
-# @end of Signature<<c191439cee1c126601dfc11795dc4cb0572e86f6>>
+# @end of Signature<<57b6040129c75d23a0e20e46321abbb083fbc7bd>>

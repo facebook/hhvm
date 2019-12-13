@@ -1,5 +1,5 @@
 # @autocargo from //hphp/hack/src/hhbc:hhas_type_const
-# Signature<<5e816cb03c16a69f2c8a7b05362856ef9a902ca8>>
+# Signature<<098f49f9279116e3a3e85b02e1f7ebb6bc95b665>>
 [package]
 name = "hhas_type_const"
 edition = "2018"
@@ -11,4 +11,4 @@ path = "../../hhas_type_const.rs"
 
 [dependencies]
 runtime = { path = "../runtime" }
-# @end of Signature<<5e816cb03c16a69f2c8a7b05362856ef9a902ca8>>
+# @end of Signature<<098f49f9279116e3a3e85b02e1f7ebb6bc95b665>>

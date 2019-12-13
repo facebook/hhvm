@@ -10,6 +10,32 @@ open Core_kernel
 open ServerEnv
 open ServerLocalConfig
 
+let should_do_remote
+    (opts : TypecheckerOptions.t) (fnl : Relative_path.t list) ~(t : float) :
+    bool * float =
+  let remote_type_check = TypecheckerOptions.remote_type_check opts in
+  let remote_type_check_threshold =
+    TypecheckerOptions.remote_type_check_threshold opts
+  in
+  let file_count = List.length fnl in
+  let do_remote =
+    match (remote_type_check, remote_type_check_threshold) with
+    | (true, Some remote_type_check_threshold)
+      when file_count >= remote_type_check_threshold ->
+      Hh_logger.log
+        "Going to schedule work because file count %d >= threshold %d"
+        file_count
+        remote_type_check_threshold;
+      true
+    | _ -> false
+  in
+  ( do_remote,
+    Hh_logger.log_duration
+      (Printf.sprintf
+         "Calculated whether should do remote type checking (%B)"
+         do_remote)
+      t )
+
 let get_naming_table_fallback_path genv (naming_table_fn : string option) :
     string option =
   Hh_logger.log "Figuring out naming table SQLite path...";
@@ -90,74 +116,6 @@ let global_typecheck_kind genv env =
     ServerCommandTypes.Interruptible
   else
     ServerCommandTypes.Blocking
-
-let set_up_remote_logging (env : ServerEnv.env) : unit =
-  let send_progress (message : string) : unit =
-    ServerBusyStatus.send
-      env
-      ServerCommandTypes.(Doing_global_typecheck (Remote_blocking message));
-    ServerProgress.send_progress_to_monitor "%s" message
-  in
-  let send_percentage_progress
-      ~(operation : string)
-      ~(done_count : int)
-      ~(total_count : int)
-      ~(unit : string) : unit =
-    let message =
-      ServerProgress.make_percentage_progress_message
-        ~operation
-        ~done_count
-        ~total_count
-        ~unit
-    in
-    ServerBusyStatus.send
-      env
-      ServerCommandTypes.(Doing_global_typecheck (Remote_blocking message));
-    ServerProgress.send_progress_to_monitor ~include_in_logs:false "%s" message
-  in
-  Typing_remote_check_service.set_up_logging
-    ~send_progress
-    ~send_percentage_progress
-
-let maybe_remote_type_check genv env (fnl : Relative_path.t list) =
-  let t = Unix.gettimeofday () in
-  let (do_remote, _t) =
-    if ServerArgs.remote genv.ServerEnv.options || env.remote then
-      (true, t)
-    else
-      Typing_remote_check_service.should_do_remote env.tcopt fnl t
-  in
-  if do_remote then (
-    set_up_remote_logging env;
-    let vfs_threshold =
-      genv.local_config.remote_type_check.worker_vfs_checkout_threshold
-    in
-    let remote_errors =
-      Typing_remote_check_service.go
-        genv.workers
-        env.tcopt
-        ~naming_table:(Some env.naming_table)
-        ~naming_sqlite_path:(get_naming_table_fallback_path genv None)
-        ~vfs_threshold
-        fnl
-    in
-    Some (remote_errors, env.typing_service.delegate_state)
-  ) else
-    None
-
-let maybe_remote_type_check_without_interrupt
-    genv env (fnl : Relative_path.t list) ~local =
-  match maybe_remote_type_check genv env fnl with
-  | Some result -> result
-  | None -> local ()
-
-let maybe_remote_type_check_with_interrupt
-    genv env (fnl : Relative_path.t list) ~local =
-  (* TODO: remote type check should actually respond to interruption *)
-  match maybe_remote_type_check genv env fnl with
-  | Some (remote_errors, delegate_state) ->
-    (remote_errors, delegate_state, env, [])
-  | None -> local ()
 
 let get_check_info genv env =
   ServerEnv.(

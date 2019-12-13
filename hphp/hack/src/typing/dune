@@ -214,8 +214,7 @@
   (wrapped false)
   (modules
     typing_check_service
-    typing_check_utils
-    typing_remote_check_service)
+    typing_check_utils)
   (libraries
     core_kernel
     decl
@@ -225,7 +224,6 @@
     global_options
     heap_global_storage
     procs_bucket
-    remote_scheduler_stubs
     server_monitor
     typing
     typing_defs

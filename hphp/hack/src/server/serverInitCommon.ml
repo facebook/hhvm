@@ -177,22 +177,17 @@ let type_check
     Hh_logger.log "Begin %s" logstring;
     let ((errorl : Errors.t), (delegate_state : Typing_service_delegate.state))
         =
-      ServerCheckUtils.maybe_remote_type_check_without_interrupt
-        genv
-        env
+      let memory_cap =
+        genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
+      in
+      Typing_check_service.go
+        genv.workers
+        env.typing_service.delegate_state
+        env.tcopt
+        Relative_path.Set.empty
         files_to_check
-        ~local:(fun () ->
-          let memory_cap =
-            genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
-          in
-          Typing_check_service.go
-            genv.workers
-            env.typing_service.delegate_state
-            env.tcopt
-            Relative_path.Set.empty
-            files_to_check
-            ~memory_cap
-            ~check_info:(ServerCheckUtils.get_check_info genv env))
+        ~memory_cap
+        ~check_info:(ServerCheckUtils.get_check_info genv env)
     in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;

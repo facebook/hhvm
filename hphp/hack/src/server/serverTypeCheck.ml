@@ -906,16 +906,15 @@ functor
       in
       let fnl = Relative_path.Set.elements files_to_check in
       let (errorl', delegate_state, env', cancelled) =
-        maybe_remote_type_check_with_interrupt genv env fnl ~local:(fun () ->
-            Typing_check_service.go_with_interrupt
-              genv.workers
-              env.typing_service.delegate_state
-              env.tcopt
-              dynamic_view_files
-              fnl
-              ~interrupt
-              ~memory_cap
-              ~check_info:(get_check_info genv env))
+        Typing_check_service.go_with_interrupt
+          genv.workers
+          env.typing_service.delegate_state
+          env.tcopt
+          dynamic_view_files
+          fnl
+          ~interrupt
+          ~memory_cap
+          ~check_info:(get_check_info genv env)
       in
       log_if_diag_subscribe_changed
         "type_checking.go_with_interrupt"

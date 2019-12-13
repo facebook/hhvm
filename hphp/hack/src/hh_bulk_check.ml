@@ -7,7 +7,11 @@
  *)
 
 type command =
-  | CSchedule of RemoteScheduler.schedule_env
+  | CSchedule of {
+      bin_root: Path.t;
+      root: Path.t;
+      timeout: int;
+    }
   | CWork of RemoteWorker.work_env
 
 type command_keyword =
@@ -57,9 +61,7 @@ let parse_schedule_args () : command =
   let args = parse_without_command options usage ~keyword:CKSchedule in
   let (root : Path.t) = parse_root args in
   let bin_root = Path.make (Filename.dirname Sys.argv.(0)) in
-  CSchedule
-    RemoteScheduler.
-      { (RemoteScheduler.default_env ~bin_root ~root) with timeout = !timeout }
+  CSchedule { bin_root; root; timeout = !timeout }
 
 let parse_work_args () : command =
   let key = ref "" in
@@ -98,9 +100,9 @@ let () =
   let command = parse_args () in
   let _errors =
     match command with
-    | CSchedule schedule_env ->
-      (* TODO: RemoteScheduler.go schedule_env *)
-      ignore schedule_env
+    | CSchedule _schedule_env ->
+      (* TODO: use schedule_env *)
+      ()
     | CWork work_env ->
       (* TODO: RemoteWorker.go work_env *)
       ignore work_env

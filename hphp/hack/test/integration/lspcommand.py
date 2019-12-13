@@ -206,6 +206,7 @@ class LspCommandProcessor:
     def _wait_for_message_from_server(
         self,
         transcript: Transcript,
+        comment: Optional[str],
         method: str,
         params: Json,
         received_request_ids: Set[int],
@@ -227,12 +228,14 @@ class LspCommandProcessor:
             timeout_seconds = 30.0
             message = self._try_read_logged(timeout_seconds=timeout_seconds)
             params_pretty = pprint.pformat(params)
+            comment = comment or "<none>"
             assert (
                 message is not None
             ), f"""\
 Timed out after {timeout_seconds} seconds while waiting for a {method!r}
-message to be sent from the server, which must not have an ID in
-{received_request_ids!r}. The message was expected to have params:
+message to be sent from the server (comment: {comment}),
+which must not have an ID in {received_request_ids!r}. The message was expected
+to have params:
 
 {params_pretty}
 
@@ -249,10 +252,12 @@ Transcript of all the messages we saw:
     def _wait_for_request(
         self, transcript: Transcript, command: Json, received_request_ids: Set[int]
     ) -> Tuple[Transcript, Set[int]]:
+        comment = command["comment"]
         method = command["params"]["method"]
         params = command["params"]["params"]
         (transcript, message) = self._wait_for_message_from_server(
             transcript,
+            comment=comment,
             method=method,
             params=params,
             received_request_ids=received_request_ids,
@@ -287,10 +292,15 @@ Transcript of all the messages we saw:
     def _wait_for_notification(
         self, transcript: Transcript, command: Json
     ) -> Transcript:
+        comment = command["comment"]
         method = command["params"]["method"]
         params = command["params"]["params"]
         (transcript, _message) = self._wait_for_message_from_server(
-            transcript, method=method, params=params, received_request_ids={}
+            transcript,
+            comment=comment,
+            method=method,
+            params=params,
+            received_request_ids={},
         )
         return transcript
 

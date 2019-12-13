@@ -196,20 +196,16 @@ class LspTestSpec:
         uri: str,
         contents: Optional[str],
         notify: bool,
+        wait: Optional[bool] = None,
     ) -> "LspTestSpec":
         """Write a file to disk in the middle of the LSP test.
-
-        Due to the asynchronous nature of these LSP tests, it may be a good idea
-        to add a `wait=True` to the previous request(s) you sent. Otherwise, the
-        request will be sent and the file will be written to disk almost
-        simultaneously, and the language server may read the new file from disk
-        by the time it processes the request, rather than the old file.
 
         If `contents` is `None`, delete the file from disk.
 
         If `notify` is `True`, also send a `workspace/didChangeWatchedFiles`
         notification to the language server corresponding to the file you just
-        changed.
+        changed. The test will then wait for serverless IDE to process the file
+        change before proceeding, unless `wait` is set to `False`.
         """
         messages = list(self._messages)
         messages.append(
@@ -227,6 +223,23 @@ class LspTestSpec:
                     comment=comment,
                 )
             )
+            if wait is None:
+                wait = True
+            if wait:
+                messages.append(
+                    _WaitForNotificationSpec(
+                        comment=(
+                            f"Waiting for change to URI {uri} to be processed... "
+                            + "(set wait=False on the corresponding `write_to_disk` call "
+                            + "if this is undesirable)"
+                        ),
+                        method="telemetry/event",
+                        params={
+                            "type": 4,
+                            "message": "[client-ide] Done processing file changes",
+                        },
+                    )
+                )
         return self._update(messages=messages)
 
     def run(

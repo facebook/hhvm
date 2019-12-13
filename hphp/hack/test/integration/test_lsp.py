@@ -4628,14 +4628,6 @@ class BaseClassIncremental {
 """,
                 notify=True,
             )
-            .wait_for_notification(
-                comment="wait for sIDE to process file change",
-                method="telemetry/event",
-                params={
-                    "type": 4,
-                    "message": "[client-ide] Done processing file changes",
-                },
-            )
             .request(
                 comment="hover after change to class hierarchy should be `string`",
                 method="textDocument/hover",

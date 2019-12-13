@@ -34,6 +34,18 @@ type format =
 
 type typing_error_callback = ?code:int -> (Pos.t * string) list -> unit
 
+type name_context =
+  | FunctionNamespace
+  | ConstantNamespace
+  (* Classes, interfaces, traits, records and type aliases.*)
+  | TypeNamespace
+  (* The following are all subsets of TypeNamespace, used when we can
+     give a more specific naming error. E.g. `use Foo;` only allows
+     traits. *)
+  | TraitContext
+  | ClassContext
+  | RecordContext
+
 (* The file and phase of analysis being currently performed *)
 let current_context : (Relative_path.t * phase) ref =
   ref (Relative_path.default, Typing)
@@ -1058,15 +1070,17 @@ let error_class_attribute_already_bound name name_prev p p_prev =
 let unbound_name pos name kind =
   let kind_str =
     match kind with
-    | `cls -> "an object type"
-    | `func -> "a global function"
-    | `const -> "a global constant"
-    | `record -> "a record type"
+    | ConstantNamespace -> " (a global constant)"
+    | FunctionNamespace -> " (a global function)"
+    | TypeNamespace -> ""
+    | ClassContext -> " (an object type)"
+    | TraitContext -> " (a trait)"
+    | RecordContext -> " (a record type)"
   in
   add
     (Naming.err_code Naming.UnboundName)
     pos
-    ("Unbound name: " ^ strip_ns name ^ " (" ^ kind_str ^ ")")
+    ("Unbound name: " ^ strip_ns name ^ kind_str)
 
 let invalid_fun_pointer pos name =
   add

@@ -1,0 +1,2 @@
+File "nonexistent_return_type.php", line 3, characters 17-28:
+Unbound name: no_such_type (Naming[2049])

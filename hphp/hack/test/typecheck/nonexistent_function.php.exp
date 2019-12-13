@@ -1,0 +1,2 @@
+File "nonexistent_function.php", line 4, characters 3-14:
+Unbound name: no_such_func (a global function) (Naming[2049])

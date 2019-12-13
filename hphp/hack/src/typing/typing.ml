@@ -8695,7 +8695,7 @@ let record_def_parent env rd parent_hint =
     | None ->
       (* Something exists with this name (naming succeeded), but it's
          not a record. *)
-      Errors.unbound_name parent_pos parent_name `record)
+      Errors.unbound_name parent_pos parent_name Errors.RecordContext)
   | _ ->
     failwith
       "Record parent was not an Happly. This should have been a syntax error."

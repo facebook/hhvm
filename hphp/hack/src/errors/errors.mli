@@ -45,6 +45,14 @@ type format =
 
 type typing_error_callback = ?code:int -> (Pos.t * string) list -> unit
 
+type name_context =
+  | FunctionNamespace
+  | ConstantNamespace
+  | TypeNamespace
+  | TraitContext
+  | ClassContext
+  | RecordContext
+
 module Parsing : Error_category
 
 module Naming : Error_category
@@ -152,8 +160,7 @@ val error_name_already_bound : string -> string -> Pos.t -> Pos.t -> unit
 val error_class_attribute_already_bound :
   string -> string -> Pos.t -> Pos.t -> unit
 
-val unbound_name :
-  Pos.t -> string -> [< `cls | `func | `const | `record ] -> unit
+val unbound_name : Pos.t -> string -> name_context -> unit
 
 val invalid_fun_pointer : Pos.t -> string -> unit
 

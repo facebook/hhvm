@@ -109,7 +109,7 @@ module Env : sig
   val global_const : genv * lenv -> Ast_defs.id -> Ast_defs.id
 
   val type_name :
-    ?elaborate_kind:NS.elaborate_kind ->
+    ?context:Errors.name_context ->
     genv * lenv ->
     Ast_defs.id ->
     allow_typedef:bool ->
@@ -187,10 +187,12 @@ end = struct
      * causes developers. *)
     begin
       match kind with
-      | `func -> Typing_deps.Dep.Fun name
-      | `cls -> Typing_deps.Dep.Class name
-      | `const -> Typing_deps.Dep.GConst name
-      | `record -> Typing_deps.Dep.RecordDef name
+      | Errors.FunctionNamespace -> Typing_deps.Dep.Fun name
+      | Errors.TypeNamespace -> Typing_deps.Dep.Class name
+      | Errors.ConstantNamespace -> Typing_deps.Dep.GConst name
+      | Errors.TraitContext -> Typing_deps.Dep.Class name
+      | Errors.RecordContext -> Typing_deps.Dep.RecordDef name
+      | Errors.ClassContext -> Typing_deps.Dep.Class name
     end
     |> Typing_deps.add_idep genv.droot;
     Errors.unbound_name pos name kind
@@ -308,7 +310,7 @@ end = struct
       | FileInfo.Mexperimental
       | FileInfo.Mpartial
       | FileInfo.Mdecl ->
-        unbound_name_error genv p x `const
+        unbound_name_error genv p x Errors.ConstantNamespace
       | FileInfo.Mphp -> ()
 
   let handle_unbound_name genv get_full_pos get_canon (p, name) kind =
@@ -407,7 +409,7 @@ end = struct
       x
 
   let type_name
-      ?(elaborate_kind = NS.ElaborateClass)
+      ?(context = Errors.TypeNamespace)
       (genv, _)
       ((p, name) as x)
       ~allow_typedef
@@ -441,12 +443,7 @@ end = struct
       | Some (_def_pos, Naming_table.TTypedef) -> x
       | Some (_def_pos, Naming_table.TRecordDef) -> x
       | None ->
-        let kind =
-          match elaborate_kind with
-          | NS.ElaborateRecord -> `record
-          | _ -> `cls
-        in
-        handle_unbound_name genv GEnv.type_pos GEnv.type_canon_name x kind)
+        handle_unbound_name genv GEnv.type_pos GEnv.type_canon_name x context)
 
   let fun_id (genv, _) x =
     canonicalize
@@ -455,7 +452,7 @@ end = struct
       GEnv.fun_pos
       GEnv.fun_canon_name
       x
-      `func
+      Errors.FunctionNamespace
 
   (**
    * Returns the position of the goto label declaration, if it exists.
@@ -532,7 +529,12 @@ let convert_shape_name env = function
           Errors.self_outside_class pos;
           (pos, SN.Classes.cUnknown)
       ) else
-        Env.type_name env x ~allow_typedef:false ~allow_generics:false
+        Env.type_name
+          env
+          x
+          ~allow_typedef:false
+          ~allow_generics:false
+          ~context:Errors.ClassContext
     in
     Ast_defs.SFclass_const (class_name, (pos, y))
 
@@ -586,7 +588,7 @@ module Make (GetLocals : GetLocals) = struct
    * Used with with Ast_to_nast to go from Ast_defs.hint -> Nast.hint
    *)
   let rec hint
-      ?(elaborate_kind = NS.ElaborateClass)
+      ?(context = Errors.TypeNamespace)
       ?(forbid_this = false)
       ?(allow_retonly = false)
       ?(allow_typedef = true)
@@ -600,7 +602,7 @@ module Make (GetLocals : GetLocals) = struct
     if Option.is_some mut then Errors.misplaced_mutability_hint p;
     ( p,
       hint_
-        ~elaborate_kind
+        ~context
         ~forbid_this
         ~allow_retonly
         ~allow_typedef
@@ -656,7 +658,7 @@ module Make (GetLocals : GetLocals) = struct
         }
 
   and hint_
-      ?(elaborate_kind = NS.ElaborateClass)
+      ~context
       ~forbid_this
       ~allow_retonly
       ~allow_typedef
@@ -770,7 +772,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Happly (((p, _x) as id), hl) ->
       let hint_id =
         hint_id
-          ~elaborate_kind
+          ~context
           ~forbid_this
           ~allow_retonly
           ~allow_typedef
@@ -807,7 +809,7 @@ module Make (GetLocals : GetLocals) = struct
         | Aast.Happly (root, _) ->
           let h =
             hint_id
-              ~elaborate_kind
+              ~context
               ~forbid_this
               ~allow_retonly
               ~allow_typedef
@@ -869,7 +871,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Hpu_access (h, id) -> N.Hpu_access (hint ~allow_retonly env h, id)
 
   and hint_id
-      ?(elaborate_kind = NS.ElaborateClass)
+      ?(context = Errors.TypeNamespace)
       ~forbid_this
       ~allow_retonly
       ~allow_typedef
@@ -956,12 +958,7 @@ module Make (GetLocals : GetLocals) = struct
           N.Habstr x
         | _ ->
           let name =
-            Env.type_name
-              ~elaborate_kind
-              env
-              id
-              ~allow_typedef
-              ~allow_generics:false
+            Env.type_name ~context env id ~allow_typedef ~allow_generics:false
           in
           (* Note that we are intentionally setting allow_typedef to `true` here.
            * In general, generics arguments can be typedefs -- there is no
@@ -1132,7 +1129,12 @@ module Make (GetLocals : GetLocals) = struct
       type_where_constraints env c.Aast.c_where_constraints
     in
     let name =
-      Env.type_name env c.Aast.c_name ~allow_typedef:false ~allow_generics:false
+      Env.type_name
+        ~context:Errors.ClassContext
+        env
+        c.Aast.c_name
+        ~allow_typedef:false
+        ~allow_generics:false
     in
     let (constructor, smethods, methods) = Aast.split_methods c in
     let smethods = List.map ~f:(method_ (fst env)) smethods in
@@ -1147,7 +1149,11 @@ module Make (GetLocals : GetLocals) = struct
     let parents =
       List.map
         c.Aast.c_extends
-        (hint ~allow_retonly:false ~allow_typedef:false env)
+        (hint
+           ~allow_retonly:false
+           ~allow_typedef:false
+           ~context:Errors.ClassContext
+           env)
     in
     let parents =
       match c.Aast.c_kind with
@@ -1166,7 +1172,11 @@ module Make (GetLocals : GetLocals) = struct
       | _ -> parents
     in
     let methods = List.map ~f:(method_ (fst env)) methods in
-    let uses = List.map ~f:(hint ~allow_typedef:false env) c.Aast.c_uses in
+    let uses =
+      List.map
+        ~f:(hint ~allow_typedef:false ~context:Errors.TraitContext env)
+        c.Aast.c_uses
+    in
     let pu_enums = List.map ~f:(class_pu_enum env) c.Aast.c_pu_enums in
     let redeclarations =
       List.map ~f:(method_redeclaration env) c.Aast.c_method_redeclarations
@@ -1178,7 +1188,9 @@ module Make (GetLocals : GetLocals) = struct
     if c_req_implements <> [] && c.Aast.c_kind <> Ast_defs.Ctrait then
       Errors.invalid_req_implements (fst (List.hd_exn c_req_implements));
     let req_implements =
-      List.map ~f:(hint ~allow_typedef:false env) c_req_implements
+      List.map
+        ~f:(hint ~allow_typedef:false ~context:Errors.ClassContext env)
+        c_req_implements
     in
     let req_implements = List.map ~f:(fun h -> (h, false)) req_implements in
     if
@@ -1188,7 +1200,9 @@ module Make (GetLocals : GetLocals) = struct
     then
       Errors.invalid_req_extends (fst (List.hd_exn c_req_extends));
     let req_extends =
-      List.map ~f:(hint ~allow_typedef:false env) c_req_extends
+      List.map
+        ~f:(hint ~allow_typedef:false ~context:Errors.ClassContext env)
+        c_req_extends
     in
     let req_extends = List.map ~f:(fun h -> (h, true)) req_extends in
     (* Setting a class type parameters constraint to the 'this' type is weird
@@ -1201,7 +1215,12 @@ module Make (GetLocals : GetLocals) = struct
     let typeconsts = List.map ~f:(typeconst env) c.Aast.c_typeconsts in
     let implements =
       List.map
-        ~f:(hint ~allow_retonly:false ~allow_typedef:false env)
+        ~f:
+          (hint
+             ~allow_retonly:false
+             ~context:Errors.ClassContext
+             ~allow_typedef:false
+             env)
         c.Aast.c_implements
     in
     let constructor = Option.map constructor (method_ (fst env)) in
@@ -1279,7 +1298,12 @@ module Make (GetLocals : GetLocals) = struct
         if SN.UserAttributes.is_reserved name then
           ua_name
         else
-          Env.type_name env ua_name ~allow_typedef:false ~allow_generics:false
+          Env.type_name
+            ~context:Errors.ClassContext
+            env
+            ua_name
+            ~allow_typedef:false
+            ~allow_generics:false
       in
       if not (validate_seen ua_name) then
         acc
@@ -2195,7 +2219,12 @@ module Make (GetLocals : GetLocals) = struct
         match Naming_table.Types.get_kind name with
         | Some Naming_table.TTypedef when snd x2 = "class" ->
           N.Typename
-            (Env.type_name env x1 ~allow_typedef:true ~allow_generics:false)
+            (Env.type_name
+               ~context:Errors.ClassContext
+               env
+               x1
+               ~allow_typedef:true
+               ~allow_generics:false)
         | _ -> N.Class_const (make_class_id env x1, x2)
       end
     | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), x2) ->
@@ -2206,7 +2235,12 @@ module Make (GetLocals : GetLocals) = struct
         match Naming_table.Types.get_kind name with
         | Some Naming_table.TTypedef when snd x2 = "class" ->
           N.Typename
-            (Env.type_name env x1 ~allow_typedef:true ~allow_generics:false)
+            (Env.type_name
+               ~context:Errors.ClassContext
+               env
+               x1
+               ~allow_typedef:true
+               ~allow_generics:false)
         | _ -> N.Class_const (make_class_id env x1, x2)
       end
     | Aast.Class_const _ -> (* TODO: report error in strict mode *) N.Any
@@ -2292,6 +2326,7 @@ module Make (GetLocals : GetLocals) = struct
             | ((pc, N.String cl), (pm, N.String meth)) ->
               N.Method_caller
                 ( Env.type_name
+                    ~context:Errors.ClassContext
                     env
                     (pc, cl)
                     ~allow_typedef:false
@@ -2300,7 +2335,12 @@ module Make (GetLocals : GetLocals) = struct
             | ((_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth))
               when mem = SN.Members.mClass ->
               N.Method_caller
-                ( Env.type_name env cl ~allow_typedef:false ~allow_generics:false,
+                ( Env.type_name
+                    ~context:Errors.ClassContext
+                    env
+                    cl
+                    ~allow_typedef:false
+                    ~allow_generics:false,
                   (pm, meth) )
             | ((p, _), _) ->
               Errors.illegal_meth_caller p;
@@ -2325,6 +2365,7 @@ module Make (GetLocals : GetLocals) = struct
             | ((pc, N.String cl), (pm, N.String meth)) ->
               N.Smethod_id
                 ( Env.type_name
+                    ~context:Errors.ClassContext
                     env
                     (pc, cl)
                     ~allow_typedef:false
@@ -2346,7 +2387,12 @@ module Make (GetLocals : GetLocals) = struct
             | ((_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth))
               when mem = SN.Members.mClass ->
               N.Smethod_id
-                ( Env.type_name env cl ~allow_typedef:false ~allow_generics:false,
+                ( Env.type_name
+                    ~context:Errors.ClassContext
+                    env
+                    cl
+                    ~allow_typedef:false
+                    ~allow_generics:false,
                   (pm, meth) )
             | ( (p, N.Class_const ((_, (N.CIself | N.CIstatic)), (_, mem))),
                 (pm, N.String meth) )
@@ -2504,7 +2550,12 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.New _ -> failwith "ast_to_nast aast.new"
     | Aast.Record (id, is_array, l) ->
       let id =
-        Env.type_name env id ~allow_typedef:false ~allow_generics:false
+        Env.type_name
+          ~context:Errors.RecordContext
+          env
+          id
+          ~allow_typedef:false
+          ~allow_generics:false
       in
       let l = List.map l (fun (e1, e2) -> (expr env e1, expr env e2)) in
       N.Record (id, is_array, l)
@@ -2539,7 +2590,12 @@ module Make (GetLocals : GetLocals) = struct
       N.Lfun (f, !to_capture)
     | Aast.Xml (x, al, el) ->
       N.Xml
-        ( Env.type_name env x ~allow_typedef:false ~allow_generics:false,
+        ( Env.type_name
+            ~context:Errors.ClassContext
+            env
+            x
+            ~allow_typedef:false
+            ~allow_generics:false,
           attrl env al,
           exprl env el )
     | Aast.Shape fdl ->
@@ -2643,8 +2699,13 @@ module Make (GetLocals : GetLocals) = struct
           (p, N.Lvar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar))
       | x when x.[0] = '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
       | _ ->
-        N.CI (Env.type_name env cid ~allow_typedef:false ~allow_generics:true)
-    )
+        N.CI
+          (Env.type_name
+             ~context:Errors.ClassContext
+             env
+             cid
+             ~allow_typedef:false
+             ~allow_generics:true) )
 
   and casel env l = List.map l (case env)
 
@@ -2665,7 +2726,12 @@ module Make (GetLocals : GetLocals) = struct
         let name2 = Local_id.get_name lid2 in
         let x2 = Env.new_lvar env (p2, name2) in
         let b = branch env b in
-        ( Env.type_name env (p1, lid1) ~allow_typedef:true ~allow_generics:false,
+        ( Env.type_name
+            ~context:Errors.ClassContext
+            env
+            (p1, lid1)
+            ~allow_typedef:true
+            ~allow_generics:false,
           x2,
           b ))
 
@@ -2907,8 +2973,7 @@ module Make (GetLocals : GetLocals) = struct
     let attrs = user_attributes env rd.Aast.rd_user_attributes in
     let extends =
       match rd.Aast.rd_extends with
-      | Some extends ->
-        Some (hint ~elaborate_kind:NS.ElaborateRecord env extends)
+      | Some extends -> Some (hint ~context:Errors.RecordContext env extends)
       | None -> None
     in
     let fields = List.map rd.Aast.rd_fields ~f:(record_field env) in

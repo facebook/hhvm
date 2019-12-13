@@ -1,2 +1,2 @@
 File "decl1.bad.php", line 6, characters 19-19:
-Unbound name: U (an object type) (Naming[2049])
+Unbound name: U (Naming[2049])

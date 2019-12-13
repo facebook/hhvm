@@ -1,5 +1,5 @@
 File "body.bad.php", line 16, characters 16-16:
-Unbound name: D (an object type) (Naming[2049])
+Unbound name: D (Naming[2049])
 File "body.bad.php", line 19, characters 17-17:
 Unbound name: D (an object type) (Naming[2049])
 File "body.bad.php", line 34, characters 7-7:

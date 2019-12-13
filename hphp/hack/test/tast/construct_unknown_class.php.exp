@@ -1,5 +1,5 @@
 Errors:
-  [3:32-39] Unbound name: Unknown (an object type)
+  [3:32-39] Unbound name: Unknown
   [4:14-21] Unbound name: Unknown (an object type)
   [4:10-44] Invalid return type
   [3:32-39] Expected Unknown

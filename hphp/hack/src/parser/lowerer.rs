@@ -331,7 +331,7 @@ impl<'a> AsMut<Env<'a>> for Env<'a> {
 
 #[derive(Debug)]
 pub enum Error {
-    APIMissingSyntax {
+    MissingSyntax {
         expecting: String,
         pos: Pos,
         node_name: String,
@@ -465,7 +465,7 @@ where
                 return Ok(x);
             }
         }
-        Err(Error::APIMissingSyntax {
+        Err(Error::MissingSyntax {
             expecting: String::from(expecting),
             pos: Self::p_pos(node, env),
             node_name: text,
@@ -745,13 +745,12 @@ where
                 if is_valid_shape_literal(t) {
                     let ast::Id(p, n) = Self::pos_name(node, env)?;
                     let str_ = Self::mk_str(node, env, Self::unesc_dbl, &n);
-                    match ocaml_helper::int_of_string_opt(&str_.as_bytes()) {
-                        Some(_) => Self::raise_parsing_error(
+                    if let Some(_) = ocaml_helper::int_of_string_opt(&str_.as_bytes()) {
+                        Self::raise_parsing_error(
                             node,
                             env,
                             &syntax_error::shape_field_int_like_string,
-                        ),
-                        _ => {}
+                        )
                     }
                     return Ok(SFlitStr((p, str_)));
                 }
@@ -4459,7 +4458,7 @@ where
         let r = Self::p_class_elt_(class, node, env);
         match r {
             // match ocaml behavior, don't throw if missing syntax when fail_open is true
-            Err(Error::APIMissingSyntax { .. }) if env.fail_open => Ok(()),
+            Err(Error::MissingSyntax { .. }) if env.fail_open => Ok(()),
             _ => r,
         }
     }
@@ -5006,7 +5005,7 @@ where
                     );
                 }
                 _ => match Self::p_def(nodes[i], env) {
-                    Err(Error::APIMissingSyntax { .. }) if env.fail_open => {}
+                    Err(Error::MissingSyntax { .. }) if env.fail_open => {}
                     e @ Err(_) => return e,
                     Ok(mut def) => acc.append(&mut def),
                 },
@@ -5029,7 +5028,7 @@ where
         script: &Syntax<T, V>,
     ) -> std::result::Result<ast::Program, String> {
         Self::p_script(script, env).map_err(|e| match e {
-            Error::APIMissingSyntax {
+            Error::MissingSyntax {
                 expecting,
                 pos,
                 node_name,

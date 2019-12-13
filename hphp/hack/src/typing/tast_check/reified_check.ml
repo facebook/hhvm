@@ -61,9 +61,9 @@ let validator =
       this#invalid acc r "the late static bound this type"
   end
 
-let tparams_has_reified tparams =
-  List.exists tparams ~f:(fun tparam ->
-      not (equal_reify_kind tparam.tp_reified Erased))
+let is_reified tparam = not (equal_reify_kind tparam.tp_reified Erased)
+
+let tparams_has_reified tparams = List.exists tparams ~f:is_reified
 
 let valid_newable_hint env tp (pos, hint) =
   match hint with
@@ -123,9 +123,7 @@ let verify_targ_valid env tparam ((_, hint) as targ) =
   (* There is some subtlety here. If a type *parameter* is declared reified,
    * even if it is soft, we require that the argument be concrete or reified, not soft
    * reified or erased *)
-  ( if equal_reify_kind tparam.tp_reified Erased then
-    ()
-  else
+  ( if is_reified tparam then
     match tparam.tp_reified with
     | Nast.Reified
     | Nast.SoftReified ->
@@ -174,6 +172,21 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     List.iter targs ~f:check_targ_hints );
   verify_targs env expr_pos decl_pos tparams targs
 
+let get_class_by_name classname =
+  match Naming_table.Types.get_filename classname with
+  | Some filename ->
+    Ide_parser_cache.with_ide_cache @@ fun () ->
+    Ast_provider.find_class_in_file filename classname
+  | _ -> None
+
+let get_static_method_by_name class_name method_name =
+  match get_class_by_name class_name with
+  | Some cls ->
+    List.hd
+    @@ List.filter cls.Nast.c_methods (fun m ->
+           String.equal (snd m.m_name) method_name && m.m_static)
+  | _ -> None
+
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -181,9 +194,50 @@ let handler =
     method! at_expr env x =
       (* only considering functions where one or more params are reified *)
       match x with
-      | ((pos, _), Class_get ((_, CI (_, t)), _)) ->
+      | ((call_pos, _), Class_get ((_, CI (_, t)), _)) ->
         if equal_reify_kind (Env.get_reified env t) Reified then
-          Errors.class_get_reified pos
+          Errors.class_get_reified call_pos
+      (* Call of the form C::f where f is a static method:
+       * error when f uses any C's reified generic *)
+      | ( (call_pos, _),
+          Call
+            ( _,
+              ( (_, (r, Tfun { ft_tparams; _ })),
+                Class_const ((_, CI (_, class_id)), (_, fname)) ),
+              targs,
+              _,
+              _ ) ) ->
+        (match Env.get_class env class_id with
+        | Some cls ->
+          let tp_names =
+            List.filter_map (Cls.tparams cls) (function tp ->
+                if is_reified tp then
+                  Some tp.tp_name
+                else
+                  None)
+          in
+          (match Cls.get_smethod cls fname with
+          | Some ce_m ->
+            (match get_static_method_by_name ce_m.ce_origin fname with
+            | Some m ->
+              let check_type_hint = function
+                | (_, Some (t_pos, Habstr t))
+                | (_, Some (_, Happly ((t_pos, t), _))) ->
+                  List.iter tp_names ~f:(function (_, name) ->
+                      if String.equal name t then
+                        Errors.static_call_with_class_level_reified_generic
+                          call_pos
+                          t_pos)
+                | _ -> ()
+              in
+              List.iter m.m_params ~f:(fun param ->
+                  check_type_hint param.param_type_hint);
+              check_type_hint m.m_ret
+            | None -> ())
+          | _ -> ())
+        | None -> ());
+        let tparams = fst ft_tparams in
+        verify_call_targs env call_pos (Reason.to_pos r) tparams targs
       | ((pos, _), Call (_, ((_, (r, Tfun { ft_tparams; _ })), _), targs, _, _))
         ->
         let tparams = fst ft_tparams in

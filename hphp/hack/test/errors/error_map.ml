@@ -607,4 +607,5 @@ RecordMissingRequiredField = 4354
 RecordUnknownField = 4355
 CyclicRecordDef = 4356
 InvalidDestructure = 4357
+StaticCallWithClassLevelReifiedGeneric = 4358
   |}]

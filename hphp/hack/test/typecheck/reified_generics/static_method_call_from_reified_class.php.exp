@@ -1,0 +1,8 @@
+File "static_method_call_from_reified_class.php", line 18, characters 3-12:
+Static methods cannot use generics reified at the class level. Try reifying them at the static method itself. (Typing[4358])
+File "static_method_call_from_reified_class.php", line 5, characters 30-30:
+Class-level reified generic used here.
+File "static_method_call_from_reified_class.php", line 18, characters 3-12:
+Static methods cannot use generics reified at the class level. Try reifying them at the static method itself. (Typing[4358])
+File "static_method_call_from_reified_class.php", line 5, characters 37-37:
+Class-level reified generic used here.

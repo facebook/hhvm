@@ -1306,3 +1306,5 @@ val unresolved_type_variable : Pos.t -> unit
 val invalid_sub_string : Pos.t -> string -> unit
 
 val php_lambda_disallowed : Pos.t -> unit
+
+val static_call_with_class_level_reified_generic : Pos.t -> Pos.t -> unit

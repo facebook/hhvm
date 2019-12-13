@@ -10,6 +10,7 @@
 open Base
 open Aast
 open Typing_defs
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 let build ?(sep = ":@") prefix name = prefix ^ sep ^ name
@@ -31,6 +32,7 @@ type err_callback = pos -> string -> string -> string -> unit
 
 (* Checks that the visited case types/values do not appear in any parent class *)
 let check_parent
+    ctx
     (err_types : err_callback)
     (err_values : err_callback)
     seen_types
@@ -38,7 +40,7 @@ let check_parent
     c_extends =
   Sequence.iter
     ~f:(fun parent ->
-      match Decl_provider.get_class parent with
+      match Decl_provider.get_class ctx parent with
       | None -> ()
       | Some cls ->
         let c_name = Cls.name cls in
@@ -72,7 +74,7 @@ let handler =
   object
     inherit Nast_visitor.handler_base
 
-    method! at_class_ _env c =
+    method! at_class_ env c =
       let c_name = snd c.c_name in
       (* We restrict PU definition to only happen in a proper class.
        * This limits PU to single inheritance, which we use here by
@@ -155,7 +157,7 @@ let handler =
             SMap.add enum_name (p, atom_pos_map) acc)
           c.c_pu_enums
       in
-      match Decl_provider.get_class c_name with
+      match Decl_provider.get_class env.Nast_check_env.ctx c_name with
       | None -> ()
       | Some cls ->
         let c_extends = Cls.all_ancestor_names cls in
@@ -163,7 +165,13 @@ let handler =
         let keys l = SSet.of_list @@ SMap.keys l in
         (* Check that none of the gathered case types/values are already defined
          * in a parent class *)
-        check_parent err_types err_values seen_types seen_values c_extends;
+        check_parent
+          env.Nast_check_env.ctx
+          err_types
+          err_values
+          seen_types
+          seen_values
+          c_extends;
 
         (* Gather information about atoms definitions and instances to check
          * if they are correct *)

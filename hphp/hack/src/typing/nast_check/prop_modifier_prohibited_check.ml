@@ -15,7 +15,7 @@ module SN = Naming_special_names
 let error_if_static_prop_is_const env cv =
   if
     cv.cv_is_static
-    && (not (TypecheckerOptions.const_static_props env.tcopt))
+    && (not (TypecheckerOptions.const_static_props (get_tcopt env)))
     && Naming_attributes.mem SN.UserAttributes.uaConst cv.cv_user_attributes
   then
     let pos = fst cv.cv_id in

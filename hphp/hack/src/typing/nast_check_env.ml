@@ -17,7 +17,7 @@ type control_context =
   | SwitchContext
 
 type env = {
-  tcopt: TypecheckerOptions.t;
+  ctx: Provider_context.t;
   is_reactive: bool;
   class_kind: Ast_defs.class_kind option;
   class_name: string option;
@@ -30,6 +30,8 @@ type env = {
   array_append_allowed: bool;
   rx_move_allowed: bool;
 }
+
+let get_tcopt env = env.ctx.Provider_context.tcopt
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
   String.equal name SN.UserAttributes.uaReactive
@@ -69,7 +71,7 @@ let typedef_env env t = { env with file_mode = t.t_mode }
 
 let get_empty_env () =
   {
-    tcopt = Global_naming_options.get ();
+    ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
     is_reactive = false;
     class_kind = None;
     class_name = None;

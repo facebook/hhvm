@@ -15,7 +15,7 @@ let error_if_abstract_type_constant_with_default env typeconst =
   if
     not
       (TypecheckerOptions.experimental_feature_enabled
-         env.tcopt
+         (get_tcopt env)
          TypecheckerOptions.experimental_abstract_type_const_with_default)
   then
     match typeconst.c_tconst_abstract with

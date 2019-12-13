@@ -46,10 +46,6 @@ def vec_elm_sizes():
     ]]
 
 @memoized
-def iter_table_types():
-    return [V('HPHP::' + t) for t in ['ILA']]
-
-@memoized
 def cell_loc_mcodes():
     return [V('HPHP::' + t) for t in ['MEC', 'MPC', 'MEL', 'MPL']]
 
@@ -196,26 +192,6 @@ class HHBC(object):
 
             info['size'] = vec_size['size'] + elm_size * num_elms
             info['value'] = '<vector>'
-
-        elif immtype in iter_table_types():
-            info['size'] = 0
-            info['value'] = '<vector>'
-
-            size = HHBC.decode_iva(ptr)
-            info['size'] += size['size']
-            ptr += size['size']
-
-            for _x in range(0, size['value']):
-                itertype = HHBC.decode_iva(ptr)
-                ptr += itertype['size']
-                info['size'] += itertype['size']
-                iterid = HHBC.decode_iva(ptr)
-                ptr += iterid['size']
-                info['size'] += iterid['size']
-                if itertype['value'] == V('HPHP::KindOfLIter'):
-                    localid = HHBC.decode_iva(ptr)
-                    ptr += localid['size']
-                    info['size'] += localid['size']
 
         elif immtype == V('HPHP::KA'):
             ptr = ptr.cast(T('unsigned char').pointer())

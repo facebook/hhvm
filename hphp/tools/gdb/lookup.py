@@ -80,7 +80,9 @@ def lookup_litstr(litstr_id, u):
     # get the base type
     ty = val.type.fields()[0].type
     val = val.address.cast(ty.pointer()).dereference()
-    return idx.compact_vector_at(val, litstr_id)
+    elm = idx.compact_vector_at(val, litstr_id)
+    ty = elm.type.template_argument(0)
+    return elm.address.cast(ty.pointer()).dereference()
 
 
 class LookupLitstrCommand(gdb.Command):

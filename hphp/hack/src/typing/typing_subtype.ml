@@ -21,6 +21,7 @@ module TUtils = Typing_utils
 module SN = Naming_special_names
 module Phase = Typing_phase
 module TL = Typing_logic
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module ITySet = Internal_type_set
 module MakeType = Typing_make_type

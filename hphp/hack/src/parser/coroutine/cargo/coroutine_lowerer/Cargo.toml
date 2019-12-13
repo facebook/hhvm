@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/parser/coroutine:coroutine_lowerer
 # Signature<<1ff27462fda10b1ccc615db358effe2a40f70548>>
 [package]

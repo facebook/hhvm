@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/hhbc:emit_pos_rust
 # Signature<<04619da4ce2af4d397a85e9e07074212edc2e0db>>
 [package]

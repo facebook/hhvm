@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/utils/ocamlpool_rust:ocamlpool_rust
 # Signature<<729892e3c8af984b2641ef3d82bd0702c55e0e6f>>
 [package]

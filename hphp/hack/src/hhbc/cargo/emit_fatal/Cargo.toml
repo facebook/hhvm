@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/hhbc:emit_fatal_rust
 # Signature<<2da652707aff05663a0f84c9c604c27474dc0c7f>>
 [package]

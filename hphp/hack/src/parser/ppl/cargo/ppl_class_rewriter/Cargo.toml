@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/parser/ppl:rust_ppl_class_rewriter
 # Signature<<7d3640c9bffc8ca49516c9f0ea84fe6340b53fe8>>
 [package]

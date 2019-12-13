@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/ocamlrep_derive:ocamlrep_derive
 # Signature<<3d5365200537424b4c1f6abda0556e891f46b09b>>
 [package]

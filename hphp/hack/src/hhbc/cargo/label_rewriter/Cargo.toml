@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/hhbc:label_rewriter_rust
 # Signature<<a3288a7be812e1a7b7384b6309f3eb4780339b8e>>
 [package]

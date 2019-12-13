@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/hhbc:string_utils_bench
 # Signature<<42dc46ca076875dee5f9845334f22b9891c1c4bf>>
 [package]

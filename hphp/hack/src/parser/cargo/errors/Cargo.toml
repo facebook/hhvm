@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/parser:rust_parser_errors
 # Signature<<bef68e8440e47b3bc4a5e29b29acefdc24b7def6>>
 [package]

@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/utils/perf:profile_rust
 # Signature<<fc5f221be2519eac08251eff9bd8387a0a5b0bce>>
 [package]

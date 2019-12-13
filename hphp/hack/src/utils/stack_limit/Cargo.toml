@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/utils:stack_limit
 # Signature<<768ceaa2f47a3d6666ba11a036f479ec8d36e6ca>>
 [package]

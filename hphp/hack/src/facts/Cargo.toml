@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/facts:facts_rust
 # Signature<<262496c4465b19ecf266c2a934e1cb106879bbc8>>
 [package]

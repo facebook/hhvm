@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/parser:coroutine_parser_leak_tree
 # Signature<<b3491b1361a4c09123e6d7e3014cb8b1df6cc4db>>
 [package]

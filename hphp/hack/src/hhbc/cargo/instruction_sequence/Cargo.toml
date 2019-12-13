@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/hhbc:instruction_sequence_rust
 # Signature<<271bdcc07cad98b2ab2e03ef979aa8a736407bd2>>
 [package]

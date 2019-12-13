@@ -1,3 +1,4 @@
+# @generated
 # @autocargo from //hphp/hack/src/hhbc:emit_memoize_helpers_rust
 # Signature<<d65a6e076f384b7c69b3392abd1358b03fd1bce6>>
 [package]

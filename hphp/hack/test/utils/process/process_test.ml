@@ -83,21 +83,6 @@ let test_future_is_ready () =
     else
       false
 
-let test_delayed_future () =
-  let future = Future.delayed_value ~delays:3 "Delayed value" in
-  Bool_asserter.assert_equals false (Future.is_ready future) "First delay";
-  Bool_asserter.assert_equals false (Future.is_ready future) "Second delay";
-  Bool_asserter.assert_equals false (Future.is_ready future) "Third delay";
-  Bool_asserter.assert_equals
-    true
-    (Future.is_ready future)
-    "After third delay should be ready";
-  String_asserter.assert_equals
-    "Delayed value"
-    (Future.get_exn future)
-    "retrieve delayed value";
-  true
-
 let test_future_continue_with () =
   Tempfile.with_real_tempdir (fun dir_path ->
       let fn = Path.concat dir_path "test.txt" in

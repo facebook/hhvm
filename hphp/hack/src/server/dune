@@ -253,7 +253,9 @@
     hhi
     ide_rpc_api_types
     linting
-    logging_stubs
+    (select logging from
+      (facebook signed_source -> logging_fb)
+      (-> logging_stubs))
     lsp
     parsing_service
     remote_worker_stubs

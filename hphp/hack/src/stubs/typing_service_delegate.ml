@@ -18,8 +18,8 @@ let start delegate_env state =
 
 let stop state = state
 
-let next files_to_process state =
-  ignore files_to_process;
+let next files_to_process files_in_progress state =
+  ignore (files_to_process, files_in_progress);
   (state, None)
 
 let merge state = state

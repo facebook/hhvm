@@ -6,6 +6,7 @@
  *
  *)
 
+open Core_kernel
 open Typing_service_types
 
 module type Delegate_sig = sig
@@ -19,6 +20,7 @@ module type Delegate_sig = sig
 
   val next :
     files_to_process ->
+    file_computation Hash_set.Poly.t ->
     state ->
     state * (files_in_progress * files_to_process * delegate_job_sig) option
 

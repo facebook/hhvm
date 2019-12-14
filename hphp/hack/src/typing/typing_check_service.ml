@@ -458,6 +458,14 @@ let next
       }
   in
   fun () ->
+    let (state, delegate_job) =
+      Typing_service_delegate.next
+        !files_to_process
+        files_in_progress
+        !delegate_state
+    in
+    delegate_state := state;
+
     match !files_to_process with
     | [] when Hash_set.Poly.is_empty files_in_progress -> Bucket.Done
     | [] ->
@@ -474,10 +482,6 @@ let next
          *)
       Bucket.Wait
     | jobs ->
-      let (state, delegate_job) =
-        Typing_service_delegate.next !files_to_process !delegate_state
-      in
-      delegate_state := state;
       (match delegate_job with
       | Some (current_bucket, remaining_jobs, job) ->
         return_bucket_job (DelegateProgress job) current_bucket remaining_jobs

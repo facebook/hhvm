@@ -15,6 +15,7 @@ open Decl_defs
 open Reordered_argument_collections
 open Shallow_decl_defs
 open Typing_defs
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Env = Typing_env
 

@@ -446,6 +446,17 @@ let next
     | Some w -> List.length w
     | None -> 1
   in
+  let return_bucket_job kind ~current_bucket ~remaining_jobs =
+    (* Update our shared mutable state, because hey: it's not like we're
+       writing OCaml or anything. *)
+    files_to_process := remaining_jobs;
+    List.iter ~f:(Hash_set.Poly.add files_in_progress) current_bucket;
+    Bucket.Job
+      {
+        kind;
+        progress = { completed = []; remaining = current_bucket; deferred = [] };
+      }
+  in
   fun () ->
     match !files_to_process with
     | [] when Hash_set.Poly.is_empty files_in_progress -> Bucket.Done
@@ -467,32 +478,18 @@ let next
         Typing_service_delegate.next !files_to_process !delegate_state
       in
       delegate_state := state;
-      let (kind, current_bucket, remaining_jobs) =
-        match delegate_job with
-        | Some (current_bucket, remaining_jobs, job) ->
-          (DelegateProgress job, current_bucket, remaining_jobs)
-        | None ->
-          let bucket_size =
-            Bucket.calculate_bucket_size
-              ~num_jobs:(List.length !files_to_process)
-              ~num_workers
-              ~max_size
-          in
-          let (current_bucket, remaining_jobs) =
-            List.split_n jobs bucket_size
-          in
-          (Progress, current_bucket, remaining_jobs)
-      in
-      (* Update our shared mutable state, because hey: it's not like we're
-         writing OCaml or anything. *)
-      files_to_process := remaining_jobs;
-      List.iter ~f:(Hash_set.Poly.add files_in_progress) current_bucket;
-      Bucket.Job
-        {
-          kind;
-          progress =
-            { completed = []; remaining = current_bucket; deferred = [] };
-        }
+      (match delegate_job with
+      | Some (current_bucket, remaining_jobs, job) ->
+        return_bucket_job (DelegateProgress job) current_bucket remaining_jobs
+      | None ->
+        let bucket_size =
+          Bucket.calculate_bucket_size
+            ~num_jobs:(List.length !files_to_process)
+            ~num_workers
+            ~max_size
+        in
+        let (current_bucket, remaining_jobs) = List.split_n jobs bucket_size in
+        return_bucket_job Progress current_bucket remaining_jobs)
 
 let on_cancelled
     (next : unit -> 'a Bucket.bucket)

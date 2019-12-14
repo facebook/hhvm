@@ -11,17 +11,19 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Env = Typing_env
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 (* Not adding a Typing_dep here because it will be added when the
  * Nast is fully processed (by the caller of this code) *)
-let get_fun name =
-  match Decl_provider.get_fun name with
+let get_fun ctx name =
+  match Decl_provider.get_fun ctx name with
   | Some { fe_type = (_, Tfun ft); _ } -> Some ft
   | _ -> None
 
-let get_static_meth (cls_name : string) (meth_name : string) =
-  match Decl_provider.get_class cls_name with
+let get_static_meth
+    (ctx : Provider_context.t) (cls_name : string) (meth_name : string) =
+  match Decl_provider.get_class ctx cls_name with
   | None -> None
   | Some cls ->
     begin
@@ -52,7 +54,8 @@ let static_meth_is_noreturn env ci meth_id =
   in
   match class_name with
   | Some class_name ->
-    funopt_is_noreturn (get_static_meth class_name (snd meth_id))
+    funopt_is_noreturn
+      (get_static_meth (Typing_env.get_ctx env) class_name (snd meth_id))
   | None -> false
 
 let typed_expression_exits ((_, (_, ty)), e) =
@@ -68,7 +71,7 @@ let expression_exits env (_, e) =
   | Yield_break ->
     true
   | Call (Cnormal, (_, Id (_, fun_name)), _, _, _) ->
-    funopt_is_noreturn @@ get_fun fun_name
+    funopt_is_noreturn @@ get_fun (Typing_env.get_ctx env) fun_name
   | Call (Cnormal, (_, Class_const ((_, ci), meth_id)), _, _, _) ->
     static_meth_is_noreturn env ci meth_id
   | _ -> false

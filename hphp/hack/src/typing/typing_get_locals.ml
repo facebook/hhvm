@@ -56,7 +56,11 @@ and terminal_ nsenv ~in_try st =
     raise Exit
   | Aast.Expr (_, Aast.Call (_, (_, Aast.Id fun_id), _, _, _)) ->
     let (_, fun_name) = NS.elaborate_id nsenv NS.ElaborateFun fun_id in
-    FuncTerm.(raise_exit_if_terminal (get_fun fun_name))
+    FuncTerm.(
+      raise_exit_if_terminal
+        (get_fun
+           (Provider_context.get_global_context_or_empty_FOR_MIGRATION ())
+           fun_name))
   | Aast.Expr
       ( _,
         Aast.Call
@@ -68,7 +72,12 @@ and terminal_ nsenv ~in_try st =
             _,
             _ ) ) ->
     let (_, cls_name) = NS.elaborate_id nsenv NS.ElaborateClass cls_id in
-    FuncTerm.(raise_exit_if_terminal (get_static_meth cls_name meth_name))
+    FuncTerm.(
+      raise_exit_if_terminal
+        (get_static_meth
+           (Provider_context.get_global_context_or_empty_FOR_MIGRATION ())
+           cls_name
+           meth_name))
   | Aast.If (_, b1, b2) ->
     (try
        terminal nsenv ~in_try b1;

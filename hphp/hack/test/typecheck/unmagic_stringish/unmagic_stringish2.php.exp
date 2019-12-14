@@ -39,10 +39,10 @@ Implicit conversions of Stringish objects to string are deprecated. (Typing[4067
 File "unmagic_stringish2.php", line 33, characters 12-25:
 Cannot cast a value of type this to string.
 Only primitives may be used in a (string) cast.
-If you are trying to cast a Stringish type, please use `stringish_cast`.
+If you are trying to cast a Stringish type, please use `HH\stringish_cast`.
 This functionality is being removed from HHVM. (Typing[4281])
 File "unmagic_stringish2.php", line 45, characters 12-25:
 Cannot cast a value of type this to string.
 Only primitives may be used in a (string) cast.
-If you are trying to cast a Stringish type, please use `stringish_cast`.
+If you are trying to cast a Stringish type, please use `HH\stringish_cast`.
 This functionality is being removed from HHVM. (Typing[4281])

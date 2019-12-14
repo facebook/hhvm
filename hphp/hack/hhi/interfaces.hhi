@@ -849,7 +849,7 @@ interface XHPChild {}
  */
 <<__HipHopSpecific>>
 interface Stringish extends XHPChild {
-  <<__Deprecated('Use `stringish_cast(<expression>)` instead.')>>
+  <<__Deprecated('Use `HH\stringish_cast(<expression>)` instead.')>>
   public function __toString(): string;
 }
 

@@ -2647,7 +2647,7 @@ let array_cast pos =
 let string_cast pos ty =
   add (Typing.err_code Typing.StringCast) pos
   @@ Printf.sprintf
-       "Cannot cast a value of type %s to string.\nOnly primitives may be used in a (string) cast.\nIf you are trying to cast a Stringish type, please use `stringish_cast`.\nThis functionality is being removed from HHVM."
+       "Cannot cast a value of type %s to string.\nOnly primitives may be used in a (string) cast.\nIf you are trying to cast a Stringish type, please use `HH\stringish_cast`.\nThis functionality is being removed from HHVM."
        ty
 
 let nullable_cast pos ty ty_pos =

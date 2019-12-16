@@ -374,12 +374,18 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     }
                 )
             elif isinstance(message, _WaitForResponseSpec):
-                [lsp_id] = [
+                lsp_ids = [
                     lsp_id
                     for previous_message, lsp_id in lsp_id_map.items()
                     if isinstance(previous_message, _RequestSpec)
                     and previous_message.wait_id == message.wait_id
                 ]
+                assert len(lsp_ids) == 1, (
+                    f"Should have had exactly one previous message with wait ID {message.wait_id!r}, "
+                    + "but got {len(lsp_ids)}"
+                )
+                [lsp_id] = lsp_ids
+
                 json_commands.append(
                     {
                         "jsonrpc": "2.0",

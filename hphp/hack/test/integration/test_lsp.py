@@ -5302,10 +5302,10 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "contentChanges": [
                         {
                             "range": {
-                                "start": {"line": 7, "character": 11},
-                                "end": {"line": 7, "character": 12},
+                                "start": {"line": 7, "character": 9},
+                                "end": {"line": 7, "character": 11},
                             },
-                            "text": "a",
+                            "text": "'foo'",
                         }
                     ],
                 },
@@ -5317,16 +5317,58 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "uri": "${php_file_uri}",
                     "diagnostics": [
                         {
+                            "code": 4110,
+                            "message": "Invalid return type",
                             "range": {
-                                "start": {"line": 7, "character": 11},
-                                "end": {"line": 7, "character": 11},
+                                "end": {"character": 14, "line": 7},
+                                "start": {"character": 9, "line": 7},
                             },
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "range": {
+                                            "end": {"character": 27, "line": 6},
+                                            "start": {"character": 24, "line": 6},
+                                        },
+                                        "uri": "${php_file_uri}",
+                                    },
+                                    "message": "Expected int",
+                                },
+                                {
+                                    "location": {
+                                        "range": {
+                                            "end": {"character": 14, "line": 7},
+                                            "start": {"character": 9, "line": 7},
+                                        },
+                                        "uri": "${php_file_uri}",
+                                    },
+                                    "message": "But got string",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "range": {
+                                            "end": {"character": 27, "line": 6},
+                                            "start": {"character": 24, "line": 6},
+                                        },
+                                        "uri": "${php_file_uri}",
+                                    },
+                                    "message": "Expected int",
+                                },
+                                {
+                                    "location": {
+                                        "range": {
+                                            "end": {"character": 14, "line": 7},
+                                            "start": {"character": 9, "line": 7},
+                                        },
+                                        "uri": "${php_file_uri}",
+                                    },
+                                    "message": "But got string",
+                                },
+                            ],
                             "severity": 1,
-                            "code": 1002,
                             "source": "Hack",
-                            "message": "A semicolon (';') is expected here.",
-                            "relatedLocations": [],
-                            "relatedInformation": [],
                         }
                     ],
                 },
@@ -5345,16 +5387,58 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "uri": "${php_file_uri}",
                     "diagnostics": [
                         {
+                            "code": 4110,
+                            "message": "Invalid return type",
                             "range": {
-                                "start": {"line": 7, "character": 11},
-                                "end": {"line": 7, "character": 11},
+                                "end": {"character": 14, "line": 7},
+                                "start": {"character": 9, "line": 7},
                             },
+                            "relatedInformation": [
+                                {
+                                    "location": {
+                                        "range": {
+                                            "end": {"character": 27, "line": 6},
+                                            "start": {"character": 24, "line": 6},
+                                        },
+                                        "uri": "${php_file_uri}",
+                                    },
+                                    "message": "Expected int",
+                                },
+                                {
+                                    "location": {
+                                        "range": {
+                                            "end": {"character": 14, "line": 7},
+                                            "start": {"character": 9, "line": 7},
+                                        },
+                                        "uri": "${php_file_uri}",
+                                    },
+                                    "message": "But got string",
+                                },
+                            ],
+                            "relatedLocations": [
+                                {
+                                    "location": {
+                                        "range": {
+                                            "end": {"character": 27, "line": 6},
+                                            "start": {"character": 24, "line": 6},
+                                        },
+                                        "uri": "${php_file_uri}",
+                                    },
+                                    "message": "Expected int",
+                                },
+                                {
+                                    "location": {
+                                        "range": {
+                                            "end": {"character": 14, "line": 7},
+                                            "start": {"character": 9, "line": 7},
+                                        },
+                                        "uri": "${php_file_uri}",
+                                    },
+                                    "message": "But got string",
+                                },
+                            ],
                             "severity": 1,
-                            "code": 1002,
                             "source": "Hack",
-                            "message": "A semicolon (';') is expected here.",
-                            "relatedLocations": [],
-                            "relatedInformation": [],
                         }
                     ],
                 },

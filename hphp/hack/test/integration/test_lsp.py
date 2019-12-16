@@ -5446,3 +5446,137 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             .request(method="shutdown", params={}, result=None)
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
+
+    def test_serverless_ide_naming_error(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("didchange.php"))
+        variables.update(
+            {
+                "main_file": self.repo_file("main.php"),
+                "main_file_contents": """\
+<?hh
+function main(): int {
+    return aaa();
+}
+""",
+                "file_a": self.repo_file("a.php"),
+                "file_b": self.repo_file("b.php"),
+            }
+        )
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_naming_error"), use_serverless_ide=True
+            )
+            .write_to_disk(
+                uri="${main_file}", contents="${main_file_contents}", notify=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "uri": "${main_file}",
+                    "languageId": "hack",
+                    "version": 1,
+                    "text": "${main_file_contents}",
+                },
+            )
+            # .request(
+            #     comment="Ensure that hover over `aaa` works even when the name is not yet defined",
+            #     method="textDocument/hover",
+            #     params={
+            #         "textDocument": {"uri": "${main_file}"},
+            #         "position": {"line": 2, "character": 13},
+            #     },
+            #     result={
+            #         "contents": [{"language": "hack", "value": "_"}],
+            #         "range": {
+            #             "start": {"line": 2, "character": 11},
+            #             "end": {"line": 2, "character": 14},
+            #         },
+            #     },
+            #     powered_by="serverless_ide",
+            # )
+            .write_to_disk(
+                comment="create file A",
+                uri="${file_a}",
+                contents="""\
+<?hh
+function aaa(): int {
+    return 1;
+}
+""",
+                notify=True,
+            )
+            .request(
+                comment="Ensure that hover over `aaa` works when there are no naming errors",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${main_file}"},
+                    "position": {"line": 2, "character": 13},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "function aaa(): int"},
+                        "Return type: `int`",
+                    ],
+                    "range": {
+                        "start": {"line": 2, "character": 11},
+                        "end": {"line": 2, "character": 14},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            #             .write_to_disk(
+            #                 comment="create file B",
+            #                 uri="${file_b}",
+            #                 contents="""\
+            # <?hh
+            # function aaa(): string {
+            #     return "foo";
+            # }
+            # """,
+            #                 notify=True,
+            #             )
+            #             .request(
+            #                 comment="Ensure that hover over `aaa` works even when there is a duplicate name",
+            #                 method="textDocument/hover",
+            #                 params={
+            #                     "textDocument": {"uri": "${main_file}"},
+            #                     "position": {"line": 2, "character": 13},
+            #                 },
+            #                 result={
+            #                     "contents": [
+            #                         {"language": "hack", "value": "function aaa(): int"},
+            #                         "Return type: `int`",
+            #                     ],
+            #                     "range": {
+            #                         "start": {"line": 2, "character": 11},
+            #                         "end": {"line": 2, "character": 14},
+            #                     },
+            #                 },
+            #                 powered_by="serverless_ide",
+            #             )
+            # .write_to_disk(
+            #     comment="delete file A", uri="${file_a}", contents=None, notify=True
+            # )
+            # .request(
+            #     comment="Ensure that hover over `aaa` works now that the naming error is resolved",
+            #     method="textDocument/hover",
+            #     params={
+            #         "textDocument": {"uri": "${main_file}"},
+            #         "position": {"line": 2, "character": 13},
+            #     },
+            #     result={
+            #         "contents": [
+            #             {"language": "hack", "value": "function aaa(): string"},
+            #             "Return type: `string`",
+            #         ],
+            #         "range": {
+            #             "start": {"line": 2, "character": 11},
+            #             "end": {"line": 2, "character": 14},
+            #         },
+            #     },
+            #     powered_by="serverless_ide",
+            # )
+            .request(method="shutdown", params={}, result=None)
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)

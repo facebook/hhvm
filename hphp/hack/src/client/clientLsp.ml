@@ -3177,15 +3177,34 @@ let log_response_if_necessary
       ~serverless_ide_flag:env.use_serverless_ide
   | _ -> ()
 
+type error_source =
+  | Error_from_server_fatal
+  | Error_from_client_fatal
+  | Error_from_client_recoverable
+  | Error_from_server_recoverable
+  | Error_from_lsp_cancelled
+  | Error_from_lsp_misc
+
 let hack_log_error
     (event : event option)
     (reason : string)
     (stack : string)
-    (source : string)
+    (source : error_source)
     (unblocked_time : float)
     (env : env) : unit =
   let root = get_root_opt () in
-  log "Exception %s: reason: %s, stack trace: %s" source reason stack;
+  let is_expected = source = Error_from_lsp_cancelled in
+  let source =
+    match source with
+    | Error_from_server_fatal -> "server_fatal"
+    | Error_from_client_fatal -> "client_fatal"
+    | Error_from_client_recoverable -> "client_recoverable"
+    | Error_from_server_recoverable -> "server_recoverable"
+    | Error_from_lsp_cancelled -> "lsp_cancelled"
+    | Error_from_lsp_misc -> "lsp_misc"
+  in
+  if not is_expected then
+    log "Exception %s: reason: %s, stack trace: %s" source reason stack;
   match event with
   | Some (Client_message (metadata, message)) ->
     let start_hh_server_state =
@@ -4007,7 +4026,9 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
         | Tick ->
           handle_tick ~env ~state ~ide_service:!ide_service ~ref_unblocked_time
       in
-      (* for LSP requests and notifications, we keep a log of what+when we responded *)
+      (* for LSP requests and notifications, we keep a log of what+when we responded.
+      INVARIANT: every LSP request gets either a response logged here,
+      or an error logged by one of the handlers below. *)
       log_response_if_necessary event !ref_unblocked_time env;
       Lwt.return_unit
     with
@@ -4041,7 +4062,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
           !ref_event
           message
           stack
-          "1:from_server"
+          Error_from_server_fatal
           !ref_unblocked_time
           env;
         Lsp_helpers.telemetry_error
@@ -4107,7 +4128,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
         !ref_event
         message
         stack
-        "2:from_client"
+        Error_from_client_fatal
         !ref_unblocked_time
         env;
       Lsp_helpers.telemetry_error to_stdout (message ^ ", from_client\n" ^ stack);
@@ -4120,7 +4141,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
         !ref_event
         message
         stack
-        "3:from_client"
+        Error_from_client_recoverable
         !ref_unblocked_time
         env;
       Lsp_helpers.telemetry_error to_stdout (message ^ ", from_client\n" ^ stack);
@@ -4131,18 +4152,22 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
         !ref_event
         message
         stack
-        "4:from_server"
+        Error_from_server_recoverable
         !ref_unblocked_time
         env;
       respond_to_error !ref_event (Error.Unknown message) stack;
       Lwt.return_unit
     | Error.RequestCancelled _ as e ->
       let stack = Printexc.get_backtrace () in
-      (* Note: we may send back a request-cancelled error if we decided to
-      cancel the user's request (such as if `hh_server` was not ready to accept
-      it, or if it timed out). This happens fairly frequently and are pretty
-      benign, so don't log them. *)
       respond_to_error !ref_event e stack;
+      let message = Exn.to_string e in
+      hack_log_error
+        !ref_event
+        message
+        stack
+        Error_from_lsp_cancelled
+        !ref_unblocked_time
+        env;
       Lwt.return_unit
     | e ->
       let stack = Printexc.get_backtrace () in
@@ -4152,7 +4177,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
         !ref_event
         message
         stack
-        "5:from_lsp"
+        Error_from_lsp_misc
         !ref_unblocked_time
         env;
       Lwt.return_unit

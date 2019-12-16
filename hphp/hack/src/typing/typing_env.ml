@@ -16,6 +16,7 @@ open Aast
 open Typing_env_return_info
 module Dep = Typing_deps.Dep
 module LID = Local_id
+module Occ = Typing_tyvar_occurrences
 module SG = SN.Superglobals
 module LEnvC = Typing_per_cont_env
 module C = Typing_continuations
@@ -55,54 +56,6 @@ let log_env_change name ?(level = 1) old_env new_env =
     in
     !env_log_function pos name old_env new_env );
   new_env
-
-let get_tyvar_occurrences env v =
-  let tyvar_occurrences = env.tyvar_occurrences in
-  Option.value (IMap.find_opt v tyvar_occurrences) ~default:ISet.empty
-
-let set_tyvar_occurrences env v vars =
-  { env with tyvar_occurrences = IMap.add v vars env.tyvar_occurrences }
-
-(** Make v occur in v', i.e. add v' to the occurrences of v. *)
-let add_tyvar_occurrence env v ~occurs_in:v' =
-  let vars = get_tyvar_occurrences env v in
-  let vars = ISet.add v' vars in
-  let env = set_tyvar_occurrences env v vars in
-  env
-
-let add_tyvar_occurrences env vars ~occur_in:v =
-  ISet.fold (fun v' env -> add_tyvar_occurrence env v' ~occurs_in:v) vars env
-
-let get_tyvars_in_tyvar env v =
-  Option.value (IMap.find_opt v env.tyvars_in_tyvar) ~default:ISet.empty
-
-let set_tyvars_in_tyvar env v vars =
-  { env with tyvars_in_tyvar = IMap.add v vars env.tyvars_in_tyvar }
-
-let make_tyvars_occur_in_tyvar env vars ~occur_in:v =
-  let env = add_tyvar_occurrences env vars ~occur_in:v in
-  let env = set_tyvars_in_tyvar env v vars in
-  env
-
-let remove_tyvar_occurrence env v ~no_more_occurs_in:v' =
-  let vars = get_tyvar_occurrences env v in
-  let vars = ISet.remove v' vars in
-  let env = set_tyvar_occurrences env v vars in
-  env
-
-let remove_tyvar_from_tyvar env ~from:v v' =
-  let vars = get_tyvars_in_tyvar env v in
-  let vars = ISet.remove v' vars in
-  let env = set_tyvars_in_tyvar env v vars in
-  env
-
-let make_tyvar_no_more_occur_in_tyvar env v ~no_more_in:v' =
-  let env = remove_tyvar_occurrence env v ~no_more_occurs_in:v' in
-  let env = remove_tyvar_from_tyvar env ~from:v' v in
-  env
-
-let contains_unsolved_tyvars env v =
-  not @@ ISet.is_empty (get_tyvars_in_tyvar env v)
 
 let add_subst env x x' =
   if Int.( <> ) x x' then
@@ -278,7 +231,10 @@ let get_unsolved_vars_in_ty env ty =
 
       method! on_tvar vars _r v =
         (* Add it if it has unsolved type vars or if it is itself unsolved. *)
-        if (not (tyvar_is_solved env v)) || contains_unsolved_tyvars env v then
+        if
+          (not (tyvar_is_solved env v))
+          || Occ.contains_unsolved_tyvars env.tyvar_occurrences v
+        then
           ISet.add v vars
         else
           vars
@@ -286,11 +242,29 @@ let get_unsolved_vars_in_ty env ty =
   in
   gatherer#on_type ISet.empty ty
 
+let make_tyvars_occur_in_tyvar env vars ~occur_in:x =
+  {
+    env with
+    tyvar_occurrences =
+      Occ.make_tyvars_occur_in_tyvar env.tyvar_occurrences vars ~occur_in:x;
+  }
+
+let make_tyvar_no_more_occur_in_tyvar env v ~no_more_in:v' =
+  {
+    env with
+    tyvar_occurrences =
+      Occ.make_tyvar_no_more_occur_in_tyvar
+        env.tyvar_occurrences
+        v
+        ~no_more_in:v';
+  }
+
 (** Binds type variable [x] to type [ty]. *)
 let add env x ty =
   let (env, x) = get_var env x in
   let env =
-    make_tyvars_occur_in_tyvar env (get_unsolved_vars_in_ty env ty) ~occur_in:x
+    let unsolved_vars_in_ty = get_unsolved_vars_in_ty env ty in
+    make_tyvars_occur_in_tyvar env unsolved_vars_in_ty ~occur_in:x
   in
   match ty with
   | (_, Tvar x') -> add_subst env x x'
@@ -623,8 +597,7 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot =
     function_pos = Pos.none;
     tenv = IMap.empty;
     subst = IMap.empty;
-    tyvar_occurrences = IMap.empty;
-    tyvars_in_tyvar = IMap.empty;
+    tyvar_occurrences = Occ.init;
     fresh_typarams = SSet.empty;
     lenv = initial_local TPEnv.empty Nonreactive;
     in_loop = false;

@@ -43,13 +43,9 @@ val rename : env -> int -> int -> env
 
 val add : env -> int -> locl_ty -> env
 
-val get_tyvar_occurrences : env -> int -> ISet.t
-
 val make_tyvar_no_more_occur_in_tyvar : env -> int -> no_more_in:int -> env
 
 val tyvar_is_solved : env -> int -> bool
-
-val contains_unsolved_tyvars : env -> int -> bool
 
 val wrap_ty_in_var :
   env -> Reason.t -> locl_ty -> Typing_env_types.env * locl_ty

@@ -54,7 +54,7 @@ where
     ) -> ScouredComments {
         let on_children = |in_block: bool, acc| {
             node.iter_children()
-                .fold(acc, |a, n| self.scour_comments_(n, true, a))
+                .fold(acc, |a, n| self.scour_comments_(n, in_block, a))
         };
         match &node.syntax {
             CompoundStatement(_) => on_children(true, acc),

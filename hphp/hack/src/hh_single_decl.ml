@@ -154,7 +154,7 @@ let compare_decl verbosity fn =
         "constant(s)"
         (fun a b -> Decl.declare_const_in_file a b |> fst)
         Typing_defs.equal_decl_ty
-        (Pp_type.show_decl_ty ())
+        Pp_type.show_decl_ty
         decls.consts;
       compare
         "function(s)"

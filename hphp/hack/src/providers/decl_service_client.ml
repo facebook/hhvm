@@ -10,18 +10,26 @@ open Core_kernel
 
 type t = {
   hhi_root: Path.t;
-  rpc_get_gconst: string -> (string, Marshal_tools.error) result;
+  rpc_get_gconst: string -> Typing_defs.decl_ty option;
 }
 
 let rpc_get_gconst
     (fd : Unix.file_descr)
     (base : Decl_ipc_ffi_externs.sharedmem_base_address)
-    (name : string) : (string, Marshal_tools.error) result =
+    (name : string) : Typing_defs.decl_ty option =
   (* TODO: this is just a placeholder for now *)
   Printf.printf "GET GCONST... %s\n%!" name;
-  let s = Decl_ipc_ffi_externs.get_gconst_ffi fd base name in
-  Printf.printf "GOT GCONST... %s = %s\n%!" name s;
-  Ok s
+  let ty = Decl_ipc_ffi_externs.get_gconst_ffi fd base name in
+  (* HACK: The decl service just stores a decl_ty, not a decl_ty option, so it
+     either responds with a pointer to the decl_ty (when present) or the integer
+     0 (otherwise). Turn that into None/Some here. *)
+  if Int.equal 0 (Obj.magic ty) then (
+    Printf.printf "NO GCONST %s\n%!" name;
+    None
+  ) else (
+    Format.printf "GOT GCONST... %s = %a\n%!" name Pp_type.pp_decl_ty ty;
+    Some ty
+  )
 
 let init
     ~(decl_sock : Path.t)
@@ -43,11 +51,19 @@ let init
 
 let inproc_get_gconst
     (state : Decl_ipc_ffi_externs.inproc_state) (name : string) :
-    (string, Marshal_tools.error) result =
+    Typing_defs.decl_ty option =
   Printf.printf "INPROC GET GCONST... %s\n%!" name;
-  let s = Decl_ipc_ffi_externs.inproc_request_ffi state 1 name in
-  Printf.printf "INPROC GOT GCONST... %s = %s\n%!" name s;
-  Ok s
+  let ty = Decl_ipc_ffi_externs.inproc_request_ffi state 1 name in
+  (* HACK: The decl service just stores a decl_ty, not a decl_ty option, so it
+     either responds with a pointer to the decl_ty (when present) or the integer
+     0 (otherwise). Turn that into None/Some here. *)
+  if Int.equal 0 (Obj.magic ty) then (
+    Printf.printf "INPROC NO GCONST %s\n%!" name;
+    None
+  ) else (
+    Format.printf "INPROC GOT GCONST... %s = %a\n%!" name Pp_type.pp_decl_ty ty;
+    Some ty
+  )
 
 let init_inproc ~(naming_table : Path.t) ~(root : Path.t) ~(hhi_root : Path.t) :
     t =

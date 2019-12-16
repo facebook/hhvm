@@ -1112,11 +1112,11 @@ let pp_locl_phase _ _ = ()
 
 let pp_decl_ty fmt ty = pp_ty fmt ty
 
-let show_decl_ty _ x = show_ty x
+let show_decl_ty x = show_ty x
 
 let pp_locl_ty fmt ty = pp_ty fmt ty
 
-let show_locl_ty _ x = show_ty x
+let show_locl_ty x = show_ty x
 
 let pp_ty _ fmt ty = pp_ty fmt ty
 

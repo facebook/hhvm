@@ -10,7 +10,7 @@
 for decls and get back answers. Often these requests will block upon IO. *)
 type t = {
   hhi_root: Path.t;  (** where does the decl-service keep its hhi files *)
-  rpc_get_gconst: string -> (string, Marshal_tools.error) result;
+  rpc_get_gconst: string -> Typing_defs.decl_ty option;
       (** fetches a global const *)
 }
 

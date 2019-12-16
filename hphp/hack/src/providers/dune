@@ -4,7 +4,8 @@
   (libraries
     decl_service_client
     heap_shared_mem
-    memory_bounded_lru_cache)
+    memory_bounded_lru_cache
+    typing_defs)
   (preprocess (pps ppx_deriving.std)))
 
 (library
@@ -37,6 +38,7 @@
     core_kernel
     decl_ipc_ffi_externs
     marshal_tools
+    typing_defs
     utils_core
     sys_utils)
   (preprocess (pps ppx_deriving.std)))

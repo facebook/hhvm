@@ -34,13 +34,13 @@ type type_param_mutability = Typing_defs.param_mutability
 
 type val_kind = Typing_defs.val_kind
 
-let pp_ty fmt ty = Pp_type.pp_ty () fmt ty
+let pp_ty = Pp_type.pp_locl_ty
 
-let show_ty ty = Pp_type.show_ty () ty
+let show_ty = Pp_type.show_locl_ty
 
-let pp_decl_ty fmt ty = Pp_type.pp_ty () fmt ty
+let pp_decl_ty = Pp_type.pp_decl_ty
 
-let show_decl_ty ty = Pp_type.show_ty () ty
+let show_decl_ty = Pp_type.show_decl_ty
 
 let pp_reactivity fmt r = Pp_type.pp_reactivity fmt r
 

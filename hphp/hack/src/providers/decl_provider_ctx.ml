@@ -210,11 +210,8 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
     let result : gconst_decl option = Obj.obj result in
     result
   | Provider_backend.Decl_service decl ->
-    begin
-      match decl.Decl_service_client.rpc_get_gconst gconst_name with
-      | Ok _ -> None (* TODO: implement it! *)
-      | Error e -> failwith (Marshal_tools.error_to_verbose_string e)
-    end
+    decl.Decl_service_client.rpc_get_gconst gconst_name
+    |> Option.map ~f:(fun decl -> (decl, Errors.empty))
 
 let invalidate_fun (ctx : Provider_context.t) (fun_name : fun_key) : unit =
   match ctx.Provider_context.backend with

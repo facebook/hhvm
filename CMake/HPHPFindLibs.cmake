@@ -289,17 +289,28 @@ if (LIBPTHREAD_STATIC)
   add_definitions("-DPTW32_STATIC_LIB")
 endif()
 
+OPTION(
+  NON_DISTRIBUTABLE_BUILD
+  "Use libraries which may result in a binary that can not be legally distributed"
+  OFF
+)
+
 # Either Readline or Editline (for hphpd)
-find_package(Readline)
-find_package(Editline)
-if (EDITLINE_INCLUDE_DIRS)
-  add_definitions("-DUSE_EDITLINE")
-  include_directories(${EDITLINE_INCLUDE_DIRS})
-elseif (READLINE_INCLUDE_DIR)
+if(NON_DISTRIBUTABLE_BUILD)
+  find_package(Readline)
+endif()
+if (NOT READLINE_INCLUDE_DIR)
+  find_package(Editline)
+endif()
+
+if (NON_DISTRIBUTABLE_BUILD AND READLINE_INCLUDE_DIR)
   if (READLINE_STATIC)
     add_definitions("-DREADLINE_STATIC")
   endif()
   include_directories(${READLINE_INCLUDE_DIR})
+elseif (EDITLINE_INCLUDE_DIRS)
+  add_definitions("-DUSE_EDITLINE")
+  include_directories(${EDITLINE_INCLUDE_DIRS})
 else()
   message(FATAL_ERROR "Could not find Readline or Editline")
 endif()

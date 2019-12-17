@@ -201,11 +201,19 @@ struct HashTable : HashTableCommon {
   }
 
   static ALWAYS_INLINE
-  ArrayType* staticAlloc(uint32_t scale) {
-    auto const size = computeAllocBytes(scale);
-    auto mem = RuntimeOption::EvalLowStaticArrays ? lower_malloc(size)
-                                                  : uncounted_malloc(size);
-    return static_cast<ArrayType*>(mem);
+  ArrayType* staticAlloc(uint32_t scale, size_t extra = 0) {
+    auto const size = computeAllocBytes(scale) + extra;
+    auto const mem = RuntimeOption::EvalLowStaticArrays
+      ? lower_malloc(size)
+      : uncounted_malloc(size);
+    return reinterpret_cast<ArrayType*>(reinterpret_cast<char*>(mem) + extra);
+  }
+
+  static ALWAYS_INLINE
+  ArrayType* uncountedAlloc(uint32_t scale, size_t extra = 0) {
+    auto const size = computeAllocBytes(scale) + extra;
+    auto const mem = uncounted_malloc(size);
+    return reinterpret_cast<ArrayType*>(reinterpret_cast<char*>(mem) + extra);
   }
 
   static ALWAYS_INLINE

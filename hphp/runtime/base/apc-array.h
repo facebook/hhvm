@@ -18,6 +18,7 @@
 #define incl_HPHP_APC_ARRAY_H_
 
 #include "hphp/runtime/base/apc-handle-defs.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
@@ -183,6 +184,9 @@ struct APCArray {
     return m_handle.kind() == APCKind::SharedKeyset;
   }
 
+  arrprov::Tag& prov() { return m_prov; }
+  arrprov::Tag prov() const { return m_prov; }
+
 private:
   struct Bucket {
     /** index of the next bucket, or -1 if the end of a chain */
@@ -251,6 +255,7 @@ private:
     // for packed arrays
     size_t m_size;
   };
+  arrprov::Tag m_prov;
 };
 
 //////////////////////////////////////////////////////////////////////

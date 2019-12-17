@@ -131,14 +131,14 @@ enum class Mode { Insert, Emplace };
  * Set the provenance tag for `a` to `tag`.
  */
 template<Mode mode = Mode::Insert> void setTag(ArrayData* a, Tag tag);
-template<Mode mode = Mode::Insert> void setTag(const APCArray* a, Tag tag);
+template<Mode mode = Mode::Insert> void setTag(APCArray* a, Tag tag);
 
 /*
  * Clear a tag for a released array---only call this if the array is henceforth
  * unreachable or no longer of a kind that accepts provenance tags
  */
 void clearTag(ArrayData* ad);
-void clearTag(const APCArray* a);
+void clearTag(APCArray* a);
 
 /*
  * Tag `tv` with provenance for the current PC and unit (if it admits a tag and

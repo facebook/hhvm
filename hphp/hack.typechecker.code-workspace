@@ -1,0 +1,87 @@
+{
+  /*
+   * TS 2019-12-16 - This file is for UX testing for vs code workspace functionality.
+   * For questions please contact Ted Spence or Omar Tawfik
+   */
+	"folders": [
+		{
+			"name": "hack",
+			"uri": "./hack"
+		}
+  ],
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Build hack",
+        "command": "./hack/scripts/facebook/build-hh.sh",
+        "args": [],
+        "group": "build",
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": "$tslint5"
+      },
+      {
+        "label": "Switch hack to buck-out",
+        "command": "hh",
+        "args": ["--switch", "buck-out"],
+        "group": "test",
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": "$tslint5"
+      },
+      {
+        "label": "Switch hack to dev",
+        "command": "hh",
+        "args": ["--switch", "dev"],
+        "group": "test",
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": "$tslint5"
+      },
+      {
+        "label": "Switch hack to prod",
+        "command": "hh",
+        "args": ["--switch", "prod"],
+        "group": "test",
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": "$tslint5"
+      },
+      {
+        "label": "Kill all running HH instances",
+        "command": "./hack/scripts/facebook/kill-hh.sh",
+        "args": [],
+        "group": "test",
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": "$tslint5"
+      },
+      {
+        "label": "Run hack integration tests",
+        "command": "buck",
+        "args": ["test", "//hphp/hack/test/integration/..."],
+        "group": "test",
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        },
+        "problemMatcher": "$tslint5"
+      }
+    ]
+  },
+  "settings": {
+    "facebook.repositories": ["fbcode"],
+    "facebook.server": "reserved"
+  }
+}

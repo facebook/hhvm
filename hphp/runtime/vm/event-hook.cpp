@@ -898,7 +898,7 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
       auto session = AsioSession::Get();
       if (session->hasOnResumableSuccess()) {
         if (!ar->func()->isGenerator()) {
-          session->onResumableSuccess(frame_afwh(ar), cellAsCVarRef(retval));
+          session->onResumableSuccess(frame_afwh(ar), tvAsCVarRef(retval));
         } else {
           auto ag = frame_async_generator(ar);
           if (!ag->isEagerlyExecuted()) {

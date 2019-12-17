@@ -174,7 +174,7 @@ void cellShrEq(tv_lval c1, Cell);
  * Post: lhs.m_type == KindOfString
  */
 inline void cellConcatEq(tv_lval lhs, Cell rhs) {
-  concat_assign(lhs, cellAsCVarRef(rhs).toString());
+  concat_assign(lhs, tvAsCVarRef(rhs).toString());
 }
 
 //////////////////////////////////////////////////////////////////////

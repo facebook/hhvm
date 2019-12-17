@@ -508,7 +508,7 @@ inline Variant ArrayData::getValue(ssize_t pos) const {
 
 inline Variant ArrayData::getKey(ssize_t pos) const {
   auto key = nvGetKey(pos);
-  return std::move(cellAsVariant(key));
+  return std::move(tvAsVariant(key));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

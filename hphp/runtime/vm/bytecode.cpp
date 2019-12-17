@@ -1718,9 +1718,9 @@ OPTBLD_INLINE void iopAddElemC() {
     raise_error("AddElemC: $3 must be an array or dict");
   }
   if (c2->m_type == KindOfInt64) {
-    cellAsVariant(*c3).asArrRef().set(c2->m_data.num, tvAsCVarRef(c1));
+    tvAsVariant(*c3).asArrRef().set(c2->m_data.num, tvAsCVarRef(c1));
   } else {
-    cellAsVariant(*c3).asArrRef().set(tvAsCVarRef(c2), tvAsCVarRef(c1));
+    tvAsVariant(*c3).asArrRef().set(tvAsCVarRef(c2), tvAsCVarRef(c1));
   }
   vmStack().popC();
   vmStack().popC();
@@ -1730,7 +1730,7 @@ OPTBLD_INLINE void iopAddNewElemC() {
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
   if (isArrayType(c2->m_type)) {
-    cellAsVariant(*c2).asArrRef().append(tvAsCVarRef(c1));
+    tvAsVariant(*c2).asArrRef().append(tvAsCVarRef(c1));
   } else if (isVecType(c2->m_type)) {
     auto in = c2->m_data.parr;
     auto out = PackedArray::AppendVec(in, *c1);
@@ -1831,9 +1831,9 @@ OPTBLD_INLINE void iopClsCnsD(const StringData* clsCnsName, Id classId) {
 OPTBLD_INLINE void iopConcat() {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
-  auto const s2 = cellAsVariant(*c2).toString();
-  auto const s1 = cellAsCVarRef(*c1).toString();
-  cellAsVariant(*c2) = concat(s2, s1);
+  auto const s2 = tvAsVariant(*c2).toString();
+  auto const s1 = tvAsCVarRef(*c1).toString();
+  tvAsVariant(*c2) = concat(s2, s1);
   assertx(c2->m_data.pstr->checkCount());
   vmStack().popC();
 }
@@ -1843,26 +1843,26 @@ OPTBLD_INLINE void iopConcatN(uint32_t n) {
   auto const c2 = vmStack().indC(1);
 
   if (n == 2) {
-    auto const s2 = cellAsVariant(*c2).toString();
-    auto const s1 = cellAsCVarRef(*c1).toString();
-    cellAsVariant(*c2) = concat(s2, s1);
+    auto const s2 = tvAsVariant(*c2).toString();
+    auto const s1 = tvAsCVarRef(*c1).toString();
+    tvAsVariant(*c2) = concat(s2, s1);
     assertx(c2->m_data.pstr->checkCount());
   } else if (n == 3) {
     auto const c3 = vmStack().indC(2);
-    auto const s3 = cellAsVariant(*c3).toString();
-    auto const s2 = cellAsCVarRef(*c2).toString();
-    auto const s1 = cellAsCVarRef(*c1).toString();
-    cellAsVariant(*c3) = concat3(s3, s2, s1);
+    auto const s3 = tvAsVariant(*c3).toString();
+    auto const s2 = tvAsCVarRef(*c2).toString();
+    auto const s1 = tvAsCVarRef(*c1).toString();
+    tvAsVariant(*c3) = concat3(s3, s2, s1);
     assertx(c3->m_data.pstr->checkCount());
   } else {
     assertx(n == 4);
     auto const c3 = vmStack().indC(2);
     auto const c4 = vmStack().indC(3);
-    auto const s4 = cellAsVariant(*c4).toString();
-    auto const s3 = cellAsCVarRef(*c3).toString();
-    auto const s2 = cellAsCVarRef(*c2).toString();
-    auto const s1 = cellAsCVarRef(*c1).toString();
-    cellAsVariant(*c4) = concat4(s4, s3, s2, s1);
+    auto const s4 = tvAsVariant(*c4).toString();
+    auto const s3 = tvAsCVarRef(*c3).toString();
+    auto const s2 = tvAsCVarRef(*c2).toString();
+    auto const s1 = tvAsCVarRef(*c1).toString();
+    tvAsVariant(*c4) = concat4(s4, s3, s2, s1);
     assertx(c4->m_data.pstr->checkCount());
   }
 
@@ -1873,7 +1873,7 @@ OPTBLD_INLINE void iopConcatN(uint32_t n) {
 
 OPTBLD_INLINE void iopNot() {
   Cell* c1 = vmStack().topC();
-  cellAsVariant(*c1) = !cellAsVariant(*c1).toBoolean();
+  tvAsVariant(*c1) = !tvAsVariant(*c1).toBoolean();
 }
 
 template<class Fn>
@@ -2240,7 +2240,7 @@ OPTBLD_INLINE void iopCheckReifiedGenericMismatch() {
 
 OPTBLD_INLINE void iopPrint() {
   Cell* c1 = vmStack().topC();
-  g_context->write(cellAsVariant(*c1).toString());
+  g_context->write(tvAsVariant(*c1).toString());
   vmStack().replaceC<KindOfInt64>(1);
 }
 
@@ -2260,7 +2260,7 @@ OPTBLD_INLINE void iopExit() {
   if (c1->m_type == KindOfInt64) {
     exitCode = c1->m_data.num;
   } else {
-    g_context->write(cellAsVariant(*c1).toString());
+    g_context->write(tvAsVariant(*c1).toString());
   }
   vmStack().popC();
   vmStack().pushNull();
@@ -2323,7 +2323,7 @@ OPTBLD_INLINE void jmpOpImpl(PC& pc, PC targetpc) {
     vmStack().popX();
     if (op == OpJmpZ ? n == 0 : n != 0) pc = targetpc;
   } else {
-    auto const cond = cellAsCVarRef(*c1).toBoolean();
+    auto const cond = tvAsCVarRef(*c1).toBoolean();
     vmStack().popC();
     if (op == OpJmpZ ? !cond : cond) pc = targetpc;
   }
@@ -2345,7 +2345,7 @@ OPTBLD_INLINE void iopSelect() {
       vmStack().popX();
       return val;
     } else {
-      auto const val = cellAsCVarRef(*c).toBoolean();
+      auto const val = tvAsCVarRef(*c).toBoolean();
       vmStack().popC();
       return val;
     }
@@ -4497,7 +4497,7 @@ void resolveMethodImpl(Cell* c1, Cell* c2) {
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
   bool dynamic = false;
-  auto arr = make_varray(cellAsVariant(*c2), cellAsVariant(*c1));
+  auto arr = make_varray(tvAsVariant(*c2), tvAsVariant(*c1));
   auto const func = vm_decode_function(
     Variant{arr},
     vmfp(),

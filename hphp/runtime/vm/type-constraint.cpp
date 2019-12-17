@@ -500,7 +500,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
       case AnnotAction::Pass: return true;
       case AnnotAction::Fail: return false;
       case AnnotAction::CallableCheck:
-        return !ForProp && (Assert || is_callable(cellAsCVarRef(*val)));
+        return !ForProp && (Assert || is_callable(tvAsCVarRef(*val)));
       case AnnotAction::ObjectCheck:
         assertx(td->type == AnnotType::Object);
         c = td->klass;
@@ -704,7 +704,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
           assertx(!isRecField);
           if (isAssert) return true;
           if (isPasses) return false;
-          return is_callable(cellAsCVarRef(*val));
+          return is_callable(tvAsCVarRef(*val));
         case MetaType::Nothing:
         case MetaType::NoReturn:
           assertx(!isProp);
@@ -743,7 +743,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
       assertx(!isRecField);
       if (isAssert) return true;
       if (isPasses) return false;
-      return is_callable(cellAsCVarRef(*val));
+      return is_callable(tvAsCVarRef(*val));
     case AnnotAction::ObjectCheck:
       assertx(isObject());
       return !isPasses && checkNamedTypeNonObj<isAssert, isProp>(val);

@@ -149,7 +149,7 @@ const EnumValues* EnumCache::loadEnumValues(const Class* klass,
       msg += " enum can only contain string and int values";
       EnumCache::failLookup(msg);
     }
-    values.set(StrNR(consts[i].name), cellAsCVarRef(value));
+    values.set(StrNR(consts[i].name), tvAsCVarRef(value));
 
     // Manually perform int-like key coercion even if names is a dict for
     // backwards compatibility.

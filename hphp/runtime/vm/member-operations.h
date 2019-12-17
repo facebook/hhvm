@@ -252,7 +252,7 @@ inline tv_rval ElemArrayPre(ArrayData* base, TypedValue key) {
 
   // TODO(#3888164): Array elements can never be KindOfUninit.  This API should
   // be changed.
-  auto const rval = ArrNR{base}.asArray().rval(cellAsCVarRef(key));
+  auto const rval = ArrNR{base}.asArray().rval(tvAsCVarRef(key));
   return rval.type() != KindOfUninit ? rval : tv_rval { nullptr };
 }
 
@@ -461,7 +461,7 @@ inline int64_t ElemStringPre(TypedValue key) {
     return key.m_data.pstr->toInt64(10);
   } else {
     raise_notice("String offset cast occurred");
-    return cellAsCVarRef(key).toInt64();
+    return tvAsCVarRef(key).toInt64();
   }
 }
 
@@ -839,7 +839,7 @@ inline tv_lval ElemDEmptyish(tv_lval base,
 
   tvMove(make_array_like_tv(ArrayData::CreateDArray()), base);
 
-  auto const result = asArrRef(base).lval(cellAsCVarRef(scratchKey));
+  auto const result = asArrRef(base).lval(tvAsCVarRef(scratchKey));
   if (mode == MOpMode::Warn) {
     throwArrayKeyException(tvAsCVarRef(&scratchKey).toString().get(), false);
   }
@@ -1801,7 +1801,7 @@ inline void SetNewElemEmptyish(tv_lval base,
                                const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
   Array a = Array::CreateVArray();
-  a.append(cellAsCVarRef(*value));
+  a.append(tvAsCVarRef(*value));
   tvMove(make_array_like_tv(a.detach()), base);
 }
 

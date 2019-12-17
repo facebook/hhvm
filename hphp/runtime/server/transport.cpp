@@ -840,7 +840,7 @@ void Transport::sendRawInternal(const char *data, int size,
     // the recursion guard calls back into m_headerCallback
     g_context->m_headerCallbackDone = true;
     try {
-      vm_call_user_func(cellAsVariant(g_context->m_headerCallback),
+      vm_call_user_func(tvAsVariant(g_context->m_headerCallback),
                         init_null_variant);
     } catch (...) {
       LogException("HeaderCallback");

@@ -104,7 +104,7 @@ Variant HHVM_FUNCTION(join, const Object& obj) {
   }
 
   if (LIKELY(handle->isSucceeded())) {
-    return cellAsCVarRef(handle->getResult());
+    return tvAsCVarRef(handle->getResult());
   } else {
     throw_object(Object{handle->getException()});
   }

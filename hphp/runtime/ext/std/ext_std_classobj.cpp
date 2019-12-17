@@ -128,7 +128,7 @@ Array HHVM_FUNCTION(get_class_constants, const String& className) {
         value = cls->clsCnsGet(consts[i].name);
       }
       assertx(value.m_type != KindOfUninit);
-      arrayInit.set(name, cellAsCVarRef(value));
+      arrayInit.set(name, tvAsCVarRef(value));
     }
   }
 

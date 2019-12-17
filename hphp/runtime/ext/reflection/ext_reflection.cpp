@@ -1431,7 +1431,7 @@ static Array HHVM_STATIC_METHOD(
     auto constName = iter.first().getStringData();
     Cell value = cls->clsCnsGet(constName);
     assertx(value.m_type != KindOfUninit);
-    ai.add(constName, cellAsCVarRef(value));
+    ai.add(constName, tvAsCVarRef(value));
   }
   return ai.toArray();
 }
@@ -2473,7 +2473,7 @@ Array get_class_info(const String& name) {
       if (consts[i].cls == cls) {
         Cell value = cls->clsCnsGet(consts[i].name);
         assertx(value.m_type != KindOfUninit);
-        arr.set(StrNR(consts[i].name), cellAsCVarRef(value));
+        arr.set(StrNR(consts[i].name), tvAsCVarRef(value));
       }
     }
 

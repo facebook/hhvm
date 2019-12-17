@@ -1452,7 +1452,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
   );
 
   assertx(tvAsCVarRef(&ret).isAllowedAsConstantValue());
-  clsCnsData.set(StrNR(clsCnsName), cellAsCVarRef(ret), true /* isKey */);
+  clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(ret), true /* isKey */);
 
   // The caller will inc-ref the returned value, so undo the inc-ref caused by
   // storing it in the cache.

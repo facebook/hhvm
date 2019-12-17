@@ -1207,11 +1207,11 @@ Array ExecutionContext::getLocalDefinedVariablesDebugger(int frame) {
 }
 
 bool ExecutionContext::setHeaderCallback(const Variant& callback) {
-  if (cellAsVariant(g_context->m_headerCallback).toBoolean()) {
+  if (tvAsVariant(g_context->m_headerCallback).toBoolean()) {
     // return false if a callback has already been set.
     return false;
   }
-  cellAsVariant(g_context->m_headerCallback) = callback;
+  tvAsVariant(g_context->m_headerCallback) = callback;
   return true;
 }
 

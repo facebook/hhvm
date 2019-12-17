@@ -385,7 +385,7 @@ Variant HHVM_FUNCTION(constant, const String& name) {
       String cnsName(constantName, data + len - constantName, CopyString);
       Cell cns = cls->clsCnsGet(cnsName.get());
       if (cns.m_type != KindOfUninit) {
-        return cellAsCVarRef(cns);
+        return tvAsCVarRef(cns);
       }
     }
   } else {

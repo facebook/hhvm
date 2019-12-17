@@ -416,6 +416,14 @@ let merge
       Prefetch files_to_prefetch :: !files_to_process
     else
       !files_to_process;
+
+  (* If workers can steal work from each other, then it's possible that
+    some of the files that the current worker completed checking have already
+    been removed from the in-progress set. Thus, we should calculate
+    the checked count by subtracting the old in-progress count from the new one
+    after we remove the completed files from the set. This way, we get
+    an accurate count whether there's work stealing going on or not. *)
+  let old_in_progress_count = Hash_set.Poly.length files_in_progress in
   List.iter ~f:(Hash_set.Poly.remove files_in_progress) results.completed;
 
   (* Let's re-add the deferred files here! *)
@@ -426,7 +434,9 @@ let merge
     | _ -> false
   in
   let deferred_check_count = List.count ~f:is_check results.deferred in
-  let completed_check_count = List.count ~f:is_check results.completed in
+  let completed_check_count =
+    old_in_progress_count - Hash_set.Poly.length files_in_progress
+  in
   files_checked_count :=
     !files_checked_count + completed_check_count - deferred_check_count;
   ServerProgress.send_percentage_progress_to_monitor

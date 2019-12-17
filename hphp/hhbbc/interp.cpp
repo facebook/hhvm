@@ -200,32 +200,40 @@ bool start_add_elem(ISS& env, Type& ty, Op op) {
  * add_elem array cached in the interp state and should write to it directly.
  */
 template <typename Fn>
-bool mutate_add_elem_array(ISS& env, ProvTag tag, Fn&& mutate) {
+bool mutate_add_elem_array(ISS& env, ProvTag loc, Fn&& mutate) {
   auto const arr = add_elem_array(env);
   if (!arr) return false;
+
+  assertx(!RuntimeOption::EvalArrayProvenance || loc.valid());
+
+  if (!RuntimeOption::EvalArrayProvenance) {
+    mutate(arr);
+    return true;
+  }
+
   // We need to propagate the provenance info in case we promote *arr from
-  // static to counted (or if its representation changes in some other
-  // way) ...
-  assertx(!RuntimeOption::EvalArrayProvenance || tag);
-  auto const oldTag = RuntimeOption::EvalArrayProvenance ?
-    arrprov::getTag(*arr) :
-    folly::none;
+  // static to counted (or if its representation changes in some other way)...
+  auto const tag = ProvTag::FromSArr(*arr);
+
   mutate(arr);
-  // ... which means we'll have to setTag if
-  // - the array still needs a tag AND
+
+  // ...which means we'll have to setTag if
+  //   - the array still needs a tag AND
   // either:
   //   - the array had no tag coming into this op OR
   //   - the set op cleared the provenance bit somehow
   //     (representation changed or we CoWed a static array)
-  if (RuntimeOption::EvalArrayProvenance &&
-      arrprov::arrayWantsTag(*arr) &&
-      (!oldTag || !(*arr)->hasProvenanceData())) {
-    // if oldTag is unset, then this operation is the provenance location
-    arrprov::setTag(*arr, oldTag ? *oldTag : *tag);
+  if (arrprov::arrayWantsTag(*arr)) {
+    if (tag == ProvTag::NoTag) {
+      arrprov::setTag(*arr, loc.get());
+    } else if (!(*arr)->hasProvenanceData()) {
+      arrprov::setTag(*arr, tag.get());
+    }
   }
-  // make sure that if provenance is enabled and the array wants a tag,
-  // that we definitely assigned one leaving this op
-  assertx(!tag ||
+
+  // Make sure that, if provenance is enabled and the array wants a tag, we
+  // definitely assigned one leaving this op.
+  assertx(!loc.valid() ||
           !arrprov::arrayWantsTag(*arr) ||
           (*arr)->hasProvenanceData());
   return true;
@@ -1090,7 +1098,7 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
         if (!ktv) return false;
         auto vtv = tv(v);
         if (!vtv) return false;
-        return mutate_add_elem_array(env, tag, [&](ArrayData** arr){
+        return mutate_add_elem_array(env, tag, [&](ArrayData** arr) {
           *arr = (*arr)->set(*ktv, *vtv);
         });
       }();
@@ -1150,7 +1158,7 @@ void in(ISS& env, const bc::AddNewElemC&) {
       auto const handled = [&] {
         auto vtv = tv(v);
         if (!vtv) return false;
-        return mutate_add_elem_array(env, tag, [&](ArrayData** arr){
+        return mutate_add_elem_array(env, tag, [&](ArrayData** arr) {
           *arr = (*arr)->append(*vtv);
         });
       }();

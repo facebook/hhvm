@@ -494,37 +494,77 @@ using MapElems = ArrayLikeMap<TypedValue>;
 struct ArrKey;
 struct IterTypes;
 
+//////////////////////////////////////////////////////////////////////
+
 /*
- * A provenance tag as tracked on a DArrLike{Packed,Map}. (and, at runtime, on
- * dicts and vecs.) The provenance tag on an array contains a file and line
- * nubmer where that array is 'from' (ideally, where the array was
- * allocated--for static arrays the srcloc where the array is first referenced)
+ * A provenance tag as tracked on a DArrLike{Packed,Map} (and, at runtime, on
+ * various kinds of arrays).  The provenance tag on an array contains a file
+ * and line nubmer where that array is "from" (ideally, where the array was
+ * allocated---for static arrays the srcloc where the array is first
+ * referenced).
  *
- * This is tracked here in hhbbc both because we manipulate and create new
+ * This is tracked here in hhbbc because we both manipulate and create new
  * static arrays.
  *
  * If the runtime option EvalArrayProvenance is not set, all ProvTags should be
- * equal to the top of the lattice (folly::none)
+ * equal to ProvTag::Top.
  *
- * The absence of a value here (folly::none) means the array type could have a
- * provenance tag from anywhere, or no tag at all. (i.e. its provenance is
- * unknown completely).
+ * ProvTag::Top means the array type could have a provenance tag from anywhere,
+ * or no tag at all. (i.e. its provenance is unknown completely, a.k.a. NoTag).
  *
  * This information forms a sublattice like:
  *
  *        top (folly::none)
- *    ____/|\___________
- *   /     |            \
- *  t_1   t_2     ...   t_n (specific arrprov::Tag's)
- *   \____ | ___________/
+ *    ____/|\_______________________________________________
+ *   /     |            \                                   \
+ *  t_1   t_2     ...   t_n (specific arrprov::Tag's)     no tag
+ *   \____ | ___________/___________________________________/
  *        \|/
  *       bottom (unrepresentable)
  *
- * If we would produce a 'bottom' provenance tag, (i.e. in intersectProvTag)
- * we widen the result to 'top'
+ * If we would produce a Bottom provenance tag, (i.e. in intersectProvTag) we
+ * widen the result to ProvTag::Top.
  */
-using ProvTag = folly::Optional<arrprov::Tag>;
+struct ProvTag {
+  template<typename... Args>
+  explicit constexpr ProvTag(Args... args)
+    : m_tag(std::forward<Args>(args)...)
+  {}
+
+  /* implicit */ ProvTag(arrprov::Tag tag) : m_tag{tag} {}
+
+  static ProvTag Top;
+  static ProvTag NoTag;
+
+  static ProvTag FromSArr(SArray a) {
+    assertx(RuntimeOption::EvalArrayProvenance);
+    // It would be nice to assert a->isStatic() here, but, of course, SArrays
+    // (like the ones representing bytecode immediates) are not always static
+    // because we muck with them during various optimization passes.
+    auto const tag = arrprov::getTag(a);
+    return tag ? *tag : ProvTag::NoTag;
+  }
+
+  const arrprov::Tag* operator->() const { return &m_tag; }
+        arrprov::Tag* operator->() { return &m_tag; }
+
+  /*
+   * Do we have a known provenance tag.
+   */
+  bool valid() const { return m_tag.filename() != nullptr; }
+
+  arrprov::Tag get() const { return m_tag; }
+
+  bool operator==(ProvTag o) const { return m_tag == o.m_tag; }
+  bool operator!=(ProvTag o) const { return m_tag != o.m_tag; }
+
+private:
+  arrprov::Tag m_tag;
+};
+
 constexpr auto kProvBits = BVec | BDict | BVArr | BDArr;
+
+//////////////////////////////////////////////////////////////////////
 
 enum class Emptiness {
   Empty,
@@ -1055,19 +1095,19 @@ Type sval_nonstatic(SString);
  */
 Type sempty();
 Type aempty();
-Type aempty_varray(ProvTag = folly::none);
-Type aempty_darray(ProvTag = folly::none);
-Type vec_empty(ProvTag = folly::none);
-Type dict_empty(ProvTag = folly::none);
+Type aempty_varray(ProvTag = ProvTag::Top);
+Type aempty_darray(ProvTag = ProvTag::Top);
+Type vec_empty(ProvTag = ProvTag::Top);
+Type dict_empty(ProvTag = ProvTag::Top);
 Type keyset_empty();
 
 /*
  * Create an any-countedness empty array/vec/dict type.
  */
 Type some_aempty();
-Type some_aempty_darray(ProvTag = folly::none);
-Type some_vec_empty(ProvTag = folly::none);
-Type some_dict_empty(ProvTag = folly::none);
+Type some_aempty_darray(ProvTag = ProvTag::Top);
+Type some_vec_empty(ProvTag = ProvTag::Top);
+Type some_dict_empty(ProvTag = ProvTag::Top);
 Type some_keyset_empty();
 
 /*
@@ -1085,7 +1125,7 @@ Type clsExact(res::Class);
  * Pre: !v.empty()
  */
 Type arr_packed(std::vector<Type> v);
-Type arr_packed_varray(std::vector<Type> v, ProvTag = folly::none);
+Type arr_packed_varray(std::vector<Type> v, ProvTag = ProvTag::Top);
 Type sarr_packed(std::vector<Type> v);
 
 /*
@@ -1102,7 +1142,7 @@ Type sarr_packedn(Type);
  * Pre: !m.empty()
  */
 Type arr_map(MapElems m);
-Type arr_map_darray(MapElems m, ProvTag = folly::none);
+Type arr_map_darray(MapElems m, ProvTag = ProvTag::Top);
 Type sarr_map(MapElems m);
 
 /*
@@ -1148,7 +1188,7 @@ Type ckeyset_n(Type);
  * Keyset from MapElems
  */
 inline Type keyset_map(MapElems m) {
-  return map_impl(BKeysetN, std::move(m), folly::none);
+  return map_impl(BKeysetN, std::move(m), ProvTag::Top);
 }
 
 /*

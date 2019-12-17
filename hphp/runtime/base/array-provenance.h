@@ -46,12 +46,11 @@ namespace arrprov {
  * make this a tagged union or store a different Tag type for static arrays
  */
 struct Tag {
-  Tag() = default;
-  Tag(const StringData* filename, int line)
+  constexpr Tag() = default;
+  constexpr Tag(const StringData* filename, int line)
     : m_filename(filename)
-    , m_line(line) {
-    assertx(m_filename);
-  }
+    , m_line(line)
+  {}
 
   const StringData* filename() const { return m_filename; }
   int line() const { return m_line; }

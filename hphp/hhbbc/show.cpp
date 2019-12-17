@@ -81,9 +81,10 @@ std::string array_string(SArray arr) {
   return str;
 }
 
-std::string provtag_string(const folly::Optional<arrprov::Tag>& tag) {
-  if (!tag) return "";
-  return folly::sformat(" [{}]", tag->toString());
+std::string provtag_string(ProvTag tag) {
+  if (tag == ProvTag::Top) return "";
+  if (tag == ProvTag::NoTag) return " [none]";
+  return folly::sformat(" [{}]", tag.get().toString());
 }
 
 }

@@ -2050,7 +2050,7 @@ TEST(Type, EmptyArray) {
     EXPECT_TRUE(estat.couldBe(BSArrE));
   }
 
-  EXPECT_EQ(array_newelem(aempty(), ival(142), folly::none).first,
+  EXPECT_EQ(array_newelem(aempty(), ival(142), ProvTag::Top).first,
             arr_packed({ival(142)}));
 }
 
@@ -2344,7 +2344,7 @@ TEST(Type, LoosenValues) {
     { aval(test_array_packed_value()), TSPArrN },
     { arr_packedn(TInt), TPArrN },
     { arr_packed({TInt, TBool}), TPArrN },
-    { arr_packed_varray({TInt, TBool}, folly::none), TVArrN },
+    { arr_packed_varray({TInt, TBool}), TVArrN },
     { arr_mapn(TStr, TInt), TPArrN },
     { arr_map(test_map), TPArrN }
   };

@@ -41,8 +41,8 @@ struct Type;
 Type typeToInt(Type ty);
 
 /*
- * Computes effects on types as for the effects at runtime of cellAdd,
- * cellSub, etc.
+ * Computes effects on types as for the effects at runtime of tvAdd,
+ * tvSub, etc.
  */
 Type typeAdd(Type, Type);
 Type typeSub(Type, Type);
@@ -56,7 +56,7 @@ Type typeMulO(Type, Type);
 
 /*
  * Bitwise operations on types.  Computes effects on types as for the
- * runtime effects of cellBitAnd, cellBitOr, etc.
+ * runtime effects of tvBitAnd, tvBitOr, etc.
  */
 Type typeBitAnd(Type, Type);
 Type typeBitOr(Type, Type);

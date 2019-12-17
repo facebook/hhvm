@@ -988,12 +988,12 @@ StringData* stringGetI(StringData* base, uint64_t x) {
 
 uint64_t pairIsset(c_Pair* pair, int64_t index) {
   auto result = pair->get(index);
-  return result ? !cellIsNull(result) : false;
+  return result ? !tvIsNull(result) : false;
 }
 
 uint64_t vectorIsset(c_Vector* vec, int64_t index) {
   auto result = vec->get(index);
-  return result ? !cellIsNull(*result) : false;
+  return result ? !tvIsNull(*result) : false;
 }
 
 TypedValue incDecElem(tv_lval base, TypedValue key,

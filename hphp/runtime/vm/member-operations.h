@@ -1391,7 +1391,7 @@ inline void SetElemBoolean(tv_lval base, key_type<keyType> key,
  */
 template<KeyType keyType>
 inline int64_t castKeyToInt(key_type<keyType> key) {
-  return cellToInt(initScratchKey(key));
+  return tvToInt(initScratchKey(key));
 }
 
 template<>
@@ -2765,9 +2765,9 @@ bool IssetEmptyElemArray(ArrayData* a, key_type<keyType> key) {
   assertx(a->isPHPArray());
   auto const result = ElemArray<MOpMode::None, keyType>(a, key);
   if (useEmpty) {
-    return !cellToBool(result.tv());
+    return !tvToBool(result.tv());
   }
-  return !cellIsNull(result.tv());
+  return !tvIsNull(result.tv());
 }
 
 /**
@@ -2778,9 +2778,9 @@ bool IssetEmptyElemVec(ArrayData* a, key_type<keyType> key) {
   assertx(a->isVecArray());
   auto const result = ElemVec<MOpMode::None, keyType>(a, key);
   if (useEmpty) {
-    return !cellToBool(tvAssertPlausible(result.tv()));
+    return !tvToBool(tvAssertPlausible(result.tv()));
   }
-  return !cellIsNull(tvAssertPlausible(result.tv()));
+  return !tvIsNull(tvAssertPlausible(result.tv()));
 }
 
 /**
@@ -2791,9 +2791,9 @@ bool IssetEmptyElemDict(ArrayData* a, key_type<keyType> key) {
   assertx(a->isDict());
   auto const result = ElemDict<MOpMode::None, keyType>(a, key);
   if (useEmpty) {
-    return !cellToBool(tvAssertPlausible(result.tv()));
+    return !tvToBool(tvAssertPlausible(result.tv()));
   }
-  return !cellIsNull(tvAssertPlausible(result.tv()));
+  return !tvIsNull(tvAssertPlausible(result.tv()));
 }
 
 /**
@@ -2804,9 +2804,9 @@ bool IssetEmptyElemKeyset(ArrayData* a, key_type<keyType> key) {
   assertx(a->isKeyset());
   auto const result = ElemKeyset<MOpMode::None, keyType>(a, key);
   if (useEmpty) {
-    return !cellToBool(tvAssertPlausible(result.tv()));
+    return !tvToBool(tvAssertPlausible(result.tv()));
   }
-  return !cellIsNull(tvAssertPlausible(result.tv()));
+  return !tvIsNull(tvAssertPlausible(result.tv()));
 }
 
 /**
@@ -2816,9 +2816,9 @@ template <bool useEmpty, KeyType keyType>
 bool IssetEmptyElemClsMeth(ClsMethDataRef base, key_type<keyType> key) {
   const TypedValue result = ElemClsMethPre<MOpMode::None>(base, key);
   if (useEmpty) {
-    return !cellToBool(tvAssertPlausible(result));
+    return !tvToBool(tvAssertPlausible(result));
   }
-  return !cellIsNull(tvAssertPlausible(result));
+  return !tvIsNull(tvAssertPlausible(result));
 }
 
 /**
@@ -2828,9 +2828,9 @@ template <bool useEmpty, KeyType keyType>
 bool IssetEmptyElemRecord(RecordData* base, key_type<keyType> key) {
   auto const  result = ElemRecord<keyType>(base, key);
   if (useEmpty) {
-    return !cellToBool(tvAssertPlausible(result.tv()));
+    return !tvToBool(tvAssertPlausible(result.tv()));
   }
-  return !cellIsNull(tvAssertPlausible(result.tv()));
+  return !tvIsNull(tvAssertPlausible(result.tv()));
 }
 
 /**

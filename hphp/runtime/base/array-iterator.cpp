@@ -109,11 +109,11 @@ ArrayIter::ArrayIter(const Object& obj) {
 }
 
 ArrayIter::ArrayIter(const Cell c) {
-  cellInit(c);
+  tvInit(c);
 }
 
 ArrayIter::ArrayIter(const Variant& v) {
-  cellInit(*v.asTypedValue());
+  tvInit(*v.asTypedValue());
 }
 
 ArrayIter::ArrayIter(const ArrayIter& iter) {
@@ -230,7 +230,7 @@ void ArrayIter::objInit(ObjectData* obj) {
   }
 }
 
-void ArrayIter::cellInit(const Cell c) {
+void ArrayIter::tvInit(const Cell c) {
   assertx(tvIsPlausible(c));
   if (LIKELY(isArrayLikeType(c.m_type))) {
     arrInit(c.m_data.parr);

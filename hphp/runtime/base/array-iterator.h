@@ -381,7 +381,7 @@ private:
   template <bool incRef>
   void objInit(ObjectData* obj);
 
-  void cellInit(Cell);
+  void tvInit(Cell);
 
   void destruct();
 

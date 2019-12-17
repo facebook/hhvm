@@ -182,21 +182,21 @@ namespace {
 
 auto setOpOpToHelper(SetOpOp op) {
   switch (op) {
-    case SetOpOp::PlusEqual:   return cellAddEq;
-    case SetOpOp::MinusEqual:  return cellSubEq;
-    case SetOpOp::MulEqual:    return cellMulEq;
-    case SetOpOp::ConcatEqual: return cellConcatEq;
-    case SetOpOp::DivEqual:    return cellDivEq;
-    case SetOpOp::PowEqual:    return cellPowEq;
-    case SetOpOp::ModEqual:    return cellModEq;
-    case SetOpOp::AndEqual:    return cellBitAndEq;
-    case SetOpOp::OrEqual:     return cellBitOrEq;
-    case SetOpOp::XorEqual:    return cellBitXorEq;
-    case SetOpOp::SlEqual:     return cellShlEq;
-    case SetOpOp::SrEqual:     return cellShrEq;
-    case SetOpOp::PlusEqualO:  return cellAddEqO;
-    case SetOpOp::MinusEqualO: return cellSubEqO;
-    case SetOpOp::MulEqualO:   return cellMulEqO;
+    case SetOpOp::PlusEqual:   return tvAddEq;
+    case SetOpOp::MinusEqual:  return tvSubEq;
+    case SetOpOp::MulEqual:    return tvMulEq;
+    case SetOpOp::ConcatEqual: return tvConcatEq;
+    case SetOpOp::DivEqual:    return tvDivEq;
+    case SetOpOp::PowEqual:    return tvPowEq;
+    case SetOpOp::ModEqual:    return tvModEq;
+    case SetOpOp::AndEqual:    return tvBitAndEq;
+    case SetOpOp::OrEqual:     return tvBitOrEq;
+    case SetOpOp::XorEqual:    return tvBitXorEq;
+    case SetOpOp::SlEqual:     return tvShlEq;
+    case SetOpOp::SrEqual:     return tvShrEq;
+    case SetOpOp::PlusEqualO:  return tvAddEqO;
+    case SetOpOp::MinusEqualO: return tvSubEqO;
+    case SetOpOp::MulEqualO:   return tvMulEqO;
   }
   not_reached();
 }

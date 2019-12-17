@@ -346,10 +346,10 @@ bool BaseSet::OffsetIsset(ObjectData* obj, const TypedValue* key) {
 bool BaseSet::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
   auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
-    return set->contains(key->m_data.num) ? !cellToBool(*key) : true;
+    return set->contains(key->m_data.num) ? !tvToBool(*key) : true;
   }
   if (isStringType(key->m_type)) {
-    return set->contains(key->m_data.pstr) ? !cellToBool(*key) : true;
+    return set->contains(key->m_data.pstr) ? !tvToBool(*key) : true;
   }
   throwBadValueType();
   return true;

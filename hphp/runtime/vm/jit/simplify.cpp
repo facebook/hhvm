@@ -3166,7 +3166,7 @@ SSATmp* hackArrIssetImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (tv_rval rval) { return cns(env, rval && !cellIsNull(rval.tv())); }
+    [&] (tv_rval rval) { return cns(env, rval && !tvIsNull(rval.tv())); }
   );
 }
 
@@ -3176,7 +3176,7 @@ SSATmp* hackArrEmptyElemImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (tv_rval rval) { return cns(env, !rval || !cellToBool(rval.tv())); }
+    [&] (tv_rval rval) { return cns(env, !rval || !tvToBool(rval.tv())); }
   );
 }
 

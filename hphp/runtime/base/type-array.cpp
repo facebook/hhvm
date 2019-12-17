@@ -704,7 +704,7 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
 
   auto const ad = arr.get() ? arr.get() : ArrayData::Create();
 
-  // The logic here is a specialization of cellToKey().
+  // The logic here is a specialization of tvToKey().
   if (key.isNull()) {
     if (!ad->useWeakKeys()) {
       throwInvalidArrayKeyException(&immutable_uninit_base, ad);

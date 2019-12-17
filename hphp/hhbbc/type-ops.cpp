@@ -73,7 +73,7 @@ Type shift_impl(Type t1, Type t2, Fun op) {
 //////////////////////////////////////////////////////////////////////
 
 Type typeToInt(Type ty) {
-  if (auto const v = tv(ty)) return ival(cellToInt(*v));
+  if (auto const v = tv(ty)) return ival(tvToInt(*v));
   if (ty.subtypeOf(BNull))   return ival(0);
   return TInt;
 }
@@ -81,7 +81,7 @@ Type typeToInt(Type ty) {
 //////////////////////////////////////////////////////////////////////
 
 Type typeAdd(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellAdd))           return *t;
+  if (auto t = eval_const(t1, t2, tvAdd))           return *t;
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
   if (t1.subtypeOf(BArr) && t2.subtypeOf(BArr))       return TArr;
   if (t1.subtypeOf(BVec) && t2.subtypeOf(BVec))       return TVec;
@@ -91,7 +91,7 @@ Type typeAdd(Type t1, Type t2) {
 }
 
 Type typeAddO(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellAddO))          return *t;
+  if (auto t = eval_const(t1, t2, tvAddO))          return *t;
   if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt))       return TNum;
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
   if (t1.subtypeOf(BArr) && t2.subtypeOf(BArr))       return TArr;
@@ -116,35 +116,35 @@ Type typeSubMulImplO(Type t1, Type t2, CellOp op) {
   return TInitPrim;
 }
 
-Type typeSub(Type t1, Type t2)  { return typeSubMulImpl(t1, t2, cellSub); }
-Type typeMul(Type t1, Type t2)  { return typeSubMulImpl(t1, t2, cellMul); }
+Type typeSub(Type t1, Type t2)  { return typeSubMulImpl(t1, t2, tvSub); }
+Type typeMul(Type t1, Type t2)  { return typeSubMulImpl(t1, t2, tvMul); }
 
-Type typeSubO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, cellSubO); }
-Type typeMulO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, cellMulO); }
+Type typeSubO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, tvSubO); }
+Type typeMulO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, tvMulO); }
 
 Type typeDiv(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellDiv)) return *t;
+  if (auto t = eval_const(t1, t2, tvDiv)) return *t;
   return TInitPrim;
 }
 
 Type typeMod(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellMod)) return *t;
+  if (auto t = eval_const(t1, t2, tvMod)) return *t;
   return TInitPrim;
 }
 
 Type typePow(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellPow)) return *t;
+  if (auto t = eval_const(t1, t2, tvPow)) return *t;
   return TNum;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-Type typeBitAnd(Type t1, Type t2) { return bitwise_impl(t1, t2, cellBitAnd); }
-Type typeBitOr(Type t1, Type t2)  { return bitwise_impl(t1, t2, cellBitOr); }
-Type typeBitXor(Type t1, Type t2) { return bitwise_impl(t1, t2, cellBitXor); }
+Type typeBitAnd(Type t1, Type t2) { return bitwise_impl(t1, t2, tvBitAnd); }
+Type typeBitOr(Type t1, Type t2)  { return bitwise_impl(t1, t2, tvBitOr); }
+Type typeBitXor(Type t1, Type t2) { return bitwise_impl(t1, t2, tvBitXor); }
 
-Type typeShl(Type t1, Type t2) { return shift_impl(t1, t2, cellShl); }
-Type typeShr(Type t1, Type t2) { return shift_impl(t1, t2, cellShr); }
+Type typeShl(Type t1, Type t2) { return shift_impl(t1, t2, tvShl); }
+Type typeShr(Type t1, Type t2) { return shift_impl(t1, t2, tvShr); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -189,9 +189,9 @@ Type typeIncDec(IncDecOp op, Type t) {
   auto resultTy = eval_cell([inc,overflowToDbl,val] {
     auto c = *val;
     if (inc) {
-      (overflowToDbl ? cellIncO : cellInc)(&c);
+      (overflowToDbl ? tvIncO : tvInc)(&c);
     } else {
-      (overflowToDbl ? cellDecO : cellDec)(&c);
+      (overflowToDbl ? tvDecO : tvDec)(&c);
     }
     return c;
   });

@@ -64,7 +64,8 @@ template<typename T>
 enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv);
 template<typename T>
 enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv);
-void cellCastToStringInPlace(tv_lval tv);
+template<typename T>
+enable_if_lval_t<T, void> tvCastToStringInPlace(T tv);
 
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T, void> tvCastInPlace(T tv, DataType DType) {
@@ -96,7 +97,7 @@ Array tvCastToArrayLike(TypedValue tv);
 Object tvCastToObject(TypedValue tv);
 
 StringData* tvCastToStringData(TypedValue tv);
-StringData* cellCastToStringData(Cell c);
+StringData* tvCastToStringData(Cell c);
 template <IntishCast IC /* = IntishCast::None */>
 ArrayData* tvCastToArrayLikeData(TypedValue tv);
 ObjectData* tvCastToObjectData(TypedValue tv);
@@ -104,17 +105,15 @@ ObjectData* tvCastToObjectData(TypedValue tv);
 /*
  * Convert a cell to various raw data types, without changing the Cell.
  */
-bool cellToBool(Cell);
-int64_t cellToInt(Cell);
-double cellToDouble(Cell);
+bool tvToBool(Cell);
+int64_t tvToInt(Cell);
+double tvToDouble(Cell);
 
 /*
  * Convert `tv' or `cell' to a valid array key for `ad', or throw an exception.
  */
 template <IntishCast IC = IntishCast::None>
-Cell cellToKey(Cell cell, const ArrayData* ad);
-template <IntishCast IC = IntishCast::None>
-Cell tvToKey(TypedValue tv, const ArrayData* ad);
+TypedValue tvToKey(TypedValue cell, const ArrayData* ad);
 
 /*
  * Convert a string to a TypedNum following PHP semantics, allowing strings

@@ -98,7 +98,7 @@ bool c_Pair::OffsetIsset(ObjectData* obj, const TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? !cellIsNull(result) : false;
+  return result ? !tvIsNull(result) : false;
 }
 
 bool c_Pair::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
@@ -110,7 +110,7 @@ bool c_Pair::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? !cellToBool(*result) : true;
+  return result ? !tvToBool(*result) : true;
 }
 
 bool c_Pair::OffsetContains(ObjectData* obj, const TypedValue* key) {

@@ -18,16 +18,16 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-inline bool cellEqual(Cell cell, int ival) {
-  return cellEqual(cell, static_cast<int64_t>(ival));
+inline bool tvEqual(Cell cell, int ival) {
+  return tvEqual(cell, static_cast<int64_t>(ival));
 }
 
-inline bool cellLess(Cell cell, int ival) {
-  return cellLess(cell, static_cast<int64_t>(ival));
+inline bool tvLess(Cell cell, int ival) {
+  return tvLess(cell, static_cast<int64_t>(ival));
 }
 
-inline bool cellGreater(Cell cell, int ival) {
-  return cellGreater(cell, static_cast<int64_t>(ival));
+inline bool tvGreater(Cell cell, int ival) {
+  return tvGreater(cell, static_cast<int64_t>(ival));
 }
 
 //////////////////////////////////////////////////////////////////////

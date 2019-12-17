@@ -326,7 +326,7 @@ bool BaseMap::OffsetIsset(ObjectData* obj, const TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? !cellIsNull(result) : false;
+  return result ? !tvIsNull(result) : false;
 }
 
 bool BaseMap::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
@@ -340,7 +340,7 @@ bool BaseMap::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
     throwBadKeyType();
     result = nullptr;
   }
-  return result ? !cellToBool(*result) : true;
+  return result ? !tvToBool(*result) : true;
 }
 
 bool BaseMap::OffsetContains(ObjectData* obj, const TypedValue* key) {

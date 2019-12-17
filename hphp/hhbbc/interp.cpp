@@ -1463,7 +1463,7 @@ void in(ISS& env, const bc::BitNot& /*op*/) {
     constprop(env);
     auto cell = eval_cell([&] {
       auto c = *v;
-      cellBitNot(c);
+      tvBitNot(c);
       return c;
     });
     if (cell) return push(env, std::move(*cell));
@@ -1506,7 +1506,7 @@ std::pair<Type,bool> resolveSame(ISS& env) {
     }
 
     if (v1 && v2) {
-      if (auto r = eval_cell_value([&]{ return cellSame(*v2, *v1); })) {
+      if (auto r = eval_cell_value([&]{ return tvSame(*v2, *v1); })) {
         // we wouldn't get here if cellSame raised a warning
         warningsEnabled = false;
         return r != NSame ? TTrue : TFalse;
@@ -1723,7 +1723,7 @@ void in(ISS& env, const bc::Eq&) {
     discard(env, 2);
     return push(env, TTrue);
   }
-  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return cellEqual(c1, c2); });
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return tvEqual(c1, c2); });
 }
 void in(ISS& env, const bc::Neq&) {
   auto rs = resolveSame<false>(env);
@@ -1732,24 +1732,24 @@ void in(ISS& env, const bc::Neq&) {
     discard(env, 2);
     return push(env, TFalse);
   }
-  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return !cellEqual(c1, c2); });
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return !tvEqual(c1, c2); });
 }
 void in(ISS& env, const bc::Lt&) {
-  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return cellLess(c1, c2); });
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return tvLess(c1, c2); });
 }
 void in(ISS& env, const bc::Gt&) {
-  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return cellGreater(c1, c2); });
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return tvGreater(c1, c2); });
 }
-void in(ISS& env, const bc::Lte&) { binOpBoolImpl(env, cellLessOrEqual); }
-void in(ISS& env, const bc::Gte&) { binOpBoolImpl(env, cellGreaterOrEqual); }
+void in(ISS& env, const bc::Lte&) { binOpBoolImpl(env, tvLessOrEqual); }
+void in(ISS& env, const bc::Gte&) { binOpBoolImpl(env, tvGreaterOrEqual); }
 
 void in(ISS& env, const bc::Cmp&) {
-  binOpInt64Impl(env, [&] (Cell c1, Cell c2) { return cellCompare(c1, c2); });
+  binOpInt64Impl(env, [&] (Cell c1, Cell c2) { return tvCompare(c1, c2); });
 }
 
 void in(ISS& env, const bc::Xor&) {
   binOpBoolImpl(env, [&] (Cell c1, Cell c2) {
-    return cellToBool(c1) ^ cellToBool(c2);
+    return tvToBool(c1) ^ tvToBool(c2);
   });
 }
 
@@ -1788,7 +1788,7 @@ void in(ISS& env, const bc::CastInt&) {
   if (!t.couldBe(BObj)) nothrow(env);
   if (auto const v = tv(t)) {
     auto cell = eval_cell([&] {
-      return make_tv<KindOfInt64>(cellToInt(*v));
+      return make_tv<KindOfInt64>(tvToInt(*v));
     });
     if (cell) return push(env, std::move(*cell));
   }
@@ -2254,7 +2254,7 @@ void in(ISS& env, const bc::Switch& op) {
           return go(op.targets.back());
         }
         auto match = eval_cell_value([&] {
-            return cellEqual(*v, static_cast<int64_t>(op.arg2 + i));
+            return tvEqual(*v, static_cast<int64_t>(op.arg2 + i));
         });
         if (!match) break;
         if (*match) {
@@ -2276,7 +2276,7 @@ void in(ISS& env, const bc::SSwitch& op) {
   if (v) {
     for (auto& kv : op.targets) {
       auto match = eval_cell_value([&] {
-        return !kv.first || cellEqual(*v, kv.first);
+        return !kv.first || tvEqual(*v, kv.first);
       });
       if (!match) break;
       if (*match) {

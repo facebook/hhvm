@@ -694,7 +694,7 @@ bool subtypeMap(const DArrLikeMap& a, const DArrLikeMap& b) {
   auto aIt = begin(a.map);
   auto bIt = begin(b.map);
   for (; aIt != end(a.map); ++aIt, ++bIt) {
-    if (!cellSame(aIt->first, bIt->first)) return false;
+    if (!tvSame(aIt->first, bIt->first)) return false;
     if (!aIt->second.subtypeOfImpl<contextSensitive>(bIt->second)) return false;
   }
   return true;
@@ -719,7 +719,7 @@ bool couldBeMap(const DArrLikeMap& a, const DArrLikeMap& b) {
   auto aIt = begin(a.map);
   auto bIt = begin(b.map);
   for (; aIt != end(a.map); ++aIt, ++bIt) {
-    if (!cellSame(aIt->first, bIt->first)) return false;
+    if (!tvSame(aIt->first, bIt->first)) return false;
     if (!aIt->second.couldBe(bIt->second)) return false;
   }
   return true;
@@ -1094,7 +1094,7 @@ struct DualDispatchIntersectionImpl {
     for (auto aIt = a.map.begin(), bIt = b.map.begin();
          aIt != a.map.end();
          ++aIt, ++bIt) {
-      if (!cellSame(aIt->first, bIt->first)) return TBottom;
+      if (!tvSame(aIt->first, bIt->first)) return TBottom;
       auto val = intersection_of(aIt->second, bIt->second);
       if (val == TBottom) return TBottom;
       map.emplace_back(aIt->first, std::move(val));
@@ -1170,7 +1170,7 @@ struct DualDispatchUnionImpl {
     auto aIt = begin(a.map);
     auto bIt = begin(b.map);
     for (; aIt != end(a.map); ++aIt, ++bIt) {
-      if (!cellSame(aIt->first, bIt->first)) return to_map();
+      if (!tvSame(aIt->first, bIt->first)) return to_map();
       retStruct.emplace_back(aIt->first, union_of(aIt->second, bIt->second));
     }
     return map_impl(
@@ -1492,7 +1492,7 @@ void add(AInit& ai, const Variant& key, const Variant& value) {
   ai.setValidKey(key, value);
 }
 void add(KeysetInit& ai, const Variant& key, const Variant& value) {
-  assert(cellSame(*key.asTypedValue(), *value.asTypedValue()));
+  assert(tvSame(*key.asTypedValue(), *value.asTypedValue()));
   ai.add(key);
 }
 
@@ -3973,10 +3973,10 @@ Emptiness emptiness(const Type& t) {
   if (is_opt(t)) {
     // Something like ?Int=0 is always empty, but ?Int=1 may or may not be.
     if (auto v = tv(unopt(t))) {
-      return cellToBool(*v) ? Emptiness::Maybe : Emptiness::Empty;
+      return tvToBool(*v) ? Emptiness::Maybe : Emptiness::Empty;
     }
   } else if (auto v = tv(t)) {
-    return cellToBool(*v) ? Emptiness::NonEmpty : Emptiness::Empty;
+    return tvToBool(*v) ? Emptiness::NonEmpty : Emptiness::Empty;
   }
 
   return Emptiness::Maybe;
@@ -4368,7 +4368,7 @@ Type assert_nonemptiness(Type t) {
   if (t.subtypeOf(BNull | BFalse | BArrE | BVecE | BDictE | BKeysetE)) {
     return TBottom;
   }
-  if (auto const v = tv(t)) return cellToBool(*v) ? t : TBottom;
+  if (auto const v = tv(t)) return tvToBool(*v) ? t : TBottom;
   if (t.subtypeOf(BBool)) return TTrue;
 
   auto remove = [&] (trep m, trep e) {

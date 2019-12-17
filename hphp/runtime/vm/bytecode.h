@@ -64,21 +64,21 @@ void setopBody(tv_lval lhs, SetOpOp op, Cell* rhs) {
   assertx(tvIsPlausible(*rhs));
 
   switch (op) {
-  case SetOpOp::PlusEqual:      cellAddEq(lhs, *rhs); return;
-  case SetOpOp::MinusEqual:     cellSubEq(lhs, *rhs); return;
-  case SetOpOp::MulEqual:       cellMulEq(lhs, *rhs); return;
-  case SetOpOp::DivEqual:       cellDivEq(lhs, *rhs); return;
-  case SetOpOp::PowEqual:       cellPowEq(lhs, *rhs); return;
-  case SetOpOp::ModEqual:       cellModEq(lhs, *rhs); return;
-  case SetOpOp::ConcatEqual:    cellConcatEq(lhs, *rhs); return;
-  case SetOpOp::AndEqual:       cellBitAndEq(lhs, *rhs); return;
-  case SetOpOp::OrEqual:        cellBitOrEq(lhs, *rhs);  return;
-  case SetOpOp::XorEqual:       cellBitXorEq(lhs, *rhs); return;
-  case SetOpOp::SlEqual:        cellShlEq(lhs, *rhs); return;
-  case SetOpOp::SrEqual:        cellShrEq(lhs, *rhs); return;
-  case SetOpOp::PlusEqualO:     cellAddEqO(lhs, *rhs); return;
-  case SetOpOp::MinusEqualO:    cellSubEqO(lhs, *rhs); return;
-  case SetOpOp::MulEqualO:      cellMulEqO(lhs, *rhs); return;
+  case SetOpOp::PlusEqual:      tvAddEq(lhs, *rhs); return;
+  case SetOpOp::MinusEqual:     tvSubEq(lhs, *rhs); return;
+  case SetOpOp::MulEqual:       tvMulEq(lhs, *rhs); return;
+  case SetOpOp::DivEqual:       tvDivEq(lhs, *rhs); return;
+  case SetOpOp::PowEqual:       tvPowEq(lhs, *rhs); return;
+  case SetOpOp::ModEqual:       tvModEq(lhs, *rhs); return;
+  case SetOpOp::ConcatEqual:    tvConcatEq(lhs, *rhs); return;
+  case SetOpOp::AndEqual:       tvBitAndEq(lhs, *rhs); return;
+  case SetOpOp::OrEqual:        tvBitOrEq(lhs, *rhs);  return;
+  case SetOpOp::XorEqual:       tvBitXorEq(lhs, *rhs); return;
+  case SetOpOp::SlEqual:        tvShlEq(lhs, *rhs); return;
+  case SetOpOp::SrEqual:        tvShrEq(lhs, *rhs); return;
+  case SetOpOp::PlusEqualO:     tvAddEqO(lhs, *rhs); return;
+  case SetOpOp::MinusEqualO:    tvSubEqO(lhs, *rhs); return;
+  case SetOpOp::MulEqualO:      tvMulEqO(lhs, *rhs); return;
   }
   not_reached();
 }

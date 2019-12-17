@@ -199,7 +199,7 @@ static CallMap s_callMap {
     {ConvObjToKeyset,    convObjToKeysetHelper, DSSA, SSync,
                            {{SSA, 0}}},
 
-    {ConvCellToBool,     cellToBool, DSSA, SSync,
+    {ConvCellToBool,     tvToBool, DSSA, SSync,
                            {{TV, 0}}},
 
     {ConvArrToDbl,       convArrToDblHelper, DSSA, SNone,
@@ -219,7 +219,7 @@ static CallMap s_callMap {
                            {{SSA, 0}, immed(10)}},
     {ConvResToInt,       &ResourceHdr::getId, DSSA, SNone,
                            {{SSA, 0}}},
-    {ConvCellToInt,      cellToInt, DSSA, SSync,
+    {ConvCellToInt,      tvToInt, DSSA, SSync,
                            {{TV, 0}}},
 
     {ConvDblToStr,       convDblToStrHelper, DSSA, SNone,
@@ -230,7 +230,7 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ConvResToStr,       convResToStrHelper, DSSA, SSync,
                            {{SSA, 0}}},
-    {ConvCellToStr,      cellCastToStringData, DSSA, SSync,
+    {ConvCellToStr,      tvCastToStringData, DSSA, SSync,
                            {{TV, 0}}},
 
     {ConcatStrStr,       concat_ss, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},

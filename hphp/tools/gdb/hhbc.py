@@ -46,7 +46,7 @@ def vec_elm_sizes():
     ]]
 
 @memoized
-def cell_loc_mcodes():
+def tv_loc_mcodes():
     return [V('HPHP::' + t) for t in ['MEC', 'MPC', 'MEL', 'MPL']]
 
 @memoized
@@ -201,7 +201,7 @@ class HHBC(object):
 
             imm_info = {}
 
-            if mcode in cell_loc_mcodes():
+            if mcode in tv_loc_mcodes():
                 imm_info = HHBC.decode_iva(ptr)
                 imm_info['kind'] = 'iva'
 

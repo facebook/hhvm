@@ -1556,7 +1556,7 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
   auto const lookup = getPropImpl<false, true, true>(ctx, key);
   if (lookup.val && lookup.accessible) {
     if (lookup.val.type() != KindOfUninit) {
-      return !cellToBool(lookup.val.tv());
+      return !tvToBool(lookup.val.tv());
     }
     if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
       return true;
@@ -1568,7 +1568,7 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
       tvCastToBooleanInPlace(&r.val);
       if (!r.val.m_data.num) return true;
       if (auto r2 = invokeNativeGetProp(key)) {
-        auto const emptyResult = !cellToBool(r2.val);
+        auto const emptyResult = !tvToBool(r2.val);
         tvDecRefGen(&r2.val);
         return emptyResult;
       }
@@ -1585,7 +1585,7 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
 
   if (m_cls->rtAttribute(Class::UseGet)) {
     if (auto r = invokeGet(key)) {
-      auto const emptyResult = !cellToBool(r.val);
+      auto const emptyResult = !tvToBool(r.val);
       tvDecRefGen(&r.val);
       return emptyResult;
     }

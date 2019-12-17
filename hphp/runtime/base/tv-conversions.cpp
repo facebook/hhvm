@@ -133,7 +133,7 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
 
 bool tvCastToBoolean(TypedValue tv) {
   assertx(tvIsPlausible(tv));
-  return cellToBool(tv);
+  return tvToBool(tv);
 }
 
 template<typename T>
@@ -299,7 +299,7 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
 
 int64_t tvCastToInt64(TypedValue tv) {
   assertx(tvIsPlausible(tv));
-  return cellToInt(tv);
+  return tvToInt(tv);
 }
 
 double tvCastToDouble(TypedValue tv) {
@@ -364,10 +364,7 @@ const StaticString
 template<typename T>
 enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
-  cellCastToStringInPlace(tv);
-}
 
-void cellCastToStringInPlace(tv_lval tv) {
   auto string = [&](StringData* s) {
     type(tv) = KindOfString;
     val(tv).pstr = s;
@@ -463,10 +460,7 @@ void cellCastToStringInPlace(tv_lval tv) {
 
 StringData* tvCastToStringData(TypedValue tv) {
   assertx(tvIsPlausible(tv));
-  return cellCastToStringData(tv);
-}
 
-StringData* cellCastToStringData(Cell tv) {
   switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:

@@ -24,12 +24,12 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE bool cellIsNull(Cell tv) {
+ALWAYS_INLINE bool tvIsNull(Cell tv) {
   assertx(tvIsPlausible(tv));
   return isNullType(tv.m_type);
 }
-ALWAYS_INLINE bool cellIsNull(const Cell* tv) {
-  return cellIsNull(*tv);
+ALWAYS_INLINE bool tvIsNull(const Cell* tv) {
+  return tvIsNull(*tv);
 }
 
 #define CASE(ty)                                                        \

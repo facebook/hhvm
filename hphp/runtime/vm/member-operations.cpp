@@ -130,7 +130,7 @@ bool objOffsetEmpty(ObjectData* base, TypedValue offset) {
   }
 
   auto value = objOffsetGet(base, offset, false);
-  auto result = !cellToBool(value);
+  auto result = !tvToBool(value);
   tvDecRefGen(value);
   return result;
 }
@@ -250,35 +250,35 @@ Cell incDecBodySlow(IncDecOp op, tv_lval fr) {
 
   switch (op) {
   case IncDecOp::PreInc:
-    cellInc(fr);
+    tvInc(fr);
     return dup();
   case IncDecOp::PostInc: {
     auto const tmp = dup();
-    cellInc(fr);
+    tvInc(fr);
     return tmp;
   }
   case IncDecOp::PreDec:
-    cellDec(fr);
+    tvDec(fr);
     return dup();
   case IncDecOp::PostDec: {
     auto const tmp = dup();
-    cellDec(fr);
+    tvDec(fr);
     return tmp;
   }
   case IncDecOp::PreIncO:
-    cellIncO(fr);
+    tvIncO(fr);
     return dup();
   case IncDecOp::PostIncO: {
     auto const tmp = dup();
-    cellIncO(fr);
+    tvIncO(fr);
     return tmp;
   }
   case IncDecOp::PreDecO:
-    cellDecO(fr);
+    tvDecO(fr);
     return dup();
   case IncDecOp::PostDecO: {
     auto const tmp = dup();
-    cellDecO(fr);
+    tvDecO(fr);
     return tmp;
   }
   }

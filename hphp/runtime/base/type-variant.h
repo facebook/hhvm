@@ -1485,7 +1485,7 @@ ALWAYS_INLINE Variant init_null() {
 inline void concat_assign(Variant &v1, const char* s2) = delete;
 
 inline void concat_assign(tv_lval lhs, const String& s2) {
-  if (!isStringType(type(lhs))) cellCastToStringInPlace(lhs);
+  if (!isStringType(type(lhs))) tvCastToStringInPlace(lhs);
   asStrRef(lhs) += s2;
 }
 
@@ -1561,7 +1561,7 @@ inline bool isa_non_null(const Variant& v) {
 // and type-array
 template <IntishCast IC>
 ALWAYS_INLINE Cell Array::convertKey(Cell k) const {
-  return cellToKey<IC>(k, m_arr ? m_arr.get() : ArrayData::Create());
+  return tvToKey<IC>(k, m_arr ? m_arr.get() : ArrayData::Create());
 }
 template <IntishCast IC>
 ALWAYS_INLINE Cell Array::convertKey(const Variant& k) const {

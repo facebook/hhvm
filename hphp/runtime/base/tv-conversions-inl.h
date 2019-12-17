@@ -37,7 +37,7 @@ void raiseClsMethConvertWarningHelper(const char* toType);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline bool cellToBool(Cell cell) {
+inline bool tvToBool(Cell cell) {
   assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -71,7 +71,7 @@ inline bool cellToBool(Cell cell) {
   not_reached();
 }
 
-inline int64_t cellToInt(Cell cell) {
+inline int64_t tvToInt(Cell cell) {
   assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -107,7 +107,7 @@ inline int64_t cellToInt(Cell cell) {
   not_reached();
 }
 
-inline double cellToDouble(Cell cell) {
+inline double tvToDouble(Cell cell) {
   Cell tmp;
   tvDup(cell, tmp);
   tvCastToDoubleInPlace(&tmp);
@@ -117,7 +117,7 @@ inline double cellToDouble(Cell cell) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <IntishCast IC>
-inline Cell cellToKey(Cell cell, const ArrayData* ad) {
+inline Cell tvToKey(Cell cell, const ArrayData* ad) {
   assertx(tvIsPlausible(cell));
 
   auto coerceKey = [&] (const StringData* str) {
@@ -186,13 +186,6 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
   }
   not_reached();
 }
-
-template <IntishCast IC>
-inline Cell tvToKey(TypedValue tv, const ArrayData* ad) {
-  assertx(tvIsPlausible(tv));
-  return cellToKey<IC>(tv, ad);
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 

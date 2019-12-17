@@ -948,7 +948,7 @@ void TypeConstraint::verifyReturnNonNull(TypedValue* tv,
                                          const Func* func) const {
   const auto DEBUG_ONLY tc = func->returnTypeConstraint();
   assertx(!tc.isNullable());
-  if (UNLIKELY(cellIsNull(tv))) {
+  if (UNLIKELY(tvIsNull(tv))) {
     verifyReturnFail(func, tv);
   } else if (debug) {
     auto vm = &*g_context;

@@ -52,28 +52,28 @@ inline bool same(const Variant& v1, const Variant& v2) {
 }
 
 inline bool equal(const Variant& v1, bool v2) {
-  return cellEqual(*v1.asTypedValue(), v2);
+  return tvEqual(*v1.asTypedValue(), v2);
 }
 inline bool equal(const Variant& v1, int v2) {
-  return cellEqual(*v1.asTypedValue(), v2);
+  return tvEqual(*v1.asTypedValue(), v2);
 }
 inline bool equal(const Variant& v1, int64_t v2) {
-  return cellEqual(*v1.asTypedValue(), v2);
+  return tvEqual(*v1.asTypedValue(), v2);
 }
 inline bool equal(const Variant& v1, double  v2) {
-  return cellEqual(*v1.asTypedValue(), v2);
+  return tvEqual(*v1.asTypedValue(), v2);
 }
 inline bool equal(const Variant& v1, const StringData* v2) {
-  return cellEqual(*v1.asTypedValue(), v2);
+  return tvEqual(*v1.asTypedValue(), v2);
 }
 inline bool equal(const Variant& v1, const String& v2) {
-  if (!v2.get()) return cellEqual(*v1.asTypedValue(), false);
-  return cellEqual(*v1.asTypedValue(), v2.get());
+  if (!v2.get()) return tvEqual(*v1.asTypedValue(), false);
+  return tvEqual(*v1.asTypedValue(), v2.get());
 }
 inline bool equal(const Variant& v1, const char* v2) = delete;
 inline bool equal(const Variant& v1, const Array& v2) {
-  if (!v2.get()) return cellEqual(*v1.asTypedValue(), false);
-  return cellEqual(*v1.asTypedValue(), v2.get());
+  if (!v2.get()) return tvEqual(*v1.asTypedValue(), false);
+  return tvEqual(*v1.asTypedValue(), v2.get());
 }
 inline bool equal(const Variant& v1, const Object& v2) = delete;
 inline bool equal(const Variant& v1, const Resource& v2) = delete;
@@ -82,28 +82,28 @@ inline bool equal(const Variant& v1, const Variant& v2) {
 }
 
 inline bool less(const Variant& v1, bool v2) {
-  return cellLess(*v1.asTypedValue(), v2);
+  return tvLess(*v1.asTypedValue(), v2);
 }
 inline bool less(const Variant& v1, int v2) {
-  return cellLess(*v1.asTypedValue(), v2);
+  return tvLess(*v1.asTypedValue(), v2);
 }
 inline bool less(const Variant& v1, int64_t v2) {
-  return cellLess(*v1.asTypedValue(), v2);
+  return tvLess(*v1.asTypedValue(), v2);
 }
 inline bool less(const Variant& v1, double v2) {
-  return cellLess(*v1.asTypedValue(), v2);
+  return tvLess(*v1.asTypedValue(), v2);
 }
 inline bool less(const Variant& v1, const StringData* v2) {
-  return cellLess(*v1.asTypedValue(), v2);
+  return tvLess(*v1.asTypedValue(), v2);
 }
 inline bool less(const Variant& v1, const String& v2) {
-  if (!v2.get()) return cellLess(*v1.asTypedValue(), false);
-  return cellLess(*v1.asTypedValue(), v2.get());
+  if (!v2.get()) return tvLess(*v1.asTypedValue(), false);
+  return tvLess(*v1.asTypedValue(), v2.get());
 }
 inline bool less(const Variant& v1, const char* v2) = delete;
 inline bool less(const Variant& v1, const Array& v2) {
-  if (!v2.get()) return cellLess(*v1.asTypedValue(), false);
-  return cellLess(*v1.asTypedValue(), v2.get());
+  if (!v2.get()) return tvLess(*v1.asTypedValue(), false);
+  return tvLess(*v1.asTypedValue(), v2.get());
 }
 inline bool less(const Variant& v1, const Object& v2) = delete;
 inline bool less(const Variant& v1, const Resource& v2) = delete;
@@ -112,28 +112,28 @@ inline bool less(const Variant& v1, const Variant& v2) {
 }
 
 inline bool more(const Variant& v1, bool v2) {
-  return cellGreater(*v1.asTypedValue(), v2);
+  return tvGreater(*v1.asTypedValue(), v2);
 }
 inline bool more(const Variant& v1, int v2) {
-  return cellGreater(*v1.asTypedValue(), v2);
+  return tvGreater(*v1.asTypedValue(), v2);
 }
 inline bool more(const Variant& v1, int64_t v2) {
-  return cellGreater(*v1.asTypedValue(), v2);
+  return tvGreater(*v1.asTypedValue(), v2);
 }
 inline bool more(const Variant& v1, double v2) {
-  return cellGreater(*v1.asTypedValue(), v2);
+  return tvGreater(*v1.asTypedValue(), v2);
 }
 inline bool more(const Variant& v1, const StringData* v2) {
-  return cellGreater(*v1.asTypedValue(), v2);
+  return tvGreater(*v1.asTypedValue(), v2);
 }
 inline bool more(const Variant& v1, const String& v2) {
-  if (!v2.get()) return cellGreater(*v1.asTypedValue(), false);
-  return cellGreater(*v1.asTypedValue(), v2.get());
+  if (!v2.get()) return tvGreater(*v1.asTypedValue(), false);
+  return tvGreater(*v1.asTypedValue(), v2.get());
 }
 inline bool more(const Variant& v1, const char* v2) = delete;
 inline bool more(const Variant& v1, const Array& v2) {
-  if (!v2.get()) return cellGreater(*v1.asTypedValue(), false);
-  return cellGreater(*v1.asTypedValue(), v2.get());
+  if (!v2.get()) return tvGreater(*v1.asTypedValue(), false);
+  return tvGreater(*v1.asTypedValue(), v2.get());
 }
 inline bool more(const Variant& v1, const Object& v2) = delete;
 inline bool more(const Variant& v1, const Resource& v2) = delete;

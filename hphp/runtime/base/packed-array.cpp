@@ -1356,7 +1356,7 @@ bool PackedArray::VecEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
   for (uint32_t i = 0; i < size; ++i) {
     auto const elm1 = *RvalPos(ad1, i);
     auto const elm2 = *RvalPos(ad2, i);
-    auto const cmp = strict ? cellSame(elm1, elm2) : cellEqual(elm1, elm2);
+    auto const cmp = strict ? tvSame(elm1, elm2) : tvEqual(elm1, elm2);
     if (!cmp) return false;
   }
 
@@ -1380,7 +1380,7 @@ int64_t PackedArray::VecCmpHelper(const ArrayData* ad1, const ArrayData* ad2) {
   check_recursion_error();
 
   for (uint32_t i = 0; i < size1; ++i) {
-    auto const cmp = cellCompare(*RvalPos(ad1, i), *RvalPos(ad2, i));
+    auto const cmp = tvCompare(*RvalPos(ad1, i), *RvalPos(ad2, i));
     if (cmp != 0) return cmp;
   }
 

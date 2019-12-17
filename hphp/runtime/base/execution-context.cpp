@@ -1712,7 +1712,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   // Push arguments.
   auto const& args = *args_.asTypedValue();
   assertx(isContainerOrNull(args));
-  auto numArgs = cellIsNull(args) ? 0 : getContainerSize(args);
+  auto numArgs = tvIsNull(args) ? 0 : getContainerSize(args);
   if (numArgs == 0) {
     if (UNLIKELY(invName != nullptr)) {
       shuffleMagicArgs(String::attach(invName), 0, false);

@@ -38,7 +38,7 @@ const StaticString s_unresolved("[unresolved]");
 namespace {
 
 template<typename F>
-bool cellInstanceOfImpl(const Cell* tv, F lookupClass) {
+bool tvInstanceOfImpl(const Cell* tv, F lookupClass) {
   switch (tv->m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -125,12 +125,12 @@ bool cellInstanceOfImpl(const Cell* tv, F lookupClass) {
 
 } // namespace
 
-bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
-  return cellInstanceOfImpl(tv, [ne]() { return Unit::lookupClass(ne); });
+bool tvInstanceOf(const Cell* tv, const NamedEntity* ne) {
+  return tvInstanceOfImpl(tv, [ne]() { return Unit::lookupClass(ne); });
 }
 
-bool cellInstanceOf(const Cell* tv, const Class* cls) {
-  return cellInstanceOfImpl(tv, [cls]() { return cls; });
+bool tvInstanceOf(const Cell* tv, const Class* cls) {
+  return tvInstanceOfImpl(tv, [cls]() { return cls; });
 }
 
 namespace {
@@ -240,7 +240,7 @@ bool typeStructureIsType(
           assertx(tvIsString(k));
           if (k.m_data.pstr->isame(s_alias.get())) return false;
           auto const v2 = type->rval(k.m_data.pstr);
-          if (v2.is_set() && cellEqual(v1, v2.tv())) return false;
+          if (v2.is_set() && tvEqual(v1, v2.tv())) return false;
           result = false;
           return true; // short circuit
         }
@@ -706,7 +706,7 @@ bool checkTypeStructureMatchesCellImpl(
     case TypeStructure::Kind::T_xhp: {
       assertx(ts.exists(s_classname));
       auto const ne = NamedEntity::get(ts[s_classname].asStrRef().get());
-      return cellInstanceOf(&c1, ne) &&
+      return tvInstanceOf(&c1, ne) &&
              checkReifiedGenericsMatch(ts, c1, ne, warn, isOrAsOp);
     }
 

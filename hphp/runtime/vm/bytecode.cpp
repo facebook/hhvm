@@ -1877,7 +1877,7 @@ OPTBLD_INLINE void iopNot() {
 }
 
 template<class Fn>
-OPTBLD_INLINE void implCellBinOp(Fn fn) {
+OPTBLD_INLINE void implTvBinOp(Fn fn) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   auto const result = fn(*c2, *c1);
@@ -1887,7 +1887,7 @@ OPTBLD_INLINE void implCellBinOp(Fn fn) {
 }
 
 template<class Fn>
-OPTBLD_INLINE void implCellBinOpBool(Fn fn) {
+OPTBLD_INLINE void implTvBinOpBool(Fn fn) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   bool const result = fn(*c2, *c1);
@@ -1897,7 +1897,7 @@ OPTBLD_INLINE void implCellBinOpBool(Fn fn) {
 }
 
 template<class Fn>
-OPTBLD_INLINE void implCellBinOpInt64(Fn fn) {
+OPTBLD_INLINE void implTvBinOpInt64(Fn fn) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   auto const result = fn(*c2, *c1);
@@ -1907,117 +1907,117 @@ OPTBLD_INLINE void implCellBinOpInt64(Fn fn) {
 }
 
 OPTBLD_INLINE void iopAdd() {
-  implCellBinOp(cellAdd);
+  implTvBinOp(tvAdd);
 }
 
 OPTBLD_INLINE void iopSub() {
-  implCellBinOp(cellSub);
+  implTvBinOp(tvSub);
 }
 
 OPTBLD_INLINE void iopMul() {
-  implCellBinOp(cellMul);
+  implTvBinOp(tvMul);
 }
 
 OPTBLD_INLINE void iopAddO() {
-  implCellBinOp(cellAddO);
+  implTvBinOp(tvAddO);
 }
 
 OPTBLD_INLINE void iopSubO() {
-  implCellBinOp(cellSubO);
+  implTvBinOp(tvSubO);
 }
 
 OPTBLD_INLINE void iopMulO() {
-  implCellBinOp(cellMulO);
+  implTvBinOp(tvMulO);
 }
 
 OPTBLD_INLINE void iopDiv() {
-  implCellBinOp(cellDiv);
+  implTvBinOp(tvDiv);
 }
 
 OPTBLD_INLINE void iopPow() {
-  implCellBinOp(cellPow);
+  implTvBinOp(tvPow);
 }
 
 OPTBLD_INLINE void iopMod() {
-  implCellBinOp(cellMod);
+  implTvBinOp(tvMod);
 }
 
 OPTBLD_INLINE void iopBitAnd() {
-  implCellBinOp(cellBitAnd);
+  implTvBinOp(tvBitAnd);
 }
 
 OPTBLD_INLINE void iopBitOr() {
-  implCellBinOp(cellBitOr);
+  implTvBinOp(tvBitOr);
 }
 
 OPTBLD_INLINE void iopBitXor() {
-  implCellBinOp(cellBitXor);
+  implTvBinOp(tvBitXor);
 }
 
 OPTBLD_INLINE void iopXor() {
-  implCellBinOpBool([&] (Cell c1, Cell c2) -> bool {
-    return cellToBool(c1) ^ cellToBool(c2);
+  implTvBinOpBool([&] (Cell c1, Cell c2) -> bool {
+    return tvToBool(c1) ^ tvToBool(c2);
   });
 }
 
 OPTBLD_INLINE void iopSame() {
-  implCellBinOpBool(cellSame);
+  implTvBinOpBool(tvSame);
 }
 
 OPTBLD_INLINE void iopNSame() {
-  implCellBinOpBool([&] (Cell c1, Cell c2) {
-    return !cellSame(c1, c2);
+  implTvBinOpBool([&] (Cell c1, Cell c2) {
+    return !tvSame(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopEq() {
-  implCellBinOpBool([&] (Cell c1, Cell c2) {
-    return cellEqual(c1, c2);
+  implTvBinOpBool([&] (Cell c1, Cell c2) {
+    return tvEqual(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopNeq() {
-  implCellBinOpBool([&] (Cell c1, Cell c2) {
-    return !cellEqual(c1, c2);
+  implTvBinOpBool([&] (Cell c1, Cell c2) {
+    return !tvEqual(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopLt() {
-  implCellBinOpBool([&] (Cell c1, Cell c2) {
-    return cellLess(c1, c2);
+  implTvBinOpBool([&] (Cell c1, Cell c2) {
+    return tvLess(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopLte() {
-  implCellBinOpBool(cellLessOrEqual);
+  implTvBinOpBool(tvLessOrEqual);
 }
 
 OPTBLD_INLINE void iopGt() {
-  implCellBinOpBool([&] (Cell c1, Cell c2) {
-    return cellGreater(c1, c2);
+  implTvBinOpBool([&] (Cell c1, Cell c2) {
+    return tvGreater(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopGte() {
-  implCellBinOpBool(cellGreaterOrEqual);
+  implTvBinOpBool(tvGreaterOrEqual);
 }
 
 OPTBLD_INLINE void iopCmp() {
-  implCellBinOpInt64([&] (Cell c1, Cell c2) {
-    return cellCompare(c1, c2);
+  implTvBinOpInt64([&] (Cell c1, Cell c2) {
+    return tvCompare(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopShl() {
-  implCellBinOp(cellShl);
+  implTvBinOp(tvShl);
 }
 
 OPTBLD_INLINE void iopShr() {
-  implCellBinOp(cellShr);
+  implTvBinOp(tvShr);
 }
 
 OPTBLD_INLINE void iopBitNot() {
-  cellBitNot(*vmStack().topC());
+  tvBitNot(*vmStack().topC());
 }
 
 OPTBLD_INLINE void iopCastBool() {
@@ -2087,7 +2087,7 @@ bool implInstanceOfHelper(const StringData* str1, Cell* c2) {
   // Because of other codepaths, an un-normalized name might enter the
   // table without a Class* so we need to check if it's there.
   if (LIKELY(rhs && rhs->getCachedClass() != nullptr)) {
-    return cellInstanceOf(c2, rhs);
+    return tvInstanceOf(c2, rhs);
   }
   return false;
 }
@@ -2117,7 +2117,7 @@ OPTBLD_INLINE void iopInstanceOf() {
 OPTBLD_INLINE void iopInstanceOfD(Id id) {
   const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
   Cell* c1 = vmStack().topC();
-  bool r = cellInstanceOf(c1, ne);
+  bool r = tvInstanceOf(c1, ne);
   vmStack().replaceC<KindOfBoolean>(r);
 }
 
@@ -2130,7 +2130,7 @@ OPTBLD_INLINE void iopIsLateBoundCls() {
     raise_error("\"is\" and \"as\" operators cannot be used with a trait");
   }
   auto const c1 = vmStack().topC();
-  bool r = cellInstanceOf(c1, cls);
+  bool r = tvInstanceOf(c1, cls);
   vmStack().replaceC<KindOfBoolean>(r);
 }
 
@@ -2535,7 +2535,7 @@ void iopSSwitch(PC origpc, PC& pc, imm_array<StrVecItem> jmptab) {
   for (i = 0; i < cases; ++i) {
     auto item = jmptab[i];
     const StringData* str = u->lookupLitstrId(item.str);
-    if (cellEqual(*val, str)) {
+    if (tvEqual(*val, str)) {
       pc = origpc + item.dest;
       vmStack().popC();
       return;
@@ -3586,7 +3586,7 @@ OPTBLD_INLINE void iopIssetG() {
   if (tv == nullptr) {
     e = false;
   } else {
-    e = !cellIsNull(tv);
+    e = !tvIsNull(tv);
   }
   vmStack().replaceC<KindOfBoolean>(e);
 }
@@ -3597,7 +3597,7 @@ OPTBLD_INLINE void iopIssetS() {
   if (!(ss.visible && ss.accessible)) {
     e = false;
   } else {
-    e = !cellIsNull(ss.val);
+    e = !tvIsNull(ss.val);
   }
   ss.output->m_data.num = e;
   ss.output->m_type = KindOfBoolean;
@@ -3763,7 +3763,7 @@ OPTBLD_INLINE void iopBreakTraceHint() {
 }
 
 OPTBLD_INLINE void iopEmptyL(local_var loc) {
-  bool e = !cellToBool(*loc.ptr);
+  bool e = !tvToBool(*loc.ptr);
   vmStack().pushBool(e);
 }
 
@@ -3777,7 +3777,7 @@ OPTBLD_INLINE void iopEmptyG() {
   if (tv == nullptr) {
     e = true;
   } else {
-    e = !cellToBool(*tv);
+    e = !tvToBool(*tv);
   }
   vmStack().replaceC<KindOfBoolean>(e);
 }
@@ -3788,7 +3788,7 @@ OPTBLD_INLINE void iopEmptyS() {
   if (!(ss.visible && ss.accessible)) {
     e = true;
   } else {
-    e = !cellToBool(*ss.val);
+    e = !tvToBool(*ss.val);
   }
   ss.output->m_data.num = e;
   ss.output->m_type = KindOfBoolean;
@@ -5871,7 +5871,7 @@ OPTBLD_INLINE TCA iopAwaitAll(PC origpc, PC& pc, LocalRange locals) {
   uint32_t cnt = 0;
   for (auto i = locals.first; i < locals.first + locals.count; ++i) {
     auto const local = *frame_local(vmfp(), i);
-    if (cellIsNull(local)) continue;
+    if (tvIsNull(local)) continue;
     auto const awaitable = c_Awaitable::fromCell(local);
     if (UNLIKELY(awaitable == nullptr)) {
       SystemLib::throwBadMethodCallExceptionObject("Await on a non-Awaitable");

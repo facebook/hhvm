@@ -832,7 +832,7 @@ void Transport::sendRawInternal(const char *data, int size,
   bool chunked = m_chunkedEncoding;
 
   if (!g_context->m_headerCallbackDone &&
-      !cellIsNull(&g_context->m_headerCallback)) {
+      !tvIsNull(&g_context->m_headerCallback)) {
     // We could use m_headerSent here, however it seems we can still
     // end up in an infinite loop when:
     // m_headerCallback calls flush()

@@ -937,7 +937,7 @@ TypedValue mapGetImpl(c_Map* map, key_type<keyType> key) {
 template<KeyType keyType>
 uint64_t mapIssetImpl(c_Map* map, key_type<keyType> key) {
   auto result = map->get(key);
-  return result ? !cellIsNull(result) : false;
+  return result ? !tvIsNull(result) : false;
 }
 
 template<KeyType keyType>

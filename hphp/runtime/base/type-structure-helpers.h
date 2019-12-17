@@ -32,12 +32,12 @@ namespace HPHP {
  * Checks whether the given cell is an instance of the class referred by
  * given named entity.
  */
-bool cellInstanceOf(const Cell* tv, const NamedEntity* ne);
+bool tvInstanceOf(const Cell* tv, const NamedEntity* ne);
 
 /*
  * Checks whether the given cell is an instance of the given class.
  */
-bool cellInstanceOf(const Cell* tv, const Class* cls);
+bool tvInstanceOf(const Cell* tv, const Class* cls);
 
 /*
  * Returns true is all the generics on the type type structure are

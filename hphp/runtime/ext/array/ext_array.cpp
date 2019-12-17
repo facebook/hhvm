@@ -767,7 +767,7 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfNull:
       case KindOfBoolean:
       case KindOfInt64:
-        i *= cellToInt(rval.tv());
+        i *= tvToInt(rval.tv());
         continue;
 
       case KindOfDouble:
@@ -812,7 +812,7 @@ DOUBLE:
     switch (rval.type()) {
       DT_UNCOUNTED_CASE:
       case KindOfString:
-        d *= cellToDouble(rval.tv());
+        d *= tvToDouble(rval.tv());
 
       case KindOfVec:
       case KindOfDict:
@@ -1042,7 +1042,7 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfNull:
       case KindOfBoolean:
       case KindOfInt64:
-        i += cellToInt(rval.tv());
+        i += tvToInt(rval.tv());
         continue;
 
       case KindOfDouble:
@@ -1087,7 +1087,7 @@ DOUBLE:
     switch (rval.type()) {
       DT_UNCOUNTED_CASE:
       case KindOfString:
-        d += cellToDouble(rval.tv());
+        d += tvToDouble(rval.tv());
 
       case KindOfVec:
       case KindOfDict:

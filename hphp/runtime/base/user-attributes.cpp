@@ -37,7 +37,7 @@ struct UserAttributeMap::MapCompare {
     auto bit = b->begin();
     while (ait != a->end()) {
       if (ait->first != bit->first) return false;
-      if (!cellSame(ait->second, bit->second)) return false;
+      if (!tvSame(ait->second, bit->second)) return false;
       ++ait;
       ++bit;
     }

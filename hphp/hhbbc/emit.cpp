@@ -327,7 +327,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
         // If there's a persistent constant with the same name, either
         // this is the one and only definition, or the persistent
         // definition is in systemlib (and this one will always fail).
-        auto const kind = val && cellSame(*val, *top) ?
+        auto const kind = val && tvSame(*val, *top) ?
           Unit::MergeKind::PersistentDefine : Unit::MergeKind::Define;
         ue.pushMergeableDef(kind, bc.DefCns.str1, *top);
         return;

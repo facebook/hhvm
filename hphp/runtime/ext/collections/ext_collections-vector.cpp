@@ -248,7 +248,7 @@ bool BaseVector::OffsetIsset(ObjectData* obj, const TypedValue* key) {
   }
   const auto vec = static_cast<BaseVector*>(obj);
   const auto result = vec->get(key->m_data.num);
-  return result ? !cellIsNull(*result) : false;
+  return result ? !tvIsNull(*result) : false;
 }
 
 bool BaseVector::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
@@ -258,7 +258,7 @@ bool BaseVector::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
   }
   const auto vec = static_cast<BaseVector*>(obj);
   const auto result = vec->get(key->m_data.num);
-  return result ? !cellToBool(*result) : true;
+  return result ? !tvToBool(*result) : true;
 }
 
 bool BaseVector::OffsetContains(ObjectData* obj, const TypedValue* key) {

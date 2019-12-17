@@ -394,7 +394,8 @@ let merge
   let () =
     match results.kind with
     | Progress -> ()
-    | DelegateProgress _ -> delegate_state := Delegate.merge !delegate_state
+    | DelegateProgress _ ->
+      delegate_state := Delegate.merge !delegate_state results.progress
   in
   let results = results.progress in
 

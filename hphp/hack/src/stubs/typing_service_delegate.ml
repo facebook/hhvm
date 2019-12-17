@@ -22,7 +22,9 @@ let next files_to_process files_in_progress state =
   ignore (files_to_process, files_in_progress);
   (state, None)
 
-let merge state = state
+let merge state computation_progress =
+  ignore computation_progress;
+  state
 
 let on_cancelled state = ([], state)
 

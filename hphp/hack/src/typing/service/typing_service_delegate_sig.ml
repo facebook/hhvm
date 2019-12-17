@@ -24,7 +24,7 @@ module type Delegate_sig = sig
     state ->
     state * (files_in_progress * files_to_process * delegate_job_sig) option
 
-  val merge : state -> state
+  val merge : state -> computation_progress -> state
 
   val on_cancelled : state -> file_computation list * state
 

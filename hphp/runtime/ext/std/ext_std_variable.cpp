@@ -120,7 +120,7 @@ bool HHVM_FUNCTION(is_scalar, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(is_array, const Variant& v) {
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+  if (UNLIKELY(RO::EvalHackArrCompatIsArrayNotices)) {
     if (v.isPHPArray()) {
       return true;
     } else if (v.isVecArray()) {
@@ -132,7 +132,14 @@ bool HHVM_FUNCTION(is_array, const Variant& v) {
     }
     return false;
   }
-  return is_array(v.asTypedValue());
+  auto const ret = is_array(v.asTypedValue());
+  if (ret &&
+      UNLIKELY(RO::EvalLogArrayProvenance) &&
+      RO::EvalArrProvDVArrays &&
+      arrprov::arrayWantsTag(v.getArrayData())) {
+    raise_array_serialization_notice("is_array", v.asCArrRef().get());
+  }
+  return ret;
 }
 
 bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
@@ -146,7 +153,9 @@ bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
     }
   }
   auto const ret =  is_vec(v.asTypedValue());
-  if (ret && UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
+  if (ret &&
+      UNLIKELY(RO::EvalLogArrayProvenance) &&
+      RO::EvalArrProvHackArrays) {
     raise_array_serialization_notice("is_vec", v.asCArrRef().get());
   }
   return ret;
@@ -163,7 +172,9 @@ bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
     }
   }
   auto const ret = is_dict(v.asTypedValue());
-  if (ret && UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
+  if (ret &&
+      UNLIKELY(RO::EvalLogArrayProvenance) &&
+      RO::EvalArrProvHackArrays) {
     raise_array_serialization_notice("is_dict", v.asCArrRef().get());
   }
   return ret;
@@ -185,7 +196,13 @@ bool HHVM_FUNCTION(HH_is_varray, const Variant& val) {
       return false;
     }
   }
-  return tvIsArray(cell) && cell->m_data.parr->isVArray();
+  auto const ret = tvIsArray(cell) && cell->m_data.parr->isVArray();
+  if (ret &&
+      UNLIKELY(RO::EvalLogArrayProvenance) &&
+      RO::EvalArrProvDVArrays) {
+    raise_array_serialization_notice("is_varray", val.asCArrRef().get());
+  }
+  return ret;
 }
 
 bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
@@ -197,7 +214,13 @@ bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
       return false;
     }
   }
-  return tvIsArray(cell) && cell->m_data.parr->isDArray();
+  auto const ret = tvIsArray(cell) && cell->m_data.parr->isDArray();
+  if (ret &&
+      UNLIKELY(RO::EvalLogArrayProvenance) &&
+      RO::EvalArrProvDVArrays) {
+    raise_array_serialization_notice("is_darray", val.asCArrRef().get());
+  }
+  return ret;
 }
 
 bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {

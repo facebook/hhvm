@@ -2344,7 +2344,7 @@ TEST(Type, LoosenValues) {
     { aval(test_array_packed_value()), TSPArrN },
     { arr_packedn(TInt), TPArrN },
     { arr_packed({TInt, TBool}), TPArrN },
-    { arr_packed_varray({TInt, TBool}), TVArrN },
+    { arr_packed_varray({TInt, TBool}, folly::none), TVArrN },
     { arr_mapn(TStr, TInt), TPArrN },
     { arr_map(test_map), TPArrN }
   };

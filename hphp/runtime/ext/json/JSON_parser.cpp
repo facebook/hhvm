@@ -1055,7 +1055,7 @@ static void object_set(const json_parser* json,
       collections::set(var.getObjectData(), &keyTV, value.asTypedValue());
     } else if (container_type == JSONContainerType::HACK_ARRAYS) {
       forceToDict(var).set(key, value);
-      if (RuntimeOption::EvalArrayProvenance && json->prov_tag) {
+      if (RO::EvalArrayProvenance && json->prov_tag) {
         auto const tv = var.asTypedValue();
         *tv = arrprov::tagTVKnown(*tv, *json->prov_tag);
       }
@@ -1066,6 +1066,10 @@ static void object_set(const json_parser* json,
         forceToDArray(var).set(i, value);
       } else {
         forceToDArray(var).set(key, value);
+      }
+      if (RO::EvalArrayProvenance && json->prov_tag) {
+        auto const tv = var.asTypedValue();
+        *tv = arrprov::tagTVKnown(*tv, *json->prov_tag);
       }
     } else {
       int64_t i;

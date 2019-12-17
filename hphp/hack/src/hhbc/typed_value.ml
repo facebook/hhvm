@@ -28,8 +28,8 @@ type t =
   (* Classic PHP arrays with explicit (key,value) entries *)
   | HhasAdata of string
   | Array of (t * t) list
-  | VArray of t list
-  | DArray of (t * t) list
+  | VArray of t list * prov_tag
+  | DArray of (t * t) list * prov_tag
   (* Hack arrays: vectors, keysets, and dictionaries *)
   | Vec of t list * prov_tag
   | Keyset of t list
@@ -76,8 +76,8 @@ let to_bool v =
   (* Empty collections cast to false *)
   | Dict ([], _)
   | Array []
-  | VArray []
-  | DArray []
+  | VArray ([], _)
+  | DArray ([], _)
   | Keyset []
   | Vec ([], _) ->
     false

@@ -523,7 +523,8 @@ struct IterTypes;
  * If we would produce a 'bottom' provenance tag, (i.e. in intersectProvTag)
  * we widen the result to 'top'
  */
-using ProvTag  = folly::Optional<arrprov::Tag>;
+using ProvTag = folly::Optional<arrprov::Tag>;
+constexpr auto kProvBits = BVec | BDict | BVArr | BDArr;
 
 enum class Emptiness {
   Empty,
@@ -720,11 +721,14 @@ private:
   friend struct ArrKey disect_strict_key(const Type&);
 
   friend Type spec_array_like_union(Type&, Type&, trep, trep);
+  friend Type aempty_varray(ProvTag);
+  friend Type aempty_darray(ProvTag);
   friend Type vec_val(SArray);
   friend Type vec_empty(ProvTag);
-  friend Type some_vec_empty(ProvTag);
   friend Type dict_val(SArray);
   friend Type dict_empty(ProvTag);
+  friend Type some_aempty_darray(ProvTag);
+  friend Type some_vec_empty(ProvTag);
   friend Type some_dict_empty(ProvTag);
   friend Type keyset_val(SArray);
   friend bool could_contain_objects(const Type&);
@@ -1051,19 +1055,19 @@ Type sval_nonstatic(SString);
  */
 Type sempty();
 Type aempty();
-Type aempty_varray();
-Type aempty_darray();
-Type vec_empty(ProvTag pt = folly::none);
-Type dict_empty(ProvTag pt = folly::none);
+Type aempty_varray(ProvTag = folly::none);
+Type aempty_darray(ProvTag = folly::none);
+Type vec_empty(ProvTag = folly::none);
+Type dict_empty(ProvTag = folly::none);
 Type keyset_empty();
 
 /*
  * Create an any-countedness empty array/vec/dict type.
  */
 Type some_aempty();
-Type some_aempty_darray();
-Type some_vec_empty(ProvTag pt = folly::none);
-Type some_dict_empty(ProvTag pt = folly::none);
+Type some_aempty_darray(ProvTag = folly::none);
+Type some_vec_empty(ProvTag = folly::none);
+Type some_dict_empty(ProvTag = folly::none);
 Type some_keyset_empty();
 
 /*
@@ -1081,7 +1085,7 @@ Type clsExact(res::Class);
  * Pre: !v.empty()
  */
 Type arr_packed(std::vector<Type> v);
-Type arr_packed_varray(std::vector<Type> v);
+Type arr_packed_varray(std::vector<Type> v, ProvTag = folly::none);
 Type sarr_packed(std::vector<Type> v);
 
 /*
@@ -1098,7 +1102,7 @@ Type sarr_packedn(Type);
  * Pre: !m.empty()
  */
 Type arr_map(MapElems m);
-Type arr_map_darray(MapElems m);
+Type arr_map_darray(MapElems m, ProvTag = folly::none);
 Type sarr_map(MapElems m);
 
 /*

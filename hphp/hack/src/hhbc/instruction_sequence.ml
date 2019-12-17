@@ -73,9 +73,6 @@ let make_fcall_args
 
 let instr_lit_const l = instr (ILitConst l)
 
-let instr_lit_empty_varray =
-  instr_lit_const (TypedValue (Typed_value.VArray []))
-
 let instr_iterinit iter_args label =
   instr (IIterator (IterInit (iter_args, label)))
 

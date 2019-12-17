@@ -1006,8 +1006,8 @@ folly::Optional<int64_t> tryIntishCast(const StringData* key);
  * Add a provenance tag for the current vmpc to `ad`, copying instead from
  * `src` if it's provided (and if it has a tag).  Returns `ad` for convenience.
  *
- * This function asserts that `ad` is singly reference counted.  It does not
- * assert that `ad` does not have an existing tag, and instead overrides it.
+ * This function does not assert that `ad` does not have an existing tag, and
+ * instead overrides it.
  */
 ArrayData* tagArrProv(ArrayData* ad, const ArrayData* src = nullptr);
 ArrayData* tagArrProv(ArrayData* ad, const APCArray* src);

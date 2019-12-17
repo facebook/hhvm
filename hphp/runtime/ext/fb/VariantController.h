@@ -17,12 +17,15 @@
 #ifndef VARIANTCONTROLLER_H
 #define VARIANTCONTROLLER_H
 
-#include <algorithm>
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/runtime-error.h"
+
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
+
+#include <algorithm>
 
 namespace HPHP {
 
@@ -282,8 +285,11 @@ struct VariantControllerImpl {
   ALWAYS_INLINE
   static void traceSerialization(const_variant_ref thing) {
     if (LIKELY(!RuntimeOption::EvalLogArrayProvenance)) return;
+    if (!thing.isArray()) return;
+    auto const ad = thing.getArrayData();
 
-    if (thing.isVecArray()) {
+    if (arrprov::arrayWantsTag(ad) &&
+        (thing.isVecArray() || ad->isVArray())) {
       raise_array_serialization_notice("fb_serialize", thing.asCArrRef().get());
     }
   }

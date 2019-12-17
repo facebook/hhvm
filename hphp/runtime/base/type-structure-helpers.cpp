@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/enum-util.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -544,8 +545,6 @@ bool checkTypeStructureMatchesCellImpl(
   bool& warn,
   bool isOrAsOp
 ) {
-  using RO = RuntimeOption;
-
   auto const errOnLen = [&givenType](auto cell, auto len) {
     if (!gen_error) return;
     givenType = folly::sformat("{} of length {}",

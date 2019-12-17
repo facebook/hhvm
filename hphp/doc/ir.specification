@@ -2149,7 +2149,7 @@ To string conversions:
   Raise a HackArrCompatNotice corresponding to a property type-hint d/varray
   mismatch.  Behaves like RaiseHackArrParamNotice.
 
-| RaiseArraySerializeNotice, ND, CStr S(Vec|Dict), NF
+| RaiseArraySerializeNotice, ND, CStr S(ArrLike), NF
 
   Raise a serialization notice with provenance information from the given vec or dict
 

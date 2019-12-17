@@ -117,8 +117,8 @@ let rec expr_to_typed_value ?(allow_maps = false) ns ((_, expr_) as expr) =
     when id = SN.SpecialFunctions.hhas_adata ->
     TV.HhasAdata data
   | A.Array fields -> array_to_typed_value ns fields
-  | A.Varray (_, fields) -> varray_to_typed_value ns fields
-  | A.Darray (_, fields) -> darray_to_typed_value ns fields
+  | A.Varray (_, fields) -> varray_to_typed_value ns fields pos
+  | A.Darray (_, fields) -> darray_to_typed_value ns fields pos
   | A.Collection ((_, "vec"), _, fields) ->
     TV.Vec (List.map fields (value_afield_to_typed_value ns), Some pos)
   | A.ValCollection (A.Vec, _, el)
@@ -171,7 +171,7 @@ let rec expr_to_typed_value ?(allow_maps = false) ns ((_, expr_) as expr) =
     let values = List.map fields ~f:(set_afield_to_typed_value_pair ns) in
     let d = update_duplicates_in_map values in
     TV.Dict (d, Some pos)
-  | A.Shape fields -> shape_to_typed_value ns fields
+  | A.Shape fields -> shape_to_typed_value ns fields pos
   | A.Class_const (cid, id) -> class_const_to_typed_value cid id
   | A.BracedExpr e -> expr_to_typed_value ~allow_maps ns e
   | A.Id _
@@ -241,19 +241,19 @@ and array_to_typed_value ns fields =
   let a = update_duplicates_in_map @@ List.rev pairs in
   TV.Array a
 
-and varray_to_typed_value ns fields =
+and varray_to_typed_value ns fields pos =
   let tv_fields = List.map fields ~f:(expr_to_typed_value ns) in
-  TV.VArray tv_fields
+  TV.VArray (tv_fields, Some pos)
 
-and darray_to_typed_value ns fields =
+and darray_to_typed_value ns fields pos =
   let fields =
     List.map fields ~f:(fun (v1, v2) ->
         (key_expr_to_typed_value ns v1, expr_to_typed_value ns v2))
   in
   let a = update_duplicates_in_map fields in
-  TV.DArray a
+  TV.DArray (a, Some pos)
 
-and shape_to_typed_value ns fields =
+and shape_to_typed_value ns fields pos =
   let aux (sf, expr) =
     let key =
       match sf with
@@ -272,7 +272,7 @@ and shape_to_typed_value ns fields =
     (key, expr_to_typed_value ns expr)
   in
   let a = List.map fields ~f:aux in
-  TV.DArray a
+  TV.DArray (a, Some pos)
 
 and key_expr_to_typed_value ns expr =
   let tv = expr_to_typed_value ns expr in
@@ -332,8 +332,8 @@ let rec value_to_expr_ p v =
   | TV.Keyset _ -> failwith "value_to_expr: keyset NYI"
   | TV.HhasAdata _ -> failwith "value_to_expr: HhasAdata NYI"
   | TV.Array pairs -> A.Array (List.map pairs (value_pair_to_afield p))
-  | TV.VArray values -> A.Varray (None, List.map values (value_to_expr p))
-  | TV.DArray pairs ->
+  | TV.VArray (values, _) -> A.Varray (None, List.map values (value_to_expr p))
+  | TV.DArray (pairs, _) ->
     A.Darray
       ( None,
         List.map pairs (fun (v1, v2) ->

@@ -957,7 +957,7 @@ void in(ISS& env, const bc::NewVArray& op) {
     elems.push_back(std::move(topC(env, op.arg1 - i - 1)));
   }
   discard(env, op.arg1);
-  push(env, arr_packed_varray(std::move(elems)));
+  push(env, arr_packed_varray(std::move(elems), provTagHere(env)));
   effect_free(env);
   constprop(env);
 }
@@ -965,7 +965,8 @@ void in(ISS& env, const bc::NewVArray& op) {
 void in(ISS& env, const bc::NewDArray& op) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   effect_free(env);
-  push(env, op.arg1 == 0 ? aempty_darray() : some_aempty_darray());
+  auto const tag = provTagHere(env);
+  push(env, op.arg1 == 0 ? aempty_darray(tag) : some_aempty_darray(tag));
 }
 
 void in(ISS& env, const bc::NewRecord& op) {
@@ -994,7 +995,7 @@ void in(ISS& env, const bc::NewStructDArray& op) {
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {
     map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
   }
-  push(env, arr_map_darray(std::move(map)));
+  push(env, arr_map_darray(std::move(map), provTagHere(env)));
   effect_free(env);
   constprop(env);
 }

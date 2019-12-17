@@ -107,8 +107,9 @@ private:
 };
 
 /*
- * Whether `a` or `tv` admits a provenance tag---i.e., whether it's either a
- * vec or a dict.
+ * Whether `a` admits a provenance tag.
+ *
+ * Depends on the ArrProv.* runtime options.
  */
 bool arrayWantsTag(const ArrayData* a);
 bool arrayWantsTag(const APCArray* a);
@@ -156,13 +157,11 @@ TypedValue tagTV(TypedValue tv);
 TypedValue tagTVKnown(TypedValue tv, Tag tag);
 
 /*
- * Produce a static empty array with the given provenance tag.
+ * Produce a static array with the given provenance tag.
  *
  * If no tag is provided, we attempt to make one from vmpc(), and failing that
  * we just return the input array.
  */
-ArrayData* makeEmptyVec(folly::Optional<Tag> tag = folly::none);
-ArrayData* makeEmptyDict(folly::Optional<Tag> tag = folly::none);
 ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag = folly::none);
 
 ///////////////////////////////////////////////////////////////////////////////

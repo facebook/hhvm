@@ -277,46 +277,49 @@ std::vector<SString> load_input(F&& fun) {
   auto const& gd = Repo::get().global();
   // When running hhbbc, these option is loaded from GD, and will override CLI.
   // When running hhvm, these option is not loaded from GD, but read from CLI.
-  RuntimeOption::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
-  RuntimeOption::EvalHackArrCompatNotices =
-    RuntimeOption::EvalHackArrCompatCheckRefBind =
-    RuntimeOption::EvalHackArrCompatCheckFalseyPromote =
-    RuntimeOption::EvalHackArrCompatCheckCompare =
-    RuntimeOption::EvalHackArrCompatCheckCompareNonAnyArray =
-    RuntimeOption::EvalHackArrCompatCheckArrayPlus =
-    RuntimeOption::EvalHackArrCompatCheckArrayKeyCast =
-    RuntimeOption::EvalHackArrCompatCheckNullHackArrayKey =
+  RO::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
+  RO::EvalHackArrCompatNotices =
+    RO::EvalHackArrCompatCheckRefBind =
+    RO::EvalHackArrCompatCheckFalseyPromote =
+    RO::EvalHackArrCompatCheckCompare =
+    RO::EvalHackArrCompatCheckCompareNonAnyArray =
+    RO::EvalHackArrCompatCheckArrayPlus =
+    RO::EvalHackArrCompatCheckArrayKeyCast =
+    RO::EvalHackArrCompatCheckNullHackArrayKey =
       gd.HackArrCompatNotices;
-  RuntimeOption::EvalForbidDynamicCallsToFunc = gd.ForbidDynamicCallsToFunc;
-  RuntimeOption::EvalForbidDynamicCallsToClsMeth =
+  RO::EvalForbidDynamicCallsToFunc = gd.ForbidDynamicCallsToFunc;
+  RO::EvalForbidDynamicCallsToClsMeth =
     gd.ForbidDynamicCallsToClsMeth;
-  RuntimeOption::EvalForbidDynamicCallsToInstMeth =
+  RO::EvalForbidDynamicCallsToInstMeth =
     gd.ForbidDynamicCallsToInstMeth;
-  RuntimeOption::EvalForbidDynamicConstructs = gd.ForbidDynamicConstructs;
-  RuntimeOption::EvalForbidDynamicCallsWithAttr =
+  RO::EvalForbidDynamicConstructs = gd.ForbidDynamicConstructs;
+  RO::EvalForbidDynamicCallsWithAttr =
     gd.ForbidDynamicCallsWithAttr;
-  RuntimeOption::EvalWarnOnNonLiteralClsMeth =
+  RO::EvalWarnOnNonLiteralClsMeth =
     gd.WarnOnNonLiteralClsMeth;
-  RuntimeOption::EvalLogKnownMethodsAsDynamicCalls =
+  RO::EvalLogKnownMethodsAsDynamicCalls =
     gd.LogKnownMethodsAsDynamicCalls;
-  RuntimeOption::EvalNoticeOnBuiltinDynamicCalls =
+  RO::EvalNoticeOnBuiltinDynamicCalls =
     gd.NoticeOnBuiltinDynamicCalls;
-  RuntimeOption::EvalHackArrCompatIsArrayNotices =
+  RO::EvalHackArrCompatIsArrayNotices =
     gd.HackArrCompatIsArrayNotices;
-  RuntimeOption::EvalHackArrCompatTypeHintNotices =
+  RO::EvalHackArrCompatTypeHintNotices =
     gd.HackArrCompatTypeHintNotices;
-  RuntimeOption::EvalHackArrCompatDVCmpNotices =
+  RO::EvalHackArrCompatDVCmpNotices =
     gd.HackArrCompatDVCmpNotices;
-  RuntimeOption::EvalHackArrCompatSerializeNotices =
+  RO::EvalHackArrCompatSerializeNotices =
     gd.HackArrCompatSerializeNotices;
-  RuntimeOption::EvalHackArrDVArrs = gd.HackArrDVArrs;
-  RuntimeOption::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
-  RuntimeOption::EnableArgsInBacktraces = gd.EnableArgsInBacktraces;
-  RuntimeOption::EvalEmitClsMethPointers = gd.EmitClsMethPointers;
-  RuntimeOption::EvalIsVecNotices = gd.IsVecNotices;
-  RuntimeOption::EvalIsCompatibleClsMethType = gd.IsCompatibleClsMethType;
-  RuntimeOption::EvalArrayProvenance = gd.ArrayProvenance;
-  RuntimeOption::StrictArrayFillKeys = gd.StrictArrayFillKeys;
+  RO::EvalHackArrDVArrs = gd.HackArrDVArrs;
+  RO::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
+  RO::EnableArgsInBacktraces = gd.EnableArgsInBacktraces;
+  RO::EvalEmitClsMethPointers = gd.EmitClsMethPointers;
+  RO::EvalIsVecNotices = gd.IsVecNotices;
+  RO::EvalIsCompatibleClsMethType = gd.IsCompatibleClsMethType;
+  RO::EvalArrayProvenance =
+    RO::EvalArrProvHackArrays =
+    RO::EvalArrProvDVArrays =
+      gd.ArrayProvenance;
+  RO::StrictArrayFillKeys = gd.StrictArrayFillKeys;
 
   auto const units = Repo::get().enumerateUnits(RepoIdCentral, true);
   auto const size = units.size();

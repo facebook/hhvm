@@ -94,13 +94,25 @@ APCArray::MakeSharedArray(ArrayData* arr, APCHandleLevel level,
     arr,
     level,
     [&]() {
+      auto const add_prov = [arr] (APCHandle::Pair pair) {
+        if (UNLIKELY(
+          RO::EvalArrayProvenance &&
+          RO::EvalArrProvDVArrays
+        )) {
+          if (auto const tag = arrprov::getTag(arr)) {
+            arrprov::setTag(APCArray::fromHandle(pair.handle), *tag);
+          }
+        }
+        return pair;
+      };
+
       if (arr->isVArray()) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
-        return MakePacked(arr, APCKind::SharedVArray, unserializeObj);
+        return add_prov(MakePacked(arr, APCKind::SharedVArray, unserializeObj));
       }
       if (arr->isDArray()) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
-        return MakeHash(arr, APCKind::SharedDArray, unserializeObj);
+        return add_prov(MakeHash(arr, APCKind::SharedDArray, unserializeObj));
       }
       return arr->isVectorData()
         ? MakePacked(arr, APCKind::SharedPackedArray, unserializeObj)
@@ -124,7 +136,10 @@ APCArray::MakeSharedVec(ArrayData* vec, APCHandleLevel level,
     level,
     [&] {
       auto const pair = MakePacked(vec, APCKind::SharedVec, unserializeObj);
-      if (RuntimeOption::EvalArrayProvenance) {
+      if (UNLIKELY(
+        RO::EvalArrayProvenance &&
+        RO::EvalArrProvHackArrays
+      )) {
         if (auto const tag = arrprov::getTag(vec)) {
           arrprov::setTag(APCArray::fromHandle(pair.handle), *tag);
         }
@@ -149,7 +164,10 @@ APCArray::MakeSharedDict(ArrayData* dict, APCHandleLevel level,
     level,
     [&] {
       auto const pair = MakeHash(dict, APCKind::SharedDict, unserializeObj);
-      if (RuntimeOption::EvalArrayProvenance) {
+      if (UNLIKELY(
+        RO::EvalArrayProvenance &&
+        RO::EvalArrProvHackArrays
+      )) {
         if (auto const tag = arrprov::getTag(dict)) {
           arrprov::setTag(APCArray::fromHandle(pair.handle), *tag);
         }

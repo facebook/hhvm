@@ -1310,12 +1310,14 @@ StringData* getHackArrCompatNullHackArrayKeyMsg() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
+namespace arrprov_detail {
 
 template<typename SrcArr>
 ArrayData* tagArrProvImpl(ArrayData* ad, const SrcArr* src) {
   assertx(RuntimeOption::EvalArrayProvenance);
   assertx(ad->hasExactlyOneRef() || !ad->isRefCounted());
+
+  if (!arrprov::arrayWantsTag(ad)) return ad;
 
   auto const do_tag = [] (ArrayData* ad, arrprov::Tag tag) {
     if (ad->isStatic()) return tagStaticArr(ad, tag);
@@ -1332,13 +1334,9 @@ ArrayData* tagArrProvImpl(ArrayData* ad, const SrcArr* src) {
   return ad;
 }
 
-}
+template ArrayData* tagArrProvImpl<ArrayData>(ArrayData*, const ArrayData*);
+template ArrayData* tagArrProvImpl<APCArray>(ArrayData*, const APCArray*);
 
-ArrayData* tagArrProv(ArrayData* ad, const ArrayData* src) {
-  return tagArrProvImpl(ad, src);
-}
-ArrayData* tagArrProv(ArrayData* ad, const APCArray* src) {
-  return tagArrProvImpl(ad, src);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -82,7 +82,6 @@ jit::vector<Vlabel> rpoLayout(Vunit& unit) {
 
   if (unit.context) {
     auto const kind = unit.context->kind;
-    using RO = RuntimeOption;
     if ((isPrologue(kind)  && !RO::EvalJitLayoutPrologueSplitHotCold) ||
         (isProfiling(kind) && !RO::EvalJitLayoutProfileSplitHotCold)) {
       for (auto b : labels) {

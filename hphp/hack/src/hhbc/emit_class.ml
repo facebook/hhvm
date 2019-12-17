@@ -233,7 +233,7 @@ let emit_reified_extends_params env class_ =
       if hack_arr_dv_arrs () then
         TV.Vec ([], None)
       else
-        TV.VArray []
+        TV.VArray ([], None)
     in
     instr (H.ILitConst (H.TypedValue tv))
   else

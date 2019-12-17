@@ -3383,20 +3383,18 @@ String HHVM_FUNCTION(HH_get_provenance, const Variant& in) {
 }
 
 TypedValue HHVM_FUNCTION(HH_tag_provenance_here, TypedValue in) {
-  if (!isVecType(type(in)) && !isDictType(type(in))) return in;
-  if (!RuntimeOption::EvalArrayProvenance) return in;
+  if (!RuntimeOption::EvalArrayProvenance ||
+      !isArrayLikeType(type(in)) ||
+      !arrprov::arrayWantsTag(val(in).parr)) {
+    return in;
+  }
 
   auto const ad = in.m_data.parr->copy();
 
   if (auto const tag = arrprov::tagFromPC()) {
     arrprov::setTag<arrprov::Mode::Emplace>(ad, *tag);
   }
-
-  assertx(ad->isDict() || ad->isVecArray());
-
-  return ad->isDict()
-    ? make_tv<KindOfDict>(ad)
-    : make_tv<KindOfVec>(ad);
+  return make_array_like_tv(ad);
 }
 
 Array HHVM_FUNCTION(merge_xhp_attr_declarations,

@@ -1097,6 +1097,10 @@ struct RuntimeOption {
   F(bool, ArrayProvenance, false)                                       \
   /* Tag _all_ empty arrays we create at runtime. */                    \
   F(bool, ArrayProvenanceEmpty, false)                                  \
+  /* Whether v/darrays and vecs/dicts (respectively) should admit       \
+   * provenance tags. */                                                \
+  F(bool, ArrProvDVArrays, false)                                       \
+  F(bool, ArrProvHackArrays, true)                                      \
   /* Enable logging the source of vecs/dicts whose vec/dict-ness is     \
    * observed, e.g. through serialization */                            \
   F(bool, LogArrayProvenance, false)                                    \
@@ -1370,6 +1374,8 @@ public:
   static bool SetProfileNullThisObject;
 };
 static_assert(sizeof(RuntimeOption) == 1, "no instance variables");
+
+using RO = RuntimeOption;
 
 inline bool isJitDeserializing() {
   auto const m = RuntimeOption::EvalJitSerdesMode;

@@ -58,7 +58,7 @@ std::mutex s_static_provenance_lock;
  * valid anymore
  */
 InitFiniNode flushTable([]{
-  if (!RuntimeOption::EvalArrayProvenance) return;
+  if (!RO::EvalArrayProvenance) return;
   rl_array_provenance->tags.clear();
 }, InitFiniNode::When::RequestFini);
 
@@ -79,14 +79,17 @@ constexpr bool wants_local_prov(const APCArray* a) { return false; }
 }
 
 bool arrayWantsTag(const ArrayData* ad) {
-  auto const kind = ad->kind();
-  return !ad->isLegacyArray() &&
-    (kind == ArrayData::ArrayKind::kVecKind ||
-     kind == ArrayData::ArrayKind::kDictKind);
+  return !ad->isLegacyArray() && (
+    (RO::EvalArrProvHackArrays && (ad->isVecArray() || ad->isDict())) ||
+    (RO::EvalArrProvDVArrays && (ad->isVArray() || ad->isDArray()))
+  );
 }
 
 bool arrayWantsTag(const APCArray* a) {
-  return a->isVec() || a->isDict();
+  return (
+    (RO::EvalArrProvHackArrays && (a->isVec() || a->isDict())) ||
+    (RO::EvalArrProvDVArrays && (a->isVArray() || a->isDArray()))
+  );
 }
 
 namespace {
@@ -210,7 +213,7 @@ void clearTag(const APCArray* a) {
 namespace {
 
 void tagTVImpl(TypedValue& tv, folly::Optional<Tag> tag) {
-  assertx(RuntimeOption::EvalArrayProvenance);
+  assertx(RO::EvalArrayProvenance);
 
   if (!isArrayType(type(tv))) return;
 
@@ -247,13 +250,8 @@ TypedValue tagTVKnown(TypedValue tv, Tag tag) {
   return tv;
 }
 
-namespace {
-
-template<typename Copy>
-ArrayData* tagStaticImpl(ArrayData* ad,
-                         folly::Optional<Tag> tag,
-                         Copy&& copy) {
-  assertx(RuntimeOption::EvalArrayProvenance);
+ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag) {
+  assertx(RO::EvalArrayProvenance);
   assertx(ad->isStatic());
   assertx(arrayWantsTag(ad));
 
@@ -265,28 +263,6 @@ ArrayData* tagStaticImpl(ArrayData* ad,
 
   ArrayData::GetScalarArray(&ad, tag);
   return ad;
-}
-
-}
-
-ArrayData* makeEmptyVec(folly::Optional<Tag> tag) {
-  return tagStaticImpl(
-    staticEmptyVecArray(), tag,
-    [] (const ArrayData* ad) { return PackedArray::CopyVec(ad); }
-  );
-}
-
-ArrayData* makeEmptyDict(folly::Optional<Tag> tag) {
-  return tagStaticImpl(
-    staticEmptyDictArray(), tag,
-    [] (const ArrayData* ad) { return MixedArray::CopyDict(ad); }
-  );
-}
-
-ArrayData* tagStaticArr(ArrayData* ad, folly::Optional<Tag> tag) {
-  return tagStaticImpl(ad, tag,
-    [] (const ArrayData* ad) { return ad->copy(); }
-  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -306,7 +282,9 @@ TagOverride::~TagOverride() {
 
 folly::Optional<Tag> tagFromPC() {
   VMRegAnchor _(VMRegAnchor::Soft);
-  if (tl_regState != VMRegState::CLEAN || vmfp() == nullptr) {
+  if (tl_regState != VMRegState::CLEAN ||
+      rds::header() == nullptr ||
+      vmfp() == nullptr) {
     return folly::none;
   }
 

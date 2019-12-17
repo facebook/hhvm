@@ -105,9 +105,11 @@ bool mayHaveData(trep bits) {
   case BOptDArrN: case BOptSDArrN: case BOptCDArrN:
     return true;
 
-    /* Under some circumstances, we store an array in
-     * B[Opt][S]{Vec,Dict}E to effectively track their
-     * provenance tag */
+  case BSArrE: case BCArrE:
+  case BSVArrE:    case BCVArrE:    case BVArrE:
+  case BOptSVArrE: case BOptCVArrE: case BOptVArrE:
+  case BSDArrE:    case BCDArrE:    case BDArrE:
+  case BOptSDArrE: case BOptCDArrE: case BOptDArrE:
   case BCVecE:     case BSVecE:     case BVecE:
   case BOptCVecE:  case BOptSVecE:  case BOptVecE:
   case BCDictE:    case BSDictE:    case BDictE:
@@ -120,19 +122,11 @@ bool mayHaveData(trep bits) {
   case BFalse:
   case BTrue:
   case BCStr:
-  case BSArrE:
-  case BCArrE:
   case BSKeysetE:
   case BCKeysetE:
   case BSPArrE:
   case BCPArrE:
   case BPArrE:
-  case BSVArrE:
-  case BCVArrE:
-  case BVArrE:
-  case BSDArrE:
-  case BCDArrE:
-  case BDArrE:
   case BRes:
   case BNull:
   case BNum:
@@ -161,12 +155,6 @@ bool mayHaveData(trep bits) {
   case BOptSPArrE:
   case BOptCPArrE:
   case BOptPArrE:
-  case BOptSVArrE:
-  case BOptCVArrE:
-  case BOptVArrE:
-  case BOptSDArrE:
-  case BOptCDArrE:
-  case BOptDArrE:
   case BOptRes:
   case BOptArrKey:
   case BOptUncArrKey:
@@ -1189,17 +1177,17 @@ struct DualDispatchUnionImpl {
              a->kind() != b->kind());
       if (a->kind() != b->kind() ||
           a->dvArray() != b->dvArray()) return Type { bits };
-      if (!a->isVecArray() && !a->isDict()) return Type { bits };
 
-      auto ad = a->copy();
-      if (auto const tag = unionProvTag(aTag, bTag)) {
-        arrprov::setTag(ad, *tag);
-      }
-      ArrayData::GetScalarArray(&ad);
+      if (!arrprov::arrayWantsTag(a)) return Type { bits };
 
-      auto r = a->isVecArray()
-        ? vec_empty()
-        : dict_empty();
+      auto r = [&] {
+        auto const tag = unionProvTag(aTag, bTag);
+        if (a->isVecArray()) return vec_empty(tag);
+        if (a->isDict()) return dict_empty(tag);
+        if (a->isVArray()) return aempty_varray(tag);
+        if (a->isDArray()) return aempty_darray(tag);
+        always_assert(false);
+      }();
       set_trep(r, bits);
       return r;
     }
@@ -2090,10 +2078,8 @@ Type project_data(Type t, trep bits) {
         return loosen_values(t);
       }
       return restrict_to(BArrE | BDictE | BVecE | BKeysetE);
-    } else{
-      return restrict_to(BArrN | BDictN | BVecN | BKeysetN);
     }
-    not_reached();
+    return restrict_to(BArrN | BDictN | BVecN | BKeysetN);
   }
   case DataTag::ArrLikePackedN:
     return restrict_to(BVecN | BDictN | BKeysetN | BArrN);
@@ -2221,7 +2207,8 @@ bool Type::checkInvariants() const {
   case DataTag::Obj:    break;
   case DataTag::ArrLikeVal:
     assert(m_data.aval->isStatic());
-    assert(!m_data.aval->empty() || isVector || isDict);
+    assert(!m_data.aval->empty() ||
+           isVector || isDict || isVArray || isDArray);
     assert(m_bits & (BArr | BVec | BDict | BKeyset));
     if (m_data.aval->empty()) {
       assert(!couldBe(BVecN));
@@ -2237,16 +2224,15 @@ bool Type::checkInvariants() const {
     assert(!isKeyset || m_data.aval->isKeyset());
     assert(!isDict || m_data.aval->isDict());
     assertx(!RuntimeOption::EvalHackArrDVArrs || m_data.aval->isNotDVArray());
-    assertx(!m_data.aval->hasProvenanceData() ||
-            RuntimeOption::EvalArrayProvenance);
-    assertx(!m_data.aval->hasProvenanceData() || isVector || isDict);
+    assertx(!m_data.aval->hasProvenanceData() || RO::EvalArrayProvenance);
+    assertx(!m_data.aval->hasProvenanceData() || m_bits & kProvBits);
     assertx(!m_data.aval->hasProvenanceData() ||
             arrprov::getTag(m_data.aval)->filename());
     break;
   case DataTag::ArrLikePacked: {
     assert(!m_data.packed->elems.empty());
-    assertx(!m_data.packed->provenance || RuntimeOption::EvalArrayProvenance);
-    assertx(!m_data.packed->provenance || couldBe(BVec) || couldBe(BDict));
+    assertx(!m_data.packed->provenance || RO::EvalArrayProvenance);
+    assertx(!m_data.packed->provenance || m_bits & kProvBits);
     assertx(!m_data.packed->provenance ||
             m_data.packed->provenance->filename());
     assert(m_bits & (BVecN | BDictN | BKeysetN | BArrN));
@@ -2262,8 +2248,8 @@ bool Type::checkInvariants() const {
     assert(!isVArray);
     assert(m_bits & (BDictN | BKeysetN | BArrN));
     assert(!m_data.map->map.empty());
-    assertx(!m_data.map->provenance || RuntimeOption::EvalArrayProvenance);
-    assertx(!m_data.map->provenance || couldBe(BDict));
+    assertx(!m_data.map->provenance || RO::EvalArrayProvenance);
+    assertx(!m_data.map->provenance || m_bits & kProvBits);
     assertx(!m_data.map->provenance || m_data.map->provenance->filename());
     DEBUG_ONLY auto idx = size_t{0};
     DEBUG_ONLY auto packed = true;
@@ -2385,35 +2371,58 @@ Type aval(SArray val) {
   assert(val->isStatic());
   assert(val->isPHPArray());
   assertx(!RuntimeOption::EvalHackArrDVArrs || val->isNotDVArray());
-  if (val->empty()) {
-    if (val->isDArray()) return aempty_darray();
-    if (val->isVArray()) return aempty_varray();
-    return aempty();
-  }
+
+  if (val->empty() && val->isNotDVArray()) return aempty();
+
   auto r = [&]{
+    if (val->empty()) {
+      if (val->isDArray()) return Type { BSDArrE };
+      if (val->isVArray()) return Type { BSVArrE };
+      always_assert(false); // handled above
+    }
     if (val->isDArray()) return Type { BSDArrN };
     if (val->isVArray()) return Type { BSVArrN };
     return Type { BSPArrN };
   }();
+
   r.m_data.aval = val;
-  r.m_dataTag   = DataTag::ArrLikeVal;
+  r.m_dataTag = DataTag::ArrLikeVal;
   return r;
 }
 
 Type aempty()         { return Type { BSPArrE }; }
-Type aempty_varray()  {
+
+Type aempty_varray(ProvTag tag)  {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return Type { BSVArrE };
+  auto r = Type { BSVArrE };
+  r.m_data.aval = tag
+    ? arrprov::tagStaticArr(staticEmptyVArray(), tag)
+    : staticEmptyVArray();
+  r.m_dataTag = DataTag::ArrLikeVal;
+  return r;
 }
-Type aempty_darray()  {
+
+Type aempty_darray(ProvTag tag)  {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return Type { BSDArrE };
+  auto r = Type { BSDArrE };
+  r.m_data.aval = tag
+    ? arrprov::tagStaticArr(staticEmptyDArray(), tag)
+    : staticEmptyDArray();
+  r.m_dataTag = DataTag::ArrLikeVal;
+  return r;
 }
+
 Type sempty()         { return sval(staticEmptyString()); }
 Type some_aempty()    { return Type { BPArrE }; }
-Type some_aempty_darray() {
+
+Type some_aempty_darray(ProvTag tag) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return Type { BDArrE };
+  auto r = Type { BDArrE };
+  r.m_data.aval = tag
+    ? arrprov::tagStaticArr(staticEmptyDArray(), tag)
+    : staticEmptyDArray();
+  r.m_dataTag = DataTag::ArrLikeVal;
+  return r;
 }
 
 Type vec_val(SArray val) {
@@ -2422,25 +2431,25 @@ Type vec_val(SArray val) {
   auto const bits = val->empty() ? BSVecE : BSVecN;
   auto r = Type { bits };
   r.m_data.aval = val;
-  r.m_dataTag   = DataTag::ArrLikeVal;
+  r.m_dataTag = DataTag::ArrLikeVal;
   return r;
 }
 
-Type vec_empty(ProvTag pt /* = folly::none */) {
+Type vec_empty(ProvTag tag) {
   auto r = Type { BSVecE };
-  r.m_data.aval = RuntimeOption::EvalArrayProvenance && pt
-    ? arrprov::makeEmptyVec(pt)
+  r.m_data.aval = tag
+    ? arrprov::tagStaticArr(staticEmptyVecArray(), tag)
     : staticEmptyVecArray();
-  r.m_dataTag   = DataTag::ArrLikeVal;
+  r.m_dataTag = DataTag::ArrLikeVal;
   return r;
 }
 
-Type some_vec_empty(ProvTag pt /* = folly::none */) {
+Type some_vec_empty(ProvTag tag) {
   auto r = Type { BVecE };
-  r.m_data.aval = RuntimeOption::EvalArrayProvenance && pt
-    ? arrprov::makeEmptyVec(pt)
+  r.m_data.aval = tag
+    ? arrprov::tagStaticArr(staticEmptyVecArray(), tag)
     : staticEmptyVecArray();
-  r.m_dataTag   = DataTag::ArrLikeVal;
+  r.m_dataTag = DataTag::ArrLikeVal;
   return r;
 }
 
@@ -2454,7 +2463,7 @@ Type packedn_impl(trep bits, Type t) {
 Type packed_impl(trep bits, std::vector<Type> elems, ProvTag prov) {
   assert(!elems.empty());
   auto r = Type { bits };
-  auto const tag = (bits & (BVec | BDict)) ? prov : folly::none;
+  auto const tag = (bits & kProvBits) ? prov : folly::none;
   construct_inner(r.m_data.packed, std::move(elems), tag);
   r.m_dataTag = DataTag::ArrLikePacked;
   return r;
@@ -2486,19 +2495,19 @@ Type dict_val(SArray val) {
   return r;
 }
 
-Type dict_empty(ProvTag pt /* = folly::none */) {
+Type dict_empty(ProvTag tag) {
   auto r = Type { BSDictE };
-  r.m_data.aval = RuntimeOption::EvalArrayProvenance && pt
-    ? arrprov::makeEmptyDict(pt)
+  r.m_data.aval = tag
+    ? arrprov::tagStaticArr(staticEmptyDictArray(), tag)
     : staticEmptyDictArray();
   r.m_dataTag   = DataTag::ArrLikeVal;
   return r;
 }
 
-Type some_dict_empty(ProvTag pt /* = folly::none */) {
+Type some_dict_empty(ProvTag tag) {
   auto r = Type { BDictE };
-  r.m_data.aval = RuntimeOption::EvalArrayProvenance && pt
-    ? arrprov::makeEmptyDict(pt)
+  r.m_data.aval = tag
+    ? arrprov::tagStaticArr(staticEmptyDictArray(), tag)
     : staticEmptyDictArray();
   r.m_dataTag   = DataTag::ArrLikeVal;
   return r;
@@ -2617,11 +2626,15 @@ Type set_trep(Type& a, trep bits) {
       ((a.subtypeOrNull(BPArr) && ((bits & (BPArr | BNull)) != bits)) ||
        (a.subtypeOrNull(BVArr) && ((bits & (BVArr | BNull)) != bits)) ||
        (a.subtypeOrNull(BDArr) && ((bits & (BDArr | BNull)) != bits)))) {
-    if (auto p = toDArrLikePacked(a.m_data.aval)) {
-      return packed_impl(bits, std::move(p->elems), p->provenance);
+    if (a.m_data.aval->empty()) {
+      a = loosen_values(a);
+    } else {
+      if (auto p = toDArrLikePacked(a.m_data.aval)) {
+        return packed_impl(bits, std::move(p->elems), p->provenance);
+      }
+      auto d = toDArrLikeMap(a.m_data.aval);
+      return map_impl(bits, std::move(d->map), d->provenance);
     }
-    auto d = toDArrLikeMap(a.m_data.aval);
-    return map_impl(bits, std::move(d->map), d->provenance);
   }
   a.m_bits = bits;
   return std::move(a);
@@ -2662,9 +2675,9 @@ Type arr_packed(std::vector<Type> elems) {
   return packed_impl(BPArrN, std::move(elems), folly::none);
 }
 
-Type arr_packed_varray(std::vector<Type> elems) {
+Type arr_packed_varray(std::vector<Type> elems, ProvTag tag) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return packed_impl(BVArrN, std::move(elems), folly::none);
+  return packed_impl(BVArrN, std::move(elems), tag);
 }
 
 Type sarr_packed(std::vector<Type> elems) {
@@ -2699,7 +2712,7 @@ Type map_impl(trep bits, MapElems m, ProvTag prov) {
   }
 
   auto r = Type { bits };
-  auto const tag = (bits & (BVec | BDict)) ? prov : folly::none;
+  auto const tag = (bits & kProvBits) ? prov : folly::none;
   construct_inner(r.m_data.map, std::move(m), tag);
   r.m_dataTag = DataTag::ArrLikeMap;
   return r;
@@ -2709,9 +2722,9 @@ Type arr_map(MapElems m) {
   return map_impl(BPArrN, std::move(m), folly::none);
 }
 
-Type arr_map_darray(MapElems m) {
+Type arr_map_darray(MapElems m, ProvTag tag) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return map_impl(BDArrN, std::move(m), folly::none);
+  return map_impl(BDArrN, std::move(m), tag);
 }
 
 Type sarr_map(MapElems m) {
@@ -3058,10 +3071,16 @@ R tvImpl(const Type& t) {
   case BVArrE:
   case BSVArrE:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
+    if (t.m_dataTag == DataTag::ArrLikeVal) {
+      return H::makePersistentArray(const_cast<ArrayData*>(t.m_data.aval));
+    }
     return H::makePersistentArray(staticEmptyVArray());
   case BDArrE:
   case BSDArrE:
     assertx(!RuntimeOption::EvalHackArrDVArrs);
+    if (t.m_dataTag == DataTag::ArrLikeVal) {
+      return H::makePersistentArray(const_cast<ArrayData*>(t.m_data.aval));
+    }
     return H::makePersistentArray(staticEmptyDArray());
   case BVecE:
   case BSVecE:
@@ -3151,7 +3170,8 @@ R tvImpl(const Type& t) {
                                                    folly::none);
       } else if (t.subtypeOf(BDArrN)) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
-        return H::template fromMap<DArrayInit>(t.m_data.map->map, folly::none);
+        return H::template fromMap<DArrayInit>(t.m_data.map->map,
+                                               t.m_data.map->provenance);
       }
       break;
     case DataTag::ArrLikePacked:
@@ -3170,11 +3190,11 @@ R tvImpl(const Type& t) {
       } else if (t.subtypeOf(BVArrN)) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
         return H::template fromVec<VArrayInit>(t.m_data.packed->elems,
-                                               folly::none);
+                                               t.m_data.packed->provenance);
       } else if (t.subtypeOf(BDArrN)) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
         return H::template fromVec<DArrayInit>(t.m_data.packed->elems,
-                                               folly::none);
+                                               t.m_data.packed->provenance);
       }
       break;
     case DataTag::ArrLikePackedN:
@@ -3214,7 +3234,7 @@ Type scalarize(Type t) {
       return t;
     case DataTag::ArrLikeVal:
       t.m_bits &= BSArrN | BSVecN | BSDictN | BSKeysetN |
-                  BSVecE | BSDictE;
+                  BSArrE | BSVecE | BSDictE;
       return t;
     case DataTag::Str:
       t.m_bits &= BSStr;
@@ -3395,7 +3415,7 @@ folly::Optional<Type> type_of_type_structure(SArray ts) {
         v.emplace_back(std::move(t.value()));
       }
       if (v.empty()) return folly::none;
-      auto const arrT = arr_packed_varray(v);
+      auto const arrT = arr_packed_varray(v, folly::none);
       return is_nullable ? union_of(std::move(arrT), TNull) : arrT;
     }
     case TypeStructure::Kind::T_shape: {
@@ -4144,7 +4164,9 @@ Type loosen_dvarrayness(Type t) {
   if (t.couldBe(BArr) && t.m_dataTag == DataTag::ArrLikeVal) {
     // We need to drop any static array from the type because TArr unions cannot
     // have one. Turn it into the equivalent Packed or Map data.
-    if (auto p = toDArrLikePacked(t.m_data.aval)) {
+    if (t.m_data.aval->empty()) {
+      t = loosen_values(t);
+    } else if (auto p = toDArrLikePacked(t.m_data.aval)) {
       t = packed_impl(t.m_bits, std::move(p->elems), p->provenance);
     } else {
       auto d = toDArrLikeMap(t.m_data.aval);
@@ -4160,7 +4182,7 @@ Type loosen_dvarrayness(Type t) {
 
 Type loosen_provenance(Type t) {
   if (!RuntimeOption::EvalArrayProvenance) return t;
-  if (t.couldBe(BVec) || t.couldBe(BDict)) {
+  if (t.couldBe(kProvBits)) {
     switch (t.m_dataTag) {
     case DataTag::None:
     case DataTag::Str:
@@ -4682,7 +4704,7 @@ bool arr_packedn_set(Type& pack,
 ProvTag arr_like_update_prov_tag(const Type& base, ProvTag loc) {
   assert(base.subtypeOrNull(BArrLike));
   if (!RuntimeOption::EvalArrayProvenance) return folly::none;
-  if (!base.couldBe(BVec | BDict)) return folly::none;
+  if (!base.couldBe(kProvBits)) return folly::none;
   // if we don't know whether or not the array is empty, we also don't know if
   // we'll preserve the provenance tag that may be associated with the
   // ArrLikeN bit(s) of arr
@@ -5013,10 +5035,10 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
       return emptyHelper(kv.first, kv.second);
     } else {
       if (auto d = toDArrLikePacked(arr.m_data.aval)) {
-        return array_like_set(packed_impl(bits,
-                                          std::move(d->elems),
-                                          d->provenance),
-                              key, valIn, src);
+        return array_like_set(
+          packed_impl(bits, std::move(d->elems), d->provenance),
+          key, valIn, src
+        );
       }
       assert(!isVector);
       assert(!isVArray);
@@ -5394,10 +5416,13 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
     if (RuntimeOption::EvalHackArrCompatIsArrayNotices && valTy.couldBe(BVec)) {
       return true;
     }
-    return RuntimeOption::EvalIsVecNotices && valTy.couldBe(BClsMeth);
+    return (RuntimeOption::EvalIsVecNotices && valTy.couldBe(BClsMeth)) ||
+           (RuntimeOption::EvalArrayProvenance && valTy.couldBe(BVArr));
   } else if (testTy == TDArr) {
-    return RuntimeOption::EvalHackArrCompatIsArrayNotices &&
-           valTy.couldBe(BDict);
+    return
+      (RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+       valTy.couldBe(BDict)) ||
+      (RuntimeOption::EvalArrayProvenance && valTy.couldBe(BDArr));
  } else if (testTy == TVec) {
    if (RuntimeOption::EvalHackArrCompatIsVecDictNotices &&
        valTy.couldBe(BVArr)) {

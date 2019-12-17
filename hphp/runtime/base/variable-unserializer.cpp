@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/struct-log-util.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -1310,7 +1311,7 @@ folly::Optional<arrprov::Tag> VariableUnserializer::unserializeProvenanceTag() {
   auto const filename = unserializeString();
   expectChar(';');
   if (!RuntimeOption::EvalArrayProvenance) return {};
-  return arrprov::Tag{ makeStaticString(filename.get()), line };
+  return arrprov::Tag { makeStaticString(filename.get()), line };
 }
 
 Array VariableUnserializer::unserializeDict() {
@@ -1320,12 +1321,13 @@ Array VariableUnserializer::unserializeDict() {
   expectChar(':');
   expectChar('{');
 
-  auto const provTag = unserializeProvenanceTag();
+  auto provTag = unserializeProvenanceTag();
+  if (!RO::EvalArrProvHackArrays) provTag = folly::none;
 
   if (size == 0) {
     expectChar('}');
     return Array::attach(provTag
-      ? arrprov::makeEmptyDict(provTag)
+      ? arrprov::tagStaticArr(staticEmptyDictArray(), provTag)
       : staticEmptyDictArray()
     );
   }
@@ -1387,12 +1389,13 @@ Array VariableUnserializer::unserializeVec() {
   expectChar(':');
   expectChar('{');
 
-  auto const provTag = unserializeProvenanceTag();
+  auto provTag = unserializeProvenanceTag();
+  if (!RO::EvalArrProvHackArrays) provTag = folly::none;
 
   if (size == 0) {
     expectChar('}');
     return Array::attach(provTag
-      ? arrprov::makeEmptyVec(provTag)
+      ? arrprov::tagStaticArr(staticEmptyVecArray(), provTag)
       : staticEmptyVecArray()
     );
   }
@@ -1434,10 +1437,30 @@ Array VariableUnserializer::unserializeVArray() {
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
+
+  auto provTag = unserializeProvenanceTag();
+  if (!RO::EvalArrProvDVArrays) provTag = folly::none;
+
   if (size == 0) {
     expectChar('}');
-    if (m_type != Type::Serialize) return Array::CreateVArray();
-    return m_forceDArrays ? Array::CreateDArray() : Array::CreateVArray();
+    if (m_type != Type::Serialize) {
+      return Array::attach(
+        provTag
+          ? arrprov::tagStaticArr(staticEmptyVArray(), provTag)
+          : staticEmptyVArray()
+      );
+    }
+    return m_forceDArrays
+      ? Array::attach(
+          provTag
+            ? arrprov::tagStaticArr(staticEmptyDArray(), provTag)
+            : staticEmptyDArray()
+        )
+      : Array::attach(
+          provTag
+            ? arrprov::tagStaticArr(staticEmptyVArray(), provTag)
+            : staticEmptyVArray()
+        );
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -1485,6 +1508,7 @@ Array VariableUnserializer::unserializeVArray() {
 
   check_non_safepoint_surprise();
   expectChar('}');
+  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), *provTag);
   return arr;
 }
 
@@ -1494,9 +1518,17 @@ Array VariableUnserializer::unserializeDArray() {
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
+
+  auto provTag = unserializeProvenanceTag();
+  if (!RO::EvalArrProvDVArrays) provTag = folly::none;
+
   if (size == 0) {
     expectChar('}');
-    return Array::CreateDArray();
+    return Array::attach(
+      provTag
+        ? arrprov::tagStaticArr(staticEmptyDArray(), provTag)
+        : staticEmptyDArray()
+    );
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -1544,6 +1576,7 @@ Array VariableUnserializer::unserializeDArray() {
 
   check_non_safepoint_surprise();
   expectChar('}');
+  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), *provTag);
   return arr;
 }
 

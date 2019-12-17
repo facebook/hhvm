@@ -115,28 +115,6 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-template<bool check_kind, typename SrcArr>
-ArrayData* implTagArrProvVec(ArrayData* ad, const SrcArr* src) {
-  return RuntimeOption::EvalArrayProvenance &&
-         (!check_kind || ad->kind() == ArrayData::kVecKind)
-    ? tagArrProv(ad, src)
-    : ad;
-}
-
-template<bool check_kind = false>
-ArrayData* tryTagArrProvVec(ArrayData* ad, const ArrayData* src = nullptr) {
-  return implTagArrProvVec<check_kind>(ad, src);
-}
-
-template<bool check_kind = false>
-ArrayData* tryTagArrProvVec(ArrayData* ad, const APCArray* src) {
-  return implTagArrProvVec<check_kind>(ad, src);
-}
-
-}
-
 ALWAYS_INLINE
 MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
                                        size_t neededSize) {
@@ -281,7 +259,7 @@ ArrayData* PackedArray::Grow(ArrayData* adIn, bool copy) {
   assertx(capacity(ad) > capacity(adIn));
   assertx(ad->hasExactlyOneRef());
   assertx(checkInvariants(ad));
-  return tryTagArrProvVec<true>(ad, adIn);
+  return tagArrProv(ad, adIn);
 }
 
 ALWAYS_INLINE
@@ -341,7 +319,7 @@ ArrayData* PackedArray::Copy(const ArrayData* adIn) {
   assertx(ad->m_pos == adIn->m_pos);
   assertx(ad->hasExactlyOneRef());
   assertx(checkInvariants(ad));
-  return tryTagArrProvVec<true>(ad, adIn);
+  return tagArrProv(ad, adIn);
 }
 
 ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
@@ -463,7 +441,7 @@ ArrayData* PackedArray::MakeReserveVArray(uint32_t capacity) {
   assertx(ad->m_size == 0);
   assertx(ad->m_pos == 0);
   assertx(checkInvariants(ad));
-  return ad;
+  return tagArrProv(ad);
 }
 
 ArrayData* PackedArray::MakeReserveVec(uint32_t capacity) {
@@ -474,7 +452,7 @@ ArrayData* PackedArray::MakeReserveVec(uint32_t capacity) {
   assertx(ad->m_size == 0);
   assertx(ad->m_pos == 0);
   assertx(checkInvariants(ad));
-  return tryTagArrProvVec(ad);
+  return tagArrProv(ad);
 }
 
 template<bool reverse>
@@ -526,7 +504,7 @@ ArrayData* PackedArray::MakeVArray(uint32_t size, const TypedValue* values) {
                                  ArrayData::kVArray);
   assertx(ad->isPacked());
   assertx(ad->isVArray());
-  return ad;
+  return tagArrProv(ad);
 }
 
 ArrayData* PackedArray::MakeVec(uint32_t size, const TypedValue* values) {
@@ -535,7 +513,7 @@ ArrayData* PackedArray::MakeVec(uint32_t size, const TypedValue* values) {
   auto ad = MakePackedImpl<true>(size, values, HeaderKind::VecArray,
                                  ArrayData::kNotDVArray);
   assertx(ad->isVecArray());
-  return tryTagArrProvVec(ad);
+  return tagArrProv(ad);
 }
 
 ArrayData* PackedArray::MakePackedNatural(uint32_t size, const TypedValue* values) {
@@ -553,14 +531,14 @@ ArrayData* PackedArray::MakeVArrayNatural(uint32_t size, const TypedValue* value
                                   ArrayData::kVArray);
   assertx(ad->isPacked());
   assertx(ad->isVArray());
-  return ad;
+  return tagArrProv(ad);
 }
 
 ArrayData* PackedArray::MakeVecNatural(uint32_t size, const TypedValue* values) {
   auto ad = MakePackedImpl<false>(size, values, HeaderKind::VecArray,
                                   ArrayData::kNotDVArray);
   assertx(ad->isVecArray());
-  return tryTagArrProvVec(ad);
+  return tagArrProv(ad);
 }
 
 ArrayData* PackedArray::MakeUninitialized(uint32_t size) {
@@ -583,7 +561,7 @@ ArrayData* PackedArray::MakeUninitializedVArray(uint32_t size) {
   assertx(ad->m_size == size);
   assertx(ad->m_pos == 0);
   assertx(checkInvariants(ad));
-  return ad;
+  return tagArrProv(ad);
 }
 
 ArrayData* PackedArray::MakeUninitializedVec(uint32_t size) {
@@ -593,7 +571,7 @@ ArrayData* PackedArray::MakeUninitializedVec(uint32_t size) {
   assertx(ad->m_size == size);
   assertx(ad->m_pos == 0);
   assertx(checkInvariants(ad));
-  return tryTagArrProvVec(ad);
+  return tagArrProv(ad);
 }
 
 ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc) {
@@ -604,7 +582,7 @@ ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc) {
     init.append(apc->getValue(i)->toLocal());
   }
   auto const ad = init.create();
-  return tryTagArrProvVec(ad, apc);
+  return tagArrProv(ad, apc);
 }
 
 ArrayData* PackedArray::MakeVArrayFromAPC(const APCArray* apc) {
@@ -615,7 +593,8 @@ ArrayData* PackedArray::MakeVArrayFromAPC(const APCArray* apc) {
   for (uint32_t i = 0; i < apcSize; ++i) {
     init.append(apc->getValue(i)->toLocal());
   }
-  return init.create();
+  auto const ad = init.create();
+  return tagArrProv(ad, apc);
 }
 
 void PackedArray::Release(ArrayData* ad) {
@@ -1130,6 +1109,7 @@ ArrayData* PackedArray::ToPHPArray(ArrayData* adIn, bool copy) {
   if (adIn->getSize() == 0) return ArrayData::Create();
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->setDVArray(ArrayData::kNotDVArray);
+  if (RO::EvalArrayProvenance) arrprov::clearTag(ad);
   assertx(checkInvariants(ad));
   return ad;
 }
@@ -1164,7 +1144,7 @@ ArrayData* PackedArray::ToPHPArrayVec(ArrayData* adIn, bool copy) {
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Packed;
   assertx(ad->isNotDVArray());
-  arrprov::clearTag(ad);
+  if (RO::EvalArrayProvenance) arrprov::clearTag(ad);
   ad->setLegacyArray(false);
   assertx(checkInvariants(ad));
   return ad;
@@ -1177,7 +1157,9 @@ ArrayData* PackedArray::ToVArrayVec(ArrayData* adIn, bool copy) {
   if (adIn->getSize() == 0) return ArrayData::CreateVArray();
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Packed;
-  arrprov::clearTag(ad);
+  if (RO::EvalArrayProvenance && !RO::EvalArrProvDVArrays) {
+    arrprov::clearTag(ad);
+  }
   ad->setDVArray(ArrayData::kVArray);
   ad->setLegacyArray(false);
   assertx(checkInvariants(ad));
@@ -1236,6 +1218,9 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
     adIn->setDVArray(ArrayData::kNotDVArray);
     ad = adIn;
   }
+  if (RO::EvalArrayProvenance && !RO::EvalArrProvHackArrays) {
+    arrprov::clearTag(ad);
+  }
 
   assertx(ad->isVecArray());
   assertx(capacity(ad) == capacity(adIn));
@@ -1243,7 +1228,7 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
   assertx(ad->m_pos == adIn->m_pos);
   assertx(ad->hasExactlyOneRef());
   assertx(checkInvariants(ad));
-  return tryTagArrProvVec(ad);
+  return tagArrProv(ad);
 }
 
 ArrayData* PackedArray::ToVecVec(ArrayData* ad, bool) {
@@ -1335,7 +1320,7 @@ ArrayData* PackedArray::MakeUncounted(ArrayData* array,
   assertx(ad->isUncounted());
   assertx(checkInvariants(ad));
   if (updateSeen) (*seen)[array] = ad;
-  return tryTagArrProvVec<true>(ad, array);
+  return tagArrProv(ad, array);
 }
 
 ALWAYS_INLINE

@@ -63,9 +63,7 @@ ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
   VecArrayInit init{size};
   IterateVNoInc(a, [&](TypedValue v) { init.append(v); });
   auto const out = init.create();
-  return RuntimeOption::EvalArrayProvenance && out->isRefCounted()
-    ? tagArrProv(out, a)
-    : out;
+  return tagArrProv(out, a);
 }
 
 ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
@@ -74,9 +72,7 @@ ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
   DictInit init{size};
   IterateKVNoInc(a, [&](TypedValue k, TypedValue v) { init.setValidKey(k, v); });
   auto const out = init.create();
-  return RuntimeOption::EvalArrayProvenance && out->isRefCounted()
-    ? tagArrProv(out, a)
-    : out;
+  return tagArrProv(out, a);
 }
 
 ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
@@ -159,8 +155,8 @@ ArrayData* castObjToArrayLikeImpl(ObjectData* obj,
   for (ArrayIter iter(iterObj); iter; ++iter) add(arr, iter);
   auto const out = arr.detach();
   return RuntimeOption::EvalArrayProvenance
-    && arrprov::arrayWantsTag(out)
-    && out->isRefCounted()
+      && arrprov::arrayWantsTag(out)
+      && out->isRefCounted()
     ? tagArrProv(out)
     : out;
 }

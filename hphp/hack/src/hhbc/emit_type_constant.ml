@@ -19,13 +19,13 @@ let vec_or_varray l =
   if hack_arr_dv_arrs () then
     TV.Vec (l, None)
   else
-    TV.VArray l
+    TV.VArray (l, None)
 
 let dict_or_darray kv =
   if hack_arr_dv_arrs () then
     TV.Dict (kv, None)
   else
-    TV.DArray kv
+    TV.DArray (kv, None)
 
 (* Taken from: hphp/runtime/base/type-structure.h *)
 let get_kind_num ~tparams p =

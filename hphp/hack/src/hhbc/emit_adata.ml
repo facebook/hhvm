@@ -69,14 +69,14 @@ let rec adata_to_buffer b argument =
   | TV.HhasAdata data -> Acc.add b (String.escaped data)
   | TV.Array pairs ->
     adata_dict_collection_argument_to_buffer b adata_array_prefix None pairs
-  | TV.VArray values ->
-    adata_collection_argument_to_buffer b adata_varray_prefix None values
+  | TV.VArray (values, loc) ->
+    adata_collection_argument_to_buffer b adata_varray_prefix loc values
   | TV.Vec (values, loc) ->
     adata_collection_argument_to_buffer b adata_vec_prefix loc values
   | TV.Dict (pairs, loc) ->
     adata_dict_collection_argument_to_buffer b adata_dict_prefix loc pairs
-  | TV.DArray pairs ->
-    adata_dict_collection_argument_to_buffer b adata_darray_prefix None pairs
+  | TV.DArray (pairs, loc) ->
+    adata_dict_collection_argument_to_buffer b adata_darray_prefix loc pairs
   | TV.Keyset values ->
     adata_collection_argument_to_buffer b adata_keyset_prefix None values
 

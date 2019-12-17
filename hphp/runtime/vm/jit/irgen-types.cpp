@@ -513,31 +513,31 @@ StaticString s_isVec("is_vec");
 
 
 SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
-  using RO = RuntimeOption;
-
   MultiCond mc{env};
 
   auto const provLogging = [&](SSATmp* src) {
     if (!RO::EvalLogArrayProvenance) return;
-    gen(env, RaiseArraySerializeNotice,
-        cns(env, s_isVec.get()),
-        src);
+    gen(env, RaiseArraySerializeNotice, cns(env, s_isVec.get()), src);
   };
 
   mc.ifTypeThen(src, TVec, [&](SSATmp* src) {
-    provLogging(src);
+    if (RO::EvalArrProvHackArrays) provLogging(src);
     return cns(env, true);
   });
 
-  if (RO::EvalHackArrCompatIsVecDictNotices) {
+  if (RO::EvalHackArrCompatIsVecDictNotices ||
+      (RO::EvalLogArrayProvenance && RO::EvalArrProvDVArrays)) {
     mc.ifTypeThen(src, TArr, [&](SSATmp* src) {
-      ifElse(
+      ifThenElse(
         env,
         [&](Block* taken) { return gen(env, CheckVArray, taken, src); },
-        [&]{
-          gen(env, RaiseHackArrCompatNotice,
-              cns(env, makeStaticString(Strings::HACKARR_COMPAT_VARR_IS_VEC)));
-        }
+        [&] {
+          if (RO::EvalHackArrCompatIsVecDictNotices) {
+            gen(env, RaiseHackArrCompatNotice,
+                cns(env, makeStaticString(Strings::HACKARR_COMPAT_VARR_IS_VEC)));
+          }
+        },
+        [&] { if (RO::EvalArrProvDVArrays) provLogging(src); }
       );
       return cns(env, false);
     });
@@ -549,7 +549,6 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
         gen(env, RaiseNotice,
             cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
       }
-      provLogging(src);
       return cns(env, true);
     });
   }
@@ -585,28 +584,31 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
 }
 
 SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
-  using RO = RuntimeOption;
-
   MultiCond mc{env};
 
+  auto const provLogging = [&](SSATmp* src) {
+    if (!RO::EvalLogArrayProvenance) return;
+    gen(env, RaiseArraySerializeNotice, cns(env, s_isDict.get()), src);
+  };
+
   mc.ifTypeThen(src, TDict, [&](SSATmp* src) {
-    if (RO::EvalLogArrayProvenance) {
-      gen(env, RaiseArraySerializeNotice,
-          cns(env, s_isDict.get()),
-          src);
-    }
+    if (RO::EvalArrProvHackArrays) provLogging(src);
     return cns(env, true);
   });
 
-  if (RO::EvalHackArrCompatIsVecDictNotices) {
+  if (RO::EvalHackArrCompatIsVecDictNotices ||
+      (RO::EvalLogArrayProvenance && RO::EvalArrProvDVArrays)) {
     mc.ifTypeThen(src, TArr, [&](SSATmp* src) {
-      ifElse(
+      ifThenElse(
         env,
         [&](Block* taken) { gen(env, CheckDArray, taken, src); },
-        [&]{
-          gen(env, RaiseHackArrCompatNotice,
-              cns(env, makeStaticString(Strings::HACKARR_COMPAT_DARR_IS_DICT)));
-        }
+        [&] {
+          if (RO::EvalHackArrCompatIsVecDictNotices) {
+            gen(env, RaiseHackArrCompatNotice,
+                cns(env, makeStaticString(Strings::HACKARR_COMPAT_DARR_IS_DICT)));
+          }
+        },
+        [&] { if (RO::EvalArrProvDVArrays) provLogging(src); }
       );
       return cns(env, false);
     });
@@ -618,11 +620,17 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
 const StaticString s_is_array("is_array");
 
 SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
-  using RO = RuntimeOption;
-
   MultiCond mc{env};
 
-  mc.ifTypeThen(src, TArr, [&](SSATmp*) { return cns(env, true); });
+  auto const provLogging = [&](SSATmp* src) {
+    if (!RO::EvalLogArrayProvenance) return;
+    gen(env, RaiseArraySerializeNotice, cns(env, s_is_array.get()), src);
+  };
+
+  mc.ifTypeThen(src, TArr, [&](SSATmp* src) {
+    if (RO::EvalArrProvDVArrays) provLogging(src);
+    return cns(env, true);
+  });
 
   if (!RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType) {
     mc.ifTypeThen(src, TClsMeth, [&](SSATmp*) {
@@ -634,30 +642,22 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
     });
   }
 
-  auto const provLogging = [&](SSATmp* src) {
-    if (!RO::EvalLogArrayProvenance) return;
-    gen(env, RaiseArraySerializeNotice,
-        cns(env, s_is_array.get()),
-        src);
-  };
-
   auto const hacLogging = [&](const char* msg) {
     if (!RO::EvalHackArrCompatIsArrayNotices) return;
-    gen(env, RaiseHackArrCompatNotice,
-        cns(env, makeStaticString(msg)));
+    gen(env, RaiseHackArrCompatNotice, cns(env, makeStaticString(msg)));
   };
 
   if (!curFunc(env)->isBuiltin() &&
-      (RO::EvalLogArrayProvenance || RO::EvalHackArrCompatIsArrayNotices)) {
-
+      (RO::EvalHackArrCompatIsArrayNotices ||
+      (RO::EvalLogArrayProvenance && RO::EvalArrProvHackArrays))) {
     mc.ifTypeThen(src, TVec, [&](SSATmp* src) {
       hacLogging(Strings::HACKARR_COMPAT_VEC_IS_ARR);
-      provLogging(src);
+      if (RO::EvalArrProvHackArrays) provLogging(src);
       return cns(env, false);
     });
     mc.ifTypeThen(src, TDict, [&](SSATmp* src) {
       hacLogging(Strings::HACKARR_COMPAT_DICT_IS_ARR);
-      provLogging(src);
+      if (RO::EvalArrProvHackArrays) provLogging(src);
       return cns(env, false);
     });
     mc.ifTypeThen(src, TKeyset, [&](SSATmp* src) {

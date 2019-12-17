@@ -217,6 +217,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalArrayProvenance,
                ini, config, "ArrayProvenance",
                RuntimeOption::EvalArrayProvenance);
+  RO::EvalArrProvHackArrays = RO::EvalArrayProvenance;
+  RO::EvalArrProvDVArrays   = RO::EvalArrayProvenance;
   Config::Bind(EnableShortTags, ini, config, "EnableShortTags", true);
 
 #define BIND_HAC_OPTION(Name, Def)                      \

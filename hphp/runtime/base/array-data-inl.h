@@ -79,22 +79,30 @@ ALWAYS_INLINE ArrayData* ArrayData::Create() {
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateVArray() {
-  return staticEmptyVArray();
+  return RO::EvalArrayProvenanceEmpty &&
+         RO::EvalArrProvDVArrays
+    ? arrprov::tagStaticArr(staticEmptyVArray())
+    : staticEmptyVArray();
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateVec() {
-  return RuntimeOption::EvalArrayProvenanceEmpty
-    ? arrprov::makeEmptyVec()
+  return RO::EvalArrayProvenanceEmpty &&
+         RO::EvalArrProvHackArrays
+    ? arrprov::tagStaticArr(staticEmptyVecArray())
     : staticEmptyVecArray();
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateDArray() {
-  return staticEmptyDArray();
+  return RO::EvalArrayProvenanceEmpty &&
+         RO::EvalArrProvDVArrays
+    ? arrprov::tagStaticArr(staticEmptyDArray())
+    : staticEmptyDArray();
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateDict() {
-  return RuntimeOption::EvalArrayProvenanceEmpty
-    ? arrprov::makeEmptyDict()
+  return RO::EvalArrayProvenanceEmpty &&
+         RO::EvalArrProvHackArrays
+    ? arrprov::tagStaticArr(staticEmptyDictArray())
     : staticEmptyDictArray();
 }
 
@@ -349,6 +357,24 @@ ALWAYS_INLINE bool checkHACArrayKeyCast() {
 ALWAYS_INLINE bool checkHACNullHackArrayKey() {
   return RuntimeOption::EvalHackArrCompatNotices &&
          RuntimeOption::EvalHackArrCompatCheckNullHackArrayKey;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace arrprov_detail {
+template<typename SrcArray>
+ArrayData* tagArrProvImpl(ArrayData*, const SrcArray*);
+}
+
+ALWAYS_INLINE ArrayData* tagArrProv(ArrayData* ad, const ArrayData* src) {
+  return RO::EvalArrayProvenance
+    ? arrprov_detail::tagArrProvImpl(ad, src)
+    : ad;
+}
+ALWAYS_INLINE ArrayData* tagArrProv(ArrayData* ad, const APCArray* src) {
+  return RO::EvalArrayProvenance
+    ? arrprov_detail::tagArrProvImpl(ad, src)
+    : ad;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,7 +19,7 @@ Class* c_ImmSet::s_cls;
 /////////////////////////////////////////////////////////////////////////////
 // BaseSet
 
-void BaseSet::addAllKeysOf(const Cell container) {
+void BaseSet::addAllKeysOf(const TypedValue container) {
   assertx(isContainer(container));
 
   decltype(cap()) oldCap = 0;
@@ -35,7 +35,7 @@ void BaseSet::addAllKeysOf(const Cell container) {
                 mutate();
                 return false;
               },
-              [this](Cell k, TypedValue /*v*/) { addRaw(k); },
+              [this](TypedValue k, TypedValue /*v*/) { addRaw(k); },
               [this](ObjectData* coll) {
                 if (!m_size && coll->collectionType() == CollectionType::Set) {
                   auto hc = static_cast<HashCollection*>(coll);

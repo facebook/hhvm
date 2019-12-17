@@ -742,7 +742,7 @@ bool visitDifferingProvTagsInSimilarArrays(SArray arr1,
   bool ret = true;
   IterateKV(
     arr1,
-    [&](Cell k, TypedValue tv1) {
+    [&](TypedValue k, TypedValue tv1) {
       auto const bail = [&] {
         ret = false;
         return true;
@@ -940,7 +940,7 @@ struct DualDispatchCouldBeImpl {
     bool bad = false;
     IterateKV(
       b,
-      [&] (Cell k, TypedValue v) {
+      [&] (TypedValue k, TypedValue v) {
         bad |= !(a.key.couldBe(from_cell(k)) && a.val.couldBe(from_cell(v)));
         return bad;
       }
@@ -1374,7 +1374,7 @@ struct DualDispatchSubtype {
     bool bad = false;
     IterateKV(
       a,
-      [&] (Cell k, TypedValue v) {
+      [&] (TypedValue k, TypedValue v) {
         bad |= !(b.key.couldBe(from_cell(k)) && b.val.couldBe(from_cell(v)));
         return bad;
       }
@@ -1457,7 +1457,7 @@ using DualDispatchIntersection = Commute<DualDispatchIntersectionImpl>;
 // Helpers for creating literal array-like types
 
 template<typename AInit, bool force_static>
-folly::Optional<Cell> fromTypeVec(const std::vector<Type> &elems,
+folly::Optional<TypedValue> fromTypeVec(const std::vector<Type> &elems,
                                   ProvTag tag) {
   AInit ai(elems.size());
   for (auto const& t : elems) {
@@ -1484,7 +1484,7 @@ bool checkTypeVec(const std::vector<Type> &elems, ProvTag /*tag*/) {
 Variant keyHelper(SString key) {
   return Variant{ key, Variant::PersistentStrInit{} };
 }
-const Variant& keyHelper(const Cell& v) {
+const Variant& keyHelper(const TypedValue& v) {
   return tvAsCVarRef(&v);
 }
 template <typename AInit>
@@ -1497,9 +1497,9 @@ void add(KeysetInit& ai, const Variant& key, const Variant& value) {
 }
 
 template<typename AInit, bool force_static, typename Key>
-folly::Optional<Cell> fromTypeMap(const ArrayLikeMap<Key> &elems,
+folly::Optional<TypedValue> fromTypeMap(const ArrayLikeMap<Key> &elems,
                                   ProvTag tag) {
-  auto val = eval_cell_value([&] () -> Cell {
+  auto val = eval_cell_value([&] () -> TypedValue {
     AInit ai(elems.size());
     for (auto const& elm : elems) {
       auto const v = tv(elm.second);
@@ -2914,7 +2914,7 @@ Type::ArrayCat categorize_array(const Type& t) {
   // unless the d/varray-ness is definitely known.
   auto val = t.subtypeOfAny(TPArr, TVArr, TDArr, TVec, TDict, TKeyset);
   size_t idx = 0;
-  auto checkKey = [&] (const Cell& key) {
+  auto checkKey = [&] (const TypedValue& key) {
     if (isStringType(key.m_type)) {
       hasStrs = true;
       isPacked = false;
@@ -2929,7 +2929,7 @@ Type::ArrayCat categorize_array(const Type& t) {
   switch (t.m_dataTag) {
     case DataTag::ArrLikeVal:
       IterateKV(t.m_data.aval,
-                [&] (Cell k, TypedValue) {
+                [&] (TypedValue k, TypedValue) {
                   return checkKey(k);
                 });
       break;
@@ -2973,7 +2973,7 @@ CompactVector<LSString> get_string_keys(const Type& t) {
   switch (t.m_dataTag) {
     case DataTag::ArrLikeVal:
       IterateKV(t.m_data.aval,
-                [&] (Cell k, TypedValue) {
+                [&] (TypedValue k, TypedValue) {
                   assert(isStringType(k.m_type));
                   strs.push_back(k.m_data.pstr);
                 });
@@ -3189,12 +3189,12 @@ R tvImpl(const Type& t) {
   return R{};
 }
 
-folly::Optional<Cell> tv(const Type& t) {
-  return tvImpl<folly::Optional<Cell>, true>(t);
+folly::Optional<TypedValue> tv(const Type& t) {
+  return tvImpl<folly::Optional<TypedValue>, true>(t);
 }
 
-folly::Optional<Cell> tvNonStatic(const Type& t) {
-  return tvImpl<folly::Optional<Cell>, false>(t);
+folly::Optional<TypedValue> tvNonStatic(const Type& t) {
+  return tvImpl<folly::Optional<TypedValue>, false>(t);
 }
 
 bool is_scalar(const Type& t) {
@@ -3477,7 +3477,7 @@ SString sval_of(const Type& t) {
   return t.m_data.sval;
 }
 
-Type from_cell(Cell cell) {
+Type from_cell(TypedValue cell) {
   assert(tvIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -4563,7 +4563,7 @@ std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key) {
   auto const couldBeInt = key.type.couldBe(BInt);
   auto const couldBeStr = key.type.couldBe(BStr);
   auto ty = TBottom;
-  IterateKV(ad, [&] (Cell k, TypedValue v) {
+  IterateKV(ad, [&] (TypedValue k, TypedValue v) {
       if (isStringType(k.m_type) ? couldBeStr : couldBeInt) {
         ty |= from_cell(v);
         return TInitCell.subtypeOf(ty);

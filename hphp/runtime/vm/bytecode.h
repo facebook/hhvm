@@ -59,7 +59,7 @@ struct Resumable;
 // perform the set(op) operation on lhs & rhs, leaving the result in lhs.
 // The old value of lhs is decrefed.
 ALWAYS_INLINE
-void setopBody(tv_lval lhs, SetOpOp op, Cell* rhs) {
+void setopBody(tv_lval lhs, SetOpOp op, TypedValue* rhs) {
   assertx(tvIsPlausible(*lhs));
   assertx(tvIsPlausible(*rhs));
 
@@ -183,8 +183,8 @@ struct CallCtx {
   bool dynamic;
 };
 
-constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
-constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
+constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(TypedValue);
+constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(TypedValue);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -347,7 +347,7 @@ public:
   }
 
   ALWAYS_INLINE
-  void trim(Cell* c) {
+  void trim(TypedValue* c) {
     assertx(c <= m_base);
     assertx(m_top <= c);
     if (debug) {
@@ -361,9 +361,9 @@ public:
   void dup() {
     assertx(m_top != m_base);
     assertx(m_top != m_elms);
-    Cell* fr = m_top;
+    TypedValue* fr = m_top;
     m_top--;
-    Cell* to = m_top;
+    TypedValue* to = m_top;
     tvDup(*fr, *to);
   }
 
@@ -562,10 +562,10 @@ public:
   }
 
   ALWAYS_INLINE
-  Cell* allocC() {
+  TypedValue* allocC() {
     assertx(m_top != m_elms);
     m_top--;
-    return (Cell*)m_top;
+    return (TypedValue*)m_top;
   }
 
   ALWAYS_INLINE
@@ -578,20 +578,20 @@ public:
   ALWAYS_INLINE
   ActRec* allocA() {
     assertx((uintptr_t)(m_top - kNumActRecCells) >= (uintptr_t)m_elms);
-    assertx(kNumActRecCells * sizeof(Cell) == sizeof(ActRec));
+    assertx(kNumActRecCells * sizeof(TypedValue) == sizeof(ActRec));
     m_top -= kNumActRecCells;
     return (ActRec*)m_top;
   }
 
   ALWAYS_INLINE
   void allocI() {
-    assertx(kNumIterCells * sizeof(Cell) == sizeof(Iter));
+    assertx(kNumIterCells * sizeof(TypedValue) == sizeof(Iter));
     assertx((uintptr_t)(m_top - kNumIterCells) >= (uintptr_t)m_elms);
     m_top -= kNumIterCells;
   }
 
   ALWAYS_INLINE
-  void replaceC(const Cell c) {
+  void replaceC(const TypedValue c) {
     assertx(m_top != m_base);
     tvDecRefGen(m_top);
     *m_top = c;
@@ -637,7 +637,7 @@ public:
   }
 
   ALWAYS_INLINE
-  Cell* topC() {
+  TypedValue* topC() {
     assertx(m_top != m_base);
     return tvAssertPlausible(m_top);
   }
@@ -656,7 +656,7 @@ public:
   }
 
   ALWAYS_INLINE
-  Cell* indC(size_t ind) {
+  TypedValue* indC(size_t ind) {
     assertx(m_top != m_base);
     return tvAssertPlausible(&m_top[ind]);
   }

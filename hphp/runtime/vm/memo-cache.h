@@ -27,7 +27,7 @@
  * methods).
  *
  * All memo caches map some set of keys (which are only integers or strings) to
- * a particular Cell value. Caches can either be non-shared or shared. A
+ * a particular TypedValue value. Caches can either be non-shared or shared. A
  * non-shared cache is for exactly one function, and the keys (corresponding to
  * the parameters) is all that's necessary to lookup the value. Non-shared
  * caches are used for static functions, and (as an optimization) on methods for
@@ -43,8 +43,8 @@
  * the pointer to the cache is null, null is returned. No ref-count manipulation
  * is done in the returned value. Setter functions receive a *reference* to a
  * pointer to MemoCacheBase, a pointer to an array of Cells, if shared, an
- * additional value distinguishing that function, and a Cell to store in the
- * cache. The Cell is stored in the cache, and its ref-count is incremented
+ * additional value distinguishing that function, and a TypedValue to store in the
+ * cache. The TypedValue is stored in the cache, and its ref-count is incremented
  * (with any previous value being dec-reffed and overwritten). If the pointer to
  * the cache was null, a new cache is allocated, and the pointer is updated to
  * point at it.
@@ -99,26 +99,26 @@ struct MemoCacheBase {
 
 // Non-shared getter
 using MemoCacheGetter =
-  const Cell* (*)(const MemoCacheBase*, const Cell*);
+  const TypedValue* (*)(const MemoCacheBase*, const TypedValue*);
 MemoCacheGetter memoCacheGetForKeyTypes(const bool* types, size_t count);
 MemoCacheGetter memoCacheGetForKeyCount(size_t count);
 
 // Non-shared setter
 using MemoCacheSetter =
-  void (*)(MemoCacheBase*&, const Cell*, Cell);
+  void (*)(MemoCacheBase*&, const TypedValue*, TypedValue);
 MemoCacheSetter memoCacheSetForKeyTypes(const bool* types, size_t count);
 MemoCacheSetter memoCacheSetForKeyCount(size_t count);
 
 // Shared getter
 using SharedMemoCacheGetter =
-  const Cell* (*)(const MemoCacheBase*, FuncId, const Cell*);
+  const TypedValue* (*)(const MemoCacheBase*, FuncId, const TypedValue*);
 SharedMemoCacheGetter sharedMemoCacheGetForKeyTypes(const bool* types,
                                                     size_t count);
 SharedMemoCacheGetter sharedMemoCacheGetForKeyCount(size_t count);
 
 // Shared setter
 using SharedMemoCacheSetter =
-  void (*)(MemoCacheBase*&, FuncId, const Cell*, Cell);
+  void (*)(MemoCacheBase*&, FuncId, const TypedValue*, TypedValue);
 SharedMemoCacheSetter sharedMemoCacheSetForKeyTypes(const bool* types,
                                                     size_t count);
 SharedMemoCacheSetter sharedMemoCacheSetForKeyCount(size_t count);
@@ -163,13 +163,13 @@ private:
   };
 };
 
-const Cell* memoCacheGetGeneric(MemoCacheBase* base,
+const TypedValue* memoCacheGetGeneric(MemoCacheBase* base,
                                 GenericMemoId::Param id,
-                                const Cell* keys);
+                                const TypedValue* keys);
 void memoCacheSetGeneric(MemoCacheBase*& base,
                          GenericMemoId::Param id,
-                         const Cell* keys,
-                         Cell val);
+                         const TypedValue* keys,
+                         TypedValue val);
 
 ////////////////////////////////////////////////////////////
 
@@ -192,11 +192,11 @@ inline SharedOnlyKey makeSharedOnlyKey(FuncId funcId) {
   );
 }
 
-const Cell* memoCacheGetSharedOnly(const MemoCacheBase* base,
+const TypedValue* memoCacheGetSharedOnly(const MemoCacheBase* base,
                                    SharedOnlyKey key);
 void memoCacheSetSharedOnly(MemoCacheBase*& base,
                             SharedOnlyKey key,
-                            Cell val);
+                            TypedValue val);
 
 ////////////////////////////////////////////////////////////
 

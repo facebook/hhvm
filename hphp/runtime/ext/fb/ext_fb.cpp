@@ -424,7 +424,7 @@ static void fb_compact_serialize_array_as_map(
   fb_compact_serialize_code(sb, FB_CS_MAP);
   IterateKV(
     arr.get(),
-    [&](Cell k, TypedValue v) {
+    [&](TypedValue k, TypedValue v) {
       if (isStringType(k.m_type)) {
         fb_compact_serialize_string(sb, StrNR{k.m_data.pstr});
       } else {

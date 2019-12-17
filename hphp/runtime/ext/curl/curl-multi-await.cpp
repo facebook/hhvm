@@ -79,7 +79,7 @@ CurlMultiAwait::~CurlMultiAwait() {
   m_handlers.clear();
 }
 
-void CurlMultiAwait::unserialize(Cell& c) {
+void CurlMultiAwait::unserialize(TypedValue& c) {
   c.m_type = KindOfInt64;
   c.m_data.num = m_result;
 }

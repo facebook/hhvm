@@ -1096,7 +1096,7 @@ struct Variant : private TypedValue {
    * Read this Variant as an InitCell, without incrementing the
    * reference count.  I.e. turn KindOfUninit into KindOfNull.
    */
-  Cell asInitCellTmp() const {
+  TypedValue asInitCellTmp() const {
     if (m_type == KindOfUninit) return make_tv<KindOfNull>();
     return *this;
   }
@@ -1451,7 +1451,7 @@ void clearBlackHole();
 ///////////////////////////////////////////////////////////////////////////////
 // breaking circular dependencies
 
-inline Variant Array::operator[](Cell key) const {
+inline Variant Array::operator[](TypedValue key) const {
   return Variant::wrap(rval(key).tv());
 }
 inline Variant Array::operator[](int key) const {
@@ -1560,11 +1560,11 @@ inline bool isa_non_null(const Variant& v) {
 // Defined here to avoid introducing a dependency cycle between type-variant
 // and type-array
 template <IntishCast IC>
-ALWAYS_INLINE Cell Array::convertKey(Cell k) const {
+ALWAYS_INLINE TypedValue Array::convertKey(TypedValue k) const {
   return tvToKey<IC>(k, m_arr ? m_arr.get() : ArrayData::Create());
 }
 template <IntishCast IC>
-ALWAYS_INLINE Cell Array::convertKey(const Variant& k) const {
+ALWAYS_INLINE TypedValue Array::convertKey(const Variant& k) const {
   return convertKey<IC>(*k.asTypedValue());
 }
 

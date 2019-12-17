@@ -203,7 +203,7 @@ APCHandle::Pair APCArray::MakeHash(ArrayData* arr, APCKind kind,
   try {
     IterateKV(
       arr,
-      [&](Cell k, TypedValue v) {
+      [&](TypedValue k, TypedValue v) {
         auto key = APCHandle::Create(VarNR(k), false,
                                      APCHandleLevel::Inner, unserializeObj);
         size += key.size;

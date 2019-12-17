@@ -286,7 +286,7 @@ StringData* makeStaticStringSafe(const char* str) {
   return makeStaticString(str);
 }
 
-bool bindPersistentCns(const StringData* cnsName, const Cell& value) {
+bool bindPersistentCns(const StringData* cnsName, const TypedValue& value) {
   assertx(s_stringDataMap);
   auto const it = s_stringDataMap->find(cnsName);
   assertx(it != s_stringDataMap->end());

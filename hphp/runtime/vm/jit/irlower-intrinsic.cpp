@@ -222,7 +222,7 @@ void cgGetMemoKeyScalar(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void memoSetDecRefImpl(Cell newVal, Cell* cache) {
+static void memoSetDecRefImpl(TypedValue newVal, TypedValue* cache) {
   assertx(tvIsPlausible(newVal));
   assertx(tvIsPlausible(*cache));
   tvSetWithAux(newVal, *cache);

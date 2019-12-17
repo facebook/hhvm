@@ -1313,7 +1313,7 @@ Slot Class::propIndexToSlot(uint16_t index) const {
 
 const StaticString s_classname("classname");
 
-Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
+TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
   Slot clsCnsInd;
   auto cnsVal = cnsNameToTV(clsCnsName, clsCnsInd, what);
   if (!cnsVal) return make_tv<KindOfUninit>();
@@ -1460,7 +1460,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
   return ret;
 }
 
-const Cell* Class::cnsNameToTV(const StringData* clsCnsName,
+const TypedValue* Class::cnsNameToTV(const StringData* clsCnsName,
                                Slot& clsCnsInd,
                                ClsCnsLookup what) const {
   clsCnsInd = m_constants.findIndex(clsCnsName);
@@ -3576,7 +3576,7 @@ void Class::setInstanceMemoCacheInfo() {
   // caches. With the remaining non-assigned slots, we give preference to the
   // parameter-less methods first. This is because there's a greater benefit to
   // giving parameter-less methods non-shared slots (they can just be a
-  // Cell). However, we only give the methods non-shared slots if we can give
+  // TypedValue). However, we only give the methods non-shared slots if we can give
   // them to all the methods. If there's more methods than we have available
   // non-shared slots, its not clear which ones should get the non-shared slots
   // and which ones shouldn't, so we treat them all equally and give them all

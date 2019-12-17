@@ -503,7 +503,7 @@ template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   // after the markAsFinished() above which is the only place mutating the state
   // of the data used here. markAsFinished() can only be called once as it is
   // only called (indirectly) from construction of this object instance.
-  void unserialize(Cell& result) override {
+  void unserialize(TypedValue& result) override {
     if (m_exception) {
       SystemLib::throwInvalidOperationExceptionObject(
         m_exception.what().c_str());
@@ -516,7 +516,7 @@ template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   // (PHP) no lock
   template<typename U = T>
   typename std::enable_if<std::is_same<U, std::string>::value>::type
-    unserializeImpl(Cell& result)
+    unserializeImpl(TypedValue& result)
   {
     tvCopy(make_tv<KindOfString>(StringData::Make(m_result)), result);
   }
@@ -524,7 +524,7 @@ template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   // (PHP) no lock
   template<typename U = T>
   typename std::enable_if<std::is_same<U, folly::Unit>::value>::type
-    unserializeImpl(Cell& result)
+    unserializeImpl(TypedValue& result)
   {
     tvCopy(make_tv<KindOfNull>(), result);
   }
@@ -532,7 +532,7 @@ template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   // (PHP) no lock
   template<typename U = T>
   typename std::enable_if<std::is_same<U, bool>::value>::type
-    unserializeImpl(Cell& result)
+    unserializeImpl(TypedValue& result)
   {
     tvCopy(make_tv<KindOfBoolean>(m_result), result);
   }

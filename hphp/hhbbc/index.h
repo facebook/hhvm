@@ -121,7 +121,7 @@ using ContextSet = hphp_hash_set<Context, ContextHash>;
 
 std::string show(Context);
 
-using ConstantMap = hphp_hash_map<SString, Cell>;
+using ConstantMap = hphp_hash_map<SString, TypedValue>;
 
 /*
  * State of properties on a class.  Map from property name to its
@@ -639,7 +639,7 @@ struct Index {
    * See if the named constant has a unique scalar definition, and
    * return its value if so.
    */
-  folly::Optional<Cell> lookup_persistent_constant(SString cnsName) const;
+  folly::Optional<TypedValue> lookup_persistent_constant(SString cnsName) const;
 
   /*
    * Return true if the return value of the function might depend on arg.

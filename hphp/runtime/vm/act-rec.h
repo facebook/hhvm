@@ -345,8 +345,8 @@ bool isReturnHelper(void* address);
 
 /* Offset of the m_func and m_thisUnsafe fields in cells */
 
-static_assert(offsetof(ActRec, m_func) % sizeof(Cell) == 0, "");
-static_assert(offsetof(ActRec, m_thisUnsafe) % sizeof(Cell) == 0, "");
+static_assert(offsetof(ActRec, m_func) % sizeof(TypedValue) == 0, "");
+static_assert(offsetof(ActRec, m_thisUnsafe) % sizeof(TypedValue) == 0, "");
 
 ///////////////////////////////////////////////////////////////////////////////
 

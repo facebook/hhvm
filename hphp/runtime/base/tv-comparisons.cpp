@@ -50,7 +50,7 @@ namespace {
  */
 
 template<class Op>
-typename Op::RetType tvRelOp(Op op, Cell cell, bool val) {
+typename Op::RetType tvRelOp(Op op, TypedValue cell, bool val) {
   if (UNLIKELY(isVecType(cell.m_type))) {
     return op.vecVsNonVec();
   } else if (UNLIKELY(isDictType(cell.m_type))) {
@@ -75,7 +75,7 @@ typename Op::RetType tvRelOp(Op op, Cell cell, bool val) {
 }
 
 template<class Op, typename Num>
-auto strRelOp(Op op, Cell cell, Num val, const StringData* str) {
+auto strRelOp(Op op, TypedValue cell, Num val, const StringData* str) {
   auto const num = stringToNumeric(str);
   return num.m_type == KindOfInt64 ? op(num.m_data.num, val) :
          num.m_type == KindOfDouble ? op(num.m_data.dbl, val) :
@@ -83,7 +83,7 @@ auto strRelOp(Op op, Cell cell, Num val, const StringData* str) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOp(Op op, Cell cell, int64_t val) {
+typename Op::RetType tvRelOp(Op op, TypedValue cell, int64_t val) {
   assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -154,7 +154,7 @@ typename Op::RetType tvRelOp(Op op, Cell cell, int64_t val) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOp(Op op, Cell cell, double val) {
+typename Op::RetType tvRelOp(Op op, TypedValue cell, double val) {
   assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -225,7 +225,7 @@ typename Op::RetType tvRelOp(Op op, Cell cell, double val) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOp(Op op, Cell cell, const StringData* val) {
+typename Op::RetType tvRelOp(Op op, TypedValue cell, const StringData* val) {
   assertx(tvIsPlausible(cell));
   assertx(val != nullptr);
 
@@ -311,7 +311,7 @@ typename Op::RetType tvRelOp(Op op, Cell cell, const StringData* val) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOp(Op op, Cell cell, const ArrayData* ad) {
+typename Op::RetType tvRelOp(Op op, TypedValue cell, const ArrayData* ad) {
   assertx(tvIsPlausible(cell));
   assertx(ad->isPHPArray());
 
@@ -397,7 +397,7 @@ typename Op::RetType tvRelOp(Op op, Cell cell, const ArrayData* ad) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOp(Op op, Cell cell, const ObjectData* od) {
+typename Op::RetType tvRelOp(Op op, TypedValue cell, const ObjectData* od) {
   assertx(tvIsPlausible(cell));
 
   auto strRelOp = [&] (const StringData* sd) {
@@ -478,7 +478,7 @@ typename Op::RetType tvRelOp(Op op, Cell cell, const ObjectData* od) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOp(Op op, Cell cell, const RecordData* rec) {
+typename Op::RetType tvRelOp(Op op, TypedValue cell, const RecordData* rec) {
   if (cell.m_type != KindOfRecord) {
     op.recordVsNonRecord();
   }
@@ -486,7 +486,7 @@ typename Op::RetType tvRelOp(Op op, Cell cell, const RecordData* rec) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOp(Op op, Cell cell, const ResourceData* rd) {
+typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceData* rd) {
   assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -561,12 +561,12 @@ typename Op::RetType tvRelOp(Op op, Cell cell, const ResourceData* rd) {
   not_reached();
 }
 template<class Op>
-typename Op::RetType tvRelOp(Op op, Cell cell, const ResourceHdr* r) {
+typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceHdr* r) {
   return tvRelOp(op, cell, r->data());
 }
 
 template<class Op>
-typename Op::RetType tvRelOpVec(Op op, Cell cell, const ArrayData* a) {
+typename Op::RetType tvRelOpVec(Op op, TypedValue cell, const ArrayData* a) {
   assertx(tvIsPlausible(cell));
   assertx(a->isVecArray());
 
@@ -591,7 +591,7 @@ typename Op::RetType tvRelOpVec(Op op, Cell cell, const ArrayData* a) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOpDict(Op op, Cell cell, const ArrayData* a) {
+typename Op::RetType tvRelOpDict(Op op, TypedValue cell, const ArrayData* a) {
   assertx(tvIsPlausible(cell));
   assertx(a->isDict());
 
@@ -608,7 +608,7 @@ typename Op::RetType tvRelOpDict(Op op, Cell cell, const ArrayData* a) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOpKeyset(Op op, Cell cell, const ArrayData* a) {
+typename Op::RetType tvRelOpKeyset(Op op, TypedValue cell, const ArrayData* a) {
   assertx(tvIsPlausible(cell));
   assertx(a->isKeyset());
 
@@ -625,7 +625,7 @@ typename Op::RetType tvRelOpKeyset(Op op, Cell cell, const ArrayData* a) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOp(Op op, Cell cell, ClsMethDataRef clsMeth) {
+typename Op::RetType tvRelOp(Op op, TypedValue cell, ClsMethDataRef clsMeth) {
   assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
@@ -683,7 +683,7 @@ typename Op::RetType tvRelOp(Op op, Cell cell, ClsMethDataRef clsMeth) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOp(Op op, Cell cell, const Func* val) {
+typename Op::RetType tvRelOp(Op op, TypedValue cell, const Func* val) {
   assertx(tvIsPlausible(cell));
   assertx(val != nullptr);
 
@@ -773,7 +773,7 @@ typename Op::RetType tvRelOp(Op op, Cell cell, const Func* val) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOp(Op op, Cell cell, const Class* val) {
+typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
   assertx(tvIsPlausible(cell));
   assertx(val != nullptr);
 
@@ -863,7 +863,7 @@ typename Op::RetType tvRelOp(Op op, Cell cell, const Class* val) {
 }
 
 template<class Op>
-typename Op::RetType tvRelOp(Op op, Cell c1, Cell c2) {
+typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
   assertx(tvIsPlausible(c1));
   assertx(tvIsPlausible(c2));
 
@@ -1337,23 +1337,23 @@ bool tvSame(TypedValue c1, TypedValue c2) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool tvEqual(Cell cell, bool val) {
+bool tvEqual(TypedValue cell, bool val) {
   return tvRelOp(Eq(), cell, val);
 }
 
-bool tvEqual(Cell cell, int64_t val) {
+bool tvEqual(TypedValue cell, int64_t val) {
   return tvRelOp(Eq(), cell, val);
 }
 
-bool tvEqual(Cell cell, double val) {
+bool tvEqual(TypedValue cell, double val) {
   return tvRelOp(Eq(), cell, val);
 }
 
-bool tvEqual(Cell cell, const StringData* val) {
+bool tvEqual(TypedValue cell, const StringData* val) {
   return tvRelOp(Eq(), cell, val);
 }
 
-bool tvEqual(Cell cell, const ArrayData* val) {
+bool tvEqual(TypedValue cell, const ArrayData* val) {
   if (val->isPHPArray()) return tvRelOp(Eq(), cell, val);
   if (val->isVecArray()) return tvRelOpVec(Eq(), cell, val);
   if (val->isDict()) return tvRelOpDict(Eq(), cell, val);
@@ -1361,18 +1361,18 @@ bool tvEqual(Cell cell, const ArrayData* val) {
   not_reached();
 }
 
-bool tvEqual(Cell cell, const ObjectData* val) {
+bool tvEqual(TypedValue cell, const ObjectData* val) {
   return tvRelOp(Eq(), cell, val);
 }
 
-bool tvEqual(Cell cell, const ResourceData* val) {
+bool tvEqual(TypedValue cell, const ResourceData* val) {
   return tvRelOp(Eq(), cell, val);
 }
-bool tvEqual(Cell cell, const ResourceHdr* val) {
+bool tvEqual(TypedValue cell, const ResourceHdr* val) {
   return tvRelOp(Eq(), cell, val);
 }
 
-bool tvEqual(Cell cell, ClsMethDataRef val) {
+bool tvEqual(TypedValue cell, ClsMethDataRef val) {
   return tvRelOp(Eq(), cell, val);
 }
 
@@ -1380,23 +1380,23 @@ bool tvEqual(TypedValue c1, TypedValue c2) {
   return tvRelOp(Eq(), c1, c2);
 }
 
-bool tvLess(Cell cell, bool val) {
+bool tvLess(TypedValue cell, bool val) {
   return tvRelOp(Lt(), cell, val);
 }
 
-bool tvLess(Cell cell, int64_t val) {
+bool tvLess(TypedValue cell, int64_t val) {
   return tvRelOp(Lt(), cell, val);
 }
 
-bool tvLess(Cell cell, double val) {
+bool tvLess(TypedValue cell, double val) {
   return tvRelOp(Lt(), cell, val);
 }
 
-bool tvLess(Cell cell, const StringData* val) {
+bool tvLess(TypedValue cell, const StringData* val) {
   return tvRelOp(Lt(), cell, val);
 }
 
-bool tvLess(Cell cell, const ArrayData* val) {
+bool tvLess(TypedValue cell, const ArrayData* val) {
   if (val->isPHPArray()) return tvRelOp(Lt(), cell, val);
   if (val->isVecArray()) return tvRelOpVec(Lt(), cell, val);
   if (val->isDict()) return tvRelOpDict(Lt(), cell, val);
@@ -1404,18 +1404,18 @@ bool tvLess(Cell cell, const ArrayData* val) {
   not_reached();
 }
 
-bool tvLess(Cell cell, const ObjectData* val) {
+bool tvLess(TypedValue cell, const ObjectData* val) {
   return tvRelOp(Lt(), cell, val);
 }
 
-bool tvLess(Cell cell, const ResourceData* val) {
+bool tvLess(TypedValue cell, const ResourceData* val) {
   return tvRelOp(Lt(), cell, val);
 }
-bool tvLess(Cell cell, const ResourceHdr* val) {
+bool tvLess(TypedValue cell, const ResourceHdr* val) {
   return tvRelOp(Lt(), cell, val);
 }
 
-bool tvLess(Cell cell, ClsMethDataRef val) {
+bool tvLess(TypedValue cell, ClsMethDataRef val) {
   return tvRelOp(Lt(), cell, val);
 }
 
@@ -1423,23 +1423,23 @@ bool tvLess(TypedValue tv1, TypedValue tv2) {
   return tvRelOp(Lt(), tv1, tv2);
 }
 
-bool tvGreater(Cell cell, bool val) {
+bool tvGreater(TypedValue cell, bool val) {
   return tvRelOp(Gt(), cell, val);
 }
 
-bool tvGreater(Cell cell, int64_t val) {
+bool tvGreater(TypedValue cell, int64_t val) {
   return tvRelOp(Gt(), cell, val);
 }
 
-bool tvGreater(Cell cell, double val) {
+bool tvGreater(TypedValue cell, double val) {
   return tvRelOp(Gt(), cell, val);
 }
 
-bool tvGreater(Cell cell, const StringData* val) {
+bool tvGreater(TypedValue cell, const StringData* val) {
   return tvRelOp(Gt(), cell, val);
 }
 
-bool tvGreater(Cell cell, const ArrayData* val) {
+bool tvGreater(TypedValue cell, const ArrayData* val) {
   if (val->isPHPArray()) return tvRelOp(Gt(), cell, val);
   if (val->isVecArray()) return tvRelOpVec(Gt(), cell, val);
   if (val->isDict()) return tvRelOpDict(Gt(), cell, val);
@@ -1447,18 +1447,18 @@ bool tvGreater(Cell cell, const ArrayData* val) {
   not_reached();
 }
 
-bool tvGreater(Cell cell, const ObjectData* val) {
+bool tvGreater(TypedValue cell, const ObjectData* val) {
   return tvRelOp(Gt(), cell, val);
 }
 
-bool tvGreater(Cell cell, const ResourceData* val) {
+bool tvGreater(TypedValue cell, const ResourceData* val) {
   return tvRelOp(Gt(), cell, val);
 }
-bool tvGreater(Cell cell, const ResourceHdr* val) {
+bool tvGreater(TypedValue cell, const ResourceHdr* val) {
   return tvRelOp(Gt(), cell, val);
 }
 
-bool tvGreater(Cell cell, ClsMethDataRef val) {
+bool tvGreater(TypedValue cell, ClsMethDataRef val) {
   return tvRelOp(Gt(), cell, val);
 }
 
@@ -1468,23 +1468,23 @@ bool tvGreater(TypedValue tv1, TypedValue tv2) {
 
 //////////////////////////////////////////////////////////////////////
 
-int64_t tvCompare(Cell cell, bool val) {
+int64_t tvCompare(TypedValue cell, bool val) {
   return tvRelOp(Cmp(), cell, val);
 }
 
-int64_t tvCompare(Cell cell, int64_t val) {
+int64_t tvCompare(TypedValue cell, int64_t val) {
   return tvRelOp(Cmp(), cell, val);
 }
 
-int64_t tvCompare(Cell cell, double val) {
+int64_t tvCompare(TypedValue cell, double val) {
   return tvRelOp(Cmp(), cell, val);
 }
 
-int64_t tvCompare(Cell cell, const StringData* val) {
+int64_t tvCompare(TypedValue cell, const StringData* val) {
   return tvRelOp(Cmp(), cell, val);
 }
 
-int64_t tvCompare(Cell cell, const ArrayData* val) {
+int64_t tvCompare(TypedValue cell, const ArrayData* val) {
   if (val->isPHPArray()) return tvRelOp(Cmp(), cell, val);
   if (val->isVecArray()) return tvRelOpVec(Cmp(), cell, val);
   if (val->isDict()) return tvRelOpDict(Cmp(), cell, val);
@@ -1492,18 +1492,18 @@ int64_t tvCompare(Cell cell, const ArrayData* val) {
   not_reached();
 }
 
-int64_t tvCompare(Cell cell, const ObjectData* val) {
+int64_t tvCompare(TypedValue cell, const ObjectData* val) {
   return tvRelOp(Cmp(), cell, val);
 }
 
-int64_t tvCompare(Cell cell, const ResourceData* val) {
+int64_t tvCompare(TypedValue cell, const ResourceData* val) {
   return tvRelOp(Cmp(), cell, val);
 }
-int64_t tvCompare(Cell cell, const ResourceHdr* val) {
+int64_t tvCompare(TypedValue cell, const ResourceHdr* val) {
   return tvRelOp(Cmp(), cell, val);
 }
 
-int64_t tvCompare(Cell cell, ClsMethDataRef val) {
+int64_t tvCompare(TypedValue cell, ClsMethDataRef val) {
   return tvRelOp(Cmp(), cell, val);
 }
 
@@ -1513,13 +1513,13 @@ int64_t tvCompare(TypedValue tv1, TypedValue tv2) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool tvLessOrEqual(Cell c1, Cell c2) {
+bool tvLessOrEqual(TypedValue c1, TypedValue c2) {
   assertx(tvIsPlausible(c1));
   assertx(tvIsPlausible(c2));
   return tvRelOp(Lte(), c1, c2);
 }
 
-bool tvGreaterOrEqual(Cell c1, Cell c2) {
+bool tvGreaterOrEqual(TypedValue c1, TypedValue c2) {
   assertx(tvIsPlausible(c1));
   assertx(tvIsPlausible(c2));
   return tvRelOp(Gte(), c1, c2);

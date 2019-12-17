@@ -143,7 +143,7 @@ struct Param {
    * Default value for this parameter, or KindOfUninit if it has no
    * default value.
    */
-  Cell defaultValue;
+  TypedValue defaultValue;
 
   /*
    * Pointer to the block we'll enter for default-value initialization
@@ -426,7 +426,7 @@ struct Prop {
    * initializers.  May be KindOfUninit in some cases where the
    * property should not have an initial value (i.e. not even null).
    */
-  Cell val;
+  TypedValue val;
 };
 
 /*
@@ -444,7 +444,7 @@ struct Const {
    *
    * The lack of a value represents an abstract class constant.
    */
-  folly::Optional<Cell> val;
+  folly::Optional<TypedValue> val;
 
   /*
    * We pass through eval'able php code and a string type constraint,
@@ -577,7 +577,7 @@ struct RecordField {
   Attr attrs;
   LSString userType;
   LSString docComment;
-  Cell val;
+  TypedValue val;
   TypeConstraint typeConstraint;
   UserAttributeMap userAttributes;
 };

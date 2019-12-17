@@ -72,7 +72,7 @@ ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return ArrayData::CreateDict();
   DictInit init{size};
-  IterateKVNoInc(a, [&](Cell k, TypedValue v) { init.setValidKey(k, v); });
+  IterateKVNoInc(a, [&](TypedValue k, TypedValue v) { init.setValidKey(k, v); });
   auto const out = init.create();
   return RuntimeOption::EvalArrayProvenance && out->isRefCounted()
     ? tagArrProv(out, a)
@@ -114,7 +114,7 @@ ArrayData* ArrayCommon::ToDArray(ArrayData* a, bool) {
   DArrayInit init{size};
   IterateKV(
     a,
-    [&](Cell k, TypedValue v) {
+    [&](TypedValue k, TypedValue v) {
       init.setUnknownKey(tvAsCVarRef(&k), tvAsCVarRef(&v));
     }
   );

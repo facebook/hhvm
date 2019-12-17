@@ -490,7 +490,7 @@ struct DArrLikePacked;
 struct DArrLikePackedN;
 struct DArrLikeMap;
 struct DArrLikeMapN;
-using MapElems = ArrayLikeMap<Cell>;
+using MapElems = ArrayLikeMap<TypedValue>;
 struct ArrKey;
 struct IterTypes;
 
@@ -786,7 +786,7 @@ struct ArrKey {
   Type type;
   bool mayThrow = false;
 
-  folly::Optional<Cell> tv() const {
+  folly::Optional<TypedValue> tv() const {
     assert(!i || !s);
     if (i) {
       return make_tv<KindOfInt64>(*i);
@@ -1275,22 +1275,22 @@ Type toobj(const Type& t);
 Type objcls(const Type& t);
 
 /*
- * If the type t has a known constant value, return it as a Cell.
+ * If the type t has a known constant value, return it as a TypedValue.
  * Otherwise return folly::none.
  *
- * The returned Cell can only contain non-reference-counted types.
+ * The returned TypedValue can only contain non-reference-counted types.
  */
-folly::Optional<Cell> tv(const Type& t);
+folly::Optional<TypedValue> tv(const Type& t);
 
 /*
- * If the type t has a known constant value, return it as a Cell.
+ * If the type t has a known constant value, return it as a TypedValue.
  * Otherwise return folly::none.
  *
- * The returned Cell may contain reference-counted types.
+ * The returned TypedValue may contain reference-counted types.
  *
  * You are responsible for any required ref-counting.
  */
-folly::Optional<Cell> tvNonStatic(const Type& t);
+folly::Optional<TypedValue> tvNonStatic(const Type& t);
 
 /*
  * If the type t has a known constant value, return true.
@@ -1370,12 +1370,12 @@ DCls dcls_of(Type t);
 SString sval_of(const Type& t);
 
 /*
- * Create a Type from a Cell.
+ * Create a Type from a TypedValue.
  *
  * Pre: the cell must contain a non-reference-counted type.
  * Post: returned type is a subtype of TUnc
  */
-Type from_cell(Cell tv);
+Type from_cell(TypedValue tv);
 
 /*
  * Create a Type from a DataType. KindOfString and KindOfPersistentString

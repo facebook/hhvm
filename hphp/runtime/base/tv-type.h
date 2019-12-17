@@ -24,11 +24,11 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE bool tvIsNull(Cell tv) {
+ALWAYS_INLINE bool tvIsNull(TypedValue tv) {
   assertx(tvIsPlausible(tv));
   return isNullType(tv.m_type);
 }
-ALWAYS_INLINE bool tvIsNull(const Cell* tv) {
+ALWAYS_INLINE bool tvIsNull(const TypedValue* tv) {
   return tvIsNull(*tv);
 }
 

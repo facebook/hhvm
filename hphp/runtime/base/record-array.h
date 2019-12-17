@@ -58,13 +58,13 @@ struct RecordArray : ArrayData,
   static constexpr auto NvTryGetStr = &NvGetStr;
   static ssize_t NvGetIntPos(const ArrayData*, int64_t k);
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
-  static Cell NvGetKey(const ArrayData*, ssize_t pos);
-  static ArrayData* SetInt(ArrayData*, int64_t key, Cell v);
-  static ArrayData* SetIntMove(ArrayData*, int64_t key, Cell v);
+  static TypedValue NvGetKey(const ArrayData*, ssize_t pos);
+  static ArrayData* SetInt(ArrayData*, int64_t key, TypedValue v);
+  static ArrayData* SetIntMove(ArrayData*, int64_t key, TypedValue v);
   static constexpr auto SetIntInPlace = &SetInt;
-  static ArrayData* SetStr(ArrayData*, StringData*, Cell v);
-  static ArrayData* SetStrMove(ArrayData*, StringData*, Cell v);
-  static ArrayData* SetStrInPlace(ArrayData*, StringData*, Cell v);
+  static ArrayData* SetStr(ArrayData*, StringData*, TypedValue v);
+  static ArrayData* SetStrMove(ArrayData*, StringData*, TypedValue v);
+  static ArrayData* SetStrInPlace(ArrayData*, StringData*, TypedValue v);
   static size_t Vsize(const ArrayData*);
   static tv_rval RvalPos(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
@@ -93,13 +93,13 @@ struct RecordArray : ArrayData,
   static bool Uasort(ArrayData*, const Variant&);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
-  static ArrayData* Append(ArrayData*, Cell v);
+  static ArrayData* Append(ArrayData*, TypedValue v);
   static constexpr auto AppendInPlace = &Append;
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
-  static ArrayData* Prepend(ArrayData*, Cell v);
+  static ArrayData* Prepend(ArrayData*, TypedValue v);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData*);
@@ -126,7 +126,7 @@ private:
    * Returns kInvalidSlot if the field does not exist.
    * Raises a typehint error if the field exists but the type check fails.
    */
-  Slot checkFieldForWrite(const StringData* key, Cell val) const;
+  Slot checkFieldForWrite(const StringData* key, TypedValue val) const;
   /*
    * Updates the field at idx if idx is valid. Otherwise inserts key, val pair
    * in the extra field map.

@@ -188,24 +188,24 @@ arr_lval APCLocalArray::LvalForceNew(ArrayData* ad, bool /*copy*/) {
   return arr_lval { helper.release(lval.arr), lval };
 }
 
-ArrayData* APCLocalArray::SetInt(ArrayData* ad, int64_t k, Cell v) {
+ArrayData* APCLocalArray::SetInt(ArrayData* ad, int64_t k, TypedValue v) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->setInPlace(k, v));
 }
 
-ArrayData* APCLocalArray::SetIntMove(ArrayData* ad, int64_t k, Cell v) {
+ArrayData* APCLocalArray::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
   EscalateHelper helper{ad};
   auto const result = helper.escalated->setMove(k, v);
   helper.escalated = nullptr;
   return result;
 }
 
-ArrayData* APCLocalArray::SetStr(ArrayData* ad, StringData* k, Cell v) {
+ArrayData* APCLocalArray::SetStr(ArrayData* ad, StringData* k, TypedValue v) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->setInPlace(k, v));
 }
 
-ArrayData* APCLocalArray::SetStrMove(ArrayData* ad, StringData* k, Cell v) {
+ArrayData* APCLocalArray::SetStrMove(ArrayData* ad, StringData* k, TypedValue v) {
   EscalateHelper helper{ad};
   auto const result = helper.escalated->setMove(k, v);
   helper.escalated = nullptr;
@@ -226,7 +226,7 @@ ArrayData* APCLocalArray::Copy(const ArrayData* ad) {
   return Escalate(ad);
 }
 
-ArrayData* APCLocalArray::Append(ArrayData* ad, Cell v) {
+ArrayData* APCLocalArray::Append(ArrayData* ad, TypedValue v) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->appendInPlace(v));
 }
@@ -242,7 +242,7 @@ ArrayData* APCLocalArray::Merge(ArrayData* ad, const ArrayData *elems) {
   return escalated->merge(elems);
 }
 
-ArrayData* APCLocalArray::Prepend(ArrayData* ad, Cell v) {
+ArrayData* APCLocalArray::Prepend(ArrayData* ad, TypedValue v) {
   EscalateHelper helper{ad};
   return helper.release(helper.escalated->prepend(v));
 }
@@ -282,7 +282,7 @@ ssize_t APCLocalArray::NvGetStrPos(const ArrayData* ad, const StringData* k) {
   return (index == -1) ? a->m_size : index;
 }
 
-Cell APCLocalArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
+TypedValue APCLocalArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asApcArray(ad);
   Variant k = a->m_arr->getKey(pos);
   auto const tv = *k.asTypedValue();

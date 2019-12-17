@@ -1081,7 +1081,7 @@ using std::string;
 EVALFLAGS();
 #undef F
 std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
-hphp_string_imap<Cell> RuntimeOption::ConstantFunctions;
+hphp_string_imap<TypedValue> RuntimeOption::ConstantFunctions;
 
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;

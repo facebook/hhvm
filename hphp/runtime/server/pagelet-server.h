@@ -187,7 +187,7 @@ struct PageletServerTaskEvent final : AsioExternalThreadEvent {
   }
 
 protected:
- void unserialize(Cell& result) final {
+ void unserialize(TypedValue& result) final {
    tvCopy(make_array_like_tv(m_job->getAsyncResults(false).detach()), result);
   }
 

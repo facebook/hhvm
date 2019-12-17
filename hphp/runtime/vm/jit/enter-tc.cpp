@@ -41,8 +41,8 @@ ALWAYS_INLINE void preEnter(TCA start) {
   }
 
   assertx(tc::isValidCodeAddress(start));
-  assertx(((uintptr_t)vmsp() & (sizeof(Cell) - 1)) == 0);
-  assertx(((uintptr_t)vmfp() & (sizeof(Cell) - 1)) == 0);
+  assertx(((uintptr_t)vmsp() & (sizeof(TypedValue) - 1)) == 0);
+  assertx(((uintptr_t)vmfp() & (sizeof(TypedValue) - 1)) == 0);
 
   INC_TPC(enter_tc);
   if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {

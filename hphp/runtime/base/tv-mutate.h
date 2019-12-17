@@ -33,23 +33,23 @@ namespace HPHP {
  *  - returns a KindOfNull when `tv' is KindOfUninit.
  *  - is the identity otherwise.
  */
-ALWAYS_INLINE Cell tvToInitCell(TypedValue tv) {
+ALWAYS_INLINE TypedValue tvToInitCell(TypedValue tv) {
   if (tv.m_type == KindOfUninit) return make_tv<KindOfNull>();
   return tv;
 }
 
 /*
- * Assert that `tv' is a Cell; then just return it.
+ * Assert that `tv' is a TypedValue; then just return it.
  */
-ALWAYS_INLINE Cell tvAssertPlausible(TypedValue tv) {
+ALWAYS_INLINE TypedValue tvAssertPlausible(TypedValue tv) {
   assertx(tvIsPlausible(tv));
   return tv;
 }
-ALWAYS_INLINE Cell* tvAssertPlausible(TypedValue* tv) {
+ALWAYS_INLINE TypedValue* tvAssertPlausible(TypedValue* tv) {
   assertx(tvIsPlausible(*tv));
   return tv;
 }
-ALWAYS_INLINE const Cell* tvAssertPlausible(const TypedValue* tv) {
+ALWAYS_INLINE const TypedValue* tvAssertPlausible(const TypedValue* tv) {
   assertx(tvIsPlausible(*tv));
   return tv;
 }
@@ -127,13 +127,13 @@ enable_if_lval_t<T&&, void> tvWriteNull(T&& to) {
  */
 
 /*
- * Move the value of the Cell in `fr' to `to'.
+ * Move the value of the TypedValue in `fr' to `to'.
  *
  * To represent move semantics, we decref the original value of `to', but we do
  * not increment its new value (i.e., `fr').
  */
 template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvMove(const Cell fr, T&& to) {
+enable_if_lval_t<T&&, void> tvMove(const TypedValue fr, T&& to) {
   assertx(tvIsPlausible(fr));
   assertx(tvIsPlausible(as_tv(to)));
   auto const old = as_tv(to);
@@ -142,11 +142,11 @@ enable_if_lval_t<T&&, void> tvMove(const Cell fr, T&& to) {
 }
 
 /*
- * Assign the value of the Cell in `fr' to `to', with appropriate reference
+ * Assign the value of the TypedValue in `fr' to `to', with appropriate reference
  * count modifications.
  */
 template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvSet(const Cell fr, T&& to) {
+enable_if_lval_t<T&&, void> tvSet(const TypedValue fr, T&& to) {
   assertx(tvIsPlausible(fr));
   assertx(tvIsPlausible(as_tv(to)));
   auto const old = as_tv(to);
@@ -158,7 +158,7 @@ enable_if_lval_t<T&&, void> tvSet(const Cell fr, T&& to) {
  * Like tvSet(), but preserves m_aux
  */
 template<typename C> ALWAYS_INLINE
-enable_if_lval_t<C&&, void> tvSetWithAux(const Cell fr, C&& to) {
+enable_if_lval_t<C&&, void> tvSetWithAux(const TypedValue fr, C&& to) {
   assertx(tvIsPlausible(fr));
   auto const old = as_tv(to);
   to = fr;

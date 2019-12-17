@@ -192,7 +192,7 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, const TypedValue *tv) {
 }
 
 ALWAYS_INLINE void serialize_memoize_arraykey(StringBuffer& sb,
-                                              const Cell& c) {
+                                              const TypedValue& c) {
   switch (c.m_type) {
     case KindOfPersistentString:
     case KindOfString:
@@ -209,7 +209,7 @@ ALWAYS_INLINE void serialize_memoize_arraykey(StringBuffer& sb,
 
 void serialize_memoize_array(StringBuffer& sb, int depth, const ArrayData* ad) {
   serialize_memoize_code(sb, SER_MC_CONTAINER);
-  IterateKV(ad, [&] (Cell k, TypedValue v) {
+  IterateKV(ad, [&] (TypedValue k, TypedValue v) {
     serialize_memoize_arraykey(sb, k);
     serialize_memoize_tv(sb, depth, v);
   });
@@ -218,7 +218,7 @@ void serialize_memoize_array(StringBuffer& sb, int depth, const ArrayData* ad) {
 
 void serialize_memoize_set(StringBuffer& sb, const ArrayData* ad) {
   serialize_memoize_code(sb, SER_MC_CONTAINER);
-  IterateKVNoInc(ad, [&] (Cell k, TypedValue) {
+  IterateKVNoInc(ad, [&] (TypedValue k, TypedValue) {
     serialize_memoize_arraykey(sb, k);
     serialize_memoize_arraykey(sb, k);
   });
@@ -419,7 +419,7 @@ TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
 
 namespace {
 
-void clearValueLink(rds::Link<Cell, rds::Mode::Normal> valLink) {
+void clearValueLink(rds::Link<TypedValue, rds::Mode::Normal> valLink) {
   if (valLink.bound() && valLink.isInit()) {
     auto oldVal = *valLink;
     valLink.markUninit();

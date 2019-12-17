@@ -59,7 +59,7 @@ struct c_ExternalThreadEventWaitHandle;
  *       markAsFinished();
  *     }
  *   protected:
- *     void unserialize(Cell& result) const {
+ *     void unserialize(TypedValue& result) const {
  *       if (UNLIKELY(m_failed)) {
  *         SystemLib::throwInvalidOperationExceptionObject(
  *           "An error has occurred while scheduling the operation"
@@ -192,7 +192,7 @@ struct AsioExternalThreadEvent {
      * If a result was already initialized, it must be uninitialized (decref
      * if needed) prior to throwing an exception.
      */
-    virtual void unserialize(Cell& result) = 0;
+    virtual void unserialize(TypedValue& result) = 0;
 
     /**
      * Get the time markAsFinished was called to retroactively reference

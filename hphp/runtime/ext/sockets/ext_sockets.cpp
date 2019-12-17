@@ -312,7 +312,7 @@ static void sock_array_from_fd_set(Variant &sockets,
   const auto& sock_array = sockets.asCArrRef();
   IterateKVNoInc(
     sock_array.get(),
-    [&](Cell k, TypedValue v) {
+    [&](TypedValue k, TypedValue v) {
       const pollfd &fd = fds.at(nfds++);
       assertx(v.m_type == KindOfResource);
       assertx(fd.fd == static_cast<File*>(v.m_data.pres->data())->fd());

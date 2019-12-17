@@ -155,7 +155,7 @@ struct alignas(16) Resumable {
     assertx(func->isResumable());
     assertx(func->contains(suspendOffset));
     // Check memory alignment
-    assertx((((uintptr_t) actRec()) & (sizeof(Cell) - 1)) == 0);
+    assertx((((uintptr_t) actRec()) & (sizeof(TypedValue) - 1)) == 0);
 
     if (!clone) {
       // Copy ActRec, locals and iterators

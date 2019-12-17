@@ -63,27 +63,27 @@ void throw_exception(const Object& e);
 ///////////////////////////////////////////////////////////////////////////////
 // type testing
 
-inline bool is_null(const Cell* c) {
+inline bool is_null(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   return tvIsNull(c);
 }
 
-inline bool is_bool(const Cell* c) {
+inline bool is_bool(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   return tvIsBool(c);
 }
 
-inline bool is_int(const Cell* c) {
+inline bool is_int(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   return tvIsInt(c);
 }
 
-inline bool is_double(const Cell* c) {
+inline bool is_double(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   return tvIsDouble(c);
 }
 
-inline bool is_string(const Cell* c) {
+inline bool is_string(const TypedValue* c) {
   if (tvIsString(c)) return true;
   if (tvIsFunc(c)) {
     if (RuntimeOption::EvalIsStringNotices) {
@@ -100,7 +100,7 @@ inline bool is_string(const Cell* c) {
   return false;
 }
 
-inline bool is_array(const Cell* c) {
+inline bool is_array(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   if (tvIsClsMeth(c)) {
     if (RuntimeOption::EvalIsCompatibleClsMethType &&
@@ -115,7 +115,7 @@ inline bool is_array(const Cell* c) {
   return tvIsArray(c);
 }
 
-inline bool is_vec(const Cell* c) {
+inline bool is_vec(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   if (tvIsClsMeth(c)) {
     if (RuntimeOption::EvalHackArrDVArrs) {
@@ -129,17 +129,17 @@ inline bool is_vec(const Cell* c) {
   return tvIsVec(c);
 }
 
-inline bool is_dict(const Cell* c) {
+inline bool is_dict(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   return tvIsDict(c);
 }
 
-inline bool is_keyset(const Cell* c) {
+inline bool is_keyset(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   return tvIsKeyset(c);
 }
 
-inline bool is_varray(const Cell* c) {
+inline bool is_varray(const TypedValue* c) {
   if (tvIsClsMeth(c)) {
     if (!RuntimeOption::EvalHackArrDVArrs) {
       if (RuntimeOption::EvalIsVecNotices) {
@@ -154,29 +154,29 @@ inline bool is_varray(const Cell* c) {
     : (tvIsArray(c) && c->m_data.parr->isVArray());
 }
 
-inline bool is_darray(const Cell* c) {
+inline bool is_darray(const TypedValue* c) {
   return RuntimeOption::EvalHackArrDVArrs
     ? tvIsDict(c)
     : (tvIsArray(c) && c->m_data.parr->isDArray());
 }
 
-inline bool is_object(const Cell* c) {
+inline bool is_object(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   return tvIsObject(c) &&
     c->m_data.pobj->getVMClass() != SystemLib::s___PHP_Incomplete_ClassClass;
 }
 
-inline bool is_clsmeth(const Cell* c) {
+inline bool is_clsmeth(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   return tvIsClsMeth(c);
 }
 
-inline bool is_fun(const Cell* c) {
+inline bool is_fun(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   return tvIsFunc(c);
 }
 
-inline bool is_empty_string(const Cell* c) {
+inline bool is_empty_string(const TypedValue* c) {
   return tvIsString(c) && c->m_data.pstr->empty();
 }
 

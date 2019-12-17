@@ -277,7 +277,7 @@ inline ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
   return LIKELY(!m_nestedVMs.empty()) ? m_nestedVMs.back().fp : nullptr;
 }
 
-inline Cell ExecutionContext::lookupClsCns(const StringData* cls,
+inline TypedValue ExecutionContext::lookupClsCns(const StringData* cls,
                                       const StringData* cns) {
   return lookupClsCns(NamedEntity::get(cls), cls, cns);
 }

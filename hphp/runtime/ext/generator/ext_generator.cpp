@@ -118,7 +118,7 @@ void Generator::copyVars(const ActRec* srcFp) {
 }
 
 void Generator::yield(Offset suspendOffset,
-                      const Cell* key, const Cell value) {
+                      const TypedValue* key, const TypedValue value) {
   assertx(isRunning());
   resumable()->setResumeAddr(nullptr, suspendOffset);
 

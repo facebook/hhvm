@@ -224,7 +224,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
    * pointers. Use this opportunity to marshal the saved data from persistent
    * data structures into per-request data.
    */
-  void unserialize(Cell& c) override {
+  void unserialize(TypedValue& c) override {
     if (!m_exception.empty()) {
       mcr_throwException(m_exception, m_op, m_replyCode, m_key);
     }
@@ -343,7 +343,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
     m_key = request.key().fullKey().str();
   }
 
-  Cell m_result;
+  TypedValue m_result;
 
   // Deferred string result and metadata
   std::string m_stringResult;

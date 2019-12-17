@@ -108,7 +108,7 @@ ArrayIter::ArrayIter(const Object& obj) {
   objInit<true>(obj.get());
 }
 
-ArrayIter::ArrayIter(const Cell c) {
+ArrayIter::ArrayIter(const TypedValue c) {
   tvInit(c);
 }
 
@@ -230,7 +230,7 @@ void ArrayIter::objInit(ObjectData* obj) {
   }
 }
 
-void ArrayIter::tvInit(const Cell c) {
+void ArrayIter::tvInit(const TypedValue c) {
   assertx(tvIsPlausible(c));
   if (LIKELY(isArrayLikeType(c.m_type))) {
     arrInit(c.m_data.parr);
@@ -331,7 +331,7 @@ tv_rval ArrayIter::secondRvalPlus() {
 
 //////////////////////////////////////////////////////////////////////
 
-bool Iter::init(Cell* base) {
+bool Iter::init(TypedValue* base) {
   // Get easy cases out of the way. Class methods promote to arrays and both
   // of them are just an ArrayIter contructor. end() never throws for arrays.
   if (isClsMethType(base->m_type)) {
@@ -819,7 +819,7 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
 // both value and key-value iterators; for value iterators, keyOut is nullptr.
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 NEVER_INLINE
-int64_t iter_next_cold(Iter* iter, Cell* valOut, Cell* keyOut) {
+int64_t iter_next_cold(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   auto const ai = unwrap(iter);
   assertx(ai->getIterType() == ArrayIter::TypeArray ||
           ai->getIterType() == ArrayIter::TypeIterator);
@@ -852,8 +852,8 @@ int64_t iter_next_cold(Iter* iter, Cell* valOut, Cell* keyOut) {
 NEVER_INLINE
 int64_t liter_next_cold(Iter* iter,
                         const ArrayData* ad,
-                        Cell* valOut,
-                        Cell* keyOut) {
+                        TypedValue* valOut,
+                        TypedValue* keyOut) {
   auto const ai = unwrap(iter);
   assertx(ai->getIterType() == ArrayIter::TypeArray);
   assertx(!ai->getArrayData());
@@ -872,8 +872,8 @@ int64_t liter_next_cold(Iter* iter,
 template <bool Local>
 NEVER_INLINE
 static int64_t iter_next_apc_array(Iter* iter,
-                                   Cell* valOut,
-                                   Cell* keyOut,
+                                   TypedValue* valOut,
+                                   TypedValue* keyOut,
                                    ArrayData* ad) {
   assertx(ad->kind() == ArrayData::kApcKind);
 
@@ -910,7 +910,7 @@ static int64_t iter_next_apc_array(Iter* iter,
 namespace {
 
 NEVER_INLINE
-int64_t iter_next_cold_inc_val(Iter* it, Cell* valOut, Cell* keyOut) {
+int64_t iter_next_cold_inc_val(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
   /*
    * If this function is executing then valOut was already decrefed
    * during iter_next_mixed_impl.  That decref can't have had side
@@ -924,8 +924,8 @@ int64_t iter_next_cold_inc_val(Iter* it, Cell* valOut, Cell* keyOut) {
 
 NEVER_INLINE
 int64_t liter_next_cold_inc_val(Iter* it,
-                                Cell* valOut,
-                                Cell* keyOut,
+                                TypedValue* valOut,
+                                TypedValue* keyOut,
                                 const ArrayData* ad) {
   /*
    * If this function is executing then valOut was already decrefed
@@ -946,7 +946,7 @@ int64_t liter_next_cold_inc_val(Iter* it,
 // iterator's position and checking that the new position is in bounds.
 NEVER_INLINE
 int64_t iter_next_packed_pointer_cold(Iter* it,
-                                      Cell* valOut,
+                                      TypedValue* valOut,
                                       TypedValue* elm) {
   auto const oldVal = *valOut;
   tvDup(*elm, *valOut);
@@ -962,8 +962,8 @@ int64_t iter_next_packed_pointer_cold(Iter* it,
 // iterator's position and checking that the new position is in bounds.
 NEVER_INLINE
 int64_t iter_next_mixed_pointer_cold(Iter* it,
-                                     Cell* valOut,
-                                     Cell* keyOut,
+                                     TypedValue* valOut,
+                                     TypedValue* keyOut,
                                      MixedArrayElm* elm) {
   auto const oldVal = *valOut;
   tvDup(*elm->datatv(), *valOut);
@@ -983,8 +983,8 @@ int64_t iter_next_mixed_pointer_cold(Iter* it,
 // iterator's position and checking that the new position is in bounds.
 NEVER_INLINE
 int64_t iter_next_mixed_pointer_cold_key(Iter* it,
-                                         Cell* valOut,
-                                         Cell* keyOut,
+                                         TypedValue* valOut,
+                                         TypedValue* keyOut,
                                          MixedArrayElm* elm) {
   tvDup(*elm->datatv(), *valOut);
   if (keyOut != nullptr) {
@@ -1006,7 +1006,7 @@ int64_t iter_next_mixed_pointer_cold_key(Iter* it,
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool Local>
 ALWAYS_INLINE
-int64_t iter_next_packed_pointer(Iter* it, Cell* valOut, ArrayData* arr) {
+int64_t iter_next_packed_pointer(Iter* it, TypedValue* valOut, ArrayData* arr) {
   auto& iter = *unwrap(it);
   auto const elm = iter.m_packed_elm + 1;
   if (elm == iter.m_packed_end) {
@@ -1044,8 +1044,8 @@ int64_t iter_next_packed_pointer(Iter* it, Cell* valOut, ArrayData* arr) {
 template<bool HasKey, bool Local>
 ALWAYS_INLINE
 int64_t iter_next_mixed_pointer(Iter* it,
-                                Cell* valOut,
-                                Cell* keyOut,
+                                TypedValue* valOut,
+                                TypedValue* keyOut,
                                 ArrayData* arr) {
   auto& iter = *unwrap(it);
   auto const elm = iter.m_mixed_elm + 1;
@@ -1093,8 +1093,8 @@ namespace {
 template<bool HasKey, bool Local>
 ALWAYS_INLINE
 int64_t iter_next_mixed_impl(Iter* it,
-                             Cell* valOut,
-                             Cell* keyOut,
+                             TypedValue* valOut,
+                             TypedValue* keyOut,
                              ArrayData* arrData) {
   auto& iter         = *unwrap(it);
   auto const arr     = MixedArray::asMixed(arrData);
@@ -1150,8 +1150,8 @@ int64_t iter_next_mixed_impl(Iter* it,
 // The result is false (= 0) if iteration is done, or true (= 1) otherwise.
 template<bool HasKey, bool Local>
 int64_t iter_next_packed_impl(Iter* it,
-                              Cell* valOut,
-                              Cell* keyOut,
+                              TypedValue* valOut,
+                              TypedValue* keyOut,
                               ArrayData* ad) {
   auto& iter = *unwrap(it);
   assertx(PackedArray::checkInvariants(ad));
@@ -1196,59 +1196,59 @@ int64_t iter_next_packed_impl(Iter* it,
 
 }
 
-int64_t iterNextArrayPacked(Iter* it, Cell* valOut) {
+int64_t iterNextArrayPacked(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArrayPacked: I %p\n", it);
   auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
   return iter_next_packed_impl<false, false>(it, valOut, nullptr, ad);
 }
 
-int64_t literNextArrayPacked(Iter* it, Cell* valOut, ArrayData* ad) {
+int64_t literNextArrayPacked(Iter* it, TypedValue* valOut, ArrayData* ad) {
   TRACE(2, "literNextArrayPacked: I %p\n", it);
   return iter_next_packed_impl<false, true>(it, valOut, nullptr, ad);
 }
 
 int64_t iterNextKArrayPacked(Iter* it,
-                             Cell* valOut,
-                             Cell* keyOut) {
+                             TypedValue* valOut,
+                             TypedValue* keyOut) {
   TRACE(2, "iterNextKArrayPacked: I %p\n", it);
   auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
   return iter_next_packed_impl<true, false>(it, valOut, keyOut, ad);
 }
 
 int64_t literNextKArrayPacked(Iter* it,
-                              Cell* valOut,
-                              Cell* keyOut,
+                              TypedValue* valOut,
+                              TypedValue* keyOut,
                               ArrayData* ad) {
   TRACE(2, "literNextKArrayPacked: I %p\n", it);
   return iter_next_packed_impl<true, true>(it, valOut, keyOut, ad);
 }
 
-int64_t iterNextArrayMixed(Iter* it, Cell* valOut) {
+int64_t iterNextArrayMixed(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArrayMixed: I %p\n", it);
   auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
   return iter_next_mixed_impl<false, false>(it, valOut, nullptr, ad);
 }
 
-int64_t literNextArrayMixed(Iter* it, Cell* valOut, ArrayData* ad) {
+int64_t literNextArrayMixed(Iter* it, TypedValue* valOut, ArrayData* ad) {
   TRACE(2, "literNextArrayMixed: I %p\n", it);
   return iter_next_mixed_impl<false, true>(it, valOut, nullptr, ad);
 }
 
-int64_t iterNextKArrayMixed(Iter* it, Cell* valOut, Cell* keyOut) {
+int64_t iterNextKArrayMixed(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iterNextKArrayMixed: I %p\n", it);
   auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
   return iter_next_mixed_impl<true, false>(it, valOut, keyOut, ad);
 }
 
 int64_t literNextKArrayMixed(Iter* it,
-                             Cell* valOut,
-                             Cell* keyOut,
+                             TypedValue* valOut,
+                             TypedValue* keyOut,
                              ArrayData* ad) {
   TRACE(2, "literNextKArrayMixed: I %p\n", it);
   return iter_next_mixed_impl<true, true>(it, valOut, keyOut, ad);
 }
 
-int64_t iterNextArray(Iter* it, Cell* valOut) {
+int64_t iterNextArray(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArray: I %p\n", it);
   auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
   if (ad->isApcArray()) {
@@ -1257,7 +1257,7 @@ int64_t iterNextArray(Iter* it, Cell* valOut) {
   return iter_next_cold(it, valOut, nullptr);
 }
 
-int64_t literNextArray(Iter* it, Cell* valOut, ArrayData* ad) {
+int64_t literNextArray(Iter* it, TypedValue* valOut, ArrayData* ad) {
   TRACE(2, "literNextArray: I %p\n", it);
   if (ad->isApcArray()) {
     return iter_next_apc_array<true>(it, valOut, nullptr, ad);
@@ -1265,7 +1265,7 @@ int64_t literNextArray(Iter* it, Cell* valOut, ArrayData* ad) {
   return liter_next_cold(it, ad, valOut, nullptr);
 }
 
-int64_t iterNextKArray(Iter* it, Cell* valOut, Cell* keyOut) {
+int64_t iterNextKArray(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iterNextKArray: I %p\n", it);
   auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
   if (ad->isApcArray()) {
@@ -1274,7 +1274,7 @@ int64_t iterNextKArray(Iter* it, Cell* valOut, Cell* keyOut) {
   return iter_next_cold(it, valOut, keyOut);
 }
 
-int64_t literNextKArray(Iter* it, Cell* valOut, Cell* keyOut, ArrayData* ad) {
+int64_t literNextKArray(Iter* it, TypedValue* valOut, TypedValue* keyOut, ArrayData* ad) {
   TRACE(2, "literNextKArray: I %p\n", it);
   if (ad->isApcArray()) {
     return iter_next_apc_array<true>(it, valOut, keyOut, ad);
@@ -1282,7 +1282,7 @@ int64_t literNextKArray(Iter* it, Cell* valOut, Cell* keyOut, ArrayData* ad) {
   return liter_next_cold(it, ad, valOut, keyOut);
 }
 
-int64_t iterNextObject(Iter* it, Cell* valOut) {
+int64_t iterNextObject(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextObject: I %p\n", it);
   // We can't just put the address of iter_next_cold in the table
   // below right now because we need to get a nullptr into the third
@@ -1290,60 +1290,60 @@ int64_t iterNextObject(Iter* it, Cell* valOut) {
   return iter_next_cold(it, valOut, nullptr);
 }
 
-int64_t literNextObject(Iter*, Cell*, ArrayData*) {
+int64_t literNextObject(Iter*, TypedValue*, ArrayData*) {
   always_assert(false);
 }
-int64_t literNextKObject(Iter*, Cell*, Cell*, ArrayData*) {
+int64_t literNextKObject(Iter*, TypedValue*, TypedValue*, ArrayData*) {
   always_assert(false);
 }
 
-int64_t iterNextArrayPackedPointer(Iter* it, Cell* valOut) {
+int64_t iterNextArrayPackedPointer(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArrayPackedPointer: I %p\n", it);
   auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
   return iter_next_packed_pointer<false>(it, valOut, ad);
 }
 
-int64_t iterNextKArrayPackedPointer(Iter* it, Cell* valOut, Cell* keyOut) {
+int64_t iterNextKArrayPackedPointer(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
   always_assert(false);
 }
 
-int64_t literNextArrayPackedPointer(Iter* it, Cell* valOut, ArrayData* ad) {
+int64_t literNextArrayPackedPointer(Iter* it, TypedValue* valOut, ArrayData* ad) {
   TRACE(2, "literNextArrayPackedPointer: I %p\n", it);
   return iter_next_packed_pointer<true>(it, valOut, ad);
 }
 
-int64_t literNextKArrayPackedPointer(Iter* it, Cell* valOut,
-                                     Cell* keyOut, ArrayData* ad) {
+int64_t literNextKArrayPackedPointer(Iter* it, TypedValue* valOut,
+                                     TypedValue* keyOut, ArrayData* ad) {
   always_assert(false);
 }
 
-int64_t iterNextArrayMixedPointer(Iter* it, Cell* valOut) {
+int64_t iterNextArrayMixedPointer(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArrayMixedPointer: I %p\n", it);
   auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
   return iter_next_mixed_pointer<false, false>(it, valOut, nullptr, ad);
 }
 
-int64_t iterNextKArrayMixedPointer(Iter* it, Cell* valOut, Cell* keyOut) {
+int64_t iterNextKArrayMixedPointer(Iter* it, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iterNextKArrayMixedPointer: I %p\n", it);
   auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
   return iter_next_mixed_pointer<true, false>(it, valOut, keyOut, ad);
 }
 
-int64_t literNextArrayMixedPointer(Iter* it, Cell* valOut, ArrayData* ad) {
+int64_t literNextArrayMixedPointer(Iter* it, TypedValue* valOut, ArrayData* ad) {
   TRACE(2, "literNextArrayMixedPointer: I %p\n", it);
   return iter_next_mixed_pointer<false, true>(it, valOut, nullptr, ad);
 }
 
-int64_t literNextKArrayMixedPointer(Iter* it, Cell* valOut,
-                                    Cell* keyOut, ArrayData* ad) {
+int64_t literNextKArrayMixedPointer(Iter* it, TypedValue* valOut,
+                                    TypedValue* keyOut, ArrayData* ad) {
   TRACE(2, "literNextKArrayMixedPointer: I %p\n", it);
   return iter_next_mixed_pointer<true, true>(it, valOut, keyOut, ad);
 }
 
-using IterNextHelper  = int64_t (*)(Iter*, Cell*);
-using IterNextKHelper = int64_t (*)(Iter*, Cell*, Cell*);
-using LIterNextHelper  = int64_t (*)(Iter*, Cell*, ArrayData*);
-using LIterNextKHelper = int64_t (*)(Iter*, Cell*, Cell*, ArrayData*);
+using IterNextHelper  = int64_t (*)(Iter*, TypedValue*);
+using IterNextKHelper = int64_t (*)(Iter*, TypedValue*, TypedValue*);
+using LIterNextHelper  = int64_t (*)(Iter*, TypedValue*, ArrayData*);
+using LIterNextKHelper = int64_t (*)(Iter*, TypedValue*, TypedValue*, ArrayData*);
 
 const IterNextHelper g_iterNextHelpers[] = {
   &iterNextArrayPacked,
@@ -1381,7 +1381,7 @@ const LIterNextKHelper g_literNextKHelpers[] = {
   &literNextKArrayMixedPointer,
 };
 
-int64_t iter_next_ind(Iter* iter, Cell* valOut) {
+int64_t iter_next_ind(Iter* iter, TypedValue* valOut) {
   TRACE(2, "iter_next_ind: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants());
   assertx(tvIsPlausible(*valOut));
@@ -1390,7 +1390,7 @@ int64_t iter_next_ind(Iter* iter, Cell* valOut) {
   return helper(iter, valOut);
 }
 
-int64_t iter_next_key_ind(Iter* iter, Cell* valOut, Cell* keyOut) {
+int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
   TRACE(2, "iter_next_key_ind: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants());
   assertx(tvIsPlausible(*valOut));
@@ -1400,7 +1400,7 @@ int64_t iter_next_key_ind(Iter* iter, Cell* valOut, Cell* keyOut) {
   return helper(iter, valOut, keyOut);
 }
 
-int64_t liter_next_ind(Iter* iter, Cell* valOut, ArrayData* ad) {
+int64_t liter_next_ind(Iter* iter, TypedValue* valOut, ArrayData* ad) {
   TRACE(2, "liter_next_ind: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants(ad));
   assertx(tvIsPlausible(*valOut));
@@ -1410,8 +1410,8 @@ int64_t liter_next_ind(Iter* iter, Cell* valOut, ArrayData* ad) {
 }
 
 int64_t liter_next_key_ind(Iter* iter,
-                           Cell* valOut,
-                           Cell* keyOut,
+                           TypedValue* valOut,
+                           TypedValue* keyOut,
                            ArrayData* ad) {
   TRACE(2, "liter_next_key_ind: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants(ad));

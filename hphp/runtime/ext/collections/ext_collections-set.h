@@ -23,7 +23,7 @@ struct SetIterator;
  * any PHP-land class. That job is delegated to its c_-prefixed child classes.
  */
 struct BaseSet : HashCollection {
-  void addAllKeysOf(Cell container);
+  void addAllKeysOf(TypedValue container);
   void addAll(const Variant& t);
 
   void init(const Variant& t) {
@@ -37,7 +37,7 @@ protected:
 
   void addRaw(int64_t k);
   void addRaw(StringData* k);
-  void addRaw(Cell tv) {
+  void addRaw(TypedValue tv) {
     if (tv.m_type == KindOfInt64) {
       addRaw(tv.m_data.num);
     } else if (isStringType(tv.m_type)) {
@@ -54,7 +54,7 @@ public:
    */
   void add(int64_t k);
   void add(StringData* k);
-  void add(Cell tv) {
+  void add(TypedValue tv) {
     if (tv.m_type == KindOfInt64) {
       add(tv.m_data.num);
     } else if (isStringType(tv.m_type)) {

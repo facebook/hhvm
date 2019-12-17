@@ -829,7 +829,7 @@ struct FrameRestore : private VMRegAnchor {
     }
   }
  private:
-  Cell*   m_top;
+  TypedValue*   m_top;
   ActRec* m_fp;
   PC      m_pc;
 };
@@ -1183,7 +1183,7 @@ tv_rval Unit::lookupCns(const StringData* cnsName) {
     assertx(tv.m_data.pcnt != nullptr);
     auto const callback =
       reinterpret_cast<Native::ConstantCallback>(tv.m_data.pcnt);
-    const Cell* tvRet = callback().asTypedValue();
+    const TypedValue* tvRet = callback().asTypedValue();
     assertx(tvIsPlausible(*tvRet));
     if (LIKELY(tvRet->m_type != KindOfUninit)) {
       return tvRet;
@@ -1192,12 +1192,12 @@ tv_rval Unit::lookupCns(const StringData* cnsName) {
   return nullptr;
 }
 
-const Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
+const TypedValue* Unit::lookupPersistentCns(const StringData* cnsName) {
   auto const handle = lookupCnsHandle(cnsName);
   if (!rds::isHandleBound(handle) || !rds::isPersistentHandle(handle)) {
     return nullptr;
   }
-  auto const ret = rds::handleToPtr<Cell, rds::Mode::Persistent>(handle);
+  auto const ret = rds::handleToPtr<TypedValue, rds::Mode::Persistent>(handle);
   assertx(tvIsPlausible(*ret));
   return ret;
 }
@@ -1242,7 +1242,7 @@ void Unit::defCns(const StringData* cnsName, const TypedValue* value) {
 }
 
 bool Unit::defNativeConstantCallback(const StringData* cnsName,
-                                     Cell value) {
+                                     TypedValue value) {
   static const bool kServer = RuntimeOption::ServerExecutionMode();
   // Zend doesn't define the STD* streams in server mode so we don't either
   if (UNLIKELY(kServer &&

@@ -135,7 +135,7 @@ const EnumValues* EnumCache::loadEnumValues(const Class* klass,
     if (consts[i].cls != klass && !recurse) {
       continue;
     }
-    Cell value = consts[i].val;
+    TypedValue value = consts[i].val;
     // Handle dynamically set constants
     if (value.m_type == KindOfUninit) {
       persist = false;

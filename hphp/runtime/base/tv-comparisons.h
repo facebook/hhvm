@@ -35,17 +35,17 @@ bool tvSame(TypedValue, TypedValue);
 // Php's operator ==
 
 /*
- * Returns whether a Cell has the same value as an unpackaged type, in
+ * Returns whether a TypedValue has the same value as an unpackaged type, in
  * the sense of php's == operator.
  */
-bool tvEqual(Cell, bool);
-bool tvEqual(Cell, int);
-bool tvEqual(Cell, int64_t);
-bool tvEqual(Cell, double);
-bool tvEqual(Cell, const StringData*);
-bool tvEqual(Cell, const ArrayData*);
-bool tvEqual(Cell, const ObjectData*);
-bool tvEqual(Cell, const ResourceData*);
+bool tvEqual(TypedValue, bool);
+bool tvEqual(TypedValue, int);
+bool tvEqual(TypedValue, int64_t);
+bool tvEqual(TypedValue, double);
+bool tvEqual(TypedValue, const StringData*);
+bool tvEqual(TypedValue, const ArrayData*);
+bool tvEqual(TypedValue, const ObjectData*);
+bool tvEqual(TypedValue, const ResourceData*);
 
 /*
  * Returns whether two TypedValues have the same value, in the sense
@@ -57,17 +57,17 @@ bool tvEqual(TypedValue, TypedValue);
 // Php's operator <
 
 /*
- * Returns whether a Cell is less than an unpackaged type, in the
+ * Returns whether a TypedValue is less than an unpackaged type, in the
  * sense of php's < operator.
  */
-bool tvLess(Cell, bool);
-bool tvLess(Cell, int);
-bool tvLess(Cell, int64_t);
-bool tvLess(Cell, double);
-bool tvLess(Cell, const StringData*);
-bool tvLess(Cell, const ArrayData*);
-bool tvLess(Cell, const ObjectData*);
-bool tvLess(Cell, const ResourceData*);
+bool tvLess(TypedValue, bool);
+bool tvLess(TypedValue, int);
+bool tvLess(TypedValue, int64_t);
+bool tvLess(TypedValue, double);
+bool tvLess(TypedValue, const StringData*);
+bool tvLess(TypedValue, const ArrayData*);
+bool tvLess(TypedValue, const ObjectData*);
+bool tvLess(TypedValue, const ResourceData*);
 
 /*
  * Returns whether tv1 is less than tv2, as in php's < operator.
@@ -78,17 +78,17 @@ bool tvLess(TypedValue, TypedValue);
 // Php's operator >
 
 /*
- * Returns whether a Cell is greater than an unpackaged type, in the
+ * Returns whether a TypedValue is greater than an unpackaged type, in the
  * sense of php's > operator.
  */
-bool tvGreater(Cell, bool);
-bool tvGreater(Cell, int);
-bool tvGreater(Cell, int64_t);
-bool tvGreater(Cell, double);
-bool tvGreater(Cell, const StringData*);
-bool tvGreater(Cell, const ArrayData*);
-bool tvGreater(Cell, const ObjectData*);
-bool tvGreater(Cell, const ResourceData*);
+bool tvGreater(TypedValue, bool);
+bool tvGreater(TypedValue, int);
+bool tvGreater(TypedValue, int64_t);
+bool tvGreater(TypedValue, double);
+bool tvGreater(TypedValue, const StringData*);
+bool tvGreater(TypedValue, const ArrayData*);
+bool tvGreater(TypedValue, const ObjectData*);
+bool tvGreater(TypedValue, const ResourceData*);
 
 /*
  * Returns whether tv1 is greather than tv2, as in php's > operator.
@@ -105,8 +105,8 @@ bool tvGreater(TypedValue, TypedValue);
  *
  * These functions are necessary to handle those cases specially.
  */
-bool tvLessOrEqual(Cell, Cell);
-bool tvGreaterOrEqual(Cell, Cell);
+bool tvLessOrEqual(TypedValue, TypedValue);
+bool tvGreaterOrEqual(TypedValue, TypedValue);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -114,17 +114,17 @@ bool tvGreaterOrEqual(Cell, Cell);
 // Php's operator <=>
 
 /*
- * Returns a Cell's comparison against an unpackaged type, in the sense of php's
+ * Returns a TypedValue's comparison against an unpackaged type, in the sense of php's
  * <=> operator.
  */
-int64_t tvCompare(Cell, bool);
-int64_t tvCompare(Cell, int);
-int64_t tvCompare(Cell, int64_t);
-int64_t tvCompare(Cell, double);
-int64_t tvCompare(Cell, const StringData*);
-int64_t tvCompare(Cell, const ArrayData*);
-int64_t tvCompare(Cell, const ObjectData*);
-int64_t tvCompare(Cell, const ResourceData*);
+int64_t tvCompare(TypedValue, bool);
+int64_t tvCompare(TypedValue, int);
+int64_t tvCompare(TypedValue, int64_t);
+int64_t tvCompare(TypedValue, double);
+int64_t tvCompare(TypedValue, const StringData*);
+int64_t tvCompare(TypedValue, const ArrayData*);
+int64_t tvCompare(TypedValue, const ObjectData*);
+int64_t tvCompare(TypedValue, const ResourceData*);
 
 /*
  * Returns the result of tv1's comparison against tv2, as in php's <=> operator.

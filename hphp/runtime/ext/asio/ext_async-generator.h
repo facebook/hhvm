@@ -53,7 +53,7 @@ struct AsyncGenerator final : BaseGenerator {
   }
 
   c_StaticWaitHandle* yield(Offset suspendOffset,
-                            const Cell* key, Cell value);
+                            const TypedValue* key, TypedValue value);
   c_StaticWaitHandle* ret();
   c_StaticWaitHandle* fail(ObjectData* exception);
   void failCpp();

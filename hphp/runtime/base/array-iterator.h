@@ -156,7 +156,7 @@ struct ArrayIter {
   explicit ArrayIter(ObjectData* obj);
   ArrayIter(ObjectData* obj, NoInc);
   explicit ArrayIter(const Object& obj);
-  explicit ArrayIter(Cell);
+  explicit ArrayIter(TypedValue);
   explicit ArrayIter(const Variant& v);
 
   // Copy ctor
@@ -371,9 +371,9 @@ private:
   friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
                                     TypedValue*);
   template<bool Local>
-  friend int64_t iter_next_packed_pointer(Iter*, Cell*, ArrayData*);
+  friend int64_t iter_next_packed_pointer(Iter*, TypedValue*, ArrayData*);
   template<bool HasKey, bool Local>
-  friend int64_t iter_next_mixed_pointer(Iter*, Cell*, Cell*, ArrayData*);
+  friend int64_t iter_next_mixed_pointer(Iter*, TypedValue*, TypedValue*, ArrayData*);
 
   template <bool incRef = true>
   void arrInit(const ArrayData* arr);
@@ -381,7 +381,7 @@ private:
   template <bool incRef>
   void objInit(ObjectData* obj);
 
-  void tvInit(Cell);
+  void tvInit(TypedValue);
 
   void destruct();
 
@@ -729,7 +729,7 @@ struct alignas(16) Iter {
 
   // Returns true if the base is non-empty. Only used for non-local iterators.
   // For local iterators, use new_iter_array / new_iter_array_key below.
-  bool init(Cell* base);
+  bool init(TypedValue* base);
 
   // Returns true if there are more elems. Only used for non-local iterators.
   // For local iterators, use liter_next_ind / liter_next_key_ind below.
@@ -793,10 +793,10 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
 // from the next key-value pair of the base.
 //
 // For non-local iters, if these helpers return 0, they also dec-ref the base.
-NEVER_INLINE int64_t iter_next_ind(Iter* iter, Cell* valOut);
-NEVER_INLINE int64_t iter_next_key_ind(Iter* iter, Cell* valOut, Cell* keyOut);
-NEVER_INLINE int64_t liter_next_ind(Iter*, Cell*, ArrayData*);
-NEVER_INLINE int64_t liter_next_key_ind(Iter*, Cell*, Cell*, ArrayData*);
+NEVER_INLINE int64_t iter_next_ind(Iter* iter, TypedValue* valOut);
+NEVER_INLINE int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut);
+NEVER_INLINE int64_t liter_next_ind(Iter*, TypedValue*, ArrayData*);
+NEVER_INLINE int64_t liter_next_key_ind(Iter*, TypedValue*, TypedValue*, ArrayData*);
 
 //////////////////////////////////////////////////////////////////////
 

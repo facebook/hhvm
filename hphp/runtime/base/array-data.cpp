@@ -89,7 +89,7 @@ struct ScalarHash {
     }
     IterateKV(
       arr,
-      [&](Cell k, TypedValue v) {
+      [&](TypedValue k, TypedValue v) {
         assertx(!isRefcountedType(k.m_type) ||
                 (k.m_type == KindOfString && k.m_data.pstr->isStatic()));
         assertx(!isRefcountedType(v.m_type));
@@ -163,7 +163,7 @@ struct ScalarHash {
     ArrayIter iter2{ad2};
     IterateKV(
       ad1,
-      [&](Cell k, TypedValue v) {
+      [&](TypedValue k, TypedValue v) {
         if (!check(k, *iter2.first().asTypedValue()) ||
             !check(v, iter2.secondVal())) {
           equal = false;
@@ -364,7 +364,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(NvGetStrPos)
 
   /*
-   * Cell NvGetKey(const ArrayData*, ssize_t pos)
+   * TypedValue NvGetKey(const ArrayData*, ssize_t pos)
    *
    *   Look up the key for an array position.  `pos' must be a valid
    *   position for this array. This function must IncRef the key if needed.
@@ -372,7 +372,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(NvGetKey)
 
   /*
-   * ArrayData* SetInt(ArrayData*, int64_t key, Cell v)
+   * ArrayData* SetInt(ArrayData*, int64_t key, TypedValue v)
    *
    *   Set a value in the array for an integer key. SetInt() and SetIntMove()
    *   have copy/grow semantics; SetIntInPlace() may only escalate or grow.
@@ -382,7 +382,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(SetIntInPlace)
 
   /*
-   * ArrayData* SetStr(ArrayData*, StringData*, Cell v)
+   * ArrayData* SetStr(ArrayData*, StringData*, TypedValue v)
    *
    *   Set a value in the array for an string key. SetStr() and SetStrMove()
    *   have copy/grow semantics; SetStrInPlace() may only escalate or grow.
@@ -614,7 +614,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(CopyStatic)
 
   /*
-   * ArrayData* Append(ArrayData*, Cell v);
+   * ArrayData* Append(ArrayData*, TypedValue v);
    *
    *   Append a new value to the array, with the next available
    *   integer key.  If there is no next available integer key, no
@@ -661,7 +661,7 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Dequeue)
 
   /*
-   * ArrayData* Prepend(ArrayData*, Cell v)
+   * ArrayData* Prepend(ArrayData*, TypedValue v)
    *
    *   Insert `v' as the first element of the array.  Then renumber
    *   integer keys.  This function has copy/grow semantics.  `v' must
@@ -771,7 +771,7 @@ DEBUG_ONLY void assertForCreate(TypedValue name) {
 // access converts them to integers.  non-int-string assertions should go
 // upstream of the ArrayData api.
 
-bool ArrayData::IsValidKey(Cell k) {
+bool ArrayData::IsValidKey(TypedValue k) {
   return isIntType(k.m_type) ||
         (isStringType(k.m_type) && IsValidKey(k.m_data.pstr));
 }
@@ -832,7 +832,7 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
     bool equal = true;
     IterateKV(
       ad1,
-      [&](Cell k, TypedValue v) {
+      [&](TypedValue k, TypedValue v) {
         if (!ad2->exists(k) || !tvEqual(v, ad2->get(k).tv())) {
           equal = false;
           return true;
@@ -868,7 +868,7 @@ int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
   int result = 0;
   IterateKV(
     ad1,
-    [&](Cell k, TypedValue v) {
+    [&](TypedValue k, TypedValue v) {
       if (!ad2->exists(k)) {
         result = 1;
         return true;

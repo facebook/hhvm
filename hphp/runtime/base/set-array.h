@@ -111,9 +111,9 @@ struct SetArrayElm {
   }
 
   ALWAYS_INLINE
-  Cell getKey() const {
+  TypedValue getKey() const {
     assertx(!isInvalid());
-    Cell out;
+    TypedValue out;
     tvDup(tv, out);
     return out;
   }
@@ -234,7 +234,7 @@ private:
 // Iteration
 
 private:
-  Cell getElm(ssize_t ei) const;
+  TypedValue getElm(ssize_t ei) const;
 
 public:
   const TypedValue* tvOfPos(uint32_t) const;
@@ -421,10 +421,10 @@ public:
   static constexpr auto LvalSilentInt = &LvalInt;
   static constexpr auto LvalSilentStr = &LvalStr;
   static arr_lval LvalForceNew(ArrayData*, bool);
-  static ArrayData* SetInt(ArrayData*, int64_t, Cell);
+  static ArrayData* SetInt(ArrayData*, int64_t, TypedValue);
   static constexpr auto SetIntMove = &SetInt;
   static constexpr auto SetIntInPlace = &SetInt;
-  static ArrayData* SetStr(ArrayData*, StringData*, Cell);
+  static ArrayData* SetStr(ArrayData*, StringData*, TypedValue);
   static constexpr auto SetStrMove = &SetStr;
   static constexpr auto SetStrInPlace = &SetStr;
   static ArrayData* RemoveInt(ArrayData*, int64_t);
@@ -433,13 +433,13 @@ public:
   static ArrayData* RemoveStrInPlace(ArrayData*, const StringData*);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
-  static ArrayData* Append(ArrayData*, Cell);
-  static ArrayData* AppendInPlace(ArrayData*, Cell);
+  static ArrayData* Append(ArrayData*, TypedValue);
+  static ArrayData* AppendInPlace(ArrayData*, TypedValue);
   static ArrayData* PlusEq(ArrayData*, const ArrayData*);
   static ArrayData* Merge(ArrayData*, const ArrayData*);
   static ArrayData* Pop(ArrayData*, Variant&);
   static ArrayData* Dequeue(ArrayData*, Variant&);
-  static ArrayData* Prepend(ArrayData*, Cell);
+  static ArrayData* Prepend(ArrayData*, TypedValue);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData*);
@@ -460,7 +460,7 @@ public:
 private:
   template<class K>
   static ArrayData* RemoveImpl(ArrayData*, K key, bool, SetArrayElm::hash_t);
-  static ArrayData* AppendImpl(ArrayData*, Cell, bool);
+  static ArrayData* AppendImpl(ArrayData*, TypedValue, bool);
 
 private:
   struct Initializer;

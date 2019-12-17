@@ -145,7 +145,7 @@ ArrayData* deepCopyArray(ArrayData* arr) {
   Array ar(arr);
   IterateKV(
     arr,
-    [&](Cell k, TypedValue v) {
+    [&](TypedValue k, TypedValue v) {
       if (!isRefcountedType(v.m_type)) return false;
       Variant value{tvAsCVarRef(&v)};
       deepCopy(value.asTypedValue());
@@ -163,7 +163,7 @@ ArrayData* deepCopyVecArray(ArrayData* arr) {
   Array ar(arr);
   PackedArray::IterateKV(
     arr,
-    [&](Cell k, TypedValue v) {
+    [&](TypedValue k, TypedValue v) {
       if (!isRefcountedType(v.m_type)) return false;
       Variant value{tvAsCVarRef(&v)};
       deepCopy(value.asTypedValue());
@@ -182,7 +182,7 @@ ArrayData* deepCopyDict(ArrayData* arr) {
   Array ar(arr);
   MixedArray::IterateKV(
     MixedArray::asMixed(arr),
-    [&](Cell k, TypedValue v) {
+    [&](TypedValue k, TypedValue v) {
       if (!isRefcountedType(v.m_type)) return false;
       Variant value{tvAsCVarRef(&v)};
       deepCopy(value.asTypedValue());

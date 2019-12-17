@@ -395,7 +395,7 @@ void SetArray::erase(int32_t pos) {
 
 //////////////////////////////////////////////////////////////////////
 
-Cell SetArray::getElm(ssize_t ei) const {
+TypedValue SetArray::getElm(ssize_t ei) const {
   assertx(0 <= ei && ei < m_used);
   return data()[ei].getKey();
 }
@@ -655,13 +655,13 @@ arr_lval SetArray::LvalForceNew(ArrayData*, bool) {
   );
 }
 
-ArrayData* SetArray::SetInt(ArrayData*, int64_t, Cell) {
+ArrayData* SetArray::SetInt(ArrayData*, int64_t, TypedValue) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (set int)"
   );
 }
 
-ArrayData* SetArray::SetStr(ArrayData*, StringData*, Cell) {
+ArrayData* SetArray::SetStr(ArrayData*, StringData*, TypedValue) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (set string)"
   );
@@ -716,7 +716,7 @@ ArrayData* SetArray::CopyStatic(const ArrayData* ad) {
   return CopySet(*a, AllocMode::Static);
 }
 
-ArrayData* SetArray::AppendImpl(ArrayData* ad, Cell v, bool copy) {
+ArrayData* SetArray::AppendImpl(ArrayData* ad, TypedValue v, bool copy) {
   if (isIntType(v.m_type)) {
     auto a = asSet(ad)->prepareForInsert(copy);
     a->insert(v.m_data.num);
@@ -730,11 +730,11 @@ ArrayData* SetArray::AppendImpl(ArrayData* ad, Cell v, bool copy) {
   }
 }
 
-ArrayData* SetArray::Append(ArrayData* ad, Cell v) {
+ArrayData* SetArray::Append(ArrayData* ad, TypedValue v) {
   return AppendImpl(ad, v, ad->cowCheck());
 }
 
-ArrayData* SetArray::AppendInPlace(ArrayData* ad, Cell v) {
+ArrayData* SetArray::AppendInPlace(ArrayData* ad, TypedValue v) {
   return AppendImpl(ad, v, false);
 }
 
@@ -795,7 +795,7 @@ ArrayData* SetArray::Dequeue(ArrayData* ad, Variant& value) {
   return a;
 }
 
-ArrayData* SetArray::Prepend(ArrayData* ad, Cell v) {
+ArrayData* SetArray::Prepend(ArrayData* ad, TypedValue v) {
   auto a = asSet(ad);
   if (a->cowCheck()) a = a->copySet();
   Elm e;

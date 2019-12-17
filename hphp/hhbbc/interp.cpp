@@ -1220,7 +1220,7 @@ void in(ISS& env, const bc::CnsE& op) {
     // There's no entry for this constant in the index. It must be
     // the first iteration, so we'll add a dummy entry to make sure
     // there /is/ something next time around.
-    Cell val;
+    TypedValue val;
     val.m_type = kReadOnlyConstant;
     env.collect.cnsMap.emplace(op.str1, val);
     t = TInitCell;
@@ -1723,7 +1723,7 @@ void in(ISS& env, const bc::Eq&) {
     discard(env, 2);
     return push(env, TTrue);
   }
-  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return tvEqual(c1, c2); });
+  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvEqual(c1, c2); });
 }
 void in(ISS& env, const bc::Neq&) {
   auto rs = resolveSame<false>(env);
@@ -1732,23 +1732,23 @@ void in(ISS& env, const bc::Neq&) {
     discard(env, 2);
     return push(env, TFalse);
   }
-  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return !tvEqual(c1, c2); });
+  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return !tvEqual(c1, c2); });
 }
 void in(ISS& env, const bc::Lt&) {
-  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return tvLess(c1, c2); });
+  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvLess(c1, c2); });
 }
 void in(ISS& env, const bc::Gt&) {
-  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return tvGreater(c1, c2); });
+  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) { return tvGreater(c1, c2); });
 }
 void in(ISS& env, const bc::Lte&) { binOpBoolImpl(env, tvLessOrEqual); }
 void in(ISS& env, const bc::Gte&) { binOpBoolImpl(env, tvGreaterOrEqual); }
 
 void in(ISS& env, const bc::Cmp&) {
-  binOpInt64Impl(env, [&] (Cell c1, Cell c2) { return tvCompare(c1, c2); });
+  binOpInt64Impl(env, [&] (TypedValue c1, TypedValue c2) { return tvCompare(c1, c2); });
 }
 
 void in(ISS& env, const bc::Xor&) {
-  binOpBoolImpl(env, [&] (Cell c1, Cell c2) {
+  binOpBoolImpl(env, [&] (TypedValue c1, TypedValue c2) {
     return tvToBool(c1) ^ tvToBool(c2);
   });
 }
@@ -3621,8 +3621,8 @@ void in(ISS& env, const bc::SetOpL& op) {
     // Can't constprop at this eval_cell, because of the effects on
     // locals.
     auto resultTy = eval_cell([&] {
-      Cell c = *locVal;
-      Cell rhs = *v1;
+      TypedValue c = *locVal;
+      TypedValue rhs = *v1;
       setopBody(&c, op.subop2, &rhs);
       return c;
     });
@@ -5715,7 +5715,7 @@ void interpStep(ISS& env, const Bytecode& bc) {
     if (!options.ConstantProp || !env.flags.canConstProp) return false;
 
     auto const numPushed   = bc.numPush();
-    TinyVector<Cell> cells;
+    TinyVector<TypedValue> cells;
 
     auto i = size_t{0};
     while (i < numPushed) {

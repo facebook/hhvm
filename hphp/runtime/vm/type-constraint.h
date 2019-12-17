@@ -343,7 +343,7 @@ struct TypeConstraint {
    * the initial value is chosen to satisfy the type-constraint, but this isn't
    * always possible (for example, for objects).
    */
-  Cell defaultValue() const {
+  TypedValue defaultValue() const {
     // Nullable type-constraints should always default to null, as Hack
     // guarantees this.
     if (!isCheckable() || isNullable()) return make_tv<KindOfNull>();

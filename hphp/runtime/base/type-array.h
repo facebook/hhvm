@@ -250,9 +250,9 @@ public:
    * Converts `k' to a valid key for this array kind.
    */
   template <IntishCast IC = IntishCast::None>
-  Cell convertKey(Cell k) const;
+  TypedValue convertKey(TypedValue k) const;
   template <IntishCast IC = IntishCast::None>
-  Cell convertKey(const Variant& k) const;
+  TypedValue convertKey(const Variant& k) const;
 
   /*
    * Should int-like string keys be implicitly converted to integers before they
@@ -412,7 +412,7 @@ public:
   // Element rval/lval.
 
 #define FOR_EACH_KEY_TYPE(...)    \
-  C(Cell, __VA_ARGS__)            \
+  C(TypedValue, __VA_ARGS__)            \
   I(int, __VA_ARGS__)             \
   I(int64_t, __VA_ARGS__)         \
   V(const String&, __VA_ARGS__)   \
@@ -422,7 +422,7 @@ public:
   /*
    * Get a refcounted copy of the element at `key'.
    */
-  Variant operator[](Cell key) const;
+  Variant operator[](TypedValue key) const;
   Variant operator[](int key) const;
   Variant operator[](int64_t key) const;
   Variant operator[](const String& key) const;

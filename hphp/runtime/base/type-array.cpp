@@ -725,7 +725,7 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
 
 template<typename Fn, typename... Args> ALWAYS_INLINE
 decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
-                    Cell key, Args&&... args) {
+                    TypedValue key, Args&&... args) {
   if (isIntType(key.m_type)) {
     return fn(key.m_data.num, std::forward<Args>(args)...);
   }
@@ -753,7 +753,7 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
   }
 
 #define FOR_EACH_KEY_TYPE(...)    \
-  C(Cell, __VA_ARGS__)            \
+  C(TypedValue, __VA_ARGS__)            \
   I(int, __VA_ARGS__)             \
   I(int64_t, __VA_ARGS__)         \
   V(const String&, __VA_ARGS__)   \

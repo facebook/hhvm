@@ -491,7 +491,7 @@ void emitGenericsMismatchCheck(IRGS& env, SSATmp* callFlags) {
           func->getReifiedGenericsInfo().m_typeParamInfo;
         if (genericsArr->size() == genericsDef.size()) {
           bool match = true;
-          IterateKV(genericsArr, [&](Cell k, TypedValue v) {
+          IterateKV(genericsArr, [&](TypedValue k, TypedValue v) {
             assertx(tvIsInt(k) && tvIsArrayLike(v));
             auto const idx = k.m_data.num;
             auto const ts = v.m_data.parr;

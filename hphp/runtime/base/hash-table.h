@@ -243,7 +243,7 @@ struct HashTable : HashTableCommon {
     return NvGetStr(ad, k);
   }
 
-  static Cell NvGetKey(const ArrayData* ad, ssize_t pos);
+  static TypedValue NvGetKey(const ArrayData* ad, ssize_t pos);
 
   /////////////////////////////////////////////////////////////////////////////
   // findForNewInsertImpl

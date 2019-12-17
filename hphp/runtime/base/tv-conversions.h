@@ -97,17 +97,17 @@ Array tvCastToArrayLike(TypedValue tv);
 Object tvCastToObject(TypedValue tv);
 
 StringData* tvCastToStringData(TypedValue tv);
-StringData* tvCastToStringData(Cell c);
+StringData* tvCastToStringData(TypedValue c);
 template <IntishCast IC /* = IntishCast::None */>
 ArrayData* tvCastToArrayLikeData(TypedValue tv);
 ObjectData* tvCastToObjectData(TypedValue tv);
 
 /*
- * Convert a cell to various raw data types, without changing the Cell.
+ * Convert a cell to various raw data types, without changing the TypedValue.
  */
-bool tvToBool(Cell);
-int64_t tvToInt(Cell);
-double tvToDouble(Cell);
+bool tvToBool(TypedValue);
+int64_t tvToInt(TypedValue);
+double tvToDouble(TypedValue);
 
 /*
  * Convert `tv' or `cell' to a valid array key for `ad', or throw an exception.

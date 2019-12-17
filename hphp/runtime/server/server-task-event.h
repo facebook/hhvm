@@ -50,7 +50,7 @@ struct ServerTaskEvent final : AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) final {
+  void unserialize(TypedValue& result) final {
     if (UNLIKELY(!m_job)) {
       SystemLib::throwInvalidOperationExceptionObject(
         "The async operation was incorrectly initialized.");

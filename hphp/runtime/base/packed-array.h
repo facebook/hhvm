@@ -82,13 +82,13 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
     assertx(ad->isPacked());
     return NvTryGetInt(ad, k);
   }
-  static Cell NvGetKey(const ArrayData*, ssize_t pos);
-  static ArrayData* SetInt(ArrayData*, int64_t k, Cell v);
-  static ArrayData* SetIntMove(ArrayData*, int64_t k, Cell v);
-  static ArrayData* SetIntInPlace(ArrayData*, int64_t k, Cell v);
-  static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);
-  static ArrayData* SetStrMove(ArrayData*, StringData* k, Cell v);
-  static ArrayData* SetStrInPlace(ArrayData*, StringData* k, Cell v);
+  static TypedValue NvGetKey(const ArrayData*, ssize_t pos);
+  static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetIntInPlace(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
+  static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
+  static ArrayData* SetStrInPlace(ArrayData*, StringData* k, TypedValue v);
   static size_t Vsize(const ArrayData*);
   static tv_rval RvalPos(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) {
@@ -119,13 +119,13 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool Uksort(ArrayData*, const Variant&);
   static bool Usort(ArrayData*, const Variant&);
   static bool Uasort(ArrayData*, const Variant&);
-  static ArrayData* Append(ArrayData*, Cell v);
-  static ArrayData* AppendInPlace(ArrayData*, Cell v);
+  static ArrayData* Append(ArrayData*, TypedValue v);
+  static ArrayData* AppendInPlace(ArrayData*, TypedValue v);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
-  static ArrayData* Prepend(ArrayData*, Cell v);
+  static ArrayData* Prepend(ArrayData*, TypedValue v);
   static ArrayData* ToPHPArray(ArrayData*, bool);
   static constexpr auto ToPHPArrayIntishCast = &ToPHPArray;
   static ArrayData* ToVArray(ArrayData*, bool);
@@ -142,10 +142,10 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
 
   static tv_rval NvTryGetIntVec(const ArrayData*, int64_t);
   static tv_rval NvTryGetStrVec(const ArrayData*, const StringData*);
-  static ArrayData* SetIntVec(ArrayData*, int64_t, Cell);
-  static ArrayData* SetIntMoveVec(ArrayData*, int64_t, Cell);
-  static ArrayData* SetIntInPlaceVec(ArrayData*, int64_t, Cell);
-  static ArrayData* SetStrVec(ArrayData*, StringData*, Cell);
+  static ArrayData* SetIntVec(ArrayData*, int64_t, TypedValue);
+  static ArrayData* SetIntMoveVec(ArrayData*, int64_t, TypedValue);
+  static ArrayData* SetIntInPlaceVec(ArrayData*, int64_t, TypedValue);
+  static ArrayData* SetStrVec(ArrayData*, StringData*, TypedValue);
   static constexpr auto SetStrMoveVec = &SetStrVec;
   static constexpr auto SetStrInPlaceVec = &SetStrVec;
   static ArrayData* RemoveIntVec(ArrayData*, int64_t);
@@ -216,7 +216,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static tv_lval LvalUncheckedInt(ArrayData*, int64_t);
 
   // Fast path for SetIntMove / SetIntMoveVec if the key is in bounds.
-  static ArrayData* SetIntMoveRaw(ArrayData*, int64_t, Cell);
+  static ArrayData* SetIntMoveRaw(ArrayData*, int64_t, TypedValue);
 
   /////////////////////////////////////////////////////////////////////
 
@@ -247,16 +247,16 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
    *
    * This function takes ownership of the Cells in `values'.
    */
-  static ArrayData* MakePacked(uint32_t size, const Cell* values);
-  static ArrayData* MakeVArray(uint32_t size, const Cell* values);
-  static ArrayData* MakeVec(uint32_t size, const Cell* values);
+  static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
+  static ArrayData* MakeVArray(uint32_t size, const TypedValue* values);
+  static ArrayData* MakeVec(uint32_t size, const TypedValue* values);
 
   /*
    * Like MakePacked, but with `values' array in natural (not reversed) order.
    */
-  static ArrayData* MakePackedNatural(uint32_t size, const Cell* values);
-  static ArrayData* MakeVArrayNatural(uint32_t size, const Cell* values);
-  static ArrayData* MakeVecNatural(uint32_t size, const Cell* values);
+  static ArrayData* MakePackedNatural(uint32_t size, const TypedValue* values);
+  static ArrayData* MakeVArrayNatural(uint32_t size, const TypedValue* values);
+  static ArrayData* MakeVecNatural(uint32_t size, const TypedValue* values);
 
   static ArrayData* MakeUninitialized(uint32_t size);
   static ArrayData* MakeUninitializedVArray(uint32_t size);
@@ -312,7 +312,7 @@ private:
   static ArrayData* MakeReserveImpl(uint32_t, HeaderKind, ArrayData::DVArray);
 
   template<bool reverse>
-  static ArrayData* MakePackedImpl(uint32_t, const Cell*,
+  static ArrayData* MakePackedImpl(uint32_t, const TypedValue*,
                                    HeaderKind, ArrayData::DVArray);
 
   static void CopyPackedHelper(const ArrayData* adIn, ArrayData* ad);
@@ -323,7 +323,7 @@ private:
   static ArrayData* RemoveImpl(ArrayData*, int64_t, bool);
   static ArrayData* RemoveImplVec(ArrayData*, int64_t, bool);
 
-  static ArrayData* AppendImpl(ArrayData*, Cell v, bool copy);
+  static ArrayData* AppendImpl(ArrayData*, TypedValue v, bool copy);
 
   struct VecInitializer;
   static VecInitializer s_vec_initializer;

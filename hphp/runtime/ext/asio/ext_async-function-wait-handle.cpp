@@ -153,7 +153,7 @@ void c_AsyncFunctionWaitHandle::await(Offset suspendOffset,
   m_children[0].setChild(child.detach());
 }
 
-void c_AsyncFunctionWaitHandle::ret(Cell& result) {
+void c_AsyncFunctionWaitHandle::ret(TypedValue& result) {
   assertx(isRunning());
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);

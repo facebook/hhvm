@@ -301,7 +301,7 @@ static void HHVM_METHOD(
     const Array& attrs) {
   auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
 
-  IterateKV(attrs.get(), [&](Cell k, TypedValue v) {
+  IterateKV(attrs.get(), [&](TypedValue k, TypedValue v) {
     data->m_conn_opts.setConnectionAttribute(
       tvCastToString(k).toCppString(),
       tvCastToString(v).toCppString()
@@ -442,7 +442,7 @@ Object HHVM_STATIC_METHOD(
 static AsyncMysqlConnection::AttributeMap transformAttributes(
     const Array& attributes) {
   AsyncMysqlConnection::AttributeMap cppAttributes;
-  IterateKV(attributes.get(), [&](Cell k, TypedValue v) {
+  IterateKV(attributes.get(), [&](TypedValue k, TypedValue v) {
     cppAttributes[tvCastToString(k).toCppString()] =
         tvCastToString(v).toCppString();
   });
@@ -1402,7 +1402,7 @@ void throwAsyncMysqlQueryException(const char* exception_type,
 
 }
 
-void AsyncMysqlConnectEvent::unserialize(Cell& result) {
+void AsyncMysqlConnectEvent::unserialize(TypedValue& result) {
   if (m_op->ok()) {
     auto ret = AsyncMysqlConnection::newInstance(
         m_op->releaseConnection(), m_op, std::move(m_clientStats));
@@ -1414,7 +1414,7 @@ void AsyncMysqlConnectEvent::unserialize(Cell& result) {
   }
 }
 
-void AsyncMysqlQueryEvent::unserialize(Cell& result) {
+void AsyncMysqlQueryEvent::unserialize(TypedValue& result) {
   // Retrieve the original conn and return the underlying connection
   // to it.
   assertx(getPrivData()->instanceof(AsyncMysqlConnection::getClass()));
@@ -1435,7 +1435,7 @@ void AsyncMysqlQueryEvent::unserialize(Cell& result) {
   }
 }
 
-void AsyncMysqlMultiQueryEvent::unserialize(Cell& result) {
+void AsyncMysqlMultiQueryEvent::unserialize(TypedValue& result) {
   // Same as unserialize from AsyncMysqlQueryEvent but the result is a
   // vector of query results
   assertx(getPrivData()->instanceof(AsyncMysqlConnection::getClass()));
@@ -1454,7 +1454,7 @@ void AsyncMysqlMultiQueryEvent::unserialize(Cell& result) {
   }
 }
 
-void AsyncMysqlConnectAndMultiQueryEvent::unserialize(Cell& result) {
+void AsyncMysqlConnectAndMultiQueryEvent::unserialize(TypedValue& result) {
   if (!m_connect_op->ok()) {
     throwAsyncMysqlException("AsyncMysqlConnectException", m_connect_op,
                              std::move(m_clientStats));

@@ -72,7 +72,7 @@ static bool read_all_post_data(Transport *transport,
 static void CopyParams(Array& dest, const Array& src) {
   IterateKVNoInc(
     src.get(),
-    [&](Cell k, TypedValue v) {
+    [&](TypedValue k, TypedValue v) {
       const auto arraykey =
         dest.convertKey<IntishCast::Cast>(k);
       dest.set(arraykey, v, true);

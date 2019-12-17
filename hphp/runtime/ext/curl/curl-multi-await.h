@@ -14,7 +14,7 @@ struct CurlMultiAwait : AsioExternalThreadEvent {
   CurlMultiAwait(req::ptr<CurlMultiResource> multi, double timeout);
   ~CurlMultiAwait();
 
-  void unserialize(Cell& c) override;
+  void unserialize(TypedValue& c) override;
 
  private:
   friend struct CurlEventHandler;

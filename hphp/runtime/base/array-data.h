@@ -340,7 +340,7 @@ public:
   /*
    * ensure a circular self-reference is not being created
    */
-  bool notCyclic(Cell v) const;
+  bool notCyclic(TypedValue v) const;
 
   /*
    * Should int-like string keys be implicitly converted to integers before
@@ -366,7 +366,7 @@ public:
    */
   bool exists(int64_t k) const;
   bool exists(const StringData* k) const;
-  bool exists(Cell k) const;
+  bool exists(TypedValue k) const;
   bool exists(const String& k) const;
   bool exists(const Variant& k) const;
 
@@ -375,7 +375,7 @@ public:
    */
   arr_lval lval(int64_t k, bool copy);
   arr_lval lval(StringData* k, bool copy);
-  arr_lval lval(Cell k, bool copy);
+  arr_lval lval(TypedValue k, bool copy);
   arr_lval lval(const String& k, bool copy);
   arr_lval lval(const Variant& k, bool copy);
 
@@ -385,7 +385,7 @@ public:
    */
   arr_lval lvalSilent(int64_t k, bool copy);
   arr_lval lvalSilent(StringData* k, bool copy);
-  arr_lval lvalSilent(Cell k, bool copy);
+  arr_lval lvalSilent(TypedValue k, bool copy);
   arr_lval lvalSilent(const String& k, bool copy);
   arr_lval lvalSilent(const Variant& k, bool copy);
 
@@ -427,7 +427,7 @@ public:
    */
   TypedValue at(int64_t k) const;
   TypedValue at(const StringData* k) const;
-  TypedValue at(Cell k) const;
+  TypedValue at(TypedValue k) const;
 
   /*
    * Get the internal position for element with key `k', if it exists.
@@ -445,7 +445,7 @@ public:
    * @requires: `pos' refers to a valid array element.
    */
   TypedValue atPos(ssize_t pos) const;
-  Cell nvGetKey(ssize_t pos) const;
+  TypedValue nvGetKey(ssize_t pos) const;
 
   /*
    * Variant wrappers around atPos() and nvGetKey().
@@ -460,7 +460,7 @@ public:
    * resultant rval !has_val(), we raise a notice and return a dummy rval
    * instead.
    */
-  tv_rval get(Cell k, bool error = false) const;
+  tv_rval get(TypedValue k, bool error = false) const;
   tv_rval get(int64_t k, bool error = false) const;
   tv_rval get(const StringData* k, bool error = false) const;
   tv_rval get(const String& k, bool error = false) const;
@@ -482,16 +482,16 @@ public:
    * These methods return `this' if copy/escalation are not needed, or a
    * copied/escalated array data if they are.
    */
-  ArrayData* set(int64_t k, Cell v);
-  ArrayData* set(StringData* k, Cell v);
-  ArrayData* set(Cell k, Cell v);
-  ArrayData* set(const String& k, Cell v);
-  ArrayData* setInPlace(int64_t k, Cell v);
-  ArrayData* setInPlace(StringData* k, Cell v);
-  ArrayData* setInPlace(Cell k, Cell v);
-  ArrayData* setInPlace(const String& k, Cell v);
-  ArrayData* setMove(int64_t k, Cell v);
-  ArrayData* setMove(StringData* k, Cell v);
+  ArrayData* set(int64_t k, TypedValue v);
+  ArrayData* set(StringData* k, TypedValue v);
+  ArrayData* set(TypedValue k, TypedValue v);
+  ArrayData* set(const String& k, TypedValue v);
+  ArrayData* setInPlace(int64_t k, TypedValue v);
+  ArrayData* setInPlace(StringData* k, TypedValue v);
+  ArrayData* setInPlace(TypedValue k, TypedValue v);
+  ArrayData* setInPlace(const String& k, TypedValue v);
+  ArrayData* setMove(int64_t k, TypedValue v);
+  ArrayData* setMove(StringData* k, TypedValue v);
 
   ArrayData* set(int64_t k, const Variant& v);
   ArrayData* set(StringData* k, const Variant& v);
@@ -501,9 +501,9 @@ public:
   ArrayData* setInPlace(const String& k, const Variant& v);
   ArrayData* setInPlace(const Variant& k, const Variant& v);
 
-  ArrayData* set(const StringData*, Cell) = delete;
+  ArrayData* set(const StringData*, TypedValue) = delete;
   ArrayData* set(const StringData*, const Variant&) = delete;
-  ArrayData* setInPlace(const StringData*, Cell) = delete;
+  ArrayData* setInPlace(const StringData*, TypedValue) = delete;
   ArrayData* setInPlace(const StringData*, const Variant&) = delete;
 
   /*
@@ -515,7 +515,7 @@ public:
    */
   ArrayData* remove(int64_t k);
   ArrayData* remove(const StringData* k);
-  ArrayData* remove(Cell k);
+  ArrayData* remove(TypedValue k);
   ArrayData* remove(const String& k);
   ArrayData* remove(const Variant& k);
   ArrayData* removeInPlace(int64_t k);
@@ -528,8 +528,8 @@ public:
    * Return `this' if copy/escalation are not needed, or a copied/escalated
    * array data.
    */
-  ArrayData* append(Cell v);
-  ArrayData* appendInPlace(Cell v);
+  ArrayData* append(TypedValue v);
+  ArrayData* appendInPlace(TypedValue v);
 
   /////////////////////////////////////////////////////////////////////////////
   // Iteration.
@@ -651,7 +651,7 @@ public:
    * Return `this' if copy/escalation are not needed, or a copied/escalated
    * array data.
    */
-  ArrayData* prepend(Cell v);
+  ArrayData* prepend(TypedValue v);
 
   /*
    * Comparisons.
@@ -785,7 +785,7 @@ protected:
   /*
    * Is `k' of an arraykey type (i.e., int or string)?
    */
-  static bool IsValidKey(Cell k);
+  static bool IsValidKey(TypedValue k);
   static bool IsValidKey(const Variant& k);
   static bool IsValidKey(const String& k);
   static bool IsValidKey(const StringData* k);
@@ -892,13 +892,13 @@ struct ArrayFunctions {
   tv_rval (*nvTryGetStr[NK])(const ArrayData*, const StringData* k);
   ssize_t (*nvGetIntPos[NK])(const ArrayData*, int64_t k);
   ssize_t (*nvGetStrPos[NK])(const ArrayData*, const StringData* k);
-  Cell (*nvGetKey[NK])(const ArrayData*, ssize_t pos);
-  ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v);
-  ArrayData* (*setIntMove[NK])(ArrayData*, int64_t k, Cell v);
-  ArrayData* (*setIntInPlace[NK])(ArrayData*, int64_t k, Cell v);
-  ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v);
-  ArrayData* (*setStrMove[NK])(ArrayData*, StringData* k, Cell v);
-  ArrayData* (*setStrInPlace[NK])(ArrayData*, StringData* k, Cell v);
+  TypedValue (*nvGetKey[NK])(const ArrayData*, ssize_t pos);
+  ArrayData* (*setInt[NK])(ArrayData*, int64_t k, TypedValue v);
+  ArrayData* (*setIntMove[NK])(ArrayData*, int64_t k, TypedValue v);
+  ArrayData* (*setIntInPlace[NK])(ArrayData*, int64_t k, TypedValue v);
+  ArrayData* (*setStr[NK])(ArrayData*, StringData* k, TypedValue v);
+  ArrayData* (*setStrMove[NK])(ArrayData*, StringData* k, TypedValue v);
+  ArrayData* (*setStrInPlace[NK])(ArrayData*, StringData* k, TypedValue v);
   size_t (*vsize[NK])(const ArrayData*);
   tv_rval (*nvGetPos[NK])(const ArrayData*, ssize_t pos);
   bool (*isVectorData[NK])(const ArrayData*);
@@ -927,13 +927,13 @@ struct ArrayFunctions {
   bool (*uasort[NK])(ArrayData* ad, const Variant& cmp_function);
   ArrayData* (*copy[NK])(const ArrayData*);
   ArrayData* (*copyStatic[NK])(const ArrayData*);
-  ArrayData* (*append[NK])(ArrayData*, Cell v);
-  ArrayData* (*appendInPlace[NK])(ArrayData*, Cell v);
+  ArrayData* (*append[NK])(ArrayData*, TypedValue v);
+  ArrayData* (*appendInPlace[NK])(ArrayData*, TypedValue v);
   ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   ArrayData* (*dequeue[NK])(ArrayData*, Variant& value);
-  ArrayData* (*prepend[NK])(ArrayData*, Cell v);
+  ArrayData* (*prepend[NK])(ArrayData*, TypedValue v);
   void (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);

@@ -270,7 +270,7 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     auto const stackTopOff = v.makeReg();
     auto const stackTopPtr = v.makeReg();
     auto const numToPack = v.makeReg();
-    assertx(sizeof(Cell) == (1 << 4));
+    assertx(sizeof(TypedValue) == (1 << 4));
     v << shlqi{4, numArgs, stackTopOff, v.makeReg()};
     v << subq{stackTopOff, rvmsp(), stackTopPtr, v.makeReg()};
     v << subl{numNonVariadicParams, numArgs, numToPack, v.makeReg()};
@@ -301,7 +301,7 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     // Figure out where to store the packed array.
     auto const unpackCellOff = v.makeReg();
     auto const unpackCellPtr = v.makeReg();
-    assertx(sizeof(Cell) == (1 << 4));
+    assertx(sizeof(TypedValue) == (1 << 4));
     v << shlqi{4, numNewArgs, unpackCellOff, v.makeReg()};
     v << subq{unpackCellOff, rvmsp(), unpackCellPtr, v.makeReg()};
 
@@ -314,8 +314,8 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
 
     // Move generics to the correct place.
     auto const generics = v.makeReg();
-    v << loadups{stackTopPtr[-int32_t(sizeof(Cell))], generics};
-    v << storeups{generics, unpackCellPtr[-int32_t(sizeof(Cell))]};
+    v << loadups{stackTopPtr[-int32_t(sizeof(TypedValue))], generics};
+    v << storeups{generics, unpackCellPtr[-int32_t(sizeof(TypedValue))]};
 
     // Restore all inputs.
     v << copy{numNewArgs, r_php_call_num_args()};

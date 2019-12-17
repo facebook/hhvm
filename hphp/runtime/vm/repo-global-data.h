@@ -191,7 +191,7 @@ struct Repo::GlobalData {
 
   std::vector<const StringData*> APCProfile;
 
-  std::vector<std::pair<std::string,Cell>> ConstantFunctions;
+  std::vector<std::pair<std::string,TypedValue>> ConstantFunctions;
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(InitialNamedEntityTableSize)

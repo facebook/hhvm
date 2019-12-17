@@ -67,12 +67,12 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
     return ArrayCommon::ReturnInvalidIndex(ad);
   }
 
-  static Cell NvGetKey(const ArrayData*, ssize_t pos);
-  static ArrayData* SetInt(ArrayData*, int64_t k, Cell v);
-  static ArrayData* SetIntMove(ArrayData*, int64_t k, Cell v);
+  static TypedValue NvGetKey(const ArrayData*, ssize_t pos);
+  static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static constexpr auto SetIntInPlace = &SetInt;
-  static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);
-  static ArrayData* SetStrMove(ArrayData*, StringData* k, Cell v);
+  static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
+  static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
   static constexpr auto SetStrInPlace = &SetStr;
   static ArrayData* RemoveInt(ArrayData* ad, int64_t);
   static constexpr auto RemoveIntInPlace = &RemoveInt;
@@ -120,11 +120,11 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static constexpr auto Dequeue = &PopOrDequeue;
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyStatic(const ArrayData*);
-  static ArrayData* Append(ArrayData*, Cell v);
+  static ArrayData* Append(ArrayData*, TypedValue v);
   static constexpr auto AppendInPlace = &Append;
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
-  static ArrayData* Prepend(ArrayData*, Cell v);
+  static ArrayData* Prepend(ArrayData*, TypedValue v);
   static ArrayData* ToPHPArray(ArrayData* ad, bool) {
     return ad;
   }

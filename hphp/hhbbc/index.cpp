@@ -5149,7 +5149,7 @@ folly::Optional<Type> Index::lookup_constant(Context ctx,
   return acc->second.type;
 }
 
-folly::Optional<Cell> Index::lookup_persistent_constant(SString cnsName) const {
+folly::Optional<TypedValue> Index::lookup_persistent_constant(SString cnsName) const {
   ConstInfoConcurrentMap::const_accessor acc;
   if (!m_data->constants.find(acc, cnsName)) return folly::none;
   return tv(acc->second.type);

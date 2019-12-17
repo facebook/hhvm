@@ -1676,7 +1676,7 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr) {
 
   IterateKV(
     arr,
-    [&](Cell k, TypedValue v) {
+    [&](TypedValue k, TypedValue v) {
       writeArrayKey(VarNR(k), kind);
       writeArrayValue(VarNR(v), kind);
     }

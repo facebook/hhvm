@@ -88,7 +88,7 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   void onUnblocked();
   void resume();
   void await(Offset suspendOffset, req::ptr<c_WaitableWaitHandle>&& child);
-  void ret(Cell& result);
+  void ret(TypedValue& result);
   void fail(ObjectData* exception);
   void failCpp();
   String getName();

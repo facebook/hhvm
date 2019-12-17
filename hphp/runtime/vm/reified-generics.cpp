@@ -74,7 +74,7 @@ extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
   std::vector<TypeParamInfo> tpList;
   IterateKV(
     arr,
-    [&](Cell k, TypedValue v) {
+    [&](TypedValue k, TypedValue v) {
       assertx(isIntType(k.m_type));
       assertx(isIntType(v.m_type));
       if (k.m_data.num == 0) {
@@ -133,7 +133,7 @@ void checkReifiedGenericMismatchHelper(
   auto it = generics.begin();
   IterateKV(
     reified_generics,
-    [&](Cell k, TypedValue v) {
+    [&](TypedValue k, TypedValue v) {
       assertx(isIntType(k.m_type));
       assertx(isArrayLikeType(v.m_type));
       auto const i = k.m_data.num;

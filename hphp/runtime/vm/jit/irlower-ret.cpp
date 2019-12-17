@@ -134,10 +134,10 @@ void asyncFuncRetImpl(IRLS& env, const IRInstruction* inst, TCA target) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void traceRet(ActRec* fp, Cell* sp, void* rip) {
+void traceRet(ActRec* fp, TypedValue* sp, void* rip) {
   if (rip == tc::ustubs().callToExit) return;
   checkFrame(fp, sp, false /* fullCheck */);
-  assertx(sp <= (Cell*)fp || isResumed(fp));
+  assertx(sp <= (TypedValue*)fp || isResumed(fp));
 }
 
 void cgRetCtrl(IRLS& env, const IRInstruction* inst) {

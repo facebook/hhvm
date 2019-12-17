@@ -99,7 +99,7 @@ template<class T>
 void annotate_items(T& what, const ArrayData* annot) {
   IterateKV(
     annot,
-    [&] (Cell k, TypedValue v) {
+    [&] (TypedValue k, TypedValue v) {
       if (!tvIsString(k) || !tvIsString(v)) return;
       what.annotate(k.m_data.pstr->data(), v.m_data.pstr->data());
     }
@@ -148,7 +148,7 @@ void HHVM_FUNCTION(
   g.setEventSuffix(suffix->data());
   IterateKV(
     events.get(),
-    [&] (Cell k, TypedValue v) {
+    [&] (TypedValue k, TypedValue v) {
       auto const arr = v.m_data.parr;
       if (!tvIsString(k) || !tvIsArrayLike(v) || arr->size() != 3) return;
       auto const elem0 = arr->rval(int64_t{0});

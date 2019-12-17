@@ -170,8 +170,8 @@ php::ProgramPtr make_test_program() {
 
 //////////////////////////////////////////////////////////////////////
 
-Cell tv(SString s) { return make_tv<KindOfPersistentString>(s); }
-Cell tv(const StaticString& s) { return tv(s.get()); }
+TypedValue tv(SString s) { return make_tv<KindOfPersistentString>(s); }
+TypedValue tv(const StaticString& s) { return tv(s.get()); }
 
 auto const test_empty_array = folly::lazy([] {
   return staticEmptyArray();

@@ -32,7 +32,7 @@ namespace HPHP {
 /*
  * Initialize a new array element.
  */
-ALWAYS_INLINE void initElem(TypedValue& elem, Cell v, bool move = false) {
+ALWAYS_INLINE void initElem(TypedValue& elem, TypedValue v, bool move = false) {
   if (UNLIKELY(v.m_type == KindOfUninit)) {
     elem.m_type = KindOfNull;
   } else if (move) {
@@ -47,7 +47,7 @@ ALWAYS_INLINE void initElem(TypedValue& elem, Cell v, bool move = false) {
  * (i.e. promote uninit null values to init null values).
  */
 template<typename C> ALWAYS_INLINE
-enable_if_lval_t<C&&, void> setElem(C&& elem, Cell v, bool move = false) {
+enable_if_lval_t<C&&, void> setElem(C&& elem, TypedValue v, bool move = false) {
   if (UNLIKELY(v.m_type == KindOfUninit)) {
     v.m_type = KindOfNull;
   }

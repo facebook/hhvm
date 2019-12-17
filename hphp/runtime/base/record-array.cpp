@@ -127,7 +127,7 @@ void RecordArray::Release(ArrayData* in) {
   AARCH64_WALKABLE_FRAME();
 }
 
-Slot RecordArray::checkFieldForWrite(const StringData* key, Cell val) const {
+Slot RecordArray::checkFieldForWrite(const StringData* key, TypedValue val) const {
   auto const rec = record();
   auto const idx = rec->lookupField(key);
   if (idx != kInvalidSlot) {
@@ -166,7 +166,7 @@ tv_rval RecordArray::NvGetStr(const ArrayData* base, const StringData* key) {
 }
 
 ArrayData* RecordArray::SetStrInPlace(ArrayData* base,
-                                      StringData* key, Cell val) {
+                                      StringData* key, TypedValue val) {
   assertx(base->notCyclic(val));
   auto const ra = asRecordArray(base);
   auto const idx = ra->checkFieldForWrite(key, val);
@@ -174,7 +174,7 @@ ArrayData* RecordArray::SetStrInPlace(ArrayData* base,
   return ra;
 }
 
-ArrayData* RecordArray::SetStr(ArrayData* base, StringData* key, Cell val) {
+ArrayData* RecordArray::SetStr(ArrayData* base, StringData* key, TypedValue val) {
   assertx(base->cowCheck() || base->notCyclic(val));
   auto ra = asRecordArray(base);
   auto const idx = ra->checkFieldForWrite(key, val);
@@ -183,7 +183,7 @@ ArrayData* RecordArray::SetStr(ArrayData* base, StringData* key, Cell val) {
   return ra;
 }
 
-ArrayData* RecordArray::SetStrMove(ArrayData* base, StringData* key, Cell val) {
+ArrayData* RecordArray::SetStrMove(ArrayData* base, StringData* key, TypedValue val) {
   auto const result = SetStr(base, key, val);
   if (result != base && base->decReleaseCheck()) RecordArray::Release(base);
   tvDecRefGen(val);
@@ -241,7 +241,7 @@ MixedArray* RecordArray::ToMixed(const ArrayData* adIn) {
   // If a record-array has non-empty ExtraFieldMap, we conservatively set
   // MixedArrayKeys to have  on-static keys in ToMixedHeader.
   auto const extra = old->extraFieldMap();
-  MixedArray::IterateKV(extra, [&](Cell k, TypedValue v) {
+  MixedArray::IterateKV(extra, [&](TypedValue k, TypedValue v) {
     auto const kstr = k.m_data.pstr;
     auto const h = kstr->hash();
     dstData->setStrKey(kstr, h);
@@ -270,14 +270,14 @@ auto PromoteForOp(ArrayData* ad, Op op, const std::string& opname) {
 }
 }
 
-ArrayData* RecordArray::SetInt(ArrayData* adIn, int64_t k, Cell v) {
+ArrayData* RecordArray::SetInt(ArrayData* adIn, int64_t k, TypedValue v) {
   return PromoteForOp(adIn,
     [&] (MixedArray* mixed) { return mixed->addVal(k, v); },
     "SetInt"
   );
 }
 
-ArrayData* RecordArray::SetIntMove(ArrayData* adIn, int64_t k, Cell v) {
+ArrayData* RecordArray::SetIntMove(ArrayData* adIn, int64_t k, TypedValue v) {
   auto const result = SetInt(adIn, k, v);
   assertx(result != adIn);
   if (adIn->decReleaseCheck()) RecordArray::Release(adIn);
@@ -300,7 +300,7 @@ ssize_t RecordArray::NvGetStrPos(const ArrayData* ad, const StringData* key) {
   return ra->record()->numFields() + posInExtra;
 }
 
-Cell RecordArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
+TypedValue RecordArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   raise_recordarray_unsupported_op_notice("NvGetKey");
   assertx(pos < ad->m_size);
   auto const ra = asRecordArray(ad);
@@ -476,7 +476,7 @@ ArrayData* RecordArray::CopyStatic(const ArrayData* ad) {
   return asRecordArray(ad)->copyRecordArray(AllocMode::Static);
 }
 
-ArrayData* RecordArray::Append(ArrayData* ad, Cell v) {
+ArrayData* RecordArray::Append(ArrayData* ad, TypedValue v) {
   return PromoteForOp(ad,
     [&] (MixedArray* mixed) { return mixed->AppendImpl(mixed, v, false); },
     "Append"
@@ -519,7 +519,7 @@ ArrayData* RecordArray::Dequeue(ArrayData* ad, Variant& v) {
   );
 }
 
-ArrayData* RecordArray::Prepend(ArrayData* ad, Cell v) {
+ArrayData* RecordArray::Prepend(ArrayData* ad, TypedValue v) {
   return PromoteForOp(ad,
     [&] (MixedArray* mixed) {
       return mixed->Prepend(mixed, v);

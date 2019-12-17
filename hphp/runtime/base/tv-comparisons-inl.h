@@ -18,15 +18,15 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-inline bool tvEqual(Cell cell, int ival) {
+inline bool tvEqual(TypedValue cell, int ival) {
   return tvEqual(cell, static_cast<int64_t>(ival));
 }
 
-inline bool tvLess(Cell cell, int ival) {
+inline bool tvLess(TypedValue cell, int ival) {
   return tvLess(cell, static_cast<int64_t>(ival));
 }
 
-inline bool tvGreater(Cell cell, int ival) {
+inline bool tvGreater(TypedValue cell, int ival) {
   return tvGreater(cell, static_cast<int64_t>(ival));
 }
 

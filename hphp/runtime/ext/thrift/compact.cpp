@@ -453,7 +453,7 @@ struct CompactWriter {
         spec.rval(s_val, AccessFlags::ErrorKey).tv()
       );
 
-      auto elemWriter = [&](Cell k, TypedValue v) {
+      auto elemWriter = [&](TypedValue k, TypedValue v) {
         writeField(VarNR(k), keySpec, keyType, fieldInfo);
         writeField(VarNR(v), valueSpec, valueType, fieldInfo);
         return false;
@@ -487,7 +487,7 @@ struct CompactWriter {
       auto const listWriter = [&](TypedValue v) {
         writeField(VarNR(v), valueSpec, valueType, fieldInfo);
       };
-      auto const setWriter = [&](Cell k, TypedValue /*v*/) {
+      auto const setWriter = [&](TypedValue k, TypedValue /*v*/) {
         writeField(VarNR(k), valueSpec, valueType, fieldInfo);
       };
 

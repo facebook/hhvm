@@ -271,7 +271,7 @@ bool interface_supports_double(const std::string& n) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Cell annotDefaultValue(AnnotType at) {
+TypedValue annotDefaultValue(AnnotType at) {
   switch (at) {
     case AnnotType::Mixed:
     case AnnotType::Self:

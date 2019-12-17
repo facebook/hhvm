@@ -688,7 +688,7 @@ public:
    * Return nullptr if no such constant exists, or the constant is not
    * persistent.
    */
-  static const Cell* lookupPersistentCns(const StringData* cnsName);
+  static const TypedValue* lookupPersistentCns(const StringData* cnsName);
 
   /*
    * Look up, or autoload and define, the value of the constant with name
@@ -707,12 +707,12 @@ public:
 
   /*
    * Define a constant with name `cnsName' with a magic callback. The
-   * Cell should be KindOfUninit, with a Native::ConstantCallback in
+   * TypedValue should be KindOfUninit, with a Native::ConstantCallback in
    * its m_data.pcnt.
    *
    * The canonical examples are STDIN, STDOUT, and STDERR.
    */
-  static bool defNativeConstantCallback(const StringData* cnsName, Cell cell);
+  static bool defNativeConstantCallback(const StringData* cnsName, TypedValue cell);
 
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.

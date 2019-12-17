@@ -541,7 +541,7 @@ void Stack::requestInit() {
   rds::header()->stackLimitAndSurprise.store(
     reinterpret_cast<uintptr_t>(
       reinterpret_cast<char*>(m_elms) + sSurprisePageSize +
-        kStackCheckPadding * sizeof(Cell)
+        kStackCheckPadding * sizeof(TypedValue)
     ),
     std::memory_order_release
   );
@@ -932,9 +932,9 @@ Array getDefinedVariables(const ActRec* fp) {
 
 namespace {
 
-Cell popUnpackArgs() {
+TypedValue popUnpackArgs() {
   auto& stack = vmStack();
-  Cell unpackArgs = *stack.topC();
+  TypedValue unpackArgs = *stack.topC();
   if (LIKELY(isContainer(unpackArgs))) {
     stack.discard();
     return unpackArgs;
@@ -974,7 +974,7 @@ void shuffleMagicArgs(String&& invName, uint32_t numArgs, bool hasUnpack) {
     IterateV(
       args,
       [](ArrayData*) { return false; },
-      [&](Cell v) { argArray.append(v); },
+      [&](TypedValue v) { argArray.append(v); },
       [](ObjectData*) { return false; }
     );
   }
@@ -1369,7 +1369,7 @@ static inline void lookup_sprop(ActRec* fp,
   accessible = lookup.accessible;
 }
 
-static inline Class* lookupClsRef(Cell* input) {
+static inline Class* lookupClsRef(TypedValue* input) {
   Class* class_ = nullptr;
   if (isStringType(input->m_type)) {
     class_ = Unit::loadClass(input->m_data.pstr);
@@ -1469,7 +1469,7 @@ OPTBLD_INLINE void iopPopFrame(uint32_t nout) {
 
 OPTBLD_INLINE void iopPopL(local_var to) {
   assertx(to.index < vmfp()->m_func->numLocals());
-  Cell* fr = vmStack().topC();
+  TypedValue* fr = vmStack().topC();
   tvMove(*fr, *to);
   vmStack().discard();
 }
@@ -1711,9 +1711,9 @@ OPTBLD_INLINE void iopNewRecordArray(const StringData* s,
 }
 
 OPTBLD_INLINE void iopAddElemC() {
-  Cell* c1 = vmStack().topC();
-  Cell* c2 = vmStack().indC(1);
-  Cell* c3 = vmStack().indC(2);
+  TypedValue* c1 = vmStack().topC();
+  TypedValue* c2 = vmStack().indC(1);
+  TypedValue* c3 = vmStack().indC(2);
   if (!isArrayType(c3->m_type) && !isDictType(c3->m_type)) {
     raise_error("AddElemC: $3 must be an array or dict");
   }
@@ -1727,8 +1727,8 @@ OPTBLD_INLINE void iopAddElemC() {
 }
 
 OPTBLD_INLINE void iopAddNewElemC() {
-  Cell* c1 = vmStack().topC();
-  Cell* c2 = vmStack().indC(1);
+  TypedValue* c1 = vmStack().topC();
+  TypedValue* c2 = vmStack().indC(1);
   if (isArrayType(c2->m_type)) {
     tvAsVariant(*c2).asArrRef().append(tvAsCVarRef(c1));
   } else if (isVecType(c2->m_type)) {
@@ -1758,8 +1758,8 @@ OPTBLD_INLINE void iopNewCol(CollectionType cType) {
 }
 
 OPTBLD_INLINE void iopNewPair() {
-  Cell* c1 = vmStack().topC();
-  Cell* c2 = vmStack().indC(1);
+  TypedValue* c1 = vmStack().topC();
+  TypedValue* c2 = vmStack().indC(1);
   // elements were pushed onto the stack in the order they should appear
   // in the pair, so the top of the stack should become the second element
   auto pair = collections::allocPair(*c2, *c1);
@@ -1872,7 +1872,7 @@ OPTBLD_INLINE void iopConcatN(uint32_t n) {
 }
 
 OPTBLD_INLINE void iopNot() {
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   tvAsVariant(*c1) = !tvAsVariant(*c1).toBoolean();
 }
 
@@ -1955,7 +1955,7 @@ OPTBLD_INLINE void iopBitXor() {
 }
 
 OPTBLD_INLINE void iopXor() {
-  implTvBinOpBool([&] (Cell c1, Cell c2) -> bool {
+  implTvBinOpBool([&] (TypedValue c1, TypedValue c2) -> bool {
     return tvToBool(c1) ^ tvToBool(c2);
   });
 }
@@ -1965,25 +1965,25 @@ OPTBLD_INLINE void iopSame() {
 }
 
 OPTBLD_INLINE void iopNSame() {
-  implTvBinOpBool([&] (Cell c1, Cell c2) {
+  implTvBinOpBool([&] (TypedValue c1, TypedValue c2) {
     return !tvSame(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopEq() {
-  implTvBinOpBool([&] (Cell c1, Cell c2) {
+  implTvBinOpBool([&] (TypedValue c1, TypedValue c2) {
     return tvEqual(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopNeq() {
-  implTvBinOpBool([&] (Cell c1, Cell c2) {
+  implTvBinOpBool([&] (TypedValue c1, TypedValue c2) {
     return !tvEqual(c1, c2);
   });
 }
 
 OPTBLD_INLINE void iopLt() {
-  implTvBinOpBool([&] (Cell c1, Cell c2) {
+  implTvBinOpBool([&] (TypedValue c1, TypedValue c2) {
     return tvLess(c1, c2);
   });
 }
@@ -1993,7 +1993,7 @@ OPTBLD_INLINE void iopLte() {
 }
 
 OPTBLD_INLINE void iopGt() {
-  implTvBinOpBool([&] (Cell c1, Cell c2) {
+  implTvBinOpBool([&] (TypedValue c1, TypedValue c2) {
     return tvGreater(c1, c2);
   });
 }
@@ -2003,7 +2003,7 @@ OPTBLD_INLINE void iopGte() {
 }
 
 OPTBLD_INLINE void iopCmp() {
-  implTvBinOpInt64([&] (Cell c1, Cell c2) {
+  implTvBinOpInt64([&] (TypedValue c1, TypedValue c2) {
     return tvCompare(c1, c2);
   });
 }
@@ -2021,54 +2021,54 @@ OPTBLD_INLINE void iopBitNot() {
 }
 
 OPTBLD_INLINE void iopCastBool() {
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   tvCastToBooleanInPlace(c1);
 }
 
 OPTBLD_INLINE void iopCastInt() {
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   tvCastToInt64InPlace(c1);
 }
 
 OPTBLD_INLINE void iopCastDouble() {
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   tvCastToDoubleInPlace(c1);
 }
 
 OPTBLD_INLINE void iopCastString() {
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   tvCastToStringInPlace(c1);
 }
 
 OPTBLD_INLINE void iopCastArray() {
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   tvCastToArrayInPlace(c1);
 }
 
 OPTBLD_INLINE void iopCastDict() {
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   tvCastToDictInPlace(c1);
 }
 
 OPTBLD_INLINE void iopCastKeyset() {
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   tvCastToKeysetInPlace(c1);
 }
 
 OPTBLD_INLINE void iopCastVec() {
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   tvCastToVecInPlace(c1);
 }
 
 OPTBLD_INLINE void iopCastVArray() {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   tvCastToVArrayInPlace(c1);
 }
 
 OPTBLD_INLINE void iopCastDArray() {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   tvCastToDArrayInPlace(c1);
 }
 
@@ -2082,7 +2082,7 @@ OPTBLD_INLINE void iopDblAsBits() {
 }
 
 ALWAYS_INLINE
-bool implInstanceOfHelper(const StringData* str1, Cell* c2) {
+bool implInstanceOfHelper(const StringData* str1, TypedValue* c2) {
   const NamedEntity* rhs = NamedEntity::get(str1, false);
   // Because of other codepaths, an un-normalized name might enter the
   // table without a Class* so we need to check if it's there.
@@ -2093,8 +2093,8 @@ bool implInstanceOfHelper(const StringData* str1, Cell* c2) {
 }
 
 OPTBLD_INLINE void iopInstanceOf() {
-  Cell* c1 = vmStack().topC();   // c2 instanceof c1
-  Cell* c2 = vmStack().indC(1);
+  TypedValue* c1 = vmStack().topC();   // c2 instanceof c1
+  TypedValue* c2 = vmStack().indC(1);
   bool r = false;
   if (isStringType(c1->m_type)) {
     r = implInstanceOfHelper(c1->m_data.pstr, c2);
@@ -2116,7 +2116,7 @@ OPTBLD_INLINE void iopInstanceOf() {
 
 OPTBLD_INLINE void iopInstanceOfD(Id id) {
   const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   bool r = tvInstanceOf(c1, ne);
   vmStack().replaceC<KindOfBoolean>(r);
 }
@@ -2239,7 +2239,7 @@ OPTBLD_INLINE void iopCheckReifiedGenericMismatch() {
 }
 
 OPTBLD_INLINE void iopPrint() {
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   g_context->write(tvAsVariant(*c1).toString());
   vmStack().replaceC<KindOfInt64>(1);
 }
@@ -2256,7 +2256,7 @@ OPTBLD_INLINE void iopClone() {
 
 OPTBLD_INLINE void iopExit() {
   int exitCode = 0;
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   if (c1->m_type == KindOfInt64) {
     exitCode = c1->m_data.num;
   } else {
@@ -2317,7 +2317,7 @@ OPTBLD_INLINE void jmpOpImpl(PC& pc, PC targetpc) {
                 "jmpOpImpl should only be used by JmpZ and JmpNZ");
   jmpSurpriseCheck(targetpc - pc);
 
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   if (c1->m_type == KindOfInt64 || c1->m_type == KindOfBoolean) {
     int64_t n = c1->m_data.num;
     vmStack().popX();
@@ -2529,7 +2529,7 @@ void iopSSwitch(PC origpc, PC& pc, imm_array<StrVecItem> jmptab) {
   auto const veclen = jmptab.size;
   assertx(veclen > 1);
   unsigned cases = veclen - 1; // the last vector item is the default case
-  Cell* val = vmStack().topTV();
+  TypedValue* val = vmStack().topTV();
   Unit* u = vmfp()->m_func->unit();
   unsigned i;
   for (i = 0; i < cases; ++i) {
@@ -2779,7 +2779,7 @@ OPTBLD_INLINE TCA iopRetM(PC& pc, uint32_t numRet) {
 }
 
 OPTBLD_INLINE void iopThrow(PC&) {
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   if (c1->m_type != KindOfObject ||
       !c1->m_data.pobj->instanceof(SystemLib::s_ThrowableClass)) {
     raise_error("Exceptions must implement the Throwable interface.");
@@ -2867,12 +2867,12 @@ OPTBLD_INLINE void cgetl_body(ActRec* fp,
 }
 
 OPTBLD_INLINE void iopCGetL(local_var fr) {
-  Cell* to = vmStack().allocC();
+  TypedValue* to = vmStack().allocC();
   cgetl_body(vmfp(), fr.ptr, to, fr.index, true);
 }
 
 OPTBLD_INLINE void iopCGetQuietL(local_var fr) {
-  Cell* to = vmStack().allocC();
+  TypedValue* to = vmStack().allocC();
   cgetl_body(vmfp(), fr.ptr, to, fr.index, false);
 }
 
@@ -2885,7 +2885,7 @@ OPTBLD_INLINE void iopCGetL2(local_var fr) {
   TypedValue* oldTop = vmStack().topTV();
   TypedValue* newTop = vmStack().allocTV();
   memcpy(newTop, oldTop, sizeof *newTop);
-  Cell* to = oldTop;
+  TypedValue* to = oldTop;
   cgetl_body(vmfp(), fr.ptr, to, fr.index, true);
 }
 
@@ -3272,7 +3272,7 @@ OPTBLD_INLINE void iopIncDecM(uint32_t nDiscard, IncDecOp subop, MemberKey mk) {
   auto const key = key_tv(mk);
 
   auto& mstate = vmMInstrState();
-  Cell result;
+  TypedValue result;
   if (mcodeIsProp(mk.mcode)) {
     result = IncDecProp(
       arGetContextClass(vmfp()), subop, mstate.base, key, &mstate.propState
@@ -3333,7 +3333,7 @@ inline void checkThis(ActRec* fp) {
   }
 }
 
-OPTBLD_INLINE const Cell* memoGetImpl(LocalRange keys) {
+OPTBLD_INLINE const TypedValue* memoGetImpl(LocalRange keys) {
   assertx(vmfp()->m_func->isMemoizeWrapper());
   assertx(keys.first + keys.count <= vmfp()->m_func->numLocals());
 
@@ -3344,7 +3344,7 @@ OPTBLD_INLINE const Cell* memoGetImpl(LocalRange keys) {
     }
   }
 
-  auto const c = [&] () -> const Cell* {
+  auto const c = [&] () -> const TypedValue* {
     auto const func = vmfp()->m_func;
     if (!func->isMethod() || func->isStatic()) {
       auto const lsbCls =
@@ -3456,7 +3456,7 @@ OPTBLD_INLINE void iopMemoGetEager(PC& pc,
 
 namespace {
 
-OPTBLD_INLINE void memoSetImpl(LocalRange keys, Cell val) {
+OPTBLD_INLINE void memoSetImpl(LocalRange keys, TypedValue val) {
   assertx(vmfp()->m_func->isMemoizeWrapper());
   assertx(keys.first + keys.count <= vmfp()->m_func->numLocals());
   assertx(tvIsPlausible(val));
@@ -3610,7 +3610,7 @@ OPTBLD_INLINE void iopIssetL(local_var tv) {
   topTv->m_type = KindOfBoolean;
 }
 
-OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
+OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
   assertx(tvIsPlausible(*val));
 
   switch (op) {
@@ -3892,13 +3892,13 @@ OPTBLD_INLINE void iopArrayIdx() {
 
 OPTBLD_INLINE void iopSetL(local_var to) {
   assertx(to.index < vmfp()->m_func->numLocals());
-  Cell* fr = vmStack().topC();
+  TypedValue* fr = vmStack().topC();
   tvSet(*fr, *to);
 }
 
 OPTBLD_INLINE void iopSetG() {
   StringData* name;
-  Cell* fr = vmStack().topC();
+  TypedValue* fr = vmStack().topC();
   TypedValue* tv2 = vmStack().indTV(1);
   TypedValue* to = nullptr;
   lookupd_gbl(vmfp(), name, tv2, to);
@@ -3911,7 +3911,7 @@ OPTBLD_INLINE void iopSetG() {
 
 OPTBLD_INLINE void iopSetS() {
   TypedValue* tv1 = vmStack().topTV();
-  Cell* clsCell = vmStack().indC(1);
+  TypedValue* clsCell = vmStack().indC(1);
   TypedValue* propn = vmStack().indTV(2);
   TypedValue* output = propn;
   StringData* name;
@@ -3947,8 +3947,8 @@ OPTBLD_INLINE void iopSetS() {
 }
 
 OPTBLD_INLINE void iopSetOpL(local_var loc, SetOpOp op) {
-  Cell* fr = vmStack().topC();
-  Cell* to = loc.ptr;
+  TypedValue* fr = vmStack().topC();
+  TypedValue* to = loc.ptr;
   setopBody(to, op, fr);
   tvDecRefGen(fr);
   tvDup(*to, *fr);
@@ -3956,7 +3956,7 @@ OPTBLD_INLINE void iopSetOpL(local_var loc, SetOpOp op) {
 
 OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
   StringData* name;
-  Cell* fr = vmStack().topC();
+  TypedValue* fr = vmStack().topC();
   TypedValue* tv2 = vmStack().indTV(1);
   TypedValue* to = nullptr;
   // XXX We're probably not getting warnings totally correct here
@@ -3971,8 +3971,8 @@ OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
 }
 
 OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
-  Cell* fr = vmStack().topC();
-  Cell* clsCell = vmStack().indC(1);
+  TypedValue* fr = vmStack().topC();
+  TypedValue* clsCell = vmStack().indC(1);
   TypedValue* propn = vmStack().indTV(2);
   TypedValue* output = propn;
   StringData* name;
@@ -3998,7 +3998,7 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
   }
   auto const& sprop = cls->staticProperties()[slot];
   if (setOpNeedsTypeCheck(sprop.typeConstraint, op, val)) {
-    Cell temp;
+    TypedValue temp;
     tvDup(*val, temp);
     SCOPE_FAIL { tvDecRefGen(&temp); };
     setopBody(&temp, op, fr);
@@ -4059,7 +4059,7 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
 
   auto const val = ss.val;
   if (checkable_sprop) {
-    Cell temp;
+    TypedValue temp;
     tvDup(*val, temp);
     SCOPE_FAIL { tvDecRefGen(&temp); };
     auto result = IncDecBody(op, &temp);
@@ -4439,7 +4439,7 @@ static void throw_call_non_object(const char* methodName,
 ALWAYS_INLINE bool
 fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
                           const StringData* methName, bool extraStk) {
-  Cell* obj = vmStack().indC(fca.numInputs() + 2 + (extraStk ? 1 : 0));
+  TypedValue* obj = vmStack().indC(fca.numInputs() + 2 + (extraStk ? 1 : 0));
   if (LIKELY(isObjectType(obj->m_type))) return false;
 
   if (UNLIKELY(op == ObjMethodOp::NullThrows || !isNullType(obj->m_type))) {
@@ -4469,7 +4469,7 @@ fcallObjMethodHandleInput(const FCallArgs& fca, ObjMethodOp op,
 OPTBLD_INLINE void
 iopFCallObjMethod(PC origpc, PC& pc, FCallArgs fca, const StringData*,
                   ObjMethodOp op) {
-  Cell* c1 = vmStack().topC(); // Method name.
+  TypedValue* c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
   }
@@ -4491,7 +4491,7 @@ iopFCallObjMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
 }
 
 namespace {
-void resolveMethodImpl(Cell* c1, Cell* c2) {
+void resolveMethodImpl(TypedValue* c1, TypedValue* c2) {
   auto name = c1->m_data.pstr;
   ObjectData* thiz = nullptr;
   HPHP::Class* cls = nullptr;
@@ -4534,8 +4534,8 @@ void resolveMethodImpl(Cell* c1, Cell* c2) {
 }
 
 OPTBLD_INLINE void iopResolveClsMethod(ClsMethResolveOp op) {
-  Cell* func = vmStack().topC();
-  Cell* cls = vmStack().indC(1);
+  TypedValue* func = vmStack().topC();
+  TypedValue* cls = vmStack().indC(1);
   if (op == ClsMethResolveOp::Warn &&
       RuntimeOption::EvalWarnOnNonLiteralClsMeth) {
     raise_warning(Strings::WARN_CLS_METH_WRONG_ARGS);
@@ -4573,8 +4573,8 @@ OPTBLD_INLINE void iopResolveClsMethod(ClsMethResolveOp op) {
 }
 
 OPTBLD_INLINE void iopResolveObjMethod() {
-  Cell* c1 = vmStack().topC();
-  Cell* c2 = vmStack().indC(1);
+  TypedValue* c1 = vmStack().topC();
+  TypedValue* c2 = vmStack().indC(1);
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
   }
@@ -4992,7 +4992,7 @@ OPTBLD_INLINE void iopLIterFree(Iter* it, local_var) {
 
 OPTBLD_INLINE void inclOp(PC origpc, PC& pc, InclOpFlags flags,
                           const char* opName) {
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
   auto path = String::attach(prepareKey(*c1));
   bool initial;
   TRACE(2, "inclOp %s %s %s %s \"%s\"\n",
@@ -5070,7 +5070,7 @@ OPTBLD_INLINE void iopReqDoc(PC origpc, PC& pc) {
 }
 
 OPTBLD_INLINE void iopEval(PC origpc, PC& pc) {
-  Cell* c1 = vmStack().topC();
+  TypedValue* c1 = vmStack().topC();
 
   if (UNLIKELY(RuntimeOption::EvalAuthoritativeMode)) {
     // Ahead of time whole program optimizations need to assume it can
@@ -5269,11 +5269,11 @@ OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
 } // namespace
 
 OPTBLD_INLINE void iopVerifyRetTypeC() {
-  verifyRetTypeImpl(0); // Cell is on the top of the stack
+  verifyRetTypeImpl(0); // TypedValue is on the top of the stack
 }
 
 OPTBLD_INLINE void iopVerifyRetTypeTS() {
-  verifyRetTypeImpl(1); // Cell is the second element on the stack
+  verifyRetTypeImpl(1); // TypedValue is the second element on the stack
   auto const ts = vmStack().topC();
   assertx(tvIsDictOrDArray(ts));
   auto const cell = vmStack().indC(1);
@@ -5474,7 +5474,7 @@ OPTBLD_INLINE void iopContRaise(PC origpc, PC& pc) {
   iopThrow(pc);
 }
 
-OPTBLD_INLINE TCA yield(PC origpc, PC& pc, const Cell* key, const Cell value) {
+OPTBLD_INLINE TCA yield(PC origpc, PC& pc, const TypedValue* key, const TypedValue value) {
   auto const jitReturn = jitReturnPre(vmfp());
 
   auto const fp = vmfp();

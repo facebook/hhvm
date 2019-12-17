@@ -28,7 +28,7 @@
  *
  * vmpc(): PC pointing to the currently executing bytecode instruction
  * vmfp(): ActRec* pointing to the current frame
- * vmsp(): Cell* pointing to the top of the eval stack
+ * vmsp(): TypedValue* pointing to the top of the eval stack
  *
  * The registers are physically located in the RDS header struct (defined in
  * runtime/base/rds-header.h), allowing efficient access from translated code
@@ -95,7 +95,7 @@ inline bool isValidVMStackAddress(const void* addr) {
   return vmRegsUnsafe().stack.isValidAddress(uintptr_t(addr));
 }
 
-inline Cell*& vmsp() {
+inline TypedValue*& vmsp() {
   return vmRegs().stack.top();
 }
 
@@ -135,7 +135,7 @@ inline void assert_native_stack_aligned() {
 #endif
 }
 
-inline void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
+inline void interp_set_regs(ActRec* ar, TypedValue* sp, Offset pcOff) {
   assertx(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
   vmfp() = ar;

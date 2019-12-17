@@ -212,7 +212,7 @@ void cgSetOpCell(IRLS& env, const IRInstruction* inst) {
 }
 
 template <SetOpOp Op>
-static void setOpCellVerifyImpl(tv_lval lhs, Cell rhs,
+static void setOpCellVerifyImpl(tv_lval lhs, TypedValue rhs,
                                 const Class* cls, Slot slot) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(slot < cls->numDeclProperties());
@@ -226,7 +226,7 @@ static void setOpCellVerifyImpl(tv_lval lhs, Cell rhs,
      * before assigning back to the property (if we raise a warning and throw,
      * we don't want to have already put the value into the prop).
      */
-    Cell temp;
+    TypedValue temp;
     tvDup(*lhs, temp);
     SCOPE_FAIL { tvDecRefGen(&temp); };
     setOpOpToHelper(Op)(&temp, rhs);

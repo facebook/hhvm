@@ -104,7 +104,7 @@ void cgVerifyRetRecDesc(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void verifyPropFailImpl(const Class* objCls, Cell val, Slot slot) {
+static void verifyPropFailImpl(const Class* objCls, TypedValue val, Slot slot) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(tvIsPlausible(val));
   assertx(slot < objCls->numDeclProperties());
@@ -119,7 +119,7 @@ static void verifyPropFailImpl(const Class* objCls, Cell val, Slot slot) {
   );
 }
 
-static void verifyStaticPropFailImpl(const Class* objCls, Cell val, Slot slot) {
+static void verifyStaticPropFailImpl(const Class* objCls, TypedValue val, Slot slot) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(tvIsPlausible(val));
   assertx(slot < objCls->numStaticProperties());
@@ -205,7 +205,7 @@ static void verifyStaticPropClsImpl(const Class* objCls,
 
 static void verifyPropImpl(const Class* cls,
                             Slot slot,
-                            Cell val) {
+                            TypedValue val) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(slot < cls->numDeclProperties());
   assertx(tvIsPlausible(val));
@@ -216,7 +216,7 @@ static void verifyPropImpl(const Class* cls,
 
 static void verifySPropImpl(const Class* cls,
                             Slot slot,
-                            Cell val) {
+                            TypedValue val) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(slot < cls->numStaticProperties());
   assertx(tvIsPlausible(val));

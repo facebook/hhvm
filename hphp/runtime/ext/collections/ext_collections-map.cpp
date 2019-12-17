@@ -79,7 +79,7 @@ void BaseMap::addAllImpl(const Variant& iterable) {
         return true;
       }
     },
-    [this](Cell k, TypedValue v) {
+    [this](TypedValue k, TypedValue v) {
       setRaw(k, v);
     },
     [this](ObjectData* coll) {

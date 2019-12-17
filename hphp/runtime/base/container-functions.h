@@ -24,7 +24,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-inline bool isContainer(const Cell c) {
+inline bool isContainer(const TypedValue c) {
   assertx(tvIsPlausible(c));
   return isArrayLikeType(c.m_type) ||
          (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
@@ -34,7 +34,7 @@ inline bool isContainer(const Variant& v) {
   return isContainer(*v.asTypedValue());
 }
 
-inline bool isContainerOrNull(const Cell c) {
+inline bool isContainerOrNull(const TypedValue c) {
   assertx(tvIsPlausible(c));
   return isNullType(c.m_type) || isArrayLikeType(c.m_type) ||
          (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
@@ -44,7 +44,7 @@ inline bool isContainerOrNull(const Variant& v) {
   return isContainerOrNull(*v.asTypedValue());
 }
 
-inline bool isMutableContainer(const Cell c) {
+inline bool isMutableContainer(const TypedValue c) {
   assertx(tvIsPlausible(c));
   return isArrayLikeType(c.m_type) ||
          (c.m_type == KindOfObject && c.m_data.pobj->isMutableCollection());
@@ -54,7 +54,7 @@ inline bool isMutableContainer(const Variant& v) {
   return isMutableContainer(*v.asTypedValue());
 }
 
-inline size_t getContainerSize(const Cell c) {
+inline size_t getContainerSize(const TypedValue c) {
   assertx(isContainer(c));
   if (isArrayLikeType(c.m_type)) {
     return c.m_data.parr->size();
@@ -67,7 +67,7 @@ inline size_t getContainerSize(const Variant& v) {
   return getContainerSize(*v.asTypedValue());
 }
 
-inline bool isPackedContainer(const Cell c) {
+inline bool isPackedContainer(const TypedValue c) {
   assertx(isContainer(c));
   if (isArrayLikeType(c.m_type)) {
     return c.m_data.parr->hasPackedLayout();
@@ -77,7 +77,7 @@ inline bool isPackedContainer(const Cell c) {
 }
 
 ALWAYS_INLINE
-const Cell container_as_cell(const Variant& container) {
+const TypedValue container_as_cell(const Variant& container) {
   const auto& cellContainer = *container.asTypedValue();
   if (UNLIKELY(!isContainer(cellContainer))) {
     SystemLib::throwInvalidArgumentExceptionObject(
@@ -91,7 +91,7 @@ const Cell container_as_cell(const Variant& container) {
 /*
  * clsmeth compact container helpers.
  */
-inline bool isClsMethCompactContainer(const Cell c) {
+inline bool isClsMethCompactContainer(const TypedValue c) {
  return isContainer(c) || isClsMethType(c.m_type);
 }
 
@@ -99,7 +99,7 @@ inline bool isClsMethCompactContainer(const Variant& v) {
  return isClsMethCompactContainer(*v.asTypedValue());
 }
 
-inline size_t getClsMethCompactContainerSize(const Cell c) {
+inline size_t getClsMethCompactContainerSize(const TypedValue c) {
  return isClsMethType(c.m_type) ? 2 : getContainerSize(c);
 }
 
@@ -107,7 +107,7 @@ inline size_t getClsMethCompactContainerSize(const Variant& v) {
  return getClsMethCompactContainerSize(*v.asTypedValue());
 }
 
-inline Cell* castClsmethToContainerInplace(Cell* c) {
+inline TypedValue* castClsmethToContainerInplace(TypedValue* c) {
   if (isClsMethType(c->m_type)) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       tvCastToVecInPlace(c);

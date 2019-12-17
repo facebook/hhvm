@@ -518,7 +518,7 @@ std::string show(const Type& t) {
       [&] {
         using namespace folly::gen;
         return from(t.m_data.map->map)
-          | map([&] (const std::pair<Cell,Type>& kv) {
+          | map([&] (const std::pair<TypedValue,Type>& kv) {
               return showElem(from_cell(kv.first), kv.second);
             })
           | unsplit<std::string>(",");

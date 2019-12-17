@@ -182,13 +182,6 @@ struct TypedValueAux : TypedValue {
 constexpr size_t kTVSimdAlign = 0x10;
 
 /*
- * Alias for TypedValue.
- *
- * See bytecode.specification for details.
- */
-using Cell = TypedValue;
-
-/*
  * A TypedNum is a TypedValue that is either KindOfDouble or KindOfInt64.
  */
 using TypedNum = TypedValue;
@@ -398,8 +391,8 @@ typename std::enable_if<
  * Unlike init_null_variant and uninit_variant, these should be placed in
  * .rodata and cause a segfault if written to.
  */
-extern const Cell immutable_null_base;
-extern const Cell immutable_uninit_base;
+extern const TypedValue immutable_null_base;
+extern const TypedValue immutable_uninit_base;
 
 ///////////////////////////////////////////////////////////////////////////////
 

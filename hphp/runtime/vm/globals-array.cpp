@@ -103,7 +103,7 @@ bool GlobalsArray::keyExists(const StringData* k) {
   return this->m_tab->lookup(k) != nullptr;
 }
 
-Cell GlobalsArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
+TypedValue GlobalsArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asGlobals(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);
   if (iter.valid()) {
@@ -178,20 +178,20 @@ arr_lval GlobalsArray::LvalForceNew(ArrayData* ad, bool /*copy*/) {
   return arr_lval { ad, lvalBlackHole().asTypedValue() };
 }
 
-ArrayData* GlobalsArray::SetIntMove(ArrayData* ad, int64_t k, Cell v) {
+ArrayData* GlobalsArray::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
   return SetStrMove(ad, String(k).get(), v);
 }
 
-ArrayData* GlobalsArray::SetIntInPlace(ArrayData* ad, int64_t k, Cell v) {
+ArrayData* GlobalsArray::SetIntInPlace(ArrayData* ad, int64_t k, TypedValue v) {
   return SetStrInPlace(ad, String(k).get(), v);
 }
 
-ArrayData* GlobalsArray::SetStrMove(ArrayData* ad, StringData* k, Cell v) {
+ArrayData* GlobalsArray::SetStrMove(ArrayData* ad, StringData* k, TypedValue v) {
   tvMove(v, *asGlobals(ad)->m_tab->lookupAdd(k));
   return ad;
 }
 
-ArrayData* GlobalsArray::SetStrInPlace(ArrayData* ad, StringData* k, Cell v) {
+ArrayData* GlobalsArray::SetStrInPlace(ArrayData* ad, StringData* k, TypedValue v) {
   tvSet(v, *asGlobals(ad)->m_tab->lookupAdd(k));
   return ad;
 }
@@ -214,7 +214,7 @@ GlobalsArray::RemoveStrInPlace(ArrayData* ad, const StringData* k) {
  * is currently $GLOBALS.
  */
 
-ArrayData* GlobalsArray::AppendInPlace(ArrayData*, Cell /*v*/) {
+ArrayData* GlobalsArray::AppendInPlace(ArrayData*, TypedValue /*v*/) {
   throw_not_implemented("append on $GLOBALS");
 }
 
@@ -226,7 +226,7 @@ ArrayData* GlobalsArray::Merge(ArrayData*, const ArrayData*) {
   throw_not_implemented("merge on $GLOBALS");
 }
 
-ArrayData* GlobalsArray::Prepend(ArrayData*, Cell) {
+ArrayData* GlobalsArray::Prepend(ArrayData*, TypedValue) {
   throw_not_implemented("prepend on $GLOBALS");
 }
 

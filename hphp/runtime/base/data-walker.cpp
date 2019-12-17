@@ -79,7 +79,7 @@ void DataWalker::traverseData(
     [&](Slot slot, const Class::Prop& prop, tv_rval val) {
       visitTypedValue(val.tv(), features, visited);
     },
-    [&](Cell key_tv, TypedValue val) {
+    [&](TypedValue key_tv, TypedValue val) {
       visitTypedValue(val, features, visited);
     }
   );

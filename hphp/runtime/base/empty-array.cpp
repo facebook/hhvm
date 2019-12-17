@@ -53,7 +53,7 @@ void EmptyArray::Release(ArrayData*) {
   always_assert(!"never try to free the empty array");
 }
 
-Cell EmptyArray::NvGetKey(const ArrayData*, ssize_t /*pos*/) {
+TypedValue EmptyArray::NvGetKey(const ArrayData*, ssize_t /*pos*/) {
   // We have no valid positions---no one should call this function.
   not_reached();
 }
@@ -221,24 +221,24 @@ arr_lval EmptyArray::LvalStrImpl(ArrayData*, StringData* k, bool) {
   return EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
 }
 
-ArrayData* EmptyArray::SetInt(ArrayData* ad, int64_t k, Cell v) {
+ArrayData* EmptyArray::SetInt(ArrayData* ad, int64_t k, TypedValue v) {
   tvIncRefGen(v);
   return SetIntMove(ad, k, v);
 }
 
-ArrayData* EmptyArray::SetIntMove(ArrayData*, int64_t k, Cell v) {
+ArrayData* EmptyArray::SetIntMove(ArrayData*, int64_t k, TypedValue v) {
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (v.m_type == KindOfUninit) v.m_type = KindOfNull;
   return k == 0 ? EmptyArray::MakePacked(v).arr
                 : EmptyArray::MakeMixed(k, v).arr;
 }
 
-ArrayData* EmptyArray::SetStr(ArrayData* ad, StringData* k, Cell v) {
+ArrayData* EmptyArray::SetStr(ArrayData* ad, StringData* k, TypedValue v) {
   tvIncRefGen(v);
   return SetStrMove(ad, k, v);
 }
 
-ArrayData* EmptyArray::SetStrMove(ArrayData*, StringData* k, Cell v) {
+ArrayData* EmptyArray::SetStrMove(ArrayData*, StringData* k, TypedValue v) {
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (v.m_type == KindOfUninit) v.m_type = KindOfNull;
   return EmptyArray::MakeMixed(k, v).arr;
@@ -272,7 +272,7 @@ arr_lval EmptyArray::LvalForceNew(ArrayData*, bool) {
   return EmptyArray::MakePacked(make_tv<KindOfNull>());
 }
 
-ArrayData* EmptyArray::Append(ArrayData*, Cell v) {
+ArrayData* EmptyArray::Append(ArrayData*, TypedValue v) {
   tvIncRefGen(v);
   return EmptyArray::MakePackedInl(v).arr;
 }
@@ -312,7 +312,7 @@ ArrayData* EmptyArray::PopOrDequeue(ArrayData* ad, Variant& value) {
   return ad;
 }
 
-ArrayData* EmptyArray::Prepend(ArrayData*, Cell v) {
+ArrayData* EmptyArray::Prepend(ArrayData*, TypedValue v) {
   tvIncRefGen(v);
   return EmptyArray::MakePacked(v).arr;
 }

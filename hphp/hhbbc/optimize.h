@@ -53,7 +53,7 @@ void optimize_class_prop_type_hints(const Index& index, Context ctx);
 /*
  * Return a bytecode to generate the value in cell
  */
-Bytecode gen_constant(const Cell& cell);
+Bytecode gen_constant(const TypedValue& cell);
 
 //////////////////////////////////////////////////////////////////////
 

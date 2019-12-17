@@ -235,9 +235,9 @@ union ArgUnion {
 
 enum FlavorDesc {
   NOV,  // None
-  CV,   // Cell
+  CV,   // TypedValue
   UV,   // Uninit
-  CUV,  // Cell, or Uninit argument
+  CUV,  // TypedValue, or Uninit argument
 };
 
 enum InstrFlags {

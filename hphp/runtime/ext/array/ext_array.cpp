@@ -412,7 +412,7 @@ TypedValue HHVM_FUNCTION(array_keys,
   IterateKV(
     input,
     [](ArrayData*) { return false; },
-    [&](Cell k, TypedValue) {
+    [&](TypedValue k, TypedValue) {
       ai.append(k);
     },
     [](ObjectData*) {}
@@ -1512,7 +1512,7 @@ Variant array_search(const Variant& needle,
   auto ok = strict ?
     IterateKV(*haystack.asTypedValue(),
               [](ArrayData*) { return false; },
-              [&](Cell k, TypedValue v) -> bool {
+              [&](TypedValue k, TypedValue v) -> bool {
                 if (tvSame(v, *needle.asTypedValue())) {
                   ret = VarNR(k);
                   return true;
@@ -1522,7 +1522,7 @@ Variant array_search(const Variant& needle,
               [](ObjectData*) { return false; }) :
     IterateKV(*haystack.asTypedValue(),
               [](ArrayData*) { return false; },
-              [&](Cell k, TypedValue v) -> bool {
+              [&](TypedValue k, TypedValue v) -> bool {
                 if (tvEqual(v, *needle.asTypedValue())) {
                   ret = VarNR(k);
                   return true;
@@ -1633,7 +1633,7 @@ static int cmp_func(const Variant& v1, const Variant& v2, const void *data) {
 // diff functions
 
 static inline void addToSetHelper(const req::ptr<c_Set>& st,
-                                  const Cell c,
+                                  const TypedValue c,
                                   TypedValue* strTv,
                                   bool convertIntLikeStrs) {
   if (c.m_type == KindOfInt64) {
@@ -1657,7 +1657,7 @@ static inline void addToSetHelper(const req::ptr<c_Set>& st,
 }
 
 static inline bool checkSetHelper(const req::ptr<c_Set>& st,
-                                  const Cell c,
+                                  const TypedValue c,
                                   TypedValue* strTv,
                                   bool convertIntLikeStrs) {
   if (c.m_type == KindOfInt64) {
@@ -1804,7 +1804,7 @@ namespace {
 
 template <typename T>
 ALWAYS_INLINE
-bool array_diff_intersect_key_inputs_ok(const Cell& c1, const Cell& c2,
+bool array_diff_intersect_key_inputs_ok(const TypedValue& c1, const TypedValue& c2,
                                         const ArrayData* args,
                                         const char* fname,
                                         T callback) {
@@ -1820,7 +1820,7 @@ bool array_diff_intersect_key_inputs_ok(const Cell& c1, const Cell& c2,
   callback(getContainerSize(c2));
 
   bool ok = true;
-  IterateKVNoInc(args, [&](Cell k, TypedValue v) {
+  IterateKVNoInc(args, [&](TypedValue k, TypedValue v) {
     assertx(k.m_type == KindOfInt64);
     if (isClsMethType(v.m_type)) {
       raiseIsClsMethWarning(fname, k.m_data.num + 3);
@@ -1842,7 +1842,7 @@ bool array_diff_intersect_key_inputs_ok(const Cell& c1, const Cell& c2,
 
 template <bool diff, bool coerceThis, bool coerceAd, typename SI, typename SS>
 ALWAYS_INLINE
-void array_diff_intersect_key_check_arr(ArrayData* ad, Cell k, TypedValue v,
+void array_diff_intersect_key_check_arr(ArrayData* ad, TypedValue k, TypedValue v,
                                         SI setInt, SS setStr) {
   if (k.m_type == KindOfInt64) {
     if (ad->exists(k.m_data.num)) {
@@ -1899,7 +1899,7 @@ void array_diff_intersect_key_check_arr(ArrayData* ad, Cell k, TypedValue v,
 
 template <bool diff, bool coerceThis, typename SI, typename SS>
 ALWAYS_INLINE
-void array_diff_intersect_key_check_pair(Cell k, TypedValue v, SI setInt,
+void array_diff_intersect_key_check_pair(TypedValue k, TypedValue v, SI setInt,
                                          SS setStr) {
   if (k.m_type == KindOfInt64) {
     if (k.m_data.num == 0 || k.m_data.num == 1) {
@@ -1927,7 +1927,7 @@ void array_diff_intersect_key_check_pair(Cell k, TypedValue v, SI setInt,
 
 template <bool coerceThis, bool coerceAd, typename SP>
 ALWAYS_INLINE
-void array_intersect_key_check_pos(const ArrayData* ad, Cell k, SP setPos) {
+void array_intersect_key_check_pos(const ArrayData* ad, TypedValue k, SP setPos) {
   if (k.m_type == KindOfInt64) {
     setPos(ad->nvGetIntPos(k.m_data.num));
     if (coerceAd) {
@@ -2008,12 +2008,12 @@ TypedValue HHVM_FUNCTION(array_diff_key,
     // array differently if right was a Pair (and so rightAd is nullptr)
     if (!rightAd) {
       if (isArrayLikeType(type(left))) {
-        iterate_left_with([&](Cell k, TypedValue v) {
+        iterate_left_with([&](TypedValue k, TypedValue v) {
           array_diff_intersect_key_check_pair<true, false>(
             k, v, setInt, setStr);
         });
       } else {
-        iterate_left_with([&](Cell k, TypedValue v) {
+        iterate_left_with([&](TypedValue k, TypedValue v) {
           array_diff_intersect_key_check_pair<true, true>(
             k, v, setInt, setStr);
         });
@@ -2021,24 +2021,24 @@ TypedValue HHVM_FUNCTION(array_diff_key,
     } else {
       if (isArrayLikeType(type(left))) {
         if (isArrayLikeType(type(right))) {
-          iterate_left_with([&](Cell k, TypedValue v) {
+          iterate_left_with([&](TypedValue k, TypedValue v) {
             array_diff_intersect_key_check_arr<true, false, false>(
               rightAd, k, v, setInt, setStr);
           });
         } else {
-          iterate_left_with([&](Cell k, TypedValue v) {
+          iterate_left_with([&](TypedValue k, TypedValue v) {
             array_diff_intersect_key_check_arr<true, false, true>(
               rightAd, k, v, setInt, setStr);
           });
         }
       } else {
         if (isArrayLikeType(type(right))) {
-          iterate_left_with([&](Cell k, TypedValue v) {
+          iterate_left_with([&](TypedValue k, TypedValue v) {
             array_diff_intersect_key_check_arr<true, true, false>(
               rightAd, k, v, setInt, setStr);
           });
         } else {
-          iterate_left_with([&](Cell k, TypedValue v) {
+          iterate_left_with([&](TypedValue k, TypedValue v) {
             array_diff_intersect_key_check_arr<true, true, true>(
               rightAd, k, v, setInt, setStr);
           });
@@ -2186,7 +2186,7 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
 }
 
 static inline void addToIntersectMapHelper(const req::ptr<c_Map>& mp,
-                                           const Cell c,
+                                           const TypedValue c,
                                            TypedValue* intOneTv,
                                            TypedValue* strTv,
                                            bool convertIntLikeStrs) {
@@ -2211,7 +2211,7 @@ static inline void addToIntersectMapHelper(const req::ptr<c_Map>& mp,
 }
 
 static inline void updateIntersectMapHelper(const req::ptr<c_Map>& mp,
-                                            const Cell c,
+                                            const TypedValue c,
                                             int pos,
                                             TypedValue* strTv,
                                             bool convertIntLikeStrs) {
@@ -2468,21 +2468,21 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
 
       if (coerceLeft) {
         if (coerceRight) {
-          iterate_right_with([&](Cell k, TypedValue) {
+          iterate_right_with([&](TypedValue k, TypedValue) {
             array_intersect_key_check_pos<true, true>(leftAd, k, setPos);
           });
         } else {
-          iterate_right_with([&](Cell k, TypedValue) {
+          iterate_right_with([&](TypedValue k, TypedValue) {
             array_intersect_key_check_pos<false, true>(leftAd, k, setPos);
           });
         }
       } else {
         if (coerceRight) {
-          iterate_right_with([&](Cell k, TypedValue) {
+          iterate_right_with([&](TypedValue k, TypedValue) {
             array_intersect_key_check_pos<true, false>(leftAd, k, setPos);
           });
         } else {
-          iterate_right_with([&](Cell k, TypedValue) {
+          iterate_right_with([&](TypedValue k, TypedValue) {
             array_intersect_key_check_pos<false, false>(leftAd, k, setPos);
           });
         }
@@ -2555,12 +2555,12 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
     // array differently if right was a Pair (and so rightAd is nullptr)
     if (!rightAd) {
       if (isArrayLikeType(type(left))) {
-        iterate_left_with([&](Cell k, TypedValue v) {
+        iterate_left_with([&](TypedValue k, TypedValue v) {
           array_diff_intersect_key_check_pair<false, false>(
             k, v, setInt, setStr);
         });
       } else {
-        iterate_left_with([&](Cell k, TypedValue v) {
+        iterate_left_with([&](TypedValue k, TypedValue v) {
           array_diff_intersect_key_check_pair<false, true>(
             k, v, setInt, setStr);
         });
@@ -2568,24 +2568,24 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
     } else {
       if (isArrayLikeType(type(left))) {
         if (isArrayLikeType(type(right))) {
-          iterate_left_with([&](Cell k, TypedValue v) {
+          iterate_left_with([&](TypedValue k, TypedValue v) {
             array_diff_intersect_key_check_arr<false, false, false>(
               rightAd, k, v, setInt, setStr);
           });
         } else {
-          iterate_left_with([&](Cell k, TypedValue v) {
+          iterate_left_with([&](TypedValue k, TypedValue v) {
             array_diff_intersect_key_check_arr<false, false, true>(
               rightAd, k, v, setInt, setStr);
           });
         }
       } else {
         if (isArrayLikeType(type(right))) {
-          iterate_left_with([&](Cell k, TypedValue v) {
+          iterate_left_with([&](TypedValue k, TypedValue v) {
             array_diff_intersect_key_check_arr<false, true, false>(
               rightAd, k, v, setInt, setStr);
           });
         } else {
-          iterate_left_with([&](Cell k, TypedValue v) {
+          iterate_left_with([&](TypedValue k, TypedValue v) {
             array_diff_intersect_key_check_arr<false, true, true>(
               rightAd, k, v, setInt, setStr);
           });
@@ -2809,7 +2809,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(Collator, s_collator);
 
 namespace {
 struct ArraySortTmp {
-  ArraySortTmp(Cell* arr, SortFunction sf) : m_arr(arr) {
+  ArraySortTmp(TypedValue* arr, SortFunction sf) : m_arr(arr) {
     m_ad = arr->m_data.parr->escalateForSort(sf);
     assertx(m_ad == arr->m_data.parr ||
             m_ad->empty() ||
@@ -2824,7 +2824,7 @@ struct ArraySortTmp {
   }
   ArrayData* operator->() { return m_ad; }
  private:
-  Cell* m_arr;
+  TypedValue* m_arr;
   ArrayData* m_ad;
 };
 }
@@ -3404,8 +3404,8 @@ Array HHVM_FUNCTION(merge_xhp_attr_declarations,
                     const Array& arr2,
                     const Array& rest) {
   auto ret = Array::CreateDArray();
-  IterateKV(arr1.get(), [&](Cell k, TypedValue v) { ret.set(k, v); });
-  IterateKV(arr2.get(), [&](Cell k, TypedValue v) { ret.set(k, v); });
+  IterateKV(arr1.get(), [&](TypedValue k, TypedValue v) { ret.set(k, v); });
+  IterateKV(arr2.get(), [&](TypedValue k, TypedValue v) { ret.set(k, v); });
   int idx = 2;
   IterateV(
     rest.get(),
@@ -3420,7 +3420,7 @@ Array HHVM_FUNCTION(merge_xhp_attr_declarations,
         ret = Array{};
         return true;
       }
-      IterateKV(arr.m_data.parr, [&](Cell k, TypedValue v) { ret.set(k, v); });
+      IterateKV(arr.m_data.parr, [&](TypedValue k, TypedValue v) { ret.set(k, v); });
       ++idx;
       return false;
     }

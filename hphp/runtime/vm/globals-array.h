@@ -67,7 +67,7 @@ public:
     return const_cast<ArrayData*>(ad);
   }
   static size_t Vsize(const ArrayData*);
-  static Cell NvGetKey(const ArrayData* ad, ssize_t pos);
+  static TypedValue NvGetKey(const ArrayData* ad, ssize_t pos);
   static tv_rval RvalPos(const ArrayData*, ssize_t pos);
 
   static bool ExistsInt(const ArrayData* ad, int64_t k);
@@ -87,23 +87,23 @@ public:
   static arr_lval LvalSilentStr(ArrayData*, StringData* k, bool copy);
   static arr_lval LvalForceNew(ArrayData*, bool copy);
 
-  static ArrayData* SetIntMove(ArrayData*, int64_t k, Cell v);
-  static ArrayData* SetIntInPlace(ArrayData*, int64_t k, Cell v);
+  static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetIntInPlace(ArrayData*, int64_t k, TypedValue v);
   static constexpr auto SetInt = &SetIntInPlace;
-  static ArrayData* SetStrMove(ArrayData*, StringData* k, Cell v);
-  static ArrayData* SetStrInPlace(ArrayData*, StringData* k, Cell v);
+  static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
+  static ArrayData* SetStrInPlace(ArrayData*, StringData* k, TypedValue v);
   static constexpr auto SetStr = &SetStrInPlace;
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
   static constexpr auto RemoveInt = &RemoveIntInPlace;
   static ArrayData* RemoveStrInPlace(ArrayData*, const StringData* k);
   static constexpr auto RemoveStr = &RemoveStrInPlace;
 
-  static ArrayData* AppendInPlace(ArrayData*, Cell v);
+  static ArrayData* AppendInPlace(ArrayData*, TypedValue v);
   static constexpr auto Append = &AppendInPlace;
 
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
-  static ArrayData* Prepend(ArrayData*, Cell v);
+  static ArrayData* Prepend(ArrayData*, TypedValue v);
 
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);

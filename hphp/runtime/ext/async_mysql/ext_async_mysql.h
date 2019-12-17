@@ -285,7 +285,7 @@ struct AsyncMysqlConnectEvent final : AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) final;
+  void unserialize(TypedValue& result) final;
 
  private:
   std::shared_ptr<am::ConnectOperation> m_op;
@@ -306,7 +306,7 @@ struct AsyncMysqlQueryEvent final : AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) final;
+  void unserialize(TypedValue& result) final;
 
  private:
   std::shared_ptr<am::QueryOperation> m_query_op;
@@ -327,7 +327,7 @@ struct AsyncMysqlMultiQueryEvent final : AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) final;
+  void unserialize(TypedValue& result) final;
 
  private:
   std::shared_ptr<am::MultiQueryOperation> m_multi_op;
@@ -351,7 +351,7 @@ struct AsyncMysqlConnectAndMultiQueryEvent final : AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) final;
+  void unserialize(TypedValue& result) final;
 
  private:
   std::shared_ptr<am::ConnectOperation> m_connect_op;

@@ -182,7 +182,7 @@ struct Generator final : BaseGenerator {
     return Native::data<Generator>(obj);
   }
 
-  void yield(Offset suspendOffset, const Cell* key, Cell value);
+  void yield(Offset suspendOffset, const TypedValue* key, TypedValue value);
   void copyVars(const ActRec *fp);
   void ret(TypedValue tv) { done(tv); }
   void fail() { done(make_tv<KindOfUninit>()); }
@@ -196,8 +196,8 @@ private:
 
 public:
   int64_t m_index;
-  Cell m_key;
-  Cell m_value;
+  TypedValue m_key;
+  TypedValue m_value;
   TypedValue m_delegate;
 
   static Class* s_class;

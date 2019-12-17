@@ -1030,7 +1030,7 @@ String ExecutionContext::getenv(const String& name) const {
   return String();
 }
 
-Cell ExecutionContext::lookupClsCns(const NamedEntity* ne,
+TypedValue ExecutionContext::lookupClsCns(const NamedEntity* ne,
                                       const StringData* cls,
                                       const StringData* cns) {
   Class* class_ = nullptr;
@@ -1049,7 +1049,7 @@ Cell ExecutionContext::lookupClsCns(const NamedEntity* ne,
   if (class_ == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, cls->data());
   }
-  Cell clsCns = class_->clsCnsGet(cns);
+  TypedValue clsCns = class_->clsCnsGet(cns);
   if (clsCns.m_type == KindOfUninit) {
     raise_error("Couldn't find constant %s::%s", cls->data(), cns->data());
   }
@@ -1362,7 +1362,7 @@ void ExecutionContext::syncGdbState() {
   }
 }
 
-void ExecutionContext::pushVMState(Cell* savedSP) {
+void ExecutionContext::pushVMState(TypedValue* savedSP) {
   if (UNLIKELY(!vmfp())) {
     // first entry
     assertx(m_nestedVMs.size() == 0);
@@ -1802,7 +1802,7 @@ static void prepareAsyncFuncEntry(ActRec* enterFnAr, Resumable* resumable) {
 
 void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
                                        ObjectData* freeObj,
-                                       const Cell awaitResult) {
+                                       const TypedValue awaitResult) {
   assertx(tl_regState == VMRegState::CLEAN);
   SCOPE_EXIT { assertx(tl_regState == VMRegState::CLEAN); };
 
@@ -1811,7 +1811,7 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
   // in normal re-entry), because the ActRec isn't on the stack.
   checkStack(vmStack(), fp->func(), 0);
 
-  Cell* savedSP = vmStack().top();
+  TypedValue* savedSP = vmStack().top();
   tvDup(awaitResult, *vmStack().allocC());
 
   // decref after awaitResult is on the stack

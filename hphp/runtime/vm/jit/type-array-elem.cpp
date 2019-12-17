@@ -98,7 +98,7 @@ std::pair<Type, bool> arrElemType(Type arr, Type idx, const Class* ctx) {
     auto type = TBottom;
     IterateKV(
       arr.arrVal(),
-      [&](Cell k, TypedValue v) {
+      [&](TypedValue k, TypedValue v) {
         // Ignore values which can't correspond to the key's type
         if (isIntType(k.m_type)) {
           if (dissected.maybe(TInt)) type |= Type::cns(v);
@@ -254,7 +254,7 @@ std::pair<Type, bool> dictElemType(Type arr, Type idx) {
     auto type = TBottom;
     MixedArray::IterateKV(
       MixedArray::asMixed(arr.dictVal()),
-      [&](Cell k, TypedValue v) {
+      [&](TypedValue k, TypedValue v) {
         // Ignore values which can't correspond to the key's type
         if (isIntType(k.m_type)) {
           if (idx.maybe(TInt)) type |= Type::cns(v);

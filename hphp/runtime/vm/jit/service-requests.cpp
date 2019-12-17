@@ -244,8 +244,8 @@ FPInvOffset extract_spoff(TCA stub) {
       if (!instr.isLea()) return FPInvOffset{0};
 
       auto const offBytes = safe_cast<int32_t>(instr.offset());
-      always_assert((offBytes % sizeof(Cell)) == 0);
-      return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
+      always_assert((offBytes % sizeof(TypedValue)) == 0);
+      return FPInvOffset{-(offBytes / int32_t{sizeof(TypedValue)})};
     }
 
     case Arch::ARM: {
@@ -253,29 +253,29 @@ FPInvOffset extract_spoff(TCA stub) {
 
       if (instr->IsAddSubImmediate()) {
         auto const offBytes = safe_cast<int32_t>(instr->ImmAddSub());
-        always_assert((offBytes % sizeof(Cell)) == 0);
+        always_assert((offBytes % sizeof(TypedValue)) == 0);
 
         if (instr->Mask(vixl::AddSubImmediateMask) == vixl::SUB_w_imm ||
             instr->Mask(vixl::AddSubImmediateMask) == vixl::SUB_x_imm) {
-          return FPInvOffset{offBytes / int32_t{sizeof(Cell)}};
+          return FPInvOffset{offBytes / int32_t{sizeof(TypedValue)}};
         } else if (instr->Mask(vixl::AddSubImmediateMask) == vixl::ADD_w_imm ||
                    instr->Mask(vixl::AddSubImmediateMask) == vixl::ADD_x_imm) {
-          return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
+          return FPInvOffset{-(offBytes / int32_t{sizeof(TypedValue)})};
         }
       } else if (instr->IsMovn()) {
         auto next = instr->NextInstruction();
         always_assert(next->Mask(vixl::AddSubShiftedMask) == vixl::ADD_w_shift ||
                       next->Mask(vixl::AddSubShiftedMask) == vixl::ADD_x_shift);
         auto const offBytes = safe_cast<int32_t>(~instr->ImmMoveWide());
-        always_assert((offBytes % sizeof(Cell)) == 0);
-        return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
+        always_assert((offBytes % sizeof(TypedValue)) == 0);
+        return FPInvOffset{-(offBytes / int32_t{sizeof(TypedValue)})};
       } else if (instr->IsMovz()) {
         auto next = instr->NextInstruction();
         always_assert(next->Mask(vixl::AddSubShiftedMask) == vixl::SUB_w_shift ||
                       next->Mask(vixl::AddSubShiftedMask) == vixl::SUB_x_shift);
         auto const offBytes = safe_cast<int32_t>(instr->ImmMoveWide());
-        always_assert((offBytes % sizeof(Cell)) == 0);
-        return FPInvOffset{offBytes / int32_t{sizeof(Cell)}};
+        always_assert((offBytes % sizeof(TypedValue)) == 0);
+        return FPInvOffset{offBytes / int32_t{sizeof(TypedValue)}};
       } else {
         always_assert(false && "Expected an instruction that offsets SP");
       }
@@ -287,7 +287,7 @@ FPInvOffset extract_spoff(TCA stub) {
         return FPInvOffset{0};
       } else {
         auto const offBytes = safe_cast<int32_t>(instr.offset());
-        return FPInvOffset{-(offBytes / int32_t{sizeof(Cell)})};
+        return FPInvOffset{-(offBytes / int32_t{sizeof(TypedValue)})};
       }
     }
   }

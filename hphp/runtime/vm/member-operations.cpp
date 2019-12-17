@@ -242,7 +242,7 @@ void throw_inout_undefined_index(const StringData* sd) {
   throwArrayKeyException(sd, true);
 }
 
-Cell incDecBodySlow(IncDecOp op, tv_lval fr) {
+TypedValue incDecBodySlow(IncDecOp op, tv_lval fr) {
   assertx(tvIsPlausible(*fr));
   assertx(type(fr) != KindOfUninit);
 

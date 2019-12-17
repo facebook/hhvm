@@ -30,16 +30,16 @@ bindClassConstant(const StringData* clsName, const StringData* cnsName) {
   return ret;
 }
 
-Link<Cell, rds::Mode::Normal>
+Link<TypedValue, rds::Mode::Normal>
 bindStaticMemoValue(const Func* func) {
-  return bind<Cell,Mode::Normal>(
+  return bind<TypedValue,Mode::Normal>(
     StaticMemoValue { func->getFuncId() }
   );
 }
 
-Link<Cell, rds::Mode::Normal>
+Link<TypedValue, rds::Mode::Normal>
 attachStaticMemoValue(const Func* func) {
-  return attach<Cell,Mode::Normal>(
+  return attach<TypedValue,Mode::Normal>(
     StaticMemoValue { func->getFuncId() }
   );
 }
@@ -58,16 +58,16 @@ attachStaticMemoCache(const Func* func) {
   );
 }
 
-Link<Cell, rds::Mode::Normal>
+Link<TypedValue, rds::Mode::Normal>
 bindLSBMemoValue(const Class* cls, const Func* func) {
-  return bind<Cell,Mode::Normal>(
+  return bind<TypedValue,Mode::Normal>(
     LSBMemoValue { cls, func->getFuncId() }
   );
 }
 
-Link<Cell, rds::Mode::Normal>
+Link<TypedValue, rds::Mode::Normal>
 attachLSBMemoValue(const Class* cls, const Func* func) {
-  return attach<Cell,Mode::Normal>(
+  return attach<TypedValue,Mode::Normal>(
     LSBMemoValue { cls, func->getFuncId() }
   );
 }

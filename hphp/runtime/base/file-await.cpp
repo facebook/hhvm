@@ -52,7 +52,7 @@ FileAwait::~FileAwait() {
   }
 }
 
-void FileAwait::unserialize(Cell& c) {
+void FileAwait::unserialize(TypedValue& c) {
   c.m_type = KindOfInt64;
   c.m_data.num = m_result;
 }
@@ -72,7 +72,7 @@ void FileAwait::setFinished(int64_t status) {
 
 Object File::await(uint16_t events, double timeout) {
   if (isClosed()) {
-    Cell closedResult;
+    TypedValue closedResult;
     closedResult.m_type = KindOfInt64;
     closedResult.m_data.num = FileAwait::CLOSED;
     return Object{c_StaticWaitHandle::CreateSucceeded(closedResult)};

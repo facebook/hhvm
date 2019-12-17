@@ -338,7 +338,7 @@ Array& ObjectData::setDynPropArray(const Array& newArr) {
     throw_object_forbids_dynamic_props(getClassName().data());
   }
   if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
-    IterateKV(newArr.get(), [&] (Cell k, TypedValue v) {
+    IterateKV(newArr.get(), [&] (TypedValue k, TypedValue v) {
       auto const key = tvCastToString(k);
       raiseCreateDynamicProp(key.get());
     });
@@ -359,7 +359,7 @@ tv_lval ObjectData::makeDynProp(const StringData* key) {
   return reserveProperties().lvalForce(StrNR(key), AccessFlags::Key);
 }
 
-void ObjectData::setDynProp(const StringData* key, Cell val) {
+void ObjectData::setDynProp(const StringData* key, TypedValue val) {
   if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
     raiseCreateDynamicProp(key);
   }
@@ -489,7 +489,7 @@ void ObjectData::o_getArray(Array& props,
   if (!m_cls->numDeclProperties() && getAttribute(HasDynPropArr)) {
     props = dynPropArray();
     if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
-      IterateKV(props.get(), [&](Cell k, TypedValue) {
+      IterateKV(props.get(), [&](TypedValue k, TypedValue) {
         auto const key = tvCastToString(k);
         raiseReadDynamicProp(key.get());
       });
@@ -522,7 +522,7 @@ void ObjectData::o_getArray(Array& props,
         }
       }
     },
-    [&](Cell key_tv, TypedValue val) {
+    [&](TypedValue key_tv, TypedValue val) {
       props.set(key_tv, val, true);
       if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
         auto const key = tvCastToString(key_tv);
@@ -618,7 +618,7 @@ Array ObjectData::o_toIterArray(const String& context) {
     if (getAttribute(HasDynPropArr)) {
       auto const props = dynPropArray();
       if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
-        IterateKV(props.get(), [&](Cell k, TypedValue) {
+        IterateKV(props.get(), [&](TypedValue k, TypedValue) {
           auto const key = tvCastToString(k);
           raiseReadDynamicProp(key.get());
         });
@@ -903,7 +903,7 @@ bool ObjectData::equal(const ObjectData& other) const {
       }
       return false;
     },
-    [&](Cell key, TypedValue thisVal) {
+    [&](TypedValue key, TypedValue thisVal) {
       if (!otherDynProps->exists(key) ||
           !tvEqual(thisVal, otherDynProps->get(key).tv())) {
         result = false;
@@ -996,7 +996,7 @@ int64_t ObjectData::compare(const ObjectData& other) const {
       }
       return false;
     },
-    [&](Cell key, TypedValue thisVal) {
+    [&](TypedValue key, TypedValue thisVal) {
       if (!otherDynProps->exists(key)) {
         result = 1;
         return true;
@@ -1323,7 +1323,7 @@ struct MagicInvoker {
 
 }
 
-bool ObjectData::invokeSet(const StringData* key, Cell val) {
+bool ObjectData::invokeSet(const StringData* key, TypedValue val) {
   auto const info = PropAccessInfo { this, key, Class::UseSet };
   auto r = magic_prop_impl(key, info, [&] {
     auto const meth = m_cls->lookupMethod(s___set.get());
@@ -1376,7 +1376,7 @@ InvokeResult ObjectData::invokeNativeGetProp(const StringData* key) {
   );
 }
 
-bool ObjectData::invokeNativeSetProp(const StringData* key, Cell val) {
+bool ObjectData::invokeNativeSetProp(const StringData* key, TypedValue val) {
   auto r = guardedNativePropResult(
     Native::setProp(Object{this}, StrNR(key), tvAsCVarRef(&val))
   );
@@ -1607,7 +1607,7 @@ bool ObjectData::propEmpty(const Class* ctx, const StringData* key) {
   return propEmptyImpl(ctx, key);
 }
 
-void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
+void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val) {
   assertx(tvIsPlausible(val));
   assertx(val.m_type != KindOfUninit);
 
@@ -1656,7 +1656,7 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
                               Class* ctx,
                               SetOpOp op,
                               const StringData* key,
-                              Cell* val) {
+                              TypedValue* val) {
   auto const lookup = getPropImpl<true, true, false>(ctx, key);
   auto prop = lookup.val;
 
@@ -1692,7 +1692,7 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
        * before assigning back to the property (if we raise a warning and throw,
        * we don't want to have already put the value into the prop).
        */
-      Cell temp;
+      TypedValue temp;
       tvDup(*prop, temp);
       SCOPE_FAIL { tvDecRefGen(&temp); };
       setopBody(&temp, op, val);
@@ -1759,7 +1759,7 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
   return prop;
 }
 
-Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
+TypedValue ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   auto const lookup = getPropImpl<true, true, false>(ctx, key);
   auto prop = lookup.val;
 
@@ -1810,7 +1810,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     }();
     if (fast) return IncDecBody(op, tvAssertPlausible(prop));
 
-    Cell temp;
+    TypedValue temp;
     tvDup(tvAssertPlausible(*prop), temp);
     SCOPE_FAIL { tvDecRefGen(&temp); };
     auto result = IncDecBody(op, &temp);

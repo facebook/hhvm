@@ -398,7 +398,7 @@ bool propagate_constants(const Bytecode& op, State& state, Gen gen) {
   auto const numPush = op.numPush();
   auto const stkSize = state.stack.size();
   constexpr auto numCells = 4;
-  Cell constVals[numCells];
+  TypedValue constVals[numCells];
 
   // All outputs of the instruction must have constant types for this
   // to be allowed.
@@ -922,7 +922,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
 
 //////////////////////////////////////////////////////////////////////
 
-Bytecode gen_constant(const Cell& cell) {
+Bytecode gen_constant(const TypedValue& cell) {
   switch (cell.m_type) {
     case KindOfUninit:
       return bc::NullUninit {};

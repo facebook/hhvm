@@ -134,7 +134,7 @@ void c_AsyncGeneratorWaitHandle::await(req::ptr<c_WaitableWaitHandle>&& child) {
     .addParent(m_blockable, AsioBlockable::Kind::AsyncGeneratorWaitHandle);
 }
 
-void c_AsyncGeneratorWaitHandle::ret(Cell& result) {
+void c_AsyncGeneratorWaitHandle::ret(TypedValue& result) {
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
   tvCopy(result, m_resultOrException);

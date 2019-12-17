@@ -122,12 +122,12 @@ struct c_Awaitable : ObjectData {
     return offsetof(c_Awaitable, m_resultOrException);
   }
 
-  static c_Awaitable* fromCell(Cell cell) {
+  static c_Awaitable* fromCell(TypedValue cell) {
     return (
         cell.m_type == KindOfObject && cell.m_data.pobj->isWaitHandle()
       ) ? static_cast<c_Awaitable*>(cell.m_data.pobj) : nullptr;
   }
-  static c_Awaitable* fromCellAssert(Cell cell) {
+  static c_Awaitable* fromCellAssert(TypedValue cell) {
     assertx(cell.m_type == KindOfObject);
     assertx(cell.m_data.pobj->isWaitHandle());
     return static_cast<c_Awaitable*>(cell.m_data.pobj);
@@ -135,7 +135,7 @@ struct c_Awaitable : ObjectData {
   bool isFinished() const { return getState() <= STATE_FAILED; }
   bool isSucceeded() const { return getState() == STATE_SUCCEEDED; }
   bool isFailed() const { return getState() == STATE_FAILED; }
-  Cell getResult() const {
+  TypedValue getResult() const {
     assertx(isSucceeded());
     return m_resultOrException;
   }
@@ -190,7 +190,7 @@ struct c_Awaitable : ObjectData {
  protected:
   union {
     // STATE_SUCCEEDED || STATE_FAILED
-    Cell m_resultOrException;
+    TypedValue m_resultOrException;
 
     // !STATE_SUCCEEDED && !STATE_FAILED
     struct {
@@ -200,7 +200,7 @@ struct c_Awaitable : ObjectData {
       // WaitableWaitHandle: !STATE_SUCCEEDED && !STATE_FAILED
       context_idx_t m_contextIdx;
 
-      // valid in any WaitHandle state. doesn't overlap Cell fields.
+      // valid in any WaitHandle state. doesn't overlap TypedValue fields.
       uint8_t m_kind_state;
 
       // type index of concrete waithandle for gc-scanning
@@ -224,7 +224,7 @@ struct c_Awaitable : ObjectData {
 };
 
 template<class T>
-T* wait_handle(Cell cell) {
+T* wait_handle(TypedValue cell) {
   return wait_handle<T>(c_Awaitable::fromCellAssert(cell));
 }
 

@@ -122,7 +122,7 @@ Array HHVM_FUNCTION(get_class_constants, const String& className) {
     if (consts[i].cls == cls && !consts[i].isAbstract() &&
         !consts[i].isType()) {
       auto const name  = const_cast<StringData*>(consts[i].name.get());
-      Cell value = consts[i].val;
+      TypedValue value = consts[i].val;
       // Handle dynamically set constants
       if (value.m_type == KindOfUninit) {
         value = cls->clsCnsGet(consts[i].name);

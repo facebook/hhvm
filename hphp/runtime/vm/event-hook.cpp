@@ -457,7 +457,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
       frame_free_locals_no_hook(ar);
 
       // Tear down the callee frame, then push the return value.
-      stack.trim((Cell*)(ar + 1));
+      stack.trim((TypedValue*)(ar + 1));
     };
 
     if (UNLIKELY(func->takesInOutParams())) {
@@ -475,7 +475,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
       };
 
       uint32_t param = 0;
-      IterateKV(args.get(), [&] (Cell, TypedValue v) {
+      IterateKV(args.get(), [&] (TypedValue, TypedValue v) {
         if (param >= func->numParams() || !func->isInOut(param++)) {
           return;
         }

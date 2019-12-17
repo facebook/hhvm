@@ -681,7 +681,7 @@ folly::Optional<Type> const_fold(ISS& env,
                                  bool variadicsPacked) {
   assert(phpFunc.attrs & AttrIsFoldable);
 
-  std::vector<Cell> args(nArgs);
+  std::vector<TypedValue> args(nArgs);
   auto const firstArgPos = numExtraInputs + nArgs - 1;
   for (auto i = uint32_t{0}; i < nArgs; ++i) {
     auto const val = tv(topT(env, firstArgPos - i));

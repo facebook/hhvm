@@ -88,7 +88,7 @@ void cgStLocRange(IRLS& env, const IRInstruction* inst) {
       auto const sf = v.makeReg();
 
       storeTV(v, i[0], loc, val);
-      v << subqi{int32_t{sizeof(Cell)}, i, res, v.makeReg()};
+      v << subqi{int32_t{sizeof(TypedValue)}, i, res, v.makeReg()};
       v << cmpq{res, nreg, sf};
       return sf;
     },

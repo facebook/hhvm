@@ -3305,7 +3305,7 @@ SSATmp* simplifyCheckMixedArrayKeys(State& env, const IRInstruction* inst) {
   if (arr == nullptr) return mergeBranchDests(env, inst);
 
   auto match = true;
-  IterateKVNoInc(arr, [&](Cell key, TypedValue val){
+  IterateKVNoInc(arr, [&](TypedValue key, TypedValue val){
     match &= Type::cns(key) <= inst->typeParam();
     return !match;
   });

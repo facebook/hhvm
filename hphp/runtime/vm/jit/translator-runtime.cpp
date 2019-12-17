@@ -771,7 +771,7 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
 
 //////////////////////////////////////////////////////////////////////
 
-void checkFrame(ActRec* fp, Cell* sp, bool fullCheck) {
+void checkFrame(ActRec* fp, TypedValue* sp, bool fullCheck) {
   const Func* func = fp->m_func;
   func->validate();
   if (func->cls()) {
@@ -781,7 +781,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool fullCheck) {
     assertx(fp->getVarEnv()->getFP() == fp);
   }
   int numLocals = func->numLocals();
-  assertx(sp <= (Cell*)fp - func->numSlotsInFrame() || isResumed(fp));
+  assertx(sp <= (TypedValue*)fp - func->numSlotsInFrame() || isResumed(fp));
 
   if (!fullCheck) return;
 
@@ -923,12 +923,12 @@ ArrayData* resolveTypeStructHelper(
   return resolved.detach();
 }
 
-bool isTypeStructHelper(ArrayData* a, Cell c) {
+bool isTypeStructHelper(ArrayData* a, TypedValue c) {
   auto const ts = ArrNR(a);
   return checkTypeStructureMatchesCell(ts, c);
 }
 
-void throwAsTypeStructExceptionHelper(ArrayData* a, Cell c) {
+void throwAsTypeStructExceptionHelper(ArrayData* a, TypedValue c) {
   std::string givenType, expectedType, errorKey;
   auto const ts = ArrNR(a);
   if (!checkTypeStructureMatchesCell(ts, c, givenType, expectedType,
@@ -966,12 +966,12 @@ void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key) {
 
 namespace MInstrHelpers {
 
-void setNewElemArray(tv_lval base, Cell val) {
+void setNewElemArray(tv_lval base, TypedValue val) {
   HPHP::SetNewElemArray(base, &val);
 }
 
 TypedValue setOpElem(tv_lval base, TypedValue key,
-                     Cell val, SetOpOp op, const MInstrPropState* pState) {
+                     TypedValue val, SetOpOp op, const MInstrPropState* pState) {
   TypedValue localTvRef;
   auto result = HPHP::SetOpElem(localTvRef, op, base, key, &val, pState);
   return cGetRefShuffle(localTvRef, result);

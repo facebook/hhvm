@@ -448,7 +448,7 @@ struct c_Vector : BaseVector {
   void addAllKeysOf(const Variant& val);
   void clear();
   Variant pop();
-  void resize(uint32_t sz, const Cell* val);
+  void resize(uint32_t sz, const TypedValue* val);
   void removeKey(int64_t k);
   void reverse();
   void shuffle();

@@ -69,7 +69,7 @@ AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
 
 c_StaticWaitHandle*
 AsyncGenerator::yield(Offset suspendOffset,
-                      const Cell* key, const Cell value) {
+                      const TypedValue* key, const TypedValue value) {
   assertx(isRunning());
   resumable()->setResumeAddr(nullptr, suspendOffset);
   setState(State::Started);

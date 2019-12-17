@@ -248,7 +248,7 @@ std::pair<int, double> sizeOfArray(
     if (stack) stack->pop_back();
   } else {
     FTRACE(2, "Iterating mixed array\n");
-    IterateKV(ad, [&] (Cell k, TypedValue v) {
+    IterateKV(ad, [&] (TypedValue k, TypedValue v) {
 
       std::pair<int, double> key_size_pair;
       switch (k.m_type) {
@@ -370,7 +370,7 @@ void stringsOfArray(
     });
     path->pop_back();
   } else {
-    IterateKV(ad, [&] (Cell k, TypedValue v) {
+    IterateKV(ad, [&] (TypedValue k, TypedValue v) {
       switch (k.m_type) {
         case KindOfPersistentString:
         case KindOfString: {
@@ -814,7 +814,7 @@ std::pair<int, double> getObjSize(
       size += val_size_pair.first;
       sized += val_size_pair.second;
     },
-    [&](Cell key_tv, TypedValue val) {
+    [&](TypedValue key_tv, TypedValue val) {
       auto key = tvCastToString(key_tv);
       std::pair<int, double> key_size_pair = {0, 0.0};
       if (isStringType(key_tv.m_type)) {
@@ -916,7 +916,7 @@ void getObjStrings(
       path->pop_back();
       FTRACE(2, "   Finished for key/val {}\n", prop.name->data());
     },
-    [&](Cell key_tv, TypedValue val) {
+    [&](TypedValue key_tv, TypedValue val) {
       auto key = tvCastToString(key_tv);
       if (isStringType(key_tv.m_type)) {
         FTRACE(2, "Inspecting dynamic string key {}\n", key.c_str());

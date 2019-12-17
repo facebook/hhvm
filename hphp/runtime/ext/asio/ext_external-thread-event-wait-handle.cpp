@@ -172,7 +172,7 @@ void c_ExternalThreadEventWaitHandle::process() {
   // clean up once event is processed
   auto exit_guard = folly::makeGuard([&] { destroyEvent(); });
 
-  Cell result;
+  TypedValue result;
   try {
     try {
       arrprov::TagOverride tag_override { this };

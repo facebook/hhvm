@@ -1688,7 +1688,7 @@ void checkSize(TypedValue tv, size_t& available) {
   if (isArrayLikeType(type(tv))) {
     update(allocSize(val(tv).parr));
 
-    IterateKVNoInc(val(tv).parr, [&] (Cell k, TypedValue v) {
+    IterateKVNoInc(val(tv).parr, [&] (TypedValue k, TypedValue v) {
       if (isStringType(type(k))) {
         update(val(k).pstr->heapSize());
       }

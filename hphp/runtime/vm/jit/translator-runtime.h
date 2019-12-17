@@ -159,7 +159,7 @@ int64_t switchDoubleHelper(double val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
 
-void checkFrame(ActRec* fp, Cell* sp, bool fullCheck);
+void checkFrame(ActRec* fp, TypedValue* sp, bool fullCheck);
 
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 
@@ -190,8 +190,8 @@ ArrayData* resolveTypeStructHelper(
   bool suppress,
   bool isOrAsOp
 );
-bool isTypeStructHelper(ArrayData*, Cell);
-[[noreturn]] void throwAsTypeStructExceptionHelper(ArrayData*, Cell);
+bool isTypeStructHelper(ArrayData*, TypedValue);
+[[noreturn]] void throwAsTypeStructExceptionHelper(ArrayData*, TypedValue);
 ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData*);
 
 /* Reified generics helpers
@@ -203,10 +203,10 @@ ArrayData* recordReifiedGenericsAndGetTSList(ArrayData*);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
 
 namespace MInstrHelpers {
-void setNewElem(tv_lval base, Cell val, const MInstrPropState*);
-void setNewElemArray(tv_lval base, Cell val);
-void setNewElemVec(tv_lval base, Cell val);
-TypedValue setOpElem(tv_lval base, TypedValue key, Cell val, SetOpOp op,
+void setNewElem(tv_lval base, TypedValue val, const MInstrPropState*);
+void setNewElemArray(tv_lval base, TypedValue val);
+void setNewElemVec(tv_lval base, TypedValue val);
+TypedValue setOpElem(tv_lval base, TypedValue key, TypedValue val, SetOpOp op,
                      const MInstrPropState*);
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);

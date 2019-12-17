@@ -68,14 +68,14 @@ namespace Native {
                                          size_t nProps);
 }
 
-// A slot to store memoization data in. This can be either a Cell storing a
+// A slot to store memoization data in. This can be either a TypedValue storing a
 // single value, or a pointer to a memoization cache.
 struct MemoSlot {
 public:
   /*
-   * We use the type field of the Cell to determine whether this is a single
+   * We use the type field of the TypedValue to determine whether this is a single
    * value or a memo cache. If the type is kInvalidDataType (which cannot occur
-   * for a valid Cell), its a memo cache. As a special case, if type is Uninit,
+   * for a valid TypedValue), its a memo cache. As a special case, if type is Uninit,
    * and the pointer is null, it can also be a cache (its also a value). This
    * lets us initialize the slots with zero regardless of how it will be
    * used. When its actually used, the correct type will be filed in. The
@@ -107,12 +107,12 @@ public:
     return value.m_data.pcache;
   }
 
-  Cell* getValue() {
+  TypedValue* getValue() {
     assertx(isValue());
     assertx(tvIsPlausible(value));
     return &value;
   }
-  const Cell* getValue() const {
+  const TypedValue* getValue() const {
     assertx(isValue());
     assertx(tvIsPlausible(value));
     return &value;
@@ -128,9 +128,9 @@ private:
     isCache() ? scanner.scan(value.m_data.pcache) : scanner.scan(value);
   }
 
-  Cell value;
+  TypedValue value;
 };
-static_assert(sizeof(MemoSlot) == sizeof(Cell), "");
+static_assert(sizeof(MemoSlot) == sizeof(TypedValue), "");
 
 struct InvokeResult {
   TypedValue val;
@@ -528,14 +528,14 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   bool propEmptyImpl(const Class* ctx, const StringData* key);
 
-  void setDynProp(const StringData* key, Cell val);
+  void setDynProp(const StringData* key, TypedValue val);
 
-  bool invokeSet(const StringData* key, Cell val);
+  bool invokeSet(const StringData* key, TypedValue val);
   InvokeResult invokeGet(const StringData* key);
   InvokeResult invokeIsset(const StringData* key);
   bool invokeUnset(const StringData* key);
   InvokeResult invokeNativeGetProp(const StringData* key);
-  bool invokeNativeSetProp(const StringData* key, Cell val);
+  bool invokeNativeSetProp(const StringData* key, TypedValue val);
   InvokeResult invokeNativeIssetProp(const StringData* key);
   bool invokeNativeUnsetProp(const StringData* key);
 
@@ -549,11 +549,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   bool propIsset(const Class* ctx, const StringData* key);
   bool propEmpty(const Class* ctx, const StringData* key);
 
-  void setProp(Class* ctx, const StringData* key, Cell val);
+  void setProp(Class* ctx, const StringData* key, TypedValue val);
   tv_lval setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
-                    const StringData* key, Cell* val);
+                    const StringData* key, TypedValue* val);
 
-  Cell incDecProp(Class* ctx, IncDecOp op, const StringData* key);
+  TypedValue incDecProp(Class* ctx, IncDecOp op, const StringData* key);
 
   void unsetProp(Class* ctx, const StringData* key);
 

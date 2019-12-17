@@ -447,7 +447,7 @@ Variant c_Vector::pop() {
   return Variant(tvAsCVarRef(&tv), Variant::CellCopy());
 }
 
-void c_Vector::resize(uint32_t sz, const Cell* val) {
+void c_Vector::resize(uint32_t sz, const TypedValue* val) {
   if (sz == m_size) {
     return;
   }

@@ -383,7 +383,7 @@ Variant HHVM_FUNCTION(constant, const String& name) {
     Class* cls = getClassByName(data, classNameLen);
     if (cls) {
       String cnsName(constantName, data + len - constantName, CopyString);
-      Cell cns = cls->clsCnsGet(cnsName.get());
+      TypedValue cns = cls->clsCnsGet(cnsName.get());
       if (cns.m_type != KindOfUninit) {
         return tvAsCVarRef(cns);
       }

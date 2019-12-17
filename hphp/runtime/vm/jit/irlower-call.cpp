@@ -458,7 +458,7 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
   }
 }
 
-static void traceCallback(ActRec* fp, Cell* sp, Offset bcOff) {
+static void traceCallback(ActRec* fp, TypedValue* sp, Offset bcOff) {
   if (Trace::moduleEnabled(Trace::hhirTracelets)) {
     FTRACE(0, "{} {} {} {} {}\n",
            fp->m_func->fullName()->data(), bcOff, fp, sp,

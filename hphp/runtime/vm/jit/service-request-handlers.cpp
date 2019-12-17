@@ -213,7 +213,7 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req, TransFlags trflags,
 void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
   auto& regs = vmRegsUnsafe();
   regs.fp = fp;
-  regs.stack.top() = (Cell*)sp;
+  regs.stack.top() = (TypedValue*)sp;
   regs.jitReturnAddr = nullptr;
 
   auto const nargs = fp->numArgs();
@@ -242,7 +242,7 @@ void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
 
 TCA funcBodyHelper(ActRec* fp) {
   assert_native_stack_aligned();
-  void* const sp = reinterpret_cast<Cell*>(fp) - fp->func()->numSlotsInFrame();
+  void* const sp = reinterpret_cast<TypedValue*>(fp) - fp->func()->numSlotsInFrame();
   syncFuncBodyVMRegs(fp, sp);
   tl_regState = VMRegState::CLEAN;
 

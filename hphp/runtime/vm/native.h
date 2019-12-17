@@ -591,11 +591,11 @@ typedef std::map<const StringData*,TypedValueAux> ConstantMap;
 extern ConstantMap s_constant_map;
 
 inline
-bool registerConstant(const StringData* cnsName, Cell cns,
+bool registerConstant(const StringData* cnsName, TypedValue cns,
                       bool dynamic = false) {
   assertx(tvIsPlausible(cns) && cns.m_type != KindOfUninit);
   auto& dst = s_constant_map[cnsName];
-  *static_cast<Cell*>(&dst) = cns;
+  *static_cast<TypedValue*>(&dst) = cns;
   dst.dynamic() = dynamic;
   return bindPersistentCns(cnsName, cns);
 }
@@ -635,11 +635,11 @@ extern ClassConstantMapMap s_class_constant_map;
 inline
 bool registerClassConstant(const StringData *clsName,
                            const StringData *cnsName,
-                           Cell cns) {
+                           TypedValue cns) {
   assertx(tvIsPlausible(cns));
   auto &cls = s_class_constant_map[clsName];
   assertx(cls.find(cnsName) == cls.end());
-  *static_cast<Cell*>(&cls[cnsName]) = cns;
+  *static_cast<TypedValue*>(&cls[cnsName]) = cns;
   return true;
 }
 

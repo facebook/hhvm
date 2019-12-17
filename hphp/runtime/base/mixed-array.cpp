@@ -1127,7 +1127,7 @@ void MixedArray::compact(bool renumber /* = false */) {
   assertx(checkInvariants());
 }
 
-void MixedArray::nextInsert(Cell v) {
+void MixedArray::nextInsert(TypedValue v) {
   assertx(m_nextKI >= 0);
   assertx(!isFull());
 
@@ -1147,7 +1147,7 @@ void MixedArray::nextInsert(Cell v) {
 }
 
 template <class K, bool move> ALWAYS_INLINE
-ArrayData* MixedArray::update(K k, Cell data) {
+ArrayData* MixedArray::update(K k, TypedValue data) {
   assertx(!isFull());
   auto p = insert(k);
   if (p.found) {
@@ -1194,12 +1194,12 @@ arr_lval MixedArray::LvalForceNew(ArrayData* ad, bool copy) {
   return arr_lval { a, &a->data()[a->m_used - 1].data };
 }
 
-ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v) {
+ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, TypedValue v) {
   assertx(ad->cowCheck() || ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(ad->cowCheck())->update(k, v);
 }
 
-ArrayData* MixedArray::SetIntMove(ArrayData* ad, int64_t k, Cell v) {
+ArrayData* MixedArray::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
   assertx(ad->cowCheck() || ad->notCyclic(v));
   auto const preped = asMixed(ad)->prepareForInsert(ad->cowCheck());
   auto const result = preped->update<int64_t, true>(k, v);
@@ -1207,17 +1207,17 @@ ArrayData* MixedArray::SetIntMove(ArrayData* ad, int64_t k, Cell v) {
   return result;
 }
 
-ArrayData* MixedArray::SetIntInPlace(ArrayData* ad, int64_t k, Cell v) {
+ArrayData* MixedArray::SetIntInPlace(ArrayData* ad, int64_t k, TypedValue v) {
   assertx(ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(false/*copy*/)->update(k, v);
 }
 
-ArrayData* MixedArray::SetStr(ArrayData* ad, StringData* k, Cell v) {
+ArrayData* MixedArray::SetStr(ArrayData* ad, StringData* k, TypedValue v) {
   assertx(ad->cowCheck() || ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(ad->cowCheck())->update(k, v);
 }
 
-ArrayData* MixedArray::SetStrMove(ArrayData* ad, StringData* k, Cell v) {
+ArrayData* MixedArray::SetStrMove(ArrayData* ad, StringData* k, TypedValue v) {
   assertx(ad->cowCheck() || ad->notCyclic(v));
   auto const preped = asMixed(ad)->prepareForInsert(ad->cowCheck());
   auto const result = preped->update<StringData*, true>(k, v);
@@ -1225,17 +1225,17 @@ ArrayData* MixedArray::SetStrMove(ArrayData* ad, StringData* k, Cell v) {
   return result;
 }
 
-ArrayData* MixedArray::SetStrInPlace(ArrayData* ad, StringData* k, Cell v) {
+ArrayData* MixedArray::SetStrInPlace(ArrayData* ad, StringData* k, TypedValue v) {
   assertx(ad->notCyclic(v));
   return asMixed(ad)->prepareForInsert(false/*copy*/)->update(k, v);
 }
 
-ArrayData* MixedArray::AddInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
+ArrayData* MixedArray::AddInt(ArrayData* ad, int64_t k, TypedValue v, bool copy) {
   assertx(!ad->exists(k));
   return asMixed(ad)->prepareForInsert(copy)->addVal(k, v);
 }
 
-ArrayData* MixedArray::AddStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
+ArrayData* MixedArray::AddStr(ArrayData* ad, StringData* k, TypedValue v, bool copy) {
   assertx(!ad->exists(k));
   return asMixed(ad)->prepareForInsert(copy)->addVal(k, v);
 }
@@ -1305,7 +1305,7 @@ ArrayData* MixedArray::Copy(const ArrayData* ad) {
   return asMixed(ad)->copyMixed();
 }
 
-ArrayData* MixedArray::AppendImpl(ArrayData* ad, Cell v, bool copy) {
+ArrayData* MixedArray::AppendImpl(ArrayData* ad, TypedValue v, bool copy) {
   assertx(copy || ad->notCyclic(v));
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {
@@ -1318,11 +1318,11 @@ ArrayData* MixedArray::AppendImpl(ArrayData* ad, Cell v, bool copy) {
   return a;
 }
 
-ArrayData* MixedArray::Append(ArrayData* ad, Cell v) {
+ArrayData* MixedArray::Append(ArrayData* ad, TypedValue v) {
   return AppendImpl(ad, v, ad->cowCheck());
 }
 
-ArrayData* MixedArray::AppendInPlace(ArrayData* ad, Cell v) {
+ArrayData* MixedArray::AppendInPlace(ArrayData* ad, TypedValue v) {
   return AppendImpl(ad, v, false);
 }
 
@@ -1602,7 +1602,7 @@ ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
   return a;
 }
 
-ArrayData* MixedArray::Prepend(ArrayData* adInput, Cell v) {
+ArrayData* MixedArray::Prepend(ArrayData* adInput, TypedValue v) {
   auto a = asMixed(adInput)->prepareForInsert(adInput->cowCheck());
 
   auto elms = a->data();

@@ -32,12 +32,12 @@ namespace HPHP {
  * Checks whether the given cell is an instance of the class referred by
  * given named entity.
  */
-bool tvInstanceOf(const Cell* tv, const NamedEntity* ne);
+bool tvInstanceOf(const TypedValue* tv, const NamedEntity* ne);
 
 /*
  * Checks whether the given cell is an instance of the given class.
  */
-bool tvInstanceOf(const Cell* tv, const Class* cls);
+bool tvInstanceOf(const TypedValue* tv, const Class* cls);
 
 /*
  * Returns true is all the generics on the type type structure are
@@ -103,7 +103,7 @@ bool typeStructureCouldBeNonStatic(const ArrayData* ts);
  * Checks whether the type of the given cell matches the type structure.
  * Expects a resolved type structure.
  */
-bool checkTypeStructureMatchesCell(const Array& ts, Cell c1);
+bool checkTypeStructureMatchesCell(const Array& ts, TypedValue c1);
 
 /*
  * In addition to regular checkTypeStructureMatchesCell, also populates the
@@ -111,7 +111,7 @@ bool checkTypeStructureMatchesCell(const Array& ts, Cell c1);
  */
 bool checkTypeStructureMatchesCell(
   const Array& ts,
-  Cell c1,
+  TypedValue c1,
   std::string& givenType,
   std::string& expectedType,
   std::string& errorKey
@@ -122,7 +122,7 @@ bool checkTypeStructureMatchesCell(
  * if the type parameter is denoted as soft either through an annotation at the
  * declaration site or by soft type hint at the generic level
  */
-bool checkTypeStructureMatchesCell(const Array& ts, Cell c1, bool& warn);
+bool checkTypeStructureMatchesCell(const Array& ts, TypedValue c1, bool& warn);
 
 /*
  * Throws user catchable exception that tells the user what the given type is,

@@ -371,14 +371,14 @@ public:
   /*
    * Look up a class constant.
    *
-   * The returned Cell is guaranteed not to hold a reference counted
+   * The returned TypedValue is guaranteed not to hold a reference counted
    * type.  Raises an error if the class has no constant with that
    * name, or if the class is not defined.
    */
-  Cell lookupClsCns(const NamedEntity* ne,
+  TypedValue lookupClsCns(const NamedEntity* ne,
                     const StringData* cls,
                     const StringData* cns);
-  Cell lookupClsCns(const StringData* cls,
+  TypedValue lookupClsCns(const StringData* cls,
                     const StringData* cns);
 
   // Get the next outermost VM frame, even across re-entry
@@ -409,7 +409,7 @@ public:
   void debuggerExecutePsps();
 
   bool isNested() { return m_nesting != 0; }
-  void pushVMState(Cell* savedSP);
+  void pushVMState(TypedValue* savedSP);
   void popVMState();
 
   /*
@@ -508,7 +508,7 @@ public:
   );
 
   void resumeAsyncFunc(Resumable* resumable, ObjectData* freeObj,
-                       Cell awaitResult);
+                       TypedValue awaitResult);
   void resumeAsyncFuncThrow(Resumable* resumable, ObjectData* freeObj,
                             ObjectData* exception);
 
@@ -617,7 +617,7 @@ public:
   bool m_executingSetprofileCallback;
   hphp_fast_set<std::string> m_setprofileFunctions;
 public:
-  Cell m_headerCallback;
+  TypedValue m_headerCallback;
   bool m_headerCallbackDone{false}; // used to prevent infinite loops
 private:
   ExcLoggerHook m_logger_hook;

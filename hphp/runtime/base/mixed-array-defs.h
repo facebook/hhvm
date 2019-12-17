@@ -74,7 +74,7 @@ inline bool MixedArray::isTombstone(ssize_t pos) const {
 }
 
 ALWAYS_INLINE
-Cell MixedArray::getElmKey(const Elm& e) {
+TypedValue MixedArray::getElmKey(const Elm& e) {
   if (e.hasIntKey()) {
     return make_tv<KindOfInt64>(e.ikey);
   }
@@ -120,7 +120,7 @@ TypedValue MixedArray::getArrayElmKey(ssize_t pos) const {
   return getElmKey(elm);
 }
 
-inline ArrayData* MixedArray::addVal(int64_t ki, Cell data) {
+inline ArrayData* MixedArray::addVal(int64_t ki, TypedValue data) {
   assertx(!exists(ki));
   assertx(!isFull());
   auto h = hash_int64(ki);
@@ -137,13 +137,13 @@ inline ArrayData* MixedArray::addVal(int64_t ki, Cell data) {
   return this;
 }
 
-inline ArrayData* MixedArray::addVal(StringData* key, Cell data) {
+inline ArrayData* MixedArray::addVal(StringData* key, TypedValue data) {
   assertx(!exists(key));
   assertx(!isFull());
   return addValNoAsserts(key, data);
 }
 
-inline ArrayData* MixedArray::addValNoAsserts(StringData* key, Cell data) {
+inline ArrayData* MixedArray::addValNoAsserts(StringData* key, TypedValue data) {
   strhash_t h = key->hash();
   auto ei = findForNewInsert(h);
   auto e = allocElm(ei);

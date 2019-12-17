@@ -125,7 +125,7 @@ struct MixedArrayElm {
     return ikey;
   }
 
-  ALWAYS_INLINE Cell getKey() const {
+  ALWAYS_INLINE TypedValue getKey() const {
     if (hasIntKey()) {
       return make_tv<KindOfInt64>(ikey);
     }
@@ -367,27 +367,27 @@ public:
   static arr_lval LvalInt(ArrayData* ad, int64_t k, bool copy);
   static arr_lval LvalStr(ArrayData* ad, StringData* k, bool copy);
   static arr_lval LvalForceNew(ArrayData*, bool copy);
-  static ArrayData* SetInt(ArrayData*, int64_t k, Cell v);
-  static ArrayData* SetIntMove(ArrayData*, int64_t k, Cell v);
-  static ArrayData* SetIntInPlace(ArrayData*, int64_t k, Cell v);
-  static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);
-  static ArrayData* SetStrMove(ArrayData*, StringData* k, Cell v);
-  static ArrayData* SetStrInPlace(ArrayData*, StringData* k, Cell v);
-  static ArrayData* AddInt(ArrayData*, int64_t k, Cell v, bool copy);
-  static ArrayData* AddStr(ArrayData*, StringData* k, Cell v, bool copy);
+  static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetIntInPlace(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
+  static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
+  static ArrayData* SetStrInPlace(ArrayData*, StringData* k, TypedValue v);
+  static ArrayData* AddInt(ArrayData*, int64_t k, TypedValue v, bool copy);
+  static ArrayData* AddStr(ArrayData*, StringData* k, TypedValue v, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k);
   static ArrayData* RemoveStrInPlace(ArrayData*, const StringData* k);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
-  static ArrayData* Append(ArrayData*, Cell v);
-  static ArrayData* AppendInPlace(ArrayData*, Cell v);
+  static ArrayData* Append(ArrayData*, TypedValue v);
+  static ArrayData* AppendInPlace(ArrayData*, TypedValue v);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
-  static ArrayData* Prepend(ArrayData*, Cell v);
+  static ArrayData* Prepend(ArrayData*, TypedValue v);
   static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToPHPArrayIntishCast(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
@@ -604,7 +604,7 @@ public:
   }
 
 private:
-  static Cell getElmKey(const Elm& e);
+  static TypedValue getElmKey(const Elm& e);
 
 private:
   enum class AllocMode : bool { Request, Static };
@@ -672,16 +672,16 @@ private:
 
   static ArrayData* RemoveIntImpl(ArrayData*, int64_t, bool);
   static ArrayData* RemoveStrImpl(ArrayData*, const StringData*, bool);
-  static ArrayData* AppendImpl(ArrayData*, Cell v, bool copy);
+  static ArrayData* AppendImpl(ArrayData*, TypedValue v, bool copy);
 
-  void nextInsert(Cell);
-  ArrayData* addVal(int64_t ki, Cell data);
-  ArrayData* addVal(StringData* key, Cell data);
-  ArrayData* addValNoAsserts(StringData* key, Cell data);
+  void nextInsert(TypedValue);
+  ArrayData* addVal(int64_t ki, TypedValue data);
+  ArrayData* addVal(StringData* key, TypedValue data);
+  ArrayData* addValNoAsserts(StringData* key, TypedValue data);
 
   template <bool warn, class K> arr_lval addLvalImpl(K k);
   // If "move" is false, this method will inc-ref data.
-  template <class K, bool move = false> ArrayData* update(K k, Cell data);
+  template <class K, bool move = false> ArrayData* update(K k, TypedValue data);
 
   void eraseNoCompact(ssize_t pos);
   void erase(ssize_t pos) {

@@ -115,7 +115,7 @@ void ArrayIterProfile::update(const ArrayData* arr, bool is_kviter) {
     m_num_iterations += arr->getSize();
     m_base_type_counts[specialization.base_type]++;
     size_t num_profiled_values = 0;
-    IterateKVNoInc(arr, [&](Cell k, TypedValue v) {
+    IterateKVNoInc(arr, [&](TypedValue k, TypedValue v) {
       m_value_type |= typeFromTV(&v, nullptr);
       return ++num_profiled_values == kNumProfiledValues;
     });

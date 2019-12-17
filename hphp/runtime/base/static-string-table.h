@@ -30,7 +30,6 @@ struct Array;
 struct StringData;
 struct String;
 struct TypedValue;
-using Cell = TypedValue;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -116,7 +115,7 @@ rds::Handle makeCnsHandle(const StringData* cnsName);
  *
  * Returns true iff the constant has a persistent handle.
  */
-bool bindPersistentCns(const StringData* cnsName, const Cell& value);
+bool bindPersistentCns(const StringData* cnsName, const TypedValue& value);
 
 /*
  * Return an array of all the static strings in the current

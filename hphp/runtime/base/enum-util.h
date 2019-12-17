@@ -24,7 +24,7 @@ namespace HPHP {
 /**
  * Determine if the input is a value of the given enum.
  */
-bool enumHasValue(const Class* cls, const Cell* value);
+bool enumHasValue(const Class* cls, const TypedValue* value);
 
 ///////////////////////////////////////////////////////////////////////////////
 

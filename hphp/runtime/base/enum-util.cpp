@@ -22,7 +22,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool enumHasValue(const Class* cls, const Cell* cell) {
+bool enumHasValue(const Class* cls, const TypedValue* cell) {
   assertx(isEnum(cls));
   auto const type = cell->m_type;
   if (UNLIKELY(type != KindOfInt64 && !isStringType(type))) {

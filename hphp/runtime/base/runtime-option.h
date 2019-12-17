@@ -632,7 +632,7 @@ struct RuntimeOption {
   static int GetScannerType();
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
-  static hphp_string_imap<Cell> ConstantFunctions;
+  static hphp_string_imap<TypedValue> ConstantFunctions;
 
   static const uint32_t kPCREInitialTableSize = 96 * 1024;
 

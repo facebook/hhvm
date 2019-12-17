@@ -38,7 +38,7 @@ const StaticString s_unresolved("[unresolved]");
 namespace {
 
 template<typename F>
-bool tvInstanceOfImpl(const Cell* tv, F lookupClass) {
+bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
   switch (tv->m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -125,11 +125,11 @@ bool tvInstanceOfImpl(const Cell* tv, F lookupClass) {
 
 } // namespace
 
-bool tvInstanceOf(const Cell* tv, const NamedEntity* ne) {
+bool tvInstanceOf(const TypedValue* tv, const NamedEntity* ne) {
   return tvInstanceOfImpl(tv, [ne]() { return Unit::lookupClass(ne); });
 }
 
-bool tvInstanceOf(const Cell* tv, const Class* cls) {
+bool tvInstanceOf(const TypedValue* tv, const Class* cls) {
   return tvInstanceOfImpl(tv, [cls]() { return cls; });
 }
 
@@ -236,7 +236,7 @@ bool typeStructureIsType(
       bool result = true;
       IterateKV(
         input,
-        [&](Cell k, TypedValue v1) {
+        [&](TypedValue k, TypedValue v1) {
           assertx(tvIsString(k));
           if (k.m_data.pstr->isame(s_alias.get())) return false;
           auto const v2 = type->rval(k.m_data.pstr);
@@ -289,7 +289,7 @@ bool typeStructureIsType(
       bool willWarn = false;
       IterateKV(
         typeFields,
-        [&](Cell k, TypedValue v) {
+        [&](TypedValue k, TypedValue v) {
           assertx(tvIsDictOrDArray(v));
           auto typeField = getShapeFieldElement(v);
           if (!inputFields->exists(k)) {
@@ -407,7 +407,7 @@ bool typeStructureIsTypeList(
 ALWAYS_INLINE
 bool checkReifiedGenericsMatch(
   const Array& ts,
-  Cell c1,
+  TypedValue c1,
   const NamedEntity* ne,
   bool& warn,
   bool strict // whether to return false on erased generics
@@ -537,7 +537,7 @@ bool verifyReifiedLocalType(
 template <bool gen_error>
 bool checkTypeStructureMatchesCellImpl(
   const Array& ts,
-  Cell c1,
+  TypedValue c1,
   std::string& givenType,
   std::string& expectedType,
   std::string& errorKey,
@@ -552,7 +552,7 @@ bool checkTypeStructureMatchesCellImpl(
       describe_actual_type(&cell, true), len);
   };
 
-  auto const errOnKey = [&errorKey](Cell key) {
+  auto const errOnKey = [&errorKey](TypedValue key) {
     if (!gen_error) return;
     auto const escapedKey = [key] {
       if (isStringType(type(key))) {
@@ -770,7 +770,7 @@ bool checkTypeStructureMatchesCellImpl(
         int index = 0;
 
         IterateKV(ad,
-          [&](Cell k, TypedValue v) {
+          [&](TypedValue k, TypedValue v) {
             if (!isIntType(k.m_type) || k.m_data.num != index++) {
               keys_match = false;
               return true;
@@ -915,7 +915,7 @@ bool checkTypeStructureMatchesCellImpl(
 
       IterateKV(
         ts_arr,
-        [&](Cell k, TypedValue v) {
+        [&](TypedValue k, TypedValue v) {
           assertx(isArrayLikeType(v.m_type));
           auto const tsFieldData = v.m_data.parr;
           if (!ad->exists(k)) {
@@ -1001,7 +1001,7 @@ bool checkTypeStructureMatchesCellImpl(
   return result;
 }
 
-bool checkTypeStructureMatchesCell(const Array& ts, Cell c1) {
+bool checkTypeStructureMatchesCell(const Array& ts, TypedValue c1) {
   std::string givenType, expectedType, errorKey;
   bool warn = false;
   return checkTypeStructureMatchesCellImpl<false>(
@@ -1010,7 +1010,7 @@ bool checkTypeStructureMatchesCell(const Array& ts, Cell c1) {
 
 bool checkTypeStructureMatchesCell(
   const Array& ts,
-  Cell c1,
+  TypedValue c1,
   std::string& givenType,
   std::string& expectedType,
   std::string& errorKey
@@ -1022,7 +1022,7 @@ bool checkTypeStructureMatchesCell(
 
 bool checkTypeStructureMatchesCell(
   const Array& ts,
-  Cell c1,
+  TypedValue c1,
   bool& warn
 ) {
   std::string givenType, expectedType, errorKey;
@@ -1257,7 +1257,7 @@ bool doesTypeStructureContainTUnresolved(const ArrayData* ts) {
   bool result = false;
   IterateKV(
     ts,
-    [&] (Cell k, TypedValue v) {
+    [&] (TypedValue k, TypedValue v) {
       if (tvIsInt(v) && tvIsString(k) && k.m_data.pstr->isame(s_kind.get()) &&
           static_cast<TypeStructure::Kind>(v.m_data.num) ==
           TypeStructure::Kind::T_unresolved) {

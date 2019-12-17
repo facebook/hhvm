@@ -148,7 +148,7 @@ ALWAYS_INLINE const TypeStructure::Kind get_ts_kind(const ArrayData* ts) {
   return static_cast<TypeStructure::Kind>(kind_field.val().num);
 }
 
-ALWAYS_INLINE bool isValidTSType(Cell c, bool error) {
+ALWAYS_INLINE bool isValidTSType(TypedValue c, bool error) {
   if (RuntimeOption::EvalHackArrDVArrs) {
     if (!tvIsDict(c)) {
       if (error) raise_error("Type structure must be a dict");

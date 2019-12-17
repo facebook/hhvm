@@ -28,7 +28,7 @@ rds::Link<Object, rds::Mode::Normal> c_StaticWaitHandle::NullHandle;
 rds::Link<Object, rds::Mode::Normal> c_StaticWaitHandle::TrueHandle;
 rds::Link<Object, rds::Mode::Normal> c_StaticWaitHandle::FalseHandle;
 
-c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceededImpl(const Cell result) {
+c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceededImpl(const TypedValue result) {
   auto waitHandle = req::make<c_StaticWaitHandle>();
   waitHandle->setState(STATE_SUCCEEDED);
   tvCopy(result, waitHandle->m_resultOrException);
@@ -44,7 +44,7 @@ c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceededImpl(const Cell result) {
  * Both the JIT and bytecode.cpp assume this function gives the nothrow
  * guarantee.
  */
-c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceeded(const Cell result) {
+c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceeded(const TypedValue result) {
   if (isNullType(result.m_type)) {
     Object ret = *NullHandle.get();
     return static_cast<c_StaticWaitHandle*>(ret.detach());

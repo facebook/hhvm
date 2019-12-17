@@ -46,7 +46,7 @@ struct FileAwait : AsioExternalThreadEvent {
 
   FileAwait(int fd, uint16_t events, double timeout);
   ~FileAwait();
-  void unserialize(Cell& c) override;
+  void unserialize(TypedValue& c) override;
   void setFinished(int64_t status);
  private:
   std::unique_ptr<FileEventHandler> m_file;

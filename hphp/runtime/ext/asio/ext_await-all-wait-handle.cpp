@@ -84,7 +84,7 @@ namespace {
     return c_StaticWaitHandle::CreateSucceeded(make_tv<KindOfNull>());
   }
 
-  void prepareChild(Cell src, context_idx_t& ctx_idx, uint32_t& cnt) {
+  void prepareChild(TypedValue src, context_idx_t& ctx_idx, uint32_t& cnt) {
     auto const waitHandle = c_Awaitable::fromCell(src);
     if (UNLIKELY(!waitHandle)) failWaitHandle();
     if (waitHandle->isFinished()) return;
@@ -94,7 +94,7 @@ namespace {
     ++cnt;
   }
 
-  bool addChild(Cell src, c_AwaitAllWaitHandle::Node*& dst, uint32_t& idx) {
+  bool addChild(TypedValue src, c_AwaitAllWaitHandle::Node*& dst, uint32_t& idx) {
     auto const waitHandle = c_Awaitable::fromCellAssert(src);
     if (waitHandle->isFinished()) return false;
 

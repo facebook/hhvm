@@ -26,14 +26,13 @@ let raise_error error = raise_notrace @@ NoTypeConst error
 
 type env = {
   tenv: Typing_env_types.env;
-  ety_env: expand_env;
   choose_assigned_type: bool;
   (* A list of generics we've seen while expanding. *)
   gen_seen: TySet.t;
 }
 
-let empty_env env ety_env =
-  { tenv = env; ety_env; choose_assigned_type = true; gen_seen = TySet.empty }
+let empty_env env =
+  { tenv = env; choose_assigned_type = true; gen_seen = TySet.empty }
 
 let make_reason env r id ty =
   Reason.Rtypeconst (r, id, Typing_print.error env ty, fst ty)
@@ -64,9 +63,17 @@ let rec expand_with_env
 
 and expand_with_env_
     ety_env env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
-  let env = empty_env env ety_env in
+  let env = empty_env env in
   let (env, ty) =
-    try expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst
+    try
+      expand
+        ety_env
+        env
+        ~as_tyvar_with_cnstr
+        root
+        id
+        ~on_error
+        ~allow_abstract_tconst
     with NoTypeConst error ->
       error ();
       ( env,
@@ -141,7 +148,8 @@ and referenced_typeconsts env ety_env (root, ids) ~on_error =
  * We also need to track what expansions have already taken place to make sure
  * we do not recurse infinitely.
  *)
-and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
+and expand
+    ety_env env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
   let (tenv, ((root_reason, root_ty) as root)) =
     Env.expand_type env.tenv root
   in
@@ -149,18 +157,17 @@ and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
    * change the this_ty in the environment to be the root as an
    * expression dependent type.
    *)
-  let update_this_ty env =
+  let ety_env =
     let this_ty =
       match root with
-      | _ when not env.choose_assigned_type -> env.ety_env.this_ty
+      | _ when not env.choose_assigned_type -> ety_env.this_ty
       (* Legacy behaviour is to preserve exactness only on `this`
        * and not through `this::T` *)
       | (r, Tclass (cid, _, tyl)) -> (r, Tclass (cid, Nonexact, tyl))
       | _ -> root
     in
-    { env with ety_env = { env.ety_env with this_ty } }
+    { ety_env with this_ty }
   in
-  let env = update_this_ty { env with tenv } in
   let make_reason env r = make_reason env r id root in
   let make_ty env name = function
     | ty when env.choose_assigned_type -> (env, ty)
@@ -215,9 +222,10 @@ and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
     (env, root)
   | Tdependent (DTcls _, ty)
   | Tnewtype (_, _, ty) ->
-    expand env ~on_error ~as_tyvar_with_cnstr ty id
+    expand ety_env env ~on_error ~as_tyvar_with_cnstr ty id
   | Tclass ((class_pos, class_name), _, _) ->
     create_root_from_type_constant
+      ety_env
       env
       root
       class_pos
@@ -253,7 +261,7 @@ and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
         ~f:(fun (prev_env, tys, errors) ty ->
           try
             let (env, ty) =
-              expand env ~on_error ~as_tyvar_with_cnstr:false ty id
+              expand ety_env env ~on_error ~as_tyvar_with_cnstr:false ty id
             in
             (* If ty here involves a type access, we have to use
             the current environment's dependent types. Otherwise,
@@ -289,18 +297,20 @@ and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
     end
   | Tdependent (dep_ty, ty) ->
     let env = { env with choose_assigned_type = false } in
-    let (env, ty) = expand env ~on_error ~as_tyvar_with_cnstr:false ty id in
+    let (env, ty) =
+      expand ety_env env ~on_error ~as_tyvar_with_cnstr:false ty id
+    in
     make_ty env (DependentKind.to_string dep_ty) ty
   | Tunion tyl ->
     let (env, tyl) =
       List.map_env env tyl ~f:(fun env ty ->
-          expand env ~on_error ~as_tyvar_with_cnstr ty id)
+          expand ety_env env ~on_error ~as_tyvar_with_cnstr ty id)
     in
     (env, (make_reason tenv Reason.Rnone, Tunion tyl))
   | Tintersection tyl ->
     let (env, tyl) =
       Typing_utils.run_on_intersection env tyl ~f:(fun env ty ->
-          expand env ~on_error ~as_tyvar_with_cnstr ty id)
+          expand ety_env env ~on_error ~as_tyvar_with_cnstr ty id)
     in
     let (tenv, ty) =
       Inter.intersect_list env.tenv (make_reason tenv Reason.Rnone) tyl
@@ -345,6 +355,7 @@ and expand env ~as_tyvar_with_cnstr root id ~on_error ~allow_abstract_tconst =
  * we choose the assigned type.
  *)
 and create_root_from_type_constant
+    ety_env
     env
     ((root_ty_r, _) as root)
     class_pos
@@ -364,7 +375,7 @@ and create_root_from_type_constant
       ~as_tyvar_with_cnstr
   in
   let ty_name = class_name ^ "::" ^ tconst in
-  let ety_env = { env.ety_env with from_class = None } in
+  let ety_env = { ety_env with from_class = None } in
   (* Check for cycles. We do this by combining the name of the current class
    * with the remaining ids that we need to expand. If we encounter the same
    * class name + ids that means we have entered a cycle.
@@ -382,7 +393,7 @@ and create_root_from_type_constant
   in
   (match typeconst with
   | { ttc_type = None; ttc_name; _ } ->
-    if (not env.ety_env.quiet) && not allow_abstract_tconst then
+    if (not ety_env.quiet) && not allow_abstract_tconst then
       Errors.abstract_tconst_not_allowed tconst_pos ttc_name
   | _ -> ());
   match typeconst with

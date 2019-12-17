@@ -62,6 +62,12 @@ std::atomic<bool> s_retranslateAllScheduled{false};
 std::atomic<bool> s_retranslateAllComplete{false};
 static __thread const CompactVector<Trace::BumpRelease>* s_bumpers;
 
+std::thread s_serializeOptProfThread;
+std::atomic<bool> s_serializeOptProfScheduled{false};
+std::atomic<bool> s_serializeOptProfTriggered{false};
+std::atomic<uint32_t> s_serializeOptProfRequest{0}; // 0 means disabled
+std::atomic<uint32_t> s_serializeOptProfSeconds{0}; // 0 means disabled
+
 CompactVector<Trace::BumpRelease> bumpTraceFunctions(const Func* func) {
   auto def = [&] {
     CompactVector<Trace::BumpRelease> result;
@@ -219,6 +225,79 @@ void createSrcRecs(const Func* func) {
   }
 }
 
+void killProcess() {
+  auto const pid = getpid();
+  if (pid > 0) {
+    kill(pid, SIGTERM);
+  } else {
+    abort();
+  }
+}
+
+/*
+ * Serialize the profile data, logging start/finish/error messages in server
+ * mode.  This function returns true iff we have stopped the server in
+ * SerializeAndExit mode.
+ */
+bool serializeProfDataAndLog() {
+  auto const serverMode = RuntimeOption::ServerExecutionMode();
+  auto const mode = RuntimeOption::EvalJitSerdesMode;
+  if (serverMode) {
+    Logger::Info("retranslateAll: serializing profile data");
+  }
+  std::string errMsg;
+  VMWorker([&errMsg] () {
+    errMsg = serializeProfData(RuntimeOption::EvalJitSerdesFile);
+  }).run();
+  if (serverMode) {
+    if (errMsg.empty()) {
+      Logger::Info("retranslateAll: serializing done");
+    } else {
+      Logger::FError("serializeProfData failed with: {}", errMsg);
+    }
+    if (mode == JitSerdesMode::SerializeAndExit && !serializeOptProfEnabled()) {
+      killProcess();
+      return true;
+    }
+  }
+  return false;
+}
+
+/*
+ * Schedule serialization of optimized code's profile to happen in the future.
+ */
+void scheduleSerializeOptProf() {
+  assertx(serializeOptProfEnabled());
+
+  if (s_serializeOptProfScheduled.exchange(true)) {
+    // someone beat us
+    return;
+  }
+
+  auto const serverMode    = RuntimeOption::ServerExecutionMode();
+  auto const delayRequests = RuntimeOption::EvalJitSerializeOptProfRequests;
+  auto const delaySeconds  = RuntimeOption::EvalJitSerializeOptProfSeconds;
+
+  if (delayRequests > 0) {
+    s_serializeOptProfRequest = requestCount() + delayRequests;
+    if (serverMode) {
+      Logger::FInfo("retranslateAll: scheduled serialization of optimized "
+                    "code's profile for after running another {} requests",
+                    delayRequests);
+    }
+  }
+
+  auto const uptime = static_cast<int>(f_server_uptime()); // may be -1
+  if (delaySeconds > 0 && uptime >= 0) {
+    s_serializeOptProfSeconds = uptime + delaySeconds;
+    if (serverMode) {
+      Logger::FInfo("retranslateAll: scheduled serialization of optimized "
+                    "code's profile for after running another {} seconds",
+                    delaySeconds);
+    }
+  }
+}
+
 /*
  * This is the main driver for the profile-guided retranslation of all the
  * functions being PGO'd, which enables controlling the order in which the
@@ -232,39 +311,11 @@ void createSrcRecs(const Func* func) {
  *   4) Relocate the functions in the TC according to the selected order.
  */
 void retranslateAll() {
-  // Return true if we have stopped the server in SerializeAndExit mode.
-  auto const checkSerializeProfData = [] () -> bool {
-    auto const serverMode = RuntimeOption::ServerExecutionMode();
-    auto const mode = RuntimeOption::EvalJitSerdesMode;
-    if (RuntimeOption::RepoAuthoritative &&
-        !RuntimeOption::EvalJitSerdesFile.empty() &&
-        isJitSerializing()) {
-      if (serverMode) Logger::Info("retranslateAll: serializing profile data");
-      std::string errMsg;
-      VMWorker([&errMsg] () {
-        errMsg = serializeProfData(RuntimeOption::EvalJitSerdesFile);
-      }).run();
-      if (serverMode) {
-        if (errMsg.empty()) {
-          Logger::Info("retranslateAll: serializing done");
-        } else {
-          Logger::Error(errMsg);
-        }
-        if (mode == JitSerdesMode::SerializeAndExit) {
-          auto const pid = getpid();
-          if (pid > 0) {
-            kill(pid, SIGTERM);
-          } else {
-            abort();
-          }
-          return true;
-        }
-      }
-    }
-    return false;
-  };
-
   const bool serverMode = RuntimeOption::ServerExecutionMode();
+  const bool serialize = RuntimeOption::RepoAuthoritative &&
+                         !RuntimeOption::EvalJitSerdesFile.empty() &&
+                         isJitSerializing();
+  const bool serializeOpt = serialize && serializeOptProfEnabled();
 
   // 1) Obtain function ordering in code.hot.
 
@@ -281,9 +332,10 @@ void retranslateAll() {
   auto const nFuncs = sortedFuncs.size();
 
   // 2) Check if we should dump profile data. We may exit here in
-  // SerializeAndExit mode, without really doing the JIT.
+  //    SerializeAndExit mode, without really doing the JIT, unless
+  //    serialization of optimized code's profile is also enabled.
 
-  if (checkSerializeProfData()) return;
+  if (serialize && serializeProfDataAndLog()) return;
 
   // 3) Generate machine code for all the profiled functions.
 
@@ -339,7 +391,7 @@ void retranslateAll() {
   s_retranslateAllComplete.store(true, std::memory_order_release);
   tc::reportJitMaturity();
 
-  if (serverMode) {
+  if (serverMode && !transdb::enabled() && !serializeOpt) {
     ProfData::Session pds;
     // The ReusableTC mode assumes that ProfData is never freed, so don't
     // discard ProfData in this mode.
@@ -347,6 +399,10 @@ void retranslateAll() {
       discardProfData();
       tc::freeProfCode();
     }
+  }
+
+  if (serializeOpt) {
+    scheduleSerializeOptProf();
   }
 }
 
@@ -377,6 +433,10 @@ void joinWorkerThreads() {
 
   if (s_retranslateAllThread.joinable()) {
     s_retranslateAllThread.join();
+  }
+
+  if (s_serializeOptProfThread.joinable()) {
+    s_serializeOptProfThread.join();
   }
 }
 
@@ -640,6 +700,62 @@ CompactVector<Trace::BumpRelease> unbumpFunctions() {
     }
   }
   return result;
+}
+
+void checkSerializeOptProf() {
+  if (!s_serializeOptProfScheduled.load(std::memory_order_relaxed) ||
+      s_serializeOptProfTriggered.load(std::memory_order_relaxed)) {
+    return;
+  }
+
+  assertx(RuntimeOption::RepoAuthoritative &&
+          !RuntimeOption::EvalJitSerdesFile.empty() &&
+          isJitSerializing());
+
+  auto const uptime = f_server_uptime(); // may be -1
+  auto const triggerSeconds =
+    s_serializeOptProfSeconds.load(std::memory_order_relaxed);
+  auto const triggerRequest =
+    s_serializeOptProfRequest.load(std::memory_order_relaxed);
+  const bool trigger =
+    ((triggerSeconds > 0 && uptime >= 0 && uptime >= triggerSeconds) ||
+     (triggerRequest > 0 && requestCount() >= triggerRequest));
+
+  if (!trigger) return;
+
+  if (s_serializeOptProfTriggered.exchange(true)) {
+    // Another thread beat us.
+    return;
+  }
+
+  // Create a thread to serialize the profile for the optimized code.
+  s_serializeOptProfThread = std::thread([] {
+    auto const serverMode = RuntimeOption::ServerExecutionMode();
+    if (serverMode) {
+      Logger::FInfo("retranslateAll: serialization of optimized code's "
+                    "profile triggered");
+    }
+
+    auto const errMsg = serializeOptProfData(RuntimeOption::EvalJitSerdesFile);
+
+    if (serverMode) {
+      if (errMsg.empty()) {
+        Logger::FInfo("retranslateAll: serializeOptProfData completed");
+      } else {
+        Logger::FInfo("retranslateAll: serializeOptProfData failed: {}",
+                      errMsg);
+      }
+    }
+
+    if (!transdb::enabled()) {
+      discardProfData();
+    }
+
+    auto const mode = RuntimeOption::EvalJitSerdesMode;
+    if (mode == JitSerdesMode::SerializeAndExit) {
+      killProcess();
+    }
+  });
 }
 
 }}}

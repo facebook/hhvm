@@ -848,15 +848,24 @@ void merge_loaded_units(int numWorkers) {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-ProfDataSerializer::ProfDataSerializer(const std::string& name)
-  : fileName(name) {
-  // Delete old profile data to avoid confusion.  This should've happened from
-  // outside the process, but in case it didn't happen, try to do it here.
-  unlink(name.c_str());
+ProfDataSerializer::ProfDataSerializer(const std::string& name, FileMode mode)
+  : fileName(name)
+  , fileMode(mode) {
 
   std::string partialFile = name + ".part";
-  fd = open(partialFile.c_str(),
-            O_CLOEXEC | O_CREAT | O_TRUNC | O_WRONLY, 0644);
+
+  if (fileMode == FileMode::Append) {
+    fd = open(partialFile.c_str(),
+              O_CLOEXEC | O_APPEND | O_WRONLY, 0644);
+  } else {
+    // Delete old profile data to avoid confusion.  This should've happened from
+    // outside the process, but in case it didn't happen, try to do it here.
+    unlink(name.c_str());
+
+    fd = open(partialFile.c_str(),
+              O_CLOEXEC | O_CREAT | O_TRUNC | O_WRONLY, 0644);
+  }
+
   if (fd == -1) {
     auto const msg =
       folly::sformat("Failed to open file for write {}, {}", name,
@@ -873,14 +882,20 @@ void ProfDataSerializer::finalize() {
   close(fd);
   fd = -1;
   std::string partialFile = fileName + ".part";
-  if (rename(partialFile.c_str(), fileName.c_str()) == -1) {
-    auto const msg =
-      folly::sformat("Failed to rename {} to {}, {}",
-                     partialFile, fileName, folly::errnoStr(errno));
-    Logger::Error(msg);
-    throw std::runtime_error(msg);
+  if (fileMode == FileMode::Create && serializeOptProfEnabled()) {
+    // Don't rename the file to it's final name yet as we're still going to
+    // append the profile data collected for the optimized code to it.
+    FTRACE(1, "Finished serializing base profile data to {}\n", partialFile);
   } else {
-    FTRACE(1, "Finished serializing profile data to " + fileName);
+    if (rename(partialFile.c_str(), fileName.c_str()) == -1) {
+      auto const msg =
+        folly::sformat("Failed to rename {} to {}, {}",
+                       partialFile, fileName, folly::errnoStr(errno));
+      Logger::Error(msg);
+      throw std::runtime_error(msg);
+    } else {
+      FTRACE(1, "Finished serializing all profile data to {}\n", fileName);
+    }
   }
 }
 
@@ -906,8 +921,10 @@ ProfDataDeserializer::~ProfDataDeserializer() {
 }
 
 bool ProfDataDeserializer::done() {
-  char byte;
-  return offset == buffer_size && ::read(fd, &byte, 1) == 0;
+  auto const pos = lseek(fd, 0, SEEK_CUR);
+  auto const end = lseek(fd, 0, SEEK_END);
+  lseek(fd, pos, SEEK_SET); // go back to original position
+  return offset == buffer_size && pos == end;
 }
 
 void write_raw(ProfDataSerializer& ser, const void* data, size_t sz) {
@@ -1287,7 +1304,7 @@ ClsMethDataRef read_clsmeth(ProfDataDeserializer& ser) {
 
 std::string serializeProfData(const std::string& filename) {
   try {
-    ProfDataSerializer ser{filename};
+    ProfDataSerializer ser{filename, ProfDataSerializer::FileMode::Create};
 
     write_raw(ser, kMagic);
     write_raw(ser, Repo::get().global().Signature);
@@ -1335,6 +1352,21 @@ std::string serializeProfData(const std::string& filename) {
     return "";
   } catch (std::runtime_error& err) {
     return folly::sformat("Failed to serialize profile data: {}", err.what());
+  }
+}
+
+std::string serializeOptProfData(const std::string& filename) {
+  try {
+    ProfDataSerializer ser(filename, ProfDataSerializer::FileMode::Append);
+
+    // The profile data collected for the optimized code should be serialized
+    // here.
+
+    ser.finalize();
+
+    return "";
+  } catch (std::runtime_error& err) {
+    return folly::sformat("Failed serializeOptProfData: {}", err.what());
   }
 }
 
@@ -1394,6 +1426,10 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
 
     read_classes_and_type_aliases(ser);
 
+    if (!ser.done()) {
+      // We have profile data for the optimized code, so deserialize it too.
+    }
+
     always_assert(ser.done());
 
     // During deserialization we didn't merge the loaded units because
@@ -1412,6 +1448,11 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     return folly::sformat("Failed to deserialize profile data {}: {}",
                           filename, err.what());
   }
+}
+
+bool serializeOptProfEnabled() {
+  return RuntimeOption::EvalJitSerializeOptProfSeconds  > 0 ||
+         RuntimeOption::EvalJitSerializeOptProfRequests > 0;
 }
 
 //////////////////////////////////////////////////////////////////////

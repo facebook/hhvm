@@ -128,6 +128,13 @@ bool retranslateOpt(FuncId funcId);
 void checkRetranslateAll(bool force = false);
 
 /*
+ * If JIT optimized code profile-data serialization is enabled and scheduled to
+ * trigger in the future, check if we hit one of the triggering conditions and,
+ * of so, append the data to the file containing the serialized profile.
+ */
+void checkSerializeOptProf();
+
+/*
  * Called once when the JIT is activated to initialize internal mcgen structures
  */
 void processInit();

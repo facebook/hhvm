@@ -37,7 +37,12 @@ namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 struct ProfDataSerializer {
-  explicit ProfDataSerializer(const std::string& name);
+  enum class FileMode {
+    Create,
+    Append
+  };
+
+  explicit ProfDataSerializer(const std::string& name, FileMode mode);
   ~ProfDataSerializer();
 
   friend void write_raw(ProfDataSerializer& ser, const void* data, size_t sz);
@@ -68,6 +73,7 @@ private:
   uint32_t offset{0};
   char buffer[buffer_size];
   const std::string& fileName;
+  const FileMode fileMode;
   // keep track of things that have already been serialized.
   jit::fast_set<const void*> serializedStatics;
 };
@@ -172,8 +178,13 @@ ClsMethDataRef read_clsmeth(ProfDataDeserializer& ser);
 
 // Return an empty string upon success, and a string that describes the reason
 // of failure otherwise.
-std::string serializeProfData(const std::string& filanme);
-std::string deserializeProfData(const std::string& filanme, int numWorkers);
+std::string serializeProfData(const std::string& filename);
+std::string serializeOptProfData(const std::string& filename);
+std::string deserializeProfData(const std::string& filename, int numWorkers);
+
+// Return whether or not serialization of profile data for optimized code is
+// enabled.
+bool serializeOptProfEnabled();
 
 //////////////////////////////////////////////////////////////////////
 } }

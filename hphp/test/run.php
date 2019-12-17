@@ -58,9 +58,10 @@ function jit_serialize_option($cmd, $test, $options, $serialize) {
   $serialized = "$test.repo/jit.dump";
   $cmds = explode(' -- ', $cmd, 2);
   $cmds[0] .=
-    ' --count=' . ($serialize ? $options['jit-serialize'] : 1) .
+    ' --count=' . ($serialize ? $options['jit-serialize'] + 1 : 1) .
     " -vEval.JitSerdesFile=" . $serialized .
-    " -vEval.JitSerdesMode=" . ($serialize ? 'Serialize' : 'DeserializeOrFail');
+    " -vEval.JitSerdesMode=" . ($serialize ? 'Serialize' : 'DeserializeOrFail').
+    ($serialize ? " -vEval.JitSerializeOptProfRequests=1" : '');
   if (isset($options['jitsample']) && $serialize) {
     $cmds[0] .= ' -vDeploymentId="' . $options['jitsample'] . '-serialize"';
   }
@@ -139,9 +140,9 @@ Examples:
   # run the test n more on the new code.
   % {$argv[0]} --retranslate-all 2 quick
 
-  # Use jit-serialize.  Run the test n times, then run retranslate all,
-  # serialize the state, and then restart hhvm, load the serialized state and
-  # run retranslate-all before starting the test.
+  # Use jit-serialize.  Run the test n times, then run retranslate all, run the
+  # test once more, serialize all profile data, and then restart hhvm, load the
+  # serialized state and run retranslate-all before starting the test.
   % {$argv[0]} --jit-serialize  2 -r quick
 
   # Run the Hack typechecker against quick typechecker.expect[f] files

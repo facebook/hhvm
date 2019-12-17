@@ -2785,6 +2785,7 @@ void hphp_session_exit(Transport* transport) {
   // In JitPGO mode, check if it's time to schedule the retranslation of all
   // profiled functions and, if so, schedule it.
   jit::mcgen::checkRetranslateAll();
+  jit::mcgen::checkSerializeOptProf();
   jit::tc::requestExit();
   // Similarly, apc strings could be in the ServerNote array, and
   // it's possible they are scheduled to be destroyed after this request

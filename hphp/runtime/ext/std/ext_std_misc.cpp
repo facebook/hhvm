@@ -100,6 +100,10 @@ String HHVM_FUNCTION(server_warmup_status) {
     return folly::sformat("Interpreted {} non-forced basic blocks.", tpc_diff);
   }
 
+  if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {
+    return "JitSerdesMode is SerializeAndExit";
+  }
+
   return empty_string();
 }
 

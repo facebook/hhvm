@@ -1,1 +1,2 @@
-No errors
+File "eif_define_var.php", line 17, characters 11-11:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

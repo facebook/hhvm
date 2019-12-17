@@ -19,7 +19,7 @@ function meh(): void {
     $outputRow[$key] = new sps_DBResultField(
       array(
         'isNull' => false,
-        'intValue' = $v,
+        'intValue' = 'foo',
       ));
   }
 }

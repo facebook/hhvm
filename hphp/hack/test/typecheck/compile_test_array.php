@@ -33,7 +33,7 @@ function main(): void {
     if ($k === 'ff') { $f++; }
   }
 
-  if ($i === 9 && $j == 6 && $f = 1) {
+  if ($i === 9 && $j == 6) {
     echo 'OK';
   }
   else {

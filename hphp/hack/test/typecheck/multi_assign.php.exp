@@ -1,1 +1,2 @@
-No errors
+File "multi_assign.php", line 17, characters 10-10:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

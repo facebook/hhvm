@@ -1,1 +1,2 @@
-No errors
+File "postfix_parse3.php", line 15, characters 9-9:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

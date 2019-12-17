@@ -12,10 +12,10 @@ class ScopeGuard implements IDisposable {
 
 function testit():void {
   // This is legal
-  using ($x = new Handle());
+  using $x = new Handle();
 
   using ($w = new Handle()) {
     // This is not
-    using ($q = new ScopeGuard(() ==> {}));
+    using $q = new ScopeGuard(() ==> {});
   }
 }

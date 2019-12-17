@@ -36,8 +36,6 @@ function test2(dyn $x): void {
     $x->f();
   } else if ($x is B) {
     $x->g();
-  } else if ($x = 0) {
-    $y = $x + 1;
   } else if ($x) {
     $x = $x + 1;
   }

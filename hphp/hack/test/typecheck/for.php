@@ -25,8 +25,3 @@ function f3() {
   for (; $i<0;){
   }
 }
-
-function f4() {
-  for($i=0, $j=1; $j+= $i, $i < 10; $i += $j) {
-  }
-}

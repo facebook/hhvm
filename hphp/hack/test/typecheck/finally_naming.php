@@ -17,9 +17,9 @@ function naming_finally(): int {
     might_throw();
     $b = 789;
   } catch (YourException $e) {
-    return $b = 23;
+    return $b == 23;
   } catch (Exception $e) {
-    return $a = 456;
+    return $a == 456;
   } finally {
     echo $b; // b is unknown!
   }

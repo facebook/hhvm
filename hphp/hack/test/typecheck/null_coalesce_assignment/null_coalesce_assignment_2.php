@@ -6,5 +6,6 @@ function f(): ?int {
 
 function g(): int {
   $x = f();
-  return $x ??= 0;
+  $x ??= 0;
+  return $x;
 }

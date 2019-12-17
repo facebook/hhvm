@@ -1,1 +1,6 @@
-No errors
+File "finally_basic.php", line 19, characters 12-19:
+Invalid return type (Typing[4110])
+File "finally_basic.php", line 12, characters 27-29:
+Expected int
+File "finally_basic.php", line 19, characters 12-19:
+But got bool because this is the result of a comparison

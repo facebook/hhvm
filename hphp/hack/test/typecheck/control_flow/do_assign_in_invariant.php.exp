@@ -1,3 +1,5 @@
+File "do_assign_in_invariant.php", line 86, characters 6-6:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "do_assign_in_invariant.php", line 47, characters 15-16:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 29, characters 20-21:

@@ -20,9 +20,6 @@ function test_KeyedContainer_subtype(
   Vector<num> $vector,
   keyset<string> $ks,
 ): void {
-  $a0 = $a[] = "a";
-  expectString($a0);
-  expectArraykey($a[0]);
   $v[] = "a";
   expectArraykey($v[0]);
   $vector[] = 2.3;
@@ -46,11 +43,6 @@ function test_array_append_on_tvar(
   varray<int> $varray,
   Map<int,num> $m,
 ): void {
-  // Turns a concrete type into a lower bound on a Tvar
-  $a = (new Inv($a))->item;
-  $a0 = $a[] = "a";
-  expectArraykey($a[0]);
-  expectString($a0);
   $varray = (new Inv($varray))->item;
   $varray[] = "a";
   expectArraykey($varray[0]);

@@ -1,7 +1,7 @@
 <?hh // strict
 
 function f(bool $b): arraykey {
-  ($b ? $x = 1 : $x = "");
+  $x = $b ? 1 : "";
   expect_int($x); // error
   expect_string($x); // error
   return $x;

@@ -1,1 +1,2 @@
-No errors
+File "test_subtyping.php", line 16, characters 12-18:
+Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

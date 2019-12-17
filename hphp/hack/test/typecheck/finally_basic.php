@@ -16,9 +16,9 @@ function finally_basic(): int {
   } catch (NonTerminalException $e) {
     $a = 28;
   } catch (SomeException $e) {
-    return $a = 23;
+    return $a == 23;
   } catch (Exception $e) {
-    return $a = 456;
+    return $a == 456;
   } finally {
     echo $a;
     $b = 'quack'; // should be fine (!)

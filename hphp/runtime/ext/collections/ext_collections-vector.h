@@ -226,7 +226,7 @@ public:
    * Append `v' to the Vector and incref it if it's refcounted.
    */
   void add(TypedValue v) { addImpl<false>(v); }
-  void add(const Variant& v) { add(*v.toCell()); }
+  void add(const Variant& v) { add(*v.asTypedValue()); }
 
   /*
    * Add `k' => `v' to the Vector, increffing `v' if it's refcounted.
@@ -239,7 +239,7 @@ public:
     set(key, *val);
   }
   void set(int64_t key, const Variant& val) {
-    set(key, val.toCell());
+    set(key, val.asTypedValue());
   }
   void set(const TypedValue* key, const TypedValue* val) {
     if (key->m_type != KindOfInt64) {
@@ -248,7 +248,7 @@ public:
     set(key->m_data.num, val);
   }
   void set(const Variant& key, const Variant& val) {
-    set(key.toCell(), val.toCell());
+    set(key.asTypedValue(), val.asTypedValue());
   }
 
   /*
@@ -350,7 +350,7 @@ protected:
   // immutable buffer, so it's only safe to use in some cases. If you're not
   // sure, use add() instead.
   void addRaw(TypedValue v) { addImpl<true>(v); }
-  void addRaw(const Variant& v) { addRaw(*v.toCell()); }
+  void addRaw(const Variant& v) { addRaw(*v.asTypedValue()); }
 
   /**
    * Copy the buffer and reset the immutable copy.
@@ -359,11 +359,11 @@ protected:
 
   Object getIterator();
   Variant php_at(const Variant& key) {
-    const auto tv = *at(key.toCell())  ;
+    const auto tv = *at(key.asTypedValue())  ;
     return Variant(tvAsCVarRef(&tv));
   }
   Variant php_get(const Variant& key) {
-    if (const auto lval = get(key.toCell())) {
+    if (const auto lval = get(key.asTypedValue())) {
       const auto tv = *lval;
       return Variant(tvAsCVarRef(&tv));
     }
@@ -528,7 +528,7 @@ struct c_Vector : BaseVector {
     return reserve(checkRequestedSize(sz));
   }
   void php_resize(const Variant& sz, const Variant& value) {
-    return resize(checkRequestedSize(sz), value.toCell());
+    return resize(checkRequestedSize(sz), value.asTypedValue());
   }
   Object php_set(const Variant& key, const Variant& value) {
     set(key, value);

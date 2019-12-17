@@ -56,7 +56,7 @@ void HHVM_STATIC_METHOD(ConditionWaitHandle, setOnCreateCallback,
 Object HHVM_STATIC_METHOD(ConditionWaitHandle, create,
                           const Variant& child) {
   // Child not an Awaitable?
-  auto const child_wh = c_Awaitable::fromCell(*child.toCell());
+  auto const child_wh = c_Awaitable::fromCell(*child.asTypedValue());
   if (UNLIKELY(!child_wh)) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Expected child to be an instance of Awaitable");
@@ -84,7 +84,7 @@ void HHVM_METHOD(ConditionWaitHandle, succeed, const Variant& result) {
   assertx(obj->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
   auto parentChain = obj->getParentChain();
   obj->setState(c_ConditionWaitHandle::STATE_SUCCEEDED);
-  tvDup(*result.toCell(), obj->m_resultOrException);
+  tvDup(*result.asTypedValue(), obj->m_resultOrException);
   parentChain.unblock();
 }
 

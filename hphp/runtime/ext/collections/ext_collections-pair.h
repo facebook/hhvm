@@ -108,14 +108,14 @@ struct c_Pair : ObjectData {
 
  private:
   Variant php_at(const Variant& key) const {
-    auto* k = key.toCell();
+    auto* k = key.asTypedValue();
     if (k->m_type == KindOfInt64) {
       return Variant(tvAsCVarRef(at(k->m_data.num)), Variant::CellDup());
     }
     throwBadKeyType();
   }
   Variant php_get(const Variant& key) const {
-    auto* k = key.toCell();
+    auto* k = key.asTypedValue();
     if (k->m_type == KindOfInt64) {
       if (auto tv = get(k->m_data.num)) {
         return Variant(tvAsCVarRef(tv), Variant::CellDup());

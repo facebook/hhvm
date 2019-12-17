@@ -48,7 +48,7 @@ Variant HHVM_FUNCTION(min,
                       const Variant& value,
                       const Array& args /* = null_array */) {
   if (args.empty()) {
-    const auto& cell_value = *value.toCell();
+    const auto& cell_value = *value.asTypedValue();
     if (UNLIKELY(!isContainer(cell_value))) {
       return value;
     }
@@ -82,7 +82,7 @@ Variant HHVM_FUNCTION(max,
                       const Variant& value,
                       const Array& args /* = null_array */) {
   if (args.empty()) {
-    const auto& cell_value = *value.toCell();
+    const auto& cell_value = *value.asTypedValue();
     if (UNLIKELY(!isContainer(cell_value))) {
       return value;
     }

@@ -416,7 +416,7 @@ tv_lval atRw(ObjectData* obj, const TypedValue* key) {
 }
 
 bool contains(ObjectData* obj, const Variant& offset) {
-  auto* key = offset.toCell();
+  auto* key = offset.asTypedValue();
   switch (obj->collectionType()) {
     case CollectionType::Vector:
     case CollectionType::ImmVector:

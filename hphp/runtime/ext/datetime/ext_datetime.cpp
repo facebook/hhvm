@@ -325,12 +325,12 @@ Array HHVM_METHOD(DateTime, __sleep) {
   auto const data = getDateTimeData(this_);
 
   auto const formatted = data->format(s_ISOformat);
-  this_->setProp(nullptr, s_date.get(), formatted.toCell());
+  this_->setProp(nullptr, s_date.get(), formatted.asTypedValue());
   int zoneType = data->m_dt->zoneType();
   this_->setProp(nullptr, s_timezone_type.get(),
                  make_tv<KindOfInt64>(zoneType));
   auto const timezone = zone_type_to_string(zoneType, data->m_dt);
-  this_->setProp(nullptr, s_timezone.get(), timezone.toCell());
+  this_->setProp(nullptr, s_timezone.get(), timezone.asTypedValue());
   return make_varray(s_date, s_timezone_type, s_timezone);
 }
 

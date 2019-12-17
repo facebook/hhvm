@@ -35,7 +35,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
                                   bool serialized,
                                   APCHandleLevel level,
                                   bool unserializeObj) {
-  auto const cell = source.toCell();
+  auto const cell = source.asTypedValue();
   switch (cell.type()) {
     case KindOfUninit: {
       auto const value = APCTypedValue::tvUninit();

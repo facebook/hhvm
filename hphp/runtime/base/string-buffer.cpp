@@ -170,7 +170,7 @@ void StringBuffer::append(int64_t n) {
 }
 
 void StringBuffer::append(const Variant& v) {
-  auto const cell = v.toCell();
+  auto const cell = v.asTypedValue();
   switch (cell->m_type) {
     case KindOfInt64:
       append(cell->m_data.num);

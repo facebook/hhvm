@@ -1614,7 +1614,7 @@ void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
   // It is possible that $name does not get serialized. If a class derives
   // from ReflectionClass and the return value of its __sleep() function does
   // not contain 'name', $name gets ignored. So, we restore $name here.
-  obj->setProp(nullptr, s_name.get(), result.toCell());
+  obj->setProp(nullptr, s_name.get(), result.asTypedValue());
 }
 
 static Variant reflection_extension_name_get(const Object& this_) {
@@ -1785,7 +1785,7 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
       data->setDynamicProp();
       this_->setProp(nullptr, s_class.get(),
                      make_tv<KindOfPersistentString>(cls->name()));
-      this_->setProp(nullptr, s_name.get(), prop_name.toCell());
+      this_->setProp(nullptr, s_name.get(), prop_name.asTypedValue());
       return;
     }
   }

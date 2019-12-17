@@ -1710,7 +1710,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   for (auto i = kNumActRecCells; i > 0; --i) vmStack().pushUninit();
 
   // Push arguments.
-  auto const& args = *args_.toCell();
+  auto const& args = *args_.asTypedValue();
   assertx(isContainerOrNull(args));
   auto numArgs = cellIsNull(args) ? 0 : getContainerSize(args);
   if (numArgs == 0) {

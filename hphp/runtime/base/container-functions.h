@@ -31,7 +31,7 @@ inline bool isContainer(const Cell c) {
 }
 
 inline bool isContainer(const Variant& v) {
-  return isContainer(*v.toCell());
+  return isContainer(*v.asTypedValue());
 }
 
 inline bool isContainerOrNull(const Cell c) {
@@ -41,7 +41,7 @@ inline bool isContainerOrNull(const Cell c) {
 }
 
 inline bool isContainerOrNull(const Variant& v) {
-  return isContainerOrNull(*v.toCell());
+  return isContainerOrNull(*v.asTypedValue());
 }
 
 inline bool isMutableContainer(const Cell c) {
@@ -51,7 +51,7 @@ inline bool isMutableContainer(const Cell c) {
 }
 
 inline bool isMutableContainer(const Variant& v) {
-  return isMutableContainer(*v.toCell());
+  return isMutableContainer(*v.asTypedValue());
 }
 
 inline size_t getContainerSize(const Cell c) {
@@ -64,7 +64,7 @@ inline size_t getContainerSize(const Cell c) {
 }
 
 inline size_t getContainerSize(const Variant& v) {
-  return getContainerSize(*v.toCell());
+  return getContainerSize(*v.asTypedValue());
 }
 
 inline bool isPackedContainer(const Cell c) {
@@ -78,7 +78,7 @@ inline bool isPackedContainer(const Cell c) {
 
 ALWAYS_INLINE
 const Cell container_as_cell(const Variant& container) {
-  const auto& cellContainer = *container.toCell();
+  const auto& cellContainer = *container.asTypedValue();
   if (UNLIKELY(!isContainer(cellContainer))) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a container (array or collection)");
@@ -96,7 +96,7 @@ inline bool isClsMethCompactContainer(const Cell c) {
 }
 
 inline bool isClsMethCompactContainer(const Variant& v) {
- return isClsMethCompactContainer(*v.toCell());
+ return isClsMethCompactContainer(*v.asTypedValue());
 }
 
 inline size_t getClsMethCompactContainerSize(const Cell c) {
@@ -104,7 +104,7 @@ inline size_t getClsMethCompactContainerSize(const Cell c) {
 }
 
 inline size_t getClsMethCompactContainerSize(const Variant& v) {
- return getClsMethCompactContainerSize(*v.toCell());
+ return getClsMethCompactContainerSize(*v.asTypedValue());
 }
 
 inline Cell* castClsmethToContainerInplace(Cell* c) {

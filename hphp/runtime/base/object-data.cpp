@@ -447,7 +447,7 @@ void ObjectData::o_set(const String& propName, const Variant& v,
   }
 
   if (useSet) {
-    invokeSet(propName.get(), *v.toCell());
+    invokeSet(propName.get(), *v.asTypedValue());
   } else if (!prop) {
     setDynProp(propName.get(), tvToInitCell(*v.asTypedValue()));
   }

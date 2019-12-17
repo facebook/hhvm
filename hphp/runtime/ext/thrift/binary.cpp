@@ -249,7 +249,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(types[0], transport, keyspec);
           Variant value = binary_deserialize(types[1], transport, valspec);
-          collections::set(obj.get(), key.toCell(), value.toCell());
+          collections::set(obj.get(), key.asTypedValue(), value.asTypedValue());
         }
         return Variant(std::move(obj));
       } else {
@@ -286,7 +286,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         int64_t i = 0;
         do {
           auto val = binary_deserialize(type, transport, elemspec);
-          tvDup(*val.toCell(), vec->appendForUnserialize(i));
+          tvDup(*val.asTypedValue(), vec->appendForUnserialize(i));
         } while (++i < size);
         return Variant(std::move(vec));
       } else {

@@ -650,13 +650,13 @@ static Object create_libxmlerror(xmlError &error) {
   ret->setProp(nullptr, s_column.get(), make_tv<KindOfInt64>(error.int2));
   if (error.message) {
     String message(error.message);
-    ret->setProp(nullptr, s_message.get(), message.toCell());
+    ret->setProp(nullptr, s_message.get(), message.asTypedValue());
   } else {
     ret->setProp(nullptr, s_message.get(), make_tv<KindOfNull>());
   }
   if (error.file) {
     String file(error.file);
-    ret->setProp(nullptr, s_file.get(), file.toCell());
+    ret->setProp(nullptr, s_file.get(), file.asTypedValue());
   } else {
     ret->setProp(nullptr, s_file.get(), make_tv<KindOfNull>());
   }

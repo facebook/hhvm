@@ -153,7 +153,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
       try {
         auto v = uns.unserialize();
         v.setEvalScalar();
-        RuntimeOption::ConstantFunctions[func] = *v.toCell();
+        RuntimeOption::ConstantFunctions[func] = *v.asTypedValue();
         continue;
       } catch (const Exception& e) {
         // fall through and log

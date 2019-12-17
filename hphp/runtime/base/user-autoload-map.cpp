@@ -103,7 +103,7 @@ AutoloadMap::Result UserAutoloadMap::handleFailure(
   //  - anything else means keep going
   Variant action = vm_call_user_func(
     m_failFunc, make_vec_array(getStringRepr(kind), className, err));
-  auto const& actionCell = action.toCell();
+  auto const& actionCell = action.asTypedValue();
   if (actionCell->m_type == KindOfBoolean) {
     return actionCell->m_data.num
       ? AutoloadMap::Result::RetryAutoloading

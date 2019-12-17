@@ -1045,14 +1045,14 @@ static void object_set(const json_parser* json,
   if (!assoc) {
     // We know it is stdClass, and everything is public (and dynamic).
     if (key.empty()) {
-      var.getObjectData()->setProp(nullptr, s__empty_.get(), *value.toCell());
+      var.getObjectData()->setProp(nullptr, s__empty_.get(), *value.asTypedValue());
     } else {
       var.getObjectData()->o_set(key, value);
     }
   } else {
     if (container_type == JSONContainerType::COLLECTIONS) {
       auto keyTV = make_tv<KindOfString>(key.get());
-      collections::set(var.getObjectData(), &keyTV, value.toCell());
+      collections::set(var.getObjectData(), &keyTV, value.asTypedValue());
     } else if (container_type == JSONContainerType::HACK_ARRAYS) {
       forceToDict(var).set(key, value);
       if (RuntimeOption::EvalArrayProvenance && json->prov_tag) {
@@ -1092,7 +1092,7 @@ static void attach_zval(json_parser *json,
 
   if (up_mode == Mode::ARRAY) {
     if (container_type == JSONContainerType::COLLECTIONS) {
-      collections::append(root.getObjectData(), child.toCell());
+      collections::append(root.getObjectData(), child.asTypedValue());
     } else {
       root.asArrRef().append(child);
     }
@@ -1440,7 +1440,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             json_create_zval(mval, *buf, type, options);
             auto& top = json->stack[json->top].val;
             if (container_type == JSONContainerType::COLLECTIONS) {
-              collections::append(top.getObjectData(), mval.toCell());
+              collections::append(top.getObjectData(), mval.asTypedValue());
             } else {
               top.asArrRef().append(mval);
             }
@@ -1524,7 +1524,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             if (type != kInvalidDataType) {
               auto& top = json->stack[json->top].val;
               if (container_type == JSONContainerType::COLLECTIONS) {
-                collections::append(top.getObjectData(), mval.toCell());
+                collections::append(top.getObjectData(), mval.asTypedValue());
               } else {
                 top.asArrRef().append(mval);
               }

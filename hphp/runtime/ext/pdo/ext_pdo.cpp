@@ -522,7 +522,7 @@ const StaticString s_queryString("queryString");
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
                                const String& clsname,
                                const Variant& ctor_args) {
-  object->setProp(nullptr, s_queryString.get(), stmt->query_string.toCell());
+  object->setProp(nullptr, s_queryString.get(), stmt->query_string.asTypedValue());
   if (clsname.empty()) {
     return;
   }

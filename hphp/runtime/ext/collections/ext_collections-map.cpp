@@ -429,7 +429,7 @@ BaseMap::php_zip(const Variant& iterable) {
     if (isTombstone(i)) continue;
     const Elm& e = data()[i];
     Variant v = iter.second();
-    auto pair = req::make<c_Pair>(e.data, *v.toCell());
+    auto pair = req::make<c_Pair>(e.data, *v.asTypedValue());
     auto const tv = make_tv<KindOfObject>(pair.get());
     if (e.hasIntKey()) {
       map->setRaw(e.ikey, tv);
@@ -610,7 +610,7 @@ BaseMap::FromItems(const Class*, const Variant& iterable) {
   target->reserve(sz);
   for (; iter; ++iter) {
     Variant v = iter.second();
-    TypedValue* tv = v.toCell();
+    TypedValue* tv = v.asTypedValue();
     if (UNLIKELY(tv->m_type != KindOfObject ||
                  tv->m_data.pobj->getVMClass() != c_Pair::classof())) {
       SystemLib::throwInvalidArgumentExceptionObject(

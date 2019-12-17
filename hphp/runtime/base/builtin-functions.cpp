@@ -138,7 +138,7 @@ bool is_callable(const Variant& v, bool syntax_only, Variant* name) {
     if (LIKELY(!name)) return ret;
   }
 
-  auto const tv_func = v.toCell();
+  auto const tv_func = v.asTypedValue();
   if (isFuncType(tv_func->m_type)) {
     auto func_name = tv_func->m_data.pfunc->fullName();
     if (name) *name = Variant{func_name, Variant::PersistentStrInit{}};

@@ -124,7 +124,7 @@ struct SoapVar {
   }
 
   static void setEncValue(ObjectData* obj, const Variant& val) {
-    obj->setProp(nullptr, s_enc_value.get(), *val.toCell());
+    obj->setProp(nullptr, s_enc_value.get(), *val.asTypedValue());
   }
 
 #define X(Name, str_name) \
@@ -132,7 +132,7 @@ struct SoapVar {
     if (str.isNull()) { \
       obj->setProp(nullptr, s_enc_##str_name.get(), make_tv<KindOfNull>()); \
     } else { \
-      obj->setProp(nullptr, s_enc_##str_name.get(), str.toCell()); \
+      obj->setProp(nullptr, s_enc_##str_name.get(), str.asTypedValue()); \
     } \
   } \
   static String getEnc##Name(ObjectData* obj) { \

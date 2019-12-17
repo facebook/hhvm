@@ -272,7 +272,7 @@ static Variant HHVM_METHOD(DirectoryIterator, hh_readdir) {
   if (auto array_dir = dyn_cast<ArrayDirectory>(dir)) {
     auto const path = array_dir->path();
     assertx(s_DirectoryIterator_class);
-    this_->setProp(s_DirectoryIterator_class, s_dirName.get(), path.toCell());
+    this_->setProp(s_DirectoryIterator_class, s_dirName.get(), path.asTypedValue());
   }
 
   return HHVM_FN(readdir)(Resource(dir));

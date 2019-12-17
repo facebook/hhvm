@@ -361,7 +361,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
       } else {
         String key_str(index, index_len, CopyString);
         auto const key =
-          symtable->convertKey<IntishCast::Cast>(key_str.toCell());
+          symtable->convertKey<IntishCast::Cast>(key_str.asTypedValue());
         auto const v = symtable->rval(key);
         if (isNullType(v.type()) || !isArrayLikeType(v.type())) {
           symtable->set(key, make_persistent_array_like_tv(ArrayData::Create()));
@@ -387,9 +387,9 @@ void register_variable(Array& variables, char *name, const Variant& value,
     } else {
       String key_str(index, index_len, CopyString);
       auto key =
-        symtable->convertKey<IntishCast::Cast>(key_str.toCell());
+        symtable->convertKey<IntishCast::Cast>(key_str.asTypedValue());
       if (overwrite || !symtable->exists(key)) {
-        symtable->set(key, *value.toCell(), true);
+        symtable->set(key, *value.asTypedValue(), true);
       }
     }
   }

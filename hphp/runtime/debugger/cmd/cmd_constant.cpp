@@ -71,7 +71,7 @@ void CmdConstant::onClient(DebuggerClient &client) {
       Variant forSort(cmd->m_constants);
       HHVM_FN(ksort)(forSort);
       assertx(forSort.isArray());
-      m_constants = forSort.toCell()->m_data.parr;
+      m_constants = forSort.asTypedValue()->m_data.parr;
     }
 
     for (ArrayIter iter(m_constants); iter; ++iter) {

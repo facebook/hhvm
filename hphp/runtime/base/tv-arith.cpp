@@ -686,7 +686,7 @@ Cell cellDiv(Cell c1, Cell c2) {
 }
 
 Cell cellPow(Cell c1, Cell c2) {
-  return *HHVM_FN(pow)(tvAsVariant(&c1), tvAsVariant(&c2)).toCell();
+  return *HHVM_FN(pow)(tvAsVariant(&c1), tvAsVariant(&c2)).asTypedValue();
 }
 
 Cell cellMod(Cell c1, Cell c2) {

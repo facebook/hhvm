@@ -91,7 +91,7 @@ public:
   auto& asCArrRef() const { return HPHP::asCArrRef(m_val); }
   auto& asCObjRef() const { return HPHP::asCObjRef(m_val); }
 
-  tv_rval toCell() const { return m_val; }
+  tv_rval asTypedValue() const { return m_val; }
 
   ArrayData *getArrayData() const {
     assertx(isArray());
@@ -1093,12 +1093,6 @@ struct Variant : private TypedValue {
         TypedValue* asTypedValue()       { return this; }
 
   /*
-   * Access this Variant as a Cell.
-   */
-  const Cell* toCell() const { return asTypedValue(); }
-        Cell* toCell()       { return asTypedValue(); }
-
-  /*
    * Read this Variant as an InitCell, without incrementing the
    * reference count.  I.e. turn KindOfUninit into KindOfNull.
    */
@@ -1571,7 +1565,7 @@ ALWAYS_INLINE Cell Array::convertKey(Cell k) const {
 }
 template <IntishCast IC>
 ALWAYS_INLINE Cell Array::convertKey(const Variant& k) const {
-  return convertKey<IC>(*k.toCell());
+  return convertKey<IC>(*k.asTypedValue());
 }
 
 template <IntishCast IC>

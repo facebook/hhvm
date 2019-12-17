@@ -202,19 +202,19 @@ inline ArrayData* ArrayData::setMove(StringData* k, Cell v) {
 }
 
 inline ArrayData* ArrayData::set(int64_t k, const Variant& v) {
-  auto c = *v.toCell();
+  auto c = *v.asTypedValue();
   assertx(cowCheck() || notCyclic(c));
   return g_array_funcs.setInt[kind()](this, k, c);
 }
 
 inline ArrayData* ArrayData::set(StringData* k, const Variant& v) {
-  auto c = *v.toCell();
+  auto c = *v.asTypedValue();
   assertx(cowCheck() || notCyclic(c));
   return g_array_funcs.setStr[kind()](this, k, c);
 }
 
 inline ArrayData* ArrayData::setInPlace(StringData* k, const Variant& v) {
-  auto c = *v.toCell();
+  auto c = *v.asTypedValue();
   assertx(notCyclic(c));
   return g_array_funcs.setStrInPlace[kind()](this, k, c);
 }
@@ -435,7 +435,7 @@ inline bool ArrayData::exists(const String& k) const {
 }
 
 inline bool ArrayData::exists(const Variant& k) const {
-  return exists(*k.toCell());
+  return exists(*k.asTypedValue());
 }
 
 inline arr_lval ArrayData::lval(const String& k, bool copy) {
@@ -444,7 +444,7 @@ inline arr_lval ArrayData::lval(const String& k, bool copy) {
 }
 
 inline arr_lval ArrayData::lval(const Variant& k, bool copy) {
-  return lval(*k.toCell(), copy);
+  return lval(*k.asTypedValue(), copy);
 }
 
 inline arr_lval ArrayData::lvalSilent(const String& k, bool copy) {
@@ -453,7 +453,7 @@ inline arr_lval ArrayData::lvalSilent(const String& k, bool copy) {
 }
 
 inline arr_lval ArrayData::lvalSilent(const Variant& k, bool copy) {
-  return lvalSilent(*k.toCell(), copy);
+  return lvalSilent(*k.asTypedValue(), copy);
 }
 
 inline tv_rval ArrayData::get(const String& k, bool error) const {
@@ -462,7 +462,7 @@ inline tv_rval ArrayData::get(const String& k, bool error) const {
 }
 
 inline tv_rval ArrayData::get(const Variant& k, bool error) const {
-  return get(*k.toCell(), error);
+  return get(*k.asTypedValue(), error);
 }
 
 inline ArrayData* ArrayData::set(const String& k, Cell v) {
@@ -478,19 +478,19 @@ inline ArrayData* ArrayData::setInPlace(const String& k, Cell v) {
 }
 
 inline ArrayData* ArrayData::set(const String& k, const Variant& v) {
-  return set(k, *v.toCell());
+  return set(k, *v.asTypedValue());
 }
 
 inline ArrayData* ArrayData::setInPlace(const String& k, const Variant& v) {
-  return setInPlace(k, *v.toCell());
+  return setInPlace(k, *v.asTypedValue());
 }
 
 inline ArrayData* ArrayData::set(const Variant& k, const Variant& v) {
-  return set(*k.toCell(), *v.toCell());
+  return set(*k.asTypedValue(), *v.asTypedValue());
 }
 
 inline ArrayData* ArrayData::setInPlace(const Variant& k, const Variant& v) {
-  return setInPlace(*k.toCell(), *v.toCell());
+  return setInPlace(*k.asTypedValue(), *v.asTypedValue());
 }
 
 inline ArrayData* ArrayData::remove(const String& k) {
@@ -499,7 +499,7 @@ inline ArrayData* ArrayData::remove(const String& k) {
 }
 
 inline ArrayData* ArrayData::remove(const Variant& k) {
-  return remove(*k.toCell());
+  return remove(*k.asTypedValue());
 }
 
 inline Variant ArrayData::getValue(ssize_t pos) const {

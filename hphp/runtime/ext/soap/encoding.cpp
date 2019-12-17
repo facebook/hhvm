@@ -1280,7 +1280,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
     if (name) {
       ret.toObject()->o_set(String(name), any);
     } else {
-      ret.toObject()->setProp(nullptr, s_any.get(), *any.toCell());
+      ret.toObject()->setProp(nullptr, s_any.get(), *any.asTypedValue());
     }
   }
 }
@@ -1429,7 +1429,7 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
         }
         ret = create_object(ce, Array());
         ret.toObject()->setProp(nullptr, s__.get(),
-                                *master_to_zval_int(enc, data).toCell());
+                                *master_to_zval_int(enc, data).asTypedValue());
       } else {
         FIND_XML_NULL(data, ret);
         if (soap_check_xml_ref(ret, data)) {
@@ -1478,7 +1478,7 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
         ret.toObject()->setProp(
           nullptr,
           s__.get(),
-          *master_to_zval_int(sdlType->encode, data).toCell()
+          *master_to_zval_int(sdlType->encode, data).asTypedValue()
         );
       }
     } else {

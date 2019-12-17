@@ -6,6 +6,7 @@
 use std::borrow::{Borrow, Cow};
 use std::collections::{btree_map, btree_set, BTreeMap, BTreeSet};
 use std::convert::TryInto;
+use std::ffi::OsString;
 use std::path::PathBuf;
 use std::rc::Rc;
 
@@ -364,6 +365,25 @@ fn btree_set_from_ocamlrep<T: OcamlRep + Ord>(
     Ok(())
 }
 
+impl OcamlRep for OsString {
+    #[cfg(unix)]
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
+        use std::os::unix::ffi::OsStrExt;
+        bytes_to_ocamlrep(self.as_bytes(), alloc)
+    }
+
+    #[cfg(unix)]
+    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
+        use std::os::unix::ffi::OsStrExt;
+        Ok(OsString::from(std::ffi::OsStr::from_bytes(
+            bytes_from_ocamlrep(value)?,
+        )))
+    }
+
+    // TODO: A Windows implementation would be nice, but what does the OCaml
+    // runtime do? If we need Windows support, we'll have to find out.
+}
+
 impl OcamlRep for PathBuf {
     #[cfg(unix)]
     fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a> {
@@ -371,16 +391,9 @@ impl OcamlRep for PathBuf {
         bytes_to_ocamlrep(self.as_os_str().as_bytes(), alloc)
     }
 
-    #[cfg(unix)]
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
-        use std::os::unix::ffi::OsStrExt;
-        Ok(PathBuf::from(std::ffi::OsStr::from_bytes(
-            bytes_from_ocamlrep(value)?,
-        )))
+        Ok(PathBuf::from(OsString::from_ocamlrep(value)?))
     }
-
-    // TODO: A Windows implementation would be nice, but what does the OCaml
-    // runtime do? If we need Windows support, we'll have to find out.
 }
 
 impl OcamlRep for String {

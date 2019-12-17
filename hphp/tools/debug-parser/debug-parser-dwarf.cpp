@@ -2741,7 +2741,7 @@ private:
 
     log_time(time, "collect_addresses_and_symbols: Visit TUs");
 
-    return {entries, symbols};
+    return {std::move(entries), std::move(symbols)};
   }
 
   SymbolAndConstantPool

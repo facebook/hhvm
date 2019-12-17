@@ -2133,12 +2133,6 @@ explicit GDBIndexerImpl(const std::string& filename, int num_threads)
     }
   }
 
-  struct SymbolAndConstantPool {
-    std::vector<uint32_t> symbol_pool;
-    std::vector<uint32_t> cu_vector_offsets;
-    std::vector<std::string> strings;
-  };
-
   void operator()(const std::string& output_file) const override {
     auto begin_time = ::HPHP::Timer::GetCurrentTimeMicros();
     DwarfState dwarf{m_filename};
@@ -2178,14 +2172,15 @@ explicit GDBIndexerImpl(const std::string& filename, int num_threads)
     // The offset, from the start of the file, of the symbol table.
     header[4] = header[3] + sizeof address[0] * address.size();
     // The offset, from the start of the file, of the constant pool.
-    header[5] = header[4] + sizeof symbol_and_constants.symbol_pool[0] *
-                            symbol_and_constants.symbol_pool.size();
+    header[5] = header[4] +
+      sizeof symbol_and_constants.symbol_pool.m_hashtable[0] *
+      symbol_and_constants.symbol_pool.m_hashtable.size();
 
     print_section(fd, header);
     print_section(fd, cu);
     print_section(fd, tu);
     print_section(fd, address);
-    print_section(fd, symbol_and_constants.symbol_pool);
+    print_section(fd, symbol_and_constants.symbol_pool.m_hashtable);
     print_section(fd, symbol_and_constants.cu_vector_offsets);
     print_section(fd, symbol_and_constants.strings);
 
@@ -2358,15 +2353,10 @@ private:
   }
 
   struct GDBSymbol {
-    std::string name;
-    uint32_t hash;
-    uint32_t cu_vector_offset;
-    uint32_t name_offset;
-    bool valid;
+    uint32_t name_offset{};
+    uint32_t cu_vector_offset{};
 
-    bool operator==(const GDBSymbol& other) {
-      return name == other.name && valid == other.valid;
-    }
+    bool valid() { return name_offset; }
   };
 
   struct GDBHashtable {
@@ -2374,6 +2364,7 @@ private:
     size_t m_size;
     size_t m_capacity;
     std::vector<GDBSymbol> m_hashtable;
+
 
     void init(size_t size) {
       assertx(m_size == 0 && m_capacity == 0);
@@ -2390,29 +2381,28 @@ private:
         return n;
       };
 
-      auto initial_size = nextPowerOfTwo(size);
-      if (((initial_size / 4) * 3) < size) initial_size <<= 1;
+      auto initial_size = nextPowerOfTwo(size * 4 / 3);
 
-      m_hashtable =
-        std::vector<GDBSymbol>(initial_size, GDBSymbol{"", 0, 0, 0, false});
+      m_hashtable = std::vector<GDBSymbol>(initial_size, GDBSymbol{});
       m_capacity = initial_size;
     }
 
-    GDBSymbol* findSlot(GDBSymbol s) {
-      uint32_t index = s.hash & (m_capacity - 1);
-      uint32_t step = ((s.hash * 17) & (m_capacity - 1)) | 1;
+    GDBSymbol* findSlot(uint32_t hash) {
+      uint32_t index = hash;
+      uint32_t step = ((hash * 17) & (m_capacity - 1)) | 1;
 
       while (true) {
-        if (!m_hashtable[index].valid || m_hashtable[index] == s) {
+        index &= m_capacity - 1;
+        if (!m_hashtable[index].valid()) {
           return &m_hashtable[index];
         }
-        index = (index + step) & (m_capacity - 1);
+        index += step;
       }
     }
 
-    bool add(GDBSymbol s) {
-      auto* loc = this->findSlot(s);
-      if (loc->valid) return false;
+    bool add(uint32_t hash, GDBSymbol s) {
+      auto const loc = this->findSlot(hash);
+      assert(!loc->valid());
       *loc = s;
       m_size++;
       return true;
@@ -2744,6 +2734,12 @@ private:
     return {std::move(entries), std::move(symbols)};
   }
 
+  struct SymbolAndConstantPool {
+    GDBHashtable symbol_pool;
+    std::vector<uint32_t> cu_vector_offsets;
+    std::vector<std::string> strings;
+  };
+
   SymbolAndConstantPool
   get_symbol_and_constants(const SymbolMap& symbols) const {
     auto time = ::HPHP::Timer::GetCurrentTimeMicros();
@@ -2764,7 +2760,9 @@ private:
     std::vector<uint32_t> cu_vector_values;
     std::vector<std::string> strings;
 
-    uint32_t name_off = 0;
+    // set name_off to 1 so can use non-zero as the valid test for a
+    // hash table entry.
+    uint32_t name_off = 1;
     for (auto& entry : symbols) {
       uint32_t cu_vector_offset = cu_vector_values.size() * 4;
       cu_vector_values.push_back(entry.second.size());
@@ -2772,41 +2770,34 @@ private:
         cu_vector_values.push_back(elem);
       }
       strings.push_back(entry.first);
-      symbol_hash_table.add(GDBSymbol{entry.first, getHashVal(entry.first),
-                                      cu_vector_offset, name_off, true});
+      symbol_hash_table.add(getHashVal(entry.first),
+                            GDBSymbol{name_off, cu_vector_offset});
       name_off += entry.first.length() + 1;
     }
 
     time = log_time(time, "Get_symbol_and_constants: Populate hash table");
 
-    std::vector<uint32_t> symbol_pool;
-    auto const num_cu_vector_elems = cu_vector_values.size() * 4;
-    for (auto i = 0; i < symbol_hash_table.m_capacity; ++i) {
-      auto& e = symbol_hash_table.m_hashtable[i];
-      // offset of the symbol name in the constant pool
-      uint32_t name_offset = 0;
-      // offset of the CU vector in the constant pool
-      uint32_t cu_vector_offset = 0;
-
-      if (e.valid) {
-        name_offset = e.name_offset + num_cu_vector_elems;
-        cu_vector_offset = e.cu_vector_offset;
+    auto const num_cu_vector_bytes =
+      cu_vector_values.size() * sizeof(cu_vector_values[0]);
+    for (auto& sym : symbol_hash_table.m_hashtable) {
+      if (sym.valid()) {
+        sym.name_offset += num_cu_vector_bytes - 1;
       }
-
-      symbol_pool.push_back(name_offset);
-      symbol_pool.push_back(cu_vector_offset);
     }
 
-    log_time(time, "Get_symbol_and_constants: Populate symbol pool");
+    log_time(time, "Get_symbol_and_constants: Update symbol pool");
 
     std::cout << "Hash Table Size: " << symbol_hash_table.m_size <<
       " Capacity: " << symbol_hash_table.m_capacity << std::endl;
-    std::cout << "Symbol Pool Size: " << symbol_pool.size() << std::endl;
     std::cout << "Strings Size: " << strings.size() << std::endl;
     std::cout << "CU Vector Values Size: " <<
       cu_vector_values.size() << std::endl;
 
-    return {symbol_pool, cu_vector_values, strings};
+    return {
+      std::move(symbol_hash_table),
+      std::move(cu_vector_values),
+      std::move(strings)
+    };
   }
 
   std::string m_filename;

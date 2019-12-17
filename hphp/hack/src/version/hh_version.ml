@@ -26,5 +26,6 @@ let version_json =
       [
         ("commit", JSON_String Build_id.build_revision);
         ("commit_time", int_ Build_id.build_commit_time);
+        ("build_mode", JSON_String Build_id.build_mode);
         ("api_version", int_ api_version);
       ])

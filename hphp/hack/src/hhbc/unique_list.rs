@@ -6,6 +6,7 @@ extern crate indexmap;
 use indexmap::IndexSet;
 use std::hash::Hash;
 
+#[derive(Clone)]
 pub struct UniqueList<T>
 where
     T: Hash + Eq,
@@ -33,12 +34,8 @@ where
         }
     }
 
-    pub fn items_iter(&self) -> impl Iterator<Item = &T> {
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
         self.set.iter()
-    }
-
-    pub fn items(&self) -> Vec<&T> {
-        self.set.iter().collect()
     }
 
     pub fn items_set(&self) -> &IndexSet<T> {
@@ -80,12 +77,12 @@ mod unique_list_tests {
     #[test]
     fn add_items_test() {
         let uniq_list = make_test_list();
-        assert!(uniq_list.items().contains(&&3));
-        assert!(uniq_list.items().contains(&&5));
-        assert!(uniq_list.items().contains(&&4));
-        assert!(uniq_list.items().contains(&&9));
-        assert!(uniq_list.items().contains(&&6));
-        assert!(uniq_list.items().contains(&&1));
+        assert!(uniq_list.items_set().contains(&3));
+        assert!(uniq_list.items_set().contains(&5));
+        assert!(uniq_list.items_set().contains(&4));
+        assert!(uniq_list.items_set().contains(&9));
+        assert!(uniq_list.items_set().contains(&6));
+        assert!(uniq_list.items_set().contains(&1));
         assert!(uniq_list.cardinal() == 6);
     }
 
@@ -93,21 +90,20 @@ mod unique_list_tests {
     fn remove_test() {
         let mut uniq_list = make_test_list();
         uniq_list.remove(&4);
-        assert!(!uniq_list.items().contains(&&4));
+        assert!(!uniq_list.items_set().contains(&4));
         assert!(uniq_list.cardinal() == 5);
 
         let expect = vec![3, 5, 9, 6, 1];
         let matching1 = uniq_list
-            .items_iter()
+            .iter()
             .zip(expect.iter())
             .filter(|&(a, b)| a == b)
             .count();
 
         let matching2 = uniq_list
-            .items()
             .iter()
             .zip(expect.iter())
-            .filter(|&(&a, b)| a == b)
+            .filter(|&(a, b)| a == b)
             .count();
         assert!(matching1 == 5);
         assert!(matching2 == 5);
@@ -117,7 +113,7 @@ mod unique_list_tests {
     fn empty_test() {
         let mut uniq_list = make_test_list();
         uniq_list.empty();
-        assert!(!uniq_list.items().contains(&&3));
+        assert!(!uniq_list.items_set().contains(&3));
         assert!(uniq_list.cardinal() == 0);
     }
 

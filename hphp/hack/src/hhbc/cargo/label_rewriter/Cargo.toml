@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:label_rewriter_rust
-# Signature<<a3288a7be812e1a7b7384b6309f3eb4780339b8e>>
+# Signature<<4fd33d3f6ae826cce41e0d3df6a301e0c0e452c0>>
 [package]
 name = "label_rewriter_rust"
 edition = "2018"
@@ -16,4 +16,4 @@ hhas_param_rust = { path = "../hhas_param" }
 hhbc_ast_rust = { path = "../hhbc_ast" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
 label_rust = { path = "../label" }
-# @end of Signature<<a3288a7be812e1a7b7384b6309f3eb4780339b8e>>
+# @end of Signature<<4fd33d3f6ae826cce41e0d3df6a301e0c0e452c0>>

@@ -728,6 +728,10 @@ module ClosureConvertTest_ = struct
   let test args ~ocaml_env:_ ~rust_env:_ file contents =
     try test args file contents with
     (* We don't care about those *)
+    | Failure x
+      when x = "TODO(T35357243): Pocket Universes syntax must be erased by now"
+      ->
+      ()
     | Failure x when x = "Unexpected concurrent stmt structure" -> ()
     | Emit_fatal.IncludeTimeFatalException _ -> ()
 end

@@ -4,18 +4,19 @@
 // LICENSE file in the "hack" directory of this source tree.
 use oxidized::{ast, ast_defs::FunKind, pos::Pos, s_map};
 use rx_rust as rx;
+use std::borrow::Cow;
 
 #[derive(Clone)]
 pub struct LongLambda {
-    is_static: bool,
-    is_async: bool,
-    rx_level: Option<rx::Level>,
+    pub is_static: bool,
+    pub is_async: bool,
+    pub rx_level: Option<rx::Level>,
 }
 
 #[derive(Clone)]
 pub struct Lambda {
-    is_async: bool,
-    rx_level: Option<rx::Level>,
+    pub is_async: bool,
+    pub rx_level: Option<rx::Level>,
 }
 
 #[derive(Clone)]
@@ -27,6 +28,16 @@ pub enum ScopeItem {
     Lambda(Lambda),
 }
 
+impl ScopeItem {
+    pub fn is_in_lambda(&self) -> bool {
+        match self {
+            ScopeItem::Lambda(_) | ScopeItem::LongLambda(_) => true,
+            _ => false,
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct Scope {
     items: Vec<ScopeItem>,
 }
@@ -36,13 +47,29 @@ impl Scope {
         Scope { items: vec![] }
     }
 
-    pub fn get_class(&self) -> Option<&ast::Class_> {
-        for scope_item in self.items.iter().rev() {
+    pub fn push_item(&mut self, s: ScopeItem) {
+        self.items.push(s)
+    }
+
+    pub fn iter(&self) -> impl ExactSizeIterator<Item = &ScopeItem> {
+        self.items.iter().rev()
+    }
+
+    pub fn iter_subscopes(&self) -> impl Iterator<Item = &[ScopeItem]> {
+        (1..self.items.len()).rev().map(move |i| &self.items[..i])
+    }
+
+    pub fn get_subscope_class(sub_scope: &[ScopeItem]) -> Option<&ast::Class_> {
+        for scope_item in sub_scope.iter().rev() {
             if let ScopeItem::Class(cd) = scope_item {
-                return Some(cd);
+                return Some(&cd);
             }
         }
         None
+    }
+
+    pub fn get_class(&self) -> Option<&ast::Class_> {
+        Self::get_subscope_class(&self.items[..])
     }
 
     pub fn get_span(&self) -> Pos {
@@ -100,16 +127,16 @@ impl Scope {
         None
     }
 
-    pub fn get_class_params(&self) -> ast::ClassTparams {
+    pub fn get_class_params(&self) -> Cow<ast::ClassTparams> {
         for scope_item in self.items.iter().rev() {
             if let ScopeItem::Class(cd) = scope_item {
-                return cd.tparams.clone();
+                return Cow::Borrowed(&cd.tparams);
             }
         }
-        ast::ClassTparams {
+        Cow::Owned(ast::ClassTparams {
             list: vec![],
             constraints: s_map::SMap::new(),
-        }
+        })
     }
 
     pub fn has_this(&self) -> bool {
@@ -166,10 +193,10 @@ impl Scope {
     }
 
     pub fn is_in_lambda(&self) -> bool {
-        match self.items.last() {
-            Some(&ScopeItem::Lambda(_)) | Some(&ScopeItem::LongLambda(_)) => true,
-            _ => false,
-        }
+        self.items
+            .last()
+            .map(&ScopeItem::is_in_lambda)
+            .unwrap_or(false)
     }
 
     pub fn rx_of_scope(&self) -> rx::Level {
@@ -215,5 +242,22 @@ impl Scope {
             }
         }
         false
+    }
+
+    pub fn is_static(&self) -> bool {
+        for x in self.items.iter().rev() {
+            match x {
+                ScopeItem::LongLambda(x) => {
+                    if x.is_static {
+                        return true;
+                    }
+                }
+                ScopeItem::Function(_) => return true,
+                ScopeItem::Method(md) => return md.static_,
+                ScopeItem::Lambda(_) => continue,
+                _ => return true,
+            }
+        }
+        true
     }
 }

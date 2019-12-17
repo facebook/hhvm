@@ -21,3 +21,15 @@ impl ShapeFieldName {
         }
     }
 }
+
+impl FunKind {
+    pub fn is_async(self) -> bool {
+        self == FunKind::FAsync || self == FunKind::FAsyncGenerator
+    }
+}
+
+impl Id {
+    pub fn name(&self) -> &str {
+        &self.1
+    }
+}

@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use aast_parser::{rust_aast_parser_types::Env, AastParser};
+use env::{emitter::Emitter, GlobalState};
 use ocamlrep_ocamlpool::ocaml_ffi;
 use options::{CompilerFlags, Options};
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
@@ -16,11 +17,13 @@ ocaml_ffi! {
         env.show_all_errors = true;
         env.fail_open = true;
         let indexed_source_text = IndexedSourceText::new(source_text);
-        let res = AastParser::from_text(&env, &indexed_source_text, None).unwrap().aast.unwrap();
+        let mut res = AastParser::from_text(&env, &indexed_source_text, None).unwrap().aast.unwrap();
 
         let mut options = Options::default();
         options.hack_compiler_flags.set(CompilerFlags::CONSTANT_FOLDING, true);
-        // TODO
+        let state = GlobalState::default();
+        let mut emitter = Emitter::new(options, state);
+        closure_convert_rust::convert_toplevel_prog(&mut emitter, &mut res);
         res
     }
 }

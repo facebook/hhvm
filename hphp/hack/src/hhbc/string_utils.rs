@@ -295,11 +295,17 @@ pub mod reified {
     pub static GENERICS_LOCAL_NAME: &'static str = "$0ReifiedGenerics";
     pub static CAPTURED_PREFIX: &'static str = "$__captured$reifiedgeneric$";
 
+    pub fn reified_generic_captured_name(is_fun: bool, i: usize) -> String {
+        let type_ = if is_fun { "function" } else { "class" };
+        // to_string() due to T52404885
+        format!("$__captured$reifiedgeneric${}${}", type_, i.to_string())
+    }
+
     pub fn mangle_reified_param(no_dollar: bool, s: &str) -> String {
         format!("{}__reified${}", if no_dollar { "" } else { "$" }, s)
     }
 
-    pub fn captured_name(is_fun: bool, i: u32) -> String {
+    pub fn captured_name(is_fun: bool, i: usize) -> String {
         format!(
             "{}{}${}",
             CAPTURED_PREFIX,

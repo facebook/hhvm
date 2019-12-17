@@ -659,6 +659,9 @@ pub mod fb {
     pub const TYPE_STRUCTURE: &str = "\\HH\\TypeStructure";
 
     pub const INCORRECT_TYPE: &str = "\\HH\\INCORRECT_TYPE";
+
+    pub const INCORRECT_TYPE_NO_NS: &str = "HH\\INCORRECT_TYPE";
+
 }
 
 pub mod hh {

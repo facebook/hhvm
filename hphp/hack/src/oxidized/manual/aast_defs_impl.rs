@@ -21,6 +21,14 @@ impl Hint {
     pub fn new(p: Pos, h: Hint_) -> Self {
         Self(p, Box::new(h))
     }
+
+    pub fn as_happly(&self) -> Option<(&Sid, &Vec<Hint>)> {
+        self.1.as_happly()
+    }
+
+    pub fn is_hlike(&self) -> bool {
+        self.1.is_hlike()
+    }
 }
 
 impl Hint_ {
@@ -31,10 +39,27 @@ impl Hint_ {
         }
     }
 
-    pub fn is_happly(&self) -> bool {
+    pub fn as_happly(&self) -> Option<(&Sid, &Vec<Hint>)> {
         match self {
-            Hint_::Happly(_, _) => true,
+            Hint_::Happly(x, y) => Some((x, y)),
+            _ => None,
+        }
+    }
+
+    pub fn is_happly(&self) -> bool {
+        self.as_happly().is_some()
+    }
+
+    pub fn is_hlike(&self) -> bool {
+        match self {
+            Hint_::Hlike(_) => true,
             _ => false,
         }
+    }
+}
+
+impl Lid {
+    pub fn name(&self) -> &String {
+        crate::local_id::get_name(&self.1)
     }
 }

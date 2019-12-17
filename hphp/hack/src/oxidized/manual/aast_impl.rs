@@ -56,11 +56,65 @@ impl<Fb, En, Hi> Expr<Pos, Fb, En, Hi> {
             Expr_::Lvar(Box::new(Lid(p.clone(), (0, String::from(n))))),
         )
     }
+
+    pub fn as_class_get(
+        &self,
+    ) -> Option<&(ClassId<Pos, Fb, En, Hi>, ClassGetExpr<Pos, Fb, En, Hi>)> {
+        self.1.as_class_get()
+    }
+
+    pub fn as_class_const(&self) -> Option<&(ClassId<Pos, Fb, En, Hi>, Pstring)> {
+        self.1.as_class_const()
+    }
+
+    pub fn as_id(&self) -> Option<&str> {
+        self.1.as_id()
+    }
 }
 
 impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn make_string(s: Vec<u8>) -> Self {
         Expr_::String(unsafe { String::from_utf8_unchecked(s) })
+    }
+
+    pub fn as_class_get(&self) -> Option<&(ClassId<Ex, Fb, En, Hi>, ClassGetExpr<Ex, Fb, En, Hi>)> {
+        if let Expr_::ClassGet(x) = self {
+            Some(x)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_class_const(&self) -> Option<&(ClassId<Ex, Fb, En, Hi>, Pstring)> {
+        if let Expr_::ClassConst(x) = self {
+            Some(x)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_id(&self) -> Option<&str> {
+        if let Expr_::Id(x) = &self {
+            Some(&x.1)
+        } else {
+            None
+        }
+    }
+}
+
+impl<Ex, Fb, En, Hi> ClassId<Ex, Fb, En, Hi> {
+    pub fn as_ci_expr(&self) -> Option<&Expr_<Ex, Fb, En, Hi>> {
+        self.1.as_ci_expr()
+    }
+}
+
+impl<Ex, Fb, En, Hi> ClassId_<Ex, Fb, En, Hi> {
+    pub fn as_ci_expr(&self) -> Option<&Expr_<Ex, Fb, En, Hi>> {
+        if let ClassId_::CIexpr(x) = &self {
+            Some(&x.1)
+        } else {
+            None
+        }
     }
 }
 

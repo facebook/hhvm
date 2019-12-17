@@ -2436,6 +2436,8 @@ private:
     bool is_external = false;
     std::string name;
     bool full_name = false;
+    bool is_inlined = false;
+    bool has_location = false;
 
     dwarf.forEachAttribute(
       die,
@@ -2447,11 +2449,24 @@ private:
           case DW_AT_external:
             is_external = dwarf.getAttributeValueFlag(attr);
             break;
+          case DW_AT_linkage_name:
+            is_external = true;
+            break;
+          case DW_AT_location:
+            has_location = true;
+            break;
           case DW_AT_name:
             if (!full_name) {
               name = dwarf.getAttributeValueString(attr);
             }
             break;
+          case DW_AT_inline: {
+            auto const val = dwarf.getAttributeValueUData(attr);
+            is_inlined =
+              (val == DW_INL_inlined) ||
+              (val == DW_INL_declared_inlined);
+            break;
+          }
           case DW_AT_language:
             language = dwarf.getAttributeValueUData(attr);
             break;
@@ -2567,15 +2582,15 @@ private:
       }
     };
 
-    auto const addParent = [&](std::string name) {
-      if (full_name) return name;
-      if (!name.empty() && !parent_name.empty()) {
+    auto const addParent = [&] {
+      if (full_name) return;
+      if (name.empty()) return;
+      if (!parent_name.empty()) {
         name = folly::sformat("{}::{}", parent_name, name);
-        if (is_declaration) {
-          spec_names.emplace(dwarf.getDIEOffset(die), name);
-        }
       }
-      return name;
+      if (is_declaration) {
+        spec_names.emplace(dwarf.getDIEOffset(die), name);
+      }
     };
 
     auto const visitChildren = [&](std::string name) {
@@ -2591,39 +2606,61 @@ private:
 
     auto const tag = dwarf.getTag(die);
     switch (tag) {
+      case DW_TAG_base_type:
+        // don't canonicalize!
+        addSymbol(name);
+        break;
+      case DW_TAG_member:
+        // static members appear first here as a declaration, then
+        // later as a DW_TAG_variable whose specification points
+        // here. We need to note the name just in case.
+        if (is_declaration) addParent();
+        break;
       case DW_TAG_subprogram:
+        if (is_inlined) break;
       case DW_TAG_constant:
       case DW_TAG_enumerator:
-        // fallthrough
-      case DW_TAG_variable:
         if (name.empty()) break;
-        name = addParent(name);
+        addParent();
+        if (is_declaration) break;
+        addSymbol(name);
+        break;
+      case DW_TAG_variable:
+        if (name.empty() || (!is_external && !has_location)) break;
+        addParent();
         if (is_declaration) break;
         addSymbol(name);
         break;
       case DW_TAG_namespace:
         if (name.empty()) name = "(anonymous namespace)";
-        name = addParent(name);
+        addParent();
         visitChildren(name);
         break;
       case DW_TAG_typedef:
+      case DW_TAG_subrange_type:
+        addParent();
+        if (is_declaration || name.empty()) break;
+        addSymbol(name);
+        break;
       case DW_TAG_union_type:
       case DW_TAG_class_type:
       case DW_TAG_interface_type:
       case DW_TAG_structure_type:
       case DW_TAG_enumeration_type:
-      case DW_TAG_subrange_type:
-        name = addParent(name);
-        if (is_declaration || name.empty()) break;
-        addSymbol(name);
-        if (tag == DW_TAG_enumeration_type) visitChildren(parent_name);
+        addParent();
+        if (!is_declaration && !name.empty()) {
+          addSymbol(name);
+        }
+        if (tag == DW_TAG_enumeration_type || !name.empty()) {
+          visitChildren(tag == DW_TAG_enumeration_type ? parent_name : name);
+        }
         break;
       case DW_TAG_compile_unit:
       case DW_TAG_type_unit:
         visitChildren(parent_name);
         break;
       default:
-        break;;
+        break;
     }
   }
 
@@ -2679,7 +2716,8 @@ private:
 
         entryList[index] = std::move(merged);
         SpecMap spec_names;
-        visit_die_for_symbols(dwarf, die, symbols, spec_names, "", 0, index);
+        visit_die_for_symbols(dwarf, die, symbols, spec_names, "",
+                              0, index);
       }, true /* Compilation Unit */, m_numThreads
     );
 
@@ -2696,7 +2734,8 @@ private:
       [&](Dwarf_Die die) {
         uint32_t index = unit_indices_tu[die->context->offset];
         SpecMap spec_names;
-        visit_die_for_symbols(dwarf, die, symbols, spec_names, "", 0, index);
+        visit_die_for_symbols(dwarf, die, symbols, spec_names, "",
+                              0, index);
       }, false /* Type Unit */, m_numThreads
     );
 

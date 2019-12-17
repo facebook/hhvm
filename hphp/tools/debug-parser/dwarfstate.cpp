@@ -487,14 +487,17 @@ auto DwarfState::getAttributeForm(Dwarf_Attribute attr) const -> Dwarf_Half {
 }
 
 std::string DwarfState::getAttributeValueString(Dwarf_Attribute attr) const {
+  return folly::to<std::string>(getAttributeValueStringPiece(attr));
+}
+
+folly::StringPiece
+DwarfState::getAttributeValueStringPiece(Dwarf_Attribute attr) const {
   if (attr->form == DW_FORM_string) {
-    return folly::to<std::string>(attr->attrValue);
+    return attr->attrValue;
   }
   if (attr->form == DW_FORM_strp) {
     auto sp = attr->attrValue;
-    return folly::to<std::string>(
-      getStringFromStringSection(readOffset(sp, attr->die->is64Bit))
-    );
+    return getStringFromStringSection(readOffset(sp, attr->die->is64Bit));
   }
   throw DwarfStateException{
     folly::sformat(

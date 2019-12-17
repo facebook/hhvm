@@ -201,6 +201,7 @@ struct DwarfState {
   std::string attributeFormToString(Dwarf_Half form) const;
   std::string opToString(Dwarf_Half form) const;
   std::string getAttributeValueString(Attribute* attr) const;
+  folly::StringPiece getAttributeValueStringPiece(Attribute* attr) const;
   bool getAttributeValueFlag(Attribute* attr) const;
   uint64_t getAttributeValueUData(Attribute* attr) const;
   int64_t getAttributeValueSData(Attribute* attr) const;

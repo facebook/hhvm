@@ -6,12 +6,17 @@
 /*
 * Basic test for preg_replace_callback
 */
-ZendGoodExtPcreTestsPregReplaceCallbackBasic::$replacement = array('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'); //array will have the default key values (0-9) and each value is the corresponding key written in words.
 function integer_word($matches) {
-
-    return ZendGoodExtPcreTestsPregReplaceCallbackBasic::$replacement[\HH\array_key_cast($matches[0])]; //all examples will be looking for an integer value, if one is found it will be stored in $matches[0] which corresponds to a key in the $replacements array
-
+  // Maps from key values (0-9) to corresponding key written in words.
+  $replacement = array('zero', 'one', 'two', 'three', 'four',
+                       'five', 'six', 'seven', 'eight', 'nine');
+  // All examples will be looking for an integer value, if one is found it
+  // will be stored in $matches[0] which corresponds to a key in the
+  // $replacements array.
+  return $replacement[\HH\array_key_cast($matches[0])];
 }
+
+<<__EntryPoint>> function main(): void {
 $count = -1;
 $subject1 = 'there are 7 words in this sentence.';
 $new_subject1 = preg_replace_callback('/\d/', fun("integer_word"), $subject1, -1, inout $count);
@@ -23,7 +28,4 @@ $subject3 = 'there are no numbers in this string';
 $new_subject3 = preg_replace_callback('/\d/', fun("integer_word"), $subject3, 5, inout $count); //limites to five replacements and counts the number of replacements made ands stores in $count variable
 print "$new_subject3 \n";
 print $count;
-
-abstract final class ZendGoodExtPcreTestsPregReplaceCallbackBasic {
-  public static $replacement;
 }

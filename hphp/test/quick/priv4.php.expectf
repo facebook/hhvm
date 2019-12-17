@@ -1,3 +1,3 @@
 D1::foo true
 
-Fatal error: Call to private method X5::foo() from context 'D5' in %s on line 28
+Fatal error: Call to private method X5::foo() from context 'D5' in %s on line 26

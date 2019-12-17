@@ -1,8 +1,8 @@
 int(1)
 
-Notice: Undefined variable: x in %s/slow/object_method/bad-inlining.php on line 26
+Notice: Undefined variable: x in %s/slow/object_method/bad-inlining.php on line 23
 
 Fatal error: Uncaught exception 'BadMethodCallException' with message 'Call to a member function foo() on a non-object (null)' in %s/slow/object_method/bad-inlining.php:15
 Stack trace:
-#0 %s/slow/object_method/bad-inlining.php(19): foo()
-#1 {main}
+#0 %s/slow/object_method/bad-inlining.php(28): foo()
+%a {main}

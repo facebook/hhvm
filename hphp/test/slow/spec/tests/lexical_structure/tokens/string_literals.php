@@ -1,11 +1,11 @@
 <?hh
-
 /*
    +-------------------------------------------------------------+
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-
+class C { public $p1 = 2; }
+<<__EntryPoint>> function main(): void {
 error_reporting(-1);
 
 echo "================= xxx =================\n";
@@ -124,9 +124,9 @@ echo ">$a1|$a2<\n";
 
 // use class properties
 
-class C {
-    public $p1 = 2;
-}
+
+
+
 $myC = new C();
 
 //echo "\$myC = >$myC<\n";  // can't use an object instance
@@ -150,3 +150,4 @@ echo ">{}|{q}|}|{<\n";
 
 $a = 10;
 echo "{$a  }\n";        // trailing white space is ignored
+}

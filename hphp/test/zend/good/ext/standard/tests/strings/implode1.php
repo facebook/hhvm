@@ -3,6 +3,15 @@
    Description: Returns a string containing a string representation of all the
                 array elements in the same order, with the glue string between each element.
 */
+
+class foo
+{
+  function __toString() {
+    return "Object";
+  }
+}
+
+<<__EntryPoint>> function main(): void {
 echo "*** Testing implode() for basic opeartions ***\n";
 $arrays = array (
   array(1,2),
@@ -66,13 +75,6 @@ var_dump( implode(2, $sub_array) );
 
 echo "\n*** Testing implode() on objects ***\n";
 /* checking on objects */
-class foo
-{
-  function __toString() {
-    return "Object";
-  }
-}
-
 $obj = new foo(); //creating new object
 $arr = array($obj, $obj);
 var_dump( implode(",", $arr) );
@@ -121,3 +123,4 @@ fclose($file_handle);
 closedir($dir_handle);
 
 echo "Done\n";
+}

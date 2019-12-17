@@ -1,9 +1,9 @@
 <?hh
 /* Prototype: array parse_ini_string(string $string [,bool $process_sections]);
    Description: parse_ini_string() loads in the ini file specified in filename,
-     and returns the settings in it in an associative array.
-*/
-
+     and returns the settings in it in an associative array. */
+const BIRD = 'Humming bird';
+<<__EntryPoint>> function main(): void {
 $parse_string = <<<EOD
 ; Comment starts with semi-colon(;)
 ; Section starts with [<section name>]
@@ -194,7 +194,6 @@ EOD;
 
 echo "*** Test parse_ini_string() function:  with various keys and values given in string ***\n";
 echo "-- ini string without process_sections optional arg --\n";
-const BIRD = 'Humming bird';
 $ini_array = parse_ini_string($parse_string);
 print_r($ini_array);
 
@@ -203,3 +202,4 @@ $ini_array = parse_ini_string($parse_string, TRUE);
 print_r($ini_array);
 
 echo "*** Done **\n";
+}

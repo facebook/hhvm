@@ -1,7 +1,4 @@
 <?hh
-$string = 'aaa bbb ccc ddd eee ccc aaa bbb';
-
-ZendGoodExtPcreTestsBug442142::$array = array();
 
 function myCallBack( $match ) {
 
@@ -9,10 +6,15 @@ function myCallBack( $match ) {
     return 'xxx';
 }
 
+abstract final class ZendGoodExtPcreTestsBug442142 {
+  public static $array;
+}
+<<__EntryPoint>> function main(): void {
+ZendGoodExtPcreTestsBug442142::$array = array();
+
+$string = 'aaa bbb ccc ddd eee ccc aaa bbb';
+
 $count = -1;
 var_dump(preg_replace_callback('`a+`', fun('myCallBack'), $string, -1, inout $count));
 var_dump(ZendGoodExtPcreTestsBug442142::$array);
-
-abstract final class ZendGoodExtPcreTestsBug442142 {
-  public static $array;
 }

@@ -6,8 +6,6 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
-
 // a simple example of passing by value and by inout
 
 function f($p1, inout $p2)
@@ -17,6 +15,15 @@ function f($p1, inout $p2)
     $p2 = 200;      // actual argument's value changed
     echo "f Out: \$p1: $p1, \$p2: $p2\n";
 }
+
+function g(inout $p1)
+{
+    echo "g In:  \$p1: $p1.\n";
+    $p1 = 200;      // actual argument's value changed
+    echo "g Out: \$p1: $p1.\n";
+}
+<<__EntryPoint>> function main(): void {
+error_reporting(-1);
 
 ///*
 $a1 = 10;
@@ -45,13 +52,6 @@ var_dump($a2);
 //*/
 
 // passing by inout explored further
-
-function g(inout $p1)
-{
-    echo "g In:  \$p1: $p1.\n";
-    $p1 = 200;      // actual argument's value changed
-    echo "g Out: \$p1: $p1.\n";
-}
 
 ///*
 $a2 = 0;
@@ -94,3 +94,4 @@ $z = 10;
 g(inout $z);              // create a reference to a modifiable lvalue
 var_dump($z);
 //*/
+}

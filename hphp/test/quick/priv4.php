@@ -17,8 +17,6 @@ class D1 {
 }
 class E1 extends D1 {
 }
-$e1 = new E1;
-$e1->test(); // Outputs 'D1:foo true'
 
 class D5 {
   private function foo() {
@@ -37,6 +35,11 @@ class X5 extends D5 {
 }
 class F5 extends X5 {
 }
+
+<<__EntryPoint>> function main(): void {
+$e1 = new E1;
+$e1->test(); // Outputs 'D1:foo true'
+
 $e5 = new E5;
 $e5->test(); // Fatals
-
+}

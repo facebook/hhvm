@@ -3,7 +3,7 @@
 /* Prototype: string substr( string str, int start[, int length] )
  * Description: Returns the portion of string specified by the start and length parameters.
  */
-
+<<__EntryPoint>> function main(): void {
 $strings_array = array( "", '12345', "abcdef", "123abc", "_123abc");
 
 
@@ -75,4 +75,4 @@ echo "\n*** Start before the first char ***\n";
 var_dump (substr("abcd" , -8) );
 
 echo"\nDone";
-
+}

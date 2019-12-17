@@ -1,4 +1,4 @@
-<?hh ;
+<?hh
 
 class X {
   private $foo;
@@ -15,13 +15,15 @@ function foo($q, $a) {
   fiz($x->foo());
 }
 
-foo(true, 1);
-foo(false, "a");
-
 function fiz($a) {
   var_dump($a);
 }
 function getX($q, $a) {
   if ($q) $x = new X($a);
   return $x;
+}
+
+<<__EntryPoint>> function main(): void {
+  foo(true, 1);
+  foo(false, "a");
 }

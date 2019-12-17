@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 class MyClass {
   public function __construct() {
@@ -6,6 +6,13 @@ class MyClass {
   }
 }
 
+async function test() {
+  $my = new MyClass();
+  await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
+  return 42;
+}
+
+<<__EntryPoint>> function main(): void {
 set_error_handler(
   ($errno, $errstr, $errfile, $errline, $errcontext) ==> {
     var_dump($errno);
@@ -24,10 +31,5 @@ ResumableWaitHandle::setOnSuccessCallback(
   },
 );
 
-async function test() {
-  $my = new MyClass();
-  await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT, 0);
-  return 42;
-}
-
 HH\Asio\join(test());
+}

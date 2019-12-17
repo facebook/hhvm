@@ -14,9 +14,9 @@ array(2) {
   float(2.2)
 }
 
-Notice: Array to string conversion in %s/implode1.php on line 17
+Notice: Array to string conversion in %s/implode1.php on line 26
 
-Notice: Array to string conversion in %s/implode1.php on line 17
+Notice: Array to string conversion in %s/implode1.php on line 26
 string(12) "Array, Array"
 array(2) {
   [0]=>
@@ -65,7 +65,7 @@ string(36) "2101-639111PHP1111 1string%r\x00%rwith%r\x00%r...%r\x00%r"
 string(27) "20-6391PHP string%r\x00%rwith%r\x00%r...%r\x00%r"
 -- Iteration 4 --
 
-Notice: Array to string conversion in %s/implode1.php on line 52
+Notice: Array to string conversion in %s/implode1.php on line 61
 string(13) "key1Arraykey2"
 -- Iteration 5 --
 string(27) "20-6391PHP string%r\x00%rwith%r\x00%r...%r\x00%r"
@@ -82,22 +82,22 @@ string(45) "2\00\0-639\01\0PHP\0\0\0\0 \0string%r\x00%rwith%r\x00%r...%r\x00%r"
 
 *** Testing implode() on empty string ***
 
-Warning: Invalid operand type was used: implode() expects a container as one of the arguments in %s/implode1.php on line 58
+Warning: Invalid operand type was used: implode() expects a container as one of the arguments in %s/implode1.php on line 67
 NULL
 
 *** Testing implode() on sub-arrays ***
 
-Notice: Array to string conversion in %s/implode1.php on line 63
+Notice: Array to string conversion in %s/implode1.php on line 72
 
-Notice: Array to string conversion in %s/implode1.php on line 63
+Notice: Array to string conversion in %s/implode1.php on line 72
 string(27) "ArrayTESTArrayTESTPHPTEST50"
 
-Notice: Array to string conversion in %s/implode1.php on line 64
+Notice: Array to string conversion in %s/implode1.php on line 73
 string(19) "1Array2Array3Array4"
 
-Notice: Array to string conversion in %s/implode1.php on line 65
+Notice: Array to string conversion in %s/implode1.php on line 74
 
-Notice: Array to string conversion in %s/implode1.php on line 65
+Notice: Array to string conversion in %s/implode1.php on line 74
 string(18) "Array2Array2PHP250"
 
 *** Testing implode() on objects ***
@@ -116,23 +116,23 @@ string(%d) "Resource id #%d::Resource id #%d"
 
 *** Testing error conditions ***
 
-Warning: implode() expects at least 1 parameter, 0 given in %s/implode1.php on line 96
+Warning: implode() expects at least 1 parameter, 0 given in %s/implode1.php on line 98
 
-Warning: Invalid operand type was used: implode() expects a container as one of the arguments in %s/implode1.php on line 99
+Warning: Invalid operand type was used: implode() expects a container as one of the arguments in %s/implode1.php on line 101
 NULL
 
-Warning: Invalid operand type was used: implode() expects a container as one of the arguments in %s/implode1.php on line 102
+Warning: Invalid operand type was used: implode() expects a container as one of the arguments in %s/implode1.php on line 104
 NULL
 
-Warning: Invalid operand type was used: implode() expects a container as one of the arguments in %s/implode1.php on line 105
+Warning: Invalid operand type was used: implode() expects a container as one of the arguments in %s/implode1.php on line 107
 NULL
 string(0) ""
 
-Warning: Invalid operand type was used: implode() expects a container as one of the arguments in %s/implode1.php on line 111
+Warning: Invalid operand type was used: implode() expects a container as one of the arguments in %s/implode1.php on line 113
 NULL
 
-Warning: Invalid operand type was used: implode() expects a container as one of the arguments in %s/implode1.php on line 114
+Warning: Invalid operand type was used: implode() expects a container as one of the arguments in %s/implode1.php on line 116
 NULL
 
-Warning: implode() expects at most 2 parameters, 3 given in %s/implode1.php on line 117
+Warning: implode() expects at most 2 parameters, 3 given in %s/implode1.php on line 119
 Done

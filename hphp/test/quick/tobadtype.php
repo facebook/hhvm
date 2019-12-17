@@ -1,4 +1,4 @@
-<?hh ;
+<?hh
 
 class X {
   function not__toString() { throw new Exception('boom'); }
@@ -24,7 +24,7 @@ function testInt($x) {
 function testDbl($x) {
   return foo((float)$x);
 }
-
+<<__EntryPoint>> function main(): void {
 echo "test int\n";
 
 try {
@@ -47,4 +47,5 @@ try {
   testStr(new X);
 } catch (Exception $e) {
   var_dump($e->getMessage());
+}
 }

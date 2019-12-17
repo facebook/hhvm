@@ -1,7 +1,8 @@
 <?hh
-error_reporting(E_ALL & ~E_STRICT);
-
+class C { static $p; }
 function f() { return 0; }
+<<__EntryPoint>> function main(): void {
+error_reporting(E_ALL & ~E_STRICT);
 $a = array(array(), array());
 $a[0][1] = 'good';
 $a[1][1] = 'bad';
@@ -41,10 +42,6 @@ $i->p = array(new stdClass());
 echo $a[$i->p[0]->p=f()][++$i->p[0]->p];
 unset($i);
 
-class C {
-	static $p;
-}
-
 echo "\n" . 'C::$p=f(): ';
 echo $a[C::$p=f()][++C::$p];
 
@@ -55,3 +52,4 @@ echo $a[C::$p[0]=f()][++C::$p[0]];
 echo "\n" . 'C::$p->q=f(): ';
 C::$p = new stdclass;
 echo $a[C::$p->q=f()][++C::$p->q];
+}

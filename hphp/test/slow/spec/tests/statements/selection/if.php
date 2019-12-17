@@ -6,12 +6,18 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
-
 // an ordinary if having 2 actions on TRUE and none on FALSE
 
 function processTransaction() { echo "Inside processTransaction\n"; }
 function postMessage() { echo "Inside postMessage\n"; }
+
+class Name
+{
+    public $firstName;
+    public $lastName;
+}
+<<__EntryPoint>> function main(): void {
+error_reporting(-1);
 
 $count = 5;
 
@@ -47,12 +53,6 @@ foreach ($scalarValueList as $e)
 }
 
 // use if with an instance of a class
-
-class Name
-{
-    public $firstName;
-    public $lastName;
-}
 
 $aName = new Name();
 var_dump($aName);
@@ -110,3 +110,4 @@ elseif ($a < 10)
     ; // ...
 else
     ; // ...
+}

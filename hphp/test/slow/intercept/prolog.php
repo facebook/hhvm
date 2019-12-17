@@ -1,4 +1,4 @@
-<?hh /* destructor */
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Cls {
@@ -22,7 +22,8 @@ function test($s) {
   }
   echo "$s DONE\n";
 }
-
-test('intercept1');
-test('intercept2');
-test('intercept3');
+<<__EntryPoint>> function main(): void {
+  test('intercept1');
+  test('intercept2');
+  test('intercept3');
+}

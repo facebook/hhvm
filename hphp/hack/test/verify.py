@@ -237,7 +237,7 @@ def run_test_program(
     Run the program and return a list of results.
     """
 
-    def run(test_case):
+    def run(test_case) -> Result:
         test_dir, test_name = os.path.split(test_case.file_path)
         flags = get_flags(test_dir)
         test_flags = get_test_flags(test_case.file_path)
@@ -257,11 +257,11 @@ def run_test_program(
                 timeout=timeout,
             )
         except subprocess.TimeoutExpired as e:
-            output = "Timed out. " + e.output
+            output = "Timed out. " + str(e.output)
         except subprocess.CalledProcessError as e:
             # we don't care about nonzero exit codes... for instance, type
             # errors cause hh_single_type_check to produce them
-            output = e.output
+            output = str(e.output)
         return check_result(test_case, default_expect_regex, ignore_error_text, output)
 
     executor = ThreadPoolExecutor(max_workers=max_workers)

@@ -64,22 +64,22 @@ void throw_exception(const Object& e);
 // type testing
 
 inline bool is_null(const Cell* c) {
-  assertx(cellIsPlausible(*c));
+  assertx(tvIsPlausible(*c));
   return tvIsNull(c);
 }
 
 inline bool is_bool(const Cell* c) {
-  assertx(cellIsPlausible(*c));
+  assertx(tvIsPlausible(*c));
   return tvIsBool(c);
 }
 
 inline bool is_int(const Cell* c) {
-  assertx(cellIsPlausible(*c));
+  assertx(tvIsPlausible(*c));
   return tvIsInt(c);
 }
 
 inline bool is_double(const Cell* c) {
-  assertx(cellIsPlausible(*c));
+  assertx(tvIsPlausible(*c));
   return tvIsDouble(c);
 }
 
@@ -101,7 +101,7 @@ inline bool is_string(const Cell* c) {
 }
 
 inline bool is_array(const Cell* c) {
-  assertx(cellIsPlausible(*c));
+  assertx(tvIsPlausible(*c));
   if (tvIsClsMeth(c)) {
     if (RuntimeOption::EvalIsCompatibleClsMethType &&
         !RuntimeOption::EvalHackArrDVArrs) {
@@ -116,7 +116,7 @@ inline bool is_array(const Cell* c) {
 }
 
 inline bool is_vec(const Cell* c) {
-  assertx(cellIsPlausible(*c));
+  assertx(tvIsPlausible(*c));
   if (tvIsClsMeth(c)) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       if (RuntimeOption::EvalIsVecNotices) {
@@ -130,12 +130,12 @@ inline bool is_vec(const Cell* c) {
 }
 
 inline bool is_dict(const Cell* c) {
-  assertx(cellIsPlausible(*c));
+  assertx(tvIsPlausible(*c));
   return tvIsDict(c);
 }
 
 inline bool is_keyset(const Cell* c) {
-  assertx(cellIsPlausible(*c));
+  assertx(tvIsPlausible(*c));
   return tvIsKeyset(c);
 }
 
@@ -161,18 +161,18 @@ inline bool is_darray(const Cell* c) {
 }
 
 inline bool is_object(const Cell* c) {
-  assertx(cellIsPlausible(*c));
+  assertx(tvIsPlausible(*c));
   return tvIsObject(c) &&
     c->m_data.pobj->getVMClass() != SystemLib::s___PHP_Incomplete_ClassClass;
 }
 
 inline bool is_clsmeth(const Cell* c) {
-  assertx(cellIsPlausible(*c));
+  assertx(tvIsPlausible(*c));
   return tvIsClsMeth(c);
 }
 
 inline bool is_fun(const Cell* c) {
-  assertx(cellIsPlausible(*c));
+  assertx(tvIsPlausible(*c));
   return tvIsFunc(c);
 }
 

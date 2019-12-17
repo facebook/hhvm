@@ -382,7 +382,7 @@ struct KeyProxy {
     // just use the hash from the header.
     if (header.size() <= 0) return header.startHash();
     auto const getHash = [](const Cell& c) {
-      assertx(cellIsPlausible(c));
+      assertx(tvIsPlausible(c));
       assertx(isIntType(c.m_type) || isStringType(c.m_type));
       return isIntType(c.m_type) ? c.m_data.num : c.m_data.pstr->hash();
     };
@@ -398,7 +398,7 @@ struct KeyProxy {
   template <typename S>
   bool equals(const S& storage) const {
     for (size_t i = 0; i < storage.size(); ++i) {
-      assertx(cellIsPlausible(keys[i]));
+      assertx(tvIsPlausible(keys[i]));
       assertx(isIntType(keys[i].m_type) || isStringType(keys[i].m_type));
       if (UNLIKELY(!storage.elem(i).equals(keys[i], storage.isString(i)))) {
         return false;
@@ -412,7 +412,7 @@ struct KeyProxy {
     // Given a storage, initialize it with values from this KeyProxy. Used when
     // we're storing a Key and need to turn a KeyProxy into a Key.
     for (size_t i = 0; i < storage.size(); ++i) {
-      assertx(cellIsPlausible(keys[i]));
+      assertx(tvIsPlausible(keys[i]));
       assertx(isIntType(keys[i].m_type) || isStringType(keys[i].m_type));
       if (isStringType(keys[i].m_type)) {
         keys[i].m_data.pstr->incRefCount();
@@ -464,7 +464,7 @@ struct KeyProxyWithTypes {
 
   template <int N, typename S>
   bool equalsRec(const S& storage) const {
-    assertx(cellIsPlausible(keys[N]));
+    assertx(tvIsPlausible(keys[N]));
     assertx(!IsStr || isStringType(keys[N].m_type));
     assertx(IsStr || isIntType(keys[N].m_type));
     if (!S::HasStringTags && UNLIKELY(storage.isString(N) != IsStr)) {
@@ -483,7 +483,7 @@ struct KeyProxyWithTypes {
 
   template <int N, typename S>
   void initStorageRec(S& storage) const {
-    assertx(cellIsPlausible(keys[N]));
+    assertx(tvIsPlausible(keys[N]));
     assertx(!IsStr || isStringType(keys[N].m_type));
     assertx(IsStr || isIntType(keys[N].m_type));
     if (IsStr) {
@@ -497,7 +497,7 @@ struct KeyProxyWithTypes {
   }
 
   template <int N> size_t hashAt() const {
-    assertx(cellIsPlausible(keys[N]));
+    assertx(tvIsPlausible(keys[N]));
     assertx(!IsStr || isStringType(keys[N].m_type));
     assertx(IsStr || isIntType(keys[N].m_type));
     return IsStr ? keys[N].m_data.pstr->hash() : keys[N].m_data.num;
@@ -549,7 +549,7 @@ template <bool IsStr> struct KeyProxyWithTypes<IsStr> {
 
   template <int N, typename S>
   bool equalsRec(const S& storage) const {
-    assertx(cellIsPlausible(keys[N]));
+    assertx(tvIsPlausible(keys[N]));
     assertx(!IsStr || isStringType(keys[N].m_type));
     assertx(IsStr || isIntType(keys[N].m_type));
     if (!S::HasStringTags && UNLIKELY(storage.isString(N) != IsStr)) {
@@ -566,7 +566,7 @@ template <bool IsStr> struct KeyProxyWithTypes<IsStr> {
 
   template <int N, typename S>
   void initStorageRec(S& storage) const {
-    assertx(cellIsPlausible(keys[N]));
+    assertx(tvIsPlausible(keys[N]));
     assertx(!IsStr || isStringType(keys[N].m_type));
     assertx(IsStr || isIntType(keys[N].m_type));
     if (IsStr) {
@@ -579,7 +579,7 @@ template <bool IsStr> struct KeyProxyWithTypes<IsStr> {
   }
 
   template <int N> size_t hashAt() const {
-    assertx(cellIsPlausible(keys[N]));
+    assertx(tvIsPlausible(keys[N]));
     assertx(!IsStr || isStringType(keys[N].m_type));
     assertx(IsStr || isIntType(keys[N].m_type));
     return IsStr ? keys[N].m_data.pstr->hash() : keys[N].m_data.num;
@@ -768,7 +768,7 @@ const Cell* getImpl(const MemoCacheBase* base,
   auto const& cache = getCache<MemoCache<K>>(base);
   auto const it = cache.find(std::make_tuple(header, keys));
   if (it == cache.end()) return nullptr;
-  assertx(cellIsPlausible(it->second.value));
+  assertx(tvIsPlausible(it->second.value));
   assertx(it->second.value.m_type != KindOfUninit);
   return &it->second.value;
 }
@@ -779,7 +779,7 @@ void setImpl(MemoCacheBase*& base,
              typename K::Header header,
              P keys,
              Cell val) {
-  assertx(cellIsPlausible(val));
+  assertx(tvIsPlausible(val));
   assertx(val.m_type != KindOfUninit);
   if (!base) base = req::make_raw<MemoCache<K>>();
   auto& cache = getCache<MemoCache<K>>(base);
@@ -851,7 +851,7 @@ const Cell* memoCacheGetSharedOnly(const MemoCacheBase* base,
   auto const& cache = getCache<SharedOnlyMemoCache>(base);
   auto const it = cache.find(key);
   if (it == cache.end()) return nullptr;
-  assertx(cellIsPlausible(it->second.value));
+  assertx(tvIsPlausible(it->second.value));
   assertx(it->second.value.m_type != KindOfUninit);
   return &it->second.value;
 }
@@ -921,7 +921,7 @@ void memoCacheSetGeneric(MemoCacheBase*& base,
 void memoCacheSetSharedOnly(MemoCacheBase*& base,
                             SharedOnlyKey key,
                             Cell val) {
-  assertx(cellIsPlausible(val));
+  assertx(tvIsPlausible(val));
   assertx(val.m_type != KindOfUninit);
   if (!base) base = req::make_raw<SharedOnlyMemoCache>();
   auto& cache = getCache<SharedOnlyMemoCache>(base);

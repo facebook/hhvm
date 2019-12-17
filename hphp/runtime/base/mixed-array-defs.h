@@ -92,15 +92,15 @@ void MixedArray::getArrayElm(ssize_t pos,
                             TypedValue* keyOut) const {
   assertx(size_t(pos) < m_used);
   auto& elm = data()[pos];
-  cellDup(elm.data, *valOut);
-  cellCopy(getElmKey(elm), *keyOut);
+  tvDup(elm.data, *valOut);
+  tvCopy(getElmKey(elm), *keyOut);
 }
 
 ALWAYS_INLINE
 void MixedArray::getArrayElm(ssize_t pos, TypedValue* valOut) const {
   assertx(size_t(pos) < m_used);
   auto& elm = data()[pos];
-  cellDup(elm.data, *valOut);
+  tvDup(elm.data, *valOut);
 }
 
 ALWAYS_INLINE
@@ -129,7 +129,7 @@ inline ArrayData* MixedArray::addVal(int64_t ki, Cell data) {
   e->setIntKey(ki, h);
   mutableKeyTypes()->recordInt();
   if (ki >= m_nextKI && m_nextKI >= 0) m_nextKI = ki + 1;
-  cellDup(data, e->data);
+  tvDup(data, e->data);
   // TODO(#3888164): should avoid needing these KindOfUninit checks.
   if (UNLIKELY(e->data.m_type == KindOfUninit)) {
     e->data.m_type = KindOfNull;

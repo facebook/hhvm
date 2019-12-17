@@ -345,9 +345,9 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
         // StaticWaitHandle.
         assertx(ar->retSlot()->m_aux.u_asyncEagerReturnFlag + 1 < 2);
         if (ar->retSlot()->m_aux.u_asyncEagerReturnFlag) {
-          auto const retval = tvAssertCell(*ar->retSlot());
+          auto const retval = tvAssertPlausible(*ar->retSlot());
           auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(retval);
-          cellCopy(make_tv<KindOfObject>(waitHandle), *ar->retSlot());
+          tvCopy(make_tv<KindOfObject>(waitHandle), *ar->retSlot());
         }
       }
       assertx(caller == vmfp());

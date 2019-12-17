@@ -1720,7 +1720,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
     }
   } else {
     assertx(isContainer(args));
-    cellDup(args, *vmStack().allocC());
+    tvDup(args, *vmStack().allocC());
     if (LIKELY(invName == nullptr)) {
       numArgs = prepareUnpackArgs(f, 0, checkRefAnnot);
     } else {
@@ -1768,7 +1768,7 @@ TypedValue ExecutionContext::invokeFuncFew(
   for (auto i = 0; i < numArgs; ++i) {
     const TypedValue *from = &argv[i];
     TypedValue* to = vmStack().allocTV();
-    cellDup(*from, *to);
+    tvDup(*from, *to);
   }
   if (UNLIKELY(invName != nullptr)) {
     shuffleMagicArgs(String::attach(invName), numArgs, false);
@@ -1812,7 +1812,7 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
   checkStack(vmStack(), fp->func(), 0);
 
   Cell* savedSP = vmStack().top();
-  cellDup(awaitResult, *vmStack().allocC());
+  tvDup(awaitResult, *vmStack().allocC());
 
   // decref after awaitResult is on the stack
   decRefObj(freeObj);

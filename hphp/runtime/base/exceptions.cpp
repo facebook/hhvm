@@ -290,14 +290,14 @@ namespace {
         if (file) {
           auto const tv = file.tv();
           tvSet(
-            tvAssertCell(tv),
+            tvAssertPlausible(tv),
             throwable->propLvalAtOffset(s_fileSlot)
           );
         }
         if (line) {
           auto const tv = line.tv();
           tvSet(
-            tvAssertCell(tv),
+            tvAssertPlausible(tv),
             throwable->propLvalAtOffset(s_lineSlot)
           );
         }
@@ -321,9 +321,9 @@ void throwable_init(ObjectData* throwable) {
     ) {
     auto trace = HHVM_FN(debug_backtrace)(opts);
     auto tv = make_array_like_tv(trace.detach());
-    cellMove(tv, trace_lval);
+    tvMove(tv, trace_lval);
   } else {
-    cellMove(
+    tvMove(
       make_tv<KindOfResource>(createCompactBacktrace().detach()->hdr()),
       trace_lval
     );
@@ -377,7 +377,7 @@ void throwable_recompute_backtrace_from_wh(ObjectData* throwable,
                                .withMetadata(provide_metadata)
                                .ignoreArgs(ignore_args));
   auto tv = make_array_like_tv(trace.detach());
-  cellMove(tv, trace_lval);
+  tvMove(tv, trace_lval);
   throwable_init_file_and_line_from_trace(throwable);
 }
 

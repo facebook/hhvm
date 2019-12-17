@@ -137,7 +137,7 @@ void c_AsyncGeneratorWaitHandle::await(req::ptr<c_WaitableWaitHandle>&& child) {
 void c_AsyncGeneratorWaitHandle::ret(Cell& result) {
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
-  cellCopy(result, m_resultOrException);
+  tvCopy(result, m_resultOrException);
   parentChain.unblock();
   m_generator.reset();
 
@@ -153,7 +153,7 @@ void c_AsyncGeneratorWaitHandle::fail(ObjectData* exception) {
 
   auto parentChain = getParentChain();
   setState(STATE_FAILED);
-  cellCopy(make_tv<KindOfObject>(exception), m_resultOrException);
+  tvCopy(make_tv<KindOfObject>(exception), m_resultOrException);
   parentChain.unblock();
   m_generator.reset();
 

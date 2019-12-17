@@ -120,7 +120,7 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
   assertx(props()->checkInvariants(numArgs));
   props()->foreach(numArgs, [&](tv_lval lval) {
     assert(beforeCurUseVar != sp);
-    cellCopy(*--beforeCurUseVar, lval);
+    tvCopy(*--beforeCurUseVar, lval);
   });
 }
 
@@ -148,7 +148,7 @@ int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
   int n = closure->getNumUseVars();
   assertx(closure->props()->checkInvariants(n));
   closure->props()->foreach(n, [&](tv_rval rval) {
-    cellDup(*rval, *--sp);
+    tvDup(*rval, *--sp);
   });
 
   return n;
@@ -218,7 +218,7 @@ ObjectData* c_Closure::clone() {
   auto const nprops = cls->numDeclProperties();
   auto dst = ret->props()->iteratorAt(0);
   for (auto src : props()->range(0, nprops)) {
-    cellDup(src, tv_lval{dst});
+    tvDup(src, tv_lval{dst});
     ++dst;
   }
 

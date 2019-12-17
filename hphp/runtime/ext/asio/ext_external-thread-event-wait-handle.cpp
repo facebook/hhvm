@@ -209,10 +209,10 @@ void c_ExternalThreadEventWaitHandle::process() {
     throw;
   }
 
-  assertx(cellIsPlausible(result));
+  assertx(tvIsPlausible(result));
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
-  cellCopy(result, m_resultOrException);
+  tvCopy(result, m_resultOrException);
   parentChain.unblock();
 
   auto session = AsioSession::Get();

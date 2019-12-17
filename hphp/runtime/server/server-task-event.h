@@ -63,7 +63,7 @@ struct ServerTaskEvent final : AsioExternalThreadEvent {
       SystemLib::throwExceptionObject(ret);
     }
 
-    cellDup(*ret.toCell(), result);
+    tvDup(*ret.toCell(), result);
   }
 
  private:

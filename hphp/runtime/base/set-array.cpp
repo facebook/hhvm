@@ -754,7 +754,7 @@ ArrayData* SetArray::Pop(ArrayData* ad, Variant& value) {
   if (a->cowCheck()) a = a->copySet();
   if (a->m_size) {
     ssize_t pos = a->getIterLast();
-    cellCopy(a->getElm(pos), *value.asTypedValue());
+    tvCopy(a->getElm(pos), *value.asTypedValue());
     auto const pelm = &a->data()[pos];
     auto loc = a->findForRemove(pelm->hash(),
       [pelm] (const Elm& e) { return &e == pelm; }
@@ -777,7 +777,7 @@ ArrayData* SetArray::Dequeue(ArrayData* ad, Variant& value) {
   if (a->cowCheck()) a = a->copySet();
   if (a->m_size) {
     ssize_t pos = a->getIterBegin();
-    cellCopy(a->getElm(pos), *value.asTypedValue());
+    tvCopy(a->getElm(pos), *value.asTypedValue());
     auto const pelm = &a->data()[pos];
     auto loc = a->findForRemove(pelm->hash(),
       [pelm] (const Elm& e) { return &e == pelm; }

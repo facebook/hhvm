@@ -242,7 +242,7 @@ retry:
   assertx(MixedArray::isValidIns(p));
   if (MixedArray::isValidPos(*p)) {
     auto& e = data()[(int32_t)*p];
-    cellMove(tv, e.data);
+    tvMove(tv, e.data);
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -250,7 +250,7 @@ retry:
     goto retry;
   }
   auto& e = allocElm(p);
-  cellCopy(tv, e.data);
+  tvCopy(tv, e.data);
   e.setIntKey(k, h);
   arrayData()->mutableKeyTypes()->recordInt();
   updateNextKI(k);
@@ -264,7 +264,7 @@ retry:
   assertx(MixedArray::isValidIns(p));
   if (MixedArray::isValidPos(*p)) {
     auto& e = data()[(int32_t)*p];
-    cellMove(tv, e.data);
+    tvMove(tv, e.data);
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -272,7 +272,7 @@ retry:
     goto retry;
   }
   auto& e = allocElm(p);
-  cellCopy(tv, e.data);
+  tvCopy(tv, e.data);
   e.setStrKey(key, h);
   arrayData()->mutableKeyTypes()->recordStr(key);
 }
@@ -587,7 +587,7 @@ BaseMap::php_concat(const Variant& iterable) {
     if (isTombstone(i)) {
       continue;
     }
-    cellDup(data()[i].data, vec->dataAt(j));
+    tvDup(data()[i].data, vec->dataAt(j));
     ++j;
   }
   for (; iter; ++iter) {

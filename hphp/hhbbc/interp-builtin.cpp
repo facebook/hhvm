@@ -730,7 +730,7 @@ folly::Optional<Type> const_fold(ISS& env,
         false, false
       );
 
-      assert(cellIsPlausible(retVal));
+      assert(tvIsPlausible(retVal));
       return retVal;
     }
   );

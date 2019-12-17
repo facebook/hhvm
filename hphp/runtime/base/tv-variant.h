@@ -55,12 +55,12 @@ ALWAYS_INLINE const Variant& tvAsCVarRef(const TypedValue* tv) {
 }
 
 ALWAYS_INLINE Variant& cellAsVariant(Cell& cell) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
   return reinterpret_cast<Variant&>(cell);
 }
 
 ALWAYS_INLINE const Variant& cellAsCVarRef(const Cell& cell) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
   return reinterpret_cast<const Variant&>(cell);
 }
 

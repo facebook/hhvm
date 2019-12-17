@@ -243,7 +243,7 @@ void throw_inout_undefined_index(const StringData* sd) {
 }
 
 Cell incDecBodySlow(IncDecOp op, tv_lval fr) {
-  assertx(cellIsPlausible(*fr));
+  assertx(tvIsPlausible(*fr));
   assertx(type(fr) != KindOfUninit);
 
   auto dup = [&]() { tvIncRefGen(*fr); return *fr; };

@@ -25,7 +25,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 inline bool isContainer(const Cell c) {
-  assertx(cellIsPlausible(c));
+  assertx(tvIsPlausible(c));
   return isArrayLikeType(c.m_type) ||
          (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
 }
@@ -35,7 +35,7 @@ inline bool isContainer(const Variant& v) {
 }
 
 inline bool isContainerOrNull(const Cell c) {
-  assertx(cellIsPlausible(c));
+  assertx(tvIsPlausible(c));
   return isNullType(c.m_type) || isArrayLikeType(c.m_type) ||
          (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
 }
@@ -45,7 +45,7 @@ inline bool isContainerOrNull(const Variant& v) {
 }
 
 inline bool isMutableContainer(const Cell c) {
-  assertx(cellIsPlausible(c));
+  assertx(tvIsPlausible(c));
   return isArrayLikeType(c.m_type) ||
          (c.m_type == KindOfObject && c.m_data.pobj->isMutableCollection());
 }

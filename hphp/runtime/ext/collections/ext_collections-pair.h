@@ -32,8 +32,8 @@ struct c_Pair : ObjectData {
                  HeaderKind::Pair)
     , m_size(2)
   {
-    cellDup(e0, elm0);
-    cellDup(e1, elm1);
+    tvDup(e0, elm0);
+    tvDup(e1, elm1);
   }
   enum class NoIncRef {};
   explicit c_Pair(const TypedValue& e0, const TypedValue& e1, NoIncRef)
@@ -41,8 +41,8 @@ struct c_Pair : ObjectData {
                  HeaderKind::Pair)
     , m_size(2)
   {
-    cellCopy(e0, elm0);
-    cellCopy(e1, elm1);
+    tvCopy(e0, elm0);
+    tvCopy(e1, elm1);
   }
   ~c_Pair();
 

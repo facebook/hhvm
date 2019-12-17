@@ -73,9 +73,9 @@ Generator& Generator::operator=(const Generator& other) {
   copyVars(fp);
   setState(other.getState());
   m_index = other.m_index;
-  cellSet(other.m_key, m_key);
-  cellSet(other.m_value, m_value);
-  cellSet(other.m_delegate, m_delegate);
+  tvSet(other.m_key, m_key);
+  tvSet(other.m_value, m_value);
+  tvSet(other.m_delegate, m_delegate);
   return *this;
 }
 
@@ -123,16 +123,16 @@ void Generator::yield(Offset suspendOffset,
   resumable()->setResumeAddr(nullptr, suspendOffset);
 
   if (key) {
-    cellSet(*key, m_key);
+    tvSet(*key, m_key);
     tvDecRefGenNZ(*key);
     if (m_key.m_type == KindOfInt64) {
       int64_t new_index = m_key.m_data.num;
       m_index = new_index > m_index ? new_index : m_index;
     }
   } else {
-    cellSet(make_tv<KindOfInt64>(++m_index), m_key);
+    tvSet(make_tv<KindOfInt64>(++m_index), m_key);
   }
-  cellSet(value, m_value);
+  tvSet(value, m_value);
   tvDecRefGenNZ(value);
 
   setState(State::Started);
@@ -140,8 +140,8 @@ void Generator::yield(Offset suspendOffset,
 
 void Generator::done(TypedValue tv) {
   assertx(isRunning());
-  cellSetNull(m_key);
-  cellSet(tv, m_value);
+  tvSetNull(m_key);
+  tvSet(tv, m_value);
   setState(State::Done);
 }
 

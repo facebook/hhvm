@@ -532,7 +532,7 @@ template<MOpMode mode, KeyType keyType>
 NEVER_INLINE tv_rval ElemSlow(TypedValue& tvRef,
                               tv_rval base,
                               key_type<keyType> key) {
-  assertx(cellIsPlausible(*base));
+  assertx(tvIsPlausible(*base));
 
   switch (base.type()) {
     case KindOfUninit:
@@ -616,7 +616,7 @@ inline tv_lval ElemDArrayPre(tv_lval base, int64_t key, bool& defined) {
   if (lval.arr != oldArr) {
     type(base) = KindOfArray;
     val(base).parr = lval.arr;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     decRefArr(oldArr);
   }
 
@@ -637,7 +637,7 @@ inline tv_lval ElemDArrayPre(tv_lval base, StringData* key,
   if (lval.arr != oldArr) {
     type(base) = KindOfArray;
     val(base).parr = lval.arr;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     decRefArr(oldArr);
   }
   return lval;
@@ -694,7 +694,7 @@ inline tv_lval ElemDVecPre(tv_lval base, int64_t key) {
   if (lval.arr != oldArr) {
     base.type() = KindOfVec;
     base.val().parr = lval.arr;
-    assertx(cellIsPlausible(base.tv()));
+    assertx(tvIsPlausible(base.tv()));
     decRefArr(oldArr);
   }
   return lval;
@@ -746,7 +746,7 @@ inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
   if (lval.arr != oldArr) {
     base.type() = KindOfDict;
     base.val().parr = lval.arr;
-    assertx(cellIsPlausible(base.tv()));
+    assertx(tvIsPlausible(base.tv()));
     decRefArr(oldArr);
   }
 
@@ -768,7 +768,7 @@ inline tv_lval ElemDDictPre(tv_lval base, StringData* key) {
   if (lval.arr != oldArr) {
     base.type() = KindOfDict;
     base.val().parr = lval.arr;
-    assertx(cellIsPlausible(base.tv()));
+    assertx(tvIsPlausible(base.tv()));
     decRefArr(oldArr);
   }
 
@@ -942,7 +942,7 @@ template<MOpMode mode, KeyType keyType = KeyType::Any, bool copyProv>
 tv_lval ElemD(TypedValue& tvRef, tv_lval base,
               key_type<keyType> key, const MInstrPropState* pState) {
   assertx(mode == MOpMode::Define);
-  assertx(cellIsPlausible(base.tv()));
+  assertx(tvIsPlausible(base.tv()));
 
   switch (base.type()) {
     case KindOfUninit:
@@ -995,7 +995,7 @@ inline tv_lval ElemUArrayImpl(tv_lval base, int64_t key) {
   if (lval.arr != oldArr) {
     type(base) = KindOfArray;
     val(base).parr = lval.arr;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     decRefArr(oldArr);
   }
   return lval;
@@ -1009,7 +1009,7 @@ inline tv_lval ElemUArrayImpl(tv_lval base, StringData* key) {
   if (lval.arr != arr) {
     type(base) = KindOfArray;
     val(base).parr = lval.arr;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     decRefArr(arr);
   }
   return lval;
@@ -1058,7 +1058,7 @@ inline tv_lval ElemUVecPre(tv_lval base, int64_t key) {
   if (lval.arr != oldArr) {
     type(base) = KindOfVec;
     val(base).parr = lval.arr;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     decRefArr(oldArr);
   }
   return lval;
@@ -1100,7 +1100,7 @@ inline tv_lval ElemUDictPre(tv_lval base, int64_t key) {
   if (lval.arr != oldArr) {
     type(base) = KindOfDict;
     val(base).parr = lval.arr;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     decRefArr(oldArr);
   }
   return lval;
@@ -1117,7 +1117,7 @@ inline tv_lval ElemUDictPre(tv_lval base, StringData* key) {
   if (lval.arr != oldArr) {
     type(base) = KindOfDict;
     val(base).parr = lval.arr;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     decRefArr(oldArr);
   }
   return lval;
@@ -1189,7 +1189,7 @@ inline tv_lval ElemUObject(TypedValue& tvRef, tv_lval base,
  */
 template <KeyType keyType = KeyType::Any>
 tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
-  assertx(cellIsPlausible(*base));
+  assertx(tvIsPlausible(*base));
 
   switch (type(base)) {
     case KindOfUninit:
@@ -1309,7 +1309,7 @@ inline tv_lval NewElemObject(TypedValue& tvRef, tv_lval base) {
 inline tv_lval NewElem(TypedValue& tvRef,
                        tv_lval base,
                        const MInstrPropState* pState) {
-  assertx(cellIsPlausible(base.tv()));
+  assertx(tvIsPlausible(base.tv()));
 
   switch (base.type()) {
     case KindOfUninit:
@@ -1356,7 +1356,7 @@ inline void SetElemEmptyish(tv_lval base, key_type<keyType> key,
                             Cell* value, const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
   auto const& scratchKey = initScratchKey(key);
-  cellMove(make_array_like_tv(ArrayData::CreateDArray()), base);
+  tvMove(make_array_like_tv(ArrayData::CreateDArray()), base);
   asArrRef(base).set(tvAsCVarRef(&scratchKey), tvAsCVarRef(value));
 }
 
@@ -1538,7 +1538,7 @@ void arraySetUpdateBase(ArrayData* oldData, ArrayData* newData, tv_lval base) {
   assertx(val(base).parr == oldData);
   type(base) = dt;
   val(base).parr = newData;
-  assertx(cellIsPlausible(*base));
+  assertx(tvIsPlausible(*base));
 
   decRefArr(oldData);
 }
@@ -1718,7 +1718,7 @@ StringData* SetElemSlow(tv_lval base,
                         key_type<keyType> key,
                         Cell* value,
                         const MInstrPropState* pState) {
-  assertx(cellIsPlausible(*base));
+  assertx(tvIsPlausible(*base));
 
   switch (type(base)) {
     case KindOfUninit:
@@ -1802,7 +1802,7 @@ inline void SetNewElemEmptyish(tv_lval base,
   detail::checkPromotion(base, pState);
   Array a = Array::CreateVArray();
   a.append(cellAsCVarRef(*value));
-  cellMove(make_array_like_tv(a.detach()), base);
+  tvMove(make_array_like_tv(a.detach()), base);
 }
 
 /**
@@ -1873,7 +1873,7 @@ inline void SetNewElemVec(tv_lval base, Cell* value) {
   if (a2 != a) {
     type(base) = KindOfVec;
     val(base).parr = a2;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     a->decRefAndRelease();
   }
 }
@@ -1890,7 +1890,7 @@ inline void SetNewElemDict(tv_lval base, Cell* value) {
   if (a2 != a) {
     type(base) = KindOfDict;
     val(base).parr = a2;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     a->decRefAndRelease();
   }
 }
@@ -1906,7 +1906,7 @@ inline void SetNewElemKeyset(tv_lval base, Cell* value) {
   if (a2 != a) {
     type(base) = KindOfKeyset;
     val(base).parr = a2;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     a->decRefAndRelease();
   }
 }
@@ -1929,7 +1929,7 @@ template <bool setResult, bool copyProv>
 inline void SetNewElem(tv_lval base,
                        Cell* value,
                        const MInstrPropState* pState) {
-  assertx(cellIsPlausible(*base));
+  assertx(tvIsPlausible(*base));
 
   switch (type(base)) {
     case KindOfUninit:
@@ -1974,11 +1974,11 @@ inline void SetNewElem(tv_lval base,
 inline tv_lval SetOpElemEmptyish(SetOpOp op, tv_lval base,
                                  TypedValue key, Cell* rhs,
                                  const MInstrPropState* pState) {
-  assertx(cellIsPlausible(*base));
+  assertx(tvIsPlausible(*base));
 
   detail::checkPromotion(base, pState);
 
-  cellMove(make_array_like_tv(ArrayData::CreateDArray()), base);
+  tvMove(make_array_like_tv(ArrayData::CreateDArray()), base);
   auto const lval = asArrRef(base).lval(tvAsCVarRef(&key));
   setopBody(lval, op, rhs);
   return lval;
@@ -2000,7 +2000,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
                          SetOpOp op, tv_lval base,
                          TypedValue key, Cell* rhs,
                          const MInstrPropState* pState) {
-  assertx(cellIsPlausible(*base));
+  assertx(tvIsPlausible(*base));
 
   switch (type(base)) {
     case KindOfUninit:
@@ -2037,7 +2037,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
           return ElemDVec<KeyType::Any, false>(base, key);
         }
       }();
-      result = tvAssertCell(result);
+      result = tvAssertPlausible(result);
       setopBody(result, op, rhs);
       return result;
     }
@@ -2051,7 +2051,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
           return ElemDDict<KeyType::Any, false>(base, key);
         }
       }();
-      result = tvAssertCell(result);
+      result = tvAssertPlausible(result);
       setopBody(result, op, rhs);
       return result;
     }
@@ -2093,7 +2093,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
 
     case KindOfRecord: {
       auto result = ElemDRecord<KeyType::Any>(base, key);
-      result = tvAssertCell(result);
+      result = tvAssertPlausible(result);
       setopBody(result, op, rhs);
       return result;
     }
@@ -2104,7 +2104,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
 inline tv_lval SetOpNewElemEmptyish(SetOpOp op, tv_lval base, Cell* rhs,
                                     const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
-  cellMove(make_array_like_tv(ArrayData::CreateVArray()), base);
+  tvMove(make_array_like_tv(ArrayData::CreateVArray()), base);
   if (checkHACFalseyPromote()) {
     raise_hac_falsey_promote_notice("Lval on missing array element");
   }
@@ -2120,7 +2120,7 @@ inline tv_lval SetOpNewElemScalar(TypedValue& tvRef) {
 inline tv_lval SetOpNewElem(TypedValue& tvRef,
                             SetOpOp op, tv_lval base,
                             Cell* rhs, const MInstrPropState* pState) {
-  assertx(cellIsPlausible(*base));
+  assertx(tvIsPlausible(*base));
 
   switch (type(base)) {
     case KindOfUninit:
@@ -2196,7 +2196,7 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
 NEVER_INLINE Cell incDecBodySlow(IncDecOp op, tv_lval fr);
 
 inline Cell IncDecBody(IncDecOp op, tv_lval fr) {
-  assertx(cellIsPlausible(*fr));
+  assertx(tvIsPlausible(*fr));
 
   if (UNLIKELY(!isIntType(type(fr)))) {
     return incDecBodySlow(op, fr);
@@ -2234,7 +2234,7 @@ inline Cell IncDecElemEmptyish(
 ) {
   detail::checkPromotion(base, pState);
 
-  cellMove(make_array_like_tv(ArrayData::CreateDArray()), base);
+  tvMove(make_array_like_tv(ArrayData::CreateDArray()), base);
   auto const lval = asArrRef(base).lval(tvAsCVarRef(&key));
   assertx(type(lval) == KindOfNull);
   return IncDecBody(op, lval);
@@ -2251,7 +2251,7 @@ inline Cell IncDecElem(
   TypedValue key,
   const MInstrPropState* pState
 ) {
-  assertx(cellIsPlausible(*base));
+  assertx(tvIsPlausible(*base));
 
   switch (type(base)) {
     case KindOfUninit:
@@ -2288,7 +2288,7 @@ inline Cell IncDecElem(
           return ElemDVec<KeyType::Any, false>(base, key);
         }
       }();
-      return IncDecBody(op, tvAssertCell(result));
+      return IncDecBody(op, tvAssertPlausible(result));
     }
 
     case KindOfPersistentDict:
@@ -2300,7 +2300,7 @@ inline Cell IncDecElem(
           return ElemDDict<KeyType::Any, false>(base, key);
         }
       }();
-      return IncDecBody(op, tvAssertCell(result));
+      return IncDecBody(op, tvAssertPlausible(result));
     }
 
     case KindOfPersistentKeyset:
@@ -2326,7 +2326,7 @@ inline Cell IncDecElem(
 
       if (LIKELY(val(base).pobj->isCollection())) {
         result = collections::atRw(val(base).pobj, &key);
-        assertx(cellIsPlausible(*result));
+        assertx(tvIsPlausible(*result));
       } else {
         localTvRef = objOffsetGet(instanceFromTv(base), key);
         result = &localTvRef;
@@ -2342,7 +2342,7 @@ inline Cell IncDecElem(
 
     case KindOfRecord: {
       auto result = ElemDRecord<KeyType::Any>(base, key);
-      return IncDecBody(op, tvAssertCell(result));
+      return IncDecBody(op, tvAssertPlausible(result));
     }
   }
   unknownBaseType(type(base));
@@ -2354,7 +2354,7 @@ inline Cell IncDecNewElemEmptyish(
   const MInstrPropState* pState
 ) {
   detail::checkPromotion(base, pState);
-  cellMove(make_array_like_tv(ArrayData::CreateVArray()), base);
+  tvMove(make_array_like_tv(ArrayData::CreateVArray()), base);
   if (checkHACFalseyPromote()) {
     raise_hac_falsey_promote_notice("Lval on missing array element");
   }
@@ -2374,7 +2374,7 @@ inline Cell IncDecNewElem(
   tv_lval base,
   const MInstrPropState* pState
 ) {
-  assertx(cellIsPlausible(*base));
+  assertx(tvIsPlausible(*base));
 
   switch (type(base)) {
     case KindOfUninit:
@@ -2491,7 +2491,7 @@ inline void UnsetElemArray(tv_lval base, key_type<keyType> key) {
   if (a2 != a) {
     type(base) = KindOfArray;
     val(base).parr = a2;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     a->decRefAndRelease();
  }
 }
@@ -2528,7 +2528,7 @@ inline void UnsetElemVec(tv_lval base, key_type<keyType> key) {
   if (a2 != a) {
     type(base) = a2->toDataType();
     val(base).parr = a2;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     a->decRefAndRelease();
   }
 }
@@ -2562,7 +2562,7 @@ inline void UnsetElemDict(tv_lval base, key_type<keyType> key) {
   if (a2 != a) {
     type(base) = KindOfDict;
     val(base).parr = a2;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     a->decRefAndRelease();
  }
 }
@@ -2596,7 +2596,7 @@ inline void UnsetElemKeyset(tv_lval base, key_type<keyType> key) {
   if (a2 != a) {
     type(base) = KindOfKeyset;
     val(base).parr = a2;
-    assertx(cellIsPlausible(*base));
+    assertx(tvIsPlausible(*base));
     a->decRefAndRelease();
  }
 }
@@ -2607,7 +2607,7 @@ inline void UnsetElemKeyset(tv_lval base, key_type<keyType> key) {
 template <KeyType keyType>
 NEVER_INLINE
 void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
-  assertx(cellIsPlausible(*base));
+  assertx(tvIsPlausible(*base));
 
   switch (type(base)) {
     case KindOfUninit:
@@ -2721,7 +2721,7 @@ bool IssetEmptyElemString(const StringData* sd, key_type<keyType> key) {
     x = scratchKey.m_data.num;
   } else {
     TypedValue tv;
-    cellDup(scratchKey, tv);
+    tvDup(scratchKey, tv);
     bool badKey = false;
     if (isStringType(tv.m_type)) {
       const char* str = tv.m_data.pstr->data();
@@ -2778,9 +2778,9 @@ bool IssetEmptyElemVec(ArrayData* a, key_type<keyType> key) {
   assertx(a->isVecArray());
   auto const result = ElemVec<MOpMode::None, keyType>(a, key);
   if (useEmpty) {
-    return !cellToBool(tvAssertCell(result.tv()));
+    return !cellToBool(tvAssertPlausible(result.tv()));
   }
-  return !cellIsNull(tvAssertCell(result.tv()));
+  return !cellIsNull(tvAssertPlausible(result.tv()));
 }
 
 /**
@@ -2791,9 +2791,9 @@ bool IssetEmptyElemDict(ArrayData* a, key_type<keyType> key) {
   assertx(a->isDict());
   auto const result = ElemDict<MOpMode::None, keyType>(a, key);
   if (useEmpty) {
-    return !cellToBool(tvAssertCell(result.tv()));
+    return !cellToBool(tvAssertPlausible(result.tv()));
   }
-  return !cellIsNull(tvAssertCell(result.tv()));
+  return !cellIsNull(tvAssertPlausible(result.tv()));
 }
 
 /**
@@ -2804,9 +2804,9 @@ bool IssetEmptyElemKeyset(ArrayData* a, key_type<keyType> key) {
   assertx(a->isKeyset());
   auto const result = ElemKeyset<MOpMode::None, keyType>(a, key);
   if (useEmpty) {
-    return !cellToBool(tvAssertCell(result.tv()));
+    return !cellToBool(tvAssertPlausible(result.tv()));
   }
-  return !cellIsNull(tvAssertCell(result.tv()));
+  return !cellIsNull(tvAssertPlausible(result.tv()));
 }
 
 /**
@@ -2816,9 +2816,9 @@ template <bool useEmpty, KeyType keyType>
 bool IssetEmptyElemClsMeth(ClsMethDataRef base, key_type<keyType> key) {
   const TypedValue result = ElemClsMethPre<MOpMode::None>(base, key);
   if (useEmpty) {
-    return !cellToBool(tvAssertCell(result));
+    return !cellToBool(tvAssertPlausible(result));
   }
-  return !cellIsNull(tvAssertCell(result));
+  return !cellIsNull(tvAssertPlausible(result));
 }
 
 /**
@@ -2828,9 +2828,9 @@ template <bool useEmpty, KeyType keyType>
 bool IssetEmptyElemRecord(RecordData* base, key_type<keyType> key) {
   auto const  result = ElemRecord<keyType>(base, key);
   if (useEmpty) {
-    return !cellToBool(tvAssertCell(result.tv()));
+    return !cellToBool(tvAssertPlausible(result.tv()));
   }
-  return !cellIsNull(tvAssertCell(result.tv()));
+  return !cellIsNull(tvAssertPlausible(result.tv()));
 }
 
 /**
@@ -2838,7 +2838,7 @@ bool IssetEmptyElemRecord(RecordData* base, key_type<keyType> key) {
  */
 template <bool useEmpty, KeyType keyType>
 NEVER_INLINE bool IssetEmptyElemSlow(tv_rval base, key_type<keyType> key) {
-  assertx(cellIsPlausible(*base));
+  assertx(tvIsPlausible(*base));
 
   switch (type(base)) {
     case KindOfUninit:
@@ -3257,8 +3257,8 @@ inline tv_lval SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
       StringData* keySD = prepareKey(key);
       SCOPE_EXIT { decRefStr(keySD); };
       tvWriteNull(tvRef);
-      setopBody(tvAssertCell(&tvRef), op, rhs);
-      obj->setProp(nullptr, keySD, tvAssertCell(tvRef));
+      setopBody(tvAssertPlausible(&tvRef), op, rhs);
+      obj->setProp(nullptr, keySD, tvAssertPlausible(tvRef));
     },
     pState
   );

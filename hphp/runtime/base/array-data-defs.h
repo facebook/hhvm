@@ -166,37 +166,37 @@ inline Cell ArrayData::nvGetKey(ssize_t pos) const {
 }
 
 inline ArrayData* ArrayData::set(int64_t k, Cell v) {
-  assertx(cellIsPlausible(v));
+  assertx(tvIsPlausible(v));
   assertx(cowCheck() || notCyclic(v));
   return g_array_funcs.setInt[kind()](this, k, v);
 }
 
 inline ArrayData* ArrayData::setInPlace(int64_t k, Cell v) {
-  assertx(cellIsPlausible(v));
+  assertx(tvIsPlausible(v));
   assertx(notCyclic(v));
   return g_array_funcs.setIntInPlace[kind()](this, k, v);
 }
 
 inline ArrayData* ArrayData::setMove(int64_t k, Cell v) {
-  assertx(cellIsPlausible(v));
+  assertx(tvIsPlausible(v));
   assertx(cowCheck() || notCyclic(v));
   return g_array_funcs.setIntMove[kind()](this, k, v);
 }
 
 inline ArrayData* ArrayData::set(StringData* k, Cell v) {
-  assertx(cellIsPlausible(v));
+  assertx(tvIsPlausible(v));
   assertx(cowCheck() || notCyclic(v));
   return g_array_funcs.setStr[kind()](this, k, v);
 }
 
 inline ArrayData* ArrayData::setInPlace(StringData* k, Cell v) {
-  assertx(cellIsPlausible(v));
+  assertx(tvIsPlausible(v));
   assertx(notCyclic(v));
   return g_array_funcs.setStrInPlace[kind()](this, k, v);
 }
 
 inline ArrayData* ArrayData::setMove(StringData* k, Cell v) {
-  assertx(cellIsPlausible(v));
+  assertx(tvIsPlausible(v));
   assertx(cowCheck() || notCyclic(v));
   return g_array_funcs.setStrMove[kind()](this, k, v);
 }
@@ -404,8 +404,8 @@ inline TypedValue ArrayData::atPos(ssize_t pos) const {
 }
 
 inline ArrayData* ArrayData::set(Cell k, Cell v) {
-  assertx(cellIsPlausible(k));
-  assertx(cellIsPlausible(v));
+  assertx(tvIsPlausible(k));
+  assertx(tvIsPlausible(v));
   assertx(IsValidKey(k));
 
   return detail::isIntKey(k) ? set(detail::getIntKey(k), v)
@@ -413,8 +413,8 @@ inline ArrayData* ArrayData::set(Cell k, Cell v) {
 }
 
 inline ArrayData* ArrayData::setInPlace(Cell k, Cell v) {
-  assertx(cellIsPlausible(k));
-  assertx(cellIsPlausible(v));
+  assertx(tvIsPlausible(k));
+  assertx(tvIsPlausible(v));
   assertx(IsValidKey(k));
 
   return detail::isIntKey(k) ? setInPlace(detail::getIntKey(k), v)
@@ -466,13 +466,13 @@ inline tv_rval ArrayData::get(const Variant& k, bool error) const {
 }
 
 inline ArrayData* ArrayData::set(const String& k, Cell v) {
-  assertx(cellIsPlausible(v));
+  assertx(tvIsPlausible(v));
   assertx(IsValidKey(k));
   return set(k.get(), v);
 }
 
 inline ArrayData* ArrayData::setInPlace(const String& k, Cell v) {
-  assertx(cellIsPlausible(v));
+  assertx(tvIsPlausible(v));
   assertx(IsValidKey(k));
   return setInPlace(k.get(), v);
 }

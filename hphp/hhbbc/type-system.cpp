@@ -2268,7 +2268,7 @@ bool Type::checkInvariants() const {
     DEBUG_ONLY auto idx = size_t{0};
     DEBUG_ONLY auto packed = true;
     for (DEBUG_ONLY auto const& kv : m_data.map->map) {
-      assert(cellIsPlausible(kv.first));
+      assert(tvIsPlausible(kv.first));
       assert(isIntType(kv.first.m_type) ||
              kv.first.m_type == KindOfPersistentString);
       assert(kv.second.subtypeOf(valBits) && kv.second != TBottom);
@@ -3478,7 +3478,7 @@ SString sval_of(const Type& t) {
 }
 
 Type from_cell(Cell cell) {
-  assert(cellIsPlausible(cell));
+  assert(tvIsPlausible(cell));
 
   switch (cell.m_type) {
   case KindOfUninit:   return TUninit;

@@ -593,7 +593,7 @@ extern ConstantMap s_constant_map;
 inline
 bool registerConstant(const StringData* cnsName, Cell cns,
                       bool dynamic = false) {
-  assertx(cellIsPlausible(cns) && cns.m_type != KindOfUninit);
+  assertx(tvIsPlausible(cns) && cns.m_type != KindOfUninit);
   auto& dst = s_constant_map[cnsName];
   *static_cast<Cell*>(&dst) = cns;
   dst.dynamic() = dynamic;
@@ -636,7 +636,7 @@ inline
 bool registerClassConstant(const StringData *clsName,
                            const StringData *cnsName,
                            Cell cns) {
-  assertx(cellIsPlausible(cns));
+  assertx(tvIsPlausible(cns));
   auto &cls = s_class_constant_map[clsName];
   assertx(cls.find(cnsName) == cls.end());
   *static_cast<Cell*>(&cls[cnsName]) = cns;

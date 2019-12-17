@@ -275,7 +275,7 @@ Object APCObject::createObject() const {
     obj->setHasUninitProps();
     for (; it != range.end(); ++it, ++i) {
       auto const val = apcProp[i]->toLocal();
-      cellDup(*val.asTypedValue(), tv_lval{it});
+      tvDup(*val.asTypedValue(), tv_lval{it});
     }
     obj->clearHasUninitProps();
   } catch (...) {

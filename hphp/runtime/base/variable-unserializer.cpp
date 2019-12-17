@@ -1769,7 +1769,7 @@ void VariableUnserializer::unserializeSet(ObjectData* obj, int64_t sz,
       if (UNLIKELY(!tv)) continue;
       // This increments the string's refcount twice, once for
       // the key and once for the value
-      cellDup(make_tv<KindOfString>(key), *tv);
+      tvDup(make_tv<KindOfString>(key), *tv);
     } else {
       throwInvalidHashKey(obj);
     }

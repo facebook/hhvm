@@ -518,7 +518,7 @@ template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   typename std::enable_if<std::is_same<U, std::string>::value>::type
     unserializeImpl(Cell& result)
   {
-    cellCopy(make_tv<KindOfString>(StringData::Make(m_result)), result);
+    tvCopy(make_tv<KindOfString>(StringData::Make(m_result)), result);
   }
 
   // (PHP) no lock
@@ -526,7 +526,7 @@ template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   typename std::enable_if<std::is_same<U, folly::Unit>::value>::type
     unserializeImpl(Cell& result)
   {
-    cellCopy(make_tv<KindOfNull>(), result);
+    tvCopy(make_tv<KindOfNull>(), result);
   }
 
   // (PHP) no lock
@@ -534,7 +534,7 @@ template <typename T> struct FutureEvent : AsioExternalThreadEvent {
   typename std::enable_if<std::is_same<U, bool>::value>::type
     unserializeImpl(Cell& result)
   {
-    cellCopy(make_tv<KindOfBoolean>(m_result), result);
+    tvCopy(make_tv<KindOfBoolean>(m_result), result);
   }
 
   T m_result;

@@ -1176,7 +1176,7 @@ tv_rval Unit::lookupCns(const StringData* cnsName) {
     auto const& tv = rds::handleToRef<TypedValue, rds::Mode::NonLocal>(handle);
 
     if (LIKELY(tv.m_type != KindOfUninit)) {
-      assertx(cellIsPlausible(tv));
+      assertx(tvIsPlausible(tv));
       return &tv;
     }
 
@@ -1184,7 +1184,7 @@ tv_rval Unit::lookupCns(const StringData* cnsName) {
     auto const callback =
       reinterpret_cast<Native::ConstantCallback>(tv.m_data.pcnt);
     const Cell* tvRet = callback().asTypedValue();
-    assertx(cellIsPlausible(*tvRet));
+    assertx(tvIsPlausible(*tvRet));
     if (LIKELY(tvRet->m_type != KindOfUninit)) {
       return tvRet;
     }
@@ -1198,7 +1198,7 @@ const Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
     return nullptr;
   }
   auto const ret = rds::handleToPtr<Cell, rds::Mode::Persistent>(handle);
-  assertx(cellIsPlausible(*ret));
+  assertx(tvIsPlausible(*ret));
   return ret;
 }
 
@@ -1237,7 +1237,7 @@ void Unit::defCns(const StringData* cnsName, const TypedValue* value) {
   }
 
   assertx(rds::isNormalHandle(ch));
-  cellDup(*value, *cns);
+  tvDup(*value, *cns);
   rds::initHandle(ch);
 }
 

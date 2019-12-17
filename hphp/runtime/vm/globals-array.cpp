@@ -187,12 +187,12 @@ ArrayData* GlobalsArray::SetIntInPlace(ArrayData* ad, int64_t k, Cell v) {
 }
 
 ArrayData* GlobalsArray::SetStrMove(ArrayData* ad, StringData* k, Cell v) {
-  cellMove(v, *asGlobals(ad)->m_tab->lookupAdd(k));
+  tvMove(v, *asGlobals(ad)->m_tab->lookupAdd(k));
   return ad;
 }
 
 ArrayData* GlobalsArray::SetStrInPlace(ArrayData* ad, StringData* k, Cell v) {
-  cellSet(v, *asGlobals(ad)->m_tab->lookupAdd(k));
+  tvSet(v, *asGlobals(ad)->m_tab->lookupAdd(k));
   return ad;
 }
 

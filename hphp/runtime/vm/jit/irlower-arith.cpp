@@ -227,11 +227,11 @@ static void setOpCellVerifyImpl(tv_lval lhs, Cell rhs,
      * we don't want to have already put the value into the prop).
      */
     Cell temp;
-    cellDup(*lhs, temp);
+    tvDup(*lhs, temp);
     SCOPE_FAIL { tvDecRefGen(&temp); };
     setOpOpToHelper(Op)(&temp, rhs);
     prop.typeConstraint.verifyProperty(&temp, cls, prop.cls, prop.name);
-    cellMove(temp, lhs);
+    tvMove(temp, lhs);
   } else {
     setOpOpToHelper(Op)(lhs, rhs);
   }

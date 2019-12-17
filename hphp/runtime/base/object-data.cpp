@@ -71,7 +71,7 @@ ALWAYS_INLINE
 void verifyTypeHint(const Class* thisCls,
                     const Class::Prop* prop,
                     tv_rval val) {
-  assertx(cellIsPlausible(*val));
+  assertx(tvIsPlausible(*val));
   assertx(type(val) != KindOfUninit);
   if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
   if (!prop || !prop->typeConstraint.isCheckable()) return;
@@ -476,7 +476,7 @@ void ObjectData::o_setArray(const Array& properties) {
       k = k.substr(subLen);
     }
 
-    setProp(ctx, k.get(), tvAssertCell(iter.secondRval().tv()));
+    setProp(ctx, k.get(), tvAssertPlausible(iter.secondRval().tv()));
   }
 }
 
@@ -1608,7 +1608,7 @@ bool ObjectData::propEmpty(const Class* ctx, const StringData* key) {
 }
 
 void ObjectData::setProp(Class* ctx, const StringData* key, Cell val) {
-  assertx(cellIsPlausible(val));
+  assertx(tvIsPlausible(val));
   assertx(val.m_type != KindOfUninit);
 
   auto const lookup = getPropImpl<true, false, true>(ctx, key);
@@ -1666,8 +1666,8 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
         SCOPE_EXIT { tvDecRefGen(r.val); };
         setopBody(&r.val, op, val);
         if (m_cls->rtAttribute(Class::UseSet)) {
-          cellDup(tvAssertCell(r.val), tvRef);
-          if (invokeSet(key, tvAssertCell(tvRef))) {
+          tvDup(tvAssertPlausible(r.val), tvRef);
+          if (invokeSet(key, tvAssertPlausible(tvRef))) {
             return &tvRef;
           }
           tvRef.m_type = KindOfUninit;
@@ -1675,8 +1675,8 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
         if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
           throwMutateConstProp(lookup.slot);
         }
-        verifyTypeHint(m_cls, lookup.prop, tvAssertCell(&r.val));
-        cellDup(tvAssertCell(r.val), prop);
+        verifyTypeHint(m_cls, lookup.prop, tvAssertPlausible(&r.val));
+        tvDup(tvAssertPlausible(r.val), prop);
         return prop;
       }
     }
@@ -1693,11 +1693,11 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
        * we don't want to have already put the value into the prop).
        */
       Cell temp;
-      cellDup(*prop, temp);
+      tvDup(*prop, temp);
       SCOPE_FAIL { tvDecRefGen(&temp); };
       setopBody(&temp, op, val);
       verifyTypeHint(m_cls, lookup.prop, &temp);
-      cellMove(temp, prop);
+      tvMove(temp, prop);
     } else {
       setopBody(prop, op, val);
     }
@@ -1767,16 +1767,16 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     if (type(prop) == KindOfUninit && m_cls->rtAttribute(Class::UseGet)) {
       if (auto r = invokeGet(key)) {
         SCOPE_EXIT { tvDecRefGen(r.val); };
-        auto const dest = IncDecBody(op, tvAssertCell(&r.val));
+        auto const dest = IncDecBody(op, tvAssertPlausible(&r.val));
         if (m_cls->rtAttribute(Class::UseSet)) {
-          invokeSet(key, tvAssertCell(r.val));
+          invokeSet(key, tvAssertPlausible(r.val));
           return dest;
         }
         if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
           throwMutateConstProp(lookup.slot);
         }
-        verifyTypeHint(m_cls, lookup.prop, tvAssertCell(&r.val));
-        cellCopy(tvAssertCell(r.val), prop);
+        verifyTypeHint(m_cls, lookup.prop, tvAssertPlausible(&r.val));
+        tvCopy(tvAssertPlausible(r.val), prop);
         tvWriteNull(r.val); // suppress decref
         return dest;
       }
@@ -1808,15 +1808,15 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
         op == IncDecOp::PreInc || op == IncDecOp::PostInc ||
         op == IncDecOp::PreDec || op == IncDecOp::PostDec;
     }();
-    if (fast) return IncDecBody(op, tvAssertCell(prop));
+    if (fast) return IncDecBody(op, tvAssertPlausible(prop));
 
     Cell temp;
-    cellDup(tvAssertCell(*prop), temp);
+    tvDup(tvAssertPlausible(*prop), temp);
     SCOPE_FAIL { tvDecRefGen(&temp); };
     auto result = IncDecBody(op, &temp);
     SCOPE_FAIL { tvDecRefGen(&result); };
     verifyTypeHint(m_cls, lookup.prop, &temp);
-    tvMove(temp, tvAssertCell(prop));
+    tvMove(temp, tvAssertPlausible(prop));
     return result;
   }
 
@@ -1826,8 +1826,8 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
     if (auto r = invokeNativeGetProp(key)) {
       SCOPE_EXIT { tvDecRefGen(r.val); };
-      auto const dest = IncDecBody(op, tvAssertCell(&r.val));
-      if (invokeNativeSetProp(key, tvAssertCell(r.val))) {
+      auto const dest = IncDecBody(op, tvAssertPlausible(&r.val));
+      if (invokeNativeSetProp(key, tvAssertPlausible(r.val))) {
         return dest;
       }
     }
@@ -1840,7 +1840,7 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
     auto r = invokeGet(key);
     if (!r) tvWriteNull(r.val);
     SCOPE_EXIT { tvDecRefGen(r.val); };
-    auto const dest = IncDecBody(op, tvAssertCell(&r.val));
+    auto const dest = IncDecBody(op, tvAssertPlausible(&r.val));
     if (prop) raise_error("Cannot access protected property");
     prop = makeDynProp(key);
 
@@ -1855,8 +1855,8 @@ Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   if (useGet && useSet) {
     if (auto r = invokeGet(key)) {
       SCOPE_EXIT { tvDecRefGen(r.val); };
-      auto const dest = IncDecBody(op, tvAssertCell(&r.val));
-      invokeSet(key, tvAssertCell(r.val));
+      auto const dest = IncDecBody(op, tvAssertPlausible(&r.val));
+      invokeSet(key, tvAssertPlausible(r.val));
       return dest;
     }
   }

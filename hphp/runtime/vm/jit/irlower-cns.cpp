@@ -140,7 +140,7 @@ Cell lookupCnsEHelper(StringData* nm) {
   auto const cns = Unit::loadCns(nm);
   if (LIKELY(cns != nullptr)) {
     Cell c1;
-    cellDup(*cns, c1);
+    tvDup(*cns, c1);
     return c1;
   }
   raise_error("Undefined constant '%s'", nm->data());
@@ -157,7 +157,7 @@ Cell lookupCnsEHelperNormal(rds::Handle tv_handle,
       const Cell* cns = callback().asTypedValue();
       if (LIKELY(cns->m_type != KindOfUninit)) {
         Cell c1;
-        cellDup(*cns, c1);
+        tvDup(*cns, c1);
         return c1;
       }
     }
@@ -179,7 +179,7 @@ Cell lookupCnsEHelperPersistent(rds::Handle tv_handle,
     const Cell* cns = callback().asTypedValue();
     if (LIKELY(cns->m_type != KindOfUninit)) {
       Cell c1;
-      cellDup(*cns, c1);
+      tvDup(*cns, c1);
       return c1;
     }
   }
@@ -302,7 +302,7 @@ void cgProfileSubClsCns(IRLS& env, const IRInstruction* inst) {
 Cell lookupClsCnsHelper(TypedValue* cache, const NamedEntity* ne,
                         const StringData* cls, const StringData* cns) {
   auto const clsCns = g_context->lookupClsCns(ne, cls, cns);
-  cellDup(clsCns, *cache);
+  tvDup(clsCns, *cache);
   return clsCns;
 }
 

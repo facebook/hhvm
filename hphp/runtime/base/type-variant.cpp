@@ -75,7 +75,7 @@ Variant::Variant(StringData *v) noexcept {
 namespace {
 ALWAYS_INLINE
 void implCopyConstruct(TypedValue tv, Variant& v) {
-  cellDup(tvToInitCell(tv), v.asTypedValue());
+  tvDup(tvToInitCell(tv), v.asTypedValue());
 }
 }
 
@@ -550,7 +550,7 @@ Variant& lvalBlackHole() {
 }
 
 void Variant::setEvalScalar() {
-  assertx(cellIsPlausible(*this));
+  assertx(tvIsPlausible(*this));
 
   auto const do_array = [this]{
     if (!m_data.parr->isStatic()) {

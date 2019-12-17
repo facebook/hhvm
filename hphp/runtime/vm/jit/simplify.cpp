@@ -3686,7 +3686,7 @@ SSATmp* simplifyGetMemoKeyScalar(State& env, const IRInstruction* inst) {
       auto const key =
         HHVM_FN(serialize_memoize_param)(*src->variantVal().asTypedValue());
       SCOPE_EXIT { tvDecRefGen(key); };
-      assertx(cellIsPlausible(key));
+      assertx(tvIsPlausible(key));
       if (tvIsString(&key)) {
         return cns(env, makeStaticString(key.m_data.pstr));
       } else {

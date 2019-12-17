@@ -31,7 +31,7 @@ rds::Link<Object, rds::Mode::Normal> c_StaticWaitHandle::FalseHandle;
 c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceededImpl(const Cell result) {
   auto waitHandle = req::make<c_StaticWaitHandle>();
   waitHandle->setState(STATE_SUCCEEDED);
-  cellCopy(result, waitHandle->m_resultOrException);
+  tvCopy(result, waitHandle->m_resultOrException);
   return waitHandle.detach();
 }
 
@@ -68,7 +68,7 @@ c_StaticWaitHandle* c_StaticWaitHandle::CreateFailed(ObjectData* exception) {
 
   auto waitHandle = req::make<c_StaticWaitHandle>();
   waitHandle->setState(STATE_FAILED);
-  cellCopy(make_tv<KindOfObject>(exception), waitHandle->m_resultOrException);
+  tvCopy(make_tv<KindOfObject>(exception), waitHandle->m_resultOrException);
   return waitHandle.detach();
 }
 

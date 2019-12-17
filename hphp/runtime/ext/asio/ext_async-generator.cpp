@@ -82,7 +82,7 @@ AsyncGenerator::yield(Offset suspendOffset,
   if (m_waitHandle) {
     // Resumed execution.
     req::ptr<c_AsyncGeneratorWaitHandle> wh(std::move(m_waitHandle));
-    wh->ret(*tvAssertCell(&keyValueTupleTV));
+    wh->ret(*tvAssertPlausible(&keyValueTupleTV));
     return nullptr;
   }
   // Eager execution.

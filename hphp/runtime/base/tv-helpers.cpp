@@ -29,7 +29,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool cellIsPlausible(const Cell cell) {
+bool tvIsPlausible(const Cell cell) {
   auto assertPtr = [](const void* ptr) {
     assertx(ptr && (uintptr_t(ptr) % sizeof(ptr) == 0));
   };
@@ -136,10 +136,6 @@ bool cellIsPlausible(const Cell cell) {
   }();
 
   return true;
-}
-
-bool tvIsPlausible(TypedValue tv) {
-  return cellIsPlausible(tv);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

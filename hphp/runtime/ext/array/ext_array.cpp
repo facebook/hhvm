@@ -2171,7 +2171,7 @@ static inline TypedValue* makeContainerListHelper(const Variant& a,
   tvCopy(*a.toCell(), containers[0]);
   int pos = 1;
   for (ArrayIter argvIter(argv); argvIter; ++argvIter, ++pos) {
-    cellCopy(argvIter.secondVal(), containers[pos]);
+    tvCopy(argvIter.secondVal(), containers[pos]);
   }
   // Perform a swap so that the smallest container occurs at the first
   // position in the TypedValue array; this helps improve the performance

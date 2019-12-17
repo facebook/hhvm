@@ -243,7 +243,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
       m_result.m_data.parr = ret.detach();
       m_stringResult.clear();
     }
-    cellDup(m_result, c);
+    tvDup(m_result, c);
   }
 
   /* Callback invoked by libmcrouter on the receipt of a reply.

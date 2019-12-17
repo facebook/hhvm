@@ -1091,7 +1091,7 @@ void VariableSerializer::writeArrayKey(
   VariableSerializer::ArrayKind kind
 ) {
   using AK = VariableSerializer::ArrayKind;
-  auto const keyCell = tvAssertCell(key.asTypedValue());
+  auto const keyCell = tvAssertPlausible(key.asTypedValue());
   bool const skey = isStringType(keyCell->m_type);
 
   ArrayInfo &info = m_arrayInfos.back();

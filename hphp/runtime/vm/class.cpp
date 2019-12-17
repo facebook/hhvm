@@ -175,7 +175,7 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
     assertx(m_data->checkInvariants(m_capacity));
   }
   auto const idx = m_size++;
-  cellDup(v, m_data->at(idx));
+  tvDup(v, m_data->at(idx));
   deepInitBits()[idx] = false;
 }
 

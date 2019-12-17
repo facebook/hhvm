@@ -397,7 +397,7 @@ TypedValue serialize_memoize_param_dbl(double val) {
 TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
   // Memoize throws in the emitter if any function parameters are references, so
   // we can just assert that the param is cell here
-  assertx(cellIsPlausible(param));
+  assertx(tvIsPlausible(param));
   auto const type = param.m_type;
 
   if (type == KindOfInt64) {

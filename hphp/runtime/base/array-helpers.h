@@ -36,9 +36,9 @@ ALWAYS_INLINE void initElem(TypedValue& elem, Cell v, bool move = false) {
   if (UNLIKELY(v.m_type == KindOfUninit)) {
     elem.m_type = KindOfNull;
   } else if (move) {
-    cellCopy(v, elem);
+    tvCopy(v, elem);
   } else {
-    cellDup(v, elem);
+    tvDup(v, elem);
   }
 }
 
@@ -52,9 +52,9 @@ enable_if_lval_t<C&&, void> setElem(C&& elem, Cell v, bool move = false) {
     v.m_type = KindOfNull;
   }
   if (move) {
-    cellMove(v, elem);
+    tvMove(v, elem);
   } else {
-    cellSet(v, elem);
+    tvSet(v, elem);
   }
 }
 

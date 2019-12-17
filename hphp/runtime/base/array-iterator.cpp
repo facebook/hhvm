@@ -231,7 +231,7 @@ void ArrayIter::objInit(ObjectData* obj) {
 }
 
 void ArrayIter::cellInit(const Cell c) {
-  assertx(cellIsPlausible(c));
+  assertx(tvIsPlausible(c));
   if (LIKELY(isArrayLikeType(c.m_type))) {
     arrInit(c.m_data.parr);
   } else if (LIKELY(c.m_type == KindOfObject)) {
@@ -443,10 +443,10 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   assertx((typeArray && arrIter.getIterType() == ArrayIter::TypeArray) ||
          (!typeArray && arrIter.getIterType() == ArrayIter::TypeIterator));
   if (typeArray) {
-    cellDup(arrIter.nvSecond().tv(), *out);
+    tvDup(arrIter.nvSecond().tv(), *out);
   } else {
     Variant val = arrIter.second();
-    cellDup(*val.asTypedValue(), *out);
+    tvDup(*val.asTypedValue(), *out);
   }
   tvDecRefGen(oldVal);
 }
@@ -459,10 +459,10 @@ static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
   assertx((typeArray && arrIter.getIterType() == ArrayIter::TypeArray) ||
          (!typeArray && arrIter.getIterType() == ArrayIter::TypeIterator));
   if (typeArray) {
-    cellCopy(arrIter.nvFirst(), *out);
+    tvCopy(arrIter.nvFirst(), *out);
   } else {
     Variant key = arrIter.first();
-    cellDup(*key.asTypedValue(), *out);
+    tvDup(*key.asTypedValue(), *out);
   }
   tvDecRefGen(oldVal);
 }
@@ -475,7 +475,7 @@ inline void liter_value_cell_local_impl(Iter* iter,
   assertx(arrIter.getIterType() == ArrayIter::TypeArray);
   assertx(!arrIter.getArrayData());
   auto const cur = arrIter.nvSecondLocal(ad);
-  cellDup(cur.tv(), *out);
+  tvDup(cur.tv(), *out);
   tvDecRefGen(oldVal);
 }
 
@@ -486,7 +486,7 @@ inline void liter_key_cell_local_impl(Iter* iter,
   auto const& arrIter = *unwrap(iter);
   assertx(arrIter.getIterType() == ArrayIter::TypeArray);
   assertx(!arrIter.getArrayData());
-  cellCopy(arrIter.nvFirstLocal(ad), *out);
+  tvCopy(arrIter.nvFirstLocal(ad), *out);
   tvDecRefGen(oldVal);
 }
 
@@ -595,7 +595,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       aiter.m_end = size;
       aiter.setArrayNext(IterNextIndex::ArrayPacked);
     }
-    cellDup(*PackedArray::RvalPos(ad, 0), *valOut);
+    tvDup(*PackedArray::RvalPos(ad, 0), *valOut);
     return 1;
   }
 
@@ -671,7 +671,7 @@ int64_t new_iter_array_key(Iter*       dest,
     aiter.m_pos = 0;
     aiter.m_end = size;
     aiter.setArrayNext(IterNextIndex::ArrayPacked);
-    cellDup(*PackedArray::RvalPos(ad, 0), *valOut);
+    tvDup(*PackedArray::RvalPos(ad, 0), *valOut);
     keyOut->m_type = KindOfInt64;
     keyOut->m_data.num = 0;
     return 1;
@@ -893,12 +893,12 @@ static int64_t iter_next_apc_array(Iter* iter,
   arrIter->setPos(pos);
 
   auto const rval = APCLocalArray::RvalPos(arr->asArrayData(), pos);
-  cellSet(rval.tv(), *valOut);
+  tvSet(rval.tv(), *valOut);
   if (LIKELY(!keyOut)) return 1;
 
   auto const key = APCLocalArray::NvGetKey(ad, pos);
   auto const oldKey = *keyOut;
-  cellCopy(key, *keyOut);
+  tvCopy(key, *keyOut);
   tvDecRefGen(oldKey);
 
   return 1;
@@ -949,7 +949,7 @@ int64_t iter_next_packed_pointer_cold(Iter* it,
                                       Cell* valOut,
                                       TypedValue* elm) {
   auto const oldVal = *valOut;
-  cellDup(*elm, *valOut);
+  tvDup(*elm, *valOut);
   tvDecRefGen(oldVal);
   return 1;
 }
@@ -966,11 +966,11 @@ int64_t iter_next_mixed_pointer_cold(Iter* it,
                                      Cell* keyOut,
                                      MixedArrayElm* elm) {
   auto const oldVal = *valOut;
-  cellDup(*elm->datatv(), *valOut);
+  tvDup(*elm->datatv(), *valOut);
   tvDecRefGen(oldVal);
   if (keyOut != nullptr) {
     auto const oldKey = *keyOut;
-    cellCopy(elm->getKey(), *keyOut);
+    tvCopy(elm->getKey(), *keyOut);
     tvDecRefGen(oldKey);
   }
   return 1;
@@ -986,10 +986,10 @@ int64_t iter_next_mixed_pointer_cold_key(Iter* it,
                                          Cell* valOut,
                                          Cell* keyOut,
                                          MixedArrayElm* elm) {
-  cellDup(*elm->datatv(), *valOut);
+  tvDup(*elm->datatv(), *valOut);
   if (keyOut != nullptr) {
     auto const oldKey = *keyOut;
-    cellCopy(elm->getKey(), *keyOut);
+    tvCopy(elm->getKey(), *keyOut);
     tvDecRefGen(oldKey);
   }
   return 1;
@@ -1028,7 +1028,7 @@ int64_t iter_next_packed_pointer(Iter* it, Cell* valOut, ArrayData* arr) {
     valOut->m_data.pcnt->decRefCount();
   }
 
-  cellDup(*elm, *valOut);
+  tvDup(*elm, *valOut);
   return 1;
 }
 
@@ -1074,8 +1074,8 @@ int64_t iter_next_mixed_pointer(Iter* it,
     keyOut->m_data.pcnt->decRefCount();
   }
 
-  cellDup(*elm->datatv(), *valOut);
-  if (HasKey) cellCopy(elm->getKey(), *keyOut);
+  tvDup(*elm->datatv(), *valOut);
+  if (HasKey) tvCopy(elm->getKey(), *keyOut);
   return 1;
 }
 
@@ -1175,7 +1175,7 @@ int64_t iter_next_packed_impl(Iter* it,
       keyOut->m_data.pcnt->decRefCount();
     }
     iter.setPos(pos);
-    cellDup(*PackedArray::RvalPos(ad, pos), *valOut);
+    tvDup(*PackedArray::RvalPos(ad, pos), *valOut);
     if (HasKey) {
       keyOut->m_data.num = pos;
       keyOut->m_type = KindOfInt64;
@@ -1384,7 +1384,7 @@ const LIterNextKHelper g_literNextKHelpers[] = {
 int64_t iter_next_ind(Iter* iter, Cell* valOut) {
   TRACE(2, "iter_next_ind: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants());
-  assertx(cellIsPlausible(*valOut));
+  assertx(tvIsPlausible(*valOut));
   auto const index = unwrap(iter)->getHelperIndex();
   IterNextHelper helper = g_iterNextHelpers[static_cast<uint32_t>(index)];
   return helper(iter, valOut);
@@ -1393,8 +1393,8 @@ int64_t iter_next_ind(Iter* iter, Cell* valOut) {
 int64_t iter_next_key_ind(Iter* iter, Cell* valOut, Cell* keyOut) {
   TRACE(2, "iter_next_key_ind: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants());
-  assertx(cellIsPlausible(*valOut));
-  assertx(cellIsPlausible(*keyOut));
+  assertx(tvIsPlausible(*valOut));
+  assertx(tvIsPlausible(*keyOut));
   auto const index = unwrap(iter)->getHelperIndex();
   IterNextKHelper helper = g_iterNextKHelpers[static_cast<uint32_t>(index)];
   return helper(iter, valOut, keyOut);
@@ -1403,7 +1403,7 @@ int64_t iter_next_key_ind(Iter* iter, Cell* valOut, Cell* keyOut) {
 int64_t liter_next_ind(Iter* iter, Cell* valOut, ArrayData* ad) {
   TRACE(2, "liter_next_ind: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants(ad));
-  assertx(cellIsPlausible(*valOut));
+  assertx(tvIsPlausible(*valOut));
   auto const index = unwrap(iter)->getHelperIndex();
   LIterNextHelper helper = g_literNextHelpers[static_cast<uint32_t>(index)];
   return helper(iter, valOut, ad);
@@ -1415,8 +1415,8 @@ int64_t liter_next_key_ind(Iter* iter,
                            ArrayData* ad) {
   TRACE(2, "liter_next_key_ind: I %p\n", iter);
   assertx(unwrap(iter)->checkInvariants(ad));
-  assertx(cellIsPlausible(*valOut));
-  assertx(cellIsPlausible(*keyOut));
+  assertx(tvIsPlausible(*valOut));
+  assertx(tvIsPlausible(*keyOut));
   auto const index = unwrap(iter)->getHelperIndex();
   LIterNextKHelper helper = g_literNextKHelpers[static_cast<uint32_t>(index)];
   return helper(iter, valOut, keyOut, ad);

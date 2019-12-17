@@ -81,7 +81,7 @@ namespace jit {
 ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
   assertx(a->isPHPArray());
 
-  auto r = a->append(*tvAssertCell(&value));
+  auto r = a->append(*tvAssertPlausible(&value));
   if (UNLIKELY(r != a)) {
     decRefArr(a);
   }
@@ -92,7 +92,7 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad,
                                int64_t key,
                                TypedValue value) {
   assertx(ad->isPHPArray());
-  assertx(cellIsPlausible(value));
+  assertx(tvIsPlausible(value));
   // this does not re-enter
   // set will decRef any old value that may have been overwritten
   // if appropriate
@@ -109,7 +109,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
                                   StringData* key,
                                   TypedValue value) {
   assertx(ad->isPHPArray());
-  assertx(cellIsPlausible(value));
+  assertx(tvIsPlausible(value));
   // set will decRef any old value that may have been overwritten
   // if appropriate
   auto const retval = ad->set(key, value);
@@ -128,7 +128,7 @@ ArrayData* dictAddElemIntKeyHelper(ArrayData* ad,
   assertx(ad->isDict());
   // set will decRef any old value that may have been overwritten
   // if appropriate
-  auto const retval = MixedArray::SetIntDict(ad, key, *tvAssertCell(&value));
+  auto const retval = MixedArray::SetIntDict(ad, key, *tvAssertPlausible(&value));
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
@@ -143,7 +143,7 @@ ArrayData* dictAddElemStringKeyHelper(ArrayData* ad,
   assertx(ad->isDict());
   // set will decRef any old value that may have been overwritten
   // if appropriate
-  auto const retval = MixedArray::SetStrDict(ad, key, *tvAssertCell(&value));
+  auto const retval = MixedArray::SetStrDict(ad, key, *tvAssertPlausible(&value));
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here

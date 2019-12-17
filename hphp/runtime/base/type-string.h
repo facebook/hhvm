@@ -527,14 +527,14 @@ ALWAYS_INLINE TypedValue empty_string_tv() {
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE String& asStrRef(tv_lval tv) {
-  assertx(cellIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   assertx(isStringType(type(tv)));
   type(tv) = KindOfString;
   return reinterpret_cast<String&>(val(tv).pstr);
 }
 
 ALWAYS_INLINE const String& asCStrRef(tv_rval tv) {
-  assertx(cellIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   assertx(isStringType(type(tv)));
   return reinterpret_cast<const String&>(val(tv).pstr);
 }

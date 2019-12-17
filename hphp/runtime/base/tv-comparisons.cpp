@@ -84,7 +84,7 @@ auto strRelOp(Op op, Cell cell, Num val, const StringData* str) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -155,7 +155,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -226,7 +226,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
   assertx(val != nullptr);
 
   switch (cell.m_type) {
@@ -312,7 +312,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
   assertx(ad->isPHPArray());
 
   auto const nonArr = [&]{
@@ -398,7 +398,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
 
   auto strRelOp = [&] (const StringData* sd) {
     auto obj = const_cast<ObjectData*>(od);
@@ -487,7 +487,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const RecordData* rec) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -567,7 +567,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceHdr* r) {
 
 template<class Op>
 typename Op::RetType cellRelOpVec(Op op, Cell cell, const ArrayData* a) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
   assertx(a->isVecArray());
 
   if (isClsMethType(cell.m_type)) {
@@ -592,7 +592,7 @@ typename Op::RetType cellRelOpVec(Op op, Cell cell, const ArrayData* a) {
 
 template<class Op>
 typename Op::RetType cellRelOpDict(Op op, Cell cell, const ArrayData* a) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
   assertx(a->isDict());
 
   if (UNLIKELY(!isDictType(cell.m_type))) {
@@ -609,7 +609,7 @@ typename Op::RetType cellRelOpDict(Op op, Cell cell, const ArrayData* a) {
 
 template<class Op>
 typename Op::RetType cellRelOpKeyset(Op op, Cell cell, const ArrayData* a) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
   assertx(a->isKeyset());
 
   if (UNLIKELY(!isKeysetType(cell.m_type))) {
@@ -626,7 +626,7 @@ typename Op::RetType cellRelOpKeyset(Op op, Cell cell, const ArrayData* a) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, ClsMethDataRef clsMeth) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -684,7 +684,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, ClsMethDataRef clsMeth) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const Func* val) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
   assertx(val != nullptr);
 
   switch (cell.m_type) {
@@ -774,7 +774,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const Func* val) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const Class* val) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
   assertx(val != nullptr);
 
   switch (cell.m_type) {
@@ -864,8 +864,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const Class* val) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
-  assertx(cellIsPlausible(c1));
-  assertx(cellIsPlausible(c2));
+  assertx(tvIsPlausible(c1));
+  assertx(tvIsPlausible(c2));
 
   switch (c2.m_type) {
   case KindOfUninit:
@@ -1209,8 +1209,8 @@ struct Cmp : CompareBase<int64_t, struct PHPPrimitiveCmp> {
 }
 
 bool cellSame(Cell c1, Cell c2) {
-  assertx(cellIsPlausible(c1));
-  assertx(cellIsPlausible(c2));
+  assertx(tvIsPlausible(c1));
+  assertx(tvIsPlausible(c2));
 
   bool const null1 = isNullType(c1.m_type);
   bool const null2 = isNullType(c2.m_type);
@@ -1543,14 +1543,14 @@ int64_t tvCompare(TypedValue tv1, TypedValue tv2) {
 //////////////////////////////////////////////////////////////////////
 
 bool cellLessOrEqual(Cell c1, Cell c2) {
-  assertx(cellIsPlausible(c1));
-  assertx(cellIsPlausible(c2));
+  assertx(tvIsPlausible(c1));
+  assertx(tvIsPlausible(c2));
   return cellRelOp(Lte(), c1, c2);
 }
 
 bool cellGreaterOrEqual(Cell c1, Cell c2) {
-  assertx(cellIsPlausible(c1));
-  assertx(cellIsPlausible(c2));
+  assertx(tvIsPlausible(c1));
+  assertx(tvIsPlausible(c2));
   return cellRelOp(Gte(), c1, c2);
 }
 

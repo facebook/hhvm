@@ -106,7 +106,7 @@ void cgVerifyRetRecDesc(IRLS& env, const IRInstruction* inst) {
 
 static void verifyPropFailImpl(const Class* objCls, Cell val, Slot slot) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
-  assertx(cellIsPlausible(val));
+  assertx(tvIsPlausible(val));
   assertx(slot < objCls->numDeclProperties());
   auto const& prop = objCls->declProperties()[slot];
   assertx(prop.typeConstraint.isCheckable());
@@ -121,7 +121,7 @@ static void verifyPropFailImpl(const Class* objCls, Cell val, Slot slot) {
 
 static void verifyStaticPropFailImpl(const Class* objCls, Cell val, Slot slot) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
-  assertx(cellIsPlausible(val));
+  assertx(tvIsPlausible(val));
   assertx(slot < objCls->numStaticProperties());
   auto const& sprop = objCls->staticProperties()[slot];
   assertx(sprop.typeConstraint.isCheckable());
@@ -208,7 +208,7 @@ static void verifyPropImpl(const Class* cls,
                             Cell val) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(slot < cls->numDeclProperties());
-  assertx(cellIsPlausible(val));
+  assertx(tvIsPlausible(val));
   auto const& prop = cls->declProperties()[slot];
   auto const& tc = prop.typeConstraint;
   if (tc.isCheckable()) tc.verifyProperty(&val, cls, prop.cls, prop.name);
@@ -219,7 +219,7 @@ static void verifySPropImpl(const Class* cls,
                             Cell val) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(slot < cls->numStaticProperties());
-  assertx(cellIsPlausible(val));
+  assertx(tvIsPlausible(val));
   auto const& prop = cls->staticProperties()[slot];
   auto const& tc = prop.typeConstraint;
   if (tc.isCheckable()) tc.verifyStaticProperty(&val, cls, prop.cls, prop.name);

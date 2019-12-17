@@ -38,7 +38,7 @@ void raiseClsMethConvertWarningHelper(const char* toType);
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool cellToBool(Cell cell) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -72,7 +72,7 @@ inline bool cellToBool(Cell cell) {
 }
 
 inline int64_t cellToInt(Cell cell) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -109,7 +109,7 @@ inline int64_t cellToInt(Cell cell) {
 
 inline double cellToDouble(Cell cell) {
   Cell tmp;
-  cellDup(cell, tmp);
+  tvDup(cell, tmp);
   tvCastToDoubleInPlace(&tmp);
   return tmp.m_data.dbl;
 }
@@ -118,7 +118,7 @@ inline double cellToDouble(Cell cell) {
 
 template <IntishCast IC>
 inline Cell cellToKey(Cell cell, const ArrayData* ad) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
 
   auto coerceKey = [&] (const StringData* str) {
     int64_t n;

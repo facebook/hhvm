@@ -41,21 +41,21 @@ ALWAYS_INLINE Cell tvToInitCell(TypedValue tv) {
 /*
  * Assert that `tv' is a Cell; then just return it.
  */
-ALWAYS_INLINE Cell tvAssertCell(TypedValue tv) {
-  assertx(cellIsPlausible(tv));
+ALWAYS_INLINE Cell tvAssertPlausible(TypedValue tv) {
+  assertx(tvIsPlausible(tv));
   return tv;
 }
-ALWAYS_INLINE Cell* tvAssertCell(TypedValue* tv) {
-  assertx(cellIsPlausible(*tv));
+ALWAYS_INLINE Cell* tvAssertPlausible(TypedValue* tv) {
+  assertx(tvIsPlausible(*tv));
   return tv;
 }
-ALWAYS_INLINE const Cell* tvAssertCell(const TypedValue* tv) {
-  assertx(cellIsPlausible(*tv));
+ALWAYS_INLINE const Cell* tvAssertPlausible(const TypedValue* tv) {
+  assertx(tvIsPlausible(*tv));
   return tv;
 }
 template<bool is_const>
-ALWAYS_INLINE tv_val<is_const> tvAssertCell(tv_val<is_const> tv) {
-  assertx(cellIsPlausible(*tv));
+ALWAYS_INLINE tv_val<is_const> tvAssertPlausible(tv_val<is_const> tv) {
+  assertx(tvIsPlausible(*tv));
   return tv;
 }
 
@@ -86,15 +86,6 @@ enable_if_lval_t<T&&, void> tvCopy(const TypedValue& fr, T&& to) {
 }
 
 /*
- * tvCopy() with added assertions, for Cells and Refs.
- */
-template<typename C> ALWAYS_INLINE
-enable_if_lval_t<C&&, void> cellCopy(const Cell fr, C&& to) {
-  assertx(cellIsPlausible(fr));
-  tvCopy(fr, to);
-}
-
-/*
  * Duplicate a TypedValue from one location to another.
  *
  * Copies the m_data and m_type fields, and increfs `fr', but does not decref
@@ -102,16 +93,7 @@ enable_if_lval_t<C&&, void> cellCopy(const Cell fr, C&& to) {
  */
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvDup(const TypedValue& fr, T&& to) {
-  tvCopy(fr, to);
-  tvIncRefGen(as_tv(to));
-}
-
-/*
- * tvDup() with added assertions, for Cells and Refs.
- */
-template<typename C> ALWAYS_INLINE
-enable_if_lval_t<C&&, void> cellDup(const Cell fr, C&& to) {
-  assertx(cellIsPlausible(fr));
+  assertx(tvIsPlausible(fr));
   tvCopy(fr, to);
   tvIncRefGen(as_tv(to));
 }
@@ -152,22 +134,11 @@ enable_if_lval_t<T&&, void> tvWriteNull(T&& to) {
  */
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvMove(const Cell fr, T&& to) {
-  assertx(cellIsPlausible(fr));
+  assertx(tvIsPlausible(fr));
+  assertx(tvIsPlausible(as_tv(to)));
   auto const old = as_tv(to);
-  cellCopy(fr, to);
+  tvCopy(fr, to);
   tvDecRefGen(old);
-}
-
-/*
- * Move the value of the Cell in `fr' to the Cell `to'.
- *
- * Just like tvMove() with added assertions for `to'.
- */
-template<typename C> ALWAYS_INLINE
-enable_if_lval_t<C&&, void> cellMove(const Cell fr, C&& to) {
-  assertx(cellIsPlausible(fr));
-  assertx(cellIsPlausible(as_tv(to)));
-  tvMove(fr, to);
 }
 
 /*
@@ -176,31 +147,19 @@ enable_if_lval_t<C&&, void> cellMove(const Cell fr, C&& to) {
  */
 template<typename T> ALWAYS_INLINE
 enable_if_lval_t<T&&, void> tvSet(const Cell fr, T&& to) {
-  assertx(cellIsPlausible(fr));
+  assertx(tvIsPlausible(fr));
+  assertx(tvIsPlausible(as_tv(to)));
   auto const old = as_tv(to);
-  cellDup(fr, to);
+  tvDup(fr, to);
   tvDecRefGen(old);
 }
 
 /*
- * Assign the value of the Cell in `fr' to `to', with appropriate reference
- * count modifications.
- *
- * Just like tvSet() or with added assertions for `to'.
+ * Like tvSet(), but preserves m_aux
  */
 template<typename C> ALWAYS_INLINE
-enable_if_lval_t<C&&, void> cellSet(const Cell fr, C&& to) {
-  assertx(cellIsPlausible(fr));
-  assertx(cellIsPlausible(as_tv(to)));
-  tvSet(fr, to);
-}
-
-/*
- * Like cellSet(), but preserves m_aux
- */
-template<typename C> ALWAYS_INLINE
-enable_if_lval_t<C&&, void> cellSetWithAux(const Cell fr, C&& to) {
-  assertx(cellIsPlausible(fr));
+enable_if_lval_t<C&&, void> tvSetWithAux(const Cell fr, C&& to) {
+  assertx(tvIsPlausible(fr));
   auto const old = as_tv(to);
   to = fr;
   tvIncRefGen(to);
@@ -225,20 +184,10 @@ enable_if_lval_t<T&&, void> tvUnset(T&& to) {
  * Equivalent to tvSet(make_tv<KindOfNull>(), to).
  */
 template<typename C> ALWAYS_INLINE
-enable_if_lval_t<C&&, void> cellSetNull(C&& to) {
+enable_if_lval_t<C&&, void> tvSetNull(C&& to) {
   auto const old = as_tv(to);
   tvWriteNull(to);
   tvDecRefGen(old);
-}
-
-/*
- * Assign KindOfNull to `to'.
- *
- * Equivalent to tvSet(make_tv<KindOfNull>(), to).
- */
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T&&, void> tvSetNull(T&& to) {
-  cellSetNull(to);
 }
 
 /*

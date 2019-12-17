@@ -1407,7 +1407,7 @@ void AsyncMysqlConnectEvent::unserialize(Cell& result) {
     auto ret = AsyncMysqlConnection::newInstance(
         m_op->releaseConnection(), m_op, std::move(m_clientStats));
 
-    cellCopy(make_tv<KindOfObject>(ret.detach()), result);
+    tvCopy(make_tv<KindOfObject>(ret.detach()), result);
   } else {
     throwAsyncMysqlException("AsyncMysqlConnectException", m_op,
                              std::move(m_clientStats));
@@ -1426,7 +1426,7 @@ void AsyncMysqlQueryEvent::unserialize(Cell& result) {
     auto ret = AsyncMysqlQueryResult::newInstance(
       m_query_op, std::move(m_clientStats), std::move(query_result),
       m_query_op->noIndexUsed());
-    cellCopy(make_tv<KindOfObject>(ret.detach()), result);
+    tvCopy(make_tv<KindOfObject>(ret.detach()), result);
   } else {
     throwAsyncMysqlQueryException("AsyncMysqlQueryException",
                                   m_query_op,
@@ -1447,7 +1447,7 @@ void AsyncMysqlMultiQueryEvent::unserialize(Cell& result) {
   auto results = transformQueryResults(m_multi_op, m_clientStats);
 
   if (m_multi_op->ok()) {
-    cellDup(make_tv<KindOfObject>(results.get()), result);
+    tvDup(make_tv<KindOfObject>(results.get()), result);
   } else {
     throwAsyncMysqlQueryException("AsyncMysqlQueryException", m_multi_op,
                                   std::move(m_clientStats), results);
@@ -1465,7 +1465,7 @@ void AsyncMysqlConnectAndMultiQueryEvent::unserialize(Cell& result) {
       m_connect_op, m_clientStats);
   auto resTuple = make_packed_array(connResult, queryResults);
   if (m_multi_query_op->ok()) {
-    cellCopy(make_array_like_tv(resTuple.detach()), result);
+    tvCopy(make_array_like_tv(resTuple.detach()), result);
   } else {
     throwAsyncMysqlQueryException("AsyncMysqlQueryException", m_multi_query_op,
                                   std::move(m_clientStats), queryResults);

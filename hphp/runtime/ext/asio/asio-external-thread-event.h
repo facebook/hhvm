@@ -72,7 +72,7 @@ struct c_ExternalThreadEventWaitHandle;
  *         );
  *       }
  *
- *       cellDup(make_tv<KindOfInt64>(m_value), result);
+ *       tvDup(make_tv<KindOfInt64>(m_value), result);
  *     }
  *   private:
  *     int m_value, m_maxValue;

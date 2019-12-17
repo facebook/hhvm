@@ -157,7 +157,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       stack.ndiscard(func->numSlotsInFrame());
       stack.ret();
       assertx(stack.topTV() == fp->retSlot());
-      cellCopy(make_tv<KindOfObject>(waitHandle), *fp->retSlot());
+      tvCopy(make_tv<KindOfObject>(waitHandle), *fp->retSlot());
       fp->retSlot()->m_aux.u_asyncEagerReturnFlag = 0;
     } else {
       // We need to discard the NullUninits from inout on the stack but if the

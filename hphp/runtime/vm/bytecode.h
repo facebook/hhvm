@@ -60,8 +60,8 @@ struct Resumable;
 // The old value of lhs is decrefed.
 ALWAYS_INLINE
 void setopBody(tv_lval lhs, SetOpOp op, Cell* rhs) {
-  assertx(cellIsPlausible(*lhs));
-  assertx(cellIsPlausible(*rhs));
+  assertx(tvIsPlausible(*lhs));
+  assertx(tvIsPlausible(*rhs));
 
   switch (op) {
   case SetOpOp::PlusEqual:      cellAddEq(lhs, *rhs); return;
@@ -269,7 +269,7 @@ public:
   ALWAYS_INLINE
   void popC() {
     assertx(m_top != m_base);
-    assertx(cellIsPlausible(*m_top));
+    assertx(tvIsPlausible(*m_top));
     tvDecRefGen(m_top);
     tvDebugTrash(m_top);
     m_top++;
@@ -364,7 +364,7 @@ public:
     Cell* fr = m_top;
     m_top--;
     Cell* to = m_top;
-    cellDup(*fr, *to);
+    tvDup(*fr, *to);
   }
 
   ALWAYS_INLINE
@@ -639,7 +639,7 @@ public:
   ALWAYS_INLINE
   Cell* topC() {
     assertx(m_top != m_base);
-    return tvAssertCell(m_top);
+    return tvAssertPlausible(m_top);
   }
 
   ALWAYS_INLINE
@@ -658,7 +658,7 @@ public:
   ALWAYS_INLINE
   Cell* indC(size_t ind) {
     assertx(m_top != m_base);
-    return tvAssertCell(&m_top[ind]);
+    return tvAssertPlausible(&m_top[ind]);
   }
 
   ALWAYS_INLINE

@@ -491,12 +491,12 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
   if (reverse) {
     uint32_t i = size - 1;
     for (auto end = values + size; values < end; ++values, --i) {
-      cellCopy(*values, LvalUncheckedInt(ad, i));
+      tvCopy(*values, LvalUncheckedInt(ad, i));
     }
   } else {
     if (debug) {
       for (uint32_t i = 0; i < size; ++i) {
-        assertx(cellIsPlausible(*(values + i)));
+        assertx(tvIsPlausible(*(values + i)));
       }
     }
     memcpy16_inline(packedData(ad), values, sizeof(Cell) * size);
@@ -1028,7 +1028,7 @@ ArrayData* PackedArray::AppendImpl(ArrayData* adIn, Cell v, bool copy) {
   assertx(v.m_type != KindOfUninit);
   assertx(copy || adIn->notCyclic(v));
   auto const ad = PrepareForInsert(adIn, copy);
-  cellDup(v, LvalUncheckedInt(ad, ad->m_size++));
+  tvDup(v, LvalUncheckedInt(ad, ad->m_size++));
   return ad;
 }
 
@@ -1116,7 +1116,7 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn, Cell v) {
   auto const size = ad->m_size;
   auto const data = packedData(ad);
   std::memmove(data + 1, data, sizeof *data * size);
-  cellDup(v, data[0]);
+  tvDup(v, data[0]);
   ad->m_size = size + 1;
   ad->m_pos = 0;
   return ad;

@@ -157,7 +157,7 @@ void c_AsyncFunctionWaitHandle::ret(Cell& result) {
   assertx(isRunning());
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
-  cellCopy(result, m_resultOrException);
+  tvCopy(result, m_resultOrException);
   parentChain.unblock();
 }
 
@@ -183,7 +183,7 @@ void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
 
   auto parentChain = getParentChain();
   setState(STATE_FAILED);
-  cellCopy(make_tv<KindOfObject>(exception), m_resultOrException);
+  tvCopy(make_tv<KindOfObject>(exception), m_resultOrException);
   parentChain.unblock();
 }
 

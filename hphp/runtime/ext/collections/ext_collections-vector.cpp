@@ -65,7 +65,7 @@ void copySlice(ArrayData* from, ArrayData* to,
   do {
     auto from_elm = PackedArray::LvalUncheckedInt(from, to_pos + offset);
     auto to_elm = PackedArray::LvalUncheckedInt(to, to_pos);
-    cellDup(*from_elm, to_elm);
+    tvDup(*from_elm, to_elm);
   } while (++to_pos < to_end);
 }
 
@@ -471,7 +471,7 @@ void c_Vector::resize(uint32_t sz, const Cell* val) {
     reserve(sz);
     uint32_t i = m_size;
     do {
-      cellDup(*val, dataAt(i));
+      tvDup(*val, dataAt(i));
     } while (++i < sz);
     setSize(sz);
   }
@@ -578,7 +578,7 @@ Object c_Vector::fromArray(const Class*, const Variant& arr) {
   ssize_t pos = ad->iter_begin();
   do {
     assertx(pos != ad->iter_end());
-    cellDup(ad->atPos(pos), target->dataAt(i));
+    tvDup(ad->atPos(pos), target->dataAt(i));
     pos = ad->iter_advance(pos);
   } while (++i < sz);
   return Object{std::move(target)};

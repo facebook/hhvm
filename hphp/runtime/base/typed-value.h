@@ -200,7 +200,6 @@ using TypedNum = TypedValue;
  * assertx().
  */
 bool tvIsPlausible(TypedValue);
-bool cellIsPlausible(Cell);
 
 ///////////////////////////////////////////////////////////////////////////////
 

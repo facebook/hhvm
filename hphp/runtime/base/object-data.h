@@ -109,12 +109,12 @@ public:
 
   Cell* getValue() {
     assertx(isValue());
-    assertx(cellIsPlausible(value));
+    assertx(tvIsPlausible(value));
     return &value;
   }
   const Cell* getValue() const {
     assertx(isValue());
-    assertx(cellIsPlausible(value));
+    assertx(tvIsPlausible(value));
     return &value;
   }
 

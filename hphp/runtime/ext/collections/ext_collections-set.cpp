@@ -146,7 +146,7 @@ void BaseSet::addImpl(StringData *key) {
   // the key and once for the value
   e.setStrKey(key, h);
   arrayData()->mutableKeyTypes()->recordStr(key);
-  cellDup(make_tv<KindOfString>(key), e.data);
+  tvDup(make_tv<KindOfString>(key), e.data);
 }
 
 void BaseSet::addRaw(int64_t k) {
@@ -207,7 +207,7 @@ void BaseSet::addFront(StringData *key) {
   // the key and once for the value
   e.setStrKey(key, h);
   arrayData()->mutableKeyTypes()->recordStr(key);
-  cellDup(make_tv<KindOfString>(key), e.data);
+  tvDup(make_tv<KindOfString>(key), e.data);
 }
 
 Variant BaseSet::pop() {
@@ -540,7 +540,7 @@ BaseSet::php_concat(const Variant& iterable) {
     if (isTombstone(i)) {
       continue;
     }
-    cellDup(data()[i].data, vec->dataAt(j));
+    tvDup(data()[i].data, vec->dataAt(j));
     ++j;
   }
   for (; iter; ++iter) {

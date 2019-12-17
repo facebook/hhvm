@@ -223,9 +223,9 @@ void cgGetMemoKeyScalar(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static void memoSetDecRefImpl(Cell newVal, Cell* cache) {
-  assertx(cellIsPlausible(newVal));
-  assertx(cellIsPlausible(*cache));
-  cellSetWithAux(newVal, *cache);
+  assertx(tvIsPlausible(newVal));
+  assertx(tvIsPlausible(*cache));
+  tvSetWithAux(newVal, *cache);
 }
 
 namespace {

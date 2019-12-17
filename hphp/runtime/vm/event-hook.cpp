@@ -487,7 +487,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
       trim(); // nothing to do throw away the frame
     }
 
-    cellDup(*ret.toCell(), *stack.allocTV());
+    tvDup(*ret.toCell(), *stack.allocTV());
     stack.topTV()->m_aux.u_asyncEagerReturnFlag = 0;
 
     vmfp() = outer;

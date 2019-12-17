@@ -219,7 +219,7 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
 template<typename T>
 enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
   assertx(tvIsPlausible(*tv));
-  assertx(cellIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
   int64_t i;
 
   do {
@@ -421,14 +421,14 @@ void cellCastToStringInPlace(tv_lval tv) {
       return persistentString(array_string.get());
 
     case KindOfObject:
-      cellMove(
+      tvMove(
         make_tv<KindOfString>(val(tv).pobj->invokeToString().detach()),
         tv
       );
       return;
 
     case KindOfResource:
-      cellMove(
+      tvMove(
         make_tv<KindOfString>(val(tv).pres->data()->o_toString().detach()),
         tv
       );
@@ -773,7 +773,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
 
   val(tv).parr = a;
   type(tv) = KindOfArray;
-  assertx(cellIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
 }
 
 template<typename T>
@@ -881,7 +881,7 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
 
   val(tv).parr = a;
   type(tv) = KindOfVec;
-  assertx(cellIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
 }
 
 template<typename T>
@@ -989,7 +989,7 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
 
   val(tv).parr = a;
   type(tv) = KindOfDict;
-  assertx(cellIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
 }
 
 template<typename T>
@@ -1099,7 +1099,7 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
 
   val(tv).parr = a;
   type(tv) = KindOfKeyset;
-  assertx(cellIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
 }
 
 template<typename T>
@@ -1219,7 +1219,7 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
 
   val(tv).parr = a;
   type(tv) = KindOfArray;
-  assertx(cellIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
 }
 
 template<typename T>
@@ -1340,7 +1340,7 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
 
   val(tv).parr = a;
   type(tv) = KindOfArray;
-  assertx(cellIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
 }
 
 ObjectData* tvCastToObjectData(TypedValue tv) {
@@ -1427,7 +1427,7 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
 
   type(tv) = KindOfResource;
   val(tv).pres = req::make<DummyResource>().detach()->hdr();
-  assertx(cellIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

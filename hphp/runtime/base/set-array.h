@@ -114,7 +114,7 @@ struct SetArrayElm {
   Cell getKey() const {
     assertx(!isInvalid());
     Cell out;
-    cellDup(tv, out);
+    tvDup(tv, out);
     return out;
   }
 

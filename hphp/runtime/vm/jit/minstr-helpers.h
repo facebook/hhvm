@@ -677,7 +677,7 @@ template<KeyType keyType>
 auto arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value) {
   static_assert(keyType != KeyType::Any,
                 "KeyType::Any is not supported in arraySetMImpl");
-  assertx(cellIsPlausible(value));
+  assertx(tvIsPlausible(value));
   assertx(a->isPHPArray());
   return a->setMove(key, value);
 }
@@ -698,7 +698,7 @@ ARRAYSET_HELPER_TABLE(X)
 
 template<bool copyProv>
 auto vecSetImpl(ArrayData* a, int64_t key, Cell value) {
-  assertx(cellIsPlausible(value));
+  assertx(tvIsPlausible(value));
   assertx(a->isVecArray());
   return PackedArray::SetIntMoveVec(a, key, value);
 }
@@ -726,7 +726,7 @@ inline ArrayData* dictSetImplPre(ArrayData* a, StringData* s, Cell val) {
 
 template<KeyType keyType, bool copyProv>
 auto dictSetImpl(ArrayData* a, key_type<keyType> key, Cell value) {
-  assertx(cellIsPlausible(value));
+  assertx(tvIsPlausible(value));
   assertx(a->isDict());
   return dictSetImplPre(a, key, value);
 }

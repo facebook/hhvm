@@ -95,7 +95,7 @@ Cell make_dbl(double d)  { return make_tv<KindOfDouble>(d); }
 // Helper for converting String, Array, Bool, Null or Obj to Dbl|Int.
 // Other types (i.e. Int and Double) must be handled outside of this.
 TypedNum numericConvHelper(Cell cell) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -150,7 +150,7 @@ again:
     for (;;) {
       if (c2.m_type == KindOfInt64)  return o(c1.m_data.num, c2.m_data.num);
       if (c2.m_type == KindOfDouble) return o(c1.m_data.num, c2.m_data.dbl);
-      cellCopy(numericConvHelper(c2), c2);
+      tvCopy(numericConvHelper(c2), c2);
       assertx(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
     }
   }
@@ -159,7 +159,7 @@ again:
     for (;;) {
       if (c2.m_type == KindOfDouble) return o(c1.m_data.dbl, c2.m_data.dbl);
       if (c2.m_type == KindOfInt64)  return o(c1.m_data.dbl, c2.m_data.num);
-      cellCopy(numericConvHelper(c2), c2);
+      tvCopy(numericConvHelper(c2), c2);
       assertx(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
     }
   }
@@ -168,7 +168,7 @@ again:
     return make_array_like_tv(o(c1.m_data.parr, c2.m_data.parr));
   }
 
-  cellCopy(numericConvHelper(c1), c1);
+  tvCopy(numericConvHelper(c1), c1);
   assertx(c1.m_type == KindOfInt64 || c1.m_type == KindOfDouble);
   goto again;
 }
@@ -183,7 +183,7 @@ Cell cellArithO(Op o, Check ck, Over ov, Cell c1, Cell c2) {
 
   auto ensure_num = [](Cell& c) {
     if (c.m_type != KindOfInt64 && c.m_type != KindOfDouble) {
-      cellCopy(numericConvHelper(c), c);
+      tvCopy(numericConvHelper(c), c);
     }
   };
 
@@ -321,7 +321,7 @@ again:
         val(c1).dbl = op(val(c1).num, c2.m_data.dbl);
         return;
       }
-      cellCopy(numericConvHelper(c2), c2);
+      tvCopy(numericConvHelper(c2), c2);
       assertx(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
     }
   }
@@ -336,7 +336,7 @@ again:
         val(c1).dbl = op(val(c1).dbl, c2.m_data.dbl);
         return;
       }
-      cellCopy(numericConvHelper(c2), c2);
+      tvCopy(numericConvHelper(c2), c2);
       assertx(c2.m_type == KindOfInt64 || c2.m_type == KindOfDouble);
     }
   }
@@ -352,7 +352,7 @@ again:
     return;
   }
 
-  cellSet(numericConvHelper(*c1), c1);
+  tvSet(numericConvHelper(*c1), c1);
   assertx(type(c1) == KindOfInt64 || type(c1) == KindOfDouble);
   goto again;
 }
@@ -423,8 +423,8 @@ StringData* stringBitOp(BitOp bop, SzOp sop, StringData* s1, StringData* s2) {
 
 template<template<class> class BitOp, class StrLenOp>
 Cell cellBitOp(StrLenOp strLenOp, Cell c1, Cell c2) {
-  assertx(cellIsPlausible(c1));
-  assertx(cellIsPlausible(c2));
+  assertx(tvIsPlausible(c1));
+  assertx(tvIsPlausible(c2));
 
   if (isStringType(c1.m_type) && isStringType(c2.m_type)) {
     return make_tv<KindOfString>(
@@ -456,7 +456,7 @@ void stringIncDecOp(Op op, tv_lval cell, StringData* sd) {
 
   if (sd->empty()) {
     decRefStr(sd);
-    cellCopy(op.emptyString(), cell);
+    tvCopy(op.emptyString(), cell);
     return;
   }
 
@@ -466,11 +466,11 @@ void stringIncDecOp(Op op, tv_lval cell, StringData* sd) {
 
   if (dt == KindOfInt64) {
     decRefStr(sd);
-    cellCopy(make_int(ival), cell);
+    tvCopy(make_int(ival), cell);
     op.intCase(cell);
   } else if (dt == KindOfDouble) {
     decRefStr(sd);
-    cellCopy(make_dbl(dval), cell);
+    tvCopy(make_dbl(dval), cell);
     op.dblCase(cell);
   } else {
     assertx(dt == KindOfNull);
@@ -508,7 +508,7 @@ void raiseIncDecInvalidType(tv_lval cell) {
  */
 template<class Op>
 void cellIncDecOp(Op op, tv_lval cell) {
-  assertx(cellIsPlausible(*cell));
+  assertx(tvIsPlausible(*cell));
 
   switch (type(cell)) {
     case KindOfUninit:
@@ -569,7 +569,7 @@ const StaticString s_1("1");
 
 struct IncBase {
   void dblCase(tv_lval cell) const { ++val(cell).dbl; }
-  void nullCase(tv_lval cell) const { cellCopy(make_int(1), cell); }
+  void nullCase(tv_lval cell) const { tvCopy(make_int(1), cell); }
 
   Cell emptyString() const {
     return make_tv<KindOfPersistentString>(s_1.get());
@@ -588,7 +588,7 @@ struct IncBase {
       return tmp;
     }();
     decRefStr(sd);
-    cellCopy(make_tv<KindOfString>(newSd), cell);
+    tvCopy(make_tv<KindOfString>(newSd), cell);
   }
 };
 
@@ -599,7 +599,7 @@ struct Inc : IncBase {
 struct IncO : IncBase {
   void intCase(tv_lval cell) const {
     if (add_overflow(val(cell).num, int64_t{1})) {
-      cellCopy(cellAddO(*cell, make_int(1)), cell);
+      tvCopy(cellAddO(*cell, make_int(1)), cell);
     } else {
       Inc().intCase(cell);
     }
@@ -622,7 +622,7 @@ struct Dec : DecBase {
 struct DecO : DecBase {
   void intCase(tv_lval cell) {
     if (sub_overflow(val(cell).num, int64_t{1})) {
-      cellCopy(cellSubO(*cell, make_int(1)), cell);
+      tvCopy(cellSubO(*cell, make_int(1)), cell);
     } else {
       Dec().intCase(cell);
     }
@@ -774,25 +774,25 @@ void cellMulEq(tv_lval c1, Cell c2) {
   cellOpEq(MulEq(), c1, c2);
 }
 
-void cellAddEqO(tv_lval c1, Cell c2) { cellSet(cellAddO(*c1, c2), c1); }
-void cellSubEqO(tv_lval c1, Cell c2) { cellSet(cellSubO(*c1, c2), c1); }
-void cellMulEqO(tv_lval c1, Cell c2) { cellSet(cellMulO(*c1, c2), c1); }
+void cellAddEqO(tv_lval c1, Cell c2) { tvSet(cellAddO(*c1, c2), c1); }
+void cellSubEqO(tv_lval c1, Cell c2) { tvSet(cellSubO(*c1, c2), c1); }
+void cellMulEqO(tv_lval c1, Cell c2) { tvSet(cellMulO(*c1, c2), c1); }
 
 void cellDivEq(tv_lval c1, Cell c2) {
-  assertx(cellIsPlausible(*c1));
-  assertx(cellIsPlausible(c2));
+  assertx(tvIsPlausible(*c1));
+  assertx(tvIsPlausible(c2));
   if (!isIntType(type(c1)) && !isDoubleType(type(c1))) {
-    cellSet(numericConvHelper(*c1), c1);
+    tvSet(numericConvHelper(*c1), c1);
   }
-  cellCopy(cellDiv(*c1, c2), c1);
+  tvCopy(cellDiv(*c1, c2), c1);
 }
 
 void cellPowEq(tv_lval c1, Cell c2) {
-  cellSet(cellPow(*c1, c2), c1);
+  tvSet(cellPow(*c1, c2), c1);
 }
 
 void cellModEq(tv_lval c1, Cell c2) {
-  cellSet(cellMod(*c1, c2), c1);
+  tvSet(cellMod(*c1, c2), c1);
 }
 
 void cellBitAndEq(tv_lval c1, Cell c2) {
@@ -807,8 +807,8 @@ void cellBitXorEq(tv_lval c1, Cell c2) {
   cellBitOpEq(cellBitXor, c1, c2);
 }
 
-void cellShlEq(tv_lval c1, Cell c2) { cellSet(cellShl(*c1, c2), c1); }
-void cellShrEq(tv_lval c1, Cell c2) { cellSet(cellShr(*c1, c2), c1); }
+void cellShlEq(tv_lval c1, Cell c2) { tvSet(cellShl(*c1, c2), c1); }
+void cellShrEq(tv_lval c1, Cell c2) { tvSet(cellShr(*c1, c2), c1); }
 
 void cellInc(tv_lval cell) { cellIncDecOp(Inc(), cell); }
 void cellIncO(tv_lval cell) { cellIncDecOp(IncO(), cell); }
@@ -816,7 +816,7 @@ void cellDec(tv_lval cell) { cellIncDecOp(Dec(), cell); }
 void cellDecO(tv_lval cell) { cellIncDecOp(DecO(), cell); }
 
 void cellBitNot(Cell& cell) {
-  assertx(cellIsPlausible(cell));
+  assertx(tvIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfInt64:

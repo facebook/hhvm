@@ -1143,7 +1143,7 @@ void MixedArray::nextInsert(Cell v) {
   e->setIntKey(ki, h);
   mutableKeyTypes()->recordInt();
   m_nextKI = static_cast<uint64_t>(ki) + 1; // Update next free element.
-  cellDup(v, e->data);
+  tvDup(v, e->data);
 }
 
 template <class K, bool move> ALWAYS_INLINE
@@ -1617,7 +1617,7 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput, Cell v) {
   auto& e = elms[0];
   e.setIntKey(0, hash_int64(0));
   a->mutableKeyTypes()->recordInt();
-  cellDup(v, e.data);
+  tvDup(v, e.data);
 
   // Renumber.
   a->compact(true);
@@ -1881,7 +1881,7 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
         if (!elm2->hasStrKey()) return false;
         if (!same(elm1->skey, elm2->skey)) return false;
       }
-      if (!cellSame(*tvAssertCell(&elm1->data), *tvAssertCell(&elm2->data))) {
+      if (!cellSame(*tvAssertPlausible(&elm1->data), *tvAssertPlausible(&elm2->data))) {
         return false;
       }
       ++elm1;
@@ -1918,8 +1918,8 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
         }
       }();
       if (!other_rval ||
-          !cellEqual(tvAssertCell(elm->data),
-                     tvAssertCell(other_rval.tv()))) {
+          !cellEqual(tvAssertPlausible(elm->data),
+                     tvAssertPlausible(other_rval.tv()))) {
         return false;
       }
     }

@@ -84,7 +84,7 @@ void HHVM_METHOD(ConditionWaitHandle, succeed, const Variant& result) {
   assertx(obj->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
   auto parentChain = obj->getParentChain();
   obj->setState(c_ConditionWaitHandle::STATE_SUCCEEDED);
-  cellDup(*result.toCell(), obj->m_resultOrException);
+  tvDup(*result.toCell(), obj->m_resultOrException);
   parentChain.unblock();
 }
 
@@ -102,7 +102,7 @@ void HHVM_METHOD(ConditionWaitHandle, fail, const Object& exception) {
   assertx(obj->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
   auto parentChain = obj->getParentChain();
   obj->setState(c_ConditionWaitHandle::STATE_FAILED);
-  cellDup(make_tv<KindOfObject>(exception.get()), obj->m_resultOrException);
+  tvDup(make_tv<KindOfObject>(exception.get()), obj->m_resultOrException);
   parentChain.unblock();
 }
 

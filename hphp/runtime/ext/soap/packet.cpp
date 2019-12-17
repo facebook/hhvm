@@ -372,7 +372,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
                   auto const tv = make_array_like_tv(
                     tvCastToArrayLikeData(lval.tv())
                   );
-                  cellMove(tv, lval);
+                  tvMove(tv, lval);
                 }
                 asArrRef(lval).append(tmp);
               } else if (val->next && get_node(val->next, (char*)val->name)) {

@@ -1060,7 +1060,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
         throwParamInOutMismatch(func, i);
       }
       auto const from = iter.secondValPlus();
-      cellDup(from, *stack.allocTV());
+      tvDup(from, *stack.allocTV());
     }
 
     if (LIKELY(!iter)) {
@@ -1470,7 +1470,7 @@ OPTBLD_INLINE void iopPopFrame(uint32_t nout) {
 OPTBLD_INLINE void iopPopL(local_var to) {
   assertx(to.index < vmfp()->m_func->numLocals());
   Cell* fr = vmStack().topC();
-  cellMove(*fr, *to);
+  tvMove(*fr, *to);
   vmStack().discard();
 }
 
@@ -1746,7 +1746,7 @@ OPTBLD_INLINE void iopAddNewElemC() {
   } else {
     raise_error("AddNewElemC: $2 must be an array, vec, or keyset");
   }
-  assertx(cellIsPlausible(*c2));
+  assertx(tvIsPlausible(*c2));
   vmStack().popC();
 }
 
@@ -1794,7 +1794,7 @@ OPTBLD_INLINE void iopCnsE(const StringData* s) {
     raise_error("Undefined constant '%s'", s->data());
   }
   auto const c1 = vmStack().allocC();
-  cellDup(*cns, *c1);
+  tvDup(*cns, *c1);
 }
 
 OPTBLD_INLINE void iopDefCns(const StringData* s) {
@@ -1816,7 +1816,7 @@ OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName) {
                 cls->name()->data(), clsCnsName->data());
   }
 
-  cellDup(clsCns, *clsTV);
+  tvDup(clsCns, *clsTV);
 }
 
 OPTBLD_INLINE void iopClsCnsD(const StringData* clsCnsName, Id classId) {
@@ -1825,7 +1825,7 @@ OPTBLD_INLINE void iopClsCnsD(const StringData* clsCnsName, Id classId) {
   auto const clsCns = g_context->lookupClsCns(classNamedEntity.second,
                                        classNamedEntity.first, clsCnsName);
   auto const c1 = vmStack().allocC();
-  cellDup(clsCns, *c1);
+  tvDup(clsCns, *c1);
 }
 
 OPTBLD_INLINE void iopConcat() {
@@ -2673,11 +2673,11 @@ OPTBLD_INLINE TCA ret(PC& pc) {
     // succeeded StaticWaitHandle. Async eager return requests are currently
     // not respected, as we don't have a way to obtain the async eager offset.
     if (UNLIKELY(vmfp()->func()->isAsyncFunction()) && !suspended) {
-      auto const& retvalCell = *tvAssertCell(&retval);
+      auto const& retvalCell = *tvAssertPlausible(&retval);
       // Heads up that we're assuming CreateSucceeded can't throw, or we won't
       // decref the return value.  (It can't right now.)
       auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(retvalCell);
-      cellCopy(make_tv<KindOfObject>(waitHandle), retval);
+      tvCopy(make_tv<KindOfObject>(waitHandle), retval);
     }
 
     // Free ActRec and store the return value.
@@ -2848,7 +2848,7 @@ static void raise_undefined_local(ActRec* fp, Id pind) {
 
 static inline void cgetl_inner_body(TypedValue* fr, TypedValue* to) {
   assertx(fr->m_type != KindOfUninit);
-  cellDup(*fr, *to);
+  tvDup(*fr, *to);
 }
 
 OPTBLD_INLINE void cgetl_body(ActRec* fp,
@@ -2950,7 +2950,7 @@ OPTBLD_INLINE void iopCGetS() {
                 ss.cls->name()->data(),
                 ss.name->data());
   }
-  cellDup(*ss.val, *ss.output);
+  tvDup(*ss.val, *ss.output);
 }
 
 static inline MInstrState& initMState() {
@@ -3421,7 +3421,7 @@ OPTBLD_INLINE const Cell* memoGetImpl(LocalRange keys) {
     );
   }();
 
-  assertx(!c || cellIsPlausible(*c));
+  assertx(!c || tvIsPlausible(*c));
   assertx(!c || c->m_type != KindOfUninit);
   return c;
 }
@@ -3430,7 +3430,7 @@ OPTBLD_INLINE const Cell* memoGetImpl(LocalRange keys) {
 
 OPTBLD_INLINE void iopMemoGet(PC& pc, PC notfound, LocalRange keys) {
   if (auto const c = memoGetImpl(keys)) {
-    cellDup(*c, *vmStack().allocC());
+    tvDup(*c, *vmStack().allocC());
   } else {
     pc = notfound;
   }
@@ -3444,7 +3444,7 @@ OPTBLD_INLINE void iopMemoGetEager(PC& pc,
   assertx(!isResumed(vmfp()));
 
   if (auto const c = memoGetImpl(keys)) {
-    cellDup(*c, *vmStack().allocC());
+    tvDup(*c, *vmStack().allocC());
     if (!c->m_aux.u_asyncEagerReturnFlag) {
       assertx(tvIsObject(c) && c->m_data.pobj->isWaitHandle());
       pc = suspended;
@@ -3459,7 +3459,7 @@ namespace {
 OPTBLD_INLINE void memoSetImpl(LocalRange keys, Cell val) {
   assertx(vmfp()->m_func->isMemoizeWrapper());
   assertx(keys.first + keys.count <= vmfp()->m_func->numLocals());
-  assertx(cellIsPlausible(val));
+  assertx(tvIsPlausible(val));
 
   for (auto i = 0; i < keys.count; ++i) {
     auto const key = frame_local(vmfp(), keys.first + i);
@@ -3497,7 +3497,7 @@ OPTBLD_INLINE void memoSetImpl(LocalRange keys, Cell val) {
       cache.markInit();
     }
 
-    cellSetWithAux(val, *cache);
+    tvSetWithAux(val, *cache);
     return;
   }
 
@@ -3516,7 +3516,7 @@ OPTBLD_INLINE void memoSetImpl(LocalRange keys, Cell val) {
     : this_->memoSlot(memoInfo.first);
 
   if (keys.count == 0 && !memoInfo.second) {
-    cellSetWithAux(val, *slot->getValue());
+    tvSetWithAux(val, *slot->getValue());
     return;
   }
 
@@ -3611,7 +3611,7 @@ OPTBLD_INLINE void iopIssetL(local_var tv) {
 }
 
 OPTBLD_INLINE static bool isTypeHelper(Cell* val, IsTypeOp op) {
-  assertx(cellIsPlausible(*val));
+  assertx(tvIsPlausible(*val));
 
   switch (op) {
   case IsTypeOp::Null:   return is_null(val);
@@ -3817,7 +3817,7 @@ OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
   // Use the generic scheme, which is performed by
   // serialize_memoize_param.
   auto const key = HHVM_FN(serialize_memoize_param)(*cell);
-  cellCopy(key, *vmStack().allocC());
+  tvCopy(key, *vmStack().allocC());
 }
 
 OPTBLD_INLINE void iopIdx() {
@@ -3951,7 +3951,7 @@ OPTBLD_INLINE void iopSetOpL(local_var loc, SetOpOp op) {
   Cell* to = loc.ptr;
   setopBody(to, op, fr);
   tvDecRefGen(fr);
-  cellDup(*to, *fr);
+  tvDup(*to, *fr);
 }
 
 OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
@@ -3966,7 +3966,7 @@ OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
   setopBody(to, op, fr);
   tvDecRefGen(fr);
   tvDecRefGen(tv2);
-  cellDup(*to, *tv2);
+  tvDup(*to, *tv2);
   vmStack().discard();
 }
 
@@ -3999,20 +3999,20 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
   auto const& sprop = cls->staticProperties()[slot];
   if (setOpNeedsTypeCheck(sprop.typeConstraint, op, val)) {
     Cell temp;
-    cellDup(*val, temp);
+    tvDup(*val, temp);
     SCOPE_FAIL { tvDecRefGen(&temp); };
     setopBody(&temp, op, fr);
     sprop.typeConstraint.verifyStaticProperty(
       &temp, cls, sprop.cls, name
     );
-    cellMove(temp, *val);
+    tvMove(temp, *val);
   } else {
     setopBody(val, op, fr);
   }
 
   tvDecRefGen(propn);
   tvDecRefGen(fr);
-  cellDup(*val, *output);
+  tvDup(*val, *output);
   vmStack().ndiscard(2);
 }
 
@@ -4023,7 +4023,7 @@ OPTBLD_INLINE void iopIncDecL(local_var fr, IncDecOp op) {
     raise_undefined_local(vmfp(), fr.index);
     tvWriteNull(*fr.ptr);
   }
-  cellCopy(IncDecBody(op, fr.ptr), *to);
+  tvCopy(IncDecBody(op, fr.ptr), *to);
 }
 
 OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
@@ -4037,7 +4037,7 @@ OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
     tvDecRefGen(oldNameCell);
   };
   assertx(gbl != nullptr);
-  cellCopy(IncDecBody(op, gbl), *nameCell);
+  tvCopy(IncDecBody(op, gbl), *nameCell);
 }
 
 OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
@@ -4060,7 +4060,7 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
   auto const val = ss.val;
   if (checkable_sprop) {
     Cell temp;
-    cellDup(*val, temp);
+    tvDup(*val, temp);
     SCOPE_FAIL { tvDecRefGen(&temp); };
     auto result = IncDecBody(op, &temp);
     SCOPE_FAIL { tvDecRefGen(&result); };
@@ -4070,10 +4070,10 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
       checkable_sprop->cls,
       ss.name
     );
-    cellMove(temp, *val);
-    cellCopy(result, *ss.output);
+    tvMove(temp, *val);
+    tvCopy(result, *ss.output);
   } else {
-    cellCopy(IncDecBody(op, val), *ss.output);
+    tvCopy(IncDecBody(op, val), *ss.output);
   }
 }
 
@@ -5551,16 +5551,16 @@ OPTBLD_INLINE void iopContAssignDelegate(Iter* iter) {
   // which case just set our delegate to Null so that ContEnterDelegate and
   // YieldFromDelegate know something is up.
   if (tvIsGenerator(param) || iter->init(&param)) {
-    cellSet(param, gen->m_delegate);
+    tvSet(param, gen->m_delegate);
   } else {
-    cellSetNull(gen->m_delegate);
+    tvSetNull(gen->m_delegate);
   }
   // When using a subgenerator we don't actually read the values of the m_key
   // and m_value of our frame generator (the delegating generator). The
   // generator itself is still holding a reference to them though, so null
   // out the key/value to free the memory.
-  cellSetNull(gen->m_key);
-  cellSetNull(gen->m_value);
+  tvSetNull(gen->m_key);
+  tvSetNull(gen->m_value);
 }
 
 OPTBLD_INLINE void iopContEnterDelegate(PC origpc, PC& pc) {
@@ -5612,7 +5612,7 @@ TCA yieldFromGenerator(PC& pc, Generator* gen, Offset suspendOffset) {
 
   if (delegate->getState() == BaseGenerator::State::Done) {
     // If the generator is done, just copy the return value onto the stack.
-    cellDup(delegate->m_value, *vmStack().topTV());
+    tvDup(delegate->m_value, *vmStack().topTV());
     return nullptr;
   }
 
@@ -5694,7 +5694,7 @@ OPTBLD_INLINE void iopContUnsetDelegate(CudOp subop, Iter* iter) {
   if (UNLIKELY(subop == CudOp::FreeIter && !tvIsGenerator(gen->m_delegate))) {
     iter->free();
   }
-  cellSetNull(gen->m_delegate);
+  tvSetNull(gen->m_delegate);
 }
 
 OPTBLD_INLINE void iopContCheck(ContCheckOp subop) {
@@ -5720,7 +5720,7 @@ OPTBLD_INLINE void iopContKey() {
   // If we are currently delegating to a generator, return its key instead
   cont = currentlyDelegatedGenerator(cont);
 
-  cellDup(cont->m_key, *vmStack().allocC());
+  tvDup(cont->m_key, *vmStack().allocC());
 }
 
 OPTBLD_INLINE void iopContCurrent() {
@@ -5733,7 +5733,7 @@ OPTBLD_INLINE void iopContCurrent() {
   if(cont->getState() == BaseGenerator::State::Done) {
     vmStack().pushNull();
   } else {
-    cellDup(cont->m_value, *vmStack().allocC());
+    tvDup(cont->m_value, *vmStack().allocC());
   }
 }
 
@@ -5746,7 +5746,7 @@ OPTBLD_INLINE void iopContGetReturn() {
                                     "that hasn't returned");
   }
 
-  cellDup(cont->m_value, *vmStack().allocC());
+  tvDup(cont->m_value, *vmStack().allocC());
 }
 
 OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
@@ -5861,7 +5861,7 @@ OPTBLD_INLINE TCA iopAwait(PC origpc, PC& pc) {
     throw req::root<Object>{wh->getException()};
   }
   if (wh->isSucceeded()) {
-    cellSet(wh->getResult(), *vmStack().topC());
+    tvSet(wh->getResult(), *vmStack().topC());
     return nullptr;
   }
   return suspendStack(origpc, pc);
@@ -5909,7 +5909,7 @@ OPTBLD_INLINE void iopWHResult() {
     throw_object(Object{wh->getException()});
   }
   if (wh->isSucceeded()) {
-    cellSet(wh->getResult(), *vmStack().topC());
+    tvSet(wh->getResult(), *vmStack().topC());
     return;
   }
   SystemLib::throwInvalidOperationExceptionObject(
@@ -5971,7 +5971,7 @@ OPTBLD_INLINE void iopInitProp(const StringData* propName, InitPropOp propOp) {
     always_assert(false);
   }();
 
-  cellDup(*fr, lval);
+  tvDup(*fr, lval);
   vmStack().popC();
 }
 

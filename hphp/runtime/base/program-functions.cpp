@@ -2334,7 +2334,7 @@ void hphp_process_init() {
 #ifndef _MSC_VER
   struct sigaction action = {};
   action.sa_sigaction = on_timeout;
-  action.sa_flags = SA_SIGINFO | SA_NODEFER;
+  action.sa_flags = SA_SIGINFO | SA_NODEFER | SA_RESTART;
   sigaction(SIGVTALRM, &action, nullptr);
 #endif
   // start takes milliseconds, Period is a double in seconds

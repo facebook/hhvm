@@ -1173,30 +1173,24 @@ let update_lost_info name blame env ty =
   in
   let info r = Reason.Rlost_info (name, r, pos, under_lambda) in
   let rec update_ty (env, seen_tyvars) ty =
+    let (env, ty) = expand_type env ty in
     match ty with
     | (_, Tvar v) ->
-      let (env, v') = get_var env v in
-      (match IMap.find_opt v' env.tenv with
-      | None ->
-        if ISet.mem v' seen_tyvars then
-          ((env, seen_tyvars), ty)
-        else
-          let seen_tyvars = ISet.add v' seen_tyvars in
-          let bs = get_tyvar_lower_bounds env v' in
-          let ((env, seen_tyvars), bs) =
-            ITySet.fold_map bs ~init:(env, seen_tyvars) ~f:update_ty_i
-          in
-          let env = set_tyvar_lower_bounds env v' bs in
-          let bs = get_tyvar_upper_bounds env v' in
-          let ((env, seen_tyvars), bs) =
-            ITySet.fold_map bs ~init:(env, seen_tyvars) ~f:update_ty_i
-          in
-          let env = set_tyvar_upper_bounds env v' bs in
-          ((env, seen_tyvars), ty)
-      | Some ty ->
-        let ((env, seen_tyvars), ty) = update_ty (env, seen_tyvars) ty in
-        let env = add env v ty in
-        ((env, seen_tyvars), ty))
+      if ISet.mem v seen_tyvars then
+        ((env, seen_tyvars), ty)
+      else
+        let seen_tyvars = ISet.add v seen_tyvars in
+        let bs = get_tyvar_lower_bounds env v in
+        let ((env, seen_tyvars), bs) =
+          ITySet.fold_map bs ~init:(env, seen_tyvars) ~f:update_ty_i
+        in
+        let env = set_tyvar_lower_bounds env v bs in
+        let bs = get_tyvar_upper_bounds env v in
+        let ((env, seen_tyvars), bs) =
+          ITySet.fold_map bs ~init:(env, seen_tyvars) ~f:update_ty_i
+        in
+        let env = set_tyvar_upper_bounds env v bs in
+        ((env, seen_tyvars), ty)
     | (r, Toption ty) ->
       let ((env, seen_tyvars), ty) = update_ty (env, seen_tyvars) ty in
       ((env, seen_tyvars), (info r, Toption ty))

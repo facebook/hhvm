@@ -578,7 +578,12 @@ let get_next_event
       begin
         try
           let message = Lsp_fmt.parse_lsp json get_outstanding_request_exn in
-          let tracking_id = Random_id.short_string () in
+          let rnd = Random_id.short_string () in
+          let tracking_id =
+            match message with
+            | RequestMessage (id, _) -> rnd ^ "." ^ Lsp_fmt.id_to_string id
+            | _ -> rnd
+          in
           Lwt.return (Client_message ({ tracking_id; timestamp }, message))
         with e ->
           let e = Exception.wrap e in

@@ -681,7 +681,7 @@ and fun_def tcopt f :
       let (env, constraints) =
         Phase.localize_generic_parameters_with_bounds env f_tparams ~ety_env
       in
-      let env = add_constraints pos env constraints in
+      let env = SubType.add_constraints pos env constraints in
       let env =
         Phase.localize_where_constraints ~ety_env env f.f_where_constraints
       in
@@ -7538,7 +7538,7 @@ and class_def_ env c tc =
       c_tparam_list
       ~ety_env:(Phase.env_with_self env)
   in
-  let env = add_constraints (fst c.c_name) env constraints in
+  let env = SubType.add_constraints (fst c.c_name) env constraints in
   let env =
     Phase.localize_where_constraints
       ~ety_env:(Phase.env_with_self env)
@@ -7877,7 +7877,7 @@ and pu_enum_def
         ignore (Phase.localize_hint_with_self env hint : _ * _));
     (env, constraints)
   in
-  let env = add_constraints pos env constraints in
+  let env = SubType.add_constraints pos env constraints in
   let members =
     let process_member pum =
       let (env, cstrs) =
@@ -7887,7 +7887,7 @@ and pu_enum_def
           ~ety_env:(Phase.env_with_self env)
           pum_types
       in
-      let env = add_constraints (fst pum.pum_atom) env cstrs in
+      let env = SubType.add_constraints (fst pum.pum_atom) env cstrs in
       let process_mapping (sid, map_expr) =
         let (env, ty, expected) =
           let equal ((_, s1) : sid) ((_, s2) : sid) = String.equal s1 s2 in
@@ -8064,12 +8064,6 @@ and class_var_def ~is_static env cv =
       Aast.cv_is_static = is_static;
       Aast.cv_span = cv.cv_span;
     } )
-
-and add_constraints p env constraints =
-  let add_constraint env (ty1, ck, ty2) =
-    SubType.add_constraint p env ck ty1 ty2
-  in
-  List.fold_left constraints ~f:add_constraint ~init:env
 
 and supertype_redeclared_method tc env m =
   let (pos, name) = m.mt_name in
@@ -8285,7 +8279,7 @@ and method_def env cls m =
       let (env, constraints) =
         Phase.localize_generic_parameters_with_bounds env m_tparams ~ety_env
       in
-      let env = add_constraints pos env constraints in
+      let env = SubType.add_constraints pos env constraints in
       let env =
         Phase.localize_where_constraints ~ety_env env m.m_where_constraints
       in
@@ -8444,7 +8438,7 @@ and typedef_def tcopt typedef =
       t_tparams
       ~ety_env:(Phase.env_with_self env)
   in
-  let env = add_constraints (fst typedef.t_name) env constraints in
+  let env = SubType.add_constraints (fst typedef.t_name) env constraints in
   NastCheck.typedef env typedef;
   let {
     t_annotation = ();

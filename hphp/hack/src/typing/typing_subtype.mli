@@ -85,3 +85,6 @@ val subtype_reactivity :
 
 val add_constraint :
   Pos.t -> env -> Ast_defs.constraint_kind -> locl_ty -> locl_ty -> env
+
+val add_constraints :
+  Pos.t -> env -> (locl_ty * Ast_defs.constraint_kind * locl_ty) list -> env

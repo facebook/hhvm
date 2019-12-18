@@ -52,7 +52,7 @@ let rec fun_ tenv f =
   let (tenv, constraints) =
     Phase.localize_generic_parameters_with_bounds env.tenv f_tparams ~ety_env
   in
-  let tenv = add_constraints p tenv constraints in
+  let tenv = Typing_subtype.add_constraints p tenv constraints in
   let tenv =
     Phase.localize_where_constraints ~ety_env tenv f.f_where_constraints
   in
@@ -214,7 +214,7 @@ and class_ tenv c =
       c_tparam_list
       ~ety_env:(Phase.env_with_self tenv)
   in
-  let tenv = add_constraints (fst c.c_name) tenv constraints in
+  let tenv = Typing_subtype.add_constraints (fst c.c_name) tenv constraints in
   (* When where clauses are present, we need instantiate those type
    * parameters before checking base class *)
   let tenv =
@@ -244,12 +244,6 @@ and typeconst (env, _) tconst =
 
 and class_var env cv = maybe hint env cv.cv_type
 
-and add_constraint pos tenv (ty1, ck, ty2) =
-  Typing_subtype.add_constraint pos tenv ck ty1 ty2
-
-and add_constraints pos tenv (cstrs : locl_where_constraint list) =
-  List.fold_left cstrs ~init:tenv ~f:(add_constraint pos)
-
 and method_ env m =
   (* Add method type parameters to environment and localize the bounds
      and where constraints *)
@@ -262,7 +256,7 @@ and method_ env m =
   let (tenv, constraints) =
     Phase.localize_generic_parameters_with_bounds env.tenv m_tparams ~ety_env
   in
-  let tenv = add_constraints (fst m.m_name) tenv constraints in
+  let tenv = Typing_subtype.add_constraints (fst m.m_name) tenv constraints in
   let tenv =
     Phase.localize_where_constraints ~ety_env tenv m.m_where_constraints
   in

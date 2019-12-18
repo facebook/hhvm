@@ -3331,6 +3331,10 @@ let add_constraint
     in
     iter 0 env
 
+let add_constraints p env constraints =
+  let add_constraint env (ty1, ck, ty2) = add_constraint p env ck ty1 ty2 in
+  List.fold_left constraints ~f:add_constraint ~init:env
+
 (** Check that the method with signature ft_sub can be used to override
  * (is a subtype of) method with signature ft_super.
  *

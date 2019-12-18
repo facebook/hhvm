@@ -927,7 +927,9 @@ let compute_tasts opts files_info interesting_files :
             | _ -> None)
       in
       let nasts = filter_non_interesting nasts in
-      Relative_path.Map.map nasts ~f:(Typing.nast_to_tast opts))
+      Relative_path.Map.map
+        nasts
+        ~f:(Typing.nast_to_tast ~do_tast_checks:true opts))
 
 (**
  * Compute TASTs for some files, then expand all type variables.

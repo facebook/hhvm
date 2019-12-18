@@ -92,7 +92,7 @@ let declare_and_check_ast ?(path = path) ?content ~make_ast ~f tcopt =
 
          let make_tast () =
            let nast = Naming.program ast in
-           Typing.nast_to_tast tcopt nast
+           Typing.nast_to_tast ~do_tast_checks:true tcopt nast
          in
          let tast =
            match content with

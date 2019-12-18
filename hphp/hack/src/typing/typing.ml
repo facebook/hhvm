@@ -8737,7 +8737,7 @@ let record_def_def tcopt rd =
     Aast.rd_doc_comment = rd.rd_doc_comment;
   }
 
-let nast_to_tast opts nast =
+let nast_to_tast ~(do_tast_checks : bool) opts nast =
   let convert_def = function
     | Fun f ->
       begin
@@ -8776,5 +8776,5 @@ let nast_to_tast opts nast =
   in
   Nast_check.program nast;
   let tast = List.map nast convert_def in
-  Tast_check.program opts tast;
+  if do_tast_checks then Tast_check.program opts tast;
   tast

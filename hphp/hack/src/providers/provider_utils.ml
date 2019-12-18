@@ -148,10 +148,16 @@ let compute_tast_and_errors_unquarantined_internal
         (fun () -> Naming.program entry.Provider_context.ast)
     in
     let (tast_errors, tast) =
+      let do_tast_checks =
+        match mode with
+        | Compute_tast_only -> false
+        | Compute_tast_and_errors -> true
+      in
       Errors.do_with_context
         entry.Provider_context.path
         Errors.Typing
-        (fun () -> Typing.nast_to_tast ctx.Provider_context.tcopt nast)
+        (fun () ->
+          Typing.nast_to_tast ~do_tast_checks ctx.Provider_context.tcopt nast)
     in
     let errors = Errors.merge nast_errors tast_errors in
 

@@ -151,7 +151,11 @@ let get_patches tcopt file =
       tcopt
       TypecheckerOptions.InferMissing.Infer_return
   in
-  let tast = Typing.nast_to_tast tcopt (Naming.program nast) in
+  let tast =
+    (* [Infer_return] is not implemented with a TAST check, so we can skip TAST
+    checks safely. *)
+    Typing.nast_to_tast ~do_tast_checks:false tcopt (Naming.program nast)
+  in
   let ret_collector = Collector.make tast in
   let source_text = Full_fidelity_source_text.from_file file in
   let positioned_tree = PositionedTree.make source_text in

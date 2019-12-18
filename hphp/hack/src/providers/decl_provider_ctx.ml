@@ -34,9 +34,9 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_fun fun_name
   | Provider_backend.Local_memory { decl_cache } ->
     let result : Obj.t =
-      Memory_bounded_lru_cache.find_or_add
+      Provider_backend.Decl_cache.find_or_add
         decl_cache
-        ~key:(Provider_backend.Fun_decl fun_name)
+        ~key:(Provider_backend.Decl_cache_entry.Fun_decl fun_name)
         ~default:(fun () ->
           let start_time = Unix.gettimeofday () in
           let result : fun_decl option =
@@ -63,9 +63,9 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_class class_name
   | Provider_backend.Local_memory { decl_cache } ->
     let result : Obj.t =
-      Memory_bounded_lru_cache.find_or_add
+      Provider_backend.Decl_cache.find_or_add
         decl_cache
-        ~key:(Provider_backend.Class_decl class_name)
+        ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
         ~default:(fun () ->
           let start_time = Unix.gettimeofday () in
           let result : class_decl option =
@@ -129,9 +129,9 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_typedef typedef_name
   | Provider_backend.Local_memory { decl_cache } ->
     let result : Obj.t =
-      Memory_bounded_lru_cache.find_or_add
+      Provider_backend.Decl_cache.find_or_add
         decl_cache
-        ~key:(Provider_backend.Typedef_decl typedef_name)
+        ~key:(Provider_backend.Decl_cache_entry.Typedef_decl typedef_name)
         ~default:(fun () ->
           let start_time = Unix.gettimeofday () in
           let result : typedef_decl option =
@@ -159,9 +159,9 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
     Typing_lazy_heap.get_record_def record_name
   | Provider_backend.Local_memory { decl_cache } ->
     let result : Obj.t =
-      Memory_bounded_lru_cache.find_or_add
+      Provider_backend.Decl_cache.find_or_add
         decl_cache
-        ~key:(Provider_backend.Record_decl record_name)
+        ~key:(Provider_backend.Decl_cache_entry.Record_decl record_name)
         ~default:(fun () ->
           let start_time = Unix.gettimeofday () in
           let result : record_def_decl option =
@@ -189,9 +189,9 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_gconst gconst_name
   | Provider_backend.Local_memory { decl_cache } ->
     let result : Obj.t =
-      Memory_bounded_lru_cache.find_or_add
+      Provider_backend.Decl_cache.find_or_add
         decl_cache
-        ~key:(Provider_backend.Gconst_decl gconst_name)
+        ~key:(Provider_backend.Decl_cache_entry.Gconst_decl gconst_name)
         ~default:(fun () ->
           let start_time = Unix.gettimeofday () in
           let result : gconst_decl option =
@@ -218,9 +218,9 @@ let invalidate_fun (ctx : Provider_context.t) (fun_name : fun_key) : unit =
   | Provider_backend.Shared_memory ->
     Decl_heap.Funs.remove_batch (SSet.singleton fun_name)
   | Provider_backend.Local_memory { decl_cache } ->
-    Memory_bounded_lru_cache.remove
+    Provider_backend.Decl_cache.remove
       decl_cache
-      (Provider_backend.Fun_decl fun_name)
+      (Provider_backend.Decl_cache_entry.Fun_decl fun_name)
   | Provider_backend.Decl_service _ ->
     failwith
       "Decl_provider.invalidate_fun not yet impl. for decl memory provider"
@@ -231,9 +231,9 @@ let invalidate_class (ctx : Provider_context.t) (class_name : class_key) : unit
   | Provider_backend.Shared_memory ->
     Decl_heap.Classes.remove_batch (SSet.singleton class_name)
   | Provider_backend.Local_memory { decl_cache } ->
-    Memory_bounded_lru_cache.remove
+    Provider_backend.Decl_cache.remove
       decl_cache
-      (Provider_backend.Class_decl class_name)
+      (Provider_backend.Decl_cache_entry.Class_decl class_name)
   | Provider_backend.Decl_service _ ->
     failwith
       "Decl_provider.invalidate_class not yet impl. for decl memory provider"
@@ -244,9 +244,9 @@ let invalidate_record_def
   | Provider_backend.Shared_memory ->
     Decl_heap.RecordDefs.remove_batch (SSet.singleton record_name)
   | Provider_backend.Local_memory { decl_cache } ->
-    Memory_bounded_lru_cache.remove
+    Provider_backend.Decl_cache.remove
       decl_cache
-      (Provider_backend.Record_decl record_name)
+      (Provider_backend.Decl_cache_entry.Record_decl record_name)
   | Provider_backend.Decl_service _ ->
     failwith
       "Decl_provider.invalidate_record_def not yet impl. for decl memory provider"
@@ -257,9 +257,9 @@ let invalidate_typedef (ctx : Provider_context.t) (typedef_name : typedef_key) :
   | Provider_backend.Shared_memory ->
     Decl_heap.Typedefs.remove_batch (SSet.singleton typedef_name)
   | Provider_backend.Local_memory { decl_cache } ->
-    Memory_bounded_lru_cache.remove
+    Provider_backend.Decl_cache.remove
       decl_cache
-      (Provider_backend.Typedef_decl typedef_name)
+      (Provider_backend.Decl_cache_entry.Typedef_decl typedef_name)
   | Provider_backend.Decl_service _ ->
     failwith
       "Decl_provider.invalidate_typedef not yet impl. for decl memory provider"
@@ -270,9 +270,9 @@ let invalidate_gconst (ctx : Provider_context.t) (gconst_name : gconst_key) :
   | Provider_backend.Shared_memory ->
     Decl_heap.GConsts.remove_batch (SSet.singleton gconst_name)
   | Provider_backend.Local_memory { decl_cache } ->
-    Memory_bounded_lru_cache.remove
+    Provider_backend.Decl_cache.remove
       decl_cache
-      (Provider_backend.Gconst_decl gconst_name)
+      (Provider_backend.Decl_cache_entry.Gconst_decl gconst_name)
   | Provider_backend.Decl_service _ ->
     failwith
       "Decl_provider.invalidate_gconst not yet impl. for decl memory provider"

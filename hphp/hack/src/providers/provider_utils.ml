@@ -117,7 +117,7 @@ let compute_tast_and_errors_unquarantined
     begin
       match ctx.Provider_context.backend with
       | Provider_backend.Local_memory { decl_cache; _ } ->
-        Memory_bounded_lru_cache.reset_telemetry decl_cache
+        Provider_backend.Decl_cache.reset_telemetry decl_cache
       | _ -> ()
     end;
     let t = Unix.gettimeofday () in
@@ -154,18 +154,15 @@ let compute_tast_and_errors_unquarantined
           cache_num_entries_opt ) =
       match ctx.Provider_context.backend with
       | Provider_backend.Local_memory { decl_cache; _ } ->
-        let {
-          Memory_bounded_lru_cache.time_spent;
-          peak_size_in_words;
-          num_evictions;
-        } =
-          Memory_bounded_lru_cache.get_telemetry decl_cache
+        let { Provider_backend.Decl_cache.time_spent; peak_size; num_evictions }
+            =
+          Provider_backend.Decl_cache.get_telemetry decl_cache
         in
         let bytes_per_word = Sys.word_size / 8 in
         ( Some time_spent,
-          Some (peak_size_in_words * bytes_per_word),
+          Some (peak_size * bytes_per_word),
           Some num_evictions,
-          Some (Memory_bounded_lru_cache.length decl_cache) )
+          Some (Provider_backend.Decl_cache.length decl_cache) )
       | _ -> (None, None, None, None)
     in
 

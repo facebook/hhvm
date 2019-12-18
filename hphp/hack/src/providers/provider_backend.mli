@@ -7,19 +7,27 @@
  *
  *)
 
-type decl_cache_key =
-  | Fun_decl of string
-  | Class_decl of string
-  | Record_decl of string
-  | Typedef_decl of string
-  | Gconst_decl of string
+module Decl_cache_entry : sig
+  type key =
+    | Fun_decl of string
+    | Class_decl of string
+    | Record_decl of string
+    | Typedef_decl of string
+    | Gconst_decl of string
+
+  type value = Obj.t
+
+  val get_size : value -> int
+end
 
 (** Maps decl names to types. *)
-type decl_cache = (decl_cache_key, Obj.t) Memory_bounded_lru_cache.t
+module Decl_cache : sig
+  include module type of Lru_cache.Cache (Decl_cache_entry)
+end
 
 type t = private
   | Shared_memory
-  | Local_memory of { decl_cache: decl_cache }
+  | Local_memory of { decl_cache: Decl_cache.t }
   (* In Decl_service, 'unit' left for further expansion *)
   | Decl_service of Decl_service_client.t
 

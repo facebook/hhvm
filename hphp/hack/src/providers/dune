@@ -4,7 +4,7 @@
   (libraries
     decl_service_client
     heap_shared_mem
-    memory_bounded_lru_cache
+    lru_cache
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
 
@@ -25,8 +25,8 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name memory_bounded_lru_cache)
-  (modules memory_bounded_lru_cache)
+  (name lru_cache)
+  (modules lru_cache)
   (libraries
     core_kernel)
   (preprocess (pps ppx_deriving.std)))

@@ -348,16 +348,6 @@ struct UnitEmitter {
   void pushMergeableClass(PreClassEmitter* e);
 
   /*
-   * Add a Unit include to the UnitEmitter's list of mergeables.
-   *
-   * The `push' flavor first merges the litstr `unitName', and then appends the
-   * mergeable object reference to the list.  The `insert' flavor inserts the
-   * mergeable (kind, id) at `ix' in the list.
-   */
-  void pushMergeableInclude(Unit::MergeKind kind, const StringData* unitName);
-  void insertMergeableInclude(int ix, Unit::MergeKind kind, Id id);
-
-  /*
    * Add a constant definition to the UnitEmitter's list of mergeables.
    *
    * The `push' flavor first merges the litstr `unitName', and then appends the

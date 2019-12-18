@@ -1596,19 +1596,6 @@ void Unit::initialMerge() {
               needsCompact = true;
             }
             break;
-          case MergeKind::ReqDoc: {
-            StringData* s = (StringData*)((char*)obj - (int)k);
-            auto const unit = lookupUnit(
-              SourceRootInfo::RelativeToPhpRoot(StrNR(s)).get(),
-              "",
-              nullptr /* initial_opt */,
-              Native::s_noNativeFuncs,
-              false
-            );
-            unit->initialMerge();
-            mi->mergeableObj(ix) = (void*)((char*)unit + (int)k);
-            break;
-          }
           case MergeKind::PersistentDefine:
             needsCompact = true;
           case MergeKind::Define: {
@@ -1622,10 +1609,6 @@ void Unit::initialMerge() {
             v->rdsHandle() = makeCnsHandle(s);
             break;
           }
-          case MergeKind::Global:
-            // Skip over the value of the global, embedded in mergeableData
-            ix += sizeof(TypedValueAux) / sizeof(void*);
-            break;
         }
         ix++;
       }
@@ -1652,27 +1635,6 @@ void Unit::merge() {
   for (auto& r : prerecords()) {
     defRecordDesc(r.get());
   }
-}
-
-void* Unit::replaceUnit() const {
-  if (isEmpty()) return nullptr;
-  if (!isMergeOnly()) return const_cast<Unit*>(this);
-  auto const mi = mergeInfo();
-  if (mi->m_mergeablesSize == mi->m_firstHoistableFunc + 1) {
-    void* obj =
-      mi->mergeableObj(mi->m_firstHoistableFunc);
-    if (mi->m_firstMergeablePreClass ==
-        mi->m_firstHoistableFunc) {
-      auto k = MergeKind(uintptr_t(obj) & 7);
-      if (k != MergeKind::Class) return obj;
-    } else if (mi->m_firstHoistablePreClass ==
-               mi->m_firstHoistableFunc) {
-      if (uintptr_t(obj) & 1) {
-        return (char*)obj - 1 + (int)MergeKind::UniqueDefinedClass;
-      }
-    }
-  }
-  return const_cast<Unit*>(this);
 }
 
 static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
@@ -1773,7 +1735,6 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
         // fall through
       }
       case MergeKind::Define:
-      case MergeKind::Global:
         if (out) {
           out->mergeableObj(oix++) = obj;
           *(TypedValueAux*)out->mergeableData(oix) =
@@ -1783,20 +1744,6 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
         ix += sizeof(TypedValueAux) / sizeof(void*);
         break;
 
-      case MergeKind::ReqDoc: {
-        Unit *unit = (Unit*)((char*)obj - (int)k);
-        void *rep = unit->replaceUnit();
-        if (!rep) {
-          delta++;
-        } else if (out) {
-          if (rep == unit) {
-            out->mergeableObj(oix++) = obj;
-          } else {
-            out->mergeableObj(oix++) = rep;
-          }
-        }
-        break;
-      }
       case MergeKind::Done:
         not_reached();
     }
@@ -2029,56 +1976,6 @@ void Unit::mergeImpl(MergeInfo* mi) {
         } while (k == MergeKind::Define);
         continue;
 
-      case MergeKind::Global:
-        do {
-          Stats::inc(Stats::UnitMerge_mergeable);
-          Stats::inc(Stats::UnitMerge_mergeable_global);
-          StringData* name = (StringData*)((char*)obj - (int)k);
-          auto* v = (TypedValueAux*)mi->mergeableData(ix + 1);
-          setGlobal(name, v);
-          ix += 1 + sizeof(*v) / sizeof(void*);
-          obj = mi->mergeableObj(ix);
-          k = MergeKind(uintptr_t(obj) & 7);
-        } while (k == MergeKind::Global);
-        continue;
-
-      case MergeKind::ReqDoc:
-        do {
-          Stats::inc(Stats::UnitMerge_mergeable);
-          Stats::inc(Stats::UnitMerge_mergeable_require);
-          Unit *unit = (Unit*)((char*)obj - (int)k);
-
-          unit->mergeImpl<debugger>(unit->mergeInfo());
-          if (UNLIKELY(!unit->isMergeOnly())) {
-            VarEnv* ve = nullptr;
-            ActRec* fp = vmfp();
-            if (!fp) {
-              ve = g_context->m_globalVarEnv;
-            } else {
-              if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
-                ve = fp->m_varEnv;
-              } else {
-                // Nothing to do. If there is no varEnv, the enclosing
-                // file was called by fb_autoload_map, which wants a
-                // local scope.
-              }
-            }
-
-            // Move the count from executed to reentered.
-            Stats::inc(Stats::PseudoMain_Reentered);
-            Stats::inc(Stats::PseudoMain_Executed, -1);
-
-            tvDecRefGen(
-              g_context->invokePseudoMain(unit->getMain(nullptr, false), ve)
-            );
-          } else {
-            Stats::inc(Stats::PseudoMain_SkipDeep);
-          }
-
-          obj = mi->mergeableObj(++ix);
-          k = MergeKind(uintptr_t(obj) & 7);
-        } while (k == MergeKind::ReqDoc);
-        continue;
       case MergeKind::TypeAlias:
         do {
           Stats::inc(Stats::UnitMerge_mergeable);

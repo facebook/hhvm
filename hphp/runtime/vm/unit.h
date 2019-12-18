@@ -299,11 +299,9 @@ public:
     UniqueDefinedClass  = 1,
     Define              = 2,  // Toplevel scalar define.
     PersistentDefine    = 3,  // Cross-request persistent toplevel defines.
-    Global              = 4,  // Global variable declarations.
-    TypeAlias           = 5,
-    ReqDoc              = 6,
-    Done                = 7,
-    // We cannot add more kinds here; this has to fit in 3 bits.
+    TypeAlias           = 4,
+    Done                = 5,
+    // We can add two more kind here; this has to fit in 3 bits.
   };
 
   /*
@@ -865,11 +863,6 @@ public:
    */
   bool isInterpretOnly() const;
   void setInterpretOnly();
-
-  /*
-   * Replace the Unit?
-   */
-  void* replaceUnit() const;
 
   /*
    * Does this unit correspond to a file with "<?hh" at the top?

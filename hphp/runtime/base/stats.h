@@ -46,10 +46,8 @@ namespace Stats {
   STAT(TC_DecRef_Profiled_100) \
   STAT(TC_DecRef_Profiled_0) \
   /* Execute pseudomain */ \
-  STAT(PseudoMain_Reentered) \
   STAT(PseudoMain_Executed) \
   STAT(PseudoMain_Skipped) \
-  STAT(PseudoMain_SkipDeep) \
   STAT(PseudoMain_Guarded) \
   STAT(VMEnter) \
   /* Unit merging stats */ \
@@ -64,9 +62,7 @@ namespace Stats {
   STAT(UnitMerge_mergeable_unique_persistent_cache) \
   STAT(UnitMerge_mergeable_define) \
   STAT(UnitMerge_mergeable_persistent_define) \
-  STAT(UnitMerge_mergeable_global) \
   STAT(UnitMerge_mergeable_class) \
-  STAT(UnitMerge_mergeable_require) \
   STAT(UnitMerge_mergeable_typealias) \
   STAT(UnitMerge_redo_hoistable) \
   /* stub reuse stats */ \

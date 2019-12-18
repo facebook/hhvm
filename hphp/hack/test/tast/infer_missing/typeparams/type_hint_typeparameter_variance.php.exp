@@ -108,7 +108,7 @@ Errors:
        { fb_ast =
          [([8:5-19],
            (Expr
-              (([8:5-18], nothing),
+              (([8:5-18], void),
                (Call (Cnormal,
                   (([8:5-16], _), (Id ([8:5-16], "\\hh_show_env"))), 
                   [], [], None)))))

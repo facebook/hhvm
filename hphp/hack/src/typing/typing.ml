@@ -2519,7 +2519,7 @@ and expr_
       ) else
         env
     in
-    let (env, ty) = Env.fresh_type env p in
+    let ty = MakeType.void (Reason.Rwitness p) in
     make_result
       env
       p

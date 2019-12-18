@@ -20,6 +20,18 @@ module TR = Typing_reactivity
 module CT = Typing_subtype.ConditionTypes
 module Cls = Decl_provider.Class
 
+type result =
+  | Exact of locl_ty
+  (* The result of the expansion can be overwritten by sub-classes; this is
+     the case where the type constant was declared using
+     const type T as X = Y;
+     Only Y is returned in that case since Y <: X *)
+  | Default of Pos.t * locl_ty
+  (* The result of the expansion is abstract; the name stored is of the form
+     X::T where X is a class with an abstract type constant named T. Type
+     constants can only have an upper bound, so one locl_ty is enough here. *)
+  | Abstract of Pos.t * locl_ty option
+
 exception NoTypeConst of (unit -> unit)
 
 let raise_error error = raise_notrace @@ NoTypeConst error
@@ -33,40 +45,6 @@ let empty_env env = { tenv = env; choose_assigned_type = true }
 
 let make_reason env r id ty =
   Reason.Rtypeconst (r, id, Typing_print.error env ty, fst ty)
-
-(* Looks up the type constant within the given class. This also checks for
- * potential cycles by examining the expansions we have already performed.
- *)
-let get_typeconst
-    env class_pos class_name pos tconst ~on_error ~as_tyvar_with_cnstr =
-  let class_ =
-    match Env.get_class env.tenv class_name with
-    | None ->
-      raise_error (fun () -> Errors.unbound_name_typing class_pos class_name)
-    | Some c -> c
-  in
-  let typeconst =
-    match Env.get_typeconst env.tenv class_ tconst with
-    | None ->
-      raise_error (fun () ->
-          if not as_tyvar_with_cnstr then
-            Errors.smember_not_found
-              `class_typeconst
-              pos
-              (Cls.pos class_, class_name)
-              tconst
-              `no_hint
-              on_error)
-    | Some tc -> tc
-  in
-  (* If the class is final then we do not need to create dependent types
-   * because the type constant cannot be overridden by a child class
-   *)
-  ( {
-      env with
-      choose_assigned_type = env.choose_assigned_type || Cls.final class_;
-    },
-    typeconst )
 
 (* The function takes a "step" forward in the expansion. We look up the type
  * constant associated with the given class_name and create a new root type.
@@ -83,18 +61,26 @@ let create_root_from_type_constant
     class_pos
     class_name
     (tconst_pos, tconst)
-    ~on_error
-    ~as_tyvar_with_cnstr
-    ~allow_abstract_tconst =
-  let (env, typeconst) =
-    get_typeconst
-      env
-      class_pos
-      class_name
-      (Reason.to_pos root_ty_r)
-      tconst
-      ~on_error
-      ~as_tyvar_with_cnstr
+    ~on_error (* ~as_tyvar_with_cnstr *)
+              (* ~allow_abstract_tconst *) =
+  let class_ =
+    match Env.get_class env class_name with
+    | None ->
+      raise_error (fun () -> Errors.unbound_name_typing class_pos class_name)
+    | Some c -> c
+  in
+  let typeconst =
+    match Env.get_typeconst env class_ tconst with
+    | Some tc -> tc
+    | None ->
+      raise_error (fun () ->
+          Errors.smember_not_found
+            `class_typeconst
+            (Reason.to_pos root_ty_r)
+            (Cls.pos class_, class_name)
+            tconst
+            `no_hint
+            on_error)
   in
   let ty_name = class_name ^ "::" ^ tconst in
   let ety_env = { ety_env with from_class = None } in
@@ -113,56 +99,25 @@ let create_root_from_type_constant
   let make_reason ?(root = ety_env.this_ty) env r =
     make_reason env r (tconst_pos, tconst) root
   in
-  (match typeconst with
-  | { ttc_type = None; ttc_name; _ } ->
-    if (not ety_env.quiet) && not allow_abstract_tconst then
-      Errors.abstract_tconst_not_allowed tconst_pos ttc_name
-  | _ -> ());
   match typeconst with
   (* Concrete type constants *)
-  | { ttc_type = Some ty; _ }
-    when Option.is_none typeconst.ttc_constraint || env.choose_assigned_type ->
-    let (tenv, (r, ty)) = Phase.localize ~ety_env env.tenv ty in
-    ({ choose_assigned_type = true; tenv }, (make_reason tenv r ~root, ty))
+  | { ttc_type = Some ty; ttc_constraint = None; _ } ->
+    let (env, (r, ty)) = Phase.localize ~ety_env env ty in
+    (env, Exact (make_reason env r ~root, ty))
+  | { ttc_type = Some ty; ttc_constraint = Some _; ttc_name = (tc_pos, _); _ }
+    ->
+    let (env, (r, ty)) = Phase.localize ~ety_env env ty in
+    let ty = (make_reason env r ~root, ty) in
+    if Cls.final class_ then
+      (env, Exact ty)
+    else
+      (env, Default (tc_pos, ty))
   (* Abstract type constants with constraint *)
-  | { ttc_constraint = Some cstr; _ } ->
-    let (tenv, cstr) = Phase.localize ~ety_env env.tenv cstr in
-    let reason = make_reason tenv (Reason.Rwitness (fst typeconst.ttc_name)) in
-    let (tenv, ty) =
-      if as_tyvar_with_cnstr then (
-        let (tenv, tvar) = Env.fresh_invariant_type_var tenv tconst_pos in
-        Log.log_new_tvar_for_tconst_access
-          tenv
-          tconst_pos
-          tvar
-          class_name
-          tconst;
-        let tenv = Typing_utils.sub_type tenv tvar cstr Errors.unify_error in
-        (tenv, tvar)
-      ) else
-        let ty = (reason, Tgeneric ty_name) in
-        let tenv = Env.add_upper_bound_global tenv ty_name cstr in
-        (tenv, ty)
-    in
-    ({ env with tenv }, ty)
+  | { ttc_constraint = Some cstr; ttc_name = (tc_pos, _); _ } ->
+    let (env, cstr) = Phase.localize ~ety_env env cstr in
+    (env, Abstract (tc_pos, Some cstr))
   (* Abstract type constant without constraint. *)
-  | _ ->
-    let (tenv, (r, ty)) =
-      if as_tyvar_with_cnstr then (
-        let (tenv, tvar) = Env.fresh_invariant_type_var env.tenv tconst_pos in
-        Log.log_new_tvar_for_tconst_access
-          tenv
-          tconst_pos
-          tvar
-          class_name
-          tconst;
-        (tenv, tvar)
-      ) else
-        let reason = Reason.Rwitness (fst typeconst.ttc_name) in
-        let ty = (reason, Tgeneric ty_name) in
-        (env.tenv, ty)
-    in
-    ({ env with tenv }, (make_reason tenv r, ty))
+  | { ttc_name = (tc_pos, _); _ } -> (env, Abstract (tc_pos, None))
 
 (* The root of a type access is a type. When expanding a type access, this type
  * needs to resolve to the name of a class so we can look up if a given type
@@ -254,16 +209,45 @@ let rec expand
   | Tnewtype (_, _, ty) ->
     expand ety_env env generics_seen ~on_error ~as_tyvar_with_cnstr ty id
   | Tclass ((class_pos, class_name), _, _) ->
-    create_root_from_type_constant
-      ety_env
-      env
-      root
-      class_pos
-      class_name
-      id
-      ~on_error
-      ~as_tyvar_with_cnstr
-      ~allow_abstract_tconst
+    let make_abstract env tc_pos bndo =
+      let name = class_name ^ "::" ^ snd id in
+      if as_tyvar_with_cnstr then (
+        let (env, tvar) = Env.fresh_invariant_type_var env (fst id) in
+        Log.log_new_tvar_for_tconst_access env (fst id) tvar class_name (snd id);
+        (env, tvar)
+      ) else
+        let reason = make_reason env (Reason.Rwitness tc_pos) in
+        let ty = (reason, Tgeneric name) in
+        let env =
+          Option.fold bndo ~init:env ~f:(fun env bnd ->
+              Env.add_upper_bound_global env name bnd)
+        in
+        (env, ty)
+    in
+    let (tenv, res) =
+      create_root_from_type_constant
+        ety_env
+        env.tenv
+        root
+        class_pos
+        class_name
+        id
+        ~on_error
+    in
+    let env = { env with tenv } in
+    (match res with
+    | Exact ty -> ({ env with choose_assigned_type = true }, ty)
+    | Default (tc_pos, ty) ->
+      if env.choose_assigned_type then
+        (env, ty)
+      else
+        let (tenv, ty) = make_abstract env.tenv tc_pos (Some ty) in
+        ({ env with tenv }, ty)
+    | Abstract (tc_pos, bnd) ->
+      if (not allow_abstract_tconst) && not ety_env.quiet then
+        Errors.abstract_tconst_not_allowed (fst id) (tc_pos, snd id);
+      let (tenv, ty) = make_abstract env.tenv tc_pos bnd in
+      ({ env with tenv }, ty))
   | Tgeneric s ->
     let generics_seen = TySet.add root generics_seen in
     let env = { env with choose_assigned_type = false } in
@@ -383,6 +367,7 @@ AKGeneric("A::T"). *)
 let expand_with_env
     ety_env
     env
+    ?(ignore_errors = false)
     ?(as_tyvar_with_cnstr = false)
     root
     id
@@ -401,7 +386,7 @@ let expand_with_env
         ~on_error
         ~allow_abstract_tconst
     with NoTypeConst error ->
-      error ();
+      if not ignore_errors then error ();
       ( env,
         (make_reason env.tenv Reason.Rnone id root, Typing_utils.terr env.tenv)
       )

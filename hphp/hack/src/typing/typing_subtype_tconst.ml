@@ -22,6 +22,7 @@ let make_type_const_equal
           tconstid
           ~on_error
           ~allow_abstract_tconst:true
+          ~ignore_errors:as_tyvar_with_cnstr
       in
       let error = Errors.type_constant_mismatch on_error in
       let env = Utils.sub_type env tytconst tconstty error in

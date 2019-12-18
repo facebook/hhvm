@@ -108,6 +108,7 @@ let add_constraint x = !add_constraint_ref x
 type expand_typeconst =
   expand_env ->
   env ->
+  ?ignore_errors:bool ->
   ?as_tyvar_with_cnstr:bool ->
   locl_ty ->
   Aast.sid ->

@@ -148,28 +148,31 @@ let compute_tast_and_errors_unquarantined
       | ServerCommandTypes.FileName _ -> None
       | ServerCommandTypes.FileContent s -> Some (String.length s)
     in
-    let (cache_overhead_time_opt, cache_peak_bytes_opt) =
+    let (cache_overhead_time_opt, cache_peak_bytes_opt, cache_num_entries_opt) =
       match ctx.Provider_context.backend with
       | Provider_backend.Local_memory { decl_cache; _ } ->
         let { Memory_bounded_lru_cache.time_spent; peak_size_in_words; _ } =
           Memory_bounded_lru_cache.get_telemetry decl_cache
         in
         let bytes_per_word = Sys.word_size / 8 in
-        (Some time_spent, Some (peak_size_in_words * bytes_per_word))
-      | _ -> (None, None)
+        ( Some time_spent,
+          Some (peak_size_in_words * bytes_per_word),
+          Some (Memory_bounded_lru_cache.length decl_cache) )
+      | _ -> (None, None, None)
     in
 
     let seconds_to_ms s = 1000. *. s |> int_of_float |> string_of_int in
     let bytes_to_k b = b / 1024 |> string_of_int in
     Hh_logger.debug
-      "compute_tast: %s (%s ms / %s k), decl-fetch (%d / %s ms), cache (%s ms, %s k)"
+      "compute_tast: %s (%s ms / %s k), decl-fetch (%d / %s ms), cache (%s ms, %s k, %s entries)"
       (Relative_path.suffix entry.Provider_context.path)
       (time_decl_and_typecheck |> seconds_to_ms)
       (Option.value_map filesize_opt ~default:"?" ~f:bytes_to_k)
       decl_cache_misses
       (decl_cache_misses_time |> seconds_to_ms)
       (Option.value_map cache_overhead_time_opt ~default:"?" ~f:seconds_to_ms)
-      (Option.value_map cache_peak_bytes_opt ~default:"?" ~f:bytes_to_k);
+      (Option.value_map cache_peak_bytes_opt ~default:"?" ~f:bytes_to_k)
+      (Option.value_map cache_num_entries_opt ~default:"?" ~f:string_of_int);
     HackEventLogger.ProfileTypeCheck.compute_tast
       ~provider_backend:
         (ctx.Provider_context.backend |> Provider_backend.t_to_string)

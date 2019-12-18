@@ -33,6 +33,9 @@ val make : max_size_in_words:int -> ('k, 'v) t
 (** Remove all entries from the cache. *)
 val clear : ('k, 'v) t -> unit
 
+(** Get the number of elements currently in the cache. *)
+val length : ('k, 'v) t -> int
+
 (** Add a [key]-[value] pair to the cache.
 
 The cache is always resized to fit under the memory limit after any addition

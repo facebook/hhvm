@@ -46,6 +46,8 @@ let clear (t : ('k, 'v) t) : unit =
   t.total_size_in_words <- 0;
   Hashtbl.clear t.entries
 
+let length (t : ('k, 'v) t) : int = Hashtbl.length t.entries
+
 let incr_timestamp (t : ('k, 'v) t) : unit =
   let new_timestamp = t.timestamp + 1 in
   t.timestamp <- new_timestamp

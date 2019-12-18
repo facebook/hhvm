@@ -1222,7 +1222,7 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
   SYNC_VM_REGS_SCOPED();
   if (mysqlExtension::ReadOnly &&
       same(preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/i", query),
-           0)) {
+           static_cast<int64_t>(0))) {
     raise_notice("runtime/ext_mysql: write query not executed [%s]",
                     query.data());
     return MySQLQueryReturn::OK; // pretend it worked

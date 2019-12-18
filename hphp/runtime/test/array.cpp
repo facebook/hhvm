@@ -131,10 +131,10 @@ TEST(ARRAY, Iteration) {
   i = 0;
   for (ArrayIter iter = arr.begin(); iter; ++iter, ++i) {
     if (i == 0) {
-      EXPECT_TRUE(equal(iter.first(), 0));
+      EXPECT_TRUE(equal(iter.first(), static_cast<int64_t>(0)));
       EXPECT_TRUE(equal(iter.second(), String("v1")));
     } else {
-      EXPECT_TRUE(equal(iter.first(), 1));
+      EXPECT_TRUE(equal(iter.first(), static_cast<int64_t>(1)));
       EXPECT_TRUE(equal(iter.second(), String("v2")));
     }
   }
@@ -311,34 +311,34 @@ TEST(Array, Offsets) {
   {
     Array arr;
     tvSet(make_tv<KindOfInt64>(10), arr.lval(1));
-    EXPECT_TRUE(equal(arr[1], 10));
-    EXPECT_TRUE(equal(arr[Variant(1.5)], 10));
-    EXPECT_FALSE(equal(arr[s_1], 10));
-    EXPECT_FALSE(equal(arr[Variant("1")], 10));
+    EXPECT_TRUE(equal(arr[1], static_cast<int64_t>(10)));
+    EXPECT_TRUE(equal(arr[Variant(1.5)], static_cast<int64_t>(10)));
+    EXPECT_FALSE(equal(arr[s_1], static_cast<int64_t>(10)));
+    EXPECT_FALSE(equal(arr[Variant("1")], static_cast<int64_t>(10)));
   }
   {
     Array arr;
     tvSet(make_tv<KindOfInt64>(10), arr.lval(Variant(1.5)));
-    EXPECT_TRUE(equal(arr[1], 10));
-    EXPECT_TRUE(equal(arr[Variant(1.5)], 10));
-    EXPECT_FALSE(equal(arr[s_1], 10));
-    EXPECT_FALSE(equal(arr[Variant("1")], 10));
+    EXPECT_TRUE(equal(arr[1], static_cast<int64_t>(10)));
+    EXPECT_TRUE(equal(arr[Variant(1.5)], static_cast<int64_t>(10)));
+    EXPECT_FALSE(equal(arr[s_1], static_cast<int64_t>(10)));
+    EXPECT_FALSE(equal(arr[Variant("1")], static_cast<int64_t>(10)));
   }
   {
     Array arr;
     tvSet(make_tv<KindOfInt64>(10), arr.lval(s_1));
-    EXPECT_FALSE(equal(arr[1], 10));
-    EXPECT_FALSE(equal(arr[Variant(1.5)], 10));
-    EXPECT_TRUE(equal(arr[s_1], 10));
-    EXPECT_TRUE(equal(arr[Variant("1")], 10));
+    EXPECT_FALSE(equal(arr[1], static_cast<int64_t>(10)));
+    EXPECT_FALSE(equal(arr[Variant(1.5)], static_cast<int64_t>(10)));
+    EXPECT_TRUE(equal(arr[s_1], static_cast<int64_t>(10)));
+    EXPECT_TRUE(equal(arr[Variant("1")], static_cast<int64_t>(10)));
   }
   {
     Array arr;
     tvSet(make_tv<KindOfInt64>(10), arr.lval(Variant("1")));
-    EXPECT_FALSE(equal(arr[1], 10));
-    EXPECT_FALSE(equal(arr[Variant(1.5)], 10));
-    EXPECT_TRUE(equal(arr[s_1], 10));
-    EXPECT_TRUE(equal(arr[Variant("1")], 10));
+    EXPECT_FALSE(equal(arr[1], static_cast<int64_t>(10)));
+    EXPECT_FALSE(equal(arr[Variant(1.5)], static_cast<int64_t>(10)));
+    EXPECT_TRUE(equal(arr[s_1], static_cast<int64_t>(10)));
+    EXPECT_TRUE(equal(arr[Variant("1")], static_cast<int64_t>(10)));
   }
   {
     Array arr = Array::CreateVec();

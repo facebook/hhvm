@@ -39,7 +39,6 @@ bool tvSame(TypedValue, TypedValue);
  * the sense of php's == operator.
  */
 bool tvEqual(TypedValue, bool);
-bool tvEqual(TypedValue, int);
 bool tvEqual(TypedValue, int64_t);
 bool tvEqual(TypedValue, double);
 bool tvEqual(TypedValue, const StringData*);
@@ -61,7 +60,6 @@ bool tvEqual(TypedValue, TypedValue);
  * sense of php's < operator.
  */
 bool tvLess(TypedValue, bool);
-bool tvLess(TypedValue, int);
 bool tvLess(TypedValue, int64_t);
 bool tvLess(TypedValue, double);
 bool tvLess(TypedValue, const StringData*);
@@ -82,7 +80,6 @@ bool tvLess(TypedValue, TypedValue);
  * sense of php's > operator.
  */
 bool tvGreater(TypedValue, bool);
-bool tvGreater(TypedValue, int);
 bool tvGreater(TypedValue, int64_t);
 bool tvGreater(TypedValue, double);
 bool tvGreater(TypedValue, const StringData*);
@@ -118,7 +115,6 @@ bool tvGreaterOrEqual(TypedValue, TypedValue);
  * <=> operator.
  */
 int64_t tvCompare(TypedValue, bool);
-int64_t tvCompare(TypedValue, int);
 int64_t tvCompare(TypedValue, int64_t);
 int64_t tvCompare(TypedValue, double);
 int64_t tvCompare(TypedValue, const StringData*);
@@ -134,7 +130,5 @@ int64_t tvCompare(TypedValue, TypedValue);
 //////////////////////////////////////////////////////////////////////
 
 }
-
-#include "hphp/runtime/base/tv-comparisons-inl.h"
 
 #endif

@@ -1000,7 +1000,7 @@ bool BreakPointInfo::Match(const char *haystack, int haystack_len,
                                 CopyString),
                          String(haystack, haystack_len, CopyString),
                          &matches);
-  return HPHP::same(r, 1);
+  return HPHP::same(r, static_cast<int64_t>(1));
 }
 
 bool BreakPointInfo::checkExceptionOrError(const Variant& e) {

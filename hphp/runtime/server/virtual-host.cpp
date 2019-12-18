@@ -399,7 +399,7 @@ bool VirtualHost::rewriteURL(const String& host, String &url, bool &qsa,
         subject = host;
       }
       Variant ret = preg_match(it->pattern, subject.get());
-      if (!same(ret, it->negate ? 0 : 1)) {
+      if (!same(ret, static_cast<int64_t>(it->negate ? 0 : 1))) {
         passed = false;
         break;
       }

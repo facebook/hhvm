@@ -1302,8 +1302,7 @@ let do_hover_local
   | Ok infos ->
     let infos = do_hover_common infos in
     Lwt.return infos
-  | Error error_message ->
-    failwith (Printf.sprintf "Local hover failed: %s" error_message)
+  | Error edata -> raise (Server_nonfatal_exception edata)
 
 let do_typeDefinition
     (conn : server_conn)
@@ -1344,9 +1343,7 @@ let do_typeDefinition_local
             ~default_path:file)
     in
     Lwt.return results
-  | Error error_message ->
-    failwith
-      (Printf.sprintf "Local go-to-type-definition failed: %s" error_message)
+  | Error edata -> raise (Server_nonfatal_exception edata)
 
 let do_definition
     (conn : server_conn)
@@ -1399,8 +1396,7 @@ let do_definition_local
               (document_location.ClientIdeMessage.file_path |> Path.to_string))
     in
     Lwt.return results
-  | Error error_message ->
-    failwith (Printf.sprintf "Local go-to-definition failed: %s" error_message)
+  | Error edata -> raise (Server_nonfatal_exception edata)
 
 let make_ide_completion_response
     (result : AutocompleteTypes.ide_result) (filename : string) :
@@ -1645,8 +1641,7 @@ let do_completion_local
       in
       let%lwt response = make_ide_completion_response infos filename in
       Lwt.return response
-    | Error error_message ->
-      failwith (Printf.sprintf "Local completion failed: %s" error_message))
+    | Error edata -> raise (Server_nonfatal_exception edata))
 
 exception NoLocationFound
 
@@ -1804,8 +1799,7 @@ let do_resolve_local
             |> docblock_to_markdown
           in
           Lwt.return { params with Completion.documentation }
-        | Error error_message ->
-          failwith (Printf.sprintf "Local resolve failed: %s" error_message))
+        | Error edata -> raise (Server_nonfatal_exception edata))
       (* If that fails, next try using symbol *)
     with _ ->
       (* The "fullname" value includes the fully qualified namespace, so
@@ -1838,8 +1832,7 @@ let do_resolve_local
       | Ok raw_docblock ->
         let documentation = docblock_to_markdown raw_docblock in
         Lwt.return { params with Completion.documentation }
-      | Error error_message ->
-        failwith (Printf.sprintf "Local resolve failed: %s" error_message))
+      | Error edata -> raise (Server_nonfatal_exception edata))
   in
   Lwt.return result
 
@@ -1995,9 +1988,7 @@ let do_documentSymbol_local
             outline
         in
         Lwt.return converted
-      | Error error_message ->
-        failwith
-          (Printf.sprintf "Local document-symbol failed: %s" error_message)))
+      | Error edata -> raise (Server_nonfatal_exception edata)))
 
 let do_findReferences
     (conn : server_conn)
@@ -2081,8 +2072,7 @@ let do_highlight_local
   in
   match result with
   | Ok ranges -> Lwt.return (List.map ranges ~f:hack_range_to_lsp_highlight)
-  | Error error_message ->
-    failwith (Printf.sprintf "Local highlight failed: %s" error_message)
+  | Error edata -> raise (Server_nonfatal_exception edata)
 
 let format_typeCoverage_result results counts =
   TypeCoverage.(
@@ -2151,8 +2141,7 @@ let do_typeCoverage_local
     | Ok (results, counts) ->
       let formatted = format_typeCoverage_result results counts in
       Lwt.return formatted
-    | Error error_message ->
-      failwith (Printf.sprintf "Local type coverage failed: %s" error_message))
+    | Error edata -> raise (Server_nonfatal_exception edata))
 
 let do_formatting_common
     (uri : Lsp.documentUri)
@@ -2270,8 +2259,7 @@ let do_signatureHelp_local
   in
   match result with
   | Ok signatures -> Lwt.return signatures
-  | Error error_message ->
-    failwith (Printf.sprintf "Local highlight failed: %s" error_message)
+  | Error edata -> raise (Server_nonfatal_exception edata)
 
 let patch_to_workspace_edit_change (patch : ServerRefactorTypes.patch) :
     string * TextEdit.t =
@@ -2466,7 +2454,7 @@ let get_client_ide_status (ide_service : ClientIdeService.t) : ShowStatus.params
       total = None;
       shortMessage = None;
     }
-  | ClientIdeService.Status.Stopped message ->
+  | ClientIdeService.Status.Stopped { Marshal_tools.message; _ } ->
     {
       ShowStatus.request =
         ShowMessageRequest.
@@ -3122,7 +3110,7 @@ let track_ide_service_open_files
     in
     let file_contents = params.DidOpen.textDocument.TextDocumentItem.text in
     let ref_unblocked_time = ref 0. in
-    let%lwt (_ : (unit, string) result) =
+    let%lwt (_ : (unit, Marshal_tools.remote_exception_data) result) =
       ClientIdeService.rpc
         ide_service
         ~tracking_id:metadata.tracking_id
@@ -3285,7 +3273,7 @@ let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
     | Ok () ->
       let%lwt () = ClientIdeService.serve ide_service in
       Lwt.return_unit
-    | Error message ->
+    | Error { Marshal_tools.message; _ } ->
       log "IDE services could not be initialized: %s" message;
       Lwt.return_unit
   ) else

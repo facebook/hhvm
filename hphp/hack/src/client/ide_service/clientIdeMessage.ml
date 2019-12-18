@@ -196,7 +196,7 @@ let notification_to_string (n : notification) : string =
 
 type 'a timed_response = {
   unblocked_time: float;
-  response: ('a, string) result;
+  response: ('a, Marshal_tools.remote_exception_data) result;
 }
 
 type message_from_daemon =
@@ -206,7 +206,8 @@ type message_from_daemon =
 let message_from_daemon_to_string (m : message_from_daemon) : string =
   match m with
   | Notification n -> notification_to_string n
-  | Response { response = Error e; _ } -> Printf.sprintf "Response_error(%s)" e
+  | Response { response = Error { Marshal_tools.message; _ }; _ } ->
+    Printf.sprintf "Response_error(%s)" message
   | Response { response = Ok _; _ } -> Printf.sprintf "Response_ok"
 
 type daemon_args = {

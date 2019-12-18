@@ -28,7 +28,8 @@ module Status : sig
         (** The IDE services are available, but are also in the middle of
         processing files. *)
     | Ready  (** The IDE services are available. *)
-    | Stopped of string  (** The IDE services are not available. *)
+    | Stopped of Marshal_tools.remote_exception_data
+        (** The IDE services are not available. *)
 
   val to_string : t -> string
 end
@@ -57,7 +58,7 @@ val initialize_from_saved_state :
   naming_table_saved_state_path:Path.t option ->
   wait_for_initialization:bool ->
   use_ranked_autocomplete:bool ->
-  (unit, string) Lwt_result.t
+  (unit, Marshal_tools.remote_exception_data) Lwt_result.t
 
 (** Pump the message loop for the IDE service. Exits once the IDE service has
 been [destroy]ed. *)
@@ -79,7 +80,7 @@ val rpc :
   tracking_id:string ->
   ref_unblocked_time:float ref ->
   'response ClientIdeMessage.t ->
-  ('response, string) Lwt_result.t
+  ('response, Marshal_tools.remote_exception_data) Lwt_result.t
 
 (** Get a handle to the stream of notifications sent by the IDE service. These
 notifications may be sent even during RPC requests, and so should be processed

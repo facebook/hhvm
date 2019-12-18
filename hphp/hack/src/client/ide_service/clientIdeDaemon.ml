@@ -24,7 +24,7 @@ type initialized_state = {
 
 type state =
   | Initializing
-  | Failed_to_initialize of string
+  | Failed_to_initialize of string * Utils.callstack
   | Initialized of initialized_state
 
 type t = {
@@ -65,7 +65,7 @@ let load_saved_state
     ~(root : Path.t)
     ~(hhi_root : Path.t)
     ~(naming_table_saved_state_path : Path.t option) :
-    (state, string) Lwt_result.t =
+    (state, string * Utils.callstack) Lwt_result.t =
   log "[saved-state] Starting load in root %s" (Path.to_string root);
   let%lwt result =
     try%lwt
@@ -116,14 +116,17 @@ let load_saved_state
                peak_changed_files_queue_size = List.length changed_files;
              })
       | Error load_error ->
+        let stack =
+          Utils.Callstack (Exception.get_current_callstack_string 100)
+        in
         let message = Saved_state_loader.load_error_to_string load_error in
         log "[saved-state] %s" message;
-        Lwt.return_error message
+        Lwt.return_error (message, stack)
     with e ->
       let stack = Printexc.get_backtrace () in
       Hh_logger.exc e ~prefix:"Uncaught exception in client IDE services" ~stack;
       Lwt.return_error
-        (Printf.sprintf "Uncaught exception in client IDE services: %s" stack)
+        ("Uncaught exception in client IDE services", Utils.Callstack stack)
   in
   Lwt.return result
 
@@ -139,7 +142,7 @@ let initialize
        use_ranked_autocomplete;
      } :
       ClientIdeMessage.Initialize_from_saved_state.t) :
-    (state, string) Lwt_result.t =
+    (state, string * Utils.callstack) Lwt_result.t =
   let start_time = Unix.gettimeofday () in
   HackEventLogger.serverless_ide_set_root root;
   set_up_hh_logger_for_client_ide_service ~root;
@@ -223,9 +226,9 @@ let initialize
   | Ok state ->
     log "Serverless IDE has completed initialization";
     Lwt.return_ok state
-  | Error message ->
+  | Error (message, stack) ->
     log "Serverless IDE failed to initialize: %s" message;
-    Lwt.return_error message
+    Lwt.return_error (message, stack)
 
 let shutdown (state : state) : unit Lwt.t =
   match state with
@@ -288,7 +291,7 @@ module Handle_message_result = struct
   type 'a t =
     | Notification
     | Response of 'a
-    | Error of string
+    | Error of string * Utils.callstack
 end
 
 let handle_message :
@@ -305,13 +308,15 @@ let handle_message :
       Lwt.return (state, Handle_message_result.Response ())
     | ((Failed_to_initialize _ | Initializing), File_changed _) ->
       (* Should not happen. *)
+      let stack = Utils.Callstack (Exception.get_current_callstack_string 99) in
       Lwt.return
         ( state,
           Handle_message_result.Error
             ( "IDE services could not process file change because "
-            ^ "it failed to initialize or was still initializing. The caller "
-            ^ "should have waited for the IDE services to become ready before "
-            ^ "sending file-change notifications." ) )
+              ^ "it failed to initialize or was still initializing. The caller "
+              ^ "should have waited for the IDE services to become ready before "
+              ^ "sending file-change notifications.",
+              stack ) )
     | (Initialized initialized_state, File_changed path) ->
       (* Only invalidate when a hack file changes *)
       if FindUtils.file_filter (Path.to_string path) then
@@ -342,27 +347,35 @@ let handle_message :
       begin
         match result with
         | Ok state -> Lwt.return (state, Handle_message_result.Response ())
-        | Error message ->
+        | Error (message, stack) ->
           Lwt.return
-            (Failed_to_initialize message, Handle_message_result.Error message)
+            ( Failed_to_initialize (message, stack),
+              Handle_message_result.Error (message, stack) )
       end
     | (Initialized _, Initialize_from_saved_state _) ->
+      let stack =
+        Utils.Callstack (Exception.get_current_callstack_string 100)
+      in
       Lwt.return
         ( state,
           Handle_message_result.Error
-            "Tried to initialize when already initialized" )
+            ("Tried to initialize when already initialized", stack) )
     | (Initializing, _) ->
+      let stack =
+        Utils.Callstack (Exception.get_current_callstack_string 100)
+      in
       Lwt.return
         ( state,
           Handle_message_result.Error
-            "IDE services have not yet been initialized" )
-    | (Failed_to_initialize error_message, _) ->
+            ("IDE services have not yet been initialized", stack) )
+    | (Failed_to_initialize (error_message, stack), _) ->
       Lwt.return
         ( state,
           Handle_message_result.Error
-            (Printf.sprintf
-               "IDE services failed to initialize: %s"
-               error_message) )
+            ( Printf.sprintf
+                "IDE services failed to initialize: %s"
+                error_message,
+              stack ) )
     | (Initialized initialized_state, File_opened { file_path; file_contents })
       ->
       let path =
@@ -659,10 +672,14 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
               in
               let%lwt () = write_message ~out_fd ~message in
               Lwt.return state
-            | Handle_message_result.Error e ->
+            | Handle_message_result.Error (message, Utils.Callstack stack) ->
               let message =
                 ClientIdeMessage.Response
-                  { ClientIdeMessage.response = Error e; unblocked_time }
+                  {
+                    ClientIdeMessage.response =
+                      Error { Marshal_tools.message; stack };
+                    unblocked_time;
+                  }
               in
               let%lwt () = write_message ~out_fd ~message in
               Lwt.return state
@@ -675,7 +692,15 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
             that exception as a response. *)
             let message =
               ClientIdeMessage.Response
-                { ClientIdeMessage.response = Error message; unblocked_time }
+                {
+                  ClientIdeMessage.response =
+                    Error
+                      {
+                        Marshal_tools.message;
+                        stack = Exception.get_backtrace_string e;
+                      };
+                  unblocked_time;
+                }
             in
             let%lwt () = write_message ~out_fd ~message in
             Lwt.return t.state

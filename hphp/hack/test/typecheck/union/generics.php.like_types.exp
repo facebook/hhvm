@@ -11,13 +11,13 @@ File "generics.php--file2.php", line 80, characters 3-13:
 File "generics.php--file2.php", line 83, characters 3-13:
   ~A<int>
 File "generics.php--file2.php", line 86, characters 3-13:
-  ~?(A<int> | exact A<[unresolved]>)
+  ~(A<int> | exact A<[unresolved]>)
 File "generics.php--file2.php", line 89, characters 3-13:
-  ~?(exact A<[unresolved]> | A<T>)
+  ~(exact A<[unresolved]> | A<T>)
 File "generics.php--file2.php", line 92, characters 3-13:
-  ~?(exact A<int> | A<T>)
+  ~(exact A<int> | A<T>)
 File "generics.php--file2.php", line 95, characters 3-13:
-  ~?(A<int> | A<T>)
+  ~(A<int> | A<T>)
 File "generics.php--file2.php", line 98, characters 3-13:
   ~A<T>
 File "generics.php--file2.php", line 101, characters 3-13:
@@ -41,7 +41,7 @@ File "generics.php--file2.php", line 119, characters 3-13:
 File "generics.php--file2.php", line 122, characters 3-13:
   ~E<int>
 File "generics.php--file2.php", line 125, characters 3-13:
-  ~?(E<int> | E<string>)
+  ~(E<int> | E<string>)
 File "generics.php--file2.php", line 128, characters 3-13:
   ~F<(int | string)>
 File "generics.php--file2.php", line 131, characters 3-13:
@@ -55,10 +55,10 @@ File "generics.php--file2.php", line 140, characters 3-13:
   ~Tu
   where Tu super \C
 File "generics.php--file2.php", line 143, characters 3-13:
-  ~?(Tu | Tw)
+  ~(Tu | Tw)
   where Tu super \C, Tw super \C
 File "generics.php--file2.php", line 146, characters 3-13:
-  ~?(Tv | Ty)
+  ~(Tv | Ty)
   where Tv as \C, Ty as \C
 File "generics.php--file2.php", line 22, characters 5-15:
   ~?int

@@ -440,52 +440,67 @@ module Full = struct
             | _ -> `Trd t)
       in
       begin
-        match (dynamic, null, nonnull) with
+        match
+          (not @@ List.is_empty dynamic, not @@ List.is_empty null, nonnull)
+        with
+        | (false, false, []) -> text "nothing"
         (* type isn't nullable or dynamic *)
-        | ([], [], [ty]) ->
+        | (false, false, [ty]) ->
           if show_verbose env then
             Concat [text "("; k ty; text ")"]
           else
             k ty
-        | ([], [], _) ->
+        | (false, false, _ :: _) ->
           delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
         (* Type only is null *)
-        | ([], _, []) ->
+        | (false, true, []) ->
           if show_verbose env then
             text "(null)"
           else
             text "null"
         (* Type only is dynamic *)
-        | (_, [], []) ->
+        | (true, false, []) ->
           if show_verbose env then
             text "(dynamic)"
           else
             text "dynamic"
         (* Type is nullable single type *)
-        | ([], _, [ty]) ->
+        | (false, true, [ty]) ->
           if show_verbose env then
             Concat [text "(null |"; k ty; text ")"]
           else
             Concat [text "?"; k ty]
         (* Type is like single type *)
-        | (_, [], [ty]) ->
+        | (true, false, [ty]) ->
           if show_verbose env then
             Concat [text "(dynamic |"; k ty; text ")"]
           else
             Concat [text "~"; k ty]
         (* Type is like null *)
-        | (_ :: _, _ :: _, []) ->
+        | (true, true, []) ->
           if show_verbose env then
             text "(dynamic | null)"
           else
             text "~null"
         (* Type is like nullable single type *)
-        | (_, _, [ty]) ->
+        | (true, true, [ty]) ->
           if show_verbose env then
             Concat [text "(dynamic | null |"; k ty; text ")"]
           else
             Concat [text "~?"; k ty]
-        | (_, _, _) ->
+        | (true, false, _ :: _) ->
+          Concat
+            [
+              text "~";
+              delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")";
+            ]
+        | (false, true, _ :: _) ->
+          Concat
+            [
+              text "?";
+              delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")";
+            ]
+        | (true, true, _ :: _) ->
           Concat
             [
               text "~";

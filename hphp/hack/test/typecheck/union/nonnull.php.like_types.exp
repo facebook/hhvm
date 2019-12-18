@@ -19,9 +19,9 @@ File "nonnull.php--file2.php", line 43, characters 3-13:
 File "nonnull.php--file2.php", line 45, characters 3-13:
   ~B
 File "nonnull.php--file2.php", line 47, characters 3-13:
-  ~?(nonnull | B)
+  ~(nonnull | B)
 File "nonnull.php--file2.php", line 50, characters 3-13:
-  ~?(nonnull | C)
+  ~(nonnull | C)
 File "nonnull.php--file2.php", line 54, characters 3-13:
   mixed
 File "nonnull.php--file2.php", line 57, characters 3-13:

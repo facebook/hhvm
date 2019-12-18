@@ -15,9 +15,9 @@ File "arrays.php", line 60, characters 3-13:
 File "arrays.php", line 61, characters 3-16:
   (_ | int)
 File "arrays.php", line 70, characters 3-13:
-  ~?(varray<int> | varray_or_darray<arraykey, _>)
+  ~(varray<int> | varray_or_darray<arraykey, _>)
 File "arrays.php", line 71, characters 3-16:
-  ~?(_ | int)
+  ~(_ | int)
 File "arrays.php", line 75, characters 3-13:
   varray<int>
 File "arrays.php", line 76, characters 3-16:
@@ -65,7 +65,7 @@ File "arrays.php", line 153, characters 3-16:
 File "arrays.php", line 160, characters 3-13:
   ~darray<int, (int | string)>
 File "arrays.php", line 161, characters 3-16:
-  ~?(int | string)
+  ~(int | string)
 File "arrays.php", line 164, characters 3-13:
   darray<int, (bool | string)>
 File "arrays.php", line 165, characters 3-16:

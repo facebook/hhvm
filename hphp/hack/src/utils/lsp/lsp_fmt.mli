@@ -23,7 +23,11 @@ val print_range : Lsp.range -> Hh_json.json
 
 val print_location : Lsp.Location.t -> Hh_json.json
 
+val print_locations : Lsp.Location.t list -> Hh_json.json
+
 val print_definition_location : Lsp.DefinitionLocation.t -> Hh_json.json
+
+val print_definition_locations : Lsp.DefinitionLocation.t list -> Hh_json.json
 
 val parse_range_exn : Hh_json.json option -> Lsp.range
 
@@ -63,7 +67,7 @@ val parse_cancelRequest : Hh_json.json option -> Lsp.CancelRequest.params
 
 val print_cancelRequest : Lsp.CancelRequest.params -> Hh_json.json
 
-val print_rage : Lsp.Rage.result -> Hh_json.json
+val print_rage : Lsp.RageFB.result -> Hh_json.json
 
 val parse_didOpen : Hh_json.json option -> Lsp.DidOpen.params
 
@@ -95,21 +99,13 @@ val print_showMessageRequest :
 val parse_result_showMessageRequest :
   Hh_json.json option -> Lsp.ShowMessageRequest.result
 
-val print_showStatus : Lsp.ShowStatus.showStatusParams -> Hh_json.json
+val print_showStatus : Lsp.ShowStatusFB.showStatusParams -> Hh_json.json
 
-val print_progress : int -> string option -> Hh_json.json
-
-val print_actionRequired : int -> string option -> Hh_json.json
-
-val print_connectionStatus : Lsp.ConnectionStatus.params -> Hh_json.json
+val print_connectionStatus : Lsp.ConnectionStatusFB.params -> Hh_json.json
 
 val parse_hover : Hh_json.json option -> Lsp.Hover.params
 
 val print_hover : Lsp.Hover.result -> Hh_json.json
-
-val parse_definition : Hh_json.json option -> Lsp.Definition.params
-
-val print_definition : Lsp.Definition.result -> Hh_json.json
 
 val parse_completionItem :
   Hh_json.json option -> Lsp.CompletionItemResolve.params
@@ -130,22 +126,17 @@ val print_documentSymbol : Lsp.DocumentSymbol.result -> Hh_json.json
 
 val parse_findReferences : Hh_json.json option -> Lsp.FindReferences.params
 
-val parse_goToImplementation :
-  Hh_json.json option -> Lsp.GoToImplementation.params
-
-val print_Locations : Lsp.Location.t list -> Hh_json.json
-
 val parse_documentHighlight :
   Hh_json.json option -> Lsp.DocumentHighlight.params
 
 val print_documentHighlight : Lsp.DocumentHighlight.result -> Hh_json.json
 
-val parse_typeCoverage : Hh_json.json option -> Lsp.TypeCoverage.params
+val parse_typeCoverage : Hh_json.json option -> Lsp.TypeCoverageFB.params
 
-val print_typeCoverage : Lsp.TypeCoverage.result -> Hh_json.json
+val print_typeCoverage : Lsp.TypeCoverageFB.result -> Hh_json.json
 
 val parse_toggleTypeCoverage :
-  Hh_json.json option -> Lsp.ToggleTypeCoverage.params
+  Hh_json.json option -> Lsp.ToggleTypeCoverageFB.params
 
 val parse_documentFormatting :
   Hh_json.json option -> Lsp.DocumentFormatting.params

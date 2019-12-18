@@ -272,12 +272,6 @@ let get_root (p : Lsp.Initialize.params) : string =
     | (None, Some path) -> path
     | (None, None) -> failwith "Initialize params missing root")
 
-let supports_progress (p : Lsp.Initialize.params) : bool =
-  Lsp.Initialize.(p.client_capabilities.window.progress)
-
-let supports_actionRequired (p : Lsp.Initialize.params) : bool =
-  Lsp.Initialize.(p.client_capabilities.window.actionRequired)
-
 let supports_status (p : Lsp.Initialize.params) : bool =
   Lsp.Initialize.(p.client_capabilities.window.status)
 
@@ -307,12 +301,12 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
     Some p.DocumentSymbol.textDocument.uri
   | RequestMessage (_, FindReferencesRequest p) ->
     Some p.FindReferences.loc.TextDocumentPositionParams.textDocument.uri
-  | RequestMessage (_, GoToImplementationRequest p) ->
-    Some p.GoToImplementation.loc.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, ImplementationRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
   | RequestMessage (_, DocumentHighlightRequest p) ->
     Some p.TextDocumentPositionParams.textDocument.uri
-  | RequestMessage (_, TypeCoverageRequest p) ->
-    Some p.TypeCoverage.textDocument.uri
+  | RequestMessage (_, TypeCoverageRequestFB p) ->
+    Some p.TypeCoverageFB.textDocument.uri
   | RequestMessage (_, DocumentFormattingRequest p) ->
     Some p.DocumentFormatting.textDocument.uri
   | RequestMessage (_, DocumentRangeFormattingRequest p) ->
@@ -338,9 +332,9 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
       | [] -> None
       | { DidChangeWatchedFiles.uri; _ } :: _ -> Some uri
     end
-  | RequestMessage (_, HackTestStartServerRequest)
-  | RequestMessage (_, HackTestStopServerRequest)
-  | RequestMessage (_, HackTestShutdownServerlessRequest)
+  | RequestMessage (_, HackTestStartServerRequestFB)
+  | RequestMessage (_, HackTestStopServerRequestFB)
+  | RequestMessage (_, HackTestShutdownServerlessRequestFB)
   | RequestMessage (_, UnknownRequest _)
   | RequestMessage (_, InitializeRequest _)
   | RequestMessage (_, RegisterCapabilityRequest _)
@@ -349,20 +343,18 @@ let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
   | RequestMessage (_, CompletionItemResolveRequest _)
   | RequestMessage (_, WorkspaceSymbolRequest _)
   | RequestMessage (_, ShowMessageRequestRequest _)
-  | RequestMessage (_, ShowStatusRequest _)
-  | RequestMessage (_, RageRequest)
+  | RequestMessage (_, ShowStatusRequestFB _)
+  | RequestMessage (_, RageRequestFB)
   | NotificationMessage ExitNotification
   | NotificationMessage (CancelRequestNotification _)
   | NotificationMessage (LogMessageNotification _)
   | NotificationMessage (TelemetryNotification _)
   | NotificationMessage (ShowMessageNotification _)
-  | NotificationMessage (ProgressNotification _)
-  | NotificationMessage (ActionRequiredNotification _)
-  | NotificationMessage (ConnectionStatusNotification _)
+  | NotificationMessage (ConnectionStatusNotificationFB _)
   | NotificationMessage InitializedNotification
   | NotificationMessage SetTraceNotification
   | NotificationMessage LogTraceNotification
-  | NotificationMessage (ToggleTypeCoverageNotification _)
+  | NotificationMessage (ToggleTypeCoverageNotificationFB _)
   | NotificationMessage (UnknownNotification _)
   | ResponseMessage _ ->
     None

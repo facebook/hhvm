@@ -266,11 +266,7 @@ module Initialize : sig
 
   and codeActionliteralSupport = { codeAction_valueSet: CodeActionKind.t list }
 
-  and windowClientCapabilities = {
-    status: bool;
-    progress: bool;
-    actionRequired: bool;
-  }
+  and windowClientCapabilities = { status: bool }
 
   and telemetryClientCapabilities = { connectionStatus: bool }
 
@@ -294,8 +290,8 @@ module Initialize : sig
     documentLinkProvider: documentLinkOptions option;
     executeCommandProvider: executeCommandOptions option;
     implementationProvider: bool;
-    typeCoverageProvider: bool;
-    rageProvider: bool;
+    typeCoverageProviderFB: bool;
+    rageProviderFB: bool;
   }
 
   and completionOptions = {
@@ -331,7 +327,7 @@ module Shutdown : sig end
 
 module Exit : sig end
 
-module Rage : sig
+module RageFB : sig
   type result = rageItem list
 
   and rageItem = {
@@ -467,6 +463,12 @@ module TypeDefinition : sig
   type params = TextDocumentPositionParams.t
 
   and result = DefinitionLocation.t list
+end
+
+module Implementation : sig
+  type params = TextDocumentPositionParams.t
+
+  and result = Location.t list
 end
 
 module CodeAction : sig
@@ -631,14 +633,6 @@ module FindReferences : sig
   }
 end
 
-module GoToImplementation : sig
-  type params = implementationParams
-
-  and result = Location.t list
-
-  and implementationParams = { loc: TextDocumentPositionParams.t }
-end
-
 module DocumentHighlight : sig
   type params = TextDocumentPositionParams.t
 
@@ -656,7 +650,7 @@ module DocumentHighlight : sig
   }
 end
 
-module TypeCoverage : sig
+module TypeCoverageFB : sig
   type params = typeCoverageParams
 
   and result = {
@@ -671,6 +665,12 @@ module TypeCoverage : sig
     range: range;
     message: string option;
   }
+end
+
+module ToggleTypeCoverageFB : sig
+  type params = toggleTypeCoverageParams
+
+  and toggleTypeCoverageParams = { toggle: bool }
 end
 
 module DocumentFormatting : sig
@@ -793,7 +793,7 @@ module ShowMessageRequest : sig
   and messageActionItem = { title: string }
 end
 
-module ShowStatus : sig
+module ShowStatusFB : sig
   type params = showStatusParams
 
   and result = ShowMessageRequest.messageActionItem option
@@ -806,48 +806,10 @@ module ShowStatus : sig
   }
 end
 
-module Progress : sig
-  type t =
-    | Present of {
-        id: int;
-        label: string;
-      }
-    | Absent
-
-  and params = progressParams
-
-  and progressParams = {
-    id: int;
-    label: string option;
-  }
-end
-
-module ActionRequired : sig
-  type t =
-    | Present of {
-        id: int;
-        label: string;
-      }
-    | Absent
-
-  and params = actionRequiredParams
-
-  and actionRequiredParams = {
-    id: int;
-    label: string option;
-  }
-end
-
-module ConnectionStatus : sig
+module ConnectionStatusFB : sig
   type params = connectionStatusParams
 
   and connectionStatusParams = { isConnected: bool }
-end
-
-module ToggleTypeCoverage : sig
-  type params = toggleTypeCoverageParams
-
-  and toggleTypeCoverageParams = { toggle: bool }
 end
 
 module Error : sig
@@ -926,27 +888,27 @@ type lsp_request =
   | HoverRequest of Hover.params
   | DefinitionRequest of Definition.params
   | TypeDefinitionRequest of TypeDefinition.params
+  | ImplementationRequest of Implementation.params
   | CodeActionRequest of CodeActionRequest.params
   | CompletionRequest of Completion.params
   | CompletionItemResolveRequest of CompletionItemResolve.params
   | WorkspaceSymbolRequest of WorkspaceSymbol.params
   | DocumentSymbolRequest of DocumentSymbol.params
   | FindReferencesRequest of FindReferences.params
-  | GoToImplementationRequest of GoToImplementation.params
   | DocumentHighlightRequest of DocumentHighlight.params
-  | TypeCoverageRequest of TypeCoverage.params
+  | TypeCoverageRequestFB of TypeCoverageFB.params
   | DocumentFormattingRequest of DocumentFormatting.params
   | DocumentRangeFormattingRequest of DocumentRangeFormatting.params
   | DocumentOnTypeFormattingRequest of DocumentOnTypeFormatting.params
   | ShowMessageRequestRequest of ShowMessageRequest.params
-  | ShowStatusRequest of ShowStatus.params
-  | RageRequest
+  | ShowStatusRequestFB of ShowStatusFB.params
+  | RageRequestFB
   | RenameRequest of Rename.params
   | DocumentCodeLensRequest of DocumentCodeLens.params
   | SignatureHelpRequest of SignatureHelp.params
-  | HackTestStartServerRequest
-  | HackTestStopServerRequest
-  | HackTestShutdownServerlessRequest
+  | HackTestStartServerRequestFB
+  | HackTestStopServerRequestFB
+  | HackTestShutdownServerlessRequestFB
   | UnknownRequest of string * Hh_json.json option
 
 type lsp_result =
@@ -956,27 +918,27 @@ type lsp_result =
   | HoverResult of Hover.result
   | DefinitionResult of Definition.result
   | TypeDefinitionResult of TypeDefinition.result
+  | ImplementationResult of Implementation.result
   | CodeActionResult of CodeAction.result
   | CompletionResult of Completion.result
   | CompletionItemResolveResult of CompletionItemResolve.result
   | WorkspaceSymbolResult of WorkspaceSymbol.result
   | DocumentSymbolResult of DocumentSymbol.result
   | FindReferencesResult of FindReferences.result
-  | GoToImplementationResult of GoToImplementation.result
   | DocumentHighlightResult of DocumentHighlight.result
-  | TypeCoverageResult of TypeCoverage.result
+  | TypeCoverageResultFB of TypeCoverageFB.result
   | DocumentFormattingResult of DocumentFormatting.result
   | DocumentRangeFormattingResult of DocumentRangeFormatting.result
   | DocumentOnTypeFormattingResult of DocumentOnTypeFormatting.result
   | ShowMessageRequestResult of ShowMessageRequest.result
-  | ShowStatusResult of ShowStatus.result
-  | RageResult of Rage.result
+  | ShowStatusResultFB of ShowStatusFB.result
+  | RageResultFB of RageFB.result
   | RenameResult of Rename.result
   | DocumentCodeLensResult of DocumentCodeLens.result
   | SignatureHelpResult of SignatureHelp.result
-  | HackTestStartServerResult
-  | HackTestStopServerResult
-  | HackTestShutdownServerlessResult
+  | HackTestStartServerResultFB
+  | HackTestStopServerResultFB
+  | HackTestShutdownServerlessResultFB
   (* the string is a stacktrace *)
   | ErrorResult of Error.t * string
 
@@ -992,13 +954,11 @@ type lsp_notification =
   | LogMessageNotification of LogMessage.params
   | TelemetryNotification of LogMessage.params (* LSP allows 'any' but we only send these *)
   | ShowMessageNotification of ShowMessage.params
-  | ProgressNotification of Progress.params
-  | ActionRequiredNotification of ActionRequired.params
-  | ConnectionStatusNotification of ConnectionStatus.params
+  | ConnectionStatusNotificationFB of ConnectionStatusFB.params
   | InitializedNotification
   | SetTraceNotification (* $/setTraceNotification *)
   | LogTraceNotification (* $/logTraceNotification *)
-  | ToggleTypeCoverageNotification of ToggleTypeCoverage.params
+  | ToggleTypeCoverageNotificationFB of ToggleTypeCoverageFB.params
   | UnknownNotification of string * Hh_json.json option
 
 type lsp_message =
@@ -1012,7 +972,7 @@ and 'a lsp_error_handler = Error.t * string -> 'a -> 'a
 
 and 'a lsp_result_handler =
   | ShowMessageHandler of (ShowMessageRequest.result -> 'a -> 'a)
-  | ShowStatusHandler of (ShowStatus.result -> 'a -> 'a)
+  | ShowStatusHandler of (ShowStatusFB.result -> 'a -> 'a)
 
 module IdKey : sig
   type t = lsp_id

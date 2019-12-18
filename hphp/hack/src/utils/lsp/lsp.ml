@@ -435,11 +435,7 @@ module Initialize = struct
 
   and windowClientCapabilities = {
     status: bool;
-    (* Nuclide-specific: client supports window/showStatusRequest *)
-    progress: bool;
-    (* Nuclide-specific: client supports window/progress *)
-    actionRequired: bool;
-        (* Nuclide-specific: client supports window/actionRequired *)
+        (* Nuclide-specific: client supports window/showStatusRequest *)
   }
 
   and telemetryClientCapabilities = {
@@ -472,8 +468,8 @@ module Initialize = struct
     executeCommandProvider: executeCommandOptions option;
     implementationProvider: bool;
     (* Nuclide-specific features below *)
-    typeCoverageProvider: bool;
-    rageProvider: bool;
+    typeCoverageProviderFB: bool;
+    rageProviderFB: bool;
   }
 
   and completionOptions = {
@@ -531,7 +527,7 @@ module Shutdown = struct end
 module Exit = struct end
 
 (* Rage request, method="telemetry/rage" *)
-module Rage = struct
+module RageFB = struct
   type result = rageItem list
 
   and rageItem = {
@@ -687,6 +683,13 @@ module TypeDefinition = struct
   type params = TextDocumentPositionParams.t
 
   and result = DefinitionLocation.t list
+end
+
+(* Go To Implementation request, method="textDocument/implementation" *)
+module Implementation = struct
+  type params = TextDocumentPositionParams.t
+
+  and result = Location.t list
 end
 
 module CodeAction = struct
@@ -875,15 +878,6 @@ module FindReferences = struct
   }
 end
 
-(* Go To Implementation request, method="textDocument/implementation" *)
-module GoToImplementation = struct
-  type params = implementationParams
-
-  and result = Location.t list
-
-  and implementationParams = { loc: TextDocumentPositionParams.t }
-end
-
 (* Document Highlights request, method="textDocument/documentHighlight" *)
 module DocumentHighlight = struct
   type params = TextDocumentPositionParams.t
@@ -908,7 +902,7 @@ end
 
 (* Type Coverage request, method="textDocument/typeCoverage" *)
 (* THIS IS A NUCLIDE-SPECIFIC EXTENSION TO LSP.              *)
-module TypeCoverage = struct
+module TypeCoverageFB = struct
   type params = typeCoverageParams
 
   and result = {
@@ -1060,7 +1054,7 @@ module ShowMessageRequest = struct
 end
 
 (* ShowStatus request, method="window/showStatus" *)
-module ShowStatus = struct
+module ShowStatusFB = struct
   type params = showStatusParams
 
   and result = ShowMessageRequest.messageActionItem option
@@ -1073,54 +1067,15 @@ module ShowStatus = struct
   }
 end
 
-(* Progress notification, method="window/progress" *)
-module Progress = struct
-  type t =
-    | Present of {
-        id: int;
-        label: string;
-      }
-    | Absent
-
-  and params = progressParams
-
-  and progressParams = {
-    (* LSP progress notifications have a lifetime that starts with their 1st  *)
-    (* window/progress update message and ends with an update message with    *)
-    (* label = None. They use an ID number (not JsonRPC id) to associate      *)
-    (* multiple messages to a single lifetime stream.                         *)
-    id: int;
-    label: string option;
-  }
-end
-
-(* ActionRequired notification, method="window/actionRequired" *)
-module ActionRequired = struct
-  type t =
-    | Present of {
-        id: int;
-        label: string;
-      }
-    | Absent
-
-  and params = actionRequiredParams
-
-  and actionRequiredParams = {
-    (* See progressParams.id for an explanation of this field. *)
-    id: int;
-    label: string option;
-  }
-end
-
 (* ConnectionStatus notification, method="telemetry/connectionStatus" *)
-module ConnectionStatus = struct
+module ConnectionStatusFB = struct
   type params = connectionStatusParams
 
   and connectionStatusParams = { isConnected: bool }
 end
 
 (* ToggleTypeCoverage notification, method="workspace/toggleTypeCoverage" *)
-module ToggleTypeCoverage = struct
+module ToggleTypeCoverageFB = struct
   type params = toggleTypeCoverageParams
 
   and toggleTypeCoverageParams = { toggle: bool }
@@ -1224,27 +1179,27 @@ type lsp_request =
   | HoverRequest of Hover.params
   | DefinitionRequest of Definition.params
   | TypeDefinitionRequest of TypeDefinition.params
+  | ImplementationRequest of Implementation.params
   | CodeActionRequest of CodeActionRequest.params
   | CompletionRequest of Completion.params
   | CompletionItemResolveRequest of CompletionItemResolve.params
   | WorkspaceSymbolRequest of WorkspaceSymbol.params
   | DocumentSymbolRequest of DocumentSymbol.params
   | FindReferencesRequest of FindReferences.params
-  | GoToImplementationRequest of GoToImplementation.params
   | DocumentHighlightRequest of DocumentHighlight.params
-  | TypeCoverageRequest of TypeCoverage.params
+  | TypeCoverageRequestFB of TypeCoverageFB.params
   | DocumentFormattingRequest of DocumentFormatting.params
   | DocumentRangeFormattingRequest of DocumentRangeFormatting.params
   | DocumentOnTypeFormattingRequest of DocumentOnTypeFormatting.params
   | ShowMessageRequestRequest of ShowMessageRequest.params
-  | ShowStatusRequest of ShowStatus.params
-  | RageRequest
+  | ShowStatusRequestFB of ShowStatusFB.params
+  | RageRequestFB
   | RenameRequest of Rename.params
   | DocumentCodeLensRequest of DocumentCodeLens.params
   | SignatureHelpRequest of SignatureHelp.params
-  | HackTestStartServerRequest
-  | HackTestStopServerRequest
-  | HackTestShutdownServerlessRequest
+  | HackTestStartServerRequestFB
+  | HackTestStopServerRequestFB
+  | HackTestShutdownServerlessRequestFB
   | UnknownRequest of string * Hh_json.json option
 
 type lsp_result =
@@ -1254,27 +1209,27 @@ type lsp_result =
   | HoverResult of Hover.result
   | DefinitionResult of Definition.result
   | TypeDefinitionResult of TypeDefinition.result
+  | ImplementationResult of Implementation.result
   | CodeActionResult of CodeAction.result
   | CompletionResult of Completion.result
   | CompletionItemResolveResult of CompletionItemResolve.result
   | WorkspaceSymbolResult of WorkspaceSymbol.result
   | DocumentSymbolResult of DocumentSymbol.result
   | FindReferencesResult of FindReferences.result
-  | GoToImplementationResult of GoToImplementation.result
   | DocumentHighlightResult of DocumentHighlight.result
-  | TypeCoverageResult of TypeCoverage.result
+  | TypeCoverageResultFB of TypeCoverageFB.result
   | DocumentFormattingResult of DocumentFormatting.result
   | DocumentRangeFormattingResult of DocumentRangeFormatting.result
   | DocumentOnTypeFormattingResult of DocumentOnTypeFormatting.result
   | ShowMessageRequestResult of ShowMessageRequest.result
-  | ShowStatusResult of ShowStatus.result
-  | RageResult of Rage.result
+  | ShowStatusResultFB of ShowStatusFB.result
+  | RageResultFB of RageFB.result
   | RenameResult of Rename.result
   | DocumentCodeLensResult of DocumentCodeLens.result
   | SignatureHelpResult of SignatureHelp.result
-  | HackTestStartServerResult
-  | HackTestStopServerResult
-  | HackTestShutdownServerlessResult
+  | HackTestStartServerResultFB
+  | HackTestStopServerResultFB
+  | HackTestShutdownServerlessResultFB
   (* the string is a stacktrace *)
   | ErrorResult of Error.t * string
 
@@ -1290,13 +1245,11 @@ type lsp_notification =
   | LogMessageNotification of LogMessage.params
   | TelemetryNotification of LogMessage.params (* LSP allows 'any' but we only send these *)
   | ShowMessageNotification of ShowMessage.params
-  | ProgressNotification of Progress.params
-  | ActionRequiredNotification of ActionRequired.params
-  | ConnectionStatusNotification of ConnectionStatus.params
+  | ConnectionStatusNotificationFB of ConnectionStatusFB.params
   | InitializedNotification
   | SetTraceNotification (* $/setTraceNotification *)
   | LogTraceNotification (* $/logTraceNotification *)
-  | ToggleTypeCoverageNotification of ToggleTypeCoverage.params
+  | ToggleTypeCoverageNotificationFB of ToggleTypeCoverageFB.params
   | UnknownNotification of string * Hh_json.json option
 
 type lsp_message =
@@ -1310,7 +1263,7 @@ and 'a lsp_error_handler = Error.t * string -> 'a -> 'a
 
 and 'a lsp_result_handler =
   | ShowMessageHandler of (ShowMessageRequest.result -> 'a -> 'a)
-  | ShowStatusHandler of (ShowStatus.result -> 'a -> 'a)
+  | ShowStatusHandler of (ShowStatusFB.result -> 'a -> 'a)
 
 module IdKey = struct
   type t = lsp_id

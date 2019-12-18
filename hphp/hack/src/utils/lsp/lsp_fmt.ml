@@ -58,6 +58,9 @@ let print_location (location : Location.t) : json =
         ("range", print_range location.range);
       ])
 
+let print_locations (r : Location.t list) : json =
+  JSON_Array (List.map r ~f:print_location)
+
 let print_definition_location (definition_location : DefinitionLocation.t) :
     json =
   DefinitionLocation.(
@@ -68,6 +71,9 @@ let print_definition_location (definition_location : DefinitionLocation.t) :
         ("range", Some (print_range location.Location.range));
         ("title", Option.map definition_location.title ~f:string_);
       ])
+
+let print_definition_locations (r : DefinitionLocation.t list) : json =
+  JSON_Array (List.map r ~f:print_definition_location)
 
 let parse_range_exn (json : json option) : range =
   {
@@ -220,13 +226,9 @@ let print_codeLens (codeLens : CodeLens.t) : json =
       ])
 
 (************************************************************************)
-(* shutdown request                                                     *)
-(************************************************************************)
 
 let print_shutdown () : json = JSON_Null
 
-(************************************************************************)
-(* $/cancelRequest notification                                         *)
 (************************************************************************)
 
 let parse_cancelRequest (params : json option) : CancelRequest.params =
@@ -236,11 +238,8 @@ let print_cancelRequest (p : CancelRequest.params) : json =
   CancelRequest.(JSON_Object [("id", print_id p.id)])
 
 (************************************************************************)
-(* rage request                                                         *)
-(************************************************************************)
-
-let print_rage (r : Rage.result) : json =
-  Rage.(
+let print_rage (r : RageFB.result) : json =
+  RageFB.(
     let print_item (item : rageItem) : json =
       JSON_Object
         [
@@ -253,8 +252,6 @@ let print_rage (r : Rage.result) : json =
     in
     JSON_Array (List.map r ~f:print_item))
 
-(************************************************************************)
-(* textDocument/didOpen notification                                    *)
 (************************************************************************)
 
 let parse_didOpen (params : json option) : DidOpen.params =
@@ -270,8 +267,6 @@ let print_didOpen (params : DidOpen.params) : json =
       [("textDocument", params.textDocument |> print_textDocumentItem)])
 
 (************************************************************************)
-(* textDocument/didClose notification                                   *)
-(************************************************************************)
 
 let parse_didClose (params : json option) : DidClose.params =
   DidClose.
@@ -280,8 +275,6 @@ let parse_didClose (params : json option) : DidClose.params =
         Jget.obj_exn params "textDocument" |> parse_textDocumentIdentifier;
     }
 
-(************************************************************************)
-(* textDocument/didSave notification                                    *)
 (************************************************************************)
 
 let parse_didSave (params : json option) : DidSave.params =
@@ -292,8 +285,6 @@ let parse_didSave (params : json option) : DidSave.params =
       text = Jget.string_opt params "text";
     }
 
-(************************************************************************)
-(* textDocument/didChange notification                                  *)
 (************************************************************************)
 
 let parse_didChange (params : json option) : DidChange.params =
@@ -314,8 +305,6 @@ let parse_didChange (params : json option) : DidChange.params =
         |> List.map ~f:parse_textDocumentContentChangeEvent;
     })
 
-(************************************************************************)
-(* textDocument/signatureHelp notification                              *)
 (************************************************************************)
 
 let parse_signatureHelp (params : json option) : SignatureHelp.params =
@@ -355,16 +344,12 @@ let print_signatureHelp (r : SignatureHelp.result) : json =
         ])
 
 (************************************************************************)
-(* codeLens/resolve Request                                             *)
-(************************************************************************)
 
 let parse_codeLensResolve (params : json option) : CodeLensResolve.params =
   parse_codeLens params
 
 let print_codeLensResolve (r : CodeLensResolve.result) : json = print_codeLens r
 
-(************************************************************************)
-(* textDocument/rename Request                                          *)
 (************************************************************************)
 
 let parse_documentRename (params : json option) : Rename.params =
@@ -379,8 +364,6 @@ let parse_documentRename (params : json option) : Rename.params =
 let print_documentRename : Rename.result -> json = print_workspaceEdit
 
 (************************************************************************)
-(* textDocument/codeLens Request                                        *)
-(************************************************************************)
 
 let parse_documentCodeLens (params : json option) : DocumentCodeLens.params =
   DocumentCodeLens.
@@ -392,8 +375,6 @@ let parse_documentCodeLens (params : json option) : DocumentCodeLens.params =
 let print_documentCodeLens (r : DocumentCodeLens.result) : json =
   JSON_Array (List.map r ~f:print_codeLens)
 
-(************************************************************************)
-(* textDocument/publishDiagnostics notification                         *)
 (************************************************************************)
 
 let print_diagnostic (diagnostic : PublishDiagnostics.diagnostic) : json =
@@ -502,8 +483,6 @@ let parse_codeActionRequest (j : json option) : CodeActionRequest.params =
     })
 
 (************************************************************************)
-(* textDocument/CodeAction result                                       *)
-(************************************************************************)
 
 let print_codeAction (c : CodeAction.t) : json =
   CodeAction.(
@@ -530,10 +509,6 @@ let print_codeActionResult (c : CodeAction.result) : json =
     in
     JSON_Array (List.map c ~f:print_command_or_action))
 
-(* print_codeAction *)
-
-(************************************************************************)
-(* window/logMessage notification                                       *)
 (************************************************************************)
 
 let print_logMessage (type_ : MessageType.t) (message : string) : json =
@@ -546,8 +521,6 @@ let print_logMessage (type_ : MessageType.t) (message : string) : json =
       ])
 
 (************************************************************************)
-(* window/showMessage notification                                      *)
-(************************************************************************)
 
 let print_showMessage (type_ : MessageType.t) (message : string) : json =
   ShowMessage.(
@@ -558,8 +531,6 @@ let print_showMessage (type_ : MessageType.t) (message : string) : json =
         ("message", JSON_String r.message);
       ])
 
-(************************************************************************)
-(* window/showMessage request                                           *)
 (************************************************************************)
 
 let print_showMessageRequest (r : ShowMessageRequest.showMessageRequestParams) :
@@ -584,14 +555,12 @@ let parse_result_showMessageRequest (result : json option) :
     Option.map title ~f:(fun title -> { title }))
 
 (************************************************************************)
-(* window/showStatus request                                            *)
-(************************************************************************)
 
-let print_showStatus (r : ShowStatus.showStatusParams) : json =
+let print_showStatus (r : ShowStatusFB.showStatusParams) : json =
   let print_action (action : ShowMessageRequest.messageActionItem) : json =
     JSON_Object [("title", JSON_String action.ShowMessageRequest.title)]
   in
-  let rr = r.ShowStatus.request in
+  let rr = r.ShowStatusFB.request in
   Jprint.object_opt
     [
       ("type", Some (int_ (MessageType.to_enum rr.ShowMessageRequest.type_)));
@@ -600,55 +569,21 @@ let print_showStatus (r : ShowStatus.showStatusParams) : json =
           (JSON_Array (List.map rr.ShowMessageRequest.actions ~f:print_action))
       );
       ("message", Some (JSON_String rr.ShowMessageRequest.message));
-      ("shortMessage", Option.map r.ShowStatus.shortMessage ~f:string_);
+      ("shortMessage", Option.map r.ShowStatusFB.shortMessage ~f:string_);
       ( "progress",
-        Option.map r.ShowStatus.progress ~f:(fun progress ->
+        Option.map r.ShowStatusFB.progress ~f:(fun progress ->
             Jprint.object_opt
               [
                 ("numerator", Some (int_ progress));
-                ("denominator", Option.map r.ShowStatus.total ~f:int_);
+                ("denominator", Option.map r.ShowStatusFB.total ~f:int_);
               ]) );
     ]
 
 (************************************************************************)
-(* window/progress notification                                         *)
-(************************************************************************)
 
-let print_progress (id : int) (label : string option) : json =
-  let r = { Progress.id; label } in
-  JSON_Object
-    [
-      ("id", r.Progress.id |> int_);
-      ( "label",
-        match r.Progress.label with
-        | None -> JSON_Null
-        | Some s -> JSON_String s );
-    ]
+let print_connectionStatus (p : ConnectionStatusFB.params) : json =
+  ConnectionStatusFB.(JSON_Object [("isConnected", JSON_Bool p.isConnected)])
 
-(************************************************************************)
-(* window/actionRequired notification                                   *)
-(************************************************************************)
-
-let print_actionRequired (id : int) (label : string option) : json =
-  let r = { ActionRequired.id; label } in
-  JSON_Object
-    [
-      ("id", r.ActionRequired.id |> int_);
-      ( "label",
-        match r.ActionRequired.label with
-        | None -> JSON_Null
-        | Some s -> JSON_String s );
-    ]
-
-(************************************************************************)
-(* telemetry/connectionStatus notification                              *)
-(************************************************************************)
-
-let print_connectionStatus (p : ConnectionStatus.params) : json =
-  ConnectionStatus.(JSON_Object [("isConnected", JSON_Bool p.isConnected)])
-
-(************************************************************************)
-(* textDocument/hover request                                           *)
 (************************************************************************)
 
 let parse_hover (params : json option) : Hover.params =
@@ -666,18 +601,6 @@ let print_hover (r : Hover.result) : json =
           ("range", Option.map r.range ~f:print_range);
         ])
 
-(************************************************************************)
-(* textDocument/definition and /typeDefinition requests                 *)
-(************************************************************************)
-
-let parse_definition (params : json option) : Definition.params =
-  parse_textDocumentPositionParams params
-
-let print_definition (r : Definition.result) : json =
-  JSON_Array (List.map r ~f:print_definition_location)
-
-(************************************************************************)
-(* completionItem/resolve request                                       *)
 (************************************************************************)
 
 let parse_completionItem (params : json option) : CompletionItemResolve.params =
@@ -754,10 +677,6 @@ let print_completionItem (item : Completion.completionItem) : json =
         ("data", item.data);
       ])
 
-(************************************************************************)
-(* textDocument/completion request                                      *)
-(************************************************************************)
-
 let parse_completion (params : json option) : Completion.params =
   Lsp.Completion.(
     let context = Jget.obj_opt params "context" in
@@ -787,8 +706,6 @@ let print_completion (r : Completion.result) : json =
       ])
 
 (************************************************************************)
-(* workspace/symbol request                                             *)
-(************************************************************************)
 
 let parse_workspaceSymbol (params : json option) : WorkspaceSymbol.params =
   WorkspaceSymbol.{ query = Jget.string_exn params "query" }
@@ -796,8 +713,6 @@ let parse_workspaceSymbol (params : json option) : WorkspaceSymbol.params =
 let print_workspaceSymbol (r : WorkspaceSymbol.result) : json =
   JSON_Array (List.map r ~f:print_symbolInformation)
 
-(************************************************************************)
-(* textDocument/documentSymbol request                                  *)
 (************************************************************************)
 
 let parse_documentSymbol (params : json option) : DocumentSymbol.params =
@@ -810,8 +725,6 @@ let parse_documentSymbol (params : json option) : DocumentSymbol.params =
 let print_documentSymbol (r : DocumentSymbol.result) : json =
   JSON_Array (List.map r ~f:print_symbolInformation)
 
-(************************************************************************)
-(* textDocument/references request                                      *)
 (************************************************************************)
 
 let parse_findReferences (params : json option) : FindReferences.params =
@@ -827,23 +740,6 @@ let parse_findReferences (params : json option) : FindReferences.params =
       };
   }
 
-(************************************************************************)
-(* textDocument/implementation request                                  *)
-(************************************************************************)
-
-let parse_goToImplementation (params : json option) : GoToImplementation.params
-    =
-  { GoToImplementation.loc = parse_textDocumentPositionParams params }
-
-(************************************************************************)
-(* shared by textDocument/references and textDocument/implementation    *)
-(************************************************************************)
-
-let print_Locations (r : Location.t list) : json =
-  JSON_Array (List.map r ~f:print_location)
-
-(************************************************************************)
-(* textDocument/documentHighlight request                               *)
 (************************************************************************)
 
 let parse_documentHighlight (params : json option) : DocumentHighlight.params =
@@ -862,17 +758,15 @@ let print_documentHighlight (r : DocumentHighlight.result) : json =
     JSON_Array (List.map r ~f:print_highlight))
 
 (************************************************************************)
-(* textDocument/typeCoverage request                                    *)
-(************************************************************************)
 
-let parse_typeCoverage (params : json option) : TypeCoverage.params =
+let parse_typeCoverage (params : json option) : TypeCoverageFB.params =
   {
-    TypeCoverage.textDocument =
+    TypeCoverageFB.textDocument =
       Jget.obj_exn params "textDocument" |> parse_textDocumentIdentifier;
   }
 
-let print_typeCoverage (r : TypeCoverage.result) : json =
-  TypeCoverage.(
+let print_typeCoverage (r : TypeCoverageFB.result) : json =
+  TypeCoverageFB.(
     let print_uncov (uncov : uncoveredRange) : json =
       Jprint.object_opt
         [
@@ -888,15 +782,10 @@ let print_typeCoverage (r : TypeCoverage.result) : json =
         ("defaultMessage", JSON_String r.defaultMessage);
       ])
 
-(************************************************************************)
-(* workspace/toggleTypeCoverage request                                 *)
-(************************************************************************)
-let parse_toggleTypeCoverage (params : json option) : ToggleTypeCoverage.params
-    =
-  { ToggleTypeCoverage.toggle = Jget.bool_d params "toggle" ~default:false }
+let parse_toggleTypeCoverage (params : json option) :
+    ToggleTypeCoverageFB.params =
+  { ToggleTypeCoverageFB.toggle = Jget.bool_d params "toggle" ~default:false }
 
-(************************************************************************)
-(* textDocument/formatting request                                      *)
 (************************************************************************)
 
 let parse_documentFormatting (params : json option) : DocumentFormatting.params
@@ -910,10 +799,6 @@ let parse_documentFormatting (params : json option) : DocumentFormatting.params
 let print_documentFormatting (r : DocumentFormatting.result) : json =
   JSON_Array (List.map r ~f:print_textEdit)
 
-(************************************************************************)
-(* textDocument/rangeFormatting request                                 *)
-(************************************************************************)
-
 let parse_documentRangeFormatting (params : json option) :
     DocumentRangeFormatting.params =
   {
@@ -925,10 +810,6 @@ let parse_documentRangeFormatting (params : json option) :
 
 let print_documentRangeFormatting (r : DocumentRangeFormatting.result) : json =
   JSON_Array (List.map r ~f:print_textEdit)
-
-(************************************************************************)
-(* textDocument/onTypeFormatting request                                *)
-(************************************************************************)
 
 let parse_documentOnTypeFormatting (params : json option) :
     DocumentOnTypeFormatting.params =
@@ -944,8 +825,6 @@ let print_documentOnTypeFormatting (r : DocumentOnTypeFormatting.result) : json
     =
   JSON_Array (List.map r ~f:print_textEdit)
 
-(************************************************************************)
-(* initialize request                                                   *)
 (************************************************************************)
 
 let parse_initialize (params : json option) : Initialize.params =
@@ -1032,11 +911,7 @@ let parse_initialize (params : json option) : Initialize.params =
         Jget.array_opt json "valueSet" >>= fun ls ->
         Some { codeAction_valueSet = parse_kinds ls })
     and parse_window json =
-      {
-        status = Jget.obj_opt json "status" |> Option.is_some;
-        progress = Jget.obj_opt json "progress" |> Option.is_some;
-        actionRequired = Jget.obj_opt json "actionRequired" |> Option.is_some;
-      }
+      { status = Jget.obj_opt json "status" |> Option.is_some }
     and parse_telemetry json =
       {
         connectionStatus =
@@ -1137,13 +1012,12 @@ let print_initialize (r : Initialize.result) : json =
               );
               ( "implementationProvider",
                 Some (JSON_Bool cap.implementationProvider) );
-              ("typeCoverageProvider", Some (JSON_Bool cap.typeCoverageProvider));
-              ("rageProvider", Some (JSON_Bool cap.rageProvider));
+              ( "typeCoverageProvider",
+                Some (JSON_Bool cap.typeCoverageProviderFB) );
+              ("rageProvider", Some (JSON_Bool cap.rageProviderFB));
             ] );
       ])
 
-(************************************************************************)
-(* capabilities                                                         *)
 (************************************************************************)
 
 let print_registrationOptions (registerOptions : Lsp.lsp_registration_options) :
@@ -1198,8 +1072,6 @@ let parse_didChangeWatchedFiles (json : Hh_json.json option) :
   in
   { DidChangeWatchedFiles.changes }
 
-(************************************************************************)
-(* error response                                                       *)
 (************************************************************************)
 
 let error_of_exn (e : exn) : Lsp.Error.t =
@@ -1280,7 +1152,7 @@ let parse_error (error : json) : Error.t =
 let request_name_to_string (request : lsp_request) : string =
   match request with
   | ShowMessageRequestRequest _ -> "window/showMessageRequest"
-  | ShowStatusRequest _ -> "window/showStatus"
+  | ShowStatusRequestFB _ -> "window/showStatus"
   | InitializeRequest _ -> "initialize"
   | RegisterCapabilityRequest _ -> "client/registerCapability"
   | ShutdownRequest -> "shutdown"
@@ -1291,28 +1163,28 @@ let request_name_to_string (request : lsp_request) : string =
   | CompletionItemResolveRequest _ -> "completionItem/resolve"
   | DefinitionRequest _ -> "textDocument/definition"
   | TypeDefinitionRequest _ -> "textDocument/typeDefinition"
+  | ImplementationRequest _ -> "textDocument/implementation"
   | WorkspaceSymbolRequest _ -> "workspace/symbol"
   | DocumentSymbolRequest _ -> "textDocument/documentSymbol"
   | FindReferencesRequest _ -> "textDocument/references"
-  | GoToImplementationRequest _ -> "textDocument/implementation"
   | DocumentHighlightRequest _ -> "textDocument/documentHighlight"
-  | TypeCoverageRequest _ -> "textDocument/typeCoverage"
+  | TypeCoverageRequestFB _ -> "textDocument/typeCoverage"
   | DocumentFormattingRequest _ -> "textDocument/formatting"
   | DocumentRangeFormattingRequest _ -> "textDocument/rangeFormatting"
   | DocumentOnTypeFormattingRequest _ -> "textDocument/onTypeFormatting"
-  | RageRequest -> "telemetry/rage"
+  | RageRequestFB -> "telemetry/rage"
   | RenameRequest _ -> "textDocument/rename"
   | DocumentCodeLensRequest _ -> "textDocument/codeLens"
   | SignatureHelpRequest _ -> "textDocument/signatureHelp"
-  | HackTestStartServerRequest -> "$test/startHhServer"
-  | HackTestStopServerRequest -> "$test/stopHhServer"
-  | HackTestShutdownServerlessRequest -> "$test/shutdownServerlessIde"
+  | HackTestStartServerRequestFB -> "$test/startHhServer"
+  | HackTestStopServerRequestFB -> "$test/stopHhServer"
+  | HackTestShutdownServerlessRequestFB -> "$test/shutdownServerlessIde"
   | UnknownRequest (method_, _params) -> method_
 
 let result_name_to_string (result : lsp_result) : string =
   match result with
   | ShowMessageRequestResult _ -> "window/showMessageRequest"
-  | ShowStatusResult _ -> "window/showStatus"
+  | ShowStatusResultFB _ -> "window/showStatus"
   | InitializeResult _ -> "initialize"
   | ShutdownResult -> "shutdown"
   | CodeLensResolveResult _ -> "codeLens/resolve"
@@ -1322,22 +1194,22 @@ let result_name_to_string (result : lsp_result) : string =
   | CompletionItemResolveResult _ -> "completionItem/resolve"
   | DefinitionResult _ -> "textDocument/definition"
   | TypeDefinitionResult _ -> "textDocument/typeDefinition"
+  | ImplementationResult _ -> "textDocument/implementation"
   | WorkspaceSymbolResult _ -> "workspace/symbol"
   | DocumentSymbolResult _ -> "textDocument/documentSymbol"
   | FindReferencesResult _ -> "textDocument/references"
-  | GoToImplementationResult _ -> "textDocument/implementation"
   | DocumentHighlightResult _ -> "textDocument/documentHighlight"
-  | TypeCoverageResult _ -> "textDocument/typeCoverage"
+  | TypeCoverageResultFB _ -> "textDocument/typeCoverage"
   | DocumentFormattingResult _ -> "textDocument/formatting"
   | DocumentRangeFormattingResult _ -> "textDocument/rangeFormatting"
   | DocumentOnTypeFormattingResult _ -> "textDocument/onTypeFormatting"
-  | RageResult _ -> "telemetry/rage"
+  | RageResultFB _ -> "telemetry/rage"
   | RenameResult _ -> "textDocument/rename"
   | DocumentCodeLensResult _ -> "textDocument/codeLens"
   | SignatureHelpResult _ -> "textDocument/signatureHelp"
-  | HackTestStartServerResult -> "$test/startHhServer"
-  | HackTestStopServerResult -> "$test/stopHhServer"
-  | HackTestShutdownServerlessResult -> "$test/shutdownServerlessIde"
+  | HackTestStartServerResultFB -> "$test/startHhServer"
+  | HackTestStopServerResultFB -> "$test/stopHhServer"
+  | HackTestShutdownServerlessResultFB -> "$test/shutdownServerlessIde"
   | ErrorResult (e, _stack) -> "ERROR/" ^ e.Error.message
 
 let notification_name_to_string (notification : lsp_notification) : string =
@@ -1353,13 +1225,11 @@ let notification_name_to_string (notification : lsp_notification) : string =
   | TelemetryNotification _ -> "telemetry/event"
   | LogMessageNotification _ -> "window/logMessage"
   | ShowMessageNotification _ -> "window/showMessage"
-  | ProgressNotification _ -> "window/progress"
-  | ActionRequiredNotification _ -> "window/actionRequired"
-  | ConnectionStatusNotification _ -> "telemetry/connectionStatus"
+  | ConnectionStatusNotificationFB _ -> "telemetry/connectionStatus"
   | InitializedNotification -> "initialized"
   | SetTraceNotification -> "$/setTraceNotification"
   | LogTraceNotification -> "$/logTraceNotification"
-  | ToggleTypeCoverageNotification _ -> "workspace/toggleTypeCoverage"
+  | ToggleTypeCoverageNotificationFB _ -> "workspace/toggleTypeCoverage"
   | UnknownNotification (method_, _params) -> method_
 
 let message_name_to_string (message : lsp_message) : string =
@@ -1390,21 +1260,22 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
   | "textDocument/completion" -> CompletionRequest (parse_completion params)
   | "completionItem/resolve" ->
     CompletionItemResolveRequest (parse_completionItem params)
-  | "textDocument/definition" -> DefinitionRequest (parse_definition params)
+  | "textDocument/definition" ->
+    DefinitionRequest (parse_textDocumentPositionParams params)
   | "textDocument/typeDefinition" ->
-    TypeDefinitionRequest (parse_definition params)
+    TypeDefinitionRequest (parse_textDocumentPositionParams params)
+  | "textDocument/implementation" ->
+    ImplementationRequest (parse_textDocumentPositionParams params)
   | "workspace/symbol" -> WorkspaceSymbolRequest (parse_workspaceSymbol params)
   | "textDocument/documentSymbol" ->
     DocumentSymbolRequest (parse_documentSymbol params)
   | "textDocument/references" ->
     FindReferencesRequest (parse_findReferences params)
-  | "textDocument/implementation" ->
-    GoToImplementationRequest (parse_goToImplementation params)
   | "textDocument/rename" -> RenameRequest (parse_documentRename params)
   | "textDocument/documentHighlight" ->
     DocumentHighlightRequest (parse_documentHighlight params)
   | "textDocument/typeCoverage" ->
-    TypeCoverageRequest (parse_typeCoverage params)
+    TypeCoverageRequestFB (parse_typeCoverage params)
   | "textDocument/formatting" ->
     DocumentFormattingRequest (parse_documentFormatting params)
   | "textDocument/rangeFormatting" ->
@@ -1415,10 +1286,10 @@ let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
     SignatureHelpRequest (parse_signatureHelp params)
   | "textDocument/codeLens" ->
     DocumentCodeLensRequest (parse_documentCodeLens params)
-  | "telemetry/rage" -> RageRequest
-  | "$test/startHhServer" -> HackTestStartServerRequest
-  | "$test/stopHhServer" -> HackTestStopServerRequest
-  | "$test/shutdownServerlessIde" -> HackTestShutdownServerlessRequest
+  | "telemetry/rage" -> RageRequestFB
+  | "$test/startHhServer" -> HackTestStartServerRequestFB
+  | "$test/stopHhServer" -> HackTestStopServerRequestFB
+  | "$test/shutdownServerlessIde" -> HackTestShutdownServerlessRequestFB
   | "window/showMessageRequest"
   | "window/showStatus"
   | _ ->
@@ -1439,7 +1310,7 @@ let parse_lsp_notification (method_ : string) (params : json option) :
   | "workspace/didChangeWatchedFiles" ->
     DidChangeWatchedFilesNotification (parse_didChangeWatchedFiles params)
   | "workspace/toggleTypeCoverage" ->
-    ToggleTypeCoverageNotification (parse_toggleTypeCoverage params)
+    ToggleTypeCoverageNotificationFB (parse_toggleTypeCoverage params)
   | "textDocument/publishDiagnostics"
   | "window/logMessage"
   | "window/showMessage"
@@ -1454,8 +1325,8 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   match request with
   | ShowMessageRequestRequest _ ->
     ShowMessageRequestResult (parse_result_showMessageRequest (Some result))
-  | ShowStatusRequest _ ->
-    ShowStatusResult (parse_result_showMessageRequest (Some result))
+  | ShowStatusRequestFB _ ->
+    ShowStatusResultFB (parse_result_showMessageRequest (Some result))
   (* shares result type *)
   | InitializeRequest _
   | RegisterCapabilityRequest _
@@ -1467,22 +1338,22 @@ let parse_lsp_result (request : lsp_request) (result : json) : lsp_result =
   | CompletionItemResolveRequest _
   | DefinitionRequest _
   | TypeDefinitionRequest _
+  | ImplementationRequest _
   | WorkspaceSymbolRequest _
   | DocumentSymbolRequest _
   | FindReferencesRequest _
-  | GoToImplementationRequest _
   | DocumentHighlightRequest _
-  | TypeCoverageRequest _
+  | TypeCoverageRequestFB _
   | DocumentFormattingRequest _
   | DocumentRangeFormattingRequest _
   | DocumentOnTypeFormattingRequest _
-  | RageRequest
+  | RageRequestFB
   | RenameRequest _
   | DocumentCodeLensRequest _
   | SignatureHelpRequest _
-  | HackTestStartServerRequest
-  | HackTestStopServerRequest
-  | HackTestShutdownServerlessRequest
+  | HackTestStartServerRequestFB
+  | HackTestStopServerRequestFB
+  | HackTestShutdownServerlessRequestFB
   | UnknownRequest _ ->
     raise (Error.Parse ("Don't know how to parse LSP response " ^ method_))
 
@@ -1516,7 +1387,7 @@ let print_lsp_request (id : lsp_id) (request : lsp_request) : json =
   let params =
     match request with
     | ShowMessageRequestRequest r -> print_showMessageRequest r
-    | ShowStatusRequest r -> print_showStatus r
+    | ShowStatusRequestFB r -> print_showStatus r
     | RegisterCapabilityRequest r -> print_registerCapability r
     | InitializeRequest _
     | ShutdownRequest
@@ -1527,22 +1398,22 @@ let print_lsp_request (id : lsp_id) (request : lsp_request) : json =
     | CompletionItemResolveRequest _
     | DefinitionRequest _
     | TypeDefinitionRequest _
+    | ImplementationRequest _
     | WorkspaceSymbolRequest _
     | DocumentSymbolRequest _
     | FindReferencesRequest _
-    | GoToImplementationRequest _
     | DocumentHighlightRequest _
-    | TypeCoverageRequest _
+    | TypeCoverageRequestFB _
     | DocumentFormattingRequest _
     | DocumentRangeFormattingRequest _
     | DocumentOnTypeFormattingRequest _
-    | RageRequest
+    | RageRequestFB
     | RenameRequest _
     | DocumentCodeLensRequest _
     | SignatureHelpRequest _
-    | HackTestStartServerRequest
-    | HackTestStopServerRequest
-    | HackTestShutdownServerlessRequest
+    | HackTestStartServerRequestFB
+    | HackTestStopServerRequestFB
+    | HackTestShutdownServerlessRequestFB
     | UnknownRequest _ ->
       failwith ("Don't know how to print request " ^ method_)
   in
@@ -1566,26 +1437,26 @@ let print_lsp_response
     | CodeActionResult r -> print_codeActionResult r
     | CompletionResult r -> print_completion r
     | CompletionItemResolveResult r -> print_completionItem r
-    | DefinitionResult r -> print_definition r
-    | TypeDefinitionResult r -> print_definition r
+    | DefinitionResult r -> print_definition_locations r
+    | TypeDefinitionResult r -> print_definition_locations r
+    | ImplementationResult r -> print_locations r
     | WorkspaceSymbolResult r -> print_workspaceSymbol r
     | DocumentSymbolResult r -> print_documentSymbol r
-    | FindReferencesResult r -> print_Locations r
-    | GoToImplementationResult r -> print_Locations r
+    | FindReferencesResult r -> print_locations r
     | DocumentHighlightResult r -> print_documentHighlight r
-    | TypeCoverageResult r -> print_typeCoverage r
+    | TypeCoverageResultFB r -> print_typeCoverage r
     | DocumentFormattingResult r -> print_documentFormatting r
     | DocumentRangeFormattingResult r -> print_documentRangeFormatting r
     | DocumentOnTypeFormattingResult r -> print_documentOnTypeFormatting r
-    | RageResult r -> print_rage r
+    | RageResultFB r -> print_rage r
     | RenameResult r -> print_documentRename r
     | DocumentCodeLensResult r -> print_documentCodeLens r
     | SignatureHelpResult r -> print_signatureHelp r
-    | HackTestStartServerResult -> JSON_Null
-    | HackTestStopServerResult -> JSON_Null
-    | HackTestShutdownServerlessResult -> JSON_Null
+    | HackTestStartServerResultFB -> JSON_Null
+    | HackTestStopServerResultFB -> JSON_Null
+    | HackTestShutdownServerlessResultFB -> JSON_Null
     | ShowMessageRequestResult _
-    | ShowStatusResult _ ->
+    | ShowStatusResultFB _ ->
       failwith ("Don't know how to print result " ^ method_)
     | ErrorResult (e, stack) -> print_error ?include_error_stack_trace e stack
   in
@@ -1609,10 +1480,7 @@ let print_lsp_notification (notification : lsp_notification) : json =
       print_logMessage r.LogMessage.type_ r.LogMessage.message
     | ShowMessageNotification r ->
       print_showMessage r.ShowMessage.type_ r.ShowMessage.message
-    | ProgressNotification r -> print_progress r.Progress.id r.Progress.label
-    | ActionRequiredNotification r ->
-      print_actionRequired r.ActionRequired.id r.ActionRequired.label
-    | ConnectionStatusNotification r -> print_connectionStatus r
+    | ConnectionStatusNotificationFB r -> print_connectionStatus r
     | ExitNotification
     | InitializedNotification
     | SetTraceNotification
@@ -1622,7 +1490,7 @@ let print_lsp_notification (notification : lsp_notification) : json =
     | DidSaveNotification _
     | DidChangeNotification _
     | DidChangeWatchedFilesNotification _
-    | ToggleTypeCoverageNotification _
+    | ToggleTypeCoverageNotificationFB _
     | UnknownNotification _ ->
       failwith ("Don't know how to print notification " ^ method_)
   in

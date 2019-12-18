@@ -100,7 +100,7 @@ module Main_env = struct
     uris_with_diagnostics: UriSet.t;
     uris_with_unsaved_changes: UriSet.t;
     (* see comment in get_uris_with_unsaved_changes *)
-    hh_server_status: ShowStatus.params;
+    hh_server_status: ShowStatusFB.params;
   }
 end
 
@@ -671,12 +671,12 @@ let status_tick () : string =
   statusFrames.(int_of_float time mod 2)
 
 (* request_showStatus: pops up a dialog *)
-let request_showStatus
-    ?(on_result : ShowStatus.result -> state -> state Lwt.t =
+let request_showStatusFB
+    ?(on_result : ShowStatusFB.result -> state -> state Lwt.t =
       (fun _ state -> Lwt.return state))
     ?(on_error : Error.t -> state -> state Lwt.t =
       (fun _ state -> Lwt.return state))
-    (params : ShowStatus.params) : unit =
+    (params : ShowStatusFB.params) : unit =
   let initialize_params = initialize_params_exc () in
   if not (Lsp_helpers.supports_status initialize_params) then
     ()
@@ -684,19 +684,19 @@ let request_showStatus
     (* We try not to send duplicate statuses. *)
     (* That means: if you call request_showStatus but your message is the same as *)
     (* what's already up, then you won't be shown, and your callbacks won't be shown. *)
-    let msg = params.ShowStatus.request.ShowMessageRequest.message in
+    let msg = params.ShowStatusFB.request.ShowMessageRequest.message in
     if msg = !showStatus_outstanding then
       ()
     else (
       showStatus_outstanding := msg;
       let id = NumberId (Jsonrpc.get_next_request_id ()) in
-      let request = ShowStatusRequest params in
+      let request = ShowStatusRequestFB params in
       to_stdout (print_lsp_request id request);
 
       let handler (result : lsp_result) (state : state) : state Lwt.t =
         if msg = !showStatus_outstanding then showStatus_outstanding := "";
         match result with
-        | ShowStatusResult result -> on_result result state
+        | ShowStatusResultFB result -> on_result result state
         | ErrorResult (error, _stack) -> on_error error state
         | _ ->
           let error =
@@ -1010,9 +1010,11 @@ let state_to_rage (state : state) : string =
           "uris_with_unsaved_changes";
           menv.uris_with_unsaved_changes |> UriSet.cardinal |> string_of_int;
           "hh_server_status.message";
-          menv.hh_server_status.ShowStatus.request.ShowMessageRequest.message;
+          menv.hh_server_status.ShowStatusFB.request.ShowMessageRequest.message;
           "hh_server_status.shortMessage";
-          Option.value menv.hh_server_status.ShowStatus.shortMessage ~default:"";
+          Option.value
+            menv.hh_server_status.ShowStatusFB.shortMessage
+            ~default:"";
         ]
     | In_init ienv ->
       In_init_env.
@@ -1049,9 +1051,9 @@ let state_to_rage (state : state) : string =
   in
   state_to_string state ^ "\n" ^ String.concat ~sep:"\n" details ^ "\n"
 
-let do_rage (state : state) (ref_unblocked_time : float ref) : Rage.result Lwt.t
-    =
-  Rage.(
+let do_rageFB (state : state) (ref_unblocked_time : float ref) :
+    RageFB.result Lwt.t =
+  RageFB.(
     let items : rageItem list ref = ref [] in
     let add item = items := item :: !items in
     let add_data data = add { title = None; data } in
@@ -1198,15 +1200,15 @@ let do_rage (state : state) (ref_unblocked_time : float ref) : Rage.result Lwt.t
     (* that's it! *)
     Lwt.return !items)
 
-let do_toggleTypeCoverage
+let do_toggleTypeCoverageFB
     (conn : server_conn)
     (ref_unblocked_time : float ref)
-    (params : ToggleTypeCoverage.params) : unit Lwt.t =
+    (params : ToggleTypeCoverageFB.params) : unit Lwt.t =
   (* Currently, the only thing to do on toggling type coverage is turn on dynamic view *)
   let command =
-    ServerCommandTypes.DYNAMIC_VIEW params.ToggleTypeCoverage.toggle
+    ServerCommandTypes.DYNAMIC_VIEW params.ToggleTypeCoverageFB.toggle
   in
-  cached_toggle_state := params.ToggleTypeCoverage.toggle;
+  cached_toggle_state := params.ToggleTypeCoverageFB.toggle;
   rpc conn ref_unblocked_time command
 
 let do_didOpen
@@ -2020,14 +2022,13 @@ let do_findReferences
 let do_goToImplementation
     (conn : server_conn)
     (ref_unblocked_time : float ref)
-    (params : GoToImplementation.params) : GoToImplementation.result Lwt.t =
+    (params : Implementation.params) : Implementation.result Lwt.t =
   let { Ide_api_types.line; column } =
-    lsp_position_to_ide
-      params.GoToImplementation.loc.TextDocumentPositionParams.position
+    lsp_position_to_ide params.TextDocumentPositionParams.position
   in
   let filename =
     Lsp_helpers.lsp_textDocumentIdentifier_to_filename
-      params.GoToImplementation.loc.TextDocumentPositionParams.textDocument
+      params.TextDocumentPositionParams.textDocument
   in
   let labelled_file = ServerCommandTypes.LabelledFileName filename in
   let command =
@@ -2075,7 +2076,7 @@ let do_highlight_local
   | Error edata -> raise (Server_nonfatal_exception edata)
 
 let format_typeCoverage_result results counts =
-  TypeCoverage.(
+  TypeCoverageFB.(
     let coveredPercent = Coverage_level.get_percent counts in
     let hack_coverage_to_lsp (pos, level) =
       let range = hack_pos_to_lsp_range pos in
@@ -2092,11 +2093,11 @@ let format_typeCoverage_result results counts =
       defaultMessage = "Un-type checked code. Consider adding type annotations.";
     })
 
-let do_typeCoverage
+let do_typeCoverageFB
     (conn : server_conn)
     (ref_unblocked_time : float ref)
-    (params : TypeCoverage.params) : TypeCoverage.result Lwt.t =
-  TypeCoverage.(
+    (params : TypeCoverageFB.params) : TypeCoverageFB.result Lwt.t =
+  TypeCoverageFB.(
     let filename =
       Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument
     in
@@ -2110,13 +2111,13 @@ let do_typeCoverage
     let formatted = format_typeCoverage_result results counts in
     Lwt.return formatted)
 
-let do_typeCoverage_local
+let do_typeCoverage_localFB
     (ide_service : ClientIdeService.t)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
-    (params : TypeCoverage.params) : TypeCoverage.result Lwt.t =
-  let open TypeCoverage in
+    (params : TypeCoverageFB.params) : TypeCoverageFB.result Lwt.t =
+  let open TypeCoverageFB in
   let document_contents =
     get_document_contents
       editor_open_files
@@ -2355,9 +2356,9 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
         let hh_server_status =
           {
             hh_server_status with
-            ShowStatus.request =
+            ShowStatusFB.request =
               {
-                hh_server_status.ShowStatus.request with
+                hh_server_status.ShowStatusFB.request with
                 ShowMessageRequest.type_;
                 message;
               };
@@ -2413,12 +2414,12 @@ let do_diagnostics
   (* this is "(uris_with_diagnostics \ uris_without) U uris_with" *)
   UriSet.union (UriSet.diff uris_with_diagnostics uris_without) uris_with
 
-let get_client_ide_status (ide_service : ClientIdeService.t) : ShowStatus.params
-    =
+let get_client_ide_status (ide_service : ClientIdeService.t) :
+    ShowStatusFB.params =
   match ClientIdeService.get_status ide_service with
   | ClientIdeService.Status.Not_started ->
     {
-      ShowStatus.request =
+      ShowStatusFB.request =
         ShowMessageRequest.
           {
             type_ = MessageType.ErrorMessage;
@@ -2431,7 +2432,7 @@ let get_client_ide_status (ide_service : ClientIdeService.t) : ShowStatus.params
     }
   | ClientIdeService.Status.Initializing ->
     {
-      ShowStatus.request =
+      ShowStatusFB.request =
         {
           ShowMessageRequest.type_ = MessageType.WarningMessage;
           message = "IDE services: initializing.";
@@ -2444,7 +2445,7 @@ let get_client_ide_status (ide_service : ClientIdeService.t) : ShowStatus.params
   | ClientIdeService.Status.Processing_files _
   | ClientIdeService.Status.Ready ->
     {
-      ShowStatus.request =
+      ShowStatusFB.request =
         {
           ShowMessageRequest.type_ = MessageType.InfoMessage;
           message = "IDE services: ready.";
@@ -2456,7 +2457,7 @@ let get_client_ide_status (ide_service : ClientIdeService.t) : ShowStatus.params
     }
   | ClientIdeService.Status.Stopped { Marshal_tools.message; _ } ->
     {
-      ShowStatus.request =
+      ShowStatusFB.request =
         ShowMessageRequest.
           {
             type_ = MessageType.ErrorMessage;
@@ -2469,8 +2470,8 @@ let get_client_ide_status (ide_service : ClientIdeService.t) : ShowStatus.params
     }
 
 let merge_statuses
-    ~(hh_server_status : ShowStatus.params)
-    ~(client_ide_status : ShowStatus.params) : ShowStatus.params =
+    ~(hh_server_status : ShowStatusFB.params)
+    ~(client_ide_status : ShowStatusFB.params) : ShowStatusFB.params =
   let add lhs rhs = Option.merge ~f:( + ) lhs rhs in
   let combine_types hh_server_type client_ide_type =
     (* Use the worse of the two status to indicate that something's not
@@ -2485,7 +2486,7 @@ let merge_statuses
     Option.merge ~f:(fun x y -> x ^ ", " ^ y) lhs rhs
   in
   let combine_messages lhs rhs = lhs ^ " " ^ rhs in
-  ShowStatus.
+  ShowStatusFB.
     {
       request =
         ShowMessageRequest.
@@ -2512,8 +2513,9 @@ let merge_statuses
     }
 
 let merge_with_client_ide_status
-    (env : env) (ide_service : ClientIdeService.t) (status : ShowStatus.params)
-    : ShowStatus.params =
+    (env : env)
+    (ide_service : ClientIdeService.t)
+    (status : ShowStatusFB.params) : ShowStatusFB.params =
   if env.use_serverless_ide then
     let client_ide_status = get_client_ide_status ide_service in
     merge_statuses ~hh_server_status:status ~client_ide_status
@@ -2524,7 +2526,7 @@ let report_connect_progress
     (env : env) (ienv : In_init_env.t) (ide_service : ClientIdeService.t) : unit
     =
   In_init_env.(
-    ShowStatus.(
+    ShowStatusFB.(
       ShowMessageRequest.(
         let time = Unix.time () in
         let delay_in_secs = int_of_float (time -. ienv.first_start_time) in
@@ -2564,7 +2566,7 @@ let report_connect_progress
               Some (Printf.sprintf "[%s] %s" progress (status_tick ()));
           }
         in
-        request_showStatus
+        request_showStatusFB
           (merge_with_client_ide_status env ide_service hh_server_status))))
 
 let report_connect_end (ienv : In_init_env.t) : state =
@@ -2580,7 +2582,7 @@ let report_connect_end (ienv : In_init_env.t) : state =
         uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
         hh_server_status =
           {
-            ShowStatus.request =
+            ShowStatusFB.request =
               {
                 ShowMessageRequest.type_ = MessageType.InfoMessage;
                 message = "hh_server: ready.";
@@ -2750,8 +2752,8 @@ let do_initialize (root : Path.t) : Initialize.result =
           executeCommandProvider = None;
           implementationProvider =
             server_local_config.ServerLocalConfig.go_to_implementation;
-          typeCoverageProvider = true;
-          rageProvider = true;
+          typeCoverageProviderFB = true;
+          rageProviderFB = true;
         };
     }
 
@@ -3286,7 +3288,8 @@ let tick_showStatus
     ~(init_id : string) : unit Lwt.t =
   let show_status () : unit Lwt.t =
     begin
-      let on_result (result : ShowStatus.result) (state : state) : state Lwt.t =
+      let on_result (result : ShowStatusFB.result) (state : state) : state Lwt.t
+          =
         let open ShowMessageRequest in
         match (result, state) with
         | (Some { title }, Lost_server _)
@@ -3330,20 +3333,20 @@ let tick_showStatus
       match !state with
       | Main_loop { Main_env.hh_server_status; _ } ->
         let shortMessage =
-          match hh_server_status.ShowStatus.shortMessage with
+          match hh_server_status.ShowStatusFB.shortMessage with
           | Some msg -> Some (msg ^ " " ^ status_tick ())
           | None -> None
         in
         let hh_server_status =
-          { hh_server_status with ShowStatus.shortMessage }
+          { hh_server_status with ShowStatusFB.shortMessage }
         in
-        request_showStatus
+        request_showStatusFB
           ~on_result
           (merge_with_client_ide_status env !ide_service hh_server_status)
       | Lost_server { Lost_env.p; _ } ->
         let hh_server_status =
           {
-            ShowStatus.request =
+            ShowStatusFB.request =
               ShowMessageRequest.
                 {
                   type_ = MessageType.ErrorMessage;
@@ -3355,7 +3358,7 @@ let tick_showStatus
             shortMessage = None;
           }
         in
-        request_showStatus
+        request_showStatusFB
           ~on_result
           (merge_with_client_ide_status env !ide_service hh_server_status)
       | _ -> ()
@@ -3453,9 +3456,9 @@ let handle_client_message
     | (Post_shutdown, _c) ->
       raise (Error.InvalidRequest "already received shutdown request")
     (* rage request *)
-    | (_, RequestMessage (id, RageRequest)) ->
-      let%lwt result = do_rage !state ref_unblocked_time in
-      respond_jsonrpc ~powered_by:Language_server id (RageResult result);
+    | (_, RequestMessage (id, RageRequestFB)) ->
+      let%lwt result = do_rageFB !state ref_unblocked_time in
+      respond_jsonrpc ~powered_by:Language_server id (RageResultFB result);
       Lwt.return_unit
     | (_, NotificationMessage (DidChangeWatchedFilesNotification notification))
       when env.use_serverless_ide ->
@@ -3514,18 +3517,21 @@ let handle_client_message
         (DocumentHighlightResult result);
       Lwt.return_unit
     (* Type coverage in serverless IDE *)
-    | (_, RequestMessage (id, TypeCoverageRequest params))
+    | (_, RequestMessage (id, TypeCoverageRequestFB params))
       when env.use_serverless_ide ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in
       let%lwt result =
-        do_typeCoverage_local
+        do_typeCoverage_localFB
           ide_service
           tracking_id
           ref_unblocked_time
           editor_open_files
           params
       in
-      respond_jsonrpc ~powered_by:Serverless_ide id (TypeCoverageResult result);
+      respond_jsonrpc
+        ~powered_by:Serverless_ide
+        id
+        (TypeCoverageResultFB result);
       Lwt.return_unit
     (* Hover docblocks in serverless IDE *)
     | (_, RequestMessage (id, HoverRequest params)) when env.use_serverless_ide
@@ -3701,12 +3707,12 @@ let handle_client_message
       respond_jsonrpc ~powered_by:Hh_server id (FindReferencesResult result);
       Lwt.return_unit
     (* textDocument/implementation request *)
-    | (Main_loop menv, RequestMessage (id, GoToImplementationRequest params)) ->
+    | (Main_loop menv, RequestMessage (id, ImplementationRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp long_timeout in
       let%lwt result =
         do_goToImplementation menv.conn ref_unblocked_time params
       in
-      respond_jsonrpc ~powered_by:Hh_server id (GoToImplementationResult result);
+      respond_jsonrpc ~powered_by:Hh_server id (ImplementationResult result);
       Lwt.return_unit
     (* textDocument/rename *)
     | (Main_loop menv, RequestMessage (id, RenameRequest params)) ->
@@ -3722,14 +3728,14 @@ let handle_client_message
       respond_jsonrpc ~powered_by:Hh_server id (DocumentHighlightResult result);
       Lwt.return_unit
     (* textDocument/typeCoverage *)
-    | (Main_loop menv, RequestMessage (id, TypeCoverageRequest params)) ->
-      let%lwt result = do_typeCoverage menv.conn ref_unblocked_time params in
-      respond_jsonrpc ~powered_by:Hh_server id (TypeCoverageResult result);
+    | (Main_loop menv, RequestMessage (id, TypeCoverageRequestFB params)) ->
+      let%lwt result = do_typeCoverageFB menv.conn ref_unblocked_time params in
+      respond_jsonrpc ~powered_by:Hh_server id (TypeCoverageResultFB result);
       Lwt.return_unit
     (* textDocument/toggleTypeCoverage *)
     | ( Main_loop menv,
-        NotificationMessage (ToggleTypeCoverageNotification params) ) ->
-      do_toggleTypeCoverage menv.conn ref_unblocked_time params
+        NotificationMessage (ToggleTypeCoverageNotificationFB params) ) ->
+      do_toggleTypeCoverageFB menv.conn ref_unblocked_time params
     (* textDocument/didOpen notification *)
     | (Main_loop menv, NotificationMessage (DidOpenNotification params)) ->
       do_didOpen menv.conn ref_unblocked_time params
@@ -3747,7 +3753,7 @@ let handle_client_message
       let%lwt result = do_signatureHelp menv.conn ref_unblocked_time params in
       respond_jsonrpc ~powered_by:Hh_server id (SignatureHelpResult result);
       Lwt.return_unit
-    | (_, RequestMessage (id, HackTestShutdownServerlessRequest))
+    | (_, RequestMessage (id, HackTestShutdownServerlessRequestFB))
       when env.use_serverless_ide ->
       let%lwt () =
         stop_ide_service
@@ -3758,21 +3764,21 @@ let handle_client_message
       respond_jsonrpc
         ~powered_by:Serverless_ide
         id
-        HackTestShutdownServerlessResult;
+        HackTestShutdownServerlessResultFB;
       Lwt.return_unit
-    | (_, RequestMessage (id, HackTestStopServerRequest)) ->
+    | (_, RequestMessage (id, HackTestStopServerRequestFB)) ->
       let root_folder =
         Path.make (Relative_path.path_of_prefix Relative_path.Root)
       in
       ClientStop.kill_server root_folder env.from;
-      respond_jsonrpc ~powered_by:Serverless_ide id HackTestStopServerResult;
+      respond_jsonrpc ~powered_by:Serverless_ide id HackTestStopServerResultFB;
       Lwt.return_unit
-    | (_, RequestMessage (id, HackTestStartServerRequest)) ->
+    | (_, RequestMessage (id, HackTestStartServerRequestFB)) ->
       let root_folder =
         Path.make (Relative_path.path_of_prefix Relative_path.Root)
       in
       start_server root_folder;
-      respond_jsonrpc ~powered_by:Serverless_ide id HackTestStartServerResult;
+      respond_jsonrpc ~powered_by:Serverless_ide id HackTestStartServerResultFB;
       Lwt.return_unit
     (* catch-all for client reqs/notifications we haven't yet implemented *)
     | (Main_loop _menv, message) ->

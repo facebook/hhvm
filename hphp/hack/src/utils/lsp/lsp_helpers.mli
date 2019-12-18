@@ -71,10 +71,6 @@ val update_diagnostics_due_to_change :
 
 val get_root : Lsp.Initialize.params -> string
 
-val supports_progress : Lsp.Initialize.params -> bool
-
-val supports_actionRequired : Lsp.Initialize.params -> bool
-
 val supports_status : Lsp.Initialize.params -> bool
 
 val supports_snippets : Lsp.Initialize.params -> bool

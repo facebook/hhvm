@@ -164,10 +164,12 @@ let initialize
   let (_ : SharedMem.handle) =
     SharedMem.init ~num_workers:0 (ServerConfig.sharedmem_config server_config)
   in
-  let bytes_per_word = Sys.word_size / 8 in
-  let words_per_mb = 1_000_000 / bytes_per_word in
-  let max_size_in_words = 250 * words_per_mb in
-  Provider_backend.set_local_memory_backend ~max_size_in_words;
+
+  (* At the time of this writing, one decl on average is about 45 KB. So 1000
+  decls is 45 MB, well under the 250 MB cap we would like to stay under. In
+  practice, we don't find ourselves needing more than a few hundred decls to
+  provide good performance and avoid most cache misses. *)
+  Provider_backend.set_local_memory_backend ~max_num_decls:1000;
 
   let genv =
     ServerEnvBuild.make_genv server_args server_config server_local_config []

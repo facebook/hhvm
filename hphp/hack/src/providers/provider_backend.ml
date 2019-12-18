@@ -25,7 +25,7 @@ module Decl_cache_entry = struct
 
   type value = Obj.t
 
-  let get_size = Obj.reachable_words
+  let get_size _value = 1
 end
 
 module Decl_cache = Lru_cache.Cache (Decl_cache_entry)
@@ -45,9 +45,9 @@ let backend_ref = ref Shared_memory
 
 let set_shared_memory_backend () : unit = backend_ref := Shared_memory
 
-let set_local_memory_backend ~(max_size_in_words : Lru_cache.size) : unit =
+let set_local_memory_backend ~(max_num_decls : int) : unit =
   backend_ref :=
-    Local_memory { decl_cache = Decl_cache.make ~max_size:max_size_in_words }
+    Local_memory { decl_cache = Decl_cache.make ~max_size:max_num_decls }
 
 let set_decl_service_backend (decl : Decl_service_client.t) : unit =
   backend_ref := Decl_service decl

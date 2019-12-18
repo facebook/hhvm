@@ -253,10 +253,7 @@ let test_compute_tast_counting () =
     "There should be 1 decl_cache_misses for shared_mem provider";
 
   (* Now try the same with local_memory backend *)
-  let bytes_per_word = Sys.word_size / 8 in
-  let words_per_mb = 1_000_000 / bytes_per_word in
-  let max_size_in_words = 250 * words_per_mb in
-  Provider_backend.set_local_memory_backend ~max_size_in_words;
+  Provider_backend.set_local_memory_backend ~max_num_decls:1000;
   Parser_options_provider.set ParserOptions.default;
   let (ctx, entry) = Provider_utils.update_context ctx path file_input in
   let { Provider_utils.decl_cache_misses; _ } =

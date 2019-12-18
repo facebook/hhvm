@@ -49,6 +49,7 @@
 
 #include <folly/ScopeGuard.h>
 #ifdef FACEBOOK
+#include <folly/Demangle.h>
 #include <folly/experimental/symbolizer/Symbolizer.h>
 #endif
 
@@ -275,7 +276,7 @@ bool record_low_mem_event(const void* addr, StructuredLogEntry& record) {
   auto const iddr = reinterpret_cast<uintptr_t>(addr);
   symbolizer.symbolize(iddr, frame);
 
-  auto const name = frame.demangledName();
+  auto const name = folly::demangle(frame.name);
   if (!name.empty()) record.setStr("symbol", name);
 #endif
 

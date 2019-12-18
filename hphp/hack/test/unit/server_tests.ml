@@ -244,7 +244,7 @@ let test_compute_tast_counting () =
   let ctx = Provider_context.empty ~tcopt in
   let file_input = ServerCommandTypes.FileContent content in
   let (ctx, entry) = Provider_utils.update_context ctx path file_input in
-  let { Provider_utils.decl_cache_misses; _ } =
+  let { Provider_utils.Compute_tast_and_errors.decl_cache_misses; _ } =
     Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
   Asserter.Int_asserter.assert_equals
@@ -256,7 +256,7 @@ let test_compute_tast_counting () =
   Provider_backend.set_local_memory_backend ~max_num_decls:1000;
   Parser_options_provider.set ParserOptions.default;
   let (ctx, entry) = Provider_utils.update_context ctx path file_input in
-  let { Provider_utils.decl_cache_misses; _ } =
+  let { Provider_utils.Compute_tast_and_errors.decl_cache_misses; _ } =
     Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry
   in
   Asserter.Int_asserter.assert_equals

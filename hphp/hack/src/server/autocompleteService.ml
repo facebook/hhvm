@@ -692,8 +692,8 @@ let go_ctx
     ~(entry : Provider_context.entry)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv : SearchUtils.si_env) =
-  let { Provider_utils.tast; _ } =
-    Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
+  let { Provider_utils.Compute_tast.tast; _ } =
+    Provider_utils.compute_tast_quarantined ~ctx ~entry
   in
   reset ();
   visitor#go tast;

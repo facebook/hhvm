@@ -10,8 +10,8 @@
 let go_quarantined ~(ctx : Provider_context.t) ~(entry : Provider_context.entry)
     =
   try
-    let { Provider_utils.tast; _ } =
-      Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
+    let { Provider_utils.Compute_tast.tast; _ } =
+      Provider_utils.compute_tast_quarantined ~ctx ~entry
     in
     Coverage_level.get_levels tast entry.Provider_context.path
   with _ ->

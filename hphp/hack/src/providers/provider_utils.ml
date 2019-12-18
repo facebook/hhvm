@@ -7,11 +7,20 @@
  *)
 open Core_kernel
 
-type compute_tast_result = {
-  tast: Tast.program;
-  errors: Errors.t;
-  decl_cache_misses: int;
-}
+module Compute_tast = struct
+  type t = {
+    tast: Tast.program;
+    decl_cache_misses: int;
+  }
+end
+
+module Compute_tast_and_errors = struct
+  type t = {
+    tast: Tast.program;
+    errors: Errors.t;
+    decl_cache_misses: int;
+  }
+end
 
 let respect_but_quarantine_unsaved_changes
     ~(ctx : Provider_context.t) ~(f : unit -> 'a) : 'a =
@@ -104,12 +113,21 @@ let get_entry_VOLATILE ~(ctx : Provider_context.t) ~(path : Relative_path.t) :
     in
     internal_load_entry ~path ~file_input
 
-let compute_tast_and_errors_unquarantined
-    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    compute_tast_result =
-  match (entry.Provider_context.tast, entry.Provider_context.errors) with
-  | (Some tast, Some errors) -> { tast; errors; decl_cache_misses = 0 }
-  | _ ->
+type _ compute_tast_mode =
+  | Compute_tast_only : Compute_tast.t compute_tast_mode
+  | Compute_tast_and_errors : Compute_tast_and_errors.t compute_tast_mode
+
+let compute_tast_and_errors_unquarantined_internal
+    (type a)
+    ~(ctx : Provider_context.t)
+    ~(entry : Provider_context.entry)
+    ~(mode : a compute_tast_mode) : a =
+  match (mode, entry.Provider_context.tast, entry.Provider_context.errors) with
+  | (Compute_tast_only, Some tast, _) ->
+    { Compute_tast.tast; decl_cache_misses = 0 }
+  | (Compute_tast_and_errors, Some tast, Some errors) ->
+    { Compute_tast_and_errors.tast; errors; decl_cache_misses = 0 }
+  | (mode, _, _) ->
     (* prepare logging *)
     let prev_deferral_state =
       Deferred_decl.reset ~enable:true ~threshold_opt:None
@@ -190,20 +208,60 @@ let compute_tast_and_errors_unquarantined
       ~filesize_opt
       ~path:entry.Provider_context.path;
 
-    (* Update the cache *)
-    entry.Provider_context.tast <- Some tast;
-    entry.Provider_context.errors <- Some errors;
-    { tast; errors; decl_cache_misses }
+    (match mode with
+    | Compute_tast_and_errors ->
+      entry.Provider_context.tast <- Some tast;
+      entry.Provider_context.errors <- Some errors;
+      { Compute_tast_and_errors.tast; errors; decl_cache_misses }
+    | Compute_tast_only ->
+      entry.Provider_context.tast <- Some tast;
+      { Compute_tast.tast; decl_cache_misses })
+
+let compute_tast_and_errors_unquarantined
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    Compute_tast_and_errors.t =
+  compute_tast_and_errors_unquarantined_internal
+    ~ctx
+    ~entry
+    ~mode:Compute_tast_and_errors
+
+let compute_tast_unquarantined
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    Compute_tast.t =
+  compute_tast_and_errors_unquarantined_internal
+    ~ctx
+    ~entry
+    ~mode:Compute_tast_only
 
 let compute_tast_and_errors_quarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    compute_tast_result =
+    Compute_tast_and_errors.t =
   (* If results have already been memoized, don't bother quarantining anything *)
   match (entry.Provider_context.tast, entry.Provider_context.errors) with
-  | (Some tast, Some errors) -> { tast; errors; decl_cache_misses = 0 }
+  | (Some tast, Some errors) ->
+    { Compute_tast_and_errors.tast; errors; decl_cache_misses = 0 }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | _ ->
     let f () = compute_tast_and_errors_unquarantined ~ctx ~entry in
+    (* If global context is not set, set it and proceed *)
+    (match Provider_context.get_global_context () with
+    | None -> respect_but_quarantine_unsaved_changes ~ctx ~f
+    | Some _ -> f ())
+
+let compute_tast_quarantined
+    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    Compute_tast.t =
+  (* If results have already been memoized, don't bother quarantining anything *)
+  match entry.Provider_context.tast with
+  | Some tast -> { Compute_tast.tast; decl_cache_misses = 0 }
+  (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
+  | None ->
+    let f () =
+      compute_tast_and_errors_unquarantined_internal
+        ~ctx
+        ~entry
+        ~mode:Compute_tast_only
+    in
     (* If global context is not set, set it and proceed *)
     (match Provider_context.get_global_context () with
     | None -> respect_but_quarantine_unsaved_changes ~ctx ~f

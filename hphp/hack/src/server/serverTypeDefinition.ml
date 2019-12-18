@@ -46,7 +46,7 @@ let go_quarantined
     ~(entry : Provider_context.entry)
     ~(line : int)
     ~(column : int) : ServerCommandTypes.Go_to_type_definition.result =
-  let { Provider_utils.tast; _ } =
-    Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
+  let { Provider_utils.Compute_tast.tast; _ } =
+    Provider_utils.compute_tast_quarantined ~ctx ~entry
   in
   go_common tast ~line ~column

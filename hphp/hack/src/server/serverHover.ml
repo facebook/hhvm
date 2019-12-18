@@ -381,8 +381,8 @@ let go_quarantined
   let identities =
     ServerIdentifyFunction.go_quarantined ~ctx ~entry ~line ~column
   in
-  let { Provider_utils.tast; _ } =
-    Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
+  let { Provider_utils.Compute_tast.tast; _ } =
+    Provider_utils.compute_tast_quarantined ~ctx ~entry
   in
   let env_and_ty =
     ServerInferType.type_at_pos tast line column

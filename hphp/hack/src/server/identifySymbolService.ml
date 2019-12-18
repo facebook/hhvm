@@ -356,8 +356,8 @@ let all_symbols_ctx
     Result_set.elt list =
   match entry.Provider_context.symbols with
   | None ->
-    let { Provider_utils.tast; _ } =
-      Provider_utils.compute_tast_and_errors_quarantined ~ctx ~entry
+    let { Provider_utils.Compute_tast.tast; _ } =
+      Provider_utils.compute_tast_quarantined ~ctx ~entry
     in
     let symbols = all_symbols tast in
     entry.Provider_context.symbols <- Some symbols;

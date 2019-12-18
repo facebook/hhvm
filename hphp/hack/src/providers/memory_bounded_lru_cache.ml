@@ -14,29 +14,33 @@ type 'v entry = {
   value: 'v;
 }
 
-type ('k, 'v) t = {
-  mutable timestamp: int;
-  mutable total_size_in_words: int;
-  mutable peak_size_in_words: int;
-  mutable time_spent: float;
-  max_size_in_words: int;
-  entries: ('k, 'v entry) Hashtbl.t;
-}
-
 type telemetry = {
   time_spent: float;
   peak_size_in_words: int;
 }
 
+let empty_telemetry = { peak_size_in_words = 0; time_spent = 0. }
+
+type ('k, 'v) t = {
+  mutable timestamp: int;
+  mutable total_size_in_words: int;
+  mutable telemetry: telemetry;
+  max_size_in_words: int;
+  entries: ('k, 'v entry) Hashtbl.t;
+}
+
 let time_internal (t : ('k, 'v) t) (start_time : float) : unit =
-  t.time_spent <- t.time_spent +. (Unix.gettimeofday () -. start_time)
+  t.telemetry <-
+    {
+      t.telemetry with
+      time_spent = t.telemetry.time_spent +. (Unix.gettimeofday () -. start_time);
+    }
 
 let make ~(max_size_in_words : int) : ('k, 'v) t =
   {
     timestamp = 0;
     total_size_in_words = 0;
-    peak_size_in_words = 0;
-    time_spent = 0.;
+    telemetry = empty_telemetry;
     max_size_in_words;
     entries = Hashtbl.Poly.create ();
   }
@@ -96,7 +100,12 @@ let add_internal (t : ('k, 'v) t) (key : 'k) (value : 'v) : 'v entry =
   in
   Hashtbl.add_exn t.entries key entry;
   t.total_size_in_words <- t.total_size_in_words + entry.size_in_words;
-  t.peak_size_in_words <- max t.peak_size_in_words t.total_size_in_words;
+  t.telemetry <-
+    {
+      t.telemetry with
+      peak_size_in_words =
+        max t.telemetry.peak_size_in_words t.total_size_in_words;
+    };
   trim_to_memory_limit t;
   entry
 
@@ -129,10 +138,6 @@ let remove (t : ('k, 'v) t) ~(key : 'k) : unit =
   time_internal t start_time;
   ()
 
-let reset_telemetry (t : ('k, 'v) t) : unit =
-  t.time_spent <- 0.;
-  t.peak_size_in_words <- 0;
-  ()
+let reset_telemetry (t : ('k, 'v) t) : unit = t.telemetry <- empty_telemetry
 
-let get_telemetry (t : ('k, 'v) t) : telemetry =
-  { time_spent = t.time_spent; peak_size_in_words = t.peak_size_in_words }
+let get_telemetry (t : ('k, 'v) t) : telemetry = t.telemetry

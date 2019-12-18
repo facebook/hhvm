@@ -17,9 +17,11 @@ type 'v entry = {
 type telemetry = {
   time_spent: float;
   peak_size_in_words: int;
+  num_evictions: int;
 }
 
-let empty_telemetry = { peak_size_in_words = 0; time_spent = 0. }
+let empty_telemetry =
+  { peak_size_in_words = 0; time_spent = 0.; num_evictions = 0 }
 
 type ('k, 'v) t = {
   mutable timestamp: int;
@@ -75,7 +77,9 @@ let trim_to_memory_limit (t : ('k, 'v) t) : unit =
     match oldest_entry with
     | Some (key, value) ->
       Hashtbl.remove t.entries key;
-      t.total_size_in_words <- t.total_size_in_words - value.size_in_words
+      t.total_size_in_words <- t.total_size_in_words - value.size_in_words;
+      t.telemetry <-
+        { t.telemetry with num_evictions = t.telemetry.num_evictions + 1 }
     | None ->
       (* Probably shouldn't get here. *)
       assert (t.total_size_in_words = 0)

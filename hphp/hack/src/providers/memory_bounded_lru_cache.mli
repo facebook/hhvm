@@ -24,6 +24,7 @@ type ('k, 'v) t
 type telemetry = {
   time_spent: float;
   peak_size_in_words: int;
+  num_evictions: int;
 }
 
 (** Construct a new cache which can store up to [max_size_in_words] words of

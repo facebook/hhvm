@@ -477,34 +477,48 @@ let next
     in
     delegate_state := state;
 
-    match !files_to_process with
-    | [] when Hash_set.Poly.is_empty files_in_progress -> Bucket.Done
-    | [] ->
-      (* NOTE: at this point, we could try taking some jobs from
-        the in-progress pile.
-        The rationale behind this is this:
-          if all we have left is files-in-progress, then we could try spreading
-          those to the idle workers anyway since we would have the benefit of
-          breaking them into different-size buckets from when they were
-          initially dispatched. It's even more relevant if the in-progress files
-          are being worked on by remote workers - we could simply race them!
-          If we finish before the original workers that were assigned
-          the files-in-progress come back, then we win.
-         *)
-      Bucket.Wait
-    | jobs ->
-      (match delegate_job with
-      | Some { current_bucket; remaining_jobs; job } ->
-        return_bucket_job (DelegateProgress job) current_bucket remaining_jobs
-      | None ->
-        let bucket_size =
-          Bucket.calculate_bucket_size
-            ~num_jobs:(List.length !files_to_process)
-            ~num_workers
-            ~max_size
-        in
-        let (current_bucket, remaining_jobs) = List.split_n jobs bucket_size in
-        return_bucket_job Progress current_bucket remaining_jobs)
+    let (stolen, state) = Typing_service_delegate.steal state max_size in
+    (* If a delegate job is returned, then that means that it should be done
+      by the next MultiWorker worker (the one for whom we're creating a job
+      in this function). If delegate job is None, then the regular (local
+      type checking) logic applies. *)
+    match delegate_job with
+    | Some { current_bucket; remaining_jobs; job } ->
+      return_bucket_job (DelegateProgress job) current_bucket remaining_jobs
+    | None ->
+      begin
+        match (!files_to_process, stolen) with
+        | ([], []) when Hash_set.Poly.is_empty files_in_progress -> Bucket.Done
+        | ([], []) -> Bucket.Wait
+        | (jobs, stolen_jobs) ->
+          ignore (jobs, stolen_jobs, num_workers, state);
+          let jobs =
+            if List.length jobs > List.length stolen_jobs then
+              jobs
+            else begin
+              delegate_state := state;
+              let stolen_jobs =
+                List.map stolen_jobs ~f:(fun job ->
+                    Hash_set.Poly.remove files_in_progress job;
+                    match job with
+                    | Check { path; deferred_count } ->
+                      Check { path; deferred_count = deferred_count + 1 }
+                    | _ -> failwith "unexpected state")
+              in
+              List.rev_append stolen_jobs jobs
+            end
+          in
+          let bucket_size =
+            Bucket.calculate_bucket_size
+              ~num_jobs:(List.length !files_to_process)
+              ~num_workers
+              ~max_size
+          in
+          let (current_bucket, remaining_jobs) =
+            List.split_n jobs bucket_size
+          in
+          return_bucket_job Progress current_bucket remaining_jobs
+      end
 
 let on_cancelled
     (next : unit -> 'a Bucket.bucket)
@@ -580,6 +594,7 @@ let process_in_parallel
       ~on_cancelled:(on_cancelled next files_to_process files_in_progress)
       ~interrupt
   in
+  Typing_service_delegate.show !delegate_state;
   TypeCheckStore.clear ();
   let paths_of (cancelled_results : progress list) : Relative_path.t list =
     let paths_of (cancelled_progress : progress) =

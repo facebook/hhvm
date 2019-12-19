@@ -29,4 +29,8 @@ module type Delegate_sig = sig
   val on_cancelled : state -> file_computation list * state
 
   val process : delegate_job_sig -> Errors.t * computation_progress
+
+  val steal : state -> int -> file_computation list * state
+
+  val show : state -> unit
 end

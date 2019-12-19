@@ -30,3 +30,9 @@ let merge state computation_progress =
 let on_cancelled state = ([], state)
 
 let process f = f ()
+
+let steal state n =
+  ignore n;
+  ([], state)
+
+let show state = ignore state

@@ -10,17 +10,20 @@ type check_file_computation = {
   path: Relative_path.t;
   deferred_count: int;
 }
+[@@deriving show]
 
 type file_computation =
   | Check of check_file_computation
   | Declare of Relative_path.t
   | Prefetch of Relative_path.t list
+[@@deriving show]
 
 type computation_progress = {
   completed: file_computation list;
   remaining: file_computation list;
   deferred: file_computation list;
 }
+[@@deriving show]
 
 type delegate_job_sig = unit -> Errors.t * computation_progress
 

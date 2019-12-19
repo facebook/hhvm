@@ -110,8 +110,9 @@ module type LocalServerApi = sig
 end
 
 type delegate_env = {
-  root: string;
   init_id: string;
   mergebase: Hg.hg_rev option;
   num_workers: int;
+  root: string;
+  version_specifier: string option;
 }

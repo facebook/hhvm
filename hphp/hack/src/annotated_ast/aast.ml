@@ -361,6 +361,7 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_mode: FileInfo.mode; [@visitors.opaque]
   c_final: bool;
   c_is_xhp: bool;
+  c_has_xhp_keyword: bool;
   c_kind: Ast_defs.class_kind;
   c_name: sid;
   (* The type parameters of a class A<T> (T is the parameter) *)

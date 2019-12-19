@@ -5,7 +5,7 @@
        (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))
        (missing 0 ())))
      (classish_declaration 328
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 11 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())

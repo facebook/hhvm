@@ -164,6 +164,8 @@ let parse_text (env : env) (source_text : SourceText.t) :
         ~disable_legacy_attribute_syntax:
           (GlobalOptions.po_disable_legacy_attribute_syntax env.parser_options)
         ?mode
+        ~enable_xhp_class_modifier:
+          (GlobalOptions.po_enable_xhp_class_modifier env.parser_options)
         ()
     in
     if quick_mode then

@@ -438,6 +438,7 @@ let schema : schema_node list =
         [
           ("attribute", ZeroOrOne (Aggregate AttributeSpecification));
           ("modifiers", ZeroOrMore Token);
+          ("xhp", ZeroOrOne Token);
           ("keyword", Token);
           ("name", Token);
           ("type_parameters", ZeroOrOne (Just "TypeParameters"));

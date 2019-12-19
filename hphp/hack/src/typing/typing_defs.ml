@@ -537,6 +537,7 @@ and class_type = {
   tc_deferred_init_members: SSet.t;
   tc_kind: Ast_defs.class_kind;
   tc_is_xhp: bool;
+  tc_has_xhp_keyword: bool;
   tc_is_disposable: bool;
   tc_name: string;
   tc_pos: Pos.t;

@@ -7,7 +7,7 @@
          (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
        (missing 0 ())))
      (classish_declaration 50
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() XHP_class_name 4 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
@@ -22,7 +22,7 @@
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 48
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() XHP_class_name 4 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())

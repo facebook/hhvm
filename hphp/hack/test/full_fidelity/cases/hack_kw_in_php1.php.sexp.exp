@@ -5,7 +5,7 @@
        (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))
        (missing 0 ())))
      (classish_declaration 14
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1))) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ())
@@ -31,7 +31,7 @@
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 26
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 3 ((whitespace 1))) (missing 0 ())
        (() extends 7 ((whitespace 1)))
@@ -41,7 +41,7 @@
         ((((extra_token_error 5) (whitespace 1)) { 1 ()) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 16
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1) (end_of_line 1) (end_of_line 1) (end_of_line 1))
         class 5 ((whitespace 1)))
        (() name 7 ((whitespace 1))) (missing 0 ()) (missing 0 ())
@@ -71,7 +71,7 @@
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 26
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ())
        (() extends 7 ((whitespace 1)))

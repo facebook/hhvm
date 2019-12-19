@@ -373,6 +373,7 @@ let class_ env c =
     sc_mode = c.c_mode;
     sc_final = c.c_final;
     sc_is_xhp = c.c_is_xhp;
+    sc_has_xhp_keyword = c.c_has_xhp_keyword;
     sc_kind = c.c_kind;
     sc_name = c.c_name;
     sc_tparams = List.map c.c_tparams.c_tparam_list (type_param env);

@@ -220,6 +220,11 @@ type t = {
   tco_error_php_lambdas: bool;
   (* Flag to error on using discarded nullable awaitables *)
   tco_disallow_discarded_nullable_awaitables: bool;
+  (* Enable the new style xhp class.
+   * Old style: class :name {}
+   * New style: xhp class name {}
+   *)
+  po_enable_xhp_class_modifier: bool;
 }
 [@@deriving show]
 
@@ -301,6 +306,7 @@ val make :
   ?po_disallow_func_ptrs_in_constants:bool ->
   ?tco_error_php_lambdas:bool ->
   ?tco_disallow_discarded_nullable_awaitables:bool ->
+  ?po_enable_xhp_class_modifier:bool ->
   unit ->
   t
 
@@ -487,3 +493,5 @@ val po_disallow_func_ptrs_in_constants : t -> bool
 val tco_error_php_lambdas : t -> bool
 
 val tco_disallow_discarded_nullable_awaitables : t -> bool
+
+val po_enable_xhp_class_modifier : t -> bool

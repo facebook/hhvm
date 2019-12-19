@@ -365,6 +365,7 @@ pub enum Node_ {
     Static,
     Super,
     Trait,
+    XHP,
     Yield,
 }
 
@@ -923,6 +924,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::DotDotDot => Node_::DotDotDot,
             TokenKind::Final => Node_::Final,
             TokenKind::Interface => Node_::Interface,
+            TokenKind::XHP => Node_::XHP,
             TokenKind::Yield => Node_::Yield,
             TokenKind::Namespace => {
                 self.state.namespace_builder.to_mut().is_building_namespace = true;
@@ -1260,6 +1262,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         &mut self,
         _arg0: Self::R,
         modifiers: Self::R,
+        xhp_keyword: Self::R,
         class_keyword: Self::R,
         name: Self::R,
         _arg4: Self::R,
@@ -1297,6 +1300,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             },
             final_: false,
             is_xhp: false,
+            has_xhp_keyword: match xhp_keyword? {
+                Node_::XHP => true,
+                _ => false,
+            },
             kind: match class_keyword? {
                 Node_::Interface => ClassKind::Cinterface,
                 Node_::Trait => ClassKind::Ctrait,

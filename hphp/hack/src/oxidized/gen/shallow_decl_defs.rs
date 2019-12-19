@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c543374136752642ec1d093f91cd63f9>>
+// @generated SignedSource<<10e48637b000258248e1c4c5b3c2176c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -101,6 +101,7 @@ pub struct ShallowClass {
     pub mode: file_info::Mode,
     pub final_: bool,
     pub is_xhp: bool,
+    pub has_xhp_keyword: bool,
     pub kind: ast_defs::ClassKind,
     pub name: aast::Sid,
     pub tparams: Vec<DeclTparam>,

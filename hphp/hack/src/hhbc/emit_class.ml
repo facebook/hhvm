@@ -663,7 +663,7 @@ let emit_class (ast_class, hoisted) =
     class_is_abstract
     class_is_interface
     class_is_trait
-    ast_class.A.c_is_xhp
+    (ast_class.A.c_is_xhp || ast_class.A.c_has_xhp_keyword)
     hoisted
     class_is_const
     class_no_dynamic_props

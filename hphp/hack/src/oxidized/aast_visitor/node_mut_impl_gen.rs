@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e57dc13a9e940958e525151ea160ecf5>>
+// @generated SignedSource<<8ebafd08585ee6b2d25e7143908d5a3e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -452,6 +452,7 @@ impl<Context, Ex, Fb, En, Hi> NodeMut<Context, Ex, Fb, En, Hi> for Class_<Ex, Fb
         self.mode.accept(c, v);
         self.final_.accept(c, v);
         self.is_xhp.accept(c, v);
+        self.has_xhp_keyword.accept(c, v);
         self.kind.accept(c, v);
         self.name.accept(c, v);
         self.tparams.accept(c, v);

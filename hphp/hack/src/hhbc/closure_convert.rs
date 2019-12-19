@@ -395,6 +395,7 @@ fn make_closure(
         file_attributes: vec![],
         final_: false,
         is_xhp: false,
+        has_xhp_keyword: false,
         kind: ClassKind::Cnormal,
         name: Id(p.clone(), make_closure_name(env, st)),
         tparams: class_tparams,

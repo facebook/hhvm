@@ -15,6 +15,7 @@ pub struct ParserEnv {
     pub hhvm_compat_mode: bool,
     pub php5_compat_mode: bool,
     pub allow_new_attribute_syntax: bool,
+    pub enable_xhp_class_modifier: bool,
 }
 
 impl From<FullFidelityParserEnv> for ParserEnv {
@@ -25,6 +26,7 @@ impl From<FullFidelityParserEnv> for ParserEnv {
             php5_compat_mode: env.php5_compat_mode,
             codegen: env.codegen,
             allow_new_attribute_syntax: env.allow_new_attribute_syntax,
+            enable_xhp_class_modifier: env.enable_xhp_class_modifier,
         }
     }
 }

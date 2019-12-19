@@ -7,7 +7,7 @@
          (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
        (missing 0 ())))
      (classish_declaration 32
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) trait 5 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
@@ -21,7 +21,7 @@
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 35
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) trait 5 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())

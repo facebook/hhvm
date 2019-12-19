@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<322a559930065be24b32dfae4cb8ef19>>
+// @generated SignedSource<<cd71e1ed74a32b13cdd01ff292b2625e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -79,6 +79,7 @@ pub struct DeclClassType {
     pub deferred_init_members: s_set::SSet,
     pub kind: ast_defs::ClassKind,
     pub is_xhp: bool,
+    pub has_xhp_keyword: bool,
     pub name: String,
     pub pos: pos::Pos,
     pub tparams: Vec<DeclTparam>,

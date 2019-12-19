@@ -1,7 +1,7 @@
 [(Class
     { c_span = [12:1-26:2]; c_annotation = (); c_mode = Mstrict;
-      c_final = false; c_is_xhp = false; c_kind = Cnormal;
-      c_name = ([12:7-20], "\\MyPhonyVector");
+      c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+      c_kind = Cnormal; c_name = ([12:7-20], "\\MyPhonyVector");
       c_tparams =
       { c_tparam_list =
         [{ tp_variance = Invariant; tp_name = ([12:21-22], "T");
@@ -122,8 +122,8 @@
       });
   (Class
      { c_span = [28:1-11]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([28:7-8], "\\X");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([28:7-8], "\\X");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
@@ -140,8 +140,8 @@
        c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [29:1-21]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([29:7-8], "\\A");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([29:7-8], "\\A");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = [([29:17-18], (Happly (([29:17-18], "\\X"), [])))];
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
@@ -159,8 +159,8 @@
        c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [30:1-21]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([30:7-8], "\\B");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([30:7-8], "\\B");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = [([30:17-18], (Happly (([30:17-18], "\\X"), [])))];
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];

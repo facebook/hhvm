@@ -12,9 +12,9 @@
            (end_of_line 1))
           abstract 8 ((whitespace 1)))
          (() final 5 ((whitespace 1)))))
-       (() class 5 ((whitespace 1))) (() name 1 ((whitespace 1)))
+       (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (classish_declaration 28
@@ -22,9 +22,9 @@
        (list 17
         ((((end_of_line 1)) abstract 8 ((whitespace 1)))
          (() abstract 8 ((whitespace 1)))))
-       (() class 5 ((whitespace 1))) (() name 1 ((whitespace 1)))
+       (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

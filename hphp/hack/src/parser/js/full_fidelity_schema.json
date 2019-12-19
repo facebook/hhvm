@@ -387,6 +387,8 @@
       "token_text" : "?>" },
     { "token_kind" : "ColonAt",
       "token_text" : ":@" },
+    { "token_kind" : "XHP",
+      "token_text" : "xhp" },
 
     { "token_kind" : "ErrorToken",
       "token_text" : null },
@@ -721,6 +723,7 @@
       "fields" : [
         { "field_name" : "attribute" },
         { "field_name" : "modifiers" },
+        { "field_name" : "xhp" },
         { "field_name" : "keyword" },
         { "field_name" : "name" },
         { "field_name" : "type_parameters" },

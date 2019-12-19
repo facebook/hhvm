@@ -7,7 +7,7 @@
          (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
        (missing 0 ())))
      (classish_declaration 69
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 11 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
@@ -35,7 +35,7 @@
              (missing 0 ())))))
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 134
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 29 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
@@ -88,7 +88,7 @@
              (missing 0 ())))))
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 96
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 21 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
@@ -125,7 +125,7 @@
              (missing 0 ())))))
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 70
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) trait 5 ((whitespace 1)))
        (() name 12 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
@@ -153,7 +153,7 @@
              (missing 0 ())))))
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 76
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) interface 9 ((whitespace 1)))
        (() name 16 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
@@ -180,9 +180,9 @@
      (classish_declaration 100
       ((missing 0 ())
        (list 8 ((((end_of_line 1)) abstract 8 ((whitespace 1)))))
-       (() class 5 ((whitespace 1))) (() name 24 ((whitespace 1)))
+       (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 24 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
        (classish_body 60
         ((() { 1 ((end_of_line 1)))
          (list 54
@@ -209,7 +209,7 @@
              (missing 0 ())))))
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 69
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 13 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())

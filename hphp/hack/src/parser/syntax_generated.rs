@@ -325,10 +325,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_classish_declaration(_: &C, classish_attribute: Self, classish_modifiers: Self, classish_keyword: Self, classish_name: Self, classish_type_parameters: Self, classish_extends_keyword: Self, classish_extends_list: Self, classish_implements_keyword: Self, classish_implements_list: Self, classish_where_clause: Self, classish_body: Self) -> Self {
+    fn make_classish_declaration(_: &C, classish_attribute: Self, classish_modifiers: Self, classish_xhp: Self, classish_keyword: Self, classish_name: Self, classish_type_parameters: Self, classish_extends_keyword: Self, classish_extends_list: Self, classish_implements_keyword: Self, classish_implements_list: Self, classish_where_clause: Self, classish_body: Self) -> Self {
         let syntax = SyntaxVariant::ClassishDeclaration(Box::new(ClassishDeclarationChildren {
             classish_attribute,
             classish_modifiers,
+            classish_xhp,
             classish_keyword,
             classish_name,
             classish_type_parameters,
@@ -2155,9 +2156,10 @@ where
                 acc
             },
             SyntaxVariant::ClassishDeclaration(x) => {
-                let ClassishDeclarationChildren { classish_attribute, classish_modifiers, classish_keyword, classish_name, classish_type_parameters, classish_extends_keyword, classish_extends_list, classish_implements_keyword, classish_implements_list, classish_where_clause, classish_body } = *x;
+                let ClassishDeclarationChildren { classish_attribute, classish_modifiers, classish_xhp, classish_keyword, classish_name, classish_type_parameters, classish_extends_keyword, classish_extends_list, classish_implements_keyword, classish_implements_list, classish_where_clause, classish_body } = *x;
                 let acc = f(classish_attribute, acc);
                 let acc = f(classish_modifiers, acc);
+                let acc = f(classish_xhp, acc);
                 let acc = f(classish_keyword, acc);
                 let acc = f(classish_name, acc);
                 let acc = f(classish_type_parameters, acc);
@@ -3684,7 +3686,7 @@ where
                  methodish_trait_attribute: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ClassishDeclaration, 11) => SyntaxVariant::ClassishDeclaration(Box::new(ClassishDeclarationChildren {
+             (SyntaxKind::ClassishDeclaration, 12) => SyntaxVariant::ClassishDeclaration(Box::new(ClassishDeclarationChildren {
                  classish_body: ts.pop().unwrap(),
                  classish_where_clause: ts.pop().unwrap(),
                  classish_implements_list: ts.pop().unwrap(),
@@ -3694,6 +3696,7 @@ where
                  classish_type_parameters: ts.pop().unwrap(),
                  classish_name: ts.pop().unwrap(),
                  classish_keyword: ts.pop().unwrap(),
+                 classish_xhp: ts.pop().unwrap(),
                  classish_modifiers: ts.pop().unwrap(),
                  classish_attribute: ts.pop().unwrap(),
                  
@@ -4913,6 +4916,7 @@ pub struct MethodishTraitResolutionChildren<T, V> {
 pub struct ClassishDeclarationChildren<T, V> {
     pub classish_attribute: Syntax<T, V>,
     pub classish_modifiers: Syntax<T, V>,
+    pub classish_xhp: Syntax<T, V>,
     pub classish_keyword: Syntax<T, V>,
     pub classish_name: Syntax<T, V>,
     pub classish_type_parameters: Syntax<T, V>,
@@ -6536,18 +6540,19 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ClassishDeclaration(x) => {
-                get_index(11).and_then(|index| { match index {
+                get_index(12).and_then(|index| { match index {
                         0 => Some(&x.classish_attribute),
                     1 => Some(&x.classish_modifiers),
-                    2 => Some(&x.classish_keyword),
-                    3 => Some(&x.classish_name),
-                    4 => Some(&x.classish_type_parameters),
-                    5 => Some(&x.classish_extends_keyword),
-                    6 => Some(&x.classish_extends_list),
-                    7 => Some(&x.classish_implements_keyword),
-                    8 => Some(&x.classish_implements_list),
-                    9 => Some(&x.classish_where_clause),
-                    10 => Some(&x.classish_body),
+                    2 => Some(&x.classish_xhp),
+                    3 => Some(&x.classish_keyword),
+                    4 => Some(&x.classish_name),
+                    5 => Some(&x.classish_type_parameters),
+                    6 => Some(&x.classish_extends_keyword),
+                    7 => Some(&x.classish_extends_list),
+                    8 => Some(&x.classish_implements_keyword),
+                    9 => Some(&x.classish_implements_list),
+                    10 => Some(&x.classish_where_clause),
+                    11 => Some(&x.classish_body),
                         _ => None,
                     }
                 })

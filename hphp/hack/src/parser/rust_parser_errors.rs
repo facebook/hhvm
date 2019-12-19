@@ -221,7 +221,7 @@ fn make_first_use_or_def(
     res
 }
 pub struct ParserErrors<'a, Token, Value, State> {
-    phanotm: std::marker::PhantomData<(*const Token, *const Value, *const State)>,
+    phantom: std::marker::PhantomData<(*const Token, *const Value, *const State)>,
 
     env: Env<'a, Syntax<Token, Value>, SyntaxTree<'a, Syntax<Token, Value>, State>>,
     errors: Vec<SyntaxError>,
@@ -257,7 +257,7 @@ where
             namespace_type: Unspecified,
             is_in_concurrent_block: false,
             nested_namespaces: vec![],
-            phanotm: std::marker::PhantomData,
+            phantom: std::marker::PhantomData,
         }
     }
 

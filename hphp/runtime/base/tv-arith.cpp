@@ -593,7 +593,10 @@ struct IncBase {
 };
 
 struct Inc : IncBase {
-  void intCase(tv_lval cell) const { ++val(cell).num; }
+  void intCase(tv_lval cell) const {
+    auto& n = val(cell).num;
+    n = add_ignore_overflow(n, 1);
+  }
 };
 
 struct IncO : IncBase {
@@ -616,7 +619,10 @@ struct DecBase {
 };
 
 struct Dec : DecBase {
-  void intCase(tv_lval cell) { --val(cell).num; }
+  void intCase(tv_lval cell) {
+    auto& n = val(cell).num;
+    n = sub_ignore_overflow(n, 1);
+  }
 };
 
 struct DecO : DecBase {

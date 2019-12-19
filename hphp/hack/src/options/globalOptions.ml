@@ -18,6 +18,8 @@ type t = {
   tco_remote_type_check: bool;
   tco_remote_worker_key: string option;
   tco_remote_check_id: string option;
+  tco_remote_max_batch_size: int;
+  tco_remote_min_batch_size: int;
   tco_num_remote_workers: int;
   so_remote_version_specifier: string option;
   so_remote_worker_vfs_checkout_threshold: int;
@@ -172,6 +174,8 @@ let default =
     tco_remote_type_check = true;
     tco_remote_worker_key = None;
     tco_remote_check_id = None;
+    tco_remote_max_batch_size = 8_000;
+    tco_remote_min_batch_size = 5_000;
     tco_num_remote_workers = 4;
     so_remote_version_specifier = None;
     so_remote_worker_vfs_checkout_threshold = 10000;
@@ -259,6 +263,8 @@ let make
     ?(tco_remote_type_check = default.tco_remote_type_check)
     ?tco_remote_worker_key
     ?tco_remote_check_id
+    ?(tco_remote_max_batch_size = default.tco_remote_max_batch_size)
+    ?(tco_remote_min_batch_size = default.tco_remote_min_batch_size)
     ?(tco_num_remote_workers = default.tco_num_remote_workers)
     ?so_remote_version_specifier
     ?(so_remote_worker_vfs_checkout_threshold =
@@ -343,6 +349,8 @@ let make
     tco_remote_type_check;
     tco_remote_worker_key;
     tco_remote_check_id;
+    tco_remote_max_batch_size;
+    tco_remote_min_batch_size;
     tco_num_remote_workers;
     so_remote_version_specifier;
     so_remote_worker_vfs_checkout_threshold;
@@ -433,6 +441,10 @@ let tco_remote_type_check t = t.tco_remote_type_check
 let tco_remote_worker_key t = t.tco_remote_worker_key
 
 let tco_remote_check_id t = t.tco_remote_check_id
+
+let tco_remote_max_batch_size t = t.tco_remote_max_batch_size
+
+let tco_remote_min_batch_size t = t.tco_remote_min_batch_size
 
 let tco_num_remote_workers t = t.tco_num_remote_workers
 

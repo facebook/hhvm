@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7e18f7bf415e87bdb2d9bb5067520356>>
+// @generated SignedSource<<0635bbb7dec587b586f0ebf3c7cd2c32>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -43,6 +43,16 @@ pub enum Severity {
 pub enum Format {
     Context,
     Raw,
+}
+
+#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
+pub enum NameContext {
+    FunctionNamespace,
+    ConstantNamespace,
+    TypeNamespace,
+    TraitContext,
+    ClassContext,
+    RecordContext,
 }
 
 pub type FileT<A> = phase_map::PhaseMap<Vec<A>>;

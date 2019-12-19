@@ -287,13 +287,20 @@ let default_genv =
   }
 
 let make_env ?init_id config =
+  let tcopt = ServerConfig.typechecker_options config in
+  let max_batch_size = TypecheckerOptions.remote_max_batch_size tcopt in
+  let min_batch_size = TypecheckerOptions.remote_min_batch_size tcopt in
   {
-    tcopt = ServerConfig.typechecker_options config;
+    tcopt;
     popt = ServerConfig.parser_options config;
     gleanopt = ServerConfig.glean_options config;
     naming_table = Naming_table.empty;
     typing_service =
-      { delegate_state = Typing_service_delegate.create (); enabled = false };
+      {
+        delegate_state =
+          Typing_service_delegate.create ~max_batch_size ~min_batch_size ();
+        enabled = false;
+      };
     errorl = Errors.empty;
     failed_naming = Relative_path.Set.empty;
     persistent_client = None;

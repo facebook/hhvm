@@ -33,7 +33,7 @@ type t = {
   enable_fuzzy_search: bool;
   lazy_parse: bool;
   lazy_init: bool;
-      (** Limit the number of clients that can sit in purgatory waiting
+  (* Limit the number of clients that can sit in purgatory waiting
    * for a server to be started because we don't want this to grow
    * unbounded. *)
   max_purgatory_clients: int;
@@ -45,7 +45,8 @@ type t = {
   shm_dirs: string list;
   state_loader_timeouts: State_loader_config.timeouts;
   max_workers: int option;
-  max_bucket_size: int;  (** See HhMonitorInformant. *)
+  max_bucket_size: int;
+  (* See HhMonitorInformant. *)
   use_dummy_informant: bool;
   informant_min_distance_restart: int;
   informant_use_xdb: bool;
@@ -131,14 +132,16 @@ type t = {
 and remote_type_check = {
   (* Enables remote type check *)
   enabled: bool;
+  max_batch_size: int;
+  min_batch_size: int;
+  (* Dictates the number of remote type checking workers *)
+  num_workers: int;
   (* If set, distributes type checking to remote workers if the number of files to
     type check exceeds the threshold. If not set, then always checks everything locally. *)
   recheck_threshold: int option;
   (* Indicates the size of the job below which a virtual file system should
     be used by the remote worker *)
   worker_vfs_checkout_threshold: int;
-  (* Dictates the number of remote type checking workers *)
-  num_workers: int;
 }
 
 let default =
@@ -199,9 +202,11 @@ let default =
     remote_type_check =
       {
         enabled = true;
+        max_batch_size = 8_000;
+        min_batch_size = 5_000;
         num_workers = 4;
         recheck_threshold = None;
-        worker_vfs_checkout_threshold = 10000;
+        worker_vfs_checkout_threshold = 10_000;
       };
     remote_worker_key = None;
     remote_check_id = None;
@@ -277,6 +282,20 @@ let load_remote_type_check ~current_version config =
       ~default:default.remote_type_check.num_workers
       config
   in
+  let max_batch_size =
+    int_
+      "max_batch_size"
+      ~prefix
+      ~default:default.remote_type_check.max_batch_size
+      config
+  in
+  let min_batch_size =
+    int_
+      "min_batch_size"
+      ~prefix
+      ~default:default.remote_type_check.min_batch_size
+      config
+  in
   let recheck_threshold = int_opt "recheck_threshold" ~prefix config in
   let enabled =
     bool_if_min_version "enabled" ~prefix ~default:true ~current_version config
@@ -288,7 +307,14 @@ let load_remote_type_check ~current_version config =
       ~default:default.remote_type_check.worker_vfs_checkout_threshold
       config
   in
-  { enabled; num_workers; recheck_threshold; worker_vfs_checkout_threshold }
+  {
+    enabled;
+    max_batch_size;
+    min_batch_size;
+    num_workers;
+    recheck_threshold;
+    worker_vfs_checkout_threshold;
+  }
 
 let apply_overrides ~silent ~current_version ~config ~overrides =
   (* First of all, apply the CLI overrides so the settings below could be specified

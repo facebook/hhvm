@@ -29,6 +29,10 @@ let remote_worker_key = GlobalOptions.tco_remote_worker_key
 
 let remote_check_id = GlobalOptions.tco_remote_check_id
 
+let remote_max_batch_size = GlobalOptions.tco_remote_max_batch_size
+
+let remote_min_batch_size = GlobalOptions.tco_remote_min_batch_size
+
 let num_remote_workers = GlobalOptions.tco_num_remote_workers
 
 let remote_version_specifier = GlobalOptions.so_remote_version_specifier

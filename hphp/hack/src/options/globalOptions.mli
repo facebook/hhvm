@@ -38,6 +38,10 @@ type t = {
   tco_remote_worker_key: string option;
   (* If set, uses the check ID when logging events in the context of remove init/work *)
   tco_remote_check_id: string option;
+  (* The max batch size that a remote worker can receive to type check *)
+  tco_remote_max_batch_size: int;
+  (* The min batch size that a remote worker can receive to type check *)
+  tco_remote_min_batch_size: int;
   (* Dictates the number of remote type checking workers *)
   tco_num_remote_workers: int;
   (* The version specifier that is used to identify the remote worker package version to install *)
@@ -237,6 +241,8 @@ val make :
   ?tco_remote_type_check:bool ->
   ?tco_remote_worker_key:string ->
   ?tco_remote_check_id:string ->
+  ?tco_remote_max_batch_size:int ->
+  ?tco_remote_min_batch_size:int ->
   ?tco_num_remote_workers:int ->
   ?so_remote_version_specifier:string ->
   ?so_remote_worker_vfs_checkout_threshold:int ->
@@ -317,6 +323,10 @@ val tco_remote_type_check : t -> bool
 val tco_remote_worker_key : t -> string option
 
 val tco_remote_check_id : t -> string option
+
+val tco_remote_max_batch_size : t -> int
+
+val tco_remote_min_batch_size : t -> int
 
 val tco_num_remote_workers : t -> int
 

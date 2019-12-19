@@ -12,7 +12,7 @@ open Typing_service_types
 module type Delegate_sig = sig
   type state [@@deriving show]
 
-  val create : unit -> state
+  val create : ?max_batch_size:int -> ?min_batch_size:int -> unit -> state
 
   val start : delegate_env -> state -> recheck_id:string option -> state
 

@@ -305,6 +305,10 @@ let load config_filename options =
       ?tco_remote_type_check:(Some local_config.remote_type_check.enabled)
       ?tco_remote_worker_key:local_config.remote_worker_key
       ?tco_remote_check_id:local_config.remote_check_id
+      ?tco_remote_max_batch_size:
+        (Some local_config.remote_type_check.max_batch_size)
+      ?tco_remote_min_batch_size:
+        (Some local_config.remote_type_check.min_batch_size)
       ?tco_num_remote_workers:(Some local_config.remote_type_check.num_workers)
       ?so_remote_version_specifier:local_config.remote_version_specifier
       ?so_remote_worker_vfs_checkout_threshold:

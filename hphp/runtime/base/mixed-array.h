@@ -367,6 +367,7 @@ public:
   static arr_lval LvalInt(ArrayData* ad, int64_t k, bool copy);
   static arr_lval LvalStr(ArrayData* ad, StringData* k, bool copy);
   static arr_lval LvalForceNew(ArrayData*, bool copy);
+  static arr_lval LvalForce(ArrayData* ad, const Variant& k, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntInPlace(ArrayData*, int64_t k, TypedValue v);

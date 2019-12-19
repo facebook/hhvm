@@ -1146,6 +1146,13 @@ arr_lval MixedArray::LvalStr(ArrayData* ad, StringData* key, bool copy) {
   return asMixed(ad)->prepareForInsert(copy)->addLvalImpl<true>(key);
 }
 
+arr_lval MixedArray::LvalForce(ArrayData* ad, const Variant& k, bool copy) {
+  auto const a = asMixed(ad)->prepareForInsert(copy);
+  return k.isInteger()
+    ? a->addLvalImpl<false>(k.asInt64Val())
+    : a->addLvalImpl<false>(k.asCStrRef().get());
+}
+
 arr_lval MixedArray::LvalSilentInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   auto const pos = a->find(k, hash_int64(k));

@@ -1355,12 +1355,7 @@ Array VariableUnserializer::unserializeDict() {
     assertx(type() != VariableUnserializer::Type::APCSerialize ||
            !arr.exists(key, true));
 
-    auto const lval = [&] {
-      SuppressHACFalseyPromoteNotices shacn;
-      return key.isInteger()
-        ? MixedArray::LvalIntDict(arr.get(), key.asInt64Val(), false)
-        : MixedArray::LvalStrDict(arr.get(), key.asCStrRef().get(), false);
-    }();
+    auto const lval = MixedArray::LvalForce(arr.get(), key, false);
     assertx(lval.arr == arr.get());
 
     if (UNLIKELY(isRefcountedType(lval.type()))) {

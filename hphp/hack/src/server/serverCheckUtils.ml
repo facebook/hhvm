@@ -11,13 +11,13 @@ open ServerEnv
 open ServerLocalConfig
 
 let should_do_remote
-    (opts : TypecheckerOptions.t) (fnl : Relative_path.t list) ~(t : float) :
+    (opts : TypecheckerOptions.t) (fnl : Relative_path.Set.t) ~(t : float) :
     bool * float =
   let remote_type_check = TypecheckerOptions.remote_type_check opts in
   let remote_type_check_threshold =
     TypecheckerOptions.remote_type_check_threshold opts
   in
-  let file_count = List.length fnl in
+  let file_count = Relative_path.Set.cardinal fnl in
   let do_remote =
     match (remote_type_check, remote_type_check_threshold) with
     | (true, Some remote_type_check_threshold)

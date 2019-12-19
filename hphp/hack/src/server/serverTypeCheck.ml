@@ -982,6 +982,40 @@ functor
         total_rechecked_count;
       }
 
+    let start_typing_delegate genv env : env =
+      let num_workers =
+        ServerLocalConfig.(genv.local_config.remote_type_check.num_workers)
+      in
+      let version_specifier =
+        ServerLocalConfig.(genv.local_config.remote_version_specifier)
+      in
+      let root = Relative_path.path_of_prefix Relative_path.Root in
+      {
+        env with
+        typing_service =
+          {
+            env.typing_service with
+            delegate_state =
+              Typing_service_delegate.start
+                Typing_service_types.
+                  {
+                    init_id = env.init_env.init_id;
+                    mergebase = env.init_env.mergebase;
+                    num_workers;
+                    root;
+                    server =
+                      ServerApi.make_local_server_api
+                        env.naming_table
+                        ~root
+                        ~ignore_hh_version:
+                          (ServerArgs.ignore_hh_version genv.options);
+                    version_specifier;
+                  }
+                env.typing_service.delegate_state
+                ~recheck_id:env.init_env.recheck_id;
+          };
+      }
+
     let type_check_core genv env =
       let env =
         if CheckKind.is_full then
@@ -1245,6 +1279,15 @@ functor
       let (files_to_check, lazy_check_later) =
         CheckKind.get_defs_to_recheck files_to_parse fast to_recheck env
       in
+      let (should_start_delegate, t) =
+        ServerCheckUtils.should_do_remote env.tcopt files_to_check ~t
+      in
+      let env =
+        if should_start_delegate then
+          start_typing_delegate genv env
+        else
+          env
+      in
       let files_to_check =
         remove_failed_parsing_set
           files_to_check
@@ -1350,6 +1393,18 @@ functor
       (* We might have completed a full check, which might mean that a rebase was
        * successfully processed. *)
       ServerRevisionTracker.check_non_blocking env;
+
+      let env =
+        {
+          env with
+          typing_service =
+            {
+              env.typing_service with
+              delegate_state =
+                Typing_service_delegate.stop env.typing_service.delegate_state;
+            };
+        }
+      in
 
       (env, { reparse_count; total_rechecked_count })
   end

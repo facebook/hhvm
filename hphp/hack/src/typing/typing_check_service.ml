@@ -494,7 +494,7 @@ let next
       Bucket.Wait
     | jobs ->
       (match delegate_job with
-      | Some (current_bucket, remaining_jobs, job) ->
+      | Some { current_bucket; remaining_jobs; job } ->
         return_bucket_job (DelegateProgress job) current_bucket remaining_jobs
       | None ->
         let bucket_size =

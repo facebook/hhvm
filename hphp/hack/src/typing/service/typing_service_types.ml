@@ -48,6 +48,12 @@ type files_to_process = file_computation list
 
 type files_in_progress = file_computation list
 
+type delegate_next_result = {
+  current_bucket: file_computation list;
+  remaining_jobs: file_computation list;
+  job: delegate_job_sig;
+}
+
 (**
   This module type exposes an API within hh_server running on the users' host
   that a component that distributes the work to other hosts can call.

@@ -22,7 +22,7 @@ module type Delegate_sig = sig
     files_to_process ->
     file_computation Hash_set.Poly.t ->
     state ->
-    state * (files_in_progress * files_to_process * delegate_job_sig) option
+    state * delegate_next_result option
 
   val merge : state -> computation_progress -> state
 

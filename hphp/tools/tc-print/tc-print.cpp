@@ -372,6 +372,16 @@ void sortTrans() {
       transPrintOrder.push_back(tid);
     }
   }
+  std::sort(transPrintOrder.begin(), transPrintOrder.end(),
+            [] (uint32_t tid1, uint32_t tid2) {
+              auto const tr1 = TREC(tid1);
+              auto const tr2 = TREC(tid2);
+
+              if (tr1->aStart != tr2->aStart) {
+                return std::less<void*>{}(tr1->aStart, tr2->aStart);
+              }
+              return tid1 < tid2;
+            });
 }
 
 void loadPerfEvents() {

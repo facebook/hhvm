@@ -969,12 +969,6 @@ extern const ArrayFunctions g_array_funcs;
 [[noreturn]] void throwInvalidAdditionException(const ArrayData* ad);
 [[noreturn]] void throwVecUnsetException();
 
-void raiseHackArrCompatRefBind(int64_t);
-void raiseHackArrCompatRefBind(const StringData*);
-void raiseHackArrCompatRefBind(TypedValue);
-void raiseHackArrCompatRefNew();
-void raiseHackArrCompatRefIter();
-
 void raiseHackArrCompatAdd();
 
 void raiseHackArrCompatArrHackArrCmp();
@@ -986,7 +980,6 @@ void raiseHackArrCompatImplicitArrayKey(const TypedValue* key);
 
 StringData* getHackArrCompatNullHackArrayKeyMsg();
 
-bool checkHACRefBind();
 bool checkHACEmptyStringPromote();
 bool checkHACCompare();
 bool checkHACCompareNonAnyArray();

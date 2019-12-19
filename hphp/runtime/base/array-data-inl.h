@@ -325,10 +325,6 @@ ALWAYS_INLINE void decRefArr(ArrayData* arr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE bool checkHACRefBind() {
-  return RuntimeOption::EvalHackArrCompatNotices &&
-         RuntimeOption::EvalHackArrCompatCheckRefBind;
-}
 ALWAYS_INLINE bool checkHACEmptyStringPromote() {
   return RuntimeOption::EvalHackArrCompatNotices &&
          RuntimeOption::EvalHackArrCompatCheckEmptyStringPromote;

@@ -245,7 +245,6 @@ static Array get_frame_args(const ActRec* ar) {
     }
   }
 
-  SuppressHACRefBindNotices _guard;
   VArrayInit retArray(numArgs);
 
   int i = 0;

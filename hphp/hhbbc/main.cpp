@@ -279,7 +279,6 @@ std::vector<SString> load_input(F&& fun) {
   // When running hhvm, these option is not loaded from GD, but read from CLI.
   RO::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
   RO::EvalHackArrCompatNotices =
-    RO::EvalHackArrCompatCheckRefBind =
     RO::EvalHackArrCompatCheckCompare =
     RO::EvalHackArrCompatCheckCompareNonAnyArray =
     RO::EvalHackArrCompatCheckArrayPlus =

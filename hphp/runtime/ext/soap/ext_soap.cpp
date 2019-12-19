@@ -2553,7 +2553,6 @@ Variant HHVM_METHOD(SoapClient, soapcallImpl,
                     const Array& args,
                     const Array& options = null_array,
                     const Variant& input_headers = uninit_variant) {
-  SuppressHACRefBindNotices shacn;
   auto* data = Native::data<SoapClient>(this_);
   SoapClientScope ss(this_);
 

@@ -1245,35 +1245,6 @@ void throwVecUnsetException() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void raiseHackArrCompatRefBind(int64_t k) {
-  raise_hac_ref_bind_notice(
-    folly::sformat("Binding ref in array with key {}", k)
-  );
-}
-
-void raiseHackArrCompatRefBind(const StringData* k) {
-  raise_hac_ref_bind_notice(
-    folly::sformat("Binding ref in array with key \"{}\"", k)
-  );
-}
-
-void raiseHackArrCompatRefBind(TypedValue tv) {
-  if (isStringType(tv.m_type)) {
-    raiseHackArrCompatRefBind(tv.m_data.pstr);
-  } else {
-    assertx(isIntType(tv.m_type));
-    raiseHackArrCompatRefBind(tv.m_data.num);
-  }
-}
-
-void raiseHackArrCompatRefNew() {
-  raise_hac_ref_bind_notice("Binding new-element ref in array");
-}
-
-void raiseHackArrCompatRefIter() {
-  raise_hac_ref_bind_notice("Ref binding iteration on array");
-}
-
 void raiseHackArrCompatAdd() {
   raise_hac_array_plus_notice("Using + operator on arrays");
 }

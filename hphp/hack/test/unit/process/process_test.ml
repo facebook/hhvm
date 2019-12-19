@@ -15,6 +15,20 @@ let test_delayed_future () =
     "retrieve delayed value";
   true
 
+let test_continue_delayed_future_with () =
+  let future = Future.delayed_value ~delays:1 "Delayed value" in
+  let future = Future.continue_with future @@ fun result -> result in
+  Bool_asserter.assert_equals false (Future.is_ready future) "Delay!";
+  Bool_asserter.assert_equals
+    true
+    (Future.is_ready future)
+    "After the delay, the continuation should execute";
+  String_asserter.assert_equals
+    "Delayed value"
+    (Future.get_exn future)
+    "The delayed value must match the expected";
+  true
+
 let test_exception_in_future_continuation () =
   let make_future (i : int) : int Future.t =
     if i mod 2 = 0 then
@@ -65,6 +79,7 @@ let test_of_error () =
 let tests =
   [
     ("test_delayed_future", test_delayed_future);
+    ("test_continue_delayed_future_with", test_continue_delayed_future_with);
     ("test_of_error", test_of_error);
     ( "test_exception_in_future_continuation",
       test_exception_in_future_continuation );

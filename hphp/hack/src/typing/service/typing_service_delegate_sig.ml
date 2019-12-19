@@ -14,7 +14,7 @@ module type Delegate_sig = sig
 
   val create : unit -> state
 
-  val start : delegate_env -> state -> state
+  val start : delegate_env -> state -> recheck_id:string option -> state
 
   val stop : state -> state
 

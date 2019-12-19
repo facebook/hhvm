@@ -12,8 +12,8 @@ type state = unit [@@deriving show]
 
 let create () = ()
 
-let start delegate_env state =
-  ignore delegate_env;
+let start delegate_env state ~recheck_id =
+  ignore (delegate_env, recheck_id);
   state
 
 let stop state = state

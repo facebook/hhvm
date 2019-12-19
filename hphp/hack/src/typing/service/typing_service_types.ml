@@ -114,5 +114,14 @@ type delegate_env = {
   mergebase: Hg.hg_rev option;
   num_workers: int;
   root: string;
+  (* This module exposes to the controller the limited set of operations that
+    it needs, without exposing the underlying types or implementation details.
+    It is also helpful in simplifying the isolation of the controller
+    for unit testing. *)
+  server: (module LocalServerApi);
+  (* Represents the version of hh_server that the remote hosts should install,
+    if it's not the default that they would be otherwise using. This field
+    is only useful in development and should not be set in the normal course
+    of business during type checking user's code. *)
   version_specifier: string option;
 }

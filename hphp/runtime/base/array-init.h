@@ -458,7 +458,7 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
  * Base initializer for Packed-layout arrays.
  */
 template<typename TArray, DataType DT>
-struct PackedArrayInitBase : ArrayInitBase<TArray, DT> {
+struct PackedArrayInitBase final : ArrayInitBase<TArray, DT> {
   using ArrayInitBase<TArray, DT>::ArrayInitBase;
 
   /*
@@ -477,44 +477,28 @@ struct PackedArrayInitBase : ArrayInitBase<TArray, DT> {
     assertx(this->m_arr->hasExactlyOneRef());
     check_non_safepoint_surprise();
   }
-};
 
-/*
- * Initializer for a PHP vector-shaped array.
- */
-template <typename TArray>
-struct PackedPHPArrayInitBase : PackedArrayInitBase<TArray, KindOfArray> {
-  using PackedArrayInitBase<TArray, KindOfArray>::PackedArrayInitBase;
-
-  PackedPHPArrayInitBase& append(TypedValue tv) {
+  PackedArrayInitBase& append(TypedValue tv) {
     this->performOp([&]{
       return PackedArray::AppendInPlace(this->m_arr, tvToInitCell(tv));
     });
     return *this;
   }
-  PackedPHPArrayInitBase& append(const Variant& v) {
+  PackedArrayInitBase& append(const Variant& v) {
     return append(*v.asTypedValue());
   }
+
 };
 
-using PackedArrayInit = PackedPHPArrayInitBase<PackedArray>;
+/*
+ * Initializer for a PHP vector-shaped array.
+ */
+using PackedArrayInit = PackedArrayInitBase<PackedArray, KindOfArray>;
 
 /*
  * Initializer for a Hack vector array.
  */
-struct VecArrayInit : PackedArrayInitBase<detail::VecArray, KindOfVec> {
-  using PackedArrayInitBase<detail::VecArray, KindOfVec>::PackedArrayInitBase;
-
-  VecArrayInit& append(TypedValue tv) {
-    performOp([&]{
-      return PackedArray::AppendInPlaceVec(m_arr, tvToInitCell(tv));
-    });
-    return *this;
-  }
-  VecArrayInit& append(const Variant& v) {
-    return append(*v.asTypedValue());
-  }
-};
+using VecArrayInit = PackedArrayInitBase<detail::VecArray, KindOfVec>;
 
 ///////////////////////////////////////////////////////////////////////////////
 

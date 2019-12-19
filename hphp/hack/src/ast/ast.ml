@@ -135,6 +135,16 @@ and record_def = {
   rd_doc_comment: string option;
 }
 
+(*
+ * There's now both an c_is_xhp and c_has_xhp_keyword and that's confusing.
+ *
+ * c_has_xhp_keyword is only used for the new style
+ * xhp class name {}
+ *
+ * as opposed to
+ *
+ * class :name {}
+ *)
 and class_ = {
   c_mode: fimode;
   c_user_attributes: user_attribute list;
@@ -142,6 +152,7 @@ and class_ = {
   c_final: bool;
   c_kind: class_kind;
   c_is_xhp: bool;
+  c_has_xhp_keyword: bool;
   c_name: id;
   c_tparams: tparam list;
   c_extends: hint list;

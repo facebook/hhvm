@@ -500,6 +500,7 @@ let make_classish_declaration_syntax
   make_classish_declaration
     (* classish_attribute *) (make_missing ())
     (* classish_modifiers *) (make_list [final_syntax])
+    (* classish_xhp *) (make_missing ())
     class_keyword_syntax
     classname_syntax
     (make_type_parameters_syntax type_parameter_list)

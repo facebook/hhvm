@@ -1245,6 +1245,7 @@ module Make (GetLocals : GetLocals) = struct
       N.c_mode = c.Aast.c_mode;
       N.c_final = c.Aast.c_final;
       N.c_is_xhp = c.Aast.c_is_xhp;
+      N.c_has_xhp_keyword = c.Aast.c_has_xhp_keyword;
       N.c_kind = c.Aast.c_kind;
       N.c_name = name;
       N.c_tparams;

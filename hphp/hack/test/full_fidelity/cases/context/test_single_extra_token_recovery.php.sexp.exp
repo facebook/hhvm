@@ -5,7 +5,7 @@
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
        (missing 0 ())))
      (classish_declaration 907
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((single_line_comment 56) (end_of_line 1) (end_of_line 1)) trait 5
         ((whitespace 1)))
        (() name 2 ((whitespace 1))) (missing 0 ()) (missing 0 ())

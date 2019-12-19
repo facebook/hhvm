@@ -1,0 +1,4 @@
+File "xhp_dupe.php", line 13, characters 11-13:
+Name already bound: foo (Naming[2012])
+File "xhp_dupe.php", line 12, characters 7-9:
+Previous definition is here

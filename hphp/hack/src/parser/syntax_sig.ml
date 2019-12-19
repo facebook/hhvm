@@ -194,6 +194,7 @@ module type Syntax_S = sig
   | ClassishDeclaration               of
     { classish_attribute                                 : t
     ; classish_modifiers                                 : t
+    ; classish_xhp                                       : t
     ; classish_keyword                                   : t
     ; classish_name                                      : t
     ; classish_type_parameters                           : t
@@ -1120,7 +1121,7 @@ module type Syntax_S = sig
   val make_where_constraint : t -> t -> t -> t
   val make_methodish_declaration : t -> t -> t -> t -> t
   val make_methodish_trait_resolution : t -> t -> t -> t -> t -> t
-  val make_classish_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_classish_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_classish_body : t -> t -> t -> t
   val make_trait_use_precedence_item : t -> t -> t -> t
   val make_trait_use_alias_item : t -> t -> t -> t -> t

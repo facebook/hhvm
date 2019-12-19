@@ -629,7 +629,7 @@ where
       Self { syntax, value }
     }
 
-    fn make_classish_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self) -> Self {
+    fn make_classish_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self, arg11: Self) -> Self {
       let children = [
           &arg0.value, 
           &arg1.value, 
@@ -641,7 +641,8 @@ where
           &arg7.value, 
           &arg8.value, 
           &arg9.value, 
-          &arg10.value
+          &arg10.value, 
+          &arg11.value
       ];
       let value = V::from_values(&children);
       let syntax = Self::make(
@@ -659,7 +660,8 @@ where
               arg7.syntax, 
               arg8.syntax, 
               arg9.syntax, 
-              arg10.syntax
+              arg10.syntax, 
+              arg11.syntax
           ],
       );
       Self { syntax, value }

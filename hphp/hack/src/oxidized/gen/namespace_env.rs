@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d972ecbcbff56fbdea625c3ed2734fa9>>
+// @generated SignedSource<<9a1cc3c354e0f26e3714b8eee3fc9948>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -22,4 +22,5 @@ pub struct Env {
     pub name: Option<String>,
     pub auto_ns_map: Vec<(String, String)>,
     pub is_codegen: bool,
+    pub disable_xhp_element_mangling: bool,
 }

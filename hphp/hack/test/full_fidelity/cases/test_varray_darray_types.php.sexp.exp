@@ -7,7 +7,7 @@
          (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
        (missing 0 ())))
      (classish_declaration 114
-      ((missing 0 ()) (list 5 ((() final 5 ((whitespace 1)))))
+      ((missing 0 ()) (list 5 ((() final 5 ((whitespace 1))))) (missing 0 ())
        (() class 5 ((whitespace 1))) (() name 21 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ())

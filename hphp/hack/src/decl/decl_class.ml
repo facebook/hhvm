@@ -75,6 +75,7 @@ let to_class_type
       dc_deferred_init_members;
       dc_kind;
       dc_is_xhp;
+      dc_has_xhp_keyword;
       dc_is_disposable;
       dc_name;
       dc_pos;
@@ -164,6 +165,7 @@ let to_class_type
     tc_deferred_init_members = dc_deferred_init_members;
     tc_kind = dc_kind;
     tc_is_xhp = dc_is_xhp;
+    tc_has_xhp_keyword = dc_has_xhp_keyword;
     tc_is_disposable = dc_is_disposable;
     tc_name = dc_name;
     tc_pos = dc_pos;

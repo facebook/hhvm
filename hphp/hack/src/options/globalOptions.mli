@@ -220,6 +220,17 @@ type t = {
   tco_error_php_lambdas: bool;
   (* Flag to error on using discarded nullable awaitables *)
   tco_disallow_discarded_nullable_awaitables: bool;
+  (*
+   * Flag to disable the old stype xhp element mangling. <something/> would otherwise be resolved as xhp_something
+   * The new style xhp class something {}; does not do this style of mangling, thus we need a way to disable it on the
+   * 'lookup side'.
+   *)
+  po_disable_xhp_element_mangling: bool;
+  (* Enable the new style xhp class.
+   * Old style: class :name {}
+   * New style: xhp class name {}
+   *)
+  po_enable_xhp_class_modifier: bool;
 }
 [@@deriving show]
 
@@ -301,6 +312,8 @@ val make :
   ?po_disallow_func_ptrs_in_constants:bool ->
   ?tco_error_php_lambdas:bool ->
   ?tco_disallow_discarded_nullable_awaitables:bool ->
+  ?po_disable_xhp_element_mangling:bool ->
+  ?po_enable_xhp_class_modifier:bool ->
   unit ->
   t
 
@@ -487,3 +500,7 @@ val po_disallow_func_ptrs_in_constants : t -> bool
 val tco_error_php_lambdas : t -> bool
 
 val tco_disallow_discarded_nullable_awaitables : t -> bool
+
+val po_disable_xhp_element_mangling : t -> bool
+
+val po_enable_xhp_class_modifier : t -> bool

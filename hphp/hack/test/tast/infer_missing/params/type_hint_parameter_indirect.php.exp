@@ -31,7 +31,7 @@ Errors:
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-        ns_is_codegen = false };
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [7:1-9:2]; f_annotation = (); f_mode = Mpartial;
@@ -67,7 +67,7 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-         ns_is_codegen = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [11:1-13:2]; f_annotation = (); f_mode = Mpartial;
@@ -107,7 +107,7 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-         ns_is_codegen = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        f_doc_comment = None; f_static = false });
   (Fun
      { f_span = [15:1-17:2]; f_annotation = (); f_mode = Mpartial;
@@ -155,6 +155,6 @@ Errors:
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-         ns_is_codegen = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        f_doc_comment = None; f_static = false })
   ]

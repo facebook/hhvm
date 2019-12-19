@@ -7676,6 +7676,7 @@ and class_def_ env c tc =
       Aast.c_mode = c.c_mode;
       Aast.c_final = c.c_final;
       Aast.c_is_xhp = c.c_is_xhp;
+      Aast.c_has_xhp_keyword = c.c_has_xhp_keyword;
       Aast.c_kind = c.c_kind;
       Aast.c_name = c.c_name;
       Aast.c_tparams = tparams;

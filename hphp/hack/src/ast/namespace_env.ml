@@ -18,6 +18,7 @@ type env = {
   ns_name: string option;
   ns_auto_ns_map: (string * string) list;
   ns_is_codegen: bool;
+  ns_disable_xhp_element_mangling: bool;
 }
 [@@deriving eq, show]
 
@@ -32,7 +33,7 @@ let default_const_uses = hh_autoimport_map_of_list Hh_autoimport.consts
 
 let default_ns_uses = hh_autoimport_map_of_list Hh_autoimport.namespaces
 
-let empty auto_ns_map is_codegen =
+let empty auto_ns_map is_codegen disable_xhp_element_mangling =
   {
     ns_ns_uses = SMap.union (SMap.of_list auto_ns_map) default_ns_uses;
     ns_class_uses = default_class_uses;
@@ -42,17 +43,25 @@ let empty auto_ns_map is_codegen =
     ns_name = None;
     ns_auto_ns_map = auto_ns_map;
     ns_is_codegen = is_codegen;
+    ns_disable_xhp_element_mangling = disable_xhp_element_mangling;
   }
 
 let empty_with_default =
   let popt = ParserOptions.default in
   let auto_ns_map = ParserOptions.auto_namespace_map popt in
   let codegen = ParserOptions.codegen popt in
-  empty auto_ns_map codegen
+  let disable_xhp_element_mangling =
+    ParserOptions.disable_xhp_element_mangling popt
+  in
+  empty auto_ns_map codegen disable_xhp_element_mangling
 
-let empty_from_env env = empty env.ns_auto_ns_map env.ns_is_codegen
+let empty_from_env env =
+  empty env.ns_auto_ns_map env.ns_is_codegen env.ns_disable_xhp_element_mangling
 
 let empty_from_popt popt =
-  empty (ParserOptions.auto_namespace_map popt) (ParserOptions.codegen popt)
+  empty
+    (ParserOptions.auto_namespace_map popt)
+    (ParserOptions.codegen popt)
+    (ParserOptions.disable_xhp_element_mangling popt)
 
 let is_global_namespace env = Option.is_none env.ns_name

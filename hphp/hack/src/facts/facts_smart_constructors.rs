@@ -79,6 +79,7 @@ pub enum Node {
 #[derive(Debug)]
 pub struct ClassDeclChildren {
     pub modifiers: Node,
+    pub xhp: Node,
     pub kind: Node,
     pub name: Node,
     pub attributes: Node,
@@ -426,6 +427,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         &mut self,
         attributes: Self::R,
         modifiers: Self::R,
+        xhp: Self::R,
         keyword: Self::R,
         name: Self::R,
         _type_params: Self::R,
@@ -440,6 +442,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
             Node::Ignored => Node::Ignored,
             _ => Node::ClassDecl(Box::new(ClassDeclChildren {
                 modifiers,
+                xhp,
                 kind: keyword,
                 name,
                 attributes,

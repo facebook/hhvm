@@ -585,6 +585,11 @@ where
         self.require_token(TokenKind::Name, Errors::error1004)
     }
 
+    fn require_xhp_class_name(&mut self) -> S::R {
+        let token = self.next_xhp_class_name_not_qualified();
+        S!(make_token, self, token)
+    }
+
     fn require_class_name(&mut self) -> S::R {
         if self.is_next_xhp_class_name() {
             let token = self.next_xhp_class_name();
@@ -734,6 +739,10 @@ where
     fn next_xhp_class_name(&mut self) -> S::Token {
         assert!(self.is_next_xhp_class_name());
         self.lexer_mut().next_xhp_class_name()
+    }
+
+    fn next_xhp_class_name_not_qualified(&mut self) -> S::Token {
+        self.lexer_mut().next_xhp_class_name_not_qualified()
     }
 
     fn require_xhp_name(&mut self) -> S::R {

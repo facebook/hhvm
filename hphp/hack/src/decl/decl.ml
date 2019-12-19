@@ -632,6 +632,7 @@ and class_decl c =
       dc_members_fully_known = ext_strict;
       dc_kind = c.sc_kind;
       dc_is_xhp = c.sc_is_xhp;
+      dc_has_xhp_keyword = c.sc_has_xhp_keyword;
       dc_is_disposable = is_disposable;
       dc_name = snd c.sc_name;
       dc_pos = fst c.sc_name;

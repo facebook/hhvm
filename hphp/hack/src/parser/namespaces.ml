@@ -49,6 +49,13 @@ let elaborate_raw_id nsenv kind id =
   if id <> "" && id.[0] = '\\' then
     id
   else
+    (* strip the colon here to match the xhp class style non colonized names *)
+    let id =
+      if nsenv.ns_disable_xhp_element_mangling then
+        String_utils.lstrip id ":"
+      else
+        id
+    in
     let fqid = Utils.add_ns id in
     match kind with
     | ElaborateConst when SN.PseudoConsts.is_pseudo_const fqid -> fqid

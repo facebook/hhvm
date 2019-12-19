@@ -1,0 +1,4 @@
+File "xhp_modifier_no_dashes.php", line 4, characters 14-14:
+A left brace ('{') is expected here. (Parsing[1002])
+File "xhp_modifier_no_dashes.php", line 4, characters 14-14:
+Encountered unexpected text '-', was expecting a class element. (Parsing[1002])

@@ -779,6 +779,7 @@ let converter
           c_mode = c.c_mode;
           c_final = c.c_final;
           c_is_xhp = c.c_is_xhp;
+          c_has_xhp_keyword = c.c_has_xhp_keyword;
           c_kind = c.c_kind;
           c_name = c.c_name;
           c_tparams;

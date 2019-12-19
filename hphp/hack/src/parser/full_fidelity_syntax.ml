@@ -797,6 +797,7 @@ module WithToken(Token: TokenType) = struct
       | ClassishDeclaration {
         classish_attribute;
         classish_modifiers;
+        classish_xhp;
         classish_keyword;
         classish_name;
         classish_type_parameters;
@@ -809,6 +810,7 @@ module WithToken(Token: TokenType) = struct
       } ->
          let acc = f acc classish_attribute in
          let acc = f acc classish_modifiers in
+         let acc = f acc classish_xhp in
          let acc = f acc classish_keyword in
          let acc = f acc classish_name in
          let acc = f acc classish_type_parameters in
@@ -2665,6 +2667,7 @@ module WithToken(Token: TokenType) = struct
       | ClassishDeclaration {
         classish_attribute;
         classish_modifiers;
+        classish_xhp;
         classish_keyword;
         classish_name;
         classish_type_parameters;
@@ -2677,6 +2680,7 @@ module WithToken(Token: TokenType) = struct
       } -> [
         classish_attribute;
         classish_modifiers;
+        classish_xhp;
         classish_keyword;
         classish_name;
         classish_type_parameters;
@@ -4534,6 +4538,7 @@ module WithToken(Token: TokenType) = struct
       | ClassishDeclaration {
         classish_attribute;
         classish_modifiers;
+        classish_xhp;
         classish_keyword;
         classish_name;
         classish_type_parameters;
@@ -4546,6 +4551,7 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "classish_attribute";
         "classish_modifiers";
+        "classish_xhp";
         "classish_keyword";
         "classish_name";
         "classish_type_parameters";
@@ -6486,6 +6492,7 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.ClassishDeclaration, [
           classish_attribute;
           classish_modifiers;
+          classish_xhp;
           classish_keyword;
           classish_name;
           classish_type_parameters;
@@ -6499,6 +6506,7 @@ module WithToken(Token: TokenType) = struct
         ClassishDeclaration {
           classish_attribute;
           classish_modifiers;
+          classish_xhp;
           classish_keyword;
           classish_name;
           classish_type_parameters;
@@ -8653,6 +8661,7 @@ module WithToken(Token: TokenType) = struct
       let make_classish_declaration
         classish_attribute
         classish_modifiers
+        classish_xhp
         classish_keyword
         classish_name
         classish_type_parameters
@@ -8666,6 +8675,7 @@ module WithToken(Token: TokenType) = struct
         let syntax = ClassishDeclaration {
           classish_attribute;
           classish_modifiers;
+          classish_xhp;
           classish_keyword;
           classish_name;
           classish_type_parameters;

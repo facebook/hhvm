@@ -233,6 +233,10 @@ module Xhp = struct
     fun s ->
       if ignore_id s then
         s
+      else if
+        Hhbc_options.disable_xhp_element_mangling !Hhbc_options.compiler_options
+      then
+        strip_colon s
       else
         match List.rev (Str.split_delim rx s) with
         | [] -> ""

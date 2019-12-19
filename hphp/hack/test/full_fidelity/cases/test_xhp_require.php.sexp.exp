@@ -7,9 +7,10 @@
          (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
        (missing 0 ())))
      (classish_declaration 37
-      ((missing 0 ()) (missing 0 ()) (() trait 5 ((whitespace 1)))
-       (() name 3 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
+       (() trait 5 ((whitespace 1))) (() name 3 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 27
         ((() { 1 ((end_of_line 1)))
          (list 21

@@ -57,6 +57,8 @@ type t = {
   option_disallow_func_ptrs_in_constants: bool;
   option_enforce_generics_ub: bool;
   option_check_int_overflow: bool;
+  option_disable_xhp_element_mangling: bool;
+  option_enable_xhp_class_modifier: bool;
   option_rust_lowerer: bool;
 }
 
@@ -110,6 +112,8 @@ let default =
     option_disallow_func_ptrs_in_constants = false;
     option_enforce_generics_ub = false;
     option_check_int_overflow = false;
+    option_disable_xhp_element_mangling = false;
+    option_enable_xhp_class_modifier = false;
     option_rust_lowerer = false;
   }
 
@@ -204,6 +208,10 @@ let disable_unset_class_const o = o.option_disable_unset_class_const
 
 let disallow_func_ptrs_in_constants o = o.option_disallow_func_ptrs_in_constants
 
+let disable_xhp_element_mangling o = o.option_disable_xhp_element_mangling
+
+let enable_xhp_class_modifier o = o.option_enable_xhp_class_modifier
+
 let enforce_generics_ub o = o.option_enforce_generics_ub
 
 let check_int_overflow o = o.option_check_int_overflow
@@ -292,6 +300,10 @@ let to_string o =
       @@ disallow_func_ptrs_in_constants o;
       Printf.sprintf "enforce_generics_ub: %B" @@ enforce_generics_ub o;
       Printf.sprintf "check_int_overflow: %B" @@ check_int_overflow o;
+      Printf.sprintf "enable_xhp_class_modifier: %B"
+      @@ enable_xhp_class_modifier o;
+      Printf.sprintf "disable_xhp_element_mangling: %B"
+      @@ disable_xhp_element_mangling o;
       Printf.sprintf "rust_lowerer: %B" @@ rust_lowerer o;
     ]
 
@@ -393,6 +405,10 @@ let set_option options name value =
     { options with option_disable_unset_class_const = as_bool value }
   | "hhvm.lang.disallow_func_ptrs_in_constants" ->
     { options with option_disallow_func_ptrs_in_constants = as_bool value }
+  | "hhvm.hack.lang.disable_xhp_element_mangling" ->
+    { options with option_disable_xhp_element_mangling = as_bool value }
+  | "hhvm.hack.lang.enable_xhp_class_modifier" ->
+    { options with option_enable_xhp_class_modifier = as_bool value }
   | "eval.enforcegenericsub" ->
     { options with option_enforce_generics_ub = int_of_string value > 0 }
   | "hhvm.hack.lang.check_int_overflow" ->
@@ -522,6 +538,15 @@ let value_setters =
     @@ fun opts v ->
       { opts with option_notice_on_by_ref_argument_typehint_violation = v = 1 }
     );
+    ( set_value
+        "hhvm.hack.lang.disable_xhp_element_mangling"
+        get_value_from_config_int
+    @@ fun opts v -> { opts with option_disable_xhp_element_mangling = v = 1 }
+    );
+    ( set_value
+        "hhvm.hack.lang.enable_xhp_class_modifier"
+        get_value_from_config_int
+    @@ fun opts v -> { opts with option_enable_xhp_class_modifier = v = 1 } );
     ( set_value "doc_root" get_value_from_config_string @@ fun opts v ->
       { opts with option_doc_root = v } );
     ( set_value

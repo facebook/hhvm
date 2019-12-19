@@ -3510,6 +3510,7 @@ if there already is one, since that one will likely be better than this one. *)
         {
           classish_attribute = attr;
           classish_modifiers = mods;
+          classish_xhp = xhp;
           classish_keyword = kw;
           classish_name = name;
           classish_type_parameters = tparaml;
@@ -3529,6 +3530,11 @@ if there already is one, since that one will likely be better than this one. *)
       let c_is_xhp =
         match token_kind name with
         | Some (TK.XHPElementName | TK.XHPClassName) -> true
+        | _ -> false
+      in
+      let c_has_xhp_keyword =
+        match token_kind xhp with
+        | Some TK.XHP -> true
         | _ -> false
       in
       let c_name = pos_name name env in
@@ -3575,6 +3581,7 @@ if there already is one, since that one will likely be better than this one. *)
             c_file_attributes;
             c_final;
             c_is_xhp;
+            c_has_xhp_keyword;
             c_name;
             c_tparams;
             c_extends;
@@ -3672,6 +3679,7 @@ if there already is one, since that one will likely be better than this one. *)
             c_final = false;
             c_kind = Cenum;
             c_is_xhp = false;
+            c_has_xhp_keyword = false;
             c_name = pos_name name env;
             c_tparams = [];
             c_extends = [];
@@ -4104,6 +4112,8 @@ let parse_text (env : env) (source_text : SourceText.t) :
         ~disable_legacy_attribute_syntax:
           (GlobalOptions.po_disable_legacy_attribute_syntax env.parser_options)
         ?mode
+        ~enable_xhp_class_modifier:
+          (GlobalOptions.po_enable_xhp_class_modifier env.parser_options)
         ()
     in
     if quick_mode then

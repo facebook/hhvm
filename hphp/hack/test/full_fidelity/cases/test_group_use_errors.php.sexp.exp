@@ -13,7 +13,7 @@
         ((() { 1 ((end_of_line 1)))
          (list 27
           ((classish_declaration 11
-            ((missing 0 ()) (missing 0 ())
+            ((missing 0 ()) (missing 0 ()) (missing 0 ())
              (((whitespace 4)) class 5 ((whitespace 1)))
              (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
              (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
@@ -21,7 +21,7 @@
               ((() { 1 ((whitespace 1))) (missing 0 ())
                (() } 1 ((end_of_line 1)))))))
            (classish_declaration 11
-            ((missing 0 ()) (missing 0 ())
+            ((missing 0 ()) (missing 0 ()) (missing 0 ())
              (((whitespace 4)) class 5 ((whitespace 1)))
              (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
              (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())

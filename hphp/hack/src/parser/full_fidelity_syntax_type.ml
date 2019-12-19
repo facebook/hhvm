@@ -307,6 +307,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ClassishDeclaration               of
     { classish_attribute                                 : t
     ; classish_modifiers                                 : t
+    ; classish_xhp                                       : t
     ; classish_keyword                                   : t
     ; classish_name                                      : t
     ; classish_type_parameters                           : t
@@ -1613,6 +1614,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and classish_declaration =
     { classish_attribute: attribute_specification option value
     ; classish_modifiers: Token.t listesque value
+    ; classish_xhp: Token.t option value
     ; classish_keyword: Token.t value
     ; classish_name: Token.t value
     ; classish_type_parameters: type_parameters option value

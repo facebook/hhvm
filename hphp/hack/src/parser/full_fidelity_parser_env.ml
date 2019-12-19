@@ -19,6 +19,7 @@ type t = {
   allow_new_attribute_syntax: bool;
   disable_legacy_attribute_syntax: bool;
   leak_rust_tree: bool;
+  enable_xhp_class_modifier: bool;
 }
 [@@deriving show]
 
@@ -35,6 +36,7 @@ let default =
     allow_new_attribute_syntax = false;
     disable_legacy_attribute_syntax = false;
     leak_rust_tree = false;
+    enable_xhp_class_modifier = false;
   }
 
 let make
@@ -52,6 +54,7 @@ let make
     ?((* DANGER: if you leak the root tree into OCaml, it's on you to ensure that
   * it's eventually disposed to avoid memory leak. *)
     leak_rust_tree = default.leak_rust_tree)
+    ?(enable_xhp_class_modifier = default.enable_xhp_class_modifier)
     () =
   {
     hhvm_compat_mode;
@@ -65,6 +68,7 @@ let make
     allow_new_attribute_syntax;
     disable_legacy_attribute_syntax;
     leak_rust_tree;
+    enable_xhp_class_modifier;
   }
 
 let hhvm_compat_mode e = e.hhvm_compat_mode
@@ -92,3 +96,5 @@ let allow_new_attribute_syntax e = e.allow_new_attribute_syntax
 let disable_legacy_attribute_syntax e = e.disable_legacy_attribute_syntax
 
 let leak_rust_tree e = e.leak_rust_tree
+
+let enable_xhp_class_modifier e = e.enable_xhp_class_modifier

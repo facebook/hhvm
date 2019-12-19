@@ -1,7 +1,7 @@
 [(Class
     { c_span = [3:1-89]; c_annotation = (); c_mode = Mstrict;
-      c_final = false; c_is_xhp = false; c_kind = Cnormal;
-      c_name = ([3:7-10], "\\Foo");
+      c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+      c_kind = Cnormal; c_name = ([3:7-10], "\\Foo");
       c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_method_redeclarations = [];
@@ -36,13 +36,13 @@
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-        ns_is_codegen = false };
+        ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
       c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [4:1-46]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([4:7-10], "\\Bar");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([4:7-10], "\\Bar");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
@@ -56,13 +56,13 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-         ns_is_codegen = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = []; c_file_attributes = []; c_enum = None;
        c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [5:1-58]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([5:7-22], "\\SingleAttribute");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([5:7-22], "\\SingleAttribute");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
@@ -76,7 +76,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-         ns_is_codegen = false };
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        c_user_attributes = []; c_file_attributes = []; c_enum = None;
        c_pu_enums = []; c_doc_comment = None });
   (Typedef
@@ -95,7 +95,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-         ns_is_codegen = false }
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
        });
   (Typedef
      { t_annotation = (); t_name = ([11:6-8], "\\T2"); t_tparams = [];
@@ -108,7 +108,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-         ns_is_codegen = false }
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
        });
   (Typedef
      { t_annotation = (); t_name = ([13:6-23], "\\Serialized_contra");
@@ -122,7 +122,7 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-         ns_is_codegen = false }
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
        });
   (Typedef
      { t_annotation = (); t_name = ([14:6-19], "\\Serialized_co");
@@ -136,6 +136,6 @@
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
          ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
-         ns_is_codegen = false }
+         ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
        })
   ]

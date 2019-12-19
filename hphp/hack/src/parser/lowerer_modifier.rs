@@ -10,15 +10,16 @@ use parser_core_types::token_kind::TokenKind as TK;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Kind(u32);
-pub const FINAL: Kind = Kind(0b000000001u32);
-pub const STATIC: Kind = Kind(0b000000010u32);
-pub const ABSTRACT: Kind = Kind(0b000000100u32);
-pub const PRIVATE: Kind = Kind(0b000001000u32);
-pub const PUBLIC: Kind = Kind(0b000010000u32);
-pub const PROTECTED: Kind = Kind(0b000100000u32);
-pub const VAR: Kind = Kind(0b001000000u32);
-pub const ASYNC: Kind = Kind(0b010000000u32);
-pub const COROUTINE: Kind = Kind(0b100000000u32);
+pub const XHP: Kind = Kind(0b0000000001u32);
+pub const FINAL: Kind = Kind(0b0000000010u32);
+pub const STATIC: Kind = Kind(0b0000000100u32);
+pub const ABSTRACT: Kind = Kind(0b0000001000u32);
+pub const PRIVATE: Kind = Kind(0b0000010000u32);
+pub const PUBLIC: Kind = Kind(0b0000100000u32);
+pub const PROTECTED: Kind = Kind(0b0001000000u32);
+pub const VAR: Kind = Kind(0b0010000000u32);
+pub const ASYNC: Kind = Kind(0b0100000000u32);
+pub const COROUTINE: Kind = Kind(0b1000000000u32);
 
 pub fn from_token_kind(t: TK) -> Option<Kind> {
     match t {
@@ -31,6 +32,7 @@ pub fn from_token_kind(t: TK) -> Option<Kind> {
         TK::Var => Some(VAR),
         TK::Async => Some(ASYNC),
         TK::Coroutine => Some(COROUTINE),
+        TK::XHP => Some(XHP),
         _ => None,
     }
 }

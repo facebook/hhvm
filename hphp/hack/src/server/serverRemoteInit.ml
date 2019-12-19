@@ -12,48 +12,22 @@ let init
     ~(worker_key : string)
     ~(check_id : string)
     ~(bin_root : Path.t)
-    ~(root : Path.t) : Errors.t * float =
-  let t = Unix.gettimeofday () in
-  (* Set up the type checking callback *)
-  let type_check files_to_check =
-    Typing_check_service.(
-      let check_info =
-        {
-          init_id = Random_id.short_string ();
-          recheck_id = None;
-          profile_log = false;
-          profile_type_check_twice = false;
-          profile_type_check_duration_threshold = 0.;
-        }
-      in
-      let delegate_state = Typing_service_delegate.create () in
-      let (errors, _delegate_state) =
-        go
-          workers
-          delegate_state
-          tcopt
-          Relative_path.Set.empty
-          files_to_check
-          ~memory_cap:None
-          ~check_info
-      in
-      errors)
+    ~(root : Path.t) : unit =
+  let (server
+        : (module RemoteWorker.RemoteServerApi
+             with type naming_table = Naming_table.t option)) =
+    ServerApi.make_remote_server_api workers tcopt
   in
-  (* Prepare the input for the remote worker *)
-  let (worker_env : RemoteWorker.work_env) =
+  let (worker_env : Naming_table.t option RemoteWorker.work_env) =
     RemoteWorker.
       {
         bin_root;
         key = worker_key;
         check_id;
+        naming_table_base = None;
         root;
-        timeout = 9999;
-        type_check = Some type_check;
+        timeout = 600;
+        server;
       }
   in
-  Hh_logger.log "Remote: begin type checking";
-  let errors = RemoteWorker.go worker_env in
-  let hs = SharedMem.heap_size () in
-  Hh_logger.log "Heap size: %d" hs;
-
-  (errors, Hh_logger.log_duration "Finished type checking" t)
+  RemoteWorker.go worker_env

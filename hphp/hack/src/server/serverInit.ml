@@ -114,16 +114,16 @@ let init
       if not (ServerArgs.check_mode genv.options) then
         failwith "Remote init is only supported in check (run once) mode";
       let bin_root = Path.make (Filename.dirname Sys.argv.(0)) in
-      let (errorl, t) =
-        ServerRemoteInit.init
-          genv.workers
-          env.tcopt
-          ~worker_key
-          ~check_id
-          ~bin_root
-          ~root
-      in
-      ( ({ env with errorl }, t),
+      let t = Unix.gettimeofday () in
+      ServerRemoteInit.init
+        genv.workers
+        env.tcopt
+        ~worker_key
+        ~check_id
+        ~bin_root
+        ~root;
+      let t = Hh_logger.log_duration "Remote type check" t in
+      ( (env, t),
         Load_state_declined "Out-of-band naming table initialization only",
         true )
     | (Init, Full_init) ->

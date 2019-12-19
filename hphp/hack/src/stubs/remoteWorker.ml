@@ -26,13 +26,14 @@ module type RemoteServerApi = sig
   val type_check : Relative_path.t list -> state_filename:string -> Errors.t
 end
 
-type work_env = {
+type 'naming_table work_env = {
   bin_root: Path.t;
   check_id: string;
   key: string;
   root: Path.t;
+  naming_table_base: 'naming_table;
   timeout: int;
-  type_check: (Relative_path.t list -> Errors.t) option;
+  server: (module RemoteServerApi with type naming_table = 'naming_table);
 }
 
 let go _ = failwith "not implemented"

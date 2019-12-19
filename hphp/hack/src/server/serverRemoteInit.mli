@@ -14,4 +14,4 @@ val init :
   check_id:string ->
   bin_root:Path.t ->
   root:Path.t ->
-  Errors.t * float
+  unit

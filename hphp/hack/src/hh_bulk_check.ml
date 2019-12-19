@@ -12,7 +12,7 @@ type command =
       root: Path.t;
       timeout: int;
     }
-  | CWork of RemoteWorker.work_env
+  | CWork of unit RemoteWorker.work_env
 
 type command_keyword =
   | CKSchedule
@@ -63,6 +63,24 @@ let parse_schedule_args () : command =
   let bin_root = Path.make (Filename.dirname Sys.argv.(0)) in
   CSchedule { bin_root; root; timeout = !timeout }
 
+let make_remote_server_api () :
+    (module RemoteWorker.RemoteServerApi with type naming_table = unit) =
+  ( module struct
+    type naming_table = unit
+
+    let type_check files_to_check ~state_filename =
+      ignore (files_to_check, state_filename);
+      Errors.empty
+
+    let load_naming_table_base ~naming_table_base =
+      Ok (ignore naming_table_base)
+
+    let load_naming_table_changes_since_baseline
+        ~naming_table ~naming_table_diff =
+      Ok (ignore (naming_table, naming_table_diff))
+  end : RemoteWorker.RemoteServerApi
+    with type naming_table = unit )
+
 let parse_work_args () : command =
   let key = ref "" in
   let timeout = ref 9999 in
@@ -84,8 +102,9 @@ let parse_work_args () : command =
         check_id;
         key = !key;
         root;
+        naming_table_base = ();
         timeout = !timeout;
-        type_check = None;
+        server = make_remote_server_api ();
       }
 
 let parse_args () =

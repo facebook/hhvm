@@ -202,6 +202,10 @@ let handled_command _ ~start_t ~major_gc_time ~minor_gc_time ~parsed_files = ()
 
 let remote_scheduler_save_naming_end _ = ()
 
+let remote_worker_type_check_end _ = ()
+
+let remote_worker_load_naming_end _ = ()
+
 let recheck_end _ _ _ _ = ()
 
 let indexing_end _ = ()

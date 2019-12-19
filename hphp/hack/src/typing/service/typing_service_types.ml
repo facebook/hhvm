@@ -99,11 +99,11 @@ module type LocalServerApi = sig
 
   (* Begins getting dirty files given a mergebase.
     *)
-  val begin_get_dirty_files : mergebase:string option -> string list Future.t
+  val begin_get_changed_files : mergebase:string option -> string list Future.t
 
-  (* Packages the dirty files into a single file.
+  (* Packages the files changed since the mergebase into a single file.
     *)
-  val write_dirty_files : string list -> destination_path:string -> unit
+  val write_changed_files : string list -> destination_path:string -> unit
 end
 
 type delegate_env = {

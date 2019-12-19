@@ -6,7 +6,25 @@
  *
  *)
 
-type type_check_input = Relative_path.t list
+module type RemoteServerApi = sig
+  type naming_table
+
+  (* Called by the worker to load the naming tabe base when first initializing *)
+  val load_naming_table_base :
+    naming_table_base:Path.t option -> (naming_table, string) result
+
+  (* Called by the worker to load the naming table before type checking *)
+  val load_naming_table_changes_since_baseline :
+    naming_table:naming_table ->
+    naming_table_diff:Naming_table.changes_since_baseline ->
+    (naming_table, string) result
+
+  (* Called by the worker to type check a list of files.
+    The state filename is where the type checker should save its state that
+    changed as a result of type checking the files
+    (i.e., the dependency graph) *)
+  val type_check : Relative_path.t list -> state_filename:string -> Errors.t
+end
 
 type work_env = {
   bin_root: Path.t;

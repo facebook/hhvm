@@ -734,8 +734,6 @@ void cgMixedArrayGetK(IRLS& env, const IRInstruction* inst) {
 void cgArraySet(IRLS& env, const IRInstruction* i)    { implArraySet(env, i); }
 
 IMPL_OPCODE_CALL(SetNewElemArray);
-
-IMPL_OPCODE_CALL(AddElemIntKey);
 IMPL_OPCODE_CALL(AddNewElem);
 
 static ArrayData* addNewElemKeysetImpl(ArrayData* keyset, TypedValue v) {
@@ -772,16 +770,6 @@ void cgAddNewElemVec(IRLS& env, const IRInstruction* inst) {
     SyncOptions::None,
     argGroup(env, inst).ssa(0).typedValue(1)
   );
-}
-
-void cgAddElemStrKey(IRLS& env, const IRInstruction* inst) {
-  auto& v = vmain(env);
-
-  auto const target = CallSpec::direct(addElemStringKeyHelper);
-
-  cgCallHelper(v, env, target,
-               callDest(env, inst), SyncOptions::Sync,
-               argGroup(env, inst).ssa(0).ssa(1).typedValue(2));
 }
 
 void cgArrayIsset(IRLS& env, const IRInstruction* inst) {
@@ -1166,9 +1154,6 @@ void cgDictGetK(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgDictSet(IRLS& env, const IRInstruction* i)    { implDictSet(env, i); }
-
-IMPL_OPCODE_CALL(DictAddElemIntKey);
-IMPL_OPCODE_CALL(DictAddElemStrKey);
 
 void cgDictIsset(IRLS& env, const IRInstruction* inst) {
   implDictIsset(env, inst);

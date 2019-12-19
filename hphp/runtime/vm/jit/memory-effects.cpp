@@ -2045,12 +2045,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StringGet:      // raise_notice
   case OrdStrIdx:      // raise_notice
   case ArrayAdd:       // decrefs source
-  case AddElemIntKey:
-  case AddElemStrKey:
   case AddNewElem:         // can re-enter
   case AddNewElemKeyset:   // can re-enter
-  case DictAddElemIntKey:  // decrefs value
-  case DictAddElemStrKey:  // decrefs value
   case ArrayGet:       // kVPackedKind warnings
   case ArraySet:       // kVPackedKind warnings
   case DictGet:

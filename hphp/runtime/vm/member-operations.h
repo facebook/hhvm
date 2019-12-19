@@ -197,13 +197,12 @@ ALWAYS_INLINE void checkPromotion(tv_rval base, const MInstrPropState* pState) {
     }
   }
 
-  auto const falseyPromote = checkHACFalseyPromote();
   auto const stringPromote = checkHACEmptyStringPromote();
 
-  if (UNLIKELY(falseyPromote) && tvIsNull(base)) {
-    raise_hac_falsey_promote_notice("Promoting null to array");
-  } else if (UNLIKELY(falseyPromote) && tvIsBool(base)) {
-    raise_hac_falsey_promote_notice("Promoting false to array");
+  if (tvIsNull(base)) {
+    throwFalseyPromoteException("null");
+  } else if (tvIsBool(base)) {
+    throwFalseyPromoteException("false");
   } else if (UNLIKELY(stringPromote) && tvIsString(base)) {
     raise_hac_empty_string_promote_notice("Promoting empty string to array");
   }
@@ -1239,11 +1238,8 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
 inline tv_lval NewElemEmptyish(tv_lval base, const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
   tvMove(make_array_like_tv(ArrayData::CreateVArray()), base);
-
-  if (checkHACFalseyPromote()) {
-    raise_hac_falsey_promote_notice("Lval on missing array element");
-  }
-  return asArrRef(base).lvalForce();
+  throwMissingElementException("Lval");
+  return nullptr;
 }
 
 /**
@@ -1285,10 +1281,8 @@ inline tv_lval NewElemString(TypedValue& tvRef,
 inline tv_lval NewElemArray(tv_lval base) {
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
-  if (checkHACFalseyPromote()) {
-    raise_hac_falsey_promote_notice("Lval on missing array element");
-  }
-  return asArrRef(base).lvalForce();
+  throwMissingElementException("Lval");
+  return nullptr;
 }
 
 /**
@@ -2062,11 +2056,8 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
 
     case KindOfPersistentArray:
     case KindOfArray: {
-      if (UNLIKELY(
-            checkHACFalseyPromote() &&
-            !asCArrRef(base).exists(tvAsCVarRef(&key))
-          )) {
-        raiseHackArrCompatMissingSetOp();
+      if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
+        throwMissingElementException("Set-op");
       }
       auto result =
         ElemDArray<MOpMode::None, KeyType::Any>(base, key);
@@ -2105,12 +2096,8 @@ inline tv_lval SetOpNewElemEmptyish(SetOpOp op, tv_lval base, TypedValue* rhs,
                                     const MInstrPropState* pState) {
   detail::checkPromotion(base, pState);
   tvMove(make_array_like_tv(ArrayData::CreateVArray()), base);
-  if (checkHACFalseyPromote()) {
-    raise_hac_falsey_promote_notice("Lval on missing array element");
-  }
-  auto result = asArrRef(base).lvalForce();
-  setopBody(result, op, rhs);
-  return result;
+  throwMissingElementException("Lval");
+  return nullptr;
 }
 inline tv_lval SetOpNewElemScalar(TypedValue& tvRef) {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
@@ -2156,19 +2143,9 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       throw_cannot_use_newelem_for_lval_read_keyset();
-
     case KindOfPersistentArray:
-    case KindOfArray: {
-      if (UNLIKELY(checkHACFalseyPromote())) {
-        raiseHackArrCompatMissingSetOp();
-      }
-      if (checkHACFalseyPromote()) {
-        raise_hac_falsey_promote_notice("Lval on missing array element");
-      }
-      auto result = asArrRef(base).lvalForce();
-      setopBody(result, op, rhs);
-      return result;
-    }
+    case KindOfArray:
+      throwMissingElementException("Set-op");
 
     case KindOfObject: {
       TypedValue* result;
@@ -2309,11 +2286,8 @@ inline TypedValue IncDecElem(
 
     case KindOfPersistentArray:
     case KindOfArray: {
-      if (UNLIKELY(
-            checkHACFalseyPromote() &&
-            !asCArrRef(base).exists(tvAsCVarRef(&key))
-          )) {
-        raiseHackArrCompatMissingIncDec();
+      if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
+        throwMissingElementException("Inc/dec");
       }
       auto result =
         ElemDArray<MOpMode::None, KeyType::Any>(base, key);
@@ -2355,12 +2329,8 @@ inline TypedValue IncDecNewElemEmptyish(
 ) {
   detail::checkPromotion(base, pState);
   tvMove(make_array_like_tv(ArrayData::CreateVArray()), base);
-  if (checkHACFalseyPromote()) {
-    raise_hac_falsey_promote_notice("Lval on missing array element");
-  }
-  auto result = asArrRef(base).lvalForce();
-  assertx(type(result) == KindOfNull);
-  return IncDecBody(op, result);
+  throwMissingElementException("Lval");
+  return make_tv<KindOfNull>();
 }
 
 inline TypedValue IncDecNewElemScalar() {
@@ -2410,19 +2380,9 @@ inline TypedValue IncDecNewElem(
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       throw_cannot_use_newelem_for_lval_read_keyset();
-
     case KindOfPersistentArray:
-    case KindOfArray: {
-      if (UNLIKELY(checkHACFalseyPromote())) {
-        raiseHackArrCompatMissingIncDec();
-      }
-      if (checkHACFalseyPromote()) {
-        raise_hac_falsey_promote_notice("Lval on missing array element");
-      }
-      auto result = asArrRef(base).lvalForce();
-      assertx(type(result) == KindOfNull);
-      return IncDecBody(op, result);
-    }
+    case KindOfArray:
+      throwMissingElementException("Inc/dec");
 
     case KindOfObject: {
       if (val(base).pobj->isCollection()) {

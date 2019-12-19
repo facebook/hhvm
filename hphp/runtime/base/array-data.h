@@ -963,6 +963,8 @@ extern const ArrayFunctions g_array_funcs;
                                             const ArrayData* ad);
 [[noreturn]] void throwOOBArrayKeyException(const StringData* key,
                                             const ArrayData* ad);
+[[noreturn]] void throwFalseyPromoteException(const char* type);
+[[noreturn]] void throwMissingElementException(const char* op);
 [[noreturn]] void throwInvalidKeysetOperation();
 [[noreturn]] void throwInvalidAdditionException(const ArrayData* ad);
 [[noreturn]] void throwVecUnsetException();
@@ -979,16 +981,12 @@ void raiseHackArrCompatArrHackArrCmp();
 void raiseHackArrCompatArrNonArrCmp();
 void raiseHackArrCompatDVArrCmp(const ArrayData*, const ArrayData*);
 
-void raiseHackArrCompatMissingIncDec();
-void raiseHackArrCompatMissingSetOp();
-
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
 void raiseHackArrCompatImplicitArrayKey(const TypedValue* key);
 
 StringData* getHackArrCompatNullHackArrayKeyMsg();
 
 bool checkHACRefBind();
-bool checkHACFalseyPromote();
 bool checkHACEmptyStringPromote();
 bool checkHACCompare();
 bool checkHACCompareNonAnyArray();

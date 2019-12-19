@@ -1,0 +1,5 @@
+0112
+
+Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Inc/dec on missing array element' in %s/quick/GetElem.php:16
+Stack trace:
+%A

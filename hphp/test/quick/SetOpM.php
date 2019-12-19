@@ -18,11 +18,6 @@ print "Test begin\n";
 
 $arr = array(0);
 $arr[0] += 23;
-$arr[1] += 47;
-
-$arr[] .= 1;
-$arr[] += 1;
-$arr[] -= 1;
 
 var_dump($arr);
 

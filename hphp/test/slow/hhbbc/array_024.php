@@ -3,6 +3,7 @@
 function junk() { return 2; }
 function bar() {
   $x = array('y' => junk(), 'x' => array());
+  $x['x']['z'] = 0;
   $x['x']['z'] += 1;
   $val = $x['x'];
   $val2 = $x['x']['z'];

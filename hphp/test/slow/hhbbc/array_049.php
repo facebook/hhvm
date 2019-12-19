@@ -3,7 +3,8 @@
 function a() { return 1; }
 function foo() {
   $x = array(a());
-  $x[] += 12;
+  $x[] = 0;
+  $x[1] += 12;
   return $x;
 }
 function d() {

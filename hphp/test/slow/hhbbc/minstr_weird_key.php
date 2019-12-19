@@ -8,12 +8,6 @@ function elem() {
 
   $b = array(4, 3);
   @var_dump($b[$k] = 4);
-
-  $b = array(4, 3);
-  @var_dump($b[$k] += 4);
-
-  $b = array(4, 3);
-  @var_dump($b[$k]++);
 }
 
 

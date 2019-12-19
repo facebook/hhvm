@@ -6,8 +6,8 @@ record Foo {
 
 function foo(array $a) : array {
   $a['x'][0] = 11;
-  $a['y'][0] = 52;
-  $a[1][0] = 62;
+  $a['y'] = 52;
+  $a[1] = 62;
   return $a;
 }
 

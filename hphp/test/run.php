@@ -1436,8 +1436,11 @@ class Queue {
     // critical for pipe writes, to ensure that they are actually atomic.
     // See the documentation for "PlainFile::writeImpl()".  But just in
     // case, we add an explicit "fflush()" below.
-    if (fwrite($output, $packet, $n) !== $n) {
-      throw new \Exception("Failed to write $n bytes");
+    $bytes_out = fwrite($output, $packet, $n);
+    if ($bytes_out !== $n) {
+      throw new \Exception(
+        "Failed to write $n bytes; only $bytes_out were written"
+      );
     }
     fflush($output);
   }
@@ -1720,6 +1723,7 @@ class Status {
       case Status::MSG_TEST_SKIP:
         self::$skipped++;
         list($test, $reason, $time, $stime, $etime) = $message;
+        self::$skip_reasons[$reason] ??= 0;
         self::$skip_reasons[$reason]++;
 
         switch (Status::getMode()) {

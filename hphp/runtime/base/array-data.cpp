@@ -1183,6 +1183,18 @@ void throwInvalidArrayKeyException(const StringData* key, const ArrayData* ad) {
   throwInvalidArrayKeyException(&tv, ad);
 }
 
+void throwFalseyPromoteException(const char* type) {
+  SystemLib::throwOutOfBoundsExceptionObject(
+    folly::sformat("Promoting {} to array", type)
+  );
+}
+
+void throwMissingElementException(const char* op) {
+  SystemLib::throwOutOfBoundsExceptionObject(
+    folly::sformat("{} on missing array element", op)
+  );
+}
+
 void throwOOBArrayKeyException(TypedValue key, const ArrayData* ad) {
   const char* type = [&]{
     if (ad->isVecArray()) return "vec";
@@ -1283,14 +1295,6 @@ void raiseHackArrCompatDVArrCmp(const ArrayData* ad1, const ArrayData* ad2) {
   raise_hackarr_compat_notice(
     folly::sformat("Comparing {} and {}", type(ad1), type(ad2))
   );
-}
-
-void raiseHackArrCompatMissingIncDec() {
-  raise_hac_falsey_promote_notice("Inc/dec on missing array element");
-}
-
-void raiseHackArrCompatMissingSetOp() {
-  raise_hac_falsey_promote_notice("Set-op on missing array element");
 }
 
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key) {

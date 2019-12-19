@@ -156,15 +156,13 @@ inline ArrayData* MixedArray::addValNoAsserts(StringData* key, TypedValue data) 
   return this;
 }
 
-template <bool warn, class K>
+template <bool enforce, class K>
 arr_lval MixedArray::addLvalImpl(K k) {
   assertx(!isFull());
   auto p = insert(k);
   if (!p.found) {
     tvWriteNull(p.tv);
-    if (warn && checkHACFalseyPromote()) {
-      raise_hac_falsey_promote_notice("Lval on missing array element");
-    }
+    if (enforce) throwMissingElementException("Lval");
   }
   return arr_lval { this, &p.tv };
 }

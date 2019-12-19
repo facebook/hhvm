@@ -645,7 +645,6 @@ struct RuntimeOption {
 
 #define HAC_CHECK_OPTS                         \
   HC(RefBind, ref_bind)                        \
-  HC(FalseyPromote, falsey_promote)            \
   HC(EmptyStringPromote, empty_string_promote) \
   HC(Compare, compare)                         \
   HC(ArrayKeyCast, array_key_cast)             \
@@ -1056,7 +1055,6 @@ struct RuntimeOption {
    * checks are made; they do not affect any optimizations. */          \
   F(bool, HackArrCompatNotices, false)                                  \
   F(bool, HackArrCompatCheckRefBind, false)                             \
-  F(bool, HackArrCompatCheckFalseyPromote, false)                       \
   F(bool, HackArrCompatCheckEmptyStringPromote, false)                  \
   F(bool, HackArrCompatCheckCompare, false)                             \
   F(bool, HackArrCompatCheckCompareNonAnyArray, false)                  \

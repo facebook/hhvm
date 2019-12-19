@@ -771,12 +771,7 @@ auto MutableOpIntVec(ArrayData* adIn, int64_t k, bool copy, FoundFn found) {
 arr_lval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
   return MutableOpInt(adIn, k, copy,
     [&] (ArrayData* ad) { return arr_lval { ad, LvalUncheckedInt(ad, k) }; },
-    [&] {
-      if (checkHACFalseyPromote()) {
-        raise_hac_falsey_promote_notice("Lval on missing array element");
-      }
-      return LvalForceNew(adIn, copy);
-    },
+    []() -> arr_lval { throwMissingElementException("Lval"); },
     // TODO(#2606310): Make use of our knowledge that the key is missing.
     [&] (MixedArray* mixed) { return mixed->addLvalImpl<true>(k); }
   );

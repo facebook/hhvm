@@ -204,20 +204,16 @@ arr_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<bool warn> ALWAYS_INLINE
+template<bool enforce> ALWAYS_INLINE
 arr_lval EmptyArray::LvalIntImpl(ArrayData*, int64_t k, bool) {
-  if (warn && checkHACFalseyPromote()) {
-    raise_hac_falsey_promote_notice("Lval on missing array element");
-  }
+  if (enforce) throwMissingElementException("Lval");
   return k == 0 ? EmptyArray::MakePacked(make_tv<KindOfNull>())
                 : EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
 }
 
-template<bool warn> ALWAYS_INLINE
+template<bool enforce> ALWAYS_INLINE
 arr_lval EmptyArray::LvalStrImpl(ArrayData*, StringData* k, bool) {
-  if (warn && checkHACFalseyPromote()) {
-    raise_hac_falsey_promote_notice("Lval on missing array element");
-  }
+  if (enforce) throwMissingElementException("Lval");
   return EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
 }
 

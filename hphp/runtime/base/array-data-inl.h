@@ -329,10 +329,6 @@ ALWAYS_INLINE bool checkHACRefBind() {
   return RuntimeOption::EvalHackArrCompatNotices &&
          RuntimeOption::EvalHackArrCompatCheckRefBind;
 }
-ALWAYS_INLINE bool checkHACFalseyPromote() {
-  return RuntimeOption::EvalHackArrCompatNotices &&
-         RuntimeOption::EvalHackArrCompatCheckFalseyPromote;
-}
 ALWAYS_INLINE bool checkHACEmptyStringPromote() {
   return RuntimeOption::EvalHackArrCompatNotices &&
          RuntimeOption::EvalHackArrCompatCheckEmptyStringPromote;

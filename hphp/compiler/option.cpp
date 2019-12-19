@@ -230,7 +230,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   BIND_HAC_OPTION_SELF(Notices)
   BIND_HAC_OPTION(CheckRefBind, Notices)
-  BIND_HAC_OPTION(CheckFalseyPromote, Notices)
   BIND_HAC_OPTION(CheckCompare, Notices)
   BIND_HAC_OPTION(CheckCompareNonAnyArray, Notices)
   BIND_HAC_OPTION(CheckArrayKeyCast, Notices)

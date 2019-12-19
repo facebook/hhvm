@@ -1,0 +1,3 @@
+Fatal error: Uncaught exception 'OutOfBoundsException' with message 'Lval on missing array element' in %s/slow/hack_arr_compat/array_merge_recursive.php:8
+Stack trace:
+%A

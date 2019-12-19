@@ -1,12 +1,12 @@
 <?hh
 
 class X {
-  private $x    = array();
+  private $x    = array(null);
   private $prop = "string";
 
   public function foo() {
     try {
-      $this->x[]->prop = 12;
+      $this->x[0]->prop = 12;
     } catch (Exception $e) {
       return $e->getMessage();
     }

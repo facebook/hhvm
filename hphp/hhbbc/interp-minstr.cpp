@@ -60,9 +60,6 @@ bool mustBeEmptyish(const Type& ty) {
   return ty.subtypeOf(BNull | BFalse) || ty.subtypeOf(sempty());
 }
 
-bool elemCouldPromoteToArr(const Type& ty) { return couldBeEmptyish(ty); }
-bool elemMustPromoteToArr(const Type& ty)  { return mustBeEmptyish(ty); }
-
 bool propCouldPromoteToObj(const Type& ty) {
   return RuntimeOption::EvalPromoteEmptyObject && couldBeEmptyish(ty);
 }
@@ -583,11 +580,6 @@ void promoteBaseElemD(ISS& env) {
   // of these functions.
   if (mustBeArrLike(ty)) return;
 
-  if (elemMustPromoteToArr(ty)) {
-    ty = some_aempty();
-    return;
-  }
-
   // Intermediate ElemD operations on strings fatal, unless the string is empty,
   // which promotes to array. So for any string here we can assume it promoted
   // to an empty array.
@@ -596,10 +588,7 @@ void promoteBaseElemD(ISS& env) {
     return;
   }
 
-  if (elemCouldPromoteToArr(ty)) {
-    ty = promote_emptyish(ty, some_aempty());
-    return;
-  }
+  if (mustBeEmptyish(ty)) return unreachable(env);
 
   /*
    * If the base still could be some kind of array (but isn't an array sub-type
@@ -612,7 +601,6 @@ void promoteBaseElemD(ISS& env) {
 
 void promoteBaseNewElem(ISS& env) {
   promoteBaseElemD(env);
-  // Technically we don't need to do TStr case.
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -623,29 +611,9 @@ void handleInPublicStaticElemD(ISS& env) {
 
   auto const name = baseLocNameType(base);
   auto const ty = env.index.lookup_public_static(env.ctx, base.locTy, name);
-  if (elemCouldPromoteToArr(ty)) {
-    // Might be possible to only merge a TArrE, but for now this is ok.
-    env.collect.publicSPropMutations.merge(
-      env.index, env.ctx, base.locTy, name, TArr
-    );
-  }
 }
 
-void handleInThisElemD(ISS& env) {
-  if (!couldBeInProp(env, env.collect.mInstrState.base)) return;
-
-  if (auto const name = env.collect.mInstrState.base.locName) {
-    auto const ty = thisPropAsCell(env, name);
-    if (ty && elemCouldPromoteToArr(*ty)) {
-      mergeThisProp(env, name, TArr);
-    }
-    return;
-  }
-
-  mergeEachThisPropRaw(env, [&] (const Type& t) {
-      return elemCouldPromoteToArr(t) ? TArr : TBottom;
-    });
-}
+void handleInThisElemD(ISS& env) {}
 
 void handleInPublicStaticPropD(ISS& env, bool isNullsafe) {
   // NullSafe (Q) props do not promote an emptyish base to stdClass instance.

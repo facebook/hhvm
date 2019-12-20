@@ -186,10 +186,12 @@ let make_remote_server_api
             profile_type_check_duration_threshold = 0.0;
           }
         in
-        let (errors, _) =
+        (* TODO: use the telemetry *)
+        let (errors, _, _telemetry) =
           go
             workers
             (Typing_check_service.Delegate.create ())
+            (Telemetry.create ())
             tcopt
             Relative_path.Set.empty
             files_to_check

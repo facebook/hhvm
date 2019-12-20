@@ -230,7 +230,7 @@ let first_redecl_end _ _ = ()
 
 let second_redecl_end _ _ = ()
 
-let type_check_end _ _ _ = ()
+let type_check_end _ _ _ _ = ()
 
 let notifier_returned _ _ = ()
 

@@ -395,7 +395,7 @@ let merge
     match results.kind with
     | Progress -> ()
     | DelegateProgress _ ->
-      delegate_state := Delegate.merge !delegate_state results.progress
+      delegate_state := Delegate.merge !delegate_state errors results.progress
   in
   let results = results.progress in
 
@@ -547,12 +547,13 @@ let process_in_parallel
     (dynamic_view_files : Relative_path.Set.t)
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state)
+    (telemetry : Telemetry.t)
     (opts : TypecheckerOptions.t)
     (fnl : file_computation list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(check_info : check_info) :
-    Errors.t * Delegate.state * 'a * Relative_path.t list =
+    Errors.t * Delegate.state * Telemetry.t * 'a * Relative_path.t list =
   TypeCheckStore.store opts;
   let delegate_state = ref delegate_state in
   let files_to_process = ref fnl in
@@ -594,7 +595,9 @@ let process_in_parallel
       ~on_cancelled:(on_cancelled next files_to_process files_in_progress)
       ~interrupt
   in
-  Typing_service_delegate.show !delegate_state;
+  let telemetry =
+    Typing_service_delegate.add_telemetry !delegate_state telemetry
+  in
   TypeCheckStore.clear ();
   let paths_of (cancelled_results : progress list) : Relative_path.t list =
     let paths_of (cancelled_progress : progress) =
@@ -608,9 +611,9 @@ let process_in_parallel
     in
     List.concat (List.map cancelled_results ~f:paths_of)
   in
-  (errors, !delegate_state, env, paths_of cancelled_results)
+  (errors, !delegate_state, telemetry, env, paths_of cancelled_results)
 
-type ('b, 'c, 'd) job_result = 'b * 'c * 'd * Relative_path.t list
+type ('a, 'b, 'c, 'd) job_result = 'a * 'b * 'c * 'd * Relative_path.t list
 
 module type Mocking_sig = sig
   val with_test_mocking :
@@ -618,9 +621,9 @@ module type Mocking_sig = sig
     file_computation list ->
     ((* ... before passing it to the real job executor... *)
      file_computation list ->
-    ('b, 'c, 'd) job_result) ->
+    ('a, 'b, 'c, 'd) job_result) ->
     (* ... which output we can also modify. *)
-    ('b, 'c, 'd) job_result
+    ('a, 'b, 'c, 'd) job_result
 end
 
 module NoMocking = struct
@@ -647,8 +650,8 @@ module TestMocking = struct
     in
     (* Only cancel once to avoid infinite loops *)
     cancelled := Relative_path.Set.empty;
-    let (res, delegate_state, env, cancelled) = f fnl in
-    (res, delegate_state, env, mock_cancelled @ cancelled)
+    let (res, delegate_state, telemetry, env, cancelled) = f fnl in
+    (res, delegate_state, telemetry, env, mock_cancelled @ cancelled)
 end
 
 module Mocking =
@@ -671,12 +674,14 @@ let should_process_sequentially
 let go_with_interrupt
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state)
+    (telemetry : Telemetry.t)
     (opts : TypecheckerOptions.t)
     (dynamic_view_files : Relative_path.Set.t)
     (fnl : Relative_path.t list)
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
-    ~(check_info : check_info) : (Errors.t, Delegate.state, 'a) job_result =
+    ~(check_info : check_info) :
+    (Errors.t, Delegate.state, Telemetry.t, 'a) job_result =
   let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
   Mocking.with_test_mocking fnl @@ fun fnl ->
   let result =
@@ -692,13 +697,14 @@ let go_with_interrupt
           ~memory_cap:None
           ~check_info
       in
-      (errors, delegate_state, interrupt.MultiThreadedCall.env, [])
+      (errors, delegate_state, telemetry, interrupt.MultiThreadedCall.env, [])
     ) else (
       Hh_logger.log "Type checking service will process files in parallel";
       process_in_parallel
         dynamic_view_files
         workers
         delegate_state
+        telemetry
         opts
         fnl
         ~interrupt
@@ -718,16 +724,18 @@ let go_with_interrupt
 let go
     (workers : MultiWorker.worker list option)
     (delegate_state : Delegate.state)
+    (telemetry : Telemetry.t)
     (opts : TypecheckerOptions.t)
     (dynamic_view_files : Relative_path.Set.t)
     (fnl : Relative_path.t list)
     ~(memory_cap : int option)
-    ~(check_info : check_info) : Errors.t * Delegate.state =
+    ~(check_info : check_info) : Errors.t * Delegate.state * Telemetry.t =
   let interrupt = MultiThreadedCall.no_interrupt () in
-  let (res, delegate_state, (), cancelled) =
+  let (res, delegate_state, telemetry, (), cancelled) =
     go_with_interrupt
       workers
       delegate_state
+      telemetry
       opts
       dynamic_view_files
       fnl
@@ -736,4 +744,4 @@ let go
       ~check_info
   in
   assert (List.is_empty cancelled);
-  (res, delegate_state)
+  (res, delegate_state, telemetry)

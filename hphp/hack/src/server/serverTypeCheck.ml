@@ -878,6 +878,7 @@ functor
       env: ServerEnv.env;
       diag_subscribe: Diagnostic_subscription.t option;
       errors: Errors.t;
+      telemetry: Telemetry.t;
       files_checked: Relative_path.Set.t;
       full_check_done: bool;
       needs_recheck: Relative_path.Set.t;
@@ -887,6 +888,7 @@ functor
     let do_type_checking
         (genv : genv)
         (env : env)
+        (telemetry : Telemetry.t)
         ~(errors : Errors.t)
         ~(files_to_check : Relative_path.Set.t)
         ~(files_to_parse : Relative_path.Set.t)
@@ -905,10 +907,11 @@ functor
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
       in
       let fnl = Relative_path.Set.elements files_to_check in
-      let (errorl', delegate_state, env', cancelled) =
+      let (errorl', delegate_state, telemetry, env', cancelled) =
         Typing_check_service.go_with_interrupt
           genv.workers
           env.typing_service.delegate_state
+          telemetry
           env.tcopt
           dynamic_view_files
           fnl
@@ -976,6 +979,7 @@ functor
         env;
         diag_subscribe;
         errors;
+        telemetry;
         files_checked = files_to_check;
         full_check_done;
         needs_recheck;
@@ -988,6 +992,12 @@ functor
       in
       let version_specifier =
         ServerLocalConfig.(genv.local_config.remote_version_specifier)
+      in
+      let max_batch_size =
+        ServerLocalConfig.(genv.local_config.remote_type_check.max_batch_size)
+      in
+      let min_batch_size =
+        ServerLocalConfig.(genv.local_config.remote_type_check.min_batch_size)
       in
       let root = Relative_path.path_of_prefix Relative_path.Root in
       {
@@ -1011,7 +1021,12 @@ functor
                           (ServerArgs.ignore_hh_version genv.options);
                     version_specifier;
                   }
-                env.typing_service.delegate_state
+                (* TODO: use env.typing_service.delegate_state when cancellation
+                  implementation is finished *)
+                (Typing_service_delegate.create
+                   ~max_batch_size
+                   ~min_batch_size
+                   ())
                 ~recheck_id:env.init_env.recheck_id;
           };
       }
@@ -1311,10 +1326,12 @@ functor
       (* Typecheck all of the files we determined might need rechecking as a
        consequence of the changes (or, in a lazy check, the subset of those
        files which are open in an IDE buffer). *)
+      let telemetry = Telemetry.create () in
       let {
         env;
         diag_subscribe;
         errors;
+        telemetry;
         files_checked;
         full_check_done;
         needs_recheck;
@@ -1323,6 +1340,7 @@ functor
         do_type_checking
           genv
           env
+          telemetry
           ~errors
           ~files_to_check
           ~files_to_parse
@@ -1342,7 +1360,11 @@ functor
         ~before:old_env.diag_subscribe
         ~after:diag_subscribe;
 
-      HackEventLogger.type_check_end to_recheck_count total_rechecked_count t;
+      HackEventLogger.type_check_end
+        telemetry
+        to_recheck_count
+        total_rechecked_count
+        t;
       let logstring =
         Printf.sprintf "Typechecked %d files" total_rechecked_count
       in

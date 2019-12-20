@@ -63,10 +63,11 @@ let test () =
       profile_type_check_duration_threshold = 0.;
     }
   in
-  let (errors, _delegate_state, (), cancelled) =
+  let (errors, _delegate_state, _telemetry, (), cancelled) =
     Typing_check_service.go_with_interrupt
       workers
       (Typing_service_delegate.create ())
+      (Telemetry.create ())
       options
       Relative_path.Set.empty
       fnl

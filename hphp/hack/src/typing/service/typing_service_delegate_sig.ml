@@ -24,7 +24,7 @@ module type Delegate_sig = sig
     state ->
     state * delegate_next_result option
 
-  val merge : state -> computation_progress -> state
+  val merge : state -> Errors.t -> computation_progress -> state
 
   val on_cancelled : state -> file_computation list * state
 
@@ -32,5 +32,5 @@ module type Delegate_sig = sig
 
   val steal : state -> int -> file_computation list * state
 
-  val show : state -> unit
+  val add_telemetry : state -> Telemetry.t -> Telemetry.t
 end

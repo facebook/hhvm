@@ -23,8 +23,8 @@ let next files_to_process files_in_progress state =
   ignore (files_to_process, files_in_progress);
   (state, None)
 
-let merge state computation_progress =
-  ignore computation_progress;
+let merge state errors computation_progress =
+  ignore (errors, computation_progress);
   state
 
 let on_cancelled state = ([], state)
@@ -35,4 +35,6 @@ let steal state n =
   ignore n;
   ([], state)
 
-let show state = ignore state
+let add_telemetry state telemetry =
+  ignore state;
+  telemetry

@@ -66,10 +66,11 @@ let test () =
     }
   in
   let delegate_state = Typing_service_delegate.create () in
-  let (errors, delegate_state) =
+  let (errors, delegate_state, telemetry) =
     Typing_check_service.go
       None
       delegate_state
+      (Telemetry.create ())
       tcopt
       empty
       [bar_path]
@@ -77,10 +78,11 @@ let test () =
       ~check_info
   in
   Test.assert_errors errors "";
-  let (errors, delegate_state) =
+  let (errors, delegate_state, telemetry) =
     Typing_check_service.go
       None
       delegate_state
+      telemetry
       tcopt
       empty
       [bar_path]
@@ -89,10 +91,11 @@ let test () =
   in
   Test.assert_errors errors "";
 
-  let (errors, delegate_state) =
+  let (errors, delegate_state, telemetry) =
     Typing_check_service.go
       None
       delegate_state
+      telemetry
       tcopt
       empty
       [foo_path]
@@ -100,10 +103,11 @@ let test () =
       ~check_info
   in
   Test.assert_errors errors expected_errors;
-  let (errors, _delegate_state) =
+  let (errors, _delegate_state, _telemetry) =
     Typing_check_service.go
       None
       delegate_state
+      telemetry
       tcopt
       empty
       [foo_path]

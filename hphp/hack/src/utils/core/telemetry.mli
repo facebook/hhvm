@@ -18,6 +18,8 @@ val bool_ : t -> key:string -> value:bool -> t
 
 val int_opt : t -> key:string -> value:int option -> t
 
+val int_ : t -> key:string -> value:int -> t
+
 val object_ : t -> key:string -> value:t -> t
 
 val duration : t -> start_time:float -> t

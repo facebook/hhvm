@@ -175,14 +175,16 @@ let type_check
     let count = List.length files_to_check in
     let logstring = Printf.sprintf "Type-check %d files" count in
     Hh_logger.log "Begin %s" logstring;
-    let ((errorl : Errors.t), (delegate_state : Typing_service_delegate.state))
-        =
+    let ( (errorl : Errors.t),
+          (delegate_state : Typing_service_delegate.state),
+          (telemetry : Telemetry.t) ) =
       let memory_cap =
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
       in
       Typing_check_service.go
         genv.workers
         env.typing_service.delegate_state
+        (Telemetry.create ())
         env.tcopt
         Relative_path.Set.empty
         files_to_check
@@ -191,7 +193,7 @@ let type_check
     in
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
-    HackEventLogger.type_check_end count count t;
+    HackEventLogger.type_check_end telemetry count count t;
     let env =
       {
         env with

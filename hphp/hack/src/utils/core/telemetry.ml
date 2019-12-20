@@ -35,6 +35,12 @@ let int_opt (key : string) (value : int option) : key_value_pair =
 let int_opt (telemetry : t) ~(key : string) ~(value : int option) : t =
   int_opt key value :: telemetry
 
+let int_ (key : string) (value : int) : key_value_pair =
+  (key, Hh_json.int_ value)
+
+let int_ (telemetry : t) ~(key : string) ~(value : int) : t =
+  int_ key value :: telemetry
+
 let object_ (telemetry : t) ~(key : string) ~(value : t) : t =
   (key, Hh_json.JSON_Object value) :: telemetry
 

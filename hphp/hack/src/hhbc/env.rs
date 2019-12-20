@@ -6,6 +6,7 @@
 pub mod emitter; // emitter is public API for mutating state
 pub mod iterator;
 
+use ast_scope_rust::Scope;
 use iterator::Iter;
 use label_rust::Label;
 use oxidized::ast as tast;
@@ -28,6 +29,7 @@ bitflags! {
 pub struct Env {
     pub flags: Flags,
     pub jump_targets_gen: jump_targets::Gen,
+    pub scope: Scope,
     // TODO(hrust)
     // - pipe_var after porting Local
     // - namespace after porting Namespace_env

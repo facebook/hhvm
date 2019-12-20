@@ -1,25 +1,36 @@
 # @generated
-# @autocargo from //hphp/hack/src/hhbc:closure_convert_rust
-# Signature<<6398124ce9e37a86d4b82def6be027351a6b7a9e>>
+# @autocargo from //hphp/hack/src/hhbc:emit_expression_rust
+# Signature<<4bb2ee63655c862d86e2f0458eb77eacf842c0f9>>
 [package]
-name = "closure_convert_rust"
+name = "emit_expression_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["closure_convert.rs"]
+include = ["emit_expression.rs"]
 
 [lib]
-path = "closure_convert.rs"
+path = "emit_expression.rs"
 
 [dependencies]
+ast_class_expr_rust = { path = "cargo/ast_class_expr" }
 ast_constant_folder_rust = { path = "cargo/ast_constant_folder" }
 ast_scope_rust = { path = "cargo/ast_scope" }
+emit_adata_rust = { path = "cargo/emit_adata" }
+emit_fatal_rust = { path = "cargo/emit_fatal" }
+emit_pos_rust = { path = "cargo/emit_pos" }
+emit_symbol_refs_rust = { path = "cargo/emit_symbol_refs" }
+emit_type_constant_rust = { path = "cargo/emit_type_constant" }
 env = { path = "cargo/env" }
+hhas_symbol_refs_rust = { path = "cargo/hhas_symbol_refs" }
+hhas_type = { path = "cargo/hhas_type" }
+hhbc_ast_rust = { path = "cargo/hhbc_ast" }
+hhbc_id_rust = { path = "cargo/hhbc_id" }
 hhbc_string_utils_rust = { path = "cargo/string_utils" }
+instruction_sequence_rust = { path = "cargo/instruction_sequence" }
+label_rust = { path = "cargo/label" }
+local_rust = { path = "cargo/local" }
 naming_special_names_rust = { path = "../naming" }
-ocamlrep = { path = "../ocamlrep" }
 options = { path = "cargo/options" }
 oxidized = { path = "../oxidized" }
-rx_rust = { path = "cargo/rx" }
-unique_list_rust = { path = "cargo/unique_list" }
-itertools = "*"
-# @end of Signature<<6398124ce9e37a86d4b82def6be027351a6b7a9e>>
+runtime = { path = "cargo/runtime" }
+scope_rust = { path = "cargo/scope" }
+# @end of Signature<<4bb2ee63655c862d86e2f0458eb77eacf842c0f9>>

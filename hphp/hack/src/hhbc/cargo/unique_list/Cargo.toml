@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:unique_list_rust
-# Signature<<401b7cf10fd30e1dae551af35df160157d2563e4>>
+# Signature<<0dc09010080441dae8fa76a7b50a01714efa9411>>
 [package]
 name = "unique_list_rust"
 edition = "2018"
@@ -12,4 +12,4 @@ path = "../../unique_list.rs"
 
 [dependencies]
 indexmap = "*"
-# @end of Signature<<401b7cf10fd30e1dae551af35df160157d2563e4>>
+# @end of Signature<<0dc09010080441dae8fa76a7b50a01714efa9411>>

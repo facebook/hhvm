@@ -591,7 +591,8 @@ and simplify_subtype_i
         (env, TL.Coerce (ty_sub, ty_super))
       | LoclType (_, Tnewtype (_, _, ty)) ->
         simplify_subtype ~subtype_env ~this_ty ty ty_super env
-      | LoclType (_, Tdependent (_, ty)) ->
+      | LoclType ((_, Tdependent (_, ty)) as ty_sub) ->
+        let this_ty = Option.first_some this_ty (Some ty_sub) in
         simplify_subtype ~subtype_env ~this_ty ty ty_super env
       | LoclType (r_sub, Tpu_type_access (base, enum, member, name)) ->
         (* If the lhs can be resolved, continue. Otherwise abort (because the
@@ -1437,244 +1438,199 @@ and simplify_subtype_i
     | LoclType _
     | ConstraintType _ ->
       default_subtype env)
-  | _ ->
-    (match (ety_sub, ety_super) with
-    | ( _,
-        ConstraintType
-          (_, (TCintersection _ | TCunion _ | Thas_member _ | Tdestructure _))
-      )
-    | ( _,
-        LoclType
-          ( _,
-            ( Tgeneric _ | Tdependent _ | Toption _ | Tunion _ | Terr | Tvar _
-            | Tintersection _ ) ) ) ->
-      assert false
-    | (LoclType (_, Tdynamic), LoclType _)
-      when subtype_env.treat_dynamic_as_bottom ->
-      default_subtype env
-    | (ConstraintType (_, (TCunion _ | TCintersection _)), _)
-    | (LoclType (_, (Tintersection _ | Tunion _ | Terr | Tvar _)), _) ->
-      default_subtype env
-    (* A & B <: C iif A <: C | !B *)
-    | (LoclType (_, Tgeneric _), _)
-      when Option.is_none subtype_env.seen_generic_params ->
-      default ()
-    | (LoclType ety_sub, LoclType ety_super) ->
-      (match (snd ety_sub, snd ety_super) with
-      | ( _,
-          ( Tgeneric _ | Tdependent _ | Toption _ | Tunion _ | Terr | Tvar _
-          | Tintersection _ | Tnonnull | Tdynamic | Tprim _ | Tobject | Tanon _
-          | Tany _ | Tpu _ | Tpu_type_access _ | Tfun _ | Ttuple _ | Tshape _
-          | Tarraykind _ | Tnewtype _ ) ) ->
-        assert false
-      | (Tnewtype (cid, _, _), Tclass ((_, class_name), _, [ty_super']))
-        when Env.is_enum env cid
-             && String.equal class_name SN.Classes.cHH_BuiltinEnum ->
+  | LoclType
+      ( (r_super, Tclass (((_, class_name) as x_super), exact_super, tyl_super))
+      as ty_super ) ->
+    (match ety_sub with
+    | LoclType (_, Tnewtype (enum_name, _, _))
+      when Env.is_enum env enum_name
+           && String.equal enum_name class_name
+           && equal_exact exact_super Nonexact ->
+      valid ()
+    | LoclType ((_, Tnewtype (cid, _, _)) as ty_sub)
+      when Env.is_enum env cid
+           && String.equal class_name SN.Classes.cHH_BuiltinEnum ->
+      (match tyl_super with
+      | [ty_super'] ->
         env
-        |> simplify_subtype ~subtype_env ~this_ty ety_sub ty_super'
-        &&& simplify_subtype ~subtype_env ~this_ty ty_super' ety_sub
-      | (Tnewtype (enum_name, _, _), Tclass ((_, class_name), Nonexact, _))
-        when (Env.is_enum env enum_name && String.equal enum_name class_name)
-             || String.equal class_name SN.Classes.cXHPChild ->
-        valid ()
-      | (Tnewtype (enum_name, _, ty), Tclass ((_, class_name), exact, _))
-        when Env.is_enum env enum_name ->
-        if String.equal enum_name class_name && equal_exact exact Nonexact then
-          valid ()
-        else
-          simplify_subtype ~subtype_env ~this_ty ty ety_super env
-      | (Tprim Nast.Tstring, Tclass ((_, class_name), exact, _)) ->
-        if
-          ( String.equal class_name SN.Classes.cStringish
-          || String.equal class_name SN.Classes.cXHPChild )
-          && equal_exact exact Nonexact
-        then
-          valid ()
-        else
-          invalid ()
-      | ( Tprim Nast.(Tarraykey | Tint | Tfloat | Tnum),
-          Tclass ((_, class_name), exact, _) ) ->
-        if
-          String.equal class_name SN.Classes.cXHPChild
-          && equal_exact exact Nonexact
-        then
-          valid ()
-        else
-          invalid ()
-      | ( ( Tnonnull | Tdynamic
-          | Tprim Nast.(Tnull | Tvoid | Tbool | Tresource | Tnoreturn | Tatom _)
-          | Toption _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tpu _
-          | Tpu_type_access _ ),
-          Tclass _ ) ->
-        invalid ()
-      (* Match what's done in unify for non-strict code *)
-      | (Tobject, Tclass _) ->
-        if Partial.should_check_error (Env.get_mode env) 4110 then
-          invalid ()
-        else
-          valid ()
-      | ( Tclass (x_sub, exact_sub, tyl_sub),
-          Tclass (x_super, exact_super, tyl_super) ) ->
-        let exact_match =
-          match (exact_sub, exact_super) with
-          | (Nonexact, Exact) -> false
-          | (_, _) -> true
-        in
-        let (p_sub, p_super) = (fst ety_sub, fst ety_super) in
-        let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
-        (* This is side-effecting as it registers a dependency *)
-        let class_def_sub = Env.get_class env cid_sub in
-        if String.equal cid_super cid_sub then
-          (* If class is final then exactness is superfluous *)
-          let is_final =
-            match class_def_sub with
-            | Some tc -> Cls.final tc
-            | None -> false
-          in
-          if not (exact_match || is_final) then
-            invalid ()
-          else
-            (* We handle the case where a generic A<T> is used as A *)
-            let tyl_super =
-              if
-                List.is_empty tyl_super
-                && not (Partial.should_check_error (Env.get_mode env) 4101)
-              then
-                List.map tyl_sub (fun _ -> (p_super, Typing_defs.make_tany ()))
-              else
-                tyl_super
-            in
-            let tyl_sub =
-              if
-                List.is_empty tyl_sub
-                && not (Partial.should_check_error (Env.get_mode env) 4101)
-              then
-                List.map tyl_super (fun _ ->
-                    (p_super, Typing_defs.make_tany ()))
-              else
-                tyl_sub
-            in
-            if Int.( <> ) (List.length tyl_sub) (List.length tyl_super) then
-              let n_sub = String_utils.soi (List.length tyl_sub) in
-              let n_super = String_utils.soi (List.length tyl_super) in
-              invalid_with (fun () ->
-                  Errors.type_arity_mismatch
-                    (fst x_super)
-                    n_super
-                    (fst x_sub)
-                    n_sub
-                    subtype_env.on_error)
-            else if List.is_empty tyl_sub && List.is_empty tyl_super then
-              valid ()
-            else
-              let variance_reifiedl =
-                match class_def_sub with
-                | None ->
-                  List.map tyl_sub (fun _ -> (Ast_defs.Invariant, Aast.Erased))
-                | Some class_sub ->
-                  List.map (Cls.tparams class_sub) (fun t ->
-                      (t.tp_variance, t.tp_reified))
-              in
-              (* C<t1, .., tn> <: C<u1, .., un> iff
-               *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
-               * where vi is the variance of the i'th generic parameter of C,
-               * and <:v denotes the appropriate direction of subtyping for variance v
-               *)
-              simplify_subtype_variance
-                ~subtype_env
-                cid_sub
-                variance_reifiedl
-                tyl_sub
-                tyl_super
-                env
-        else if not exact_match then
-          invalid ()
-        else (
+        |> simplify_subtype ~subtype_env ~this_ty ty_sub ty_super'
+        &&& simplify_subtype ~subtype_env ~this_ty ty_super' ty_sub
+      | _ -> default_subtype env)
+    | LoclType (_, Tnewtype (enum_name, _, _))
+      when (Env.is_enum env enum_name && String.equal enum_name class_name)
+           || String.equal class_name SN.Classes.cXHPChild ->
+      valid ()
+    | LoclType
+        ( _,
+          ( Tarraykind _
+          | Tprim Nast.(Tstring | Tarraykey | Tint | Tfloat | Tnum) ) )
+      when String.equal class_name SN.Classes.cXHPChild
+           && equal_exact exact_super Nonexact ->
+      valid ()
+    | LoclType (_, Tprim Nast.Tstring)
+      when String.equal class_name SN.Classes.cStringish
+           && equal_exact exact_super Nonexact ->
+      valid ()
+    (* Match what's done in unify for non-strict code *)
+    | LoclType (_, Tobject)
+      when not @@ Partial.should_check_error (Env.get_mode env) 4110 ->
+      valid ()
+    | LoclType ((r_sub, Tclass (x_sub, exact_sub, tyl_sub)) as ty_sub) ->
+      let exact_match =
+        match (exact_sub, exact_super) with
+        | (Nonexact, Exact) -> false
+        | (_, _) -> true
+      in
+      let (cid_super, cid_sub) = (snd x_super, snd x_sub) in
+      (* This is side-effecting as it registers a dependency *)
+      let class_def_sub = Env.get_class env cid_sub in
+      if String.equal cid_super cid_sub then
+        (* If class is final then exactness is superfluous *)
+        let is_final =
           match class_def_sub with
-          | None ->
-            (* This should have been caught already in the naming phase *)
-            valid ()
-          | Some class_sub ->
-            (* We handle the case where a generic A<T> is used as A *)
-            let tyl_sub =
-              if
-                List.is_empty tyl_sub
-                && not (Partial.should_check_error (Env.get_mode env) 4029)
-              then
-                List.map (Cls.tparams class_sub) (fun _ ->
-                    (p_sub, Typing_defs.make_tany ()))
-              else
-                tyl_sub
-            in
+          | Some tc -> Cls.final tc
+          | None -> false
+        in
+        if not (exact_match || is_final) then
+          invalid ()
+        else
+          (* We handle the case where a generic A<T> is used as A *)
+          let tyl_super =
             if
-              not
-                (Int.equal
-                   (List.length (Cls.tparams class_sub))
-                   (List.length tyl_sub))
+              List.is_empty tyl_super
+              && not (Partial.should_check_error (Env.get_mode env) 4101)
             then
-              invalid_with (fun () ->
-                  Errors.expected_tparam
-                    ~definition_pos:(Cls.pos class_sub)
-                    ~use_pos:(Reason.to_pos p_sub)
-                    (List.length (Cls.tparams class_sub))
-                    (Some subtype_env.on_error))
+              List.map tyl_sub (fun _ -> (r_super, Typing_defs.make_tany ()))
             else
-              let ety_env =
-                {
-                  type_expansions = [];
-                  substs = Subst.make_locl (Cls.tparams class_sub) tyl_sub;
-                  (* TODO: do we need this? *)
-                  this_ty = Option.value this_ty ~default:ety_sub;
-                  from_class = None;
-                  quiet = true;
-                }
-              in
-              let up_obj = Cls.get_ancestor class_sub cid_super in
-              (match up_obj with
-              | Some up_obj ->
-                let (env, up_obj) = Phase.localize ~ety_env env up_obj in
-                simplify_subtype ~subtype_env ~this_ty up_obj ety_super env
+              tyl_super
+          in
+          let tyl_sub =
+            if
+              List.is_empty tyl_sub
+              && not (Partial.should_check_error (Env.get_mode env) 4101)
+            then
+              List.map tyl_super (fun _ -> (r_super, Typing_defs.make_tany ()))
+            else
+              tyl_sub
+          in
+          if Int.( <> ) (List.length tyl_sub) (List.length tyl_super) then
+            let n_sub = String_utils.soi (List.length tyl_sub) in
+            let n_super = String_utils.soi (List.length tyl_super) in
+            invalid_with (fun () ->
+                Errors.type_arity_mismatch
+                  (fst x_super)
+                  n_super
+                  (fst x_sub)
+                  n_sub
+                  subtype_env.on_error)
+          else if List.is_empty tyl_sub && List.is_empty tyl_super then
+            valid ()
+          else
+            let variance_reifiedl =
+              match class_def_sub with
               | None ->
-                if
-                  Ast_defs.(equal_class_kind (Cls.kind class_sub) Ctrait)
-                  || Ast_defs.(equal_class_kind (Cls.kind class_sub) Cinterface)
-                then
-                  let rec try_upper_bounds_on_this up_objs env =
-                    match Sequence.next up_objs with
-                    | None ->
-                      (* It's crucial that we don't lose updates to global_tpenv in env that were
-                       * introduced by PHase.localize. TODO: avoid this requirement *)
-                      invalid_env env
-                    | Some (ub_obj_typ, up_objs) ->
-                      (* a trait is never the runtime type, but it can be used
-                       * as a constraint if it has requirements or where constraints
-                       * for its using classes *)
-                      let (env, ub_obj_typ) =
-                        Phase.localize ~ety_env env ub_obj_typ
-                      in
-                      env
-                      |> simplify_subtype
-                           ~subtype_env
-                           ~this_ty
-                           (p_sub, snd ub_obj_typ)
-                           ety_super
-                      ||| try_upper_bounds_on_this up_objs
-                  in
-                  try_upper_bounds_on_this
-                    (Cls.upper_bounds_on_this class_sub)
+                List.map tyl_sub (fun _ -> (Ast_defs.Invariant, Aast.Erased))
+              | Some class_sub ->
+                List.map (Cls.tparams class_sub) (fun t ->
+                    (t.tp_variance, t.tp_reified))
+            in
+            (* C<t1, .., tn> <: C<u1, .., un> iff
+             *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
+             * where vi is the variance of the i'th generic parameter of C,
+             * and <:v denotes the appropriate direction of subtyping for variance v
+             *)
+            simplify_subtype_variance
+              ~subtype_env
+              cid_sub
+              variance_reifiedl
+              tyl_sub
+              tyl_super
+              env
+      else if not exact_match then
+        invalid ()
+      else (
+        match class_def_sub with
+        | None ->
+          (* This should have been caught already in the naming phase *)
+          valid ()
+        | Some class_sub ->
+          (* We handle the case where a generic A<T> is used as A *)
+          let tyl_sub =
+            if
+              List.is_empty tyl_sub
+              && not (Partial.should_check_error (Env.get_mode env) 4029)
+            then
+              List.map (Cls.tparams class_sub) (fun _ ->
+                  (r_sub, Typing_defs.make_tany ()))
+            else
+              tyl_sub
+          in
+          if
+            not
+              (Int.equal
+                 (List.length (Cls.tparams class_sub))
+                 (List.length tyl_sub))
+          then
+            invalid_with (fun () ->
+                Errors.expected_tparam
+                  ~definition_pos:(Cls.pos class_sub)
+                  ~use_pos:(Reason.to_pos r_sub)
+                  (List.length (Cls.tparams class_sub))
+                  (Some subtype_env.on_error))
+          else
+            let ety_env =
+              {
+                type_expansions = [];
+                substs = Subst.make_locl (Cls.tparams class_sub) tyl_sub;
+                (* TODO: do we need this? *)
+                this_ty = Option.value this_ty ~default:ty_sub;
+                from_class = None;
+                quiet = true;
+              }
+            in
+            let up_obj = Cls.get_ancestor class_sub cid_super in
+            (match up_obj with
+            | Some up_obj ->
+              let (env, up_obj) = Phase.localize ~ety_env env up_obj in
+              simplify_subtype ~subtype_env ~this_ty up_obj ty_super env
+            | None ->
+              if
+                Ast_defs.(equal_class_kind (Cls.kind class_sub) Ctrait)
+                || Ast_defs.(equal_class_kind (Cls.kind class_sub) Cinterface)
+              then
+                let rec try_upper_bounds_on_this up_objs env =
+                  match Sequence.next up_objs with
+                  | None ->
+                    (* It's crucial that we don't lose updates to global_tpenv in env that were
+                     * introduced by PHase.localize. TODO: avoid this requirement *)
+                    invalid_env env
+                  | Some (ub_obj_typ, up_objs) ->
+                    (* a trait is never the runtime type, but it can be used
+                     * as a constraint if it has requirements or where constraints
+                     * for its using classes *)
+                    let (env, ub_obj_typ) =
+                      Phase.localize ~ety_env env ub_obj_typ
+                    in
                     env
-                else
-                  invalid ())
-        )
-      | (Tnewtype (_, _, ty), Tclass _) ->
-        simplify_subtype ~subtype_env ~this_ty ty ety_super env
-      | (Tarraykind _, Tclass ((_, class_name), Nonexact, _))
-        when String.equal class_name SN.Classes.cXHPChild ->
-        valid ()
-      | (Tarraykind akind, Tclass ((_, coll), Nonexact, [tv_super]))
-        when String.equal coll SN.Collections.cTraversable
-             || String.equal coll SN.Rx.cTraversable
-             || String.equal coll SN.Collections.cContainer ->
+                    |> simplify_subtype
+                         ~subtype_env
+                         ~this_ty
+                         (r_sub, snd ub_obj_typ)
+                         ty_super
+                    ||| try_upper_bounds_on_this up_objs
+                in
+                try_upper_bounds_on_this
+                  (Cls.upper_bounds_on_this class_sub)
+                  env
+              else
+                invalid ())
+      )
+    | LoclType (r_sub, Tarraykind akind) ->
+      (match (exact_super, tyl_super) with
+      | (Nonexact, [tv_super])
+        when String.equal class_name SN.Collections.cTraversable
+             || String.equal class_name SN.Rx.cTraversable
+             || String.equal class_name SN.Collections.cContainer ->
         (match akind with
         (* array <: Traversable<_> and emptyarray <: Traversable<t> for any t *)
         | AKempty -> valid ()
@@ -1688,53 +1644,35 @@ and simplify_subtype_i
         | AKdarray (_, tv)
         | AKvarray_or_darray (_, tv) ->
           simplify_subtype ~subtype_env ~this_ty tv tv_super env)
-      | (Tarraykind akind, Tclass ((_, coll), Nonexact, [tk_super; tv_super]))
-        when String.equal coll SN.Collections.cKeyedTraversable
-             || String.equal coll SN.Rx.cKeyedTraversable
-             || String.equal coll SN.Collections.cKeyedContainer ->
-        let r = fst ety_sub in
+      | (Nonexact, [tk_super; tv_super])
+        when String.equal class_name SN.Collections.cKeyedTraversable
+             || String.equal class_name SN.Rx.cKeyedTraversable
+             || String.equal class_name SN.Collections.cKeyedContainer ->
         (match akind with
         | AKempty -> valid ()
         | AKvarray tv ->
           env
-          |> simplify_subtype ~subtype_env ~this_ty (MakeType.int r) tk_super
+          |> simplify_subtype
+               ~subtype_env
+               ~this_ty
+               (MakeType.int r_sub)
+               tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
         | AKvarray_or_darray (tk, tv)
         | AKdarray (tk, tv) ->
           env
           |> simplify_subtype ~subtype_env ~this_ty tk tk_super
           &&& simplify_subtype ~subtype_env ~this_ty tv tv_super)
-      | (Tarraykind _, Tclass ((_, coll), Nonexact, []))
-        when String.equal coll SN.Collections.cKeyedTraversable
-             || String.equal coll SN.Rx.cKeyedTraversable
-             || String.equal coll SN.Collections.cKeyedContainer ->
+      | (Nonexact, [])
+        when String.equal class_name SN.Collections.cKeyedTraversable
+             || String.equal class_name SN.Rx.cKeyedTraversable
+             || String.equal class_name SN.Collections.cKeyedContainer ->
         (* All arrays are subtypes of the untyped KeyedContainer / Traversables *)
         valid ()
-      | (Tarraykind _, Tclass _) -> invalid ()
-      | (Tdependent (_, ty), Tclass _) ->
-        let this_ty = Option.first_some this_ty (Some ety_sub) in
-        simplify_subtype ~subtype_env ~this_ty ty ety_super env
-      | (Tunion _, _)
-      | (Terr, _)
-      | (Tvar _, _)
-      | (Tintersection _, _) ->
-        (* Should have been matched by the external match. We add it here to make
-      Ocaml warnings happy. *)
-        assert false
-      | (Tany _, _) -> default_subtype env
-      | (Tgeneric _, _) -> default_subtype env)
-    | (ConstraintType ty_sub, LoclType ty_super) ->
-      (match (ty_sub, ty_super) with
-      | ((_, Thas_member _), (_, Tnonnull))
-      | ((_, Tdestructure _), (_, Tnonnull)) ->
-        assert false
-      | ((_, Thas_member _), _ty_super)
-      | ((_, Tdestructure _), _ty_super) ->
-        invalid ()
-      | ((_, TCunion _), _)
-      | ((_, TCintersection _), _) ->
-        failwith
-          "This subtyping case must have been handled by the external match wrapping this match."))
+      | (_, _) -> default_subtype env)
+    | LoclType _
+    | ConstraintType _ ->
+      default_subtype env)
 
 and simplify_subtype_variance
     ~(subtype_env : subtype_env)

@@ -5,20 +5,20 @@
 pub mod emit_memoize_helpers {
     use emit_fatal_rust as emit_fatal;
     use hhas_param_rust::HhasParam;
-    use instruction_sequence_rust::Instr;
+    use instruction_sequence_rust::InstrSeq;
     use local_rust as local;
     use oxidized::{aast::FunParam, pos::Pos};
 
-    fn get_memo_key_list(local: local::Id, index: usize, name: String) -> Vec<Instr> {
+    fn get_memo_key_list(local: local::Id, index: usize, name: String) -> Vec<InstrSeq> {
         vec![
-            Instr::make_instr_getmemokeyl(local::Type::Named(name)),
-            Instr::make_instr_setl(local::Type::Unnamed(local + index)),
-            Instr::make_instr_popc(),
+            InstrSeq::make_getmemokeyl(local::Type::Named(name)),
+            InstrSeq::make_setl(local::Type::Unnamed(local + index)),
+            InstrSeq::make_popc(),
         ]
     }
 
-    pub fn param_code_sets(params: Vec<HhasParam>, local: local::Id) -> Instr {
-        Instr::gather(
+    pub fn param_code_sets(params: Vec<HhasParam>, local: local::Id) -> InstrSeq {
+        InstrSeq::gather(
             params
                 .into_iter()
                 .enumerate()
@@ -28,11 +28,11 @@ pub mod emit_memoize_helpers {
         )
     }
 
-    pub fn param_code_gets(params: Vec<HhasParam>) -> Instr {
-        Instr::gather(
+    pub fn param_code_gets(params: Vec<HhasParam>) -> InstrSeq {
+        InstrSeq::gather(
             params
                 .into_iter()
-                .map(|param| Instr::make_instr_cgetl(local::Type::Named(param.name)))
+                .map(|param| InstrSeq::make_cgetl(local::Type::Named(param.name)))
                 .collect(),
         )
     }

@@ -5,7 +5,7 @@
 
 use hhas_attribute_rust::HhasAttribute;
 use hhbc_id_rust as hhbc_id;
-use instruction_sequence_rust as instruction_sequence;
+use instruction_sequence_rust::InstrSeq;
 use oxidized::{aast_defs::Visibility, doc_comment::DocComment};
 
 extern crate bitflags;
@@ -32,7 +32,7 @@ pub struct HhasProperty<'id> {
     pub attributes: Vec<HhasAttribute>,
     pub visibility: Visibility,
     pub initial_value: runtime::TypedValue,
-    pub initializer_instrs: instruction_sequence::Instr,
+    pub initializer_instrs: InstrSeq,
     pub type_info: hhas_type::Info,
     pub doc_comment: Option<DocComment>,
 }

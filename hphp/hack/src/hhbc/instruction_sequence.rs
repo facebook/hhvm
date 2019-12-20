@@ -21,14 +21,14 @@ use std::convert::TryInto;
 /// repeated appending to a list. Instead, we simply build a tree of
 /// instructions which can easily be flattened at the end.
 #[derive(Clone, Debug)]
-pub enum Instr {
+pub enum InstrSeq {
     Empty,
     One(Box<Instruct>),
     List(Vec<Instruct>),
-    Concat(Vec<Instr>),
+    Concat(Vec<InstrSeq>),
 }
 
-impl Instr {
+impl InstrSeq {
     pub fn gather(instrs: Vec<Self>) -> Self {
         let nonempty_instrs = instrs
             .into_iter()
@@ -56,28 +56,23 @@ impl Instr {
         Self::List(instructions)
     }
 
-    pub fn make_instr_lit_const(l: InstructLitConst) -> Self {
+    pub fn make_lit_const(l: InstructLitConst) -> Self {
         Self::make_instr(Instruct::ILitConst(l))
     }
 
-    pub fn make_instr_lit_empty_varray() -> Self {
-        Self::make_instr_lit_const(InstructLitConst::TypedValue(TypedValue::VArray(vec![])))
+    pub fn make_lit_empty_varray() -> Self {
+        Self::make_lit_const(InstructLitConst::TypedValue(TypedValue::VArray(vec![])))
     }
 
-    pub fn make_instr_iterinit(args: IterArgs, label: Label) -> Self {
+    pub fn make_iterinit(args: IterArgs, label: Label) -> Self {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterInit(args, label)))
     }
 
-    pub fn make_instr_iternext(args: IterArgs, label: Label) -> Self {
+    pub fn make_iternext(args: IterArgs, label: Label) -> Self {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterNext(args, label)))
     }
 
-    pub fn make_instr_iternextk(
-        id: Iter,
-        label: Label,
-        value: local::Type,
-        key: local::Type,
-    ) -> Self {
+    pub fn make_iternextk(id: Iter, label: Label, value: local::Type, key: local::Type) -> Self {
         let args = IterArgs {
             iter_id: id,
             key_id: Some(key),
@@ -86,43 +81,43 @@ impl Instr {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterNext(args, label)))
     }
 
-    pub fn make_instr_iterfree(id: Iter) -> Self {
+    pub fn make_iterfree(id: Iter) -> Self {
         Self::make_instr(Instruct::IIterator(InstructIterator::IterFree(id)))
     }
 
-    pub fn make_instr_whresult() -> Self {
+    pub fn make_whresult() -> Self {
         Self::make_instr(Instruct::IAsync(AsyncFunctions::WHResult))
     }
 
-    pub fn make_instr_jmp(label: Label) -> Self {
+    pub fn make_jmp(label: Label) -> Self {
         Self::make_instr(Instruct::IContFlow(InstructControlFlow::Jmp(label)))
     }
 
-    pub fn make_instr_jmpz(label: Label) -> Self {
+    pub fn make_jmpz(label: Label) -> Self {
         Self::make_instr(Instruct::IContFlow(InstructControlFlow::JmpZ(label)))
     }
 
-    pub fn make_instr_jmpnz(label: Label) -> Self {
+    pub fn make_jmpnz(label: Label) -> Self {
         Self::make_instr(Instruct::IContFlow(InstructControlFlow::JmpNZ(label)))
     }
 
-    pub fn make_instr_jmpns(label: Label) -> Self {
+    pub fn make_jmpns(label: Label) -> Self {
         Self::make_instr(Instruct::IContFlow(InstructControlFlow::JmpNS(label)))
     }
 
-    pub fn make_instr_continue(level: isize) -> Self {
+    pub fn make_continue(level: isize) -> Self {
         Self::make_instr(Instruct::ISpecialFlow(InstructSpecialFlow::Continue(level)))
     }
 
-    pub fn make_instr_break(level: isize) -> Self {
+    pub fn make_break(level: isize) -> Self {
         Self::make_instr(Instruct::ISpecialFlow(InstructSpecialFlow::Break(level)))
     }
 
-    pub fn make_instr_goto(label: String) -> Self {
+    pub fn make_goto(label: String) -> Self {
         Self::make_instr(Instruct::ISpecialFlow(InstructSpecialFlow::Goto(label)))
     }
 
-    pub fn make_instr_iter_break(label: Label, itrs: Vec<Iter>) -> Self {
+    pub fn make_iter_break(label: Label, itrs: Vec<Iter>) -> Self {
         let mut instrs = itrs
             .into_iter()
             .rev()
@@ -132,273 +127,273 @@ impl Instr {
         Self::make_instrs(instrs)
     }
 
-    pub fn make_instr_false() -> Self {
+    pub fn make_false() -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::False))
     }
 
-    pub fn make_instr_true() -> Self {
+    pub fn make_true() -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::True))
     }
 
-    pub fn make_instr_eq() -> Self {
+    pub fn make_eq() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::Eq))
     }
 
-    pub fn make_instr_gt() -> Self {
+    pub fn make_gt() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::Gt))
     }
 
-    pub fn make_instr_concat() -> Self {
+    pub fn make_concat() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::Concat))
     }
 
-    pub fn make_instr_concatn(n: isize) -> Self {
+    pub fn make_concatn(n: isize) -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::ConcatN(n)))
     }
 
-    pub fn make_instr_print() -> Self {
+    pub fn make_print() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::Print))
     }
 
-    pub fn make_instr_cast_darray() -> Self {
+    pub fn make_cast_darray() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::CastDArray))
     }
 
-    pub fn make_instr_cast_dict() -> Self {
+    pub fn make_cast_dict() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::CastDict))
     }
 
-    pub fn make_instr_retc() -> Self {
+    pub fn make_retc() -> Self {
         Self::make_instr(Instruct::IContFlow(InstructControlFlow::RetC))
     }
 
-    pub fn make_instr_retc_suspended() -> Self {
+    pub fn make_retc_suspended() -> Self {
         Self::make_instr(Instruct::IContFlow(InstructControlFlow::RetCSuspended))
     }
 
-    pub fn make_instr_retm(p: NumParams) -> Self {
+    pub fn make_retm(p: NumParams) -> Self {
         Self::make_instr(Instruct::IContFlow(InstructControlFlow::RetM(p)))
     }
 
-    pub fn make_instr_null() -> Self {
+    pub fn make_null() -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::Null))
     }
 
-    pub fn make_instr_nulluninit() -> Self {
+    pub fn make_nulluninit() -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::NullUninit))
     }
 
-    pub fn make_instr_chain_faults() -> Self {
+    pub fn make_chain_faults() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::ChainFaults))
     }
 
-    pub fn make_instr_dup() -> Self {
+    pub fn make_dup() -> Self {
         Self::make_instr(Instruct::IBasic(InstructBasic::Dup))
     }
 
-    pub fn make_instr_nop() -> Self {
+    pub fn make_nop() -> Self {
         Self::make_instr(Instruct::IBasic(InstructBasic::Nop))
     }
 
-    pub fn make_instr_instanceofd(s: ClassId) -> Self {
+    pub fn make_instanceofd(s: ClassId) -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::InstanceOfD(s)))
     }
 
-    pub fn make_instr_instanceof() -> Self {
+    pub fn make_instanceof() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::InstanceOf))
     }
 
-    pub fn make_instr_islateboundcls() -> Self {
+    pub fn make_islateboundcls() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::IsLateBoundCls))
     }
 
-    pub fn make_instr_istypestructc(mode: TypestructResolveOp) -> Self {
+    pub fn make_istypestructc(mode: TypestructResolveOp) -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::IsTypeStructC(mode)))
     }
 
-    pub fn make_instr_throwastypestructexception() -> Self {
+    pub fn make_throwastypestructexception() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::ThrowAsTypeStructException))
     }
 
-    pub fn make_instr_combine_and_resolve_type_struct(i: isize) -> Self {
+    pub fn make_combine_and_resolve_type_struct(i: isize) -> Self {
         Self::make_instr(Instruct::IOp(
             InstructOperator::CombineAndResolveTypeStruct(i),
         ))
     }
 
-    pub fn make_instr_record_reified_generic() -> Self {
+    pub fn make_record_reified_generic() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::RecordReifiedGeneric))
     }
 
-    pub fn make_instr_check_reified_generic_mismatch() -> Self {
+    pub fn make_check_reified_generic_mismatch() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::CheckReifiedGenericMismatch))
     }
 
-    pub fn make_instr_int(i: isize) -> Self {
+    pub fn make_int(i: isize) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::Int(
             i.try_into().unwrap(),
         )))
     }
 
-    pub fn make_instr_int64(i: i64) -> Self {
+    pub fn make_int64(i: i64) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::Int(i)))
     }
 
-    pub fn make_instr_int_of_string(litstr: &str) -> Self {
+    pub fn make_int_of_string(litstr: &str) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::Int(
             litstr.parse::<i64>().unwrap(),
         )))
     }
 
-    pub fn make_instr_double(litstr: &str) -> Self {
+    pub fn make_double(litstr: &str) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::Double(
             litstr.to_string(),
         )))
     }
 
-    pub fn make_instr_string(litstr: &str) -> Self {
+    pub fn make_string(litstr: &str) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::String(
             litstr.to_string(),
         )))
     }
 
-    pub fn make_instr_this() -> Self {
+    pub fn make_this() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::This))
     }
 
-    pub fn make_instr_istypec(op: IstypeOp) -> Self {
+    pub fn make_istypec(op: IstypeOp) -> Self {
         Self::make_instr(Instruct::IIsset(InstructIsset::IsTypeC(op)))
     }
 
-    pub fn make_instr_istypel(id: local::Type, op: IstypeOp) -> Self {
+    pub fn make_istypel(id: local::Type, op: IstypeOp) -> Self {
         Self::make_instr(Instruct::IIsset(InstructIsset::IsTypeL(id, op)))
     }
 
-    pub fn make_instr_not() -> Self {
+    pub fn make_not() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::Not))
     }
 
-    pub fn make_instr_sets() -> Self {
+    pub fn make_sets() -> Self {
         Self::make_instr(Instruct::IMutator(InstructMutator::SetS))
     }
 
-    pub fn make_instr_setl(local: local::Type) -> Self {
+    pub fn make_setl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IMutator(InstructMutator::SetL(local)))
     }
 
-    pub fn make_instr_unsetl(local: local::Type) -> Self {
+    pub fn make_unsetl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IMutator(InstructMutator::UnsetL(local)))
     }
 
-    pub fn make_instr_issetl(local: local::Type) -> Self {
+    pub fn make_issetl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IIsset(InstructIsset::IssetL(local)))
     }
 
-    pub fn make_instr_issetg() -> Self {
+    pub fn make_issetg() -> Self {
         Self::make_instr(Instruct::IIsset(InstructIsset::IssetG))
     }
 
-    pub fn make_instr_issets() -> Self {
+    pub fn make_issets() -> Self {
         Self::make_instr(Instruct::IIsset(InstructIsset::IssetS))
     }
 
-    pub fn make_instr_emptys() -> Self {
+    pub fn make_emptys() -> Self {
         Self::make_instr(Instruct::IIsset(InstructIsset::EmptyS))
     }
 
-    pub fn make_instr_emptyg() -> Self {
+    pub fn make_emptyg() -> Self {
         Self::make_instr(Instruct::IIsset(InstructIsset::EmptyG))
     }
 
-    pub fn make_instr_emptyl(local: local::Type) -> Self {
+    pub fn make_emptyl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IIsset(InstructIsset::EmptyL(local)))
     }
 
-    pub fn make_instr_cgets() -> Self {
+    pub fn make_cgets() -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::CGetS))
     }
 
-    pub fn make_instr_cgetg() -> Self {
+    pub fn make_cgetg() -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::CGetG))
     }
 
-    pub fn make_instr_cgetl(local: local::Type) -> Self {
+    pub fn make_cgetl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::CGetL(local)))
     }
 
-    pub fn make_instr_cugetl(local: local::Type) -> Self {
+    pub fn make_cugetl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::CUGetL(local)))
     }
 
-    pub fn make_instr_vgetl(local: local::Type) -> Self {
+    pub fn make_vgetl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::VGetL(local)))
     }
 
-    pub fn make_instr_cgetl2(local: local::Type) -> Self {
+    pub fn make_cgetl2(local: local::Type) -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::CGetL2(local)))
     }
 
-    pub fn make_instr_cgetquietl(local: local::Type) -> Self {
+    pub fn make_cgetquietl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::CGetQuietL(local)))
     }
 
-    pub fn make_instr_classgetc() -> Self {
+    pub fn make_classgetc() -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::ClassGetC))
     }
 
-    pub fn make_instr_classgetts() -> Self {
+    pub fn make_classgetts() -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::ClassGetTS))
     }
 
-    pub fn make_instr_classname() -> Self {
+    pub fn make_classname() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::ClassName))
     }
 
-    pub fn make_instr_self() -> Self {
+    pub fn make_self() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::Self_))
     }
 
-    pub fn make_instr_lateboundcls() -> Self {
+    pub fn make_lateboundcls() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::LateBoundCls))
     }
 
-    pub fn make_instr_parent() -> Self {
+    pub fn make_parent() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::Parent))
     }
 
-    pub fn make_instr_popu() -> Self {
+    pub fn make_popu() -> Self {
         Self::make_instr(Instruct::IBasic(InstructBasic::PopU))
     }
 
-    pub fn make_instr_popc() -> Self {
+    pub fn make_popc() -> Self {
         Self::make_instr(Instruct::IBasic(InstructBasic::PopC))
     }
 
-    pub fn make_instr_popl(l: local::Type) -> Self {
+    pub fn make_popl(l: local::Type) -> Self {
         Self::make_instr(Instruct::IMutator(InstructMutator::PopL(l)))
     }
 
-    pub fn make_instr_pushl(local: local::Type) -> Self {
+    pub fn make_pushl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IGet(InstructGet::PushL(local)))
     }
 
-    pub fn make_instr_throw() -> Self {
+    pub fn make_throw() -> Self {
         Self::make_instr(Instruct::IContFlow(InstructControlFlow::Throw))
     }
 
-    pub fn make_instr_new_vec_array(i: isize) -> Self {
+    pub fn make_new_vec_array(i: isize) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::NewVecArray(i)))
     }
 
-    pub fn make_instr_add_elemc() -> Self {
+    pub fn make_add_elemc() -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::AddElemC))
     }
 
-    pub fn make_instr_add_new_elemc() -> Self {
+    pub fn make_add_new_elemc() -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::AddNewElemC))
     }
 
-    pub fn make_instr_switch(labels: Vec<Label>) -> Self {
+    pub fn make_switch(labels: Vec<Label>) -> Self {
         Self::make_instr(Instruct::IContFlow(InstructControlFlow::Switch(
             Switchkind::Unbounded,
             0,
@@ -406,105 +401,105 @@ impl Instr {
         )))
     }
 
-    pub fn make_instr_newobj() -> Self {
+    pub fn make_newobj() -> Self {
         Self::make_instr(Instruct::ICall(InstructCall::NewObj))
     }
 
-    pub fn make_instr_newobjr() -> Self {
+    pub fn make_newobjr() -> Self {
         Self::make_instr(Instruct::ICall(InstructCall::NewObjR))
     }
 
-    pub fn make_instr_newobjd(id: ClassId) -> Self {
+    pub fn make_newobjd(id: ClassId) -> Self {
         Self::make_instr(Instruct::ICall(InstructCall::NewObjD(id)))
     }
 
-    pub fn make_instr_newobjrd(id: ClassId) -> Self {
+    pub fn make_newobjrd(id: ClassId) -> Self {
         Self::make_instr(Instruct::ICall(InstructCall::NewObjRD(id)))
     }
 
-    pub fn make_instr_newobjs(scref: SpecialClsRef) -> Self {
+    pub fn make_newobjs(scref: SpecialClsRef) -> Self {
         Self::make_instr(Instruct::ICall(InstructCall::NewObjS(scref)))
     }
 
-    pub fn make_instr_lockobj() -> Self {
+    pub fn make_lockobj() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::LockObj))
     }
 
-    pub fn make_instr_clone() -> Self {
+    pub fn make_clone() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::Clone))
     }
 
-    pub fn make_instr_new_record(id: ClassId, keys: Vec<String>) -> Self {
+    pub fn make_new_record(id: ClassId, keys: Vec<String>) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::NewRecord(id, keys)))
     }
 
-    pub fn make_instr_new_recordarray(id: ClassId, keys: Vec<String>) -> Self {
+    pub fn make_new_recordarray(id: ClassId, keys: Vec<String>) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::NewRecordArray(
             id, keys,
         )))
     }
 
-    pub fn make_instr_newstructarray(keys: Vec<String>) -> Self {
+    pub fn make_newstructarray(keys: Vec<String>) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::NewStructArray(keys)))
     }
 
-    pub fn make_instr_newstructdarray(keys: Vec<String>) -> Self {
+    pub fn make_newstructdarray(keys: Vec<String>) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::NewStructDArray(keys)))
     }
 
-    pub fn make_instr_newstructdict(keys: Vec<String>) -> Self {
+    pub fn make_newstructdict(keys: Vec<String>) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::NewStructDict(keys)))
     }
 
-    pub fn make_instr_newcol(collection_type: CollectionType) -> Self {
+    pub fn make_newcol(collection_type: CollectionType) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::NewCol(
             collection_type,
         )))
     }
 
-    pub fn make_instr_colfromarray(collection_type: CollectionType) -> Self {
+    pub fn make_colfromarray(collection_type: CollectionType) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::ColFromArray(
             collection_type,
         )))
     }
 
-    pub fn make_instr_entrynop() -> Self {
+    pub fn make_entrynop() -> Self {
         Self::make_instr(Instruct::IBasic(InstructBasic::EntryNop))
     }
 
-    pub fn make_instr_typedvalue(xs: TypedValue) -> Self {
+    pub fn make_typedvalue(xs: TypedValue) -> Self {
         Self::make_instr(Instruct::ILitConst(InstructLitConst::TypedValue(xs)))
     }
 
-    pub fn make_instr_basel(local: local::Type, mode: MemberOpMode) -> Self {
+    pub fn make_basel(local: local::Type, mode: MemberOpMode) -> Self {
         Self::make_instr(Instruct::IBase(InstructBase::BaseL(local, mode)))
     }
 
-    pub fn make_instr_basec(stack_index: StackIndex, mode: MemberOpMode) -> Self {
+    pub fn make_basec(stack_index: StackIndex, mode: MemberOpMode) -> Self {
         Self::make_instr(Instruct::IBase(InstructBase::BaseC(stack_index, mode)))
     }
 
-    pub fn make_instr_basesc(y: StackIndex, z: StackIndex, mode: MemberOpMode) -> Self {
+    pub fn make_basesc(y: StackIndex, z: StackIndex, mode: MemberOpMode) -> Self {
         Self::make_instr(Instruct::IBase(InstructBase::BaseSC(y, z, mode)))
     }
 
-    pub fn make_instr_baseh() -> Self {
+    pub fn make_baseh() -> Self {
         Self::make_instr(Instruct::IBase(InstructBase::BaseH))
     }
 
-    pub fn make_instr_cgetcunop() -> Self {
+    pub fn make_cgetcunop() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::CGetCUNop))
     }
 
-    pub fn make_instr_ugetcunop() -> Self {
+    pub fn make_ugetcunop() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::UGetCUNop))
     }
 
-    pub fn make_instr_memoget(label: Label, range: Option<(local::Type, isize)>) -> Self {
+    pub fn make_memoget(label: Label, range: Option<(local::Type, isize)>) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::MemoGet(label, range)))
     }
 
-    pub fn make_instr_memoget_eager(
+    pub fn make_memoget_eager(
         label1: Label,
         label2: Label,
         range: Option<(local::Type, isize)>,
@@ -514,47 +509,47 @@ impl Instr {
         )))
     }
 
-    pub fn make_instr_memoset(range: Option<(local::Type, isize)>) -> Self {
+    pub fn make_memoset(range: Option<(local::Type, isize)>) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::MemoSet(range)))
     }
 
-    pub fn make_instr_memoset_eager(range: Option<(local::Type, isize)>) -> Self {
+    pub fn make_memoset_eager(range: Option<(local::Type, isize)>) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::MemoSetEager(range)))
     }
 
-    pub fn make_instr_getmemokeyl(local: local::Type) -> Self {
+    pub fn make_getmemokeyl(local: local::Type) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::GetMemoKeyL(local)))
     }
 
-    pub fn make_instr_checkthis() -> Self {
+    pub fn make_checkthis() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::CheckThis))
     }
 
-    pub fn make_instr_verify_ret_type_c() -> Self {
+    pub fn make_verify_ret_type_c() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::VerifyRetTypeC))
     }
 
-    pub fn make_instr_verify_ret_type_ts() -> Self {
+    pub fn make_verify_ret_type_ts() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::VerifyRetTypeTS))
     }
 
-    pub fn make_instr_verify_out_type(i: ParamId) -> Self {
+    pub fn make_verify_out_type(i: ParamId) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::VerifyOutType(i)))
     }
 
-    pub fn make_instr_dim(op: MemberOpMode, key: MemberKey) -> Self {
+    pub fn make_dim(op: MemberOpMode, key: MemberKey) -> Self {
         Self::make_instr(Instruct::IBase(InstructBase::Dim(op, key)))
     }
 
-    pub fn make_instr_dim_warn_pt(key: PropId) -> Self {
-        Self::make_instr_dim(MemberOpMode::Warn, MemberKey::PT(key))
+    pub fn make_dim_warn_pt(key: PropId) -> Self {
+        Self::make_dim(MemberOpMode::Warn, MemberKey::PT(key))
     }
 
-    pub fn make_instr_dim_define_pt(key: PropId) -> Self {
-        Self::make_instr_dim(MemberOpMode::Define, MemberKey::PT(key))
+    pub fn make_dim_define_pt(key: PropId) -> Self {
+        Self::make_dim(MemberOpMode::Define, MemberKey::PT(key))
     }
 
-    pub fn make_instr_fcallclsmethod(
+    pub fn make_fcallclsmethod(
         is_log_as_dynamic_call: IsLogAsDynamicCallOp,
         fcall_args: FcallArgs,
         pl: ParamLocations,
@@ -566,7 +561,7 @@ impl Instr {
         )))
     }
 
-    pub fn make_instr_fcallclsmethodd(
+    pub fn make_fcallclsmethodd(
         fcall_args: FcallArgs,
         method_name: MethodId,
         class_name: ClassId,
@@ -578,13 +573,13 @@ impl Instr {
         )))
     }
 
-    pub fn make_instr_fcallclsmethods(fcall_args: FcallArgs, scref: SpecialClsRef) -> Self {
+    pub fn make_fcallclsmethods(fcall_args: FcallArgs, scref: SpecialClsRef) -> Self {
         Self::make_instr(Instruct::ICall(InstructCall::FCallClsMethodS(
             fcall_args, scref,
         )))
     }
 
-    pub fn make_instr_fcallclsmethodsd(
+    pub fn make_fcallclsmethodsd(
         fcall_args: FcallArgs,
         scref: SpecialClsRef,
         method_name: MethodId,
@@ -596,21 +591,21 @@ impl Instr {
         )))
     }
 
-    pub fn make_instr_fcallctor(fcall_args: FcallArgs) -> Self {
+    pub fn make_fcallctor(fcall_args: FcallArgs) -> Self {
         Self::make_instr(Instruct::ICall(InstructCall::FCallCtor(fcall_args)))
     }
 
-    pub fn make_instr_fcallfunc(fcall_args: FcallArgs, param_locs: ParamLocations) -> Self {
+    pub fn make_fcallfunc(fcall_args: FcallArgs, param_locs: ParamLocations) -> Self {
         Self::make_instr(Instruct::ICall(InstructCall::FCallFunc(
             fcall_args, param_locs,
         )))
     }
 
-    pub fn make_instr_fcallfuncd(fcall_args: FcallArgs, id: FunctionId) -> Self {
+    pub fn make_fcallfuncd(fcall_args: FcallArgs, id: FunctionId) -> Self {
         Self::make_instr(Instruct::ICall(InstructCall::FCallFuncD(fcall_args, id)))
     }
 
-    pub fn make_instr_fcallobjmethod(
+    pub fn make_fcallobjmethod(
         fcall_args: FcallArgs,
         flavor: ObjNullFlavor,
         pl: ParamLocations,
@@ -620,7 +615,7 @@ impl Instr {
         )))
     }
 
-    pub fn make_instr_fcallobjmethodd(
+    pub fn make_fcallobjmethodd(
         fcall_args: FcallArgs,
         method: MethodId,
         flavor: ObjNullFlavor,
@@ -630,67 +625,67 @@ impl Instr {
         )))
     }
 
-    pub fn make_instr_fcallobjmethodd_nullthrows(fcall_args: FcallArgs, method: MethodId) -> Self {
-        Self::make_instr_fcallobjmethodd(fcall_args, method, ObjNullFlavor::NullThrows)
+    pub fn make_fcallobjmethodd_nullthrows(fcall_args: FcallArgs, method: MethodId) -> Self {
+        Self::make_fcallobjmethodd(fcall_args, method, ObjNullFlavor::NullThrows)
     }
 
-    pub fn make_instr_querym(num_params: NumParams, op: QueryOp, key: MemberKey) -> Self {
+    pub fn make_querym(num_params: NumParams, op: QueryOp, key: MemberKey) -> Self {
         Self::make_instr(Instruct::IFinal(InstructFinal::QueryM(num_params, op, key)))
     }
 
-    pub fn make_instr_querym_cget_pt(num_params: NumParams, key: PropId) -> Self {
-        Self::make_instr_querym(num_params, QueryOp::CGet, MemberKey::PT(key))
+    pub fn make_querym_cget_pt(num_params: NumParams, key: PropId) -> Self {
+        Self::make_querym(num_params, QueryOp::CGet, MemberKey::PT(key))
     }
 
-    pub fn make_instr_setm(num_params: NumParams, key: MemberKey) -> Self {
+    pub fn make_setm(num_params: NumParams, key: MemberKey) -> Self {
         Self::make_instr(Instruct::IFinal(InstructFinal::SetM(num_params, key)))
     }
 
-    pub fn make_instr_setm_pt(num_params: NumParams, key: PropId) -> Self {
-        Self::make_instr_setm(num_params, MemberKey::PT(key))
+    pub fn make_setm_pt(num_params: NumParams, key: PropId) -> Self {
+        Self::make_setm(num_params, MemberKey::PT(key))
     }
 
-    pub fn make_instr_resolve_func(func_id: FunctionId) -> Self {
+    pub fn make_resolve_func(func_id: FunctionId) -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::ResolveFunc(func_id)))
     }
 
-    pub fn make_instr_resolve_obj_method() -> Self {
+    pub fn make_resolve_obj_method() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::ResolveObjMethod))
     }
 
-    pub fn make_instr_resolve_cls_method(mode: ClsMethResolveOp) -> Self {
+    pub fn make_resolve_cls_method(mode: ClsMethResolveOp) -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::ResolveClsMethod(mode)))
     }
 
-    pub fn make_instr_fatal(op: FatalOp) -> Self {
+    pub fn make_fatal(op: FatalOp) -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::Fatal(op)))
     }
 
-    pub fn make_instr_await() -> Self {
+    pub fn make_await() -> Self {
         Self::make_instr(Instruct::IAsync(AsyncFunctions::Await))
     }
 
-    pub fn make_instr_yield() -> Self {
+    pub fn make_yield() -> Self {
         Self::make_instr(Instruct::IGenerator(GenCreationExecution::Yield))
     }
 
-    pub fn make_instr_yieldk() -> Self {
+    pub fn make_yieldk() -> Self {
         Self::make_instr(Instruct::IGenerator(GenCreationExecution::YieldK))
     }
 
-    pub fn make_instr_createcont() -> Self {
+    pub fn make_createcont() -> Self {
         Self::make_instr(Instruct::IGenerator(GenCreationExecution::CreateCont))
     }
 
-    pub fn make_instr_awaitall(range: Option<(local::Type, isize)>) -> Self {
+    pub fn make_awaitall(range: Option<(local::Type, isize)>) -> Self {
         Self::make_instr(Instruct::IAsync(AsyncFunctions::AwaitAll(range)))
     }
 
-    pub fn make_instr_label(label: Label) -> Self {
+    pub fn make_label(label: Label) -> Self {
         Self::make_instr(Instruct::ILabel(label))
     }
 
-    pub fn make_instr_awaitall_list(unnamed_locals: Vec<local::Type>) -> Self {
+    pub fn make_awaitall_list(unnamed_locals: Vec<local::Type>) -> Self {
         use local::Type::Unnamed;
         match unnamed_locals.split_first() {
             None => panic!("Expected at least one await"),
@@ -706,7 +701,7 @@ impl Instr {
                             _ => panic!("Expected unnamed local"),
                         }
                     }
-                    Self::make_instr_awaitall(Some((
+                    Self::make_awaitall(Some((
                         Unnamed(*hd_id),
                         unnamed_locals.len().try_into().unwrap(),
                     )))
@@ -717,147 +712,147 @@ impl Instr {
         }
     }
 
-    pub fn make_instr_exit() -> Self {
+    pub fn make_exit() -> Self {
         Self::make_instr(Instruct::IOp(InstructOperator::Exit))
     }
 
-    pub fn make_instr_idx() -> Self {
+    pub fn make_idx() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::Idx))
     }
 
-    pub fn make_instr_array_idx() -> Self {
+    pub fn make_array_idx() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::ArrayIdx))
     }
 
-    pub fn make_instr_fcallbuiltin(n: NumParams, un: NumParams, io: NumParams, s: String) -> Self {
+    pub fn make_fcallbuiltin(n: NumParams, un: NumParams, io: NumParams, s: String) -> Self {
         Self::make_instr(Instruct::ICall(InstructCall::FCallBuiltin(n, un, io, s)))
     }
 
-    pub fn make_instr_defcls(n: ClassNum) -> Self {
+    pub fn make_defcls(n: ClassNum) -> Self {
         Self::make_instr(Instruct::IIncludeEvalDefine(
             InstructIncludeEvalDefine::DefCls(n),
         ))
     }
 
-    pub fn make_instr_defclsnop(n: ClassNum) -> Self {
+    pub fn make_defclsnop(n: ClassNum) -> Self {
         Self::make_instr(Instruct::IIncludeEvalDefine(
             InstructIncludeEvalDefine::DefClsNop(n),
         ))
     }
 
-    pub fn make_instr_defrecord(n: ClassNum) -> Self {
+    pub fn make_defrecord(n: ClassNum) -> Self {
         Self::make_instr(Instruct::IIncludeEvalDefine(
             InstructIncludeEvalDefine::DefRecord(n),
         ))
     }
 
-    pub fn make_instr_deftypealias(n: ClassNum) -> Self {
+    pub fn make_deftypealias(n: ClassNum) -> Self {
         Self::make_instr(Instruct::IIncludeEvalDefine(
             InstructIncludeEvalDefine::DefTypeAlias(n),
         ))
     }
 
-    pub fn make_instr_defcns(s: &'static str) -> Self {
+    pub fn make_defcns(s: &'static str) -> Self {
         Self::make_instr(Instruct::IIncludeEvalDefine(
             InstructIncludeEvalDefine::DefCns(hhbc_id_rust::r#const::from_raw_string(s)),
         ))
     }
 
-    pub fn make_instr_eval() -> Self {
+    pub fn make_eval() -> Self {
         Self::make_instr(Instruct::IIncludeEvalDefine(
             InstructIncludeEvalDefine::Eval,
         ))
     }
 
-    pub fn make_instr_silence_start(local: local::Type) -> Self {
+    pub fn make_silence_start(local: local::Type) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::Silence(
             local,
             OpSilence::Start,
         )))
     }
 
-    pub fn make_instr_silence_end(local: local::Type) -> Self {
+    pub fn make_silence_end(local: local::Type) -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::Silence(
             local,
             OpSilence::End,
         )))
     }
 
-    pub fn make_instr_cont_assign_delegate(iter: Iter) -> Self {
+    pub fn make_cont_assign_delegate(iter: Iter) -> Self {
         Self::make_instr(Instruct::IGenDelegation(GenDelegation::ContAssignDelegate(
             iter,
         )))
     }
 
-    pub fn make_instr_cont_enter_delegate() -> Self {
+    pub fn make_cont_enter_delegate() -> Self {
         Self::make_instr(Instruct::IGenDelegation(GenDelegation::ContEnterDelegate))
     }
 
-    pub fn make_instr_yield_from_delegate(iter: Iter, l: Label) -> Self {
+    pub fn make_yield_from_delegate(iter: Iter, l: Label) -> Self {
         Self::make_instr(Instruct::IGenDelegation(GenDelegation::YieldFromDelegate(
             iter, l,
         )))
     }
 
-    pub fn make_instr_cont_unset_delegate_free(iter: Iter) -> Self {
+    pub fn make_cont_unset_delegate_free(iter: Iter) -> Self {
         Self::make_instr(Instruct::IGenDelegation(GenDelegation::ContUnsetDelegate(
             FreeIterator::FreeIter,
             iter,
         )))
     }
 
-    pub fn make_instr_cont_unset_delegate_ignore(iter: Iter) -> Self {
+    pub fn make_cont_unset_delegate_ignore(iter: Iter) -> Self {
         Self::make_instr(Instruct::IGenDelegation(GenDelegation::ContUnsetDelegate(
             FreeIterator::IgnoreIter,
             iter,
         )))
     }
 
-    pub fn make_instr_contcheck_check() -> Self {
+    pub fn make_contcheck_check() -> Self {
         Self::make_instr(Instruct::IGenerator(GenCreationExecution::ContCheck(
             CheckStarted::CheckStarted,
         )))
     }
 
-    pub fn make_instr_contcheck_ignore() -> Self {
+    pub fn make_contcheck_ignore() -> Self {
         Self::make_instr(Instruct::IGenerator(GenCreationExecution::ContCheck(
             CheckStarted::IgnoreStarted,
         )))
     }
 
-    pub fn make_instr_contenter() -> Self {
+    pub fn make_contenter() -> Self {
         Self::make_instr(Instruct::IGenerator(GenCreationExecution::ContEnter))
     }
 
-    pub fn make_instr_contraise() -> Self {
+    pub fn make_contraise() -> Self {
         Self::make_instr(Instruct::IGenerator(GenCreationExecution::ContRaise))
     }
 
-    pub fn make_instr_contvalid() -> Self {
+    pub fn make_contvalid() -> Self {
         Self::make_instr(Instruct::IGenerator(GenCreationExecution::ContValid))
     }
 
-    pub fn make_instr_contcurrent() -> Self {
+    pub fn make_contcurrent() -> Self {
         Self::make_instr(Instruct::IGenerator(GenCreationExecution::ContCurrent))
     }
 
-    pub fn make_instr_contkey() -> Self {
+    pub fn make_contkey() -> Self {
         Self::make_instr(Instruct::IGenerator(GenCreationExecution::ContKey))
     }
 
-    pub fn make_instr_contgetreturn() -> Self {
+    pub fn make_contgetreturn() -> Self {
         Self::make_instr(Instruct::IGenerator(GenCreationExecution::ContGetReturn))
     }
 
-    pub fn make_instr_trigger_sampled_error() -> Self {
-        Self::make_instr_fcallbuiltin(3, 3, 0, String::from("trigger_sampled_error"))
+    pub fn make_trigger_sampled_error() -> Self {
+        Self::make_fcallbuiltin(3, 3, 0, String::from("trigger_sampled_error"))
     }
 
-    pub fn make_instr_nativeimpl() -> Self {
+    pub fn make_nativeimpl() -> Self {
         Self::make_instr(Instruct::IMisc(InstructMisc::NativeImpl))
     }
 
-    pub fn make_instr_srcloc(
+    pub fn make_srcloc(
         line_begin: isize,
         line_end: isize,
         col_begin: isize,
@@ -885,7 +880,7 @@ impl Instr {
         Self::gather(vec![
             Self::make_instr(Instruct::ITry(InstructTry::TryCatchBegin)),
             try_instrs,
-            Self::make_instr_jmp(done_label.clone()),
+            Self::make_jmp(done_label.clone()),
             Self::make_instr(Instruct::ITry(InstructTry::TryCatchMiddle)),
             catch_instrs,
             if skip_throw {
@@ -894,7 +889,7 @@ impl Instr {
                 Self::make_instr(Instruct::IContFlow(InstructControlFlow::Throw))
             },
             Self::make_instr(Instruct::ITry(InstructTry::TryCatchEnd)),
-            Self::make_instr_label(done_label.clone()),
+            Self::make_label(done_label.clone()),
         ])
     }
 
@@ -959,13 +954,13 @@ impl Instr {
         name_label_map: &'a HashMap<String, Label>,
     ) -> (Self, &'a HashMap<String, Label>) {
         match &instrseq {
-            Instr::Empty => (Instr::Empty, name_label_map),
-            Instr::One(instr) => {
+            Self::Empty => (Self::Empty, name_label_map),
+            Self::One(instr) => {
                 let (i, name_label_map) =
                     Self::rewrite_user_labels_instr(label_gen, instr, name_label_map);
                 (Self::make_instr(i), name_label_map)
             }
-            Instr::Concat(instrseq) => {
+            Self::Concat(instrseq) => {
                 let folder = |(mut acc, map): (Vec<Self>, &'a HashMap<String, Label>),
                               seq: &Self| {
                     let (l, map) = Self::rewrite_user_labels_aux(label_gen, seq, map);
@@ -974,9 +969,9 @@ impl Instr {
                 };
                 let (instrseq, name_label_map) =
                     instrseq.iter().fold((vec![], name_label_map), folder);
-                (Instr::Concat(instrseq), name_label_map)
+                (Self::Concat(instrseq), name_label_map)
             }
-            Instr::List(l) => {
+            Self::List(l) => {
                 let folder = |(mut acc, map): (Vec<Instruct>, &'a HashMap<String, Label>),
                               instr: &Instruct| {
                     let (i, map) = Self::rewrite_user_labels_instr(label_gen, instr, map);
@@ -984,7 +979,7 @@ impl Instr {
                     (acc, map)
                 };
                 let (instrlst, name_label_map) = l.iter().fold((vec![], name_label_map), folder);
-                (Instr::List(instrlst), name_label_map)
+                (Self::List(instrlst), name_label_map)
             }
         }
     }
@@ -996,8 +991,8 @@ impl Instr {
         }
     }
 
-    fn first(instrs: &Self) -> Option<&Instruct> {
-        match instrs {
+    fn first(&self) -> Option<&Instruct> {
+        match self {
             Self::Empty => None,
             Self::One(i) => {
                 if Self::is_srcloc(i) {
@@ -1014,116 +1009,109 @@ impl Instr {
         }
     }
 
-    fn is_empty(instrs: &Self) -> bool {
-        match instrs {
+    fn is_empty(&self) -> bool {
+        match self {
             Self::Empty => true,
             Self::One(i) => Self::is_srcloc(i),
             Self::List(l) => l.is_empty() || l.iter().all(Self::is_srcloc),
             Self::Concat(l) => l.iter().all(Self::is_empty),
         }
     }
-}
 
-pub mod instr_seq {
-    use crate::Instr;
-    use hhbc_ast_rust::Instruct;
-
-    pub fn flat_map<F>(instrseq: &Instr, f: &mut F) -> Instr
+    pub fn flat_map<F>(&self, f: &mut F) -> Self
     where
         F: FnMut(&Instruct) -> Vec<Instruct>,
     {
-        match instrseq {
-            Instr::Empty => Instr::Empty,
-            Instr::One(instr) => match &f(&instr)[..] {
-                [] => Instr::Empty,
-                [x] => Instr::make_instr(x.clone()),
-                xs => Instr::List(xs.to_vec()),
+        match self {
+            Self::Empty => Self::Empty,
+            Self::One(instr) => match &f(&instr)[..] {
+                [] => Self::Empty,
+                [x] => Self::make_instr(x.clone()),
+                xs => Self::List(xs.to_vec()),
             },
-            Instr::List(instr_lst) => {
+            Self::List(instr_lst) => {
                 let newlst = instr_lst.iter().flat_map(|x| f(x)).collect::<Vec<_>>();
-                Instr::List(newlst)
+                Self::List(newlst)
             }
-            Instr::Concat(instrseq_lst) => {
+            Self::Concat(instrseq_lst) => {
                 let newlst = instrseq_lst
                     .iter()
-                    .map(|x| flat_map(x, f))
+                    .map(|x| x.flat_map(f))
                     .collect::<Vec<_>>();
-                Instr::Concat(newlst)
+                Self::Concat(newlst)
             }
         }
     }
 
-    pub fn flat_map_seq<F>(instrseq: &Instr, f: &mut F) -> Instr
+    pub fn flat_map_seq<F>(&self, f: &mut F) -> Self
     where
-        F: FnMut(&Instruct) -> Instr,
+        F: FnMut(&Instruct) -> Self,
     {
-        match instrseq {
-            Instr::Empty => Instr::Empty,
-            Instr::One(instr) => f(instr),
-            Instr::List(instr_lst) => {
-                Instr::Concat(instr_lst.iter().map(|x| f(x)).collect::<Vec<_>>())
+        match self {
+            Self::Empty => Self::Empty,
+            Self::One(instr) => f(instr),
+            Self::List(instr_lst) => {
+                Self::Concat(instr_lst.iter().map(|x| f(x)).collect::<Vec<_>>())
             }
-            Instr::Concat(instrseq_lst) => Instr::Concat(
+            Self::Concat(instrseq_lst) => Self::Concat(
                 instrseq_lst
                     .iter()
-                    .map(|x| flat_map_seq(x, f))
+                    .map(|x| x.flat_map_seq(f))
                     .collect::<Vec<_>>(),
             ),
         }
     }
 
-    pub fn fold_left<F, A>(instrseq: &Instr, f: &mut F, init: A) -> A
+    pub fn fold_left<F, A>(&self, f: &mut F, init: A) -> A
     where
         F: FnMut(A, &Instruct) -> A,
     {
-        match instrseq {
-            Instr::Empty => init,
-            Instr::One(x) => f(init, x),
-            Instr::List(instr_lst) => instr_lst.iter().fold(init, f),
-            Instr::Concat(instrseq_lst) => instrseq_lst
-                .iter()
-                .fold(init, |acc, x| fold_left(x, f, acc)),
+        match self {
+            Self::Empty => init,
+            Self::One(x) => f(init, x),
+            Self::List(instr_lst) => instr_lst.iter().fold(init, f),
+            Self::Concat(instrseq_lst) => {
+                instrseq_lst.iter().fold(init, |acc, x| x.fold_left(f, acc))
+            }
         }
     }
 
-    pub fn filter_map<F>(instrseq: &Instr, f: &mut F) -> Instr
+    pub fn filter_map<F>(&self, f: &mut F) -> Self
     where
         F: FnMut(&Instruct) -> Option<Instruct>,
     {
-        match instrseq {
-            Instr::Empty => Instr::Empty,
-            Instr::One(x) => match f(x) {
-                Some(x) => Instr::make_instr(x.clone()),
-                None => Instr::Empty,
+        match self {
+            Self::Empty => Self::Empty,
+            Self::One(x) => match f(x) {
+                Some(x) => Self::make_instr(x.clone()),
+                None => Self::Empty,
             },
-            Instr::List(instr_lst) => {
-                Instr::List(instr_lst.iter().filter_map(f).collect::<Vec<_>>())
-            }
-            Instr::Concat(instrseq_lst) => Instr::Concat(
+            Self::List(instr_lst) => Self::List(instr_lst.iter().filter_map(f).collect::<Vec<_>>()),
+            Self::Concat(instrseq_lst) => Self::Concat(
                 instrseq_lst
                     .iter()
-                    .map(|x| filter_map(x, f))
+                    .map(|x| x.filter_map(f))
                     .collect::<Vec<_>>(),
             ),
         }
     }
 
-    pub fn map_mut<F>(instrseq: &mut Instr, f: &mut F)
+    pub fn map_mut<F>(&mut self, f: &mut F)
     where
         F: FnMut(&mut Instruct),
     {
-        match instrseq {
-            Instr::Empty => (),
-            Instr::One(x) => f(x),
-            Instr::List(instr_lst) => instr_lst.iter_mut().for_each(|x| f(x)),
-            Instr::Concat(instrseq_lst) => instrseq_lst.iter_mut().for_each(|x| map_mut(x, f)),
+        match self {
+            Self::Empty => (),
+            Self::One(x) => f(x),
+            Self::List(instr_lst) => instr_lst.iter_mut().for_each(|x| f(x)),
+            Self::Concat(instrseq_lst) => instrseq_lst.iter_mut().for_each(|x| x.map_mut(f)),
         }
     }
 
-    pub fn map<F>(instrseq: &Instr, f: &mut F) -> Instr
+    pub fn map<F>(&self, f: &mut F) -> Self
     where
         F: FnMut(Instruct) -> Instruct,
     {
-        filter_map(instrseq, &mut |x| Some(f(x.clone())))
+        self.filter_map(&mut |x| Some(f(x.clone())))
     }
 }

@@ -12,13 +12,12 @@ mod label_rewriter {
         FcallArgs, GenDelegation, Instruct, InstructCall, InstructControlFlow, InstructIterator,
         InstructMisc,
     };
-    use instruction_sequence_rust::instr_seq;
-    use instruction_sequence_rust::Instr;
+    use instruction_sequence_rust::InstrSeq;
     use label_rust::{Id, Label};
 
     use std::collections::{HashMap, HashSet};
 
-    fn create_label_to_offset_map(instrseq: &Instr) -> HashMap<Id, usize> {
+    fn create_label_to_offset_map(instrseq: &InstrSeq) -> HashMap<Id, usize> {
         let mut folder = |(i, mut map): (usize, HashMap<Id, usize>), instr: &Instruct| match instr {
             Instruct::ILabel(l) => {
                 if let Ok(id) = Label::id(l) {
@@ -30,7 +29,7 @@ mod label_rewriter {
             }
             _ => (i + 1, map),
         };
-        instr_seq::fold_left(instrseq, &mut folder, (0, HashMap::new())).1
+        instrseq.fold_left(&mut folder, (0, HashMap::new())).1
     }
 
     fn lookup_def(l: &Id, defs: &HashMap<Id, usize>) -> usize {
@@ -75,7 +74,7 @@ mod label_rewriter {
     fn create_label_ref_map(
         defs: &HashMap<Id, usize>,
         params: &Vec<HhasParam>,
-        body: &Instr,
+        body: &InstrSeq,
     ) -> (HashSet<Id>, HashMap<Id, usize>) {
         let process_ref =
             |(mut n, (mut used, mut refs)): (usize, (HashSet<Id>, HashMap<Id, usize>)),
@@ -93,12 +92,12 @@ mod label_rewriter {
                 }
             };
         let gather_using = |acc: (usize, (HashSet<Id>, HashMap<Id, usize>)),
-                            instrseq: &Instr,
+                            instrseq: &InstrSeq,
                             get_labels: fn(&Instruct) -> Vec<Label>| {
             let mut folder = |acc: (usize, (HashSet<Id>, HashMap<Id, usize>)), instr: &Instruct| {
                 (get_labels(instr)).iter().fold(acc, process_ref)
             };
-            instr_seq::fold_left(instrseq, &mut folder, acc)
+            instrseq.fold_left(&mut folder, acc)
         };
         let init = gather_using(
             (0, (HashSet::new(), HashMap::new())),
@@ -161,7 +160,7 @@ mod label_rewriter {
         used: &HashSet<Id>,
         refs: &HashMap<Id, usize>,
         params: &mut Vec<HhasParam>,
-        body: &mut Instr,
+        body: &mut InstrSeq,
     ) {
         let relabel_id = |id: &mut Id| {
             *id = *refs
@@ -186,16 +185,16 @@ mod label_rewriter {
             }
         };
         params.iter_mut().for_each(|param| rewrite_param(param));
-        instr_seq::map_mut(body, &mut rewrite_instr);
+        body.map_mut(&mut rewrite_instr);
     }
 
-    pub fn relabel_function(params: &mut Vec<HhasParam>, body: &mut Instr) {
+    pub fn relabel_function(params: &mut Vec<HhasParam>, body: &mut InstrSeq) {
         let defs = create_label_to_offset_map(body);
         let (used, refs) = create_label_ref_map(&defs, &params, body);
         rewrite_params_and_body(&defs, &used, &refs, params, body)
     }
 
-    pub fn clone_with_fresh_regular_labels(emitter: &mut Emitter, block: &mut Instr) {
+    pub fn clone_with_fresh_regular_labels(emitter: &mut Emitter, block: &mut InstrSeq) {
         let mut folder =
             |(mut regular, mut named): (HashMap<Id, Label>, HashMap<String, Label>),
              instr: &Instruct| {
@@ -211,7 +210,7 @@ mod label_rewriter {
                 (regular, named)
             };
         let (regular_labels, named_labels) =
-            instr_seq::fold_left(block, &mut folder, (HashMap::new(), HashMap::new()));
+            block.fold_left(&mut folder, (HashMap::new(), HashMap::new()));
 
         if !regular_labels.is_empty() || !named_labels.is_empty() {
             let relabel = |l: &mut Label| {
@@ -222,9 +221,7 @@ mod label_rewriter {
                 };
                 lopt.unwrap_or(l).to_owned()
             };
-            instr_seq::map_mut(block, &mut |instr| {
-                relabel_instr(instr, &mut |l| *l = relabel(l))
-            })
+            block.map_mut(&mut |instr| relabel_instr(instr, &mut |l| *l = relabel(l)))
         }
     }
 }

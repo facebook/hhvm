@@ -7,7 +7,7 @@ use ast_scope_rust::Scope;
 use env::emitter::Emitter;
 use hhbc_ast_rust::SpecialClsRef;
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::Instr;
+use instruction_sequence_rust::InstrSeq;
 use naming_special_names_rust::classes;
 use oxidized::{aast::*, ast, ast_defs};
 
@@ -15,7 +15,7 @@ pub enum ClassExpr {
     Special(SpecialClsRef),
     Id(ast_defs::Id),
     Expr(ast::Expr),
-    Reified(Instr),
+    Reified(InstrSeq),
 }
 
 impl ClassExpr {

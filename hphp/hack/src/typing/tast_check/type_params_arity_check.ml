@@ -115,6 +115,7 @@ let handler =
     inherit Tast_visitor.handler_base
 
     method! at_class_ env c =
+      List.iter c.c_uses (check_hint env);
       List.iter c.c_extends (check_hint env);
       List.iter c.c_implements (check_hint env);
       let c_tparam_list = c.c_tparams.c_tparam_list in

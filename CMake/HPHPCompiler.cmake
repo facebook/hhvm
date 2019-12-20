@@ -66,7 +66,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   # General options to pass to the C++ compiler
   set(GENERAL_CXX_OPTIONS)
   list(APPEND GENERAL_CXX_OPTIONS
-    "std=gnu++1y"
+    "std=gnu++1z"
     "fno-omit-frame-pointer"
     "fno-operator-names"
     "Wall"

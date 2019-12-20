@@ -206,17 +206,20 @@ public:
 
   Array toPHPArrayImpl() {
     if (!m_size) return empty_array();
-    return Array::attach(const_cast<ArrayData*>(arrayData()->toPHPArray(true)));
+    auto ad = arrayData()->toPHPArray(true);
+    return ad != arrayData() ? Array::attach(ad) : Array{ad};
   }
 
   Array toVArray() {
     if (!m_size) return empty_varray();
-    return Array::attach(arrayData()->toVArray(true));
+    auto ad = arrayData()->toVArray(true);
+    return ad != arrayData() ? Array::attach(ad) : Array{ad};
   }
 
   Array toDArray() {
     if (!m_size) return empty_darray();
-    return Array::attach(arrayData()->toDArray(true));
+    auto ad = arrayData()->toDArray(true);
+    return ad != arrayData() ? Array::attach(ad) : Array{ad};
   }
 
   static constexpr size_t sizeOffset() { return offsetof(BaseVector, m_size); }

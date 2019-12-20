@@ -9,16 +9,17 @@ To do this:
 - run the stuff below:
 
 ```
+$ cd third-party/thrift/src
 $ os_image=ubuntu:16.04 gcc_version=5 make_parallelism=16 travis_cache_dir=~/travis_ccache \
   build/fbcode_builder/travis_docker_build.sh`
 $ docker ps -a # to get the container ID
 $ export CONTAINER_ID= # whatever you got from docker ps -a
 $ cd third-party/thrift/gen/thrift/lib
 $ rm -rf cpp2 thrift
-$ mkdir cpp2 thrift
+$ mkdir thrift
 $ # Don't use /home/install/... as those are only the .h files, and we need the .cpp too
 $ docker cp $CONTAINER_ID:/home/fbthrift/thrift/thrift/lib/thrift/gen-cpp2/ thrift/gen-cpp2
-$ docker cp $CONTAINER_ID:/home/fbthrift/thrift/thrift/lib/cpp2/ cpp2/
+$ docker cp $CONTAINER_ID:/home/fbthrift/thrift/thrift/lib/cpp2/ cpp2
 ```
 
 Assuming you're rebuilding and retesting, re-run cmake so that the glob patterns used to

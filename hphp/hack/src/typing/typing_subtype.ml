@@ -462,34 +462,6 @@ and simplify_subtype_i
   let valid () = valid_env env in
   (* We don't know whether the assertion is valid or not *)
   let default () = (env, TL.IsSubtype (ety_sub, ety_super)) in
-  let simplify_subtype_generic_super ty_sub name_super env =
-    match subtype_env.seen_generic_params with
-    | None -> default ()
-    | Some seen ->
-      (* If we've seen this type parameter before then we must have gone
-       * round a cycle so we fail
-       *)
-      if SSet.mem name_super seen then
-        invalid ()
-      else
-        let subtype_env = add_seen_generic subtype_env name_super in
-        (* Collect all the lower bounds ("super" constraints) on the
-         * generic parameter, and check ty_sub against each of them in turn
-         * until one of them succeeds *)
-        let rec try_bounds tyl env =
-          match tyl with
-          | [] -> invalid ()
-          | ty :: tyl ->
-            env
-            |> simplify_subtype ~subtype_env ~this_ty ty_sub ty
-            ||| try_bounds tyl
-        in
-        (* Turn error into a generic error about the type parameter *)
-        env
-        |> try_bounds
-             (Typing_set.elements (Env.get_lower_bounds env name_super))
-        |> if_unsat invalid
-  in
   (* This function contains typing rules that are based solely on the subtype
    * if you need to pattern match on the super type it should NOT be included
    * here
@@ -943,13 +915,52 @@ and simplify_subtype_i
       else
         simplify_subtype ~subtype_env ~this_ty bound_sub ty_super env
     | _ -> default_subtype env)
+  | LoclType (_, Tgeneric name_super) ->
+    (match ety_sub with
+    (* If subtype and supertype are the same generic parameter, we're done *)
+    | LoclType (_, Tgeneric name_sub) when String.equal name_sub name_super ->
+      valid ()
+    (* When decomposing subtypes for the purpose of adding bounds on generic
+     * parameters to the context, (so seen_generic_params = None), leave
+     * subtype so that the bounds get added *)
+    | LoclType (_, (Tvar _ | Tunion _ | Terr))
+    | ConstraintType (_, TCunion _) ->
+      default_subtype env
+    | ConstraintType _ -> default_subtype env
+    | LoclType ty_sub ->
+      (match subtype_env.seen_generic_params with
+      | None -> default ()
+      | Some seen ->
+        (* If we've seen this type parameter before then we must have gone
+         * round a cycle so we fail
+         *)
+        if SSet.mem name_super seen then
+          invalid ()
+        else
+          let subtype_env = add_seen_generic subtype_env name_super in
+          (* Collect all the lower bounds ("super" constraints) on the
+           * generic parameter, and check ty_sub against each of them in turn
+           * until one of them succeeds *)
+          let rec try_bounds tyl env =
+            match tyl with
+            | [] -> default_subtype env
+            | ty :: tyl ->
+              env
+              |> simplify_subtype ~subtype_env ~this_ty ty_sub ty
+              ||| try_bounds tyl
+          in
+          (* Turn error into a generic error about the type parameter *)
+          env
+          |> try_bounds
+               (Typing_set.elements (Env.get_lower_bounds env name_super))
+          |> if_unsat invalid))
   | _ ->
     (match (ety_sub, ety_super) with
     | (_, ConstraintType (_, TCintersection _))
     | ( _,
         LoclType
           ( _,
-            ( Tdependent _ | Toption _ | Tunion _ | Terr | Tvar _
+            ( Tgeneric _ | Tdependent _ | Toption _ | Tunion _ | Terr | Tvar _
             | Tintersection _ ) ) ) ->
       assert false
     | (LoclType (_, Tdynamic), LoclType _)
@@ -963,15 +974,7 @@ and simplify_subtype_i
       when let (_, non_ty_opt, _) = find_type_with_exact_negation env tyl in
            Option.is_some non_ty_opt ->
       default_subtype env
-    (* If subtype and supertype are the same generic parameter, we're done *)
-    | (LoclType (_, Tgeneric name_sub), LoclType (_, Tgeneric name_super))
-      when String.equal name_sub name_super ->
-      valid ()
-    (* When decomposing subtypes for the purpose of adding bounds on generic
-     * parameters to the context, (so seen_generic_params = None), leave
-     * subtype so that the bounds get added *)
     | (LoclType (_, Tgeneric _), _)
-    | (_, LoclType (_, Tgeneric _))
       when Option.is_none subtype_env.seen_generic_params ->
       default ()
     (* Likewise, reduce nullable on left to a union *)
@@ -1109,8 +1112,8 @@ and simplify_subtype_i
     | (LoclType ety_sub, LoclType ety_super) ->
       (match (snd ety_sub, snd ety_super) with
       | ( _,
-          (Tdependent _ | Toption _ | Tunion _ | Terr | Tvar _ | Tintersection _)
-        ) ->
+          ( Tgeneric _ | Tdependent _ | Toption _ | Tunion _ | Terr | Tvar _
+          | Tintersection _ ) ) ->
         assert false
       | ( ( Tprim
               Nast.(
@@ -1680,66 +1683,11 @@ and simplify_subtype_i
           let ety_super = anyfy env (fst ety_super) ety_sub in
           simplify_subtype ~subtype_env ~this_ty ety_sub ety_super env
       | (Tany _, _) -> default_subtype env
-      (* Supertype is generic parameter *and* subtype is a newtype with bound.
-       * We need to make this a special case because there is a *choice*
-       * of subtyping rule to apply. See details in the case of dependent type
-       * against generic parameter which is similar
-       *)
-      | (Tnewtype (_, _, ty), Tgeneric name_super)
-        when Option.is_some subtype_env.seen_generic_params ->
-        env
-        |> simplify_subtype ~subtype_env ~this_ty ty ety_super
-        ||| simplify_subtype_generic_super ety_sub name_super
-      (* void behaves with respect to subtyping as an abstract type with
-       * an implicit upper bound ?nonnull
-       *)
-      | (Tprim Nast.Tvoid, Tgeneric name_super)
-        when Option.is_some subtype_env.seen_generic_params ->
-        let r =
-          Reason.Rimplicit_upper_bound (Reason.to_pos (fst ety_sub), "?nonnull")
-        in
-        let tmixed = (r, Toption (r, Tnonnull)) in
-        env
-        |> simplify_subtype ~subtype_env ~this_ty tmixed ety_super
-        ||| simplify_subtype_generic_super ety_sub name_super
-      (* Supertype is generic parameter *and* subtype is dependent.
-       * We need to make this a special case because there is a *choice*
-       * of subtyping rule to apply.
-       *
-       * Example. First suppose that we have the definition
-       *
-       *     abstract const type TC as C
-       *
-       * (1) Now suppose we have to check
-       *       this::TC <: Tu
-       *     where we have the constraint
-       *       <Tu super C>.
-       *     Then it's necessary to apply the rule for AKdependent first, so we
-       *     reduce this problem to
-       *       C <: Tu
-       *     and then call sub_generic_params to deal with the type parameter.
-       * (2) Alternatively, suppose we again have to check
-       *       this::TC <: Tu
-       *     but this time we have the constraint
-       *       <Tu super this::TC>.
-       *    Then if we first reduce the problem to C <: Tu we fail;
-       *    but if we also try sub_generic_params then we succeed, because
-       *    we end up checking this::TC <: this::TC.
-       *)
-      | (Tdependent (_, ty), Tgeneric name_super)
-        when Option.is_some subtype_env.seen_generic_params ->
-        env
-        |> simplify_subtype_generic_super ety_sub name_super
-        |||
-        let this_ty = Option.first_some this_ty (Some ety_sub) in
-        simplify_subtype ~subtype_env ~this_ty ty ety_super
       (* Subtype or supertype is generic parameter
        * We delegate these cases to a separate function in order to catch cycles
        * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
        *)
       | (Tgeneric _, _) -> default_subtype env
-      | (_, Tgeneric name_super) ->
-        simplify_subtype_generic_super ety_sub name_super env
       | (Tpu (base_sub, (_, enum_sub)), Tpu (base_super, (_, enum_super))) ->
         (* TODO: document contravariance *)
         if String.equal enum_sub enum_super then

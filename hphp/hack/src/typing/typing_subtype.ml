@@ -1156,6 +1156,74 @@ and simplify_subtype_i
       let ty_super = anyfy env r_super ty_sub in
       simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
     | ConstraintType _ -> valid ())
+  | LoclType (_, Tpu (base_super, (_, enum_super))) ->
+    (match ety_sub with
+    (* TODO: document contravariance *)
+    | LoclType (_, Tpu (base_sub, (_, enum_sub)))
+      when String.equal enum_sub enum_super ->
+      simplify_subtype ~subtype_env ~this_ty base_super base_sub env
+    (* Atom vs Tpu: check for membership *)
+    | LoclType (_, Tprim (Aast_defs.Tatom atom))
+      when Option.is_some
+           @@ snd
+           @@ TUtils.class_get_pu_member env base_super enum_super atom ->
+      valid ()
+    | LoclType _
+    | ConstraintType _ ->
+      default_subtype env)
+  | LoclType ((_, Tpu_type_access (bsuper, esuper, msuper, nsuper)) as ty_super)
+    ->
+    (match ety_sub with
+    | LoclType ((_, Tpu_type_access (bsub, esub, msub, nsub)) as ty_sub) ->
+      (* Is the lhs known and can be reduced ? *)
+      let rsub = reduce_pu_type_access env (fst ty_sub) bsub esub msub nsub in
+      (match rsub with
+      | PTA_Reduced (env, ety_sub) ->
+        (* Yes, let's continue the problem with its definition *)
+        simplify_subtype ~subtype_env ~this_ty ety_sub ty_super env
+      (* No, and it's a rigid definition, so it can only unify with
+         itself *)
+      | PTA_Rigid (env, msub) ->
+        (* So let's look at the rhs *)
+        let rsuper =
+          reduce_pu_type_access env (fst ty_super) bsuper esuper msuper nsuper
+        in
+        (match rsuper with
+        (* It reduces, so let's continue with its definition *)
+        | PTA_Reduced (env, ty_super) ->
+          simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
+        (* It is rigid too, so let's test for reflexivity *)
+        | PTA_Rigid (env, msuper) ->
+          if
+            String.equal (snd esub) (snd esuper)
+            && String.equal (snd nsub) (snd nsuper)
+          then
+            env
+            |> simplify_subtype ~subtype_env ~this_ty bsuper bsub
+            &&& simplify_subtype ~subtype_env ~this_ty msub msuper
+            &&& simplify_subtype ~subtype_env ~this_ty msuper msub
+          else
+            default_subtype env
+        (* Missing atom, unknown generic or internal failure. *)
+        | PTA_Not_found env -> default_subtype env
+        | PTA_Unsupported env -> default_subtype env)
+      (* Missing atom, unknown generic or internal failure. *)
+      | PTA_Not_found env -> default_subtype env
+      | PTA_Unsupported env -> default_subtype env)
+    | LoclType (_, (Tunion _ | Tvar _ | Tintersection _)) -> default_subtype env
+    | LoclType ty_sub ->
+      (* If the rhs can be resolved, continue. Otherwise abort (because the
+     only possible rigid case has been handled by the previous case) *)
+      (match
+         reduce_pu_type_access env (fst ty_super) bsuper esuper msuper nsuper
+       with
+      | PTA_Reduced (env, ty_super) ->
+        simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
+      | PTA_Rigid (_env, _ty_super) -> default_subtype env
+      (* Missing atom, unknown generic or internal failure. *)
+      | PTA_Not_found env -> default_subtype env
+      | PTA_Unsupported _env -> default_subtype env)
+    | ConstraintType _ -> default_subtype env)
   | _ ->
     (match (ety_sub, ety_super) with
     | ( _,
@@ -1183,7 +1251,7 @@ and simplify_subtype_i
       | ( _,
           ( Tgeneric _ | Tdependent _ | Toption _ | Tunion _ | Terr | Tvar _
           | Tintersection _ | Tnonnull | Tdynamic | Tprim _ | Tobject | Tanon _
-          | Tany _ ) ) ->
+          | Tany _ | Tpu _ | Tpu_type_access _ ) ) ->
         assert false
       | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Ttuple _ | Tshape _
           | Tobject | Tclass _ | Tarraykind _ ),
@@ -1676,83 +1744,9 @@ and simplify_subtype_i
       Ocaml warnings happy. *)
         assert false
       | (Tany _, _) -> default_subtype env
-      (* Subtype or supertype is generic parameter
-       * We delegate these cases to a separate function in order to catch cycles
-       * in constraints e.g. <T1 as T2, T2 as T3, T3 as T1>
-       *)
       | (Tgeneric _, _) -> default_subtype env
-      | (Tpu (base_sub, (_, enum_sub)), Tpu (base_super, (_, enum_super))) ->
-        (* TODO: document contravariance *)
-        if String.equal enum_sub enum_super then
-          simplify_subtype ~subtype_env ~this_ty base_super base_sub env
-        else
-          invalid ()
-      | ( Tpu_type_access (bsub, esub, msub, nsub),
-          Tpu_type_access (bsuper, esuper, msuper, nsuper) ) ->
-        (* Is the lhs known and can be reduced ? *)
-        let rsub =
-          reduce_pu_type_access env (fst ety_sub) bsub esub msub nsub
-        in
-        (match rsub with
-        | PTA_Reduced (env, ety_sub) ->
-          (* Yes, let's continue the problem with its definition *)
-          simplify_subtype ~subtype_env ~this_ty ety_sub ety_super env
-        (* No, and it's a rigid definition, so it can only unify with
-             itself *)
-        | PTA_Rigid (env, msub) ->
-          (* So let's look at the rhs *)
-          let rsuper =
-            reduce_pu_type_access
-              env
-              (fst ety_super)
-              bsuper
-              esuper
-              msuper
-              nsuper
-          in
-          (match rsuper with
-          (* It reduces, so let's continue with its definition *)
-          | PTA_Reduced (env, ety_super) ->
-            simplify_subtype ~subtype_env ~this_ty ety_sub ety_super env
-          (* It is rigid too, so let's test for reflexivity *)
-          | PTA_Rigid (env, msuper) ->
-            if
-              String.equal (snd esub) (snd esuper)
-              && String.equal (snd nsub) (snd nsuper)
-            then
-              env
-              |> simplify_subtype ~subtype_env ~this_ty bsuper bsub
-              &&& simplify_subtype ~subtype_env ~this_ty msub msuper
-              &&& simplify_subtype ~subtype_env ~this_ty msuper msub
-            else
-              invalid_env env
-          (* Missing atom, unknown generic or internal failure. *)
-          | PTA_Not_found env -> invalid_env env
-          | PTA_Unsupported env -> invalid_env env)
-        (* Missing atom, unknown generic or internal failure. *)
-        | PTA_Not_found env -> invalid_env env
-        | PTA_Unsupported env -> invalid_env env)
       | (Tpu_type_access _, _) -> default_subtype env
-      | (_, Tpu_type_access (base, enum, member, name)) ->
-        (* If the rhs can be resolved, continue. Otherwise abort (because the
-         only possible rigid case has been handled by the previous case) *)
-        (match
-           reduce_pu_type_access env (fst ety_super) base enum member name
-         with
-        | PTA_Reduced (env, ety_super) ->
-          simplify_subtype ~subtype_env ~this_ty ety_sub ety_super env
-        | PTA_Rigid (_env, _ety_super) -> invalid_env env
-        (* Missing atom, unknown generic or internal failure. *)
-        | PTA_Not_found env -> invalid_env env
-        | PTA_Unsupported _env -> invalid_env env)
-      (* Atom vs Tpu: check for membership *)
-      | (Tprim (Aast_defs.Tatom atom), Tpu (base, (_, name))) ->
-        (match TUtils.class_get_pu_member env base name atom with
-        | (_, None) -> invalid ()
-        | (_, Some _) -> valid ())
-      | (Tpu _, _)
-      | (_, Tpu _) ->
-        invalid ())
+      | (Tpu _, _) -> invalid ())
     | (ConstraintType ty_sub, LoclType ty_super) ->
       (match (ty_sub, ty_super) with
       | ((_, Thas_member _), (_, Tnonnull))

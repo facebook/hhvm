@@ -1088,6 +1088,74 @@ and simplify_subtype_i
              |> Errors.invalid_destructure
                   (Reason.to_pos r_super)
                   (Reason.to_pos (fst ty_sub))))
+  | LoclType (_, Tnonnull) ->
+    (match ety_sub with
+    | LoclType
+        ( _,
+          ( Tprim
+              Nast.(
+                ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
+                | Tnoreturn | Tatom _ ))
+          | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject
+          | Tclass _ | Tarraykind _ | Tpu _ | Tpu_type_access _ ) ) ->
+      valid ()
+    | ConstraintType (_, (Thas_member _ | Tdestructure _)) -> valid ()
+    | ConstraintType _
+    | LoclType _ ->
+      default_subtype env)
+  | LoclType (_, Tdynamic) ->
+    (match ety_sub with
+    | LoclType (_, Tdynamic) -> valid ()
+    | ConstraintType _
+    | LoclType _ ->
+      default_subtype env)
+  | LoclType ((_, Tprim prim_ty) as ty_super) ->
+    (match (ety_sub, prim_ty) with
+    | (LoclType (_, Tprim (Nast.Tint | Nast.Tfloat)), Nast.Tnum) -> valid ()
+    | (LoclType (_, Tprim (Nast.Tint | Nast.Tstring)), Nast.Tarraykey) ->
+      valid ()
+    | (LoclType (_, Tprim prim_sub), _) when Aast.equal_tprim prim_sub prim_ty
+      ->
+      valid ()
+    | (LoclType (_, Toption arg_ty_sub), Nast.Tnull) ->
+      simplify_subtype ~subtype_env ~this_ty arg_ty_sub ty_super env
+    | (LoclType _, _)
+    | (ConstraintType _, _) ->
+      default_subtype env)
+  | LoclType (_, Tobject) ->
+    (match ety_sub with
+    (* Any class type is a subtype of object *)
+    | LoclType (_, (Tobject | Tclass _)) -> valid ()
+    | LoclType _
+    | ConstraintType _ ->
+      default_subtype env)
+  | LoclType (_, Tanon (_, id_super)) ->
+    (match ety_sub with
+    | LoclType (_, Tanon (_, id_sub)) when Ident.equal id_sub id_super ->
+      valid ()
+    | LoclType _
+    | ConstraintType _ ->
+      default_subtype env)
+  | LoclType (r_super, Tany _) ->
+    (match ety_sub with
+    | LoclType (_, Tany _) -> valid ()
+    | ConstraintType (_, (TCunion _ | TCintersection _))
+    | LoclType (_, (Tunion _ | Tintersection _ | Tvar _)) ->
+      default_subtype env
+    | LoclType _ when subtype_env.no_top_bottom -> default ()
+    (* If ty_sub contains other types, e.g. C<T>, make this a subtype assertion on
+    those inner types and `any`. For example transform the assertion
+      C<D> <: Tany
+    into
+      C<D> <: C<Tany>
+    which might become
+      D <: Tany
+    if say C is covariant.
+    *)
+    | LoclType ty_sub ->
+      let ty_super = anyfy env r_super ty_sub in
+      simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
+    | ConstraintType _ -> valid ())
   | _ ->
     (match (ety_sub, ety_super) with
     | ( _,
@@ -1114,48 +1182,9 @@ and simplify_subtype_i
       (match (snd ety_sub, snd ety_super) with
       | ( _,
           ( Tgeneric _ | Tdependent _ | Toption _ | Tunion _ | Terr | Tvar _
-          | Tintersection _ ) ) ->
+          | Tintersection _ | Tnonnull | Tdynamic | Tprim _ | Tobject | Tanon _
+          | Tany _ ) ) ->
         assert false
-      | ( ( Tprim
-              Nast.(
-                ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
-                | Tnoreturn | Tatom _ ))
-          | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject
-          | Tclass _ | Tarraykind _ | Tpu _ | Tpu_type_access _ ),
-          Tnonnull ) ->
-        valid ()
-      | ((Tdynamic | Toption _ | Tprim Nast.(Tnull | Tvoid)), Tnonnull) ->
-        invalid ()
-      | ((Tnewtype (_, _, ty) | Tdependent (_, ty)), Tnonnull) ->
-        simplify_subtype ~subtype_env ~this_ty ty ety_super env
-      | (Tdynamic, Tdynamic) -> valid ()
-      | ( ( Tnonnull | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _
-          | Tanon _ | Tobject | Tclass _ | Tarraykind _ ),
-          Tdynamic ) ->
-        invalid ()
-      | ((Tnewtype (_, _, ty) | Tdependent (_, ty)), Tdynamic) ->
-        simplify_subtype ~subtype_env ~this_ty ty ety_super env
-      | (Tprim (Nast.Tint | Nast.Tfloat), Tprim Nast.Tnum) -> valid ()
-      | (Tprim (Nast.Tint | Nast.Tstring), Tprim Nast.Tarraykey) -> valid ()
-      | (Tprim p1, Tprim p2) ->
-        if Aast.equal_tprim p1 p2 then
-          valid ()
-        else
-          invalid ()
-      | ( ( Tnonnull | Tdynamic | Tfun _ | Ttuple _ | Tshape _ | Tanon _
-          | Tobject | Tclass _ | Tarraykind _ ),
-          Tprim _ ) ->
-        invalid ()
-      | ( Toption _,
-          Tprim
-            Nast.(
-              ( Tvoid | Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
-              | Tarraykey | Tnoreturn | Tatom _ )) ) ->
-        invalid ()
-      | (Toption ty_sub', Tprim Nast.Tnull) ->
-        simplify_subtype ~subtype_env ~this_ty ty_sub' ety_super env
-      | ((Tnewtype (_, _, ty) | Tdependent (_, ty)), Tprim _) ->
-        simplify_subtype ~subtype_env ~this_ty ty ety_super env
       | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Ttuple _ | Tshape _
           | Tobject | Tclass _ | Tarraykind _ ),
           Tfun _ ) ->
@@ -1360,27 +1389,6 @@ and simplify_subtype_i
           | None -> invalid ()
         end
       | ((Tnewtype (_, _, ty) | Tdependent (_, ty)), Tnewtype (_, _, _)) ->
-        simplify_subtype ~subtype_env ~this_ty ty ety_super env
-      | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Ttuple _ | Tshape _
-          | Tobject | Tclass _ | Tarraykind _ ),
-          Tanon _ ) ->
-        invalid ()
-      | (Tanon (_, id1), Tanon (_, id2)) ->
-        if Ident.equal id1 id2 then
-          valid ()
-        else
-          invalid ()
-      | ((Tnewtype (_, _, ty) | Tdependent (_, ty)), Tanon _) ->
-        simplify_subtype ~subtype_env ~this_ty ty ety_super env
-      | (Tfun _, Tanon _) -> invalid ()
-      | (Tobject, Tobject) -> valid ()
-      (* Any class type is a subtype of object *)
-      | (Tclass _, Tobject) -> valid ()
-      | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
-          | Tshape _ | Tanon _ | Tarraykind _ ),
-          Tobject ) ->
-        invalid ()
-      | ((Tnewtype (_, _, ty) | Tdependent (_, ty)), Tobject) ->
         simplify_subtype ~subtype_env ~this_ty ty ety_super env
       | (Tnewtype (cid, _, _), Tclass ((_, class_name), _, [ty_super']))
         when Env.is_enum env cid
@@ -1667,22 +1675,6 @@ and simplify_subtype_i
         (* Should have been matched by the external match. We add it here to make
       Ocaml warnings happy. *)
         assert false
-      | (Tany _, Tany _) -> valid ()
-      (* If ty_sub contains other types, e.g. C<T>, make this a subtype assertion on
-      those inner types and `any`. For example transform the assertion
-        C<D> <: Tany
-      into
-        C<D> <: C<Tany>
-      which might become
-        D <: Tany
-      if say C is covariant.
-      *)
-      | (_, Tany _) ->
-        if subtype_env.no_top_bottom then
-          default ()
-        else
-          let ety_super = anyfy env (fst ety_super) ety_sub in
-          simplify_subtype ~subtype_env ~this_ty ety_sub ety_super env
       | (Tany _, _) -> default_subtype env
       (* Subtype or supertype is generic parameter
        * We delegate these cases to a separate function in order to catch cycles
@@ -1765,7 +1757,7 @@ and simplify_subtype_i
       (match (ty_sub, ty_super) with
       | ((_, Thas_member _), (_, Tnonnull))
       | ((_, Tdestructure _), (_, Tnonnull)) ->
-        valid ()
+        assert false
       | ((_, Thas_member _), _ty_super)
       | ((_, Tdestructure _), _ty_super) ->
         invalid ()

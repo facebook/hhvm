@@ -1925,10 +1925,8 @@ where
                 let right = Self::p_expr_with_loc(rlocation, &c.binary_right_operand, env)?;
                 let left = Self::p_expr(&c.binary_left_operand, env)?;
                 let bop_ast_node = Self::p_bop(pos, &c.binary_operator, left, right, env)?;
-                if let E_::Binop(bop) = &bop_ast_node {
-                    if let (ast::Bop::Eq(_), lhs, _) = bop.as_ref() {
-                        Self::check_lvalue(lhs, env);
-                    }
+                if let Some((ast::Bop::Eq(_), lhs, _)) = bop_ast_node.as_binop() {
+                    Self::check_lvalue(lhs, env);
                 }
                 Ok(bop_ast_node)
             }
@@ -3584,10 +3582,8 @@ where
     fn p_block(remove_noop: bool, node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Block> {
         let ast::Stmt(p, stmt_) = Self::p_stmt(node, env)?;
         if let ast::Stmt_::Block(blk) = stmt_ {
-            if remove_noop && blk.len() == 1 {
-                if let ast::Stmt_::Noop = blk[0].1 {
-                    return Ok(vec![]);
-                }
+            if remove_noop && blk.len() == 1 && blk[0].1.is_noop() {
+                return Ok(vec![]);
             }
             return Ok(blk);
         } else {

@@ -105,22 +105,19 @@ impl Visitor for Checker {
         c: &mut Self::Context,
         p: &aast::Expr<Self::Ex, Self::Fb, Self::En, Self::Hi>,
     ) {
-        use aast::{ClassId, ClassId_::*, Expr, Expr_::*};
+        use aast::{ClassId, ClassId_::*, Expr, Expr_::*, Lid};
 
         if let Await(_) = p.1 {
             if !c.in_methodish {
                 self.add_error(&p.0, syntax_error::toplevel_await_use)
             }
-        } else if let Call(cl) = &p.1 {
-            if let ClassConst(cc) = &(cl.1).1 {
-                if let ClassId(_, CIexpr(Expr(pos, Id(id)))) = &cc.0 {
-                    if Self::name_eq_this_and_in_static_method(c, &id.1) {
-                        self.add_error(&pos, syntax_error::this_in_static);
-                    }
+        } else if let Some((_, Expr(_, f), ..)) = p.1.as_call() {
+            if let Some((ClassId(_, CIexpr(Expr(pos, Id(id)))), ..)) = f.as_class_const() {
+                if Self::name_eq_this_and_in_static_method(c, &id.1) {
+                    self.add_error(&pos, syntax_error::this_in_static);
                 }
             }
-        } else if let Lvar(lid) = &p.1 {
-            let aast::Lid(pos, (_, name)) = lid.as_ref();
+        } else if let Some(Lid(pos, (_, name))) = p.1.as_lvar() {
             if Self::name_eq_this_and_in_static_method(c, name) {
                 self.add_error(pos, syntax_error::this_in_static);
             }

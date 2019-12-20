@@ -36,7 +36,7 @@ extern const int64_t k_PHP_QUERY_RFC3986;
 
 Variant HHVM_FUNCTION(base64_decode, const String& data,
                                      bool strict /* = false */);
-Variant HHVM_FUNCTION(base64_encode, const String& data);
+String HHVM_FUNCTION(base64_encode, const String& data);
 
 Variant HHVM_FUNCTION(get_headers, const String& url, int format /* = 0 */);
 Array HHVM_FUNCTION(get_meta_tags, const String& filename,

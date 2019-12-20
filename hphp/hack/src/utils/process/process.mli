@@ -75,3 +75,5 @@ val status_to_string : Unix.process_status -> string
 
 (** Returns true if read_and_close_pid would be nonblocking. *)
 val is_ready : Process_types.t -> bool
+
+val env_to_array : Process_types.environment -> string array option

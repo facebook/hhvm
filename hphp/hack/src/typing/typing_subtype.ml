@@ -1224,6 +1224,219 @@ and simplify_subtype_i
       | PTA_Not_found env -> default_subtype env
       | PTA_Unsupported _env -> default_subtype env)
     | ConstraintType _ -> default_subtype env)
+  | LoclType ((r_super, Tfun ft_super) as ty_super) ->
+    (match ety_sub with
+    | LoclType (r_sub, Tfun ft_sub) ->
+      simplify_subtype_funs
+        ~subtype_env
+        ~check_return:true
+        r_sub
+        ft_sub
+        r_super
+        ft_super
+        env
+    | LoclType (r_sub, Tanon (anon_arity, id)) ->
+      begin
+        match Env.get_anonymous env id with
+        | None ->
+          invalid_with (fun () ->
+              Errors.anonymous_recursive_call (Reason.to_pos r_sub))
+        | Some
+            {
+              rx = reactivity;
+              is_coroutine;
+              counter = ftys;
+              typecheck = anon;
+              _;
+            } ->
+          let p_super = Reason.to_pos r_super in
+          let p_sub = Reason.to_pos r_sub in
+          (* Add function type to set of types seen so far *)
+          ftys := TUtils.add_function_type env ty_super !ftys;
+          (env, TL.valid)
+          |> check_with
+               (Aast.equal_is_coroutine is_coroutine ft_super.ft_is_coroutine)
+               (fun () ->
+                 Errors.coroutinness_mismatch
+                   ft_super.ft_is_coroutine
+                   p_super
+                   p_sub
+                   subtype_env.on_error)
+          |> check_with
+               (check_anon_arity
+                  ~ellipsis_is_variadic:true
+                  anon_arity
+                  ft_super.ft_arity)
+               (fun () ->
+                 Errors.fun_arity_mismatch p_super p_sub subtype_env.on_error)
+          |> fun (env, prop) ->
+          let (env, _, ret) = anon env ft_super.ft_params ft_super.ft_arity in
+          (env, prop)
+          &&& (fun env ->
+                if TypecheckerOptions.unsafe_rx (Env.get_tcopt env) then
+                  (env, TL.valid)
+                else
+                  simplify_subtype_reactivity
+                    ~subtype_env
+                    p_sub
+                    reactivity
+                    p_super
+                    ft_super.ft_reactive
+                    env)
+          &&& simplify_subtype ~subtype_env ~this_ty ret ft_super.ft_ret.et_type
+      end
+    | LoclType _
+    | ConstraintType _ ->
+      default_subtype env)
+  | LoclType (_, Ttuple tyl_super) ->
+    (match ety_sub with
+    (* (t1,...,tn) <: (u1,...,un) iff t1<:u1, ... , tn <: un *)
+    | LoclType (_, Ttuple tyl_sub)
+      when Int.equal (List.length tyl_super) (List.length tyl_sub) ->
+      wfold_left2
+        (fun res ty_sub ty_super ->
+          res &&& simplify_subtype ~subtype_env ty_sub ty_super)
+        (env, TL.valid)
+        tyl_sub
+        tyl_super
+    | LoclType _
+    | ConstraintType _ ->
+      default_subtype env)
+  | LoclType (r_super, Tshape (shape_kind_super, fdm_super)) ->
+    (*
+     * shape_field_type A <: shape_field_type B iff:
+     *   1. A is no more optional than B
+     *   2. A's type <: B.type
+     *)
+    let simplify_subtype_shape_field r_sub name res sft_sub sft_super =
+      match (sft_sub.sft_optional, sft_super.sft_optional) with
+      | (_, true)
+      | (false, false) ->
+        res
+        &&& simplify_subtype
+              ~subtype_env
+              ~this_ty
+              sft_sub.sft_ty
+              sft_super.sft_ty
+      | (true, false) ->
+        res
+        |> with_error (fun () ->
+               let printable_name =
+                 TUtils.get_printable_shape_field_name name
+               in
+               match fst sft_sub.sft_ty with
+               | Reason.Rmissing_required_field _ ->
+                 Errors.missing_field
+                   (Reason.to_pos r_sub)
+                   (Reason.to_pos r_super)
+                   printable_name
+                   subtype_env.on_error
+               | _ ->
+                 Errors.required_field_is_optional
+                   (Reason.to_pos r_sub)
+                   (Reason.to_pos r_super)
+                   printable_name
+                   subtype_env.on_error)
+    in
+    let lookup_shape_field_type name r shape_kind fdm =
+      match ShapeMap.find_opt name fdm with
+      | Some sft -> sft
+      | None ->
+        let printable_name = TUtils.get_printable_shape_field_name name in
+        let sft_ty =
+          match shape_kind with
+          | Closed_shape ->
+            MakeType.nothing
+              (Reason.Rmissing_required_field (Reason.to_pos r, printable_name))
+          | Open_shape ->
+            MakeType.mixed
+              (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name))
+        in
+        { sft_ty; sft_optional = true }
+    in
+    (match ety_sub with
+    | LoclType (r_sub, Tshape (Open_shape, _))
+      when equal_shape_kind Closed_shape shape_kind_super ->
+      invalid_with (fun () ->
+          Errors.shape_fields_unknown
+            (Reason.to_pos r_sub)
+            (Reason.to_pos r_super)
+            subtype_env.on_error)
+    | LoclType (r_sub, Tshape (shape_kind_sub, fdm_sub)) ->
+      ShapeSet.fold
+        (fun name res ->
+          simplify_subtype_shape_field
+            r_sub
+            name
+            res
+            (lookup_shape_field_type name r_sub shape_kind_sub fdm_sub)
+            (lookup_shape_field_type name r_super shape_kind_super fdm_super))
+        (ShapeSet.of_list (ShapeMap.keys fdm_sub @ ShapeMap.keys fdm_super))
+        (env, TL.valid)
+    | LoclType _
+    | ConstraintType _ ->
+      default_subtype env)
+  | LoclType (_, Tarraykind ak_super) ->
+    (match ety_sub with
+    | LoclType (r_sub, Tarraykind ak_sub) ->
+      begin
+        match (ak_sub, ak_super) with
+        (* An empty array is a subtype of any array type *)
+        | (AKempty, _) -> valid ()
+        | (AKvarray ty_sub, AKvarray ty_super) ->
+          simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
+        | ( AKvarray_or_darray (tk_sub, tv_sub),
+            AKvarray_or_darray (tk_super, tv_super) )
+        | (AKdarray (tk_sub, tv_sub), AKdarray (tk_super, tv_super))
+        | (AKdarray (tk_sub, tv_sub), AKvarray_or_darray (tk_super, tv_super))
+          ->
+          env
+          |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
+          &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
+        | (AKvarray tv_sub, AKvarray_or_darray (tk_super, tv_super)) ->
+          let pos = Reason.to_pos r_sub in
+          let tk_sub = MakeType.int (Reason.Ridx_vector pos) in
+          env
+          |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
+          &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
+        (* any other array subtyping is unsatisfiable *)
+        | _ -> invalid ()
+      end
+    | LoclType _
+    | ConstraintType _ ->
+      default_subtype env)
+  | LoclType (_, Tnewtype (name_super, tyl_super, _)) ->
+    let super_is_enum = Env.is_enum env name_super in
+    (match ety_sub with
+    | LoclType (_, Tclass ((_, name_sub), _, _))
+      when super_is_enum && String.equal name_sub name_super ->
+      valid ()
+    | LoclType (_, Tnewtype (name_sub, _, _))
+      when super_is_enum
+           && Env.is_enum env name_sub
+           && String.equal name_sub name_super ->
+      valid ()
+    | LoclType (_, Tnewtype (name_sub, tyl_sub, _))
+      when String.equal name_sub name_super ->
+      let td = Env.get_typedef env name_super in
+      begin
+        match td with
+        | Some { td_tparams; _ } ->
+          let variance_reifiedl =
+            List.map td_tparams (fun t -> (t.tp_variance, t.tp_reified))
+          in
+          simplify_subtype_variance
+            ~subtype_env
+            name_sub
+            variance_reifiedl
+            tyl_sub
+            tyl_super
+            env
+        | None -> invalid ()
+      end
+    | LoclType _
+    | ConstraintType _ ->
+      default_subtype env)
   | _ ->
     (match (ety_sub, ety_super) with
     | ( _,
@@ -1251,213 +1464,9 @@ and simplify_subtype_i
       | ( _,
           ( Tgeneric _ | Tdependent _ | Toption _ | Tunion _ | Terr | Tvar _
           | Tintersection _ | Tnonnull | Tdynamic | Tprim _ | Tobject | Tanon _
-          | Tany _ | Tpu _ | Tpu_type_access _ ) ) ->
+          | Tany _ | Tpu _ | Tpu_type_access _ | Tfun _ | Ttuple _ | Tshape _
+          | Tarraykind _ | Tnewtype _ ) ) ->
         assert false
-      | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Ttuple _ | Tshape _
-          | Tobject | Tclass _ | Tarraykind _ ),
-          Tfun _ ) ->
-        invalid ()
-      | (Tfun ft_sub, Tfun ft_super) ->
-        let (r_sub, r_super) = (fst ety_sub, fst ety_super) in
-        simplify_subtype_funs
-          ~subtype_env
-          ~check_return:true
-          r_sub
-          ft_sub
-          r_super
-          ft_super
-          env
-      | (Tanon (anon_arity, id), Tfun ft) ->
-        let (r_sub, r_super) = (fst ety_sub, fst ety_super) in
-        begin
-          match Env.get_anonymous env id with
-          | None ->
-            invalid_with (fun () ->
-                Errors.anonymous_recursive_call (Reason.to_pos r_sub))
-          | Some
-              {
-                rx = reactivity;
-                is_coroutine;
-                counter = ftys;
-                typecheck = anon;
-                _;
-              } ->
-            let p_super = Reason.to_pos r_super in
-            let p_sub = Reason.to_pos r_sub in
-            (* Add function type to set of types seen so far *)
-            ftys := TUtils.add_function_type env ety_super !ftys;
-            (env, TL.valid)
-            |> check_with
-                 (Aast.equal_is_coroutine is_coroutine ft.ft_is_coroutine)
-                 (fun () ->
-                   Errors.coroutinness_mismatch
-                     ft.ft_is_coroutine
-                     p_super
-                     p_sub
-                     subtype_env.on_error)
-            |> check_with
-                 (check_anon_arity
-                    ~ellipsis_is_variadic:true
-                    anon_arity
-                    ft.ft_arity)
-                 (fun () ->
-                   Errors.fun_arity_mismatch p_super p_sub subtype_env.on_error)
-            |> fun (env, prop) ->
-            let (env, _, ret) = anon env ft.ft_params ft.ft_arity in
-            (env, prop)
-            &&& (fun env ->
-                  if TypecheckerOptions.unsafe_rx (Env.get_tcopt env) then
-                    (env, TL.valid)
-                  else
-                    simplify_subtype_reactivity
-                      ~subtype_env
-                      p_sub
-                      reactivity
-                      p_super
-                      ft.ft_reactive
-                      env)
-            &&& simplify_subtype ~subtype_env ~this_ty ret ft.ft_ret.et_type
-        end
-      | ((Tnewtype (_, _, ty) | Tdependent (_, ty)), Tfun _) ->
-        let this_ty = Option.first_some this_ty (Some ety_sub) in
-        simplify_subtype ~subtype_env ~this_ty ty ety_super env
-      | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Tshape _
-          | Tanon _ | Tobject | Tclass _ | Tarraykind _ ),
-          Ttuple _ ) ->
-        invalid ()
-      (* (t1,...,tn) <: (u1,...,un) iff t1<:u1, ... , tn <: un *)
-      | (Ttuple tyl_sub, Ttuple tyl_super) ->
-        if Int.equal (List.length tyl_super) (List.length tyl_sub) then
-          wfold_left2
-            (fun res ty_sub ty_super ->
-              res &&& simplify_subtype ~subtype_env ty_sub ty_super)
-            (env, TL.valid)
-            tyl_sub
-            tyl_super
-        else
-          invalid ()
-      | ((Tnewtype (_, _, ty) | Tdependent (_, ty)), Ttuple _) ->
-        let this_ty = Option.first_some this_ty (Some ety_sub) in
-        simplify_subtype ~subtype_env ~this_ty ty ety_super env
-      | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
-          | Tanon _ | Tobject | Tclass _ | Tarraykind _ ),
-          Tshape _ ) ->
-        invalid ()
-      | (Tshape (shape_kind_sub, fdm_sub), Tshape (shape_kind_super, fdm_super))
-        ->
-        let (r_sub, r_super) = (fst ety_sub, fst ety_super) in
-        (*
-         * shape_field_type A <: shape_field_type B iff:
-         *   1. A is no more optional than B
-         *   2. A's type <: B.type
-         *)
-        let simplify_subtype_shape_field name res sft_sub sft_super =
-          match (sft_sub.sft_optional, sft_super.sft_optional) with
-          | (_, true)
-          | (false, false) ->
-            res
-            &&& simplify_subtype
-                  ~subtype_env
-                  ~this_ty
-                  sft_sub.sft_ty
-                  sft_super.sft_ty
-          | (true, false) ->
-            res
-            |> with_error (fun () ->
-                   let printable_name =
-                     TUtils.get_printable_shape_field_name name
-                   in
-                   match fst sft_sub.sft_ty with
-                   | Reason.Rmissing_required_field _ ->
-                     Errors.missing_field
-                       (Reason.to_pos r_sub)
-                       (Reason.to_pos r_super)
-                       printable_name
-                       subtype_env.on_error
-                   | _ ->
-                     Errors.required_field_is_optional
-                       (Reason.to_pos r_sub)
-                       (Reason.to_pos r_super)
-                       printable_name
-                       subtype_env.on_error)
-        in
-        let lookup_shape_field_type name r shape_kind fdm =
-          match ShapeMap.find_opt name fdm with
-          | Some sft -> sft
-          | None ->
-            let printable_name = TUtils.get_printable_shape_field_name name in
-            let sft_ty =
-              match shape_kind with
-              | Closed_shape ->
-                MakeType.nothing
-                  (Reason.Rmissing_required_field
-                     (Reason.to_pos r, printable_name))
-              | Open_shape ->
-                MakeType.mixed
-                  (Reason.Rmissing_optional_field
-                     (Reason.to_pos r, printable_name))
-            in
-            { sft_ty; sft_optional = true }
-        in
-        begin
-          match (shape_kind_sub, shape_kind_super) with
-          | (Open_shape, Closed_shape) ->
-            invalid_with (fun () ->
-                Errors.shape_fields_unknown
-                  (Reason.to_pos r_sub)
-                  (Reason.to_pos r_super)
-                  subtype_env.on_error)
-          | (_, _) ->
-            ShapeSet.fold
-              (fun name res ->
-                simplify_subtype_shape_field
-                  name
-                  res
-                  (lookup_shape_field_type name r_sub shape_kind_sub fdm_sub)
-                  (lookup_shape_field_type
-                     name
-                     r_super
-                     shape_kind_super
-                     fdm_super))
-              (ShapeSet.of_list
-                 (ShapeMap.keys fdm_sub @ ShapeMap.keys fdm_super))
-              (env, TL.valid)
-        end
-      | ((Tnewtype (_, _, ty) | Tdependent (_, ty)), Tshape _) ->
-        let this_ty = Option.first_some this_ty (Some ety_sub) in
-        simplify_subtype ~subtype_env ~this_ty ty ety_super env
-      | (Tclass ((_, class_name), _, _), Tnewtype (enum_name, _, _))
-        when Env.is_enum env enum_name && String.equal enum_name class_name ->
-        valid ()
-      | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
-          | Tshape _ | Tanon _ | Tobject | Tclass _ | Tarraykind _ ),
-          Tnewtype _ ) ->
-        invalid ()
-      | (Tnewtype (e_sub, _, _), Tnewtype (e_super, _, _))
-        when Env.is_enum env e_sub
-             && Env.is_enum env e_super
-             && String.equal e_sub e_super ->
-        valid ()
-      | (Tnewtype (name_sub, tyl_sub, _), Tnewtype (name_super, tyl_super, _))
-        when String.equal name_super name_sub ->
-        let td = Env.get_typedef env name_super in
-        begin
-          match td with
-          | Some { td_tparams; _ } ->
-            let variance_reifiedl =
-              List.map td_tparams (fun t -> (t.tp_variance, t.tp_reified))
-            in
-            simplify_subtype_variance
-              ~subtype_env
-              name_sub
-              variance_reifiedl
-              tyl_sub
-              tyl_super
-              env
-          | None -> invalid ()
-        end
-      | ((Tnewtype (_, _, ty) | Tdependent (_, ty)), Tnewtype (_, _, _)) ->
-        simplify_subtype ~subtype_env ~this_ty ty ety_super env
       | (Tnewtype (cid, _, _), Tclass ((_, class_name), _, [ty_super']))
         when Env.is_enum env cid
              && String.equal class_name SN.Classes.cHH_BuiltinEnum ->
@@ -1705,37 +1714,6 @@ and simplify_subtype_i
       | (Tdependent (_, ty), Tclass _) ->
         let this_ty = Option.first_some this_ty (Some ety_sub) in
         simplify_subtype ~subtype_env ~this_ty ty ety_super env
-      (* Arrays *)
-      | ( ( Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _
-          | Tshape _ | Tanon _ | Tobject | Tclass _ ),
-          Tarraykind _ ) ->
-        invalid ()
-      | ((Tnewtype (_, _, ty) | Tdependent (_, ty)), Tarraykind _) ->
-        simplify_subtype ~subtype_env ~this_ty ty ety_super env
-      | (Tarraykind ak_sub, Tarraykind ak_super) ->
-        begin
-          match (ak_sub, ak_super) with
-          (* An empty array is a subtype of any array type *)
-          | (AKempty, _) -> valid ()
-          | (AKvarray ty_sub, AKvarray ty_super) ->
-            simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-          | ( AKvarray_or_darray (tk_sub, tv_sub),
-              AKvarray_or_darray (tk_super, tv_super) )
-          | (AKdarray (tk_sub, tv_sub), AKdarray (tk_super, tv_super))
-          | (AKdarray (tk_sub, tv_sub), AKvarray_or_darray (tk_super, tv_super))
-            ->
-            env
-            |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
-            &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
-          | (AKvarray tv_sub, AKvarray_or_darray (tk_super, tv_super)) ->
-            let pos = Reason.to_pos (fst ety_sub) in
-            let tk_sub = MakeType.int (Reason.Ridx_vector pos) in
-            env
-            |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
-            &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
-          (* any other array subtyping is unsatisfiable *)
-          | _ -> invalid ()
-        end
       | (Tunion _, _)
       | (Terr, _)
       | (Tvar _, _)
@@ -1744,9 +1722,7 @@ and simplify_subtype_i
       Ocaml warnings happy. *)
         assert false
       | (Tany _, _) -> default_subtype env
-      | (Tgeneric _, _) -> default_subtype env
-      | (Tpu_type_access _, _) -> default_subtype env
-      | (Tpu _, _) -> invalid ())
+      | (Tgeneric _, _) -> default_subtype env)
     | (ConstraintType ty_sub, LoclType ty_super) ->
       (match (ty_sub, ty_super) with
       | ((_, Thas_member _), (_, Tnonnull))

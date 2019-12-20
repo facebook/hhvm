@@ -1027,9 +1027,73 @@ and simplify_subtype_i
       else
         invalid ()
     | ConstraintType _ -> default_subtype env)
+  | ConstraintType (r_super, Tdestructure tyl_dest) ->
+    let destructure_tuple r_sub ts =
+      let len = List.length ts in
+      let len_required = List.length tyl_dest in
+      if len < len_required then
+        invalid_with (fun () ->
+            Errors.typing_too_few_args
+              len_required
+              len
+              (Reason.to_pos r_super)
+              (Reason.to_pos r_sub))
+      else
+        let (ts_required, ts_remaining) = List.split_n ts len_required in
+        let (env, prop) =
+          List.fold2_exn
+            ts_required
+            tyl_dest
+            ~init:(env, TL.valid)
+            ~f:(fun res ty ty_dest ->
+              res &&& simplify_subtype ~subtype_env ~this_ty ty ty_dest)
+        in
+        if List.is_empty ts_remaining then
+          (env, prop)
+        else
+          invalid_with (fun () ->
+              Errors.typing_too_many_args
+                len_required
+                len
+                (Reason.to_pos r_super)
+                (Reason.to_pos r_sub))
+    in
+    let destructure_list t =
+      List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+          res &&& simplify_subtype ~subtype_env ~this_ty t ty_dest)
+    in
+    (match ety_sub with
+    | LoclType (r_sub, Ttuple tyl) -> destructure_tuple r_sub tyl
+    | LoclType (r_sub, Tclass ((_, x), _, tyl))
+      when String.equal x SN.Collections.cPair ->
+      destructure_tuple r_sub tyl
+    | LoclType (_, Tclass ((_, x), _, [elt_type]))
+      when String.equal x SN.Collections.cVector
+           || String.equal x SN.Collections.cImmVector
+           || String.equal x SN.Collections.cVec
+           || String.equal x SN.Collections.cConstVector ->
+      destructure_list elt_type
+    | LoclType ((_, (Tdynamic | Tany _)) as elt_type)
+    | LoclType (_, Tarraykind (AKvarray elt_type)) ->
+      destructure_list elt_type
+    | ConstraintType _
+    | LoclType (_, (Tunion _ | Tintersection _ | Tgeneric _ | Tvar _)) ->
+      default_subtype env
+    | LoclType ty_sub ->
+      default_subtype env
+      |> if_unsat @@ fun () ->
+         invalid_with (fun () ->
+             Typing_print.with_blank_tyvars (fun () ->
+                 Typing_print.full_strip_ns env ty_sub)
+             |> Errors.invalid_destructure
+                  (Reason.to_pos r_super)
+                  (Reason.to_pos (fst ty_sub))))
   | _ ->
     (match (ety_sub, ety_super) with
-    | (_, ConstraintType (_, (TCintersection _ | TCunion _ | Thas_member _)))
+    | ( _,
+        ConstraintType
+          (_, (TCintersection _ | TCunion _ | Thas_member _ | Tdestructure _))
+      )
     | ( _,
         LoclType
           ( _,
@@ -1046,73 +1110,6 @@ and simplify_subtype_i
     | (LoclType (_, Tgeneric _), _)
       when Option.is_none subtype_env.seen_generic_params ->
       default ()
-    (* List destructuring *)
-    | (LoclType ety_sub, ConstraintType (r, Tdestructure tyl_dest)) ->
-      let destructure_list t =
-        List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-            res &&& simplify_subtype ~subtype_env ~this_ty t ty_dest)
-      in
-      let destructure_tuple ts =
-        let len = List.length ts in
-        let len_required = List.length tyl_dest in
-        if len < len_required then
-          invalid_with (fun () ->
-              Errors.typing_too_few_args
-                len_required
-                len
-                (Reason.to_pos r)
-                (Reason.to_pos (fst ety_sub)))
-        else
-          let (ts_required, ts_remaining) = List.split_n ts len_required in
-          let (env, prop) =
-            List.fold2_exn
-              ts_required
-              tyl_dest
-              ~init:(env, TL.valid)
-              ~f:(fun res ty ty_dest ->
-                res &&& simplify_subtype ~subtype_env ~this_ty ty ty_dest)
-          in
-          if List.is_empty ts_remaining then
-            (env, prop)
-          else
-            invalid_with (fun () ->
-                Errors.typing_too_many_args
-                  len_required
-                  len
-                  (Reason.to_pos r)
-                  (Reason.to_pos (fst ety_sub)))
-      in
-      begin
-        match ety_sub with
-        | (_, Ttuple tyl) -> destructure_tuple tyl
-        | (_, Tclass ((_, x), _, tyl)) when String.equal x SN.Collections.cPair
-          ->
-          destructure_tuple tyl
-        | (_, Tclass ((_, x), _, [elt_type]))
-          when String.equal x SN.Collections.cVector
-               || String.equal x SN.Collections.cImmVector
-               || String.equal x SN.Collections.cVec
-               || String.equal x SN.Collections.cConstVector ->
-          destructure_list elt_type
-        | (_, Tarraykind (AKvarray elt_type)) -> destructure_list elt_type
-        | (_, Tdynamic) -> destructure_list ety_sub
-        | (_, Tgeneric _) -> default_subtype env
-        (* TODO: should remove these any cases *)
-        | (_, Tarraykind AKempty)
-        | (_, Tany _) ->
-          let any = (r, Typing_defs.make_tany ()) in
-          destructure_list any
-        | _ ->
-          let ty_sub_descr =
-            Typing_print.with_blank_tyvars (fun () ->
-                Typing_print.full_strip_ns env ety_sub)
-          in
-          invalid_with (fun () ->
-              Errors.invalid_destructure
-                (Reason.to_pos r)
-                (Reason.to_pos (fst ety_sub))
-                ty_sub_descr)
-      end
     | (LoclType ety_sub, LoclType ety_super) ->
       (match (snd ety_sub, snd ety_super) with
       | ( _,
@@ -1764,16 +1761,6 @@ and simplify_subtype_i
       | (Tpu _, _)
       | (_, Tpu _) ->
         invalid ())
-    | (ConstraintType ty_sub, ConstraintType ty_super) ->
-      (match (ty_sub, ty_super) with
-      | (_, (_, Thas_member _)) -> assert false
-      | ((_, Tdestructure _), _) -> invalid ()
-      | (_, (_, Tdestructure _))
-      | ((_, TCunion _), _)
-      | (_, (_, TCintersection _))
-      | (_, (_, TCunion _)) ->
-        failwith
-          "This subtyping case must have been handled by the external match wrapping this match.")
     | (ConstraintType ty_sub, LoclType ty_super) ->
       (match (ty_sub, ty_super) with
       | ((_, Thas_member _), (_, Tnonnull))

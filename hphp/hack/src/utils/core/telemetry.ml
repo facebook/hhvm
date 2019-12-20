@@ -18,7 +18,14 @@ let to_string (telemetry : t) : string =
 let string_ (key : string) (value : string) : string * Hh_json.json =
   (key, Hh_json.JSON_String value)
 
-let string_ (telemetry : t) ~(key : string) ~(value : string) : t =
+let string_
+    ?(truncate : int option) (telemetry : t) ~(key : string) ~(value : string) :
+    t =
+  let value =
+    match truncate with
+    | None -> value
+    | Some truncate -> String_utils.truncate truncate value
+  in
   string_ key value :: telemetry
 
 let bool_ (key : string) (value : bool) : key_value_pair =

@@ -12,7 +12,7 @@ val create : unit -> t
 
 val to_string : t -> string
 
-val string_ : t -> key:string -> value:string -> t
+val string_ : ?truncate:int -> t -> key:string -> value:string -> t
 
 val bool_ : t -> key:string -> value:bool -> t
 

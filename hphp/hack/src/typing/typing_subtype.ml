@@ -770,6 +770,28 @@ and simplify_subtype_i
       else
         simplify_sub_union env ty_sub tyl_super
     | _ -> simplify_sub_union env ty_sub tyl_super)
+  | ConstraintType (_, TCunion (lty_super, cty_super)) ->
+    (match ety_sub with
+    | LoclType (r, Toption ty) ->
+      let ty_null = MakeType.null r in
+      let (env, p1) =
+        simplify_subtype_i ~subtype_env ~this_ty (LoclType ty_null) ty_super env
+      in
+      if TL.is_unsat p1 then
+        invalid ()
+      else
+        let (env, p2) =
+          simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ty_super env
+        in
+        (env, TL.conj p1 p2)
+    | ConstraintType (_, TCunion _)
+    | LoclType (_, (Tintersection _ | Tunion _ | Terr | Tvar _)) ->
+      default_subtype env
+    | _ ->
+      env
+      |> simplify_subtype_i ~subtype_env ty_sub (LoclType lty_super)
+      ||| simplify_subtype_i ~subtype_env ty_sub (ConstraintType cty_super)
+      ||| default_subtype)
   | LoclType ((r_super, Toption arg_ty_super) as ty_super) ->
     let (env, ety) = Env.expand_type env arg_ty_super in
 
@@ -956,7 +978,7 @@ and simplify_subtype_i
           |> if_unsat invalid))
   | _ ->
     (match (ety_sub, ety_super) with
-    | (_, ConstraintType (_, TCintersection _))
+    | (_, ConstraintType (_, (TCintersection _ | TCunion _)))
     | ( _,
         LoclType
           ( _,
@@ -977,19 +999,6 @@ and simplify_subtype_i
     | (LoclType (_, Tgeneric _), _)
       when Option.is_none subtype_env.seen_generic_params ->
       default ()
-    (* Likewise, reduce nullable on left to a union *)
-    | (LoclType (r, Toption ty), (ConstraintType (_, TCunion _) as ty_super)) ->
-      let ty_null = MakeType.null r in
-      let (env, p1) =
-        simplify_subtype_i ~subtype_env ~this_ty (LoclType ty_null) ty_super env
-      in
-      if TL.is_unsat p1 then
-        invalid ()
-      else
-        let (env, p2) =
-          simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ty_super env
-        in
-        (env, TL.conj p1 p2)
     (* Ideally, we'd want this case to come after the case with an intersection
   on the left, to deal properly with (#1 & A) <: Thas_member(#2) by potentially
   adding an upper bound to #1, but that would result in a disjunction
@@ -1028,16 +1037,6 @@ and simplify_subtype_i
       in
       error_prop &&& simplify_subtype ~subtype_env ~this_ty obj_get_ty member_ty
     | (LoclType (_, Tintersection _), _) -> default_subtype env
-    | ( LoclType (_, Tgeneric _),
-        ConstraintType (_, TCunion (lty_super, cty_super)) ) ->
-      env
-      |> default_subtype
-      ||| simplify_subtype_i ~subtype_env ty_sub (LoclType lty_super)
-      ||| simplify_subtype_i ~subtype_env ty_sub (ConstraintType cty_super)
-    | (ty_sub, ConstraintType (_, TCunion (lty_super, cty_super))) ->
-      env
-      |> simplify_subtype_i ~subtype_env ty_sub (LoclType lty_super)
-      ||| simplify_subtype_i ~subtype_env ty_sub (ConstraintType cty_super)
     | (ConstraintType (_, TCintersection (lty_sub, cty_sub)), ty_super) ->
       env
       |> simplify_subtype_i ~subtype_env (LoclType lty_sub) ty_super

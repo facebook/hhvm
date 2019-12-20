@@ -260,9 +260,9 @@ let save_decls_failure _ _ = ()
 
 let load_decls_failure _ _ = ()
 
-let watchman_success ~duration:_ ~query:_ ~response:_ = ()
+let saved_state_load_ok _ ~start_time:_ = ()
 
-let watchman_failure ~duration:_ ~query:_ ~response:_ ~error:_ ~stack:_ = ()
+let saved_state_load_failure _ ~start_time:_ = ()
 
 (** Informant events *)
 let init_informant_prefetcher_runner _ = ()

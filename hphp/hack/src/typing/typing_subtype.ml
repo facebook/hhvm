@@ -976,46 +976,28 @@ and simplify_subtype_i
           |> try_bounds
                (Typing_set.elements (Env.get_lower_bounds env name_super))
           |> if_unsat invalid))
-  | _ ->
-    (match (ety_sub, ety_super) with
-    | (_, ConstraintType (_, (TCintersection _ | TCunion _)))
-    | ( _,
-        LoclType
-          ( _,
-            ( Tgeneric _ | Tdependent _ | Toption _ | Tunion _ | Terr | Tvar _
-            | Tintersection _ ) ) ) ->
-      assert false
-    | (LoclType (_, Tdynamic), LoclType _)
-      when subtype_env.treat_dynamic_as_bottom ->
-      default_subtype env
-    | (ConstraintType (_, TCunion _), _)
-    | (LoclType (_, (Tunion _ | Terr | Tvar _)), _) ->
-      default_subtype env
-    (* A & B <: C iif A <: C | !B *)
-    | (LoclType (_, Tintersection tyl), _)
+  | ConstraintType
+      ( r,
+        Thas_member
+          { hm_name = name; hm_type = member_ty; hm_class_id = class_id } ) ->
+    (match ety_sub with
+    | LoclType (_, (Tvar _ | Tunion _ | Terr)) -> default_subtype env
+    | LoclType (_, Tintersection tyl)
       when let (_, non_ty_opt, _) = find_type_with_exact_negation env tyl in
            Option.is_some non_ty_opt ->
       default_subtype env
-    | (LoclType (_, Tgeneric _), _)
-      when Option.is_none subtype_env.seen_generic_params ->
-      default ()
     (* Ideally, we'd want this case to come after the case with an intersection
-  on the left, to deal properly with (#1 & A) <: Thas_member(#2) by potentially
-  adding an upper bound to #1, but that would result in a disjunction
-  which we don't handle very well at the moment.
-  TODO: when we have a better treatment of disjunctions, move that case after
-  the case with an intersection on the left.
-  For now, if there is an intersection on the left here,
-  we rely on how obj_get itself treats intersections. If that
-  intersection contains a type variable, this type variable will be eagerly
-  solved. Once this case is moved, we can clean up obj_get from the Tvar and
-  Tintersection cases *)
-    | ( LoclType ty,
-        ConstraintType
-          ( r,
-            Thas_member
-              { hm_name = name; hm_type = member_ty; hm_class_id = class_id } )
-      ) ->
+     on the left, to deal properly with (#1 & A) <: Thas_member(#2) by potentially
+     adding an upper bound to #1, but that would result in a disjunction
+     which we don't handle very well at the moment.
+     TODO: when we have a better treatment of disjunctions, move that case after
+     the case with an intersection on the left.
+     For now, if there is an intersection on the left here,
+     we rely on how obj_get itself treats intersections. If that
+     intersection contains a type variable, this type variable will be eagerly
+     solved. Once this case is moved, we can clean up obj_get from the Tvar and
+     Tintersection cases *)
+    | LoclType ty_sub ->
       let (obj_get_ty, error_prop) =
         Errors.try_with_result
           (fun () ->
@@ -1026,7 +1008,7 @@ and simplify_subtype_i
                 ~coerce_from_ty:None
                 ~nullsafe:None
                 env
-                ty
+                ty_sub
                 class_id
                 name
                 subtype_env.on_error
@@ -1036,11 +1018,34 @@ and simplify_subtype_i
             (obj_get_ty, invalid_with (fun () -> Errors.add_error error)))
       in
       error_prop &&& simplify_subtype ~subtype_env ~this_ty obj_get_ty member_ty
-    | (LoclType (_, Tintersection _), _) -> default_subtype env
-    | (ConstraintType (_, TCintersection (lty_sub, cty_sub)), ty_super) ->
-      env
-      |> simplify_subtype_i ~subtype_env (LoclType lty_sub) ty_super
-      ||| simplify_subtype_i ~subtype_env (ConstraintType cty_sub) ty_super
+    | ConstraintType
+        ( _,
+          Thas_member
+            { hm_name = name_sub; hm_type = ty_sub; hm_class_id = cid_sub } ) ->
+      if Nast.equal_sid name_sub name && class_id_equal cid_sub class_id then
+        simplify_subtype ~subtype_env ~this_ty ty_sub member_ty env
+      else
+        invalid ()
+    | ConstraintType _ -> default_subtype env)
+  | _ ->
+    (match (ety_sub, ety_super) with
+    | (_, ConstraintType (_, (TCintersection _ | TCunion _ | Thas_member _)))
+    | ( _,
+        LoclType
+          ( _,
+            ( Tgeneric _ | Tdependent _ | Toption _ | Tunion _ | Terr | Tvar _
+            | Tintersection _ ) ) ) ->
+      assert false
+    | (LoclType (_, Tdynamic), LoclType _)
+      when subtype_env.treat_dynamic_as_bottom ->
+      default_subtype env
+    | (ConstraintType (_, (TCunion _ | TCintersection _)), _)
+    | (LoclType (_, (Tintersection _ | Tunion _ | Terr | Tvar _)), _) ->
+      default_subtype env
+    (* A & B <: C iif A <: C | !B *)
+    | (LoclType (_, Tgeneric _), _)
+      when Option.is_none subtype_env.seen_generic_params ->
+      default ()
     (* List destructuring *)
     | (LoclType ety_sub, ConstraintType (r, Tdestructure tyl_dest)) ->
       let destructure_list t =
@@ -1761,29 +1766,12 @@ and simplify_subtype_i
         invalid ())
     | (ConstraintType ty_sub, ConstraintType ty_super) ->
       (match (ty_sub, ty_super) with
-      | ((_, Thas_member hm_sub), (_, Thas_member hm_super)) ->
-        let { hm_name = name_sub; hm_type = ty_sub; hm_class_id = cid_sub } =
-          hm_sub
-        in
-        let {
-          hm_name = name_super;
-          hm_type = ty_super;
-          hm_class_id = cid_super;
-        } =
-          hm_super
-        in
-        if
-          Nast.equal_sid name_sub name_super && class_id_equal cid_sub cid_super
-        then
-          simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-        else
-          invalid ()
+      | (_, (_, Thas_member _)) -> assert false
       | ((_, Tdestructure _), _) -> invalid ()
       | (_, (_, Tdestructure _))
       | ((_, TCunion _), _)
       | (_, (_, TCintersection _))
-      | (_, (_, TCunion _))
-      | ((_, TCintersection _), _) ->
+      | (_, (_, TCunion _)) ->
         failwith
           "This subtyping case must have been handled by the external match wrapping this match.")
     | (ConstraintType ty_sub, LoclType ty_super) ->

@@ -14,8 +14,8 @@ $ docker run --rm -w $(pwd) -v $(pwd):$(pwd) -v $(realpath ../../../../gen/mcrou
 
 ```
 $ cd third-party/mcrouter/src/mcrouter/lib/network/gen
-$ mkdir -p ../../../../../gen/mcrouter/lib/network/gen 
-$ docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -o outdir Common.thrift
-$ docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -o outdir Memcache.thrift
-$ docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -o outdir MemcacheService.thrift
+$ mkdir -p ../../../../../gen/mcrouter/lib/network/gen
+$ docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -I ../../../../ -o outdir Common.thrift
+$ docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -I ../../../../ -o outdir Memcache.thrift
+$ docker run --rm -w $(pwd) -v $(realpath ../../../../):$(realpath ../../../../) -v $(realpath ../../../../../gen/mcrouter/lib/network/gen):$(pwd)/outdir $IMAGE_ID /home/install/bin/thrift1 -gen mstch_cpp2:stack_arguments,include_prefix=mcrouter/lib/network/gen/ -I ../../../../ -o outdir MemcacheService.thrift
 ```

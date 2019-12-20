@@ -143,8 +143,8 @@ pub fn is_self(s: &str) -> bool {
     s.eq_ignore_ascii_case(ns_classes::SELF)
 }
 
-pub fn is_parent(s: &str) -> bool {
-    s.eq_ignore_ascii_case(ns_classes::PARENT)
+pub fn is_parent(s: impl AsRef<str>) -> bool {
+    s.as_ref().eq_ignore_ascii_case(ns_classes::PARENT)
 }
 
 pub fn is_static(s: &str) -> bool {

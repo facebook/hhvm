@@ -7,8 +7,9 @@
 extern crate clap;
 
 mod common;
-mod gen_enum_constr;
+mod gen_enum_helper;
 mod gen_visitor;
+mod quote_helper;
 
 use common::*;
 use crypto::digest::Digest;
@@ -19,7 +20,7 @@ fn main() -> Result<()> {
     let matches = clap_app!(myapp =>
         (@arg regencmd: --("regen-cmd") +takes_value "command to re-genreate the output, this text will be included in file header")
         (@arg rustfmt: -f --rustfmt +takes_value "Rust formatter")
-        (@subcommand enum_constr =>
+        (@subcommand enum_helpers =>
             (@arg input: -i --input +required +takes_value ... "Rust file contains enums")
             (@arg output: -o --output +takes_value "mod output path")
         )
@@ -38,7 +39,7 @@ fn main() -> Result<()> {
     eprintln!("Re-generate cmd set to {:?}", regencmd);
 
     let files = match matches.subcommand() {
-        ("enum_constr", Some(sub_m)) => gen_enum_constr::run(sub_m)?,
+        ("enum_helpers", Some(sub_m)) => gen_enum_helper::run(sub_m)?,
         ("visitor", Some(sub_m)) => gen_visitor::run(sub_m)?,
         _ => vec![],
     };

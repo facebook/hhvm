@@ -700,15 +700,15 @@ impl VisitorMut for ClosureConvertVisitor {
             Expr_::Call(x)
                 if (x.1)
                     .as_class_get()
-                    .and_then(|(id, _)| id.as_ci_expr())
+                    .and_then(|(id, _)| id.as_ciexpr())
                     .and_then(|x| x.as_id())
-                    .map(|x| string_utils::is_parent(x))
+                    .map(string_utils::is_parent)
                     .unwrap_or(false)
                     || (x.1)
                         .as_class_const()
-                        .and_then(|(id, _)| id.as_ci_expr())
+                        .and_then(|(id, _)| id.as_ciexpr())
                         .and_then(|x| x.as_id())
-                        .map(|x| string_utils::is_parent(x))
+                        .map(string_utils::is_parent)
                         .unwrap_or(false) =>
             {
                 add_var(env, &mut self.state, "$this");
@@ -719,7 +719,7 @@ impl VisitorMut for ClosureConvertVisitor {
             Expr_::Call(mut x)
                 if x.1
                     .as_id()
-                    .map(|id| id.eq_ignore_ascii_case("tuple"))
+                    .map(|id| id.1.eq_ignore_ascii_case("tuple"))
                     .unwrap_or_default() =>
             {
                 // replace tuple with varray

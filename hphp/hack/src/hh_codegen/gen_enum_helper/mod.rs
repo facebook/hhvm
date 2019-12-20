@@ -5,10 +5,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 extern crate proc_macro;
 
-use crate::{common, common::*};
+mod ref_kind;
+
+use crate::{common, common::*, quote_helper::*};
+
 use clap::ArgMatches;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
+use ref_kind::RefKind;
 use std::{
     fmt::Write,
     fs::File,
@@ -67,7 +71,7 @@ fn parse_input_arg<'a>(file_with_uses: &'a str) -> (&'a str, Vec<&'a str>) {
     (data.next().unwrap(), data.collect::<Vec<_>>())
 }
 
-fn mk_file(file: &syn::File, uses: Vec<&str>) -> proc_macro2::TokenStream {
+fn mk_file(file: &syn::File, uses: Vec<&str>) -> TokenStream {
     let uses = uses
         .into_iter()
         .map(|u| syn::parse_str::<UseTree>(u).unwrap());
@@ -79,46 +83,147 @@ fn mk_file(file: &syn::File, uses: Vec<&str>) -> proc_macro2::TokenStream {
     }
 }
 
-fn mk_impl(e: &ItemEnum) -> proc_macro2::TokenStream {
+fn mk_impl(e: &ItemEnum) -> TokenStream {
     let name = &e.ident;
+    let is_singleton = e.variants.len() < 2;
     let generics = &e.generics;
-    let mut seen_field = false;
-    let mut constrs = vec![];
-    for v in e.variants.iter() {
-        let (has_field, constr) = mk_constr(name, v);
-        seen_field = seen_field || has_field;
-        constrs.push(constr);
-    }
-    if seen_field {
-        quote! {
-            impl#generics #name#generics {
-                #(#constrs)*
-            }
+    let constrs = e.variants.iter().map(|v| mk_constr(name, v));
+    let is_functions = e
+        .variants
+        .iter()
+        .map(|v| mk_is_function(name, v, is_singleton));
+    let as_ref_functions = e
+        .variants
+        .iter()
+        .map(|v| mk_as_function("", name, v, RefKind::Ref, is_singleton));
+
+    let as_mut_functions = e
+        .variants
+        .iter()
+        .map(|v| mk_as_function("_mut", name, v, RefKind::RefMut, is_singleton));
+
+    let as_into_functions = e
+        .variants
+        .iter()
+        .map(|v| mk_as_function("_into", name, v, RefKind::Owned, is_singleton));
+
+    quote! {
+        impl#generics #name#generics {
+            #(#constrs)*
+            #(#is_functions)*
+            #(#as_ref_functions)*
+            #(#as_mut_functions)*
+            #(#as_into_functions)*
         }
-    } else {
-        quote! {}
     }
 }
 
-// It returns seen_fields and constructor function
-fn mk_constr(enum_name: &Ident, v: &Variant) -> (bool, proc_macro2::TokenStream) {
+fn mk_as_function(
+    fn_name_suffix: &str,
+    enum_name: &Ident,
+    v: &Variant,
+    ref_kind: RefKind,
+    is_singleton: bool,
+) -> TokenStream {
     let name = &v.ident;
-    let fn_name = format_ident!("mk_{}", &to_snake(&v.ident.to_string()));
+    let fn_name = format_ident!("as_{}{}", &to_snake(&name.to_string()), fn_name_suffix);
     match &v.fields {
-        Fields::Unit => (
-            false,
-            quote! {
-                pub fn #fn_name () -> Self {
-                    #enum_name::#name
-                }
-            },
-        ),
+        Fields::Unit => quote! {},
         Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => {
-            let fields = unnamed.iter();
+            let mut i = 0;
+            let mut field_match: Vec<TokenStream> = vec![];
+            let mut results: Vec<TokenStream> = vec![];
+            let mut return_tys: Vec<TokenStream> = vec![];
+            for field in unnamed {
+                let matched = format_ident!("p{}", i.to_string());
+                field_match.push(quote! { #matched, });
+                let tys = unbox(&field.ty);
+                if tys.is_empty() {
+                    results.push(ref_kind.mk_value(&matched, false, None));
+                    return_tys.push(ref_kind.mk_ty(&field.ty));
+                } else if tys.len() == 1 {
+                    results.push(ref_kind.mk_value(&matched, true, None));
+                    return_tys.push(ref_kind.mk_ty(&tys[0]));
+                } else {
+                    let mut j = 0;
+                    for ty in tys {
+                        results.push(ref_kind.mk_value(&matched, true, Some(j)));
+                        return_tys.push(ref_kind.mk_ty(ty));
+                        j += 1;
+                    }
+                }
+                i += 1;
+            }
+            let sep = <Token![,]>::default();
+            let return_tys = if return_tys.len() > 1 {
+                with_paren(join(return_tys.iter(), sep))
+            } else {
+                join(return_tys.iter(), sep)
+            };
+            let results = if results.len() > 1 {
+                with_paren(join(results.iter(), sep))
+            } else {
+                join(results.iter(), sep)
+            };
+            let self_ = ref_kind.mk_ty(&format_ident!("self"));
+            let else_ = if is_singleton {
+                quote! {}
+            } else {
+                quote! { _ => None, }
+            };
+            quote! {
+                pub fn #fn_name(#self_) -> Option<#return_tys> {
+                    match self {
+                        #enum_name::#name(#(#field_match)*) => Some(#results),
+                        #else_
+                    }
+                }
+            }
+        }
+        Fields::Named(_) => {
+            eprintln!("Warning: not support named field: {:?}", &v.ident);
+            quote! {}
+        }
+    }
+}
+
+fn mk_is_function(enum_name: &Ident, v: &Variant, is_singleton: bool) -> TokenStream {
+    let name = &v.ident;
+    let field_match = if let Fields::Unit = &v.fields {
+        quote! {}
+    } else {
+        quote! { (..) }
+    };
+    let body = if is_singleton {
+        quote! { true }
+    } else {
+        quote! {
+            match self {
+                #enum_name::#name#field_match => true,
+                _ => false,
+            }
+        }
+    };
+    let fn_name = format_ident!("is_{}", &to_snake(&name.to_string()));
+    quote! {
+        pub fn #fn_name(&self) -> bool { #body }
+    }
+}
+
+fn mk_constr(enum_name: &Ident, v: &Variant) -> TokenStream {
+    let name = &v.ident;
+    let fn_name = format_ident!("mk_{}", &to_snake(&name.to_string()));
+    match &v.fields {
+        Fields::Unit => quote! {
+            pub fn #fn_name () -> Self {
+                #enum_name::#name
+            }
+        },
+        Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => {
             let mut i = 0;
             let mut params: Vec<TokenStream> = vec![];
             let mut args: Vec<TokenStream> = vec![];
-            for f in fields {
+            for f in unnamed {
                 let ty = &f.ty;
                 let boxed_tys = unbox(ty);
                 if boxed_tys.is_empty() {
@@ -143,18 +248,15 @@ fn mk_constr(enum_name: &Ident, v: &Variant) -> (bool, proc_macro2::TokenStream)
                     args.push(quote! {Box::new(( #(#tuple_items)* )) ,});
                 }
             }
-            (
-                true,
-                quote! {
-                    pub fn #fn_name (#(#params)*) -> Self {
-                        #enum_name::#name(#(#args)*)
-                    }
-                },
-            )
+            quote! {
+                pub fn #fn_name (#(#params)*) -> Self {
+                    #enum_name::#name(#(#args)*)
+                }
+            }
         }
         Fields::Named(_) => {
             eprintln!("Warning: not support named field: {:?}", &v.ident);
-            (false, quote! {})
+            quote! {}
         }
     }
 }

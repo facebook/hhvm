@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::aast_defs::*;
 use crate::pos::Pos;
-use std::boxed::Box;
+use crate::{aast_defs::*, ast_defs::*};
+use std::{boxed::Box, convert::AsRef};
 
 impl Lid {
     pub fn new(p: Pos, s: String) -> Self {
@@ -31,35 +31,14 @@ impl Hint {
     }
 }
 
-impl Hint_ {
-    pub fn is_hfun(&self) -> bool {
-        match self {
-            Hint_::Hfun(_) => true,
-            _ => false,
-        }
-    }
-
-    pub fn as_happly(&self) -> Option<(&Sid, &Vec<Hint>)> {
-        match self {
-            Hint_::Happly(x, y) => Some((x, y)),
-            _ => None,
-        }
-    }
-
-    pub fn is_happly(&self) -> bool {
-        self.as_happly().is_some()
-    }
-
-    pub fn is_hlike(&self) -> bool {
-        match self {
-            Hint_::Hlike(_) => true,
-            _ => false,
-        }
-    }
-}
-
 impl Lid {
     pub fn name(&self) -> &String {
         crate::local_id::get_name(&self.1)
+    }
+}
+
+impl AsRef<str> for Id {
+    fn as_ref(&self) -> &str {
+        &self.1
     }
 }

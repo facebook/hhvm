@@ -8,7 +8,7 @@ use std::marker::PhantomData;
 use std::panic::UnwindSafe;
 
 use ocamlpool_rust::utils::{caml_set_field, reserve_block};
-use ocamlrep::{Allocator, Value};
+use ocamlrep::{Allocator, BlockBuilder, Value};
 
 pub use ocamlrep::OcamlRep;
 
@@ -51,19 +51,24 @@ impl<'a> Allocator<'a> for Pool<'a> {
     }
 
     #[inline(always)]
-    fn block_with_size_and_tag(&mut self, size: usize, tag: u8) -> *mut Value<'a> {
-        unsafe { reserve_block(tag, size) as *mut Value<'a> }
+    fn block_with_size_and_tag<'b>(&'b self, size: usize, tag: u8) -> BlockBuilder<'a, 'b> {
+        let block = unsafe {
+            let ptr = reserve_block(tag, size) as *mut Value<'a>;
+            std::slice::from_raw_parts_mut(ptr, size)
+        };
+        BlockBuilder::new(block)
     }
 
     #[inline(always)]
-    unsafe fn set_field(block: *mut Value<'a>, index: usize, value: Value<'a>) {
-        caml_set_field(block as usize, index, value.to_bits());
+    fn set_field(block: &mut BlockBuilder<'a, '_>, index: usize, value: Value<'a>) {
+        assert!(index < block.size());
+        unsafe { caml_set_field(block.as_mut_ptr() as usize, index, value.to_bits()) };
     }
 }
 
 #[inline(always)]
 pub fn to_ocaml<T: OcamlRep>(value: &T) -> usize {
-    let mut pool = Pool::new();
+    let pool = Pool::new();
     let result = pool.add(value);
     unsafe { result.to_bits() }
 }

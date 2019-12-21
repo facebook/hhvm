@@ -13,6 +13,37 @@ pub const NO_SCAN_TAG: u8 = 251;
 pub const STRING_TAG: u8 = 252;
 pub const DOUBLE_TAG: u8 = 253;
 
+/// A recently-allocated, not-yet-finalized Block.
+#[repr(transparent)]
+pub struct BlockBuilder<'arena: 'builder, 'builder>(pub(crate) &'builder mut [Value<'arena>]);
+
+impl<'a, 'b> BlockBuilder<'a, 'b> {
+    #[inline(always)]
+    pub fn new(block: &'b mut [Value<'a>]) -> Self {
+        if block.len() == 0 {
+            panic!()
+        }
+        BlockBuilder(block)
+    }
+
+    /// The number of fields in this block.
+    #[inline(always)]
+    pub fn size(&self) -> usize {
+        self.0.len()
+    }
+
+    #[inline(always)]
+    pub fn build(self) -> Value<'a> {
+        unsafe { Value::from_bits(self.0.as_ptr() as usize) }
+    }
+
+    /// Return a pointer to the first field in the block.
+    #[inline(always)]
+    pub unsafe fn as_mut_ptr(&mut self) -> *mut Value<'a> {
+        self.0.as_mut_ptr()
+    }
+}
+
 /// The contents of an OCaml block, consisting of a header and one or more
 /// fields of type [`Value`](struct.Value.html).
 #[repr(transparent)]

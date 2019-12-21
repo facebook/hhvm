@@ -31,7 +31,7 @@ use ocamlrep::{Allocator, Arena, Value};
 let tuple = (Some(42), String::from("a"));
 
 // Allocate a chunk of Rust-managed backing storage for our OCaml value.
-let mut arena = Arena::new();
+let arena = Arena::new();
 
 // This value borrows the Arena, to ensure that we cannot continue to use it
 // after the Arena has been freed. OcamlRep values do not borrow the Rust values
@@ -98,7 +98,7 @@ And call into OCaml from Rust (using the `ocaml` crate) to hand over the value:
 #[no_mangle]
 pub extern "C" fn make_and_use_tuple(_unit: usize) -> usize {
     use ocamlrep::{Allocator, Arena};
-    let mut arena = Arena::new();
+    let arena = Arena::new();
     let tuple_ocamlrep = arena.add(&(Some(42), String::from("a")));
 
     let use_tuple = ocaml::named_value("use_tuple")
@@ -276,7 +276,7 @@ trait.
 
 When derived for custom types like this:
 
-```rust
+```ocaml
 use ocamlrep_derive::OcamlRep;
 
 #[derive(OcamlRep)]
@@ -329,7 +329,7 @@ pub mod rc;
 pub mod slab;
 
 pub use arena::Arena;
-pub use block::Block;
+pub use block::{Block, BlockBuilder};
 pub use error::{FromError, SlabIntegrityError};
 pub use impls::{bytes_from_ocamlrep, bytes_to_ocamlrep, str_from_ocamlrep, str_to_ocamlrep};
 pub use value::{OpaqueValue, Value};
@@ -338,7 +338,7 @@ pub use value::{OpaqueValue, Value};
 /// reconstructed from an OCaml value of the same (OCaml) type.
 pub trait OcamlRep: Sized {
     /// Allocate an OCaml representation of `self` using the given Allocator.
-    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &mut A) -> Value<'a>;
+    fn to_ocamlrep<'a, A: Allocator<'a>>(&self, alloc: &A) -> Value<'a>;
 
     /// Convert the given ocamlrep Value to a value of type `Self`, if possible.
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError>;
@@ -365,31 +365,24 @@ pub trait Allocator<'a>: Sized {
     fn generation(&self) -> usize;
 
     /// Allocate a block with enough space for `size` fields, write its header,
-    /// and return a pointer to the first field. This pointer is suitable to be
-    /// passed to
-    /// [`Allocator::set_field`](trait.Allocator.html#tymethod.set_field) and
-    /// [`Value::from_ptr`](struct.Value.html#method.from_ptr) (and implementors
-    /// of [`to_ocamlrep`](trait.OcamlRep.html#tymethod.to_ocamlrep) are
-    /// expected to do so).
-    fn block_with_size_and_tag(&mut self, size: usize, tag: u8) -> *mut Value<'a>;
+    /// and return it.
+    fn block_with_size_and_tag<'b>(&'b self, size: usize, tag: u8) -> BlockBuilder<'a, 'b>;
 
     /// Write the given value to the `index`th field of `block`.
     ///
-    /// # Safety
+    /// # Panics
     ///
-    /// This method is marked unsafe because there is no bounds checking for
-    /// this write. It requires that `block` point to the first field of a block
-    /// allocated by an `Allocator` method and that the index is strictly less
-    /// than the size of the block.
-    unsafe fn set_field(block: *mut Value<'a>, index: usize, value: Value<'a>);
+    /// Panics if `index` is out of bounds for `block` (i.e., greater than or
+    /// equal to the block's size).
+    fn set_field(block: &mut BlockBuilder<'a, '_>, index: usize, value: Value<'a>);
 
     #[inline(always)]
-    fn block_with_size(&mut self, size: usize) -> *mut Value<'a> {
-        self.block_with_size_and_tag(size, 0)
+    fn block_with_size<'b>(&'b self, size: usize) -> BlockBuilder<'a, 'b> {
+        self.block_with_size_and_tag(size, 0u8)
     }
 
     #[inline(always)]
-    fn add<T: OcamlRep>(&mut self, value: &T) -> Value<'a> {
+    fn add<T: OcamlRep>(&self, value: &T) -> Value<'a> {
         value.to_ocamlrep(self)
     }
 }

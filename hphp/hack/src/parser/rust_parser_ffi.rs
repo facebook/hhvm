@@ -42,7 +42,7 @@ where
         let env = env.clone();
         Box::new(
             move |stack_limit: &StackLimit, nonmain_stack_size: Option<usize>| {
-                let mut pool = Pool::new();
+                let pool = Pool::new();
 
                 // Safety: the parser asks for a stack limit with the same lifetime
                 // as the source text, but no syntax tree borrows the stack limit,
@@ -82,19 +82,19 @@ where
                 };
                 let ocaml_tree = pool.add(&tree);
 
-                // Safety: We only invoke set_field with `res`, and only with
-                // indices less than the size we gave. The UnsafeOcamlPtr must
-                // point to the first field in the block. It must be handed back
-                // to OCaml before the garbage collector is given an opportunity
-                // to run.
-                let res = pool.block_with_size(4);
-                unsafe {
-                    Pool::set_field(res, 0, ocamlrep::Value::from_bits(ocaml_state));
-                    Pool::set_field(res, 1, ocamlrep::Value::from_bits(ocaml_root));
-                    Pool::set_field(res, 2, ocaml_errors);
-                    Pool::set_field(res, 3, ocaml_tree);
-                    UnsafeOcamlPtr::new(res as usize)
-                }
+                let mut res = pool.block_with_size(4);
+                Pool::set_field(&mut res, 0, unsafe {
+                    ocamlrep::Value::from_bits(ocaml_state)
+                });
+                Pool::set_field(&mut res, 1, unsafe {
+                    ocamlrep::Value::from_bits(ocaml_root)
+                });
+                Pool::set_field(&mut res, 2, ocaml_errors);
+                Pool::set_field(&mut res, 3, ocaml_tree);
+                // Safety: The UnsafeOcamlPtr must point to the first field in
+                // the block. It must be handed back to OCaml before the garbage
+                // collector is given an opportunity to run.
+                unsafe { UnsafeOcamlPtr::new(res.build().to_bits()) }
             },
         )
     };

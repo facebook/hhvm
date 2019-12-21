@@ -7554,7 +7554,7 @@ and class_def_ env c tc =
       env
       (Cls.where_constraints tc)
   in
-  Typing_variance.class_ (Env.get_tcopt env) (snd c.c_name) tc impl;
+  Typing_variance.class_ (Env.get_ctx env) (snd c.c_name) tc impl;
   List.iter impl (check_implements_tparaml env);
   let check_where_constraints env ht =
     let (_, (p, _), _) = TUtils.unwrap_class_type ht in

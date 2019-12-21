@@ -140,7 +140,7 @@ let check_typedef
     let typedef = Naming.typedef t in
     Nast_check.def (Aast.Typedef typedef);
     let ret = Typing.typedef_def opts typedef in
-    Typing_variance.typedef opts x;
+    Typing_variance.typedef (Provider_context.empty ~tcopt:opts) x;
     let def = Aast.Typedef ret in
     Tast_check.def opts def;
     Some def

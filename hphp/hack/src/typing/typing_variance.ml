@@ -13,6 +13,7 @@ open Utils
 module Env = Typing_env
 module SN = Naming_special_names
 module TGen = Typing_generic
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 (*****************************************************************************)
@@ -257,7 +258,7 @@ let check_final_this_pos_variance env_variance rpos class_ty =
  *)
 (*****************************************************************************)
 
-let get_class_variance root (pos, class_name) =
+let get_class_variance ctx root (pos, class_name) =
   match class_name with
   | name when String.equal name SN.Classes.cAwaitable ->
     [Vcovariant [(pos, Rtype_argument (Utils.strip_ns name), Pcovariant)]]
@@ -266,11 +267,11 @@ let get_class_variance root (pos, class_name) =
     Typing_deps.add_idep (fst root) dep;
     let tparams =
       if Env.is_typedef class_name then
-        match Decl_provider.get_typedef class_name with
+        match Decl_provider.get_typedef ctx class_name with
         | Some { td_tparams; _ } -> td_tparams
         | None -> []
       else
-        match Decl_provider.get_class class_name with
+        match Decl_provider.get_class ctx class_name with
         | None -> []
         | Some cls -> Cls.tparams cls
     in
@@ -305,8 +306,8 @@ let rec class_ tcopt class_name class_type impl =
 (*****************************************************************************)
 (* The entry point (for typedefs). *)
 (*****************************************************************************)
-and typedef tcopt type_name =
-  match Decl_provider.get_typedef type_name with
+and typedef ctx type_name =
+  match Decl_provider.get_typedef ctx type_name with
   | Some
       {
         td_tparams;
@@ -323,7 +324,7 @@ and typedef tcopt type_name =
     in
     let pos = Reason.to_pos (fst td_type) in
     let reason_covariant = [(pos, Rtypedef, Pcovariant)] in
-    type_ tcopt root (Vcovariant reason_covariant) env td_type
+    type_ ctx root (Vcovariant reason_covariant) env td_type
   | None -> ()
 
 and class_member class_type tcopt root static env (_member_name, member) =
@@ -488,7 +489,7 @@ and generic_ env variance name =
     let emsg = detailed_message "covariant (+)" pos2 stack2 in
     Errors.declared_contravariant pos1 pos2 emsg
 
-and type_ tcopt root variance env (reason, ty) =
+and type_ ctx root variance env (reason, ty) =
   match ty with
   | Tany _
   | Tmixed
@@ -499,13 +500,13 @@ and type_ tcopt root variance env (reason, ty) =
   | Tvar _ ->
     ()
   | Tarray (ty1, ty2) ->
-    type_option tcopt root variance env ty1;
-    type_option tcopt root variance env ty2
+    type_option ctx root variance env ty1;
+    type_option ctx root variance env ty2
   | Tdarray (ty1, ty2) ->
-    type_ tcopt root variance env (reason, Tarray (Some ty1, Some ty2))
-  | Tvarray ty -> type_ tcopt root variance env (reason, Tarray (Some ty, None))
+    type_ ctx root variance env (reason, Tarray (Some ty1, Some ty2))
+  | Tvarray ty -> type_ ctx root variance env (reason, Tarray (Some ty, None))
   | Tvarray_or_darray (ty1_opt, ty2) ->
-    type_ tcopt root variance env (reason, Tarray (ty1_opt, Some ty2))
+    type_ ctx root variance env (reason, Tarray (ty1_opt, Some ty2))
   | Tthis ->
     (* Check that 'this' isn't being improperly referenced in a contravariant
      * position.
@@ -537,39 +538,39 @@ and type_ tcopt root variance env (reason, ty) =
       | x -> x
     in
     generic_ env variance name
-  | Toption ty -> type_ tcopt root variance env ty
-  | Tlike ty -> type_ tcopt root variance env ty
+  | Toption ty -> type_ ctx root variance env ty
+  | Tlike ty -> type_ ctx root variance env ty
   | Tprim _ -> ()
   | Tfun ft ->
-    List.iter ft.ft_params ~f:(fun_param tcopt root variance `Instance env);
-    fun_arity tcopt root variance `Instance env ft.ft_arity;
-    fun_ret tcopt root variance `Instance env ft.ft_ret.et_type
+    List.iter ft.ft_params ~f:(fun_param ctx root variance `Instance env);
+    fun_arity ctx root variance `Instance env ft.ft_arity;
+    fun_ret ctx root variance `Instance env ft.ft_ret.et_type
   | Tapply (_, []) -> ()
   | Tapply (((_, name) as pos_name), tyl) ->
-    let variancel = get_class_variance root pos_name in
+    let variancel = get_class_variance ctx root pos_name in
     iter2_shortest
       begin
         fun tparam_variance ((r, _) as ty) ->
         let pos = Reason.to_pos r in
         let reason = Rtype_argument (Utils.strip_ns name) in
         let variance = compose (pos, reason) variance tparam_variance in
-        type_ tcopt root variance env ty
+        type_ ctx root variance env ty
       end
       variancel
       tyl
   | Ttuple tyl
   | Tunion tyl
   | Tintersection tyl ->
-    type_list tcopt root variance env tyl
-  | Taccess (ty, _) -> type_ tcopt root variance env ty
+    type_list ctx root variance env tyl
+  | Taccess (ty, _) -> type_ ctx root variance env ty
   | Tshape (_, ty_map) ->
     Nast.ShapeMap.iter
       begin
         fun _ { sft_ty; _ } ->
-        type_ tcopt root variance env sft_ty
+        type_ ctx root variance env sft_ty
       end
       ty_map
-  | Tpu_access (base, _) -> type_ tcopt root variance env base
+  | Tpu_access (base, _) -> type_ ctx root variance env base
 
 (* `as` constraints on method type parameters must be contravariant
  * and `super` constraints on method type parameters are covariant. To
@@ -653,7 +654,7 @@ and constraint_ tcopt root env (ck, ((r, _) as ty)) =
   in
   type_ tcopt root var env ty
 
-and get_typarams root env (ty : decl_ty) =
+and get_typarams ctx root env (ty : decl_ty) =
   let empty = (SMap.empty, SMap.empty) in
   let union (pos1, neg1) (pos2, neg2) =
     ( SMap.union ~combine:(fun _ x y -> Some (x @ y)) pos1 pos2,
@@ -661,9 +662,9 @@ and get_typarams root env (ty : decl_ty) =
   in
   let flip (pos, neg) = (neg, pos) in
   let single id pos = (SMap.singleton id [pos], SMap.empty) in
-  let get_typarams_union acc ty = union acc (get_typarams root env ty) in
+  let get_typarams_union acc ty = union acc (get_typarams ctx root env ty) in
   let get_typarams_opt ty_opt =
-    Option.value_map ty_opt ~f:(get_typarams root env) ~default:empty
+    Option.value_map ty_opt ~f:(get_typarams ctx root env) ~default:empty
   in
   match snd ty with
   | Tgeneric id ->
@@ -685,7 +686,7 @@ and get_typarams root env (ty : decl_ty) =
   | Toption ty
   | Tlike ty
   | Taccess (ty, _) ->
-    get_typarams root env ty
+    get_typarams ctx root env ty
   | Tunion tyl
   | Tintersection tyl
   | Ttuple tyl ->
@@ -697,7 +698,7 @@ and get_typarams root env (ty : decl_ty) =
       empty
   | Tfun ft ->
     let get_typarams_param acc fp =
-      let tp = get_typarams root env fp.fp_type.et_type in
+      let tp = get_typarams ctx root env fp.fp_type.et_type in
       let tp =
         match fp.fp_kind with
         (* Parameters behave contravariantly *)
@@ -722,16 +723,16 @@ and get_typarams root env (ty : decl_ty) =
         ~init:(get_typarams_arity empty ft.ft_arity)
         ~f:get_typarams_param
     in
-    let ret = get_typarams root env ft.ft_ret.et_type in
+    let ret = get_typarams ctx root env ft.ft_ret.et_type in
     let get_typarams_constraint acc (ck, ty) =
       union
         acc
         (match ck with
-        | Ast_defs.Constraint_as -> get_typarams root env ty
+        | Ast_defs.Constraint_as -> get_typarams ctx root env ty
         | Ast_defs.Constraint_eq ->
-          let tp = get_typarams root env ty in
+          let tp = get_typarams ctx root env ty in
           union (flip tp) tp
-        | Ast_defs.Constraint_super -> flip (get_typarams root env ty))
+        | Ast_defs.Constraint_super -> flip (get_typarams ctx root env ty))
     in
     let get_typarams_tparam acc tp =
       List.fold_left tp.tp_constraints ~init:acc ~f:get_typarams_constraint
@@ -744,12 +745,18 @@ and get_typarams root env (ty : decl_ty) =
         acc
         (match ck with
         | Ast_defs.Constraint_super ->
-          union (flip (get_typarams root env ty1)) (get_typarams root env ty2)
+          union
+            (flip (get_typarams ctx root env ty1))
+            (get_typarams ctx root env ty2)
         | Ast_defs.Constraint_as ->
-          union (get_typarams root env ty1) (flip (get_typarams root env ty2))
+          union
+            (get_typarams ctx root env ty1)
+            (flip (get_typarams ctx root env ty2))
         | Ast_defs.Constraint_eq ->
           let tp =
-            union (get_typarams root env ty1) (get_typarams root env ty2)
+            union
+              (get_typarams ctx root env ty1)
+              (get_typarams ctx root env ty2)
           in
           union tp (flip tp))
     in
@@ -764,7 +771,7 @@ and get_typarams root env (ty : decl_ty) =
     let rec get_typarams_variance_list acc variancel tyl =
       match (variancel, tyl) with
       | (variance :: variancel, ty :: tyl) ->
-        let param = get_typarams root env ty in
+        let param = get_typarams ctx root env ty in
         let param =
           match variance with
           | Vcovariant _ -> param
@@ -774,12 +781,12 @@ and get_typarams root env (ty : decl_ty) =
         get_typarams_variance_list (union acc param) variancel tyl
       | _ -> acc
     in
-    let variancel = get_class_variance root pos_name in
+    let variancel = get_class_variance ctx root pos_name in
     get_typarams_variance_list empty variancel tyl
   | Tarray (ty1, ty2) -> union (get_typarams_opt ty1) (get_typarams_opt ty2)
   | Tdarray (ty1, ty2) ->
-    union (get_typarams root env ty1) (get_typarams root env ty2)
-  | Tvarray ty -> get_typarams root env ty
+    union (get_typarams ctx root env ty1) (get_typarams ctx root env ty2)
+  | Tvarray ty -> get_typarams ctx root env ty
   | Tvarray_or_darray (ty1_opt, ty2) ->
-    union (get_typarams_opt ty1_opt) (get_typarams root env ty2)
-  | Tpu_access (base, _) -> get_typarams root env base
+    union (get_typarams_opt ty1_opt) (get_typarams ctx root env ty2)
+  | Tpu_access (base, _) -> get_typarams ctx root env base

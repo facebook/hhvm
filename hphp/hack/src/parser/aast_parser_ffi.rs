@@ -29,7 +29,9 @@ extern "C" fn from_text(env: usize, source_text: usize) -> usize {
                     let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
                     let indexed_source_text = IndexedSourceText::new(source_text);
                     let res = AastParser::from_text(&env, &indexed_source_text, Some(stack_limit));
-                    to_ocaml(&res)
+                    // Safety: Requires no concurrent interaction with OCaml
+                    // runtime from other threads.
+                    unsafe { to_ocaml(&res) }
                 },
             )
         };
@@ -64,7 +66,9 @@ extern "C" fn from_text(env: usize, source_text: usize) -> usize {
             Err(_) => {
                 let r: &Result<(), AastParserError> =
                     &Err("Expression recursion limit reached".into());
-                to_ocaml(r)
+                // Safety: Requires no concurrent interaction with OCaml runtime
+                // from other threads.
+                unsafe { to_ocaml(r) }
             }
         }
     })

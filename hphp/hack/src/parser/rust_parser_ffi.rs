@@ -42,7 +42,9 @@ where
         let env = env.clone();
         Box::new(
             move |stack_limit: &StackLimit, nonmain_stack_size: Option<usize>| {
-                let pool = Pool::new();
+                // Safety: Requires no concurrent interaction with OCaml runtime
+                // from other threads.
+                let pool = unsafe { Pool::new() };
 
                 // Safety: the parser asks for a stack limit with the same lifetime
                 // as the source text, but no syntax tree borrows the stack limit,

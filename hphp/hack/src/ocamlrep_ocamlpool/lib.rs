@@ -23,9 +23,18 @@ pub struct Pool<'a> {
 }
 
 impl<'a> Pool<'a> {
+    /// Prepare the ocamlpool library to allocate values directly on the OCaml
+    /// runtime's garbage-collected heap.
+    ///
+    /// # Safety
+    ///
+    /// The OCaml runtime is not thread-safe, and this function will interact
+    /// with it. If any other thread interacts with the OCaml runtime or
+    /// ocamlpool library during the lifetime of the `Pool`, undefined behavior
+    /// will result.
     #[inline(always)]
-    pub fn new() -> Self {
-        unsafe { ocamlpool_enter() };
+    pub unsafe fn new() -> Self {
+        ocamlpool_enter();
         Self {
             _phantom: PhantomData,
         }
@@ -66,8 +75,16 @@ impl<'a> Allocator<'a> for Pool<'a> {
     }
 }
 
+/// Convert the given value to an OCaml value on the OCaml runtime's
+/// garbage-collected heap.
+///
+/// # Safety
+///
+/// The OCaml runtime is not thread-safe, and this function will interact with
+/// it. If any other thread interacts with the OCaml runtime or ocamlpool
+/// library during the execution of `to_ocaml`, undefined behavior will result.
 #[inline(always)]
-pub fn to_ocaml<T: OcamlRep>(value: &T) -> usize {
+pub unsafe fn to_ocaml<T: OcamlRep>(value: &T) -> usize {
     let pool = Pool::new();
     let result = pool.add(value);
     result.to_bits()
@@ -109,6 +126,13 @@ pub fn catch_unwind(f: impl FnOnce() -> usize + UnwindSafe) -> usize {
 /// Assume that some Pool exists in some parent scope. Since ocamlpool is
 /// implemented with statics, we don't need a reference to that pool to write to
 /// it.
+///
+/// # Safety
+///
+/// The OCaml runtime is not thread-safe, and this function will interact with
+/// it. If any other thread interacts with the OCaml runtime or ocamlpool
+/// library during the execution of this function, undefined behavior will
+/// result.
 #[inline(always)]
 pub unsafe fn add_to_ambient_pool<T: OcamlRep>(value: &T) -> usize {
     let mut fake_pool = Pool {
@@ -126,14 +150,16 @@ macro_rules! ocaml_ffi_no_panic_fn {
         pub extern "C" fn $name ($($param: usize,)*) -> usize {
             use $crate::OcamlRep;
             $(let $param = unsafe { <$ty>::from_ocaml($param).unwrap() };)*
-            $crate::to_ocaml::<$ret>(&(|| $code)())
+            let result: $ret = $code;
+            unsafe { $crate::to_ocaml(&result) }
         }
     };
 
     (fn $name:ident() -> $ret:ty $code:block) => {
         #[no_mangle]
         pub extern "C" fn $name (_unit: usize) -> usize {
-            $crate::to_ocaml::<$ret>(&$code)
+            let result: $ret = $code;
+            unsafe { $crate::to_ocaml(&result) }
         }
     };
 
@@ -166,7 +192,8 @@ macro_rules! ocaml_ffi_fn {
             $crate::catch_unwind(|| {
                 use $crate::OcamlRep;
                 $(let $param = unsafe { <$ty>::from_ocaml($param).unwrap() };)*
-                $crate::to_ocaml::<$ret>(&(|| $code)())
+                let result: $ret = $code;
+                unsafe { $crate::to_ocaml(&result) }
             })
         }
     };
@@ -174,7 +201,10 @@ macro_rules! ocaml_ffi_fn {
     (fn $name:ident() -> $ret:ty $code:block) => {
         #[no_mangle]
         pub extern "C" fn $name (_unit: usize) -> usize {
-            $crate::catch_unwind(|| $crate::to_ocaml::<$ret>(&$code))
+            $crate::catch_unwind(|| {
+                let result: $ret = $code;
+                unsafe { $crate::to_ocaml(&result) }
+            })
         }
     };
 

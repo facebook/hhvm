@@ -31,12 +31,15 @@ module SN = Naming_special_names
 module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module TUtils = Typing_utils
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 type env = {
   typedef_tparams: Nast.tparam list;
   tenv: Typing_env_types.env;
 }
+
+let get_ctx env = Env.get_ctx env.tenv
 
 let rec fun_ tenv f =
   let env = { typedef_tparams = []; tenv } in
@@ -116,7 +119,7 @@ and hint_ env p = function
     Option.iter variadic_hint (hint env)
   | Happly ((_, x), hl) as h when Env.is_typedef x ->
     begin
-      match Decl_provider.get_typedef x with
+      match Decl_provider.get_typedef (get_ctx env) x with
       | Some _ ->
         check_happly env.typedef_tparams env.tenv (p, h);
         List.iter hl (hint env)

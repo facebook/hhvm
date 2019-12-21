@@ -7,6 +7,11 @@
  *
  *)
 
+type env = {
+  ctx: Provider_context.t;
+  nsenv: Namespace_env.env;
+}
+
 val lvalue : Pos.t SMap.t -> Nast.expr -> Pos.t SMap.t
 
-val stmt : Namespace_env.env -> Pos.t SMap.t -> Nast.stmt -> Pos.t SMap.t
+val stmt : env -> Pos.t SMap.t -> Nast.stmt -> Pos.t SMap.t

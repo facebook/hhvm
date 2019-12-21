@@ -23,6 +23,11 @@ module NS = Namespaces
  * }
  *)
 
+type env = {
+  ctx: Provider_context.t;
+  nsenv: Namespace_env.env;
+}
+
 type acc = Pos.t SMap.t
 
 let rec lvalue (acc : acc) (p, e) : acc =
@@ -36,9 +41,9 @@ let rec lvalue (acc : acc) (p, e) : acc =
  * exposes a lot of errors in www unfortunately -- we should bite the bullet on
  * fixing switch all the way when we do that, most likely though -- see tasks
  * #3140431 and #2813555. *)
-let rec terminal nsenv ~in_try stl = List.iter stl (terminal_ nsenv ~in_try)
+let rec terminal env ~in_try stl = List.iter stl (terminal_ env ~in_try)
 
-and terminal_ nsenv ~in_try st =
+and terminal_ env ~in_try st =
   match snd st with
   | Aast.Throw _ when not in_try -> raise Exit
   | Aast.Throw _ -> ()
@@ -55,12 +60,8 @@ and terminal_ nsenv ~in_try st =
   | Aast.Return _ ->
     raise Exit
   | Aast.Expr (_, Aast.Call (_, (_, Aast.Id fun_id), _, _, _)) ->
-    let (_, fun_name) = NS.elaborate_id nsenv NS.ElaborateFun fun_id in
-    FuncTerm.(
-      raise_exit_if_terminal
-        (get_fun
-           (Provider_context.get_global_context_or_empty_FOR_MIGRATION ())
-           fun_name))
+    let (_, fun_name) = NS.elaborate_id env.nsenv NS.ElaborateFun fun_id in
+    FuncTerm.(raise_exit_if_terminal (get_fun env.ctx fun_name))
   | Aast.Expr
       ( _,
         Aast.Call
@@ -71,25 +72,21 @@ and terminal_ nsenv ~in_try st =
             _,
             _,
             _ ) ) ->
-    let (_, cls_name) = NS.elaborate_id nsenv NS.ElaborateClass cls_id in
+    let (_, cls_name) = NS.elaborate_id env.nsenv NS.ElaborateClass cls_id in
     FuncTerm.(
-      raise_exit_if_terminal
-        (get_static_meth
-           (Provider_context.get_global_context_or_empty_FOR_MIGRATION ())
-           cls_name
-           meth_name))
+      raise_exit_if_terminal (get_static_meth env.ctx cls_name meth_name))
   | Aast.If (_, b1, b2) ->
     (try
-       terminal nsenv ~in_try b1;
+       terminal env ~in_try b1;
        ()
-     with Exit -> terminal nsenv ~in_try b2)
-  | Aast.Switch (_, cl) -> terminal_cl nsenv ~in_try cl
-  | Aast.Block b -> terminal nsenv ~in_try b
-  | Aast.Using u -> terminal nsenv ~in_try u.Aast.us_block
+     with Exit -> terminal env ~in_try b2)
+  | Aast.Switch (_, cl) -> terminal_cl env ~in_try cl
+  | Aast.Block b -> terminal env ~in_try b
+  | Aast.Using u -> terminal env ~in_try u.Aast.us_block
   | Aast.Try (b, catch_l, _fb) ->
     (* return is not allowed in finally, so we can ignore fb *)
-    terminal nsenv ~in_try:true b;
-    List.iter catch_l (terminal_catch nsenv ~in_try)
+    terminal env ~in_try:true b;
+    List.iter catch_l (terminal_catch env ~in_try)
   | Aast.Break
   | Aast.Expr _
   | Aast.Markup _
@@ -105,21 +102,21 @@ and terminal_ nsenv ~in_try st =
   | Aast.Awaitall _ ->
     ()
 
-and terminal_catch nsenv ~in_try (_, _, b) = terminal nsenv ~in_try b
+and terminal_catch env ~in_try (_, _, b) = terminal env ~in_try b
 
-and terminal_cl nsenv ~in_try = function
+and terminal_cl env ~in_try = function
   | [] -> raise Exit
   | Aast.Case (_, b) :: rl ->
     (try
-       terminal nsenv ~in_try b;
+       terminal env ~in_try b;
        if blockHasBreak b then
          ()
        else
          raise Exit
-     with Exit -> terminal_cl nsenv ~in_try rl)
+     with Exit -> terminal_cl env ~in_try rl)
   | Aast.Default (_, b) :: rl ->
     begin
-      try terminal nsenv ~in_try b with Exit -> terminal_cl nsenv ~in_try rl
+      try terminal env ~in_try b with Exit -> terminal_cl env ~in_try rl
     end
 
 and blockHasBreak = function
@@ -137,9 +134,9 @@ and blockHasBreak = function
     in
     x' || blockHasBreak xs
 
-let is_terminal nsenv stl =
+let is_terminal env stl =
   try
-    terminal nsenv ~in_try:false stl;
+    terminal env ~in_try:false stl;
     false
   with Exit -> true
 
@@ -258,7 +255,7 @@ let rec expr (acc : acc) (_, e) : acc =
   | Aast.Typename _ ->
     failwith "Unexpected Expr: Typing_get_locals expr not found on legacy AST"
 
-let rec stmt (nsenv : Namespace_env.env) (acc : acc) st : acc =
+let rec stmt (env : env) (acc : acc) st : acc =
   match snd st with
   | Aast.Expr e -> expr acc e
   | Aast.Fallthrough
@@ -268,7 +265,7 @@ let rec stmt (nsenv : Namespace_env.env) (acc : acc) st : acc =
   | Aast.Throw _ ->
     acc
   | Aast.Do (b, e) ->
-    let acc = block nsenv acc b in
+    let acc = block env acc b in
     let acc = expr acc e in
     acc
   | Aast.While (e, _b) -> expr acc e
@@ -297,25 +294,25 @@ let rec stmt (nsenv : Namespace_env.env) (acc : acc) st : acc =
     acc
   | Aast.Awaitall (el, b) ->
     let acc = List.fold_left ~init:acc ~f:(fun acc (_, e2) -> expr acc e2) el in
-    let acc = block nsenv acc b in
+    let acc = block env acc b in
     acc
-  | Aast.Using u -> block nsenv acc u.Aast.us_block
-  | Aast.Block b -> block nsenv acc b
+  | Aast.Using u -> block env acc u.Aast.us_block
+  | Aast.Block b -> block env acc b
   | Aast.If (e, b1, b2) ->
     let acc = expr acc e in
-    let term1 = is_terminal nsenv b1 in
-    let term2 = is_terminal nsenv b2 in
+    let term1 = is_terminal env b1 in
+    let term2 = is_terminal env b2 in
     if term1 && term2 then
       acc
     else if term1 then
-      let m2 = block nsenv SMap.empty b2 in
+      let m2 = block env SMap.empty b2 in
       SMap.union acc m2
     else if term2 then
-      let m1 = block nsenv SMap.empty b1 in
+      let m1 = block env SMap.empty b1 in
       SMap.union acc m1
     else
-      let m1 = block nsenv SMap.empty b1 in
-      let m2 = block nsenv SMap.empty b2 in
+      let m1 = block env SMap.empty b1 in
+      let m2 = block env SMap.empty b2 in
       let (m : Pos.t SMap.t) = smap_inter m1 m2 in
       SMap.union acc m
   | Aast.Switch (e, cl) ->
@@ -324,28 +321,28 @@ let rec stmt (nsenv : Namespace_env.env) (acc : acc) st : acc =
       List.filter cl ~f:(function
           | Aast.Case (_, b)
           | Aast.Default (_, b)
-          -> not (is_terminal nsenv b))
+          -> not (is_terminal env b))
     in
-    let cl = casel nsenv cl in
+    let cl = casel env cl in
     let c = smap_inter_list cl in
     SMap.union acc c
   | Aast.Try (b, cl, _fb) ->
-    let c = block nsenv SMap.empty b in
-    let cl = List.filter cl ~f:(fun (_, _, b) -> not (is_terminal nsenv b)) in
-    let lcl = List.map cl (catch nsenv) in
+    let c = block env SMap.empty b in
+    let cl = List.filter cl ~f:(fun (_, _, b) -> not (is_terminal env b)) in
+    let lcl = List.map cl (catch env) in
     let c = smap_inter_list (c :: lcl) in
     SMap.union acc c
 
-and block nsenv acc l =
-  List.fold_left ~init:acc ~f:(fun acc st -> stmt nsenv acc st) l
+and block env acc l =
+  List.fold_left ~init:acc ~f:(fun acc st -> stmt env acc st) l
 
-and casel nsenv cl =
+and casel env cl =
   match cl with
   | [] -> []
-  | Aast.Case (_, []) :: rl -> casel nsenv rl
+  | Aast.Case (_, []) :: rl -> casel env rl
   | Aast.Default (_, b) :: rl
   | Aast.Case (_, b) :: rl ->
-    let b = block nsenv SMap.empty b in
-    b :: casel nsenv rl
+    let b = block env SMap.empty b in
+    b :: casel env rl
 
-and catch nsenv (_, _, b) : acc = block nsenv SMap.empty b
+and catch env (_, _, b) : acc = block env SMap.empty b

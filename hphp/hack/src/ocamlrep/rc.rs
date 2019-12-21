@@ -246,7 +246,7 @@ impl<T: OcamlRep> OcamlRep for RcOc<T> {
             Some(value) => unsafe { Value::from_bits(value) },
             None => {
                 let value = alloc.add(self.as_ref());
-                self.set_cached_value(unsafe { value.to_bits() }, generation);
+                self.set_cached_value(value.to_bits(), generation);
                 value
             }
         }

@@ -12,7 +12,7 @@ use crate::{Block, FromError, OcamlRep, Value};
 pub fn expect_int(value: Value<'_>) -> Result<isize, FromError> {
     match value.as_int() {
         Some(value) => Ok(value),
-        None => Err(FromError::ExpectedImmediate(unsafe { value.to_bits() })),
+        None => Err(FromError::ExpectedImmediate(value.to_bits())),
     }
 }
 

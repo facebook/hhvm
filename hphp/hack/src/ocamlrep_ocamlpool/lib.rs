@@ -70,7 +70,7 @@ impl<'a> Allocator<'a> for Pool<'a> {
 pub fn to_ocaml<T: OcamlRep>(value: &T) -> usize {
     let pool = Pool::new();
     let result = pool.add(value);
-    unsafe { result.to_bits() }
+    result.to_bits()
 }
 
 /// Catches panics in `f` and raises a OCaml exception of type RustException

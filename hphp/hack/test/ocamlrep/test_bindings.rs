@@ -14,7 +14,7 @@ fn val<T: OcamlRep>(value: T) -> usize {
     // Round-trip back to T to exercise from_ocamlrep.
     let value = T::from_ocamlrep(value).unwrap();
     let value = arena.add(&value);
-    unsafe { value.to_bits() }
+    value.to_bits()
 }
 
 #[no_mangle]

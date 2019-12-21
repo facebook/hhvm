@@ -103,6 +103,6 @@ impl<T> OcamlRep for NakedPtr<T> {
         if value.is_immediate() {
             return Err(FromError::ExpectedBlock(value.as_int().unwrap()));
         }
-        Ok(unsafe { Self::new(value.to_bits() as *const T) })
+        Ok(Self::new(value.to_bits() as *const T))
     }
 }

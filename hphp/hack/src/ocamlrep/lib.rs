@@ -38,10 +38,10 @@ let arena = Arena::new();
 // they were converted from--the string "a" is copied into the Arena.
 let ocamlrep_value: Value<'_> = arena.add(&tuple);
 
-// We must use unsafe code to convert the value to a usize which can be handed
-// over to the OCaml runtime. `Value::to_bits` is marked unsafe because we must
-// ensure that our OCaml program doesn't use the value after the Arena is freed.
-let ocaml_value: usize = unsafe { ocamlrep_value.to_bits() };
+// We must now convert the value to a usize which can be handed over to the
+// OCaml runtime. We must take care when doing this to ensure that our OCaml
+// program doesn't use the value after the Arena is freed.
+let ocaml_value: usize = ocamlrep_value.to_bits();
 ```
 
 # Example: return an OCaml value to the OCaml runtime #########################
@@ -68,7 +68,7 @@ pub extern "C" fn get_tuple(_unit: usize) -> usize {
     let ocaml_tuple = arena.add(&(Some(42), String::from("a")));
     // This is safe because we leaked the Arena--no matter what we do with this
     // value on the OCaml side, we'll never use-after-free.
-    unsafe { ocaml_tuple.to_bits() }
+    ocaml_tuple.to_bits()
 }
 ```
 
@@ -106,7 +106,7 @@ pub extern "C" fn make_and_use_tuple(_unit: usize) -> usize {
 
     // This is safe because we are passing the value to `use_tuple`, which
     // doesn't store the value and returns before we free the Arena.
-    let ocaml_tuple: usize = unsafe { tuple_ocamlrep.to_bits() };
+    let ocaml_tuple: usize = tuple_ocamlrep.to_bits();
     use_tuple
         .call(ocaml::Value::new(ocaml_tuple))
         .expect("use_tuple must be a function");

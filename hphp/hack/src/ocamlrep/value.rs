@@ -88,15 +88,10 @@ impl<'a> Value<'a> {
     }
 
     /// Convert this value to a usize, which can be handed to the OCaml runtime
-    /// to be used as an OCaml value.
-    ///
-    /// # Safety
-    ///
-    /// This method is unsafe because it decouples the value from the lifetime
-    /// of its containing arena or slab. Take care that the returned value does
+    /// to be used as an OCaml value. Take care that the returned value does
     /// not outlive the arena.
     #[inline(always)]
-    pub unsafe fn to_bits(self) -> usize {
+    pub fn to_bits(self) -> usize {
         self.0
     }
 }
@@ -143,7 +138,7 @@ impl<'a> OpaqueValue<'a> {
     }
 
     #[inline(always)]
-    pub(crate) unsafe fn to_bits(self) -> usize {
+    pub(crate) fn to_bits(self) -> usize {
         self.0
     }
 

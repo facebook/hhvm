@@ -107,15 +107,15 @@ impl<'a> SlabTrait for Slab<'a> {
     }
 
     fn base(&self) -> usize {
-        unsafe { self[0].to_bits() }
+        self[0].to_bits()
     }
 
     fn root_value_offset(&self) -> usize {
-        unsafe { self[1].to_bits() }
+        self[1].to_bits()
     }
 
     fn is_initialized(&self) -> bool {
-        unsafe { self[2].to_bits() == SLAB_MAGIC_NUMBER }
+        self[2].to_bits() == SLAB_MAGIC_NUMBER
     }
 
     fn set_base(&mut self, base: usize) {
@@ -231,7 +231,7 @@ impl<'a> SlabTrait for Slab<'a> {
                 // Skip header, then validate pointer fields
                 i += 1;
                 for value in self[i..(i + size)].iter().filter(|v| !v.is_immediate()) {
-                    let ptr = unsafe { value.to_bits() };
+                    let ptr = value.to_bits();
                     if ptr < base || ptr % WORD_SIZE != 0 {
                         return Err(InvalidPointer(ptr));
                     }

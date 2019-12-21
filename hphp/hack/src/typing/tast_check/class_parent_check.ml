@@ -10,6 +10,7 @@
 open Hh_prelude
 open Aast
 module Env = Tast_env
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 let check_is_class env (p, h) =

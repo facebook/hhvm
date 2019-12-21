@@ -11,6 +11,7 @@ open Hh_prelude
 open Aast
 module ShapeMap = Aast.ShapeMap
 module SN = Naming_special_names
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 let validate_classname (pos, hint) =

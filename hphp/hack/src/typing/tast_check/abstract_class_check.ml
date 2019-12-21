@@ -10,6 +10,7 @@
 open Aast
 open Hh_prelude
 module Env = Tast_env
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module SN = Naming_special_names
 

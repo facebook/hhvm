@@ -12,6 +12,7 @@ open Typing_defs
 open String_utils
 open Aast
 module Env = Tast_env
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module ShapeMap = Aast.ShapeMap
 module Partial = Partial_provider
@@ -20,7 +21,7 @@ let rec check_hint env (pos, hint) =
   match hint with
   | Aast.Happly ((_, x), hl) when Typing_env.is_typedef x ->
     begin
-      match Decl_provider.get_typedef x with
+      match Decl_provider.get_typedef (Env.get_ctx env) x with
       | Some { td_tparams; td_pos; _ } as _ty ->
         check_tparams env pos x td_tparams hl td_pos
       | None -> ()

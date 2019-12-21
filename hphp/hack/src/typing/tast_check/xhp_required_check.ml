@@ -11,6 +11,7 @@ open Aast
 open Typing_defs
 open Utils
 module S = Core_kernel.Sequence
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Env = Tast_env
 

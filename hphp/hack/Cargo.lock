@@ -534,6 +534,11 @@ dependencies = [
 [[package]]
 name = "ocamlrep"
 version = "0.0.0"
+dependencies = [
+ "ocaml 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ocamlrep_derive 0.0.0",
+ "ocamlrep_ocamlpool 0.0.0",
+]
 
 [[package]]
 name = "ocamlrep_derive"

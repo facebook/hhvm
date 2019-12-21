@@ -11,9 +11,9 @@
 open Hh_prelude
 open Typing_defs
 open Aast
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Env = Tast_env
-module TLazyHeap = Decl_provider
 
 let has_ppl_attribute c =
   List.exists c.c_user_attributes (fun { ua_name; _ } ->
@@ -32,7 +32,7 @@ let rec base_type env ty =
  * Given a class, check the class's direct ancestors to verify that if
  * one member is annotated with the <<__PPL>> attribute, then all of them are.
  *)
-let check_ppl_class c =
+let check_ppl_class env c =
   let is_ppl = has_ppl_attribute c in
   let child_class_string = Ast_defs.string_of_class_kind c.c_kind in
   let c_pos = fst c.c_name in
@@ -40,7 +40,7 @@ let check_ppl_class c =
   let check verb parent_class_string = function
     | (_, Happly ((_, name), _)) ->
       begin
-        match TLazyHeap.get_class name with
+        match Decl_provider.get_class (Env.get_ctx env) name with
         | Some parent_type ->
           if Bool.( <> ) (Cls.ppl parent_type) is_ppl then
             error
@@ -73,7 +73,7 @@ let check_ppl_obj_get env ((p, ty), e) =
     match snd bty with
     | Tclass ((_, name), _, _) ->
       begin
-        match TLazyHeap.get_class name with
+        match Decl_provider.get_class (Env.get_ctx env) name with
         | Some cls when Cls.ppl cls ->
           if not @@ Env.get_inside_ppl_class env then
             Errors.invalid_ppl_call p "from a different class";
@@ -119,7 +119,7 @@ let check_ppl_class_const env p e =
       ()
   | CI (_, name) ->
     begin
-      match TLazyHeap.get_class name with
+      match Decl_provider.get_class (Env.get_ctx env) name with
       | Some cls when Cls.ppl cls ->
         Errors.invalid_ppl_static_call
           p
@@ -128,8 +128,8 @@ let check_ppl_class_const env p e =
     end
   | CIexpr e -> check_ppl_obj_get env e
 
-let check_ppl_meth_pointers p classname special_name =
-  match TLazyHeap.get_class classname with
+let check_ppl_meth_pointers env p classname special_name =
+  match Decl_provider.get_class (Env.get_ctx env) classname with
   | Some cls when Cls.ppl cls -> Errors.ppl_meth_pointer p special_name
   | _ -> ()
 
@@ -139,7 +139,7 @@ let check_ppl_inst_meth env ((p, ty), _) =
     match snd bty with
     | Tclass ((_, name), _, _) ->
       begin
-        match TLazyHeap.get_class name with
+        match Decl_provider.get_class (Env.get_ctx env) name with
         | Some cls when Cls.ppl cls -> Errors.ppl_meth_pointer p "inst_meth"
         | _ -> ()
       end
@@ -167,13 +167,13 @@ let handler =
       | Call (_, e, _, _, _) -> on_call_expr env e
       (* class_meth *)
       | Smethod_id ((_, classname), _) ->
-        check_ppl_meth_pointers p classname "class_meth"
+        check_ppl_meth_pointers env p classname "class_meth"
       (* meth_caller *)
       | Method_caller ((_, classname), _) ->
-        check_ppl_meth_pointers p classname "meth_caller"
+        check_ppl_meth_pointers env p classname "meth_caller"
       (* inst_meth *)
       | Method_id (instance, _) -> check_ppl_inst_meth env instance
       | _ -> ()
 
-    method! at_class_ _env c = check_ppl_class c
+    method! at_class_ env c = check_ppl_class env c
   end

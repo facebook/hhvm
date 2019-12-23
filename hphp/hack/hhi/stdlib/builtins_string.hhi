@@ -110,13 +110,13 @@ function str_repeat(string $input, int $multiplier);
 <<__PHPStdLib>>
 function wordwrap(string $str, int $width = 75, string $wordbreak = "\n", bool $cut = false);
 <<__PHPStdLib>>
-function html_entity_decode(string $str, int $quote_style = ENT_COMPAT, string $charset = "ISO-8859-1");
+function html_entity_decode(string $str, int $quote_style = ENT_COMPAT, string $charset = "ISO-8859-1"): string;
 <<__PHPStdLib>>
-function htmlentities(string $str, int $quote_style = ENT_COMPAT, string $charset = "ISO-8859-1", bool $double_encode = true);
+function htmlentities(string $str, int $quote_style = ENT_COMPAT, string $charset = "ISO-8859-1", bool $double_encode = true): string;
 <<__PHPStdLib>>
-function htmlspecialchars_decode(string $str, int $quote_style = ENT_COMPAT);
+function htmlspecialchars_decode(string $str, int $quote_style = ENT_COMPAT): string;
 <<__PHPStdLib>>
-function htmlspecialchars(string $str, int $quote_style = ENT_COMPAT, string $charset = "ISO-8859-1", bool $double_encode = true);
+function htmlspecialchars(string $str, int $quote_style = ENT_COMPAT, string $charset = "ISO-8859-1", bool $double_encode = true): string;
 <<__PHPStdLib, __Rx>>
 function quoted_printable_encode(string $str);
 <<__PHPStdLib, __Rx>>

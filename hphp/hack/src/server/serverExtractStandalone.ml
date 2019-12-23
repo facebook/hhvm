@@ -1114,26 +1114,22 @@ let get_implementation_dependencies ctx deps cls_name =
     let open Typing_deps.Dep in
     let add_smethod_impl acc smethod_name =
       match Class.get_smethod cls smethod_name with
-      | Some elt when elt.ce_origin = cls_name ->
-        SMethod (cls_name, smethod_name) :: acc
+      | Some elt -> SMethod (elt.ce_origin, smethod_name) :: acc
       | _ -> acc
     in
     let add_method_impl acc method_name =
       match Class.get_method cls method_name with
-      | Some elt when elt.ce_origin = cls_name ->
-        Method (cls_name, method_name) :: acc
+      | Some elt -> Method (elt.ce_origin, method_name) :: acc
       | _ -> acc
     in
     let add_typeconst_impl acc typeconst_name =
       match Class.get_typeconst cls typeconst_name with
-      | Some tc when tc.ttc_origin = cls_name ->
-        Const (cls_name, typeconst_name) :: acc
+      | Some tc -> Const (tc.ttc_origin, typeconst_name) :: acc
       | _ -> acc
     in
     let add_const_impl acc const_name =
       match Class.get_const cls const_name with
-      | Some c when c.cc_origin = cls_name ->
-        Const (cls_name, const_name) :: acc
+      | Some c -> Const (c.cc_origin, const_name) :: acc
       | _ -> acc
     in
     let add_impls acc ancestor_name =

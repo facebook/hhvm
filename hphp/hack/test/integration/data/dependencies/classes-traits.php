@@ -170,7 +170,7 @@ function with_method_defined_in_trait(IWibble $w, Wibble $_): void {
 }
 
 abstract class WobbleBase {
-  abstract function f(): void;
+  abstract public function f(): void;
 }
 
 trait TWobble {
@@ -200,4 +200,34 @@ abstract class CCC {
   const type T = this::TA::T;
 
   public function with_nested_type_access(this::T $_): void {}
+}
+
+interface IFlob {
+  abstract const type T;
+  public function f1(): void;
+  public static function f2(): this::T;
+}
+
+interface IToto {
+  const type T = int;
+}
+
+abstract class FlobBase {
+  public function f1(): void {}
+  public static function f2(): int {
+    return 42;
+  }
+}
+
+final class Flob extends FlobBase implements IFlob, IToto {
+  use TFlob;
+}
+
+trait TFlob {
+  require implements IFlob;
+
+  public function g(Flob $_): void {
+    $this->f1();
+    $_ = static::f2();
+  }
 }

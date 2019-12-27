@@ -110,7 +110,7 @@ let default =
     option_disallow_func_ptrs_in_constants = false;
     option_enforce_generics_ub = false;
     option_check_int_overflow = false;
-    option_rust_lowerer = false;
+    option_rust_lowerer = true;
   }
 
 let constant_folding o = o.option_constant_folding

@@ -5,14 +5,13 @@
 
 pub mod emitter; // emitter is public API for mutating state
 pub mod iterator;
+pub mod jump_targets;
 
 use ast_scope_rust::Scope;
 use iterator::Iter;
 use label_rust::Label;
 use oxidized::ast as tast;
 use rx_rust as rx;
-
-mod jump_targets;
 
 extern crate bitflags;
 use bitflags::bitflags;

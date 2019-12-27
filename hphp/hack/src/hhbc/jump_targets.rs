@@ -10,12 +10,14 @@ use std::collections::{HashMap, HashSet};
 type Id = usize;
 type LabelSet = HashSet<String>;
 
+#[derive(Debug)]
 pub struct LoopLabels {
     label_break: Label,
     label_continue: Label,
     iterator: Option<Iter>,
 }
 
+#[derive(Debug)]
 pub enum Region {
     Loop(LoopLabels, LabelSet),
     Switch(Label, LabelSet),
@@ -25,129 +27,22 @@ pub enum Region {
     Using(Label, LabelSet),
 }
 
-pub type JumpTargets = Vec<Region>;
-
-#[derive(PartialEq, Eq, Hash)]
-pub enum IdKey {
-    IdReturn,
-    IdLabel(Label),
-}
-
-#[derive(Default)]
-pub struct Gen {
-    label_id_map: HashMap<IdKey, Id>,
-    labels_in_function: HashMap<Label, bool>,
-    function_has_goto: bool,
-    jump_targets: JumpTargets,
-}
-
-impl Gen {
-    pub fn new_id(&mut self, key: IdKey) -> Id {
-        match self.label_id_map.get(&key) {
-            Some(id) => *id,
-            None => {
-                let mut next_id = 0;
-                while self.label_id_map.values().any(|&id| id == next_id) {
-                    next_id += 1;
-                }
-                self.label_id_map.insert(key, next_id);
-                next_id
-            }
-        }
+#[derive(Debug)]
+pub struct JumpTargets(Vec<Region>);
+impl JumpTargets {
+    pub fn as_slice(&self) -> &[Region] {
+        self.0.as_slice()
     }
 
-    pub fn get_labels_in_function(&self) -> &HashMap<Label, bool> {
-        &self.labels_in_function
-    }
-
-    pub fn get_function_has_goto(&self) -> bool {
-        self.function_has_goto
-    }
-
-    pub fn set_labels_in_function(&mut self, labels_in_function: HashMap<Label, bool>) {
-        self.labels_in_function = labels_in_function;
-    }
-
-    pub fn set_function_has_goto(&mut self, function_has_goto: bool) {
-        self.function_has_goto = function_has_goto;
-    }
-
-    pub fn reset(&mut self) {
-        self.label_id_map.clear();
-    }
-
-    pub fn get_id_for_return(&mut self) -> Id {
-        self.new_id(IdKey::IdReturn)
-    }
-
-    pub fn get_id_for_label(&mut self, l: Label) -> Id {
-        self.new_id(IdKey::IdLabel(l))
-    }
-
-    pub fn with_loop<Ex, Fb, En, Hi>(
-        &mut self,
-        label_break: Label,
-        label_continue: Label,
-        iterator: Option<Iter>,
-        stmt: &Stmt<Ex, Fb, En, Hi>,
-    ) {
-        let labels = self.collect_valid_target_labels_for_stmt(stmt);
-        self.jump_targets.push(Region::Loop(
-            LoopLabels {
-                label_break,
-                label_continue,
-                iterator,
-            },
-            labels,
-        ))
-    }
-
-    pub fn with_switch<Ex, Fb, En, Hi>(
-        &mut self,
-        end_label: Label,
-        cases: &Vec<Case<Ex, Fb, En, Hi>>,
-    ) {
-        let labels = self.collect_valid_target_labels_for_switch_cases(cases);
-        // CONSIDER: now HHVM eagerly reserves state id for the switch end label
-        // which does not seem to be necessary - do it for now for HHVM compatibility
-        let _ = self.get_id_for_label(end_label.clone());
-        self.jump_targets.push(Region::Switch(end_label, labels));
-    }
-
-    pub fn with_try<Ex, Fb, En, Hi>(&mut self, finally_label: Label, stmt: &Stmt<Ex, Fb, En, Hi>) {
-        let labels = self.collect_valid_target_labels_for_stmt(stmt);
-        self.jump_targets
-            .push(Region::TryFinally(finally_label, labels));
-    }
-
-    pub fn with_finally<Ex, Fb, En, Hi>(&mut self, stmt: &Stmt<Ex, Fb, En, Hi>) {
-        let labels = self.collect_valid_target_labels_for_stmt(stmt);
-        self.jump_targets.push(Region::Finally(labels));
-    }
-
-    pub fn with_function<Ex, Fb, En, Hi>(&mut self, defs: &Program<Ex, Fb, En, Hi>) {
-        let labels = self.collect_valid_target_labels_for_defs(defs);
-        self.jump_targets.push(Region::Function(labels));
-    }
-
-    pub fn with_using<Ex, Fb, En, Hi>(
-        &mut self,
-        finally_label: Label,
-        stmt: &Stmt<Ex, Fb, En, Hi>,
-    ) {
-        let labels = self.collect_valid_target_labels_for_stmt(stmt);
-        self.jump_targets.push(Region::Using(finally_label, labels));
-    }
-
-    pub fn get_closest_enclosing_finally_label(t: JumpTargets) -> Option<(Label, Vec<Iter>)> {
+    pub fn get_closest_enclosing_finally_label(&self) -> Option<(Label, Vec<Iter>)> {
         let mut iters = vec![];
-        for r in t.into_iter().rev() {
+        for r in self.0.iter().rev() {
             match r {
                 Region::Using(l, _) | Region::TryFinally(l, _) => {
-                    return Some((l, iters));
+                    return Some((l.clone(), iters));
                 }
                 Region::Loop(LoopLabels { iterator, .. }, _) => {
-                    add_iterator(iterator, &mut iters);
+                    add_iterator(iterator.clone(), &mut iters);
                 }
                 _ => (),
             }
@@ -155,50 +50,84 @@ impl Gen {
         None
     }
 
-    pub fn collect_iterators(t: JumpTargets) -> Vec<Iter> {
-        let mut iters = vec![];
-        for r in t.into_iter().rev() {
+    // NOTE(hrust) this corresponds to collect_iterators in OCaml but doesn't allocate/clone
+    pub fn iterators(&self) -> impl Iterator<Item = &Iter> {
+        self.0.iter().rev().filter_map(|r| {
             if let Region::Loop(LoopLabels { iterator, .. }, _) = r {
-                add_iterator(iterator, &mut iters);
+                iterator.as_ref()
+            } else {
+                None
+            }
+        })
+    }
+
+    pub fn find_goto_target(&self, label: &str) -> ResolvedGotoTarget {
+        assert_eq!(self.0.is_empty(), false);
+
+        let mut iters = vec![];
+        for r in self.0.iter().rev() {
+            match r {
+                Region::Loop(LoopLabels { iterator, .. }, labels) => {
+                    if labels.contains(label) {
+                        return ResolvedGotoTarget::Label(iters);
+                    } else {
+                        add_iterator(iterator.clone(), &mut iters);
+                    }
+                }
+                Region::Switch(_, labels) => {
+                    if labels.contains(label) {
+                        return ResolvedGotoTarget::Label(iters);
+                    }
+                }
+                Region::Using(finally_start, labels)
+                | Region::TryFinally(finally_start, labels) => {
+                    if labels.contains(label) {
+                        return ResolvedGotoTarget::Label(iters);
+                    } else {
+                        return ResolvedGotoTarget::Finally(ResolvedGotoFinally {
+                            rgf_finally_start_label: finally_start.clone(),
+                            rgf_iterators_to_release: iters,
+                        });
+                    }
+                }
+                Region::Finally(labels) => {
+                    if labels.contains(label) {
+                        return ResolvedGotoTarget::Label(iters);
+                    } else {
+                        return ResolvedGotoTarget::GotoFromFinally;
+                    }
+                }
+                Region::Function(labels) => {
+                    if labels.contains(label) {
+                        return ResolvedGotoTarget::Label(iters);
+                    } else {
+                        return ResolvedGotoTarget::GotoInvalidLabel;
+                    }
+                }
             }
         }
-        iters
+        panic!("impossible")
     }
-}
 
-pub struct ResolvedTryFinally {
-    target_label: Label,
-    finally_label: Label,
-    adjusted_level: usize,
-    iterators_to_release: Vec<Iter>,
-}
-
-pub enum ResolvedJumpTarget {
-    NotFound,
-    ResolvedTryFinally(ResolvedTryFinally),
-    ResolvedRegular(Label, Vec<Iter>),
-}
-
-impl ResolvedJumpTarget {
     /// Tries to find a target label given a level and a jump kind (break or continue)
-    pub fn get_target_for_level(is_break: bool, mut level: usize, t: JumpTargets) -> Self {
+    pub fn get_target_for_level(&self, is_break: bool, mut level: usize) -> ResolvedJumpTarget {
         let mut iters = vec![];
         let mut acc = vec![];
         let mut label = None;
         let mut skip_try_finally = None;
-        /// skip_try_finally is Some if we've already determined that we need to jump out of
-        ///  finally and now we are looking for the actual target label (break label of the
-        ///  while loop in the example below: )
-        ///
-        ///  while (1) {
-        ///     try {
-        ///        break;
-        ///     }
-        ///     finally {
-        ///        ...
-        ///     }
-        ///  }
-        for r in t.into_iter().rev() {
+        // skip_try_finally is Some if we've already determined that we need to jump out of
+        //  finally and now we are looking for the actual target label (break label of the
+        //  while loop in the example below: )
+        //
+        //  while (1) {
+        //     try {
+        //        break;
+        //     }
+        //     finally {
+        //        ...
+        //     }
+        //  }
+        for r in self.0.iter().rev() {
             match r {
                 Region::Using(finally_label, _) | Region::TryFinally(finally_label, _) => {
                     // we need to jump out of try body in try/finally - in order to do this
@@ -223,7 +152,7 @@ impl ResolvedJumpTarget {
                 ) => {
                     if level == 1 {
                         if is_break {
-                            add_iterator(iterator, &mut acc);
+                            add_iterator(iterator.clone(), &mut acc);
                             label = Some(label_break);
                             iters.extend_from_slice(&std::mem::replace(&mut acc, vec![]));
                         } else {
@@ -231,7 +160,7 @@ impl ResolvedJumpTarget {
                             iters.extend_from_slice(&std::mem::replace(&mut acc, vec![]));
                         };
                     } else {
-                        add_iterator(iterator, &mut acc);
+                        add_iterator(iterator.clone(), &mut acc);
                         level -= 1;
                     }
                 }
@@ -240,25 +169,156 @@ impl ResolvedJumpTarget {
         }
         if let Some(finally_label) = skip_try_finally {
             if let Some(target_label) = label {
-                return Self::ResolvedTryFinally(ResolvedTryFinally {
-                    target_label,
-                    finally_label,
+                return ResolvedJumpTarget::ResolvedTryFinally(ResolvedTryFinally {
+                    target_label: target_label.clone(),
+                    finally_label: finally_label.clone(),
                     adjusted_level: level,
                     iterators_to_release: iters,
                 });
             }
         };
-        if label.is_none() {
-            Self::NotFound
-        } else {
-            Self::ResolvedRegular(label.unwrap(), iters)
-        }
+        label.map_or(ResolvedJumpTarget::NotFound, |l| {
+            ResolvedJumpTarget::ResolvedRegular(l.clone(), iters)
+        })
     }
 }
 
+#[derive(PartialEq, Eq, Hash, Debug)]
+pub enum IdKey {
+    IdReturn,
+    IdLabel(Label),
+}
+
+#[derive(Debug)]
+pub struct Gen {
+    label_id_map: HashMap<IdKey, Id>,
+    labels_in_function: HashMap<String, bool>,
+    function_has_goto: bool,
+    jump_targets: JumpTargets,
+}
+
+impl Gen {
+    pub fn new_id(&mut self, key: IdKey) -> Id {
+        match self.label_id_map.get(&key) {
+            Some(id) => *id,
+            None => {
+                let mut next_id = 0;
+                while self.label_id_map.values().any(|&id| id == next_id) {
+                    next_id += 1;
+                }
+                self.label_id_map.insert(key, next_id);
+                next_id
+            }
+        }
+    }
+
+    pub fn get_labels_in_function(&self) -> &HashMap<String, bool> {
+        &self.labels_in_function
+    }
+
+    pub fn get_function_has_goto(&self) -> bool {
+        self.function_has_goto
+    }
+
+    pub fn set_labels_in_function(&mut self, labels_in_function: HashMap<String, bool>) {
+        self.labels_in_function = labels_in_function;
+    }
+
+    pub fn set_function_has_goto(&mut self, function_has_goto: bool) {
+        self.function_has_goto = function_has_goto;
+    }
+
+    pub fn jump_targets(&self) -> &JumpTargets {
+        &self.jump_targets
+    }
+
+    pub fn reset(&mut self) {
+        self.label_id_map.clear();
+    }
+
+    pub fn get_id_for_return(&mut self) -> Id {
+        self.new_id(IdKey::IdReturn)
+    }
+
+    pub fn get_id_for_label(&mut self, l: Label) -> Id {
+        self.new_id(IdKey::IdLabel(l))
+    }
+
+    pub fn with_loop<Ex, Fb, En, Hi>(
+        &mut self,
+        label_break: Label,
+        label_continue: Label,
+        iterator: Option<Iter>,
+        stmt: &Stmt<Ex, Fb, En, Hi>,
+    ) {
+        let labels = self.collect_valid_target_labels_for_stmt(stmt);
+        self.jump_targets.0.push(Region::Loop(
+            LoopLabels {
+                label_break,
+                label_continue,
+                iterator,
+            },
+            labels,
+        ))
+    }
+
+    pub fn with_switch<Ex, Fb, En, Hi>(
+        &mut self,
+        end_label: Label,
+        cases: &Vec<Case<Ex, Fb, En, Hi>>,
+    ) {
+        let labels = self.collect_valid_target_labels_for_switch_cases(cases);
+        // CONSIDER: now HHVM eagerly reserves state id for the switch end label
+        // which does not seem to be necessary - do it for now for HHVM compatibility
+        let _ = self.get_id_for_label(end_label.clone());
+        self.jump_targets.0.push(Region::Switch(end_label, labels));
+    }
+
+    pub fn with_try<Ex, Fb, En, Hi>(&mut self, finally_label: Label, stmt: &Stmt<Ex, Fb, En, Hi>) {
+        let labels = self.collect_valid_target_labels_for_stmt(stmt);
+        self.jump_targets
+            .0
+            .push(Region::TryFinally(finally_label, labels));
+    }
+
+    pub fn with_finally<Ex, Fb, En, Hi>(&mut self, stmt: &Stmt<Ex, Fb, En, Hi>) {
+        let labels = self.collect_valid_target_labels_for_stmt(stmt);
+        self.jump_targets.0.push(Region::Finally(labels));
+    }
+
+    pub fn with_function<Ex, Fb, En, Hi>(&mut self, defs: &Program<Ex, Fb, En, Hi>) {
+        let labels = self.collect_valid_target_labels_for_defs(defs);
+        self.jump_targets.0.push(Region::Function(labels));
+    }
+
+    pub fn with_using<Ex, Fb, En, Hi>(
+        &mut self,
+        finally_label: Label,
+        stmt: &Stmt<Ex, Fb, En, Hi>,
+    ) {
+        let labels = self.collect_valid_target_labels_for_stmt(stmt);
+        self.jump_targets
+            .0
+            .push(Region::Using(finally_label, labels));
+    }
+}
+
+pub struct ResolvedTryFinally {
+    pub target_label: Label,
+    pub finally_label: Label,
+    pub adjusted_level: usize,
+    pub iterators_to_release: Vec<Iter>,
+}
+
+pub enum ResolvedJumpTarget {
+    NotFound,
+    ResolvedTryFinally(ResolvedTryFinally),
+    ResolvedRegular(Label, Vec<Iter>),
+}
+
 pub struct ResolvedGotoFinally {
-    rgf_finally_start_label: Label,
-    rgf_iterators_to_release: Vec<Iter>,
+    pub rgf_finally_start_label: Label,
+    pub rgf_iterators_to_release: Vec<Iter>,
 }
 
 pub enum ResolvedGotoTarget {
@@ -266,56 +326,6 @@ pub enum ResolvedGotoTarget {
     Finally(ResolvedGotoFinally),
     GotoFromFinally,
     GotoInvalidLabel,
-}
-
-impl ResolvedGotoTarget {
-    pub fn find_goto_target(t: JumpTargets, label: String) -> Self {
-        assert_eq!(t.is_empty(), false);
-
-        let mut iters = vec![];
-        for r in t.into_iter().rev() {
-            match r {
-                Region::Loop(LoopLabels { iterator, .. }, labels) => {
-                    if labels.contains(&label) {
-                        return Self::Label(iters);
-                    } else {
-                        add_iterator(iterator, &mut iters);
-                    }
-                }
-                Region::Switch(_, labels) => {
-                    if labels.contains(&label) {
-                        return Self::Label(iters);
-                    }
-                }
-                Region::Using(finally_start, labels)
-                | Region::TryFinally(finally_start, labels) => {
-                    if labels.contains(&label) {
-                        return Self::Label(iters);
-                    } else {
-                        return Self::Finally(ResolvedGotoFinally {
-                            rgf_finally_start_label: finally_start.clone(),
-                            rgf_iterators_to_release: iters,
-                        });
-                    }
-                }
-                Region::Finally(labels) => {
-                    if labels.contains(&label) {
-                        return Self::Label(iters);
-                    } else {
-                        return Self::GotoFromFinally;
-                    }
-                }
-                Region::Function(labels) => {
-                    if labels.contains(&label) {
-                        return Self::Label(iters);
-                    } else {
-                        return Self::GotoInvalidLabel;
-                    }
-                }
-            }
-        }
-        panic!("impossible")
-    }
 }
 
 impl Gen {
@@ -439,6 +449,7 @@ impl Gen {
         use Region::*;
         let _labels = match self
             .jump_targets
+            .0
             .last_mut()
             .expect("empty region after executing run_and_release")
         {

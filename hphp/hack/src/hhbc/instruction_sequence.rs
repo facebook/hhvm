@@ -1062,9 +1062,9 @@ impl InstrSeq {
         }
     }
 
-    pub fn fold_left<F, A>(&self, f: &mut F, init: A) -> A
+    pub fn fold_left<'a, F, A>(&'a self, f: &mut F, init: A) -> A
     where
-        F: FnMut(A, &Instruct) -> A,
+        F: FnMut(A, &'a Instruct) -> A,
     {
         match self {
             Self::Empty => init,

@@ -129,12 +129,10 @@ std::string Type::constValString() const {
     return folly::format("Keyset({})", m_keysetVal).str();
   }
   if (*this <= TFunc) {
-    return folly::format("Func({})", m_funcVal ? m_funcVal->fullName()->data()
-                                               : "nullptr").str();
+    return folly::format("Func({})", m_funcVal->fullName()->data()).str();
   }
   if (*this <= TCls) {
-    return folly::format("Cls({})", m_clsVal ? m_clsVal->name()->data()
-                                             : "nullptr").str();
+    return folly::format("Cls({})", m_clsVal->name()->data()).str();
   }
   if (*this <= TClsMeth) {
     return folly::format("ClsMeth({},{})",
@@ -145,8 +143,7 @@ std::string Type::constValString() const {
     ).str();
   }
   if (*this <= TRecDesc) {
-    return folly::format("RecDesc({})", m_recVal ? m_recVal->name()->data()
-                                                 : "nullptr").str();
+    return folly::format("RecDesc({})", m_recVal->name()->data()).str();
   }
   if (*this <= TTCA) {
     auto name = getNativeFunctionName(m_tcaVal);
@@ -466,12 +463,16 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool Type::checkValid() const {
-  // Note: be careful, the TFoo objects aren't all constructed yet in this
-  // function.
+  // NOTE: Be careful: the TFoo objects aren't all constructed yet in this
+  // function, and we can't call operator<=, etc. because they call checkValid.
+  auto constexpr kNonNullConstVals = kArrLike | kCls | kFunc | kRecDesc | kStr;
+  if (m_hasConstVal && ((m_bits & kNonNullConstVals) == m_bits)) {
+    assert_flog(m_extra, "Null constant type: {}", m_bits.hexStr());
+  }
   if (m_extra) {
-    assertx(((m_bits & kClsSpecBits) == kBottom ||
-             (m_bits & kArrSpecBits) == kBottom) &&
-            "Conflicting specialization");
+    assert_flog(((m_bits & kClsSpecBits) == kBottom ||
+                 (m_bits & kArrSpecBits) == kBottom) &&
+                "Conflicting specialization: {}", m_bits.hexStr());
   }
 
   // We should have one canonical representation of Bottom.

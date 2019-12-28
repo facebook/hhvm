@@ -269,6 +269,7 @@ Type Type::cns(T val, Type ret) {
                 "Unexpected size for toCopy");
 
   std::memcpy(&ret.m_extra, &toCopy, sizeof(toCopy));
+  assertx(ret.checkValid());
   return ret;
 }
 

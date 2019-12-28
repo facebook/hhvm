@@ -149,12 +149,14 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
     if (lookup.propPtr) return lookup;
   }
 
+  auto const ctxClass = curClass(env);
+  auto const ctxTmp = ctxClass ? cns(env, ctxClass) : cns(env, nullptr);
   auto const propAddr = gen(
     env,
     raise ? LdClsPropAddrOrRaise : LdClsPropAddrOrNull,
     ssaCls,
     ssaName,
-    cns(env, curClass(env)),
+    ctxTmp,
     cns(env, ignoreLateInit),
     cns(env, disallowConst)
   );

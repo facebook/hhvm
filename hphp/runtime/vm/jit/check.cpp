@@ -446,6 +446,12 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     }
   };
 
+  auto checkConstant = [&] (SSATmp* src, Type type, const char* expected) {
+    // We can't check src->hasConstVal(type) because of TNullptr.
+    auto const match = src->isA(type) && src->type().admitsSingleVal();
+    check(match || src->isA(TBottom), type, expected);
+  };
+
   auto checkVariadic = [&] (Type super) {
     for (; curSrc < inst->numSrcs(); ++curSrc) {
       auto const valid = (inst->src(curSrc)->type() <= super);
@@ -472,11 +478,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
                         ++curSrc;                         \
                       }
 #define AK(kind)      Type::Array(ArrayData::k##kind##Kind)
-#define C(T)          check(src()->hasConstVal(T) ||     \
-                            src()->isA(TBottom),         \
-                            Type(),                      \
-                            "constant " #T);             \
-                      ++curSrc;
+#define C(T)          checkConstant(src(), T, "constant " #T); ++curSrc;
 #define CStr          C(StaticStr)
 #define SVar(...)     checkVariadic(buildUnion(__VA_ARGS__));
 #define SVArr         checkArr(false /* is_kv */, false /* is_const */);

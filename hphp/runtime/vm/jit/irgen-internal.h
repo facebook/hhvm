@@ -655,7 +655,9 @@ inline SSATmp* ldCls(IRGS& env, SSATmp* className, Block* ctrace = nullptr) {
     }
     return gen(env, LdClsCached, ctrace, className);
   }
-  return gen(env, LdCls, ctrace, className, cns(env, curClass(env)));
+  auto const ctxClass = curClass(env);
+  auto const ctxTmp = ctxClass ? cns(env, ctxClass) : cns(env, nullptr);
+  return gen(env, LdCls, ctrace, className, ctxTmp);
 }
 
 //////////////////////////////////////////////////////////////////////

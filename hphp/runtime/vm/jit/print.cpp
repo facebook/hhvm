@@ -309,44 +309,6 @@ dynamic getTCRange(const AreaIndex area,
                         ("disasm", disasmStr.str());
 }
 
-namespace {
-// TODO(T52856776) - move into AnnotationData class
-struct TargetProfileVisitor {
-  explicit TargetProfileVisitor(const TransContext& ctx) : ctx(ctx) {}
-
-  template<typename T>
-  dynamic getProfileDynamic(const rds::Profile<T>& prof,
-                            const dynamic& linkObj) const {
-    return dynamic::object("offset", prof.bcOff)
-                          ("name", folly::sformat("{}", prof.name))
-                          ("data", linkObj);
-  }
-
-  dynamic operator() (const rds::Profile<jit::SwitchProfile>& prof) const {
-    auto const link = rds::bind<jit::SwitchProfile, rds::Mode::Local>(prof);
-    auto const func = ctx.initSrcKey.func();
-    assert(func->contains(prof.bcOff));
-    auto const funcBCOffset = func->unit()->at(func->base() + prof.bcOff);
-    auto const bcSize = getImmVector(funcBCOffset).size();
-    return getProfileDynamic(prof, link.get()->toDynamic(bcSize));
-  }
-
-  template<typename T>
-  dynamic operator() (const rds::Profile<T>& prof) const {
-    auto const link = rds::bind<T, rds::Mode::Local>(prof);
-    return getProfileDynamic(prof, link.get()->toDynamic());;
-  }
-
-  template<typename T>
-  dynamic operator() (T&&) const {
-    assertx(false);
-    return dynamic();
-  }
-
-  const TransContext& ctx;
-};
-}
-
 dynamic getBlock(const Block* block,
                  const TransKind kind,
                  const AsmInfo* asmInfo,
@@ -489,18 +451,6 @@ dynamic getBlock(const Block* block,
                                                 dynamic::object("tc_ranges",
                                                                 dynamic())));
     }
-  }
-
-  auto const& ctx = unit.context();
-
-  for (auto& inst : result["instrs"]) {
-    auto const& offset = inst["offset"].asInt();
-    dynamic profileObjs = dynamic::array;
-    for (auto const& key : unit.annotationData->profileKeys) {
-      auto const profile = boost::apply_visitor(TargetProfileVisitor(ctx), key);
-      if (profile["offset"].asInt() == offset) profileObjs.push_back(profile);
-    }
-    inst["profileData"] = profileObjs;
   }
 
   return result;

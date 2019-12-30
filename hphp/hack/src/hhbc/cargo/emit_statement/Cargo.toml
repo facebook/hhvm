@@ -1,0 +1,25 @@
+# @generated
+# @autocargo from //hphp/hack/src/hhbc:emit_statement_rust
+# Signature<<0f12f0b599ee2cf0aa5dd88f418ee172955a4187>>
+[package]
+name = "emit_statement_rust"
+edition = "2018"
+version = "0.0.0"
+include = ["../../emit_body.rs", "../../emit_statement.rs", "../../try_finally_rewriter.rs"]
+
+[lib]
+path = "../../emit_statement.rs"
+
+[dependencies]
+ast_scope_rust = { path = "../ast_scope" }
+emit_expression_rust = { path = "../.." }
+emit_fatal_rust = { path = "../emit_fatal" }
+emit_pos_rust = { path = "../emit_pos" }
+env = { path = "../env" }
+hhbc_ast_rust = { path = "../hhbc_ast" }
+instruction_sequence_rust = { path = "../instruction_sequence" }
+label_rust = { path = "../label" }
+local_rust = { path = "../local" }
+oxidized = { path = "../../../oxidized" }
+bitflags = "*"
+# @end of Signature<<0f12f0b599ee2cf0aa5dd88f418ee172955a4187>>

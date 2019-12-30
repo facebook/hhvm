@@ -3,10 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::cmp::Ordering;
-use std::ops::Range;
-use std::path::PathBuf;
-use std::result::Result::*;
+use std::{borrow::Cow, cmp::Ordering, ops::Range, path::PathBuf, result::Result::*};
 
 use ocamlrep::rc::RcOc;
 use ocamlrep_derive::OcamlRep;
@@ -295,6 +292,31 @@ impl Pos {
                     end: Box::new(Self::small_to_large_file_pos(&end)),
                 }),
             ),
+        }
+    }
+
+    pub fn first_char_of_line(&self) -> Cow<Self> {
+        if self.is_none() {
+            Cow::Borrowed(self)
+        } else {
+            Cow::Owned(Pos(match &self.0 {
+                Small { file, start, .. } => {
+                    let start = start.with_column(0);
+                    Small {
+                        file: file.clone(),
+                        start,
+                        end: start,
+                    }
+                }
+                Large { file, start, .. } => {
+                    let start = start.with_column(0);
+                    Large {
+                        file: file.clone(),
+                        start: Box::new(start),
+                        end: Box::new(start),
+                    }
+                }
+            }))
         }
     }
 

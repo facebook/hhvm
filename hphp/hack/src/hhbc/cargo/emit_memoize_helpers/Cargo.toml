@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:emit_memoize_helpers_rust
-# Signature<<f99f000f40ac1673dbda795b4dd152fc1ab6eebd>>
+# Signature<<185b48fe28e7c24cb561d4ee03382bd8917f781e>>
 [package]
 name = "emit_memoize_helpers_rust"
 edition = "2018"
@@ -17,4 +17,4 @@ hhbc_ast_rust = { path = "../hhbc_ast" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
 local_rust = { path = "../local" }
 oxidized = { path = "../../../oxidized" }
-# @end of Signature<<f99f000f40ac1673dbda795b4dd152fc1ab6eebd>>
+# @end of Signature<<185b48fe28e7c24cb561d4ee03382bd8917f781e>>

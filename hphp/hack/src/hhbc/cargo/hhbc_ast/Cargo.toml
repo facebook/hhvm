@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:hhbc_ast_rust
-# Signature<<cdf2202123478b24402a3e595163c2cb36471eae>>
+# Signature<<66637edf0089fe0f1486e94c9103d935c3ddf9b3>>
 [package]
 name = "hhbc_ast_rust"
 edition = "2018"
@@ -17,4 +17,4 @@ label_rust = { path = "../label" }
 local_rust = { path = "../local" }
 runtime = { path = "../runtime" }
 bitflags = "*"
-# @end of Signature<<cdf2202123478b24402a3e595163c2cb36471eae>>
+# @end of Signature<<66637edf0089fe0f1486e94c9103d935c3ddf9b3>>

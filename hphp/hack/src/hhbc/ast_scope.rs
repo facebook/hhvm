@@ -90,18 +90,23 @@ impl Scope {
         Pos::make_none()
     }
 
-    pub fn get_tparams(&self) -> Vec<ast::Tparam> {
+    pub fn get_tparams(&self) -> Vec<&ast::Tparam> {
         let mut tparams = vec![];
+        let extend_shallowly = &mut |tps| {
+            for tparam in tps {
+                tparams.push(tparam);
+            }
+        };
         for scope_item in self.items.iter().rev() {
             match scope_item {
                 ScopeItem::Class(cd) => {
-                    tparams.extend_from_slice(cd.tparams.list.as_slice());
+                    extend_shallowly(cd.tparams.list.as_slice());
                 }
                 ScopeItem::Function(fd) => {
-                    tparams.extend_from_slice(fd.tparams.as_slice());
+                    extend_shallowly(fd.tparams.as_slice());
                 }
                 ScopeItem::Method(md) => {
-                    tparams.extend_from_slice(md.tparams.as_slice());
+                    extend_shallowly(md.tparams.as_slice());
                 }
                 _ => (),
             }

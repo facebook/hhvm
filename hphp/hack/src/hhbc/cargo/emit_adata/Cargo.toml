@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:emit_adata_rust
-# Signature<<2d33f40ab6190f57a81c12be37dac2e0c96680e7>>
+# Signature<<7c374be3e2320ccc88bcf082a8a1e040212b9093>>
 [package]
 name = "emit_adata_rust"
 edition = "2018"
@@ -14,4 +14,4 @@ path = "../../emit_adata.rs"
 env = { path = "../env" }
 options = { path = "../options" }
 bitflags = "*"
-# @end of Signature<<2d33f40ab6190f57a81c12be37dac2e0c96680e7>>
+# @end of Signature<<7c374be3e2320ccc88bcf082a8a1e040212b9093>>

@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:hhas_property_rust
-# Signature<<b45bef1644570587be4cb9c163bd0d42f2b48d45>>
+# Signature<<10a258dc8200140edc8d11325ea5083c6671a94c>>
 [package]
 name = "hhas_property_rust"
 edition = "2018"
@@ -19,4 +19,4 @@ instruction_sequence_rust = { path = "../instruction_sequence" }
 oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }
 bitflags = "*"
-# @end of Signature<<b45bef1644570587be4cb9c163bd0d42f2b48d45>>
+# @end of Signature<<10a258dc8200140edc8d11325ea5083c6671a94c>>

@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:hhbc_string_utils_rust
-# Signature<<ca609bfadb42c1a3e013b90dccac3a6fb4156af1>>
+# Signature<<ac88f7867572931ecdac3c5a7da6b920405cdf50>>
 [package]
 name = "hhbc_string_utils_rust"
 edition = "2018"
@@ -19,4 +19,4 @@ regex = "*"
 
 [dev-dependencies]
 pretty_assertions = "*"
-# @end of Signature<<ca609bfadb42c1a3e013b90dccac3a6fb4156af1>>
+# @end of Signature<<ac88f7867572931ecdac3c5a7da6b920405cdf50>>

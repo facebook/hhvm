@@ -21,7 +21,7 @@ pub(crate) enum ReificationLevel {
     Unconstrained,
 }
 impl ReificationLevel {
-    pub(crate) fn combine(v1: &Self, v2: &Self) -> Self {
+    fn combine(v1: &Self, v2: &Self) -> Self {
         match (v1, v2) {
             (Self::Definitely, _) | (_, Self::Definitely) => Self::Definitely,
             (Self::Maybe, _) | (_, Self::Maybe) => Self::Maybe,

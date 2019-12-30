@@ -5,11 +5,18 @@
 
 #![allow(dead_code)]
 
-use super::*; // reimport from emit_statement
+use crate::emit_statement::{LazyState, Level};
 
 use ast_scope_rust as ast_scope;
+use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::emit_pos;
-use env::iterator::Iter;
+use env::{emitter::Emitter, iterator::Iter, jump_targets as jt, Env};
+use hhbc_ast_rust as hhbc_ast;
+use instruction_sequence_rust::InstrSeq;
+use label::Label;
+use label_rust as label;
+use local_rust as local;
+use oxidized::{aast as a, pos::Pos};
 
 use bitflags::bitflags;
 

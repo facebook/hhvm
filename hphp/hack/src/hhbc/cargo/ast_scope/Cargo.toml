@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:ast_scope_rust
-# Signature<<4af5d314becebce953b519ae4464f82d504d2263>>
+# Signature<<efd44291fc2dfa12cd3f5f2c602a27c96842309e>>
 [package]
 name = "ast_scope_rust"
 edition = "2018"
@@ -13,4 +13,4 @@ path = "../../ast_scope.rs"
 [dependencies]
 oxidized = { path = "../../../oxidized" }
 rx_rust = { path = "../rx" }
-# @end of Signature<<4af5d314becebce953b519ae4464f82d504d2263>>
+# @end of Signature<<efd44291fc2dfa12cd3f5f2c602a27c96842309e>>

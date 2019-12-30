@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:options
-# Signature<<5e1609c2f3c6af38e8b439023208916ce3779efa>>
+# Signature<<2b967d2c039a845a4b14c2dee64a5f4b3d83e09b>>
 [package]
 name = "options"
 edition = "2018"
@@ -20,4 +20,4 @@ serde_json = "*"
 
 [dev-dependencies]
 pretty_assertions = "*"
-# @end of Signature<<5e1609c2f3c6af38e8b439023208916ce3779efa>>
+# @end of Signature<<2b967d2c039a845a4b14c2dee64a5f4b3d83e09b>>

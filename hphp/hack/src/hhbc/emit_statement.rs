@@ -5,21 +5,19 @@
 
 #![allow(dead_code)]
 
+use crate::try_finally_rewriter as tfr;
+
 use emit_fatal_rust as emit_fatal;
+use env::{emitter::Emitter, Env};
 use hhbc_ast_rust as hhbc_ast;
-use instruction_sequence_rust as instruction_sequence;
-use label_rust as label;
+use instruction_sequence_rust::InstrSeq;
 use local_rust as local;
 
-use env::{emitter::Emitter, jump_targets as jt, Env};
-use instruction_sequence::InstrSeq;
-use label::Label;
 use oxidized::{aast as a, pos::Pos};
 
 /// Context for code generation. It would be more elegant to pass this
 /// around in an environment parameter.
-// TODO(hrust) restrict visibility further: pub(crate) -> pub(in crate::emit_statement)
-pub(crate) struct State {
+pub(in crate) struct State {
     pub(crate) verify_return: Option<a::Hint>,
     pub(crate) default_return_value: InstrSeq,
     pub(crate) default_dropthrough: Option<InstrSeq>,
@@ -47,7 +45,7 @@ pub(crate) fn set_state(e: &mut Emitter, state: State) {
     *e.emit_state_mut() = state;
 }
 
-type Level = usize;
+pub(crate) type Level = usize;
 
 fn get_level<Ex, Fb, En, Hi>(
     pos: Pos,
@@ -70,9 +68,7 @@ fn get_level<Ex, Fb, En, Hi>(
     Err(emit_fatal::raise_fatal_parse(&pos, msg))
 }
 
-/// Wrapper functions
-mod try_finally_rewriter;
-use try_finally_rewriter as tfr;
+// Wrapper functions
 
 fn emit_return(e: &Emitter, env: &Env) -> InstrSeq {
     let ctx = e.emit_state();

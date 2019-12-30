@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:emit_expression_rust
-# Signature<<af25abc5317bcb64ec20c141f6ae4bdb968a21d5>>
+# Signature<<13dcb41d1b255c818b3e03788e374c784c4d59e4>>
 [package]
 name = "emit_expression_rust"
 edition = "2018"
@@ -33,4 +33,4 @@ options = { path = "cargo/options" }
 oxidized = { path = "../oxidized" }
 runtime = { path = "cargo/runtime" }
 scope_rust = { path = "cargo/scope" }
-# @end of Signature<<af25abc5317bcb64ec20c141f6ae4bdb968a21d5>>
+# @end of Signature<<13dcb41d1b255c818b3e03788e374c784c4d59e4>>

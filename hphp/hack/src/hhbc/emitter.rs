@@ -125,7 +125,7 @@ macro_rules! lazy_emit_state {
         // Note: if multiple decls or name clashes, do one of:
         // - add explicit name(s) as macro parameter(s)
         // - use crate paste/mashup to create unique trait/method names
-        trait LazyState<T> {
+        pub(crate) trait LazyState<T> {
             fn emit_state(&self) -> &T;
             fn emit_state_mut(&mut self) -> &mut T;
         }

@@ -72,6 +72,8 @@ class ReflectionClass implements Reflector {
   <<__Rx, __MaybeMutable>>
   final public function getAttributes(): darray<string, varray<mixed>>;
   <<__Rx, __MaybeMutable>>
+  public function getAttributesNamespaced(): darray<string, array<mixed>>;
+  <<__Rx, __MaybeMutable>>
   final public function getAttribute(string $name): ?varray<mixed>;
   <<__Rx, __MaybeMutable>>
   final public function getAttributeClass<T as HH\ClassLikeAttribute>(classname<T> $c): ?T;
@@ -205,6 +207,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getReturnTypeText();
   <<__Rx, __MaybeMutable>>
   final public function getAttributes(): darray<string, varray<mixed>>;
+  <<__Rx, __MaybeMutable>>
+  final public function getAttributesNamespaced(): darray<arraykey, varray<mixed>>;
   <<__Rx, __MaybeMutable>>
   final public function getAttribute(string $name): ?varray<mixed>;
   <<__Rx, __MaybeMutable>>
@@ -464,6 +468,8 @@ class ReflectionTypeAlias implements Reflector {
   <<__Rx, __MaybeMutable>>
   final public function getAttributes(): darray<string, varray<mixed>>;
   <<__Rx, __MaybeMutable>>
+  final public function getAttributesNamespaced(): darray<arraykey, varray<mixed>>;
+  <<__Rx, __MaybeMutable>>
   final public function getAttribute(string $name): ?varray<mixed>;
   <<__Rx, __MaybeMutable>>
   final public function getAttributeClass<T as HH\TypeAliasAttribute>(classname<T> $c): ?T;
@@ -494,6 +500,8 @@ class ReflectionFile implements Reflector {
   final public function getAttributes(): darray<string, varray<mixed>>;
   <<__Rx, __MaybeMutable>>
   final public function getAttribute(string $name): ?varray<mixed>;
+  <<__Rx, __MaybeMutable>>
+  final public function getAttributesNamespaced(): darray<arraykey, varray<mixed>>;
   <<__Rx, __MaybeMutable>>
   final public function getAttributeClass<T as HH\FileAttribute>(classname<T> $c): ?T;
 }

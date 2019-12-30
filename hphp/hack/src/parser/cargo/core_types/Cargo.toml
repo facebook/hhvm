@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:parser_core_types
-# Signature<<1591c20cd6dc23aa9ea9f56cb9875236d8e388e4>>
+# Signature<<08892db4a4770d81a2ea59b4eb61fc5bff24e75f>>
 [package]
 name = "parser_core_types"
 edition = "2018"
@@ -17,4 +17,4 @@ ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 oxidized = { path = "../../../oxidized" }
 itertools = "*"
 ocaml = "*"
-# @end of Signature<<1591c20cd6dc23aa9ea9f56cb9875236d8e388e4>>
+# @end of Signature<<08892db4a4770d81a2ea59b4eb61fc5bff24e75f>>

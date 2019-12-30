@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:lowerer
-# Signature<<ae804fc05076327a1d4948944c709910dce6e359>>
+# Signature<<ec0fbb13ec4a11af6c2313d196130095730a9e4e>>
 [package]
 name = "lowerer"
 edition = "2018"
@@ -25,4 +25,4 @@ itertools = "*"
 lazy_static = "*"
 ocaml = "*"
 regex = "*"
-# @end of Signature<<ae804fc05076327a1d4948944c709910dce6e359>>
+# @end of Signature<<ec0fbb13ec4a11af6c2313d196130095730a9e4e>>

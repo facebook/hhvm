@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:rust_editable_positioned_syntax
-# Signature<<dd9f7c614da2ac916a0c562c0d5af9738c3911f8>>
+# Signature<<9ab11bdec2f5e6095f202b778ad73447fd792f43>>
 [package]
 name = "rust_editable_positioned_syntax"
 edition = "2018"
@@ -17,4 +17,4 @@ parser_core_types = { path = "../core_types" }
 parser_rust = { path = "../.." }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 ocaml = "*"
-# @end of Signature<<dd9f7c614da2ac916a0c562c0d5af9738c3911f8>>
+# @end of Signature<<9ab11bdec2f5e6095f202b778ad73447fd792f43>>

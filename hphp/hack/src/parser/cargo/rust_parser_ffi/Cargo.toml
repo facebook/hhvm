@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:rust_parser_ffi
-# Signature<<895b2d7f2854eae3cdc893fc01cda8978f3546ce>>
+# Signature<<61b339bf3f127ff33fd2599c4f99b884ef28a08d>>
 [package]
 name = "rust_parser_ffi"
 edition = "2018"
@@ -21,4 +21,4 @@ stack_limit = { path = "../../../utils/stack_limit" }
 syntax_tree = { path = "../syntax_tree" }
 libc = "*"
 ocaml = "*"
-# @end of Signature<<895b2d7f2854eae3cdc893fc01cda8978f3546ce>>
+# @end of Signature<<61b339bf3f127ff33fd2599c4f99b884ef28a08d>>

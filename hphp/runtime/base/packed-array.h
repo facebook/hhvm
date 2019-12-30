@@ -215,9 +215,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   // never copies the array, so we can return tv_lval instead of arr_lval.
   static tv_lval LvalUncheckedInt(ArrayData*, int64_t);
 
-  // Fast path for SetIntMove / SetIntMoveVec if the key is in bounds.
-  static ArrayData* SetIntMoveRaw(ArrayData*, int64_t, TypedValue);
-
   /////////////////////////////////////////////////////////////////////
 
   static bool checkInvariants(const ArrayData*);

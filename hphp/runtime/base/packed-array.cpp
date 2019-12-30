@@ -823,20 +823,6 @@ arr_lval PackedArray::LvalForceNew(ArrayData* adIn, bool copy) {
   return arr_lval { ad, lval };
 }
 
-ArrayData* PackedArray::SetIntMoveRaw(ArrayData* adIn, int64_t k, TypedValue v) {
-  assertx(adIn->hasPackedLayout());
-  assertx(size_t(k) < adIn->getSize());
-  auto const ad = [&]{
-    if (!adIn->cowCheck()) return adIn;
-    auto const result = PackedArray::Copy(adIn);
-    assertx(result != adIn);
-    if (adIn->decReleaseCheck()) PackedArray::Release(adIn);
-    return result;
-  }();
-  setElem(LvalUncheckedInt(ad, k), v, true);
-  return ad;
-}
-
 ArrayData* PackedArray::SetInt(ArrayData* adIn, int64_t k, TypedValue v) {
   auto const copy = adIn->cowCheck();
   return MutableOpInt(adIn, k, copy,
@@ -847,8 +833,20 @@ ArrayData* PackedArray::SetInt(ArrayData* adIn, int64_t k, TypedValue v) {
 }
 
 ArrayData* PackedArray::SetIntMove(ArrayData* adIn, int64_t k, TypedValue v) {
-  if (size_t(k) < adIn->getSize()) return SetIntMoveRaw(adIn, k, v);
-  auto const result = SetInt(adIn, k, v);
+  auto done = false;
+  auto const copy = adIn->cowCheck();
+  auto const result = MutableOpInt(adIn, k, copy,
+    [&] (ArrayData* ad) {
+      assertx((adIn != ad) == copy);
+      if (copy && adIn->decReleaseCheck()) PackedArray::Release(adIn);
+      setElem(LvalUncheckedInt(ad, k), v, true);
+      done = true;
+      return ad;
+    },
+    [&] { return AppendImpl(adIn, v, copy); },
+    [&] (MixedArray* mixed) { return mixed->addVal(k, v); }
+  );
+  if (done) return result;
   if (adIn != result && adIn->decReleaseCheck()) PackedArray::Release(adIn);
   tvDecRefGen(v);
   return result;
@@ -870,8 +868,16 @@ ArrayData* PackedArray::SetIntVec(ArrayData* adIn, int64_t k, TypedValue v) {
 }
 
 ArrayData* PackedArray::SetIntMoveVec(ArrayData* adIn, int64_t k, TypedValue v) {
-  if (size_t(k) < adIn->getSize()) return SetIntMoveRaw(adIn, k, v);
-  throwOOBArrayKeyException(k, adIn);
+  assertx(adIn->cowCheck() || adIn->notCyclic(v));
+  auto const copy = adIn->cowCheck();
+  return MutableOpIntVec(adIn, k, copy,
+    [&] (ArrayData* ad) {
+      assertx((adIn != ad) == copy);
+      if (copy && adIn->decReleaseCheck()) PackedArray::Release(adIn);
+      setElem(LvalUncheckedInt(ad, k), v, true);
+      return ad;
+    }
+  );
 }
 
 ArrayData* PackedArray::SetIntInPlaceVec(ArrayData* adIn, int64_t k, TypedValue v) {

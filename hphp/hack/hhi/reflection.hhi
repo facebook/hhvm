@@ -17,7 +17,7 @@ class Reflection  {
   <<__Rx>>
   public static function getModifierNames($modifiers);
   public static function export(Reflector $reflector, $return = false);
-}
+}Reflection
 
 class ReflectionClass implements Reflector {
 
@@ -396,6 +396,8 @@ class ReflectionProperty implements Reflector {
   <<__Rx, __MaybeMutable>>
   public function getTypeText();
   public function getAttributes(): darray<string, varray<mixed>>;
+  <<__Rx, __MaybeMutable>>
+  final public function getAttributesNamespaced(): dict<arraykey, varray<mixed>>;
   public function getAttribute(string $name): ?varray<mixed>;
 }
 

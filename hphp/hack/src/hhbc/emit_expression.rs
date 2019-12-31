@@ -3,12 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use ast_scope_rust::Scope;
+use emit_type_constant_rust as emit_type_constant;
 use env::Env;
 use hhbc_ast_rust::*;
 use instruction_sequence_rust::InstrSeq;
 use local_rust as local;
 use naming_special_names_rust::special_idents;
-use oxidized::local_id;
+use options::Options;
+use oxidized::{aast, local_id};
+
+use std::collections::BTreeMap;
 
 pub struct EmitJmpResult {
     // generated instruction sequence
@@ -230,4 +234,14 @@ mod inout_locals {
             _ => (),
         }
     }
+}
+
+pub fn get_type_structure_for_hint(
+    opts: &Options,
+    tparams: &[&str],
+    targ_map: &BTreeMap<&str, i64>,
+    hint: aast::Hint,
+) -> InstrSeq {
+    let _tv = emit_type_constant::hint_to_type_constant(opts, tparams, targ_map, hint);
+    unimplemented!("TODO(hrust) after porting most of emit_adata")
 }

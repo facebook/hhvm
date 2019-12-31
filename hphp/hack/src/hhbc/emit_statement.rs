@@ -70,16 +70,8 @@ fn get_level<Ex, Fb, En, Hi>(
 
 // Wrapper functions
 
-fn emit_return(e: &Emitter, env: &Env) -> InstrSeq {
-    let ctx = e.emit_state();
-    tfr::emit_return(
-        e,
-        &ctx.verify_return,
-        &ctx.verify_out,
-        ctx.num_out,
-        false,
-        env,
-    )
+fn emit_return(e: &mut Emitter, env: &mut Env) -> InstrSeq {
+    tfr::emit_return(e, false, env)
 }
 
 fn emit_break(e: &mut Emitter, env: &mut Env, pos: &Pos) -> InstrSeq {

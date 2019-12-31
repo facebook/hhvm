@@ -6,23 +6,25 @@
 #![allow(dead_code)]
 
 use crate::emit_statement::{LazyState, Level};
+use crate::reified_generics_helpers as reified;
 
 use ast_scope_rust as ast_scope;
+use emit_expression_rust as emit_expression;
 use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::emit_pos;
 use env::{emitter::Emitter, iterator::Iter, jump_targets as jt, Env};
-use hhbc_ast_rust as hhbc_ast;
+use hhbc_ast_rust::{self as hhbc_ast, Instruct};
 use instruction_sequence_rust::InstrSeq;
 use label::Label;
 use label_rust as label;
 use local_rust as local;
-use oxidized::{aast as a, pos::Pos};
+use oxidized::pos::Pos;
 
 use bitflags::bitflags;
 
 use std::{borrow::Cow, collections::BTreeMap};
 
-type LabelMap<'a> = BTreeMap<label::Id, &'a hhbc_ast::Instruct>;
+type LabelMap<'a> = BTreeMap<label::Id, &'a Instruct>;
 
 pub(super) struct JumpInstructions<'a>(LabelMap<'a>);
 impl JumpInstructions<'_> {
@@ -69,7 +71,6 @@ impl JumpInstructions<'_> {
 }
 
 /// Delete Ret*, Break/Continue/Jmp(Named) instructions from the try body
-
 pub(super) fn cleanup_try_body(is: &InstrSeq) -> InstrSeq {
     use hhbc_ast::Instruct::*;
     use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
@@ -180,15 +181,101 @@ fn emit_goto(
     }
 }
 
-pub(super) fn emit_return(
-    _e: &Emitter,
-    _verify_return: &Option<a::Hint>,
-    _verify_out: &InstrSeq,
-    _num_out: usize,
-    _in_finally_epilogue: bool,
-    _env: &Env,
-) -> InstrSeq {
-    unimplemented!("TODO(hrust) port reified_generics_helpers first")
+pub(super) fn emit_return(e: &mut Emitter, in_finally_epilogue: bool, env: &mut Env) -> InstrSeq {
+    // check if there are try/finally region
+    let jt_gen = &env.jump_targets_gen;
+    match jt_gen.jump_targets().get_closest_enclosing_finally_label() {
+        None => {
+            // no finally blocks, but there might be some iterators that should be
+            // released before exit - do it
+            let ctx = e.emit_state();
+            let num_out = ctx.num_out;
+            let verify_out = ctx.verify_out.clone();
+            let verify_return = ctx.verify_return.clone();
+            let release_iterators_instr = InstrSeq::gather(
+                jt_gen
+                    .jump_targets()
+                    .iterators()
+                    .cloned()
+                    .map(InstrSeq::make_iterfree)
+                    .collect(),
+            );
+            let mut instrs = Vec::with_capacity(5);
+            if in_finally_epilogue {
+                let load_retval_instr =
+                    InstrSeq::make_cgetl(e.local_gen_mut().get_retval().clone());
+                instrs.push(load_retval_instr);
+            }
+            let verify_return_instr = verify_return.map_or_else(
+                || InstrSeq::make_empty(),
+                |h| {
+                    use reified::ReificationLevel;
+                    let h = reified::convert_awaitable(env, h.clone());
+                    let h = reified::remove_erased_generics(env, h);
+                    match reified::has_reified_type_constraint(env, &h) {
+                        ReificationLevel::Unconstrained => InstrSeq::make_empty(),
+                        ReificationLevel::Not => InstrSeq::make_verify_ret_type_c(),
+                        ReificationLevel::Maybe => InstrSeq::gather(vec![
+                            emit_expression::get_type_structure_for_hint(
+                                e.options(),
+                                &[],
+                                &BTreeMap::new(),
+                                h,
+                            ),
+                            InstrSeq::make_verify_ret_type_ts(),
+                        ]),
+                        ReificationLevel::Definitely => {
+                            let check = InstrSeq::gather(vec![
+                                InstrSeq::make_dup(),
+                                InstrSeq::make_istypec(hhbc_ast::IstypeOp::OpNull),
+                            ]);
+                            reified::simplify_verify_type(
+                                env,
+                                &Pos::make_none(),
+                                check,
+                                &h,
+                                InstrSeq::make_verify_ret_type_ts(),
+                                e.label_gen_mut(),
+                            )
+                        }
+                    }
+                },
+            );
+            instrs.extend(vec![
+                verify_return_instr,
+                verify_out,
+                release_iterators_instr,
+                if num_out != 0 {
+                    InstrSeq::make_retm(num_out + 1)
+                } else {
+                    InstrSeq::make_retc()
+                },
+            ]);
+            InstrSeq::gather(instrs)
+        }
+        // ret is in finally block and there might be iterators to release -
+        // jump to finally block via Jmp
+        Some((target_label, iterators_to_release)) => {
+            let preamble = if in_finally_epilogue {
+                InstrSeq::make_empty()
+            } else {
+                let jt_gen = &mut env.jump_targets_gen;
+                let save_state = emit_save_label_id(e.local_gen_mut(), jt_gen.get_id_for_return());
+                let save_retval = InstrSeq::gather(vec![
+                    InstrSeq::make_setl(e.local_gen_mut().get_retval().clone()),
+                    InstrSeq::make_popc(),
+                ]);
+                InstrSeq::gather(vec![save_state, save_retval])
+            };
+            InstrSeq::gather(vec![
+                preamble,
+                emit_jump_to_label(target_label, iterators_to_release),
+                // emit ret instr as an indicator for try/finally rewriter to generate
+                // finally epilogue, try/finally rewriter will remove it.
+                InstrSeq::make_retc(),
+            ])
+        }
+    }
 }
 
 bitflags! {
@@ -254,14 +341,116 @@ pub(super) fn emit_break_or_continue(
 }
 
 fn emit_finally_epilogue(
-    e: &Emitter,
-    _env: &Env,
-    _jump_instrs: (),
-    _finally_end: Label,
-) -> InstrSeq {
-    let ctx = e.emit_state();
-    let _verify_return = &ctx.verify_return;
-    unimplemented!("TODO(hrust) blocked on porting emit_return")
+    e: &mut Emitter,
+    env: &mut Env,
+    pos: &Pos,
+    jump_instrs: JumpInstructions,
+    finally_end: Label,
+) -> Result<InstrSeq, emit_fatal::Error> {
+    fn emit_instr(
+        e: &mut Emitter,
+        env: &mut Env,
+        pos: &Pos,
+        i: &Instruct,
+    ) -> Result<InstrSeq, emit_fatal::Error> {
+        use hhbc_ast::Instruct::*;
+        use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
+        use hhbc_ast::InstructSpecialFlow::{Break, Continue, Goto};
+        let fail = || {
+            panic!("unexpected instruction: only Ret* or Break/Continue/Jmp(Named) are expected")
+        };
+        match i {
+            &IContFlow(ref cont_flow) => match cont_flow {
+                RetC | RetCSuspended | RetM(_) => Ok(emit_return(e, true, env)),
+                _ => fail(),
+            },
+            &ISpecialFlow(Break(level)) => Ok(emit_break_or_continue(
+                e,
+                EmitBreakOrContinueFlags::IS_BREAK | EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
+                env,
+                pos,
+                level as Level,
+            )),
+            &ISpecialFlow(Continue(level)) => Ok(emit_break_or_continue(
+                e,
+                EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
+                env,
+                pos,
+                level as Level,
+            )),
+            &ISpecialFlow(Goto(ref label)) => {
+                emit_goto(true, label.clone(), env, e.local_gen_mut())
+            }
+            _ => fail(),
+        }
+    };
+    Ok(if jump_instrs.0.is_empty() {
+        InstrSeq::make_empty()
+    } else if jump_instrs.0.len() == 1 {
+        let (_, instr) = jump_instrs.0.iter().next().unwrap();
+        InstrSeq::gather(vec![
+            emit_pos(e, pos),
+            InstrSeq::make_issetl(e.local_gen_mut().get_label().clone()),
+            InstrSeq::make_jmpz(finally_end),
+            emit_instr(e, env, pos, instr)?,
+        ])
+    } else {
+        // mimic HHVM behavior:
+        // in some cases ids can be non-consequtive - this might happen i.e. return statement
+        //  appear in the block and it was assigned a high id before.
+        //  ((3, Return), (1, Break), (0, Continue))
+        //  In thid case generate switch as
+        //  switch  (id) {
+        //     L0 -> handler for continue
+        //     L1 -> handler for break
+        //     FinallyEnd -> empty
+        //     L3 -> handler for return
+        //  }
+        //
+        // This function builds a list of labels and jump targets for switch.
+        // It is possible that cases ids are not consequtive
+        // [L1,L2,L4]. Vector of labels in switch should be dense so we need to
+        // fill holes with a label that points to the end of finally block
+        // [End, L1, L2, End, L4]
+        let (max_id, _) = jump_instrs.0.iter().next_back().unwrap();
+        let (mut labels, mut bodies) = (vec![], vec![]);
+        let mut n: isize = *max_id as isize;
+        // lst is already sorted - BTreeMap/IMap bindings took care of it
+        // TODO: add is_sorted assert to make sure this behavior is preserved for labels
+        for (id, instr) in jump_instrs.0.into_iter().rev() {
+            let mut done = false;
+            while !done {
+                // NOTE(hrust) looping is equivalent to recursing without consuming instr
+                done = (id as isize) == n;
+                let (label, body) = if done {
+                    let label = e.label_gen_mut().next_regular();
+                    let body = InstrSeq::gather(vec![
+                        InstrSeq::make_label(label.clone()),
+                        emit_instr(e, env, pos, instr)?,
+                    ]);
+                    (label, body)
+                } else {
+                    (finally_end.clone(), InstrSeq::make_empty())
+                };
+                labels.push(label);
+                bodies.push(body);
+                n -= 1;
+            }
+        }
+        // NOTE(hrust): base case when empty and n >= 0
+        for _ in 0..=n {
+            labels.push(finally_end.clone());
+            bodies.push(InstrSeq::make_empty());
+        }
+        InstrSeq::gather(vec![
+            emit_pos(e, pos),
+            InstrSeq::make_issetl(e.local_gen_mut().get_label().clone()),
+            InstrSeq::make_jmpz(finally_end),
+            InstrSeq::make_cgetl(e.local_gen_mut().get_label().clone()),
+            InstrSeq::make_switch(labels),
+            InstrSeq::gather(bodies),
+        ])
+    })
 }
 
 // TODO: This codegen is unnecessarily complex.  Basically we are generating

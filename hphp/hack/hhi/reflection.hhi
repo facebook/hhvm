@@ -17,7 +17,7 @@ class Reflection  {
   <<__Rx>>
   public static function getModifierNames($modifiers);
   public static function export(Reflector $reflector, $return = false);
-}Reflection
+}
 
 class ReflectionClass implements Reflector {
 

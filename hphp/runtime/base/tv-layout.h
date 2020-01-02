@@ -198,6 +198,10 @@ public:
     return idx;
   }
 
+  static index_t offset2Idx(size_t offset) {
+    return offset / sizeof(TypedValue);
+  }
+
   void scan(index_t count, type_scan::Scanner& scanner) const {
     scanner.scan(*rep(), count * sizeof(TypedValue));
   }
@@ -434,6 +438,11 @@ struct Tv7Up : public LayoutBase<Tv7Up,
     ret.quot = idx / 7;
     ret.rem = idx % 7;
     return ret;
+  }
+
+  static index_t offset2Idx(size_t offset) {
+    auto off = offset / sizeof(Value);
+    return off - (off / 8) - 1;
   }
 
   iterator iteratorAt(index_t pos) {

@@ -1,22 +1,60 @@
+From 79446e9c055ef2db2b648da27681afc06092af92 Mon Sep 17 00:00:00 2001
+From: jjergus <jjergus@fb.com>
+Date: Thu, 2 Jan 2020 13:14:23 -0800
+Subject: [PATCH] mcrouter alpn check
+
+---
+ mcrouter/lib/network/ThriftTransport.cpp | 12 +++++-------
+ 1 file changed, 5 insertions(+), 7 deletions(-)
+
 diff --git a/third-party/mcrouter/src/mcrouter/lib/network/ThriftTransport.cpp b/third-party/mcrouter/src/mcrouter/lib/network/ThriftTransport.cpp
-index 279136a1..67967446 100644
+index 91896d52..e8503428 100644
 --- a/third-party/mcrouter/src/mcrouter/lib/network/ThriftTransport.cpp
 +++ b/third-party/mcrouter/src/mcrouter/lib/network/ThriftTransport.cpp
-@@ -111,6 +111,7 @@ ThriftTransportBase::getConnectingSocket() {
+@@ -40,10 +40,12 @@ void ThriftTransportBase::setConnectionStatusCallbacks(
+     ConnectionStatusCallbacks callbacks) {
+   connectionCallbacks_ = std::move(callbacks);
+ 
++#if FOLLY_OPENSSL_HAS_ALPN
+   if (connectionState_ == ConnectionState::Up && connectionCallbacks_.onUp) {
+     // Connection retries not currently supported in thrift transport so pass 0
+     connectionCallbacks_.onUp(*channel_->getTransport(), 0);
+   }
++#endif
+ }
+ 
+ void ThriftTransportBase::setRequestStatusCallbacks(
+@@ -137,13 +139,7 @@ ThriftTransportBase::getConnectingSocket() {
  }
  
  apache::thrift::RocketClientChannel::Ptr ThriftTransportBase::createChannel() {
+-  // HHVM supports Debian 8 (EOL 2020-06-30), which includes OpenSSL 1.0.1;
+-  // Rocket/RSocket require ALPN, which requiers 1.0.2.
+-  //
+-  // For these platforms, build MCRouter client without a functional
+-  // Thrift transport, but continue to permit use as an async Memcache client
+-  // library for Hack
+-#ifndef MCROUTER_NOOP_THRIFT_CLIENT
 +#if FOLLY_OPENSSL_HAS_ALPN
    auto socket = getConnectingSocket();
    if (!socket) {
      return nullptr;
-@@ -120,6 +121,9 @@ apache::thrift::RocketClientChannel::Ptr ThriftTransportBase::createChannel() {
-   channel->setProtocolId(apache::thrift::protocol::T_COMPACT_PROTOCOL);
-   channel->setCloseCallback(this);
-   return channel;
-+#else
-+  return nullptr;
+@@ -167,6 +163,7 @@ apache::thrift::RpcOptions ThriftTransportBase::getRpcOptions(
+ }
+ 
+ void ThriftTransportBase::connectSuccess() noexcept {
++#if FOLLY_OPENSSL_HAS_ALPN
+   auto transport = channel_->getTransport();
+   assert(
+       transport != nullptr && connectionState_ == ConnectionState::Connecting);
+@@ -190,6 +187,7 @@ void ThriftTransportBase::connectSuccess() noexcept {
+     connectionCallbacks_.onUp(*channel_->getTransport(), 0);
+   }
+   VLOG(5) << "[ThriftTransport] Connection successfully established!";
 +#endif
  }
  
- apache::thrift::RpcOptions ThriftTransportBase::getRpcOptions(
+ void ThriftTransportBase::connectErr(
+-- 
+2.17.1
+

@@ -64,6 +64,7 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/act-rec-defs.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -1378,6 +1379,7 @@ void ExecutionContext::pushVMState(TypedValue* savedSP) {
   savedVM.mInstrState = vmMInstrState();
   savedVM.jitCalledFrame = vmJitCalledFrame();
   savedVM.jitReturnAddr = vmJitReturnAddr();
+  savedVM.exn = jit::g_unwind_rds->exn;
   m_nesting++;
 
   if (debug && savedVM.fp &&
@@ -1414,6 +1416,7 @@ void ExecutionContext::popVMState() {
   vmMInstrState() = savedVM.mInstrState;
   vmJitCalledFrame() = savedVM.jitCalledFrame;
   vmJitReturnAddr() = savedVM.jitReturnAddr;
+  jit::g_unwind_rds->exn = savedVM.exn;
 
   if (debug) {
     if (savedVM.fp &&

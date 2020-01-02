@@ -62,6 +62,7 @@ struct VMState {
   MInstrState mInstrState;
   ActRec* jitCalledFrame;
   jit::TCA jitReturnAddr;
+  ObjectData* exn;
 };
 
 enum class InclOpFlags {

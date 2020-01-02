@@ -156,7 +156,7 @@ struct RequestInjectionData {
   /*
    * Triggers the user time based callback
    */
-  void invokeUserTimeoutCallback();
+  void invokeUserTimeoutCallback(c_WaitableWaitHandle* wh = nullptr);
 
   int getCPUTimeout() const;
   void setCPUTimeout(int seconds);

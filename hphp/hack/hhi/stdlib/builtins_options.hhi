@@ -108,7 +108,7 @@ function putenv(string $setting);
 <<__PHPStdLib>>
 function set_time_limit(int $seconds);
 function set_pre_timeout_handler(
-  int $seconds, (function(): void) $callback): void;
+  int $seconds, (function(HH\Awaitable<mixed>): void) $callback): void;
 <<__PHPStdLib>>
 function sys_get_temp_dir();
 <<__PHPStdLib, __Rx>>

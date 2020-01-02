@@ -1,0 +1,7 @@
+Testing handle during IO
+object(HH\SleepWaitHandle) (0) {
+}
+Testing handle during IO but no args in lambda
+Handle but no args in lambda
+Testing handle during CPU
+NULL

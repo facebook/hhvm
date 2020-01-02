@@ -29,6 +29,7 @@
 #include <folly/portability/SysTime.h>
 
 #include "hphp/util/logger.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -39,6 +40,7 @@
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
 namespace HPHP {
 
@@ -616,15 +618,13 @@ void RequestInjectionData::setUserTimeout(int seconds) {
   m_userTimeoutTimer.setTimeout(seconds);
 }
 
-void RequestInjectionData::invokeUserTimeoutCallback() {
+void RequestInjectionData::invokeUserTimeoutCallback(c_WaitableWaitHandle* wh) {
   clearTimeoutFlag(TimeoutSoft);
   if (!g_context->m_timeThresholdCallback.isNull()) {
     VMRegAnchor _;
     try {
-      vm_call_user_func(
-        g_context->m_timeThresholdCallback,
-        empty_vec_array()
-      );
+      auto args = make_vec_array(Object { wh });
+      vm_call_user_func(g_context->m_timeThresholdCallback, args);
     } catch (Object& ex) {
       raise_error("Uncaught exception escaping pre timeout callback: %s",
                   ex.toString().data());

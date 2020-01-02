@@ -50,8 +50,8 @@ SHA1SUM="openssl dgst -sha1 -r"
 if [ -z "${HHVM_REPO_SCHEMA}" ] ; then
   # Use Perl as BSD grep (MacOS) does not support negated groups
   HHVM_REPO_SCHEMA=$(sh -c "$find_files" | \
-      perl -ne 'print unless m#^hphp/(bin|facebook(?!/extensions)|hack/facebook/flow|neo|public_tld|test|tools|util|vixl|zend)#' | \
-      tr '\n' '\0' | xargs -0 cat | $SHA1SUM | cut -b-40)
+      perl -ne 'chomp; print "$_\n" if -f && !m#^hphp/(bin|facebook(?!/extensions)|hack/facebook/flow|neo|public_tld|test|tools|util|vixl|zend)#' | \
+      xargs -d'\n' cat | $SHA1SUM | cut -b-40)
 fi
 
 ################################################################################

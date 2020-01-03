@@ -9,16 +9,53 @@
 type size = int
 
 module type Entry = sig
-  type key
+  (** The key-value pair type of the stored values. This is expected to be a
+  GADT, which allows us to have a type-safe heterogeneous mapping from key type
+  to value type.
 
-  type value
+  For example, for storing decls, we want to have different stored value types
+  based on the key type. A [Fun_decl "foo"] should store a [Typing_defs.fun_elt]
+  and a [Typedef_decl "foo"] should store a [Typing_defs.typedef_type]. (Note
+  that functions and typedefs live in different namespaces.)
 
-  (** Get the size associated with a [value]. For example, you can measure its
+  In GADT syntax, this would be:
+
+  ```
+  type _ t =
+    | Fun_decl : string -> Typing_defs.fun_elt t
+    | Typedef_decl : string -> Typing_defs.typedef_decl t
+  ```
+
+  Then the following is well-typed:
+
+  ```
+  let foo_fun : Typing_defs.fun_elt option = Decl_cache.find_or_add
+    cache
+    ~key:(Fun_decl "foo")
+    ~default:(fun () -> None)
+  in
+  let foo_typedef : Typing_defs.typedef_decl option = Decl_cache.find_or_add
+    cache
+    ~key:(Typedef_decl "foo")
+    ~default:(fun () -> None)
+  in
+  *)
+  type _ t
+
+  (** Helper type alias. ['a Entry.key] should be read as "the key type of the
+  entry key-value pair". *)
+  type 'a key = 'a t
+
+  (** Helper type alias. ['a Entry.value] should be read as "the value type of
+  the entry key-value pair". *)
+  type 'a value = 'a
+
+  (** Get the size associated with a value. For example, you can measure its
   size in bytes. If the size is always [1], this causes the cache to act as a
   regular LRU cache.
 
-  The [key] is currently not considered as part of the size. *)
-  val get_size : value -> size
+  The key is currently not considered as part of the size. *)
+  val get_size : 'a value -> size
 end
 
 module Cache (Entry : Entry) : sig
@@ -46,21 +83,24 @@ module Cache (Entry : Entry) : sig
   operation. Under some circumstances, this could mean that the given [value] is
   immediately evicted. (For example, if the [value] is greater than the maximum
   size of the cache, then it must be evicted.) *)
-  val add : t -> key:Entry.key -> value:Entry.value -> unit
+  val add : t -> key:'a Entry.key -> value:'a Entry.value -> unit
 
   (** Find the element with the given [key] in the cache and return the
   corresponding value. If the [key] is not present, calls [default] to calculate
-  its value, then [add]s it to the cache and returns that value.
+  its value, then [add]s it to the cache and returns that value. If [default]
+  returns [None], then returns [None]; otherwise returns the computed value.
 
-  The value is always guaranteed to be returned (whether by lookup or
-  calculation), although it may be evicted immediately from the cache (see note on
-  [add]). *)
+  Note that this could immediately evict the added value, if any was computed by
+  [default] (see note on [add]). *)
   val find_or_add :
-    t -> key:Entry.key -> default:(unit -> Entry.value) -> Entry.value
+    t ->
+    key:'a Entry.key ->
+    default:(unit -> 'a Entry.value option) ->
+    'a Entry.value option
 
   (** Remove the entry with the given key from the cache. If the key is not
   present, does nothing. *)
-  val remove : t -> key:Entry.key -> unit
+  val remove : t -> key:'a Entry.key -> unit
 
   (** The cache keeps track of how long it's spent doing cache overhead *)
   val get_telemetry : t -> telemetry

@@ -8,22 +8,27 @@
  *)
 
 module Decl_cache_entry = struct
-  (* NOTE: we can't simply use a string as a key. In the case of a name conflict,
-  we may put e.g. a function named 'foo' into the cache whose value is one type,
-  and then later try to withdraw a class named 'foo' whose value is another type.
+  (* NOTE: we can't simply use a string as a key. In the case of a name
+  conflict, we may put e.g. a function named 'foo' into the cache whose value is
+  one type, and then later try to withdraw a class named 'foo' whose value is
+  another type.
 
-  The problem can be solved with a GADT, but making a GADT with references to
-  types like `Typing_defs.ty` causes dependency cycles, since `typing` ends up
-  depending on `Provider_backend` transitively.
+  The actual value type for [Class_decl] is a [Typing_classes_heap.Classes.t],
+  but that module depends on this module, so we can't write it down or else we
+  will cause a circular dependency. (It could probably be refactored to break
+  the dependency.) We just use [Obj.t] instead, which is better than using
+  [Obj.t] for all of the cases here.
   *)
-  type key =
-    | Fun_decl of string
-    | Class_decl of string
-    | Record_decl of string
-    | Typedef_decl of string
-    | Gconst_decl of string
+  type _ t =
+    | Fun_decl : string -> Typing_defs.fun_elt t
+    | Class_decl : string -> Obj.t t
+    | Record_decl : string -> Typing_defs.record_def_type t
+    | Typedef_decl : string -> Typing_defs.typedef_type t
+    | Gconst_decl : string -> (Typing_defs.decl_ty * Errors.t) t
 
-  type value = Obj.t
+  type 'a key = 'a t
+
+  type 'a value = 'a
 
   let get_size _value = 1
 end

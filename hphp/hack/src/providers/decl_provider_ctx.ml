@@ -33,27 +33,23 @@ let get_fun (ctx : Provider_context.t) (fun_name : fun_key) : fun_decl option =
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_fun fun_name
   | Provider_backend.Local_memory { decl_cache } ->
-    let result : Obj.t =
-      Provider_backend.Decl_cache.find_or_add
-        decl_cache
-        ~key:(Provider_backend.Decl_cache_entry.Fun_decl fun_name)
-        ~default:(fun () ->
-          let start_time = Unix.gettimeofday () in
-          let result : fun_decl option =
-            match Naming_table.Funs.get_filename fun_name with
-            | Some filename ->
-              let ft =
-                Errors.run_in_decl_mode filename (fun () ->
-                    Decl.declare_fun_in_file filename fun_name)
-              in
-              Some ft
-            | None -> None
-          in
-          Deferred_decl.count_decl_cache_miss fun_name ~start_time;
-          Obj.repr result)
-    in
-    let result : fun_decl option = Obj.obj result in
-    result
+    Provider_backend.Decl_cache.find_or_add
+      decl_cache
+      ~key:(Provider_backend.Decl_cache_entry.Fun_decl fun_name)
+      ~default:(fun () ->
+        let start_time = Unix.gettimeofday () in
+        let result =
+          match Naming_table.Funs.get_filename fun_name with
+          | Some filename ->
+            let ft =
+              Errors.run_in_decl_mode filename (fun () ->
+                  Decl.declare_fun_in_file filename fun_name)
+            in
+            Some ft
+          | None -> None
+        in
+        Deferred_decl.count_decl_cache_miss fun_name ~start_time;
+        result)
   | Provider_backend.Decl_service _ ->
     failwith "Decl_provider.get_fun not yet impl. for decl memory provider"
 
@@ -62,7 +58,7 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_class class_name
   | Provider_backend.Local_memory { decl_cache } ->
-    let result : Obj.t =
+    let result : Obj.t option =
       Provider_backend.Decl_cache.find_or_add
         decl_cache
         ~key:(Provider_backend.Decl_cache_entry.Class_decl class_name)
@@ -72,9 +68,9 @@ let get_class (ctx : Provider_context.t) (class_name : class_key) :
             Typing_classes_heap.compute_class_decl_no_cache class_name
           in
           Deferred_decl.count_decl_cache_miss class_name ~start_time;
-          Obj.repr result)
+          Option.map result ~f:Obj.repr)
     in
-    let result : class_decl option = Obj.obj result in
+    let result : class_decl option = Option.map result ~f:Obj.obj in
     result
   | Provider_backend.Decl_service _ ->
     failwith "Decl_provider.get_class not yet impl. for decl memory provider"
@@ -128,27 +124,23 @@ let get_typedef (ctx : Provider_context.t) (typedef_name : string) :
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_typedef typedef_name
   | Provider_backend.Local_memory { decl_cache } ->
-    let result : Obj.t =
-      Provider_backend.Decl_cache.find_or_add
-        decl_cache
-        ~key:(Provider_backend.Decl_cache_entry.Typedef_decl typedef_name)
-        ~default:(fun () ->
-          let start_time = Unix.gettimeofday () in
-          let result : typedef_decl option =
-            match get_type_id_filename typedef_name Naming_table.TTypedef with
-            | Some filename ->
-              let tdecl =
-                Errors.run_in_decl_mode filename (fun () ->
-                    Decl.declare_typedef_in_file filename typedef_name)
-              in
-              Some tdecl
-            | None -> None
-          in
-          Deferred_decl.count_decl_cache_miss typedef_name ~start_time;
-          Obj.repr result)
-    in
-    let result : typedef_decl option = Obj.obj result in
-    result
+    Provider_backend.Decl_cache.find_or_add
+      decl_cache
+      ~key:(Provider_backend.Decl_cache_entry.Typedef_decl typedef_name)
+      ~default:(fun () ->
+        let start_time = Unix.gettimeofday () in
+        let result =
+          match get_type_id_filename typedef_name Naming_table.TTypedef with
+          | Some filename ->
+            let tdecl =
+              Errors.run_in_decl_mode filename (fun () ->
+                  Decl.declare_typedef_in_file filename typedef_name)
+            in
+            Some tdecl
+          | None -> None
+        in
+        Deferred_decl.count_decl_cache_miss typedef_name ~start_time;
+        result)
   | Provider_backend.Decl_service _ ->
     failwith "Decl_provider.get_typedef not yet impl. for decl memory provider"
 
@@ -158,27 +150,23 @@ let get_record_def (ctx : Provider_context.t) (record_name : string) :
   | Provider_backend.Shared_memory ->
     Typing_lazy_heap.get_record_def record_name
   | Provider_backend.Local_memory { decl_cache } ->
-    let result : Obj.t =
-      Provider_backend.Decl_cache.find_or_add
-        decl_cache
-        ~key:(Provider_backend.Decl_cache_entry.Record_decl record_name)
-        ~default:(fun () ->
-          let start_time = Unix.gettimeofday () in
-          let result : record_def_decl option =
-            match Naming_table.Consts.get_filename record_name with
-            | Some filename ->
-              let rdecl =
-                Errors.run_in_decl_mode filename (fun () ->
-                    Decl.declare_record_def_in_file filename record_name)
-              in
-              Some rdecl
-            | None -> None
-          in
-          Deferred_decl.count_decl_cache_miss record_name ~start_time;
-          Obj.repr result)
-    in
-    let result : record_def_decl option = Obj.obj result in
-    result
+    Provider_backend.Decl_cache.find_or_add
+      decl_cache
+      ~key:(Provider_backend.Decl_cache_entry.Record_decl record_name)
+      ~default:(fun () ->
+        let start_time = Unix.gettimeofday () in
+        let result =
+          match Naming_table.Consts.get_filename record_name with
+          | Some filename ->
+            let rdecl =
+              Errors.run_in_decl_mode filename (fun () ->
+                  Decl.declare_record_def_in_file filename record_name)
+            in
+            Some rdecl
+          | None -> None
+        in
+        Deferred_decl.count_decl_cache_miss record_name ~start_time;
+        result)
   | Provider_backend.Decl_service _ ->
     failwith
       "Decl_provider.get_record_def not yet impl. for decl memory provider"
@@ -188,27 +176,23 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
   match ctx.Provider_context.backend with
   | Provider_backend.Shared_memory -> Typing_lazy_heap.get_gconst gconst_name
   | Provider_backend.Local_memory { decl_cache } ->
-    let result : Obj.t =
-      Provider_backend.Decl_cache.find_or_add
-        decl_cache
-        ~key:(Provider_backend.Decl_cache_entry.Gconst_decl gconst_name)
-        ~default:(fun () ->
-          let start_time = Unix.gettimeofday () in
-          let result : gconst_decl option =
-            match Naming_table.Consts.get_filename gconst_name with
-            | Some filename ->
-              let gconst =
-                Errors.run_in_decl_mode filename (fun () ->
-                    Decl.declare_const_in_file filename gconst_name)
-              in
-              Some gconst
-            | None -> None
-          in
-          Deferred_decl.count_decl_cache_miss gconst_name ~start_time;
-          Obj.repr result)
-    in
-    let result : gconst_decl option = Obj.obj result in
-    result
+    Provider_backend.Decl_cache.find_or_add
+      decl_cache
+      ~key:(Provider_backend.Decl_cache_entry.Gconst_decl gconst_name)
+      ~default:(fun () ->
+        let start_time = Unix.gettimeofday () in
+        let result =
+          match Naming_table.Consts.get_filename gconst_name with
+          | Some filename ->
+            let gconst =
+              Errors.run_in_decl_mode filename (fun () ->
+                  Decl.declare_const_in_file filename gconst_name)
+            in
+            Some gconst
+          | None -> None
+        in
+        Deferred_decl.count_decl_cache_miss gconst_name ~start_time;
+        result)
   | Provider_backend.Decl_service decl ->
     decl.Decl_service_client.rpc_get_gconst gconst_name
     |> Option.map ~f:(fun decl -> (decl, Errors.empty))

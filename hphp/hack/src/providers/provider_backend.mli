@@ -8,16 +8,18 @@
  *)
 
 module Decl_cache_entry : sig
-  type key =
-    | Fun_decl of string
-    | Class_decl of string
-    | Record_decl of string
-    | Typedef_decl of string
-    | Gconst_decl of string
+  type _ t =
+    | Fun_decl : string -> Typing_defs.fun_elt t
+    | Class_decl : string -> Obj.t t
+    | Record_decl : string -> Typing_defs.record_def_type t
+    | Typedef_decl : string -> Typing_defs.typedef_type t
+    | Gconst_decl : string -> (Typing_defs.decl_ty * Errors.t) t
 
-  type value = Obj.t
+  type 'a key = 'a t
 
-  val get_size : value -> int
+  type 'a value = 'a
+
+  val get_size : 'a value -> int
 end
 
 (** Maps decl names to types. *)

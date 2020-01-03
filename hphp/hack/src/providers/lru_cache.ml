@@ -11,11 +11,13 @@ open Core_kernel
 type size = int
 
 module type Entry = sig
-  type key
+  type _ t
 
-  type value
+  type 'a key = 'a t
 
-  val get_size : value -> size
+  type 'a value = 'a
+
+  val get_size : 'a value -> size
 end
 
 module Cache (Entry : Entry) = struct
@@ -27,10 +29,14 @@ module Cache (Entry : Entry) = struct
 
   let empty_telemetry = { peak_size = 0; time_spent = 0.; num_evictions = 0 }
 
+  type key_wrapper = Key : 'a Entry.key -> key_wrapper
+
+  type value_wrapper = Value_wrapper : 'a Entry.value -> value_wrapper
+
   type entry = {
     size: size;
     last_used_timestamp: int;
-    value: Entry.value;
+    value: value_wrapper;
   }
 
   type t = {
@@ -38,7 +44,7 @@ module Cache (Entry : Entry) = struct
     mutable total_size: size;
     mutable telemetry: telemetry;
     max_size: size;
-    entries: (Entry.key, entry) Hashtbl.t;
+    entries: (key_wrapper, entry) Hashtbl.t;
   }
 
   let time_internal (t : t) (start_time : float) : unit =
@@ -96,9 +102,10 @@ module Cache (Entry : Entry) = struct
         assert (t.total_size = 0)
     done
 
-  let add_internal (t : t) (key : Entry.key) (value : Entry.value) : entry =
+  let add_internal (t : t) (key : 'a Entry.key) (value : 'a Entry.value) : entry
+      =
     begin
-      match Hashtbl.find_and_remove t.entries key with
+      match Hashtbl.find_and_remove t.entries (Key key) with
       | None -> ()
       | Some { size; _ } ->
         t.total_size <- t.total_size - size;
@@ -107,42 +114,64 @@ module Cache (Entry : Entry) = struct
 
     incr_timestamp t;
     let entry =
-      { size = Entry.get_size value; last_used_timestamp = t.timestamp; value }
+      {
+        size = Entry.get_size value;
+        last_used_timestamp = t.timestamp;
+        value = Value_wrapper value;
+      }
     in
-    Hashtbl.add_exn t.entries key entry;
+    Hashtbl.add_exn t.entries (Key key) entry;
     t.total_size <- t.total_size + entry.size;
     t.telemetry <-
       { t.telemetry with peak_size = max t.telemetry.peak_size t.total_size };
     trim_to_memory_limit t;
     entry
 
-  let add (t : t) ~(key : Entry.key) ~(value : Entry.value) : unit =
+  let add (t : t) ~(key : 'a Entry.key) ~(value : 'a Entry.value) : unit =
     let start_time = Unix.gettimeofday () in
     let (_ : entry) = add_internal t key value in
     time_internal t start_time;
     ()
 
-  let find_or_add (t : t) ~(key : Entry.key) ~(default : unit -> Entry.value) :
-      Entry.value =
+  let find_or_add
+      (type a)
+      (t : t)
+      ~(key : a Entry.key)
+      ~(default : unit -> a Entry.value option) : a Entry.value option =
     let start_time = ref (Unix.gettimeofday ()) in
     let entry =
       Hashtbl.find_and_call
         t.entries
-        key
-        ~if_found:(fun entry -> entry)
-        ~if_not_found:(fun key ->
+        (Key key)
+        ~if_found:(fun entry -> Some entry)
+        ~if_not_found:(fun _key ->
           time_internal t !start_time;
-          let value = default () in
+          let value_opt = default () in
           start_time := Unix.gettimeofday ();
-          add_internal t key value)
+          Option.map value_opt ~f:(add_internal t key))
     in
     trim_to_memory_limit t;
     time_internal t !start_time;
-    entry.value
 
-  let remove (t : t) ~(key : Entry.key) : unit =
+    match entry with
+    | None -> None
+    | Some { value = Value_wrapper value; _ } ->
+      (* OCaml [Hashtbl.t] isn't a heterogeneous map. There's no way to indicate
+      that the key and the value type have some relation. Consequently, the
+      [value] we've just retrieved from the hash table has type
+      [$Value_wrapper_'a] but we need one of type ['a], and there's no good way
+      to convince the OCaml compiler that these two types are equivalent.
+
+      We hope to reduce the danger of this using this cache as a heterogeneous
+      map by having this be the only call to unsafe [Obj] functions, as opposed
+      to having every caller call into [Obj]. (The alternative is to implement a
+      heterogeneous map from scratch, or import a library for one.) *)
+      let value = (Obj.magic value : a Entry.value) in
+      Some value
+
+  let remove (t : t) ~(key : 'a Entry.key) : unit =
     let start_time = Unix.gettimeofday () in
-    Hashtbl.remove t.entries key;
+    Hashtbl.remove t.entries (Key key);
     time_internal t start_time;
     ()
 

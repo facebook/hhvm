@@ -20,15 +20,15 @@ pub struct Lambda {
 }
 
 #[derive(Clone)]
-pub enum ScopeItem {
-    Class(ast::Class_),
-    Function(ast::Fun_),
-    Method(ast::Method_),
-    LongLambda(LongLambda),
-    Lambda(Lambda),
+pub enum ScopeItem<'a> {
+    Class(Cow<'a, ast::Class_>),
+    Function(Cow<'a, ast::Fun_>),
+    Method(Cow<'a, ast::Method_>),
+    LongLambda(Cow<'a, LongLambda>),
+    Lambda(Cow<'a, Lambda>),
 }
 
-impl ScopeItem {
+impl ScopeItem<'_> {
     pub fn is_in_lambda(&self) -> bool {
         match self {
             ScopeItem::Lambda(_) | ScopeItem::LongLambda(_) => true,
@@ -38,16 +38,16 @@ impl ScopeItem {
 }
 
 #[derive(Clone)]
-pub struct Scope {
-    items: Vec<ScopeItem>,
+pub struct Scope<'a> {
+    items: Vec<ScopeItem<'a>>,
 }
 
-impl Scope {
+impl<'a> Scope<'a> {
     pub fn toplevel() -> Self {
         Scope { items: vec![] }
     }
 
-    pub fn push_item(&mut self, s: ScopeItem) {
+    pub fn push_item(&mut self, s: ScopeItem<'a>) {
         self.items.push(s)
     }
 
@@ -59,10 +59,10 @@ impl Scope {
         (1..self.items.len()).rev().map(move |i| &self.items[..i])
     }
 
-    pub fn get_subscope_class(sub_scope: &[ScopeItem]) -> Option<&ast::Class_> {
+    pub fn get_subscope_class<'b>(sub_scope: &'b [ScopeItem<'b>]) -> Option<&'b ast::Class_> {
         for scope_item in sub_scope.iter().rev() {
             if let ScopeItem::Class(cd) = scope_item {
-                return Some(&cd);
+                return Some(cd.as_ref());
             }
         }
         None
@@ -165,8 +165,10 @@ impl Scope {
                 ScopeItem::Class(_) => {
                     return false;
                 }
-                ScopeItem::Method(ast::Method_ { fun_kind, .. })
-                | ScopeItem::Function(ast::Fun_ { fun_kind, .. }) => {
+                ScopeItem::Method(Cow::Borrowed(ast::Method_ { fun_kind, .. }))
+                | ScopeItem::Method(Cow::Owned(ast::Method_ { fun_kind, .. }))
+                | ScopeItem::Function(Cow::Borrowed(ast::Fun_ { fun_kind, .. }))
+                | ScopeItem::Function(Cow::Owned(ast::Fun_ { fun_kind, .. })) => {
                     return *fun_kind == FunKind::FAsync || *fun_kind == FunKind::FAsyncGenerator;
                 }
                 _ => (),
@@ -185,8 +187,8 @@ impl Scope {
                 ScopeItem::Method(md) => {
                     return md.static_;
                 }
-                ScopeItem::LongLambda(LongLambda { is_static, .. }) => {
-                    if *is_static {
+                ScopeItem::LongLambda(ll) => {
+                    if ll.as_ref().is_static {
                         return false;
                     }
                 }
@@ -205,25 +207,32 @@ impl Scope {
     }
 
     pub fn rx_of_scope(&self) -> rx::Level {
+        fn from_uas(user_attrs: &Vec<ast::UserAttribute>) -> rx::Level {
+            rx::Level::from_ast(user_attrs).unwrap_or(rx::Level::NonRx)
+        }
         for scope_item in self.items.iter().rev() {
             match scope_item {
                 ScopeItem::Class(_) => {
                     return rx::Level::NonRx;
                 }
-                ScopeItem::Method(ast::Method_ {
-                    user_attributes, ..
-                })
-                | ScopeItem::Function(ast::Fun_ {
-                    user_attributes, ..
-                }) => {
-                    return rx::Level::from_ast(user_attributes).unwrap_or(rx::Level::NonRx);
-                }
-                ScopeItem::Lambda(Lambda {
-                    rx_level: Some(rl), ..
-                })
-                | ScopeItem::LongLambda(LongLambda {
-                    rx_level: Some(rl), ..
-                }) => {
+                ScopeItem::Method(m) => return from_uas(&m.as_ref().user_attributes),
+                ScopeItem::Function(f) => return from_uas(&f.as_ref().user_attributes),
+                ScopeItem::Lambda(Cow::Borrowed(Lambda {
+                    rx_level: Some(ref rl),
+                    ..
+                }))
+                | ScopeItem::Lambda(Cow::Owned(Lambda {
+                    rx_level: Some(ref rl),
+                    ..
+                }))
+                | ScopeItem::LongLambda(Cow::Borrowed(LongLambda {
+                    rx_level: Some(ref rl),
+                    ..
+                }))
+                | ScopeItem::LongLambda(Cow::Owned(LongLambda {
+                    rx_level: Some(ref rl),
+                    ..
+                })) => {
                     return *rl;
                 }
                 _ => (),
@@ -235,12 +244,18 @@ impl Scope {
     pub fn has_function_attribute(&self, attr_name: String) -> bool {
         for scope_item in self.items.iter().rev() {
             match scope_item {
-                ScopeItem::Method(ast::Method_ {
+                ScopeItem::Method(Cow::Borrowed(ast::Method_ {
                     user_attributes, ..
-                })
-                | ScopeItem::Function(ast::Fun_ {
+                }))
+                | ScopeItem::Method(Cow::Owned(ast::Method_ {
                     user_attributes, ..
-                }) => {
+                }))
+                | ScopeItem::Function(Cow::Borrowed(ast::Fun_ {
+                    user_attributes, ..
+                }))
+                | ScopeItem::Function(Cow::Owned(ast::Fun_ {
+                    user_attributes, ..
+                })) => {
                     return user_attributes.iter().any(|attr| attr.name.1 == attr_name);
                 }
                 _ => (),

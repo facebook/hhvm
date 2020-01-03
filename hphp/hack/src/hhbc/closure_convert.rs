@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use itertools::{EitherOrBoth::*, Itertools};
-use std::{collections::HashSet, mem};
+use std::{borrow::Cow, collections::HashSet, mem};
 
 use ast_constant_folder_rust as ast_constant_folder;
 use ast_scope_rust as ast_scope;
@@ -24,26 +24,29 @@ use unique_list_rust::UniqueList;
 
 #[derive(Clone)] // TODO(hrust): Clone is used when bactracking now, can we somehow avoid it?
 struct Variables {
-    // all variables declared/used in the scope
+    /// all variables declared/used in the scope
     all_vars: HashSet<String>,
-    // names of parameters if scope correspond to a function
+    /// names of parameters if scope correspond to a function
     parameter_names: HashSet<String>,
 }
 
 #[derive(Clone)] // TODO(hrust): do we need clone
-struct Env {
-    // What is the current context?
-    scope: ast_scope::Scope,
+struct Env<'a> {
+    /// What is the current context?
+    // TODO(hrust) VisitorMut doesn't provide an interface
+    // where a reference to visited NodeMut outlives the Context type (in this case Env<'a>),
+    // so we have no choice but to clone in ach ScopeItem (i.e., can't se Borrowed for 'a)
+    scope: ast_scope::Scope<'a>,
     variable_scopes: Vec<Variables>,
-    // How many existing classes are there?
+    /// How many existing classes are there?
     defined_class_count: usize,
-    // How many existing records are there?
+    /// How many existing records are there?
     defined_record_count: usize,
-    // How many existing functions are there?
+    /// How many existing functions are there?
     defined_function_count: usize,
 }
 
-impl Env {
+impl<'a> Env<'a> {
     pub fn toplevel(
         class_count: usize,
         record_count: usize,
@@ -67,7 +70,7 @@ impl Env {
 
     fn with_function_like_(
         &mut self,
-        e: ast_scope::ScopeItem,
+        e: ast_scope::ScopeItem<'a>,
         _is_closure_body: bool,
         params: &[FunParam],
         _body: &Block,
@@ -79,22 +82,26 @@ impl Env {
         })
     }
 
-    fn with_function_like(&mut self, e: ast_scope::ScopeItem, is_closure_body: bool, fd: &Fun_) {
+    fn with_function_like(
+        &mut self,
+        e: ast_scope::ScopeItem<'a>,
+        is_closure_body: bool,
+        fd: &Fun_,
+    ) {
         self.with_function_like_(e, is_closure_body, &fd.params, &fd.body.ast)
     }
 
-    pub fn with_function(&mut self, fd: &Fun_) {
+    fn with_function(&mut self, fd: &Fun_) {
         self.with_function_like(
-            // TODO(hrust): does ScopeItem need to own entire function?
-            ast_scope::ScopeItem::Function(fd.clone()),
+            ast_scope::ScopeItem::Function(Cow::Owned(fd.clone())),
             false,
             fd,
         )
     }
 
-    pub fn with_method(&mut self, md: &Method_) {
+    fn with_method(&mut self, md: &Method_) {
         self.with_function_like_(
-            ast_scope::ScopeItem::Method(md.clone()),
+            ast_scope::ScopeItem::Method(Cow::Owned(md.clone())),
             false,
             &md.params,
             &md.body.ast,
@@ -106,7 +113,7 @@ impl Env {
         let rx_level = rx::Level::from_ast(&fd.user_attributes);
 
         let lambda = ast_scope::Lambda { is_async, rx_level };
-        self.with_function_like(ast_scope::ScopeItem::Lambda(lambda), true, fd)
+        self.with_function_like(ast_scope::ScopeItem::Lambda(Cow::Owned(lambda)), true, fd)
     }
 
     fn with_longlambda(&mut self, is_static: bool, fd: &Fun_) {
@@ -118,13 +125,17 @@ impl Env {
             is_async,
             rx_level,
         };
-        self.with_function_like(ast_scope::ScopeItem::LongLambda(long_lambda), true, fd)
+        self.with_function_like(
+            ast_scope::ScopeItem::LongLambda(Cow::Owned(long_lambda.clone())),
+            true,
+            fd,
+        )
     }
 
     fn with_class(&mut self, cd: &Class_) {
         self.scope = ast_scope::Scope::toplevel();
         self.scope
-            .push_item(ast_scope::ScopeItem::Class(cd.clone()));
+            .push_item(ast_scope::ScopeItem::Class(Cow::Owned(cd.clone())));
     }
 }
 
@@ -430,9 +441,9 @@ fn convert_id(_env: &Env, Id(p, s): Id) -> Expr_ {
 
 // Closure-convert a lambda expression, with use_vars_opt = Some vars
 // if there is an explicit `use` clause.
-fn convert_lambda(
-    env: &mut Env,
-    self_: &mut ClosureConvertVisitor,
+fn convert_lambda<'a>(
+    env: &mut Env<'a>,
+    self_: &mut ClosureConvertVisitor<'a>,
     mut fd: Fun_,
     use_vars_opt: Option<Vec<aast_defs::Lid>>,
 ) -> Expr_ {
@@ -613,12 +624,13 @@ fn count_records(defs: &Program) -> usize {
         .count()
 }
 
-struct ClosureConvertVisitor {
+struct ClosureConvertVisitor<'a> {
     state: State,
+    phantom_lifetime_a: std::marker::PhantomData<&'a ()>,
 }
 
-impl VisitorMut for ClosureConvertVisitor {
-    type Context = Env;
+impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
+    type Context = Env<'a>;
     type Ex = Pos;
     type Fb = ();
     type En = ();
@@ -636,7 +648,7 @@ impl VisitorMut for ClosureConvertVisitor {
         self
     }
 
-    fn visit_method_(&mut self, env: &mut Env, md: &mut Method_) {
+    fn visit_method_(&mut self, env: &mut Env<'a>, md: &mut Method_) {
         // TODO(hrust): not great to have to clone env constantly
         let mut env = env.clone();
         env.with_method(md);
@@ -644,7 +656,7 @@ impl VisitorMut for ClosureConvertVisitor {
         md.recurse(&mut env, self.object());
     }
 
-    fn visit_class_(&mut self, env: &mut Env, cd: &mut Class_) {
+    fn visit_class_<'b>(&mut self, env: &mut Env<'a>, cd: &'b mut Class_) {
         let mut env = env.clone();
         env.with_class(cd);
         self.state.reset_function_counts();
@@ -652,7 +664,7 @@ impl VisitorMut for ClosureConvertVisitor {
         add_reified_property(&cd.tparams, &mut cd.vars);
     }
 
-    fn visit_def(&mut self, env: &mut Env, def: &mut Def) {
+    fn visit_def(&mut self, env: &mut Env<'a>, def: &mut Def) {
         match &def {
             // need to handle it ourselvses, because in visit_fun_ is
             // called both for toplevel functions and lambdas
@@ -666,7 +678,7 @@ impl VisitorMut for ClosureConvertVisitor {
         }
     }
 
-    fn visit_hint_(&mut self, env: &mut Env, hint: &mut Hint_) {
+    fn visit_hint_(&mut self, env: &mut Env<'a>, hint: &mut Hint_) {
         if let Hint_::Happly(id, _) = hint {
             // T43412864 claims that this does not need to be added into the closure and can be removed
             // There are no relevant HHVM tests checking for it, but there are flib test failures when you try
@@ -678,7 +690,7 @@ impl VisitorMut for ClosureConvertVisitor {
 
     //TODO(hrust): do we need special handling for Awaitall?
 
-    fn visit_expr(&mut self, env: &mut Env, Expr(pos, e): &mut Expr) {
+    fn visit_expr(&mut self, env: &mut Env<'a>, Expr(pos, e): &mut Expr) {
         let null = Expr_::mk_null();
         let e_owned = std::mem::replace(e, null);
         *e = match e_owned {
@@ -798,6 +810,7 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) {
 
     let mut visitor = ClosureConvertVisitor {
         state: State::initial_state(empty_namespace),
+        phantom_lifetime_a: std::marker::PhantomData,
     };
 
     let mut new_defs = vec![];

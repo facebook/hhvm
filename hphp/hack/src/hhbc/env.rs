@@ -28,7 +28,8 @@ bitflags! {
 pub struct Env {
     pub flags: Flags,
     pub jump_targets_gen: jump_targets::Gen,
-    pub scope: Scope,
+    // Scope is owned (not borrowed) here
+    pub scope: Scope<'static>,
     // TODO(hrust)
     // - pipe_var after porting Local
     // - namespace after porting Namespace_env

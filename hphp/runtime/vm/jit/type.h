@@ -855,7 +855,6 @@ private:
     const ArrayData* m_arrVal;
     const ArrayData* m_vecVal;
     const ArrayData* m_dictVal;
-    const ArrayData* m_shapeVal;
     const ArrayData* m_keysetVal;
     const HPHP::Func* m_funcVal;
     const Class* m_clsVal;

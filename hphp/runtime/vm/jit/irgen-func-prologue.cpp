@@ -485,8 +485,7 @@ void emitGenericsMismatchCheck(IRGS& env, SSATmp* callFlags) {
 
       // Generics may be known if we are inlining.
       if (generics->hasConstVal(type)) {
-        auto const genericsArr = RuntimeOption::EvalHackArrDVArrs
-          ? generics->vecVal() : generics->arrVal();
+        auto const genericsArr = generics->arrLikeVal();
         auto const& genericsDef =
           func->getReifiedGenericsInfo().m_typeParamInfo;
         if (genericsArr->size() == genericsDef.size()) {

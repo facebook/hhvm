@@ -1478,14 +1478,7 @@ SSATmp* simplifyEqArrayDataPtr(State& env, const IRInstruction* inst) {
   if (left == right) return cns(env, true);
   if (!left->type().maybe(right->type())) return cns(env, false);
   if (left->hasConstVal() && right->hasConstVal()) {
-    auto const val = [&](const SSATmp* s) -> const ArrayData* {
-      if (s->hasConstVal(TArr))    return s->arrVal();
-      if (s->hasConstVal(TVec))    return s->vecVal();
-      if (s->hasConstVal(TDict))   return s->dictVal();
-      if (s->hasConstVal(TKeyset)) return s->keysetVal();
-      always_assert(false);
-    };
-    return cns(env, val(left) == val(right));
+    return cns(env, left->arrLikeVal() == right->arrLikeVal());
   }
   return nullptr;
 }
@@ -1937,54 +1930,48 @@ SSATmp* simplifyConcatStrInt(State& env, const IRInstruction* inst) {
 
 namespace {
 
-template <typename G, typename C>
-SSATmp* arrayLikeConvImpl(State& env, const IRInstruction* inst,
-                          G get, C convert) {
+template <typename C>
+SSATmp* arrayLikeConvImpl(State& env, const IRInstruction* inst, C convert) {
   auto const src = inst->src(0);
   if (!src->hasConstVal()) return nullptr;
-  auto const before = get(src);
+  auto const before = src->arrLikeVal();
   auto converted = convert(const_cast<ArrayData*>(before));
   if (!converted) return nullptr;
   ArrayData::GetScalarArray(&converted);
   return cns(env, converted);
 }
 
-template <typename G>
-SSATmp* convToArrImpl(State& env, const IRInstruction* inst, G get) {
+SSATmp* convToArrImpl(State& env, const IRInstruction* inst) {
   return arrayLikeConvImpl(
-    env, inst, get,
+    env, inst,
     [&](ArrayData* a) { return a->toPHPArray(true); }
   );
 }
 
-template <typename G>
-SSATmp* convToVecImpl(State& env, const IRInstruction* inst, G get) {
+SSATmp* convToVecImpl(State& env, const IRInstruction* inst) {
   return arrayLikeConvImpl(
-    env, inst, get,
+    env, inst,
     [&](ArrayData* a) { return a->toVec(true); }
   );
 }
 
-template <typename G>
-SSATmp* convToDictImpl(State& env, const IRInstruction* inst, G get) {
+SSATmp* convToDictImpl(State& env, const IRInstruction* inst) {
   return arrayLikeConvImpl(
-    env, inst, get,
+    env, inst,
     [&](ArrayData* a) { return a->toDict(true); }
   );
 }
 
-template <typename G>
-SSATmp* convToNonDVArrImpl(State& env, const IRInstruction* inst, G get) {
+SSATmp* convToNonDVArrImpl(State& env, const IRInstruction* inst) {
   return arrayLikeConvImpl(
-    env, inst, get,
+    env, inst,
     [&](ArrayData* a) { return a->toPHPArray(true); }
   );
 }
 
-template <typename G>
-SSATmp* convToKeysetImpl(State& env, const IRInstruction* inst, G get) {
+SSATmp* convToKeysetImpl(State& env, const IRInstruction* inst) {
   return arrayLikeConvImpl(
-    env, inst, get,
+    env, inst,
     [&](ArrayData* a) {
       // We need to check if the array contains values suitable for keyset
       // before attempting the conversion. Otherwise, toKeyset() might re-enter
@@ -2005,18 +1992,16 @@ SSATmp* convToKeysetImpl(State& env, const IRInstruction* inst, G get) {
   );
 }
 
-template <typename G>
-SSATmp* convToVArrImpl(State& env, const IRInstruction* inst, G get) {
+SSATmp* convToVArrImpl(State& env, const IRInstruction* inst) {
   return arrayLikeConvImpl(
-    env, inst, get,
+    env, inst,
     [&](ArrayData* a) { return a->toVArray(true); }
   );
 }
 
-template <typename G>
-SSATmp* convToDArrImpl(State& env, const IRInstruction* inst, G get) {
+SSATmp* convToDArrImpl(State& env, const IRInstruction* inst) {
   return arrayLikeConvImpl(
-    env, inst, get,
+    env, inst,
     [&](ArrayData* a) { return a->toDArray(true); }
   );
 }
@@ -2032,41 +2017,39 @@ SSATmp* convNonArrToArrImpl(State& env, const IRInstruction* inst) {
 
 }
 
-#define X(FromTy, FromTy2, ToTy)                                          \
+#define X(FromTy, ToTy)                                                   \
 SSATmp*                                                                   \
 simplifyConv##FromTy##To##ToTy(State& env, const IRInstruction* inst) {   \
-  return convTo##ToTy##Impl(                                              \
-    env, inst,                                                            \
-    [&](const SSATmp* s) { return s->FromTy2(); });                       \
+  return convTo##ToTy##Impl(env, inst);                                   \
 }
 
-X(Vec, vecVal, Arr)
-X(Dict, dictVal, Arr)
-X(Keyset, keysetVal, Arr)
+X(Vec, Arr)
+X(Dict, Arr)
+X(Keyset, Arr)
 
-X(Arr, arrVal, Vec)
-X(Dict, dictVal, Vec)
-X(Keyset, keysetVal, Vec)
+X(Arr, Vec)
+X(Dict, Vec)
+X(Keyset, Vec)
 
-X(Arr, arrVal, Dict)
-X(Vec, vecVal, Dict)
-X(Keyset, keysetVal, Dict)
+X(Arr, Dict)
+X(Vec, Dict)
+X(Keyset, Dict)
 
-X(Arr, arrVal, Keyset)
-X(Vec, vecVal, Keyset)
-X(Dict, dictVal, Keyset)
+X(Arr, Keyset)
+X(Vec, Keyset)
+X(Dict, Keyset)
 
-X(Arr, arrVal, VArr)
-X(Vec, vecVal, VArr)
-X(Dict, dictVal, VArr)
-X(Keyset, keysetVal, VArr)
+X(Arr, VArr)
+X(Vec, VArr)
+X(Dict, VArr)
+X(Keyset, VArr)
 
-X(Arr, arrVal, DArr)
-X(Vec, vecVal, DArr)
-X(Dict, dictVal, DArr)
-X(Keyset, keysetVal, DArr)
+X(Arr, DArr)
+X(Vec, DArr)
+X(Dict, DArr)
+X(Keyset, DArr)
 
-X(Arr, arrVal, NonDVArr)
+X(Arr, NonDVArr)
 
 #undef X
 
@@ -3062,15 +3045,14 @@ SSATmp* simplifyAKExistsArr(State& env, const IRInstruction* inst) {
 
 namespace {
 
-template <typename G>
-SSATmp* arrGetKImpl(State& env, const IRInstruction* inst, G get) {
+SSATmp* arrGetKImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const& extra = inst->extra<IndexData>();
 
   assertx(validPos(ssize_t(extra->index)));
   if (!arr->hasConstVal()) return nullptr;
 
-  auto const mixed = MixedArray::asMixed(get(arr));
+  auto const mixed = MixedArray::asMixed(arr->arrLikeVal());
   auto const tv = mixed->getArrayElmPtr(extra->index);
 
   // The array doesn't contain a valid element at that offset. Since this
@@ -3084,8 +3066,7 @@ SSATmp* arrGetKImpl(State& env, const IRInstruction* inst, G get) {
   return cns(env, *tv);
 }
 
-template <typename G>
-SSATmp* checkOffsetImpl(State& env, const IRInstruction* inst, G get) {
+SSATmp* checkOffsetImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const key = inst->src(1);
   auto const& extra = inst->extra<IndexData>();
@@ -3093,7 +3074,7 @@ SSATmp* checkOffsetImpl(State& env, const IRInstruction* inst, G get) {
   assertx(validPos(ssize_t(extra->index)));
   if (!arr->hasConstVal()) return mergeBranchDests(env, inst);
 
-  auto const mixed = MixedArray::asMixed(get(arr));
+  auto const mixed = MixedArray::asMixed(arr->arrLikeVal());
 
   auto const dataTV = mixed->getArrayElmPtr(extra->index);
   if (!dataTV) return gen(env, Jmp, inst->taken());
@@ -3247,11 +3228,11 @@ X(AKExistsKeyset, AKExists, keysetVal)
 #undef X
 
 SSATmp* simplifyMixedArrayGetK(State& env, const IRInstruction* inst) {
-  return arrGetKImpl(env, inst, [](SSATmp* a) { return a->arrVal(); });
+  return arrGetKImpl(env, inst);
 }
 
 SSATmp* simplifyDictGetK(State& env, const IRInstruction* inst) {
-  return arrGetKImpl(env, inst, [](SSATmp* a) { return a->dictVal(); });
+  return arrGetKImpl(env, inst);
 }
 
 SSATmp* simplifyKeysetGetK(State& env, const IRInstruction* inst) {
@@ -3296,13 +3277,9 @@ SSATmp* simplifyGetPackedPtrIter(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyCheckMixedArrayKeys(State& env, const IRInstruction* inst) {
-  auto const arr = [&]() -> const ArrayData* {
-    auto const src = inst->src(0);
-    if (src->hasConstVal(TArr))  return src->arrVal();
-    if (src->hasConstVal(TDict)) return src->dictVal();
-    return nullptr;
-  }();
-  if (arr == nullptr) return mergeBranchDests(env, inst);
+  auto const src = inst->src(0);
+  if (!src->hasConstVal()) return mergeBranchDests(env, inst);
+  auto const arr = src->arrLikeVal();
 
   auto match = true;
   IterateKVNoInc(arr, [&](TypedValue key, TypedValue val){
@@ -3313,11 +3290,11 @@ SSATmp* simplifyCheckMixedArrayKeys(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyCheckMixedArrayOffset(State& env, const IRInstruction* inst) {
-  return checkOffsetImpl(env, inst, [](SSATmp* a) { return a->arrVal(); });
+  return checkOffsetImpl(env, inst);
 }
 
 SSATmp* simplifyCheckDictOffset(State& env, const IRInstruction* inst) {
-  return checkOffsetImpl(env, inst, [](SSATmp* a) { return a->dictVal(); });
+  return checkOffsetImpl(env, inst);
 }
 
 SSATmp* simplifyCheckKeysetOffset(State& env, const IRInstruction* inst) {
@@ -3396,15 +3373,13 @@ SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
 }
 
 namespace {
-template <class Fn>
 SSATmp* simplifyCountHelper(
   State& env,
   const IRInstruction* inst,
-  const Type& ty,
-  Fn szFn
+  const Type& ty
 ) {
   auto const src = inst->src(0);
-  if (src->hasConstVal(ty)) return cns(env, (src->*szFn)()->size());
+  if (src->hasConstVal(ty)) return cns(env, src->arrLikeVal()->size());
 
   auto const at = src->type().arrSpec().type();
   if (!at) return nullptr;
@@ -3421,19 +3396,19 @@ SSATmp* simplifyCountHelper(
 }
 
 SSATmp* simplifyCountArrayFast(State& env, const IRInstruction* inst) {
-  return simplifyCountHelper(env, inst, TArr, &SSATmp::arrVal);
+  return simplifyCountHelper(env, inst, TArr);
 }
 
 SSATmp* simplifyCountVec(State& env, const IRInstruction* inst) {
-  return simplifyCountHelper(env, inst, TVec, &SSATmp::vecVal);
+  return simplifyCountHelper(env, inst, TVec);
 }
 
 SSATmp* simplifyCountDict(State& env, const IRInstruction* inst) {
-  return simplifyCountHelper(env, inst, TDict, &SSATmp::dictVal);
+  return simplifyCountHelper(env, inst, TDict);
 }
 
 SSATmp* simplifyCountKeyset(State& env, const IRInstruction* inst) {
-  return simplifyCountHelper(env, inst, TKeyset, &SSATmp::keysetVal);
+  return simplifyCountHelper(env, inst, TKeyset);
 }
 
 SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {
@@ -3469,7 +3444,7 @@ SSATmp* packedLayoutLoadImpl(State& env,
   auto const src0 = inst->src(0);
   auto const src1 = inst->src(1);
   if (src0->hasConstVal() && src1->hasConstVal(TInt)) {
-    auto const arr = isVec ? src0->vecVal() : src0->arrVal();
+    auto const arr = src0->arrLikeVal();
     auto const idx = src1->intVal();
     assertx(arr->hasPackedLayout());
     if (idx >= 0) {
@@ -3737,8 +3712,7 @@ SSATmp* simplifyRaiseErrorOnInvalidIsAsExpressionType(
   if (!ts->hasConstVal(RuntimeOption::EvalHackArrDVArrs ? TDict : TArr)) {
     return nullptr;
   }
-  auto const tsVal = RuntimeOption::EvalHackArrDVArrs ? ts->dictVal()
-                                                      : ts->arrVal();
+  auto const tsVal = ts->arrLikeVal();
   if (errorOnIsAsExpressionInvalidTypes(ArrNR(tsVal), true)) {
     gen(env, Unreachable, ASSERT_REASON);
     return cns(env, TBottom);

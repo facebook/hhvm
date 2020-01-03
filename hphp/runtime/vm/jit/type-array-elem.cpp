@@ -40,14 +40,13 @@ PackedBounds packedArrayBoundsStaticCheck(Type arrayType,
   assertx(arrayType.subtypeOfAny(TArr, TVec));
   if (idx && (*idx < 0 || *idx > MixedArray::MaxSize)) return PackedBounds::Out;
 
-  auto const const_check = [&] (const ArrayData* val) {
+  if (arrayType.hasConstVal()) {
+    auto const val = arrayType.arrLikeVal();
     assertx(val->hasPackedLayout());
     if (val->empty()) return PackedBounds::Out;
     if (!idx) return PackedBounds::Unknown;
     return *idx < val->size() ? PackedBounds::In : PackedBounds::Out;
   };
-  if (arrayType.hasConstVal(TArr)) return const_check(arrayType.arrVal());
-  if (arrayType.hasConstVal(TVec)) return const_check(arrayType.vecVal());
 
   if (!idx) return PackedBounds::Unknown;
 
@@ -325,7 +324,7 @@ std::pair<Type, bool> vecFirstLastType(Type arr,
   assertx(arr <= (TVec | Type::Array(ArrayData::kPackedKind)));
 
   if (arr.hasConstVal()) {
-    auto const val = (arr <= TVec) ? arr.vecVal() : arr.arrVal();
+    auto const val = arr.arrLikeVal();
     if (val->empty()) return {TBottom, false};
     auto const pos = isFirst ? val->iter_begin() : val->iter_end();
     return {Type::cns(val->atPos(pos)), true};
@@ -367,7 +366,7 @@ std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey) {
   assertx(arr <= (TDict | Type::Array(ArrayData::kMixedKind)));
 
   if (arr.hasConstVal()) {
-    auto const val = (arr <= TDict) ? arr.dictVal() : arr.arrVal();
+    auto const val = arr.arrLikeVal();
     if (val->empty()) return {TBottom, false};
     auto const pos = isFirst ? val->iter_begin() : val->iter_end();
     auto const tv = isKey ? val->nvGetKey(pos) : val->atPos(pos);

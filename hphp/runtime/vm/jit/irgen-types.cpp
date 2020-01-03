@@ -1138,8 +1138,7 @@ SSATmp* handleIsResolutionAndCommonOpts(
     shouldDecRef = false;
     return gen(env, RaiseErrorOnInvalidIsAsExpressionType, popC(env));
   }
-  auto const ts =
-    RuntimeOption::EvalHackArrDVArrs ? a->dictVal() : a->arrVal();
+  auto const ts = a->arrLikeVal();
   auto maybe_resolved = ts;
   bool partial = true;
   bool invalidType = true;
@@ -1191,8 +1190,7 @@ void emitThrowAsTypeStructException(IRGS& env) {
   auto const c = topC(env, BCSPRelOffset { 1 });
   auto const tsAndBlock = [&]() -> std::pair<SSATmp*, Block*> {
     if (arr->hasConstVal(RuntimeOption::EvalHackArrDVArrs ? TDict : TArr)) {
-      auto const ts =
-        RuntimeOption::EvalHackArrDVArrs ? arr->dictVal() : arr->arrVal();
+      auto const ts = arr->arrLikeVal();
       auto maybe_resolved = ts;
       bool partial = true, invalidType = true;
       maybe_resolved =

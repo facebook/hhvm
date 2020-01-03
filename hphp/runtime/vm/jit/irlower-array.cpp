@@ -84,8 +84,7 @@ void cgCheckPackedArrayDataBounds(IRLS& env, const IRInstruction* inst) {
 
   auto const size = [&]{
     auto const arrTmp = inst->src(0);
-    if (arrTmp->hasConstVal(TArr)) return v.cns(arrTmp->arrVal()->size());
-    if (arrTmp->hasConstVal(TVec)) return v.cns(arrTmp->vecVal()->size());
+    if (arrTmp->hasConstVal()) return v.cns(arrTmp->arrLikeVal()->size());
     auto const at = arrTmp->type().arrSpec().type();
     using A = RepoAuthType::Array;
     if (at && at->tag() == A::Tag::Packed && at->emptiness() == A::Empty::No) {

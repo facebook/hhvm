@@ -81,7 +81,8 @@ int SSATmp::numWords() const {
 }
 
 Variant SSATmp::variantVal() const {
-  switch (type().toDataType()) {
+  auto const dt = type().toDataType();
+  switch (dt) {
     case KindOfUninit:
     case KindOfNull:
       // Upon return both will converted to KindOfNull anyway.
@@ -95,17 +96,10 @@ Variant SSATmp::variantVal() const {
     case KindOfPersistentString:
       return Variant{strVal(), Variant::PersistentStrInit{}};
     case KindOfPersistentVec:
-      return Variant{vecVal(), KindOfPersistentVec,
-                     Variant::PersistentArrInit{}};
     case KindOfPersistentDict:
-      return Variant{dictVal(), KindOfPersistentDict,
-                     Variant::PersistentArrInit{}};
     case KindOfPersistentKeyset:
-      return Variant{keysetVal(), KindOfPersistentKeyset,
-                     Variant::PersistentArrInit{}};
     case KindOfPersistentArray:
-      return Variant{arrVal(), KindOfPersistentArray,
-                     Variant::PersistentArrInit{}};
+      return Variant{arrLikeVal(), dt, Variant::PersistentArrInit{}};
     case KindOfClass:
       return Variant{const_cast<Class*>(clsVal())};
     case KindOfFunc:

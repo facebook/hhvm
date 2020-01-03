@@ -70,11 +70,8 @@ constexpr Type::bits_t Type::kClsSpecBits;
 
 const ArrayData* Type::arrLikeVal() const {
   assertx(hasConstVal(TArrLike));
-  if (*this <= TArr)    return m_arrVal;
-  if (*this <= TVec)    return m_vecVal;
-  if (*this <= TDict)   return m_dictVal;
-  if (*this <= TKeyset) return m_keysetVal;
-  always_assert(false);
+  assertx(subtypeOfAny(TArr, TVec, TDict, TKeyset));
+  return reinterpret_cast<const ArrayData*>(m_extra);
 }
 
 std::string Type::constValString() const {

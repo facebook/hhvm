@@ -1092,12 +1092,9 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
       // Otherwise, the return value is actually a tuple containing
       // all of the results. We need to unpack the tuple and write the
       // contents to their proper place on the stack.
-      auto const ad = [&] {
-        if (retVal->hasConstVal(TArr)) return retVal->arrVal();
-        if (retVal->hasConstVal(TVec)) return retVal->vecVal();
-        always_assert(false);
-      }();
+      auto const ad = retVal->arrLikeVal();
       assertx(ad->isStatic());
+      assertx(ad->hasPackedLayout());
       assertx(ad->size() == numInOut + 1);
 
       size_t inOutIndex = 0;

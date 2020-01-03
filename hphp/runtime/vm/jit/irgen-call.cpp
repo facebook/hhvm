@@ -212,8 +212,7 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     // Do not bother calculating the bitmap using a C++ helper if generics are
     // not statically known, as the prologue already has the same logic.
     if (!generics->hasConstVal(type)) return uint32_t{0};
-    auto const genericsArr = RuntimeOption::EvalHackArrDVArrs
-      ? generics->vecVal() : generics->arrVal();
+    auto const genericsArr = generics->arrLikeVal();
     return getGenericsBitmap(genericsArr);
   }();
 

@@ -1783,9 +1783,21 @@ void may_decref(Env& env, RCState& state, ASetID asetID, PreAdder add_node) {
   FTRACE(3, "    {} lb: {}({})\n",
          asetID, aset.lower_bound, aset.unsupported_refs);
 
-  if (balanced) return;
-  FTRACE(4, "    adding unbalanced decref: {}\n", asetID);
-  state.unbalanced_decrefs.push_back(asetID);
+  if (balanced) {
+    FTRACE(4, "    adding balanced decref: {}\n", asetID);
+    if (!state.has_unsupported_refs) return;
+    for (auto may_id : env.asets[asetID].may_alias) {
+      auto& may_aset = state.asets[may_id];
+      if (!may_aset.unsupported_refs) continue;
+      may_aset.lower_bound -= 1;
+      may_aset.unsupported_refs -= 1;
+      FTRACE(5, "    dropping unsupported ref for {}: {}({})\n",
+             may_id, may_aset.lower_bound, may_aset.unsupported_refs);
+    }
+  } else {
+    FTRACE(4, "    adding unbalanced decref: {}\n", asetID);
+    state.unbalanced_decrefs.push_back(asetID);
+  }
 }
 
 void kill_unsupported_refs(RCState& state, PreAdder add_node = {}) {

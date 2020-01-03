@@ -12,8 +12,15 @@ use naming_special_names_rust::{math, members, typehints};
 use oxidized::{
     aast_visitor::{visit_mut, NodeMut, VisitorMut},
     ast as tast, ast_defs,
+    namespace_env::Env as Namespace,
 };
 use runtime::TypedValue;
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Error {
+    NotLiteral,
+    UserDefinedConstant,
+}
 
 enum Radix {
     Oct,
@@ -75,6 +82,15 @@ fn array_to_typed_value(fields: &Vec<tast::Afield>) -> Option<TypedValue> {
         // of this module (in emit_expression)
         vec![(TypedValue::Uninit, TypedValue::Uninit)]
     }))
+}
+
+fn expr_to_typed_value(
+    e: &Emitter,
+    _ns: &Namespace,
+    expr: &tast::Expr,
+) -> Result<TypedValue, Error> {
+    // TODO(hrust) move logic of expr_to_opt_typed_value here, and make it a wrapper instead
+    expr_to_opt_typed_value(e, expr).map_or(Err(Error::UserDefinedConstant), |o| Ok(o))
 }
 
 pub fn expr_to_opt_typed_value(emitter: &Emitter, expr: &tast::Expr) -> Option<TypedValue> {
@@ -192,6 +208,28 @@ impl VisitorMut for FolderVisitor {
     }
 }
 
+pub fn fold_expr(expr: &mut tast::Expr, e: &mut Emitter) {
+    visit_mut(&mut FolderVisitor {}, e, expr);
+}
+
 pub fn fold_program(p: &mut tast::Program, e: &mut Emitter) {
     visit_mut(&mut FolderVisitor {}, e, p);
+}
+
+pub fn literals_from_exprs(
+    ns: &Namespace,
+    exprs: &mut [tast::Expr],
+    e: &mut Emitter,
+) -> Result<Vec<TypedValue>, Error> {
+    for expr in exprs.iter_mut() {
+        fold_expr(expr, e);
+    }
+    let ret = exprs
+        .iter()
+        .map(|expr| expr_to_typed_value(e, ns, expr))
+        .collect();
+    if let Err(Error::NotLiteral) = ret {
+        panic!("literals_from_exprs: not literal");
+    }
+    ret
 }

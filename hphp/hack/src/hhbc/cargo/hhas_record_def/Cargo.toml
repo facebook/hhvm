@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:hhas_record_def_rust
-# Signature<<3c126e308a5d80c0debcd0e16d56b50c2561f21a>>
+# Signature<<d7edf06ea663480edb890d22ebe80a5f32d3b08b>>
 [package]
 name = "hhas_record_def_rust"
 edition = "2018"
@@ -14,4 +14,4 @@ path = "../../hhas_record_def.rs"
 hhas_type = { path = "../hhas_type" }
 hhbc_id_rust = { path = "../hhbc_id" }
 runtime = { path = "../runtime" }
-# @end of Signature<<3c126e308a5d80c0debcd0e16d56b50c2561f21a>>
+# @end of Signature<<d7edf06ea663480edb890d22ebe80a5f32d3b08b>>

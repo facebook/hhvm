@@ -139,7 +139,6 @@ void install_catch_trace(_Unwind_Context* ctx, TCA rip,
   // things to the handler using the RDS. This also simplifies the handler code
   // because it doesn't have to worry about saving its arguments somewhere
   // while executing the exit trace.
-  assertx(g_unwind_rds.isInit());
   if (do_side_exit) {
     __cxxabiv1::__cxa_end_catch();
     g_unwind_rds->exn = nullptr;
@@ -223,7 +222,6 @@ tc_unwind_personality(int version,
     static_cast<InvalidSetMException*>(exn);
   __cxxabiv1::__cxa_begin_catch(ue);
   if (tl_regState == VMRegState::DIRTY) sync_regstate(ip, context);
-  assertx(g_unwind_rds.isInit());
   g_unwind_rds->exn = [&] () -> ObjectData* {
     if (ti == typeid(Object)) return static_cast<Object*>(exn)->get();
     if (ti == typeid(req::root<Object>)) {
@@ -242,7 +240,6 @@ tc_unwind_personality(int version,
 }
 
 TCUnwindInfo tc_unwind_resume(ActRec* fp) {
-  assertx(g_unwind_rds.isInit());
   if (g_unwind_rds->shouldCallResume) {
     ITRACE(3, "shouldCallResume is set\n");
     g_unwind_rds->shouldCallResume = false;
@@ -356,7 +353,6 @@ TCUnwindInfo tc_unwind_resume_stublogue(ActRec* fp, TCA savedRip) {
   // same logical VM frame, but in the context before entering this stub.
   ITRACE(1, "tc_unwind_resume_stublogue: fp {}, saved rip {}\n",
          fp, savedRip);
-  assertx(g_unwind_rds.isInit());
   auto catchTrace = lookup_catch_trace(savedRip);
   if (catchTrace) {
     ITRACE(1,

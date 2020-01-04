@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:rust_parser_errors
-# Signature<<6e3464a93cfd2660d291fe1c47c40061d8175fda>>
+# Signature<<f2904701ca722841f06c32092897c54fc48d11aa>>
 [package]
 name = "rust_parser_errors"
 edition = "2018"
@@ -20,4 +20,4 @@ syntax_tree = { path = "../syntax_tree" }
 itertools = "*"
 lazy_static = "*"
 regex = "*"
-# @end of Signature<<6e3464a93cfd2660d291fe1c47c40061d8175fda>>
+# @end of Signature<<f2904701ca722841f06c32092897c54fc48d11aa>>

@@ -2,7 +2,6 @@
   (name ast)
   (wrapped false)
   (modules
-    ast
     ast_defs
     ast_defs_visitors_ancestors)
   (libraries

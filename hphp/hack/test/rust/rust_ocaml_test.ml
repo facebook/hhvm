@@ -541,16 +541,12 @@ module LowererTest_ = struct
         (print_lowpri_errs result.lowpri_errors)
         (print_errs result.syntax_errors))
 
-  let lower lower_env source_text is_rust =
+  let lower lower_env source_text =
     (Errors.is_hh_fixme := (fun _ _ -> false));
     (Errors.get_hh_fixme_pos := (fun _ _ -> None));
     (Errors.is_hh_fixme_disallowed := (fun _ _ -> false));
     let (_err, r) =
-      Errors.do_ (fun () ->
-          if is_rust then
-            Lowerer.from_text_rust lower_env source_text
-          else
-            Lowerer.from_text_ocaml lower_env source_text)
+      Errors.do_ (fun () -> Lowerer.from_text_rust lower_env source_text)
     in
     r
 
@@ -559,7 +555,7 @@ module LowererTest_ = struct
       Lowerer.make_env
         file
         ~codegen:args.codegen
-        ~rust_compare_mode:true
+        ~disable_global_state_mutation:true
         ~show_all_errors:true
         ~keep_errors:true
         ~elaborate_namespaces:false
@@ -567,7 +563,7 @@ module LowererTest_ = struct
         ~parser_options:
           { ParserOptions.default with GlobalOptions.po_rust_lowerer = is_rust }
     in
-    try Tree (lower lower_env source_text is_rust)
+    try Tree (lower lower_env source_text)
     with e -> Crash (Caml.Printexc.to_string e)
 
   let test args ~ocaml_env ~rust_env file contents =
@@ -694,7 +690,7 @@ module ClosureConvertTest_ = struct
       Lowerer.make_env
         file
         ~codegen:args.codegen
-        ~rust_compare_mode:true
+        ~disable_global_state_mutation:true
         ~show_all_errors:true
         ~keep_errors:true
         ~elaborate_namespaces:false
@@ -704,7 +700,7 @@ module ClosureConvertTest_ = struct
 
     let ocaml_tast =
       let open Rust_aast_parser_types in
-      (match (LowererTest_.lower lower_env source_text false).aast with
+      (match (LowererTest_.lower lower_env source_text).aast with
       | Ok x -> x
       | Error x -> failwith x)
       |> Full_fidelity_ast.aast_to_tast

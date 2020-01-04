@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:rust_parser_errors_ffi
-# Signature<<c86d5eb480f794f6998bd63f662337edab284edc>>
+# Signature<<5e6fe67a9368f2cb7f822fd5e1582f330b75c847>>
 [package]
 name = "rust_parser_errors_ffi"
 edition = "2018"
@@ -21,4 +21,4 @@ rust_parser_errors = { path = ".." }
 rust_to_ocaml = { path = "../../rust_to_ocaml" }
 syntax_tree = { path = "../../syntax_tree" }
 ocaml = "*"
-# @end of Signature<<c86d5eb480f794f6998bd63f662337edab284edc>>
+# @end of Signature<<5e6fe67a9368f2cb7f822fd5e1582f330b75c847>>

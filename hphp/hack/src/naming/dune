@@ -18,14 +18,6 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
-  (name ast_to_nast)
-  (modules
-    ast_to_nast)
-  (libraries
-    nast)
-  (preprocess (pps ppx_deriving.std)))
-
-(library
   (name naming_attributes)
   (modules
     naming_attributes)

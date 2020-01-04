@@ -280,10 +280,8 @@ let compute_cst ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
   | Some cst -> cst
   | None ->
     let parser_env = Full_fidelity_ast.make_env entry.Provider_context.path in
-    let (cst, _) =
-      Full_fidelity_ast.from_text_with_legacy_and_cst
-        parser_env
-        entry.Provider_context.source_text
+    let (_, cst) =
+      Full_fidelity_ast.parse_text parser_env entry.Provider_context.source_text
     in
     entry.Provider_context.cst <- Some cst;
     cst

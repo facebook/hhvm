@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:parser_rust
-# Signature<<6716db4388d80c0a01905ce3708c9c26ce455156>>
+# Signature<<a0e1f767d03bc9a8e53327bac9a39fcf29339ba1>>
 [package]
 name = "parser_rust"
 edition = "2018"
@@ -19,4 +19,4 @@ parser_core_types = { path = "cargo/core_types" }
 stack_limit = { path = "../utils/stack_limit" }
 lazy_static = "*"
 ocaml = "*"
-# @end of Signature<<6716db4388d80c0a01905ce3708c9c26ce455156>>
+# @end of Signature<<a0e1f767d03bc9a8e53327bac9a39fcf29339ba1>>

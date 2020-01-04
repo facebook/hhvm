@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:decl_mode_parser
-# Signature<<f3728174bd3004962c07a02487c87c07005fd047>>
+# Signature<<7a7d229a104a5df8ad7ab977e3450127ef7d3a0d>>
 [package]
 name = "decl_mode_parser"
 edition = "2018"
@@ -16,4 +16,4 @@ parser_rust = { path = "../.." }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 syntax_smart_constructors = { path = "../syntax_smart_constructors" }
 ocaml = "*"
-# @end of Signature<<f3728174bd3004962c07a02487c87c07005fd047>>
+# @end of Signature<<7a7d229a104a5df8ad7ab977e3450127ef7d3a0d>>

@@ -79,7 +79,6 @@
   (name parser)
   (wrapped false)
   (modules
-    ast_check
     docblock_finder
     docblock_parser
     full_fidelity_ast
@@ -101,7 +100,6 @@
     full_fidelity
     heap_shared_mem
     hh_autoimport
-    html_entities
     logging
     namespace_env
     nast

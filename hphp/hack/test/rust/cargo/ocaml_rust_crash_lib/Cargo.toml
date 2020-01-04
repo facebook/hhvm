@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/test/rust:ocaml_rust_crash_lib
-# Signature<<0415572464337479663a26c8f0642c8b1ff2bf1b>>
+# Signature<<826cfb61190357f32b1631e5c8fdd289862ef6b7>>
 [package]
 name = "ocaml_rust_crash_lib"
 edition = "2018"
@@ -12,4 +12,4 @@ path = "../../ocaml_rust_crash.rs"
 
 [dependencies]
 ocaml = "*"
-# @end of Signature<<0415572464337479663a26c8f0642c8b1ff2bf1b>>
+# @end of Signature<<826cfb61190357f32b1631e5c8fdd289862ef6b7>>

@@ -41,9 +41,11 @@ class EqualTest(unittest.TestCase):
     def test_infinite_actual_lines_due_to_infinite_loop(self) -> None:
         COMMON_LINE = "foo\n"
 
+        # pyre-fixme[53]: Captured variable `COMMON_LINE` is not annotated.
         def gen_foo_once() -> Iterator[str]:
             yield COMMON_LINE
 
+        # pyre-fixme[53]: Captured variable `COMMON_LINE` is not annotated.
         def gen_foo_indefinitely() -> Iterator[str]:
             while True:
                 yield COMMON_LINE

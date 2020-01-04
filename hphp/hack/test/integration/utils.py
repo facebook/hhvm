@@ -46,6 +46,7 @@ def ensure_output_contains(f: BinaryIO, s: str, timeout: int = 20) -> None:
     """
     lines = []
 
+    # pyre-fixme[53]: Captured variable `lines` is not annotated.
     def handler(signo: int, frame: FrameType) -> None:
         raise AssertionError(
             "Failed to find %s in the following output: %s" % (s, "".join(lines))
@@ -117,6 +118,7 @@ def uninterpolate_variables(payload: Json, variables: VariableMap) -> Json:
 
     for variable, value in variable_bindings:
 
+        # pyre-fixme[53]: Captured variable `value` is not annotated.
         def uninterpolate(json: JsonScalar) -> JsonScalar:
             if isinstance(json, str):
                 return json.replace(value, "${" + variable + "}")

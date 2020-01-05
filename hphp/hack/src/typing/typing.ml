@@ -2194,7 +2194,7 @@ and expr_
         (Aast.Id id)
         (Reason.Rwitness cst_pos, Typing_utils.tany env)
     | Some (ty, _) ->
-      let (env, ty) = Phase.localize_with_self env ty in
+      let (env, ty) = Phase.localize_with_self ~pos:p env ty in
       make_result env p (Aast.Id id) ty)
   | Method_id (instance, meth) ->
     (* Method_id is used when creating a "method pointer" using the magic
@@ -2368,6 +2368,7 @@ and expr_
             this_ty = cid_ty;
             from_class = Some cid;
             quiet = true;
+            on_error = Errors.unify_error_at p;
           }
         in
         (match ty with
@@ -4180,6 +4181,7 @@ and new_object
                 this_ty = obj_ty;
                 from_class = None;
                 quiet = false;
+                on_error = Errors.unify_error_at p;
               }
             in
             if ce_abstract then
@@ -5811,6 +5813,7 @@ and class_get_
           substs = Subst.make_locl (Cls.tparams class_) paraml;
           from_class = Some cid;
           quiet = true;
+          on_error = Errors.unify_error_at p;
         }
       in
       let get_smember_from_constraints env class_info =
@@ -6264,6 +6267,7 @@ and call_construct p env class_ params el unpacked_element cid =
       substs = Subst.make_locl (Cls.tparams class_) params;
       from_class = Some cid;
       quiet = true;
+      on_error = Errors.unify_error_at p;
     }
   in
   let env =
@@ -7184,6 +7188,7 @@ and safely_refine_class_type
       (* In case `this` appears in constraints *)
       from_class = None;
       quiet = true;
+      on_error = Errors.unify_error_at p;
     }
   in
   let add_bounds env (t, ty_fresh) =
@@ -8454,12 +8459,12 @@ and typedef_def tcopt typedef =
     typedef
   in
   let ty = Decl_hint.hint env.decl_env hint in
-  let (env, ty) = Phase.localize_with_self env ty in
+  let (env, ty) = Phase.localize_with_self ~pos:t_pos env ty in
   let env =
     match tcstr with
     | Some tcstr ->
       let cstr = Decl_hint.hint env.decl_env tcstr in
-      let (env, cstr) = Phase.localize_with_self env cstr in
+      let (env, cstr) = Phase.localize_with_self ~pos:t_pos env cstr in
       Typing_ops.sub_type
         t_pos
         Reason.URnewtype_cstr
@@ -8599,7 +8604,14 @@ and class_get_pu ?from_class env ty name =
   | (env, None) -> (env, None)
   | (env, Some (this_ty, substs, et)) ->
     let ety_env =
-      { type_expansions = []; this_ty; substs; from_class; quiet = false }
+      {
+        type_expansions = [];
+        this_ty;
+        substs;
+        from_class;
+        quiet = false;
+        on_error = Errors.unify_error;
+      }
     in
     (env, Some (ety_env, et))
 

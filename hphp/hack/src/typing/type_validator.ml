@@ -146,6 +146,7 @@ class virtual type_validator =
                     ~default:(MakeType.nothing Reason.none);
                 from_class = Some Aast.CIstatic;
                 quiet = true;
+                on_error = Errors.unify_error_at (Reason.to_pos (fst root_ty));
               };
             expanded_typedefs = SSet.empty;
             validity = Valid;

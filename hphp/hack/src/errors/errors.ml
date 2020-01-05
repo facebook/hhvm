@@ -3567,6 +3567,9 @@ let discarded_awaitable pos1 pos2 =
 let unify_error ?code errl =
   add_list (Option.value code ~default:(Typing.err_code Typing.UnifyError)) errl
 
+let unify_error_at pos ?code errl =
+  unify_error ?code ((pos, "Typing error") :: errl)
+
 let maybe_unify_error specific_code ?code errl =
   add_list (Option.value code ~default:(Typing.err_code specific_code)) errl
 

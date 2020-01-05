@@ -656,6 +656,7 @@ type expand_env = {
    *)
   from_class: Nast.class_id_ option;
   quiet: bool;
+  on_error: Errors.typing_error_callback;
       (** If what we are localizing or expanding comes from the decl heap for
   example, then some errors must be silenced since they must have already been
   raised when first typechecking whatever we have fetched from the heap.

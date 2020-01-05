@@ -473,6 +473,8 @@ val discarded_awaitable : Pos.t -> Pos.t -> unit
 
 val unify_error : typing_error_callback
 
+val unify_error_at : Pos.t -> typing_error_callback
+
 val index_type_mismatch : typing_error_callback
 
 val expected_stringlike : typing_error_callback

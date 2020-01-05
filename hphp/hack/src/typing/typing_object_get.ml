@@ -168,6 +168,7 @@ and obj_get_concrete_ty
       substs = Subst.make_locl (Cls.tparams class_info) paraml;
       from_class = Some class_id;
       quiet = true;
+      on_error;
     }
   in
   let (env, concrete_ty) = Env.expand_type env concrete_ty in
@@ -469,7 +470,7 @@ and obj_get_concrete_ty
       on_error;
     default ()
 
-and widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
+and widen_class_for_obj_get ~is_method ~nullsafe ~on_error member_name env ty =
   match ty with
   | (_, Tprim Tnull) ->
     if Option.is_some nullsafe then
@@ -502,6 +503,7 @@ and widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
                   this_ty = ty;
                   from_class = None;
                   quiet = true;
+                  on_error;
                 }
               in
               let (env, basety) = Phase.localize ~ety_env env basety in
@@ -583,7 +585,7 @@ and obj_get_
       Typing_solver.expand_type_and_narrow
         env
         ~description_of_expected:"an object"
-        (widen_class_for_obj_get ~is_method ~nullsafe id_str)
+        (widen_class_for_obj_get ~is_method ~nullsafe ~on_error id_str)
         obj_pos
         ty1
         Errors.unify_error

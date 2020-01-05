@@ -179,7 +179,8 @@ let (simplify_intersections_ref : simplify_intersections ref) =
 
 let simplify_intersections x = !simplify_intersections_ref x
 
-type localize_with_self = env -> ?quiet:bool -> decl_ty -> env * locl_ty
+type localize_with_self =
+  env -> ?pos:Pos.t -> ?quiet:bool -> decl_ty -> env * locl_ty
 
 let (localize_with_self_ref : localize_with_self ref) =
   ref (not_implemented "localize_with_self")
@@ -681,7 +682,14 @@ let class_get_pu ?from_class env ty name =
   ( env,
     pu >>= fun (this_ty, substs, et) ->
     let ety_env =
-      { type_expansions = []; this_ty; substs; from_class; quiet = false }
+      {
+        type_expansions = [];
+        this_ty;
+        substs;
+        from_class;
+        quiet = false;
+        on_error = Errors.unify_error;
+      }
     in
     Some (ety_env, et) )
 

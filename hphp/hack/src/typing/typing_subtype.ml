@@ -915,6 +915,7 @@ and simplify_subtype_i
               substs = Subst.make_locl (Cls.tparams class_ty) tyl_super;
               this_ty = Option.value this_ty ~default:ty_super;
               from_class = None;
+              on_error = subtype_env.on_error;
               quiet = true;
             }
           in
@@ -1586,6 +1587,7 @@ and simplify_subtype_i
                 this_ty = Option.value this_ty ~default:ty_sub;
                 from_class = None;
                 quiet = true;
+                on_error = subtype_env.on_error;
               }
             in
             let up_obj = Cls.get_ancestor class_sub cid_super in
@@ -2805,10 +2807,10 @@ and sub_type_inner
 
 and is_sub_type_alt_i
     ~ignore_generic_params ~no_top_bottom ~treat_dynamic_as_bottom env ty1 ty2 =
-  let this_ty =
+  let (this_ty, pos) =
     match ty1 with
-    | LoclType ty1 -> Some ty1
-    | ConstraintType _ -> None
+    | LoclType ty1 -> (Some ty1, Reason.to_pos (fst ty1))
+    | ConstraintType _ -> (None, Pos.none)
   in
   let (_env, prop) =
     simplify_subtype_i
@@ -2821,7 +2823,7 @@ and is_sub_type_alt_i
               empty_seen );
           no_top_bottom;
           treat_dynamic_as_bottom;
-          on_error = Errors.unify_error;
+          on_error = Errors.unify_error_at pos;
         }
       ~this_ty
       (* It is weird that this can cause errors, but I am wary to discard them.
@@ -3127,12 +3129,14 @@ and decompose_constraint
   (* constraints are caught based on reason, not error callback. Using unify_error *)
   match ck with
   | Ast_defs.Constraint_as ->
-    decompose_subtype p env ty_sub ty_super Errors.unify_error
+    decompose_subtype p env ty_sub ty_super (Errors.unify_error_at p)
   | Ast_defs.Constraint_super ->
-    decompose_subtype p env ty_super ty_sub Errors.unify_error
+    decompose_subtype p env ty_super ty_sub (Errors.unify_error_at p)
   | Ast_defs.Constraint_eq ->
-    let env = decompose_subtype p env ty_sub ty_super Errors.unify_error in
-    decompose_subtype p env ty_super ty_sub Errors.unify_error
+    let env =
+      decompose_subtype p env ty_sub ty_super (Errors.unify_error_at p)
+    in
+    decompose_subtype p env ty_super ty_sub (Errors.unify_error_at p)
 
 (* Given a constraint ty1 ck ty2 where ck is AS, SUPER or =,
  * add bounds to type parameters in the environment that necessarily
@@ -3198,7 +3202,7 @@ let add_constraint
                         env
                         ty_sub'
                         ty_super'
-                        Errors.unify_error)))
+                        (Errors.unify_error_at p))))
         in
         if Int.equal (Env.get_tpenv_size env) oldsize then
           env

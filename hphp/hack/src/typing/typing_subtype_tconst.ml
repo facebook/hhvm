@@ -98,7 +98,9 @@ let get_tyvar_type_const env var ((pos, tconstid_) as tconstid) =
   | None ->
     let (env, tvar) = Env.fresh_invariant_type_var env pos in
     Typing_log.log_new_tvar_for_tconst env pos var tconstid_ tvar;
-    let env = add_tyvar_type_const env var tconstid tvar Errors.unify_error in
+    let env =
+      add_tyvar_type_const env var tconstid tvar (Errors.unify_error_at pos)
+    in
     (env, tvar)
 
 module Pu = struct

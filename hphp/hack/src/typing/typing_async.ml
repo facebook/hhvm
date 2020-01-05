@@ -79,7 +79,9 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
   in
   let env = Env.open_tyvars env p in
   let (env, ty) = extract_inner env opt_ty_maybe in
-  let env = Typing_solver.close_tyvars_and_solve env Errors.unify_error in
+  let env =
+    Typing_solver.close_tyvars_and_solve env (Errors.unify_error_at p)
+  in
   (env, ty)
 
 let overload_extract_from_awaitable_list env p tyl =

@@ -3348,30 +3348,16 @@ bool canReduceToDontResolve(SArray ts, bool checkArrays) {
       return isTSAllWildcards(ts) || checkGenerics(ts);
     case TypeStructure::Kind::T_tuple:
       return canReduceToDontResolveList(get_ts_elem_types(ts), checkArrays);
-    case TypeStructure::Kind::T_shape: {
-      auto result = true;
-      IterateV(
-        get_ts_fields(ts),
-        [&](TypedValue v) {
-          assertx(isArrayLikeType(v.m_type));
-          auto const arr = v.m_data.parr;
-          if (arr->exists(s_is_cls_cns)) {
-            result = false;
-            return true; // short circuit
-          }
-          result &= canReduceToDontResolve(get_ts_value(arr), checkArrays);
-           // when result is false, we can short circuit
-          return !result;
-        }
-      );
-      return result;
-    }
     case TypeStructure::Kind::T_fun: {
       auto const variadicType = get_ts_variadic_type_opt(ts);
       return canReduceToDontResolve(get_ts_return_type(ts), checkArrays)
         && canReduceToDontResolveList(get_ts_param_types(ts), checkArrays)
         && (!variadicType || canReduceToDontResolve(variadicType, checkArrays));
     }
+    case TypeStructure::Kind::T_shape:
+      // We cannot skip resolution on shapes since shapes contain "value" field
+      // which resolution removes.
+      return false;
     // Following needs to be resolved
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:

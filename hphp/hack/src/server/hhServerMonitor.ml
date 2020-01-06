@@ -147,6 +147,9 @@ let start () =
   (* TODO: Catch all exceptions that make it this high, log them, and exit with
    * the proper code *)
   try
+    (* This avoids dying if SIGUSR{1,2} is received by accident *)
+    Sys_utils.set_signal Sys.sigusr1 Sys.Signal_ignore;
+    Sys_utils.set_signal Sys.sigusr2 Sys.Signal_ignore;
     Daemon.check_entry_point ();
 
     (* this call might not return *)

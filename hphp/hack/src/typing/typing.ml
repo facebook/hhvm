@@ -105,7 +105,9 @@ let map_funcbody_annotation an =
 let debug_last_pos = ref Pos.none
 
 let debug_print_last_pos _ =
-  print_endline (Pos.string (Pos.to_absolute !debug_last_pos))
+  Hh_logger.info
+    "Last typecheck pos: %s"
+    (Pos.string (Pos.to_absolute !debug_last_pos))
 
 (****************************************************************************)
 (* Hooks *)

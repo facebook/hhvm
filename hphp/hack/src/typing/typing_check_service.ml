@@ -371,6 +371,11 @@ let load_and_process_files
     ~(memory_cap : int option)
     ~(check_info : check_info) : Errors.t * computation_progress =
   let opts = TypeCheckStore.load () in
+  (* When the type-checking worker receives SIGUSR1, display a position which
+     corresponds approximately with the function/expression being checked. *)
+  Sys_utils.set_signal
+    Sys.sigusr1
+    (Sys.Signal_handle Typing.debug_print_last_pos);
   process_files dynamic_view_files opts errors progress ~memory_cap ~check_info
 
 (*****************************************************************************)

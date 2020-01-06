@@ -1,9 +1,7 @@
 File "class_get_union.php--file1.php", line 7, characters 11-12:
 Invalid argument (Typing[4110])
-File "class_get_union.php--file2.php", line 9, characters 23-23:
-Expected C2::T
 File "class_get_union.php--file2.php", line 11, characters 28-34:
-  resulting from expanding the type constant C2::T
+Expected C2::T
 File "class_get_union.php--file1.php", line 6, characters 27-28:
   where the class 'C2' was referenced here
 File "class_get_union.php--file1.php", line 5, characters 40-42:

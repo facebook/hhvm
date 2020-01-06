@@ -45,6 +45,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     "attributes"
     "deprecated"
     "invalid-offsetof"
+    "register"
     "sign-compare"
     "strict-aliasing"
     "unused-function"

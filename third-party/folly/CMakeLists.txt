@@ -75,6 +75,7 @@ list(REMOVE_ITEM files
   ${FOLLY_DIR}/experimental/io/IoUring.cpp
   ${FOLLY_DIR}/experimental/io/IoUringBackend.cpp
   ${FOLLY_DIR}/experimental/io/HugePageUtil.cpp
+  ${FOLLY_DIR}/experimental/io/PollIoBackend.cpp
   ${FOLLY_DIR}/experimental/symbolizer/StackTrace.cpp
   ${FOLLY_DIR}/experimental/symbolizer/SignalHandler.cpp
   ${FOLLY_DIR}/init/Init.cpp
@@ -99,6 +100,7 @@ list(REMOVE_ITEM hfiles
   ${FOLLY_DIR}/experimental/io/AsyncIO.h
   ${FOLLY_DIR}/experimental/io/IoUring.h
   ${FOLLY_DIR}/experimental/io/IoUringBackend.h
+  ${FOLLY_DIR}/experimental/io/PollIoBackend.h
   ${FOLLY_DIR}/experimental/symbolizer/StackTrace.h
   ${FOLLY_DIR}/experimental/symbolizer/ElfCache.h
   ${FOLLY_DIR}/experimental/symbolizer/SignalHandler.h

@@ -30,7 +30,7 @@ type t =
   | Rarith_ret_float of Pos.t * t * arg_position (* pos, arg float typing reason, arg position *)
   | Rarith_ret_num of Pos.t * t * arg_position (* pos, arg num typing reason, arg position *)
   | Rarith_ret_int of Pos.t
-  | Rsum_dynamic of Pos.t
+  | Rarith_dynamic of Pos.t
   | Rbitwise_dynamic of Pos.t
   | Rincdec_dynamic of Pos.t
   | Rstring2 of Pos.t
@@ -201,8 +201,13 @@ let rec to_string prefix r =
         prefix
         ^ " because this is the result of an integer arithmetic operation" );
     ]
-  | Rsum_dynamic _ ->
-    [(p, prefix ^ " because this is the sum of two arguments typed dynamic")]
+  | Rarith_dynamic _ ->
+    [
+      ( p,
+        prefix
+        ^ " because this is the result of an arithmetic operation with two arguments typed dynamic"
+      );
+    ]
   | Rbitwise_dynamic _ ->
     [
       ( p,
@@ -498,7 +503,7 @@ and to_pos = function
   | Raccess p -> p
   | Rarith p -> p
   | Rarith_ret p -> p
-  | Rsum_dynamic p -> p
+  | Rarith_dynamic p -> p
   | Rstring2 p -> p
   | Rcomp p -> p
   | Rconcat p -> p
@@ -686,7 +691,7 @@ let to_constructor_string r =
   | Rarith_ret_num _ -> "Rarith_ret_num"
   | Rarith_ret_float _ -> "Rarith_ret_float"
   | Rarith_ret_int _ -> "Rarith_ret_int"
-  | Rsum_dynamic _ -> "Rsum_dynamic"
+  | Rarith_dynamic _ -> "Rarith_dynamic"
   | Rbitwise_dynamic _ -> "Rbitwise_dynamic"
   | Rincdec_dynamic _ -> "Rincdec_dynamic"
   | Rtype_variable _ -> "Rtype_variable"

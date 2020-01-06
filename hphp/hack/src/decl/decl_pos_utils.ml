@@ -109,7 +109,7 @@ struct
     | Rarith_ret_int p -> Rarith_ret_int (pos p)
     | Rarith_ret_float (p, r, s) -> Rarith_ret_float (pos p, reason r, s)
     | Rarith_ret_num (p, r, s) -> Rarith_ret_num (pos p, reason r, s)
-    | Rsum_dynamic p -> Rsum_dynamic (pos p)
+    | Rarith_dynamic p -> Rarith_dynamic (pos p)
     | Rbitwise_dynamic p -> Rbitwise_dynamic (pos p)
     | Rincdec_dynamic p -> Rincdec_dynamic (pos p)
     | Rtype_variable p -> Rtype_variable (pos p)

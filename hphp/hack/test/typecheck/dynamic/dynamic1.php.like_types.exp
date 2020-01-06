@@ -23,7 +23,7 @@ File "dynamic1.php", line 33, characters 3-13:
 File "dynamic1.php", line 35, characters 3-13:
   dynamic
 File "dynamic1.php", line 37, characters 3-13:
-  num
+  ~int
 File "dynamic1.php", line 39, characters 3-13:
   float
 File "dynamic1.php", line 41, characters 3-13:

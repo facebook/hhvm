@@ -309,7 +309,7 @@ function foo($x) : void {
 let dynamic_view_cases =
   [
     (("dynamic_view.php", 5, 14), "dynamic");
-    (("dynamic_view.php", 7, 3), "num");
+    (("dynamic_view.php", 7, 3), "(dynamic | int)");
     (("dynamic_view.php", 9, 3), "dynamic");
     (("dynamic_view.php", 11, 3), "dynamic");
     (("dynamic_view.php", 13, 3), "dynamic");

@@ -11,6 +11,27 @@ module Env = Typing_env
 module MakeType = Typing_make_type
 module Reason = Typing_reason
 
+let is_sub_dynamic env t =
+  Typing_solver.is_sub_type env t (MakeType.dynamic Reason.Rnone)
+
+let is_float_or_like_float env t =
+  let (env, like_float) =
+    Typing_union.union
+      env
+      (MakeType.dynamic Reason.Rnone)
+      (MakeType.float Reason.Rnone)
+  in
+  Typing_solver.is_sub_type env t like_float && not (is_sub_dynamic env t)
+
+let is_int_or_like_int env t =
+  let (env, like_int) =
+    Typing_union.union
+      env
+      (MakeType.dynamic Reason.Rnone)
+      (MakeType.int Reason.Rnone)
+  in
+  Typing_solver.is_sub_type env t like_int && not (is_sub_dynamic env t)
+
 let is_float env t =
   Typing_solver.is_sub_type env t (MakeType.float Reason.Rnone)
 
@@ -130,62 +151,81 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     (* TODO: extend this behaviour to other operators. Consider producing dynamic
      * result if *either* operand is dynamic
      *)
-    if is_dynamic1 && is_dynamic2 && Ast_defs.(equal_bop bop Plus) then
-      make_result env te1 te2 (MakeType.dynamic (Reason.Rsum_dynamic p))
-    else if
-      (* If either argument is a float then return float *)
-      is_float env ty1
-    then
-      make_result
-        env
-        te1
-        te2
-        (MakeType.float (Reason.Rarith_ret_float (p, fst ty1, Reason.Afirst)))
-    else if is_float env ty2 then
-      make_result
-        env
-        te1
-        te2
-        (MakeType.float (Reason.Rarith_ret_float (p, fst ty2, Reason.Asecond)))
-    (* If both arguments are ints then return int *)
-    else if is_int env ty1 && is_int env ty2 then
-      make_result env te1 te2 (MakeType.int (Reason.Rarith_ret_int p))
-    else if
-      (* We already know that ty1 and ty2 are subtypes of num.
-       * If either is *exactly* num then type of whole expression must be num.
-       * We do this now to avoid unnnecessarily resolving type variables to int below.
-       *)
-      is_super_num env ty1
-    then
-      make_result
-        env
-        te1
-        te2
-        (MakeType.num (Reason.Rarith_ret_num (p, fst ty1, Reason.Afirst)))
-    else if is_super_num env ty2 then
-      make_result
-        env
-        te1
-        te2
-        (MakeType.num (Reason.Rarith_ret_num (p, fst ty2, Reason.Asecond)))
-    else
-      let is_infer_missing_mode =
-        TypecheckerOptions.InferMissing.is_on
-        @@ TypecheckerOptions.infer_missing (Env.get_tcopt env)
+    if is_float_or_like_float env ty1 then
+      let ty =
+        MakeType.float (Reason.Rarith_ret_float (p, fst ty1, Reason.Afirst))
       in
-      (* If ty1 is int, the result has the same type as ty2. *)
-      if is_infer_missing_mode && is_int env ty1 && is_num env ty2 then
-        make_result env te1 te2 ty2
-      else if is_infer_missing_mode && is_int env ty2 && is_num env ty1 then
-        make_result env te1 te2 ty1
-      else
-        (* Otherwise try narrowing any type variable, with default int *)
-        let (env, ty1) = expand_type_and_narrow_to_int env p ty1 in
-        let (env, ty2) = expand_type_and_narrow_to_int env p ty2 in
-        if is_int env ty1 && is_int env ty2 then
-          make_result env te1 te2 (MakeType.int (Reason.Rarith_ret_int p))
+      let (env, ty) =
+        (* If either operand is exactly float. This way defers checking
+         * subtyping on the second operand except in the case of ~float + float = float. *)
+        if
+          (not is_dynamic1)
+          || ((not is_dynamic2) && is_float_or_like_float env ty2)
+        then
+          (env, ty)
         else
-          make_result env te1 te2 (MakeType.num (Reason.Rarith_ret p))
+          Typing_union.union env (MakeType.dynamic (Reason.Rwitness p)) ty
+      in
+      make_result env te1 te2 ty
+    else if is_float_or_like_float env ty2 then
+      let ty =
+        MakeType.float (Reason.Rarith_ret_float (p, fst ty2, Reason.Asecond))
+      in
+      let (env, ty) =
+        (* We know the left operand is not float or ~float, so the result only depends on ty2 *)
+        if not is_dynamic2 then
+          (env, ty)
+        else
+          Typing_union.union env (MakeType.dynamic (Reason.Rwitness p)) ty
+      in
+      make_result env te1 te2 ty
+    else
+      let num1 = is_super_num env ty1 in
+      if
+        (* If either operand is num or ~num (and neither is float or ~float), return num *)
+        num1 || is_super_num env ty2
+      then
+        let (r, apos) =
+          if num1 then
+            (fst ty1, Reason.Afirst)
+          else
+            (fst ty2, Reason.Asecond)
+        in
+        make_result
+          env
+          te1
+          te2
+          (MakeType.num (Reason.Rarith_ret_num (p, r, apos)))
+      (* The only remaining cases return ~int, except for int + int = int and dynamic + dynamic = dynamic *)
+      else if is_sub_dynamic env ty1 && is_sub_dynamic env ty2 then
+        make_result env te1 te2 (MakeType.dynamic (Reason.Rarith_dynamic p))
+      else if is_int_or_like_int env ty1 || is_int_or_like_int env ty2 then
+        let ty = MakeType.int (Reason.Rarith_ret_int p) in
+        let (env, ty) =
+          if is_dynamic1 || is_dynamic2 then
+            Typing_union.union env (MakeType.dynamic (Reason.Rwitness p)) ty
+          else
+            (env, ty)
+        in
+        make_result env te1 te2 ty
+      else
+        let is_infer_missing_mode =
+          TypecheckerOptions.InferMissing.is_on
+          @@ TypecheckerOptions.infer_missing (Env.get_tcopt env)
+        in
+        (* If ty1 is int, the result has the same type as ty2. *)
+        if is_infer_missing_mode && is_int env ty1 && is_num env ty2 then
+          make_result env te1 te2 ty2
+        else if is_infer_missing_mode && is_int env ty2 && is_num env ty1 then
+          make_result env te1 te2 ty1
+        else
+          (* Otherwise try narrowing any type variable, with default int *)
+          let (env, ty1) = expand_type_and_narrow_to_int env p ty1 in
+          let (env, ty2) = expand_type_and_narrow_to_int env p ty2 in
+          if is_int env ty1 && is_int env ty2 then
+            make_result env te1 te2 (MakeType.int (Reason.Rarith_ret_int p))
+          else
+            make_result env te1 te2 (MakeType.num (Reason.Rarith_ret p))
   (* Type of division and exponentiation is essentially
    *    (float,num):float
    *  & (num,float):float
@@ -200,17 +240,32 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
     let (env, is_dynamic2) =
       check_dynamic_or_enforce_num env p ty2 (Reason.Rarith p2)
     in
-    let result_ty =
-      if is_dynamic1 && is_dynamic2 then
-        MakeType.dynamic (Reason.Rsum_dynamic p)
-      else if is_float env ty1 then
-        MakeType.float (Reason.Rarith_ret_float (p, fst ty1, Reason.Afirst))
-      else if is_float env ty2 then
-        MakeType.float (Reason.Rarith_ret_float (p, fst ty2, Reason.Asecond))
+    let (env, result_ty) =
+      if is_float_or_like_float env ty1 then
+        let ty =
+          MakeType.float (Reason.Rarith_ret_float (p, fst ty1, Reason.Afirst))
+        in
+        if
+          (not is_dynamic1)
+          || ((not is_dynamic2) && is_float_or_like_float env ty2)
+        then
+          (env, ty)
+        else
+          Typing_union.union env (MakeType.dynamic Reason.Rnone) ty
+      else if is_float_or_like_float env ty2 then
+        let ty =
+          MakeType.float (Reason.Rarith_ret_float (p, fst ty2, Reason.Asecond))
+        in
+        if not is_dynamic2 then
+          (env, ty)
+        else
+          Typing_union.union env (MakeType.dynamic Reason.Rnone) ty
+      else if is_sub_dynamic env ty1 && is_sub_dynamic env ty2 then
+        (env, MakeType.dynamic (Reason.Rarith_dynamic p))
       else
         match bop with
-        | Ast_defs.Slash -> MakeType.num (Reason.Rret_div p)
-        | _ -> MakeType.num (Reason.Rarith_ret p)
+        | Ast_defs.Slash -> (env, MakeType.num (Reason.Rret_div p))
+        | _ -> (env, MakeType.num (Reason.Rarith_ret p))
     in
     make_result env te1 te2 result_ty
   | Ast_defs.Percent

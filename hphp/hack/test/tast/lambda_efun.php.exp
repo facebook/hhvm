@@ -14,18 +14,18 @@ Errors:
                  (([13:8-9], int), (Int "2")))))));
           ([15:3-23],
            (Expr
-              (([15:3-22], (function(int $z): int)),
+              (([15:3-22], (function(num $z): int)),
                (Binop ((Eq None),
-                  (([15:3-5], (function(int $z): int)), (Lvar ([15:3-5], $x))),
-                  (([15:8-22], (function(int $z): int)),
+                  (([15:3-5], (function(num $z): int)), (Lvar ([15:3-5], $x))),
+                  (([15:8-22], (function(num $z): int)),
                    (Lfun (
                       { f_span = [15:8-22]; f_annotation = ();
                         f_mode = Mstrict; f_ret = ((int), None);
                         f_name = ([15:8-22], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =
-                        [{ param_annotation = ([15:8-10], int);
-                           param_type_hint = ((int), None);
+                        [{ param_annotation = ([15:8-10], num);
+                           param_type_hint = ((num), None);
                            param_is_reference = false;
                            param_is_variadic = false; param_pos = [15:8-10];
                            param_name = "$z"; param_expr = None;
@@ -40,7 +40,7 @@ Errors:
                                       (Binop (Plus,
                                          (([15:15-17], int),
                                           (Lvar ([15:15-17], $y))),
-                                         (([15:20-22], int),
+                                         (([15:20-22], num),
                                           (Lvar ([15:20-22], $z)))
                                          ))))))
                             ];
@@ -63,24 +63,24 @@ Errors:
                (Binop ((Eq None), (([16:3-5], int), (Lvar ([16:3-5], $l))),
                   (([16:8-13], int),
                    (Call (Cnormal,
-                      (([16:8-10], (function(int $z): int)),
+                      (([16:8-10], (function(num $z): int)),
                        (Lvar ([16:8-10], $x))),
                       [], [(([16:11-12], int), (Int "2"))], None)))
                   )))));
           ([18:3-20:4],
            (Expr
-              (([18:3-20:4], (function(int $z): int)),
+              (([18:3-20:4], (function(num $z): int)),
                (Binop ((Eq None),
-                  (([18:3-5], (function(int $z): int)), (Lvar ([18:3-5], $x))),
-                  (([18:8-20:4], (function(int $z): int)),
+                  (([18:3-5], (function(num $z): int)), (Lvar ([18:3-5], $x))),
+                  (([18:8-20:4], (function(num $z): int)),
                    (Efun (
                       { f_span = [18:8-20:4]; f_annotation = ();
                         f_mode = Mstrict; f_ret = ((int), None);
                         f_name = ([18:8-20:4], ";anonymous"); f_tparams = [];
                         f_where_constraints = []; f_variadic = FVnonVariadic;
                         f_params =
-                        [{ param_annotation = ([18:17-19], int);
-                           param_type_hint = ((int), None);
+                        [{ param_annotation = ([18:17-19], num);
+                           param_type_hint = ((num), None);
                            param_is_reference = false;
                            param_is_variadic = false; param_pos = [18:17-19];
                            param_name = "$z"; param_expr = None;
@@ -95,7 +95,7 @@ Errors:
                                       (Binop (Plus,
                                          (([19:12-14], int),
                                           (Lvar ([19:12-14], $y))),
-                                         (([19:17-19], int),
+                                         (([19:17-19], num),
                                           (Lvar ([19:17-19], $z)))
                                          ))))))
                             ];
@@ -118,7 +118,7 @@ Errors:
                (Binop ((Eq None), (([21:3-5], int), (Lvar ([21:3-5], $l))),
                   (([21:8-13], int),
                    (Call (Cnormal,
-                      (([21:8-10], (function(int $z): int)),
+                      (([21:8-10], (function(num $z): int)),
                        (Lvar ([21:8-10], $x))),
                       [], [(([21:11-12], int), (Int "2"))], None)))
                   )))));

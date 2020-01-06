@@ -33,7 +33,7 @@ Definition is here
 File "lambda_unpacked_parameters.php", line 55, characters 14-17:
 Invalid argument (Typing[4110])
 File "lambda_unpacked_parameters.php", line 55, characters 14-17:
-Expected Traversable<int> (it is unpacked with '...')
+Expected Traversable<num> (it is unpacked with '...')
 File "lambda_unpacked_parameters.php", line 3, characters 15-27:
 But got (string, int)
 File "lambda_unpacked_parameters.php", line 55, characters 14-17:

@@ -1,6 +1,0 @@
-File "mayberx9.php", line 5, characters 10-17:
-Invalid return type (Typing[4110])
-File "mayberx9.php", line 4, characters 61-63:
-Expected int
-File "mayberx9.php", line 5, characters 10-17:
-But got num because this is the result of an arithmetic operation

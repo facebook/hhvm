@@ -486,9 +486,8 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   }
 
   auto const scale = other.m_scale;
-  auto const ad = mode == AllocMode::Request
-    ? reqAlloc(scale)
-    : staticAlloc(scale, sizeof(arrprov::Tag));
+  auto const ad = mode == AllocMode::Request ? reqAlloc(scale)
+                                             : staticAlloc(scale);
 #ifdef USE_JEMALLOC
   // Copy everything including tombstones.  We want to copy the elements and
   // the hash separately, because the array may not be very full.
@@ -580,8 +579,11 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
   }
   auto a = asMixed(array);
   assertx(!a->empty());
-  auto const extra = uncountedAllocExtra(withApcTypedValue);
-  auto const ad = uncountedAlloc(a->scale(), extra);
+  auto const extra = withApcTypedValue ? sizeof(APCTypedValue) : 0;
+  auto const scale = a->scale();
+  auto const allocSize = extra + computeAllocBytes(scale);
+  auto const mem = static_cast<char*>(uncounted_malloc(allocSize));
+  auto const ad = reinterpret_cast<MixedArray*>(mem + extra);
   auto const used = a->m_used;
   // Do a raw copy first, without worrying about counted types or refcount
   // manipulation.  To copy in 32-byte chunks, we add 24 bytes to the length.
@@ -598,7 +600,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
   }
   ad->m_aux16 &= ~kHasProvenanceData;
   assertx(ad->keyTypes() == a->keyTypes());
-  CopyHash(ad->hashTab(), a->hashTab(), a->scale());
+  CopyHash(ad->hashTab(), a->hashTab(), scale);
   ad->mutableKeyTypes()->makeStatic();
 
   // Need to make sure keys and values are all uncounted.
@@ -737,7 +739,7 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
       ReleaseUncountedTv(&ptr->data);
     }
   }
-  auto const extra = uncountedAllocExtra(ad->hasApcTv());
+  auto const extra = ad->hasApcTv() ? sizeof(APCTypedValue) : 0;
   uncounted_sized_free(reinterpret_cast<char*>(ad) - extra,
                        computeAllocBytes(ad->scale()) + extra);
   if (APCStats::IsCreated()) {

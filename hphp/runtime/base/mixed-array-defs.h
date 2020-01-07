@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/mixed-array.h"
 
-#include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/data-walker.h"
@@ -409,13 +408,6 @@ void ReleaseUncountedTv(tv_lval lval) {
     return;
   }
   assertx(!isRefcountedType(type(lval)));
-}
-
-/*
- * Extra space that gets prepended to uncounted arrays.
- */
-ALWAYS_INLINE size_t uncountedAllocExtra(bool apc_tv) {
-  return (apc_tv ? sizeof(APCTypedValue) : 0) + sizeof(arrprov::Tag);
 }
 
 //////////////////////////////////////////////////////////////////////

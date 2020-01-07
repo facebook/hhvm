@@ -143,7 +143,9 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array,
   auto const scale = src->scale();
   auto const used = src->m_used;
   auto const extra = withApcTypedValue ? sizeof(APCTypedValue) : 0;
-  auto const dest = uncountedAlloc(scale, extra);
+  auto const mem =
+    static_cast<char*>(uncounted_malloc(extra + computeAllocBytes(scale)));
+  auto const dest = reinterpret_cast<SetArray*>(mem + extra);
 
   assertx(reinterpret_cast<uintptr_t>(dest) % 16 == 0);
   assertx(reinterpret_cast<uintptr_t>(src) % 16 == 0);

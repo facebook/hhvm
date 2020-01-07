@@ -1702,6 +1702,12 @@ let method_attributes (m : Hhas_method.t) =
       attrs
   in
   let attrs =
+    if Hhas_attribute.has_provenance_skip_frame user_attrs then
+      "prov_skip_frame" :: attrs
+    else
+      attrs
+  in
+  let attrs =
     match Rx.rx_level_to_attr_string (Hhas_method.rx_level m) with
     | Some s -> s :: attrs
     | None -> attrs

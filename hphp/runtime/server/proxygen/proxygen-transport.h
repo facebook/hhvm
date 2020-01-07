@@ -24,7 +24,6 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/synchronizable.h"
 #include <proxygen/lib/http/session/HTTPTransaction.h>
-#include <thrift/lib/cpp/async/TAsyncTransport.h>
 #include <folly/IntrusiveList.h>
 #include <folly/IPAddress.h>
 

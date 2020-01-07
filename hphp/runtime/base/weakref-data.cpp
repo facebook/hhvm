@@ -54,18 +54,19 @@ req::shared_ptr<WeakRefData> WeakRefData::forObject(Object obj) {
 
     obj->setWeakRefed();
     req::weak_ptr<WeakRefData> weak_data = req::weak_ptr<WeakRefData>(wr_data);
-    if (!(weakmap->emplace((uintptr_t)obj.get(), weak_data).second)) {
-      // Failure. Key should be unique.  We just checked.
-      assertx(false);
-    }
+    auto const DEBUG_ONLY result = weakmap->emplace(
+      reinterpret_cast<uintptr_t>(obj.get()),
+      weak_data
+    );
+    // Failure. Key should be unique.  We just checked.
+    assertx(result.second);
   }
   return wr_data;
 }
 
 WeakRefData::~WeakRefData() {
-  if (pointee.m_type != KindOfUninit) {
-    ObjectData* obj = unpack_tv<KindOfObject>(&pointee);
-    s_weakref_data.get()->erase((uintptr_t)obj);
+  if (type(pointee) != KindOfUninit) {
+    s_weakref_data.get()->erase(reinterpret_cast<uintptr_t>(val(pointee).pobj));
   }
 }
 
@@ -83,10 +84,10 @@ WeakRefData::~WeakRefData() {
  * - So we look at the refcount of the object and make sure it is > 0.
  */
 bool WeakRefData::isValid() const {
-  if (LIKELY(isRefcountedType(pointee.m_type))) {
-    return tvGetCount(pointee) > 0;
-  }
-  return pointee.m_type != KindOfUninit;
+  auto const ty = type(pointee);
+  return LIKELY(isRefcountedType(ty))
+    ? tvGetCount(pointee) > 0
+    : ty != KindOfUninit;
 }
 
 } // namespace HPHP

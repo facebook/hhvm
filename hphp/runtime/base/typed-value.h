@@ -345,46 +345,6 @@ typename std::enable_if<
   return ret;
 }
 
-/*
- * Extract the underlying data element for the TypedValue
- *
- * int64_t val = unpack_tv<KindOfInt64>(tv);
- */
-template <DataType DType, typename T>
-typename std::enable_if<
-  std::is_same<typename DataTypeCPPType<DType>::type,double>::value,
-  enable_if_lval_t<T, double>
->::type unpack_tv(T tv) {
-  assertx(DType == type(tv));
-  return val(tv).dbl;
-}
-
-template <DataType DType, typename T>
-typename std::enable_if<
-  std::is_integral<typename DataTypeCPPType<DType>::type>::value,
-  enable_if_lval_t<T, typename DataTypeCPPType<DType>::type>
->::type unpack_tv(T tv) {
-  assertx(DType == type(tv));
-  assertx(tvIsPlausible(*tv));
-  return val(tv).num;
-}
-
-template <DataType DType, typename T>
-typename std::enable_if<
-  std::is_pointer<typename DataTypeCPPType<DType>::type>::value,
-  enable_if_lval_t<T, typename DataTypeCPPType<DType>::type>
->::type unpack_tv(T tv) {
-  assertx((DType == type(tv)) ||
-         (isStringType(DType) && isStringType(type(tv))) ||
-         (isArrayType(DType) && isArrayType(type(tv))) ||
-         (isVecType(DType) && isVecType(type(tv))) ||
-         (isDictType(DType) && isDictType(type(tv))) ||
-         (isKeysetType(DType) && isKeysetType(type(tv))));
-  assertx(tvIsPlausible(*tv));
-  return reinterpret_cast<typename DataTypeCPPType<DType>::type>
-           (val(tv).pstr);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

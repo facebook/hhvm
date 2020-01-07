@@ -5,8 +5,7 @@
 #![allow(unused_variables)]
 use ast_constant_folder_rust as ast_constant_folder;
 use ast_scope_rust::Scope;
-
-use emit_pos_rust::{emit_pos, emit_pos_then};
+use emit_fatal_rust as emit_fatal;
 use emit_type_constant_rust as emit_type_constant;
 use env::{emitter::Emitter, Env};
 use hhbc_ast_rust::*;
@@ -316,7 +315,11 @@ enum ArrayGetBase {
     },
 }
 
-pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> InstrSeq {
+pub fn emit_expr(
+    emitter: &mut Emitter,
+    env: &Env,
+    expression: &tast::Expr,
+) -> Result<InstrSeq, emit_fatal::Error> {
     use aast_defs::Lid;
     use tast::Expr_;
     let tast::Expr(pos, expr) = expression;
@@ -334,10 +337,10 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> I
         Expr_::ParenthesizedExpr(e) => emit_expr(emitter, env, &*e),
         Expr_::Lvar(e) => {
             let Lid(pos, _) = &**e;
-            InstrSeq::gather(vec![
-                emit_pos(emitter, pos),
-                emit_local(env, BareThisOp::Notice, &**e),
-            ])
+            Ok(InstrSeq::gather(vec![
+                emit_pos(emitter, pos)?,
+                emit_local(env, BareThisOp::Notice, &**e)?,
+            ]))
         }
         Expr_::ClassConst(e) => emit_class_const(env, pos, &**e),
         Expr_::Unop(e) => emit_unop(env, pos, &**e),
@@ -345,22 +348,29 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> I
         Expr_::Pipe(e) => emit_pipe(env, &**e),
         Expr_::Is(is_expr) => {
             let (e, h) = &**is_expr;
-            InstrSeq::gather(vec![emit_expr(emitter, env, e), emit_is_hint(env, pos, h)])
+            Ok(InstrSeq::gather(vec![
+                emit_expr(emitter, env, e)?,
+                emit_is_hint(env, pos, h)?,
+            ]))
         }
         Expr_::As(e) => emit_as(env, pos, &**e),
         Expr_::Cast(e) => emit_cast(env, pos, &**e),
         Expr_::Eif(e) => emit_conditional_expr(env, pos, &**e),
-        Expr_::ExprList(es) => {
-            InstrSeq::gather(es.iter().map(|e| emit_expr(emitter, env, e)).collect())
-        }
+        Expr_::ExprList(es) => Ok(InstrSeq::gather(
+            es.iter()
+                .map(|e| emit_expr(emitter, env, e).unwrap_or_default())
+                .collect(),
+        )),
         Expr_::ArrayGet(e) => {
             let (base_expr, opt_elem_expr) = &**e;
             match (base_expr.lvar_name(), opt_elem_expr) {
-                (Some(name), Some(e)) if name == superglobals::GLOBALS => InstrSeq::gather(vec![
-                    emit_expr(emitter, env, e),
-                    emit_pos(emitter, pos),
-                    InstrSeq::make_cgetg(),
-                ]),
+                (Some(name), Some(e)) if name == superglobals::GLOBALS => {
+                    Ok(InstrSeq::gather(vec![
+                        emit_expr(emitter, env, e)?,
+                        emit_pos(emitter, pos)?,
+                        InstrSeq::make_cgetg(),
+                    ]))
+                }
                 _ => emit_array_get(env, pos, QueryOp::CGet, &**e),
             }
         }
@@ -368,13 +378,13 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> I
         Expr_::Call(e) => emit_call_expr(env, pos, None, &**e),
         Expr_::New(e) => emit_new(env, pos, &**e),
         Expr_::Record(e) => emit_record(env, pos, &**e),
-        Expr_::Array(es) => emit_pos_then(emitter, pos, emit_collection(env, expression, es)),
+        Expr_::Array(es) => emit_pos_then(emitter, pos, emit_collection(env, expression, es)?),
         Expr_::Darray(e) => {
-            let instrs = emit_collection(env, expression, &mk_afkvalues(&(&**e).1));
+            let instrs = emit_collection(env, expression, &mk_afkvalues(&(&**e).1))?;
             emit_pos_then(emitter, pos, instrs)
         }
         Expr_::Varray(e) => {
-            let instrs = emit_collection(env, expression, &mk_afvalues(&(&**e).1));
+            let instrs = emit_collection(env, expression, &mk_afvalues(&(&**e).1))?;
             emit_pos_then(emitter, pos, instrs)
         }
         Expr_::Collection(e) => emit_named_collection_str(env, expression, &**e),
@@ -411,19 +421,19 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> I
             };
             emit_named_collection(env, pos, expression, &fields, collection_typ)
         }
-        Expr_::Clone(e) => emit_pos_then(emitter, pos, emit_clone(env, &**e)),
-        Expr_::Shape(e) => emit_pos_then(emitter, pos, emit_shape(env, expression, e)),
+        Expr_::Clone(e) => emit_pos_then(emitter, pos, emit_clone(env, &**e)?),
+        Expr_::Shape(e) => emit_pos_then(emitter, pos, emit_shape(env, expression, e)?),
         Expr_::Await(e) => emit_await(env, pos, &**e),
         Expr_::Yield(e) => emit_yield(env, pos, &**e),
-        Expr_::Efun(e) => emit_pos_then(emitter, pos, emit_lambda(env, &**e)),
+        Expr_::Efun(e) => emit_pos_then(emitter, pos, emit_lambda(env, &**e)?),
         Expr_::ClassGet(e) => emit_class_get(env, QueryOp::CGet, &**e),
         Expr_::String2(es) => emit_string2(env, pos, es),
         Expr_::BracedExpr(e) => emit_expr(emitter, env, &**e),
-        Expr_::Id(id) => emit_pos_then(emitter, pos, emit_id(env, &**id)),
+        Expr_::Id(id) => emit_pos_then(emitter, pos, emit_id(env, &**id)?),
         Expr_::Xml(e) => emit_xhp(env, pos, &**e),
         Expr_::Callconv(e) => emit_callconv(env, &**e),
         Expr_::Import(e) => emit_import(env, pos, &**e),
-        Expr_::Omitted => InstrSeq::Empty,
+        Expr_::Omitted => Ok(InstrSeq::Empty),
         Expr_::YieldBreak => panic!("yield break should be in statement position"),
         Expr_::YieldFrom(_) => panic!("complex yield_from expression"),
         Expr_::Lfun(_) => {
@@ -433,11 +443,26 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> I
     }
 }
 
-fn emit_id(env: &Env, id: &tast::Sid) -> InstrSeq {
+fn emit_pos_then(
+    emitter: &Emitter,
+    pos: &Pos,
+    instrs: InstrSeq,
+) -> Result<InstrSeq, emit_fatal::Error> {
+    Ok(emit_pos_rust::emit_pos_then(emitter, pos, instrs))
+}
+
+fn emit_pos(emitter: &Emitter, pos: &Pos) -> Result<InstrSeq, emit_fatal::Error> {
+    Ok(emit_pos_rust::emit_pos(emitter, pos))
+}
+
+fn emit_id(env: &Env, id: &tast::Sid) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_callconv(env: &Env, (kind, expr): &(ast_defs::ParamKind, tast::Expr)) -> InstrSeq {
+fn emit_callconv(
+    env: &Env,
+    (kind, expr): &(ast_defs::ParamKind, tast::Expr),
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -445,11 +470,11 @@ fn emit_xhp(
     env: &Env,
     pos: &Pos,
     (id, attributes, children): &(tast::Sid, Vec<tast::XhpAttribute>, Vec<tast::Expr>),
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_yield(env: &Env, pos: &Pos, af: &tast::Afield) -> InstrSeq {
+fn emit_yield(env: &Env, pos: &Pos, af: &tast::Afield) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -457,23 +482,26 @@ fn emit_import(
     env: &Env,
     pos: &Pos,
     (flavor, expr): &(tast::ImportFlavor, tast::Expr),
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_string2(env: &Env, pos: &Pos, es: &Vec<tast::Expr>) -> InstrSeq {
+fn emit_string2(env: &Env, pos: &Pos, es: &Vec<tast::Expr>) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_clone(env: &Env, expr: &tast::Expr) -> InstrSeq {
+fn emit_clone(env: &Env, expr: &tast::Expr) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_lambda(env: &Env, (fndef, ids): &(tast::Fun_, Vec<aast_defs::Lid>)) -> InstrSeq {
+fn emit_lambda(
+    env: &Env,
+    (fndef, ids): &(tast::Fun_, Vec<aast_defs::Lid>),
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_await(env: &Env, pos: &Pos, expr: &tast::Expr) -> InstrSeq {
+fn emit_await(env: &Env, pos: &Pos, expr: &tast::Expr) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -481,7 +509,7 @@ fn emit_shape(
     env: &Env,
     expr: &tast::Expr,
     fl: &Vec<(ast_defs::ShapeFieldName, tast::Expr)>,
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -491,7 +519,7 @@ fn emit_named_collection(
     expr: &tast::Expr,
     fields: &Vec<tast::Afield>,
     collection_typ: CollectionType,
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -503,7 +531,7 @@ fn emit_named_collection_str(
         Option<tast::CollectionTarg>,
         Vec<tast::Afield>,
     ),
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -521,7 +549,11 @@ fn mk_afvalues(es: &Vec<(tast::Expr)>) -> Vec<tast::Afield> {
         .collect()
 }
 
-fn emit_collection(env: &Env, expression: &tast::Expr, fields: &Vec<tast::Afield>) -> InstrSeq {
+fn emit_collection(
+    env: &Env,
+    expression: &tast::Expr,
+    fields: &Vec<tast::Afield>,
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -529,7 +561,7 @@ fn emit_record(
     env: &Env,
     pos: &Pos,
     (cid, is_array, es): &(tast::Sid, bool, Vec<(tast::Expr, tast::Expr)>),
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     let es = mk_afkvalues(es);
     unimplemented!("TODO(hrust)")
 }
@@ -545,7 +577,7 @@ fn emit_call_expr(
         Vec<tast::Expr>,
         Option<tast::Expr>,
     ),
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -559,7 +591,7 @@ fn emit_new(
         Option<tast::Expr>,
         Pos,
     ),
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -568,7 +600,7 @@ fn emit_obj_get(
     pos: &Pos,
     query_op: QueryOp,
     (expr, prop, nullflavor): &(tast::Expr, tast::Expr, ast_defs::OgNullFlavor),
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -577,7 +609,7 @@ fn emit_array_get(
     pos: &Pos,
     query_op: QueryOp,
     (base_expr, opt_elem_expr): &(tast::Expr, Option<tast::Expr>),
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -585,7 +617,7 @@ fn emit_class_get(
     env: &Env,
     query_op: QueryOp,
     (cid, cls_get_expr): &(tast::ClassId, tast::ClassGetExpr),
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -593,11 +625,15 @@ fn emit_conditional_expr(
     env: &Env,
     pos: &Pos,
     (etest, etrue, efalse): &(tast::Expr, Option<tast::Expr>, tast::Expr),
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_local(env: &Env, notice: BareThisOp, lid: &aast_defs::Lid) -> InstrSeq {
+fn emit_local(
+    env: &Env,
+    notice: BareThisOp,
+    lid: &aast_defs::Lid,
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -605,11 +641,15 @@ fn emit_class_const(
     env: &Env,
     pos: &Pos,
     (ci, id): &(tast::ClassId, ast_defs::Pstring),
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_unop(env: &Env, pos: &Pos, (uop, e): &(ast_defs::Uop, tast::Expr)) -> InstrSeq {
+fn emit_unop(
+    env: &Env,
+    pos: &Pos,
+    (uop, e): &(ast_defs::Uop, tast::Expr),
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -617,15 +657,18 @@ fn emit_binop(
     env: &Env,
     pos: &Pos,
     (op, e1, e2): &(ast_defs::Bop, tast::Expr, tast::Expr),
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_pipe(env: &Env, (_, e1, e2): &(aast_defs::Lid, tast::Expr, tast::Expr)) -> InstrSeq {
+fn emit_pipe(
+    env: &Env,
+    (_, e1, e2): &(aast_defs::Lid, tast::Expr, tast::Expr),
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_is_hint(env: &Env, pos: &Pos, h: &aast_defs::Hint) -> InstrSeq {
+fn emit_is_hint(env: &Env, pos: &Pos, h: &aast_defs::Hint) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
@@ -633,10 +676,14 @@ fn emit_as(
     env: &Env,
     pos: &Pos,
     (e, h, is_nullable): &(tast::Expr, aast_defs::Hint, bool),
-) -> InstrSeq {
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }
 
-fn emit_cast(env: &Env, pos: &Pos, (h, e): &(aast_defs::Hint, tast::Expr)) -> InstrSeq {
+fn emit_cast(
+    env: &Env,
+    pos: &Pos,
+    (h, e): &(aast_defs::Hint, tast::Expr),
+) -> Result<InstrSeq, emit_fatal::Error> {
     unimplemented!("TODO(hrust)")
 }

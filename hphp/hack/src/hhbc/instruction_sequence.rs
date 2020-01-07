@@ -28,6 +28,12 @@ pub enum InstrSeq {
     Concat(Vec<InstrSeq>),
 }
 
+impl Default for InstrSeq {
+    fn default() -> Self {
+        Self::Empty
+    }
+}
+
 impl InstrSeq {
     pub fn gather(instrs: Vec<Self>) -> Self {
         let nonempty_instrs = instrs

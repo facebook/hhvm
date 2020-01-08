@@ -264,6 +264,7 @@ struct Vunit {
   bool profiling{false};
   folly::Optional<TransContext> context;
   StructuredLogEntry* log_entry{nullptr};
+  Annotations annotations;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

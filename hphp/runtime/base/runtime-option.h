@@ -962,6 +962,7 @@ struct RuntimeOption {
   F(uint32_t, DumpInlDecision,         0)                               \
   F(uint32_t, DumpRegion,              0)                               \
   F(bool,     DumpCallTargets,         false)                           \
+  F(bool,     DumpLayoutCFG,           false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, DumpTargetProfiles,          false)                           \
   F(bool, MapTgtCacheHuge,             false)                           \

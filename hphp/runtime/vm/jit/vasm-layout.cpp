@@ -118,6 +118,14 @@ struct Scale {
       , m_preds(computePreds(unit)) {
     computeArcWeights();
   }
+
+  explicit Scale(const Vunit& unit, const jit::vector<Vlabel>& blockOrder)
+      : m_unit(unit)
+      , m_blocks(blockOrder)
+      , m_preds(computePreds(unit)) {
+    computeArcWeights();
+  }
+
   int64_t weight(Vlabel blk) const;
   int64_t weight(Vlabel src, Vlabel dst) const;
 
@@ -259,19 +267,20 @@ void Scale::computeArcWeights() {
 
 std::string Scale::toString() const {
   std::ostringstream out;
-  out << "digraph {\n";
+  out << "digraph LayoutCFG {\n";
   int64_t maxWgt = 1;
   for (auto b : m_blocks) {
     maxWgt = std::max(maxWgt, weight(b));
   }
   for (auto b : m_blocks) {
+    auto const& block = m_unit.blocks[b];
     unsigned coldness = 255 - (255 * weight(b) / maxWgt);
     out << folly::format(
-      "{} [label=\"{}\\nw: {}\\nptid: {}\\narea: {}\\nprof: {}\","
+      "{} [label=\"{}\\nw: {}\\nptid: {}\\narea: {}\\nprof: {}\\ninsts: {}\","
       "shape=box,style=filled,fillcolor=\"#ff{:02x}{:02x}\"]\n",
-      b, b, weight(b), findProfTransID(b), unsigned(m_unit.blocks[b].area_idx),
-      findProfCount(b), coldness, coldness);
-    for (auto s : succs(m_unit.blocks[b])) {
+      b, b, weight(b), findProfTransID(b), unsigned(block.area_idx),
+      findProfCount(b), block.code.size(), coldness, coldness);
+    for (auto s : succs(block)) {
       out << folly::format("{} -> {} [label={}];\n", b, s, weight(b, s));
     }
   }
@@ -550,6 +559,10 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
       FTRACE(1, "{}, ", b);
     }
     FTRACE(1, "\n");
+  }
+
+  if (RuntimeOption::EvalDumpLayoutCFG) {
+    unit.annotations.emplace_back("LayoutCFG", Scale(unit, labels).toString());
   }
 
   return labels;

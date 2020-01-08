@@ -191,6 +191,12 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   bindDataPtrs(vunit, vtext.data());
   emit(vunit, vtext, meta, ai);
 
+  if (annotations != nullptr) {
+    annotations->insert(annotations->end(),
+                        vunit.annotations.begin(),
+                        vunit.annotations.end());
+  }
+
   assertx(code.isLocal() || cold_in.frontier() == cold_start);
   assertx(code.isLocal() || main_in.frontier() == main_start);
 

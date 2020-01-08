@@ -130,7 +130,8 @@ bool dumpEnabled() {
          RuntimeOption::EvalDumpIR ||
          RuntimeOption::EvalDumpRegion ||
          RuntimeOption::EvalDumpInlDecision ||
-         RuntimeOption::EvalDumpCallTargets;
+         RuntimeOption::EvalDumpCallTargets ||
+         RuntimeOption::EvalDumpLayoutCFG;
 }
 
 bool dump(bool ignoreLease /* = false */) {

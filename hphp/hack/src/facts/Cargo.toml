@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/facts:facts_rust
-# Signature<<262496c4465b19ecf266c2a934e1cb106879bbc8>>
+# Signature<<912b84d92ea1ae6924b4ce1e722693e13f517354>>
 [package]
 name = "facts_rust"
 edition = "2018"
@@ -19,10 +19,10 @@ oxidized = { path = "../oxidized" }
 parser_rust = { path = "../parser" }
 syntax_tree = { path = "../parser/cargo/syntax_tree" }
 rust-crypto = "*"
-serde = "*"
+serde = { version = "*", features = ["derive"] }
 serde_derive = "*"
 serde_json = "*"
 
 [dev-dependencies]
 pretty_assertions = "*"
-# @end of Signature<<262496c4465b19ecf266c2a934e1cb106879bbc8>>
+# @end of Signature<<912b84d92ea1ae6924b4ce1e722693e13f517354>>

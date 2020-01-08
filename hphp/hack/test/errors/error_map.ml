@@ -50,6 +50,7 @@ UnexpectedEofDEPRECATED = 1003
 UnterminatedCommentDEPRECATED = 1004
 UnterminatedXhpCommentDEPRECATED = 1005
 CallTimePassByReferenceDEPRECATED = 1006
+XhpParsingError = 1007
 
 Naming Errors:
 AddATypehint = 2001

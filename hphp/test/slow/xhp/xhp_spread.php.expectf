@@ -13,19 +13,19 @@ array(1) {
 }
 string(7) "xhp_foo"
 array(2) {
-  ["name"]=>
-  string(4) "foo2"
   ["...$0"]=>
   object(xhp_bar) (0) {
   }
+  ["name"]=>
+  string(4) "foo2"
 }
 string(7) "xhp_foo"
 array(3) {
-  ["name"]=>
-  string(4) "foo2"
   ["...$0"]=>
   object(xhp_bar) (0) {
   }
+  ["name"]=>
+  string(4) "foo2"
   ["...$1"]=>
   object(xhp_bar) (0) {
   }

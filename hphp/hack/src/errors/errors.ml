@@ -948,6 +948,9 @@ let fixme_format pos =
 
 let parsing_error (p, msg) = add (Parsing.err_code Parsing.ParsingError) p msg
 
+let xhp_parsing_error (p, msg) =
+  add (Parsing.err_code Parsing.XhpParsingError) p msg
+
 (*****************************************************************************)
 (* Legacy AST / AAST errors *)
 (*****************************************************************************)

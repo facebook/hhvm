@@ -30,6 +30,7 @@ let visitor =
       Fun_pointer_name_check.handler;
       Record_field_check.handler;
       Php_lambda_check.handler;
+      Duplicate_xhp_attribute_check.handler;
     ]
 
 let program = visitor#go

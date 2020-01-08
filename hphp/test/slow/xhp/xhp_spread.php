@@ -19,8 +19,8 @@ class :bar extends :foo {
 function main_xhp_spread() {
 $bar = <bar name="test" age={21} />;
 <foo {...$bar} />;
-<foo name="foo1" {...$bar} name="foo2" />;
-<foo name="foo1" {...$bar} name="foo2" {...$bar} />;
+<foo {...$bar} name="foo2" />;
+<foo {...$bar} name="foo2" {...$bar} />;
 <foo {...<bar name="test" age={21} />} />;
 <foo {...<bar name="test" {...$bar} age={21} />} />;
 <foo {...<bar />} />;

@@ -278,6 +278,8 @@ val illegal_constant : Pos.t -> unit
 
 val parsing_error : Pos.t * string -> unit
 
+val xhp_parsing_error : Pos.t * string -> unit
+
 val format_string :
   Pos.t -> string -> string -> Pos.t -> string -> string -> unit
 

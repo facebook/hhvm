@@ -313,9 +313,13 @@ bool canDCE(IRInstruction* inst) {
   case ConcatStrStr:
   case ConcatStr3:
   case ConcatStr4:
+  case AddElemStrKey:
+  case AddElemIntKey:
   case AddNewElem:
   case AddNewElemKeyset:
   case AddNewElemVec:
+  case DictAddElemStrKey:
+  case DictAddElemIntKey:
     return true;
 
   // Some of these conversion functions can run arbitrary PHP code.

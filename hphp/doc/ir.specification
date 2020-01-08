@@ -2056,8 +2056,8 @@ To string conversions:
 
 | VerifyParamFail, ND, NA, NF
 
-  Assumes that parameter specified in extra-data in the current function
-  has failed a its type check. Depending on the typehint being verified and
+  Assumes that parameter specified in extra-data in the current function 
+  has failed a its type check. Depending on the typehint being verified and 
   a number of runtime options, may coerce the parameter to the correct type i
   or raise a recoverable fatal error describing the type mismatch.
 
@@ -2292,6 +2292,14 @@ To string conversions:
 
   Concatenate S0, S1, S2, and S3.
 
+| AddElemStrKey, D(Arr), S(Arr) S(Str) S(Cell), CRc|PRc
+
+  Add S2 to the array S0 for the key S1, and return the resulting array.
+
+| AddElemIntKey, D(Arr), S(Arr) S(Int) S(Cell), CRc|PRc
+
+  Add S2 to the array S0 for the key S1, and return the resulting array.
+
 | AddNewElem, D(Arr), S(Arr) S(Cell), CRc|PRc
 
 | AddNewElemKeyset, D(Keyset), S(Keyset) S(Cell), CRc|PRc
@@ -2302,6 +2310,14 @@ To string conversions:
   be a subtype of InitCell for array invariants, but we can't assert this yet
   in the IR because many eval stack slots are not entirely typed wrt initness
   right now.)
+
+| DictAddElemStrKey, D(Dict), S(Dict) S(Str) S(Cell), CRc|PRc
+
+  Add S2 to the dict S0 for the key S1, and return the resulting dict.
+
+| DictAddElemIntKey, D(Dict), S(Dict) S(Int) S(Cell), CRc|PRc
+
+  Add S2 to the dict S0 for the key S1, and return the resulting dict.
 
 | ArrayAdd, D(Arr), S(Arr) S(Arr), CRc|PRc
 

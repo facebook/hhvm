@@ -543,24 +543,37 @@ void emitAddElemC(IRGS& env) {
   // and we don't want to constrain it if we're just going to InterpOne.
   auto const kt = topC(env, BCSPRelOffset{1}, DataTypeGeneric)->type();
   auto const at = topC(env, BCSPRelOffset{2}, DataTypeGeneric)->type();
-
-  if (!at.subtypeOfAny(TArr, TDict)) {
+  Opcode op;
+  if (at <= TArr) {
+    if (kt <= TInt) {
+      op = AddElemIntKey;
+    } else if (kt <= TStr) {
+      op = AddElemStrKey;
+    } else {
+      interpOne(env, TArr, 3);
+      return;
+    }
+  } else if (at <= TDict) {
+    if (kt <= TInt) {
+      op = DictAddElemIntKey;
+    } else if (kt <= TStr) {
+      op = DictAddElemStrKey;
+    } else {
+      interpOne(env, TDict, 3);
+      return;
+    }
+  } else {
     PUNT(AddElemC-BadArr);
-  } else if (!kt.subtypeOfAny(TInt, TStr)) {
-    auto const type = (at <= TArr) ? TArr : TDict;
-    interpOne(env, type, 3);
-    return;
   }
 
-  // ArraySet and DictSet teleport the value from the stack into the base,
-  // and they dec-ref the old base on copy / escalation, so we only need to
-  // to do refcount ops on the key.
-  auto const op = (at <= TArr) ? ArraySet : DictSet;
+  // val is teleported from the stack to the array, so we don't have to do any
+  // refcounting.
   auto const val = popC(env, DataTypeGeneric);
   auto const key = popC(env);
   auto const arr = popC(env);
+  // The AddElem* instructions decref their args, so don't decref pop'ed
+  // values.
   push(env, gen(env, op, arr, key, val));
-  decRef(env, key);
 }
 
 void emitAddNewElemC(IRGS& env) {

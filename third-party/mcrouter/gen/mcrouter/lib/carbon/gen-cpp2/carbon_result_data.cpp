@@ -16,7 +16,5 @@ constexpr const std::array<Result, 33> _ResultEnumDataStorage::values;
 constexpr const std::array<folly::StringPiece, 33> _ResultEnumDataStorage::names;
 
 } // carbon
-namespace apache { namespace thrift {
 
-}} // apache::thrift
 

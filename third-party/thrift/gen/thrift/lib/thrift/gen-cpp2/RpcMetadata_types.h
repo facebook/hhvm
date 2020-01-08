@@ -11,6 +11,145 @@
 
 #include "thrift/lib/thrift/RpcMetadata_extra.h"
 
+namespace apache {
+namespace thrift {
+namespace tag {
+struct compressionAlgos;
+struct protocol;
+struct name;
+struct kind;
+struct seqId;
+struct clientTimeoutMs;
+struct queueTimeoutMs;
+struct priority;
+struct otherMetadata;
+struct host;
+struct url;
+struct crc32c;
+struct flags;
+struct loadMetric;
+struct compression;
+struct protocol;
+struct seqId;
+struct otherMetadata;
+struct load;
+struct crc32c;
+struct compression;
+struct compression;
+struct opaque;
+struct interfaceKind;
+struct otherMetadata;
+struct compression;
+} // namespace tag
+namespace detail {
+#ifndef APACHE_THRIFT_ACCESSOR_compressionAlgos
+#define APACHE_THRIFT_ACCESSOR_compressionAlgos
+APACHE_THRIFT_DEFINE_ACCESSOR(compressionAlgos);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_protocol
+#define APACHE_THRIFT_ACCESSOR_protocol
+APACHE_THRIFT_DEFINE_ACCESSOR(protocol);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_name
+#define APACHE_THRIFT_ACCESSOR_name
+APACHE_THRIFT_DEFINE_ACCESSOR(name);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_kind
+#define APACHE_THRIFT_ACCESSOR_kind
+APACHE_THRIFT_DEFINE_ACCESSOR(kind);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_seqId
+#define APACHE_THRIFT_ACCESSOR_seqId
+APACHE_THRIFT_DEFINE_ACCESSOR(seqId);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_clientTimeoutMs
+#define APACHE_THRIFT_ACCESSOR_clientTimeoutMs
+APACHE_THRIFT_DEFINE_ACCESSOR(clientTimeoutMs);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_queueTimeoutMs
+#define APACHE_THRIFT_ACCESSOR_queueTimeoutMs
+APACHE_THRIFT_DEFINE_ACCESSOR(queueTimeoutMs);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_priority
+#define APACHE_THRIFT_ACCESSOR_priority
+APACHE_THRIFT_DEFINE_ACCESSOR(priority);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_otherMetadata
+#define APACHE_THRIFT_ACCESSOR_otherMetadata
+APACHE_THRIFT_DEFINE_ACCESSOR(otherMetadata);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_host
+#define APACHE_THRIFT_ACCESSOR_host
+APACHE_THRIFT_DEFINE_ACCESSOR(host);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_url
+#define APACHE_THRIFT_ACCESSOR_url
+APACHE_THRIFT_DEFINE_ACCESSOR(url);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_crc32c
+#define APACHE_THRIFT_ACCESSOR_crc32c
+APACHE_THRIFT_DEFINE_ACCESSOR(crc32c);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_flags
+#define APACHE_THRIFT_ACCESSOR_flags
+APACHE_THRIFT_DEFINE_ACCESSOR(flags);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_loadMetric
+#define APACHE_THRIFT_ACCESSOR_loadMetric
+APACHE_THRIFT_DEFINE_ACCESSOR(loadMetric);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_compression
+#define APACHE_THRIFT_ACCESSOR_compression
+APACHE_THRIFT_DEFINE_ACCESSOR(compression);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_protocol
+#define APACHE_THRIFT_ACCESSOR_protocol
+APACHE_THRIFT_DEFINE_ACCESSOR(protocol);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_seqId
+#define APACHE_THRIFT_ACCESSOR_seqId
+APACHE_THRIFT_DEFINE_ACCESSOR(seqId);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_otherMetadata
+#define APACHE_THRIFT_ACCESSOR_otherMetadata
+APACHE_THRIFT_DEFINE_ACCESSOR(otherMetadata);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_load
+#define APACHE_THRIFT_ACCESSOR_load
+APACHE_THRIFT_DEFINE_ACCESSOR(load);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_crc32c
+#define APACHE_THRIFT_ACCESSOR_crc32c
+APACHE_THRIFT_DEFINE_ACCESSOR(crc32c);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_compression
+#define APACHE_THRIFT_ACCESSOR_compression
+APACHE_THRIFT_DEFINE_ACCESSOR(compression);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_compression
+#define APACHE_THRIFT_ACCESSOR_compression
+APACHE_THRIFT_DEFINE_ACCESSOR(compression);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_opaque
+#define APACHE_THRIFT_ACCESSOR_opaque
+APACHE_THRIFT_DEFINE_ACCESSOR(opaque);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_interfaceKind
+#define APACHE_THRIFT_ACCESSOR_interfaceKind
+APACHE_THRIFT_DEFINE_ACCESSOR(interfaceKind);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_otherMetadata
+#define APACHE_THRIFT_ACCESSOR_otherMetadata
+APACHE_THRIFT_DEFINE_ACCESSOR(otherMetadata);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_compression
+#define APACHE_THRIFT_ACCESSOR_compression
+APACHE_THRIFT_DEFINE_ACCESSOR(compression);
+#endif
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 // BEGIN declare_enums
 namespace apache { namespace thrift {
 
@@ -47,9 +186,26 @@ enum class RpcPriority {
 
 
 
+enum class CompressionAlgorithm {
+  NONE = 0,
+  ZLIB = 1,
+  ZSTD = 2
+};
+
+
+
+
 enum class RequestRpcMetadataFlags {
   UNKNOWN = 0,
   QUERY_SERVER_LOAD = 1
+};
+
+
+
+
+enum class InterfaceKind {
+  USER = 0,
+  DEBUGGING = 1
 };
 
 
@@ -71,8 +227,16 @@ template<> struct hash<typename ::apache::thrift::RpcPriority> : public apache::
 template<> struct equal_to<typename ::apache::thrift::RpcPriority> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::RpcPriority> {};
 
 
+template<> struct hash<typename ::apache::thrift::CompressionAlgorithm> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::CompressionAlgorithm> {};
+template<> struct equal_to<typename ::apache::thrift::CompressionAlgorithm> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::CompressionAlgorithm> {};
+
+
 template<> struct hash<typename ::apache::thrift::RequestRpcMetadataFlags> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::RequestRpcMetadataFlags> {};
 template<> struct equal_to<typename ::apache::thrift::RequestRpcMetadataFlags> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::RequestRpcMetadataFlags> {};
+
+
+template<> struct hash<typename ::apache::thrift::InterfaceKind> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::InterfaceKind> {};
+template<> struct equal_to<typename ::apache::thrift::InterfaceKind> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::InterfaceKind> {};
 
 
 } // std
@@ -131,6 +295,23 @@ template <> struct TEnumTraits<::apache::thrift::RpcPriority> {
 };
 
 
+template <> struct TEnumDataStorage<::apache::thrift::CompressionAlgorithm>;
+
+template <> struct TEnumTraits<::apache::thrift::CompressionAlgorithm> {
+  using type = ::apache::thrift::CompressionAlgorithm;
+
+  static constexpr std::size_t const size = 3;
+  static folly::Range<type const*> const values;
+  static folly::Range<folly::StringPiece const*> const names;
+
+  static char const* findName(type value);
+  static bool findValue(char const* name, type* out);
+
+  static constexpr type min() { return type::NONE; }
+  static constexpr type max() { return type::ZSTD; }
+};
+
+
 template <> struct TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags>;
 
 template <> struct TEnumTraits<::apache::thrift::RequestRpcMetadataFlags> {
@@ -145,6 +326,23 @@ template <> struct TEnumTraits<::apache::thrift::RequestRpcMetadataFlags> {
 
   static constexpr type min() { return type::UNKNOWN; }
   static constexpr type max() { return type::QUERY_SERVER_LOAD; }
+};
+
+
+template <> struct TEnumDataStorage<::apache::thrift::InterfaceKind>;
+
+template <> struct TEnumTraits<::apache::thrift::InterfaceKind> {
+  using type = ::apache::thrift::InterfaceKind;
+
+  static constexpr std::size_t const size = 2;
+  static folly::Range<type const*> const values;
+  static folly::Range<folly::StringPiece const*> const names;
+
+  static char const* findName(type value);
+  static bool findValue(char const* name, type* out);
+
+  static constexpr type min() { return type::USER; }
+  static constexpr type max() { return type::DEBUGGING; }
 };
 
 
@@ -164,9 +362,17 @@ using _RpcPriority_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<RpcP
 extern const _RpcPriority_EnumMapFactory::ValuesToNamesMapType _RpcPriority_VALUES_TO_NAMES;
 extern const _RpcPriority_EnumMapFactory::NamesToValuesMapType _RpcPriority_NAMES_TO_VALUES;
 
+using _CompressionAlgorithm_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<CompressionAlgorithm>;
+extern const _CompressionAlgorithm_EnumMapFactory::ValuesToNamesMapType _CompressionAlgorithm_VALUES_TO_NAMES;
+extern const _CompressionAlgorithm_EnumMapFactory::NamesToValuesMapType _CompressionAlgorithm_NAMES_TO_VALUES;
+
 using _RequestRpcMetadataFlags_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<RequestRpcMetadataFlags>;
 extern const _RequestRpcMetadataFlags_EnumMapFactory::ValuesToNamesMapType _RequestRpcMetadataFlags_VALUES_TO_NAMES;
 extern const _RequestRpcMetadataFlags_EnumMapFactory::NamesToValuesMapType _RequestRpcMetadataFlags_NAMES_TO_VALUES;
+
+using _InterfaceKind_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<InterfaceKind>;
+extern const _InterfaceKind_EnumMapFactory::ValuesToNamesMapType _InterfaceKind_VALUES_TO_NAMES;
+extern const _InterfaceKind_EnumMapFactory::NamesToValuesMapType _InterfaceKind_NAMES_TO_VALUES;
 
 }} // apache::thrift
 
@@ -176,10 +382,13 @@ extern const _RequestRpcMetadataFlags_EnumMapFactory::NamesToValuesMapType _Requ
 // END struct_indirection
 // BEGIN forward_declare
 namespace apache { namespace thrift {
+class NegotiationParameters;
 class RequestRpcMetadata;
 class ResponseRpcMetadata;
 class StreamPayloadMetadata;
 class RequestSetupMetadata;
+class HeadersPayloadContent;
+class HeadersPayloadMetadata;
 }} // apache::thrift
 // END forward_declare
 // BEGIN typedefs
@@ -188,6 +397,91 @@ class RequestSetupMetadata;
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace apache { namespace thrift {
+class NegotiationParameters final : private apache::thrift::detail::st::ComparisonOperators<NegotiationParameters> {
+ public:
+
+  NegotiationParameters() :
+      compressionAlgos(0) {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  NegotiationParameters(apache::thrift::FragileConstructor, std::uint64_t compressionAlgos__arg);
+
+  NegotiationParameters(NegotiationParameters&&) = default;
+
+  NegotiationParameters(const NegotiationParameters&) = default;
+
+  NegotiationParameters& operator=(NegotiationParameters&&) = default;
+
+  NegotiationParameters& operator=(const NegotiationParameters&) = default;
+  void __clear();
+ private:
+  std::uint64_t compressionAlgos;
+
+ public:
+  struct __isset {
+    bool compressionAlgos;
+  } __isset = {};
+  bool operator==(const NegotiationParameters& rhs) const;
+  bool operator<(const NegotiationParameters& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::uint64_t&> compressionAlgos_ref() const& {
+    return {compressionAlgos, __isset.compressionAlgos};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::uint64_t&&> compressionAlgos_ref() const&& {
+    return {std::move(compressionAlgos), __isset.compressionAlgos};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<std::uint64_t&> compressionAlgos_ref() & {
+    return {compressionAlgos, __isset.compressionAlgos};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<std::uint64_t&&> compressionAlgos_ref() && {
+    return {std::move(compressionAlgos), __isset.compressionAlgos};
+  }
+
+  const std::uint64_t* get_compressionAlgos() const& {
+    return __isset.compressionAlgos ? std::addressof(compressionAlgos) : nullptr;
+  }
+
+  std::uint64_t* get_compressionAlgos() & {
+    return __isset.compressionAlgos ? std::addressof(compressionAlgos) : nullptr;
+  }
+  std::uint64_t* get_compressionAlgos() && = delete;
+
+  std::uint64_t& set_compressionAlgos(std::uint64_t compressionAlgos_) {
+    compressionAlgos = compressionAlgos_;
+    __isset.compressionAlgos = true;
+    return compressionAlgos;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< NegotiationParameters >;
+};
+
+void swap(NegotiationParameters& a, NegotiationParameters& b);
+
+template <class Protocol_>
+uint32_t NegotiationParameters::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
 class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonOperators<RequestRpcMetadata> {
  public:
 
@@ -195,72 +489,7 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  RequestRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, ::std::string name__arg,  ::apache::thrift::RpcKind kind__arg, int32_t seqId__arg, int32_t clientTimeoutMs__arg, int32_t queueTimeoutMs__arg,  ::apache::thrift::RpcPriority priority__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, ::std::string host__arg, ::std::string url__arg, std::uint32_t crc32c__arg, std::uint64_t flags__arg, ::std::string loadMetric__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    protocol = arg.extract();
-    __isset.protocol = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    name = arg.extract();
-    __isset.name = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<3, _T> arg) {
-    kind = arg.extract();
-    __isset.kind = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<4, _T> arg) {
-    seqId = arg.extract();
-    __isset.seqId = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<5, _T> arg) {
-    clientTimeoutMs = arg.extract();
-    __isset.clientTimeoutMs = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<6, _T> arg) {
-    queueTimeoutMs = arg.extract();
-    __isset.queueTimeoutMs = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<7, _T> arg) {
-    priority = arg.extract();
-    __isset.priority = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<8, _T> arg) {
-    otherMetadata = arg.extract();
-    __isset.otherMetadata = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<9, _T> arg) {
-    host = arg.extract();
-    __isset.host = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<10, _T> arg) {
-    url = arg.extract();
-    __isset.url = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<11, _T> arg) {
-    crc32c = arg.extract();
-    __isset.crc32c = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<12, _T> arg) {
-    flags = arg.extract();
-    __isset.flags = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<13, _T> arg) {
-    loadMetric = arg.extract();
-    __isset.loadMetric = true;
-  }
+  RequestRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, ::std::string name__arg,  ::apache::thrift::RpcKind kind__arg, int32_t seqId__arg, int32_t clientTimeoutMs__arg, int32_t queueTimeoutMs__arg,  ::apache::thrift::RpcPriority priority__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, ::std::string host__arg, ::std::string url__arg, std::uint32_t crc32c__arg, std::uint64_t flags__arg, ::std::string loadMetric__arg,  ::apache::thrift::CompressionAlgorithm compression__arg);
 
   RequestRpcMetadata(RequestRpcMetadata&&) = default;
 
@@ -273,20 +502,36 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
 
   ~RequestRpcMetadata();
 
+ private:
    ::apache::thrift::ProtocolId protocol;
+ private:
   ::std::string name;
+ private:
    ::apache::thrift::RpcKind kind;
+ private:
   int32_t seqId;
+ private:
   int32_t clientTimeoutMs;
+ private:
   int32_t queueTimeoutMs;
+ private:
    ::apache::thrift::RpcPriority priority;
+ private:
   ::std::map<::std::string, ::std::string> otherMetadata;
+ private:
   ::std::string host;
+ private:
   ::std::string url;
+ private:
   std::uint32_t crc32c;
+ private:
   std::uint64_t flags;
+ private:
   ::std::string loadMetric;
+ private:
+   ::apache::thrift::CompressionAlgorithm compression;
 
+ public:
   struct __isset {
     bool protocol;
     bool name;
@@ -301,6 +546,7 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
     bool crc32c;
     bool flags;
     bool loadMetric;
+    bool compression;
   } __isset = {};
   bool operator==(const RequestRpcMetadata& rhs) const;
   bool operator<(const RequestRpcMetadata& rhs) const;
@@ -513,6 +759,22 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
     return {std::move(loadMetric), __isset.loadMetric};
   }
 
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionAlgorithm&> compression_ref() const& {
+    return {compression, __isset.compression};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionAlgorithm&&> compression_ref() const&& {
+    return {std::move(compression), __isset.compression};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionAlgorithm&> compression_ref() & {
+    return {compression, __isset.compression};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionAlgorithm&&> compression_ref() && {
+    return {std::move(compression), __isset.compression};
+  }
+
   const  ::apache::thrift::ProtocolId* get_protocol() const& {
     return __isset.protocol ? std::addressof(protocol) : nullptr;
   }
@@ -707,6 +969,21 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
     return loadMetric;
   }
 
+  const  ::apache::thrift::CompressionAlgorithm* get_compression() const& {
+    return __isset.compression ? std::addressof(compression) : nullptr;
+  }
+
+   ::apache::thrift::CompressionAlgorithm* get_compression() & {
+    return __isset.compression ? std::addressof(compression) : nullptr;
+  }
+   ::apache::thrift::CompressionAlgorithm* get_compression() && = delete;
+
+   ::apache::thrift::CompressionAlgorithm& set_compression( ::apache::thrift::CompressionAlgorithm compression_) {
+    compression = compression_;
+    __isset.compression = true;
+    return compression;
+  }
+
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
   template <class Protocol_>
@@ -741,32 +1018,7 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  ResponseRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, int32_t seqId__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, int64_t load__arg, std::uint32_t crc32c__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    protocol = arg.extract();
-    __isset.protocol = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    seqId = arg.extract();
-    __isset.seqId = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<3, _T> arg) {
-    otherMetadata = arg.extract();
-    __isset.otherMetadata = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<4, _T> arg) {
-    load = arg.extract();
-    __isset.load = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<5, _T> arg) {
-    crc32c = arg.extract();
-    __isset.crc32c = true;
-  }
+  ResponseRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, int32_t seqId__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, int64_t load__arg, std::uint32_t crc32c__arg,  ::apache::thrift::CompressionAlgorithm compression__arg);
 
   ResponseRpcMetadata(ResponseRpcMetadata&&) = default;
 
@@ -779,18 +1031,27 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
 
   ~ResponseRpcMetadata();
 
+ private:
    ::apache::thrift::ProtocolId protocol;
+ private:
   int32_t seqId;
+ private:
   ::std::map<::std::string, ::std::string> otherMetadata;
+ private:
   int64_t load;
+ private:
   std::uint32_t crc32c;
+ private:
+   ::apache::thrift::CompressionAlgorithm compression;
 
+ public:
   struct __isset {
     bool protocol;
     bool seqId;
     bool otherMetadata;
     bool load;
     bool crc32c;
+    bool compression;
   } __isset = {};
   bool operator==(const ResponseRpcMetadata& rhs) const;
   bool operator<(const ResponseRpcMetadata& rhs) const;
@@ -875,6 +1136,22 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
     return {std::move(crc32c), __isset.crc32c};
   }
 
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionAlgorithm&> compression_ref() const& {
+    return {compression, __isset.compression};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionAlgorithm&&> compression_ref() const&& {
+    return {std::move(compression), __isset.compression};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionAlgorithm&> compression_ref() & {
+    return {compression, __isset.compression};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionAlgorithm&&> compression_ref() && {
+    return {std::move(compression), __isset.compression};
+  }
+
   const  ::apache::thrift::ProtocolId* get_protocol() const& {
     return __isset.protocol ? std::addressof(protocol) : nullptr;
   }
@@ -945,6 +1222,21 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
     return crc32c;
   }
 
+  const  ::apache::thrift::CompressionAlgorithm* get_compression() const& {
+    return __isset.compression ? std::addressof(compression) : nullptr;
+  }
+
+   ::apache::thrift::CompressionAlgorithm* get_compression() & {
+    return __isset.compression ? std::addressof(compression) : nullptr;
+  }
+   ::apache::thrift::CompressionAlgorithm* get_compression() && = delete;
+
+   ::apache::thrift::CompressionAlgorithm& set_compression( ::apache::thrift::CompressionAlgorithm compression_) {
+    compression = compression_;
+    __isset.compression = true;
+    return compression;
+  }
+
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
   template <class Protocol_>
@@ -975,10 +1267,11 @@ namespace apache { namespace thrift {
 class StreamPayloadMetadata final : private apache::thrift::detail::st::ComparisonOperators<StreamPayloadMetadata> {
  public:
 
-  StreamPayloadMetadata() {}
+  StreamPayloadMetadata() :
+      compression( ::apache::thrift::CompressionAlgorithm::NONE) {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  StreamPayloadMetadata(apache::thrift::FragileConstructor);
+  StreamPayloadMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::CompressionAlgorithm compression__arg);
 
   StreamPayloadMetadata(StreamPayloadMetadata&&) = default;
 
@@ -988,8 +1281,46 @@ class StreamPayloadMetadata final : private apache::thrift::detail::st::Comparis
 
   StreamPayloadMetadata& operator=(const StreamPayloadMetadata&) = default;
   void __clear();
+ private:
+   ::apache::thrift::CompressionAlgorithm compression;
+
+ public:
+  struct __isset {
+    bool compression;
+  } __isset = {};
   bool operator==(const StreamPayloadMetadata& rhs) const;
   bool operator<(const StreamPayloadMetadata& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionAlgorithm&> compression_ref() const& {
+    return {compression, __isset.compression};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionAlgorithm&&> compression_ref() const&& {
+    return {std::move(compression), __isset.compression};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionAlgorithm&> compression_ref() & {
+    return {compression, __isset.compression};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionAlgorithm&&> compression_ref() && {
+    return {std::move(compression), __isset.compression};
+  }
+
+  const  ::apache::thrift::CompressionAlgorithm* get_compression() const& {
+    return __isset.compression ? std::addressof(compression) : nullptr;
+  }
+
+   ::apache::thrift::CompressionAlgorithm* get_compression() & {
+    return __isset.compression ? std::addressof(compression) : nullptr;
+  }
+   ::apache::thrift::CompressionAlgorithm* get_compression() && = delete;
+
+   ::apache::thrift::CompressionAlgorithm& set_compression( ::apache::thrift::CompressionAlgorithm compression_) {
+    compression = compression_;
+    __isset.compression = true;
+    return compression;
+  }
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -1021,15 +1352,11 @@ namespace apache { namespace thrift {
 class RequestSetupMetadata final : private apache::thrift::detail::st::ComparisonOperators<RequestSetupMetadata> {
  public:
 
-  RequestSetupMetadata() {}
+  RequestSetupMetadata() :
+      interfaceKind( ::apache::thrift::InterfaceKind::USER) {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    opaque = arg.extract();
-    __isset.opaque = true;
-  }
+  RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg,  ::apache::thrift::InterfaceKind interfaceKind__arg);
 
   RequestSetupMetadata(RequestSetupMetadata&&) = default;
 
@@ -1039,10 +1366,15 @@ class RequestSetupMetadata final : private apache::thrift::detail::st::Compariso
 
   RequestSetupMetadata& operator=(const RequestSetupMetadata&) = default;
   void __clear();
+ private:
   apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque;
+ private:
+   ::apache::thrift::InterfaceKind interfaceKind;
 
+ public:
   struct __isset {
     bool opaque;
+    bool interfaceKind;
   } __isset = {};
   bool operator==(const RequestSetupMetadata& rhs) const;
   bool operator<(const RequestSetupMetadata& rhs) const;
@@ -1062,6 +1394,22 @@ class RequestSetupMetadata final : private apache::thrift::detail::st::Compariso
   FOLLY_ERASE ::apache::thrift::optional_field_ref<apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>&&> opaque_ref() && {
     return {std::move(opaque), __isset.opaque};
   }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::InterfaceKind&> interfaceKind_ref() const& {
+    return {interfaceKind, __isset.interfaceKind};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::InterfaceKind&&> interfaceKind_ref() const&& {
+    return {std::move(interfaceKind), __isset.interfaceKind};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::InterfaceKind&> interfaceKind_ref() & {
+    return {interfaceKind, __isset.interfaceKind};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::InterfaceKind&&> interfaceKind_ref() && {
+    return {std::move(interfaceKind), __isset.interfaceKind};
+  }
   const apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* get_opaque() const&;
   apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* get_opaque() &;
   apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* get_opaque() && = delete;
@@ -1071,6 +1419,21 @@ class RequestSetupMetadata final : private apache::thrift::detail::st::Compariso
     opaque = std::forward<T_RequestSetupMetadata_opaque_struct_setter>(opaque_);
     __isset.opaque = true;
     return opaque;
+  }
+
+  const  ::apache::thrift::InterfaceKind* get_interfaceKind() const& {
+    return __isset.interfaceKind ? std::addressof(interfaceKind) : nullptr;
+  }
+
+   ::apache::thrift::InterfaceKind* get_interfaceKind() & {
+    return __isset.interfaceKind ? std::addressof(interfaceKind) : nullptr;
+  }
+   ::apache::thrift::InterfaceKind* get_interfaceKind() && = delete;
+
+   ::apache::thrift::InterfaceKind& set_interfaceKind( ::apache::thrift::InterfaceKind interfaceKind_) {
+    interfaceKind = interfaceKind_;
+    __isset.interfaceKind = true;
+    return interfaceKind;
   }
 
   template <class Protocol_>
@@ -1093,6 +1456,170 @@ void swap(RequestSetupMetadata& a, RequestSetupMetadata& b);
 
 template <class Protocol_>
 uint32_t RequestSetupMetadata::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class HeadersPayloadContent final : private apache::thrift::detail::st::ComparisonOperators<HeadersPayloadContent> {
+ public:
+
+  HeadersPayloadContent() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  HeadersPayloadContent(apache::thrift::FragileConstructor, ::std::map<::std::string, ::std::string> otherMetadata__arg);
+
+  HeadersPayloadContent(HeadersPayloadContent&&) = default;
+
+  HeadersPayloadContent(const HeadersPayloadContent&) = default;
+
+  HeadersPayloadContent& operator=(HeadersPayloadContent&&) = default;
+
+  HeadersPayloadContent& operator=(const HeadersPayloadContent&) = default;
+  void __clear();
+ private:
+  ::std::map<::std::string, ::std::string> otherMetadata;
+
+ public:
+  struct __isset {
+    bool otherMetadata;
+  } __isset = {};
+  bool operator==(const HeadersPayloadContent& rhs) const;
+  bool operator<(const HeadersPayloadContent& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::map<::std::string, ::std::string>&> otherMetadata_ref() const& {
+    return {otherMetadata, __isset.otherMetadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::map<::std::string, ::std::string>&&> otherMetadata_ref() const&& {
+    return {std::move(otherMetadata), __isset.otherMetadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::map<::std::string, ::std::string>&> otherMetadata_ref() & {
+    return {otherMetadata, __isset.otherMetadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::map<::std::string, ::std::string>&&> otherMetadata_ref() && {
+    return {std::move(otherMetadata), __isset.otherMetadata};
+  }
+  const ::std::map<::std::string, ::std::string>* get_otherMetadata() const&;
+  ::std::map<::std::string, ::std::string>* get_otherMetadata() &;
+  ::std::map<::std::string, ::std::string>* get_otherMetadata() && = delete;
+
+  template <typename T_HeadersPayloadContent_otherMetadata_struct_setter = ::std::map<::std::string, ::std::string>>
+  ::std::map<::std::string, ::std::string>& set_otherMetadata(T_HeadersPayloadContent_otherMetadata_struct_setter&& otherMetadata_) {
+    otherMetadata = std::forward<T_HeadersPayloadContent_otherMetadata_struct_setter>(otherMetadata_);
+    __isset.otherMetadata = true;
+    return otherMetadata;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< HeadersPayloadContent >;
+};
+
+void swap(HeadersPayloadContent& a, HeadersPayloadContent& b);
+
+template <class Protocol_>
+uint32_t HeadersPayloadContent::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class HeadersPayloadMetadata final : private apache::thrift::detail::st::ComparisonOperators<HeadersPayloadMetadata> {
+ public:
+
+  HeadersPayloadMetadata() :
+      compression( ::apache::thrift::CompressionAlgorithm::NONE) {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  HeadersPayloadMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::CompressionAlgorithm compression__arg);
+
+  HeadersPayloadMetadata(HeadersPayloadMetadata&&) = default;
+
+  HeadersPayloadMetadata(const HeadersPayloadMetadata&) = default;
+
+  HeadersPayloadMetadata& operator=(HeadersPayloadMetadata&&) = default;
+
+  HeadersPayloadMetadata& operator=(const HeadersPayloadMetadata&) = default;
+  void __clear();
+ private:
+   ::apache::thrift::CompressionAlgorithm compression;
+
+ public:
+  struct __isset {
+    bool compression;
+  } __isset = {};
+  bool operator==(const HeadersPayloadMetadata& rhs) const;
+  bool operator<(const HeadersPayloadMetadata& rhs) const;
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionAlgorithm&> compression_ref() const& {
+    return {compression, __isset.compression};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionAlgorithm&&> compression_ref() const&& {
+    return {std::move(compression), __isset.compression};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionAlgorithm&> compression_ref() & {
+    return {compression, __isset.compression};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionAlgorithm&&> compression_ref() && {
+    return {std::move(compression), __isset.compression};
+  }
+
+  const  ::apache::thrift::CompressionAlgorithm* get_compression() const& {
+    return __isset.compression ? std::addressof(compression) : nullptr;
+  }
+
+   ::apache::thrift::CompressionAlgorithm* get_compression() & {
+    return __isset.compression ? std::addressof(compression) : nullptr;
+  }
+   ::apache::thrift::CompressionAlgorithm* get_compression() && = delete;
+
+   ::apache::thrift::CompressionAlgorithm& set_compression( ::apache::thrift::CompressionAlgorithm compression_) {
+    compression = compression_;
+    __isset.compression = true;
+    return compression;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< HeadersPayloadMetadata >;
+};
+
+void swap(HeadersPayloadMetadata& a, HeadersPayloadMetadata& b);
+
+template <class Protocol_>
+uint32_t HeadersPayloadMetadata::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

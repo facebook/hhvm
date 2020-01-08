@@ -99,6 +99,31 @@ template <> struct TEnumDataStorage<::apache::thrift::RpcPriority> {
 }} // apache::thrift
 namespace apache { namespace thrift {
 
+struct _CompressionAlgorithmEnumDataStorage {
+  using type = CompressionAlgorithm;
+  static constexpr const std::size_t size = 3;
+  static constexpr const std::array<CompressionAlgorithm, 3> values = {{
+    CompressionAlgorithm::NONE,
+    CompressionAlgorithm::ZLIB,
+    CompressionAlgorithm::ZSTD,
+  }};
+  static constexpr const std::array<folly::StringPiece, 3> names = {{
+    "NONE",
+    "ZLIB",
+    "ZSTD",
+  }};
+};
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+template <> struct TEnumDataStorage<::apache::thrift::CompressionAlgorithm> {
+  using storage_type = ::apache::thrift::_CompressionAlgorithmEnumDataStorage;
+};
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
 struct _RequestRpcMetadataFlagsEnumDataStorage {
   using type = RequestRpcMetadataFlags;
   static constexpr const std::size_t size = 2;
@@ -117,6 +142,29 @@ namespace apache { namespace thrift {
 
 template <> struct TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags> {
   using storage_type = ::apache::thrift::_RequestRpcMetadataFlagsEnumDataStorage;
+};
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+struct _InterfaceKindEnumDataStorage {
+  using type = InterfaceKind;
+  static constexpr const std::size_t size = 2;
+  static constexpr const std::array<InterfaceKind, 2> values = {{
+    InterfaceKind::USER,
+    InterfaceKind::DEBUGGING,
+  }};
+  static constexpr const std::array<folly::StringPiece, 2> names = {{
+    "USER",
+    "DEBUGGING",
+  }};
+};
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+template <> struct TEnumDataStorage<::apache::thrift::InterfaceKind> {
+  using storage_type = ::apache::thrift::_InterfaceKindEnumDataStorage;
 };
 
 }} // apache::thrift

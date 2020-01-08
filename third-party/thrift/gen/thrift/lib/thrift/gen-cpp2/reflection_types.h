@@ -11,6 +11,75 @@
 
 #include <unordered_map>
 
+namespace apache {
+namespace thrift {
+namespace tag {
+struct isRequired;
+struct type;
+struct name;
+struct annotations;
+struct order;
+struct name;
+struct fields;
+struct mapKeyType;
+struct valueType;
+struct enumValues;
+struct dataTypes;
+struct names;
+} // namespace tag
+namespace detail {
+#ifndef APACHE_THRIFT_ACCESSOR_isRequired
+#define APACHE_THRIFT_ACCESSOR_isRequired
+APACHE_THRIFT_DEFINE_ACCESSOR(isRequired);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_type
+#define APACHE_THRIFT_ACCESSOR_type
+APACHE_THRIFT_DEFINE_ACCESSOR(type);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_name
+#define APACHE_THRIFT_ACCESSOR_name
+APACHE_THRIFT_DEFINE_ACCESSOR(name);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_annotations
+#define APACHE_THRIFT_ACCESSOR_annotations
+APACHE_THRIFT_DEFINE_ACCESSOR(annotations);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_order
+#define APACHE_THRIFT_ACCESSOR_order
+APACHE_THRIFT_DEFINE_ACCESSOR(order);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_name
+#define APACHE_THRIFT_ACCESSOR_name
+APACHE_THRIFT_DEFINE_ACCESSOR(name);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_fields
+#define APACHE_THRIFT_ACCESSOR_fields
+APACHE_THRIFT_DEFINE_ACCESSOR(fields);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_mapKeyType
+#define APACHE_THRIFT_ACCESSOR_mapKeyType
+APACHE_THRIFT_DEFINE_ACCESSOR(mapKeyType);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_valueType
+#define APACHE_THRIFT_ACCESSOR_valueType
+APACHE_THRIFT_DEFINE_ACCESSOR(valueType);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_enumValues
+#define APACHE_THRIFT_ACCESSOR_enumValues
+APACHE_THRIFT_DEFINE_ACCESSOR(enumValues);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_dataTypes
+#define APACHE_THRIFT_ACCESSOR_dataTypes
+APACHE_THRIFT_DEFINE_ACCESSOR(dataTypes);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_names
+#define APACHE_THRIFT_ACCESSOR_names
+APACHE_THRIFT_DEFINE_ACCESSOR(names);
+#endif
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 // BEGIN declare_enums
 namespace apache { namespace thrift { namespace reflection {
 
@@ -101,31 +170,6 @@ class StructField final : private apache::thrift::detail::st::ComparisonOperator
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   StructField(apache::thrift::FragileConstructor, bool isRequired__arg, int64_t type__arg, ::std::string name__arg, std::unordered_map<::std::string, ::std::string> annotations__arg, int16_t order__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    isRequired = arg.extract();
-    __isset.isRequired = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    type = arg.extract();
-    __isset.type = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<3, _T> arg) {
-    name = arg.extract();
-    __isset.name = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<4, _T> arg) {
-    annotations = arg.extract();
-    __isset.annotations = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<5, _T> arg) {
-    order = arg.extract();
-    __isset.order = true;
-  }
 
   StructField(StructField&&) = default;
 
@@ -138,12 +182,18 @@ class StructField final : private apache::thrift::detail::st::ComparisonOperator
 
   ~StructField();
 
+ public:
   bool isRequired;
+ public:
   int64_t type;
+ public:
   ::std::string name;
+ private:
   std::unordered_map<::std::string, ::std::string> annotations;
+ public:
   int16_t order;
 
+ public:
   struct __isset {
     bool isRequired;
     bool type;
@@ -260,31 +310,6 @@ class DataType final : private apache::thrift::detail::st::ComparisonOperators<D
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   DataType(apache::thrift::FragileConstructor, ::std::string name__arg, std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField> fields__arg, int64_t mapKeyType__arg, int64_t valueType__arg, std::unordered_map<::std::string, int32_t> enumValues__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    name = arg.extract();
-    __isset.name = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    fields = arg.extract();
-    __isset.fields = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<3, _T> arg) {
-    mapKeyType = arg.extract();
-    __isset.mapKeyType = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<4, _T> arg) {
-    valueType = arg.extract();
-    __isset.valueType = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<5, _T> arg) {
-    enumValues = arg.extract();
-    __isset.enumValues = true;
-  }
 
   DataType(DataType&&) = default;
 
@@ -297,12 +322,18 @@ class DataType final : private apache::thrift::detail::st::ComparisonOperators<D
 
   ~DataType();
 
+ public:
   ::std::string name;
+ private:
   std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField> fields;
+ private:
   int64_t mapKeyType;
+ private:
   int64_t valueType;
+ private:
   std::unordered_map<::std::string, int32_t> enumValues;
 
+ public:
   struct __isset {
     bool name;
     bool fields;
@@ -476,16 +507,6 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Schema(apache::thrift::FragileConstructor, std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType> dataTypes__arg, std::unordered_map<::std::string, int64_t> names__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    dataTypes = arg.extract();
-    __isset.dataTypes = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    names = arg.extract();
-    __isset.names = true;
-  }
 
   Schema(Schema&&) = default;
 
@@ -495,9 +516,12 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
 
   Schema& operator=(const Schema&) = default;
   void __clear();
+ public:
   std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType> dataTypes;
+ public:
   std::unordered_map<::std::string, int64_t> names;
 
+ public:
   struct __isset {
     bool dataTypes;
     bool names;

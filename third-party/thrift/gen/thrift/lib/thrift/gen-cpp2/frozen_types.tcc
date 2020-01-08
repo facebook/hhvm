@@ -61,7 +61,7 @@ void Field::readNoXfer(Protocol_* iprot) {
   }
 _readField_layoutId:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::read(*iprot, this->layoutId);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->layoutId, _readState);
     this->__isset.layoutId = true;
   }
 
@@ -74,7 +74,7 @@ _readField_layoutId:
   }
 _readField_offset:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::read(*iprot, this->offset);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->offset, _readState);
     this->__isset.offset = true;
   }
 
@@ -197,7 +197,7 @@ void Layout::readNoXfer(Protocol_* iprot) {
   }
 _readField_size:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::read(*iprot, this->size);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::readWithContext(*iprot, this->size, _readState);
     this->__isset.size = true;
   }
 
@@ -210,7 +210,7 @@ _readField_size:
   }
 _readField_bits:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::read(*iprot, this->bits);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->bits, _readState);
     this->__isset.bits = true;
   }
 
@@ -223,9 +223,12 @@ _readField_bits:
   }
 _readField_fields:
   {
+    _readState.beforeSubobject(iprot);
+    
     this->fields = ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field>>::read(*iprot, this->fields);
     this->__isset.fields = true;
+    _readState.afterSubobject(iprot);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -237,6 +240,7 @@ _readField_fields:
   }
 _readField_typeName:
   {
+    
     iprot->readString(this->typeName);
     this->__isset.typeName = true;
   }
@@ -390,7 +394,7 @@ void Schema::readNoXfer(Protocol_* iprot) {
   }
 _readField_fileVersion:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::read(*iprot, this->fileVersion);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::readWithContext(*iprot, this->fileVersion, _readState);
     this->__isset.fileVersion = true;
   }
 
@@ -403,7 +407,7 @@ _readField_fileVersion:
   }
 _readField_relaxTypeChecks:
   {
-    iprot->readBool(this->relaxTypeChecks);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->relaxTypeChecks, _readState);
     this->__isset.relaxTypeChecks = true;
   }
 
@@ -416,9 +420,12 @@ _readField_relaxTypeChecks:
   }
 _readField_layouts:
   {
+    _readState.beforeSubobject(iprot);
+    
     this->layouts = ::std::map<int16_t,  ::apache::thrift::frozen::schema::Layout>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, ::std::map<int16_t,  ::apache::thrift::frozen::schema::Layout>>::read(*iprot, this->layouts);
     this->__isset.layouts = true;
+    _readState.afterSubobject(iprot);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -430,7 +437,7 @@ _readField_layouts:
   }
 _readField_rootLayout:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::read(*iprot, this->rootLayout);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->rootLayout, _readState);
     this->__isset.rootLayout = true;
   }
 

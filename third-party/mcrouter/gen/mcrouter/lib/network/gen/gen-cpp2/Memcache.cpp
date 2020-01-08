@@ -378,10 +378,6 @@ const char* MemcacheAsyncProcessor::getServiceName() {
   return "Memcache";
 }
 
-folly::Optional<std::string> MemcacheAsyncProcessor::getCacheKey(folly::IOBuf* buf, apache::thrift::protocol::PROTOCOL_TYPES protType) {
-  return apache::thrift::detail::ap::get_cache_key(buf, protType, cacheKeyMap_);
-}
-
 void MemcacheAsyncProcessor::process(std::unique_ptr<apache::thrift::ResponseChannelRequest> req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   apache::thrift::detail::ap::process(this, std::move(req), std::move(buf), protType, context, eb, tm);
 }
@@ -395,7 +391,6 @@ std::shared_ptr<folly::RequestContext> MemcacheAsyncProcessor::getBaseContextFor
 }
 
 std::unordered_set<std::string> MemcacheAsyncProcessor::onewayMethods_ {};
-std::unordered_map<std::string, int16_t> MemcacheAsyncProcessor::cacheKeyMap_ {};
 const MemcacheAsyncProcessor::ProcessMap& MemcacheAsyncProcessor::getBinaryProtocolProcessMap() {
   return binaryProcessMap_;
 }
@@ -451,6 +446,3 @@ const MemcacheAsyncProcessor::ProcessMap MemcacheAsyncProcessor::compactProcessM
 };
 
 }}} // facebook::memcache::thrift
-namespace apache { namespace thrift {
-
-}} // apache::thrift

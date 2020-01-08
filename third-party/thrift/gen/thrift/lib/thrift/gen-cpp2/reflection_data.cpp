@@ -16,7 +16,5 @@ constexpr const std::array<Type, 16> _TypeEnumDataStorage::values;
 constexpr const std::array<folly::StringPiece, 16> _TypeEnumDataStorage::names;
 
 }}} // apache::thrift::reflection
-namespace apache { namespace thrift {
 
-}} // apache::thrift
 

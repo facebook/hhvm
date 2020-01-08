@@ -10,6 +10,65 @@
 
 
 
+namespace apache {
+namespace thrift {
+namespace tag {
+struct layoutId;
+struct offset;
+struct size;
+struct bits;
+struct fields;
+struct typeName;
+struct fileVersion;
+struct relaxTypeChecks;
+struct layouts;
+struct rootLayout;
+} // namespace tag
+namespace detail {
+#ifndef APACHE_THRIFT_ACCESSOR_layoutId
+#define APACHE_THRIFT_ACCESSOR_layoutId
+APACHE_THRIFT_DEFINE_ACCESSOR(layoutId);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_offset
+#define APACHE_THRIFT_ACCESSOR_offset
+APACHE_THRIFT_DEFINE_ACCESSOR(offset);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_size
+#define APACHE_THRIFT_ACCESSOR_size
+APACHE_THRIFT_DEFINE_ACCESSOR(size);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_bits
+#define APACHE_THRIFT_ACCESSOR_bits
+APACHE_THRIFT_DEFINE_ACCESSOR(bits);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_fields
+#define APACHE_THRIFT_ACCESSOR_fields
+APACHE_THRIFT_DEFINE_ACCESSOR(fields);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_typeName
+#define APACHE_THRIFT_ACCESSOR_typeName
+APACHE_THRIFT_DEFINE_ACCESSOR(typeName);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_fileVersion
+#define APACHE_THRIFT_ACCESSOR_fileVersion
+APACHE_THRIFT_DEFINE_ACCESSOR(fileVersion);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_relaxTypeChecks
+#define APACHE_THRIFT_ACCESSOR_relaxTypeChecks
+APACHE_THRIFT_DEFINE_ACCESSOR(relaxTypeChecks);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_layouts
+#define APACHE_THRIFT_ACCESSOR_layouts
+APACHE_THRIFT_DEFINE_ACCESSOR(layouts);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_rootLayout
+#define APACHE_THRIFT_ACCESSOR_rootLayout
+APACHE_THRIFT_DEFINE_ACCESSOR(rootLayout);
+#endif
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 // BEGIN declare_enums
 
 // END declare_enums
@@ -38,16 +97,6 @@ class Field final : private apache::thrift::detail::st::ComparisonOperators<Fiel
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Field(apache::thrift::FragileConstructor, int16_t layoutId__arg, int16_t offset__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    layoutId = arg.extract();
-    __isset.layoutId = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    offset = arg.extract();
-    __isset.offset = true;
-  }
 
   Field(Field&&) = default;
 
@@ -57,9 +106,12 @@ class Field final : private apache::thrift::detail::st::ComparisonOperators<Fiel
 
   Field& operator=(const Field&) = default;
   void __clear();
+ public:
   int16_t layoutId;
+ public:
   int16_t offset;
 
+ public:
   struct __isset {
     bool layoutId;
     bool offset;
@@ -123,26 +175,6 @@ class Layout final : private apache::thrift::detail::st::ComparisonOperators<Lay
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Layout(apache::thrift::FragileConstructor, int32_t size__arg, int16_t bits__arg, ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field> fields__arg, ::std::string typeName__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    size = arg.extract();
-    __isset.size = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    bits = arg.extract();
-    __isset.bits = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<3, _T> arg) {
-    fields = arg.extract();
-    __isset.fields = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<4, _T> arg) {
-    typeName = arg.extract();
-    __isset.typeName = true;
-  }
 
   Layout(Layout&&) = default;
 
@@ -152,11 +184,16 @@ class Layout final : private apache::thrift::detail::st::ComparisonOperators<Lay
 
   Layout& operator=(const Layout&) = default;
   void __clear();
+ public:
   int32_t size;
+ public:
   int16_t bits;
+ public:
   ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field> fields;
+ public:
   ::std::string typeName;
 
+ public:
   struct __isset {
     bool size;
     bool bits;
@@ -247,26 +284,6 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   Schema(apache::thrift::FragileConstructor, int32_t fileVersion__arg, bool relaxTypeChecks__arg, ::std::map<int16_t,  ::apache::thrift::frozen::schema::Layout> layouts__arg, int16_t rootLayout__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<4, _T> arg) {
-    fileVersion = arg.extract();
-    __isset.fileVersion = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    relaxTypeChecks = arg.extract();
-    __isset.relaxTypeChecks = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    layouts = arg.extract();
-    __isset.layouts = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<3, _T> arg) {
-    rootLayout = arg.extract();
-    __isset.rootLayout = true;
-  }
 
   Schema(Schema&&) = default;
 
@@ -276,11 +293,16 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
 
   Schema& operator=(const Schema&) = default;
   void __clear();
+ public:
   int32_t fileVersion;
+ public:
   bool relaxTypeChecks;
+ public:
   ::std::map<int16_t,  ::apache::thrift::frozen::schema::Layout> layouts;
+ public:
   int16_t rootLayout;
 
+ public:
   struct __isset {
     bool fileVersion;
     bool relaxTypeChecks;

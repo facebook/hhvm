@@ -16,41 +16,54 @@ namespace apache { namespace thrift {
 namespace std {
 
 } // std
-namespace apache { namespace thrift {
 
-}} // apache::thrift
-namespace apache { namespace thrift {
-
-}} // apache::thrift
-namespace std {
-
-} // std
-namespace apache { namespace thrift {
-
-}} // apache::thrift
 namespace apache { namespace thrift {
 
 }} // apache::thrift
 namespace std {
 
 } // std
-namespace apache { namespace thrift {
 
-}} // apache::thrift
 namespace apache { namespace thrift {
 
 }} // apache::thrift
 namespace std {
 
 } // std
+
 namespace apache { namespace thrift {
 
 }} // apache::thrift
+namespace std {
+
+} // std
+
+namespace apache { namespace thrift {
+
+}} // apache::thrift
+namespace std {
+
+} // std
+
+namespace apache { namespace thrift {
+
+}} // apache::thrift
+namespace std {
+
+} // std
+
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
+template <>
+struct TccStructTraits<::apache::thrift::NegotiationParameters> {
+  static void translateFieldName(
+      folly::StringPiece _fname,
+      int16_t& fid,
+      apache::thrift::protocol::TType& _ftype);
+};
 template <>
 struct TccStructTraits<::apache::thrift::RequestRpcMetadata> {
   static void translateFieldName(
@@ -79,11 +92,139 @@ struct TccStructTraits<::apache::thrift::RequestSetupMetadata> {
       int16_t& fid,
       apache::thrift::protocol::TType& _ftype);
 };
+template <>
+struct TccStructTraits<::apache::thrift::HeadersPayloadContent> {
+  static void translateFieldName(
+      folly::StringPiece _fname,
+      int16_t& fid,
+      apache::thrift::protocol::TType& _ftype);
+};
+template <>
+struct TccStructTraits<::apache::thrift::HeadersPayloadMetadata> {
+  static void translateFieldName(
+      folly::StringPiece _fname,
+      int16_t& fid,
+      apache::thrift::protocol::TType& _ftype);
+};
 
 } // namespace detail
 } // namespace thrift
 } // namespace apache
 
+namespace apache { namespace thrift {
+
+template <class Protocol_>
+void NegotiationParameters::readNoXfer(Protocol_* iprot) {
+  apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
+
+  _readState.readStructBegin(iprot);
+
+  using apache::thrift::TProtocolException;
+
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          0,
+          1,
+          apache::thrift::protocol::T_I64))) {
+    goto _loop;
+  }
+_readField_compressionAlgos:
+  {
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, std::uint64_t>::readWithContext(*iprot, this->compressionAlgos, _readState);
+    this->__isset.compressionAlgos = true;
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          1,
+          0,
+          apache::thrift::protocol::T_STOP))) {
+    goto _loop;
+  }
+
+_end:
+  _readState.readStructEnd(iprot);
+
+  return;
+
+_loop:
+  _readState.afterAdvanceFailure(iprot);
+  if (_readState.atStop()) {
+    goto _end;
+  }
+  if (iprot->kUsesFieldNames()) {
+    _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<NegotiationParameters>>();
+  }
+
+  switch (_readState.fieldId) {
+    case 1:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I64))) {
+        goto _readField_compressionAlgos;
+      } else {
+        goto _skip;
+      }
+    }
+    default:
+    {
+_skip:
+      _readState.skip(iprot);
+      _readState.readFieldEnd(iprot);
+      _readState.readFieldBeginNoInline(iprot);
+      goto _loop;
+    }
+  }
+}
+
+template <class Protocol_>
+uint32_t NegotiationParameters::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("NegotiationParameters");
+  if (this->__isset.compressionAlgos) {
+    xfer += prot_->serializedFieldSize("compressionAlgos", apache::thrift::protocol::T_I64, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, std::uint64_t>::serializedSize<false>(*prot_, this->compressionAlgos);
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t NegotiationParameters::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("NegotiationParameters");
+  if (this->__isset.compressionAlgos) {
+    xfer += prot_->serializedFieldSize("compressionAlgos", apache::thrift::protocol::T_I64, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, std::uint64_t>::serializedSize<false>(*prot_, this->compressionAlgos);
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t NegotiationParameters::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("NegotiationParameters");
+  if (this->__isset.compressionAlgos) {
+    xfer += prot_->writeFieldBegin("compressionAlgos", apache::thrift::protocol::T_I64, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, std::uint64_t>::write(*prot_, this->compressionAlgos);
+    xfer += prot_->writeFieldEnd();
+  }
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+
+extern template void NegotiationParameters::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t NegotiationParameters::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t NegotiationParameters::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t NegotiationParameters::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void NegotiationParameters::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t NegotiationParameters::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t NegotiationParameters::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t NegotiationParameters::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
 namespace apache { namespace thrift {
 
 template <class Protocol_>
@@ -104,7 +245,7 @@ void RequestRpcMetadata::readNoXfer(Protocol_* iprot) {
   }
 _readField_protocol:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::ProtocolId>::read(*iprot, this->protocol);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::ProtocolId>::readWithContext(*iprot, this->protocol, _readState);
     this->__isset.protocol = true;
   }
 
@@ -117,6 +258,7 @@ _readField_protocol:
   }
 _readField_name:
   {
+    
     iprot->readString(this->name);
     this->__isset.name = true;
   }
@@ -130,7 +272,7 @@ _readField_name:
   }
 _readField_kind:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::RpcKind>::read(*iprot, this->kind);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::RpcKind>::readWithContext(*iprot, this->kind, _readState);
     this->__isset.kind = true;
   }
 
@@ -143,7 +285,7 @@ _readField_kind:
   }
 _readField_seqId:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::read(*iprot, this->seqId);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::readWithContext(*iprot, this->seqId, _readState);
     this->__isset.seqId = true;
   }
 
@@ -156,7 +298,7 @@ _readField_seqId:
   }
 _readField_clientTimeoutMs:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::read(*iprot, this->clientTimeoutMs);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::readWithContext(*iprot, this->clientTimeoutMs, _readState);
     this->__isset.clientTimeoutMs = true;
   }
 
@@ -169,7 +311,7 @@ _readField_clientTimeoutMs:
   }
 _readField_queueTimeoutMs:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::read(*iprot, this->queueTimeoutMs);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::readWithContext(*iprot, this->queueTimeoutMs, _readState);
     this->__isset.queueTimeoutMs = true;
   }
 
@@ -182,7 +324,7 @@ _readField_queueTimeoutMs:
   }
 _readField_priority:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::RpcPriority>::read(*iprot, this->priority);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::RpcPriority>::readWithContext(*iprot, this->priority, _readState);
     this->__isset.priority = true;
   }
 
@@ -195,9 +337,12 @@ _readField_priority:
   }
 _readField_otherMetadata:
   {
+    _readState.beforeSubobject(iprot);
+    
     this->otherMetadata = ::std::map<::std::string, ::std::string>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::read(*iprot, this->otherMetadata);
     this->__isset.otherMetadata = true;
+    _readState.afterSubobject(iprot);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -209,6 +354,7 @@ _readField_otherMetadata:
   }
 _readField_host:
   {
+    
     iprot->readString(this->host);
     this->__isset.host = true;
   }
@@ -222,6 +368,7 @@ _readField_host:
   }
 _readField_url:
   {
+    
     iprot->readString(this->url);
     this->__isset.url = true;
   }
@@ -235,7 +382,7 @@ _readField_url:
   }
 _readField_crc32c:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, std::uint32_t>::read(*iprot, this->crc32c);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, std::uint32_t>::readWithContext(*iprot, this->crc32c, _readState);
     this->__isset.crc32c = true;
   }
 
@@ -248,7 +395,7 @@ _readField_crc32c:
   }
 _readField_flags:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, std::uint64_t>::read(*iprot, this->flags);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, std::uint64_t>::readWithContext(*iprot, this->flags, _readState);
     this->__isset.flags = true;
   }
 
@@ -261,6 +408,7 @@ _readField_flags:
   }
 _readField_loadMetric:
   {
+    
     iprot->readString(this->loadMetric);
     this->__isset.loadMetric = true;
   }
@@ -268,6 +416,19 @@ _readField_loadMetric:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           13,
+          14,
+          apache::thrift::protocol::T_I32))) {
+    goto _loop;
+  }
+_readField_compression:
+  {
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::readWithContext(*iprot, this->compression, _readState);
+    this->__isset.compression = true;
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          14,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -392,6 +553,14 @@ _loop:
         goto _skip;
       }
     }
+    case 14:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_compression;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -459,6 +628,10 @@ uint32_t RequestRpcMetadata::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("loadMetric", apache::thrift::protocol::T_STRING, 13);
     xfer += prot_->serializedSizeString(this->loadMetric);
   }
+  if (this->__isset.compression) {
+    xfer += prot_->serializedFieldSize("compression", apache::thrift::protocol::T_I32, 14);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::serializedSize<false>(*prot_, this->compression);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -518,6 +691,10 @@ uint32_t RequestRpcMetadata::serializedSizeZC(Protocol_ const* prot_) const {
   if (this->__isset.loadMetric) {
     xfer += prot_->serializedFieldSize("loadMetric", apache::thrift::protocol::T_STRING, 13);
     xfer += prot_->serializedSizeString(this->loadMetric);
+  }
+  if (this->__isset.compression) {
+    xfer += prot_->serializedFieldSize("compression", apache::thrift::protocol::T_I32, 14);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::serializedSize<false>(*prot_, this->compression);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -592,6 +769,11 @@ uint32_t RequestRpcMetadata::write(Protocol_* prot_) const {
     xfer += prot_->writeString(this->loadMetric);
     xfer += prot_->writeFieldEnd();
   }
+  if (this->__isset.compression) {
+    xfer += prot_->writeFieldBegin("compression", apache::thrift::protocol::T_I32, 14);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::write(*prot_, this->compression);
+    xfer += prot_->writeFieldEnd();
+  }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
@@ -627,7 +809,7 @@ void ResponseRpcMetadata::readNoXfer(Protocol_* iprot) {
   }
 _readField_protocol:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::ProtocolId>::read(*iprot, this->protocol);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::ProtocolId>::readWithContext(*iprot, this->protocol, _readState);
     this->__isset.protocol = true;
   }
 
@@ -640,7 +822,7 @@ _readField_protocol:
   }
 _readField_seqId:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::read(*iprot, this->seqId);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::readWithContext(*iprot, this->seqId, _readState);
     this->__isset.seqId = true;
   }
 
@@ -653,9 +835,12 @@ _readField_seqId:
   }
 _readField_otherMetadata:
   {
+    _readState.beforeSubobject(iprot);
+    
     this->otherMetadata = ::std::map<::std::string, ::std::string>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::read(*iprot, this->otherMetadata);
     this->__isset.otherMetadata = true;
+    _readState.afterSubobject(iprot);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -667,7 +852,7 @@ _readField_otherMetadata:
   }
 _readField_load:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::read(*iprot, this->load);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::readWithContext(*iprot, this->load, _readState);
     this->__isset.load = true;
   }
 
@@ -680,13 +865,26 @@ _readField_load:
   }
 _readField_crc32c:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, std::uint32_t>::read(*iprot, this->crc32c);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, std::uint32_t>::readWithContext(*iprot, this->crc32c, _readState);
     this->__isset.crc32c = true;
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           5,
+          6,
+          apache::thrift::protocol::T_I32))) {
+    goto _loop;
+  }
+_readField_compression:
+  {
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::readWithContext(*iprot, this->compression, _readState);
+    this->__isset.compression = true;
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          6,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -747,6 +945,14 @@ _loop:
         goto _skip;
       }
     }
+    case 6:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_compression;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -782,6 +988,10 @@ uint32_t ResponseRpcMetadata::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("crc32c", apache::thrift::protocol::T_I32, 5);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, std::uint32_t>::serializedSize<false>(*prot_, this->crc32c);
   }
+  if (this->__isset.compression) {
+    xfer += prot_->serializedFieldSize("compression", apache::thrift::protocol::T_I32, 6);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::serializedSize<false>(*prot_, this->compression);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -809,6 +1019,10 @@ uint32_t ResponseRpcMetadata::serializedSizeZC(Protocol_ const* prot_) const {
   if (this->__isset.crc32c) {
     xfer += prot_->serializedFieldSize("crc32c", apache::thrift::protocol::T_I32, 5);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, std::uint32_t>::serializedSize<false>(*prot_, this->crc32c);
+  }
+  if (this->__isset.compression) {
+    xfer += prot_->serializedFieldSize("compression", apache::thrift::protocol::T_I32, 6);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::serializedSize<false>(*prot_, this->compression);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -843,6 +1057,11 @@ uint32_t ResponseRpcMetadata::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, std::uint32_t>::write(*prot_, this->crc32c);
     xfer += prot_->writeFieldEnd();
   }
+  if (this->__isset.compression) {
+    xfer += prot_->writeFieldBegin("compression", apache::thrift::protocol::T_I32, 6);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::write(*prot_, this->compression);
+    xfer += prot_->writeFieldEnd();
+  }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
@@ -872,6 +1091,19 @@ void StreamPayloadMetadata::readNoXfer(Protocol_* iprot) {
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           0,
+          1,
+          apache::thrift::protocol::T_I32))) {
+    goto _loop;
+  }
+_readField_compression:
+  {
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::readWithContext(*iprot, this->compression, _readState);
+    this->__isset.compression = true;
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          1,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -892,8 +1124,17 @@ _loop:
   }
 
   switch (_readState.fieldId) {
+    case 1:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_compression;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
+_skip:
       _readState.skip(iprot);
       _readState.readFieldEnd(iprot);
       _readState.readFieldBeginNoInline(iprot);
@@ -906,6 +1147,10 @@ template <class Protocol_>
 uint32_t StreamPayloadMetadata::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("StreamPayloadMetadata");
+  if (this->__isset.compression) {
+    xfer += prot_->serializedFieldSize("compression", apache::thrift::protocol::T_I32, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::serializedSize<false>(*prot_, this->compression);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -914,6 +1159,10 @@ template <class Protocol_>
 uint32_t StreamPayloadMetadata::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("StreamPayloadMetadata");
+  if (this->__isset.compression) {
+    xfer += prot_->serializedFieldSize("compression", apache::thrift::protocol::T_I32, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::serializedSize<false>(*prot_, this->compression);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -922,6 +1171,11 @@ template <class Protocol_>
 uint32_t StreamPayloadMetadata::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("StreamPayloadMetadata");
+  if (this->__isset.compression) {
+    xfer += prot_->writeFieldBegin("compression", apache::thrift::protocol::T_I32, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::write(*prot_, this->compression);
+    xfer += prot_->writeFieldEnd();
+  }
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
   return xfer;
@@ -957,14 +1211,30 @@ void RequestSetupMetadata::readNoXfer(Protocol_* iprot) {
   }
 _readField_opaque:
   {
+    _readState.beforeSubobject(iprot);
+    
     this->opaque = apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::binary>, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>>::read(*iprot, this->opaque);
     this->__isset.opaque = true;
+    _readState.afterSubobject(iprot);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           1,
+          2,
+          apache::thrift::protocol::T_I32))) {
+    goto _loop;
+  }
+_readField_interfaceKind:
+  {
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::InterfaceKind>::readWithContext(*iprot, this->interfaceKind, _readState);
+    this->__isset.interfaceKind = true;
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          2,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -993,6 +1263,14 @@ _loop:
         goto _skip;
       }
     }
+    case 2:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_interfaceKind;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -1012,6 +1290,10 @@ uint32_t RequestSetupMetadata::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("opaque", apache::thrift::protocol::T_MAP, 1);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::binary>, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>>::serializedSize<false>(*prot_, this->opaque);
   }
+  if (this->__isset.interfaceKind) {
+    xfer += prot_->serializedFieldSize("interfaceKind", apache::thrift::protocol::T_I32, 2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::InterfaceKind>::serializedSize<false>(*prot_, this->interfaceKind);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -1024,6 +1306,10 @@ uint32_t RequestSetupMetadata::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("opaque", apache::thrift::protocol::T_MAP, 1);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::binary>, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>>::serializedSize<false>(*prot_, this->opaque);
   }
+  if (this->__isset.interfaceKind) {
+    xfer += prot_->serializedFieldSize("interfaceKind", apache::thrift::protocol::T_I32, 2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::InterfaceKind>::serializedSize<false>(*prot_, this->interfaceKind);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -1035,6 +1321,11 @@ uint32_t RequestSetupMetadata::write(Protocol_* prot_) const {
   if (this->__isset.opaque) {
     xfer += prot_->writeFieldBegin("opaque", apache::thrift::protocol::T_MAP, 1);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::binary>, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>>::write(*prot_, this->opaque);
+    xfer += prot_->writeFieldEnd();
+  }
+  if (this->__isset.interfaceKind) {
+    xfer += prot_->writeFieldBegin("interfaceKind", apache::thrift::protocol::T_I32, 2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::InterfaceKind>::write(*prot_, this->interfaceKind);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();
@@ -1050,5 +1341,237 @@ extern template void RequestSetupMetadata::readNoXfer<>(apache::thrift::CompactP
 extern template uint32_t RequestSetupMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 extern template uint32_t RequestSetupMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 extern template uint32_t RequestSetupMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+template <class Protocol_>
+void HeadersPayloadContent::readNoXfer(Protocol_* iprot) {
+  apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
+
+  _readState.readStructBegin(iprot);
+
+  using apache::thrift::TProtocolException;
+
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          0,
+          1,
+          apache::thrift::protocol::T_MAP))) {
+    goto _loop;
+  }
+_readField_otherMetadata:
+  {
+    _readState.beforeSubobject(iprot);
+    
+    this->otherMetadata = ::std::map<::std::string, ::std::string>();
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::read(*iprot, this->otherMetadata);
+    this->__isset.otherMetadata = true;
+    _readState.afterSubobject(iprot);
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          1,
+          0,
+          apache::thrift::protocol::T_STOP))) {
+    goto _loop;
+  }
+
+_end:
+  _readState.readStructEnd(iprot);
+
+  return;
+
+_loop:
+  _readState.afterAdvanceFailure(iprot);
+  if (_readState.atStop()) {
+    goto _end;
+  }
+  if (iprot->kUsesFieldNames()) {
+    _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<HeadersPayloadContent>>();
+  }
+
+  switch (_readState.fieldId) {
+    case 1:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_MAP))) {
+        goto _readField_otherMetadata;
+      } else {
+        goto _skip;
+      }
+    }
+    default:
+    {
+_skip:
+      _readState.skip(iprot);
+      _readState.readFieldEnd(iprot);
+      _readState.readFieldBeginNoInline(iprot);
+      goto _loop;
+    }
+  }
+}
+
+template <class Protocol_>
+uint32_t HeadersPayloadContent::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("HeadersPayloadContent");
+  if (this->__isset.otherMetadata) {
+    xfer += prot_->serializedFieldSize("otherMetadata", apache::thrift::protocol::T_MAP, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<false>(*prot_, this->otherMetadata);
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t HeadersPayloadContent::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("HeadersPayloadContent");
+  if (this->__isset.otherMetadata) {
+    xfer += prot_->serializedFieldSize("otherMetadata", apache::thrift::protocol::T_MAP, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<false>(*prot_, this->otherMetadata);
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t HeadersPayloadContent::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("HeadersPayloadContent");
+  if (this->__isset.otherMetadata) {
+    xfer += prot_->writeFieldBegin("otherMetadata", apache::thrift::protocol::T_MAP, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::write(*prot_, this->otherMetadata);
+    xfer += prot_->writeFieldEnd();
+  }
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+
+extern template void HeadersPayloadContent::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t HeadersPayloadContent::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t HeadersPayloadContent::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t HeadersPayloadContent::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void HeadersPayloadContent::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t HeadersPayloadContent::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t HeadersPayloadContent::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t HeadersPayloadContent::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+template <class Protocol_>
+void HeadersPayloadMetadata::readNoXfer(Protocol_* iprot) {
+  apache::thrift::detail::ProtocolReaderStructReadState<Protocol_> _readState;
+
+  _readState.readStructBegin(iprot);
+
+  using apache::thrift::TProtocolException;
+
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          0,
+          1,
+          apache::thrift::protocol::T_I32))) {
+    goto _loop;
+  }
+_readField_compression:
+  {
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::readWithContext(*iprot, this->compression, _readState);
+    this->__isset.compression = true;
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          1,
+          0,
+          apache::thrift::protocol::T_STOP))) {
+    goto _loop;
+  }
+
+_end:
+  _readState.readStructEnd(iprot);
+
+  return;
+
+_loop:
+  _readState.afterAdvanceFailure(iprot);
+  if (_readState.atStop()) {
+    goto _end;
+  }
+  if (iprot->kUsesFieldNames()) {
+    _readState.template fillFieldTraitsFromName<apache::thrift::detail::TccStructTraits<HeadersPayloadMetadata>>();
+  }
+
+  switch (_readState.fieldId) {
+    case 1:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_I32))) {
+        goto _readField_compression;
+      } else {
+        goto _skip;
+      }
+    }
+    default:
+    {
+_skip:
+      _readState.skip(iprot);
+      _readState.readFieldEnd(iprot);
+      _readState.readFieldBeginNoInline(iprot);
+      goto _loop;
+    }
+  }
+}
+
+template <class Protocol_>
+uint32_t HeadersPayloadMetadata::serializedSize(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("HeadersPayloadMetadata");
+  if (this->__isset.compression) {
+    xfer += prot_->serializedFieldSize("compression", apache::thrift::protocol::T_I32, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::serializedSize<false>(*prot_, this->compression);
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t HeadersPayloadMetadata::serializedSizeZC(Protocol_ const* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->serializedStructSize("HeadersPayloadMetadata");
+  if (this->__isset.compression) {
+    xfer += prot_->serializedFieldSize("compression", apache::thrift::protocol::T_I32, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::serializedSize<false>(*prot_, this->compression);
+  }
+  xfer += prot_->serializedSizeStop();
+  return xfer;
+}
+
+template <class Protocol_>
+uint32_t HeadersPayloadMetadata::write(Protocol_* prot_) const {
+  uint32_t xfer = 0;
+  xfer += prot_->writeStructBegin("HeadersPayloadMetadata");
+  if (this->__isset.compression) {
+    xfer += prot_->writeFieldBegin("compression", apache::thrift::protocol::T_I32, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::write(*prot_, this->compression);
+    xfer += prot_->writeFieldEnd();
+  }
+  xfer += prot_->writeFieldStop();
+  xfer += prot_->writeStructEnd();
+  return xfer;
+}
+
+extern template void HeadersPayloadMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+extern template uint32_t HeadersPayloadMetadata::write<>(apache::thrift::BinaryProtocolWriter*) const;
+extern template uint32_t HeadersPayloadMetadata::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template uint32_t HeadersPayloadMetadata::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+extern template void HeadersPayloadMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+extern template uint32_t HeadersPayloadMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
+extern template uint32_t HeadersPayloadMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+extern template uint32_t HeadersPayloadMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 }} // apache::thrift

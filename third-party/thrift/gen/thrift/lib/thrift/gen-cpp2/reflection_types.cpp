@@ -192,7 +192,7 @@ void swap(StructField& a, StructField& b) {
   swap(a.isRequired, b.isRequired);
   swap(a.type, b.type);
   swap(a.name, b.name);
-  swap(a.annotations, b.annotations);
+  swap(a.annotations_ref().value_unchecked(), b.annotations_ref().value_unchecked());
   swap(a.order, b.order);
   swap(a.__isset, b.__isset);
 }
@@ -301,10 +301,10 @@ std::unordered_map<::std::string, int32_t>* DataType::get_enumValues() & {
 void swap(DataType& a, DataType& b) {
   using ::std::swap;
   swap(a.name, b.name);
-  swap(a.fields, b.fields);
-  swap(a.mapKeyType, b.mapKeyType);
-  swap(a.valueType, b.valueType);
-  swap(a.enumValues, b.enumValues);
+  swap(a.fields_ref().value_unchecked(), b.fields_ref().value_unchecked());
+  swap(a.mapKeyType_ref().value_unchecked(), b.mapKeyType_ref().value_unchecked());
+  swap(a.valueType_ref().value_unchecked(), b.valueType_ref().value_unchecked());
+  swap(a.enumValues_ref().value_unchecked(), b.enumValues_ref().value_unchecked());
   swap(a.__isset, b.__isset);
 }
 

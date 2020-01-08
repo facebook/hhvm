@@ -342,8 +342,12 @@ void MemcacheAsyncClient::sync_mcGet(apache::thrift::RpcOptions& rpcOptions, fac
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcGet(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcGet(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McGetReply> MemcacheAsyncClient::future_mcGet(const facebook::memcache::McGetRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -502,8 +506,12 @@ void MemcacheAsyncClient::sync_mcSet(apache::thrift::RpcOptions& rpcOptions, fac
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcSet(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcSet(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McSetReply> MemcacheAsyncClient::future_mcSet(const facebook::memcache::McSetRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -662,8 +670,12 @@ void MemcacheAsyncClient::sync_mcDelete(apache::thrift::RpcOptions& rpcOptions, 
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcDelete(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcDelete(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McDeleteReply> MemcacheAsyncClient::future_mcDelete(const facebook::memcache::McDeleteRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -822,8 +834,12 @@ void MemcacheAsyncClient::sync_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcLeaseGet(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcLeaseGet(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McLeaseGetReply> MemcacheAsyncClient::future_mcLeaseGet(const facebook::memcache::McLeaseGetRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -982,8 +998,12 @@ void MemcacheAsyncClient::sync_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcLeaseSet(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcLeaseSet(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McLeaseSetReply> MemcacheAsyncClient::future_mcLeaseSet(const facebook::memcache::McLeaseSetRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -1142,8 +1162,12 @@ void MemcacheAsyncClient::sync_mcAdd(apache::thrift::RpcOptions& rpcOptions, fac
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcAdd(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcAdd(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McAddReply> MemcacheAsyncClient::future_mcAdd(const facebook::memcache::McAddRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -1302,8 +1326,12 @@ void MemcacheAsyncClient::sync_mcReplace(apache::thrift::RpcOptions& rpcOptions,
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcReplace(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcReplace(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McReplaceReply> MemcacheAsyncClient::future_mcReplace(const facebook::memcache::McReplaceRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -1462,8 +1490,12 @@ void MemcacheAsyncClient::sync_mcGets(apache::thrift::RpcOptions& rpcOptions, fa
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcGets(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcGets(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McGetsReply> MemcacheAsyncClient::future_mcGets(const facebook::memcache::McGetsRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -1622,8 +1654,12 @@ void MemcacheAsyncClient::sync_mcCas(apache::thrift::RpcOptions& rpcOptions, fac
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcCas(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcCas(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McCasReply> MemcacheAsyncClient::future_mcCas(const facebook::memcache::McCasRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -1782,8 +1818,12 @@ void MemcacheAsyncClient::sync_mcIncr(apache::thrift::RpcOptions& rpcOptions, fa
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcIncr(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcIncr(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McIncrReply> MemcacheAsyncClient::future_mcIncr(const facebook::memcache::McIncrRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -1942,8 +1982,12 @@ void MemcacheAsyncClient::sync_mcDecr(apache::thrift::RpcOptions& rpcOptions, fa
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcDecr(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcDecr(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McDecrReply> MemcacheAsyncClient::future_mcDecr(const facebook::memcache::McDecrRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -2102,8 +2146,12 @@ void MemcacheAsyncClient::sync_mcMetaget(apache::thrift::RpcOptions& rpcOptions,
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcMetaget(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcMetaget(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McMetagetReply> MemcacheAsyncClient::future_mcMetaget(const facebook::memcache::McMetagetRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -2262,8 +2310,12 @@ void MemcacheAsyncClient::sync_mcAppend(apache::thrift::RpcOptions& rpcOptions, 
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcAppend(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcAppend(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McAppendReply> MemcacheAsyncClient::future_mcAppend(const facebook::memcache::McAppendRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -2422,8 +2474,12 @@ void MemcacheAsyncClient::sync_mcPrepend(apache::thrift::RpcOptions& rpcOptions,
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcPrepend(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcPrepend(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McPrependReply> MemcacheAsyncClient::future_mcPrepend(const facebook::memcache::McPrependRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -2582,8 +2638,12 @@ void MemcacheAsyncClient::sync_mcTouch(apache::thrift::RpcOptions& rpcOptions, f
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcTouch(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcTouch(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McTouchReply> MemcacheAsyncClient::future_mcTouch(const facebook::memcache::McTouchRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -2742,8 +2802,12 @@ void MemcacheAsyncClient::sync_mcFlushRe(apache::thrift::RpcOptions& rpcOptions,
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcFlushRe(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcFlushRe(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McFlushReReply> MemcacheAsyncClient::future_mcFlushRe(const facebook::memcache::McFlushReRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -2902,8 +2966,12 @@ void MemcacheAsyncClient::sync_mcFlushAll(apache::thrift::RpcOptions& rpcOptions
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcFlushAll(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcFlushAll(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McFlushAllReply> MemcacheAsyncClient::future_mcFlushAll(const facebook::memcache::McFlushAllRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -3062,8 +3130,12 @@ void MemcacheAsyncClient::sync_mcGat(apache::thrift::RpcOptions& rpcOptions, fac
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcGat(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcGat(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McGatReply> MemcacheAsyncClient::future_mcGat(const facebook::memcache::McGatRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -3222,8 +3294,12 @@ void MemcacheAsyncClient::sync_mcGats(apache::thrift::RpcOptions& rpcOptions, fa
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcGats(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcGats(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McGatsReply> MemcacheAsyncClient::future_mcGats(const facebook::memcache::McGatsRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -3382,8 +3458,12 @@ void MemcacheAsyncClient::sync_mcVersion(apache::thrift::RpcOptions& rpcOptions,
     assert(!!_returnState.exception());
     _returnState.exception().throw_exception();
   }
-  recv_mcVersion(_return, _returnState);
+  return folly::fibers::runInMainContext([&] {
+      recv_mcVersion(_return, _returnState);
+  });
 }
+
+
 
 folly::Future<facebook::memcache::McVersionReply> MemcacheAsyncClient::future_mcVersion(const facebook::memcache::McVersionRequest& request) {
   ::apache::thrift::RpcOptions rpcOptions;
@@ -3474,6 +3554,3 @@ folly::exception_wrapper MemcacheAsyncClient::recv_instance_wrapped_mcVersion(fa
 }
 
 }}} // facebook::memcache::thrift
-namespace apache { namespace thrift {
-
-}} // apache::thrift

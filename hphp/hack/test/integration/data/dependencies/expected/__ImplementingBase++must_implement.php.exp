@@ -7,7 +7,9 @@ class ImplementingBase extends \AbstractBase {
     $this->inherited();
   }
 }
-abstract class AbstractBase {}
+abstract class AbstractBase {
+  abstract protected function must_implement(): void;
+}
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
   throw new Exception();

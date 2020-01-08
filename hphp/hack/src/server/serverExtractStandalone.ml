@@ -730,10 +730,12 @@ let get_class_elt_declaration
                ~abstract:cons.cc_abstract
                cons.cc_type
                const_name)
-      | Method (_, method_name) ->
+      | Method (class_name, method_name) ->
         (match target with
-        | ServerCommandTypes.Extract_standalone.Method (_, target_name)
-          when method_name = target_name ->
+        | ServerCommandTypes.Extract_standalone.Method
+            (target_class_name, target_method_name)
+          when class_name = target_class_name
+               && method_name = target_method_name ->
           None
         | _ ->
           let m =
@@ -754,10 +756,12 @@ let get_class_elt_declaration
               "{throw new Exception();}"
           in
           Some (decl ^ body))
-      | SMethod (_, smethod_name) ->
+      | SMethod (class_name, smethod_name) ->
         (match target with
-        | ServerCommandTypes.Extract_standalone.Method (_, target_name)
-          when smethod_name = target_name ->
+        | ServerCommandTypes.Extract_standalone.Method
+            (target_class_name, target_method_name)
+          when class_name = target_class_name
+               && smethod_name = target_method_name ->
           None
         | _ ->
           let m =

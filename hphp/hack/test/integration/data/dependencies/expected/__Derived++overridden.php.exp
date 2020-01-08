@@ -1,0 +1,21 @@
+<?hh
+class ImplementingBase extends \AbstractBase {
+  public function overridden(): int {
+    throw new Exception();
+  }
+}
+abstract class AbstractBase {}
+final class Derived extends \ImplementingBase {
+  private int $result;
+  public function __construct(int $num) {
+    throw new \Exception();
+  }
+  <<__Override>>
+  public function overridden(): int {
+    return $this->result;
+  }
+}
+<<__Rx>>
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

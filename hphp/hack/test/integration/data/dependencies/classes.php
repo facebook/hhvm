@@ -30,6 +30,7 @@ final class Derived extends ImplementingBase {
     $this->result = $num;
   }
 
+  <<__Override>>
   public function overridden(): int {
     return $this->result;
   }

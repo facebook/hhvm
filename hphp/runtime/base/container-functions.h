@@ -77,7 +77,7 @@ inline bool isPackedContainer(const TypedValue c) {
 }
 
 ALWAYS_INLINE
-const TypedValue container_as_cell(const Variant& container) {
+const TypedValue container_as_tv(const Variant& container) {
   const auto& cellContainer = *container.asTypedValue();
   if (UNLIKELY(!isContainer(cellContainer))) {
     SystemLib::throwInvalidArgumentExceptionObject(

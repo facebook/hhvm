@@ -182,7 +182,7 @@ protected:
     if (container.isNull()) {
       return Object(req::make<TSet>());
     }
-    const auto& cellContainer = container_as_cell(container);
+    auto const& cellContainer = container_as_tv(container);
     auto target = req::make<TSet>();
     target->addAllKeysOf(cellContainer);
     return Object(std::move(target));
@@ -280,7 +280,7 @@ struct c_Set : BaseSet {
   }
   Object php_addAllKeysOf(const Variant& container) {
     if (!container.isNull()) {
-      const auto& containerCell = container_as_cell(container);
+      auto const& containerCell = container_as_tv(container);
       addAllKeysOf(containerCell);
     }
     return Object{this};

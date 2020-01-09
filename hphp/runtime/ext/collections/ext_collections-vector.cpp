@@ -425,7 +425,7 @@ void c_Vector::removeKey(int64_t k) {
 
 void c_Vector::addAllKeysOf(const Variant& container) {
   if (container.isNull()) return;
-  const auto& containerCell = container_as_cell(container);
+  auto const& containerCell = container_as_tv(container);
 
   auto sz = getContainerSize(containerCell);
   ArrayIter iter(containerCell);

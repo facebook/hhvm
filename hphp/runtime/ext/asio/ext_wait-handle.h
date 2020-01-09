@@ -122,12 +122,12 @@ struct c_Awaitable : ObjectData {
     return offsetof(c_Awaitable, m_resultOrException);
   }
 
-  static c_Awaitable* fromCell(TypedValue cell) {
+  static c_Awaitable* fromTV(TypedValue cell) {
     return (
         cell.m_type == KindOfObject && cell.m_data.pobj->isWaitHandle()
       ) ? static_cast<c_Awaitable*>(cell.m_data.pobj) : nullptr;
   }
-  static c_Awaitable* fromCellAssert(TypedValue cell) {
+  static c_Awaitable* fromTVAssert(TypedValue cell) {
     assertx(cell.m_type == KindOfObject);
     assertx(cell.m_data.pobj->isWaitHandle());
     return static_cast<c_Awaitable*>(cell.m_data.pobj);
@@ -225,7 +225,7 @@ struct c_Awaitable : ObjectData {
 
 template<class T>
 T* wait_handle(TypedValue cell) {
-  return wait_handle<T>(c_Awaitable::fromCellAssert(cell));
+  return wait_handle<T>(c_Awaitable::fromTVAssert(cell));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

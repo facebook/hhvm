@@ -5877,7 +5877,7 @@ TCA suspendStack(PC origpc, PC &pc) {
 
 OPTBLD_INLINE TCA iopAwait(PC origpc, PC& pc) {
   auto const awaitable = vmStack().topC();
-  auto wh = c_Awaitable::fromCell(*awaitable);
+  auto wh = c_Awaitable::fromTV(*awaitable);
   if (UNLIKELY(wh == nullptr)) {
     SystemLib::throwBadMethodCallExceptionObject("Await on a non-Awaitable");
   }
@@ -5896,7 +5896,7 @@ OPTBLD_INLINE TCA iopAwaitAll(PC origpc, PC& pc, LocalRange locals) {
   for (auto i = locals.first; i < locals.first + locals.count; ++i) {
     auto const local = *frame_local(vmfp(), i);
     if (tvIsNull(local)) continue;
-    auto const awaitable = c_Awaitable::fromCell(local);
+    auto const awaitable = c_Awaitable::fromTV(local);
     if (UNLIKELY(awaitable == nullptr)) {
       SystemLib::throwBadMethodCallExceptionObject("Await on a non-Awaitable");
     }
@@ -5922,7 +5922,7 @@ OPTBLD_INLINE TCA iopAwaitAll(PC origpc, PC& pc, LocalRange locals) {
 
 OPTBLD_INLINE void iopWHResult() {
   // we should never emit this bytecode for non-waithandle
-  auto const wh = c_Awaitable::fromCell(*vmStack().topC());
+  auto const wh = c_Awaitable::fromTV(*vmStack().topC());
   if (UNLIKELY(!wh)) {
     raise_error("WHResult input was not a subclass of Awaitable");
   }

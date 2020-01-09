@@ -213,7 +213,7 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
   auto const op = peek_op(pc);
   if (op == OpAwait) {
     assertx(fp->func()->isAsync());
-    auto wh = c_Awaitable::fromCell(*vmsp());
+    auto wh = c_Awaitable::fromTV(*vmsp());
     if (wh && !wh->isFinished()) {
       TRACE(2, "CmdNext: encountered blocking await\n");
       if (isResumed(fp)) {

@@ -631,19 +631,19 @@ struct SharedOnlyKeyHasher {
 ////////////////////////////////////////////////////////////
 
 // Wrapper around a TypedValue to handle the ref-count manipulations for us.
-struct CellWrapper {
-  explicit CellWrapper(TypedValue value) : value{value}
+struct TVWrapper {
+  explicit TVWrapper(TypedValue value) : value{value}
   { tvIncRefGen(value); }
-  CellWrapper(CellWrapper&& o) noexcept: value{o.value} {
+  TVWrapper(TVWrapper&& o) noexcept: value{o.value} {
     o.value = make_tv<KindOfNull>();
   }
-  CellWrapper(const CellWrapper&) = delete;
-  CellWrapper& operator=(const CellWrapper&) = delete;
-  CellWrapper& operator=(CellWrapper&& o) noexcept {
+  TVWrapper(const TVWrapper&) = delete;
+  TVWrapper& operator=(const TVWrapper&) = delete;
+  TVWrapper& operator=(TVWrapper&& o) noexcept {
     std::swap(value, o.value);
     return *this;
   }
-  ~CellWrapper() { tvDecRefGen(value); }
+  ~TVWrapper() { tvDecRefGen(value); }
   TypedValue value;
 };
 
@@ -673,10 +673,10 @@ namespace memoCacheDetail {
 template <typename K> struct MemoCache : MemoCacheBase {
   using Cache = folly::F14ValueMap<
     K,
-    CellWrapper,
+    TVWrapper,
     KeyHasher<K>,
     KeyEquals<K>,
-    req::ConservativeAllocator<std::pair<const K, CellWrapper>>
+    req::ConservativeAllocator<std::pair<const K, TVWrapper>>
   >;
   Cache cache;
 
@@ -699,10 +699,10 @@ template <typename K> struct MemoCache : MemoCacheBase {
 struct SharedOnlyMemoCache : MemoCacheBase {
   using Cache = folly::F14ValueMap<
     SharedOnlyKey,
-    CellWrapper,
+    TVWrapper,
     SharedOnlyKeyHasher,
     std::equal_to<SharedOnlyKey>,
-    req::ConservativeAllocator<std::pair<const SharedOnlyKey, CellWrapper>>
+    req::ConservativeAllocator<std::pair<const SharedOnlyKey, TVWrapper>>
   >;
   Cache cache;
 
@@ -783,7 +783,7 @@ void setImpl(MemoCacheBase*& base,
   assertx(val.m_type != KindOfUninit);
   if (!base) base = req::make_raw<MemoCache<K>>();
   auto& cache = getCache<MemoCache<K>>(base);
-  cache.insert_or_assign(K{header, keys}, CellWrapper{val});
+  cache.insert_or_assign(K{header, keys}, TVWrapper{val});
 }
 
 }
@@ -925,7 +925,7 @@ void memoCacheSetSharedOnly(MemoCacheBase*& base,
   assertx(val.m_type != KindOfUninit);
   if (!base) base = req::make_raw<SharedOnlyMemoCache>();
   auto& cache = getCache<SharedOnlyMemoCache>(base);
-  cache.insert_or_assign(key, CellWrapper{val});
+  cache.insert_or_assign(key, TVWrapper{val});
 }
 
 ////////////////////////////////////////////////////////////

@@ -269,8 +269,8 @@ struct Variant : private TypedValue {
 
   enum class NullInit {};
   enum class NoInit {};
-  enum class CellCopy {};
-  enum class CellDup {};
+  enum class TVCopy {};
+  enum class TVDup {};
   enum class ArrayInitCtor {};
   enum class Attach {};
   enum class Wrap {};
@@ -425,12 +425,12 @@ struct Variant : private TypedValue {
   Variant(const Variant& v) noexcept;
   explicit Variant(const_variant_ref v) noexcept;
 
-  Variant(const Variant& v, CellCopy) noexcept {
+  Variant(const Variant& v, TVCopy) noexcept {
     m_type = v.m_type;
     m_data = v.m_data;
   }
 
-  Variant(const Variant& v, CellDup) noexcept {
+  Variant(const Variant& v, TVDup) noexcept {
     m_type = v.m_type;
     m_data = v.m_data;
     tvIncRefGen(*asTypedValue());

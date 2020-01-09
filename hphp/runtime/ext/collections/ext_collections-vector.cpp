@@ -292,7 +292,7 @@ Variant BaseVector::popFront() {
     SystemLib::throwInvalidOperationExceptionObject("Cannot pop empty Vector");
   }
   const auto tv = removeKeyImpl(0);
-  return Variant(tvAsCVarRef(&tv), Variant::CellCopy());
+  return Variant(tvAsCVarRef(&tv), Variant::TVCopy());
 }
 
 TypedValue BaseVector::removeKeyImpl(int64_t k) {
@@ -444,7 +444,7 @@ Variant c_Vector::pop() {
   mutate();
   decSize();
   const auto tv = *dataAt(m_size);
-  return Variant(tvAsCVarRef(&tv), Variant::CellCopy());
+  return Variant(tvAsCVarRef(&tv), Variant::TVCopy());
 }
 
 void c_Vector::resize(uint32_t sz, const TypedValue* val) {

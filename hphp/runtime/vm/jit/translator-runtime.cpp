@@ -573,14 +573,14 @@ void VerifyReifiedReturnTypeImpl(TypedValue cell, ArrayData* ts) {
 namespace {
 
 ALWAYS_INLINE
-TypedValue getDefaultIfNullCell(tv_rval rval, const TypedValue& def) {
+TypedValue getDefaultIfNullTV(tv_rval rval, const TypedValue& def) {
   return UNLIKELY(!rval) ? def : rval.tv();
 }
 
 NEVER_INLINE
 TypedValue arrayIdxSSlow(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
-  return getDefaultIfNullCell(a->rval(key), def);
+  return getDefaultIfNullTV(a->rval(key), def);
 }
 
 ALWAYS_INLINE
@@ -600,13 +600,13 @@ TypedValue doScan(const MixedArray* arr, StringData* key, TypedValue def) {
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isPHPArray());
-  return getDefaultIfNullCell(a->rval(key), def);
+  return getDefaultIfNullTV(a->rval(key), def);
 }
 
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
   if (UNLIKELY(!a->isMixed())) return arrayIdxSSlow(a, key, def);
-  return getDefaultIfNullCell(MixedArray::RvalStr(a, key), def);
+  return getDefaultIfNullTV(MixedArray::RvalStr(a, key), def);
 }
 
 TypedValue arrayIdxScan(ArrayData* a, StringData* key, TypedValue def) {
@@ -618,13 +618,13 @@ TypedValue arrayIdxScan(ArrayData* a, StringData* key, TypedValue def) {
 
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isDict());
-  return getDefaultIfNullCell(MixedArray::RvalIntDict(a, key), def);
+  return getDefaultIfNullTV(MixedArray::RvalIntDict(a, key), def);
 }
 
 NEVER_INLINE
 TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isDict());
-  return getDefaultIfNullCell(MixedArray::RvalStrDict(a, key), def);
+  return getDefaultIfNullTV(MixedArray::RvalStrDict(a, key), def);
 }
 
 TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
@@ -637,12 +637,12 @@ TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
 
 TypedValue keysetIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isKeyset());
-  return getDefaultIfNullCell(SetArray::RvalInt(a, key), def);
+  return getDefaultIfNullTV(SetArray::RvalInt(a, key), def);
 }
 
 TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isKeyset());
-  return getDefaultIfNullCell(SetArray::RvalStr(a, key), def);
+  return getDefaultIfNullTV(SetArray::RvalStr(a, key), def);
 }
 
 template <bool isFirst>

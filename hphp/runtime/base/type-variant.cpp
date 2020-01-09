@@ -75,7 +75,7 @@ Variant::Variant(StringData *v) noexcept {
 namespace {
 ALWAYS_INLINE
 void implCopyConstruct(TypedValue tv, Variant& v) {
-  tvDup(tvToInitCell(tv), v.asTypedValue());
+  tvDup(tvToInit(tv), v.asTypedValue());
 }
 }
 

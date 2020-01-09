@@ -439,7 +439,7 @@ void ObjectData::o_set(const String& propName, const Variant& v,
       if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
         throwMutateConstProp(lookup.slot);
       }
-      auto const val = tvToInitCell(*v.asTypedValue());
+      auto const val = tvToInit(*v.asTypedValue());
       verifyTypeHint(m_cls, lookup.prop, &val);
       tvSet(val, prop);
       return;
@@ -449,7 +449,7 @@ void ObjectData::o_set(const String& propName, const Variant& v,
   if (useSet) {
     invokeSet(propName.get(), *v.asTypedValue());
   } else if (!prop) {
-    setDynProp(propName.get(), tvToInitCell(*v.asTypedValue()));
+    setDynProp(propName.get(), tvToInit(*v.asTypedValue()));
   }
 }
 

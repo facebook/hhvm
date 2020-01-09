@@ -800,7 +800,7 @@ void VariableUnserializer::unserializeVariant(
       int64_t id = readInt();
       auto v = getByVal(id);
       if (!v) throwOutOfRange(id);
-      tvSet(tvToInitCell(*v), self);
+      tvSet(tvToInit(*v), self);
     }
     break;
   case 'b':

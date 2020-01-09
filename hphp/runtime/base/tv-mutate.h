@@ -33,7 +33,7 @@ namespace HPHP {
  *  - returns a KindOfNull when `tv' is KindOfUninit.
  *  - is the identity otherwise.
  */
-ALWAYS_INLINE TypedValue tvToInitCell(TypedValue tv) {
+ALWAYS_INLINE TypedValue tvToInit(TypedValue tv) {
   if (tv.m_type == KindOfUninit) return make_tv<KindOfNull>();
   return tv;
 }

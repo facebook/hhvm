@@ -559,7 +559,7 @@ void mergeSettings(tv_lval curval, TypedValue v) {
       mergeSettings(cur_inner_ref.lval(i.first()), i.secondVal());
     }
   } else {
-    tvSet(tvToInitCell(v), curval);
+    tvSet(tvToInit(v), curval);
   }
 }
 }

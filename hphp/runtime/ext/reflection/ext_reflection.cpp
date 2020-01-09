@@ -528,7 +528,7 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
 
   auto const& sprop = class_->staticProperties()[lookup.slot];
   auto const& tc = sprop.typeConstraint;
-  auto const temp = value.asInitCellTmp();
+  auto const temp = value.asInitTVTmp();
   if (RuntimeOption::EvalCheckPropTypeHints > 0 && tc.isCheckable()) {
     tc.verifyStaticProperty(&temp, class_, sprop.cls, prop.get());
   }

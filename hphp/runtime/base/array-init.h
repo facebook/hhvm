@@ -215,7 +215,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
    */
   MixedPHPArrayInitBase& append(TypedValue tv) {
     this->performOp([&]{
-      return MixedArray::AppendInPlace(this->m_arr, tvToInitCell(tv));
+      return MixedArray::AppendInPlace(this->m_arr, tvToInit(tv));
     });
     return *this;
   }
@@ -228,14 +228,14 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
    */
   MixedPHPArrayInitBase& set(int64_t name, TypedValue tv) {
     this->performOp([&]{
-      return MixedArray::SetIntInPlace(this->m_arr, name, tvToInitCell(tv));
+      return MixedArray::SetIntInPlace(this->m_arr, name, tvToInit(tv));
     });
     return *this;
   }
   MixedPHPArrayInitBase& set(const String& name, TypedValue tv) {
     this->performOp([&]{
       return MixedArray::SetStrInPlace(
-        this->m_arr, name.get(), tvToInitCell(tv)
+        this->m_arr, name.get(), tvToInit(tv)
       );
     });
     return *this;
@@ -243,7 +243,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
   template<class T>
   MixedPHPArrayInitBase& set(const T& name, TypedValue tv) {
     this->performOp([&]{
-      return this->m_arr->setInPlace(name, tvToInitCell(tv));
+      return this->m_arr->setInPlace(name, tvToInit(tv));
     });
     return *this;
   }
@@ -266,7 +266,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
    */
   MixedPHPArrayInitBase& setValidKey(TypedValue name, TypedValue v) {
     this->performOp([&]{
-      return this->m_arr->setInPlace(tvToInitCell(name), tvToInitCell(v));
+      return this->m_arr->setInPlace(tvToInit(name), tvToInit(v));
     });
     return *this;
   }
@@ -287,7 +287,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
     auto const k = name.toKey<IC>(this->m_arr).tv();
     if (LIKELY(!isNullType(k.m_type))) {
       this->performOp([&]{
-        return this->m_arr->setInPlace(k, v.asInitCellTmp());
+        return this->m_arr->setInPlace(k, v.asInitTVTmp());
       });
     }
     return *this;
@@ -299,7 +299,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
   MixedPHPArrayInitBase& add(int64_t name, TypedValue tv,
                              bool /*keyConverted*/ = false) {
     this->performOp([&]{
-      return MixedArray::AddInt(this->m_arr, name, tvToInitCell(tv), false);
+      return MixedArray::AddInt(this->m_arr, name, tvToInit(tv), false);
     });
     return *this;
   }
@@ -309,13 +309,13 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
     if (keyConverted) {
       this->performOp([&]{
         return MixedArray::AddStr(
-          this->m_arr, name.get(), tvToInitCell(tv), false
+          this->m_arr, name.get(), tvToInit(tv), false
         );
       });
     } else if (!name.isNull()) {
       this->performOp([&]{
         return this->m_arr->setInPlace(
-          VarNR::MakeKey(name).tv(), tvToInitCell(tv)
+          VarNR::MakeKey(name).tv(), tvToInit(tv)
         );
       });
     }
@@ -326,13 +326,13 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
                              bool keyConverted = false) {
     if (keyConverted) {
       this->performOp([&]{
-        return this->m_arr->setInPlace(name.asInitCellTmp(), tvToInitCell(tv));
+        return this->m_arr->setInPlace(name.asInitTVTmp(), tvToInit(tv));
       });
     } else {
       auto const k = name.toKey(this->m_arr).tv();
       if (!isNullType(k.m_type)) {
         this->performOp([&]{
-          return this->m_arr->setInPlace(k, tvToInitCell(tv));
+          return this->m_arr->setInPlace(k, tvToInit(tv));
         });
       }
     }
@@ -344,13 +344,13 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
                              bool keyConverted = false) {
     if (keyConverted) {
       this->performOp([&]{
-        return this->m_arr->setInPlace(name, tvToInitCell(tv));
+        return this->m_arr->setInPlace(name, tvToInit(tv));
       });
     } else {
       auto const k = Variant(name).toKey(this->m_arr).tv();
       if (!isNullType(k.m_type)) {
         this->performOp([&]{
-          return this->m_arr->setInPlace(k, tvToInitCell(tv));
+          return this->m_arr->setInPlace(k, tvToInit(tv));
         });
       }
     }
@@ -394,7 +394,7 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
 
   DictInit& append(TypedValue tv) {
     performOp([&]{
-      return MixedArray::AppendInPlaceDict(m_arr, tvToInitCell(tv));
+      return MixedArray::AppendInPlaceDict(m_arr, tvToInit(tv));
     });
     return *this;
   }
@@ -404,19 +404,19 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
 
   DictInit& set(int64_t name, TypedValue tv) {
     performOp([&]{
-      return MixedArray::SetIntInPlaceDict(m_arr, name, tvToInitCell(tv));
+      return MixedArray::SetIntInPlaceDict(m_arr, name, tvToInit(tv));
     });
     return *this;
   }
   DictInit& set(StringData* name, TypedValue tv) {
     performOp([&]{
-      return MixedArray::SetStrInPlaceDict(m_arr, name, tvToInitCell(tv));
+      return MixedArray::SetStrInPlaceDict(m_arr, name, tvToInit(tv));
     });
     return *this;
   }
   DictInit& set(const String& name, TypedValue tv) {
     performOp([&]{
-      return MixedArray::SetStrInPlaceDict(m_arr, name.get(), tvToInitCell(tv));
+      return MixedArray::SetStrInPlaceDict(m_arr, name.get(), tvToInit(tv));
     });
     return *this;
   }
@@ -441,9 +441,9 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
       assertx(isIntType(name.m_type) || isStringType(name.m_type));
 
       return isIntType(name.m_type)
-        ? MixedArray::SetIntInPlaceDict(m_arr, name.m_data.num, tvToInitCell(v))
+        ? MixedArray::SetIntInPlaceDict(m_arr, name.m_data.num, tvToInit(v))
         : MixedArray::SetStrInPlaceDict(m_arr, name.m_data.pstr,
-                                        tvToInitCell(v));
+                                        tvToInit(v));
     });
     return *this;
   }
@@ -480,7 +480,7 @@ struct PackedArrayInitBase final : ArrayInitBase<TArray, DT> {
 
   PackedArrayInitBase& append(TypedValue tv) {
     this->performOp([&]{
-      return PackedArray::AppendInPlace(this->m_arr, tvToInitCell(tv));
+      return PackedArray::AppendInPlace(this->m_arr, tvToInit(tv));
     });
     return *this;
   }
@@ -541,7 +541,7 @@ struct VArrayInit {
   }
 
   VArrayInit& append(TypedValue tv) {
-    performOp([&]{ return m_arr->appendInPlace(tvToInitCell(tv)); });
+    performOp([&]{ return m_arr->appendInPlace(tvToInit(tv)); });
     return *this;
   }
   VArrayInit& append(const Variant& v) {
@@ -640,7 +640,7 @@ struct DArrayInit {
   }
 
   DArrayInit& append(TypedValue tv) {
-    performOp([&]{ return m_arr->appendInPlace(tvToInitCell(tv)); });
+    performOp([&]{ return m_arr->appendInPlace(tvToInit(tv)); });
     return *this;
   }
   DArrayInit& append(const Variant& v) {
@@ -652,18 +652,18 @@ struct DArrayInit {
    */
   DArrayInit& add(int64_t name, TypedValue tv,
                   bool /*keyConverted*/ = false) {
-    performOp([&]{ return m_arr->setInPlace(name, tvToInitCell(tv)); });
+    performOp([&]{ return m_arr->setInPlace(name, tvToInit(tv)); });
     return *this;
   }
 
   DArrayInit& add(const String& name, TypedValue tv,
                   bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{ return m_arr->setInPlace(name, tvToInitCell(tv)); });
+      performOp([&]{ return m_arr->setInPlace(name, tvToInit(tv)); });
     } else if (!name.isNull()) {
       performOp(
         [&]{
-          return m_arr->setInPlace(VarNR::MakeKey(name).tv(), tvToInitCell(tv));
+          return m_arr->setInPlace(VarNR::MakeKey(name).tv(), tvToInit(tv));
         }
       );
     }
@@ -674,12 +674,12 @@ struct DArrayInit {
                   bool keyConverted = false) {
     if (keyConverted) {
       performOp(
-        [&]{ return m_arr->setInPlace(name.asInitCellTmp(), tvToInitCell(tv)); }
+        [&]{ return m_arr->setInPlace(name.asInitTVTmp(), tvToInit(tv)); }
       );
     } else {
       auto const k = name.toKey(m_arr).tv();
       if (!isNullType(k.m_type)) {
-        performOp([&]{ return m_arr->setInPlace(k, tvToInitCell(tv)); });
+        performOp([&]{ return m_arr->setInPlace(k, tvToInit(tv)); });
       }
     }
     return *this;
@@ -689,11 +689,11 @@ struct DArrayInit {
   DArrayInit& add(const T& name, TypedValue tv,
                   bool keyConverted = false) {
     if (keyConverted) {
-      performOp([&]{ return m_arr->setInPlace(name, tvToInitCell(tv)); });
+      performOp([&]{ return m_arr->setInPlace(name, tvToInit(tv)); });
     } else {
       auto const k = Variant(name).toKey(m_arr).tv();
       if (!isNullType(k.m_type)) {
-        performOp([&]{ return m_arr->setInPlace(k, tvToInitCell(tv)); });
+        performOp([&]{ return m_arr->setInPlace(k, tvToInit(tv)); });
       }
     }
     return *this;
@@ -715,16 +715,16 @@ struct DArrayInit {
    * Call set() on the underlying ArrayData.
    */
   DArrayInit& set(int64_t name, TypedValue tv) {
-    performOp([&]{ return m_arr->setInPlace(name, tvToInitCell(tv)); });
+    performOp([&]{ return m_arr->setInPlace(name, tvToInit(tv)); });
     return *this;
   }
   DArrayInit& set(const String& name, TypedValue tv) {
-    performOp([&]{ return m_arr->setInPlace(name, tvToInitCell(tv)); });
+    performOp([&]{ return m_arr->setInPlace(name, tvToInit(tv)); });
     return *this;
   }
   template<class T>
   DArrayInit& set(const T& name, TypedValue tv) {
-    performOp([&]{ return m_arr->setInPlace(name, tvToInitCell(tv)); });
+    performOp([&]{ return m_arr->setInPlace(name, tvToInit(tv)); });
     return *this;
   }
 
@@ -742,7 +742,7 @@ struct DArrayInit {
 
   DArrayInit& setValidKey(TypedValue name, TypedValue v) {
     performOp(
-      [&]{ return m_arr->setInPlace(tvToInitCell(name), tvToInitCell(v)); }
+      [&]{ return m_arr->setInPlace(tvToInit(name), tvToInit(v)); }
     );
     return *this;
   }
@@ -754,7 +754,7 @@ struct DArrayInit {
   DArrayInit& setUnknownKey(const Variant& name, const Variant& v) {
     auto const k = name.toKey<IC>(m_arr).tv();
     if (LIKELY(!isNullType(k.m_type))) {
-      performOp([&]{ return m_arr->setInPlace(k, v.asInitCellTmp()); });
+      performOp([&]{ return m_arr->setInPlace(k, v.asInitTVTmp()); });
     }
     return *this;
   }
@@ -835,7 +835,7 @@ struct KeysetInit : ArrayInitBase<SetArray, KindOfKeyset> {
   }
   KeysetInit& add(TypedValue tv) {
     performOp([&]{
-      return SetArray::AppendInPlace(m_arr, tvToInitCell(tv));
+      return SetArray::AppendInPlace(m_arr, tvToInit(tv));
     });
     return *this;
   }

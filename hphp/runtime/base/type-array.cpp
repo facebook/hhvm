@@ -846,14 +846,14 @@ arr_lval Array::lvalForce() {
 void Array::append(TypedValue v) {
   if (!m_arr) operator=(Create());
   assertx(m_arr);
-  auto const escalated = m_arr->append(tvToInitCell(v));
+  auto const escalated = m_arr->append(tvToInit(v));
   if (escalated != m_arr) m_arr = Ptr::attach(escalated);
 }
 
 void Array::prepend(TypedValue v) {
   if (!m_arr) operator=(Create());
   assertx(m_arr);
-  auto const escalated = m_arr->prepend(tvToInitCell(v));
+  auto const escalated = m_arr->prepend(tvToInit(v));
   if (escalated != m_arr) m_arr = Ptr::attach(escalated);
 }
 

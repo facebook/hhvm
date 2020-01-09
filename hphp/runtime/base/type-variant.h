@@ -810,7 +810,7 @@ struct Variant : private TypedValue {
    * Operators
    */
   Variant& assign(const Variant& v) noexcept {
-    tvSet(tvToInitCell(*v.asTypedValue()), *asTypedValue());
+    tvSet(tvToInit(*v.asTypedValue()), *asTypedValue());
     return *this;
   }
 
@@ -1096,7 +1096,7 @@ struct Variant : private TypedValue {
    * Read this Variant as an InitCell, without incrementing the
    * reference count.  I.e. turn KindOfUninit into KindOfNull.
    */
-  TypedValue asInitCellTmp() const {
+  TypedValue asInitTVTmp() const {
     if (m_type == KindOfUninit) return make_tv<KindOfNull>();
     return *this;
   }
@@ -1305,7 +1305,7 @@ inline variant_ref& variant_ref::operator=(const Variant& v) noexcept {
 }
 
 inline variant_ref& variant_ref::assign(const Variant& v) noexcept {
-  tvSet(tvToInitCell(*v.asTypedValue()), m_val);
+  tvSet(tvToInit(*v.asTypedValue()), m_val);
   return *this;
 }
 

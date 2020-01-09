@@ -254,7 +254,7 @@ void emitEmptyS(IRGS& env) {
     },
     [&] (SSATmp* ptr) {
       auto const val = gen(env, LdMem, ptr->type().deref(), ptr);
-      return gen(env, XorBool, gen(env, ConvCellToBool, val), cns(env, true));
+      return gen(env, XorBool, gen(env, ConvTVToBool, val), cns(env, true));
     },
     [&] { // Taken: LdClsPropAddr* returned Nullptr because it isn't defined
       return cns(env, true);
@@ -371,7 +371,7 @@ void emitEmptyG(IRGS& env) {
     },
     [&] (SSATmp* ptr) { // Next: global exists
       auto const val = gen(env, LdMem, TCell, ptr);
-      return gen(env, XorBool, gen(env, ConvCellToBool, val), cns(env, true));
+      return gen(env, XorBool, gen(env, ConvTVToBool, val), cns(env, true));
     },
     [&] { // Taken: global doesn't exist
       return cns(env, true);

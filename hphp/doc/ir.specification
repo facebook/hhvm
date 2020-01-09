@@ -396,7 +396,7 @@ To array conversions:
 
 | ConvClsMethToArr,             D(Arr), S(ClsMeth),               PRc|CRc
 
-| ConvCellToArr,                D(Arr), S(Cell),                  PRc|CRc
+| ConvTVToArr,                D(Arr), S(Cell),                  PRc|CRc
 
 
 | ConvArrToNonDVArr,            D(Arr), S(Arr),                      PRc|CRc
@@ -483,7 +483,7 @@ To bool conversions:
 
 | ConvObjToBool,               D(Bool), S(Obj),                           NF
 
-| ConvCellToBool,              D(Bool), S(Cell),                          NF
+| ConvTVToBool,              D(Bool), S(Cell),                          NF
 
 
 To double conversions:
@@ -500,7 +500,7 @@ To double conversions:
 
 | ConvResToDbl,                 D(Dbl), S(Res),                           NF
 
-| ConvCellToDbl,                D(Dbl), S(Cell),                          NF
+| ConvTVToDbl,                D(Dbl), S(Cell),                          NF
 
 
 To int conversions:
@@ -515,7 +515,7 @@ To int conversions:
 
 | ConvResToInt,                 D(Int), S(Res),                           NF
 
-| ConvCellToInt,                D(Int), S(Cell),                          NF
+| ConvTVToInt,                D(Int), S(Cell),                          NF
 
 
 To string conversions:
@@ -528,7 +528,7 @@ To string conversions:
 
 | ConvResToStr,                 D(Str), S(Res),                          PRc
 
-| ConvCellToStr,                D(Str), S(Cell),                         PRc
+| ConvTVToStr,                D(Str), S(Cell),                         PRc
 
 
   All the above opcodes convert S0 from its current type to the destination

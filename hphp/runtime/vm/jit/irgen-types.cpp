@@ -1620,7 +1620,7 @@ void emitEmptyL(IRGS& env, int32_t id) {
   }
   push(
     env,
-    gen(env, XorBool, gen(env, ConvCellToBool, ld), cns(env, true))
+    gen(env, XorBool, gen(env, ConvTVToBool, ld), cns(env, true))
   );
 }
 

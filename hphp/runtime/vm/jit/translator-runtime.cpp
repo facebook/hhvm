@@ -179,7 +179,7 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
   return a1;
 }
 
-ArrayData* convCellToArrHelper(TypedValue tv) {
+ArrayData* convTVToArrHelper(TypedValue tv) {
   // Note: the call sites of this function all assume that
   // no user code will run and no recoverable exceptions will
   // occur while running this code. This seems trivially true
@@ -377,7 +377,7 @@ double convResToDblHelper(const ResourceHdr* r) {
   return r->getId();
 }
 
-double convCellToDblHelper(TypedValue tv) {
+double convTVToDblHelper(TypedValue tv) {
   return tvCastToDouble(tv);
 }
 

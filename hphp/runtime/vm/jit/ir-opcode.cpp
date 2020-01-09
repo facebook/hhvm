@@ -338,11 +338,11 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvArrToDict:
   case ConvArrToKeyset:
   case ConvArrToVec:
-  case ConvCellToArr:
-  case ConvCellToBool:
-  case ConvCellToDbl:
-  case ConvCellToInt:
-  case ConvCellToStr:
+  case ConvTVToArr:
+  case ConvTVToBool:
+  case ConvTVToDbl:
+  case ConvTVToInt:
+  case ConvTVToStr:
   case ConvClsMethToArr:
   case ConvClsMethToDArr:
   case ConvClsMethToDict:

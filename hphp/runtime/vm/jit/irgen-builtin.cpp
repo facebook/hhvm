@@ -479,7 +479,7 @@ SSATmp* opt_ceil(IRGS& env, const ParamPrep& params) {
   auto const val = params[0].value;
   if (!type_converts_to_number(val->type())) return nullptr;
   // May throw
-  auto const dbl = gen(env, ConvCellToDbl, make_opt_catch(env, params), val);
+  auto const dbl = gen(env, ConvTVToDbl, make_opt_catch(env, params), val);
   return gen(env, Ceil, dbl);
 }
 
@@ -489,7 +489,7 @@ SSATmp* opt_floor(IRGS& env, const ParamPrep& params) {
   auto const val = params[0].value;
   if (!type_converts_to_number(val->type())) return nullptr;
   // May throw
-  auto const dbl = gen(env, ConvCellToDbl, make_opt_catch(env, params), val);
+  auto const dbl = gen(env, ConvTVToDbl, make_opt_catch(env, params), val);
   return gen(env, Floor, dbl);
 }
 

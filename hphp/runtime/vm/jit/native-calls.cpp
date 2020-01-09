@@ -135,17 +135,17 @@ static auto c_AsyncFunctionWaitHandle_Create_false =
  */
 static CallMap s_callMap {
     /* Opcode, Func, Dest, SyncPoint, Args */
-    {ConvBoolToArr,      convCellToArrHelper, DSSA, SNone,
+    {ConvBoolToArr,      convTVToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
-    {ConvDblToArr,       convCellToArrHelper, DSSA, SNone,
+    {ConvDblToArr,       convTVToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
-    {ConvIntToArr,       convCellToArrHelper, DSSA, SNone,
+    {ConvIntToArr,       convTVToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
-    {ConvObjToArr,       convCellToArrHelper, DSSA, SSync,
+    {ConvObjToArr,       convTVToArrHelper, DSSA, SSync,
                            {{TV, 0}}},
-    {ConvStrToArr,       convCellToArrHelper, DSSA, SNone,
+    {ConvStrToArr,       convTVToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
-    {ConvFuncToArr,      convCellToArrHelper, DSSA, SNone,
+    {ConvFuncToArr,      convTVToArrHelper, DSSA, SNone,
                            {{TV, 0}}},
     {ConvVecToArr,       convVecToArrHelper, DSSA, SNone,
                            {{SSA, 0}}},
@@ -154,7 +154,7 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ConvKeysetToArr,    convKeysetToArrHelper, DSSA, SSync,
                            {{SSA, 0}}},
-    {ConvCellToArr,      convCellToArrHelper, DSSA, SSync,
+    {ConvTVToArr,      convTVToArrHelper, DSSA, SSync,
                            {{TV, 0}}},
     {ConvArrToNonDVArr,  convArrToNonDVArrHelper, DSSA, SSync,
                            {{SSA, 0}}},
@@ -199,7 +199,7 @@ static CallMap s_callMap {
     {ConvObjToKeyset,    convObjToKeysetHelper, DSSA, SSync,
                            {{SSA, 0}}},
 
-    {ConvCellToBool,     tvToBool, DSSA, SSync,
+    {ConvTVToBool,     tvToBool, DSSA, SSync,
                            {{TV, 0}}},
 
     {ConvArrToDbl,       convArrToDblHelper, DSSA, SNone,
@@ -210,7 +210,7 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ConvResToDbl,       convResToDblHelper, DSSA, SNone,
                            {{SSA, 0}}},
-    {ConvCellToDbl,      convCellToDblHelper, DSSA, SSync,
+    {ConvTVToDbl,      convTVToDblHelper, DSSA, SSync,
                            {{TV, 0}}},
 
     {ConvObjToInt,       &ObjectData::toInt64, DSSA, SSync,
@@ -219,7 +219,7 @@ static CallMap s_callMap {
                            {{SSA, 0}, immed(10)}},
     {ConvResToInt,       &ResourceHdr::getId, DSSA, SNone,
                            {{SSA, 0}}},
-    {ConvCellToInt,      tvToInt, DSSA, SSync,
+    {ConvTVToInt,      tvToInt, DSSA, SSync,
                            {{TV, 0}}},
 
     {ConvDblToStr,       convDblToStrHelper, DSSA, SNone,
@@ -230,7 +230,7 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
     {ConvResToStr,       convResToStrHelper, DSSA, SSync,
                            {{SSA, 0}}},
-    {ConvCellToStr,      tvCastToStringData, DSSA, SSync,
+    {ConvTVToStr,      tvCastToStringData, DSSA, SSync,
                            {{TV, 0}}},
 
     {ConcatStrStr,       concat_ss, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},

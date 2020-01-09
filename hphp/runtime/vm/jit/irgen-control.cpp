@@ -73,7 +73,7 @@ void jmpImpl(IRGS& env, Offset offset) {
 void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {
   auto const target = getBlock(env, taken);
   assertx(target != nullptr);
-  auto const boolSrc = gen(env, ConvCellToBool, src);
+  auto const boolSrc = gen(env, ConvTVToBool, src);
   decRef(env, src);
   gen(env, negate ? JmpZero : JmpNZero, target, boolSrc);
 }
@@ -293,7 +293,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
 
 void emitSelect(IRGS& env) {
   auto const condSrc = popC(env);
-  auto const boolSrc = gen(env, ConvCellToBool, condSrc);
+  auto const boolSrc = gen(env, ConvTVToBool, condSrc);
   decRef(env, condSrc);
 
   ifThenElse(

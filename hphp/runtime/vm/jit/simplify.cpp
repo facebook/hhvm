@@ -2053,7 +2053,7 @@ X(Arr, NonDVArr)
 
 #undef X
 
-SSATmp* simplifyConvCellToArr(State& env, const IRInstruction* inst) {
+SSATmp* simplifyConvTVToArr(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->isA(TArr))    return gen(env, ConvArrToNonDVArr, src);
   if (src->isA(TVec))    return gen(env, ConvVecToArr, src);
@@ -2279,7 +2279,7 @@ const StaticString
     s_msgClsMethToDbl("Implicit clsmeth to double conversion");
 }
 
-SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
+SSATmp* simplifyConvTVToBool(State& env, const IRInstruction* inst) {
   auto const src     = inst->src(0);
   auto const srcType = src->type();
 
@@ -2325,7 +2325,7 @@ SSATmp* simplifyConvCellToBool(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
+SSATmp* simplifyConvTVToStr(State& env, const IRInstruction* inst) {
   auto const src        = inst->src(0);
   auto const srcType    = src->type();
   auto const catchTrace = inst->taken();
@@ -2384,7 +2384,7 @@ SSATmp* simplifyConvCellToStr(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyConvCellToInt(State& env, const IRInstruction* inst) {
+SSATmp* simplifyConvTVToInt(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
   auto const catchTrace = inst->taken();
@@ -2427,7 +2427,7 @@ SSATmp* simplifyConvCellToInt(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyConvCellToDbl(State& env, const IRInstruction* inst) {
+SSATmp* simplifyConvTVToDbl(State& env, const IRInstruction* inst) {
   auto const src      = inst->src(0);
   auto const srcType  = src->type();
   auto const catchTrace = inst->taken();
@@ -3764,11 +3764,11 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvBoolToArr)
   X(ConvBoolToDbl)
   X(ConvBoolToInt)
-  X(ConvCellToBool)
-  X(ConvCellToDbl)
-  X(ConvCellToInt)
-  X(ConvCellToStr)
-  X(ConvCellToArr)
+  X(ConvTVToBool)
+  X(ConvTVToDbl)
+  X(ConvTVToInt)
+  X(ConvTVToStr)
+  X(ConvTVToArr)
   X(ConvDblToArr)
   X(ConvDblToBool)
   X(ConvDblToInt)

@@ -1934,7 +1934,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // Some that touch memory we might care about later, but currently don't:
   case ColIsEmpty:
   case ColIsNEmpty:
-  case ConvCellToBool:
+  case ConvTVToBool:
   case ConvObjToBool:
   case CountCollection:
   case LdVectorSize:
@@ -1999,7 +1999,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseStrToClassNotice:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
-  case ConvCellToStr:
+  case ConvTVToStr:
   case ConvObjToStr:
   case Count:      // re-enters on CountableClass
   case GtObj:
@@ -2025,7 +2025,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CmpVec:
   case EqDict:
   case NeqDict:
-  case ConvCellToArr:  // decrefs src, may read obj props
+  case ConvTVToArr:  // decrefs src, may read obj props
   case ConvObjToArr:   // decrefs src
   case ConvObjToVArr:  // can invoke PHP
   case ConvObjToDArr:  // can invoke PHP
@@ -2070,11 +2070,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdSSwitchDestSlow:
   case ConvObjToDbl:
   case ConvObjToInt:
-  case ConvCellToInt:
+  case ConvTVToInt:
   case ConvResToStr:
   case ConcatStr3:
   case ConcatStr4:
-  case ConvCellToDbl:
+  case ConvTVToDbl:
   case ConvArrToVec:
   case ConvArrToDict:
   case ConvObjToVec:

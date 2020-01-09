@@ -544,7 +544,7 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
          gen(env,
              toBoolCmpOpcode(op),
              cns(env, false),
-             gen(env, ConvCellToBool, right)));
+             gen(env, ConvTVToBool, right)));
   }
 }
 
@@ -571,7 +571,7 @@ void implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
          gen(env,
              toBoolCmpOpcode(op),
              left,
-             gen(env, ConvCellToBool, right)));
+             gen(env, ConvTVToBool, right)));
   }
 }
 
@@ -605,7 +605,7 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
          gen(env,
              toBoolCmpOpcode(op),
              gen(env, ConvIntToBool, left),
-             gen(env, ConvCellToBool, right)));
+             gen(env, ConvTVToBool, right)));
   } else if (rightTy <= TArr) {
     // All ints are implicity less than arrays.
     push(env, emitConstCmp(env, op, false, true));
@@ -647,7 +647,7 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
          gen(env,
              toIntCmpOpcode(op),
              left,
-             gen(env, ConvCellToInt, right)));
+             gen(env, ConvTVToInt, right)));
   }
 }
 
@@ -663,7 +663,7 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
          gen(env,
              toBoolCmpOpcode(op),
              gen(env, ConvDblToBool, left),
-             gen(env, ConvCellToBool, right)));
+             gen(env, ConvTVToBool, right)));
   } else if (rightTy <= TArr) {
     // All doubles are implicitly less than arrays.
     push(env, emitConstCmp(env, op, false, true));
@@ -705,7 +705,7 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
          gen(env,
              toDblCmpOpcode(op),
              left,
-             gen(env, ConvCellToDbl, right)));
+             gen(env, ConvTVToDbl, right)));
   }
 }
 
@@ -765,7 +765,7 @@ void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
          gen(env,
              toBoolCmpOpcode(op),
              gen(env, ConvArrToBool, left),
-             gen(env, ConvCellToBool, right)));
+             gen(env, ConvTVToBool, right)));
   } else if (rightTy <= TObj) {
     // Objects are always greater than arrays. Emit a collection check first.
     push(
@@ -1379,7 +1379,7 @@ void implConcat(IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef) {
   auto cast =
     [&] (SSATmp* s) {
       if (s->isA(TStr)) return s;
-      auto const ret = gen(env, ConvCellToStr, s);
+      auto const ret = gen(env, ConvTVToStr, s);
       decRef(env, s);
       return ret;
     };
@@ -1412,7 +1412,7 @@ void implConcat(IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef) {
    * We don't want to convert to strings if either was already a string.  Note
    * that for the c2 string, failing to do this could change big-O program
    * behavior if refcount opts were off, since we'd COW strings that we
-   * shouldn't (a ConvCellToStr of a Str will simplify into an IncRef).
+   * shouldn't (a ConvTVToStr of a Str will simplify into an IncRef).
    */
   auto const s2 = cast(c2);
   auto const s1 = cast(c1);
@@ -1439,10 +1439,10 @@ void emitConcatN(IRGS& env, uint32_t n) {
   auto const t3 = popC(env);
   auto const t4 = n == 4 ? popC(env) : nullptr;
 
-  auto const s4 = !t4 || t4->isA(TStr) ? t4 : gen(env, ConvCellToStr, t4);
-  auto const s3 = t3->isA(TStr) ? t3 : gen(env, ConvCellToStr, t3);
-  auto const s2 = t2->isA(TStr) ? t2 : gen(env, ConvCellToStr, t2);
-  auto const s1 = t1->isA(TStr) ? t1 : gen(env, ConvCellToStr, t1);
+  auto const s4 = !t4 || t4->isA(TStr) ? t4 : gen(env, ConvTVToStr, t4);
+  auto const s3 = t3->isA(TStr) ? t3 : gen(env, ConvTVToStr, t3);
+  auto const s2 = t2->isA(TStr) ? t2 : gen(env, ConvTVToStr, t2);
+  auto const s1 = t1->isA(TStr) ? t1 : gen(env, ConvTVToStr, t1);
 
   if (n == 3) {
     push(env, gen(env, ConcatStr3, s3, s2, s1));
@@ -1571,8 +1571,8 @@ void emitIncDecL(IRGS& env, int32_t id, IncDecOp subop) {
 void emitXor(IRGS& env) {
   auto const btr = popC(env);
   auto const btl = popC(env);
-  auto const tr = gen(env, ConvCellToBool, btr);
-  auto const tl = gen(env, ConvCellToBool, btl);
+  auto const tr = gen(env, ConvTVToBool, btr);
+  auto const tl = gen(env, ConvTVToBool, btl);
   push(env, gen(env, XorBool, tl, tr));
   decRef(env, btl);
   decRef(env, btr);
@@ -1583,8 +1583,8 @@ const StaticString s_NEGATIVE_SHIFT(Strings::NEGATIVE_SHIFT);
 void implShift(IRGS& env, Opcode op) {
   auto const shiftAmount    = popC(env);
   auto const lhs            = popC(env);
-  auto const lhsInt         = gen(env, ConvCellToInt, lhs);
-  auto const shiftAmountInt = gen(env, ConvCellToInt, shiftAmount);
+  auto const lhsInt         = gen(env, ConvTVToInt, lhs);
+  auto const shiftAmountInt = gen(env, ConvTVToInt, shiftAmount);
 
   // - PHP7 defines shifts of width >= 64 to return the value you get from a
   //   naive shift, i.e., either 0 or -1 depending on the shift and value. This
@@ -1715,7 +1715,7 @@ void emitBitNot(IRGS& env) {
 
 void emitNot(IRGS& env) {
   auto const src = popC(env);
-  push(env, gen(env, XorBool, gen(env, ConvCellToBool, src), cns(env, true)));
+  push(env, gen(env, XorBool, gen(env, ConvTVToBool, src), cns(env, true)));
   decRef(env, src);
 }
 
@@ -1831,8 +1831,8 @@ const StaticString s_MODULO_BY_ZERO(Strings::MODULO_BY_ZERO);
 void emitMod(IRGS& env) {
   auto const btr = popC(env);
   auto const btl = popC(env);
-  auto const tr = gen(env, ConvCellToInt, btr);
-  auto const tl = gen(env, ConvCellToInt, btl);
+  auto const tr = gen(env, ConvTVToInt, btr);
+  auto const tl = gen(env, ConvTVToInt, btl);
 
   // Generate an exit for the rare case that r is zero.
   ifThen(

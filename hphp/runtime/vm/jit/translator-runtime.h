@@ -58,7 +58,7 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2);
 /* Helper functions for conversion instructions that are too
  * complicated to inline
  */
-ArrayData* convCellToArrHelper(TypedValue tv);
+ArrayData* convTVToArrHelper(TypedValue tv);
 ArrayData* convArrToNonDVArrHelper(ArrayData* a);
 ArrayData* convVecToArrHelper(ArrayData* a);
 ArrayData* convDictToArrHelper(ArrayData* a);
@@ -67,17 +67,14 @@ ArrayData* convArrToVecHelper(ArrayData* a);
 ArrayData* convDictToVecHelper(ArrayData* a);
 ArrayData* convKeysetToVecHelper(ArrayData* a);
 ArrayData* convObjToVecHelper(ObjectData* o);
-ArrayData* convCellToVecHelper(TypedValue tv);
 ArrayData* convArrToDictHelper(ArrayData* a);
 ArrayData* convVecToDictHelper(ArrayData* a);
 ArrayData* convKeysetToDictHelper(ArrayData* a);
 ArrayData* convObjToDictHelper(ObjectData* o);
-ArrayData* convCellToDictHelper(TypedValue tv);
 ArrayData* convArrToKeysetHelper(ArrayData* a);
 ArrayData* convVecToKeysetHelper(ArrayData* a);
 ArrayData* convDictToKeysetHelper(ArrayData* a);
 ArrayData* convObjToKeysetHelper(ObjectData* o);
-ArrayData* convCellToKeysetHelper(TypedValue tv);
 ArrayData* convClsMethToArrHealper(ClsMethDataRef clsmeth);
 ArrayData* convClsMethToVArrHealper(ClsMethDataRef clsmeth);
 ArrayData* convClsMethToVecHealper(ClsMethDataRef clsmeth);
@@ -88,7 +85,7 @@ double convObjToDblHelper(const ObjectData* o);
 double convArrToDblHelper(ArrayData* a);
 double convStrToDblHelper(const StringData* s);
 double convResToDblHelper(const ResourceHdr* r);
-double convCellToDblHelper(TypedValue tv);
+double convTVToDblHelper(TypedValue tv);
 StringData* convDblToStrHelper(double i);
 StringData* convIntToStrHelper(int64_t i);
 StringData* convObjToStrHelper(ObjectData* o);

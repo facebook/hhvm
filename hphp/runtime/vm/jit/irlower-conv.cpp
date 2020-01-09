@@ -178,7 +178,7 @@ void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-IMPL_OPCODE_CALL(ConvCellToBool);
+IMPL_OPCODE_CALL(ConvTVToBool);
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToInt
@@ -263,7 +263,7 @@ void cgConvDblToInt(IRLS& env, const IRInstruction* inst) {
 IMPL_OPCODE_CALL(ConvStrToInt);
 IMPL_OPCODE_CALL(ConvObjToInt);
 IMPL_OPCODE_CALL(ConvResToInt);
-IMPL_OPCODE_CALL(ConvCellToInt);
+IMPL_OPCODE_CALL(ConvTVToInt);
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToDbl
@@ -299,7 +299,7 @@ IMPL_OPCODE_CALL(ConvStrToDbl);
 IMPL_OPCODE_CALL(ConvArrToDbl);
 IMPL_OPCODE_CALL(ConvObjToDbl);
 IMPL_OPCODE_CALL(ConvResToDbl);
-IMPL_OPCODE_CALL(ConvCellToDbl);
+IMPL_OPCODE_CALL(ConvTVToDbl);
 
 ///////////////////////////////////////////////////////////////////////////////
 // ConvToVArray
@@ -492,7 +492,7 @@ IMPL_OPCODE_CALL(ConvIntToStr);
 IMPL_OPCODE_CALL(ConvDblToStr);
 IMPL_OPCODE_CALL(ConvObjToStr);
 IMPL_OPCODE_CALL(ConvResToStr);
-IMPL_OPCODE_CALL(ConvCellToStr);
+IMPL_OPCODE_CALL(ConvTVToStr);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -506,7 +506,7 @@ IMPL_OPCODE_CALL(ConvDictToArr);
 IMPL_OPCODE_CALL(ConvKeysetToArr);
 IMPL_OPCODE_CALL(ConvClsMethToArr);
 IMPL_OPCODE_CALL(ConvObjToArr);
-IMPL_OPCODE_CALL(ConvCellToArr);
+IMPL_OPCODE_CALL(ConvTVToArr);
 IMPL_OPCODE_CALL(ConvArrToNonDVArr);
 
 IMPL_OPCODE_CALL(ConvClsMethToVArr);

@@ -324,21 +324,21 @@ bool canDCE(IRInstruction* inst) {
 
   // Some of these conversion functions can run arbitrary PHP code.
   case ConvObjToArr:
-  case ConvCellToArr:
+  case ConvTVToArr:
   case ConvStrToArr:
   case ConvVecToArr:
   case ConvDictToArr:
   case ConvKeysetToArr:
   case ConvArrToNonDVArr:
   case ConvObjToDbl:
-  case ConvCellToDbl:
+  case ConvTVToDbl:
   case ConvObjToInt:
-  case ConvCellToInt:
-  case ConvCellToBool:
+  case ConvTVToInt:
+  case ConvTVToBool:
   case ConvObjToBool:
   case ConvObjToStr:
   case ConvResToStr:
-  case ConvCellToStr:
+  case ConvTVToStr:
   case ConvArrToVec:
   case ConvDictToVec:
   case ConvKeysetToVec:

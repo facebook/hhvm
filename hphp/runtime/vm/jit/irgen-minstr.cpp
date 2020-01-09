@@ -930,7 +930,7 @@ SSATmp* emitVecArrayEmptyElem(IRGS& env, SSATmp* base, SSATmp* key) {
     },
     [&] {
       auto const elem = gen(env, LdVecElem, base, key);
-      auto const b = gen(env, ConvCellToBool, elem);
+      auto const b = gen(env, ConvTVToBool, elem);
       return gen(env, XorBool, b, cns(env, true));
     },
     [&] { return cns(env, true); }
@@ -2158,9 +2158,9 @@ void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
 }
 
 void emitSetRangeM(IRGS& env, uint32_t nDiscard, SetRangeOp op, uint32_t size) {
-  auto const count = gen(env, ConvCellToInt, topC(env));
+  auto const count = gen(env, ConvTVToInt, topC(env));
   auto const src = topC(env, BCSPRelOffset{1});
-  auto const offset = gen(env, ConvCellToInt, topC(env, BCSPRelOffset{2}));
+  auto const offset = gen(env, ConvTVToInt, topC(env, BCSPRelOffset{2}));
   auto const reverse = op == SetRangeOp::Reverse;
 
   gen(

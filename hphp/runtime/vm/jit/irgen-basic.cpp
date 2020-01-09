@@ -316,7 +316,7 @@ void emitClassName(IRGS& env) {
 
 void emitCastArray(IRGS& env) {
   auto const src = popC(env);
-  push(env, gen(env, ConvCellToArr, src));
+  push(env, gen(env, ConvTVToArr, src));
 }
 
 void emitCastVArray(IRGS& env) {
@@ -524,25 +524,25 @@ void emitCastKeyset(IRGS& env) {
 
 void emitCastBool(IRGS& env) {
   auto const src = popC(env);
-  push(env, gen(env, ConvCellToBool, src));
+  push(env, gen(env, ConvTVToBool, src));
   decRef(env, src);
 }
 
 void emitCastDouble(IRGS& env) {
   auto const src = popC(env);
-  push(env, gen(env, ConvCellToDbl, src));
+  push(env, gen(env, ConvTVToDbl, src));
   decRef(env, src);
 }
 
 void emitCastInt(IRGS& env) {
   auto const src = popC(env);
-  push(env, gen(env, ConvCellToInt, src));
+  push(env, gen(env, ConvTVToInt, src));
   decRef(env, src);
 }
 
 void emitCastString(IRGS& env) {
   auto const src = popC(env);
-  push(env, gen(env, ConvCellToStr, src));
+  push(env, gen(env, ConvTVToStr, src));
   decRef(env, src);
 }
 

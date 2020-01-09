@@ -28,7 +28,21 @@ let recheck_naming filename_l =
 let helper tcopt acc filetuple_l =
   let filename_l = List.rev_map filetuple_l fst in
   recheck_naming filename_l;
-  let tasts = ServerIdeUtils.recheck tcopt filetuple_l |> List.map ~f:snd in
+  let ctx = Provider_context.empty ~tcopt in
+  let tasts =
+    List.map filename_l ~f:(fun path ->
+        let (ctx, entry) =
+          Provider_utils.update_context
+            ~ctx
+            ~path
+            ~file_input:
+              (ServerCommandTypes.FileName (Relative_path.to_absolute path))
+        in
+        let { Provider_utils.Compute_tast.tast; _ } =
+          Provider_utils.compute_tast_unquarantined ~ctx ~entry
+        in
+        tast)
+  in
   let fun_calls = SymbolFunCallService.find_fun_calls tasts in
   let symbol_types = SymbolTypeService.generate_types tasts in
   (fun_calls, symbol_types) :: acc

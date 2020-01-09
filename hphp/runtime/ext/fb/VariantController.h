@@ -290,7 +290,8 @@ struct VariantControllerImpl {
 
     if (arrprov::arrayWantsTag(ad) &&
         (thing.isVecArray() || ad->isVArray())) {
-      raise_array_serialization_notice("fb_serialize", thing.asCArrRef().get());
+      raise_array_serialization_notice(SerializationSite::FBSerialize,
+                                       thing.asCArrRef().get());
     }
   }
 };

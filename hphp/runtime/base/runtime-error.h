@@ -218,7 +218,27 @@ void raise_hackarr_compat_is_operator(const char* source, const char* target);
 
 void raise_hackarr_compat_notice(const std::string& msg);
 
-void raise_array_serialization_notice(const char* src, const ArrayData* arr);
+
+enum class SerializationSite {
+  IsDict,
+  IsVec,
+  IsTuple,
+  IsShape,
+  IsArray,
+  IsVArray,
+  IsDArray,
+  FBSerialize,
+  FBCompactSerialize,
+  Gettype,
+  Serialize,
+  VarExport,
+  PrintR,
+  JsonEncode,
+  Count
+};
+
+void raise_array_serialization_notice(SerializationSite src,
+                                      const ArrayData* arr);
 
 #define HC(Opt, opt) void raise_hac_##opt##_notice(const std::string& msg);
 HAC_CHECK_OPTS

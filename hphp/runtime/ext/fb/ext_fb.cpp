@@ -499,7 +499,8 @@ static int fb_compact_serialize_variant(
       Array arr = var.toArray();
       assertx(arr->isVecArray());
       if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
-        raise_array_serialization_notice("fb_compact_serialize", arr.get());
+        raise_array_serialization_notice(SerializationSite::FBCompactSerialize,
+                                         arr.get());
       }
       fb_compact_serialize_vec(sb, std::move(arr), depth);
       return 0;
@@ -510,7 +511,8 @@ static int fb_compact_serialize_variant(
       Array arr = var.toArray();
       assertx(arr->isDict());
       if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
-        raise_array_serialization_notice("fb_compact_serialize", arr.get());
+        raise_array_serialization_notice(SerializationSite::FBCompactSerialize,
+                                         arr.get());
       }
       fb_compact_serialize_array_as_map(sb, std::move(arr), depth);
       return 0;

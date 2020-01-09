@@ -630,7 +630,7 @@ bool checkTypeStructureMatchesTVImpl(
       auto const result = isDictType(type);
       if (result &&
           UNLIKELY(RO::EvalLogArrayProvenance)) {
-        raise_array_serialization_notice("is_dict", data.parr);
+        raise_array_serialization_notice(SerializationSite::IsDict, data.parr);
       }
       return result;
     }
@@ -653,7 +653,7 @@ bool checkTypeStructureMatchesTVImpl(
       auto const result = isVecType(type);
       if (result &&
           UNLIKELY(RO::EvalLogArrayProvenance)) {
-        raise_array_serialization_notice("is_vec", data.parr);
+        raise_array_serialization_notice(SerializationSite::IsVec, data.parr);
       }
       return result;
     }
@@ -672,7 +672,10 @@ bool checkTypeStructureMatchesTVImpl(
       if (result &&
           UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
         raise_array_serialization_notice(
-          isVecType(type) ? "is_vec" : "is_dict", data.parr
+          isVecType(type)
+            ? SerializationSite::IsVec
+            : SerializationSite::IsDict,
+          data.parr
         );
       }
       return result;
@@ -748,7 +751,7 @@ bool checkTypeStructureMatchesTVImpl(
 
       auto const with_prov_check = [&] (bool const result) {
         if (result && wants_prov_logging) {
-          raise_array_serialization_notice("is_tuple", ad);
+          raise_array_serialization_notice(SerializationSite::IsTuple, ad);
           return false;
         }
         return result;
@@ -875,7 +878,7 @@ bool checkTypeStructureMatchesTVImpl(
 
       auto const with_prov_check = [&] (bool const result) {
         if (result && wants_prov_logging) {
-          raise_array_serialization_notice("is_shape", ad);
+          raise_array_serialization_notice(SerializationSite::IsShape, ad);
           return false;
         }
         return result;

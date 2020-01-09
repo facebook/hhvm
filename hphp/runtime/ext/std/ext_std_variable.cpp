@@ -66,7 +66,8 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
   }
   if (RuntimeOption::EvalLogArrayProvenance &&
       v.isArray() && arrprov::arrayWantsTag(v.asCArrRef().get())) {
-    raise_array_serialization_notice("gettype", v.getArrayData());
+    raise_array_serialization_notice(SerializationSite::Gettype,
+                                     v.getArrayData());
   }
   return getDataTypeString(v.getType());
 }
@@ -137,7 +138,8 @@ bool HHVM_FUNCTION(is_array, const Variant& v) {
       UNLIKELY(RO::EvalLogArrayProvenance) &&
       RO::EvalArrProvDVArrays &&
       arrprov::arrayWantsTag(v.getArrayData())) {
-    raise_array_serialization_notice("is_array", v.asCArrRef().get());
+    raise_array_serialization_notice(SerializationSite::IsArray,
+                                     v.asCArrRef().get());
   }
   return ret;
 }
@@ -156,7 +158,8 @@ bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
   if (ret &&
       UNLIKELY(RO::EvalLogArrayProvenance) &&
       RO::EvalArrProvHackArrays) {
-    raise_array_serialization_notice("is_vec", v.asCArrRef().get());
+    raise_array_serialization_notice(SerializationSite::IsVec,
+                                     v.asCArrRef().get());
   }
   return ret;
 }
@@ -175,7 +178,8 @@ bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
   if (ret &&
       UNLIKELY(RO::EvalLogArrayProvenance) &&
       RO::EvalArrProvHackArrays) {
-    raise_array_serialization_notice("is_dict", v.asCArrRef().get());
+    raise_array_serialization_notice(SerializationSite::IsDict,
+                                     v.asCArrRef().get());
   }
   return ret;
 }
@@ -200,7 +204,8 @@ bool HHVM_FUNCTION(HH_is_varray, const Variant& val) {
   if (ret &&
       UNLIKELY(RO::EvalLogArrayProvenance) &&
       RO::EvalArrProvDVArrays) {
-    raise_array_serialization_notice("is_varray", val.asCArrRef().get());
+    raise_array_serialization_notice(SerializationSite::IsVArray,
+                                     val.asCArrRef().get());
   }
   return ret;
 }
@@ -218,7 +223,8 @@ bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
   if (ret &&
       UNLIKELY(RO::EvalLogArrayProvenance) &&
       RO::EvalArrProvDVArrays) {
-    raise_array_serialization_notice("is_darray", val.asCArrRef().get());
+    raise_array_serialization_notice(SerializationSite::IsDArray,
+                                     val.asCArrRef().get());
   }
   return ret;
 }

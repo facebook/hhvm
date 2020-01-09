@@ -517,7 +517,9 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
 
   auto const provLogging = [&](SSATmp* src) {
     if (!RO::EvalLogArrayProvenance) return;
-    gen(env, RaiseArraySerializeNotice, cns(env, s_isVec.get()), src);
+    gen(env, RaiseArraySerializeNotice,
+        cns(env, SerializationSite::IsVec),
+        src);
   };
 
   mc.ifTypeThen(src, TVec, [&](SSATmp* src) {
@@ -588,7 +590,9 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
 
   auto const provLogging = [&](SSATmp* src) {
     if (!RO::EvalLogArrayProvenance) return;
-    gen(env, RaiseArraySerializeNotice, cns(env, s_isDict.get()), src);
+    gen(env, RaiseArraySerializeNotice,
+        cns(env, SerializationSite::IsDict),
+        src);
   };
 
   mc.ifTypeThen(src, TDict, [&](SSATmp* src) {
@@ -624,7 +628,9 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
 
   auto const provLogging = [&](SSATmp* src) {
     if (!RO::EvalLogArrayProvenance) return;
-    gen(env, RaiseArraySerializeNotice, cns(env, s_is_array.get()), src);
+    gen(env, RaiseArraySerializeNotice,
+        cns(env, SerializationSite::IsArray),
+        src);
   };
 
   mc.ifTypeThen(src, TArr, [&](SSATmp* src) {

@@ -3626,7 +3626,8 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
     } else if (isArrayType(val->m_type)) {
       if (RO::EvalLogArrayProvenance &&
           arrprov::arrayWantsTag(val->m_data.parr)) {
-        raise_array_serialization_notice("is_array", val->m_data.parr);
+        raise_array_serialization_notice(SerializationSite::IsArray,
+                                         val->m_data.parr);
       }
       return true;
     } else if (isVecType(val->m_type)) {
@@ -3635,7 +3636,8 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
       }
       if (RO::EvalLogArrayProvenance &&
           arrprov::arrayWantsTag(val->m_data.parr)) {
-        raise_array_serialization_notice("is_array", val->m_data.parr);
+        raise_array_serialization_notice(SerializationSite::IsArray,
+                                         val->m_data.parr);
       }
     } else if (isDictType(val->m_type)) {
       if (RO::EvalHackArrCompatIsArrayNotices) {
@@ -3643,7 +3645,8 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
       }
       if (RO::EvalLogArrayProvenance &&
           arrprov::arrayWantsTag(val->m_data.parr)) {
-        raise_array_serialization_notice("is_array", val->m_data.parr);
+        raise_array_serialization_notice(SerializationSite::IsArray,
+                                         val->m_data.parr);
       }
     } else if (isKeysetType(val->m_type)) {
       if (RO::EvalHackArrCompatIsArrayNotices) {
@@ -3664,7 +3667,8 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
     if (ret &&
         UNLIKELY(RO::EvalLogArrayProvenance) &&
         arrprov::arrayWantsTag(val->m_data.parr)) {
-      raise_array_serialization_notice("is_vec", val->m_data.parr);
+      raise_array_serialization_notice(SerializationSite::IsVec,
+                                       val->m_data.parr);
     }
     return ret;
   }
@@ -3681,7 +3685,8 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
     if (ret &&
         UNLIKELY(RO::EvalLogArrayProvenance) &&
         arrprov::arrayWantsTag(val->m_data.parr)) {
-      raise_array_serialization_notice("is_dict", val->m_data.parr);
+      raise_array_serialization_notice(SerializationSite::IsDict,
+                                       val->m_data.parr);
     }
     return ret;
   }
@@ -3710,7 +3715,8 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
     if (ret &&
         UNLIKELY(RO::EvalLogArrayProvenance) &&
         arrprov::arrayWantsTag(val->m_data.parr)) {
-      raise_array_serialization_notice("is_varray", val->m_data.parr);
+      raise_array_serialization_notice(SerializationSite::IsVArray,
+                                       val->m_data.parr);
     }
     return ret;
   }
@@ -3726,7 +3732,8 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
     if (ret &&
         UNLIKELY(RO::EvalLogArrayProvenance) &&
         arrprov::arrayWantsTag(val->m_data.parr)) {
-      raise_array_serialization_notice("is_darray", val->m_data.parr);
+      raise_array_serialization_notice(SerializationSite::IsDArray,
+                                       val->m_data.parr);
     }
     return ret;
   }

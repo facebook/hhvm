@@ -478,8 +478,8 @@ void cgRaiseStrToClassNotice(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void raiseArraySerializeImpl(const StringData* source, const ArrayData* ad) {
-  raise_array_serialization_notice(source->data(), ad);
+void raiseArraySerializeImpl(SerializationSite src, const ArrayData* ad) {
+  raise_array_serialization_notice(src, ad);
 }
 
 void cgRaiseArraySerializeNotice(IRLS& env, const IRInstruction* inst) {

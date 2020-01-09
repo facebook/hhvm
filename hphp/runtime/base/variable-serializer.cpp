@@ -1705,17 +1705,23 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
   if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance &&
                !m_forcePHPArrays &&
                arrprov::arrayWantsTag(arr))) {
-    auto const source = [&]() -> const char* {
+    auto const source = [&]() -> folly::Optional<SerializationSite> {
       switch (getType()) {
       case VariableSerializer::Type::JSON:
-        return arr->isVecArray() ? nullptr : "json_encode";
-      case VariableSerializer::Type::Serialize: return "serialize";
-      case VariableSerializer::Type::VarExport: return "var_export";
-      case VariableSerializer::Type::PrintR:    return "print_r";
-      default:                                  return nullptr;
+        return arr->isVecArray()
+          ? folly::none
+          : folly::make_optional(SerializationSite::JsonEncode);
+      case VariableSerializer::Type::Serialize:
+        return SerializationSite::Serialize;
+      case VariableSerializer::Type::VarExport:
+        return SerializationSite::VarExport;
+      case VariableSerializer::Type::PrintR:
+        return SerializationSite::PrintR;
+      default:
+        return folly::none;
       }
     }();
-    if (source) raise_array_serialization_notice(source, arr);
+    if (source) raise_array_serialization_notice(*source, arr);
   }
 
   if (arr->size() == 0 && LIKELY(!RuntimeOption::EvalArrayProvenance)) {

@@ -729,8 +729,8 @@ bool canDCE(IRInstruction* inst) {
   case InlineReturnNoFrame:
   case BeginInlining:
   case SyncReturnBC:
-  case SetOpCell:
-  case SetOpCellVerify:
+  case SetOpTV:
+  case SetOpTVVerify:
   case ConjureUse:
   case LdClsMethodFCacheFunc:
   case LdClsMethodCacheFunc:

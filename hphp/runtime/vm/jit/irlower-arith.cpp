@@ -203,7 +203,7 @@ auto setOpOpToHelper(SetOpOp op) {
 
 }
 
-void cgSetOpCell(IRLS& env, const IRInstruction* inst) {
+void cgSetOpTV(IRLS& env, const IRInstruction* inst) {
   auto const op = inst->extra<SetOpData>()->op;
   auto const helper = setOpOpToHelper(op);
   auto& v = vmain(env);
@@ -212,7 +212,7 @@ void cgSetOpCell(IRLS& env, const IRInstruction* inst) {
 }
 
 template <SetOpOp Op>
-static void setOpCellVerifyImpl(tv_lval lhs, TypedValue rhs,
+static void setOpTVVerifyImpl(tv_lval lhs, TypedValue rhs,
                                 const Class* cls, Slot slot) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(slot < cls->numDeclProperties());
@@ -237,28 +237,28 @@ static void setOpCellVerifyImpl(tv_lval lhs, TypedValue rhs,
   }
 }
 
-void cgSetOpCellVerify(IRLS& env, const IRInstruction* inst) {
+void cgSetOpTVVerify(IRLS& env, const IRInstruction* inst) {
   auto const op = inst->extra<SetOpData>()->op;
   auto& v = vmain(env);
 
   using S = SetOpOp;
   auto const helper = [&]{
     switch (op) {
-      case S::PlusEqual:   return setOpCellVerifyImpl<S::PlusEqual>;
-      case S::MinusEqual:  return setOpCellVerifyImpl<S::MinusEqual>;
-      case S::MulEqual:    return setOpCellVerifyImpl<S::MulEqual>;
-      case S::ConcatEqual: return setOpCellVerifyImpl<S::ConcatEqual>;
-      case S::DivEqual:    return setOpCellVerifyImpl<S::DivEqual>;
-      case S::PowEqual:    return setOpCellVerifyImpl<S::PowEqual>;
-      case S::ModEqual:    return setOpCellVerifyImpl<S::ModEqual>;
-      case S::AndEqual:    return setOpCellVerifyImpl<S::AndEqual>;
-      case S::OrEqual:     return setOpCellVerifyImpl<S::OrEqual>;
-      case S::XorEqual:    return setOpCellVerifyImpl<S::XorEqual>;
-      case S::SlEqual:     return setOpCellVerifyImpl<S::SlEqual>;
-      case S::SrEqual:     return setOpCellVerifyImpl<S::SrEqual>;
-      case S::PlusEqualO:  return setOpCellVerifyImpl<S::PlusEqualO>;
-      case S::MinusEqualO: return setOpCellVerifyImpl<S::MinusEqualO>;
-      case S::MulEqualO:   return setOpCellVerifyImpl<S::MulEqualO>;
+      case S::PlusEqual:   return setOpTVVerifyImpl<S::PlusEqual>;
+      case S::MinusEqual:  return setOpTVVerifyImpl<S::MinusEqual>;
+      case S::MulEqual:    return setOpTVVerifyImpl<S::MulEqual>;
+      case S::ConcatEqual: return setOpTVVerifyImpl<S::ConcatEqual>;
+      case S::DivEqual:    return setOpTVVerifyImpl<S::DivEqual>;
+      case S::PowEqual:    return setOpTVVerifyImpl<S::PowEqual>;
+      case S::ModEqual:    return setOpTVVerifyImpl<S::ModEqual>;
+      case S::AndEqual:    return setOpTVVerifyImpl<S::AndEqual>;
+      case S::OrEqual:     return setOpTVVerifyImpl<S::OrEqual>;
+      case S::XorEqual:    return setOpTVVerifyImpl<S::XorEqual>;
+      case S::SlEqual:     return setOpTVVerifyImpl<S::SlEqual>;
+      case S::SrEqual:     return setOpTVVerifyImpl<S::SrEqual>;
+      case S::PlusEqualO:  return setOpTVVerifyImpl<S::PlusEqualO>;
+      case S::MinusEqualO: return setOpTVVerifyImpl<S::MinusEqualO>;
+      case S::MulEqualO:   return setOpTVVerifyImpl<S::MulEqualO>;
     }
     not_reached();
   }();

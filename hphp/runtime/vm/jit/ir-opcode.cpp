@@ -480,8 +480,8 @@ bool opcodeMayRaise(Opcode opc) {
   case SetNewElemArray:
   case SetNewElemKeyset:
   case SetNewElemVec:
-  case SetOpCell:
-  case SetOpCellVerify:
+  case SetOpTV:
+  case SetOpTVVerify:
   case SetOpElem:
   case SetOpProp:
   case SetProp:

@@ -2311,7 +2311,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
     if (!fast) {
       gen(
         env,
-        SetOpCellVerify,
+        SetOpTVVerify,
         SetOpData{op},
         propPtr,
         rhs,
@@ -2319,7 +2319,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
         cns(env, propInfo->slot)
       );
     } else {
-      gen(env, SetOpCell, SetOpData{op}, propPtr, rhs);
+      gen(env, SetOpTV, SetOpData{op}, propPtr, rhs);
     }
     auto newVal = gen(env, LdMem, propPtr->type().deref(), propPtr);
     auto const pNewVal = profiledType(env, newVal, [&] {

@@ -2427,13 +2427,13 @@ To string conversions:
   Returns a bool indicating whether the class, interface, or trait named by S0
   exists. Invokes autoload if S1 is true.
 
-| SetOpCell<op>, ND, S(LvalToCell) S(Cell), NF
+| SetOpTV<op>, ND, S(LvalToCell) S(Cell), NF
 
   Performs S0 <op>= S1.
 
-| SetOpCellVerify<op>, ND, S(LvalToCell) S(Cell) S(Cls) S(Int), NF
+| SetOpTVVerify<op>, ND, S(LvalToCell) S(Cell) S(Cls) S(Int), NF
 
-  Similar to SetOpCell, but does a type-hint check of the result (before
+  Similar to SetOpTV, but does a type-hint check of the result (before
   assigning to S0) using the type-hint of the property in class S2 at slot S3.
 
 | GetTime, D(Dbl), NA, NF

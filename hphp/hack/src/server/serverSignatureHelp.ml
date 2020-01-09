@@ -145,7 +145,7 @@ let go_quarantined
   let cst = Provider_utils.compute_cst ~ctx ~entry in
   let nast = entry.Provider_context.ast in
   match
-    get_positional_info (Full_fidelity_ast.PositionedSyntaxTree.root cst) offset
+    get_positional_info (Provider_context.PositionedSyntaxTree.root cst) offset
   with
   | None -> None
   | Some ((symbol_line, symbol_char), argument_idx) ->

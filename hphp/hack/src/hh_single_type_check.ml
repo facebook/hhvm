@@ -1150,23 +1150,21 @@ let handle_mode
           let type_acc = ServerCoverageMetric.accumulate_types tast fn in
           print_coverage type_acc)
   | Cst_search ->
-    let filename = expect_single_file () in
-    let fileinfo =
-      match Relative_path.Map.find_opt files_info filename with
-      | Some fileinfo -> fileinfo
-      | None ->
-        failwith
-          (Printf.sprintf
-             "Missing fileinfo for path %s"
-             (Relative_path.to_absolute filename))
-    in
+    let path = expect_single_file () in
     let ctx = Provider_context.empty ~tcopt in
+    let (ctx, entry) =
+      Provider_utils.update_context
+        ~ctx
+        ~path
+        ~file_input:
+          (ServerCommandTypes.FileName (Relative_path.to_absolute path))
+    in
     let result =
       let open Result.Monad_infix in
       Sys_utils.read_stdin_to_string ()
       |> Hh_json.json_of_string
       |> CstSearchService.compile_pattern ctx
-      >>| CstSearchService.search tcopt filename fileinfo
+      >>| CstSearchService.search ctx entry
       >>| CstSearchService.result_to_json ~sort_results:true
       >>| Hh_json.json_to_string ~pretty:true
     in

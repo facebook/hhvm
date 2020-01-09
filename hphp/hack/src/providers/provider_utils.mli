@@ -96,4 +96,4 @@ val get_entry_VOLATILE :
 val compute_cst :
   ctx:Provider_context.t ->
   entry:Provider_context.entry ->
-  Full_fidelity_ast.PositionedSyntaxTree.t
+  Provider_context.PositionedSyntaxTree.t

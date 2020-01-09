@@ -149,10 +149,8 @@ type collected_type_map =
 
 (* The environment used in searching a single file. *)
 type env = {
-  tcopt: TypecheckerOptions.t;
-  fileinfo: FileInfo.t;
-  path: Relative_path.t;
-  syntax_tree: SyntaxTree.t;
+  ctx: Provider_context.t;
+  entry: Provider_context.entry;
   collected_types: collected_type_map option;
 }
 
@@ -179,8 +177,10 @@ let find_child_with_type (node : Syntax.t) (child_type : child_type) :
 let collect_types (env : env) : env * collected_type_map =
   match env with
   | { collected_types = Some collected_types; _ } -> (env, collected_types)
-  | { collected_types = None; tcopt; fileinfo; path; _ } ->
-    let tast = ServerIdeUtils.check_fileinfo tcopt path fileinfo in
+  | { collected_types = None; ctx; entry } ->
+    let { Provider_utils.Compute_tast.tast; _ } =
+      Provider_utils.compute_tast_unquarantined ~ctx ~entry
+    in
     let collected_types = Tast_type_collector.collect_types tast in
     let env = { env with collected_types = Some collected_types } in
     (env, collected_types)
@@ -266,7 +266,7 @@ let rec search_node ~(env : env) ~(pattern : pattern) ~(node : Syntax.t) :
       (env, None)
   | TypePattern { subtype_of } ->
     Line_break_map.reset_global_state ();
-    let pos = Syntax.position env.path node in
+    let pos = Syntax.position env.entry.Provider_context.path node in
     begin
       match pos with
       | None -> (env, None)
@@ -549,15 +549,13 @@ let result_to_json ~(sort_results : bool) (result : result option) :
     JSON_Object [("matched_nodes", JSON_Array matched_nodes)]
 
 let search
-    (tcopt : TypecheckerOptions.t)
-    (path : Relative_path.t)
-    (fileinfo : FileInfo.t)
+    (ctx : Provider_context.t)
+    (entry : Provider_context.entry)
     (pattern : pattern) : result option =
-  let source_text = Full_fidelity_source_text.from_file path in
-  let syntax_tree = SyntaxTree.make source_text in
-  let env = { tcopt; fileinfo; path; syntax_tree; collected_types = None } in
+  let syntax_tree = Provider_utils.compute_cst ~ctx ~entry in
+  let env = { ctx; entry; collected_types = None } in
   let (_env, result) =
-    search_node ~env ~pattern ~node:(SyntaxTree.root env.syntax_tree)
+    search_node ~env ~pattern ~node:(SyntaxTree.root syntax_tree)
   in
   result
 
@@ -589,28 +587,27 @@ let go
     );
     if is_bucket_empty then done_searching := true
   in
-  let next_files : (Relative_path.t * FileInfo.t * pattern) list Hh_bucket.next
-      =
-    let with_file_data path =
+  let next_files : (Relative_path.t * pattern) list Hh_bucket.next =
+    let get_job_info path =
       let path = Relative_path.create_detect_prefix path in
-      match Naming_table.get_file_info env.ServerEnv.naming_table path with
-      | Some fileinfo -> Some (path, fileinfo, pattern)
-      | None ->
+      if Naming_table.has_file env.ServerEnv.naming_table path then
+        Some (path, pattern)
+      else
         (* We may not have the file information for a file such as one that we
-        ignore in `.hhconfig`. *)
+          ignore in `.hhconfig`. *)
         None
     in
     match files_to_search with
     | Some files_to_search ->
       let files_to_search =
         Sys_utils.parse_path_list files_to_search
-        |> List.filter_map ~f:with_file_data
+        |> List.filter_map ~f:get_job_info
       in
       MultiWorker.next genv.ServerEnv.workers files_to_search ~progress_fn
     | None ->
       let indexer = genv.ServerEnv.indexer FindUtils.is_hack in
       fun () ->
-        let files = indexer () |> List.filter_map ~f:with_file_data in
+        let files = indexer () |> List.filter_map ~f:get_job_info in
         progress_fn ~total:0 ~start:0 ~length:(List.length files);
         Hh_bucket.of_list files
   in
@@ -618,11 +615,19 @@ let go
   let tcopt = env.ServerEnv.tcopt in
   let job
       (acc : (Relative_path.t * result) list)
-      (inputs : (Relative_path.t * FileInfo.t * pattern) list) :
+      (inputs : (Relative_path.t * pattern) list) :
       (Relative_path.t * result) list =
-    List.fold inputs ~init:acc ~f:(fun acc (path, fileinfo, pattern) ->
+    List.fold inputs ~init:acc ~f:(fun acc (path, pattern) ->
         try
-          match search tcopt path fileinfo pattern with
+          let ctx = Provider_context.empty ~tcopt in
+          let (ctx, entry) =
+            Provider_utils.update_context
+              ~ctx
+              ~path
+              ~file_input:
+                (ServerCommandTypes.FileName (Relative_path.to_absolute path))
+          in
+          match search ctx entry pattern with
           | Some result -> (path, result) :: acc
           | None -> acc
         with e ->

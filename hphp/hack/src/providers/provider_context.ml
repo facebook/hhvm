@@ -7,6 +7,8 @@
  *)
 
 open Core_kernel
+module PositionedSyntaxTree =
+  Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 
 type entry = {
   file_input: ServerCommandTypes.file_input;
@@ -14,7 +16,7 @@ type entry = {
   source_text: Full_fidelity_source_text.t;
   comments: Parser_return.comments;
   ast: Nast.program;
-  mutable cst: Full_fidelity_ast.PositionedSyntaxTree.t option;
+  mutable cst: PositionedSyntaxTree.t option;
   mutable tast: Tast.program option;
   mutable errors: Errors.t option;
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;

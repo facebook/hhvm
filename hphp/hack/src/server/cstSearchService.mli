@@ -33,8 +33,4 @@ val go :
 (** Execute a search on a single syntax tree. This is most useful in debugging
     utilities like `hh_single_type_check`. *)
 val search :
-  TypecheckerOptions.t ->
-  Relative_path.t ->
-  FileInfo.t ->
-  pattern ->
-  result option
+  Provider_context.t -> Provider_context.entry -> pattern -> result option

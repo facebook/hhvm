@@ -274,14 +274,14 @@ let compute_tast_quarantined
     | Some _ -> f ())
 
 let compute_cst ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    Full_fidelity_ast.PositionedSyntaxTree.t =
+    Provider_context.PositionedSyntaxTree.t =
   let _ = ctx in
   match entry.Provider_context.cst with
   | Some cst -> cst
   | None ->
-    let parser_env = Full_fidelity_ast.make_env entry.Provider_context.path in
-    let (_, cst) =
-      Full_fidelity_ast.parse_text parser_env entry.Provider_context.source_text
+    let cst =
+      Provider_context.PositionedSyntaxTree.make
+        entry.Provider_context.source_text
     in
     entry.Provider_context.cst <- Some cst;
     cst

@@ -15,12 +15,12 @@ val debug_print_last_pos : 'a -> unit
 val fun_def :
   TypecheckerOptions.t ->
   Nast.fun_ ->
-  (Tast.fun_ * Typing_env_types.global_tvenv_with_pos) option
+  (Tast.fun_ * Typing_inference_env.t_global_with_pos) option
 
 val class_def :
   TypecheckerOptions.t ->
   Nast.class_ ->
-  (Tast.class_ * Typing_env_types.global_tvenv_with_pos list) option
+  (Tast.class_ * Typing_inference_env.t_global_with_pos list) option
 
 val record_def_def : TypecheckerOptions.t -> Nast.record_def -> Tast.record_def
 

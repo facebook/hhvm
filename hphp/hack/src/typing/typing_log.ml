@@ -11,6 +11,7 @@ open Hh_prelude
 open Typing_defs
 open Typing_env_types
 module Env = Typing_env
+module Inf = Typing_inference_env
 module Occ = Typing_tyvar_occurrences
 module Pr = Typing_print
 module TPEnv = Type_parameter_env
@@ -178,7 +179,7 @@ let log_sset s =
     List.iter ss (fun s -> lprintf (Normal Green) ",%s" s);
     lprintf (Normal Green) "}"
 
-let rec log_value value =
+let rec log_value env value =
   match value with
   | Atom s -> lprintf (Normal Green) "%s" s
   | Bool b ->
@@ -192,31 +193,34 @@ let rec log_value value =
   | List [] -> lprintf (Normal Green) "[]"
   | List (v :: vs) ->
     lprintf (Normal Green) "[";
-    log_value v;
+    log_value env v;
     List.iter vs (fun v ->
         lprintf (Normal Green) ",";
-        log_value v);
+        log_value env v);
     lprintf (Normal Green) "]"
   | Map m ->
     if SMap.is_empty m then
       lprintf (Normal Green) "{}"
     else
-      SMap.iter (log_key_value "") m
+      SMap.iter (log_key_value env "") m
   | Set s -> log_sset s
+  | Type ty -> Typing_print.debug_i env ty |> lprintf (Normal Green) "%s"
+  | SubtypeProp prop ->
+    Typing_print.subtype_prop env prop |> lprintf (Normal Green) "%s"
 
-and log_key_value prefix k v =
+and log_key_value env prefix k v =
   if is_leaf_value v then (
     lprintf (Normal Green) "%s" prefix;
     log_key k;
     lprintf (Normal Yellow) " ";
-    log_value v;
+    log_value env v;
     lnewline ()
   ) else (
     lnewline ();
     lprintf (Normal Green) "%s" prefix;
     log_key k;
     lnewline_open ();
-    log_value v;
+    log_value env v;
     lnewline_close ()
   )
 
@@ -226,9 +230,9 @@ let is_leaf_delta d =
   (* | Added d | Removed d | Updated d -> is_leaf_delta d*)
   | _ -> false
 
-let rec log_delta delta =
+let rec log_delta env delta =
   match delta with
-  | Updated v -> log_value v
+  | Updated v -> log_value env v
   | Unchanged -> ()
   | Set_delta { added; removed } ->
     if not (SSet.is_empty added) then (
@@ -246,21 +250,21 @@ let rec log_delta delta =
         log_key k;
         lnewline ())
       removed;
-    SMap.iter (log_key_value "+") added;
-    SMap.iter log_key_delta changed
+    SMap.iter (log_key_value env "+") added;
+    SMap.iter (log_key_delta env) changed
 
-and log_key_delta k d =
+and log_key_delta env k d =
   if is_leaf_delta d then (
     log_key k;
     lprintf (Normal Yellow) " ";
-    log_delta d;
+    log_delta env d;
     lnewline ()
   ) else (
     lnewline ();
     log_key k;
     lprintf (Normal Yellow) " ";
     lnewline_open ();
-    log_delta d;
+    log_delta env d;
     lnewline_close ()
   )
 
@@ -313,13 +317,6 @@ let tyset_as_value env tys =
   Set
     (TySet.fold
        (fun t s -> SSet.add (Typing_print.debug env t) s)
-       tys
-       SSet.empty)
-
-let ityset_as_value env tys =
-  Set
-    (ITySet.fold
-       (fun t s -> SSet.add (Typing_print.debug_i env t) s)
        tys
        SSet.empty)
 
@@ -408,76 +405,6 @@ let log_subtype_prop env message prop =
   lprintf (Tty.Normal Tty.Green) "%s" (Typing_print.subtype_prop env prop);
   lnewline ()
 
-let tenv_as_value env tenv =
-  Map
-    (IMap.fold
-       (fun i x m ->
-         SMap.add (var_as_string i) (Atom (Typing_print.debug env x)) m)
-       tenv
-       SMap.empty)
-
-let subst_as_value subst =
-  Map
-    (IMap.fold
-       (fun i x m ->
-         SMap.add (var_as_string i) (Atom (Printf.sprintf "#%d" x)) m)
-       subst
-       SMap.empty)
-
-let global_tyvar_info_as_value = Atom "global"
-
-let local_tyvar_info_as_value env tvinfo =
-  let {
-    tyvar_pos;
-    eager_solve_fail;
-    appears_covariantly;
-    appears_contravariantly;
-    type_constants;
-    lower_bounds;
-    upper_bounds;
-    pu_accesses;
-  } =
-    tvinfo
-  in
-  make_map
-    [
-      ("tyvar_pos", pos_as_value tyvar_pos);
-      ("eager_solve_fail", bool_as_value eager_solve_fail);
-      ("appears_covariantly", bool_as_value appears_covariantly);
-      ("appears_contravariantly", bool_as_value appears_contravariantly);
-      ("lower_bounds", ityset_as_value env lower_bounds);
-      ("upper_bounds", ityset_as_value env upper_bounds);
-      ( "type_constants",
-        smap_as_value (fun (_, ty) -> type_as_value env ty) type_constants );
-      ( "pu_acceses",
-        smap_as_value (fun (_, _, ty, _) -> type_as_value env ty) pu_accesses );
-    ]
-
-let tvenv_as_value env tvenv =
-  Map
-    (IMap.fold
-       (fun i x m ->
-         match x with
-         | LocalTyvar x ->
-           SMap.add (var_as_string i) (local_tyvar_info_as_value env x) m
-         | GlobalTyvar ->
-           SMap.add (var_as_string i) global_tyvar_info_as_value m)
-       tvenv
-       SMap.empty)
-
-let global_tvenv_as_value env global_tvenv =
-  Map
-    (IMap.fold
-       (fun i x m ->
-         SMap.add (var_as_string i) (local_tyvar_info_as_value env x) m)
-       global_tvenv
-       SMap.empty)
-
-let tyvars_stack_as_value tyvars_stack =
-  List
-    (List.map tyvars_stack (fun (_, l) ->
-         List (List.map l (fun i -> Atom (var_as_string i)))))
-
 let local_mutability_as_value local_mutability =
   local_id_map_as_value
     (fun m -> Atom (Typing_mutability_env.to_string m))
@@ -539,8 +466,6 @@ let lenv_as_value env lenv =
         string_as_value (reactivity_to_string env local_reactive) );
     ]
 
-let subtype_prop_as_value env prop = Atom (Typing_print.subtype_prop env prop)
-
 let param_as_value env (ty, mode) =
   let ty_str = Typing_print.debug env ty in
   match mode with
@@ -598,8 +523,6 @@ let genv_as_value env genv =
 let env_as_value env =
   let {
     function_pos;
-    tenv;
-    subst;
     tyvar_occurrences;
     fresh_typarams;
     lenv;
@@ -611,12 +534,9 @@ let env_as_value env =
     inside_constructor;
     inside_ppl_class;
     global_tpenv;
-    subtype_prop;
     log_levels = _;
-    tvenv;
-    global_tvenv;
-    tyvars_stack;
     allow_wildcards;
+    inference_env;
     big_envs = _;
     pessimize = _;
   } =
@@ -625,13 +545,8 @@ let env_as_value env =
   make_map
     [
       ("function_pos", pos_as_value function_pos);
-      ("tvenv", tvenv_as_value env tvenv);
-      ("global_tvenv", global_tvenv_as_value env global_tvenv);
-      ("tenv", tenv_as_value env tenv);
-      ("subst", subst_as_value subst);
       ("tyvar_occurrences", Occ.Log.as_value tyvar_occurrences);
       ("fresh_typarams", Set fresh_typarams);
-      ("tyvars_stack", tyvars_stack_as_value tyvars_stack);
       ("lenv", lenv_as_value env lenv);
       ("genv", genv_as_value env genv);
       ("in_loop", bool_as_value in_loop);
@@ -640,8 +555,9 @@ let env_as_value env =
       ("inside_constructor", bool_as_value inside_constructor);
       ("inside_ppl_class", bool_as_value inside_ppl_class);
       ("global_tpenv", tpenv_as_value env global_tpenv);
-      ("subtype_prop", subtype_prop_as_value env subtype_prop);
       ("allow_wildcards", bool_as_value allow_wildcards);
+      ( "inference_env",
+        Typing_inference_env.Log.inference_env_as_value inference_env );
     ]
 
 let log_env_diff p ?function_name old_env new_env =
@@ -650,7 +566,7 @@ let log_env_diff p ?function_name old_env new_env =
   let d = compute_value_delta old_value value in
   match d with
   | Unchanged -> ()
-  | _ -> log_position p ?function_name (fun () -> log_delta d)
+  | _ -> log_position p ?function_name (fun () -> log_delta new_env d)
 
 (* Log the environment: local_types, subst, tenv and tpenv *)
 let hh_show_env p env =
@@ -707,8 +623,9 @@ let log_types p env items =
       in
       go items)
 
-let log_global_tvenv p env global_tvenv =
-  log_position p (fun () -> log_value @@ global_tvenv_as_value env global_tvenv)
+let log_global_inference_env p env global_tvenv =
+  log_position p (fun () ->
+      log_value env @@ Inf.Log.global_inference_env_as_value global_tvenv)
 
 let log_prop level p message env prop =
   log_with_level env "prop" level (fun () ->

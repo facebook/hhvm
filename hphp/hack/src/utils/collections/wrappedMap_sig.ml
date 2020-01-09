@@ -39,6 +39,10 @@ module type S = sig
 
   val map_env : ('c -> key -> 'a -> 'c * 'b) -> 'c -> 'a t -> 'c * 'b t
 
+  val filter_map : ('a -> 'b option) -> 'a t -> 'b t
+
+  val filter_opt : 'a option t -> 'a t
+
   val of_list : (key * 'a) list -> 'a t
 
   val of_function : key list -> (key -> 'a) -> 'a t

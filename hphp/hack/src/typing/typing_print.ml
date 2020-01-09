@@ -367,21 +367,20 @@ module Full = struct
     | Toption x -> Concat [text "?"; k x]
     | Tprim x -> tprim x
     | Tvar n ->
-      let (_, n') = Env.get_var env n in
       let (_, ety) = Env.expand_type env (Reason.Rnone, Tvar n) in
       begin
         match ety with
         (* For unsolved type variables, always show the type variable *)
-        | (_, Tvar _) ->
+        | (_, Tvar n') ->
           if ISet.mem n' st then
             text "[rec]"
           else if !blank_tyvars then
             text "[unresolved]"
           else
-            text ("#" ^ string_of_int n)
+            text ("#" ^ string_of_int n')
         | _ ->
           let prepend =
-            if ISet.mem n' st then
+            if ISet.mem n st then
               text "[rec]"
             else if
               (* For hh_show_env we further show the type variable number *)
@@ -391,7 +390,7 @@ module Full = struct
             else
               Nothing
           in
-          let st = ISet.add n' st in
+          let st = ISet.add n st in
           Concat [prepend; ty to_doc st env ety]
       end
     | Tfun ft -> tfun ~ty to_doc st env ft

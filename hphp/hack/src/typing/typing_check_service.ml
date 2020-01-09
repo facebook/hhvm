@@ -92,7 +92,7 @@ let neutral = Errors.empty
 (*****************************************************************************)
 
 let type_fun (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
-    (Tast.def * Typing_env_types.global_tvenv_with_pos) option =
+    (Tast.def * Typing_inference_env.t_global_with_pos) option =
   match Ast_provider.find_fun_in_file ~full:true fn x with
   | Some f ->
     let fun_ = Naming.fun_ f in
@@ -106,7 +106,7 @@ let type_fun (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
   | None -> None
 
 let type_class (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string)
-    : (Tast.def * Typing_env_types.global_tvenv_with_pos list) option =
+    : (Tast.def * Typing_inference_env.t_global_with_pos list) option =
   match Ast_provider.find_class_in_file ~full:true fn x with
   | Some cls ->
     let class_ = Naming.class_ cls in

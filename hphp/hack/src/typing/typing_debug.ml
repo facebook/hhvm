@@ -1,6 +1,15 @@
+(*
+ * Copyright (c) 2015, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
 open Core_kernel
 open Typing_env_types
-open Typing_defs
+open Typing_inference_env.Size
 module Env = Typing_env
 module Log = Typing_log
 module ITySet = Internal_type_set
@@ -10,42 +19,11 @@ let local_env_size env =
   | None -> 0
   | Some Typing_per_cont_env.{ local_types; _ } ->
     Local_id.Map.fold
-      (fun _ (ty, _) size -> size + Typing_utils.ty_size env ty)
+      (fun _ (ty, _) size -> size + ty_size env.inference_env ty)
       local_types
       0
 
-let rec constraint_ty_size env ty =
-  match ty with
-  | (_, Tdestructure tyl) ->
-    List.fold ~init:1 ~f:(fun size ty -> size + Typing_utils.ty_size env ty) tyl
-  | (_, Thas_member hm) ->
-    1
-    +
-    let { hm_type = ty; hm_name = _; hm_class_id = _ } = hm in
-    Typing_utils.ty_size env ty
-  | (_, TCunion (lty, cty))
-  | (_, TCintersection (lty, cty)) ->
-    1 + Typing_utils.ty_size env lty + constraint_ty_size env cty
-
-let ty_size env ty =
-  match ty with
-  | LoclType ty -> Typing_utils.ty_size env ty
-  | ConstraintType ty -> constraint_ty_size env ty
-
-let ty_set_size env tyset =
-  ITySet.fold (fun ty size -> size + ty_size env ty) tyset 0
-
-let tvenv_size env =
-  IMap.fold
-    (fun _ tyvar_info size ->
-      match tyvar_info with
-      | LocalTyvar { lower_bounds; upper_bounds; _ } ->
-        size + ty_set_size env lower_bounds + ty_set_size env upper_bounds
-      | GlobalTyvar -> 0)
-    env.tvenv
-    0
-
-let env_size env = local_env_size env + tvenv_size env
+let env_size env = local_env_size env + inference_env_size env.inference_env
 
 let log_env_if_too_big pos env =
   if

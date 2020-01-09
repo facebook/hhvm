@@ -91,6 +91,20 @@ module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
       m
       empty
 
+  let filter_map (f : 'a -> 'b option) m =
+    m
+    |> map f
+    |> merge
+         (fun _k _v v ->
+           match v with
+           | Some (Some v) -> Some v
+           | Some None
+           | None ->
+             None)
+         empty
+
+  let filter_opt m = filter_map (fun x -> x) m
+
   let of_list elts =
     List.fold_left
       begin

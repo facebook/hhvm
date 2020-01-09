@@ -10,6 +10,7 @@ open Hh_prelude
 open Typing_defs
 open Typing_env_types
 module Env = Typing_env
+module Inf = Typing_inference_env
 module Occ = Typing_tyvar_occurrences
 
 (** Unions and intersections containing unsolved type variables may remain
@@ -58,19 +59,18 @@ let simplify_occurrences env v =
       (env, seen_vars)
     else
       let seen_vars = ISet.add v seen_vars in
-      let (env, v') = Env.get_var env v in
       let (env, ty) = Env.expand_var env Reason.Rnone v in
       let (env, ty) =
         (* Only simplify the type of variables which are bound directly to a
         concrete type to preserve the variable aliasings and save some memory. *)
-        if Ident.equal v v' then
+        if Inf.is_alias_for_another_var env.inference_env v then
+          (env, ty)
+        else
           (* The following call to simplify_unions might itself return a
           type variable v wrapping a union. If that union contains a type variable
           v', then at this point v has already been added to the tyvar occurrences
           of v' when doing the wrapping. *)
           Typing_utils.simplify_unions env ty
-        else
-          (env, ty)
       in
       (* Note that this call into add will itself maintain the occurrence maps *)
       let env = Env.add env v ty in

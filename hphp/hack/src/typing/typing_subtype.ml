@@ -40,11 +40,13 @@ let class_get_pu_member_type ?from_class env ty enum member name =
     let (env, lty) = Typing_phase.localize ~ety_env env dty in
     (env, Some lty)
 
+type error_f = unit -> unit
+
 type pu_reduced_access =
   | PTA_Reduced of env * locl_ty
   | PTA_Rigid of env * locl_ty
-  | PTA_Not_found of env
-  | PTA_Unsupported of env
+  | PTA_Not_found of env * error_f
+  | PTA_Unsupported of env * error_f
 
 let reduce_pu_type_access env reason base enum member name =
   let (env, base) = Env.expand_type env base in
@@ -55,8 +57,8 @@ let reduce_pu_type_access env reason base enum member name =
        class_get_pu_member_type env base (snd enum) atom_name (snd name)
      with
     | (env, None) ->
-      Errors.pu_typing (Reason.to_pos reason) "member" atom_name;
-      PTA_Not_found env
+      let err () = Errors.pu_typing (Reason.to_pos reason) "member" atom_name in
+      PTA_Not_found (env, err)
     | (env, Some lty) ->
       (* Not sure if this expand is necessary, ask Catg *)
       let (env, lty) = Env.expand_type env lty in
@@ -73,17 +75,20 @@ let reduce_pu_type_access env reason base enum member name =
     let tparam_names = Env.get_generic_parameters env in
     if List.mem ~equal:String.equal tparam_names s then
       PTA_Rigid (env, member)
-    else (
+    else
       (* Not a real generic *)
-      Errors.pu_typing (Reason.to_pos reason) "generic parameter" s;
-      PTA_Not_found env
-    )
+      let err () =
+        Errors.pu_typing (Reason.to_pos reason) "generic parameter" s
+      in
+      PTA_Not_found (env, err)
   (* TODO(T36532263) deal with unions of Tatoms ! *)
   | _ ->
-    Errors.pu_typing_not_supported
-      (Reason.to_pos reason)
-      (Typing_print.debug env member);
-    PTA_Unsupported env
+    let err () =
+      Errors.pu_typing_not_supported
+        (Reason.to_pos reason)
+        (Typing_print.debug env member)
+    in
+    PTA_Unsupported (env, err)
 
 type subtype_env = {
   seen_generic_params: SSet.t option;
@@ -456,6 +461,7 @@ and simplify_subtype_i
   (* We *know* that the assertion is unsatisfiable *)
   let invalid_with f = invalid ~fail:f env in
   let invalid_env env = invalid ~fail env in
+  let invalid_env_with env f = invalid ~fail:f env in
   let invalid () = invalid_with fail in
   (* We *know* that the assertion is valid *)
   let valid_env env = valid env in
@@ -602,8 +608,8 @@ and simplify_subtype_i
           simplify_subtype ~subtype_env ~this_ty ety_sub ty_super env
         | PTA_Rigid (env, _ety_sub) -> invalid_env env
         (* Missing atom, unknown generic or internal failure. *)
-        | PTA_Not_found env -> invalid_env env
-        | PTA_Unsupported env -> invalid_env env)
+        | PTA_Not_found (env, err) -> invalid_env_with env err
+        | PTA_Unsupported (env, err) -> invalid_env_with env err)
       | LoclType (r_sub, Tany _) ->
         if subtype_env.no_top_bottom then
           default ()
@@ -1207,11 +1213,13 @@ and simplify_subtype_i
           else
             default_subtype env
         (* Missing atom, unknown generic or internal failure. *)
-        | PTA_Not_found env -> default_subtype env
-        | PTA_Unsupported env -> default_subtype env)
+        | PTA_Not_found (env, err)
+        | PTA_Unsupported (env, err) ->
+          invalid_env_with env err)
       (* Missing atom, unknown generic or internal failure. *)
-      | PTA_Not_found env -> default_subtype env
-      | PTA_Unsupported env -> default_subtype env)
+      | PTA_Not_found (env, err)
+      | PTA_Unsupported (env, err) ->
+        invalid_env_with env err)
     | LoclType (_, (Tunion _ | Tvar _ | Tintersection _)) -> default_subtype env
     | LoclType ty_sub ->
       (* If the rhs can be resolved, continue. Otherwise abort (because the
@@ -1223,8 +1231,9 @@ and simplify_subtype_i
         simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
       | PTA_Rigid (_env, _ty_super) -> default_subtype env
       (* Missing atom, unknown generic or internal failure. *)
-      | PTA_Not_found env -> default_subtype env
-      | PTA_Unsupported _env -> default_subtype env)
+      | PTA_Not_found (env, err)
+      | PTA_Unsupported (env, err) ->
+        invalid_env_with env err)
     | ConstraintType _ -> default_subtype env)
   | LoclType ((r_super, Tfun ft_super) as ty_super) ->
     (match ety_sub with

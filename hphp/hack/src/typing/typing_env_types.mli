@@ -19,34 +19,9 @@ type local_env = {
   local_using_vars: Local_id.Set.t;
 }
 
-type tyvar_info_ = {
-  tyvar_pos: Pos.t;
-  eager_solve_fail: bool;
-  appears_covariantly: bool;
-  appears_contravariantly: bool;
-  lower_bounds: ITySet.t;
-  upper_bounds: ITySet.t;
-  type_constants: (Aast.sid * locl_ty) SMap.t;
-  pu_accesses: (locl_ty * Aast.sid * locl_ty * Aast.sid) SMap.t;
-}
-[@@deriving eq]
-
-type tyvar_info =
-  | LocalTyvar of tyvar_info_
-  | GlobalTyvar
-[@@deriving eq]
-
-type tvenv = tyvar_info IMap.t
-
-type global_tvenv = tyvar_info_ IMap.t
-
-type global_tvenv_with_pos = Pos.t * global_tvenv
-
 type env = {
   (* position of the function/method being checked *)
   function_pos: Pos.t;
-  tenv: locl_ty IMap.t;
-  subst: int IMap.t;
   tyvar_occurrences: Typing_tyvar_occurrences.t;
   fresh_typarams: SSet.t;
   lenv: local_env;
@@ -59,11 +34,8 @@ type env = {
   inside_ppl_class: bool;
   (* A set of constraints that are global to a given method *)
   global_tpenv: Type_parameter_env.t;
-  subtype_prop: Typing_logic.subtype_prop;
   log_levels: int SMap.t;
-  tvenv: tvenv;
-  global_tvenv: global_tvenv;
-  tyvars_stack: (Pos.t * Ident.t list) list;
+  inference_env: Typing_inference_env.t;
   allow_wildcards: bool;
   big_envs: (Pos.t * env) list ref;
   pessimize: bool;

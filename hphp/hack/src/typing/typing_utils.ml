@@ -19,23 +19,6 @@ module TySet = Typing_set
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
 
-(* This can be useful to debug type which blow up in size *)
-let ty_size env ty =
-  let ty_size_visitor =
-    object
-      inherit [int] Type_visitor.locl_type_visitor as super
-
-      method! on_type acc ty = 1 + super#on_type acc ty
-
-      method! on_tvar acc r v =
-        let (_, ty) = Env.expand_var env r v in
-        match ty with
-        | (_, Tvar v') when Ident.equal v' v -> acc
-        | _ -> super#on_type acc ty
-    end
-  in
-  ty_size_visitor#on_type 0 ty
-
 (*****************************************************************************)
 (* Importing what is necessary *)
 (*****************************************************************************)
@@ -198,13 +181,17 @@ let is_option env ty =
   let null = MakeType.null Reason.Rnone in
   is_sub_type_for_union env null ty
 
-let is_mixed env ty =
-  let mixed = MakeType.mixed Reason.Rnone in
-  is_sub_type_for_union env mixed ty
+let is_mixed_i env ty =
+  let mixed = LoclType (MakeType.mixed Reason.Rnone) in
+  is_sub_type_for_union_i env mixed ty
 
-let is_nothing env ty =
-  let nothing = MakeType.nothing Reason.Rnone in
-  is_sub_type_for_union env ty nothing
+let is_mixed env ty = is_mixed_i env (LoclType ty)
+
+let is_nothing_i env ty =
+  let nothing = LoclType (MakeType.nothing Reason.Rnone) in
+  is_sub_type_for_union_i env ty nothing
+
+let is_nothing env ty = is_nothing_i env (LoclType ty)
 
 (** Simplify unions and intersections of constraint
 types which involve mixed or nothing. *)

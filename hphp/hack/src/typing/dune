@@ -37,7 +37,6 @@
   (wrapped false)
   (modules
     ide_tast_cache
-    internal_type_set
     tast_env
     tast_expand
     tast_utils
@@ -47,7 +46,6 @@
     type_mapper
     type_parameter_env_ops
     type_validator
-    type_visitor
     typing_arrays
     typing_async
     typing_coercion
@@ -69,8 +67,6 @@
     typing_local_types
     typing_intersection
     typing_log
-    typing_log_value
-    typing_logic
     typing_logic_helpers
     typing_make_type
     typing_mutability
@@ -183,13 +179,20 @@
   (name typing_ast)
   (wrapped false)
   (modules
+    internal_type_set
     tast
+    type_mapper_generic
     type_parameter_env
+    typing_log_value
+    typing_logic
     typing_mutability_env
-    typing_set)
+    typing_set
+    typing_inference_env
+    type_visitor)
   (libraries
     annotated_ast
     ast
+    common
     core_kernel
     errors
     naming_attributes

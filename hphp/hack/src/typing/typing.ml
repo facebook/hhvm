@@ -645,7 +645,7 @@ and get_callable_variadicity
 (* Now we are actually checking stuff! *)
 (*****************************************************************************)
 and fun_def tcopt f :
-    (Tast.fun_def * Typing_env_types.global_tvenv_with_pos) option =
+    (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
   let env = EnvFromDef.fun_env tcopt f in
   with_timeout env f.f_name ~do_:(fun env ->
       (* reset the expression dependent display ids for each function body *)
@@ -766,7 +766,6 @@ and fun_def tcopt f :
       let env =
         Typing_solver.solve_all_unsolved_tyvars env Errors.bad_function_typevar
       in
-      let env = Typing_solver.expand_bounds_of_global_tyvars env in
       let fundef =
         {
           Aast.f_annotation = Env.save local_tpenv env;
@@ -792,8 +791,9 @@ and fun_def tcopt f :
           Aast.f_static = f.f_static;
         }
       in
+      let (env, global_inference_env) = Env.extract_global_inference_env env in
       ( Typing_lambda_ambiguous.suggest_fun_def env fundef,
-        (pos, env.global_tvenv) ))
+        (pos, global_inference_env) ))
 
 (*****************************************************************************)
 (* function used to type closures, functions and methods *)
@@ -7643,7 +7643,7 @@ and class_def_ env c tc =
     List.map_env env vars (class_var_def ~is_static:false)
   in
   let typed_method_redeclarations = [] in
-  let (typed_methods, typed_methods_global_tvenv) =
+  let (typed_methods, methods_global_inference_envs) =
     List.filter_map methods (method_def env tc) |> List.unzip
   in
   let (env, typed_typeconsts) = List.map_env env c.c_typeconsts typeconst_def in
@@ -7655,15 +7655,15 @@ and class_def_ env c tc =
   let (env, typed_static_vars) =
     List.map_env env static_vars (class_var_def ~is_static:true)
   in
-  let (typed_static_methods, typed_static_methods_global_tvenv) =
+  let (typed_static_methods, static_methods_global_inference_envs) =
     List.filter_map static_methods (method_def env tc) |> List.unzip
   in
   let (env, file_attrs) = file_attributes env c.c_file_attributes in
-  let (methods, constr_global_tvenv) =
+  let (methods, constr_global_inference_env) =
     match typed_constructor with
     | None -> (typed_static_methods @ typed_methods, [])
-    | Some (m, global_tvenv) ->
-      ((m :: typed_static_methods) @ typed_methods, [global_tvenv])
+    | Some (m, global_inference_env) ->
+      ((m :: typed_static_methods) @ typed_methods, [global_inference_env])
   in
   let pu_enums =
     try List.map c.c_pu_enums ~f:(pu_enum_def env (snd c.c_name))
@@ -7676,7 +7676,6 @@ and class_def_ env c tc =
   let env =
     Typing_solver.solve_all_unsolved_tyvars env Errors.bad_class_typevar
   in
-  let env = Typing_solver.expand_bounds_of_global_tyvars env in
   ( {
       Aast.c_span = c.c_span;
       Aast.c_annotation = Env.save (Env.get_tpenv env) env;
@@ -7713,9 +7712,9 @@ and class_def_ env c tc =
       Aast.c_xhp_attrs = [];
       Aast.c_pu_enums = pu_enums;
     },
-    typed_methods_global_tvenv
-    @ typed_static_methods_global_tvenv
-    @ constr_global_tvenv )
+    methods_global_inference_envs
+    @ static_methods_global_inference_envs
+    @ constr_global_inference_env )
 
 and check_dynamic_class_element get_static_elt element_name dyn_pos ~elt_type =
   (* The non-static properties that we get passed do not start with '$', but the
@@ -8404,7 +8403,6 @@ and method_def env cls m =
       let env =
         Typing_solver.solve_all_unsolved_tyvars env Errors.bad_method_typevar
       in
-      let env = Typing_solver.expand_bounds_of_global_tyvars env in
       let method_def =
         {
           Aast.m_annotation = Env.save local_tpenv env;
@@ -8426,8 +8424,9 @@ and method_def env cls m =
           Aast.m_doc_comment = m.m_doc_comment;
         }
       in
+      let (env, global_inference_env) = Env.extract_global_inference_env env in
       ( Typing_lambda_ambiguous.suggest_method_def env method_def,
-        (pos, env.global_tvenv) ))
+        (pos, global_inference_env) ))
 
 and typedef_def tcopt typedef =
   let env = EnvFromDef.typedef_env tcopt typedef in

@@ -57,8 +57,7 @@ let pp_type_param_mutability fmt v =
 
 type saved_env = {
   tcopt: TypecheckerOptions.t; [@opaque]
-  tenv: ty IMap.t;
-  subst: int IMap.t;
+  inference_env: Typing_inference_env.t;
   tpenv: Type_parameter_env.t;
   reactivity: reactivity;
   local_mutability: mutability_env;
@@ -136,8 +135,7 @@ type pu_enum = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.pu_enum
 let empty_saved_env tcopt : saved_env =
   {
     tcopt;
-    tenv = IMap.empty;
-    subst = IMap.empty;
+    inference_env = Typing_inference_env.empty_inference_env;
     tpenv = Type_parameter_env.empty;
     reactivity = Typing_defs.Nonreactive;
     local_mutability = Local_id.Map.empty;

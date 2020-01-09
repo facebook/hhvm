@@ -1248,14 +1248,14 @@ let get_dependencies ctx target =
     Typing_deps.Dep.(
       match target with
       | Function func ->
-        let (_ : (Tast.def * Typing_env_types.global_tvenv_with_pos) option) =
+        let (_ : (Tast.def * Typing_inference_env.t_global_with_pos) option) =
           Typing_check_service.type_fun ctx.Provider_context.tcopt filename func
         in
         HashSet.remove dependencies (Fun func);
         HashSet.remove dependencies (FunName func)
       | Method (cls, m) ->
         let (_
-              : (Tast.def * Typing_env_types.global_tvenv_with_pos list) option)
+              : (Tast.def * Typing_inference_env.t_global_with_pos list) option)
             =
           Typing_check_service.type_class
             ctx.Provider_context.tcopt

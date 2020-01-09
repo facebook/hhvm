@@ -97,13 +97,29 @@ class TestThreeFilesGlobalInference(TestCase[GlobalInferenceDriver]):
         )
         time.sleep(1)
 
+        # When merging all global environments, some type variables are
+        # actually aliases. When merging, only one will contain the actual
+        # upper/lower bounds, the others will point to that one.
+        def is_alias(node) -> bool:
+            lbs = node["lower_bounds"]
+            ubs = node["upper_bounds"]
+            if len(lbs) != 1 or len(ubs) != 1:
+                return False
+            lb, ub = lbs[0], ubs[0]
+            if lb[:1] != "#" or ub[:1] != "#":
+                return False
+            lb_n, ub_n = int(lb[1:]), int(ub[1:])
+            return lb_n == ub_n
+
         with open(path.join(temp_dir, "env.json")) as json_file:
             content = json_file.read().replace("\\", "\\\\")
             graph_json = json.loads(content)
             graph_json = {
                 key: node
                 for key, node in graph_json.items()
-                if "hhi" not in node["filename"]
+                if node["filename"]
+                and "hhi" not in node["filename"]
+                and not is_alias(node)
             }
             return graph_json
 
@@ -123,8 +139,8 @@ class TestThreeFilesGlobalInference(TestCase[GlobalInferenceDriver]):
             and int(node["start_column"]) == start_column
             and int(node["end_line"]) == end_line
             and int(node["end_column"]) == end_column
-            and sorted(expect_lower_bounds) == sorted(node["lower_bounds"])
-            and sorted(expect_upper_bounds) == sorted(node["upper_bounds"])
+            and set(expect_lower_bounds) == set(node["lower_bounds"])
+            and set(expect_upper_bounds) == set(node["upper_bounds"])
             and expect_file in node["filename"]
         ):
             pass
@@ -135,7 +151,7 @@ class TestThreeFilesGlobalInference(TestCase[GlobalInferenceDriver]):
         graph = self.execute_once()
         keys = ["", "", ""]
         for key, node in graph.items():
-            id = len(node["lower_bounds"]) - 1
+            id = len(set(node["lower_bounds"])) - 1
             if id < 0 or id > 2:
                 self.fail("In this test we should have between 1 and 3 lower bounds")
             keys[id] = key

@@ -15,6 +15,8 @@ type value =
   | List of value list
   | Set of SSet.t
   | Map of value SMap.t
+  | Type of Typing_defs.internal_type
+  | SubtypeProp of Typing_logic.subtype_prop
 [@@deriving eq]
 
 let make_map l = Map (SMap.of_list l)
@@ -24,6 +26,19 @@ let bool_as_value v = Bool v
 let string_as_value s = Atom s
 
 let smap_as_value f m = Map (SMap.map f m)
+
+let list_as_value l = List l
+
+let internal_type_as_value ty = Type ty
+
+let locl_type_as_value ty = internal_type_as_value (Typing_defs.LoclType ty)
+
+let internal_type_set_as_value tys =
+  Internal_type_set.elements tys
+  |> List.map internal_type_as_value
+  |> list_as_value
+
+let subtype_prop_as_value prop = SubtypeProp prop
 
 let pos_as_value p = string_as_value (Pos.string (Pos.to_absolute p))
 
@@ -41,3 +56,5 @@ let var_as_string v = Printf.sprintf "#%d" v
 
 let varset_as_value s =
   Set (ISet.fold (fun v s -> SSet.add (var_as_string v) s) s SSet.empty)
+
+let variant_as_value name v = make_map [(name, v)]

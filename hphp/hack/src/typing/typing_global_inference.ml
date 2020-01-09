@@ -6,7 +6,11 @@
  *
  *)
 open Hh_prelude
+open Typing_defs
 open Typing_env_types
+module Inf = Typing_inference_env
+module Env = Typing_env
+module Sub = Typing_subtype
 
 module StateErrors = struct
   module IdentMap = WrappedMap.Make (Ident)
@@ -29,6 +33,20 @@ let make_error_callback errors var ?code msgl =
     Option.value code ~default:Error_codes.Typing.(err_code UnifyError)
   in
   StateErrors.add errors var (Errors.make_error code msgl)
+
+let catch_exc pos (on_error : Errors.typing_error_callback) r f =
+  try
+    let (other_errors, v) =
+      Errors.do_with_context (Pos.filename pos) Errors.Typing (fun () ->
+          f on_error)
+    in
+    List.iter (Errors.get_error_list other_errors) ~f:(fun error ->
+        on_error (Errors.to_list error));
+    v
+  with e ->
+    let e = Printf.sprintf "Exception: %s" (Exn.to_string e) in
+    on_error [(pos, e)];
+    r
 
 module type MarshalledData = sig
   type t
@@ -56,62 +74,29 @@ module StateConstraintGraph = struct
     type t = env * StateErrors.t
   end)
 
-  let merge_subgraph (env, errors) (_pos, subgraph) =
+  let merge_var (env, errors) (pos, subgraph) var =
+    let catch_exc = catch_exc pos in
+    let (env, var') =
+      Env.copy_tyvar_from_genv_to_env var ~from:subgraph ~to_:env
+    in
+    let ty = (Reason.Rnone, Tvar var) and ty' = (Reason.Rnone, Tvar var') in
+    let on_err = make_error_callback errors var in
+    let env = catch_exc on_err env (Sub.sub_type env ty ty') in
+    let env = catch_exc on_err env (Sub.sub_type env ty' ty) in
     let env =
-      IMap.fold
-        (fun var tyvar_info env ->
-          let current_tyvar_info : tyvar_info_ =
-            Typing_env.get_tyvar_info env var
-          in
-          let pos =
-            match (tyvar_info.tyvar_pos, current_tyvar_info.tyvar_pos) with
-            | (p, t) when Pos.equal t Pos.none -> p
-            | (_, p) -> p
-          in
-          let try_sub_type_i env ty_sub ty_super on_error =
-            try Typing_subtype.sub_type_i env ty_sub ty_super on_error
-            with e ->
-              let e = Printf.sprintf "Exception: %s" (Exn.to_string e) in
-              on_error [(pos, e)];
-              env
-          in
-          let current_tyvar_info =
-            {
-              current_tyvar_info with
-              appears_covariantly =
-                tyvar_info.appears_covariantly
-                || current_tyvar_info.appears_covariantly;
-              appears_contravariantly =
-                tyvar_info.appears_contravariantly
-                || current_tyvar_info.appears_contravariantly;
-              tyvar_pos = pos;
-            }
-          in
-          (* We store in the env the updated tyvar_info_ *)
-          Typing_env.update_tyvar_info env var current_tyvar_info
-          (* Add the missing upper and lower bounds - and do the transitive closure *)
-          |> ITySet.fold
-               (fun bound env ->
-                 try_sub_type_i
-                   env
-                   (Typing_defs.LoclType
-                      (Typing_reason.Rwitness pos, Typing_defs.Tvar var))
-                   bound
-                   (make_error_callback errors var))
-               tyvar_info.upper_bounds
-          |> ITySet.fold
-               (fun bound env ->
-                 try_sub_type_i
-                   env
-                   bound
-                   (Typing_defs.LoclType
-                      (Typing_reason.Rwitness pos, Typing_defs.Tvar var))
-                   (make_error_callback errors var))
-               tyvar_info.lower_bounds)
-        subgraph
-        env
+      catch_exc on_err env (fun _ ->
+          Typing_solver.try_bind_to_equal_bound env var')
+    in
+    let env =
+      catch_exc on_err env (fun _ ->
+          Typing_solver.try_bind_to_equal_bound env var)
     in
     (env, errors)
+
+  let merge_subgraph (env, errors) ((pos, subgraph) : Inf.t_global_with_pos) =
+    let vars = Inf.get_vars_g subgraph in
+    List.fold vars ~init:(env, errors) ~f:(fun (env, errors) var ->
+        merge_var (env, errors) (pos, subgraph) var)
 
   let merge_subgraphs (env, errors) subgraphs =
     List.fold ~f:merge_subgraph ~init:(env, errors) subgraphs
@@ -119,30 +104,15 @@ end
 
 module StateSubConstraintGraphs = struct
   include StateFunctor (struct
-    type t = global_tvenv_with_pos list
+    type t = Inf.t_global_with_pos list
   end)
 
   let save subconstraints =
-    (* Some ty vars in the map will carry no additional information, e.g.
-     * some ty vars belong to methods declared in parent classes, even
-     * when these methods are not used in the subclass itself. In those cases,
-     * the ty var will be registered, but the accompagnying ty var info
-     * will contain nothing useful. It will in essence be an identity element
-     * under the merge operation.
-     *)
-    let carries_information tyvar_info =
-      tyvar_info.appears_contravariantly
-      || tyvar_info.appears_covariantly
-      || (not (ITySet.is_empty tyvar_info.upper_bounds))
-      || not (ITySet.is_empty tyvar_info.lower_bounds)
-    in
     let subconstraints =
-      List.map subconstraints ~f:(fun (p, env) ->
-          (p, IMap.filter (fun _ -> carries_information) env))
+      List.map subconstraints ~f:(fun (p, env) -> (p, Inf.compress_g env))
     in
-    let subconstraints =
-      List.filter ~f:(fun (_, e) -> not @@ IMap.is_empty e) subconstraints
-    in
+    let is_not_empty_graph (_p, g) = not @@ List.is_empty (Inf.get_vars_g g) in
+    let subconstraints = List.filter ~f:is_not_empty_graph subconstraints in
     if List.is_empty subconstraints then
       ()
     else
@@ -156,47 +126,33 @@ end
 
 module StateSolvedGraph = struct
   include StateFunctor (struct
-    type t = env * StateErrors.t * (Pos.t * int) list
+    type t = env * StateErrors.t * (Pos.t * Ident.t) list
   end)
 
   let save path t = save path t
 
-  let from_constraint_graph (constraintgraph, errors) =
-    let extract_pos = function
-      | LocalTyvar tyvar -> tyvar.tyvar_pos
-      | GlobalTyvar -> Pos.none
-    in
+  (** Solve the constraint graph. *)
+  let from_constraint_graph (env, errors) =
+    let vars = Env.get_all_tyvars env in
     let positions =
-      IMap.fold
-        (fun var tyvar_info l -> (extract_pos tyvar_info, var) :: l)
-        constraintgraph.tvenv
-        []
+      List.map vars ~f:(fun var -> (Env.get_tyvar_pos env var, var))
     in
-    let (_, tyvars) = List.unzip positions in
-    let env = { constraintgraph with tyvars_stack = [(Pos.none, tyvars)] } in
-    Typing_solver.use_bind_to_equal_bound := false;
 
     (* For any errors seen during the last step (that is graph merging), we bind
     the corresponding tyvar to Terr *)
     let env =
-      IMap.fold
-        (fun var _ env ->
+      List.fold vars ~init:env ~f:(fun env var ->
           if StateErrors.has_error errors var then
             Typing_solver.bind env var (Typing_reason.Rnone, Typing_defs.Terr)
           else
             env)
-        env.tvenv
-        env
     in
     let env =
-      Typing_solver.close_tyvars_and_solve_gi env (make_error_callback errors)
-    in
-    let env =
+      catch_exc Pos.none (make_error_callback errors 0) env @@ fun _ ->
       Typing_solver.solve_all_unsolved_tyvars_gi
         env
         (make_error_callback errors)
     in
-    Typing_solver.use_bind_to_equal_bound := true;
     (env, errors, positions)
 end
 

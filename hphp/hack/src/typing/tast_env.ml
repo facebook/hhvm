@@ -163,8 +163,10 @@ let restore_saved_env env saved_env =
         Env.fun_mutable = saved_env.Tast.fun_mutable;
         Env.condition_types = saved_env.Tast.condition_types;
       };
-    Env.tenv = IMap.union env.Env.tenv saved_env.Tast.tenv;
-    Env.subst = IMap.union env.Env.subst saved_env.Tast.subst;
+    Env.inference_env =
+      Typing_inference_env.simple_merge
+        env.Env.inference_env
+        saved_env.Tast.inference_env;
     Env.global_tpenv = saved_env.Tast.tpenv;
     Env.lenv =
       {

@@ -11,6 +11,8 @@ open Core_kernel
 open File_content
 open String_utils
 open Sys_utils
+open Typing_env_types
+module Inf = Typing_inference_env
 module TNBody = Typing_naming_body
 
 module StringAnnotation = struct
@@ -1489,13 +1491,13 @@ let handle_mode
           false
         | _ -> true
       in
-      file_relevant && not (IMap.is_empty global_tvenv)
+      file_relevant && (not @@ List.is_empty @@ Inf.get_vars_g global_tvenv)
     in
     let env = Typing_env.empty tcopt Relative_path.default ~droot:None in
 
     List.filter global_tvenvs ~f:should_log
     |> List.iter ~f:(fun (pos, global_tvenv) ->
-           Typing_log.log_global_tvenv pos env global_tvenv);
+           Typing_log.log_global_inference_env pos env global_tvenv);
 
     print_error_list error_format errors max_errors;
     if errors <> [] then exit 2
@@ -1512,18 +1514,7 @@ let handle_mode
       StateConstraintGraph.merge_subgraphs (env, state_errors) global_tvenvs
     in
     (* we are not going to print type variables without any bounds *)
-    let tvenv =
-      let open Typing_env_types in
-      (* note that during merging, all global tyvars are converted
-       * into a local tyvar, so we shouldn't be encountering any globals *)
-      let empty_bounds = function
-        | GlobalTyvar -> failwith "did not expect a global tyvar"
-        | LocalTyvar { lower_bounds; upper_bounds; _ } ->
-          ITySet.is_empty lower_bounds && ITySet.is_empty upper_bounds
-      in
-      IMap.filter (fun _ tyvar_info -> not (empty_bounds tyvar_info)) env.tvenv
-    in
-    let env = { env with Typing_env_types.tvenv } in
+    let env = { env with inference_env = Inf.compress env.inference_env } in
     let print_header s =
       print_endline s;
       print_endline (String.map s (const '='))

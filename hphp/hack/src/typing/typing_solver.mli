@@ -1,3 +1,12 @@
+(*
+ * Copyright (c) 2015, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
 module Env = Typing_env
 open Typing_defs
 open Typing_env_types
@@ -7,8 +16,6 @@ open Typing_env_types
     result = false implies NOT ty1 <: ty2 OR we don't know
 *)
 val is_sub_type : env -> locl_ty -> locl_ty -> bool
-
-val use_bind_to_equal_bound : bool ref
 
 val non_null : env -> Pos.t -> locl_ty -> env * locl_ty
 
@@ -38,12 +45,9 @@ val expand_type_and_narrow :
 
 val close_tyvars_and_solve : env -> Errors.typing_error_callback -> env
 
-val expand_bounds_of_global_tyvars : env -> env
-
 val solve_all_unsolved_tyvars_gi :
   env -> (Ident.t -> Errors.typing_error_callback) -> env
 
-val close_tyvars_and_solve_gi :
-  env -> (Ident.t -> Errors.typing_error_callback) -> env
-
 val bind : env -> Ident.t -> locl_ty -> env
+
+val try_bind_to_equal_bound : env -> Ident.t -> env

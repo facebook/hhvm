@@ -32,16 +32,9 @@ val open_tyvars : env -> Pos.t -> env
 
 val get_current_tyvars : env -> Ident.t list
 
-val add_current_tyvar :
-  ?variance:Ast_defs.variance -> env -> Pos.t -> Ident.t -> env
-
 val close_tyvars : env -> env
 
-val get_var : env -> int -> env * int
-
-val rename : env -> int -> int -> env
-
-val add : env -> int -> locl_ty -> env
+val add : env -> ?tyvar_pos:Pos.t -> int -> locl_ty -> env
 
 val make_tyvar_no_more_occur_in_tyvar : env -> int -> no_more_in:int -> env
 
@@ -276,14 +269,14 @@ val get_generic_parameters : env -> string list
 
 val is_generic_parameter : env -> string -> bool
 
+val get_tyvar_pos : env -> Ident.t -> Pos.t
+
 (* Get or add to bounds on type variables *)
 val get_tyvar_lower_bounds : env -> Ident.t -> Internal_type_set.t
 
 val get_tyvar_upper_bounds : env -> Ident.t -> Internal_type_set.t
 
 val set_tyvar_lower_bounds : env -> Ident.t -> Internal_type_set.t -> env
-
-val update_tyvar_info : env -> Ident.t -> tyvar_info_ -> env
 
 val set_tyvar_upper_bounds : env -> Ident.t -> Internal_type_set.t -> env
 
@@ -318,18 +311,16 @@ val get_tyvar_appears_contravariantly : env -> Ident.t -> bool
 
 val get_tyvar_appears_invariantly : env -> Ident.t -> bool
 
-val get_tyvar_info : env -> Ident.t -> tyvar_info_
-
 val is_global_tyvar : env -> Ident.t -> bool
 
-val create_global_tyvar :
+val new_global_tyvar :
   ?variance:Ast_defs.variance -> env -> Ident.t -> Pos.t -> env
 
+(** At the end of typechecking a function body, extract the remaining
+inference env, which should only contain global type variables. *)
+val extract_global_inference_env : env -> env * Typing_inference_env.t_global
+
 val get_tyvar_eager_solve_fail : env -> Ident.t -> bool
-
-val create_tyvar_info : ?variance:Ast_defs.variance -> Pos.t -> tyvar_info_
-
-val empty_tyvar_info : tyvar_info_
 
 val get_tyvar_type_const : env -> int -> Aast.sid -> (Aast.sid * locl_ty) option
 
@@ -343,10 +334,10 @@ val set_tyvar_pu_access :
 
 val get_tyvar_type_consts : env -> int -> (Aast.sid * locl_ty) SMap.t
 
-val get_tyvar_pu_accesses :
-  env -> int -> (locl_ty * Aast.sid * locl_ty * Aast.sid) SMap.t
+val copy_tyvar_from_genv_to_env :
+  Ident.t -> to_:env -> from:Typing_inference_env.t_global -> env * Ident.t
 
-val remove_tyvar : env -> Ident.t -> env
+val get_all_tyvars : env -> Ident.t list
 
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 

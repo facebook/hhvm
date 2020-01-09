@@ -1037,8 +1037,18 @@ let rec constraint_ty_compare ?(normalize_lists = false) (_, ty1) (_, ty2) =
   | (_, (Thas_member _ | Tdestructure _ | TCunion _ | TCintersection _)) ->
     constraint_ty_con_ordinal ty2 - constraint_ty_con_ordinal ty1
 
+let constraint_ty_equal ?(normalize_lists = false) ty1 ty2 =
+  Int.equal (constraint_ty_compare ~normalize_lists ty1 ty2) 0
+
 let ty_equal ?(normalize_lists = false) ty1 ty2 =
   Int.equal 0 (ty_compare ~normalize_lists ty1 ty2)
+
+let equal_internal_type ty1 ty2 =
+  match (ty1, ty2) with
+  | (LoclType ty1, LoclType ty2) -> ty_equal ~normalize_lists:true ty1 ty2
+  | (ConstraintType ty1, ConstraintType ty2) ->
+    constraint_ty_equal ~normalize_lists:true ty1 ty2
+  | (_, (LoclType _ | ConstraintType _)) -> false
 
 let equal_locl_ty ty1 ty2 = ty_equal ty1 ty2
 

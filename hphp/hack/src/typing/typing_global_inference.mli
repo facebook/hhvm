@@ -23,7 +23,7 @@ module StateErrors : sig
 end
 
 module StateSubConstraintGraphs : sig
-  type t = global_tvenv_with_pos list
+  type t = Typing_inference_env.t_global_with_pos list
 
   val load : string -> t
 

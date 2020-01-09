@@ -6,6 +6,35 @@ File "type_hint_typeparameter_subtyping.php", line 5, characters 5-17:
     return 
       return_explicit true
       return_type void
+  inference_env 
+    subtype_prop 
+      TRUE
+    tvenv 
+      +#2051
+        eager_solve_failed false
+        is_global false
+        solving_info
+          TVIConstraints
+            appears_contravariantly true
+            appears_covariantly true
+            lower_bounds []
+            pu_acceses {}
+            type_constants {}
+            upper_bounds [int]
+        tyvar_pos File "type_hint_typeparameter_subtyping.php", line 4, characters 12-12:
+      +#2052
+        eager_solve_failed false
+        is_global false
+        solving_info
+          TVIConstraints
+            appears_contravariantly true
+            appears_covariantly true
+            lower_bounds [string]
+            pu_acceses {}
+            type_constants {}
+            upper_bounds []
+        tyvar_pos File "type_hint_typeparameter_subtyping.php", line 4, characters 12-12:
+    tyvars_stack [[],[],[#2052,#2051]]
   lenv 
     local_mutability 
       +$x[#0] immutable
@@ -13,26 +42,6 @@ File "type_hint_typeparameter_subtyping.php", line 5, characters 5-17:
       Next 
         local_types 
           +$x[#0] D<#2051, #2052>
-  tvenv 
-    +#2051
-      appears_contravariantly true
-      appears_covariantly true
-      eager_solve_fail false
-      lower_bounds {}
-      pu_acceses {}
-      type_constants {}
-      tyvar_pos File "type_hint_typeparameter_subtyping.php", line 4, characters 12-12:
-      upper_bounds {int}
-    +#2052
-      appears_contravariantly true
-      appears_covariantly true
-      eager_solve_fail false
-      lower_bounds {string}
-      pu_acceses {}
-      type_constants {}
-      tyvar_pos File "type_hint_typeparameter_subtyping.php", line 4, characters 12-12:
-      upper_bounds {}
-  tyvars_stack [[],[],[#2052,#2051]]
 Errors:
   [4:12-13] The type D expects 2 type parameter(s)
   [3:7-8] Definition is here

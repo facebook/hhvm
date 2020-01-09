@@ -1,8 +1,2 @@
 File "tpu_access.bad.php", line 12, characters 35-47:
 Unexpected Pocket Universes generic parameter A during typing. (Typing[4350])
-File "tpu_access.bad.php", line 13, characters 12-15:
-Invalid return type (Typing[4110])
-File "tpu_access.bad.php", line 12, characters 35-47:
-Expected this:@E:@A:@T
-File "tpu_access.bad.php", line 13, characters 12-15:
-But got int

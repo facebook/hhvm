@@ -7,6 +7,8 @@
  *)
 
 open Core_kernel
+open Typing_defs
+module Inf = Typing_inference_env
 module Syntax = Full_fidelity_editable_positioned_syntax
 module Rewriter = Full_fidelity_rewriter.WithSyntax (Syntax)
 module PositionedTree =
@@ -66,6 +68,7 @@ open Typing_env_types
 open ServerGlobalInferenceTypes
 open Typing_global_inference
 
+(** Whether a type has type variables with errors. *)
 let was_type_correctly_solved errors ty =
   let finder =
     object
@@ -86,6 +89,8 @@ let ( >>| ) error f =
   | Ok data -> f data
   | Error error -> RError error
 
+(** Expects the file list to contain two files, the first of which
+exists and can be read. *)
 let expect_2_files_read_write ~error_message (files : string list) =
   begin
     match files with
@@ -98,6 +103,8 @@ let expect_2_files_read_write ~error_message (files : string list) =
   else
     Ok (a, b)
 
+(** Expects the file list to contain one file, which
+exists and can be read. *)
 let expect_1_file_read ~error_message (files : string list) =
   begin
     match files with
@@ -126,7 +133,6 @@ module Mode_merge = struct
         ~droot:None
     in
     let genv = env.genv in
-    let subtype_prop = env.subtype_prop in
     let progress_i = ref 0 in
     let log_progress fn =
       Hh_logger.log
@@ -137,18 +143,18 @@ module Mode_merge = struct
       progress_i := !progress_i + 1;
       fn
     in
+    (* Merging happens here *)
     let (env, errors) =
       Array.foldi
-        ~f:(fun _ env_with_errors subgraph_file ->
+        ~f:(fun _ (env, errors) subgraph_file ->
           Filename.concat input subgraph_file
           |> log_progress
           |> StateSubConstraintGraphs.load
-          |> StateConstraintGraph.merge_subgraphs env_with_errors)
+          |> StateConstraintGraph.merge_subgraphs (env, errors))
         ~init:(env, StateErrors.mk_empty ())
         subgraphs
     in
-    (* Really needed to restore subtype prop? *)
-    let env = { env with genv; subtype_prop } in
+    let env = { env with genv } in
     Hh_logger.log "GI: Saving to %s" output;
     StateConstraintGraph.save output (env, errors);
     Ok ()
@@ -178,43 +184,36 @@ module Mode_export_json = struct
     let out = Out_channel.create output in
     Out_channel.output_string out "{";
     let is_start = ref false in
-    let tyvar_to_json env = function
-      | LocalTyvar tyvar ->
-        let type_to_json ty = "\"" ^ Typing_print.full_i env ty ^ "\"" in
-        let bounds_to_json bounds =
-          if List.length bounds = 0 then
-            "[]"
-          else
-            "["
-            ^ List.fold
-                ~init:(type_to_json @@ List.hd_exn bounds)
-                ~f:(fun acc e -> acc ^ ", " ^ type_to_json e)
-                (List.tl_exn bounds)
-            ^ "]"
-        in
-        Printf.sprintf
-          "{\"start_line\": \"%d\", \"start_column\": \"%d\", \"end_line\": \"%d\", \"end_column\": \"%d\", \"filename\": \"%s\", \"lower_bounds\": %s, \"upper_bounds\": %s}"
-          (fst (Pos.line_column tyvar.tyvar_pos))
-          (snd (Pos.line_column tyvar.tyvar_pos))
-          (fst (Pos.end_line_column tyvar.tyvar_pos))
-          (snd (Pos.end_line_column tyvar.tyvar_pos))
-          (Pos.filename (Pos.to_absolute tyvar.tyvar_pos))
-          (bounds_to_json (ITySet.elements tyvar.lower_bounds))
-          (bounds_to_json (ITySet.elements tyvar.upper_bounds))
-      | GlobalTyvar -> "global"
+    let tyvar_to_json env var =
+      let type_to_json ty = "\"" ^ Typing_print.full_i env ty ^ "\"" in
+      let bounds_to_json bounds =
+        "[" ^ (List.map bounds type_to_json |> String.concat ~sep:", ") ^ "]"
+      in
+      let tyvar_pos = Inf.get_tyvar_pos env.inference_env var in
+      let upper_bounds = Inf.get_tyvar_upper_bounds env.inference_env var in
+      let lower_bounds = Inf.get_tyvar_lower_bounds env.inference_env var in
+      Printf.sprintf
+        "{\"start_line\": \"%d\", \"start_column\": \"%d\", \"end_line\": \"%d\", \"end_column\": \"%d\", \"filename\": \"%s\", \"lower_bounds\": %s, \"upper_bounds\": %s}"
+        (fst (Pos.line_column tyvar_pos))
+        (snd (Pos.line_column tyvar_pos))
+        (fst (Pos.end_line_column tyvar_pos))
+        (snd (Pos.end_line_column tyvar_pos))
+        (Pos.filename (Pos.to_absolute tyvar_pos))
+        (bounds_to_json (ITySet.elements lower_bounds))
+        (bounds_to_json (ITySet.elements upper_bounds))
     in
-    IMap.iter
-      (fun var tyvar ->
+    List.iter
+      ~f:(fun var ->
         let key =
           ( if !is_start then
             ","
           else
             "" )
-          ^ Printf.sprintf "\n\"#%d\": %s" var (tyvar_to_json env tyvar)
+          ^ Printf.sprintf "\n\"#%d\": %s" var (tyvar_to_json env var)
         in
         is_start := true;
         Out_channel.output_string out key)
-      env.tvenv;
+      (Inf.get_vars env.inference_env);
     Out_channel.output_string out "}";
     Out_channel.close out;
     Ok ()
@@ -327,7 +326,9 @@ let get_first_suggested_type_as_string ~syntax_type errors file type_map node =
           type_str_opt
         | Typing_defs.DeclTy _ -> None))
 
-let get_patches errors type_map file =
+let get_patches
+    errors (type_map : (Tast_env.env * phase_ty) list Pos.AbsolutePosMap.t) file
+    =
   let file = Relative_path.create_detect_prefix file in
   if Relative_path.prefix file = Relative_path.Hhi then
     []
@@ -414,16 +415,20 @@ let get_patches errors type_map file =
     patches
 
 module Mode_rewrite = struct
-  let build_positions_map (env, positions) =
+  (** Returns a map indexed by filenames. *)
+  let build_positions_map :
+      Tast_env.env * (Pos.t * Ident.t) list ->
+      Tast_env.env * (Tast_env.env * phase_ty) list Pos.AbsolutePosMap.t SMap.t
+      =
+   fun (env, positions) ->
     let positions =
       List.map ~f:(fun (p, v) -> (Pos.to_absolute p, v)) positions
     in
     List.fold
       ~init:(env, SMap.empty)
       ~f:(fun (env, map) (pos, var) ->
-        let key = Pos.filename pos in
-        let previous =
-          SMap.find_opt key map
+        let previous_pos_map =
+          SMap.find_opt (Pos.filename pos) map
           |> Option.value ~default:Pos.AbsolutePosMap.empty
         in
         let ty = Typing_defs.(Reason.none, Tvar var) in
@@ -433,7 +438,7 @@ module Mode_rewrite = struct
         let data =
           Pos.AbsolutePosMap.union
             ~combine:(fun _ a b -> Some (a @ b))
-            previous
+            previous_pos_map
             element
         in
         (env, SMap.add (Pos.filename pos) data map))
@@ -447,6 +452,11 @@ module Mode_rewrite = struct
     let (env, errors, positions) = StateSolvedGraph.load input in
     let (_, positions_map) =
       build_positions_map (Tast_env.typing_env_as_tast_env env, positions)
+    in
+    let positions_map =
+      SMap.filter
+        (fun filename _ -> not @@ Int.equal (String.length filename) 0)
+        positions_map
     in
     let patches =
       SMap.fold

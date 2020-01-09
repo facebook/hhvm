@@ -55,71 +55,9 @@ let pp_tfun _ _ = Printf.printf "%s\n" "<tfun>"
 
 [@@@warning "+32"]
 
-type tyvar_info_ = {
-  (* Where was the type variable introduced? (e.g. generic method invocation,
-   * new object construction)
-   *)
-  tyvar_pos: Pos.t;
-  (* Set to true if a call to expand_type_and_solve on this variable cannot resolve
-   *)
-  eager_solve_fail: bool;
-  (* Does this type variable appear covariantly in the type of the expression?
-   *)
-  appears_covariantly: bool;
-  (* Does this type variable appear contravariantly in the type of the expression?
-   * If it appears in an invariant position then both will be true; if it doesn't
-   * appear at all then both will be false
-   *)
-  appears_contravariantly: bool;
-  lower_bounds: ITySet.t;
-  upper_bounds: ITySet.t;
-  (* Map associating a type to each type constant id of this variable.
-  Whenever we localize "T1::T" in a constraint, we add a fresh type variable
-  indexed by "T" in the type_constants of the type variable representing T1.
-  This allows to properly check constraints on "T1::T". *)
-  type_constants:
-    ( Aast.sid (* id of the type constant "T", containing its position. *)
-    * locl_ty )
-    SMap.t;
-  (* Map associating PU information to each instance of
-     C:@E:@#v:@T
-     when the type variable #v is not resolved yet. We introduce a new type
-     variable to 'postpone' the checking of this expression until the end,
-     when #v will be known. *)
-  pu_accesses:
-    (* base * enum * new_var * typname *)
-    (locl_ty * Aast.sid * locl_ty * Aast.sid) SMap.t;
-}
-[@@deriving eq]
-
-(* For global inference we are distinguishing global tyvars and local tyvars.
-Global tyvars are tyvars which have to remain unsolved until all of the files
-are done typechecking. Thus, global tyvars are going possess their own constraint
-graph which is global_tvenv. Local tyvars have the same behavior as a "normal"
-tyvar.
-
-Concerning the implementation, the tvenv can now hold either "LocalTyvar tyvar_info"
-if the tyvar is local or a "GlobalTyvar" atom if the tyvar is global and thus
-can be found in the globalenv.
-*)
-type tyvar_info =
-  | LocalTyvar of tyvar_info_
-  | GlobalTyvar
-[@@deriving eq]
-
-type tvenv = tyvar_info IMap.t
-
-type global_tvenv = tyvar_info_ IMap.t
-
-type global_tvenv_with_pos = Pos.t * global_tvenv
-
 type env = {
   (* position of the function/method being checked *)
   function_pos: Pos.t;
-  (* Mapping of type variables to types. *)
-  tenv: locl_ty IMap.t;
-  (* Mapping of type variables to other type variables *)
-  subst: int IMap.t;
   tyvar_occurrences: Typing_tyvar_occurrences.t;
   fresh_typarams: SSet.t;
   lenv: local_env;
@@ -132,11 +70,8 @@ type env = {
   inside_ppl_class: bool;
   (* A set of constraints that are global to a given method *)
   global_tpenv: TPEnv.t;
-  subtype_prop: Typing_logic.subtype_prop;
   log_levels: int SMap.t;
-  tvenv: tvenv;
-  global_tvenv: global_tvenv;
-  tyvars_stack: (Pos.t * Ident.t list) list;
+  inference_env: Typing_inference_env.t;
   allow_wildcards: bool;
   big_envs: (Pos.t * env) list ref;
   pessimize: bool;

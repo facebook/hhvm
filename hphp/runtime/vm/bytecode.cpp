@@ -2177,7 +2177,7 @@ ALWAYS_INLINE ArrayData* maybeResolveAndErrorOnTypeStructure(
 OPTBLD_INLINE void iopIsTypeStructC(TypeStructResolveOp op) {
   auto const c = vmStack().indC(1);
   auto const ts = maybeResolveAndErrorOnTypeStructure(op, true);
-  auto b = checkTypeStructureMatchesCell(ArrNR(ts), *c);
+  auto b = checkTypeStructureMatchesTV(ArrNR(ts), *c);
   vmStack().popC(); // pop ts
   vmStack().replaceC<KindOfBoolean>(b);
 }
@@ -2187,10 +2187,10 @@ OPTBLD_INLINE void iopThrowAsTypeStructException() {
   auto const ts =
     maybeResolveAndErrorOnTypeStructure(TypeStructResolveOp::Resolve, false);
   std::string givenType, expectedType, errorKey;
-  if (!checkTypeStructureMatchesCell(ArrNR(ts), *c, givenType, expectedType,
+  if (!checkTypeStructureMatchesTV(ArrNR(ts), *c, givenType, expectedType,
                                      errorKey)) {
     vmStack().popC(); // pop ts
-    throwTypeStructureDoesNotMatchCellException(
+    throwTypeStructureDoesNotMatchTVException(
       givenType, expectedType, errorKey);
   }
   raise_error("Invalid bytecode sequence: Instruction must throw");

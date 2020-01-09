@@ -925,15 +925,15 @@ ArrayData* resolveTypeStructHelper(
 
 bool isTypeStructHelper(ArrayData* a, TypedValue c) {
   auto const ts = ArrNR(a);
-  return checkTypeStructureMatchesCell(ts, c);
+  return checkTypeStructureMatchesTV(ts, c);
 }
 
 void throwAsTypeStructExceptionHelper(ArrayData* a, TypedValue c) {
   std::string givenType, expectedType, errorKey;
   auto const ts = ArrNR(a);
-  if (!checkTypeStructureMatchesCell(ts, c, givenType, expectedType,
+  if (!checkTypeStructureMatchesTV(ts, c, givenType, expectedType,
                                      errorKey)) {
-    throwTypeStructureDoesNotMatchCellException(
+    throwTypeStructureDoesNotMatchTVException(
       givenType, expectedType, errorKey);
   }
   raise_error("Invalid bytecode sequence: Instruction must throw");

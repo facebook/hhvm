@@ -521,11 +521,11 @@ bool verifyReifiedLocalType(
       return false;
     }
   }
-  return checkTypeStructureMatchesCell(type, *param, warn);
+  return checkTypeStructureMatchesTV(type, *param, warn);
 }
 
 /*
- * Shared implementation for checkTypeStructureMatchesCell().
+ * Shared implementation for checkTypeStructureMatchesTV().
  *
  * If `isOrAsOp` is set, we are running this check for "is type" testing or "as
  * type" assertion operations.  For these operations, we reject comparisons
@@ -536,7 +536,7 @@ bool verifyReifiedLocalType(
  * userland.
  */
 template <bool gen_error>
-bool checkTypeStructureMatchesCellImpl(
+bool checkTypeStructureMatchesTVImpl(
   const Array& ts,
   TypedValue c1,
   std::string& givenType,
@@ -776,7 +776,7 @@ bool checkTypeStructureMatchesCellImpl(
             }
             auto const& ts2 = asCArrRef(ts_arr->rval(k.m_data.num));
             auto thisElemWarns = false;
-            if (!checkTypeStructureMatchesCellImpl<gen_error>(
+            if (!checkTypeStructureMatchesTVImpl<gen_error>(
               ts2, v, givenType, expectedType, errorKey, thisElemWarns, isOrAsOp
             )) {
               errOnKey(k);
@@ -929,7 +929,7 @@ bool checkTypeStructureMatchesCellImpl(
           auto const field = ad->at(k);
           bool thisFieldWarns = false;
           numExpectedFields++;
-          if (!checkTypeStructureMatchesCellImpl<gen_error>(
+          if (!checkTypeStructureMatchesTVImpl<gen_error>(
             ArrNR(tsField), field, givenType,
             expectedType, errorKey, thisFieldWarns, isOrAsOp
           )) {
@@ -1000,14 +1000,14 @@ bool checkTypeStructureMatchesCellImpl(
   return result;
 }
 
-bool checkTypeStructureMatchesCell(const Array& ts, TypedValue c1) {
+bool checkTypeStructureMatchesTV(const Array& ts, TypedValue c1) {
   std::string givenType, expectedType, errorKey;
   bool warn = false;
-  return checkTypeStructureMatchesCellImpl<false>(
+  return checkTypeStructureMatchesTVImpl<false>(
     ts, c1, givenType, expectedType, errorKey, warn, true);
 }
 
-bool checkTypeStructureMatchesCell(
+bool checkTypeStructureMatchesTV(
   const Array& ts,
   TypedValue c1,
   std::string& givenType,
@@ -1015,17 +1015,17 @@ bool checkTypeStructureMatchesCell(
   std::string& errorKey
 ) {
   bool warn = false;
-  return checkTypeStructureMatchesCellImpl<true>(
+  return checkTypeStructureMatchesTVImpl<true>(
     ts, c1, givenType, expectedType, errorKey, warn, true);
 }
 
-bool checkTypeStructureMatchesCell(
+bool checkTypeStructureMatchesTV(
   const Array& ts,
   TypedValue c1,
   bool& warn
 ) {
   std::string givenType, expectedType, errorKey;
-  return checkTypeStructureMatchesCellImpl<false>(
+  return checkTypeStructureMatchesTVImpl<false>(
     ts, c1, givenType, expectedType, errorKey, warn, false);
 }
 
@@ -1235,7 +1235,7 @@ template Array resolveAndVerifyTypeStructure<true>(
 template Array resolveAndVerifyTypeStructure<false>(
   const Array&, const Class*, const Class*, const req::vector<Array>&, bool);
 
-void throwTypeStructureDoesNotMatchCellException(
+void throwTypeStructureDoesNotMatchTVException(
   std::string& givenType,
   std::string& expectedType,
   std::string& errorKey

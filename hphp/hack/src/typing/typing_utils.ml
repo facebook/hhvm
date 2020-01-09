@@ -16,6 +16,7 @@ module Reason = Typing_reason
 module Env = Typing_env
 module ShapeMap = Aast.ShapeMap
 module TySet = Typing_set
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
 

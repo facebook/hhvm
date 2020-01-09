@@ -11,6 +11,7 @@ open Typing_defs
 module Env = Tast_env
 module MakeType = Typing_make_type
 module Reason = Typing_reason
+module Decl_provider = Decl_provider_ctx
 
 type validity =
   | Valid

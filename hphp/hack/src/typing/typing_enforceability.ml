@@ -10,6 +10,7 @@
 open Hh_prelude
 open Typing_defs
 open Typing_env_types
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
 module Env = Typing_env

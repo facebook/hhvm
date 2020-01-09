@@ -18,6 +18,7 @@ module ITySet = Internal_type_set
 module Union = Typing_union
 module TL = Typing_logic
 module TUtils = Typing_utils
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module TySet = Typing_set
 module MakeType = Typing_make_type

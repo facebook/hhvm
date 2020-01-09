@@ -1,0 +1,92 @@
+From D19172394-96028208 Mon Sep 17 00:00:00 2001
+From: Alex Guzman <reanimus@fb.com>
+Date: Fri, 20 Dec 2019 12:41:23 -0800
+Subject: [PATCH] Make OpenSSLCertUtils::asnTimeToTimepoint compatible with OpenSSL <1.0.2
+
+Summary: Adds an implementation that reads the struct internals and parses them into a tm struct rather than use ASN1_TIME_diff, which was added in 1.0.2.
+
+Differential Revision: D19172394
+---
+
+diff --git a/third-party/folly/src/folly/ssl/OpenSSLCertUtils.cpp b/third-party/folly/src/folly/ssl/OpenSSLCertUtils.cpp
+--- a/third-party/folly/src/folly/ssl/OpenSSLCertUtils.cpp
++++ b/third-party/folly/src/folly/ssl/OpenSSLCertUtils.cpp
+@@ -19,6 +19,7 @@
+ #include <folly/FileUtil.h>
+ #include <folly/ScopeGuard.h>
+ #include <folly/String.h>
++#include <folly/portability/Time.h>
+ #include <folly/ssl/OpenSSLPtrTypes.h>
+
+ namespace folly {
+@@ -166,6 +167,60 @@
+
+ std::chrono::system_clock::time_point OpenSSLCertUtils::asnTimeToTimepoint(
+     const ASN1_TIME* asnTime) {
++  // Handle 1.1.0 taking const but all below not
++  using MaybeConstAsnTime = typename std::
++      conditional<FOLLY_OPENSSL_IS_110, const ASN1_TIME, ASN1_TIME>::type;
++  auto maybeConstAsnTime = const_cast<MaybeConstAsnTime*>(asnTime);
++  if (ASN1_TIME_check(maybeConstAsnTime) != 1) {
++    throw std::runtime_error("ASN.1 time failed verification.");
++  }
++#if OPENSSL_VERSION_NUMBER < 0x1000200fL
++  // Pre-1.0.2: Parse internal struct and convert to tm
++  // ASN1 time is stored in string format as it is in the ASN.1, so
++  // parse it depending on the type.
++  auto timeStr = reinterpret_cast<const char*>(asnTime->data);
++  if (!timeStr) {
++    throw std::runtime_error("Failed to get ASN1_TIME data");
++  }
++
++  // Helper lambda to parse string numbers of arbitrary length <32
++  auto getNum = [](const char*& p, size_t digits) mutable {
++    unsigned int ret = 0;
++    for (size_t i = 0; i < digits; i++) {
++      ret *= 10;
++      ret += *(p++) - '0';
++    }
++    return ret;
++  };
++
++  std::tm tm{0};
++  // tm.year = years since 1900
++  if (asnTime->type == V_ASN1_UTCTIME) {
++    // 2 year date
++    tm.tm_year = getNum(timeStr, 2);
++    if (tm.tm_year < 50) {
++      tm.tm_year += 100;
++    }
++  } else if (asnTime->type == V_ASN1_GENERALIZEDTIME) {
++    // Check for date representing a not after date of undefined validity
++    // (See RFC 5280 Section 4.1.2.5)
++    // In that case, return the max date.
++    const size_t cmpLen = std::min(asnTime->length, 15);
++    if (strncmp(timeStr, "99991231235959Z", cmpLen) == 0) {
++      return std::chrono::system_clock::time_point::max();
++    }
++    tm.tm_year = getNum(timeStr, 4) - 1900;
++  } else {
++    throw std::runtime_error("Unknown ASN.1 time type");
++  }
++  tm.tm_mon = getNum(timeStr, 2) - 1; // (months since jan)
++  tm.tm_mday = getNum(timeStr, 2);
++  tm.tm_hour = getNum(timeStr, 2);
++  tm.tm_min = getNum(timeStr, 2);
++  tm.tm_sec = getNum(timeStr, 2);
++  return std::chrono::system_clock::from_time_t(timegm(&tm));
++#else
++  // 1.0.2+: Use ASN1_TIME_diff
+   int dSecs = 0;
+   int dDays = 0;
+
+@@ -183,6 +238,7 @@
+
+   return std::chrono::system_clock::time_point(
+       std::chrono::seconds(dSecs) + std::chrono::hours(24 * dDays));
++#endif
+ }
+
+ std::string OpenSSLCertUtils::getDateTimeStr(const ASN1_TIME* time) {
+--
+1.7.9.5

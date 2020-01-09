@@ -1032,6 +1032,3 @@ void MemcacheAsyncProcessor::throw_wrapped_mcVersion(std::unique_ptr<apache::thr
 }
 
 }}} // facebook::memcache::thrift
-namespace apache { namespace thrift {
-
-}} // apache::thrift

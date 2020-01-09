@@ -124,6 +124,7 @@ void McVersionRequest::readNoXfer(Protocol_* iprot) {
   }
 _readField_key:
   {
+    
     iprot->readBinary(this->key.rawUnsafe());
     this->__isset.key = true;
   }
@@ -232,7 +233,7 @@ void McVersionReply::readNoXfer(Protocol_* iprot) {
   }
 _readField_result:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::read(*iprot, this->result);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
     this->__isset.result = true;
   }
 
@@ -245,6 +246,7 @@ _readField_result:
   }
 _readField_value:
   {
+    
     iprot->readBinary(this->value);
     this->__isset.value = true;
   }
@@ -258,6 +260,7 @@ _readField_value:
   }
 _readField_message:
   {
+    
     iprot->readString(this->message);
     this->__isset.message = true;
   }
@@ -271,7 +274,7 @@ _readField_message:
   }
 _readField_appSpecificErrorCode:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::read(*iprot, this->appSpecificErrorCode);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
     this->__isset.appSpecificErrorCode = true;
   }
 
@@ -424,6 +427,7 @@ void McStatsRequest::readNoXfer(Protocol_* iprot) {
   }
 _readField_key:
   {
+    
     iprot->readBinary(this->key.rawUnsafe());
     this->__isset.key = true;
   }
@@ -532,7 +536,7 @@ void McStatsReply::readNoXfer(Protocol_* iprot) {
   }
 _readField_result:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::read(*iprot, this->result);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
     this->__isset.result = true;
   }
 
@@ -545,6 +549,7 @@ _readField_result:
   }
 _readField_message:
   {
+    
     iprot->readString(this->message);
     this->__isset.message = true;
   }
@@ -558,9 +563,12 @@ _readField_message:
   }
 _readField_stats:
   {
+    _readState.beforeSubobject(iprot);
+    
     this->stats = ::std::vector<::std::string>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::std::vector<::std::string>>::read(*iprot, this->stats);
     this->__isset.stats = true;
+    _readState.afterSubobject(iprot);
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -572,7 +580,7 @@ _readField_stats:
   }
 _readField_appSpecificErrorCode:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::read(*iprot, this->appSpecificErrorCode);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
     this->__isset.appSpecificErrorCode = true;
   }
 
@@ -725,6 +733,7 @@ void McShutdownRequest::readNoXfer(Protocol_* iprot) {
   }
 _readField_key:
   {
+    
     iprot->readBinary(this->key.rawUnsafe());
     this->__isset.key = true;
   }
@@ -833,7 +842,7 @@ void McShutdownReply::readNoXfer(Protocol_* iprot) {
   }
 _readField_result:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::read(*iprot, this->result);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
     this->__isset.result = true;
   }
 
@@ -846,6 +855,7 @@ _readField_result:
   }
 _readField_message:
   {
+    
     iprot->readString(this->message);
     this->__isset.message = true;
   }
@@ -859,7 +869,7 @@ _readField_message:
   }
 _readField_appSpecificErrorCode:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::read(*iprot, this->appSpecificErrorCode);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
     this->__isset.appSpecificErrorCode = true;
   }
 
@@ -997,6 +1007,7 @@ void McQuitRequest::readNoXfer(Protocol_* iprot) {
   }
 _readField_key:
   {
+    
     iprot->readBinary(this->key.rawUnsafe());
     this->__isset.key = true;
   }
@@ -1105,7 +1116,7 @@ void McQuitReply::readNoXfer(Protocol_* iprot) {
   }
 _readField_result:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::read(*iprot, this->result);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
     this->__isset.result = true;
   }
 
@@ -1118,6 +1129,7 @@ _readField_result:
   }
 _readField_message:
   {
+    
     iprot->readString(this->message);
     this->__isset.message = true;
   }
@@ -1131,7 +1143,7 @@ _readField_message:
   }
 _readField_appSpecificErrorCode:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::read(*iprot, this->appSpecificErrorCode);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
     this->__isset.appSpecificErrorCode = true;
   }
 
@@ -1269,6 +1281,7 @@ void McExecRequest::readNoXfer(Protocol_* iprot) {
   }
 _readField_key:
   {
+    
     iprot->readBinary(this->key.rawUnsafe());
     this->__isset.key = true;
   }
@@ -1377,7 +1390,7 @@ void McExecReply::readNoXfer(Protocol_* iprot) {
   }
 _readField_result:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::read(*iprot, this->result);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
     this->__isset.result = true;
   }
 
@@ -1390,6 +1403,7 @@ _readField_result:
   }
 _readField_response:
   {
+    
     iprot->readString(this->response);
     this->__isset.response = true;
   }
@@ -1403,6 +1417,7 @@ _readField_response:
   }
 _readField_message:
   {
+    
     iprot->readString(this->message);
     this->__isset.message = true;
   }
@@ -1416,7 +1431,7 @@ _readField_message:
   }
 _readField_appSpecificErrorCode:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::read(*iprot, this->appSpecificErrorCode);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
     this->__isset.appSpecificErrorCode = true;
   }
 
@@ -1648,7 +1663,7 @@ void GoAwayRequest::readNoXfer(Protocol_* iprot) {
   }
 _readField_result:
   {
-    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::read(*iprot, this->result);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
     this->__isset.result = true;
   }
 
@@ -1661,6 +1676,7 @@ _readField_result:
   }
 _readField_reason:
   {
+    
     iprot->readString(this->reason);
     this->__isset.reason = true;
   }

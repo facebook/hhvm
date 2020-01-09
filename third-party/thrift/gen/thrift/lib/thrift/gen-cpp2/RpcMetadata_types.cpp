@@ -107,6 +107,37 @@ const _RpcPriority_EnumMapFactory::NamesToValuesMapType _RpcPriority_NAMES_TO_VA
 
 namespace apache { namespace thrift {
 
+constexpr std::size_t const TEnumTraits<::apache::thrift::CompressionAlgorithm>::size;
+folly::Range<::apache::thrift::CompressionAlgorithm const*> const TEnumTraits<::apache::thrift::CompressionAlgorithm>::values = folly::range(::apache::thrift::_CompressionAlgorithmEnumDataStorage::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::CompressionAlgorithm>::names = folly::range(::apache::thrift::_CompressionAlgorithmEnumDataStorage::names);
+
+char const* TEnumTraits<::apache::thrift::CompressionAlgorithm>::findName(type value) {
+  using factory = ::apache::thrift::_CompressionAlgorithm_EnumMapFactory;
+  static folly::Indestructible<factory::ValuesToNamesMapType> const map{
+      factory::makeValuesToNamesMap()};
+  auto found = map->find(value);
+  return found == map->end() ? nullptr : found->second;
+}
+
+bool TEnumTraits<::apache::thrift::CompressionAlgorithm>::findValue(char const* name, type* out) {
+  using factory = ::apache::thrift::_CompressionAlgorithm_EnumMapFactory;
+  static folly::Indestructible<factory::NamesToValuesMapType> const map{
+      factory::makeNamesToValuesMap()};
+  auto found = map->find(name);
+  return found == map->end() ? false : (*out = found->second, true);
+}
+
+}} // apache::thrift
+
+namespace apache { namespace thrift {
+
+const _CompressionAlgorithm_EnumMapFactory::ValuesToNamesMapType _CompressionAlgorithm_VALUES_TO_NAMES = _CompressionAlgorithm_EnumMapFactory::makeValuesToNamesMap();
+const _CompressionAlgorithm_EnumMapFactory::NamesToValuesMapType _CompressionAlgorithm_NAMES_TO_VALUES = _CompressionAlgorithm_EnumMapFactory::makeNamesToValuesMap();
+
+}} // apache::thrift
+
+namespace apache { namespace thrift {
+
 constexpr std::size_t const TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::size;
 folly::Range<::apache::thrift::RequestRpcMetadataFlags const*> const TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::values = folly::range(::apache::thrift::_RequestRpcMetadataFlagsEnumDataStorage::values);
 folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::names = folly::range(::apache::thrift::_RequestRpcMetadataFlagsEnumDataStorage::names);
@@ -136,10 +167,51 @@ const _RequestRpcMetadataFlags_EnumMapFactory::NamesToValuesMapType _RequestRpcM
 
 }} // apache::thrift
 
+namespace apache { namespace thrift {
+
+constexpr std::size_t const TEnumTraits<::apache::thrift::InterfaceKind>::size;
+folly::Range<::apache::thrift::InterfaceKind const*> const TEnumTraits<::apache::thrift::InterfaceKind>::values = folly::range(::apache::thrift::_InterfaceKindEnumDataStorage::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::InterfaceKind>::names = folly::range(::apache::thrift::_InterfaceKindEnumDataStorage::names);
+
+char const* TEnumTraits<::apache::thrift::InterfaceKind>::findName(type value) {
+  using factory = ::apache::thrift::_InterfaceKind_EnumMapFactory;
+  static folly::Indestructible<factory::ValuesToNamesMapType> const map{
+      factory::makeValuesToNamesMap()};
+  auto found = map->find(value);
+  return found == map->end() ? nullptr : found->second;
+}
+
+bool TEnumTraits<::apache::thrift::InterfaceKind>::findValue(char const* name, type* out) {
+  using factory = ::apache::thrift::_InterfaceKind_EnumMapFactory;
+  static folly::Indestructible<factory::NamesToValuesMapType> const map{
+      factory::makeNamesToValuesMap()};
+  auto found = map->find(name);
+  return found == map->end() ? false : (*out = found->second, true);
+}
+
+}} // apache::thrift
+
+namespace apache { namespace thrift {
+
+const _InterfaceKind_EnumMapFactory::ValuesToNamesMapType _InterfaceKind_VALUES_TO_NAMES = _InterfaceKind_EnumMapFactory::makeValuesToNamesMap();
+const _InterfaceKind_EnumMapFactory::NamesToValuesMapType _InterfaceKind_NAMES_TO_VALUES = _InterfaceKind_EnumMapFactory::makeNamesToValuesMap();
+
+}} // apache::thrift
+
 namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::apache::thrift::NegotiationParameters>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "compressionAlgos") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_I64;
+  }
+}
 void TccStructTraits<::apache::thrift::RequestRpcMetadata>::translateFieldName(
     FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
     FOLLY_MAYBE_UNUSED int16_t& fid,
@@ -197,6 +269,10 @@ void TccStructTraits<::apache::thrift::RequestRpcMetadata>::translateFieldName(
     fid = 13;
     _ftype = apache::thrift::protocol::T_STRING;
   }
+  else if (_fname == "compression") {
+    fid = 14;
+    _ftype = apache::thrift::protocol::T_I32;
+  }
 }
 void TccStructTraits<::apache::thrift::ResponseRpcMetadata>::translateFieldName(
     FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
@@ -223,12 +299,20 @@ void TccStructTraits<::apache::thrift::ResponseRpcMetadata>::translateFieldName(
     fid = 5;
     _ftype = apache::thrift::protocol::T_I32;
   }
+  else if (_fname == "compression") {
+    fid = 6;
+    _ftype = apache::thrift::protocol::T_I32;
+  }
 }
 void TccStructTraits<::apache::thrift::StreamPayloadMetadata>::translateFieldName(
     FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
     FOLLY_MAYBE_UNUSED int16_t& fid,
     FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
   if (false) {}
+  else if (_fname == "compression") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_I32;
+  }
 }
 void TccStructTraits<::apache::thrift::RequestSetupMetadata>::translateFieldName(
     FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
@@ -239,12 +323,96 @@ void TccStructTraits<::apache::thrift::RequestSetupMetadata>::translateFieldName
     fid = 1;
     _ftype = apache::thrift::protocol::T_MAP;
   }
+  else if (_fname == "interfaceKind") {
+    fid = 2;
+    _ftype = apache::thrift::protocol::T_I32;
+  }
+}
+void TccStructTraits<::apache::thrift::HeadersPayloadContent>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "otherMetadata") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_MAP;
+  }
+}
+void TccStructTraits<::apache::thrift::HeadersPayloadMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "compression") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_I32;
+  }
 }
 
 } // namespace detail
 } // namespace thrift
 } // namespace apache
 
+namespace apache { namespace thrift {
+
+NegotiationParameters::NegotiationParameters(apache::thrift::FragileConstructor, std::uint64_t compressionAlgos__arg) :
+    compressionAlgos(std::move(compressionAlgos__arg)) {
+  __isset.compressionAlgos = true;
+}
+
+void NegotiationParameters::__clear() {
+  // clear all fields
+  compressionAlgos = 0;
+  __isset = {};
+}
+
+bool NegotiationParameters::operator==(const NegotiationParameters& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.__isset.compressionAlgos != rhs.__isset.compressionAlgos) {
+    return false;
+  }
+  if (lhs.__isset.compressionAlgos) {
+    if (!(lhs.compressionAlgos == rhs.compressionAlgos)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool NegotiationParameters::operator<(const NegotiationParameters& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.__isset.compressionAlgos != rhs.__isset.compressionAlgos) {
+    return lhs.__isset.compressionAlgos < rhs.__isset.compressionAlgos;
+  }
+  if (lhs.__isset.compressionAlgos) {
+    if (!(lhs.compressionAlgos == rhs.compressionAlgos)) {
+      return lhs.compressionAlgos < rhs.compressionAlgos;
+    }
+  }
+  return false;
+}
+
+
+void swap(NegotiationParameters& a, NegotiationParameters& b) {
+  using ::std::swap;
+  swap(a.compressionAlgos_ref().value_unchecked(), b.compressionAlgos_ref().value_unchecked());
+  swap(a.__isset, b.__isset);
+}
+
+template void NegotiationParameters::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t NegotiationParameters::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t NegotiationParameters::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t NegotiationParameters::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void NegotiationParameters::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t NegotiationParameters::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t NegotiationParameters::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t NegotiationParameters::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
 namespace apache { namespace thrift {
 
 RequestRpcMetadata::RequestRpcMetadata() :
@@ -255,12 +423,13 @@ RequestRpcMetadata::RequestRpcMetadata() :
       queueTimeoutMs(0),
       priority( ::apache::thrift::RpcPriority::HIGH_IMPORTANT),
       crc32c(0),
-      flags(0) {}
+      flags(0),
+      compression( ::apache::thrift::CompressionAlgorithm::NONE) {}
 
 
 RequestRpcMetadata::~RequestRpcMetadata() {}
 
-RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, ::std::string name__arg,  ::apache::thrift::RpcKind kind__arg, int32_t seqId__arg, int32_t clientTimeoutMs__arg, int32_t queueTimeoutMs__arg,  ::apache::thrift::RpcPriority priority__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, ::std::string host__arg, ::std::string url__arg, std::uint32_t crc32c__arg, std::uint64_t flags__arg, ::std::string loadMetric__arg) :
+RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, ::std::string name__arg,  ::apache::thrift::RpcKind kind__arg, int32_t seqId__arg, int32_t clientTimeoutMs__arg, int32_t queueTimeoutMs__arg,  ::apache::thrift::RpcPriority priority__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, ::std::string host__arg, ::std::string url__arg, std::uint32_t crc32c__arg, std::uint64_t flags__arg, ::std::string loadMetric__arg,  ::apache::thrift::CompressionAlgorithm compression__arg) :
     protocol(std::move(protocol__arg)),
     name(std::move(name__arg)),
     kind(std::move(kind__arg)),
@@ -273,7 +442,8 @@ RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor,  ::ap
     url(std::move(url__arg)),
     crc32c(std::move(crc32c__arg)),
     flags(std::move(flags__arg)),
-    loadMetric(std::move(loadMetric__arg)) {
+    loadMetric(std::move(loadMetric__arg)),
+    compression(std::move(compression__arg)) {
   __isset.protocol = true;
   __isset.name = true;
   __isset.kind = true;
@@ -287,6 +457,7 @@ RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor,  ::ap
   __isset.crc32c = true;
   __isset.flags = true;
   __isset.loadMetric = true;
+  __isset.compression = true;
 }
 
 void RequestRpcMetadata::__clear() {
@@ -304,6 +475,7 @@ void RequestRpcMetadata::__clear() {
   crc32c = 0;
   flags = 0;
   loadMetric = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  compression =  ::apache::thrift::CompressionAlgorithm::NONE;
   __isset = {};
 }
 
@@ -412,6 +584,14 @@ bool RequestRpcMetadata::operator==(const RequestRpcMetadata& rhs) const {
   }
   if (lhs.__isset.loadMetric) {
     if (!(lhs.loadMetric == rhs.loadMetric)) {
+      return false;
+    }
+  }
+  if (lhs.__isset.compression != rhs.__isset.compression) {
+    return false;
+  }
+  if (lhs.__isset.compression) {
+    if (!(lhs.compression == rhs.compression)) {
       return false;
     }
   }
@@ -526,6 +706,14 @@ bool RequestRpcMetadata::operator<(const RequestRpcMetadata& rhs) const {
       return lhs.loadMetric < rhs.loadMetric;
     }
   }
+  if (lhs.__isset.compression != rhs.__isset.compression) {
+    return lhs.__isset.compression < rhs.__isset.compression;
+  }
+  if (lhs.__isset.compression) {
+    if (!(lhs.compression == rhs.compression)) {
+      return lhs.compression < rhs.compression;
+    }
+  }
   return false;
 }
 
@@ -540,19 +728,20 @@ const ::std::map<::std::string, ::std::string>* RequestRpcMetadata::get_otherMet
 
 void swap(RequestRpcMetadata& a, RequestRpcMetadata& b) {
   using ::std::swap;
-  swap(a.protocol, b.protocol);
-  swap(a.name, b.name);
-  swap(a.kind, b.kind);
-  swap(a.seqId, b.seqId);
-  swap(a.clientTimeoutMs, b.clientTimeoutMs);
-  swap(a.queueTimeoutMs, b.queueTimeoutMs);
-  swap(a.priority, b.priority);
-  swap(a.otherMetadata, b.otherMetadata);
-  swap(a.host, b.host);
-  swap(a.url, b.url);
-  swap(a.crc32c, b.crc32c);
-  swap(a.flags, b.flags);
-  swap(a.loadMetric, b.loadMetric);
+  swap(a.protocol_ref().value_unchecked(), b.protocol_ref().value_unchecked());
+  swap(a.name_ref().value_unchecked(), b.name_ref().value_unchecked());
+  swap(a.kind_ref().value_unchecked(), b.kind_ref().value_unchecked());
+  swap(a.seqId_ref().value_unchecked(), b.seqId_ref().value_unchecked());
+  swap(a.clientTimeoutMs_ref().value_unchecked(), b.clientTimeoutMs_ref().value_unchecked());
+  swap(a.queueTimeoutMs_ref().value_unchecked(), b.queueTimeoutMs_ref().value_unchecked());
+  swap(a.priority_ref().value_unchecked(), b.priority_ref().value_unchecked());
+  swap(a.otherMetadata_ref().value_unchecked(), b.otherMetadata_ref().value_unchecked());
+  swap(a.host_ref().value_unchecked(), b.host_ref().value_unchecked());
+  swap(a.url_ref().value_unchecked(), b.url_ref().value_unchecked());
+  swap(a.crc32c_ref().value_unchecked(), b.crc32c_ref().value_unchecked());
+  swap(a.flags_ref().value_unchecked(), b.flags_ref().value_unchecked());
+  swap(a.loadMetric_ref().value_unchecked(), b.loadMetric_ref().value_unchecked());
+  swap(a.compression_ref().value_unchecked(), b.compression_ref().value_unchecked());
   swap(a.__isset, b.__isset);
 }
 
@@ -572,22 +761,25 @@ ResponseRpcMetadata::ResponseRpcMetadata() :
       protocol( ::apache::thrift::ProtocolId::BINARY),
       seqId(0),
       load(0),
-      crc32c(0) {}
+      crc32c(0),
+      compression( ::apache::thrift::CompressionAlgorithm::NONE) {}
 
 
 ResponseRpcMetadata::~ResponseRpcMetadata() {}
 
-ResponseRpcMetadata::ResponseRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, int32_t seqId__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, int64_t load__arg, std::uint32_t crc32c__arg) :
+ResponseRpcMetadata::ResponseRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, int32_t seqId__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, int64_t load__arg, std::uint32_t crc32c__arg,  ::apache::thrift::CompressionAlgorithm compression__arg) :
     protocol(std::move(protocol__arg)),
     seqId(std::move(seqId__arg)),
     otherMetadata(std::move(otherMetadata__arg)),
     load(std::move(load__arg)),
-    crc32c(std::move(crc32c__arg)) {
+    crc32c(std::move(crc32c__arg)),
+    compression(std::move(compression__arg)) {
   __isset.protocol = true;
   __isset.seqId = true;
   __isset.otherMetadata = true;
   __isset.load = true;
   __isset.crc32c = true;
+  __isset.compression = true;
 }
 
 void ResponseRpcMetadata::__clear() {
@@ -597,6 +789,7 @@ void ResponseRpcMetadata::__clear() {
   otherMetadata.clear();
   load = 0;
   crc32c = 0;
+  compression =  ::apache::thrift::CompressionAlgorithm::NONE;
   __isset = {};
 }
 
@@ -641,6 +834,14 @@ bool ResponseRpcMetadata::operator==(const ResponseRpcMetadata& rhs) const {
   }
   if (lhs.__isset.crc32c) {
     if (!(lhs.crc32c == rhs.crc32c)) {
+      return false;
+    }
+  }
+  if (lhs.__isset.compression != rhs.__isset.compression) {
+    return false;
+  }
+  if (lhs.__isset.compression) {
+    if (!(lhs.compression == rhs.compression)) {
       return false;
     }
   }
@@ -691,6 +892,14 @@ bool ResponseRpcMetadata::operator<(const ResponseRpcMetadata& rhs) const {
       return lhs.crc32c < rhs.crc32c;
     }
   }
+  if (lhs.__isset.compression != rhs.__isset.compression) {
+    return lhs.__isset.compression < rhs.__isset.compression;
+  }
+  if (lhs.__isset.compression) {
+    if (!(lhs.compression == rhs.compression)) {
+      return lhs.compression < rhs.compression;
+    }
+  }
   return false;
 }
 
@@ -705,11 +914,12 @@ const ::std::map<::std::string, ::std::string>* ResponseRpcMetadata::get_otherMe
 
 void swap(ResponseRpcMetadata& a, ResponseRpcMetadata& b) {
   using ::std::swap;
-  swap(a.protocol, b.protocol);
-  swap(a.seqId, b.seqId);
-  swap(a.otherMetadata, b.otherMetadata);
-  swap(a.load, b.load);
-  swap(a.crc32c, b.crc32c);
+  swap(a.protocol_ref().value_unchecked(), b.protocol_ref().value_unchecked());
+  swap(a.seqId_ref().value_unchecked(), b.seqId_ref().value_unchecked());
+  swap(a.otherMetadata_ref().value_unchecked(), b.otherMetadata_ref().value_unchecked());
+  swap(a.load_ref().value_unchecked(), b.load_ref().value_unchecked());
+  swap(a.crc32c_ref().value_unchecked(), b.crc32c_ref().value_unchecked());
+  swap(a.compression_ref().value_unchecked(), b.compression_ref().value_unchecked());
   swap(a.__isset, b.__isset);
 }
 
@@ -725,16 +935,29 @@ template uint32_t ResponseRpcMetadata::serializedSizeZC<>(apache::thrift::Compac
 }} // apache::thrift
 namespace apache { namespace thrift {
 
-StreamPayloadMetadata::StreamPayloadMetadata(apache::thrift::FragileConstructor) {}
+StreamPayloadMetadata::StreamPayloadMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::CompressionAlgorithm compression__arg) :
+    compression(std::move(compression__arg)) {
+  __isset.compression = true;
+}
 
 void StreamPayloadMetadata::__clear() {
   // clear all fields
+  compression =  ::apache::thrift::CompressionAlgorithm::NONE;
+  __isset = {};
 }
 
 bool StreamPayloadMetadata::operator==(const StreamPayloadMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
+  if (lhs.__isset.compression != rhs.__isset.compression) {
+    return false;
+  }
+  if (lhs.__isset.compression) {
+    if (!(lhs.compression == rhs.compression)) {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -742,14 +965,22 @@ bool StreamPayloadMetadata::operator<(const StreamPayloadMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
+  if (lhs.__isset.compression != rhs.__isset.compression) {
+    return lhs.__isset.compression < rhs.__isset.compression;
+  }
+  if (lhs.__isset.compression) {
+    if (!(lhs.compression == rhs.compression)) {
+      return lhs.compression < rhs.compression;
+    }
+  }
   return false;
 }
 
 
 void swap(StreamPayloadMetadata& a, StreamPayloadMetadata& b) {
   using ::std::swap;
-  (void)a;
-  (void)b;
+  swap(a.compression_ref().value_unchecked(), b.compression_ref().value_unchecked());
+  swap(a.__isset, b.__isset);
 }
 
 template void StreamPayloadMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -764,14 +995,17 @@ template uint32_t StreamPayloadMetadata::serializedSizeZC<>(apache::thrift::Comp
 }} // apache::thrift
 namespace apache { namespace thrift {
 
-RequestSetupMetadata::RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg) :
-    opaque(std::move(opaque__arg)) {
+RequestSetupMetadata::RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg,  ::apache::thrift::InterfaceKind interfaceKind__arg) :
+    opaque(std::move(opaque__arg)),
+    interfaceKind(std::move(interfaceKind__arg)) {
   __isset.opaque = true;
+  __isset.interfaceKind = true;
 }
 
 void RequestSetupMetadata::__clear() {
   // clear all fields
   opaque.clear();
+  interfaceKind =  ::apache::thrift::InterfaceKind::USER;
   __isset = {};
 }
 
@@ -784,6 +1018,14 @@ bool RequestSetupMetadata::operator==(const RequestSetupMetadata& rhs) const {
   }
   if (lhs.__isset.opaque) {
     if (!(lhs.opaque == rhs.opaque)) {
+      return false;
+    }
+  }
+  if (lhs.__isset.interfaceKind != rhs.__isset.interfaceKind) {
+    return false;
+  }
+  if (lhs.__isset.interfaceKind) {
+    if (!(lhs.interfaceKind == rhs.interfaceKind)) {
       return false;
     }
   }
@@ -801,7 +1043,8 @@ apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* RequestSetupMet
 
 void swap(RequestSetupMetadata& a, RequestSetupMetadata& b) {
   using ::std::swap;
-  swap(a.opaque, b.opaque);
+  swap(a.opaque_ref().value_unchecked(), b.opaque_ref().value_unchecked());
+  swap(a.interfaceKind_ref().value_unchecked(), b.interfaceKind_ref().value_unchecked());
   swap(a.__isset, b.__isset);
 }
 
@@ -813,5 +1056,133 @@ template void RequestSetupMetadata::readNoXfer<>(apache::thrift::CompactProtocol
 template uint32_t RequestSetupMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t RequestSetupMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t RequestSetupMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+HeadersPayloadContent::HeadersPayloadContent(apache::thrift::FragileConstructor, ::std::map<::std::string, ::std::string> otherMetadata__arg) :
+    otherMetadata(std::move(otherMetadata__arg)) {
+  __isset.otherMetadata = true;
+}
+
+void HeadersPayloadContent::__clear() {
+  // clear all fields
+  otherMetadata.clear();
+  __isset = {};
+}
+
+bool HeadersPayloadContent::operator==(const HeadersPayloadContent& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.__isset.otherMetadata != rhs.__isset.otherMetadata) {
+    return false;
+  }
+  if (lhs.__isset.otherMetadata) {
+    if (!(lhs.otherMetadata == rhs.otherMetadata)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool HeadersPayloadContent::operator<(const HeadersPayloadContent& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.__isset.otherMetadata != rhs.__isset.otherMetadata) {
+    return lhs.__isset.otherMetadata < rhs.__isset.otherMetadata;
+  }
+  if (lhs.__isset.otherMetadata) {
+    if (!(lhs.otherMetadata == rhs.otherMetadata)) {
+      return lhs.otherMetadata < rhs.otherMetadata;
+    }
+  }
+  return false;
+}
+
+const ::std::map<::std::string, ::std::string>* HeadersPayloadContent::get_otherMetadata() const& {
+  return __isset.otherMetadata ? std::addressof(otherMetadata) : nullptr;
+}
+
+::std::map<::std::string, ::std::string>* HeadersPayloadContent::get_otherMetadata() & {
+  return __isset.otherMetadata ? std::addressof(otherMetadata) : nullptr;
+}
+
+
+void swap(HeadersPayloadContent& a, HeadersPayloadContent& b) {
+  using ::std::swap;
+  swap(a.otherMetadata_ref().value_unchecked(), b.otherMetadata_ref().value_unchecked());
+  swap(a.__isset, b.__isset);
+}
+
+template void HeadersPayloadContent::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t HeadersPayloadContent::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t HeadersPayloadContent::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t HeadersPayloadContent::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void HeadersPayloadContent::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t HeadersPayloadContent::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t HeadersPayloadContent::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t HeadersPayloadContent::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+HeadersPayloadMetadata::HeadersPayloadMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::CompressionAlgorithm compression__arg) :
+    compression(std::move(compression__arg)) {
+  __isset.compression = true;
+}
+
+void HeadersPayloadMetadata::__clear() {
+  // clear all fields
+  compression =  ::apache::thrift::CompressionAlgorithm::NONE;
+  __isset = {};
+}
+
+bool HeadersPayloadMetadata::operator==(const HeadersPayloadMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.__isset.compression != rhs.__isset.compression) {
+    return false;
+  }
+  if (lhs.__isset.compression) {
+    if (!(lhs.compression == rhs.compression)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool HeadersPayloadMetadata::operator<(const HeadersPayloadMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.__isset.compression != rhs.__isset.compression) {
+    return lhs.__isset.compression < rhs.__isset.compression;
+  }
+  if (lhs.__isset.compression) {
+    if (!(lhs.compression == rhs.compression)) {
+      return lhs.compression < rhs.compression;
+    }
+  }
+  return false;
+}
+
+
+void swap(HeadersPayloadMetadata& a, HeadersPayloadMetadata& b) {
+  using ::std::swap;
+  swap(a.compression_ref().value_unchecked(), b.compression_ref().value_unchecked());
+  swap(a.__isset, b.__isset);
+}
+
+template void HeadersPayloadMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t HeadersPayloadMetadata::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t HeadersPayloadMetadata::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t HeadersPayloadMetadata::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void HeadersPayloadMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t HeadersPayloadMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t HeadersPayloadMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t HeadersPayloadMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 }} // apache::thrift

@@ -12,6 +12,140 @@
 #include "mcrouter/lib/carbon/gen-cpp2/carbon_types.h"
 #include "mcrouter/lib/carbon/gen-cpp2/carbon_result_types.h"
 
+namespace apache {
+namespace thrift {
+namespace tag {
+struct key;
+struct result;
+struct value;
+struct message;
+struct appSpecificErrorCode;
+struct key;
+struct result;
+struct message;
+struct stats;
+struct appSpecificErrorCode;
+struct key;
+struct result;
+struct message;
+struct appSpecificErrorCode;
+struct key;
+struct result;
+struct message;
+struct appSpecificErrorCode;
+struct key;
+struct result;
+struct response;
+struct message;
+struct appSpecificErrorCode;
+struct result;
+struct reason;
+} // namespace tag
+namespace detail {
+#ifndef APACHE_THRIFT_ACCESSOR_key
+#define APACHE_THRIFT_ACCESSOR_key
+APACHE_THRIFT_DEFINE_ACCESSOR(key);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_result
+#define APACHE_THRIFT_ACCESSOR_result
+APACHE_THRIFT_DEFINE_ACCESSOR(result);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_value
+#define APACHE_THRIFT_ACCESSOR_value
+APACHE_THRIFT_DEFINE_ACCESSOR(value);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_message
+#define APACHE_THRIFT_ACCESSOR_message
+APACHE_THRIFT_DEFINE_ACCESSOR(message);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_appSpecificErrorCode
+#define APACHE_THRIFT_ACCESSOR_appSpecificErrorCode
+APACHE_THRIFT_DEFINE_ACCESSOR(appSpecificErrorCode);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_key
+#define APACHE_THRIFT_ACCESSOR_key
+APACHE_THRIFT_DEFINE_ACCESSOR(key);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_result
+#define APACHE_THRIFT_ACCESSOR_result
+APACHE_THRIFT_DEFINE_ACCESSOR(result);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_message
+#define APACHE_THRIFT_ACCESSOR_message
+APACHE_THRIFT_DEFINE_ACCESSOR(message);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_stats
+#define APACHE_THRIFT_ACCESSOR_stats
+APACHE_THRIFT_DEFINE_ACCESSOR(stats);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_appSpecificErrorCode
+#define APACHE_THRIFT_ACCESSOR_appSpecificErrorCode
+APACHE_THRIFT_DEFINE_ACCESSOR(appSpecificErrorCode);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_key
+#define APACHE_THRIFT_ACCESSOR_key
+APACHE_THRIFT_DEFINE_ACCESSOR(key);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_result
+#define APACHE_THRIFT_ACCESSOR_result
+APACHE_THRIFT_DEFINE_ACCESSOR(result);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_message
+#define APACHE_THRIFT_ACCESSOR_message
+APACHE_THRIFT_DEFINE_ACCESSOR(message);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_appSpecificErrorCode
+#define APACHE_THRIFT_ACCESSOR_appSpecificErrorCode
+APACHE_THRIFT_DEFINE_ACCESSOR(appSpecificErrorCode);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_key
+#define APACHE_THRIFT_ACCESSOR_key
+APACHE_THRIFT_DEFINE_ACCESSOR(key);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_result
+#define APACHE_THRIFT_ACCESSOR_result
+APACHE_THRIFT_DEFINE_ACCESSOR(result);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_message
+#define APACHE_THRIFT_ACCESSOR_message
+APACHE_THRIFT_DEFINE_ACCESSOR(message);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_appSpecificErrorCode
+#define APACHE_THRIFT_ACCESSOR_appSpecificErrorCode
+APACHE_THRIFT_DEFINE_ACCESSOR(appSpecificErrorCode);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_key
+#define APACHE_THRIFT_ACCESSOR_key
+APACHE_THRIFT_DEFINE_ACCESSOR(key);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_result
+#define APACHE_THRIFT_ACCESSOR_result
+APACHE_THRIFT_DEFINE_ACCESSOR(result);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_response
+#define APACHE_THRIFT_ACCESSOR_response
+APACHE_THRIFT_DEFINE_ACCESSOR(response);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_message
+#define APACHE_THRIFT_ACCESSOR_message
+APACHE_THRIFT_DEFINE_ACCESSOR(message);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_appSpecificErrorCode
+#define APACHE_THRIFT_ACCESSOR_appSpecificErrorCode
+APACHE_THRIFT_DEFINE_ACCESSOR(appSpecificErrorCode);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_result
+#define APACHE_THRIFT_ACCESSOR_result
+APACHE_THRIFT_DEFINE_ACCESSOR(result);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_reason
+#define APACHE_THRIFT_ACCESSOR_reason
+APACHE_THRIFT_DEFINE_ACCESSOR(reason);
+#endif
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 // BEGIN declare_enums
 
 // END declare_enums
@@ -47,11 +181,6 @@ class McVersionRequest final : private apache::thrift::detail::st::ComparisonOpe
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McVersionRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    key = arg.extract();
-    __isset.key = true;
-  }
 
   McVersionRequest(McVersionRequest&&) = default;
 
@@ -61,8 +190,10 @@ class McVersionRequest final : private apache::thrift::detail::st::ComparisonOpe
 
   McVersionRequest& operator=(const McVersionRequest&) = default;
   void __clear();
+ public:
    ::carbon::thrift::IOBufKey key;
 
+ public:
   struct __isset {
     bool key;
   } __isset = {};
@@ -120,26 +251,6 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McVersionReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, folly::IOBuf value__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    result = arg.extract();
-    __isset.result = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    value = arg.extract();
-    __isset.value = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<3, _T> arg) {
-    message = arg.extract();
-    __isset.message = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<4, _T> arg) {
-    appSpecificErrorCode = arg.extract();
-    __isset.appSpecificErrorCode = true;
-  }
 
   McVersionReply(McVersionReply&&) = default;
 
@@ -149,11 +260,16 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
 
   McVersionReply& operator=(const McVersionReply&) = default;
   void __clear();
+ public:
    ::carbon::Result result;
+ public:
   folly::IOBuf value;
+ public:
   ::std::string message;
+ public:
   int16_t appSpecificErrorCode;
 
+ public:
   struct __isset {
     bool result;
     bool value;
@@ -247,11 +363,6 @@ class McStatsRequest final : private apache::thrift::detail::st::ComparisonOpera
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McStatsRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    key = arg.extract();
-    __isset.key = true;
-  }
 
   McStatsRequest(McStatsRequest&&) = default;
 
@@ -261,8 +372,10 @@ class McStatsRequest final : private apache::thrift::detail::st::ComparisonOpera
 
   McStatsRequest& operator=(const McStatsRequest&) = default;
   void __clear();
+ public:
    ::carbon::thrift::IOBufKey key;
 
+ public:
   struct __isset {
     bool key;
   } __isset = {};
@@ -320,26 +433,6 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McStatsReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, ::std::vector<::std::string> stats__arg, int16_t appSpecificErrorCode__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    result = arg.extract();
-    __isset.result = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    message = arg.extract();
-    __isset.message = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<3, _T> arg) {
-    stats = arg.extract();
-    __isset.stats = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<4, _T> arg) {
-    appSpecificErrorCode = arg.extract();
-    __isset.appSpecificErrorCode = true;
-  }
 
   McStatsReply(McStatsReply&&) = default;
 
@@ -349,11 +442,16 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
 
   McStatsReply& operator=(const McStatsReply&) = default;
   void __clear();
+ public:
    ::carbon::Result result;
+ public:
   ::std::string message;
+ public:
   ::std::vector<::std::string> stats;
+ public:
   int16_t appSpecificErrorCode;
 
+ public:
   struct __isset {
     bool result;
     bool message;
@@ -441,11 +539,6 @@ class McShutdownRequest final : private apache::thrift::detail::st::ComparisonOp
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McShutdownRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    key = arg.extract();
-    __isset.key = true;
-  }
 
   McShutdownRequest(McShutdownRequest&&) = default;
 
@@ -455,8 +548,10 @@ class McShutdownRequest final : private apache::thrift::detail::st::ComparisonOp
 
   McShutdownRequest& operator=(const McShutdownRequest&) = default;
   void __clear();
+ public:
    ::carbon::thrift::IOBufKey key;
 
+ public:
   struct __isset {
     bool key;
   } __isset = {};
@@ -514,21 +609,6 @@ class McShutdownReply final : private apache::thrift::detail::st::ComparisonOper
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McShutdownReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    result = arg.extract();
-    __isset.result = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    message = arg.extract();
-    __isset.message = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<3, _T> arg) {
-    appSpecificErrorCode = arg.extract();
-    __isset.appSpecificErrorCode = true;
-  }
 
   McShutdownReply(McShutdownReply&&) = default;
 
@@ -538,10 +618,14 @@ class McShutdownReply final : private apache::thrift::detail::st::ComparisonOper
 
   McShutdownReply& operator=(const McShutdownReply&) = default;
   void __clear();
+ public:
    ::carbon::Result result;
+ public:
   ::std::string message;
+ public:
   int16_t appSpecificErrorCode;
 
+ public:
   struct __isset {
     bool result;
     bool message;
@@ -619,11 +703,6 @@ class McQuitRequest final : private apache::thrift::detail::st::ComparisonOperat
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McQuitRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    key = arg.extract();
-    __isset.key = true;
-  }
 
   McQuitRequest(McQuitRequest&&) = default;
 
@@ -633,8 +712,10 @@ class McQuitRequest final : private apache::thrift::detail::st::ComparisonOperat
 
   McQuitRequest& operator=(const McQuitRequest&) = default;
   void __clear();
+ public:
    ::carbon::thrift::IOBufKey key;
 
+ public:
   struct __isset {
     bool key;
   } __isset = {};
@@ -692,21 +773,6 @@ class McQuitReply final : private apache::thrift::detail::st::ComparisonOperator
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McQuitReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    result = arg.extract();
-    __isset.result = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    message = arg.extract();
-    __isset.message = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<3, _T> arg) {
-    appSpecificErrorCode = arg.extract();
-    __isset.appSpecificErrorCode = true;
-  }
 
   McQuitReply(McQuitReply&&) = default;
 
@@ -716,10 +782,14 @@ class McQuitReply final : private apache::thrift::detail::st::ComparisonOperator
 
   McQuitReply& operator=(const McQuitReply&) = default;
   void __clear();
+ public:
    ::carbon::Result result;
+ public:
   ::std::string message;
+ public:
   int16_t appSpecificErrorCode;
 
+ public:
   struct __isset {
     bool result;
     bool message;
@@ -797,11 +867,6 @@ class McExecRequest final : private apache::thrift::detail::st::ComparisonOperat
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McExecRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    key = arg.extract();
-    __isset.key = true;
-  }
 
   McExecRequest(McExecRequest&&) = default;
 
@@ -811,8 +876,10 @@ class McExecRequest final : private apache::thrift::detail::st::ComparisonOperat
 
   McExecRequest& operator=(const McExecRequest&) = default;
   void __clear();
+ public:
    ::carbon::thrift::IOBufKey key;
 
+ public:
   struct __isset {
     bool key;
   } __isset = {};
@@ -870,26 +937,6 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   McExecReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string response__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    result = arg.extract();
-    __isset.result = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    response = arg.extract();
-    __isset.response = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<3, _T> arg) {
-    message = arg.extract();
-    __isset.message = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<4, _T> arg) {
-    appSpecificErrorCode = arg.extract();
-    __isset.appSpecificErrorCode = true;
-  }
 
   McExecReply(McExecReply&&) = default;
 
@@ -899,11 +946,16 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
 
   McExecReply& operator=(const McExecReply&) = default;
   void __clear();
+ public:
    ::carbon::Result result;
+ public:
   ::std::string response;
+ public:
   ::std::string message;
+ public:
   int16_t appSpecificErrorCode;
 
+ public:
   struct __isset {
     bool result;
     bool response;
@@ -1044,16 +1096,6 @@ class GoAwayRequest final : private apache::thrift::detail::st::ComparisonOperat
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
   GoAwayRequest(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string reason__arg);
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<1, _T> arg) {
-    result = arg.extract();
-    __isset.result = true;
-  }
-  template <typename _T>
-  void __set_field(::apache::thrift::detail::argument_wrapper<2, _T> arg) {
-    reason = arg.extract();
-    __isset.reason = true;
-  }
 
   GoAwayRequest(GoAwayRequest&&) = default;
 
@@ -1063,9 +1105,12 @@ class GoAwayRequest final : private apache::thrift::detail::st::ComparisonOperat
 
   GoAwayRequest& operator=(const GoAwayRequest&) = default;
   void __clear();
+ public:
    ::carbon::Result result;
+ public:
   ::std::string reason;
 
+ public:
   struct __isset {
     bool result;
     bool reason;

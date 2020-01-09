@@ -940,7 +940,7 @@ bool McGetReply::operator<(const McGetReply& rhs) const {
 void swap(McGetReply& a, McGetReply& b) {
   using ::std::swap;
   swap(a.result, b.result);
-  swap(a.value, b.value);
+  swap(a.value_ref().value_unchecked(), b.value_ref().value_unchecked());
   swap(a.flags, b.flags);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
@@ -1478,7 +1478,7 @@ void swap(McLeaseGetReply& a, McLeaseGetReply& b) {
   using ::std::swap;
   swap(a.result, b.result);
   swap(a.leaseToken, b.leaseToken);
-  swap(a.value, b.value);
+  swap(a.value_ref().value_unchecked(), b.value_ref().value_unchecked());
   swap(a.flags, b.flags);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
@@ -2125,7 +2125,7 @@ void swap(McGetsReply& a, McGetsReply& b) {
   using ::std::swap;
   swap(a.result, b.result);
   swap(a.casToken, b.casToken);
-  swap(a.value, b.value);
+  swap(a.value_ref().value_unchecked(), b.value_ref().value_unchecked());
   swap(a.flags, b.flags);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
@@ -3591,7 +3591,7 @@ bool McGatReply::operator<(const McGatReply& rhs) const {
 void swap(McGatReply& a, McGatReply& b) {
   using ::std::swap;
   swap(a.result, b.result);
-  swap(a.value, b.value);
+  swap(a.value_ref().value_unchecked(), b.value_ref().value_unchecked());
   swap(a.flags, b.flags);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
@@ -3770,7 +3770,7 @@ void swap(McGatsReply& a, McGatsReply& b) {
   using ::std::swap;
   swap(a.result, b.result);
   swap(a.casToken, b.casToken);
-  swap(a.value, b.value);
+  swap(a.value_ref().value_unchecked(), b.value_ref().value_unchecked());
   swap(a.flags, b.flags);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);

@@ -10,6 +10,15 @@
 
 
 
+namespace apache {
+namespace thrift {
+namespace tag {
+} // namespace tag
+namespace detail {
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 // BEGIN declare_enums
 
 // END declare_enums

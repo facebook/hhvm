@@ -1,0 +1,35 @@
+From D19279530-96366234 Mon Sep 17 00:00:00 2001
+From: Ján . <jjergus@fb.com>
+Date: Tue, 07 Jan 2020 11:06:50 -0800
+Subject: [PATCH] make ProxyDestinationKey.cpp more portable
+
+Summary:
+On some systems where we build HHVM packages, `std::hash` is not available for enums (specifically, GCC 5.5 doesn't support it despite claiming to support C++17) so we get compilation errors here.
+
+These `static_cast`s (backported from how the hash is declared for enums in newer GCC's header files) would fix that.
+
+If you're opposed, that's fine, I can abandon this and keep it as a HHVM-specific patch in our build system; but maintaining these patches is a non-trivial burden so anything like this that we can fix more generally helps us quite a bit.
+
+Reviewed By: pavlo-fb
+
+Differential Revision: D19279530
+---
+
+diff --git a/third-party/mcrouter/src/mcrouter/ProxyDestinationKey.cpp b/third-party/mcrouter/src/mcrouter/ProxyDestinationKey.cpp
+--- a/third-party/mcrouter/src/mcrouter/ProxyDestinationKey.cpp
++++ b/third-party/mcrouter/src/mcrouter/ProxyDestinationKey.cpp
+@@ -36,8 +36,10 @@
+   auto result = folly::hash::hash_combine(
+       accessPoint.getHost(),
+       accessPoint.getPort(),
+-      accessPoint.getProtocol(),
+-      accessPoint.getSecurityMech(),
++      static_cast<std::underlying_type_t<mc_protocol_e>>(
++          accessPoint.getProtocol()),
++      static_cast<std::underlying_type_t<SecurityMech>>(
++          accessPoint.getSecurityMech()),
+       accessPoint.compressed());
+   if (accessPoint.getProtocol() == mc_ascii_protocol) {
+     result = folly::hash::hash_combine(result, timeout.count());
+--
+1.7.9.5

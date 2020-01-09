@@ -57,6 +57,7 @@ list(REMOVE_ITEM files
   ${FOLLY_DIR}/Benchmark.cpp
   ${FOLLY_DIR}/SingletonStackTrace.cpp
   ${FOLLY_DIR}/build/GenerateFingerprintTables.cpp
+  ${FOLLY_DIR}/compression/CompressionContextPoolSingletons.cpp
   ${FOLLY_DIR}/experimental/DynamicParser.cpp
   ${FOLLY_DIR}/experimental/JSONSchemaTester.cpp
   ${FOLLY_DIR}/experimental/RCUUtils.cpp
@@ -69,8 +70,12 @@ list(REMOVE_ITEM files
   ${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracerBenchmark.cpp
   ${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracerLib.cpp
   ${FOLLY_DIR}/experimental/exception_tracer/StackTrace.cpp
+  ${FOLLY_DIR}/experimental/io/AsyncBase.cpp
   ${FOLLY_DIR}/experimental/io/AsyncIO.cpp
+  ${FOLLY_DIR}/experimental/io/IoUring.cpp
+  ${FOLLY_DIR}/experimental/io/IoUringBackend.cpp
   ${FOLLY_DIR}/experimental/io/HugePageUtil.cpp
+  ${FOLLY_DIR}/experimental/io/PollIoBackend.cpp
   ${FOLLY_DIR}/experimental/symbolizer/StackTrace.cpp
   ${FOLLY_DIR}/experimental/symbolizer/SignalHandler.cpp
   ${FOLLY_DIR}/init/Init.cpp
@@ -81,6 +86,7 @@ list(REMOVE_ITEM files
 )
 list(REMOVE_ITEM hfiles
   ${FOLLY_DIR}/Benchmark.h
+  ${FOLLY_DIR}/compression/CompressionContextPoolSingletons.h
   ${FOLLY_DIR}/experimental/DynamicParser.h
   ${FOLLY_DIR}/experimental/DynamicParser-inl.h
   ${FOLLY_DIR}/experimental/RCUUtils.h
@@ -90,7 +96,11 @@ list(REMOVE_ITEM hfiles
   ${FOLLY_DIR}/experimental/exception_tracer/ExceptionCounterLib.h
   ${FOLLY_DIR}/experimental/exception_tracer/ExceptionTracer.h
   ${FOLLY_DIR}/experimental/exception_tracer/StackTrace.h
+  ${FOLLY_DIR}/experimental/io/AsyncBase.h
   ${FOLLY_DIR}/experimental/io/AsyncIO.h
+  ${FOLLY_DIR}/experimental/io/IoUring.h
+  ${FOLLY_DIR}/experimental/io/IoUringBackend.h
+  ${FOLLY_DIR}/experimental/io/PollIoBackend.h
   ${FOLLY_DIR}/experimental/symbolizer/StackTrace.h
   ${FOLLY_DIR}/experimental/symbolizer/ElfCache.h
   ${FOLLY_DIR}/experimental/symbolizer/SignalHandler.h
@@ -169,6 +179,8 @@ endif()
 if (JEMALLOC_ENABLED)
   target_link_libraries(folly PUBLIC jemalloc)
 endif()
+
+include_directories("${TP_DIR}/fmt/fmt/include")
 
 # For some reason we aren't making a folly-config.h and this is in there.
 # Please fix properly!

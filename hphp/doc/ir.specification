@@ -3458,6 +3458,11 @@ fields of that struct for holding intermediate values.
 
   Loads the value contained by the current unwinder exception.
 
+| EnterTCUnwind, ND, S(Obj), T
+
+  Enters tc_unwind_resume by doing a side enter, i.e. skipping itanium ABI.
+  Stores the ObjectData* in S0 to UnwindRDS' exn field as well as true to
+  sideEnter field.
 
 19. Function prologues
 

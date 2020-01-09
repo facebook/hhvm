@@ -389,6 +389,11 @@ struct UniqueStubs {
   TCA endCatchStublogueHelper;
 
   /*
+   * Throws an exception from the unwinder to enter the itanium unwinder
+   */
+  TCA throwExceptionWhileUnwinding;
+
+  /*
    * Service request helper.
    *
    * Packs service request arguments into a struct on the stack before calling

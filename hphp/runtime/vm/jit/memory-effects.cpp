@@ -681,6 +681,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
   }
 
+  case EnterTCUnwind: {
+    auto const stack_kills = stack_below(
+      inst.marker().fp(),
+      -inst.marker().spOff() - 1
+    );
+    return ExitEffects {
+      AUnknown,
+      stack_kills | AMIStateTempBase | AMIStateBase | AMIStatePropS
+    };
+  }
+
   /*
    * DefInlineFP has some special treatment here.
    *

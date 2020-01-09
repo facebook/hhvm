@@ -34,6 +34,7 @@ inline void exception_handler(Action action) {
     checkVMRegState();
     ITRACE_MOD(Trace::unwind, 1, "unwind: Object of class {}\n",
                o->getVMClass()->name()->data());
+    assertx(o.get());
     unwindVM(o.get());
     if (LIKELY(o.get()->hasMultipleRefs()) ||
         vmfp() != nullptr ||

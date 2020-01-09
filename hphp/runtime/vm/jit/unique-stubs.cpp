@@ -1081,6 +1081,30 @@ TCA emitEndCatchStublogueHelper(CodeBlock& cb, DataBlock& data,
   });
 }
 
+namespace {
+
+[[noreturn]] static void throw_exception_while_unwinding() {
+  assert_native_stack_aligned();
+  assertx(g_unwind_rds->exn != nullptr);
+  throw req::root<Object>(Object::attach(g_unwind_rds->exn));
+}
+
+} // namespace
+
+TCA emitThrowExceptionWhileUnwinding(CodeBlock& cb, DataBlock& data) {
+  alignCacheLine(cb);
+  alignJmpTarget(cb);
+
+  return vwrap(cb, data, [&] (Vout& v) {
+    // The saved rip is the caller is callToExit. We want to skip over
+    // callToExit and enterTCExit, so move the stack pointer and set the rbp
+    // to be the next frame in the rbp chain.
+    if (arch() == Arch::X64) v << lea{rsp()[16], rsp()};
+    v << load{rsp()[0], rvmfp()};
+    v << tailcallstub{TCA(throw_exception_while_unwinding)};
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -1123,6 +1147,9 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(endCatchStublogueHelper,
       hotView(),
       emitEndCatchStublogueHelper(hot(), data, *this));
+  ADD(throwExceptionWhileUnwinding,
+      hotView(),
+      emitThrowExceptionWhileUnwinding(hot(), data));
 
   ADD(funcPrologueRedispatch,
       hotView(),

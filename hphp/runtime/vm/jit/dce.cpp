@@ -700,6 +700,7 @@ bool canDCE(IRInstruction* inst) {
   case LdVectorSize:
   case BeginCatch:
   case EndCatch:
+  case EnterTCUnwind:
   case UnwindCheckSideExit:
   case DbgTrashStk:
   case DbgTrashFrame:

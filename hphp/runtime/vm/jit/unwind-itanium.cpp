@@ -277,6 +277,14 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
     if (savedRip == tc::ustubs().callToExit) {
       // If we're the top VM frame, there's nothing we need to do; we can just
       // let the native C++ unwinder take over.
+      if (g_unwind_rds->sideEnter) {
+        ITRACE(1, "top VM frame, sideEnter is set, enter itanium unwinder "
+                  "by throwing\n");
+        // Looks like we got here having skipped itanium unwinder, lets enter
+        g_unwind_rds->sideEnter = false;
+        assertx(g_unwind_rds->exn);
+        return {tc::ustubs().throwExceptionWhileUnwinding, sfp};
+      }
       ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
 
       switch (arch()) {
@@ -299,8 +307,9 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
       if (g_unwind_rds->exn) {
         auto const result = unwindVM(g_unwind_rds->exn, sfp);
         if (!(result & UnwindReachedGoal)) {
-          __cxxabiv1::__cxa_end_catch();
+          if (!g_unwind_rds->sideEnter) __cxxabiv1::__cxa_end_catch();
           g_unwind_rds->doSideExit = true;
+          g_unwind_rds->sideEnter = false;
 
           // If we have a failed static wait handle, we need to run the next
           // catch trace as well to clean up the stack

@@ -65,6 +65,11 @@ struct UnwindRDS {
   /* Whether tc_unwind_resume should increment the vmpc
    */
   bool shouldSkipCall;
+
+  /* Indicates that we entered tc_unwind_resume directly rather than through
+   * itanium ABI
+   */
+  bool sideEnter;
 };
 extern rds::Link<UnwindRDS, rds::Mode::Normal> g_unwind_rds;
 
@@ -72,8 +77,10 @@ extern rds::Link<UnwindRDS, rds::Mode::Normal> g_unwind_rds;
   inline ptrdiff_t unwinder##Name##Off() {                      \
     return g_unwind_rds.handle() + offsetof(UnwindRDS, member); \
   }
+IMPLEMENT_OFF(Exn, exn)
 IMPLEMENT_OFF(TV, tv)
 IMPLEMENT_OFF(SideExit, doSideExit)
+IMPLEMENT_OFF(SideEnter, sideEnter)
 #undef IMPLEMENT_OFF
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -75,6 +75,17 @@ void cgLdUnwinderValue(IRLS& env, const IRInstruction* inst) {
   loadTV(v, inst->dst(), dstLoc(env, inst, 0), rvmtl()[unwinderTVOff()]);
 }
 
+void cgEnterTCUnwind(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const exn = srcLoc(env, inst, 0).reg();
+  v << storebi{1, rvmtl()[unwinderSideEnterOff()]};
+  v << store{exn, rvmtl()[unwinderExnOff()]};
+  v << copy{rvmfp(), rarg(0)};
+  v << call{TCA(tc_unwind_resume), arg_regs(1)};
+  v << copy{rret(1), rvmfp()};
+  v << jmpr{rret(0), vm_regs_with_sp()};
+}
+
 IMPL_OPCODE_CALL(DebugBacktrace)
 IMPL_OPCODE_CALL(DebugBacktraceFast)
 

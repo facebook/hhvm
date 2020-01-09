@@ -1380,6 +1380,9 @@ void ExecutionContext::pushVMState(TypedValue* savedSP) {
   savedVM.jitCalledFrame = vmJitCalledFrame();
   savedVM.jitReturnAddr = vmJitReturnAddr();
   savedVM.exn = jit::g_unwind_rds->exn;
+  savedVM.unwinderSideEnter = jit::g_unwind_rds->sideEnter;
+  jit::g_unwind_rds->exn = nullptr;
+  jit::g_unwind_rds->sideEnter = false;
   m_nesting++;
 
   if (debug && savedVM.fp &&
@@ -1417,6 +1420,7 @@ void ExecutionContext::popVMState() {
   vmJitCalledFrame() = savedVM.jitCalledFrame;
   vmJitReturnAddr() = savedVM.jitReturnAddr;
   jit::g_unwind_rds->exn = savedVM.exn;
+  jit::g_unwind_rds->sideEnter = savedVM.unwinderSideEnter;
 
   if (debug) {
     if (savedVM.fp &&

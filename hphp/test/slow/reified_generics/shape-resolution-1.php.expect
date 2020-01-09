@@ -29,7 +29,7 @@ array(2) {
   int(14)
   ["fields"]=>
   array(1) {
-    ["C::foo"]=>
+    ["A"]=>
     array(1) {
       ["kind"]=>
       int(4)

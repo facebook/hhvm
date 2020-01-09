@@ -13,6 +13,7 @@ open Aast_defs
 open Typing_defs
 module Env = Tast_env
 module MakeType = Typing_make_type
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 (** Return true if ty definitely does not contain null.  I.e., the
@@ -122,7 +123,7 @@ let rec truthiness env ty =
       (* Classes which implement Traversable but not Container will always be
        truthy when empty. If this Tclass is instead an interface type like
        KeyedTraversable, the value may or may not be truthy when empty. *)
-      match Decl_provider.get_class cid with
+      match Decl_provider.get_class (Env.get_ctx env) cid with
       | None -> Unknown
       | Some cls ->
         (match Cls.kind cls with
@@ -212,7 +213,7 @@ let rec find_sketchy_types env acc ty =
     then
       acc
     else (
-      match Decl_provider.get_class cid with
+      match Decl_provider.get_class (Env.get_ctx env) cid with
       | None -> acc
       | Some cls ->
         (match Cls.kind cls with

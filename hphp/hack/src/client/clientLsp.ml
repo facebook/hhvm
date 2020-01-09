@@ -14,17 +14,11 @@ open Hh_json_helpers
 
 (* All hack-specific code relating to LSP goes in here. *)
 
-(* The environment for hh_client with LSP *)
 type env = {
-  (* The source where the client was spawned from, i.e. nuclide, vim, emacs, etc. *)
   from: string;
-  (* Flag to turn on the (experimental) FFP based autocomplete *)
   use_ffp_autocomplete: bool;
-  (* Flag to turn on ranked autocompletion results *)
   use_ranked_autocomplete: bool;
-  (* Flag to provide IDE services from `hh_client` *)
   use_serverless_ide: bool;
-  (* Extra logging, including logs per LSP message (voluminous!) *)
   verbose: bool;
 }
 
@@ -331,12 +325,6 @@ let set_hh_server_state (new_hh_server_state : hh_server_state) : unit =
       when prev_hh_server_state = new_hh_server_state ->
       (prev_time, prev_hh_server_state) :: retain rest
     | rest -> (new_time, new_hh_server_state) :: retain rest
-
-let get_current_hh_server_state () : hh_server_state =
-  (* current state is at head of list. *)
-  match List.hd !hh_server_state with
-  | None -> Hh_server_unknown
-  | Some (_, hh_server_state) -> hh_server_state
 
 let get_older_hh_server_state (requested_time : float) : hh_server_state =
   (* find the first item which is older than the specified time. *)
@@ -760,6 +748,11 @@ let dismiss_showMessageRequest (dialog : ShowMessageRequest.t) :
       to_stdout json
   end;
   ShowMessageRequest.Absent
+
+(** These functions are not currently used, but may be useful in the future. *)
+let (_ : 'a -> 'b) = request_showMessage
+
+and (_ : 'c -> 'd) = dismiss_showMessageRequest
 
 (* dismiss_ui: dismisses all dialogs, progress- and action-required           *)
 (* indicators and diagnostics in a state.                                     *)
@@ -3948,8 +3941,6 @@ let handle_tick
   in
   Lwt.return_unit
 
-(* main: this is the main loop for processing incoming Lsp client requests,
-   and incoming server notifications. Never returns. *)
 let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
   if env.verbose then Hh_logger.Level.set_min_level Hh_logger.Level.Debug;

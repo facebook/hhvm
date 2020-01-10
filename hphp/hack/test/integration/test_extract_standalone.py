@@ -165,6 +165,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\CCC::with_nested_type_access",
             "\\TFlob::g",
             "\\Derived::overridden",
+            "\\with_xhp",
         ]
 
         for path in paths:

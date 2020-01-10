@@ -253,8 +253,12 @@ let tree_from_string s =
     raise Hackfmt_error.InvalidSyntax
   )
 
+let fixup_xhp =
+  let re = Str.regexp "\\\\:" in
+  Str.global_replace re ":"
+
 let format text =
-  try Libhackfmt.format_tree (tree_from_string text)
+  try Libhackfmt.format_tree (tree_from_string (fixup_xhp text))
   with Hackfmt_error.InvalidSyntax -> text
 
 let name_from_type (_, ty) =

@@ -1,0 +1,10 @@
+<?hh
+class :xhp implements \XHPChild {}
+class :foo extends :xhp {}
+function with_xhp(): :xhp {
+  return <foo />;
+}
+<<__Rx>>
+function extract_standalone_make_default(): nothing {
+  throw new Exception();
+}

@@ -1326,7 +1326,7 @@ void optimizeCatchBlocks(const BlockList& blocks,
 
   for (auto block : blocks) {
     if (block->back().is(EndCatch) &&
-        block->back().extra<EndCatch>()->mode == EndCatchData::UnwindOnly &&
+        block->back().extra<EndCatch>()->mode != EndCatchData::SideExit &&
         block->front().is(BeginCatch)) {
       auto const astk = AStack {
         block->back().src(1), block->back().extra<EndCatch>()->offset, 0

@@ -704,7 +704,7 @@ void adjustFrame(IRUnit& unit,
 
 bool isCallCatch(Block* block) {
   assertx(block->back().is(EndCatch));
-  return block->back().extra<EndCatch>()->mode == EndCatchData::SwitchMode;
+  return block->back().extra<EndCatch>()->mode == EndCatchData::CallCatch;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

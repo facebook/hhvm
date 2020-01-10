@@ -95,7 +95,7 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
         []{},
         inst->is(Call) ||
         inst->is(CallUnpack) ?
-        EndCatchData::SwitchMode : EndCatchData::UnwindOnly
+        EndCatchData::CallCatch : EndCatchData::UnwindOnly
       )
     );
   }

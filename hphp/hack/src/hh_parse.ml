@@ -49,7 +49,6 @@ module FullFidelityParseArgs = struct
     schema: bool;
     show_file_name: bool;
     (* Configuring the parser *)
-    is_hh_file: bool;
     codegen: bool;
     php5_compat_mode: bool;
     elaborate_namespaces: bool;
@@ -86,7 +85,6 @@ module FullFidelityParseArgs = struct
       program_text
       pretty_print
       schema
-      is_hh_file
       codegen
       php5_compat_mode
       elaborate_namespaces
@@ -121,7 +119,6 @@ module FullFidelityParseArgs = struct
       program_text;
       pretty_print;
       schema;
-      is_hh_file;
       codegen;
       php5_compat_mode;
       elaborate_namespaces;
@@ -170,7 +167,6 @@ module FullFidelityParseArgs = struct
     let set_pretty_print () = pretty_print := true in
     let schema = ref false in
     let set_schema () = schema := true in
-    let is_hh_file = ref false in
     let codegen = ref false in
     let php5_compat_mode = ref false in
     let elaborate_namespaces = ref true in
@@ -238,12 +234,6 @@ No errors are filtered out."
         ( "--schema",
           Arg.Unit set_schema,
           "Displays the parser version and schema of nodes." );
-        ( "--is-hh-file",
-          Arg.Set is_hh_file,
-          "Set the is_hh_file option for the parser." );
-        ( "--no-is-hh-file",
-          Arg.Clear is_hh_file,
-          "Unset the is_hh_file option for the parser." );
         ("--codegen", Arg.Set codegen, "Set the codegen option for the parser.");
         ( "--no-codegen",
           Arg.Clear codegen,
@@ -365,7 +355,6 @@ No errors are filtered out."
       !program_text
       !pretty_print
       !schema
-      !is_hh_file
       !codegen
       !php5_compat_mode
       !elaborate_namespaces
@@ -529,7 +518,6 @@ let handle_existing_file args filename =
             ~lower_coroutines:args.lower_coroutines
             ~parser_options:popt
             ~fail_open:args.fail_open
-            ~is_hh_file:args.is_hh_file
             file
         in
         try

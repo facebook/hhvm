@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:instruction_sequence_rust
-# Signature<<7bc87035c834ca76e47e357f57d2e5b35d70930d>>
+# Signature<<12eeb919d28d8670493efa9e84d243eb459347e8>>
 [package]
 name = "instruction_sequence_rust"
 edition = "2018"
@@ -20,4 +20,4 @@ runtime = { path = "../runtime" }
 
 [dev-dependencies]
 pretty_assertions = "*"
-# @end of Signature<<7bc87035c834ca76e47e357f57d2e5b35d70930d>>
+# @end of Signature<<12eeb919d28d8670493efa9e84d243eb459347e8>>

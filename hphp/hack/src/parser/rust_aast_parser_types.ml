@@ -8,7 +8,6 @@
  *)
 
 type env = {
-  is_hh_file: bool;
   codegen: bool;
   php5_compat_mode: bool;
   elaborate_namespaces: bool;

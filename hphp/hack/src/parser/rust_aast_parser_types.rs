@@ -11,7 +11,6 @@ use parser_core_types::syntax_error::SyntaxError;
 
 #[derive(Clone, Debug, OcamlRep, Default)]
 pub struct Env {
-    pub is_hh_file: bool,
     pub codegen: bool,
     pub php5_compat_mode: bool,
     pub elaborate_namespaces: bool,

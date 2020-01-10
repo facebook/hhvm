@@ -13,7 +13,6 @@ open Scoured_comments
 
 (* Context of the file being parsed, as (hopefully some day read-only) state. *)
 type env = {
-  is_hh_file: bool;
   codegen: bool;
   php5_compat_mode: bool;
   elaborate_namespaces: bool;
@@ -45,13 +44,11 @@ let make_env
     ?(lower_coroutines = true)
     ?(fail_open = true)
     ?(parser_options = ParserOptions.default)
-    ?(is_hh_file = false)
     ?(hacksperimental = false)
     ?(disable_global_state_mutation = false)
     (file : Relative_path.t) : env =
   let parser_options = ParserOptions.with_codegen parser_options codegen in
   {
-    is_hh_file;
     codegen;
     php5_compat_mode;
     elaborate_namespaces;
@@ -75,7 +72,6 @@ let should_surface_errors env =
 
 type aast_result = {
   fi_mode: FileInfo.mode;
-  is_hh_file: bool;
   ast: (Pos.t, unit, unit, unit) Aast.program;
   content: string;
   file: Relative_path.t;
@@ -265,7 +261,6 @@ let from_text_rust (env : env) (source_text : SourceText.t) :
   let rust_env =
     Rust_aast_parser_types.
       {
-        is_hh_file = env.is_hh_file;
         codegen = env.codegen;
         elaborate_namespaces = env.elaborate_namespaces;
         php5_compat_mode = env.php5_compat_mode;
@@ -299,7 +294,6 @@ let process_lowerer_result
     | Ok aast ->
       {
         fi_mode = r.file_mode;
-        is_hh_file = r.file_mode <> FileInfo.Mphp;
         ast = elaborate_top_level_defs env aast;
         content =
           ( if env.codegen then
@@ -400,7 +394,7 @@ let aast_to_nast (consolidate_pos : bool) aast =
  *)
 let from_text_to_empty_tast env source_text =
   let aast_result = from_text env source_text in
-  (aast_to_tast aast_result.ast, aast_result.is_hh_file)
+  (aast_to_tast aast_result.ast, aast_result.fi_mode)
 
 (*****************************************************************************(
  * Backward compatibility matter (should be short-lived)
@@ -410,7 +404,6 @@ let legacy (env : env) (x : aast_result) : Parser_return.t =
   {
     Parser_return.file_mode =
       Option.some_if (x.fi_mode <> FileInfo.Mphp) x.fi_mode;
-    Parser_return.is_hh_file = x.is_hh_file;
     Parser_return.comments = x.comments.sc_comments;
     Parser_return.ast =
       aast_to_nast (ParserOptions.rust_lowerer env.parser_options) x.ast;
@@ -477,7 +470,6 @@ let defensive_program
       Parser_return.comments = [];
       Parser_return.ast = [];
       Parser_return.content;
-      Parser_return.is_hh_file = mode <> None;
     }
 
 let defensive_from_file ?quick ?show_all_errors popt fn =

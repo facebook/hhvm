@@ -10,8 +10,6 @@ type comments = (Pos.t * Prim_defs.comment) list
 
 type t = {
   file_mode: FileInfo.mode option;
-  (* None if PHP *)
-  is_hh_file: bool;
   comments: comments;
   ast: Nast.program;
   content: string;

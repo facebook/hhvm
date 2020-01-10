@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:emit_body_rust
-# Signature<<5ff1e1e1ea7f4fe13eaeadd23621b4d24e3ea457>>
+# Signature<<d2dd65a866c0b152a6d1a765bc22099898b6b475>>
 [package]
 name = "emit_body_rust"
 edition = "2018"
@@ -29,4 +29,4 @@ options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }
 bitflags = "*"
-# @end of Signature<<5ff1e1e1ea7f4fe13eaeadd23621b4d24e3ea457>>
+# @end of Signature<<d2dd65a866c0b152a6d1a765bc22099898b6b475>>

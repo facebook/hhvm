@@ -49,6 +49,8 @@ let is_strict = function
   | Mpartial ->
     false
 
+let is_hh_file mode = mode <> Mphp
+
 let string_of_mode = function
   | Mphp -> "php"
   | Mdecl -> "decl"

@@ -80,7 +80,7 @@ let parse_text ~hhbc_options popt filename text =
       filename
   in
   let source_text = SourceText.make filename text in
-  let (ast, is_hh_file) =
+  let (ast, file_mode) =
     Full_fidelity_ast.from_text_to_empty_tast env source_text
   in
   let elaborate_namespaces =
@@ -92,7 +92,7 @@ let parse_text ~hhbc_options popt filename text =
       (Naming_elaborate_namespaces_endo.make_env nsenv)
       ast
   in
-  (ast, is_hh_file)
+  (ast, file_mode)
 
 let parse_file ~hhbc_options filename text =
   let popt =
@@ -178,7 +178,7 @@ let from_text (source_text : string) (env : env) : result =
       in
       let (_, parsing_t) = add_to_time t in
       let empty_namespace = Namespace_env.empty_from_popt popt in
-      let (tast_hh, is_runtime_error, error) =
+      let (tast_with_file_mode, is_runtime_error, error) =
         match fail_or_tast with
         | `ParseFailure (e, pos) ->
           let is_runtime_error =
@@ -187,19 +187,20 @@ let from_text (source_text : string) (env : env) : result =
             | SyntaxError.RuntimeError -> true
           in
           (None, is_runtime_error, Some (pos, Some (SyntaxError.message e)))
-        | `ParseResult (errors, (tast, is_hh_file)) ->
+        | `ParseResult (errors, tast) ->
           let error_list = Errors.get_error_list errors in
           let error_list = handle_conversion_errors error_list in
           List.iter error_list (fun e ->
               Printf.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
           if List.is_empty error_list then
-            (Some (tast, is_hh_file), false, None)
+            (Some tast, false, None)
           else
             (None, false, Some (Pos.none, None))
       in
       let ret =
-        match (tast_hh, error) with
-        | (Some (tast, is_hh_file), _) ->
+        match (tast_with_file_mode, error) with
+        | (Some (tast, file_mode), _) ->
+          let is_hh_file = FileInfo.is_hh_file file_mode in
           from_ast ~env ~is_hh_file ~empty_namespace ~hhbc_options tast
         | (_, Some (pos, msg)) -> fatal ~env ~is_runtime_error pos msg
         | _ -> failwith "Impossible case: emits program or fatals"

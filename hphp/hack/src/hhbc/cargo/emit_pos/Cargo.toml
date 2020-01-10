@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:emit_pos_rust
-# Signature<<481141d1cbb252018d6f7e8575611d7f0c08d777>>
+# Signature<<7a57242139c23e135e60a0b853e830f4cbac0c7d>>
 [package]
 name = "emit_pos_rust"
 edition = "2018"
@@ -16,4 +16,4 @@ hhbc_ast_rust = { path = "../hhbc_ast" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
-# @end of Signature<<481141d1cbb252018d6f7e8575611d7f0c08d777>>
+# @end of Signature<<7a57242139c23e135e60a0b853e830f4cbac0c7d>>

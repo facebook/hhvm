@@ -36,9 +36,7 @@ let legacy_php_file_info = ref (fun _fn -> empty_file_info)
  *)
 let process_parse_result
     ?(ide = false) ~quick (acc, errorl, error_files) fn res popt =
-  let ( errorl',
-        { Parser_return.file_mode; comments = _; ast; content; is_hh_file = _ }
-      ) =
+  let (errorl', { Parser_return.file_mode; comments = _; ast; content }) =
     res
   in
   let ast =

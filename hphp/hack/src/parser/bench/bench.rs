@@ -88,7 +88,6 @@ mod tests {
                 let indexed_source_text = IndexedSourceText::new(text.clone());
                 aast_parser::AastParser::from_text(
                     &rust_aast_parser_types::Env {
-                        is_hh_file: true,
                         codegen: false,
                         php5_compat_mode: false,
                         elaborate_namespaces: false,
@@ -117,7 +116,6 @@ mod tests {
                 let indexed_source_text = IndexedSourceText::new(text.clone());
                 aast_parser::AastParser::from_text(
                     &rust_aast_parser_types::Env {
-                        is_hh_file: true,
                         codegen: false,
                         php5_compat_mode: false,
                         elaborate_namespaces: false,

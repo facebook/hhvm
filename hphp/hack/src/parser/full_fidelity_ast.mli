@@ -28,7 +28,6 @@ val make_env (* Optional parts *) :
   ?lower_coroutines:bool ->
   ?fail_open:bool ->
   ?parser_options:ParserOptions.t ->
-  ?is_hh_file:bool ->
   ?hacksperimental:bool (* Required parts *) ->
   ?disable_global_state_mutation:bool ->
   Relative_path.t ->
@@ -43,7 +42,7 @@ val parse_text :
 
 (* Only for hh_single_compile at the moment. *)
 val from_text_to_empty_tast :
-  env -> Full_fidelity_source_text.t -> Tast.program * bool
+  env -> Full_fidelity_source_text.t -> Tast.program * FileInfo.mode
 
 (**
  * Here only for backward compatibility. Consider these deprecated.

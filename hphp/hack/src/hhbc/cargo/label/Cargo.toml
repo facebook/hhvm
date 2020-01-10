@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:label_rust
-# Signature<<08381b3e75a6f39fa196f0888cbb3faf2e11834d>>
+# Signature<<0b539d72edd08eaf3b2af69c862d052be48541d1>>
 [package]
 name = "label_rust"
 edition = "2018"
@@ -9,4 +9,4 @@ include = ["../../label.rs"]
 
 [lib]
 path = "../../label.rs"
-# @end of Signature<<08381b3e75a6f39fa196f0888cbb3faf2e11834d>>
+# @end of Signature<<0b539d72edd08eaf3b2af69c862d052be48541d1>>

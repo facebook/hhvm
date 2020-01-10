@@ -37,6 +37,8 @@ val parse_mode : string -> mode option
 
 val string_of_mode : mode -> string
 
+val is_hh_file : mode -> bool
+
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)

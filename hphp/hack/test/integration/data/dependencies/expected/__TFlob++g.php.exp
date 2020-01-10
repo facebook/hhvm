@@ -16,10 +16,10 @@ final class Flob extends \FlobBase implements \IFlob, \IToto {
 }
 abstract class FlobBase {
   public function f1(): void {
-    throw new Exception();
+    throw new \Exception();
   }
   public static function f2(): int {
-    throw new Exception();
+    throw new \Exception();
   }
 }
 interface IToto {
@@ -27,5 +27,5 @@ interface IToto {
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

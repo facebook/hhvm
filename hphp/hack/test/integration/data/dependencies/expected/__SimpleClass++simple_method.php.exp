@@ -1,11 +1,11 @@
 <?hh
 class SimpleClass {
   public function coarse_grained_dependency(): void {
-    throw new Exception();
+    throw new \Exception();
   }
   public function simple_method(): void {}
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

@@ -9,5 +9,5 @@ function reactive(mixed $x = \extract_standalone_make_default()): void {
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

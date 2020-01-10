@@ -3,7 +3,7 @@
 function with_newtype_with_bound(dict<N, mixed> $_): void {}
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }
 
 //// partial_toplevel.php

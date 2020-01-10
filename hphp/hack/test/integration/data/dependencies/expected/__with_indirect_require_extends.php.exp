@@ -4,7 +4,7 @@ function with_indirect_require_extends(Jay $x): void {
 }
 abstract class Bee {
   public function f(): void {
-    throw new Exception();
+    throw new \Exception();
   }
 }
 interface Eye {
@@ -13,5 +13,5 @@ interface Eye {
 interface Jay extends \Eye {}
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

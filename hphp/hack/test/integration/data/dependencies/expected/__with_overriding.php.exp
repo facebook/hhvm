@@ -1,7 +1,7 @@
 <?hh
 class ImplementingBase extends \AbstractBase {
   public function inherited(): void {
-    throw new Exception();
+    throw new \Exception();
   }
 }
 abstract class AbstractBase {}
@@ -11,10 +11,10 @@ function with_overriding(Derived $arg): int {
 }
 final class Derived extends \ImplementingBase {
   public function overridden(): int {
-    throw new Exception();
+    throw new \Exception();
   }
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

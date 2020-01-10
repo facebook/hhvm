@@ -2,7 +2,7 @@
 abstract class HasBar {}
 class StringBarWrapper extends \HasBar implements \IHasBar {
   public function getBar(): this::TBar {
-    throw new Exception();
+    throw new \Exception();
   }
 }
 interface IHasBar {
@@ -15,5 +15,5 @@ function with_type_const_from_implemented_interface(
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

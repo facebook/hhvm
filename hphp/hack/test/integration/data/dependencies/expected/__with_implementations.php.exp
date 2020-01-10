@@ -5,10 +5,10 @@ function with_implementations(BB $b, II $i, CC $c): void {
 }
 final class CC extends \BB implements \II {
   public function g(): int {
-    throw new Exception();
+    throw new \Exception();
   }
   public function f(): void {
-    throw new Exception();
+    throw new \Exception();
   }
   const type T = int;
 }
@@ -21,5 +21,5 @@ interface II {
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

@@ -1,7 +1,7 @@
 <?hh
 class Regular {
   public function generic_method<T>(T $arg): void {
-    throw new Exception();
+    throw new \Exception();
   }
 }
 function with_generic_method_with_wildcard_tparam(int $arg): void {
@@ -10,5 +10,5 @@ function with_generic_method_with_wildcard_tparam(int $arg): void {
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

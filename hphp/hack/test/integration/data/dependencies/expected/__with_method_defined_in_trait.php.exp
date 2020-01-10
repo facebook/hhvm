@@ -5,7 +5,7 @@ function with_method_defined_in_trait(IWibble $w, Wibble $_): void {
 trait TWibble {
   require implements \IWibble;
   public function f(): void {
-    throw new Exception();
+    throw new \Exception();
   }
 }
 interface IWibble {
@@ -16,5 +16,5 @@ class Wibble implements \IWibble {
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

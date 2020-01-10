@@ -2,11 +2,11 @@
 class WithReactiveMethods {
   <<__RxShallow>>
   public function shallow_reactive(): void {
-    throw new Exception();
+    throw new \Exception();
   }
   <<__Rx>>
   public function reactive(): void {
-    throw new Exception();
+    throw new \Exception();
   }
   <<__RxShallow>>
   public function call_shallow_reactive(): void {
@@ -15,5 +15,5 @@ class WithReactiveMethods {
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

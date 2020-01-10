@@ -1,7 +1,7 @@
 <?hh
 class BoundedGeneric<T as arraykey> {
   public function emptyKeyset(): \HH\keyset<T> {
-    throw new Exception();
+    throw new \Exception();
   }
 }
 function with_bounded_generic_class_tparam(
@@ -11,5 +11,5 @@ function with_bounded_generic_class_tparam(
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

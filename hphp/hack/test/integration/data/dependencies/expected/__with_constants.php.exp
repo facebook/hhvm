@@ -41,5 +41,5 @@ enum SecondEnum: string {
 const \HH\keyset<string> KEYSET = keyset[];
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

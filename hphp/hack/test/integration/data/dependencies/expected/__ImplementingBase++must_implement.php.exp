@@ -1,7 +1,7 @@
 <?hh
 class ImplementingBase extends \AbstractBase {
   public function inherited(): void {
-    throw new Exception();
+    throw new \Exception();
   }
   protected function must_implement(): void {
     $this->inherited();
@@ -12,5 +12,5 @@ abstract class AbstractBase {
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

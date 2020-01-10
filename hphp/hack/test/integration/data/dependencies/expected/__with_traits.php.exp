@@ -10,11 +10,11 @@ abstract class AbstractBase {}
 trait T {
   require extends \AbstractBase;
   public function routine(): void {
-    throw new Exception();
+    throw new \Exception();
   }
 }
 trait ImplementingAbstractBase {}
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

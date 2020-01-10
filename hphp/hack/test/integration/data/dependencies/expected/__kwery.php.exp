@@ -8,5 +8,5 @@ class Kwery<TValue, TResult as \Result<TValue>> implements \IKwery<TResult> {}
 interface IResult<+T> {}
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

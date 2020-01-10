@@ -2,7 +2,7 @@
 trait THasFoo {
   require implements \IHasFoo;
   public function getFoo(): this::TFoo {
-    throw new Exception();
+    throw new \Exception();
   }
 }
 interface IHasFoo {
@@ -17,5 +17,5 @@ function with_type_const_from_required_interface(IntFooWrapper $w): int {
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

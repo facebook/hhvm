@@ -78,3 +78,20 @@ function with_implementations(BB $b, II $i, CC $c): void {
   $b->f();
   $_ = $i->g();
 }
+
+<<__ConsistentConstruct>>
+interface IWithNullaryConstructor {
+  public function __construct();
+}
+
+trait TDummy implements IWithNullaryConstructor {}
+
+class WithOptionalConstructorArguments implements IWithNullaryConstructor {
+  use TDummy;
+
+  public function __construct(?int $x = null, ?string $y = null) {}
+
+  public static function get(): this {
+    return new static();
+  }
+}

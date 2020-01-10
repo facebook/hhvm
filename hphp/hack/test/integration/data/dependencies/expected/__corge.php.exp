@@ -9,11 +9,11 @@ function corge(Corge $x, ICorge $y): void {
 }
 final class Corge implements \ICorge {
   public function get(): this::Tthis {
-    throw new Exception();
+    throw new \Exception();
   }
   const type Tthis = \Corge;
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

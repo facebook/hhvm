@@ -594,6 +594,11 @@ let get_direct_ancestors ctx cls =
 
 let get_class_declaration ctx (cls : Decl_provider.class_decl) =
   Decl_provider.(
+    let consistent_construct =
+      match Class.construct cls with
+      | (_, ConsistentConstruct) -> "<<__ConsistentConstruct>> "
+      | (_, (Inconsistent | FinalClass)) -> ""
+    in
     let final =
       if Class.final cls then
         "final "
@@ -635,7 +640,15 @@ let get_class_declaration ctx (cls : Decl_provider.class_decl) =
       @@ List.map ~f:(Typing_print.full_decl ctx) implements
     in
     (* TODO: traits, records *)
-    Printf.sprintf "%s%s %s%s%s%s" final kind name tparams extends implements)
+    Printf.sprintf
+      "%s%s%s %s%s%s%s"
+      consistent_construct
+      final
+      kind
+      name
+      tparams
+      extends
+      implements)
 
 let get_method_declaration
     ctx
@@ -757,7 +770,7 @@ let get_class_elt_declaration
             if m.ce_abstract then
               ";"
             else
-              "{throw new Exception();}"
+              "{throw new \\Exception();}"
           in
           Some (decl ^ body))
       | SMethod (class_name, smethod_name) ->
@@ -783,7 +796,7 @@ let get_class_elt_declaration
             if m.ce_abstract then
               ";"
             else
-              "{throw new Exception();}"
+              "{throw new \\Exception();}"
           in
           Some (decl ^ body))
       | Prop (_, prop_name) ->
@@ -849,9 +862,20 @@ let get_constructor_declaration tcopt cls prop_names =
       Some "public function __construct() {throw new \\Exception();}"
   | Some cstr ->
     let decl =
-      get_method_declaration tcopt cstr ~is_static:false "__construct"
+      get_method_declaration
+        tcopt
+        cstr
+        ~is_static:false
+        ~from_interface:(Class.kind cls = Ast_defs.Cinterface)
+        "__construct"
     in
-    Some (decl ^ " {throw new \\Exception();}")
+    let body =
+      if cstr.ce_abstract then
+        ";"
+      else
+        "{throw new \\Exception();}"
+    in
+    Some (decl ^ body)
 
 let get_class_body ctx cls target class_elts =
   let { uses; req_extends; req_implements; _ } = get_direct_ancestors ctx cls in
@@ -1383,7 +1407,7 @@ let get_code strict_declarations partial_declarations =
   let (partial_toplevel, partial_namespaces) = get_code partial_declarations in
   let helper =
     Printf.sprintf
-      "<<__Rx>> function %s(): nothing {throw new Exception();}"
+      "<<__Rx>> function %s(): nothing {throw new \\Exception();}"
       function_make_default
   in
   let strict_hh_prefix = "<?hh" in

@@ -7,5 +7,5 @@ function generic_with_bound<T as arraykey>(T $x): \HH\keyset<T> {
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

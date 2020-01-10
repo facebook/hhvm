@@ -4,7 +4,7 @@ function with_newtype_with_newtype_bound(M $_): void {}
 newtype M as \N = nothing;
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }
 
 //// partial_toplevel.php

@@ -1,7 +1,7 @@
 <?hh
 class WithRecursiveMethods {
   public function recursive_instance(): void {
-    throw new Exception();
+    throw new \Exception();
   }
   public static function recursive_static(): void {
     WithRecursiveMethods::recursive_static();
@@ -9,5 +9,5 @@ class WithRecursiveMethods {
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

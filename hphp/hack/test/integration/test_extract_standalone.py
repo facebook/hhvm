@@ -166,6 +166,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\TFlob::g",
             "\\Derived::overridden",
             "\\with_xhp",
+            "\\WithOptionalConstructorArguments::get",
         ]
 
         for path in paths:

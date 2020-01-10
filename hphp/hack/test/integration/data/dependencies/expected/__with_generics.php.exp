@@ -17,5 +17,5 @@ function with_generics<Tfirst, Tsecond>(
 interface I1 {}
 <<__Rx>>
 function extract_standalone_make_default(): nothing {
-  throw new Exception();
+  throw new \Exception();
 }

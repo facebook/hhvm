@@ -186,7 +186,7 @@ using FPUseMap = jit::fast_map<SSATmp*, InstructionSet>;
 using FPMap = jit::fast_map<Block*, SSATmp*>;
 
 struct BlockCmp {
-  bool operator()(const Block* a, const Block* b) {
+  bool operator()(const Block* a, const Block* b) const {
     if (a->id() == b->id()) return false;
     return a->id() < b->id();
   }

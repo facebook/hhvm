@@ -2618,13 +2618,8 @@ To string conversions:
 
 | LdWHResult, DParam(Cell), S(Obj), NF
 
-  Loads the result of the succeeded WaitHandle in S0. This instruction has
-  undefined behavior if S0 is not a WaitHandle, or if S0 had not succeeded.
-
-| LdWHException, D(Obj), S(Obj), NF
-
-  Loads the result of the failed WaitHandle in S0. This instruction has
-  undefined behavior if S0 is not a WaitHandle, or if S0 had not failed.
+  Loads the result of the WaitHandle in S0. This instruction has undefined
+  behavior if S0 is not a WaitHandle, or if S0 is not finished.
 
 | LdWHNotDone, D(Int), S(Obj), NF
 

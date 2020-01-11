@@ -240,7 +240,6 @@ bool canDCE(IRInstruction* inst) {
   case LdContArKey:
   case LdWHState:
   case LdWHResult:
-  case LdWHException:
   case LdWHNotDone:
   case LdAFWHActRec:
   case LdMIPropStateAddr:

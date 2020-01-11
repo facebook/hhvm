@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<38d5349b69dfd54bee8393aec5046a03>>
+// @generated SignedSource<<259a719fe079736f2b19d6067026dde8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -25,4 +25,5 @@ pub struct FullFidelityParserEnv {
     pub allow_new_attribute_syntax: bool,
     pub disable_legacy_attribute_syntax: bool,
     pub leak_rust_tree: bool,
+    pub enable_xhp_class_modifier: bool,
 }

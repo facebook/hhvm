@@ -19,7 +19,8 @@
              (constructor_call 5
               ((() name 5 ((end_of_line 1))) (missing 0 ()) (missing 0 ())
                (missing 0 ())))))))))
-       (missing 0 ()) (() class 5 ((whitespace 1))) (() name 1 ())
+       (missing 0 ()) (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 1 ())
        (type_parameters 3
         ((() < 1 ())
          (list 1

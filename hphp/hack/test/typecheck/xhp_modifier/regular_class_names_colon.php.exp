@@ -1,0 +1,4 @@
+File "regular_class_names_colon.php", line 4, characters 10-10:
+A left brace ('{') is expected here. (Parsing[1002])
+File "regular_class_names_colon.php", line 4, characters 10-10:
+Encountered unexpected text ':', was expecting a class element. (Parsing[1002])

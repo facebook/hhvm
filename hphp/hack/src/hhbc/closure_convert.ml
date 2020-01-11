@@ -501,6 +501,7 @@ let make_closure
       c_file_attributes = [];
       c_final = false;
       c_is_xhp = false;
+      c_has_xhp_keyword = false;
       c_kind = Ast_defs.Cnormal;
       c_name = (p, make_closure_name env st);
       c_tparams = class_tparams;

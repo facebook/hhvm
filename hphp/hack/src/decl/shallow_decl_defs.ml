@@ -89,6 +89,7 @@ type shallow_class = {
   sc_mode: FileInfo.mode;
   sc_final: bool;
   sc_is_xhp: bool;
+  sc_has_xhp_keyword: bool;
   sc_kind: Ast_defs.class_kind;
   sc_name: Aast.sid;
   sc_tparams: decl_tparam list;

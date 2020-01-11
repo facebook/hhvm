@@ -1,7 +1,7 @@
 [(Class
     { c_span = [5:1-7:2]; c_annotation = (); c_mode = Mstrict;
-      c_final = false; c_is_xhp = false; c_kind = Cnormal;
-      c_name = ([5:7-8], "\\A");
+      c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+      c_kind = Cnormal; c_name = ([5:7-8], "\\A");
       c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_method_redeclarations = [];
@@ -65,8 +65,8 @@
       c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [9:1-50]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([9:7-8], "\\C");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([9:7-8], "\\C");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = [([9:17-18], (Happly (([9:17-18], "\\A"), [])))];
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
@@ -108,8 +108,8 @@
        c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [10:1-49]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([10:7-8], "\\E");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([10:7-8], "\\E");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = [([10:17-18], (Happly (([10:17-18], "\\A"), [])))];
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
@@ -151,8 +151,8 @@
        c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [11:1-53]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([11:7-8], "\\F");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([11:7-8], "\\F");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = [([11:17-18], (Happly (([11:17-18], "\\A"), [])))];
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
@@ -194,8 +194,8 @@
        c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [12:1-53]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([12:7-10], "\\Met");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([12:7-10], "\\Met");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = [([12:19-20], (Happly (([12:19-20], "\\A"), [])))];
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
@@ -237,8 +237,8 @@
        c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [13:1-65]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([13:7-12], "\\IProp");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([13:7-12], "\\IProp");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = [([13:21-22], (Happly (([13:21-22], "\\A"), [])))];
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
@@ -281,8 +281,8 @@
        c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [14:1-63]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([14:7-12], "\\SProp");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([14:7-12], "\\SProp");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = [([14:21-22], (Happly (([14:21-22], "\\A"), [])))];
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
@@ -325,8 +325,8 @@
        c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [15:1-54]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([15:7-8], "\\P");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([15:7-8], "\\P");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = [([15:17-18], (Happly (([15:17-18], "\\A"), [])))];
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
@@ -369,8 +369,8 @@
        c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [16:1-59]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([16:7-13], "\\TAlias");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([16:7-13], "\\TAlias");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = [([16:22-23], (Happly (([16:22-23], "\\A"), [])))];
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
@@ -413,8 +413,8 @@
        c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [17:1-50]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([17:7-9], "\\Fi");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([17:7-9], "\\Fi");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = [([17:18-19], (Happly (([17:18-19], "\\A"), [])))];
        c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
@@ -507,8 +507,8 @@
        f_doc_comment = None; f_static = false });
   (Class
      { c_span = [22:1-30:2]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([23:7-9], "\\CC");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([23:7-9], "\\CC");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
@@ -630,8 +630,8 @@
        c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [32:1-33:16]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cenum;
-       c_name = ([33:6-8], "\\EE");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cenum; c_name = ([33:6-8], "\\EE");
        c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
        c_extends =
        [([33:6-8],

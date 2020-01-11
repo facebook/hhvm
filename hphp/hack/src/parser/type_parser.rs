@@ -221,6 +221,7 @@ where
             | TokenKind::SelfToken
             | TokenKind::Parent => self.parse_simple_type_or_type_constant(),
             | TokenKind::Category
+            | TokenKind::XHP
             | TokenKind::XHPClassName => self.parse_simple_type_or_type_constant_or_generic(),
             | TokenKind::Array => self.parse_array_type_specifier(),
             | TokenKind::Darray => self.parse_darray_type_specifier(),

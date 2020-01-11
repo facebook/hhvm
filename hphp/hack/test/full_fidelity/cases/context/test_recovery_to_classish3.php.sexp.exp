@@ -8,7 +8,7 @@
           ((whitespace 1) (single_line_comment 10) (end_of_line 1)))))
        (missing 0 ())))
      (classish_declaration 10
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1) (single_line_comment 74) (end_of_line 1)) trait 5
         ((whitespace 1)))
        (() name 2 ((whitespace 1))) (missing 0 ()) (missing 0 ())
@@ -16,14 +16,14 @@
        (classish_body 1
         ((() { 1 ((end_of_line 1))) (list 0 ((missing 0 ()))) (missing 0 ())))))
      (classish_declaration 13
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) interface 9 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 1
         ((() { 1 ((end_of_line 1))) (list 0 ((missing 0 ()))) (missing 0 ())))))
      (classish_declaration 87
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
@@ -46,14 +46,14 @@
            (missing 0 ())))
          (missing 0 ())))))
      (classish_declaration 10
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) trait 5 ((whitespace 1)))
        (() name 2 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 1
         ((() { 1 ((end_of_line 1))) (list 0 ((missing 0 ()))) (missing 0 ())))))
      (classish_declaration 52
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1) (single_line_comment 54) (end_of_line 1)) class 5
         ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
@@ -72,7 +72,7 @@
               ((() { 1 ((end_of_line 1)))
                (list 14
                 ((classish_declaration 14
-                  ((missing 0 ()) (missing 0 ())
+                  ((missing 0 ()) (missing 0 ()) (missing 0 ())
                    (((end_of_line 1) (whitespace 4)) class 5
                     ((whitespace 1)))
                    (() name 1 ()) (missing 0 ()) (missing 0 ())

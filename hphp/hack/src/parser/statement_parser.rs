@@ -191,6 +191,7 @@ where
             | TokenKind::Final
             | TokenKind::Interface
             | TokenKind::Trait
+            | TokenKind::XHP
             | TokenKind::Class => {
                 self.with_error(Errors::decl_outside_global_scope);
                 self.with_decl_parser(|x| {

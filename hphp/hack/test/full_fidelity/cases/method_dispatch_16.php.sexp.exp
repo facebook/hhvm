@@ -7,7 +7,7 @@
          (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
        (missing 0 ())))
      (classish_declaration 82
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((delimited_comment 206) (end_of_line 1) (end_of_line 1)
          (delimited_comment 67) (end_of_line 1) (end_of_line 1))
         class 5 ((whitespace 1)))
@@ -44,7 +44,7 @@
              (missing 0 ())))))
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 189
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ())
        (() extends 7 ((whitespace 1)))
@@ -120,7 +120,7 @@
              (missing 0 ())))))
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 82
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())

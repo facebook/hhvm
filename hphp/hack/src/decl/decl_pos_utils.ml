@@ -304,6 +304,7 @@ struct
       dc_members_fully_known = dc.dc_members_fully_known;
       dc_kind = dc.dc_kind;
       dc_is_xhp = dc.dc_is_xhp;
+      dc_has_xhp_keyword = dc.dc_has_xhp_keyword;
       dc_is_disposable = dc.dc_is_disposable;
       dc_name = dc.dc_name;
       dc_pos = dc.dc_pos;
@@ -355,6 +356,7 @@ struct
       sc_mode = sc.sc_mode;
       sc_final = sc.sc_final;
       sc_is_xhp = sc.sc_is_xhp;
+      sc_has_xhp_keyword = sc.sc_has_xhp_keyword;
       sc_kind = sc.sc_kind;
       sc_name = string_id sc.sc_name;
       sc_tparams = List.map sc.sc_tparams type_param;

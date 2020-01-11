@@ -82,6 +82,7 @@ impl Default for GlobalOptions {
             po_disallow_func_ptrs_in_constants: false,
             tco_error_php_lambdas: false,
             tco_disallow_discarded_nullable_awaitables: false,
+            po_enable_xhp_class_modifier: false,
             glean_service: String::new(),
             glean_hostname: String::new(),
             glean_port: 0,

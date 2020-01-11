@@ -8,9 +8,9 @@
       ((missing 0 ())
        (list 14
         ((() final 5 ((whitespace 1))) (() abstract 8 ((whitespace 1)))))
-       (() class 5 ((whitespace 1))) (() name 1 ((whitespace 1)))
+       (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ())
          (() } 1 ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))))
@@ -18,14 +18,14 @@
       ((missing 0 ())
        (list 14
         ((() abstract 8 ((whitespace 1))) (() final 5 ((whitespace 1)))))
-       (() class 5 ((whitespace 1))) (() name 1 ((whitespace 1)))
+       (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ())
          (() } 1 ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))))
      (classish_declaration 16
-      ((missing 0 ()) (list 5 ((() final 5 ((whitespace 1)))))
+      ((missing 0 ()) (list 5 ((() final 5 ((whitespace 1))))) (missing 0 ())
        (() class 5 ((whitespace 1))) (() name 1 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ())
@@ -34,16 +34,17 @@
          (() } 1 ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))))
      (classish_declaration 19
       ((missing 0 ()) (list 8 ((() abstract 8 ((whitespace 1)))))
-       (() class 5 ((whitespace 1))) (() name 1 ((whitespace 1)))
+       (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ())
          (() } 1 ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))))
      (classish_declaration 10
-      ((missing 0 ()) (missing 0 ()) (() class 5 ((whitespace 1)))
-       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
+       (() class 5 ((whitespace 1))) (() name 1 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ())
          (() } 1 ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))))
@@ -51,9 +52,9 @@
       ((missing 0 ())
        (list 11
         ((() final 5 ((whitespace 1))) (() final 5 ((whitespace 1)))))
-       (() class 5 ((whitespace 1))) (() name 1 ((whitespace 1)))
+       (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ())
          (() } 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))))
@@ -61,9 +62,9 @@
       ((missing 0 ())
        (list 17
         ((() abstract 8 ((whitespace 1))) (() abstract 8 ((whitespace 1)))))
-       (() class 5 ((whitespace 1))) (() name 1 ((whitespace 1)))
+       (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ())
          (() } 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))))
@@ -72,9 +73,9 @@
        (list 23
         ((() abstract 8 ((whitespace 1))) (() final 5 ((whitespace 1)))
          (() abstract 8 ((whitespace 1)))))
-       (() class 5 ((whitespace 1))) (() name 1 ((whitespace 1)))
+       (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((() { 1 ()) (missing 0 ())
          (() } 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))))

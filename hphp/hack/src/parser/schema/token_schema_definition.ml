@@ -259,6 +259,7 @@ let given_text_tokens =
     make_token_node "LessThanQuestion" "<?" ();
     make_token_node "QuestionGreaterThan" "?>" ();
     make_token_node "ColonAt" ":@" ();
+    make_token_node "XHP" "xhp" ~allowed_as_identifier:true ();
   ]
 
 let tokens = variable_text_tokens @ no_text_tokens @ given_text_tokens

@@ -11,9 +11,9 @@
        (list 8
         ((((single_line_comment 56) (end_of_line 1) (end_of_line 1)) abstract
           8 ((whitespace 1)))))
-       (() class 5 ((whitespace 1))) (() name 1 ((whitespace 1)))
+       (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
        (classish_body 106
         ((() { 1 ((end_of_line 1)))
          (list 100

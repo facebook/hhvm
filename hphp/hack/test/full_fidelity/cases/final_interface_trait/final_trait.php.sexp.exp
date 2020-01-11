@@ -11,9 +11,9 @@
        (list 5
         ((((single_line_comment 56) (end_of_line 1) (end_of_line 1)) final 5
           ((whitespace 1)))))
-       (() trait 5 ((whitespace 1))) (() name 1 ((whitespace 1)))
+       (missing 0 ()) (() trait 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
        (classish_body 3
         ((() { 1 ((end_of_line 1))) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))

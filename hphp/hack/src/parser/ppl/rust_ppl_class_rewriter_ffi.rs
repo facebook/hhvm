@@ -32,6 +32,7 @@ pub extern "C" fn parse_and_rewrite_ppl_classes(ocaml_source_text: usize) -> usi
         php5_compat_mode: false,
         codegen: false,
         allow_new_attribute_syntax: false,
+        enable_xhp_class_modifier: false,
     };
 
     let mut parser = PositionedSyntaxParser::make(&source_text, env);

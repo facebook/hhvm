@@ -148,6 +148,10 @@ where
         self.is_specific_token(TokenKind::Final)
     }
 
+    pub fn is_xhp(&self) -> bool {
+        self.is_specific_token(TokenKind::XHP)
+    }
+
     pub fn is_async(&self) -> bool {
         self.is_specific_token(TokenKind::Async)
     }

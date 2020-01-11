@@ -1,7 +1,7 @@
 [(Class
     { c_span = [4:1-19]; c_annotation = (); c_mode = Mstrict;
-      c_final = false; c_is_xhp = false; c_kind = Cinterface;
-      c_name = ([4:11-12], "\\I");
+      c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+      c_kind = Cinterface; c_name = ([4:11-12], "\\I");
       c_tparams =
       { c_tparam_list =
         [{ tp_variance = Contravariant; tp_name = ([4:14-15], "T");
@@ -24,8 +24,8 @@
       c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [6:1-30]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([6:7-8], "\\E");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([6:7-8], "\\E");
        c_tparams =
        { c_tparam_list =
          [{ tp_variance = Invariant; tp_name = ([6:9-10], "T");

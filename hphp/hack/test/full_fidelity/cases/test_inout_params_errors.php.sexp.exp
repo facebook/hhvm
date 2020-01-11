@@ -185,7 +185,7 @@
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))))
      (classish_declaration 143
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())

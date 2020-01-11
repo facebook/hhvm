@@ -1208,6 +1208,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; classish_type_parameters = validate_option_with (validate_type_parameters) x.classish_type_parameters
     ; classish_name = validate_token x.classish_name
     ; classish_keyword = validate_token x.classish_keyword
+    ; classish_xhp = validate_option_with (validate_token) x.classish_xhp
     ; classish_modifiers = validate_list_with (validate_token) x.classish_modifiers
     ; classish_attribute = validate_option_with (validate_attribute_specification) x.classish_attribute
     }
@@ -1217,6 +1218,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.ClassishDeclaration
       { classish_attribute = invalidate_option_with (invalidate_attribute_specification) x.classish_attribute
       ; classish_modifiers = invalidate_list_with (invalidate_token) x.classish_modifiers
+      ; classish_xhp = invalidate_option_with (invalidate_token) x.classish_xhp
       ; classish_keyword = invalidate_token x.classish_keyword
       ; classish_name = invalidate_token x.classish_name
       ; classish_type_parameters = invalidate_option_with (invalidate_type_parameters) x.classish_type_parameters

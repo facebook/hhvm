@@ -1,0 +1,4 @@
+File "xhp_modifier_require_order.php", line 4, characters 5-5:
+The 'class' keyword is expected here. (Parsing[1002])
+File "xhp_modifier_require_order.php", line 4, characters 5-5:
+Encountered unexpected text '', was expecting a class kind. (Parsing[1002])

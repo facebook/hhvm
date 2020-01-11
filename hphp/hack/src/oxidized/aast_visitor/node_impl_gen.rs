@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<055ade412c520293a2240671d00ab82a>>
+// @generated SignedSource<<f942121d0e6ef0474e2c7cf8ea75a86b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -452,6 +452,7 @@ impl<Context, Ex, Fb, En, Hi> Node<Context, Ex, Fb, En, Hi> for Class_<Ex, Fb, E
         self.mode.accept(c, v);
         self.final_.accept(c, v);
         self.is_xhp.accept(c, v);
+        self.has_xhp_keyword.accept(c, v);
         self.kind.accept(c, v);
         self.name.accept(c, v);
         self.tparams.accept(c, v);

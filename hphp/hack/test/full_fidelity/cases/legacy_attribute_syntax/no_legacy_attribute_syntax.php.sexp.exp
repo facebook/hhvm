@@ -104,7 +104,7 @@
                (() ")" 1 ())))
              (missing 0 ())))))
          (() >> 2 ((end_of_line 1)))))
-       (missing 0 ()) (() class 5 ((whitespace 1)))
+       (missing 0 ()) (missing 0 ()) (() class 5 ((whitespace 1)))
        (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (classish_body 30

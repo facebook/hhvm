@@ -5,7 +5,7 @@
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
        (missing 0 ())))
      (classish_declaration 10
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1) (single_line_comment 77) (end_of_line 1)
          (single_line_comment 78) (end_of_line 1) (single_line_comment 68)
          (end_of_line 1) (end_of_line 1) (single_line_comment 79)
@@ -18,7 +18,7 @@
         ((() { 1 ((whitespace 1) (single_line_comment 22) (end_of_line 1)))
          (list 0 ((missing 0 ()))) (missing 0 ())))))
      (classish_declaration 14
-      ((missing 0 ()) (missing 0 ())
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1) (whitespace 2)) class 5 ((whitespace 1)))
        (() name 2 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())

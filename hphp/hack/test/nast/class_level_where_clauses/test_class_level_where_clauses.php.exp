@@ -1,7 +1,7 @@
 [(Class
     { c_span = [12:1-40]; c_annotation = (); c_mode = Mstrict;
-      c_final = false; c_is_xhp = false; c_kind = Cnormal;
-      c_name = ([12:7-19], "\\SingleConstr");
+      c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+      c_kind = Cnormal; c_name = ([12:7-19], "\\SingleConstr");
       c_tparams =
       { c_tparam_list =
         [{ tp_variance = Invariant; tp_name = ([12:21-22], "T");
@@ -30,8 +30,8 @@
       });
   (Class
      { c_span = [14:1-50]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([14:7-18], "\\ListConstrs");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([14:7-18], "\\ListConstrs");
        c_tparams =
        { c_tparam_list =
          [{ tp_variance = Invariant; tp_name = ([14:20-21], "T");
@@ -60,8 +60,8 @@
        c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [16:1-66]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([16:7-19], "\\MultiConstrs");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([16:7-19], "\\MultiConstrs");
        c_tparams =
        { c_tparam_list =
          [{ tp_variance = Invariant; tp_name = ([16:21-22], "T");
@@ -96,8 +96,8 @@
        c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [18:1-37]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([18:7-15], "\\AsConstr");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([18:7-15], "\\AsConstr");
        c_tparams =
        { c_tparam_list =
          [{ tp_variance = Invariant; tp_name = ([18:17-18], "T");
@@ -123,8 +123,8 @@
        c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [20:1-43]; c_annotation = (); c_mode = Mstrict;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([20:7-18], "\\SuperConstr");
+       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
+       c_kind = Cnormal; c_name = ([20:7-18], "\\SuperConstr");
        c_tparams =
        { c_tparam_list =
          [{ tp_variance = Invariant; tp_name = ([20:20-21], "T");

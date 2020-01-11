@@ -204,6 +204,7 @@ impl<'a> AastParser {
             hhvm_compat_mode: env.codegen,
             php5_compat_mode: env.php5_compat_mode,
             allow_new_attribute_syntax: env.parser_options.po_allow_new_attribute_syntax,
+            enable_xhp_class_modifier: env.parser_options.po_enable_xhp_class_modifier,
         };
 
         let tree = if quick_mode {

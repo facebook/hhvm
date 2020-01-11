@@ -4123,7 +4123,7 @@ where
             };
 
             self.invalid_modifier_errors("Classes, interfaces, and traits", node, |kind| {
-                kind == TokenKind::Abstract || kind == TokenKind::Final
+                kind == TokenKind::Abstract || kind == TokenKind::Final || kind == TokenKind::XHP
             });
 
             self.produce_error(
@@ -4191,6 +4191,24 @@ where
                     Some(TokenKind::Trait) => self.errors.push(Self::make_error_from_node(
                         node,
                         errors::declared_final("Traits"),
+                    )),
+                    _ => (),
+                }
+            }
+
+            if Self::token_kind(&cd.classish_xhp) == Some(TokenKind::XHP) {
+                match Self::token_kind(&cd.classish_keyword) {
+                    Some(TokenKind::Interface) => self.errors.push(Self::make_error_from_node(
+                        node,
+                        errors::invalid_xhp_classish("Interfaces"),
+                    )),
+                    Some(TokenKind::Trait) => self.errors.push(Self::make_error_from_node(
+                        node,
+                        errors::invalid_xhp_classish("Traits"),
+                    )),
+                    Some(TokenKind::Enum) => self.errors.push(Self::make_error_from_node(
+                        node,
+                        errors::invalid_xhp_classish("Enums"),
                     )),
                     _ => (),
                 }

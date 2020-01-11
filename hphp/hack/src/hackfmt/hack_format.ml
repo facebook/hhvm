@@ -544,6 +544,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         {
           classish_attribute = attr;
           classish_modifiers = modifiers;
+          classish_xhp = xhp;
           classish_keyword = kw;
           classish_name = name;
           classish_type_parameters = type_params;
@@ -567,6 +568,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Span
             [
               handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
+              t env xhp;
+              when_present xhp space;
               t env kw;
               Space;
               SplitWith Cost.Base;

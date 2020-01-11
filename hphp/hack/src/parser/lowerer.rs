@@ -4633,6 +4633,7 @@ where
                     Some(TK::XHPClassName) => true,
                     _ => false,
                 };
+                let has_xhp_keyword = kinds.has(modifier::XHP);
                 let name = Self::pos_name(&c.classish_name, env)?;
                 *env.cls_reified_generics() = HashSet::new();
                 let tparams = ast::ClassTparams {
@@ -4663,6 +4664,7 @@ where
                     mode,
                     final_,
                     is_xhp,
+                    has_xhp_keyword,
                     kind: class_kind,
                     name,
                     tparams,
@@ -4776,6 +4778,7 @@ where
                     final_: false,
                     kind: ast::ClassKind::Cenum,
                     is_xhp: false,
+                    has_xhp_keyword: false,
                     name: Self::pos_name(&c.enum_name, env)?,
                     tparams: ast::ClassTparams {
                         list: vec![],

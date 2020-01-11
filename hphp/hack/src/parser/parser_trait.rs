@@ -253,6 +253,8 @@ where
     fn next_xhp_children_name_or_other(&mut self) -> S::Token {
         if self.is_next_xhp_category_name() {
             self.next_xhp_category_name()
+        } else if self.env().enable_xhp_class_modifier {
+            self.next_xhp_modifier_class_name_or_other_token()
         } else {
             self.next_xhp_class_name_or_other_token()
         }
@@ -585,6 +587,11 @@ where
         self.require_token(TokenKind::Name, Errors::error1004)
     }
 
+    fn require_xhp_class_name(&mut self) -> S::R {
+        let token = self.next_xhp_modifier_class_name();
+        S!(make_token, self, token)
+    }
+
     fn require_class_name(&mut self) -> S::R {
         if self.is_next_xhp_class_name() {
             let token = self.next_xhp_class_name();
@@ -734,6 +741,10 @@ where
     fn next_xhp_class_name(&mut self) -> S::Token {
         assert!(self.is_next_xhp_class_name());
         self.lexer_mut().next_xhp_class_name()
+    }
+
+    fn next_xhp_modifier_class_name(&mut self) -> S::Token {
+        self.lexer_mut().next_xhp_modifier_class_name()
     }
 
     fn require_xhp_name(&mut self) -> S::R {
@@ -940,6 +951,14 @@ where
 
     fn is_next_xhp_class_name(&self) -> bool {
         self.lexer().is_next_xhp_class_name()
+    }
+
+    fn next_xhp_modifier_class_name_or_other_token(&mut self) -> S::Token {
+        if self.is_next_name() {
+            self.next_xhp_modifier_class_name()
+        } else {
+            self.next_token()
+        }
     }
 
     fn next_xhp_class_name_or_other_token(&mut self) -> S::Token {

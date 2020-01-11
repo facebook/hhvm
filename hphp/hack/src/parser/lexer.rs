@@ -1071,6 +1071,18 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         }
     }
 
+    fn scan_xhp_class_no_dash(&mut self) -> TokenKind {
+        self.scan_xhp_label();
+        let ch0 = self.peek_char(0);
+        let ch1 = self.peek_char(1);
+        if ch0 == ':' && Self::is_name_nondigit(ch1) {
+            self.advance(1);
+            self.scan_xhp_class_no_dash()
+        } else {
+            TokenKind::XHPElementName
+        }
+    }
+
     // Is the next token we're going to lex a possible xhp class name?
     fn is_xhp_class_name(&self) -> bool {
         (self.peek_char(0) == ':') && (Self::is_name_nondigit(self.peek_char(1)))
@@ -1086,6 +1098,18 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             self.with_error(Errors::error0008);
             self.advance(1);
             TokenKind::ErrorToken
+        }
+    }
+
+    // To support xhp class style class definitions we don't require a : prefix
+    fn scan_xhp_modifier_class_name(&mut self) -> TokenKind {
+        // we don't want to allow xhp names with a : prefix here
+        if self.peek_char(0) == ':' {
+            self.with_error(Errors::error0008);
+            TokenKind::ErrorToken
+        } else {
+            self.scan_xhp_class_no_dash();
+            TokenKind::XHPClassName
         }
     }
 
@@ -2213,6 +2237,16 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             Token::make(kind, lexer.source(), token_start, w, leading, trailing)
         };
         self.scan_assert_progress(&scanner)
+    }
+
+    //
+    // When the xhp modifier is used for declaring xhp classes
+    // we do not allow colon prefixes or dashes.
+    //
+    // This ensures that the syntax is closer to regular classes.
+    //
+    pub fn next_xhp_modifier_class_name(&mut self) -> Token {
+        self.scan_token_and_trivia(&Self::scan_xhp_modifier_class_name, KwSet::NoKeywords)
     }
 
     pub fn next_xhp_class_name(&mut self) -> Token {

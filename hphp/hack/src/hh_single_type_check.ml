@@ -236,6 +236,7 @@ let parse_options () =
   let disallow_func_ptrs_in_constants = ref false in
   let error_php_lambdas = ref false in
   let disallow_discarded_nullable_awaitables = ref false in
+  let enable_xhp_class_modifier = ref false in
   let options =
     [
       ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
@@ -535,6 +536,10 @@ let parse_options () =
       ( "--disallow-discarded-nullable-awaitables",
         Arg.Set disallow_discarded_nullable_awaitables,
         "Error on using discarded nullable awaitables" );
+      ( "--enable-xhp-class-modifier",
+        Arg.Set enable_xhp_class_modifier,
+        "Enable the XHP class modifier, xhp class name {} will define an xhp class."
+      );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -595,6 +600,7 @@ let parse_options () =
       ~glean_hostname:!glean_hostname
       ~glean_port:!glean_port
       ~glean_reponame:!glean_reponame
+      ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
       ()
   in
   let tcopt =

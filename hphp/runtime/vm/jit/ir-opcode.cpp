@@ -862,6 +862,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdVectorSize:
   case LdWHNotDone:
   case LdWHResult:
+  case LdWHException:
   case LdWHState:
   case LIterInit:
   case LIterInitK:

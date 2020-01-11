@@ -1932,6 +1932,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdSwitchDblIndex:
   case LdSwitchStrIndex:
   case LdWHResult:
+  case LdWHException:
   case LdWHState:
   case LdWHNotDone:
   case LookupClsMethod:

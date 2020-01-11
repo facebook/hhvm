@@ -521,6 +521,11 @@ void cgLdWHResult(IRLS& env, const IRInstruction* inst) {
   loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), obj[WH::resultOff()]);
 }
 
+void cgLdWHException(IRLS& env, const IRInstruction* inst) {
+  auto const obj = srcLoc(env, inst, 0).reg();
+  loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), obj[WH::resultOff()]);
+}
+
 void cgLdAFWHActRec(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const obj = srcLoc(env, inst, 0).reg();

@@ -3543,7 +3543,16 @@ SSATmp* simplifyLdWHState(State& env, const IRInstruction* inst) {
 SSATmp* simplifyLdWHResult(State& env, const IRInstruction* inst) {
   auto const wh = canonical(inst->src(0));
   if (wh->inst()->is(CreateSSWH)) {
-    return wh->inst()->src(0);
+    return gen(env, AssertType, inst->typeParam(), wh->inst()->src(0));
+  }
+  return nullptr;
+}
+
+SSATmp* simplifyLdWHException(State& env, const IRInstruction* inst) {
+  auto const wh = canonical(inst->src(0));
+  if (wh->inst()->is(CreateSSWH)) {
+    // Statically succeeded WH couldn't have failed.
+    return gen(env, Unreachable, ASSERT_REASON);
   }
   return nullptr;
 }
@@ -3841,6 +3850,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdCls)
   X(LdClsName)
   X(LdWHResult)
+  X(LdWHException)
   X(LdWHState)
   X(LdWHNotDone)
   X(LookupClsRDS)

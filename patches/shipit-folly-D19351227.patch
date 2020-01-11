@@ -1,0 +1,29 @@
+From D19351227-96525515 Mon Sep 17 00:00:00 2001
+From: Ján . <jjergus@fb.com>
+Date: Fri, 10 Jan 2020 12:47:26 -0800
+Subject: [PATCH] fix is_nothrow_invocable for GCC 6
+
+Summary:
+In GCC 6's stdlib, `std::invoke` is missing a `noexcept` declaration (it's fixed in GCC 8), so this doesn't work.
+
+I think we can probably just skip `invoke` here completely to avoid the issue...? Since all we care about is the `invoke`'s `noexcept` declaration anyway.
+
+Differential Revision: D19351227
+---
+
+diff --git a/third-party/folly/src/folly/functional/Invoke.h b/third-party/folly/src/folly/functional/Invoke.h
+--- a/third-party/folly/src/folly/functional/Invoke.h
++++ b/third-party/folly/src/folly/functional/Invoke.h
+@@ -103,8 +103,8 @@
+
+ template <typename F, typename... Args>
+ struct invoke_nothrow_
+-    : bool_constant<noexcept(
+-          invoke(std::declval<F>(), std::declval<Args>()...))> {};
++    : bool_constant<noexcept(static_cast<F&&>(std::declval<F>())(
++          static_cast<Args&&>(std::declval<Args>())...))> {};
+
+ //  from: http://en.cppreference.com/w/cpp/types/result_of, CC-BY-SA
+
+--
+1.7.9.5

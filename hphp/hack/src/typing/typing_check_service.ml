@@ -343,7 +343,7 @@ let process_files
           (errors, [])
         | Prefetch paths ->
           Vfs.prefetch paths;
-          (Errors.empty, [])
+          (errors, [])
       in
       let progress =
         {

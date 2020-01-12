@@ -155,6 +155,14 @@ bool TransRec::isConsistent() const {
   return true;
 }
 
+bool TransRec::contains(TCA tca) const {
+  if (!isValid()) return false;
+  if (aStart <= tca && tca - aStart < aLen) return true;
+  if (acoldStart <= tca && tca - acoldStart < acoldLen) return true;
+  if (afrozenStart <= tca && tca - afrozenStart < afrozenLen) return true;
+  return false;
+}
+
 std::string TransRec::print() const {
   if (!isValid()) return "Translation -1 {\n}\n\n";
 

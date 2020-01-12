@@ -83,6 +83,7 @@ struct TransRec {
 
   bool isValid() const { return id != kInvalidTransID; }
   bool isConsistent() const;
+  bool contains(TCA tca) const;
   std::string print() const;
   Offset bcPast() const;
   void optimizeForMemory();

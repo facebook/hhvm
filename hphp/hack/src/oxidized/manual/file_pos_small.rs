@@ -32,7 +32,7 @@ use ocamlrep::OcamlRep;
 // behave incorrectly on a 32-bit machine. We use `usize` here to match its
 // behavior, but once parity is no longer necessary, we may want to switch to
 // `u64`.
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub struct FilePosSmall(usize);
 
 const COLUMN_BITS: usize = 9;
@@ -162,6 +162,18 @@ impl FilePosSmall {
             None => FilePosSmall(DUMMY),
             Some(pos) => pos,
         }
+    }
+}
+
+impl Ord for FilePosSmall {
+    fn cmp(&self, other: &FilePosSmall) -> std::cmp::Ordering {
+        self.offset().cmp(&other.offset())
+    }
+}
+
+impl PartialOrd for FilePosSmall {
+    fn partial_cmp(&self, other: &FilePosSmall) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }
 

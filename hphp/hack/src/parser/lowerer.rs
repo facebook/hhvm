@@ -2650,7 +2650,7 @@ where
         }
         awaits
             .awaits
-            .sort_unstable_by(|a1, a2| Pos::compare(&(a1.1).0, &(a2.1).0));
+            .sort_unstable_by(|a1, a2| Pos::cmp(&(a1.1).0, &(a2.1).0));
         Ok(awaits.awaits)
     }
 

@@ -333,31 +333,31 @@ impl Pos {
             Large { start, .. } => start.offset(),
         }
     }
+}
 
-    // Pos does not satisfy total order,
-    // when relative path is not equal, two Pos isn't comparable,
-    // so it shouldn't implement Ord trait.
-    // This compare is to match Ocaml's Pos.compare.
-    pub fn compare(p1: &Pos, p2: &Pos) -> Ordering {
-        let prefix1 = p1.filename().prefix() as i32;
-        let prefix2 = p2.filename().prefix() as i32;
-        let path1 = p1.filename().path_str();
-        let path2 = p2.filename().path_str();
-        prefix1
-            .cmp(&prefix2)
-            .then(path1.cmp(&path2))
-            .then(p1.start_cnum().cmp(&p2.start_cnum()))
-            .then(p1.end_cnum().cmp(&p2.end_cnum()))
+impl Ord for Pos {
+    // Intended to match the implementation of `Pos.compare` in OCaml.
+    fn cmp(&self, other: &Pos) -> Ordering {
+        self.filename()
+            .cmp(other.filename())
+            .then(self.start_cnum().cmp(&other.start_cnum()))
+            .then(self.end_cnum().cmp(&other.end_cnum()))
+    }
+}
+
+impl PartialOrd for Pos {
+    fn partial_cmp(&self, other: &Pos) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
 impl PartialEq for Pos {
     fn eq(&self, other: &Self) -> bool {
-        self.filename() == other.filename()
-            && self.start_cnum() == other.start_cnum()
-            && self.end_cnum() == other.end_cnum()
+        self.cmp(other) == Ordering::Equal
     }
 }
+
+impl Eq for Pos {}
 
 // TODO(hrust) eventually move this into a separate file used by Small & Large
 trait FilePos {

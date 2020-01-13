@@ -5,7 +5,7 @@
 
 use ocamlrep_derive::OcamlRep;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, OcamlRep)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, OcamlRep)]
 pub struct FilePosLarge {
     lnum: usize,
     bol: usize,
@@ -103,5 +103,17 @@ impl FilePosLarge {
     #[inline]
     pub const fn line_beg_offset(self) -> (usize, usize, usize) {
         (self.lnum, self.bol, self.cnum)
+    }
+}
+
+impl Ord for FilePosLarge {
+    fn cmp(&self, other: &FilePosLarge) -> std::cmp::Ordering {
+        self.offset().cmp(&other.offset())
+    }
+}
+
+impl PartialOrd for FilePosLarge {
+    fn partial_cmp(&self, other: &FilePosLarge) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
     }
 }

@@ -9,8 +9,6 @@
 
 type t = GlobalOptions.t [@@deriving show]
 
-module InferMissing = InferMissing
-
 let disallow_ambiguous_lambda = GlobalOptions.tco_disallow_ambiguous_lambda
 
 let defer_class_declaration_threshold =
@@ -128,13 +126,13 @@ let disallow_invalid_arraykey_constraint =
 
 let const_static_props = GlobalOptions.tco_const_static_props
 
-let infer_missing = GlobalOptions.tco_infer_missing
+let global_inference = GlobalOptions.tco_global_inference
 
 let const_attribute = GlobalOptions.tco_const_attribute
 
 let abstract_static_props = GlobalOptions.po_abstract_static_props
 
-let set_infer_missing = GlobalOptions.set_infer_missing
+let set_global_inference = GlobalOptions.set_global_inference
 
 let check_attribute_locations = GlobalOptions.tco_check_attribute_locations
 

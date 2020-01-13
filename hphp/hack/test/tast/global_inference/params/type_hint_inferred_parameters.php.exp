@@ -18,7 +18,9 @@
               (Is ((([4:7-9], mixed), (Lvar ([4:7-9], $x))),
                  ([4:13-16], (Hprim Tint))))),
              [([5:5-15],
-               (Return (Some (([5:12-14], int), (Lvar ([5:12-14], $x))))))],
+               (Return
+                  (Some (([5:12-14], (mixed & int)), (Lvar ([5:12-14], $x))))))
+               ],
              [([Pos.none], Noop)])));
           ([7:3-19],
            (Return

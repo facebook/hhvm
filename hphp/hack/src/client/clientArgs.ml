@@ -561,19 +561,6 @@ let parse_check_args cmd =
           end,
         " (mode) rewrite lambdas in the files from the given list"
         ^ " with suggested parameter types" );
-      ( "--rewrite-parameter-types",
-        Arg.Rest
-          begin
-            fun fn ->
-            mode :=
-              match !mode with
-              | None -> Some (MODE_REWRITE_PARAMETER_TYPES [fn])
-              | Some (MODE_REWRITE_PARAMETER_TYPES fnl) ->
-                Some (MODE_REWRITE_PARAMETER_TYPES (fn :: fnl))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
-          end,
-        " (mode) add type annotation of unannotated parameters in the files from the given list"
-        ^ " with suggested types" );
       ( "--rewrite-partial-parameters-type-hints",
         Arg.Rest
           begin
@@ -588,19 +575,6 @@ let parse_check_args cmd =
         " (mode) add missing type parameters in the type hints for function"
         ^ " parameters (e.g.: C $x -> C<int> $x) in the files from the given list"
       );
-      ( "--rewrite-return-type",
-        Arg.Rest
-          begin
-            fun fn ->
-            mode :=
-              match !mode with
-              | None -> Some (MODE_REWRITE_RETURN_TYPE [fn])
-              | Some (MODE_REWRITE_RETURN_TYPE fnl) ->
-                Some (MODE_REWRITE_RETURN_TYPE (fn :: fnl))
-              | _ -> raise (Arg.Bad "only a single mode should be specified")
-          end,
-        " (mode) rewrite return types of function in the files from the given list"
-        ^ " with suggested return types" );
       ( "--save-naming",
         Arg.String (fun x -> set_mode (MODE_SAVE_NAMING x) ()),
         " (mode) Save the naming table to the given file."

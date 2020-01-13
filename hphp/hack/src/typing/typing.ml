@@ -38,7 +38,6 @@ module TOG = Typing_object_get
 module Subst = Decl_subst
 module ExprDepTy = Typing_dependent_type.ExprDepTy
 module TCO = TypecheckerOptions
-module IM = TCO.InferMissing
 module EnvFromDef = Typing_env_from_def
 module C = Typing_continuations
 module CMap = C.Map
@@ -391,7 +390,7 @@ let make_param_local_ty env decl_hint param =
   let (env, ty) =
     match decl_hint with
     | None ->
-      if IM.can_infer_params @@ TCO.infer_missing (Env.get_tcopt env) then
+      if TCO.global_inference (Env.get_tcopt env) then
         Env.fresh_type_reason ~variance:Ast_defs.Contravariant env r
       else
         (env, (r, TUtils.tany env))
@@ -507,9 +506,7 @@ let rec bind_param env (ty1, param) =
       let (env, ty1) =
         if
           Option.is_none (hint_of_type_hint param.param_type_hint)
-          && not
-             @@ IM.can_infer_params
-             @@ TCO.infer_missing (Env.get_tcopt env)
+          && (not @@ TCO.global_inference (Env.get_tcopt env))
           (* ty1 will be Tany iff we have no type hint and we are not in
            * 'infer missing mode'. When it ty1 is Tany we just union it with
            * the type of the default expression *)
@@ -701,8 +698,7 @@ and fun_def tcopt f :
         | None ->
           Typing_return.make_default_return
             ~is_method:false
-            ~is_infer_missing_on:
-              (IM.can_infer_return @@ TCO.infer_missing (Env.get_tcopt env))
+            ~is_global_inference_on:(TCO.global_inference (Env.get_tcopt env))
             env
             f.f_name
         | Some ty ->
@@ -6466,7 +6462,7 @@ and call
                     expr ~expected env elt
                   in
                   let env =
-                    if IM.is_on @@ TCO.infer_missing (Env.get_tcopt env) then
+                    if TCO.global_inference (Env.get_tcopt env) then
                       match efty with
                       | (_, (Terr | Tany _ | Tdynamic)) ->
                         Typing_coercion.coerce_type
@@ -7462,7 +7458,7 @@ and class_def tcopt c =
   header from the shared mem. Note that they only return a non None value if
   global inference is on *)
 and get_decl_method_header tcopt cls method_id =
-  let is_global_inference_on = IM.global_inference @@ TCO.infer_missing tcopt in
+  let is_global_inference_on = TCO.global_inference tcopt in
   if is_global_inference_on then
     match Cls.get_method cls method_id with
     | Some { ce_type = (lazy (_, Tfun fun_type)); _ } -> Some fun_type
@@ -7471,9 +7467,7 @@ and get_decl_method_header tcopt cls method_id =
     None
 
 and get_decl_function_header env function_id =
-  let is_global_inference_on =
-    IM.global_inference @@ TCO.infer_missing (Env.get_tcopt env)
-  in
+  let is_global_inference_on = TCO.global_inference (Env.get_tcopt env) in
   if is_global_inference_on then
     match Decl_provider.get_fun (Env.get_ctx env) function_id with
     | Some { fe_type = (_, Tfun fun_type); _ } -> Some fun_type
@@ -8321,8 +8315,7 @@ and method_def env cls m =
         | None ->
           Typing_return.make_default_return
             ~is_method:true
-            ~is_infer_missing_on:
-              (IM.can_infer_return @@ TCO.infer_missing (Env.get_tcopt env))
+            ~is_global_inference_on:(TCO.global_inference (Env.get_tcopt env))
             env
             m.m_name
         | Some ret ->
@@ -8751,36 +8744,37 @@ let record_def_def tcopt rd =
     Aast.rd_doc_comment = rd.rd_doc_comment;
   }
 
-let nast_to_tast ~(do_tast_checks : bool) opts nast =
+let nast_to_tast_gienv ~(do_tast_checks : bool) opts nast :
+    _ * Typing_inference_env.t_global_with_pos list =
   let convert_def = function
     | Fun f ->
       begin
         match fun_def opts f with
-        | Some (f, _) -> Aast.Fun f
+        | Some (f, env) -> (Aast.Fun f, [env])
         | None ->
           failwith
           @@ Printf.sprintf
                "Error when typechecking function: %s"
                (snd f.f_name)
       end
-    | Constant gc -> Aast.Constant (gconst_def opts gc)
-    | Typedef td -> Aast.Typedef (typedef_def opts td)
+    | Constant gc -> (Aast.Constant (gconst_def opts gc), [])
+    | Typedef td -> (Aast.Typedef (typedef_def opts td), [])
     | Class c ->
       begin
         match class_def opts c with
-        | Some (c, _) -> Aast.Class c
+        | Some (c, envs) -> (Aast.Class c, envs)
         | None ->
           failwith
           @@ Printf.sprintf "Error in declaration of class: %s" (snd c.c_name)
       end
-    | RecordDef rd -> Aast.RecordDef (record_def_def opts rd)
+    | RecordDef rd -> (Aast.RecordDef (record_def_def opts rd), [])
     (* We don't typecheck top level statements:
      * https://docs.hhvm.com/hack/unsupported/top-level
      * so just create the minimal env for us to construct a Stmt.
      *)
     | Stmt s ->
       let env = Env.empty opts Relative_path.default None in
-      Aast.Stmt (snd (stmt env s))
+      (Aast.Stmt (snd (stmt env s)), [])
     | Namespace _
     | NamespaceUse _
     | SetNamespaceEnv _
@@ -8789,6 +8783,11 @@ let nast_to_tast ~(do_tast_checks : bool) opts nast =
         "Invalid nodes in NAST. These nodes should be removed during naming."
   in
   Nast_check.program nast;
-  let tast = List.map nast convert_def in
+  let (tast, envs) = List.unzip @@ List.map nast convert_def in
+  let envs = List.concat envs in
   if do_tast_checks then Tast_check.program opts tast;
+  (tast, envs)
+
+let nast_to_tast ~do_tast_checks opts nast =
+  let (tast, _gienvs) = nast_to_tast_gienv ~do_tast_checks opts nast in
   tast

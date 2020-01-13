@@ -28,6 +28,12 @@ val typedef_def : TypecheckerOptions.t -> Nast.typedef -> Tast.typedef
 
 val gconst_def : TypecheckerOptions.t -> Nast.gconst -> Tast.gconst
 
+val nast_to_tast_gienv :
+  do_tast_checks:bool ->
+  TypecheckerOptions.t ->
+  Nast.program ->
+  Tast.program * Typing_inference_env.t_global_with_pos list
+
 (** Run typing on the given named AST (NAST) to produced a typed AST (TAST).
 
 Set [do_tast_checks] to [false] to skip running TAST checks on the resulting

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5b3ea9492235337aa2efeed1858d5814>>
+// @generated SignedSource<<e0b697770b0837adcc9505279757b45d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -31,7 +31,7 @@ pub enum Reason {
     RarithRetFloat(pos::Pos, Box<Reason>, ArgPosition),
     RarithRetNum(pos::Pos, Box<Reason>, ArgPosition),
     RarithRetInt(pos::Pos),
-    RsumDynamic(pos::Pos),
+    RarithDynamic(pos::Pos),
     RbitwiseDynamic(pos::Pos),
     RincdecDynamic(pos::Pos),
     Rstring2(pos::Pos),

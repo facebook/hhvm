@@ -36,8 +36,7 @@ let module_blacklist =
    nested modules (I think it would be a bit of work to handle imports
    properly), so we convert them manually and re-export them when we see their
    OCaml definition. *)
-let nested_modules =
-  [("ast_defs", "ShapeMap"); ("global_options", "InferMissing")]
+let nested_modules = [("ast_defs", "ShapeMap")]
 
 let blacklisted = List.mem module_blacklist ~equal:String.equal
 

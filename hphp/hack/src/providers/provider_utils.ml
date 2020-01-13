@@ -159,6 +159,7 @@ let compute_tast_and_errors_unquarantined_internal
         (fun () ->
           Typing.nast_to_tast ~do_tast_checks ctx.Provider_context.tcopt nast)
     in
+
     let errors = Errors.merge nast_errors tast_errors in
 
     (* Logging... *)

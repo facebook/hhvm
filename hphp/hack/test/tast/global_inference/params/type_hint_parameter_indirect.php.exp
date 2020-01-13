@@ -144,7 +144,7 @@ Errors:
                (Binop ((Eq None),
                   (([16:3-9], mixed),
                    (Array_get (
-                      (([16:3-5], vec<mixed>), (Lvar ([16:3-5], $x))),
+                      (([16:3-5], vec<(mixed | int)>), (Lvar ([16:3-5], $x))),
                       (Some (([16:6-8], int), (Lvar ([16:6-8], $i))))))),
                   (([16:12-14], mixed), (Lvar ([16:12-14], $w))))))))
            ];

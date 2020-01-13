@@ -8,8 +8,6 @@
 
 type t = GlobalOptions.t [@@deriving show]
 
-module InferMissing = InferMissing
-
 let service = GlobalOptions.glean_service
 
 let hostname = GlobalOptions.glean_hostname

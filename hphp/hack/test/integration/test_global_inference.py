@@ -38,7 +38,7 @@ class TestPushOptionOutGlobalInference(TestCase[GlobalInferenceDriver]):
 
     def test(self) -> None:
         self.test_driver.start_hh_server(
-            args=["--config", "infer_missing=global", "--config", "timeout=20"]
+            args=["--config", "global_inference=true", "--config", "timeout=20"]
         )
         self.test_driver.check_cmd(["No errors!"])
 
@@ -54,7 +54,7 @@ class TestDynamicNonnullHasMember(TestCase[GlobalInferenceDriver]):
 
     def test(self) -> None:
         self.test_driver.start_hh_server(
-            args=["--config", "infer_missing=global", "--config", "timeout=20"]
+            args=["--config", "global_inference=true", "--config", "timeout=20"]
         )
         self.test_driver.check_cmd(["No errors!"])
 
@@ -76,7 +76,7 @@ class TestThreeFilesGlobalInference(TestCase[GlobalInferenceDriver]):
     def execute_once(self):
         temp_dir = tempfile.mkdtemp()
 
-        self.test_driver.start_hh_server(args=["--config", "infer_missing=global"])
+        self.test_driver.start_hh_server(args=["--config", "global_inference=true"])
         logpath, _, _ = self.test_driver.proc_call(
             [hh_client, self.test_driver.repo_dir, "--logname"]
         )
@@ -187,7 +187,7 @@ class TestGlobalInferenceCorrectness(TestCase[GlobalInferenceDriver]):
     def execute_once(self):
         temp_dir = tempfile.mkdtemp()
 
-        self.test_driver.start_hh_server(args=["--config", "infer_missing=global"])
+        self.test_driver.start_hh_server(args=["--config", "global_inference=true"])
         logpath, _, _ = self.test_driver.proc_call(
             [hh_client, self.test_driver.repo_dir, "--logname"]
         )

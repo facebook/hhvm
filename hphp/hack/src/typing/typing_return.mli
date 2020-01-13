@@ -55,7 +55,7 @@ special functions `__construct`, otherwise we can either
 introduce a new fresh variable when infer missing is on or assume type Tany *)
 val make_default_return :
   is_method:bool ->
-  is_infer_missing_on:bool ->
+  is_global_inference_on:bool ->
   env ->
   Ast_defs.pos * string ->
   env * (Typing_reason.t * Typing_defs.locl_phase Typing_defs.ty_)

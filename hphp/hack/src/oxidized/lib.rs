@@ -51,7 +51,6 @@ pub use gen::file_info;
 pub use gen::full_fidelity_parser_env;
 pub use gen::global_options;
 pub use gen::ident;
-pub use gen::infer_missing;
 pub use gen::namespace_env;
 pub use gen::nast;
 pub use gen::parser_options;

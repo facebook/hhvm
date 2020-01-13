@@ -209,14 +209,14 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
         in
         make_result env te1 te2 ty
       else
-        let is_infer_missing_mode =
-          TypecheckerOptions.InferMissing.is_on
-          @@ TypecheckerOptions.infer_missing (Env.get_tcopt env)
+        let is_global_inference_mode =
+          TypecheckerOptions.global_inference (Env.get_tcopt env)
         in
         (* If ty1 is int, the result has the same type as ty2. *)
-        if is_infer_missing_mode && is_int env ty1 && is_num env ty2 then
+        if is_global_inference_mode && is_int env ty1 && is_num env ty2 then
           make_result env te1 te2 ty2
-        else if is_infer_missing_mode && is_int env ty2 && is_num env ty1 then
+        else if is_global_inference_mode && is_int env ty2 && is_num env ty1
+        then
           make_result env te1 te2 ty1
         else
           (* Otherwise try narrowing any type variable, with default int *)

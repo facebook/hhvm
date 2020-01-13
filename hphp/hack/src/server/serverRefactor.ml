@@ -34,18 +34,6 @@ let get_lambda_parameter_rewrite_patches env files =
         env.tcopt
         (Relative_path.from_root file))
 
-let get_return_type_rewrite_patches env files =
-  List.concat_map files (fun file ->
-      ServerRewriteReturnType.get_patches
-        env.tcopt
-        (Relative_path.from_root file))
-
-let get_parameter_types_rewrite_patches env files =
-  List.concat_map files (fun file ->
-      ServerRewriteParameterTypes.get_patches
-        env.tcopt
-        (Relative_path.from_root file))
-
 let get_type_params_type_rewrite_patches env files =
   List.concat_map files (fun file ->
       ServerRewriteTypeParamsType.get_patches

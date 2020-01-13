@@ -222,8 +222,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
       (env, (r, Tnewtype (x, [], cstr)))
   | (r, Tapply (((_, cid) as cls), tyl)) ->
     let can_infer_tparams =
-      InferMissing.can_infer_params
-      @@ TypecheckerOptions.infer_missing (Env.get_tcopt env)
+      TypecheckerOptions.global_inference (Env.get_tcopt env)
     in
     let (env, tyl) =
       match Env.get_class env cid with

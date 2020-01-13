@@ -114,14 +114,8 @@ let get_first_suggested_type_as_string file type_map node =
 
 let get_patches tcopt file =
   let nast = Ast_provider.get_ast ~full:true file in
-  let tcopt =
-    TypecheckerOptions.set_infer_missing
-      tcopt
-      TypecheckerOptions.InferMissing.Infer_params
-  in
+  let tcopt = TypecheckerOptions.set_global_inference tcopt in
   let tast =
-    (* [Infer_params] is not implemented with a TAST check, so we can skip TAST
-    checks safely. *)
     Typing.nast_to_tast ~do_tast_checks:false tcopt (Naming.program nast)
   in
   let type_map = collect_types tast in

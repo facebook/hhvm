@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{gen::global_options::GlobalOptions, i_set, infer_missing, s_map, s_set};
+use crate::{gen::global_options::GlobalOptions, i_set, s_map, s_set};
 
 impl Default for GlobalOptions {
     fn default() -> Self {
@@ -69,7 +69,7 @@ impl Default for GlobalOptions {
             po_disable_legacy_soft_typehints: false,
             po_disallowed_decl_fixmes: i_set::ISet::new(),
             po_allow_new_attribute_syntax: false,
-            tco_infer_missing: infer_missing::InferMissing::Deactivated,
+            tco_global_inference: false,
             tco_const_static_props: false,
             po_disable_legacy_attribute_syntax: false,
             tco_const_attribute: false,

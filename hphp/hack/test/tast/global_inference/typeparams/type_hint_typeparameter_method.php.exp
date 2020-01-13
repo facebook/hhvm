@@ -3,7 +3,7 @@ Errors:
   [59:13-16] Definition is here
 [(Fun
     { f_span = [3:1-6:2]; f_annotation = (); f_mode = Mpartial;
-      f_ret = ((_), None); f_name = ([3:10-13], "\\foo"); f_tparams = [];
+      f_ret = ((void), None); f_name = ([3:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([3:18-20], Map<string, (int | string)>);

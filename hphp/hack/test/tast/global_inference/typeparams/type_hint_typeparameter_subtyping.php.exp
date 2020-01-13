@@ -1,47 +1,3 @@
-File "type_hint_typeparameter_subtyping.php", line 5, characters 5-17:
-  function_pos File "type_hint_typeparameter_subtyping.php", line 4, characters 10-10:
-  genv 
-    params 
-      +$x[#0] D<#2051, #2052>
-    return 
-      return_explicit true
-      return_type void
-  inference_env 
-    subtype_prop 
-      TRUE
-    tvenv 
-      +#2051
-        eager_solve_failed false
-        is_global false
-        solving_info
-          TVIConstraints
-            appears_contravariantly true
-            appears_covariantly true
-            lower_bounds []
-            pu_acceses {}
-            type_constants {}
-            upper_bounds [int]
-        tyvar_pos File "type_hint_typeparameter_subtyping.php", line 4, characters 12-12:
-      +#2052
-        eager_solve_failed false
-        is_global false
-        solving_info
-          TVIConstraints
-            appears_contravariantly true
-            appears_covariantly true
-            lower_bounds [string]
-            pu_acceses {}
-            type_constants {}
-            upper_bounds []
-        tyvar_pos File "type_hint_typeparameter_subtyping.php", line 4, characters 12-12:
-    tyvars_stack [[],[],[#2052,#2051]]
-  lenv 
-    local_mutability 
-      +$x[#0] immutable
-    per_cont_env 
-      Next 
-        local_types 
-          +$x[#0] D<#2051, #2052>
 Errors:
   [4:12-13] The type D expects 2 type parameter(s)
   [3:7-8] Definition is here
@@ -82,7 +38,7 @@ Errors:
       c_user_attributes = []; c_file_attributes = []; c_enum = None;
       c_pu_enums = []; c_doc_comment = None });
   (Fun
-     { f_span = [4:1-6:2]; f_annotation = (); f_mode = Mpartial;
+     { f_span = [4:1-26]; f_annotation = (); f_mode = Mpartial;
        f_ret = ((void), (Some ([4:19-23], (Hprim Tvoid))));
        f_name = ([4:10-11], "\\g"); f_tparams = []; f_where_constraints = [];
        f_variadic = FVnonVariadic;
@@ -97,15 +53,7 @@ Errors:
           param_visibility = None }
          ];
        f_body =
-       { fb_ast =
-         [([5:5-19],
-           (Expr
-              (([5:5-18], void),
-               (Call (Cnormal,
-                  (([5:5-16], _), (Id ([5:5-16], "\\hh_show_env"))), 
-                  [], [], None)))))
-           ];
-         fb_annotation = No unsafe blocks };
+       { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

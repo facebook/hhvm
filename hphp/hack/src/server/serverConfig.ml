@@ -370,8 +370,7 @@ let load config_filename options =
       ?tco_const_attribute:(bool_opt "const_attribute" config)
       ?po_const_default_func_args:(bool_opt "const_default_func_args" config)
       ?po_disallow_silence:(bool_opt "disallow_silence" config)
-      ~tco_infer_missing:
-        (InferMissing.from_string_opt @@ string_opt "infer_missing" config)
+      ?tco_global_inference:(bool_opt "global_inference" config)
       ?tco_const_static_props:(bool_opt "const_static_props" config)
       ?po_abstract_static_props:(bool_opt "abstract_static_props" config)
       ?po_disable_unset_class_const:

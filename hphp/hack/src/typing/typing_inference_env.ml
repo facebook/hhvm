@@ -665,10 +665,63 @@ module Size = struct
 end
 
 let simple_merge env1 env2 =
-  let { tvenv = tvenv1; subtype_prop = _; tyvars_stack = _ } = env1 in
+  let {
+    tvenv = tvenv1;
+    subtype_prop = subtype_prop1;
+    tyvars_stack = tyvars_stack1;
+  } =
+    env1
+  in
   let { tvenv = tvenv2; subtype_prop = _; tyvars_stack = _ } = env2 in
-  let tvenv = IMap.union tvenv1 tvenv2 in
-  { env1 with tvenv }
+  let tvenv =
+    IMap.merge
+      (fun _v tvinfo1 tvinfo2 ->
+        match (tvinfo1, tvinfo2) with
+        | (None, None) -> None
+        | (Some tvinfo, None)
+        | (None, Some tvinfo) ->
+          Some tvinfo
+        | (Some tvinfo1, Some tvinfo2) ->
+          let {
+            tyvar_pos = tyvar_pos1;
+            is_global = is_global1;
+            eager_solve_failed = eager_solve_failed1;
+            solving_info = sinfo1;
+          } =
+            tvinfo1
+          in
+          let {
+            tyvar_pos = tyvar_pos2;
+            is_global = is_global2;
+            eager_solve_failed = eager_solve_failed2;
+            solving_info = sinfo2;
+          } =
+            tvinfo2
+          in
+          let tvinfo =
+            {
+              tyvar_pos =
+                ( if Pos.equal tyvar_pos1 Pos.none then
+                  tyvar_pos2
+                else
+                  tyvar_pos1 );
+              is_global = is_global1 || is_global2;
+              eager_solve_failed = eager_solve_failed1 || eager_solve_failed2;
+              solving_info =
+                (match (sinfo1, sinfo2) with
+                | (TVIConstraints _, TVIType ty)
+                | (TVIType ty, TVIConstraints _) ->
+                  TVIType ty
+                | (TVIConstraints _, TVIConstraints _)
+                | (TVIType _, TVIType _) ->
+                  sinfo1);
+            }
+          in
+          Some tvinfo)
+      tvenv1
+      tvenv2
+  in
+  { tvenv; subtype_prop = subtype_prop1; tyvars_stack = tyvars_stack1 }
 
 let get_nongraph_subtype_prop env = env.subtype_prop
 

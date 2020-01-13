@@ -285,10 +285,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       (env, `Error remove_dead_fixme_warning)
   | REWRITE_LAMBDA_PARAMETERS files ->
     (env, ServerRefactor.get_lambda_parameter_rewrite_patches env files)
-  | REWRITE_RETURN_TYPE files ->
-    (env, ServerRefactor.get_return_type_rewrite_patches env files)
-  | REWRITE_PARAMETER_TYPES files ->
-    (env, ServerRefactor.get_parameter_types_rewrite_patches env files)
   | REWRITE_TYPE_PARAMS_TYPE files ->
     (env, ServerRefactor.get_type_params_type_rewrite_patches env files)
   | DUMP_SYMBOL_INFO file_list ->

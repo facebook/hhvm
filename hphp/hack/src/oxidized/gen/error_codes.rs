@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3523fdb7f90e4afca161446def0f8df6>>
+// @generated SignedSource<<2a17b5403b0e96f0623f93ffcdb01173>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -18,6 +18,7 @@ pub enum Parsing {
     UnterminatedCommentDEPRECATED,
     UnterminatedXhpCommentDEPRECATED,
     CallTimePassByReferenceDEPRECATED,
+    XhpParsingError,
 }
 
 #[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]

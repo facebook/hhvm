@@ -64,8 +64,8 @@ Errors:
       c_pu_enums = []; c_doc_comment = None });
   (Fun
      { f_span = [10:1-12:2]; f_annotation = (); f_mode = Mpartial;
-       f_ret = ((_), None); f_name = ([10:10-13], "\\foo"); f_tparams = [];
-       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_ret = ((void), None); f_name = ([10:10-13], "\\foo");
+       f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
        [{ param_annotation = ([10:16-18], C<int>);
           param_type_hint =

@@ -126,13 +126,13 @@ let force_awaitable env p ty =
     (env, wrapped_ty)
   | _ -> (env, ty)
 
-let make_default_return ~is_method ~is_infer_missing_on env name =
+let make_default_return ~is_method ~is_global_inference_on env name =
   let pos = fst name in
   let reason = Reason.Rwitness pos in
   let default = (reason, Typing_utils.tany env) in
   if is_method && String.equal (snd name) SN.Members.__construct then
     (env, MakeType.void (Reason.Rwitness pos))
-  else if is_infer_missing_on then
+  else if is_global_inference_on then
     (* When infer missing is turned on we create a fresh variable for the
         returned type. Later on it will be reused to get back the inferred type
         of the function. *)

@@ -185,9 +185,8 @@ type t = {
   po_disallowed_decl_fixmes: ISet.t;
   (* Enable @ attribute syntax *)
   po_allow_new_attribute_syntax: bool;
-  (* Trigger the use of inferred types in the tast for non annotated
-    arguments and return types *)
-  tco_infer_missing: InferMissing.t;
+  (* Perform global inference globally on the code base to infer missing type annotations. *)
+  tco_global_inference: bool;
   (* Enable const static properties *)
   tco_const_static_props: bool;
   (* Disable <<...>> attribute syntax *)
@@ -289,7 +288,7 @@ val make :
   ?po_disable_legacy_soft_typehints:bool ->
   ?po_disallowed_decl_fixmes:ISet.t ->
   ?po_allow_new_attribute_syntax:bool ->
-  ?tco_infer_missing:InferMissing.t ->
+  ?tco_global_inference:bool ->
   ?tco_const_static_props:bool ->
   ?po_disable_legacy_attribute_syntax:bool ->
   ?tco_const_attribute:bool ->
@@ -458,7 +457,7 @@ val po_disallowed_decl_fixmes : t -> ISet.t
 
 val po_allow_new_attribute_syntax : t -> bool
 
-val tco_infer_missing : t -> InferMissing.t
+val tco_global_inference : t -> bool
 
 val tco_const_static_props : t -> bool
 
@@ -474,7 +473,7 @@ val po_abstract_static_props : t -> bool
 
 val po_disable_unset_class_const : t -> bool
 
-val set_infer_missing : t -> InferMissing.t -> t
+val set_global_inference : t -> t
 
 val po_parser_errors_only : t -> bool
 

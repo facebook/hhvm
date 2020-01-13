@@ -232,8 +232,6 @@
     serverRevisionTracker
     serverRewriteLambdaParameters
     codemodTypePrinter
-    serverRewriteReturnType
-    serverRewriteParameterTypes
     serverRewriteTypeParamsType
     serverSearch
     serverSignatureHelp

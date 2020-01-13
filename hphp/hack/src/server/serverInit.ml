@@ -99,10 +99,7 @@ let init
   Global_naming_options.set env.tcopt;
   let root = ServerArgs.root genv.options in
   let (lazy_lev, init_approach) =
-    if
-      GlobalOptions.(
-        InferMissing.global_inference @@ tco_infer_missing env.tcopt)
-    then (
+    if GlobalOptions.tco_global_inference env.tcopt then (
       Typing_global_inference.init ();
       (Off, Full_init)
     ) else

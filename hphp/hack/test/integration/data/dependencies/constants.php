@@ -50,6 +50,8 @@ const shape('x' => int, 'y' => SecondEnum) SHAPE1 =
   shape('x' => 5, 'y' => SecondEnum::SECOND);
 const shape(WithConst::CSTRING => int) SHAPE2 =
   shape(WithConst::CSTRING => 42);
+const shape('a' => int, 'b' => string, ...) SHAPE3 =
+  shape('a' => 42, 'b' => 'foo', 'c' => 3.14);
 const (int, ?(string, float)) OPTION = tuple(7, null);
 const array<string, int> ARR = array('a' => 1, 'b' => 2);
 const darray<string, int> AGE_RANGE = darray['min' => 21];
@@ -72,6 +74,7 @@ function with_constants(): void {
   $_ = TYPEDEF;
   $_ = SHAPE2;
   $_ = CVARRAY_OR_DARRAY;
+  $_ = SHAPE3;
 }
 
 function with_type_constants(WithAbstractConst::NESTED::WITH_THIS $arg)

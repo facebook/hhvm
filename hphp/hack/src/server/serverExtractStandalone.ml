@@ -445,7 +445,7 @@ let get_init_from_type ctx ty =
             value_exn UnexpectedDependency @@ Decl_provider.get_typedef ctx name
           in
           get_ typedef.td_type))
-    | Tshape (kind, fields) ->
+    | Tshape (_, fields) ->
       let print_shape_field name sft acc =
         (* Omit all optional fields *)
         if sft.sft_optional then
@@ -460,16 +460,9 @@ let get_init_from_type ctx ty =
           in
           Printf.sprintf "%s => %s" name (get_ sft.sft_ty) :: acc
       in
-      let open_shape =
-        if kind = Open_shape then
-          "..."
-        else
-          ""
-      in
       Printf.sprintf
-        "shape(%s%s)"
+        "shape(%s)"
         (list_items @@ Nast.ShapeMap.fold print_shape_field fields [])
-        open_shape
     | _ -> raise Unsupported
   in
   get_ ty

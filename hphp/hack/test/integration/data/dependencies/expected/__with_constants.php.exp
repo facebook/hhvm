@@ -17,8 +17,10 @@ function with_constants(): void {
   $_ = TYPEDEF;
   $_ = SHAPE2;
   $_ = CVARRAY_OR_DARRAY;
+  $_ = SHAPE3;
 }
 const \TypedefForString TYPEDEF = "";
+const shape('a' => int, 'b' => string, ...) SHAPE3 = shape('b' => "", 'a' => 0);
 const shape(\WithConst::CSTRING => int) SHAPE2 =
   shape(\WithConst::CSTRING => 0);
 const array<string, int> ARR = [];

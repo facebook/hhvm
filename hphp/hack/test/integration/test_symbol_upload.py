@@ -159,5 +159,5 @@ max_workers = 2
         print("repo_contents : {}".format(os.listdir(self.test_driver.repo_dir)))
         args: Optional[List[str]] = None
         args = ["--write-symbol-info", self.write_repo]
-        self.test_driver.start_hh_server(args=args)
+        self.start_hh_server(args=args)
         assert self.verify_all_json()

@@ -617,11 +617,11 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
       ~f:(fun x m -> Relative_path.Map.remove m x)
       ~init:fast
   in
-  let file_tuples =
+  let files =
     Relative_path.Map.fold fast ~init:[] ~f:(fun path _ acc ->
         match Naming_table.get_file_info env.naming_table path with
         | None -> acc
-        | Some info -> (path, info) :: acc)
+        | Some _ -> path :: acc)
   in
   (* ensuring we are writing to fresh files *)
   let dir_exists = (try Sys.is_directory out_dir with _ -> false) in
@@ -631,7 +631,7 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
     Sys_utils.mkdir_p out_dir;
 
   let ctx = Provider_context.empty ~tcopt:env.tcopt in
-  Typing_symbol_info_writer.go genv.workers ctx out_dir file_tuples;
+  Typing_symbol_info_writer.go genv.workers ctx out_dir files;
 
   (env, t)
 

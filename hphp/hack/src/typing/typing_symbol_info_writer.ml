@@ -38,13 +38,12 @@ let get_localvars fn_def lv_acc =
   in
   new_lvs @ lv_acc
 
-let get_decls (tast : (Relative_path.t * Tast.program) list) :
-    symbol_occurrences =
+let get_decls (tast : Tast.program list) : symbol_occurrences =
   let (all_decls, all_defs, all_lvs) =
     List.fold
       tast
       ~init:([], [], [])
-      ~f:(fun (decl_acc, def_acc, lvs_acc) (_, prog) ->
+      ~f:(fun (decl_acc, def_acc, lvs_acc) prog ->
         List.fold
           prog
           ~init:(decl_acc, def_acc, lvs_acc)
@@ -63,7 +62,7 @@ let get_decls (tast : (Relative_path.t * Tast.program) list) :
 let write_json
     (ctx : Provider_context.t)
     (file_dir : string)
-    (tast_lst : (Relative_path.t * Tast.program) list) : unit =
+    (tast_lst : Tast.program list) : unit =
   try
     let symbol_occurrences = get_decls tast_lst in
     let json_chunks =
@@ -85,15 +84,28 @@ let recheck_job
     (ctx : Provider_context.t)
     (out_dir : string)
     ()
-    (progress : (Relative_path.t * FileInfo.t) list) : unit =
-  let results = ServerIdeUtils.recheck ctx.Provider_context.tcopt progress in
-  write_json ctx out_dir results
+    (progress : Relative_path.t list) : unit =
+  let tasts =
+    List.map progress ~f:(fun path ->
+        let (ctx, entry) =
+          Provider_utils.update_context
+            ~ctx
+            ~path
+            ~file_input:
+              (ServerCommandTypes.FileName (Relative_path.to_absolute path))
+        in
+        let { Provider_utils.Compute_tast.tast; _ } =
+          Provider_utils.compute_tast_unquarantined ~ctx ~entry
+        in
+        tast)
+  in
+  write_json ctx out_dir tasts
 
 let go
     (workers : MultiWorker.worker list option)
     (ctx : Provider_context.t)
     (out_dir : string)
-    (file_tuples : (Relative_path.t * FileInfo.t) list) : unit =
+    (file_tuples : Relative_path.t list) : unit =
   let num_workers =
     match workers with
     | Some w -> List.length w

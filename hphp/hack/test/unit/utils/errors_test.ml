@@ -42,6 +42,60 @@ let test_do () =
     "get_sorted_error_list should sort errors by filename";
   true
 
+let expected_unsorted =
+  {|File "/FileWithErrors.php", line 1, characters 4-7:
+This value is not a valid key type for this container (Typing[4298])
+File "/C2", line 0, characters 0-0:
+This container is C2_Type
+File "/K2", line 0, characters 0-0:
+K2_Type cannot be used as a key for C2_Type
+
+File "/FileWithErrors.php", line 1, characters 4-7:
+This value is not a valid key type for this container (Typing[4298])
+File "/C1", line 0, characters 0-0:
+This container is C1_Type
+File "/K1", line 0, characters 0-0:
+K1_Type cannot be used as a key for C1_Type
+
+File "/FileWithErrors.php", line 0, characters 0-0:
+ (Parsing[1002])
+
+File "/FileWithErrors.php", line 1, characters 4-7:
+This value is not a valid key type for this container (Typing[4298])
+File "/C2", line 0, characters 0-0:
+This container is C2_Type
+File "/K2", line 0, characters 0-0:
+K2_Type cannot be used as a key for C2_Type
+
+File "/FileWithErrors.php", line 1, characters 4-7:
+This value is not a valid key type for this container (Typing[4298])
+File "/C1", line 0, characters 0-0:
+This container is C1_Type
+File "/K1", line 0, characters 0-0:
+K1_Type cannot be used as a key for C1_Type
+
+|}
+
+let expected_sorted =
+  {|File "/FileWithErrors.php", line 0, characters 0-0:
+ (Parsing[1002])
+
+File "/FileWithErrors.php", line 1, characters 4-7:
+This value is not a valid key type for this container (Typing[4298])
+File "/C1", line 0, characters 0-0:
+This container is C1_Type
+File "/K1", line 0, characters 0-0:
+K1_Type cannot be used as a key for C1_Type
+
+File "/FileWithErrors.php", line 1, characters 4-7:
+This value is not a valid key type for this container (Typing[4298])
+File "/C2", line 0, characters 0-0:
+This container is C2_Type
+File "/K2", line 0, characters 0-0:
+K2_Type cannot be used as a key for C2_Type
+
+|}
+
 let test_get_sorted_error_list () =
   let (errors, ()) =
     Errors.do_ (fun () ->
@@ -60,6 +114,50 @@ let test_get_sorted_error_list () =
     expected
     (Errors.get_sorted_error_list errors |> error_list_to_string)
     "get_sorted_error_list should sort errors by filename";
+
+  let file_with_errors = create_path "FileWithErrors.php" in
+  let err_pos =
+    Pos.make_from_lnum_bol_cnum
+      ~pos_file:file_with_errors
+      ~pos_start:(1, 5, 8)
+      ~pos_end:(2, 10, 12)
+  in
+  Printf.printf "%s" (Pos.print_verbose_relative err_pos);
+  let container_pos1 = Pos.make_from (create_path "C1") in
+  let container_pos2 = Pos.make_from (create_path "C2") in
+  let key_pos1 = Pos.make_from (create_path "K1") in
+  let key_pos2 = Pos.make_from (create_path "K2") in
+  let (errors, ()) =
+    Errors.do_with_context file_with_errors Errors.Typing (fun () ->
+        Errors.invalid_arraykey
+          err_pos
+          (container_pos2, "C2_Type")
+          (key_pos2, "K2_Type");
+        Errors.invalid_arraykey
+          err_pos
+          (container_pos1, "C1_Type")
+          (key_pos1, "K1_Type");
+        error_in "FileWithErrors.php";
+        Errors.invalid_arraykey
+          err_pos
+          (container_pos2, "C2_Type")
+          (key_pos2, "K2_Type");
+        Errors.invalid_arraykey
+          err_pos
+          (container_pos1, "C1_Type")
+          (key_pos1, "K1_Type");
+        ())
+  in
+  Asserter.String_asserter.assert_equals
+    expected_unsorted
+    (Errors.get_error_list errors |> error_list_to_string)
+    "Errors should be returned in the order they were added";
+
+  Asserter.String_asserter.assert_equals
+    expected_sorted
+    (Errors.get_sorted_error_list errors |> error_list_to_string)
+    "get_sorted_error_list should sort errors by position, code, and warrant";
+
   true
 
 let test_try () =

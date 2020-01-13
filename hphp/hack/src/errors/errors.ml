@@ -256,19 +256,50 @@ let phase_to_string (phase : phase) : string =
   | Decl -> "Decl"
   | Typing -> "Typing"
 
-let rec get_pos (error : error) = fst (List.hd_exn (snd error))
+let get_message (error : error) =
+  (* We get the position of the first item in the message error list, which
+    represents the location of the error (error claim). Other messages represent
+    the reason for the error (the warrant and the grounds). *)
+  let message_list = snd error in
+  let first_message = List.hd_exn message_list in
+  first_message
 
-and sort err =
-  List.sort
-    ~compare:
-      begin
-        fun x y ->
-        Pos.compare (get_pos x) (get_pos y)
-      end
-    err
-  |> List.remove_consecutive_duplicates ~equal:( = )
+let get_pos (error : error) = fst (get_message error)
 
-and get_sorted_error_list (err, _) = sort (files_t_to_list err)
+let sort err =
+  let rec compare (x_code, x_messages) (y_code, y_messages) =
+    match (x_messages, y_messages) with
+    | ([], []) -> 0
+    | (_x_messages, []) -> -1
+    | ([], _y_messages) -> 1
+    | (x_message :: x_messages, y_message :: y_messages) ->
+      (* The primary sort order is position *)
+      let comparison = Pos.compare (fst x_message) (fst y_message) in
+      (* If the positions are the same, sort by error code *)
+      let comparison =
+        if comparison = 0 then
+          Int.compare x_code y_code
+        else
+          comparison
+      in
+      (* If the error codes are also the same, sort by message text *)
+      let comparison =
+        if comparison = 0 then
+          String.compare (snd x_message) (snd y_message)
+        else
+          comparison
+      in
+      (* Finally, if the message text is also the same, then continue comparing
+      the rest of the messages (which indicate the reason why Hack believes
+      there is an error reported in the 1st message) *)
+      if comparison = 0 then
+        compare (x_code, x_messages) (y_code, y_messages)
+      else
+        comparison
+  in
+  List.sort ~compare err |> List.remove_consecutive_duplicates ~equal:( = )
+
+let get_sorted_error_list (err, _) = sort (files_t_to_list err)
 
 (* Getters and setter for passed-in map, based on current context *)
 let get_current_file_t file_t_map =

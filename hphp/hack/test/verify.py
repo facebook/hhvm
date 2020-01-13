@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyre-strict
 
 import argparse
 import difflib
@@ -8,8 +9,8 @@ import re
 import shlex
 import subprocess
 import sys
-from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Tuple
 
 from hphp.hack.test.parse_errors import Error, parse_errors, sprint_errors
@@ -21,10 +22,18 @@ dump_on_failure = False
 batch_size = 500
 
 
-TestCase = namedtuple("TestCase", ["file_path", "input", "expected"])
+@dataclass
+class TestCase:
+    file_path: str
+    input: Optional[str]
+    expected: str
 
 
-Result = namedtuple("Result", ["test_case", "output", "is_failure"])
+@dataclass
+class Result:
+    test_case: TestCase
+    output: str
+    is_failure: bool
 
 
 """
@@ -33,7 +42,9 @@ same name as test, but with .flags extension.
 """
 
 
-def compare_errors_by_line_no(errors_exp: List[Error], errors_out: List[Error]):
+def compare_errors_by_line_no(
+    errors_exp: List[Error], errors_out: List[Error]
+) -> Tuple[List[Error], List[Error]]:
     i_out = 0
     i_exp = 0
     len_out = len(errors_out)
@@ -63,7 +74,9 @@ def compare_errors_by_line_no(errors_exp: List[Error], errors_out: List[Error]):
     return (errors_in_exp_not_in_out, errors_in_out_not_in_exp)
 
 
-def compare_output_files_error_lines_only(file_out: str, file_exp: str):
+def compare_output_files_error_lines_only(
+    file_out: str, file_exp: str
+) -> Tuple[bool, str]:
     out = ""
     failed = False
     try:
@@ -74,7 +87,7 @@ def compare_output_files_error_lines_only(file_out: str, file_exp: str):
             errors_in_out_not_in_exp,
         ) = compare_errors_by_line_no(errors_out=errors_out, errors_exp=errors_exp)
 
-        failed = errors_in_exp_not_in_out or errors_in_out_not_in_exp
+        failed = bool(errors_in_exp_not_in_out) or bool(errors_in_out_not_in_exp)
         if errors_in_exp_not_in_out:
             out += f"""\033[93mExpected errors which were not produced:\033[0m
 {sprint_errors(errors_in_exp_not_in_out)}
@@ -88,7 +101,9 @@ def compare_output_files_error_lines_only(file_out: str, file_exp: str):
     return (failed, out)
 
 
-def check_output_error_lines_only(test: str, out_ext=".out", exp_ext=".exp"):
+def check_output_error_lines_only(
+    test: str, out_ext: str = ".out", exp_ext: str = ".exp"
+) -> Tuple[bool, str]:
     file_out = test + out_ext
     file_exp = test + exp_ext
     return compare_output_files_error_lines_only(file_out=file_out, file_exp=file_exp)
@@ -105,12 +120,12 @@ def get_test_flags(path: str) -> List[str]:
 
 
 def check_output(
-    case,
+    case: TestCase,
     out_extension: str,
-    default_expect_regex,
+    default_expect_regex: Optional[str],
     ignore_error_text: bool,
     only_compare_error_lines: bool,
-):
+) -> Result:
     if only_compare_error_lines:
         (failed, out) = check_output_error_lines_only(case.file_path)
         return Result(test_case=case, output=out, is_failure=failed)
@@ -135,10 +150,10 @@ def debug_cmd(cwd: str, cmd: List[str]) -> None:
 def run_batch_tests(
     test_cases: List[TestCase],
     program: str,
-    default_expect_regex,
-    ignore_error_text,
+    default_expect_regex: Optional[str],
+    ignore_error_text: bool,
     no_stderr: bool,
-    mode_flag,
+    mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
     out_extension: str,
     only_compare_error_lines: bool = False,
@@ -158,7 +173,7 @@ def run_batch_tests(
     # The contract here is that the program will write to
     # filename.out_extension for each file, and we read that
     # for the output.
-    def run(test_cases: List[TestCase]):
+    def run(test_cases: List[TestCase]) -> List[Result]:
         if not test_cases:
             raise AssertionError()
         first_test = test_cases[0]
@@ -181,7 +196,7 @@ def run_batch_tests(
         except subprocess.CalledProcessError:
             # we don't care about nonzero exit codes... for instance, type
             # errors cause hh_single_type_check to produce them
-            pass
+            return_code = None
         if return_code == -11:
             print(
                 "Segmentation fault while running the following command "
@@ -225,19 +240,19 @@ def run_batch_tests(
 def run_test_program(
     test_cases: List[TestCase],
     program: str,
-    default_expect_regex,
-    ignore_error_text,
-    no_stderr,
+    default_expect_regex: Optional[str],
+    ignore_error_text: bool,
+    no_stderr: bool,
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
-    timeout=None,
+    timeout: Optional[float] = None,
 ) -> List[Result]:
 
     """
     Run the program and return a list of results.
     """
 
-    def run(test_case) -> Result:
+    def run(test_case: TestCase) -> Result:
         test_dir, test_name = os.path.split(test_case.file_path)
         flags = get_flags(test_dir)
         test_flags = get_test_flags(test_case.file_path)
@@ -253,6 +268,7 @@ def run_test_program(
                 stderr=None if no_stderr else subprocess.STDOUT,
                 cwd=test_dir,
                 universal_newlines=True,
+                # pyre-ignore
                 input=test_case.input,
                 timeout=timeout,
             )
@@ -291,7 +307,7 @@ def filter_version_field(text: str) -> str:
     return re.sub(r',"version":"\d{4}-\d{2}-\d{2}-\d{4}"', "", text, count=1)
 
 
-def compare_expected(expected, out):
+def compare_expected(expected: str, out: str) -> bool:
     if expected == "No errors\n" or out == "No errors\n":
         return expected == out
     else:
@@ -304,7 +320,10 @@ def strip_lines(text: str) -> str:
 
 
 def check_result(
-    test_case: TestCase, default_expect_regex, ignore_error_messages, out: str
+    test_case: TestCase,
+    default_expect_regex: Optional[str],
+    ignore_error_messages: bool,
+    out: str,
 ) -> Result:
     """
     Check that the output of the test in :out corresponds to the expected
@@ -383,6 +402,7 @@ def report_failures(
         if fallback_expect_extension is not None:
             fallback_expect_ext_var = "FALLBACK_EXP_EXT=%s " % fallback_expect_extension
         first_test_file = os.path.realpath(failures[0].test_case.file_path)
+        out_dir: str  # for Pyre
         (exp_dir, out_dir) = get_exp_out_dirs(first_test_file)
         output_dir_var = "SOURCE_ROOT=%s OUTPUT_ROOT=%s " % (exp_dir, out_dir)
 
@@ -408,7 +428,7 @@ def dump_failures(failures: List[Result]) -> None:
     for f in failures:
         expected = f.test_case.expected
         actual = f.output
-        diff = difflib.ndiff(expected.splitlines(1), actual.splitlines(1))
+        diff = difflib.ndiff(expected.splitlines(True), actual.splitlines(True))
         print("Details for the failed test %s:" % f.test_case.file_path)
         print("\n>>>>>  Expected output  >>>>>>\n")
         print(expected)
@@ -495,11 +515,11 @@ def run_tests(
     program: str,
     default_expect_regex: Optional[str],
     batch_mode: str,
-    ignore_error_text: str,
+    ignore_error_text: bool,
     no_stderr: bool,
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
-    timeout=None,
+    timeout: Optional[float] = None,
     only_compare_error_lines: bool = False,
 ) -> List[Result]:
 
@@ -565,7 +585,7 @@ def run_idempotence_tests(
     fallback_expect_extension: Optional[str],
     out_extension: str,
     program: str,
-    default_expect_regex,
+    default_expect_regex: Optional[str],
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
 ) -> None:
@@ -630,15 +650,9 @@ def get_flags_cache(args_flags: List[str]) -> Callable[[str], List[str]]:
 
 
 if __name__ == "__main__":
-    # Defining this function to make the Flake8 linter happy (error T484)
-    # instead of passing os.path.abspath directly to add_argument. A different
-    # linter/type checker may not have this issue.
-    def abspath(path: str) -> str:
-        return os.path.abspath(path)
-
     parser = argparse.ArgumentParser()
     parser.add_argument("test_path", help="A file or a directory. ")
-    parser.add_argument("--program", type=abspath)
+    parser.add_argument("--program", type=os.path.abspath)
     parser.add_argument("--out-extension", type=str, default=".out")
     parser.add_argument("--expect-extension", type=str, default=".exp")
     parser.add_argument("--fallback-expect-extension", type=str)
@@ -694,7 +708,7 @@ if __name__ == "__main__":
         "<program> in addition to any arguments "
         "specified by --flags" % parser.prog
     )
-    args = parser.parse_args()
+    args: argparse.Namespace = parser.parse_args()
 
     max_workers = args.max_workers
     verbose = args.verbose
@@ -706,15 +720,17 @@ if __name__ == "__main__":
     if not os.path.isfile(args.program):
         raise Exception("Could not find program at %s" % args.program)
 
-    files = list_test_files(args.test_path, args.disabled_extension, args.in_extension)
+    files: List[str] = list_test_files(
+        args.test_path, args.disabled_extension, args.in_extension
+    )
 
     if len(files) == 0:
         raise Exception("Could not find any files to test in " + args.test_path)
 
-    mode_flag = [] if args.mode_flag is None else [args.mode_flag]
-    get_flags = get_flags_cache(args.flags)
+    mode_flag: List[str] = [] if args.mode_flag is None else [args.mode_flag]
+    get_flags: Callable[[str], List[str]] = get_flags_cache(args.flags)
 
-    results = run_tests(
+    results: List[Result] = run_tests(
         files,
         args.expect_extension,
         args.fallback_expect_extension,
@@ -732,7 +748,7 @@ if __name__ == "__main__":
     )
 
     # Doesn't make sense to check failures for idempotence
-    successes = [result for result in results if not result.is_failure]
+    successes: List[Result] = [result for result in results if not result.is_failure]
 
     if args.idempotence and successes:
         run_idempotence_tests(

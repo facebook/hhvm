@@ -1,28 +1,33 @@
 #!/usr/bin/env python3
+# pyre-strict
 
-import os.path
 import re
-from typing import List, NamedTuple
+from dataclasses import dataclass
+from typing import IO, List, Tuple
 
 
-class ErrorCode(NamedTuple):
+@dataclass
+class ErrorCode:
     type: str
     code: int
 
 
-class Position(NamedTuple):
+@dataclass
+class Position:
     fileName: str
     line: int
     startColumn: int
     endColumn: int
 
 
-class PositionedMessage(NamedTuple):
+@dataclass
+class PositionedMessage:
     position: Position
     message: str
 
 
-class Error(NamedTuple):
+@dataclass
+class Error:
     code: ErrorCode
     message: PositionedMessage
     reason: List[PositionedMessage]
@@ -37,15 +42,15 @@ def make_error(
     position: Position,
     message: str,
     reasons: List[PositionedMessage],
-):
+) -> Error:
     return Error(errorCode, PositionedMessage(position, message), reasons)
 
 
-def end_of_file(line) -> bool:
+def end_of_file(line: str) -> bool:
     return line == "" or line == "\n"
 
 
-def parse_errors(output_file_name: str):
+def parse_errors(output_file_name: str) -> List[Error]:
     with open(output_file_name) as output_file:
         try:
             return parse_error(output_file, True)
@@ -56,14 +61,14 @@ def parse_errors(output_file_name: str):
                 raise ParseException(f"at file {output_file_name}: {ex}")
 
 
-def same_error(line: str, multiple_error_file: bool):
+def same_error(line: str, multiple_error_file: bool) -> bool:
     if multiple_error_file:
         return starts_with_space(line)
     else:
         return not end_of_file(line)
 
 
-def parse_error(output_file, multiple_error_file: bool):
+def parse_error(output_file: IO[str], multiple_error_file: bool) -> List[Error]:
     errors = []
     line = output_file.readline()
     while not end_of_file(line):
@@ -92,7 +97,7 @@ def parse_error(output_file, multiple_error_file: bool):
 position_regex = r'^\s*File "(.*)", line (\d+), characters (\d+)-(\d+):(\[\d+\])?\n'
 
 
-def parse_position(line: str):
+def parse_position(line: str) -> Position:
     match = re.match(position_regex, line)
     if match is None:
         raise ParseException(f"Could not parse position line: {line}")
@@ -103,7 +108,7 @@ def parse_position(line: str):
     return Position(file, lineNum, startCol, endCol)
 
 
-def parse_message_and_code(file, line: str):
+def parse_message_and_code(file: IO[str], line: str) -> Tuple[str, ErrorCode]:
     message_chunks = []
     message_and_code_regex = r"^\s*(.*) \((.*)\[(\d+)\]\)\n"
     match = re.match(message_and_code_regex, line)
@@ -115,6 +120,7 @@ def parse_message_and_code(file, line: str):
         message_chunks.append(message_line)
         line = file.readline()
         match = re.match(message_and_code_regex, line)
+    assert match is not None, "should have raised exception above"
     message_line = match.group(1)
     type = match.group(2)
     code = int(match.group(3))
@@ -123,7 +129,7 @@ def parse_message_and_code(file, line: str):
     return (message, ErrorCode(type, code))
 
 
-def parse_message(file, line: str):
+def parse_message(file: IO[str], line: str) -> Tuple[str, str]:
     message_chunks = []
     message_regex = r"^\s*(.*)\n"
 
@@ -148,11 +154,11 @@ def parse_message(file, line: str):
     return (line, message)
 
 
-def starts_with_space(s: str):
+def starts_with_space(s: str) -> bool:
     return re.match(r"^\s", s) is not None
 
 
-def sprint_error(error: Error):
+def sprint_error(error: Error) -> str:
     file = error.message.position.fileName
     line = error.message.position.line
     startCol = error.message.position.startColumn
@@ -175,7 +181,7 @@ def sprint_error(error: Error):
     return "".join(out)
 
 
-def sprint_errors(errors: List[Error]):
+def sprint_errors(errors: List[Error]) -> str:
     if not errors:
         return "No errors\n"
     out = []

@@ -1258,6 +1258,7 @@ void raiseHackArrCompatArrNonArrCmp() {
 }
 
 void raiseHackArrCompatDVArrCmp(const ArrayData* ad1, const ArrayData* ad2) {
+  if (UNLIKELY(RID().getSuppressHACCompareNotices())) return;
   auto const type = [](const ArrayData* a) {
     if (a->isVArray()) return "varray";
     if (a->isDArray()) return "darray";

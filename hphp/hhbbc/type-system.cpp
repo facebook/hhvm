@@ -755,6 +755,7 @@ bool visitDifferingProvTagsInSimilarArrays(SArray arr1,
 bool subtypeArrLike(SArray arr1, SArray arr2) {
   if (arr1 == arr2) return true;
   if (arr1->size() != arr2->size()) return false;
+  SuppressHACCompareNotices _;
   if (!arr1->equal(arr2, true)) return false;
   return visitDifferingProvTagsInSimilarArrays(arr1, arr2, subtypeProvTag);
 }
@@ -762,6 +763,7 @@ bool subtypeArrLike(SArray arr1, SArray arr2) {
 bool couldBeArrLike(SArray arr1, SArray arr2) {
   if (arr1 == arr2) return true;
   if (arr1->size() != arr2->size()) return false;
+  SuppressHACCompareNotices _;
   if (!arr1->equal(arr2, true)) return false;
   return visitDifferingProvTagsInSimilarArrays(arr1, arr2, couldBeProvTag);
 }

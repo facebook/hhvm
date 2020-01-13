@@ -248,31 +248,31 @@ and fun_decl f =
             ctx = Provider_context.get_global_context_or_empty_FOR_MIGRATION ();
           }
         in
-        fun_decl_in_env env f)
+        fun_decl_in_env env ~is_lambda:false f)
   in
   let fe = { fe with fe_decl_errors = Some errors } in
   record_fun (snd f.f_name);
   Decl_heap.Funs.add (snd f.f_name) fe;
   fe
 
-and fun_decl_in_env env f =
+and fun_decl_in_env env ~is_lambda f =
   check_params env f.f_params;
   let reactivity = fun_reactivity env f.f_user_attributes in
   let returns_mutable = fun_returns_mutable f.f_user_attributes in
   let returns_void_to_rx = fun_returns_void_to_rx f.f_user_attributes in
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
   let arity_min = minimum_arity f.f_params in
-  let params = make_params env f.f_params in
+  let params = make_params env ~is_lambda f.f_params in
   let ret_ty =
     match hint_of_type_hint f.f_ret with
-    | None -> ret_from_fun_kind (fst f.f_name) f.f_fun_kind
+    | None -> ret_from_fun_kind (fst f.f_name) ~is_lambda f.f_fun_kind
     | Some ty -> Decl_hint.hint env ty
   in
   let arity =
     match f.f_variadic with
     | FVvariadicArg param ->
       assert param.param_is_variadic;
-      Fvariadic (arity_min, make_param_ty env param)
+      Fvariadic (arity_min, make_param_ty env ~is_lambda param)
     | FVellipsis p -> Fellipsis (arity_min, p)
     | FVnonVariadic -> Fstandard (arity_min, List.length f.f_params)
   in

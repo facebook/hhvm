@@ -21,7 +21,8 @@ val name_and_declare_types_program : Nast.program -> unit
 
 val make_env : Relative_path.t -> unit
 
-val fun_decl_in_env : Decl_env.env -> Nast.fun_ -> Typing_defs.fun_elt
+val fun_decl_in_env :
+  Decl_env.env -> is_lambda:bool -> Nast.fun_ -> Typing_defs.fun_elt
 
 val declare_const_in_file :
   Relative_path.t -> string -> Typing_defs.decl_ty * Errors.t

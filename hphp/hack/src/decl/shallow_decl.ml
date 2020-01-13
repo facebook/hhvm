@@ -203,11 +203,12 @@ let method_type env m =
   let returns_void_to_rx = fun_returns_void_to_rx m.m_user_attributes in
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
   let arity_min = minimum_arity m.m_params in
-  let params = make_params env m.m_params in
+  let params = make_params env ~is_lambda:false m.m_params in
   let ret =
     match hint_of_type_hint m.m_ret with
     | None ->
       ret_from_fun_kind
+        ~is_lambda:false
         ~is_constructor:(String.equal (snd m.m_name) SN.Members.__construct)
         (fst m.m_name)
         m.m_fun_kind
@@ -218,7 +219,7 @@ let method_type env m =
     | FVvariadicArg param ->
       assert param.param_is_variadic;
       assert (Option.is_none param.param_expr);
-      Fvariadic (arity_min, make_param_ty env param)
+      Fvariadic (arity_min, make_param_ty env ~is_lambda:false param)
     | FVellipsis p -> Fellipsis (arity_min, p)
     | FVnonVariadic -> Fstandard (arity_min, List.length m.m_params)
   in
@@ -244,11 +245,12 @@ let method_type env m =
 let method_redeclaration_type env m =
   check_params env m.mt_params;
   let arity_min = minimum_arity m.mt_params in
-  let params = make_params env m.mt_params in
+  let params = make_params env ~is_lambda:false m.mt_params in
   let ret =
     match hint_of_type_hint m.mt_ret with
     | None ->
       ret_from_fun_kind
+        ~is_lambda:false
         ~is_constructor:(String.equal (snd m.mt_name) SN.Members.__construct)
         (fst m.mt_name)
         m.mt_fun_kind
@@ -259,7 +261,7 @@ let method_redeclaration_type env m =
     | FVvariadicArg param ->
       assert param.param_is_variadic;
       assert (Option.is_none param.param_expr);
-      Fvariadic (arity_min, make_param_ty env param)
+      Fvariadic (arity_min, make_param_ty env ~is_lambda:false param)
     | FVellipsis p -> Fellipsis (arity_min, p)
     | FVnonVariadic -> Fstandard (arity_min, List.length m.mt_params)
   in

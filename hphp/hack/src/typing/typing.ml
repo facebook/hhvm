@@ -3110,7 +3110,7 @@ and expr_
     in
     (* This is the function type as declared on the lambda itself.
      * If type hints are absent then use Tany instead. *)
-    let declared_fe = Decl.fun_decl_in_env env.decl_env f in
+    let declared_fe = Decl.fun_decl_in_env env.decl_env ~is_lambda:true f in
     let (declared_pos, declared_ft) =
       match declared_fe with
       | { fe_type = (_, Tfun ft); fe_pos; _ } -> (fe_pos, ft)
@@ -3307,7 +3307,7 @@ and expr_
               env
               FL.Lambda.non_function_typed_context;
             check_body_under_known_params env declared_ft
-          | _ ->
+          | None ->
             (* If we're in partial mode then type-check definition anyway,
              * so treating parameters without type hints as "untyped"
              *)

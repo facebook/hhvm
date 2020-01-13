@@ -72,19 +72,21 @@ let get_param_mutability user_attributes =
 
 (* If global inference is on this will create a new type variable and store it in
   the global tvenv. Otherwise we return the default type given as parameter *)
-let global_inference_create_tyvar (reason, default_ty_) =
+let global_inference_create_tyvar ~is_lambda ~default:(reason, default_ty_) =
   let tco = Global_naming_options.get () in
-  if GlobalOptions.tco_global_inference tco then
+  if GlobalOptions.tco_global_inference tco && not is_lambda then
     (reason, Tvar (Ident.tmp ()))
   else
     (reason, default_ty_)
 
-let make_param_ty env param =
+let make_param_ty env ~is_lambda param =
   let ty =
     match hint_of_type_hint param.param_type_hint with
     | None ->
       let r = Reason.Rwitness param.param_pos in
-      global_inference_create_tyvar (r, Typing_defs.make_tany ())
+      global_inference_create_tyvar
+        ~is_lambda
+        ~default:(r, Typing_defs.make_tany ())
     (* if the code is strict, use the type-hint *)
     | Some x -> Decl_hint.hint env x
   in
@@ -126,13 +128,13 @@ let make_param_ty env param =
     fp_rx_annotation = rx_annotation;
   }
 
-let ret_from_fun_kind ?(is_constructor = false) pos kind =
+let ret_from_fun_kind ?(is_constructor = false) ~is_lambda pos kind =
   let default = (Reason.Rwitness pos, Typing_defs.make_tany ()) in
   let ret_ty () =
     if is_constructor then
       default
     else
-      global_inference_create_tyvar default
+      global_inference_create_tyvar ~is_lambda ~default
   in
   match kind with
   | Ast_defs.FGenerator ->
@@ -204,4 +206,5 @@ let check_params env paraml =
   (* PHP allows non-default valued parameters after default valued parameters. *)
   if not FileInfo.(equal_mode env.Decl_env.mode Mphp) then loop false paraml
 
-let make_params env paraml = List.map paraml ~f:(make_param_ty env)
+let make_params env ~is_lambda paraml =
+  List.map paraml ~f:(make_param_ty env ~is_lambda)

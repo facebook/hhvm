@@ -30,12 +30,11 @@ val find_refs_ctx :
   (string * Pos.t) list
 
 val find_references :
-  TypecheckerOptions.t ->
+  Provider_context.t ->
   MultiWorker.worker list option ->
   action_internal ->
   bool ->
-  Naming_table.t ->
-  Relative_path.Set.t ->
+  Relative_path.t list ->
   (string * Pos.t) list
 
 val find_child_classes :

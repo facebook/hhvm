@@ -40,19 +40,14 @@ let strip_ns results = List.map results (fun (s, p) -> (Utils.strip_ns s, p))
 
 let search target include_defs files genv env =
   if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
-    Relative_path.Set.iter files ~f:(fun file ->
+    List.iter files ~f:(fun file ->
         Hh_logger.debug
           "ServerFindRefs.search file %s"
           (Relative_path.to_absolute file));
   (* Get all the references to the provided target in the files *)
+  let ctx = Provider_context.empty ~tcopt:env.tcopt in
   let res =
-    FindRefsService.find_references
-      env.tcopt
-      genv.workers
-      target
-      include_defs
-      env.naming_table
-      files
+    FindRefsService.find_references ctx genv.workers target include_defs files
   in
   strip_ns res
 
@@ -82,6 +77,7 @@ let search_function function_name include_defs genv env =
     FindRefsService.get_dependent_files_function
       genv.ServerEnv.workers
       function_name
+    |> Relative_path.Set.elements
   in
   search (FindRefsService.IFunction function_name) include_defs files genv env
 
@@ -99,6 +95,7 @@ let search_member class_name member include_defs genv env =
   (* Get all the files that reference those classes *)
   let files =
     FindRefsService.get_dependent_files genv.ServerEnv.workers all_classes
+    |> Relative_path.Set.elements
   in
   let target =
     FindRefsService.IMember (FindRefsService.Class_set all_classes, member)
@@ -111,6 +108,7 @@ let search_gconst cst_name include_defs genv env =
   @@ fun () ->
   let files =
     FindRefsService.get_dependent_files_gconst genv.ServerEnv.workers cst_name
+    |> Relative_path.Set.elements
   in
   search (FindRefsService.IGConst cst_name) include_defs files genv env
 
@@ -122,6 +120,7 @@ let search_class class_name include_defs genv env =
     FindRefsService.get_dependent_files
       genv.ServerEnv.workers
       (SSet.singleton class_name)
+    |> Relative_path.Set.elements
   in
   search (FindRefsService.IClass class_name) include_defs files genv env
 
@@ -136,6 +135,7 @@ let search_record record_name include_defs genv env =
     FindRefsService.get_dependent_files
       genv.ServerEnv.workers
       (SSet.singleton record_name)
+    |> Relative_path.Set.elements
   in
   search (FindRefsService.IRecord record_name) include_defs files genv env
 

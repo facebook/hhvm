@@ -225,10 +225,10 @@ let fold_one_tast target acc symbol =
   | _ -> Pos.Map.empty
 
 let find_refs
-    (tcopt : TypecheckerOptions.t)
+    (ctx : Provider_context.t)
     (target : action_internal)
     (acc : (string * Pos.t) list)
-    (fileinfo_l : (Relative_path.t * FileInfo.t) list) : (string * Pos.t) list =
+    (files : Relative_path.t list) : (string * Pos.t) list =
   (* The helper function 'results_from_tast' takes a tast, looks at all *)
   (* use-sites in the tast e.g. "foo(1)" is a use-site of symbol foo,   *)
   (* and returns a map from use-site-position to name of the symbol.    *)
@@ -239,7 +239,18 @@ let find_refs
   in
   (* These are the tasts for all the 'fileinfo_l' passed in *)
   let tasts_of_files : (Relative_path.t * Tast.program) list =
-    ServerIdeUtils.recheck tcopt fileinfo_l
+    List.map files ~f:(fun path ->
+        let (_ctx, entry) =
+          Provider_utils.update_context
+            ~ctx
+            ~path
+            ~file_input:
+              (ServerCommandTypes.FileName (Relative_path.to_absolute path))
+        in
+        let { Provider_utils.Compute_tast.tast; _ } =
+          Provider_utils.compute_tast_unquarantined ~ctx ~entry
+        in
+        (path, tast))
   in
   Hh_logger.debug "find_refs.target: %s" (action_internal_to_string target);
   if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
@@ -276,13 +287,13 @@ let find_refs_ctx
   in
   Pos.Map.fold (fun p str acc -> (str, p) :: acc) results []
 
-let parallel_find_refs workers fileinfo_l target tcopt =
+let parallel_find_refs workers files target ctx =
   MultiWorker.call
     workers
-    ~job:(find_refs tcopt target)
+    ~job:(find_refs ctx target)
     ~neutral:[]
     ~merge:List.rev_append
-    ~next:(MultiWorker.next workers fileinfo_l)
+    ~next:(MultiWorker.next workers files)
 
 let get_definitions = function
   | IMember (Class_set classes, Method method_name) ->
@@ -346,26 +357,14 @@ let get_definitions = function
        later time *)
     []
 
-let find_references tcopt workers target include_defs naming_table files =
-  let fileinfo_l =
-    Relative_path.Set.fold
-      files
-      ~f:
-        begin
-          fun fn acc ->
-          match Naming_table.get_file_info naming_table fn with
-          | Some fi -> (fn, fi) :: acc
-          | None -> acc
-        end
-      ~init:[]
-  in
-  let len = List.length fileinfo_l in
+let find_references ctx workers target include_defs files =
+  let len = List.length files in
   Hh_logger.debug "find_references: %d files" len;
   let results =
     if len < 10 then
-      find_refs tcopt target [] fileinfo_l
+      find_refs ctx target [] files
     else
-      parallel_find_refs workers fileinfo_l target tcopt
+      parallel_find_refs workers files target ctx
   in
   let () =
     Hh_logger.debug "find_references: %d results" (List.length results)

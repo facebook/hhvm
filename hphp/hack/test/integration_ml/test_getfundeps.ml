@@ -222,16 +222,10 @@ let test () =
   let env = Test.setup_disk env files in
   let h = ServerFunDepsBatch.handlers in
   let do_test ((file, line, col), expected) =
-    let ServerEnv.{ tcopt; naming_table; _ } = env in
-    let (pos_infos, errors) =
-      ServerRxApiShared.prepare_pos_infos
-        h
-        [("/" ^ file, line, col)]
-        naming_table
-    in
-    if errors <> [] then
-      Test.fail ("Unexpected errors:" ^ String.concat "," errors);
-    let result = ServerRxApiShared.helper h tcopt [] pos_infos in
+    let ServerEnv.{ tcopt; _ } = env in
+    let ctx = Provider_context.empty ~tcopt in
+    let pos_list = [(Relative_path.from_root file, line, col)] in
+    let result = ServerRxApiShared.helper h ctx [] pos_list in
     if result <> [expected] then
       let msg =
         "Unexpected test result\nExpected:\n"

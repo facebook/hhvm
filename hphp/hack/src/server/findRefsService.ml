@@ -14,12 +14,6 @@ open ServerCommandTypes.Find_refs
 open Typing_defs
 module Cls = Decl_provider.Class
 
-(* The class containing the member can be specified in two ways:
- * - Class_set - as an explicit, pre-computed set of names, which are then
- *   compared using string comparison
- * - Subclasses_of - the class's name, in which comparison will use the
- *   subtyping relation
- *)
 type member_class =
   | Class_set of SSet.t
   | Subclasses_of of string

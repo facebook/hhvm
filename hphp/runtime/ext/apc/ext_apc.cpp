@@ -855,7 +855,7 @@ void apc_load_impl_compressed
         p += thrift_lens[i + i + 2] + 1; // skip \0
         String value(p, thrift_lens[i + i + 3], CopyString);
         bool success;
-        Variant v = HHVM_FN(fb_unserialize)(value, success);
+        Variant v = HHVM_FN(fb_unserialize)(value, success, k_FB_SERIALIZE_VARRAY_DARRAY);
         if (success ==  false) {
           throw Exception("bad apc archive, fb_unserialize failed");
         }

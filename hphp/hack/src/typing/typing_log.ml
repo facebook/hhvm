@@ -12,7 +12,6 @@ open Typing_defs
 open Typing_env_types
 module Env = Typing_env
 module Inf = Typing_inference_env
-module Occ = Typing_tyvar_occurrences
 module Pr = Typing_print
 module TPEnv = Type_parameter_env
 module TySet = Typing_set
@@ -523,7 +522,6 @@ let genv_as_value env genv =
 let env_as_value env =
   let {
     function_pos;
-    tyvar_occurrences;
     fresh_typarams;
     lenv;
     genv;
@@ -545,7 +543,6 @@ let env_as_value env =
   make_map
     [
       ("function_pos", pos_as_value function_pos);
-      ("tyvar_occurrences", Occ.Log.as_value tyvar_occurrences);
       ("fresh_typarams", Set fresh_typarams);
       ("lenv", lenv_as_value env lenv);
       ("genv", genv_as_value env genv);

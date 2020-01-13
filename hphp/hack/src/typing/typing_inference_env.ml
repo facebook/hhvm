@@ -10,6 +10,7 @@
 open Hh_prelude
 open Typing_defs
 module ITySet = Internal_type_set
+module Occ = Typing_tyvar_occurrences
 module TL = Typing_logic
 
 [@@@warning "-32"]
@@ -65,6 +66,7 @@ type t = {
   tvenv: tvenv;
   tyvars_stack: (Pos.t * Ident.t list) list;
   subtype_prop: Typing_logic.subtype_prop;
+  tyvar_occurrences: Typing_tyvar_occurrences.t;
 }
 
 type global_tyvar_info = {
@@ -135,12 +137,13 @@ module Log = struct
            List (List.map l (fun i -> Atom (var_as_string i)))))
 
   let inference_env_as_value env =
-    let { tvenv; tyvars_stack; subtype_prop } = env in
+    let { tvenv; tyvars_stack; subtype_prop; tyvar_occurrences } = env in
     make_map
       [
         ("tvenv", tvenv_as_value tvenv);
         ("tyvars_stack", tyvars_stack_as_value tyvars_stack);
         ("subtype_prop", subtype_prop_as_value subtype_prop);
+        ("tyvar_occurrences", Occ.Log.as_value tyvar_occurrences);
       ]
 
   let global_tyvar_info_as_value tvinfo =
@@ -165,7 +168,12 @@ end
 let empty_tvenv = IMap.empty
 
 let empty_inference_env =
-  { tvenv = empty_tvenv; tyvars_stack = []; subtype_prop = TL.valid }
+  {
+    tvenv = empty_tvenv;
+    tyvars_stack = [];
+    subtype_prop = TL.valid;
+    tyvar_occurrences = Occ.init;
+  }
 
 let empty_tyvar_constraints =
   {
@@ -190,6 +198,11 @@ let get_tyvar_info_opt env v = IMap.find_opt v env.tvenv
 let set_tyvar_info env v tvinfo =
   { env with tvenv = IMap.add v tvinfo env.tvenv }
 
+let get_solving_info_opt env var =
+  match get_tyvar_info_opt env var with
+  | None -> None
+  | Some tvinfo -> Some tvinfo.solving_info
+
 let set_solving_info env ?(tyvar_pos = Pos.none) x solving_info =
   let tvinfo =
     Option.value
@@ -199,13 +212,62 @@ let set_solving_info env ?(tyvar_pos = Pos.none) x solving_info =
   let tvinfo = { tvinfo with solving_info } in
   set_tyvar_info env x tvinfo
 
-let add env ?(tyvar_pos = Pos.none) x ty =
-  set_solving_info env ~tyvar_pos x (TVIType ty)
+let get_tyvar_occurrences env = Occ.get_tyvar_occurrences env.tyvar_occurrences
 
-let get_solving_info_opt env var =
-  match get_tyvar_info_opt env var with
-  | None -> None
-  | Some tvinfo -> Some tvinfo.solving_info
+let contains_unsolved_tyvars env =
+  Occ.contains_unsolved_tyvars env.tyvar_occurrences
+
+let tyvar_is_solved env var =
+  match get_solving_info_opt env var with
+  | None -> false
+  | Some sinfo ->
+    (match sinfo with
+    | TVIConstraints _ -> false
+    | TVIType _ -> true)
+
+(** Get type variables in a type that are either unsolved or
+solved to a type that itself contains unsolved type variables. *)
+let get_unsolved_vars_in_ty env ty =
+  let gatherer =
+    object
+      inherit [ISet.t] Type_visitor.locl_type_visitor
+
+      method! on_tvar vars _r v =
+        (* Add it if it has unsolved type vars or if it is itself unsolved. *)
+        if
+          (not (tyvar_is_solved env v))
+          || Occ.contains_unsolved_tyvars env.tyvar_occurrences v
+        then
+          ISet.add v vars
+        else
+          vars
+    end
+  in
+  gatherer#on_type ISet.empty ty
+
+let make_tyvars_occur_in_tyvar env vars ~occur_in:x =
+  {
+    env with
+    tyvar_occurrences =
+      Occ.make_tyvars_occur_in_tyvar env.tyvar_occurrences vars ~occur_in:x;
+  }
+
+let make_tyvar_no_more_occur_in_tyvar env v ~no_more_in:v' =
+  {
+    env with
+    tyvar_occurrences =
+      Occ.make_tyvar_no_more_occur_in_tyvar
+        env.tyvar_occurrences
+        v
+        ~no_more_in:v';
+  }
+
+let add env ?(tyvar_pos = Pos.none) v ty =
+  let env =
+    let unsolved_vars_in_ty = get_unsolved_vars_in_ty env ty in
+    make_tyvars_occur_in_tyvar env unsolved_vars_in_ty ~occur_in:v
+  in
+  set_solving_info env ~tyvar_pos v (TVIType ty)
 
 let get_type env r v =
   let rec get v aliases =
@@ -659,7 +721,9 @@ module Size = struct
       ubound_size + lbound_size + tconst_size + pu_accesses_size
 
   let inference_env_size env =
-    let { tvenv; subtype_prop = _; tyvars_stack = _ } = env in
+    let { tvenv; subtype_prop = _; tyvars_stack = _; tyvar_occurrences = _ } =
+      env
+    in
     IMap.map (tyvar_info_size env) tvenv |> fun m ->
     IMap.fold (fun _ x y -> x + y) m 0
 end
@@ -669,10 +733,18 @@ let simple_merge env1 env2 =
     tvenv = tvenv1;
     subtype_prop = subtype_prop1;
     tyvars_stack = tyvars_stack1;
+    tyvar_occurrences = tyvar_occurrences1;
   } =
     env1
   in
-  let { tvenv = tvenv2; subtype_prop = _; tyvars_stack = _ } = env2 in
+  let {
+    tvenv = tvenv2;
+    subtype_prop = _;
+    tyvars_stack = _;
+    tyvar_occurrences = _;
+  } =
+    env2
+  in
   let tvenv =
     IMap.merge
       (fun _v tvinfo1 tvinfo2 ->
@@ -721,7 +793,12 @@ let simple_merge env1 env2 =
       tvenv1
       tvenv2
   in
-  { tvenv; subtype_prop = subtype_prop1; tyvars_stack = tyvars_stack1 }
+  {
+    tvenv;
+    subtype_prop = subtype_prop1;
+    tyvars_stack = tyvars_stack1;
+    tyvar_occurrences = tyvar_occurrences1;
+  }
 
 let get_nongraph_subtype_prop env = env.subtype_prop
 
@@ -767,9 +844,9 @@ let global_tyvar_info_carries_information tvinfo =
   solving_info_carries_information solving_info
 
 let compress env =
-  let { tvenv; subtype_prop; tyvars_stack } = env in
+  let { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences } = env in
   let tvenv = IMap.filter (fun _k -> tyvar_info_carries_information) tvenv in
-  { tvenv; subtype_prop; tyvars_stack }
+  { tvenv; subtype_prop; tyvars_stack; tyvar_occurrences }
 
 let compress_g genv =
   IMap.filter (fun _ -> global_tyvar_info_carries_information) genv

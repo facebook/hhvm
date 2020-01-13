@@ -11,7 +11,6 @@ open Typing_defs
 open Typing_env_types
 module Env = Typing_env
 module Inf = Typing_inference_env
-module Occ = Typing_tyvar_occurrences
 
 (** Unions and intersections containing unsolved type variables may remain
 in an unsimplified form once those type variables get solved.
@@ -31,11 +30,13 @@ This module deals with this simplification.
 The simplification is recursive: simplifying a type variable will
 trigger simplification of its own occurrences. *)
 
+(** v has just been solved. If v does not recursively contain unsolved type variables,
+we simplify the types where v occurs by calling this function. *)
 let simplify_occurrences env v =
   Env.log_env_change "simplify_occurrences" env
   @@
   let rec simplify_occurrences env v ~seen_vars =
-    let vars = Occ.get_tyvar_occurrences env.tyvar_occurrences v in
+    let vars = Inf.get_tyvar_occurrences env.inference_env v in
     let (env, seen_vars) =
       ISet.fold
         (fun v' (env, seen_vars) ->
@@ -46,7 +47,7 @@ let simplify_occurrences env v =
           in
           (* Only simplify when the type of v' does not contain any more
           unsolved type variables. *)
-          if not @@ Occ.contains_unsolved_tyvars env.tyvar_occurrences v' then
+          if not @@ Inf.contains_unsolved_tyvars env.inference_env v' then
             simplify_type_of_var env v' ~seen_vars
           else
             (env, seen_vars))
@@ -79,7 +80,7 @@ let simplify_occurrences env v =
   in
   (* Only simplify when the type of v does not contain any more
   unsolved type variables. *)
-  if not @@ Occ.contains_unsolved_tyvars env.tyvar_occurrences v then
+  if not @@ Inf.contains_unsolved_tyvars env.inference_env v then
     fst @@ simplify_occurrences env v ~seen_vars:ISet.empty
   else
     env

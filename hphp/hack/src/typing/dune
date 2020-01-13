@@ -85,7 +85,6 @@
     typing_taccess
     typing_tdef
     typing_type_simplifier
-    typing_tyvar_occurrences
     typing_unify
     typing_union
     typing_utils
@@ -188,6 +187,7 @@
     typing_mutability_env
     typing_set
     typing_inference_env
+    typing_tyvar_occurrences
     type_visitor)
   (libraries
     annotated_ast

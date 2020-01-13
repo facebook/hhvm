@@ -17,7 +17,6 @@ open Typing_env_return_info
 module Dep = Typing_deps.Dep
 module Inf = Typing_inference_env
 module LID = Local_id
-module Occ = Typing_tyvar_occurrences
 module SG = SN.Superglobals
 module LEnvC = Typing_per_cont_env
 module C = Typing_continuations
@@ -114,53 +113,13 @@ let is_global_tyvar env var =
 
 let empty_bounds = TySet.empty
 
-let tyvar_is_solved env var =
-  match snd @@ snd @@ expand_var env Reason.Rnone var with
-  | Tvar var' when Ident.equal var' var -> false
-  | _ -> true
-
-(** Get type variables in a type that are either unsolved or
-solved to a type that itself contains unsolved type variables. *)
-let get_unsolved_vars_in_ty env ty =
-  let gatherer =
-    object
-      inherit [ISet.t] Type_visitor.locl_type_visitor
-
-      method! on_tvar vars _r v =
-        (* Add it if it has unsolved type vars or if it is itself unsolved. *)
-        if
-          (not (tyvar_is_solved env v))
-          || Occ.contains_unsolved_tyvars env.tyvar_occurrences v
-        then
-          ISet.add v vars
-        else
-          vars
-    end
-  in
-  gatherer#on_type ISet.empty ty
-
-let make_tyvars_occur_in_tyvar env vars ~occur_in:x =
-  {
-    env with
-    tyvar_occurrences =
-      Occ.make_tyvars_occur_in_tyvar env.tyvar_occurrences vars ~occur_in:x;
-  }
+let tyvar_is_solved env var = Inf.tyvar_is_solved env.inference_env var
 
 let make_tyvar_no_more_occur_in_tyvar env v ~no_more_in:v' =
-  {
-    env with
-    tyvar_occurrences =
-      Occ.make_tyvar_no_more_occur_in_tyvar
-        env.tyvar_occurrences
-        v
-        ~no_more_in:v';
-  }
+  wrap_inference_env_call_env env (fun env ->
+      Inf.make_tyvar_no_more_occur_in_tyvar env v ~no_more_in:v')
 
 let add env ?(tyvar_pos = Pos.none) v ty =
-  let env =
-    let unsolved_vars_in_ty = get_unsolved_vars_in_ty env ty in
-    make_tyvars_occur_in_tyvar env unsolved_vars_in_ty ~occur_in:v
-  in
   wrap_inference_env_call_env env (fun env -> Inf.add env ~tyvar_pos v ty)
 
 let get_type env r var =
@@ -486,7 +445,6 @@ let initial_local tpenv local_reactive =
 let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot =
   {
     function_pos = Pos.none;
-    tyvar_occurrences = Occ.init;
     fresh_typarams = SSet.empty;
     lenv = initial_local TPEnv.empty Nonreactive;
     in_loop = false;

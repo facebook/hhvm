@@ -22,7 +22,6 @@ type local_env = {
 type env = {
   (* position of the function/method being checked *)
   function_pos: Pos.t;
-  tyvar_occurrences: Typing_tyvar_occurrences.t;
   fresh_typarams: SSet.t;
   lenv: local_env;
   genv: genv;

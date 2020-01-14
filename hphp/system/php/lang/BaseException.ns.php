@@ -151,7 +151,7 @@ trait BaseException {
     $i = 0;
     $s = "";
     foreach ($this->getTrace() as $frame) {
-      if (!\is_array($frame)) continue;
+      if (!\HH\is_any_array($frame)) continue;
       $s .= "#$i " .
         ($frame['file'] ?? "") . "(" .
         ($frame['line'] ?? "") . "): " .

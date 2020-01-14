@@ -1,0 +1,26 @@
+<?hh
+<<__ConsistentConstruct>>
+class WithConsistentConstruct {
+  public function __construct() {
+    throw new \Exception();
+  }
+}
+<<__ConsistentConstruct>>
+trait TExtendsWithConsistentConstruct {
+  require implements \IExtendsWithConsistentConstruct;
+  public function __construct() {
+    throw new \Exception();
+  }
+  public static function get(): this {
+    return new static();
+  }
+}
+<<__ConsistentConstruct>>
+interface IExtendsWithConsistentConstruct {
+  require extends \WithConsistentConstruct;
+  public function __construct();
+}
+<<__Rx>>
+function extract_standalone_make_default(): nothing {
+  throw new \Exception();
+}

@@ -167,6 +167,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\Derived::overridden",
             "\\with_xhp",
             "\\WithOptionalConstructorArguments::get",
+            "\\TExtendsWithConsistentConstruct::get",
         ]
 
         for path in paths:

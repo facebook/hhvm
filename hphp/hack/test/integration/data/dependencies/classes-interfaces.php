@@ -95,3 +95,20 @@ class WithOptionalConstructorArguments implements IWithNullaryConstructor {
     return new static();
   }
 }
+
+<<__ConsistentConstruct>>
+class WithConsistentConstruct {
+  public function __construct() {}
+}
+
+interface IExtendsWithConsistentConstruct {
+  require extends WithConsistentConstruct;
+}
+
+trait TExtendsWithConsistentConstruct {
+  require implements IExtendsWithConsistentConstruct;
+
+  public static function get(): this {
+    return new static();
+  }
+}

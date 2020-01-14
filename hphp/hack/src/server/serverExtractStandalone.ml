@@ -854,16 +854,19 @@ let get_constructor_declaration tcopt cls prop_names =
     else
       Some "public function __construct() {throw new \\Exception();}"
   | Some cstr ->
+    let from_interface = Class.kind cls = Ast_defs.Cinterface in
     let decl =
       get_method_declaration
         tcopt
         cstr
         ~is_static:false
-        ~from_interface:(Class.kind cls = Ast_defs.Cinterface)
+        ~from_interface
         "__construct"
     in
     let body =
-      if cstr.ce_abstract then
+      (* An interface may inherit a non-abstract constructor
+         through a `require extends` declaration. *)
+      if cstr.ce_abstract || from_interface then
         ";"
       else
         "{throw new \\Exception();}"

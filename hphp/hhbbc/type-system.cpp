@@ -5458,7 +5458,7 @@ std::pair<Type,Type> array_newelem(Type arr, const Type& val, ProvTag src) {
 IterTypes iter_types(const Type& iterable) {
   // Only array types and objects can be iterated. Everything else raises a
   // warning and jumps out of the loop.
-  if (!iterable.couldBeAny(TArr, TVec, TDict, TKeyset, TObj)) {
+  if (!iterable.couldBeAny(TArr, TVec, TDict, TKeyset, TObj, TClsMeth)) {
     return { TBottom, TBottom, IterTypes::Count::Empty, true, true };
   }
 

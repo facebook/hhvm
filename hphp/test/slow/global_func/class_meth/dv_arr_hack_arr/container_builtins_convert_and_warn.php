@@ -68,6 +68,6 @@ function main() {
   test_compact_builtins($c, $f);
 
   test_string_builtins($c, $f);
-  // Fatal
+
   var_dump(array_map(($n) ==> { return $n * $n; }, HH\class_meth($c, $f)));
 }

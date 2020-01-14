@@ -205,4 +205,10 @@ vec(3) {
 Notice: Implicit clsmeth to vec conversion for implode() in %s/container_builtins_convert_and_warn.php on line 61
 string(8) "A::func1"
 
-Fatal error: Invalid operand type was used: expects iterable, clsmeth was given in %s/container_builtins_convert_and_warn.php on line 72
+Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 72
+array(2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(0)
+}

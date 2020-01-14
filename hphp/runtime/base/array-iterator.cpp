@@ -335,11 +335,8 @@ bool Iter::init(TypedValue* base) {
   // Get easy cases out of the way. Class methods promote to arrays and both
   // of them are just an ArrayIter contructor. end() never throws for arrays.
   if (isClsMethType(base->m_type)) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      tvCastToVecInPlace(base);
-    } else {
-      tvCastToVArrayInPlace(base);
-    }
+    new (&m_iter) ArrayIter(tvAsVariant(base).toArray().get());
+    return !m_iter.end();
   }
   if (isArrayLikeType(base->m_type)) {
     new (&m_iter) ArrayIter(base->m_data.parr);

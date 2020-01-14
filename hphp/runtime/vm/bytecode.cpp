@@ -4954,10 +4954,6 @@ void implIterInit(PC& pc, const IterArgs& ita, TypedValue* base,
   // It's also about as fast as it can get, because at this point, we're almost
   // always going to create an object iter, which can't really be optimized.
   //
-  if (isClsMethType(type(base))) {
-    raise_error("Invalid operand type was used: "
-                "expects iterable, clsmeth was given");
-  }
 
   if (it->init(base)) {
     tvAsVariant(val) = it->val();

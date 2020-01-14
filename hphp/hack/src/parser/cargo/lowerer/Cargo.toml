@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:lowerer
-# Signature<<85a79d53d73544e9def4ae1b488de4e95ef6a082>>
+# Signature<<51375b3fbadc4175a7c13103c057c2fb4843b033>>
 [package]
 name = "lowerer"
 edition = "2018"
@@ -21,8 +21,8 @@ ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
 stack_limit = { path = "../../../utils/stack_limit" }
-itertools = "*"
-lazy_static = "*"
-ocaml = "*"
-regex = "*"
-# @end of Signature<<85a79d53d73544e9def4ae1b488de4e95ef6a082>>
+itertools = "0.8"
+lazy_static = "1.4"
+ocaml = "0.8"
+regex = "1.3"
+# @end of Signature<<51375b3fbadc4175a7c13103c057c2fb4843b033>>

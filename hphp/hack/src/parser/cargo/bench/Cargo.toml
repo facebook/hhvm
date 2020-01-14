@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser/bench:bench
-# Signature<<1a727195f5703cd0d5c65587cc524501bc111e67>>
+# Signature<<6c19cc2874ffe9c2463b235c8370e62ec7b7db97>>
 [package]
 name = "bench"
 edition = "2018"
@@ -22,5 +22,5 @@ parser_rust = { path = "../.." }
 positioned_parser = { path = "../positioned_parser" }
 
 [dev-dependencies]
-pretty_assertions = "*"
-# @end of Signature<<1a727195f5703cd0d5c65587cc524501bc111e67>>
+pretty_assertions = "0.6"
+# @end of Signature<<6c19cc2874ffe9c2463b235c8370e62ec7b7db97>>

@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/utils/ocamlpool_rust:ocamlpool_rust
-# Signature<<729892e3c8af984b2641ef3d82bd0702c55e0e6f>>
+# Signature<<0a3e3210cf3cc769c0af4d4ae5b8c5c0c9a6941b>>
 [package]
 name = "ocamlpool_rust"
 edition = "2018"
@@ -12,6 +12,6 @@ path = "lib.rs"
 
 [dependencies]
 ocamlrep = { path = "../../ocamlrep" }
-libc = "*"
-ocaml = "*"
-# @end of Signature<<729892e3c8af984b2641ef3d82bd0702c55e0e6f>>
+libc = "0.2"
+ocaml = "0.8"
+# @end of Signature<<0a3e3210cf3cc769c0af4d4ae5b8c5c0c9a6941b>>

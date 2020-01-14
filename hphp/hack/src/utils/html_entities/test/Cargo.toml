@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/utils/html_entities/test:[bench,tests]
-# Signature<<fe4b172be6ad16836dfd45f8b3a0221df697da15>>
+# Signature<<29074ef743858400a9f8003908389c92629a9667>>
 [package]
 name = "tests"
 edition = "2018"
@@ -18,5 +18,5 @@ path = "bench.rs"
 html_entities = { path = ".." }
 
 [dev-dependencies]
-pretty_assertions = "*"
-# @end of Signature<<fe4b172be6ad16836dfd45f8b3a0221df697da15>>
+pretty_assertions = "0.6"
+# @end of Signature<<29074ef743858400a9f8003908389c92629a9667>>

@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:options
-# Signature<<d502c5f7d311248ce31513385870dd6cbe716e06>>
+# Signature<<731a5e8b954ca11799d7fd6e018600967d746ffb>>
 [package]
 name = "options"
 edition = "2018"
@@ -12,12 +12,12 @@ path = "../../options.rs"
 
 [dependencies]
 options_serde = { path = "../options_serde" }
-bitflags = "*"
-lazy_static = "*"
-serde = { version = "*", features = ["derive"] }
-serde_derive = "*"
-serde_json = "*"
+bitflags = "1.2"
+lazy_static = "1.4"
+serde = { version = "1.0", features = ["derive", "rc"] }
+serde_derive = "1.0"
+serde_json = "1.0"
 
 [dev-dependencies]
-pretty_assertions = "*"
-# @end of Signature<<d502c5f7d311248ce31513385870dd6cbe716e06>>
+pretty_assertions = "0.6"
+# @end of Signature<<731a5e8b954ca11799d7fd6e018600967d746ffb>>

@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser/coroutine:coroutine_lowerer
-# Signature<<1ff27462fda10b1ccc615db358effe2a40f70548>>
+# Signature<<a59f757a073b658356f1cd4f3ada58a9ed39d335>>
 [package]
 name = "coroutine_lowerer"
 edition = "2018"
@@ -14,5 +14,5 @@ path = "../../coroutine_lowerer.rs"
 ocamlrep = { path = "../../../../ocamlrep" }
 parser_core_types = { path = "../../../cargo/core_types" }
 rust_to_ocaml = { path = "../../../cargo/rust_to_ocaml" }
-ocaml = "*"
-# @end of Signature<<1ff27462fda10b1ccc615db358effe2a40f70548>>
+ocaml = "0.8"
+# @end of Signature<<a59f757a073b658356f1cd4f3ada58a9ed39d335>>

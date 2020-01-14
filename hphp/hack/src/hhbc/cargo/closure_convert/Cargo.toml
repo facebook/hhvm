@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:closure_convert_rust
-# Signature<<8a990cc18ac1d71c56236466ae742fcf05923929>>
+# Signature<<47137ce945abdecf506781464eb53d092b848f7a>>
 [package]
 name = "closure_convert_rust"
 edition = "2018"
@@ -21,5 +21,5 @@ options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 rx_rust = { path = "../rx" }
 unique_list_rust = { path = "../unique_list" }
-itertools = "*"
-# @end of Signature<<8a990cc18ac1d71c56236466ae742fcf05923929>>
+itertools = "0.8"
+# @end of Signature<<47137ce945abdecf506781464eb53d092b848f7a>>

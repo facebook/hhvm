@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:emit_attribute_rust
-# Signature<<5f0ee89a6610ef21d8d406fd5833aaae6817cda9>>
+# Signature<<d0fc8ee7557322fe071fabf6a34a794b2c80cf41>>
 [package]
 name = "emit_attribute_rust"
 edition = "2018"
@@ -21,5 +21,5 @@ hhbc_id_rust = { path = "../hhbc_id" }
 naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }
-itertools = "*"
-# @end of Signature<<5f0ee89a6610ef21d8d406fd5833aaae6817cda9>>
+itertools = "0.8"
+# @end of Signature<<d0fc8ee7557322fe071fabf6a34a794b2c80cf41>>

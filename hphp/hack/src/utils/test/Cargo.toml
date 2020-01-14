@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/utils/test:line_break_map_tests
-# Signature<<b63cd8d1c29b224732f0d3b887cb95f692054c0f>>
+# Signature<<40c8edde5aa8176174bb940f04a6469ec157214e>>
 [package]
 name = "line_break_map_tests"
 edition = "2018"
@@ -15,6 +15,6 @@ line_break_map = { path = "../line_break_map" }
 ocamlpool_rust = { path = "../ocamlpool_rust" }
 ocamlrep = { path = "../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../ocamlrep_ocamlpool" }
-libc = "*"
-ocaml = "*"
-# @end of Signature<<b63cd8d1c29b224732f0d3b887cb95f692054c0f>>
+libc = "0.2"
+ocaml = "0.8"
+# @end of Signature<<40c8edde5aa8176174bb940f04a6469ec157214e>>

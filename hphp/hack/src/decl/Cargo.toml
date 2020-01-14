@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/decl:decl_rust
-# Signature<<b3082c108460f7634f41638a5f89c838a06bb0f9>>
+# Signature<<d6de7a49ea64c564b8c94c8c6108345c9735c137>>
 [package]
 name = "decl_rust"
 edition = "2018"
@@ -19,8 +19,8 @@ ocamlrep = { path = "../ocamlrep" }
 oxidized = { path = "../oxidized" }
 parser_rust = { path = "../parser" }
 syntax_tree = { path = "../parser/cargo/syntax_tree" }
-rust-crypto = "*"
+rust-crypto = "0.2"
 
 [dev-dependencies]
-pretty_assertions = "*"
-# @end of Signature<<b3082c108460f7634f41638a5f89c838a06bb0f9>>
+pretty_assertions = "0.6"
+# @end of Signature<<d6de7a49ea64c564b8c94c8c6108345c9735c137>>

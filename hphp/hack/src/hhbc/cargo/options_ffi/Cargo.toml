@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:options_ffi
-# Signature<<99e7cb037def26c8131c3ed8a6c68f4f2e05bb17>>
+# Signature<<271964141936ee465a8de521c4ff55d5792cbf44>>
 [package]
 name = "options_ffi"
 edition = "2018"
@@ -15,5 +15,5 @@ hhbc_string_utils_rust = { path = "../string_utils" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 options = { path = "../options" }
-ocaml = "*"
-# @end of Signature<<99e7cb037def26c8131c3ed8a6c68f4f2e05bb17>>
+ocaml = "0.8"
+# @end of Signature<<271964141936ee465a8de521c4ff55d5792cbf44>>

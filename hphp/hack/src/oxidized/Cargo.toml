@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/oxidized:oxidized
-# Signature<<772b8687ce8af4ad6578bbe490dc36e148abd2da>>
+# Signature<<f836821842f2d4b4a4c2b5791f35a1cc7db41ace>>
 [package]
 name = "oxidized"
 edition = "2018"
@@ -13,8 +13,8 @@ path = "lib.rs"
 [dependencies]
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }
-ocaml = "*"
+ocaml = "0.8"
 
 [dev-dependencies]
-pretty_assertions = "*"
-# @end of Signature<<772b8687ce8af4ad6578bbe490dc36e148abd2da>>
+pretty_assertions = "0.6"
+# @end of Signature<<f836821842f2d4b4a4c2b5791f35a1cc7db41ace>>

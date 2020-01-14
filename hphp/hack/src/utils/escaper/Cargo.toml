@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/utils:escaper
-# Signature<<bd74b9fdb06dc70b952ab2e9940aa93c47a816d2>>
+# Signature<<15d11f5a9b139e8fa21b640bd39a64497eb859db>>
 [package]
 name = "escaper"
 edition = "2018"
@@ -11,5 +11,5 @@ include = ["../escaper.rs"]
 path = "../escaper.rs"
 
 [dev-dependencies]
-pretty_assertions = "*"
-# @end of Signature<<bd74b9fdb06dc70b952ab2e9940aa93c47a816d2>>
+pretty_assertions = "0.6"
+# @end of Signature<<15d11f5a9b139e8fa21b640bd39a64497eb859db>>

@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser/ppl:rust_ppl_class_rewriter_ffi
-# Signature<<061c7c5870e1c020be3d218c90050c359b571212>>
+# Signature<<fdc20a2fe27e1c580c478a13a69f2a113b126817>>
 [package]
 name = "rust_ppl_class_rewriter_ffi"
 edition = "2018"
@@ -19,6 +19,6 @@ positioned_parser = { path = "../../../cargo/positioned_parser" }
 rust_editable_positioned_syntax = { path = "../../../cargo/editable_positioned_syntax" }
 rust_ppl_class_rewriter = { path = "../ppl_class_rewriter" }
 rust_to_ocaml = { path = "../../../cargo/rust_to_ocaml" }
-libc = "*"
-ocaml = "*"
-# @end of Signature<<061c7c5870e1c020be3d218c90050c359b571212>>
+libc = "0.2"
+ocaml = "0.8"
+# @end of Signature<<fdc20a2fe27e1c580c478a13a69f2a113b126817>>

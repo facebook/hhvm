@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/name_index:hh_name_index
-# Signature<<7e88673abe6b7bbb26b8007c180b7973dd278e33>>
+# Signature<<57c3f723ddfbed26feb852efca64e10040d50f9b>>
 [package]
 name = "hh_name_index"
 edition = "2018"
@@ -14,6 +14,6 @@ path = "main.rs"
 [dependencies]
 names = { path = "sqlite" }
 oxidized = { path = "../oxidized" }
-rusqlite = "*"
-structopt = "*"
-# @end of Signature<<7e88673abe6b7bbb26b8007c180b7973dd278e33>>
+rusqlite = "0.21"
+structopt = "0.3"
+# @end of Signature<<57c3f723ddfbed26feb852efca64e10040d50f9b>>

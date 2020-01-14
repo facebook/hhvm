@@ -245,12 +245,32 @@ auto const specialized_array_examples = folly::lazy([] {
   test_map_d[tv(s_test)]   = TDbl;
   ret.emplace_back(sarr_map(test_map_d));
 
+  auto test_map_e          = MapElems{};
+  test_map_e[tv(s_A)]      = TInt;
+  test_map_e[tv(s_test)]   = TObj;
+  ret.emplace_back(arr_map(test_map_e));
+
   ret.emplace_back(arr_packedn(TInt));
   ret.emplace_back(arr_mapn(TSStr, arr_mapn(TInt, TSStr)));
   ret.emplace_back(arr_mapn(TSStr, TArr));
   ret.emplace_back(arr_mapn(TSStr, arr_packedn(TSStr)));
   ret.emplace_back(arr_mapn(TSStr, arr_mapn(TSStr, TSStr)));
   ret.emplace_back(arr_packed({TInt, TStr, TBool}));
+  ret.emplace_back(arr_packedn(TObj));
+  ret.emplace_back(arr_packed({TInt, TObj}));
+  ret.emplace_back(arr_mapn(TSStr, TObj));
+  ret.emplace_back(union_of(arr_packedn(TObj), some_aempty()));
+  ret.emplace_back(union_of(arr_packed({TInt, TObj}), some_aempty()));
+  ret.emplace_back(union_of(arr_mapn(TInt, TObj), some_aempty()));
+  ret.emplace_back(union_of(arr_map(test_map_e), some_aempty()));
+  ret.emplace_back(opt(arr_packedn(TObj)));
+  ret.emplace_back(opt(arr_packed({TInt, TObj})));
+  ret.emplace_back(opt(arr_mapn(TInt, TObj)));
+  ret.emplace_back(opt(arr_map(test_map_e)));
+  ret.emplace_back(opt(union_of(arr_packedn(TObj), some_aempty())));
+  ret.emplace_back(opt(union_of(arr_packed({TInt, TObj}), some_aempty())));
+  ret.emplace_back(opt(union_of(arr_mapn(TInt, TObj), some_aempty())));
+  ret.emplace_back(opt(union_of(arr_map(test_map_e), some_aempty())));
 
   return ret;
 });
@@ -479,7 +499,7 @@ TEST(Type, Relations) {
 
   // couldBe is symmetric and reflexive
   for (auto& t1 : all_with_waithandles(index)) {
-    for (auto& t2 : all()) {
+    for (auto& t2 : all_with_waithandles(index)) {
       EXPECT_TRUE(t1.couldBe(t2) == t2.couldBe(t1));
     }
   }
@@ -499,6 +519,17 @@ TEST(Type, Relations) {
     EXPECT_TRUE(t1.subtypeOf(t1));
   }
 
+  for (auto const& t1 : all_with_waithandles(index)) {
+    for (auto const& t2 : all_with_waithandles(index)) {
+      if (t1.subtypeOf(t2)) {
+        EXPECT_TRUE(t1.couldBe(t2));
+      }
+      if (!t1.couldBe(t2)) {
+        EXPECT_FALSE(t1.subtypeOf(t2));
+      }
+    }
+  }
+
   // union_of is commutative
   for (auto& t1 : all_with_waithandles(index)) {
     for (auto& t2 : all_with_waithandles(index)) {
@@ -507,6 +538,51 @@ TEST(Type, Relations) {
         << "\n   union_of(t1, t2): " << show(union_of(t1, t2))
         << "\n   union_of(t2, t1): " << show(union_of(t2, t1));
     }
+  }
+
+  for (auto const& t1 : all_with_waithandles(index)) {
+    for (auto const& t2 : all_with_waithandles(index)) {
+      EXPECT_TRUE(t1.subtypeOf(union_of(t1, t2)));
+      EXPECT_TRUE(t2.subtypeOf(union_of(t1, t2)));
+      EXPECT_TRUE(t1.couldBe(union_of(t1, t2)));
+      EXPECT_TRUE(t2.couldBe(union_of(t1, t2)));
+    }
+  }
+
+  for (auto const& t1 : all_with_waithandles(index)) {
+    for (auto const& t2 : all_with_waithandles(index)) {
+      if (t1.subtypeOf(t2)) {
+        EXPECT_EQ(union_of(t1, t2), t2);
+      }
+      if (t2.subtypeOf(t1)) {
+        EXPECT_EQ(union_of(t1, t2), t1);
+      }
+    }
+  }
+
+  for (auto const& t1 : all_with_waithandles(index)) {
+    for (auto const& t2 : all_with_waithandles(index)) {
+      EXPECT_EQ(intersection_of(t1, t2), intersection_of(t2, t1));
+
+      if (t1.subtypeOf(t2)) {
+        EXPECT_EQ(intersection_of(t1, t2), t1);
+      } else if (t2.subtypeOf(t1)) {
+        EXPECT_EQ(intersection_of(t1, t2), t2);
+      }
+
+      if (t1.couldBe(t2)) {
+        EXPECT_NE(intersection_of(t1, t2), TBottom);
+      } else {
+        EXPECT_EQ(intersection_of(t1, t2), TBottom);
+      }
+
+      EXPECT_EQ(intersection_of(union_of(t1, t2), t1), t1);
+      EXPECT_EQ(intersection_of(union_of(t1, t2), t2), t2);
+    }
+  }
+
+  for (auto const& t : all_with_waithandles(index)) {
+    EXPECT_EQ(intersection_of(t, t), t);
   }
 }
 
@@ -720,9 +796,11 @@ TEST(Type, Option) {
   for (auto& t : optionals()) EXPECT_EQ(t, opt(unopt(t)));
   for (auto& t : optionals()) EXPECT_TRUE(is_opt(t));
   for (auto& t : all()) {
-    auto const found =
-      std::find(begin(optionals()), end(optionals()), t) != end(optionals());
-    EXPECT_EQ(found, is_opt(t));
+    if (!is_specialized_array(t)) {
+      auto const found =
+        std::find(begin(optionals()), end(optionals()), t) != end(optionals());
+      EXPECT_EQ(found, is_opt(t));
+    }
   }
 
   EXPECT_TRUE(is_opt(opt(sval(s_test.get()))));
@@ -2030,6 +2108,24 @@ TEST(Type, ArrIntersections) {
   test_map_h[tv(s_B)]      = TInt;
   auto const tstruct8      = sarr_map(test_map_h);
 
+  auto test_map_i          = MapElems{};
+  test_map_i[tv(s_A)]      = TStr;
+  test_map_i[tv(s_B)]      = TInt;
+  test_map_i[tv(s_BB)]     = TVec;
+  auto const tstruct9      = arr_map(test_map_i);
+
+  auto test_map_j          = MapElems{};
+  test_map_j[tv(s_A)]      = TSStr;
+  test_map_j[tv(s_B)]      = TInt;
+  test_map_j[tv(s_BB)]     = TSVec;
+  auto const tstruct10     = sarr_map(test_map_j);
+
+  auto test_map_k          = MapElems{};
+  test_map_k[tv(s_A)]      = TSStr;
+  test_map_k[tv(s_B)]      = TInt;
+  test_map_k[tv(s_BB)]     = TObj;
+  auto const tstruct11     = arr_map(test_map_k);
+
   auto const mapn_str_int = arr_mapn(TStr, TInt);
 
   EXPECT_EQ(intersection_of(tstruct,  mapn_str_int), tstruct);
@@ -2048,6 +2144,45 @@ TEST(Type, ArrIntersections) {
   EXPECT_EQ(intersection_of(sarr_packed({TNum, TDbl, TNum}),
                             sarr_packed({TDbl, TNum, TInt})),
             sarr_packed({TDbl, TDbl, TInt}));
+  EXPECT_EQ(intersection_of(TSDictN, dict_n(TArrKey, TInitCell, ProvTag::Top)),
+            sdict_n(TUncArrKey, TInitUnc, ProvTag::Top));
+  EXPECT_EQ(intersection_of(TSDictN, dict_n(TArrKey, TInitCell, ProvTag::Top)),
+            sdict_n(TUncArrKey, TInitUnc, ProvTag::Top));
+  EXPECT_EQ(intersection_of(tstruct9, TSArrN), tstruct10);
+  EXPECT_EQ(intersection_of(TSArrN, arr_packed({TStr, TVec, TInt, TInitCell})),
+                            sarr_packed({TSStr, TSVec, TInt, TInitUnc}));
+  EXPECT_EQ(intersection_of(arr_packedn(TStr), TSArrN), sarr_packedn(TSStr));
+  EXPECT_EQ(intersection_of(TSArrN, arr_packedn(TObj)), TBottom);
+  EXPECT_EQ(intersection_of(arr_packed({TStr, TInt, TObj}), TSArrN), TBottom);
+  EXPECT_EQ(intersection_of(TSArrN, tstruct11), TBottom);
+  EXPECT_EQ(
+    intersection_of(dict_n(TArrKey, TObj, ProvTag::Top), TSDictN),
+    TBottom
+  );
+  EXPECT_EQ(
+    intersection_of(union_of(arr_mapn(TInt, TObj), some_aempty()),
+                    union_of(arr_packed({TInt, TObj}), some_aempty())),
+    some_aempty()
+  );
+  EXPECT_EQ(
+    intersection_of(opt(arr_mapn(TInt, TObj)), TUnc),
+    TInitNull
+  );
+  EXPECT_EQ(
+    intersection_of(opt(arr_packedn(TObj)), TInitUnc),
+    TInitNull
+  );
+  EXPECT_EQ(
+    intersection_of(union_of(arr_packed({TInt, TObj}), some_aempty()), TUnc),
+    aempty()
+  );
+  EXPECT_EQ(
+    intersection_of(
+      opt(union_of(arr_packed({TInt, TObj}), some_aempty())),
+      TUnc
+    ),
+    opt(aempty())
+  );
 }
 
 TEST(Type, ArrOfArr) {
@@ -2550,6 +2685,256 @@ TEST(Type, StrValues) {
   EXPECT_TRUE(union_of(t4, t2) == t2);
   EXPECT_TRUE(union_of(t2, t5) == TStr);
   EXPECT_TRUE(union_of(t5, t2) == TStr);
+}
+
+TEST(Type, RemoveCounted) {
+  for (auto const& t1 : all()) {
+    auto const t2 = remove_counted(t1);
+    EXPECT_TRUE(t2.subtypeOf(TUnc));
+    if (t1.subtypeOf(TUnc)) {
+      EXPECT_EQ(t2, t1);
+    }
+    if (!t1.couldBe(TUnc)) {
+      EXPECT_EQ(t2, TBottom);
+    }
+    EXPECT_EQ(t2, intersection_of(t1, TUnc));
+  }
+
+  auto test_map_a = MapElems{};
+  test_map_a[tv(s_test)] = TInt;
+  test_map_a[tv(s_A)] = TDbl;
+
+  auto test_map_b = MapElems{};
+  test_map_b[tv(s_A)] = TStr;
+  test_map_b[tv(s_B)] = TArrKey;
+
+  auto test_map_c = MapElems{};
+  test_map_c[tv(s_A)] = TSStr;
+  test_map_c[tv(s_B)] = TUncArrKey;
+
+  auto test_map_d = MapElems{};
+  test_map_d[tv(s_A)] = TInt;
+  test_map_d[tv(s_B)] = TObj;
+
+  auto test_map_e = MapElems{};
+  test_map_e[tv(s_A)] = ival(123);
+  test_map_e[tv(s_B)] = sval_nonstatic(s_test.get());
+
+  auto test_map_f = MapElems{};
+  test_map_f[tv(s_A)] = ival(123);
+  test_map_f[tv(s_B)] = sval(s_test.get());
+
+  auto test_map_g = MapElems{};
+  test_map_g[tv(s_A)] = TSStr;
+  test_map_g[tv(s_B)] = sarr_map(test_map_f);
+
+  auto test_map_h = MapElems{};
+  test_map_h[tv(s_A)] = TStr;
+  test_map_h[tv(s_B)] = arr_map(test_map_e);
+
+  auto test_map_i = MapElems{};
+  test_map_i[tv(s_A)] = TSStr;
+  test_map_i[tv(s_B)] = sarr_map(test_map_f);
+
+  auto test_map_j = MapElems{};
+  test_map_j[tv(s_A)] = TSStr;
+  test_map_j[tv(s_B)] = arr_map(test_map_d);
+
+  auto const cases = std::vector<std::pair<Type, Type>>{
+    { TInt, TInt },
+    { TUninit, TUninit },
+    { TInitNull, TInitNull },
+    { TFalse, TFalse },
+    { TTrue, TTrue },
+    { TInt, TInt },
+    { TDbl, TDbl },
+    { TSStr, TSStr },
+    { TFunc, TFunc },
+    { TSArr, TSArr },
+    { TSDict, TSDict },
+    { TSVec, TSVec },
+    { TSKeyset, TSKeyset },
+    { TCls, TCls },
+    { TPrim, TPrim },
+    { TUnc, TUnc },
+    { TInitUnc, TInitUnc },
+    { TSDictN, TSDictN },
+    { TSVecE, TSVecE },
+    { TUncArrKey, TUncArrKey },
+    { TUncStrLike, TUncStrLike },
+    { TObj, TBottom },
+    { TRes, TBottom },
+    { TStr, TSStr },
+    { TArr, TSArr },
+    { TVec, TSVec },
+    { TDict, TSDict },
+    { TKeyset, TSKeyset },
+    { TVecN, TSVecN },
+    { TKeysetN, TSKeysetN },
+    { TDArr, TSDArr },
+    { TDArrN, TSDArrN },
+    { TArrKey, TUncArrKey },
+    { TStrLike, TUncStrLike },
+    { TInitCell, TInitUnc },
+    { TCell, TUnc },
+    { ival(1), ival(1) },
+    { dval(2.0), dval(2.0) },
+    { sval(s_test.get()), sval(s_test.get()) },
+    { sval_nonstatic(s_test.get()), sval(s_test.get()) },
+    { aval(test_array_map_value()), aval(test_array_map_value()) },
+    { aval(test_array_packed_value()), aval(test_array_packed_value()) },
+    { sarr_packedn(TInt), sarr_packedn(TInt) },
+    { arr_packedn(TInitCell), sarr_packedn(TInitUnc) },
+    { arr_packedn(TObj), TBottom },
+    { arr_packedn(ival(123)), sarr_packedn(ival(123)) },
+    {
+      arr_packedn(sval_nonstatic(s_test.get())),
+      sarr_packedn(sval(s_test.get()))
+    },
+    { sarr_packed({TInt, TSStr}), sarr_packed({TInt, TSStr}) },
+    { arr_packed({TInitCell, TStr}), sarr_packed({TInitUnc, TSStr}) },
+    { arr_packed({TInt, TObj, TInt}), TBottom },
+    { sarr_mapn(TInt, TSStr), sarr_mapn(TInt, TSStr) },
+    { sarr_mapn(TSStr, TInt), sarr_mapn(TSStr, TInt) },
+    { arr_mapn(TArrKey, TArrKey), sarr_mapn(TUncArrKey, TUncArrKey) },
+    { arr_mapn(TStr, TStr), sarr_mapn(TSStr, TSStr) },
+    { arr_mapn(TInt, TObj), TBottom },
+    { arr_mapn(TStr, dval(3.14)), sarr_mapn(TSStr, dval(3.14)) },
+    { sarr_map(test_map_a), sarr_map(test_map_a) },
+    { arr_map(test_map_a), sarr_map(test_map_a) },
+    { arr_map(test_map_b), sarr_map(test_map_c) },
+    { arr_map(test_map_d), TBottom },
+    { arr_map(test_map_e), sarr_map(test_map_f) },
+    { sarr_map(test_map_f), sarr_map(test_map_f) },
+    { sarr_packedn(sarr_packedn(TInt)), sarr_packedn(sarr_packedn(TInt)) },
+    { arr_packedn(arr_packedn(TStr)), sarr_packedn(sarr_packedn(TSStr)) },
+    { arr_packedn(arr_packedn(TObj)), TBottom },
+    {
+      sarr_packed({sarr_packed({TInt, TDbl}), TInt}),
+      sarr_packed({sarr_packed({TInt, TDbl}), TInt})
+    },
+    {
+      arr_packed({arr_packed({TArrKey, TStr}), TInitCell}),
+      sarr_packed({sarr_packed({TUncArrKey, TSStr}), TInitUnc})
+    },
+    { arr_packed({arr_packed({TObj, TObj}), TInt}), TBottom },
+    {
+      sarr_mapn(TSStr, sarr_mapn(TSStr, TInitUnc)),
+      sarr_mapn(TSStr, sarr_mapn(TSStr, TInitUnc))
+    },
+    {
+      arr_mapn(TStr, arr_mapn(TStr, TArrKey)),
+      sarr_mapn(TSStr, sarr_mapn(TSStr, TUncArrKey))
+    },
+    { arr_mapn(TInt, arr_mapn(TInt, TObj)), TBottom },
+    { sarr_map(test_map_g), sarr_map(test_map_g) },
+    { arr_map(test_map_h), sarr_map(test_map_i) },
+    { arr_map(test_map_j), TBottom },
+    { opt(sarr_mapn(TInt, TInt)), opt(sarr_mapn(TInt, TInt)) },
+    {
+      union_of(sarr_mapn(TInt, TInt), aempty()),
+      union_of(sarr_mapn(TInt, TInt), aempty())
+    },
+    { opt(arr_mapn(TStr, TObj)), TInitNull },
+    { opt(arr_packedn(TObj)), TInitNull },
+    { opt(arr_packed({TObj, TInt})), TInitNull },
+    { opt(arr_map(test_map_j)), TInitNull },
+    {
+      opt(arr_packedn(opt(arr_mapn(TStr, TObj)))),
+      opt(sarr_packedn(TInitNull))
+    },
+    { union_of(arr_mapn(TStr, TObj), some_aempty()), aempty() },
+    { union_of(arr_packedn(TObj), some_aempty()), aempty() },
+    { union_of(arr_packed({TObj, TInt}), some_aempty()), aempty() },
+    { union_of(arr_map(test_map_j), some_aempty()), aempty() },
+    {
+      arr_packedn(union_of(arr_mapn(TStr, TObj), some_aempty())),
+      sarr_packedn(aempty())
+    },
+    { opt(union_of(arr_mapn(TStr, TObj), some_aempty())), opt(aempty()) },
+    { opt(union_of(arr_packedn(TObj), some_aempty())), opt(aempty()) },
+    { opt(union_of(arr_packed({TObj, TInt}), some_aempty())), opt(aempty()) },
+    { opt(union_of(arr_map(test_map_j), some_aempty())), opt(aempty()) },
+  };
+  for (auto const& p : cases) {
+    EXPECT_EQ(remove_counted(p.first), p.second);
+    if (!p.first.couldBe(TNull) && p.second != TBottom) {
+      EXPECT_EQ(remove_counted(opt(p.first)), opt(p.second));
+    }
+  }
+}
+
+TEST(Type, MustBeCounted) {
+  for (auto const& t1 : all()) {
+    if (t1.subtypeOf(TUnc)) {
+      EXPECT_FALSE(must_be_counted(t1));
+    }
+    EXPECT_EQ(!t1.couldBe(TUnc), must_be_counted(t1));
+    if (is_opt(t1)) {
+      EXPECT_FALSE(must_be_counted(t1));
+    }
+    EXPECT_FALSE(must_be_counted(union_of(t1, TUnc)));
+    if (!t1.couldBe(TNull)) {
+      EXPECT_FALSE(must_be_counted(opt(t1)));
+    }
+    EXPECT_FALSE(must_be_counted(union_of(t1, some_aempty())));
+  }
+
+  auto test_map_a = MapElems{};
+  test_map_a[tv(s_A)] = TSStr;
+  test_map_a[tv(s_B)] = TInt;
+
+  auto test_map_b = MapElems{};
+  test_map_b[tv(s_A)] = TSStr;
+  test_map_b[tv(s_B)] = TObj;
+
+  auto const cases = std::vector<std::pair<Type, bool>>{
+    { TInt, false },
+    { TUninit, false },
+    { TInitNull, false },
+    { TFalse, false },
+    { TTrue, false },
+    { TInt, false },
+    { TDbl, false },
+    { TFunc, false },
+    { TSArr, false },
+    { TCls, false },
+    { TPrim, false },
+    { TUnc, false },
+    { TInitUnc, false },
+    { TSDictN, false },
+    { TUncArrKey, false },
+    { TUncStrLike, false },
+    { TInitCell, false },
+    { TObj, true },
+    { TRes, true },
+    { ival(1), false },
+    { dval(2.0), false },
+    { sval(s_test.get()), false },
+    { aval(test_array_map_value()), false },
+    { aval(test_array_packed_value()), false },
+    { arr_packedn(TInt), false },
+    { arr_packedn(TObj), true },
+    { arr_packed({TInt, TStr}), false },
+    { arr_packed({TInt, TObj}), true },
+    { arr_mapn(TInt, TInt), false },
+    { arr_mapn(TInt, TObj), true },
+    { arr_packed({TInt, arr_packedn(TObj)}), true },
+    { arr_map(test_map_a), false },
+    { arr_map(test_map_b), true },
+  };
+  for (auto const& p : cases) {
+    if (p.second) {
+      EXPECT_TRUE(must_be_counted(p.first));
+    } else {
+      EXPECT_FALSE(must_be_counted(p.first));
+    }
+
+    if (!p.first.couldBe(TNull)) {
+      EXPECT_FALSE(must_be_counted(opt(p.first)));
+    }
+    EXPECT_FALSE(must_be_counted(union_of(p.first, some_aempty())));
+  }
 }
 
 TEST(Type, ContextDependent) {

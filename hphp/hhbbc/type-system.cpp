@@ -2062,6 +2062,51 @@ size_t Type::hash() const {
   return folly::hash::hash_combine(rawBits, rawTag, data);
 }
 
+bool must_be_counted(const Type& t) {
+  return must_be_counted(t, t.m_bits);
+}
+
+bool must_be_counted(const Type& t, trep bits) {
+  if ((bits & BUnc) == BBottom) return true;
+  if (bits & BInitNull) return false;
+
+  switch (t.m_dataTag) {
+  case DataTag::None:
+  case DataTag::Int:
+  case DataTag::Dbl:
+  case DataTag::Cls:
+  case DataTag::Str:
+  case DataTag::ArrLikeVal:
+    return false;
+  case DataTag::Obj:
+    return true;
+  case DataTag::ArrLikePackedN:
+    if (bits & BSArrLikeE) return false;
+    return must_be_counted(t.m_data.packedn->type);
+  case DataTag::ArrLikePacked: {
+    if (bits & BSArrLikeE) return false;
+    auto const packed = t.m_data.packed.get();
+    for (size_t i = 0; i < packed->elems.size(); ++i) {
+      if (must_be_counted(packed->elems[i])) return true;
+    }
+    return false;
+  }
+  case DataTag::ArrLikeMapN:
+    if (bits & BSArrLikeE) return false;
+    return
+      must_be_counted(t.m_data.mapn->key) ||
+      must_be_counted(t.m_data.mapn->val);
+  case DataTag::ArrLikeMap:
+    if (bits & BSArrLikeE) return false;
+    for (auto const& p : t.m_data.map->map) {
+      if (must_be_counted(p.second)) return true;
+    }
+    return false;
+  default:
+    not_reached();
+  }
+}
+
 Type project_data(Type t, trep bits) {
   auto const restrict_to = [&](trep allowed) {
     assert(t.m_bits & allowed);
@@ -2099,6 +2144,105 @@ Type project_data(Type t, trep bits) {
   }
 }
 
+Type remove_counted(Type t) {
+  auto const isStatic = [] (const Type& t) {
+    return (t.m_bits & BUnc) == t.m_bits;
+  };
+  auto const isCounted = [] (const Type& t) {
+    return (t.m_bits & BUnc) == BBottom;
+  };
+  auto const strip = [&] {
+    t.m_bits &= BUnc;
+    assertx(isPredefined(t.m_bits));
+    return t;
+  };
+  auto const nothing = [&] {
+    auto ret = t.m_bits & BSArrLikeE;
+    if (is_opt(t)) ret |= BInitNull;
+    return Type { ret };
+  };
+
+  switch (t.m_dataTag) {
+    case DataTag::None:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Cls:
+    case DataTag::Str:
+    case DataTag::ArrLikeVal:
+      return strip();
+    case DataTag::Obj:
+      return nothing();
+    case DataTag::ArrLikePackedN: {
+      if (isStatic(t.m_data.packedn->type)) return strip();
+      if (isCounted(t.m_data.packedn->type)) return nothing();
+      auto mutated = t.m_data.packedn.mutate();
+      auto ty = remove_counted(std::move(mutated->type));
+      if (ty == TBottom) return nothing();
+      mutated->type = std::move(ty);
+      return strip();
+    }
+    case DataTag::ArrLikeMapN: {
+      auto const keyStatic = isStatic(t.m_data.mapn->key);
+      auto const valStatic = isStatic(t.m_data.mapn->val);
+      if (keyStatic && valStatic) return strip();
+      if (isCounted(t.m_data.mapn->key)) return nothing();
+      if (isCounted(t.m_data.mapn->val)) return nothing();
+
+      DArrLikeMapN* mutated = nullptr;
+      if (!keyStatic) {
+        mutated = t.m_data.mapn.mutate();
+        auto ty = remove_counted(std::move(mutated->key));
+        if (ty == TBottom) return nothing();
+        mutated->key = std::move(ty);
+      }
+      if (!valStatic) {
+        if (!mutated) mutated = t.m_data.mapn.mutate();
+        auto ty = remove_counted(std::move(mutated->val));
+        if (ty == TBottom) return nothing();
+        mutated->val = std::move(ty);
+      }
+      return strip();
+    }
+    case DataTag::ArrLikePacked: {
+      auto packed = const_cast<DArrLikePacked*>(t.m_data.packed.get());
+      auto changed = false;
+      for (size_t i = 0; i < packed->elems.size(); ++i) {
+        if (isStatic(packed->elems[i])) continue;
+        if (isCounted(packed->elems[i])) return nothing();
+        if (!changed) {
+          packed = t.m_data.packed.mutate();
+          changed = true;
+        }
+        auto ty = remove_counted(std::move(packed->elems[i]));
+        if (ty == TBottom) return nothing();
+        packed->elems[i] = std::move(ty);
+      }
+      return strip();
+    }
+    case DataTag::ArrLikeMap: {
+      auto const map = t.m_data.map.get();
+      size_t count = 0;
+      for (auto it = map->map.begin(); it != map->map.end(); ++it, ++count) {
+        if (isStatic(it->second)) continue;
+        if (isCounted(it->second)) return nothing();
+        break;
+      }
+      if (count < map->map.size()) {
+        auto mutated = t.m_data.map.mutate();
+        auto it = mutated->map.begin();
+        for (std::advance(it, count); it != mutated->map.end(); ++it) {
+          if (isStatic(it->second)) continue;
+          if (isCounted(it->second)) return nothing();
+          auto ty = remove_counted(it->second);
+          if (ty == TBottom) return nothing();
+          mutated->map.update(it, std::move(ty));
+        }
+      }
+      return strip();
+    }
+  }
+  not_reached();
+}
 
 template<bool contextSensitive>
 bool Type::subtypeOfImpl(const Type& o) const {
@@ -2162,7 +2306,23 @@ bool Type::couldBe(const Type& o) const {
 
   auto const this_projected = project_data(*this, isect);
   auto const o_projected = project_data(o, isect);
-  if (!this_projected.hasData() || !o_projected.hasData()) return true;
+
+  // If the intersection is static and only one type has data, we need
+  // to check if that data does not only contains counted values. If
+  // so, there's no actual intersection (because you cannot get a
+  // counted value from a static type). This isn't an issue if both
+  // have data because couldBeData() will check.
+  if (!this_projected.hasData()) {
+    return
+      ((isect & BUnc) != isect) ||
+      !o_projected.hasData() ||
+      !must_be_counted(o_projected, isect);
+  }
+  if (!o_projected.hasData()) {
+    return
+      ((isect & BUnc) != isect) ||
+      !must_be_counted(this_projected, isect);
+  }
 
   // BArrLikeE is similar to the null and bool case above, except we
   // need to check for the special case where both types have data
@@ -3654,7 +3814,7 @@ Type from_hni_constraint(SString s) {
 }
 
 Type intersection_of(Type a, Type b) {
-  auto const isect = a.m_bits & b.m_bits;
+  auto isect = a.m_bits & b.m_bits;
   if (!mayHaveData(isect)) return Type { isect };
 
   auto fix = [&] (Type& t) {
@@ -3665,8 +3825,38 @@ Type intersection_of(Type a, Type b) {
   auto aProjected = project_data(a, isect);
   auto bProjected = project_data(b, isect);
 
-  if (!bProjected.hasData()) return fix(aProjected);
-  if (!aProjected.hasData()) return fix(bProjected);
+  auto const isStatic = [] (trep b) {
+    return ((b & BUnc) == b);
+  };
+
+  // The intersection is non-empty. If either type has data (but not
+  // both), the intersection will contain that data. If the
+  // intersection is static, we need to remove any counted types from
+  // the data first (if there's no types left afterwards, the
+  // intersection doesn't actually exist).
+  if (!bProjected.hasData()) {
+    if (isStatic(isect) &&
+        !isStatic(aProjected.m_bits) &&
+        aProjected.hasData()) {
+      aProjected = remove_counted(std::move(aProjected));
+      if (aProjected == TBottom) return TBottom;
+      isect &= aProjected.m_bits;
+    }
+    return fix(aProjected);
+  }
+  if (!aProjected.hasData()) {
+    if (isStatic(isect) &&
+        !isStatic(bProjected.m_bits) &&
+        bProjected.hasData()) {
+      bProjected = remove_counted(std::move(bProjected));
+      if (bProjected == TBottom) return TBottom;
+      isect &= bProjected.m_bits;
+    }
+    return fix(bProjected);
+  }
+
+  // Otherwise we have data for both types, which we need to
+  // intersect.
   if (aProjected.subtypeData<true>(bProjected)) return fix(aProjected);
   if (bProjected.subtypeData<true>(aProjected)) return fix(bProjected);
 

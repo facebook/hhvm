@@ -425,6 +425,7 @@ constexpr auto BArrLikeE = BArrE | BVecE | BDictE | BKeysetE;
 constexpr auto BArrLikeN = BArrN | BVecN | BDictN | BKeysetN;
 constexpr auto BArrLike = BArrLikeE | BArrLikeN;
 constexpr auto BSArrLike = BSArr | BSVec | BSDict | BSKeyset;
+constexpr auto BSArrLikeE = BSArrE | BSVecE | BSDictE | BSKeysetE;
 
 #define DATATAGS                                                \
   DT(Str, SString, sval)                                        \
@@ -716,6 +717,9 @@ private:
   friend bool is_opt(const Type&);
   friend bool is_nullish(const Type&);
   friend Type project_data(Type t, trep bits);
+  friend bool must_be_counted(const Type&);
+  friend bool must_be_counted(const Type&, trep bits);
+  friend Type remove_counted(Type t);
   template<typename R, bool>
   friend R tvImpl(const Type&);
   friend Type scalarize(Type t);
@@ -1256,6 +1260,16 @@ Type unctx(Type t);
 Type project_data(Type t, trep bits);
 
 /*
+ * Returns true if the type can only be counted. We don't allow the
+ * the usage of the counted side of the type lattice, so this checks
+ * if the type is a definitely counted type (IE, object or resource),
+ * or if it has an array specialization which contains such a type
+ * recursively (an array which contains a definitely counted type must
+ * itself by counted).
+ */
+bool must_be_counted(const Type&);
+
+/*
  * Refinedness equivalence checks.
  */
 bool equivalently_refined(const Type&, const Type&);
@@ -1577,6 +1591,13 @@ Type to_cell(Type t);
  * present. Doesn't change the type otherwise.
  */
 Type add_nonemptiness(Type t);
+
+/*
+ * Force `t` to only contain static types, including any specialized
+ * data recursively. If `t` is definitely counted, TBottom will be
+ * returned.
+ */
+Type remove_counted(Type t);
 
 /*
  * Produced the most refined type possible, given that

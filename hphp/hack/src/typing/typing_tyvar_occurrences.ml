@@ -106,3 +106,17 @@ let make_tyvar_no_more_occur_in_tyvar x v ~no_more_in:v' =
 
 let contains_unsolved_tyvars x v =
   not @@ ISet.is_empty (get_tyvars_in_tyvar x v)
+
+(** Update the tyvar occurrences after unbinding a type variable. *)
+let unbind_tyvar x v =
+  let vars_in_v = get_tyvars_in_tyvar x v in
+  (* update tyvar_occurrences. *)
+  let x =
+    ISet.fold
+      (fun v' x -> remove_tyvar_occurrence x v' ~no_more_occurs_in:v)
+      vars_in_v
+      x
+  in
+  (* update tyvars_in_tyvar *)
+  let x = set_tyvars_in_tyvar x v ISet.empty in
+  x

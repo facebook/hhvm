@@ -21,3 +21,6 @@ val contains_unsolved_tyvars : t -> Ident.t -> bool
 val make_tyvars_occur_in_tyvar : t -> ISet.t -> occur_in:Ident.t -> t
 
 val make_tyvar_no_more_occur_in_tyvar : t -> Ident.t -> no_more_in:int -> t
+
+(** Update the tyvar occurrences after unbinding a type variable. *)
+val unbind_tyvar : t -> Ident.t -> t

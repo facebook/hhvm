@@ -317,6 +317,9 @@ let make_tyvar_no_more_occur_in_tyvar env v ~no_more_in:v' =
 
 let add env ?(tyvar_pos = Pos.none) v ty =
   let env =
+    { env with tyvar_occurrences = Occ.unbind_tyvar env.tyvar_occurrences v }
+  in
+  let env =
     let unsolved_vars_in_ty = get_unsolved_vars_in_ty env ty in
     make_tyvars_occur_in_tyvar env unsolved_vars_in_ty ~occur_in:v
   in

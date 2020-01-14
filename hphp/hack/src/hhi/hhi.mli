@@ -7,7 +7,7 @@
  *
  *)
 
-val get_hhi_root : unit -> Path.t
+val get_hhi_root : ?force_write:bool -> unit -> Path.t
 
 val set_hhi_root_for_unit_test : Path.t -> unit
 

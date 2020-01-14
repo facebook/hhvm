@@ -38,10 +38,11 @@ let touch () =
  * We want this to be idempotent so that later code can check if a given file
  * came from the hhi unarchive directory or not, to provide better error
  * messages. *)
-let get_hhi_root () =
-  match !root with
-  | Some r -> r
-  | None ->
+let get_hhi_root ?(force_write = false) () =
+  match (!root, force_write) with
+  | (Some r, false) -> r
+  | (_, true)
+  | (None, _) ->
     let tmpdir = Path.make (Tmp.temp_dir GlobalConfig.tmp_dir "hhi") in
     extract_hhis tmpdir;
     root := Some tmpdir;

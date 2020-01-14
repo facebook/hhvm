@@ -244,11 +244,28 @@ let shutdown (state : state) : unit Lwt.t =
     Sys_utils.rm_dir_tree hhi_root;
     Lwt.return_unit
 
+let restore_hhi_root_if_necessary (state : initialized_state) :
+    initialized_state =
+  if Sys.file_exists (Path.to_string state.hhi_root) then
+    state
+  else
+    (* Some processes may clean up the temporary HHI directory we're using.
+    Assume that such a process has deleted the directory, and re-write the HHI
+    files to disk. *)
+    let hhi_root = Hhi.get_hhi_root ~force_write:true () in
+    log
+      "Old hhi root %s no longer exists. Creating a new hhi root at %s"
+      (Path.to_string state.hhi_root)
+      (Path.to_string hhi_root);
+    Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
+    { state with hhi_root }
+
 let make_context_from_file_input
     (initialized_state : initialized_state)
     (path : Relative_path.t)
     (file_input : ServerCommandTypes.file_input) :
     state * Provider_context.t * Provider_context.entry =
+  let initialized_state = restore_hhi_root_if_necessary initialized_state in
   let ctx = initialized_state.ctx in
   match Provider_utils.find_entry ~ctx ~path with
   | None ->
@@ -303,242 +320,231 @@ let handle_message :
     a ClientIdeMessage.t ->
     (state * a Handle_message_result.t) Lwt.t =
  fun state _tracking_id message ->
-  ClientIdeMessage.(
-    match (state, message) with
-    | (state, Shutdown ()) ->
-      let%lwt () = shutdown state in
-      Lwt.return (state, Handle_message_result.Response ())
-    | ((Failed_to_initialize _ | Initializing), File_changed _) ->
-      (* Should not happen. *)
-      let stack = Utils.Callstack (Exception.get_current_callstack_string 99) in
-      Lwt.return
-        ( state,
-          Handle_message_result.Error
-            ( "IDE services could not process file change because "
-              ^ "it failed to initialize or was still initializing. The caller "
-              ^ "should have waited for the IDE services to become ready before "
-              ^ "sending file-change notifications.",
-              stack ) )
-    | (Initialized initialized_state, File_changed path) ->
-      (* Only invalidate when a hack file changes *)
-      if FindUtils.file_filter (Path.to_string path) then
-        let changed_files_to_process =
-          Path.Set.add initialized_state.changed_files_to_process path
-        in
-        let peak_changed_files_queue_size =
-          initialized_state.peak_changed_files_queue_size + 1
-        in
-        let ctx =
-          Provider_context.empty
-            ~tcopt:initialized_state.server_env.ServerEnv.tcopt
-        in
-        let state =
-          Initialized
-            {
-              initialized_state with
-              changed_files_to_process;
-              ctx;
-              peak_changed_files_queue_size;
-            }
-        in
-        Lwt.return (state, Handle_message_result.Notification)
-      else
-        Lwt.return (state, Handle_message_result.Notification)
-    | (Initializing, Initialize_from_saved_state param) ->
-      let%lwt result = initialize param in
-      begin
-        match result with
-        | Ok state -> Lwt.return (state, Handle_message_result.Response ())
-        | Error (message, stack) ->
-          Lwt.return
-            ( Failed_to_initialize (message, stack),
-              Handle_message_result.Error (message, stack) )
-      end
-    | (Initialized _, Initialize_from_saved_state _) ->
-      let stack =
-        Utils.Callstack (Exception.get_current_callstack_string 100)
+  let open ClientIdeMessage in
+  match (state, message) with
+  | (state, Shutdown ()) ->
+    let%lwt () = shutdown state in
+    Lwt.return (state, Handle_message_result.Response ())
+  | ((Failed_to_initialize _ | Initializing), File_changed _) ->
+    (* Should not happen. *)
+    let stack = Utils.Callstack (Exception.get_current_callstack_string 99) in
+    Lwt.return
+      ( state,
+        Handle_message_result.Error
+          ( "IDE services could not process file change because "
+            ^ "it failed to initialize or was still initializing. The caller "
+            ^ "should have waited for the IDE services to become ready before "
+            ^ "sending file-change notifications.",
+            stack ) )
+  | (Initialized initialized_state, File_changed path) ->
+    (* Only invalidate when a hack file changes *)
+    if FindUtils.file_filter (Path.to_string path) then
+      let changed_files_to_process =
+        Path.Set.add initialized_state.changed_files_to_process path
       in
-      Lwt.return
-        ( state,
-          Handle_message_result.Error
-            ("Tried to initialize when already initialized", stack) )
-    | (Initializing, _) ->
-      let stack =
-        Utils.Callstack (Exception.get_current_callstack_string 100)
+      let peak_changed_files_queue_size =
+        initialized_state.peak_changed_files_queue_size + 1
       in
-      Lwt.return
-        ( state,
-          Handle_message_result.Error
-            ("IDE services have not yet been initialized", stack) )
-    | (Failed_to_initialize (error_message, stack), _) ->
-      Lwt.return
-        ( state,
-          Handle_message_result.Error
-            ( Printf.sprintf
-                "IDE services failed to initialize: %s"
-                error_message,
-              stack ) )
-    | (Initialized initialized_state, File_opened { file_path; file_contents })
-      ->
-      let path =
-        file_path |> Path.to_string |> Relative_path.create_detect_prefix
+      let ctx =
+        Provider_context.empty
+          ~tcopt:initialized_state.server_env.ServerEnv.tcopt
       in
-      let (state, _, _) =
-        make_context_from_file_input
-          initialized_state
-          path
-          (ServerCommandTypes.FileContent file_contents)
+      let state =
+        Initialized
+          {
+            initialized_state with
+            changed_files_to_process;
+            ctx;
+            peak_changed_files_queue_size;
+          }
       in
-      Lwt.return (state, Handle_message_result.Response ())
-    | (Initialized initialized_state, Hover document_location) ->
-      let (state, ctx, entry) =
-        make_context_from_document_location initialized_state document_location
-      in
+      Lwt.return (state, Handle_message_result.Notification)
+    else
+      Lwt.return (state, Handle_message_result.Notification)
+  | (Initializing, Initialize_from_saved_state param) ->
+    let%lwt result = initialize param in
+    begin
+      match result with
+      | Ok state -> Lwt.return (state, Handle_message_result.Response ())
+      | Error (message, stack) ->
+        Lwt.return
+          ( Failed_to_initialize (message, stack),
+            Handle_message_result.Error (message, stack) )
+    end
+  | (Initialized _, Initialize_from_saved_state _) ->
+    let stack = Utils.Callstack (Exception.get_current_callstack_string 100) in
+    Lwt.return
+      ( state,
+        Handle_message_result.Error
+          ("Tried to initialize when already initialized", stack) )
+  | (Initializing, _) ->
+    let stack = Utils.Callstack (Exception.get_current_callstack_string 100) in
+    Lwt.return
+      ( state,
+        Handle_message_result.Error
+          ("IDE services have not yet been initialized", stack) )
+  | (Failed_to_initialize (error_message, stack), _) ->
+    Lwt.return
+      ( state,
+        Handle_message_result.Error
+          ( Printf.sprintf "IDE services failed to initialize: %s" error_message,
+            stack ) )
+  | (Initialized initialized_state, File_opened { file_path; file_contents }) ->
+    let path =
+      file_path |> Path.to_string |> Relative_path.create_detect_prefix
+    in
+    let (state, _, _) =
+      make_context_from_file_input
+        initialized_state
+        path
+        (ServerCommandTypes.FileContent file_contents)
+    in
+    Lwt.return (state, Handle_message_result.Response ())
+  | (Initialized initialized_state, Hover document_location) ->
+    let (state, ctx, entry) =
+      make_context_from_document_location initialized_state document_location
+    in
+    let result =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerHover.go_quarantined
+            ~ctx
+            ~entry
+            ~line:document_location.ClientIdeMessage.line
+            ~column:document_location.ClientIdeMessage.column)
+    in
+    Lwt.return (state, Handle_message_result.Response result)
+  (* Autocomplete *)
+  | ( Initialized initialized_state,
+      Completion
+        { ClientIdeMessage.Completion.document_location; is_manually_invoked }
+    ) ->
+    (* Update the state of the world with the document as it exists in the IDE *)
+    let (state, ctx, entry) =
+      make_context_from_document_location initialized_state document_location
+    in
+    let sienv = !(initialized_state.server_env.ServerEnv.local_symbol_table) in
+    let result =
+      ServerAutoComplete.go_ctx
+        ~ctx
+        ~entry
+        ~sienv
+        ~is_manually_invoked
+        ~line:document_location.line
+        ~column:document_location.column
+    in
+    Lwt.return (state, Handle_message_result.Response result)
+  (* Autocomplete docblock resolve *)
+  | (Initialized initialized_state, Completion_resolve param) ->
+    let ctx = initialized_state.ctx in
+    ClientIdeMessage.Completion_resolve.(
       let result =
-        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-            ServerHover.go_quarantined
-              ~ctx
-              ~entry
-              ~line:document_location.ClientIdeMessage.line
-              ~column:document_location.ClientIdeMessage.column)
-      in
-      Lwt.return (state, Handle_message_result.Response result)
-    (* Autocomplete *)
-    | ( Initialized initialized_state,
-        Completion
-          { ClientIdeMessage.Completion.document_location; is_manually_invoked }
-      ) ->
-      (* Update the state of the world with the document as it exists in the IDE *)
-      let (state, ctx, entry) =
-        make_context_from_document_location initialized_state document_location
-      in
-      let sienv =
-        !(initialized_state.server_env.ServerEnv.local_symbol_table)
-      in
-      let result =
-        ServerAutoComplete.go_ctx
+        ServerDocblockAt.go_docblock_for_symbol
+          ~env:initialized_state.server_env
           ~ctx
-          ~entry
-          ~sienv
-          ~is_manually_invoked
-          ~line:document_location.line
-          ~column:document_location.column
-      in
-      Lwt.return (state, Handle_message_result.Response result)
-    (* Autocomplete docblock resolve *)
-    | (Initialized initialized_state, Completion_resolve param) ->
-      let ctx = initialized_state.ctx in
-      ClientIdeMessage.Completion_resolve.(
-        let result =
-          ServerDocblockAt.go_docblock_for_symbol
-            ~env:initialized_state.server_env
-            ~ctx
-            ~symbol:param.symbol
-            ~kind:param.kind
-        in
-        Lwt.return (state, Handle_message_result.Response result))
-    (* Autocomplete docblock resolve *)
-    | (Initialized initialized_state, Completion_resolve_location param) ->
-      ClientIdeMessage.Completion_resolve_location.(
-        let (state, ctx, entry) =
-          make_context_from_document_location
-            initialized_state
-            param.document_location
-        in
-        let result =
-          Provider_utils.respect_but_quarantine_unsaved_changes
-            ~ctx
-            ~f:(fun () ->
-              ServerDocblockAt.go_docblock_ctx
-                ~ctx
-                ~entry
-                ~line:param.document_location.line
-                ~column:param.document_location.column
-                ~kind:param.kind)
-        in
-        Lwt.return (state, Handle_message_result.Response result))
-    (* Document highlighting *)
-    | (Initialized initialized_state, Document_highlight document_location) ->
-      let (state, ctx, entry) =
-        make_context_from_document_location initialized_state document_location
-      in
-      let results =
-        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-            ServerHighlightRefs.go_quarantined
-              ~ctx
-              ~entry
-              ~line:document_location.line
-              ~column:document_location.column)
-      in
-      Lwt.return (state, Handle_message_result.Response results)
-    (* Signature help *)
-    | (Initialized initialized_state, Signature_help document_location) ->
-      let (state, ctx, entry) =
-        make_context_from_document_location initialized_state document_location
-      in
-      let results =
-        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-            ServerSignatureHelp.go_quarantined
-              ~env:initialized_state.server_env
-              ~ctx
-              ~entry
-              ~line:document_location.line
-              ~column:document_location.column)
-      in
-      Lwt.return (state, Handle_message_result.Response results)
-    (* Go to definition *)
-    | (Initialized initialized_state, Definition document_location) ->
-      let (state, ctx, entry) =
-        make_context_from_document_location initialized_state document_location
-      in
-      let result =
-        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-            ServerGoToDefinition.go_quarantined
-              ~ctx
-              ~entry
-              ~line:document_location.ClientIdeMessage.line
-              ~column:document_location.ClientIdeMessage.column)
-      in
-      Lwt.return (state, Handle_message_result.Response result)
-    (* Type Definition *)
-    | (Initialized initialized_state, Type_definition document_location) ->
-      let (state, ctx, entry) =
-        make_context_from_document_location initialized_state document_location
-      in
-      let result =
-        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-            ServerTypeDefinition.go_quarantined
-              ~ctx
-              ~entry
-              ~line:document_location.ClientIdeMessage.line
-              ~column:document_location.ClientIdeMessage.column)
-      in
-      Lwt.return (state, Handle_message_result.Response result)
-    (* Document Symbol *)
-    | (Initialized initialized_state, Document_symbol document_location) ->
-      let (state, ctx, entry) =
-        make_context_from_document_location initialized_state document_location
-      in
-      let result = FileOutline.outline_ctx ~ctx ~entry in
-      Lwt.return (state, Handle_message_result.Response result)
-    (* Type Coverage *)
-    | (Initialized initialized_state, Type_coverage document_identifier) ->
-      let document_location =
-        {
-          file_path = document_identifier.file_path;
-          file_contents = Some document_identifier.file_contents;
-          line = 0;
-          column = 0;
-        }
-      in
-      let (state, ctx, entry) =
-        make_context_from_document_location initialized_state document_location
-      in
-      let result =
-        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-            ServerColorFile.go_quarantined ~ctx ~entry)
+          ~symbol:param.symbol
+          ~kind:param.kind
       in
       Lwt.return (state, Handle_message_result.Response result))
+  (* Autocomplete docblock resolve *)
+  | (Initialized initialized_state, Completion_resolve_location param) ->
+    ClientIdeMessage.Completion_resolve_location.(
+      let (state, ctx, entry) =
+        make_context_from_document_location
+          initialized_state
+          param.document_location
+      in
+      let result =
+        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+            ServerDocblockAt.go_docblock_ctx
+              ~ctx
+              ~entry
+              ~line:param.document_location.line
+              ~column:param.document_location.column
+              ~kind:param.kind)
+      in
+      Lwt.return (state, Handle_message_result.Response result))
+  (* Document highlighting *)
+  | (Initialized initialized_state, Document_highlight document_location) ->
+    let (state, ctx, entry) =
+      make_context_from_document_location initialized_state document_location
+    in
+    let results =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerHighlightRefs.go_quarantined
+            ~ctx
+            ~entry
+            ~line:document_location.line
+            ~column:document_location.column)
+    in
+    Lwt.return (state, Handle_message_result.Response results)
+  (* Signature help *)
+  | (Initialized initialized_state, Signature_help document_location) ->
+    let (state, ctx, entry) =
+      make_context_from_document_location initialized_state document_location
+    in
+    let results =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerSignatureHelp.go_quarantined
+            ~env:initialized_state.server_env
+            ~ctx
+            ~entry
+            ~line:document_location.line
+            ~column:document_location.column)
+    in
+    Lwt.return (state, Handle_message_result.Response results)
+  (* Go to definition *)
+  | (Initialized initialized_state, Definition document_location) ->
+    let (state, ctx, entry) =
+      make_context_from_document_location initialized_state document_location
+    in
+    let result =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerGoToDefinition.go_quarantined
+            ~ctx
+            ~entry
+            ~line:document_location.ClientIdeMessage.line
+            ~column:document_location.ClientIdeMessage.column)
+    in
+    Lwt.return (state, Handle_message_result.Response result)
+  (* Type Definition *)
+  | (Initialized initialized_state, Type_definition document_location) ->
+    let (state, ctx, entry) =
+      make_context_from_document_location initialized_state document_location
+    in
+    let result =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerTypeDefinition.go_quarantined
+            ~ctx
+            ~entry
+            ~line:document_location.ClientIdeMessage.line
+            ~column:document_location.ClientIdeMessage.column)
+    in
+    Lwt.return (state, Handle_message_result.Response result)
+  (* Document Symbol *)
+  | (Initialized initialized_state, Document_symbol document_location) ->
+    let (state, ctx, entry) =
+      make_context_from_document_location initialized_state document_location
+    in
+    let result = FileOutline.outline_ctx ~ctx ~entry in
+    Lwt.return (state, Handle_message_result.Response result)
+  (* Type Coverage *)
+  | (Initialized initialized_state, Type_coverage document_identifier) ->
+    let document_location =
+      {
+        file_path = document_identifier.file_path;
+        file_contents = Some document_identifier.file_contents;
+        line = 0;
+        column = 0;
+      }
+    in
+    let (state, ctx, entry) =
+      make_context_from_document_location initialized_state document_location
+    in
+    let result =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerColorFile.go_quarantined ~ctx ~entry)
+    in
+    Lwt.return (state, Handle_message_result.Response result)
 
 let write_message
     ~(out_fd : Lwt_unix.file_descr)

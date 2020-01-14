@@ -259,25 +259,25 @@ let hh_server_state_to_string (hh_server_state : hh_server_state) : string =
 let completion_kind_to_si_kind
     (completion_kind : Completion.completionItemKind option) :
     SearchUtils.si_kind =
-  Lsp.(
-    SearchUtils.(
-      match completion_kind with
-      | Some Completion.Class -> SI_Class
-      | Some Completion.Method -> SI_ClassMethod
-      | Some Completion.Function -> SI_Function
-      | Some Completion.Variable ->
-        SI_LocalVariable (* or SI_Mixed, but that's never used *)
-      | Some Completion.Property -> SI_Property
-      | Some Completion.Constant -> SI_GlobalConstant (* or SI_ClassConstant *)
-      | Some Completion.Interface -> SI_Interface (* or SI_Trait *)
-      | Some Completion.Enum -> SI_Enum
-      | Some Completion.Module -> SI_Namespace
-      | Some Completion.Constructor -> SI_Constructor
-      | Some Completion.Keyword -> SI_Keyword
-      | Some Completion.Value -> SI_Literal
-      | Some Completion.TypeParameter -> SI_Typedef
-      (* The completion enum includes things we don't really support *)
-      | _ -> SI_Unknown))
+  let open Lsp in
+  let open SearchUtils in
+  match completion_kind with
+  | Some Completion.Class -> SI_Class
+  | Some Completion.Method -> SI_ClassMethod
+  | Some Completion.Function -> SI_Function
+  | Some Completion.Variable ->
+    SI_LocalVariable (* or SI_Mixed, but that's never used *)
+  | Some Completion.Property -> SI_Property
+  | Some Completion.Constant -> SI_GlobalConstant (* or SI_ClassConstant *)
+  | Some Completion.Interface -> SI_Interface (* or SI_Trait *)
+  | Some Completion.Enum -> SI_Enum
+  | Some Completion.Module -> SI_Namespace
+  | Some Completion.Constructor -> SI_Constructor
+  | Some Completion.Keyword -> SI_Keyword
+  | Some Completion.Value -> SI_Literal
+  | Some Completion.TypeParameter -> SI_Typedef
+  (* The completion enum includes things we don't really support *)
+  | _ -> SI_Unknown
 
 let si_kind_to_completion_kind (kind : SearchUtils.si_kind) :
     Completion.completionItemKind option =
@@ -376,30 +376,30 @@ let get_uris_with_unsaved_changes (state : state) : UriSet.t =
   | _ -> UriSet.empty
 
 let update_hh_server_state_if_necessary (event : event) : unit =
-  ServerCommandTypes.(
-    let helper push =
-      match push with
-      | BUSY_STATUS Needs_local_typecheck
-      | BUSY_STATUS Done_local_typecheck
-      | BUSY_STATUS (Done_global_typecheck _) ->
-        set_hh_server_state Hh_server_handling_or_ready
-      | BUSY_STATUS Doing_local_typecheck ->
-        set_hh_server_state Hh_server_typechecking_local
-      | BUSY_STATUS (Doing_global_typecheck global_typecheck_kind) ->
-        set_hh_server_state
-          (match global_typecheck_kind with
-          | Blocking -> Hh_server_typechecking_global_blocking
-          | Interruptible -> Hh_server_typechecking_global_interruptible
-          | Remote_blocking _ -> Hh_server_typechecking_global_remote_blocking)
-      | NEW_CLIENT_CONNECTED -> set_hh_server_state Hh_server_stolen
-      | DIAGNOSTIC _
-      | FATAL_EXCEPTION _
-      | NONFATAL_EXCEPTION _ ->
-        ()
-    in
-    match event with
-    | Server_message { push; has_updated_server_state = false } -> helper push
-    | _ -> ())
+  let open ServerCommandTypes in
+  let helper push =
+    match push with
+    | BUSY_STATUS Needs_local_typecheck
+    | BUSY_STATUS Done_local_typecheck
+    | BUSY_STATUS (Done_global_typecheck _) ->
+      set_hh_server_state Hh_server_handling_or_ready
+    | BUSY_STATUS Doing_local_typecheck ->
+      set_hh_server_state Hh_server_typechecking_local
+    | BUSY_STATUS (Doing_global_typecheck global_typecheck_kind) ->
+      set_hh_server_state
+        (match global_typecheck_kind with
+        | Blocking -> Hh_server_typechecking_global_blocking
+        | Interruptible -> Hh_server_typechecking_global_interruptible
+        | Remote_blocking _ -> Hh_server_typechecking_global_remote_blocking)
+    | NEW_CLIENT_CONNECTED -> set_hh_server_state Hh_server_stolen
+    | DIAGNOSTIC _
+    | FATAL_EXCEPTION _
+    | NONFATAL_EXCEPTION _ ->
+      ()
+  in
+  match event with
+  | Server_message { push; has_updated_server_state = false } -> helper push
+  | _ -> ()
 
 let rpc_lock = Lwt_mutex.create ()
 
@@ -526,24 +526,24 @@ let get_client_message_source
 
 (*  Read a message unmarshaled from the server's out_channel. *)
 let read_message_from_server (server : server_conn) : event Lwt.t =
-  ServerCommandTypes.(
-    try%lwt
-      let fd =
-        Unix.descr_of_out_channel server.oc |> Lwt_unix.of_unix_file_descr
-      in
-      let%lwt (message : 'a ServerCommandTypes.message_type) =
-        Marshal_tools_lwt.from_fd_with_preamble fd
-      in
-      match message with
-      | Response _ -> failwith "unexpected response without request"
-      | Push push ->
-        Lwt.return (Server_message { push; has_updated_server_state = false })
-      | Hello -> Lwt.return Server_hello
-      | Ping -> failwith "unexpected ping on persistent connection"
-    with e ->
-      let message = Exn.to_string e in
-      let stack = Printexc.get_backtrace () in
-      raise (Server_fatal_connection_exception { Marshal_tools.message; stack }))
+  let open ServerCommandTypes in
+  try%lwt
+    let fd =
+      Unix.descr_of_out_channel server.oc |> Lwt_unix.of_unix_file_descr
+    in
+    let%lwt (message : 'a ServerCommandTypes.message_type) =
+      Marshal_tools_lwt.from_fd_with_preamble fd
+    in
+    match message with
+    | Response _ -> failwith "unexpected response without request"
+    | Push push ->
+      Lwt.return (Server_message { push; has_updated_server_state = false })
+    | Hello -> Lwt.return Server_hello
+    | Ping -> failwith "unexpected ping on persistent connection"
+  with e ->
+    let message = Exn.to_string e in
+    let stack = Printexc.get_backtrace () in
+    raise (Server_fatal_connection_exception { Marshal_tools.message; stack })
 
 (* get_next_event: picks up the next available message from either client or
    server. The way it's implemented, at the first character of a message
@@ -784,12 +784,12 @@ let lsp_position_to_ide (position : Lsp.position) : Ide_api_types.position =
 
 let lsp_file_position_to_hack (params : Lsp.TextDocumentPositionParams.t) :
     string * int * int =
-  Lsp.TextDocumentPositionParams.(
-    let { Ide_api_types.line; column } = lsp_position_to_ide params.position in
-    let filename =
-      Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument
-    in
-    (filename, line, column))
+  let open Lsp.TextDocumentPositionParams in
+  let { Ide_api_types.line; column } = lsp_position_to_ide params.position in
+  let filename =
+    Lsp_helpers.lsp_textDocumentIdentifier_to_filename params.textDocument
+  in
+  (filename, line, column)
 
 let rename_params_to_document_position (params : Lsp.Rename.params) :
     Lsp.TextDocumentPositionParams.t =
@@ -845,7 +845,8 @@ let lsp_range_to_ide (range : Lsp.range) : Ide_api_types.range =
 let hack_symbol_definition_to_lsp_construct_location
     (symbol : string SymbolDefinition.t) ~(default_path : string) :
     Lsp.Location.t =
-  SymbolDefinition.(hack_pos_to_lsp_location symbol.span ~default_path)
+  let open SymbolDefinition in
+  hack_pos_to_lsp_location symbol.span ~default_path
 
 let hack_pos_definition_to_lsp_identifier_location
     (sid : Pos.absolute * string) ~(default_path : string) :
@@ -857,64 +858,62 @@ let hack_pos_definition_to_lsp_identifier_location
 let hack_symbol_definition_to_lsp_identifier_location
     (symbol : string SymbolDefinition.t) ~(default_path : string) :
     Lsp.DefinitionLocation.t =
-  SymbolDefinition.(
-    let location = hack_pos_to_lsp_location symbol.pos ~default_path in
-    Lsp.DefinitionLocation.
-      {
-        location;
-        title = Some (Utils.strip_ns symbol.SymbolDefinition.full_name);
-      })
+  let open SymbolDefinition in
+  let location = hack_pos_to_lsp_location symbol.pos ~default_path in
+  Lsp.DefinitionLocation.
+    {
+      location;
+      title = Some (Utils.strip_ns symbol.SymbolDefinition.full_name);
+    }
 
 let hack_errors_to_lsp_diagnostic
     (filename : string) (errors : Pos.absolute Errors.error_ list) :
     PublishDiagnostics.params =
-  Lsp.Location.(
-    let location_message (error : Pos.absolute * string) :
-        Lsp.Location.t * string =
-      let (pos, message) = error in
-      let { uri; range } =
-        hack_pos_to_lsp_location pos ~default_path:filename
-      in
-      ({ Location.uri; range }, message)
+  let open Lsp.Location in
+  let location_message (error : Pos.absolute * string) : Lsp.Location.t * string
+      =
+    let (pos, message) = error in
+    let { uri; range } = hack_pos_to_lsp_location pos ~default_path:filename in
+    ({ Location.uri; range }, message)
+  in
+  let hack_error_to_lsp_diagnostic (error : Pos.absolute Errors.error_) =
+    let all_messages = Errors.to_list error |> List.map ~f:location_message in
+    let (first_message, additional_messages) =
+      match all_messages with
+      | hd :: tl -> (hd, tl)
+      | [] -> failwith "Expected at least one error in the error list"
     in
-    let hack_error_to_lsp_diagnostic (error : Pos.absolute Errors.error_) =
-      let all_messages = Errors.to_list error |> List.map ~f:location_message in
-      let (first_message, additional_messages) =
-        match all_messages with
-        | hd :: tl -> (hd, tl)
-        | [] -> failwith "Expected at least one error in the error list"
-      in
-      let ({ range; _ }, message) = first_message in
-      let relatedInformation =
-        additional_messages
-        |> List.map ~f:(fun (location, message) ->
-               {
-                 PublishDiagnostics.relatedLocation = location;
-                 relatedMessage = message;
-               })
-      in
-      let severity =
-        match Errors.get_severity error with
-        | Errors.Error -> Some PublishDiagnostics.Error
-        | Errors.Warning -> Some PublishDiagnostics.Warning
-      in
-      {
-        Lsp.PublishDiagnostics.range;
-        severity;
-        code = PublishDiagnostics.IntCode (Errors.get_code error);
-        source = Some "Hack";
-        message;
-        relatedInformation;
-        relatedLocations = relatedInformation (* legacy FB extension *);
-      }
+    let ({ range; _ }, message) = first_message in
+    let relatedInformation =
+      additional_messages
+      |> List.map ~f:(fun (location, message) ->
+             {
+               PublishDiagnostics.relatedLocation = location;
+               relatedMessage = message;
+             })
     in
-    (* The caller is required to give us a non-empty filename. If it is empty,  *)
-    (* the following path_to_lsp_uri will fall back to the default path - which *)
-    (* is also empty - and throw, logging appropriate telemetry.                *)
+    let severity =
+      match Errors.get_severity error with
+      | Errors.Error -> Some PublishDiagnostics.Error
+      | Errors.Warning -> Some PublishDiagnostics.Warning
+    in
     {
-      Lsp.PublishDiagnostics.uri = path_to_lsp_uri filename ~default_path:"";
-      diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
-    })
+      Lsp.PublishDiagnostics.range;
+      severity;
+      code = PublishDiagnostics.IntCode (Errors.get_code error);
+      source = Some "Hack";
+      message;
+      relatedInformation;
+      relatedLocations = relatedInformation (* legacy FB extension *);
+    }
+  in
+  (* The caller is required to give us a non-empty filename. If it is empty,  *)
+  (* the following path_to_lsp_uri will fall back to the default path - which *)
+  (* is also empty - and throw, logging appropriate telemetry.                *)
+  {
+    Lsp.PublishDiagnostics.uri = path_to_lsp_uri filename ~default_path:"";
+    diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
+  }
 
 (************************************************************************)
 (* Protocol                                                             *)
@@ -1123,19 +1122,19 @@ let do_rageFB (state : state) (ref_unblocked_time : float ref) :
     (* client's log of server state *)
     let tnow = Unix.gettimeofday () in
     let server_state_to_string (tstate, state) =
-      Unix.(
-        let tdiff = tnow -. tstate in
-        let state = hh_server_state_to_string state in
-        let tm = Unix.localtime tstate in
-        let ms = int_of_float (tstate *. 1000.) mod 1000 in
-        Printf.sprintf
-          "[%02d:%02d:%02d.%03d] [%03.3fs ago] %s\n"
-          tm.tm_hour
-          tm.tm_min
-          tm.tm_sec
-          ms
-          tdiff
-          state)
+      let open Unix in
+      let tdiff = tnow -. tstate in
+      let state = hh_server_state_to_string state in
+      let tm = Unix.localtime tstate in
+      let ms = int_of_float (tstate *. 1000.) mod 1000 in
+      Printf.sprintf
+        "[%02d:%02d:%02d.%03d] [%03.3fs ago] %s\n"
+        tm.tm_hour
+        tm.tm_min
+        tm.tm_sec
+        ms
+        tdiff
+        state
     in
     let server_state_strings =
       List.map ~f:server_state_to_string !hh_server_state
@@ -1208,40 +1207,40 @@ let do_didOpen
     (conn : server_conn)
     (ref_unblocked_time : float ref)
     (params : DidOpen.params) : unit Lwt.t =
-  DidOpen.(
-    TextDocumentItem.(
-      let filename = lsp_uri_to_path params.textDocument.uri in
-      let text = params.textDocument.text in
-      let command = ServerCommandTypes.OPEN_FILE (filename, text) in
-      rpc conn ref_unblocked_time command))
+  let open DidOpen in
+  let open TextDocumentItem in
+  let filename = lsp_uri_to_path params.textDocument.uri in
+  let text = params.textDocument.text in
+  let command = ServerCommandTypes.OPEN_FILE (filename, text) in
+  rpc conn ref_unblocked_time command
 
 let do_didClose
     (conn : server_conn)
     (ref_unblocked_time : float ref)
     (params : DidClose.params) : unit Lwt.t =
-  DidClose.(
-    TextDocumentIdentifier.(
-      let filename = lsp_uri_to_path params.textDocument.uri in
-      let command = ServerCommandTypes.CLOSE_FILE filename in
-      rpc conn ref_unblocked_time command))
+  let open DidClose in
+  let open TextDocumentIdentifier in
+  let filename = lsp_uri_to_path params.textDocument.uri in
+  let command = ServerCommandTypes.CLOSE_FILE filename in
+  rpc conn ref_unblocked_time command
 
 let do_didChange
     (conn : server_conn)
     (ref_unblocked_time : float ref)
     (params : DidChange.params) : unit Lwt.t =
-  VersionedTextDocumentIdentifier.(
-    Lsp.DidChange.(
-      let lsp_change_to_ide (lsp : DidChange.textDocumentContentChangeEvent) :
-          Ide_api_types.text_edit =
-        {
-          Ide_api_types.range = Option.map lsp.range lsp_range_to_ide;
-          text = lsp.text;
-        }
-      in
-      let filename = lsp_uri_to_path params.textDocument.uri in
-      let changes = List.map params.contentChanges ~f:lsp_change_to_ide in
-      let command = ServerCommandTypes.EDIT_FILE (filename, changes) in
-      rpc conn ref_unblocked_time command))
+  let open VersionedTextDocumentIdentifier in
+  let open Lsp.DidChange in
+  let lsp_change_to_ide (lsp : DidChange.textDocumentContentChangeEvent) :
+      Ide_api_types.text_edit =
+    {
+      Ide_api_types.range = Option.map lsp.range lsp_range_to_ide;
+      text = lsp.text;
+    }
+  in
+  let filename = lsp_uri_to_path params.textDocument.uri in
+  let changes = List.map params.contentChanges ~f:lsp_change_to_ide in
+  let command = ServerCommandTypes.EDIT_FILE (filename, changes) in
+  rpc conn ref_unblocked_time command
 
 let do_hover_common (infos : HoverService.hover_info list) : Hover.result =
   let contents =
@@ -1396,214 +1395,211 @@ let do_definition_local
 let make_ide_completion_response
     (result : AutocompleteTypes.ide_result) (filename : string) :
     Completion.completionList Lwt.t =
-  AutocompleteTypes.(
-    Completion.(
-      (* We use snippets to provide parentheses+arguments when autocompleting     *)
-      (* method calls e.g. "$c->|" ==> "$c->foo($arg1)". But we'll only do this   *)
-      (* there's nothing after the caret: no "$c->|(1)" -> "$c->foo($arg1)(1)"    *)
-      let is_caret_followed_by_lparen = result.char_at_pos = '(' in
-      let p = initialize_params_exc () in
-      let hack_to_itemType (completion : complete_autocomplete_result) :
-          string option =
-        (* TODO: we're using itemType (left column) for function return types, and *)
-        (* the inlineDetail (right column) for variable/field types. Is that good? *)
-        Option.map completion.func_details ~f:(fun details -> details.return_ty)
+  let open AutocompleteTypes in
+  let open Completion in
+  (* We use snippets to provide parentheses+arguments when autocompleting     *)
+  (* method calls e.g. "$c->|" ==> "$c->foo($arg1)". But we'll only do this   *)
+  (* there's nothing after the caret: no "$c->|(1)" -> "$c->foo($arg1)(1)"    *)
+  let is_caret_followed_by_lparen = result.char_at_pos = '(' in
+  let p = initialize_params_exc () in
+  let hack_to_itemType (completion : complete_autocomplete_result) :
+      string option =
+    (* TODO: we're using itemType (left column) for function return types, and *)
+    (* the inlineDetail (right column) for variable/field types. Is that good? *)
+    Option.map completion.func_details ~f:(fun details -> details.return_ty)
+  in
+  let hack_to_detail (completion : complete_autocomplete_result) : string =
+    (* TODO: retrieve the actual signature including name+modifiers     *)
+    (* For now we just return the type of the completion. In the case   *)
+    (* of functions, their function-types have parentheses around them  *)
+    (* which we want to strip. In other cases like tuples, no strip.    *)
+    match completion.func_details with
+    | None -> completion.res_ty
+    | Some _ ->
+      String_utils.rstrip (String_utils.lstrip completion.res_ty "(") ")"
+  in
+  let hack_to_inline_detail (completion : complete_autocomplete_result) : string
+      =
+    match completion.func_details with
+    | None -> hack_to_detail completion
+    | Some details ->
+      (* "(type1 $param1, ...)" *)
+      let f param = Printf.sprintf "%s %s" param.param_ty param.param_name in
+      let params = String.concat ~sep:", " (List.map details.params ~f) in
+      Printf.sprintf "(%s)" params
+    (* Returns a tuple of (insertText, insertTextFormat, textEdits). *)
+  in
+  let hack_to_insert (completion : complete_autocomplete_result) :
+      [ `InsertText of string | `TextEdit of TextEdit.t list ]
+      * Completion.insertTextFormat =
+    let use_textedits =
+      Initialize.(p.initializationOptions.useTextEditAutocomplete)
+    in
+    match (completion.func_details, use_textedits) with
+    | (Some details, _)
+      when Lsp_helpers.supports_snippets p
+           && (not is_caret_followed_by_lparen)
+           && completion.res_kind <> SearchUtils.SI_LocalVariable ->
+      (* "method(${1:arg1}, ...)" but for args we just use param names. *)
+      let f i param = Printf.sprintf "${%i:%s}" (i + 1) param.param_name in
+      let params = String.concat ~sep:", " (List.mapi details.params ~f) in
+      ( `InsertText (Printf.sprintf "%s(%s)" completion.res_name params),
+        SnippetFormat )
+    | (_, false) -> (`InsertText completion.res_name, PlainText)
+    | (_, true) ->
+      ( `TextEdit
+          [
+            TextEdit.
+              {
+                range = ide_range_to_lsp completion.res_replace_pos;
+                newText = completion.res_name;
+              };
+          ],
+        PlainText )
+  in
+  let hack_completion_to_lsp (completion : complete_autocomplete_result) :
+      Completion.completionItem =
+    let (insertText, insertTextFormat, textEdits) =
+      match hack_to_insert completion with
+      | (`InsertText text, format) -> (Some text, format, [])
+      | (`TextEdit edits, format) -> (None, format, edits)
+    in
+    let pos =
+      if Pos.filename completion.res_pos = "" then
+        Pos.set_file filename completion.res_pos
+      else
+        completion.res_pos
+    in
+    let data =
+      let (line, start, _) = Pos.info_pos pos in
+      let filename = Pos.filename pos in
+      let base_class =
+        match completion.res_base_class with
+        | Some base_class -> [("base_class", Hh_json.JSON_String base_class)]
+        | None -> []
       in
-      let hack_to_detail (completion : complete_autocomplete_result) : string =
-        (* TODO: retrieve the actual signature including name+modifiers     *)
-        (* For now we just return the type of the completion. In the case   *)
-        (* of functions, their function-types have parentheses around them  *)
-        (* which we want to strip. In other cases like tuples, no strip.    *)
-        match completion.func_details with
-        | None -> completion.res_ty
-        | Some _ ->
-          String_utils.rstrip (String_utils.lstrip completion.res_ty "(") ")"
-      in
-      let hack_to_inline_detail (completion : complete_autocomplete_result) :
-          string =
-        match completion.func_details with
-        | None -> hack_to_detail completion
+      let ranking_detail =
+        match completion.ranking_details with
         | Some details ->
-          (* "(type1 $param1, ...)" *)
-          let f param =
-            Printf.sprintf "%s %s" param.param_ty param.param_name
-          in
-          let params = String.concat ~sep:", " (List.map details.params ~f) in
-          Printf.sprintf "(%s)" params
-        (* Returns a tuple of (insertText, insertTextFormat, textEdits). *)
+          [
+            ("ranking_detail", Hh_json.JSON_String details.detail);
+            ("ranking_source", Hh_json.JSON_Number details.kind);
+          ]
+        | None -> []
       in
-      let hack_to_insert (completion : complete_autocomplete_result) :
-          [ `InsertText of string | `TextEdit of TextEdit.t list ]
-          * Completion.insertTextFormat =
-        let use_textedits =
-          Initialize.(p.initializationOptions.useTextEditAutocomplete)
-        in
-        match (completion.func_details, use_textedits) with
-        | (Some details, _)
-          when Lsp_helpers.supports_snippets p
-               && (not is_caret_followed_by_lparen)
-               && completion.res_kind <> SearchUtils.SI_LocalVariable ->
-          (* "method(${1:arg1}, ...)" but for args we just use param names. *)
-          let f i param = Printf.sprintf "${%i:%s}" (i + 1) param.param_name in
-          let params = String.concat ~sep:", " (List.mapi details.params ~f) in
-          ( `InsertText (Printf.sprintf "%s(%s)" completion.res_name params),
-            SnippetFormat )
-        | (_, false) -> (`InsertText completion.res_name, PlainText)
-        | (_, true) ->
-          ( `TextEdit
-              [
-                TextEdit.
-                  {
-                    range = ide_range_to_lsp completion.res_replace_pos;
-                    newText = completion.res_name;
-                  };
-              ],
-            PlainText )
+      (* If we do not have a correct file position, skip sending that data *)
+      if Int.equal line 0 && Int.equal start 0 then
+        Some
+          (Hh_json.JSON_Object
+             ( [("fullname", Hh_json.JSON_String completion.res_fullname)]
+             @ base_class
+             @ ranking_detail ))
+      else
+        Some
+          (Hh_json.JSON_Object
+             ( [
+                 (* Fullname is needed for namespaces.  We often trim namespaces to make
+                  * the results more readable, such as showing "ad__breaks" instead of
+                  * "Thrift\Packages\cf\ad__breaks".
+                  *)
+                 ("fullname", Hh_json.JSON_String completion.res_fullname);
+                 (* Filename/line/char/base_class are used to handle class methods.
+                  * We could unify this with fullname in the future.
+                  *)
+                 ("filename", Hh_json.JSON_String filename);
+                 ("line", Hh_json.int_ line);
+                 ("char", Hh_json.int_ start);
+               ]
+             @ base_class
+             @ ranking_detail ))
+    in
+    let hack_to_sort_text (completion : complete_autocomplete_result) :
+        string option =
+      let label = completion.res_name in
+      let should_downrank label =
+        (String.length label > 2 && Str.string_before label 2 = "__")
+        || Str.string_match (Str.regexp_case_fold ".*do_not_use.*") label 0
       in
-      let hack_completion_to_lsp (completion : complete_autocomplete_result) :
-          Completion.completionItem =
-        let (insertText, insertTextFormat, textEdits) =
-          match hack_to_insert completion with
-          | (`InsertText text, format) -> (Some text, format, [])
-          | (`TextEdit edits, format) -> (None, format, edits)
-        in
-        let pos =
-          if Pos.filename completion.res_pos = "" then
-            Pos.set_file filename completion.res_pos
-          else
-            completion.res_pos
-        in
-        let data =
-          let (line, start, _) = Pos.info_pos pos in
-          let filename = Pos.filename pos in
-          let base_class =
-            match completion.res_base_class with
-            | Some base_class ->
-              [("base_class", Hh_json.JSON_String base_class)]
-            | None -> []
-          in
-          let ranking_detail =
-            match completion.ranking_details with
-            | Some details ->
-              [
-                ("ranking_detail", Hh_json.JSON_String details.detail);
-                ("ranking_source", Hh_json.JSON_Number details.kind);
-              ]
-            | None -> []
-          in
-          (* If we do not have a correct file position, skip sending that data *)
-          if Int.equal line 0 && Int.equal start 0 then
-            Some
-              (Hh_json.JSON_Object
-                 ( [("fullname", Hh_json.JSON_String completion.res_fullname)]
-                 @ base_class
-                 @ ranking_detail ))
-          else
-            Some
-              (Hh_json.JSON_Object
-                 ( [
-                     (* Fullname is needed for namespaces.  We often trim namespaces to make
-                      * the results more readable, such as showing "ad__breaks" instead of
-                      * "Thrift\Packages\cf\ad__breaks".
-                      *)
-                     ("fullname", Hh_json.JSON_String completion.res_fullname);
-                     (* Filename/line/char/base_class are used to handle class methods.
-                      * We could unify this with fullname in the future.
-                      *)
-                     ("filename", Hh_json.JSON_String filename);
-                     ("line", Hh_json.int_ line);
-                     ("char", Hh_json.int_ start);
-                   ]
-                 @ base_class
-                 @ ranking_detail ))
-        in
-        let hack_to_sort_text (completion : complete_autocomplete_result) :
-            string option =
-          let label = completion.res_name in
-          let should_downrank label =
-            (String.length label > 2 && Str.string_before label 2 = "__")
-            || Str.string_match (Str.regexp_case_fold ".*do_not_use.*") label 0
-          in
-          let downranked_result_prefix_character = "~" in
-          if should_downrank label then
-            Some (downranked_result_prefix_character ^ label)
-          else
-            Some label
-        in
-        {
-          label =
-            ( completion.res_name
-            ^
-            if completion.res_kind = SearchUtils.SI_Namespace then
-              "\\"
-            else
-              "" );
-          kind =
-            (match completion.ranking_details with
-            | Some _ -> Some Completion.Event
-            | None ->
-              si_kind_to_completion_kind completion.AutocompleteTypes.res_kind);
-          detail = Some (hack_to_detail completion);
-          inlineDetail = Some (hack_to_inline_detail completion);
-          itemType = hack_to_itemType completion;
-          documentation = None;
-          (* This will be filled in by completionItem/resolve. *)
-          sortText =
-            (match completion.ranking_details with
-            | Some detail -> Some detail.sort_text
-            | None -> hack_to_sort_text completion);
-          filterText = None;
-          insertText;
-          insertTextFormat = Some insertTextFormat;
-          textEdits;
-          command = None;
-          data;
-        }
-      in
-      Lwt.return
-        {
-          isIncomplete = not result.is_complete;
-          items = List.map result.completions ~f:hack_completion_to_lsp;
-        }))
+      let downranked_result_prefix_character = "~" in
+      if should_downrank label then
+        Some (downranked_result_prefix_character ^ label)
+      else
+        Some label
+    in
+    {
+      label =
+        ( completion.res_name
+        ^
+        if completion.res_kind = SearchUtils.SI_Namespace then
+          "\\"
+        else
+          "" );
+      kind =
+        (match completion.ranking_details with
+        | Some _ -> Some Completion.Event
+        | None ->
+          si_kind_to_completion_kind completion.AutocompleteTypes.res_kind);
+      detail = Some (hack_to_detail completion);
+      inlineDetail = Some (hack_to_inline_detail completion);
+      itemType = hack_to_itemType completion;
+      documentation = None;
+      (* This will be filled in by completionItem/resolve. *)
+      sortText =
+        (match completion.ranking_details with
+        | Some detail -> Some detail.sort_text
+        | None -> hack_to_sort_text completion);
+      filterText = None;
+      insertText;
+      insertTextFormat = Some insertTextFormat;
+      textEdits;
+      command = None;
+      data;
+    }
+  in
+  Lwt.return
+    {
+      isIncomplete = not result.is_complete;
+      items = List.map result.completions ~f:hack_completion_to_lsp;
+    }
 
 let do_completion_ffp
     (conn : server_conn)
     (ref_unblocked_time : float ref)
     (params : Completion.params) : Completion.result Lwt.t =
-  Completion.(
-    TextDocumentIdentifier.(
-      let pos =
-        lsp_position_to_ide params.loc.TextDocumentPositionParams.position
-      in
-      let filename =
-        lsp_uri_to_path params.loc.TextDocumentPositionParams.textDocument.uri
-      in
-      let command = ServerCommandTypes.IDE_FFP_AUTOCOMPLETE (filename, pos) in
-      let%lwt result = rpc conn ref_unblocked_time command in
-      make_ide_completion_response result filename))
+  let open Completion in
+  let open TextDocumentIdentifier in
+  let pos =
+    lsp_position_to_ide params.loc.TextDocumentPositionParams.position
+  in
+  let filename =
+    lsp_uri_to_path params.loc.TextDocumentPositionParams.textDocument.uri
+  in
+  let command = ServerCommandTypes.IDE_FFP_AUTOCOMPLETE (filename, pos) in
+  let%lwt result = rpc conn ref_unblocked_time command in
+  make_ide_completion_response result filename
 
 let do_completion_legacy
     (conn : server_conn)
     (ref_unblocked_time : float ref)
     (params : Completion.params) : Completion.result Lwt.t =
-  Completion.(
-    TextDocumentIdentifier.(
-      let pos =
-        lsp_position_to_ide params.loc.TextDocumentPositionParams.position
-      in
-      let filename =
-        lsp_uri_to_path params.loc.TextDocumentPositionParams.textDocument.uri
-      in
-      let is_manually_invoked =
-        match params.context with
-        | None -> false
-        | Some c -> c.triggerKind = Invoked
-      in
-      let command =
-        ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos, is_manually_invoked)
-      in
-      let%lwt result = rpc conn ref_unblocked_time command in
-      make_ide_completion_response result filename))
+  let open Completion in
+  let open TextDocumentIdentifier in
+  let pos =
+    lsp_position_to_ide params.loc.TextDocumentPositionParams.position
+  in
+  let filename =
+    lsp_uri_to_path params.loc.TextDocumentPositionParams.textDocument.uri
+  in
+  let is_manually_invoked =
+    match params.context with
+    | None -> false
+    | Some c -> c.triggerKind = Invoked
+  in
+  let command =
+    ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos, is_manually_invoked)
+  in
+  let%lwt result = rpc conn ref_unblocked_time command in
+  make_ide_completion_response result filename
 
 let do_completion_local
     (ide_service : ClientIdeService.t)
@@ -1611,32 +1607,30 @@ let do_completion_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : Completion.params) : Completion.result Lwt.t =
-  Completion.(
-    let document_location =
-      get_document_location editor_open_files params.loc
+  let open Completion in
+  let document_location = get_document_location editor_open_files params.loc in
+  (* Other parameters *)
+  let is_manually_invoked =
+    match params.context with
+    | None -> false
+    | Some c -> c.triggerKind = Invoked
+  in
+  (* this is what I want to fix *)
+  let request =
+    ClientIdeMessage.Completion
+      { ClientIdeMessage.Completion.document_location; is_manually_invoked }
+  in
+  let%lwt result =
+    ClientIdeService.rpc ide_service ~tracking_id ~ref_unblocked_time request
+  in
+  match result with
+  | Ok infos ->
+    let filename =
+      document_location.ClientIdeMessage.file_path |> Path.to_string
     in
-    (* Other parameters *)
-    let is_manually_invoked =
-      match params.context with
-      | None -> false
-      | Some c -> c.triggerKind = Invoked
-    in
-    (* this is what I want to fix *)
-    let request =
-      ClientIdeMessage.Completion
-        { ClientIdeMessage.Completion.document_location; is_manually_invoked }
-    in
-    let%lwt result =
-      ClientIdeService.rpc ide_service ~tracking_id ~ref_unblocked_time request
-    in
-    match result with
-    | Ok infos ->
-      let filename =
-        document_location.ClientIdeMessage.file_path |> Path.to_string
-      in
-      let%lwt response = make_ide_completion_response infos filename in
-      Lwt.return response
-    | Error edata -> raise (Server_nonfatal_exception edata))
+    let%lwt response = make_ide_completion_response infos filename in
+    Lwt.return response
+  | Error edata -> raise (Server_nonfatal_exception edata)
 
 exception NoLocationFound
 
@@ -1835,116 +1829,116 @@ let do_workspaceSymbol
     (conn : server_conn)
     (ref_unblocked_time : float ref)
     (params : WorkspaceSymbol.params) : WorkspaceSymbol.result Lwt.t =
-  WorkspaceSymbol.(
-    SearchUtils.(
-      let query = params.query in
-      let query_type = "" in
-      let command = ServerCommandTypes.SEARCH (query, query_type) in
-      let%lwt results = rpc conn ref_unblocked_time command in
-      let hack_to_lsp_kind = function
-        | SearchUtils.SI_Class -> SymbolInformation.Class
-        | SearchUtils.SI_Interface -> SymbolInformation.Interface
-        | SearchUtils.SI_Trait -> SymbolInformation.Interface
-        (* LSP doesn't have traits, so we approximate with interface *)
-        | SearchUtils.SI_Enum -> SymbolInformation.Enum
-        (* TODO(T36697624): Add SymbolInformation.Record *)
-        | SearchUtils.SI_ClassMethod -> SymbolInformation.Method
-        | SearchUtils.SI_Function -> SymbolInformation.Function
-        | SearchUtils.SI_Typedef -> SymbolInformation.Class
-        (* LSP doesn't have typedef, so we approximate with class *)
-        | SearchUtils.SI_GlobalConstant -> SymbolInformation.Constant
-        | SearchUtils.SI_Namespace -> SymbolInformation.Namespace
-        | SearchUtils.SI_Mixed -> SymbolInformation.Variable
-        | SearchUtils.SI_XHP -> SymbolInformation.Class
-        | SearchUtils.SI_Literal -> SymbolInformation.Variable
-        | SearchUtils.SI_ClassConstant -> SymbolInformation.Constant
-        | SearchUtils.SI_Property -> SymbolInformation.Property
-        | SearchUtils.SI_LocalVariable -> SymbolInformation.Variable
-        | SearchUtils.SI_Constructor -> SymbolInformation.Constructor
-        | SearchUtils.SI_RecordDef -> SymbolInformation.Struct
-        (* Do these happen in practice? *)
-        | SearchUtils.SI_Keyword
-        | SearchUtils.SI_Unknown ->
-          failwith "Unknown symbol kind"
-      in
-      (* Hack sometimes gives us back items with an empty path, by which it       *)
-      (* intends "whichever path you asked me about". That would be meaningless   *)
-      (* here. If it does, then it'll pick up our default path (also empty),      *)
-      (* which will throw and go into our telemetry. That's the best we can do.   *)
-      let hack_symbol_to_lsp (symbol : SearchUtils.symbol) =
-        {
-          SymbolInformation.name = Utils.strip_ns symbol.name;
-          kind = hack_to_lsp_kind symbol.result_type;
-          location = hack_pos_to_lsp_location symbol.pos ~default_path:"";
-          containerName = None;
-        }
-      in
-      Lwt.return (List.map results ~f:hack_symbol_to_lsp)))
+  let open WorkspaceSymbol in
+  let open SearchUtils in
+  let query = params.query in
+  let query_type = "" in
+  let command = ServerCommandTypes.SEARCH (query, query_type) in
+  let%lwt results = rpc conn ref_unblocked_time command in
+  let hack_to_lsp_kind = function
+    | SearchUtils.SI_Class -> SymbolInformation.Class
+    | SearchUtils.SI_Interface -> SymbolInformation.Interface
+    | SearchUtils.SI_Trait -> SymbolInformation.Interface
+    (* LSP doesn't have traits, so we approximate with interface *)
+    | SearchUtils.SI_Enum -> SymbolInformation.Enum
+    (* TODO(T36697624): Add SymbolInformation.Record *)
+    | SearchUtils.SI_ClassMethod -> SymbolInformation.Method
+    | SearchUtils.SI_Function -> SymbolInformation.Function
+    | SearchUtils.SI_Typedef -> SymbolInformation.Class
+    (* LSP doesn't have typedef, so we approximate with class *)
+    | SearchUtils.SI_GlobalConstant -> SymbolInformation.Constant
+    | SearchUtils.SI_Namespace -> SymbolInformation.Namespace
+    | SearchUtils.SI_Mixed -> SymbolInformation.Variable
+    | SearchUtils.SI_XHP -> SymbolInformation.Class
+    | SearchUtils.SI_Literal -> SymbolInformation.Variable
+    | SearchUtils.SI_ClassConstant -> SymbolInformation.Constant
+    | SearchUtils.SI_Property -> SymbolInformation.Property
+    | SearchUtils.SI_LocalVariable -> SymbolInformation.Variable
+    | SearchUtils.SI_Constructor -> SymbolInformation.Constructor
+    | SearchUtils.SI_RecordDef -> SymbolInformation.Struct
+    (* Do these happen in practice? *)
+    | SearchUtils.SI_Keyword
+    | SearchUtils.SI_Unknown ->
+      failwith "Unknown symbol kind"
+  in
+  (* Hack sometimes gives us back items with an empty path, by which it       *)
+  (* intends "whichever path you asked me about". That would be meaningless   *)
+  (* here. If it does, then it'll pick up our default path (also empty),      *)
+  (* which will throw and go into our telemetry. That's the best we can do.   *)
+  let hack_symbol_to_lsp (symbol : SearchUtils.symbol) =
+    {
+      SymbolInformation.name = Utils.strip_ns symbol.name;
+      kind = hack_to_lsp_kind symbol.result_type;
+      location = hack_pos_to_lsp_location symbol.pos ~default_path:"";
+      containerName = None;
+    }
+  in
+  Lwt.return (List.map results ~f:hack_symbol_to_lsp)
 
 let rec hack_symbol_tree_to_lsp
     ~(filename : string)
     ~(accu : Lsp.SymbolInformation.t list)
     ~(container_name : string option)
     (defs : FileOutline.outline) : Lsp.SymbolInformation.t list =
-  SymbolDefinition.(
-    let hack_to_lsp_kind = function
-      | SymbolDefinition.Function -> SymbolInformation.Function
-      | SymbolDefinition.Class -> SymbolInformation.Class
-      | SymbolDefinition.Method -> SymbolInformation.Method
-      | SymbolDefinition.Property -> SymbolInformation.Property
-      | SymbolDefinition.RecordDef -> SymbolInformation.Struct
-      | SymbolDefinition.Const -> SymbolInformation.Constant
-      | SymbolDefinition.Enum -> SymbolInformation.Enum
-      | SymbolDefinition.Interface -> SymbolInformation.Interface
-      | SymbolDefinition.Trait -> SymbolInformation.Interface
-      (* LSP doesn't have traits, so we approximate with interface *)
-      | SymbolDefinition.LocalVar -> SymbolInformation.Variable
-      | SymbolDefinition.Typeconst -> SymbolInformation.Class
-      (* e.g. "const type Ta = string;" -- absent from LSP *)
-      | SymbolDefinition.Typedef -> SymbolInformation.Class
-      (* e.g. top level type alias -- absent from LSP *)
-      | SymbolDefinition.Param -> SymbolInformation.Variable
-      (* We never return a param from a document-symbol-search *)
+  let open SymbolDefinition in
+  let hack_to_lsp_kind = function
+    | SymbolDefinition.Function -> SymbolInformation.Function
+    | SymbolDefinition.Class -> SymbolInformation.Class
+    | SymbolDefinition.Method -> SymbolInformation.Method
+    | SymbolDefinition.Property -> SymbolInformation.Property
+    | SymbolDefinition.RecordDef -> SymbolInformation.Struct
+    | SymbolDefinition.Const -> SymbolInformation.Constant
+    | SymbolDefinition.Enum -> SymbolInformation.Enum
+    | SymbolDefinition.Interface -> SymbolInformation.Interface
+    | SymbolDefinition.Trait -> SymbolInformation.Interface
+    (* LSP doesn't have traits, so we approximate with interface *)
+    | SymbolDefinition.LocalVar -> SymbolInformation.Variable
+    | SymbolDefinition.Typeconst -> SymbolInformation.Class
+    (* e.g. "const type Ta = string;" -- absent from LSP *)
+    | SymbolDefinition.Typedef -> SymbolInformation.Class
+    (* e.g. top level type alias -- absent from LSP *)
+    | SymbolDefinition.Param -> SymbolInformation.Variable
+    (* We never return a param from a document-symbol-search *)
+  in
+  let hack_symbol_to_lsp definition containerName =
+    {
+      SymbolInformation.name = definition.name;
+      kind = hack_to_lsp_kind definition.kind;
+      location =
+        hack_symbol_definition_to_lsp_construct_location
+          definition
+          ~default_path:filename;
+      containerName;
+    }
+  in
+  match defs with
+  (* Flattens the recursive list of symbols *)
+  | [] -> List.rev accu
+  | def :: defs ->
+    let children = Option.value def.children ~default:[] in
+    let accu = hack_symbol_to_lsp def container_name :: accu in
+    let accu =
+      hack_symbol_tree_to_lsp
+        ~filename
+        ~accu
+        ~container_name:(Some def.name)
+        children
     in
-    let hack_symbol_to_lsp definition containerName =
-      {
-        SymbolInformation.name = definition.name;
-        kind = hack_to_lsp_kind definition.kind;
-        location =
-          hack_symbol_definition_to_lsp_construct_location
-            definition
-            ~default_path:filename;
-        containerName;
-      }
-    in
-    match defs with
-    (* Flattens the recursive list of symbols *)
-    | [] -> List.rev accu
-    | def :: defs ->
-      let children = Option.value def.children ~default:[] in
-      let accu = hack_symbol_to_lsp def container_name :: accu in
-      let accu =
-        hack_symbol_tree_to_lsp
-          ~filename
-          ~accu
-          ~container_name:(Some def.name)
-          children
-      in
-      hack_symbol_tree_to_lsp ~filename ~accu ~container_name defs)
+    hack_symbol_tree_to_lsp ~filename ~accu ~container_name defs
 
 let do_documentSymbol
     (conn : server_conn)
     (ref_unblocked_time : float ref)
     (params : DocumentSymbol.params) : DocumentSymbol.result Lwt.t =
-  DocumentSymbol.(
-    TextDocumentIdentifier.(
-      let filename = lsp_uri_to_path params.textDocument.uri in
-      let command = ServerCommandTypes.OUTLINE filename in
-      let%lwt outline = rpc conn ref_unblocked_time command in
-      let converted =
-        hack_symbol_tree_to_lsp ~filename ~accu:[] ~container_name:None outline
-      in
-      Lwt.return converted))
+  let open DocumentSymbol in
+  let open TextDocumentIdentifier in
+  let filename = lsp_uri_to_path params.textDocument.uri in
+  let command = ServerCommandTypes.OUTLINE filename in
+  let%lwt outline = rpc conn ref_unblocked_time command in
+  let converted =
+    hack_symbol_tree_to_lsp ~filename ~accu:[] ~container_name:None outline
+  in
+  Lwt.return converted
 
 (* for serverless ide *)
 let do_documentSymbol_local
@@ -1953,37 +1947,29 @@ let do_documentSymbol_local
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : DocumentSymbol.params) : DocumentSymbol.result Lwt.t =
-  DocumentSymbol.(
-    TextDocumentIdentifier.(
-      let filename = lsp_uri_to_path params.textDocument.uri in
-      let document_location =
-        {
-          ClientIdeMessage.file_path = Path.make filename;
-          file_contents =
-            get_document_contents editor_open_files params.textDocument.uri;
-          line = 0;
-          column = 0;
-        }
-      in
-      let request = ClientIdeMessage.Document_symbol document_location in
-      let%lwt results =
-        ClientIdeService.rpc
-          ide_service
-          ~tracking_id
-          ~ref_unblocked_time
-          request
-      in
-      match results with
-      | Ok outline ->
-        let converted =
-          hack_symbol_tree_to_lsp
-            ~filename
-            ~accu:[]
-            ~container_name:None
-            outline
-        in
-        Lwt.return converted
-      | Error edata -> raise (Server_nonfatal_exception edata)))
+  let open DocumentSymbol in
+  let open TextDocumentIdentifier in
+  let filename = lsp_uri_to_path params.textDocument.uri in
+  let document_location =
+    {
+      ClientIdeMessage.file_path = Path.make filename;
+      file_contents =
+        get_document_contents editor_open_files params.textDocument.uri;
+      line = 0;
+      column = 0;
+    }
+  in
+  let request = ClientIdeMessage.Document_symbol document_location in
+  let%lwt results =
+    ClientIdeService.rpc ide_service ~tracking_id ~ref_unblocked_time request
+  in
+  match results with
+  | Ok outline ->
+    let converted =
+      hack_symbol_tree_to_lsp ~filename ~accu:[] ~container_name:None outline
+    in
+    Lwt.return converted
+  | Error edata -> raise (Server_nonfatal_exception edata)
 
 let do_findReferences
     (conn : server_conn)
@@ -2257,27 +2243,26 @@ let do_signatureHelp_local
 
 let patch_to_workspace_edit_change (patch : ServerRefactorTypes.patch) :
     string * TextEdit.t =
-  ServerRefactorTypes.(
-    Pos.(
-      let text_edit =
-        match patch with
-        | Insert insert_patch
-        | Replace insert_patch ->
-          {
-            TextEdit.range = hack_pos_to_lsp_range insert_patch.pos;
-            newText = insert_patch.text;
-          }
-        | Remove pos ->
-          { TextEdit.range = hack_pos_to_lsp_range pos; newText = "" }
-      in
-      let uri =
-        match patch with
-        | Insert insert_patch
-        | Replace insert_patch ->
-          File_url.create (filename insert_patch.pos)
-        | Remove pos -> File_url.create (filename pos)
-      in
-      (uri, text_edit)))
+  let open ServerRefactorTypes in
+  let open Pos in
+  let text_edit =
+    match patch with
+    | Insert insert_patch
+    | Replace insert_patch ->
+      {
+        TextEdit.range = hack_pos_to_lsp_range insert_patch.pos;
+        newText = insert_patch.text;
+      }
+    | Remove pos -> { TextEdit.range = hack_pos_to_lsp_range pos; newText = "" }
+  in
+  let uri =
+    match patch with
+    | Insert insert_patch
+    | Replace insert_patch ->
+      File_url.create (filename insert_patch.pos)
+    | Remove pos -> File_url.create (filename pos)
+  in
+  (uri, text_edit)
 
 let patches_to_workspace_edit (patches : ServerRefactorTypes.patch list) :
     WorkspaceEdit.t =
@@ -2297,69 +2282,69 @@ let do_documentRename
   let (filename, line, char) =
     lsp_file_position_to_hack (rename_params_to_document_position params)
   in
-  Rename.(
-    let new_name = params.newName in
-    let command =
-      ServerCommandTypes.IDE_REFACTOR
-        { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name }
-    in
-    let%lwt patches = rpc_with_retry conn ref_unblocked_time command in
-    let patches =
-      match patches with
-      | Ok patches -> patches
-      | Error message -> raise (Error.InvalidRequest message)
-    in
-    Lwt.return (patches_to_workspace_edit patches))
+  let open Rename in
+  let new_name = params.newName in
+  let command =
+    ServerCommandTypes.IDE_REFACTOR
+      { ServerCommandTypes.Ide_refactor_type.filename; line; char; new_name }
+  in
+  let%lwt patches = rpc_with_retry conn ref_unblocked_time command in
+  let patches =
+    match patches with
+    | Ok patches -> patches
+    | Error message -> raise (Error.InvalidRequest message)
+  in
+  Lwt.return (patches_to_workspace_edit patches)
 
 let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
     state =
-  Main_env.(
-    ServerCommandTypes.(
-      let (type_, shortMessage, message) =
-        match status with
-        | Needs_local_typecheck ->
-          (MessageType.InfoMessage, None, "Hack: preparing to check edits")
-        | Doing_local_typecheck ->
-          (MessageType.InfoMessage, None, "Hack: checking edits")
-        | Done_local_typecheck ->
-          ( MessageType.InfoMessage,
-            None,
-            "hh_server is initialized and running correctly." )
-        | Doing_global_typecheck Blocking ->
-          ( MessageType.WarningMessage,
-            Some "checking project",
-            "Hack: checking entire project (blocking)" )
-        | Doing_global_typecheck Interruptible ->
-          ( MessageType.InfoMessage,
-            None,
-            "Hack: checking entire project (interruptible)" )
-        | Doing_global_typecheck (Remote_blocking message) ->
-          ( MessageType.WarningMessage,
-            Some (Printf.sprintf "checking project: %s" message),
-            Printf.sprintf
-              "Hack: checking entire project (remote, blocking) - %s"
-              message )
-        | Done_global_typecheck _ ->
-          ( MessageType.InfoMessage,
-            None,
-            "hh_server is initialized and running correctly." )
-      in
-      match state with
-      | Main_loop ({ hh_server_status; _ } as menv) ->
-        let hh_server_status =
+  let open Main_env in
+  let open ServerCommandTypes in
+  let (type_, shortMessage, message) =
+    match status with
+    | Needs_local_typecheck ->
+      (MessageType.InfoMessage, None, "Hack: preparing to check edits")
+    | Doing_local_typecheck ->
+      (MessageType.InfoMessage, None, "Hack: checking edits")
+    | Done_local_typecheck ->
+      ( MessageType.InfoMessage,
+        None,
+        "hh_server is initialized and running correctly." )
+    | Doing_global_typecheck Blocking ->
+      ( MessageType.WarningMessage,
+        Some "checking project",
+        "Hack: checking entire project (blocking)" )
+    | Doing_global_typecheck Interruptible ->
+      ( MessageType.InfoMessage,
+        None,
+        "Hack: checking entire project (interruptible)" )
+    | Doing_global_typecheck (Remote_blocking message) ->
+      ( MessageType.WarningMessage,
+        Some (Printf.sprintf "checking project: %s" message),
+        Printf.sprintf
+          "Hack: checking entire project (remote, blocking) - %s"
+          message )
+    | Done_global_typecheck _ ->
+      ( MessageType.InfoMessage,
+        None,
+        "hh_server is initialized and running correctly." )
+  in
+  match state with
+  | Main_loop ({ hh_server_status; _ } as menv) ->
+    let hh_server_status =
+      {
+        hh_server_status with
+        ShowStatusFB.request =
           {
-            hh_server_status with
-            ShowStatusFB.request =
-              {
-                hh_server_status.ShowStatusFB.request with
-                ShowMessageRequest.type_;
-                message;
-              };
-            shortMessage;
-          }
-        in
-        Main_loop { menv with hh_server_status }
-      | _ -> state))
+            hh_server_status.ShowStatusFB.request with
+            ShowMessageRequest.type_;
+            message;
+          };
+        shortMessage;
+      }
+    in
+    Main_loop { menv with hh_server_status }
+  | _ -> state
 
 (* do_diagnostics: sends notifications for all reported diagnostics; also     *)
 (* returns an updated "uris_with_diagnostics" set of all files for which     *)
@@ -2518,49 +2503,47 @@ let merge_with_client_ide_status
 let report_connect_progress
     (env : env) (ienv : In_init_env.t) (ide_service : ClientIdeService.t) : unit
     =
-  In_init_env.(
-    ShowStatusFB.(
-      ShowMessageRequest.(
-        let time = Unix.time () in
-        let delay_in_secs = int_of_float (time -. ienv.first_start_time) in
-        (* TODO: better to report time that hh_server has spent initializing *)
-        let root =
-          match get_root_opt () with
-          | Some root -> root
-          | None -> failwith "we should have root by now"
-        in
-        let (progress, warning) =
-          match ServerUtils.server_progress ~timeout:3 root with
-          | Error _ -> (None, None)
-          | Ok (progress, warning) -> (progress, warning)
-        in
-        let progress =
-          Option.value progress ~default:ClientConnect.default_progress_message
-        in
-        let message =
-          if Option.is_some warning then
-            Printf.sprintf
-              "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
-              progress
-              delay_in_secs
-          else
-            Printf.sprintf
-              "hh_server initializing: %s [%i seconds]"
-              progress
-              delay_in_secs
-        in
-        let hh_server_status =
-          {
-            request =
-              { type_ = MessageType.WarningMessage; message; actions = [] };
-            progress = None;
-            total = None;
-            shortMessage =
-              Some (Printf.sprintf "[%s] %s" progress (status_tick ()));
-          }
-        in
-        request_showStatusFB
-          (merge_with_client_ide_status env ide_service hh_server_status))))
+  let open In_init_env in
+  let open ShowStatusFB in
+  let open ShowMessageRequest in
+  let time = Unix.time () in
+  let delay_in_secs = int_of_float (time -. ienv.first_start_time) in
+  (* TODO: better to report time that hh_server has spent initializing *)
+  let root =
+    match get_root_opt () with
+    | Some root -> root
+    | None -> failwith "we should have root by now"
+  in
+  let (progress, warning) =
+    match ServerUtils.server_progress ~timeout:3 root with
+    | Error _ -> (None, None)
+    | Ok (progress, warning) -> (progress, warning)
+  in
+  let progress =
+    Option.value progress ~default:ClientConnect.default_progress_message
+  in
+  let message =
+    if Option.is_some warning then
+      Printf.sprintf
+        "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
+        progress
+        delay_in_secs
+    else
+      Printf.sprintf
+        "hh_server initializing: %s [%i seconds]"
+        progress
+        delay_in_secs
+  in
+  let hh_server_status =
+    {
+      request = { type_ = MessageType.WarningMessage; message; actions = [] };
+      progress = None;
+      total = None;
+      shortMessage = Some (Printf.sprintf "[%s] %s" progress (status_tick ()));
+    }
+  in
+  request_showStatusFB
+    (merge_with_client_ide_status env ide_service hh_server_status)
 
 let report_connect_end (ienv : In_init_env.t) : state =
   log "report_connect_end";
@@ -3039,23 +3022,23 @@ let track_open_files (state : state) (event : event) : state =
         params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
       in
       let doc = UriMap.find_opt uri prev_opened_files in
-      Lsp.TextDocumentItem.(
-        (match doc with
-        | Some doc ->
-          let doc' =
-            {
-              doc with
-              version =
-                params.DidChange.textDocument
-                  .VersionedTextDocumentIdentifier.version;
-              text =
-                Lsp_helpers.apply_changes_unsafe
-                  doc.text
-                  params.DidChange.contentChanges;
-            }
-          in
-          UriMap.add uri doc' prev_opened_files
-        | None -> prev_opened_files))
+      let open Lsp.TextDocumentItem in
+      (match doc with
+      | Some doc ->
+        let doc' =
+          {
+            doc with
+            version =
+              params.DidChange.textDocument
+                .VersionedTextDocumentIdentifier.version;
+            text =
+              Lsp_helpers.apply_changes_unsafe
+                doc.text
+                params.DidChange.contentChanges;
+          }
+        in
+        UriMap.add uri doc' prev_opened_files
+      | None -> prev_opened_files)
     | Client_message (_, NotificationMessage (DidCloseNotification params)) ->
       let uri = params.DidClose.textDocument.TextDocumentIdentifier.uri in
       UriMap.remove uri prev_opened_files
@@ -3809,13 +3792,13 @@ let handle_server_message ~(message : server_message) ~(state : state ref) :
       in
       ( if should_send_status then
         let status_message =
-          ServerCommandTypes.(
-            match status with
-            | Needs_local_typecheck -> "needs_local_typecheck"
-            | Doing_local_typecheck -> "doing_local_typecheck"
-            | Done_local_typecheck -> "done_local_typecheck"
-            | Doing_global_typecheck _ -> "doing_global_typecheck"
-            | Done_global_typecheck _ -> "done_global_typecheck")
+          let open ServerCommandTypes in
+          match status with
+          | Needs_local_typecheck -> "needs_local_typecheck"
+          | Doing_local_typecheck -> "doing_local_typecheck"
+          | Done_local_typecheck -> "done_local_typecheck"
+          | Doing_global_typecheck _ -> "doing_global_typecheck"
+          | Done_global_typecheck _ -> "done_global_typecheck"
         in
         Lsp_helpers.telemetry_log to_stdout status_message );
       state := do_server_busy !state status;

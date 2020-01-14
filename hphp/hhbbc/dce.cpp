@@ -284,6 +284,7 @@ struct DceAction {
     PopAndReplace,
     MinstrStackFinal,
     MinstrStackFixup,
+    MinstrPushBase,
     AdjustPop,
   } action;
   using MaskOrCountType = uint32_t;
@@ -404,6 +405,7 @@ const char* show(DceAction action) {
     case DceAction::PopAndReplace:    return "PopAndReplace";
     case DceAction::MinstrStackFinal: return "MinstrStackFinal";
     case DceAction::MinstrStackFixup: return "MinstrStackFixup";
+    case DceAction::MinstrPushBase:   return "MinstrPushBase";
     case DceAction::AdjustPop:        return "AdjustPop";
   };
   not_reached();
@@ -1529,7 +1531,6 @@ void dce(Env& env, const bc::Await& op) { no_dce(env, op); }
 void dce(Env& env, const bc::AwaitAll& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BaseGL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BaseH& op) { no_dce(env, op); }
-void dce(Env& env, const bc::BaseL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BreakTraceHint& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetCUNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetG& op) { no_dce(env, op); }
@@ -1746,6 +1747,15 @@ void dce(Env& env, const bc::BaseGC& op)      { minstr_base(env, op, op.arg1); }
 void dce(Env& env, const bc::BaseSC& op)      {
   minstr_base(env, op, op.arg1);
   minstr_base(env, op, op.arg2);
+}
+
+void dce(Env& env, const bc::BaseL& op) {
+  if (!isLocLive(env, op.loc1) &&
+      !readCouldHaveSideEffects(locRaw(env, op.loc1)) &&
+      !isLocVolatile(env, op.loc1)) {
+    env.dceState.actionMap[env.id] = DceAction::MinstrPushBase;
+  }
+  no_dce(env, op);
 }
 
 void dce(Env& env, const bc::Dim& op)         { minstr_dim(env, op); }
@@ -2042,6 +2052,47 @@ DceAnalysis analyze_dce(const Index& index,
   return DceAnalysis {};
 }
 
+template<class Op>
+using has_mkey = std::is_same<decltype(((Op*)0)->mkey), MKey>;
+
+template<class Op>
+void adjust_mkey(Op& bc, bool) {}
+
+template<class Op>
+typename std::enable_if<has_mkey<Op>::value>::type
+adjust_mkey(Op& bc, int64_t adj) {
+  if (bc.mkey.mcode == MEC || bc.mkey.mcode == MPC) {
+    bc.mkey.idx += adj;
+  }
+}
+
+void adjust_member_key(Bytecode& bc, int64_t adj) {
+#define O(opcode, ...) case Op::opcode: adjust_mkey(bc.opcode, adj); break;
+  switch (bc.op) { OPCODES }
+#undef O
+}
+
+template<class Op>
+using has_arg1 = std::is_same<decltype(((Op*)0)->arg1), uint32_t>;
+
+template<class Op>
+void adjust_arg1(Op& bc, bool) {}
+
+template<class Op>
+typename std::enable_if<has_arg1<Op>::value>::type
+adjust_arg1(Op& bc, int64_t adj) {
+  bc.arg1 += adj;
+}
+
+void adjust_ndiscard(Bytecode& bc, int64_t adj) {
+#define O(opcode, ...)                                            \
+  case Op::opcode:                                                \
+    if (isMemberFinalOp(Op::opcode)) adjust_arg1(bc.opcode, adj); \
+    break;
+  switch (bc.op) { OPCODES }
+#undef O
+}
+
 /*
  * Do the actual updates to the bytecodes.
  */
@@ -2125,6 +2176,29 @@ void dce_perform(php::Func& func,
       case DceAction::MinstrStackFixup:
       {
         adjustMinstr(b->hhbcs[id.idx], elm.second.maskOrCount);
+        break;
+      }
+      case DceAction::MinstrPushBase:
+      {
+        assertx(b->hhbcs[id.idx].op == OpBaseL);
+        auto const base = b->hhbcs[id.idx].BaseL;
+        auto const srcLoc = b->hhbcs[id.idx].srcLoc;
+        b->hhbcs[id.idx] = bc::PushL {base.loc1};
+        b->hhbcs.insert(
+          b->hhbcs.begin() + id.idx + 1, bc::BaseC{0, base.subop2});
+        setloc(srcLoc, b->hhbcs.begin() + id.idx, 2);
+        for (auto p = id.idx + 2; p < b->hhbcs.size(); ++p) {
+          auto const& bc = b->hhbcs[p];
+
+          // Sometimes parts of a minstr will be unreachable, hhbbc marks these
+          // with a fatal.
+          if (bc.op == OpFatal) break;
+
+          assertx(p + 1 < b->hhbcs.size() || isMemberFinalOp(bc.op));
+          adjust_member_key(b->hhbcs[p], 1);
+          adjust_ndiscard(b->hhbcs[p], 1);
+          if (isMemberFinalOp(bc.op)) break;
+        }
         break;
       }
       case DceAction::AdjustPop:

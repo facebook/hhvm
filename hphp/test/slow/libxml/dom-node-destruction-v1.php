@@ -39,6 +39,7 @@ function bar() {
     $foo->info();
   }
   echo "Leave bar()\n";
+  __hhvm_intrinsics\launder_value($c);
 }
 
 

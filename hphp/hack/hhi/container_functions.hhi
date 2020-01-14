@@ -57,17 +57,17 @@ function krsort<Tk as arraykey, Tv>(
 <<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
 function usort<Tv, T as Container<Tv>>(
   <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout T $arg,
-  <<__AtMostRxAsFunc>> (function(Tv, Tv): int) $c,
+  <<__AtMostRxAsFunc>> (function(Tv, Tv): num) $c,
 ): bool;
 <<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
 function uasort<Tk as arraykey, Tv>(
   <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout KeyedContainer<Tk, Tv> $arg,
-  <<__AtMostRxAsFunc>> (function(Tv, Tv): int) $c,
+  <<__AtMostRxAsFunc>> (function(Tv, Tv): num) $c,
 ): bool;
 <<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
 function uksort<Tk as arraykey, Tv>(
   <<__OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> inout KeyedContainer<Tk, Tv> $arg,
-  <<__AtMostRxAsFunc>> (function(Tk, Tk): int) $c,
+  <<__AtMostRxAsFunc>> (function(Tk, Tk): num) $c,
 ): bool;
 
 }

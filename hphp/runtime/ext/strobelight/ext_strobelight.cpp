@@ -50,6 +50,12 @@ struct strobelight::backtrace_t bt_slab;
 std::mutex usdt_mutex;
 
 void onStrobelightSignal(int signo) {
+  if (!RuntimeOption::StrobelightEnabled) {
+    // Handle the signal so we don't crash, but do nothing.
+    TRACE(1, "Strobelight signaled, but disabled\n");
+    return;
+  }
+
   if (signo == strobelight::kSignum) {
     Strobelight::getInstance().surpriseAll();
   }
@@ -137,7 +143,7 @@ void Strobelight::init() {
 
 bool Strobelight::active() {
   // Turn off strobelight if xenon is forced on
-  // TODO remove this when strobelight has its own flag
+  // TODO remove this when strobelight has its own surpriseFlag
   if (isXenonActive()) {
     return false;
   }
@@ -163,12 +169,12 @@ bool Strobelight::isXenonActive() {
 void Strobelight::log(c_WaitableWaitHandle* wh) const {
   if (RuntimeOption::XenonForceAlwaysOn) {
     // Disable strobelight if Xenon forced on
-    // TODO remove this when strobelight has its own flag
+    // TODO remove this when strobelight has its own surpriseFlag
     return;
   }
 
   if (getSurpriseFlag(XenonSignalFlag)) {
-    // TODO remove this when strobelight has its own flag
+    // TODO remove this when strobelight has its own surpriseFlag
     clearSurpriseFlag(XenonSignalFlag);
   }
 
@@ -190,7 +196,7 @@ void Strobelight::surpriseAll() {
   TRACE(1, "Strobelight::surpriseAll\n");
   FOLLY_SDT(hhvm, hhvm_surprise);
 
-  // TODO remove this when strobelight has its own flag
+  // TODO remove this when strobelight has its own surpriseFlag
   if (isXenonActive()) {
     return;
   }

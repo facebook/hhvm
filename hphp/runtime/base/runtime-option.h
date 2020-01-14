@@ -1369,6 +1369,9 @@ public:
   static uint32_t XenonRequestFreq;
   static bool XenonForceAlwaysOn;
 
+  // Strobelight options
+  static bool StrobelightEnabled;
+
   static bool SetProfileNullThisObject;
 };
 static_assert(sizeof(RuntimeOption) == 1, "no instance variables");

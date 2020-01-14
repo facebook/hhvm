@@ -1168,6 +1168,9 @@ int RuntimeOption::Fb303ServerPoolThreads = 1;
 double RuntimeOption::XenonPeriodSeconds = 0.0;
 uint32_t RuntimeOption::XenonRequestFreq = 1;
 bool RuntimeOption::XenonForceAlwaysOn = false;
+
+bool RuntimeOption::StrobelightEnabled = false;
+
 bool RuntimeOption::TrackPerUnitMemory = false;
 
 bool RuntimeOption::SetProfileNullThisObject = true;
@@ -2630,6 +2633,10 @@ void RuntimeOption::Load(
     Config::Bind(XenonPeriodSeconds, ini, config, "Xenon.Period", 0.0);
     Config::Bind(XenonRequestFreq, ini, config, "Xenon.RequestFreq", 1);
     Config::Bind(XenonForceAlwaysOn, ini, config, "Xenon.ForceAlwaysOn", false);
+  }
+  {
+    // Strobelight
+    Config::Bind(StrobelightEnabled, ini, config, "Strobelight.Enabled", false);
   }
   {
     // Profiling

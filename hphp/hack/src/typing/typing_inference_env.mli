@@ -23,6 +23,14 @@ module Log : sig
   val inference_env_as_value : t -> Typing_log_value.value
 
   val global_inference_env_as_value : t_global -> Typing_log_value.value
+
+  (** Convert a type variable from a global inference environment into json *)
+  val tyvar_to_json_g :
+    (locl_ty -> string) ->
+    (internal_type -> string) ->
+    t_global ->
+    Ident.t ->
+    Hh_json.json
 end
 
 val pp : Format.formatter -> t -> unit

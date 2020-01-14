@@ -163,6 +163,59 @@ module Log = struct
          SMap.empty)
 
   let global_inference_env_as_value genv = global_tvenv_as_value genv
+
+  let tyvar_to_json_g
+      (p_locl_ty : locl_ty -> string)
+      (p_internal_type : internal_type -> string)
+      (genv : t_global)
+      (v : Ident.t) =
+    let open Hh_json in
+    let pos_to_json p =
+      let to_n x = JSON_Number (string_of_int x) in
+      JSON_Object
+        [
+          ("filename", JSON_String (Relative_path.suffix (Pos.filename p)));
+          ("start_line", to_n @@ fst (Pos.line_column p));
+          ("start_column", to_n @@ snd (Pos.line_column p));
+          ("end_line", to_n @@ fst (Pos.end_line_column p));
+          ("end_column", to_n @@ snd (Pos.end_line_column p));
+        ]
+    in
+    let constraints_to_json
+        {
+          appears_covariantly;
+          appears_contravariantly;
+          lower_bounds;
+          upper_bounds;
+          pu_accesses = _;
+          type_constants = _;
+        } =
+      let bounds_to_json bs =
+        ITySet.elements bs
+        |> List.map ~f:(fun b -> JSON_String (p_internal_type b))
+      in
+      JSON_Object
+        [
+          ("appears_covariantly", JSON_Bool appears_covariantly);
+          ("appears_contravariantly", JSON_Bool appears_contravariantly);
+          ("lower_bounds", JSON_Array (bounds_to_json lower_bounds));
+          ("upper_bounds", JSON_Array (bounds_to_json upper_bounds));
+        ]
+    in
+    let locl_ty_to_json x = JSON_String (p_locl_ty x) in
+    let solving_info_to_json = function
+      | TVIType locl_ty -> JSON_Object [("type", locl_ty_to_json locl_ty)]
+      | TVIConstraints cstr ->
+        JSON_Object [("constraints", constraints_to_json cstr)]
+    in
+    match IMap.find_opt v genv with
+    | None -> JSON_Null
+    | Some { tyvar_pos; solving_info } ->
+      JSON_Object
+        [
+          ("tyvar_pos", pos_to_json tyvar_pos);
+          ("solving_info", solving_info_to_json solving_info);
+        ]
 end
 
 let empty_tvenv = IMap.empty

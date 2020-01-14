@@ -46,7 +46,6 @@
     test_gconst_file
     test_get_dependent_classes
     test_getfundeps
-    test_ide_utils
     test_infer_type
     test_interrupt
     test_interrupt2
@@ -184,11 +183,6 @@
   (deps test_all.exe)
   (action (run ./test_all.exe gconst_file)))
 
-(alias
-  (name ide_utils)
-  (deps test_all.exe)
-  (action (run ./test_all.exe ide_utils)))
-
 ;         ":integration_test_base",
 ;         "//hphp/hack/src/decl:decl",
 ;         "//hphp/hack/src/deps:deps",
@@ -322,7 +316,6 @@
     (alias server_hover)
     (alias failed_naming)
     (alias gconst_file)
-    (alias ide_utils)
     (alias unbound_name)
     (alias decl_decl)
     (alias rx_if_implements)

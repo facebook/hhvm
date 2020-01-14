@@ -23,7 +23,6 @@
     test_ide_redecl
     test_ide_status
     test_ide_typing_deps
-    test_ide_utils_ide
     test_max_errors
     test_naming_errors
     test_override
@@ -77,11 +76,6 @@
   (name ide_close)
   (deps ../test_all.exe)
   (action (run ../test_all.exe ide/ide_close)))
-
-(alias
-  (name ide_utils)
-  (deps ../test_all.exe)
-  (action (run ../test_all.exe ide/ide_utils)))
 
 (alias
   (name ide_typing_deps)
@@ -190,7 +184,6 @@
    (alias ide_status)
    (alias ide_parsing_errors)
    (alias ide_close)
-   (alias ide_utils)
    (alias ide_typing_deps)
    (alias added_parent)
    (alias auto_ns_aliasing)

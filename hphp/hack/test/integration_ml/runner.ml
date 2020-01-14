@@ -32,7 +32,6 @@ let tests =
     ("ide/ide_redecl", run Test_ide_redecl.test);
     ("ide/ide_status", run Test_ide_status.test);
     ("ide/ide_typing_deps", run Test_ide_typing_deps.test);
-    ("ide/ide_utils", run Test_ide_utils.test);
     ("ide/max_errors", run Test_max_errors.test);
     ("ide/naming_errors", run Test_naming_errors.test);
     ("ide/override", run Test_override.test);
@@ -60,7 +59,6 @@ let tests =
     ("gconst_file", run Test_gconst_file.test);
     ("get_dependent_classes", run Test_get_dependent_classes.test);
     ("getfundeps", run Test_getfundeps.test);
-    ("ide_utils", run Test_ide_utils.test);
     ("infer_type", run Test_infer_type.test);
     ("interrupt2", run Test_interrupt2.test);
     ("interrupt", run Test_interrupt.test);

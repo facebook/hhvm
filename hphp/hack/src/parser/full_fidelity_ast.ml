@@ -187,13 +187,6 @@ let process_scour_comments (env : env) (sc : Scoured_comments.t) =
 let process_lowpri_errors (env : env) (lowpri_errors : (Pos.t * string) list) =
   if should_surface_errors env then
     List.iter ~f:Errors.parsing_error lowpri_errors
-  else if env.codegen then
-    match lowpri_errors with
-    | (p, msg) :: _ ->
-      let (s, e) = Pos.info_raw p in
-      let e = SyntaxError.make ~error_type:SyntaxError.ParseError s e msg in
-      raise @@ SyntaxError.ParserFatal (e, p)
-    | _ -> ()
 
 let process_non_syntax_errors (_ : env) (errors : Errors.error list) =
   List.iter ~f:Errors.add_error_with_check errors
@@ -243,20 +236,10 @@ let process_syntax_errors
     (source_text : SourceText.t)
     (errors : Full_fidelity_syntax_error.t list) =
   let relative_pos = pos_of_error env.file source_text in
-  if env.codegen then
-    let runtime_errors =
-      List.filter errors ~f:SyntaxError.((fun e -> error_type e = RuntimeError))
-    in
-    match (errors, runtime_errors) with
-    | ([], []) -> ()
-    | (_, e :: _)
-    | (e :: _, _) ->
-      raise @@ SyntaxError.ParserFatal (e, relative_pos e)
-  else
-    let report_error e =
-      Errors.parsing_error (relative_pos e, SyntaxError.message e)
-    in
-    List.iter ~f:report_error errors
+  let report_error e =
+    Errors.parsing_error (relative_pos e, SyntaxError.message e)
+  in
+  List.iter ~f:report_error errors
 
 let from_text_rust (env : env) (source_text : SourceText.t) :
     Rust_aast_parser_types.result =
@@ -394,9 +377,17 @@ let aast_to_nast (consolidate_pos : bool) aast =
  * to produce valid bytecode. hh_single_compile is expected to catch
  * these errors.
  *)
-let from_text_to_empty_tast env source_text =
-  let aast_result = from_text env source_text in
-  (aast_to_tast aast_result.ast, aast_result.fi_mode)
+let from_text_to_empty_tast (env : env) (source_text : SourceText.t) :
+    Rust_aast_parser_types.tast_result =
+  let result = from_text_rust env source_text in
+  Rust_aast_parser_types.
+    {
+      result with
+      aast =
+        Result.map
+          ~f:(fun x -> aast_to_tast (elaborate_top_level_defs env x))
+          result.aast;
+    }
 
 (*****************************************************************************(
  * Backward compatibility matter (should be short-lived)

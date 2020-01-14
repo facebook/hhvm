@@ -24,15 +24,19 @@ type env = {
   hacksperimental: bool;
 }
 
-type result = {
+type 'aast result_ = {
   file_mode: FileInfo.mode;
   scoured_comments: Scoured_comments.t;
-  aast: ((Pos.t, unit, unit, unit) Aast.program, string) Pervasives.result;
+  aast: ('aast, string) Pervasives.result;
   lowpri_errors: (Pos.t * string) list;
   syntax_errors: Full_fidelity_syntax_error.t list;
   errors: Errors.error list;
   lint_errors: Relative_path.t Lint.t list;
 }
+
+type result = (Pos.t, unit, unit, unit) Aast.program result_
+
+type tast_result = Tast.program result_
 
 type error =
   | ParserFatal of Full_fidelity_syntax_error.t * Pos.t

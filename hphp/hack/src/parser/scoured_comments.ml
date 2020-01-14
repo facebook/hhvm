@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+open Core_kernel
 
 type fixmes = Pos.t IMap.t IMap.t [@@deriving show]
 
@@ -18,3 +19,7 @@ type t = {
   sc_error_pos: Pos.t list;
 }
 [@@deriving show, eq]
+
+let get_fixme_pos (fixmes : fixmes) (pos : Pos.t) (code : int) : Pos.t option =
+  let (line, _, _) = Pos.info_pos pos in
+  Option.bind (IMap.find_opt line fixmes) (IMap.find_opt code)

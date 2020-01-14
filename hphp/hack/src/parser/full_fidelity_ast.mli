@@ -42,7 +42,7 @@ val parse_text :
 
 (* Only for hh_single_compile at the moment. *)
 val from_text_to_empty_tast :
-  env -> Full_fidelity_source_text.t -> Tast.program * FileInfo.mode
+  env -> Full_fidelity_source_text.t -> Rust_aast_parser_types.tast_result
 
 (**
  * Here only for backward compatibility. Consider these deprecated.

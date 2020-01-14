@@ -62,39 +62,32 @@ let with_compilation_times env f =
   let (_, printing_t) = add_to_time t in
   { bytecode_segments; codegen_t; printing_t; parsing_t = Float.nan }
 
-let parse_text ~hhbc_options popt filename text =
-  let php5_compat_mode =
-    not (Hhbc_options.enable_uniform_variable_syntax hhbc_options)
-  in
-  let hacksperimental = Hhbc_options.hacksperimental hhbc_options in
-  let lower_coroutines = Hhbc_options.enable_coroutines hhbc_options in
-  let env =
-    Full_fidelity_ast.make_env
-      ~parser_options:popt
-      ~codegen:true
-      ~fail_open:false
-      ~php5_compat_mode
-      ~hacksperimental
-      ~keep_errors:false
-      ~lower_coroutines
-      filename
-  in
-  let source_text = SourceText.make filename text in
-  let (ast, file_mode) =
-    Full_fidelity_ast.from_text_to_empty_tast env source_text
-  in
-  let elaborate_namespaces =
-    new Naming_elaborate_namespaces_endo.generic_elaborator
-  in
+let elaborate_namespaces popt aast =
+  let elaborator = new Naming_elaborate_namespaces_endo.generic_elaborator in
   let nsenv = Namespace_env.empty_from_popt popt in
-  let ast =
-    elaborate_namespaces#on_program
-      (Naming_elaborate_namespaces_endo.make_env nsenv)
-      ast
-  in
-  (ast, file_mode)
+  elaborator#on_program (Naming_elaborate_namespaces_endo.make_env nsenv) aast
 
-let parse_file ~hhbc_options filename text =
+let handle_conversion_errors errors =
+  List.filter errors ~f:(fun error ->
+      match Errors.get_code error with
+      (* Ignore these errors to match legacy AST behavior *)
+      | 2086
+      (* Naming.MethodNeedsVisibility *)
+      | 2102
+      (* Naming.UnsupportedTraitUseAs *)
+      | 2103 (* Naming.UnsupportedInsteadOf *) ->
+        false
+      | _ (* Emit fatal parse otherwise *) -> true)
+
+let pos_of_error path source_text error =
+  SourceText.relative_pos
+    path
+    source_text
+    (SyntaxError.start_offset error)
+    (SyntaxError.end_offset error)
+
+let parse_file ~hhbc_options filename text :
+    (Tast.program * bool, Pos.t * string * bool) Either.t * ParserOptions.t =
   let popt =
     Hhbc_options.(
       let co = hhbc_options in
@@ -119,15 +112,65 @@ let parse_file ~hhbc_options filename text =
         ~enable_xhp_class_modifier:(enable_xhp_class_modifier co)
         ~rust_lowerer:(rust_lowerer co))
   in
-  ( (try
-       `ParseResult
-         (Errors.do_ (fun () -> parse_text popt filename text ~hhbc_options))
-     with
-    (* FFP failed to parse *)
-    | Failure s -> `ParseFailure (SyntaxError.make 0 0 s, Pos.none)
-    (* FFP generated an error *)
-    | SyntaxError.ParserFatal (e, p) -> `ParseFailure (e, p)),
-    popt )
+  let env =
+    Full_fidelity_ast.make_env
+      ~parser_options:popt
+      ~codegen:true
+      ~fail_open:false
+      ~php5_compat_mode:
+        (not (Hhbc_options.enable_uniform_variable_syntax hhbc_options))
+      ~hacksperimental:(Hhbc_options.hacksperimental hhbc_options)
+      ~keep_errors:false
+      ~lower_coroutines:(Hhbc_options.enable_coroutines hhbc_options)
+      filename
+  in
+  let source_text = SourceText.make filename text in
+  let result =
+    try
+      let tast_result =
+        Full_fidelity_ast.from_text_to_empty_tast env source_text
+      in
+      Rust_aast_parser_types.(
+        match tast_result with
+        | { syntax_errors = e :: _ as errors; _ } ->
+          let pos_of_error = pos_of_error filename source_text in
+          let runtime_errors =
+            List.filter
+              errors
+              ~f:SyntaxError.((fun e -> error_type e = RuntimeError))
+          in
+          (match runtime_errors with
+          | e :: _ -> Either.Second (pos_of_error e, SyntaxError.message e, true)
+          | _ -> Either.Second (pos_of_error e, SyntaxError.message e, false))
+        | { lowpri_errors = (p, msg) :: _; _ } -> Either.Second (p, msg, false)
+        | {
+         errors;
+         aast;
+         scoured_comments = { Scoured_comments.sc_fixmes; _ };
+         file_mode;
+         _;
+        } ->
+          let errors =
+            List.filter errors ~f:(fun e ->
+                Scoured_comments.get_fixme_pos
+                  sc_fixmes
+                  (Errors.get_pos e)
+                  (Errors.get_code e)
+                |> Option.is_none)
+          in
+          let errors = handle_conversion_errors errors in
+          List.iter errors (fun e ->
+              Printf.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
+          (match (errors, aast) with
+          | ([], Ok aast) -> Either.First (aast, FileInfo.is_hh_file file_mode)
+          | ([], Error msg) -> Either.Second (Pos.none, msg, false)
+          | _ -> Either.Second (Pos.none, "", false)))
+    with
+    | Failure s -> Either.Second (Pos.none, s, false)
+    | SyntaxError.ParserFatal (e, p) ->
+      Either.Second (p, SyntaxError.message e, false)
+  in
+  (result, popt)
 
 let from_ast ~env ~is_hh_file ~empty_namespace ~hhbc_options tast =
   with_compilation_times env (fun _ ->
@@ -143,18 +186,6 @@ let from_ast ~env ~is_hh_file ~empty_namespace ~hhbc_options tast =
         ~empty_namespace
         ~is_hh_file
         tast)
-
-let handle_conversion_errors errors =
-  List.filter errors ~f:(fun error ->
-      match Errors.get_code error with
-      (* Ignore these errors to match legacy AST behavior *)
-      | 2086
-      (* Naming.MethodNeedsVisibility *)
-      | 2102
-      (* Naming.UnsupportedTraitUseAs *)
-      | 2103 (* Naming.UnsupportedInsteadOf *) ->
-        false
-      | _ (* Emit fatal parse otherwise *) -> true)
 
 let fatal ~env ~is_runtime_error pos message =
   with_compilation_times env (fun _ ->
@@ -178,32 +209,13 @@ let from_text (source_text : string) (env : env) : result =
         parse_file env.filepath source_text ~hhbc_options
       in
       let (_, parsing_t) = add_to_time t in
-      let empty_namespace = Namespace_env.empty_from_popt popt in
-      let (tast_with_file_mode, is_runtime_error, error) =
-        match fail_or_tast with
-        | `ParseFailure (e, pos) ->
-          let is_runtime_error =
-            match SyntaxError.error_type e with
-            | SyntaxError.ParseError -> false
-            | SyntaxError.RuntimeError -> true
-          in
-          (None, is_runtime_error, Some (pos, Some (SyntaxError.message e)))
-        | `ParseResult (errors, tast) ->
-          let error_list = Errors.get_error_list errors in
-          let error_list = handle_conversion_errors error_list in
-          List.iter error_list (fun e ->
-              Printf.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
-          if List.is_empty error_list then
-            (Some tast, false, None)
-          else
-            (None, false, Some (Pos.none, None))
-      in
       let ret =
-        match (tast_with_file_mode, error) with
-        | (Some (tast, file_mode), _) ->
-          let is_hh_file = FileInfo.is_hh_file file_mode in
+        match fail_or_tast with
+        | Either.First (tast, is_hh_file) ->
+          let empty_namespace = Namespace_env.empty_from_popt popt in
+          let tast = elaborate_namespaces popt tast in
           from_ast ~env ~is_hh_file ~empty_namespace ~hhbc_options tast
-        | (_, Some (pos, msg)) -> fatal ~env ~is_runtime_error pos msg
-        | _ -> failwith "Impossible case: emits program or fatals"
+        | Either.Second (pos, msg, is_runtime_error) ->
+          fatal ~env ~is_runtime_error pos (Some msg)
       in
       { ret with parsing_t })

@@ -725,7 +725,7 @@ class CommonTests(BarebonesTests):
             options=["--list-files"],
         )
 
-    def test_misc_ide_tools(self) -> None:
+    def test_type_at_pos(self) -> None:
         """
         Test hh_client --type-at-pos
         """
@@ -739,6 +739,25 @@ class CommonTests(BarebonesTests):
                 + '"full_type":{{"kind":"primitive","name":"string"}}}}'
             ],
             options=["--type-at-pos", "{root}foo_3.php:11:14"],
+        )
+
+    def test_type_at_pos_batch(self) -> None:
+        """
+        Test hh_client --type-at-pos-batch
+        """
+        self.test_driver.start_hh_server()
+
+        self.test_driver.check_cmd(
+            [
+                '{{"position":'
+                + '{{"file":"{root}foo_3.php",'
+                + '"line":11,'
+                + '"character":14}}'
+                + ',"type":{{'
+                + '"kind":"primitive",'
+                + '"name":"string"}}}}'
+            ],
+            options=["--type-at-pos-batch", "{root}foo_3.php:11:14"],
         )
 
     def test_ide_get_definition(self) -> None:

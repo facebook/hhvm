@@ -9,25 +9,27 @@
 
 open Core_kernel
 
-(* In order to run recheck_typing, workers need access to the FileInfo for each
- * file to be typechecked, so a FileInfo is paired with each query.
- *
- * Note that this means that many queries on the same file result in needlessly
- * marshalling and unmarshalling the same FileInfo many times over. There are
- * probably ways we could avoid this, but it doesn't seem to be a major problem.
- *)
 type pos = Relative_path.t * int * int * (int * int) option
 
-type pos_info = pos * FileInfo.t
-
-let recheck_typing tcopt (pos_infos : pos_info list) =
+let recheck_typing ctx (pos_list : pos list) =
   let files_to_check =
-    pos_infos
-    |> List.map ~f:(fun ((filename, _, _, _), file_info) ->
-           (filename, file_info))
-    |> List.remove_consecutive_duplicates ~equal:(fun (a, _) (b, _) -> a = b)
+    pos_list |> List.remove_consecutive_duplicates ~equal:( = )
   in
-  ServerIdeUtils.recheck tcopt files_to_check
+  let tasts =
+    List.map files_to_check ~f:(fun (path, _, _, _) ->
+        let (_ctx, entry) =
+          Provider_utils.update_context
+            ~ctx
+            ~path
+            ~file_input:
+              (ServerCommandTypes.FileName (Relative_path.to_absolute path))
+        in
+        let { Provider_utils.Compute_tast.tast; _ } =
+          Provider_utils.compute_tast_unquarantined ~ctx ~entry
+        in
+        (path, tast))
+  in
+  tasts
 
 let result_to_string result (fn, line, char, range_end) =
   Hh_json.(
@@ -52,14 +54,14 @@ let result_to_string result (fn, line, char, range_end) =
     in
     json_to_string obj)
 
-let helper tcopt acc pos_infos =
+let helper ctx acc pos_list =
   let tasts =
     List.fold
-      (recheck_typing tcopt pos_infos)
+      (recheck_typing ctx pos_list)
       ~init:Relative_path.Map.empty
       ~f:(fun map (key, data) -> Relative_path.Map.add map ~key ~data)
   in
-  List.fold pos_infos ~init:acc ~f:(fun acc (pos, _) ->
+  List.fold pos_list ~init:acc ~f:(fun acc pos ->
       let (fn, line, char, range_end) = pos in
       let result =
         Relative_path.Map.find_opt tasts fn
@@ -81,13 +83,13 @@ let helper tcopt acc pos_infos =
       in
       result_to_string result pos :: acc)
 
-let parallel_helper workers tcopt pos_infos =
+let parallel_helper workers ctx pos_list =
   MultiWorker.call
     workers
-    ~job:(helper tcopt)
+    ~job:(helper ctx)
     ~neutral:[]
     ~merge:List.rev_append
-    ~next:(MultiWorker.next workers pos_infos)
+    ~next:(MultiWorker.next workers pos_list)
 
 (* Entry Point *)
 let go :
@@ -96,32 +98,23 @@ let go :
     ServerEnv.env ->
     string list =
  fun workers pos_list env ->
-  let { ServerEnv.tcopt; naming_table; _ } = env in
-  let pos_info_results =
+  let { ServerEnv.tcopt; _ } = env in
+  let pos_list =
     pos_list
     (* Sort, so that many queries on the same file will (generally) be
      * dispatched to the same worker. *)
     |> List.sort ~compare
     (* Dedup identical queries *)
     |> List.remove_consecutive_duplicates ~equal:( = )
-    (* Get the FileInfo for each query *)
     |> List.map ~f:(fun (fn, line, char, range_end) ->
            let fn = Relative_path.create_detect_prefix fn in
-           let pos = (fn, line, char, range_end) in
-           match Naming_table.get_file_info naming_table fn with
-           | Some fileinfo -> Ok (pos, fileinfo)
-           | None -> Error pos)
+           (fn, line, char, range_end))
   in
-  let pos_infos = List.filter_map pos_info_results ~f:Result.ok in
-  let failure_msgs =
-    pos_info_results
-    |> List.filter_map ~f:Result.error
-    |> List.map ~f:(result_to_string (Error "No such file or directory"))
-  in
+  let ctx = Provider_context.empty ~tcopt in
   let results =
-    if List.length pos_infos < 10 then
-      helper tcopt [] pos_infos
+    if List.length pos_list < 10 then
+      helper ctx [] pos_list
     else
-      parallel_helper workers tcopt pos_infos
+      parallel_helper workers ctx pos_list
   in
-  failure_msgs @ results
+  results

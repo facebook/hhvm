@@ -9,17 +9,15 @@
 open Hh_core
 open ServerCommandTypes
 
-let go fn tcopt =
-  let (contents, path) =
-    match fn with
-    | FileName file_name ->
-      let path = Relative_path.create_detect_prefix file_name in
-      (File_provider.get_contents path, path)
-    | FileContent content -> (Some content, Relative_path.default)
+let go file_input tcopt =
+  let ctx = Provider_context.empty ~tcopt in
+  let path =
+    match file_input with
+    | FileName file_name -> Relative_path.create_detect_prefix file_name
+    | FileContent _ -> Relative_path.default
   in
-  match contents with
-  | None -> []
-  | Some x ->
-    ServerIdeUtils.get_errors path x tcopt
-    |> Errors.get_sorted_error_list
-    |> List.map ~f:Errors.to_absolute
+  let (_ctx, entry) = Provider_utils.update_context ~ctx ~path ~file_input in
+  let { Provider_utils.Compute_tast_and_errors.errors; _ } =
+    Provider_utils.compute_tast_and_errors_unquarantined ~ctx ~entry
+  in
+  errors |> Errors.get_sorted_error_list |> List.map ~f:Errors.to_absolute

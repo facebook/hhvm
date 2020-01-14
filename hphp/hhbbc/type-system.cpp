@@ -2143,22 +2143,38 @@ bool Type::couldBe(const Type& o) const {
 
   auto const isect = m_bits & o.m_bits;
   if (isect == 0) return false;
-  // just an optimization; if the intersection contains one of these,
-  // we're done because they don't support data.
+
+  // If the intersection contains any of these, it's a valid
+  // intersection regardless of any data since they do not use
+  // data. This is not just an optimization: if data exists and
+  // doesn't match, we don't want to (incorrectly) report no
+  // intersection.
   if (isect & (BNull | BBool)) return true;
 
-  auto const this_projected = project_data(*this, isect);
-  auto const o_projected = project_data(o, isect);
-  // hasData is actually cheaper than mayHaveData, so do those checks first
-  if (!this_projected.hasData() || !o_projected.hasData()) return true;
   // This looks like it could be problematic - eg BCell does not
   // support data, but lots of its subtypes do. It seems like what we
   // need here is !subtypeMayHaveData(isect) (a function we don't
-  // actually have). We know however that both inputs have data, so
-  // all we rely on here is that if A supports data, and B is a
-  // subtype of A that does not (eg TOptArr and TOptArrE), then no
-  // subtype of B can support data.
+  // actually have). We only care in the case that both inputs have
+  // data, however, so all we rely on here is that if A supports data,
+  // and B is a subtype of A that does not, then no subtype of B can
+  // support data.
   if (!mayHaveData(isect)) return true;
+
+  auto const this_projected = project_data(*this, isect);
+  auto const o_projected = project_data(o, isect);
+  if (!this_projected.hasData() || !o_projected.hasData()) return true;
+
+  // BArrLikeE is similar to the null and bool case above, except we
+  // need to check for the special case where both types have data
+  // corresponding to an empty array. Only in that case does the data
+  // correspond to the BArrLikeE bits and we need to check it (for
+  // provenance mismatch purposes).
+  if (isect & BArrLikeE) {
+    if (m_dataTag != o.m_dataTag) return true;
+    if (m_dataTag != DataTag::ArrLikeVal) return true;
+    if (m_data.aval->size() != 0 || o.m_data.aval->size() != 0) return true;
+    return couldBeArrLike(m_data.aval, o.m_data.aval);
+  }
   return this_projected.couldBeData(o_projected);
 }
 

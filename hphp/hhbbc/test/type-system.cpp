@@ -918,6 +918,59 @@ TEST(Type, SpecificExamples) {
   EXPECT_TRUE(TNull.couldBe(opt(ival(3))));
   EXPECT_TRUE(TInitNull.subtypeOf(opt(ival(3))));
   EXPECT_TRUE(!TNull.subtypeOf(opt(ival(3))));
+
+  auto test_map_a = MapElems{};
+  test_map_a[tv(s_A)] = TDbl;
+  test_map_a[tv(s_B)] = TBool;
+
+  auto test_map_b = MapElems{};
+  test_map_b[tv(s_A)] = TObj;
+  test_map_b[tv(s_B)] = TRes;
+
+  auto const disjointArrSpecs = std::vector<Type>{
+    arr_packedn(TInt),
+    arr_packedn(TStr),
+    arr_packed({TDbl}),
+    arr_packed({TBool}),
+    arr_mapn(TStr, TStr),
+    arr_mapn(TStr, TInt),
+    arr_map(test_map_a),
+    arr_map(test_map_b)
+  };
+  for (auto const& t1 : disjointArrSpecs) {
+    for (auto const& t2 : disjointArrSpecs) {
+      if (t1 == t2) continue;
+      EXPECT_FALSE(t1.couldBe(t2));
+      EXPECT_FALSE(t2.couldBe(t1));
+
+      auto const t3 = union_of(t1, some_aempty());
+      auto const t4 = union_of(t2, some_aempty());
+      EXPECT_TRUE(t3.couldBe(t4));
+      EXPECT_TRUE(t4.couldBe(t3));
+      EXPECT_FALSE(t3.subtypeOf(t4));
+      EXPECT_FALSE(t4.subtypeOf(t3));
+      EXPECT_EQ(intersection_of(t3, t4), some_aempty());
+      EXPECT_EQ(intersection_of(t4, t3), some_aempty());
+
+      auto const t5 = opt(t1);
+      auto const t6 = opt(t2);
+      EXPECT_TRUE(t5.couldBe(t6));
+      EXPECT_TRUE(t6.couldBe(t5));
+      EXPECT_FALSE(t5.subtypeOf(t6));
+      EXPECT_FALSE(t6.subtypeOf(t5));
+      EXPECT_EQ(intersection_of(t5, t6), TInitNull);
+      EXPECT_EQ(intersection_of(t6, t5), TInitNull);
+
+      auto const t7 = opt(t3);
+      auto const t8 = opt(t4);
+      EXPECT_TRUE(t7.couldBe(t8));
+      EXPECT_TRUE(t8.couldBe(t7));
+      EXPECT_FALSE(t7.subtypeOf(t8));
+      EXPECT_FALSE(t8.subtypeOf(t7));
+      EXPECT_EQ(intersection_of(t7, t8), opt(some_aempty()));
+      EXPECT_EQ(intersection_of(t8, t7), opt(some_aempty()));
+    }
+  }
 }
 
 TEST(Type, IndexBased) {

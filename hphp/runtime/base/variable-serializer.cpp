@@ -1527,10 +1527,12 @@ void VariableSerializer::serializeClsMeth(
     case Type::Internal:
     case Type::APCSerialize:
     case Type::DebuggerSerialize:
+      raiseClsMethToVecWarningHelper();
       serializeArray(clsMethToVecHelper(clsMeth), skipNestCheck);
       break;
 
     case Type::JSON:
+      raiseClsMethToVecWarningHelper();
       serializeArray(clsMethToVecHelper(clsMeth), skipNestCheck);
       break;
   }

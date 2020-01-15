@@ -1578,22 +1578,23 @@ let handle_mode
           write_error_list error_format parse_errors oc max_errors
         else (
           Typing_log.out_channel := oc;
-          ServerIdeUtils.make_local_changes ();
-          let files_contents = Multifile.file_to_files filename in
-          let (parse_errors, individual_file_info) =
-            parse_name_and_decl popt files_contents
-          in
-          let errors =
-            check_file
-              tcopt
-              ~verbosity
-              (Errors.get_error_list parse_errors)
-              individual_file_info
-              error_format
-              max_errors
-          in
-          write_error_list error_format errors oc max_errors;
-          ServerIdeUtils.revert_local_changes ()
+          Provider_utils.respect_but_quarantine_unsaved_changes
+            ~ctx:(Provider_context.empty ~tcopt)
+            ~f:(fun () ->
+              let files_contents = Multifile.file_to_files filename in
+              let (parse_errors, individual_file_info) =
+                parse_name_and_decl popt files_contents
+              in
+              let errors =
+                check_file
+                  tcopt
+                  ~verbosity
+                  (Errors.get_error_list parse_errors)
+                  individual_file_info
+                  error_format
+                  max_errors
+              in
+              write_error_list error_format errors oc max_errors)
         ))
   | Decl_compare when batch_mode ->
     (* For each file in our batch, run typechecking serially.
@@ -1602,25 +1603,27 @@ let handle_mode
         let oc =
           Out_channel.create (Relative_path.to_absolute filename ^ ".decl_out")
         in
-        ServerIdeUtils.make_local_changes ();
-        let files_contents =
-          Relative_path.Map.filter files_contents ~f:(fun k _v -> k = filename)
-        in
-        let (_, individual_file_info) =
-          parse_name_and_decl popt files_contents
-        in
-        (try
-           test_decl_compare
-             filename
-             popt
-             builtins
-             files_contents
-             individual_file_info;
-           Out_channel.output_string oc ""
-         with e ->
-           let msg = Exn.to_string e in
-           Out_channel.output_string oc msg);
-        ServerIdeUtils.revert_local_changes ();
+        Provider_utils.respect_but_quarantine_unsaved_changes
+          ~ctx:(Provider_context.empty ~tcopt)
+          ~f:(fun () ->
+            let files_contents =
+              Relative_path.Map.filter files_contents ~f:(fun k _v ->
+                  k = filename)
+            in
+            let (_, individual_file_info) =
+              parse_name_and_decl popt files_contents
+            in
+            try
+              test_decl_compare
+                filename
+                popt
+                builtins
+                files_contents
+                individual_file_info;
+              Out_channel.output_string oc ""
+            with e ->
+              let msg = Exn.to_string e in
+              Out_channel.output_string oc msg);
         Out_channel.close oc)
   | Errors ->
     (* Don't typecheck builtins *)

@@ -33,7 +33,6 @@ list(REMOVE_ITEM files
   ${THRIFT_DIR}/lib/cpp/transport/TMemPagedTransport.cpp
   ${THRIFT_DIR}/lib/cpp/transport/TMemPagedFactory.cpp
   ${THRIFT_DIR}/lib/cpp/protocol/TSimpleJSONProtocol.cpp
-  ${THRIFT_DIR}/lib/cpp/concurrency/NumaThreadManager.cpp
   ${THRIFT_DIR}/lib/cpp/util/TThreadedServerCreator.cpp
   ${THRIFT_DIR}/lib/cpp/util/TNonblockingServerCreator.cpp
 )

@@ -3,9 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use serde::{Deserialize, Serialize};
+
 use ocamlrep_derive::OcamlRep;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, OcamlRep)]
+#[derive(Copy, Clone, Debug, Deserialize, Eq, PartialEq, OcamlRep, Serialize)]
 pub struct FilePosLarge {
     lnum: usize,
     bol: usize,

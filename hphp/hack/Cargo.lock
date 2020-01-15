@@ -538,6 +538,7 @@ dependencies = [
  "ocaml 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocamlrep_derive 0.0.0",
  "ocamlrep_ocamlpool 0.0.0",
+ "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -598,6 +599,7 @@ dependencies = [
  "ocamlrep 0.0.0",
  "ocamlrep_derive 0.0.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

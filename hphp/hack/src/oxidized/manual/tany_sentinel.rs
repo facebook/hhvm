@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocamlrep_derive::OcamlRep;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct TanySentinel;

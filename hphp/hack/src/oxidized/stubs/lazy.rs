@@ -4,8 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocamlrep::OcamlRep;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Lazy<T>(T);
 
 impl<T: OcamlRep> OcamlRep for Lazy<T> {

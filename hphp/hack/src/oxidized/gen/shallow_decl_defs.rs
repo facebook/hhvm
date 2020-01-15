@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<10e48637b000258248e1c4c5b3c2176c>>
+// @generated SignedSource<<0bc0b078811951aea4879c32c2e63681>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use ocamlrep_derive::OcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::aast;
 use crate::ast_defs;
@@ -21,7 +23,7 @@ use crate::pos;
 
 use crate::typing_defs::*;
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct ShallowClassConst {
     pub abstract_: bool,
     pub expr: Option<nast::Expr>,
@@ -29,7 +31,7 @@ pub struct ShallowClassConst {
     pub type_: DeclTy,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct ShallowTypeconst {
     pub abstract_: TypeconstAbstractKind,
     pub constraint: Option<DeclTy>,
@@ -39,14 +41,14 @@ pub struct ShallowTypeconst {
     pub reifiable: Option<pos::Pos>,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct ShallowPuMember {
     pub atom: aast::Sid,
     pub types: Vec<(aast::Sid, DeclTy)>,
     pub exprs: Vec<aast::Sid>,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct ShallowPuEnum {
     pub name: aast::Sid,
     pub is_final: bool,
@@ -55,7 +57,7 @@ pub struct ShallowPuEnum {
     pub members: Vec<ShallowPuMember>,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct ShallowProp {
     pub const_: bool,
     pub xhp_attr: Option<XhpAttr>,
@@ -69,7 +71,7 @@ pub struct ShallowProp {
     pub fixme_codes: i_set::ISet,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct ShallowMethod {
     pub abstract_: bool,
     pub final_: bool,
@@ -83,7 +85,7 @@ pub struct ShallowMethod {
     pub deprecated: Option<String>,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct ShallowMethodRedeclaration {
     pub abstract_: bool,
     pub final_: bool,
@@ -96,7 +98,7 @@ pub struct ShallowMethodRedeclaration {
     pub fixme_codes: i_set::ISet,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct ShallowClass {
     pub mode: file_info::Mode,
     pub final_: bool,

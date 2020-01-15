@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/ocamlrep:ocamlrep
-# Signature<<14c8325774c76af3d2c475f8cfffa5cc57cdbfbb>>
+# Signature<<2c07c3069536dc33e5e708f934636337fb1066c4>>
 [package]
 name = "ocamlrep"
 edition = "2018"
@@ -10,8 +10,11 @@ include = ["*.rs"]
 [lib]
 path = "lib.rs"
 
+[dependencies]
+serde = { version = "1.0", features = ["derive", "rc"] }
+
 [dev-dependencies]
 ocamlrep_derive = { path = "../ocamlrep_derive" }
 ocamlrep_ocamlpool = { path = "../ocamlrep_ocamlpool" }
 ocaml = "0.8"
-# @end of Signature<<14c8325774c76af3d2c475f8cfffa5cc57cdbfbb>>
+# @end of Signature<<2c07c3069536dc33e5e708f934636337fb1066c4>>

@@ -4,8 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocamlrep::OcamlRep;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Sequence<T>(T);
 
 impl<T: OcamlRep> OcamlRep for Sequence<T> {

@@ -3,12 +3,25 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_derive::OcamlRep;
 use std::convert::TryFrom;
 use std::fmt::{self, Display};
 use std::path::{Path, PathBuf};
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, Ord, PartialEq, PartialOrd)]
+use ocamlrep_derive::OcamlRep;
+use serde::{Deserialize, Serialize};
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub enum Prefix {
     Root,
     Hhi,
@@ -42,7 +55,17 @@ impl Display for Prefix {
     }
 }
 
-#[derive(Clone, Debug, Eq, OcamlRep, Ord, PartialEq, PartialOrd)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    OcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize
+)]
 pub struct RelativePath {
     prefix: Prefix,
     path: PathBuf,

@@ -3,14 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2a17b5403b0e96f0623f93ffcdb01173>>
+// @generated SignedSource<<a0ae4f6a0fa0d12767c803c8322d184d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use ocamlrep_derive::OcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
 pub enum Parsing {
     FixmeFormat = 1001,
     ParsingError,
@@ -21,7 +23,7 @@ pub enum Parsing {
     XhpParsingError,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
 pub enum Naming {
     AddATypehint = 2001,
     TypeparamAlokDEPRECATED,
@@ -135,7 +137,7 @@ pub enum Naming {
     PocketUniversesLocalization,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
 pub enum NastCheck {
     AbstractBody = 3001,
     AbstractWithBody,
@@ -223,7 +225,7 @@ pub enum NastCheck {
     PhpLambdaDisallowed,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
 pub enum Typing {
     AbstractClassFinalDEPRECATED = 4001,
     UninstantiableClass,
@@ -585,7 +587,7 @@ pub enum Typing {
     StaticCallWithClassLevelReifiedGeneric,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
 pub enum Init {
     ForwardCompatibilityNotCurrent = 8001,
     ForwardCompatibilityBelowMinimum,

@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f0087fef3c9c65644b583f84764940b0>>
+// @generated SignedSource<<4b0c21e027ef86fc472d9630b4a8c62a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use ocamlrep_derive::OcamlRep;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::opaque_digest;
 use crate::pos;
@@ -17,7 +19,7 @@ use crate::s_set;
 
 use crate::prim_defs::*;
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
 pub enum Mode {
     Mphp,
     Mdecl,
@@ -26,7 +28,7 @@ pub enum Mode {
     Mexperimental,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
 pub enum NameType {
     Fun,
     Class,
@@ -35,18 +37,18 @@ pub enum NameType {
     Const,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub enum Pos {
     Full(pos::Pos),
     File(NameType, ocamlrep::rc::RcOc<relative_path::RelativePath>),
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct Id(pub Pos, pub String);
 
 pub type HashType = Option<opaque_digest::OpaqueDigest>;
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct FileInfo {
     pub hash: HashType,
     pub file_mode: Option<Mode>,
@@ -58,7 +60,7 @@ pub struct FileInfo {
     pub comments: Option<Vec<(pos::Pos, Comment)>>,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct Names {
     pub funs: s_set::SSet,
     pub classes: s_set::SSet,
@@ -67,7 +69,7 @@ pub struct Names {
     pub consts: s_set::SSet,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct Saved {
     pub names: Names,
     pub hash: Option<opaque_digest::OpaqueDigest>,

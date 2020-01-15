@@ -18,7 +18,13 @@ open Convert_longident
 open Convert_type
 
 let derived_traits =
-  [(None, "Clone"); (None, "Debug"); (Some "ocamlrep_derive", "OcamlRep")]
+  [
+    (None, "Clone");
+    (None, "Debug");
+    (Some "ocamlrep_derive", "OcamlRep");
+    (Some "serde", "Serialize");
+    (Some "serde", "Deserialize");
+  ]
 
 let additional_derived_traits ty =
   match (State.curr_module_name (), ty) with

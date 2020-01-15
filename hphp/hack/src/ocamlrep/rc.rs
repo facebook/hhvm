@@ -15,6 +15,8 @@ use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 use std::rc::Rc;
 
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
 use crate::{Allocator, FromError, OcamlRep, Value};
 
 const UNIT: usize = crate::value::isize_to_ocaml_int(0);
@@ -255,5 +257,27 @@ impl<T: OcamlRep> OcamlRep for RcOc<T> {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
         // NB: We don't get any sharing this way.
         Ok(RcOc::new(T::from_ocamlrep(value)?))
+    }
+}
+
+impl<T: Serialize> Serialize for RcOc<T> {
+    #[inline]
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        (**self).serialize(serializer)
+    }
+}
+
+impl<'de, T: Deserialize<'de>> Deserialize<'de> for RcOc<T> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        // NB: We don't get any sharing this way.
+        // FWIW, looks like serde doesn't preserve sharing for Rc either.
+        // https://github.com/serde-rs/serde/blob/a00aee14950baca7de2e334b895e203b013712da/serde/src/de/impls.rs#L1806-L1808
+        Deserialize::deserialize(deserializer).map(RcOc::new)
     }
 }

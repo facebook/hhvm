@@ -33,6 +33,7 @@
 #include <folly/portability/Unistd.h>
 #include <pwd.h>
 
+#include <folly/container/Array.h>
 #include <folly/String.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -318,7 +319,12 @@ Variant HHVM_FUNCTION(posix_getpwuid,
   return php_posix_passwd_to_array(pw);
 }
 
-static bool posix_addlimit(int limit, const char *name, Array &ret) {
+namespace {
+
+const StaticString s_unlimited{"unlimited"};
+
+template <class T>
+bool posix_addlimit(int limit, const char *name, T &ret) {
   char hard[80]; snprintf(hard, 80, "hard %s", name);
   char soft[80]; snprintf(soft, 80, "soft %s", name);
 
@@ -332,13 +338,13 @@ static bool posix_addlimit(int limit, const char *name, Array &ret) {
   String hardStr(hard, CopyString);
 
   if (rl.rlim_cur == RLIM_INFINITY) {
-    ret.set(softStr, "unlimited");
+    ret.set(softStr, s_unlimited);
   } else {
     ret.set(softStr, (int)rl.rlim_cur);
   }
 
   if (rl.rlim_max == RLIM_INFINITY) {
-    ret.set(hardStr, "unlimited");
+    ret.set(hardStr, s_unlimited);
   } else {
     ret.set(hardStr, (int)rl.rlim_max);
   }
@@ -346,38 +352,36 @@ static bool posix_addlimit(int limit, const char *name, Array &ret) {
   return true;
 }
 
-static struct limitlist {
-  int limit;
-  const char *name;
-} limits[] = {
-  { RLIMIT_CORE,    "core" },
-  { RLIMIT_DATA,    "data" },
-  { RLIMIT_STACK,   "stack" },
+constexpr auto limits = folly::make_array<std::pair<int, const char *>>(
+  std::make_pair(RLIMIT_CORE,    "core"),
+  std::make_pair(RLIMIT_DATA,    "data"),
+  std::make_pair(RLIMIT_STACK,   "stack"),
   //{ RLIMIT_VMEM,    "virtualmem" },
-  { RLIMIT_AS,      "totalmem" },
+  std::make_pair(RLIMIT_AS,      "totalmem"),
 #ifdef RLIMIT_RSS
-  { RLIMIT_RSS,     "rss" },
+  std::make_pair(RLIMIT_RSS,     "rss"),
 #endif
 #ifdef RLIMIT_NPROC
-  { RLIMIT_NPROC,   "maxproc" },
+  std::make_pair(RLIMIT_NPROC,   "maxproc"),
 #endif
 #ifdef RLIMIT_MEMLOCK
-  { RLIMIT_MEMLOCK, "memlock" },
+  std::make_pair(RLIMIT_MEMLOCK, "memlock"),
 #endif
-  { RLIMIT_CPU,     "cpu" },
-  { RLIMIT_FSIZE,   "filesize" },
-  { RLIMIT_NOFILE,  "openfiles" },
-  { 0, NULL }
-};
+  std::make_pair(RLIMIT_CPU,     "cpu"),
+  std::make_pair(RLIMIT_FSIZE,   "filesize"),
+  std::make_pair(RLIMIT_NOFILE,  "openfiles")
+);
+
+} // namespace
 
 Variant HHVM_FUNCTION(posix_getrlimit) {
-  Array ret;
-  for (struct limitlist *l = limits; l->name; l++) {
-    if (!posix_addlimit(l->limit, l->name, ret)) {
+  DArrayInit ret{2 * limits.size()};
+  for (auto const l : limits) {
+    if (!posix_addlimit(l.first, l.second, ret)) {
       return false;
     }
   }
-  return ret;
+  return ret.toVariant();
 }
 
 Variant HHVM_FUNCTION(posix_getsid,

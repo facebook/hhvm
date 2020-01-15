@@ -1369,4 +1369,16 @@ namespace HH {
   <<__Native, __Rx>>
   function type_structure_classname(mixed $cls_or_obj,
                                     ?string $cns_name = null): string;
+
+  /**
+   * Retrieves the TypeStructure for a type alias.
+   *
+   * @cls_or_obj    mixed    the name of a type alias.
+   *
+   * @return        darray   The resolved type structure for a type alias.
+   */
+  <<__Rx>>
+  function type_structure_for_alias(mixed $cls_or_obj): darray {
+    return type_structure($cls_or_obj, null);
+  }
 }

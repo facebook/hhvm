@@ -127,4 +127,10 @@ function type_structure(mixed $cls_or_obj, string $cns_name);
 // type_structure(C::class or new C, 'type_const_name')
 //   : TypeStructure
 
+/*
+ * Retrieves the TypeStructure for a type alias.
+ */
+<<__Rx>>
+function type_structure_for_alias<T>(typename<T> $cls_or_obj): TypeStructure<T>;
+
 } // namespace HH

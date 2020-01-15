@@ -1,0 +1,21 @@
+array(3) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  array(2) {
+    ["a"]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+    ["b"]=>
+    array(2) {
+      ["kind"]=>
+      int(4)
+      ["optional_shape_field"]=>
+      bool(true)
+    }
+  }
+  ["alias"]=>
+  string(8) "MyAlias1"
+}

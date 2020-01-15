@@ -609,10 +609,9 @@ and check_inout_return env =
          * type for the parameter (under subtyping rules). *)
         let local_ty = Env.get_local env id in
         let (env, ety) = Env.expand_type env local_ty in
-        let pos = Reason.to_pos (fst ety) in
         let param_ty = (Reason.Rinout_param (Reason.to_pos r), ty) in
         Type.sub_type
-          pos
+          (Reason.to_pos r)
           Reason.URassign_inout
           env
           ety

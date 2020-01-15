@@ -72,4 +72,5 @@ abstract class BuiltinEnum<T> {
   ): Container<T>;
 }
 
+type enumname<T> = classname<BuiltinEnum<T>>;
 }

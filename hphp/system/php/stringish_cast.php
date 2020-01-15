@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace HH;
+namespace HH {
 
 function stringish_cast(mixed $value): string {
   if (HH\is_fun($value)) {
@@ -11,4 +11,6 @@ function stringish_cast(mixed $value): string {
     return $value->__toString();
   }
   return (string)$value;
+}
+
 }

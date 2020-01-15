@@ -14,6 +14,7 @@ open Typing_defs
 module Nast = Aast
 module Tast = Aast
 module Phase = Typing_phase
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 type autocomplete_data_entry = {
@@ -83,7 +84,7 @@ class visitor =
       candidates := [];
       Tast_env.get_class_ids env class_ty
       |> List.iter ~f:(fun cname ->
-             Decl_provider.get_class cname
+             Decl_provider.get_class (Tast_env.get_ctx env) cname
              |> Option.iter ~f:(fun class_ ->
                     let cid = Option.map cid to_nast_class_id_ in
                     self#autocomplete_member ~is_static env class_ cid))

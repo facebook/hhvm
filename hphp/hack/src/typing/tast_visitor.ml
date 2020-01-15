@@ -55,9 +55,18 @@ class virtual iter =
     method! on_Binop env op e1 e2 =
       match op with
       | Ast_defs.Eq _ ->
+        self#on_bop env op;
         self#on_expr (Env.set_val_kind env Typing_defs.Lval) e1;
         self#on_expr env e2
       | _ -> super#on_Binop env op e1 e2
+
+    method! on_Is env e h =
+      let env = Env.set_allow_wildcards env in
+      super#on_Is env e h
+
+    method! on_As env e h =
+      let env = Env.set_allow_wildcards env in
+      super#on_As env e h
   end
 
 class virtual ['state] iter_with_state =
@@ -105,6 +114,22 @@ class virtual ['state] iter_with_state =
 
     method! on_Lfun (env, state) x =
       super#on_Lfun (Env.set_ppl_lambda env, state) x
+
+    method! on_Binop (env, state) op e1 e2 =
+      match op with
+      | Ast_defs.Eq _ ->
+        self#on_bop (env, state) op;
+        self#on_expr (Env.set_val_kind env Typing_defs.Lval, state) e1;
+        self#on_expr (env, state) e2
+      | _ -> super#on_Binop (env, state) op e1 e2
+
+    method! on_Is (env, state) e h =
+      let env = Env.set_allow_wildcards env in
+      super#on_Is (env, state) e h
+
+    method! on_As (env, state) e h =
+      let env = Env.set_allow_wildcards env in
+      super#on_As (env, state) e h
   end
 
 class virtual ['a] reduce =
@@ -148,6 +173,23 @@ class virtual ['a] reduce =
     method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
 
     method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
+
+    method! on_Binop env op e1 e2 =
+      match op with
+      | Ast_defs.Eq _ ->
+        let op = self#on_bop env op in
+        let e1 = self#on_expr (Env.set_val_kind env Typing_defs.Lval) e1 in
+        let e2 = self#on_expr env e2 in
+        self#plus e1 (self#plus op e2)
+      | _ -> super#on_Binop env op e1 e2
+
+    method! on_Is env e h =
+      let env = Env.set_allow_wildcards env in
+      super#on_Is env e h
+
+    method! on_As env e h =
+      let env = Env.set_allow_wildcards env in
+      super#on_As env e h
   end
 
 class virtual map =
@@ -200,6 +242,23 @@ class virtual map =
     method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
 
     method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
+
+    method! on_Binop env op e1 e2 =
+      match op with
+      | Ast_defs.Eq _ ->
+        Aast.Binop
+          ( self#on_bop env op,
+            self#on_expr (Env.set_val_kind env Typing_defs.Lval) e1,
+            self#on_expr env e2 )
+      | _ -> super#on_Binop env op e1 e2
+
+    method! on_Is env e h =
+      let env = Env.set_allow_wildcards env in
+      super#on_Is env e h
+
+    method! on_As env e h =
+      let env = Env.set_allow_wildcards env in
+      super#on_As env e h
   end
 
 class virtual endo =
@@ -251,6 +310,26 @@ class virtual endo =
     method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
 
     method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
+
+    method! on_Binop env this op e1 e2 =
+      match op with
+      | Ast_defs.Eq _ ->
+        let op' = self#on_bop env op in
+        let e1' = self#on_expr (Env.set_val_kind env Typing_defs.Lval) e1 in
+        let e2' = self#on_expr env e2 in
+        if phys_equal op op' && phys_equal e1 e2' && phys_equal e2 e2' then
+          this
+        else
+          Aast.Binop (op', e1', e2')
+      | _ -> super#on_Binop env this op e1 e2
+
+    method! on_Is env e h =
+      let env = Env.set_allow_wildcards env in
+      super#on_Is env e h
+
+    method! on_As env e h =
+      let env = Env.set_allow_wildcards env in
+      super#on_As env e h
   end
 
 (** A {!handler} is an {!iter} visitor which is not in control of the iteration
@@ -294,10 +373,6 @@ class type handler =
 
     method at_class_typeconst : Env.t -> Tast.class_typeconst -> unit
 
-    method at_Is : Env.t -> Tast.expr -> Tast.hint -> unit
-
-    method at_As : Env.t -> Tast.expr -> Tast.hint -> unit
-
     method at_xhp_child : Env.t -> Tast.xhp_child -> unit
   end
 
@@ -330,10 +405,6 @@ class virtual handler_base : handler =
     method at_user_attribute _ _ = ()
 
     method at_class_typeconst _ _ = ()
-
-    method at_Is _ _ _ = ()
-
-    method at_As _ _ _ = ()
 
     method at_xhp_child _ _ = ()
   end
@@ -395,16 +466,6 @@ let iter_with (handlers : handler list) : iter =
     method! on_class_typeconst env tc =
       List.iter handlers (fun v -> v#at_class_typeconst env tc);
       super#on_class_typeconst env tc
-
-    method! on_Is env e h =
-      let env = Env.set_allow_wildcards env in
-      List.iter handlers (fun v -> v#at_Is env e h);
-      super#on_Is env e h
-
-    method! on_As env e h =
-      let env = Env.set_allow_wildcards env in
-      List.iter handlers (fun v -> v#at_As env e h);
-      super#on_As env e h
 
     method! on_xhp_child env c =
       List.iter handlers (fun v -> v#at_xhp_child env c);

@@ -331,15 +331,15 @@ SSATmp* simplifyLdCls(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyLdClsMethod(State& env, const IRInstruction* inst) {
-  auto const ctx = inst->src(0);
+  auto const clsTmp = inst->src(0);
+  auto const idxTmp = inst->src(1);
 
-  if (ctx->hasConstVal()) {
-    auto const idx = inst->src(1);
-    if (idx->hasConstVal()) {
-      auto const cls = ctx->clsVal();
-      return cns(env, cls->getMethod(-idx->intVal() - 1));
+  if (clsTmp->hasConstVal() && idxTmp->hasConstVal()) {
+    auto const cls = clsTmp->clsVal();
+    auto const idx = idxTmp->intVal();
+    if (idx < cls->numMethods()) {
+      return cns(env, cls->getMethod(idx));
     }
-    return nullptr;
   }
 
   return nullptr;

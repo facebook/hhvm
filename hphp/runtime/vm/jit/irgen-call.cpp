@@ -574,8 +574,8 @@ SSATmp* lookupObjMethodNonExactFunc(IRGS& env, SSATmp* obj,
                                     const Func* superFunc) {
   implIncStat(env, Stats::ObjMethod_methodslot);
   auto const cls = gen(env, LdObjClass, obj);
-  auto const methSlot = -(superFunc->methodSlot() + 1);
-  auto const func = gen(env, LdClsMethod, cls, cns(env, methSlot));
+  auto const slot = cns(env, superFunc->methodSlot());
+  auto const func = gen(env, LdClsMethod, cls, slot);
   if (superFunc->isStaticInPrologue()) {
     gen(env, ThrowHasThisNeedStatic, func);
   }
@@ -730,13 +730,12 @@ void optimizeProfiledCallMethod(IRGS& env,
       env,
       [&] (Block* sideExit) {
         auto const slot = cns(env, uniqueMeth->methodSlot());
-        auto const negSlot = cns(env, -(uniqueMeth->methodSlot() + 1));
         auto const cls = isStaticCall
           ? objOrCls : gen(env, LdObjClass, objOrCls);
         auto const len = gen(env, LdFuncVecLen, cls);
         auto const cmp = gen(env, LteInt, len, slot);
         gen(env, JmpNZero, sideExit, cmp);
-        auto const meth = gen(env, LdClsMethod, cls, negSlot);
+        auto const meth = gen(env, LdClsMethod, cls, slot);
         auto const same = gen(env, EqFunc, meth, cns(env, uniqueMeth));
         gen(env, JmpZero, sideExit, same);
         auto const ctx = getCtx(uniqueMeth, objOrCls, nullptr);
@@ -764,8 +763,8 @@ void optimizeProfiledCallMethod(IRGS& env,
         auto const ecData = ExtendsClassData{baseMeth->cls(), true};
         auto const flag = gen(env, ExtendsClass, ecData, cls);
         gen(env, JmpZero, sideExit, flag);
-        auto const negSlot = cns(env, -(baseMeth->methodSlot() + 1));
-        auto const meth = gen(env, LdClsMethod, cls, negSlot);
+        auto const slot = cns(env, baseMeth->methodSlot());
+        auto const meth = gen(env, LdClsMethod, cls, slot);
         auto const ctx = getCtx(baseMeth, objOrCls, nullptr);
         auto const mightCareAboutDynCall =
           RuntimeOption::EvalForbidDynamicCallsToClsMeth > 0
@@ -1520,9 +1519,9 @@ SSATmp* lookupClsMethodKnown(IRGS& env,
     baseClass, methodName, curFunc(env), exact);
   if (!func) return nullptr;
 
-  auto funcTmp = exact || func->isImmutableFrom(baseClass) ?
-    cns(env, func) :
-    gen(env, LdClsMethod, callerCtx, cns(env, -(func->methodSlot() + 1)));
+  auto funcTmp = exact || func->isImmutableFrom(baseClass)
+    ? cns(env, func)
+    : gen(env, LdClsMethod, callerCtx, cns(env, func->methodSlot()));
 
   calleeCtx = forward
     ? forwardCtx(env, func, funcTmp)

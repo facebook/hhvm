@@ -60,10 +60,11 @@ IMPL_OPCODE_CALL(MethodExists)
 void cgLdClsMethod(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const cls = srcLoc(env, inst, 0).reg();
-  int32_t const mSlotVal = inst->src(1)->rawVal();
+  auto const idx = inst->src(1)->intVal();
+  assertx(idx >= 0);
 
-  auto const methOff = int32_t(mSlotVal * sizeof(LowPtr<Func>));
   auto& v = vmain(env);
+  auto const methOff = -(idx + 1) * sizeof(LowPtr<Func>);
   emitLdLowPtr(v, cls[methOff], dst, sizeof(LowPtr<Func>));
 }
 

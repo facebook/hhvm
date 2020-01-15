@@ -1278,8 +1278,9 @@ To string conversions:
 
 | LdClsMethod, D(Func), S(Cls) C(Int), NF
 
-  Load a Func* off of the class method table for S0, at offset S1 (in method
-  slots).
+  Load the Func* in slot S1 of the class method table for class S0. (Note that
+  this vector is located before the class in memory, so the non-negative slots
+  will map to negative offset loads.)
 
 | LookupClsMethod, D(Func|Nullptr), S(Cls) S(Str) S(Obj|Nullptr) S(Cls|Nullptr),
 |                  NF
@@ -2056,8 +2057,8 @@ To string conversions:
 
 | VerifyParamFail, ND, NA, NF
 
-  Assumes that parameter specified in extra-data in the current function 
-  has failed a its type check. Depending on the typehint being verified and 
+  Assumes that parameter specified in extra-data in the current function
+  has failed a its type check. Depending on the typehint being verified and
   a number of runtime options, may coerce the parameter to the correct type i
   or raise a recoverable fatal error describing the type mismatch.
 

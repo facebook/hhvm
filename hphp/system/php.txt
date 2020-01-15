@@ -1,5 +1,10 @@
 # Files to include in systemlib.php
 
+# If your file uses a namespace, it must be in a namespace block.
+# `namespace HH;` cannot be used. Use `namespace HH { /*code*/ }` instead.
+# If you used a namespace, your file must use the `.ns.php` extension instead of `.php`.
+# These restrictions may be lifted at some point in the future.
+
 # Order matters here. Put parent classes in this list before child classes
 hphp/system/php/lang/stdClass.php
 hphp/system/php/lang/Closure.php

@@ -49,30 +49,6 @@
   (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
 
 (library
-  (name server_ide_utils)
-  (wrapped false)
-  (modules
-    serverIdeUtils)
-  (libraries
-    ast_provider
-    decl
-    decl_provider
-    decl_provider_ctx
-    errors
-    typing_check
-    file_provider
-    fixme_provider
-    parser
-    provider_context
-    relative_path
-    typechecker_options
-    typing
-    typing_deps
-    utils_core
-    )
-  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
-
-(library
   (name server_utils)
   (wrapped false)
   (modules

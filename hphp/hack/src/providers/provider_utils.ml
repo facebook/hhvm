@@ -6,6 +6,7 @@
  *
  *)
 open Core_kernel
+module Decl_provider = Decl_provider_ctx
 
 module Compute_tast = struct
   type t = {
@@ -28,9 +29,33 @@ let respect_but_quarantine_unsaved_changes
     Utils.with_context
       ~enter:(fun () ->
         Provider_context.set_global_context_internal ctx;
-        ServerIdeUtils.make_local_changes ())
+
+        Errors.set_allow_errors_in_default_path true;
+        SharedMem.allow_hashtable_writes_by_current_process false;
+
+        Ast_provider.local_changes_push_stack ();
+        Decl_provider.local_changes_push_stack ctx;
+        File_provider.local_changes_push_stack ();
+        Fixme_provider.local_changes_push_stack ();
+
+        Ide_parser_cache.activate ();
+
+        Naming_table.push_local_changes ())
       ~exit:(fun () ->
-        ServerIdeUtils.revert_local_changes ();
+        Errors.set_allow_errors_in_default_path false;
+        SharedMem.allow_hashtable_writes_by_current_process true;
+
+        Ast_provider.local_changes_pop_stack ();
+        Decl_provider.local_changes_pop_stack ctx;
+        File_provider.local_changes_pop_stack ();
+        Fixme_provider.local_changes_pop_stack ();
+
+        Ide_parser_cache.deactivate ();
+
+        Naming_table.pop_local_changes ();
+
+        SharedMem.invalidate_caches ();
+
         Provider_context.unset_global_context_internal ())
       ~do_:f
   in

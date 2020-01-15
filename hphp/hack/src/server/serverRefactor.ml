@@ -42,7 +42,7 @@ let get_type_params_type_rewrite_patches env files =
 
 let find_def_filename current_filename definition =
   SymbolDefinition.(
-    if Pos.filename definition.pos = ServerIdeUtils.path then
+    if Pos.filename definition.pos = Relative_path.default then
       (* When the definition is in an IDE buffer with local changes, the filename
        in the definition will be empty. *)
       current_filename

@@ -279,7 +279,7 @@ const StaticString
   s_versionNumber("versionNumber");
 
 Array HHVM_STATIC_METHOD(SQLite3, version) {
-  return make_map_array(
+  return make_darray(
     s_versionString, String((char*)sqlite3_libversion(), CopyString),
     s_versionNumber, (int64_t)sqlite3_libversion_number()
   );

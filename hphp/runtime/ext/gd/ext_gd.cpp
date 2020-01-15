@@ -3887,7 +3887,7 @@ Variant HHVM_FUNCTION(imagecolorsforindex, const Resource& image,
   if (!im) return false;
   if (index >= 0 &&
       (gdImageTrueColor(im) || index < gdImageColorsTotal(im))) {
-    return make_map_array(
+    return make_darray(
       s_red,  gdImageRed(im,index),
       s_green, gdImageGreen(im,index),
       s_blue, gdImageBlue(im,index),

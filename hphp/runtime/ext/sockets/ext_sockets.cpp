@@ -695,7 +695,7 @@ Variant HHVM_FUNCTION(socket_get_option,
         return false;
       }
 
-      return make_map_array(
+      return make_darray(
         s_l_onoff, linger_val.l_onoff,
         s_l_linger, linger_val.l_linger
       );
@@ -711,7 +711,7 @@ Variant HHVM_FUNCTION(socket_get_option,
         SOCKET_ERROR(sock, "unable to retrieve socket option", errno);
         return false;
       }
-      return make_map_array(
+      return make_darray(
         s_sec,  (int)tv.tv_sec,
         s_usec, (int)tv.tv_usec
       );

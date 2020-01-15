@@ -448,7 +448,7 @@ const StaticString
   s_wrapper_data("wrapper_data");
 
 Array File::getMetaData() {
-  return make_map_array(
+  return make_darray(
     s_wrapper_type, getWrapperType(),
     s_stream_type,  getStreamType(),
     s_mode,         String(m_data->m_mode),

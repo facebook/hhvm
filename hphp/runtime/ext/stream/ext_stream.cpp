@@ -495,7 +495,7 @@ bool HHVM_FUNCTION(stream_set_timeout,
   if (isa<Socket>(stream)) {
     return HHVM_FN(socket_set_option)
       (stream, SOL_SOCKET, SO_RCVTIMEO,
-       make_map_array(s_sec, seconds, s_usec, microseconds));
+       make_darray(s_sec, seconds, s_usec, microseconds));
   } else if (isa<File>(stream)) {
     return cast<File>(stream)->setTimeout(
       (uint64_t)seconds * 1000000 + microseconds);

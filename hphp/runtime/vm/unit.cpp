@@ -2053,7 +2053,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
 namespace {
 
 Array getClassesWithAttrInfo(Attr attrs, bool inverse = false) {
-  Array a = Array::Create();
+  Array a = Array::CreateVArray();
   NamedEntity::foreach_cached_class([&](Class* c) {
     if ((c->attrs() & attrs) ? !inverse : inverse) {
       if (c->isBuiltin()) {
@@ -2070,7 +2070,7 @@ template<bool system>
 Array getFunctions() {
   // Return an array of all defined functions.  This method is used
   // to support get_defined_functions().
-  Array a = Array::Create();
+  Array a = Array::CreateVArray();
   NamedEntity::foreach_cached_func([&](Func* func) {
     if ((system ^ func->isBuiltin()) || func->isGenerated()) return; //continue
     a.append(HHVM_FN(strtolower)(func->nameStr()));

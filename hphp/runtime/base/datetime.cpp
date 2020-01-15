@@ -171,7 +171,7 @@ Array DateTime::ParseAsStrptime(const String& format, const String& date) {
     return Array();
   }
 
-  return make_map_array(
+  return make_darray(
     s_tm_sec,  parsed_time.tm_sec,
     s_tm_min,  parsed_time.tm_min,
     s_tm_hour, parsed_time.tm_hour,
@@ -186,7 +186,7 @@ Array DateTime::ParseAsStrptime(const String& format, const String& date) {
 
 Array DateTime::ParseTime(timelib_time* parsed_time,
                           struct timelib_error_container* error) {
-  Array ret;
+  auto ret = Array::CreateDArray();
   PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_year,      y);
   PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_month,     m);
   PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(s_day,       d);
@@ -236,24 +236,25 @@ Array DateTime::ParseTime(timelib_time* parsed_time,
     }
   }
 
-  {
-    Array element;
-    if (parsed_time->have_relative) {
-      element.set(s_year,   parsed_time->relative.y);
-      element.set(s_month,  parsed_time->relative.m);
-      element.set(s_day,    parsed_time->relative.d);
-      element.set(s_hour,   parsed_time->relative.h);
-      element.set(s_minute, parsed_time->relative.i);
-      element.set(s_second, parsed_time->relative.s);
+  if (parsed_time->have_relative) {
+    auto element = make_darray(
+      s_year,   parsed_time->relative.y,
+      s_month,  parsed_time->relative.m,
+      s_day,    parsed_time->relative.d,
+      s_hour,   parsed_time->relative.h,
+      s_minute, parsed_time->relative.i,
+      s_second, parsed_time->relative.s
+    );
+    if (
 #if defined(TIMELIB_VERSION)
-      if (parsed_time->relative.have_weekday_relative) {
+        parsed_time->relative.have_weekday_relative
 #else
-      if (parsed_time->have_weekday_relative) {
+        parsed_time->have_weekday_relative
 #endif
-        element.set(s_weekday, parsed_time->relative.weekday);
-      }
-      ret.set(s_relative, element);
+    ) {
+      element.set(s_weekday, parsed_time->relative.weekday);
     }
+    ret.set(s_relative, element);
   }
 
   timelib_time_dtor(parsed_time);

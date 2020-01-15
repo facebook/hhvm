@@ -438,7 +438,7 @@ Array ServerStats::EndNetworkProfile() {
   s_profile_network = false;
   Lock lock(s_lock, false);
 
-  Array ret;
+  Array ret = Array::CreateDArray();
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
     auto ss = s_loggers[i];
     Lock loggerLock(ss->m_lock, false);
@@ -446,8 +446,9 @@ Array ServerStats::EndNetworkProfile() {
     IOStatusMap& status = ss->m_ioProfiles;
     for (auto const& iter : status) {
       ret.set(String(iter.first),
-              make_map_array(s_ct, iter.second.count,
-                             s_wt, iter.second.wall_time));
+              make_darray(
+                s_ct, iter.second.count,
+                s_wt, iter.second.wall_time));
     }
     status.clear();
   }

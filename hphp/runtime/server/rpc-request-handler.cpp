@@ -390,7 +390,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         case 1: response = m_context->obDetachContents(); break;
         case 2:
           response = Variant::attach(HHVM_FN(json_encode)(
-            make_map_array(
+            make_dict_array(
               s_output,
               m_context->obDetachContents(),
               s_return,

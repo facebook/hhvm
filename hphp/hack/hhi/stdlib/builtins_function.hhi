@@ -11,7 +11,7 @@
 namespace {
 
 <<__PHPStdLib>>
-function get_defined_functions(): array<string, array<string>>;
+function get_defined_functions(): darray<string, varray<string>>;
 <<__PHPStdLib, __Rx>>
 function function_exists(string $function_name, bool $autoload = true): bool;
 <<__PHPStdLib, __Rx>>

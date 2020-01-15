@@ -60,7 +60,7 @@ function debug_print_backtrace(int $options = 0,
  *   name. Returns NULL if there hasn't been an error yet.
  */
 <<__Native>>
-function error_get_last(): array<string, mixed>;
+function error_get_last(): darray<string, mixed>;
 
 /**
  * Send an error message to the defined error handling routines

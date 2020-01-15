@@ -69,13 +69,13 @@ function function_exists(string $function_name, bool $autoload = true): bool;
 /**
  * Returns an array of all defined functions
  *
- * @return array - Returns a multidimensional array containing a list of
+ * @return darray - Returns a multidimensional array containing a list of
  *   all defined functions, both built-in (internal) and user-defined. The
  *   internal functions will be accessible via $arr["internal"], and the
  *   user defined ones using $arr["user"] (see example below).
  */
 <<__Native>>
-function get_defined_functions(): array;
+function get_defined_functions(): darray;
 
 /**
  * Register a function for execution on shutdown

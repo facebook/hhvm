@@ -86,7 +86,7 @@ class SQLite3 {
    *
    */
   <<__Native>>
-  public static function version(): array;
+  public static function version(): darray;
 
   /**
    * Returns the row ID of the most recent INSERT into the database.

@@ -1025,7 +1025,7 @@ Array HHVM_FUNCTION(proc_get_status,
   }
 #endif
 
-  return make_map_array(
+  return make_darray(
     s_command,  proc->command,
     s_pid, (int)proc->child,
     s_running,  running,

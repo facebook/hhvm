@@ -42,8 +42,8 @@ const StaticString
   s_user("user");
 
 Array HHVM_FUNCTION(get_defined_functions) {
-  return make_map_array(s_internal, Unit::getSystemFunctions(),
-                        s_user, Unit::getUserFunctions());
+  return make_darray(s_internal, Unit::getSystemFunctions(),
+                     s_user, Unit::getUserFunctions());
 }
 
 bool HHVM_FUNCTION(function_exists, const String& function_name,

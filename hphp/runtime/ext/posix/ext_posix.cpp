@@ -193,12 +193,12 @@ static Variant php_posix_group_to_array(group* gr) {
   // Invalid user.
   if (gr == nullptr) return false;
 
-  Array members = Array::Create();
+  auto members = Array::CreateVArray();
   for (int count=0; gr->gr_mem[count] != NULL; count++) {
     members.append(String(gr->gr_mem[count], CopyString));
   }
 
-  return make_map_array(
+  return make_darray(
     s_name, String(gr->gr_name, CopyString),
     s_passwd, String(gr->gr_passwd, CopyString),
     s_members, members,
@@ -239,11 +239,11 @@ Variant HHVM_FUNCTION(posix_getgroups) {
     return false;
   }
 
-  Array ret;
+  VArrayInit ret(result);
   for (int i = 0; i < result; i++) {
     ret.append((int)gidlist[i]);
   }
-  return ret;
+  return ret.toVariant();
 }
 
 Variant HHVM_FUNCTION(posix_getlogin) {
@@ -281,7 +281,7 @@ static Variant php_posix_passwd_to_array(passwd* pw) {
   // Invalid user.
   if (pw == nullptr) return false;
 
-  return make_map_array(
+  return make_darray(
     s_name,   String(pw->pw_name,   CopyString),
     s_passwd, String(pw->pw_passwd, CopyString),
     s_uid,    (int)pw->pw_uid,
@@ -519,7 +519,7 @@ Variant HHVM_FUNCTION(posix_times) {
     return false;
   }
 
-  return make_map_array(
+  return make_darray(
     s_ticks,  (int)ticks,        /* clock ticks */
     s_utime,  (int)t.tms_utime,  /* user time */
     s_stime,  (int)t.tms_stime,  /* system time */
@@ -558,16 +558,16 @@ Variant HHVM_FUNCTION(posix_uname) {
     return false;
   }
 
-  Array ret;
-  ret.set(s_sysname,    String(u.sysname,    CopyString));
-  ret.set(s_nodename,   String(u.nodename,   CopyString));
-  ret.set(s_release,    String(u.release,    CopyString));
-  ret.set(s_version,    String(u.version,    CopyString));
-  ret.set(s_machine,    String(u.machine,    CopyString));
+  return make_darray(
+    s_sysname,      String(u.sysname,    CopyString)
+    , s_nodename,   String(u.nodename,   CopyString)
+    , s_release,    String(u.release,    CopyString)
+    , s_version,    String(u.version,    CopyString)
+    , s_machine,    String(u.machine,    CopyString)
 #if defined(_GNU_SOURCE)
-  ret.set(s_domainname, String(u.domainname, CopyString));
+    , s_domainname, String(u.domainname, CopyString)
 #endif
-  return ret;
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

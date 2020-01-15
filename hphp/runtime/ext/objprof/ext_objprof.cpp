@@ -1237,7 +1237,7 @@ Array HHVM_FUNCTION(thread_memory_stats, void) {
   auto stack_size = get_thread_stack_size();
   auto stack_size_peak = get_thread_stack_peak_size();
 
-  auto stats = make_map_array(
+  auto stats = make_darray(
       s_cpp_stack, Variant(stack_size),
       s_cpp_stack_peak, Variant(stack_size_peak)
   );

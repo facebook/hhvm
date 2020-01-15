@@ -189,12 +189,14 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
 Array HHVM_FUNCTION(error_get_last) {
   String lastError = g_context->getLastError();
   if (lastError.isNull()) {
-    return Array();
+    return null_array;
   }
-  return make_map_array(s_type, g_context->getLastErrorNumber(),
-                        s_message, g_context->getLastError(),
-                        s_file, g_context->getLastErrorPath(),
-                        s_line, g_context->getLastErrorLine());
+  return make_darray(
+    s_type, g_context->getLastErrorNumber(),
+    s_message, g_context->getLastError(),
+    s_file, g_context->getLastErrorPath(),
+    s_line, g_context->getLastErrorLine()
+  );
 }
 
 bool HHVM_FUNCTION(error_log, const String& message, int message_type /* = 0 */,

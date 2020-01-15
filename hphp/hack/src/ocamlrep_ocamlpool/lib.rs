@@ -147,19 +147,21 @@ pub unsafe fn add_to_ambient_pool<T: OcamlRep>(value: &T) -> usize {
 macro_rules! ocaml_ffi_no_panic_fn {
     (fn $name:ident($($param:ident: $ty:ty),+  $(,)?) -> $ret:ty $code:block) => {
         #[no_mangle]
-        pub extern "C" fn $name ($($param: usize,)*) -> usize {
+        pub unsafe extern "C" fn $name ($($param: usize,)*) -> usize {
+            fn inner($($param: $ty,)*) -> $ret { $code }
             use $crate::OcamlRep;
-            $(let $param = unsafe { <$ty>::from_ocaml($param).unwrap() };)*
-            let result: $ret = $code;
-            unsafe { $crate::to_ocaml(&result) }
+            $(let $param = <$ty>::from_ocaml($param).unwrap();)*
+            let result = inner($($param,)*);
+            $crate::to_ocaml(&result)
         }
     };
 
     (fn $name:ident() -> $ret:ty $code:block) => {
         #[no_mangle]
-        pub extern "C" fn $name (_unit: usize) -> usize {
-            let result: $ret = $code;
-            unsafe { $crate::to_ocaml(&result) }
+        pub unsafe extern "C" fn $name (_unit: usize) -> usize {
+            fn inner() -> $ret { $code }
+            let result = inner();
+            $crate::to_ocaml(&result)
         }
     };
 
@@ -188,22 +190,24 @@ macro_rules! ocaml_ffi_no_panic {
 macro_rules! ocaml_ffi_fn {
     (fn $name:ident($($param:ident: $ty:ty),+  $(,)?) -> $ret:ty $code:block) => {
         #[no_mangle]
-        pub extern "C" fn $name ($($param: usize,)*) -> usize {
+        pub unsafe extern "C" fn $name ($($param: usize,)*) -> usize {
             $crate::catch_unwind(|| {
+                fn inner($($param: $ty,)*) -> $ret { $code }
                 use $crate::OcamlRep;
-                $(let $param = unsafe { <$ty>::from_ocaml($param).unwrap() };)*
-                let result: $ret = $code;
-                unsafe { $crate::to_ocaml(&result) }
+                $(let $param = <$ty>::from_ocaml($param).unwrap();)*
+                let result = inner($($param,)*);
+                $crate::to_ocaml(&result)
             })
         }
     };
 
     (fn $name:ident() -> $ret:ty $code:block) => {
         #[no_mangle]
-        pub extern "C" fn $name (_unit: usize) -> usize {
+        pub unsafe extern "C" fn $name (_unit: usize) -> usize {
             $crate::catch_unwind(|| {
-                let result: $ret = $code;
-                unsafe { $crate::to_ocaml(&result) }
+                fn inner() -> $ret { $code }
+                let result = inner();
+                $crate::to_ocaml(&result)
             })
         }
     };

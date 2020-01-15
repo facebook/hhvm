@@ -857,6 +857,33 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
   return Type(outer);
 }
 
+namespace {
+
+bool ratArrIsCounted(const RepoAuthType::Array* arr, const Class* ctx) {
+  using E = RepoAuthType::Array::Empty;
+  using T = RepoAuthType::Array::Tag;
+
+  if (arr->emptiness() == E::Maybe) return false;
+
+  switch (arr->tag()) {
+    case T::Packed: {
+      auto const size = arr->size();
+      for (size_t i = 0; i < size; ++i) {
+        if (!(typeFromRAT(arr->packedElem(i), ctx) <= TCounted)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    case T::PackedN:
+      return typeFromRAT(arr->elemType(), ctx) <= TCounted;
+  }
+
+  return false;
+}
+
+}
+
 Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
   using T = RepoAuthType::Tag;
   switch (ty.tag()) {
@@ -900,52 +927,74 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
     case T::Unc:            return TUncounted;
     case T::InitCell:       return TInitCell;
 
-#define X(A, B) \
+#define X(A, B, C)                                                      \
       [&]{                                                              \
-        if (auto const arr = ty.array()) return Type::B(arr);           \
-        else return A;                                                  \
+        if (auto const arr = ty.array()) {                              \
+          if (ratArrIsCounted(arr, ctx)) {                              \
+            return Type::C(arr);                                        \
+          } else {                                                      \
+            return Type::B(arr);                                        \
+          }                                                             \
+        } else {                                                        \
+          return A;                                                     \
+        }                                                               \
       }()
 
-    case T::SArr:           return X(TStaticArr, StaticArray);
-    case T::Arr:            return X(TArr, Array);
-    case T::SVec:           return X(TStaticVec, StaticVec);
-    case T::Vec:            return X(TVec, Vec);
-    case T::SDict:          return X(TStaticDict, StaticDict);
-    case T::Dict:           return X(TDict, Dict);
-    case T::SKeyset:        return X(TStaticKeyset, StaticKeyset);
-    case T::Keyset:         return X(TKeyset, Keyset);
+    case T::SArr:           return X(TStaticArr, StaticArray, StaticArray);
+    case T::Arr:            return X(TArr, Array, CountedArray);
+    case T::SVec:           return X(TStaticVec, StaticVec, StaticVec);
+    case T::Vec:            return X(TVec, Vec, CountedVec);
+    case T::SDict:          return X(TStaticDict, StaticDict, StaticDict);
+    case T::Dict:           return X(TDict, Dict, CountedDict);
+    case T::SKeyset:        return X(TStaticKeyset, StaticKeyset, StaticKeyset);
+    case T::Keyset:         return X(TKeyset, Keyset, Keyset);
 
-    case T::OptSArr:        return X(TStaticArr, StaticArray) | TInitNull;
-    case T::OptArr:         return X(TArr, Array)             | TInitNull;
-    case T::OptSVec:        return X(TStaticVec, StaticVec)   | TInitNull;
-    case T::OptVec:         return X(TVec, Vec)               | TInitNull;
-    case T::OptSDict:       return X(TStaticDict, StaticDict) | TInitNull;
-    case T::OptDict:        return X(TDict, Dict)             | TInitNull;
-    case T::OptSKeyset:     return X(TStaticKeyset, StaticKeyset) | TInitNull;
-    case T::OptKeyset:      return X(TKeyset, Keyset)         | TInitNull;
+    case T::OptSArr:        return X(TStaticArr, StaticArray, StaticArray)
+                                   | TInitNull;
+    case T::OptArr:         return X(TArr, Array, CountedArray)
+                                   | TInitNull;
+    case T::OptSVec:        return X(TStaticVec, StaticVec, StaticVec)
+                                   | TInitNull;
+    case T::OptVec:         return X(TVec, Vec, CountedVec)
+                                   | TInitNull;
+    case T::OptSDict:       return X(TStaticDict, StaticDict, StaticDict)
+                                   | TInitNull;
+    case T::OptDict:        return X(TDict, Dict, CountedDict)
+                                   | TInitNull;
+    case T::OptSKeyset:     return X(TStaticKeyset, StaticKeyset, StaticKeyset)
+                                   | TInitNull;
+    case T::OptKeyset:      return X(TKeyset, Keyset, Keyset)
+                                   | TInitNull;
 #undef X
 
-#define X(A, B)                                                         \
+#define X(A, B, C)                                                      \
       [&]{                                                              \
-        if (auto const arr = ty.array()) return Type::B(A, arr);        \
-        else return Type::B(A);                                         \
+        if (auto const arr = ty.array()) {                              \
+          if (ratArrIsCounted(arr, ctx)) {                              \
+            return Type::C(A, arr);                                     \
+          } else {                                                      \
+            return Type::B(A, arr);                                     \
+          }                                                             \
+        } else {                                                        \
+          return Type::B(A);                                            \
+        }                                                               \
       }()
 
-    case T::SVArr:          return X(ArrayData::kPackedKind, StaticArray);
-    case T::VArr:           return X(ArrayData::kPackedKind, Array);
+    case T::SVArr:   return X(ArrayData::kPackedKind, StaticArray, StaticArray);
+    case T::VArr:    return X(ArrayData::kPackedKind, Array, CountedArray);
 
-    case T::OptSVArr:       return X(ArrayData::kPackedKind, StaticArray)
-                                   | TInitNull;
-    case T::OptVArr:        return X(ArrayData::kPackedKind, Array)
-                                   | TInitNull;
+    case T::OptSVArr:return X(ArrayData::kPackedKind, StaticArray, StaticArray)
+                            | TInitNull;
+    case T::OptVArr: return X(ArrayData::kPackedKind, Array, CountedArray)
+                            | TInitNull;
 
-    case T::SDArr:          return X(ArrayData::kMixedKind, StaticArray);
-    case T::DArr:           return X(ArrayData::kMixedKind, Array);
+    case T::SDArr:   return X(ArrayData::kMixedKind, StaticArray, StaticArray);
+    case T::DArr:    return X(ArrayData::kMixedKind, Array, CountedArray);
 
-    case T::OptSDArr:       return X(ArrayData::kMixedKind, StaticArray)
-                                   | TInitNull;
-    case T::OptDArr:        return X(ArrayData::kMixedKind, Array)
-                                   | TInitNull;
+    case T::OptSDArr:return X(ArrayData::kMixedKind, StaticArray, StaticArray)
+                            | TInitNull;
+    case T::OptDArr: return X(ArrayData::kMixedKind, Array, CountedArray)
+                            | TInitNull;
 #undef X
 
     case T::SubObj:

@@ -713,6 +713,14 @@ public:
   static Type StaticKeyset(const RepoAuthType::Array*);
 
   /*
+   * Return a specialized TCountedArr/TCountedVec/TCountedDict.
+   */
+  static Type CountedArray(ArrayData::ArrayKind, const RepoAuthType::Array*);
+  static Type CountedArray(const RepoAuthType::Array*);
+  static Type CountedVec(const RepoAuthType::Array*);
+  static Type CountedDict(const RepoAuthType::Array*);
+
+  /*
    * Return a specialized TObj.
    */
   static Type SubObj(const Class* cls);

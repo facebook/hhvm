@@ -466,6 +466,26 @@ inline Type Type::StaticKeyset(const RepoAuthType::Array* rat) {
   return Type(TStaticKeyset, ArraySpec(rat));
 }
 
+inline Type Type::CountedArray(const RepoAuthType::Array* rat) {
+  return Type(TCountedArr, ArraySpec(rat));
+}
+
+inline Type Type::CountedArray(ArrayData::ArrayKind kind,
+                              const RepoAuthType::Array* rat) {
+  assertx(kind != ArrayData::kVecKind &&
+          kind != ArrayData::kDictKind &&
+          kind != ArrayData::kKeysetKind);
+  return Type(TCountedArr, ArraySpec(kind, rat));
+}
+
+inline Type Type::CountedVec(const RepoAuthType::Array* rat) {
+  return Type(TCountedVec, ArraySpec(rat));
+}
+
+inline Type Type::CountedDict(const RepoAuthType::Array* rat) {
+  return Type(TCountedDict, ArraySpec(rat));
+}
+
 inline Type Type::SubObj(const Class* cls) {
   if (cls->attrs() & AttrNoOverride) return ExactObj(cls);
   return Type(TObj, ClassSpec(cls, ClassSpec::SubTag{}));

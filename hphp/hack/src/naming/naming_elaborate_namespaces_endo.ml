@@ -350,6 +350,17 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let sido1 = Option.map ~f:(elaborate_type_name env) sido1 in
       (sido1, pstr, sido2, visl)
 
+    method! on_xhp_child env child =
+      if in_codegen env then
+        super#on_xhp_child env child
+      else
+        match child with
+        | ChildName ((_, name) as sid)
+          when (not @@ Naming_special_names.XHP.is_reserved name)
+               && (not @@ Naming_special_names.XHP.is_xhp_category name) ->
+          ChildName (elaborate_type_name env sid)
+        | _ -> super#on_xhp_child env child
+
     method! on_program (env : env) (p : ('a, 'b, 'c, 'd) Aast.program) =
       let aux (env, defs) def =
         match def with

@@ -758,3 +758,15 @@ end
 module PocketUniverses = struct
   let members = "Members"
 end
+
+module XHP = struct
+  let pcdata = "pcdata"
+
+  let any = "any"
+
+  let empty = "empty"
+
+  let is_reserved name = name = pcdata || name = any || name = empty
+
+  let is_xhp_category name = String_utils.string_starts_with name "%"
+end

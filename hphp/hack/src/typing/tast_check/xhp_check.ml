@@ -27,4 +27,16 @@ let handler =
       | (_, Xml (_, _, tel)) ->
         List.iter tel ~f:(fun ((pos, ty), _) -> check_xhp_children env pos ty)
       | _ -> ()
+
+    method! at_xhp_child env child =
+      match child with
+      | ChildName (p, name)
+        when (not @@ Naming_special_names.XHP.is_reserved name)
+             && (not @@ Naming_special_names.XHP.is_xhp_category name) ->
+        begin
+          match Env.get_class env name with
+          | Some _ -> ()
+          | None -> Errors.unbound_name p name Errors.ClassContext
+        end
+      | _ -> ()
   end

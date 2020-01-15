@@ -1,5 +1,9 @@
 <?hh // strict
 
+class foo {}
+
+class :foo:bar {}
+
 class :xhpchildren {
   children (xhp)*;
 }

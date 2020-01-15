@@ -6,6 +6,10 @@ xhp class nochildren {
   children empty;
 }
 
+xhp class foo {}
+
+xhp class foo:bar {}
+
 xhp class xhpchildren {
   children (xhp)*;
 }

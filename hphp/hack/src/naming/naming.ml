@@ -1277,9 +1277,9 @@ module Make (GetLocals : GetLocals) = struct
       N.c_enum = enum;
       N.c_doc_comment = c.Aast.c_doc_comment;
       N.c_pu_enums = pu_enums;
+      N.c_xhp_children = c.Aast.c_xhp_children;
       (* Naming and typechecking shouldn't use these fields *)
       N.c_attributes = [];
-      N.c_xhp_children = [];
       N.c_xhp_attrs = [];
     }
 

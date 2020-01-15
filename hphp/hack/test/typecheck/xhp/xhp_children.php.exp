@@ -1,0 +1,8 @@
+File "xhp_children.php", line 15, characters 5-9:
+Unbound name: :body (an object type) (Naming[2049])
+File "xhp_children.php", line 18, characters 5-10:
+Unbound name: banana (an object type) (Naming[2049])
+File "xhp_children.php", line 21, characters 6-11:
+Unbound name: PCDATA (an object type) (Naming[2049])
+File "xhp_children.php", line 21, characters 15-23:
+Unbound name: Undefined (an object type) (Naming[2049])

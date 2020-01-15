@@ -62,8 +62,6 @@ pub struct KindSet(u32);
 
 pub const VISIBILITIES: KindSet = KindSet(PRIVATE.0 | PUBLIC.0 | PROTECTED.0);
 
-pub const USE_AS_VISIBILITY: KindSet = KindSet(PRIVATE.0 | PUBLIC.0 | PROTECTED.0 | FINAL.0);
-
 impl KindSet {
     pub fn new() -> Self {
         KindSet(0)

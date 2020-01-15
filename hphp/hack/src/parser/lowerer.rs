@@ -342,10 +342,6 @@ pub enum Error {
 
 type Result<T> = std::result::Result<T, Error>;
 
-pub struct LoweredAst {
-    pub aast: ast::Program,
-}
-
 use parser_core_types::syntax::SyntaxVariant::*;
 
 pub trait Lowerer<'a, T, V>
@@ -461,7 +457,7 @@ where
         let text = Self::text(node, env);
         Self::lowering_error(env, &pos, &text, expecting);
         if let Some(x) = fallback {
-            if env.fail_open {
+            if env.fail_open() {
                 return Ok(x);
             }
         }
@@ -1282,7 +1278,7 @@ where
             let node = node.as_ref().unwrap_or(&nodes[i]);
 
             if Self::token_kind(node) == Some(TK::Dollar) && i < last {
-                if let EmbeddedBracedExpression(c) = &nodes[i + 1].syntax {
+                if let EmbeddedBracedExpression(_) = &nodes[i + 1].syntax {
                     Self::raise_parsing_error(
                         &nodes[i + 1],
                         env,
@@ -1881,7 +1877,7 @@ where
                             None,
                         )),
                         Some(TK::Dollar) => {
-                            let E(p, expr_) = expr;
+                            let E(_, expr_) = expr;
                             match expr_ {
                                 E_::String(s) | E_::Int(s) | E_::Float(s) => {
                                     if !env.codegen() {
@@ -2452,7 +2448,7 @@ where
                         combine(&mut state)?;
                     }
                 }
-                Token(t) => {
+                Token(_) => {
                     if state.0.is_none() {
                         state.0 = Some(n)
                     } else {
@@ -2636,13 +2632,13 @@ where
         let lifted_awaits = mem::replace(&mut env.lifted_awaits, saved_lifted_awaits);
         let result = result?;
         let awaits = match lifted_awaits {
-            Some(la) => Self::process_lifted_awaits(la, env)?,
+            Some(la) => Self::process_lifted_awaits(la)?,
             None => Self::failwith("lifted awaits should not be None")?,
         };
         Ok((awaits, result))
     }
 
-    fn process_lifted_awaits(mut awaits: LiftedAwaits, env: &Env) -> Result<LiftedAwaitExprs> {
+    fn process_lifted_awaits(mut awaits: LiftedAwaits) -> Result<LiftedAwaitExprs> {
         for await_ in awaits.awaits.iter() {
             if (await_.1).0.is_none() {
                 return Self::failwith("none pos in lifted awaits");
@@ -2703,7 +2699,7 @@ where
         };
         if let Some(lifted_awaits) = lifted_awaits {
             if !lifted_awaits.awaits.is_empty() {
-                let awaits = Self::process_lifted_awaits(lifted_awaits, env)?;
+                let awaits = Self::process_lifted_awaits(lifted_awaits)?;
                 let pos = match pos {
                     Either::Left(n) => Self::p_pos(n, env),
                     Either::Right(p) => p.clone(),
@@ -4451,7 +4447,7 @@ where
         let r = Self::p_class_elt_(class, node, env);
         match r {
             // match ocaml behavior, don't throw if missing syntax when fail_open is true
-            Err(Error::MissingSyntax { .. }) if env.fail_open => Ok(()),
+            Err(Error::MissingSyntax { .. }) if env.fail_open() => Ok(()),
             _ => r,
         }
     }
@@ -4911,15 +4907,6 @@ where
         }
     }
 
-    fn partial_should_check_error(mode: file_info::Mode, code: usize) -> bool {
-        use file_info::Mode::*;
-        match mode {
-            Mexperimental | Mstrict => true,
-            Mdecl | Mphp => false,
-            Mpartial => false, // TODO: Error.is_strict_code code
-        }
-    }
-
     fn post_process(env: &mut Env, program: ast::Program, acc: &mut ast::Program) {
         use aast::{Def, Def::*, Stmt_::*};
         let mut saw_ns: Option<(ast::Sid, ast::Program)> = None;
@@ -4957,9 +4944,17 @@ where
                         false
                     }
                     _ => {
+                        use file_info::Mode::*;
+                        let mode = env.file_mode();
                         env.keep_errors
                             && env.is_typechecker()
-                            && Self::partial_should_check_error(env.file_mode(), 1002)
+                            && (mode == Mexperimental
+                                || mode == Mstrict
+                                || (mode == Mpartial
+                                    && env
+                                        .parser_options
+                                        .error_codes_treated_strictly
+                                        .contains(&1002)))
                     }
                 };
                 if raise_error {

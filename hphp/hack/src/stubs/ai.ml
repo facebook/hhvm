@@ -7,6 +7,8 @@
  *
  *)
 
+let magic_builtins = [||]
+
 let do_ _ _ _ _ = ()
 
 let go _ _ _ _ _ _ = Errors.empty

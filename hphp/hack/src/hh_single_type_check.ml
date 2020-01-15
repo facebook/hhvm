@@ -1184,7 +1184,26 @@ let handle_mode
   in
   let iter_over_files f : unit = List.iter filenames f in
   match mode with
-  | Ai _ -> ()
+  | Ai ai_options ->
+    if parse_errors <> [] then
+      List.iter ~f:(print_error error_format) parse_errors
+    else
+      let to_check =
+        Relative_path.Map.filter files_info ~f:(fun _p i ->
+            let open FileInfo in
+            match i.file_mode with
+            | None
+            | Some Mstrict ->
+              true
+            | _ -> false)
+      in
+      let errors =
+        check_file ~verbosity tcopt [] to_check error_format max_errors
+      in
+      if errors <> [] then
+        List.iter ~f:(print_error error_format) errors
+      else
+        Ai.do_ Typing_check_utils.type_file files_info ai_options tcopt
   | Autocomplete
   | Autocomplete_manually_invoked ->
     let path = expect_single_file () in
@@ -1725,9 +1744,14 @@ let decl_and_run_mode
   let builtins =
     if no_builtins then
       Relative_path.Map.empty
-    else (
+    else
       (* Note that the regular `.hhi` files have already been written to disk
       with `Hhi.get_root ()` *)
+      let magic_builtins =
+        match mode with
+        | Ai _ -> Array.append magic_builtins Ai.magic_builtins
+        | _ -> magic_builtins
+      in
       Array.iter magic_builtins ~f:(fun (file_name, file_contents) ->
           let file_path = Path.concat hhi_root file_name in
           let file = Path.to_string file_path in
@@ -1746,7 +1770,6 @@ let decl_and_run_mode
         end
         Relative_path.Map.empty
         (Array.append magic_builtins hhi_builtins)
-    )
   in
   let files = List.map ~f:(Relative_path.create Relative_path.Dummy) files in
   let files_contents =
@@ -1819,8 +1842,7 @@ let decl_and_run_mode
     sienv
     ~verbosity
 
-let main_hack ({ files; mode; tcopt; _ } as opts) (sienv : SearchUtils.si_env) :
-    unit =
+let main_hack ({ tcopt; _ } as opts) (sienv : SearchUtils.si_env) : unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1 (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init_fake ();
@@ -1835,22 +1857,8 @@ let main_hack ({ files; mode; tcopt; _ } as opts) (sienv : SearchUtils.si_env) :
       Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
       Parser_options_provider.set tcopt;
       Global_naming_options.set tcopt;
-      match mode with
-      | Ai ai_options ->
-        begin
-          match files with
-          | [filename] ->
-            let filecontents =
-              filename
-              |> Relative_path.create Relative_path.Dummy
-              |> Multifile.file_to_files
-            in
-            Ai.do_ Typing_check_utils.type_file filecontents ai_options tcopt
-          | _ -> die "Ai mode does not support multiple files"
-        end
-      | _ ->
-        decl_and_run_mode opts tcopt hhi_root sienv;
-        TypingLogger.flush_buffers ())
+      decl_and_run_mode opts tcopt hhi_root sienv;
+      TypingLogger.flush_buffers ())
 
 (* command line driver *)
 let () =

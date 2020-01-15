@@ -5483,109 +5483,121 @@ and dispatch_call
       tel
       typed_unpack_element
       ty
-  | PU_identifier ((cpos, cid), ((_, enum) as enum'), ((_, case) as case')) ->
+  | PU_identifier ((cpos, cid), ((epos, enum) as enum'), ((_, case) as case'))
+    ->
     let (env, tal, te1, ty1) =
       static_class_id ~check_constraints:false cpos env [] cid
     in
-    let (env, fty) =
-      let (env, ety_env, et) =
-        match class_get_pu ~from_class:cid env ty1 enum with
-        | (_env, None) ->
-          failwithf "TODO(T36532263): class_get_pu: %s not found" enum ()
-        | (env, Some (ety_env, et)) -> (env, ety_env, et)
-      in
-      let make_fty params ft_ret =
-        let len = List.length params in
-        {
-          ft_is_coroutine = false;
-          ft_arity = Fstandard (len, len);
-          ft_tparams = ([], FTKtparams);
-          ft_where_constraints = [];
-          ft_params =
-            List.map params ~f:(fun et_type ->
-                {
-                  fp_pos = cpos;
-                  fp_name = None;
-                  fp_type = { et_enforced = false; et_type };
-                  fp_kind = FPnormal;
-                  fp_accept_disposable = true;
-                  fp_mutability = None;
-                  fp_rx_annotation = None;
-                });
-          ft_ret = { et_enforced = false; et_type = ft_ret };
-          ft_reactive = Nonreactive;
-          ft_return_disposable = false;
-          (* mutability of the receiver *)
-          ft_mutability = None;
-          ft_returns_mutable = false;
-          ft_returns_void_to_rx = false;
-          ft_fun_kind = Ast_defs.FSync;
-        }
-      in
-      let reason = Reason.Rwitness cpos in
-      let (env, fty) =
-        let pu_type = (reason, Tpu (ty1, enum')) in
-        if String.equal SN.PocketUniverses.members case then
-          ( env,
-            make_fty
-              []
-              (reason, Tclass ((fst et.tpu_name, "\\vec"), Nonexact, [pu_type]))
-          )
-        else
-          let case_ty =
-            match SMap.find_opt case et.tpu_case_values with
-            | Some (_, case) -> case
-            | None ->
-              failwithf
-                "TODO(T36532263): PU_identifier: %s has no case value %s"
-                enum
-                case
-                ()
+    if Typing_utils.is_any env ty1 then
+      ( (* An error message is already printed by the Naming phase. Let's avoid
+         * duplication. *)
+        env,
+        Tast.make_typed_expr cpos ty1 Aast.Any,
+        ty1 )
+    else (
+      match class_get_pu ~from_class:cid env ty1 enum with
+      | (env, None) ->
+        let () = Errors.unbound_name_typing epos enum in
+        let tany = (Reason.Rwitness epos, Typing_defs.make_tany ()) in
+        (env, Tast.make_typed_expr epos tany Aast.Any, tany)
+      | (env, Some (ety_env, et)) ->
+        let (env, fty) =
+          let make_fty params ft_ret =
+            let len = List.length params in
+            {
+              ft_is_coroutine = false;
+              ft_arity = Fstandard (len, len);
+              ft_tparams = ([], FTKtparams);
+              ft_where_constraints = [];
+              ft_params =
+                List.map params ~f:(fun et_type ->
+                    {
+                      fp_pos = cpos;
+                      fp_name = None;
+                      fp_type = { et_enforced = false; et_type };
+                      fp_kind = FPnormal;
+                      fp_accept_disposable = true;
+                      fp_mutability = None;
+                      fp_rx_annotation = None;
+                    });
+              ft_ret = { et_enforced = false; et_type = ft_ret };
+              ft_reactive = Nonreactive;
+              ft_return_disposable = false;
+              (* mutability of the receiver *)
+              ft_mutability = None;
+              ft_returns_mutable = false;
+              ft_returns_void_to_rx = false;
+              ft_fun_kind = Ast_defs.FSync;
+            }
           in
-          (* Type variable to type the parameter of the Pu expression call.
-             We use a variable in case there is some dependency *)
-          (* let (env, fresh_ty) = Env.fresh_invariant_type_var env cpos in *)
-          let (env, fresh_ty) = Env.fresh_type env cpos in
-          (* It's original upper bound is the PU enum itself *)
-          let env =
-            SubType.sub_type
-              env
-              fresh_ty
-              (reason, Tpu (ty1, enum'))
-              Errors.pocket_universes_typing
+          let reason = Reason.Rwitness cpos in
+          let (env, fty) =
+            let pu_type = (reason, Tpu (ty1, enum')) in
+            if String.equal SN.PocketUniverses.members case then
+              ( env,
+                make_fty
+                  []
+                  ( reason,
+                    Tclass ((fst et.tpu_name, "\\vec"), Nonexact, [pu_type]) )
+              )
+            else
+              let case_ty =
+                match SMap.find_opt case et.tpu_case_values with
+                | Some (_, case) -> case
+                | None ->
+                  failwithf
+                    "TODO(T36532263): PU_identifier: %s has no case value %s"
+                    enum
+                    case
+                    ()
+              in
+              (* Type variable to type the parameter of the Pu expression call.
+                 We use a variable in case there is some dependency *)
+              (* let (env, fresh_ty) = Env.fresh_invariant_type_var env cpos in *)
+              let (env, fresh_ty) = Env.fresh_type env cpos in
+              (* It's original upper bound is the PU enum itself *)
+              let env =
+                SubType.sub_type
+                  env
+                  fresh_ty
+                  (reason, Tpu (ty1, enum'))
+                  Errors.pocket_universes_typing
+              in
+              let substs =
+                let f (id, _reified) =
+                  (reason, Tpu_type_access (ty1, enum', fresh_ty, id))
+                in
+                SMap.map f et.tpu_case_types
+              in
+              let ety_env =
+                let combine _ va vb =
+                  if Option.is_some vb then
+                    vb
+                  else
+                    va
+                in
+                let substs = SMap.merge combine ety_env.substs substs in
+                { ety_env with substs }
+              in
+              let (env, case_ty) = Phase.localize ~ety_env env case_ty in
+              (env, make_fty [fresh_ty] case_ty)
           in
-          let substs =
-            let f (id, _reified) =
-              (reason, Tpu_type_access (ty1, enum', fresh_ty, id))
-            in
-            SMap.map f et.tpu_case_types
-          in
-          let ety_env =
-            let combine _ va vb =
-              if Option.is_some vb then
-                vb
-              else
-                va
-            in
-            let substs = SMap.merge combine ety_env.substs substs in
-            { ety_env with substs }
-          in
-          let (env, case_ty) = Phase.localize ~ety_env env case_ty in
-          (env, make_fty [fresh_ty] case_ty)
-      in
-      (env, (Reason.Rwitness p, Tfun fty))
-    in
-    let (env, (tel, tuel, ty)) = call ~expected p env fty el unpacked_element in
-    let (a, b, c) =
-      make_call
-        env
-        (Tast.make_typed_expr fpos fty (Aast.PU_identifier (te1, enum', case')))
-        tal
-        tel
-        tuel
-        ty
-    in
-    (a, b, c)
+          (env, (Reason.Rwitness p, Tfun fty))
+        in
+        let (env, (tel, tuel, ty)) =
+          call ~expected p env fty el unpacked_element
+        in
+        make_call
+          env
+          (Tast.make_typed_expr
+             fpos
+             fty
+             (Aast.PU_identifier (te1, enum', case')))
+          tal
+          tel
+          tuel
+          ty
+    )
   | _ ->
     let (env, te, fty) = expr env e in
     let (env, fty) =

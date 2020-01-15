@@ -84,9 +84,10 @@ let reduce_pu_type_access env reason base enum member name =
   (* TODO(T36532263) deal with unions of Tatoms ! *)
   | _ ->
     let err () =
-      Errors.pu_typing_not_supported
-        (Reason.to_pos reason)
-        (Typing_print.debug env member)
+      if Typing_utils.is_any env base then
+        ()
+      else
+        Errors.pu_typing_not_supported (Reason.to_pos reason)
     in
     PTA_Unsupported (env, err)
 

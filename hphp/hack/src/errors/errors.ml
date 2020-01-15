@@ -4109,12 +4109,11 @@ let pu_typing pos kind msg =
     pos
     (sprintf "Unexpected Pocket Universes %s %s during typing." kind msg)
 
-let pu_typing_not_supported pos typ =
-  let typ = strip_ns typ in
+let pu_typing_not_supported pos =
   add
     (Typing.err_code Typing.PocketUniversesTyping)
     pos
-    (sprintf "Unexpected type %s instead of a Pocket Universes member." typ)
+    "Unsupported Pocket Universes member."
 
 let php_lambda_disallowed pos =
   add

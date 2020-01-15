@@ -4,8 +4,10 @@
 // and that all of the functions in this file are in the stack
 function verifyTestRun($samples, $required, $optional): void {
   echo "Verifying PHP Stack\n";
-  $required = array_fill_keys($required, true);
-  $required += array_fill_keys($optional, false);
+  $required = dict(array_fill_keys($required, true));
+  foreach ($optional as $opt) {
+    $required[$opt] ??= false;
+  }
   foreach ($samples as $sample) {
     $stack = $sample['stack'];
     if (!$stack) {

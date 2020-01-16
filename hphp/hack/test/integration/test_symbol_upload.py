@@ -13,7 +13,7 @@ from hh_paths import hh_server
 
 class SymbolUploadTests(test_case.TestCase[CommonTestDriver]):
     write_repo: ClassVar[str] = "default_symbol_info_test_dir"
-    valid_keys: ClassVar[Dict[str, List[str]]] = {}
+    valid_keys: ClassVar[Dict[str, List[object]]] = {}
 
     @classmethod
     def get_test_driver(cls) -> CommonTestDriver:
@@ -45,98 +45,54 @@ max_workers = 2
             cls.write_repo = os.path.join(test_driver.repo_dir, "symbol_info_test_dir")
 
         # hardcoded map of valid keys
-        # pyre-fixme[8]: Attribute has type `Dict[str, List[str]]`; used as
-        #  `Dict[str, List[Type[Union[int, str]]]]`.
         cls.valid_keys = {
-            "hackfull.symbolOccurrence.1": [
-                "name_lowercase",
-                "type",
-                "position",
-                "definition_pos",
-            ],
-            "hackfull.symbol.1": ["name_lowercase", "position", "declaration"],
-            "hackfull.functionParameter.1": ["name", "type"],
-            "hackfull.filename.1": ["filename", "filehash_id"],
-            "hackfull.functionDeclaration.1": ["name", "params", "return_type"],
-            "hackfull.classDeclaration.1": ["name", "is_abstract", "is_final"],
-            "hackfull.typedefDeclaration.1": ["name", "is_visible"],
-            "hackfull.gconstDeclaration.1": ["name", "type"],
-            "type": ["key"],
+            "hack.ClassDeclaration.1": ["name", "is_abstract", "is_final"],
+            "hack.DeclarationLocation.1": ["declaration", "file", "span"],
+            "hack.FileXRefs.1": ["file", "xrefs"],
             "name": ["key"],
-            "declaration": ["class_", "typedef_", "gconst_", "function_"],
-            "position": ["filename", "line_start", "line_end", "char_end"],
-            "definition_pos": ["filename", "line_start", "line_end", "char_end"],
-            "filename": ["filename", "filehash_id", str],
-            "filehash_id": [str],
-            "name_lowercase": [str],
-            "class_": ["id", "key"],
-            "typedef_": ["id", "key"],
-            "gconst_": ["id", "key"],
-            "function_": ["id", "key"],
+            "declaration": ["class_"],
             "id": [int],
-            "key": [int, str],
+            "key": [str],
         }
 
-    def verify_all_json(self) -> bool:
+    def verify_all_json(self) -> None:
         for filename in os.listdir(self.write_repo):
             if not filename.endswith(".json"):  # not a json for some reason - ignore
                 continue
 
             with open(os.path.join(self.write_repo, filename)) as file:
                 json_obj = json.load(file)
-                if not self.verify_json_array(json_obj):
-                    print("Error with file: {}".format(filename))
-                    return False
+                self.verify_json_array(json_obj)
 
-        return True
-
-    def verify_json_array(self, json_array: List[utils.Json]) -> bool:
+    def verify_json_array(self, json_array: List[utils.Json]) -> None:
         # starts off as json array
         all_preds = [
-            "hackfull.symbolOccurrence.1",
-            "hackfull.symbol.1",
-            "hackfull.functionParameter.1",
-            "hackfull.filename.1",
-            "hackfull.functionDeclaration.1",
-            "hackfull.classDeclaration.1",
-            "hackfull.typedefDeclaration.1",
-            "hackfull.gconstDeclaration.1",
+            "hack.ClassDeclaration.1",
+            "hack.DeclarationLocation.1",
+            "hack.FileXRefs.1",
         ]
 
         for json_obj in json_array:
-            if "predicate" not in json_obj or json_obj["predicate"] not in all_preds:
-                print("Predicate error: {}".format(json_obj["predicate"]))
-                return False
+            self.assertIn("predicate", json_obj, "Object is predicate")
+            self.assertIn(json_obj["predicate"], all_preds, "Predicate is valid")
 
             valid_keys = self.valid_keys[json_obj["predicate"]]
             for json_fact in json_obj["facts"]:
-                if self.verify_json(json_fact, valid_keys):
-                    return False
+                self.verify_json(json_fact, valid_keys)
 
-        return True
-
-    def verify_json(self, json_obj: Dict[str, Any], valid_keys: List[str]) -> bool:
+    def verify_json(self, json_obj: Dict[str, Any], valid_keys: List[object]) -> None:
         for key, element in json_obj.items():
             # if element is not an object, just check that type(element)
-            #   in valid_keys[key]
-            if type(element) in self.valid_keys[key]:
-                # must be a string or int as an element, no need to recurse
+            # in valid_keys[key]
+            if key in self.valid_keys and type(element) in self.valid_keys[key]:
                 continue
 
-            if key not in valid_keys:
-                return False
-
-            next_valid_keys = self.valid_keys[key]
             if key == "key":
-                # if didn't pass the above if, must be an object with any valid key
-                next_valid_keys = self.valid_keys.keys()
-
-            # pyre-fixme[6]: Expected `List[str]` for 2nd param but got
-            #  `Union[List[str], KeysView[str]]`.
-            if not self.verify_json(element, next_valid_keys):
-                return False
-
-        return True
+                self.verify_json(element, valid_keys)
+            else:
+                self.assertIn(key, valid_keys, "Object key is valid")
+                if key in self.valid_keys:
+                    self.verify_json(element, self.valid_keys[key])
 
     def start_hh_server(
         self,
@@ -160,4 +116,4 @@ max_workers = 2
         args: Optional[List[str]] = None
         args = ["--write-symbol-info", self.write_repo]
         self.start_hh_server(args=args)
-        assert self.verify_all_json()
+        self.verify_all_json()

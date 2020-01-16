@@ -4629,7 +4629,10 @@ where
                     Some(TK::XHPClassName) => true,
                     _ => false,
                 };
-                let has_xhp_keyword = kinds.has(modifier::XHP);
+                let has_xhp_keyword = match Self::token_kind(&c.classish_xhp) {
+                    Some(TK::XHP) => true,
+                    _ => false,
+                };
                 let name = Self::pos_name(&c.classish_name, env)?;
                 *env.cls_reified_generics() = HashSet::new();
                 let tparams = ast::ClassTparams {

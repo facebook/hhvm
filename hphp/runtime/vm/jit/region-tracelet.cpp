@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
 #include "hphp/runtime/vm/jit/inlining-decider.h"
@@ -434,21 +433,10 @@ RegionDescPtr form_region(Env& env) {
 
   irgen::gen(env.irgs, EndGuards);
 
-  int32_t maxBCInstrs = env.numBCInstrs;
   for (bool firstInst = true; true; firstInst = false) {
     assertx(env.numBCInstrs >= 0);
     if (env.numBCInstrs == 0) {
       FTRACE(1, "selectTracelet: breaking region due to size limit\n");
-      if (!env.inlining) {
-        logLowPriPerfWarning(
-          "selectTracelet",
-          [&](StructuredLogEntry& cols) {
-            cols.setInt("maxBCInstrSize", maxBCInstrs);
-            auto sd = env.region->start().func()->fullName();
-            cols.setStr("funcName", sd->data());
-          }
-        );
-      }
       break;
     }
 

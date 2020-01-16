@@ -11,7 +11,7 @@ open Core_kernel
 open ServerCommandTypes.Method_jumps
 open Typing_defs
 module Reason = Typing_reason
-module TLazyHeap = Decl_provider
+module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 
 let string_filter_to_method_jump_filter = function
@@ -28,8 +28,8 @@ let add_ns name =
   else
     "\\" ^ name
 
-let get_overridden_methods origin_class get_or_method dest_class acc =
-  match TLazyHeap.get_class dest_class with
+let get_overridden_methods ctx origin_class get_or_method dest_class acc =
+  match Decl_provider.get_class ctx dest_class with
   | None -> acc
   | Some dest_class ->
     (* Check if each destination method exists in the origin *)
@@ -61,13 +61,13 @@ let get_overridden_methods origin_class get_or_method dest_class acc =
             acc)
 
 let check_if_extends_class_and_find_methods
-    target_class_name get_method target_class_pos class_name acc =
-  let class_ = TLazyHeap.get_class class_name in
+    ctx target_class_name get_method target_class_pos class_name acc =
+  let class_ = Decl_provider.get_class ctx class_name in
   match class_ with
   | None -> acc
   | Some c when Cls.has_ancestor c target_class_name ->
     let acc =
-      get_overridden_methods target_class_name get_method class_name acc
+      get_overridden_methods ctx target_class_name get_method class_name acc
     in
     {
       orig_name = target_class_name;
@@ -81,9 +81,10 @@ let check_if_extends_class_and_find_methods
   | _ -> acc
 
 let filter_extended_classes
-    target_class_name get_method target_class_pos acc classes =
+    ctx target_class_name get_method target_class_pos acc classes =
   List.fold_left classes ~init:acc ~f:(fun acc cid ->
       check_if_extends_class_and_find_methods
+        ctx
         target_class_name
         get_method
         target_class_pos
@@ -91,9 +92,10 @@ let filter_extended_classes
         acc)
 
 let find_extended_classes_in_files
-    target_class_name get_method target_class_pos acc classes =
+    ctx target_class_name get_method target_class_pos acc classes =
   List.fold_left classes ~init:acc ~f:(fun acc classes ->
       filter_extended_classes
+        ctx
         target_class_name
         get_method
         target_class_pos
@@ -101,7 +103,8 @@ let find_extended_classes_in_files
         classes)
 
 let find_extended_classes_in_files_parallel
-    workers target_class_name get_method target_class_pos naming_table files =
+    ctx workers target_class_name get_method target_class_pos naming_table files
+    =
   let classes =
     Relative_path.Set.fold files ~init:[] ~f:(fun fn acc ->
         let { FileInfo.classes; _ } =
@@ -114,6 +117,7 @@ let find_extended_classes_in_files_parallel
       workers
       ~job:
         (find_extended_classes_in_files
+           ctx
            target_class_name
            get_method
            target_class_pos)
@@ -122,6 +126,7 @@ let find_extended_classes_in_files_parallel
       ~next:(MultiWorker.next workers classes)
   else
     find_extended_classes_in_files
+      ctx
       target_class_name
       get_method
       target_class_pos
@@ -129,11 +134,12 @@ let find_extended_classes_in_files_parallel
       classes
 
 (* Find child classes *)
-let get_child_classes_and_methods cls ~filter naming_table workers =
+let get_child_classes_and_methods ctx cls ~filter naming_table workers =
   if filter <> No_filter then
     failwith "Method jump filters not implemented for finding children";
   let files = FindRefsService.get_child_classes_files (Cls.name cls) in
   find_extended_classes_in_files_parallel
+    ctx
     workers
     (Cls.name cls)
     (Cls.get_method cls)
@@ -151,17 +157,18 @@ let class_passes_filter ~filter cls =
   | _ -> false
 
 (* Find ancestor classes *)
-let get_ancestor_classes_and_methods cls ~filter acc =
-  let class_ = TLazyHeap.get_class (Cls.name cls) in
+let get_ancestor_classes_and_methods ctx cls ~filter acc =
+  let class_ = Decl_provider.get_class ctx (Cls.name cls) in
   match class_ with
   | None -> []
   | Some cls ->
     Sequence.fold (Cls.all_ancestor_names cls) ~init:acc ~f:(fun acc k ->
-        let class_ = TLazyHeap.get_class k in
+        let class_ = Decl_provider.get_class ctx k in
         match class_ with
         | Some c when class_passes_filter ~filter c ->
           let acc =
             get_overridden_methods
+              ctx
               (Cls.name cls)
               (Cls.get_method cls)
               (Cls.name c)
@@ -181,13 +188,13 @@ let get_ancestor_classes_and_methods cls ~filter acc =
 (*  Returns a list of the ancestor or child
  *  classes and methods for a given class
  *)
-let get_inheritance class_ ~filter ~find_children naming_table workers =
+let get_inheritance ctx class_ ~filter ~find_children naming_table workers =
   let class_ = add_ns class_ in
-  let class_ = TLazyHeap.get_class class_ in
+  let class_ = Decl_provider.get_class ctx class_ in
   match class_ with
   | None -> []
   | Some c ->
     if find_children then
-      get_child_classes_and_methods c ~filter naming_table workers
+      get_child_classes_and_methods ctx c ~filter naming_table workers
     else
-      get_ancestor_classes_and_methods c ~filter []
+      get_ancestor_classes_and_methods ctx c ~filter []

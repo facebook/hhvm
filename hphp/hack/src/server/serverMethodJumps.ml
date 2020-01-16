@@ -10,8 +10,10 @@
 open ServerEnv
 
 let go class_ find_children env genv oc =
+  let ctx = Provider_context.empty ~tcopt:env.tcopt in
   let res_list =
     MethodJumps.get_inheritance
+      ctx
       class_
       ~find_children
       env.naming_table

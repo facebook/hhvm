@@ -202,15 +202,18 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     (env, result)
   | METHOD_JUMP (class_, filter, find_children) ->
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
     ( env,
       MethodJumps.get_inheritance
+        ctx
         class_
         ~filter
         ~find_children
         env.naming_table
         genv.workers )
   | METHOD_JUMP_BATCH (classes, filter) ->
-    (env, ServerMethodJumpsBatch.go genv.workers classes filter)
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
+    (env, ServerMethodJumpsBatch.go ctx genv.workers classes filter)
   | FIND_REFS find_refs_action ->
     Done_or_retry.(
       let include_defs = false in

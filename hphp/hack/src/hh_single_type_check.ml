@@ -1367,43 +1367,46 @@ let handle_mode
         ignore @@ Typing_check_utils.check_defs tcopt fn fileinfo);
     dump_debug_glean_deps dbg_glean_deps
   | Dump_inheritance ->
-    ServerCommandTypes.Method_jumps.(
-      let naming_table = Naming_table.create files_info in
-      Naming_table.iter naming_table Typing_deps.update_file;
-      Naming_table.iter naming_table (fun fn fileinfo ->
-          if Relative_path.Map.mem builtins fn then
-            ()
-          else (
-            List.iter fileinfo.FileInfo.classes (fun (_p, class_) ->
-                Printf.printf
-                  "Ancestors of %s and their overridden methods:\n"
-                  class_;
-                let ancestors =
-                  MethodJumps.get_inheritance
-                    class_
-                    ~filter:No_filter
-                    ~find_children:false
-                    naming_table
-                    None
-                in
-                ClientMethodJumps.print_readable ancestors ~find_children:false;
-                Printf.printf "\n");
-            Printf.printf "\n";
-            List.iter fileinfo.FileInfo.classes (fun (_p, class_) ->
-                Printf.printf
-                  "Children of %s and the methods they override:\n"
-                  class_;
-                let children =
-                  MethodJumps.get_inheritance
-                    class_
-                    ~filter:No_filter
-                    ~find_children:true
-                    naming_table
-                    None
-                in
-                ClientMethodJumps.print_readable children ~find_children:true;
-                Printf.printf "\n")
-          )))
+    let open ServerCommandTypes.Method_jumps in
+    let ctx = Provider_context.empty ~tcopt in
+    let naming_table = Naming_table.create files_info in
+    Naming_table.iter naming_table Typing_deps.update_file;
+    Naming_table.iter naming_table (fun fn fileinfo ->
+        if Relative_path.Map.mem builtins fn then
+          ()
+        else (
+          List.iter fileinfo.FileInfo.classes (fun (_p, class_) ->
+              Printf.printf
+                "Ancestors of %s and their overridden methods:\n"
+                class_;
+              let ancestors =
+                MethodJumps.get_inheritance
+                  ctx
+                  class_
+                  ~filter:No_filter
+                  ~find_children:false
+                  naming_table
+                  None
+              in
+              ClientMethodJumps.print_readable ancestors ~find_children:false;
+              Printf.printf "\n");
+          Printf.printf "\n";
+          List.iter fileinfo.FileInfo.classes (fun (_p, class_) ->
+              Printf.printf
+                "Children of %s and the methods they override:\n"
+                class_;
+              let children =
+                MethodJumps.get_inheritance
+                  ctx
+                  class_
+                  ~filter:No_filter
+                  ~find_children:true
+                  naming_table
+                  None
+              in
+              ClientMethodJumps.print_readable children ~find_children:true;
+              Printf.printf "\n")
+        ))
   | Identify_symbol (line, column) ->
     let path = expect_single_file () in
     let file_input =

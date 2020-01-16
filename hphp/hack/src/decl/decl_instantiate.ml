@@ -18,22 +18,24 @@ let make_subst tparams tyl = Subst.make_decl tparams tyl
 (* Code dealing with instantiation. *)
 (*****************************************************************************)
 
-let rec instantiate subst ((r, ty) : decl_ty) =
+let rec instantiate subst (ty : decl_ty) =
   (* PERF: If subst is empty then instantiation is a no-op. We can save a
    * significant amount of CPU by avoiding recursively deconstructing the ty
    * data type.
    *)
   if SMap.is_empty subst then
-    (r, ty)
+    ty
   else
-    match ty with
-    | Tgeneric x ->
+    match deref ty with
+    | (r, Tgeneric x) ->
       (match SMap.find_opt x subst with
-      | Some x_ty -> (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty)
-      | None -> (r, Tgeneric x))
-    | _ ->
+      | Some x_ty ->
+        let (r', ty_) = deref x_ty in
+        mk (Reason.Rinstantiate (r', x, r), ty_)
+      | None -> mk (r, Tgeneric x))
+    | (r, ty) ->
       let ty = instantiate_ subst ty in
-      (r, ty)
+      mk (r, ty)
 
 and instantiate_ subst x =
   match x with
@@ -69,8 +71,8 @@ and instantiate_ subst x =
   | Toption ty ->
     let ty = instantiate subst ty in
     (* we want to avoid double option: ??T *)
-    (match ty with
-    | (_, Toption _) -> snd ty
+    (match get_node ty with
+    | Toption _ as ty_node -> ty_node
     | _ -> Toption ty)
   | Tlike ty -> Tlike (instantiate subst ty)
   | Tfun ft ->

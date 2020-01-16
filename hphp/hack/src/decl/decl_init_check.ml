@@ -22,8 +22,8 @@ let parent_init_prop = "parent::" ^ SN.Members.__construct
  * but it works. The idea here is that if the parent needs to be
  * initialized, we add a phony class variable. *)
 let add_parent_construct decl_env c props parent_ty =
-  match parent_ty with
-  | (_, Tapply ((_, parent), _)) ->
+  match get_node parent_ty with
+  | Tapply ((_, parent), _) ->
     begin
       match Decl_env.get_class_dep decl_env parent with
       | Some class_ when class_.dc_need_init && Option.is_some c.sc_constructor
@@ -56,12 +56,14 @@ let prop_needs_init sp =
     false
   else
     match sp.sp_type with
-    | None
-    | Some (_, Tprim Tnull)
-    | Some (_, Toption _)
-    | Some (_, Tmixed) ->
-      false
-    | Some _ -> sp.sp_needs_init
+    | None -> false
+    | Some ty ->
+      (match get_node ty with
+      | Tprim Tnull
+      | Toption _
+      | Tmixed ->
+        false
+      | _ -> sp.sp_needs_init)
 
 let own_props c props =
   List.fold_left
@@ -95,8 +97,8 @@ let parent_props decl_env c props =
     ~f:
       begin
         fun acc parent ->
-        match parent with
-        | (_, Tapply ((_, parent), _)) ->
+        match get_node parent with
+        | Tapply ((_, parent), _) ->
           let tc = Decl_env.get_class_dep decl_env parent in
           begin
             match tc with
@@ -113,8 +115,9 @@ let trait_props decl_env c props =
     c.sc_uses
     ~f:
       begin
-        fun acc -> function
-        | (_, Tapply ((_, trait), _)) ->
+        fun acc ty ->
+        match get_node ty with
+        | Tapply ((_, trait), _) ->
           let class_ = Decl_env.get_class_dep decl_env trait in
           (match class_ with
           | None -> acc

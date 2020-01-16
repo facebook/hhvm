@@ -22,7 +22,8 @@ let unwrap_class_hint = function
     Errors.expected_class ~suffix:" or interface" p;
     (Pos.none, "", [])
 
-let unwrap_class_type = function
+let unwrap_class_type ty =
+  match deref ty with
   | (r, Tapply (name, tparaml)) -> (r, name, tparaml)
   | (r, Tgeneric _) ->
     let p = Typing_reason.to_pos r in
@@ -76,12 +77,12 @@ let split_defs defs split_if_in_defs =
 
 let rec infer_const (p, expr_) =
   match expr_ with
-  | String _ -> (Reason.Rwitness p, Tprim Tstring)
+  | String _ -> mk (Reason.Rwitness p, Tprim Tstring)
   | True
   | False ->
-    (Reason.Rwitness p, Tprim Tbool)
-  | Int _ -> (Reason.Rwitness p, Tprim Tint)
-  | Float _ -> (Reason.Rwitness p, Tprim Tfloat)
+    mk (Reason.Rwitness p, Tprim Tbool)
+  | Int _ -> mk (Reason.Rwitness p, Tprim Tint)
+  | Float _ -> mk (Reason.Rwitness p, Tprim Tfloat)
   | Unop
       ((Ast_defs.Uminus | Ast_defs.Uplus | Ast_defs.Utild | Ast_defs.Unot), e2)
     ->

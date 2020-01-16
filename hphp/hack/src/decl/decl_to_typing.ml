@@ -137,7 +137,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
       begin
         let ty =
           match sp_type with
-          | None -> (Reason.Rwitness (fst sp_name), Typing_defs.make_tany ())
+          | None -> mk (Reason.Rwitness (fst sp_name), Typing_defs.make_tany ())
           | Some ty -> ty
         in
         if String.equal child_class mro.mro_name then
@@ -195,7 +195,7 @@ let classname_const class_id =
   let (pos, name) = class_id in
   let reason = Reason.Rclass_class (pos, name) in
   let classname_ty =
-    (reason, Tapply ((pos, SN.Classes.cClassname), [(reason, Tthis)]))
+    mk (reason, Tapply ((pos, SN.Classes.cClassname), [mk (reason, Tthis)]))
   in
   ( SN.Members.mClass,
     {
@@ -215,7 +215,9 @@ let typeconst_structure mro class_name stc =
   let pos = fst stc.stc_name in
   let r = Reason.Rwitness pos in
   let tsid = (pos, SN.FB.cTypeStructure) in
-  let ts_ty = (r, Tapply (tsid, [(r, Taccess ((r, Tthis), [stc.stc_name]))])) in
+  let ts_ty =
+    mk (r, Tapply (tsid, [mk (r, Taccess (mk (r, Tthis), [stc.stc_name]))]))
+  in
   let abstract =
     match stc.stc_abstract with
     | TCAbstract (Some _) when not mro.mro_passthrough_abstract_typeconst ->

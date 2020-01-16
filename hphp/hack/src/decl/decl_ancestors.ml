@@ -24,7 +24,7 @@ type ancestor_caches = {
 
 let type_of_mro_element mro =
   let { mro_name; mro_type_args; mro_use_pos; mro_ty_pos; _ } = mro in
-  (Reason.Rhint mro_ty_pos, Tapply ((mro_use_pos, mro_name), mro_type_args))
+  mk (Reason.Rhint mro_ty_pos, Tapply ((mro_use_pos, mro_name), mro_type_args))
 
 let all_ancestors lin =
   Sequence.map lin ~f:(fun mro -> (mro.mro_name, type_of_mro_element mro))

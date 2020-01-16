@@ -287,23 +287,24 @@ and fun_decl_in_env env ~is_lambda f =
       f.f_user_attributes
   in
   let fe_type =
-    ( Reason.Rwitness (fst f.f_name),
-      Tfun
-        {
-          ft_is_coroutine = Ast_defs.(equal_fun_kind f.f_fun_kind FCoroutine);
-          ft_arity = arity;
-          ft_tparams = (tparams, FTKtparams);
-          ft_where_constraints = where_constraints;
-          ft_params = params;
-          ft_ret = { et_type = ret_ty; et_enforced = false };
-          ft_fun_kind = f.f_fun_kind;
-          ft_reactive = reactivity;
-          ft_mutability = None;
-          (* Functions can't be mutable because they don't have "this" *)
-          ft_returns_mutable = returns_mutable;
-          ft_return_disposable = return_disposable;
-          ft_returns_void_to_rx = returns_void_to_rx;
-        } )
+    mk
+      ( Reason.Rwitness (fst f.f_name),
+        Tfun
+          {
+            ft_is_coroutine = Ast_defs.(equal_fun_kind f.f_fun_kind FCoroutine);
+            ft_arity = arity;
+            ft_tparams = (tparams, FTKtparams);
+            ft_where_constraints = where_constraints;
+            ft_params = params;
+            ft_ret = { et_type = ret_ty; et_enforced = false };
+            ft_fun_kind = f.f_fun_kind;
+            ft_reactive = reactivity;
+            ft_mutability = None;
+            (* Functions can't be mutable because they don't have "this" *)
+            ft_returns_mutable = returns_mutable;
+            ft_return_disposable = return_disposable;
+            ft_returns_void_to_rx = returns_void_to_rx;
+          } )
   in
   { fe_pos = fst f.f_name; fe_type; fe_deprecated; fe_decl_errors = None }
 
@@ -423,8 +424,8 @@ and class_parents_decl class_env c =
   ()
 
 and is_disposable_type env hint =
-  match hint with
-  | (_, Tapply ((_, c), _)) ->
+  match get_node hint with
+  | Tapply ((_, c), _) ->
     begin
       match Decl_env.get_class_dep env c with
       | None -> false
@@ -433,8 +434,8 @@ and is_disposable_type env hint =
   | _ -> false
 
 and class_type_decl class_env hint =
-  match hint with
-  | (_, Tapply ((_, cid), _)) ->
+  match get_node hint with
+  | Tapply ((_, cid), _) ->
     begin
       match Naming_table.Types.get_filename_and_kind cid with
       | Some (fn, Naming_table.TClass) when not (Decl_heap.Classes.mem cid) ->
@@ -564,7 +565,9 @@ and class_decl c =
        * with a __toString method; "string" also implements this interface *)
       (* Declare Stringish and parents if not already declared *)
       let class_env = { stack = SSet.empty } in
-      let ty = (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), [])) in
+      let ty =
+        mk (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), []))
+      in
       let (_ : Typing_defs.class_type option) = class_type_decl class_env ty in
       ty :: impl
     | _ -> impl
@@ -694,8 +697,8 @@ and get_implements env ht =
     SMap.add c ht sub_implements
 
 and trait_exists env acc trait =
-  match trait with
-  | (_, Tapply ((_, trait), _)) ->
+  match get_node trait with
+  | Tapply ((_, trait), _) ->
     let class_ = Decl_env.get_class_dep env trait in
     (match class_ with
     | None -> false
@@ -784,7 +787,7 @@ and class_class_decl class_id =
   let (pos, name) = class_id in
   let reason = Reason.Rclass_class (pos, name) in
   let classname_ty =
-    (reason, Tapply ((pos, SN.Classes.cClassname), [(reason, Tthis)]))
+    mk (reason, Tapply ((pos, SN.Classes.cClassname), [mk (reason, Tthis)]))
   in
   {
     cc_abstract = false;
@@ -799,7 +802,7 @@ and prop_decl c acc sp =
   let (sp_pos, sp_name) = sp.sp_name in
   let ty =
     match sp.sp_type with
-    | None -> (Reason.Rwitness sp_pos, Typing_defs.make_tany ())
+    | None -> mk (Reason.Rwitness sp_pos, Typing_defs.make_tany ())
     | Some ty' -> ty'
   in
   let vis = visibility (snd c.sc_name) sp.sp_visibility in
@@ -829,7 +832,7 @@ and static_prop_decl c acc sp =
   let (sp_pos, sp_name) = sp.sp_name in
   let ty =
     match sp.sp_type with
-    | None -> (Reason.Rwitness sp_pos, Typing_defs.make_tany ())
+    | None -> mk (Reason.Rwitness sp_pos, Typing_defs.make_tany ())
     | Some ty' -> ty'
   in
   let vis = visibility (snd c.sc_name) sp.sp_visibility in
@@ -866,7 +869,9 @@ and typeconst_structure c stc =
   let pos = fst stc.stc_name in
   let r = Reason.Rwitness pos in
   let tsid = (pos, SN.FB.cTypeStructure) in
-  let ts_ty = (r, Tapply (tsid, [(r, Taccess ((r, Tthis), [stc.stc_name]))])) in
+  let ts_ty =
+    mk (r, Tapply (tsid, [mk (r, Taccess (mk (r, Tthis), [stc.stc_name]))]))
+  in
   let abstract =
     match stc.stc_abstract with
     | TCAbstract _ -> true
@@ -984,17 +989,32 @@ and method_decl_acc ~is_static c (acc, condition_types) m =
   let has_memoizelsb = m.sm_memoizelsb in
   let (pos, id) = m.sm_name in
   let get_reactivity t =
-    match t with
-    | (_, Tfun { ft_reactive; _ }) -> ft_reactive
+    match get_node t with
+    | Tfun { ft_reactive; _ } -> ft_reactive
     | _ -> Local None
   in
   let condition_types =
     match get_reactivity m.sm_type with
-    | Reactive (Some (_, Tapply ((_, cls), []))) -> SSet.add cls condition_types
+    | Reactive (Some ty) ->
+      begin
+        match get_node ty with
+        | Tapply ((_, cls), []) -> SSet.add cls condition_types
+        | _ -> condition_types
+      end
     | Reactive None -> condition_types
-    | Shallow (Some (_, Tapply ((_, cls), []))) -> SSet.add cls condition_types
+    | Shallow (Some ty) ->
+      begin
+        match get_node ty with
+        | Tapply ((_, cls), []) -> SSet.add cls condition_types
+        | _ -> condition_types
+      end
     | Shallow None -> condition_types
-    | Local (Some (_, Tapply ((_, cls), []))) -> SSet.add cls condition_types
+    | Local (Some ty) ->
+      begin
+        match get_node ty with
+        | Tapply ((_, cls), []) -> SSet.add cls condition_types
+        | _ -> condition_types
+      end
     | Local None -> condition_types
     | _ -> condition_types
   in
@@ -1150,8 +1170,8 @@ let const_decl cst =
     | Some ty -> ty
     | None when Partial.should_check_error cst.cst_mode 2035 ->
       Errors.missing_typehint cst_pos;
-      (Reason.Rwitness cst_pos, Terr)
-    | None -> (Reason.Rwitness cst_pos, Typing_defs.make_tany ()))
+      mk (Reason.Rwitness cst_pos, Terr)
+    | None -> mk (Reason.Rwitness cst_pos, Typing_defs.make_tany ()))
 
 let iconst_decl cst =
   let cst = Errors.ignore_ (fun () -> Naming.global_const cst) in

@@ -23,7 +23,7 @@ let conditionally_reactive_attribute_to_hint env { ua_params = l; _ } =
   | _ ->
     (* error for invalid argument list was already reported during the
        naming step, do nothing *)
-    (Reason.none, Typing_defs.make_tany ())
+    mk (Reason.none, Typing_defs.make_tany ())
 
 let condition_type_from_attributes env user_attributes =
   Naming_attributes.find SN.UserAttributes.uaOnlyRxIfImpl user_attributes
@@ -72,12 +72,13 @@ let get_param_mutability user_attributes =
 
 (* If global inference is on this will create a new type variable and store it in
   the global tvenv. Otherwise we return the default type given as parameter *)
-let global_inference_create_tyvar ~is_lambda ~default:(reason, default_ty_) =
+let global_inference_create_tyvar ~is_lambda ~default =
+  let (reason, default_ty_) = deref default in
   let tco = Global_naming_options.get () in
   if GlobalOptions.tco_global_inference tco && not is_lambda then
-    (reason, Tvar (Ident.tmp ()))
+    mk (reason, Tvar (Ident.tmp ()))
   else
-    (reason, default_ty_)
+    mk (reason, default_ty_)
 
 let make_param_ty env ~is_lambda param =
   let ty =
@@ -86,17 +87,17 @@ let make_param_ty env ~is_lambda param =
       let r = Reason.Rwitness param.param_pos in
       global_inference_create_tyvar
         ~is_lambda
-        ~default:(r, Typing_defs.make_tany ())
+        ~default:(mk (r, Typing_defs.make_tany ()))
     (* if the code is strict, use the type-hint *)
     | Some x -> Decl_hint.hint env x
   in
   let ty =
-    match ty with
-    | (_, t) when param.param_is_variadic ->
+    match get_node ty with
+    | t when param.param_is_variadic ->
       (* When checking a call f($a, $b) to a function f(C ...$args),
        * both $a and $b must be of type C *)
-      (Reason.Rvar_param param.param_pos, t)
-    | x -> x
+      mk (Reason.Rvar_param param.param_pos, t)
+    | _ -> ty
   in
   let module UA = SN.UserAttributes in
   let has_at_most_rx_as_func =
@@ -129,7 +130,7 @@ let make_param_ty env ~is_lambda param =
   }
 
 let ret_from_fun_kind ?(is_constructor = false) ~is_lambda pos kind =
-  let default = (Reason.Rwitness pos, Typing_defs.make_tany ()) in
+  let default = mk (Reason.Rwitness pos, Typing_defs.make_tany ()) in
   let ret_ty () =
     if is_constructor then
       default
@@ -139,16 +140,20 @@ let ret_from_fun_kind ?(is_constructor = false) ~is_lambda pos kind =
   match kind with
   | Ast_defs.FGenerator ->
     let r = Reason.Rret_fun_kind (pos, kind) in
-    (r, Tapply ((pos, SN.Classes.cGenerator), [ret_ty (); ret_ty (); ret_ty ()]))
+    mk
+      ( r,
+        Tapply ((pos, SN.Classes.cGenerator), [ret_ty (); ret_ty (); ret_ty ()])
+      )
   | Ast_defs.FAsyncGenerator ->
     let r = Reason.Rret_fun_kind (pos, kind) in
-    ( r,
-      Tapply
-        ((pos, SN.Classes.cAsyncGenerator), [ret_ty (); ret_ty (); ret_ty ()])
-    )
+    mk
+      ( r,
+        Tapply
+          ((pos, SN.Classes.cAsyncGenerator), [ret_ty (); ret_ty (); ret_ty ()])
+      )
   | Ast_defs.FAsync ->
     let r = Reason.Rret_fun_kind (pos, kind) in
-    (r, Tapply ((pos, SN.Classes.cAwaitable), [ret_ty ()]))
+    mk (r, Tapply ((pos, SN.Classes.cAwaitable), [ret_ty ()]))
   | Ast_defs.FSync
   | Ast_defs.FCoroutine ->
     ret_ty ()

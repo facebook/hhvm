@@ -317,7 +317,7 @@ and linearize (env : env) (c : shallow_class) : linearization =
       | None -> []
       | Some { sm_name = (pos, _); _ } ->
         let ty =
-          (Typing_reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), []))
+          mk (Typing_reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), []))
         in
         [ancestor_from_ty Interface ty]
   in

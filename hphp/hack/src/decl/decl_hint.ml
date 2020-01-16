@@ -18,7 +18,7 @@ module Partial = Partial_provider
 (* Unpacking a hint for typing *)
 let rec hint env (p, h) =
   let h = hint_ p env h in
-  (Typing_reason.Rhint p, h)
+  mk (Typing_reason.Rhint p, h)
 
 and shape_field_info_to_shape_field_type env { sfi_optional; sfi_hint; _ } =
   { sft_optional = sfi_optional; sft_ty = hint env sfi_hint }

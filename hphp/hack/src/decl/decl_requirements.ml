@@ -92,8 +92,8 @@ let naive_dedup req_extends =
   (* maps class names to type params *)
   let h = Caml.Hashtbl.create 0 in
   List.rev_filter_map req_extends (fun (parent_pos, ty) ->
-      match ty with
-      | (_r, Tapply (name, hl)) ->
+      match get_node ty with
+      | Tapply (name, hl) ->
         let hl = List.map hl Decl_pos_utils.NormalizeSig.ty in
         begin
           try

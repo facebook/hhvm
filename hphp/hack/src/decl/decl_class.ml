@@ -177,14 +177,14 @@ let to_class_type
       map_elements
         (fun x ->
           let ty = Decl_heap.Props.find_unsafe x in
-          (Reason.to_pos (fst ty), ty))
+          (get_pos ty, ty))
         dc_props;
     tc_pu_enums = dc_pu_enums;
     tc_sprops =
       map_elements
         (fun x ->
           let ty = Decl_heap.StaticProps.find_unsafe x in
-          (Reason.to_pos (fst ty), ty))
+          (get_pos ty, ty))
         dc_sprops;
     tc_methods = ft_map_elements Decl_heap.Methods.find_unsafe dc_methods;
     tc_smethods =

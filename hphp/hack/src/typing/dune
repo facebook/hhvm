@@ -6,6 +6,8 @@
     deferred_decl
     pp_type
     typing_defs
+    typing_defs_core
+    tanySentinel
     typing_reason)
   (libraries
     ast

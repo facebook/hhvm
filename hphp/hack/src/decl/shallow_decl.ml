@@ -49,15 +49,15 @@ let class_const env c cc =
               && not Ast_defs.(equal_class_kind c.c_kind Cenum)
             then (
               Errors.missing_typehint pos;
-              ((Reason.Rwitness pos, Terr), false)
+              (mk (Reason.Rwitness pos, Terr), false)
             ) else
-              ((Reason.Rwitness pos, Typing_defs.make_tany ()), false)
+              (mk (Reason.Rwitness pos, Typing_defs.make_tany ()), false)
         end
       | (None, None) ->
         if Partial.should_check_error c.c_mode 2035 then
           Errors.missing_typehint pos;
         let r = Reason.Rwitness pos in
-        ((r, Typing_defs.make_tany ()), true)
+        (mk (r, Typing_defs.make_tany ()), true)
     in
     Some
       { scc_abstract = abstract; scc_expr = e; scc_name = name; scc_type = ty }
@@ -295,13 +295,26 @@ let method_ env c m =
   let ft = method_type env m in
   let reactivity =
     match ft.ft_reactive with
-    | Reactive (Some (_, Tapply ((_, cls), []))) ->
-      Some (Method_reactive (Some cls))
+    | Reactive (Some ty) ->
+      begin
+        match get_node ty with
+        | Tapply ((_, cls), []) -> Some (Method_reactive (Some cls))
+        | _ -> None
+      end
     | Reactive None -> Some (Method_reactive None)
-    | Shallow (Some (_, Tapply ((_, cls), []))) ->
-      Some (Method_shallow (Some cls))
+    | Shallow (Some ty) ->
+      begin
+        match get_node ty with
+        | Tapply ((_, cls), []) -> Some (Method_shallow (Some cls))
+        | _ -> None
+      end
     | Shallow None -> Some (Method_shallow None)
-    | Local (Some (_, Tapply ((_, cls), []))) -> Some (Method_local (Some cls))
+    | Local (Some ty) ->
+      begin
+        match get_node ty with
+        | Tapply ((_, cls), []) -> Some (Method_local (Some cls))
+        | _ -> None
+      end
     | Local None -> Some (Method_local None)
     | _ -> None
   in
@@ -318,7 +331,7 @@ let method_ env c m =
     sm_name = m.m_name;
     sm_override = override;
     sm_reactivity = reactivity;
-    sm_type = (Reason.Rwitness pos, Tfun ft);
+    sm_type = mk (Reason.Rwitness pos, Tfun ft);
     sm_visibility = m.m_visibility;
     sm_fixme_codes = Fixme_provider.get_fixme_codes_for_pos pos;
     sm_deprecated;
@@ -331,7 +344,7 @@ let method_redeclaration env m =
     smr_final = m.mt_final;
     smr_static = m.mt_static;
     smr_name = m.mt_name;
-    smr_type = (Reason.Rwitness (fst m.mt_name), Tfun ft);
+    smr_type = mk (Reason.Rwitness (fst m.mt_name), Tfun ft);
     smr_visibility = m.mt_visibility;
     smr_trait = m.mt_trait;
     smr_method = m.mt_method;

@@ -137,7 +137,9 @@ struct
       method on_'hi _ hi = hi
     end
 
-  let rec ty (p, x) = (reason p, ty_ x)
+  let rec ty t =
+    let (p, x) = deref t in
+    mk (reason p, ty_ x)
 
   and ty_ : decl_phase ty_ -> decl_phase ty_ = function
     | (Tany _ | Tthis | Terr | Tmixed | Tnonnull | Tdynamic | Tnothing | Tvar _)

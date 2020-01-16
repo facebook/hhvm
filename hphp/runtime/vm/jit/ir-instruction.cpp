@@ -159,6 +159,9 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case CallUnpack:
       return move != MustMove && srcNo == 3;
 
+    case EnterTCUnwind:
+      return srcNo == 0;
+
     case RaiseTooManyArg:
       // RaiseTooManyArg decrefs the unpack arguments.
       return move == Consume && srcNo == 0;

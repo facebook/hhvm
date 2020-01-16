@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:runtime
-# Signature<<aa21f250ce91f1205330f3a18c28574ece893264>>
+# Signature<<debf039d9702562b93bbe4508a36e6c1923b49a8>>
 [package]
 name = "runtime"
 edition = "2018"
@@ -14,4 +14,4 @@ path = "../../typed_value.rs"
 hhbc_string_utils_rust = { path = "../string_utils" }
 oxidized = { path = "../../../oxidized" }
 lazy_static = "1.4"
-# @end of Signature<<aa21f250ce91f1205330f3a18c28574ece893264>>
+# @end of Signature<<debf039d9702562b93bbe4508a36e6c1923b49a8>>

@@ -22,6 +22,13 @@ use oxidized::{
 use rx_rust as rx;
 use unique_list_rust::UniqueList;
 
+pub enum HoistKind {
+    /// Def that is already at top-level
+    TopLevel,
+    /// Def that was hoisted to top-level
+    Hoisted,
+}
+
 #[derive(Clone)] // TODO(hrust): Clone is used when bactracking now, can we somehow avoid it?
 struct Variables {
     /// all variables declared/used in the scope

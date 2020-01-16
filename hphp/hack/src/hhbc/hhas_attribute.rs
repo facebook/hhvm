@@ -4,15 +4,15 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use naming_special_names_rust as naming_special_names;
-use runtime;
-
 use runtime::TypedValue;
+
+use naming_special_names::user_attributes as ua;
 
 /// Attributes with a name from [naming_special_names::user_attributes] and
 /// a series of arguments.  Emitter code can match on an attribute as follows:
 /// ```
 ///   use naming_special_names::user_attributes as ua;
-///   fn is_memoized(attr: HhasAttribute) -> bool {
+///   fn is_memoized(attr: &HhasAttribute) -> bool {
 ///      attr.is(ua::memoized)
 ///   }
 ///   fn has_dynamically_callable(attrs: &Vec<HhasAttribute>) {
@@ -30,25 +30,36 @@ impl HhasAttribute {
     pub fn is<F: Fn(&str) -> bool>(&self, f: F) -> bool {
         f(&self.name)
     }
+}
 
-    pub fn is_no_injection(attrs: &[&HhasAttribute]) -> bool {
-        Self::is_native_arg(native_arg::NO_INJECTION, attrs)
-    }
+pub fn is_no_injection(attrs: &[HhasAttribute]) -> bool {
+    is_native_arg(native_arg::NO_INJECTION, attrs)
+}
 
-    pub fn is_native_opcode_impl(attrs: &[&HhasAttribute]) -> bool {
-        Self::is_native_arg(native_arg::OP_CODE_IMPL, attrs)
-    }
+pub fn is_native_opcode_impl(attrs: &[HhasAttribute]) -> bool {
+    is_native_arg(native_arg::OP_CODE_IMPL, attrs)
+}
 
-    fn is_native_arg(s: &str, attrs: &[&HhasAttribute]) -> bool {
-        use naming_special_names::user_attributes as ua;
-        attrs.iter().any(|attr| {
-            attr.is(ua::is_native)
-                && attr.arguments.iter().any(|tv| match tv {
-                    TypedValue::String(s0) => s0 == s,
-                    _ => false,
-                })
-        })
-    }
+fn is_native_arg(s: &str, attrs: &[HhasAttribute]) -> bool {
+    attrs.iter().any(|attr| {
+        attr.is(ua::is_native)
+            && attr.arguments.iter().any(|tv| match tv {
+                TypedValue::String(s0) => s0 == s,
+                _ => false,
+            })
+    })
+}
+
+pub fn deprecation_info<'a>(
+    mut iter: impl Iterator<Item = &'a HhasAttribute>,
+) -> Option<&'a [TypedValue]> {
+    iter.find_map(|attr| {
+        if attr.name == ua::DEPRECATED {
+            Some(attr.arguments.as_slice())
+        } else {
+            None
+        }
+    })
 }
 
 pub mod native_arg {

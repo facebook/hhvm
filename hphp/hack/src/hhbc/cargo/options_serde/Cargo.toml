@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:options_serde
-# Signature<<5d9c16989d28df1c667537e2e0e2461fd6e4cc36>>
+# Signature<<c6d3e5dd5fb6b6b23a18a254e0cf54a1e2674c5e>>
 [package]
 name = "options_serde"
 edition = "2018"
@@ -17,4 +17,4 @@ doctest = false
 proc-macro2 = "1.0"
 quote = "1.0"
 syn = { version = "1.0", features = ["full", "visit", "visit-mut", "fold", "extra-traits"] }
-# @end of Signature<<5d9c16989d28df1c667537e2e0e2461fd6e4cc36>>
+# @end of Signature<<c6d3e5dd5fb6b6b23a18a254e0cf54a1e2674c5e>>

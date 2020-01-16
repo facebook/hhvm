@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use naming_special_names_rust::user_attributes::*;
-use oxidized::aast;
+use naming_special_names_rust::{self as sn, user_attributes::*};
+use oxidized::{aast as a, ast_defs};
 use std::{convert::TryFrom, str::FromStr};
 
 /// The possible Rx levels of a function or method
@@ -65,7 +65,7 @@ impl FromStr for Level {
 
 impl Level {
     pub fn from_ast<Ex, Fb, En, Hi>(
-        ast_attrs: &Vec<aast::UserAttribute<Ex, Fb, En, Hi>>,
+        ast_attrs: &Vec<a::UserAttribute<Ex, Fb, En, Hi>>,
     ) -> Option<Self> {
         let attrs_contain = |name| ast_attrs.iter().any(|attr| attr.name.1 == name);
         let rx = attrs_contain(REACTIVE);
@@ -85,6 +85,26 @@ impl Level {
             _ => panic!("invalid combination of Rx attributes escaped the parser"),
         }
     }
+}
+
+pub fn halves_of_is_enabled_body<Ex, Fb, En, Hi>(
+    body: &a::FuncBody<Ex, Fb, En, Hi>,
+) -> Option<(&a::Block<Ex, Fb, En, Hi>, &a::Block<Ex, Fb, En, Hi>)> {
+    use a::*;
+    if let [Stmt(_, Stmt_::If(if_))] = body.ast.as_slice() {
+        if let (Expr(_, Expr_::Id(sid)), enabled, disabled) = &**if_ {
+            let ast_defs::Id(_, name) = &**sid;
+            return if name != sn::rx::IS_ENABLED {
+                None
+            } else {
+                match disabled.as_slice() {
+                    [] | [Stmt(_, Stmt_::Noop)] => None,
+                    _ => Some((enabled, disabled)),
+                }
+            };
+        }
+    }
+    None
 }
 
 // TODO(hrust) port remaining

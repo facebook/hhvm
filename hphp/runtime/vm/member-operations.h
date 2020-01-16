@@ -1586,7 +1586,8 @@ inline ArrayData* SetElemArrayPre(ArrayData* a, TypedValue key, TypedValue* valu
     );
   }
 
-  raise_warning("Illegal offset type");
+  raise_warning("Invalid operand type was used: Invalid type used as key");
+
   // Assignment failed, so the result is null rather than the RHS.
   if (setResult) {
     tvDecRefGen(value);

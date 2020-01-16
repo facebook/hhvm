@@ -38,14 +38,14 @@ array(1) {
 NULL
 NULL
 
-Warning: Illegal offset type in %s on line 9
+Warning: Invalid operand type was used: Invalid type used as key in %s on line 9
 
 Warning: Invalid operand type was used: Invalid type used as key in %s on line 10
 
 Notice: Array to string conversion in %s on line 10
 Undefined index: Array
 
-Warning: Illegal offset type in %s on line 11
+Warning: Invalid operand type was used: Invalid type used as key in %s on line 11
 array(0) {
 }
 NULL

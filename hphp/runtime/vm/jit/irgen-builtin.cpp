@@ -153,9 +153,13 @@ Block* make_opt_catch(IRGS& env, const ParamPrep& params) {
   BlockPusher bp(*env.irb, makeMarker(env, nextBcOff(env)), exit);
   gen(env, BeginCatch);
   params.decRefParams(env);
-  gen(env, EndCatch,
-      EndCatchData { spOffBCFromIRSP(env), EndCatchData::UnwindOnly, false },
-      fp(env), sp(env));
+  auto const data = EndCatchData {
+    spOffBCFromIRSP(env),
+    EndCatchData::CatchMode::UnwindOnly,
+    EndCatchData::FrameMode::Phplogue,
+    EndCatchData::Teardown::Full
+  };
+  gen(env, EndCatch, data, fp(env), sp(env));
   return exit;
 }
 
@@ -1319,8 +1323,9 @@ struct CatchMaker {
         EndCatch,
         EndCatchData {
           spOffBCFromIRSP(env),
-          EndCatchData::UnwindOnly,
-          false
+          EndCatchData::CatchMode::UnwindOnly,
+          EndCatchData::FrameMode::Phplogue,
+          EndCatchData::Teardown::Full
         },
         fp(env), sp(env));
     return exit;

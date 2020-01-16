@@ -849,19 +849,25 @@ inline void decRefThis(IRGS& env) {
 template<class Body>
 Block* create_catch_block(
     IRGS& env, Body body,
-    EndCatchData::CatchMode mode = EndCatchData::UnwindOnly) {
- auto const catchBlock = defBlock(env, Block::Hint::Unused);
- BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
+    EndCatchData::CatchMode mode = EndCatchData::CatchMode::UnwindOnly) {
+  auto const catchBlock = defBlock(env, Block::Hint::Unused);
+  BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
 
- auto const& exnState = env.irb->exceptionStackState();
- env.irb->fs().setBCSPOff(exnState.syncedSpLevel);
+  auto const& exnState = env.irb->exceptionStackState();
+  env.irb->fs().setBCSPOff(exnState.syncedSpLevel);
 
- gen(env, BeginCatch);
- body();
- auto const stublogue = env.irb->fs().stublogue();
- gen(env, EndCatch, EndCatchData { spOffBCFromIRSP(env), mode, stublogue },
-     fp(env), sp(env));
- return catchBlock;
+  gen(env, BeginCatch);
+  body();
+  auto const stublogue = env.irb->fs().stublogue();
+  auto const data = EndCatchData {
+    spOffBCFromIRSP(env),
+    mode,
+    stublogue ?
+      EndCatchData::FrameMode::Stublogue : EndCatchData::FrameMode::Phplogue,
+    stublogue ? EndCatchData::Teardown::NA : EndCatchData::Teardown::Full
+  };
+  gen(env, EndCatch, data, fp(env), sp(env));
+  return catchBlock;
 }
 
 //////////////////////////////////////////////////////////////////////

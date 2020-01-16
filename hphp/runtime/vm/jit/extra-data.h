@@ -1570,21 +1570,32 @@ struct AssertReason : IRExtraData {
 #define ASSERT_REASON AssertReason{Reason{__FILE__, __LINE__}}
 
 struct EndCatchData : IRSPRelOffsetData {
-  enum CatchMode { UnwindOnly, CallCatch, SideExit };
+  enum class CatchMode { UnwindOnly, CallCatch, SideExit };
+  enum class FrameMode { Phplogue, Stublogue };
+  enum class Teardown  { NA, None, Full, OnlyThis };
 
-  explicit EndCatchData(IRSPRelOffset offset, CatchMode mode, bool stublogue) :
-      IRSPRelOffsetData{offset}, mode{mode}, stublogue{stublogue} {}
+  explicit EndCatchData(IRSPRelOffset offset, CatchMode mode,
+                        FrameMode stublogue, Teardown teardown)
+    : IRSPRelOffsetData{offset}
+    , mode{mode}
+    , stublogue{stublogue}
+    , teardown{teardown}
+    {}
 
   std::string show() const {
     return folly::to<std::string>(
       IRSPRelOffsetData::show(), ",",
-      mode == UnwindOnly ? "UnwindOnly" :
-        mode == CallCatch ? "CallCatch" : "SideExit", ",",
-      stublogue ? "" : "not-", "stublogue");
+      mode == CatchMode::UnwindOnly ? "UnwindOnly" :
+        mode == CatchMode::CallCatch ? "CallCatch" : "SideExit", ",",
+      stublogue == FrameMode::Stublogue ? "Stublogue" : "Phplogue", ",",
+      teardown == Teardown::NA ? "NA" :
+        teardown == Teardown::None ? "None" :
+          teardown == Teardown::Full ? "Full" : "OnlyThis");
   }
 
   CatchMode mode;
-  bool stublogue;
+  FrameMode stublogue;
+  Teardown teardown;
 };
 
 /*

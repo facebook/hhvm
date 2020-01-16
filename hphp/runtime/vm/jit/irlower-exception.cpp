@@ -51,7 +51,8 @@ void cgBeginCatch(IRLS& env, const IRInstruction* /*inst*/) {
 void cgEndCatch(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
-  auto const helper = inst->extra<EndCatch>()->stublogue
+  auto const helper =
+    inst->extra<EndCatch>()->stublogue == EndCatchData::FrameMode::Stublogue
     ? tc::ustubs().endCatchStublogueHelper
     : tc::ustubs().endCatchHelper;
 

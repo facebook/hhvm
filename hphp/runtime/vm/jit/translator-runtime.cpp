@@ -545,7 +545,7 @@ void VerifyReifiedLocalTypeImpl(int32_t id, ArrayData* ts) {
       func->fullName()->data(),
       TypeStructure::toString(ArrNR(ts),
         TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
-      describe_actual_type(param, true)
+      describe_actual_type(param)
     ), warn
   );
 }
@@ -565,7 +565,7 @@ void VerifyReifiedReturnTypeImpl(TypedValue cell, ArrayData* ts) {
       func->fullName()->data(),
       TypeStructure::toString(ArrNR(ts),
         TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
-      describe_actual_type(&cell, true)
+      describe_actual_type(&cell)
     ), warn
   );
 }

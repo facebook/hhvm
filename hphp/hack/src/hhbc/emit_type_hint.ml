@@ -168,7 +168,7 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h) =
   let happly_helper (pos, name) =
     if List.mem ~equal:( = ) tparams name then
       let tc_name = Some "" in
-      let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeVar] in
+      let tc_flags = [TC.ExtendedHint; TC.TypeVar] in
       TC.make tc_name tc_flags
     else if kind = TypeDef && (is_self name || is_parent name) then
       Emit_fatal.raise_fatal_runtime
@@ -181,8 +181,7 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h) =
         else
           Hhbc_id.Class.(from_ast_name name |> to_raw_string)
       in
-      let tc_flags = [TC.HHType] in
-      TC.make (Some tc_name) tc_flags
+      TC.make (Some tc_name) []
   in
   let is_awaitable s = s = SN.Classes.cAwaitable in
   match h with
@@ -202,7 +201,7 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h) =
     TC.make None []
   | Aast.Haccess _ ->
     let tc_name = Some "" in
-    let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeConstant] in
+    let tc_flags = [TC.ExtendedHint; TC.TypeConstant] in
     TC.make tc_name tc_flags
   (* Elide the Awaitable class for async return types only *)
   | Aast.Happly ((_, s), [(_, Aast.Hprim Aast.Tvoid)])
@@ -220,7 +219,7 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h) =
       ~tparams
       ~skipawaitable
       h
-      [TC.Soft; TC.HHType; TC.ExtendedHint]
+      [TC.Soft; TC.ExtendedHint]
   | Aast.Happly ((_, s), [])
   | Aast.Hoption (_, Aast.Happly ((_, s), []))
     when skipawaitable && is_awaitable s ->
@@ -230,11 +229,11 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h) =
   (* Shapes and tuples are just arrays *)
   | Aast.Hshape _ ->
     let tc_name = Some "HH\\darray" in
-    let tc_flags = [TC.HHType; TC.ExtendedHint] in
+    let tc_flags = [TC.ExtendedHint] in
     TC.make tc_name tc_flags
   | Aast.Htuple _ ->
     let tc_name = Some "HH\\varray" in
-    let tc_flags = [TC.HHType; TC.ExtendedHint] in
+    let tc_flags = [TC.ExtendedHint] in
     TC.make tc_name tc_flags
   | Aast.Hoption t ->
     make_tc_with_flags_if_non_empty_flags
@@ -242,14 +241,14 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h) =
       ~tparams
       ~skipawaitable
       t
-      [TC.Nullable; TC.DisplayNullable; TC.HHType; TC.ExtendedHint]
+      [TC.Nullable; TC.DisplayNullable; TC.ExtendedHint]
   | Aast.Hsoft t ->
     make_tc_with_flags_if_non_empty_flags
       ~kind
       ~tparams
       ~skipawaitable
       t
-      [TC.Soft; TC.HHType; TC.ExtendedHint]
+      [TC.Soft; TC.ExtendedHint]
   | Aast.Herr
   | Aast.Hany ->
     failwith "I'm convinced that this should be an error caught in naming"
@@ -324,7 +323,7 @@ let param_hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams h =
   let tc = hint_to_type_constraint ~kind ~tparams ~skipawaitable h in
   let tc_name = TC.name tc in
   if is_simple_hint then
-    let tc_flags = try_add_nullable ~nullable h [TC.HHType] in
+    let tc_flags = try_add_nullable ~nullable h [] in
     make_type_info ~tparams h tc_name tc_flags
   else
     let tc_flags = TC.flags tc in
@@ -369,7 +368,7 @@ let emit_type_constraint_for_native_function tparams ret ti =
     match (user_type, ret) with
     | (_, None)
     | (None, _) ->
-      (Some "HH\\void", [TC.HHType; TC.ExtendedHint])
+      (Some "HH\\void", [TC.ExtendedHint])
     | (Some t, _) when t = "HH\\mixed" || t = "callable" -> (None, [])
     | (Some t, Some ret) ->
       let strip_nullable n = String_utils.lstrip n "?" in
@@ -379,7 +378,7 @@ let emit_type_constraint_for_native_function tparams ret ti =
         (* Strip twice since we don't know which one is coming first *)
         Some (vanilla_name @@ strip_nullable @@ strip_soft @@ strip_nullable t)
       in
-      let flags = [TC.HHType; TC.ExtendedHint] in
+      let flags = [TC.ExtendedHint] in
       let rec get_flags (_, t) flags =
         match t with
         | Aast.Hoption x ->

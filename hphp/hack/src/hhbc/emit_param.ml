@@ -241,9 +241,7 @@ let emit_reified_params tparams =
     | (_, (_, s), _, true) ->
       let param_name = SU.Reified.mangle_reified_param s in
       let type_name = Some "HH\\darray" in
-      let tc =
-        Hhas_type_constraint.make type_name [Hhas_type_constraint.HHType]
-      in
+      let tc = Hhas_type_constraint.make type_name [] in
       let ti = Some (Hhas_type_info.make type_name tc) in
       Some (Hhas_param.make param_name false false [] ti None)
   in

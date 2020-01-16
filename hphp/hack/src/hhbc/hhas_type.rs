@@ -33,7 +33,6 @@ pub mod constraint {
         #[derive(Default)]
         pub struct Flags: u8 {
             const NULLABLE =         0b0000_0001;
-            const HH_TYPE =          0b0000_0010;
             const EXTENDED_HINT =    0b0000_0100;
             const TYPE_VAR =         0b0000_1000;
             const SOFT =             0b0001_0000;
@@ -90,6 +89,5 @@ mod test {
         use crate::constraint::Flags;
         let typevar_and_soft = Flags::TYPE_VAR | Flags::SOFT;
         assert_eq!("type_var soft", typevar_and_soft.to_string());
-        assert_eq!("hh_type", Flags::HH_TYPE.to_string());
     }
 }

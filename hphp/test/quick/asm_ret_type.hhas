@@ -13,7 +13,7 @@
   RetC
 }
 
-.function <"HH\\int" "HH\\int" hh_type extended_hint> fail() {
+.function <"HH\\int" "HH\\int" extended_hint> fail() {
   Array @A_0
   VerifyRetTypeC
   RetC

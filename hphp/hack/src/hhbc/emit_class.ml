@@ -180,9 +180,7 @@ let from_enum_type opt =
       Some (Emit_type_hint.fmt_hint ~tparams:[] ~strip_tparams:true e.A.e_base)
     in
     let type_info_type_constraint =
-      Hhas_type_constraint.make
-        None
-        [Hhas_type_constraint.HHType; Hhas_type_constraint.ExtendedHint]
+      Hhas_type_constraint.make None [Hhas_type_constraint.ExtendedHint]
     in
     Some (Hhas_type_info.make type_info_user_type type_info_type_constraint)
   | _ -> None

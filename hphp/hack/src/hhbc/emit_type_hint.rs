@@ -194,18 +194,15 @@ fn hint_to_type_constraint(
         Hdynamic | Hlike(_) | Hfun(_) | Hunion(_) | Hintersection(_) | Hmixed | HpuAccess(_, _) => {
             Type::default()
         }
-        Haccess(_, _) => Type::make_with_raw_str(
-            "",
-            Flags::HH_TYPE | Flags::EXTENDED_HINT | Flags::TYPE_CONSTANT,
-        ),
-        Hshape(_) => Type::make_with_raw_str("HH\\darray", Flags::HH_TYPE | Flags::EXTENDED_HINT),
-        Htuple(_) => Type::make_with_raw_str("HH\\varray", Flags::HH_TYPE | Flags::EXTENDED_HINT),
+        Haccess(_, _) => Type::make_with_raw_str("", Flags::EXTENDED_HINT | Flags::TYPE_CONSTANT),
+        Hshape(_) => Type::make_with_raw_str("HH\\darray", Flags::EXTENDED_HINT),
+        Htuple(_) => Type::make_with_raw_str("HH\\varray", Flags::EXTENDED_HINT),
         Hsoft(t) => make_tc_with_flags_if_non_empty_flags(
             kind,
             tparams,
             skipawaitable,
             t,
-            Flags::SOFT | Flags::HH_TYPE | Flags::EXTENDED_HINT,
+            Flags::SOFT | Flags::EXTENDED_HINT,
         ),
         Herr | Hany => panic!("This should be an error caught in naming"),
         Hoption(t) => {
@@ -226,7 +223,7 @@ fn hint_to_type_constraint(
                                 tparams,
                                 skipawaitable,
                                 h,
-                                Flags::SOFT | Flags::HH_TYPE | Flags::EXTENDED_HINT,
+                                Flags::SOFT | Flags::EXTENDED_HINT,
                             );
                         }
                     }
@@ -237,7 +234,7 @@ fn hint_to_type_constraint(
                 tparams,
                 skipawaitable,
                 t,
-                Flags::NULLABLE | Flags::DISPLAY_NULLABLE | Flags::HH_TYPE | Flags::EXTENDED_HINT,
+                Flags::NULLABLE | Flags::DISPLAY_NULLABLE | Flags::EXTENDED_HINT,
             )
         }
         Happly(Id(_, s), hs) => {
@@ -308,7 +305,7 @@ fn happly_helper(
     if tparams.contains(&name.as_str()) {
         Ok(Type::make_with_raw_str(
             "",
-            Flags::HH_TYPE | Flags::EXTENDED_HINT | Flags::TYPE_VAR,
+            Flags::EXTENDED_HINT | Flags::TYPE_VAR,
         ))
     } else if string_utils::is_self(&name) || string_utils::is_parent(&name) {
         if is_typedef(&kind) {
@@ -317,11 +314,11 @@ fn happly_helper(
                 format!("Cannot access {} when no class scope is active", name),
             ))
         } else {
-            Ok(Type::make(Some(name), Flags::HH_TYPE))
+            Ok(Type::make(Some(name), Flags::empty()))
         }
     } else {
         let name: String = class::Type::from_ast_name(&name).into();
-        Ok(Type::make(Some(name), Flags::HH_TYPE))
+        Ok(Type::make(Some(name), Flags::empty()))
     }
 }
 
@@ -349,45 +346,6 @@ fn make_type_info(
     Info::make(type_info_user_type, type_info_type_constraint)
 }
 
-fn param_hint_to_type_info(
-    kind: &Kind,
-    skipawaitable: bool,
-    nullable: bool,
-    tparams: &[&str],
-    hint: &Hint,
-) -> Info {
-    let Hint(_, h) = hint;
-    let is_simple_hint = match &**h {
-        Hsoft(_)
-        | Hoption(_)
-        | Haccess(_, _)
-        | Hfun(_)
-        | Hdynamic
-        | Hnonnull
-        | Hmixed
-        | Harray(Some(_), Some(_))
-        | Hdarray(_, _) => false,
-        Happly(Id(_, s), hs) if hs.is_empty() => {
-            s != "\\HH\\dynamic" && s != "\\HH\\nonnull" && s != "\\HH\\mixed"
-        }
-        Habstr(s) | Happly(Id(_, s), _) => !tparams.contains(&s.as_str()),
-        Herr | Hany => panic!("Expected error on Tany in naming: param_hint_to_type_info"),
-        _ => true,
-    };
-    let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint);
-    let flags = if is_simple_hint {
-        constraint::Flags::HH_TYPE
-    } else {
-        tc.flags
-    };
-    make_type_info(
-        tparams,
-        hint,
-        tc.name,
-        try_add_nullable(nullable, hint, flags),
-    )
-}
-
 pub fn hint_to_type_info(
     kind: &Kind,
     skipawaitable: bool,
@@ -395,10 +353,15 @@ pub fn hint_to_type_info(
     tparams: &[&str],
     hint: &Hint,
 ) -> Info {
-    if let Kind::Param = kind {
-        return param_hint_to_type_info(kind, skipawaitable, nullable, tparams, hint);
-    };
     let tc = hint_to_type_constraint(kind, tparams, skipawaitable, hint);
+    if let Kind::Param = kind {
+        return make_type_info(
+            tparams,
+            hint,
+            tc.name,
+            try_add_nullable(nullable, hint, tc.flags),
+        );
+    };
     let flags = match kind {
         Kind::Return | Kind::Property if tc.name.is_some() => {
             constraint::Flags::EXTENDED_HINT | tc.flags
@@ -434,10 +397,7 @@ pub fn emit_type_constraint_for_native_function(
 ) -> Info {
     use constraint::Flags;
     let (name, flags) = match (&ti.user_type, ret_opt) {
-        (_, None) | (None, _) => (
-            Some(String::from("HH\\void")),
-            Flags::HH_TYPE | Flags::EXTENDED_HINT,
-        ),
+        (_, None) | (None, _) => (Some(String::from("HH\\void")), Flags::EXTENDED_HINT),
         (Some(t), _) => {
             if t == "HH\\mixed" || t == "callable" {
                 (None, Flags::default())
@@ -451,10 +411,7 @@ pub fn emit_type_constraint_for_native_function(
                     )
                     .to_string(),
                 );
-                (
-                    name,
-                    get_flags(tparams, Flags::HH_TYPE | Flags::EXTENDED_HINT, &h),
-                )
+                (name, get_flags(tparams, Flags::EXTENDED_HINT, &h))
             }
         }
     };

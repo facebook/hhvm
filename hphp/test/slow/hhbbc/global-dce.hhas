@@ -23,7 +23,7 @@
   RetC
 }
 
-.function <"" N  > test(<"\?HH\\string" "HH\\string" nullable hh_type extended_hint > $a, <"\?HH\\string" "HH\\string" nullable hh_type extended_hint > $b, <"HH\\string" "HH\\string" hh_type > $c) {
+.function <"" N  > test(<"\?HH\\string" "HH\\string" nullable extended_hint > $a, <"\?HH\\string" "HH\\string" nullable extended_hint > $b, <"HH\\string" "HH\\string" > $c) {
   VerifyParamType $a
   VerifyParamType $b
   VerifyParamType $c

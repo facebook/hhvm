@@ -5256,7 +5256,7 @@ OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
         vmfp()->m_func->fullName()->data(),
         TypeStructure::toString(ArrNR(cell->m_data.parr),
           TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
-        describe_actual_type(param.ptr, true)
+        describe_actual_type(param.ptr)
       ), warn
     );
   }
@@ -5314,7 +5314,7 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
         vmfp()->m_func->fullName()->data(),
         TypeStructure::toString(ArrNR(ts->m_data.parr),
           TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
-        describe_actual_type(cell, true)
+        describe_actual_type(cell)
       ), warn
     );
   }

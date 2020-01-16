@@ -15,5 +15,5 @@
 }
 
 .class [enum final is_const no_dynamic_props "__Const"("""y:0:{}""")] E extends HH\BuiltinEnum {
-  .enum_ty <"HH\\int" hh_type extended_hint >;
+  .enum_ty <"HH\\int" extended_hint >;
 }

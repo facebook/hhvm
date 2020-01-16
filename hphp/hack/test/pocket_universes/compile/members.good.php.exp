@@ -12,7 +12,7 @@
   RetC
 }
 
-.function <"HH\\void" N  > foo(<"HH\\vec<(C:@E)>" "HH\\vec" hh_type > $v) {
+.function <"HH\\void" N  > foo(<"HH\\vec<(C:@E)>" "HH\\vec"  > $v) {
   .numiters 1;
   .declvars $x;
   Array @A_0
@@ -69,7 +69,7 @@ L0:
     CGetL $mems
     RetC
   }
-  .method [public static] <"HH\\mixed" N  > E##val(<"HH\\string" "HH\\string" hh_type > $atom) {
+  .method [public static] <"HH\\mixed" N  > E##val(<"HH\\string" "HH\\string"  > $atom) {
     VerifyParamType $atom
     String "A0"
     CGetL2 $atom

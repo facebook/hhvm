@@ -51,12 +51,6 @@ struct TypeConstraint {
     Nullable = 0x1,
 
     /*
-     * This flag indicates either EnableHipHopSyntax was true, or the
-     * type came from a <?hh file and EnableHipHopSyntax was false.
-     */
-    HHType = 0x2,
-
-    /*
      * Extended hints are hints that do not apply to normal, vanilla
      * php.  For example "?Foo".
      */
@@ -238,7 +232,6 @@ struct TypeConstraint {
    */
   bool isNullable() const { return m_flags & Nullable; }
   bool isSoft()     const { return m_flags & Soft; }
-  bool isHHType()   const { return m_flags & HHType; }
   bool isExtended() const { return m_flags & ExtendedHint; }
   bool isTypeVar()  const { return m_flags & TypeVar; }
   bool isTypeConstant() const { return m_flags & TypeConstant; }
@@ -525,7 +518,7 @@ enum class MemoKeyConstraint {
 };
 MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint&);
 
-std::string describe_actual_type(tv_rval val, bool isHHType);
+std::string describe_actual_type(tv_rval val);
 
 bool tcCouldBeReified(const Func*, uint32_t);
 

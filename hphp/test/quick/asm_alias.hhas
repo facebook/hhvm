@@ -99,25 +99,25 @@
   RetC
 }
 
-.function foo(<"@Foo" "Foo" hh_type extended_hint soft > $x) {
+.function foo(<"@Foo" "Foo" extended_hint soft > $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
-.function bar(<"@Bar" "Bar" hh_type extended_hint soft > $x) {
+.function bar(<"@Bar" "Bar" extended_hint soft > $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
-.function baz(<"@Baz" "Baz" hh_type extended_hint soft > $x) {
+.function baz(<"@Baz" "Baz" extended_hint soft > $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
-.function quux(<"@Quux" "Quux" hh_type extended_hint soft > $x) {
+.function quux(<"@Quux" "Quux" extended_hint soft > $x) {
   VerifyParamType $x
   Null
   RetC

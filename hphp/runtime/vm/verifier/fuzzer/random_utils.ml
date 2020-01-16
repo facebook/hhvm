@@ -54,7 +54,7 @@ let random_incdec_op () : incdec_op =
    rand_elt
 
 let random_flag () : HTC.type_constraint_flag =
-  [HTC.Nullable; HTC.HHType; HTC.ExtendedHint; HTC.TypeVar; HTC.Soft;
+  [HTC.Nullable; HTC.ExtendedHint; HTC.TypeVar; HTC.Soft;
    HTC.TypeConstant] |> rand_elt
 
 let random_collection_type () : CollectionType.t =

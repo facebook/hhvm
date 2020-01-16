@@ -9,7 +9,6 @@
 
 type type_constraint_flag =
   | Nullable
-  | HHType
   | ExtendedHint
   | TypeVar
   | Soft
@@ -20,7 +19,6 @@ type type_constraint_flag =
 let string_of_flag f =
   match f with
   | Nullable -> "nullable"
-  | HHType -> "hh_type"
   | ExtendedHint -> "extended_hint"
   | TypeVar -> "type_var"
   | Soft -> "soft"

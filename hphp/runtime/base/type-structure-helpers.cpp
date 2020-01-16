@@ -548,7 +548,7 @@ bool checkTypeStructureMatchesTVImpl(
   auto const errOnLen = [&givenType](auto cell, auto len) {
     if (!gen_error) return;
     givenType = folly::sformat("{} of length {}",
-      describe_actual_type(&cell, true), len);
+      describe_actual_type(&cell), len);
   };
 
   auto const errOnKey = [&errorKey](TypedValue key) {
@@ -993,7 +993,7 @@ bool checkTypeStructureMatchesTVImpl(
   }();
   if (!warn && is_ts_soft(ts.get())) warn = true;
   if (gen_error && !result) {
-    if (givenType.empty()) givenType = describe_actual_type(&c1, true);
+    if (givenType.empty()) givenType = describe_actual_type(&c1);
     if (expectedType.empty()) {
       expectedType =
         TypeStructure::toString(ts,

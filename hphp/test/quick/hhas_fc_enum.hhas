@@ -19,14 +19,14 @@
   RetC
 }
 
-.function test(<"Foo" "Foo" hh_type> $x) {
+.function test(<"Foo" "Foo"> $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
 .class [enum final] Foo extends HH\BuiltinEnum {
-  .enum_ty <"HH\\int" hh_type extended_hint>;
+  .enum_ty <"HH\\int" extended_hint>;
 
   .const FOO = """i:1;""";
   .default_ctor;

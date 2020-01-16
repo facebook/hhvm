@@ -961,13 +961,13 @@ void TypeConstraint::verifyReturnNonNull(TypedValue* tv,
   }
 }
 
-std::string describe_actual_type(tv_rval val, bool isHHType) {
+std::string describe_actual_type(tv_rval val) {
   switch (val.type()) {
     case KindOfUninit:        return "undefined variable";
     case KindOfNull:          return "null";
     case KindOfBoolean:       return "bool";
     case KindOfInt64:         return "int";
-    case KindOfDouble:        return isHHType ? "float" : "double";
+    case KindOfDouble:        return "float";
     case KindOfPersistentString:
     case KindOfString:        return "string";
     case KindOfPersistentVec:
@@ -1101,7 +1101,7 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
       func->fullName(),
       isUpperBound() ? "upper-bounded by" : "of type",
       displayName(func->cls()),
-      describe_actual_type(c, isHHType())
+      describe_actual_type(c)
   );
 
   if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()
@@ -1130,7 +1130,7 @@ void TypeConstraint::verifyRecFieldFail(tv_rval val,
       recordName,
       fieldName,
       displayName(nullptr),
-      describe_actual_type(val, isHHType())
+      describe_actual_type(val)
     ),
     isSoft()
   );
@@ -1187,7 +1187,7 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
       declCls->name(),
       propName,
       displayName(nullptr),
-      describe_actual_type(val, isHHType())
+      describe_actual_type(val)
     ),
     isSoft()
   );
@@ -1197,7 +1197,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
                                 int id) const {
   VMRegAnchor _;
   std::string name = displayName(func->cls());
-  auto const givenType = describe_actual_type(c, isHHType());
+  auto const givenType = describe_actual_type(c);
 
   if (checkDVArray(c)) {
     if (id == ReturnId) {

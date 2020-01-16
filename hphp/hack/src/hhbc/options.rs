@@ -227,6 +227,7 @@ prefixed_flags!(
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
     ENABLE_COROUTINES,
     ENABLE_POCKET_UNIVERSES,
+    ENABLE_XHP_CLASS_MODIFIER,
     HACKSPERIMENTAL,
 );
 impl Default for LangFlags {
@@ -578,6 +579,9 @@ mod tests {
     "global_value": true
   },
   "hhvm.hack.lang.enable_pocket_universes": {
+    "global_value": false
+  },
+  "hhvm.hack.lang.enable_xhp_class_modifier": {
     "global_value": false
   },
   "hhvm.hack.lang.hacksperimental": {
@@ -939,5 +943,6 @@ bitflags! {
         const DISALLOW_FUNC_PTRS_IN_CONSTANTS = 1 << 43;
         const ENFORCE_GENERICS_UB = 1 << 44;
         const CHECK_INT_OVERFLOW = 1 << 45;
+        const ENABLE_XHP_CLASS_MODIFIER = 1 << 46;
     }
 }

@@ -172,7 +172,7 @@ let parse_file ~hhbc_options filename text :
   in
   (result, popt)
 
-let from_ast ~env ~is_hh_file ~empty_namespace ~hhbc_options tast =
+let emit ~env ~is_hh_file ~empty_namespace ~hhbc_options tast =
   with_compilation_times env (fun _ ->
       let tast =
         if Hhbc_options.enable_pocket_universes hhbc_options then
@@ -187,7 +187,7 @@ let from_ast ~env ~is_hh_file ~empty_namespace ~hhbc_options tast =
         ~is_hh_file
         tast)
 
-let fatal ~env ~is_runtime_error pos message =
+let emit_fatal ~env ~is_runtime_error pos message =
   with_compilation_times env (fun _ ->
       let error_t =
         if is_runtime_error then
@@ -214,8 +214,8 @@ let from_text (source_text : string) (env : env) : result =
         | Either.First (tast, is_hh_file) ->
           let empty_namespace = Namespace_env.empty_from_popt popt in
           let tast = elaborate_namespaces popt tast in
-          from_ast ~env ~is_hh_file ~empty_namespace ~hhbc_options tast
+          emit ~env ~is_hh_file ~empty_namespace ~hhbc_options tast
         | Either.Second (pos, msg, is_runtime_error) ->
-          fatal ~env ~is_runtime_error pos (Some msg)
+          emit_fatal ~env ~is_runtime_error pos (Some msg)
       in
       { ret with parsing_t })

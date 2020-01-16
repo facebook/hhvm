@@ -53,6 +53,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ast_scope_rust"
+version = "0.0.0"
+dependencies = [
+ "oxidized 0.0.0",
+ "rx_rust 0.0.0",
+]
+
+[[package]]
 name = "atty"
 version = "0.2.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -101,6 +109,10 @@ version = "0.0.0"
 dependencies = [
  "aast_parser 0.0.0",
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "env 0.0.0",
+ "hhas_program_rust 0.0.0",
+ "hhbc_hhas_rust 0.0.0",
+ "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocamlrep 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
@@ -229,6 +241,41 @@ version = "1.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "emit_fatal_rust"
+version = "0.0.0"
+dependencies = [
+ "emit_pos_rust 0.0.0",
+ "env 0.0.0",
+ "hhbc_ast_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "oxidized 0.0.0",
+]
+
+[[package]]
+name = "emit_pos_rust"
+version = "0.0.0"
+dependencies = [
+ "env 0.0.0",
+ "hhbc_ast_rust 0.0.0",
+ "instruction_sequence_rust 0.0.0",
+ "options 0.0.0",
+ "oxidized 0.0.0",
+]
+
+[[package]]
+name = "env"
+version = "0.0.0"
+dependencies = [
+ "ast_scope_rust 0.0.0",
+ "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "label_rust 0.0.0",
+ "local_rust 0.0.0",
+ "options 0.0.0",
+ "oxidized 0.0.0",
+ "rx_rust 0.0.0",
+]
+
+[[package]]
 name = "escaper"
 version = "0.0.0"
 dependencies = [
@@ -354,6 +401,82 @@ dependencies = [
 ]
 
 [[package]]
+name = "hhas_attribute_rust"
+version = "0.0.0"
+dependencies = [
+ "naming_special_names_rust 0.0.0",
+ "runtime 0.0.0",
+]
+
+[[package]]
+name = "hhas_program_rust"
+version = "0.0.0"
+dependencies = [
+ "hhas_attribute_rust 0.0.0",
+ "hhas_record_def_rust 0.0.0",
+ "hhas_symbol_refs_rust 0.0.0",
+ "hhas_typedef_rust 0.0.0",
+]
+
+[[package]]
+name = "hhas_record_def_rust"
+version = "0.0.0"
+dependencies = [
+ "hhas_type 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "runtime 0.0.0",
+]
+
+[[package]]
+name = "hhas_symbol_refs_rust"
+version = "0.0.0"
+
+[[package]]
+name = "hhas_type"
+version = "0.0.0"
+dependencies = [
+ "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "emit_fatal_rust 0.0.0",
+]
+
+[[package]]
+name = "hhas_typedef_rust"
+version = "0.0.0"
+dependencies = [
+ "hhas_attribute_rust 0.0.0",
+ "hhas_type 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "runtime 0.0.0",
+]
+
+[[package]]
+name = "hhbc_ast_rust"
+version = "0.0.0"
+dependencies = [
+ "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "env 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "label_rust 0.0.0",
+ "local_rust 0.0.0",
+ "runtime 0.0.0",
+]
+
+[[package]]
+name = "hhbc_hhas_rust"
+version = "0.0.0"
+dependencies = [
+ "hhas_program_rust 0.0.0",
+ "oxidized 0.0.0",
+]
+
+[[package]]
+name = "hhbc_id_rust"
+version = "0.0.0"
+dependencies = [
+ "hhbc_string_utils_rust 0.0.0",
+]
+
+[[package]]
 name = "hhbc_string_utils_rust"
 version = "0.0.0"
 dependencies = [
@@ -376,6 +499,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "instruction_sequence_rust"
+version = "0.0.0"
+dependencies = [
+ "env 0.0.0",
+ "hhbc_ast_rust 0.0.0",
+ "hhbc_id_rust 0.0.0",
+ "label_rust 0.0.0",
+ "local_rust 0.0.0",
+ "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "runtime 0.0.0",
+]
+
+[[package]]
 name = "itertools"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -387,6 +523,10 @@ dependencies = [
 name = "itoa"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "label_rust"
+version = "0.0.0"
 
 [[package]]
 name = "lazy_static"
@@ -426,6 +566,14 @@ dependencies = [
  "ocamlrep 0.0.0",
  "ocamlrep_derive 0.0.0",
  "oxidized 0.0.0",
+]
+
+[[package]]
+name = "local_rust"
+version = "0.0.0"
+dependencies = [
+ "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "naming_special_names_rust 0.0.0",
 ]
 
 [[package]]
@@ -791,6 +939,15 @@ version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "runtime"
+version = "0.0.0"
+dependencies = [
+ "hhbc_string_utils_rust 0.0.0",
+ "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "oxidized 0.0.0",
+]
+
+[[package]]
 name = "rusqlite"
 version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -890,6 +1047,14 @@ dependencies = [
 name = "rustc-serialize"
 version = "0.3.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "rx_rust"
+version = "0.0.0"
+dependencies = [
+ "naming_special_names_rust 0.0.0",
+ "oxidized 0.0.0",
+]
 
 [[package]]
 name = "ryu"

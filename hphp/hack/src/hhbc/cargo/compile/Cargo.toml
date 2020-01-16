@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:compile_rust
-# Signature<<689ea6453e6a1ec314ba1c305da4daef242201df>>
+# Signature<<868944fd725a52f1f0a7c0da4a6a98c8ef23b96e>>
 [package]
 name = "compile_rust"
 edition = "2018"
@@ -12,9 +12,13 @@ path = "../../compile.rs"
 
 [dependencies]
 aast_parser = { path = "../../../parser/cargo/aast_parser" }
+env = { path = "../env" }
+hhas_program_rust = { path = "../hhas_program" }
+hhbc_hhas_rust = { path = "../hhbc_hhas" }
 ocamlrep = { path = "../../../ocamlrep" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 bitflags = "1.2"
-# @end of Signature<<689ea6453e6a1ec314ba1c305da4daef242201df>>
+itertools = "0.8"
+# @end of Signature<<868944fd725a52f1f0a7c0da4a6a98c8ef23b96e>>

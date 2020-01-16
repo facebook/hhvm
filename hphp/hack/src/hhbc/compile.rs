@@ -2,13 +2,22 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
+#![allow(unused_variables)]
 extern crate bitflags;
 
-use aast_parser::{rust_aast_parser_types::Env as AastEnv, AastParser};
+use aast_parser::{
+    rust_aast_parser_types::{Env as AastEnv, Result as AastResult},
+    AastParser, Error as AastError,
+};
+use hhas_program_rust::HhasProgram;
+use hhbc_hhas_rust::to_segments;
+use itertools::{Either, Either::*};
 use ocamlrep::rc::RcOc;
-use options::{HhvmFlags, Options};
-use oxidized::{namespace_env::Env as NamespaceEnv, relative_path::RelativePath};
+use options::{HhvmFlags, LangFlags, Options, PhpismFlags};
+use oxidized::{
+    ast as Tast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
+    relative_path::RelativePath,
+};
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
 
 use bitflags::bitflags;
@@ -68,21 +77,121 @@ pub fn from_text(text: &[u8], env: Env) -> Output {
     };
 
     let ast = profile(&opts, &mut ret.parsing_t, || {
-        let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
-        let mut aast_env = AastEnv::default();
-        aast_env.keep_errors = true;
-        aast_env.show_all_errors = true;
-        aast_env.fail_open = true;
-        let indexed_source_text = IndexedSourceText::new(source_text);
-        AastParser::from_text(&aast_env, &indexed_source_text, None)
-            .unwrap()
-            .aast
-            .unwrap()
+        parse_file(&opts, &env.filepath, text)
     });
 
-    // TODO(hrust) this is just a placeholder for emitted segments
-    ret.bytecode_segments.push(format!("{:?}", ast));
+    let (program, codegen_t) = match ast {
+        Either::Right((ast, is_hh_file)) => emit(&env, ast),
+        Either::Left((pos, msg, is_runtime_error)) => emit_fatal(&env, is_runtime_error, pos, msg),
+    };
+
+    let bytecode = profile(&opts, &mut ret.printing_t, || {
+        to_segments(
+            Some(&env.filepath),
+            env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
+            program,
+        )
+    });
+
+    ret.bytecode_segments = bytecode;
+    ret.codegen_t = codegen_t;
     ret
+}
+
+fn emit(env: &Env, ast: Tast::Program) -> (HhasProgram, f64) {
+    //TODO(hrust): enable emit_programm::from_ast
+    unimplemented!()
+}
+
+fn emit_fatal(env: &Env, is_runtime_error: bool, pos: Pos, msg: String) -> (HhasProgram, f64) {
+    //TODO(hrust): enable emit_program::emit_fatal_program
+    unimplemented!()
+}
+
+fn create_parser_options(opts: &Options) -> ParserOptions {
+    let hack_lang_flags = |flag| opts.hhvm.hack_lang_flags.contains(flag);
+    let phpism_flags = |flag| opts.phpism_flags.contains(flag);
+    let mut popt = ParserOptions::default();
+    popt.po_auto_namespace_map = opts
+        .hhvm
+        .aliased_namespaces
+        .get()
+        .iter()
+        .map(|(x, y)| (x.to_owned(), y.to_owned()))
+        .collect();
+    popt.po_codegen = true;
+    popt.po_disallow_silence = false;
+    popt.po_disallow_execution_operator = phpism_flags(PhpismFlags::DISALLOW_EXECUTION_OPERATOR);
+    popt.po_disable_nontoplevel_declarations =
+        phpism_flags(PhpismFlags::DISABLE_NONTOPLEVEL_DECLARATIONS);
+    popt.po_disable_static_closures = phpism_flags(PhpismFlags::DISABLE_STATIC_CLOSURES);
+    popt.po_disable_lval_as_an_expression =
+        hack_lang_flags(LangFlags::DISABLE_LVAL_AS_AN_EXPRESSION);
+    popt.po_enable_class_level_where_clauses =
+        hack_lang_flags(LangFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES);
+    popt.po_disable_legacy_soft_typehints =
+        hack_lang_flags(LangFlags::DISABLE_LEGACY_SOFT_TYPEHINTS);
+    popt.po_allow_new_attribute_syntax = hack_lang_flags(LangFlags::ALLOW_NEW_ATTRIBUTE_SYNTAX);
+    popt.po_disable_legacy_attribute_syntax =
+        hack_lang_flags(LangFlags::DISABLE_LEGACY_ATTRIBUTE_SYNTAX);
+    popt.po_const_default_func_args = hack_lang_flags(LangFlags::CONST_DEFAULT_FUNC_ARGS);
+    popt.tco_const_static_props = hack_lang_flags(LangFlags::CONST_STATIC_PROPS);
+    popt.po_abstract_static_props = hack_lang_flags(LangFlags::ABSTRACT_STATIC_PROPS);
+    popt.po_disable_unset_class_const = hack_lang_flags(LangFlags::DISABLE_UNSET_CLASS_CONST);
+    popt.po_disallow_func_ptrs_in_constants =
+        hack_lang_flags(LangFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS);
+    popt.po_enable_xhp_class_modifier = hack_lang_flags(LangFlags::ENABLE_XHP_CLASS_MODIFIER);
+    popt
+}
+
+/// parse_file returns either error(Left) or ast(Right)
+/// - Left((Position, message, is_runtime_error))
+/// - Right((ast, is_hh_file))
+fn parse_file(
+    opts: &Options,
+    filepath: &RelativePath,
+    text: &[u8],
+) -> Either<(Pos, String, bool), (Tast::Program, bool)> {
+    let mut aast_env = AastEnv::default();
+    aast_env.codegen = true;
+    aast_env.keep_errors = true;
+    aast_env.show_all_errors = true;
+    aast_env.fail_open = true;
+    aast_env.parser_options = create_parser_options(opts);
+    let source_text = SourceText::make(RcOc::new(filepath.clone()), text);
+    let indexed_source_text = IndexedSourceText::new(source_text);
+    let ast_result = AastParser::from_text(&aast_env, &indexed_source_text, None);
+    match ast_result {
+        Err(AastError::Other(msg)) => Left((Pos::make_none(), msg, false)),
+        Err(AastError::ParserFatal(syntax_error, pos)) => {
+            Left((pos, syntax_error.message.to_string(), false))
+        }
+        Ok(ast) => match ast {
+            AastResult { syntax_errors, .. } if !syntax_errors.is_empty() => unimplemented!(),
+            AastResult {
+                mut lowpri_errors, ..
+            } if !lowpri_errors.is_empty() => {
+                let (pos, msg) = lowpri_errors.pop().unwrap();
+                Left((pos, msg, false))
+            }
+            AastResult {
+                errors,
+                aast,
+                scoured_comments,
+                file_mode,
+                ..
+            } => {
+                if !errors.is_empty() {
+                    unimplemented!()
+                } else {
+                    match aast {
+                        Ok(aast) => Right((aast, file_mode.is_hh_file())),
+                        Err(msg) => Left((Pos::make_none(), msg, false)),
+                    }
+                }
+            }
+        },
+    }
 }
 
 fn profile<T, F>(opts: &Options, dt: &mut f64, f: F) -> T

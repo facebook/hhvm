@@ -247,9 +247,9 @@ impl ToOcaml for PositionedValue {
                 caml_set_field(block, 0, token);
                 block
             }
-            PositionedValue::TokenSpan { left, right } => {
-                let left = left.to_ocaml(context);
-                let right = right.to_ocaml(context);
+            PositionedValue::TokenSpan(x) => {
+                let left = x.left.to_ocaml(context);
+                let right = x.right.to_ocaml(context);
                 // TokenSpan { left: Token.t; right: Token.t }
                 let block = reserve_block(TOKEN_SPAN_VARIANT.into(), 2);
                 caml_set_field(block, 0, left);

@@ -14,14 +14,17 @@ use ocamlrep::rc::RcOc;
 use oxidized::pos::Pos;
 
 #[derive(Debug, Clone)]
+pub struct Span {
+    pub left: PositionedToken,
+    pub right: PositionedToken,
+}
+
+#[derive(Debug, Clone)]
 pub enum PositionedValue {
     /// value for a token node is token itself
     TokenValue(PositionedToken),
     /// value for a range denoted by pair of tokens
-    TokenSpan {
-        left: PositionedToken,
-        right: PositionedToken,
-    },
+    TokenSpan(Box<Span>),
     Missing {
         offset: usize,
     },
@@ -31,9 +34,7 @@ impl PositionedValue {
     pub fn width(&self) -> usize {
         match self {
             PositionedValue::TokenValue(t) => t.width(),
-            PositionedValue::TokenSpan { left, right } => {
-                (right.end_offset() - left.start_offset()) + 1
-            }
+            PositionedValue::TokenSpan(x) => (x.right.end_offset() - x.left.start_offset()) + 1,
             PositionedValue::Missing { .. } => 0,
         }
     }
@@ -41,7 +42,11 @@ impl PositionedValue {
     fn start_offset(&self) -> usize {
         use PositionedValue::*;
         match &self {
-            TokenValue(t) | TokenSpan { left: t, .. } => t
+            TokenValue(t) => t
+                .leading_start_offset()
+                .expect("invariant violation for Positioned Syntax"),
+            TokenSpan(x) => x
+                .left
                 .leading_start_offset()
                 .expect("invariant violation for Positioned Syntax"),
             Missing { offset, .. } => *offset,
@@ -51,7 +56,8 @@ impl PositionedValue {
     fn leading_width(&self) -> usize {
         use PositionedValue::*;
         match self {
-            TokenValue(t) | TokenSpan { left: t, .. } => t.leading_width(),
+            TokenValue(t) => t.leading_width(),
+            TokenSpan(x) => x.left.leading_width(),
             Missing { .. } => 0,
         }
     }
@@ -59,25 +65,46 @@ impl PositionedValue {
     fn trailing_width(&self) -> usize {
         use PositionedValue::*;
         match self {
-            TokenValue(t) | TokenSpan { right: t, .. } => t.trailing_width(),
+            TokenValue(t) => t.trailing_width(),
+            TokenSpan(x) => x.right.trailing_width(),
             Missing { .. } => 0,
+        }
+    }
+
+    fn leading_token(&self) -> Option<&PositionedToken> {
+        use PositionedValue::*;
+        match self {
+            TokenValue(l) => Some(&l),
+            TokenSpan(x) => Some(&x.left),
+            _ => None,
+        }
+    }
+
+    fn trailing_token(&self) -> Option<&PositionedToken> {
+        use PositionedValue::*;
+        match self {
+            TokenValue(r) => Some(&r),
+            TokenSpan(x) => Some(&x.right),
+            _ => None,
         }
     }
 
     fn value_from_outer_children(first: &Self, last: &Self) -> Self {
         use PositionedValue::*;
         match (first, last) {
-            (TokenValue(l), TokenValue(r))
-            | (TokenSpan { left: l, .. }, TokenValue(r))
-            | (TokenValue(l), TokenSpan { right: r, .. })
-            | (TokenSpan { left: l, .. }, TokenSpan { right: r, .. }) => {
+            (TokenValue(_), TokenValue(_))
+            | (TokenSpan(_), TokenValue(_))
+            | (TokenValue(_), TokenSpan(_))
+            | (TokenSpan(_), TokenSpan(_)) => {
+                let l = first.leading_token().unwrap();
+                let r = last.trailing_token().unwrap();
                 if RcOc::ptr_eq(&l, &r) {
                     TokenValue(RcOc::clone(&l))
                 } else {
-                    TokenSpan {
+                    TokenSpan(Box::new(Span {
                         left: RcOc::clone(&l),
                         right: RcOc::clone(&r),
-                    }
+                    }))
                 }
             }
             // can have two missing nodes if first and last child nodes of

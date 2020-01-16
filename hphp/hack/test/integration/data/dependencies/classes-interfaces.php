@@ -112,3 +112,32 @@ trait TExtendsWithConsistentConstruct {
     return new static();
   }
 }
+
+function with_IEWGPCOUP(IEWGPCOUB $x): IEWGP {
+  return $x->f();
+}
+
+interface IEWGPCOUB extends IEWGPMB, IEPCOUB {}
+
+interface IEWGPMB extends IEPMB {
+  abstract const type T as IEWGP;
+}
+
+interface IEPCOUB extends IEMBUIDCOUB {}
+
+interface IEPMB extends IEMBUIDMB {
+  abstract const type T as IEP;
+}
+
+interface IEMBUIDCOUB extends IEMBUIDMB {}
+
+interface IEMBUIDMB {
+  abstract const type T as IEMBUID;
+  public function f(): this::T;
+}
+
+interface IEWGP extends IEP {}
+
+interface IEP extends IEMBUID {}
+
+interface IEMBUID {}

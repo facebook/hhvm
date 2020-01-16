@@ -6,6 +6,7 @@
  *
  *)
 
+open Aast
 open Core_kernel
 open Typing_defs
 open ServerCommandTypes.Extract_standalone
@@ -155,6 +156,11 @@ let get_gconst_mode ctx =
 let get_class_or_typedef_mode ctx name =
   Option.first_some (get_class_mode ctx name) (get_typedef_mode ctx name)
 
+let get_class_nast ctx name =
+  let open Option in
+  get_class_pos ctx name >>= fun pos ->
+  Ast_provider.find_class_in_file (Pos.filename pos) name >>| Naming.class_
+
 let get_dep_mode ctx dep =
   let open Typing_deps.Dep in
   match dep with
@@ -260,11 +266,6 @@ let fixup_xhp =
 let format text =
   try Libhackfmt.format_tree (tree_from_string (fixup_xhp text))
   with Hackfmt_error.InvalidSyntax -> text
-
-let name_from_type (_, ty) =
-  match ty with
-  | Tapply ((_, name), _) -> name
-  | _ -> raise Unsupported
 
 let strip_ns obj_name =
   match String.rsplit2 obj_name '\\' with
@@ -505,85 +506,130 @@ let get_global_object_declaration ctx obj =
     (* No other global declarations *)
     | _ -> raise UnexpectedDependency)
 
-type ancestors = {
-  extends: decl_ty list;
-  implements: decl_ty list;
-  uses: decl_ty list;
-  req_extends: decl_ty list;
-  req_implements: decl_ty list;
-}
+let string_of_tprim = function
+  | Tbool -> "bool"
+  | Tint -> "int"
+  | Tfloat -> "float"
+  | Tnum -> "num"
+  | Tstring -> "string"
+  | Tarraykey -> "arraykey"
+  | Tnull -> "null"
+  | Tvoid -> "void"
+  | Tresource -> "resource"
+  | Tnoreturn -> "noreturn"
+  | Tatom s -> ":@" ^ s
 
-let get_direct_ancestors ctx cls =
-  Decl_provider.(
-    let set_of_sequence seq =
-      Sequence.fold seq ~f:(fun set x -> SSet.add x set) ~init:SSet.empty
-    in
-    let get_direct ~get_ancestors ~get_ancestor_ancestors =
-      let ancestors = get_ancestors cls in
-      let ancestors_ancestors =
-        Sequence.concat_map ancestors ~f:(fun ancestor_name ->
-            Option.value_map
-              (get_class ctx ancestor_name)
-              ~default:Sequence.empty
-              ~f:get_ancestor_ancestors)
-        |> set_of_sequence
-      in
-      Sequence.filter ancestors ~f:(fun x ->
-          not (SSet.mem x ancestors_ancestors))
-    in
-    let direct_ancestors =
-      get_direct
-        ~get_ancestors:Class.all_ancestor_names
-        ~get_ancestor_ancestors:Class.all_ancestor_names
-    in
-    let direct_reqs =
-      get_direct
-        ~get_ancestors:(fun cls ->
-          Sequence.append
-            (Class.all_ancestor_names cls)
-            (Class.all_ancestor_req_names cls))
-        ~get_ancestor_ancestors:Class.all_ancestor_req_names
-    in
-    let cls_kind = Class.kind cls in
-    let filter_by_kind seq kind_condition =
-      Sequence.to_list
-      @@ Sequence.filter seq ~f:(fun n ->
-             kind_condition cls_kind (Class.kind (get_class_exn ctx n)))
-    in
-    let get_ancestor_types names =
-      List.map names ~f:(fun n ->
-          value_or_not_found n @@ Class.get_ancestor cls n)
-    in
-    let get_req_types names =
-      let names_set = SSet.of_list names in
-      Sequence.to_list
-      @@ Sequence.filter
-           (Sequence.map (Class.all_ancestor_reqs cls) ~f:snd)
-           ~f:(fun ty -> SSet.mem (name_from_type ty) names_set)
-    in
-    Ast_defs.
+let rec string_of_hint hint =
+  match snd hint with
+  | Hoption hint -> "?" ^ string_of_hint hint
+  | Hlike hint -> "~" ^ string_of_hint hint
+  | Hfun
       {
-        extends =
-          get_ancestor_types
-          @@ filter_by_kind direct_ancestors (fun kderived kbase ->
-                 (kderived = Cinterface && kbase = Cinterface)
-                 || kbase = Cabstract
-                 || kbase = Cnormal);
-        implements =
-          get_ancestor_types
-          @@ filter_by_kind direct_ancestors (fun kderived kbase ->
-                 kderived <> Cinterface && kbase = Cinterface);
-        uses =
-          get_ancestor_types
-          @@ filter_by_kind direct_ancestors (fun _ kbase -> kbase = Ctrait);
-        req_extends =
-          get_req_types
-          @@ filter_by_kind direct_reqs (fun _ kbase ->
-                 kbase = Cabstract || kbase = Cnormal);
-        req_implements =
-          get_req_types
-          @@ filter_by_kind direct_reqs (fun _ kbase -> kbase = Cinterface);
-      })
+        hf_reactive_kind = _;
+        hf_is_coroutine;
+        hf_param_tys;
+        hf_param_kinds;
+        hf_param_mutability = _;
+        hf_variadic_ty;
+        hf_return_ty;
+        hf_is_mutable_return = _;
+      } ->
+    let coroutine =
+      if hf_is_coroutine then
+        "coroutine "
+      else
+        ""
+    in
+    let param_hints = List.map hf_param_tys ~f:string_of_hint in
+    let param_kinds =
+      List.map hf_param_kinds ~f:(function
+          | Some Ast_defs.Pinout -> "inout "
+          | None -> "")
+    in
+    let params = List.map2_exn param_kinds param_hints ~f:( ^ ) in
+    let variadic =
+      match hf_variadic_ty with
+      | Some hint -> [string_of_hint hint ^ "..."]
+      | None -> []
+    in
+    Printf.sprintf
+      "(%sfunction(%s) : %s)"
+      coroutine
+      (String.concat ~sep:", " (params @ variadic))
+      (string_of_hint hf_return_ty)
+  | Htuple hints -> Printf.sprintf "(%s)" (string_of_hint_list hints)
+  | Happly ((_, name), hints) ->
+    let params =
+      match hints with
+      | [] -> ""
+      | _ -> Printf.sprintf "<%s>" (string_of_hint_list hints)
+    in
+    name ^ params
+  | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
+    let string_of_shape_field { sfi_optional; sfi_name; sfi_hint } =
+      let optional_prefix =
+        if sfi_optional then
+          "?"
+        else
+          ""
+      in
+      let name =
+        match sfi_name with
+        | Ast_defs.SFlit_int (_, str_i) -> str_i
+        | Ast_defs.SFlit_str (_, str) -> "\"" ^ str ^ "\""
+        | Ast_defs.SFclass_const ((_, class_name), (_, const_name)) ->
+          class_name ^ "::" ^ const_name
+      in
+      optional_prefix ^ name ^ " => " ^ string_of_hint sfi_hint
+    in
+    let shape_fields = List.map nsi_field_map ~f:string_of_shape_field in
+    let shape_suffix =
+      if nsi_allows_unknown_fields then
+        ["..."]
+      else
+        []
+    in
+    let shape_entries = shape_fields @ shape_suffix in
+    Printf.sprintf "shape(%s)" (String.concat ~sep:", " shape_entries)
+  | Haccess (root, ids) ->
+    String.concat ~sep:"::" (string_of_hint root :: List.map ids ~f:snd)
+  | Hsoft hint -> "@" ^ string_of_hint hint
+  | Hmixed -> "mixed"
+  | Hnonnull -> "nonnull"
+  | Habstr s -> s
+  | Harray (None, None) -> "array"
+  | Harray (None, Some vhint) ->
+    Printf.sprintf "array<%s>" (string_of_hint vhint)
+  | Harray (Some khint, Some vhint) ->
+    Printf.sprintf "array<%s, %s>" (string_of_hint khint) (string_of_hint vhint)
+  | Harray (Some _, None) ->
+    failwith "malformed type hint: Harray (Some _, None)"
+  | Hdarray (khint, vhint) ->
+    Printf.sprintf
+      "darray<%s, %s>"
+      (string_of_hint khint)
+      (string_of_hint vhint)
+  | Hvarray hint -> Printf.sprintf "varray<%s>" (string_of_hint hint)
+  | Hvarray_or_darray (None, vhint) ->
+    Printf.sprintf "varray_or_darray<%s>" (string_of_hint vhint)
+  | Hvarray_or_darray (Some khint, vhint) ->
+    Printf.sprintf
+      "varray_or_darray<%s, %s>"
+      (string_of_hint khint)
+      (string_of_hint vhint)
+  | Hprim prim -> string_of_tprim prim
+  | Hthis -> "this"
+  | Hdynamic -> "dynamic"
+  | Hnothing -> "nothing"
+  | Hpu_access (hint, (_, id)) -> string_of_hint hint ^ ":@" ^ id
+  | Hunion hints -> Printf.sprintf "(%s)" (string_of_hint_list ~sep:" | " hints)
+  | Hintersection hints ->
+    Printf.sprintf "(%s)" (string_of_hint_list ~sep:" & " hints)
+  | Hany -> failwith "unprintable type hint: Hany"
+  | Herr -> failwith "unprintable type hint: Herr"
+
+and string_of_hint_list ?(sep = ", ") hints =
+  String.concat ~sep (List.map hints ~f:string_of_hint)
 
 let get_class_declaration ctx (cls : Decl_provider.class_decl) =
   Decl_provider.(
@@ -606,7 +652,7 @@ let get_class_declaration ctx (cls : Decl_provider.class_decl) =
       | Ast_defs.Ctrait -> "trait"
       | Ast_defs.Cenum -> "enum"
     in
-    let name = strip_ns @@ Class.name cls in
+    let name = Class.name cls in
     let tparams =
       if List.is_empty @@ Class.tparams cls then
         ""
@@ -615,7 +661,7 @@ let get_class_declaration ctx (cls : Decl_provider.class_decl) =
           "<%s>"
           (list_items @@ List.map (Class.tparams cls) ~f:(print_tparam ctx))
     in
-    let { extends; implements; _ } = get_direct_ancestors ctx cls in
+    let nast = value_or_not_found name @@ get_class_nast ctx name in
     let prefix_if_nonempty prefix s =
       if s = "" then
         ""
@@ -625,12 +671,12 @@ let get_class_declaration ctx (cls : Decl_provider.class_decl) =
     let extends =
       prefix_if_nonempty " extends "
       @@ list_items
-      @@ List.map ~f:(Typing_print.full_decl ctx) extends
+      @@ List.map nast.c_extends ~f:string_of_hint
     in
     let implements =
       prefix_if_nonempty " implements "
       @@ list_items
-      @@ List.map ~f:(Typing_print.full_decl ctx) implements
+      @@ List.map nast.c_implements ~f:string_of_hint
     in
     (* TODO: traits, records *)
     Printf.sprintf
@@ -638,7 +684,7 @@ let get_class_declaration ctx (cls : Decl_provider.class_decl) =
       consistent_construct
       final
       kind
-      name
+      (strip_ns name)
       tparams
       extends
       implements)
@@ -874,18 +920,18 @@ let get_constructor_declaration tcopt cls prop_names =
     Some (decl ^ body)
 
 let get_class_body ctx cls target class_elts =
-  let { uses; req_extends; req_implements; _ } = get_direct_ancestors ctx cls in
+  let name = Decl_provider.Class.name cls in
+  let nast = value_or_not_found name @@ get_class_nast ctx name in
   let uses =
-    List.map uses ~f:(fun s ->
-        Printf.sprintf "use %s;" (Typing_print.full_decl ctx s))
+    List.map nast.c_uses ~f:(fun s ->
+        Printf.sprintf "use %s;" (string_of_hint s))
   in
-  let req_extends =
-    List.map req_extends (fun s ->
-        Printf.sprintf "require extends %s;" (Typing_print.full_decl ctx s))
-  in
-  let req_implements =
-    List.map req_implements (fun s ->
-        Printf.sprintf "require implements %s;" (Typing_print.full_decl ctx s))
+  let (req_extends, req_implements) =
+    List.partition_map nast.c_reqs ~f:(fun (s, extends) ->
+        if extends then
+          `Fst (Printf.sprintf "require extends %s;" (string_of_hint s))
+        else
+          `Snd (Printf.sprintf "require implements %s;" (string_of_hint s)))
   in
   let open Typing_deps in
   let prop_names =

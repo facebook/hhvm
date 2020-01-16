@@ -168,6 +168,7 @@ class TestExtractStandalone(TestCase[ExtractStandaloneDriver]):
             "\\with_xhp",
             "\\WithOptionalConstructorArguments::get",
             "\\TExtendsWithConsistentConstruct::get",
+            "\\with_IEWGPCOUP",
         ]
 
         for path in paths:

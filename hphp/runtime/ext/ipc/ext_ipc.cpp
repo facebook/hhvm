@@ -16,6 +16,8 @@
 */
 
 #include "hphp/runtime/ext/ipc/ext_ipc.h"
+
+#include "hphp/runtime/ext/posix/ext_posix.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-unserializer.h"
@@ -358,6 +360,7 @@ union semun {
 struct Semaphore : SweepableResourceData {
   int key;          // For error reporting.
   int semid;        // Returned by semget()
+  int64_t pid;      // Used to only release semaphore on creating process.
   int count;        // Acquire count for auto-release.
   int auto_release; // flag that says to auto-release.
 
@@ -399,6 +402,15 @@ struct Semaphore : SweepableResourceData {
      * Need better way to handle this
      */
     if (count == -1 || !auto_release) {
+      return;
+    }
+
+    /*
+     * Some resources only need to be cleaned up in the process that created
+     * them.  Semaphores are one such resource.  The fork manpage reads: "The
+     * child does not inherit semaphore adjustments from its parent"
+     */
+    if (pid != f_posix_getpid()) {
       return;
     }
 
@@ -522,6 +534,7 @@ Variant HHVM_FUNCTION(sem_get,
   auto sem_ptr = req::make<Semaphore>();
   sem_ptr->key   = key;
   sem_ptr->semid = semid;
+  sem_ptr->pid = f_posix_getpid();
   sem_ptr->count = 0;
   sem_ptr->auto_release = auto_release;
   return Resource(sem_ptr);

@@ -272,7 +272,7 @@ let strip_ns obj_name =
   | Some (_, name) -> name
   | None -> obj_name
 
-let list_items items = String.concat items ~sep:", "
+let concat_map ~sep ~f list = String.concat ~sep (List.map ~f list)
 
 let tparam_name (tp : Typing_defs.decl_tparam) = snd tp.tp_name
 
@@ -329,18 +329,18 @@ let print_constraint_kind = function
 let print_tparam_constraint ctx (ck, cty) =
   print_constraint_kind ck ^ " " ^ Typing_print.full_decl ctx cty
 
-let print_tparam_variance = function
+let string_of_variance = function
   | Ast_defs.Covariant -> "+"
   | Ast_defs.Contravariant -> "-"
   | Ast_defs.Invariant -> ""
 
-let print_tparam
-    ctx
-    { tp_name = (_, name); tp_constraints = cstrl; tp_variance = variance; _ } =
-  String.concat
-    ~sep:" "
-    ( (print_tparam_variance variance ^ name)
-    :: List.map cstrl ~f:(print_tparam_constraint ctx) )
+let print_tparam ctx { tp_name; tp_constraints; tp_variance; _ } =
+  let variance = string_of_variance tp_variance in
+  let name = snd tp_name in
+  let constraints =
+    concat_map ~sep:" " ~f:(print_tparam_constraint ctx) tp_constraints
+  in
+  Printf.sprintf "%s%s %s" variance name constraints
 
 let rec get_reactivity_attr r =
   match r with
@@ -357,9 +357,7 @@ let get_function_declaration ctx fun_name fun_type =
     match fun_type.ft_tparams with
     | ([], _) -> ""
     | (tparams, _) ->
-      Printf.sprintf "<%s>"
-      @@ list_items
-      @@ List.map tparams ~f:(print_tparam ctx)
+      Printf.sprintf "<%s>" (concat_map ~sep:", " ~f:(print_tparam ctx) tparams)
   in
   let args = print_fun_args ctx fun_type in
   let rtype =
@@ -411,7 +409,7 @@ let get_init_from_type ctx ty =
     | Tvarray_or_darray _ ->
       "varray[]"
     | Ttuple elems ->
-      Printf.sprintf "tuple(%s)" @@ list_items (List.map elems get_)
+      Printf.sprintf "tuple(%s)" (concat_map ~sep:", " ~f:get_ elems)
     (* Must be an enum, a containter type or a typedef for another supported type since those are the only
        cases we can have a constant value of some class *)
     | Tapply ((_, name), targs) ->
@@ -463,7 +461,8 @@ let get_init_from_type ctx ty =
       in
       Printf.sprintf
         "shape(%s)"
-        (list_items @@ Nast.ShapeMap.fold print_shape_field fields [])
+        ( String.concat ~sep:", "
+        @@ Nast.ShapeMap.fold print_shape_field fields [] )
     | _ -> raise Unsupported
   in
   get_ ty
@@ -557,12 +556,14 @@ let rec string_of_hint hint =
       coroutine
       (String.concat ~sep:", " (params @ variadic))
       (string_of_hint hf_return_ty)
-  | Htuple hints -> Printf.sprintf "(%s)" (string_of_hint_list hints)
+  | Htuple hints ->
+    Printf.sprintf "(%s)" (concat_map ~sep:", " ~f:string_of_hint hints)
   | Happly ((_, name), hints) ->
     let params =
       match hints with
       | [] -> ""
-      | _ -> Printf.sprintf "<%s>" (string_of_hint_list hints)
+      | _ ->
+        Printf.sprintf "<%s>" (concat_map ~sep:", " ~f:string_of_hint hints)
     in
     name ^ params
   | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
@@ -622,72 +623,102 @@ let rec string_of_hint hint =
   | Hdynamic -> "dynamic"
   | Hnothing -> "nothing"
   | Hpu_access (hint, (_, id)) -> string_of_hint hint ^ ":@" ^ id
-  | Hunion hints -> Printf.sprintf "(%s)" (string_of_hint_list ~sep:" | " hints)
+  | Hunion hints ->
+    Printf.sprintf "(%s)" (concat_map ~sep:" | " ~f:string_of_hint hints)
   | Hintersection hints ->
-    Printf.sprintf "(%s)" (string_of_hint_list ~sep:" & " hints)
+    Printf.sprintf "(%s)" (concat_map ~sep:" & " ~f:string_of_hint hints)
   | Hany -> failwith "unprintable type hint: Hany"
   | Herr -> failwith "unprintable type hint: Herr"
 
-and string_of_hint_list ?(sep = ", ") hints =
-  String.concat ~sep (List.map hints ~f:string_of_hint)
+let string_of_user_attribute { ua_name; ua_params } =
+  match ua_params with
+  | [] -> snd ua_name
+  | _ -> failwith "user attributes with parameters not supported"
 
-let get_class_declaration ctx (cls : Decl_provider.class_decl) =
-  Decl_provider.(
-    let consistent_construct =
-      match Class.construct cls with
-      | (_, ConsistentConstruct) -> "<<__ConsistentConstruct>> "
-      | (_, (Inconsistent | FinalClass)) -> ""
-    in
-    let final =
-      if Class.final cls then
-        "final "
-      else
-        ""
-    in
-    let kind =
-      match Class.kind cls with
-      | Ast_defs.Cabstract -> "abstract class"
-      | Ast_defs.Cnormal -> "class"
-      | Ast_defs.Cinterface -> "interface"
-      | Ast_defs.Ctrait -> "trait"
-      | Ast_defs.Cenum -> "enum"
-    in
-    let name = Class.name cls in
-    let tparams =
-      if List.is_empty @@ Class.tparams cls then
-        ""
-      else
-        Printf.sprintf
-          "<%s>"
-          (list_items @@ List.map (Class.tparams cls) ~f:(print_tparam ctx))
-    in
-    let nast = value_or_not_found name @@ get_class_nast ctx name in
-    let prefix_if_nonempty prefix s =
-      if s = "" then
-        ""
-      else
-        prefix ^ s
-    in
-    let extends =
-      prefix_if_nonempty " extends "
-      @@ list_items
-      @@ List.map nast.c_extends ~f:string_of_hint
-    in
-    let implements =
-      prefix_if_nonempty " implements "
-      @@ list_items
-      @@ List.map nast.c_implements ~f:string_of_hint
-    in
-    (* TODO: traits, records *)
+let string_of_user_attributes user_attributes =
+  match user_attributes with
+  | [] -> ""
+  | _ ->
     Printf.sprintf
-      "%s%s%s %s%s%s%s"
-      consistent_construct
-      final
-      kind
-      (strip_ns name)
-      tparams
-      extends
-      implements)
+      "<<%s>>"
+      (concat_map ~sep:", " ~f:string_of_user_attribute user_attributes)
+
+let string_of_constraint (kind, hint) =
+  let keyword =
+    match kind with
+    | Ast_defs.Constraint_as -> "as"
+    | Ast_defs.Constraint_eq -> "="
+    | Ast_defs.Constraint_super -> "super"
+  in
+  keyword ^ " " ^ string_of_hint hint
+
+let string_of_tparam
+    Aast.
+      { tp_variance; tp_name; tp_constraints; tp_reified; tp_user_attributes } =
+  let variance = string_of_variance tp_variance in
+  let name = snd tp_name in
+  let constraints = List.map tp_constraints ~f:string_of_constraint in
+  let user_attributes = string_of_user_attributes tp_user_attributes in
+  let reified =
+    match tp_reified with
+    | Aast.Erased -> ""
+    | Aast.SoftReified
+    | Aast.Reified ->
+      "refied"
+  in
+  String.concat
+    ~sep:" "
+    (user_attributes :: reified :: (variance ^ name) :: constraints)
+
+let get_class_declaration ctx name =
+  let class_ = value_or_not_found name @@ get_class_nast ctx name in
+  let user_attributes = string_of_user_attributes class_.c_user_attributes in
+  let final =
+    if class_.c_final then
+      "final"
+    else
+      ""
+  in
+  let kind =
+    match class_.c_kind with
+    | Ast_defs.Cabstract -> "abstract class"
+    | Ast_defs.Cnormal -> "class"
+    | Ast_defs.Cinterface -> "interface"
+    | Ast_defs.Ctrait -> "trait"
+    | Ast_defs.Cenum -> "enum"
+  in
+  let tparams =
+    match class_.c_tparams.c_tparam_list with
+    | [] -> ""
+    | tparams ->
+      Printf.sprintf "<%s>" (concat_map ~sep:", " ~f:string_of_tparam tparams)
+  in
+  let extends =
+    match class_.c_extends with
+    | [] -> ""
+    | _ ->
+      Printf.sprintf
+        "extends %s"
+        (concat_map ~sep:", " ~f:string_of_hint class_.c_extends)
+  in
+  let implements =
+    match class_.c_implements with
+    | [] -> ""
+    | _ ->
+      Printf.sprintf
+        "implements %s"
+        (concat_map ~sep:", " ~f:string_of_hint class_.c_implements)
+  in
+  (* TODO: traits, records *)
+  Printf.sprintf
+    "%s %s %s %s%s %s %s"
+    user_attributes
+    final
+    kind
+    (strip_ns name)
+    tparams
+    extends
+    implements
 
 let get_method_declaration
     ctx
@@ -968,7 +999,7 @@ let construct_class ctx cls target fields =
   if Class.kind cls = Ast_defs.Cenum then
     construct_enum ctx cls fields
   else
-    let decl = get_class_declaration ctx cls in
+    let decl = get_class_declaration ctx (Class.name cls) in
     let body = get_class_body ctx cls target fields in
     Printf.sprintf "%s {%s}" decl body
 
@@ -987,7 +1018,7 @@ let construct_typedef ctx t =
     if List.is_empty td.td_tparams then
       ""
     else
-      Printf.sprintf "<%s>" (list_items @@ List.map td.td_tparams tparam_name)
+      Printf.sprintf "<%s>" (concat_map ~sep:", " ~f:tparam_name td.td_tparams)
   in
   let constraint_ =
     match td.td_constraint with
@@ -1472,9 +1503,10 @@ let get_code strict_declarations partial_declarations =
   match non_empty_sections with
   | [(_, section)] -> format_section section
   | _ ->
-    String.concat ~sep:"\n"
-    @@ List.map non_empty_sections ~f:(fun (comment, section) ->
-           comment ^ "\n" ^ format_section section)
+    concat_map
+      ~sep:"\n"
+      ~f:(fun (comment, section) -> comment ^ "\n" ^ format_section section)
+      non_empty_sections
 
 let get_declarations ctx target class_dependencies global_dependencies =
   let (strict_class_dependencies, partial_class_dependencies) =

@@ -5,7 +5,6 @@ class WithConsistentConstruct {
     throw new \Exception();
   }
 }
-<<__ConsistentConstruct>>
 trait TExtendsWithConsistentConstruct {
   require implements \IExtendsWithConsistentConstruct;
   public function __construct() {
@@ -15,7 +14,6 @@ trait TExtendsWithConsistentConstruct {
     return new static();
   }
 }
-<<__ConsistentConstruct>>
 interface IExtendsWithConsistentConstruct {
   require extends \WithConsistentConstruct;
   public function __construct();

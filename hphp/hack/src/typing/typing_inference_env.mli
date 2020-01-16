@@ -165,3 +165,7 @@ val compress : t -> t
 
 (** Remove variables containing no information. *)
 val compress_g : t_global -> t_global
+
+(** Split multiple global environments into (weakly) connected components. *)
+val connected_components_g :
+  t_global_with_pos list -> t_global_with_pos list list

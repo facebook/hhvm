@@ -906,3 +906,143 @@ let compress env =
 
 let compress_g genv =
   IMap.filter (fun _ -> global_tyvar_info_carries_information) genv
+
+let construct_undirected_tyvar_graph genvs :
+    (Pos.t * global_tyvar_info) list IMap.t * ISet.t IMap.t =
+  (* gather all constraints per type variable *)
+  let all : (Pos.t * global_tyvar_info) list IMap.t =
+    List.fold genvs ~init:IMap.empty ~f:(fun all (pos, genv) ->
+        IMap.fold
+          (fun tyvar tyvar_info ->
+            IMap.update tyvar @@ function
+            | None -> Some [(pos, tyvar_info)]
+            | Some tl -> Some ((pos, tyvar_info) :: tl))
+          genv
+          all)
+  in
+  (* create an undirected graph of type variables where an edge
+   * u <~> v means u <: v or v <: u.
+   * the graph is a mapping from a tyvar to other tyvars (a collection of
+   * directed edges).
+   *)
+  let add_edge ~(from : Ident.t) ~(to_ : Ident.t) (graph : ISet.t IMap.t) =
+    IMap.update
+      from
+      (fun neighbors ->
+        let neighbors = Option.value neighbors ~default:ISet.empty in
+        Some (ISet.add to_ neighbors))
+      graph
+  in
+  let walk tyvar ty graph =
+    match ty with
+    | ConstraintType _ -> graph
+    | LoclType ty ->
+      let walker =
+        object
+          inherit [_] Type_visitor.locl_type_visitor
+
+          method! on_tvar graph _ tyvar' =
+            add_edge ~from:tyvar ~to_:tyvar' graph
+            |> add_edge ~from:tyvar' ~to_:tyvar
+        end
+      in
+      walker#on_type graph ty
+  in
+  let graph : ISet.t IMap.t =
+    IMap.fold
+      (fun tyvar infos edges ->
+        List.fold infos ~init:edges ~f:(fun edges (_, tyvar_info) ->
+            match tyvar_info.solving_info with
+            | TVIType ty -> walk tyvar (LoclType ty) edges
+            | TVIConstraints cstrs ->
+              ITySet.fold (walk tyvar) cstrs.lower_bounds edges
+              |> ITySet.fold (walk tyvar) cstrs.upper_bounds))
+      all
+      IMap.empty
+  in
+  (all, graph)
+
+let split_undirected_tyvar_graph (graph : ISet.t IMap.t) : ISet.t list =
+  (* compute connected components by doing DFS *)
+  let visited : ISet.t ref = ref ISet.empty in
+  let rec dfs (component : ISet.t) tyvar : ISet.t =
+    let component = ISet.add tyvar component in
+    visited := ISet.add tyvar !visited;
+    ISet.fold
+      (fun neighbor component ->
+        if not (ISet.mem neighbor !visited) then
+          dfs component neighbor
+        else
+          component)
+      (IMap.find tyvar graph)
+      component
+  in
+  let components : ISet.t list =
+    IMap.fold
+      (fun tyvar _ components ->
+        if not (ISet.mem tyvar !visited) then
+          let c = dfs ISet.empty tyvar in
+          c :: components
+        else
+          components)
+      graph
+      []
+  in
+  (* sanity check: no type variables should be lost *)
+  (* TODO: (hverr) T60273306 Normally the following should hold as well:
+   *       sum(len(c for c in components)) == len(all)
+   *       unfortunately it doesn't because somehow non-global (?)
+   *       variables appear in lower/upper bounds of some global
+   *       variables, for which we have no information whatsoever
+   *       (e.g. position), where do these tyvars come from?
+   *)
+  let () =
+    assert (
+      Int.equal
+        (IMap.cardinal graph)
+        (List.fold components ~init:0 ~f:(fun acc c -> acc + ISet.cardinal c))
+    )
+  in
+  (* sanity check: check whether components are really disconnected *)
+  let (_ : ISet.t) =
+    List.fold components ~init:ISet.empty ~f:(fun c set ->
+        ISet.fold
+          (fun var set ->
+            if ISet.mem var set then
+              failwith "variable is in two connected components, impossible"
+            else
+              ISet.add var set)
+          c
+          set)
+  in
+  components
+
+let connected_components_g genvs =
+  let (nodes, graph) = construct_undirected_tyvar_graph genvs in
+  let components = split_undirected_tyvar_graph graph in
+  (* collect tyvar information *)
+  let components : (Pos.t * global_tyvar_info) list IMap.t list =
+    List.map components ~f:(fun vars ->
+        ISet.fold
+          (fun var ->
+            IMap.update var @@ function
+            | Some _ -> failwith "programming error, expected unique variables"
+            | None -> IMap.find_opt var nodes)
+          vars
+          IMap.empty)
+  in
+  (* convert each component to a list of gobal environments *)
+  let component_to_subgraph
+      (component : (Pos.t * global_tyvar_info) list IMap.t) :
+      t_global_with_pos list =
+    IMap.fold
+      (fun tyvar infos all ->
+        let infos =
+          List.map infos ~f:(fun (pos, tyvar_info) ->
+              (pos, IMap.singleton tyvar tyvar_info))
+        in
+        infos @ all)
+      component
+      []
+  in
+  List.map components ~f:component_to_subgraph

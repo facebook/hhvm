@@ -107,6 +107,8 @@ module StateSubConstraintGraphs = struct
     type t = Inf.t_global_with_pos list
   end)
 
+  let save_to = save
+
   let save subconstraints =
     let subconstraints =
       List.map subconstraints ~f:(fun (p, env) -> (p, Inf.compress_g env))

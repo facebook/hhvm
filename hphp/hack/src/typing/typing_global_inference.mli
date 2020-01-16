@@ -28,6 +28,8 @@ module StateSubConstraintGraphs : sig
   val load : string -> t
 
   val save : t -> unit
+
+  val save_to : string -> t -> unit
 end
 
 module StateConstraintGraph : sig

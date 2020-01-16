@@ -26,6 +26,8 @@ module StateErrors = struct
   let has_error t id = not @@ List.is_empty @@ get_errors t id
 
   let elements t = IdentMap.elements !t
+
+  let cardinal t = IdentMap.fold (fun _ l acc -> acc + List.length l) !t 0
 end
 
 let make_error_callback errors var ?code msgl =

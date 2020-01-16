@@ -20,6 +20,8 @@ module StateErrors : sig
   val get_errors : t -> Ident.t -> Errors.error list
 
   val elements : t -> (Ident.t * Errors.error list) list
+
+  val cardinal : t -> int
 end
 
 module StateSubConstraintGraphs : sig

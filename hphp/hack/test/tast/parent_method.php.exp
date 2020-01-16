@@ -16,10 +16,9 @@
          m_params =
          [{ param_annotation = ([4:25-27], int);
             param_type_hint = ((int), (Some ([4:21-24], (Hprim Tint))));
-            param_is_reference = false; param_is_variadic = false;
-            param_pos = [4:25-27]; param_name = "$i"; param_expr = None;
-            param_callconv = None; param_user_attributes = [];
-            param_visibility = None }
+            param_is_variadic = false; param_pos = [4:25-27];
+            param_name = "$i"; param_expr = None; param_callconv = None;
+            param_user_attributes = []; param_visibility = None }
            ];
          m_body =
          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };

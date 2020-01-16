@@ -23,10 +23,9 @@
        f_params =
        [{ param_annotation = ([5:23-25], dynamic);
           param_type_hint = ((dynamic), (Some ([5:15-22], Hdynamic)));
-          param_is_reference = false; param_is_variadic = false;
-          param_pos = [5:23-25]; param_name = "$c"; param_expr = None;
-          param_callconv = None; param_user_attributes = [];
-          param_visibility = None }
+          param_is_variadic = false; param_pos = [5:23-25];
+          param_name = "$c"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None }
          ];
        f_body =
        { fb_ast =

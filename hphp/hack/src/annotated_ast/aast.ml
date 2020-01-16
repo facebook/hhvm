@@ -247,14 +247,11 @@ and ('ex, 'fb, 'en, 'hi) xhp_attribute =
   | Xhp_simple of pstring * ('ex, 'fb, 'en, 'hi) expr
   | Xhp_spread of ('ex, 'fb, 'en, 'hi) expr
 
-and is_reference = bool
-
 and is_variadic = bool
 
 and ('ex, 'fb, 'en, 'hi) fun_param = {
   param_annotation: 'ex;
   param_type_hint: 'hi type_hint;
-  param_is_reference: is_reference;
   param_is_variadic: is_variadic;
   param_pos: pos;
   param_name: string;

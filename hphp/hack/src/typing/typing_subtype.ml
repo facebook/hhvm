@@ -1837,11 +1837,9 @@ and simplify_subtype_params
     &&& fun env ->
     let { fp_type = ty_sub; _ } = sub in
     let { fp_type = ty_super; _ } = super in
-    (* Check that the calling conventions of the params are compatible.
-     * We don't currently raise an error for reffiness because function
-     * hints don't support '&' annotations (enforce_ctpbr = false). *)
+    (* Check that the calling conventions of the params are compatible. *)
     env
-    |> simplify_param_modes ~enforce_ctpbr:is_method ~subtype_env sub super
+    |> simplify_param_modes ~subtype_env sub super
     &&& simplify_param_accept_disposable ~subtype_env sub super
     &&& begin
           fun env ->
@@ -2302,32 +2300,13 @@ and simplify_subtype_fun_params_reactivity
       cond_type_super
       env
 
-and simplify_param_modes ?(enforce_ctpbr = true) ~subtype_env param1 param2 env
-    =
-  (* ctpbr = call-time pass-by-reference i.e. & annotation *)
+and simplify_param_modes ~subtype_env param1 param2 env =
   let { fp_pos = pos1; fp_kind = mode1; _ } = param1 in
   let { fp_pos = pos2; fp_kind = mode2; _ } = param2 in
   match (mode1, mode2) with
   | (FPnormal, FPnormal)
-  | (FPref, FPref)
   | (FPinout, FPinout) ->
     valid env
-  | (FPnormal, FPref) ->
-    if enforce_ctpbr then
-      invalid
-        ~fail:(fun () ->
-          Errors.reffiness_invariant pos2 pos1 `normal subtype_env.on_error)
-        env
-    else
-      valid env
-  | (FPref, FPnormal) ->
-    if enforce_ctpbr then
-      invalid
-        ~fail:(fun () ->
-          Errors.reffiness_invariant pos1 pos2 `normal subtype_env.on_error)
-        env
-    else
-      valid env
   | (FPnormal, FPinout) ->
     invalid
       ~fail:(fun () -> Errors.inoutness_mismatch pos2 pos1 subtype_env.on_error)
@@ -2335,16 +2314,6 @@ and simplify_param_modes ?(enforce_ctpbr = true) ~subtype_env param1 param2 env
   | (FPinout, FPnormal) ->
     invalid
       ~fail:(fun () -> Errors.inoutness_mismatch pos1 pos2 subtype_env.on_error)
-      env
-  | (FPref, FPinout) ->
-    invalid
-      ~fail:(fun () ->
-        Errors.reffiness_invariant pos1 pos2 `inout subtype_env.on_error)
-      env
-  | (FPinout, FPref) ->
-    invalid
-      ~fail:(fun () ->
-        Errors.reffiness_invariant pos2 pos1 `inout subtype_env.on_error)
       env
 
 and simplify_param_accept_disposable ~subtype_env param1 param2 env =

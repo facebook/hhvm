@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c2747033bf44a814867f3a61b17ee61f>>
+// @generated SignedSource<<f4f45a4e8da956a88ceabf73651bac9e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -67,7 +67,6 @@ pub enum ShapeKind {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
 pub enum ParamMode {
     FPnormal,
-    FPref,
     FPinout,
 }
 

@@ -15,7 +15,7 @@
          m_params =
          [{ param_annotation = ([6:35-37], int);
             param_hint = (Some ([6:31-34], (Hprim Tint)));
-            param_is_reference = false; param_is_variadic = false;
+            param_is_variadic = false;
             param_pos = [6:35-37]; param_name = "$s"; param_expr = None;
             param_callconv = None; param_user_attributes = [] }
            ];
@@ -48,7 +48,7 @@
           m_params =
           [{ param_annotation = ([9:35-37], int);
              param_hint = (Some ([9:31-34], (Hprim Tint)));
-             param_is_reference = false; param_is_variadic = false;
+             param_is_variadic = false;
              param_pos = [9:35-37]; param_name = "$f"; param_expr = None;
              param_callconv = None; param_user_attributes = [] }
             ];
@@ -83,7 +83,7 @@
        f_params =
        [{ param_annotation = ([13:23-25], bool);
           param_hint = (Some ([13:18-22], (Hprim Tbool)));
-          param_is_reference = false; param_is_variadic = false;
+          param_is_variadic = false;
           param_pos = [13:23-25]; param_name = "$b"; param_expr = None;
           param_callconv = None; param_user_attributes = [] }
          ];

@@ -29,7 +29,7 @@
          m_params =
          [{ param_annotation = ([6:25-33], T);
             param_hint = (Some ([6:23-24], (Habstr "T")));
-            param_is_reference = false; param_is_variadic = false;
+            param_is_variadic = false;
             param_pos = [6:25-33]; param_name = "$default";
             param_expr = None; param_callconv = None;
             param_user_attributes = [] }
@@ -57,7 +57,7 @@
           m_params =
           [{ param_annotation = ([9:25-31], T);
              param_hint = (Some ([9:23-24], (Habstr "T")));
-             param_is_reference = false; param_is_variadic = false;
+             param_is_variadic = false;
              param_pos = [9:25-31]; param_name = "$value"; param_expr = None;
              param_callconv = None; param_user_attributes = [] }
             ];
@@ -100,7 +100,7 @@
           (Some ([14:20-26],
                  (Happly (([14:20-23], "\\Ref"), [([14:24-25], (Habstr "T"))]
                     ))));
-          param_is_reference = false; param_is_variadic = false;
+          param_is_variadic = false;
           param_pos = [14:27-29]; param_name = "$r"; param_expr = None;
           param_callconv = None; param_user_attributes = [] }
          ];
@@ -117,7 +117,7 @@
                           f_variadic = FVnonVariadic;
                           f_params =
                           [{ param_annotation = ([15:10-12], T);
-                             param_hint = None; param_is_reference = false;
+                             param_hint = None;
                              param_is_variadic = false;
                              param_pos = [15:10-12]; param_name = "$x";
                              param_expr = None; param_callconv = None;
@@ -160,7 +160,7 @@
        f_params =
        [{ param_annotation = ([18:31-33], string);
           param_hint = (Some ([18:24-30], (Hprim Tstring)));
-          param_is_reference = false; param_is_variadic = false;
+          param_is_variadic = false;
           param_pos = [18:31-33]; param_name = "$_"; param_expr = None;
           param_callconv = None; param_user_attributes = [] }
          ];
@@ -177,12 +177,12 @@
        f_params =
        [{ param_annotation = ([20:19-21], int);
           param_hint = (Some ([20:15-18], (Hprim Tint)));
-          param_is_reference = false; param_is_variadic = false;
+          param_is_variadic = false;
           param_pos = [20:19-21]; param_name = "$a"; param_expr = None;
           param_callconv = None; param_user_attributes = [] };
          { param_annotation = ([20:30-32], string);
            param_hint = (Some ([20:23-29], (Hprim Tstring)));
-           param_is_reference = false; param_is_variadic = false;
+           param_is_variadic = false;
            param_pos = [20:30-32]; param_name = "$b"; param_expr = None;
            param_callconv = None; param_user_attributes = [] }
          ];

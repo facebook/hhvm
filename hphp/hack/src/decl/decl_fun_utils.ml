@@ -108,7 +108,7 @@ let make_param_ty env ~is_lambda param =
     else
       ty
   in
-  let mode = get_param_mode param.param_is_reference param.param_callconv in
+  let mode = get_param_mode param.param_callconv in
   let rx_annotation =
     if has_at_most_rx_as_func then
       Some Param_rx_var

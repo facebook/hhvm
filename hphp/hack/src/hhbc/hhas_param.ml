@@ -9,7 +9,6 @@
 
 type t = {
   param_name: string;
-  param_is_reference: bool;
   param_is_variadic: bool;
   param_is_inout: bool;
   param_user_attributes: Hhas_attribute.t list;
@@ -19,7 +18,6 @@ type t = {
 
 let make
     param_name
-    param_is_reference
     param_is_variadic
     param_is_inout
     param_user_attributes
@@ -27,7 +25,6 @@ let make
     param_default_value =
   {
     param_name;
-    param_is_reference;
     param_is_variadic;
     param_is_inout;
     param_user_attributes;
@@ -36,8 +33,6 @@ let make
   }
 
 let name p = p.param_name
-
-let is_reference p = p.param_is_reference
 
 let is_variadic p = p.param_is_variadic
 

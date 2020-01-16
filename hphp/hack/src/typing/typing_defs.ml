@@ -82,7 +82,6 @@ type shape_kind =
 
 type param_mode =
   | FPnormal
-  | FPref
   | FPinout
 [@@deriving eq]
 
@@ -724,11 +723,9 @@ let arity_min ft_arity : int =
   | Fellipsis (min, _) ->
     min
 
-let get_param_mode ~is_ref callconv =
-  (* If a param has both & and inout, this should have errored in parsing. *)
+let get_param_mode callconv =
   match callconv with
   | Some Ast_defs.Pinout -> FPinout
-  | None when is_ref -> FPref
   | None -> FPnormal
 
 module DependentKind = struct

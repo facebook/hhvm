@@ -128,7 +128,6 @@ let gen_pu_accessor
           param_annotation = annotation pos;
           param_type_hint =
             (snd (annotation pos), Some (simple_typ pos "\\HH\\string"));
-          param_is_reference = false;
           param_is_variadic = false;
           param_pos = pos;
           param_name = "$atom";

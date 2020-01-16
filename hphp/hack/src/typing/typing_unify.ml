@@ -26,23 +26,15 @@ let unify_arities ~ellipsis_is_variadic anon_arity func_arity : bool =
     Int.equal a_min f_min && Int.equal a_max f_max
   | (_, _) -> false
 
-let unify_param_modes ?(enforce_ctpbr = true) param1 param2 on_error =
-  (* ctpbr = call-time pass-by-reference i.e. & annotation *)
+let unify_param_modes param1 param2 on_error =
   let { fp_pos = pos1; fp_kind = mode1; _ } = param1 in
   let { fp_pos = pos2; fp_kind = mode2; _ } = param2 in
   match (mode1, mode2) with
   | (FPnormal, FPnormal)
-  | (FPref, FPref)
   | (FPinout, FPinout) ->
     ()
-  | (FPnormal, FPref) ->
-    if enforce_ctpbr then Errors.reffiness_invariant pos2 pos1 `normal on_error
-  | (FPref, FPnormal) ->
-    if enforce_ctpbr then Errors.reffiness_invariant pos1 pos2 `normal on_error
   | (FPnormal, FPinout) -> Errors.inoutness_mismatch pos2 pos1 on_error
   | (FPinout, FPnormal) -> Errors.inoutness_mismatch pos1 pos2 on_error
-  | (FPref, FPinout) -> Errors.reffiness_invariant pos1 pos2 `inout on_error
-  | (FPinout, FPref) -> Errors.reffiness_invariant pos2 pos1 `inout on_error
 
 let unify_accept_disposable param1 param2 on_error =
   let { fp_pos = pos1; fp_accept_disposable = mode1; _ } = param1 in

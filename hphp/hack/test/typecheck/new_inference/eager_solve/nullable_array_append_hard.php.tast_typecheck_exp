@@ -28,7 +28,7 @@
          m_params =
          [{ param_annotation = ([5:40-45], T);
             param_hint = (Some ([5:38-39], (Habstr "T")));
-            param_is_reference = false; param_is_variadic = false;
+            param_is_variadic = false;
             param_pos = [5:40-45]; param_name = "$item"; param_expr = None;
             param_callconv = None; param_user_attributes = [] }
            ];
@@ -74,12 +74,12 @@
                     ([7:27-38],
                      (Happly (([7:27-30], "\\vec"),
                         [([7:31-37], (Hprim Tstring))]))))));
-          param_is_reference = false; param_is_variadic = false;
+          param_is_variadic = false;
           param_pos = [7:39-41]; param_name = "$v"; param_expr = None;
           param_callconv = None; param_user_attributes = [] };
          { param_annotation = ([7:47-49], int);
            param_hint = (Some ([7:43-46], (Hprim Tint)));
-           param_is_reference = false; param_is_variadic = false;
+           param_is_variadic = false;
            param_pos = [7:47-49]; param_name = "$i"; param_expr = None;
            param_callconv = None; param_user_attributes = [] }
          ];

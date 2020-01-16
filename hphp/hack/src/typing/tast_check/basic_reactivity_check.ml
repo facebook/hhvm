@@ -723,14 +723,6 @@ let check_has_at_most_rx_as_rxfunc_attribute env attrs =
     SN.UserAttributes.uaAtMostRxAsFunc
     Errors.atmost_rx_as_rxfunc_invalid_location
 
-let check_reference_in_rx env ctx pos param =
-  let check_reactivity =
-    (not (equal_reactivity ctx.reactivity Nonreactive))
-    && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
-  in
-  if check_reactivity && param.param_is_reference then
-    Errors.reference_in_rx pos
-
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -741,10 +733,7 @@ let handler =
       check#handle_body env ctx f.f_body
 
     method! at_fun_ env f =
-      check_has_at_most_rx_as_rxfunc_attribute env f.f_user_attributes;
-      let ctx = new_ctx (Env.env_reactivity env) in
-      let pos = fst f.f_name in
-      List.iter f.f_params (check_reference_in_rx env ctx pos)
+      check_has_at_most_rx_as_rxfunc_attribute env f.f_user_attributes
 
     method! at_method_ env m =
       check_has_at_most_rx_as_rxfunc_attribute env m.m_user_attributes;

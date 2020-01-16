@@ -906,12 +906,6 @@ and string_of_is_variadic b =
   else
     ""
 
-and string_of_is_reference b =
-  if b then
-    "&"
-  else
-    ""
-
 and string_of_fun ~env f use_list =
   let string_of_args p =
     match p.A.param_name with
@@ -944,9 +938,7 @@ and string_of_fun ~env f use_list =
         else
           param_text ^ " "
       in
-      let param_text =
-        param_text ^ string_of_is_reference p.A.param_is_reference ^ name
-      in
+      let param_text = param_text ^ name in
       Some (param_text ^ default_val)
   in
   let args =
@@ -1443,7 +1435,6 @@ let string_of_param env p =
   ^ string_of_is_inout (Hhas_param.is_inout p)
   ^ string_of_is_variadic (Hhas_param.is_variadic p)
   ^ string_of_type_info_option param_type_info
-  ^ string_of_is_reference (Hhas_param.is_reference p)
   ^ param_name
   ^ string_of_param_default_value_option env param_default_value
 

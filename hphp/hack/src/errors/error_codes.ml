@@ -138,8 +138,8 @@ module Naming = struct
     | WildcardDisallowed
     | AttributeClassNameConflict
     | MethodNeedsVisibility
-    | ReferenceInStrictMode
-    | ReferenceInRx
+    | ReferenceInStrictModeDEPRECATED
+    | ReferenceInRxDEPRECATED
     | DeclareStatementDEPRECATED
     | MisplacedRxOfScopeDEPRECATED
     | RxOfScopeAndExplicitRxDEPRECATED
@@ -212,7 +212,7 @@ module NastCheck = struct
     | StaticMemoizedFunction
     | InoutParamsOutsideOfSync
     | InoutParamsSpecial
-    | InoutParamsMixByref
+    | InoutParamsMixByrefDEPRECATED
     | InoutParamsMemoize
     | InoutParamsRetByRefDEPRECATED
     | ReadingFromAppend
@@ -235,8 +235,8 @@ module NastCheck = struct
     | NoOnlyrxIfRxfuncForRxIfArgs
     | CoroutineInConstructor
     | IllegalReturnByRefDEPRECATED
-    | IllegalByRefExpr
-    | VariadicByRefParam
+    | IllegalByRefExprDEPRECATED
+    | VariadicByRefParamDEPRECATED
     | MaybeMutableAttributeOnFunction
     | ConflictingMutableAndMaybeMutableAttributes
     | MaybeMutableMethodsMustBeReactive
@@ -245,10 +245,10 @@ module NastCheck = struct
     | NonstaticMethodInAbstractFinalClass
     | MutableOnStaticDEPRECATED
     | ClassnameConstInstanceOfDEPRECATED
-    | ByRefParamOnConstruct
-    | ByRefDynamicCall
-    | ByRefProperty
-    | ByRefCall
+    | ByRefParamOnConstructDEPRECATED
+    | ByRefDynamicCallDEPRECATED
+    | ByRefPropertyDEPRECATED
+    | ByRefCallDEPRECATED
     | SwitchNonTerminalDefault
     | SwitchMultipleDefault
     | RepeatedRecordFieldName
@@ -427,20 +427,20 @@ module Typing = struct
     | ArrayGetWithOptionalField
     | UnknownFieldDisallowedInShape
     | NullableCast
-    | PassByRefAnnotationMissing
+    | PassByRefAnnotationMissingDEPRECATED
     | NonCallArgumentInSuspend
     | NonCoroutineCallInSuspend
     | CoroutineCallOutsideOfSuspend
     | FunctionIsNotCoroutine
     | CoroutinnessMismatch
     | ExpectingAwaitableReturnTypeHint
-    | ReffinessInvariant
+    | ReffinessInvariantDEPRECATED
     | DollardollarLvalue
     | StaticMethodOnInterfaceDEPRECATED
     | DuplicateUsingVar
     | IllegalDisposable
     | EscapingDisposable
-    | PassByRefAnnotationUnexpected
+    | PassByRefAnnotationUnexpectedDEPRECATED
     | InoutAnnotationMissing
     | InoutAnnotationUnexpected
     | InoutnessMismatch
@@ -484,7 +484,7 @@ module Typing = struct
     | AmbiguousLambda
     | EllipsisStrictMode
     | UntypedLambdaStrictMode
-    | BindingRefInArray
+    | BindingRefInArrayDEPRECATED
     | EchoInReactiveContext
     | SuperglobalInReactiveContext
     | StaticPropertyInReactiveContext
@@ -512,7 +512,7 @@ module Typing = struct
     | ShapesKeyExistsAlwaysFalse
     | ShapesMethodAccessWithNonExistentField
     | NonClassMember
-    | PassingArrayCellByRef
+    | PassingArrayCellByRefDEPRECATED
     | CallSiteReactivityMismatch
     | RxParameterConditionMismatch
     | AmbiguousObjectAccess
@@ -558,7 +558,7 @@ module Typing = struct
     | UnknownObjectMember
     | UnknownType
     | InvalidArrayKey
-    | ReferenceExprNotFunctionArg
+    | ReferenceExprNotFunctionArgDEPRECATED
     | RedundantRxCondition
     | RedeclaringMissingMethod
     | InvalidEnforceableTypeArgument

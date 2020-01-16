@@ -157,7 +157,6 @@ let rewrite_params_and_body defs used refs params body =
     | Some (l, e) ->
       Hhas_param.make
         (Hhas_param.name param)
-        (Hhas_param.is_reference param)
         (Hhas_param.is_variadic param)
         (Hhas_param.is_inout param)
         (Hhas_param.user_attributes param)

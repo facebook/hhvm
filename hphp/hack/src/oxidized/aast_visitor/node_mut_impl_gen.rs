@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8ebafd08585ee6b2d25e7143908d5a3e>>
+// @generated SignedSource<<f28df777729916b716f4af1af8eedf56>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -924,7 +924,6 @@ impl<Context, Ex, Fb, En, Hi> NodeMut<Context, Ex, Fb, En, Hi> for FunParam<Ex, 
     ) {
         v.visit_ex(c, &mut self.annotation);
         self.type_hint.accept(c, v);
-        self.is_reference.accept(c, v);
         self.is_variadic.accept(c, v);
         self.pos.accept(c, v);
         self.name.accept(c, v);

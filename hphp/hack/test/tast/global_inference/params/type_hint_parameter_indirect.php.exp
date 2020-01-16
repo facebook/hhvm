@@ -10,10 +10,10 @@ Errors:
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ param_annotation = ([3:24-26], nothing);
-         param_type_hint = ((nothing), None); param_is_reference = false;
-         param_is_variadic = false; param_pos = [3:24-26]; param_name = "$x";
-         param_expr = None; param_callconv = None;
-         param_user_attributes = []; param_visibility = None }
+         param_type_hint = ((nothing), None); param_is_variadic = false;
+         param_pos = [3:24-26]; param_name = "$x"; param_expr = None;
+         param_callconv = None; param_user_attributes = [];
+         param_visibility = None }
         ];
       f_body =
       { fb_ast =
@@ -41,15 +41,14 @@ Errors:
        f_params =
        [{ param_annotation = ([7:24-26], {suggest:mixed});
           param_type_hint = (({suggest:mixed}), None);
-          param_is_reference = false; param_is_variadic = false;
-          param_pos = [7:24-26]; param_name = "$x"; param_expr = None;
-          param_callconv = None; param_user_attributes = [];
-          param_visibility = None };
+          param_is_variadic = false; param_pos = [7:24-26];
+          param_name = "$x"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None };
          { param_annotation = ([7:28-30], mixed);
-           param_type_hint = ((mixed), None); param_is_reference = false;
-           param_is_variadic = false; param_pos = [7:28-30];
-           param_name = "$i"; param_expr = None; param_callconv = None;
-           param_user_attributes = []; param_visibility = None }
+           param_type_hint = ((mixed), None); param_is_variadic = false;
+           param_pos = [7:28-30]; param_name = "$i"; param_expr = None;
+           param_callconv = None; param_user_attributes = [];
+           param_visibility = None }
          ];
        f_body =
        { fb_ast =
@@ -77,15 +76,14 @@ Errors:
        f_params =
        [{ param_annotation = ([11:19-21], {suggest:mixed});
           param_type_hint = (({suggest:mixed}), None);
-          param_is_reference = false; param_is_variadic = false;
-          param_pos = [11:19-21]; param_name = "$x"; param_expr = None;
-          param_callconv = None; param_user_attributes = [];
-          param_visibility = None };
+          param_is_variadic = false; param_pos = [11:19-21];
+          param_name = "$x"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None };
          { param_annotation = ([11:23-25], mixed);
-           param_type_hint = ((mixed), None); param_is_reference = false;
-           param_is_variadic = false; param_pos = [11:23-25];
-           param_name = "$w"; param_expr = None; param_callconv = None;
-           param_user_attributes = []; param_visibility = None }
+           param_type_hint = ((mixed), None); param_is_variadic = false;
+           param_pos = [11:23-25]; param_name = "$w"; param_expr = None;
+           param_callconv = None; param_user_attributes = [];
+           param_visibility = None }
          ];
        f_body =
        { fb_ast =
@@ -121,20 +119,19 @@ Errors:
            (Some ([15:19-27],
                   (Happly (([15:19-22], "\\HH\\vec"),
                      [([15:23-26], (Hprim Tint))])))));
-          param_is_reference = false; param_is_variadic = false;
-          param_pos = [15:28-30]; param_name = "$x"; param_expr = None;
-          param_callconv = None; param_user_attributes = [];
-          param_visibility = None };
+          param_is_variadic = false; param_pos = [15:28-30];
+          param_name = "$x"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None };
          { param_annotation = ([15:32-34], int);
-           param_type_hint = ((int), None); param_is_reference = false;
-           param_is_variadic = false; param_pos = [15:32-34];
-           param_name = "$i"; param_expr = None; param_callconv = None;
-           param_user_attributes = []; param_visibility = None };
+           param_type_hint = ((int), None); param_is_variadic = false;
+           param_pos = [15:32-34]; param_name = "$i"; param_expr = None;
+           param_callconv = None; param_user_attributes = [];
+           param_visibility = None };
          { param_annotation = ([15:36-38], mixed);
-           param_type_hint = ((mixed), None); param_is_reference = false;
-           param_is_variadic = false; param_pos = [15:36-38];
-           param_name = "$w"; param_expr = None; param_callconv = None;
-           param_user_attributes = []; param_visibility = None }
+           param_type_hint = ((mixed), None); param_is_variadic = false;
+           param_pos = [15:36-38]; param_name = "$w"; param_expr = None;
+           param_callconv = None; param_user_attributes = [];
+           param_visibility = None }
          ];
        f_body =
        { fb_ast =

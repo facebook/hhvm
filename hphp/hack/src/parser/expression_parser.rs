@@ -2548,12 +2548,7 @@ where
     }
 
     fn parse_use_variable(&mut self) -> S::R {
-        if self.peek_token_kind() == TokenKind::Ampersand {
-            self.with_error(Errors::error1062);
-            S!(make_missing, self, self.pos())
-        } else {
-            self.require_variable()
-        }
+        self.require_variable()
     }
 
     fn parse_anon_or_lambda_or_awaitable(&mut self) -> S::R {

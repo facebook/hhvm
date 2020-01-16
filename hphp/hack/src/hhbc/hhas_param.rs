@@ -12,7 +12,6 @@ extern crate bitflags;
 #[derive(Clone)]
 pub struct HhasParam {
     pub name: String,
-    pub is_reference: bool,
     pub is_variadic: bool,
     pub is_inout: bool,
     pub user_attributes: Vec<HhasAttribute>,
@@ -35,19 +34,5 @@ impl HhasParam {
 
     pub fn with_name(&mut self, name: String) {
         self.name = name;
-    }
-
-    pub fn switch_inout_to_reference(&mut self) {
-        if self.is_inout {
-            self.is_inout = false;
-            self.is_reference = true;
-        }
-    }
-
-    pub fn switch_reference_to_inout(&mut self) {
-        if self.is_reference {
-            self.is_inout = true;
-            self.is_reference = false;
-        }
     }
 }

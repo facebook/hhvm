@@ -7,10 +7,9 @@
       [{ param_annotation = ([3:18-20], ?int);
          param_type_hint =
          ((?int), (Some ([3:13-17], (Hoption ([3:14-17], (Hprim Tint))))));
-         param_is_reference = false; param_is_variadic = false;
-         param_pos = [3:18-20]; param_name = "$x"; param_expr = None;
-         param_callconv = None; param_user_attributes = [];
-         param_visibility = None }
+         param_is_variadic = false; param_pos = [3:18-20]; param_name = "$x";
+         param_expr = None; param_callconv = None;
+         param_user_attributes = []; param_visibility = None }
         ];
       f_body =
       { fb_ast =

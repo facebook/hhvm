@@ -470,7 +470,6 @@ let param_as_value env (ty, mode) =
   match mode with
   | FPnormal -> Atom ty_str
   | FPinout -> Atom (Printf.sprintf "[inout]%s" ty_str)
-  | FPref -> Atom (Printf.sprintf "[ref]%s" ty_str)
 
 let genv_as_value env genv =
   let {

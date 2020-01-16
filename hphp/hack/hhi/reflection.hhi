@@ -200,8 +200,6 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getDocComment(): mixed; // string | false
   public function getStaticVariables(): darray<string, mixed>;
   <<__Rx, __MaybeMutable>>
-  public function returnsReference(): bool;
-  <<__Rx, __MaybeMutable>>
   public function getReturnTypeText();
   <<__Rx, __MaybeMutable>>
   final public function getAttributes(): darray<string, varray<mixed>>;

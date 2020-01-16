@@ -36,7 +36,7 @@
        f_params =
        [{ Aast.AnnotatedAST.param_annotation = ([9:17-22], bool);
           param_hint = (Some ([9:12-16], (Hprim Tbool)));
-          param_is_reference = false; param_is_variadic = false;
+          param_is_variadic = false;
           param_pos = [9:17-22]; param_name = "$cond"; param_expr = None;
           param_callconv = None; param_user_attributes = [] }
          ];

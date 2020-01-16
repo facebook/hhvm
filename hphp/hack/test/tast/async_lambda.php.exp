@@ -10,10 +10,9 @@
       f_params =
       [{ param_annotation = ([3:33-35], string);
          param_type_hint = ((string), (Some ([3:26-32], (Hprim Tstring))));
-         param_is_reference = false; param_is_variadic = false;
-         param_pos = [3:33-35]; param_name = "$s"; param_expr = None;
-         param_callconv = None; param_user_attributes = [];
-         param_visibility = None }
+         param_is_variadic = false; param_pos = [3:33-35]; param_name = "$s";
+         param_expr = None; param_callconv = None;
+         param_user_attributes = []; param_visibility = None }
         ];
       f_body =
       { fb_ast =
@@ -96,7 +95,6 @@
                          f_params =
                          [{ param_annotation = ([9:15-17], string);
                             param_type_hint = ((string), None);
-                            param_is_reference = false;
                             param_is_variadic = false; param_pos = [9:15-17];
                             param_name = "$x"; param_expr = None;
                             param_callconv = None;

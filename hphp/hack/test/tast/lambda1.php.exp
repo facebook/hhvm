@@ -28,7 +28,6 @@
                            param_type_hint =
                            (((dynamic | ?(bool | float | resource | arraykey | FormatString<nothing>))),
                             None);
-                           param_is_reference = false;
                            param_is_variadic = false; param_pos = [4:8-10];
                            param_name = "$n"; param_expr = None;
                            param_callconv = None; param_user_attributes = [];

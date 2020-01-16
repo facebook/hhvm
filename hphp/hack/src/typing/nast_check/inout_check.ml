@@ -12,16 +12,13 @@ open Aast
 module SN = Naming_special_names
 
 let check_param _env params p user_attributes f_type name =
-  let byref = List.find params (fun x -> x.param_is_reference) in
   List.iter params (fun param ->
       match param.param_callconv with
       | Some Ast_defs.Pinout ->
         let pos = param.param_pos in
         if not Ast_defs.(equal_fun_kind f_type FSync) then
           Errors.inout_params_outside_of_sync pos;
-        if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos;
-        Option.iter byref ~f:(fun p ->
-            Errors.inout_params_mix_byref pos p.param_pos)
+        if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos
       | None -> ());
   let inout =
     List.find params (fun x ->

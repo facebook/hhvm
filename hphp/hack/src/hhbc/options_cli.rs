@@ -33,13 +33,12 @@ lazy_static! {
             "hack.compiler.constantfolding" => "hack.compiler.constant_folding",
             "hack.compiler.optimizenullcheck" => "hack.compiler.optimize_null_checks",
             // group 3: also different prefix without any obvious rule
-            "eval.createinoutwrapperfunctions" => "hhvm.create_in_out_wrapper_functions",
             "eval.hackarrcompatnotices" => "hhvm.hack_arr_compat_notices",
             "eval.hackarrdvarrs" => "hhvm.hack_arr_dv_arrs",
+            "eval.emitfuncpointers" => "hhvm.emit_func_pointers",
             "eval.jitenablerenamefunction" => "hhvm.jit_enable_rename_function",
             "eval.logexterncompilerperf" => "hhvm.log_extern_compiler_perf",
             "eval.enableintrinsicsextension" => "hhvm.enable_intrinsics_extension",
-            "eval.reffinessinvariance" => "hhvm.reffiness_invariance",
             "eval.enforcegenericsub" => "hhvm.enforce_generics_ub",
             // group 4: we could ignore hhvm. part of prefix in deser.
             "hack.lang.disable_lval_as_an_expression" => "hhvm.hack.lang.disable_lval_as_an_expression",
@@ -67,8 +66,8 @@ lazy_static! {
 pub type ParseFn = fn(&str) -> Option<Json>;
 
 /// Given a config key as in JSON (not CLI) returns a to-JSON parse function. E.g.,
-/// for "hhvm.reffiness_invariance" (not "eval.reffinessinessinvariance"), it
-/// returns an integer parser.
+/// for "hhvm.hack_arr_compat_notices" (not "eval.hackarrcompatnotices"), it
+/// returns a boolean parser.
 pub fn to_json(key: &str) -> ParseFn {
     *BY_JSON_KEY.get(key).unwrap_or(&(parse_str as ParseFn))
 }
@@ -78,17 +77,12 @@ lazy_static! {
         let mut m = HashMap::new();
         m.insert("hhvm.dynamic_invoke_functions", parse_csv_strs as ParseFn);
         m.insert("hhvm.include_roots", parse_csv_keyval_strs as ParseFn);
-        m.insert("hhvm.reffiness_invariance", parse_int as ParseFn);
         m
     };
 }
 
 fn parse_str(s: &str) -> Option<Json> {
     Some(json!(s))
-}
-
-fn parse_int(s: &str) -> Option<Json> {
-    s.parse::<isize>().map(|i| json!(i)).ok()
 }
 
 fn parse_csv_strs(s: &str) -> Option<Json> {

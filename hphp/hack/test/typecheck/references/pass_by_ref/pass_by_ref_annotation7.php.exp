@@ -1,8 +1,0 @@
-File "pass_by_ref_annotation7.php", line 6, characters 11-11:
-An expression is expected here. (Parsing[1002])
-File "pass_by_ref_annotation7.php", line 6, characters 10-10:
-Unbound name: & (a global constant) (Naming[2049])
-File "pass_by_ref_annotation7.php", line 6, characters 13-13:
-Unbound name: , (a global constant) (Naming[2049])
-File "pass_by_ref_annotation7.php", line 6, characters 17-17:
-Unbound name: , (a global constant) (Naming[2049])

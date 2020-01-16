@@ -17,10 +17,9 @@ Errors:
       f_params =
       [{ param_annotation = ([3:28-30], Tu);
          param_type_hint = ((Tu), (Some ([3:25-27], (Habstr "Tu"))));
-         param_is_reference = false; param_is_variadic = false;
-         param_pos = [3:28-30]; param_name = "$f"; param_expr = None;
-         param_callconv = None; param_user_attributes = [];
-         param_visibility = None }
+         param_is_variadic = false; param_pos = [3:28-30]; param_name = "$f";
+         param_expr = None; param_callconv = None;
+         param_user_attributes = []; param_visibility = None }
         ];
       f_body =
       { fb_ast =

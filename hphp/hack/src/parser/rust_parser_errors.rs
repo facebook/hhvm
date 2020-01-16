@@ -438,35 +438,14 @@ where
         }
     }
 
-    // Test two levels in case ...& or &... hiding under
-    fn is_reference_expression(node: &'a Syntax<Token, Value>) -> bool {
-        Self::is_decorated_expression(node, |x| x.is_ampersand())
-            || Self::test_decorated_expression_child(node, &Self::is_reference_expression)
-    }
-
     fn is_variadic_expression(node: &'a Syntax<Token, Value>) -> bool {
         Self::is_decorated_expression(node, |x| x.is_ellipsis())
             || Self::test_decorated_expression_child(node, &Self::is_variadic_expression)
     }
 
-    fn is_reference_variadic(node: &'a Syntax<Token, Value>) -> bool {
-        Self::is_decorated_expression(node, |x| x.is_ellipsis())
-            && Self::test_decorated_expression_child(node, &Self::is_reference_expression)
-    }
-
-    fn is_variadic_reference(node: &'a Syntax<Token, Value>) -> bool {
-        Self::is_decorated_expression(node, |x| x.is_ampersand())
-            && Self::test_decorated_expression_child(node, &Self::is_variadic_expression)
-    }
-
     fn is_double_variadic(node: &'a Syntax<Token, Value>) -> bool {
         Self::is_decorated_expression(node, |x| x.is_ellipsis())
             && Self::test_decorated_expression_child(node, &Self::is_variadic_expression)
-    }
-
-    fn is_double_reference(node: &'a Syntax<Token, Value>) -> bool {
-        Self::is_decorated_expression(node, |x| x.is_ampersand())
-            && Self::test_decorated_expression_child(node, &Self::is_reference_expression)
     }
 
     fn is_variadic_parameter_variable(node: &'a Syntax<Token, Value>) -> bool {
@@ -1404,25 +1383,6 @@ where
         is_concrete && init.is_missing()
     }
 
-    // Given a PropertyDeclaration node, tests whether parent class is abstract
-    // final but child variable is non-static
-    fn is_byref_expression(node: &'a Syntax<Token, Value>) -> bool {
-        Self::is_decorated_expression(node, |x| x.is_ampersand())
-    }
-
-    fn is_byref_parameter_variable(node: &'a Syntax<Token, Value>) -> bool {
-        // TODO: This shouldn't be a decorated *expression* because we are not
-        //  expecting an expression at all. We're expecting a declaration.
-        Self::is_byref_expression(node)
-    }
-
-    fn is_param_by_ref(node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
-            ParameterDeclaration(x) => Self::is_byref_parameter_variable(&x.parameter_name),
-            _ => false,
-        }
-    }
-
     fn methodish_memoize_lsb_on_non_static(&mut self, node: &'a Syntax<Token, Value>) {
         if self.methodish_contains_attribute(node, sn::user_attributes::MEMOIZE_LSB)
             && !Self::has_modifier_static(node)
@@ -1726,12 +1686,6 @@ where
                 || s == sn::members::__ISSET
                 || s == sn::members::__UNSET
             {
-                if params().any(&Self::is_param_by_ref) {
-                    self.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::invalid_args_by_ref(&full_name),
-                    ))
-                }
                 // disallow inout parameters on magic methods
                 if params().any(&Self::is_parameter_with_callconv) {
                     self.errors.push(Self::make_error_from_node(
@@ -2059,21 +2013,6 @@ where
         }
     }
 
-    // If an inout parameter is passed by reference, return it
-    fn param_with_callconv_is_byref(
-        node: &'a Syntax<Token, Value>,
-    ) -> Option<&'a Syntax<Token, Value>> {
-        match &node.syntax {
-            ParameterDeclaration(x)
-                if Self::is_parameter_with_callconv(node)
-                    && Self::is_byref_parameter_variable(&x.parameter_name) =>
-            {
-                Some(node)
-            }
-            _ => None,
-        }
-    }
-
     fn params_errors(&mut self, params: &'a Syntax<Token, Value>) {
         self.produce_error_from_check(&Self::ends_with_variadic_comma, params, || {
             errors::error2022
@@ -2089,30 +2028,6 @@ where
         self.produce_error_from_check(&Self::variadic_param_with_callconv, params, || {
             errors::error2073
         });
-
-        let mut has_inout_param = false;
-        let mut has_reference_param = false;
-        let mut has_inout_and_ref_param = false;
-        for p in Self::syntax_to_list_no_separators(params) {
-            let is_inout = Self::is_parameter_with_callconv(p);
-            let is_ref = Self::is_param_by_ref(p);
-            has_inout_param |= is_inout;
-            has_reference_param |= is_ref;
-            has_inout_and_ref_param |= is_inout && is_ref;
-        }
-
-        if has_inout_param && has_reference_param {
-            let error_type = if has_inout_and_ref_param {
-                ErrorType::ParseError
-            } else {
-                ErrorType::RuntimeError
-            };
-            self.errors.push(Self::make_error_from_node_with_type(
-                params,
-                errors::fn_with_inout_and_ref_params,
-                error_type,
-            ))
-        }
     }
 
     fn decoration_errors(&mut self, node: &'a Syntax<Token, Value>) {
@@ -2120,12 +2035,6 @@ where
             |_, x| Self::is_double_variadic(x),
             node,
             || errors::double_variadic,
-            node,
-        );
-        self.produce_error(
-            |_, x| Self::is_double_reference(x),
-            node,
-            || errors::double_reference,
             node,
         );
     }
@@ -2203,7 +2112,7 @@ where
 
     fn does_unop_create_write(token_kind: Option<TokenKind>) -> bool {
         token_kind.map_or(false, |x| match x {
-            TokenKind::PlusPlus | TokenKind::MinusMinus | TokenKind::Ampersand => true,
+            TokenKind::PlusPlus | TokenKind::MinusMinus => true,
             _ => false,
         })
     }
@@ -2332,14 +2241,6 @@ where
                 {
                     lval_ness_of_function_arg_for_inout(next_node, parents)
                 }
-                PrefixUnaryExpression(x)
-                    if node as *const _ == &x.prefix_unary_operand as *const _
-                        && Self::token_kind(&x.prefix_unary_operator)
-                            == Some(TokenKind::Ampersand) =>
-                {
-                    LvalTypeNone
-                }
-
                 PrefixUnaryExpression(_) | PostfixUnaryExpression(_)
                     if node as *const _ == unary_expression_operand(next_node) as *const _
                         && Self::does_unop_create_write(Self::token_kind(
@@ -2402,9 +2303,6 @@ where
                     errors::error2074(callconv_text)
                 });
                 self.parameter_rx_errors(node);
-                self.produce_error_from_check(&Self::param_with_callconv_is_byref, node, || {
-                    errors::error2075(callconv_text)
-                });
                 self.check_type_hint(&p.parameter_type);
 
                 if Self::is_parameter_with_callconv(node) {
@@ -2434,21 +2332,6 @@ where
                             ErrorType::RuntimeError,
                         ))
                     }
-                }
-
-                if Self::is_reference_variadic(&p.parameter_name) {
-                    self.errors
-                        .push(Self::make_error_from_node(node, errors::variadic_reference))
-                } else if Self::is_variadic_reference(&p.parameter_name) {
-                    self.errors
-                        .push(Self::make_error_from_node(node, errors::reference_variadic))
-                } else if Self::is_reference_expression(&p.parameter_name)
-                    && self.is_in_construct_method()
-                {
-                    self.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::reference_param_in_construct,
-                    ))
                 }
             }
             FunctionDeclarationHeader(x) => param_errors(self, &x.function_parameter_list),
@@ -2610,31 +2493,6 @@ where
         })
     }
 
-    fn check_collection_element(&mut self, m: &'a Syntax<Token, Value>, error_text: Error) {
-        if let PrefixUnaryExpression(x) = &m.syntax {
-            if let Token(token) = &x.prefix_unary_operator.syntax {
-                if token.kind() == TokenKind::Ampersand {
-                    self.errors.push(Self::make_error_from_node(m, error_text))
-                }
-            }
-        }
-    }
-
-    fn check_collection_member(&mut self, m: &'a Syntax<Token, Value>) {
-        if let ElementInitializer(x) = &m.syntax {
-            self.check_collection_element(&x.element_key, errors::reference_not_allowed_on_key);
-            self.check_collection_element(&x.element_value, errors::reference_not_allowed_on_value);
-        } else {
-            self.check_collection_element(m, errors::reference_not_allowed_on_element)
-        }
-    }
-
-    fn check_collection_members(&mut self, members: &'a Syntax<Token, Value>) {
-        for member in Self::syntax_to_list_no_separators(members) {
-            self.check_collection_member(member)
-        }
-    }
-
     fn invalid_shape_initializer_name(&mut self, node: &'a Syntax<Token, Value>) {
         match &node.syntax {
             LiteralExpression(x) => {
@@ -2709,23 +2567,6 @@ where
                 if self.text(&x.variable_expression) == sn::superglobals::GLOBALS =>
             {
                 Some(errors::globals_without_subscript)
-            }
-            PrefixUnaryExpression(x) => {
-                // local lambda allows for more readable control flow using early "return"
-                let check = || {
-                    if let Token(token) = &x.prefix_unary_operator.syntax {
-                        if token.kind() == TokenKind::Ampersand {
-                            let text = self.text(&x.prefix_unary_operand);
-                            if sn::superglobals::is_any_global(text) {
-                                return Some(errors::error2078);
-                            } else if in_constructor_call {
-                                return Some(errors::reference_param_in_construct);
-                            }
-                        }
-                    }
-                    None
-                };
-                check()
             }
             DecoratedExpression(x) => {
                 if let Token(token) = &x.decorated_expression_decorator.syntax {
@@ -2917,68 +2758,10 @@ where
 
     fn class_type_designator_errors(&mut self, node: &'a Syntax<Token, Value>) {
         if !Self::is_good_scope_resolution_qualifier(node) {
-            if let ParenthesizedExpression(x) = &node.syntax {
-                if let PrefixUnaryExpression(x) = &x.parenthesized_expression_expression.syntax {
-                    if let Token(token) = &x.prefix_unary_operator.syntax {
-                        if token.kind() == TokenKind::Ampersand {
-                            self.errors.push(Self::make_error_from_node(
-                                node,
-                                errors::instanceof_reference,
-                            ))
-                        }
-                    }
-                }
-
-            // A parenthesized expression that evaluates to a string or object is a
-            // valid RHS for `new`.
-            } else {
-                self.new_variable_errors(node)
+            match &node.syntax {
+                ParenthesizedExpression(_) => (),
+                _ => self.new_variable_errors(node),
             }
-        }
-    }
-    fn check_reference(&mut self, node: &'a Syntax<Token, Value>) {
-        let err_invalid_reference = |self_: &mut Self| {
-            self_
-                .errors
-                .push(Self::make_error_from_node(node, errors::invalid_reference))
-        };
-        match &node.syntax {
-            PrefixUnaryExpression(x)
-                if Self::token_kind(&x.prefix_unary_operator) != Some(TokenKind::Dollar) =>
-            {
-                self.errors.push(Self::make_error_from_node(
-                    node,
-                    errors::nested_unary_reference,
-                ))
-            }
-            VariableExpression(_) => (),
-            Token(token) if token.kind() == TokenKind::Variable => (),
-            PrefixUnaryExpression(x) => {
-                if let Token(token) = &x.prefix_unary_operator.syntax {
-                    match &x.prefix_unary_operand.syntax {
-                        PrefixUnaryExpression(x)
-                            if token.kind() == TokenKind::Dollar
-                                && Self::token_kind(&x.prefix_unary_operator)
-                                    == Some(TokenKind::Dollar) =>
-                        {
-                            ()
-                        }
-                        BracedExpression(_) | VariableExpression(_)
-                            if token.kind() == TokenKind::Dollar =>
-                        {
-                            ()
-                        }
-                        _ => err_invalid_reference(self),
-                    }
-                } else {
-                    err_invalid_reference(self)
-                }
-            }
-
-            ParenthesizedExpression(x) => {
-                self.check_reference(&x.parenthesized_expression_expression)
-            }
-            _ => err_invalid_reference(self),
         }
     }
 
@@ -3493,34 +3276,9 @@ where
             }
             DecoratedExpression(x) => {
                 let decorator = &x.decorated_expression_decorator;
-                if let PrefixUnaryExpression(x) = &x.decorated_expression_expression.syntax {
-                    if decorator.is_inout() && x.prefix_unary_operator.is_ampersand() {
-                        self.errors
-                            .push(Self::make_error_from_node(node, errors::error2076))
-                    }
-                } else if Self::token_kind(decorator) == Some(TokenKind::Await) {
+                if Self::token_kind(decorator) == Some(TokenKind::Await) {
                     self.await_as_an_expression_errors(node)
                 }
-            }
-            VectorIntrinsicExpression(x) => {
-                self.check_collection_members(&x.vector_intrinsic_members)
-            }
-            DictionaryIntrinsicExpression(x) => {
-                self.check_collection_members(&x.dictionary_intrinsic_members)
-            }
-            KeysetIntrinsicExpression(x) => {
-                self.check_collection_members(&x.keyset_intrinsic_members)
-            }
-            ArrayCreationExpression(x) => self.check_collection_members(&x.array_creation_members),
-            ArrayIntrinsicExpression(x) => {
-                self.check_collection_members(&x.array_intrinsic_members)
-            }
-
-            VarrayIntrinsicExpression(x) => {
-                self.check_collection_members(&x.varray_intrinsic_members)
-            }
-            DarrayIntrinsicExpression(x) => {
-                self.check_collection_members(&x.darray_intrinsic_members)
             }
             YieldFromExpression(_) | YieldExpression(_) => {
                 if self.is_in_unyieldable_magic_method() {
@@ -3607,11 +3365,6 @@ where
                 }
             }
 
-            PrefixUnaryExpression(x)
-                if Self::token_kind(&x.prefix_unary_operator) == Some(TokenKind::Ampersand) =>
-            {
-                self.check_reference(&x.prefix_unary_operand)
-            }
             PrefixUnaryExpression(x)
                 if Self::token_kind(&x.prefix_unary_operator) == Some(TokenKind::Dollar) =>
             {
@@ -3774,7 +3527,6 @@ where
                         errors::invalid_class_in_collection_initializer,
                     )),
                 }
-                self.check_collection_members(initializers)
             }
             PrefixUnaryExpression(x)
                 if Self::token_kind(&x.prefix_unary_operator) == Some(TokenKind::Await) =>
@@ -5123,7 +4875,6 @@ where
 
         let check_unary_expression = |self_: &mut Self, op| match Self::token_kind(op) {
             Some(TokenKind::At) | Some(TokenKind::Dollar) => {}
-            Some(TokenKind::Ampersand) => err(self_, errors::not_allowed_in_write("&")),
             _ => err(self_, errors::not_allowed_in_write("Unary expression")),
         };
 
@@ -5212,12 +4963,6 @@ where
                     if self_.text(&x.variable_expression) == sn::superglobals::GLOBALS =>
                 {
                     append_errors(self_, roperand, errors::globals_without_subscript)
-                }
-
-                PrefixUnaryExpression(x)
-                    if Self::token_kind(&x.prefix_unary_operator) == Some(TokenKind::Ampersand) =>
-                {
-                    append_errors(self_, roperand, errors::references_not_allowed)
                 }
 
                 _ => (),

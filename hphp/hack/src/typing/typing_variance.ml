@@ -418,7 +418,6 @@ and fun_param
     let reason = (pos, Rfun_parameter static, Pcontravariant) in
     let variance = flip reason variance in
     type_ tcopt root variance env ty
-  | FPref
   | FPinout ->
     let variance =
       make_variance (Rfun_inout_parameter static) pos Ast_defs.Invariant
@@ -703,10 +702,8 @@ and get_typarams ctx root env (ty : decl_ty) =
         match fp.fp_kind with
         (* Parameters behave contravariantly *)
         | FPnormal -> flip tp
-        (* Inout/ref parameters behave both co- and contra-variantly *)
-        | FPref
-        | FPinout ->
-          union tp (flip tp)
+        (* Inout parameters behave both co- and contra-variantly *)
+        | FPinout -> union tp (flip tp)
       in
       union acc tp
     in

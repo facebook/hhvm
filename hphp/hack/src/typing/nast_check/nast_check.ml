@@ -15,7 +15,6 @@ let visitor =
       Interface_check.handler;
       Nast_reactivity_check.handler;
       Illegal_name_check.handler;
-      Variadic_check.handler;
       Class_tparams_check.handler;
       Control_context_check.handler;
       Pocket_universes_check.handler;

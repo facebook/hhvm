@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<84b155f4c5cbe2a6d7820b447e9785f4>>
+// @generated SignedSource<<cfff63cb3c61e9a488bf95c95d87ab4f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -287,15 +287,12 @@ pub enum XhpAttribute<Ex, Fb, En, Hi> {
     XhpSpread(Expr<Ex, Fb, En, Hi>),
 }
 
-pub type IsReference = bool;
-
 pub type IsVariadic = bool;
 
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct FunParam<Ex, Fb, En, Hi> {
     pub annotation: Ex,
     pub type_hint: TypeHint<Hi>,
-    pub is_reference: IsReference,
     pub is_variadic: IsVariadic,
     pub pos: Pos,
     pub name: String,

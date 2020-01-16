@@ -6,10 +6,9 @@
       f_params =
       [{ param_annotation = ([3:30-32], string);
          param_type_hint = ((string), (Some ([3:23-29], (Hprim Tstring))));
-         param_is_reference = false; param_is_variadic = false;
-         param_pos = [3:30-32]; param_name = "$s"; param_expr = None;
-         param_callconv = None; param_user_attributes = [];
-         param_visibility = None }
+         param_is_variadic = false; param_pos = [3:30-32]; param_name = "$s";
+         param_expr = None; param_callconv = None;
+         param_user_attributes = []; param_visibility = None }
         ];
       f_body =
       { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };

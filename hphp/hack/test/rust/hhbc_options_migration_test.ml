@@ -26,9 +26,6 @@ let _assert_opts_equal caml rust =
     Hhbc_options.(php7_ltr_assign caml)
     Hhbc_options.(php7_ltr_assign rust);
   assert_equal
-    Hhbc_options.(create_in_out_wrapper_functions caml)
-    Hhbc_options.(create_in_out_wrapper_functions rust);
-  assert_equal
     Hhbc_options.(hack_arr_compat_notices caml)
     Hhbc_options.(hack_arr_compat_notices rust);
   assert_equal
@@ -95,9 +92,6 @@ let _assert_opts_equal caml rust =
   assert_equal
     Hhbc_options.(enable_pocket_universes caml)
     Hhbc_options.(enable_pocket_universes rust);
-  assert_equal
-    Hhbc_options.(notice_on_by_ref_argument_typehint_violation caml)
-    Hhbc_options.(notice_on_by_ref_argument_typehint_violation rust);
   assert_equal
     Hhbc_options.(array_provenance caml)
     Hhbc_options.(array_provenance rust);

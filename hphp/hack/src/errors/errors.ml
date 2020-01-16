@@ -1050,12 +1050,6 @@ let method_name_already_bound pos name =
     pos
     ("Method name already bound: " ^ name)
 
-let reference_in_rx pos =
-  add
-    (Naming.err_code Naming.ReferenceInRx)
-    pos
-    "References are not allowed in reactive code."
-
 let error_name_already_bound name name_prev p p_prev =
   let name = strip_ns name in
   let name_prev = strip_ns name_prev in
@@ -1584,9 +1578,6 @@ let wildcard_disallowed pos =
     pos
     "Wildcard typehints are not allowed in this position"
 
-let reference_in_strict_mode pos =
-  add (Naming.err_code Naming.ReferenceInStrictMode) pos "Don't use references!"
-
 let misplaced_mutability_hint pos =
   add
     (Naming.err_code Naming.MisplacedMutabilityHint)
@@ -2014,12 +2005,6 @@ let inout_params_special pos =
     pos
     "Methods with special semantics cannot have inout parameters."
 
-let inout_params_mix_byref pos1 pos2 =
-  if pos1 <> pos2 then
-    let msg1 = (pos1, "Cannot mix inout and byRef parameters") in
-    let msg2 = (pos2, "This parameter is passed by reference") in
-    add_list (NastCheck.err_code NastCheck.InoutParamsMixByref) [msg1; msg2]
-
 let inout_params_memoize fpos pos =
   let msg1 = (fpos, "Functions with inout parameters cannot be memoized") in
   let msg2 = (pos, "This is an inout parameter") in
@@ -2092,36 +2077,6 @@ let coroutine_in_constructor pos =
     (NastCheck.err_code NastCheck.CoroutineInConstructor)
     pos
     "A class constructor may not be a coroutine"
-
-let illegal_by_ref_expr pos str verb =
-  add
-    (NastCheck.err_code NastCheck.IllegalByRefExpr)
-    pos
-    (str ^ " cannot be " ^ verb ^ " by reference")
-
-let variadic_byref_param pos =
-  add
-    (NastCheck.err_code NastCheck.VariadicByRefParam)
-    pos
-    "Variadic parameters should not be taken by reference"
-
-let byref_dynamic_call pos =
-  add
-    (NastCheck.err_code NastCheck.ByRefDynamicCall)
-    pos
-    "Arguments can not be passed by reference to dynamic function calls"
-
-let byref_call pos =
-  add
-    (NastCheck.err_code NastCheck.ByRefCall)
-    pos
-    "Arguments can not be passed by reference"
-
-let byref_on_property pos =
-  add
-    (NastCheck.err_code NastCheck.ByRefProperty)
-    pos
-    "Properties cannot be passed by reference"
 
 let switch_non_terminal_default pos =
   add
@@ -4520,36 +4475,6 @@ let override_no_default_typeconst pos_child pos_parent =
       );
     ]
 
-let reference_expr pos =
-  let msg = "References are only allowed as function call arguments" in
-  add (Typing.err_code Typing.ReferenceExprNotFunctionArg) pos msg
-
-let pass_by_ref_annotation_missing pos1 pos2 =
-  let msg1 = (pos1, "This argument should be annotated with &") in
-  let msg2 = (pos2, "Because this parameter is passed by reference") in
-  add_list (Typing.err_code Typing.PassByRefAnnotationMissing) [msg1; msg2]
-
-let pass_by_ref_annotation_unexpected pos1 pos2 pos2_is_variadic =
-  let msg1 = (pos1, "This argument should not be annotated with &") in
-  let param_str =
-    if pos2_is_variadic then
-      "variadic parameters are"
-    else
-      "this parameter is"
-  in
-  let msg2 = (pos2, "Because " ^ param_str ^ " passed by value") in
-  add_list (Typing.err_code Typing.PassByRefAnnotationUnexpected) [msg1; msg2]
-
-let reffiness_invariant pos1 pos2 mode2 (on_error : typing_error_callback) =
-  let msg1 = (pos1, "This parameter is passed by reference") in
-  let mode_str =
-    match mode2 with
-    | `normal -> "a normal parameter"
-    | `inout -> "an inout parameter"
-  in
-  let msg2 = (pos2, "It is incompatible with " ^ mode_str) in
-  on_error ~code:(Typing.err_code Typing.ReffinessInvariant) [msg1; msg2]
-
 let inout_annotation_missing pos1 pos2 =
   let msg1 = (pos1, "This argument should be annotated with 'inout'") in
   let msg2 = (pos2, "Because this is an inout parameter") in
@@ -4734,21 +4659,6 @@ let missing_annotation_for_atmost_rx_as_rxfunc_parameter pos =
     (Typing.err_code Typing.MissingAnnotationForOnlyrxIfRxfuncParameter)
     pos
     "Missing function type annotation on parameter marked with <<__AtMostRxAsFunc>> attribute."
-
-let binding_ref_in_array pos =
-  let msg = "Arrays cannot contain references." in
-  add (Typing.err_code Typing.BindingRefInArray) pos msg
-
-let binding_ref_to_array pos =
-  let msg = "Cannot take references to array elements." in
-  add (Typing.err_code Typing.BindingRefInArray) pos msg
-
-let passing_array_cell_by_ref pos =
-  let msg =
-    "Passing array elements by reference is no longer supported; "
-    ^ "use 'inout' instead"
-  in
-  add (Typing.err_code Typing.PassingArrayCellByRef) pos msg
 
 let superglobal_in_reactive_context pos name =
   add

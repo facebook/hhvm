@@ -14,8 +14,8 @@
 //! The options are grouped their common prefix in their canonical names,
 //! which is specified via macros `prefix_all` or `prefixed_flags`, respectively.
 //! E.g., `prefix_all("hhvm.")`` or `prefixed_flags(..., "hhvm.", ...)` ensure that
-//! an argument "reffiness_variance" or flag LOG_EXTERN_COMPILER_PERF gets the
-//! canonical name "hhvm.reffiness_variance" or "hhvm.log_extern_compiler_perf", respectively.
+//! an argument "emit_func_pointers" or flag LOG_EXTERN_COMPILER_PERF gets the
+//! canonical name "hhvm.emit_func_pointers" or "hhvm.log_extern_compiler_perf", respectively.
 //!
 //! Non-canonical names (used when parsing from CLI) are specified by:
 //! - `options_cli::CANON_BY_ALIAS.get("some_alias")`; and
@@ -28,12 +28,12 @@
 //! Example:
 //! ```
 //! let opts: Options = Options::default(); // JSON key
-//! opts.doc_root.get()                     // doc_root
-//! opts.hhvm.reffiness_invariance.set(32); // hhvm.reffiness_invariance
+//! opts.doc_root.get();                    // doc_root
+//! opts.hhvm.emit_func_pointers.set(42);   // hhvm.emit_func_pointers
 //! opts.hhvm_flags.contains(
 //!     HhvmFlags::RX_IS_ENABLED);          // hhvm.rx_is_enabled
 //! opts.hhvm.hack_lang_flags.set(
-//!     LangFlags::ENABLE_COROUTINES        // hhvm.hack.lang.enable_coroutines
+//!     LangFlags::ENABLE_COROUTINES);      // hhvm.hack.lang.enable_coroutines
 //! ```
 
 mod options_cli;
@@ -163,7 +163,6 @@ prefixed_flags!(
     HhvmFlags,
     "hhvm.",
     ARRAY_PROVENANCE,
-    CREATE_IN_OUT_WRAPPER_FUNCTIONS,
     EMIT_CLS_METH_POINTERS,
     EMIT_FUNC_POINTERS,
     EMIT_INST_METH_POINTERS,
@@ -174,13 +173,11 @@ prefixed_flags!(
     JIT_ENABLE_RENAME_FUNCTION,
     HACK_ARR_COMPAT_NOTICES,
     HACK_ARR_DV_ARRS,
-    NOTICE_ON_BY_REF_ARGUMENT_TYPEHINT_VIOLATION,
     RX_IS_ENABLED,
 );
 impl Default for HhvmFlags {
     fn default() -> HhvmFlags {
-        HhvmFlags::CREATE_IN_OUT_WRAPPER_FUNCTIONS
-            | HhvmFlags::EMIT_CLS_METH_POINTERS
+        HhvmFlags::EMIT_CLS_METH_POINTERS
             | HhvmFlags::EMIT_FUNC_POINTERS
             | HhvmFlags::EMIT_INST_METH_POINTERS
             | HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS
@@ -198,9 +195,6 @@ pub struct Hhvm {
 
     #[serde(default)]
     pub include_roots: Arg<BTreeMap<String, String>>, // TODO(leoo) change to HashMap if order doesn't matter
-
-    #[serde(default, alias = "eval.reffinessinvariance")]
-    pub reffiness_invariance: Arg<isize>,
 
     #[serde(
         flatten,
@@ -526,9 +520,6 @@ mod tests {
   "hhvm.array_provenance": {
     "global_value": false
   },
-  "hhvm.create_in_out_wrapper_functions": {
-    "global_value": true
-  },
   "hhvm.dynamic_invoke_functions": {
     "global_value": []
   },
@@ -536,7 +527,7 @@ mod tests {
     "global_value": false
   },
   "hhvm.emit_func_pointers": {
-    "global_value": false
+    "global_value": true
   },
   "hhvm.emit_inst_meth_pointers": {
     "global_value": false
@@ -607,12 +598,6 @@ mod tests {
   "hhvm.log_extern_compiler_perf": {
     "global_value": false
   },
-  "hhvm.notice_on_by_ref_argument_typehint_violation": {
-    "global_value": true
-  },
-  "hhvm.reffiness_invariance": {
-    "global_value": 5
-  },
   "hhvm.rx_is_enabled": {
     "global_value": false
   }
@@ -628,9 +613,7 @@ mod tests {
                 m.insert("bar".to_owned(), "baz".to_owned());
                 m
             }),
-            flags: (HhvmFlags::CREATE_IN_OUT_WRAPPER_FUNCTIONS
-                | HhvmFlags::NOTICE_ON_BY_REF_ARGUMENT_TYPEHINT_VIOLATION),
-            reffiness_invariance: Arg::new(5),
+            flags: HhvmFlags::EMIT_FUNC_POINTERS,
             ..Default::default()
         });
         assert_eq!(HHVM_1, serde_json::to_string_pretty(&hhvm).unwrap(),);
@@ -641,52 +624,46 @@ mod tests {
         let j = serde_json::from_str(
             r#"{
             "hhvm.aliased_namespaces": { "global_value": {"foo": "bar"} },
-            "hhvm.create_in_out_wrapper_functions": { "global_value": "1333" },
+            "hhvm.emit_func_pointers": { "global_value": "1337" },
             "hhvm.jit_enable_rename_function": { "global_value": 2 },
             "hhvm.log_extern_compiler_perf": { "global_value": false },
-            "hhvm.notice_on_by_ref_argument_typehint_violation": { "global_value": "1" },
-            "hhvm.reffiness_invariance": { "global_value": 42 }
+            "hhvm.array_provenance": { "global_value": "1" }
             }"#,
         )
         .unwrap();
         let hhvm: Hhvm = serde_json::from_value(j).unwrap();
         println!("{:?}", hhvm);
         assert!(hhvm.flags.contains(
-            HhvmFlags::CREATE_IN_OUT_WRAPPER_FUNCTIONS
+            HhvmFlags::EMIT_FUNC_POINTERS
                 | HhvmFlags::JIT_ENABLE_RENAME_FUNCTION
-                | HhvmFlags::NOTICE_ON_BY_REF_ARGUMENT_TYPEHINT_VIOLATION
+                | HhvmFlags::ARRAY_PROVENANCE
         ));
         assert!(!hhvm.flags.contains(HhvmFlags::LOG_EXTERN_COMPILER_PERF));
-        assert_eq!(hhvm.reffiness_invariance.global_value, 42);
     }
 
     #[test]
     fn test_hhvm_json_de_defaults_overrideable() {
         let hhvm: Hhvm = serde_json::value::from_value(json!({})).unwrap();
         assert_eq!(hhvm.flags, HhvmFlags::default());
-        assert!(hhvm
-            .flags
-            .contains(HhvmFlags::CREATE_IN_OUT_WRAPPER_FUNCTIONS));
+        assert!(hhvm.flags.contains(HhvmFlags::EMIT_FUNC_POINTERS));
 
         // now override a true-by-default option with a false value
         let hhvm: Hhvm = serde_json::value::from_value(json!({
-            "hhvm.create_in_out_wrapper_functions": { "global_value": "false" },
+            "hhvm.emit_func_pointers": { "global_value": "false" },
         }))
         .unwrap();
-        assert!(!hhvm
-            .flags
-            .contains(HhvmFlags::CREATE_IN_OUT_WRAPPER_FUNCTIONS));
+        assert!(!hhvm.flags.contains(HhvmFlags::EMIT_FUNC_POINTERS));
     }
 
     #[test]
     fn test_hhvm_flags_alias_json_de() {
         // sanity check for defaults (otherwise this test doesn't do much!)
         assert!(!HhvmFlags::default().contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION));
-        assert!(HhvmFlags::default().contains(HhvmFlags::CREATE_IN_OUT_WRAPPER_FUNCTIONS));
+        assert!(HhvmFlags::default().contains(HhvmFlags::EMIT_FUNC_POINTERS));
 
         let hhvm: Hhvm = serde_json::from_str(
             r#"{ "eval.jitenablerenamefunction": { "global_value": "true" },
-                 "eval.createinoutwrapperfunctions": { "global_value": "false" } }"#,
+                 "eval.emitfuncpointers": { "global_value": "false" } }"#,
         )
         .unwrap();
         assert!(hhvm // verify a false-by-default flag was parsed as true
@@ -695,21 +672,17 @@ mod tests {
 
         assert!(!hhvm // verify a true-by-default flag was parsed as false
             .flags
-            .contains(HhvmFlags::CREATE_IN_OUT_WRAPPER_FUNCTIONS));
+            .contains(HhvmFlags::EMIT_FUNC_POINTERS));
     }
 
     #[test]
     fn test_options_flat_arg_alias_json_de() {
         let act: Options = serde_json::value::from_value(json!({
-            "eval.reffinessinvariance": {
-                "global_value": 123,
-            },
             "eval.jitenablerenamefunction": {
                 "global_value": "true",
             },
         }))
         .expect("failed to deserialize");
-        assert_eq!(act.hhvm.reffiness_invariance.global_value, 123);
         assert!(act
             .hhvm
             .flags
@@ -844,18 +817,18 @@ mod tests {
     fn test_options_de_from_cli_override_json() {
         let cli_args = [
             "eval.jitenablerenamefunction=1",
-            "eval.reffinessinvariance=999",
+            "eval.hackarrcompatnotices=true",
         ];
         let json = json!({
-            "hhvm.reffiness_invariance": {
-                "global_value": 123,
+            "hhvm.hack_arr_compat_notices": {
+                "global_value": "0",
             },
             "hhvm.log_extern_compiler_perf": {
                 "global_value": "true",
             },
         });
         let act = Options::from_configs(&[json.to_string()], &cli_args).unwrap();
-        assert_eq!(act.hhvm.reffiness_invariance.global_value, 999);
+        assert!(act.hhvm.flags.contains(HhvmFlags::HACK_ARR_COMPAT_NOTICES));
     }
 
     #[test]
@@ -931,12 +904,10 @@ bitflags! {
         const DISASSEMBLER_SOURCE_MAPPING = 1 << 2;
         const UVS = 1 << 3;
         const LTR_ASSIGN = 1 << 4;
-
         /// If true, then renumber labels after generating code for a method
         /// body. Semantic diff doesn't care about labels, but for visual diff against
         /// HHVM it's helpful to renumber in order that the labels match more closely
         const RELABEL = 1 << 5;
-        const CREATE_IN_OUT_WRAPPER_FUNCTIONS = 1 << 6;
         const HACK_ARR_COMPAT_NOTICES = 1 << 7;
         const HACK_ARR_DV_ARRS = 1 << 8;
         const AUTHORITATIVE = 1 << 9;
@@ -956,7 +927,6 @@ bitflags! {
         const RX_IS_ENABLED = 1 << 29;
         const DISABLE_LVAL_AS_AN_EXPRESSION = 1 << 30;
         const ENABLE_POCKET_UNIVERSES = 1 << 31;
-        const NOTICE_ON_BY_REF_ARGUMENT_TYPEHINT_VIOLATION = 1 << 32;
         const ARRAY_PROVENANCE = 1 << 33;
         const ENABLE_CLASS_LEVEL_WHERE_CLAUSES = 1 << 35;
         const DISABLE_LEGACY_SOFT_TYPEHINTS = 1 << 36;

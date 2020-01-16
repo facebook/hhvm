@@ -164,7 +164,6 @@ let from_ast ~tparams ~namespace ~generate_defaults ~scope p =
     Some
       (Hhas_param.make
          param_name
-         p.A.param_is_reference
          param_is_variadic
          param_is_inout
          param_user_attributes
@@ -210,11 +209,7 @@ let emit_param_default_value_setter ?(is_native = false) env pos params =
       | _ -> (false, false, false)
     in
     let nop_requirements e =
-      is_native
-      && snd e = A.Null
-      && ( is_mixed
-         || Hhas_param.is_reference param
-         || (is_optional && is_callable) )
+      is_native && snd e = A.Null && (is_mixed || (is_optional && is_callable))
     in
     let dvo = Hhas_param.default_value param in
     Option.map dvo ~f:(fun (l, e) ->
@@ -250,6 +245,6 @@ let emit_reified_params tparams =
         Hhas_type_constraint.make type_name [Hhas_type_constraint.HHType]
       in
       let ti = Some (Hhas_type_info.make type_name tc) in
-      Some (Hhas_param.make param_name false false false [] ti None)
+      Some (Hhas_param.make param_name false false [] ti None)
   in
   List.filter_map tparams ~f:convert_reified_params

@@ -93,7 +93,7 @@ and hint_ p env = function
         fp_pos = p;
         fp_name = None;
         fp_type = possibly_enforced_hint env x;
-        fp_kind = get_param_mode ~is_ref:false k;
+        fp_kind = get_param_mode k;
         fp_accept_disposable = false;
         fp_mutability;
         fp_rx_annotation = None;

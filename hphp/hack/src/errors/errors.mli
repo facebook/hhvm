@@ -801,8 +801,6 @@ val illegal_typeconst_direct_access : Pos.t -> unit
 
 val override_no_default_typeconst : Pos.t -> Pos.t -> unit
 
-val reference_expr : Pos.t -> unit
-
 val unification_cycle : Pos.t -> string -> unit
 
 val eq_incompatible_types :
@@ -812,13 +810,6 @@ val comparison_invalid_types :
   Pos.t -> (Pos.t * string) list -> (Pos.t * string) list -> unit
 
 val final_property : Pos.t -> unit
-
-val pass_by_ref_annotation_missing : Pos.t -> Pos.t -> unit
-
-val reffiness_invariant :
-  Pos.t -> Pos.t -> [< `normal | `inout ] -> typing_error_callback -> unit
-
-val pass_by_ref_annotation_unexpected : Pos.t -> Pos.t -> bool -> unit
 
 val invalid_new_disposable : Pos.t -> unit
 
@@ -1033,8 +1024,6 @@ val inout_params_outside_of_sync : Pos.t -> unit
 
 val inout_params_special : Pos.t -> unit
 
-val inout_params_mix_byref : Pos.t -> Pos.t -> unit
-
 val inout_params_memoize : Pos.t -> Pos.t -> unit
 
 val obj_set_reactive : Pos.t -> unit
@@ -1075,12 +1064,6 @@ val ellipsis_strict_mode :
 
 val untyped_lambda_strict_mode : Pos.t -> unit
 
-val binding_ref_in_array : Pos.t -> unit
-
-val binding_ref_to_array : Pos.t -> unit
-
-val passing_array_cell_by_ref : Pos.t -> unit
-
 val multiple_conditionally_reactive_annotations : Pos.t -> string -> unit
 
 val conditionally_reactive_annotation_invalid_arguments :
@@ -1106,16 +1089,6 @@ val atmost_rx_as_rxfunc_invalid_location : Pos.t -> unit
 val no_atmost_rx_as_rxfunc_for_rx_if_args : Pos.t -> unit
 
 val coroutine_in_constructor : Pos.t -> unit
-
-val illegal_by_ref_expr : Pos.t -> string -> string -> unit
-
-val variadic_byref_param : Pos.t -> unit
-
-val byref_dynamic_call : Pos.t -> unit
-
-val byref_call : Pos.t -> unit
-
-val reference_in_strict_mode : Pos.t -> unit
 
 val pu_duplication : Pos.t -> string -> string -> string -> unit
 
@@ -1209,8 +1182,6 @@ val mutability_mismatch :
 
 val invalid_traversable_in_rx : Pos.t -> unit
 
-val reference_in_rx : Pos.t -> unit
-
 val reassign_mutable_this :
   in_collection:bool -> is_maybe_mutable:bool -> Pos.t -> unit
 
@@ -1286,8 +1257,6 @@ val mutability_hint_in_non_rx_function : Pos.t -> unit
 val invalid_mutability_in_return_type_hint : Pos.t -> unit
 
 val typechecker_timeout : Pos.t * string -> int -> unit
-
-val byref_on_property : Pos.t -> unit
 
 val switch_multiple_default : Pos.t -> unit
 

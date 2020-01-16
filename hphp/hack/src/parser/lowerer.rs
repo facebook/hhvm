@@ -1546,7 +1546,6 @@ where
                             vec![ast::FunParam {
                                 annotation: p.clone(),
                                 type_hint: ast::TypeHint((), None),
-                                is_reference: false,
                                 is_variadic: false,
                                 pos: p,
                                 name: n,
@@ -3325,7 +3324,6 @@ where
         ast::FunParam {
             annotation: pos.clone(),
             type_hint: ast::TypeHint((), None),
-            is_reference: false,
             is_variadic: false,
             pos,
             name: Self::text(node, env),
@@ -3345,7 +3343,7 @@ where
                 let parameter_type = &c.parameter_type;
                 let parameter_name = &c.parameter_name;
                 let parameter_default_value = &c.parameter_default_value;
-                let (is_reference, is_variadic, name) = match &parameter_name.syntax {
+                let (is_variadic, name) = match &parameter_name.syntax {
                     DecoratedExpression(c) => {
                         let decorated_expression_decorator = &c.decorated_expression_decorator;
                         let decorated_expression_expression = &c.decorated_expression_expression;
@@ -3356,19 +3354,14 @@ where
                                 let nested_decorator =
                                     Self::text_str(&c.decorated_expression_decorator, env);
                                 (
-                                    decorator == "&" || nested_decorator == "&",
                                     decorator == "..." || nested_decorator == "...",
                                     nested_expression,
                                 )
                             }
-                            _ => (
-                                decorator == "&",
-                                decorator == "...",
-                                decorated_expression_expression,
-                            ),
+                            _ => (decorator == "...", decorated_expression_expression),
                         }
                     }
-                    _ => (false, false, parameter_name),
+                    _ => (false, parameter_name),
                 };
                 let user_attributes = Self::p_user_attributes(&parameter_attribute, env)?;
                 let hint = Self::mp_optional(Self::p_hint, parameter_type, env)?
@@ -3385,7 +3378,6 @@ where
                     annotation: pos.clone(),
                     type_hint: ast::TypeHint((), hint),
                     user_attributes,
-                    is_reference,
                     is_variadic,
                     pos,
                     name: Self::text(name, env),

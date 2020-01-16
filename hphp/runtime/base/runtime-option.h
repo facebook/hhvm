@@ -86,7 +86,6 @@ struct RepoOptions {
   H(bool,           AbstractStaticProps,            false)            \
   H(bool,           DisableUnsetClassConst,         false)            \
   H(bool,           DisallowFuncPtrsInConstants,    false)            \
-  E(bool,           CreateInOutWrapperFunctions,    true)             \
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
   E(bool,           EnforceGenericsUB,              false)            \
@@ -1145,7 +1144,6 @@ struct RuntimeOption {
   F(bool, NoticeOnSimpleXMLBehavior, false)                             \
   F(bool, NoticeOnBadMethodStaticness, true)                            \
   F(bool, ForbidDivisionByZero, true)                                   \
-  F(bool, NoticeOnByRefArgumentTypehintViolation, false)                \
   /* Enables Hack records. */                                           \
   F(bool, HackRecords, false)                                           \
   F(bool, HackRecordArrays, false)                                           \

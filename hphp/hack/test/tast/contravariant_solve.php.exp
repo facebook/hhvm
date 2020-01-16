@@ -67,19 +67,17 @@
           ((I<T>),
            (Some ([9:15-19],
                   (Happly (([9:15-16], "\\I"), [([9:17-18], (Habstr "T"))])))));
-          param_is_reference = false; param_is_variadic = false;
-          param_pos = [9:20-22]; param_name = "$_"; param_expr = None;
-          param_callconv = None; param_user_attributes = [];
-          param_visibility = None };
+          param_is_variadic = false; param_pos = [9:20-22];
+          param_name = "$_"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None };
          { param_annotation = ([9:29-31], I<T>);
            param_type_hint =
            ((I<T>),
             (Some ([9:24-28],
                    (Happly (([9:24-25], "\\I"), [([9:26-27], (Habstr "T"))])))));
-           param_is_reference = false; param_is_variadic = false;
-           param_pos = [9:29-31]; param_name = "$_"; param_expr = None;
-           param_callconv = None; param_user_attributes = [];
-           param_visibility = None }
+           param_is_variadic = false; param_pos = [9:29-31];
+           param_name = "$_"; param_expr = None; param_callconv = None;
+           param_user_attributes = []; param_visibility = None }
          ];
        f_body =
        { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
@@ -106,10 +104,9 @@
        f_params =
        [{ param_annotation = ([13:17-19], T);
           param_type_hint = ((T), (Some ([13:15-16], (Habstr "T"))));
-          param_is_reference = false; param_is_variadic = false;
-          param_pos = [13:17-19]; param_name = "$_"; param_expr = None;
-          param_callconv = None; param_user_attributes = [];
-          param_visibility = None }
+          param_is_variadic = false; param_pos = [13:17-19];
+          param_name = "$_"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None }
          ];
        f_body =
        { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };

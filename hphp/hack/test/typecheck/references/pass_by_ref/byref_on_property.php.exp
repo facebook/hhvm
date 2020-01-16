@@ -1,8 +1,0 @@
-File "byref_on_property.php", line 8, characters 32-32:
-Encountered unexpected token '&'. (Parsing[1002])
-File "byref_on_property.php", line 15, characters 21-21:
-Unbound name: & (a global constant) (Naming[2049])
-File "byref_on_property.php", line 17, characters 21-21:
-Unbound name: & (a global constant) (Naming[2049])
-File "byref_on_property.php", line 19, characters 21-21:
-Unbound name: & (a global constant) (Naming[2049])

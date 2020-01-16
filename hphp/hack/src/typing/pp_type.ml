@@ -528,7 +528,6 @@ and pp_param_mode : Format.formatter -> param_mode -> unit =
  fun fmt mode ->
   match mode with
   | FPnormal -> Format.pp_print_string fmt "FPnormal"
-  | FPref -> Format.pp_print_string fmt "FPref"
   | FPinout -> Format.pp_print_string fmt "FPinout"
 
 and show_param_mode : param_mode -> string =

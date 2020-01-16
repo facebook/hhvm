@@ -6,10 +6,9 @@
       f_params =
       [{ param_annotation = ([3:36-41], bool);
          param_type_hint = ((bool), (Some ([3:31-35], (Hprim Tbool))));
-         param_is_reference = false; param_is_variadic = false;
-         param_pos = [3:36-41]; param_name = "$cond"; param_expr = None;
-         param_callconv = None; param_user_attributes = [];
-         param_visibility = None }
+         param_is_variadic = false; param_pos = [3:36-41];
+         param_name = "$cond"; param_expr = None; param_callconv = None;
+         param_user_attributes = []; param_visibility = None }
         ];
       f_body =
       { fb_ast =

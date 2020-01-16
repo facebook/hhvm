@@ -277,9 +277,6 @@ let emit_verify_out params =
     | Some { Hhas_type_info.type_info_user_type = Some t; _ } ->
       not @@ is_mixed_or_dynamic t
     | _ -> true
-  and emit_verify_out_type_for_refs =
-    Hhbc_options.notice_on_by_ref_argument_typehint_violation
-      !Hhbc_options.compiler_options
   in
   let param_instrs =
     List.filter_mapi params ~f:(fun i p ->
@@ -292,18 +289,6 @@ let emit_verify_out params =
                    instr_verifyOutType (Param_unnamed i)
                  else
                    empty );
-               ])
-        else if
-          Hhas_param.is_reference p
-          && is_verifiable p
-          && emit_verify_out_type_for_refs
-        then
-          Some
-            (gather
-               [
-                 instr_cgetl (Local.Named (Hhas_param.name p));
-                 instr_verifyOutType (Param_unnamed i);
-                 instr_popc;
                ])
         else
           None)

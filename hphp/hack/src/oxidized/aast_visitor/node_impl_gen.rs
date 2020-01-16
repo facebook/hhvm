@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f942121d0e6ef0474e2c7cf8ea75a86b>>
+// @generated SignedSource<<702f35ed167ea6d2ff74a9a3d21857d2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -924,7 +924,6 @@ impl<Context, Ex, Fb, En, Hi> Node<Context, Ex, Fb, En, Hi> for FunParam<Ex, Fb,
     ) {
         v.visit_ex(c, &self.annotation);
         self.type_hint.accept(c, v);
-        self.is_reference.accept(c, v);
         self.is_variadic.accept(c, v);
         self.pos.accept(c, v);
         self.name.accept(c, v);

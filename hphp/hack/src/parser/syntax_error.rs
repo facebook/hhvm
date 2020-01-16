@@ -182,7 +182,6 @@ pub const error1060: Error = Cow::Borrowed(concat!(
     "files, which are always strict."
 ));
 pub const error1061: Error = Cow::Borrowed("A Pocket Universes operator (':@') is expected here.");
-pub const error1062: Error = Cow::Borrowed("References in use lists are not supported in Hack.");
 pub const error1063: Error = Cow::Borrowed("Expected matching separator here.");
 pub const error2001: Error = Cow::Borrowed("A type annotation is required in strict mode.");
 pub const error2003: Error =
@@ -330,7 +329,6 @@ pub const error2061: Error = Cow::Borrowed(concat!(
 pub const error2062: Error =
     Cow::Borrowed("Non-static methods are not allowed in abstract final classes.");
 pub const error2063: Error = Cow::Borrowed("Expected integer or string literal.");
-pub const error2064: Error = Cow::Borrowed("Reference methods are not allowed in strict mode.");
 pub const error2065: Error =
     Cow::Borrowed("A variadic parameter ('...') must not have a default value.");
 // This was typing error 4077.
@@ -402,8 +400,6 @@ pub fn instanceof_new_unknown_node(msg: &str) -> Error {
         msg.to_string(),
     ))
 }
-pub const instanceof_reference: Error =
-    Cow::Borrowed("References are not allowed on the right side of an instanceof operation");
 pub const invalid_await_use: Error = Cow::Borrowed("Await cannot be used as an expression");
 pub const toplevel_await_use: Error = Cow::Borrowed("Await cannot be used in a toplevel statement");
 pub const invalid_constructor_method_call: Error = Cow::Borrowed(
@@ -414,7 +410,6 @@ pub const invalid_scope_resolution_qualifier: Error =
 pub const invalid_variable_name: Error = Cow::Borrowed(
     "A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores",
 );
-pub const invalid_reference: Error = Cow::Borrowed("Only variables can be used as references");
 pub const invalid_variable_variable: Error = Cow::Borrowed("Variable Variables are not legal");
 pub const invalid_yield: Error =
     Cow::Borrowed("Yield can only appear as a statement or on the right of an assignment");
@@ -446,8 +441,6 @@ pub const invalid_hack_mode: Error =
 pub const pair_initializer_needed: Error = Cow::Borrowed("Initializer needed for Pair object");
 pub const pair_initializer_arity: Error =
     Cow::Borrowed("Pair objects must have exactly 2 elements");
-pub const nested_unary_reference: Error =
-    Cow::Borrowed("References cannot be followed by unary operators");
 pub const toplevel_statements: Error =
     Cow::Borrowed("Toplevel statements are not allowed. Use __EntryPoint attribute instead");
 pub const invalid_reified: Error =
@@ -613,15 +606,7 @@ pub fn error2074(call_modifier: &str) -> Error {
         call_modifier.to_string(),
     ))
 }
-pub fn error2075(call_modifier: &str) -> Error {
-    Cow::Owned(format!(
-        "An '{}' parameter cannot be passed by reference ('&').",
-        call_modifier.to_string(),
-    ))
-}
-pub const error2076: Error = Cow::Borrowed("Cannot use both 'inout' and '&' on the same argument.");
 pub const error2077: Error = Cow::Borrowed("Cannot use empty list");
-pub const error2078: Error = Cow::Borrowed("Superglobals may not be taken by reference.");
 pub fn not_allowed_in_write(what: &str) -> Error {
     Cow::Owned(format!(
         "{} is not allowed in write context",
@@ -629,8 +614,6 @@ pub fn not_allowed_in_write(what: &str) -> Error {
     ))
 }
 pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign $this");
-pub const references_not_allowed: Error =
-    Cow::Borrowed("References are only allowed as function call arguments");
 pub const enum_elem_name_is_class: Error = Cow::Borrowed("Enum element cannot be named 'class'");
 pub const sealed_enum: Error = Cow::Borrowed("Enums cannot be sealed.");
 pub const property_requires_visibility: Error = Cow::Borrowed(concat!(
@@ -722,12 +705,6 @@ pub fn invalid_number_of_args(name: &str, n: usize) -> Error {
         n.to_string(),
     ))
 }
-pub fn invalid_args_by_ref(name: &str) -> Error {
-    Cow::Owned(format!(
-        "Method {} cannot take arguments by reference",
-        name.to_string(),
-    ))
-}
 pub fn invalid_inout_args(name: &str) -> Error {
     Cow::Owned(format!(
         "Method {} cannot take inout arguments",
@@ -773,14 +750,8 @@ pub const using_st_function_scoped_top_level: Error = Cow::Borrowed(concat!(
     "Using statement in function scoped form may only be used at the top ",
     "level of a function or a method",
 ));
-pub const variadic_reference: Error =
-    Cow::Borrowed("Variadic '...' should be followed by a '$variable'");
-pub const reference_variadic: Error =
-    Cow::Borrowed("Variadic parameters cannot be taken by reference");
 pub const double_variadic: Error =
     Cow::Borrowed("Parameter redundantly marked as variadic ('...').");
-pub const double_reference: Error =
-    Cow::Borrowed("Parameter redundantly marked as reference ('&').");
 pub fn conflicting_trait_require_clauses(name: &str) -> Error {
     Cow::Owned(format!(
         "Conflicting requirements for '{}'",
@@ -791,15 +762,7 @@ pub const shape_type_ellipsis_without_trailing_comma: Error =
     Cow::Borrowed("A comma is required before the ... in a shape type");
 pub const yield_in_magic_methods: Error =
     Cow::Borrowed("'yield' is not allowed in constructors or magic methods");
-pub const reference_not_allowed_on_key: Error =
-    Cow::Borrowed("Key of collection element cannot be marked as reference");
-pub const reference_not_allowed_on_value: Error =
-    Cow::Borrowed("Value of collection element cannot be marked as reference");
-pub const reference_not_allowed_on_element: Error =
-    Cow::Borrowed("Collection element cannot be marked as reference");
 pub const yield_outside_function: Error = Cow::Borrowed("Yield can only be used inside a function");
-pub const reference_param_in_construct: Error =
-    Cow::Borrowed("Constructors cannot take parameters by reference");
 pub const coloncolonclass_on_dynamic: Error =
     Cow::Borrowed("Dynamic class names are not allowed in compile-time ::class fetch");
 pub const this_in_static: Error =
@@ -839,8 +802,6 @@ pub const fun_arg_inout_containers: Error = Cow::Borrowed(concat!(
 ));
 pub const memoize_with_inout: Error =
     Cow::Borrowed("<<__Memoize>> cannot be used on functions with inout parameters");
-pub const fn_with_inout_and_ref_params: Error =
-    Cow::Borrowed("Functions may not use both reference and inout parameters");
 pub const method_calls_on_xhp_attributes: Error =
     Cow::Borrowed("Method calls are not allowed on XHP attributes");
 pub const method_calls_on_xhp_expression: Error =

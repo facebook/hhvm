@@ -535,7 +535,6 @@ let rec bind_param env (ty1, param) =
     {
       Aast.param_annotation = Tast.make_expr_annotation param.param_pos ty1;
       Aast.param_type_hint = (ty1, hint_of_type_hint param.param_type_hint);
-      Aast.param_is_reference = param.param_is_reference;
       Aast.param_is_variadic = param.param_is_variadic;
       Aast.param_pos = param.param_pos;
       Aast.param_name = param.param_name;
@@ -545,7 +544,7 @@ let rec bind_param env (ty1, param) =
       Aast.param_visibility = param.param_visibility;
     }
   in
-  let mode = get_param_mode param.param_is_reference param.param_callconv in
+  let mode = get_param_mode param.param_callconv in
   let id = Local_id.make_unscoped param.param_name in
   let env = Env.set_local env id ty1 in
   let env = Env.set_param env id (ty1, mode) in
@@ -6372,12 +6371,6 @@ and param_modes ?(is_variadic = false) { fp_pos; fp_kind; _ } (pos, e) =
   | (FPnormal, Callconv _) ->
     Errors.inout_annotation_unexpected pos fp_pos is_variadic
   | (FPnormal, _) -> ()
-  | (FPref, Callconv (kind, _)) ->
-    (match kind with
-    (* HHVM supports pass-by-ref for arguments annotated as 'inout'. *)
-    | Ast_defs.Pinout -> ())
-  | (FPref, _) -> Errors.pass_by_ref_annotation_missing pos fp_pos
-  (* HHVM also allows '&' on arguments to inout parameters via interop layer. *)
   | (FPinout, Callconv (Ast_defs.Pinout, _)) -> ()
   | (FPinout, _) -> Errors.inout_annotation_missing pos fp_pos
 

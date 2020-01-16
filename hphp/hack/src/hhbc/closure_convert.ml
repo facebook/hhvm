@@ -639,7 +639,6 @@ let make_fn_param (p, lid) is_variadic =
   {
     param_annotation = Tast_annotate.null_annotation p;
     param_type_hint = (Typing_make_type.null Tast_annotate.witness, None);
-    param_is_reference = false;
     param_is_variadic = is_variadic;
     param_pos = p;
     param_name = Local_id.get_name lid;

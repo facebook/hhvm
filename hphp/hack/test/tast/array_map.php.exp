@@ -16,10 +16,9 @@
                       hf_variadic_ty = None;
                       hf_return_ty = ([4:19-23], (Hprim Tbool));
                       hf_is_mutable_return = false }))));
-         param_is_reference = false; param_is_variadic = false;
-         param_pos = [4:25-27]; param_name = "$f"; param_expr = None;
-         param_callconv = None; param_user_attributes = [];
-         param_visibility = None };
+         param_is_variadic = false; param_pos = [4:25-27]; param_name = "$f";
+         param_expr = None; param_callconv = None;
+         param_user_attributes = []; param_visibility = None };
         { param_annotation = ([5:33-35], (function(int, string): bool));
           param_type_hint =
           (((function(int, string): bool)),
@@ -35,10 +34,9 @@
                        hf_variadic_ty = None;
                        hf_return_ty = ([5:27-31], (Hprim Tbool));
                        hf_is_mutable_return = false }))));
-          param_is_reference = false; param_is_variadic = false;
-          param_pos = [5:33-35]; param_name = "$g"; param_expr = None;
-          param_callconv = None; param_user_attributes = [];
-          param_visibility = None };
+          param_is_variadic = false; param_pos = [5:33-35];
+          param_name = "$g"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None };
         { param_annotation =
           ([6:48-50], (function(int, string, num): Container<int>));
           param_type_hint =
@@ -59,10 +57,9 @@
                         (Happly (([6:32-41], "\\HH\\Container"),
                            [([6:42-45], (Hprim Tint))])));
                        hf_is_mutable_return = false }))));
-          param_is_reference = false; param_is_variadic = false;
-          param_pos = [6:48-50]; param_name = "$h"; param_expr = None;
-          param_callconv = None; param_user_attributes = [];
-          param_visibility = None };
+          param_is_variadic = false; param_pos = [6:48-50];
+          param_name = "$h"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None };
         { param_annotation = ([7:25-27], (function(num): bool));
           param_type_hint =
           (((function(num): bool)),
@@ -75,30 +72,27 @@
                        hf_variadic_ty = None;
                        hf_return_ty = ([7:19-23], (Hprim Tbool));
                        hf_is_mutable_return = false }))));
-          param_is_reference = false; param_is_variadic = false;
-          param_pos = [7:25-27]; param_name = "$i"; param_expr = None;
-          param_callconv = None; param_user_attributes = [];
-          param_visibility = None };
+          param_is_variadic = false; param_pos = [7:25-27];
+          param_name = "$i"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None };
         { param_annotation = ([8:18-21], Container<int>);
           param_type_hint =
           ((Container<int>),
            (Some ([8:3-17],
                   (Happly (([8:3-12], "\\HH\\Container"),
                      [([8:13-16], (Hprim Tint))])))));
-          param_is_reference = false; param_is_variadic = false;
-          param_pos = [8:18-21]; param_name = "$ci"; param_expr = None;
-          param_callconv = None; param_user_attributes = [];
-          param_visibility = None };
+          param_is_variadic = false; param_pos = [8:18-21];
+          param_name = "$ci"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None };
         { param_annotation = ([9:21-24], Container<string>);
           param_type_hint =
           ((Container<string>),
            (Some ([9:3-20],
                   (Happly (([9:3-12], "\\HH\\Container"),
                      [([9:13-19], (Hprim Tstring))])))));
-          param_is_reference = false; param_is_variadic = false;
-          param_pos = [9:21-24]; param_name = "$cs"; param_expr = None;
-          param_callconv = None; param_user_attributes = [];
-          param_visibility = None };
+          param_is_variadic = false; param_pos = [9:21-24];
+          param_name = "$cs"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None };
         { param_annotation = ([10:28-31], KeyedContainer<int, num>);
           param_type_hint =
           ((KeyedContainer<int, num>),
@@ -106,16 +100,14 @@
                   (Happly (([10:3-17], "\\HH\\KeyedContainer"),
                      [([10:18-21], (Hprim Tint)); ([10:23-26], (Hprim Tnum))]
                      )))));
-          param_is_reference = false; param_is_variadic = false;
-          param_pos = [10:28-31]; param_name = "$cn"; param_expr = None;
-          param_callconv = None; param_user_attributes = [];
-          param_visibility = None };
+          param_is_variadic = false; param_pos = [10:28-31];
+          param_name = "$cn"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None };
         { param_annotation = ([11:8-10], bool);
           param_type_hint = ((bool), (Some ([11:3-7], (Hprim Tbool))));
-          param_is_reference = false; param_is_variadic = false;
-          param_pos = [11:8-10]; param_name = "$b"; param_expr = None;
-          param_callconv = None; param_user_attributes = [];
-          param_visibility = None }
+          param_is_variadic = false; param_pos = [11:8-10];
+          param_name = "$b"; param_expr = None; param_callconv = None;
+          param_user_attributes = []; param_visibility = None }
         ];
       f_body =
       { fb_ast =

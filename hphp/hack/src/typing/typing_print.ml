@@ -878,12 +878,10 @@ module Json = struct
 
   let param_mode_to_string = function
     | FPnormal -> "normal"
-    | FPref -> "ref"
     | FPinout -> "inout"
 
   let string_to_param_mode = function
     | "normal" -> Some FPnormal
-    | "ref" -> Some FPref
     | "inout" -> Some FPinout
     | _ -> None
 

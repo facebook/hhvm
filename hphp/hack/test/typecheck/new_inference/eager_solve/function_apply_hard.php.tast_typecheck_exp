@@ -28,7 +28,7 @@
          m_params =
          [{ param_annotation = ([5:40-45], T);
             param_hint = (Some ([5:38-39], (Habstr "T")));
-            param_is_reference = false; param_is_variadic = false;
+            param_is_variadic = false;
             param_pos = [5:40-45]; param_name = "$item"; param_expr = None;
             param_callconv = None; param_user_attributes = [] }
            ];
@@ -60,7 +60,7 @@
        f_params =
        [{ param_annotation = ([7:34-37], arraykey);
           param_hint = (Some ([7:25-33], (Hprim Tarraykey)));
-          param_is_reference = false; param_is_variadic = false;
+          param_is_variadic = false;
           param_pos = [7:34-37]; param_name = "$ak"; param_expr = None;
           param_callconv = None; param_user_attributes = [] }
          ];
@@ -89,12 +89,12 @@
                  (Hfun (FNonreactive, false, [([8:38-44], (Hprim Tstring))],
                     [None], [None], Hnon_variadic, ([8:46-49], (Hprim Tint)),
                     false))));
-          param_is_reference = false; param_is_variadic = false;
+          param_is_variadic = false;
           param_pos = [8:51-53]; param_name = "$f"; param_expr = None;
           param_callconv = None; param_user_attributes = [] };
          { param_annotation = ([8:59-61], int);
            param_hint = (Some ([8:55-58], (Hprim Tint)));
-           param_is_reference = false; param_is_variadic = false;
+           param_is_variadic = false;
            param_pos = [8:59-61]; param_name = "$i"; param_expr = None;
            param_callconv = None; param_user_attributes = [] }
          ];

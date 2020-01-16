@@ -26,10 +26,10 @@
          m_params =
          [{ param_annotation = [5:47-58];
             param_type_hint = ((), (Some ([5:40-46], (Hprim Tstring))));
-            param_is_reference = false; param_is_variadic = false;
-            param_pos = [5:47-58]; param_name = "$attr_value";
-            param_expr = None; param_callconv = None;
-            param_user_attributes = []; param_visibility = (Some Public) }
+            param_is_variadic = false; param_pos = [5:47-58];
+            param_name = "$attr_value"; param_expr = None;
+            param_callconv = None; param_user_attributes = [];
+            param_visibility = (Some Public) }
            ];
          m_body =
          { fb_ast =

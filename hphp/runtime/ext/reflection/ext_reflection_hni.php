@@ -219,21 +219,6 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   <<__Native, __Rx, __MaybeMutable>>
   public function getDocComment(): mixed;
 
-  /**
-   * ( excerpt from
-   * http://php.net/manual/en/reflectionfunctionabstract.returnsreference.php
-   * )
-   *
-   * Checks whether the function returns a reference. Warning: This function
-   * is currently not documented; only its argument list is available.
-   *
-   * @return     mixed   TRUE if it returns a reference, otherwise FALSE
-   */
-  <<__Rx, __MaybeMutable>>
-  public function returnsReference(): bool {
-    return false;
-  }
-
   <<__Native, __Rx, __MaybeMutable>>
   private function getRetTypeInfo(): array;
 

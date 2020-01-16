@@ -20,7 +20,6 @@ type t = {
   option_relabel: bool;
   option_php7_uvs: bool;
   option_php7_ltr_assign: bool;
-  option_create_in_out_wrapper_functions: bool;
   option_hack_arr_compat_notices: bool;
   option_hack_arr_dv_arrs: bool;
   option_dynamic_invoke_functions: SSet.t;
@@ -44,7 +43,6 @@ type t = {
   option_rx_is_enabled: bool;
   option_disable_lval_as_an_expression: bool;
   option_enable_pocket_universes: bool;
-  option_notice_on_by_ref_argument_typehint_violation: bool;
   option_array_provenance: bool;
   option_enable_class_level_where_clauses: bool;
   option_disable_legacy_soft_typehints: bool;
@@ -74,7 +72,6 @@ let default =
      * body. Semantic diff doesn't care about labels, but for visual diff against
      * HHVM it's helpful to renumber in order that the labels match more closely *)
     option_relabel = true;
-    option_create_in_out_wrapper_functions = true;
     option_hack_arr_compat_notices = false;
     option_hack_arr_dv_arrs = false;
     option_dynamic_invoke_functions = SSet.empty;
@@ -98,7 +95,6 @@ let default =
     option_rx_is_enabled = false;
     option_disable_lval_as_an_expression = false;
     option_enable_pocket_universes = false;
-    option_notice_on_by_ref_argument_typehint_violation = false;
     option_array_provenance = false;
     option_enable_class_level_where_clauses = false;
     option_disable_legacy_soft_typehints = false;
@@ -131,8 +127,6 @@ let relabel o = o.option_relabel
 let enable_uniform_variable_syntax o = o.option_php7_uvs
 
 let php7_ltr_assign o = o.option_php7_ltr_assign
-
-let create_in_out_wrapper_functions o = o.option_create_in_out_wrapper_functions
 
 let hack_arr_compat_notices o = o.option_hack_arr_compat_notices
 
@@ -181,9 +175,6 @@ let rx_is_enabled o = o.option_rx_is_enabled
 let disable_lval_as_an_expression o = o.option_disable_lval_as_an_expression
 
 let enable_pocket_universes o = o.option_enable_pocket_universes
-
-let notice_on_by_ref_argument_typehint_violation o =
-  o.option_notice_on_by_ref_argument_typehint_violation
 
 let array_provenance o = o.option_array_provenance
 
@@ -242,8 +233,6 @@ let to_string o =
       Printf.sprintf "enable_uniform_variable_syntax: %B"
       @@ enable_uniform_variable_syntax o;
       Printf.sprintf "php7_ltr_assign: %B" @@ php7_ltr_assign o;
-      Printf.sprintf "create_in_out_wrapper_functions: %B"
-      @@ create_in_out_wrapper_functions o;
       Printf.sprintf "hack_arr_compat_notices: %B" @@ hack_arr_compat_notices o;
       Printf.sprintf "hack_arr_dv_arrs: %B" @@ hack_arr_dv_arrs o;
       Printf.sprintf "dynamic_invoke_functions: [%s]" dynamic_invokes;
@@ -276,8 +265,6 @@ let to_string o =
       Printf.sprintf "disable_lval_as_an_expression: %B"
       @@ disable_lval_as_an_expression o;
       Printf.sprintf "enable_pocket_universes: %B" @@ enable_pocket_universes o;
-      Printf.sprintf "notice_on_by_ref_argument_typehint_violation: %B"
-      @@ notice_on_by_ref_argument_typehint_violation o;
       Printf.sprintf "array_provenance: %B" @@ array_provenance o;
       Printf.sprintf "enable_class_level_where_clauses: %B"
       @@ enable_class_level_where_clauses o;
@@ -328,8 +315,6 @@ let set_option options name value =
     { options with option_php7_ltr_assign = as_bool value }
   | "hhvm.php7.uvs" -> { options with option_php7_uvs = as_bool value }
   | "hack.compiler.relabel" -> { options with option_relabel = as_bool value }
-  | "eval.createinoutwrapperfunctions" ->
-    { options with option_create_in_out_wrapper_functions = as_bool value }
   | "eval.hackarrcompatnotices" ->
     { options with option_hack_arr_compat_notices = as_bool value }
   | "eval.hackarrdvarrs" ->
@@ -374,11 +359,6 @@ let set_option options name value =
     { options with option_disable_lval_as_an_expression = as_bool value }
   | "hack.lang.enablepocketuniverses" ->
     { options with option_enable_pocket_universes = as_bool value }
-  | "hhvm.notice_on_by_ref_argument_typehint_violation" ->
-    {
-      options with
-      option_notice_on_by_ref_argument_typehint_violation = as_bool value;
-    }
   | "hhvm.array_provenance" ->
     { options with option_array_provenance = as_bool value }
   | "hhvm.lang.enable_class_level_where_clauses" ->
@@ -491,9 +471,6 @@ let value_setters =
       { opts with option_php7_uvs = v = 1 } );
     ( set_value "hhvm.php7.ltr_assign" get_value_from_config_int @@ fun opts v ->
       { opts with option_php7_ltr_assign = v = 1 } );
-    ( set_value "hhvm.create_in_out_wrapper_functions" get_value_from_config_int
-    @@ fun opts v ->
-      { opts with option_create_in_out_wrapper_functions = v = 1 } );
     ( set_value "hhvm.hack_arr_compat_notices" get_value_from_config_int
     @@ fun opts v -> { opts with option_hack_arr_compat_notices = v = 1 } );
     ( set_value "hhvm.hack_arr_dv_arrs" get_value_from_config_int
@@ -524,12 +501,6 @@ let value_setters =
         "hhvm.hack.lang.enable_pocket_universes"
         get_value_from_config_int
     @@ fun opts v -> { opts with option_enable_pocket_universes = v = 1 } );
-    ( set_value
-        "hhvm.notice_on_by_ref_argument_typehint_violation"
-        get_value_from_config_int
-    @@ fun opts v ->
-      { opts with option_notice_on_by_ref_argument_typehint_violation = v = 1 }
-    );
     ( set_value
         "hhvm.hack.lang.enable_xhp_class_modifier"
         get_value_from_config_int

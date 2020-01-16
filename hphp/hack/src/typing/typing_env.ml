@@ -1181,9 +1181,8 @@ and get_tyvars_i env (ty : internal_type) =
     (* Parameters are treated contravariantly *)
     | FPnormal ->
       (env, ISet.union negative acc_positive, ISet.union positive acc_negative)
-    (* Inout/ref parameters are both co- and contra-variant *)
-    | FPinout
-    | FPref ->
+    (* Inout parameters are both co- and contra-variant *)
+    | FPinout ->
       let tyvars = ISet.union negative positive in
       (env, ISet.union tyvars acc_positive, ISet.union tyvars acc_negative)
   in

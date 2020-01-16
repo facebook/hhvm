@@ -42,14 +42,6 @@ pub mod emit_memoize_helpers {
         params: &[&FunParam<Ex, Fb, En, Hi>],
         is_method: bool,
     ) -> Result<(), emit_fatal::Error> {
-        if params.iter().any(|param| param.is_reference) {
-            return Err(emit_fatal::raise_fatal_runtime(
-                pos,
-                String::from(
-                    "<<__Memoize>> cannot be used on functions with args passed by reference",
-                ),
-            ));
-        };
         if !is_method && params.iter().any(|param| param.is_variadic) {
             return Err(emit_fatal::raise_fatal_runtime(
                 pos,

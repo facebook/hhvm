@@ -308,7 +308,6 @@ let emit_reified_init_method env ast_class =
       [
         Hhas_param.make
           SU.Reified.reified_init_method_param_name
-          false (* reference *)
           false (* variadic *)
           false (* inout *)
           [] (* uattrs *)
@@ -585,9 +584,7 @@ let emit_class (ast_class, hoisted) =
         Emit_pos.emit_pos_then ast_class.A.c_span
         @@ make_cinit_instrs initialized_class_constants
       in
-      let params =
-        [Hhas_param.make "$constName" false false false [] None None]
-      in
+      let params = [Hhas_param.make "$constName" false false [] None None] in
       [
         make_86method
           ~name:"86cinit"

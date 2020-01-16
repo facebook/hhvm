@@ -603,7 +603,6 @@ let mutate_metadata (input : HP.t)  =
   let mutate_param (param : Hhas_param.t) : Hhas_param.t =
     Hhas_param.make
       (param |> Hhas_param.name)
-      (param |> Hhas_param.is_reference |> mutate_bool)
       (param |> Hhas_param.is_variadic  |> mutate_bool)
       (param |> Hhas_param.is_inout  |> mutate_bool)
       (param |> Hhas_param.user_attributes |> List.map ~f:mutate_attribute)

@@ -4,6 +4,7 @@
   (libraries
     collections
     disk
+    exec_command
     str
     unix
     utils_core)

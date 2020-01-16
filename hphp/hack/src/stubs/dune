@@ -99,3 +99,7 @@
   (libraries
     hh_json
     collections))
+
+(library
+  (name exec_command)
+  (modules exec_command))

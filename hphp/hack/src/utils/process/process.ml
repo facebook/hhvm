@@ -284,10 +284,11 @@ let send_input_and_form_result
  * Launches a process, optionally modifying the environment variables with ~env
  *)
 let exec_no_chdir
-    ~(prog : string)
+    ~(prog : Exec_command.t)
     ?(input : string option)
     ~(env : Process_types.environment option)
     (args : string list) : Process_types.t =
+  let prog = Exec_command.to_string prog in
   let info =
     {
       Process_types.name = prog;
@@ -386,7 +387,7 @@ let chdir_entry : (chdir_params, 'a, 'b) Daemon.entry =
   Entry.register "chdir_main" chdir_main
 
 let exec
-    (prog : string)
+    (prog : Exec_command.t)
     ?(input : string option)
     ?(env : Process_types.environment option)
     (args : string list) : Process_types.t =
@@ -394,8 +395,11 @@ let exec
 
 let exec_with_working_directory
     ~(dir : string)
-    (prog : string)
+    (prog : Exec_command.t)
     ?(input : string option)
     ?(env : Process_types.environment option)
     (args : string list) : Process_types.t =
-  run_entry ?input chdir_entry { cwd = dir; prog; env; args }
+  run_entry
+    ?input
+    chdir_entry
+    { cwd = dir; prog = Exec_command.to_string prog; env; args }

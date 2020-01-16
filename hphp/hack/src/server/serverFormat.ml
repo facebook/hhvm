@@ -11,9 +11,9 @@ open Result.Monad_infix
 
 (* TODO t14922604: Further improve error handling *)
 let call_external_formatter
-    (cmd : string) (content : string) (args : string list) :
+    (cmd : Exec_command.t) (content : string) (args : string list) :
     (string list, string) result =
-  let args = Array.of_list (cmd :: args) in
+  let args = Array.of_list (Exec_command.to_string cmd :: args) in
   let reader timeout ic oc =
     Out_channel.output_string oc content;
     Out_channel.close oc;
@@ -72,7 +72,8 @@ let go_hackfmt ?filename_for_logging ~content args =
   in
   let path = List.find ~f:Sys.file_exists paths in
   match path with
-  | Some path -> call_external_formatter path content args
+  | Some path ->
+    call_external_formatter (Exec_command.Hackfmt path) content args
   | _ ->
     Hh_logger.log "Formatter not found";
     Error

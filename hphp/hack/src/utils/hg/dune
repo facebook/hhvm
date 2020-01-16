@@ -5,6 +5,7 @@
     hg
     hg_sig)
   (libraries
+    exec_command
     injector_config
     process
     process_types

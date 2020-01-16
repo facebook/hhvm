@@ -64,9 +64,9 @@ val input_line : ?timeout:t -> in_channel -> string
 
 val input_value : ?timeout:t -> in_channel -> 'a
 
-val open_process : string -> string array -> in_channel * out_channel
+val open_process : Exec_command.t -> string array -> in_channel * out_channel
 
-val open_process_in : string -> string array -> in_channel
+val open_process_in : Exec_command.t -> string array -> in_channel
 
 val close_process_in : in_channel -> Unix.process_status
 
@@ -74,7 +74,7 @@ val read_process :
   timeout:int ->
   on_timeout:(unit -> 'a) ->
   reader:(t -> in_channel -> out_channel -> 'a) ->
-  string ->
+  Exec_command.t ->
   string array ->
   'a
 

@@ -45,7 +45,7 @@ stdin/stdout/stderr.)
 val exec_checked :
   ?input:string ->
   ?env:string array ->
-  string ->
+  Exec_command.t ->
   string array ->
   (Process_success.t, Process_failure.t) Lwt_result.t
 

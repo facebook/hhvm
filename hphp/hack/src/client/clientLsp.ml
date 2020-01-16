@@ -1059,14 +1059,14 @@ let do_rageFB (state : state) (ref_unblocked_time : float ref) :
         Lwt.return (Printf.sprintf "PSTACK %s (%s) - %s\n\n" pid reason msg)
       in
       log "Getting pstack for %s" pid;
-      match%lwt Lwt_utils.exec_checked "pstack" [| pid |] with
+      match%lwt Lwt_utils.exec_checked Exec_command.Pstack [| pid |] with
       | Ok result ->
         let stack = result.Lwt_utils.Process_success.stdout in
         format_data stack
       | Error _ ->
         (* pstack is just an alias for gstack, but it's not present on all systems. *)
         log "Failed to execute pstack for %s. Executing gstack instead" pid;
-        (match%lwt Lwt_utils.exec_checked "gstack" [| pid |] with
+        (match%lwt Lwt_utils.exec_checked Exec_command.Gstack [| pid |] with
         | Ok result ->
           let stack = result.Lwt_utils.Process_success.stdout in
           format_data stack

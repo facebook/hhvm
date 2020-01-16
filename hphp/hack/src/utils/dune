@@ -177,9 +177,11 @@
     lwt_message_queue
     lwt_utils)
   (libraries
+    core_kernel
+    exec_command
     lwt
     lwt.unix
-    core_kernel
+    process
     promise
     utils_core)
   (preprocess

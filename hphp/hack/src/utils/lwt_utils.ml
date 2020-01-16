@@ -112,9 +112,10 @@ end
 let exec_checked
     ?(input : string option)
     ?(env : string array option)
-    (program : string)
+    (program : Exec_command.t)
     (args : string array) : (Process_success.t, Process_failure.t) Lwt_result.t
     =
+  let program = Exec_command.to_string program in
   let command_line =
     let args =
       args |> Array.map ~f:(fun x -> " " ^ x) |> String.concat_array ~sep:""

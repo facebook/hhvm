@@ -161,8 +161,12 @@ end = struct
   let get_sockname timeout =
     let ic =
       Timeout.open_process_in
-        "watchman"
-        [| "watchman"; "get-sockname"; "--no-pretty" |]
+        Exec_command.Watchman
+        [|
+          Exec_command.to_string Exec_command.Watchman;
+          "get-sockname";
+          "--no-pretty";
+        |]
     in
     let reader =
       Buffered_line_reader.create @@ Timeout.descr_of_in_channel ic

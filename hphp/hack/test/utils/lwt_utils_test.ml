@@ -2,7 +2,9 @@ open Asserter
 
 let test_exec_checked_basic () : bool Lwt.t =
   let%lwt process_status =
-    Lwt_utils.exec_checked "echo" [| "hello"; "world" |]
+    Lwt_utils.exec_checked
+      (Exec_command.For_use_in_testing_only "echo")
+      [| "hello"; "world" |]
   in
   match process_status with
   | Ok { Lwt_utils.Process_success.command_line; stdout; stderr } ->
@@ -17,7 +19,9 @@ let test_exec_checked_basic () : bool Lwt.t =
 
 let test_exec_checked_failing () : bool Lwt.t =
   let%lwt process_status =
-    Lwt_utils.exec_checked "false" [| "ignored-argument" |]
+    Lwt_utils.exec_checked
+      (Exec_command.For_use_in_testing_only "false")
+      [| "ignored-argument" |]
   in
   match process_status with
   | Ok _ -> failwith "command succeeded unexpectedly"
@@ -47,7 +51,10 @@ let test_exec_checked_big_payload () : bool Lwt.t =
   let payload_size = 500000 in
   let big_payload = String.init payload_size (fun _ -> 'x') in
   let%lwt process_status =
-    Lwt_utils.exec_checked "cat" [||] ~input:big_payload
+    Lwt_utils.exec_checked
+      (Exec_command.For_use_in_testing_only "cat")
+      [||]
+      ~input:big_payload
   in
   match process_status with
   | Ok { Lwt_utils.Process_success.stdout; _ } ->

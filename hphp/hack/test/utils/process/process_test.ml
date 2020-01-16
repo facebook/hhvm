@@ -1,7 +1,9 @@
 open Asserter
 
 let test_echo () =
-  let process = Process.exec "echo" ["hello world"] in
+  let process =
+    Process.exec (Exec_command.For_use_in_testing_only "echo") ["hello world"]
+  in
   match Process.read_and_wait_pid ~timeout:2 process with
   | Ok { Process_types.stdout; _ } ->
     let () = String_asserter.assert_equals "hello world\n" stdout "" in
@@ -20,7 +22,9 @@ let test_echo_in_a_loop () =
   loop true 600
 
 let test_process_read_idempotent () =
-  let process = Process.exec "echo" ["hello world"] in
+  let process =
+    Process.exec (Exec_command.For_use_in_testing_only "echo") ["hello world"]
+  in
   let result = Process.read_and_wait_pid ~timeout:2 process in
   let () =
     match result with
@@ -37,7 +41,10 @@ let test_process_read_idempotent () =
 
 let test_env_variable () =
   let process =
-    Process.exec "printenv" ~env:(Process_types.Augment ["NAME=world"]) []
+    Process.exec
+      (Exec_command.For_use_in_testing_only "printenv")
+      ~env:(Process_types.Augment ["NAME=world"])
+      []
   in
   match Process.read_and_wait_pid ~timeout:2 process with
   | Ok { Process_types.stdout; _ } ->
@@ -53,25 +60,37 @@ let test_env_variable () =
   | _ -> false
 
 let test_process_timeout () =
-  let process = Process.exec "sleep" ["2"] in
+  let process =
+    Process.exec (Exec_command.For_use_in_testing_only "sleep") ["2"]
+  in
   match Process.read_and_wait_pid ~timeout:1 process with
   | Error (Process_types.Timed_out _) -> true
   | _ -> false
 
 let test_process_finishes_within_timeout () =
-  let process = Process.exec "sleep" ["1"] in
+  let process =
+    Process.exec (Exec_command.For_use_in_testing_only "sleep") ["1"]
+  in
   match Process.read_and_wait_pid ~timeout:2 process with
   | Ok _ -> true
   | _ -> false
 
 let test_future () =
-  let future = Future.make (Process.exec "sleep" ["1"]) String.trim in
+  let future =
+    Future.make
+      (Process.exec (Exec_command.For_use_in_testing_only "sleep") ["1"])
+      String.trim
+  in
   let result = Future.get_exn future in
   let () = String_asserter.assert_equals "" result "" in
   true
 
 let test_future_is_ready () =
-  let future = Future.make (Process.exec "sleep" ["1"]) String.trim in
+  let future =
+    Future.make
+      (Process.exec (Exec_command.For_use_in_testing_only "sleep") ["1"])
+      String.trim
+  in
   (* Shouldn't be ready immediately. *)
   if Future.is_ready future then
     false
@@ -87,7 +106,11 @@ let test_future_continue_with () =
   Tempfile.with_real_tempdir (fun dir_path ->
       let fn = Path.concat dir_path "test.txt" in
       RealDisk.write_file ~file:(Path.to_string fn) ~contents:"my file contents";
-      let ls_proc = Process.exec "ls" [Path.to_string dir_path] in
+      let ls_proc =
+        Process.exec
+          (Exec_command.For_use_in_testing_only "ls")
+          [Path.to_string dir_path]
+      in
       let future = Future.make ls_proc String.trim in
       let future = Future.continue_with future String.uppercase_ascii in
       String_asserter.assert_equals
@@ -100,12 +123,18 @@ let test_future_continue_with_future () =
   Tempfile.with_real_tempdir (fun dir_path ->
       let fn = Path.concat dir_path "test.txt" in
       RealDisk.write_file ~file:(Path.to_string fn) ~contents:"my file contents";
-      let ls_proc = Process.exec "ls" [Path.to_string dir_path] in
+      let ls_proc =
+        Process.exec
+          (Exec_command.For_use_in_testing_only "ls")
+          [Path.to_string dir_path]
+      in
       let future = Future.make ls_proc String.trim in
       let future =
         Future.continue_with_future future (fun a ->
             let cat_proc =
-              Process.exec "cat" [Path.to_string (Path.concat dir_path a)]
+              Process.exec
+                (Exec_command.For_use_in_testing_only "cat")
+                [Path.to_string (Path.concat dir_path a)]
             in
             Future.make cat_proc String.trim)
       in
@@ -119,7 +148,11 @@ let test_future_continue_and_map_err_ok () =
   Tempfile.with_real_tempdir (fun dir_path ->
       let fn = Path.concat dir_path "test.txt" in
       RealDisk.write_file ~file:(Path.to_string fn) ~contents:"my file contents";
-      let ls_proc = Process.exec "ls" [Path.to_string dir_path] in
+      let ls_proc =
+        Process.exec
+          (Exec_command.For_use_in_testing_only "ls")
+          [Path.to_string dir_path]
+      in
       let future = Future.make ls_proc String.trim in
       let future =
         Future.continue_and_map_err future (fun res ->
@@ -137,7 +170,11 @@ let test_future_continue_and_map_err_ok () =
   true
 
 let test_future_continue_and_map_err_error () =
-  let fail_proc = Process.exec "command_that_doesnt_exist" [] in
+  let fail_proc =
+    Process.exec
+      (Exec_command.For_use_in_testing_only "command_that_doesnt_exist")
+      []
+  in
   let future = Future.make fail_proc String.trim in
   let future =
     Future.continue_and_map_err future (fun res ->
@@ -164,18 +201,28 @@ let test_future_long_continuation_chain_ok () =
       let fn2 = Path.to_string (Path.concat dir2 "test2.txt") in
       RealDisk.write_file ~file:fn ~contents:fn2;
       RealDisk.write_file ~file:fn2 ~contents:"my file contents";
-      let ls_proc = Process.exec "ls" [Path.to_string dir1] in
+      let ls_proc =
+        Process.exec
+          (Exec_command.For_use_in_testing_only "ls")
+          [Path.to_string dir1]
+      in
       let future = Future.make ls_proc String.trim in
       let future =
         Future.continue_with_future future (fun ls_result ->
             let cat_proc =
-              Process.exec "cat" [Path.to_string (Path.concat dir1 ls_result)]
+              Process.exec
+                (Exec_command.For_use_in_testing_only "cat")
+                [Path.to_string (Path.concat dir1 ls_result)]
             in
             Future.make cat_proc String.trim)
       in
       let future =
         Future.continue_with_future future (fun cat_result ->
-            let cat_proc = Process.exec "cat" [cat_result] in
+            let cat_proc =
+              Process.exec
+                (Exec_command.For_use_in_testing_only "cat")
+                [cat_result]
+            in
             Future.make cat_proc String.trim)
       in
       String_asserter.assert_equals
@@ -194,18 +241,28 @@ let test_future_long_continuation_chain_error () =
       let fn2 = Path.to_string (Path.concat dir2 "test2.txt") in
       RealDisk.write_file ~file:fn ~contents:(fn2 ^ ".nowhere");
       RealDisk.write_file ~file:fn2 ~contents:"my file contents";
-      let ls_proc = Process.exec "ls" [Path.to_string dir1] in
+      let ls_proc =
+        Process.exec
+          (Exec_command.For_use_in_testing_only "ls")
+          [Path.to_string dir1]
+      in
       let future = Future.make ls_proc String.trim in
       let future =
         Future.continue_with_future future (fun ls_result ->
             let cat_proc =
-              Process.exec "cat" [Path.to_string (Path.concat dir1 ls_result)]
+              Process.exec
+                (Exec_command.For_use_in_testing_only "cat")
+                [Path.to_string (Path.concat dir1 ls_result)]
             in
             Future.make cat_proc String.trim)
       in
       let future =
         Future.continue_with_future future (fun cat_result ->
-            let cat_proc = Process.exec "cat" [cat_result] in
+            let cat_proc =
+              Process.exec
+                (Exec_command.For_use_in_testing_only "cat")
+                [cat_result]
+            in
             Future.make cat_proc String.trim)
       in
       let future =
@@ -231,7 +288,12 @@ let test_future_long_continuation_chain_error () =
 
 (** Send "hello" to stdin and use sed to replace hello to world. *)
 let test_stdin_input () =
-  let process = Process.exec "sed" ~input:"hello" ["s/hello/world/g"] in
+  let process =
+    Process.exec
+      (Exec_command.For_use_in_testing_only "sed")
+      ~input:"hello"
+      ["s/hello/world/g"]
+  in
   match Process.read_and_wait_pid ~timeout:3 process with
   | Ok { Process_types.stdout; _ } ->
     String_asserter.assert_equals
@@ -258,7 +320,12 @@ let test_entry_point () =
   | _ -> false
 
 let test_chdir () =
-  let process = Process.exec_with_working_directory ~dir:"/tmp" "pwd" [] in
+  let process =
+    Process.exec_with_working_directory
+      ~dir:"/tmp"
+      (Exec_command.For_use_in_testing_only "pwd")
+      []
+  in
   let result = Process.read_and_wait_pid ~timeout:10 process in
   match result with
   | Ok { Process_types.stdout; _ } ->

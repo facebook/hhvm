@@ -15,6 +15,7 @@
     process)
   (flags (:standard -unsafe-string))
   (libraries
+    exec_command
     process_types
     utils_core
     utils_ocaml_overrides

@@ -22,7 +22,7 @@ end
  * Sends input to stdin of spawned process if given.
  *)
 val exec :
-  string ->
+  Exec_command.t ->
   ?input:string ->
   ?env:Process_types.environment ->
   string list ->
@@ -44,7 +44,7 @@ val exec :
  *)
 val exec_with_working_directory :
   dir:string ->
-  string ->
+  Exec_command.t ->
   ?input:string ->
   ?env:Process_types.environment ->
   string list ->

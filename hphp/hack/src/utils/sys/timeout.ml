@@ -86,7 +86,15 @@ module Alarm_timeout = struct
     let (in_fd, child_out_fd) = Unix.pipe () in
     Unix.set_close_on_exec in_fd;
     Unix.set_close_on_exec out_fd;
-    let pid = Unix.(create_process cmd args child_in_fd child_out_fd stderr) in
+    let pid =
+      Unix.(
+        create_process
+          (Exec_command.to_string cmd)
+          args
+          child_in_fd
+          child_out_fd
+          stderr)
+    in
     Unix.close child_out_fd;
     Unix.close child_in_fd;
     let ic = (Unix.in_channel_of_descr in_fd, Some pid) in
@@ -99,7 +107,15 @@ module Alarm_timeout = struct
     Unix.set_close_on_exec in_fd;
     Unix.set_close_on_exec out_fd;
     Unix.close out_fd;
-    let pid = Unix.(create_process cmd args child_in_fd child_out_fd stderr) in
+    let pid =
+      Unix.(
+        create_process
+          (Exec_command.to_string cmd)
+          args
+          child_in_fd
+          child_out_fd
+          stderr)
+    in
     Unix.close child_out_fd;
     Unix.close child_in_fd;
     let ic = (Unix.in_channel_of_descr in_fd, Some pid) in
@@ -391,7 +407,15 @@ module Select_timeout = struct
     let (in_fd, child_out_fd) = Unix.pipe () in
     Unix.set_close_on_exec in_fd;
     Unix.set_close_on_exec out_fd;
-    let pid = Unix.(create_process cmd args child_in_fd child_out_fd stderr) in
+    let pid =
+      Unix.(
+        create_process
+          (Exec_command.to_string cmd)
+          args
+          child_in_fd
+          child_out_fd
+          stderr)
+    in
     Unix.close child_out_fd;
     Unix.close child_in_fd;
     let tic = in_channel_of_descr in_fd in
@@ -405,7 +429,15 @@ module Select_timeout = struct
     Unix.set_close_on_exec in_fd;
     Unix.set_close_on_exec out_fd;
     Unix.close out_fd;
-    let pid = Unix.(create_process cmd args child_in_fd child_out_fd stderr) in
+    let pid =
+      Unix.(
+        create_process
+          (Exec_command.to_string cmd)
+          args
+          child_in_fd
+          child_out_fd
+          stderr)
+    in
     Unix.close child_out_fd;
     Unix.close child_in_fd;
     let tic = in_channel_of_descr in_fd in
@@ -515,9 +547,9 @@ module type S = sig
 
   val input_value : ?timeout:t -> in_channel -> 'a
 
-  val open_process : string -> string array -> in_channel * out_channel
+  val open_process : Exec_command.t -> string array -> in_channel * out_channel
 
-  val open_process_in : string -> string array -> in_channel
+  val open_process_in : Exec_command.t -> string array -> in_channel
 
   val close_process_in : in_channel -> Unix.process_status
 
@@ -525,7 +557,7 @@ module type S = sig
     timeout:int ->
     on_timeout:(unit -> 'a) ->
     reader:(t -> in_channel -> out_channel -> 'a) ->
-    string ->
+    Exec_command.t ->
     string array ->
     'a
 

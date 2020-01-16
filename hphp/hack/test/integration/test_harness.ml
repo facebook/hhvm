@@ -43,7 +43,7 @@ let exec_hh_client args harness =
     "executing hh_client. Args: %s\n%!"
     (String.concat ~sep:", " args);
   Process.exec
-    harness.hh_client_path
+    (Exec_command.For_use_in_testing_only harness.hh_client_path)
     ~env:(Process_types.Augment harness.test_env)
     args
 

@@ -26,7 +26,7 @@ let test_proc_env () =
   let () = Unix.putenv "B" "1" in
   let proc_t =
     exec
-      "bash"
+      (Exec_command.For_use_in_testing_only "bash")
       ~env:(Process_types.Augment ["A=1"])
       ["-c"; "case \"$B\" in 1) exit 0;; *) exit 1;; esac"]
   in

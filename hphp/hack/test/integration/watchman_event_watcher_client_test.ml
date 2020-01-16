@@ -54,23 +54,25 @@ let hg_commit ?(add_remove = false) ~msg repo =
       args
   in
   let args = args @ ["-m"; msg; "--cwd"; Path.to_string repo] in
-  let p = Process.exec "hg" args in
+  let p = Process.exec Exec_command.Hg args in
   ignore
   @@ assert_process_completes_ok ~msg:(Printf.sprintf "hg commit of %s" msg) p
 
 let hg_update ~dest repo =
-  let p = Process.exec "hg" ["update"; dest; "--cwd"; Path.to_string repo] in
+  let p =
+    Process.exec Exec_command.Hg ["update"; dest; "--cwd"; Path.to_string repo]
+  in
   ignore
   @@ assert_process_completes_ok ~msg:(Printf.sprintf "hg update %s" dest) p
 
 let init_hg_repo repo =
-  let p = Process.exec "hg" ["init"; Path.to_string repo] in
+  let p = Process.exec Exec_command.Hg ["init"; Path.to_string repo] in
   ignore @@ assert_process_completes_ok ~msg:"hg init" p;
   let hg_dir = Filename.concat (Path.to_string repo) ".hg" in
   let hgrc_file = Filename.concat hg_dir "hgrc" in
   let hgrc = Printf.sprintf "%s\n%s\n" "[extensions]" "fsmonitor =" in
   Sys_utils.write_file ~file:hgrc_file hgrc;
-  let p = Process.exec "hg" ["add"; "--cwd"; Path.to_string repo] in
+  let p = Process.exec Exec_command.Hg ["add"; "--cwd"; Path.to_string repo] in
   ignore @@ assert_process_completes_ok ~msg:"hg add" p;
   hg_commit ~msg:"Starting" repo
 

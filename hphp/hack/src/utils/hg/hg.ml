@@ -22,7 +22,7 @@ module Hg_actual = struct
       (* Disable user aliases or configs. *)
       Process_types.Augment ["HGPLAIN=1"]
     in
-    Process.exec "hg" ~env args
+    Process.exec Exec_command.Hg ~env args
 
   (** Given a list of files and their revisions, saves the files to the output
    * directory. For example,

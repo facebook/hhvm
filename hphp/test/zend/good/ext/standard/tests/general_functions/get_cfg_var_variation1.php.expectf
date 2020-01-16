@@ -1,9 +1,0 @@
-*** Test substituting argument 1 with array values ***
-
-Warning: get_cfg_var() expects parameter 1 to be string, array given in %s/get_cfg_var_variation1.php on line 20
-
-Warning: get_cfg_var() expects parameter 1 to be string, array given in %s/get_cfg_var_variation1.php on line 20
-
-Warning: get_cfg_var() expects parameter 1 to be string, array given in %s/get_cfg_var_variation1.php on line 20
-
-Warning: get_cfg_var() expects parameter 1 to be string, array given in %s/get_cfg_var_variation1.php on line 20

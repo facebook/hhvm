@@ -18,7 +18,7 @@ function assert_options(int $what, $value = null);
 <<__PHPStdLib>>
 function assert($assertion);
 <<__PHPStdLib>>
-function dl(string $library);
+function dl(string $_library);
 <<__PHPStdLib>>
 function extension_loaded(string $name);
 <<__PHPStdLib>>
@@ -26,7 +26,7 @@ function get_loaded_extensions(bool $zend_extensions = false);
 <<__PHPStdLib>>
 function get_extension_funcs(string $module_name);
 <<__PHPStdLib>>
-function get_cfg_var(string $option);
+function get_cfg_var(string $_option);
 <<__PHPStdLib>>
 function get_current_user();
 <<__PHPStdLib>>

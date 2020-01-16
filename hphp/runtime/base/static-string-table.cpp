@@ -374,7 +374,7 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
 
   if (categorize) {
     return make_darray(
-      s_user, usr.toDArray(),
+      s_user, usr,
       s_Core, sys
     );
   } else {

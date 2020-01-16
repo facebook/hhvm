@@ -29,8 +29,7 @@ function assert(mixed $assertion, mixed $message = null): mixed;
  * (either through php.ini or dl()). Warning: This function has been removed
  * from some SAPI's in PHP 5.3.
  */
-<<__Native>>
-function dl(string $library): int;
+function dl(string $_library): int { return 0; }
 
 /* Finds out whether the extension is loaded.
  */
@@ -41,7 +40,7 @@ function extension_loaded(string $name): bool;
  * the PHP interpreter.
  */
 <<__Native>>
-function get_loaded_extensions(bool $zend_extensions = false): array;
+function get_loaded_extensions(bool $zend_extensions = false): varray;
 
 /* This function returns the names of all the functions defined in the module
  * indicated by module_name or false if $module_name is not a valid extension.
@@ -56,8 +55,7 @@ function get_extension_funcs(string $module_name): mixed;
  * configuration setting. If this is available, a configuration file is being
  * used.
  */
-<<__Native>>
-function get_cfg_var(string $option): mixed;
+function get_cfg_var(string $_option): mixed { return false; }
 
 <<__Native>>
 function get_current_user(): string;
@@ -83,9 +81,9 @@ function set_include_path(mixed $new_include_path): string;
  * include_once(), require() or require_once().
  */
 <<__Native>>
-function get_included_files(): array;
+function get_included_files(): varray;
 
-function get_required_files(): array {
+function get_required_files(): varray {
   return get_included_files();
 }
 
@@ -127,13 +125,13 @@ function getmyuid(): mixed;
  */
 <<__Native>>
 function getopt(string $options,
-                mixed $longopts = null): array;
+                mixed $longopts = null): darray;
 
 /* This is an interface to getrusage(2). It gets data returned from the system
  * call.
  */
 <<__Native>>
-function getrusage(int $who = 0): array;
+function getrusage(int $who = 0): darray;
 
 /* Gets resolution of system clock. "man 3 clock_getres" for more details.
  */

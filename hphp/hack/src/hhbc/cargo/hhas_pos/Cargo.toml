@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:hhas_pos_rust
-# Signature<<9208e84e0dea6e594dbd6c637c3bcc4ac7ac473a>>
+# Signature<<29a06836ca6461d4a77f82cd85000b04df9d07fb>>
 [package]
 name = "hhas_pos_rust"
 edition = "2018"
@@ -12,4 +12,4 @@ path = "../../hhas_pos.rs"
 
 [dependencies]
 oxidized = { path = "../../../oxidized" }
-# @end of Signature<<9208e84e0dea6e594dbd6c637c3bcc4ac7ac473a>>
+# @end of Signature<<29a06836ca6461d4a77f82cd85000b04df9d07fb>>

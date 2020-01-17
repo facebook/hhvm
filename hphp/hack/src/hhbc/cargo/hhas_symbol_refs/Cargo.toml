@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:hhas_symbol_refs_rust
-# Signature<<d8251480d15861724f3a57555224ede8bce7a1cd>>
+# Signature<<da47640eb8c9c62e84148a386e5ba9e89bdc2ded>>
 [package]
 name = "hhas_symbol_refs_rust"
 edition = "2018"
@@ -9,4 +9,4 @@ include = ["../../hhas_symbol_refs.rs"]
 
 [lib]
 path = "../../hhas_symbol_refs.rs"
-# @end of Signature<<d8251480d15861724f3a57555224ede8bce7a1cd>>
+# @end of Signature<<da47640eb8c9c62e84148a386e5ba9e89bdc2ded>>

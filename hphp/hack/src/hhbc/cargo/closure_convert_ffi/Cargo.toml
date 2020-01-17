@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:closure_convert_rust_ffi
-# Signature<<5aa4b5f9cfb632a0b38e812aa28e4a57e8fb54d7>>
+# Signature<<b4d39be81418dc3e62505f0f174964b1dc6fdb3f>>
 [package]
 name = "closure_convert_rust_ffi"
 edition = "2018"
@@ -19,4 +19,4 @@ ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
-# @end of Signature<<5aa4b5f9cfb632a0b38e812aa28e4a57e8fb54d7>>
+# @end of Signature<<b4d39be81418dc3e62505f0f174964b1dc6fdb3f>>

@@ -17,6 +17,8 @@ use oxidized::{aast, ast as tast, ast_defs, namespace_env, pos::Pos};
 use runtime::TypedValue;
 
 extern crate bitflags;
+extern crate lazy_static;
+extern crate regex;
 
 use bitflags::bitflags;
 

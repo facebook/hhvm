@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:emit_body_rust
-# Signature<<c4150f3fa33b98fb8d8ee064732bce71b3ccf865>>
+# Signature<<cc5608c5749bb22dd574fc554bc05abeae465e23>>
 [package]
 name = "emit_body_rust"
 edition = "2018"
@@ -20,6 +20,7 @@ emit_type_hint_rust = { path = "../emit_type_hint" }
 env = { path = "../env" }
 hhas_body_rust = { path = "../hhas_body" }
 hhbc_ast_rust = { path = "../hhbc_ast" }
+hhbc_id_rust = { path = "../hhbc_id" }
 hhbc_string_utils_rust = { path = "../string_utils" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
 label_rewriter_rust = { path = "../label_rewriter" }
@@ -30,4 +31,6 @@ options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }
 bitflags = "1.2"
-# @end of Signature<<c4150f3fa33b98fb8d8ee064732bce71b3ccf865>>
+lazy_static = "1.4"
+regex = "1.3"
+# @end of Signature<<cc5608c5749bb22dd574fc554bc05abeae465e23>>

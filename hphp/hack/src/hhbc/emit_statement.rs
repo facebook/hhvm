@@ -7,13 +7,17 @@
 
 use crate::try_finally_rewriter as tfr;
 
+use emit_expression_rust::{self as emit_expr, Setrange};
 use emit_fatal_rust as emit_fatal;
+use emit_pos_rust::emit_pos_then;
 use env::{emitter::Emitter, Env};
-use hhbc_ast_rust as hhbc_ast;
+use hhbc_ast_rust::*;
+use hhbc_id_rust::{self as hhbc_id, Id};
 use instruction_sequence_rust::InstrSeq;
-use local_rust as local;
+use oxidized::{aast as a, ast as tast, ast_defs, pos::Pos};
 
-use oxidized::{aast as a, pos::Pos};
+use lazy_static::lazy_static;
+use regex::Regex;
 
 /// Context for code generation. It would be more elegant to pass this
 /// around in an environment parameter.
@@ -72,6 +76,117 @@ fn get_level<Ex, Fb, En, Hi>(
 
 fn emit_return(e: &mut Emitter, env: &mut Env) -> InstrSeq {
     tfr::emit_return(e, false, env)
+}
+
+fn emit_def_inline<Ex, Fb, En, Hi>(e: &mut Emitter, def: a::Def<Ex, Fb, En, Hi>) -> InstrSeq {
+    use ast_defs::Id;
+    match def {
+        a::Def::Class(cd) => {
+            let make_def_instr = |num| {
+                if e.context().systemlib() {
+                    InstrSeq::make_defclsnop(num)
+                } else {
+                    InstrSeq::make_defcls(num)
+                }
+            };
+            let Id(pos, name) = (*cd).name;
+            let num = name.parse::<ClassNum>().unwrap();
+            emit_pos_then(e, &pos, make_def_instr(num))
+        }
+        a::Def::Typedef(td) => {
+            let Id(pos, name) = (*td).name;
+            let num = name.parse::<TypedefNum>().unwrap();
+            emit_pos_then(e, &pos, InstrSeq::make_deftypealias(num))
+        }
+        a::Def::RecordDef(rd) => {
+            let Id(pos, name) = (*rd).name;
+            let num = name.parse::<ClassNum>().unwrap();
+            emit_pos_then(e, &pos, InstrSeq::make_defrecord(num))
+        }
+        _ => panic!("Define inline: Invalid inline definition"),
+    }
+}
+
+fn set_bytes_kind(name: &str) -> Option<Setrange> {
+    lazy_static! {
+        static ref RE: Regex = Regex::new("(?i)^hh\\set_bytes(_rev|)_([a-z0-9]+)(_vec|)$").unwrap();
+    }
+    RE.captures(name).map_or(None, |groups| {
+        let op = if !groups.get(1).unwrap().as_str().is_empty() {
+            // == _rev
+            SetrangeOp::Reverse
+        } else {
+            SetrangeOp::Forward
+        };
+        let kind = groups.get(2).unwrap().as_str();
+        let vec = !groups.get(3).unwrap().as_str().is_empty(); // == _vec
+        if kind == "string" && !vec {
+            Some(Setrange {
+                size: 1,
+                vec: false,
+                op,
+            })
+        } else {
+            let size = match kind {
+                "bool" | "int8" => 1,
+                "int16" => 2,
+                "int32" | "float32" => 4,
+                "int64" | "float64" => 8,
+                _ => return None,
+            };
+            Some(Setrange { size, vec, op })
+        }
+    })
+}
+
+fn emit_stmt(
+    e: &mut Emitter,
+    env: &mut Env,
+    stmt: &tast::Stmt,
+) -> Result<InstrSeq, emit_fatal::Error> {
+    use ast_defs::Id;
+    let pos = &stmt.0;
+    match &stmt.1 {
+        a::Stmt_::Expr(e_) => match &(*e_).1 {
+            a::Expr_::YieldBreak => {
+                return Ok(InstrSeq::gather(vec![
+                    InstrSeq::make_null(),
+                    emit_return(e, env),
+                ]))
+            }
+            a::Expr_::Call(c) => {
+                if let (_, a::Expr(_, a::Expr_::Id(sid)), _, exprs, None) = &**c {
+                    let expr = &(**c).1;
+                    let ft = hhbc_id::function::Type::from_ast_name(&(*sid).1);
+                    let fname = ft.to_raw_string();
+                    return if fname.eq_ignore_ascii_case("unset") {
+                        Ok(InstrSeq::gather(
+                            exprs
+                                .iter()
+                                .map(|ex| emit_expr::emit_unset_expr(env, ex))
+                                .collect::<std::result::Result<Vec<_>, _>>()?,
+                        ))
+                    } else {
+                        if let Some(kind) = set_bytes_kind(fname) {
+                            let (args, arg) = match exprs.last() {
+                                Some(a::Expr(_, a::Expr_::Callconv(cc))) => {
+                                    let (ast_defs::ParamKind::Pinout, ex) = &**cc;
+                                    (&exprs.as_slice()[..exprs.len() - 1], Some(ex))
+                                }
+                                _ => (exprs.as_slice(), None),
+                            };
+                            emit_expr::emit_set_range_expr(e, env, pos, fname, kind, args, arg)
+                        } else {
+                            emit_expr::emit_ignored_expr(e, env, pos, expr)
+                        }
+                    };
+                }
+            }
+            _ => (),
+        },
+        _ => (),
+    }
+    unimplemented!("TODO(hrust)")
 }
 
 fn emit_break(e: &mut Emitter, env: &mut Env, pos: &Pos) -> InstrSeq {

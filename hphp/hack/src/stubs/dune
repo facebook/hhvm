@@ -101,5 +101,6 @@
     collections))
 
 (library
-  (name exec_command)
+  (name exec_command_stubs)
+  (wrapped false)
   (modules exec_command))

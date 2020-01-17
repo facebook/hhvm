@@ -35,9 +35,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-int numImmediates(Op opcode) {
-  assertx(isValidOpcode(opcode));
-  static const int8_t values[] = {
+EXTERNALLY_VISIBLE
+extern const int8_t numImmediatesTable[] = {
 #define NA         0
 #define ONE(...)   1
 #define TWO(...)   2
@@ -55,15 +54,15 @@ int numImmediates(Op opcode) {
 #undef FOUR
 #undef FIVE
 #undef SIX
-  };
-  return values[size_t(opcode)];
+};
+
+int numImmediates(Op opcode) {
+  assertx(isValidOpcode(opcode));
+  return numImmediatesTable[size_t(opcode)];
 }
 
-ArgType immType(const Op opcode, int idx) {
-  assertx(isValidOpcode(opcode));
-  assertx(idx >= 0 && idx < numImmediates(opcode));
-  always_assert(idx < kMaxHhbcImms); // No opcodes have more than 6 immediates
-  static const int8_t argTypes[][kMaxHhbcImms] = {
+EXTERNALLY_VISIBLE
+extern const int8_t immTypeTable[][kMaxHhbcImms] = {
 #define NA                    {-1, -1, -1, -1, -1, -1},
 #define ONE(a)                { a, -1, -1, -1, -1, -1},
 #define TWO(a, b)             { a,  b, -1, -1, -1, -1},
@@ -83,15 +82,29 @@ ArgType immType(const Op opcode, int idx) {
 #undef FOUR
 #undef FIVE
 #undef SIX
-  };
+};
+
+ArgType immType(const Op opcode, int idx) {
+  assertx(isValidOpcode(opcode));
+  assertx(idx >= 0 && idx < numImmediates(opcode));
+  always_assert(idx < kMaxHhbcImms); // No opcodes have more than 6 immediates
   auto opInt = size_t(opcode);
-  return (ArgType)argTypes[opInt][idx];
+  return (ArgType)immTypeTable[opInt][idx];
 }
 
 static size_t encoded_iva_size(uint8_t lowByte) {
   // High order bit set => 4-byte.
   return int8_t(lowByte) >= 0 ? 1 : 4;
 }
+
+EXTERNALLY_VISIBLE
+extern const int8_t immSizeTable[] = {
+#define ARGTYPE(nm, type) sizeof(type),
+#define ARGTYPEVEC(nm, type) 0,
+    ARGTYPES
+#undef ARGTYPE
+#undef ARGTYPEVEC
+};
 
 namespace {
 
@@ -102,13 +115,6 @@ bool argTypeIsVector(ArgType type) {
 
 int immSize(Op op, ArgType type, PC immPC) {
   auto pc = immPC;
-  static const int8_t argTypeToSizes[] = {
-#define ARGTYPE(nm, type) sizeof(type),
-#define ARGTYPEVEC(nm, type) 0,
-    ARGTYPES
-#undef ARGTYPE
-#undef ARGTYPEVEC
-  };
 
   if (type == IVA || type == LA || type == IA) {
     return encoded_iva_size(decode_raw<uint8_t>(pc));
@@ -161,7 +167,7 @@ int immSize(Op op, ArgType type, PC immPC) {
     return pc - immPC + vecElemSz * size;
   }
 
-  return (type >= 0) ? argTypeToSizes[type] : 0;
+  return (type >= 0) ? immSizeTable[type] : 0;
 }
 
 }
@@ -841,15 +847,17 @@ OPCODES
   return out;
 }
 
-const char* opcodeToName(Op op) {
-  static const char* namesArr[] = {
+EXTERNALLY_VISIBLE
+extern const char* const opcodeToNameTable[] = {
 #define O(name, imm, inputs, outputs, flags) \
     #name ,
     OPCODES
 #undef O
-  };
+};
+
+const char* opcodeToName(Op op) {
   if (size_t(op) < Op_count) {
-    return namesArr[size_t(op)];
+    return opcodeToNameTable[size_t(op)];
   }
   return "Invalid";
 }

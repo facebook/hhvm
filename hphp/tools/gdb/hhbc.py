@@ -22,8 +22,14 @@ def as_idx(op):
 @memoized
 def op_table(name):
     """Get the symbol `name' as an int8_t[]."""
-    return gdb.parse_and_eval("&'" + name + "'").cast(T('int8_t').pointer())
-
+    try:
+        return V(name).address.cast(T('int8_t').pointer())
+    except:
+        # for some reason some of these tables have no type
+        # information.  for those cases, just take the address and
+        # cast to a pointer.  Note that this *doesn't* work for the
+        # tables with types, because gdb objects to the '&'!
+        return gdb.parse_and_eval("(unsigned char*)&'%s'" % (name))
 
 #------------------------------------------------------------------------------
 # Bytecode immediates.
@@ -133,7 +139,7 @@ class HHBC(object):
     def op_name(op):
         """Return the name of HPHP::Op `op'."""
 
-        table_name = 'HPHP::opcodeToName(HPHP::Op)::namesArr'
+        table_name = 'HPHP::opcodeToNameTable'
         table_type = T('char').pointer().pointer()
         return op_table(table_name).cast(table_type)[as_idx(op)]
 
@@ -155,7 +161,7 @@ class HHBC(object):
     def num_imms(op):
         """Return the number of immediates for HPHP::Op `op'."""
 
-        table_name = 'HPHP::numImmediates(HPHP::Op)::values'
+        table_name = 'HPHP::numImmediatesTable'
         return op_table(table_name)[as_idx(op)]
 
     @staticmethod
@@ -164,7 +170,7 @@ class HHBC(object):
 
         op_count = V('HPHP::Op_count')
 
-        table_name = 'HPHP::immType(HPHP::Op, int)::argTypes'
+        table_name = 'HPHP::immTypeTable'
         # This looks like an int8_t[6][op_count], but in fact, it's actually an
         # int8_t[op_count][6], as desired.
         table_type = T('int8_t').array(6 - 1).array(op_count - 1).pointer()
@@ -328,9 +334,7 @@ class HHBC(object):
                              + ' ' + num_rets + asyncEagerOffset + skipNumArgsCheck)
 
         else:
-            table_name = (
-                'HPHP::(anonymous namespace)::immSize'
-                + '(HPHP::Op, HPHP::ArgType, unsigned char const*)::argTypeToSizes')
+            table_name = 'HPHP::immSizeTable'
             if immtype >= 0:
                 size = op_table(table_name)[as_idx(immtype)]
 

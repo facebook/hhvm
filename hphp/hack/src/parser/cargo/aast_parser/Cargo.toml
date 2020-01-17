@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:aast_parser
-# Signature<<d95d1779220ab5fbbab20f173e643ca66605845a>>
+# Signature<<9fee0f2adbf9dce07a0c35cc733c576df6133508>>
 [package]
 name = "aast_parser"
 edition = "2018"
@@ -28,4 +28,4 @@ stack_limit = { path = "../../../utils/stack_limit" }
 syntax_tree = { path = "../syntax_tree" }
 itertools = "0.8"
 regex = "1.3"
-# @end of Signature<<d95d1779220ab5fbbab20f173e643ca66605845a>>
+# @end of Signature<<9fee0f2adbf9dce07a0c35cc733c576df6133508>>

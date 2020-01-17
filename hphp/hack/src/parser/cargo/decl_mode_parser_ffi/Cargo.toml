@@ -1,23 +1,26 @@
+# @generated
+# @autocargo from //hphp/hack/src/parser:decl_mode_parser_ffi
+# Signature<<7a7e117171b9e6bb730f010e2c52b9fe9c9b9780>>
 [package]
 name = "decl_mode_parser_ffi"
-version = "3.49.0"
 edition = "2018"
+version = "0.0.0"
+include = ["../../decl_mode_parser_ffi.rs"]
 
 [lib]
-name = "decl_mode_parser_ffi"
 path = "../../decl_mode_parser_ffi.rs"
 
 [dependencies]
-positioned_parser = { path = "../positioned_parser", package = "positioned_parser" }
-parser_rust = { path = "../..", package = "parser_rust" }
-syntax_tree = { path = "../syntax_tree", package = "syntax_tree" }
-libc = "^0.2.60"
-decl_mode_parser = { path = "../decl_mode_parser", package = "decl_mode_parser" }
-parser_core_types = { path = "../core_types", package = "parser_core_types" }
-rust_parser_ffi = { path = "../rust_parser_ffi", package = "rust_parser_ffi" }
-rust_to_ocaml = { path = "../rust_to_ocaml", package = "rust_to_ocaml" }
-ocamlpool_rust = { path = "../../../utils/ocamlpool_rust", package = "ocamlpool_rust" }
-ocaml = "^0.7"
-ocamlrep = { path = "../../../ocamlrep", package = "ocamlrep" }
-ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool", package = "ocamlrep_ocamlpool" }
-oxidized = { path = "../../../oxidized", package = "oxidized" }
+decl_mode_parser = { path = "../decl_mode_parser" }
+ocamlpool_rust = { path = "../../../utils/ocamlpool_rust" }
+ocamlrep = { path = "../../../ocamlrep" }
+ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
+oxidized = { path = "../../../oxidized" }
+parser_core_types = { path = "../core_types" }
+parser_rust = { path = "../.." }
+rust_parser_ffi = { path = "../rust_parser_ffi" }
+rust_to_ocaml = { path = "../rust_to_ocaml" }
+syntax_tree = { path = "../syntax_tree" }
+libc = "0.2"
+ocaml = "0.8"
+# @end of Signature<<7a7e117171b9e6bb730f010e2c52b9fe9c9b9780>>

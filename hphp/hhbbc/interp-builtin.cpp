@@ -392,6 +392,53 @@ bool builtin_type_structure_classname(ISS& env, const bc::FCallBuiltin& op) {
   return true;
 }
 
+bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
+  if (op.arg1 != 3) return false;
+
+  auto const def = to_cell(topT(env));
+  auto const key = topC(env, 1);
+  auto const base = topC(env, 2);
+
+  if (!base.couldBe(RuntimeOption::EvalHackArrDVArrs ? BDict : BArr) ||
+      !key.couldBe(BArrKey)) {
+    unreachable(env);
+    discard(env, 3);
+    push(env, TBottom);
+    return true;
+  }
+  if (!base.subtypeOf(RuntimeOption::EvalHackArrDVArrs ? BOptDict : BOptDArr) ||
+      !key.subtypeOf(BOptArrKey)) {
+    return false;
+  }
+
+  auto const unoptBase = is_opt(base) ? unopt(base) : base;
+  auto const unoptKey = is_opt(key) ? unopt(key) : key;
+  auto mightThrow = is_opt(base) || is_opt(key);
+
+  auto elem = RuntimeOption::EvalHackArrDVArrs
+    ? dict_elem(unoptBase, unoptKey, def)
+    : array_elem(unoptBase, unoptKey, def);
+  switch (elem.second) {
+    case ThrowMode::None:
+    case ThrowMode::MaybeMissingElement:
+    case ThrowMode::MissingElement:
+      break;
+    case ThrowMode::MaybeBadKey:
+      mightThrow = true;
+      break;
+    case ThrowMode::BadOperation:
+      always_assert(false);
+  }
+
+  if (!mightThrow) {
+    constprop(env);
+    effect_free(env);
+  }
+  discard(env, 3);
+  push(env, std::move(elem.first));
+  return true;
+}
+
 #define SPECIAL_BUILTINS                                                \
   X(abs, abs)                                                           \
   X(ceil, ceil)                                                         \
@@ -410,6 +457,7 @@ bool builtin_type_structure_classname(ISS& env, const bc::FCallBuiltin& op) {
   X(is_list_like, HH\\is_list_like)                                     \
   X(type_structure, HH\\type_structure)                                 \
   X(type_structure_classname, HH\\type_structure_classname)             \
+  X(shapes_idx, HH\\Shapes::idx)                                        \
 
 #define X(x, y)    const StaticString s_##x(#y);
   SPECIAL_BUILTINS

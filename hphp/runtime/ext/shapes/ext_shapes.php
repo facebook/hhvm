@@ -3,7 +3,7 @@
 namespace HH {
   abstract final class Shapes {
 
-    <<__Native, __Rx>>
+    <<__Native, __Rx, __IsFoldable>>
     public static function idx(
       darray $shape,
       arraykey $index,

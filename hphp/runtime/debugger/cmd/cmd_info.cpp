@@ -306,7 +306,7 @@ void getSymbolNames(std::shared_ptr<DebuggerClient::LiveLists>& liveLists) {
     functions.push_back(iter.second().toString().toCppString());
   }
   auto consts = lookupDefinedConstants();
-  constants.reserve(consts.size());
+  constants.reserve(consts.size() + constants.size());
   for (ArrayIter iter(consts); iter; ++iter) {
     constants.push_back(iter.first().toString().toCppString());
   }

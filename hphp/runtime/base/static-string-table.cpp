@@ -330,10 +330,10 @@ rds::Handle makeCnsHandle(const StringData* cnsName) {
 std::vector<StringData*> lookupDefinedStaticStrings() {
   assertx(s_stringDataMap);
   std::vector<StringData*> ret;
+  ret.reserve(s_stringDataMap->size());
 
-  for (auto it = s_stringDataMap->begin();
-       it != s_stringDataMap->end(); ++it) {
-    ret.push_back(const_cast<StringData*>(to_sdata(it->first)));
+  for (auto const& it : *s_stringDataMap) {
+    ret.push_back(const_cast<StringData*>(to_sdata(it.first)));
   }
 
   return ret;
@@ -345,29 +345,25 @@ const StaticString s_Core("Core");
 
 Array lookupDefinedConstants(bool categorize /*= false */) {
   assertx(s_stringDataMap);
-  Array usr = Array::CreateDArray();
-  Array sys = Array::CreateDArray();
+  auto usr = Array::CreateDArray();
+  auto sys = categorize ? Array::CreateDArray() : Array();
 
-  for (auto it = s_stringDataMap->begin();
-       it != s_stringDataMap->end(); ++it) {
-    if (it->second.bound()) {
-      if (!it->second.isInit()) continue;
+  for (auto const& it : *s_stringDataMap) {
+    auto const& rval = it.second;
+    if (!rval.bound() || !rval.isInit()) continue;
 
-      Array *tbl = (categorize && it->second.isPersistent()) ? &sys : &usr;
-      auto& tv = *it->second;
+    auto* tbl = (categorize && rval.isPersistent()) ? &sys : &usr;
+    auto const& tv = *rval;
 
-      if (tv.m_type != KindOfUninit) {
-        StrNR key(const_cast<StringData*>(to_sdata(it->first)));
-        tbl->set(key, tvAsVariant(&tv), true);
-      } else {
-        assertx(tv.m_data.pcnt);
-        StrNR key(const_cast<StringData*>(to_sdata(it->first)));
-        auto callback =
-          reinterpret_cast<Native::ConstantCallback>(tv.m_data.pcnt);
-        auto cns = callback();
-        if (cns.isInitialized()) {
-          tbl->set(key, cns, true);
-        }
+    StrNR key{to_sdata(it.first)};
+    if (type(tv) != KindOfUninit) {
+      tbl->set(key, tv, true);
+    } else {
+      assertx(val(tv).pcnt);
+      auto callback = reinterpret_cast<Native::ConstantCallback>(val(tv).pcnt);
+      auto cns = callback();
+      if (cns.isInitialized()) {
+        tbl->set(key, cns, true);
       }
     }
   }
@@ -385,9 +381,9 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
 size_t countStaticStringConstants() {
   if (!s_stringDataMap) return 0;
   size_t count = 0;
-  for (auto it = s_stringDataMap->begin();
-       it != s_stringDataMap->end(); ++it) {
-    if (it->second.bound()) {
+
+  for (auto const& it : *s_stringDataMap) {
+    if (it.second.bound()) {
       ++count;
     }
   }

@@ -1385,14 +1385,13 @@ std::string formatStaticString(StringData* str) {
 
 bool AdminRequestHandler::handleDumpStaticStringsRequest(
   const std::string& /*cmd*/, const std::string& filename) {
-  std::vector<StringData*> list = lookupDefinedStaticStrings();
+  auto const& list = lookupDefinedStaticStrings();
   std::ofstream out(filename.c_str());
   SCOPE_EXIT { out.close(); };
   for (auto item : list) {
     out << formatStaticString(item);
     if (RuntimeOption::EvalPerfDataMap) {
-      size_t len = item->size();
-      if (len > 255) len = 255;
+      auto const len = std::min<size_t>(item->size(), 255);
       std::string str(item->data(), len);
       // Only print the first line (up to 255 characters). Since we want '\0' in
       // the list of characters to avoid, we need to use the version of
@@ -1419,7 +1418,7 @@ bool AdminRequestHandler::handleRandomStaticStringsRequest(
     }
   }
   std::string output;
-  std::vector<StringData*> list = lookupDefinedStaticStrings();
+  auto list = lookupDefinedStaticStrings();
   if (count < list.size()) {
     for (size_t i = 0; i < count; i++) {
       size_t j = folly::Random::rand64(i, list.size());

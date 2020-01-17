@@ -240,6 +240,8 @@ enum class SerializationSite {
 void raise_array_serialization_notice(SerializationSite src,
                                       const ArrayData* arr);
 
+[[noreturn]] void raise_use_of_specialized_array();
+
 #define HC(Opt, opt) void raise_hac_##opt##_notice(const std::string& msg);
 HAC_CHECK_OPTS
 #undef HC

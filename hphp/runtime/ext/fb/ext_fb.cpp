@@ -555,6 +555,13 @@ static int fb_compact_serialize_variant(
       return 0;
     }
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfObject:
     case KindOfResource:
     case KindOfRecord: // TODO(T41025646)

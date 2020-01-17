@@ -48,6 +48,11 @@ inline bool tvToBool(TypedValue cell) {
     case KindOfDouble:        return cell.m_data.dbl != 0;
     case KindOfPersistentString:
     case KindOfString:        return cell.m_data.pstr->toBoolean();
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR); break;
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -82,6 +87,11 @@ inline int64_t tvToInt(TypedValue cell) {
     case KindOfDouble:        return double_to_int64(cell.m_data.dbl);
     case KindOfPersistentString:
     case KindOfString:        return cell.m_data.pstr->toInt64(10);
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR); break;
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -162,6 +172,12 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
 
     case KindOfResource:
       return make_tv<KindOfInt64>(cell.m_data.pres->data()->o_toInt64());
+
+    case KindOfDArray:
+    case KindOfPersistentDArray:
+    case KindOfVArray:
+    case KindOfPersistentVArray:
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
     case KindOfClsMeth:
     case KindOfPersistentArray:

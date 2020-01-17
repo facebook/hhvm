@@ -321,6 +321,11 @@ inline Type Type::cns(const TypedValue& tv) {
         assertx(tv.m_data.parr->isPHPArray());
         return type_detail::for_const(tv.m_data.parr);
 
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        // TODO(T58820726)
       case KindOfObject:
       case KindOfResource:
       // TODO (T29639296)

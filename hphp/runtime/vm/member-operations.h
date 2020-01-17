@@ -563,6 +563,12 @@ NEVER_INLINE tv_rval ElemSlow(TypedValue& tvRef,
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return ElemKeyset<mode, keyType>(base.val().parr, key);
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      not_reached();
     case KindOfPersistentArray:
     case KindOfArray:
       return ElemArray<mode, keyType>(base.val().parr, key);
@@ -967,6 +973,12 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base,
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return ElemDKeyset<keyType>(base, key);
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      not_reached();
     case KindOfPersistentArray:
     case KindOfArray:
       return ElemDArray<mode, keyType>(base, key);
@@ -1221,6 +1233,12 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return ElemUKeyset<keyType>(base, key);
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      not_reached();
     case KindOfPersistentArray:
     case KindOfArray:
       return ElemUArray<keyType>(base, key);
@@ -1329,6 +1347,12 @@ inline tv_lval NewElem(TypedValue& tvRef,
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       throw_cannot_use_newelem_for_lval_read_keyset();
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      not_reached();
     case KindOfPersistentArray:
     case KindOfArray:
       return NewElemArray(base);
@@ -1744,6 +1768,12 @@ StringData* SetElemSlow(tv_lval base,
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       throwInvalidKeysetOperation();
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      not_reached();
     case KindOfPersistentArray:
     case KindOfArray:
       SetElemArray<setResult, keyType>(base, key, value);
@@ -1950,6 +1980,12 @@ inline void SetNewElem(tv_lval base,
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return SetNewElemKeyset(base, value);
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      not_reached();
     case KindOfPersistentArray:
     case KindOfArray:
       return SetNewElemArray(base, value);
@@ -2055,6 +2091,13 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
     case KindOfKeyset:
       throwInvalidKeysetOperation();
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      not_reached();
+
     case KindOfPersistentArray:
     case KindOfArray: {
       if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
@@ -2144,6 +2187,13 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       throw_cannot_use_newelem_for_lval_read_keyset();
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfPersistentArray:
     case KindOfArray:
       throwMissingElementException("Set-op");
@@ -2285,6 +2335,12 @@ inline TypedValue IncDecElem(
     case KindOfKeyset:
       throwInvalidKeysetOperation();
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfPersistentArray:
     case KindOfArray: {
       if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
@@ -2381,6 +2437,13 @@ inline TypedValue IncDecNewElem(
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       throw_cannot_use_newelem_for_lval_read_keyset();
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfPersistentArray:
     case KindOfArray:
       throwMissingElementException("Inc/dec");
@@ -2605,6 +2668,12 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
     case KindOfKeyset:
       UnsetElemKeyset<keyType>(base, key);
       return;
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
     case KindOfPersistentArray:
     case KindOfArray:
@@ -2836,6 +2905,12 @@ NEVER_INLINE bool IssetEmptyElemSlow(tv_rval base, key_type<keyType> key) {
     case KindOfKeyset:
       return IssetEmptyElemKeyset<useEmpty, keyType>(val(base).parr, key);
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfPersistentArray:
     case KindOfArray:
       return IssetEmptyElemArray<useEmpty, keyType>(
@@ -3009,6 +3084,12 @@ tv_lval propPre(TypedValue& tvRef, tv_lval base, MInstrPropState* pState) {
       }
       return propPreStdclass<mode>(tvRef, base, pState);
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -3048,6 +3129,10 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfFunc:
@@ -3181,6 +3266,10 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfResource:
@@ -3259,6 +3348,10 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfResource:
@@ -3341,6 +3434,10 @@ inline TypedValue IncDecProp(
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfResource:

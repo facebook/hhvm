@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-provenance.h"
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/runtime-error.h"
 
 #include "hphp/runtime/ext/extension.h"
@@ -119,6 +120,12 @@ struct VariantControllerImpl {
         } else {
           return HPHP::serialize::Type::MAP;
         }
+
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        // TODO(T58820726)
 
       case KindOfResource:
       case KindOfRecord: // TODO(T41025646): implement serialization for records

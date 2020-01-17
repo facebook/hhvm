@@ -3921,6 +3921,12 @@ Type from_cell(TypedValue cell) {
   case KindOfRecord: // TODO(arnabde)
     not_implemented();
 
+  case KindOfPersistentDArray:
+  case KindOfDArray:
+  case KindOfPersistentVArray:
+  case KindOfVArray:
+    not_implemented(); // TODO(T58820726)
+
   case KindOfPersistentArray:
   case KindOfArray:
     always_assert(cell.m_data.parr->isStatic());
@@ -3953,6 +3959,10 @@ Type from_DataType(DataType dt) {
   case KindOfPersistentKeyset:
   case KindOfKeyset:   return TKeyset;
   case KindOfRecord:   return TRecord;
+  case KindOfPersistentDArray:
+  case KindOfDArray:
+  case KindOfPersistentVArray:
+  case KindOfVArray:   return TBottom; // TODO(T58820726)
   case KindOfPersistentArray:
   case KindOfArray:    return TArr;
   case KindOfObject:   return TObj;

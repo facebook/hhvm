@@ -324,6 +324,12 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfString:
         return interface_supports_string(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        // TODO(T58820726)
+        not_reached();
       case KindOfPersistentArray:
       case KindOfArray:
         return interface_supports_array(annotClsName)

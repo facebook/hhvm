@@ -174,6 +174,10 @@ void raise_convert_record_to_type(const char* typeName) {
   raise_error("Cannot convert record to %s", typeName);
 }
 
+void raise_use_of_specialized_array() {
+  raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+}
+
 void raise_hackarr_compat_notice(const std::string& msg) {
   raise_notice("Hack Array Compat: %s", msg.c_str());
 }

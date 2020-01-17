@@ -617,6 +617,10 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfDict:
   case KindOfPersistentKeyset:
   case KindOfKeyset:
+  case KindOfPersistentDArray:
+  case KindOfDArray:
+  case KindOfPersistentVArray:
+  case KindOfVArray:
   case KindOfPersistentArray:
   case KindOfArray:
   case KindOfObject:
@@ -735,6 +739,11 @@ static std::string toStringElm(const TypedValue* tv) {
        << tv->m_data.pclsmeth->getFunc()->fullName()->data()
        << ")";
        continue;
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
     }
     not_reached();
   } while (0);
@@ -2446,6 +2455,10 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfDict:
             case KindOfPersistentKeyset:
             case KindOfKeyset:
+            case KindOfPersistentDArray:
+            case KindOfDArray:
+            case KindOfPersistentVArray:
+            case KindOfVArray:
             case KindOfPersistentArray:
             case KindOfArray:
             case KindOfObject:
@@ -2498,6 +2511,13 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           intval = val->m_data.pres->data()->o_toInt64();
           tvDecRefRes(val);
           return;
+
+        case KindOfPersistentDArray:
+        case KindOfDArray:
+        case KindOfPersistentVArray:
+        case KindOfVArray:
+          // TODO(T58820726)
+          raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
         case KindOfRecord: // TODO (T41029094)
           raise_error(Strings::RECORD_NOT_SUPPORTED);

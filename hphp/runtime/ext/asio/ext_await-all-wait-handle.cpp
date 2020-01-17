@@ -276,6 +276,12 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromContainer,
     case KindOfPersistentDict:
     case KindOfDict:
       return c_AwaitAllWaitHandle_ns_fromDict(self_, dependencies.asCArrRef());
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
     case KindOfPersistentArray:
     case KindOfArray:
       return c_AwaitAllWaitHandle_ns_fromArray(self_, dependencies.asCArrRef());

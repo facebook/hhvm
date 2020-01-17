@@ -115,6 +115,12 @@ TypedNum numericConvHelper(TypedValue cell) {
     case KindOfPersistentString:
       return stringToNumeric(cell.m_data.pstr);
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -552,6 +558,10 @@ void tvIncDecOp(Op op, tv_lval cell) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
@@ -877,6 +887,10 @@ void tvBitNot(TypedValue& cell) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:

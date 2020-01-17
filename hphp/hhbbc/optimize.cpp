@@ -963,6 +963,11 @@ Bytecode gen_constant(const TypedValue& cell) {
       assert(cell.m_data.parr->isPHPArray());
       return bc::Array { cell.m_data.parr };
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
     case KindOfResource:
     case KindOfObject:
     case KindOfFunc:

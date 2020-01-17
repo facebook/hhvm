@@ -131,6 +131,12 @@ bool tvIsPlausible(const TypedValue cell) {
       case KindOfClsMeth:
         assertx(cell.m_data.pclsmeth->validate());
         return;
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        assert_flog(false, "premature use of datatype-specialized php arrays");
+        return;
     }
     not_reached();
   }();

@@ -116,6 +116,13 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, int64_t val) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -186,6 +193,13 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, double val) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
     case KindOfPersistentArray:
     case KindOfArray:
@@ -265,6 +279,13 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const StringData* val) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
     case KindOfPersistentArray:
     case KindOfArray:
@@ -366,6 +387,13 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ArrayData* ad) {
       hackArr();
       return op.keysetVsNonKeyset();
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfPersistentArray:
     case KindOfArray:
       return op(cell.m_data.parr, ad);
@@ -441,6 +469,13 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ObjectData* od) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
     case KindOfPersistentArray:
     case KindOfArray:
@@ -520,6 +555,13 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceData* rd) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
     case KindOfPersistentArray:
     case KindOfArray:
@@ -649,6 +691,13 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, ClsMethDataRef clsMeth) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:   return op.keysetVsNonKeyset();
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfPersistentArray:
     case KindOfArray: {
       if (RuntimeOption::EvalHackArrDVArrs) {
@@ -723,6 +772,13 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Func* val) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
     case KindOfPersistentArray:
     case KindOfArray:
@@ -814,6 +870,13 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfPersistentArray:
     case KindOfArray:
       if (UNLIKELY(op.noticeOnArrNonArr())) {
@@ -885,6 +948,13 @@ typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
   case KindOfDict:         return tvRelOpDict(op, c1, c2.m_data.parr);
   case KindOfPersistentKeyset:
   case KindOfKeyset:       return tvRelOpKeyset(op, c1, c2.m_data.parr);
+
+  // TODO(T58820726)
+  case KindOfPersistentDArray:
+  case KindOfDArray:
+  case KindOfPersistentVArray:
+  case KindOfVArray:       raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
   case KindOfPersistentArray:
   case KindOfArray:        return tvRelOp(op, c1, c2.m_data.parr);
   case KindOfObject:       return tvRelOp(op, c1, c2.m_data.pobj);
@@ -1280,6 +1350,13 @@ bool tvSame(TypedValue c1, TypedValue c2) {
         return false;
       }
       return SetArray::Same(c1.m_data.parr, c2.m_data.parr);
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
     case KindOfPersistentArray:
     case KindOfArray:

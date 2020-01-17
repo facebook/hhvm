@@ -993,6 +993,11 @@ std::string describe_actual_type(tv_rval val) {
       auto const generics = getClsReifiedGenericsProp(cls, obj);
       return folly::sformat("{}{}", name, mangleReifiedGenericsName(generics));
     }
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      return "premature use of datatype-specialized php arrays";
   }
   not_reached();
 }
@@ -1389,6 +1394,10 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfResource:
         case KindOfRecord:
         case KindOfNull:         return MK::None;
+        case KindOfPersistentDArray:
+        case KindOfDArray:
+        case KindOfPersistentVArray:
+        case KindOfVArray:
         case KindOfUninit:
         case KindOfFunc:
         case KindOfClass:

@@ -582,6 +582,12 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
       }
       break;
     }
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
     case KindOfDouble:
     case KindOfObject:
     case KindOfClsMeth:

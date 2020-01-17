@@ -512,6 +512,12 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
     case KindOfClass            : return kCls;
     case KindOfClsMeth          : return kClsMeth;
     case KindOfRecord           : return kRecord;
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      not_reached();
   }
   not_reached();
 }

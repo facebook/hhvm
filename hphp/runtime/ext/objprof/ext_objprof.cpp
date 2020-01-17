@@ -302,6 +302,10 @@ std::pair<int, double> sizeOfArray(
         case KindOfResource:
         case KindOfVec:
         case KindOfDict:
+        case KindOfPersistentDArray:
+        case KindOfDArray:
+        case KindOfPersistentVArray:
+        case KindOfVArray:
         case KindOfArray:
         case KindOfKeyset:
         case KindOfFunc:
@@ -400,6 +404,10 @@ void stringsOfArray(
         case KindOfResource:
         case KindOfVec:
         case KindOfDict:
+        case KindOfPersistentDArray:
+        case KindOfDArray:
+        case KindOfPersistentVArray:
+        case KindOfVArray:
         case KindOfArray:
         case KindOfKeyset:
         case KindOfFunc:
@@ -507,6 +515,14 @@ std::pair<int, double> tvGetSize(
       }
       break;
     }
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -646,6 +662,12 @@ void tvGetStrings(
       // This is a shallow size function, not a recursive one
       break;
     }
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
     case HPHP::KindOfPersistentVec:
     case HPHP::KindOfVec:
     case HPHP::KindOfPersistentDict:

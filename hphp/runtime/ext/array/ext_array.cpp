@@ -351,6 +351,13 @@ bool HHVM_FUNCTION(array_key_exists,
       }
       return ad->useWeakKeys() && ad->exists(staticEmptyString());
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfClsMeth:
       raiseClsMethToVecWarningHelper(__FUNCTION__+2);
       // fallthrough
@@ -791,6 +798,10 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
@@ -817,6 +828,8 @@ DOUBLE:
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
+      case KindOfDArray:
+      case KindOfVArray:
       case KindOfArray:
       case KindOfClsMeth:
       case KindOfObject:
@@ -1066,6 +1079,10 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
@@ -1092,6 +1109,8 @@ DOUBLE:
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
+      case KindOfDArray:
+      case KindOfVArray:
       case KindOfArray:
       case KindOfClsMeth:
       case KindOfObject:
@@ -1302,6 +1321,13 @@ int64_t HHVM_FUNCTION(count,
     case KindOfFunc:
     case KindOfClass:
       return 1;
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -3347,6 +3373,10 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
       SystemLib::throwInvalidArgumentExceptionObject(
         "Keysets cannot be cast to an array-key"
       );
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
       SystemLib::throwInvalidArgumentExceptionObject(

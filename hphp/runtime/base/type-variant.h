@@ -772,6 +772,10 @@ struct Variant : private TypedValue {
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfFunc:
@@ -1414,6 +1418,8 @@ private:
       case KindOfDict:
       case KindOfKeyset:
       case KindOfArray:
+      case KindOfDArray:
+      case KindOfVArray:
         assertx(m_data.parr->checkCount());
         return;
       case KindOfClsMeth:

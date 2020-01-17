@@ -83,6 +83,13 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
         tvDecRefStr(tv);
         continue;
 
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        // TODO(T58820726)
+        raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
@@ -167,6 +174,13 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         tvDecRefStr(tv);
         continue;
 
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        // TODO(T58820726)
+        raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
@@ -248,6 +262,13 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         tvDecRefStr(tv);
         continue;
 
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        // TODO(T58820726)
+        raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
@@ -321,6 +342,13 @@ double tvCastToDouble(TypedValue tv) {
     case KindOfPersistentString:
     case KindOfString:
       return tv.m_data.pstr->toDouble();
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -411,6 +439,13 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
       if (type(tv) == KindOfKeyset) tvDecRefArr(*tv);
       return persistentString(keyset_string.get());
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfArray:
     case KindOfPersistentArray:
       raise_notice("Array to string conversion");
@@ -499,6 +534,13 @@ StringData* tvCastToStringData(TypedValue tv) {
       raise_notice("Keyset to string conversion");
       return keyset_string.get();
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfPersistentArray:
     case KindOfArray:
       raise_notice("Array to string conversion");
@@ -557,6 +599,13 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     case KindOfFunc:
     case KindOfClass:
       return ArrayData::Create(tv);
+
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -708,6 +757,13 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         continue;
       }
 
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        // TODO(T58820726)
+        raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
       case KindOfPersistentArray: {
         auto* adIn = val(tv).parr;
         assertx(adIn->isPHPArray());
@@ -829,6 +885,13 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         continue;
       }
 
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        // TODO(T58820726)
+        raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = val(tv).parr;
@@ -935,6 +998,13 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         if (a != adIn) decRefArr(adIn);
         continue;
       }
+
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        // TODO(T58820726)
+        raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
       case KindOfPersistentArray:
       case KindOfArray: {
@@ -1043,6 +1113,13 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
         if (a != adIn) decRefArr(adIn);
         continue;
       }
+
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        // TODO(T58820726)
+        raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 
       case KindOfPersistentArray:
       case KindOfArray: {
@@ -1165,6 +1242,13 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
         continue;
       }
 
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        // TODO(T58820726)
+        raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = val(tv).parr;
@@ -1285,6 +1369,13 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
         continue;
       }
 
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+        // TODO(T58820726)
+        raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
       case KindOfPersistentArray:
       case KindOfArray: {
         auto* adIn = val(tv).parr;
@@ -1367,6 +1458,13 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
       return ObjectData::FromArray(arr.get()).detach();
     }
 
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
+
     case KindOfPersistentArray:
     case KindOfArray:
       return ObjectData::FromArray(tv.m_data.parr).detach();
@@ -1404,6 +1502,8 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
+      case KindOfDArray:
+      case KindOfVArray:
       case KindOfArray:
       case KindOfObject:
       case KindOfRecord:

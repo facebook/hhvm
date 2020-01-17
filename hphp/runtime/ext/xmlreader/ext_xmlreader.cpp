@@ -650,6 +650,10 @@ Variant HHVM_METHOD(XMLReader, __get,
     case KindOfNull:
     case KindOfDouble:
     case KindOfPersistentString:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfArray:
     case KindOfPersistentArray:
     case KindOfVec:

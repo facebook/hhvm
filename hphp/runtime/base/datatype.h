@@ -56,6 +56,10 @@ namespace HPHP {
  * - Audit jit::emitTypeTest().
  */
 #define DATATYPES \
+  DT(PersistentDArray, -16) \
+  DT(DArray,           -15) \
+  DT(PersistentVArray, -14) \
+  DT(VArray,           -13) \
   DT(PersistentArray,  -12) \
   DT(Array,            -11) \
   DT(PersistentKeyset, -10) \
@@ -115,9 +119,9 @@ constexpr DataType kExtraInvalidDataType = static_cast<DataType>(-127);
 /*
  * DataType limits.
  */
-auto constexpr kMinDataType = dt_t(KindOfPersistentArray);
+auto constexpr kMinDataType = dt_t(KindOfPersistentDArray);
 auto constexpr kMaxDataType = dt_t(use_lowptr ? KindOfClsMeth : KindOfClass);
-auto constexpr kMinRefCountedDataType = dt_t(KindOfArray);
+auto constexpr kMinRefCountedDataType = dt_t(KindOfDArray);
 auto constexpr kMaxRefCountedDataType =
   dt_t(use_lowptr ? KindOfResource : KindOfClsMeth);
 
@@ -309,6 +313,23 @@ inline bool isHackArrayType(MaybeDataType t) {
   return t && isHackArrayType(*t);
 }
 
+constexpr bool isVArrayType(DataType t) {
+  return
+    static_cast<DataType>(dt_t(t) & ~kRefCountedBit) == KindOfPersistentVArray;
+}
+
+inline bool isVArrayType(MaybeDataType t) {
+  return t && isVArrayType(*t);
+}
+
+constexpr bool isDArrayType(DataType t) {
+  return
+    static_cast<DataType>(dt_t(t) & ~kRefCountedBit) == KindOfPersistentDArray;
+}
+inline bool isDArrayType(MaybeDataType t) {
+  return t && isDArrayType(*t);
+}
+
 constexpr bool isVecType(DataType t) {
   return
     static_cast<DataType>(dt_t(t) & ~kRefCountedBit) == KindOfPersistentVec;
@@ -391,6 +412,8 @@ bool operator>=(DataType, DataType) = delete;
   case KindOfInt64:         \
   case KindOfDouble:        \
   case KindOfPersistentString:  \
+  case KindOfPersistentVArray:  \
+  case KindOfPersistentDArray:  \
   case KindOfPersistentArray:   \
   case KindOfPersistentVec: \
   case KindOfPersistentDict: \

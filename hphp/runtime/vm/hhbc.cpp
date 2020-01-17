@@ -644,6 +644,12 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
                     escapeStringForCPP(tv->m_data.pstr->data(),
                                        tv->m_data.pstr->size()));
       return;
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
+      break;
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:

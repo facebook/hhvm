@@ -403,6 +403,11 @@ StaticString getDataTypeString(DataType t) {
     case KindOfDict:       return s_dict;
     case KindOfPersistentKeyset:
     case KindOfKeyset:     return s_keyset;
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      // TODO(T58820726)
     case KindOfPersistentArray:
     case KindOfArray:      return s_array;
     case KindOfObject:     return s_object;

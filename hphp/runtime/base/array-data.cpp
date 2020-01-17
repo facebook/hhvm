@@ -105,6 +105,8 @@ struct ScalarHash {
           case KindOfInt64:
           case KindOfDouble:
           case KindOfPersistentString:
+          case KindOfPersistentDArray:
+          case KindOfPersistentVArray:
           case KindOfPersistentArray:
           case KindOfPersistentVec:
           case KindOfPersistentDict:
@@ -112,6 +114,8 @@ struct ScalarHash {
             ret = folly::hash::hash_combine(ret, v.m_data.num);
             break;
           case KindOfString:
+          case KindOfDArray:
+          case KindOfVArray:
           case KindOfArray:
           case KindOfVec:
           case KindOfDict:
@@ -1110,6 +1114,11 @@ std::string describeKeyType(const TypedValue* tv) {
   case KindOfDict:             return "dict";
   case KindOfPersistentKeyset:
   case KindOfKeyset:           return "keyset";
+  case KindOfPersistentDArray:
+  case KindOfDArray:
+  case KindOfPersistentVArray:
+  case KindOfVArray:
+    // TODO(T58820726)
   case KindOfPersistentArray:
   case KindOfArray:            return "array";
   case KindOfResource:
@@ -1145,6 +1154,10 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfDict:
   case KindOfPersistentKeyset:
   case KindOfKeyset:
+  case KindOfPersistentDArray:
+  case KindOfDArray:
+  case KindOfPersistentVArray:
+  case KindOfVArray:
   case KindOfPersistentArray:
   case KindOfArray:
   case KindOfResource:

@@ -1335,13 +1335,14 @@ let handle_mode
           print_endline (Hh_json.json_to_multiline result_json)
         | None -> ())
   | Lint ->
+    let ctx = Provider_context.empty ~tcopt in
     let lint_errors =
       Relative_path.Map.fold
         files_contents
         ~init:[]
         ~f:(fun fn content lint_errors ->
           lint_errors
-          @ fst (Lint.do_ (fun () -> Linting_service.lint tcopt fn content)))
+          @ fst (Lint.do_ (fun () -> Linting_service.lint ctx fn content)))
     in
     if lint_errors <> [] then (
       let lint_errors =

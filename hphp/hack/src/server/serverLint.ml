@@ -74,7 +74,7 @@ let lint_and_filter tcopt code acc fnl =
   let lint_errs = lint tcopt acc fnl in
   List.filter lint_errs (fun err -> Lint.get_code err = code)
 
-let lint_all genv env code =
+let lint_all genv ctx code =
   let next =
     compose
       (fun lst ->
@@ -87,7 +87,7 @@ let lint_all genv env code =
   let errs =
     MultiWorker.call
       genv.workers
-      ~job:(lint_and_filter env.tcopt code)
+      ~job:(lint_and_filter ctx code)
       ~merge:List.rev_append
       ~neutral:[]
       ~next
@@ -102,7 +102,7 @@ let prepare_errors_for_output errs =
          Pos.compare (Lint.get_pos x) (Lint.get_pos y))
   |> List.map ~f:Lint.to_absolute
 
-let go genv env fnl =
+let go genv ctx fnl =
   let files_with_contents =
     List.map fnl ~f:(fun filename ->
         { filename = create_rp filename; contents = None })
@@ -111,20 +111,20 @@ let go genv env fnl =
     if List.length files_with_contents > 10 then
       MultiWorker.call
         genv.workers
-        ~job:(lint env.tcopt)
+        ~job:(lint ctx)
         ~merge:List.rev_append
         ~neutral:[]
         ~next:(MultiWorker.next genv.workers files_with_contents)
     else
-      lint env.tcopt [] files_with_contents
+      lint ctx [] files_with_contents
   in
   prepare_errors_for_output errs
 
-let go_stdin env ~(filename : string) ~(contents : string) =
+let go_stdin ctx ~(filename : string) ~(contents : string) =
   let file_with_contents =
     { filename = create_rp filename; contents = Some contents }
   in
-  lint env.tcopt [] [file_with_contents] |> prepare_errors_for_output
+  lint ctx [] [file_with_contents] |> prepare_errors_for_output
 
 let lint_single_xcontroller tcopt name =
   let module Cls = Decl_provider.Class in

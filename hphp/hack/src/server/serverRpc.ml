@@ -311,10 +311,15 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let lst = env.ServerEnv.local_symbol_table in
     (env, ServerSearch.go query type_ !lst)
   | COVERAGE_COUNTS path -> (env, ServerCoverageMetric.go path genv env)
-  | LINT fnl -> (env, ServerLint.go genv env fnl)
+  | LINT fnl ->
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
+    (env, ServerLint.go genv ctx fnl)
   | LINT_STDIN { filename; contents } ->
-    (env, ServerLint.go_stdin env ~filename ~contents)
-  | LINT_ALL code -> (env, ServerLint.lint_all genv env code)
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
+    (env, ServerLint.go_stdin ctx ~filename ~contents)
+  | LINT_ALL code ->
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
+    (env, ServerLint.lint_all genv ctx code)
   | LINT_XCONTROLLER fnl -> (env, ServerLint.go_xcontroller genv env fnl)
   | CREATE_CHECKPOINT x -> (env, ServerCheckpoint.create_checkpoint x)
   | RETRIEVE_CHECKPOINT x -> (env, ServerCheckpoint.retrieve_checkpoint x)

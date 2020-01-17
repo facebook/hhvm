@@ -21,7 +21,7 @@ args = parser.parse_args()
 # see tracing_types.h
 cflags = [
     "-DNUM_CPUS".format(os.cpu_count()),
-    "-DHHVM_TRACING_SIGNUM={}".format(42),
+    "-DHHVM_TRACING_SIGNUM={}".format(43),
     "-DHHVM_TRACING_MAX_STACK_FRAMES={}".format(200),
     "-DHHVM_TRACING_FILE_NAME_MAX={}".format(128),
     "-DHHVM_TRACING_CLASS_NAME_MAX={}".format(128),

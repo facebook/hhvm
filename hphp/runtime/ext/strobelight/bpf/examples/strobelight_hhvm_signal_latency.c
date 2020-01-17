@@ -15,7 +15,7 @@ int on_event(void* ctx) {
   if (is_hhvm) {
     // Let USDT know thread id of collected traces
     uint64_t ktime_ns = bpf_ktime_get_ns();
-    bpf_send_signal(HHVM_TRACING_SIGNUM);
+    bpf_send_signal_thread(HHVM_TRACING_SIGNUM);
     send_time.insert(&pid, &ktime_ns);
   }
   return 0;

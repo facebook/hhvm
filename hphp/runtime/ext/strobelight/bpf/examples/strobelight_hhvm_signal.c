@@ -10,7 +10,7 @@ int on_event(void* ctx) {
   if (is_hhvm) {
     // Let USDT know thread id of collected traces
     bpf_trace_printk("Sig sent %d\n", pid);
-    bpf_send_signal(HHVM_TRACING_SIGNUM);
+    bpf_send_signal_thread(HHVM_TRACING_SIGNUM);
   }
   return 0;
 }

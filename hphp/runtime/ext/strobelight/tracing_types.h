@@ -7,7 +7,8 @@ namespace HPHP {
 namespace strobelight {
 
 // Should be a signal number in the real-time range
-constexpr uint32_t kSignum = 42;
+constexpr uint32_t kSignumAll = 42;
+constexpr uint32_t kSignumCurrent = 43;
 
 constexpr int32_t kFileNameMax = 128;
 constexpr int32_t kClassNameMax = 128;

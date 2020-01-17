@@ -1,15 +1,23 @@
 #!/usr/bin/env bcc-py
 #
 
+#
+#  An example of using kSignumAll to profile all active requests
+#
+# This sets up listeners for all provided HHVM pids, and then sends
+# the signal to each pid when you press enter. It then dumps and stack
+# traces it receives out to the console.
+#
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from bcc import BPF, USDT, PerfType, PerfHWConfig
+from bcc import BPF, USDT
 import ctypes as ct
 import argparse
 import os
 
 parser = argparse.ArgumentParser(
-    description="Log stack snapshots triggered by HW events")
+    description="Trigger dumps of current HHVM stack traces by sending signals")
 parser.add_argument("pids",
                     metavar='pid',
                     type=int,
@@ -20,7 +28,6 @@ args = parser.parse_args()
 # see tracing_types.h
 cflags = [
     "-DNUM_CPUS".format(os.cpu_count()),
-    "-DHHVM_TRACING_SIGNUM={}".format(43),
     "-DHHVM_TRACING_MAX_STACK_FRAMES={}".format(200),
     "-DHHVM_TRACING_FILE_NAME_MAX={}".format(128),
     "-DHHVM_TRACING_CLASS_NAME_MAX={}".format(128),
@@ -30,9 +37,6 @@ cflags = [
 bpf_text = ""
 with open("../strobelight_hhvm_structs.h", "r") as structs_file:
     bpf_text += structs_file.read() + "\n"
-
-with open("./strobelight_hhvm_signal.c", "r") as signal_file:
-    bpf_text += signal_file.read() + "\n"
 
 with open("../strobelight_hhvm_stacks_usdt_probe.c", "r") as stacks_file:
     bpf_text += stacks_file.read() + "\n"
@@ -47,18 +51,6 @@ for pid in args.pids:
 b = BPF(text=bpf_text,
         usdt_contexts=usdts,
         cflags=cflags)
-
-# Track pids to fire signals on
-hhvm_pids = b.get_table("hhvm_pids")
-for pid in args.pids:
-    hhvm_pids[ct.c_int(pid)] = ct.c_int(1)
-
-# Collect a stack every 10m cycles
-b.attach_perf_event(
-    ev_type=PerfType.HARDWARE,
-    ev_config=PerfHWConfig.CPU_CYCLES,
-    fn_name="on_event",
-    sample_period=10000000)
 
 
 class HackSymbol():
@@ -129,7 +121,10 @@ def print_stack_sample(cpu, data, size):
 
 b["hack_samples"].open_perf_buffer(print_stack_sample)
 while 1:
+    input("Press Enter to signal hhvm...")
+    for pid in args.pids:
+        os.kill(pid, 42)
     try:
-        b.perf_buffer_poll()
+        b.perf_buffer_poll(3000)
     except KeyboardInterrupt:
         exit()

@@ -56,9 +56,18 @@ void onStrobelightSignal(int signo) {
     return;
   }
 
-  if (signo == strobelight::kSignum) {
+  if (signo == strobelight::kSignumCurrent) {
+    // sets on only current thread
+    if (rds::header()) {
+      // Ignore threads that are not serving requests, otherwise this segfaults
+      setSurpriseFlag(XenonSignalFlag);
+    }
+  } else if (signo == strobelight::kSignumAll) {
+    // sets on ALL threads
     Strobelight::getInstance().surpriseAll();
   }
+
+  FOLLY_SDT(hhvm, hhvm_surprise);
 }
 
 /**
@@ -137,7 +146,8 @@ Strobelight& Strobelight::getInstance() noexcept {
 
 void Strobelight::init() {
 #if !defined(__APPLE__) && !defined(_MSC_VER)
-  sync_signal(strobelight::kSignum, onStrobelightSignal);
+  signal(strobelight::kSignumCurrent, onStrobelightSignal);
+  sync_signal(strobelight::kSignumAll, onStrobelightSignal);
 #endif
 }
 
@@ -194,7 +204,6 @@ void Strobelight::log(c_WaitableWaitHandle* wh) const {
 
 void Strobelight::surpriseAll() {
   TRACE(1, "Strobelight::surpriseAll\n");
-  FOLLY_SDT(hhvm, hhvm_surprise);
 
   // TODO remove this when strobelight has its own surpriseFlag
   if (isXenonActive()) {

@@ -698,7 +698,7 @@ private:
   friend Type rname(SString);
   friend Type packed_impl(trep, std::vector<Type>, ProvTag);
   friend Type packedn_impl(trep, Type);
-  friend Type map_impl(trep, MapElems, ProvTag);
+  friend Type map_impl(trep, MapElems, Type, Type, ProvTag);
   friend Type mapn_impl(trep bits, Type k, Type v, ProvTag);
   friend Type mapn_impl_from_map(trep bits, Type k, Type v, ProvTag);
   friend DObj dobj_of(const Type&);
@@ -724,8 +724,6 @@ private:
   friend R tvImpl(const Type&);
   friend Type scalarize(Type t);
   friend folly::Optional<size_t> array_size(const Type& t);
-  friend folly::Optional<std::pair<Type,Type>>
-  array_get_by_index(const Type& t, ssize_t index);
 
   friend Type return_with_context(Type, Type);
   friend Type setctx(Type, bool);
@@ -863,11 +861,19 @@ struct DArrLikePackedN {
 
 struct DArrLikeMap {
   DArrLikeMap() {}
-  explicit DArrLikeMap(MapElems map, ProvTag tag)
+  explicit DArrLikeMap(MapElems map, Type optKey, Type optVal, ProvTag tag)
     : map(std::move(map))
+    , optKey(std::move(optKey))
+    , optVal(std::move(optVal))
     , provenance(tag)
   {}
+  bool hasOptElements() const { return !optKey.subtypeOf(BBottom); }
+  // The array always starts with these known keys
   MapElems map;
+  // Key/value types for optional elements after known keys. Bottom if
+  // none.
+  Type optKey;
+  Type optVal;
   ProvTag provenance;
 };
 
@@ -1145,9 +1151,9 @@ Type sarr_packedn(Type);
  *
  * Pre: !m.empty()
  */
-Type arr_map(MapElems m);
+Type arr_map(MapElems m, Type optKey = TBottom, Type optVal = TBottom);
 Type arr_map_darray(MapElems m, ProvTag = ProvTag::Top);
-Type sarr_map(MapElems m);
+Type sarr_map(MapElems m, Type optKey = TBottom, Type optVal = TBottom);
 
 /*
  * Map-like arrays.
@@ -1174,7 +1180,9 @@ Type svec_n(Type);
  *
  * Pre: !m.empty()
  */
-Type dict_map(MapElems m, ProvTag);
+Type dict_map(MapElems m, ProvTag,
+              Type optKey = TBottom,
+              Type optVal = TBottom);
 
 /*
  * Dict with key/value types.
@@ -1192,7 +1200,7 @@ Type ckeyset_n(Type);
  * Keyset from MapElems
  */
 inline Type keyset_map(MapElems m) {
-  return map_impl(BKeysetN, std::move(m), ProvTag::Top);
+  return map_impl(BKeysetN, std::move(m), TBottom, TBottom, ProvTag::Top);
 }
 
 /*
@@ -1373,15 +1381,6 @@ Type scalarize(Type t);
  * If t represents an array, and we know its size, return it.
  */
 folly::Optional<size_t> array_size(const Type& t);
-
-/*
- * If t represents an array, and we know the index'th element (by
- * iteration order), return the key/value pair.
- *
- * Negative values of index work backwards from the last element.
- */
-folly::Optional<std::pair<Type,Type>>
-array_get_by_index(const Type& t, ssize_t index);
 
 /*
  * Get the type in our typesystem that corresponds to an hhbc

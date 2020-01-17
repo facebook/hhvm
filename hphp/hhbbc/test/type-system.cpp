@@ -172,6 +172,7 @@ php::ProgramPtr make_test_program() {
 
 TypedValue tv(SString s) { return make_tv<KindOfPersistentString>(s); }
 TypedValue tv(const StaticString& s) { return tv(s.get()); }
+TypedValue tv(int64_t i) { return make_tv<KindOfInt64>(i); }
 
 auto const test_empty_array = folly::lazy([] {
   return staticEmptyArray();
@@ -237,7 +238,7 @@ auto const specialized_array_examples = folly::lazy([] {
   ret.emplace_back(sarr_map(test_map_b));
 
   auto test_map_c          = MapElems{};
-  test_map_c[tv(s_A)]    = TInt;
+  test_map_c[tv(s_A)]      = TInt;
   ret.emplace_back(sarr_map(test_map_c));
 
   auto test_map_d          = MapElems{};
@@ -249,6 +250,28 @@ auto const specialized_array_examples = folly::lazy([] {
   test_map_e[tv(s_A)]      = TInt;
   test_map_e[tv(s_test)]   = TObj;
   ret.emplace_back(arr_map(test_map_e));
+
+  auto test_map_f          = MapElems{};
+  test_map_f[tv(s_A)]      = TInt;
+  test_map_f[tv(s_test)]   = TDbl;
+  ret.emplace_back(arr_map(test_map_f, TInt, TSStr));
+
+  auto test_map_g          = MapElems{};
+  test_map_g[tv(s_A)]      = TInt;
+  ret.emplace_back(arr_map(test_map_g, sval(s_test.get()), TSStr));
+
+  auto test_map_h          = MapElems{};
+  test_map_h[tv(s_A)]      = TInt;
+  ret.emplace_back(arr_map(test_map_h, TSStr, TDbl));
+
+  auto test_map_i          = MapElems{};
+  test_map_i[tv(s_A)]      = TInt;
+  test_map_i[tv(s_test)]   = TDbl;
+  ret.emplace_back(arr_map(test_map_i, TArrKey, TBool));
+
+  auto test_map_j          = MapElems{};
+  test_map_j[tv(s_A)]      = TInt;
+  ret.emplace_back(arr_map(test_map_j));
 
   ret.emplace_back(arr_packedn(TInt));
   ret.emplace_back(arr_mapn(TSStr, arr_mapn(TInt, TSStr)));
@@ -263,14 +286,17 @@ auto const specialized_array_examples = folly::lazy([] {
   ret.emplace_back(union_of(arr_packed({TInt, TObj}), some_aempty()));
   ret.emplace_back(union_of(arr_mapn(TInt, TObj), some_aempty()));
   ret.emplace_back(union_of(arr_map(test_map_e), some_aempty()));
+  ret.emplace_back(union_of(arr_map(test_map_i, TStr, TObj), some_aempty()));
   ret.emplace_back(opt(arr_packedn(TObj)));
   ret.emplace_back(opt(arr_packed({TInt, TObj})));
   ret.emplace_back(opt(arr_mapn(TInt, TObj)));
   ret.emplace_back(opt(arr_map(test_map_e)));
+  ret.emplace_back(opt(arr_map(test_map_i, TStr, TObj)));
   ret.emplace_back(opt(union_of(arr_packedn(TObj), some_aempty())));
   ret.emplace_back(opt(union_of(arr_packed({TInt, TObj}), some_aempty())));
   ret.emplace_back(opt(union_of(arr_mapn(TInt, TObj), some_aempty())));
   ret.emplace_back(opt(union_of(arr_map(test_map_e), some_aempty())));
+  ret.emplace_back(opt(union_of(arr_map(test_map_i, TSStr, TObj), some_aempty())));
 
   return ret;
 });
@@ -2777,6 +2803,7 @@ TEST(Type, RemoveCounted) {
     { TStrLike, TUncStrLike },
     { TInitCell, TInitUnc },
     { TCell, TUnc },
+    { some_aempty(), aempty() },
     { ival(1), ival(1) },
     { dval(2.0), dval(2.0) },
     { sval(s_test.get()), sval(s_test.get()) },
@@ -2855,6 +2882,22 @@ TEST(Type, RemoveCounted) {
     { opt(union_of(arr_packedn(TObj), some_aempty())), opt(aempty()) },
     { opt(union_of(arr_packed({TObj, TInt}), some_aempty())), opt(aempty()) },
     { opt(union_of(arr_map(test_map_j), some_aempty())), opt(aempty()) },
+    { arr_map(test_map_d, TInt, TInt), TBottom },
+    { arr_map(test_map_d, TStr, TObj), TBottom },
+    { arr_map(test_map_a, TInt, TStr), sarr_map(test_map_a, TInt, TSStr) },
+    {
+      arr_map(test_map_a, TStr, TInitCell),
+      sarr_map(test_map_a, TSStr, TInitUnc)
+    },
+    { arr_map(test_map_a, TInt, TObj), sarr_map(test_map_a) },
+    {
+      arr_map(test_map_a, TStr, opt(TObj)),
+      sarr_map(test_map_a, TSStr, TInitNull)
+    },
+    {
+      arr_map(test_map_a, TStr, union_of(arr_packedn(TObj), some_aempty())),
+      sarr_map(test_map_a, TSStr, aempty())
+    },
   };
   for (auto const& p : cases) {
     EXPECT_EQ(remove_counted(p.first), p.second);
@@ -2922,6 +2965,10 @@ TEST(Type, MustBeCounted) {
     { arr_packed({TInt, arr_packedn(TObj)}), true },
     { arr_map(test_map_a), false },
     { arr_map(test_map_b), true },
+    { arr_map(test_map_b, TStr, TObj), true },
+    { arr_map(test_map_a, TStr, TObj), false },
+    { arr_map(test_map_b, TSStr, TInt), true },
+    { arr_map(test_map_a, TSStr, TInt), false },
   };
   for (auto const& p : cases) {
     if (p.second) {
@@ -2935,6 +2982,291 @@ TEST(Type, MustBeCounted) {
     }
     EXPECT_FALSE(must_be_counted(union_of(p.first, some_aempty())));
   }
+}
+
+TEST(Type, ArrMapOptValues) {
+  auto test_map_a = MapElems{};
+  test_map_a[tv(s_A)] = TInt;
+  test_map_a[tv(s_B)] = TDbl;
+
+  auto test_map_b = MapElems{};
+  test_map_b[tv(s_A)] = TInt;
+
+  auto test_map_c = MapElems{};
+  test_map_c[tv(s_A)] = TInt;
+  test_map_c[tv(s_test)] = TInt;
+
+  auto test_map_d = MapElems{};
+  test_map_d[tv(s_test)] = TInt;
+  test_map_d[tv(s_A)] = TInt;
+
+  auto test_map_e = MapElems{};
+  test_map_e[tv(s_A)] = TInt;
+  test_map_e[tv(s_B)] = TObj;
+
+  auto test_map_f = MapElems{};
+  test_map_f[tv(10)] = TInt;
+  test_map_f[tv(11)] = TDbl;
+
+  auto test_map_g = MapElems{};
+  test_map_g[tv(s_A)] = TArrKey;
+
+  auto test_map_h = MapElems{};
+  test_map_h[tv(s_A)] = TInt;
+  test_map_h[tv(s_B)] = TStr;
+
+  auto test_map_i = MapElems{};
+  test_map_i[tv(s_A)] = TInt;
+  test_map_i[tv(s_B)] = TDbl;
+  test_map_i[tv(s_test)] = TStr;
+
+  auto test_map_j = MapElems{};
+  test_map_j[tv(s_A)] = TInt;
+  test_map_j[tv(s_B)] = TDbl;
+  test_map_j[tv(s_test)] = TArrKey;
+
+  EXPECT_EQ(arr_map(test_map_a, TInt, TSStr), arr_map(test_map_a, TInt, TSStr));
+  EXPECT_NE(arr_map(test_map_a, TInt, TSStr), arr_map(test_map_a, TInt, TStr));
+
+  EXPECT_FALSE(
+    arr_map(test_map_c, TSStr, TInt).subtypeOf(arr_map(test_map_d, TSStr, TInt))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_map(test_map_e, TSStr, TInt))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_b, TSStr, TInt).subtypeOf(arr_map(test_map_a, TSStr, TInt))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_map(test_map_b, TSStr, TInt))
+  );
+  EXPECT_TRUE(
+    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_map(test_map_b, TSStr, TNum))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_map(test_map_b, TInt, TNum))
+  );
+  EXPECT_TRUE(
+    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_map(test_map_a, TStr, TInt))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_a, TStr, TInt).subtypeOf(arr_map(test_map_a, TSStr, TInt))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_a, TSStr, TNum).subtypeOf(arr_map(test_map_a, TSStr, TInt))
+  );
+  EXPECT_TRUE(
+    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_mapn(TStr, TNum))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_mapn(TStr, TInt))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_f, TSStr, TInt).subtypeOf(arr_mapn(TInt, TNum))
+  );
+  EXPECT_FALSE(arr_map(test_map_a).subtypeOf(arr_mapn(TInt, TNum)));
+  EXPECT_FALSE(
+    arr_mapn(TSStr, TInt).subtypeOf(arr_map(test_map_a, TSStr, TInt))
+  );
+
+  EXPECT_TRUE(
+    arr_map(test_map_a, TSStr, TInt).couldBe(arr_map(test_map_a, TSStr, TInt))
+  );
+  EXPECT_TRUE(
+    arr_map(test_map_a, TSStr, TInt).couldBe(arr_map(test_map_a, TSStr, TNum))
+  );
+  EXPECT_TRUE(
+    arr_map(test_map_a, TSStr, TNum).couldBe(arr_map(test_map_a, TSStr, TInt))
+  );
+  EXPECT_TRUE(
+    arr_map(test_map_a, TArrKey, TInt).couldBe(arr_map(test_map_a, TSStr, TInt))
+  );
+  EXPECT_TRUE(
+    arr_map(test_map_a, TSStr, TInt).couldBe(arr_map(test_map_a, TArrKey, TInt))
+  );
+  EXPECT_TRUE(
+    arr_map(test_map_a, TSStr, TInt).couldBe(arr_map(test_map_a, TInt, TInt))
+  );
+  EXPECT_TRUE(
+    arr_map(test_map_a, TInt, TInt).couldBe(arr_map(test_map_a, TSStr, TInt))
+  );
+  EXPECT_TRUE(
+    arr_map(test_map_a, TSStr, TDbl).couldBe(arr_map(test_map_a, TSStr, TObj))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_a, TSStr, TInt).couldBe(arr_map(test_map_c, TSStr, TInt))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_c, TSStr, TInt).couldBe(arr_map(test_map_a, TSStr, TInt))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_a, TSStr, TInt).couldBe(arr_map(test_map_e, TSStr, TInt))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_e, TSStr, TInt).couldBe(arr_map(test_map_a, TSStr, TInt))
+  );
+  EXPECT_TRUE(
+    arr_map(test_map_a).couldBe(arr_map(test_map_b, TSStr, TDbl))
+  );
+  EXPECT_TRUE(
+    arr_map(test_map_b, TSStr, TDbl).couldBe(arr_map(test_map_a))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_a).couldBe(arr_map(test_map_b, TSStr, TObj))
+  );
+  EXPECT_FALSE(
+    arr_map(test_map_b, TSStr, TObj).couldBe(arr_map(test_map_a))
+  );
+
+  EXPECT_EQ(
+    union_of(arr_map(test_map_a), arr_map(test_map_b)),
+    arr_map(test_map_b, sval(s_B.get()), TDbl)
+  );
+  EXPECT_EQ(
+    union_of(arr_map(test_map_a), arr_map(test_map_c)),
+    arr_map(test_map_b, TSStr, TNum)
+  );
+  EXPECT_EQ(
+    union_of(arr_map(test_map_a, TInt, TStr), arr_map(test_map_a, TStr, TInt)),
+    arr_map(test_map_a, TArrKey, TArrKey)
+  );
+  EXPECT_EQ(
+    union_of(arr_map(test_map_c), arr_map(test_map_d)),
+    arr_mapn(TSStr, TInt)
+  );
+  EXPECT_EQ(
+    union_of(arr_map(test_map_c, TInt, TInt), arr_map(test_map_d, TInt, TInt)),
+    arr_mapn(TUncArrKey, TInt)
+  );
+  EXPECT_EQ(
+    union_of(
+      arr_map(test_map_c, TSStr, TDbl),
+      arr_map(test_map_d, TSStr, TDbl)
+    ),
+    arr_mapn(TSStr, TNum)
+  );
+  EXPECT_EQ(
+    union_of(arr_map(test_map_c, TSStr, TDbl), arr_packed({TInt})),
+    arr_mapn(TUncArrKey, TNum)
+  );
+  EXPECT_EQ(
+    union_of(arr_map(test_map_c, TSStr, TDbl), arr_packedn(TInt)),
+    arr_mapn(TUncArrKey, TNum)
+  );
+  EXPECT_EQ(
+    union_of(arr_map(test_map_c, TInt, TDbl), arr_mapn(TSStr, TInt)),
+    arr_mapn(TUncArrKey, TNum)
+  );
+
+  EXPECT_EQ(
+    intersection_of(
+      arr_map(test_map_a, TSStr, TInt),
+      arr_map(test_map_a, TSStr, TInt)
+    ),
+    arr_map(test_map_a, TSStr, TInt)
+  );
+  EXPECT_EQ(
+    intersection_of(
+      arr_map(test_map_a, TSStr, TArrKey),
+      arr_map(test_map_a, TSStr, TInt)
+    ),
+    arr_map(test_map_a, TSStr, TInt)
+  );
+  EXPECT_EQ(
+    intersection_of(
+      arr_map(test_map_a, TSStr, TInt),
+      arr_map(test_map_a, TArrKey, TInt)
+    ),
+    arr_map(test_map_a, TSStr, TInt)
+  );
+  EXPECT_EQ(
+    intersection_of(
+      arr_map(test_map_a, TSStr, TInt),
+      arr_map(test_map_a, TInt, TInt)
+    ),
+    arr_map(test_map_a)
+  );
+  EXPECT_EQ(
+    intersection_of(
+      arr_map(test_map_a, TInt, TStr),
+      arr_map(test_map_a, TInt, TInt)
+    ),
+    arr_map(test_map_a)
+  );
+  EXPECT_EQ(
+    intersection_of(
+      arr_map(test_map_a, TInt, TInt),
+      arr_map(test_map_e, TInt, TInt)
+    ),
+    TBottom
+  );
+  EXPECT_EQ(
+    intersection_of(arr_map(test_map_a), arr_map(test_map_b, TSStr, TNum)),
+    arr_map(test_map_a)
+  );
+  EXPECT_EQ(
+    intersection_of(arr_map(test_map_b, TSStr, TNum), arr_map(test_map_a)),
+    arr_map(test_map_a)
+  );
+  EXPECT_EQ(
+    intersection_of(arr_map(test_map_a), arr_map(test_map_b, TSStr, TObj)),
+    TBottom
+  );
+  EXPECT_EQ(
+    intersection_of(arr_map(test_map_b, TSStr, TObj), arr_map(test_map_a)),
+    TBottom
+  );
+  EXPECT_EQ(
+    intersection_of(arr_map(test_map_a, TSStr, TObj), arr_mapn(TSStr, TObj)),
+    TBottom
+  );
+  EXPECT_EQ(
+    intersection_of(arr_map(test_map_a, TSStr, TObj), arr_mapn(TSStr, TNum)),
+    arr_map(test_map_a)
+  );
+  EXPECT_EQ(
+    intersection_of(
+      arr_map(test_map_a, TSStr, TInitCell),
+      arr_mapn(TSStr, TNum)
+    ),
+    arr_map(test_map_a, TSStr, TNum)
+  );
+
+  EXPECT_EQ(
+    array_set(arr_map(test_map_b), TSStr, TStr, ProvTag::NoTag).first,
+    arr_map(test_map_g, TSStr, TStr)
+  );
+  EXPECT_EQ(
+    array_set(arr_map(test_map_a), sval(s_B.get()), TStr, ProvTag::NoTag).first,
+    arr_map(test_map_h)
+  );
+  EXPECT_EQ(
+    array_set(
+      arr_map(test_map_a),
+      sval(s_test.get()),
+      TStr,
+      ProvTag::NoTag
+    ).first,
+    arr_map(test_map_i)
+  );
+  EXPECT_EQ(
+    array_set(
+      arr_map(test_map_a, TSStr, TInt),
+      sval(s_test.get()),
+      TStr,
+      ProvTag::NoTag
+    ).first,
+    arr_map(test_map_a, TSStr, TArrKey)
+  );
+  EXPECT_EQ(
+    array_set(
+      arr_map(test_map_a, sval(s_test.get()), TInt),
+      sval(s_test.get()),
+      TStr,
+      ProvTag::NoTag
+    ).first,
+    arr_map(test_map_j)
+  );
 }
 
 TEST(Type, ContextDependent) {

@@ -515,7 +515,7 @@ std::string show(const Type& t) {
   case DataTag::ArrLikeMap:
     folly::format(
       &ret,
-      "({}){}",
+      "({}{}){}",
       [&] {
         using namespace folly::gen;
         return from(t.m_data.map->map)
@@ -523,6 +523,13 @@ std::string show(const Type& t) {
               return showElem(from_cell(kv.first), kv.second);
             })
           | unsplit<std::string>(",");
+      }(),
+      [&] {
+        if (!t.m_data.map->hasOptElements()) return std::string{};
+        return folly::sformat(
+          ",...[{}]",
+          showElem(t.m_data.map->optKey, t.m_data.map->optVal)
+        );
       }(),
       provtag_string(t.m_data.map->provenance)
     );

@@ -7,16 +7,12 @@ class WithConsistentConstruct {
 }
 trait TExtendsWithConsistentConstruct {
   require implements \IExtendsWithConsistentConstruct;
-  public function __construct() {
-    throw new \Exception();
-  }
   public static function get(): this {
     return new static();
   }
 }
 interface IExtendsWithConsistentConstruct {
   require extends \WithConsistentConstruct;
-  public function __construct();
 }
 <<__Rx>>
 function extract_standalone_make_default(): nothing {

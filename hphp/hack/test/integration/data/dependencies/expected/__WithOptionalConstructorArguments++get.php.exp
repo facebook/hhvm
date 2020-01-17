@@ -1,7 +1,5 @@
 <?hh
-trait TDummy implements \IWithNullaryConstructor {
-  abstract public function __construct();
-}
+trait TDummy implements \IWithNullaryConstructor {}
 <<__ConsistentConstruct>>
 interface IWithNullaryConstructor {
   public function __construct();

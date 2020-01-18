@@ -3,24 +3,30 @@
 bool(false)
 bool(true)
 
-Notice: Hack Array Compat: is_array() called on vec in %s/is_array.php on line 41
+Notice: Hack Array Compat: is_array() called on vec in %s/test/slow/hack_arr_compat/is_array.php on line 41
 bool(false)
 
-Notice: Hack Array Compat: is_array() called on dict in %s/is_array.php on line 42
+Notice: Hack Array Compat: is_array() called on dict in %s/test/slow/hack_arr_compat/is_array.php on line 42
 bool(false)
 
-Notice: Hack Array Compat: is_array() called on keyset in %s/is_array.php on line 43
+Notice: Hack Array Compat: is_array() called on keyset in %s/test/slow/hack_arr_compat/is_array.php on line 43
 bool(false)
+
+Notice: Observing varray in is_array from %s/test/slow/hack_arr_compat/is_array.php:44 in %s/test/slow/hack_arr_compat/is_array.php on line 44
 bool(true)
+
+Notice: Observing darray in is_array from %s/test/slow/hack_arr_compat/is_array.php:45 in %s/test/slow/hack_arr_compat/is_array.php on line 45
 bool(true)
 ---------------------- is_varray -------------------
 bool(false)
 bool(false)
 
-Notice: Hack Array Compat: is_varray() called on vec in %s/is_array.php on line 51
+Notice: Hack Array Compat: is_varray() called on vec in %s/test/slow/hack_arr_compat/is_array.php on line 51
 bool(false)
 bool(false)
 bool(false)
+
+Notice: Observing varray in is_varray from %s/test/slow/hack_arr_compat/is_array.php:54 in %s/test/slow/hack_arr_compat/is_array.php on line 54
 bool(true)
 bool(false)
 ---------------------- is_darray -------------------
@@ -28,10 +34,12 @@ bool(false)
 bool(false)
 bool(false)
 
-Notice: Hack Array Compat: is_darray() called on dict in %s/is_array.php on line 62
+Notice: Hack Array Compat: is_darray() called on dict in %s/test/slow/hack_arr_compat/is_array.php on line 62
 bool(false)
 bool(false)
 bool(false)
+
+Notice: Observing darray in is_darray from %s/test/slow/hack_arr_compat/is_array.php:65 in %s/test/slow/hack_arr_compat/is_array.php on line 65
 bool(true)
 ---------------------- is_vec ----------------------
 bool(false)
@@ -40,7 +48,9 @@ bool(true)
 bool(false)
 bool(false)
 
-Notice: Hack Array Compat: is_vec() called on varray in %s/is_array.php on line 74
+Notice: Hack Array Compat: is_vec() called on varray in %s/test/slow/hack_arr_compat/is_array.php on line 74
+
+Notice: Observing varray in is_vec from %s/test/slow/hack_arr_compat/is_array.php:74 in %s/test/slow/hack_arr_compat/is_array.php on line 74
 bool(false)
 bool(false)
 ---------------------- is_dict ---------------------
@@ -51,31 +61,39 @@ bool(true)
 bool(false)
 bool(false)
 
-Notice: Hack Array Compat: is_dict() called on darray in %s/is_array.php on line 85
+Notice: Hack Array Compat: is_dict() called on darray in %s/test/slow/hack_arr_compat/is_array.php on line 85
+
+Notice: Observing darray in is_dict from %s/test/slow/hack_arr_compat/is_array.php:85 in %s/test/slow/hack_arr_compat/is_array.php on line 85
 bool(false)
 ================= normal =============================
 ---------------------- is_array ----------------------
 bool(false)
 bool(true)
 
-Notice: Hack Array Compat: is_array() called on vec in %s/is_array.php on line 5
+Notice: Hack Array Compat: is_array() called on vec in %s/test/slow/hack_arr_compat/is_array.php on line 5
 bool(false)
 
-Notice: Hack Array Compat: is_array() called on dict in %s/is_array.php on line 5
+Notice: Hack Array Compat: is_array() called on dict in %s/test/slow/hack_arr_compat/is_array.php on line 5
 bool(false)
 
-Notice: Hack Array Compat: is_array() called on keyset in %s/is_array.php on line 5
+Notice: Hack Array Compat: is_array() called on keyset in %s/test/slow/hack_arr_compat/is_array.php on line 5
 bool(false)
+
+Notice: Observing varray in is_array from %s/test/slow/hack_arr_compat/is_array.php:102 in %s/test/slow/hack_arr_compat/is_array.php on line 5
 bool(true)
+
+Notice: Observing darray in is_array from %s/test/slow/hack_arr_compat/is_array.php:103 in %s/test/slow/hack_arr_compat/is_array.php on line 5
 bool(true)
 ---------------------- is_varray ---------------------
 bool(false)
 bool(false)
 
-Notice: Hack Array Compat: is_varray() called on vec in %s/is_array.php on line 8
+Notice: Hack Array Compat: is_varray() called on vec in %s/test/slow/hack_arr_compat/is_array.php on line 8
 bool(false)
 bool(false)
 bool(false)
+
+Notice: Observing varray in is_varray from %s/test/slow/hack_arr_compat/is_array.php:112 in %s/test/slow/hack_arr_compat/is_array.php on line 8
 bool(true)
 bool(false)
 ---------------------- is_darray ---------------------
@@ -83,10 +101,12 @@ bool(false)
 bool(false)
 bool(false)
 
-Notice: Hack Array Compat: is_darray() called on dict in %s/is_array.php on line 11
+Notice: Hack Array Compat: is_darray() called on dict in %s/test/slow/hack_arr_compat/is_array.php on line 11
 bool(false)
 bool(false)
 bool(false)
+
+Notice: Observing darray in is_darray from %s/test/slow/hack_arr_compat/is_array.php:123 in %s/test/slow/hack_arr_compat/is_array.php on line 11
 bool(true)
 ---------------------- is_vec ------------------------
 bool(false)
@@ -95,7 +115,9 @@ bool(true)
 bool(false)
 bool(false)
 
-Notice: Hack Array Compat: is_vec() called on varray in %s/is_array.php on line 14
+Notice: Hack Array Compat: is_vec() called on varray in %s/test/slow/hack_arr_compat/is_array.php on line 14
+
+Notice: Observing varray in is_vec from %s/test/slow/hack_arr_compat/is_array.php:132 in %s/test/slow/hack_arr_compat/is_array.php on line 14
 bool(false)
 bool(false)
 ---------------------- is_dict -----------------------
@@ -106,31 +128,39 @@ bool(true)
 bool(false)
 bool(false)
 
-Notice: Hack Array Compat: is_dict() called on darray in %s/is_array.php on line 17
+Notice: Hack Array Compat: is_dict() called on darray in %s/test/slow/hack_arr_compat/is_array.php on line 17
+
+Notice: Observing darray in is_dict from %s/test/slow/hack_arr_compat/is_array.php:143 in %s/test/slow/hack_arr_compat/is_array.php on line 17
 bool(false)
 ================= dynamic =============================
 ---------------------- is_array ----------------------
 bool(false)
 bool(true)
 
-Notice: Hack Array Compat: is_array() called on vec in %s/is_array.php on line 21
+Notice: Hack Array Compat: is_array() called on vec in %s/test/slow/hack_arr_compat/is_array.php on line 21
 bool(false)
 
-Notice: Hack Array Compat: is_array() called on dict in %s/is_array.php on line 21
+Notice: Hack Array Compat: is_array() called on dict in %s/test/slow/hack_arr_compat/is_array.php on line 21
 bool(false)
 
-Notice: Hack Array Compat: is_array() called on keyset in %s/is_array.php on line 21
+Notice: Hack Array Compat: is_array() called on keyset in %s/test/slow/hack_arr_compat/is_array.php on line 21
 bool(false)
+
+Notice: Observing varray in is_array from %s/test/slow/hack_arr_compat/is_array.php:153 in %s/test/slow/hack_arr_compat/is_array.php on line 21
 bool(true)
+
+Notice: Observing darray in is_array from %s/test/slow/hack_arr_compat/is_array.php:154 in %s/test/slow/hack_arr_compat/is_array.php on line 21
 bool(true)
 ---------------------- is_varray ---------------------
 bool(false)
 bool(false)
 
-Notice: Hack Array Compat: is_varray() called on vec in %s/is_array.php on line 24
+Notice: Hack Array Compat: is_varray() called on vec in %s/test/slow/hack_arr_compat/is_array.php on line 24
 bool(false)
 bool(false)
 bool(false)
+
+Notice: Observing varray in is_varray from %s/test/slow/hack_arr_compat/is_array.php:163 in %s/test/slow/hack_arr_compat/is_array.php on line 24
 bool(true)
 bool(false)
 ---------------------- is_darray ---------------------
@@ -138,10 +168,12 @@ bool(false)
 bool(false)
 bool(false)
 
-Notice: Hack Array Compat: is_darray() called on dict in %s/is_array.php on line 27
+Notice: Hack Array Compat: is_darray() called on dict in %s/test/slow/hack_arr_compat/is_array.php on line 27
 bool(false)
 bool(false)
 bool(false)
+
+Notice: Observing darray in is_darray from %s/test/slow/hack_arr_compat/is_array.php:174 in %s/test/slow/hack_arr_compat/is_array.php on line 27
 bool(true)
 ---------------------- is_vec ------------------------
 bool(false)
@@ -150,7 +182,9 @@ bool(true)
 bool(false)
 bool(false)
 
-Notice: Hack Array Compat: is_vec() called on varray in %s/is_array.php on line 30
+Notice: Hack Array Compat: is_vec() called on varray in %s/test/slow/hack_arr_compat/is_array.php on line 30
+
+Notice: Observing varray in is_vec from %s/test/slow/hack_arr_compat/is_array.php:183 in %s/test/slow/hack_arr_compat/is_array.php on line 30
 bool(false)
 bool(false)
 ---------------------- is_dict -----------------------
@@ -161,5 +195,7 @@ bool(true)
 bool(false)
 bool(false)
 
-Notice: Hack Array Compat: is_dict() called on darray in %s/is_array.php on line 33
+Notice: Hack Array Compat: is_dict() called on darray in %s/test/slow/hack_arr_compat/is_array.php on line 33
+
+Notice: Observing darray in is_dict from %s/test/slow/hack_arr_compat/is_array.php:194 in %s/test/slow/hack_arr_compat/is_array.php on line 33
 bool(false)

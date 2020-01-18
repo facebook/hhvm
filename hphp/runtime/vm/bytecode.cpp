@@ -3638,79 +3638,12 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
   case IsTypeOp::Bool:   return is_bool(val);
   case IsTypeOp::Int:    return is_int(val);
   case IsTypeOp::Dbl:    return is_double(val);
-  case IsTypeOp::Arr:
-    if (LIKELY(!RO::EvalHackArrCompatIsArrayNotices &&
-               !RO::EvalLogArrayProvenance) ||
-        vmfp()->m_func->isBuiltin()) {
-      return is_array(val);
-    } else if (isArrayType(val->m_type)) {
-      if (RO::EvalLogArrayProvenance &&
-          arrprov::arrayWantsTag(val->m_data.parr)) {
-        raise_array_serialization_notice(SerializationSite::IsArray,
-                                         val->m_data.parr);
-      }
-      return true;
-    } else if (isVecType(val->m_type)) {
-      if (RO::EvalHackArrCompatIsArrayNotices) {
-        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_ARR);
-      }
-      if (RO::EvalLogArrayProvenance &&
-          arrprov::arrayWantsTag(val->m_data.parr)) {
-        raise_array_serialization_notice(SerializationSite::IsArray,
-                                         val->m_data.parr);
-      }
-    } else if (isDictType(val->m_type)) {
-      if (RO::EvalHackArrCompatIsArrayNotices) {
-        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_ARR);
-      }
-      if (RO::EvalLogArrayProvenance &&
-          arrprov::arrayWantsTag(val->m_data.parr)) {
-        raise_array_serialization_notice(SerializationSite::IsArray,
-                                         val->m_data.parr);
-      }
-    } else if (isKeysetType(val->m_type)) {
-      if (RO::EvalHackArrCompatIsArrayNotices) {
-        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
-      }
-    }
-    return false;
-  case IsTypeOp::Vec: {
-    if (UNLIKELY(RO::EvalHackArrCompatIsVecDictNotices)) {
-      if (isArrayType(val->m_type)) {
-        if (val->m_data.parr->isVArray()) {
-          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_VEC);
-        }
-        return false;
-      }
-    }
-    auto const ret = is_vec(val);
-    if (ret &&
-        UNLIKELY(RO::EvalLogArrayProvenance) &&
-        arrprov::arrayWantsTag(val->m_data.parr)) {
-      raise_array_serialization_notice(SerializationSite::IsVec,
-                                       val->m_data.parr);
-    }
-    return ret;
-  }
-  case IsTypeOp::Dict: {
-    if (UNLIKELY(RO::EvalHackArrCompatIsVecDictNotices)) {
-      if (isArrayType(val->m_type)) {
-        if (val->m_data.parr->isDArray()) {
-          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
-        }
-        return false;
-      }
-    }
-    auto const ret = is_dict(val);
-    if (ret &&
-        UNLIKELY(RO::EvalLogArrayProvenance) &&
-        arrprov::arrayWantsTag(val->m_data.parr)) {
-      raise_array_serialization_notice(SerializationSite::IsDict,
-                                       val->m_data.parr);
-    }
-    return ret;
-  }
+  case IsTypeOp::Arr:    return is_array(val, !vmfp()->m_func->isBuiltin());
+  case IsTypeOp::Vec:    return is_vec(val);
+  case IsTypeOp::Dict:   return is_dict(val);
   case IsTypeOp::Keyset: return is_keyset(val);
+  case IsTypeOp::VArray: return is_varray(val);
+  case IsTypeOp::DArray: return is_darray(val);
   case IsTypeOp::Obj:    return is_object(val);
   case IsTypeOp::Str:    return is_string(val);
   case IsTypeOp::Res:    return val->m_type == KindOfResource;
@@ -3723,40 +3656,6 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue* val, IsTypeOp op) {
       return true;
     }
     return isArrayLikeType(val->m_type);
-  case IsTypeOp::VArray: {
-    assertx(!RO::EvalHackArrDVArrs);
-    if (UNLIKELY(RO::EvalHackArrCompatIsVecDictNotices)) {
-      if (isVecType(val->m_type)) {
-        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_VARR);
-        return false;
-      }
-    }
-    auto const ret = is_varray(val);
-    if (ret &&
-        UNLIKELY(RO::EvalLogArrayProvenance) &&
-        arrprov::arrayWantsTag(val->m_data.parr)) {
-      raise_array_serialization_notice(SerializationSite::IsVArray,
-                                       val->m_data.parr);
-    }
-    return ret;
-  }
-  case IsTypeOp::DArray: {
-    assertx(!RO::EvalHackArrDVArrs);
-    if (UNLIKELY(RO::EvalHackArrCompatIsVecDictNotices)) {
-      if (isDictType(val->m_type)) {
-        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_DARR);
-        return false;
-      }
-    }
-    auto const ret = is_darray(val);
-    if (ret &&
-        UNLIKELY(RO::EvalLogArrayProvenance) &&
-        arrprov::arrayWantsTag(val->m_data.parr)) {
-      raise_array_serialization_notice(SerializationSite::IsDArray,
-                                       val->m_data.parr);
-    }
-    return ret;
-  }
   case IsTypeOp::ClsMeth: return is_clsmeth(val);
   case IsTypeOp::Func: return is_fun(val);
   }

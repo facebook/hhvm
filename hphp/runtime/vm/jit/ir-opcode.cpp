@@ -567,6 +567,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckArrayCOW:
   case CheckCold:
   case CheckDArray:
+  case CheckDVArray:
   case CheckDictOffset:
   case CheckInit:
   case CheckInitMem:
@@ -760,7 +761,6 @@ bool opcodeMayRaise(Opcode opc) {
   case InterfaceSupportsVec:
   case InterpOneCF:
   case IsCol:
-  case IsDVArray:
   case IsFunReifiedGenericsMatched:
   case IsClsDynConstructible:
   case IsNType:

@@ -1821,6 +1821,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckType:
   case CheckVArray:
   case CheckDArray:
+  case CheckDVArray:
   case StArResumeAddr:
   case StContArState:
   case ZeroErrorLevel:
@@ -1856,7 +1857,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InterfaceSupportsStr:
   case IsWaitHandle:
   case IsCol:
-  case IsDVArray:
   case HasToString:
   case DbgAssertRefCount:
   case GtStr:

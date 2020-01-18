@@ -198,6 +198,11 @@ Instruction set
   Check that S0 is a darray, and if so copy it to D, and fallthrough. If S0 is
   not a darray, branch to block B.
 
+| CheckDVArray, D(Arr), S(Arr), B|P
+
+  Check that S0 is a darray or varray, and if so copy it to D, and fallthrough.
+  If S0 is not a darray or varray, branch to block B.
+
 | CheckIter<iterId,iterType>, ND, S(FramePtr), B
 
   Check that specialization type of the given iterator `iterId` on the frame S0
@@ -902,10 +907,6 @@ To string conversions:
 | IsCol, D(Bool), S(Obj), NF
 
   Sets D to true iff S0 is a collection.
-
-| IsDVArray, D(Bool), S(Arr), NF
-
-  Sets D to true iff S0 is a darray or varray.
 
 5. Branches
 

@@ -100,38 +100,97 @@ inline bool is_string(const TypedValue* c) {
   return false;
 }
 
-inline bool is_array(const TypedValue* c) {
+// This function behaves how most callers of raise_array_serialization_notice
+// should behave: it checks if `tv` *should* have a provenance tag and then
+// logs a serialization notice of some kind if so.
+//
+// If we trace through call sites of the bare function, we'll find a number of
+// places where we're incorrectly losing provenance logs. Clean this up soon.
+inline void maybe_raise_array_serialization_notice(
+    SerializationSite site, const TypedValue* tv) {
+  assertx(isArrayLikeType(tv->m_type));
+  auto const ad = tv->m_data.parr;
+  if (RuntimeOption::EvalLogArrayProvenance && arrprov::arrayWantsTag(ad)) {
+    raise_array_serialization_notice(site, ad);
+  }
+}
+
+inline bool is_array(const TypedValue* c, bool logOnHackArrays) {
   assertx(tvIsPlausible(*c));
+
+  if (tvIsArray(c)) {
+    maybe_raise_array_serialization_notice(SerializationSite::IsArray, c);
+    return true;
+  }
+
   if (tvIsClsMeth(c)) {
-    if (RuntimeOption::EvalIsCompatibleClsMethType &&
-        !RuntimeOption::EvalHackArrDVArrs) {
-      if (RuntimeOption::EvalIsVecNotices) {
-        raise_notice(Strings::CLSMETH_COMPAT_IS_ARR);
-      }
+    if (!RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType) {
+      if (RO::EvalIsVecNotices) raise_notice(Strings::CLSMETH_COMPAT_IS_ARR);
       return true;
     }
     return false;
   }
-  return tvIsArray(c);
+
+  auto const hacLogging = [&](const char* msg) {
+    if (RO::EvalHackArrCompatIsArrayNotices) raise_hackarr_compat_notice(msg);
+  };
+  if (logOnHackArrays /* let's get rid of this condition if we can */) {
+    if (tvIsVec(c)) {
+      hacLogging(Strings::HACKARR_COMPAT_VEC_IS_ARR);
+      maybe_raise_array_serialization_notice(SerializationSite::IsArray, c);
+    } else if (tvIsDict(c)) {
+      hacLogging(Strings::HACKARR_COMPAT_DICT_IS_ARR);
+      maybe_raise_array_serialization_notice(SerializationSite::IsArray, c);
+    } else if (tvIsKeyset(c)) {
+      hacLogging(Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
+      assertx(!arrprov::arrayWantsTag(c->m_data.parr));
+    }
+  }
+  return false;
 }
 
 inline bool is_vec(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
+
+  if (tvIsVec(c)) {
+    maybe_raise_array_serialization_notice(SerializationSite::IsVec, c);
+    return true;
+  }
+
   if (tvIsClsMeth(c)) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      if (RuntimeOption::EvalIsVecNotices) {
-        raise_notice(Strings::CLSMETH_COMPAT_IS_VEC);
-      }
+    if (RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType) {
+      if (RO::EvalIsVecNotices) raise_notice(Strings::CLSMETH_COMPAT_IS_VEC);
       return true;
     }
     return false;
   }
-  return tvIsVec(c);
+
+  auto const hacLogging = [&](const char* msg) {
+    if (RO::EvalHackArrCompatIsVecDictNotices) raise_hackarr_compat_notice(msg);
+  };
+  if (tvIsArray(c) && c->m_data.parr->isVArray()) {
+    hacLogging(Strings::HACKARR_COMPAT_VARR_IS_VEC);
+    maybe_raise_array_serialization_notice(SerializationSite::IsVec, c);
+  }
+  return false;
 }
 
 inline bool is_dict(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
-  return tvIsDict(c);
+
+  if (tvIsDict(c)) {
+    maybe_raise_array_serialization_notice(SerializationSite::IsDict, c);
+    return true;
+  }
+
+  auto const hacLogging = [&](const char* msg) {
+    if (RO::EvalHackArrCompatIsVecDictNotices) raise_hackarr_compat_notice(msg);
+  };
+  if (tvIsArray(c) && c->m_data.parr->isDArray()) {
+    hacLogging(Strings::HACKARR_COMPAT_DARR_IS_DICT);
+    maybe_raise_array_serialization_notice(SerializationSite::IsDict, c);
+  }
+  return false;
 }
 
 inline bool is_keyset(const TypedValue* c) {
@@ -140,24 +199,54 @@ inline bool is_keyset(const TypedValue* c) {
 }
 
 inline bool is_varray(const TypedValue* c) {
-  if (tvIsClsMeth(c)) {
-    if (!RuntimeOption::EvalHackArrDVArrs) {
-      if (RuntimeOption::EvalIsVecNotices) {
-        raise_notice(Strings::CLSMETH_COMPAT_IS_VARR);
-      }
-      return true;
-    }
-    return false;
+  assertx(tvIsPlausible(*c));
+
+  // Is this line safe? It returns the correct result, but if it logs a notice,
+  // it'll be for is_vec, not is_varray. That may be fine, post-HAM, because
+  // only dynamic calls to is_varray will remain at that point.
+  if (RuntimeOption::EvalHackArrDVArrs) return is_vec(c);
+
+  if (tvIsArray(c) && c->m_data.parr->isVArray()) {
+    maybe_raise_array_serialization_notice(SerializationSite::IsVArray, c);
+    return true;
   }
-  return RuntimeOption::EvalHackArrDVArrs
-    ? tvIsVec(c)
-    : (tvIsArray(c) && c->m_data.parr->isVArray());
+
+  if (tvIsClsMeth(c) && RO::EvalIsCompatibleClsMethType) {
+    if (RO::EvalIsVecNotices) raise_notice(Strings::CLSMETH_COMPAT_IS_VARR);
+    return true;
+  }
+
+  auto const hacLogging = [&](const char* msg) {
+    if (RO::EvalHackArrCompatIsVecDictNotices) raise_hackarr_compat_notice(msg);
+  };
+  if (tvIsVec(c)) {
+    hacLogging(Strings::HACKARR_COMPAT_VEC_IS_VARR);
+    maybe_raise_array_serialization_notice(SerializationSite::IsVArray, c);
+  }
+  return false;
 }
 
 inline bool is_darray(const TypedValue* c) {
-  return RuntimeOption::EvalHackArrDVArrs
-    ? tvIsDict(c)
-    : (tvIsArray(c) && c->m_data.parr->isDArray());
+  assertx(tvIsPlausible(*c));
+
+  // Is this line safe? It returns the correct result, but if it logs a notice,
+  // it'll be for is_dict, not is_darray. That may be fine, post-HAM, because
+  // only dynamic calls to is_darray will remain at that point.
+  if (RuntimeOption::EvalHackArrDVArrs) return is_dict(c);
+
+  if (tvIsArray(c) && c->m_data.parr->isDArray()) {
+    maybe_raise_array_serialization_notice(SerializationSite::IsDArray, c);
+    return true;
+  }
+
+  auto const hacLogging = [&](const char* msg) {
+    if (RO::EvalHackArrCompatIsVecDictNotices) raise_hackarr_compat_notice(msg);
+  };
+  if (tvIsDict(c)) {
+    hacLogging(Strings::HACKARR_COMPAT_DICT_IS_DARR);
+    maybe_raise_array_serialization_notice(SerializationSite::IsDArray, c);
+  }
+  return false;
 }
 
 inline bool is_object(const TypedValue* c) {

@@ -5922,41 +5922,44 @@ bool could_copy_on_write(const Type& t) {
 }
 
 bool is_type_might_raise(const Type& testTy, const Type& valTy) {
+  auto const hackarr = RO::EvalHackArrDVArrs;
+  auto const BHackArr = BVec | BDict | BKeyset;
+
+  // Explanation for the array-like type test behaviors:
+  //
+  //  1. If arrprov is on, we may log if an array-like with provenance fails or
+  //     passes a type test, because those arrays may have to be marked.
+  //
+  //  2. The ...IsArrayNotices flag is used to migrate is_array calls to
+  //     is_any_array calls, which differ for Hack arrays, so we must log.
+  //
+  //  3. The ...IsVecDictNotices flag tracks those type tests that would change
+  //     behavior with the Hack array migration - i.e. those tests which have
+  //     varrays in is_vec, darrays in is_dict, or vice versa.
+
+  auto const mayLogProv = RO::EvalArrayProvenance && valTy.couldBe(kProvBits);
+
   if (is_opt(testTy)) return is_type_might_raise(unopt(testTy), valTy);
   if (testTy == TStrLike) {
     return valTy.couldBe(BFunc | BCls);
   } else if (testTy == TArr) {
-    if (RuntimeOption::EvalHackArrCompatIsArrayNotices &&
-        valTy.couldBe(BVec | BDict | BKeyset)) {
-      return true;
-    }
-    return RuntimeOption::EvalIsVecNotices &&
-          !RuntimeOption::EvalHackArrDVArrs && valTy.couldBe(BClsMeth);
+    return mayLogProv ||
+           (RO::EvalIsVecNotices && !hackarr && valTy.couldBe(BClsMeth)) ||
+           (RO::EvalHackArrCompatIsArrayNotices && valTy.couldBe(BHackArr));
   } else if (testTy == TVArr) {
-    if (RuntimeOption::EvalHackArrCompatIsArrayNotices && valTy.couldBe(BVec)) {
-      return true;
-    }
-    return (RuntimeOption::EvalIsVecNotices && valTy.couldBe(BClsMeth)) ||
-           (RuntimeOption::EvalArrayProvenance && valTy.couldBe(BVArr));
+    return mayLogProv ||
+           (RO::EvalIsVecNotices && valTy.couldBe(BClsMeth)) ||
+           (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BVec));
   } else if (testTy == TDArr) {
-    return
-      (RuntimeOption::EvalHackArrCompatIsArrayNotices &&
-       valTy.couldBe(BDict)) ||
-      (RuntimeOption::EvalArrayProvenance && valTy.couldBe(BDArr));
- } else if (testTy == TVec) {
-   if (RuntimeOption::EvalHackArrCompatIsVecDictNotices &&
-       valTy.couldBe(BVArr)) {
-     return true;
-   }
-   return (RuntimeOption::EvalIsVecNotices &&
-           RuntimeOption::EvalHackArrDVArrs && valTy.couldBe(BClsMeth)) ||
-          (RuntimeOption::EvalArrayProvenance &&
-            valTy.couldBe(TVec));
+    return mayLogProv ||
+           (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BDict));
+  } else if (testTy == TVec) {
+    return mayLogProv ||
+           (RO::EvalIsVecNotices && hackarr && valTy.couldBe(BClsMeth)) ||
+           (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BVec));
   } else if (testTy == TDict) {
-    return (RuntimeOption::EvalHackArrCompatIsArrayNotices &&
-            valTy.couldBe(BDArr)) ||
-           (RuntimeOption::EvalArrayProvenance &&
-            valTy.couldBe(TDict));
+    return mayLogProv ||
+           (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BDArr));
   }
   return false;
 }

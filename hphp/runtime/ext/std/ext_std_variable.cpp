@@ -121,67 +121,15 @@ bool HHVM_FUNCTION(is_scalar, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(is_array, const Variant& v) {
-  if (UNLIKELY(RO::EvalHackArrCompatIsArrayNotices)) {
-    if (v.isPHPArray()) {
-      return true;
-    } else if (v.isVecArray()) {
-      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_ARR);
-    } else if (v.isDict()) {
-      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_ARR);
-    } else if (v.isKeyset()) {
-      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
-    }
-    return false;
-  }
-  auto const ret = is_array(v.asTypedValue());
-  if (ret &&
-      UNLIKELY(RO::EvalLogArrayProvenance) &&
-      RO::EvalArrProvDVArrays &&
-      arrprov::arrayWantsTag(v.getArrayData())) {
-    raise_array_serialization_notice(SerializationSite::IsArray,
-                                     v.asCArrRef().get());
-  }
-  return ret;
+  return is_array(v.asTypedValue(), /*logOnHackArrays=*/true);
 }
 
 bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
-    if (v.isPHPArray()) {
-      auto const& arr = v.asCArrRef();
-      if (arr.isVArray()) {
-        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_VEC);
-      }
-      return false;
-    }
-  }
-  auto const ret =  is_vec(v.asTypedValue());
-  if (ret &&
-      UNLIKELY(RO::EvalLogArrayProvenance) &&
-      RO::EvalArrProvHackArrays) {
-    raise_array_serialization_notice(SerializationSite::IsVec,
-                                     v.asCArrRef().get());
-  }
-  return ret;
+  return is_vec(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
-    if (v.isPHPArray()) {
-      auto const& arr = v.asCArrRef();
-      if (arr.isDArray()) {
-        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
-      }
-      return false;
-    }
-  }
-  auto const ret = is_dict(v.asTypedValue());
-  if (ret &&
-      UNLIKELY(RO::EvalLogArrayProvenance) &&
-      RO::EvalArrProvHackArrays) {
-    raise_array_serialization_notice(SerializationSite::IsDict,
-                                     v.asCArrRef().get());
-  }
-  return ret;
+  return is_dict(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_keyset, const Variant& v) {
@@ -189,47 +137,15 @@ bool HHVM_FUNCTION(HH_is_keyset, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(HH_is_varray, const Variant& val) {
-  if (tvIsClsMeth(val.asTypedValue())) {
-    return !RuntimeOption::EvalHackArrDVArrs;
-  }
-  auto const cell = val.asTypedValue();
-  if (RuntimeOption::EvalHackArrDVArrs) return is_vec(cell);
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
-    if (val.isVecArray()) {
-      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_VARR);
-      return false;
-    }
-  }
-  auto const ret = tvIsArray(cell) && cell->m_data.parr->isVArray();
-  if (ret &&
-      UNLIKELY(RO::EvalLogArrayProvenance) &&
-      RO::EvalArrProvDVArrays) {
-    raise_array_serialization_notice(SerializationSite::IsVArray,
-                                     val.asCArrRef().get());
-  }
-  return ret;
+  return is_varray(val.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
-  auto const cell = val.asTypedValue();
-  if (RuntimeOption::EvalHackArrDVArrs) return is_dict(cell);
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
-    if (val.isDict()) {
-      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_DARR);
-      return false;
-    }
-  }
-  auto const ret = tvIsArray(cell) && cell->m_data.parr->isDArray();
-  if (ret &&
-      UNLIKELY(RO::EvalLogArrayProvenance) &&
-      RO::EvalArrProvDVArrays) {
-    raise_array_serialization_notice(SerializationSite::IsDArray,
-                                     val.asCArrRef().get());
-  }
-  return ret;
+  return is_darray(val.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {
+  // TODO(T60686780): Check EvalIsCompatibleClsMethType here, and maybe log.
   return tvIsArrayLike(val.asTypedValue()) || tvIsClsMeth(val.asTypedValue());
 }
 

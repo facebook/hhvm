@@ -275,7 +275,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case IsNType:
   case IsWaitHandle:
   case IsCol:
-  case IsDVArray:
   case LdRDSAddr:
   case LdFrameThis:
   case LdFrameCls:

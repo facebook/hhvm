@@ -3577,13 +3577,6 @@ SSATmp* simplifyHasToString(State& env, const IRInstruction* inst) {
     });
 }
 
-SSATmp* simplifyIsDVArray(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  return src->hasConstVal(TArr)
-    ? cns(env, !src->arrVal()->isNotDVArray())
-    : nullptr;
-}
-
 SSATmp* simplifyChrInt(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal(TInt)) {
@@ -3836,7 +3829,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(IsType)
   X(IsWaitHandle)
   X(IsCol)
-  X(IsDVArray)
   X(HasToString)
   X(LdCls)
   X(LdClsName)

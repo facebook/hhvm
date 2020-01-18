@@ -440,124 +440,6 @@ SSATmp* isScalarImpl(IRGS& env, SSATmp* val) {
   return gen(env, ConvIntToBool, result);
 }
 
-SSATmp* isDVArrayImpl(IRGS& env, SSATmp* val, IsTypeOp op) {
-  return cond(
-    env,
-    [&] (Block* taken) {
-      auto const arr = gen(env, CheckType, TArr, taken, val);
-      return gen(
-        env,
-        op == IsTypeOp::VArray ? CheckVArray : CheckDArray,
-        taken,
-        arr
-      );
-    },
-    [&](SSATmp*) { return cns(env, true); },
-    [&]{
-      if (RuntimeOption::EvalHackArrCompatIsVecDictNotices) {
-        ifElse(
-          env,
-          [&] (Block* taken) {
-            gen(
-              env,
-              CheckType,
-              op == IsTypeOp::VArray ? TVec : TDict,
-              taken,
-              val
-            );
-          },
-          [&] {
-            gen(
-              env,
-              RaiseHackArrCompatNotice,
-              cns(
-                env,
-                makeStaticString(
-                  op == IsTypeOp::VArray
-                  ? Strings::HACKARR_COMPAT_VEC_IS_VARR
-                  : Strings::HACKARR_COMPAT_DICT_IS_DARR
-                )
-              )
-            );
-          }
-        );
-      }
-
-      // check if type is TClsMeth and raise notice
-      if (op == IsTypeOp::VArray) {
-        return cond(
-          env,
-          [&] (Block* taken) {
-            return gen(env, CheckType, TClsMeth, taken, val);
-          },
-          [&] (SSATmp*) {
-            if (!RuntimeOption::EvalHackArrDVArrs) {
-              if (RuntimeOption::EvalIsVecNotices) {
-                gen(env, RaiseNotice, cns(env,
-                  makeStaticString(Strings::CLSMETH_COMPAT_IS_VARR)));
-              }
-              return cns(env, true);
-            }
-            return cns(env, false);
-          },
-          [&] { return cns(env, false); }
-        );
-      }
-      return cns(env, false);
-    }
-  );
-}
-
-StaticString s_isDict("is_dict");
-StaticString s_isVec("is_vec");
-
-
-SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
-  MultiCond mc{env};
-
-  auto const provLogging = [&](SSATmp* src) {
-    if (!RO::EvalLogArrayProvenance) return;
-    gen(env, RaiseArraySerializeNotice,
-        cns(env, SerializationSite::IsVec),
-        src);
-  };
-
-  mc.ifTypeThen(src, TVec, [&](SSATmp* src) {
-    if (RO::EvalArrProvHackArrays) provLogging(src);
-    return cns(env, true);
-  });
-
-  if (RO::EvalHackArrCompatIsVecDictNotices ||
-      (RO::EvalLogArrayProvenance && RO::EvalArrProvDVArrays)) {
-    mc.ifTypeThen(src, TArr, [&](SSATmp* src) {
-      ifThenElse(
-        env,
-        [&](Block* taken) { return gen(env, CheckVArray, taken, src); },
-        [&] {
-          if (RO::EvalHackArrCompatIsVecDictNotices) {
-            gen(env, RaiseHackArrCompatNotice,
-                cns(env, makeStaticString(Strings::HACKARR_COMPAT_VARR_IS_VEC)));
-          }
-        },
-        [&] { if (RO::EvalArrProvDVArrays) provLogging(src); }
-      );
-      return cns(env, false);
-    });
-  }
-
-  if (RO::EvalHackArrDVArrs) {
-    mc.ifTypeThen(src, TClsMeth, [&](SSATmp* src) {
-      if (RO::EvalIsVecNotices) {
-        gen(env, RaiseNotice,
-            cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
-      }
-      return cns(env, true);
-    });
-  }
-
-  return mc.elseDo([&]{ return cns(env, false); });
-}
-
 const StaticString s_FUNC_CONVERSION(Strings::FUNC_TO_STRING);
 const StaticString s_FUNC_IS_STRING("Func used in is_string");
 const StaticString s_CLASS_CONVERSION(Strings::CLASS_TO_STRING);
@@ -585,64 +467,55 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
   return mc.elseDo([&]{ return cns(env, false); });
 }
 
-SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
-  MultiCond mc{env};
+// Checks if `arr` is a darray, varray, or varray (based on op). Executes the
+// code in `next` if that is the case.
+//
+// The JIT's type system doesn't track dvarray-ness, and it's not particularly
+// useful in general, but we implement a simple optimization here based on the
+// instruction that created src. This optimization is valuable because it lets
+// us check dvarray-ness for other reasons and then call maybeLogSerialization,
+// which is the canonical safe way to do provenance-based logging.
+template <typename Next>
+void ifDVArray(IRGS& env, Opcode op, SSATmp* arr, Next next) {
+  assertx(arr->isA(TArr));
+  assertx(op == CheckDArray || op == CheckVArray || op == CheckDVArray);
 
-  auto const provLogging = [&](SSATmp* src) {
-    if (!RO::EvalLogArrayProvenance) return;
-    gen(env, RaiseArraySerializeNotice,
-        cns(env, SerializationSite::IsDict),
-        src);
-  };
-
-  mc.ifTypeThen(src, TDict, [&](SSATmp* src) {
-    if (RO::EvalArrProvHackArrays) provLogging(src);
-    return cns(env, true);
-  });
-
-  if (RO::EvalHackArrCompatIsVecDictNotices ||
-      (RO::EvalLogArrayProvenance && RO::EvalArrProvDVArrays)) {
-    mc.ifTypeThen(src, TArr, [&](SSATmp* src) {
-      ifThenElse(
-        env,
-        [&](Block* taken) { gen(env, CheckDArray, taken, src); },
-        [&] {
-          if (RO::EvalHackArrCompatIsVecDictNotices) {
-            gen(env, RaiseHackArrCompatNotice,
-                cns(env, makeStaticString(Strings::HACKARR_COMPAT_DARR_IS_DICT)));
-          }
-        },
-        [&] { if (RO::EvalArrProvDVArrays) provLogging(src); }
-      );
-      return cns(env, false);
-    });
+  if (arr->inst()->is(CheckDArray, CheckVArray, CheckDVArray)) {
+    next(arr);
+  } else {
+    ifThen(env, [&](Block* taken) { next(gen(env, op, taken, arr)); }, [&]{});
   }
-
-  return mc.elseDo([&]{ return cns(env, false); });
 }
 
-const StaticString s_is_array("is_array");
+// Checks if the `arr` has provenance, implementing the same logic as in the
+// runtume helper arrprov::arrayWantsTag. If so, logs a serialization notice.
+void maybeLogSerialization(IRGS& env, SSATmp* arr, SerializationSite site) {
+  assertx(arr->type().isKnownDataType());
+
+  if (!RO::EvalLogArrayProvenance) return;
+
+  if (arr->isA(TArr) && RO::EvalArrProvDVArrays) {
+    ifDVArray(env, CheckDVArray, arr, [&](SSATmp* arr) {
+      gen(env, RaiseArraySerializeNotice, cns(env, site), arr);
+    });
+  } else if ((arr->isA(TVec) || arr->isA(TDict)) && RO::EvalArrProvHackArrays) {
+    gen(env, RaiseArraySerializeNotice, cns(env, site), arr);
+  }
+}
 
 SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
   MultiCond mc{env};
 
-  auto const provLogging = [&](SSATmp* src) {
-    if (!RO::EvalLogArrayProvenance) return;
-    gen(env, RaiseArraySerializeNotice,
-        cns(env, SerializationSite::IsArray),
-        src);
-  };
-
   mc.ifTypeThen(src, TArr, [&](SSATmp* src) {
-    if (RO::EvalArrProvDVArrays) provLogging(src);
+    maybeLogSerialization(env, src, SerializationSite::IsArray);
     return cns(env, true);
   });
 
   if (!RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType) {
     mc.ifTypeThen(src, TClsMeth, [&](SSATmp*) {
       if (RO::EvalIsVecNotices) {
-        gen(env, RaiseNotice,
-            cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_ARR)));
+        auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_ARR);
+        gen(env, RaiseNotice, cns(env, msg));
       }
       return cns(env, true);
     });
@@ -658,12 +531,12 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
       (RO::EvalLogArrayProvenance && RO::EvalArrProvHackArrays))) {
     mc.ifTypeThen(src, TVec, [&](SSATmp* src) {
       hacLogging(Strings::HACKARR_COMPAT_VEC_IS_ARR);
-      if (RO::EvalArrProvHackArrays) provLogging(src);
+      maybeLogSerialization(env, src, SerializationSite::IsArray);
       return cns(env, false);
     });
     mc.ifTypeThen(src, TDict, [&](SSATmp* src) {
       hacLogging(Strings::HACKARR_COMPAT_DICT_IS_ARR);
-      if (RO::EvalArrProvHackArrays) provLogging(src);
+      maybeLogSerialization(env, src, SerializationSite::IsArray);
       return cns(env, false);
     });
     mc.ifTypeThen(src, TKeyset, [&](SSATmp* src) {
@@ -671,6 +544,117 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src) {
       return cns(env, false);
     });
   }
+
+  return mc.elseDo([&]{ return cns(env, false); });
+}
+
+SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
+  MultiCond mc{env};
+
+
+  mc.ifTypeThen(src, TVec, [&](SSATmp* src) {
+    maybeLogSerialization(env, src, SerializationSite::IsVec);
+    return cns(env, true);
+  });
+
+  if (RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType) {
+    mc.ifTypeThen(src, TClsMeth, [&](SSATmp* src) {
+      if (RO::EvalIsVecNotices) {
+        gen(env, RaiseNotice,
+            cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_VEC)));
+      }
+      return cns(env, true);
+    });
+  }
+
+  auto const hacLogging = [&](const char* msg) {
+    if (!RO::EvalHackArrCompatIsVecDictNotices) return;
+    gen(env, RaiseHackArrCompatNotice, cns(env, makeStaticString(msg)));
+  };
+
+  if (RO::EvalHackArrCompatIsVecDictNotices ||
+      (RO::EvalLogArrayProvenance && RO::EvalArrProvDVArrays)) {
+    mc.ifTypeThen(src, TArr, [&](SSATmp* src) {
+      ifDVArray(env, CheckVArray, src, [&](SSATmp* src) {
+        hacLogging(Strings::HACKARR_COMPAT_VARR_IS_VEC);
+        maybeLogSerialization(env, src, SerializationSite::IsVec);
+      });
+      return cns(env, false);
+    });
+  }
+
+  return mc.elseDo([&]{ return cns(env, false); });
+}
+
+SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
+  MultiCond mc{env};
+
+  mc.ifTypeThen(src, TDict, [&](SSATmp* src) {
+    maybeLogSerialization(env, src, SerializationSite::IsDict);
+    return cns(env, true);
+  });
+
+  auto const hacLogging = [&](const char* msg) {
+    if (!RO::EvalHackArrCompatIsVecDictNotices) return;
+    gen(env, RaiseHackArrCompatNotice, cns(env, makeStaticString(msg)));
+  };
+
+  if (RO::EvalHackArrCompatIsVecDictNotices ||
+      (RO::EvalLogArrayProvenance && RO::EvalArrProvDVArrays)) {
+    mc.ifTypeThen(src, TArr, [&](SSATmp* src) {
+      ifDVArray(env, CheckDArray, src, [&](SSATmp* src) {
+        hacLogging(Strings::HACKARR_COMPAT_DARR_IS_DICT);
+        maybeLogSerialization(env, src, SerializationSite::IsDict);
+      });
+      return cns(env, false);
+    });
+  }
+
+  return mc.elseDo([&]{ return cns(env, false); });
+}
+
+SSATmp* isDVArrayImpl(IRGS& env, SSATmp* src, IsTypeOp subop) {
+  MultiCond mc{env};
+
+  assertx(subop == IsTypeOp::VArray || subop == IsTypeOp::DArray);
+  auto const varray = subop == IsTypeOp::VArray;
+  auto const check = varray ? CheckVArray : CheckDArray;
+  auto const site = varray ? SerializationSite::IsVArray
+                           : SerializationSite::IsDArray;
+
+  mc.ifTypeThen(src, TArr, [&](SSATmp* src) {
+    return cond(env,
+      [&](Block* taken) { return gen(env, check, taken, src); },
+      [&](SSATmp* src) {
+        maybeLogSerialization(env, src, site);
+        return cns(env, true);
+      },
+      [&]{ return cns(env, false); }
+    );
+  });
+
+  if (varray && RO::EvalIsCompatibleClsMethType) {
+    mc.ifTypeThen(src, TClsMeth, [&](SSATmp*) {
+      if (RO::EvalIsVecNotices) {
+        auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_VARR);
+        gen(env, RaiseNotice, cns(env, msg));
+      }
+      return cns(env, true);
+    });
+  }
+
+
+  auto const hacLogging = [&](const char* msg) {
+    if (!RO::EvalHackArrCompatIsVecDictNotices) return;
+    gen(env, RaiseHackArrCompatNotice, cns(env, makeStaticString(msg)));
+  };
+
+  mc.ifTypeThen(src, varray ? TVec : TDict, [&](SSATmp* src) {
+    hacLogging(varray ? Strings::HACKARR_COMPAT_VEC_IS_VARR
+                      : Strings::HACKARR_COMPAT_DICT_IS_DARR);
+    maybeLogSerialization(env, src, site);
+    return cns(env, false);
+  });
 
   return mc.elseDo([&]{ return cns(env, false); });
 }
@@ -1630,74 +1614,41 @@ void emitEmptyL(IRGS& env, int32_t id) {
   );
 }
 
-void emitIsTypeC(IRGS& env, IsTypeOp subop) {
-  auto const src = popC(env, DataTypeSpecific);
-
-  if (subop == IsTypeOp::VArray || subop == IsTypeOp::DArray) {
-    push(env, isDVArrayImpl(env, src, subop));
-  } else if (subop == IsTypeOp::Arr) {
-    push(env, isArrayImpl(env, src));
-  } else if (subop == IsTypeOp::Vec) {
-    push(env, isVecImpl(env, src));
-  } else if (subop == IsTypeOp::Dict) {
-    push(env, isDictImpl(env, src));
-  } else if (subop == IsTypeOp::Scalar) {
-    push(env, isScalarImpl(env, src));
-  } else if (subop == IsTypeOp::Str) {
-    push(env, isStrImpl(env, src));
-  } else {
-    if (subop == IsTypeOp::ArrLike && src->isA(TClsMeth)) {
-      // To make ClsMeth compatiable with arraylike tentitively
-      if (RuntimeOption::EvalIsVecNotices) {
-        gen(env, RaiseNotice,
-          cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR)));
-      }
-      push(env, cns(env, true));
-    } else {
-      auto const t = typeOpToType(subop);
-      if (t <= TObj) {
-        push(env, optimizedCallIsObject(env, src));
-      } else {
-        push(env, gen(env, IsType, t, src));
-      }
-    }
+SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
+  switch (subop) {
+    case IsTypeOp::VArray: /* intentional fallthrough */
+    case IsTypeOp::DArray: return isDVArrayImpl(env, val, subop);
+    case IsTypeOp::Arr:    return isArrayImpl(env, val);
+    case IsTypeOp::Vec:    return isVecImpl(env, val);
+    case IsTypeOp::Dict:   return isDictImpl(env, val);
+    case IsTypeOp::Scalar: return isScalarImpl(env, val);
+    case IsTypeOp::Str:    return isStrImpl(env, val);
+    default: break;
   }
-  decRef(env, src);
+
+  // We eventually want ClsMeth to be its own DataType, so we must log.
+  if (subop == IsTypeOp::ArrLike && val->isA(TClsMeth)) {
+    if (RuntimeOption::EvalIsVecNotices) {
+      auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
+      gen(env, RaiseNotice, cns(env, msg));
+    }
+    return cns(env, true);
+  }
+
+  auto const t = typeOpToType(subop);
+  return t <= TObj ? optimizedCallIsObject(env, val) : gen(env, IsType, t, val);
+}
+
+void emitIsTypeC(IRGS& env, IsTypeOp subop) {
+  auto const val = popC(env, DataTypeSpecific);
+  push(env, isTypeHelper(env, subop, val));
+  decRef(env, val);
 }
 
 void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
   auto const ldPMExit = makePseudoMainExit(env);
   auto const val = ldLocWarn(env, id, ldPMExit, DataTypeSpecific);
-
-  if (subop == IsTypeOp::VArray || subop == IsTypeOp::DArray) {
-    push(env, isDVArrayImpl(env, val, subop));
-  } else if (subop == IsTypeOp::Arr) {
-    push(env, isArrayImpl(env, val));
-  } else if (subop == IsTypeOp::Vec) {
-    push(env, isVecImpl(env, val));
-  } else if (subop == IsTypeOp::Dict) {
-    push(env, isDictImpl(env, val));
-  } else if (subop == IsTypeOp::Scalar) {
-    push(env, isScalarImpl(env, val));
-  } else if (subop == IsTypeOp::Str) {
-    push(env, isStrImpl(env, val));
-  } else {
-    if (subop == IsTypeOp::ArrLike && val->isA(TClsMeth)) {
-      // To make ClsMeth compatiable with arraylike tentitively
-      if (RuntimeOption::EvalIsVecNotices) {
-        gen(env, RaiseNotice,
-          cns(env, makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR)));
-      }
-      push(env, cns(env, true));
-    } else {
-      auto const t = typeOpToType(subop);
-      if (t <= TObj) {
-        push(env, optimizedCallIsObject(env, val));
-      } else {
-        push(env, gen(env, IsType, t, val));
-      }
-    }
-  }
+  push(env, isTypeHelper(env, subop, val));
 }
 
 //////////////////////////////////////////////////////////////////////

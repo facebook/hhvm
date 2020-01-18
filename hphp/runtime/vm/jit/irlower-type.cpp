@@ -234,13 +234,14 @@ void cgCheckDArray(IRLS& env, const IRInstruction* inst) {
   v << copy{src, dst};
 }
 
-void cgIsDVArray(IRLS& env, const IRInstruction* inst) {
+void cgCheckDVArray(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
   auto const sf = v.makeReg();
   v << testbim{ArrayData::kDVArrayMask, src + ArrayData::offsetofDVArray(), sf};
-  v << setcc{CC_NZ, sf, dst};
+  fwdJcc(v, env, CC_Z, sf, inst->taken());
+  v << copy{src, dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

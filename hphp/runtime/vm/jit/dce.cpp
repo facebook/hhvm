@@ -164,7 +164,6 @@ bool canDCE(IRInstruction* inst) {
   case IsNTypeMem:
   case IsWaitHandle:
   case IsCol:
-  case IsDVArray:
   case LdStk:
   case LdLoc:
   case LdStkAddr:
@@ -386,6 +385,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckTypeMem:
   case CheckVArray:
   case CheckDArray:
+  case CheckDVArray:
   case CheckMixedArrayKeys:
   case CheckSmashableClass:
   case CheckLoc:

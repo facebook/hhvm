@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-provenance.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/enum-util.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -626,70 +627,19 @@ bool checkTypeStructureMatchesTVImpl(
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
-      return !isOrAsOp && isArrayType(type);
+      return !isOrAsOp && is_array(&c1, /*logOnHackArrays=*/true);
 
-    case TypeStructure::Kind::T_dict: {
-      if (UNLIKELY(RO::EvalHackArrCompatIsVecDictNotices)) {
-        if (isArrayType(type) && data.parr->isDArray()) {
-          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
-        }
-      }
-      auto const result = isDictType(type);
-      if (result &&
-          UNLIKELY(RO::EvalLogArrayProvenance)) {
-        raise_array_serialization_notice(SerializationSite::IsDict, data.parr);
-      }
-      return result;
-    }
+    case TypeStructure::Kind::T_dict:
+      return is_dict(&c1);
 
-    case TypeStructure::Kind::T_vec: {
-      if (UNLIKELY(RO::EvalHackArrCompatIsVecDictNotices)) {
-        if (isArrayType(type) && data.parr->isVArray()) {
-          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_VEC);
-        }
-      }
-      if (isClsMethType(type)) {
-        if (RO::EvalHackArrDVArrs) {
-          if (RO::EvalIsVecNotices) {
-            raise_notice(Strings::CLSMETH_COMPAT_IS_VEC);
-          }
-          return true;
-        }
-        return false;
-      }
-      auto const result = isVecType(type);
-      if (result &&
-          UNLIKELY(RO::EvalLogArrayProvenance)) {
-        raise_array_serialization_notice(SerializationSite::IsVec, data.parr);
-      }
-      return result;
-    }
+    case TypeStructure::Kind::T_vec:
+      return is_vec(&c1);
 
-    case TypeStructure::Kind::T_vec_or_dict: {
-      if (isClsMethType(type)) {
-        if (RO::EvalHackArrDVArrs) {
-          if (RO::EvalIsVecNotices) {
-            raise_notice(Strings::CLSMETH_COMPAT_IS_VEC);
-          }
-          return true;
-        }
-        return false;
-      }
-      auto const result = isVecType(type) || isDictType(type);
-      if (result &&
-          UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
-        raise_array_serialization_notice(
-          isVecType(type)
-            ? SerializationSite::IsVec
-            : SerializationSite::IsDict,
-          data.parr
-        );
-      }
-      return result;
-    }
+    case TypeStructure::Kind::T_vec_or_dict:
+      return is_vec(&c1) || is_dict(&c1);
 
     case TypeStructure::Kind::T_keyset:
-      return isKeysetType(type);
+      return is_keyset(&c1);
 
     case TypeStructure::Kind::T_arraylike:
       if (isClsMethType(type)) {

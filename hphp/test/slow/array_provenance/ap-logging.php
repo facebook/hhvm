@@ -18,4 +18,10 @@ function main() {
   $b = __hhvm_intrinsics\launder_value(dict[]);
   $b['foo'] = 42;
   var_dump(fb_serialize($b, FB_SERIALIZE_HACK_ARRAYS));
+
+  $c = __hhvm_intrinsics\launder_value(varray[]);
+  $c[] = 'hello';
+  var_dump(fb_serialize($c));
+  var_dump(fb_serialize($c, FB_SERIALIZE_VARRAY_DARRAY));
+  var_dump(fb_serialize($c, FB_SERIALIZE_HACK_ARRAYS));
 }

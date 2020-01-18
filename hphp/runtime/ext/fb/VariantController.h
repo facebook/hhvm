@@ -292,6 +292,7 @@ struct VariantControllerImpl {
   ALWAYS_INLINE
   static void traceSerialization(const_variant_ref thing) {
     if (LIKELY(!RuntimeOption::EvalLogArrayProvenance)) return;
+    if (HackArraysMode != VariantControllerHackArraysMode::ON) return;
     if (!thing.isArray()) return;
     auto const ad = thing.getArrayData();
 

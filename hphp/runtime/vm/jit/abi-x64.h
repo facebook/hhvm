@@ -43,6 +43,9 @@ constexpr PhysReg rsp()   { return reg::rsp; }
 
 inline RegSet vm_regs_no_sp()   { return rvmfp() | rvmtl(); }
 inline RegSet vm_regs_with_sp() { return vm_regs_no_sp() | rvmsp(); }
+inline RegSet cross_jit_save() {
+  return reg::rbx | reg::r12 | reg::r13 | reg::r14 | reg::r15;
+}
 
 constexpr PhysReg rret_data() { return reg::rax; }
 constexpr PhysReg rret_type() { return reg::rdx; }

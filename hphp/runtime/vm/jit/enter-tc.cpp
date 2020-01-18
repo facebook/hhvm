@@ -64,7 +64,11 @@ ALWAYS_INLINE void postExit() {
 
 void enterTC(TCA start) {
   preEnter(start);
-  enterTCImpl(start);
+  assert_flog(tc::isValidCodeAddress(start), "start = {} ; func = {} ({})\n",
+              start, vmfp()->func(), vmfp()->func()->fullName());
+  auto& regs = vmRegsUnsafe();
+  tc::ustubs().enterTCHelper(start, regs.fp, rds::tl_base, regs.stack.top(),
+                             vmFirstAR());
   postExit();
 }
 

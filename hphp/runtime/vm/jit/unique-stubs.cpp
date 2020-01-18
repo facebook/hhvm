@@ -910,9 +910,6 @@ TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& /*us*/) {
     // Eagerly save VM regs.
     storeVMRegs(v);
 
-    // Realign the native stack.
-    alignNativeStack(v, true);
-
     // Store the return value on the top of the eval stack.  Whenever we get to
     // enterTCExit, we're semantically executing some PHP construct that sends
     // a return value out of a function (either a RetC, or a Yield, or an Await
@@ -925,11 +922,20 @@ TCA emitEnterTCExit(CodeBlock& cb, DataBlock& data, UniqueStubs& /*us*/) {
     // which we need to put on the top of the evaluation stack.
     storeReturnRegs(v);
 
+    // Restore the registers that need to be saved across enterTC
+    auto cross_jit = cross_jit_save();
+    if (!(cross_jit.size() & 1)) alignNativeStack(v, true);
+    cross_jit.forEachR(
+      [&] (PhysReg r) {
+        v << pop{r};
+      }
+    );
+
     // Perform a native return.
     //
     // On PPC64, as there is no new frame created when entering the VM, the FP
-    // must not be saved.
-    v << stubret{RegSet(), arch() != Arch::PPC64};
+    // must not be restored.
+    v << stubret{cross_jit, arch() != Arch::PPC64};
   });
 }
 
@@ -940,11 +946,7 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   auto const fp       = rarg(1);
   auto const tl       = rarg(2);
   auto const sp       = rarg(3);
-#ifdef _MSC_VER
-  auto const firstAR  = reg::r10;
-#else
   auto const firstAR  = rarg(4);
-#endif
 
   return vwrap2(cb, cb, data, [&] (Vout& v, Vout& vc) {
     // Architecture-specific setup for entering the TC.
@@ -953,13 +955,16 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // Native func prologue.
     v << stublogue{arch() != Arch::PPC64};
 
-#ifdef _MSC_VER
-    // Windows hates argument registers.
-    v << load{rsp()[0x28], reg::r10};
-#endif
-
     // Set up linkage with the top VM frame in this nesting.
     v << store{rsp(), firstAR[AROFF(m_sfp)]};
+
+    // Save the registers that need to be saved across enterTC
+    auto cross_jit = cross_jit_save();
+    cross_jit.forEach(
+      [&] (PhysReg r) {
+        v << push{r};
+      }
+    );
 
     // Set up the VM registers.
     v << copy{fp, rvmfp()};
@@ -967,7 +972,7 @@ TCA emitEnterTCHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     v << copy{sp, rvmsp()};
 
     // Unalign the native stack.
-    alignNativeStack(v, false);
+    if (!(cross_jit.size() & 1)) alignNativeStack(v, false);
 
     v << resumetc{start, us.enterTCExit, vm_regs_with_sp()};
   });
@@ -1026,9 +1031,19 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
                   "The following store must match the size of tl_regState.");
     auto const regstate = emitTLSAddr(v, tls_datum(tl_regState));
     v << storeqi{static_cast<int32_t>(VMRegState::CLEAN), regstate};
+    // We were about to return to callToExit, so drop the return
+    // address, then do what enterTCExit would have done.
+    alignNativeStack(v, true);
+    auto cross_jit = cross_jit_save();
+    if (!(cross_jit.size() & 1)) alignNativeStack(v, true);
+    cross_jit.forEachR(
+      [&] (PhysReg r) {
+        v << pop{r};
+      }
+    );
     v << call{
       TCA(__cxxabiv1::__cxa_rethrow),
-      arg_regs(0),
+      arg_regs(0) | cross_jit,
       &us.endCatchHelperPast
     };
     v << trap{TRAP_REASON};
@@ -1099,9 +1114,16 @@ TCA emitThrowExceptionWhileUnwinding(CodeBlock& cb, DataBlock& data) {
     // The saved rip is the caller is callToExit. We want to skip over
     // callToExit and enterTCExit, so move the stack pointer and set the rbp
     // to be the next frame in the rbp chain.
-    if (arch() == Arch::X64) v << lea{rsp()[16], rsp()};
+    alignNativeStack(v, true);
+    auto cross_jit = cross_jit_save();
+    if (!(cross_jit.size() & 1)) alignNativeStack(v, true);
+    cross_jit.forEachR(
+      [&] (PhysReg r) {
+        v << pop{r};
+      }
+    );
     v << load{rsp()[0], rvmfp()};
-    v << tailcallstub{TCA(throw_exception_while_unwinding)};
+    v << tailcallstub{TCA(throw_exception_while_unwinding), cross_jit};
   });
 }
 
@@ -1292,25 +1314,6 @@ void emitInterpReq(Vout& v, SrcKey sk, FPInvOffset spOff) {
   }
   v << copy{v.cns(sk.pc()), rarg(0)};
   v << jmpi{tc::ustubs().interpHelper, arg_regs(1)};
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-// see T39604764: inlining-specific issue that might also affect GCC
-#ifdef __clang__
-NEVER_INLINE
-#endif
-void enterTCImpl(TCA start) {
-  assert_flog(tc::isValidCodeAddress(start), "start = {} ; func = {} ({})\n",
-              start, vmfp()->func(), vmfp()->func()->fullName());
-
-  // We have to force C++ to spill anything that might be in a callee-saved
-  // register (aside from rvmfp()), since enterTCHelper does not save them.
-  CALLEE_SAVED_BARRIER();
-  auto& regs = vmRegsUnsafe();
-  tc::ustubs().enterTCHelper(start, regs.fp, rds::tl_base, regs.stack.top(),
-                             vmFirstAR());
-  CALLEE_SAVED_BARRIER();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

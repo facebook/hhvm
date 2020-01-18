@@ -135,6 +135,12 @@ RegSet vm_regs_with_sp();
 RegSet vm_regs_no_sp();
 
 /*
+ * Registers that need to be preserved across enterTC. Should not
+ * include rvmfp, or anything else that is "naturally" preserved.
+ */
+RegSet cross_jit_save();
+
+/*
  * Registers that are live between tracelets, in two flavors, depending whether
  * we are between tracelets in a resumed function.
  */

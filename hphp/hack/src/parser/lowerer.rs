@@ -1915,11 +1915,13 @@ where
                 } else {
                     TopLevel
                 };
-                // Ocaml evaluates right first then left, ordering will affect
-                // tmp var count in lifted await statement.
-                let right = Self::p_expr_with_loc(rlocation, &c.binary_right_operand, env)?;
-                let left = Self::p_expr(&c.binary_left_operand, env)?;
-                let bop_ast_node = Self::p_bop(pos, &c.binary_operator, left, right, env)?;
+                let bop_ast_node = Self::p_bop(
+                    pos,
+                    &c.binary_operator,
+                    Self::p_expr(&c.binary_left_operand, env)?,
+                    Self::p_expr_with_loc(rlocation, &c.binary_right_operand, env)?,
+                    env,
+                )?;
                 if let Some((ast::Bop::Eq(_), lhs, _)) = bop_ast_node.as_binop() {
                     Self::check_lvalue(lhs, env);
                 }

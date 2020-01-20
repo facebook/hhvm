@@ -22,7 +22,7 @@ module Cls = Decl_provider.Class
     newtype. *)
 let rec type_non_nullable env ty =
   let (_, ty) = Env.expand_type env ty in
-  match ty with
+  match deref ty with
   | ( _,
       ( Tprim
           ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
@@ -98,8 +98,8 @@ let (tclass_is_falsy_when_empty, is_traversable) =
     (e.g. user-defined objects) are always truthy, so testing their truthiness
     indicates a logic error. *)
 let rec truthiness env ty =
-  let (env, ty) = Env.expand_type env ty in
-  match snd ty with
+  let (env, ety) = Env.expand_type env ty in
+  match get_node ety with
   | Tany _
   | Terr
   | Tdynamic
@@ -199,8 +199,8 @@ type sketchy_type_kind =
       always truthy, even when empty. *)
 
 let rec find_sketchy_types env acc ty =
-  let (env, ty) = Env.expand_type env ty in
-  match snd ty with
+  let (env, ety) = Env.expand_type env ty in
+  match get_node ety with
   | Toption ty -> find_sketchy_types env acc ty
   | Tprim Tstring -> String :: acc
   | Tprim Tarraykey -> Arraykey :: acc

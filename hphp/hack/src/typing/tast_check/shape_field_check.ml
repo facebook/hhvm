@@ -16,25 +16,26 @@ module SN = Naming_special_names
 
 let shapes_key_exists env shape field_name =
   let (_, shape) = Tast_env.expand_type env shape in
-  match shape with
-  | (r, Tshape (shape_kind, fields)) ->
+  match get_node shape with
+  | Tshape (shape_kind, fields) ->
     begin
       match ShapeMap.find_opt field_name fields with
       | None ->
         begin
           match shape_kind with
-          | Closed_shape -> `DoesNotExist (Reason.to_pos r, `Undefined)
+          | Closed_shape -> `DoesNotExist (get_pos shape, `Undefined)
           | Open_shape -> `Unknown
         end
       | Some { sft_optional; sft_ty } ->
         if not sft_optional then
-          `DoesExist (Reason.to_pos (fst sft_ty))
+          `DoesExist (get_pos sft_ty)
         else
           let nothing = Typing_make_type.nothing Reason.Rnone in
           if Tast_env.is_sub_type env sft_ty nothing then
             `DoesNotExist
-              ( Reason.to_pos r,
-                `Nothing (Reason.to_string "It is nothing" (fst sft_ty)) )
+              ( get_pos shape,
+                `Nothing (Reason.to_string "It is nothing" (get_reason sft_ty))
+              )
           else
             `Unknown
     end

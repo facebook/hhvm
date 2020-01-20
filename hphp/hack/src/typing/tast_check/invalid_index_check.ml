@@ -34,12 +34,15 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
     | Some _ -> ()
     | None ->
       if
-        ( Env.can_subtype env ty_have (fst ty_have, Tdynamic)
+        ( Env.can_subtype env ty_have (MakeType.dynamic (get_reason ty_have))
         (* Terrible heuristic to agree with legacy: if we inferred `nothing` for
          * the key type of the array, just let it pass *)
-        || Env.can_subtype env ty_expect (fst ty_expect, Tunion []) )
+        || Env.can_subtype
+             env
+             ty_expect
+             (MakeType.nothing (get_reason ty_expect)) )
         (* If the key is not even an arraykey, we've already produced an error *)
-        || (not (Env.can_subtype env ty_have (Reason.Rnone, Tprim Tarraykey)))
+        || (not (Env.can_subtype env ty_have (MakeType.arraykey Reason.Rnone)))
            && should_enforce env
       then
         ()
@@ -52,13 +55,13 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
           ( (expr_pos, Reason.string_of_ureason reason)
             :: Typing_reason.to_string
                  ("This is " ^ ty_expect_str)
-                 (fst ty_expect)
+                 (get_reason ty_expect)
           @ Typing_reason.to_string
               ("It is incompatible with " ^ ty_have_str)
-              (fst ty_have) )
+              (get_reason ty_have) )
   in
   let (_, ety) = Env.expand_type env array_ty in
-  match snd ety with
+  match get_node ety with
   | Tunion tyl ->
     List.iter tyl (fun ty ->
         array_get ~array_pos ~expr_pos ~index_pos env ty index_ty)

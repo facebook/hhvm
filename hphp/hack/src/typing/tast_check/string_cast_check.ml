@@ -32,7 +32,7 @@ let check__toString m =
 
 let rec is_stringish env ty =
   let (env, ety) = Env.expand_type env ty in
-  match snd ety with
+  match get_node ety with
   | Toption ty' -> is_stringish env ty'
   | Tunion tyl -> List.for_all ~f:(is_stringish env) tyl
   | Tintersection tyl -> List.exists ~f:(is_stringish env) tyl

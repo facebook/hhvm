@@ -148,7 +148,8 @@ let empty_saved_env tcopt : saved_env =
  *)
 let dummy_saved_env = empty_saved_env GlobalOptions.default
 
-let dummy_type_hint = ((Typing_reason.Rnone, Typing_defs.Tdynamic), None)
+let dummy_type_hint : ty * 'a option =
+  (Typing_defs.mk (Typing_reason.Rnone, Typing_defs.Tdynamic), None)
 
 (* Helper function to create an annotation for a typed and positioned expression.
  * Do not construct this tuple directly - at some point we will build

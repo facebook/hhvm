@@ -26,9 +26,11 @@ let handler =
       function
       | ((p, _), Obj_get (((_, ty), _), _, OG_nullsafe))
         when Utils.type_non_nullable env ty ->
-        let (_, (r, _)) = Env.expand_type env ty in
+        let (_, ty) = Env.expand_type env ty in
         Errors.nullsafe_not_needed
           p
-          (Reason.to_string "This is what makes me believe it cannot be null" r)
+          (Reason.to_string
+             "This is what makes me believe it cannot be null"
+             (get_reason ty))
       | _ -> ()
   end

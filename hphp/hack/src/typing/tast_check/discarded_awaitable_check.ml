@@ -24,14 +24,14 @@ let can_be_null env ty =
 
 let rec enforce_not_awaitable env p ty =
   let (_, ety) = Tast_env.expand_type env ty in
-  match ety with
-  | (_, Tunion tyl)
-  | (_, Tintersection tyl) ->
+  match get_node ety with
+  | Tunion tyl
+  | Tintersection tyl ->
     List.iter tyl (enforce_not_awaitable env p)
-  | (r, Tclass ((_, awaitable), _, _))
+  | Tclass ((_, awaitable), _, _)
     when String.equal awaitable SN.Classes.cAwaitable ->
-    Errors.discarded_awaitable p (Typing_reason.to_pos r)
-  | (_, Toption ty') ->
+    Errors.discarded_awaitable p (get_pos ety)
+  | Toption ty' ->
     if
       TypecheckerOptions.disallow_discarded_nullable_awaitables
         (Env.get_tcopt env)
@@ -39,10 +39,24 @@ let rec enforce_not_awaitable env p ty =
       enforce_not_awaitable env p ty'
     else
       ()
-  | ( _,
-      ( Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Tvar _ | Tfun _
-      | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _ | Ttuple _ | Tanon _
-      | Tobject | Tshape _ | Tdynamic | Tpu _ | Tpu_type_access _ ) ) ->
+  | Terr
+  | Tany _
+  | Tnonnull
+  | Tarraykind _
+  | Tprim _
+  | Tvar _
+  | Tfun _
+  | Tgeneric _
+  | Tnewtype _
+  | Tdependent _
+  | Tclass _
+  | Ttuple _
+  | Tanon _
+  | Tobject
+  | Tshape _
+  | Tdynamic
+  | Tpu _
+  | Tpu_type_access _ ->
     ()
 
 let enforce_nullable_or_not_awaitable env p ty =

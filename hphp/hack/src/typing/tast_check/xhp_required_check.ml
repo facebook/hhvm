@@ -32,11 +32,11 @@ let collect_attrs_from_ty_sid ?(include_optional = false) env add bag sid =
 
 let rec collect_attrs_from_ty env set ty =
   let (_, ty) = Env.expand_type env ty in
-  match ty with
-  | (_, Tunion (ty :: tys)) ->
+  match get_node ty with
+  | Tunion (ty :: tys) ->
     let collect = collect_attrs_from_ty env SSet.empty in
     List.fold (List.map tys collect) ~init:(collect ty) ~f:SSet.inter
-  | (_, Tclass ((_, sid), _, _)) ->
+  | Tclass ((_, sid), _, _) ->
     collect_attrs_from_ty_sid
       ~include_optional:true
       env

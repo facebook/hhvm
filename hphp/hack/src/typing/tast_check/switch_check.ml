@@ -58,15 +58,15 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
   (* This function has a built in hack where if Tunion has an enum
      inside then it tells the enum exhaustiveness checker to
      not punish for extra default *)
-  let (env, (_, ty)) = Env.expand_type env ty in
-  match ty with
+  let (env, ty) = Env.expand_type env ty in
+  match get_node ty with
   | Tunion tyl ->
     let new_enum =
       enum_coming_from_unresolved
       || List.length tyl > 1
          && List.exists tyl ~f:(fun cur_ty ->
-                let (_, (_, cur_ty)) = Env.expand_type env cur_ty in
-                match cur_ty with
+                let (_, cur_ty) = Env.expand_type env cur_ty in
+                match get_node cur_ty with
                 | Tnewtype (cid, _, _) -> Env.is_enum env cid
                 | _ -> false)
     in
@@ -119,8 +119,8 @@ let check_exhaustiveness env pos ty caselist =
 
 let ensure_valid_switch_case_value_types env scrutinee_ty casel errorf =
   let is_subtype ty_sub ty_super = Env.can_subtype env ty_sub ty_super in
-  let ty_num = (Reason.Rnone, Tprim Tnum) in
-  let ty_arraykey = (Reason.Rnone, Tprim Tarraykey) in
+  let ty_num = MakeType.num Reason.Rnone in
+  let ty_arraykey = MakeType.arraykey Reason.Rnone in
   let ty_mixed = MakeType.mixed Reason.Rnone in
   let ty_traversable = MakeType.traversable Typing_reason.Rnone ty_mixed in
   let compatible_types ty1 ty2 =

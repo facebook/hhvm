@@ -122,9 +122,9 @@ let validator =
 
     method! on_tvarray_or_darray acc r _ _ = this#invalid acc r "an array type"
 
-    method is_wildcard =
-      function
-      | (_, Tapply ((_, name), _)) -> String.equal name SN.Typehints.wildcard
+    method is_wildcard ty =
+      match get_node ty with
+      | Tapply ((_, name), _) -> String.equal name SN.Typehints.wildcard
       | _ -> false
 
     method check_generic acc r name =

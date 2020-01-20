@@ -9,6 +9,7 @@
 
 open Aast
 open Typing_defs
+module MakeType = Typing_make_type
 
 let handler =
   object
@@ -17,12 +18,16 @@ let handler =
     method! at_expr env =
       function
       | (_, Obj_get (((_, ty), _), _, _))
-        when Tast_env.is_sub_type_for_union env ty (Reason.none, Tdynamic)
+        when Tast_env.is_sub_type_for_union
+               env
+               ty
+               (MakeType.dynamic Reason.none)
              || Tast_env.is_sub_type_for_union
                   env
                   ty
-                  (Reason.none, Typing_defs.make_tany ())
-             || Tast_env.is_sub_type_for_union env ty (Reason.none, Terr) ->
+                  (mk (Reason.none, Typing_defs.make_tany ()))
+             || Tast_env.is_sub_type_for_union env ty (mk (Reason.none, Terr))
+        ->
         ()
       | (_, Obj_get (_, ((p, _), Lvar _), _)) -> Errors.lvar_in_obj_get p
       | _ -> ()

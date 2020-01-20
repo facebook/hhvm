@@ -18,18 +18,23 @@ let check_types env ((p, _), te) =
     | Array_get (((_, ty1), te1), Some _) ->
       let rec iter ty1 =
         let (_, ety1) = Env.expand_type env ty1 in
-        match ety1 with
-        | (_, Tany _)
-        | (_, Terr) ->
+        match get_node ety1 with
+        | Tany _
+        | Terr ->
           true
-        | (_, (Tarraykind _ | Ttuple _ | Tshape _)) -> true
-        | (_, Tclass ((_, cn), _, _))
+        | Tarraykind _
+        | Ttuple _
+        | Tshape _ ->
+          true
+        | Tclass ((_, cn), _, _)
           when String.equal cn SN.Collections.cDict
                || String.equal cn SN.Collections.cKeyset
                || String.equal cn SN.Collections.cVec ->
           true
-        | (_, Tunion tyl) -> List.for_all ~f:iter tyl
-        | (_, (Tgeneric _ | Tnewtype _ | Tdependent _)) ->
+        | Tunion tyl -> List.for_all ~f:iter tyl
+        | Tgeneric _
+        | Tnewtype _
+        | Tdependent _ ->
           let (_, tyl) = Env.get_concrete_supertypes env ety1 in
           List.exists ~f:iter tyl
         | _ -> false
@@ -38,7 +43,7 @@ let check_types env ((p, _), te) =
         check_types_helper te1
       else
         let ty_str = Env.print_error_ty env ty1 in
-        let msgl = Reason.to_string ("This is " ^ ty_str) (fst ty1) in
+        let msgl = Reason.to_string ("This is " ^ ty_str) (get_reason ty1) in
         Errors.inout_argument_bad_type p msgl
     (* Other invalid expressions are caught in NastCheck. *)
     | _ -> ()

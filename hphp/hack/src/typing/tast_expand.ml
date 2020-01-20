@@ -22,45 +22,46 @@ module T = Aast
 let expand_ty ?var_hook ?pos env ty =
   let rec exp_ty ty =
     begin
-      match (ty, var_hook) with
+      match (deref ty, var_hook) with
       | ((_, Tvar var), Some hook) -> hook var
       | _ -> ()
     end;
     let (_, ety) = Tast_env.expand_type env ty in
     let ety =
-      match ety with
+      match deref ety with
       | (_, (Tany _ | Tnonnull | Tprim _ | Tobject | Tdynamic | Tgeneric _)) ->
         ety
-      | (p, Tclass (n, e, tyl)) -> (p, Tclass (n, e, exp_tys tyl))
-      | (p, Tunion tyl) -> (p, Tunion (exp_tys tyl))
-      | (p, Tintersection tyl) -> (p, Tintersection (exp_tys tyl))
-      | (p, Toption ty) -> (p, Toption (exp_ty ty))
-      | (p, Ttuple tyl) -> (p, Ttuple (exp_tys tyl))
-      | (p, Tfun ft) -> (p, Tfun (exp_fun_type ft))
-      | (p, Tnewtype (n, tyl, ty)) -> (p, Tnewtype (n, exp_tys tyl, exp_ty ty))
-      | (p, Tdependent (n, ty)) -> (p, Tdependent (n, exp_ty ty))
+      | (p, Tclass (n, e, tyl)) -> mk (p, Tclass (n, e, exp_tys tyl))
+      | (p, Tunion tyl) -> mk (p, Tunion (exp_tys tyl))
+      | (p, Tintersection tyl) -> mk (p, Tintersection (exp_tys tyl))
+      | (p, Toption ty) -> mk (p, Toption (exp_ty ty))
+      | (p, Ttuple tyl) -> mk (p, Ttuple (exp_tys tyl))
+      | (p, Tfun ft) -> mk (p, Tfun (exp_fun_type ft))
+      | (p, Tnewtype (n, tyl, ty)) ->
+        mk (p, Tnewtype (n, exp_tys tyl, exp_ty ty))
+      | (p, Tdependent (n, ty)) -> mk (p, Tdependent (n, exp_ty ty))
       | (p, Tshape (shape_kind, fields)) ->
-        (p, Tshape (shape_kind, Nast.ShapeMap.map exp_sft fields))
-      | (p, Tarraykind ak) -> (p, Tarraykind (exp_array_kind ak))
+        mk (p, Tshape (shape_kind, Nast.ShapeMap.map exp_sft fields))
+      | (p, Tarraykind ak) -> mk (p, Tarraykind (exp_array_kind ak))
       | (p, Tvar v) ->
         (match pos with
-        | None -> (p, Tvar v)
+        | None -> mk (p, Tvar v)
         | Some pos ->
           if
             TypecheckerOptions.disallow_unresolved_type_variables
               (Tast_env.get_tcopt env)
           then
             Errors.unresolved_type_variable pos;
-          (p, Tvar v))
+          mk (p, Tvar v))
       (* TODO TAST: replace with Tfun type *)
-      | (p, Tanon (x, y)) -> (p, Tanon (x, y))
-      | (p, Terr) -> (p, Terr)
+      | (p, Tanon (x, y)) -> mk (p, Tanon (x, y))
+      | (p, Terr) -> mk (p, Terr)
       (* TODO(T36532263) see if that needs updating *)
-      | (p, Tpu (base, enum)) -> (p, Tpu (exp_ty base, enum))
+      | (p, Tpu (base, enum)) -> mk (p, Tpu (exp_ty base, enum))
       | (p, Tpu_type_access (base, enum, member, tyname)) ->
         let base = exp_ty base in
         let member = exp_ty member in
-        (p, Tpu_type_access (base, enum, member, tyname))
+        mk (p, Tpu_type_access (base, enum, member, tyname))
     in
     ety
   and exp_tys tyl = List.map ~f:exp_ty tyl

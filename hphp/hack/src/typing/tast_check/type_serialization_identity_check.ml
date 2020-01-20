@@ -14,7 +14,7 @@ open Typing_defs
 For example, we don't currently serialize the arity of function types, so update
 the input type to set it to a default arity value. *)
 let rec strip_ty ty =
-  let (reason, ty) = ty in
+  let (reason, ty) = deref ty in
   let strip_tyl tyl = List.map tyl ~f:strip_ty in
   let strip_possibly_enforced_ty et =
     { et with et_type = strip_ty et.et_type }
@@ -88,7 +88,7 @@ let rec strip_ty ty =
     | Tpu_type_access (base, enum, member, tyname) ->
       Tpu_type_access (strip_ty base, enum, strip_ty member, tyname)
   in
-  (reason, ty)
+  mk (reason, ty)
 
 (*
  * Check that type deserialization works correctly by examining every type of

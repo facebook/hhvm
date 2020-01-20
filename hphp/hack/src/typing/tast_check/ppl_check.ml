@@ -22,7 +22,7 @@ let has_ppl_attribute c =
 (* If an object's type is wrapped in a Tabstract, recurse until we've hit the base *)
 let rec base_type env ty =
   let (env, ty) = Env.expand_type env ty in
-  match snd ty with
+  match get_node ty with
   | Tnewtype (_, _, ty)
   | Tdependent (_, ty) ->
     base_type env ty
@@ -70,7 +70,7 @@ let check_ppl_class env c =
 let check_ppl_obj_get env ((p, ty), e) =
   let check_type ty =
     let (env, bty) = base_type env ty in
-    match snd bty with
+    match get_node bty with
     | Tclass ((_, name), _, _) ->
       begin
         match Decl_provider.get_class (Env.get_ctx env) name with
@@ -136,7 +136,7 @@ let check_ppl_meth_pointers env p classname special_name =
 let check_ppl_inst_meth env ((p, ty), _) =
   let check_type ty =
     let (_env, bty) = base_type env ty in
-    match snd bty with
+    match get_node bty with
     | Tclass ((_, name), _, _) ->
       begin
         match Decl_provider.get_class (Env.get_ctx env) name with

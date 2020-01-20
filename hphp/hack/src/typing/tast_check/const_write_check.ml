@@ -48,13 +48,18 @@ let rec check_expr env (_, e) =
   | Class_get (((_, cty), _), CGstring pid) ->
     let (env, cty) = Env.expand_type env cty in
     begin
-      match snd cty with
+      match get_node cty with
       | Tclass ((_, c), _, _) -> check_prop env c pid None
-      | Tdependent (_, (_, Tclass ((_, c), _, _))) -> check_prop env c pid None
+      | Tdependent (_, bound) ->
+        begin
+          match get_node bound with
+          | Tclass ((_, c), _, _) -> check_prop env c pid None
+          | _ -> ()
+        end
       | Tgeneric name ->
         let upper_bounds = Env.get_upper_bounds env name in
         let check_class bound =
-          match snd bound with
+          match get_node bound with
           | Tclass ((_, c), _, _) -> check_prop env c pid None
           | _ -> ()
         in
@@ -64,11 +69,15 @@ let rec check_expr env (_, e) =
   | Obj_get (((_, cty), _), (_, Id id), _) ->
     let (env, cty) = Env.expand_type env cty in
     begin
-      match snd cty with
+      match get_node cty with
       | Tclass ((_, c), _, _) -> check_prop env c id (Some cty)
-      | Tnewtype (_, _, ((_, Tclass ((_, c), _, _)) as ty))
-      | Tdependent (_, ((_, Tclass ((_, c), _, _)) as ty)) ->
-        check_prop env c id (Some ty)
+      | Tnewtype (_, _, bound)
+      | Tdependent (_, bound) ->
+        begin
+          match get_node bound with
+          | Tclass ((_, c), _, _) -> check_prop env c id (Some bound)
+          | _ -> ()
+        end
       | _ -> ()
     end
   | Call (_, (_, Id (_, f)), _, el, None)

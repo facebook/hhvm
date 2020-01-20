@@ -26,13 +26,14 @@ exception Not_implemented
 
 let expect_ty_equal
     env ((pos, ty) : Pos.t * locl_ty) (expected_ty : locl_phase ty_) =
-  let expected_ty = (Reason.none, expected_ty) in
+  let expected_ty = mk (Reason.none, expected_ty) in
   if not @@ ty_equal ~normalize_lists:true ty expected_ty then
     let actual_ty = Typing_print.debug env ty in
     let expected_ty = Typing_print.debug env expected_ty in
     Errors.unexpected_ty_in_tast pos ~actual_ty ~expected_ty
 
-let refine ((_p, (_r, cond_ty)), cond_expr) _cond_is_true gamma =
+let refine ((_p, cond_ty), cond_expr) _cond_is_true gamma =
+  let cond_ty_ = get_node cond_ty in
   let is_refinement_fun fun_name =
     match fun_name with
     | "\\is_int"
@@ -65,7 +66,7 @@ let refine ((_p, (_r, cond_ty)), cond_expr) _cond_is_true gamma =
   | True
   | False ->
     raise Not_implemented
-  | _ when equal_locl_ty_ cond_ty (Tprim Nast.Tbool) -> gamma
+  | _ when equal_locl_ty_ cond_ty_ (Tprim Nast.Tbool) -> gamma
   | _ -> raise Not_implemented
 
 let check_assign (_lty, lvalue) ty gamma =
@@ -107,7 +108,7 @@ let check_expr env (expr : ETast.expr) (gamma : gamma) : gamma =
           let expected_ty =
             match lookup lid gamma.Typing_per_cont_env.local_types with
             | None -> Typing_defs.make_tany ()
-            | Some (_p, (_r, ty)) -> ty
+            | Some (_p, ty) -> get_node ty
           in
           expect_ty_equal ty expected_ty
         | _ -> (* TODO *) super#on_expr env texpr
@@ -238,7 +239,7 @@ let gamma_from_params env (params : ETast.fun_param list) =
     let name = make_local_id param.param_name in
     let ty = localize env (hint_of_type_hint param.param_type_hint) in
     (* TODO can we avoid this? *)
-    let reas_ty_to_pos_reas_ty ((r, _) as ty) = (Typing_reason.to_pos r, ty) in
+    let reas_ty_to_pos_reas_ty ty = (get_pos ty, ty) in
     let ty = reas_ty_to_pos_reas_ty ty in
     add_to_gamma name ty gamma
   in

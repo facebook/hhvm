@@ -87,8 +87,9 @@ let verify_has_consistent_bound env (tparam : Tast.tparam) =
     Typing_set.elements (Env.get_upper_bounds env (snd tparam.tp_name))
   in
   let bound_classes =
-    List.filter_map upper_bounds ~f:(function
-        | (_, Tclass ((_, class_id), _, _)) -> Env.get_class env class_id
+    List.filter_map upper_bounds ~f:(fun ty ->
+        match get_node ty with
+        | Tclass ((_, class_id), _, _) -> Env.get_class env class_id
         | _ -> None)
   in
   let valid_classes =
@@ -202,50 +203,58 @@ let handler =
       | ( (call_pos, _),
           Call
             ( _,
-              ( (_, (r, Tfun { ft_tparams; _ })),
-                Class_const ((_, CI (_, class_id)), (_, fname)) ),
+              ((_, fun_ty), Class_const ((_, CI (_, class_id)), (_, fname))),
               targs,
               _,
               _ ) ) ->
-        (match Env.get_class env class_id with
-        | Some cls ->
-          let tp_names =
-            List.filter_map (Cls.tparams cls) (function tp ->
-                if is_reified tp then
-                  Some tp.tp_name
-                else
-                  None)
-          in
-          (match Cls.get_smethod cls fname with
-          | Some ce_m ->
-            (match get_static_method_by_name ce_m.ce_origin fname with
-            | Some m ->
-              let check_type_hint = function
-                | (_, Some (t_pos, Habstr t))
-                | (_, Some (_, Happly ((t_pos, t), _))) ->
-                  List.iter tp_names ~f:(function (_, name) ->
-                      if String.equal name t then
-                        Errors.static_call_with_class_level_reified_generic
-                          call_pos
-                          t_pos)
-                | _ -> ()
+        begin
+          match get_node fun_ty with
+          | Tfun { ft_tparams; _ } ->
+            (match Env.get_class env class_id with
+            | Some cls ->
+              let tp_names =
+                List.filter_map (Cls.tparams cls) (function tp ->
+                    if is_reified tp then
+                      Some tp.tp_name
+                    else
+                      None)
               in
-              List.iter m.m_params ~f:(fun param ->
-                  check_type_hint param.param_type_hint);
-              check_type_hint m.m_ret
-            | None -> ())
-          | _ -> ())
-        | None -> ());
-        let tparams = fst ft_tparams in
-        verify_call_targs env call_pos (Reason.to_pos r) tparams targs
-      | ((pos, _), Call (_, ((_, (r, Tfun { ft_tparams; _ })), _), targs, _, _))
-        ->
-        let tparams = fst ft_tparams in
-        verify_call_targs env pos (Reason.to_pos r) tparams targs
+              (match Cls.get_smethod cls fname with
+              | Some ce_m ->
+                (match get_static_method_by_name ce_m.ce_origin fname with
+                | Some m ->
+                  let check_type_hint = function
+                    | (_, Some (t_pos, Habstr t))
+                    | (_, Some (_, Happly ((t_pos, t), _))) ->
+                      List.iter tp_names ~f:(function (_, name) ->
+                          if String.equal name t then
+                            Errors.static_call_with_class_level_reified_generic
+                              call_pos
+                              t_pos)
+                    | _ -> ()
+                  in
+                  List.iter m.m_params ~f:(fun param ->
+                      check_type_hint param.param_type_hint);
+                  check_type_hint m.m_ret
+                | None -> ())
+              | _ -> ())
+            | None -> ());
+            let tparams = fst ft_tparams in
+            verify_call_targs env call_pos (get_pos fun_ty) tparams targs
+          | _ -> ()
+        end
+      | ((pos, _), Call (_, ((_, fun_ty), _), targs, _, _)) ->
+        begin
+          match get_node fun_ty with
+          | Tfun { ft_tparams; _ } ->
+            let tparams = fst ft_tparams in
+            verify_call_targs env pos (get_pos fun_ty) tparams targs
+          | _ -> ()
+        end
       | ((pos, _), New (((_, ty), CI (_, class_id)), targs, _, _, _)) ->
         let (env, ty) = Env.expand_type env ty in
-        (match ty with
-        | (_, Tgeneric ci) when String.equal ci class_id ->
+        (match get_node ty with
+        | Tgeneric ci when String.equal ci class_id ->
           if not (Env.get_newable env ci) then Errors.new_without_newable pos ci;
           if not (List.is_empty targs) then Errors.tparam_with_tparam pos ci
         | _ ->

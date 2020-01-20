@@ -47,7 +47,7 @@ class count_getter fixme_map =
       match expr_kind_opt with
       | None -> acc
       | Some kind ->
-        let r = fst ty in
+        let r = Typing_defs.get_reason ty in
         let (_env, lvl) = level_of_type env fixme_map (pos, ty) in
         let counter =
           match SMap.find_opt acc kind with

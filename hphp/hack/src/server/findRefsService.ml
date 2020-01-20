@@ -303,7 +303,7 @@ let get_definitions = function
           let add_meth get acc =
             match get method_name with
             | Some meth when meth.ce_origin = Cls.name class_ ->
-              let pos = Reason.to_pos (fst @@ Lazy.force meth.ce_type) in
+              let pos = get_pos @@ Lazy.force meth.ce_type in
               (method_name, pos) :: acc
             | _ -> acc
           in

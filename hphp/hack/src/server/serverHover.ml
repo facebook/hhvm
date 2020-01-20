@@ -53,26 +53,35 @@ let make_hover_return_type env_and_ty occurrence =
   SymbolOccurrence.(
     Typing_defs.(
       match (occurrence, env_and_ty) with
-      | ({ type_ = Function | Method _; _ }, Some (env, (_, Tfun ft))) ->
-        [
-          Printf.sprintf
-            "Return type: `%s`"
-            (Tast_env.print_ty env ft.ft_ret.et_type);
-        ]
+      | ({ type_ = Function | Method _; _ }, Some (env, ty)) ->
+        begin
+          match get_node ty with
+          | Tfun ft ->
+            [
+              Printf.sprintf
+                "Return type: `%s`"
+                (Tast_env.print_ty env ft.ft_ret.et_type);
+            ]
+          | _ -> []
+        end
       | _ -> []))
 
 let make_hover_full_name env_and_ty occurrence def_opt =
   SymbolOccurrence.(
+    let found_it () =
+      let name =
+        match def_opt with
+        | Some def -> def.SymbolDefinition.full_name
+        | None -> occurrence.name
+      in
+      [Printf.sprintf "Full name: `%s`" (Utils.strip_ns name)]
+    in
     Typing_defs.(
       match (occurrence, env_and_ty) with
-      | ({ type_ = Method _; _ }, _)
-      | ({ type_ = Property _ | ClassConst _; _ }, Some (_, (_, Tfun _))) ->
-        let name =
-          match def_opt with
-          | Some def -> def.SymbolDefinition.full_name
-          | None -> occurrence.name
-        in
-        [Printf.sprintf "Full name: `%s`" (Utils.strip_ns name)]
+      | ({ type_ = Method _; _ }, Some (_, _ty)) -> found_it ()
+      | ({ type_ = Property _ | ClassConst _; _ }, Some (_, ty)) when is_fun ty
+        ->
+        found_it ()
       | _ -> []))
 
 (* Return a markdown description of built-in Hack attributes. *)

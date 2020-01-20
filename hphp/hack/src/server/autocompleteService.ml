@@ -175,7 +175,7 @@ let autocomplete_shape_key env fields id =
         | Ast_defs.SFlit_int (pos, str) ->
           let reason = Typing_reason.Rwitness pos in
           let ty = Typing_defs.Tprim Aast_defs.Tint in
-          (str, SI_Literal, (reason, ty))
+          (str, SI_Literal, Typing_defs.mk (reason, ty))
         | Ast_defs.SFlit_str (pos, str) ->
           let reason = Typing_reason.Rwitness pos in
           let ty = Typing_defs.Tprim Aast_defs.Tstring in
@@ -185,11 +185,11 @@ let autocomplete_shape_key env fields id =
             else
               "'"
           in
-          (quote ^ str ^ quote, SI_Literal, (reason, ty))
+          (quote ^ str ^ quote, SI_Literal, Typing_defs.mk (reason, ty))
         | Ast_defs.SFclass_const ((pos, cid), (_, mid)) ->
           ( Printf.sprintf "%s::%s" cid mid,
             SI_ClassConstant,
-            (Reason.Rwitness pos, Typing_defs.make_tany ()) )
+            Typing_defs.mk (Reason.Rwitness pos, Typing_defs.make_tany ()) )
       in
       if (not have_prefix) || string_starts_with code prefix then
         add_partial_result code (Phase.decl ty) kind None
@@ -281,7 +281,8 @@ let tfun_to_func_details (env : Tast_env.t) (ft : Typing_defs.locl_fun_type) :
       match ft.ft_arity with
       | Fellipsis _ ->
         let empty =
-          TUtils.default_fun_param (Reason.none, Tany TanySentinel.value)
+          TUtils.default_fun_param
+            (Typing_defs.mk (Reason.none, Tany TanySentinel.value))
         in
         [param_to_record ~is_variadic:true empty]
       | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
@@ -295,8 +296,8 @@ let get_func_details_for env ty =
     | DeclTy ty -> Tast_env.localize_with_self env ty
     | LoclTy ty -> (env, ty)
   in
-  match ty with
-  | (_, Tfun ft) -> Some (tfun_to_func_details env ft)
+  match Typing_defs.get_node ty with
+  | Tfun ft -> Some (tfun_to_func_details env ft)
   | _ -> None
 
 (* Here we turn partial_autocomplete_results into complete_autocomplete_results *)
@@ -333,8 +334,8 @@ let resolve_ty
   in
   let pos =
     match x.ty with
-    | LoclTy loclt -> fst loclt |> Typing_reason.to_pos |> Pos.to_absolute
-    | DeclTy declt -> fst declt |> Typing_reason.to_pos |> Pos.to_absolute
+    | LoclTy loclt -> loclt |> Typing_defs.get_pos |> Pos.to_absolute
+    | DeclTy declt -> declt |> Typing_defs.get_pos |> Pos.to_absolute
   in
   {
     res_pos = pos;
@@ -407,8 +408,8 @@ let visitor =
         let ty = get_type arr in
         let (_, ty) = Tast_env.expand_type env ty in
         begin
-          match ty with
-          | (_, Typing_defs.Tshape (_, fields)) ->
+          match Typing_defs.get_node ty with
+          | Typing_defs.Tshape (_, fields) ->
             (match key with
             | Tast.Id (_, mid) -> autocomplete_shape_key env fields (pos, mid)
             | Tast.String mid ->
@@ -664,7 +665,7 @@ let find_global_results
             let fixed_name = ns ^ r.si_name in
             match Tast_env.get_fun tast_env fixed_name with
             | None -> absolute_none
-            | Some fe -> Reason.to_pos (fst fe.fe_type) |> Pos.to_absolute
+            | Some fe -> Typing_defs.get_pos fe.fe_type |> Pos.to_absolute
           else
             absolute_none
         in

@@ -47,7 +47,7 @@ let get_first_suggested_type_as_string file type_map node =
         | Typing_defs.LoclTy ty ->
           let (env, ty) = Tast_env.simplify_unions env ty in
           begin
-            match ty with
+            match Typing_defs.deref ty with
             | (Typing_reason.Rsolve_fail _, ty_) ->
               begin
                 match print_ty ty with
@@ -57,7 +57,9 @@ let get_first_suggested_type_as_string file type_map node =
                     "%s failed to rewrite lambda parameter %s: the suggested type %s is non-denotable"
                     (Pos.string (Pos.to_absolute pos))
                     (text node)
-                    (Tast_env.print_ty env (Typing_reason.Rnone, ty_));
+                    (Tast_env.print_ty
+                       env
+                       (Typing_defs.mk (Typing_reason.Rnone, ty_)));
                   None
               end
             | _ -> None

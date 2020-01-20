@@ -36,8 +36,8 @@ let get_all_ancestors class_name =
 let get_docblock_for_member ctx class_info member_name =
   Option.Monad_infix.(
     Cls.get_method class_info member_name >>= fun member ->
-    match Lazy.force member.Typing_defs.ce_type with
-    | (_, Typing_defs.Tfun _) ->
+    match Typing_defs.get_node @@ Lazy.force member.Typing_defs.ce_type with
+    | Typing_defs.Tfun _ ->
       let pos = Lazy.force member.Typing_defs.ce_pos in
       let path = Pos.filename pos in
       let entry = Provider_utils.get_entry_VOLATILE ~ctx ~path in

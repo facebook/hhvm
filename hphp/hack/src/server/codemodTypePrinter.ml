@@ -29,7 +29,7 @@ let strip_ns str =
     str'
 
 let rec print_ty_exn ?(allow_nothing = false) ty =
-  match snd ty with
+  match get_node ty with
   | Tprim p -> print_tprim p
   | Tunion [] when allow_nothing -> "nothing"
   | Tany _
@@ -45,8 +45,12 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
   | Tnonnull -> "nonnull"
   | Tdynamic -> "dynamic"
   | Tgeneric s -> s
-  | Toption (_, Tnonnull) -> "mixed"
-  | Toption ty -> "?" ^ print_ty_exn ty
+  | Toption ty ->
+    begin
+      match get_node ty with
+      | Tnonnull -> "mixed"
+      | _ -> "?" ^ print_ty_exn ty
+    end
   | Tfun ft ->
     let params = List.map ft.ft_params ~f:print_fun_param_exn in
     let params =

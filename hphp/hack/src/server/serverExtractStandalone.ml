@@ -94,7 +94,7 @@ let get_typedef_pos ctx name =
 
 let get_gconst_pos ctx name =
   Decl_provider.get_gconst ctx name
-  |> Option.map ~f:(fun ((r, _), _) -> Typing_reason.to_pos r)
+  |> Option.map ~f:(fun (ty, _) -> Typing_defs.get_pos ty)
 
 let get_class_or_typedef_pos ctx name =
   Option.first_some (get_class_pos ctx name) (get_typedef_pos ctx name)
@@ -213,7 +213,7 @@ let get_filename ctx target =
     match target with
     | Function func ->
       let f = value_exn NotFound @@ Decl_provider.get_fun ctx func in
-      Reason.to_pos (fst f.fe_type)
+      Typing_defs.get_pos f.fe_type
     | Method (cls, _) ->
       let cls = value_exn NotFound @@ Decl_provider.get_class ctx cls in
       Class.pos cls
@@ -1075,7 +1075,7 @@ and add_dep ctx deps ~this ty : unit =
             add_dep ctx deps ~this sft_ty)
           fdm
 
-      method! on_taccess () r ((_, root), tconsts) =
+      method! on_taccess () r (root, tconsts) =
         let expand_type_access class_name tconsts =
           match tconsts with
           | [] -> raise UnexpectedDependency
@@ -1096,19 +1096,27 @@ and add_dep ctx deps ~this ty : unit =
                 | (None, Some tc_type) ->
                   (* What does 'this' refer to inside of T? *)
                   let this =
-                    match snd tc_type with
+                    match Typing_defs.get_node tc_type with
                     | Tapply ((_, name), _) -> Some name
                     | _ -> this
                   in
                   let taccess = Typing_defs.Taccess (tc_type, tconsts) in
-                  add_dep ctx ~this deps (Typing_reason.Rnone, taccess)
+                  add_dep
+                    ctx
+                    ~this
+                    deps
+                    (Typing_defs.mk (Typing_reason.Rnone, taccess))
                 | (None, None) -> ()
               )
             | None -> ())
         in
-        match root with
+        match Typing_defs.get_node root with
         | Taccess (root', tconsts') ->
-          add_dep ctx ~this deps (r, Taccess (root', tconsts' @ tconsts))
+          add_dep
+            ctx
+            ~this
+            deps
+            (Typing_defs.mk (r, Taccess (root', tconsts' @ tconsts)))
         | Tapply ((_, name), _) -> expand_type_access name tconsts
         | Tthis -> expand_type_access (Option.value_exn this) tconsts
         | _ -> raise UnexpectedDependency

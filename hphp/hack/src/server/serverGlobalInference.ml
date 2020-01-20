@@ -49,8 +49,8 @@ let is_not_acceptable ~is_return ty =
       adding mixed annotations says "it is fine to add mixed types everywhere"
       which is not really fine. *)
       method! on_toption acc _ ty =
-        match ty with
-        | (_, Typing_defs.Tnonnull) -> true
+        match Typing_defs.get_node ty with
+        | Typing_defs.Tnonnull -> true
         | _ -> this#on_type acc ty
     end
   in
@@ -431,7 +431,7 @@ module Mode_rewrite = struct
           SMap.find_opt (Pos.filename pos) map
           |> Option.value ~default:Pos.AbsolutePosMap.empty
         in
-        let ty = Typing_defs.(Reason.none, Tvar var) in
+        let ty = Typing_defs.(mk (Reason.none, Tvar var)) in
         let element =
           Pos.AbsolutePosMap.singleton pos [(env, Typing_defs.LoclTy ty)]
         in

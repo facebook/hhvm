@@ -200,8 +200,8 @@ let go_quarantined
               | None -> None
             in
             let ft_params =
-              match fe.fe_type with
-              | (_, Tfun ft) -> ft.ft_params
+              match get_node fe.fe_type with
+              | Tfun ft -> ft.ft_params
               | _ -> []
             in
             let params =

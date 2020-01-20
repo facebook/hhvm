@@ -45,7 +45,7 @@ let get_overridden_methods ctx origin_class get_or_method dest_class acc =
           match or_mthd with
           | Some or_mthd when or_mthd.ce_origin = origin_class ->
             let get_pos (lazy ty) =
-              ty |> fst |> Reason.to_pos |> Pos.to_absolute
+              ty |> Typing_defs.get_pos |> Pos.to_absolute
             in
             {
               orig_name = m_name;

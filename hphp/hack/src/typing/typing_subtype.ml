@@ -3364,8 +3364,6 @@ let sub_type_with_dynamic_as_bottom
 (* Exporting *)
 (*****************************************************************************)
 
-let () = Typing_utils.sub_type_ref := sub_type
-
 let sub_type_i env ty1 ty2 on_error =
   sub_type_i
     ~subtype_env:(make_subtype_env ~treat_dynamic_as_bottom:false on_error)
@@ -3373,23 +3371,19 @@ let sub_type_i env ty1 ty2 on_error =
     ty1
     ty2
 
-let () = Typing_utils.sub_type_i_ref := sub_type_i
+let sub_type_or_fail env ty1 ty2 fail =
+  sub_type env ty1 ty2 (fun ?code:_ _ -> fail ())
 
-let () =
+let set_fun_refs () =
+  Typing_utils.sub_type_ref := sub_type;
+  Typing_utils.sub_type_i_ref := sub_type_i;
   Typing_utils.sub_type_with_dynamic_as_bottom_ref :=
-    sub_type_with_dynamic_as_bottom
-
-let () = Typing_utils.add_constraint_ref := add_constraint
-
-let () = Typing_utils.is_sub_type_ref := is_sub_type
-
-let () = Typing_utils.is_sub_type_for_union_ref := is_sub_type_for_union
-
-let () = Typing_utils.is_sub_type_for_union_i_ref := is_sub_type_for_union_i
-
-let () =
+    sub_type_with_dynamic_as_bottom;
+  Typing_utils.add_constraint_ref := add_constraint;
+  Typing_utils.is_sub_type_ref := is_sub_type;
+  Typing_utils.is_sub_type_for_union_ref := is_sub_type_for_union;
+  Typing_utils.is_sub_type_for_union_i_ref := is_sub_type_for_union_i;
   Typing_utils.is_sub_type_ignore_generic_params_ref :=
     is_sub_type_ignore_generic_params
 
-let sub_type_or_fail env ty1 ty2 fail =
-  sub_type env ty1 ty2 (fun ?code:_ _ -> fail ())
+let () = set_fun_refs ()

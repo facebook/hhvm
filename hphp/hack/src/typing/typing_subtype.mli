@@ -88,3 +88,6 @@ val add_constraint :
 
 val add_constraints :
   Pos.t -> env -> (locl_ty * Ast_defs.constraint_kind * locl_ty) list -> env
+
+(** Hack to allow for circular dependencies between Ocaml modules. *)
+val set_fun_refs : unit -> unit

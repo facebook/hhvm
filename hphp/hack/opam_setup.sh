@@ -75,13 +75,14 @@ eval "$(opam env)"
 opam install \
   core_kernel.v0.11.1 \
   dtoa.0.3.1 \
-  dune.1.10.0 \
+  dune.1.11.0 \
   fileutils.0.5.3 \
   lwt.4.2.1 \
   lwt_log.1.1.0 \
   lwt_ppx.1.2.2 \
   merlin.3.3.2 \
   ocp-indent.1.7.0 \
+  ounit.2.2.1 \
   pcre.7.3.5 \
   ppx_deriving.4.2.1 \
   ppx_gen_rec.1.1.0 \

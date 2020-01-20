@@ -53,7 +53,11 @@ val close_tyvars : t -> t
 
 val tyvar_is_solved : t -> Ident.t -> bool
 
+val tyvar_occurs_in_tyvar : t -> Ident.t -> in_:Ident.t -> bool
+
 val get_tyvar_occurrences : t -> Ident.t -> ISet.t
+
+val get_tyvars_in_tyvar : t -> Ident.t -> ISet.t
 
 val contains_unsolved_tyvars : t -> Ident.t -> bool
 

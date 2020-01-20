@@ -1,0 +1,13 @@
+(test
+  (name typeSimplifierTest)
+  (libraries
+    core_kernel
+    default_injector_config
+    heap_ident
+    ounit2
+    pos
+    relative_path
+    tast
+    typechecker_options
+    typing_ast
+    typing_defs))

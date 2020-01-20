@@ -265,7 +265,11 @@ let set_solving_info env ?(tyvar_pos = Pos.none) x solving_info =
   let tvinfo = { tvinfo with solving_info } in
   set_tyvar_info env x tvinfo
 
+let tyvar_occurs_in_tyvar env = Occ.occurs_in env.tyvar_occurrences
+
 let get_tyvar_occurrences env = Occ.get_tyvar_occurrences env.tyvar_occurrences
+
+let get_tyvars_in_tyvar env = Occ.get_tyvars_in_tyvar env.tyvar_occurrences
 
 let contains_unsolved_tyvars env =
   Occ.contains_unsolved_tyvars env.tyvar_occurrences

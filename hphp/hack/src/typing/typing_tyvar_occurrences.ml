@@ -60,8 +60,10 @@ end
 let init = { tyvar_occurrences = IMap.empty; tyvars_in_tyvar = IMap.empty }
 
 let get_tyvar_occurrences x v =
-  let tyvar_occurrences = x.tyvar_occurrences in
-  Option.value (IMap.find_opt v tyvar_occurrences) ~default:ISet.empty
+  Option.value (IMap.find_opt v x.tyvar_occurrences) ~default:ISet.empty
+
+let get_tyvars_in_tyvar x v =
+  Option.value (IMap.find_opt v x.tyvars_in_tyvar) ~default:ISet.empty
 
 let set_tyvar_occurrences x v vars =
   { x with tyvar_occurrences = IMap.add v vars x.tyvar_occurrences }
@@ -75,9 +77,6 @@ let add_tyvar_occurrence x v ~occurs_in:v' =
 
 let add_tyvar_occurrences x vars ~occur_in:v =
   ISet.fold (fun v' x -> add_tyvar_occurrence x v' ~occurs_in:v) vars x
-
-let get_tyvars_in_tyvar x v =
-  Option.value (IMap.find_opt v x.tyvars_in_tyvar) ~default:ISet.empty
 
 let set_tyvars_in_tyvar x v vars =
   { x with tyvars_in_tyvar = IMap.add v vars x.tyvars_in_tyvar }
@@ -120,3 +119,9 @@ let unbind_tyvar x v =
   (* update tyvars_in_tyvar *)
   let x = set_tyvars_in_tyvar x v ISet.empty in
   x
+
+let occurs_in x occuring_tv ~in_:containing_tv =
+  let occurs = ISet.mem containing_tv (get_tyvar_occurrences x occuring_tv) in
+  let contains = ISet.mem occuring_tv (get_tyvars_in_tyvar x containing_tv) in
+  assert (occurs = contains);
+  occurs

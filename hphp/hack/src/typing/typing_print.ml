@@ -290,6 +290,25 @@ module Full = struct
     Concat
       [text "has_member"; text "("; text name; comma_sep; k hm_type; text ")"]
 
+  let tdestructure k d =
+    let { d_required; d_optional; d_variadic; d_kind } = d in
+    let e_required = List.map d_required ~f:k in
+    let e_optional =
+      List.map d_optional ~f:(fun v -> Concat [text "opt"; k v])
+    in
+    let e_variadic =
+      Option.value_map
+        ~default:[]
+        ~f:(fun v -> [Concat [text "..."; k v]])
+        d_variadic
+    in
+    let prefix =
+      match d_kind with
+      | ListDestructure -> text "list"
+      | SplatUnpack -> text "splat"
+    in
+    Concat [prefix; list "(" id (e_required @ e_optional @ e_variadic) ")"]
+
   let rec decl_ty to_doc st env x = decl_ty_ to_doc st env (get_node x)
 
   and decl_ty_ : _ -> _ -> _ -> decl_phase ty_ -> Doc.t =
@@ -565,7 +584,7 @@ module Full = struct
     let k' cty = constraint_type to_doc st env cty in
     match x with
     | Thas_member hm -> thas_member k hm
-    | Tdestructure tyl -> list "list(" k tyl ")"
+    | Tdestructure d -> tdestructure k d
     | TCunion (lty, cty) -> Concat [text "("; k lty; text "|"; k' cty; text ")"]
     | TCintersection (lty, cty) ->
       Concat [text "("; k lty; text "&"; k' cty; text ")"]

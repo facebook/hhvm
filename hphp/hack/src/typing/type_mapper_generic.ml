@@ -334,7 +334,7 @@ class type ['env] constraint_type_mapper_type =
       'env -> Reason.t -> has_member -> 'env * constraint_type
 
     method on_Tdestructure :
-      'env -> Reason.t -> locl_ty list -> 'env * constraint_type
+      'env -> Reason.t -> destructure -> 'env * constraint_type
 
     method on_TCunion :
       'env -> Reason.t -> locl_ty -> constraint_type -> 'env * constraint_type
@@ -371,9 +371,20 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       let hm = { hm_name; hm_type; hm_class_id } in
       (env, mk_constraint_type (r, Thas_member hm))
 
-    method on_Tdestructure env r tyl =
-      let (env, tyl) = this#on_locl_ty_list env tyl in
-      (env, mk_constraint_type (r, Tdestructure tyl))
+    method on_Tdestructure env r { d_required; d_optional; d_variadic; d_kind }
+        =
+      let (env, d_required) = this#on_locl_ty_list env d_required in
+      let (env, d_optional) = this#on_locl_ty_list env d_optional in
+      let (env, d_variadic) =
+        match d_variadic with
+        | None -> (env, d_variadic)
+        | Some v ->
+          let (env, v) = this#on_type env v in
+          (env, Some v)
+      in
+      ( env,
+        mk_constraint_type
+          (r, Tdestructure { d_required; d_optional; d_variadic; d_kind }) )
 
     method on_TCunion env r lty cty =
       let (env, lty) = this#on_type env lty in

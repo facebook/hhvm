@@ -123,6 +123,11 @@ type dependent_type =
   | DTexpr of Ident.t
 [@@deriving eq]
 
+type destructure_kind =
+  | ListDestructure
+  | SplatUnpack
+[@@deriving eq, ord]
+
 type 'ty tparam = {
   tp_variance: Ast_defs.variance;
   tp_name: Ast_defs.id;
@@ -318,9 +323,8 @@ and _ ty_ =
 
 and constraint_type_ =
   | Thas_member of has_member
-  (* The type of a list destructuring assignment.
-   * Implements valid destructuring operations via subtyping *)
-  | Tdestructure of locl_ty list
+  (* The type of container destructuring via list() or splat `...` *)
+  | Tdestructure of destructure
   | TCunion of locl_ty * constraint_type
   | TCintersection of locl_ty * constraint_type
 
@@ -331,6 +335,29 @@ and has_member = {
       (** This is required to check ambiguous object access, where sometimes
   HHVM would access the private member of a parent class instead of the
   one from the current class. *)
+}
+
+and destructure = {
+  (* This represents the standard parameters of a function or the fields in a list
+   * destructuring assignment. Example:
+   *
+   * function take(bool $b, float $f = 3.14, arraykey ...$aks): void {}
+   * function f((bool, float, int, string) $tup): void {
+   *   take(...$tup);
+   * }
+   *
+   * corresponds to the subtyping assertion
+   *
+   * (bool, float, int, string) <: splat([#1], [opt#2], ...#3)
+   *)
+  d_required: locl_ty list;
+  (* Represents the optional parameters in a function, only used for splats *)
+  d_optional: locl_ty list;
+  (* Represents a function's variadic parameter, also only used for splats *)
+  d_variadic: locl_ty option;
+  (* list() destructuring allows for partial matches on lists, even when the operation
+   * might throw i.e. list($a) = vec[]; *)
+  d_kind: destructure_kind;
 }
 
 and constraint_type = Reason.t * constraint_type_

@@ -1269,8 +1269,27 @@ and get_tyvars_i env (ty : internal_type) =
       get_tyvars_union env member)
   | ConstraintType ty ->
     (match deref_constraint_type ty with
-    | (_, Tdestructure tyl) ->
-      List.fold_left tyl ~init:(env, ISet.empty, ISet.empty) ~f:get_tyvars_union
+    | (_, Tdestructure { d_required; d_optional; d_variadic; d_kind = _ }) ->
+      let (env, positive1, negative1) =
+        List.fold_left
+          d_required
+          ~init:(env, ISet.empty, ISet.empty)
+          ~f:get_tyvars_union
+      in
+      let (env, positive2, negative2) =
+        List.fold_left
+          d_optional
+          ~init:(env, ISet.empty, ISet.empty)
+          ~f:get_tyvars_union
+      in
+      let (env, positive3, negative3) =
+        match d_variadic with
+        | Some ty -> get_tyvars env ty
+        | None -> (env, ISet.empty, ISet.empty)
+      in
+      ( env,
+        ISet.union (ISet.union positive1 positive2) positive3,
+        ISet.union (ISet.union negative1 negative2) negative3 )
     | (_, Thas_member hm) ->
       let { hm_type; hm_name = _; hm_class_id = _ } = hm in
       get_tyvars env hm_type

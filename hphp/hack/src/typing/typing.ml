@@ -4391,9 +4391,7 @@ and assign_ p ur env e1 ty2 =
       List.map_env env el ~f:(fun env _ -> Env.fresh_type env (get_pos ty2))
     in
     let destructure_ty =
-      ConstraintType
-        (mk_constraint_type
-           (Reason.Rdestructure (fst e1, List.length tyl), Tdestructure tyl))
+      MakeType.list_destructure (Reason.Rdestructure (fst e1)) tyl
     in
     let lty2 = LoclType ty2 in
     let env = Type.sub_type_i p ur env lty2 destructure_ty Errors.unify_error in
@@ -6498,9 +6496,6 @@ and call
   if is_empty_type fty then
     (env, ([], None, fty))
   else
-    let make_unpacked_traversable_ty pos ty =
-      MakeType.traversable (Reason.Runpack_param pos) ty
-    in
     let resl =
       TUtils.try_over_concrete_supertypes env fty (fun env fty ->
           let (env, efty) =
@@ -6514,7 +6509,7 @@ and call
           match deref efty with
           (* We allow nullsafe calls on a "null" function type, in order to type check nullsafe
            * method invocation *)
-          | (_, Tprim Tnull) when Option.is_some nullsafe ->
+          | (r, Tprim Tnull) when Option.is_some nullsafe ->
             let el =
               Option.value_map
                 ~f:(fun u -> el @ [u])
@@ -6532,9 +6527,11 @@ and call
                   let (env, te, _) = expr ~expected env elt in
                   (env, te))
             in
-            let env = call_untyped_unpack env unpacked_element in
+            let env =
+              call_untyped_unpack env (Reason.to_pos r) unpacked_element
+            in
             (env, (tel, None, efty))
-          | (_, (Terr | Tany _ | Tunion [] | Tdynamic)) ->
+          | (r, (Terr | Tany _ | Tunion [] | Tdynamic)) ->
             let el =
               Option.value_map
                 ~f:(fun u -> el @ [u])
@@ -6580,7 +6577,9 @@ and call
                   in
                   (env, te))
             in
-            let env = call_untyped_unpack env unpacked_element in
+            let env =
+              call_untyped_unpack env (Reason.to_pos r) unpacked_element
+            in
             let ty =
               if is_dynamic efty then
                 MakeType.dynamic (Reason.Rdynamic_call pos)
@@ -6743,59 +6742,74 @@ and call
               match unpacked_element with
               | None -> (env, None, List.length el, false)
               | Some e ->
-                (* Enforces that e is unpackable. If e is a tuple, check types against
-                 * parameter types *)
-                let (env, te, ty) = expr env e in
-                let (env, ety) =
-                  Typing_solver.expand_type_and_solve
-                    ~description_of_expected:"an unpackable value"
+                (* Now that we're considering an splat (Some e) we need to construct a type that
+                 * represents the remainder of the function's parameters. `paraml` represents those
+                 * remaining parameters, and the variadic parameter is stored in `var_param`. For example, given
+                 *
+                 * function f(int $i, string $j, float $k = 3.14, mixed ...$m): void {}
+                 * function g((string, float, bool) $t): void {
+                 *   f(3, ...$t);
+                 * }
+                 *
+                 * the constraint type we want is splat([#1], [opt#2], #3).
+                 *)
+                let (consumed, required_params, optional_params) =
+                  split_remaining_params_required_optional ft paraml
+                in
+                let (env, (d_required, d_optional, d_variadic)) =
+                  generate_splat_type_vars
                     env
                     (fst e)
-                    ty
+                    required_params
+                    optional_params
+                    var_param
+                in
+                let destructure_ty =
+                  ConstraintType
+                    ( Reason.Runpack_param (fst e, pos_def, consumed),
+                      Tdestructure
+                        {
+                          d_required;
+                          d_optional;
+                          d_variadic;
+                          d_kind = SplatUnpack;
+                        } )
+                in
+                let (env, te, ty) = expr env e in
+                (* Populate the type variables from the expression in the splat *)
+                let env =
+                  SubType.sub_type_i
+                    env
+                    (LoclType ty)
+                    destructure_ty
                     Errors.unify_error
                 in
-                (match ety with
-                | (_, Ttuple tyl) ->
-                  let rec check_elements env tyl paraml =
-                    match tyl with
-                    | [] -> env
-                    | ty :: tyl ->
-                      let (is_variadic, opt_param, paraml) =
-                        get_next_param_info paraml
-                      in
-                      (match opt_param with
-                      | None -> env
-                      | Some param ->
-                        let env = call_param env param (e, ty) ~is_variadic in
-                        check_elements env tyl paraml)
-                  in
-                  let env = check_elements env tyl paraml in
-                  (env, Some te, List.length el + List.length tyl, false)
-                | _ ->
-                  let param_tyl =
-                    List.map paraml (fun param -> param.fp_type)
-                  in
-                  let add_variadic_param_ty param_tyl =
-                    match var_param with
-                    | Some param -> param.fp_type :: param_tyl
-                    | None -> param_tyl
-                  in
-                  let param_tyl = add_variadic_param_ty param_tyl in
-                  let pos = fst e in
-                  let env =
-                    List.fold_right param_tyl ~init:env ~f:(fun param_ty env ->
-                        let traversable_ty =
-                          make_unpacked_traversable_ty pos param_ty.et_type
-                        in
-                        Typing_coercion.coerce_type
-                          pos
-                          Reason.URparam
-                          env
-                          ety
-                          { et_type = traversable_ty; et_enforced = false }
-                          Errors.unify_error)
-                  in
-                  (env, Some te, List.length el, true))
+                (* Use the type variables for the remaining parameters *)
+                let env =
+                  List.fold2_exn
+                    ~init:env
+                    d_required
+                    required_params
+                    ~f:(fun env elt param ->
+                      call_param env param (e, elt) ~is_variadic:false)
+                in
+                let env =
+                  List.fold2_exn
+                    ~init:env
+                    d_optional
+                    optional_params
+                    ~f:(fun env elt param ->
+                      call_param env param (e, elt) ~is_variadic:false)
+                in
+                let env =
+                  Option.map2 d_variadic var_param ~f:(fun v vp ->
+                      call_param env vp (e, v) ~is_variadic:true)
+                  |> Option.value ~default:env
+                in
+                ( env,
+                  Some te,
+                  List.length el + List.length d_required,
+                  Option.is_some d_variadic )
             in
             (* If we unpacked an array, we don't check arity exactly. Since each
              * unpacked array consumes 1 or many parameters, it is nonsensical to say
@@ -6829,47 +6843,47 @@ and call
             let determine_arity env min_arity pos = function
               | None -> (env, Fstandard (min_arity, min_arity))
               | Some ety ->
-                (match get_node ety with
-                | Ttuple _ -> (env, Fstandard (min_arity, min_arity))
-                | _ ->
-                  (* We need to figure out the underlying type of the unpacked expr type.
-                   *
-                   * For example, assume the call is:
-                   *    $lambda(...$y);
-                   * where $y is a variadic or collection of strings.
-                   *
-                   * $y may have the type Tarraykind or Traversable, however we need to
-                   * pass Fvariadic a param of type string.
-                   *
-                   * Assuming $y has type Tarraykind, in order to get the underlying type
-                   * we create a fresh_type(), wrap it in a Traversable and make that
-                   * Traversable a super type of the expr type (Tarraykind). This way
-                   * we can infer the underlying type and create the correct param for
-                   * Fvariadic.
-                   *)
-                  let (env, ty) = Env.fresh_type env pos in
-                  let traversable_ty = make_unpacked_traversable_ty pos ty in
-                  let env =
-                    Typing_coercion.coerce_type
-                      pos
-                      Reason.URparam
-                      env
-                      ety
-                      { et_type = traversable_ty; et_enforced = false }
-                      Errors.unify_error
-                  in
-                  let param =
-                    {
-                      fp_pos = pos;
-                      fp_name = None;
-                      fp_type = MakeType.unenforced ty;
-                      fp_kind = FPnormal;
-                      fp_accept_disposable = false;
-                      fp_mutability = None;
-                      fp_rx_annotation = None;
-                    }
-                  in
-                  (env, Fvariadic (min_arity, param)))
+                (* We need to figure out the underlying type of the unpacked expr type.
+                 *
+                 * For example, assume the call is:
+                 *    $lambda(...$y);
+                 * where $y is a variadic or collection of strings.
+                 *
+                 * $y may have the type Tarraykind or Traversable, however we need to
+                 * pass Fvariadic a param of type string.
+                 *
+                 * Assuming $y has type Tarraykind, in order to get the underlying type
+                 * we create a fresh_type(), wrap it in a Traversable and make that
+                 * Traversable a super type of the expr type (Tarraykind). This way
+                 * we can infer the underlying type and create the correct param for
+                 * Fvariadic.
+                 *)
+                let (env, ty) = Env.fresh_type env pos in
+                let destructure_ty =
+                  MakeType.simple_variadic_splat
+                    (Reason.Runpack_param
+                       (Reason.to_pos (fst ety), Reason.to_pos r2, 0))
+                    ty
+                in
+                let env =
+                  SubType.sub_type_i
+                    env
+                    (LoclType ety)
+                    destructure_ty
+                    Errors.unify_error
+                in
+                let param =
+                  {
+                    fp_pos = pos;
+                    fp_name = None;
+                    fp_type = MakeType.unenforced ty;
+                    fp_kind = FPnormal;
+                    fp_accept_disposable = false;
+                    fp_mutability = None;
+                    fp_rx_annotation = None;
+                  }
+                in
+                (env, Fvariadic (min_arity, param))
             in
             let (env, typed_unpack_element, uety_opt, uepos) =
               expr_for_unpacked_expr_list env unpacked_element
@@ -6921,15 +6935,65 @@ and call
               (env, (tel, typed_unpack_element, ty)))
           | _ ->
             bad_call env pos efty;
-            let env = call_untyped_unpack env unpacked_element in
+            let env =
+              call_untyped_unpack
+                env
+                (Reason.to_pos (fst efty))
+                unpacked_element
+            in
             (env, ([], None, err_witness env pos)))
     in
     match resl with
     | [res] -> res
     | _ ->
       bad_call env pos fty;
-      let env = call_untyped_unpack env unpacked_element in
+      let env =
+        call_untyped_unpack env (Reason.to_pos (fst fty)) unpacked_element
+      in
       (env, ([], None, err_witness env pos))
+
+and split_remaining_params_required_optional ft remaining_params =
+  (* Same example as above
+   *
+   * function f(int $i, string $j, float $k = 3.14, mixed ...$m): void {}
+   * function g((string, float, bool) $t): void {
+   *   f(3, ...$t);
+   * }
+   *
+   * `remaining_params` will contain [string, float] and there has been 1 parameter consumed. The min_arity
+   * of this function is 2, so there is 1 required parameter remaining and 1 optional parameter.
+   *)
+  let min_arity =
+    match ft.ft_arity with
+    | Fstandard (min_arity, _)
+    | Fvariadic (min_arity, _)
+    | Fellipsis (min_arity, _) ->
+      min_arity
+  in
+  let original_params = ft.ft_params in
+  let consumed = List.length original_params - List.length remaining_params in
+  let required_remaining = Int.max (min_arity - consumed) 0 in
+  let (required_params, optional_params) =
+    List.split_n remaining_params required_remaining
+  in
+  (consumed, required_params, optional_params)
+
+and generate_splat_type_vars
+    env p required_params optional_params variadic_param =
+  let (env, d_required) =
+    List.map_env env required_params ~f:(fun env _ -> Env.fresh_type env p)
+  in
+  let (env, d_optional) =
+    List.map_env env optional_params ~f:(fun env _ -> Env.fresh_type env p)
+  in
+  let (env, d_variadic) =
+    match variadic_param with
+    | None -> (env, None)
+    | Some _ ->
+      let (env, ty) = Env.fresh_type env p in
+      (env, Some ty)
+  in
+  (env, (d_required, d_optional, d_variadic))
 
 and call_param env param (((pos, _) as e), arg_ty) ~is_variadic =
   param_modes ~is_variadic param e;
@@ -6951,7 +7015,7 @@ and call_param env param (((pos, _) as e), arg_ty) ~is_variadic =
     param.fp_type
     Errors.unify_error
 
-and call_untyped_unpack env unpacked_element =
+and call_untyped_unpack env f_pos unpacked_element =
   match unpacked_element with
   (* In the event that we don't have a known function call type, we can still
    * verify that any unpacked arguments (`...$args`) are something that can
@@ -6959,20 +7023,11 @@ and call_untyped_unpack env unpacked_element =
   | None -> env
   | Some e ->
     let (env, _, ety) = expr env e in
-    (match get_node ety with
-    | Ttuple _ -> env (* tuples are always fine *)
-    | _ ->
-      let pos = fst e in
-      let (env, ty) = Env.fresh_type env pos in
-      let unpack_r = Reason.Runpack_param pos in
-      let unpack_ty = MakeType.traversable unpack_r ty in
-      Typing_coercion.coerce_type
-        pos
-        Reason.URparam
-        env
-        ety
-        (MakeType.unenforced unpack_ty)
-        Errors.unify_error)
+    let (env, ty) = Env.fresh_type env (fst e) in
+    let destructure_ty =
+      MakeType.simple_variadic_splat (Reason.Runpack_param (fst e, f_pos, 0)) ty
+    in
+    SubType.sub_type_i env (LoclType ety) destructure_ty Errors.unify_error
 
 and bad_call env p ty = Errors.bad_call p (Typing_print.error env ty)
 

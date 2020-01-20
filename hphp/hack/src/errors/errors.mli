@@ -368,6 +368,10 @@ val unpacking_disallowed_builtin_function : Pos.t -> string -> unit
 
 val invalid_destructure : Pos.t -> Pos.t -> string -> unit
 
+val unpack_array_required_argument : Pos.t -> Pos.t -> unit
+
+val unpack_array_variadic_argument : Pos.t -> Pos.t -> unit
+
 val array_get_arity : Pos.t -> string -> Pos.t -> unit
 
 val typing_error : Pos.t -> string -> unit

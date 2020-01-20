@@ -617,7 +617,9 @@ module Typing = struct
     | RecordUnknownField
     | CyclicRecordDef
     | InvalidDestructure
-    | StaticCallWithClassLevelReifiedGeneric (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | StaticCallWithClassLevelReifiedGeneric
+    | SplatArrayRequired
+    | SplatArrayVariadic (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

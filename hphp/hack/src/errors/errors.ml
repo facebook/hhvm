@@ -2777,6 +2777,26 @@ let invalid_destructure pos1 pos2 ty =
       (pos2, "This is " ^ ty);
     ]
 
+let unpack_array_required_argument p fp =
+  add_list
+    (Typing.err_code Typing.SplatArrayRequired)
+    [
+      ( p,
+        "An array cannot be unpacked into the required arguments of a function"
+      );
+      (fp, "Definition is here");
+    ]
+
+let unpack_array_variadic_argument p fp =
+  add_list
+    (Typing.err_code Typing.SplatArrayRequired)
+    [
+      ( p,
+        "A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array"
+      );
+      (fp, "Definition is here");
+    ]
+
 let array_get_arity pos1 name pos2 =
   add_list
     (Typing.err_code Typing.ArrayGetArity)

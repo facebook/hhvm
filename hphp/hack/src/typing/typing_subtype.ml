@@ -1036,67 +1036,148 @@ and simplify_subtype_i
       else
         invalid ()
     | ConstraintType _ -> default_subtype env)
-  | ConstraintType (r_super, Tdestructure tyl_dest) ->
-    let destructure_tuple r_sub ts =
-      let len = List.length ts in
-      let len_required = List.length tyl_dest in
-      if len < len_required then
+  | ConstraintType
+      (r_super, Tdestructure { d_required; d_optional; d_variadic; d_kind }) ->
+    (* List destructuring *)
+    let destructure_array t env =
+      (* If this is a splat, there must be a variadic box to receive the elements
+       * but for list(...) destructuring this is not required. Example:
+       *
+       * function f(int $i): void {}
+       * function g(vec<int> $v): void {
+       *   list($a) = $v; // ok (but may throw)
+       *   f(...$v); // error
+       * } *)
+      let fpos =
+        match r_super with
+        | Reason.Runpack_param (_, fpos, _) -> fpos
+        | _ -> Reason.to_pos r_super
+      in
+      match (d_kind, d_required, d_variadic) with
+      | (SplatUnpack, _ :: _, _) ->
         invalid_with (fun () ->
-            Errors.typing_too_few_args
-              len_required
-              len
-              (Reason.to_pos r_super)
-              (Reason.to_pos r_sub))
-      else
-        let (ts_required, ts_remaining) = List.split_n ts len_required in
-        let (env, prop) =
-          List.fold2_exn
-            ts_required
-            tyl_dest
-            ~init:(env, TL.valid)
-            ~f:(fun res ty ty_dest ->
-              res &&& simplify_subtype ~subtype_env ~this_ty ty ty_dest)
+            Errors.unpack_array_required_argument (Reason.to_pos r_super) fpos)
+      | (SplatUnpack, [], None) ->
+        invalid_with (fun () ->
+            Errors.unpack_array_variadic_argument (Reason.to_pos r_super) fpos)
+      | (SplatUnpack, [], Some _)
+      | (ListDestructure, _, _) ->
+        List.fold d_required ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+            res &&& simplify_subtype ~subtype_env ~this_ty t ty_dest)
+        &&& fun env ->
+        List.fold d_optional ~init:(env, TL.valid) ~f:(fun res ty_dest ->
+            res &&& simplify_subtype ~subtype_env ~this_ty t ty_dest)
+        &&& fun env ->
+        Option.value_map ~default:(env, TL.valid) d_variadic ~f:(fun vty ->
+            simplify_subtype ~subtype_env ~this_ty t vty env)
+    in
+
+    let destructure_tuple r ts env =
+      (* First fill the required elements. If there are insufficient elements, an error is reported.
+       * Fill as many of the optional elements as possible, and the remainder are unioned into the
+       * variadic element. Example:
+       *
+       * (float, bool, string, int) <: Tdestructure(#1, opt#2, ...#3) =>
+       * float <: #1 /\ bool <: #2 /\ string <: #3 /\ int <: #3
+       *
+       * (float, bool) <: Tdestructure(#1, #2, opt#3) =>
+       * float <: #1 /\ bool <: #2
+       *)
+      let len_ts = List.length ts in
+      let len_required = List.length d_required in
+      let arity_error f =
+        let (epos, fpos, prefix) =
+          match r_super with
+          | Reason.Runpack_param (epos, fpos, c) -> (epos, fpos, c)
+          | _ -> (Reason.to_pos r_super, Reason.to_pos r, 0)
         in
-        if List.is_empty ts_remaining then
-          (env, prop)
-        else
-          invalid_with (fun () ->
-              Errors.typing_too_many_args
-                len_required
-                len
-                (Reason.to_pos r_super)
-                (Reason.to_pos r_sub))
+        invalid_with (fun () ->
+            f (prefix + len_required) (prefix + len_ts) epos fpos)
+      in
+      if len_ts < len_required then
+        arity_error Errors.typing_too_few_args
+      else
+        let len_optional = List.length d_optional in
+        let (ts_required, remain) = List.split_n ts len_required in
+        let (ts_optional, ts_variadic) = List.split_n remain len_optional in
+        List.fold2_exn
+          ts_required
+          d_required
+          ~init:(env, TL.valid)
+          ~f:(fun res ty ty_dest ->
+            res &&& simplify_subtype ~subtype_env ~this_ty ty ty_dest)
+        &&& fun env ->
+        let len_ts_opt = List.length ts_optional in
+        let d_optional_part =
+          if len_ts_opt < len_optional then
+            List.take d_optional len_ts_opt
+          else
+            d_optional
+        in
+        List.fold2_exn
+          ts_optional
+          d_optional_part
+          ~init:(env, TL.valid)
+          ~f:(fun res ty ty_dest ->
+            res &&& simplify_subtype ~subtype_env ~this_ty ty ty_dest)
+        &&& fun env ->
+        match (ts_variadic, d_variadic) with
+        | (vars, Some vty) ->
+          List.fold vars ~init:(env, TL.valid) ~f:(fun res ty ->
+              res &&& simplify_subtype ~subtype_env ~this_ty ty vty)
+        | ([], None) -> valid ()
+        | (_, None) ->
+          (* Elements remain but we have nowhere to put them *)
+          arity_error Errors.typing_too_many_args
     in
-    let destructure_list t =
-      List.fold tyl_dest ~init:(env, TL.valid) ~f:(fun res ty_dest ->
-          res &&& simplify_subtype ~subtype_env ~this_ty t ty_dest)
-    in
-    (match ety_sub with
-    | LoclType (r_sub, Ttuple tyl) -> destructure_tuple r_sub tyl
-    | LoclType (r_sub, Tclass ((_, x), _, tyl))
-      when String.equal x SN.Collections.cPair ->
-      destructure_tuple r_sub tyl
-    | LoclType (_, Tclass ((_, x), _, [elt_type]))
-      when String.equal x SN.Collections.cVector
-           || String.equal x SN.Collections.cImmVector
-           || String.equal x SN.Collections.cVec
-           || String.equal x SN.Collections.cConstVector ->
-      destructure_list elt_type
-    | LoclType ((_, (Tdynamic | Tany _)) as elt_type)
-    | LoclType (_, Tarraykind (AKvarray elt_type)) ->
-      destructure_list elt_type
-    | ConstraintType _
-    | LoclType (_, (Tunion _ | Tintersection _ | Tgeneric _ | Tvar _)) ->
-      default_subtype env
-    | LoclType ty_sub ->
-      default_subtype env
-      |> if_unsat @@ fun () ->
-         invalid_with (fun () ->
-             Typing_print.with_blank_tyvars (fun () ->
-                 Typing_print.full_strip_ns env ty_sub)
-             |> Errors.invalid_destructure
-                  (Reason.to_pos r_super)
-                  (Reason.to_pos (fst ty_sub))))
+
+    begin
+      match ety_sub with
+      | LoclType (r, Ttuple tyl) -> env |> destructure_tuple r tyl
+      | LoclType (r, Tclass ((_, x), _, tyl))
+        when String.equal x SN.Collections.cPair ->
+        env |> destructure_tuple r tyl
+      | LoclType (_, Tclass ((_, x), _, [elt_type]))
+        when String.equal x SN.Collections.cVector
+             || String.equal x SN.Collections.cImmVector
+             || String.equal x SN.Collections.cVec
+             || String.equal x SN.Collections.cConstVector ->
+        env |> destructure_array elt_type
+      | LoclType (_, Tarraykind (AKvarray elt_type)) ->
+        env |> destructure_array elt_type
+      | LoclType ((_, Tdynamic) as ty_sub) -> env |> destructure_array ty_sub
+      (* TODO: should remove these any cases *)
+      | LoclType (r, Tarraykind AKempty)
+      | LoclType (r, Tany _) ->
+        let any = (r, Typing_defs.make_tany ()) in
+        env |> destructure_array any
+      | ConstraintType _
+      | LoclType (_, (Tunion _ | Tintersection _ | Tgeneric _ | Tvar _)) ->
+        default_subtype env
+      | LoclType ty_sub ->
+        begin
+          match d_kind with
+          | SplatUnpack ->
+            (* Allow splatting of arbitrary Traversables *)
+            let (env, ty_inner) = Env.fresh_type env (Reason.to_pos r_super) in
+            let traversable = MakeType.traversable r_super ty_inner in
+            env
+            |> simplify_subtype ~subtype_env ~this_ty ty_sub traversable
+            &&& destructure_array ty_inner
+          | ListDestructure ->
+            let ty_sub_descr =
+              Typing_print.with_blank_tyvars (fun () ->
+                  Typing_print.full_strip_ns env ty_sub)
+            in
+            default_subtype env
+            |> if_unsat @@ fun () ->
+               invalid_with (fun () ->
+                   Errors.invalid_destructure
+                     (Reason.to_pos r_super)
+                     (Reason.to_pos (fst ty_sub))
+                     ty_sub_descr)
+        end
+    end
   | LoclType (_, Tnonnull) ->
     (match ety_sub with
     | LoclType

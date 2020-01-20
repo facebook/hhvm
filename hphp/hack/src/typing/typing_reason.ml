@@ -65,7 +65,7 @@ type t =
   | Rdynamic_yield of Pos.t * Pos.t * string * string
   | Rmap_append of Pos.t
   | Rvar_param of Pos.t
-  | Runpack_param of Pos.t
+  | Runpack_param of Pos.t * Pos.t * int (* splat pos, fun def pos, number of args before splat *)
   | Rinout_param of Pos.t
   | Rinstantiate of t * string * t
   | Rarray_filter of Pos.t * t
@@ -100,7 +100,7 @@ type t =
   | Rlambda_param of Pos.t * t
   | Rshape of Pos.t * string
   | Renforceable of Pos.t
-  | Rdestructure of Pos.t * int
+  | Rdestructure of Pos.t
   | Rkey_value_collection_key of Pos.t
 
 and arg_position =
@@ -481,13 +481,8 @@ let rec to_string prefix r =
   | Rshape (p, fun_name) ->
     [(p, prefix ^ " because " ^ fun_name ^ " expects a shape")]
   | Renforceable p -> [(p, prefix ^ " because it is an unenforceable type")]
-  | Rdestructure (p, n) ->
-    [
-      ( p,
-        prefix
-        ^ " resulting from a list destructuring assignment of length "
-        ^ string_of_int n );
-    ]
+  | Rdestructure p ->
+    [(p, prefix ^ " resulting from a list destructuring assignment or a splat")]
   | Rkey_value_collection_key _ ->
     [(p, "This is a key-value collection, which requires arraykey-typed keys")]
 
@@ -536,7 +531,7 @@ and to_pos = function
   | Rdynamic_yield (p, _, _, _) -> p
   | Rmap_append p -> p
   | Rvar_param p -> p
-  | Runpack_param p -> p
+  | Runpack_param (p, _, _) -> p
   | Rinout_param p -> p
   | Rinstantiate (_, _, r) -> to_pos r
   | Rtypeconst (Rnone, (p, _), _, _)
@@ -581,7 +576,7 @@ and to_pos = function
   | Rlambda_param (p, _) -> p
   | Rshape (p, _) -> p
   | Renforceable p -> p
-  | Rdestructure (p, _) -> p
+  | Rdestructure p -> p
   | Rkey_value_collection_key p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.

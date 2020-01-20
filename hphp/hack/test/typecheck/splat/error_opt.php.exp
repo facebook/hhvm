@@ -1,0 +1,6 @@
+File "error_opt.php", line 6, characters 8-9:
+Invalid argument (Typing[4110])
+File "error_opt.php", line 3, characters 22-24:
+Expected int
+File "error_opt.php", line 5, characters 20-24:
+But got float

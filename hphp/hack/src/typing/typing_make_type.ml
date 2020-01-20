@@ -128,3 +128,27 @@ let has_member r name ty class_id =
   ConstraintType
     (mk_constraint_type
        (r, Thas_member { hm_name = name; hm_type = ty; hm_class_id = class_id }))
+
+let list_destructure r tyl =
+  ConstraintType
+    (mk_constraint_type
+       ( r,
+         Tdestructure
+           {
+             d_required = tyl;
+             d_optional = [];
+             d_variadic = None;
+             d_kind = ListDestructure;
+           } ))
+
+let simple_variadic_splat r ty =
+  ConstraintType
+    (mk_constraint_type
+       ( r,
+         Tdestructure
+           {
+             d_required = [];
+             d_optional = [];
+             d_variadic = Some ty;
+             d_kind = SplatUnpack;
+           } ))

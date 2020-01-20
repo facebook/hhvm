@@ -739,9 +739,13 @@ module Size = struct
     ty_size_visitor#on_type 0 ty
 
   let rec constraint_type_size env ty =
-    match deref_constraint_type ty with
-    | (_, Tdestructure tyl) ->
-      List.fold ~init:1 ~f:(fun size ty -> size + ty_size env ty) tyl
+    match ty with
+    | (_, Tdestructure d) ->
+      let { d_required; d_optional; d_variadic; _ } = d in
+      1
+      + List.fold ~init:0 ~f:(fun size ty -> size + ty_size env ty) d_required
+      + List.fold ~init:0 ~f:(fun size ty -> size + ty_size env ty) d_optional
+      + Option.value_map ~default:0 ~f:(ty_size env) d_variadic
     | (_, Thas_member hm) ->
       1
       +

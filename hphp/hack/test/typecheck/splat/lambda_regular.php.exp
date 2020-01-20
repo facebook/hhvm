@@ -1,0 +1,4 @@
+File "lambda_regular.php", line 5, characters 9-10:
+Too many arguments (expected 2 but got 3) (Typing[4105])
+File "lambda_regular.php", line 4, characters 8-46:
+Definition is here

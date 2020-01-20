@@ -1,16 +1,4 @@
 File "unpack_call6.php", line 12, characters 13-17:
-Invalid argument (Typing[4110])
-File "unpack_call6.php", line 12, characters 13-17:
-Expected Traversable<int> (it is unpacked with '...')
+Expected Traversable<[unresolved]> (it is unpacked with '...') (Typing[4110])
 File "unpack_call6.php", line 11, characters 11-18:
 But got string
-File "unpack_call6.php", line 12, characters 13-17:
-Invalid argument (Typing[4110])
-File "unpack_call6.php", line 12, characters 13-17:
-Expected Traversable<_> (it is unpacked with '...')
-File "unpack_call6.php", line 11, characters 11-18:
-But got string
-File "unpack_call6.php", line 12, characters 7-8:
-Too few arguments (required 1 but got 0) (Typing[4104])
-File "unpack_call6.php", line 4, characters 19-29:
-Definition is here

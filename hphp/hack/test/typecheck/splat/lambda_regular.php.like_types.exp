@@ -1,4 +1,4 @@
-File "varargs.php", line 13, characters 20-22:
+File "lambda_regular.php", line 5, characters 9-10:
 An array cannot be unpacked into the required arguments of a function (Typing[4359])
-File "varargs.php", line 3, characters 10-15:
+File "lambda_regular.php", line 4, characters 8-46:
 Definition is here

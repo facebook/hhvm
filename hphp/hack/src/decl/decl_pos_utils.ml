@@ -75,7 +75,7 @@ struct
     | Rdynamic_yield (p1, p2, s1, s2) -> Rdynamic_yield (pos p1, pos p2, s1, s2)
     | Rmap_append p -> Rmap_append (pos p)
     | Rvar_param p -> Rvar_param (pos p)
-    | Runpack_param p -> Runpack_param (pos p)
+    | Runpack_param (p1, p2, i) -> Runpack_param (pos p1, pos p2, i)
     | Rinout_param p -> Rinout_param (pos p)
     | Rinstantiate (r1, x, r2) -> Rinstantiate (reason r1, x, reason r2)
     | Rarray_filter (p, r) -> Rarray_filter (pos p, reason r)
@@ -119,7 +119,7 @@ struct
     | Rlambda_param (p, r) -> Rlambda_param (pos p, reason r)
     | Rshape (p, fun_name) -> Rshape (pos p, fun_name)
     | Renforceable p -> Renforceable (pos p)
-    | Rdestructure (p, l) -> Rdestructure (pos p, l)
+    | Rdestructure p -> Rdestructure (pos p)
     | Rkey_value_collection_key p -> Rkey_value_collection_key (pos p)
 
   let pos_mapper =

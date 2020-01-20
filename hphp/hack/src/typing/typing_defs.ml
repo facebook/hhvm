@@ -600,6 +600,33 @@ let has_member_compare ~normalize_lists hm1 hm2 =
     | comp -> comp)
   | comp -> comp
 
+let destructure_compare ~normalize_lists d1 d2 =
+  let {
+    d_required = tyl1;
+    d_optional = tyl_opt1;
+    d_variadic = ty_opt1;
+    d_kind = e1;
+  } =
+    d1
+  in
+  let {
+    d_required = tyl2;
+    d_optional = tyl_opt2;
+    d_variadic = ty_opt2;
+    d_kind = e2;
+  } =
+    d2
+  in
+  match tyl_compare ~normalize_lists ~sort:false tyl1 tyl2 with
+  | 0 ->
+    (match tyl_compare ~normalize_lists ~sort:false tyl_opt1 tyl_opt2 with
+    | 0 ->
+      (match Option.compare ty_compare ty_opt1 ty_opt2 with
+      | 0 -> compare_destructure_kind e1 e2
+      | comp -> comp)
+    | comp -> comp)
+  | comp -> comp
+
 let constraint_ty_con_ordinal cty =
   match cty with
   | Thas_member _ -> 0
@@ -613,7 +640,8 @@ let rec constraint_ty_compare ?(normalize_lists = false) ty1 ty2 =
   match (ty1, ty2) with
   | (Thas_member hm1, Thas_member hm2) ->
     has_member_compare ~normalize_lists hm1 hm2
-  | (Tdestructure tyl1, Tdestructure tyl2) -> tyl_compare ~sort:false tyl1 tyl2
+  | (Tdestructure d1, Tdestructure d2) ->
+    destructure_compare ~normalize_lists d1 d2
   | (TCunion (lty1, cty1), TCunion (lty2, cty2))
   | (TCintersection (lty1, cty1), TCintersection (lty2, cty2)) ->
     let comp1 = ty_compare ~normalize_lists lty1 lty2 in

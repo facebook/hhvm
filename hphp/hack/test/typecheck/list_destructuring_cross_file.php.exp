@@ -1,0 +1,4 @@
+File "list_destructuring_cross_file.php--file2.php", line 5, characters 3-14:
+Too many arguments (expected 2 but got 3) (Typing[4105])
+File "list_destructuring_cross_file.php--file1.php", line 3, characters 16-34:
+Definition is here

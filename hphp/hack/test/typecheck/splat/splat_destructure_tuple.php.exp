@@ -1,0 +1,10 @@
+File "splat_destructure_tuple.php", line 6, characters 8-15:
+Too few arguments (required 2 but got 1) (Typing[4104])
+File "splat_destructure_tuple.php", line 3, characters 10-10:
+Definition is here
+File "splat_destructure_tuple.php", line 11, characters 8-45:
+Invalid argument (Typing[4110])
+File "splat_destructure_tuple.php", line 3, characters 71-73:
+Expected int (variadic argument)
+File "splat_destructure_tuple.php", line 11, characters 37-41:
+But got bool

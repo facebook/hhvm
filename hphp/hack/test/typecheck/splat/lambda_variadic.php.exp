@@ -1,0 +1,4 @@
+File "lambda_variadic.php", line 8, characters 9-10:
+An array cannot be unpacked into the required arguments of a function (Typing[4359])
+File "lambda_variadic.php", line 5, characters 8-44:
+Definition is here

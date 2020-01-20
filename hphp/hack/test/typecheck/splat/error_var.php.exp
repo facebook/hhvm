@@ -1,0 +1,6 @@
+File "error_var.php", line 6, characters 8-9:
+Invalid argument (Typing[4110])
+File "error_var.php", line 3, characters 19-20:
+Expected int (variadic argument)
+File "error_var.php", line 5, characters 16-20:
+But got float

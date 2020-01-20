@@ -29,7 +29,7 @@ let make_type_const_equal
       let env = Utils.sub_type env tconstty tytconst error in
       env
     | ConstraintType ty ->
-      (match ty with
+      (match deref_constraint_type ty with
       | (_, Thas_member _)
       | (_, Tdestructure _) ->
         env

@@ -27,7 +27,7 @@ module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
 module Partial = Partial_provider
 
-let err_witness env p = (Reason.Rwitness p, Typing_utils.terr env)
+let err_witness env p = mk (Reason.Rwitness p, Typing_utils.terr env)
 
 let smember_not_found pos ~is_const ~is_method class_ member_name on_error =
   let kind =
@@ -158,10 +158,10 @@ and obj_get_concrete_ty
     k_lhs
     on_error =
   let default () =
-    (env, ((Reason.Rwitness id_pos, Typing_utils.tany env), []))
+    (env, (mk (Reason.Rwitness id_pos, Typing_utils.tany env), []))
   in
   let mk_ety_env r class_info x e paraml =
-    let this_ty = k_lhs (r, Tclass (x, e, paraml)) in
+    let this_ty = k_lhs (mk (r, Tclass (x, e, paraml))) in
     {
       type_expansions = [];
       this_ty;
@@ -172,7 +172,7 @@ and obj_get_concrete_ty
     }
   in
   let (env, concrete_ty) = Env.expand_type env concrete_ty in
-  match concrete_ty with
+  match deref concrete_ty with
   | (r, Tclass (x, exact, paraml)) ->
     let get_member_from_constraints env class_info =
       let ety_env = mk_ety_env r class_info x exact paraml in
@@ -215,7 +215,7 @@ and obj_get_concrete_ty
         let paraml =
           if List.is_empty paraml then
             List.map (Cls.tparams class_info) (fun _ ->
-                (Reason.Rwitness id_pos, Typing_utils.tany env))
+                mk (Reason.Rwitness id_pos, Typing_utils.tany env))
           else
             paraml
         in
@@ -259,65 +259,73 @@ and obj_get_concrete_ty
               | Some
                   {
                     ce_visibility = vis;
-                    ce_type = (lazy (r, Tfun ft));
+                    ce_type = (lazy member_);
                     ce_deprecated;
                     _;
                   } ->
-                let mem_pos = Reason.to_pos r in
-                TVis.check_deprecated
-                  ~use_pos:id_pos
-                  ~def_pos:mem_pos
-                  ce_deprecated;
-                TVis.check_obj_access ~use_pos:id_pos ~def_pos:mem_pos env vis;
-
-                (* the return type of __call can depend on the class params or be this *)
-                let ety_env = mk_ety_env r class_info x exact paraml in
-                (* TODO: possibly support coercion from dynamic in __call *)
-                let (env, ft) =
-                  Phase.(
-                    localize_ft
-                      ~instantiation:
-                        {
-                          use_pos = id_pos;
-                          use_name = strip_ns id_str;
-                          explicit_targs = [];
-                        }
-                      ~ety_env
+                begin
+                  match get_node member_ with
+                  | Tfun ft ->
+                    let mem_pos = get_pos member_ in
+                    TVis.check_deprecated
+                      ~use_pos:id_pos
+                      ~def_pos:mem_pos
+                      ce_deprecated;
+                    TVis.check_obj_access
+                      ~use_pos:id_pos
                       ~def_pos:mem_pos
                       env
-                      ft)
-                in
-                let arity_pos =
-                  match ft.ft_params with
-                  | [_; { fp_pos; fp_kind = FPnormal; _ }] -> fp_pos
-                  (* we should really assert here but this is not yet validated *)
-                  | _ -> mem_pos
-                in
-                (* we change the params of the underlying declaration to act as a
-                 * variadic function ... this transform cannot be done when processing
-                 * the declaration of call because direct calls to $inst->__call are also
-                 * valid.
-                 *)
-                let ft =
-                  {
-                    ft with
-                    ft_arity = Fellipsis (0, arity_pos);
-                    ft_tparams = ([], FTKtparams);
-                    ft_params = [];
-                  }
-                in
-                let member_ty = (r, Tfun ft) in
-                if inst_meth then
-                  TVis.check_inst_meth_access
-                    ~use_pos:id_pos
-                    ~def_pos:mem_pos
-                    vis;
-                TVis.check_deprecated
-                  ~use_pos:id_pos
-                  ~def_pos:mem_pos
-                  ce_deprecated;
-                (env, (member_ty, []))
-              | _ -> assert false
+                      vis;
+
+                    (* the return type of __call can depend on the class params or be this *)
+                    let ety_env = mk_ety_env r class_info x exact paraml in
+                    (* TODO: possibly support coercion from dynamic in __call *)
+                    let (env, ft) =
+                      Phase.(
+                        localize_ft
+                          ~instantiation:
+                            {
+                              use_pos = id_pos;
+                              use_name = strip_ns id_str;
+                              explicit_targs = [];
+                            }
+                          ~ety_env
+                          ~def_pos:mem_pos
+                          env
+                          ft)
+                    in
+                    let arity_pos =
+                      match ft.ft_params with
+                      | [_; { fp_pos; fp_kind = FPnormal; _ }] -> fp_pos
+                      (* we should really assert here but this is not yet validated *)
+                      | _ -> mem_pos
+                    in
+                    (* we change the params of the underlying declaration to act as a
+                     * variadic function ... this transform cannot be done when processing
+                     * the declaration of call because direct calls to $inst->__call are also
+                     * valid.
+                     *)
+                    let ft =
+                      {
+                        ft with
+                        ft_arity = Fellipsis (0, arity_pos);
+                        ft_tparams = ([], FTKtparams);
+                        ft_params = [];
+                      }
+                    in
+                    let member_ty = mk (r, Tfun ft) in
+                    if inst_meth then
+                      TVis.check_inst_meth_access
+                        ~use_pos:id_pos
+                        ~def_pos:mem_pos
+                        vis;
+                    TVis.check_deprecated
+                      ~use_pos:id_pos
+                      ~def_pos:mem_pos
+                      ce_deprecated;
+                    (env, (member_ty, []))
+                  | _ -> assert false
+                end
             end
           (* match Env.get_member is_method env class_info SN.Members.__call *)
           | Some
@@ -329,12 +337,12 @@ and obj_get_concrete_ty
                   ce_deprecated;
                   _;
                 } as member_ce ) ->
-            let mem_pos = Reason.to_pos (fst member_) in
+            let mem_pos = get_pos member_ in
             ( if shadowed then
               match old_member_info with
               | Some { ce_visibility = old_vis; ce_type = (lazy old_member); _ }
                 ->
-                let old_mem_pos = Reason.to_pos (fst old_member) in
+                let old_mem_pos = get_pos old_member in
                 begin
                   match class_id with
                   | CIexpr (_, This) when String.equal (snd x) self_id -> ()
@@ -356,7 +364,7 @@ and obj_get_concrete_ty
             let member_decl_ty = Typing_enum.member_type env member_ce in
             let ety_env = mk_ety_env r class_info x exact paraml in
             let (env, member_ty, tal, et_enforced) =
-              match member_decl_ty with
+              match deref member_decl_ty with
               | (r, Tfun ft) when is_method ->
                 (* We special case function types here to be able to pass explicit type
                  * parameters. *)
@@ -389,7 +397,7 @@ and obj_get_concrete_ty
                       env
                       ft)
                 in
-                (env, (r, Tfun ft), explicit_targs, false)
+                (env, mk (r, Tfun ft), explicit_targs, false)
               | _ ->
                 let is_xhp_attr = Option.is_some ce_xhp_attr in
                 let { et_type; et_enforced } =
@@ -458,7 +466,7 @@ and obj_get_concrete_ty
       id_str
       id_pos
       (Typing_print.error env concrete_ty)
-      (Reason.to_pos (fst concrete_ty));
+      (get_pos concrete_ty);
     default ()
   | _ ->
     Errors.non_object_member
@@ -466,12 +474,12 @@ and obj_get_concrete_ty
       id_str
       id_pos
       (Typing_print.error env concrete_ty)
-      (Reason.to_pos (fst concrete_ty))
+      (get_pos concrete_ty)
       on_error;
     default ()
 
 and widen_class_for_obj_get ~is_method ~nullsafe ~on_error member_name env ty =
-  match ty with
+  match deref ty with
   | (_, Tprim Tnull) ->
     if Option.is_some nullsafe then
       (env, Some ty)
@@ -479,7 +487,7 @@ and widen_class_for_obj_get ~is_method ~nullsafe ~on_error member_name env ty =
       (env, None)
   | (r2, Tclass (((_, class_name) as class_id), _, tyl)) ->
     let default () =
-      let ty = (r2, Tclass (class_id, Nonexact, tyl)) in
+      let ty = mk (r2, Tclass (class_id, Nonexact, tyl)) in
       (env, Some ty)
     in
     begin
@@ -525,7 +533,7 @@ and widen_class_for_obj_get ~is_method ~nullsafe ~on_error member_name env ty =
 and make_nullable_member_type env ~is_method id_pos pos ty =
   if is_method then
     let (env, ty) = Env.expand_type env ty in
-    match ty with
+    match deref ty with
     | (r, Tfun tf) ->
       let (env, ty) =
         make_nullable_member_type
@@ -535,7 +543,7 @@ and make_nullable_member_type env ~is_method id_pos pos ty =
           pos
           tf.ft_ret.et_type
       in
-      (env, (r, Tfun { tf with ft_ret = { tf.ft_ret with et_type = ty } }))
+      (env, mk (r, Tfun { tf with ft_ret = { tf.ft_ret with et_type = ty } }))
     | (r, Tunion (_ :: _ as tyl)) ->
       let (env, tyl) =
         List.map_env env tyl (fun env ty ->
@@ -615,25 +623,35 @@ and obj_get_
       in
       (env, (ty, tal))
     | None ->
-      (match ety1 with
-      | (_, Toption (_, Tnonnull)) as ty ->
-        Errors.top_member
-          ~is_method
-          ~is_nullable:true
-          id_str
-          id_pos
-          (Typing_print.error env ty)
-          (Reason.to_pos (fst ety1))
-      | _ ->
+      (match deref ety1 with
+      | (r, Toption opt_ty) ->
+        begin
+          match get_node opt_ty with
+          | Tnonnull ->
+            Errors.top_member
+              ~is_method
+              ~is_nullable:true
+              id_str
+              id_pos
+              (Typing_print.error env ety1)
+              (Reason.to_pos r)
+          | _ ->
+            Errors.null_member
+              ~is_method
+              id_str
+              id_pos
+              (Reason.to_string "This can be null" r)
+        end
+      | (r, _) ->
         Errors.null_member
           ~is_method
           id_str
           id_pos
-          (Reason.to_string "This can be null" (fst ety1)));
-      (env, ((fst ety1, Typing_utils.terr env), []))
+          (Reason.to_string "This can be null" r));
+      (env, (mk (get_reason ety1, Typing_utils.terr env), []))
   in
-  match ety1 with
-  | (_, Tunion tyl) ->
+  match deref ety1 with
+  | (r, Tunion tyl) ->
     let (env, resultl) =
       List.map_env env tyl (fun env ty ->
           obj_get_
@@ -660,9 +678,9 @@ and obj_get_
       | (_, tal) :: _ -> tal
     in
     let tyl = List.map ~f:fst resultl in
-    let (env, ty) = Union.union_list env (fst ety1) tyl in
+    let (env, ty) = Union.union_list env r tyl in
     (env, (ty, tal))
-  | (_, Tintersection tyl) ->
+  | (r, Tintersection tyl) ->
     let is_nonnull =
       is_nonnull
       || Typing_solver.is_sub_type
@@ -696,10 +714,10 @@ and obj_get_
       | (_, tal) :: _ -> tal
     in
     let tyl = List.map ~f:fst resultl in
-    let (env, ty) = Inter.intersect_list env (fst ety1) tyl in
+    let (env, ty) = Inter.intersect_list env r tyl in
     (env, (ty, tal))
   | (p', Tdependent (dep, ty)) ->
-    let k_lhs' ty = k_lhs (p', Tdependent (dep, ty)) in
+    let k_lhs' ty = k_lhs (mk (p', Tdependent (dep, ty))) in
     obj_get_
       ~inst_meth
       ~obj_pos
@@ -731,7 +749,7 @@ and obj_get_
       id
       k_lhs
       on_error
-  | (_, Tgeneric _) ->
+  | (r, Tgeneric _) ->
     let resl =
       TUtils.try_over_concrete_supertypes env ety1 (fun env ty ->
           (* We probably don't want to rewrap new types for the 'this' closure *)
@@ -768,7 +786,7 @@ and obj_get_
           id_str
           id_pos
           (Typing_print.error env ety1)
-          (Reason.to_pos (fst ety1))
+          (Reason.to_pos r)
           on_error;
         (env, (err_witness env id_pos, []))
       | ((_env, (ty, _)) as res) :: rest ->
@@ -778,14 +796,14 @@ and obj_get_
             id_str
             id_pos
             (Typing_print.error env ety1)
-            (Reason.to_pos (fst ety1));
+            (get_pos ety1);
           (env, (err_witness env id_pos, []))
         ) else
           res
     end
   | (_, Toption ty) -> nullable_obj_get ty
   | (r, Tprim Tnull) ->
-    let ty = (r, Tunion []) in
+    let ty = mk (r, Tunion []) in
     nullable_obj_get ty
   (* We are trying to access a member through a value of unknown type *)
   | (r, Tvar _) ->
@@ -794,7 +812,7 @@ and obj_get_
       id_str
       id_pos
       (Reason.to_string "It is unknown" r);
-    (env, ((r, Typing_utils.terr env), []))
+    (env, (mk (r, Typing_utils.terr env), []))
   | (_, _) ->
     obj_get_concrete_ty
       ~inst_meth

@@ -104,15 +104,15 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
   let (env, ety1) = Env.expand_type env ty1 in
   let (env, ety2) = Env.expand_type env ty2 in
   let ty =
-    match ((ety1, ty1), (ety2, ty2)) with
-    | (((_, Tunion []), _), (_, ty))
-    | ((_, ty), ((_, Tunion []), _))
+    match ((get_node ety1, ty1), (get_node ety2, ty2)) with
+    | ((Tunion [], _), (_, ty))
+    | ((_, ty), (Tunion [], _))
       when are_ty_param ->
       Some ty
     | _ when ty_equal ety1 ety2 ->
       begin
-        match ty1 with
-        | (_, Tvar _) -> Some ty1
+        match get_node ty1 with
+        | Tvar _ -> Some ty1
         | _ -> Some ty2
       end
     | _ -> None
@@ -125,7 +125,7 @@ let make_union env r tyl reason_nullable_opt reason_dyn_opt =
   let ty =
     match tyl with
     | [ty] -> ty
-    | tyl -> (r, Tunion tyl)
+    | tyl -> MakeType.union r tyl
   in
   (* Given that unions with null are encoded specially in the type system - as options -
   we still need to simplify unions of null and nonnull here.
@@ -137,7 +137,7 @@ let make_union env r tyl reason_nullable_opt reason_dyn_opt =
     let is_nonnull ty = ty_equal ty (MakeType.nonnull r) in
     let rec simplify env ty =
       let (env, ty) = Env.expand_type env ty in
-      match ty with
+      match deref ty with
       | (_, Toption ty) ->
         (* ok to remove the Toption since we'll re-add it at the end. *)
         simplify env ty
@@ -161,20 +161,21 @@ let make_union env r tyl reason_nullable_opt reason_dyn_opt =
     else
       (env, ty)
   in
-  let like_ty dyn_r ty = (dyn_r, Tunion [MakeType.dynamic dyn_r; ty]) in
+  let like_ty dyn_r ty = MakeType.union dyn_r [MakeType.dynamic dyn_r; ty] in
   (* Some code is sensitive to dynamic appearing first in the union. *)
   let ty =
-    match (reason_nullable_opt, reason_dyn_opt, ty) with
+    match (reason_nullable_opt, reason_dyn_opt, deref ty) with
     | (None, Some dyn_r, (_, Tunion [])) -> MakeType.dynamic dyn_r
     | (Some null_r, None, (_, Tunion [])) -> MakeType.null null_r
     | (Some null_r, Some dyn_r, (_, Tunion [])) ->
       like_ty dyn_r (MakeType.null null_r)
-    | (None, None, ty) -> ty
+    | (None, None, _) -> ty
     | (None, Some dyn_r, (r, Tunion tyl)) ->
-      (r, Tunion (MakeType.dynamic dyn_r :: tyl))
-    | (None, Some dyn_r, ty) -> like_ty dyn_r ty
-    | (Some null_r, None, ty) -> (null_r, Toption ty)
-    | (Some null_r, Some dyn_r, ty) -> like_ty dyn_r (null_r, Toption ty)
+      MakeType.union r (MakeType.dynamic dyn_r :: tyl)
+    | (None, Some dyn_r, _) -> like_ty dyn_r ty
+    | (Some null_r, None, _) -> MakeType.nullable_locl null_r ty
+    | (Some null_r, Some dyn_r, _) ->
+      like_ty dyn_r (MakeType.nullable_locl null_r ty)
   in
   let (env, ty) = Typing_utils.wrap_union_inter_ty_in_var env r ty in
   (env, ty)
@@ -184,7 +185,9 @@ let exact_least_upper_bound e1 e2 =
   | (Exact, Exact) -> Exact
   | (_, _) -> Nonexact
 
-let rec union env ((r1, _) as ty1) ((r2, _) as ty2) =
+let rec union env ty1 ty2 =
+  let r1 = get_reason ty1 in
+  let r2 = get_reason ty2 in
   Log.log_union r2 ty1 ty2
   @@
   if ty_equal ty1 ty2 then
@@ -214,11 +217,16 @@ and simplify_union env ty1 ty2 r =
   else
     simplify_union_ env ty1 ty2 r
 
+and is_class ty =
+  match get_node ty with
+  | Tclass _ -> true
+  | _ -> false
+
 and simplify_union_ env ty1 ty2 r =
   let (env, ty1) = Env.expand_type env ty1 in
   let (env, ty2) = Env.expand_type env ty2 in
   try
-    match (ty1, ty2) with
+    match (deref ty1, deref ty2) with
     | ((r1, Tprim Nast.Tint), (r2, Tprim Nast.Tfloat))
     | ((r1, Tprim Nast.Tfloat), (r2, Tprim Nast.Tint)) ->
       let r = union_reason r1 r2 in
@@ -227,39 +235,40 @@ and simplify_union_ env ty1 ty2 r =
       when String.equal id1 id2 ->
       let e = exact_least_upper_bound e1 e2 in
       let (env, tyl) = union_class env id1 tyl1 tyl2 in
-      (env, Some (r, Tclass ((p, id1), e, tyl)))
+      (env, Some (mk (r, Tclass ((p, id1), e, tyl))))
     | ((_, Tgeneric name1), (_, Tgeneric name2)) when String.equal name1 name2
       ->
-      (env, Some (r, Tgeneric name1))
+      (env, Some (mk (r, Tgeneric name1)))
     | ((_, Tarraykind ak1), (_, Tarraykind ak2)) ->
       let (env, ak) = union_arraykind env ak1 ak2 in
-      (env, Some (r, Tarraykind ak))
+      (env, Some (mk (r, Tarraykind ak)))
     | ((_, Tdependent (dep1, tcstr1)), (_, Tdependent (dep2, tcstr2)))
       when equal_dependent_type dep1 dep2 ->
       let (env, tcstr) = union env tcstr1 tcstr2 in
-      (env, Some (r, Tdependent (dep1, tcstr)))
-    | ((_, Tdependent (_, ((_, Tclass _) as ty1))), ty2)
-    | (ty2, (_, Tdependent (_, ((_, Tclass _) as ty1)))) ->
+      (env, Some (mk (r, Tdependent (dep1, tcstr))))
+    | ((_, Tdependent (_, ty1)), _) when is_class ty1 ->
       ty_equiv env ty1 ty2 ~are_ty_param:false
+    | (_, (_, Tdependent (_, ty2))) when is_class ty2 ->
+      ty_equiv env ty2 ty1 ~are_ty_param:false
     | ((_, Tnewtype (id1, tyl1, tcstr1)), (_, Tnewtype (id2, tyl2, tcstr2)))
       when String.equal id1 id2 ->
       let (env, tyl) = union_newtype env id1 tyl1 tyl2 in
       let (env, tcstr) = union env tcstr1 tcstr2 in
-      (env, Some (r, Tnewtype (id1, tyl, tcstr)))
+      (env, Some (mk (r, Tnewtype (id1, tyl, tcstr))))
     | ((_, Ttuple tyl1), (_, Ttuple tyl2)) ->
       if Int.equal (List.length tyl1) (List.length tyl2) then
         let (env, tyl) = List.map2_env env tyl1 tyl2 ~f:union in
-        (env, Some (r, Ttuple tyl))
+        (env, Some (mk (r, Ttuple tyl)))
       else
         (env, None)
     | ((r1, Tshape (shape_kind1, fdm1)), (r2, Tshape (shape_kind2, fdm2))) ->
       let (env, ty) =
         union_shapes env (shape_kind1, fdm1, r1) (shape_kind2, fdm2, r2)
       in
-      (env, Some (r, ty))
+      (env, Some (mk (r, ty)))
     | ((_, Tfun ft1), (_, Tfun ft2)) ->
       let (env, ft) = union_funs env ft1 ft2 in
-      (env, Some (r, Tfun ft))
+      (env, Some (mk (r, Tfun ft)))
     | ((_, Tanon (_, id1)), (_, Tanon (_, id2))) when Ident.equal id1 id2 ->
       (env, Some ty1)
     (* TODO with Tclass, union type arguments if covariant *)
@@ -326,7 +335,7 @@ and union_lists env tyl1 tyl2 r =
   let orr r_opt r = Some (Option.value r_opt ~default:r) in
   let rec decompose env ty tyl tyl_res r_null r_union r_dyn =
     let (env, ty) = Env.expand_type env ty in
-    match ty with
+    match deref ty with
     | (r, Tunion tyl') ->
       decompose_list env (tyl' @ tyl) tyl_res r_null (orr r_union r) r_dyn
     | (r, Toption ty) ->
@@ -511,7 +520,7 @@ let normalize_union env ?on_tyvar tyl =
       let (env, ty) = Env.expand_type env ty in
       let proceed env ty = (env, r_null, r_union, r_dyn, TySet.singleton ty) in
       let (env, r_null, r_union, r_dyn, tys') =
-        match (ty, on_tyvar) with
+        match (deref ty, on_tyvar) with
         | ((r, Tvar v), Some on_tyvar) ->
           let (env, ty') = on_tyvar env r v in
           if ty_equal ty ty' then
@@ -530,11 +539,11 @@ let normalize_union env ?on_tyvar tyl =
           let (env, ty) = Utils.simplify_intersections env ty ?on_tyvar in
           let (env, ety) = Env.expand_type env ty in
           begin
-            match ety with
+            match deref ety with
             | (_, Tintersection _) -> proceed env ty
             | _ -> normalize_union env [ty] r_null r_union r_dyn
           end
-        | (ty, _) -> proceed env ty
+        | _ -> proceed env ty
       in
       let (env, r_null, r_union, r_dyn, tys) =
         normalize_union env tyl r_null r_union r_dyn
@@ -572,7 +581,8 @@ let union_list env r tyl =
 let fold_union env r tyl =
   List.fold_left_env env tyl ~init:(MakeType.nothing r) ~f:union
 
-let simplify_unions env ?on_tyvar ((r, _) as ty) =
+let simplify_unions env ?on_tyvar ty =
+  let r = get_reason ty in
   Log.log_simplify_unions r ty
   @@
   let (env, r_null, r_union, r_dyn, tys) = normalize_union env [ty] ?on_tyvar in
@@ -593,10 +603,10 @@ let rec union_i env r ty1 lty2 =
         let (env, ty) = union env lty1 lty2 in
         (env, LoclType ty)
       | ConstraintType cty1 ->
-        (match cty1 with
+        (match deref_constraint_type cty1 with
         | (_, TCunion (lty1, cty1)) ->
           let (env, lty) = union env lty1 lty2 in
-          (env, ConstraintType (r, TCunion (lty, cty1)))
+          (env, ConstraintType (mk_constraint_type (r, TCunion (lty, cty1))))
         | (r', TCintersection (lty1, cty1)) ->
           (* Distribute union over intersection.
           At the moment local types in TCintersection can only be
@@ -609,10 +619,12 @@ let rec union_i env r ty1 lty2 =
             let (env, ty) = Typing_intersection.intersect env r' lty ty in
             (env, LoclType ty)
           | ConstraintType cty ->
-            (env, ConstraintType (r', TCintersection (lty, cty))))
+            ( env,
+              ConstraintType
+                (mk_constraint_type (r', TCintersection (lty, cty))) ))
         | (_, Thas_member _)
         | (_, Tdestructure _) ->
-          (env, ConstraintType (r, TCunion (lty2, cty1))))
+          (env, ConstraintType (mk_constraint_type (r, TCunion (lty2, cty1)))))
     in
     match ty with
     | LoclType _ -> (env, ty)

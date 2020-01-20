@@ -26,15 +26,20 @@ end
 module Shared (Env : Env_S) = struct
   (* true if function has <<__ReturnMutable>> annotation, otherwise false *)
   let is_fun_call_returning_mutable (env : Env.env) (e : Tast.expr) : bool =
-    let fty_returns_mutable fty =
-      match (Env.env_reactivity env, fty.ft_reactive) with
-      (* in localrx context assume non-reactive functions to return mutable *)
-      | (Local _, Nonreactive) -> true
-      | _ -> fty.ft_returns_mutable
+    let fun_ty_returns_mutable fun_ty =
+      match deref fun_ty with
+      | (_, Tfun fty) ->
+        begin
+          match (Env.env_reactivity env, fty.ft_reactive) with
+          (* in localrx context assume non-reactive functions to return mutable *)
+          | (Local _, Nonreactive) -> true
+          | _ -> fty.ft_returns_mutable
+        end
+      | _ -> false
     in
     let fun_returns_mutable id =
       match Env.get_fun env (snd id) with
-      | Some { fe_type = (_, Tfun fty); _ } -> fty_returns_mutable fty
+      | Some { fe_type = fun_ty; _ } -> fun_ty_returns_mutable fun_ty
       | _ -> false
     in
     match snd e with
@@ -42,10 +47,10 @@ module Shared (Env : Env_S) = struct
     | T.Call (_, (_, T.Id id), _, _, _)
     | T.Call (_, (_, T.Fun_id id), _, _, _) ->
       fun_returns_mutable id
-    | T.Call (_, ((_, (_, Tfun fty)), T.Obj_get _), _, _, _)
-    | T.Call (_, ((_, (_, Tfun fty)), T.Class_const _), _, _, _)
-    | T.Call (_, ((_, (_, Tfun fty)), T.Lvar _), _, _, _) ->
-      fty_returns_mutable fty
+    | T.Call (_, ((_, fun_ty), T.Obj_get _), _, _, _)
+    | T.Call (_, ((_, fun_ty), T.Class_const _), _, _, _)
+    | T.Call (_, ((_, fun_ty), T.Lvar _), _, _, _) ->
+      fun_ty_returns_mutable fun_ty
     | _ -> false
 end
 

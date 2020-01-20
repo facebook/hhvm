@@ -20,6 +20,7 @@ module TR = Typing_reactivity
 module CT = Typing_subtype.ConditionTypes
 module Decl_provider = Decl_provider_ctx
 module Cls = Decl_provider.Class
+module MakeType = Typing_make_type
 
 (* A guiding principle when expanding a type access C::T is that if C <: D and
    we know that D::T = X (represented by an Exact result below), then C::T is
@@ -88,7 +89,7 @@ let make_abstract env id name namel bnd =
        Here, $x->get() has type expr#1::T as T1::T (as Box::T).
        But T1::T is exactly equal to int, so $x->get() no longer needs
        to be expression dependent. Thus, $x->get() typechecks. *)
-    Exact (mk (Reason.Rnone, Tgeneric tp_name))
+    Exact (MakeType.generic Reason.Rnone tp_name)
   else
     Abstract (name, namel, bnd)
 
@@ -177,7 +178,7 @@ let rec type_of_result ctx env root res =
     ) else
       let generic_name = tp_name name id in
       let reason = make_reason env Reason.Rnone id root in
-      let ty = mk (reason, Tgeneric generic_name) in
+      let ty = MakeType.generic reason generic_name in
       let env =
         Option.fold bnd ~init:env ~f:(fun env bnd ->
             (* TODO(T59317869): play well with flow sensitivity *)
@@ -289,7 +290,7 @@ let rec expand ctx env root =
           let (env, res) = expand ctx env ty in
           type_of_result ctx env root res)
     in
-    let ty = mk (make_reason env, Tunion tyl) in
+    let ty = MakeType.union (make_reason env) tyl in
     (env, Exact ty)
   | Tintersection tyl ->
     let (env, tyl) =

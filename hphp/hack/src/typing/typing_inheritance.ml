@@ -74,7 +74,7 @@ let check_trait_override_annotations env cls ~static =
             ()
           else (
             match meth with
-            | { ce_type = (lazy (r, _)); _ } ->
+            | { ce_type = (lazy ty); _ } ->
               let parent_method_exists =
                 List.exists (all_methods_named cls id) (fun parent_meth ->
                     String.( <> ) meth.ce_origin parent_meth.ce_origin)
@@ -83,7 +83,7 @@ let check_trait_override_annotations env cls ~static =
                 Errors.override_per_trait
                   (Cls.pos cls, Cls.name cls)
                   id
-                  (Reason.to_pos r)
+                  (get_pos ty)
           ))
 
 let check_if_cyclic cls =

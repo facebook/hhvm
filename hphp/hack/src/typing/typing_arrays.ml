@@ -36,8 +36,9 @@ class virtual downcast_tabstract_to_array_type_mapper =
       match TUtils.get_all_supertypes env ty with
       | (_, []) -> (env, ty)
       | (env, tyl) ->
-        let is_array = function
-          | (_, Tarraykind _) -> true
+        let is_array ty =
+          match get_node ty with
+          | Tarraykind _ -> true
           | _ -> false
         in
         (match List.filter tyl is_array with
@@ -50,15 +51,15 @@ class virtual downcast_tabstract_to_array_type_mapper =
           this#on_type env x)
 
     method on_tgeneric env r x =
-      let ty = (r, Tgeneric x) in
+      let ty = mk (r, Tgeneric x) in
       this#try_super_types env ty
 
     method on_tdependent env r x ty =
-      let ty = (r, Tdependent (x, ty)) in
+      let ty = mk (r, Tdependent (x, ty)) in
       this#try_super_types env ty
 
     method on_tnewtype env r x tyl ty =
-      let ty = (r, Tnewtype (x, tyl, ty)) in
+      let ty = mk (r, Tnewtype (x, tyl, ty)) in
       this#try_super_types env ty
 
     method virtual on_type : env -> locl_ty -> result
@@ -74,10 +75,10 @@ let union_keys = union
 let union_values env values =
   let unknown =
     List.find values (fun ty ->
-        TUtils.is_sub_type_for_union env (Reason.none, make_tany ()) ty)
+        TUtils.is_sub_type_for_union env (mk (Reason.none, make_tany ())) ty)
   in
   match unknown with
-  | Some (r, _) -> (env, (r, TUtils.tany env))
+  | Some ty -> (env, mk (get_reason ty, TUtils.tany env))
   | None -> union env values
 
 (* Apply this function to a type after lvalue array access that should update
@@ -93,10 +94,10 @@ let update_array_type p ~is_map env ty =
         if is_map then
           let (env, tk) = Env.fresh_type env p in
           let (env, tv) = Env.fresh_type env p in
-          (env, (Reason.Rused_as_map p, Tarraykind (AKdarray (tk, tv))))
+          (env, mk (Reason.Rused_as_map p, Tarraykind (AKdarray (tk, tv))))
         else
           let (env, tv) = Env.fresh_type env p in
-          (env, (Reason.Rappend p, Tarraykind (AKvarray tv)))
+          (env, mk (Reason.Rappend p, Tarraykind (AKvarray tv)))
     end
   in
   let (env, ty) = mapper#on_type (fresh_env env) ty in

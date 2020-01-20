@@ -298,7 +298,7 @@ let from_file (env : env) : aast_result =
   from_text env source_text
 
 let aast_to_tast aast =
-  let tany = (Typing_reason.Rnone, Typing_defs.make_tany ()) in
+  let tany = Typing_defs.mk (Typing_reason.Rnone, Typing_defs.make_tany ()) in
   let endo =
     object
       inherit [_] Aast.map

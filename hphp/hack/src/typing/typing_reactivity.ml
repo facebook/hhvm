@@ -30,9 +30,10 @@ let make_call_info ~receiver_is_self ~is_static receiver_type method_name =
 
 let type_to_str env ty =
   (* strip expression dependent types to make error message clearer *)
-  let rec unwrap = function
-    | (_, Tdependent (DTthis, ty)) -> unwrap ty
-    | ty -> ty
+  let rec unwrap ty =
+    match get_node ty with
+    | Tdependent (DTthis, ty) -> unwrap ty
+    | _ -> ty
   in
   Typing_print.full env (unwrap ty)
 
@@ -58,9 +59,9 @@ let rec condition_type_from_reactivity r =
    - for all other cases return None *)
 let get_associated_condition_type env ~is_self ty =
   let (env, ty) = Env.expand_type env ty in
-  match ty with
-  | (_, Tgeneric n) -> Env.get_condition_type env n
-  | (_, Tdependent (DTthis, _)) ->
+  match get_node ty with
+  | Tgeneric n -> Env.get_condition_type env n
+  | Tdependent (DTthis, _) ->
     condition_type_from_reactivity (env_reactivity env)
   | _ when is_self -> condition_type_from_reactivity (env_reactivity env)
   | _ -> None
@@ -102,7 +103,7 @@ let check_only_rx_if_impl env ~is_receiver ~is_self pos reason ty cond_ty =
   let fail () =
     let condition_type_str = type_to_str env cond_ty in
     let arg_type_str = type_to_str env ty in
-    let arg_pos = Reason.to_pos (fst ty) in
+    let arg_pos = get_pos ty in
     Errors.invalid_argument_type_for_condition_in_rx
       ~is_receiver
       pos
@@ -113,10 +114,11 @@ let check_only_rx_if_impl env ~is_receiver ~is_self pos reason ty cond_ty =
   in
   let rec check env ty =
     (* TODO: move caller to be TAST check  *)
-    match Env.expand_type env ty with
-    | (env, (_, Tintersection tyl)) ->
+    let (env, ty) = Env.expand_type env ty in
+    match get_node ty with
+    | Tintersection tyl ->
       fst (TU.run_on_intersection env tyl ~f:(fun env ty -> (check env ty, ())))
-    | (env, ty) ->
+    | _ ->
       Errors.try_
         (fun () -> SubType.sub_type_or_fail env ty cond_ty fail)
         (fun _ -> assert_condition_type_matches ~is_self env ty cond_ty fail)
@@ -140,9 +142,12 @@ let try_get_method_from_condition_type env receiver_info =
          |> Option.map ~f:(fun t -> (t, is_static, method_name)))
   |> bind ~f:(fun (t, is_static, method_name) ->
          CT.try_get_method_from_condition_type env t is_static method_name)
-  |> bind ~f:(function
-         | { ce_type = (lazy (_, Typing_defs.Tfun f)); _ } -> Some f
-         | _ -> None)
+  |> bind ~f:(function { ce_type = (lazy ty); _ } ->
+         begin
+           match get_node ty with
+           | Tfun f -> Some f
+           | _ -> None
+         end)
 
 let try_get_reactivity_from_condition_type env receiver_info =
   try_get_method_from_condition_type env receiver_info
@@ -195,7 +200,7 @@ let check_reactivity_matches
 let get_effective_reactivity env r ft arg_types =
   let go ((env, res, opt_pos) as acc) (p, arg_ty) =
     let (env, arg_ty) = Env.expand_type env arg_ty in
-    match (p.fp_rx_annotation, arg_ty) with
+    match (p.fp_rx_annotation, deref arg_ty) with
     | (Some Param_rx_var, (reason, Tfun { ft_reactive = r; _ })) ->
       Errors.try_
         (fun () ->
@@ -294,7 +299,7 @@ let check_call env method_info pos reason ft arg_types =
                 arg_ty :: arg_tl ) ->
               let ty =
                 if Typing_utils.is_option env fp_type.et_type then
-                  MakeType.nullable_decl (fst ty) ty
+                  MakeType.nullable_decl (get_reason ty) ty
                 else
                   ty
               in
@@ -317,7 +322,7 @@ let check_call env method_info pos reason ft arg_types =
               when Typing_utils.is_option env fp_type.et_type ->
               (* if there are more parameters than actual arguments - assume that remaining parameters
             have default values (actual arity check is performed elsewhere).  *)
-              let ty = MakeType.nullable_decl (fst ty) ty in
+              let ty = MakeType.nullable_decl (get_reason ty) ty in
               (* Treat missing arguments as if null was provided explicitly *)
               let arg_ty = MakeType.null Reason.none in
               let env =
@@ -369,17 +374,16 @@ let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
     else
       let rec err_if_not_fun env ty =
         let (env, ty) = Env.expand_type env ty in
-        match snd ty with
+        match get_node ty with
         (* if parameter has <<__AtMostRxAsFunc>> annotation then:
            - parameter should be typed as function or a like function *)
         | Tfun _ -> ()
-        | Tunion [ty; (_, Tdynamic)]
-        | Tunion [(_, Tdynamic); ty]
-        | Toption ty ->
-          err_if_not_fun env ty
+        | Tunion [ty; dty] when is_dynamic dty -> err_if_not_fun env ty
+        | Tunion [dty; ty] when is_dynamic dty -> err_if_not_fun env ty
+        | Toption ty -> err_if_not_fun env ty
         | _ ->
           Errors.invalid_type_for_atmost_rx_as_rxfunc_parameter
-            (Reason.to_pos (fst param_ty))
+            (get_pos param_ty)
             (Typing_print.full env param_ty)
       in
       err_if_not_fun env param_ty
@@ -387,10 +391,10 @@ let disallow_atmost_rx_as_rxfunc_on_non_functions env param param_ty =
 (* generate a name that uniquely identifies pair target_type * condition_type *)
 let generate_fresh_name_for_target_of_condition_type
     env target_type condition_type =
-  match condition_type with
-  | (_, Tapply ((_, cond_name), _)) ->
+  match get_node condition_type with
+  | Tapply ((_, cond_name), _) ->
     Some (Typing_print.full env target_type ^ "#" ^ cond_name)
-  | (_, Taccess _) ->
+  | Taccess _ ->
     Some
       ( Typing_print.full env target_type
       ^ "#"
@@ -401,8 +405,7 @@ let try_substitute_type_with_condition env cond_ty ty =
   generate_fresh_name_for_target_of_condition_type env ty cond_ty
   |> Option.map ~f:(fun fresh_type_argument_name ->
          let param_ty =
-           ( Reason.Rwitness (Reason.to_pos (fst ty)),
-             Tgeneric fresh_type_argument_name )
+           mk (Reason.Rwitness (get_pos ty), Tgeneric fresh_type_argument_name)
          in
          (* if generic type is already registered this means we already saw
        parameter with the same pair (declared type * condition type) so there
@@ -410,10 +413,11 @@ let try_substitute_type_with_condition env cond_ty ty =
          if Env.is_generic_parameter env fresh_type_argument_name then
            (env, param_ty)
          else
-           let (env, ty) = Env.expand_type env ty in
+           let (env, ety) = Env.expand_type env ty in
            let (param_ty, ty) =
-             match ty with
-             | (_, Toption ty) -> ((fst param_ty, Toption param_ty), ty)
+             match get_node ety with
+             | Toption ty ->
+               (MakeType.nullable_locl (get_reason param_ty) param_ty, ty)
              | _ -> (param_ty, ty)
            in
            (* constraint type argument to hint *)
@@ -445,9 +449,9 @@ let strip_condition_type_in_return env ty =
   if not (equal_reactivity (env_reactivity env) Nonreactive) then
     ty
   else
-    let (env, ty) = Env.expand_type env ty in
-    match ty with
-    | (_, Tgeneric n) when Option.is_some (Env.get_condition_type env n) ->
+    let (env, ety) = Env.expand_type env ty in
+    match get_node ety with
+    | Tgeneric n when Option.is_some (Env.get_condition_type env n) ->
       let upper_bounds = Env.get_upper_bounds env n in
       begin
         match Typing_set.elements upper_bounds with

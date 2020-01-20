@@ -65,10 +65,10 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
 let check_class_elt_visibility parent_class_elt class_elt on_error =
   let parent_vis = parent_class_elt.ce_visibility in
   let c_vis = class_elt.ce_visibility in
-  let (lazy (parent_pos, _)) = parent_class_elt.ce_type in
-  let (lazy (elt_pos, _)) = class_elt.ce_type in
-  let parent_pos = Reason.to_pos parent_pos in
-  let pos = Reason.to_pos elt_pos in
+  let (lazy parent_ty) = parent_class_elt.ce_type in
+  let (lazy elt_ty) = class_elt.ce_type in
+  let parent_pos = get_pos parent_ty in
+  let pos = get_pos elt_ty in
   check_visibility parent_vis c_vis parent_pos pos on_error
 
 (* Check that all the required members are implemented *)
@@ -86,13 +86,9 @@ let check_members_implemented
          * trait *)
         ()
       | _ when Option.is_none (get_member member_name) ->
-        let (lazy (pos, _)) = class_elt.ce_type in
-        let defn_reason = Reason.to_pos pos in
-        Errors.member_not_implemented
-          member_name
-          parent_reason
-          reason
-          defn_reason
+        let (lazy ty) = class_elt.ce_type in
+        let defn_pos = get_pos ty in
+        Errors.member_not_implemented member_name parent_reason reason defn_pos
       | _ -> ())
 
 (* An abstract member can be declared in multiple ancestors. Sometimes these
@@ -147,10 +143,10 @@ let check_final_method member_source parent_class_elt class_elt =
   in
   if is_method && is_override && not class_elt.ce_synthesized then
     (* we have a final method being overridden by a user-declared method *)
-    let (lazy (parent_pos, _)) = parent_class_elt.ce_type in
-    let (lazy (elt_pos, _)) = class_elt.ce_type in
-    let parent_pos = Reason.to_pos parent_pos in
-    let pos = Reason.to_pos elt_pos in
+    let (lazy parent_ty) = parent_class_elt.ce_type in
+    let (lazy elt_ty) = class_elt.ce_type in
+    let parent_pos = get_pos parent_ty in
+    let pos = get_pos elt_ty in
     Errors.override_final parent_pos pos
 
 let check_memoizelsb_method member_source parent_class_elt class_elt =
@@ -167,10 +163,10 @@ let check_memoizelsb_method member_source parent_class_elt class_elt =
   in
   if is_method && is_memoizelsb && is_override then
     (* we have a __MemoizeLSB method which is overriding something else *)
-    let (lazy (parent_pos, _)) = parent_class_elt.ce_type in
-    let (lazy (elt_pos, _)) = class_elt.ce_type in
-    let parent_pos = Reason.to_pos parent_pos in
-    let pos = Reason.to_pos elt_pos in
+    let (lazy parent_ty) = parent_class_elt.ce_type in
+    let (lazy elt_ty) = class_elt.ce_type in
+    let parent_pos = get_pos parent_ty in
+    let pos = get_pos elt_ty in
     Errors.override_memoizelsb parent_pos pos
 
 let check_lsb_overrides member_source member_name parent_class_elt class_elt =
@@ -185,10 +181,10 @@ let check_lsb_overrides member_source member_name parent_class_elt class_elt =
   in
   if is_sprop && parent_is_lsb && is_override then
     (* __LSB attribute is being overridden *)
-    let (lazy (parent_pos, _)) = parent_class_elt.ce_type in
-    let (lazy (elt_pos, _)) = class_elt.ce_type in
-    let parent_pos = Reason.to_pos parent_pos in
-    let pos = Reason.to_pos elt_pos in
+    let (lazy parent_ty) = parent_class_elt.ce_type in
+    let (lazy elt_ty) = class_elt.ce_type in
+    let parent_pos = get_pos parent_ty in
+    let pos = get_pos elt_ty in
     Errors.override_lsb member_name parent_pos pos
 
 let check_lateinit parent_class_elt class_elt =
@@ -199,10 +195,10 @@ let check_lateinit parent_class_elt class_elt =
     Bool.( <> ) parent_class_elt.ce_lateinit class_elt.ce_lateinit
   in
   if is_override && lateinit_diff then
-    let (lazy (parent_reason, _)) = parent_class_elt.ce_type in
-    let (lazy (child_reason, _)) = class_elt.ce_type in
-    let parent_pos = Reason.to_pos parent_reason in
-    let child_pos = Reason.to_pos child_reason in
+    let (lazy parent_ty) = parent_class_elt.ce_type in
+    let (lazy child_ty) = class_elt.ce_type in
+    let parent_pos = get_pos parent_ty in
+    let child_pos = get_pos child_ty in
     Errors.bad_lateinit_override
       parent_class_elt.ce_lateinit
       parent_pos
@@ -225,10 +221,10 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
     match (parent_attr, attr) with
     | (Some { xa_tag = parent_tag; _ }, Some { xa_tag = tag; _ })
       when is_less_strict (tag, parent_tag) ->
-      let (lazy (parent_reason, _)) = parent_class_elt.ce_type in
-      let (lazy (child_reason, _)) = class_elt.ce_type in
-      let parent_pos = Reason.to_pos parent_reason in
-      let child_pos = Reason.to_pos child_reason in
+      let (lazy parent_ty) = parent_class_elt.ce_type in
+      let (lazy child_ty) = class_elt.ce_type in
+      let parent_pos = get_pos parent_ty in
+      let child_pos = get_pos child_ty in
       let show = function
         | None -> "not required or lateinit"
         | Some Required -> "required"
@@ -275,8 +271,8 @@ let check_override
   check_class_elt_visibility parent_class_elt class_elt on_error;
   let (lazy fty_child) = class_elt.ce_type in
   let (lazy fty_parent) = parent_class_elt.ce_type in
-  let pos = Reason.to_pos (fst fty_child) in
-  let parent_pos = Reason.to_pos (fst fty_parent) in
+  let pos = get_pos fty_child in
+  let parent_pos = get_pos fty_parent in
   if Bool.( <> ) class_elt.ce_const parent_class_elt.ce_const then
     Errors.overriding_prop_const_mismatch
       parent_pos
@@ -300,7 +296,7 @@ let check_override
     let on_error ?code:_ errorl =
       Errors.bad_method_override pos member_name errorl on_error
     in
-    match (fty_parent, fty_child) with
+    match (deref fty_parent, deref fty_child) with
     | ((r_parent, Tfun ft_parent), (r_child, Tfun ft_child)) ->
       let is_static = Cls.has_smethod parent_class member_name in
       let check (r1, ft1) (r2, ft2) () =
@@ -358,8 +354,8 @@ let check_override
         class_
         class_elt.ce_origin
         on_error
-    | (fty_parent, _) ->
-      (match (snd fty_parent, snd fty_child) with
+    | _ ->
+      (match (get_node fty_parent, get_node fty_child) with
       | (Tany _, Tany _) -> ()
       | (Tany _, _) -> Errors.decl_override_missing_hint parent_pos on_error
       | (_, Tany _) -> Errors.decl_override_missing_hint pos on_error
@@ -434,8 +430,8 @@ let check_const_override
         (Cls.name class_)
         on_error
     else if (not parent_class_const.cc_abstract) && class_const.cc_abstract then
-      let pos = Reason.to_pos (fst class_const.cc_type) in
-      let parent_pos = Reason.to_pos (fst parent_class_const.cc_type) in
+      let pos = get_pos class_const.cc_type in
+      let parent_pos = get_pos parent_class_const.cc_type in
       Errors.abstract_concrete_override pos parent_pos `constant );
   Phase.sub_type_decl
     env
@@ -594,7 +590,7 @@ let default_constructor_ce class_ =
     ce_memoizelsb = false;
     ce_synthesized = true;
     ce_visibility = Vpublic;
-    ce_type = lazy (r, Tfun ft);
+    ce_type = lazy (mk (r, Tfun ft));
     ce_origin = name;
     ce_deprecated = None;
     ce_pos = lazy pos;
@@ -612,8 +608,8 @@ let check_constructors
     match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
     | (Some parent_cstr, _) when parent_cstr.ce_synthesized -> env
     | (Some parent_cstr, None) ->
-      let (lazy (pos, _)) = parent_cstr.ce_type in
-      Errors.missing_constructor (Reason.to_pos pos) on_error;
+      let (lazy ty) = parent_cstr.ce_type in
+      Errors.missing_constructor (get_pos ty) on_error;
       env
     | (_, Some cstr) when cstr.ce_override ->
       (* <<__UNSAFE_Construct>> *)
@@ -714,7 +710,7 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
     in
 
     let default =
-      (Reason.Rtconst_no_cstr child_typeconst.ttc_name, Tgeneric name)
+      mk (Reason.Rtconst_no_cstr child_typeconst.ttc_name, Tgeneric name)
     in
     let child_cstr =
       if child_is_abstract then
@@ -843,7 +839,7 @@ let check_consts env parent_class class_ psubst subst on_error =
               on_error
           | Some _ -> ())
         | None ->
-          let parent_pos = Reason.to_pos (fst parent_const.cc_type) in
+          let parent_pos = get_pos parent_const.cc_type in
           Errors.member_not_implemented
             const_name
             parent_pos

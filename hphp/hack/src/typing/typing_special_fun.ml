@@ -39,27 +39,37 @@ let transform_special_fun_ty fty id nargs =
       | [param1; param2; param3] -> (param1, param2, param3)
       | _ -> failwith "Expected 3 parameters for idx in hhi file"
     in
-    let r3 = fst param1.fp_type.et_type in
-    let rret = fst fty.ft_ret.et_type in
+    let r3 = get_reason param1.fp_type.et_type in
+    let rret = get_reason fty.ft_ret.et_type in
     let (params, ret) =
       match nargs with
       | 2 ->
         (* Transform ?KeyedContainer<Tk, Tv> to ?KeyedContainer<Tk, ?Tv> *)
+        let fail () = failwith "Wrong type for idx in hhi file" in
         let ty1 =
-          match param1.fp_type.et_type with
-          | (r11, Toption (r12, Tapply (coll, [tk; ((r13, _) as tv)]))) ->
-            (r11, Toption (r12, Tapply (coll, [tk; (r13, Toption tv)])))
-          | _ -> failwith "Wrong type for idx in hhi file"
+          match deref param1.fp_type.et_type with
+          | (r11, Toption t) ->
+            begin
+              match deref t with
+              | (r12, Tapply (coll, [tk; tv])) ->
+                let (r13, _) = deref tv in
+                mk
+                  ( r11,
+                    Toption
+                      (mk (r12, Tapply (coll, [tk; mk (r13, Toption tv)]))) )
+              | _ -> fail ()
+            end
+          | _ -> fail ()
         in
         let param1 = update_param param1 ty1 in
         (* Return type should be ?Tv *)
-        let ret = MakeType.nullable_decl rret (rret, Tgeneric "Tv") in
+        let ret = MakeType.nullable_decl rret (mk (rret, Tgeneric "Tv")) in
         ([param1; param2], ret)
       | 3 ->
         (* Third parameter should have type Tv *)
-        let param3 = update_param param3 (r3, Tgeneric "Tv") in
+        let param3 = update_param param3 (mk (r3, Tgeneric "Tv")) in
         (* Return type should be Tv *)
-        let ret = (rret, Tgeneric "Tv") in
+        let ret = mk (rret, Tgeneric "Tv") in
         ([param1; param2; param3], ret)
       (* Shouldn't happen! *)
       | _ -> (fty.ft_params, fty.ft_ret.et_type)
@@ -92,10 +102,10 @@ let transform_special_fun_ty fty id nargs =
         | param1 :: param2 :: _ -> (param1, param2)
         | _ -> assert false
       in
-      let r1 = fst param1.fp_type.et_type in
-      let r2 = fst param2.fp_type.et_type in
-      let rret = fst fty.ft_ret.et_type in
-      let tr = (rret, Tgeneric "Tr") in
+      let r1 = get_reason param1.fp_type.et_type in
+      let r2 = get_reason param2.fp_type.et_type in
+      let rret = get_reason fty.ft_ret.et_type in
+      let tr = mk (rret, Tgeneric "Tr") in
       let rec make_tparam_names i =
         if Int.equal i 0 then
           []
@@ -103,7 +113,7 @@ let transform_special_fun_ty fty id nargs =
           ("T" ^ string_of_int i) :: make_tparam_names (i - 1)
       in
       let tparam_names = List.rev (make_tparam_names arity) in
-      let vars = List.map tparam_names (fun name -> (r2, Tgeneric name)) in
+      let vars = List.map tparam_names (fun name -> mk (r2, Tgeneric name)) in
       let make_tparam name =
         {
           tp_variance = Ast_defs.Invariant;
@@ -120,34 +130,35 @@ let transform_special_fun_ty fty id nargs =
       let param1 =
         update_param
           param1
-          ( r1,
-            Tfun
-              {
-                ft_is_coroutine = false;
-                ft_arity = Fstandard (arity, arity);
-                ft_tparams = ([], FTKtparams);
-                ft_where_constraints = [];
-                ft_params = List.map vars TUtils.default_fun_param;
-                ft_ret = MakeType.unenforced tr;
-                ft_fun_kind = fty.ft_fun_kind;
-                ft_reactive = fty.ft_reactive;
-                ft_mutability = fty.ft_mutability;
-                ft_returns_mutable = fty.ft_returns_mutable;
-                ft_return_disposable = fty.ft_return_disposable;
-                ft_returns_void_to_rx = fty.ft_returns_void_to_rx;
-              } )
+          (mk
+             ( r1,
+               Tfun
+                 {
+                   ft_is_coroutine = false;
+                   ft_arity = Fstandard (arity, arity);
+                   ft_tparams = ([], FTKtparams);
+                   ft_where_constraints = [];
+                   ft_params = List.map vars TUtils.default_fun_param;
+                   ft_ret = MakeType.unenforced tr;
+                   ft_fun_kind = fty.ft_fun_kind;
+                   ft_reactive = fty.ft_reactive;
+                   ft_mutability = fty.ft_mutability;
+                   ft_returns_mutable = fty.ft_returns_mutable;
+                   ft_return_disposable = fty.ft_return_disposable;
+                   ft_returns_void_to_rx = fty.ft_returns_void_to_rx;
+                 } ))
       in
       let param_rest =
         List.map vars (fun var ->
             let tc = Tapply ((fst id, SN.Collections.cContainer), [var]) in
-            TUtils.default_fun_param (r2, tc))
+            TUtils.default_fun_param (mk (r2, tc)))
       in
       {
         fty with
         ft_arity = Fstandard (arity + 1, arity + 1);
         ft_params = param1 :: param_rest;
         ft_tparams;
-        ft_ret = MakeType.unenforced (rret, Tarray (Some tr, None));
+        ft_ret = MakeType.unenforced (mk (rret, Tarray (Some tr, None)));
       }
   else
     fty

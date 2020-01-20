@@ -26,9 +26,9 @@ return nothing. *)
 let non env r ty ~approx =
   let (env, ty) = Env.expand_type env ty in
   let non_ty =
-    match snd ty with
-    | Tprim Aast.Tnull -> (r, Tnonnull)
-    | Tnonnull -> (r, Tprim Aast.Tnull)
+    match get_node ty with
+    | Tprim Aast.Tnull -> MkType.nonnull r
+    | Tnonnull -> MkType.null r
     | _ ->
       if Utils.equal_approx approx Utils.ApproxUp then
         MkType.mixed r
@@ -48,13 +48,13 @@ let decompose_atomic env ty =
     | [] -> acc_tyl
     | ty :: tyl -> decompose ty tyl acc_tyl
   and decompose ty tyl acc_tyl =
-    match ty with
+    match deref ty with
     | (r, Toption ty) -> decompose_list (ty :: tyl) (MkType.null r :: acc_tyl)
     | _ -> decompose_list tyl (ty :: acc_tyl)
   in
   let tyl = decompose ty [] [] in
   let tyl = TySet.elements (TySet.of_list tyl) in
-  (env, MkType.union (fst ty) tyl)
+  (env, MkType.union (get_reason ty) tyl)
 
 (** Number of '&' symbols in an intersection representation. E.g. for (A & B),
 returns 1, for A, returns 0. *)
@@ -65,7 +65,7 @@ let number_of_inter_symbols env ty =
     | ty :: tyl ->
       let (env, ty) = Env.expand_type env ty in
       begin
-        match snd ty with
+        match get_node ty with
         | Tintersection tyl' ->
           n_inter env (tyl' @ tyl) (List.length tyl' - 1 + n)
         | Tunion tyl' -> n_inter env (tyl' @ tyl) n
@@ -110,24 +110,23 @@ let rec intersect env ~r ty1 ty2 =
         let (env, ty2) = decompose_atomic env ty2 in
         let (env, inter_ty) =
           try
-            match (ty1, ty2) with
+            match (deref ty1, deref ty2) with
             | ((_, Ttuple tyl1), (_, Ttuple tyl2))
               when Int.equal (List.length tyl1) (List.length tyl2) ->
               let (env, inter_tyl) =
                 List.map2_env env tyl1 tyl2 ~f:(intersect ~r)
               in
-              (env, (r, Ttuple inter_tyl))
+              (env, mk (r, Ttuple inter_tyl))
             | ((_, Tshape (shape_kind1, fdm1)), (_, Tshape (shape_kind2, fdm2)))
               ->
               let (env, shape_kind, fdm) =
                 intersect_shapes env r (shape_kind1, fdm1) (shape_kind2, fdm2)
               in
-              (env, (r, Tshape (shape_kind, fdm)))
+              (env, mk (r, Tshape (shape_kind, fdm)))
             | ((_, Tintersection tyl1), (_, Tintersection tyl2)) ->
               intersect_lists env r tyl1 tyl2
-            | ((_, Tintersection tyl), ty)
-            | (ty, (_, Tintersection tyl)) ->
-              intersect_lists env r [ty] tyl
+            | ((_, Tintersection tyl), _) -> intersect_lists env r [ty2] tyl
+            | (_, (_, Tintersection tyl)) -> intersect_lists env r [ty1] tyl
             | ((r1, Tunion tyl1), (r2, Tunion tyl2)) ->
               (* Factorize common types, for example
            (A | B) & (A | C) = A | (B & C)
@@ -149,7 +148,7 @@ let rec intersect env ~r ty1 ty2 =
             | ((r_union, Tunion tyl), ty)
             | (ty, (r_union, Tunion tyl)) ->
               let (env, inter_tyl) =
-                intersect_ty_union env r ty (r_union, tyl)
+                intersect_ty_union env r (mk ty) (r_union, tyl)
               in
               Utils.fold_union env r inter_tyl
             | _ -> make_intersection env r [ty1; ty2]
@@ -216,7 +215,7 @@ and intersect_ty_tyl env r ty tyl =
 and try_intersect env r ty1 ty2 =
   let (env, ty) = intersect env r ty1 ty2 in
   let (env, ty) = Env.expand_type env ty in
-  match snd ty with
+  match get_node ty with
   | Tintersection _ -> (env, None)
   | _ -> (env, Some ty)
 
@@ -241,7 +240,7 @@ and J the set of indices such that this is not the case,
 the result would be
   (|_{i in I} (Ai & B)) | (B & (|_{j in J} Aj))
 *)
-and intersect_ty_union env r ty1 (r_union, tyl2) =
+and intersect_ty_union env r (ty1 : locl_ty) (r_union, tyl2) =
   let (env, inter_tyl) =
     List.map_env env tyl2 ~f:(fun env ty2 -> intersect env r ty1 ty2)
   in
@@ -279,7 +278,7 @@ let normalize_intersection env ?on_tyvar tyl =
         normalize_intersection env r tyl (TySet.add ty tys_acc)
       in
       begin
-        match (ty, on_tyvar) with
+        match (deref ty, on_tyvar) with
         | ((r', Tvar v), Some on_tyvar) ->
           let (env, ty') = on_tyvar env r' v in
           if ty_equal ty ty' then
@@ -292,8 +291,8 @@ let normalize_intersection env ?on_tyvar tyl =
           let (env, ty) = Utils.simplify_unions env ty ?on_tyvar in
           let (env, ety) = Env.expand_type env ty in
           begin
-            match ety with
-            | (_, Tunion _) -> proceed env ty
+            match get_node ety with
+            | Tunion _ -> proceed env ty
             | _ -> normalize_intersection env r (ty :: tyl) tys_acc
           end
         | _ -> proceed env ty
@@ -301,7 +300,8 @@ let normalize_intersection env ?on_tyvar tyl =
   in
   normalize_intersection env None tyl TySet.empty
 
-let simplify_intersections env ?on_tyvar ((r, _) as ty) =
+let simplify_intersections env ?on_tyvar ty =
+  let r = get_reason ty in
   let (env, r', tys) = normalize_intersection env [ty] ?on_tyvar in
   let r = Option.value r' ~default:r in
   intersect_list env r (TySet.elements tys)
@@ -324,10 +324,12 @@ let rec intersect_i env r ty1 lty2 =
         let (env, ty) = intersect env r lty1 lty2 in
         (env, LoclType ty)
       | ConstraintType cty1 ->
-        (match cty1 with
+        (match deref_constraint_type cty1 with
         | (r, TCintersection (lty1, cty1)) ->
           let (env, lty) = intersect env r lty1 lty2 in
-          (env, ConstraintType (r, TCintersection (lty, cty1)))
+          ( env,
+            ConstraintType (mk_constraint_type (r, TCintersection (lty, cty1)))
+          )
         | (r, TCunion (lty1, cty1)) ->
           (* Distribute intersection over union.
           At the moment local types in TCunion can only be
@@ -339,10 +341,13 @@ let rec intersect_i env r ty1 lty2 =
           | LoclType ty ->
             let (env, ty) = Utils.union env lty ty in
             (env, LoclType ty)
-          | ConstraintType cty -> (env, ConstraintType (r, TCunion (lty, cty))))
+          | ConstraintType cty ->
+            (env, ConstraintType (mk_constraint_type (r, TCunion (lty, cty)))))
         | (_, Thas_member _)
         | (_, Tdestructure _) ->
-          (env, ConstraintType (r, TCintersection (lty2, cty1))))
+          ( env,
+            ConstraintType (mk_constraint_type (r, TCintersection (lty2, cty1)))
+          ))
     in
     match ty with
     | LoclType _ -> (env, ty)

@@ -28,14 +28,15 @@ let log_anonymous env =
         Errors.ambiguous_lambda
           pos
           (List.map ftys (fun fty ->
-               (Reason.to_pos (fst fty), Typing_print.full_strip_ns env fty)))
+               (get_pos fty, Typing_print.full_strip_ns env fty)))
       else
         ());
   !found
 
 let make_suggest_ty tys =
-  ( Reason.Rnone,
-    Tnewtype ("HackSuggest", tys, Typing_make_type.mixed Reason.none) )
+  mk
+    ( Reason.Rnone,
+      Tnewtype ("HackSuggest", tys, Typing_make_type.mixed Reason.none) )
 
 let visitor =
   object
@@ -51,44 +52,60 @@ let visitor =
           (* If we have a single type, propagate types onto parameters *)
           let (newty, f) =
             match ftys with
-            | [(_, Tfun { ft_params; _ })] ->
-              let rec add_types tfun_params efun_params =
-                match (tfun_params, efun_params) with
-                | (_, []) -> []
-                | ( { fp_type; _ } :: tfun_params,
-                    ({ Tast.param_annotation = (pos, _); _ } as param) :: params
-                  )
-                  when Option.is_none
-                         (Tast.hint_of_type_hint param.Tast.param_type_hint) ->
-                  {
-                    param with
-                    Tast.param_annotation =
-                      (pos, make_suggest_ty [fp_type.et_type]);
-                  }
-                  :: add_types tfun_params params
-                | (_ :: tfun_params, param :: params) ->
-                  param :: add_types tfun_params params
-                | ([], _) -> efun_params
-              in
-              let f_params = add_types ft_params f.Tast.f_params in
-              ((pos, newty), { f with Tast.f_params })
+            | [funty] ->
+              begin
+                match get_node funty with
+                | Tfun { ft_params; _ } ->
+                  let rec add_types tfun_params efun_params =
+                    match (tfun_params, efun_params) with
+                    | (_, []) -> []
+                    | ( { fp_type; _ } :: tfun_params,
+                        ({ Tast.param_annotation = (pos, _); _ } as param)
+                        :: params )
+                      when Option.is_none
+                             (Tast.hint_of_type_hint param.Tast.param_type_hint)
+                      ->
+                      {
+                        param with
+                        Tast.param_annotation =
+                          (pos, make_suggest_ty [fp_type.et_type]);
+                      }
+                      :: add_types tfun_params params
+                    | (_ :: tfun_params, param :: params) ->
+                      param :: add_types tfun_params params
+                    | ([], _) -> efun_params
+                  in
+                  let f_params = add_types ft_params f.Tast.f_params in
+                  ((pos, newty), { f with Tast.f_params })
+                | _ -> ((pos, newty), f)
+              end
             | _ -> ((pos, newty), f)
           in
           Some (newty, f)
       in
       let result =
         match x with
-        | ((pos, (_p, Tanon (_anon_arity, id))), Tast.Efun (f, ids)) ->
+        | ((pos, ty), Tast.Efun (f, ids)) ->
           begin
-            match on_fun pos id f with
-            | None -> x
-            | Some (newty, f) -> (newty, Tast.Efun (f, ids))
+            match get_node ty with
+            | Tanon (_anon_arity, id) ->
+              begin
+                match on_fun pos id f with
+                | None -> x
+                | Some (newty, f) -> (newty, Tast.Efun (f, ids))
+              end
+            | _ -> x
           end
-        | ((pos, (_p, Tanon (_anon_arity, id))), Tast.Lfun (f, ids)) ->
+        | ((pos, ty), Tast.Lfun (f, ids)) ->
           begin
-            match on_fun pos id f with
-            | None -> x
-            | Some (newty, f) -> (newty, Tast.Lfun (f, ids))
+            match get_node ty with
+            | Tanon (_anon_arity, id) ->
+              begin
+                match on_fun pos id f with
+                | None -> x
+                | Some (newty, f) -> (newty, Tast.Lfun (f, ids))
+              end
+            | _ -> x
           end
         | _ -> x
       in

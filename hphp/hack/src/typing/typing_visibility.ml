@@ -23,7 +23,7 @@ let is_private_visible env x self_id =
     let their_class = Env.get_class env x in
     match (my_class, their_class) with
     | (Some my_class, Some their_class) ->
-      let make_tany _ = (Reason.Rnone, Typing_defs.make_tany ()) in
+      let make_tany _ = mk (Reason.Rnone, Typing_defs.make_tany ()) in
       let my_class_ty =
         Typing_make_type.class_type
           Reason.Rnone
@@ -56,7 +56,7 @@ let is_protected_visible env x self_id =
       (* Children can call parent's protected methods and
        * parents can call children's protected methods (like a
        * constructor) *)
-      let make_tany _ = (Reason.Rnone, Typing_defs.make_tany ()) in
+      let make_tany _ = mk (Reason.Rnone, Typing_defs.make_tany ()) in
       let my_class_ty =
         Typing_make_type.class_type
           Reason.Rnone

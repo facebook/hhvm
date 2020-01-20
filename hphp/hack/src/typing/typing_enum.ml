@@ -26,8 +26,8 @@ let member_type env member_ce =
   if Option.is_none member_ce.ce_xhp_attr then
     default_result
   else
-    match default_result with
-    | (_, Tapply (enum_id, _)) ->
+    match get_node default_result with
+    | Tapply (enum_id, _) ->
       (* XHP attribute type transform is necessary to account for
        * non-first class Enums:
 
@@ -45,8 +45,8 @@ let member_type env member_ce =
              (Cls.get_ancestor tc)
          with
         | None -> default_result
-        | Some (_base, (_, enum_ty), _constraint) ->
-          let ty = (fst default_result, enum_ty) in
+        | Some (_base, enum_ty, _constraint) ->
+          let ty = mk (get_reason default_result, get_node enum_ty) in
           ty))
     | _ -> default_result
 
@@ -56,10 +56,8 @@ let member_type env member_ce =
 let check_valid_array_key_type f_fail ~allow_any env p t =
   let rec check_valid_array_key_type env t =
     let ety_env = Phase.env_with_self env in
-    let (env, (r, t'), trail) =
-      Typing_tdef.force_expand_typedef ~ety_env env t
-    in
-    match t' with
+    let (env, t, trail) = Typing_tdef.force_expand_typedef ~ety_env env t in
+    match get_node t with
     | Tprim (Tint | Tstring) -> (env, None)
     (* Enums have to be valid array keys *)
     | Tnewtype (id, _, _) when Typing_env.is_enum env id -> (env, None)
@@ -97,9 +95,7 @@ let check_valid_array_key_type f_fail ~allow_any env p t =
     | Tpu _
     | Tpu_type_access _ ->
       ( env,
-        Some
-          (fun () ->
-            f_fail p (Reason.to_pos r) (Typing_print.error env (r, t')) trail)
+        Some (fun () -> f_fail p (get_pos t) (Typing_print.error env t) trail)
       )
   in
   let (env, err) = check_valid_array_key_type env t in

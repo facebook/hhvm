@@ -318,23 +318,24 @@ module Api = struct
 
   let all_where_constraints_on_this t =
     List.filter
-      ~f:(fun c ->
-        match c with
-        | ((_, Typing_defs.Tthis), _, _)
-        | (_, _, (_, Typing_defs.Tthis)) ->
+      ~f:(fun (l, _, r) ->
+        match (get_node l, get_node r) with
+        | (Tthis, _)
+        | (_, Tthis) ->
           true
         | _ -> false)
       (where_constraints t)
 
   let upper_bounds_on_this_from_constraints t =
     List.filter_map
-      ~f:(fun c ->
-        match c with
-        | ((_, Typing_defs.Tthis), Ast_defs.Constraint_as, ty)
-        | ((_, Typing_defs.Tthis), Ast_defs.Constraint_eq, ty)
-        | (ty, Ast_defs.Constraint_eq, (_, Typing_defs.Tthis))
-        | (ty, Ast_defs.Constraint_super, (_, Typing_defs.Tthis)) ->
-          Some ty
+      ~f:(fun (l, c, r) ->
+        match (get_node l, c, get_node r) with
+        | (Tthis, Ast_defs.Constraint_as, _)
+        | (Tthis, Ast_defs.Constraint_eq, _) ->
+          Some r
+        | (_, Ast_defs.Constraint_eq, Tthis)
+        | (_, Ast_defs.Constraint_super, Tthis) ->
+          Some l
         | _ -> None)
       (where_constraints t)
     |> Sequence.of_list
@@ -351,13 +352,14 @@ module Api = struct
   (* get lower bounds on `this` from the where constraints *)
   let lower_bounds_on_this_from_constraints t =
     List.filter_map
-      ~f:(fun c ->
-        match c with
-        | ((_, Typing_defs.Tthis), Ast_defs.Constraint_super, ty)
-        | ((_, Typing_defs.Tthis), Ast_defs.Constraint_eq, ty)
-        | (ty, Ast_defs.Constraint_eq, (_, Typing_defs.Tthis))
-        | (ty, Ast_defs.Constraint_as, (_, Typing_defs.Tthis)) ->
-          Some ty
+      ~f:(fun (l, c, r) ->
+        match (get_node l, c, get_node r) with
+        | (Tthis, Ast_defs.Constraint_super, _)
+        | (Tthis, Ast_defs.Constraint_eq, _) ->
+          Some r
+        | (_, Ast_defs.Constraint_eq, Tthis)
+        | (_, Ast_defs.Constraint_as, Tthis) ->
+          Some l
         | _ -> None)
       (where_constraints t)
     |> Sequence.of_list

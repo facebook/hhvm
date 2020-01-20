@@ -12,6 +12,7 @@ open Typing_defs
 open Aast
 open Ast_defs
 module Reason = Typing_reason
+module MakeType = Typing_make_type
 
 exception Empty_regex_pattern
 
@@ -73,7 +74,7 @@ let keys p s ~flags =
 
 let type_match p s ~flags =
   let sft =
-    { sft_optional = false; sft_ty = (Reason.Rregex p, Tprim Tstring) }
+    { sft_optional = false; sft_ty = MakeType.string (Reason.Rregex p) }
   in
   let keys = keys p s ~flags in
   let shape_map =
@@ -84,7 +85,7 @@ let type_match p s ~flags =
   in
   (* Any Regex\Match will contain the entire matched substring at key 0 *)
   let shape_map = ShapeMap.add (SFlit_int (p, "0")) sft shape_map in
-  (Reason.Rregex p, Tshape (Closed_shape, shape_map))
+  mk (Reason.Rregex p, Tshape (Closed_shape, shape_map))
 
 let get_global_options s =
   List.fold_left (String.to_list_rev s) ~init:[] ~f:(fun acc x ->
@@ -166,9 +167,10 @@ let type_pattern (p, e_) =
   | String s ->
     let (s, flags) = check_and_strip_delimiters s in
     let match_type = type_match p s ~flags in
-    ( Reason.Rregex p,
-      Tnewtype
-        ( Naming_special_names.Regex.tPattern,
-          [match_type],
-          (Reason.Rregex p, Tprim Tstring) ) )
+    mk
+      ( Reason.Rregex p,
+        Tnewtype
+          ( Naming_special_names.Regex.tPattern,
+            [match_type],
+            MakeType.string (Reason.Rregex p) ) )
   | _ -> failwith "Should have caught non-Ast_defs.String prefixed expression!"

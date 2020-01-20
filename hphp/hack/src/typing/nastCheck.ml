@@ -156,16 +156,16 @@ and check_happly unchecked_tparams env h =
   in
   let tyl =
     List.map unchecked_tparams (fun t ->
-        (Reason.Rwitness (fst t.tp_name), Typing_defs.make_tany ()))
+        mk (Reason.Rwitness (fst t.tp_name), Typing_defs.make_tany ()))
   in
   let subst = Inst.make_subst unchecked_tparams tyl in
   let decl_ty = Inst.instantiate subst decl_ty in
-  match decl_ty with
-  | (_, Tapply _) ->
+  match get_node decl_ty with
+  | Tapply _ ->
     let (env, locl_ty) = Phase.localize_with_self env decl_ty in
     begin
-      match TUtils.get_base_type env locl_ty with
-      | (_, Tclass (cls, _, tyl)) ->
+      match get_node (TUtils.get_base_type env locl_ty) with
+      | Tclass (cls, _, tyl) ->
         (match Env.get_class env (snd cls) with
         | Some cls ->
           let tc_tparams = Cls.tparams cls in

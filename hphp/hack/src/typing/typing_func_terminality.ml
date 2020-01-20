@@ -18,7 +18,12 @@ module Cls = Decl_provider.Class
  * Nast is fully processed (by the caller of this code) *)
 let get_fun ctx name =
   match Decl_provider.get_fun ctx name with
-  | Some { fe_type = (_, Tfun ft); _ } -> Some ft
+  | Some { fe_type; _ } ->
+    begin
+      match get_node fe_type with
+      | Tfun ft -> Some ft
+      | _ -> None
+    end
   | _ -> None
 
 let get_static_meth
@@ -29,13 +34,16 @@ let get_static_meth
     begin
       match Cls.get_smethod cls meth_name with
       | None -> None
-      | Some { Typing_defs.ce_type = (lazy (_r, Typing_defs.Tfun fty)); _ } ->
-        Some fty
-      | Some _ -> None
+      | Some { Typing_defs.ce_type = (lazy ty); _ } ->
+        begin
+          match get_node ty with
+          | Tfun fty -> Some fty
+          | _ -> None
+        end
     end
 
 let funopt_is_noreturn = function
-  | Some { ft_ret = { et_type = (_r, Tprim Tnoreturn); _ }; _ } -> true
+  | Some { ft_ret = { et_type; _ }; _ } -> is_prim Tnoreturn et_type
   | _ -> false
 
 let raise_exit_if_terminal f = if funopt_is_noreturn f then raise Exit
@@ -58,12 +66,12 @@ let static_meth_is_noreturn env ci meth_id =
       (get_static_meth (Typing_env.get_ctx env) class_name (snd meth_id))
   | None -> false
 
-let typed_expression_exits ((_, (_, ty)), e) =
+let typed_expression_exits ((_, ty), e) =
   match e with
   | Assert (AE_assert (_, False))
   | Yield_break ->
     true
-  | _ -> is_type_no_return ty
+  | _ -> is_type_no_return (get_node ty)
 
 let expression_exits env (_, e) =
   match e with
@@ -82,6 +90,4 @@ let is_noreturn env =
       env
       (Env.get_return env).Typing_env_return_info.return_type.et_type
   in
-  match ret_ty with
-  | (_, Tprim Tnoreturn) -> true
-  | _ -> false
+  is_prim Tnoreturn ret_ty

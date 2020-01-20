@@ -16,11 +16,11 @@ module MakeType = Typing_make_type
 module Env = Typing_env
 
 let wrap_like ty =
-  let r = Typing_reason.Renforceable (Typing_reason.to_pos (fst ty)) in
+  let r = Typing_reason.Renforceable (get_pos ty) in
   MakeType.like r ty
 
 let rec is_enforceable (env : env) (ty : decl_ty) =
-  match snd ty with
+  match get_node ty with
   | Tthis -> false
   | Tapply ((_, name), _) when Env.is_enum env name -> false
   | Tapply ((_, name), _) when Env.is_typedef name ->
@@ -45,10 +45,10 @@ let rec is_enforceable (env : env) (ty : decl_ty) =
               begin
                 match
                   List.fold2 ~init:true targs tparams ~f:(fun acc targ tparam ->
-                      match targ with
-                      | (_, Tdynamic)
+                      match get_node targ with
+                      | Tdynamic
                       (* We accept the inner type being dynamic regardless of reification *)
-                      | (_, Tlike _) ->
+                      | Tlike _ ->
                         acc
                       | _ ->
                         (match tparam.tp_reified with
@@ -97,15 +97,14 @@ let rec is_enforceable (env : env) (ty : decl_ty) =
   | Tdarray _ -> false
   | Tvarray _ -> false
   (* With no parameters, we enforce varray_or_darray just like array *)
-  | Tvarray_or_darray (_, (_, Tany _)) -> true
-  | Tvarray_or_darray _ -> false
+  | Tvarray_or_darray (_, ty) -> is_any ty
   | Toption ty -> is_enforceable env ty
   (* TODO(T36532263) make sure that this is what we want *)
   | Tpu_access _ -> false
 
 let make_locl_like_type env ty =
   if env.Typing_env_types.pessimize then
-    let dyn = MakeType.dynamic (Reason.Renforceable (Reason.to_pos (fst ty))) in
+    let dyn = MakeType.dynamic (Reason.Renforceable (get_pos ty)) in
     Typing_union.union env dyn ty
   else
     (env, ty)
@@ -113,8 +112,7 @@ let make_locl_like_type env ty =
 let is_enforced env ~explicitly_untrusted ty =
   let enforceable = is_enforceable env ty in
   let is_hhi =
-    fst ty
-    |> Reason.to_pos
+    get_pos ty
     |> Pos.filename
     |> Relative_path.prefix
     |> Relative_path.(equal_prefix Hhi)
@@ -126,8 +124,8 @@ let pessimize_type env { et_type; et_enforced } =
     if et_enforced || not env.pessimize then
       et_type
     else
-      match et_type with
-      | (_, Tprim (Aast.Tvoid | Aast.Tnoreturn)) -> et_type
+      match get_node et_type with
+      | Tprim (Aast.Tvoid | Aast.Tnoreturn) -> et_type
       | _ -> wrap_like et_type
   in
   { et_type; et_enforced }
@@ -144,8 +142,8 @@ let compute_enforced_and_pessimize_ty
 let handle_awaitable_return env ft_fun_kind (ft_ret : decl_possibly_enforced_ty)
     =
   let { et_type = return_type; _ } = ft_ret in
-  match (ft_fun_kind, return_type) with
-  | (Ast_defs.FAsync, (_, Tapply ((_, name), [inner_ty])))
+  match (ft_fun_kind, get_node return_type) with
+  | (Ast_defs.FAsync, Tapply ((_, name), [inner_ty]))
     when String.equal name Naming_special_names.Classes.cAwaitable ->
     let { et_enforced; _ } = compute_enforced_ty env inner_ty in
     pessimize_type env { et_type = return_type; et_enforced }

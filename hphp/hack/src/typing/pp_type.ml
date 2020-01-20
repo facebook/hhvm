@@ -24,7 +24,8 @@ open Typing_defs
  *)
 
 let rec pp_ty : type a. Format.formatter -> a ty -> unit =
- fun fmt (a0, a1) ->
+ fun fmt t ->
+  let (a0, a1) = deref t in
   Format.fprintf fmt "(@[";
   Reason.pp fmt a0;
   Format.fprintf fmt ",@ ";

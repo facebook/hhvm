@@ -30,9 +30,9 @@ module ExprDepTy = struct
           let (ereason, dep) = new_ () in
           (pos, ereason, dep))
       | N.CIself ->
-        (match Env.get_self env with
-        | (_, Tclass ((_, cls), _, _)) -> (pos, Reason.ERself cls, DTcls cls)
-        | (_, _) ->
+        (match get_node (Env.get_self env) with
+        | Tclass ((_, cls), _, _) -> (pos, Reason.ERself cls, DTcls cls)
+        | _ ->
           let (ereason, dep) = new_ () in
           (pos, ereason, dep))
       | N.CI (p, cls) -> (p, Reason.ERclass cls, DTcls cls)
@@ -79,11 +79,11 @@ module ExprDepTy = struct
    *)
   (****************************************************************************)
   let make env ~cid ty =
-    let (r_dep_ty, dep_ty) = from_cid env (fst ty) cid in
-    let apply env ty = (env, (r_dep_ty, Tdependent (dep_ty, ty))) in
+    let (r_dep_ty, dep_ty) = from_cid env (get_reason ty) cid in
+    let apply env ty = (env, mk (r_dep_ty, Tdependent (dep_ty, ty))) in
     let rec make env ty =
-      let (env, ty) = Env.expand_type env ty in
-      match ty with
+      let (env, ety) = Env.expand_type env ty in
+      match deref ety with
       | (_, Tclass (_, Exact, _)) -> (env, ty)
       | (_, Tclass (((_, x) as c), Nonexact, tyl)) ->
         let class_ = Env.get_class env x in
@@ -99,7 +99,7 @@ module ExprDepTy = struct
         else (
           match dep_ty with
           | DTcls n when String.equal n x ->
-            (env, (r_dep_ty, Tclass (c, Exact, tyl)))
+            (env, mk (r_dep_ty, Tclass (c, Exact, tyl)))
           | _ -> apply env ty
         )
       | (_, Tgeneric s) when DependentKind.is_generic_dep_ty s -> (env, ty)
@@ -112,17 +112,17 @@ module ExprDepTy = struct
           apply env ty
       | (r, Toption ty) ->
         let (env, ty) = make env ty in
-        (env, (r, Toption ty))
+        (env, mk (r, Toption ty))
       | (r, Tnewtype (n, p, ty)) ->
         let (env, ty) = make env ty in
-        (env, (r, Tnewtype (n, p, ty)))
+        (env, mk (r, Tnewtype (n, p, ty)))
       | (_, Tdependent (_, _)) -> (env, ty)
       | (r, Tunion tyl) ->
         let (env, tyl) = List.fold_map tyl ~init:env ~f:make in
-        (env, (r, Tunion tyl))
+        (env, mk (r, Tunion tyl))
       | (r, Tintersection tyl) ->
         let (env, tyl) = List.fold_map tyl ~init:env ~f:make in
-        (env, (r, Tintersection tyl))
+        (env, mk (r, Tintersection tyl))
       (* TODO(T36532263) check if this is legal *)
       | ( _,
           ( Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _

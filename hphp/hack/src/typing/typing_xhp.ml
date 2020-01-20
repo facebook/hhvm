@@ -21,7 +21,7 @@ module Cls = Decl_provider.Class
 
 let raise_xhp_required env pos ureason ty =
   let ty_str = Typing_print.error env ty in
-  let msgl = Reason.to_string ("This is " ^ ty_str) (fst ty) in
+  let msgl = Reason.to_string ("This is " ^ ty_str) (get_reason ty) in
   Errors.xhp_required pos (Reason.string_of_ureason ureason) msgl
 
 (**
@@ -44,7 +44,7 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
       cty
       Errors.unify_error
   in
-  match snd cty with
+  match get_node cty with
   | Tany _
   | Terr
   | Tdynamic ->
@@ -155,4 +155,4 @@ let is_xhp_child env pos ty =
     ty
     (MakeType.nullable_locl
        r
-       (r, Tunion [MakeType.dynamic r; ty_child; ty_traversable]))
+       (MakeType.union r [MakeType.dynamic r; ty_child; ty_traversable]))

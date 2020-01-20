@@ -35,8 +35,20 @@ type glean_json = {
   fileXRefs: json list;
 }
 
-let default_json =
-  { classDeclaration = []; declarationLocation = []; fileXRefs = [] }
+type result_progress = {
+  resultJson: glean_json;
+  (* Maps fact JSON to fact id *)
+  factIds: (json, int) Hashtbl.t;
+}
+
+let init_progress =
+  let default_json =
+    { classDeclaration = []; declarationLocation = []; fileXRefs = [] }
+  in
+  (* TODO: The default poly function does not fully examine data structures;
+  this will probably require a custom function *)
+  let table = Hashtbl.Poly.create () in
+  { resultJson = default_json; factIds = table }
 
 let hint ctx h =
   let mode = FileInfo.Mdecl in
@@ -55,27 +67,40 @@ let json_element_id = get_next_elem_id ()
 
 let type_ = Typing_print.full_decl
 
-let update_json_data predicate json json_data_progress =
-  match predicate with
-  | ClassDeclaration ->
-    {
-      json_data_progress with
-      classDeclaration = json :: json_data_progress.classDeclaration;
-    }
-  | DeclarationLocation ->
-    {
-      json_data_progress with
-      declarationLocation = json :: json_data_progress.declarationLocation;
-    }
-  | FileXRefs ->
-    { json_data_progress with fileXRefs = json :: json_data_progress.fileXRefs }
+let update_json_data predicate json progress =
+  let json =
+    match predicate with
+    | ClassDeclaration ->
+      {
+        progress.resultJson with
+        classDeclaration = json :: progress.resultJson.classDeclaration;
+      }
+    | DeclarationLocation ->
+      {
+        progress.resultJson with
+        declarationLocation = json :: progress.resultJson.declarationLocation;
+      }
+    | FileXRefs ->
+      {
+        progress.resultJson with
+        fileXRefs = json :: progress.resultJson.fileXRefs;
+      }
+  in
+  { resultJson = json; factIds = progress.factIds }
 
-let glean_json predicate json json_data_progress =
-  let id = json_element_id () in
-  let json_facts =
+let glean_json predicate json progress =
+  let id =
+    match Hashtbl.find progress.factIds json with
+    | Some fid -> fid
+    | None ->
+      let newFactId = json_element_id () in
+      Hashtbl.add_exn progress.factIds json newFactId;
+      newFactId
+  in
+  let json_fact =
     JSON_Object [("id", JSON_Number (string_of_int id)); ("key", json)]
   in
-  (json_facts, id, update_json_data predicate json_facts json_data_progress)
+  (json_fact, id, update_json_data predicate json_fact progress)
 
 let json_of_bytespan pos =
   let start = fst (Pos.info_raw pos) in
@@ -86,13 +111,13 @@ let json_of_bytespan pos =
       ("length", JSON_Number (string_of_int length));
     ]
 
-let json_of_class _ class_name clss json_data_progress =
+let json_of_class _ class_name clss progress =
   let is_abstract =
     match clss.c_kind with
     | Cabstract -> true
     | _ -> false
   in
-  let json_facts =
+  let json_fact =
     JSON_Object
       [
         ("name", JSON_Object [("key", JSON_String class_name)]);
@@ -100,30 +125,36 @@ let json_of_class _ class_name clss json_data_progress =
         ("is_final", JSON_Bool clss.c_final);
       ]
   in
-  glean_json ClassDeclaration json_facts json_data_progress
+  glean_json ClassDeclaration json_fact progress
 
-let json_of_decl_loc tcopt decl_type json_fun pos id elem json_data_progress =
-  let (_, fact_id, progress) = json_fun tcopt id elem json_data_progress in
+let json_of_decl tcopt decl_type json_fun id elem progress =
+  let (_, fact_id, progress) = json_fun tcopt id elem progress in
+  let json = JSON_Object [(decl_type, JSON_Number (string_of_int fact_id))] in
+  (json, fact_id, progress)
+
+let json_of_decl_loc tcopt decl_type pos json_fun id elem progress =
+  let (decl_json, _, progress) =
+    json_of_decl tcopt decl_type json_fun id elem progress
+  in
   let filepath = Relative_path.S.to_string (Pos.filename pos) in
-  let json_facts =
+  let json_fact =
     JSON_Object
       [
-        ( "declaration",
-          JSON_Object [(decl_type, JSON_Number (string_of_int fact_id))] );
+        ("declaration", decl_json);
         ("file", JSON_Object [("key", JSON_String filepath)]);
         ("span", json_of_bytespan pos);
       ]
   in
-  glean_json DeclarationLocation json_facts progress
+  glean_json DeclarationLocation json_fact progress
 
 let build_json tcopt symbols =
-  let json_data_progress =
-    List.fold symbols.decls ~init:default_json ~f:(fun acc symbol ->
+  let progress =
+    List.fold symbols.decls ~init:init_progress ~f:(fun acc symbol ->
         match symbol with
         | Class cd ->
           let (pos, id) = cd.c_name in
           let (_, _, res) =
-            json_of_decl_loc tcopt "class_" json_of_class pos id cd acc
+            json_of_decl_loc tcopt "class_" pos json_of_class id cd acc
           in
           res
         | _ -> acc)
@@ -133,9 +164,9 @@ let build_json tcopt symbols =
     which is significant because later entries can refer to earlier ones
     by id only *)
     [
-      ("hack.FileXRefs.1", json_data_progress.fileXRefs);
-      ("hack.DeclarationLocation.1", json_data_progress.declarationLocation);
-      ("hack.ClassDeclaration.1", json_data_progress.classDeclaration);
+      ("hack.FileXRefs.1", progress.resultJson.fileXRefs);
+      ("hack.DeclarationLocation.1", progress.resultJson.declarationLocation);
+      ("hack.ClassDeclaration.1", progress.resultJson.classDeclaration);
     ]
   in
   let json_array =

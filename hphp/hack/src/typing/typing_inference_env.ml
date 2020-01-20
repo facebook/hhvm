@@ -378,9 +378,9 @@ let fresh_unsolved_tyvar env v ?variance ~is_global tyvar_pos =
   set_tyvar_info env v tvinfo
 
 let add_current_tyvar ?variance env p v =
+  let env = fresh_unsolved_tyvar env v ?variance ~is_global:false p in
   match env.tyvars_stack with
   | (expr_pos, tyvars) :: rest ->
-    let env = fresh_unsolved_tyvar env v ?variance ~is_global:false p in
     { env with tyvars_stack = (expr_pos, v :: tyvars) :: rest }
   | _ -> env
 

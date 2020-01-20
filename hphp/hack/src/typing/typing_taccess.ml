@@ -64,7 +64,7 @@ exception NoTypeConst of (unit -> unit)
 let raise_error error = raise_notrace @@ NoTypeConst error
 
 let make_reason env r id root =
-  Reason.Rtypeconst (r, id, Typing_print.error env root, fst root)
+  Reason.Rtypeconst (r, id, Typing_print.error env root, get_reason root)
 
 (* FIXME: It is bogus to use strings here and put them in Tgeneric; one
    possible problem is when a type parameter has a name which conflicts
@@ -88,7 +88,7 @@ let make_abstract env id name namel bnd =
        Here, $x->get() has type expr#1::T as T1::T (as Box::T).
        But T1::T is exactly equal to int, so $x->get() no longer needs
        to be expression dependent. Thus, $x->get() typechecks. *)
-    Exact (Reason.Rnone, Tgeneric tp_name)
+    Exact (mk (Reason.Rnone, Tgeneric tp_name))
   else
     Abstract (name, namel, bnd)
 
@@ -111,7 +111,7 @@ let create_root_from_type_constant ctx env root (class_pos, class_name) =
       raise_error (fun () ->
           Errors.smember_not_found
             `class_typeconst
-            (Reason.to_pos (fst root))
+            (get_pos root)
             (Cls.pos class_, class_name)
             id_name
             `no_hint
@@ -128,8 +128,8 @@ let create_root_from_type_constant ctx env root (class_pos, class_name) =
   let drop_exact ty =
     (* Legacy behavior is to preserve exactness only on `this` and not
        through `this::T` *)
-    match ty with
-    | (r, Tclass (cid, _, tyl)) -> (r, Tclass (cid, Nonexact, tyl))
+    match deref ty with
+    | (r, Tclass (cid, _, tyl)) -> mk (r, Tclass (cid, Nonexact, tyl))
     | _ -> ty
   in
   let ety_env =
@@ -147,13 +147,15 @@ let create_root_from_type_constant ctx env root (class_pos, class_name) =
   match typeconst with
   (* Concrete type constants *)
   | { ttc_type = Some ty; ttc_constraint = None; _ } ->
-    let (env, (r, ty)) = Phase.localize ~ety_env env ty in
-    (env, Exact (make_reason env r id root, ty))
+    let (env, ty) = Phase.localize ~ety_env env ty in
+    let (r, ty) = deref ty in
+    (env, Exact (mk (make_reason env r id root, ty)))
   (* A type constant with default can be seen as abstract or exact, depending
      on the root and base of the access. *)
   | { ttc_type = Some ty; ttc_constraint = Some _; _ } ->
-    let (env, (r, ty)) = Phase.localize ~ety_env env ty in
-    let ty = (make_reason env r id root, ty) in
+    let (env, ty) = Phase.localize ~ety_env env ty in
+    let (r, ty) = deref ty in
+    let ty = mk (make_reason env r id root, ty) in
     if Cls.final class_ || Option.is_none ctx.base then
       (env, Exact ty)
     else
@@ -175,7 +177,7 @@ let rec type_of_result ctx env root res =
     ) else
       let generic_name = tp_name name id in
       let reason = make_reason env Reason.Rnone id root in
-      let ty = (reason, Tgeneric generic_name) in
+      let ty = mk (reason, Tgeneric generic_name) in
       let env =
         Option.fold bnd ~init:env ~f:(fun env bnd ->
             (* TODO(T59317869): play well with flow sensitivity *)
@@ -198,9 +200,9 @@ let update_class_name env id new_name = function
     make_abstract env id new_name (name :: namel) bnd
 
 let rec expand ctx env root =
-  let (env, ((root_reason, root_ty) as root)) = Env.expand_type env root in
+  let (env, root) = Env.expand_type env root in
   let make_reason env = make_reason env Reason.Rnone ctx.id root in
-  match root_ty with
+  match get_node root with
   | Tany _
   | Terr ->
     (env, Exact root)
@@ -259,7 +261,7 @@ let rec expand ctx env root =
       Errors.non_object_member
         ~is_method:false
         tconst
-        (Reason.to_pos root_reason)
+        (get_pos root)
         ty
         pos
         ctx.on_error
@@ -287,7 +289,7 @@ let rec expand ctx env root =
           let (env, res) = expand ctx env ty in
           type_of_result ctx env root res)
     in
-    let ty = (make_reason env, Tunion tyl) in
+    let ty = mk (make_reason env, Tunion tyl) in
     (env, Exact ty)
   | Tintersection tyl ->
     let (env, tyl) =
@@ -303,8 +305,7 @@ let rec expand ctx env root =
   (* TODO(T36532263): Pocket Universes *)
   | Tpu (base, _)
   | Tpu_type_access (base, _, _, _) ->
-    let reason = fst base in
-    let pos = Reason.to_pos reason in
+    let pos = get_pos base in
     raise_error (fun _ -> Errors.pu_expansion pos)
   | Tanon _
   | Tobject
@@ -324,7 +325,7 @@ let rec expand ctx env root =
           tconst
           pos
           ty
-          (Reason.to_pos root_reason)
+          (get_pos root)
           ctx.on_error)
 
 let expand_with_env
@@ -354,14 +355,14 @@ let expand_with_env
     with NoTypeConst error ->
       if not ignore_errors then error ();
       let reason = make_reason env Reason.Rnone id root in
-      (env, (reason, Typing_utils.terr env))
+      (env, mk (reason, Typing_utils.terr env))
   in
   (* If type constant has type this::ID and method has associated condition
      type ROOTCOND_TY for the receiver - check if condition type has type
      constant at the same path.  If yes - attach a condition type
      ROOTCOND_TY::ID to a result type *)
   match
-    ( root,
+    ( deref root,
       id,
       TR.condition_type_from_reactivity (Typing_env_types.env_reactivity env) )
   with
@@ -369,7 +370,7 @@ let expand_with_env
     begin
       match CT.try_get_class_for_condition_type env cond_ty with
       | Some (_, cls) when Cls.has_typeconst cls tconst ->
-        let cond_ty = (Reason.Rwitness (fst id), Taccess (cond_ty, [id])) in
+        let cond_ty = mk (Reason.Rwitness (fst id), Taccess (cond_ty, [id])) in
         Option.value
           (TR.try_substitute_type_with_condition env cond_ty ty)
           ~default:(env, ty)
@@ -389,8 +390,8 @@ let referenced_typeconsts env ety_env (root, ids) ~on_error =
         let acc =
           List.fold tyl ~init:acc ~f:(fun acc ty ->
               let (env, ty) = Env.expand_type env ty in
-              match snd ty with
-              | Typing_defs.Tclass ((_, class_name), _, _) ->
+              match get_node ty with
+              | Tclass ((_, class_name), _, _) ->
                 let ( >>= ) = Option.( >>= ) in
                 Option.value
                   ~default:acc

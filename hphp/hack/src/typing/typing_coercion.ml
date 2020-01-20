@@ -42,9 +42,9 @@ let coerce_type_impl env ty_have ty_expect on_error =
   in
   let (env, ety_expect) = Typing_env.expand_type env ty_expect.et_type in
   let (env, ety_have) = Typing_env.expand_type env ty_have in
-  match (ety_have, ety_expect) with
-  | (_, (_, Tdynamic)) -> env
-  | ((_, Tdynamic), _) when ty_expect.et_enforced -> env
+  match (get_node ety_have, get_node ety_expect) with
+  | (_, Tdynamic) -> env
+  | (Tdynamic, _) when ty_expect.et_enforced -> env
   | _ when ty_expect.et_enforced ->
     Typing_utils.sub_type_with_dynamic_as_bottom
       env

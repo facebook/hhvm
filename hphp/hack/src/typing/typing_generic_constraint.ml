@@ -18,7 +18,7 @@ let check_constraint env ck ty ~cstr_ty on_error =
   Typing_log.(
     log_with_level env "sub" 1 (fun () ->
         log_types
-          (Reason.to_pos (fst ty))
+          (get_pos ty)
           env
           [
             Log_head

@@ -25,7 +25,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r x argl =
   let pos = Reason.to_pos r in
   if Typing_defs.has_expanded ety_env x then (
     Errors.cyclic_typedef pos;
-    (env, (ety_env, (r, Terr)))
+    (env, (ety_env, mk (r, Terr)))
   ) else
     let {
       td_pos;
@@ -62,18 +62,18 @@ let expand_typedef_ ?(force_expand = false) ety_env env r x argl =
             let r_cstr =
               Reason.Rimplicit_upper_bound (Reason.to_pos r, "?nonnull")
             in
-            let cstr = (r_cstr, Toption (r_cstr, Tnonnull)) in
+            let cstr = MakeType.mixed r_cstr in
             (env, cstr)
           | Some cstr ->
             let (env, cstr) = Phase.localize ~ety_env env cstr in
             (env, cstr)
         in
-        (env, (r, Tnewtype (x, argl, td_constraint)))
+        (env, mk (r, Tnewtype (x, argl, td_constraint)))
     in
     if Naming_special_names.Classes.is_format_string x then
       (env, (ety_env, MakeType.class_type r x argl))
     else
-      (env, (ety_env, (r, snd expanded_ty)))
+      (env, (ety_env, mk (r, get_node expanded_ty)))
 
 let expand_typedef ety_env env r x argl =
   let (env, (_, ty)) = expand_typedef_ ety_env env r x argl in
@@ -82,13 +82,13 @@ let expand_typedef ety_env env r x argl =
 (* Expand a typedef, smashing abstraction and collecting a trail
  * of where the typedefs come from. *)
 let rec force_expand_typedef ~ety_env env (t : locl_ty) =
-  match t with
+  match deref t with
   | (r, Tnewtype (x, argl, _)) when not (Env.is_enum env x) ->
     let (env, (ety_env, ty)) =
       expand_typedef_ ~force_expand:true ety_env env r x argl
     in
     force_expand_typedef ~ety_env env ty
-  | ty -> (env, ty, List.rev_map ety_env.type_expansions fst)
+  | _ -> (env, t, List.rev_map ety_env.type_expansions fst)
 
 (*****************************************************************************)
 (*****************************************************************************)

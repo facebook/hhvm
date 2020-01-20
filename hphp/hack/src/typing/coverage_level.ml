@@ -124,7 +124,7 @@ let merge_and_sum cs1 cs2 =
 
 let rec is_tany env ty =
   let (env, ty) = Tast_env.expand_type env ty in
-  match ty with
+  match deref ty with
   | (r, (Tany _ | Terr)) -> (env, Some r)
   | (_, Tunion []) -> (env, None)
   | (_, Tunion (h :: tl)) ->
@@ -139,9 +139,9 @@ let rec is_tany env ty =
 
 let level_of_type env fixme_map (pos, ty) =
   let (env, ty) = Tast_env.expand_type env ty in
-  match ty with
-  | (_, Tobject) -> (env, Partial)
-  | (_, _) ->
+  match get_node ty with
+  | Tobject -> (env, Partial)
+  | _ ->
     let (env, r_opt) = is_tany env ty in
     let level =
       match r_opt with

@@ -58,4 +58,4 @@ val make_default_return :
   is_global_inference_on:bool ->
   env ->
   Ast_defs.pos * string ->
-  env * (Typing_reason.t * Typing_defs.locl_phase Typing_defs.ty_)
+  env * Typing_defs.locl_ty

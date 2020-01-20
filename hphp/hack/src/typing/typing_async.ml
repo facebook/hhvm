@@ -31,39 +31,64 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
         opt_ty_maybe
         Errors.unify_error
     in
-    match e_opt_ty with
-    | (_, Tunion tyl) ->
+    match get_node e_opt_ty with
+    | Tunion tyl ->
       let (env, tyl) = List.fold_map ~init:env ~f:extract_inner tyl in
       TUtils.union_list env r tyl
-    | (_, Toption ty) ->
+    | Toption ty ->
       (* We want to try to avoid easy double nullables here, so we handle Toption
        * with some special logic. *)
       let (env, ty) = extract_inner env ty in
       TUtils.union env (MakeType.null r) ty
-    | (_, Tintersection tyl) ->
+    | Tintersection tyl ->
       let (env, rtyl) = TUtils.run_on_intersection env tyl ~f:extract_inner in
-      (env, (r, Tintersection rtyl))
-    | (r, Tprim Aast.Tnull) -> (env, (r, Tprim Aast.Tnull))
-    | (_, Tdynamic) ->
+      (env, MakeType.intersection r rtyl)
+    | Tprim Aast.Tnull -> (env, e_opt_ty)
+    | Tdynamic ->
       (* Awaiting a dynamic results in a new dynamic *)
-      (env, (r, Tdynamic))
-    | ( _,
-        ( Terr | Tany _ | Tarraykind _ | Tnonnull | Tprim _ | Tvar _ | Tfun _
-        | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _ | Ttuple _
-        | Tanon (_, _)
-        | Tobject | Tshape _ | Tpu _ | Tpu_type_access _ ) ) ->
+      (env, MakeType.dynamic r)
+    | Terr
+    | Tany _
+    | Tarraykind _
+    | Tnonnull
+    | Tprim _
+    | Tvar _
+    | Tfun _
+    | Tgeneric _
+    | Tnewtype _
+    | Tdependent _
+    | Tclass _
+    | Ttuple _
+    | Tanon (_, _)
+    | Tobject
+    | Tshape _
+    | Tpu _
+    | Tpu_type_access _ ->
       let (env, type_var) = Env.fresh_type env p in
       let expected_type = MakeType.awaitable r type_var in
       let return_type =
-        match e_opt_ty with
-        | (_, Tany _) -> (r, Typing_defs.make_tany ())
-        | (_, Terr) -> (r, Terr)
-        | (_, Tdynamic) -> (r, Tdynamic)
-        | ( _,
-            ( Tnonnull | Tarraykind _ | Tprim _ | Tvar _ | Tfun _ | Tgeneric _
-            | Tnewtype _ | Tdependent _ | Tclass _ | Ttuple _ | Tanon _
-            | Tintersection _ | Toption _ | Tunion _ | Tobject | Tshape _
-            | Tpu _ | Tpu_type_access _ ) ) ->
+        match get_node e_opt_ty with
+        | Tany _ -> mk (r, Typing_defs.make_tany ())
+        | Terr -> mk (r, Terr)
+        | Tdynamic -> MakeType.dynamic r
+        | Tnonnull
+        | Tarraykind _
+        | Tprim _
+        | Tvar _
+        | Tfun _
+        | Tgeneric _
+        | Tnewtype _
+        | Tdependent _
+        | Tclass _
+        | Ttuple _
+        | Tanon _
+        | Tintersection _
+        | Toption _
+        | Tunion _
+        | Tobject
+        | Tshape _
+        | Tpu _
+        | Tpu_type_access _ ->
           type_var
       in
       let env =

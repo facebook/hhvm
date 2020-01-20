@@ -78,7 +78,7 @@ module LocalIdsPerCont = struct
     match get C.Next m with
     | None -> m
     | Some e ->
-      let tany = ((Reason.none, Utils.tany env), Ident.tmp ()) in
+      let tany = (Typing_defs.mk (Reason.none, Utils.tany env), Ident.tmp ()) in
       add
         C.Next
         {

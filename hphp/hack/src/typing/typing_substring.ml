@@ -7,7 +7,6 @@
  *
  *)
 
-open Hh_prelude
 open Typing_defs
 open Typing_env_types
 module Reason = Typing_reason
@@ -15,7 +14,8 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module MakeType = Typing_make_type
 
-let is_object env ty = Typing_solver.is_sub_type env ty (Reason.Rnone, Tobject)
+let is_object env ty =
+  Typing_solver.is_sub_type env ty (MakeType.ty_object (get_reason ty))
 
 let sub_string (p : Pos.Map.key) (env : env) (ty : locl_ty) : env =
   (* Under constraint-based inference, we implement sub_string as a subtype test.
@@ -36,16 +36,12 @@ let sub_string (p : Pos.Map.key) (env : env) (ty : locl_ty) : env =
       MakeType.class_type r SN.Classes.cHHFormatString [formatter_tyvar];
     ]
   in
-  let stringish =
-    (Reason.Rwitness p, Tclass ((p, SN.Classes.cStringish), Nonexact, []))
-  in
-  let stringlike =
-    (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunion tyl))
-  in
+  let stringish = MakeType.class_type r SN.Classes.cStringish [] in
+  let stringlike = MakeType.nullable_locl r (MakeType.union r tyl) in
   Typing_subtype.sub_type_or_fail env ty stringlike (fun () ->
       if Typing_solver.is_sub_type env ty stringish then
         Errors.object_string_deprecated p
       else if is_object env ty then
-        Errors.object_string p (Reason.to_pos (fst ty))
+        Errors.object_string p (get_pos ty)
       else
         Errors.invalid_sub_string p (Typing_print.error env ty))

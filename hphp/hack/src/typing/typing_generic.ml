@@ -19,12 +19,12 @@ module IsGeneric : sig
   (* Give back the position and name of a generic type parameter if found *)
   val ty : decl_ty -> (Pos.t * string) option
 end = struct
-  exception Found of Reason.t * string
+  exception Found of Pos.t * string
 
   let ty x =
-    let rec ty (r, t) =
-      match t with
-      | Tgeneric x -> raise (Found (r, x))
+    let rec ty t =
+      match get_node t with
+      | Tgeneric x -> raise (Found (get_pos t, x))
       | Tthis -> ()
       | Tmixed -> ()
       | Tnothing -> ()
@@ -65,5 +65,5 @@ end = struct
     try
       ty x;
       None
-    with Found (r, x) -> Some (Reason.to_pos r, x)
+    with Found (p, x) -> Some (p, x)
 end

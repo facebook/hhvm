@@ -24,8 +24,8 @@ let parent_init_prop = "parent::" ^ SN.Members.__construct
  * but it works. The idea here is that if the parent needs to be
  * initialized, we add a phony class variable. *)
 let add_parent_construct env c props parent_ty =
-  match parent_ty with
-  | (_, Tapply ((_, parent), _)) ->
+  match get_node parent_ty with
+  | Tapply ((_, parent), _) ->
     begin
       match Env.get_class_dep env parent with
       | Some class_ when Cls.need_init class_ && Option.is_some c.sc_constructor
@@ -55,12 +55,14 @@ let prop_needs_init sp =
     false
   else
     match sp.sp_type with
-    | None
-    | Some (_, Tprim Tnull)
-    | Some (_, Toption _)
-    | Some (_, Tmixed) ->
-      false
-    | Some _ -> sp.sp_needs_init
+    | None -> false
+    | Some ty ->
+      (match get_node ty with
+      | Tprim Tnull
+      | Toption _
+      | Tmixed ->
+        false
+      | _ -> sp.sp_needs_init)
 
 let own_props c props =
   List.fold_left
@@ -94,8 +96,8 @@ let rec parent_props env c props =
     ~f:
       begin
         fun acc parent ->
-        match parent with
-        | (_, Tapply ((_, parent), _)) ->
+        match get_node parent with
+        | Tapply ((_, parent), _) ->
           begin
             match Shallow_classes_heap.get parent with
             | None -> acc
@@ -112,8 +114,9 @@ and trait_props env c props =
     c.sc_uses
     ~f:
       begin
-        fun acc -> function
-        | (_, Tapply ((_, trait), _)) ->
+        fun acc ty ->
+        match get_node ty with
+        | Tapply ((_, trait), _) ->
           let cls = Env.get_class_dep env trait in
           let shallow_class = Shallow_classes_heap.get trait in
           (match (cls, shallow_class) with

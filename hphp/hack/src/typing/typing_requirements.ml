@@ -21,7 +21,7 @@ let check_fulfillment env get_impl (parent_pos, req_ty) =
   | Some (_r, (_p, req_name), _paraml) ->
     (match get_impl req_name with
     | None ->
-      let req_pos = Reason.to_pos (fst req_ty) in
+      let req_pos = Typing_defs.get_pos req_ty in
       Errors.unsatisfied_req parent_pos req_name req_pos;
       ()
     | Some impl_ty ->

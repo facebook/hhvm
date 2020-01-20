@@ -19,8 +19,8 @@ let strip_awaitable_decl fun_kind env (ty : decl_ty) =
   if not Ast_defs.(equal_fun_kind fun_kind FAsync) then
     ty
   else
-    match (Env.get_fn_kind env, ty) with
-    | (Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty])))
+    match (Env.get_fn_kind env, get_node ty) with
+    | (Ast_defs.FAsync, Tapply ((_, class_name), [inner_ty]))
       when String.equal class_name Naming_special_names.Classes.cAwaitable ->
       inner_ty
     | _ -> ty
@@ -29,14 +29,15 @@ let strip_awaitable fun_kind env et =
   if not Ast_defs.(equal_fun_kind fun_kind FAsync) then
     et
   else
-    match Env.expand_type env et.et_type with
-    | (_env, (_, Tclass ((_, class_name), _, [ty])))
+    let (_env, ty) = Env.expand_type env et.et_type in
+    match get_node ty with
+    | Tclass ((_, class_name), _, [ty])
       when String.equal class_name Naming_special_names.Classes.cAwaitable ->
       { et with et_type = ty }
     (* In non-strict code we might find Awaitable without type arguments. Assume Tany *)
-    | (_env, (_, Tclass ((_, class_name), _, [])))
+    | Tclass ((_, class_name), _, [])
       when String.equal class_name Naming_special_names.Classes.cAwaitable ->
-      { et with et_type = (Reason.Rnone, TUtils.tany env) }
+      { et with et_type = mk (Reason.Rnone, TUtils.tany env) }
     | _ -> et
 
 let enforce_return_not_disposable fun_kind env et =
@@ -44,7 +45,7 @@ let enforce_return_not_disposable fun_kind env et =
   match Typing_disposable.is_disposable_type env stripped_et.et_type with
   | Some class_name ->
     Errors.invalid_disposable_return_hint
-      (Reason.to_pos (fst et.et_type))
+      (get_pos et.et_type)
       (Utils.strip_ns class_name)
   | None -> ()
 
@@ -91,31 +92,37 @@ let wrap_awaitable env p rty =
   | Ast_defs.FGenerator
   (* Is an error, but caught in NastCheck. *)
   | Ast_defs.FAsyncGenerator ->
-    (Reason.Rnone, TUtils.terr env)
+    mk (Reason.Rnone, TUtils.terr env)
   | Ast_defs.FAsync ->
     MakeType.awaitable (Reason.Rret_fun_kind (p, Ast_defs.FAsync)) rty
 
 let make_return_type localize env (ty : decl_ty) =
-  match (Env.get_fn_kind env, ty) with
-  | (Ast_defs.FAsync, (r, Tapply ((_, class_name), [inner_ty])))
+  match (Env.get_fn_kind env, deref ty) with
+  | (Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty])))
     when String.equal class_name Naming_special_names.Classes.cAwaitable ->
     let (env, ty) = localize env inner_ty in
-    (env, wrap_awaitable env (Reason.to_pos r) ty)
-  | (Ast_defs.FAsync, (r_like, Tlike (r, Tapply ((_, class_name), [inner_ty]))))
-    when String.equal class_name Naming_special_names.Classes.cAwaitable ->
-    let ty = (r_like, Tlike inner_ty) in
-    let (env, ty) = localize env ty in
-    (env, wrap_awaitable env (Reason.to_pos r) ty)
+    (env, wrap_awaitable env (get_pos ty) ty)
+  | (Ast_defs.FAsync, (r_like, Tlike ty_like)) ->
+    begin
+      match get_node ty_like with
+      | Tapply ((_, class_name), [inner_ty])
+        when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+        let ty = mk (r_like, Tlike inner_ty) in
+        let (env, ty) = localize env ty in
+        (env, wrap_awaitable env (get_pos ty_like) ty)
+      | _ -> localize env ty
+    end
   | _ -> localize env ty
 
 let force_awaitable env p ty =
   let fun_kind = Env.get_fn_kind env in
-  match Env.expand_type env ty with
-  | (env, (_, Tclass ((_, class_name), _, _)))
+  let (env, ty) = Env.expand_type env ty in
+  match get_node ty with
+  | Tclass ((_, class_name), _, _)
     when Ast_defs.(equal_fun_kind fun_kind FAsync)
          && String.equal class_name Naming_special_names.Classes.cAwaitable ->
     (env, ty)
-  | (env, (_, Tany _)) when Ast_defs.(equal_fun_kind fun_kind FAsync) ->
+  | Tany _ when Ast_defs.(equal_fun_kind fun_kind FAsync) ->
     (env, wrap_awaitable env p ty)
   | _ when Ast_defs.(equal_fun_kind fun_kind FAsync) ->
     let (env, underlying_ty) = Env.fresh_type env p in
@@ -129,7 +136,7 @@ let force_awaitable env p ty =
 let make_default_return ~is_method ~is_global_inference_on env name =
   let pos = fst name in
   let reason = Reason.Rwitness pos in
-  let default = (reason, Typing_utils.tany env) in
+  let default = mk (reason, Typing_utils.tany env) in
   if is_method && String.equal (snd name) SN.Members.__construct then
     (env, MakeType.void (Reason.Rwitness pos))
   else if is_global_inference_on then

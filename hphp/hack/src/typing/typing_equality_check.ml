@@ -31,8 +31,8 @@ let trivial_comparison_error env p bop ty1 ty2 trail1 trail2 =
   Errors.trivial_strict_eq
     p
     trivial_result
-    (Reason.to_string ("This is " ^ tys1) (fst ty1))
-    (Reason.to_string ("This is " ^ tys2) (fst ty2))
+    (Reason.to_string ("This is " ^ tys1) (get_reason ty1))
+    (Reason.to_string ("This is " ^ tys2) (get_reason ty2))
     trail1
     trail2
 
@@ -41,8 +41,13 @@ let eq_incompatible_types env p ty1 ty2 =
   let tys2 = Typing_print.error env ty2 in
   Errors.eq_incompatible_types
     p
-    (Reason.to_string ("This is " ^ tys1) (fst ty1))
-    (Reason.to_string ("This is " ^ tys2) (fst ty2))
+    (Reason.to_string ("This is " ^ tys1) (get_reason ty1))
+    (Reason.to_string ("This is " ^ tys2) (get_reason ty2))
+
+let is_arraykey t =
+  match get_node t with
+  | Tprim N.Tarraykey -> true
+  | _ -> false
 
 let rec assert_nontrivial p bop env ty1 ty2 =
   let ety_env = Phase.env_with_self env in
@@ -50,18 +55,20 @@ let rec assert_nontrivial p bop env ty1 ty2 =
   let (_, ety1, trail1) = TDef.force_expand_typedef ~ety_env env ty1 in
   let (_, ty2) = Env.expand_type env ty2 in
   let (_, ety2, trail2) = TDef.force_expand_typedef ~ety_env env ty2 in
-  match (ty1, ty2) with
+  match (get_node ty1, get_node ty2) with
   (* Disallow `===` on distinct abstract enum types. *)
   (* Future: consider putting this in typed lint not type checking *)
-  | ( (_, Tnewtype (e1, _, (_, Tprim N.Tarraykey))),
-      (_, Tnewtype (e2, _, (_, Tprim N.Tarraykey))) )
-    when Env.is_enum env e1 && Env.is_enum env e2 ->
+  | (Tnewtype (e1, _, bound1), Tnewtype (e2, _, bound2))
+    when Env.is_enum env e1
+         && Env.is_enum env e2
+         && is_arraykey bound1
+         && is_arraykey bound2 ->
     if String.equal e1 e2 then
       ()
     else
       eq_incompatible_types env p ety1 ety2
   | _ ->
-    (match (ety1, ety2) with
+    (match (deref ety1, deref ety2) with
     | ((_, Tprim N.Tnum), (_, Tprim (N.Tint | N.Tfloat)))
     | ((_, Tprim (N.Tint | N.Tfloat)), (_, Tprim N.Tnum)) ->
       ()
@@ -80,9 +87,8 @@ let rec assert_nontrivial p bop env ty1 ty2 =
       Errors.void_usage p (Reason.to_string "This is void" r)
     | ((_, Tprim a), (_, Tprim b)) when not (Aast.equal_tprim a b) ->
       trivial_comparison_error env p bop ty1 ty2 trail1 trail2
-    | ((_, Toption ty1), ((_, Tprim _) as ty2))
-    | (((_, Tprim _) as ty1), (_, Toption ty2)) ->
-      assert_nontrivial p bop env ty1 ty2
+    | ((_, Toption ty1), (_, Tprim _)) -> assert_nontrivial p bop env ty1 ty2
+    | ((_, Tprim _), (_, Toption ty2)) -> assert_nontrivial p bop env ty1 ty2
     | ( ( _,
           ( Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Toption _
           | Tdynamic | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _
@@ -95,7 +101,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
 
 let assert_nullable p bop env ty =
   let (_, ty) = Env.expand_type env ty in
-  match ty with
+  match deref ty with
   | (r, Tarraykind _) ->
     let trivial_result = trivial_result_str bop in
     let ty_str = Typing_print.error env ty in

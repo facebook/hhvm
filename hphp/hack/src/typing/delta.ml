@@ -54,7 +54,9 @@ let lookup local_id gamma =
 
 let add_to_gamma local_id ty gamma =
   let local_id = dummify_local_id local_id in
-  let pos_ty_to_local (p, (_r, ty)) = ((Reason.Rwitness p, ty), 0) in
+  let pos_ty_to_local (p, ty) =
+    Typing_defs.(mk (Reason.Rwitness p, get_node ty), 0)
+  in
   let ty = pos_ty_to_local ty in
   {
     gamma with

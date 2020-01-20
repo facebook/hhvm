@@ -1,6 +1,7 @@
 (test
   (name typeSimplifierTest)
   (libraries
+    collections
     core_kernel
     default_injector_config
     heap_ident

@@ -132,7 +132,8 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
       Nast.ShapeMap.fold f fdm acc
 
-    method on_type acc (r, x) =
+    method on_type acc ty =
+      let (r, x) = deref ty in
       match x with
       | Tany _ -> this#on_tany acc r
       | Terr -> this#on_terr acc r
@@ -142,8 +143,9 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tnothing -> this#on_tnothing acc r
       | Tthis -> this#on_tthis acc r
       | Tarray (ty1_opt, ty2_opt) -> this#on_tarray acc r ty1_opt ty2_opt
-      | Tdarray (ty1, ty2) -> this#on_type acc (r, Tarray (Some ty1, Some ty2))
-      | Tvarray ty -> this#on_type acc (r, Tarray (Some ty, None))
+      | Tdarray (ty1, ty2) ->
+        this#on_type acc (mk (r, Tarray (Some ty1, Some ty2)))
+      | Tvarray ty -> this#on_type acc (mk (r, Tarray (Some ty, None)))
       | Tvarray_or_darray (ty1_opt, ty2) ->
         this#on_tvarray_or_darray acc r ty1_opt ty2
       | Tgeneric s -> this#on_tgeneric acc r s
@@ -290,7 +292,8 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
 
     method on_tlist acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_type acc (r, x) =
+    method on_type acc ty =
+      let (r, x) = deref ty in
       match x with
       | Tany _ -> this#on_tany acc r
       | Terr -> this#on_terr acc r

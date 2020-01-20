@@ -17,7 +17,7 @@ open Typing_defs
 module Ty_ = struct
   type t = locl_ty
 
-  let compare r1 r2 = ty_compare r1 r2
+  let compare r1 r2 = Typing_defs.ty_compare r1 r2
 end
 
 include Caml.Set.Make (Ty_)

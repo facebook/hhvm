@@ -60,14 +60,14 @@ class virtual type_validator =
           if List.is_empty rest then
             root
           else
-            (r, Taccess (root, List.rev rest))
+            mk (r, Taccess (root, List.rev rest))
         in
         let (env, root) = Env.localize acc.env acc.ety_env root in
         let (env, tyl) = Env.get_concrete_supertypes env root in
         List.fold tyl ~init:acc ~f:(fun acc ty ->
             let (env, ty) = Env.expand_type env ty in
-            match snd ty with
-            | Typing_defs.Tclass ((_, class_name), _, _) ->
+            match get_node ty with
+            | Tclass ((_, class_name), _, _) ->
               let ( >>= ) = Option.( >>= ) in
               Option.value
                 ~default:acc
@@ -126,7 +126,7 @@ class virtual type_validator =
                         (Env.get_file acc.env)) ->
               let td_constraint =
                 match td_constraint with
-                | None -> (r, Tmixed)
+                | None -> mk (r, Tmixed)
                 | Some ty -> Decl_instantiate.instantiate subst ty
               in
               this#on_newtype acc r (pos, name) tyl td_constraint td_type
@@ -147,7 +147,7 @@ class virtual type_validator =
                     ~default:(MakeType.nothing Reason.none);
                 from_class = Some Aast.CIstatic;
                 quiet = true;
-                on_error = Errors.unify_error_at (Reason.to_pos (fst root_ty));
+                on_error = Errors.unify_error_at (get_pos root_ty);
               };
             expanded_typedefs = SSet.empty;
             validity = Valid;
@@ -156,8 +156,7 @@ class virtual type_validator =
           root_ty
       in
       match state.validity with
-      | Invalid (r, msg) ->
-        emit_error (Reason.to_pos (fst root_ty)) (Reason.to_pos r) msg
+      | Invalid (r, msg) -> emit_error (get_pos root_ty) (Reason.to_pos r) msg
       | Valid -> ()
 
     method validate_hint env hint emit_error =

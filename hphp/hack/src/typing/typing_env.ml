@@ -210,7 +210,7 @@ let extract_global_inference_env env =
 let wrap_ty_in_var env r ty =
   let v = Ident.tmp () in
   let env = add env v ty in
-  (env, (r, Tvar v))
+  (env, mk (r, Tvar v))
 
 let get_shape_field_name = function
   | Ast_defs.SFlit_int (_, s)
@@ -294,9 +294,12 @@ let env_with_global_tpenv env global_tpenv = { env with global_tpenv }
 let add_upper_bound_global env name ty =
   let tpenv =
     let (env, ty) = expand_type env ty in
-    match ty with
+    match deref ty with
     | (r, Tgeneric formal_super) ->
-      TPEnv.add_lower_bound env.global_tpenv formal_super (r, Tgeneric name)
+      TPEnv.add_lower_bound
+        env.global_tpenv
+        formal_super
+        (mk (r, Tgeneric name))
     | _ -> env.global_tpenv
   in
   { env with global_tpenv = TPEnv.add_upper_bound tpenv name ty }
@@ -391,8 +394,8 @@ let tparams_visitor env =
 
     method! on_tvar acc r ix =
       let (_env, ty) = expand_var env r ix in
-      match ty with
-      | (_, Tvar _) -> acc
+      match get_node ty with
+      | Tvar _ -> acc
       | _ -> this#on_type acc ty
   end
 
@@ -415,8 +418,8 @@ let get_tpenv_tparams env =
           acc ->
       let folder ty acc =
         let (_env, ty) = expand_type env ty in
-        match ty with
-        | (_, Tgeneric _) -> acc
+        match get_node ty with
+        | Tgeneric _ -> acc
         | _ -> get_tparams_aux env acc ty
       in
       TySet.fold folder lower_bounds @@ TySet.fold folder upper_bounds acc
@@ -460,7 +463,7 @@ let empty ?(mode = FileInfo.Mstrict) tcopt file ~droot =
           {
             (* Actually should get set straight away anyway *)
             return_type =
-              { et_type = (Reason.Rnone, Tunion []); et_enforced = false };
+              { et_type = mk (Reason.Rnone, Tunion []); et_enforced = false };
             return_disposable = false;
             return_mutable = false;
             return_explicit = false;
@@ -651,8 +654,8 @@ let most_similar
 
 let suggest_member members mid =
   let pairs =
-    Sequence.map members ~f:(fun (x, { ce_type = (lazy (r, _)); _ }) ->
-        (Reason.to_pos r, x))
+    Sequence.map members ~f:(fun (x, { ce_type = (lazy ty); _ }) ->
+        (get_pos ty, x))
   in
   most_similar mid pairs snd
 
@@ -748,7 +751,7 @@ let get_self_ty env = Option.map env.genv.self ~f:snd
 let get_self env =
   match get_self_ty env with
   | Some self -> self
-  | None -> (Reason.none, Typing_defs.make_tany ())
+  | None -> mk (Reason.none, Typing_defs.make_tany ())
 
 let get_self_id env = Option.map env.genv.self ~f:fst
 
@@ -835,8 +838,8 @@ let set_local_ env x ty =
  *)
 let set_local env x new_type =
   let new_type =
-    match new_type with
-    | (_, Tunion [ty]) -> ty
+    match get_node new_type with
+    | Tunion [ty] -> ty
     | _ -> new_type
   in
   match next_cont_opt env with
@@ -945,7 +948,7 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
 
 let get_local_ty_in_ctx env ?error_if_undef_at_pos x ctx_opt =
   match get_local_in_ctx env ?error_if_undef_at_pos x ctx_opt with
-  | None -> (false, (Reason.Rnone, tany env))
+  | None -> (false, mk (Reason.Rnone, tany env))
   | Some (x, _) -> (true, x)
 
 let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
@@ -1018,7 +1021,7 @@ let update_lost_info name blame env ty =
   let info r = Reason.Rlost_info (name, r, pos, under_lambda) in
   let rec update_ty (env, seen_tyvars) ty =
     let (env, ty) = expand_type env ty in
-    match ty with
+    match deref ty with
     | (_, Tvar v) ->
       if ISet.mem v seen_tyvars then
         ((env, seen_tyvars), ty)
@@ -1037,19 +1040,21 @@ let update_lost_info name blame env ty =
         ((env, seen_tyvars), ty)
     | (r, Toption ty) ->
       let ((env, seen_tyvars), ty) = update_ty (env, seen_tyvars) ty in
-      ((env, seen_tyvars), (info r, Toption ty))
+      ((env, seen_tyvars), mk (info r, Toption ty))
     | (r, Tunion tyl) ->
       let ((env, seen_tyvars), tyl) =
         List.fold_map tyl ~init:(env, seen_tyvars) ~f:update_ty
       in
-      ((env, seen_tyvars), (info r, Tunion tyl))
-    | (r, ty) -> ((env, seen_tyvars), (info r, ty))
+      ((env, seen_tyvars), mk (info r, Tunion tyl))
+    | (r, ty) -> ((env, seen_tyvars), mk (info r, ty))
   and update_ty_i (env, seen_tyvars) ty =
     match ty with
     | LoclType ty ->
       let ((env, seen_tyvars), ty) = update_ty (env, seen_tyvars) ty in
       ((env, seen_tyvars), LoclType ty)
-    | ConstraintType (r, ty) -> ((env, seen_tyvars), ConstraintType (info r, ty))
+    | ConstraintType ty ->
+      let (r, ty) = deref_constraint_type ty in
+      ((env, seen_tyvars), ConstraintType (mk_constraint_type (info r, ty)))
   in
   let ((env, _seen_tyvars), ty) = update_ty (env, ISet.empty) ty in
   (env, ty)
@@ -1189,7 +1194,7 @@ and get_tyvars_i env (ty : internal_type) =
   let (env, ety) = expand_internal_type env ty in
   match ety with
   | LoclType ety ->
-    (match snd ety with
+    (match get_node ety with
     | Tvar v -> (env, ISet.singleton v, ISet.empty)
     | Tany _
     | Tnonnull
@@ -1263,7 +1268,7 @@ and get_tyvars_i env (ty : internal_type) =
       let env = get_tyvars_union (env, ISet.empty, ISet.empty) base in
       get_tyvars_union env member)
   | ConstraintType ty ->
-    (match ty with
+    (match deref_constraint_type ty with
     | (_, Tdestructure tyl) ->
       List.fold_left tyl ~init:(env, ISet.empty, ISet.empty) ~f:get_tyvars_union
     | (_, Thas_member hm) ->
@@ -1324,7 +1329,7 @@ and update_variance_of_tyvars_occurring_in_upper_bounds env tys =
 and update_variance_of_tyvars_occurring_in_lower_bound env ty =
   let (env, ety) = expand_internal_type env ty in
   match ety with
-  | LoclType (_, Tvar _) -> env
+  | LoclType ty when is_tyvar ty -> env
   | _ ->
     let (env, positive, negative) = get_tyvars_i env ty in
     let env =
@@ -1344,7 +1349,7 @@ and update_variance_of_tyvars_occurring_in_lower_bound env ty =
 and update_variance_of_tyvars_occurring_in_upper_bound env ty =
   let (env, ety) = expand_internal_type env ty in
   match ety with
-  | LoclType (_, Tvar _) -> env
+  | LoclType ty when is_tyvar ty -> env
   | _ ->
     let (env, positive, negative) = get_tyvars_i env ty in
     let env =

@@ -239,6 +239,11 @@ let is_generic_equal_to n t =
   | Tgeneric n' when String.equal n n' -> true
   | _ -> false
 
+let is_prim p t =
+  match get_node t with
+  | Tprim p' when Aast.equal_tprim p p' -> true
+  | _ -> false
+
 let show_phase_ty _ = "<phase_ty>"
 
 let pp_phase_ty _ _ = Printf.printf "%s\n" "<phase_ty>"

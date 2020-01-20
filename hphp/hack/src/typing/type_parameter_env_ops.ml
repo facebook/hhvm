@@ -99,7 +99,8 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
     List.fold
       tparams
       ~init:(tpenv, SMap.empty)
-      ~f:(fun (tpenv, substs) (p_opt, (reason, _)) ->
+      ~f:(fun (tpenv, substs) (p_opt, ty) ->
+        let reason = get_reason ty in
         match p_opt with
         | None -> (tpenv, substs)
         | Some (tp, tparam_name) ->
@@ -133,7 +134,7 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
             let substs = SMap.add tparam_name lower_bound substs in
             (tpenv, substs)
           | _ ->
-            let tparam_ty = (r, Tgeneric tparam_name) in
+            let tparam_ty = mk (r, Tgeneric tparam_name) in
             let substs = SMap.add tparam_name tparam_ty substs in
             (tpenv, substs)))
   in
@@ -148,16 +149,18 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
   let rec reduce substs tparam =
     match SMap.find_opt tparam substs with
     | None -> (substs, None)
-    | Some ((_, Tgeneric tparam') as subst) when String.( <> ) tparam' tparam ->
-      let (substs, new_subst_opt) = reduce substs tparam' in
-      begin
-        match new_subst_opt with
-        | None -> (substs, Some subst)
-        | Some new_subst ->
-          let substs = SMap.add tparam new_subst substs in
-          (substs, Some new_subst)
-      end
-    | Some subst -> (substs, Some subst)
+    | Some subst ->
+      (match get_node subst with
+      | Tgeneric tparam' when String.( <> ) tparam' tparam ->
+        let (substs, new_subst_opt) = reduce substs tparam' in
+        begin
+          match new_subst_opt with
+          | None -> (substs, Some subst)
+          | Some new_subst ->
+            let substs = SMap.add tparam new_subst substs in
+            (substs, Some new_subst)
+        end
+      | _ -> (substs, Some subst))
   in
   let reduce substs (p_opt, _) =
     match p_opt with

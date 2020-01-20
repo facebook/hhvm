@@ -244,8 +244,8 @@ module Full = struct
         text "function";
         fun_type ~ty to_doc st env ft;
         text ")";
-        (match ft.ft_ret.et_type with
-        | (Reason.Rdynamic_yield _, _) -> Space ^^ text "[DynamicYield]"
+        (match get_reason ft.ft_ret.et_type with
+        | Reason.Rdynamic_yield _ -> Space ^^ text "[DynamicYield]"
         | _ -> Nothing);
       ]
 
@@ -290,7 +290,7 @@ module Full = struct
     Concat
       [text "has_member"; text "("; text name; comma_sep; k hm_type; text ")"]
 
-  let rec decl_ty to_doc st env (_, x) = decl_ty_ to_doc st env x
+  let rec decl_ty to_doc st env x = decl_ty_ to_doc st env (get_node x)
 
   and decl_ty_ : _ -> _ -> _ -> decl_phase ty_ -> Doc.t =
    fun to_doc st env x ->
@@ -335,7 +335,8 @@ module Full = struct
     | Tpu_access (ty', (_, access)) -> pu_concat k ty' access
 
   let rec locl_ty : _ -> _ -> _ -> locl_ty -> Doc.t =
-   fun to_doc st env (r, x) ->
+   fun to_doc st env ty ->
+    let (r, x) = deref ty in
     let d = locl_ty_ to_doc st env x in
     match r with
     | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
@@ -357,19 +358,23 @@ module Full = struct
     | Tclass ((_, s), Exact, []) when !debug_mode ->
       Concat [text "exact"; Space; to_doc s]
     | Tclass ((_, s), _, []) -> to_doc s
-    | Toption (_, Tnonnull) -> text "mixed"
-    | Toption (r, Tunion tyl)
-      when TypecheckerOptions.like_type_hints (Env.get_tcopt env)
-           && List.exists ~f:(fun (_, ty) -> equal_locl_ty_ ty Tdynamic) tyl ->
-      (* Unions with null become Toption, which leads to the awkward ?~...
-       * The Tunion case can better handle this *)
-      k (r, Tunion ((r, Tprim Nast.Tnull) :: tyl))
-    | Toption x -> Concat [text "?"; k x]
+    | Toption ty ->
+      begin
+        match deref ty with
+        | (_, Tnonnull) -> text "mixed"
+        | (r, Tunion tyl)
+          when TypecheckerOptions.like_type_hints (Env.get_tcopt env)
+               && List.exists ~f:is_dynamic tyl ->
+          (* Unions with null become Toption, which leads to the awkward ?~...
+           * The Tunion case can better handle this *)
+          k (mk (r, Tunion (mk (r, Tprim Nast.Tnull) :: tyl)))
+        | _ -> Concat [text "?"; k ty]
+      end
     | Tprim x -> tprim x
     | Tvar n ->
-      let (_, ety) = Env.expand_type env (Reason.Rnone, Tvar n) in
+      let (_, ety) = Env.expand_type env (mk (Reason.Rnone, Tvar n)) in
       begin
-        match ety with
+        match deref ety with
         (* For unsolved type variables, always show the type variable *)
         | (_, Tvar n') ->
           if ISet.mem n' st then
@@ -433,9 +438,9 @@ module Full = struct
       in
       let (dynamic, null, nonnull) =
         List.partition3_map tyl ~f:(fun t ->
-            match t with
-            | (_, Tdynamic) -> `Fst t
-            | (_, Tprim Nast.Tnull) -> `Snd t
+            match get_node t with
+            | Tdynamic -> `Fst t
+            | Tprim Nast.Tnull -> `Snd t
             | _ -> `Trd t)
       in
       begin
@@ -513,8 +518,8 @@ module Full = struct
         |> Typing_set.elements
       in
       let (null, nonnull) =
-        List.partition_tf tyl ~f:(fun (_, t) ->
-            equal_locl_ty_ t (Tprim Nast.Tnull))
+        List.partition_tf tyl ~f:(fun ty ->
+            equal_locl_ty_ (get_node ty) (Tprim Nast.Tnull))
       in
       begin
         match (null, nonnull) with
@@ -565,7 +570,8 @@ module Full = struct
     | TCintersection (lty, cty) ->
       Concat [text "("; k lty; text "&"; k' cty; text ")"]
 
-  and constraint_type to_doc st env (r, x) =
+  and constraint_type to_doc st env ty =
+    let (r, x) = deref_constraint_type ty in
     let d = constraint_type_ to_doc st env x in
     match r with
     | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
@@ -674,11 +680,11 @@ module Full = struct
     in
     let body =
       SymbolOccurrence.(
-        match (occurrence, x) with
+        match (occurrence, get_node x) with
         | ({ type_ = Class; name; _ }, _) ->
           Concat [text "class"; Space; text_strip_ns name]
-        | ({ type_ = Function; name; _ }, (_, Tfun ft))
-        | ({ type_ = Method (_, name); _ }, (_, Tfun ft)) ->
+        | ({ type_ = Function; name; _ }, Tfun ft)
+        | ({ type_ = Method (_, name); _ }, Tfun ft) ->
           (* Use short names for function types since they display a lot more
            information to the user. *)
           Concat
@@ -742,11 +748,7 @@ module ErrorString = struct
     | Terr -> "a type error"
     | Tdynamic -> "a dynamic value"
     | Tunion l when ignore_dynamic ->
-      union
-        env
-        (List.filter l ~f:(function
-            | (_, Tdynamic) -> false
-            | _ -> true))
+      union env (List.filter l ~f:(fun x -> not (is_dynamic x)))
     | Tunion l -> union env l
     | Tintersection [] -> "a mixed value"
     | Tintersection l -> intersection env l
@@ -756,8 +758,12 @@ module ErrorString = struct
     | Tarraykind (AKdarray (_, _)) -> darray
     | Ttuple l -> "a tuple of size " ^ string_of_int (List.length l)
     | Tnonnull -> "a nonnull value"
-    | Toption (_, Tnonnull) -> "a mixed value"
-    | Toption _ -> "a nullable type"
+    | Toption x ->
+      begin
+        match get_node x with
+        | Tnonnull -> "a mixed value"
+        | _ -> "a nullable type"
+      end
     | Tprim tp -> tprim tp
     | Tvar _ -> "some value"
     | Tanon _ -> "a function"
@@ -777,16 +783,16 @@ module ErrorString = struct
       "an object of type " ^ strip_ns x ^ inst env tyl
     | Tobject -> "an object"
     | Tshape _ -> "a shape"
-    | Tpu ((_, ty), (_, enum)) ->
+    | Tpu (ty, (_, enum)) ->
       let ty =
-        match ty with
+        match get_node ty with
         | Tclass ((_, x), _, tyl) -> strip_ns x ^ inst env tyl
         | _ -> "..."
       in
       "the pocket universe " ^ ty ^ ":@" ^ enum
-    | Tpu_type_access ((_, ty), (_, enum), _, (_, tyname)) ->
+    | Tpu_type_access (ty, (_, enum), _, (_, tyname)) ->
       let ty =
-        match ty with
+        match get_node ty with
         | Tclass ((_, x), _, tyl) -> strip_ns x ^ inst env tyl
         | _ -> "..."
       in
@@ -822,7 +828,8 @@ module ErrorString = struct
 
   and union env l =
     let (null, nonnull) =
-      List.partition_tf l (fun ty -> equal_locl_ty_ (snd ty) (Tprim Nast.Tnull))
+      List.partition_tf l (fun ty ->
+          equal_locl_ty_ (get_node ty) (Tprim Nast.Tnull))
     in
     let l = List.map nonnull (to_string env) in
     let s = List.fold_right l ~f:SSet.add ~init:SSet.empty in
@@ -857,7 +864,7 @@ module ErrorString = struct
 
   and to_string ?(ignore_dynamic = false) env ty =
     let (_, ety) = Env.expand_type env ty in
-    type_ ~ignore_dynamic env (snd ety)
+    type_ ~ignore_dynamic env (get_node ety)
 end
 
 module Json = struct
@@ -913,11 +920,11 @@ module Json = struct
     in
     let fields fl = [("fields", JSON_Array (List.map fl make_field))] in
     let as_type ty = [("as", from_type env ty)] in
-    match snd ty with
+    match get_node ty with
     | Tvar n ->
-      let (_, ty) = Typing_env.expand_type env (fst ty, Tvar n) in
+      let (_, ty) = Typing_env.expand_type env (mk (get_reason ty, Tvar n)) in
       begin
-        match snd ty with
+        match get_node ty with
         | Tvar _ -> obj @@ kind "var"
         | _ -> from_type env ty
       end
@@ -941,8 +948,12 @@ module Json = struct
       obj @@ kind "path" @ [("type", obj @@ kind "expr")] @ as_type ty
     | Tdependent (DTthis, ty) ->
       obj @@ kind "path" @ [("type", obj @@ kind "this")] @ as_type ty
-    | Toption (_, Tnonnull) -> obj @@ kind "mixed"
-    | Toption ty -> obj @@ kind "nullable" @ args [ty]
+    | Toption ty ->
+      begin
+        match get_node ty with
+        | Tnonnull -> obj @@ kind "mixed"
+        | _ -> obj @@ kind "nullable" @ args [ty]
+      end
     | Tprim tp -> obj @@ kind "primitive" @ name (prim tp)
     | Tclass ((_, cid), _, tys) -> obj @@ kind "class" @ name cid @ args tys
     | Tobject -> obj @@ kind "object"
@@ -1027,7 +1038,7 @@ module Json = struct
       ?(keytrace = []) (ctx : Provider_context.t) (json : Hh_json.json) :
       deserialized_result =
     let reason = Reason.none in
-    let ty (ty : locl_phase ty_) : deserialized_result = Ok (reason, ty) in
+    let ty (ty : locl_phase ty_) : deserialized_result = Ok (mk (reason, ty)) in
     let rec aux (json : Hh_json.json) ~(keytrace : Hh_json.Access.keytrace) :
         deserialized_result =
       Result.Monad_infix.(
@@ -1036,7 +1047,7 @@ module Json = struct
         | "this" ->
           not_supported ~message:"Cannot deserialize 'this' type." ~keytrace
         | "any" -> ty (Typing_defs.make_tany ())
-        | "mixed" -> ty (Toption (reason, Tnonnull))
+        | "mixed" -> ty (Toption (mk (reason, Tnonnull)))
         | "nonnull" -> ty Tnonnull
         | "dynamic" -> ty Tdynamic
         | "generic" ->
@@ -1164,7 +1175,7 @@ module Json = struct
               if empty then
                 ty (Tarraykind AKempty)
               else
-                let tany = (Reason.Rnone, Typing_defs.make_tany ()) in
+                let tany = mk (Reason.Rnone, Typing_defs.make_tany ()) in
                 ty (Tarraykind (AKvarray_or_darray (tany, tany)))
             | [ty1] ->
               aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
@@ -1407,7 +1418,7 @@ module Json = struct
         | Ok (as_json, as_keytrace) ->
           aux as_json ~keytrace:as_keytrace >>= fun as_ty -> Ok as_ty
         | Error (Hh_json.Access.Missing_key_error _) ->
-          Ok (Reason.none, Toption (Reason.none, Tnonnull))
+          Ok (mk (Reason.none, Toption (mk (Reason.none, Tnonnull))))
         | Error access_failure ->
           deserialization_error
             ~message:

@@ -22,19 +22,24 @@ module Cls = Decl_provider.Class
     newtype. *)
 let rec type_non_nullable env ty =
   let (_, ty) = Env.expand_type env ty in
-  match deref ty with
-  | ( _,
-      ( Tprim
-          ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
-          | Tnoreturn )
-      | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject | Tclass _
-      | Tarraykind _ ) ) ->
+  match get_node ty with
+  | Tprim
+      ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey
+      | Tnoreturn )
+  | Tnonnull
+  | Tfun _
+  | Ttuple _
+  | Tshape _
+  | Tanon _
+  | Tobject
+  | Tclass _
+  | Tarraykind _ ->
     true
-  | (_, Tnewtype (_, _, ty))
-  | (_, Tdependent (_, ty))
+  | Tnewtype (_, _, ty)
+  | Tdependent (_, ty)
     when type_non_nullable env ty ->
     true
-  | (_, Tunion tyl) when not (List.is_empty tyl) ->
+  | Tunion tyl when not (List.is_empty tyl) ->
     List.for_all tyl (type_non_nullable env)
   | _ -> false
 
@@ -98,8 +103,8 @@ let (tclass_is_falsy_when_empty, is_traversable) =
     (e.g. user-defined objects) are always truthy, so testing their truthiness
     indicates a logic error. *)
 let rec truthiness env ty =
-  let (env, ety) = Env.expand_type env ty in
-  match get_node ety with
+  let (env, ty) = Env.expand_type env ty in
+  match get_node ty with
   | Tany _
   | Terr
   | Tdynamic

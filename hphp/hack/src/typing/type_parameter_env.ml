@@ -99,10 +99,9 @@ let is_consistent tpenv = tpenv.consistent
 let mark_inconsistent tpenv = { tpenv with consistent = false }
 
 let rec is_generic_param ~elide_nullable ty name =
-  match ty with
-  | (_, Tgeneric name') -> String.equal name name'
-  | (_, Toption ty) when elide_nullable ->
-    is_generic_param ~elide_nullable ty name
+  match get_node ty with
+  | Tgeneric name' -> String.equal name name'
+  | Toption ty when elide_nullable -> is_generic_param ~elide_nullable ty name
   | _ -> false
 
 (* Add a single new upper bound [ty] to generic parameter [name] in [tpenv] *)
@@ -156,9 +155,9 @@ let add_lower_bound_ tpenv name ty =
   *)
 let add_upper_bound ?intersect env_tpenv name ty =
   let tpenv =
-    match ty with
+    match deref ty with
     | (r, Tgeneric formal_super) ->
-      add_lower_bound_ env_tpenv formal_super (r, Tgeneric name)
+      add_lower_bound_ env_tpenv formal_super (mk (r, Tgeneric name))
     | _ -> env_tpenv
   in
   match intersect with
@@ -189,9 +188,9 @@ let add_upper_bound ?intersect env_tpenv name ty =
  *)
 let add_lower_bound ?union env_tpenv name ty =
   let tpenv =
-    match ty with
+    match deref ty with
     | (r, Tgeneric formal_sub) ->
-      add_upper_bound_ env_tpenv formal_sub (r, Tgeneric name)
+      add_upper_bound_ env_tpenv formal_sub (mk (r, Tgeneric name))
     | _ -> env_tpenv
   in
   match union with
@@ -224,18 +223,18 @@ let remove_lower_bound tpenv name bound =
     add name tparam_info tpenv
 
 let remove tpenv name =
-  let tparam = (Typing_reason.Rnone, Tgeneric name) in
+  let tparam = mk (Typing_reason.Rnone, Tgeneric name) in
   let lower_bounds = get_lower_bounds tpenv name in
   let remove_from_upper_bounds_of ty tpenv =
-    match ty with
-    | (_, Tgeneric name) -> remove_upper_bound tpenv name tparam
+    match get_node ty with
+    | Tgeneric name -> remove_upper_bound tpenv name tparam
     | _ -> tpenv
   in
   let tpenv = TySet.fold remove_from_upper_bounds_of lower_bounds tpenv in
   let upper_bounds = get_upper_bounds tpenv name in
   let remove_from_lower_bounds_of ty tpenv =
-    match ty with
-    | (_, Tgeneric name) -> remove_lower_bound tpenv name tparam
+    match get_node ty with
+    | Tgeneric name -> remove_lower_bound tpenv name tparam
     | _ -> tpenv
   in
   let tpenv = TySet.fold remove_from_lower_bounds_of upper_bounds tpenv in

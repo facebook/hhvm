@@ -12,11 +12,12 @@ module SN = Naming_special_names
 module Reason = Typing_reason
 module Nast = Aast
 
-let class_type r name tyl = (r, Tclass ((Reason.to_pos r, name), Nonexact, tyl))
+let class_type r name tyl =
+  mk (r, Tclass ((Reason.to_pos r, name), Nonexact, tyl))
 
-let prim_type r t = (r, Tprim t)
+let prim_type r t = mk (r, Tprim t)
 
-let array_type r ak = (r, Tarraykind ak)
+let array_type r ak = mk (r, Tarraykind ak)
 
 let traversable r ty = class_type r SN.Collections.cTraversable [ty]
 
@@ -79,44 +80,51 @@ let void r = prim_type r Nast.Tvoid
 
 let null r = prim_type r Nast.Tnull
 
-let nonnull r = (r, Tnonnull)
+let nonnull r = mk (r, Tnonnull)
 
-let dynamic r = (r, Tdynamic)
+let dynamic r = mk (r, Tdynamic)
 
-let like r ty = (r, Tlike ty)
+let like r ty = mk (r, Tlike ty)
 
-let mixed r = (r, Toption (r, Tnonnull))
+let mixed r = mk (r, Toption (nonnull r))
 
 let resource r = prim_type r Nast.Tresource
 
+let ty_object r = mk (r, Tobject)
+
+let tyvar r v = mk (r, Tvar v)
+
+let generic r n = mk (r, Tgeneric n)
+
 let nullable_decl r ty =
   (* Cheap avoidance of double nullable *)
-  match ty with
-  | (_, (Toption _ as ty_)) -> (r, ty_)
-  | _ -> (r, Toption ty)
+  match deref ty with
+  | (_, (Toption _ as ty_)) -> mk (r, ty_)
+  | _ -> mk (r, Toption ty)
 
 let nullable_locl r ty =
   (* Cheap avoidance of double nullable *)
-  match ty with
-  | (_, (Toption _ as ty_)) -> (r, ty_)
+  match deref ty with
+  | (_, (Toption _ as ty_)) -> mk (r, ty_)
   | (_, Tunion []) -> null r
-  | _ -> (r, Toption ty)
+  | _ -> mk (r, Toption ty)
 
-let nothing r = (r, Tunion [])
+let nothing r = mk (r, Tunion [])
 
 let union r tyl =
   match tyl with
   | [ty] -> ty
-  | _ -> (r, Tunion tyl)
+  | _ -> mk (r, Tunion tyl)
 
 let intersection r tyl =
   match tyl with
   | [] -> mixed r
   | [ty] -> ty
-  | _ -> (r, Tintersection tyl)
+  | _ -> mk (r, Tintersection tyl)
 
 let unenforced ty = { et_type = ty; et_enforced = false }
 
 let has_member r name ty class_id =
   ConstraintType
-    (r, Thas_member { hm_name = name; hm_type = ty; hm_class_id = class_id })
+    (mk_constraint_type
+       (r, Thas_member { hm_name = name; hm_type = ty; hm_class_id = class_id }))

@@ -197,7 +197,7 @@ let is_nothing env ty = is_nothing_i env (LoclType ty)
 (** Simplify unions and intersections of constraint
 types which involve mixed or nothing. *)
 let simplify_constraint_type env ty =
-  match ty with
+  match deref_constraint_type ty with
   | (_, TCunion (lty, cty)) ->
     if is_nothing env lty then
       (env, ConstraintType cty)
@@ -223,9 +223,10 @@ let contains_unresolved_tyvars env ty =
 
       method! on_tvar (env, occurs) r v =
         let (env, ty) = Env.expand_var env r v in
-        match ty with
-        | (_, Tvar _) -> (env, true)
-        | ty -> this#on_type (env, occurs) ty
+        if is_tyvar ty then
+          (env, true)
+        else
+          this#on_type (env, occurs) ty
 
       method! on_type (env, occurs) ty =
         if occurs then
@@ -253,7 +254,7 @@ let get_all_supertypes env ty =
     | [] -> (env, acc)
     | ty :: tyl ->
       let (env, ty) = Env.expand_type env ty in
-      (match snd ty with
+      (match get_node ty with
       | Tnewtype (_, _, ty)
       | Tdependent (_, ty) ->
         iter seen env (TySet.add ty acc) tyl
@@ -285,9 +286,10 @@ let get_concrete_supertypes env ty =
     | [] -> (env, acc)
     | ty :: tyl ->
       let (env, ty) = Env.expand_type env ty in
-      (match snd ty with
+      (match get_node ty with
       (* Enums with arraykey upper bound are treated as "abstract" *)
-      | Tnewtype (cid, _, (_, Tprim Aast.Tarraykey)) when Env.is_enum env cid ->
+      | Tnewtype (cid, _, bound_ty)
+        when Env.is_enum env cid && is_prim Aast.Tarraykey bound_ty ->
         iter seen env acc tyl
       (* Don't expand enums or newtype; just return the type itself *)
       | Tnewtype (_, _, ty)
@@ -376,22 +378,25 @@ let is_dynamic env ty =
 (*****************************************************************************)
 
 let rec is_any env ty =
-  match Env.expand_type env ty with
-  | (_, (_, (Tany _ | Terr))) -> true
-  | (_, (_, Tunion tyl)) -> List.for_all tyl (is_any env)
-  | (_, (_, Tintersection tyl)) -> List.exists tyl (is_any env)
+  let (env, ty) = Env.expand_type env ty in
+  match get_node ty with
+  | Tany _
+  | Terr ->
+    true
+  | Tunion tyl -> List.for_all tyl (is_any env)
+  | Tintersection tyl -> List.exists tyl (is_any env)
   | _ -> false
 
 let is_tunion env ty =
   let (_env, ty) = Env.expand_type env ty in
-  match ty with
-  | (_, Tunion _) -> true
+  match get_node ty with
+  | Tunion _ -> true
   | _ -> false
 
 let is_tintersection env ty =
   let (_env, ty) = Env.expand_type env ty in
-  match ty with
-  | (_, Tintersection _) -> true
+  match get_node ty with
+  | Tintersection _ -> true
   | _ -> false
 
 (*****************************************************************************)
@@ -400,7 +405,7 @@ let is_tintersection env ty =
 
 let rec get_base_type env ty =
   let (env, ty) = Env.expand_type env ty in
-  match snd ty with
+  match get_node ty with
   | Tnewtype (classname, _, _) when String.equal classname SN.Classes.cClassname
     ->
     ty
@@ -418,7 +423,9 @@ let rec get_base_type env ty =
           get_base_type env ty
       | [] -> ty
     end
-  | Tnewtype (cid, _, (_, Tprim Aast.Tarraykey)) when Env.is_enum env cid -> ty
+  | Tnewtype (cid, _, bound_ty)
+    when Env.is_enum env cid && is_prim Aast.Tarraykey bound_ty ->
+    ty
   | Tgeneric _
   | Tnewtype _
   | Tdependent _ ->
@@ -440,14 +447,17 @@ let rec get_base_type env ty =
  * we would like the name of that class. *)
 (*****************************************************************************)
 let get_class_ids env ty =
-  let rec aux seen acc = function
-    | (_, Tclass ((_, cid), _, _)) -> cid :: acc
-    | (_, (Toption ty | Tdependent (_, ty) | Tnewtype (_, _, ty))) ->
+  let rec aux seen acc ty =
+    match get_node ty with
+    | Tclass ((_, cid), _, _) -> cid :: acc
+    | Toption ty
+    | Tdependent (_, ty)
+    | Tnewtype (_, _, ty) ->
       aux seen acc ty
-    | (_, Tunion tys)
-    | (_, Tintersection tys) ->
+    | Tunion tys
+    | Tintersection tys ->
       List.fold tys ~init:acc ~f:(aux seen)
-    | (_, Tgeneric name) when not (List.mem ~equal:String.equal seen name) ->
+    | Tgeneric name when not (List.mem ~equal:String.equal seen name) ->
       let seen = name :: seen in
       let upper_bounds = Env.get_upper_bounds env name in
       TySet.fold (fun ty acc -> aux seen acc ty) upper_bounds acc
@@ -487,7 +497,7 @@ let shape_field_name_ env field =
     | (p, String name) -> Ok (Ast_defs.SFlit_str (p, name))
     | (_, Class_const ((_, CI x), y)) -> Ok (Ast_defs.SFclass_const (x, y))
     | (_, Class_const ((_, CIself), y)) ->
-      let (_, c_ty) = Env.get_self env in
+      let c_ty = get_node (Env.get_self env) in
       (match c_ty with
       | Tclass (sid, _, _) -> Ok (Ast_defs.SFclass_const (sid, y))
       | _ -> Error `Expected_class)
@@ -512,7 +522,8 @@ let string_of_visibility = function
   | Vprivate _ -> "private"
   | Vprotected _ -> "protected"
 
-let unwrap_class_type = function
+let unwrap_class_type ty =
+  match deref ty with
   | (r, Tapply (name, tparaml)) -> (r, name, tparaml)
   | ( _,
       ( Terr | Tdynamic | Tany _ | Tmixed | Tnonnull | Tnothing
@@ -624,8 +635,8 @@ let add_function_type env fty logged =
     (untyped_ftys, try_intersect env fty ftys)
 
 let rec class_get_pu_ env cty name =
-  let (env, cty) = Env.expand_type env cty in
-  match snd cty with
+  let (env, ety) = Env.expand_type env cty in
+  match get_node ety with
   | Tany _
   | Terr
   | Tdynamic

@@ -30,9 +30,9 @@ let fun_env tcopt f =
 let get_self_from_c c =
   let tparams =
     List.map c.c_tparams.c_tparam_list (fun { tp_name = (p, s); _ } ->
-        (Reason.Rwitness p, Tgeneric s))
+        mk (Reason.Rwitness p, Tgeneric s))
   in
-  (Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams))
+  mk (Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams))
 
 let class_env tcopt c =
   let file = Pos.filename (fst c.c_name) in
@@ -45,7 +45,8 @@ let class_env tcopt c =
    * want *)
   let (env, self_ty) =
     match c.c_kind with
-    | Ast_defs.Cenum -> (env, MakeType.class_type (fst self) (snd c.c_name) [])
+    | Ast_defs.Cenum ->
+      (env, MakeType.class_type (get_reason self) (snd c.c_name) [])
     | Ast_defs.Cinterface
     | Ast_defs.Cabstract
     | Ast_defs.Ctrait

@@ -328,20 +328,24 @@ let add env ?(tyvar_pos = Pos.none) v ty =
 let get_type env r v =
   let rec get v aliases =
     let shorten_paths () =
-      ISet.fold (fun v' env -> add env v' (r, Tvar v)) aliases env
+      ISet.fold (fun v' env -> add env v' (mk (r, Tvar v))) aliases env
     in
     match get_solving_info_opt env v with
-    | Some (TVIType (_, Tvar v')) ->
-      if ISet.mem v aliases then
-        failwith "Two type variables are aliasing each other!";
-      get v' (ISet.add v aliases)
+    | Some (TVIType ty) ->
+      begin
+        match get_node ty with
+        | Tvar v' ->
+          if ISet.mem v aliases then
+            failwith "Two type variables are aliasing each other!";
+          get v' (ISet.add v aliases)
+        | _ ->
+          let env = shorten_paths () in
+          (env, ty)
+      end
     | None
     | Some (TVIConstraints _) ->
       let env = shorten_paths () in
-      (env, (r, Tvar v))
-    | Some (TVIType ty) ->
-      let env = shorten_paths () in
-      (env, ty)
+      (env, mk (r, Tvar v))
   in
   get v ISet.empty
 
@@ -379,7 +383,7 @@ let add_current_tyvar ?variance env p v =
 let fresh_type_reason ?variance env r =
   let v = Ident.tmp () in
   let env = add_current_tyvar ?variance env (Reason.to_pos r) v in
-  (env, (r, Tvar v))
+  (env, mk (r, Tvar v))
 
 let fresh_type ?variance env p =
   fresh_type_reason env (Reason.Rtype_variable p) ?variance
@@ -428,14 +432,14 @@ let get_tyvar_eager_solve_fail env v =
 let expand_var env r v =
   let (env, ty) = get_type env r v in
   if get_tyvar_eager_solve_fail env v then
-    (env, (Reason.Rsolve_fail (Reason.to_pos r), snd ty))
+    (env, mk (Reason.Rsolve_fail (Reason.to_pos r), get_node ty))
   else
     (env, ty)
 
 let expand_type env x =
-  match x with
+  match deref x with
   | (r, Tvar x) -> expand_var env r x
-  | x -> (env, x)
+  | _ -> (env, x)
 
 let full_expander =
   object (this)
@@ -443,8 +447,8 @@ let full_expander =
 
     method! on_tvar env r v =
       let (env, ty) = expand_var env r v in
-      match ty with
-      | (_, Tvar _) -> (env, ty)
+      match get_node ty with
+      | Tvar _ -> (env, ty)
       | _ -> this#on_type env ty
   end
 
@@ -616,7 +620,12 @@ let remove_tyvar_upper_bound env var upper_var =
       ITySet.filter
         (fun ty ->
           match expand_internal_type env ty with
-          | (_, LoclType (_, Tvar v)) -> not (Ident.equal v upper_var)
+          | (_, LoclType ty) ->
+            begin
+              match get_node ty with
+              | Tvar v -> not (Ident.equal v upper_var)
+              | _ -> true
+            end
           | _ -> true)
         tvconstraints.upper_bounds
     in
@@ -632,7 +641,12 @@ let remove_tyvar_lower_bound env var lower_var =
       ITySet.filter
         (fun ty ->
           match expand_internal_type env ty with
-          | (_, LoclType (_, Tvar v)) -> not (Ident.equal v lower_var)
+          | (_, LoclType ty) ->
+            begin
+              match get_node ty with
+              | Tvar v -> not (Ident.equal v lower_var)
+              | _ -> true
+            end
           | _ -> true)
         tvconstraints.lower_bounds
     in
@@ -713,15 +727,15 @@ module Size = struct
 
         method! on_tvar acc r v =
           let (_, ty) = expand_var env r v in
-          match ty with
-          | (_, Tvar v') when Ident.equal v' v -> acc
+          match get_node ty with
+          | Tvar v' when Ident.equal v' v -> acc
           | _ -> super#on_type acc ty
       end
     in
     ty_size_visitor#on_type 0 ty
 
   let rec constraint_type_size env ty =
-    match ty with
+    match deref_constraint_type ty with
     | (_, Tdestructure tyl) ->
       List.fold ~init:1 ~f:(fun size ty -> size + ty_size env ty) tyl
     | (_, Thas_member hm) ->
@@ -860,7 +874,12 @@ let get_nongraph_subtype_prop env = env.subtype_prop
 
 let is_alias_for_another_var env v =
   match get_solving_info_opt env v with
-  | Some (TVIType (_, Tvar v')) when Int.( <> ) v v' -> true
+  | Some (TVIType ty) ->
+    begin
+      match get_node ty with
+      | Tvar v' when Int.( <> ) v v' -> true
+      | _ -> false
+    end
   | _ -> false
 
 (** Some ty vars in the map will carry no additional information, e.g.

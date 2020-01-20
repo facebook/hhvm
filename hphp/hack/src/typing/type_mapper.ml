@@ -45,9 +45,10 @@ class virtual tvar_expanding_type_mapper =
   object (this)
     method on_tvar env (r : Reason.t) n =
       let (env, ty) = Env.get_type env r n in
-      match ty with
-      | (_, Tvar _) -> (env, ty)
-      | _ -> this#on_type env ty
+      if is_tyvar ty then
+        (env, ty)
+      else
+        this#on_type env ty
 
     method virtual on_type : env -> locl_ty -> result
   end
@@ -58,9 +59,9 @@ class virtual tvar_substituting_type_mapper =
   object (this)
     method on_tvar (env : env) (r : Reason.t) n =
       let (env, ty) = Env.get_type env r n in
-      match ty with
-      | (_, Tvar _) -> (env, ty)
-      | _ ->
+      if is_tyvar ty then
+        (env, ty)
+      else
         let (env, ty) = this#on_type env ty in
         let env = Env.add env n ty in
         (env, ty)

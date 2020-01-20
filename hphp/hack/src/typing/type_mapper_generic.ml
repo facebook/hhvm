@@ -86,53 +86,57 @@ class type ['env] type_mapper_type =
  * types. *)
 class ['env] shallow_type_mapper : ['env] type_mapper_type =
   object (this)
-    method on_tvar env r n = (env, (r, Tvar n))
+    method on_tvar env r n = (env, mk (r, Tvar n))
 
-    method on_tnonnull env r = (env, (r, Tnonnull))
+    method on_tnonnull env r = (env, mk (r, Tnonnull))
 
-    method on_tdynamic env r = (env, (r, Tdynamic))
+    method on_tdynamic env r = (env, mk (r, Tdynamic))
 
-    method on_tany env r = (env, (r, Typing_defs.make_tany ()))
+    method on_tany env r = (env, mk (r, Typing_defs.make_tany ()))
 
-    method on_terr env r = (env, (r, Terr))
+    method on_terr env r = (env, mk (r, Terr))
 
-    method on_tanon env r fun_arity id = (env, (r, Tanon (fun_arity, id)))
+    method on_tanon env r fun_arity id = (env, mk (r, Tanon (fun_arity, id)))
 
-    method on_tprim env r p = (env, (r, Tprim p))
+    method on_tprim env r p = (env, mk (r, Tprim p))
 
-    method on_tarraykind_akempty env r = (env, (r, Tarraykind AKempty))
+    method on_tarraykind_akempty env r = (env, mk (r, Tarraykind AKempty))
 
-    method on_tarraykind_akvarray env r tv = (env, (r, Tarraykind (AKvarray tv)))
+    method on_tarraykind_akvarray env r tv =
+      (env, mk (r, Tarraykind (AKvarray tv)))
 
     method on_tarraykind_akdarray env r tk tv =
-      (env, (r, Tarraykind (AKdarray (tk, tv))))
+      (env, mk (r, Tarraykind (AKdarray (tk, tv))))
 
     method on_tvarray_or_darray env r tk tv =
-      (env, (r, Tarraykind (AKvarray_or_darray (tk, tv))))
+      (env, mk (r, Tarraykind (AKvarray_or_darray (tk, tv))))
 
-    method on_ttuple env r tyl = (env, (r, Ttuple tyl))
+    method on_ttuple env r tyl = (env, mk (r, Ttuple tyl))
 
-    method on_tunion env r tyl = (env, (r, Tunion tyl))
+    method on_tunion env r tyl = (env, mk (r, Tunion tyl))
 
-    method on_tintersection env r tyl = (env, (r, Tintersection tyl))
+    method on_tintersection env r tyl = (env, mk (r, Tintersection tyl))
 
-    method on_toption env r ty = (env, (r, Toption ty))
+    method on_toption env r ty = (env, mk (r, Toption ty))
 
-    method on_tfun env r fun_type = (env, (r, Tfun fun_type))
+    method on_tfun env r fun_type = (env, mk (r, Tfun fun_type))
 
-    method on_tgeneric env r name = (env, (r, Tgeneric name))
+    method on_tgeneric env r name = (env, mk (r, Tgeneric name))
 
-    method on_tnewtype env r name tyl ty = (env, (r, Tnewtype (name, tyl, ty)))
+    method on_tnewtype env r name tyl ty =
+      (env, mk (r, Tnewtype (name, tyl, ty)))
 
-    method on_tdependent env r dep ty = (env, (r, Tdependent (dep, ty)))
+    method on_tdependent env r dep ty = (env, mk (r, Tdependent (dep, ty)))
 
-    method on_tclass env r x e tyl = (env, (r, Tclass (x, e, tyl)))
+    method on_tclass env r x e tyl = (env, mk (r, Tclass (x, e, tyl)))
 
-    method on_tobject env r = (env, (r, Tobject))
+    method on_tobject env r = (env, mk (r, Tobject))
 
-    method on_tshape env r shape_kind fdm = (env, (r, Tshape (shape_kind, fdm)))
+    method on_tshape env r shape_kind fdm =
+      (env, mk (r, Tshape (shape_kind, fdm)))
 
-    method on_type env (r, ty) =
+    method on_type env ty =
+      let (r, ty) = deref ty in
       match ty with
       | Tvar n -> this#on_tvar env r n
       | Tnonnull -> this#on_tnonnull env r
@@ -160,11 +164,11 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tshape (shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
       | Tpu (base, enum) ->
         let (env, base) = this#on_type env base in
-        (env, (r, Tpu (base, enum)))
+        (env, mk (r, Tpu (base, enum)))
       | Tpu_type_access (base, enum, member, tyname) ->
         let (env, base) = this#on_type env base in
         let (env, member) = this#on_type env member in
-        (env, (r, Tpu_type_access (base, enum, member, tyname)))
+        (env, mk (r, Tpu_type_access (base, enum, member, tyname)))
 
     method on_locl_ty_list env tyl = List.map_env env tyl ~f:this#on_type
   end
@@ -175,7 +179,7 @@ class virtual ['env] tunion_type_mapper =
   object (this)
     method on_tunion env r tyl : 'env * locl_ty =
       let (env, tyl) = this#on_locl_ty_list env tyl in
-      (env, (r, Tunion tyl))
+      (env, mk (r, Tunion tyl))
 
     method virtual on_locl_ty_list : 'env -> locl_ty list -> 'env * locl_ty list
   end
@@ -184,7 +188,7 @@ class virtual ['env] tinter_type_mapper =
   object (this)
     method on_tintersection env r tyl : 'env * locl_ty =
       let (env, tyl) = this#on_locl_ty_list env tyl in
-      (env, (r, Tintersection tyl))
+      (env, mk (r, Tintersection tyl))
 
     method virtual on_locl_ty_list : 'env -> locl_ty list -> 'env * locl_ty list
   end
@@ -194,9 +198,10 @@ class virtual ['env] tvar_expanding_type_mapper =
   object (this)
     method on_tvar (env, expand) r n =
       let (env, ty) = expand env r n in
-      match ty with
-      | (_, Tvar _) -> ((env, expand), ty)
-      | _ -> this#on_type (env, expand) ty
+      if is_tyvar ty then
+        ((env, expand), ty)
+      else
+        this#on_type (env, expand) ty
 
     method virtual on_type
         : 'env * ('env -> Reason.t -> int -> 'env * locl_ty) ->
@@ -216,9 +221,9 @@ class virtual ['env] tvar_substituting_type_mapper =
         (r : Reason.t)
         (n : int) =
       let (env, ty) = expand env r n in
-      match ty with
-      | (_, Tvar _) -> (env, ty)
-      | _ ->
+      if is_tyvar ty then
+        (env, ty)
+      else
         let ((env, _expand, add), ty) = this#on_type (env, expand, add) ty in
         let env = add env n ty in
         (env, ty)
@@ -248,25 +253,25 @@ class ['env] deep_type_mapper =
 
     method! on_tarraykind_akvarray env r tv =
       let (env, tv) = this#on_type env tv in
-      (env, (r, Tarraykind (AKvarray tv)))
+      (env, mk (r, Tarraykind (AKvarray tv)))
 
     method! on_tarraykind_akdarray env r tk tv =
       let (env, tk) = this#on_type env tk in
       let (env, tv) = this#on_type env tv in
-      (env, (r, Tarraykind (AKdarray (tk, tv))))
+      (env, mk (r, Tarraykind (AKdarray (tk, tv))))
 
     method! on_tvarray_or_darray env r tk tv =
       let (env, tk) = this#on_type env tk in
       let (env, tv) = this#on_type env tv in
-      (env, (r, Tarraykind (AKvarray_or_darray (tk, tv))))
+      (env, mk (r, Tarraykind (AKvarray_or_darray (tk, tv))))
 
     method! on_ttuple env r tyl =
       let (env, tyl) = this#on_locl_ty_list env tyl in
-      (env, (r, Ttuple tyl))
+      (env, mk (r, Ttuple tyl))
 
     method! on_toption env r ty =
       let (env, ty) = this#on_type env ty in
-      (env, (r, Toption ty))
+      (env, mk (r, Toption ty))
 
     method! on_tfun env r ft =
       let on_param env param =
@@ -283,25 +288,27 @@ class ['env] deep_type_mapper =
         | x -> (env, x)
       in
       ( env,
-        (r, Tfun { ft with ft_params = params; ft_arity = arity; ft_ret = ret })
-      )
+        mk
+          ( r,
+            Tfun { ft with ft_params = params; ft_arity = arity; ft_ret = ret }
+          ) )
 
     method! on_tnewtype env r x tyl cstr =
       let (env, tyl) = List.map_env env tyl this#on_type in
       let (env, cstr) = this#on_type env cstr in
-      (env, (r, Tnewtype (x, tyl, cstr)))
+      (env, mk (r, Tnewtype (x, tyl, cstr)))
 
     method! on_tdependent env r x cstr =
       let (env, cstr) = this#on_type env cstr in
-      (env, (r, Tdependent (x, cstr)))
+      (env, mk (r, Tdependent (x, cstr)))
 
     method! on_tclass env r x e tyl =
       let (env, tyl) = this#on_locl_ty_list env tyl in
-      (env, (r, Tclass (x, e, tyl)))
+      (env, mk (r, Tclass (x, e, tyl)))
 
     method! on_tshape env r shape_kind fdm =
       let (env, fdm) = ShapeFieldMap.map_env this#on_type env fdm in
-      (env, (r, Tshape (shape_kind, fdm)))
+      (env, mk (r, Tshape (shape_kind, fdm)))
 
     method private on_opt_type env x =
       match x with
@@ -347,7 +354,9 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
   object (this)
     inherit ['env] deep_type_mapper
 
-    method on_constraint_type env (r, ty) = this#on_constraint_type_ env r ty
+    method on_constraint_type env ty =
+      let (r, ty) = deref_constraint_type ty in
+      this#on_constraint_type_ env r ty
 
     method on_constraint_type_ env r ty_ =
       match ty_ with
@@ -360,21 +369,21 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       let { hm_name; hm_type; hm_class_id } = hm in
       let (env, hm_type) = this#on_type env hm_type in
       let hm = { hm_name; hm_type; hm_class_id } in
-      (env, (r, Thas_member hm))
+      (env, mk_constraint_type (r, Thas_member hm))
 
     method on_Tdestructure env r tyl =
       let (env, tyl) = this#on_locl_ty_list env tyl in
-      (env, (r, Tdestructure tyl))
+      (env, mk_constraint_type (r, Tdestructure tyl))
 
     method on_TCunion env r lty cty =
       let (env, lty) = this#on_type env lty in
       let (env, cty) = this#on_constraint_type env cty in
-      (env, (r, TCunion (lty, cty)))
+      (env, mk_constraint_type (r, TCunion (lty, cty)))
 
     method on_TCintersection env r lty cty =
       let (env, lty) = this#on_type env lty in
       let (env, cty) = this#on_constraint_type env cty in
-      (env, (r, TCintersection (lty, cty)))
+      (env, mk_constraint_type (r, TCintersection (lty, cty)))
   end
 
 class type ['env] internal_type_mapper_type =

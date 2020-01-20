@@ -22,8 +22,8 @@ module T = Aast
 let expand_ty ?var_hook ?pos env ty =
   let rec exp_ty ty =
     begin
-      match (deref ty, var_hook) with
-      | ((_, Tvar var), Some hook) -> hook var
+      match (get_node ty, var_hook) with
+      | (Tvar var, Some hook) -> hook var
       | _ -> ()
     end;
     let (_, ety) = Tast_env.expand_type env ty in

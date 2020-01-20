@@ -11,6 +11,7 @@ open Typing_env_types
 module Inf = Typing_inference_env
 module Env = Typing_env
 module Sub = Typing_subtype
+module MakeType = Typing_make_type
 
 module StateErrors = struct
   module IdentMap = WrappedMap.Make (Ident)
@@ -81,7 +82,8 @@ module StateConstraintGraph = struct
     let (env, var') =
       Env.copy_tyvar_from_genv_to_env var ~from:subgraph ~to_:env
     in
-    let ty = (Reason.Rnone, Tvar var) and ty' = (Reason.Rnone, Tvar var') in
+    let ty = MakeType.tyvar Reason.Rnone var
+    and ty' = MakeType.tyvar Reason.Rnone var' in
     let on_err = make_error_callback errors var in
     let env = catch_exc on_err env (Sub.sub_type env ty ty') in
     let env = catch_exc on_err env (Sub.sub_type env ty' ty) in
@@ -147,7 +149,10 @@ module StateSolvedGraph = struct
     let env =
       List.fold vars ~init:env ~f:(fun env var ->
           if StateErrors.has_error errors var then
-            Typing_solver.bind env var (Typing_reason.Rnone, Typing_defs.Terr)
+            Typing_solver.bind
+              env
+              var
+              (Typing_defs.mk (Typing_reason.Rnone, Typing_defs.Terr))
           else
             env)
     in

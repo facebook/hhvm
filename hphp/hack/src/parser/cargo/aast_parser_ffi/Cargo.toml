@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:aast_parser_ffi
-# Signature<<fa4be1f070cabe2bce7407f450c8181c3611a5ff>>
+# Signature<<7cc4c395adbed4565f7432686762d3e5d5530bf7>>
 [package]
 name = "aast_parser_ffi"
 edition = "2018"
@@ -18,4 +18,4 @@ parser_core_types = { path = "../core_types" }
 stack_limit = { path = "../../../utils/stack_limit" }
 libc = "0.2"
 ocaml = "0.8"
-# @end of Signature<<fa4be1f070cabe2bce7407f450c8181c3611a5ff>>
+# @end of Signature<<7cc4c395adbed4565f7432686762d3e5d5530bf7>>

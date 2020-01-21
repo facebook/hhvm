@@ -1621,12 +1621,12 @@ module GenerateOcamlSyntax = struct
   let template : string =
     make_header CStyle ""
     ^ "
-use crate::ocaml_syntax::{OcamlSyntax, Context};
+use crate::{OcamlSyntax, Context};
 use rust_to_ocaml::*;
 
-use parser::syntax_kind::SyntaxKind;
-use parser::syntax::{SyntaxType, SyntaxValueType};
-use parser::positioned_token::PositionedToken;
+use parser_core_types::syntax_kind::SyntaxKind;
+use parser_core_types::syntax::{SyntaxType, SyntaxValueType};
+use parser_core_types::positioned_token::PositionedToken;
 
 impl<V, C> SyntaxType<'_, C> for OcamlSyntax<V>
 where

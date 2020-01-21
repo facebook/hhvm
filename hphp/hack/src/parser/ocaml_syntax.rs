@@ -4,9 +4,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+pub mod ocaml_coroutine_state;
+mod ocaml_syntax_generated;
+
 use ocaml::core::mlvalues::Value as OcamlValue;
+use ocaml::core::mlvalues::Value;
 use ocamlpool_rust::utils::*;
-use parser::{
+use parser_core_types::{
     lexable_token::LexableToken,
     positioned_token::PositionedToken,
     syntax::{SyntaxTypeBase, SyntaxValueType},
@@ -113,5 +117,11 @@ where
 
     fn value(&self) -> &Self::Value {
         &self.value
+    }
+}
+
+impl<V> ToOcaml for OcamlSyntax<V> {
+    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
+        self.syntax
     }
 }

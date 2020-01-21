@@ -38,17 +38,14 @@ type glean_json = {
 type result_progress = {
   resultJson: glean_json;
   (* Maps fact JSON to fact id *)
-  factIds: (json, int) Hashtbl.t;
+  factIds: int JMap.t;
 }
 
 let init_progress =
   let default_json =
     { classDeclaration = []; declarationLocation = []; fileXRefs = [] }
   in
-  (* TODO: The default poly function does not fully examine data structures;
-  this will probably require a custom function *)
-  let table = Hashtbl.Poly.create () in
-  { resultJson = default_json; factIds = table }
+  { resultJson = default_json; factIds = JMap.empty }
 
 let hint ctx h =
   let mode = FileInfo.Mdecl in
@@ -89,18 +86,29 @@ let update_json_data predicate json progress =
   { resultJson = json; factIds = progress.factIds }
 
 let glean_json predicate json progress =
-  let id =
-    match Hashtbl.find progress.factIds json with
-    | Some fid -> fid
+  let (id, is_new, progress) =
+    match JMap.find_opt json progress.factIds with
+    | Some fid -> (fid, false, progress)
     | None ->
       let newFactId = json_element_id () in
-      Hashtbl.add_exn progress.factIds json newFactId;
-      newFactId
+      let progress =
+        {
+          resultJson = progress.resultJson;
+          factIds = JMap.add json newFactId progress.factIds;
+        }
+      in
+      (newFactId, true, progress)
   in
   let json_fact =
     JSON_Object [("id", JSON_Number (string_of_int id)); ("key", json)]
   in
-  (json_fact, id, update_json_data predicate json_fact progress)
+  let progress =
+    if is_new then
+      update_json_data predicate json_fact progress
+    else
+      progress
+  in
+  (json_fact, id, progress)
 
 let json_of_bytespan pos =
   let start = fst (Pos.info_raw pos) in

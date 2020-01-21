@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::lexable_token::LexableToken;
-use crate::syntax::{Syntax, SyntaxValueType};
-use crate::syntax_kind::SyntaxKind;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::syntax::{Syntax, SyntaxValueType};
+use parser_core_types::syntax_kind::SyntaxKind;
 
 use std::marker::PhantomData;
 

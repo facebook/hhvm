@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:rust_to_ocaml
-# Signature<<76e0daac1263b964df710aa1f86b31f621b547f7>>
+# Signature<<1019b07a134017bdbd23d8c3a426fa31126a0958>>
 [package]
 name = "rust_to_ocaml"
 edition = "2018"
@@ -17,4 +17,4 @@ parser_core_types = { path = "../core_types" }
 parser_rust = { path = "../.." }
 libc = "0.2"
 ocaml = "0.8"
-# @end of Signature<<76e0daac1263b964df710aa1f86b31f621b547f7>>
+# @end of Signature<<1019b07a134017bdbd23d8c3a426fa31126a0958>>

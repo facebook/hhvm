@@ -29,4 +29,3 @@ pub use parser_core_types::{
     minimal_trivia, parser_env, positioned_syntax, positioned_token, positioned_trivia,
     source_text, syntax, syntax_error, syntax_kind, syntax_trait, token_kind, trivia_kind,
 };
-pub mod rewriter;

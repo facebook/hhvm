@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser/ppl:rust_ppl_class_rewriter
-# Signature<<d1ef21f5b70753cd7961876302faea7f9902ee79>>
+# Signature<<6b56c776215a69d043a3c998f0cafa4f940e7e31>>
 [package]
 name = "rust_ppl_class_rewriter"
 edition = "2018"
@@ -12,8 +12,8 @@ path = "../../rust_ppl_class_rewriter.rs"
 
 [dependencies]
 parser_core_types = { path = "../../../cargo/core_types" }
-parser_rust = { path = "../../.." }
+rewriter = { path = "../../../cargo/rewriter" }
 rust_coroutine = { path = "../../../coroutine/cargo/rust_coroutine" }
 rust_editable_positioned_syntax = { path = "../../../cargo/editable_positioned_syntax" }
 lazy_static = "1.4"
-# @end of Signature<<d1ef21f5b70753cd7961876302faea7f9902ee79>>
+# @end of Signature<<6b56c776215a69d043a3c998f0cafa4f940e7e31>>

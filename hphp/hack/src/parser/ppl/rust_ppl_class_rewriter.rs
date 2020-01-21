@@ -9,7 +9,7 @@ use parser_core_types::{
     },
     syntax_type::SyntaxType,
 };
-use parser_rust::rewriter::Rewriter;
+use rewriter::Rewriter;
 use rust_coroutine::CoroutineSyntax;
 use rust_editable_positioned_syntax::{
     editable_positioned_token::EditablePositionedToken, EditablePositionedSyntax,

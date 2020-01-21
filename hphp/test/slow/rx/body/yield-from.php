@@ -13,7 +13,6 @@ function gen_bad() {
 }
 
 <<__EntryPoint>>
-function main() {
+function test() {
   foreach (gen_bad() as $v) echo "$v\n";
-  echo "Done\n";
 }

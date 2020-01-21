@@ -1,0 +1,3 @@
+Verification Error (unit %s/rx/body/prop_write_after_dim_through_array_incdec.php func bad): writes to embedded objects are forbidden in Rx functions: IncDecM
+
+Verification failed for unit %s/rx/body/prop_write_after_dim_through_array_incdec.php. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

@@ -1,9 +1,0 @@
-Verification Error (unit %s/test/slow/rx/body/rx-levels.php func full_rx): Print cannot appear in Rx function
-
-Verification Error (unit %s/test/slow/rx/body/rx-levels.php func shallow_rx): Print cannot appear in Rx function
-
-Verification Error (unit %s/test/slow/rx/body/rx-levels.php func local_rx): Print cannot appear in Rx function
-
-Full
-Shallow
-Local

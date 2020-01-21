@@ -1,0 +1,3 @@
+Verification Error (unit %s/rx/body/second_dim_for_unset_through_prop_from_this_name_expression.php func C::bad): Dim through object for write is only allowed on locals and $this in Rx functions
+
+Verification failed for unit %s/rx/body/second_dim_for_unset_through_prop_from_this_name_expression.php. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

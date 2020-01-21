@@ -1,0 +1,3 @@
+Verification Error (unit %s/rx/body/include.php func test): defines/includes are forbidden in Rx functions: Incl
+
+Verification failed for unit %s/rx/body/include.php. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

@@ -6,11 +6,13 @@
  *
  *)
 
-open Hh_prelude
-open Hh_json
 open Aast
 open Ast_defs
 open Decl_env
+open Hh_json
+open Hh_prelude
+open SymbolDefinition
+open SymbolOccurrence
 
 type localvar = {
   lv_name: string;
@@ -119,21 +121,38 @@ let json_of_bytespan pos =
       ("length", JSON_Number (string_of_int length));
     ]
 
-let json_of_class _ class_name clss progress =
-  let is_abstract =
-    match clss.c_kind with
-    | Cabstract -> true
-    | _ -> false
-  in
+let json_of_rel_bytespan offset len =
+  JSON_Object
+    [
+      ("offset", JSON_Number (string_of_int offset));
+      ("length", JSON_Number (string_of_int len));
+    ]
+
+let json_of_file filepath = JSON_Object [("key", JSON_String filepath)]
+
+let json_of_class class_name is_abstract is_final progress =
   let json_fact =
     JSON_Object
       [
         ("name", JSON_Object [("key", JSON_String class_name)]);
         ("is_abstract", JSON_Bool is_abstract);
-        ("is_final", JSON_Bool clss.c_final);
+        ("is_final", JSON_Bool is_final);
       ]
   in
   glean_json ClassDeclaration json_fact progress
+
+let json_of_class_from_node _ class_name clss progress =
+  let is_abstract =
+    match clss.c_kind with
+    | Cabstract -> true
+    | _ -> false
+  in
+  json_of_class class_name is_abstract clss.c_final progress
+
+let json_of_class_from_symbol _ class_name mods progress =
+  let is_abstract = List.mem mods SymbolDefinition.Abstract ~equal:phys_equal in
+  let is_final = List.mem mods SymbolDefinition.Final ~equal:phys_equal in
+  json_of_class class_name is_abstract is_final progress
 
 let json_of_decl tcopt decl_type json_fun id elem progress =
   let (_, fact_id, progress) = json_fun tcopt id elem progress in
@@ -149,11 +168,40 @@ let json_of_decl_loc tcopt decl_type pos json_fun id elem progress =
     JSON_Object
       [
         ("declaration", decl_json);
-        ("file", JSON_Object [("key", JSON_String filepath)]);
+        ("file", json_of_file filepath);
         ("span", json_of_bytespan pos);
       ]
   in
   glean_json DeclarationLocation json_fact progress
+
+let json_of_xrefs xref_map =
+  let xrefs =
+    IMap.fold
+      (fun _id (target_json, pos_list) acc ->
+        let sorted_pos = List.sort Pos.compare pos_list in
+        let (byte_spans, _) =
+          List.fold sorted_pos ~init:([], 0) ~f:(fun (spans, last_start) pos ->
+              let start = fst (Pos.info_raw pos) in
+              let length = Pos.length pos in
+              let span = json_of_rel_bytespan (start - last_start) length in
+              (span :: spans, start))
+        in
+        let xref =
+          JSON_Object
+            [("target", target_json); ("ranges", JSON_Array byte_spans)]
+        in
+        xref :: acc)
+      xref_map
+      []
+  in
+  JSON_Array xrefs
+
+let json_of_file_xrefs filepath xref_map progress =
+  let json_fact =
+    JSON_Object
+      [("file", json_of_file filepath); ("xrefs", json_of_xrefs xref_map)]
+  in
+  glean_json FileXRefs json_fact progress
 
 let build_json tcopt symbols =
   let progress =
@@ -162,10 +210,76 @@ let build_json tcopt symbols =
         | Class cd ->
           let (pos, id) = cd.c_name in
           let (_, _, res) =
-            json_of_decl_loc tcopt "class_" pos json_of_class id cd acc
+            json_of_decl_loc
+              tcopt
+              "class_"
+              pos
+              json_of_class_from_node
+              id
+              cd
+              acc
           in
           res
         | _ -> acc)
+  in
+  (* file_xrefs : Hh_json.json * Relative_path.t Pos.pos list) IMap.t SMap.t *)
+  let (progress, file_xrefs) =
+    List.fold
+      symbols.occurrences
+      ~init:(progress, SMap.empty)
+      ~f:(fun (prog, xrefs) occ ->
+        if occ.is_declaration then
+          (prog, xrefs)
+        else
+          let symbol_def_res = ServerSymbolDefinition.go None occ in
+          let filepath = Relative_path.S.to_string (Pos.filename occ.pos) in
+          match symbol_def_res with
+          | None -> (prog, xrefs)
+          | Some symbol_def ->
+            (match symbol_def.kind with
+            | Class ->
+              let (decl_json, target_id, prog) =
+                json_of_decl
+                  tcopt
+                  "class_"
+                  json_of_class_from_symbol
+                  symbol_def.name
+                  symbol_def.modifiers
+                  prog
+              in
+              let xrefs =
+                SMap.update
+                  filepath
+                  (fun file_map ->
+                    let target_json =
+                      JSON_Object [("declaration", decl_json)]
+                    in
+                    let new_ref = (target_json, [occ.pos]) in
+                    match file_map with
+                    | None -> Some (IMap.singleton target_id new_ref)
+                    | Some map ->
+                      let updated_xref_map =
+                        IMap.update
+                          target_id
+                          (fun target_tuple ->
+                            match target_tuple with
+                            | None -> Some new_ref
+                            | Some (json, refs) -> Some (json, occ.pos :: refs))
+                          map
+                      in
+                      Some updated_xref_map)
+                  xrefs
+              in
+              (prog, xrefs)
+            | _ -> (prog, xrefs)))
+  in
+  let progress =
+    SMap.fold
+      (fun fp target_map acc ->
+        let (_, _, res) = json_of_file_xrefs fp target_map acc in
+        res)
+      file_xrefs
+      progress
   in
   let preds_and_records =
     (* The order is the reverse of how these items appear in the JSON,

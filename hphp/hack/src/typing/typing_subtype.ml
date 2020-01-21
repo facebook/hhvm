@@ -51,7 +51,7 @@ type pu_reduced_access =
 let reduce_pu_type_access env reason base enum member name =
   let (env, base) = Env.expand_type env base in
   let (env, member) = Env.expand_type env member in
-  match snd member with
+  match get_node member with
   | Tprim (Aast_defs.Tatom atom_name) ->
     (match
        class_get_pu_member_type env base (snd enum) atom_name (snd name)
@@ -158,19 +158,19 @@ module ConditionTypes = struct
         | Some (((p, _) as sid), cls) ->
           let params =
             List.map (Cls.tparams cls) ~f:(fun { tp_name = (p, x); _ } ->
-                (Reason.Rwitness p, Tgeneric x))
+                mk (Reason.Rwitness p, Tgeneric x))
           in
           let subst = Decl_instantiate.make_subst (Cls.tparams cls) [] in
-          let ty = (Reason.Rwitness p, Tapply (sid, params)) in
+          let ty = mk (Reason.Rwitness p, Tapply (sid, params)) in
           Decl_instantiate.instantiate subst ty
       in
       let ety_env = Phase.env_with_self env in
       let (_, t) = Phase.localize ~ety_env env ty in
       t
     in
-    match ty with
-    | (r, Toption ty) -> (r, Toption (do_localize ty))
-    | ty -> do_localize ty
+    match deref ty with
+    | (r, Toption ty) -> mk (r, Toption (do_localize ty))
+    | _ -> do_localize ty
 end
 
 (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
@@ -281,7 +281,7 @@ let anyfy env r ty =
     object
       inherit Type_mapper.deep_type_mapper as super
 
-      method! on_type env _ty = (env, (r, Typing_defs.make_tany ()))
+      method! on_type env _ty = (env, mk (r, Typing_defs.make_tany ()))
 
       method go ty =
         let (_, ty) = super#on_type env ty in
@@ -295,7 +295,7 @@ let find_type_with_exact_negation env tyl =
     match tyl with
     | [] -> (env, None, acc_tyl)
     | ty :: tyl' ->
-      let (env, non_ty) = TUtils.non env (fst ty) ty TUtils.ApproxDown in
+      let (env, non_ty) = TUtils.non env (get_reason ty) ty TUtils.ApproxDown in
       let nothing = MakeType.nothing Reason.none in
       if ty_equal non_ty nothing then
         find env tyl' (ty :: acc_tyl)
@@ -313,12 +313,12 @@ let rec describe_ty_super env ?(short = false) ty =
   match ty with
   | LoclType ty ->
     let (env, ty) = Env.expand_type env ty in
-    (match ty with
-    | (_, Tvar v) ->
+    (match get_node ty with
+    | Tvar v ->
       let upper_bounds = ITySet.elements (Env.get_tyvar_upper_bounds env v) in
       (* The constraint graph is transitively closed so we can filter tyvars. *)
       let is_not_tyvar = function
-        | LoclType (_, Tvar _) -> false
+        | LoclType t -> not (is_tyvar t)
         | _ -> true
       in
       let upper_bounds = List.filter upper_bounds ~f:is_not_tyvar in
@@ -355,7 +355,7 @@ let rec describe_ty_super env ?(short = false) ty =
             (List.map cstr_tyl ~f:(describe_ty_super env))
         in
         prefix ^ locl_descr ^ sep ^ cstr_descr)
-    | (_, Toption ((_, Tvar _) as ty)) ->
+    | Toption ty when is_tyvar ty ->
       "null or " ^ describe_ty_super env (LoclType ty)
     | _ -> default ())
   | ConstraintType ty ->
@@ -501,7 +501,9 @@ and simplify_subtype_i
       (* A & B <: C iif A <: C | !B *)
       (match find_type_with_exact_negation env tyl with
       | (env, Some non_ty, tyl) ->
-        let (env, ty_super) = TUtils.union_i env (fst non_ty) ty_super non_ty in
+        let (env, ty_super) =
+          TUtils.union_i env (get_reason non_ty) ty_super non_ty
+        in
         let ty_sub = MakeType.intersection r_sub tyl in
         simplify_subtype_i ~subtype_env (LoclType ty_sub) ty_super env
       | _ ->
@@ -1817,11 +1819,15 @@ and simplify_subtype_variance
       | Ast_defs.Covariant -> simplify_subtype child super env
       | Ast_defs.Contravariant ->
         let super =
-          (Reason.Rcontravariant_generic (fst super, cid), snd super)
+          mk
+            ( Reason.Rcontravariant_generic (get_reason super, cid),
+              get_node super )
         in
         simplify_subtype super child env
       | Ast_defs.Invariant ->
-        let super' = (Reason.Rinvariant_generic (fst super, cid), snd super) in
+        let super' =
+          mk (Reason.Rinvariant_generic (get_reason super, cid), get_node super)
+        in
         env |> simplify_subtype child super' &&& simplify_subtype super' child
     end
     &&& simplify_subtype_variance cid variance_reifiedl childrenl superl
@@ -2333,11 +2339,10 @@ and simplify_subtype_fun_params_reactivity
     hence check below *)
     let (_, p_sub_type) = Env.expand_type env p_sub.fp_type.et_type in
     begin
-      match p_sub_type with
-      | (_, Tfun tfun) when not (equal_reactivity tfun.ft_reactive Nonreactive)
-        ->
+      match get_node p_sub_type with
+      | Tfun tfun when not (equal_reactivity tfun.ft_reactive Nonreactive) ->
         valid env
-      | (_, Tfun _) ->
+      | Tfun _ ->
         ( env,
           TL.invalid ~fail:(fun () ->
               Errors.rx_parameter_condition_mismatch
@@ -2732,109 +2737,124 @@ and add_tyvar_lower_bound_and_close
   in
   (env, prop)
 
+and get_tyvar_opt t =
+  match t with
+  | LoclType lt ->
+    begin
+      match get_node lt with
+      | Tvar var -> Some var
+      | _ -> None
+    end
+  | _ -> None
+
 and props_to_env env remain props on_error =
   match props with
   | [] -> (env, List.rev remain)
-  | TL.IsSubtype
-      ( (LoclType (_, Tvar var_sub) as ty_sub),
-        (LoclType (_, Tvar var_super) as ty_super) )
-    :: props ->
-    let (env, prop1) =
-      add_tyvar_upper_bound_and_close
-        ~treat_dynamic_as_bottom:false
-        (valid env)
-        var_sub
-        ty_super
-        on_error
-    in
-    let (env, prop2) =
-      add_tyvar_lower_bound_and_close
-        ~treat_dynamic_as_bottom:false
-        (valid env)
-        var_super
-        ty_sub
-        on_error
-    in
-    props_to_env env remain (prop1 :: prop2 :: props) on_error
-  | TL.IsSubtype (LoclType (_, Tvar var), ty) :: props ->
-    let (env, prop) =
-      add_tyvar_upper_bound_and_close
-        ~treat_dynamic_as_bottom:false
-        (valid env)
-        var
-        ty
-        on_error
-    in
-    props_to_env env remain (prop :: props) on_error
-  | TL.IsSubtype (ty, LoclType (_, Tvar var)) :: props ->
-    let (env, prop) =
-      add_tyvar_lower_bound_and_close
-        ~treat_dynamic_as_bottom:false
-        (valid env)
-        var
-        ty
-        on_error
-    in
-    props_to_env env remain (prop :: props) on_error
-  | TL.Coerce (((_, Tvar var_sub) as ty_sub), ((_, Tvar var_super) as ty_super))
-    :: props ->
-    let (env, prop1) =
-      add_tyvar_upper_bound_and_close
-        ~treat_dynamic_as_bottom:true
-        (valid env)
-        var_sub
-        (LoclType ty_super)
-        on_error
-    in
-    let (env, prop2) =
-      add_tyvar_lower_bound_and_close
-        ~treat_dynamic_as_bottom:true
-        (valid env)
-        var_super
-        (LoclType ty_sub)
-        on_error
-    in
-    props_to_env env remain (prop1 :: prop2 :: props) on_error
-  | TL.Coerce ((_, Tvar var), ty) :: props ->
-    let (env, prop) =
-      add_tyvar_upper_bound_and_close
-        ~treat_dynamic_as_bottom:true
-        (valid env)
-        var
-        (LoclType ty)
-        on_error
-    in
-    props_to_env env remain (prop :: props) on_error
-  | TL.Coerce (ty, (_, Tvar var)) :: props ->
-    let (env, prop) =
-      add_tyvar_lower_bound_and_close
-        ~treat_dynamic_as_bottom:true
-        (valid env)
-        var
-        (LoclType ty)
-        on_error
-    in
-    props_to_env env remain (prop :: props) on_error
-  | TL.Conj props' :: props -> props_to_env env remain (props' @ props) on_error
-  | TL.Disj (f, disj_props) :: conj_props ->
-    (* For now, just find the first prop in the disjunction that works *)
-    let rec try_disj disj_props =
-      match disj_props with
-      | [] ->
-        (* For now let it fail later when calling
+  | prop :: props ->
+    (match prop with
+    | TL.Conj props' -> props_to_env env remain (props' @ props) on_error
+    | TL.Disj (f, disj_props) ->
+      (* For now, just find the first prop in the disjunction that works *)
+      let rec try_disj disj_props =
+        match disj_props with
+        | [] ->
+          (* For now let it fail later when calling
         process_simplify_subtype_result on the remaining constraints. *)
-        props_to_env env (TL.invalid ~fail:f :: remain) conj_props on_error
-      | prop :: disj_props' ->
-        let (env', other) = props_to_env env remain [prop] on_error in
-        if TL.is_unsat (TL.conj_list other) then
-          try_disj disj_props'
-        else
-          props_to_env env' (remain @ other) conj_props on_error
-    in
-    try_disj disj_props
-  | (TL.IsSubtype _ as prop) :: props ->
-    props_to_env env (prop :: remain) props on_error
-  | TL.Coerce _ :: _ -> failwith "Coercion not expected"
+          props_to_env env (TL.invalid ~fail:f :: remain) props on_error
+        | prop :: disj_props' ->
+          let (env', other) = props_to_env env remain [prop] on_error in
+          if TL.is_unsat (TL.conj_list other) then
+            try_disj disj_props'
+          else
+            props_to_env env' (remain @ other) props on_error
+      in
+      try_disj disj_props
+    | TL.IsSubtype (ty_sub, ty_super) ->
+      begin
+        match (get_tyvar_opt ty_sub, get_tyvar_opt ty_super) with
+        | (Some var_sub, Some var_super) ->
+          let (env, prop1) =
+            add_tyvar_upper_bound_and_close
+              ~treat_dynamic_as_bottom:false
+              (valid env)
+              var_sub
+              ty_super
+              on_error
+          in
+          let (env, prop2) =
+            add_tyvar_lower_bound_and_close
+              ~treat_dynamic_as_bottom:false
+              (valid env)
+              var_super
+              ty_sub
+              on_error
+          in
+          props_to_env env remain (prop1 :: prop2 :: props) on_error
+        | (Some var, _) ->
+          let (env, prop) =
+            add_tyvar_upper_bound_and_close
+              ~treat_dynamic_as_bottom:false
+              (valid env)
+              var
+              ty_super
+              on_error
+          in
+          props_to_env env remain (prop :: props) on_error
+        | (_, Some var) ->
+          let (env, prop) =
+            add_tyvar_lower_bound_and_close
+              ~treat_dynamic_as_bottom:false
+              (valid env)
+              var
+              ty_sub
+              on_error
+          in
+          props_to_env env remain (prop :: props) on_error
+        | _ -> props_to_env env (prop :: remain) props on_error
+      end
+    | TL.Coerce (ty_sub, ty_super) ->
+      begin
+        match (get_node ty_sub, get_node ty_super) with
+        | (Tvar var_sub, Tvar var_super) ->
+          let (env, prop1) =
+            add_tyvar_upper_bound_and_close
+              ~treat_dynamic_as_bottom:true
+              (valid env)
+              var_sub
+              (LoclType ty_super)
+              on_error
+          in
+          let (env, prop2) =
+            add_tyvar_lower_bound_and_close
+              ~treat_dynamic_as_bottom:true
+              (valid env)
+              var_super
+              (LoclType ty_sub)
+              on_error
+          in
+          props_to_env env remain (prop1 :: prop2 :: props) on_error
+        | (Tvar var, _) ->
+          let (env, prop) =
+            add_tyvar_upper_bound_and_close
+              ~treat_dynamic_as_bottom:true
+              (valid env)
+              var
+              (LoclType ty_super)
+              on_error
+          in
+          props_to_env env remain (prop :: props) on_error
+        | (_, Tvar var) ->
+          let (env, prop) =
+            add_tyvar_lower_bound_and_close
+              ~treat_dynamic_as_bottom:true
+              (valid env)
+              var
+              (LoclType ty_sub)
+              on_error
+          in
+          props_to_env env remain (prop :: props) on_error
+        | _ -> failwith "Coercion not expected"
+      end)
 
 (* Move any top-level conjuncts of the form Tvar v <: t or t <: Tvar v to
  * the type variable environment. To do: use intersection and union to
@@ -2869,7 +2889,7 @@ and is_sub_type_alt_i
     ~ignore_generic_params ~no_top_bottom ~treat_dynamic_as_bottom env ty1 ty2 =
   let (this_ty, pos) =
     match ty1 with
-    | LoclType ty1 -> (Some ty1, Reason.to_pos (fst ty1))
+    | LoclType ty1 -> (Some ty1, get_pos ty1)
     | ConstraintType _ -> (None, Pos.none)
   in
   let (_env, prop) =
@@ -3003,17 +3023,26 @@ and try_intersect_i env ty tyl =
     else if is_sub_type_ignore_generic_params_i env ty' ty then
       tyl
     else
-      let nonnull_ty = LoclType (reason ty, Tnonnull) in
+      let nonnull_ty = LoclType (MakeType.nonnull (reason ty)) in
       let (env, ty) = Env.expand_internal_type env ty in
       let (env, ty') = Env.expand_internal_type env ty' in
+      let default () = ty' :: try_intersect_i env ty tyl' in
       (match (ty, ty') with
-      | (LoclType (_, Toption t), _)
+      | (LoclType lty, _)
         when is_sub_type_ignore_generic_params_i env ty' nonnull_ty ->
-        try_intersect_i env (LoclType t) (ty' :: tyl')
-      | (_, LoclType (_, Toption t))
+        begin
+          match get_node lty with
+          | Toption t -> try_intersect_i env (LoclType t) (ty' :: tyl')
+          | _ -> default ()
+        end
+      | (_, LoclType lty)
         when is_sub_type_ignore_generic_params_i env ty nonnull_ty ->
-        try_intersect_i env (LoclType t) (ty :: tyl')
-      | (_, _) -> ty' :: try_intersect_i env ty tyl')
+        begin
+          match get_node lty with
+          | Toption t -> try_intersect_i env (LoclType t) (ty :: tyl')
+          | _ -> default ()
+        end
+      | (_, _) -> default ())
 
 and try_intersect env ty tyl =
   List.map
@@ -3053,8 +3082,9 @@ and try_union_i env ty tyl =
       let (env, ty) = Env.expand_internal_type env ty in
       let (env, ty') = Env.expand_internal_type env ty' in
       (match (ty, ty') with
-      | (LoclType (_, Tprim Nast.Tfloat), LoclType (_, Tprim Nast.Tint))
-      | (LoclType (_, Tprim Nast.Tint), LoclType (_, Tprim Nast.Tfloat)) ->
+      | (LoclType t1, LoclType t2)
+        when (is_prim Nast.Tfloat t1 && is_prim Nast.Tint t2)
+             || (is_prim Nast.Tint t1 && is_prim Nast.Tfloat t2) ->
         let num = LoclType (MakeType.num (reason ty)) in
         try_union_i env num tyl'
       | (_, _) -> ty' :: try_union_i env ty tyl')
@@ -3088,10 +3118,10 @@ let decompose_subtype_add_bound
     (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) : env =
   let (env, ty_super) = Env.expand_type env ty_super in
   let (env, ty_sub) = Env.expand_type env ty_sub in
-  match (ty_sub, ty_super) with
-  | (_, (_, Tany _)) -> env
+  match (get_node ty_sub, get_node ty_super) with
+  | (_, Tany _) -> env
   (* name_sub <: ty_super so add an upper bound on name_sub *)
-  | ((_, Tgeneric name_sub), _) when not (phys_equal ty_sub ty_super) ->
+  | (Tgeneric name_sub, _) when not (phys_equal ty_sub ty_super) ->
     log_subtype
       ~level:2
       ~this_ty:None
@@ -3106,7 +3136,7 @@ let decompose_subtype_add_bound
     else
       Env.add_upper_bound ~intersect:(try_intersect env) env name_sub ty_super
   (* ty_sub <: name_super so add a lower bound on name_super *)
-  | (_, (_, Tgeneric name_super)) when not (phys_equal ty_sub ty_super) ->
+  | (_, Tgeneric name_super) when not (phys_equal ty_sub ty_super) ->
     log_subtype
       ~level:2
       ~this_ty:None
@@ -3340,7 +3370,7 @@ let subtype_method
   let add_tparams_constraints env (tparams : locl_tparam list) =
     let add_bound env { tp_name = (pos, name); tp_constraints = cstrl; _ } =
       List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
-          let tparam_ty = (Reason.Rwitness pos, Tgeneric name) in
+          let tparam_ty = MakeType.generic (Reason.Rwitness pos) name in
           add_constraint pos env ck tparam_ty ty)
     in
     List.fold_left tparams ~f:add_bound ~init:env
@@ -3372,7 +3402,7 @@ let subtype_method
     let check_tparam_constraints
         env { tp_name = (p, name); tp_constraints = cstrl; _ } =
       List.fold_left cstrl ~init:env ~f:(fun env (ck, cstr_ty) ->
-          let tgeneric = (Reason.Rwitness p, Tgeneric name) in
+          let tgeneric = MakeType.generic (Reason.Rwitness p) name in
           Typing_generic_constraint.check_constraint
             env
             ck

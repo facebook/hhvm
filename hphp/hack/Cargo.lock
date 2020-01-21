@@ -137,6 +137,7 @@ version = "0.0.0"
 dependencies = [
  "coroutine_smart_constructors 0.0.0",
  "parser 0.0.0",
+ "stack_limit 0.0.0",
 ]
 
 [[package]]
@@ -150,7 +151,6 @@ dependencies = [
  "ocamlrep 0.0.0",
  "ocamlrep_ocamlpool 0.0.0",
  "oxidized 0.0.0",
- "parser 0.0.0",
  "parser_core_types 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",

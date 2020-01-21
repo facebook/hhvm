@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser/api:direct_decl_parser
-# Signature<<3eade6f280f190bff29a2757c15d4c8f35afb540>>
+# Signature<<d169971d37757a384badf833d5d78adae878c941>>
 [package]
 name = "direct_decl_parser"
 edition = "2018"
@@ -15,4 +15,4 @@ direct_decl_smart_constructors = { path = "../../../../decl/direct_decl_smart_co
 parser = { path = "../../../core" }
 parser_core_types = { path = "../../../cargo/core_types" }
 stack_limit = { path = "../../../../utils/stack_limit" }
-# @end of Signature<<3eade6f280f190bff29a2757c15d4c8f35afb540>>
+# @end of Signature<<d169971d37757a384badf833d5d78adae878c941>>

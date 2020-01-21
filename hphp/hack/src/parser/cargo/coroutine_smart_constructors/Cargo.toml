@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:coroutine_smart_constructors
-# Signature<<06be6d7da3795ec89ce0b350fd5a535ecefd967c>>
+# Signature<<083fdb50cd3cd2dd0848d513a1f07c4ce05e7139>>
 [package]
 name = "coroutine_smart_constructors"
 edition = "2018"
@@ -16,4 +16,4 @@ parser_core_types = { path = "../core_types" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 syntax_smart_constructors = { path = "../syntax_smart_constructors" }
 ocaml = "0.8"
-# @end of Signature<<06be6d7da3795ec89ce0b350fd5a535ecefd967c>>
+# @end of Signature<<083fdb50cd3cd2dd0848d513a1f07c4ce05e7139>>

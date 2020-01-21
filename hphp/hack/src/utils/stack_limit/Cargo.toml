@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/utils:stack_limit
-# Signature<<768ceaa2f47a3d6666ba11a036f479ec8d36e6ca>>
+# Signature<<a9e72a483c8bf507e4a72f3f5bceb5d06b0c756e>>
 [package]
 name = "stack_limit"
 edition = "2018"
@@ -9,4 +9,4 @@ include = ["lib.rs", "retry.rs"]
 
 [lib]
 path = "lib.rs"
-# @end of Signature<<768ceaa2f47a3d6666ba11a036f479ec8d36e6ca>>
+# @end of Signature<<a9e72a483c8bf507e4a72f3f5bceb5d06b0c756e>>

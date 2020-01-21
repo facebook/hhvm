@@ -23,10 +23,10 @@ use parser_core_types::{
     Syntax,
     SyntaxValueType,
   },
+  parser_env::ParserEnv,
 };
-use crate::decl_mode_smart_constructors::*;
-use parser::parser_env::ParserEnv;
-use parser::smart_constructors::SmartConstructors;
+use crate::*;
+use smart_constructors::SmartConstructors;
 use syntax_smart_constructors::SyntaxSmartConstructors;
 
 impl<'src, Token, Value>

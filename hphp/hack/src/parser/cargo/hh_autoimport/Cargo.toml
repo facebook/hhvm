@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:hh_autoimport_rust
-# Signature<<ed04d3e95de044df08439cab54c64eccf3199d21>>
+# Signature<<76a7439427e2ec9650607c5e2162dc511d1dde74>>
 [package]
 name = "hh_autoimport_rust"
 edition = "2018"
@@ -12,4 +12,4 @@ path = "../../hh_autoimport.rs"
 
 [dependencies]
 lazy_static = "1.4"
-# @end of Signature<<ed04d3e95de044df08439cab54c64eccf3199d21>>
+# @end of Signature<<76a7439427e2ec9650607c5e2162dc511d1dde74>>

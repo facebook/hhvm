@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser/core:parser
-# Signature<<a95eee4b9db21b86de45c640a0d1c9d42f785dd4>>
+# Signature<<fa98ce19fce1a50135d9f1dbbec7cc3dbd13ad38>>
 [package]
 name = "parser"
 edition = "2018"
@@ -21,4 +21,4 @@ smart_constructors = { path = "../cargo/smart_constructors" }
 stack_limit = { path = "../../utils/stack_limit" }
 lazy_static = "1.4"
 ocaml = "0.8"
-# @end of Signature<<a95eee4b9db21b86de45c640a0d1c9d42f785dd4>>
+# @end of Signature<<fa98ce19fce1a50135d9f1dbbec7cc3dbd13ad38>>

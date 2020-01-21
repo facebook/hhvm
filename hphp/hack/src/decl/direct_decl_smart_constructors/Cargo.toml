@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/decl:direct_decl_smart_constructors
-# Signature<<64a91b85036653df80a6859093d339ad0d6b1576>>
+# Signature<<bafe6ec23365353c8a858c51b86f43f8773aa127>>
 [package]
 name = "direct_decl_smart_constructors"
 edition = "2018"
@@ -19,9 +19,8 @@ ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }
 parser_core_types = { path = "../../parser/cargo/core_types" }
 smart_constructors = { path = "../../parser/cargo/smart_constructors" }
-syntax_tree = { path = "../../parser/cargo/syntax_tree" }
 rust-crypto = "0.2"
 
 [dev-dependencies]
 pretty_assertions = "0.6"
-# @end of Signature<<64a91b85036653df80a6859093d339ad0d6b1576>>
+# @end of Signature<<bafe6ec23365353c8a858c51b86f43f8773aa127>>

@@ -4,10 +4,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use parser::parser_env::ParserEnv;
+mod decl_mode_smart_constructors_generated;
+
+use ocaml::core::mlvalues::Value;
 use parser_core_types::{
-    lexable_token::LexableToken, source_text::SourceText, syntax::*, token_kind::TokenKind,
+    lexable_token::LexableToken, parser_env::ParserEnv, source_text::SourceText, syntax::*,
+    token_kind::TokenKind,
 };
+use rust_to_ocaml::{SerializationContext, ToOcaml};
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
 pub struct State<'src, S> {
@@ -220,5 +224,11 @@ where
             )
         }
         _ => body,
+    }
+}
+
+impl<S> ToOcaml for State<'_, S> {
+    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
+        self.stack().to_ocaml(context)
     }
 }

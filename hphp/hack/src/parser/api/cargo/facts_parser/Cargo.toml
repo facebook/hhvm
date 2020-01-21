@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser/api:facts_parser
-# Signature<<b38f80607f9fde286995e66c5051c33ce0ae6f48>>
+# Signature<<1d20b2d62b01edf12a03ff72e88c8c8c1a2213ae>>
 [package]
 name = "facts_parser"
 edition = "2018"
@@ -15,4 +15,4 @@ facts_smart_constructors = { path = "../../../../facts/cargo/facts_smart_constru
 parser = { path = "../../../core" }
 parser_core_types = { path = "../../../cargo/core_types" }
 stack_limit = { path = "../../../../utils/stack_limit" }
-# @end of Signature<<b38f80607f9fde286995e66c5051c33ce0ae6f48>>
+# @end of Signature<<1d20b2d62b01edf12a03ff72e88c8c8c1a2213ae>>

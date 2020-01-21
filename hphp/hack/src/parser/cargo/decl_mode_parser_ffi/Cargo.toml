@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:decl_mode_parser_ffi
-# Signature<<399a6c6201e6d83dc6a7d3fddb250ab8ba7aa1c9>>
+# Signature<<41323c24913efc4399a789e03be00b447887e7fb>>
 [package]
 name = "decl_mode_parser_ffi"
 edition = "2018"
@@ -11,16 +11,15 @@ include = ["../../decl_mode_parser_ffi.rs"]
 path = "../../decl_mode_parser_ffi.rs"
 
 [dependencies]
-decl_mode_parser = { path = "../decl_mode_parser" }
+decl_mode_parser = { path = "../../api/cargo/decl_mode_parser" }
 ocamlpool_rust = { path = "../../../utils/ocamlpool_rust" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
-parser = { path = "../../core" }
 parser_core_types = { path = "../core_types" }
 rust_parser_ffi = { path = "../rust_parser_ffi" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 syntax_tree = { path = "../syntax_tree" }
 libc = "0.2"
 ocaml = "0.8"
-# @end of Signature<<399a6c6201e6d83dc6a7d3fddb250ab8ba7aa1c9>>
+# @end of Signature<<41323c24913efc4399a789e03be00b447887e7fb>>

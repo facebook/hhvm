@@ -7,7 +7,6 @@
 use crate::aast_check;
 use crate::rust_aast_parser_types::{Env, Result as ParserResult};
 use coroutine_smart_constructors::{CoroutineSmartConstructors, State as CoroutineState};
-use decl_mode_parser::DeclModeParser;
 use itertools::{
     Either,
     Either::{Left, Right},
@@ -15,9 +14,9 @@ use itertools::{
 use lowerer::{Lowerer, ScourComment};
 use ocamlrep_derive::OcamlRep;
 use oxidized::{aast::Program, file_info::Mode, pos::Pos, scoured_comments::ScouredComments};
-use parser::{parser_env::ParserEnv, smart_constructors_wrappers::WithKind};
 use parser_core_types::{
     indexed_source_text::IndexedSourceText,
+    parser_env::ParserEnv,
     positioned_syntax::{PositionedSyntax, PositionedValue},
     positioned_token::PositionedToken,
     syntax_error,
@@ -25,6 +24,7 @@ use parser_core_types::{
 };
 use regex::bytes::Regex;
 use rust_parser_errors::ParserErrors;
+use smart_constructors::smart_constructors_wrappers::WithKind;
 use stack_limit::StackLimit;
 use std::borrow::Borrow;
 use syntax_tree::{make_syntax_tree, mode_parser::parse_mode, SyntaxTree};
@@ -208,12 +208,12 @@ impl<'a> AastParser {
         };
 
         let tree = if quick_mode {
-            let mut decl_parser = DeclModeParser::make(source_text, parser_env);
-            let tree = decl_parser.parse_script(stack_limit);
+            let (tree, errors, _state) =
+                decl_mode_parser::parse_script(source_text, parser_env, stack_limit);
             PositionedSyntaxTree::create(
                 source_text,
                 tree,
-                decl_parser.errors(),
+                errors,
                 mode,
                 State::new(source_text, env.codegen),
                 None,

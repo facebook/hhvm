@@ -6,12 +6,13 @@
 
 use crate::aast_check;
 use crate::rust_aast_parser_types::{Env, Result as ParserResult};
-use coroutine_smart_constructors::{CoroutineSmartConstructors, State as CoroutineState};
+use coroutine_smart_constructors::State as CoroutineState;
 use itertools::{
     Either,
     Either::{Left, Right},
 };
 use lowerer::{Lowerer, ScourComment};
+use mode_parser::parse_mode;
 use ocamlrep_derive::OcamlRep;
 use oxidized::{aast::Program, file_info::Mode, pos::Pos, scoured_comments::ScouredComments};
 use parser_core_types::{
@@ -21,17 +22,13 @@ use parser_core_types::{
     positioned_token::PositionedToken,
     syntax_error,
     syntax_error::SyntaxError,
+    syntax_tree::SyntaxTree,
 };
 use regex::bytes::Regex;
 use rust_parser_errors::ParserErrors;
-use smart_constructors::WithKind;
 use stack_limit::StackLimit;
 use std::borrow::Borrow;
-use syntax_tree::{make_syntax_tree, mode_parser::parse_mode, SyntaxTree};
 
-type SmartConstructor<'a> = WithKind<
-    CoroutineSmartConstructors<'a, PositionedSyntax, CoroutineState<'a, PositionedSyntax>>,
->;
 type State<'a> = CoroutineState<'a, PositionedSyntax>;
 type PositionedSyntaxTree<'a> = SyntaxTree<'a, PositionedSyntax, State<'a>>;
 
@@ -219,11 +216,9 @@ impl<'a> AastParser {
                 None,
             )
         } else {
-            make_syntax_tree::<SmartConstructor<'a>, State<'a>>(
-                source_text,
-                parser_env,
-                stack_limit,
-            )
+            let (tree, errors, state) =
+                coroutine_parser_leak_tree::parse_script(source_text, parser_env, stack_limit);
+            PositionedSyntaxTree::create(source_text, tree, errors, mode, state, None)
         };
         Ok((mode, tree))
     }

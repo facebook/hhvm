@@ -16,9 +16,9 @@ use parser_core_types::{
     syntax::{ListItemChildren, Syntax, SyntaxValueType, SyntaxVariant, SyntaxVariant::*},
     syntax_error::{self as errors, Error, ErrorType, SyntaxError},
     syntax_trait::SyntaxTrait,
+    syntax_tree::SyntaxTree,
     token_kind::TokenKind,
 };
-use syntax_tree::SyntaxTree;
 
 use hh_autoimport_rust as hh_autoimport;
 

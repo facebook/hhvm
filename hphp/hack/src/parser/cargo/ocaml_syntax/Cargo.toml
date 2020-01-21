@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:ocaml_syntax
-# Signature<<14e205cd77e4c2e2b5b30e814bdef0e9f6f2f437>>
+# Signature<<7bf252d4313f70b1e80922fc0129d8c06c9a5cbd>>
 [package]
 name = "ocaml_syntax"
 edition = "2018"
@@ -17,4 +17,4 @@ parser_core_types = { path = "../core_types" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 syntax_smart_constructors = { path = "../syntax_smart_constructors" }
 ocaml = "0.8"
-# @end of Signature<<14e205cd77e4c2e2b5b30e814bdef0e9f6f2f437>>
+# @end of Signature<<7bf252d4313f70b1e80922fc0129d8c06c9a5cbd>>

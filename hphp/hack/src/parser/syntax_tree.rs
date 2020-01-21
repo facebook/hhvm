@@ -2,23 +2,16 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-pub mod mode_parser;
 
-use crate::mode_parser::parse_mode;
 use oxidized::file_info::Mode;
-use parser::{
-    parser::Parser,
-    parser_env::ParserEnv,
-    smart_constructors::{NodeType, SmartConstructors},
-};
-use parser_core_types::{
+
+use crate::{
     lexable_token::LexableToken,
     source_text::SourceText,
     syntax::{Syntax, SyntaxValueType},
     syntax_error::SyntaxError,
     syntax_trait::SyntaxTrait,
 };
-use stack_limit::StackLimit;
 use std::{borrow::Borrow, convert::AsRef};
 
 pub struct SyntaxTree<'a, Syntax, State> {
@@ -232,28 +225,10 @@ impl<'a, Syntax, State> AsRef<SyntaxTree<'a, Syntax, State>> for SyntaxTree<'a, 
     }
 }
 
-pub fn make_syntax_tree<'a, S, T>(
-    source: &'a SourceText<'a>,
-    env: ParserEnv,
-    stack_limit: Option<&'a StackLimit>,
-) -> SyntaxTree<'a, <S::R as NodeType>::R, T>
-where
-    T: Clone,
-    S: SmartConstructors<'a, T>,
-    S::R: NodeType,
-{
-    let mode = parse_mode(source);
-    let mut parser = Parser::<S, T>::make(&source, env);
-    let root = parser.parse_script(stack_limit);
-    let errors = parser.errors();
-    let sc_state = parser.into_sc_state();
-    SyntaxTree::create(source, root, errors, mode, sc_state, None)
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::SyntaxTree;
-    use parser_core_types::syntax_error;
+    use crate::syntax_error;
+    use crate::syntax_tree::SyntaxTree;
 
     #[test]
     fn test_process_errors() {

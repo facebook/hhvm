@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/facts:facts_smart_constructors
-# Signature<<21a864383385d68d964450735f2225ec23390535>>
+# Signature<<7f6283cb0f4251a83676a79ec6b76e0773f2e41c>>
 [package]
 name = "facts_smart_constructors"
 edition = "2018"
@@ -18,7 +18,6 @@ ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 smart_constructors = { path = "../../../parser/cargo/smart_constructors" }
-syntax_tree = { path = "../../../parser/cargo/syntax_tree" }
 rust-crypto = "0.2"
 serde = { version = "1.0", features = ["derive", "rc"] }
 serde_derive = "1.0"
@@ -26,4 +25,4 @@ serde_json = "1.0"
 
 [dev-dependencies]
 pretty_assertions = "0.6"
-# @end of Signature<<21a864383385d68d964450735f2225ec23390535>>
+# @end of Signature<<7f6283cb0f4251a83676a79ec6b76e0773f2e41c>>

@@ -13,8 +13,8 @@ use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::parser_options::ParserOptions;
 use parser_core_types::{
     positioned_syntax::PositionedSyntax, source_text::SourceText, syntax_error::SyntaxError,
+    syntax_tree::SyntaxTree,
 };
-use syntax_tree::SyntaxTree;
 
 // "only_for_parser_errors" because it sets only a subset of options relevant to parser errors,
 // leaving the rest default

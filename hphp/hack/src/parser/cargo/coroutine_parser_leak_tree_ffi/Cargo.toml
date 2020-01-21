@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:coroutine_parser_leak_tree_ffi
-# Signature<<6e68da6b0e098e01a661872882666696017c0059>>
+# Signature<<d9a5ac80b34ff4bd5c446d8ee7d2b3b3237ecfdb>>
 [package]
 name = "coroutine_parser_leak_tree_ffi"
 edition = "2018"
@@ -19,7 +19,6 @@ oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
 rust_parser_ffi = { path = "../rust_parser_ffi" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
-syntax_tree = { path = "../syntax_tree" }
 libc = "0.2"
 ocaml = "0.8"
-# @end of Signature<<6e68da6b0e098e01a661872882666696017c0059>>
+# @end of Signature<<d9a5ac80b34ff4bd5c446d8ee7d2b3b3237ecfdb>>

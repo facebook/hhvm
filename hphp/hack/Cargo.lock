@@ -5,11 +5,13 @@ name = "aast_parser"
 version = "0.0.0"
 dependencies = [
  "coroutine_lowerer 0.0.0",
+ "coroutine_parser_leak_tree 0.0.0",
  "coroutine_smart_constructors 0.0.0",
  "decl_mode_parser 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "lint_rust 0.0.0",
  "lowerer 0.0.0",
+ "mode_parser 0.0.0",
  "naming_special_names_rust 0.0.0",
  "ocamlrep 0.0.0",
  "ocamlrep_derive 0.0.0",
@@ -19,7 +21,6 @@ dependencies = [
  "rust_parser_errors 0.0.0",
  "smart_constructors 0.0.0",
  "stack_limit 0.0.0",
- "syntax_tree 0.0.0",
 ]
 
 [[package]]
@@ -153,7 +154,6 @@ dependencies = [
  "parser_core_types 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",
- "syntax_tree 0.0.0",
 ]
 
 [[package]]
@@ -199,7 +199,6 @@ dependencies = [
  "parser_core_types 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",
- "syntax_tree 0.0.0",
 ]
 
 [[package]]
@@ -222,13 +221,13 @@ dependencies = [
  "flatten_smart_constructors 0.0.0",
  "hh_autoimport_rust 0.0.0",
  "hhbc_string_utils_rust 0.0.0",
+ "mode_parser 0.0.0",
  "naming_special_names_rust 0.0.0",
  "ocamlrep 0.0.0",
  "oxidized 0.0.0",
  "parser_core_types 0.0.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust-crypto 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)",
- "syntax_tree 0.0.0",
 ]
 
 [[package]]
@@ -337,6 +336,7 @@ dependencies = [
  "facts_smart_constructors 0.0.0",
  "flatten_smart_constructors 0.0.0",
  "hhbc_string_utils_rust 0.0.0",
+ "mode_parser 0.0.0",
  "ocamlrep 0.0.0",
  "oxidized 0.0.0",
  "parser_core_types 0.0.0",
@@ -345,7 +345,6 @@ dependencies = [
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.42 (registry+https://github.com/rust-lang/crates.io-index)",
- "syntax_tree 0.0.0",
 ]
 
 [[package]]
@@ -364,7 +363,6 @@ dependencies = [
  "serde_derive 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.42 (registry+https://github.com/rust-lang/crates.io-index)",
  "smart_constructors 0.0.0",
- "syntax_tree 0.0.0",
 ]
 
 [[package]]
@@ -699,7 +697,6 @@ dependencies = [
  "parser_core_types 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",
- "syntax_tree 0.0.0",
 ]
 
 [[package]]
@@ -709,6 +706,15 @@ dependencies = [
  "parser_core_types 0.0.0",
  "smart_constructors 0.0.0",
  "syntax_smart_constructors 0.0.0",
+]
+
+[[package]]
+name = "mode_parser"
+version = "0.0.0"
+dependencies = [
+ "minimal_parser 0.0.0",
+ "oxidized 0.0.0",
+ "parser_core_types 0.0.0",
 ]
 
 [[package]]
@@ -898,7 +904,6 @@ dependencies = [
  "positioned_coroutine_parser 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",
- "syntax_tree 0.0.0",
 ]
 
 [[package]]
@@ -924,7 +929,6 @@ dependencies = [
  "positioned_parser 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",
- "syntax_tree 0.0.0",
 ]
 
 [[package]]
@@ -1094,7 +1098,6 @@ dependencies = [
  "oxidized 0.0.0",
  "parser_core_types 0.0.0",
  "regex 1.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "syntax_tree 0.0.0",
 ]
 
 [[package]]
@@ -1108,7 +1111,6 @@ dependencies = [
  "parser_core_types 0.0.0",
  "rust_parser_errors 0.0.0",
  "rust_to_ocaml 0.0.0",
- "syntax_tree 0.0.0",
 ]
 
 [[package]]
@@ -1117,6 +1119,7 @@ version = "0.0.0"
 dependencies = [
  "libc 0.2.66 (registry+https://github.com/rust-lang/crates.io-index)",
  "minimal_parser 0.0.0",
+ "mode_parser 0.0.0",
  "ocaml 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocamlrep 0.0.0",
  "ocamlrep_ocamlpool 0.0.0",
@@ -1125,7 +1128,6 @@ dependencies = [
  "parser_core_types 0.0.0",
  "rust_to_ocaml 0.0.0",
  "stack_limit 0.0.0",
- "syntax_tree 0.0.0",
 ]
 
 [[package]]
@@ -1263,17 +1265,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "syntax_tree"
-version = "0.0.0"
-dependencies = [
- "minimal_parser 0.0.0",
- "oxidized 0.0.0",
- "parser 0.0.0",
- "parser_core_types 0.0.0",
- "stack_limit 0.0.0",
-]
-
-[[package]]
 name = "textwrap"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1346,7 +1337,6 @@ dependencies = [
  "parser_core_types 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",
- "syntax_tree 0.0.0",
  "verify_parser 0.0.0",
 ]
 

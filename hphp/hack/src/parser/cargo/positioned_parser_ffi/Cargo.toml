@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:positioned_parser_ffi
-# Signature<<f6362cd40c7455efac694d08cb34020ffa2754bd>>
+# Signature<<75f3e10c29add0900acaec0403899a41eee613e7>>
 [package]
 name = "positioned_parser_ffi"
 edition = "2018"
@@ -19,7 +19,6 @@ parser_core_types = { path = "../core_types" }
 positioned_parser = { path = "../../api/cargo/positioned_parser" }
 rust_parser_ffi = { path = "../rust_parser_ffi" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
-syntax_tree = { path = "../syntax_tree" }
 libc = "0.2"
 ocaml = "0.8"
-# @end of Signature<<f6362cd40c7455efac694d08cb34020ffa2754bd>>
+# @end of Signature<<75f3e10c29add0900acaec0403899a41eee613e7>>

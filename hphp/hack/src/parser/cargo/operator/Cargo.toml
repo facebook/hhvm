@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:operator
-# Signature<<ca362ed6b83d8b459ec5e110279e976fbc1ab590>>
+# Signature<<fd35cda78b6f2371fa76d9dd18ffd730646d7358>>
 [package]
 name = "operator"
 edition = "2018"
@@ -14,4 +14,4 @@ path = "../../operator.rs"
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 parser_core_types = { path = "../core_types" }
-# @end of Signature<<ca362ed6b83d8b459ec5e110279e976fbc1ab590>>
+# @end of Signature<<fd35cda78b6f2371fa76d9dd18ffd730646d7358>>

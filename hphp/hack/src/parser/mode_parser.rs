@@ -5,9 +5,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use oxidized::file_info::Mode;
-use parser::parser_env::ParserEnv;
 use parser_core_types::{
     lexable_token::LexableToken,
+    parser_env::ParserEnv,
     source_text::SourceText,
     syntax::{self, SyntaxVariant},
     token_kind::TokenKind,

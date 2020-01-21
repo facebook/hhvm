@@ -5,11 +5,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hhbc_string_utils_rust::mangle_xhp_id;
+use mode_parser::parse_mode;
 use ocamlrep::rc::RcOc;
 use oxidized::{file_info::Mode, relative_path::RelativePath};
 use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::source_text::SourceText;
-use syntax_tree::mode_parser::parse_mode;
 
 use crate::facts::*;
 use crate::facts_smart_constructors::*;

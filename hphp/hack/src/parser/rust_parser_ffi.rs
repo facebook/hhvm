@@ -4,6 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use mode_parser::parse_mode;
 use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, OcamlRep};
 use ocamlrep_ocamlpool::{ocaml_ffi, Pool};
 use oxidized::{file_info, full_fidelity_parser_env::FullFidelityParserEnv};
@@ -17,9 +18,9 @@ use parser::{
     source_text::SourceText,
     token_kind::TokenKind,
 };
+use parser_core_types::syntax_tree::SyntaxTree;
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 use stack_limit::{StackLimit, KI, MI};
-use syntax_tree::{mode_parser::parse_mode, SyntaxTree};
 
 pub fn parse<'a, Sc, ScState>(
     ocaml_source_text: UnsafeOcamlPtr,

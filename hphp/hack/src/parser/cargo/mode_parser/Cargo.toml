@@ -1,0 +1,17 @@
+# @generated
+# @autocargo from //hphp/hack/src/parser:mode_parser
+# Signature<<f17c6af1f42cf72e3969fabc292ebdd19e78fea5>>
+[package]
+name = "mode_parser"
+edition = "2018"
+version = "0.0.0"
+include = ["../../mode_parser.rs"]
+
+[lib]
+path = "../../mode_parser.rs"
+
+[dependencies]
+minimal_parser = { path = "../../api/cargo/minimal_parser" }
+oxidized = { path = "../../../oxidized" }
+parser_core_types = { path = "../core_types" }
+# @end of Signature<<f17c6af1f42cf72e3969fabc292ebdd19e78fea5>>

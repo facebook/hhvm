@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:verify_parser_ffi
-# Signature<<251803ee15db00451335d9ca00fd637e0f93a177>>
+# Signature<<160b6a22e8627c37fd93941c9a4978b7816c58f7>>
 [package]
 name = "verify_parser_ffi"
 edition = "2018"
@@ -23,4 +23,4 @@ syntax_tree = { path = "../syntax_tree" }
 verify_parser = { path = "../verify_parser" }
 libc = "0.2"
 ocaml = "0.8"
-# @end of Signature<<251803ee15db00451335d9ca00fd637e0f93a177>>
+# @end of Signature<<160b6a22e8627c37fd93941c9a4978b7816c58f7>>

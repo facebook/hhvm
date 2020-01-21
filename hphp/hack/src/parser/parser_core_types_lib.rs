@@ -21,6 +21,7 @@ pub mod lexable_trivia;
 pub mod minimal_syntax;
 pub mod minimal_token;
 pub mod minimal_trivia;
+pub mod parser_env;
 pub mod positioned_syntax;
 pub mod positioned_token;
 pub mod positioned_trivia;

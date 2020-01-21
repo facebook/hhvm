@@ -1,11 +1,11 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:parser_core_types
-# Signature<<f423141f703331584d4fe5d9dabbcf4c930f569d>>
+# Signature<<ebf4a76939d98c7d0f112036ce83db6a1f0cdd6a>>
 [package]
 name = "parser_core_types"
 edition = "2018"
 version = "0.0.0"
-include = ["../../indexed_source_text.rs", "../../lexable_token.rs", "../../lexable_trivia.rs", "../../minimal_syntax.rs", "../../minimal_token.rs", "../../minimal_trivia.rs", "../../parser_core_types_lib.rs", "../../positioned_syntax.rs", "../../positioned_token.rs", "../../positioned_trivia.rs", "../../source_text.rs", "../../syntax.rs", "../../syntax_error.rs", "../../syntax_generated.rs", "../../syntax_kind.rs", "../../syntax_trait.rs", "../../syntax_type.rs", "../../token_kind.rs", "../../trivia_kind.rs"]
+include = ["../../indexed_source_text.rs", "../../lexable_token.rs", "../../lexable_trivia.rs", "../../minimal_syntax.rs", "../../minimal_token.rs", "../../minimal_trivia.rs", "../../parser_core_types_lib.rs", "../../parser_env.rs", "../../positioned_syntax.rs", "../../positioned_token.rs", "../../positioned_trivia.rs", "../../source_text.rs", "../../syntax.rs", "../../syntax_error.rs", "../../syntax_generated.rs", "../../syntax_kind.rs", "../../syntax_trait.rs", "../../syntax_type.rs", "../../token_kind.rs", "../../trivia_kind.rs"]
 
 [lib]
 path = "../../parser_core_types_lib.rs"
@@ -17,4 +17,4 @@ ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 oxidized = { path = "../../../oxidized" }
 itertools = "0.8"
 ocaml = "0.8"
-# @end of Signature<<f423141f703331584d4fe5d9dabbcf4c930f569d>>
+# @end of Signature<<ebf4a76939d98c7d0f112036ce83db6a1f0cdd6a>>

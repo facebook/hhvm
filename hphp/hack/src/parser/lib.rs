@@ -8,7 +8,6 @@ pub mod lexer;
 pub mod operator;
 mod operator_generated;
 pub mod parser;
-pub mod parser_env;
 
 #[macro_use]
 pub mod smart_constructors; // must be before users of providing macros (*_parser)
@@ -28,7 +27,7 @@ pub mod type_parser;
 // are re-exported here so that consumers do not need to be made aware of the data-code split.
 pub use parser_core_types::{
     indexed_source_text, lexable_token, lexable_trivia, minimal_syntax, minimal_token,
-    minimal_trivia, positioned_syntax, positioned_token, positioned_trivia, source_text, syntax,
-    syntax_error, syntax_kind, syntax_trait, token_kind, trivia_kind,
+    minimal_trivia, parser_env, positioned_syntax, positioned_token, positioned_trivia,
+    source_text, syntax, syntax_error, syntax_kind, syntax_trait, token_kind, trivia_kind,
 };
 pub mod rewriter;

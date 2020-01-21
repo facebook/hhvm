@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:verify_parser
-# Signature<<d5de30d70007c955c29436552ec2063dc7b73362>>
+# Signature<<d77210fdc6b415ff168e1380a6c84a2a544d7861>>
 [package]
 name = "verify_parser"
 edition = "2018"
@@ -16,4 +16,4 @@ parser_core_types = { path = "../core_types" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 syntax_smart_constructors = { path = "../syntax_smart_constructors" }
 ocaml = "0.8"
-# @end of Signature<<d5de30d70007c955c29436552ec2063dc7b73362>>
+# @end of Signature<<d77210fdc6b415ff168e1380a6c84a2a544d7861>>

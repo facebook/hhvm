@@ -4,7 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use minimal_parser::MinimalSyntaxParser;
 use oxidized::file_info::Mode;
 use parser::parser_env::ParserEnv;
 use parser_core_types::{
@@ -15,7 +14,7 @@ use parser_core_types::{
 };
 
 pub fn parse_mode(text: &SourceText) -> Option<Mode> {
-    if let Some(header) = MinimalSyntaxParser::parse_header_only(ParserEnv::default(), text) {
+    if let Some(header) = minimal_parser::parse_header_only(ParserEnv::default(), text) {
         match header.syntax {
             SyntaxVariant::MarkupSection(section_children) => {
                 if let syntax::MarkupSectionChildren {

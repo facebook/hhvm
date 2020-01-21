@@ -9,8 +9,6 @@ use ocamlrep_ocamlpool::{ocaml_ffi, Pool};
 use oxidized::{file_info, full_fidelity_parser_env::FullFidelityParserEnv};
 use parser::{
     self,
-    lexer::Lexer,
-    minimal_token::MinimalToken,
     minimal_trivia::MinimalTrivia,
     operator::{Assoc, Operator},
     parser::Parser,
@@ -165,27 +163,22 @@ macro_rules! parse {
     };
 }
 
-fn trivia_lexer<'a>(source_text: SourceText<'a>, offset: usize) -> Lexer<'a, MinimalToken> {
-    let is_experimental_mode = false;
-    Lexer::make_at(&source_text, is_experimental_mode, offset)
-}
-
 ocaml_ffi! {
     fn rust_parse_mode(source_text: SourceText) -> Option<file_info::Mode> {
         parse_mode(&source_text)
     }
 
     fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivia> {
-        trivia_lexer(source_text, offset).scan_leading_xhp_trivia()
+        minimal_parser::scan_leading_xhp_trivia(source_text, offset)
     }
     fn scan_trailing_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivia> {
-        trivia_lexer(source_text, offset).scan_trailing_xhp_trivia()
+        minimal_parser::scan_trailing_xhp_trivia(source_text, offset)
     }
     fn scan_leading_php_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivia> {
-        trivia_lexer(source_text, offset).scan_leading_php_trivia()
+        minimal_parser::scan_leading_php_trivia(source_text, offset)
     }
     fn scan_trailing_php_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivia> {
-        trivia_lexer(source_text, offset).scan_trailing_php_trivia()
+        minimal_parser::scan_trailing_php_trivia(source_text, offset)
     }
 
     fn trailing_from_token(token: TokenKind) -> Operator {

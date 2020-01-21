@@ -1,0 +1,17 @@
+# @generated
+# @autocargo from //hphp/hack/src/parser/api:minimal_parser
+# Signature<<ff2902b1f266251bb3c1265bbc13c70d56953a63>>
+[package]
+name = "minimal_parser"
+edition = "2018"
+version = "0.0.0"
+include = ["../../minimal_parser.rs"]
+
+[lib]
+path = "../../minimal_parser.rs"
+
+[dependencies]
+minimal_smart_constructors = { path = "../../../cargo/minimal_parser" }
+parser = { path = "../../../core" }
+stack_limit = { path = "../../../../utils/stack_limit" }
+# @end of Signature<<ff2902b1f266251bb3c1265bbc13c70d56953a63>>

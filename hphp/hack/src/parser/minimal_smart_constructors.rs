@@ -20,10 +20,9 @@ use parser_core_types::{
   minimal_syntax::MinimalSyntax,
   minimal_token::MinimalToken,
   source_text::SourceText,
+  parser_env::ParserEnv,
 };
-
-use parser::parser_env::ParserEnv;
-use parser::smart_constructors::{NoState, SmartConstructors};
+use smart_constructors::{NoState, SmartConstructors};
 use syntax_smart_constructors::SyntaxSmartConstructors;
 
 #[derive(Clone)]

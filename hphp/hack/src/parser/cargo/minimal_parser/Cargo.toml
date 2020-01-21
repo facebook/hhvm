@@ -1,17 +1,17 @@
 # @generated
-# @autocargo from //hphp/hack/src/parser:minimal_parser
-# Signature<<883ce045acaddaebe7f8fdc93a1f03f332680f29>>
+# @autocargo from //hphp/hack/src/parser:minimal_smart_constructors
+# Signature<<594523fbdeeb5de0124eb00075a2a192aa379910>>
 [package]
-name = "minimal_parser"
+name = "minimal_smart_constructors"
 edition = "2018"
 version = "0.0.0"
-include = ["../../minimal_parser.rs", "../../minimal_smart_constructors.rs"]
+include = ["../../minimal_smart_constructors.rs"]
 
 [lib]
-path = "../../minimal_parser.rs"
+path = "../../minimal_smart_constructors.rs"
 
 [dependencies]
-parser = { path = "../../core" }
 parser_core_types = { path = "../core_types" }
+smart_constructors = { path = "../smart_constructors" }
 syntax_smart_constructors = { path = "../syntax_smart_constructors" }
-# @end of Signature<<883ce045acaddaebe7f8fdc93a1f03f332680f29>>
+# @end of Signature<<594523fbdeeb5de0124eb00075a2a192aa379910>>

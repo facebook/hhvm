@@ -681,9 +681,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "minimal_parser"
 version = "0.0.0"
 dependencies = [
+ "minimal_smart_constructors 0.0.0",
  "parser 0.0.0",
- "parser_core_types 0.0.0",
- "syntax_smart_constructors 0.0.0",
+ "stack_limit 0.0.0",
 ]
 
 [[package]]
@@ -697,11 +697,19 @@ dependencies = [
  "ocamlrep 0.0.0",
  "ocamlrep_ocamlpool 0.0.0",
  "oxidized 0.0.0",
- "parser 0.0.0",
  "parser_core_types 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",
  "syntax_tree 0.0.0",
+]
+
+[[package]]
+name = "minimal_smart_constructors"
+version = "0.0.0"
+dependencies = [
+ "parser_core_types 0.0.0",
+ "smart_constructors 0.0.0",
+ "syntax_smart_constructors 0.0.0",
 ]
 
 [[package]]
@@ -1094,6 +1102,7 @@ name = "rust_parser_ffi"
 version = "0.0.0"
 dependencies = [
  "libc 0.2.66 (registry+https://github.com/rust-lang/crates.io-index)",
+ "minimal_parser 0.0.0",
  "ocaml 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocamlrep 0.0.0",
  "ocamlrep_ocamlpool 0.0.0",

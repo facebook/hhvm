@@ -16,7 +16,7 @@
  **
  *
  */
-use parser::smart_constructors_generated::SmartConstructors;
+use smart_constructors::SmartConstructors;
 
 pub trait FlattenOp {
     type S;

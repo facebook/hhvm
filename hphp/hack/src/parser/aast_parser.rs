@@ -24,7 +24,7 @@ use parser_core_types::{
 };
 use regex::bytes::Regex;
 use rust_parser_errors::ParserErrors;
-use smart_constructors::smart_constructors_wrappers::WithKind;
+use smart_constructors::WithKind;
 use stack_limit::StackLimit;
 use std::borrow::Borrow;
 use syntax_tree::{make_syntax_tree, mode_parser::parse_mode, SyntaxTree};

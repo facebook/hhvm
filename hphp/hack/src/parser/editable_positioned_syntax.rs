@@ -9,11 +9,11 @@ pub mod editable_positioned_token;
 
 use std::rc::Rc;
 
-use parser::positioned_syntax::PositionedSyntax;
-use parser::source_text::SourceText;
-use parser::syntax::SyntaxValueType;
-use parser::syntax::{Syntax, SyntaxVariant};
-use parser::syntax_kind::SyntaxKind;
+use parser_core_types::positioned_syntax::PositionedSyntax;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::syntax::SyntaxValueType;
+use parser_core_types::syntax::{Syntax, SyntaxVariant};
+use parser_core_types::syntax_kind::SyntaxKind;
 
 use crate::editable_positioned_original_source_data::SourceData;
 use crate::editable_positioned_token::EditablePositionedToken;

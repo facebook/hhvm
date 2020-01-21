@@ -5,8 +5,8 @@
 
 mod syntax_smart_constructors_generated;
 
-use parser::{parser_env::ParserEnv, smart_constructors::NoState};
-use parser_core_types::source_text::SourceText;
+use parser_core_types::{parser_env::ParserEnv, source_text::SourceText};
+use smart_constructors::NoState;
 
 pub use crate::syntax_smart_constructors_generated::*;
 

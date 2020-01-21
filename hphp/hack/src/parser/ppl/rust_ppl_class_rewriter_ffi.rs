@@ -6,16 +6,11 @@
 use std::rc::Rc;
 
 use ocamlrep::OcamlRep;
-use parser::{
-    parser::Parser, parser_env::ParserEnv, smart_constructors::NoState,
-    smart_constructors::WithKind, source_text::SourceText,
-};
-use positioned_smart_constructors::PositionedSmartConstructors;
+use parser_core_types::{parser_env::ParserEnv, source_text::SourceText};
+use positioned_parser;
 use rust_editable_positioned_syntax::{EditablePositionedSyntax, EditablePositionedSyntaxTrait};
 use rust_ppl_class_rewriter::PplClassRewriter;
 use rust_to_ocaml::{SerializationContext, ToOcaml};
-
-type PositionedSyntaxParser<'a> = Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
 
 extern "C" {
     fn ocamlpool_enter();
@@ -35,8 +30,7 @@ pub extern "C" fn parse_and_rewrite_ppl_classes(ocaml_source_text: usize) -> usi
         enable_xhp_class_modifier: false,
     };
 
-    let mut parser = PositionedSyntaxParser::make(&source_text, env);
-    let root = parser.parse_script(None);
+    let (root, _, _) = positioned_parser::parse_script(&source_text, env, None);
 
     let context = SerializationContext::new(ocaml_source_text);
 

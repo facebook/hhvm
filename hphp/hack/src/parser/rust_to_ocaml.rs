@@ -10,7 +10,6 @@ use std::iter::Iterator;
 
 use ocamlpool_rust::utils::*;
 use ocamlrep_ocamlpool::add_to_ambient_pool;
-use parser::smart_constructors::NoState;
 use parser_core_types::{
     lexable_token::LexableToken, minimal_syntax::MinimalValue, minimal_token::MinimalToken,
     minimal_trivia::MinimalTrivia, positioned_syntax::PositionedValue,
@@ -18,6 +17,7 @@ use parser_core_types::{
     source_text::SourceText, syntax::*, syntax_error::SyntaxError, syntax_kind::SyntaxKind,
     token_kind::TokenKind, trivia_kind::TriviaKind,
 };
+use smart_constructors::NoState;
 
 pub struct SerializationContext {
     pub source_text: Value,

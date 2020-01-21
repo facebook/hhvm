@@ -11,7 +11,7 @@
 use ocamlrep::{ptr::UnsafeOcamlPtr, OcamlRep};
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::parser_options::ParserOptions;
-use parser::{
+use parser_core_types::{
     positioned_syntax::PositionedSyntax, source_text::SourceText, syntax_error::SyntaxError,
 };
 use syntax_tree::SyntaxTree;

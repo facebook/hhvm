@@ -19,9 +19,9 @@
 use parser_core_types::{
   syntax::*,
   source_text::SourceText,
+  parser_env::ParserEnv,
 };
-use parser::parser_env::ParserEnv;
-use parser::smart_constructors::{NoState, SmartConstructors};
+use smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
 pub trait SyntaxSmartConstructors<'src, S: SyntaxType<'src, State>, State = NoState>:

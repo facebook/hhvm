@@ -6,9 +6,9 @@
 mod coroutine_smart_constructors_generated;
 
 use ocaml::core::mlvalues::Value;
-use parser::parser_env::ParserEnv;
 use parser_core_types::{
-    lexable_token::LexableToken, source_text::SourceText, syntax::*, token_kind::TokenKind,
+    lexable_token::LexableToken, parser_env::ParserEnv, source_text::SourceText, syntax::*,
+    token_kind::TokenKind,
 };
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 use std::marker::PhantomData;

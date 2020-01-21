@@ -1313,10 +1313,10 @@ use parser_core_types::{
   syntax::*,
   source_text::SourceText,
   lexable_token::LexableToken,
+  parser_env::ParserEnv,
 };
 use crate::*;
-use parser::parser_env::ParserEnv;
-use parser::smart_constructors::SmartConstructors;
+use smart_constructors::SmartConstructors;
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
 impl<'src, S, T, Token, Value> SmartConstructors<'src, T>
@@ -1533,9 +1533,9 @@ module GenerateFFRustSyntaxSmartConstructors = struct
 use parser_core_types::{
   syntax::*,
   source_text::SourceText,
+  parser_env::ParserEnv,
 };
-use parser::parser_env::ParserEnv;
-use parser::smart_constructors::{NoState, SmartConstructors};
+use smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
 pub trait SyntaxSmartConstructors<'src, S: SyntaxType<'src, State>, State = NoState>:
@@ -1751,7 +1751,7 @@ module GenerateRustFlattenSmartConstructors = struct
   let flatten_smart_constructors_template : string =
     make_header CStyle ""
     ^ "
-use parser::smart_constructors_generated::SmartConstructors;
+use smart_constructors::SmartConstructors;
 
 pub trait FlattenOp {
     type S;

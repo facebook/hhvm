@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use parser::lexable_token::LexableToken;
-use parser::positioned_token::PositionedToken;
-use parser::positioned_trivia::PositionedTrivia;
-use parser::source_text::SourceText;
-use parser::token_kind::TokenKind;
-use parser::trivia_kind::TriviaKind;
+use parser_core_types::lexable_token::LexableToken;
+use parser_core_types::positioned_token::PositionedToken;
+use parser_core_types::positioned_trivia::PositionedTrivia;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::token_kind::TokenKind;
+use parser_core_types::trivia_kind::TriviaKind;
 
 use crate::editable_positioned_original_source_data::SourceData;
 

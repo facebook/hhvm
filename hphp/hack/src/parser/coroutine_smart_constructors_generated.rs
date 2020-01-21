@@ -20,10 +20,10 @@ use parser_core_types::{
   syntax::*,
   source_text::SourceText,
   lexable_token::LexableToken,
+  parser_env::ParserEnv,
 };
 use crate::*;
-use parser::parser_env::ParserEnv;
-use parser::smart_constructors::SmartConstructors;
+use smart_constructors::SmartConstructors;
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
 impl<'src, S, T, Token, Value> SmartConstructors<'src, T>

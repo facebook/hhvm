@@ -704,6 +704,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "operator"
+version = "0.0.0"
+dependencies = [
+ "ocamlrep 0.0.0",
+ "ocamlrep_derive 0.0.0",
+ "parser_core_types 0.0.0",
+]
+
+[[package]]
 name = "options"
 version = "0.0.0"
 dependencies = [
@@ -765,6 +774,7 @@ dependencies = [
  "ocaml 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocamlrep 0.0.0",
  "ocamlrep_derive 0.0.0",
+ "operator 0.0.0",
  "oxidized 0.0.0",
  "parser_core_types 0.0.0",
  "smart_constructors 0.0.0",

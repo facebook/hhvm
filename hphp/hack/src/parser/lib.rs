@@ -5,8 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub mod lexer;
-pub mod operator;
-mod operator_generated;
+pub use operator::{self, *};
 pub mod parser;
 
 #[macro_use]

@@ -4,9 +4,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::parser_env::ParserEnv;
+mod operator_generated;
+
 use ocamlrep_derive::OcamlRep;
-use parser_core_types::token_kind::TokenKind;
+use parser_core_types::{parser_env::ParserEnv, token_kind::TokenKind};
 
 pub use crate::operator_generated::*;
 

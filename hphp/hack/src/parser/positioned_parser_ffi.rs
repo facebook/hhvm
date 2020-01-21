@@ -4,5 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use positioned_parser::{ScState, SmartConstructors};
+use smart_constructors;
 
-rust_parser_ffi::parse!(parse_positioned, SmartConstructors, ScState);
+rust_parser_ffi::parse!(
+    parse_positioned,
+    SmartConstructors,
+    ScState,
+    positioned_parser::parse_script
+);

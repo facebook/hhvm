@@ -7,6 +7,7 @@ use coroutine_parser_leak_tree::{ScState, SmartConstructors};
 
 rust_parser_ffi::parse!(
     parse_positioned_with_coroutine_sc_leak_tree,
-    SmartConstructors<'_>,
-    ScState<'_>,
+    SmartConstructors<'a>,
+    ScState<'a>,
+    coroutine_parser_leak_tree::parse_script,
 );

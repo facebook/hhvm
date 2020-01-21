@@ -7,6 +7,7 @@ use positioned_coroutine_parser::{ScState, SmartConstructors};
 
 rust_parser_ffi::parse!(
     parse_positioned_with_coroutine_sc,
-    SmartConstructors<'_>,
-    ScState<'_>,
+    SmartConstructors<'a>,
+    ScState<'a>,
+    positioned_coroutine_parser::parse_script,
 );

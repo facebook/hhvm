@@ -7,26 +7,37 @@
 use mode_parser::parse_mode;
 use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, OcamlRep};
 use ocamlrep_ocamlpool::{ocaml_ffi, Pool};
+use operator::{Assoc, Operator};
 use oxidized::{file_info, full_fidelity_parser_env::FullFidelityParserEnv};
-use parser::{
-    self,
-    minimal_trivia::MinimalTrivia,
-    operator::{Assoc, Operator},
-    parser::Parser,
-    parser_env::ParserEnv,
-    smart_constructors::{NodeType, SmartConstructors},
-    source_text::SourceText,
-    token_kind::TokenKind,
-};
+use smart_constructors::{NodeType, SmartConstructors};
+
 use parser_core_types::syntax_tree::SyntaxTree;
+use parser_core_types::{
+    minimal_trivia::MinimalTrivia, parser_env::ParserEnv, source_text::SourceText,
+    syntax_error::SyntaxError, token_kind::TokenKind,
+};
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 use stack_limit::{StackLimit, KI, MI};
 
-pub fn parse<'a, Sc, ScState>(
+pub trait ParseScript<'a, Sc, ScState> {
+    fn parse_script(
+        source: &SourceText<'a>,
+        env: ParserEnv,
+        stack_limit: Option<&'a StackLimit>,
+    ) -> (<Sc::R as NodeType>::R, Vec<SyntaxError>, ScState)
+    where
+        Sc: SmartConstructors<'a, ScState>,
+        Sc::R: NodeType,
+        <Sc::R as NodeType>::R: ToOcaml,
+        ScState: Clone + ToOcaml;
+}
+
+pub fn parse<'a, Sc, ScState, ParseFun>(
     ocaml_source_text: UnsafeOcamlPtr,
     env: FullFidelityParserEnv,
 ) -> UnsafeOcamlPtr
 where
+    ParseFun: ParseScript<'a, Sc, ScState>,
     Sc: SmartConstructors<'a, ScState>,
     Sc::R: NodeType,
     <Sc::R as NodeType>::R: ToOcaml,
@@ -57,11 +68,8 @@ where
                 // send it between threads, but it has internal mutablility and
                 // is not Send.
                 let source_text = unsafe { SourceText::from_ocaml(ocaml_source_text).unwrap() };
-                let mut parser = <Parser<'a, Sc, ScState>>::make(&source_text, env);
-                let root = parser.parse_script(Some(&stack_limit_ref));
-                let errors = parser.errors();
-                let state = parser.sc_state();
-
+                let (root, errors, state) =
+                    ParseFun::parse_script(&source_text, env, Some(stack_limit_ref));
                 // traversing the parsed syntax tree uses about 1/3 of the stack
                 let context = SerializationContext::new(ocaml_source_text);
                 let ocaml_root = unsafe { root.to_ocaml(&context) };
@@ -147,18 +155,39 @@ where
 
 #[macro_export]
 macro_rules! parse {
-    ($name:ident, $sc:ty, $scstate:ty $(,)?) => {
+    ($name:ident, $sc:ty, $scstate:ty, $parse_script:expr $(,)?) => {
         // We don't use the ocaml_ffi! macro here because we want precise
         // control over the Pool--when a parse fails, we want to free the old
         // pool and create a new one.
         #[no_mangle]
-        pub extern "C" fn $name(ocaml_source_text: usize, env: usize) -> usize {
+        pub extern "C" fn $name<'a>(ocaml_source_text: usize, env: usize) -> usize {
             ocamlrep_ocamlpool::catch_unwind(|| {
                 use ocamlrep::{ptr::UnsafeOcamlPtr, OcamlRep};
                 use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
+                use smart_constructors::NodeType;
+                use parser_core_types::source_text::SourceText;
+                use parser_core_types::parser_env::ParserEnv;
+                use stack_limit::StackLimit;
+                use parser_core_types::syntax_error::SyntaxError;
+                use rust_to_ocaml::ToOcaml;
+
+                struct ParseFun;
+                impl<'a> $crate::ParseScript<'a, $sc, $scstate> for ParseFun {
+
+                        fn parse_script(
+                            source: &SourceText<'a>,
+                            env: ParserEnv,
+                            stack_limit: Option<&'a StackLimit>,
+                        ) -> (<<$sc as smart_constructors::SmartConstructors<'a, $scstate>>::R as NodeType>::R , Vec<SyntaxError>, $scstate)
+                        {
+                            $parse_script(source, env, stack_limit)
+                        }
+
+
+                }
                 let ocaml_source_text = unsafe { UnsafeOcamlPtr::new(ocaml_source_text) };
                 let env = unsafe { FullFidelityParserEnv::from_ocaml(env).unwrap() };
-                $crate::parse::<'_, $sc, $scstate>(ocaml_source_text, env).as_usize()
+                $crate::parse::<'a, $sc, $scstate, ParseFun, >(ocaml_source_text, env).as_usize()
             })
         }
     };
@@ -206,7 +235,7 @@ ocaml_ffi! {
     fn rust_precedence_helper(op: Operator) -> usize {
         // NOTE: ParserEnv is not used in operator::precedence(), so we just create an empty ParserEnv
         // If operator::precedence() starts using ParserEnv, this function and the callsites in OCaml must be updated
-        use parser::parser_env::ParserEnv;
+        use parser_core_types::parser_env::ParserEnv;
         op.precedence(&ParserEnv::default())
     }
 
@@ -217,7 +246,7 @@ ocaml_ffi! {
     fn rust_associativity_helper(op: Operator) -> Assoc {
         // NOTE: ParserEnv is not used in operator::associativity(), so we just create an empty ParserEnv
         // If operator::associativity() starts using ParserEnv, this function and the callsites in OCaml must be updated
-        use parser::parser_env::ParserEnv;
+        use parser_core_types::parser_env::ParserEnv;
         op.associativity(&ParserEnv::default())
     }
 }

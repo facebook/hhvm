@@ -7,6 +7,7 @@ use decl_mode_parser::{ScState, SmartConstructors};
 
 rust_parser_ffi::parse!(
     parse_positioned_with_decl_mode_sc,
-    SmartConstructors<'_>,
-    ScState<'_>,
+    SmartConstructors<'a>,
+    ScState<'a>,
+    decl_mode_parser::parse_script
 );

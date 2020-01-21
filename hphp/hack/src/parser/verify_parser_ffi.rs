@@ -5,4 +5,9 @@
 
 use verify_parser::{ScState, SmartConstructors};
 
-rust_parser_ffi::parse!(parse_positioned_with_verify_sc, SmartConstructors, ScState);
+rust_parser_ffi::parse!(
+    parse_positioned_with_verify_sc,
+    SmartConstructors,
+    ScState,
+    verify_parser::parse_script
+);

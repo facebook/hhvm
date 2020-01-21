@@ -5,4 +5,9 @@
 
 use minimal_parser::{ScState, SmartConstructors};
 
-rust_parser_ffi::parse!(parse_minimal, SmartConstructors, ScState);
+rust_parser_ffi::parse!(
+    parse_minimal,
+    SmartConstructors,
+    ScState,
+    minimal_parser::parse_script
+);

@@ -154,6 +154,8 @@ dependencies = [
  "parser_core_types 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",
+ "smart_constructors 0.0.0",
+ "stack_limit 0.0.0",
 ]
 
 [[package]]
@@ -199,6 +201,8 @@ dependencies = [
  "parser_core_types 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",
+ "smart_constructors 0.0.0",
+ "stack_limit 0.0.0",
 ]
 
 [[package]]
@@ -697,6 +701,8 @@ dependencies = [
  "parser_core_types 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",
+ "smart_constructors 0.0.0",
+ "stack_limit 0.0.0",
 ]
 
 [[package]]
@@ -904,6 +910,8 @@ dependencies = [
  "positioned_coroutine_parser 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",
+ "smart_constructors 0.0.0",
+ "stack_limit 0.0.0",
 ]
 
 [[package]]
@@ -929,6 +937,8 @@ dependencies = [
  "positioned_parser 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",
+ "smart_constructors 0.0.0",
+ "stack_limit 0.0.0",
 ]
 
 [[package]]
@@ -1123,10 +1133,11 @@ dependencies = [
  "ocaml 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocamlrep 0.0.0",
  "ocamlrep_ocamlpool 0.0.0",
+ "operator 0.0.0",
  "oxidized 0.0.0",
- "parser 0.0.0",
  "parser_core_types 0.0.0",
  "rust_to_ocaml 0.0.0",
+ "smart_constructors 0.0.0",
  "stack_limit 0.0.0",
 ]
 
@@ -1337,6 +1348,8 @@ dependencies = [
  "parser_core_types 0.0.0",
  "rust_parser_ffi 0.0.0",
  "rust_to_ocaml 0.0.0",
+ "smart_constructors 0.0.0",
+ "stack_limit 0.0.0",
  "verify_parser 0.0.0",
 ]
 

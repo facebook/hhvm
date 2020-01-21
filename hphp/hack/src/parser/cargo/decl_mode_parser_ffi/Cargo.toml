@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:decl_mode_parser_ffi
-# Signature<<fc117af3354f8c45a04a44052421ebb28ab6ee4d>>
+# Signature<<705cfd592bb85ce42e9f21505355ea930bdc85c6>>
 [package]
 name = "decl_mode_parser_ffi"
 edition = "2018"
@@ -19,6 +19,8 @@ oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
 rust_parser_ffi = { path = "../rust_parser_ffi" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
+smart_constructors = { path = "../smart_constructors" }
+stack_limit = { path = "../../../utils/stack_limit" }
 libc = "0.2"
 ocaml = "0.8"
-# @end of Signature<<fc117af3354f8c45a04a44052421ebb28ab6ee4d>>
+# @end of Signature<<705cfd592bb85ce42e9f21505355ea930bdc85c6>>

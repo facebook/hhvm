@@ -33,7 +33,7 @@ mod tests {
 
     use aast_parser::rust_aast_parser_types;
     use direct_decl_parser;
-    use facts_rust::facts_parser;
+    use facts_parser;
     use ocamlrep::rc::RcOc;
     use oxidized::{
         global_options,
@@ -60,8 +60,7 @@ mod tests {
             let filename = RcOc::new(filename);
             b.iter(|| {
                 let text = SourceText::make(RcOc::clone(&filename), text.as_bytes());
-                let mut parser = facts_parser::FactsParser::make(&text, ParserEnv::default());
-                parser.parse_script(None)
+                facts_parser::parse_script(&text, ParserEnv::default(), None);
             });
         });
     }

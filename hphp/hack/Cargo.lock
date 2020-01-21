@@ -77,6 +77,7 @@ dependencies = [
  "decl_mode_parser 0.0.0",
  "decl_rust 0.0.0",
  "direct_decl_parser 0.0.0",
+ "facts_parser 0.0.0",
  "facts_rust 0.0.0",
  "ocamlrep 0.0.0",
  "oxidized 0.0.0",
@@ -312,7 +313,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "facts_parser"
+version = "0.0.0"
+dependencies = [
+ "facts_smart_constructors 0.0.0",
+ "parser 0.0.0",
+ "parser_core_types 0.0.0",
+ "stack_limit 0.0.0",
+]
+
+[[package]]
 name = "facts_rust"
+version = "0.0.0"
+dependencies = [
+ "escaper 0.0.0",
+ "facts_parser 0.0.0",
+ "facts_smart_constructors 0.0.0",
+ "flatten_smart_constructors 0.0.0",
+ "hhbc_string_utils_rust 0.0.0",
+ "ocamlrep 0.0.0",
+ "oxidized 0.0.0",
+ "parser_core_types 0.0.0",
+ "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rust-crypto 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_derive 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_json 1.0.42 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syntax_tree 0.0.0",
+]
+
+[[package]]
+name = "facts_smart_constructors"
 version = "0.0.0"
 dependencies = [
  "escaper 0.0.0",
@@ -320,12 +351,13 @@ dependencies = [
  "hhbc_string_utils_rust 0.0.0",
  "ocamlrep 0.0.0",
  "oxidized 0.0.0",
- "parser 0.0.0",
+ "parser_core_types 0.0.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust-crypto 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.42 (registry+https://github.com/rust-lang/crates.io-index)",
+ "smart_constructors 0.0.0",
  "syntax_tree 0.0.0",
 ]
 

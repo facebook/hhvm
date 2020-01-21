@@ -7,16 +7,13 @@
 use hhbc_string_utils_rust::mangle_xhp_id;
 use ocamlrep::rc::RcOc;
 use oxidized::{file_info::Mode, relative_path::RelativePath};
-use parser::{
-    parser::Parser, parser_env::ParserEnv, smart_constructors_wrappers::WithKind,
-    source_text::SourceText,
-};
+use parser_core_types::parser_env::ParserEnv;
+use parser_core_types::source_text::SourceText;
 use syntax_tree::mode_parser::parse_mode;
 
 use crate::facts::*;
 use crate::facts_smart_constructors::*;
-
-pub type FactsParser<'a> = Parser<'a, WithKind<FactsSmartConstructors<'a>>, HasScriptContent<'a>>;
+use facts_parser;
 
 pub struct ExtractAsJsonOpts {
     pub php5_compat_mode: bool,
@@ -48,11 +45,10 @@ pub fn from_text(text: &[u8], opts: ExtractAsJsonOpts) -> Option<Facts> {
         allow_new_attribute_syntax,
         ..ParserEnv::default()
     };
-    let mut parser = FactsParser::make(&text, env);
-    let root = parser.parse_script(None);
+    let (root, errors, has_script_content) = facts_parser::parse_script(&text, env, None);
 
     // report errors only if result of parsing is non-empty *)
-    if parser.sc_state().0 && !parser.errors().is_empty() {
+    if has_script_content.0 && !errors.is_empty() {
         None
     } else {
         Some(collect(("".to_owned(), Facts::default()), root).1)

@@ -1808,13 +1808,13 @@ module GenerateRustFactsSmartConstructors = struct
   let facts_smart_constructors_template : string =
     make_header CStyle ""
     ^ "
-use parser::source_text::SourceText;
+use parser_core_types::source_text::SourceText;
 use flatten_smart_constructors::*;
-use parser::smart_constructors::SmartConstructors;
-use parser::parser_env::ParserEnv;
-use parser::positioned_token::PositionedToken;
+use smart_constructors::SmartConstructors;
+use parser_core_types::parser_env::ParserEnv;
+use parser_core_types::positioned_token::PositionedToken;
 
-use crate::facts_smart_constructors::*;
+use crate::*;
 
 #[derive(Clone)]
 pub struct FactsSmartConstructors<'src> {

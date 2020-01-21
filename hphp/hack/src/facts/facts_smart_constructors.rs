@@ -6,9 +6,13 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 */
+mod facts_smart_constructors_generated;
+
 use escaper::{extract_unquoted_string, unescape_double, unescape_single};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
-use parser::{lexable_token::LexableToken, source_text::SourceText, token_kind::TokenKind};
+use parser_core_types::{
+    lexable_token::LexableToken, source_text::SourceText, token_kind::TokenKind,
+};
 
 pub use crate::facts_smart_constructors_generated::*;
 

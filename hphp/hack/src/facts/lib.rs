@@ -6,5 +6,4 @@
 
 mod facts;
 pub mod facts_parser;
-pub mod facts_smart_constructors;
-mod facts_smart_constructors_generated;
+pub use facts_smart_constructors;

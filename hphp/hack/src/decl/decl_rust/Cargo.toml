@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/decl:decl_rust
-# Signature<<75ccb247c675a411e24da019053485442145fd99>>
+# Signature<<39c6df833516f422c3204fc1dab93bfe44e925ec>>
 [package]
 name = "decl_rust"
 edition = "2018"
@@ -11,7 +11,7 @@ include = ["../direct_decl_parser.rs", "../lib.rs"]
 path = "../lib.rs"
 
 [dependencies]
-direct_decl_parser = { path = "../../parser/api" }
+direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 direct_decl_smart_constructors = { path = "../direct_decl_smart_constructors" }
 flatten_smart_constructors = { path = "../../parser/cargo/flatten_smart_constructors" }
 hh_autoimport_rust = { path = "../../parser/cargo/hh_autoimport" }
@@ -25,4 +25,4 @@ rust-crypto = "0.2"
 
 [dev-dependencies]
 pretty_assertions = "0.6"
-# @end of Signature<<75ccb247c675a411e24da019053485442145fd99>>
+# @end of Signature<<39c6df833516f422c3204fc1dab93bfe44e925ec>>

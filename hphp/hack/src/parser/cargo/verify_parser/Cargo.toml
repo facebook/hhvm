@@ -1,19 +1,19 @@
 # @generated
-# @autocargo from //hphp/hack/src/parser:verify_parser
-# Signature<<996aaa565a400b7aab95650bd8ce78140227fb32>>
+# @autocargo from //hphp/hack/src/parser:verify_smart_constructors
+# Signature<<30058e02102477d8cf1f27b3d9c69da97d00974f>>
 [package]
-name = "verify_parser"
+name = "verify_smart_constructors"
 edition = "2018"
 version = "0.0.0"
-include = ["../../verify_parser.rs", "../../verify_smart_constructors.rs", "../../verify_smart_constructors_generated.rs"]
+include = ["../../verify_smart_constructors.rs", "../../verify_smart_constructors_generated.rs"]
 
 [lib]
-path = "../../verify_parser.rs"
+path = "../../verify_smart_constructors.rs"
 
 [dependencies]
-parser = { path = "../../core" }
 parser_core_types = { path = "../core_types" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
+smart_constructors = { path = "../smart_constructors" }
 syntax_smart_constructors = { path = "../syntax_smart_constructors" }
 ocaml = "0.8"
-# @end of Signature<<996aaa565a400b7aab95650bd8ce78140227fb32>>
+# @end of Signature<<30058e02102477d8cf1f27b3d9c69da97d00974f>>

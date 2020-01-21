@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser/api:decl_mode_parser
-# Signature<<f13ae0f873c10ddead74d35397c9485cf968f17d>>
+# Signature<<952640f1d2206844c26cced9d50e531f8cab5456>>
 [package]
 name = "decl_mode_parser"
 edition = "2018"
@@ -14,4 +14,4 @@ path = "../../decl_mode_parser.rs"
 decl_mode_smart_constructors = { path = "../../../cargo/decl_mode_parser" }
 parser = { path = "../../../core" }
 stack_limit = { path = "../../../../utils/stack_limit" }
-# @end of Signature<<f13ae0f873c10ddead74d35397c9485cf968f17d>>
+# @end of Signature<<952640f1d2206844c26cced9d50e531f8cab5456>>

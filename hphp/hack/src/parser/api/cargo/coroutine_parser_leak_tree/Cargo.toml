@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser/api:coroutine_parser_leak_tree
-# Signature<<bed264b38fa965187594f48073b7a60eb7aa520b>>
+# Signature<<4a71ac13936059af00674056cd46184bc057499a>>
 [package]
 name = "coroutine_parser_leak_tree"
 edition = "2018"
@@ -14,4 +14,4 @@ path = "../../coroutine_parser_leak_tree.rs"
 coroutine_smart_constructors = { path = "../../../cargo/coroutine_smart_constructors" }
 parser = { path = "../../../core" }
 stack_limit = { path = "../../../../utils/stack_limit" }
-# @end of Signature<<bed264b38fa965187594f48073b7a60eb7aa520b>>
+# @end of Signature<<4a71ac13936059af00674056cd46184bc057499a>>

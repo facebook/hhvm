@@ -1,14 +1,18 @@
-use parser::{parser_env::ParserEnv, positioned_syntax::PositionedSyntax};
-/**
- * Copyright (c) 2019, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the "hack" directory of this source tree.
- *
-*/
-use parser_core_types::{source_text::SourceText, syntax_kind::SyntaxKind};
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
+mod verify_smart_constructors_generated;
+
+use parser_core_types::{
+    parser_env::ParserEnv, positioned_syntax::PositionedSyntax, source_text::SourceText,
+    syntax_kind::SyntaxKind,
+};
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
+
+use ocaml::core::mlvalues::Value;
+use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
 
 // TODO: This parser is only used by the ffp tests, and should be moved out of
 // the parser crate into a separate crate colocated with the tests. This will
@@ -68,5 +72,11 @@ impl<'src> SyntaxSmartConstructors<'src, PositionedSyntax, State> for VerifySmar
         Self {
             state: <State as StateType<'src, PositionedSyntax>>::initial(env, src),
         }
+    }
+}
+
+impl ToOcaml for State {
+    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
+        to_list(self.stack(), context)
     }
 }

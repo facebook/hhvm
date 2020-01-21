@@ -8,7 +8,7 @@ members = [
     "src/hhbc/cargo/string_utils",
     "src/name_index/sqlite",
     "src/name_index",
-    "src/parser",
+    "src/parser/core",
     "src/parser/cargo/bench",
     "src/parser/cargo/core_types",
     "src/parser/cargo/errors",

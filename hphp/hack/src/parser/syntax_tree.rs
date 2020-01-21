@@ -6,17 +6,17 @@ pub mod mode_parser;
 
 use crate::mode_parser::parse_mode;
 use oxidized::file_info::Mode;
+use parser::{
+    parser::Parser,
+    parser_env::ParserEnv,
+    smart_constructors::{NodeType, SmartConstructors},
+};
 use parser_core_types::{
     lexable_token::LexableToken,
     source_text::SourceText,
     syntax::{Syntax, SyntaxValueType},
     syntax_error::SyntaxError,
     syntax_trait::SyntaxTrait,
-};
-use parser_rust::{
-    parser::Parser,
-    parser_env::ParserEnv,
-    smart_constructors::{NodeType, SmartConstructors},
 };
 use stack_limit::StackLimit;
 use std::{borrow::Borrow, convert::AsRef};

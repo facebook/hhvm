@@ -6,7 +6,7 @@
 
 use crate::ocaml_syntax::Context;
 use coroutine_smart_constructors::CoroutineStateType;
-use parser_rust::{parser_env::ParserEnv, source_text::SourceText};
+use parser::{parser_env::ParserEnv, source_text::SourceText};
 use rust_to_ocaml::SerializationContext;
 use syntax_smart_constructors::StateType;
 

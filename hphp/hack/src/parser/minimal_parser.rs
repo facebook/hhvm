@@ -9,9 +9,7 @@
 mod minimal_smart_constructors;
 
 use crate::minimal_smart_constructors::MinimalSmartConstructors;
-use parser_rust::{
-    parser::Parser, smart_constructors::NoState, smart_constructors_wrappers::WithKind,
-};
+use parser::{parser::Parser, smart_constructors::NoState, smart_constructors_wrappers::WithKind};
 
 pub type SmartConstructors = WithKind<MinimalSmartConstructors>;
 pub type ScState = NoState;

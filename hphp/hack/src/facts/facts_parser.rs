@@ -7,7 +7,7 @@
 use hhbc_string_utils_rust::mangle_xhp_id;
 use ocamlrep::rc::RcOc;
 use oxidized::{file_info::Mode, relative_path::RelativePath};
-use parser_rust::{
+use parser::{
     parser::Parser, parser_env::ParserEnv, smart_constructors_wrappers::WithKind,
     source_text::SourceText,
 };

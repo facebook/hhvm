@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use coroutine_smart_constructors::{CoroutineSmartConstructors, State as CoroutineState};
-use parser_rust::{
+use parser::{
     parser::Parser, positioned_syntax::PositionedSyntax, smart_constructors_wrappers::WithKind,
 };
 

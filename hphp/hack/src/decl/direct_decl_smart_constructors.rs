@@ -8,7 +8,6 @@
 */
 use hh_autoimport_rust as hh_autoimport;
 use naming_special_names_rust as naming_special_names;
-use parser_rust as parser;
 
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use oxidized::{

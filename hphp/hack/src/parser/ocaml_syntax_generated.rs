@@ -19,7 +19,6 @@
 use crate::ocaml_syntax::{OcamlSyntax, Context};
 use rust_to_ocaml::*;
 
-use parser_rust as parser;
 use parser::syntax_kind::SyntaxKind;
 use parser::syntax::{SyntaxType, SyntaxValueType};
 use parser::positioned_token::PositionedToken;

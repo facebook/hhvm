@@ -22,8 +22,8 @@ use parser_core_types::{
   lexable_token::LexableToken,
 };
 use crate::*;
-use parser_rust::parser_env::ParserEnv;
-use parser_rust::smart_constructors::SmartConstructors;
+use parser::parser_env::ParserEnv;
+use parser::smart_constructors::SmartConstructors;
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
 impl<'src, S, T, Token, Value> SmartConstructors<'src, T>

@@ -11,9 +11,7 @@ mod ocaml_syntax_generated;
 use crate::{ocaml_coroutine_state::OcamlCoroutineState, ocaml_syntax::OcamlSyntax};
 use coroutine_smart_constructors::{CoroutineSmartConstructors, CoroutineStateType};
 use ocaml::core::mlvalues::Value;
-use parser_rust::{
-    parser::Parser, positioned_syntax::PositionedValue, smart_constructors::WithKind,
-};
+use parser::{parser::Parser, positioned_syntax::PositionedValue, smart_constructors::WithKind};
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 
 pub type SmartConstructors<'a> = WithKind<

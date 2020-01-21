@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:rust_parser_errors_ffi
-# Signature<<2c71808649ce811b2f02c7fe6c526ad291d7d3be>>
+# Signature<<6d8108d02827dbbc758d1c34d54744d0c6f06aa2>>
 [package]
 name = "rust_parser_errors_ffi"
 edition = "2018"
@@ -15,10 +15,10 @@ crate-type = ["lib", "staticlib"]
 ocamlrep = { path = "../../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../../oxidized" }
+parser = { path = "../../../core" }
 parser_core_types = { path = "../../core_types" }
-parser_rust = { path = "../../.." }
 rust_parser_errors = { path = ".." }
 rust_to_ocaml = { path = "../../rust_to_ocaml" }
 syntax_tree = { path = "../../syntax_tree" }
 ocaml = "0.8"
-# @end of Signature<<2c71808649ce811b2f02c7fe6c526ad291d7d3be>>
+# @end of Signature<<6d8108d02827dbbc758d1c34d54744d0c6f06aa2>>

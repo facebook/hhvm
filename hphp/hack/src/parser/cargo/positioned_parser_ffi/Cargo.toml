@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:positioned_parser_ffi
-# Signature<<39a055a1ce3bba834549716cc8cb18fb4f839a99>>
+# Signature<<8f1d845fc044f460b6afb49be495ddb0efb7d747>>
 [package]
 name = "positioned_parser_ffi"
 edition = "2018"
@@ -15,12 +15,12 @@ ocamlpool_rust = { path = "../../../utils/ocamlpool_rust" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
+parser = { path = "../../core" }
 parser_core_types = { path = "../core_types" }
-parser_rust = { path = "../.." }
 positioned_parser = { path = "../positioned_parser" }
 rust_parser_ffi = { path = "../rust_parser_ffi" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 syntax_tree = { path = "../syntax_tree" }
 libc = "0.2"
 ocaml = "0.8"
-# @end of Signature<<39a055a1ce3bba834549716cc8cb18fb4f839a99>>
+# @end of Signature<<8f1d845fc044f460b6afb49be495ddb0efb7d747>>

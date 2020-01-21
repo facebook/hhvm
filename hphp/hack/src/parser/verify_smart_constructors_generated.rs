@@ -18,10 +18,10 @@
  */
 use parser_core_types::source_text::SourceText;
 use crate::verify_smart_constructors::*;
-use parser_rust::parser_env::ParserEnv;
+use parser::parser_env::ParserEnv;
 use parser_core_types::positioned_syntax::PositionedSyntax;
 use parser_core_types::positioned_token::PositionedToken;
-use parser_rust::smart_constructors::SmartConstructors;
+use parser::smart_constructors::SmartConstructors;
 use syntax_smart_constructors::SyntaxSmartConstructors;
 
 macro_rules! arg_kinds {

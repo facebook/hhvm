@@ -5,9 +5,7 @@
 
 pub mod positioned_smart_constructors;
 
-use parser_rust::{
-    parser::Parser, smart_constructors::NoState, smart_constructors_wrappers::WithKind,
-};
+use parser::{parser::Parser, smart_constructors::NoState, smart_constructors_wrappers::WithKind};
 use positioned_smart_constructors::*;
 
 pub type SmartConstructors = WithKind<PositionedSmartConstructors>;

@@ -8,7 +8,7 @@ mod verify_smart_constructors_generated;
 
 use crate::verify_smart_constructors::{State as VerifyState, VerifySmartConstructors};
 use ocaml::core::mlvalues::Value;
-use parser_rust::{parser::Parser, smart_constructors_wrappers::WithKind};
+use parser::{parser::Parser, smart_constructors_wrappers::WithKind};
 use rust_to_ocaml::{to_list, SerializationContext, ToOcaml};
 
 pub type SmartConstructors = WithKind<VerifySmartConstructors>;

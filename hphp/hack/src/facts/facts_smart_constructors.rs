@@ -8,7 +8,7 @@
 */
 use escaper::{extract_unquoted_string, unescape_double, unescape_single};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
-use parser_rust::{lexable_token::LexableToken, source_text::SourceText, token_kind::TokenKind};
+use parser::{lexable_token::LexableToken, source_text::SourceText, token_kind::TokenKind};
 
 pub use crate::facts_smart_constructors_generated::*;
 

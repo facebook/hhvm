@@ -4,8 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 /// SourceData represents information with relation to the original SourceText.
-use parser_rust as parser;
-
 use parser::lexable_token::LexableToken;
 use parser::positioned_syntax::PositionedSyntax;
 use parser::positioned_token::PositionedToken;

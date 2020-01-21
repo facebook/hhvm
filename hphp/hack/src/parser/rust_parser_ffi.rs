@@ -7,7 +7,7 @@
 use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, OcamlRep};
 use ocamlrep_ocamlpool::{ocaml_ffi, Pool};
 use oxidized::{file_info, full_fidelity_parser_env::FullFidelityParserEnv};
-use parser_rust::{
+use parser::{
     self,
     lexer::Lexer,
     minimal_token::MinimalToken,
@@ -212,7 +212,7 @@ ocaml_ffi! {
     fn rust_precedence_helper(op: Operator) -> usize {
         // NOTE: ParserEnv is not used in operator::precedence(), so we just create an empty ParserEnv
         // If operator::precedence() starts using ParserEnv, this function and the callsites in OCaml must be updated
-        use parser_rust::parser_env::ParserEnv;
+        use parser::parser_env::ParserEnv;
         op.precedence(&ParserEnv::default())
     }
 
@@ -223,7 +223,7 @@ ocaml_ffi! {
     fn rust_associativity_helper(op: Operator) -> Assoc {
         // NOTE: ParserEnv is not used in operator::associativity(), so we just create an empty ParserEnv
         // If operator::associativity() starts using ParserEnv, this function and the callsites in OCaml must be updated
-        use parser_rust::parser_env::ParserEnv;
+        use parser::parser_env::ParserEnv;
         op.associativity(&ParserEnv::default())
     }
 }

@@ -4,10 +4,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use parser::parser_env::ParserEnv;
 use parser_core_types::{
     lexable_token::LexableToken, source_text::SourceText, syntax::*, token_kind::TokenKind,
 };
-use parser_rust::parser_env::ParserEnv;
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
 pub struct State<'src, S> {

@@ -6,13 +6,13 @@
 
 use minimal_parser::MinimalSyntaxParser;
 use oxidized::file_info::Mode;
+use parser::parser_env::ParserEnv;
 use parser_core_types::{
     lexable_token::LexableToken,
     source_text::SourceText,
     syntax::{self, SyntaxVariant},
     token_kind::TokenKind,
 };
-use parser_rust::parser_env::ParserEnv;
 
 pub fn parse_mode(text: &SourceText) -> Option<Mode> {
     if let Some(header) = MinimalSyntaxParser::parse_header_only(ParserEnv::default(), text) {

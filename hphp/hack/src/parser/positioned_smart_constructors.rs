@@ -17,10 +17,10 @@
  *
  */
 use parser_core_types::source_text::SourceText;
-use parser_rust::parser_env::ParserEnv;
+use parser::parser_env::ParserEnv;
 use parser_core_types::positioned_syntax::PositionedSyntax;
 use parser_core_types::positioned_token::PositionedToken;
-use parser_rust::smart_constructors::{NoState, SmartConstructors};
+use parser::smart_constructors::{NoState, SmartConstructors};
 use syntax_smart_constructors::{SyntaxSmartConstructors, StateType};
 
 #[derive(Clone)]

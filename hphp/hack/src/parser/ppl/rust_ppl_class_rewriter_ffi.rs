@@ -6,7 +6,7 @@
 use std::rc::Rc;
 
 use ocamlrep::OcamlRep;
-use parser_rust::{
+use parser::{
     parser::Parser, parser_env::ParserEnv, smart_constructors::NoState,
     smart_constructors::WithKind, source_text::SourceText,
 };

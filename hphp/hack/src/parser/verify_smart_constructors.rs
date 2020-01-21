@@ -1,3 +1,4 @@
+use parser::{parser_env::ParserEnv, positioned_syntax::PositionedSyntax};
 /**
  * Copyright (c) 2019, Facebook, Inc.
  * All rights reserved.
@@ -7,7 +8,6 @@
  *
 */
 use parser_core_types::{source_text::SourceText, syntax_kind::SyntaxKind};
-use parser_rust::{parser_env::ParserEnv, positioned_syntax::PositionedSyntax};
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
 // TODO: This parser is only used by the ffp tests, and should be moved out of

@@ -16,7 +16,6 @@
  **
  *
  */
-use parser_rust as parser;
 use parser::source_text::SourceText;
 use flatten_smart_constructors::*;
 use parser::smart_constructors::SmartConstructors;

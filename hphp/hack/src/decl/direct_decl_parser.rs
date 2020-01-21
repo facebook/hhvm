@@ -4,8 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use parser_rust as parser;
-
 use crate::direct_decl_smart_constructors::*;
 use ocamlrep::rc::RcOc;
 use oxidized::{direct_decl_parser::Decls, file_info::Mode, relative_path::RelativePath};

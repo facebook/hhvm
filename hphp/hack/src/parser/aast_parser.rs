@@ -15,6 +15,7 @@ use itertools::{
 use lowerer::{Lowerer, ScourComment};
 use ocamlrep_derive::OcamlRep;
 use oxidized::{aast::Program, file_info::Mode, pos::Pos, scoured_comments::ScouredComments};
+use parser::{parser_env::ParserEnv, smart_constructors_wrappers::WithKind};
 use parser_core_types::{
     indexed_source_text::IndexedSourceText,
     positioned_syntax::{PositionedSyntax, PositionedValue},
@@ -22,7 +23,6 @@ use parser_core_types::{
     syntax_error,
     syntax_error::SyntaxError,
 };
-use parser_rust::{parser_env::ParserEnv, smart_constructors_wrappers::WithKind};
 use regex::bytes::Regex;
 use rust_parser_errors::ParserErrors;
 use stack_limit::StackLimit;

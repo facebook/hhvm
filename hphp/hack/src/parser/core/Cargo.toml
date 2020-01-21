@@ -1,0 +1,24 @@
+# @generated
+# @autocargo from //hphp/hack/src/parser/core:parser
+# Signature<<dd98d41f729d37b221bcb42244fe11a2705b8b41>>
+[package]
+name = "parser"
+edition = "2018"
+version = "0.0.0"
+include = ["declaration_parser.rs", "expression_parser.rs", "lexer.rs", "lib.rs", "parser.rs", "parser_trait.rs", "smart_constructors_macros.rs", "statement_parser.rs", "type_parser.rs"]
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+hh_autoimport_rust = { path = "../cargo/hh_autoimport" }
+ocamlrep = { path = "../../ocamlrep" }
+ocamlrep_derive = { path = "../../ocamlrep_derive" }
+operator = { path = "../cargo/operator" }
+oxidized = { path = "../../oxidized" }
+parser_core_types = { path = "../cargo/core_types" }
+smart_constructors = { path = "../cargo/smart_constructors" }
+stack_limit = { path = "../../utils/stack_limit" }
+lazy_static = "1.4"
+ocaml = "0.8"
+# @end of Signature<<dd98d41f729d37b221bcb42244fe11a2705b8b41>>

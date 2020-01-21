@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/facts:rust_facts_ffi
-# Signature<<55a705443e4fc74ff941c1fd02dfb5c5bd9a821b>>
+# Signature<<6872c67601ae1d8079f6e3de8792ba610468dca9>>
 [package]
 name = "rust_facts_ffi"
 edition = "2018"
@@ -18,4 +18,4 @@ ocamlrep = { path = "../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../oxidized" }
 ocaml = "0.8"
-# @end of Signature<<55a705443e4fc74ff941c1fd02dfb5c5bd9a821b>>
+# @end of Signature<<6872c67601ae1d8079f6e3de8792ba610468dca9>>

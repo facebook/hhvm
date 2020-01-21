@@ -7,7 +7,6 @@ pub mod editable_positioned_original_source_data;
 pub mod editable_positioned_syntax_to_ocaml;
 pub mod editable_positioned_token;
 
-use parser_rust as parser;
 use std::rc::Rc;
 
 use parser::positioned_syntax::PositionedSyntax;

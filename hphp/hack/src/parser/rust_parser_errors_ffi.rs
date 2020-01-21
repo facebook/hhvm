@@ -8,8 +8,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use parser_rust as parser;
-
 use ocamlrep::{ptr::UnsafeOcamlPtr, OcamlRep};
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::parser_options::ParserOptions;

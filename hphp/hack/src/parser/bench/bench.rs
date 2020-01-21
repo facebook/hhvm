@@ -39,7 +39,7 @@ mod tests {
         global_options,
         relative_path::{Prefix, RelativePath},
     };
-    use parser_rust::{
+    use parser::{
         indexed_source_text::IndexedSourceText, parser_env::ParserEnv, source_text::SourceText,
     };
     use std::{env, fs, path::PathBuf};

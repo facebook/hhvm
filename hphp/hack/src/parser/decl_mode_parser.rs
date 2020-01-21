@@ -8,7 +8,7 @@ mod decl_mode_smart_constructors_generated;
 
 use crate::decl_mode_smart_constructors::{DeclModeSmartConstructors, State as DeclModeState};
 use ocaml::core::mlvalues::Value;
-use parser_rust::{
+use parser::{
     parser::Parser,
     positioned_syntax::{PositionedSyntax, PositionedValue},
     positioned_token::PositionedToken,

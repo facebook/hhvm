@@ -1056,8 +1056,8 @@ use parser_core_types::{
   source_text::SourceText,
 };
 
-use parser_rust::parser_env::ParserEnv;
-use parser_rust::smart_constructors::{NoState, SmartConstructors};
+use parser::parser_env::ParserEnv;
+use parser::smart_constructors::{NoState, SmartConstructors};
 use syntax_smart_constructors::SyntaxSmartConstructors;
 
 #[derive(Clone)]
@@ -1132,10 +1132,10 @@ module GenerateFFRustPositionedSmartConstructors = struct
     make_header CStyle ""
     ^ "
 use parser_core_types::source_text::SourceText;
-use parser_rust::parser_env::ParserEnv;
+use parser::parser_env::ParserEnv;
 use parser_core_types::positioned_syntax::PositionedSyntax;
 use parser_core_types::positioned_token::PositionedToken;
-use parser_rust::smart_constructors::{NoState, SmartConstructors};
+use parser::smart_constructors::{NoState, SmartConstructors};
 use syntax_smart_constructors::{SyntaxSmartConstructors, StateType};
 
 #[derive(Clone)]
@@ -1221,10 +1221,10 @@ module GenerateFFRustVerifySmartConstructors = struct
     ^ "
 use parser_core_types::source_text::SourceText;
 use crate::verify_smart_constructors::*;
-use parser_rust::parser_env::ParserEnv;
+use parser::parser_env::ParserEnv;
 use parser_core_types::positioned_syntax::PositionedSyntax;
 use parser_core_types::positioned_token::PositionedToken;
-use parser_rust::smart_constructors::SmartConstructors;
+use parser::smart_constructors::SmartConstructors;
 use syntax_smart_constructors::SyntaxSmartConstructors;
 
 macro_rules! arg_kinds {
@@ -1316,8 +1316,8 @@ use parser_core_types::{
   lexable_token::LexableToken,
 };
 use crate::*;
-use parser_rust::parser_env::ParserEnv;
-use parser_rust::smart_constructors::SmartConstructors;
+use parser::parser_env::ParserEnv;
+use parser::smart_constructors::SmartConstructors;
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
 
 impl<'src, S, T, Token, Value> SmartConstructors<'src, T>
@@ -1535,8 +1535,8 @@ use parser_core_types::{
   syntax::*,
   source_text::SourceText,
 };
-use parser_rust::parser_env::ParserEnv;
-use parser_rust::smart_constructors::{NoState, SmartConstructors};
+use parser::parser_env::ParserEnv;
+use parser::smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
 pub trait SyntaxSmartConstructors<'src, S: SyntaxType<'src, State>, State = NoState>:
@@ -1625,7 +1625,6 @@ module GenerateOcamlSyntax = struct
 use crate::ocaml_syntax::{OcamlSyntax, Context};
 use rust_to_ocaml::*;
 
-use parser_rust as parser;
 use parser::syntax_kind::SyntaxKind;
 use parser::syntax::{SyntaxType, SyntaxValueType};
 use parser::positioned_token::PositionedToken;
@@ -1674,8 +1673,8 @@ use parser_core_types::{
   },
 };
 use crate::decl_mode_smart_constructors::*;
-use parser_rust::parser_env::ParserEnv;
-use parser_rust::smart_constructors::SmartConstructors;
+use parser::parser_env::ParserEnv;
+use parser::smart_constructors::SmartConstructors;
 use syntax_smart_constructors::SyntaxSmartConstructors;
 
 impl<'src, Token, Value>
@@ -1753,7 +1752,7 @@ module GenerateRustFlattenSmartConstructors = struct
   let flatten_smart_constructors_template : string =
     make_header CStyle ""
     ^ "
-use parser_rust::smart_constructors_generated::SmartConstructors;
+use parser::smart_constructors_generated::SmartConstructors;
 
 pub trait FlattenOp {
     type S;
@@ -1809,7 +1808,6 @@ module GenerateRustFactsSmartConstructors = struct
   let facts_smart_constructors_template : string =
     make_header CStyle ""
     ^ "
-use parser_rust as parser;
 use parser::source_text::SourceText;
 use flatten_smart_constructors::*;
 use parser::smart_constructors::SmartConstructors;
@@ -1885,7 +1883,6 @@ module GenerateRustDirectDeclSmartConstructors = struct
     make_header CStyle ""
     ^ "
 use flatten_smart_constructors::*;
-use parser_rust as parser;
 use parser::source_text::SourceText;
 use parser::indexed_source_text::IndexedSourceText;
 use parser::smart_constructors::SmartConstructors;

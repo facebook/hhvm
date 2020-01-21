@@ -6,7 +6,7 @@
 
 use ocaml::core::mlvalues::Value as OcamlValue;
 use ocamlpool_rust::utils::*;
-use parser_rust::{
+use parser::{
     lexable_token::LexableToken,
     positioned_token::PositionedToken,
     syntax::{SyntaxTypeBase, SyntaxValueType},

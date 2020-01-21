@@ -19,8 +19,8 @@
 use parser_core_types::{
   lexable_token::LexableToken,
   source_text::SourceText,
+  parser_env::ParserEnv,
 };
-use crate::parser_env::ParserEnv;
 
 pub trait SmartConstructors<'src, State>: Clone {
     type Token: LexableToken<'src>;

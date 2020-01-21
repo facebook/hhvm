@@ -11,9 +11,7 @@ pub mod parser;
 
 #[macro_use]
 mod smart_constructors_macros; // must be before users of providing macros (*_parser)
-pub mod smart_constructors;
-pub mod smart_constructors_generated;
-pub mod smart_constructors_wrappers;
+pub use smart_constructors::{self, *};
 
 pub mod parser_trait;
 

@@ -1004,8 +1004,8 @@ module GenerateFFRustSmartConstructors = struct
 use parser_core_types::{
   lexable_token::LexableToken,
   source_text::SourceText,
+  parser_env::ParserEnv,
 };
-use crate::parser_env::ParserEnv;
 
 pub trait SmartConstructors<'src, State>: Clone {
     type Token: LexableToken<'src>;
@@ -2029,9 +2029,9 @@ use parser_core_types::{
   lexable_token::LexableToken,
   source_text::SourceText,
   syntax_kind::SyntaxKind,
+  parser_env::ParserEnv,
 };
-use crate::parser_env::ParserEnv;
-use crate::smart_constructors::SmartConstructors;
+use crate::SmartConstructors;
 
 #[derive(Clone)]
 pub struct WithKind<S> {

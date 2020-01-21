@@ -4,6 +4,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+pub mod smart_constructors_generated;
+pub mod smart_constructors_wrappers;
+
 use ocamlrep_derive::OcamlRep;
 
 use parser_core_types::syntax_kind::SyntaxKind;

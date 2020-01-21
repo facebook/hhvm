@@ -1,0 +1,17 @@
+# @generated
+# @autocargo from //hphp/hack/src/parser:smart_constructors
+# Signature<<dd8e225c6ed5b4cc5508069ea521d7d01d07552e>>
+[package]
+name = "smart_constructors"
+edition = "2018"
+version = "0.0.0"
+include = ["../../smart_constructors.rs", "../../smart_constructors_generated.rs", "../../smart_constructors_wrappers.rs"]
+
+[lib]
+path = "../../smart_constructors.rs"
+
+[dependencies]
+ocamlrep = { path = "../../../ocamlrep" }
+ocamlrep_derive = { path = "../../../ocamlrep_derive" }
+parser_core_types = { path = "../core_types" }
+# @end of Signature<<dd8e225c6ed5b4cc5508069ea521d7d01d07552e>>

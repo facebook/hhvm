@@ -1,7 +1,8 @@
 [workspace]
 members = [
     "src/cargo",
-    "src/decl",
+    "src/decl/decl_rust",
+    "src/decl/direct_decl_smart_constructors",
     "src/decl/ffi",
     "src/facts",
     "src/facts/ffi",

@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser/bench:bench
-# Signature<<7ceb084244748a256f28be1d047aa133e18a6a74>>
+# Signature<<f5000107ef1c6a12236c9720a3e91e2edeefc347>>
 [package]
 name = "bench"
 edition = "2018"
@@ -14,13 +14,14 @@ path = "../../bench/bench.rs"
 [dependencies]
 aast_parser = { path = "../aast_parser" }
 decl_mode_parser = { path = "../decl_mode_parser" }
-decl_rust = { path = "../../../decl" }
+decl_rust = { path = "../../../decl/decl_rust" }
+direct_decl_parser = { path = "../../api" }
 facts_rust = { path = "../../../facts" }
 ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }
-parser = { path = "../../core" }
+parser_core_types = { path = "../core_types" }
 positioned_parser = { path = "../positioned_parser" }
 
 [dev-dependencies]
 pretty_assertions = "0.6"
-# @end of Signature<<7ceb084244748a256f28be1d047aa133e18a6a74>>
+# @end of Signature<<f5000107ef1c6a12236c9720a3e91e2edeefc347>>

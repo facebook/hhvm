@@ -4,17 +4,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::direct_decl_smart_constructors::*;
 use ocamlrep::rc::RcOc;
 use oxidized::{direct_decl_parser::Decls, file_info::Mode, relative_path::RelativePath};
-use parser::{
-    parser::Parser, parser_env::ParserEnv, smart_constructors_wrappers::WithKind,
-    source_text::SourceText,
-};
+use parser_core_types::{parser_env::ParserEnv, source_text::SourceText};
 use std::collections::BTreeMap;
 use syntax_tree::mode_parser::parse_mode;
-
-pub type DirectDeclParser<'a> = Parser<'a, WithKind<DirectDeclSmartConstructors<'a>>, State<'a>>;
 
 pub fn parse_decls(filename: RelativePath, text: &str) -> Result<Decls, String> {
     let text = SourceText::make(RcOc::new(filename), text.as_bytes());
@@ -26,10 +20,9 @@ pub fn parse_decls(filename: RelativePath, text: &str) -> Result<Decls, String> 
         is_experimental_mode: is_experimental,
         ..ParserEnv::default()
     };
-    let mut parser = DirectDeclParser::make(&text, env);
-    let root = parser.parse_script(None);
+    let (root, _errors, state) = direct_decl_parser::parse_script(&text, env, None);
     let decls = root.map(|_| {
-        let decls = parser.into_sc_state().decls;
+        let decls = state.decls;
         Decls {
             classes: decls
                 .classes

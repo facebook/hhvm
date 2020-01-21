@@ -5,5 +5,3 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub mod direct_decl_parser;
-mod direct_decl_smart_constructors;
-mod direct_decl_smart_constructors_generated;

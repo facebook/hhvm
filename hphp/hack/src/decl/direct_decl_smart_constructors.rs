@@ -6,6 +6,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 */
+pub mod direct_decl_smart_constructors_generated;
+
 use hh_autoimport_rust as hh_autoimport;
 use naming_special_names_rust as naming_special_names;
 
@@ -26,7 +28,7 @@ use oxidized::{
     },
     typing_reason::Reason,
 };
-use parser::{
+use parser_core_types::{
     indexed_source_text::IndexedSourceText, lexable_token::LexableToken,
     lexable_trivia::LexablePositionedTrivia, positioned_token::PositionedToken,
     token_kind::TokenKind, trivia_kind::TriviaKind,

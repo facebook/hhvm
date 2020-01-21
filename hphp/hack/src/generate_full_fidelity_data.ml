@@ -1883,13 +1883,13 @@ module GenerateRustDirectDeclSmartConstructors = struct
     make_header CStyle ""
     ^ "
 use flatten_smart_constructors::*;
-use parser::source_text::SourceText;
-use parser::indexed_source_text::IndexedSourceText;
-use parser::smart_constructors::SmartConstructors;
-use parser::parser_env::ParserEnv;
-use parser::positioned_token::PositionedToken;
+use parser_core_types::source_text::SourceText;
+use parser_core_types::indexed_source_text::IndexedSourceText;
+use smart_constructors::SmartConstructors;
+use parser_core_types::parser_env::ParserEnv;
+use parser_core_types::positioned_token::PositionedToken;
 
-use crate::direct_decl_smart_constructors::*;
+use crate::*;
 
 #[derive(Clone)]
 pub struct DirectDeclSmartConstructors<'src> {

@@ -32,14 +32,14 @@ mod tests {
     use test::Bencher;
 
     use aast_parser::rust_aast_parser_types;
-    use decl_rust::direct_decl_parser;
+    use direct_decl_parser;
     use facts_rust::facts_parser;
     use ocamlrep::rc::RcOc;
     use oxidized::{
         global_options,
         relative_path::{Prefix, RelativePath},
     };
-    use parser::{
+    use parser_core_types::{
         indexed_source_text::IndexedSourceText, parser_env::ParserEnv, source_text::SourceText,
     };
     use std::{env, fs, path::PathBuf};
@@ -72,9 +72,7 @@ mod tests {
             let filename = RcOc::new(filename);
             b.iter(|| {
                 let text = SourceText::make(RcOc::clone(&filename), text.as_bytes());
-                let mut parser =
-                    direct_decl_parser::DirectDeclParser::make(&text, ParserEnv::default());
-                parser.parse_script(None)
+                direct_decl_parser::parse_script(&text, ParserEnv::default(), None)
             });
         });
     }

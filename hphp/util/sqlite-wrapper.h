@@ -81,6 +81,29 @@ struct SQLite {
    */
   void setBusyTimeout(int ms) noexcept;
 
+  enum class SynchronousLevel {
+    // Trust the filesystem to fsync for you. This may result in database
+    // corruption if power loss occurs.
+    OFF = 0,
+
+    // Sync often enough to guarantee consistency in WAL mode.
+    NORMAL = 1,
+
+    // Sync on every write.
+    FULL = 2,
+
+    // On every write, sync the SQLite DB, its journal or WAL, and the
+    // directory containing the files.
+    EXTRA = 3,
+  };
+
+  /**
+   * Tell SQLite when to fsync the DB.
+   *
+   * https://www.sqlite.org/pragma.html#pragma_synchronous
+   */
+  void setSynchronousLevel(SynchronousLevel lvl);
+
   /**
    * Return the most recent error message from SQLite.
    */

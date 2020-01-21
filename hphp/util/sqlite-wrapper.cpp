@@ -90,6 +90,13 @@ void SQLite::setBusyTimeout(int ms) noexcept {
   sqlite3_busy_timeout(m_dbc, ms);
 }
 
+void SQLite::setSynchronousLevel(SynchronousLevel lvl) {
+  SQLiteStmt stmt{
+    *this,
+    folly::sformat("PRAGMA synchronous = {}", static_cast<int>(lvl))};
+  stmt.query().step();
+}
+
 std::string SQLite::errMsg() const noexcept { return {sqlite3_errmsg(m_dbc)}; }
 
 SQLite::SQLite(sqlite3* dbc)

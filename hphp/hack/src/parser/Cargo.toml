@@ -1,11 +1,11 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:parser_rust
-# Signature<<4c9bd7f3da0d158e49f001fa9e8958fde24d3447>>
+# Signature<<ae7bc41318fc630de8699c1560f8664785f24796>>
 [package]
 name = "parser_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["declaration_parser.rs", "expression_parser.rs", "lexer.rs", "lib.rs", "operator.rs", "operator_generated.rs", "parser.rs", "parser_trait.rs", "rewriter.rs", "smart_constructors.rs", "smart_constructors_generated.rs", "smart_constructors_wrappers.rs", "statement_parser.rs", "type_parser.rs"]
+include = ["declaration_parser.rs", "expression_parser.rs", "lexer.rs", "lib.rs", "operator.rs", "operator_generated.rs", "parser.rs", "parser_trait.rs", "rewriter.rs", "smart_constructors.rs", "smart_constructors_generated.rs", "smart_constructors_macros.rs", "smart_constructors_wrappers.rs", "statement_parser.rs", "type_parser.rs"]
 
 [lib]
 path = "lib.rs"
@@ -19,4 +19,4 @@ parser_core_types = { path = "cargo/core_types" }
 stack_limit = { path = "../utils/stack_limit" }
 lazy_static = "1.4"
 ocaml = "0.8"
-# @end of Signature<<4c9bd7f3da0d158e49f001fa9e8958fde24d3447>>
+# @end of Signature<<ae7bc41318fc630de8699c1560f8664785f24796>>

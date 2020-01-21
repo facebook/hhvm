@@ -657,7 +657,8 @@ module Rx = struct
 
   let cTraversable = "\\HH\\Rx\\Traversable"
 
-  let is_enabled = "\\HH\\Rx\\IS_ENABLED"
+  let is_enabled v =
+    String.equal v "\\HH\\Rx\\IS_ENABLED" || String.equal v "\\Rx\\IS_ENABLED"
 
   let cKeyedTraversable = "\\HH\\Rx\\KeyedTraversable"
 

@@ -136,7 +136,7 @@ let check_non_rx =
 
     method! on_expr env expr =
       match snd expr with
-      | Id (p, n) when String.equal n SN.Rx.is_enabled ->
+      | Id (p, n) when SN.Rx.is_enabled n ->
         Errors.rx_enabled_in_non_rx_context p
       | _ -> super#on_expr env expr
   end
@@ -536,7 +536,7 @@ let check =
       else
         match b.fb_ast with
         | [(_, If ((_, Id (_, c)), then_stmt, else_stmt))]
-          when String.equal c SN.Rx.is_enabled ->
+          when SN.Rx.is_enabled c ->
           List.iter then_stmt (self#on_stmt (env, ctx));
           List.iter else_stmt ~f:(check_non_rx#on_stmt env)
         | _ -> List.iter b.fb_ast (self#on_stmt (env, ctx))

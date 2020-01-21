@@ -89,8 +89,7 @@ let handler =
     method! at_expr env (_, e) =
       match e with
       | Id (pos, const) ->
-        if String.equal const SN.Rx.is_enabled && not env.rx_is_enabled_allowed
-        then
+        if SN.Rx.is_enabled const && not env.rx_is_enabled_allowed then
           Errors.rx_is_enabled_invalid_location pos
       | Call (_, (p, Id (_, cn)), _, _, _)
         when String.equal cn SN.Rx.move && not env.rx_move_allowed ->

@@ -99,13 +99,12 @@ let halves_of_is_enabled_body ast_body =
   let block = ast_body.T.fb_ast in
   match block with
   | [(_, T.If ((_, T.Id (_, const)), enabled, disabled))] ->
-    if const <> Naming_special_names.Rx.is_enabled then
-      None
-    else (
+    if Naming_special_names.Rx.is_enabled const then
       match disabled with
       | []
       | [(_, T.Noop)] ->
         None
       | _ -> Some (enabled, disabled)
-    )
+    else
+      None
   | _ -> None

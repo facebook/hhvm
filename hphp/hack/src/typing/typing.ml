@@ -7154,7 +7154,7 @@ and condition
         Ast_defs.Eqeqeq
     in
     condition env (not tparamet) (pty, Aast.Binop (op, e1, e2))
-  | Aast.Id (_, s) when String.equal s SN.Rx.is_enabled ->
+  | Aast.Id (_, s) when SN.Rx.is_enabled s ->
     (* when Rx\IS_ENABLED is false - switch env to non-reactive *)
     if not tparamet then
       Env.set_env_reactive env Nonreactive

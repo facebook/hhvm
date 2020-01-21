@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:positioned_coroutine_parser_ffi
-# Signature<<9fdd9fab526ba1275389d595b794d6bcd1eb4474>>
+# Signature<<5a2c2c242c87d856085038da1c8b49877edb2c3d>>
 [package]
 name = "positioned_coroutine_parser_ffi"
 edition = "2018"
@@ -22,4 +22,4 @@ rust_to_ocaml = { path = "../rust_to_ocaml" }
 syntax_tree = { path = "../syntax_tree" }
 libc = "0.2"
 ocaml = "0.8"
-# @end of Signature<<9fdd9fab526ba1275389d595b794d6bcd1eb4474>>
+# @end of Signature<<5a2c2c242c87d856085038da1c8b49877edb2c3d>>

@@ -10,7 +10,7 @@ use parser::{
     parser::Parser, parser_env::ParserEnv, smart_constructors::NoState,
     smart_constructors::WithKind, source_text::SourceText,
 };
-use positioned_parser::positioned_smart_constructors::PositionedSmartConstructors;
+use positioned_smart_constructors::PositionedSmartConstructors;
 use rust_editable_positioned_syntax::{EditablePositionedSyntax, EditablePositionedSyntaxTrait};
 use rust_ppl_class_rewriter::PplClassRewriter;
 use rust_to_ocaml::{SerializationContext, ToOcaml};

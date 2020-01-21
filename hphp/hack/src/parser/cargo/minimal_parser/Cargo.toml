@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:minimal_smart_constructors
-# Signature<<3d8298fc5005d716ff664f7c0d6edf8fffffd130>>
+# Signature<<70e977fd76ad0448e18192b0ee272d1acddacb7d>>
 [package]
 name = "minimal_smart_constructors"
 edition = "2018"
@@ -14,4 +14,4 @@ path = "../../minimal_smart_constructors.rs"
 parser_core_types = { path = "../core_types" }
 smart_constructors = { path = "../smart_constructors" }
 syntax_smart_constructors = { path = "../syntax_smart_constructors" }
-# @end of Signature<<3d8298fc5005d716ff664f7c0d6edf8fffffd130>>
+# @end of Signature<<70e977fd76ad0448e18192b0ee272d1acddacb7d>>

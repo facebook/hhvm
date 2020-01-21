@@ -1131,10 +1131,10 @@ module GenerateFFRustPositionedSmartConstructors = struct
     make_header CStyle ""
     ^ "
 use parser_core_types::source_text::SourceText;
-use parser::parser_env::ParserEnv;
+use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::positioned_syntax::PositionedSyntax;
 use parser_core_types::positioned_token::PositionedToken;
-use parser::smart_constructors::{NoState, SmartConstructors};
+use smart_constructors::{NoState, SmartConstructors};
 use syntax_smart_constructors::{SyntaxSmartConstructors, StateType};
 
 #[derive(Clone)]

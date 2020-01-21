@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:rewriter
-# Signature<<b2950363eda72d6ba5c6718975f6123a8cf9f9c6>>
+# Signature<<e6694a4813879d1b4329e4e34193211ab855dfef>>
 [package]
 name = "rewriter"
 edition = "2018"
@@ -12,4 +12,4 @@ path = "../../rewriter.rs"
 
 [dependencies]
 parser_core_types = { path = "../core_types" }
-# @end of Signature<<b2950363eda72d6ba5c6718975f6123a8cf9f9c6>>
+# @end of Signature<<e6694a4813879d1b4329e4e34193211ab855dfef>>

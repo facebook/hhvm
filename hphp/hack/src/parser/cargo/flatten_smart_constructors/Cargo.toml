@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:flatten_smart_constructors
-# Signature<<3db16c25e89c09e20b140f3dac0e4e2be3621065>>
+# Signature<<2ca3eeef4465ea481b09aadca6e60559d01cde2d>>
 [package]
 name = "flatten_smart_constructors"
 edition = "2018"
@@ -13,4 +13,4 @@ path = "../../flatten_smart_constructors.rs"
 [dependencies]
 parser = { path = "../../core" }
 parser_core_types = { path = "../core_types" }
-# @end of Signature<<3db16c25e89c09e20b140f3dac0e4e2be3621065>>
+# @end of Signature<<2ca3eeef4465ea481b09aadca6e60559d01cde2d>>

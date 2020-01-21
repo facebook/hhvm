@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser/ppl:rust_ppl_class_rewriter_ffi
-# Signature<<ac06223810d973867dd10a0bae0efbac4b470ab6>>
+# Signature<<7562f1308d9bc278e701610f4d2ebe0251c6eeaa>>
 [package]
 name = "rust_ppl_class_rewriter_ffi"
 edition = "2018"
@@ -15,11 +15,12 @@ ocamlpool_rust = { path = "../../../../utils/ocamlpool_rust" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }
 parser = { path = "../../../core" }
-positioned_parser = { path = "../../../cargo/positioned_parser" }
+positioned_parser = { path = "../../../api/cargo/positioned_parser" }
+positioned_smart_constructors = { path = "../../../cargo/positioned_smart_constructors" }
 rewriter = { path = "../../../cargo/rewriter" }
 rust_editable_positioned_syntax = { path = "../../../cargo/editable_positioned_syntax" }
 rust_ppl_class_rewriter = { path = "../ppl_class_rewriter" }
 rust_to_ocaml = { path = "../../../cargo/rust_to_ocaml" }
 libc = "0.2"
 ocaml = "0.8"
-# @end of Signature<<ac06223810d973867dd10a0bae0efbac4b470ab6>>
+# @end of Signature<<7562f1308d9bc278e701610f4d2ebe0251c6eeaa>>

@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser/api:positioned_coroutine_parser
-# Signature<<42e7c2bad5ab3a45db3f02bfdac29ddef73174b6>>
+# Signature<<00c9c7e1b5be23fd0b167d1c4892a375e5100a42>>
 [package]
 name = "positioned_coroutine_parser"
 edition = "2018"
@@ -15,4 +15,4 @@ coroutine_smart_constructors = { path = "../../../cargo/coroutine_smart_construc
 ocaml_syntax = { path = "../../../cargo/ocaml_syntax" }
 parser = { path = "../../../core" }
 stack_limit = { path = "../../../../utils/stack_limit" }
-# @end of Signature<<42e7c2bad5ab3a45db3f02bfdac29ddef73174b6>>
+# @end of Signature<<00c9c7e1b5be23fd0b167d1c4892a375e5100a42>>

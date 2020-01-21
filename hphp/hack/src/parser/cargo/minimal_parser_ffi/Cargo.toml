@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:minimal_parser_ffi
-# Signature<<2603b9e5a1a7b3e034d32982dd08497adb74a991>>
+# Signature<<19b261418c85e6082db63795db63a9c05a70b8d0>>
 [package]
 name = "minimal_parser_ffi"
 edition = "2018"
@@ -22,4 +22,4 @@ rust_to_ocaml = { path = "../rust_to_ocaml" }
 syntax_tree = { path = "../syntax_tree" }
 libc = "0.2"
 ocaml = "0.8"
-# @end of Signature<<2603b9e5a1a7b3e034d32982dd08497adb74a991>>
+# @end of Signature<<19b261418c85e6082db63795db63a9c05a70b8d0>>

@@ -1147,11 +1147,11 @@ static const Class* class_from_name(const String& class_name,
   if (!class_name.empty()) {
     cls = Unit::loadClass(class_name.get());
     if (!cls) {
-      throw_invalid_argument("class not found: %s", class_name.data());
+      raise_invalid_argument_warning("class not found: %s", class_name.data());
       return nullptr;
     }
     if (!cls->classof(SimpleXMLElement_classof())) {
-      throw_invalid_argument(
+      raise_invalid_argument_warning(
         "%s() expects parameter 2 to be a class name "
         "derived from SimpleXMLElement, '%s' given",
         callee,

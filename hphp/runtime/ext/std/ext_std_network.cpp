@@ -437,7 +437,7 @@ bool validate_dns_arguments(const String& host, const String& type,
     stype = type.data();
   }
   if (host.empty()) {
-    throw_invalid_argument("host: [empty]");
+    raise_invalid_argument_warning("host: [empty]");
   }
 
   if (!strcasecmp("A", stype)) ntype = DNS_T_A;
@@ -453,7 +453,7 @@ bool validate_dns_arguments(const String& host, const String& type,
   else if (!strcasecmp("NAPTR", stype)) ntype = DNS_T_NAPTR;
   else if (!strcasecmp("A6",    stype)) ntype = DNS_T_A6;
   else {
-    throw_invalid_argument("type: %s", stype);
+    raise_invalid_argument_warning("type: %s", stype);
     return false;
   }
 

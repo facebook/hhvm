@@ -145,7 +145,7 @@ Array Array::diff(const Variant& array, bool by_key, bool by_value,
                   PFUNC_CMP value_cmp_function /* = NULL */,
                   const void *value_data /* = NULL */) const {
   if (!array.isArray()) {
-    throw_expected_array_exception();
+    raise_expected_array_warning();
     return Array();
   }
   return diffImpl(array.toArray(), by_key, by_value, false,
@@ -159,7 +159,7 @@ Array Array::intersect(const Variant& array, bool by_key, bool by_value,
                        PFUNC_CMP value_cmp_function /* = NULL */,
                        const void *value_data /* = NULL */) const {
   if (!array.isArray()) {
-    throw_expected_array_exception();
+    raise_expected_array_warning();
     return Array();
   }
   return diffImpl(array.toArray(), by_key, by_value, true,
@@ -982,7 +982,7 @@ bool Array::MultiSort(std::vector<SortData> &data) {
     if (count == -1) {
       count = size;
     } else if (count != size) {
-      throw_invalid_argument("arrays: (inconsistent sizes)");
+      raise_invalid_argument_warning("arrays: (inconsistent sizes)");
       return false;
     }
 

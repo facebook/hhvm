@@ -538,7 +538,7 @@ static bool HHVM_FUNCTION(mysql_async_query_completed, const Resource& result) {
 static Variant HHVM_FUNCTION(mysql_async_fetch_array, const Resource& result,
                                                int result_type /* = 1 */) {
   if ((result_type & PHP_MYSQL_BOTH) == 0) {
-    throw_invalid_argument("result_type: %d", result_type);
+    raise_invalid_argument_warning("result_type: %d", result_type);
     return false;
   }
 

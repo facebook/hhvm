@@ -418,7 +418,7 @@ Variant HHVM_FUNCTION(fgets,
                       const Resource& handle,
                       int64_t length /* = 0 */) {
   if (length < 0) {
-    throw_invalid_argument("length (negative): %" PRId64, length);
+    raise_invalid_argument_warning("length (negative): %" PRId64, length);
     return false;
   }
   CHECK_HANDLE(handle, f);
@@ -528,7 +528,7 @@ bool HHVM_FUNCTION(flock,
 
   act = operation & 3;
   if (act < 1 || act > 3) {
-    throw_invalid_argument("operation: %d", operation);
+    raise_invalid_argument_warning("operation: %d", operation);
     return false;
   }
   act = flock_values[act - 1] | (operation & 4 ? LOCK_NB : 0);
@@ -539,7 +539,7 @@ bool HHVM_FUNCTION(flock,
 // match the behavior of PHP5
 #define FCSV_CHECK_ARG(NAME)                            \
   if (NAME.size() == 0) {                               \
-    throw_invalid_argument(#NAME ": %s", NAME.data());  \
+    raise_invalid_argument_warning(#NAME ": %s", NAME.data());  \
     return false;                                       \
   } else if (NAME.size() > 1) {                         \
     raise_notice(#NAME " must be a single character");  \
@@ -567,7 +567,7 @@ Variant HHVM_FUNCTION(fgetcsv,
                       const String& enclosure /* = "\"" */,
                       const String& escape /* = "\\" */) {
   if (length < 0) {
-    throw_invalid_argument("Length parameter may not be negative");
+    raise_invalid_argument_warning("Length parameter may not be negative");
     return false;
   }
 
@@ -880,7 +880,7 @@ Variant HHVM_FUNCTION(parse_ini_file,
                       int scanner_mode /* = k_INI_SCANNER_NORMAL */) {
   CHECK_PATH_FALSE(filename, 1);
   if (filename.empty()) {
-    throw_invalid_argument("Filename cannot be empty!");
+    raise_invalid_argument_warning("Filename cannot be empty!");
     return false;
   }
 

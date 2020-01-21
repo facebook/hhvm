@@ -1305,13 +1305,13 @@ bool ProfilerFactory::start(ProfilerKind kind,
     } else if (m_external_profiler) {
       m_profiler = m_external_profiler;
     } else {
-      throw_invalid_argument(
+      raise_invalid_argument_warning(
         "ProfilerFactory::setExternalProfiler() not yet called");
       return false;
     }
     break;
   default:
-    throw_invalid_argument("level: %d", static_cast<int>(kind));
+    raise_invalid_argument_warning("level: %d", static_cast<int>(kind));
     return false;
   }
   if (m_profiler && m_profiler->m_successful) {

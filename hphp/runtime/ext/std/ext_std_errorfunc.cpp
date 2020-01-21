@@ -371,8 +371,10 @@ Array HHVM_FUNCTION(HH_deferred_errors) {
 Array HHVM_FUNCTION(SL_extract_trace, const Resource& handle) {
   auto bt = dyn_cast<CompactTrace>(handle);
   if (!bt) {
-    throw_invalid_argument("__SystemLib\\extract_trace() expects parameter 1 "
-                           "to be a CompactTrace resource.");
+    raise_invalid_argument_warning(
+        "__SystemLib\\extract_trace() expects parameter 1 "
+        "to be a CompactTrace resource.");
+    return Array::CreateVArray();
   }
 
   return bt->extract();

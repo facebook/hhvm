@@ -311,7 +311,7 @@ Variant HHVM_FUNCTION(stream_copy_to_stream,
   auto srcFile = cast<File>(source);
   auto destFile = cast<File>(dest);
   if (maxlength < 0) {
-    throw_invalid_argument("maxlength: %d", maxlength);
+    raise_invalid_argument_warning("maxlength: %d", maxlength);
     return false;
   }
   if (offset > 0 && !srcFile->seek(offset, SEEK_SET) ) {
@@ -348,7 +348,7 @@ Variant HHVM_FUNCTION(stream_get_contents,
                       int maxlen /* = -1 */,
                       int offset /* = -1 */) {
   if (maxlen < -1) {
-    throw_invalid_argument("maxlen: %d", maxlen);
+    raise_invalid_argument_warning("maxlen: %d", maxlen);
     return false;
   }
 
@@ -358,7 +358,7 @@ Variant HHVM_FUNCTION(stream_get_contents,
 
   auto file = dyn_cast<File>(handle);
   if (!file) {
-    throw_invalid_argument(
+    raise_invalid_argument_warning(
       "stream_get_contents() expects parameter 1 to be a resource");
     return false;
   }

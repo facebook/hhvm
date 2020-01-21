@@ -764,7 +764,7 @@ Variant HHVM_FUNCTION(gmmktime,
 static TypedValue HHVM_FUNCTION(idate,
                                 const String& fmt, TypedValue timestamp) {
   if (fmt.size() != 1) {
-    throw_invalid_argument("format: %s", fmt.data());
+    raise_invalid_argument_warning("format: %s", fmt.data());
     return make_tv<KindOfBoolean>(false);
   }
   int64_t ret = req::make<DateTime>(

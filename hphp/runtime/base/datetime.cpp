@@ -639,7 +639,7 @@ int64_t DateTime::toInteger(char format) const {
   case 'Z': return utc() ? 0 : m_tz->offset(toTimeStamp(error));
   case 'U': return toTimeStamp(error);
   }
-  throw_invalid_argument("unknown format char: %d", (int)format);
+  raise_invalid_argument_warning("unknown format char: %d", (int)format);
   return -1;
 }
 
@@ -662,7 +662,7 @@ String DateTime::toString(DateFormat format) const {
   default:
     assertx(false);
   }
-  throw_invalid_argument("format: %d", static_cast<int>(format));
+  raise_invalid_argument_warning("format: %d", static_cast<int>(format));
   return String();
 }
 
@@ -821,7 +821,7 @@ String DateTime::stdcFormat(const String& format) const {
       (ta.tm_mon < 0 || ta.tm_mon > 11) ||
       (ta.tm_wday < 0 || ta.tm_wday > 6) ||
       (ta.tm_yday < 0 || ta.tm_yday > 365)) {
-    throw_invalid_argument("argument: invalid time");
+    raise_invalid_argument_warning("argument: invalid time");
     return String();
   }
 
@@ -844,7 +844,7 @@ String DateTime::stdcFormat(const String& format) const {
     return String(buf, real_len, AttachString);
   }
   free(buf);
-  throw_invalid_argument("format: (over internal buffer)");
+  raise_invalid_argument_warning("format: (over internal buffer)");
   return String();
 }
 

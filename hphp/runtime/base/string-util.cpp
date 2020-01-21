@@ -52,7 +52,7 @@ String StringUtil::StripHTMLTags(const String& input,
 Variant StringUtil::Explode(const String& input, const String& delimiter,
                             int64_t limit /* = PHP_INT_MAX */) {
   if (delimiter.empty()) {
-    throw_invalid_argument("delimiter: (empty)");
+    raise_invalid_argument_warning("delimiter: (empty)");
     return false;
   }
 
@@ -156,7 +156,7 @@ String StringUtil::Implode(const Variant& items, const String& delim,
 
 Variant StringUtil::Split(const String& str, int64_t split_length /* = 1 */) {
   if (split_length <= 0) {
-    throw_invalid_argument(
+    raise_invalid_argument_warning(
       "The length of each segment must be greater than zero"
     );
     return false;
@@ -177,7 +177,7 @@ Variant StringUtil::Split(const String& str, int64_t split_length /* = 1 */) {
 Variant StringUtil::ChunkSplit(const String& body, int chunklen /* = 76 */,
                                const String& end /* = "\r\n" */) {
   if (chunklen <= 0) {
-    throw_invalid_argument("chunklen: (non-positive)");
+    raise_invalid_argument_warning("chunklen: (non-positive)");
     return false;
   }
 

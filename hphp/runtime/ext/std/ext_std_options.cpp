@@ -123,7 +123,7 @@ static Variant HHVM_FUNCTION(assert_options,
     if (!value.isNull()) s_option_data->assertException = value.toBoolean();
     return Variant(oldValue);
   }
-  throw_invalid_argument("assert option %ld is not supported", (long)what);
+  raise_invalid_argument_warning("assert option %ld is not supported", (long)what);
   return false;
 }
 

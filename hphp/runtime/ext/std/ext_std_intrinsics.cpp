@@ -78,7 +78,7 @@ Array HHVM_FUNCTION(dummy_dict_builtin, const Array& arr) {
 String HHVM_FUNCTION(serialize_with_format, const Variant& thing,
                      int64_t format) {
   if (format > static_cast<int64_t>(VariableSerializer::Type::Last)) {
-    throw_invalid_argument("invalid serializer format");
+    raise_invalid_argument_warning("invalid serializer format");
   }
   VariableSerializer vs(static_cast<VariableSerializer::Type>(format));
   return vs.serialize(thing, true);

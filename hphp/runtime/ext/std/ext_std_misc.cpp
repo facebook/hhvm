@@ -484,11 +484,11 @@ const StaticString
 
 Variant HHVM_FUNCTION(time_nanosleep, int seconds, int nanoseconds) {
   if (seconds < 0) {
-    throw_invalid_argument("seconds: cannot be negative");
+    raise_invalid_argument_warning("seconds: cannot be negative");
     return false;
   }
   if (nanoseconds < 0 || nanoseconds > 999999999) {
-    throw_invalid_argument("nanoseconds: has to be 0 to 999999999");
+    raise_invalid_argument_warning("nanoseconds: has to be 0 to 999999999");
     return false;
   }
 
@@ -520,7 +520,7 @@ bool HHVM_FUNCTION(time_sleep_until, double timestamp) {
 
   double c_ts = (double)(timestamp - tm.tv_sec - tm.tv_usec / 1000000.0);
   if (c_ts < 0) {
-    throw_invalid_argument
+    raise_invalid_argument_warning
       ("timestamp: Sleep until to time is less than current time");
     return false;
   }

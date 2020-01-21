@@ -326,7 +326,7 @@ const Func* vm_decode_func_from_name(
       } else {
         // Bail out if we couldn't find the method or __call
         if (flags == DecodeFlags::Warn) {
-          throw_invalid_argument("function: method '%s' not found",
+          raise_invalid_argument_warning("function: method '%s' not found",
                                  funcName.data());
         }
         return nullptr;
@@ -393,7 +393,7 @@ std::pair<Class*, Func*> decode_for_clsmeth(
     clsName, funcName, nameContainsClass, ar, forwarding, ctx, flags);
   if (!cls) {
     if (flags == DecodeFlags::Warn) {
-      throw_invalid_argument("function: class not found");
+      raise_invalid_argument_warning("function: class not found");
     }
     return std::make_pair(nullptr, nullptr);
   }
@@ -461,7 +461,7 @@ vm_decode_function(const_variant_ref function,
       Array arr = function.toArray();
       if (!array_is_valid_callback(arr)) {
         if (flags == DecodeFlags::Warn) {
-          throw_invalid_argument("function: not a valid callback array");
+          raise_invalid_argument_warning("function: not a valid callback array");
         }
         return nullptr;
       }
@@ -493,7 +493,7 @@ vm_decode_function(const_variant_ref function,
           flags);
         if (!cls) {
           if (flags == DecodeFlags::Warn) {
-            throw_invalid_argument("function: class not found");
+            raise_invalid_argument_warning("function: class not found");
           }
           return nullptr;
         }
@@ -550,7 +550,7 @@ vm_decode_function(const_variant_ref function,
       }
       if (!cc) {
         if (flags == DecodeFlags::Warn) {
-          throw_invalid_argument("function: class not found");
+          raise_invalid_argument_warning("function: class not found");
         }
         return nullptr;
       }
@@ -575,14 +575,14 @@ vm_decode_function(const_variant_ref function,
       HPHP::Func* f = HPHP::Unit::loadFunc(name.get());
       if (!f) {
         if (flags == DecodeFlags::Warn) {
-          throw_invalid_argument("function: method '%s' not found",
+          raise_invalid_argument_warning("function: method '%s' not found",
                                  name.data());
         }
         return nullptr;
       }
       assertx(f && f->preClass() == nullptr);
       if (f->hasReifiedGenerics() && !genericsAlreadyGiven) {
-        throw_invalid_argument("You may not call the reified function '%s' "
+        raise_invalid_argument_warning("You may not call the reified function '%s' "
                                "without reified arguments",
                                f->fullName()->data());
         return nullptr;
@@ -611,7 +611,7 @@ vm_decode_function(const_variant_ref function,
     return f;
   }
   if (flags == DecodeFlags::Warn) {
-    throw_invalid_argument("function: not string, closure, or array");
+    raise_invalid_argument_warning("function: not string, closure, or array");
   }
   return nullptr;
 }
@@ -929,7 +929,7 @@ void throw_missing_arguments_nr(const char *fn, int expected, int got) {
   ));
 }
 
-void throw_bad_type_exception(const char *fmt, ...) {
+void raise_bad_type_warning(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   std::string msg;
@@ -939,7 +939,7 @@ void throw_bad_type_exception(const char *fmt, ...) {
   raise_warning("Invalid operand type was used: %s", msg.c_str());
 }
 
-void throw_expected_array_exception(const char* fn /*=nullptr*/) {
+void raise_expected_array_warning(const char* fn /*=nullptr*/) {
   if (!fn) {
     if (auto ar = g_context->getStackFrame()) {
      fn = ar->m_func->name()->data();
@@ -947,10 +947,10 @@ void throw_expected_array_exception(const char* fn /*=nullptr*/) {
      fn = "(unknown)";
     }
   }
-  throw_bad_type_exception("%s expects array(s)", fn);
+  raise_bad_type_warning("%s expects array(s)", fn);
 }
 
-void throw_expected_array_or_collection_exception(const char* fn /*=nullptr*/) {
+void raise_expected_array_or_collection_warning(const char* fn /*=nullptr*/) {
   if (!fn) {
     if (auto ar = g_context->getStackFrame()) {
       fn = ar->m_func->name()->data();
@@ -958,10 +958,10 @@ void throw_expected_array_or_collection_exception(const char* fn /*=nullptr*/) {
       fn = "(unknown)";
     }
   }
-  throw_bad_type_exception("%s expects array(s) or collection(s)", fn);
+  raise_bad_type_warning("%s expects array(s) or collection(s)", fn);
 }
 
-void throw_invalid_argument(const char *fmt, ...) {
+void raise_invalid_argument_warning(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string msg;

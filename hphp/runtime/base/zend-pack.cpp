@@ -25,7 +25,7 @@ namespace HPHP {
 
 #define INC_OUTPUTPOS(a,b)                                              \
   if ((a) < 0 || ((INT_MAX - outputpos)/((int)b)) < (a)) {              \
-    throw_invalid_argument                                              \
+    raise_invalid_argument_warning                                      \
       ("Type %c: integer overflow in format string", code);             \
     return false;                                                       \
   }                                                                     \
@@ -194,7 +194,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'X':
     case '@':
       if (arg < 0) {
-        throw_invalid_argument("Type %c: '*' ignored", code);
+        raise_invalid_argument_warning("Type %c: '*' ignored", code);
         arg = 1;
       }
       break;
@@ -206,7 +206,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     case 'H':
     case 'Z':
       if (currentarg >= argc) {
-        throw_invalid_argument("Type %c: not enough arguments", code);
+        raise_invalid_argument_warning("Type %c: not enough arguments", code);
         return false;
       }
 
@@ -247,13 +247,13 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
       currentarg += arg;
 
       if (currentarg > argc) {
-        throw_invalid_argument("Type %c: too few arguments", code);
+        raise_invalid_argument_warning("Type %c: too few arguments", code);
         return false;
       }
       break;
 
     default:
-      throw_invalid_argument("Type %c: unknown format code", code);
+      raise_invalid_argument_warning("Type %c: unknown format code", code);
       return false;
     }
 
@@ -262,7 +262,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
   }
 
   if (currentarg < argc) {
-    throw_invalid_argument("%d arguments unused", (argc - currentarg));
+    raise_invalid_argument_warning("%d arguments unused", (argc - currentarg));
   }
 
   int outputpos = 0, outputsize = 0;
@@ -323,7 +323,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
       outputpos -= arg;
 
       if (outputpos < 0) {
-        throw_invalid_argument("Type %c: outside of string", code);
+        raise_invalid_argument_warning("Type %c: outside of string", code);
         outputpos = 0;
       }
       break;
@@ -376,7 +376,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
       slen = val.size();
       outputpos--;
       if (arg > slen) {
-        throw_invalid_argument
+        raise_invalid_argument_warning
           ("Type %c: not enough characters in string", code);
         arg = slen;
       }
@@ -391,7 +391,7 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
         } else if (n >= 'a' && n <= 'f') {
           n -= ('a' - 10);
         } else {
-          throw_invalid_argument("Type %c: illegal hex digit %c", code, n);
+          raise_invalid_argument_warning("Type %c: illegal hex digit %c", code, n);
           n = 0;
         }
 
@@ -596,7 +596,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
     case 'X':
       size = -1;
       if (arg < 0) {
-        throw_invalid_argument("Type %c: '*' ignored", type);
+        raise_invalid_argument_warning("Type %c: '*' ignored", type);
         arg = 1;
       }
       break;
@@ -665,7 +665,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
       break;
 
     default:
-      throw_invalid_argument("Invalid format type %c", type);
+      raise_invalid_argument_warning("Invalid format type %c", type);
       return false;
     }
 
@@ -689,7 +689,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
         : Variant(n_str);
 
       if (size != 0 && size != -1 && INT_MAX - size + 1 < inputpos) {
-        throw_invalid_argument("Type %c: integer overflow", type);
+        raise_invalid_argument_warning("Type %c: integer overflow", type);
         inputpos = 0;
       }
 
@@ -922,7 +922,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
             i = arg - 1;    /* Break out of for loop */
 
             if (arg >= 0) {
-              throw_invalid_argument("Type %c: outside of string", type);
+              raise_invalid_argument_warning("Type %c: outside of string", type);
             }
           }
           break;
@@ -931,7 +931,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
           if (arg <= inputlen) {
             inputpos = arg;
           } else {
-            throw_invalid_argument("Type %c: outside of string", type);
+            raise_invalid_argument_warning("Type %c: outside of string", type);
           }
 
           i = arg - 1;  /* Done, break out of for loop */
@@ -941,7 +941,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
         inputpos += size;
         if (inputpos < 0) {
           if (size != -1) { /* only print warning if not working with * */
-            throw_invalid_argument("Type %c: outside of string", type);
+            raise_invalid_argument_warning("Type %c: outside of string", type);
           }
           inputpos = 0;
         }
@@ -949,7 +949,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
         /* Reached end of input for '*' repeater */
         break;
       } else {
-        throw_invalid_argument
+        raise_invalid_argument_warning
           ("Type %c: not enough input, need %d, have %d",
            type, size, inputlen - inputpos);
         return false;

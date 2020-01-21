@@ -208,7 +208,7 @@ iconv_t iconv_open_helper(const char* out, const char* in) {
 #endif
 static bool validate_charset(const String& charset) {
   if (charset.size() >= ICONV_CSNMAXLEN) {
-    throw_invalid_argument
+    raise_invalid_argument_warning
       ("Charset parameter exceeds the maximum allowed "
        "length of %d characters", ICONV_CSNMAXLEN);
     return false;

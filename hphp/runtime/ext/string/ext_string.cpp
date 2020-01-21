@@ -551,7 +551,7 @@ String HHVM_FUNCTION(implode,
       arg1.toString(),
       StrNR(clsMeth->getFunc()->name()));
   } else {
-    throw_bad_type_exception("implode() expects a container as "
+    raise_bad_type_warning("implode() expects a container as "
                              "one of the arguments");
     return String();
   }
@@ -773,17 +773,17 @@ static Variant substr_replace(const Variant& str, const Variant& replacement,
     }
     if (start.isArray()) {
       if (!length.isArray()) {
-        throw_invalid_argument("start and length should be of same type - "
+        raise_invalid_argument_warning("start and length should be of same type - "
                                "numerical or array");
         return str;
       }
       Array startArr = start.toArray();
       Array lengthArr = length.toArray();
       if (startArr.size() != lengthArr.size()) {
-        throw_invalid_argument("start and length: (different item count)");
+        raise_invalid_argument_warning("start and length: (different item count)");
         return str;
       }
-      throw_invalid_argument("start and length as arrays not implemented");
+      raise_invalid_argument_warning("start and length as arrays not implemented");
       return str;
     }
     return string_replace(str.toString(), start.toInt32(), length.toInt32(),
@@ -1221,7 +1221,7 @@ template<bool existence_only>
 static ALWAYS_INLINE
 Variant strpbrk_impl(const String& haystack, const String& char_list) {
   if (char_list.empty()) {
-    throw_invalid_argument("char_list: (empty)");
+    raise_invalid_argument_warning("char_list: (empty)");
     return false;
   }
   if (haystack.empty()) {
@@ -1407,18 +1407,18 @@ TypedValue HHVM_FUNCTION(substr_count,
                          int length /* = 0x7FFFFFFF */) {
   int lenNeedle = needle.size();
   if (lenNeedle == 0) {
-    throw_invalid_argument("needle: (empty)");
+    raise_invalid_argument_warning("needle: (empty)");
     return make_tv<KindOfBoolean>(false);
   }
 
   if (offset < 0 || offset > haystack.size()) {
-    throw_invalid_argument("offset: (out of range)");
+    raise_invalid_argument_warning("offset: (out of range)");
     return make_tv<KindOfBoolean>(false);
   }
   if (length == 0x7FFFFFFF) {
     length = haystack.size() - offset;
   } else if (length <= 0 || length > haystack.size() - offset) {
-    throw_invalid_argument("length: (out of range)");
+    raise_invalid_argument_warning("length: (out of range)");
     return make_tv<KindOfBoolean>(false);
   }
 
@@ -1579,7 +1579,7 @@ Variant HHVM_FUNCTION(count_chars,
     return String(retstr, retlen, CopyString);
   }
 
-  throw_invalid_argument("mode: %" PRId64, mode);
+  raise_invalid_argument_warning("mode: %" PRId64, mode);
   return false;
 }
 
@@ -1612,7 +1612,7 @@ Variant HHVM_FUNCTION(str_word_count,
     }
     break;
   default:
-    throw_invalid_argument("format: %" PRId64, format);
+    raise_invalid_argument_warning("format: %" PRId64, format);
     return false;
   }
 
@@ -1746,7 +1746,7 @@ String HHVM_FUNCTION(fb_htmlspecialchars,
                      const String& charset /* = "ISO-8859-1" */,
                      const Variant& extra /* = varray[] */) {
   if (!extra.isNull() && !extra.isArray()) {
-    throw_expected_array_exception("fb_htmlspecialchars");
+    raise_expected_array_warning("fb_htmlspecialchars");
   }
   const Array& arr_extra = extra.isNull() ? empty_varray() : extra.toArray();
   return StringUtil::HtmlEncodeExtra(str, StringUtil::toQuoteStyle(flags),
@@ -2109,7 +2109,7 @@ Variant HHVM_FUNCTION(strtr,
   }
 
   if (!from.isArray()) {
-    throw_invalid_argument("2nd argument: (not array)");
+    raise_invalid_argument_warning("2nd argument: (not array)");
     return false;
   }
 
@@ -2167,7 +2167,7 @@ Variant HHVM_FUNCTION(setlocale,
                       const Array& _argv /* = null_array */) {
   Array argv = _argv;
   if (locale.isArray()) {
-    if (!argv.empty()) throw_invalid_argument("locale: not string)");
+    if (!argv.empty()) raise_invalid_argument_warning("locale: not string)");
     argv = locale; // ignore _argv
   }
 
@@ -2182,7 +2182,7 @@ Variant HHVM_FUNCTION(setlocale,
 
     const char *loc = slocale.c_str();
     if (slocale.size() >= 255) {
-      throw_invalid_argument("locale name is too long: %s", loc);
+      raise_invalid_argument_warning("locale name is too long: %s", loc);
       return false;
     }
     if (strcmp("0", loc) == 0) {

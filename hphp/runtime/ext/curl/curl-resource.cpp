@@ -308,7 +308,7 @@ bool CurlResource::setOption(long option, const Variant& value) {
     ret = true;
   } else {
     m_error_no = CURLE_FAILED_INIT;
-    throw_invalid_argument("option: %ld", option);
+    raise_invalid_argument_warning("option: %ld", option);
     ret = false;
   }
 

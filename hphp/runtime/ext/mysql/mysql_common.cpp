@@ -1422,7 +1422,7 @@ Variant php_mysql_do_query_and_get_result(const String& query, const Variant& li
 
 Variant php_mysql_fetch_hash(const Resource& result, int result_type) {
   if ((result_type & PHP_MYSQL_BOTH) == 0) {
-    throw_invalid_argument("result_type: %d", result_type);
+    raise_invalid_argument_warning("result_type: %d", result_type);
     return false;
   }
 

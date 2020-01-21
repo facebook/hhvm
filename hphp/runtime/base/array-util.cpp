@@ -142,7 +142,7 @@ Variant ArrayUtil::PadLeft(const Array& input, const Variant& pad_value,
 Variant ArrayUtil::Range(unsigned char low, unsigned char high,
                          int64_t step /* = 1 */) {
   if (step <= 0) {
-    throw_invalid_argument("step exceeds the specified range");
+    raise_invalid_argument_warning("step exceeds the specified range");
     return false;
   }
 
@@ -193,7 +193,7 @@ Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
   int64_t i;
   if (low > high) { // Negative steps
     if (low - high < step || step <= 0) {
-      throw_invalid_argument("step exceeds the specified range");
+      raise_invalid_argument_warning("step exceeds the specified range");
       return false;
     }
     rangeCheckAlloc((low - high) / step);
@@ -203,7 +203,7 @@ Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
     }
   } else if (high > low) { // Positive steps
     if (high - low < step || step <= 0) {
-      throw_invalid_argument("step exceeds the specified range");
+      raise_invalid_argument_warning("step exceeds the specified range");
       return false;
     }
     rangeCheckAlloc((high - low) / step);
@@ -221,7 +221,7 @@ Variant ArrayUtil::Range(int64_t low, int64_t high, int64_t step /* = 1 */) {
   Array ret;
   if (low > high) { // Negative steps
     if (low - high < step || step <= 0) {
-      throw_invalid_argument("step exceeds the specified range");
+      raise_invalid_argument_warning("step exceeds the specified range");
       return false;
     }
     rangeCheckAlloc((low - high) / step);
@@ -230,7 +230,7 @@ Variant ArrayUtil::Range(int64_t low, int64_t high, int64_t step /* = 1 */) {
     }
   } else if (high > low) { // Positive steps
     if (high - low < step || step <= 0) {
-      throw_invalid_argument("step exceeds the specified range");
+      raise_invalid_argument_warning("step exceeds the specified range");
       return false;
     }
     rangeCheckAlloc((high - low) / step);

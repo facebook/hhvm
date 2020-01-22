@@ -1060,15 +1060,13 @@ and add_dep ctx deps ~this ty : unit =
            on all its values.  We need all the values and not only the
            ones used by the extracted code.  See the \with_switch test
            case. *)
-        match Decl_provider.get_class ctx name with
-        | Some enum when Class.kind enum = Ast_defs.Cenum ->
-          Class.consts enum
-          |> Sequence.iter ~f:(fun (const_name, _) ->
-                 if const_name <> "class" then
-                   do_add_dep
-                     ctx
-                     deps
-                     (Typing_deps.Dep.Const (name, const_name)))
+        match get_class_nast ctx name with
+        | Some class_ when class_.c_kind = Ast_defs.Cenum ->
+          List.iter class_.c_consts ~f:(fun const ->
+              do_add_dep
+                ctx
+                deps
+                (Typing_deps.Dep.Const (name, snd const.cc_id)))
         | _ -> ()
 
       method! on_tshape _ _ _ fdm =

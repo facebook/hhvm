@@ -120,42 +120,6 @@ let get_dep_pos ctx dep =
     get_gconst_pos ctx name
   | RecordDef _ -> records_not_supported ()
 
-let make_mode_getter ~ctx ~get_pos ~find_in_file ~get_mode name =
-  let open Option in
-  get_pos ctx name >>= fun pos ->
-  find_in_file (Pos.filename pos) name >>| get_mode
-
-let get_fun_mode ctx =
-  make_mode_getter
-    ~ctx
-    ~get_pos:get_fun_pos
-    ~find_in_file:Ast_provider.find_fun_in_file
-    ~get_mode:(fun fun_ -> fun_.Aast.f_mode)
-
-let get_class_mode ctx =
-  make_mode_getter
-    ~ctx
-    ~get_pos:get_class_pos
-    ~find_in_file:Ast_provider.find_class_in_file
-    ~get_mode:(fun class_ -> class_.Aast.c_mode)
-
-let get_typedef_mode ctx =
-  make_mode_getter
-    ~ctx
-    ~get_pos:get_typedef_pos
-    ~find_in_file:Ast_provider.find_typedef_in_file
-    ~get_mode:(fun typedef -> typedef.Aast.t_mode)
-
-let get_gconst_mode ctx =
-  make_mode_getter
-    ~ctx
-    ~get_pos:get_gconst_pos
-    ~find_in_file:Ast_provider.find_gconst_in_file
-    ~get_mode:(fun gconst -> gconst.Aast.cst_mode)
-
-let get_class_or_typedef_mode ctx name =
-  Option.first_some (get_class_mode ctx name) (get_typedef_mode ctx name)
-
 let memoize f =
   let table = ref SMap.empty in
   fun ctx key ->
@@ -167,22 +131,40 @@ let memoize f =
       table := SMap.add key value !table;
       Some value
 
-let get_fun_nast =
+let make_nast_getter ~get_pos ~find_in_file ~naming =
   memoize @@ fun ctx name ->
   let open Option in
-  get_fun_pos ctx name >>= fun pos ->
-  Ast_provider.find_fun_in_file (Pos.filename pos) name >>| Naming.fun_
+  get_pos ctx name >>= fun pos ->
+  find_in_file (Pos.filename pos) name >>| naming
+
+let get_fun_nast =
+  make_nast_getter
+    ~get_pos:get_fun_pos
+    ~find_in_file:Ast_provider.find_fun_in_file
+    ~naming:Naming.fun_
 
 let get_fun_nast_exn ctx name = value_or_not_found name (get_fun_nast ctx name)
 
 let get_class_nast =
-  memoize @@ fun ctx name ->
-  let open Option in
-  get_class_pos ctx name >>= fun pos ->
-  Ast_provider.find_class_in_file (Pos.filename pos) name >>| Naming.class_
+  make_nast_getter
+    ~get_pos:get_class_pos
+    ~find_in_file:Ast_provider.find_class_in_file
+    ~naming:Naming.class_
 
 let get_class_nast_exn ctx name =
   value_or_not_found name (get_class_nast ctx name)
+
+let get_typedef_nast =
+  make_nast_getter
+    ~get_pos:get_typedef_pos
+    ~find_in_file:Ast_provider.find_typedef_in_file
+    ~naming:Naming.typedef
+
+let get_gconst_nast =
+  make_nast_getter
+    ~get_pos:get_gconst_pos
+    ~find_in_file:Ast_provider.find_gconst_in_file
+    ~naming:Naming.global_const
 
 let get_method_nast =
   let methods_by_class_name = ref SMap.empty in
@@ -207,6 +189,22 @@ let get_method_nast_exn ctx class_name method_name =
   value_or_not_found
     (class_name ^ "::" ^ method_name)
     (get_method_nast ctx class_name method_name)
+
+let get_fun_mode ctx name =
+  get_fun_nast ctx name |> Option.map ~f:(fun fun_ -> fun_.Aast.f_mode)
+
+let get_class_mode ctx name =
+  get_class_nast ctx name |> Option.map ~f:(fun class_ -> class_.Aast.c_mode)
+
+let get_typedef_mode ctx name =
+  get_typedef_nast ctx name
+  |> Option.map ~f:(fun typedef -> typedef.Aast.t_mode)
+
+let get_gconst_mode ctx name =
+  get_gconst_nast ctx name |> Option.map ~f:(fun gconst -> gconst.Aast.cst_mode)
+
+let get_class_or_typedef_mode ctx name =
+  Option.first_some (get_class_mode ctx name) (get_typedef_mode ctx name)
 
 let get_dep_mode ctx dep =
   let open Typing_deps.Dep in

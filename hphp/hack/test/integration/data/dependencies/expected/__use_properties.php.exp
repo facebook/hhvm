@@ -2,7 +2,7 @@
 class WithProperties {
   public int $first;
   public static int $third = 0;
-  public int $second;
+  public int $second = 0;
   public function __construct(int $arg) {
     throw new \Exception();
   }

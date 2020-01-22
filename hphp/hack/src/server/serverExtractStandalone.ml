@@ -210,6 +210,16 @@ let get_typeconst_nast =
     ~get_elements:(fun class_ -> class_.c_typeconsts)
     ~get_element_name:(fun typeconst -> snd typeconst.c_tconst_name)
 
+let get_prop_nast =
+  make_class_element_nast_getter
+    ~get_elements:(fun class_ -> class_.c_vars)
+    ~get_element_name:(fun class_var -> snd class_var.cv_id)
+
+let get_prop_nast_exn ctx class_name prop_name =
+  value_or_not_found
+    (class_name ^ "::" ^ prop_name)
+    (get_prop_nast ctx class_name prop_name)
+
 let get_fun_mode ctx name =
   get_fun_nast ctx name |> Option.map ~f:(fun fun_ -> fun_.Aast.f_mode)
 
@@ -871,24 +881,25 @@ let get_method_declaration method_ ~from_interface =
     params
     ret
 
-let get_property_declaration ctx (prop : Typing_defs.class_elt) ~is_static name
-    =
-  let visibility = Typing_utils.string_of_visibility prop.ce_visibility in
+let get_prop_declaration ctx prop =
+  let name = snd prop.cv_id in
+  let visibility = string_of_visibility prop.cv_visibility in
   let static =
-    if is_static then
-      "static "
+    if prop.cv_is_static then
+      "static"
     else
       ""
   in
-  let ty = Lazy.force prop.ce_type in
-  let prop_type = Typing_print.full_decl ctx ty in
-  let init =
-    if is_static && not prop.ce_abstract then
-      Printf.sprintf " = %s" (get_init_from_type ctx ty)
-    else
-      ""
+  let (type_, init) =
+    match (prop.cv_type, prop.cv_expr) with
+    | (Some hint, Some _) ->
+      (string_of_hint hint, Printf.sprintf " = %s" (get_init_from_hint ctx hint))
+    | (Some hint, None) -> (string_of_hint hint, "")
+    | (None, None) -> ("", "")
+    (* Untyped prop, not supported for now *)
+    | (None, Some _) -> raise Unsupported
   in
-  Printf.sprintf "%s %s%s $%s%s;" visibility static prop_type name init
+  Printf.sprintf "%s %s %s $%s%s;" visibility static type_ name init
 
 let get_typeconst_declaration typeconst =
   let abstract =
@@ -912,66 +923,53 @@ let get_typeconst_declaration typeconst =
   Printf.sprintf "%s const type %s%s%s;" abstract name constraint_ type_
 
 let get_class_elt_declaration
-    ctx
-    (cls : Decl_provider.class_decl)
-    target
-    (class_elt : 'a Typing_deps.Dep.variant) =
-  Typing_deps.Dep.(
-    Decl_provider.(
-      let from_interface = Class.kind cls = Ast_defs.Cinterface in
-      let description = to_string class_elt in
-      match class_elt with
-      | Const (class_name, const_name) ->
-        (match get_typeconst_nast ctx class_name const_name with
-        | Some typeconst -> Some (get_typeconst_declaration typeconst)
-        | None ->
-          (match get_const_nast ctx class_name const_name with
-          | Some const -> Some (get_const_declaration ctx const)
-          | None -> raise (DependencyNotFound (class_name ^ "::" ^ const_name))))
-      | Method (class_name, method_name)
-      | SMethod (class_name, method_name) ->
-        (match target with
-        | ServerCommandTypes.Extract_standalone.Method
-            (target_class_name, target_method_name)
-          when class_name = target_class_name
-               && method_name = target_method_name ->
-          None
-        | _ ->
-          let method_ = get_method_nast_exn ctx class_name method_name in
-          let decl = get_method_declaration method_ ~from_interface in
-          let body =
-            if method_.m_abstract then
-              ";"
-            else
-              "{throw new \\Exception();}"
-          in
-          Some (decl ^ body))
-      | Prop (_, prop_name) ->
-        let p =
-          value_or_not_found description @@ Class.get_prop cls prop_name
-        in
-        Some (get_property_declaration ctx p ~is_static:false prop_name)
-      | SProp (_, sprop_name) ->
-        let sp =
-          value_or_not_found description @@ Class.get_sprop cls sprop_name
-        in
-        Some
-          (get_property_declaration
-             ctx
-             sp
-             ~is_static:true
-             (String.lstrip ~drop:(fun c -> c = '$') sprop_name))
-      (* Constructor should've been tackled earlier, and all other dependencies aren't class elements *)
-      | Cstr _
-      | Extends _
-      | AllMembers _
-      | Class _
-      | Fun _
-      | FunName _
-      | GConst _
-      | GConstName _ ->
-        raise UnexpectedDependency
-      | RecordDef _ -> records_not_supported ()))
+    ctx target (class_elt : 'a Typing_deps.Dep.variant) =
+  let open Typing_deps.Dep in
+  match class_elt with
+  | Const (class_name, const_name) ->
+    (match get_typeconst_nast ctx class_name const_name with
+    | Some typeconst -> Some (get_typeconst_declaration typeconst)
+    | None ->
+      (match get_const_nast ctx class_name const_name with
+      | Some const -> Some (get_const_declaration ctx const)
+      | None -> raise (DependencyNotFound (class_name ^ "::" ^ const_name))))
+  | Method (class_name, method_name)
+  | SMethod (class_name, method_name) ->
+    (match target with
+    | ServerCommandTypes.Extract_standalone.Method
+        (target_class_name, target_method_name)
+      when class_name = target_class_name && method_name = target_method_name ->
+      None
+    | _ ->
+      let class_ = get_class_nast_exn ctx class_name in
+      let from_interface = class_.c_kind = Ast_defs.Cinterface in
+      let method_ = get_method_nast_exn ctx class_name method_name in
+      let decl = get_method_declaration method_ ~from_interface in
+      let body =
+        if method_.m_abstract then
+          ";"
+        else
+          "{throw new \\Exception();}"
+      in
+      Some (decl ^ body))
+  | Prop (class_name, prop_name) ->
+    let prop = get_prop_nast_exn ctx class_name prop_name in
+    Some (get_prop_declaration ctx prop)
+  | SProp (class_name, sprop_name) ->
+    let sprop_name = String.lstrip ~drop:(fun c -> c = '$') sprop_name in
+    let prop = get_prop_nast_exn ctx class_name sprop_name in
+    Some (get_prop_declaration ctx prop)
+  (* Constructor should've been tackled earlier, and all other dependencies aren't class elements *)
+  | Cstr _
+  | Extends _
+  | AllMembers _
+  | Class _
+  | Fun _
+  | FunName _
+  | GConst _
+  | GConstName _ ->
+    raise UnexpectedDependency
+  | RecordDef _ -> records_not_supported ()
 
 let construct_enum ctx enum fields =
   let enum_name = Decl_provider.Class.name enum in
@@ -1053,7 +1051,7 @@ let get_class_body ctx cls target class_elts =
            information about properties. *)
         | Dep.Cstr _ -> get_constructor_declaration ctx name prop_names
         | Dep.Const (_, "class") -> None
-        | class_elt -> get_class_elt_declaration ctx cls target class_elt)
+        | class_elt -> get_class_elt_declaration ctx target class_elt)
   in
   (* If we are extracting a method of this class, we should declare it
      here, with stubs of other class elements. *)

@@ -65,7 +65,7 @@ class WithProperties {
   }
 
   public int $first;
-  public int $second = 0;
+  public int $second = 42;
   public static int $third = 7;
 }
 

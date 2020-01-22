@@ -1140,6 +1140,9 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   } =
     local_config
   in
+  let hhconfig_version =
+    config |> ServerConfig.version |> Config_file.version_to_string_opt
+  in
   List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
   List.iter
     (ServerConfig.coroutine_whitelist_paths config)
@@ -1162,6 +1165,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     else if is_worker then
       HackEventLogger.init_worker
         ~root
+        ~hhconfig_version
         ~init_id
         ~time:(Unix.gettimeofday ())
         ~profile_type_check_duration_threshold
@@ -1171,6 +1175,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     else
       HackEventLogger.init
         ~root
+        ~hhconfig_version
         ~init_id
         ~informant_managed
         ~time:(Unix.gettimeofday ())

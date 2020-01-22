@@ -157,6 +157,11 @@ let initialize
   let (server_config, server_local_config) =
     ServerConfig.load ServerConfig.filename server_args
   in
+  let hhconfig_version =
+    server_config |> ServerConfig.version |> Config_file.version_to_string_opt
+  in
+  HackEventLogger.set_hhconfig_version hhconfig_version;
+
   (* NOTE: We don't want to depend on shared memory in the long-term, since
   we're only running one process and don't need to share memory with anyone. To
   remove the shared memory usage here requires refactoring our heaps to never

@@ -3406,6 +3406,8 @@ let handle_client_message
 
       let%lwt version = read_hhconfig_version () in
       hhconfig_version := version;
+      HackEventLogger.set_hhconfig_version
+        (Some (String_utils.lstrip !hhconfig_version "^"));
       let%lwt new_state = connect !state in
       state := new_state;
       Relative_path.set_path_prefix Relative_path.Root root;

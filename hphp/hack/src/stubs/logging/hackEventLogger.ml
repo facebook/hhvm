@@ -19,10 +19,13 @@ let set_changed_mergebase _ = ()
 
 let set_from _ = ()
 
+let set_hhconfig_version _ = ()
+
 let bad_exit _ _ _ ~is_oom:_ = ()
 
 let init
     ~root:_
+    ~hhconfig_version:_
     ~init_id:_
     ~informant_managed:_
     ~time:_
@@ -43,6 +46,7 @@ let init
 
 let init_worker
     ~root:_
+    ~hhconfig_version:_
     ~init_id:_
     ~time:_
     ~profile_type_check_duration_threshold:_

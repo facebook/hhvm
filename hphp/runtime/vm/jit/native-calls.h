@@ -57,21 +57,6 @@ struct FuncPtr {
     : call(CallSpec::method(fp))
   {}
 
-  /*
-   * Create FuncPtrs to array data "rotated" vtables.  For example, in
-   * native-calls.cpp:
-   *
-   *   {NvGetInt, &g_array_funcs.nvGetInt, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
-   *
-   */
-  template<class Ret, class... Args>
-  /* implicit */ FuncPtr(Ret (*const (*p)[ArrayData::kNumKinds])(Args...))
-    : call(CallSpec::array(p))
-  {
-    always_assert(0 && "This code needs to be conditional on "
-                       "deltaFits(p, sz::dword) before using it");
-  }
-
   union { CallSpec call; };
 };
 

@@ -106,9 +106,6 @@ struct FormatVisitor {
     case CallSpec::Kind::Direct:
     case CallSpec::Kind::Smashable:
       return imm((TCA)call.address());
-    case CallSpec::Kind::ArrayVirt:
-      str << sep() << folly::format("ArrayVirt({})", call.arrayTable());
-      break;
     case CallSpec::Kind::Destructor:
       str << sep() << folly::format("destructor({})", show(call.reg()));
       break;

@@ -157,6 +157,7 @@ void implCountArrayLike(IRLS& env, const IRInstruction* inst) {
 IMPL_OPCODE_CALL(Count)
 
 void cgCountArray(IRLS& env, const IRInstruction* inst) {
+  auto const& arr_type = inst->src(0)->type();
   auto const src = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
@@ -170,8 +171,9 @@ void cgCountArray(IRLS& env, const IRInstruction* inst) {
     v, vcold(env), CC_S, sf, dst,
     [&](Vout& v) {
       auto const d = v.makeReg();
-      cgCallHelper(v, env, CallSpec::array(&g_array_funcs.vsize),
-                   callDest(d), SyncOptions::None,
+      auto const call = CallSpec::array(
+        arr_type, &g_array_funcs.vsize, &ArrayData::size);
+      cgCallHelper(v, env, call, callDest(d), SyncOptions::None,
                    argGroup(env, inst).ssa(0));
       return d;
     },
@@ -218,12 +220,19 @@ bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
 }
 
 void cgAKExistsArr(IRLS& env, const IRInstruction* inst) {
-  auto const keyTy = inst->src(1)->type();
+  auto const& arr_type = inst->src(0)->type();
+  auto const& key_type = inst->src(1)->type();
   auto& v = vmain(env);
 
-  auto const target = (keyTy <= TInt)
-    ? CallSpec::array(&g_array_funcs.existsInt)
-    : CallSpec::array(&g_array_funcs.existsStr);
+  using ExistsInt = bool (ArrayData::*)(int64_t) const;
+  using ExistsStr = bool (ArrayData::*)(const StringData*) const;
+
+  assertx(key_type.subtypeOfAny(TInt, TStr));
+  auto const target = (key_type <= TInt)
+    ? CallSpec::array(arr_type, &g_array_funcs.existsInt,
+                      static_cast<ExistsInt>(&ArrayData::exists))
+    : CallSpec::array(arr_type, &g_array_funcs.existsStr,
+                      static_cast<ExistsStr>(&ArrayData::exists));
 
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None,
                argGroup(env, inst).ssa(0).ssa(1));

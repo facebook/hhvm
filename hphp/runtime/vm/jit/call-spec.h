@@ -211,15 +211,6 @@ struct CallSpec {
     Smashable,
 
     /*
-     * Call to an ArrayData vtable function.
-     *
-     * This is used to call ArrayData APIs by loading the appropriate function
-     * table for the desired function family out of g_array_funcs, and indexing
-     * into it with the ArrayKind of the passed ArrayData* argument.
-     */
-    ArrayVirt,
-
-    /*
      * Call the appropriate destructor (i.e., release) function for the unitary
      * argument.
      *
@@ -298,20 +289,49 @@ struct CallSpec {
   }
 
   /*
-   * An ArrayVirt call, for the array function table `p'.
+   * A call to an ArrayData method with type `arrType` and function table `p',
+   * along with `fp`, the ArrayData generic dispatch method for the table `p`.
+   * We take `arrType` so we can devirtualize this call when its kind is known;
+   * otherwise, we'll emit a method call to `fp`. Example usage:
    *
-   * Takes a pointer to an array of function pointers to use for the particular
-   * entry point.  For example,
+   *   CallSpec::array(arr_type, &g_array_funcs.release, &ArrayData::release);
    *
-   *   CallSpec::array(&g_array_funcs.nvGetInt)
+   * The call mechanism assumes that the first argument to the direct calls is
+   * an ArrayData*, and that the rest of the arguments are parallel between the
+   * direct calls in `p` and the method `fp`.
    *
-   * The call mechanism assumes that the first argument to the function is an
-   * ArrayData*, and loads the kind from there.
+   * Note that we also load the ArrayData's kind and use it to make an indirect
+   * call to a method in `p` in the JIT; in fact, we used to emit such code.
+   * However, doing so is a branch miss loss (in particular, for set methods)
+   * over calling `fp`. We're not sure why, but here are two hypotheses:
+   *
+   *   1. BOLT can inline the likely virtual target into the function `fp`.
+   *   2. We may be save on indirect-call prediction cache with only one call.
+   *
+   * In any case, making this change looks like it's neutral to a small win in
+   * load tests, in addition to generating cleaner code.
    */
   template<class Ret, class... Args>
-  static CallSpec array(Ret (*const (*p)[ArrayData::kNumKinds])(Args...)) {
-    const void* vp = p;
-    return CallSpec { Kind::ArrayVirt, const_cast<void*>(vp) };
+  static CallSpec array(
+      const Type& arr_type,
+      Ret (*const (*p)[ArrayData::kNumKinds])(ArrayData*, Args...),
+      Ret (ArrayData::*fp)(Args...)) {
+    assertx(arr_type <= TArr);
+    if (auto const kind = arr_type.arrSpec().kind()) {
+      return direct((*p)[*kind]);
+    }
+    return method(fp);
+  }
+  template<class Ret, class... Args>
+  static CallSpec array(
+      const Type& arr_type,
+      Ret (*const (*p)[ArrayData::kNumKinds])(const ArrayData*, Args...),
+      Ret (ArrayData::*fp)(Args...) const) {
+    assertx(arr_type <= TArr);
+    if (auto const kind = arr_type.arrSpec().kind()) {
+      return direct((*p)[*kind]);
+    }
+    return method(fp);
   }
 
   /*
@@ -353,14 +373,6 @@ struct CallSpec {
   }
 
   /*
-   * The table of array functions, for ArrayVirt calls.
-   */
-  void* arrayTable() const {
-    assertx(kind() == Kind::ArrayVirt);
-    return m_u.fp;
-  }
-
-  /*
    * The register containing the DataType, for Destructor calls.
    */
   Vreg reg() const {
@@ -393,7 +405,6 @@ struct CallSpec {
     switch (k1) {
       case CallSpec::Kind::Direct:
       case CallSpec::Kind::Smashable:  return address() == o.address();
-      case CallSpec::Kind::ArrayVirt:  return arrayTable() == o.arrayTable();
       case CallSpec::Kind::Destructor: return reg() == o.reg();
       case CallSpec::Kind::Stub:       return stubAddr() == o.stubAddr();
       case CallSpec::Kind::ObjDestructor: return reg() == o.reg();

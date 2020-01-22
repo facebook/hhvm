@@ -673,29 +673,6 @@ CGETELEM_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template<KeyType keyType>
-auto arraySetImpl(ArrayData* a, key_type<keyType> key, TypedValue value) {
-  static_assert(keyType != KeyType::Any,
-                "KeyType::Any is not supported in arraySetMImpl");
-  assertx(tvIsPlausible(value));
-  assertx(a->isPHPArray());
-  return a->setMove(key, value);
-}
-
-#define ARRAYSET_HELPER_TABLE(m)  \
-  /* name         keyType */      \
-  m(arraySetS,    KeyType::Str)   \
-  m(arraySetI,    KeyType::Int)   \
-
-#define X(nm, keyType)                                                  \
-inline ArrayData* nm(ArrayData* a, key_type<keyType> key, TypedValue value) { \
-  return arraySetImpl<keyType>(a, key, value);                          \
-}
-ARRAYSET_HELPER_TABLE(X)
-#undef X
-
-//////////////////////////////////////////////////////////////////////
-
 template<bool copyProv>
 auto vecSetImpl(ArrayData* a, int64_t key, TypedValue value) {
   assertx(tvIsPlausible(value));

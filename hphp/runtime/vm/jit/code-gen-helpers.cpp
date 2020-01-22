@@ -415,22 +415,6 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
       v << calls{static_cast<TCA>(target.address()), args};
       return;
 
-    case K::ArrayVirt: {
-      auto const addr = reinterpret_cast<intptr_t>(target.arrayTable());
-
-      auto const arrkind = v.makeReg();
-      v << loadzbl{rarg(0)[HeaderKindOffset], arrkind};
-
-      if (deltaFits(addr, sz::dword)) {
-        v << callm{baseless(arrkind * 8 + addr), args};
-      } else {
-        auto const base = v.makeReg();
-        v << ldimmq{addr, base};
-        v << callm{base[arrkind * 8], args};
-      }
-      static_assert(sizeof(HeaderKind) == 1, "");
-    } return;
-
     case K::Destructor: {
       auto dtor = lookupDestructor(v, target.reg());
       v << callm{dtor, args};

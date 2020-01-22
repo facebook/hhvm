@@ -296,14 +296,9 @@ CallSpec getDtorCallSpec(Vout& v, Vreg obj, DataType type, ArgGroup& args) {
 }
 
 CallSpec makeDtorCall(Vout& v, Type ty, Vloc loc, ArgGroup& args) {
-  static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
-  static auto const TMixedArr = Type::Array(ArrayData::kMixedKind);
-  static auto const TAPCArr = Type::Array(ArrayData::kApcKind);
-
-  if (ty <= TPackedArr) return CallSpec::direct(PackedArray::Release);
-  if (ty <= TMixedArr)  return CallSpec::direct(MixedArray::Release);
-  if (ty <= TAPCArr)    return CallSpec::direct(APCLocalArray::Release);
-  if (ty <= TArr)       return CallSpec::array(&g_array_funcs.release);
+  if (ty <= TArr) {
+    return CallSpec::array(ty, &g_array_funcs.release, &ArrayData::release);
+  }
 
   if (ty <= TObj && ty.clsSpec().cls()) {
     auto const cls = ty.clsSpec().cls();

@@ -23,6 +23,9 @@ void StandardExtension::initStandard() {
   HHVM_RC_BOOL(HHVM_DEBUG, debug);
   HHVM_RC_STR(HHVM_COMPILER_ID, compilerId());
   HHVM_RC_STR(HHVM_REPO_SCHEMA, repoSchemaId());
+  HHVM_RC_INT_SAME(HHVM_VERSION_MAJOR);
+  HHVM_RC_INT_SAME(HHVM_VERSION_MINOR);
+  HHVM_RC_INT_SAME(HHVM_VERSION_PATCH);
 }
 
 StandardExtension s_standard_extension;

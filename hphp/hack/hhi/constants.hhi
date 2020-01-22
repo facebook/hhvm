@@ -21,7 +21,12 @@ const int PHP_VERSION_ID = 50699;
 const string PHP_EXTRA_VERSION = 'hhvm';
 
 const string HHVM_VERSION = 'typechecker placeholder, see runtime';
+const string HHVM_COMPILER_ID = 'typechecker placeholder, see runtime';
+const string HHVM_REPO_SCHEMA = 'typechecker placeholder, see runtime';
 const int HHVM_VERSION_ID = 0;
+const int HHVM_VERSION_MAJOR = 0;
+const int HHVM_VERSION_MINOR = 0;
+const int HHVM_VERSION_PATCH = 0;
 
 const int PHP_INT_MAX = (1 << 63) - 1;
 const int PHP_INT_MIN = -1 << 63;

@@ -42,7 +42,7 @@ let class_const env c cc =
       | (None, Some e) ->
         begin
           match Decl_utils.infer_const e with
-          | Some ty -> (ty, false)
+          | Some tprim -> (mk (Reason.Rwitness (fst e), Tprim tprim), false)
           | None ->
             if
               Partial.should_check_error c.c_mode 2035

@@ -1167,7 +1167,7 @@ let const_decl cst =
   | Some h -> Decl_hint.hint env h
   | None ->
     (match Decl_utils.infer_const cst.cst_value with
-    | Some ty -> ty
+    | Some tprim -> mk (Reason.Rwitness (fst cst.cst_value), Tprim tprim)
     | None when Partial.should_check_error cst.cst_mode 2035 ->
       Errors.missing_typehint cst_pos;
       mk (Reason.Rwitness cst_pos, Terr)

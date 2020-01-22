@@ -38,6 +38,7 @@ class WithConst {
   const float CFLOAT = 1.2;
   const string CSTRING = 'foo';
   const SomeEnum CENUM = SomeEnum::SECOND;
+  const CWITHOUT_HINT = 'constant with inferred type';
   const type WITH_CONSTRAINT = A0;
   const type WITH_THIS = this::WITH_CONSTRAINT;
   const type TYPECONST as num = int;
@@ -75,6 +76,7 @@ function with_constants(): void {
   $_ = SHAPE2;
   $_ = CVARRAY_OR_DARRAY;
   $_ = SHAPE3;
+  $_ = WithConst::CWITHOUT_HINT;
 }
 
 function with_type_constants(WithAbstractConst::NESTED::WITH_THIS $arg)

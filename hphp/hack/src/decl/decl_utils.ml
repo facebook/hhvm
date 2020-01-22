@@ -75,14 +75,14 @@ let split_defs defs split_if_in_defs =
     in
     (r1, r2))
 
-let rec infer_const (p, expr_) =
+let rec infer_const (_, expr_) =
   match expr_ with
-  | String _ -> mk (Reason.Rwitness p, Tprim Tstring)
+  | String _ -> Tstring
   | True
   | False ->
-    mk (Reason.Rwitness p, Tprim Tbool)
-  | Int _ -> mk (Reason.Rwitness p, Tprim Tint)
-  | Float _ -> mk (Reason.Rwitness p, Tprim Tfloat)
+    Tbool
+  | Int _ -> Tint
+  | Float _ -> Tfloat
   | Unop
       ((Ast_defs.Uminus | Ast_defs.Uplus | Ast_defs.Utild | Ast_defs.Unot), e2)
     ->

@@ -123,22 +123,18 @@ let get_dep_pos ctx dep =
     get_gconst_pos ctx name
   | RecordDef _ -> records_not_supported ()
 
-let memoize f =
-  let table = ref SMap.empty in
-  fun ctx key ->
-    if SMap.mem key !table then
-      Some (SMap.find key !table)
+let make_nast_getter ~get_pos ~find_in_file ~naming =
+  let nasts = ref SMap.empty in
+  fun ctx name ->
+    if SMap.mem name !nasts then
+      Some (SMap.find name !nasts)
     else
       let open Option in
-      f ctx key >>= fun value ->
-      table := SMap.add key value !table;
-      Some value
-
-let make_nast_getter ~get_pos ~find_in_file ~naming =
-  memoize @@ fun ctx name ->
-  let open Option in
-  get_pos ctx name >>= fun pos ->
-  find_in_file (Pos.filename pos) name >>| naming
+      get_pos ctx name >>= fun pos ->
+      find_in_file (Pos.filename pos) name >>= fun nast ->
+      let nast = naming nast in
+      nasts := SMap.add name nast !nasts;
+      Some nast
 
 let get_fun_nast =
   make_nast_getter
@@ -175,29 +171,44 @@ let get_gconst_nast =
 let get_gconst_nast_exn ctx name =
   value_or_not_found name (get_gconst_nast ctx name)
 
-let get_method_nast =
-  let methods_by_class_name = ref SMap.empty in
-  fun ctx class_name method_name ->
-    if SMap.mem class_name !methods_by_class_name then
-      SMap.find_opt method_name (SMap.find class_name !methods_by_class_name)
+let make_class_element_nast_getter ~get_elements ~get_element_name =
+  let elements_by_class_name = ref SMap.empty in
+  fun ctx class_name element_name ->
+    if SMap.mem class_name !elements_by_class_name then
+      SMap.find_opt element_name (SMap.find class_name !elements_by_class_name)
     else
       let open Option in
       get_class_nast ctx class_name >>= fun class_ ->
-      let class_methods_by_name =
+      let elements_by_element_name =
         List.fold_left
-          class_.c_methods
-          ~f:(fun methods method_ ->
-            SMap.add (snd method_.m_name) method_ methods)
+          (get_elements class_)
+          ~f:(fun elements element ->
+            SMap.add (get_element_name element) element elements)
           ~init:SMap.empty
       in
-      methods_by_class_name :=
-        SMap.add class_name class_methods_by_name !methods_by_class_name;
-      SMap.find_opt method_name class_methods_by_name
+      elements_by_class_name :=
+        SMap.add class_name elements_by_element_name !elements_by_class_name;
+      SMap.find_opt element_name elements_by_element_name
+
+let get_method_nast =
+  make_class_element_nast_getter
+    ~get_elements:(fun class_ -> class_.c_methods)
+    ~get_element_name:(fun method_ -> snd method_.m_name)
 
 let get_method_nast_exn ctx class_name method_name =
   value_or_not_found
     (class_name ^ "::" ^ method_name)
     (get_method_nast ctx class_name method_name)
+
+let get_const_nast =
+  make_class_element_nast_getter
+    ~get_elements:(fun class_ -> class_.c_consts)
+    ~get_element_name:(fun const -> snd const.cc_id)
+
+let get_typeconst_nast =
+  make_class_element_nast_getter
+    ~get_elements:(fun class_ -> class_.c_typeconsts)
+    ~get_element_name:(fun typeconst -> snd typeconst.c_tconst_name)
 
 let get_fun_mode ctx name =
   get_fun_nast ctx name |> Option.map ~f:(fun fun_ -> fun_.Aast.f_mode)
@@ -335,6 +346,11 @@ let string_of_tprim = function
   | Tnoreturn -> "noreturn"
   | Tatom s -> ":@" ^ s
 
+let string_of_shape_field_name = function
+  | Ast_defs.SFlit_int (_, s) -> s
+  | Ast_defs.SFlit_str (_, s) -> Printf.sprintf "'%s'" s
+  | Ast_defs.SFclass_const ((_, c), (_, s)) -> Printf.sprintf "%s::%s" c s
+
 let rec string_of_hint hint =
   match snd hint with
   | Hoption hint -> "?" ^ string_of_hint hint
@@ -391,14 +407,11 @@ let rec string_of_hint hint =
         else
           ""
       in
-      let name =
-        match sfi_name with
-        | Ast_defs.SFlit_int (_, str_i) -> str_i
-        | Ast_defs.SFlit_str (_, str) -> "\"" ^ str ^ "\""
-        | Ast_defs.SFclass_const ((_, class_name), (_, const_name)) ->
-          class_name ^ "::" ^ const_name
-      in
-      optional_prefix ^ name ^ " => " ^ string_of_hint sfi_hint
+      Printf.sprintf
+        "%s%s => %s"
+        optional_prefix
+        (string_of_shape_field_name sfi_name)
+        (string_of_hint sfi_hint)
     in
     let shape_fields = List.map nsi_field_map ~f:string_of_shape_field in
     let shape_suffix =
@@ -446,11 +459,6 @@ let rec string_of_hint hint =
     Printf.sprintf "(%s)" (concat_map ~sep:" & " ~f:string_of_hint hints)
   | Hany -> failwith "unprintable type hint: Hany"
   | Herr -> failwith "unprintable type hint: Herr"
-
-let string_of_shape_field_name = function
-  | Ast_defs.SFlit_int (_, s) -> s
-  | Ast_defs.SFlit_str (_, s) -> Printf.sprintf "'%s'" s
-  | Ast_defs.SFclass_const ((_, c), (_, s)) -> Printf.sprintf "%s::%s" c s
 
 let string_of_user_attribute { ua_name; ua_params } =
   match ua_params with
@@ -741,16 +749,26 @@ let get_gconst_declaration ctx name =
   let init = get_init_from_hint ctx hint in
   Printf.sprintf "const %s %s = %s;" (string_of_hint hint) (strip_ns name) init
 
-let get_const_declaration ctx ?abstract:(is_abstract = false) ty name =
+let get_const_declaration ctx const =
+  let name = snd const.cc_id in
   let abstract =
-    if is_abstract then
-      "abstract "
-    else
-      ""
+    match const.cc_expr with
+    | Some _ -> ""
+    | None -> "abstract"
   in
-  let typ = Typing_print.full_decl ctx ty in
-  let init = get_init_from_type ctx ty in
-  Printf.sprintf "%sconst %s %s = %s;" abstract typ name init
+  let (type_, init) =
+    match (const.cc_type, const.cc_expr) with
+    | (Some hint, _) ->
+      (string_of_hint hint, " = " ^ get_init_from_hint ctx hint)
+    | (None, Some e) ->
+      (match Decl_utils.infer_const e with
+      | Some tprim ->
+        let hint = (fst e, Hprim tprim) in
+        ("", " = " ^ get_init_from_hint ctx hint)
+      | None -> raise Unsupported)
+    | (None, None) -> ("", "")
+  in
+  Printf.sprintf "%s const %s %s%s;" abstract type_ name init
 
 let get_global_object_declaration ctx obj =
   Typing_deps.Dep.(
@@ -872,25 +890,26 @@ let get_property_declaration ctx (prop : Typing_defs.class_elt) ~is_static name
   in
   Printf.sprintf "%s %s%s $%s%s;" visibility static prop_type name init
 
-let get_typeconst_declaration ctx tconst name =
+let get_typeconst_declaration typeconst =
   let abstract =
-    match tconst.ttc_abstract with
-    | Typing_defs.TCAbstract _ -> "abstract "
+    match typeconst.c_tconst_abstract with
+    | TCAbstract _ -> "abstract"
     | TCPartiallyAbstract
     | TCConcrete ->
       ""
   in
-  let typ =
-    match tconst.ttc_type with
-    | Some t -> Printf.sprintf " = %s" (Typing_print.full_decl ctx t)
+  let name = snd typeconst.c_tconst_name in
+  let type_ =
+    match typeconst.c_tconst_type with
+    | Some hint -> " = " ^ string_of_hint hint
     | None -> ""
   in
-  let constr =
-    match tconst.ttc_constraint with
-    | Some t -> Printf.sprintf " as %s" (Typing_print.full_decl ctx t)
+  let constraint_ =
+    match typeconst.c_tconst_constraint with
+    | Some hint -> " as " ^ string_of_hint hint
     | None -> ""
   in
-  Printf.sprintf "%s const type %s%s%s;" abstract name constr typ
+  Printf.sprintf "%s const type %s%s%s;" abstract name constraint_ type_
 
 let get_class_elt_declaration
     ctx
@@ -902,22 +921,13 @@ let get_class_elt_declaration
       let from_interface = Class.kind cls = Ast_defs.Cinterface in
       let description = to_string class_elt in
       match class_elt with
-      | Const (_, const_name) ->
-        if Class.has_typeconst cls const_name then
-          let tconst =
-            value_or_not_found description @@ Class.get_typeconst cls const_name
-          in
-          Some (get_typeconst_declaration ctx tconst const_name)
-        else
-          let cons =
-            value_or_not_found description @@ Class.get_const cls const_name
-          in
-          Some
-            (get_const_declaration
-               ctx
-               ~abstract:cons.cc_abstract
-               cons.cc_type
-               const_name)
+      | Const (class_name, const_name) ->
+        (match get_typeconst_nast ctx class_name const_name with
+        | Some typeconst -> Some (get_typeconst_declaration typeconst)
+        | None ->
+          (match get_const_nast ctx class_name const_name with
+          | Some const -> Some (get_const_declaration ctx const)
+          | None -> raise (DependencyNotFound (class_name ^ "::" ^ const_name))))
       | Method (class_name, method_name)
       | SMethod (class_name, method_name) ->
         (match target with

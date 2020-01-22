@@ -1709,8 +1709,8 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
     // No int-like string keys, so transform in place.
     a->m_kind = HeaderKind::Mixed;
     if (toDArray) a->setDVArray(ArrayData::kDArray);
-    if (!toDArray || !RO::EvalArrProvDVArrays) arrprov::clearTag(a);
     a->setLegacyArray(false);
+    if (RO::EvalArrayProvenance) arrprov::reassignTag(a);
     assertx(a->checkInvariants());
     return a;
   } else {
@@ -1745,7 +1745,8 @@ ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
   out->setDVArray(ArrayData::kDArray);
   out->setLegacyArray(false);
   assertx(out->checkInvariants());
-  return tagArrProv(out, in);
+  if (RO::EvalArrayProvenance) arrprov::reassignTag(out);
+  return out;
 }
 
 ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
@@ -1753,7 +1754,7 @@ ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
   auto out = FromDictImpl<IntishCast::None>(in, copy, true);
   assertx(out->isDArray());
   assertx(!out->isLegacyArray());
-  return tagArrProv(out, in);
+  return out;
 }
 
 MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {
@@ -1762,9 +1763,7 @@ MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {
   assertx(!a->cowCheck());
   a->m_kind = HeaderKind::Dict;
   a->setDVArray(ArrayData::kNotDVArray);
-  if (RO::EvalArrayProvenance && !RO::EvalArrProvHackArrays) {
-    arrprov::clearTag(ad);
-  }
+  if (RO::EvalArrayProvenance) arrprov::reassignTag(a);
   return a;
 }
 
@@ -1779,9 +1778,9 @@ ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
       *a, AllocMode::Request,
       HeaderKind::Dict, ArrayData::kNotDVArray
     );
-    return tagArrProv(out, ad);
+    return tagArrProv(out);
   } else {
-    return tagArrProv(ToDictInPlace(a), ad);
+    return tagArrProv(ToDictInPlace(a));
   }
 }
 

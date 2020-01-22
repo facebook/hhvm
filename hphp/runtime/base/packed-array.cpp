@@ -1123,6 +1123,7 @@ ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
   if (adIn->getSize() == 0) return ArrayData::CreateVArray();
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->setDVArray(ArrayData::kVArray);
+  if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
   assertx(checkInvariants(ad));
   return ad;
 }
@@ -1158,11 +1159,9 @@ ArrayData* PackedArray::ToVArrayVec(ArrayData* adIn, bool copy) {
   if (adIn->getSize() == 0) return ArrayData::CreateVArray();
   ArrayData* ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Packed;
-  if (RO::EvalArrayProvenance && !RO::EvalArrProvDVArrays) {
-    arrprov::clearTag(ad);
-  }
-  ad->setDVArray(ArrayData::kVArray);
   ad->setLegacyArray(false);
+  ad->setDVArray(ArrayData::kVArray);
+  if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
   assertx(checkInvariants(ad));
   return ad;
 }
@@ -1174,10 +1173,7 @@ ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
   if (ad->empty()) return ArrayData::CreateDict();
 
   auto const mixed = copy ? ToMixedCopy(ad) : ToMixed(ad);
-  auto const out = MixedArray::ToDictInPlace(mixed);
-  return RuntimeOption::EvalArrayProvenance
-    ? tagArrProv(out, ad)
-    : out;
+  return MixedArray::ToDictInPlace(mixed);
 }
 
 ArrayData* PackedArray::ToDictVec(ArrayData* ad, bool copy) {
@@ -1185,10 +1181,7 @@ ArrayData* PackedArray::ToDictVec(ArrayData* ad, bool copy) {
   assertx(ad->isVecArray());
   if (ad->empty()) return ArrayData::CreateDict();
   auto mixed = copy ? ToMixedCopy(ad) : ToMixed(ad);
-  auto const out = MixedArray::ToDictInPlace(mixed);
-  return RuntimeOption::EvalArrayProvenance
-    ? tagArrProv(out, ad)
-    : out;
+  return MixedArray::ToDictInPlace(mixed);
 }
 
 ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
@@ -1219,9 +1212,7 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
     adIn->setDVArray(ArrayData::kNotDVArray);
     ad = adIn;
   }
-  if (RO::EvalArrayProvenance && !RO::EvalArrProvHackArrays) {
-    arrprov::clearTag(ad);
-  }
+  if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
 
   assertx(ad->isVecArray());
   assertx(capacity(ad) == capacity(adIn));

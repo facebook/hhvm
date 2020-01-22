@@ -63,7 +63,7 @@ ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
   VecArrayInit init{size};
   IterateVNoInc(a, [&](TypedValue v) { init.append(v); });
   auto const out = init.create();
-  return tagArrProv(out, a);
+  return tagArrProv(out);
 }
 
 ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
@@ -72,7 +72,7 @@ ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
   DictInit init{size};
   IterateKVNoInc(a, [&](TypedValue k, TypedValue v) { init.setValidKey(k, v); });
   auto const out = init.create();
-  return tagArrProv(out, a);
+  return tagArrProv(out);
 }
 
 ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {

@@ -141,6 +141,16 @@ void clearTag(ArrayData* ad);
 void clearTag(const APCArray* a);
 
 /*
+ * Invalidates the old tag on the provided array and reassigns one from the
+ * current PC, if the array still admits a tag.
+ *
+ * If the array no longer admits a tag, but has one set, clears it.
+ *
+ */
+void reassignTag(ArrayData* ad);
+
+
+/*
  * Tag `tv` with provenance for the current PC and unit (if it admits a tag and
  * doesn't already have one).
  *

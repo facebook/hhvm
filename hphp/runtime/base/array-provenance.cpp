@@ -210,6 +210,17 @@ void clearTag(const APCArray* a) {
   clearTagImpl(a);
 }
 
+void reassignTag(ArrayData* ad) {
+  if (arrayWantsTag(ad)) {
+    if (auto const tag = tagFromPC()) {
+      setTag<Mode::Emplace>(ad, *tag);
+      return;
+    }
+  }
+
+  clearTag(ad);
+}
+
 namespace {
 
 void tagTVImpl(TypedValue& tv, folly::Optional<Tag> tag) {

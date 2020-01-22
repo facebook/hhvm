@@ -1,0 +1,28 @@
+
+--------------------
+vec
+varray: string(%d) "%s/conversion.php:26"
+darray: string(%d) "%s/conversion.php:26"
+vec:    string(%d) "%s/conversion.php:18"
+dict:   string(%d) "%s/conversion.php:26"
+
+--------------------
+varray
+varray: string(%d) "%s/conversion.php:19"
+darray: string(%d) "%s/conversion.php:26"
+vec:    string(%d) "%s/conversion.php:26"
+dict:   string(%d) "%s/conversion.php:26"
+
+--------------------
+dict
+varray: string(%d) "%s/conversion.php:26"
+darray: string(%d) "%s/conversion.php:26"
+vec:    string(%d) "%s/conversion.php:26"
+dict:   string(%d) "%s/conversion.php:20"
+
+--------------------
+darray
+varray: string(%d) "%s/conversion.php:26"
+darray: string(%d) "%s/conversion.php:21"
+vec:    string(%d) "%s/conversion.php:26"
+dict:   string(%d) "%s/conversion.php:26"

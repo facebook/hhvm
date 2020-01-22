@@ -59,4 +59,5 @@ pub use gen::scoured_comments;
 pub use gen::shallow_decl_defs;
 pub use gen::typechecker_options;
 pub use gen::typing_defs;
+pub use gen::typing_defs_core;
 pub use gen::typing_reason;

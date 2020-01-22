@@ -36,6 +36,7 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   hphp/hack/src/options/typecheckerOptions.ml                                 \
   hphp/hack/src/parser/full_fidelity_parser_env.ml                            \
   hphp/hack/src/typing/typing_defs.ml                                         \
+  hphp/hack/src/typing/typing_defs_core.ml                                    \
   hphp/hack/src/typing/typing_reason.ml                                       \
   hphp/hack/src/utils/core/prim_defs.ml                                       \
   hphp/hack/src/parser/scoured_comments.ml                                    \

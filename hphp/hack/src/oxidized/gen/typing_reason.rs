@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a44faa87fd877c37261059656e1e3aa0>>
+// @generated SignedSource<<79cc968d6fca9e5e638dfe7ef5250c2d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -68,7 +68,7 @@ pub enum Reason {
     RdynamicYield(pos::Pos, pos::Pos, String, String),
     RmapAppend(pos::Pos),
     RvarParam(pos::Pos),
-    RunpackParam(pos::Pos),
+    RunpackParam(pos::Pos, pos::Pos, isize),
     RinoutParam(pos::Pos),
     Rinstantiate(Box<Reason>, String, Box<Reason>),
     RarrayFilter(pos::Pos, Box<Reason>),
@@ -103,7 +103,7 @@ pub enum Reason {
     RlambdaParam(pos::Pos, Box<Reason>),
     Rshape(pos::Pos, String),
     Renforceable(pos::Pos),
-    Rdestructure(pos::Pos, isize),
+    Rdestructure(pos::Pos),
     RkeyValueCollectionKey(pos::Pos),
 }
 

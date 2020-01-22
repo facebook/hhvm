@@ -34,21 +34,23 @@ let additional_derived_traits ty =
 (* HACK: ignore phases since we are only considering decl tys *)
 let blacklisted_types =
   [
-    ("typing_defs", "AbstractKind");
-    ("typing_defs", "ArrayKind");
-    ("typing_defs", "DeclPhase");
+    ("typing_defs_core", "ArrayKind");
+    ("typing_defs_core", "ConstraintType_");
+    ("typing_defs_core", "ConstraintType");
+    ("typing_defs_core", "DeclPhase");
+    ("typing_defs_core", "Destructure");
+    ("typing_defs_core", "HasMember");
+    ("typing_defs_core", "InternalType_");
+    ("typing_defs_core", "InternalType");
+    ("typing_defs_core", "LoclPhase");
     ("typing_defs", "ExpandEnv");
-    ("typing_defs", "LoclPhase");
     ("typing_defs", "PhaseTy");
-    ("typing_defs", "ConstraintType_");
-    ("typing_defs", "HasMember");
-    ("typing_defs", "ConstraintType");
-    ("typing_defs", "InternalType");
   ]
 
 (* HACK: ignore anything beginning with the "locl" prefix, since we are only
    considering decl tys *)
-let blacklisted_type_prefixes = [("typing_defs", "Locl")]
+let blacklisted_type_prefixes =
+  [("typing_defs", "Locl"); ("typing_defs_core", "Locl")]
 
 (* HACK: Typing_reason is usually aliased to Reason, so we have lots of
    instances of Reason.t. Since we usually convert an identifier like Reason.t

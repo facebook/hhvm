@@ -20,7 +20,7 @@ open State
    (for instances of mutual recursion where we would otherwise define types of
    infinite size). *)
 let add_box_between =
-  [("typing_defs", "Ty", "Ty_"); ("aast_defs", "Hint", "Hint_")]
+  [("typing_defs_core", "Ty", "Ty_"); ("aast_defs", "Hint", "Hint_")]
 
 let should_add_box ty =
   List.mem add_box_between (curr_module_name (), self (), ty) ~equal:( = )

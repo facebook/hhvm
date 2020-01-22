@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f4f45a4e8da956a88ceabf73651bac9e>>
+// @generated SignedSource<<99504a1f17208ef7035c26c55acc2559>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -15,208 +15,44 @@ use serde::Serialize;
 use crate::aast;
 use crate::ast_defs;
 use crate::errors;
-use crate::ident;
 use crate::lazy;
 use crate::nast;
 use crate::pos;
 use crate::s_map;
 use crate::s_set;
-use crate::tany_sentinel;
+use crate::typing_defs_core;
 
-pub use crate::typing_reason as reason;
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub enum Visibility {
-    Vpublic,
-    Vprivate(String),
-    Vprotected(String),
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
-pub enum Exact {
-    Exact,
-    Nonexact,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
-pub enum ValKind {
-    Lval,
-    LvalSubexpr,
-    Other,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
-pub enum ParamMutability {
-    ParamOwnedMutable,
-    ParamBorrowedMutable,
-    ParamMaybeMutable,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
-pub enum FunTparamsKind {
-    FTKtparams,
-    FTKinstantiatedTargs,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
-pub enum ShapeKind {
-    ClosedShape,
-    OpenShape,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
-pub enum ParamMode {
-    FPnormal,
-    FPinout,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
-pub enum XhpAttrTag {
-    Required,
-    Lateinit,
-}
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub struct XhpAttr {
-    pub tag: Option<XhpAttrTag>,
-    pub has_default: bool,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, OcamlRep, PartialEq, Serialize)]
-pub enum ConsistentKind {
-    Inconsistent,
-    ConsistentConstruct,
-    FinalClass,
-}
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub enum DependentType {
-    DTthis,
-    DTcls(String),
-    DTexpr(ident::Ident),
-}
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub struct Tparam<Ty> {
-    pub variance: ast_defs::Variance,
-    pub name: ast_defs::Id,
-    pub constraints: Vec<(ast_defs::ConstraintKind, Ty)>,
-    pub reified: aast::ReifyKind,
-    pub user_attributes: Vec<nast::UserAttribute>,
-}
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub struct WhereConstraint<Ty>(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub struct Ty(pub reason::Reason, pub Box<Ty_>);
-
-pub type DeclTy = Ty;
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub struct ShapeFieldType {
-    pub optional: bool,
-    pub ty: Ty,
-}
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub enum Ty_ {
-    Tthis,
-    Tapply(nast::Sid, Vec<DeclTy>),
-    Taccess(TaccessType),
-    Tarray(Option<DeclTy>, Option<DeclTy>),
-    Tdarray(DeclTy, DeclTy),
-    Tvarray(DeclTy),
-    TvarrayOrDarray(Option<DeclTy>, DeclTy),
-    Tmixed,
-    Tnothing,
-    Tlike(DeclTy),
-    TpuAccess(DeclTy, nast::Sid),
-    Tany(tany_sentinel::TanySentinel),
-    Terr,
-    Tnonnull,
-    Tdynamic,
-    Toption(Ty),
-    Tprim(aast::Tprim),
-    Tfun(FunType<Ty>),
-    Ttuple(Vec<Ty>),
-    Tshape(ShapeKind, nast::shape_map::ShapeMap<ShapeFieldType>),
-    Tvar(ident::Ident),
-    Tgeneric(String),
-    Tunion(Vec<Ty>),
-    Tintersection(Vec<Ty>),
-}
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub struct TaccessType(pub DeclTy, pub Vec<nast::Sid>);
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub enum Reactivity {
-    Nonreactive,
-    Local(Option<DeclTy>),
-    Shallow(Option<DeclTy>),
-    Reactive(Option<DeclTy>),
-    MaybeReactive(Box<Reactivity>),
-    RxVar(Option<Box<Reactivity>>),
-}
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub struct FunType<Ty> {
-    pub is_coroutine: bool,
-    pub arity: FunArity<Ty>,
-    pub tparams: (Vec<Tparam<Ty>>, FunTparamsKind),
-    pub where_constraints: Vec<WhereConstraint<Ty>>,
-    pub params: FunParams<Ty>,
-    pub ret: PossiblyEnforcedTy<Ty>,
-    pub fun_kind: ast_defs::FunKind,
-    pub reactive: Reactivity,
-    pub return_disposable: bool,
-    pub mutability: Option<ParamMutability>,
-    pub returns_mutable: bool,
-    pub returns_void_to_rx: bool,
-}
-
-pub type DeclFunType = FunType<DeclTy>;
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub enum FunArity<Ty> {
-    Fstandard(isize, isize),
-    Fvariadic(isize, FunParam<Ty>),
-    Fellipsis(isize, pos::Pos),
-}
-
-pub type DeclFunArity = FunArity<DeclTy>;
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub enum ParamRxAnnotation {
-    ParamRxVar,
-    ParamRxIfImpl(DeclTy),
-}
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub struct PossiblyEnforcedTy<Ty> {
-    pub enforced: bool,
-    pub type_: Ty,
-}
-
-pub type DeclPossiblyEnforcedTy = PossiblyEnforcedTy<DeclTy>;
-
-#[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
-pub struct FunParam<Ty> {
-    pub pos: pos::Pos,
-    pub name: Option<String>,
-    pub type_: PossiblyEnforcedTy<Ty>,
-    pub kind: ParamMode,
-    pub accept_disposable: bool,
-    pub mutability: Option<ParamMutability>,
-    pub rx_annotation: Option<ParamRxAnnotation>,
-}
-
-pub type DeclFunParam = FunParam<DeclTy>;
-
-pub type FunParams<Ty> = Vec<FunParam<Ty>>;
-
-pub type DeclFunParams = FunParams<DeclTy>;
+pub use typing_defs_core::ConsistentKind;
+pub use typing_defs_core::DeclFunArity;
+pub use typing_defs_core::DeclFunParam;
+pub use typing_defs_core::DeclFunParams;
+pub use typing_defs_core::DeclFunType;
+pub use typing_defs_core::DeclPossiblyEnforcedTy;
+pub use typing_defs_core::DeclTy;
+pub use typing_defs_core::DependentType;
+pub use typing_defs_core::DestructureKind;
+pub use typing_defs_core::Exact;
+pub use typing_defs_core::FunArity;
+pub use typing_defs_core::FunParam;
+pub use typing_defs_core::FunParams;
+pub use typing_defs_core::FunTparamsKind;
+pub use typing_defs_core::FunType;
+pub use typing_defs_core::ParamMode;
+pub use typing_defs_core::ParamMutability;
+pub use typing_defs_core::ParamRxAnnotation;
+pub use typing_defs_core::PossiblyEnforcedTy;
+pub use typing_defs_core::Reactivity;
+pub use typing_defs_core::ShapeFieldType;
+pub use typing_defs_core::ShapeKind;
+pub use typing_defs_core::TaccessType;
+pub use typing_defs_core::Tparam;
+pub use typing_defs_core::Ty;
+pub use typing_defs_core::Ty_;
+pub use typing_defs_core::ValKind;
+pub use typing_defs_core::Visibility;
+pub use typing_defs_core::WhereConstraint;
+pub use typing_defs_core::XhpAttr;
+pub use typing_defs_core::XhpAttrTag;
 
 #[derive(Clone, Debug, Deserialize, OcamlRep, Serialize)]
 pub struct ClassElt {

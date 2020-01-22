@@ -807,7 +807,7 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
 
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatDVCmpNotices &&
                !ArrayData::dvArrayEqual(ad1, ad2))) {
-    raiseHackArrCompatDVArrCmp(ad1, ad2);
+    raiseHackArrCompatDVArrCmp(ad1, ad2, /* is relational */ false);
   }
 
   if (ad1->size() != ad2->size()) return false;
@@ -847,7 +847,7 @@ int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
 
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatDVCmpNotices)) {
     if (!ArrayData::dvArrayEqual(ad1, ad2)) {
-      raiseHackArrCompatDVArrCmp(ad1, ad2);
+      raiseHackArrCompatDVArrCmp(ad1, ad2, /* is relational */ true);
     } else if (ad1->isDArray()) {
       raise_hackarr_compat_notice("Comparing two darrays relationally");
     }
@@ -1262,7 +1262,9 @@ void raiseHackArrCompatArrNonArrCmp() {
   raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_NON_ARR_CMP);
 }
 
-void raiseHackArrCompatDVArrCmp(const ArrayData* ad1, const ArrayData* ad2) {
+void raiseHackArrCompatDVArrCmp(const ArrayData* ad1,
+                                const ArrayData* ad2,
+                                bool is_relational) {
   if (UNLIKELY(RID().getSuppressHACCompareNotices())) return;
   auto const type = [](const ArrayData* a) {
     if (a->isVArray()) return "varray";
@@ -1270,7 +1272,10 @@ void raiseHackArrCompatDVArrCmp(const ArrayData* ad1, const ArrayData* ad2) {
     return "array";
   };
   raise_hackarr_compat_notice(
-    folly::sformat("Comparing {} and {}", type(ad1), type(ad2))
+    folly::sformat("Comparing {} and {}{}",
+                   type(ad1),
+                   type(ad2),
+                   is_relational ? " relationally" : "")
   );
 }
 

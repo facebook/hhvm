@@ -8,11 +8,11 @@ Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php 
 
 Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 21
 
@@ -22,11 +22,11 @@ Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php o
 
 Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 21
 
@@ -36,11 +36,11 @@ Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php 
 
 Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 21
 
@@ -50,11 +50,11 @@ Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php o
 
 Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 21
 
@@ -64,11 +64,11 @@ Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php 
 
 Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing two darrays relationally in %s/dv-comparisons.php on line 25
 
@@ -84,11 +84,11 @@ Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php o
 
 Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 21
 
@@ -98,11 +98,11 @@ Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php 
 
 Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing two darrays relationally in %s/dv-comparisons.php on line 25
 
@@ -118,39 +118,11 @@ Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php o
 
 Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 27
-
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 21
-
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 22
-
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 23
-
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 24
-
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 25
-
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 26
-
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 27
-
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 21
-
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 22
-
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 23
-
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 24
-
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 25
-
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 26
-
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 21
 
@@ -160,11 +132,11 @@ Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php o
 
 Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 21
 
@@ -174,11 +146,39 @@ Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php o
 
 Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 27
+
+Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 21
+
+Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 22
+
+Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 23
+
+Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 24
+
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 25
+
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 26
+
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 27
+
+Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 21
+
+Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 22
+
+Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 23
+
+Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 24
+
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 25
+
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 26
+
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 21
 
@@ -188,11 +188,11 @@ Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php 
 
 Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 21
 
@@ -202,11 +202,11 @@ Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php o
 
 Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 21
 
@@ -216,11 +216,11 @@ Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php 
 
 Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 21
 
@@ -230,11 +230,11 @@ Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php o
 
 Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 21
 
@@ -244,11 +244,11 @@ Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php 
 
 Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing two darrays relationally in %s/dv-comparisons.php on line 25
 
@@ -264,11 +264,11 @@ Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php o
 
 Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 21
 
@@ -278,11 +278,11 @@ Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php 
 
 Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing two darrays relationally in %s/dv-comparisons.php on line 25
 
@@ -298,39 +298,11 @@ Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php o
 
 Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 27
-
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 21
-
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 22
-
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 23
-
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 24
-
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 25
-
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 26
-
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 27
-
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 21
-
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 22
-
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 23
-
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 24
-
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 25
-
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 26
-
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 21
 
@@ -340,11 +312,11 @@ Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php o
 
 Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 27
 
 Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 21
 
@@ -354,11 +326,39 @@ Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php o
 
 Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 24
 
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 25
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 25
 
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 26
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 26
 
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 27
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 27
+
+Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 21
+
+Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 22
+
+Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 23
+
+Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 24
+
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 25
+
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 26
+
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 27
+
+Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 21
+
+Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 22
+
+Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 23
+
+Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 24
+
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 25
+
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 26
+
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 27
 ============== literals ==============================
 
 Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 33
@@ -409,45 +409,45 @@ Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php o
 
 Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 62
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 65
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 65
 
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 66
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 66
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 67
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 67
 
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 68
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 68
 
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 69
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 69
 
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 70
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 70
 
 Notice: Hack Array Compat: Comparing two darrays relationally in %s/dv-comparisons.php on line 71
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 73
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 73
 
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 74
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 74
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 75
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 75
 
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 76
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 76
 
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 77
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 77
 
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 78
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 78
 
 Notice: Hack Array Compat: Comparing two darrays relationally in %s/dv-comparisons.php on line 79
 
-Notice: Hack Array Compat: Comparing varray and darray in %s/dv-comparisons.php on line 81
+Notice: Hack Array Compat: Comparing varray and darray relationally in %s/dv-comparisons.php on line 81
 
-Notice: Hack Array Compat: Comparing varray and array in %s/dv-comparisons.php on line 82
+Notice: Hack Array Compat: Comparing varray and array relationally in %s/dv-comparisons.php on line 82
 
-Notice: Hack Array Compat: Comparing darray and varray in %s/dv-comparisons.php on line 83
+Notice: Hack Array Compat: Comparing darray and varray relationally in %s/dv-comparisons.php on line 83
 
-Notice: Hack Array Compat: Comparing darray and array in %s/dv-comparisons.php on line 84
+Notice: Hack Array Compat: Comparing darray and array relationally in %s/dv-comparisons.php on line 84
 
-Notice: Hack Array Compat: Comparing array and varray in %s/dv-comparisons.php on line 85
+Notice: Hack Array Compat: Comparing array and varray relationally in %s/dv-comparisons.php on line 85
 
-Notice: Hack Array Compat: Comparing array and darray in %s/dv-comparisons.php on line 86
+Notice: Hack Array Compat: Comparing array and darray relationally in %s/dv-comparisons.php on line 86
 
 Notice: Hack Array Compat: Comparing two darrays relationally in %s/dv-comparisons.php on line 87
 ============== test_all (exn) ========================
@@ -455,37 +455,37 @@ Exception: Hack Array Compat: Comparing varray and darray
 Exception: Hack Array Compat: Comparing varray and darray
 Exception: Hack Array Compat: Comparing varray and darray
 Exception: Hack Array Compat: Comparing varray and darray
-Exception: Hack Array Compat: Comparing varray and darray
-Exception: Hack Array Compat: Comparing darray and varray
-Exception: Hack Array Compat: Comparing varray and darray
+Exception: Hack Array Compat: Comparing varray and darray relationally
+Exception: Hack Array Compat: Comparing darray and varray relationally
+Exception: Hack Array Compat: Comparing varray and darray relationally
 Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing varray and darray
-Exception: Hack Array Compat: Comparing varray and darray
+Exception: Hack Array Compat: Comparing varray and array relationally
+Exception: Hack Array Compat: Comparing array and varray relationally
+Exception: Hack Array Compat: Comparing varray and array relationally
 Exception: Hack Array Compat: Comparing varray and darray
 Exception: Hack Array Compat: Comparing varray and darray
 Exception: Hack Array Compat: Comparing varray and darray
-Exception: Hack Array Compat: Comparing darray and varray
 Exception: Hack Array Compat: Comparing varray and darray
+Exception: Hack Array Compat: Comparing varray and darray relationally
+Exception: Hack Array Compat: Comparing darray and varray relationally
+Exception: Hack Array Compat: Comparing varray and darray relationally
 Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing darray and varray
-Exception: Hack Array Compat: Comparing darray and varray
+Exception: Hack Array Compat: Comparing varray and array relationally
+Exception: Hack Array Compat: Comparing array and varray relationally
+Exception: Hack Array Compat: Comparing varray and array relationally
 Exception: Hack Array Compat: Comparing darray and varray
 Exception: Hack Array Compat: Comparing darray and varray
 Exception: Hack Array Compat: Comparing darray and varray
-Exception: Hack Array Compat: Comparing varray and darray
 Exception: Hack Array Compat: Comparing darray and varray
+Exception: Hack Array Compat: Comparing darray and varray relationally
+Exception: Hack Array Compat: Comparing varray and darray relationally
+Exception: Hack Array Compat: Comparing darray and varray relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
@@ -493,16 +493,16 @@ Exception: Hack Array Compat: Comparing darray and array
 Exception: Hack Array Compat: Comparing darray and array
 Exception: Hack Array Compat: Comparing darray and array
 Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing darray and array
+Exception: Hack Array Compat: Comparing darray and array relationally
+Exception: Hack Array Compat: Comparing array and darray relationally
+Exception: Hack Array Compat: Comparing darray and array relationally
 Exception: Hack Array Compat: Comparing darray and varray
 Exception: Hack Array Compat: Comparing darray and varray
 Exception: Hack Array Compat: Comparing darray and varray
 Exception: Hack Array Compat: Comparing darray and varray
-Exception: Hack Array Compat: Comparing darray and varray
-Exception: Hack Array Compat: Comparing varray and darray
-Exception: Hack Array Compat: Comparing darray and varray
+Exception: Hack Array Compat: Comparing darray and varray relationally
+Exception: Hack Array Compat: Comparing varray and darray relationally
+Exception: Hack Array Compat: Comparing darray and varray relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
@@ -510,72 +510,72 @@ Exception: Hack Array Compat: Comparing darray and array
 Exception: Hack Array Compat: Comparing darray and array
 Exception: Hack Array Compat: Comparing darray and array
 Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing darray and array
+Exception: Hack Array Compat: Comparing darray and array relationally
+Exception: Hack Array Compat: Comparing array and darray relationally
+Exception: Hack Array Compat: Comparing darray and array relationally
 Exception: Hack Array Compat: Comparing array and varray
 Exception: Hack Array Compat: Comparing array and varray
 Exception: Hack Array Compat: Comparing array and varray
 Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing array and varray
+Exception: Hack Array Compat: Comparing array and varray relationally
+Exception: Hack Array Compat: Comparing varray and array relationally
+Exception: Hack Array Compat: Comparing array and varray relationally
 Exception: Hack Array Compat: Comparing array and darray
 Exception: Hack Array Compat: Comparing array and darray
 Exception: Hack Array Compat: Comparing array and darray
 Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing array and varray
+Exception: Hack Array Compat: Comparing array and darray relationally
+Exception: Hack Array Compat: Comparing darray and array relationally
+Exception: Hack Array Compat: Comparing array and darray relationally
 Exception: Hack Array Compat: Comparing array and varray
 Exception: Hack Array Compat: Comparing array and varray
 Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing array and varray
+Exception: Hack Array Compat: Comparing array and varray relationally
+Exception: Hack Array Compat: Comparing varray and array relationally
+Exception: Hack Array Compat: Comparing array and varray relationally
 Exception: Hack Array Compat: Comparing array and darray
 Exception: Hack Array Compat: Comparing array and darray
 Exception: Hack Array Compat: Comparing array and darray
 Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing array and darray
+Exception: Hack Array Compat: Comparing array and darray relationally
+Exception: Hack Array Compat: Comparing darray and array relationally
+Exception: Hack Array Compat: Comparing array and darray relationally
 Exception: Hack Array Compat: Comparing varray and darray
 Exception: Hack Array Compat: Comparing varray and darray
 Exception: Hack Array Compat: Comparing varray and darray
 Exception: Hack Array Compat: Comparing varray and darray
-Exception: Hack Array Compat: Comparing varray and darray
-Exception: Hack Array Compat: Comparing darray and varray
-Exception: Hack Array Compat: Comparing varray and darray
+Exception: Hack Array Compat: Comparing varray and darray relationally
+Exception: Hack Array Compat: Comparing darray and varray relationally
+Exception: Hack Array Compat: Comparing varray and darray relationally
 Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing varray and darray
-Exception: Hack Array Compat: Comparing varray and darray
+Exception: Hack Array Compat: Comparing varray and array relationally
+Exception: Hack Array Compat: Comparing array and varray relationally
+Exception: Hack Array Compat: Comparing varray and array relationally
 Exception: Hack Array Compat: Comparing varray and darray
 Exception: Hack Array Compat: Comparing varray and darray
 Exception: Hack Array Compat: Comparing varray and darray
-Exception: Hack Array Compat: Comparing darray and varray
 Exception: Hack Array Compat: Comparing varray and darray
+Exception: Hack Array Compat: Comparing varray and darray relationally
+Exception: Hack Array Compat: Comparing darray and varray relationally
+Exception: Hack Array Compat: Comparing varray and darray relationally
 Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing darray and varray
-Exception: Hack Array Compat: Comparing darray and varray
+Exception: Hack Array Compat: Comparing varray and array relationally
+Exception: Hack Array Compat: Comparing array and varray relationally
+Exception: Hack Array Compat: Comparing varray and array relationally
 Exception: Hack Array Compat: Comparing darray and varray
 Exception: Hack Array Compat: Comparing darray and varray
 Exception: Hack Array Compat: Comparing darray and varray
-Exception: Hack Array Compat: Comparing varray and darray
 Exception: Hack Array Compat: Comparing darray and varray
+Exception: Hack Array Compat: Comparing darray and varray relationally
+Exception: Hack Array Compat: Comparing varray and darray relationally
+Exception: Hack Array Compat: Comparing darray and varray relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
@@ -583,16 +583,16 @@ Exception: Hack Array Compat: Comparing darray and array
 Exception: Hack Array Compat: Comparing darray and array
 Exception: Hack Array Compat: Comparing darray and array
 Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing darray and array
+Exception: Hack Array Compat: Comparing darray and array relationally
+Exception: Hack Array Compat: Comparing array and darray relationally
+Exception: Hack Array Compat: Comparing darray and array relationally
 Exception: Hack Array Compat: Comparing darray and varray
 Exception: Hack Array Compat: Comparing darray and varray
 Exception: Hack Array Compat: Comparing darray and varray
 Exception: Hack Array Compat: Comparing darray and varray
-Exception: Hack Array Compat: Comparing darray and varray
-Exception: Hack Array Compat: Comparing varray and darray
-Exception: Hack Array Compat: Comparing darray and varray
+Exception: Hack Array Compat: Comparing darray and varray relationally
+Exception: Hack Array Compat: Comparing varray and darray relationally
+Exception: Hack Array Compat: Comparing darray and varray relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
@@ -600,37 +600,37 @@ Exception: Hack Array Compat: Comparing darray and array
 Exception: Hack Array Compat: Comparing darray and array
 Exception: Hack Array Compat: Comparing darray and array
 Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing darray and array
+Exception: Hack Array Compat: Comparing darray and array relationally
+Exception: Hack Array Compat: Comparing array and darray relationally
+Exception: Hack Array Compat: Comparing darray and array relationally
 Exception: Hack Array Compat: Comparing array and varray
 Exception: Hack Array Compat: Comparing array and varray
 Exception: Hack Array Compat: Comparing array and varray
 Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing array and varray
+Exception: Hack Array Compat: Comparing array and varray relationally
+Exception: Hack Array Compat: Comparing varray and array relationally
+Exception: Hack Array Compat: Comparing array and varray relationally
 Exception: Hack Array Compat: Comparing array and darray
 Exception: Hack Array Compat: Comparing array and darray
 Exception: Hack Array Compat: Comparing array and darray
 Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing array and varray
+Exception: Hack Array Compat: Comparing array and darray relationally
+Exception: Hack Array Compat: Comparing darray and array relationally
+Exception: Hack Array Compat: Comparing array and darray relationally
 Exception: Hack Array Compat: Comparing array and varray
 Exception: Hack Array Compat: Comparing array and varray
 Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing varray and array
 Exception: Hack Array Compat: Comparing array and varray
+Exception: Hack Array Compat: Comparing array and varray relationally
+Exception: Hack Array Compat: Comparing varray and array relationally
+Exception: Hack Array Compat: Comparing array and varray relationally
 Exception: Hack Array Compat: Comparing array and darray
 Exception: Hack Array Compat: Comparing array and darray
 Exception: Hack Array Compat: Comparing array and darray
 Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing array and darray
+Exception: Hack Array Compat: Comparing array and darray relationally
+Exception: Hack Array Compat: Comparing darray and array relationally
+Exception: Hack Array Compat: Comparing array and darray relationally
 ============== literals (exn) ========================
 Exception: Hack Array Compat: Comparing varray and darray
 Exception: Hack Array Compat: Comparing varray and array
@@ -656,24 +656,24 @@ Exception: Hack Array Compat: Comparing darray and varray
 Exception: Hack Array Compat: Comparing darray and array
 Exception: Hack Array Compat: Comparing array and varray
 Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing varray and darray
-Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing darray and varray
-Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing array and darray
+Exception: Hack Array Compat: Comparing varray and darray relationally
+Exception: Hack Array Compat: Comparing varray and array relationally
+Exception: Hack Array Compat: Comparing darray and varray relationally
+Exception: Hack Array Compat: Comparing darray and array relationally
+Exception: Hack Array Compat: Comparing array and varray relationally
+Exception: Hack Array Compat: Comparing array and darray relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
-Exception: Hack Array Compat: Comparing darray and varray
-Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing varray and darray
-Exception: Hack Array Compat: Comparing array and darray
-Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing darray and array
+Exception: Hack Array Compat: Comparing darray and varray relationally
+Exception: Hack Array Compat: Comparing array and varray relationally
+Exception: Hack Array Compat: Comparing varray and darray relationally
+Exception: Hack Array Compat: Comparing array and darray relationally
+Exception: Hack Array Compat: Comparing varray and array relationally
+Exception: Hack Array Compat: Comparing darray and array relationally
 Exception: Hack Array Compat: Comparing two darrays relationally
-Exception: Hack Array Compat: Comparing varray and darray
-Exception: Hack Array Compat: Comparing varray and array
-Exception: Hack Array Compat: Comparing darray and varray
-Exception: Hack Array Compat: Comparing darray and array
-Exception: Hack Array Compat: Comparing array and varray
-Exception: Hack Array Compat: Comparing array and darray
+Exception: Hack Array Compat: Comparing varray and darray relationally
+Exception: Hack Array Compat: Comparing varray and array relationally
+Exception: Hack Array Compat: Comparing darray and varray relationally
+Exception: Hack Array Compat: Comparing darray and array relationally
+Exception: Hack Array Compat: Comparing array and varray relationally
+Exception: Hack Array Compat: Comparing array and darray relationally
 Exception: Hack Array Compat: Comparing two darrays relationally

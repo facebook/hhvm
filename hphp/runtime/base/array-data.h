@@ -960,7 +960,7 @@ void raiseHackArrCompatAdd();
 
 void raiseHackArrCompatArrHackArrCmp();
 void raiseHackArrCompatArrNonArrCmp();
-void raiseHackArrCompatDVArrCmp(const ArrayData*, const ArrayData*);
+void raiseHackArrCompatDVArrCmp(const ArrayData*, const ArrayData*, bool);
 
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
 void raiseHackArrCompatImplicitArrayKey(const TypedValue* key);

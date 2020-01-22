@@ -305,9 +305,13 @@ private:
   SSATmp* preOptimizeAssertLocation(IRInstruction*, Location);
   SSATmp* preOptimizeAssertLoc(IRInstruction*);
   SSATmp* preOptimizeAssertStk(IRInstruction*);
+  Type preOptimizeTypeParam(Location, Type);
   SSATmp* preOptimizeLdLocation(IRInstruction*, Location);
+  SSATmp* preOptimizeLdLocationAddr(IRInstruction*, Location);
   SSATmp* preOptimizeLdLoc(IRInstruction*);
   SSATmp* preOptimizeLdStk(IRInstruction*);
+  SSATmp* preOptimizeLdLocAddr(IRInstruction*);
+  SSATmp* preOptimizeLdStkAddr(IRInstruction*);
   SSATmp* preOptimizeLdMBase(IRInstruction*);
   SSATmp* preOptimizeLdClosureCtx(IRInstruction*);
   SSATmp* preOptimizeLdClosureThis(IRInstruction*);

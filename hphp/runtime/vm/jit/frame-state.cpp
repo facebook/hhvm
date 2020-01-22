@@ -494,6 +494,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case AssertMBase:
   case CheckMBase:
+    cur().mbr.ptrType &= inst->typeParam().lval(Ptr::Ptr);
     refineType(Location::MBase{}, inst->typeParam(),
                TypeSource::makeGuard(inst));
     break;
@@ -1457,6 +1458,7 @@ void FrameStateMgr::clearLocals() {
 
 void FrameStateMgr::setMemberBase(SSATmp* base,
                                   folly::Optional<Type> predicted) {
+  cur().mbr.ptrType &= base->type().lval(Ptr::Ptr);
   setValueImpl(Location::MBase{}, cur().mbase, base, predicted);
 }
 

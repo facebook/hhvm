@@ -813,18 +813,14 @@ inline SSATmp* pushStLoc(IRGS& env,
 
 inline SSATmp* ldLocAddr(IRGS& env, uint32_t locId) {
   env.irb->constrainLocal(locId, DataTypeSpecific, "LdLocAddr");
-  return gen(env, LdLocAddr, LocalId(locId), fp(env));
+  return gen(env, LdLocAddr, LocalId(locId), TPtrToFrameCell, fp(env));
 }
 
 inline SSATmp* ldStkAddr(IRGS& env, BCSPRelOffset relOffset) {
   auto const offset = offsetFromIRSP(env, relOffset);
   env.irb->constrainStack(offset, DataTypeSpecific);
-  return gen(
-    env,
-    LdStkAddr,
-    IRSPRelOffsetData { offset },
-    sp(env)
-  );
+  auto const data = IRSPRelOffsetData{offset};
+  return gen(env, LdStkAddr, data, TPtrToStkCell, sp(env));
 }
 
 inline void decRefLocalsInline(IRGS& env) {

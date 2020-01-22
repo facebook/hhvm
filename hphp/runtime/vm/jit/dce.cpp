@@ -1453,6 +1453,7 @@ void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
         &inst,
         LdStkAddr,
         IRSPRelOffsetData { locToStkOff(*inst.extra<LocalId>(), inst.src(0)) },
+        inst.typeParam().deref().mem(Mem::Ptr, Ptr::Stk),
         mainSP
       );
       retypeDests(&inst, &unit);

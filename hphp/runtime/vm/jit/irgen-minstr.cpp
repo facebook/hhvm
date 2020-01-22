@@ -1255,11 +1255,10 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Update FrameState for a base at a known location.
+ * Update FrameState for a base with a known SSATmp value.
  */
-void simpleBaseImpl(IRGS& env, SSATmp* base, MOpMode mode, Location l) {
+void simpleBaseImpl(IRGS& env, SSATmp* base, MOpMode mode) {
   env.irb->fs().setMemberBase(base);
-
   setEmptyMIPropState(env, base, mode);
 }
 
@@ -1361,8 +1360,7 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
   return propPtr;
 }
 
-SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
-  assertx(baseType <= TVec);
+SSATmp* vecElemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   assertx(key->isA(TInt) || key->isA(TStr) ||
           !key->type().maybe(TInt | TStr));
 
@@ -1377,12 +1375,12 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 
   if (define) {
     return key->isA(TInt)
-      ? gen(env, ElemVecD, baseType, ldMBase(env), key)
+      ? gen(env, ElemVecD, ldMBase(env), key)
       : invalid_key();
   }
 
   if (unset) {
-    return key->isA(TInt) ? gen(env, ElemVecU, baseType, ldMBase(env), key) :
+    return key->isA(TInt) ? gen(env, ElemVecU, ldMBase(env), key) :
            key->isA(TStr) ? ptrToInitNull(env)
            /* invalid */  : invalid_key();
   }
@@ -1425,9 +1423,7 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
   return invalid_key();
 }
 
-SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
-  assertx(baseType <= TDict);
-
+SSATmp* dictElemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   auto const unset = mode == MOpMode::Unset;
   auto const define = mode == MOpMode::Define;
 
@@ -1445,8 +1441,7 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
     },
     [&] (SSATmp* key, SizeHintData data) {
       if (define || unset) {
-        return gen(env, unset ? ElemDictU : ElemDictD,
-                   baseType, ldMBase(env), key);
+        return gen(env, unset ? ElemDictU : ElemDictD, ldMBase(env), key);
       }
       assertx(
         mode == MOpMode::Warn ||
@@ -1459,9 +1454,7 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
   );
 }
 
-SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
-  assertx(baseType <= TKeyset);
-
+SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   auto const unset = mode == MOpMode::Unset;
   auto const define = mode == MOpMode::Define;
 
@@ -1487,7 +1480,7 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
       return gen(env, ElemKeysetK, IndexData { pos }, keyset, key);
     },
     [&] (SSATmp* key, SizeHintData data) {
-      if (unset) return gen(env, ElemKeysetU, baseType, ldMBase(env), key);
+      if (unset) return gen(env, ElemKeysetU, ldMBase(env), key);
       assertx(
         mode == MOpMode::Warn ||
         mode == MOpMode::None ||
@@ -1511,9 +1504,9 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   assertx(!define || !unset);
   assertx(!define || !warn);
 
-  if (baseType <= TVec) return vecElemImpl(env, mode, baseType, key);
-  if (baseType <= TDict) return dictElemImpl(env, mode, baseType, key);
-  if (baseType <= TKeyset) return keysetElemImpl(env, mode, baseType, key);
+  if (baseType <= TVec) return vecElemImpl(env, mode, key);
+  if (baseType <= TDict) return dictElemImpl(env, mode, key);
+  if (baseType <= TKeyset) return keysetElemImpl(env, mode, key);
 
   if (baseType <= TArr && key->type().subtypeOfAny(TInt, TStr)) {
     auto const base = extractBase(env);
@@ -1524,8 +1517,7 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
       },
       [&] (SSATmp* key, SizeHintData data) {
         if (define || unset) {
-          return gen(env, unset ? ElemArrayU : ElemArrayD,
-                     base->type(), ldMBase(env), key);
+          return gen(env, unset ? ElemArrayU : ElemArrayD, ldMBase(env), key);
         }
         assertx(
           mode == MOpMode::Warn ||
@@ -2021,20 +2013,17 @@ void emitBaseL(IRGS& env, int32_t locId, MOpMode mode) {
     gen(env, RaiseUninitLoc, cns(env, curFunc(env)->localVarName(locId)));
   }
 
-  simpleBaseImpl(
-    env, base, mode, Location::Local { safe_cast<uint32_t>(locId) }
-  );
+  simpleBaseImpl(env, base, mode);
 }
 
 void emitBaseC(IRGS& env, uint32_t idx, MOpMode mode) {
   initTvRefs(env);
 
   auto const bcOff = BCSPRelOffset{safe_cast<int32_t>(idx)};
-  auto const irOff = offsetFromIRSP(env, bcOff);
   stMBase(env, ldStkAddr(env, bcOff));
 
   auto base = topC(env, bcOff);
-  simpleBaseImpl(env, base, mode, Location::Stack { offsetFromFP(env, irOff) });
+  simpleBaseImpl(env, base, mode);
 }
 
 void emitBaseH(IRGS& env) {

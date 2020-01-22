@@ -85,9 +85,22 @@ struct RefineTmpsRec {
       FTRACE(3, "  {}\n", inst);
       for (auto srcID = uint32_t{0}; srcID < inst.numSrcs(); ++srcID) {
         auto const src = inst.src(srcID);
-        if (auto const replace = find_replacement(src, blk)) {
-          FTRACE(1, "    rewrite {} -> {} in {}\n", *src, *replace, inst);
-          inst.setSrc(srcID, replace);
+        // We'll often see multiple refinements of a given tmp in a row; for
+        // example, in a retranslation chain, we may see a negative type assert
+        // for the previous check followed by a new CheckType. Keep following
+        // this chain of replacements as long as they're usable.
+        //
+        // We shouldn't hit a cycle here because we always transition to a tmp
+        // defined earlier in the same block or to one defined in a dominator.
+        auto prev = src;
+        auto next = src;
+        while (next != nullptr) {
+          prev = next;
+          next = find_replacement(next, blk);
+        }
+        if (prev != src) {
+          FTRACE(1, "    rewrite {} -> {} in {}\n", *src, *prev, inst);
+          inst.setSrc(srcID, prev);
           if (inst.hasDst()) needsReflow = true;
         }
       }

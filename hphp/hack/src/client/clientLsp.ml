@@ -1392,6 +1392,8 @@ let do_definition_local
     Lwt.return results
   | Error edata -> raise (Server_nonfatal_exception edata)
 
+let snippet_re = Str.regexp {|[\$}]|} (* snippets must backslash-escape "$\}" *)
+
 let make_ide_completion_response
     (result : AutocompleteTypes.ide_result) (filename : string) :
     Completion.completionList Lwt.t =
@@ -1441,7 +1443,10 @@ let make_ide_completion_response
            && (not is_caret_followed_by_lparen)
            && completion.res_kind <> SearchUtils.SI_LocalVariable ->
       (* "method(${1:arg1}, ...)" but for args we just use param names. *)
-      let f i param = Printf.sprintf "${%i:%s}" (i + 1) param.param_name in
+      let f i param =
+        let name = Str.global_replace snippet_re "\\\\\\0" param.param_name in
+        Printf.sprintf "${%i:%s}" (i + 1) name
+      in
       let params = String.concat ~sep:", " (List.mapi details.params ~f) in
       ( `InsertText (Printf.sprintf "%s(%s)" completion.res_name params),
         SnippetFormat )

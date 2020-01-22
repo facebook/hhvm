@@ -1280,7 +1280,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "inlineDetail": "(mixed $value)",
                             "itemType": "bool",
                             "sortText": "isValid",
-                            "insertText": "isValid(${1:$value})",
+                            "insertText": "isValid(${1:\\$value})",
                             "insertTextFormat": InsertTextFormat.Snippet.value,
                             "data": {
                                 "fullname": "isValid",
@@ -1331,7 +1331,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "inlineDetail": "(mixed $value)",
                             "itemType": "?Elsa",
                             "sortText": "coerce",
-                            "insertText": "coerce(${1:$value})",
+                            "insertText": "coerce(${1:\\$value})",
                             "insertTextFormat": InsertTextFormat.Snippet.value,
                             "data": {
                                 "fullname": "coerce",
@@ -1348,7 +1348,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "inlineDetail": "(Traversable<mixed> $values)",
                             "itemType": "Container<Elsa>",
                             "sortText": "assertAll",
-                            "insertText": "assertAll(${1:$values})",
+                            "insertText": "assertAll(${1:\\$values})",
                             "insertTextFormat": InsertTextFormat.Snippet.value,
                             "data": {
                                 "fullname": "assertAll",
@@ -1365,7 +1365,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "inlineDetail": "(mixed $value)",
                             "itemType": "Elsa",
                             "sortText": "assert",
-                            "insertText": "assert(${1:$value})",
+                            "insertText": "assert(${1:\\$value})",
                             "insertTextFormat": InsertTextFormat.Snippet.value,
                             "data": {
                                 "fullname": "assert",
@@ -2436,7 +2436,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "inlineDetail": "(mixed $value)",
                             "itemType": "bool",
                             "sortText": "isValid",
-                            "insertText": "isValid(${1:$value})",
+                            "insertText": "isValid(${1:\\$value})",
                             "insertTextFormat": InsertTextFormat.Snippet.value,
                             "data": {
                                 "fullname": "isValid",
@@ -2487,7 +2487,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "inlineDetail": "(mixed $value)",
                             "itemType": "?Elsa",
                             "sortText": "coerce",
-                            "insertText": "coerce(${1:$value})",
+                            "insertText": "coerce(${1:\\$value})",
                             "insertTextFormat": InsertTextFormat.Snippet.value,
                             "data": {
                                 "fullname": "coerce",
@@ -2504,7 +2504,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "inlineDetail": "(Traversable<mixed> $values)",
                             "itemType": "Container<Elsa>",
                             "sortText": "assertAll",
-                            "insertText": "assertAll(${1:$values})",
+                            "insertText": "assertAll(${1:\\$values})",
                             "insertTextFormat": InsertTextFormat.Snippet.value,
                             "data": {
                                 "fullname": "assertAll",
@@ -2521,7 +2521,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "inlineDetail": "(mixed $value)",
                             "itemType": "Elsa",
                             "sortText": "assert",
-                            "insertText": "assert(${1:$value})",
+                            "insertText": "assert(${1:\\$value})",
                             "insertTextFormat": InsertTextFormat.Snippet.value,
                             "data": {
                                 "fullname": "assert",

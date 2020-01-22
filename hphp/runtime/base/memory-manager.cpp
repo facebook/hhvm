@@ -312,7 +312,9 @@ void MemoryManager::recordStats(StructuredLogEntry& entry) {
  * time the fast path is interrupted.
  */
 void MemoryManager::updateMMDebt() {
-  auto const delta = static_cast<uint64_t>(m_nextGC) - m_stats.mmUsage();
+  const int64_t delta_sample = m_nextSample - m_stats.mmAllocated();
+  const int64_t delta_gc = m_nextGC - m_stats.mmUsage();
+  auto const delta = static_cast<uint64_t>(std::min(delta_sample, delta_gc));
   auto const new_debt = delta > std::numeric_limits<int64_t>::max() ? 0 : delta;
   m_stats.mm_uallocated += new_debt - m_stats.mm_udebt;
   m_stats.mm_udebt = new_debt;
@@ -807,6 +809,7 @@ void* MemoryManager::mallocSmallSizeSlow(size_t nbytes, size_t index) {
   assertx(nbytes == sizeIndex2Size(index));
 
   if (UNLIKELY(m_stats.mm_udebt > std::numeric_limits<int64_t>::max())) {
+    checkSampling(nbytes);
     // Must be here to check gc; might still have free objects.
     checkGC();
     updateMMDebt();
@@ -1078,8 +1081,7 @@ bool MemoryManager::triggerProfiling(const std::string& filename) {
 void MemoryManager::requestInit() {
   tl_heap->m_req_start_micros = HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
 
-  if (RuntimeOption::DisableSmallAllocator &&
-      RuntimeOption::EvalHeapAllocSampleRequests &&
+  if (RuntimeOption::EvalHeapAllocSampleRequests > 0 &&
       RuntimeOption::EvalHeapAllocSampleBytes > 0) {
     if (!folly::Random::rand32(RuntimeOption::EvalHeapAllocSampleRequests)) {
       tl_heap->m_nextSample =
@@ -1124,10 +1126,9 @@ void MemoryManager::requestInit() {
 }
 
 void MemoryManager::requestShutdown() {
-  if (tl_heap->m_nextSample != std::numeric_limits<int64_t>::max()) {
-    assertx(tl_heap->m_bypassSlabAlloc);
+  if (tl_heap->m_nextSample != kNoNextSample) {
     reset_alloc_sampling();
-    tl_heap->m_nextSample = std::numeric_limits<int64_t>::max();
+    tl_heap->m_nextSample = kNoNextSample;
   }
 
   auto& profctx = tl_heap->m_profctx;

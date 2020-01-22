@@ -1013,6 +1013,7 @@ private:
   TRACE_SET_MOD(mm);
 
   static auto constexpr kNoNextGC = std::numeric_limits<int64_t>::max();
+  static auto constexpr kNoNextSample = std::numeric_limits<int64_t>::max();
 
   void* m_front{nullptr};
   void* m_limit{nullptr};
@@ -1020,6 +1021,7 @@ private:
   StringDataNode m_strings; // in-place node is head of circular list
   std::vector<APCLocalArray*> m_apc_arrays;
   int64_t m_nextGC{kNoNextGC}; // request gc when heap usage reaches this size
+  int64_t m_nextSample{kNoNextSample};
   int64_t m_usageLimit; // OOM when m_stats.usage() > m_usageLimit
   MemoryUsageStats m_stats;
   HeapImpl m_heap;
@@ -1041,9 +1043,6 @@ private:
 
   // Peak memory threshold callback (installed via setMemThresholdCallback)
   size_t m_memThresholdCallbackPeakUsage{SIZE_MAX};
-
-  // Allocation sampling.
-  int64_t m_nextSample{std::numeric_limits<int64_t>::max()};
 
   // pointers to jemalloc-maintained allocation counters
   uint64_t* m_allocated;

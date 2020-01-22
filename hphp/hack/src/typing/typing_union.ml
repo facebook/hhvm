@@ -639,3 +639,8 @@ let () = Typing_utils.union_list_ref := union_list
 let () = Typing_utils.fold_union_ref := fold_union
 
 let () = Typing_utils.simplify_unions_ref := simplify_unions
+
+let () =
+  (* discard optional parameter. *)
+  let simplify_unions env ty = simplify_unions env ty in
+  Typing_env.simplify_unions_ref := simplify_unions

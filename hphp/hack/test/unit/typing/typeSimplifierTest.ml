@@ -15,7 +15,6 @@ module Inf = Typing_inference_env
 module Log = Typing_log
 module MakeType = Typing_make_type
 module Reason = Typing_reason
-module Solver = Typing_solver
 module U = Typing_union
 
 module Helpers : sig
@@ -30,6 +29,8 @@ module Helpers : sig
   val assert_tyvars_contain : env -> Ident.t list IMap.t -> unit
 
   val assert_ty_equal : locl_ty -> locl_ty -> unit
+
+  val assert_are_alias_for_another_var : env -> Ident.t list -> unit
 
   val show_env : env -> unit
 end = struct
@@ -90,6 +91,14 @@ end = struct
 
   let assert_ty_equal ty1 ty2 = assert_equal (snd ty1) (snd ty2)
 
+  let assert_are_alias_for_another_var env vars =
+    List.iter vars ~f:(fun v ->
+        assert_bool
+          (Printf.sprintf
+             "Variable %d should be an alias for another variable."
+             v)
+          (Inf.is_alias_for_another_var env.inference_env v))
+
   let show_env env = Log.hh_show_env Pos.none env
 end
 
@@ -101,8 +110,8 @@ let int_union _test_ctx =
   let (env, tv2, n2) = fresh_tyvar env in
   let (env, tunion, nu) = union env tv1 tv2 in
   assert_tyvars_contain env @@ IMap.of_list [(nu, [n1; n2]); (n1, []); (n2, [])];
-  let env = Solver.bind env n1 tint in
-  let env = Solver.bind env n2 tint in
+  let env = Env.add env n1 tint in
+  let env = Env.add env n2 tint in
   let (env, etunion) = Env.expand_type env tunion in
   assert_ty_equal etunion tint;
   assert_tyvars_contain env @@ IMap.of_list [(nu, []); (n1, []); (n2, [])]
@@ -111,19 +120,20 @@ let alias_chain _ =
   let env = dummy_env in
   let (env, tv1, v1) = fresh_tyvar env in
   let (env, tv2, v2) = fresh_tyvar env in
-  let env = Solver.bind env v2 tv1 in
+  let env = Env.add env v2 tv1 in
   assert_tyvars_contain env @@ IMap.of_list [(v1, []); (v2, [v1])];
   let (env, tv3, v3) = fresh_tyvar env in
-  let env = Solver.bind env v3 tv2 in
+  let env = Env.add env v3 tv2 in
   assert_tyvars_contain env @@ IMap.of_list [(v1, []); (v2, [v1]); (v3, [v2])];
   let (env, tv4, v4) = fresh_tyvar env in
-  let env = Solver.bind env v4 tv3 in
+  let env = Env.add env v4 tv3 in
   let (env, _ty) = Env.expand_type env tv4 in
   assert_tyvars_contain env
   @@ IMap.of_list [(v1, []); (v2, [v1]); (v3, [v1]); (v4, [v1])];
-  let env = Solver.bind env v1 tint in
+  let env = Env.add env v1 tint in
   assert_tyvars_contain env
-  @@ IMap.of_list [(v1, []); (v2, []); (v3, []); (v4, [])]
+  @@ IMap.of_list [(v1, []); (v2, []); (v3, []); (v4, [])];
+  assert_are_alias_for_another_var env [v2; v3; v4]
 
 let union_of_union _ =
   let env = dummy_env in
@@ -143,7 +153,7 @@ let union_of_union _ =
          (v2l, []);
          (v2r, []);
        ];
-  let env = Solver.bind env v2l tvu1 in
+  let env = Env.add env v2l tvu1 in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -154,7 +164,7 @@ let union_of_union _ =
          (v2l, [vu1]);
          (v2r, []);
        ];
-  let env = Solver.bind env v1l tint in
+  let env = Env.add env v1l tint in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -165,7 +175,7 @@ let union_of_union _ =
          (v2l, [vu1]);
          (v2r, []);
        ];
-  let env = Solver.bind env v2r tint in
+  let env = Env.add env v2r tint in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -176,14 +186,15 @@ let union_of_union _ =
          (v2l, [vu1]);
          (v2r, []);
        ];
-  let env = Solver.bind env v1r tint in
+  let env = Env.add env v1r tint in
   assert_tyvars_contain env
   @@ IMap.of_list
        [(vu2, []); (vu1, []); (v1l, []); (v1r, []); (v2l, []); (v2r, [])];
   let (env, ty1) = Env.expand_type env tvu1 in
   assert_ty_equal ty1 tint;
-  let (_env, ty2) = Env.expand_type env tvu2 in
-  assert_ty_equal ty2 tint
+  let (env, ty2) = Env.expand_type env tvu2 in
+  assert_ty_equal ty2 tint;
+  assert_are_alias_for_another_var env [v2l]
 
 let union_of_union_w_chain1 _ =
   let env = dummy_env in
@@ -204,7 +215,7 @@ let union_of_union_w_chain1 _ =
          (v2r, []);
        ];
   let (env, tvch1, vch1) = fresh_tyvar env in
-  let env = Solver.bind env v2l tvch1 in
+  let env = Env.add env v2l tvch1 in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -216,7 +227,7 @@ let union_of_union_w_chain1 _ =
          (v2r, []);
          (vch1, []);
        ];
-  let env = Solver.bind env vch1 tvu1 in
+  let env = Env.add env vch1 tvu1 in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -228,7 +239,7 @@ let union_of_union_w_chain1 _ =
          (v2r, []);
          (vch1, [vu1]);
        ];
-  let env = Solver.bind env v1l tint in
+  let env = Env.add env v1l tint in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -240,7 +251,7 @@ let union_of_union_w_chain1 _ =
          (v2r, []);
          (vch1, [vu1]);
        ];
-  let env = Solver.bind env v2r tint in
+  let env = Env.add env v2r tint in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -252,7 +263,7 @@ let union_of_union_w_chain1 _ =
          (v2r, []);
          (vch1, [vu1]);
        ];
-  let env = Solver.bind env v1r tint in
+  let env = Env.add env v1r tint in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -266,8 +277,9 @@ let union_of_union_w_chain1 _ =
        ];
   let (env, ty1) = Env.expand_type env tvu1 in
   assert_ty_equal ty1 tint;
-  let (_env, ty2) = Env.expand_type env tvu2 in
-  assert_ty_equal ty2 tint
+  let (env, ty2) = Env.expand_type env tvu2 in
+  assert_ty_equal ty2 tint;
+  assert_are_alias_for_another_var env [v2l; vch1]
 
 let union_of_union_w_chain2 _ =
   let env = dummy_env in
@@ -288,7 +300,7 @@ let union_of_union_w_chain2 _ =
          (v2r, []);
        ];
   let (env, tvch1, vch1) = fresh_tyvar env in
-  let env = Solver.bind env v2l tvch1 in
+  let env = Env.add env v2l tvch1 in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -301,7 +313,7 @@ let union_of_union_w_chain2 _ =
          (vch1, []);
        ];
   let (env, tvch2, vch2) = fresh_tyvar env in
-  let env = Solver.bind env vch1 tvch2 in
+  let env = Env.add env vch1 tvch2 in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -314,7 +326,7 @@ let union_of_union_w_chain2 _ =
          (vch1, [vch2]);
          (vch2, []);
        ];
-  let env = Solver.bind env vch2 tvu1 in
+  let env = Env.add env vch2 tvu1 in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -327,7 +339,7 @@ let union_of_union_w_chain2 _ =
          (vch1, [vch2]);
          (vch2, [vu1]);
        ];
-  let env = Solver.bind env v1l tint in
+  let env = Env.add env v1l tint in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -340,7 +352,7 @@ let union_of_union_w_chain2 _ =
          (vch1, [vch2]);
          (vch2, [vu1]);
        ];
-  let env = Solver.bind env v2r tint in
+  let env = Env.add env v2r tint in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -353,7 +365,7 @@ let union_of_union_w_chain2 _ =
          (vch1, [vch2]);
          (vch2, [vu1]);
        ];
-  let env = Solver.bind env v1r tint in
+  let env = Env.add env v1r tint in
   assert_tyvars_contain env
   @@ IMap.of_list
        [
@@ -368,8 +380,9 @@ let union_of_union_w_chain2 _ =
        ];
   let (env, ty1) = Env.expand_type env tvu1 in
   assert_ty_equal ty1 tint;
-  let (_env, ty2) = Env.expand_type env tvu2 in
-  assert_ty_equal ty2 tint
+  let (env, ty2) = Env.expand_type env tvu2 in
+  assert_ty_equal ty2 tint;
+  assert_are_alias_for_another_var env [v2l; vch1; vch2]
 
 let diamond _ =
   let env = dummy_env in
@@ -378,15 +391,16 @@ let diamond _ =
   let (env, tvu, vu) = union env tvl tvr in
   assert_tyvars_contain env @@ IMap.of_list [(vl, []); (vr, []); (vu, [vl; vr])];
   let (env, tv, v) = fresh_tyvar env in
-  let env = Solver.bind env vl tv in
-  let env = Solver.bind env vr tv in
+  let env = Env.add env vl tv in
+  let env = Env.add env vr tv in
   assert_tyvars_contain env
   @@ IMap.of_list [(v, []); (vl, [v]); (vr, [v]); (vu, [vl; vr])];
-  let env = Solver.bind env v tint in
+  let env = Env.add env v tint in
   assert_tyvars_contain env
   @@ IMap.of_list [(v, []); (vl, []); (vr, []); (vu, [])];
-  let (_env, ty) = Env.expand_type env tvu in
-  assert_ty_equal ty tint
+  let (env, ty) = Env.expand_type env tvu in
+  assert_ty_equal ty tint;
+  assert_are_alias_for_another_var env [vl; vr]
 
 let () =
   "typeSimplifierTest"

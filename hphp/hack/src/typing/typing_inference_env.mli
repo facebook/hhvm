@@ -63,7 +63,11 @@ val contains_unsolved_tyvars : t -> Ident.t -> bool
 
 val make_tyvar_no_more_occur_in_tyvar : t -> int -> no_more_in:int -> t
 
+val bind : t -> ?tyvar_pos:Pos.t -> Ident.t -> locl_ty -> t
+
 val add : t -> ?tyvar_pos:Pos.t -> Ident.t -> locl_ty -> t
+
+val get_direct_binding : t -> Ident.t -> locl_ty option
 
 val get_type : t -> Reason.t -> Ident.t -> t * locl_ty
 

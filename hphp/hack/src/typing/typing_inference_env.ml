@@ -319,15 +319,24 @@ let make_tyvar_no_more_occur_in_tyvar env v ~no_more_in:v' =
         ~no_more_in:v';
   }
 
+let get_direct_binding env v =
+  match get_solving_info_opt env v with
+  | None
+  | Some (TVIConstraints _) ->
+    None
+  | Some (TVIType ty) -> Some ty
+
+let bind env ?(tyvar_pos = Pos.none) v ty =
+  set_solving_info env ~tyvar_pos v (TVIType ty)
+
 let add env ?(tyvar_pos = Pos.none) v ty =
   let env =
     { env with tyvar_occurrences = Occ.unbind_tyvar env.tyvar_occurrences v }
   in
-  let env =
-    let unsolved_vars_in_ty = get_unsolved_vars_in_ty env ty in
-    make_tyvars_occur_in_tyvar env unsolved_vars_in_ty ~occur_in:v
-  in
-  set_solving_info env ~tyvar_pos v (TVIType ty)
+  let unsolved_vars_in_ty = get_unsolved_vars_in_ty env ty in
+  let env = make_tyvars_occur_in_tyvar env unsolved_vars_in_ty ~occur_in:v in
+  let env = bind env ~tyvar_pos v ty in
+  env
 
 let get_type env r v =
   let rec get v aliases =

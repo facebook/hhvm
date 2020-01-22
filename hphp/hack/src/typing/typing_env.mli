@@ -12,6 +12,8 @@ open Decl_provider
 open Typing_defs
 module TPEnv = Type_parameter_env
 
+val simplify_unions_ref : (env -> locl_ty -> env * locl_ty) ref
+
 val show_env : env -> string
 
 val pp_env : Format.formatter -> env -> unit

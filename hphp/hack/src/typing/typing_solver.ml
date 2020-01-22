@@ -216,7 +216,6 @@ let bind env var (ty : locl_ty) =
     end else
       Env.add env var ty
   in
-  let env = Typing_type_simplifier.simplify_occurrences env var in
   env
 
 (** If a type variable appear in one of its own lower bounds under a combination

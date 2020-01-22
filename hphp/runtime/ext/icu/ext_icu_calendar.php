@@ -453,7 +453,7 @@ class IntlCalendar {
                       ?int $hour = NULL,
                       ?int $minute = NULL,
                       ?int $second = NULL): bool {
-    return $this->__set_array([$yearOrField,$monthOrValue,
+    return $this->__set_array(varray[$yearOrField,$monthOrValue,
                        $dayOfMonth,$hour,$minute,$second]);
   }
 
@@ -1200,7 +1200,7 @@ class IntlGregorianCalendar extends IntlCalendar {
                               ?int $hour = NULL,
                               ?int $minute = NULL,
                               ?int $second = NULL): void {
-    $this->__ctor_array([$yearOrTz, $monthOrLocale, $day,
+    $this->__ctor_array(varray[$yearOrTz, $monthOrLocale, $day,
                          $hour, $minute, $second]);
   }
 

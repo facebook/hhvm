@@ -106,6 +106,7 @@ struct VariableSerializer {
   // Emit a HAC notice on serialization of the specified kind of array.
   void setHackWarn()  { m_hackWarn = true; }
   void setDictWarn()  { m_dictWarn = true; }
+  void setKeysetWarn()  { m_keysetWarn = true; }
   void setPHPWarn()   { m_phpWarn = true; }
   void setEmptyDArrayWarn()    { m_edWarn = true; }
   void setVecLikeDArrayWarn()  { m_vdWarn = true; }
@@ -254,6 +255,7 @@ private:
   bool m_forcePHPArrays{false};  // serialize PHP and Hack arrays as PHP arrays
   bool m_hackWarn{false};        // warn when attempting on Hack arrays
   bool m_dictWarn{false};        // warn when attempting on dicts
+  bool m_keysetWarn{false};        // warn when attempting on keysets
   bool m_phpWarn{false};         // warn when attempting on PHP arrays
   bool m_edWarn{false};          // warn when attempting on empty darrays
   bool m_vdWarn{false};          // warn when attempting on vec-like darrays
@@ -261,6 +263,7 @@ private:
   bool m_ignoreLateInit{false};  // ignore uninitalized late init props
   bool m_hasHackWarned{false};   // have we already warned on Hack arrays?
   bool m_hasDictWarned{false};   // have we already warned on dicts?
+  bool m_hasKeysetWarned{false};   // have we already warned on dicts?
   bool m_hasPHPWarned{false};    // have we already warned on PHP arrays?
   bool m_hasEDWarned{false};     // have we already warned on empty darrays?
   bool m_hasVDWarned{false};     // have we already warned on vec-like darrays?

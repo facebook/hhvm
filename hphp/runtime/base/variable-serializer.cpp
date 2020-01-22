@@ -1704,6 +1704,10 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasDictWarned = true;
     }
+    if (UNLIKELY(m_keysetWarn && !m_hasKeysetWarned && arr->isKeyset())) {
+      raise_hack_arr_compat_serialize_notice(arr);
+      m_hasKeysetWarned = true;
+    }
     if (UNLIKELY(m_phpWarn && !m_hasPHPWarned && arr->isPHPArray())) {
       raise_hack_arr_compat_serialize_notice(arr);
       m_hasPHPWarned = true;

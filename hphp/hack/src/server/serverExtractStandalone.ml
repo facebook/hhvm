@@ -156,12 +156,27 @@ let get_gconst_mode ctx =
 let get_class_or_typedef_mode ctx name =
   Option.first_some (get_class_mode ctx name) (get_typedef_mode ctx name)
 
-let get_fun_nast ctx name =
+let memoize f =
+  let table = ref SMap.empty in
+  fun ctx key ->
+    if SMap.mem key !table then
+      Some (SMap.find key !table)
+    else
+      let open Option in
+      f ctx key >>= fun value ->
+      table := SMap.add key value !table;
+      Some value
+
+let get_fun_nast =
+  memoize @@ fun ctx name ->
   let open Option in
   get_fun_pos ctx name >>= fun pos ->
   Ast_provider.find_fun_in_file (Pos.filename pos) name >>| Naming.fun_
 
-let get_class_nast ctx name =
+let get_fun_nast_exn ctx name = value_or_not_found name (get_fun_nast ctx name)
+
+let get_class_nast =
+  memoize @@ fun ctx name ->
   let open Option in
   get_class_pos ctx name >>= fun pos ->
   Ast_provider.find_class_in_file (Pos.filename pos) name >>| Naming.class_
@@ -530,7 +545,7 @@ let string_of_fun_param
     default
 
 let get_fun_declaration ctx name =
-  let fun_ = value_or_not_found name @@ get_fun_nast ctx name in
+  let fun_ = get_fun_nast_exn ctx name in
   let user_attributes = string_of_user_attributes fun_.f_user_attributes in
   let tparams = string_of_tparams fun_.f_tparams in
   let variadic =

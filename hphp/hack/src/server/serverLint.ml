@@ -12,6 +12,7 @@ open Utils
 module Hack_bucket = Bucket
 open Core_kernel
 module RP = Relative_path
+module Decl_provider = Decl_provider_ctx
 
 let output_json oc el =
   let errors_json = List.map el Lint.to_json in
@@ -126,12 +127,14 @@ let go_stdin ctx ~(filename : string) ~(contents : string) =
   in
   lint ctx [] [file_with_contents] |> prepare_errors_for_output
 
-let lint_single_xcontroller tcopt name =
+let lint_single_xcontroller ctx name =
   let module Cls = Decl_provider.Class in
-  match Decl_provider.get_class name with
+  match Decl_provider.get_class ctx name with
   | Some class_ ->
     if Cls.extends class_ "\\XControllerBase" && not (Cls.abstract class_) then
-      Linting_service.lint_xcontroller tcopt Cls.(pos class_, name class_)
+      Linting_service.lint_xcontroller
+        ctx.Provider_context.tcopt
+        Cls.(pos class_, name class_)
   | None -> Lint.internal_error Pos.none ("Could not find class: " ^ name)
 
 let lint_xcontroller tcopt acc classes =
@@ -151,9 +154,10 @@ let go_xcontroller genv env (fnl : string list) =
           >>= fun info -> Some (List.map info.FileInfo.classes ~f:snd))
       |> List.concat
     in
+    let ctx = Provider_context.empty ~tcopt:env.tcopt in
     MultiWorker.call
       genv.workers
-      ~job:(lint_xcontroller env.tcopt)
+      ~job:(lint_xcontroller ctx)
       ~merge:List.rev_append
       ~neutral:[]
       ~next:(MultiWorker.next genv.workers classes)

@@ -7,6 +7,4 @@
  *
  *)
 
-let message =
-  "Type checking of this file produced an error with the primary position "
-  ^ "in a different file. Please file a bug."
+let please_file_a_bug_message = "Please file a bug."

@@ -619,7 +619,8 @@ module Typing = struct
     | InvalidDestructure
     | StaticCallWithClassLevelReifiedGeneric
     | SplatArrayRequired
-    | SplatArrayVariadic (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | SplatArrayVariadic
+    | ExceptionOccurred (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

@@ -1285,3 +1285,5 @@ val invalid_sub_string : Pos.t -> string -> unit
 val php_lambda_disallowed : Pos.t -> unit
 
 val static_call_with_class_level_reified_generic : Pos.t -> Pos.t -> unit
+
+val exception_occurred : Pos.t -> unit

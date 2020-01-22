@@ -10,6 +10,6 @@
     (select coroutine_errors.ml from
     (facebook -> facebook/coroutine_errors.ml)
     (-> ../stubs/coroutine_errors.ml))
-    (select badpos_sentinel.ml from
-    (facebook -> facebook/badpos_sentinel.ml)
-    (-> ../stubs/badpos_sentinel.ml))))
+    (select error_message_sentinel.ml from
+    (facebook -> facebook/error_message_sentinel.ml)
+    (-> ../stubs/error_message_sentinel.ml))))

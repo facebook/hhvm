@@ -611,4 +611,5 @@ InvalidDestructure = 4357
 StaticCallWithClassLevelReifiedGeneric = 4358
 SplatArrayRequired = 4359
 SplatArrayVariadic = 4360
+ExceptionOccurred = 4361
   |}]

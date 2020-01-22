@@ -91,32 +91,50 @@ let neutral = Errors.empty
 (* The job that will be run on the workers *)
 (*****************************************************************************)
 
+let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
+    =
+ fun pos f ->
+  try f ()
+  with e ->
+    let stack = Caml.Printexc.get_raw_backtrace () in
+    prerr_endline
+      (Printf.sprintf
+         "Exception while typechecking definition at position %s"
+         (Pos.string (Pos.to_absolute pos)));
+    prerr_endline (Caml.Printexc.to_string e);
+    Caml.Printexc.print_raw_backtrace stderr stack;
+    Errors.exception_occurred pos;
+    None
+
 let type_fun (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string) :
     (Tast.def * Typing_inference_env.t_global_with_pos) option =
   match Ast_provider.find_fun_in_file ~full:true fn x with
   | Some f ->
-    let fun_ = Naming.fun_ f in
-    Nast_check.def (Aast.Fun fun_);
-    let def_opt =
-      Typing.fun_def opts fun_
-      |> Option.map ~f:(fun (f, global_tvenv) -> (Aast.Fun f, global_tvenv))
-    in
-    Option.iter def_opt (fun (f, _) -> Tast_check.def opts f);
-    def_opt
+    handle_exn_as_error f.Aast.f_span (fun () ->
+        let fun_ = Naming.fun_ f in
+        Nast_check.def (Aast.Fun fun_);
+        let def_opt =
+          Typing.fun_def opts fun_
+          |> Option.map ~f:(fun (f, global_tvenv) -> (Aast.Fun f, global_tvenv))
+        in
+        Option.iter def_opt (fun (f, _) -> Tast_check.def opts f);
+        def_opt)
   | None -> None
 
 let type_class (opts : TypecheckerOptions.t) (fn : Relative_path.t) (x : string)
     : (Tast.def * Typing_inference_env.t_global_with_pos list) option =
   match Ast_provider.find_class_in_file ~full:true fn x with
   | Some cls ->
-    let class_ = Naming.class_ cls in
-    Nast_check.def (Aast.Class class_);
-    let def_opt =
-      Typing.class_def opts class_
-      |> Option.map ~f:(fun (c, global_tvenv) -> (Aast.Class c, global_tvenv))
-    in
-    Option.iter def_opt (fun (f, _) -> Tast_check.def opts f);
-    def_opt
+    handle_exn_as_error cls.Aast.c_span (fun () ->
+        let class_ = Naming.class_ cls in
+        Nast_check.def (Aast.Class class_);
+        let def_opt =
+          Typing.class_def opts class_
+          |> Option.map ~f:(fun (c, global_tvenv) ->
+                 (Aast.Class c, global_tvenv))
+        in
+        Option.iter def_opt (fun (f, _) -> Tast_check.def opts f);
+        def_opt)
   | None -> None
 
 let type_record_def
@@ -124,12 +142,13 @@ let type_record_def
     Tast.def option =
   match Ast_provider.find_record_def_in_file ~full:true fn x with
   | Some rd ->
-    let rd = Naming.record_def rd in
-    Nast_check.def (Aast.RecordDef rd);
+    handle_exn_as_error rd.Aast.rd_span (fun () ->
+        let rd = Naming.record_def rd in
+        Nast_check.def (Aast.RecordDef rd);
 
-    let def = Aast.RecordDef (Typing.record_def_def opts rd) in
-    Tast_check.def opts def;
-    Some def
+        let def = Aast.RecordDef (Typing.record_def_def opts rd) in
+        Tast_check.def opts def;
+        Some def)
   | None -> None
 
 let check_typedef
@@ -137,13 +156,14 @@ let check_typedef
     Tast.def option =
   match Ast_provider.find_typedef_in_file ~full:true fn x with
   | Some t ->
-    let typedef = Naming.typedef t in
-    Nast_check.def (Aast.Typedef typedef);
-    let ret = Typing.typedef_def opts typedef in
-    Typing_variance.typedef (Provider_context.empty ~tcopt:opts) x;
-    let def = Aast.Typedef ret in
-    Tast_check.def opts def;
-    Some def
+    handle_exn_as_error Pos.none (fun () ->
+        let typedef = Naming.typedef t in
+        Nast_check.def (Aast.Typedef typedef);
+        let ret = Typing.typedef_def opts typedef in
+        Typing_variance.typedef (Provider_context.empty ~tcopt:opts) x;
+        let def = Aast.Typedef ret in
+        Tast_check.def opts def;
+        Some def)
   | None -> None
 
 let check_const
@@ -152,11 +172,12 @@ let check_const
   match Ast_provider.find_gconst_in_file ~full:true fn x with
   | None -> None
   | Some cst ->
-    let cst = Naming.global_const cst in
-    Nast_check.def (Aast.Constant cst);
-    let def = Aast.Constant (Typing.gconst_def opts cst) in
-    Tast_check.def opts def;
-    Some def
+    handle_exn_as_error cst.Aast.cst_span (fun () ->
+        let cst = Naming.global_const cst in
+        Nast_check.def (Aast.Constant cst);
+        let def = Aast.Constant (Typing.gconst_def opts cst) in
+        Tast_check.def opts def;
+        Some def)
 
 let should_enable_deferring
     (opts : GlobalOptions.t) (file : check_file_computation) =

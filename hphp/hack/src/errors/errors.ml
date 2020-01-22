@@ -143,6 +143,11 @@ let in_lazy_decl = ref None
 
 let (is_hh_fixme : (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
 
+let badpos_message =
+  Printf.sprintf
+    "Type checking of this file produced an error with the primary position in a different file. %s"
+    Error_message_sentinel.please_file_a_bug_message
+
 let try_with_result f1 f2 =
   let error_map_copy = !error_map in
   let accumulate_errors_copy = !accumulate_errors in
@@ -173,7 +178,7 @@ let try_with_result f1 f2 =
      * error position*)
     let l =
       match l with
-      | (_, msg) :: l when msg = Badpos_sentinel.message -> l
+      | (_, msg) :: l when msg = badpos_message -> l
       | _ -> l
     in
     f2 result (code, l)
@@ -769,7 +774,7 @@ let check_pos_msg pos_msg_l =
   let current_file = fst !current_context in
   if current_file <> Relative_path.default && Pos.filename pos <> current_file
   then
-    (Pos.make_from current_file, Badpos_sentinel.message) :: pos_msg_l
+    (Pos.make_from current_file, badpos_message) :: pos_msg_l
   else
     pos_msg_l
 
@@ -4856,6 +4861,14 @@ let invalid_arraykey_constraint pos t =
     ( "This type is "
     ^ t
     ^ ", which cannot be used as an arraykey (string | int)" )
+
+let exception_occurred pos =
+  add
+    (Typing.err_code Typing.ExceptionOccurred)
+    pos
+    (Printf.sprintf
+       "An exception occurred while typechecking this. %s"
+       Error_message_sentinel.please_file_a_bug_message)
 
 (*****************************************************************************)
 (* Printing *)

@@ -336,6 +336,30 @@ impl Pos {
     }
 }
 
+impl std::fmt::Display for Pos {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fn do_fmt<P: FilePos>(
+            f: &mut std::fmt::Formatter<'_>,
+            file: &RelativePath,
+            start: &P,
+            end: &P,
+        ) -> std::fmt::Result {
+            write!(f, "{}", file)?;
+            let (start_line, start_col, _) = start.line_column_beg();
+            let (end_line, end_col, _) = end.line_column_beg();
+            if start_line == end_line {
+                write!(f, "({}:{}-{})", start_line, start_col, end_col)
+            } else {
+                write!(f, "({}:{}-{}:{})", start_line, start_col, end_line, end_col)
+            }
+        }
+        match &self.0 {
+            Small { file, start, end } => do_fmt(f, file, start, end),
+            Large { file, start, end } => do_fmt(f, file, &**start, &**end),
+        }
+    }
+}
+
 impl Ord for Pos {
     // Intended to match the implementation of `Pos.compare` in OCaml.
     fn cmp(&self, other: &Pos) -> Ordering {
@@ -362,17 +386,17 @@ impl Eq for Pos {}
 
 // TODO(hrust) eventually move this into a separate file used by Small & Large
 trait FilePos {
-    fn offset(self) -> usize;
-    fn line_column_beg(self) -> (usize, usize, usize);
+    fn offset(&self) -> usize;
+    fn line_column_beg(&self) -> (usize, usize, usize);
 }
 macro_rules! impl_file_pos {
     ($type: ty) => {
         impl FilePos for $type {
-            fn offset(self) -> usize {
-                self.offset()
+            fn offset(&self) -> usize {
+                (*self).offset()
             }
-            fn line_column_beg(self) -> (usize, usize, usize) {
-                self.line_column_beg()
+            fn line_column_beg(&self) -> (usize, usize, usize) {
+                (*self).line_column_beg()
             }
         }
     };

@@ -30,7 +30,6 @@
 #define MAX_INSTR_ASM_LEN 128
 
 using std::string;
-using std::vector;
 
 namespace HPHP { namespace jit {
 

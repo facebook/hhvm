@@ -25,12 +25,10 @@
 #include "hphp/tools/tc-print/tc-print.h"
 #include "hphp/tools/tc-print/offline-trans-data.h"
 
-#include "hphp/util/disasm.h"
 
 #define MAX_SYM_LEN       10240
 
 using std::string;
-using std::vector;
 
 namespace HPHP { namespace jit {
 

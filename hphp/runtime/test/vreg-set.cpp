@@ -517,7 +517,6 @@ TEST(VregSet, Swap) {
       auto s1 = c1.second;
       auto s2 = c2.second;
 
-      using std::swap;
       swap(s1, s2);
 
       EXPECT_EQ(s1, c2.second);

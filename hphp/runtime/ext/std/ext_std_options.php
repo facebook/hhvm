@@ -404,9 +404,9 @@ namespace __SystemLib {
     private function tr(string $l, mixed $d) {
       return
         $this->element(
-          'tr', [],
-          $this->element('td', ['class' => 'l'], $l),
-          $this->element('td', ['class' => 'r'], $d));
+          'tr', darray[],
+          $this->element('td', darray['class' => 'l'], $l),
+          $this->element('td', darray['class' => 'r'], $d));
     }
 
     private function table(string $title, array $data) {
@@ -418,14 +418,14 @@ namespace __SystemLib {
         }
         echo "\n";
       } else {
-        $children = [];
+        $children = darray[];
         foreach ($data as $k => $v) {
           \array_push(inout $children, $this->tr($k, \print_r($v, true)));
         }
-        return [
+        return varray[
           $this->element('hr'),
-          $this->element('h2', [], $title),
-          $this->element('table', [], $children)
+          $this->element('h2', darray[], $title),
+          $this->element('table', darray[], $children)
         ];
       }
     }
@@ -441,9 +441,9 @@ namespace __SystemLib {
 
       $html->appendChild(
         $this->element(
-          'head', [],
-          $this->element('title', [], "HHVM phpinfo"),
-          $this->element('style', ['type' => 'text/css'], $style)));
+          'head', darray[],
+          $this->element('title', darray[], "HHVM phpinfo"),
+          $this->element('style', darray['type' => 'text/css'], $style)));
     }
 
     private function reportVersionTitle() {
@@ -451,13 +451,13 @@ namespace __SystemLib {
         echo 'HHVM Version => ' . \HHVM_VERSION . "\n";
       } else {
         $this->body->appendChild(
-          $this->element('h1', [], 'HHVM Version ' . \HHVM_VERSION));
+          $this->element('h1', darray[], 'HHVM Version ' . \HHVM_VERSION));
       }
     }
 
     private function reportVersions() {
       if (!$this->is_cli()) {
-        $this->body->appendChild($this->element('h2', [], 'Version'));
+        $this->body->appendChild($this->element('h2', darray[], 'Version'));
       }
 
       $data = array(
@@ -484,7 +484,7 @@ namespace __SystemLib {
     }
 
     private function reportMap(string $name, array $map) {
-      $data = [];
+      $data = darray[];
       foreach ($map as $k => $v) {
         $data[\sprintf("%s['%s']", $name, $k)] = $v;
       }

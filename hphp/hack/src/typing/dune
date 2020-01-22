@@ -153,7 +153,6 @@
     typing_disposable
     typing_extends
     typing_exts
-    typing_gather_defined
     typing_inheritance
     typing_lambda_ambiguous
     typing_lenv

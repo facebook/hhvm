@@ -88,7 +88,6 @@ struct APCLocalArray final : ArrayData,
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
-  static ArrayData* Escalate(const ArrayData*);
   static ArrayData* EscalateForSort(ArrayData*, SortFunction);
   static void Ksort(ArrayData*, int, bool);
   static void Sort(ArrayData*, int, bool);
@@ -126,6 +125,7 @@ public:
   // Pre: ad->isApcArray()
   static APCLocalArray* asApcArray(ArrayData*);
   static const APCLocalArray* asApcArray(const ArrayData*);
+  static ArrayData* Escalate(const ArrayData*);
 
   void scan(type_scan::Scanner& scanner) const;
   size_t heapSize() const;

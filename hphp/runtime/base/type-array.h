@@ -181,11 +181,6 @@ public:
   }
   Array& operator=(Variant&& v);
 
-  /*
-   * Escalate the underlying ArrayData.
-   */
-  void escalate();
-
   #define COPY_BODY(meth, def)                                          \
     if (!m_arr) return def;                                             \
     auto new_arr = m_arr->meth;                                         \

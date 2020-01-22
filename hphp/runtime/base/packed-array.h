@@ -134,9 +134,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* ToVec(ArrayData*, bool);
   static void Renumber(ArrayData*) {}
   static void OnSetEvalScalar(ArrayData*);
-  static ArrayData* Escalate(const ArrayData* ad) {
-    return const_cast<ArrayData*>(ad);
-  }
 
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
 
@@ -195,7 +192,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto PrependVec = &Prepend;
   static constexpr auto RenumberVec = &Renumber;
   static constexpr auto OnSetEvalScalarVec = &OnSetEvalScalar;
-  static constexpr auto EscalateVec = &Escalate;
   static constexpr auto ToKeysetVec = &ArrayCommon::ToKeyset;
   static constexpr auto ToDArrayVec = &ToDArray;
 

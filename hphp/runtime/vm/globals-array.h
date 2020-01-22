@@ -126,10 +126,6 @@ public:
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
 
-  static ArrayData* Escalate(const ArrayData* ad) {
-    return const_cast<ArrayData*>(ad);
-  }
-
   static ArrayData* ToPHPArray(ArrayData* ad, bool) {
     return ad;
   }

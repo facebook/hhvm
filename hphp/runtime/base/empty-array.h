@@ -140,9 +140,6 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static ArrayData* ToKeyset(ArrayData*, bool);
   static void Renumber(ArrayData*) {}
   static void OnSetEvalScalar(ArrayData*);
-  static ArrayData* Escalate(const ArrayData* ad) {
-    return const_cast<ArrayData*>(ad);
-  }
 
 private:
   static arr_lval MakePacked(TypedValue);

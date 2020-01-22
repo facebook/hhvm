@@ -187,19 +187,6 @@ public:
   ArrayData* toDArray(bool copy);
 
   /*
-   * Return an array with identical contents to this array, but of an array
-   * kind which can handle all array operations.
-   *
-   * Certain array kinds (e.g., APCLocalArray) can't handle all operations
-   * (e.g., binding modifications), and such operations either automagically
-   * escalate, or require escalation as a precondition.
-   *
-   * If the array is already of a kind that can handle all operations,
-   * escalate() is guaranteed to return `this'.
-   */
-  ArrayData* escalate() const;
-
-  /*
    * Return the array to the request heap.
    *
    * This is normally called when the reference count goes to zero (e.g., via a
@@ -610,7 +597,8 @@ public:
   // PHP array functions.
 
   /*
-   * Spiritually similar to escalate(), but for sort functions.
+   * Called prior to sorting this array. Some array kinds, such as struct-like
+   * RecordArrays, have layouts that are overly constrained to sort in-place.
    */
   ArrayData* escalateForSort(SortFunction sort_function);
 
@@ -936,7 +924,6 @@ struct ArrayFunctions {
   ArrayData* (*prepend[NK])(ArrayData*, TypedValue v);
   void (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
-  ArrayData* (*escalate[NK])(const ArrayData*);
   ArrayData* (*toPHPArray[NK])(ArrayData*, bool);
   ArrayData* (*toPHPArrayIntishCast[NK])(ArrayData*, bool);
   ArrayData* (*toDict[NK])(ArrayData*, bool);

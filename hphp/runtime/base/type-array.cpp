@@ -86,13 +86,6 @@ Array& Array::operator=(Variant&& v) {
   return *this;
 }
 
-void Array::escalate() {
-  if (m_arr) {
-    auto escalated = m_arr->escalate();
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 Array Array::values() const {

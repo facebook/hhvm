@@ -542,10 +542,6 @@ void RecordArray::OnSetEvalScalar(ArrayData* ad) {
   MixedArray::OnSetEvalScalar(ra->extraFieldMap());
 }
 
-ArrayData* RecordArray::Escalate(const ArrayData* ad) {
-  return ToMixed(ad);
-}
-
 ArrayData* RecordArray::ToPHPArray(ArrayData* ad, bool) {
   return ad;
 }

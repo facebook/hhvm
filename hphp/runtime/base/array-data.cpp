@@ -688,14 +688,6 @@ const ArrayFunctions g_array_funcs = {
    */
   DISPATCH(OnSetEvalScalar)
 
-  /*
-   * ArrayData* Escalate(const ArrayData*)
-   *
-   *   Arrays must be given a chance to 'escalate' to more general
-   *   kinds prior to some unusual operations.
-   */
-  DISPATCH(Escalate)
-
    /*
    * ArrayData* ToPHPArray(ArrayData*, bool)
    *

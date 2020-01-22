@@ -442,7 +442,6 @@ public:
   static ArrayData* Prepend(ArrayData*, TypedValue);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
-  static ArrayData* Escalate(const ArrayData*);
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static ArrayData* ToPHPArray(ArrayData*, bool);

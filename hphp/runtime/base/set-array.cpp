@@ -842,10 +842,6 @@ void SetArray::OnSetEvalScalar(ArrayData* ad) {
   }
 }
 
-ArrayData* SetArray::Escalate(const ArrayData* ad) {
-  return const_cast<ArrayData*>(ad);
-}
-
 template <typename Init, IntishCast IC>
 ALWAYS_INLINE
 ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {

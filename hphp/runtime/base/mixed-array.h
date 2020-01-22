@@ -393,9 +393,6 @@ public:
   static void RegisterUncountedAllocations(ArrayData* ad,
                                            APCHandle* rootAPCHandle);
   static void ReleaseUncounted(ArrayData*);
-  static ArrayData* Escalate(const ArrayData* ad) {
-    return const_cast<ArrayData*>(ad);
-  }
 
   static ArrayData* EscalateForSort(ArrayData* ad, SortFunction sf);
   static void Ksort(ArrayData*, int sort_flags, bool ascending);
@@ -474,7 +471,6 @@ public:
   static constexpr auto PrependDict = &Prepend;
   static constexpr auto RenumberDict = &Renumber;
   static constexpr auto OnSetEvalScalarDict = &OnSetEvalScalar;
-  static constexpr auto EscalateDict = &Escalate;
   static ArrayData* ToPHPArrayDict(ArrayData*, bool);
   static ArrayData* ToPHPArrayIntishCastDict(ArrayData*, bool);
   static ArrayData* ToDictDict(ArrayData*, bool);

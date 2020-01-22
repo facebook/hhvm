@@ -102,7 +102,6 @@ struct RecordArray : ArrayData,
   static ArrayData* Prepend(ArrayData*, TypedValue v);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
-  static ArrayData* Escalate(const ArrayData*);
   static ArrayData* ToPHPArray(ArrayData*, bool);
   static constexpr auto ToPHPArrayIntishCast = &ToPHPArray;
   static constexpr auto ToDict = &ArrayCommon::ToDict;

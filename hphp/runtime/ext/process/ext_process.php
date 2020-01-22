@@ -33,7 +33,7 @@ function pcntl_alarm(int $seconds): int;
  *
  */
 <<__Native>>
-function pcntl_exec(string $path, array $args = [], array $envs = []): void;
+function pcntl_exec(string $path, array $args = varray[], array $envs = darray[]): void;
 
 /**
  * The pcntl_fork() function creates a child process that differs from the

@@ -329,13 +329,17 @@ let get_direct_binding env v =
 let bind env ?(tyvar_pos = Pos.none) v ty =
   set_solving_info env ~tyvar_pos v (TVIType ty)
 
-let add env ?(tyvar_pos = Pos.none) v ty =
+let update_tyvar_occurrences env v ty =
   let env =
     { env with tyvar_occurrences = Occ.unbind_tyvar env.tyvar_occurrences v }
   in
   let unsolved_vars_in_ty = get_unsolved_vars_in_ty env ty in
   let env = make_tyvars_occur_in_tyvar env unsolved_vars_in_ty ~occur_in:v in
+  env
+
+let add env ?(tyvar_pos = Pos.none) v ty =
   let env = bind env ~tyvar_pos v ty in
+  let env = update_tyvar_occurrences env v ty in
   env
 
 let get_type env r v =
@@ -404,6 +408,20 @@ let fresh_type ?variance env p =
 let fresh_invariant_type_var = fresh_type ~variance:Ast_defs.Invariant
 
 let new_global_tyvar = fresh_unsolved_tyvar ~is_global:true
+
+let wrap_ty_in_var env r ty =
+  let v = Ident.tmp () in
+  let tvinfo =
+    {
+      tyvar_pos = Reason.to_pos r;
+      is_global = false;
+      eager_solve_failed = false;
+      solving_info = TVIType ty;
+    }
+  in
+  let env = set_tyvar_info env v tvinfo in
+  let env = update_tyvar_occurrences env v ty in
+  (env, mk (r, Tvar v))
 
 let is_global_tyvar env v =
   match get_tyvar_info_opt env v with

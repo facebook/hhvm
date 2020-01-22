@@ -192,18 +192,16 @@ let simplify_occurrences env v =
         in
         simplify_occurrences env v ~seen_tyvars
   in
-  fst @@ simplify_occurrences env v ~seen_tyvars:ISet.empty
+  if not @@ Inf.contains_unsolved_tyvars env.inference_env v then
+    fst @@ simplify_occurrences env v ~seen_tyvars:ISet.empty
+  else
+    env
 
 let add env ?(tyvar_pos = Pos.none) v ty =
   let env =
     wrap_inference_env_call_env env (fun env -> Inf.add env ~tyvar_pos v ty)
   in
-  let env =
-    if not @@ Inf.contains_unsolved_tyvars env.inference_env v then
-      simplify_occurrences env v
-    else
-      env
-  in
+  let env = simplify_occurrences env v in
   env
 
 let get_type env r var =
@@ -292,9 +290,7 @@ let extract_global_inference_env env =
   wrap_inference_env_call env (fun env -> Inf.extract_global_inference_env env)
 
 let wrap_ty_in_var env r ty =
-  let v = Ident.tmp () in
-  let env = add env v ty in
-  (env, mk (r, Tvar v))
+  wrap_inference_env_call env (fun env -> Inf.wrap_ty_in_var env r ty)
 
 let get_shape_field_name = function
   | Ast_defs.SFlit_int (_, s)

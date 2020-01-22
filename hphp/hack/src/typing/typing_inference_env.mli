@@ -123,6 +123,8 @@ val is_global_tyvar : t -> Ident.t -> bool
 
 val new_global_tyvar : t -> Ident.t -> ?variance:Ast_defs.variance -> Pos.t -> t
 
+val wrap_ty_in_var : t -> Typing_reason.t -> locl_ty -> t * locl_ty
+
 val get_tyvar_eager_solve_fail : t -> Ident.t -> bool
 
 val get_tyvar_type_const :

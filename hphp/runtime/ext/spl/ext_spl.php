@@ -129,7 +129,7 @@ function class_uses(mixed $obj,
  * @param array $params - Arguments to pass to the callback function.
  * @return mixed - Returns the iteration count.
  */
-function iterator_apply(mixed $obj, mixed $func, array $params = []): mixed {
+function iterator_apply(mixed $obj, mixed $func, array $params = varray[]): mixed {
   if (!is_object($obj) || !($obj is \HH\Traversable)) {
     trigger_error("Argument must implement interface Traversable", E_RECOVERABLE_ERROR);
     return 0;

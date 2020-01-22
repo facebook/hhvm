@@ -899,7 +899,7 @@ let get_class_elt_declaration
     raise UnexpectedDependency
   | RecordDef _ -> records_not_supported ()
 
-let construct_enum ctx class_ fields =
+let construct_enum ctx class_ =
   let name = snd class_.c_name in
   let enum =
     match class_.c_enum with
@@ -911,18 +911,18 @@ let construct_enum ctx class_ fields =
     | Some hint -> " as " ^ string_of_hint hint
     | None -> ""
   in
-  let string_of_enum_const = function
-    | Typing_deps.Dep.Const (_, name) when name <> "class" ->
-      Some (Printf.sprintf "%s = %s;" name (get_init_from_hint ctx enum.e_base))
-    | _ -> None
+  let string_of_enum_const const =
+    Printf.sprintf
+      "%s = %s;"
+      (snd const.cc_id)
+      (get_init_from_hint ctx enum.e_base)
   in
-  let constants = List.filter_map fields ~f:string_of_enum_const in
   Printf.sprintf
     "enum %s: %s%s {%s}"
     (strip_ns name)
     (string_of_hint enum.e_base)
     constraint_
-    (String.concat ~sep:"\n" constants)
+    (concat_map ~sep:"\n" ~f:string_of_enum_const class_.c_consts)
 
 let get_constructor_declaration ctx name prop_names =
   let class_ = get_class_nast_exn ctx name in
@@ -1002,7 +1002,7 @@ let construct_enum_or_class ctx class_ target fields =
   | Ast_defs.Cinterface
   | Ast_defs.Ctrait ->
     construct_class ctx class_ target fields
-  | Ast_defs.Cenum -> construct_enum ctx class_ fields
+  | Ast_defs.Cenum -> construct_enum ctx class_
 
 let construct_typedef typedef =
   let name = snd typedef.t_name in
@@ -1054,20 +1054,7 @@ and add_dep ctx deps ~this ty : unit =
         (* If we have a constant of a generic type, it can only be an
            array type, e.g., vec<A>, for which don't need values of A
            to generate an initializer. *)
-        List.iter tyl ~f:(add_dep ctx deps ~this);
-
-        (* When adding a dependency on an enum, also add dependencies
-           on all its values.  We need all the values and not only the
-           ones used by the extracted code.  See the \with_switch test
-           case. *)
-        match get_class_nast ctx name with
-        | Some class_ when class_.c_kind = Ast_defs.Cenum ->
-          List.iter class_.c_consts ~f:(fun const ->
-              do_add_dep
-                ctx
-                deps
-                (Typing_deps.Dep.Const (name, snd const.cc_id)))
-        | _ -> ()
+        List.iter tyl ~f:(add_dep ctx deps ~this)
 
       method! on_tshape _ _ _ fdm =
         Nast.ShapeMap.iter

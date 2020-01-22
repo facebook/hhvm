@@ -10,8 +10,8 @@ class WithStaticProperty {
 }
 class A extends \A0 implements \I1 {}
 enum SomeEnum: int {
-  SECOND = 0;
   FIRST = 0;
+  SECOND = 0;
 }
 interface I1 {}
 <<__Rx>>

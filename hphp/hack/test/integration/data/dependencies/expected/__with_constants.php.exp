@@ -33,14 +33,14 @@ const shape('x' => int, 'y' => \SecondEnum) SHAPE1 =
 const (int, ?(string, float)) OPTION = tuple(0, null);
 const darray<string, int> AGE_RANGE = darray[];
 enum SomeEnum: int {
-  SECOND = 0;
   FIRST = 0;
+  SECOND = 0;
 }
 const varray_or_darray<int> CVARRAY_OR_DARRAY = varray[];
 const \HH\classname<\WithConst> CLASSNAME = \WithConst::class;
 enum SecondEnum: string {
-  SECOND = "";
   FIRST = "";
+  SECOND = "";
 }
 const \HH\keyset<string> KEYSET = keyset[];
 <<__Rx>>

@@ -20,8 +20,7 @@ from typing import (
 )
 
 import libcst
-from libcst.metadata.position_provider import SyntacticPositionProvider
-from libcst.metadata.wrapper import MetadataWrapper
+from libcst.metadata import CodeRange, MetadataWrapper, PositionProvider
 from lspcommand import LspCommandProcessor, Transcript, TranscriptEntry
 from utils import (
     Json,
@@ -853,21 +852,21 @@ class _FunctionCallFinder(libcst.CSTVisitor):
     starts.
     """
 
-    METADATA_DEPENDENCIES = (SyntacticPositionProvider,)
+    METADATA_DEPENDENCIES = (PositionProvider,)
 
     def __init__(self) -> None:
-        self.function_calls: List[Tuple[libcst.Call, libcst.CodeRange]] = []
+        self.function_calls: List[Tuple[libcst.Call, CodeRange]] = []
 
     def visit_Call(self, node: libcst.Call) -> None:
-        node_range = self.get_metadata(SyntacticPositionProvider, node)
+        node_range = self.get_metadata(PositionProvider, node)
 
         start_node = node.func
         while isinstance(start_node, libcst.Attribute):
             start_node = start_node.attr
-        start_node_range = self.get_metadata(SyntacticPositionProvider, start_node)
+        start_node_range = self.get_metadata(PositionProvider, start_node)
         start_position = start_node_range.start
         end_position = node_range.end
-        node_range = libcst.CodeRange(start=start_position, end=end_position)
+        node_range = CodeRange(start=start_position, end=end_position)
 
         self.function_calls.append((node, node_range))
 

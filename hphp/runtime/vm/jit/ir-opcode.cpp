@@ -301,8 +301,6 @@ bool opcodeMayRaise(Opcode opc) {
            RuntimeOption::EvalIsExprEnableUnresolvedWarning ||
            RuntimeOption::EvalIsVecNotices;
 
-  case AddElemIntKey:
-  case AddElemStrKey:
   case AddNewElem:
   case AddNewElemKeyset:
   case AFWHPrepareChild:
@@ -369,8 +367,6 @@ bool opcodeMayRaise(Opcode opc) {
   case Count:
   case CreateAAWH:
   case DefCls:
-  case DictAddElemIntKey:
-  case DictAddElemStrKey:
   case DictGet:
   case DictSet:
   case ElemArrayD:

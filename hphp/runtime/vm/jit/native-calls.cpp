@@ -240,16 +240,8 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {ConcatStr4,         concat_s4, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
-
-    {AddElemIntKey,      addElemIntKeyHelper, DSSA, SSync,
-                           {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {AddNewElem,         addNewElemHelper, DSSA, SSync,
                            {{SSA, 0}, {TV, 1}}},
-    {DictAddElemStrKey,  dictAddElemStringKeyHelper, DSSA, SSync,
-                           {{SSA, 0}, {SSA, 1}, {TV, 2}}},
-    {DictAddElemIntKey,  dictAddElemIntKeyHelper, DSSA, SSync,
-                           {{SSA, 0}, {SSA, 1}, {TV, 2}}},
-
     {ArrayAdd,           arrayAdd, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {Clone,              &ObjectData::clone, DSSA, SSync, {{SSA, 0}}},
     {NewPair,            collections::allocPair, DSSA, SNone,

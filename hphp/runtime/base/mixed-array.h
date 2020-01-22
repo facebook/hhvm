@@ -168,17 +168,6 @@ struct MixedArrayElm {
 struct MixedArray final : ArrayData,
                           array::HashTable<MixedArray, MixedArrayElm>,
                           type_scan::MarkCollectable<MixedArray> {
-  /*
-   * Iterator helper for kPackedKind and kMixedKind.  You can use this
-   * to look at the values in the array, but not the keys unless you
-   * know it is kMixedKind.
-   *
-   * This can be used as an optimization vs. ArrayIter, which uses
-   * indirect calls in the loop.
-   */
-  struct ValIter;
-
-
   struct ElmKey {
     ElmKey() {}
     ElmKey(strhash_t hash, StringData* key)
@@ -553,8 +542,6 @@ private:
   friend struct c_Set;
   friend struct c_ImmSet;
   friend struct c_AwaitAllWaitHandle;
-  enum class ClonePacked {};
-  enum class CloneMixed {};
 
   friend size_t getMemSize(const ArrayData*, bool);
   template <typename AccessorT, class ArrayT>

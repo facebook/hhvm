@@ -166,6 +166,33 @@ let get_class_nast ctx name =
   get_class_pos ctx name >>= fun pos ->
   Ast_provider.find_class_in_file (Pos.filename pos) name >>| Naming.class_
 
+let get_class_nast_exn ctx name =
+  value_or_not_found name (get_class_nast ctx name)
+
+let get_method_nast =
+  let methods_by_class_name = ref SMap.empty in
+  fun ctx class_name method_name ->
+    if SMap.mem class_name !methods_by_class_name then
+      SMap.find_opt method_name (SMap.find class_name !methods_by_class_name)
+    else
+      let open Option in
+      get_class_nast ctx class_name >>= fun class_ ->
+      let class_methods_by_name =
+        List.fold_left
+          class_.c_methods
+          ~f:(fun methods method_ ->
+            SMap.add (snd method_.m_name) method_ methods)
+          ~init:SMap.empty
+      in
+      methods_by_class_name :=
+        SMap.add class_name class_methods_by_name !methods_by_class_name;
+      SMap.find_opt method_name class_methods_by_name
+
+let get_method_nast_exn ctx class_name method_name =
+  value_or_not_found
+    (class_name ^ "::" ^ method_name)
+    (get_method_nast ctx class_name method_name)
+
 let get_dep_mode ctx dep =
   let open Typing_deps.Dep in
   match dep with
@@ -656,7 +683,7 @@ let get_global_object_declaration ctx obj =
     | _ -> raise UnexpectedDependency)
 
 let get_class_declaration ctx name =
-  let class_ = value_or_not_found name @@ get_class_nast ctx name in
+  let class_ = get_class_nast_exn ctx name in
   let user_attributes = string_of_user_attributes class_.c_user_attributes in
   let final =
     if class_.c_final then
@@ -809,30 +836,7 @@ let get_class_elt_declaration
                ~abstract:cons.cc_abstract
                cons.cc_type
                const_name)
-      | Method (class_name, method_name) ->
-        (match target with
-        | ServerCommandTypes.Extract_standalone.Method
-            (target_class_name, target_method_name)
-          when class_name = target_class_name
-               && method_name = target_method_name ->
-          None
-        | _ ->
-          let class_ =
-            value_or_not_found class_name @@ get_class_nast ctx class_name
-          in
-          let method_ =
-            value_or_not_found method_name
-            @@ List.find class_.c_methods ~f:(fun method_ ->
-                   snd method_.m_name = method_name)
-          in
-          let decl = get_method_declaration method_ ~from_interface in
-          let body =
-            if method_.m_abstract then
-              ";"
-            else
-              "{throw new \\Exception();}"
-          in
-          Some (decl ^ body))
+      | Method (class_name, method_name)
       | SMethod (class_name, method_name) ->
         (match target with
         | ServerCommandTypes.Extract_standalone.Method
@@ -841,14 +845,7 @@ let get_class_elt_declaration
                && method_name = target_method_name ->
           None
         | _ ->
-          let class_ =
-            value_or_not_found class_name @@ get_class_nast ctx class_name
-          in
-          let method_ =
-            value_or_not_found method_name
-            @@ List.find class_.c_methods ~f:(fun method_ ->
-                   snd method_.m_name = method_name)
-          in
+          let method_ = get_method_nast_exn ctx class_name method_name in
           let decl = get_method_declaration method_ ~from_interface in
           let body =
             if method_.m_abstract then
@@ -911,7 +908,7 @@ let construct_enum ctx enum fields =
   Printf.sprintf "%s {%s}" enum_decl (String.concat ~sep:"\n" constants)
 
 let get_constructor_declaration ctx name prop_names =
-  let class_ = value_or_not_found name @@ get_class_nast ctx name in
+  let class_ = get_class_nast_exn ctx name in
   let construct_opt =
     List.find class_.c_methods ~f:(fun method_ ->
         snd method_.m_name = "__construct")
@@ -937,13 +934,13 @@ let get_constructor_declaration ctx name prop_names =
 
 let get_class_body ctx cls target class_elts =
   let name = Decl_provider.Class.name cls in
-  let nast = value_or_not_found name @@ get_class_nast ctx name in
+  let class_ = get_class_nast_exn ctx name in
   let uses =
-    List.map nast.c_uses ~f:(fun s ->
+    List.map class_.c_uses ~f:(fun s ->
         Printf.sprintf "use %s;" (string_of_hint s))
   in
   let (req_extends, req_implements) =
-    List.partition_map nast.c_reqs ~f:(fun (s, extends) ->
+    List.partition_map class_.c_reqs ~f:(fun (s, extends) ->
         if extends then
           `Fst (Printf.sprintf "require extends %s;" (string_of_hint s))
         else

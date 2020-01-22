@@ -73,4 +73,6 @@ abstract class BuiltinEnum<T> {
   }
 }
 
+type enumname<T> = classname<BuiltinEnum<T>>;
+
 }

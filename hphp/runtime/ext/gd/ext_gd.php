@@ -66,7 +66,7 @@ function imageaffinematrixconcat(varray $m1, varray $m2): mixed;
  * an optional clipping area.
  */
 <<__Native>>
-function imageaffinematrixget(int $type, mixed $options = []): mixed;
+function imageaffinematrixget(int $type, mixed $options = darray[]): mixed;
 
 /* imagealphablending() allows for two different modes of drawing on truecolor
  * images. In blending mode, the alpha channel component of the color supplied

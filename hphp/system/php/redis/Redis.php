@@ -237,7 +237,7 @@ class Redis {
           "Invalid set options: nx and xx may not be specified at the same time"
         );
       }
-      $args = [
+      $args = varray[
         $key,
         $value
       ];
@@ -282,8 +282,8 @@ class Redis {
                           $start = -1,
                           $count = -1,
                           $store = null) {
-    $limit = (($start > 0) && ($count > 0)) ? [$start, $count] : null;
-    return $this->sort($key, [
+    $limit = (($start > 0) && ($count > 0)) ? varray[$start, $count] : null;
+    return $this->sort($key, darray[
       'by' => $pattern,
       'get' => $get,
       'limit' => $limit,
@@ -298,8 +298,8 @@ class Redis {
                                $start = -1,
                                $count = -1,
                                $store = null) {
-    $limit = (($start > 0) && ($count > 0)) ? [$start, $count] : null;
-    return $this->sort($key, [
+    $limit = (($start > 0) && ($count > 0)) ? varray[$start, $count] : null;
+    return $this->sort($key, darray[
       'by' => $pattern,
       'get' => $get,
       'limit' => $limit,
@@ -315,8 +315,8 @@ class Redis {
                            $start = -1,
                            $count = -1,
                            $store = null) {
-    $limit = (($start > 0) && ($count > 0)) ? [$start, $count] : null;
-    return $this->sort($key, [
+    $limit = (($start > 0) && ($count > 0)) ? varray[$start, $count] : null;
+    return $this->sort($key, darray[
       'by' => $pattern,
       'get' => $get,
       'limit' => $limit,
@@ -331,8 +331,8 @@ class Redis {
                                 $start = -1,
                                 $count = -1,
                                 $store = null) {
-    $limit = (($start > 0) && ($count > 0)) ? [$start, $count] : null;
-    return $this->sort($key, [
+    $limit = (($start > 0) && ($count > 0)) ? varray[$start, $count] : null;
+    return $this->sort($key, darray[
       'by' => $pattern,
       'get' => $get,
       'limit' => $limit,
@@ -355,13 +355,13 @@ class Redis {
 
   public function hMGet($key, array $members) {
     $members = array_values($members);
-    $args = array_merge([$this->_prefix($key)], $members);
+    $args = array_merge(varray[$this->_prefix($key)], $members);
     $this->processArrayCommand('HMGET', $args);
     return $this->processAssocResponse($members);
   }
 
   public function hMSet($key, array $pairs) {
-    $args = [$this->_prefix($key)];
+    $args = varray[$this->_prefix($key)];
     foreach ($pairs as $k => $v) {
       $args[] = $k;
       $args[] = $this->_serialize($v);
@@ -373,7 +373,7 @@ class Redis {
   /* Sets ---------------------------------------------------------------- */
 
   public function sRandMember($key, $count = null) {
-    $args = [$this->_prefix($key)];
+    $args = varray[$this->_prefix($key)];
     if ($count !== null) {
        $args[] = $count;
     }
@@ -411,7 +411,7 @@ class Redis {
                                       array $keys,
                                       array $weights = null,
                                       $op = '') {
-    $args = [ $this->_prefix($key), count($keys) ];
+    $args = varray[ $this->_prefix($key), count($keys) ];
     foreach ($keys as $k) {
       $args[] = $this->_prefix($k);
     }
@@ -453,7 +453,7 @@ class Redis {
   }
 
   public function zRange($key, $start, $end, $withscores = false) {
-    $args = [
+    $args = varray[
       $this->_prefix($key),
       (int)$start,
       (int)$end,
@@ -473,7 +473,7 @@ class Redis {
                                        $start,
                                        $end,
                                        array $opts = null) {
-    $args = [$this->_prefix($key), $start, $end];
+    $args = varray[$this->_prefix($key), $start, $end];
     if (isset($opts['limit']) &&
         is_array($opts['limit']) &&
         (count($opts['limit']) == 2)) {
@@ -503,7 +503,7 @@ class Redis {
   }
 
   public function zRevRange($key, $start, $end, $withscores = false) {
-    $args = [
+    $args = varray[
       $this->_prefix($key),
       (int)$start,
       (int)$end,
@@ -529,7 +529,7 @@ class Redis {
     do {
       if ($cursor === 0) return $results;
 
-      $args = [];
+      $args = varray[];
       if ($cmd !== 'SCAN') {
         $args[] = $this->_prefix($key);
       }
@@ -600,12 +600,12 @@ class Redis {
   protected function flushCallbacks($multibulk = true) {
     $type = null;
     if ($multibulk) $this->sockReadData(inout $type); // Response Count
-    $ret = [];
+    $ret = varray[];
     foreach ($this->multiHandler as $callback) {
-      $args = isset($callback['args']) ? $callback['args'] : [];
+      $args = isset($callback['args']) ? $callback['args'] : varray[];
       $ret[] = call_user_func_array($callback['cb'], $args);
     }
-    $this->multiHandler = [];
+    $this->multiHandler = varray[];
     return $ret;
   }
 
@@ -638,7 +638,7 @@ class Redis {
       foreach ($this->commands as $cmd) {
         $this->processArrayCommand($cmd['cmd'], $cmd['args']);
       }
-      $this->commands = [];
+      $this->commands = varray[];
       return $this->flushCallbacks(false);
     }
   }
@@ -646,8 +646,8 @@ class Redis {
   public function discard() {
     $discard = ($this->mode === self::MULTI);
     $this->mode = self::ATOMIC;
-    $this->commands = [];
-    $this->multiHandler = [];
+    $this->commands = varray[];
+    $this->multiHandler = varray[];
     if ($discard) {
        $this->processCommand('DISCARD');
        return $this->process1Response();
@@ -679,7 +679,7 @@ class Redis {
   /* Batch --------------------------------------------------------------- */
 
   protected function processMSetCommand($cmd, array $data) {
-    $args = [];
+    $args = varray[];
     foreach ($data as $key => $val) {
       $args[] = $this->_prefix($key);
       $args[] = $this->_serialize($val);
@@ -712,19 +712,19 @@ class Redis {
     return ($response !== NULL) ? $response : false;
   }
 
-  public function evaluate($script, array $args = [], $numKeys = 0) {
+  public function evaluate($script, array $args = varray[], $numKeys = 0) {
     return $this->doEval('EVAL', $script, $args, $numKeys);
   }
 
-  public function eval($script, array $args = [], $numKeys = 0) {
+  public function eval($script, array $args = varray[], $numKeys = 0) {
     return $this->doEval('EVAL', $script, $args, $numKeys);
   }
 
-  public function evaluateSha($sha, array $args = [], $numKeys = 0) {
+  public function evaluateSha($sha, array $args = varray[], $numKeys = 0) {
     return $this->doEval('EVALSHA', $sha, $args, $numKeys);
   }
 
-  public function evalSha($sha, array $args = [], $numKeys = 0) {
+  public function evalSha($sha, array $args = varray[], $numKeys = 0) {
     return $this->doEval('EVALSHA', $sha, $args, $numKeys);
   }
 
@@ -838,156 +838,156 @@ class Redis {
    *   is elsewhere in the map, __call's state will be reset to use the new
    *   map element.
    */
-  protected static $map = [
+  protected static $map = darray[
     // Connection
-    'open' => [ 'alias' => 'connect' ],
-    'popen' => [ 'alias' => 'pconnect' ],
-    'ping' => [ 'return' => 'Raw' ],
-    'echo' => [ 'format' => 's', 'return' => 'String' ],
-    'quit' => [ 'return' => 'Boolean' ],
+    'open' => darray[ 'alias' => 'connect' ],
+    'popen' => darray[ 'alias' => 'pconnect' ],
+    'ping' => darray[ 'return' => 'Raw' ],
+    'echo' => darray[ 'format' => 's', 'return' => 'String' ],
+    'quit' => darray[ 'return' => 'Boolean' ],
 
     // Server
-    'bgrewriteaof' => [ 'return' => 'Boolean' ],
-    'bgsave' => [ 'return' => 'Boolean' ],
-    'dbsize' => [ 'return' => 'Long' ],
-    'flushall' => [ 'return' => 'Boolean' ],
-    'flushdb' => [ 'return' => 'Boolean' ],
-    'lastsave' => [ 'return' => 'Long' ],
-    'save' => [ 'return' => 'Boolean' ],
-    'time' => [ 'return' => 'Vector' ],
+    'bgrewriteaof' => darray[ 'return' => 'Boolean' ],
+    'bgsave' => darray[ 'return' => 'Boolean' ],
+    'dbsize' => darray[ 'return' => 'Long' ],
+    'flushall' => darray[ 'return' => 'Boolean' ],
+    'flushdb' => darray[ 'return' => 'Boolean' ],
+    'lastsave' => darray[ 'return' => 'Long' ],
+    'save' => darray[ 'return' => 'Boolean' ],
+    'time' => darray[ 'return' => 'Vector' ],
 
     // Strings
-    'append' => [ 'format' => 'kv', 'return' => 'Long' ],
-    'bitcount' => [ 'format' => 'kll', 'return' => 'Long' ],
-    'bitop' => [ 'vararg' => self::VAR_KEY_NOT_FIRST, 'return' => 'Long' ],
-    'get' => [ 'format' => 'k', 'return' => 'Serialized' ],
-    'getbit' => [ 'format' => 'kl', 'return' => 'Long' ],
-    'getrange' => [ 'format' => 'kll', 'return' => 'String', 'cmd' => 'RANGE' ],
-    'getset' => [ 'format' => 'kv', 'return' => 'Serialized' ],
-    'setbit' => [ 'format' => 'klv', 'return' => 'Long' ],
-    'setex' => [ 'format' => 'klv', 'return' => 'Boolean' ],
-    'psetex' => [ 'format' => 'klv', 'return' => 'Boolean' ],
-    'setnx' => [ 'format' => 'kv', 'return' => '1' ],
-    'setrange' => [ 'format' => 'klv', 'return' => 'Long' ],
-    'strlen' => [ 'format' => 'k', 'return' => 'Long' ],
+    'append' => darray[ 'format' => 'kv', 'return' => 'Long' ],
+    'bitcount' => darray[ 'format' => 'kll', 'return' => 'Long' ],
+    'bitop' => darray[ 'vararg' => self::VAR_KEY_NOT_FIRST, 'return' => 'Long' ],
+    'get' => darray[ 'format' => 'k', 'return' => 'Serialized' ],
+    'getbit' => darray[ 'format' => 'kl', 'return' => 'Long' ],
+    'getrange' => darray[ 'format' => 'kll', 'return' => 'String', 'cmd' => 'RANGE' ],
+    'getset' => darray[ 'format' => 'kv', 'return' => 'Serialized' ],
+    'setbit' => darray[ 'format' => 'klv', 'return' => 'Long' ],
+    'setex' => darray[ 'format' => 'klv', 'return' => 'Boolean' ],
+    'psetex' => darray[ 'format' => 'klv', 'return' => 'Boolean' ],
+    'setnx' => darray[ 'format' => 'kv', 'return' => '1' ],
+    'setrange' => darray[ 'format' => 'klv', 'return' => 'Long' ],
+    'strlen' => darray[ 'format' => 'k', 'return' => 'Long' ],
 
     // Keys
-    'del' => [ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Long' ],
-    'delete' => [ 'alias' => 'del' ],
-    'dump' => [ 'format' => 'k', 'return' => 'Raw' ],
-    'exists' => [ 'format' => 'k', 'return' => '1' ],
-    'expire' => [ 'format' => 'kl', 'return' => '1' ],
-    'settimeout' => [ 'alias' => 'expire' ],
-    'pexpire' => [ 'format' => 'kl', 'return' => '1' ],
-    'expireat' => [ 'format' => 'kl', 'return' => '1' ],
-    'pexpireat' => [ 'format' => 'kl', 'return' => '1' ],
-    'keys' => [ 'format' => 's', 'return' => 'Vector' ],
-    'getkeys' => [ 'alias' => 'keys' ],
-    'migrate' => [ 'format' => 'slkll', 'return' => 'Boolean' ],
-    'move' => [ 'format' => 'kl', 'return' => '1' ],
-    'persist' => [ 'format' => 'k', 'return' => '1' ],
-    'randomkey' => [ 'return' => 'String' ],
-    'rename' => [ 'format' => 'kk', 'return' => 'Boolean' ],
-    'renamekey' => [ 'alias' => 'rename' ],
-    'renamenx' => [ 'format' => 'kk', 'return' => '1' ],
-    'type' => [ 'format' => 'k', 'return' => 'Type' ],
-    'ttl' => [ 'format' => 'k', 'return' => 'Long' ],
-    'pttl' => [ 'format' => 'k', 'return' => 'Long' ],
-    'restore' => [ 'format' => 'kls', 'return' => 'Boolean' ],
+    'del' => darray[ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Long' ],
+    'delete' => darray[ 'alias' => 'del' ],
+    'dump' => darray[ 'format' => 'k', 'return' => 'Raw' ],
+    'exists' => darray[ 'format' => 'k', 'return' => '1' ],
+    'expire' => darray[ 'format' => 'kl', 'return' => '1' ],
+    'settimeout' => darray[ 'alias' => 'expire' ],
+    'pexpire' => darray[ 'format' => 'kl', 'return' => '1' ],
+    'expireat' => darray[ 'format' => 'kl', 'return' => '1' ],
+    'pexpireat' => darray[ 'format' => 'kl', 'return' => '1' ],
+    'keys' => darray[ 'format' => 's', 'return' => 'Vector' ],
+    'getkeys' => darray[ 'alias' => 'keys' ],
+    'migrate' => darray[ 'format' => 'slkll', 'return' => 'Boolean' ],
+    'move' => darray[ 'format' => 'kl', 'return' => '1' ],
+    'persist' => darray[ 'format' => 'k', 'return' => '1' ],
+    'randomkey' => darray[ 'return' => 'String' ],
+    'rename' => darray[ 'format' => 'kk', 'return' => 'Boolean' ],
+    'renamekey' => darray[ 'alias' => 'rename' ],
+    'renamenx' => darray[ 'format' => 'kk', 'return' => '1' ],
+    'type' => darray[ 'format' => 'k', 'return' => 'Type' ],
+    'ttl' => darray[ 'format' => 'k', 'return' => 'Long' ],
+    'pttl' => darray[ 'format' => 'k', 'return' => 'Long' ],
+    'restore' => darray[ 'format' => 'kls', 'return' => 'Boolean' ],
 
     //Geospatial
-    'geoadd' => [ 'format' => 'kdds', 'return' => 'Long' ],
-    'geodist' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'String' ],
-    'geohash' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Vector' ],
-    'geopos' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Variant' ],
-    'georadius' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Variant' ],
-    'georadiusbymember' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Variant' ],
+    'geoadd' => darray[ 'format' => 'kdds', 'return' => 'Long' ],
+    'geodist' => darray[ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'String' ],
+    'geohash' => darray[ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Vector' ],
+    'geopos' => darray[ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Variant' ],
+    'georadius' => darray[ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Variant' ],
+    'georadiusbymember' => darray[ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Variant' ],
 
     // Hashes
-    'hdel' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Long' ],
-    'hexists' => [ 'format' => 'ks', 'return' => '1' ],
-    'hget' => [ 'format' => 'ks', 'return' => 'Serialized' ],
-    'hgetall' => [ 'format' => 'k', 'return' => 'Map',
-                                    'retargs' => [false,true] ],
-    'hincrby' => [ 'format' => 'ksl', 'return' => 'Long' ],
-    'hincrbyfloat' => [ 'format' => 'ksd', 'return' => 'Double' ],
-    'hkeys' => [ 'format' => 'k', 'return' => 'Vector' ],
-    'hlen' => [ 'format' => 'k', 'return' => 'Long' ],
-    'hset' => [ 'format' => 'ksv', 'return' => 'Long' ],
-    'hsetnx' => [ 'format' => 'ksv', 'return' => '1' ],
-    'hvals' => [ 'format' => 'k', 'return' => 'Vector', 'retargs' => [1] ],
+    'hdel' => darray[ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Long' ],
+    'hexists' => darray[ 'format' => 'ks', 'return' => '1' ],
+    'hget' => darray[ 'format' => 'ks', 'return' => 'Serialized' ],
+    'hgetall' => darray[ 'format' => 'k', 'return' => 'Map',
+                                    'retargs' => varray[false,true] ],
+    'hincrby' => darray[ 'format' => 'ksl', 'return' => 'Long' ],
+    'hincrbyfloat' => darray[ 'format' => 'ksd', 'return' => 'Double' ],
+    'hkeys' => darray[ 'format' => 'k', 'return' => 'Vector' ],
+    'hlen' => darray[ 'format' => 'k', 'return' => 'Long' ],
+    'hset' => darray[ 'format' => 'ksv', 'return' => 'Long' ],
+    'hsetnx' => darray[ 'format' => 'ksv', 'return' => '1' ],
+    'hvals' => darray[ 'format' => 'k', 'return' => 'Vector', 'retargs' => varray[1] ],
 
     // Lists
-    'blpop' => [ 'vararg' => self::VAR_KEY_ALL_AND_TIMEOUT,
-                 'return' => 'Vector', 'retargs' => [1] ],
-    'brpop' => [ 'vararg' => self::VAR_KEY_ALL_AND_TIMEOUT,
-                 'return' => 'Vector', 'retargs' => [1] ],
-    'brpoplpush' => [ 'format' => 'kkl', 'return' => 'Serialized' ],
-    'lindex' => [ 'format' => 'kl', 'return' => 'Serialized' ],
-    'lget' => [ 'alias' => 'lindex' ],
-    'linsert' => [ 'format' => 'kpkv', 'return' => 'Long' ],
-    'llen' => [ 'format' => 'k', 'return' => 'Long', 'cmd' => 'LLEN' ],
-    'lsize' => [ 'alias' => 'llen' ],
-    'lpop' => [ 'format' => 'k', 'return' => 'Serialized' ],
-    'lpush' => [ 'vararg' => self::VAR_KEY_FIRST_AND_SERIALIZE,
+    'blpop' => darray[ 'vararg' => self::VAR_KEY_ALL_AND_TIMEOUT,
+                 'return' => 'Vector', 'retargs' => varray[1] ],
+    'brpop' => darray[ 'vararg' => self::VAR_KEY_ALL_AND_TIMEOUT,
+                 'return' => 'Vector', 'retargs' => varray[1] ],
+    'brpoplpush' => darray[ 'format' => 'kkl', 'return' => 'Serialized' ],
+    'lindex' => darray[ 'format' => 'kl', 'return' => 'Serialized' ],
+    'lget' => darray[ 'alias' => 'lindex' ],
+    'linsert' => darray[ 'format' => 'kpkv', 'return' => 'Long' ],
+    'llen' => darray[ 'format' => 'k', 'return' => 'Long', 'cmd' => 'LLEN' ],
+    'lsize' => darray[ 'alias' => 'llen' ],
+    'lpop' => darray[ 'format' => 'k', 'return' => 'Serialized' ],
+    'lpush' => darray[ 'vararg' => self::VAR_KEY_FIRST_AND_SERIALIZE,
                  'return' => 'Long' ],
-    'lpushx' => [ 'format' => 'kl', 'return' => 'Long' ],
-    'lrange' => [ 'format' => 'kll', 'return' => 'Vector', 'retargs' => [1] ],
-    'lgetrange' => [ 'alias' => 'lrange' ],
-    'lrem' => [ 'format' => 'kvs', 'return' => 'Long' ],
-    'lremove' => [ 'alias' => 'lrem' ],
-    'lset' => [ 'format' => 'klv', 'return' => 'Boolean' ],
-    'ltrim' => [ 'format' => 'kll', 'return' => 'Boolean' ],
-    'listtrim' => [ 'alias' => 'ltrim' ],
-    'rpop' => [ 'format' => 'k', 'return' => 'Serialized' ],
-    'rpoplpush' => [ 'format' => 'kk', 'return' => 'Serialized' ],
-    'rpush' => [ 'vararg' => self::VAR_KEY_FIRST_AND_SERIALIZE,
+    'lpushx' => darray[ 'format' => 'kl', 'return' => 'Long' ],
+    'lrange' => darray[ 'format' => 'kll', 'return' => 'Vector', 'retargs' => varray[1] ],
+    'lgetrange' => darray[ 'alias' => 'lrange' ],
+    'lrem' => darray[ 'format' => 'kvs', 'return' => 'Long' ],
+    'lremove' => darray[ 'alias' => 'lrem' ],
+    'lset' => darray[ 'format' => 'klv', 'return' => 'Boolean' ],
+    'ltrim' => darray[ 'format' => 'kll', 'return' => 'Boolean' ],
+    'listtrim' => darray[ 'alias' => 'ltrim' ],
+    'rpop' => darray[ 'format' => 'k', 'return' => 'Serialized' ],
+    'rpoplpush' => darray[ 'format' => 'kk', 'return' => 'Serialized' ],
+    'rpush' => darray[ 'vararg' => self::VAR_KEY_FIRST_AND_SERIALIZE,
                  'return' => 'Long' ],
-    'rpushx' => [ 'format' => 'kl', 'return' => 'Long' ],
+    'rpushx' => darray[ 'format' => 'kl', 'return' => 'Long' ],
 
     // Sets
-    'sadd' => [ 'vararg' => self::VAR_KEY_FIRST_AND_SERIALIZE,
+    'sadd' => darray[ 'vararg' => self::VAR_KEY_FIRST_AND_SERIALIZE,
                 'return' => 'Long' ],
-    'scard' => [ 'format' => 'k', 'return' => 'Long' ],
-    'ssize' => [ 'alias' => 'scard' ],
-    'sdiff' => [ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Vector' ],
-    'sdiffstore' => [ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Long' ],
-    'sinter' => [ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Vector' ],
-    'sinterstore' => [ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Long' ],
-    'sismember' => [ 'format' => 'kv', 'return' => '1' ],
-    'scontains' => [ 'alias' => 'sismember' ],
-    'smembers' => [ 'format' => 'k', 'return' => 'Vector' ],
-    'sgetmembers' => [ 'alias' => 'smembers' ],
-    'smove' => [ 'format' => 'kkv', 'return' => '1' ],
-    'spop' => [ 'format' => 'k', 'return' => 'Serialized' ],
-    'srem' => [ 'vararg' => self::VAR_KEY_FIRST_AND_SERIALIZE,
+    'scard' => darray[ 'format' => 'k', 'return' => 'Long' ],
+    'ssize' => darray[ 'alias' => 'scard' ],
+    'sdiff' => darray[ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Vector' ],
+    'sdiffstore' => darray[ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Long' ],
+    'sinter' => darray[ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Vector' ],
+    'sinterstore' => darray[ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Long' ],
+    'sismember' => darray[ 'format' => 'kv', 'return' => '1' ],
+    'scontains' => darray[ 'alias' => 'sismember' ],
+    'smembers' => darray[ 'format' => 'k', 'return' => 'Vector' ],
+    'sgetmembers' => darray[ 'alias' => 'smembers' ],
+    'smove' => darray[ 'format' => 'kkv', 'return' => '1' ],
+    'spop' => darray[ 'format' => 'k', 'return' => 'Serialized' ],
+    'srem' => darray[ 'vararg' => self::VAR_KEY_FIRST_AND_SERIALIZE,
                 'return' => 'Long' ],
-    'sremove' => [ 'alias' => 'srem' ],
-    'sunion' => [ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Vector' ],
-    'sunionstore' => [ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Long' ],
+    'sremove' => darray[ 'alias' => 'srem' ],
+    'sunion' => darray[ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Vector' ],
+    'sunionstore' => darray[ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Long' ],
 
     // zSets
-    'zcard' => [ 'format' => 'k', 'return' => 'Long' ],
-    'zsize' => [ 'alias' => 'zcard' ],
-    'zcount' => [ 'format' => 'kss', 'return' => 'Long' ],
-    'zincrby' => [ 'format' => 'kdv', 'return' => 'Double' ],
-    'zinter' => [ 'alias' => 'zinterstore' ],
-    'zunion' => [ 'alias' => 'zunionstore' ],
-    'zrank' => [ 'format' => 'kv', 'return' => 'Long' ],
-    'zrevrank' => [ 'format' => 'kv', 'return' => 'Long' ],
-    'zrem' => [ 'vararg' => self::VAR_KEY_FIRST_AND_SERIALIZE,
+    'zcard' => darray[ 'format' => 'k', 'return' => 'Long' ],
+    'zsize' => darray[ 'alias' => 'zcard' ],
+    'zcount' => darray[ 'format' => 'kss', 'return' => 'Long' ],
+    'zincrby' => darray[ 'format' => 'kdv', 'return' => 'Double' ],
+    'zinter' => darray[ 'alias' => 'zinterstore' ],
+    'zunion' => darray[ 'alias' => 'zunionstore' ],
+    'zrank' => darray[ 'format' => 'kv', 'return' => 'Long' ],
+    'zrevrank' => darray[ 'format' => 'kv', 'return' => 'Long' ],
+    'zrem' => darray[ 'vararg' => self::VAR_KEY_FIRST_AND_SERIALIZE,
                 'return' => 'Long' ],
-    'zremove' => [ 'alias' => 'zrem' ],
-    'zdelete' => [ 'alias' => 'zrem' ],
-    'zremrangebyrank' => [ 'format' => 'kll', 'return' => 'Long' ],
-    'zdeleterangebyrank' => [ 'alias' => 'zremrangebyrank' ],
-    'zremrangebyscore' => [ 'format' => 'kll', 'return' => 'Long' ],
-    'zdeleterangebyscore' => [ 'alias' => 'zremrangebyscore' ],
-    'zreverserange' => [ 'alias' => 'zrevrange' ],
-    'zscore' => [ 'format' => 'kv', 'return' => 'Double' ],
+    'zremove' => darray[ 'alias' => 'zrem' ],
+    'zdelete' => darray[ 'alias' => 'zrem' ],
+    'zremrangebyrank' => darray[ 'format' => 'kll', 'return' => 'Long' ],
+    'zdeleterangebyrank' => darray[ 'alias' => 'zremrangebyrank' ],
+    'zremrangebyscore' => darray[ 'format' => 'kll', 'return' => 'Long' ],
+    'zdeleterangebyscore' => darray[ 'alias' => 'zremrangebyscore' ],
+    'zreverserange' => darray[ 'alias' => 'zrevrange' ],
+    'zscore' => darray[ 'format' => 'kv', 'return' => 'Double' ],
 
     // Publish
-    'publish' => [ 'format' => 'kv', 'return' => 'Long' ],
+    'publish' => darray[ 'format' => 'kv', 'return' => 'Long' ],
     /* These APIs are listed as "subject to change", avoid for now */
     'subscribe' => false,
     'psubscribe' => false,
@@ -995,9 +995,9 @@ class Redis {
     'punsubscribe' => false,
 
     // Batch Ops
-    'mget' => [ 'vararg' => self::VAR_KEY_ALL,
-                'return' => 'Vector', 'retargs' => [1] ],
-    'getmultiple' => [ 'alias' => 'mget' ],
+    'mget' => darray[ 'vararg' => self::VAR_KEY_ALL,
+                'return' => 'Vector', 'retargs' => varray[1] ],
+    'getmultiple' => darray[ 'alias' => 'mget' ],
   ];
 
 
@@ -1018,8 +1018,8 @@ class Redis {
   protected $timeout_useconds = 0;
 
   protected $mode = self::ATOMIC;
-  protected $multiHandler = [];
-  protected $commands = [];
+  protected $multiHandler = varray[];
+  protected $commands = varray[];
   protected $prefix = '';
   protected $serializer = self::SERIALIZER_NONE;
 
@@ -1157,7 +1157,7 @@ class Redis {
         (count($args) == 2) &&
         (is_array($args[0])) &&
         (is_int($args[1]))) {
-      $args = $args[0] + [$args[1]];
+      $args = $args[0] + varray[$args[1]];
     }
     if ((!($flags & self::VAR_TIMEOUT)) &&
         (count($args) == 1) &&
@@ -1211,7 +1211,7 @@ class Redis {
    */
   protected function processArrayCommand($cmd, array $args) {
     if ($this->mode == self::PIPELINE) {
-      $this->commands[] = [ 'cmd' => $cmd, 'args' => $args ];
+      $this->commands[] = darray[ 'cmd' => $cmd, 'args' => $args ];
       return true;
     }
 
@@ -1259,7 +1259,7 @@ class Redis {
 
   protected function processClientListResponse() {
     if ($this->mode !== self::ATOMIC) {
-      $this->multiHandler[] = [ 'cb' => [$this,'processClientListResponse'] ];
+      $this->multiHandler[] = darray[ 'cb' => varray[$this,'processClientListResponse'] ];
       if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
         return false;
       }
@@ -1270,7 +1270,7 @@ class Redis {
     if (($type !== self::TYPE_LINE) && ($type !== self::TYPE_BULK)) {
       return null;
     }
-    $ret = [];
+    $ret = darray[];
     $pairs = explode(' ', trim($resp));
     foreach ($pairs as $pair) {
       $kv = explode('=', $pair, 2);
@@ -1286,7 +1286,7 @@ class Redis {
 
   protected function processVariantResponse() {
     if ($this->mode !== self::ATOMIC) {
-      $this->multiHandler[] = [ 'cb' => [$this,'processVariantResponse'] ];
+      $this->multiHandler[] = darray[ 'cb' => varray[$this,'processVariantResponse'] ];
       if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
         return false;
       }
@@ -1308,7 +1308,7 @@ class Redis {
       if ($resp === '-1') {
           return '';
       }
-      $ret = [];
+      $ret = varray[];
       $lineNo = 0;
       $count = (int) $resp;
       while($count--) {
@@ -1336,7 +1336,7 @@ class Redis {
       return (($type === self::TYPE_LINE) || ($type === self::TYPE_BULK))
              ? $this->_unserialize($resp) : false;
     }
-    $this->multiHandler[] = [ 'cb' => [$this,'processSerializedResponse'] ];
+    $this->multiHandler[] = darray[ 'cb' => varray[$this,'processSerializedResponse'] ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
       return false;
     }
@@ -1349,7 +1349,7 @@ class Redis {
       $resp = $this->sockReadData(inout $type);
       return ($type === self::TYPE_LINE) && ($resp === 'OK');
     }
-    $this->multiHandler[] = [ 'cb' => [$this,'processBooleanResponse'] ];
+    $this->multiHandler[] = darray[ 'cb' => varray[$this,'processBooleanResponse'] ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
       return false;
     }
@@ -1362,7 +1362,7 @@ class Redis {
       $resp = $this->sockReadData(inout $type);
       return ($type === self::TYPE_INT) ? ((int)$resp) : null;
     }
-    $this->multiHandler[] = [ 'cb' => [$this,'processLongResponse'] ];
+    $this->multiHandler[] = darray[ 'cb' => varray[$this,'processLongResponse'] ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
       return false;
     }
@@ -1379,7 +1379,7 @@ class Redis {
       }
       return false;
     }
-    $this->multiHandler[] = [ 'cb' => [$this,'processDoubleResponse'] ];
+    $this->multiHandler[] = darray[ 'cb' => varray[$this,'processDoubleResponse'] ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
       return false;
     }
@@ -1393,7 +1393,7 @@ class Redis {
       return (($type === self::TYPE_LINE) || ($type === self::TYPE_BULK))
              ? ((string)$resp) : null;
     }
-    $this->multiHandler[] = [ 'cb' => [$this,'processStringResponse'] ];
+    $this->multiHandler[] = darray[ 'cb' => varray[$this,'processStringResponse'] ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
       return false;
     }
@@ -1402,8 +1402,8 @@ class Redis {
 
   protected function processVectorResponse($unser = 0) {
     if ($this->mode !== self::ATOMIC) {
-      $this->multiHandler[] = [ 'cb' => [$this, 'processVectorResponse'],
-                                'args' => [$unser]
+      $this->multiHandler[] = darray[ 'cb' => varray[$this, 'processVectorResponse'],
+                                'args' => varray[$unser]
                            ];
       if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
         return false;
@@ -1417,7 +1417,7 @@ class Redis {
       return null;
     }
 
-    $ret = [];
+    $ret = varray[];
     $lineNo = 0;
     while($count--) {
       $lineNo++;
@@ -1433,8 +1433,8 @@ class Redis {
 
   protected function processMapResponse($unser_key, $unser_val = true) {
     if ($this->mode !== self::ATOMIC) {
-      $this->multiHandler[] = [ 'cb' => [$this, 'processMapResponse'],
-                                'args' => [$unser_key,$unser_val]
+      $this->multiHandler[] = darray[ 'cb' => varray[$this, 'processMapResponse'],
+                                'args' => varray[$unser_key,$unser_val]
                               ];
       if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
         return false;
@@ -1448,7 +1448,7 @@ class Redis {
       return null;
     }
 
-    $ret = [];
+    $ret = darray[];
     while($count > 1) {
       $type = null;
       $key = $this->sockReadData(inout $type);
@@ -1472,8 +1472,8 @@ class Redis {
 
   protected function processAssocResponse(array $keys, $unser_val = true) {
     if ($this->mode !== self::ATOMIC) {
-      $this->multiHandler[] = [ 'cb' => [$this, 'processAssocResponse'],
-                                'args' => [$keys, $unser_val]
+      $this->multiHandler[] = darray[ 'cb' => varray[$this, 'processAssocResponse'],
+                                'args' => varray[$keys, $unser_val]
                               ];
       if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
         return false;
@@ -1487,7 +1487,7 @@ class Redis {
       return null;
     }
 
-    $ret = [];
+    $ret = darray[];
     while($count--) {
       $key = array_shift(inout $keys);
       $type = null;
@@ -1506,7 +1506,7 @@ class Redis {
       $resp = $this->sockReadData(inout $type);
       return ($type === self::TYPE_INT) && ($resp === '1');
     }
-    $this->multiHandler[] = [ 'cb' => [$this,'process1Response'] ];
+    $this->multiHandler[] = darray[ 'cb' => varray[$this,'process1Response'] ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
       return false;
     }
@@ -1529,7 +1529,7 @@ class Redis {
         default:        return self::REDIS_NOT_FOUND;
       }
     }
-    $this->multiHandler[] = [ 'cb' => 'processTypeResponse' ];
+    $this->multiHandler[] = darray[ 'cb' => 'processTypeResponse' ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
       return false;
     }
@@ -1540,7 +1540,7 @@ class Redis {
     if ($this->mode === self::ATOMIC) {
       return $this->sockReadLine();
     }
-    $this->multiHandler[] = [ 'cb' => 'processRawResponse' ];
+    $this->multiHandler[] = darray[ 'cb' => 'processRawResponse' ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
       return false;
     }
@@ -1549,7 +1549,7 @@ class Redis {
 
   protected function processInfoResponse() {
     if ($this->mode !== self::ATOMIC) {
-      $this->multiHandler[] = [ 'cb' => 'processInfoResponse' ];
+      $this->multiHandler[] = darray[ 'cb' => 'processInfoResponse' ];
       if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
         return false;
       }
@@ -1561,7 +1561,7 @@ class Redis {
       return false;
     }
 
-    $ret = [];
+    $ret = darray[];
     $lines = preg_split('/[\r\n]+/', $resp);
     foreach ($lines as $line) {
       if ((substr($line, 0, 1) == '#') ||
@@ -1610,7 +1610,7 @@ class Redis {
         $fname = $func['alias'];
         $func = self::$map[$fname];
       } else {
-        return call_user_func_array([$this,$func['alias']],$args);
+        return call_user_func_array(varray[$this,$func['alias']],$args);
       }
     }
     if (!($func['format'] ?? false)) {
@@ -1624,7 +1624,7 @@ class Redis {
                        ? null : "process{$func['return']}Response";
     }
     if (!($func['retargs'] ?? false)) {
-      $func['retargs'] = [];
+      $func['retargs'] = varray[];
     }
 
     $format = $func['format'];
@@ -1636,7 +1636,7 @@ class Redis {
       if (!($func['handler'] ?? false)) {
         return null;
       }
-      return call_user_func_array([$this, $func['handler']], $func['retargs']);
+      return call_user_func_array(varray[$this, $func['handler']], $func['retargs']);
     }
 
     $flen = strlen($format);
@@ -1684,7 +1684,7 @@ class Redis {
     if (!($func['handler'] ?? false)) {
       return null;
     }
-    return call_user_func_array([$this, $func['handler']], $func['retargs']);
+    return call_user_func_array(varray[$this, $func['handler']], $func['retargs']);
   }
 
   /* --------------------------------------------------------------------- */
@@ -1735,8 +1735,8 @@ class Redis {
     $this->persistent = $persistent;
     $this->persistent_id = $persistent_id;
     $this->connection = $conn;
-    $this->commands = [];
-    $this->multiHandler = [];
+    $this->commands = varray[];
+    $this->multiHandler = varray[];
     $this->mode = self::ATOMIC;
 
     if (is_null($this->dbNumber)) {
@@ -1758,11 +1758,11 @@ class Redis {
   protected function sortClause(array $arr, inout $using_store) {
     $using_store = false;
     if (!$arr) {
-      return [];
+      return varray[];
     }
 
-    $ret = [];
-    foreach(['by','sort','store','get','alpha','limit','dir'] as $k) {
+    $ret = varray[];
+    foreach(varray['by','sort','store','get','alpha','limit','dir'] as $k) {
       if (isset($arr[$k])) {
         $v = $arr[$k];
       } else if (isset($arr[strtoupper($k)])) {

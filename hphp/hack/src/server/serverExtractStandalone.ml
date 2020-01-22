@@ -463,18 +463,19 @@ let rec string_of_hint hint =
   | Hany -> failwith "unprintable type hint: Hany"
   | Herr -> failwith "unprintable type hint: Herr"
 
-let string_of_user_attribute { ua_name; ua_params } =
+let maybe_string_of_user_attribute { ua_name; ua_params } =
+  let name = snd ua_name in
   match ua_params with
-  | [] -> snd ua_name
-  | _ -> failwith "user attributes with parameters not supported"
+  | [] when SMap.mem name SN.UserAttributes.as_map -> Some name
+  | _ -> None
 
 let string_of_user_attributes user_attributes =
+  let user_attributes =
+    List.filter_map ~f:maybe_string_of_user_attribute user_attributes
+  in
   match user_attributes with
   | [] -> ""
-  | _ ->
-    Printf.sprintf
-      "<<%s>>"
-      (concat_map ~sep:", " ~f:string_of_user_attribute user_attributes)
+  | _ -> Printf.sprintf "<<%s>>" (String.concat ~sep:", " user_attributes)
 
 let string_of_variance = function
   | Ast_defs.Covariant -> "+"

@@ -75,7 +75,7 @@ def map_json_scalars(json: Json, f: Callable[[JsonScalar], JsonScalar]) -> Json:
     elif isinstance(json, (str, int, float, bool, type(None))):
         return f(json)
     else:
-        assert False, f"Unhandled JSON case: {json.__class__.__name__}"
+        raise AssertionError(f"Unhandled JSON case: {json.__class__.__name__}")
 
 
 # Because HHI folders are different for each process,
@@ -96,7 +96,7 @@ def interpolate_variables(payload: Json, variables: VariableMap) -> Json:
         if isinstance(json, str):
             for variable, value in variables.items():
                 json = json.replace("${" + variable + "}", value)
-            if "${" in json:
+            if re.search(r"\$\{[^0-9]", json) is not None:
                 raise ValueError(
                     f"There was an undefined ${{}}-variable "
                     + f"in this JSON value: {json!r}. "

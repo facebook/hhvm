@@ -18,8 +18,6 @@ module SN = Naming_special_names
 module Decl_provider = Decl_provider_ctx
 module Class = Decl_provider.Class
 
-exception NotFound
-
 (* Internal error: for example, we are generating code for a dependency on an enum,
    but the passed dependency is not an enum *)
 exception UnexpectedDependency
@@ -86,8 +84,13 @@ let global_dep_name dep =
 let get_fun_pos ctx name =
   Decl_provider.get_fun ctx name |> Option.map ~f:(fun decl -> decl.fe_pos)
 
+let get_fun_pos_exn ctx name = value_or_not_found name (get_fun_pos ctx name)
+
 let get_class_pos ctx name =
   Decl_provider.get_class ctx name |> Option.map ~f:(fun decl -> Class.pos decl)
+
+let get_class_pos_exn ctx name =
+  value_or_not_found name (get_class_pos ctx name)
 
 let get_typedef_pos ctx name =
   Decl_provider.get_typedef ctx name |> Option.map ~f:(fun decl -> decl.td_pos)
@@ -160,11 +163,17 @@ let get_typedef_nast =
     ~find_in_file:Ast_provider.find_typedef_in_file
     ~naming:Naming.typedef
 
+let get_typedef_nast_exn ctx name =
+  value_or_not_found name (get_typedef_nast ctx name)
+
 let get_gconst_nast =
   make_nast_getter
     ~get_pos:get_gconst_pos
     ~find_in_file:Ast_provider.find_gconst_in_file
     ~naming:Naming.global_const
+
+let get_gconst_nast_exn ctx name =
+  value_or_not_found name (get_gconst_nast ctx name)
 
 let get_method_nast =
   let methods_by_class_name = ref SMap.empty in
@@ -251,36 +260,24 @@ let is_relevant_dependency
 let get_filename ctx target =
   let pos =
     match target with
-    | Function func ->
-      let f = value_exn NotFound @@ Decl_provider.get_fun ctx func in
-      Typing_defs.get_pos f.fe_type
-    | Method (cls, _) ->
-      let cls = value_exn NotFound @@ Decl_provider.get_class ctx cls in
-      Class.pos cls
+    | Function name -> get_fun_pos_exn ctx name
+    | Method (name, _) -> get_class_pos_exn ctx name
   in
   Pos.filename pos
 
-let extract_body ctx target =
+let extract_target ctx target =
   let filename = get_filename ctx target in
   let abs_filename = Relative_path.to_absolute filename in
   let file_content = In_channel.read_all abs_filename in
   Aast.(
     let pos =
       match target with
-      | Function func ->
-        let ast_function =
-          value_exn NotFound @@ Ast_provider.find_fun_in_file filename func
-        in
-        ast_function.f_span
-      | Method (cls, name) ->
-        let ast_class =
-          value_exn NotFound @@ Ast_provider.find_class_in_file filename cls
-        in
-        let m =
-          value_exn NotFound
-          @@ List.find ast_class.c_methods (fun meth -> snd meth.m_name = name)
-        in
-        m.m_span
+      | Function name ->
+        let fun_ = get_fun_nast_exn ctx name in
+        fun_.f_span
+      | Method (class_name, method_name) ->
+        let method_ = get_method_nast_exn ctx class_name method_name in
+        method_.m_span
     in
     Pos.get_text_from_pos file_content pos)
 
@@ -450,6 +447,11 @@ let rec string_of_hint hint =
   | Hany -> failwith "unprintable type hint: Hany"
   | Herr -> failwith "unprintable type hint: Herr"
 
+let string_of_shape_field_name = function
+  | Ast_defs.SFlit_int (_, s) -> s
+  | Ast_defs.SFlit_str (_, s) -> Printf.sprintf "'%s'" s
+  | Ast_defs.SFclass_const ((_, c), (_, s)) -> Printf.sprintf "%s::%s" c s
+
 let string_of_user_attribute { ua_name; ua_params } =
   match ua_params with
   | [] -> snd ua_name
@@ -595,6 +597,74 @@ let get_enum_value ctx enum_name =
     | [] -> raise UnexpectedDependency
     | class_const :: _ -> snd class_const.cc_id
 
+let rec get_init_from_hint ctx hint =
+  match snd hint with
+  | Hprim prim -> get_init_for_prim prim
+  | Hoption _ -> "null"
+  | Hlike hint -> get_init_from_hint ctx hint
+  | Harray _ -> "[]"
+  | Hdarray _ -> "darray[]"
+  | Hvarray_or_darray _
+  | Hvarray _ ->
+    "varray[]"
+  | Htuple hints ->
+    Printf.sprintf
+      "tuple(%s)"
+      (concat_map ~sep:", " ~f:(get_init_from_hint ctx) hints)
+  | Happly ((_, name), hints) ->
+    (match name with
+    | _
+      when name = SN.Collections.cVec
+           || name = SN.Collections.cKeyset
+           || name = SN.Collections.cDict ->
+      Printf.sprintf "%s[]" (strip_ns name)
+    | _
+      when name = SN.Collections.cVector
+           || name = SN.Collections.cImmVector
+           || name = SN.Collections.cMap
+           || name = SN.Collections.cImmMap
+           || name = SN.Collections.cSet
+           || name = SN.Collections.cImmSet ->
+      Printf.sprintf "%s {}" (strip_ns name)
+    | _ when name = SN.Collections.cPair ->
+      (match hints with
+      | [first; second] ->
+        Printf.sprintf
+          "Pair {%s, %s}"
+          (get_init_from_hint ctx first)
+          (get_init_from_hint ctx second)
+      | _ -> raise UnexpectedDependency)
+    | _ when name = SN.Classes.cClassname ->
+      (match hints with
+      | [(_, Happly ((_, class_name), _))] ->
+        Printf.sprintf "%s::class" class_name
+      | _ -> raise UnexpectedDependency)
+    | _ ->
+      (match get_class_nast ctx name with
+      | Some class_ ->
+        if class_.c_kind = Ast_defs.Cenum then
+          Printf.sprintf "%s::%s" name (get_enum_value ctx name)
+        else
+          raise Unsupported
+      | None ->
+        let typedef = get_typedef_nast_exn ctx name in
+        get_init_from_hint ctx typedef.t_kind))
+  | Hshape { nsi_field_map; _ } ->
+    let non_optional_fields =
+      List.filter nsi_field_map ~f:(fun shape_field_info ->
+          not shape_field_info.sfi_optional)
+    in
+    let get_init_shape_field { sfi_hint; sfi_name; _ } =
+      Printf.sprintf
+        "%s => %s"
+        (string_of_shape_field_name sfi_name)
+        (get_init_from_hint ctx sfi_hint)
+    in
+    Printf.sprintf
+      "shape(%s)"
+      (concat_map ~sep:", " ~f:get_init_shape_field non_optional_fields)
+  | _ -> raise Unsupported
+
 let get_init_from_type ctx ty =
   let open Typing_defs in
   let rec get_ (_, ty) =
@@ -665,6 +735,12 @@ let get_init_from_type ctx ty =
   in
   get_ ty
 
+let get_gconst_declaration ctx name =
+  let gconst = get_gconst_nast_exn ctx name in
+  let hint = value_or_not_found ("type of " ^ name) gconst.cst_type in
+  let init = get_init_from_hint ctx hint in
+  Printf.sprintf "const %s %s = %s;" (string_of_hint hint) (strip_ns name) init
+
 let get_const_declaration ctx ?abstract:(is_abstract = false) ty name =
   let abstract =
     if is_abstract then
@@ -678,17 +754,13 @@ let get_const_declaration ctx ?abstract:(is_abstract = false) ty name =
 
 let get_global_object_declaration ctx obj =
   Typing_deps.Dep.(
-    let description = to_string obj in
     match obj with
     | Fun f
     | FunName f ->
       Printf.sprintf "%s {throw new \\Exception();}" (get_fun_declaration ctx f)
     | GConst c
     | GConstName c ->
-      let (const_type, _) =
-        value_or_not_found description @@ Decl_provider.get_gconst ctx c
-      in
-      get_const_declaration ctx const_type (strip_ns c)
+      get_gconst_declaration ctx c
     (* No other global declarations *)
     | _ -> raise UnexpectedDependency)
 
@@ -978,7 +1050,7 @@ let get_class_body ctx cls target class_elts =
   let extracted_method =
     match target with
     | Method (cls_name, _) when cls_name = Decl_provider.Class.name cls ->
-      [extract_body ctx target]
+      [extract_target ctx target]
     | _ -> []
   in
   String.concat
@@ -1559,7 +1631,7 @@ let get_declarations ctx target class_dependencies global_dependencies =
   in
   match target with
   | Function name ->
-    let decl = extract_body ctx target in
+    let decl = extract_target ctx target in
     if is_strict_fun ctx name then
       (add_declaration strict_declarations name decl, partial_declarations)
     else
@@ -1582,7 +1654,6 @@ let go ctx target =
     in
     get_code strict_declarations partial_declarations
   with
-  | NotFound -> "Not found!"
   | DependencyNotFound d -> Printf.sprintf "Dependency not found: %s" d
   | Unsupported
   | UnexpectedDependency ->

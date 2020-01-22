@@ -589,16 +589,13 @@ let get_init_for_prim = function
     raise Unsupported
 
 let get_enum_value ctx enum_name =
-  let enum =
-    value_exn UnexpectedDependency @@ Decl_provider.get_class ctx enum_name
-  in
-  if Class.kind enum <> Ast_defs.Cenum then
+  let class_ = get_class_nast_exn ctx enum_name in
+  if class_.c_kind <> Ast_defs.Cenum then
     raise Unsupported
   else
-    Class.consts enum
-    |> Sequence.map ~f:fst
-    |> Sequence.find ~f:(fun name -> name <> "class")
-    |> value_exn UnexpectedDependency
+    match class_.c_consts with
+    | [] -> raise UnexpectedDependency
+    | class_const :: _ -> snd class_const.cc_id
 
 let get_init_from_type ctx ty =
   let open Typing_defs in

@@ -17,7 +17,15 @@ open Oxidized_module
 let get_includes modules includes =
   let get_all_exported_types directly_included_mod acc =
     let rec aux mod_name acc =
-      let included_module = SMap.find modules mod_name in
+      let included_module =
+        try SMap.find modules mod_name
+        with Caml.Not_found ->
+          failwith
+            ( "Could not find module "
+            ^ mod_name
+            ^ ". Perhaps it needs to be added to the list of files run through hh_oxidize?"
+            )
+      in
       let acc = SSet.fold included_module.includes ~init:acc ~f:aux in
       let ty_uses = List.map included_module.ty_uses snd in
       let decls = List.map included_module.decls fst in

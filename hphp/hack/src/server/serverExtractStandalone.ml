@@ -221,17 +221,16 @@ let get_prop_nast_exn ctx class_name prop_name =
     (get_prop_nast ctx class_name prop_name)
 
 let get_fun_mode ctx name =
-  get_fun_nast ctx name |> Option.map ~f:(fun fun_ -> fun_.Aast.f_mode)
+  get_fun_nast ctx name |> Option.map ~f:(fun fun_ -> fun_.f_mode)
 
 let get_class_mode ctx name =
-  get_class_nast ctx name |> Option.map ~f:(fun class_ -> class_.Aast.c_mode)
+  get_class_nast ctx name |> Option.map ~f:(fun class_ -> class_.c_mode)
 
 let get_typedef_mode ctx name =
-  get_typedef_nast ctx name
-  |> Option.map ~f:(fun typedef -> typedef.Aast.t_mode)
+  get_typedef_nast ctx name |> Option.map ~f:(fun typedef -> typedef.t_mode)
 
 let get_gconst_mode ctx name =
-  get_gconst_nast ctx name |> Option.map ~f:(fun gconst -> gconst.Aast.cst_mode)
+  get_gconst_nast ctx name |> Option.map ~f:(fun gconst -> gconst.cst_mode)
 
 let get_class_or_typedef_mode ctx name =
   Option.first_some (get_class_mode ctx name) (get_typedef_mode ctx name)
@@ -290,17 +289,16 @@ let extract_target ctx target =
   let filename = get_filename ctx target in
   let abs_filename = Relative_path.to_absolute filename in
   let file_content = In_channel.read_all abs_filename in
-  Aast.(
-    let pos =
-      match target with
-      | Function name ->
-        let fun_ = get_fun_nast_exn ctx name in
-        fun_.f_span
-      | Method (class_name, method_name) ->
-        let method_ = get_method_nast_exn ctx class_name method_name in
-        method_.m_span
-    in
-    Pos.get_text_from_pos file_content pos)
+  let pos =
+    match target with
+    | Function name ->
+      let fun_ = get_fun_nast_exn ctx name in
+      fun_.f_span
+    | Method (class_name, method_name) ->
+      let method_ = get_method_nast_exn ctx class_name method_name in
+      method_.m_span
+  in
+  Pos.get_text_from_pos file_content pos
 
 let print_error source_text error =
   let text =
@@ -504,9 +502,9 @@ let string_of_tparam
   let user_attributes = string_of_user_attributes tp_user_attributes in
   let reified =
     match tp_reified with
-    | Aast.Erased -> ""
-    | Aast.SoftReified
-    | Aast.Reified ->
+    | Erased -> ""
+    | SoftReified
+    | Reified ->
       "refied"
   in
   String.concat
@@ -581,7 +579,7 @@ let get_fun_declaration ctx name =
     | (_, None) -> ""
   in
   Printf.sprintf
-    "%s function %s%s(%s)%s"
+    "%s function %s%s(%s)%s {throw new \\Exception();}"
     user_attributes
     (strip_ns name)
     tparams
@@ -598,20 +596,11 @@ let get_init_for_prim = function
   | Aast_defs.Tstring
   | Aast_defs.Tarraykey ->
     "\"\""
+  | Aast_defs.Tatom s -> s
   | Aast_defs.Tvoid
   | Aast_defs.Tresource
-  | Aast_defs.Tnoreturn
-  | Aast_defs.Tatom _ ->
+  | Aast_defs.Tnoreturn ->
     raise Unsupported
-
-let get_enum_value ctx enum_name =
-  let class_ = get_class_nast_exn ctx enum_name in
-  if class_.c_kind <> Ast_defs.Cenum then
-    raise Unsupported
-  else
-    match class_.c_consts with
-    | [] -> raise UnexpectedDependency
-    | class_const :: _ -> snd class_const.cc_id
 
 let rec get_init_from_hint ctx hint =
   match snd hint with
@@ -628,7 +617,7 @@ let rec get_init_from_hint ctx hint =
       "tuple(%s)"
       (concat_map ~sep:", " ~f:(get_init_from_hint ctx) hints)
   | Happly ((_, name), hints) ->
-    (match name with
+    (match () with
     | _
       when name = SN.Collections.cVec
            || name = SN.Collections.cKeyset
@@ -649,7 +638,7 @@ let rec get_init_from_hint ctx hint =
           "Pair {%s, %s}"
           (get_init_from_hint ctx first)
           (get_init_from_hint ctx second)
-      | _ -> raise UnexpectedDependency)
+      | _ -> failwith "malformed hint")
     | _ when name = SN.Classes.cClassname ->
       (match hints with
       | [(_, Happly ((_, class_name), _))] ->
@@ -659,7 +648,12 @@ let rec get_init_from_hint ctx hint =
       (match get_class_nast ctx name with
       | Some class_ ->
         if class_.c_kind = Ast_defs.Cenum then
-          Printf.sprintf "%s::%s" name (get_enum_value ctx name)
+          let const_name =
+            match class_.c_consts with
+            | [] -> failwith "empty enum"
+            | const :: _ -> snd const.cc_id
+          in
+          Printf.sprintf "%s::%s" name const_name
         else
           raise Unsupported
       | None ->
@@ -713,7 +707,7 @@ let get_global_object_declaration ctx obj =
     match obj with
     | Fun f
     | FunName f ->
-      Printf.sprintf "%s {throw new \\Exception();}" (get_fun_declaration ctx f)
+      get_fun_declaration ctx f
     | GConst c
     | GConstName c ->
       get_gconst_declaration ctx c
@@ -754,7 +748,6 @@ let get_class_declaration class_ =
         "implements %s"
         (concat_map ~sep:", " ~f:string_of_hint class_.c_implements)
   in
-  (* TODO: traits, records *)
   Printf.sprintf
     "%s %s %s %s%s %s %s"
     user_attributes
@@ -767,10 +760,10 @@ let get_class_declaration class_ =
 
 let get_method_declaration method_ ~from_interface =
   let abstract =
-    if (not method_.m_abstract) || from_interface then
-      ""
-    else
+    if method_.m_abstract && not from_interface then
       "abstract"
+    else
+      ""
   in
   let visibility = string_of_visibility method_.m_visibility in
   let static =
@@ -798,8 +791,14 @@ let get_method_declaration method_ ~from_interface =
     | (_, Some hint) -> ": " ^ string_of_hint hint
     | (_, None) -> ""
   in
+  let body =
+    if method_.m_abstract || from_interface then
+      ";"
+    else
+      "{throw new \\Exception();}"
+  in
   Printf.sprintf
-    "%s %s %s %s function %s%s(%s)%s"
+    "%s %s %s %s function %s%s(%s)%s%s"
     user_attributes
     abstract
     visibility
@@ -808,6 +807,7 @@ let get_method_declaration method_ ~from_interface =
     tparams
     params
     ret
+    body
 
 let get_prop_declaration ctx prop =
   let name = snd prop.cv_id in
@@ -872,14 +872,7 @@ let get_class_elt_declaration
       let class_ = get_class_nast_exn ctx class_name in
       let from_interface = class_.c_kind = Ast_defs.Cinterface in
       let method_ = get_method_nast_exn ctx class_name method_name in
-      let decl = get_method_declaration method_ ~from_interface in
-      let body =
-        if method_.m_abstract then
-          ";"
-        else
-          "{throw new \\Exception();}"
-      in
-      Some (decl ^ body))
+      Some (get_method_declaration method_ ~from_interface))
   | Prop (class_name, prop_name) ->
     let prop = get_prop_nast_exn ctx class_name prop_name in
     Some (get_prop_declaration ctx prop)
@@ -925,29 +918,16 @@ let construct_enum ctx class_ =
     (concat_map ~sep:"\n" ~f:string_of_enum_const class_.c_consts)
 
 let get_constructor_declaration ctx name prop_names =
-  let class_ = get_class_nast_exn ctx name in
-  let construct_opt =
-    List.find class_.c_methods ~f:(fun method_ ->
-        snd method_.m_name = "__construct")
-  in
-  match construct_opt with
+  match get_method_nast ctx name "__construct" with
   | None ->
     if List.is_empty prop_names then
       None
     else
       Some "public function __construct() {throw new \\Exception();}"
   | Some construct ->
+    let class_ = get_class_nast_exn ctx name in
     let from_interface = class_.c_kind = Ast_defs.Cinterface in
-    let decl = get_method_declaration construct ~from_interface in
-    let body =
-      (* An interface may inherit a non-abstract constructor
-         through a `require extends` declaration. *)
-      if construct.m_abstract || from_interface then
-        ";"
-      else
-        "{throw new \\Exception();}"
-    in
-    Some (decl ^ body)
+    Some (get_method_declaration construct ~from_interface)
 
 let get_class_body ctx class_ target class_elts =
   let name = snd class_.c_name in

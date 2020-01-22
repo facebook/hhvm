@@ -2922,9 +2922,9 @@ SHIP
 }
 
 function aggregate_srcloc_info($tests) {
-  $all_missing_on_lhs = [];
-  $all_missing_on_rhs = [];
-  $all_mismatched_srcloc = [];
+  $all_missing_on_lhs = varray[];
+  $all_missing_on_rhs = varray[];
+  $all_mismatched_srcloc = varray[];
 
   foreach ($tests as $test) {
     $file = "$test.diff";

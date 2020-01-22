@@ -145,7 +145,10 @@ enum SerializeMemoizeCode {
   SER_MC_STRING    = 8,
   SER_MC_OBJECT    = 9,
   SER_MC_CONTAINER = 10,
-  SER_MC_STOP      = 11,
+  SER_MC_CLS       = 11,
+  SER_MC_FUNC      = 12,
+  SER_MC_CLSMETH   = 13,
+  SER_MC_STOP      = 14,
 };
 
 const uint64_t kCodeMask DEBUG_ONLY = 0x0f;
@@ -290,13 +293,13 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       break;
 
     case KindOfFunc:
-      serialize_memoize_code(sb, SER_MC_STRING);
-      serialize_memoize_string_data(sb, funcToStringHelper(tv.m_data.pfunc));
+      serialize_memoize_code(sb, SER_MC_FUNC);
+      serialize_memoize_string_data(sb, tv.m_data.pfunc->fullName());
       break;
 
     case KindOfClass:
-      serialize_memoize_code(sb, SER_MC_STRING);
-      serialize_memoize_string_data(sb, classToStringHelper(tv.m_data.pclass));
+      serialize_memoize_code(sb, SER_MC_CLS);
+      serialize_memoize_string_data(sb, tv.m_data.pclass->name());
       break;
 
     case KindOfPersistentString:
@@ -327,9 +330,10 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       break;
 
     case KindOfClsMeth:
-      raiseClsMethToVecWarningHelper();
-      serialize_memoize_array(
-        sb, depth, clsMethToVecHelper(tv.m_data.pclsmeth).get());
+      serialize_memoize_code(sb, SER_MC_CLSMETH);
+      serialize_memoize_string_data(sb, tv.m_data.pclsmeth->getCls()->name());
+      serialize_memoize_string_data(
+        sb, tv.m_data.pclsmeth->getFunc()->fullName());
       break;
     case KindOfObject:
       serialize_memoize_obj(sb, depth, tv.m_data.pobj);

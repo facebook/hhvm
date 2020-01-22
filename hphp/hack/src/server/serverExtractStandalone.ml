@@ -150,9 +150,6 @@ let get_class_nast =
     ~find_in_file:Ast_provider.find_class_in_file
     ~naming:Naming.class_
 
-let get_class_nast_exn ctx name =
-  value_or_not_found name (get_class_nast ctx name)
-
 let get_typedef_nast =
   make_nast_getter
     ~get_pos:get_typedef_pos
@@ -850,6 +847,19 @@ let get_typeconst_declaration typeconst =
   in
   Printf.sprintf "%s const type %s%s%s;" abstract name constraint_ type_
 
+let get_method_declaration ctx target class_name method_name =
+  match target with
+  | ServerCommandTypes.Extract_standalone.Method
+      (target_class_name, target_method_name)
+    when class_name = target_class_name && method_name = target_method_name ->
+    None
+  | _ ->
+    let open Option in
+    get_class_nast ctx class_name >>= fun class_ ->
+    let from_interface = class_.c_kind = Ast_defs.Cinterface in
+    get_method_nast ctx class_name method_name >>= fun method_ ->
+    Some (get_method_declaration method_ ~from_interface)
+
 let get_class_elt_declaration
     ctx target (class_elt : 'a Typing_deps.Dep.variant) =
   let open Typing_deps.Dep in
@@ -863,16 +873,9 @@ let get_class_elt_declaration
       | None -> raise (DependencyNotFound (class_name ^ "::" ^ const_name))))
   | Method (class_name, method_name)
   | SMethod (class_name, method_name) ->
-    (match target with
-    | ServerCommandTypes.Extract_standalone.Method
-        (target_class_name, target_method_name)
-      when class_name = target_class_name && method_name = target_method_name ->
-      None
-    | _ ->
-      let class_ = get_class_nast_exn ctx class_name in
-      let from_interface = class_.c_kind = Ast_defs.Cinterface in
-      let method_ = get_method_nast_exn ctx class_name method_name in
-      Some (get_method_declaration method_ ~from_interface))
+    get_method_declaration ctx target class_name method_name
+  | Cstr class_name ->
+    get_method_declaration ctx target class_name "__construct"
   | Prop (class_name, prop_name) ->
     let prop = get_prop_nast_exn ctx class_name prop_name in
     Some (get_prop_declaration ctx prop)
@@ -881,7 +884,6 @@ let get_class_elt_declaration
     let prop = get_prop_nast_exn ctx class_name sprop_name in
     Some (get_prop_declaration ctx prop)
   (* Constructor should've been tackled earlier, and all other dependencies aren't class elements *)
-  | Cstr _
   | Extends _
   | AllMembers _
   | Class _
@@ -917,18 +919,6 @@ let construct_enum ctx class_ =
     constraint_
     (concat_map ~sep:"\n" ~f:string_of_enum_const class_.c_consts)
 
-let get_constructor_declaration ctx name prop_names =
-  match get_method_nast ctx name "__construct" with
-  | None ->
-    if List.is_empty prop_names then
-      None
-    else
-      Some "public function __construct() {throw new \\Exception();}"
-  | Some construct ->
-    let class_ = get_class_nast_exn ctx name in
-    let from_interface = class_.c_kind = Ast_defs.Cinterface in
-    Some (get_method_declaration construct ~from_interface)
-
 let get_class_body ctx class_ target class_elts =
   let name = snd class_.c_name in
   let uses =
@@ -943,19 +933,11 @@ let get_class_body ctx class_ target class_elts =
           `Snd (Printf.sprintf "require implements %s;" (string_of_hint s)))
   in
   let open Typing_deps in
-  let prop_names =
-    List.filter_map class_elts ~f:(function
-        | Dep.Prop (_, p) -> Some p
-        | _ -> None)
-  in
   let body =
     List.filter_map class_elts ~f:(function
         | Dep.AllMembers _
         | Dep.Extends _ ->
           raise UnexpectedDependency
-        (* Constructor needs special treatment because we need
-           information about properties. *)
-        | Dep.Cstr _ -> get_constructor_declaration ctx name prop_names
         | Dep.Const (_, "class") -> None
         | class_elt -> get_class_elt_declaration ctx target class_elt)
   in

@@ -398,8 +398,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   <<__Rx, __MaybeMutable>>
   final protected function __toStringHelper(
     $type,
-    array $preAttrs = [],
-    array $funcAttrs = [],
+    varray<string> $preAttrs = varray[],
+    varray<string> $funcAttrs = varray[],
   ): string {
     $ret = '';
     if ($doc = $this->getDocComment()) {
@@ -716,7 +716,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    */
   <<__Rx, __MaybeMutable>>
   public function __toString(): string {
-    $preAttrs = [];
+    $preAttrs = varray[];
 
     $decl_class = $this->getDeclaringClassname();
     if ($this->originalClass !== $decl_class) {
@@ -731,7 +731,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
       $preAttrs[] = 'ctor';
     }
 
-    $funcAttrs = [];
+    $funcAttrs = varray[];
     if ($this->isAbstract()) {
       $funcAttrs[] = 'abstract';
     }

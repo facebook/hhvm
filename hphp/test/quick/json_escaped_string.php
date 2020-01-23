@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$data = [
+$data = varray[
   '"foo\nbar"',
   '"baz\u003dbong"',
 ];

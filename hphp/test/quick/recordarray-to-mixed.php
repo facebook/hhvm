@@ -14,7 +14,7 @@ function main() {
   $o2 = new Bar;
   $o2->f = 10;
   $r1 = FooBar@['z' => $o1];
-  $key = 'abc'.count([1,2]);
+  $key = 'abc'.count(varray[1,2]);
   $r1[$key] = 42;
   $r2 = $r1;
   $r1[1] = $o2;

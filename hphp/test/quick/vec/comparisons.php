@@ -114,7 +114,7 @@ function compare($a, $b) {
   compare(vec[], 1.2345);
   compare(vec[], 'abc');
   compare(vec[], new stdclass);
-  compare(vec[], []);
+  compare(vec[], varray[]);
   compare(vec[], dict[]);
   compare(vec[], keyset[]);
 

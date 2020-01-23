@@ -130,7 +130,7 @@ function compare($a, $b) {
   compare(dict[], 1.2345);
   compare(dict[], 'abc');
   compare(dict[], new stdclass);
-  compare(dict[], []);
+  compare(dict[], varray[]);
   compare(dict[], vec[]);
   compare(dict[], keyset[]);
 

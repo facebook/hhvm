@@ -83,7 +83,7 @@ function base($d) {
   echo "======= base_prop_set ==============================\n";
   try {
     $copy = $d;
-    $copy->foobaz = [123];
+    $copy->foobaz = varray[123];
     var_dump($copy);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
@@ -172,7 +172,7 @@ function dim($a) {
   echo "======= dim_prop_set ===============================\n";
   try {
     $copy = $a;
-    $copy[1]->foobaz = [123];
+    $copy[1]->foobaz = varray[123];
     var_dump($copy);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
@@ -349,7 +349,7 @@ function fini($a) {
   }
 }
 <<__EntryPoint>> function main(): void {
-base(dict[1 => ['a' => 100], 2 => "", "1" => ['a' => 500]]);
-dim([null, dict[1 => ['a' => 100], 2 => "", "1" => ['a' => 500]]]);
-fini([null, dict[1 => "abc", 2 => "", "1" => "def"]]);
+base(dict[1 => darray['a' => 100], 2 => "", "1" => darray['a' => 500]]);
+dim(varray[null, dict[1 => darray['a' => 100], 2 => "", "1" => darray['a' => 500]]]);
+fini(varray[null, dict[1 => "abc", 2 => "", "1" => "def"]]);
 }

@@ -4,7 +4,7 @@
 class NoisyClass {
   function __sleep() {
     echo "NoisyClass::__sleep()\n";
-    return [];
+    return varray[];
   }
   function __wakeup() {
     echo "NoisyClass::__wakeup()\n";

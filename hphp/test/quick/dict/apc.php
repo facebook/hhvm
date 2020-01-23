@@ -14,7 +14,7 @@ class Sleep {
 
   function __sleep() {
     echo "Sleep...\n";
-    return [];
+    return varray[];
   }
 }
 

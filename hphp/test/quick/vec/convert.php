@@ -88,9 +88,9 @@ function convert_to($from) {
 }
 
 <<__EntryPoint>> function main(): void {
-  convert_to([]);
-  convert_to([100, 'val1', 'val2', 400, null, true, 1.234, new stdclass]);
-  convert_to([1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
+  convert_to(varray[]);
+  convert_to(varray[100, 'val1', 'val2', 400, null, true, 1.234, new stdclass]);
+  convert_to(darray[1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
               10 => null, 15 => true, 'key3' => 1.234,
               'key4' => new stdclass]);
 

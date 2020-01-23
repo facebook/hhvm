@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:string_utils_bench
-# Signature<<285d2526962fc997c7b54acce92631edfd4604a0>>
+# Signature
 [package]
 name = "string_utils_bench"
 edition = "2018"
@@ -13,4 +13,4 @@ path = "../../string_utils_bench.rs"
 
 [dependencies]
 hhbc_string_utils_rust = { path = "../string_utils" }
-# @end of Signature<<285d2526962fc997c7b54acce92631edfd4604a0>>
+# @end of Signature

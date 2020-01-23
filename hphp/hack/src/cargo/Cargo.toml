@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src:hh_compile
-# Signature<<402e73f6648a00334f0d2e3fce21d3464a118f70>>
+# Signature
 [package]
 name = "hh_compile"
 edition = "2018"
@@ -18,4 +18,4 @@ oxidized = { path = "../oxidized" }
 itertools = "0.8"
 structopt = "0.3"
 walkdir = "2.2"
-# @end of Signature<<402e73f6648a00334f0d2e3fce21d3464a118f70>>
+# @end of Signature

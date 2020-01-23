@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/ocamlrep_derive:ocamlrep_derive
-# Signature<<c5fb065966fc306c5efacb72379c1f1f83b5d3d6>>
+# Signature
 [package]
 name = "ocamlrep_derive"
 edition = "2018"
@@ -19,4 +19,4 @@ proc-macro2 = "1.0"
 quote = "1.0"
 syn = { version = "1.0", features = ["full", "visit", "visit-mut", "fold", "extra-traits"] }
 synstructure = "0.12"
-# @end of Signature<<c5fb065966fc306c5efacb72379c1f1f83b5d3d6>>
+# @end of Signature

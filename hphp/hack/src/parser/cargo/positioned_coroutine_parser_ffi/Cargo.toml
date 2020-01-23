@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:positioned_coroutine_parser_ffi
-# Signature<<f5249e44318743782e04ed43eade13c823a9d4bc>>
+# Signature
 [package]
 name = "positioned_coroutine_parser_ffi"
 edition = "2018"
@@ -23,4 +23,4 @@ smart_constructors = { path = "../smart_constructors" }
 stack_limit = { path = "../../../utils/stack_limit" }
 libc = "0.2"
 ocaml = "0.8"
-# @end of Signature<<f5249e44318743782e04ed43eade13c823a9d4bc>>
+# @end of Signature

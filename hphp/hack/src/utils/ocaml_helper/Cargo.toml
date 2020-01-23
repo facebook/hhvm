@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/utils:ocaml_helper
-# Signature<<df6b6baca3e8e2d17063145821515921ad134cbf>>
+# Signature
 [package]
 name = "ocaml_helper"
 edition = "2018"
@@ -12,4 +12,4 @@ path = "../ocaml_helper.rs"
 
 [dev-dependencies]
 pretty_assertions = "0.6"
-# @end of Signature<<df6b6baca3e8e2d17063145821515921ad134cbf>>
+# @end of Signature

@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:emit_program_rust
-# Signature<<107285577ccb6cfe9655583673b0de0bb2919355>>
+# Signature
 [package]
 name = "emit_program_rust"
 edition = "2018"
@@ -14,4 +14,4 @@ path = "../../emit_program.rs"
 env = { path = "../env" }
 options = { path = "../options" }
 bitflags = "1.2"
-# @end of Signature<<107285577ccb6cfe9655583673b0de0bb2919355>>
+# @end of Signature

@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser/api:positioned_parser
-# Signature<<98e564053fd9e929b63ce5777dadbefc8b3a7160>>
+# Signature
 [package]
 name = "positioned_parser"
 edition = "2018"
@@ -14,4 +14,4 @@ path = "../../positioned_parser.rs"
 parser = { path = "../../../core" }
 positioned_smart_constructors = { path = "../../../cargo/positioned_smart_constructors" }
 stack_limit = { path = "../../../../utils/stack_limit" }
-# @end of Signature<<98e564053fd9e929b63ce5777dadbefc8b3a7160>>
+# @end of Signature

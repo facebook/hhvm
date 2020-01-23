@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/facts:facts_rust
-# Signature<<15e73e3de6b2bb6a406f38b63641a51ad2729ccf>>
+# Signature
 [package]
 name = "facts_rust"
 edition = "2018"
@@ -27,4 +27,4 @@ serde_json = "1.0"
 
 [dev-dependencies]
 pretty_assertions = "0.6"
-# @end of Signature<<15e73e3de6b2bb6a406f38b63641a51ad2729ccf>>
+# @end of Signature

@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:hhas_body_rust
-# Signature<<55108238cec603b9c37b6db34947f08871743c16>>
+# Signature
 [package]
 name = "hhas_body_rust"
 edition = "2018"
@@ -15,4 +15,4 @@ env = { path = "../env" }
 hhas_param_rust = { path = "../hhas_param" }
 hhas_type = { path = "../hhas_type" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
-# @end of Signature<<55108238cec603b9c37b6db34947f08871743c16>>
+# @end of Signature

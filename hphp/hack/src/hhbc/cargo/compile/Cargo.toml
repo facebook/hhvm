@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:compile_rust
-# Signature<<5f77eb6e5e1aad9068c1f3506606239242ff3adc>>
+# Signature
 [package]
 name = "compile_rust"
 edition = "2018"
@@ -21,4 +21,4 @@ oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 bitflags = "1.2"
 itertools = "0.8"
-# @end of Signature<<5f77eb6e5e1aad9068c1f3506606239242ff3adc>>
+# @end of Signature

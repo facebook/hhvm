@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:emit_body_rust
-# Signature<<cc5608c5749bb22dd574fc554bc05abeae465e23>>
+# Signature
 [package]
 name = "emit_body_rust"
 edition = "2018"
@@ -33,4 +33,4 @@ runtime = { path = "../runtime" }
 bitflags = "1.2"
 lazy_static = "1.4"
 regex = "1.3"
-# @end of Signature<<cc5608c5749bb22dd574fc554bc05abeae465e23>>
+# @end of Signature

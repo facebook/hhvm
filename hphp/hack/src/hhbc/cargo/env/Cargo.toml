@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/hhbc:env
-# Signature<<5039fb34cfe6fc4966af4118f371bbe60f746036>>
+# Signature
 [package]
 name = "env"
 edition = "2018"
@@ -18,4 +18,4 @@ options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 rx_rust = { path = "../rx" }
 bitflags = "1.2"
-# @end of Signature<<5039fb34cfe6fc4966af4118f371bbe60f746036>>
+# @end of Signature

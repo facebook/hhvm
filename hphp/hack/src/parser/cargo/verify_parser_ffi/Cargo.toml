@@ -1,6 +1,6 @@
 # @generated
 # @autocargo from //hphp/hack/src/parser:verify_parser_ffi
-# Signature<<e1503cb4367f6b3a2544655c576090377147216a>>
+# Signature
 [package]
 name = "verify_parser_ffi"
 edition = "2018"
@@ -23,4 +23,4 @@ stack_limit = { path = "../../../utils/stack_limit" }
 verify_parser = { path = "../../api/cargo/verify_parser" }
 libc = "0.2"
 ocaml = "0.8"
-# @end of Signature<<e1503cb4367f6b3a2544655c576090377147216a>>
+# @end of Signature

@@ -7209,7 +7209,6 @@ and condition
       { (Phase.env_with_self env) with from_class = Some CIstatic }
     in
     let (env, hint_ty) = Phase.localize_hint ~ety_env env h in
-    let (env, hint_ty) = Env.expand_type env hint_ty in
     let reason = Reason.Ris (fst h) in
     let refine_type env hint_ty =
       let (ivar_pos, ivar_ty) = fst ivar in
@@ -7229,8 +7228,10 @@ and condition
     refine_type env hint_ty
   | _ -> env
 
-(** Transform a hint like `A<_>` to a localized type like `A<T#1>` *)
+(** Transform a hint like `A<_>` to a localized type like `A<T#1>` for refinment of
+an instance variable. ivar_ty is the previous type of that instance variable. *)
 and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
+  let (env, hint_ty) = Env.expand_type env hint_ty in
   match (get_node ivar_ty, get_node hint_ty) with
   | (_, Tclass (((_, cid) as _c), _, tyl)) ->
     begin
@@ -7374,7 +7375,7 @@ and safely_refine_class_type
    * We take a simple approach:
    *    For a fresh type parameter T#1, if
    *      - There is an eqality constraint T#1 = t,
-   *      - T#1 is covariant, and T# has upper bound t (or mixed if absent)
+   *      - T#1 is covariant, and T#1 has upper bound t (or mixed if absent)
    *      - T#1 is contravariant, and T#1 has lower bound t (or nothing if absent)
    *    then replace T#1 with t.
    * This is done in Type_parameter_env_ops.simplify_tpenv

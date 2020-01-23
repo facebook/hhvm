@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2019-11-29-0001",
+  "version" : "2020-01-22-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -1446,6 +1446,14 @@
         { "field_name" : "left_paren" },
         { "field_name" : "argument_list" },
         { "field_name" : "right_paren" }
+      ] },
+    { "kind_name" : "FunctionPointerExpression",
+      "type_name" : "function_pointer_expression",
+      "description" : "function_pointer_expression",
+      "prefix" : "function_pointer",
+      "fields" : [
+        { "field_name" : "receiver" },
+        { "field_name" : "type_args" }
       ] },
     { "kind_name" : "ParenthesizedExpression",
       "type_name" : "parenthesized_expression",

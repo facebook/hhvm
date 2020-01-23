@@ -121,6 +121,7 @@ pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
     fn make_halt_compiler_expression(ctx: &C, halt_compiler_keyword: Self, halt_compiler_left_paren: Self, halt_compiler_argument_list: Self, halt_compiler_right_paren: Self) -> Self;
     fn make_isset_expression(ctx: &C, isset_keyword: Self, isset_left_paren: Self, isset_argument_list: Self, isset_right_paren: Self) -> Self;
     fn make_function_call_expression(ctx: &C, function_call_receiver: Self, function_call_type_args: Self, function_call_left_paren: Self, function_call_argument_list: Self, function_call_right_paren: Self) -> Self;
+    fn make_function_pointer_expression(ctx: &C, function_pointer_receiver: Self, function_pointer_type_args: Self) -> Self;
     fn make_parenthesized_expression(ctx: &C, parenthesized_expression_left_paren: Self, parenthesized_expression_expression: Self, parenthesized_expression_right_paren: Self) -> Self;
     fn make_braced_expression(ctx: &C, braced_expression_left_brace: Self, braced_expression_expression: Self, braced_expression_right_brace: Self) -> Self;
     fn make_embedded_braced_expression(ctx: &C, embedded_braced_expression_left_brace: Self, embedded_braced_expression_expression: Self, embedded_braced_expression_right_brace: Self) -> Self;

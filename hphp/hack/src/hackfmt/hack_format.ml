@@ -1482,6 +1482,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
                 t env false_expr );
             ] )
     | Syntax.FunctionCallExpression _ -> handle_possible_chaining env node
+    | Syntax.FunctionPointerExpression _ -> handle_possible_chaining env node
     | Syntax.EvalExpression
         {
           eval_keyword = kw;

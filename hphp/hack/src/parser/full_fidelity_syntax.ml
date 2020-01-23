@@ -161,6 +161,7 @@ module WithToken(Token: TokenType) = struct
       | HaltCompilerExpression            _ -> SyntaxKind.HaltCompilerExpression
       | IssetExpression                   _ -> SyntaxKind.IssetExpression
       | FunctionCallExpression            _ -> SyntaxKind.FunctionCallExpression
+      | FunctionPointerExpression         _ -> SyntaxKind.FunctionPointerExpression
       | ParenthesizedExpression           _ -> SyntaxKind.ParenthesizedExpression
       | BracedExpression                  _ -> SyntaxKind.BracedExpression
       | EmbeddedBracedExpression          _ -> SyntaxKind.EmbeddedBracedExpression
@@ -350,6 +351,7 @@ module WithToken(Token: TokenType) = struct
     let is_halt_compiler_expression             = has_kind SyntaxKind.HaltCompilerExpression
     let is_isset_expression                     = has_kind SyntaxKind.IssetExpression
     let is_function_call_expression             = has_kind SyntaxKind.FunctionCallExpression
+    let is_function_pointer_expression          = has_kind SyntaxKind.FunctionPointerExpression
     let is_parenthesized_expression             = has_kind SyntaxKind.ParenthesizedExpression
     let is_braced_expression                    = has_kind SyntaxKind.BracedExpression
     let is_embedded_braced_expression           = has_kind SyntaxKind.EmbeddedBracedExpression
@@ -1598,6 +1600,13 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc function_call_left_paren in
          let acc = f acc function_call_argument_list in
          let acc = f acc function_call_right_paren in
+         acc
+      | FunctionPointerExpression {
+        function_pointer_receiver;
+        function_pointer_type_args;
+      } ->
+         let acc = f acc function_pointer_receiver in
+         let acc = f acc function_pointer_type_args in
          acc
       | ParenthesizedExpression {
         parenthesized_expression_left_paren;
@@ -3469,6 +3478,13 @@ module WithToken(Token: TokenType) = struct
         function_call_argument_list;
         function_call_right_paren;
       ]
+      | FunctionPointerExpression {
+        function_pointer_receiver;
+        function_pointer_type_args;
+      } -> [
+        function_pointer_receiver;
+        function_pointer_type_args;
+      ]
       | ParenthesizedExpression {
         parenthesized_expression_left_paren;
         parenthesized_expression_expression;
@@ -5339,6 +5355,13 @@ module WithToken(Token: TokenType) = struct
         "function_call_left_paren";
         "function_call_argument_list";
         "function_call_right_paren";
+      ]
+      | FunctionPointerExpression {
+        function_pointer_receiver;
+        function_pointer_type_args;
+      } -> [
+        "function_pointer_receiver";
+        "function_pointer_type_args";
       ]
       | ParenthesizedExpression {
         parenthesized_expression_left_paren;
@@ -7366,6 +7389,14 @@ module WithToken(Token: TokenType) = struct
           function_call_left_paren;
           function_call_argument_list;
           function_call_right_paren;
+        }
+      | (SyntaxKind.FunctionPointerExpression, [
+          function_pointer_receiver;
+          function_pointer_type_args;
+        ]) ->
+        FunctionPointerExpression {
+          function_pointer_receiver;
+          function_pointer_type_args;
         }
       | (SyntaxKind.ParenthesizedExpression, [
           parenthesized_expression_left_paren;
@@ -9751,6 +9782,17 @@ module WithToken(Token: TokenType) = struct
           function_call_left_paren;
           function_call_argument_list;
           function_call_right_paren;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_function_pointer_expression
+        function_pointer_receiver
+        function_pointer_type_args
+      =
+        let syntax = FunctionPointerExpression {
+          function_pointer_receiver;
+          function_pointer_type_args;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

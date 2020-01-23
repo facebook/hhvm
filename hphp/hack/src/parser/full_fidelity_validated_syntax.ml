@@ -208,6 +208,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.HaltCompilerExpression _ -> tag validate_halt_compiler_expression (fun x -> ExprHaltCompiler x) x
     | Syntax.IssetExpression _ -> tag validate_isset_expression (fun x -> ExprIsset x) x
     | Syntax.FunctionCallExpression _ -> tag validate_function_call_expression (fun x -> ExprFunctionCall x) x
+    | Syntax.FunctionPointerExpression _ -> tag validate_function_pointer_expression (fun x -> ExprFunctionPointer x) x
     | Syntax.ParenthesizedExpression _ -> tag validate_parenthesized_expression (fun x -> ExprParenthesized x) x
     | Syntax.BracedExpression _ -> tag validate_braced_expression (fun x -> ExprBraced x) x
     | Syntax.EmbeddedBracedExpression _ -> tag validate_embedded_braced_expression (fun x -> ExprEmbeddedBraced x) x
@@ -261,6 +262,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | ExprHaltCompiler                 thing -> invalidate_halt_compiler_expression       (value, thing)
     | ExprIsset                        thing -> invalidate_isset_expression               (value, thing)
     | ExprFunctionCall                 thing -> invalidate_function_call_expression       (value, thing)
+    | ExprFunctionPointer              thing -> invalidate_function_pointer_expression    (value, thing)
     | ExprParenthesized                thing -> invalidate_parenthesized_expression       (value, thing)
     | ExprBraced                       thing -> invalidate_braced_expression              (value, thing)
     | ExprEmbeddedBraced               thing -> invalidate_embedded_braced_expression     (value, thing)
@@ -467,6 +469,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.HaltCompilerExpression _ -> tag validate_halt_compiler_expression (fun x -> LambdaHaltCompiler x) x
     | Syntax.IssetExpression _ -> tag validate_isset_expression (fun x -> LambdaIsset x) x
     | Syntax.FunctionCallExpression _ -> tag validate_function_call_expression (fun x -> LambdaFunctionCall x) x
+    | Syntax.FunctionPointerExpression _ -> tag validate_function_pointer_expression (fun x -> LambdaFunctionPointer x) x
     | Syntax.ParenthesizedExpression _ -> tag validate_parenthesized_expression (fun x -> LambdaParenthesized x) x
     | Syntax.BracedExpression _ -> tag validate_braced_expression (fun x -> LambdaBraced x) x
     | Syntax.EmbeddedBracedExpression _ -> tag validate_embedded_braced_expression (fun x -> LambdaEmbeddedBraced x) x
@@ -520,6 +523,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | LambdaHaltCompiler                 thing -> invalidate_halt_compiler_expression       (value, thing)
     | LambdaIsset                        thing -> invalidate_isset_expression               (value, thing)
     | LambdaFunctionCall                 thing -> invalidate_function_call_expression       (value, thing)
+    | LambdaFunctionPointer              thing -> invalidate_function_pointer_expression    (value, thing)
     | LambdaParenthesized                thing -> invalidate_parenthesized_expression       (value, thing)
     | LambdaBraced                       thing -> invalidate_braced_expression              (value, thing)
     | LambdaEmbeddedBraced               thing -> invalidate_embedded_braced_expression     (value, thing)
@@ -571,6 +575,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.HaltCompilerExpression _ -> tag validate_halt_compiler_expression (fun x -> CExprHaltCompiler x) x
     | Syntax.IssetExpression _ -> tag validate_isset_expression (fun x -> CExprIsset x) x
     | Syntax.FunctionCallExpression _ -> tag validate_function_call_expression (fun x -> CExprFunctionCall x) x
+    | Syntax.FunctionPointerExpression _ -> tag validate_function_pointer_expression (fun x -> CExprFunctionPointer x) x
     | Syntax.ParenthesizedExpression _ -> tag validate_parenthesized_expression (fun x -> CExprParenthesized x) x
     | Syntax.BracedExpression _ -> tag validate_braced_expression (fun x -> CExprBraced x) x
     | Syntax.EmbeddedBracedExpression _ -> tag validate_embedded_braced_expression (fun x -> CExprEmbeddedBraced x) x
@@ -624,6 +629,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | CExprHaltCompiler                 thing -> invalidate_halt_compiler_expression       (value, thing)
     | CExprIsset                        thing -> invalidate_isset_expression               (value, thing)
     | CExprFunctionCall                 thing -> invalidate_function_call_expression       (value, thing)
+    | CExprFunctionPointer              thing -> invalidate_function_pointer_expression    (value, thing)
     | CExprParenthesized                thing -> invalidate_parenthesized_expression       (value, thing)
     | CExprBraced                       thing -> invalidate_braced_expression              (value, thing)
     | CExprEmbeddedBraced               thing -> invalidate_embedded_braced_expression     (value, thing)
@@ -2510,6 +2516,20 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; function_call_left_paren = invalidate_token x.function_call_left_paren
       ; function_call_argument_list = invalidate_list_with (invalidate_expression) x.function_call_argument_list
       ; function_call_right_paren = invalidate_token x.function_call_right_paren
+      }
+    ; Syntax.value = v
+    }
+  and validate_function_pointer_expression : function_pointer_expression validator = function
+  | { Syntax.syntax = Syntax.FunctionPointerExpression x; value = v } -> v,
+    { function_pointer_type_args = validate_type_arguments x.function_pointer_type_args
+    ; function_pointer_receiver = validate_expression x.function_pointer_receiver
+    }
+  | s -> validation_fail (Some SyntaxKind.FunctionPointerExpression) s
+  and invalidate_function_pointer_expression : function_pointer_expression invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.FunctionPointerExpression
+      { function_pointer_receiver = invalidate_expression x.function_pointer_receiver
+      ; function_pointer_type_args = invalidate_type_arguments x.function_pointer_type_args
       }
     ; Syntax.value = v
     }

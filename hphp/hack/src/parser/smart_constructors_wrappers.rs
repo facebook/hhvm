@@ -369,6 +369,9 @@ where S: SmartConstructors<'src, State> {
     fn make_function_call_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
         compose(SyntaxKind::FunctionCallExpression, self.s.make_function_call_expression(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }
+    fn make_function_pointer_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
+        compose(SyntaxKind::FunctionPointerExpression, self.s.make_function_pointer_expression(arg0.1, arg1.1))
+    }
     fn make_parenthesized_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::ParenthesizedExpression, self.s.make_parenthesized_expression(arg0.1, arg1.1, arg2.1))
     }

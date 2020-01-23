@@ -1436,6 +1436,18 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "FunctionPointerExpression";
+      type_name = "function_pointer_expression";
+      func_name = "function_pointer_expression";
+      description = "function_pointer_expression";
+      prefix = "function_pointer";
+      aggregates = [Expression; ConstructorExpression; LambdaBody];
+      fields =
+        [
+          ("receiver", Aggregate Expression); ("type_args", Just "TypeArguments");
+        ];
+    };
+    {
       kind_name = "ParenthesizedExpression";
       type_name = "parenthesized_expression";
       func_name = "parenthesized_expression";

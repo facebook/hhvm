@@ -122,6 +122,7 @@ type t =
   | HaltCompilerExpression
   | IssetExpression
   | FunctionCallExpression
+  | FunctionPointerExpression
   | ParenthesizedExpression
   | BracedExpression
   | EmbeddedBracedExpression
@@ -305,6 +306,7 @@ let to_string kind =
   | HaltCompilerExpression            -> "halt_compiler_expression"
   | IssetExpression                   -> "isset_expression"
   | FunctionCallExpression            -> "function_call_expression"
+  | FunctionPointerExpression         -> "function_pointer_expression"
   | ParenthesizedExpression           -> "parenthesized_expression"
   | BracedExpression                  -> "braced_expression"
   | EmbeddedBracedExpression          -> "embedded_braced_expression"

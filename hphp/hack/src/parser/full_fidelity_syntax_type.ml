@@ -743,6 +743,10 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_call_argument_list                        : t
     ; function_call_right_paren                          : t
     }
+  | FunctionPointerExpression         of
+    { function_pointer_receiver                          : t
+    ; function_pointer_type_args                         : t
+    }
   | ParenthesizedExpression           of
     { parenthesized_expression_left_paren                : t
     ; parenthesized_expression_expression                : t
@@ -1237,6 +1241,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprHaltCompiler                 of halt_compiler_expression
   | ExprIsset                        of isset_expression
   | ExprFunctionCall                 of function_call_expression
+  | ExprFunctionPointer              of function_pointer_expression
   | ExprParenthesized                of parenthesized_expression
   | ExprBraced                       of braced_expression
   | ExprEmbeddedBraced               of embedded_braced_expression
@@ -1358,6 +1363,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaHaltCompiler                 of halt_compiler_expression
   | LambdaIsset                        of isset_expression
   | LambdaFunctionCall                 of function_call_expression
+  | LambdaFunctionPointer              of function_pointer_expression
   | LambdaParenthesized                of parenthesized_expression
   | LambdaBraced                       of braced_expression
   | LambdaEmbeddedBraced               of embedded_braced_expression
@@ -1408,6 +1414,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprHaltCompiler                 of halt_compiler_expression
   | CExprIsset                        of isset_expression
   | CExprFunctionCall                 of function_call_expression
+  | CExprFunctionPointer              of function_pointer_expression
   | CExprParenthesized                of parenthesized_expression
   | CExprBraced                       of braced_expression
   | CExprEmbeddedBraced               of embedded_braced_expression
@@ -2049,6 +2056,10 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_call_left_paren: Token.t value
     ; function_call_argument_list: expression listesque value
     ; function_call_right_paren: Token.t value
+    }
+  and function_pointer_expression =
+    { function_pointer_receiver: expression value
+    ; function_pointer_type_args: type_arguments value
     }
   and parenthesized_expression =
     { parenthesized_expression_left_paren: Token.t value

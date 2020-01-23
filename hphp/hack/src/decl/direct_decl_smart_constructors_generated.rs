@@ -461,6 +461,10 @@ impl<'src> SmartConstructors<'src, State<'src>> for DirectDeclSmartConstructors<
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_function_call_expression(self, arg0, arg1, arg2, arg3, arg4)
     }
 
+    fn make_function_pointer_expression(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_function_pointer_expression(self, arg0, arg1)
+    }
+
     fn make_parenthesized_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_parenthesized_expression(self, arg0, arg1, arg2)
     }

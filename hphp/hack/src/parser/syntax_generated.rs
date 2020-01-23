@@ -1129,6 +1129,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_function_pointer_expression(_: &C, function_pointer_receiver: Self, function_pointer_type_args: Self) -> Self {
+        let syntax = SyntaxVariant::FunctionPointerExpression(Box::new(FunctionPointerExpressionChildren {
+            function_pointer_receiver,
+            function_pointer_type_args,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }
+
     fn make_parenthesized_expression(_: &C, parenthesized_expression_left_paren: Self, parenthesized_expression_expression: Self, parenthesized_expression_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ParenthesizedExpression(Box::new(ParenthesizedExpressionChildren {
             parenthesized_expression_left_paren,
@@ -2740,6 +2749,12 @@ where
                 let acc = f(function_call_right_paren, acc);
                 acc
             },
+            SyntaxVariant::FunctionPointerExpression(x) => {
+                let FunctionPointerExpressionChildren { function_pointer_receiver, function_pointer_type_args } = *x;
+                let acc = f(function_pointer_receiver, acc);
+                let acc = f(function_pointer_type_args, acc);
+                acc
+            },
             SyntaxVariant::ParenthesizedExpression(x) => {
                 let ParenthesizedExpressionChildren { parenthesized_expression_left_paren, parenthesized_expression_expression, parenthesized_expression_right_paren } = *x;
                 let acc = f(parenthesized_expression_left_paren, acc);
@@ -3417,6 +3432,7 @@ where
             SyntaxVariant::HaltCompilerExpression {..} => SyntaxKind::HaltCompilerExpression,
             SyntaxVariant::IssetExpression {..} => SyntaxKind::IssetExpression,
             SyntaxVariant::FunctionCallExpression {..} => SyntaxKind::FunctionCallExpression,
+            SyntaxVariant::FunctionPointerExpression {..} => SyntaxKind::FunctionPointerExpression,
             SyntaxVariant::ParenthesizedExpression {..} => SyntaxKind::ParenthesizedExpression,
             SyntaxVariant::BracedExpression {..} => SyntaxKind::BracedExpression,
             SyntaxVariant::EmbeddedBracedExpression {..} => SyntaxKind::EmbeddedBracedExpression,
@@ -4196,6 +4212,11 @@ where
                  function_call_left_paren: ts.pop().unwrap(),
                  function_call_type_args: ts.pop().unwrap(),
                  function_call_receiver: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::FunctionPointerExpression, 2) => SyntaxVariant::FunctionPointerExpression(Box::new(FunctionPointerExpressionChildren {
+                 function_pointer_type_args: ts.pop().unwrap(),
+                 function_pointer_receiver: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::ParenthesizedExpression, 3) => SyntaxVariant::ParenthesizedExpression(Box::new(ParenthesizedExpressionChildren {
@@ -5498,6 +5519,12 @@ pub struct FunctionCallExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct FunctionPointerExpressionChildren<T, V> {
+    pub function_pointer_receiver: Syntax<T, V>,
+    pub function_pointer_type_args: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct ParenthesizedExpressionChildren<T, V> {
     pub parenthesized_expression_left_paren: Syntax<T, V>,
     pub parenthesized_expression_expression: Syntax<T, V>,
@@ -6171,6 +6198,7 @@ pub enum SyntaxVariant<T, V> {
     HaltCompilerExpression(Box<HaltCompilerExpressionChildren<T, V>>),
     IssetExpression(Box<IssetExpressionChildren<T, V>>),
     FunctionCallExpression(Box<FunctionCallExpressionChildren<T, V>>),
+    FunctionPointerExpression(Box<FunctionPointerExpressionChildren<T, V>>),
     ParenthesizedExpression(Box<ParenthesizedExpressionChildren<T, V>>),
     BracedExpression(Box<BracedExpressionChildren<T, V>>),
     EmbeddedBracedExpression(Box<EmbeddedBracedExpressionChildren<T, V>>),
@@ -7266,6 +7294,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     2 => Some(&x.function_call_left_paren),
                     3 => Some(&x.function_call_argument_list),
                     4 => Some(&x.function_call_right_paren),
+                        _ => None,
+                    }
+                })
+            },
+            FunctionPointerExpression(x) => {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.function_pointer_receiver),
+                    1 => Some(&x.function_pointer_type_args),
                         _ => None,
                     }
                 })

@@ -296,30 +296,26 @@ SSATmp* IRBuilder::preOptimizeAssertStk(IRInstruction* inst) {
   return preOptimizeAssertLocation(inst, stk(inst->extra<AssertStk>()->offset));
 }
 
-Type IRBuilder::preOptimizeTypeParam(Location l, Type param) {
+SSATmp* IRBuilder::preOptimizeLdLocation(IRInstruction* inst, Location l) {
+  if (auto tmp = valueOf(l, DataTypeGeneric)) return tmp;
+
   auto const type = typeOf(l, DataTypeGeneric);
 
   // The types may not be compatible in the presence of unreachable code.
   // Don't try to optimize the code in this case, and just let dead code
   // elimination take care of it later.
-  if (!type.maybe(param)) return TBottom;
+  if (!type.maybe(inst->typeParam())) {
+    inst->setTypeParam(TBottom);
+    return nullptr;
+  }
 
-  // If FrameStateMgr's type for a local isn't as good as the type param,
-  // then we're missing information in the IR.
-  assertx(IMPLIES(l.tag() == LTag::Local, type <= param));
-  return type & param;
-}
+  if (l.tag() == LTag::Local) {
+    // If FrameStateMgr's type for a local isn't as good as the type param,
+    // we're missing information in the IR.
+    assertx(inst->typeParam() >= type);
+  }
+  inst->setTypeParam(std::min(type, inst->typeParam()));
 
-SSATmp* IRBuilder::preOptimizeLdLocation(IRInstruction* inst, Location l) {
-  if (auto tmp = valueOf(l, DataTypeGeneric)) return tmp;
-  inst->setTypeParam(preOptimizeTypeParam(l, inst->typeParam()));
-  return nullptr;
-}
-
-SSATmp* IRBuilder::preOptimizeLdLocationAddr(IRInstruction* inst, Location l) {
-  auto const& param = inst->typeParam();
-  auto const optimized = preOptimizeTypeParam(l, param.deref());
-  inst->setTypeParam(optimized.mem(param.memKind(), param.ptrKind()));
   return nullptr;
 }
 
@@ -331,24 +327,11 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   return preOptimizeLdLocation(inst, stk(inst->extra<LdStk>()->offset));
 }
 
-SSATmp* IRBuilder::preOptimizeLdLocAddr(IRInstruction* inst) {
-  return preOptimizeLdLocationAddr(inst, loc(inst->extra<LdLocAddr>()->locId));
-}
-
-SSATmp* IRBuilder::preOptimizeLdStkAddr(IRInstruction* inst) {
-  return preOptimizeLdLocationAddr(inst, stk(inst->extra<LdStkAddr>()->offset));
-}
-
 SSATmp* IRBuilder::preOptimizeLdMBase(IRInstruction* inst) {
-  // If FrameStateMgr's type for the member base register isn't as good as the
-  // type param, then we're missing information in the IR.
-  assertx(m_state.mbr().ptrType <= inst->typeParam());
-  inst->setTypeParam(inst->typeParam() & m_state.mbr().ptrType);
+  if (auto ptr = m_state.mbr().ptr) return ptr;
 
-  if (auto ptr = m_state.mbr().ptr) {
-    if (ptr->isA(inst->typeParam())) return ptr;
-    return gen(AssertType, inst->typeParam(), ptr);
-  }
+  assertx(m_state.mbr().ptrType.maybe(inst->typeParam()));
+  inst->setTypeParam(inst->typeParam() & m_state.mbr().ptrType);
   return nullptr;
 }
 
@@ -420,8 +403,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(CheckMBase)
   X(LdLoc)
   X(LdStk)
-  X(LdLocAddr)
-  X(LdStkAddr)
   X(LdMBase)
   X(LdClosureCls)
   X(LdClosureThis)

@@ -1806,8 +1806,7 @@ SSATmp* builtinCall(IRGS& env,
       auto const out = offsetFromIRSP(env, offset);
       gen(env, StStk, IRSPRelOffsetData{out}, ty, sp(env), realized[i + aoff]);
       params[i].value = cns(env, TInitNull);
-      auto const data = IRSPRelOffsetData{out};
-      realized[i + aoff] = gen(env, LdStkAddr, data, TPtrToStkCell, sp(env));
+      realized[i + aoff] = gen(env, LdStkAddr, IRSPRelOffsetData{out}, sp(env));
     }
     env.irb->exceptionStackBoundary();
   }
@@ -1987,7 +1986,7 @@ void emitNativeImpl(IRGS& env) {
     callee->numParams(),
     true,
     [&] (uint32_t i, const Type) {
-      return gen(env, LdLocAddr, LocalId(i), TPtrToFrameCell, fp(env));
+      return gen(env, LdLocAddr, LocalId(i), fp(env));
     }
   );
   auto const catcher = CatchMaker {

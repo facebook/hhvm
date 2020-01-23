@@ -175,12 +175,12 @@ Instruction set
 
   Also note that many types are not supported as the typeParam right now.
 
-| CheckNullptr, ND, S(Cls|StaticStr|Nullptr), B
+| CheckNullptr, ND, S(StaticStr,Nullptr,Cls), B
 
   If S0 is not a null pointer, branch to block B. This is used to check the
   return value of a native helper that returns a potentially null StringData*.
 
-| AssertType<T>, DRefineS(0), S(Cell,MemToCell), P
+| AssertType, DRefineS(0), S(Cell,MemToCell), P
 
   Assert that the type of S0 is T, copying it to D.
 
@@ -281,12 +281,12 @@ Instruction set
   A no-op at runtime, this instruction serves to mark the end of the initial
   sequence of guards in a trace.
 
-| CheckNonNull, DSubtract(0, Nullptr), S(Cls|Func|Obj|Str|PtrToCell|TCA|Nullptr), B
+| CheckNonNull, DSubtract(0, Nullptr), S(Nullptr,Func,PtrToCell,TCA,Cls,Obj,Str), B
 
   If the value in S0 is Nullptr, branch to block B. If S0 cannot be Nullptr, or
   always is Nullptr, this check may be optimized away.
 
-| AssertNonNull, DSubtract(0, Nullptr), S(ArrLike|Func|StaticStr|Nullptr), P
+| AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,StaticStr,Func,ArrLike), P
 
   Returns S0, with Nullptr removed from its type. This instruction currently
   supports a very limited range of types but can be expanded if needed.
@@ -1023,15 +1023,14 @@ To string conversions:
   instruction is used for loading locals in pseudo-mains, where they can alias
   globals.
 
-| LdStkAddr<T,offset>, DParam(PtrToStkCell), S(StkPtr), NF
+| LdStkAddr<T,offset>, D(PtrToStkCell), S(StkPtr), NF
 
   Loads the address of the stack slot given by the pointer in S0 at the offset
   (in cells). T must be a subtype of PtrToStkCell.
 
-| LdLocAddr<T,localId>, DParam(PtrToFrameCell), S(FramePtr), NF
+| LdLocAddr<localId>, D(PtrToFrameCell), S(FramePtr), NF
 
-  Loads the address of the local slot localId from the frame S0 into D. T must
-  be a subtype of PtrToFrameCell.
+  Loads the address of the local slot localId from the frame S0 into D.
 
 | LdRDSAddr<T,RDSHandle>, DParam(PtrToCell), NA, NF
 
@@ -1260,7 +1259,9 @@ To string conversions:
   is known to not be empty (i.e., LdClsMethodCacheFunc must have succeeded, or
   LookupClsMethodCache returned a non-null value).
 
-| LookupClsMethodCache<clsName,methodName>, D(Func|Nullptr), S(FramePtr), NF
+| LookupClsMethodCache<clsName,methodName>, D(Func|Nullptr),
+|                                           S(FramePtr),
+|                                           NF
 
   Lookup a function in the class method targetcache. The class name and method
   name are clsName and methodName, respectively. S0 is the current vm frame
@@ -1491,7 +1492,7 @@ To string conversions:
 
   Call the custom instance constructor of an extension class.
 
-| ConstructClosure<class>, DAllocObj, S(Cls|Obj|Nullptr), CRc|PRc
+| ConstructClosure<class>, DAllocObj, S(Cls,Obj,Nullptr), CRc|PRc
 
   Call the custom instance constructor of a Closure.
 
@@ -1548,13 +1549,13 @@ To string conversions:
   The array will be initialized with values using either InitPackedLayoutArray
   or InitPackedLayoutArrayLoop.
 
-| InitPackedLayoutArray<index>, ND, S(AK(Packed),Vec) S(Cell), CRc
+| InitPackedLayoutArray<index>, ND, S(Arr,Vec) S(Cell), CRc
 
   Store the S1 into the slot at index in array S0. This instruction assumes
   that it doesn't have to incref the value being stored. Used to initialize an
   array allocated with AllocPackedArray or AllocVecArray.
 
-| InitPackedLayoutArrayLoop<offset,size>, ND, S(AK(Packed),Vec) S(StkPtr), CRc
+| InitPackedLayoutArrayLoop<offset,size>, ND, S(Arr,Vec) S(StkPtr), CRc
 
   Move `size' elements from the stack given by S1, at `offset', into the array
   S0.  Assumes that the first element on the stack is the last element in the
@@ -1572,7 +1573,7 @@ To string conversions:
   immediates for keys. This op initializes the header and hash table of the
   new array-like, but does not its elements; use InitMixedLayoutArray for that.
 
-| InitMixedLayoutArray<index,key>, ND, S(AK(Mixed),Dict) S(Cell), NF
+| InitMixedLayoutArray<index,key>, ND, S(Arr,Dict) S(Cell), NF
 
   Initialize the element at position `index` in array S0 to have the string
   literal `key` as its key and S1 as its value. This instruction assumes that
@@ -1641,7 +1642,7 @@ To string conversions:
 
 | DefInlineFP<func,callBCOff,retSPOff>,
 |   D(FramePtr),
-|   S(StkPtr) S(FramePtr) S(Cls|Obj|Nullptr),
+|   S(StkPtr) S(FramePtr) S(Obj,Cls,Nullptr),
 |   NF
 
   Defines a frame pointer for an inlined function.
@@ -1687,7 +1688,7 @@ To string conversions:
 
 | DefFuncEntryFP<func>,
 |   D(FramePtr),
-|   S(FramePtr) S(StkPtr) S(Int) S(Int) S(Cls|Obj|Nullptr),
+|   S(FramePtr) S(StkPtr) S(Int) S(Int) S(Cls,Obj,Nullptr),
 |   NF
 
   Writes a callee's frame and defines a frame pointer.
@@ -1701,7 +1702,7 @@ To string conversions:
 
 | CallUnpack<spOffset,numParams,callOff,destroyLocals>,
 |   DCall,
-|   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr),
+|   S(StkPtr) S(FramePtr) S(Func) S(Obj,Cls,Nullptr),
 |   CRc
 
   Invoke function S2 corresponding to the current FPI with numParams arguments,
@@ -1718,7 +1719,7 @@ To string conversions:
 
 | Call<offset,numParams,callOff,destroyLocals>,
 |   DCall,
-|   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr),
+|   S(StkPtr) S(FramePtr) S(Func) S(Obj,Cls,Nullptr),
 |   CRc
 
   Transfer control to a callee S2, based on the pre-live activation record and
@@ -2936,35 +2937,44 @@ fields of that struct for holding intermediate values.
 
 | ElemArrayX<M>, D(LvalToMembInitCell), S(Arr) S(Int,Str), NF
 
-| ElemArrayD,    D(LvalToElemInitCell), S(LvalToArr) S(Int,Str), MElem
+| ElemArrayD<T>, D(LvalToElemInitCell), S(LvalToCell) S(Int,Str), MElem
 
-| ElemArrayU,    D(LvalToMembInitCell), S(LvalToArr) S(Int,Str), MElem
+| ElemArrayU<T>, D(LvalToMembInitCell), S(LvalToCell) S(Int,Str), MElem
 
   Similar to ElemX, but the base S0 is an array and the key S1 is an int/str.
   ElemArrayD is for Define member instrs, ElemArrayU is for Unset, and
   ElemArrayX is for InOut, Warn, and None instrs (where the mode is M).
 
+  ElemArray{D,U} both take a LvalToCell for the base operand, but expect it to be
+  a LvalToArr.  T is the type of the base array.
+
 | ElemMixedArrayK<pos>, D(LvalToElemInitCell), S(AK(Mixed)) S(Int,Str), NF
 
   Like ElemArray, but the element for S1 is at a known position `pos' in S0.
 
-| ElemVecD, D(LvalToElemInitCell), S(LvalToVec) S(Int), MElem
+| ElemVecD<T>, D(LvalToElemInitCell), S(LvalToCell) S(Int), MElem
 
-| ElemVecU, D(LvalToMembInitCell), S(LvalToVec) S(Int), MElem
+| ElemVecU<T>, D(LvalToMembInitCell), S(LvalToCell) S(Int), MElem
 
   Similar to ElemX, but the base S0 is a vec and the key S1 is an int. ElemVecD
   is for Define member instrs and ElemVecU is for Unset. (Other variations can
   be implemented without special IR instructions).
 
+  ElemVec{D,U} both take a LvalToCell for the base operand, but expect it to be a
+  LvalToVec. T is the type of the base vec.
+
 | ElemDictX<M>, D(LvalToMembInitCell), S(Dict) S(Int,Str), NF
 
-| ElemDictD,    D(LvalToElemInitCell), S(LvalToDict) S(Int,Str), MElem
+| ElemDictD<T>, D(LvalToElemInitCell), S(LvalToCell) S(Int,Str), MElem
 
-| ElemDictU,    D(LvalToMembInitCell), S(LvalToDict) S(Int,Str), MElem
+| ElemDictU<T>, D(LvalToMembInitCell), S(LvalToCell) S(Int,Str), MElem
 
   Similar to ElemX, but the base S0 is a dict and the key S1 is an int/str.
   ElemDictD is for Define member instrs, ElemDictU is for Unset, and
   ElemDictX is for InOut, Warn, and None instrs (where the mode is M).
+
+  ElemDict{D,U} both take a LvalToCell for the base operand, but expect it to be
+  a LvalToDict.  T is the type of the base array.
 
 | ElemDictK<pos>, D(LvalToElemInitCell), S(Dict) S(Int,Str), NF
 
@@ -2972,11 +2982,14 @@ fields of that struct for holding intermediate values.
 
 | ElemKeysetX<M>, D(LvalToMembInitCell), S(Keyset) S(Int,Str), NF
 
-| ElemKeysetU,    D(LvalToMembInitCell), S(LvalToKeyset) S(Int,Str), MElem
+| ElemKeysetU<T>, D(LvalToMembInitCell), S(LvalToCell) S(Int,Str), MElem
 
   Similar to ElemX, but the base S0 is a keyset and the key S1 is an int/str.
   ElemKeysetU is for Unset instrs and ElemKeysetX is for InOut, Warn and None
   instrs (where the mode is M).
+
+  ElemKeysetU both take a LvalToCell for the base operand, but expect it to be
+  a LvalToKeyset.  T is the type of the base array.
 
 | ElemKeysetK<pos>, D(LvalToElemInitCell), S(Keyset) S(Int,Str), NF
 
@@ -3184,13 +3197,17 @@ fields of that struct for holding intermediate values.
 
   Append the value in S1 to S0.
 
-| SetNewElemArray,  ND, S(LvalToArr) S(Cell), MElem
+| SetNewElemArray, ND, S(LvalToCell) S(Cell), MElem
 
-| SetNewElemVec,    ND, S(LvalToVec) S(Cell), MElem
+  Append the value in S1 to S0, where S0 must be a pointer to a array.
 
-| SetNewElemKeyset, ND, S(LvalToKeyset) S(Int,Str), MElem
+| SetNewElemVec, ND, S(LvalToCell) S(Cell), MElem
 
-  Specializations of SetNewElem for pointers to arrays, vecs, and keysets.
+  Append the value in S1 to S0, where S0 must be a pointer to a vec.
+
+| SetNewElemKeyset, ND, S(LvalToCell) S(Int,Str), MElem
+
+  Append the value in S1 to S0, where S0 must be a pointer to a keyset.
 
 | ArrayIsset, D(Bool), S(Arr) S(Int,Str), NF
 

@@ -412,7 +412,8 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     return true;
   };
 
-  auto checkArr = [&] (bool is_kv, bool is_const) {
+  auto checkArr = [&] (bool is_kv,
+                       bool is_const) {
     auto t = src()->type();
     auto cond_type = RuntimeOption::EvalHackArrDVArrs
       ? (is_kv ? TDict : TVec) : TArr;
@@ -451,6 +452,13 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
     check(match || src->isA(TBottom), type, expected);
   };
 
+  auto checkVariadic = [&] (Type super) {
+    for (; curSrc < inst->numSrcs(); ++curSrc) {
+      auto const valid = (inst->src(curSrc)->type() <= super);
+      check(valid, Type(), nullptr);
+    }
+  };
+
 #define IRT(name, ...) UNUSED static constexpr Type name = T##name;
 #define IRTP(name, ...) IRT(name)
 #define IRTL(name, ...) IRT(name)
@@ -464,18 +472,15 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #undef IRTX
 
 #define NA            return checkNoArgs();
-#define S(T...)       {                                                   \
-                        check(src()->type().subtypeOfAny(T), Type(), #T); \
-                        ++curSrc;                                         \
+#define S(...)        {                                   \
+                        Type t = buildUnion(__VA_ARGS__); \
+                        check(src()->isA(t), t, nullptr); \
+                        ++curSrc;                         \
                       }
 #define AK(kind)      Type::Array(ArrayData::k##kind##Kind)
 #define C(T)          checkConstant(src(), T, "constant " #T); ++curSrc;
 #define CStr          C(StaticStr)
-#define SVar(T...)    {                                                     \
-                        for (; curSrc < inst->numSrcs(); ++curSrc) {        \
-                          check(src()->type().subtypeOfAny(T), Type(), #T); \
-                        }                                                   \
-                      }
+#define SVar(...)     checkVariadic(buildUnion(__VA_ARGS__));
 #define SVArr         checkArr(false /* is_kv */, false /* is_const */);
 #define SDArr         checkArr(true  /* is_kv */, false /* is_const */);
 #define CDArr         checkArr(true  /* is_kv */, true  /* is_const */);

@@ -49,7 +49,7 @@ let lookup local_id gamma =
   (* Convert from type (local = ty * expression_id) to
    * (Tast.annotation = Pos.t * ty). Ignore the expression id.
    * TODO Avoid this conversion? Do we need the expression ids? *)
-  let local_to_pos_ty (((r, _) as ty), _expr_id) = (Reason.to_pos r, ty) in
+  let local_to_pos_ty (ty, _expr_id) = (Typing_defs.get_pos ty, ty) in
   Option.map tyopt local_to_pos_ty
 
 let add_to_gamma local_id ty gamma =

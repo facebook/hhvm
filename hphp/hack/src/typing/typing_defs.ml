@@ -224,6 +224,11 @@ let is_dynamic t =
   | Tdynamic -> true
   | _ -> false
 
+let is_nonnull t =
+  match get_node t with
+  | Tnonnull -> true
+  | _ -> false
+
 let is_fun t =
   match get_node t with
   | Tfun _ -> true

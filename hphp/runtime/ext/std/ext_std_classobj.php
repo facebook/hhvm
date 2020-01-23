@@ -12,7 +12,7 @@ namespace {
  * @return bool - Returns TRUE if class_name is a defined class, FALSE
  *   otherwise.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function class_exists(string $class_name,
                       bool $autoload = true): bool;
 
@@ -205,7 +205,7 @@ function property_exists(<<__MaybeMutable>> mixed $class,
  * @return bool - Returns TRUE if trait exists, FALSE if not, NULL in
  *   case of an error.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function trait_exists(string $traitname,
                       bool $autoload = true): bool;
 
@@ -217,7 +217,7 @@ function trait_exists(string $traitname,
  *
  * @return bool - Returns TRUE if enum exists, FALSE if not
  */
-<<__Native>>
+<<__Native, __Rx>>
 function enum_exists(string $enumname,
                       bool $autoload = true): bool;
 

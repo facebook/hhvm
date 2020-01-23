@@ -9,6 +9,8 @@
  */
 
 namespace HH {
+<<__Rx>>
 function dynamic_fun(string $func_name): dynamic;
+<<__Rx>>
 function dynamic_class_meth(string $cls_name, string $meth_name): dynamic;
 }

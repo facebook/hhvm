@@ -141,14 +141,14 @@ function get_compiled_units(int $kind = 0): keyset;
  * Construct a function pointer for the function with $name. The function should
  * be marked __DynamicallyCallable.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function dynamic_fun(string $name): mixed;
 
 /**
  * Construct a cls_meth pointer for the method $cls::$meth. The method should be
  * a static method marked __DynamicallyCallable.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function dynamic_class_meth(string $cls, string $meth): mixed;
 
 /**

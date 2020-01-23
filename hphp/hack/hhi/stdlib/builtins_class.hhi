@@ -15,13 +15,13 @@ function get_declared_classes();
 function get_declared_interfaces();
 <<__PHPStdLib>>
 function get_declared_traits();
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function enum_exists(string $class_name, bool $autoload = true): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function class_exists(string $class_name, bool $autoload = true): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function interface_exists(string $interface_name, bool $autoload = true): bool;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function trait_exists(string $trait_name, bool $autoload = true): bool;
 <<__PHPStdLib>>
 function get_class_methods($class_or_object): ?array<string>;

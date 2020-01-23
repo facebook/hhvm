@@ -244,6 +244,16 @@ let is_prim p t =
   | Tprim p' when Aast.equal_tprim p p' -> true
   | _ -> false
 
+let is_union t =
+  match get_node t with
+  | Tunion _ -> true
+  | _ -> false
+
+let is_constraint_type_union t =
+  match deref_constraint_type t with
+  | (_, TCunion _) -> true
+  | _ -> false
+
 let show_phase_ty _ = "<phase_ty>"
 
 let pp_phase_ty _ _ = Printf.printf "%s\n" "<phase_ty>"

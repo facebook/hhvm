@@ -1777,6 +1777,16 @@ where
                     }
                 }
             }
+            FunctionPointerExpression(c) => {
+                let targs = match &c.function_pointer_type_args.syntax {
+                    TypeArguments(c) => {
+                        Self::could_map(Self::p_targ, &c.type_arguments_types, env)?
+                    }
+                    _ => vec![],
+                };
+                let recv = Self::p_expr(&c.function_pointer_receiver, env)?;
+                Ok(E_::mk_function_pointer(recv, targs))
+            }
             QualifiedName(_) => {
                 if location.in_string() {
                     let ast::Id(_, n) = Self::pos_qualified_name(node, env)?;

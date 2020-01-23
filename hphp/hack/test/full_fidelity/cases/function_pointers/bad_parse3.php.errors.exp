@@ -1,0 +1,3 @@
+(4,11)-(4,11) Only double-quoted strings may be prefixed.
+(4,11)-(4,14) A name is expected here.
+(6,1)-(6,1) This string literal is not terminated.

@@ -1146,7 +1146,7 @@ where
         }
     }
 
-    fn try_parse_specified_function_call(&self, term: &S::R) -> Option<(S::R, Self)> {
+    fn try_parse_specified_function_call(&mut self, term: &S::R) -> Option<(S::R, Self)> {
         if !Self::can_term_take_type_args(term) {
             return None;
         }
@@ -1158,6 +1158,15 @@ where
         if no_arg_is_missing && self.errors.len() == parser1.errors.len() {
             Some((type_arguments, parser1))
         } else {
+            // Parse empty <> for function pointer without targ
+            let mut parser2 = self.clone();
+            let open_angle = parser2.fetch_token();
+            if parser2.peek_token_kind() == TokenKind::GreaterThan {
+                let missing = S!(make_missing, parser2, parser2.pos());
+                let close_angle = parser2.assert_token(TokenKind::GreaterThan);
+                let empty_targs = S!(make_type_arguments, self, open_angle, missing, close_angle);
+                return Some((empty_targs, parser2));
+            }
             None
         }
     }
@@ -1169,7 +1178,7 @@ where
                 let type_specifier = S!(make_generic_type_specifier, self, term, type_arguments);
                 self.parse_scope_resolution_expression(type_specifier)
             }
-            _ => {
+            TokenKind::LeftParen => {
                 let (left, args, right) = self.parse_expression_list_opt();
                 S!(
                     make_function_call_expression,
@@ -1181,6 +1190,7 @@ where
                     right
                 )
             }
+            _ => S!(make_function_pointer_expression, self, term, type_arguments),
         };
         self.parse_remaining_expression(result)
     }
@@ -1202,7 +1212,7 @@ where
     // prefix of assignment
     // - Prefix:LessThan - is the start of a specified function call f<T>(...)
     fn check_if_should_override_normal_precedence(
-        &self,
+        &mut self,
         left_term: &S::R,
         operator: TokenKind,
         left_precedence: usize,

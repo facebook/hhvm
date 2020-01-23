@@ -10,16 +10,3 @@
     naming_special_names)
   (preprocess
     (pps visitors.ppx ppx_deriving.std)))
-
-(library
-  (name namespace_env)
-  (wrapped false)
-  (modules
-    namespace_env)
-  (libraries
-    collections
-    core_kernel
-    hh_autoimport
-    parser_options)
-  (preprocess
-    (pps visitors.ppx ppx_deriving.std))) ; See T41851208

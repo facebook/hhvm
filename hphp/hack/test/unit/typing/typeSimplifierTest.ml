@@ -47,14 +47,14 @@ end = struct
 
   let fresh_tyvar env =
     let (env, tv) = Env.fresh_type_reason env Reason.none in
-    match tv with
-    | (_, Tvar v) -> (env, tv, v)
+    match get_node tv with
+    | Tvar v -> (env, tv, v)
     | _ -> assert_failure "fresh_type_reason should return a type var"
 
   let union env ty1 ty2 =
     let (env, tunion) = U.union env ty1 ty2 in
-    match tunion with
-    | (_, Tvar v) -> (env, tunion, v)
+    match get_node tunion with
+    | Tvar v -> (env, tunion, v)
     | _ -> assert_failure "A union should always be wrapped in a type variable."
 
   let assert_tyvar_occurs_in_tyvar ?(negate = false) env tv1 ~in_:tv2 =
@@ -89,7 +89,7 @@ end = struct
         assert_tyvar_contains env v ~contains ~doesnt_contain)
       contain_map
 
-  let assert_ty_equal ty1 ty2 = assert_equal (snd ty1) (snd ty2)
+  let assert_ty_equal ty1 ty2 = assert_equal (get_node ty1) (get_node ty2)
 
   let assert_are_alias_for_another_var env vars =
     List.iter vars ~f:(fun v ->

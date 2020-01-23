@@ -6766,14 +6766,15 @@ and call
                 in
                 let destructure_ty =
                   ConstraintType
-                    ( Reason.Runpack_param (fst e, pos_def, consumed),
-                      Tdestructure
-                        {
-                          d_required;
-                          d_optional;
-                          d_variadic;
-                          d_kind = SplatUnpack;
-                        } )
+                    (mk_constraint_type
+                       ( Reason.Runpack_param (fst e, pos_def, consumed),
+                         Tdestructure
+                           {
+                             d_required;
+                             d_optional;
+                             d_variadic;
+                             d_kind = SplatUnpack;
+                           } ))
                 in
                 let (env, te, ty) = expr env e in
                 (* Populate the type variables from the expression in the splat *)
@@ -6861,8 +6862,7 @@ and call
                 let (env, ty) = Env.fresh_type env pos in
                 let destructure_ty =
                   MakeType.simple_variadic_splat
-                    (Reason.Runpack_param
-                       (Reason.to_pos (fst ety), Reason.to_pos r2, 0))
+                    (Reason.Runpack_param (get_pos ety, Reason.to_pos r2, 0))
                     ty
                 in
                 let env =
@@ -6935,21 +6935,14 @@ and call
               (env, (tel, typed_unpack_element, ty)))
           | _ ->
             bad_call env pos efty;
-            let env =
-              call_untyped_unpack
-                env
-                (Reason.to_pos (fst efty))
-                unpacked_element
-            in
+            let env = call_untyped_unpack env (get_pos efty) unpacked_element in
             (env, ([], None, err_witness env pos)))
     in
     match resl with
     | [res] -> res
     | _ ->
       bad_call env pos fty;
-      let env =
-        call_untyped_unpack env (Reason.to_pos (fst fty)) unpacked_element
-      in
+      let env = call_untyped_unpack env (get_pos fty) unpacked_element in
       (env, ([], None, err_witness env pos))
 
 and split_remaining_params_required_optional ft remaining_params =
